@@ -1,0 +1,13 @@
+name = Bean Usage
+description = View Bean (Block Entities) Usage
+core = 7.x
+dependencies[] = bean
+dependencies[] = blockreference
+package = Bean
+
+; Information added by drupal.org packaging script on 2013-02-27
+version = "7.x-1.1"
+core = "7.x"
+project = "bean"
+datestamp = "1361977163"
+
