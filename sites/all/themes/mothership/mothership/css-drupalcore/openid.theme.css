@@ -1,0 +1,30 @@
+#edit-openid-identifier {
+  background-image: url("../images/openid.png");
+  background-position: left 50%; /* LTR */
+  background-repeat: no-repeat;
+  padding-left: 20px; /* LTR */
+}
+
+
+#user-login-form ul {
+  margin-top: 0;
+}
+#user-login ul {
+  margin: 0 0 5px;
+}
+#user-login ul li {
+  margin: 0;
+}
+#user-login-form .openid-links {
+  padding-bottom: 0;
+}
+#user-login .openid-links {
+  padding-left: 0; /* LTR */
+}
+#user-login-form li.openid-link a,
+#user-login li.openid-link a {
+  background-image: url("../images/openid.png");
+  background-position: left top; /* LTR */
+  background-repeat: no-repeat;
+  padding: 0 0 0 1.5em; /* LTR */
+}

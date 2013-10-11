@@ -1,0 +1,34 @@
+/*
+feed icon 
+* ------------------------------------- */
+.feed {text-indent: -9999em;}
+  .feed a.feed-icon{background:transparent url(/misc/feed.png); width:16px; height:16px; display:block;}
+
+/*ical icon*/
+a.ical-icon div {background-color:#900; color:#fff; display:inline; padding:2px;}
+
+/*file icons
+* ------------------------------------- */
+.file a.file-icon{background: transparent url(/modules/file/icons/text-plain.png) no-repeat left center; padding: 2px 2px 2px 20px;}
+  .file a.mime-application-pdf{background-image: url(/modules/file/icons/application-pdf.png)}
+  .file a.mime-application-octet-stream{background-image: url(/modules/file/icons/application-octet-stream.png)}
+  .file a.mime-application-x-executable{background-image: url(/modules/file/icons/application-x-executable.png)}
+  .file a.mime-audio-x-generic{background-image: url(/modules/file/icons/audio-x-generic.png)}
+  .file a.mime-image-x-generic{background-image: url(/modules/file/icons/image-x-generic.png)}
+  .file a.mime-package-x-generic{background-image: url(/modules/file/icons/package-x-generic.png)}
+  .file a.mime-text-html{background-image: url(/modules/file/icons/text-html.png)}
+  .file a.mime-text-plain{background-image: url(/modules/file/icons/text-plain.png)}
+  .file a.mime-text-x-generic{background-image: url(/modules/file/icons/text-x-generic.png)}
+  .file a.mime-text-x-script{background-image: url(/modules/file/icons/text-x-script.png)}
+  .file a.mime-video-x-generic{background-image: url(/modules/file/icons/video-x-generic.png)}
+  .file a.mime-x-office-document{background-image: url(/modules/file/icons/x-office-document.png)}
+  .file a.mime-x-office-presentation{background-image: url(/modules/file/icons/x-office-presentation.png)}
+  .file a.mime-x-office-spreadsheet{background-image: url(/modules/file/icons/x-office-spreadsheet.png)}
+
+/*
+Tables
+* ------------------------------------- */
+.table-order-asc, .table-order-desc{width:16px; height:16px; float:right}
+.table-order-asc{background: transparent url(/misc/arrow-asc.png) no-repeat center top;}
+.table-order-desc{background: transparent url(/misc/arrow-desc.png) no-repeat center top;}
+
