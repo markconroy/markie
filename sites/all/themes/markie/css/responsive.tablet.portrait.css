@@ -7,8 +7,8 @@
  *
  * - Read the _README file in this directory, it contains useful help and other information.
  */
-
-/* Increase the body font size on tablet devices */
-body {
-  font-size: 93.8%;
+/* Increase the body font size on small devices */
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/responsive\.tablet\.portrait\.scss}line{font-family:\0000316}}
+html {
+  font-size: 81.3%;
 }

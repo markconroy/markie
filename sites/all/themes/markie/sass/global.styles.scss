@@ -1,6 +1,7 @@
 
 // _base.scss imports _custom.scss (variables and mixins) and other partials.
 @import "base";
+@import "fonts";
 
 /*
  * @file
@@ -39,10 +40,11 @@
  */
 
 html {
-  background: $page;
+  background: $defcol1;
 }
 
 body {
+  color: $defcol1_dark;
   font-family: $sans-serif-small; // Set from _custom.scss font variables
   font-size: 87.5%;
 }
@@ -230,7 +232,7 @@ var {
  */
 #header-wrapper {
   /* Debug styles, is this working */
-  background: $debug;
+  background: $defcol1;
   .container {}
 }
 
@@ -239,6 +241,8 @@ var {
  * Wraps the nav elements
  */
 #nav-wrapper {
+  @include nav-borders;
+  background: $defcol;
   .container {}
 }
 
@@ -288,7 +292,8 @@ var {
  */
 #footer-wrapper {
   /* Debug styles, is this working? */
-  background: $debug;
+  @include nav-borders;
+  background: $defcol;
 
   .container {}
 }
@@ -565,14 +570,19 @@ a {
 
   li a,
   ul.menu li a {
+    color: $defcol1;
     display: block;
     white-space: nowrap;
-    padding: 0 10px;
+    padding: 1em;
+    text-decoration: none;
 
     &:visited {}
 
     &:hover,
-    &:focus {}
+    &:focus {
+      background: $defcol1_dark;
+      color: $defcol1;
+    }
   }
 
   .block {

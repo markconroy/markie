@@ -31,6 +31,12 @@ $light:        #eee;    // table row odd active, primary link inactive hover
 $medium_light: #ebebeb; // table row even active
 $medium_dark:  #e5e5e5; // table thead
 $debug:        rgba(255, 192, 203, 0.5); // Full width wrapper test
+$white:        #fff;     // White
+$black:        #000;     //
+$defcol:       #DD4814; // Orange - menu bar
+$defcol1:      #F4F4F4; // Background grey colour
+$defcol1_dark:    darken($defcol1, 75%);
+
 
 $thead:          $medium_dark;
 $tr_odd:         $page;
@@ -49,7 +55,7 @@ $primary_task_active: $page;
 // theme settings for web safe fonts.
 //
 
-$sans-serif-small:            'Trebuchet MS', 'Helvetica Neue', Arial, Helvetica, sans-serif;
+$sans-serif-small:            ubuntu-light, 'Trebuchet MS', 'Helvetica Neue', Arial, Helvetica, sans-serif;
 $sans-serif-large:            Verdana, Geneva, 'DejaVu Sans', Arial, Helvetica, sans-serif;
 $sans-serif-arial-helvetica:  Arial, Helvetica, sans-serif;
 $calibri-candara:             Calibri, Candara, Arial, Helvetica, sans-serif;
@@ -188,4 +194,13 @@ $gutter-width: 10px;
       position: relative; // Otherwise these elements will appear below the "Unpublished" text.
     }
   }
+}
+
+//
+// My Custom Mixins
+// 
+@mixin nav-borders {
+  border-bottom: 2px $white solid;
+  border-top: 2px $defcol1_dark solid;
+
 }
