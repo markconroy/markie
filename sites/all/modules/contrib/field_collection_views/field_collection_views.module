@@ -1,0 +1,116 @@
+<?php
+
+/**
+ * @file
+ * Module implementing a field-collection views formatter.
+ */
+
+
+/**
+ * Implements hook_field_formatter_info().
+ */
+function field_collection_views_field_formatter_info() {
+  return array(
+    'field_collection_views_view' => array(
+      'label' => t('Views field-collection items'),
+      'field types' => array('field_collection'),
+      'settings' =>  array(
+        'name' => 'field_collection_view',
+        'display_id' => 'default',
+        'add' => t('Add'),
+      ),
+    ),
+  );
+}
+
+/**
+ * Implements hook_field_formatter_view().
+ */
+function field_collection_views_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
+  $element = array();
+  $settings = $display['settings'];
+
+  switch ($display['type']) {
+    case 'field_collection_views_view':
+      //debug($items);
+      $args = '';
+      $i = 1;
+      foreach ($items as $delta => $item) {
+        if ($i == 1) {
+          $args .= $item['value'];
+        }
+        else {
+          $args .= '+' . $item['value'];
+        }
+        $i++;
+      }
+      $view_name = isset($settings['name']) ? $settings['name'] : 'field_collection_view';
+      $display_id = isset($settings['display_id']) ? $settings['display_id'] : 'default';
+      $content = views_embed_view($view_name, $display_id, $args);
+      $element[0] = array(
+        '#markup' => $content,
+      );
+      if (empty($items)) {
+        field_collection_field_formatter_links($element, $entity_type, $entity, $field, $instance, $langcode, $items, $display);
+      }
+      break;
+  }
+
+  return $element;
+}
+
+/**
+ * Implements hook_field_formatter_settings_form().
+ */
+function field_collection_views_field_formatter_settings_form($field, $instance, $view_mode, $form, &$form_state) {
+  $display = $instance['display'][$view_mode];
+  $settings = $display['settings'];
+
+  $elements['name'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Name'),
+    '#default_value' => $settings['name'],
+    '#description' => t('The machine name of the view to embed.'),
+  );
+  $elements['display_id'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Display id'),
+    '#default_value' => $settings['display_id'],
+    '#description' => t('The display id to embed.'),
+  );
+  $elements['add'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Add link title'),
+    '#default_value' => $settings['add'],
+    '#description' => t('Leave the title empty, to hide the link.'),
+  );
+
+  return $elements;
+}
+
+/**
+ * Implements hook_field_formatter_settings_summary().
+ */
+function field_collection_views_field_formatter_settings_summary($field, $instance, $view_mode) {
+  $display = $instance['display'][$view_mode];
+  $settings = $display['settings'];
+
+  $links = array_filter(array_intersect_key($settings, array_flip(array('name', 'display_id'))));
+  if ($links) {
+    return '<em>Embed View:</em> ' . check_plain(implode(', ', $links));
+  }
+  else {
+    return t('Not showing any view.');
+  }
+
+}
+
+/**
+ * Implements hook_views_api().
+ */
+function field_collection_views_views_api() {
+  return array(
+    'api' => '3.0-alpha1',
+    'path' => drupal_get_path('module', 'field_collection_views') . '/views',
+  );
+}

@@ -22,18 +22,22 @@ function hook_bean_types_api_info() {
  */
 function hook_bean_types() {
   $plugins = array();
-
   $plugins['plugin_key'] = array(
     'label' => t('Title'),
     'description' => t('Description'),
-    // This is optional.  Set it to TRUE if you do not want the plugin to be displayed in the UI
+    // This is optional. Set it to TRUE if you do not want the plugin to be
+    // displayed in the UI.
     'abstract' => FALSE,
     'handler' => array(
       'class' => 'ClassName',
       'parent' => 'bean',
+      // This should be pointing to the path of your custom bean plugin module.
+      'path' => drupal_get_path('module', 'example_bean') . '/plugins',
+      // Class files should be named accordingly in order to support ctools
+      // autoloading procedures.
+      'file' => 'ClassName.class.php',
     ),
   );
-
   return $plugins;
 }
 
@@ -71,4 +75,3 @@ function hook_bean_form_submit($form, $form_state) {
 function hook_bean_cache_clear() {
 
 }
-

@@ -1,0 +1,22 @@
+<?php
+/**
+ * @file
+ * Implements the module uninstallation process
+ *
+ * Module developed by Ixis www.ixis.co.uk
+ */
+ 
+function cookiecontrol_uninstall() {
+  variable_del('cookiecontrol_text');
+  variable_del('cookiecontrol_fulltext');
+  variable_del('cookiecontrol_privacynode');
+  variable_del('cookiecontrol_position');
+  variable_del('cookiecontrol_shape');
+  variable_del('cookiecontrol_startopen');
+  variable_del('cookiecontrol_timeout');
+  variable_del('cookiecontrol_countries');
+  variable_del('cookiecontrol_theme');
+  variable_del('cookiecontrol_consentmodel');
+}
+
+?>

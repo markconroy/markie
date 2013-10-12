@@ -1,0 +1,275 @@
+<?php
+/**
+ * @file
+ * Implements the display of the Cookie Control pop-up dialog.
+ *
+ * Module developed by Ixis www.ixis.co.uk
+ * JavaScript by Civic UK www.civicuk.com
+ *
+ * @author: Mike Carter <http://drupal.org/user/13164>
+ */
+
+define('COOKIECONTROL_TEXT', '<p>' . t('This site uses cookies to store information on your computer.') . '</p>');
+define('COOKIECONTROL_FULLTEXT', '<p>' . t("Some cookies on this site are essential, and the site won't work as expected without them. These cookies are set when you submit a form, login or interact with the site by doing something that goes beyond clicking on simple links.") . '</p><p>' . t("We also use some non-essential cookies to anonymously track visitors or enhance your experience of the site. If you're not happy with this, we won't set these cookies but some nice features of the site may be unavailable.") . '</p>');
+
+/**
+ * cookiecontrol_menu function.
+ *
+ * @access public
+ * @return void
+ */
+function cookiecontrol_menu() {
+  $items['admin/config/people/cookiecontrol'] = array(
+    'title' => 'Cookie Control',
+    'description' => 'Configure cookie notification pop-up.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('cookiecontrol_admin_settings'),
+    'access arguments' => array('administer users'),
+    'file' => 'cookiecontrol.admin.inc',
+    'weight' => 0,
+  );
+
+  return $items;
+}
+
+function cookiecontrol_theme($existing, $type, $theme, $path) {
+  return array(
+      'cookiecontrol' => array(
+        'template' => 'cookiecontrol',
+        'path' => drupal_get_path('module', 'cookiecontrol') . '/theme',
+      ),
+    );
+}
+
+/**
+ * Implements hook_variable_info
+ */
+function cookiecontrol_variable_info($options) {
+  $variable['cookiecontrol_privacynode'] = array(
+    'title' => t('Privacy Policy Link'),
+    'description' => t('NID of node that represents your site\'s privacy policy.'),
+    'type' => 'string',
+    'default' => '',
+    'localize' => TRUE
+  );
+  $variable['cookiecontrol_text'] = array(
+    'title' => t('Introduction Text'),
+    'description' => t('A short message requesting consent to use cookies on this site. HTML markup is allowed for adding links and paragraphs.'),
+    'type' => 'string',
+    'default' => COOKIECONTROL_TEXT,
+    'localize' => TRUE,
+  );
+  $variable['cookiecontrol_fulltext'] = array(
+    'title' => t('Full Text'),
+    'description' => t('A further information about the use of cookies on this site. HTML markup is allowed for adding links and paragraphs.'),
+    'type' => 'string',
+    'default' => COOKIECONTROL_FULLTEXT,
+    'localize' => TRUE,
+  );
+
+  return $variable;
+}
+
+/**
+ * cookiecontrol_generatesitecookie function
+ * Generates a clean string used for the sites cookie name
+ */
+function cookiecontrol_generatesitecookie() {
+  return drupal_clean_css_identifier(drupal_strtolower(variable_get('site_name', t('Drupal')))) . '_cookiecontrol';
+}
+
+/**
+ * cookiecontrol_preprocess_html function.
+ *
+ * @access public
+ * @param mixed &$variables
+ * @return void
+ */
+function cookiecontrol_preprocess_html(&$variables) {
+  // don't render on admin pages or excluded paths
+  if (path_is_admin(current_path()) === FALSE && drupal_match_path(current_path(), variable_get('cookiecontrol_exclude_paths', '')) === FALSE) {
+  
+    $cookiecontrol_text = addslashes(t(variable_get('cookiecontrol_text', COOKIECONTROL_TEXT)));
+    $cookiecontrol_fulltext = addslashes(t(variable_get('cookiecontrol_fulltext', COOKIECONTROL_FULLTEXT)));
+  
+    // Append the privacy policy link if available
+    if ($nid = variable_get('cookiecontrol_privacynode', '')) {
+      $cookiecontrol_fulltext .= t('<p>By using our site you accept the terms of our !privacynode.', array('!privacynode' => l('Privacy Policy', 'node/' . $nid)));
+    }
+    
+    // Escape anything that might cause a JavaScript error
+    $cookiecontrol_text = str_replace(array("\r\n", "\n", "\r", '  '), '', $cookiecontrol_text);
+    $cookiecontrol_fulltext = str_replace(array("\r\n", "\n", "\r", '  '), '', $cookiecontrol_fulltext);
+  
+    $cookiecontrol_html = str_replace(array("\r\n", "\n", "\r", '  '), '', theme('cookiecontrol'));
+    $cookiecontrol_position = variable_get('cookiecontrol_position', 'left');
+    $cookiecontrol_shape = variable_get('cookiecontrol_shape', 'triangle');
+    $cookiecontrol_startopen = variable_get('cookiecontrol_startopen', TRUE) ? 'true' : 'false';
+    $cookiecontrol_timeout = variable_get('cookiecontrol_timeout', '60') * 1000; // Convert seconds to microseconds
+    $cookiecontrol_countries = variable_get('cookiecontrol_countries', '');
+    $cookiecontrol_theme = variable_get('cookiecontrol_theme', 'dark');
+    $cookiecontrol_cookiename = cookiecontrol_generatesitecookie();
+    $cookiecontrol_consentmodel = variable_get('cookiecontrol_consentmodel', 'information_only');
+  
+    $cookiecontrol_settings = "
+    jQuery(document).ready(function($) {
+    cookieControl({
+        introText: '{$cookiecontrol_text}',
+        fullText: '{$cookiecontrol_fulltext}',
+        theme: '{$cookiecontrol_theme}',
+        html: '{$cookiecontrol_html}',
+        position: '{$cookiecontrol_position}',
+        shape: '{$cookiecontrol_shape}',
+        startOpen: {$cookiecontrol_startopen},
+        autoHide: {$cookiecontrol_timeout},
+        onAccept: function(cc){cookiecontrol_accepted(cc)},
+        onReady: function(){},
+        onCookiesAllowed: function(cc){cookiecontrol_cookiesallowed(cc)},
+        onCookiesNotAllowed: function(cc){cookiecontrol_cookiesnotallowed(cc)},
+        countries: '{$cookiecontrol_countries}',
+        subdomains: true,
+        cookieName: '{$cookiecontrol_cookiename}',
+        iconStatusCookieName: 'ccShowCookieIcon',
+        consentModel: '{$cookiecontrol_consentmodel}'
+        });
+      });
+    ";
+  
+    // If country restrictions are specified include the required plugin
+    if ($cookiecontrol_countries) {
+      drupal_add_js('https://ssl.geoplugin.net/javascript.gp', array('type' => 'external'));
+    }
+  
+    drupal_add_js($cookiecontrol_settings, array(
+      'type' => 'inline',
+      'preprocess' => TRUE,
+      'scope' => 'footer',
+      'group' => JS_DEFAULT,
+      'every_page' => TRUE,
+      'cache' => TRUE,
+    ));
+
+    // Set-up all the callback functions
+    cookiecontrol_onacceptance();
+    cookiecontrol_cookiesallowed();
+    cookiecontrol_cookiesnotallowed();
+  }
+}
+
+/**
+ * Build up a list of functions to call when a user accepts cookies for the first time
+ */
+function cookiecontrol_onacceptance() {
+  $callbacks = array();
+
+  // Include any callback javascript specified in the admin settings UI
+  if ($callbacklist = variable_get('cookiecontrol_onaccept', '')) {
+    $callbacks = array($callbacklist);
+  }
+  
+  // Hide the Cookie Control icon after acceptance
+  if (variable_get('cookiecontrol_hideonaccept', FALSE)) {
+    $callbacks[] = "cc.setCookie('ccShowCookieIcon', 'no');jQuery('#ccc-icon').hide();";
+  }
+  
+  // Allow other modules to add their acceptance callback functions in
+  drupal_alter('cookieaccept', $callbacks);
+  
+  $cookiecontrol_acceptancecallback = "function cookiecontrol_accepted(cc) {\n" . implode("\n", $callbacks) . "\n}";
+      
+  drupal_add_js($cookiecontrol_acceptancecallback, array(
+    'type' => 'inline',
+    'preprocess' => TRUE,
+    'scope' => 'footer',
+    'group' => JS_DEFAULT,
+    'every_page' => TRUE,
+    'cache' => TRUE,
+  ));
+}
+
+/**
+ * Execute a series of callbacks if cookie consent has previously been granted by the visitor
+ */
+function cookiecontrol_cookiesallowed() {
+  $callbacks = array();
+  
+  // Allow other modules to add their cookies allowed callback functions in
+  drupal_alter('cookiesallowed', $callbacks);
+
+  $cookiecontrol_cookiesallowedcallback = "function cookiecontrol_cookiesallowed(cc) {\n" . implode("\n", $callbacks) . "\n}";
+
+  drupal_add_js($cookiecontrol_cookiesallowedcallback, array(
+    'type' => 'inline',
+    'preprocess' => TRUE,
+    'scope' => 'footer',
+    'group' => JS_DEFAULT,
+    'every_page' => TRUE,
+    'cache' => TRUE,
+  ));
+}
+
+/**
+ * Execute a series of callbacks if cookie consent has previously been granted by the visitor
+ */
+function cookiecontrol_cookiesnotallowed() {
+  $callbacks = array();
+  
+  // Allow other modules to add their no cookies allowed callback functions in
+  drupal_alter('cookiesnotallowed', $callbacks);
+
+  $cookiecontrol_cookiesnotallowedcallback = "function cookiecontrol_cookiesnotallowed(cc) {\n" . implode("\n", $callbacks) . "\n}";
+
+  drupal_add_js($cookiecontrol_cookiesnotallowedcallback, array(
+    'type' => 'inline',
+    'preprocess' => TRUE,
+    'scope' => 'footer',
+    'group' => JS_DEFAULT,
+    'every_page' => TRUE,
+    'cache' => TRUE,
+  ));
+}
+
+/**
+ * If cookie consent has not yet been given add a validation callback to tell the user and disable any submission callbacks
+ */
+function cookiecontrol_form_user_login_block_alter(&$form, &$form_state, $form_id) {
+  if ($s = cookiecontrol_userinrestrictedcountry()) {
+    if (!isset($_COOKIE[cookiecontrol_generatesitecookie()]) || $_COOKIE[cookiecontrol_generatesitecookie()] != 'yes') {
+      // Replace all validation callbacks with just one telling the visitor they cannot log in yet
+      $form['#validate'] = array('cookiecontrol_user_login_ban');
+      
+      // Remove any existing submit handlers to prevent any authentication taking place
+      unset($form['#submit']);
+    }
+  }
+}
+
+/**
+ * Let the visitor know why they cannot currently log in.
+ */
+function cookiecontrol_user_login_ban() {
+  drupal_set_message(t('You cannot log in until you have allowed cookies to be used.'), 'warning');
+}
+
+/**
+ * Check if the visitors country is in the restricted list where cookie control is enforced
+ */
+function cookiecontrol_userinrestrictedcountry() {
+  $cookiecontrol_countries = variable_get('cookiecontrol_countries', '');
+
+  // If no countries are listed then enforce on every visitor
+  if ($cookiecontrol_countries == '') {
+    return TRUE;
+  }
+
+  $request = drupal_http_request('http://www.geoplugin.net/php.gp?ip=' . ip_address());
+    
+  // Ensure a valid response was received
+  if ($request->code == 200) {
+    $geo_info = unserialize($request->data);
+    return stripos($cookiecontrol_countries, $geo_info['geoplugin_countryName']) !== FALSE ? TRUE : FALSE;
+  } else {
+    watchdog('Cookie Control', 'A visitors IP address could not be matched to a location so they were not blocked from logging in. Geoplugin returned the error [@code] @message', array('@code' => $request->code, '@message' => $request->status_message), WATCHDOG_ERROR);
+    return TRUE;
+  }
+}

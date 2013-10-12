@@ -1,0 +1,13 @@
+name = Filter allowed protocols
+description = "Creates an interface for the allowed protocols used in filter_xss_bad_protocol()."
+core = 7.x
+files[] = filter_protocols.module
+files[] = filter_protocols.admin.inc
+config = admin/config/content/formats/protocols
+
+; Information added by drupal.org packaging script on 2011-04-16
+version = "7.x-1.2"
+core = "7.x"
+project = "filter_protocols"
+datestamp = "1302996415"
+

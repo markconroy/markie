@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * Alter view data for bean block entity.
+ */
+
+/**
  * Implements hook_views_data_alter().
  */
 function bean_views_data_alter(&$data) {
@@ -28,6 +33,14 @@ function bean_views_data_alter(&$data) {
     'help' => t('Delete link for bean block'),
     'field' => array(
       'handler' => 'views_handler_field_bean_delete_link',
+    ),
+  );
+
+  $data['bean']['operations'] = array(
+    'title' => t('Contextual / Operation links'),
+    'help' => t('Display all the available contextual / operation links for the block.'),
+    'field' => array(
+      'handler' => 'views_handler_field_bean_operations',
     ),
   );
 }

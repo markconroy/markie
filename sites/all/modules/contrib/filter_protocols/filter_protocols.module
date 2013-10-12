@@ -1,0 +1,18 @@
+<?php
+
+/**
+ * Implements hook_menu().
+ */
+function filter_protocols_menu() {
+  $items['admin/config/content/formats/protocols'] = array(
+    'title' => 'Allowed protocols',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('filter_protocols_settings_form'),
+    'access arguments' => array('administer filters'),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 10,
+    'file' => 'filter_protocols.admin.inc',
+  );
+
+  return $items;
+}

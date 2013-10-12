@@ -1,0 +1,45 @@
+<?php
+/*
+ * @file
+ * Drupal Module: Cookie Controlled GoogleAnalytics
+ * Controls when GA can track a visitor based on their cookie consent for the domain.
+ *
+ * @author: Mike Carter <http://drupal.org/user/13164>
+ */
+
+/**
+ * Add the analytics javascript callback to the list for on acceptance
+ */
+function cookie_googleanalytics_cookieaccept_alter(&$callbacks) { 
+  $callbacks[] = 'ccAddAnalytics();';
+}
+
+/**
+ * Add the analytics javascript callback to the list for already consenting visitors
+ */
+function cookie_googleanalytics_cookiesallowed_alter(&$callbacks) { 
+  $callbacks[] = 'ccAddAnalytics();';
+}
+
+/**
+ * Remove the standard Google Analytics code from the header and place in
+ * a function which can be called manually when appropriate
+ */
+function cookie_googleanalytics_js_alter(&$javascript) {
+  // Find the Google Analytics code. Wish there was a better keyed way to find the code :-(
+  foreach($javascript as $key => $script) {
+    if (is_string($script['data']) && strpos($script['data'], '/ga.js') > 0) {
+      
+      // Wrap code in a callback function
+      $code = str_replace(
+        array("var _gaq", "_gaq"),
+        array("window._gaq", "window._gaq"),
+        $script['data']
+      );
+      $script = "function ccAddAnalytics() {\n" . $code . "\n}";
+      
+      // Substitue the original script snippet with our function wrapped version
+      $javascript[$key]['data'] = $script;
+    }
+  }
+}

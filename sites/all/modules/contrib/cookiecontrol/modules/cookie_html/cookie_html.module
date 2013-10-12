@@ -1,0 +1,38 @@
+<?php
+/*
+ * @file
+ * Drupal Module: Cookie Controlled HTML class
+ * Adds class the cookies to the html tag much like modernizer does for other functions
+ *
+ * @author: Micheas Herman <http://drupal.org/user/6336>
+ */
+
+/**
+ * Add the class after cookies are accepted
+ */
+function cookie_html_cookieaccept_alter(&$callbacks) { 
+  $callbacks[] = 'ccAddHtmlClass();';
+}
+
+/**
+ * Add the class for already consenting visitors
+ */
+function cookie_html_cookiesallowed_alter(&$callbacks) { 
+  $callbacks[] = 'ccAddHtmlClass();';
+}
+
+/**
+ * The function that actually adds the javascript to the page
+ */
+function cookie_html_preprocess_page(&$varaibles) {
+  $script = "jQuery('html').addClass('cookies');";
+  // Wrap code in a callback function
+  $script = "function ccAddHtmlClass() {\n" . $script . "\n}";
+  drupal_add_js(
+    $script,
+    array(
+      'type' => 'inline',
+      'scope' => 'header',
+    )
+  );
+}

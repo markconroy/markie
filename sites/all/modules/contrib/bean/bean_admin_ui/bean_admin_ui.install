@@ -125,3 +125,12 @@ function bean_admin_ui_update_7002() {
 
   return t('Added description field to beans.');
 }
+
+/**
+ * Rebuild registry to ensure autoloading for renamed plugin.
+ */
+function bean_admin_ui_update_7003() {
+  registry_rebuild();
+  return t('Registry has been rebuilt');
+}
+

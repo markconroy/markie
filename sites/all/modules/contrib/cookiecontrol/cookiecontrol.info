@@ -1,0 +1,15 @@
+; $Id$
+name = "Cookie Control"
+description = "Enables you to comply with UK and EU law on cookies"
+
+core = 7.x
+
+configure = admin/config/people/cookiecontrol
+
+scripts[] = js/cookieControl-5.1.min.js
+; Information added by drupal.org packaging script on 2013-02-25
+version = "7.x-1.6"
+core = "7.x"
+project = "cookiecontrol"
+datestamp = "1361776247"
+

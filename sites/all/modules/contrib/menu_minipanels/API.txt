@@ -1,0 +1,190 @@
+Menu_MiniPanels PHP & JavaScript APIs
+-------------------------------------
+The following APIs are available:
+
+* Override menu display defaults (PHP).
+* Add custom styles (PHP & JS).
+* Custom callbacks (JS).
+
+
+Override menu display defaults
+------------------------------
+By implementing hook_menu_minipanels_defaults_alter() a module may override
+the default display settings that are given to new menus.
+
+
+Add custom styles
+-----------------
+By implementing hook_menu_minipanels_style() and hook_menu_minipanels_styles()
+a module can add new display styles.  Please note that due to JS dependencies,
+the custom styles must be loaded *after* the core qtip and menu_minipansls.js
+files, so this is the easiest way of handling it.
+
+There are three steps necessary in order to make this work:
+
+Step 1: Add a JS file called e.g. "mymodule_style.js" with the desired style
+settings.
+
+/**
+ * @file
+ * Custom style(s) for Menu_MiniPanels.
+ */
+
+(function($) {
+  // Last part is the internal name of the style.
+  jQuery.fn.qtip.styles.mystyle = {
+    background: '#A2D959',
+    border: {
+      color: '#A2D959',
+      radius: 5,
+      width: 7,
+    },
+    color: 'black',
+  };
+})(jQuery);
+
+Part 2: List the new styles, to be added to mymodule.module:
+
+<?php
+/**
+ * Implements hook_menu_minipanels_styles().
+ */
+function mymodule_menu_minipanels_styles() {
+  $styles = array(
+    'mystyle' => t('My new style'),
+  );
+  return $styles;
+}
+?>
+
+Step 3: Tell Drupal to load the new JS file, to be added to mymodule.module:
+
+<?php
+/**
+ * Implements hook_menu_minipanels_style().
+ */
+function mymodule_menu_minipanels_style($menu_config) {
+  // Load the custom styles in the footer but after other things have loaded.
+  drupal_add_js(drupal_get_path('module', 'mymodule_styles') . '/menu_minipanels_styles.js', array('scope' => 'footer', 'weight' => 100));
+}
+?>
+
+Note:
+* Because the qTips script is loaded in the footer scope, the custom styles
+  should also be added to the footer scope.
+
+To help deciding on what settings to use, the qTips defaults are:
+{
+  background: 'white',
+  color: '#111',
+  overflow: 'hidden',
+  textAlign: 'left',
+  width: {
+    min: 0,
+    max: 250,
+  },
+  padding: '5px 9px',
+  border: {
+    width: 3,
+    radius: 0,
+    color: '#d3d3d3',
+  },
+  tip: {
+    corner: topLeft,
+    color: false,
+    size: { x: 12, x: 12 },
+    opacity: 1,
+  },
+  title: {
+    background: '#e1e1e1',
+    fontWeight: 'bold',
+    padding: '7px 12px',
+  },
+  button: {
+    cursor: 'pointer'
+  },
+  classes: {
+    target: '',
+    tip: 'qtip-tip',
+    title: 'qtip-title',
+    button: 'qtip-button',
+    content: 'qtip-content',
+    active: 'qtip-active',
+  }
+}
+
+
+Custom JavaScript callbacks
+---------------------------
+All of qTips' callbacks are available to JavaScript via the
+MenuMiniPanels.setCallback() function, e.g.:
+
+MenuMiniPanels.setCallback('onShow', function(qTip, event, content) {
+  alert('onShow');
+});
+
+The following callbacks are available:
+
+MenuMiniPanels.setCallback('beforeRender', function(qTip, event, content) {}
+MenuMiniPanels.setCallback('onRender', function(qTip, event, content) {}
+MenuMiniPanels.setCallback('beforePositionUpdate', function(qTip, event, content) {}
+MenuMiniPanels.setCallback('onPositionUpdate', function(qTip, event, content) {}
+MenuMiniPanels.setCallback('beforeShow', function(qTip, event, content) {}
+MenuMiniPanels.setCallback('onShow', function(qTip, event, content) {}
+MenuMiniPanels.setCallback('beforeHide', function(qTip, event, content) {}
+MenuMiniPanels.setCallback('onHide', function(qTip, event, content) {}
+MenuMiniPanels.setCallback('beforeContentUpdate', function(qTip, event, content) {}
+MenuMiniPanels.setCallback('onContentUpdate', function(qTip, event, content) {}
+MenuMiniPanels.setCallback('beforeContentLoad', function(qTip, event, content) {}
+MenuMiniPanels.setCallback('onContentLoad', function(qTip, event, content) {}
+MenuMiniPanels.setCallback('beforeTitleUpdate', function(qTip, event, content) {}
+MenuMiniPanels.setCallback('onTitleUpdate', function(qTip, event, content) {}
+MenuMiniPanels.setCallback('beforeDestroy', function(qTip, event, content) {}
+MenuMiniPanels.setCallback('onDestroy', function(qTip, event, content) {}
+MenuMiniPanels.setCallback('beforeFocus', function(qTip, event, content) {}
+MenuMiniPanels.setCallback('onFocus', function(qTip, event, content) {}
+
+Use a web browser debugging tool, e.g. Firebug or Safari's Web Inspector to
+identify the capabilities of each callback.
+
+To aid working with the menu system, the DOM path used to identify the menu
+item which activated a given MiniPanel is available from the string
+"qTip.options.activator", thus the object itself is available as
+$(qTip.options.activator).
+
+If either the "beforeShow", "beforeHide" or 'onRender' callbacks are to be used
+then the default callbacks must be disabled via the module's main settings
+page; see menu_minipanels.callbacks.js for further details.
+
+An example usage would be to make the menu item retain its 'active' state when
+its MiniPanel is displayed. Note: the module already adds the class
+"qtip-hover" to the menu items, this example shows how to add another class.
+
+/**
+ * @file
+ * Custom callbacks for Menu_MiniPanels.
+ */
+
+(function($) {
+  /**
+   * Callback for the beforeShow qTip event.
+   */
+  MenuMiniPanels.setCallback('beforeShow', function(qTip, event, content) {
+    // Mark target element as selected.
+    var $target = $(qTip.elements.target.get(0));
+    if ($target !== undefined) {
+      $target.addClass('active');
+    }
+  });
+
+  /**
+   * Callback for the beforeHide qTip event.
+   */
+  MenuMiniPanels.setCallback('beforeHide', function(qTip, event) {
+    // Unmark target element as selected.
+    var $target = $(qTip.elements.target.get(0));
+    if ($target !== undefined) {
+      $target.removeClass('active');
+    }
+  });
+})(jQuery);

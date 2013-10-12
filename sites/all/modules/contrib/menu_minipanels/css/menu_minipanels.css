@@ -1,0 +1,11 @@
+/**
+ * @file
+ * Custom CSS for the Menu_MiniPanels module.
+ */
+
+div.qtip {
+  z-index: 6000;
+}
+div.menu-minipanels {
+  display: none;
+}

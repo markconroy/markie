@@ -249,16 +249,16 @@ class Bean extends Entity {
   }
 
   /**
-  +   * Get the default label
-  +   *
-  +   * @return string
-  +   */
+  * Get the default label
+  *
+  * @return string
+  */
   protected function defaultLabel() {
-    if (empty($this->label)) {
-      return $this->getTranslation('title');
+    if (empty($this->title)) {
+      return $this->label;
     }
 
-    return $this->getTranslation('label');
+    return $this->title;
   }
 
   /**

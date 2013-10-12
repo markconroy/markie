@@ -423,3 +423,21 @@ function bean_update_7010(&$sand) {
 
   return $t('Bean Table updated and data upgraded');
 }
+
+/**
+ * Clear the menu cache so that the new path for assigning the active revision
+ * will be picked up.
+ */
+function bean_update_7011() {
+  menu_cache_clear_all();
+  menu_rebuild();
+}
+
+/**
+ * Rebuild registry to ensure autoloading for renamed plugins.
+ */
+function bean_update_7012() {
+  registry_rebuild();
+  return t('Registry has been rebuilt');
+}
+

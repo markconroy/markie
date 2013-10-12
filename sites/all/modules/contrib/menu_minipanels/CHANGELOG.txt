@@ -1,0 +1,246 @@
+Menu_MiniPanels 7.x-1.1, 2012-12-01
+-----------------------------------
+#1854870 by DamienMcKenna: Replaced the array_replace_recursive() function with
+  one taken from php.net.
+#1851816 by DamienMcKenna: Cleaned up handling of default values and settings
+  for the shared settings form, resolves errors in 1.0.
+
+
+Menu_MiniPanels 7.x-1.0, 2012-11-24
+-----------------------------------
+#1847292 by patrickd: Drush Make integration for automatic downloading of the
+  necessary qTip library.
+#1844338 by willvincent, DamienMcKenna: Workaround for older versions of PHP
+  that don't have the array_replace_recursive function.
+#1148956 by DamienMcKenna, lussoluca: Support for qTip's position 'adjust'
+  settings.
+#1148956 by DamienMcKenna: Due to problems with qTip, both 'adjust' values must
+  be non-zero in order for them to work.
+#1798938 by DamienMcKenna: Separated the bundled qTip JS callback code so it
+  may be overridden & customized.
+#1021372 by DamienMcKenna: Remove each menu item's configuration in
+  hook_uninstall().
+#1840360 by DamienMcKenna: Check the entire menu tree when determining if qTip
+  should be loaded.
+#1849694 by DamienMcKenna: Disable integration with the Admin Menu and Devel
+  modules.
+#1849710 by DamienMcKenna: Drush download-qtip command could fail when the
+  Libraries API module is installed.
+
+
+Menu_MiniPanels 7.x-1.0-rc9, 2012-11-13
+---------------------------------------
+#1718012 by DamienMcKenna: Optional style setting fields were required; also
+  reorganized the style settings fieldset for a slight UX improvement.
+#1775482 by DamienMcKenna: Position Type selections are incorrect.
+#1218174 by DamienMcKenna: Allow the position container to be changed.
+#1837178 by DamienMcKenna: Corrected the Mini Panels admin link.
+#1810496 by DamienMcKenna: If the 'container' value is empty, don't output it.
+
+
+Menu_MiniPanels 7.x-1.0-rc8, 2012-08-21
+---------------------------------------
+#1580312 by codycraven, DamienMcKenna: Improved the custom JS to be cleaner and
+  more compatible with theming changes.
+#1661730 by DamienMcKenna: Replaced $.each with for() loop (minor performance
+  improvement).
+#1683872 by DamienMcKenna: Fixed callbacks, they were broken by the changes in
+  #1661730.
+#1633136 by DamienMcKenna: If the main menu and secondary menu are the same,
+  also process the second level of that menu.
+#1728018 by DamienMcKenna: Restructured the output generation so it happens
+  earlier in the page cycle to help avoid problems with other modules.
+
+
+Menu_MiniPanels 7.x-1.0-rc7, 2012-06-17
+---------------------------------------
+#1264738 by DamienMcKenna: Added a note about 404 pages and Navigation404.
+#1553144 by DamienMcKenna: Removed some unnecessary code from
+  menu_minipanels_prepare_links().
+#1586122 by DamienMcKenna: Bug in how menus were enabled, should work now.
+#1396032 by DamienMckenna: Manually re-load contextual menus on all qTip popups
+  and cleans up the output code to better use the render API.
+#1604638 by DamienMcKenna: Added a note to the README.txt about a compatibility
+  problem with old versions of Menu_Attributes.
+#1425046 by jwilson3: Hover class could still get stuck in certain scenarios.
+Added a note about compatibility problems with JavaScript widgets.
+
+
+Menu_MiniPanels 7.x-1.0-rc6, 2012-04-28
+---------------------------------------
+#1440474 by davidwhthomas, DamienMcKenna: Allow pages to be skipped by path.
+#1535712 by DamienMcKenna: Quick links to toggle menus from the settings page.
+#1551562 by DamienMcKenna: Don't load qTip code if no menu items configured.
+#1535736 by DamienMcKenna: Documentation updates.
+
+
+Menu_MiniPanels 7.x-1.0-rc5, 2012-04-08
+---------------------------------------
+#1505112 by DamienMcKenna: Updated drupal_add_js() calls to ensure the module's
+  files load before any custom style JS files are loaded.
+#1199790 by DamienMcKenna: Fixed update 7101.
+#1199790 by DamienMcKenna: Slight code cleanup on the update scripts.
+#1337710 by DamienMcKenna: Moved the menu path to the correct location, and
+  slightly improved the settings menu item's description.
+#1387914 by DamienMcKenna: Updated the README.txt file.
+#1216546 by DamienMcKenna: Added support for the Hide Delay setting.
+#1508774 by DamienMcKenna: Added the 'configure' directive to the info file so
+  that a link to the settings page shows on the main modules page.
+#1508776 by DamienMcKenna: Show the qTip library status on the settings page.
+#1284396 by DamienMcKenna: Settings form UX improvements.
+
+
+Menu_MiniPanels 7.x-1.0-rc4, 2012-03-23
+---------------------------------------
+#1370840 by DuaelFr: Stop searching for the JS file at the first matching path.
+#1491396 by DamienMcKenna: Collision between admin and non-admin JS.
+#1491502 by DamienMcKenna: Mention the Drush command in hook_requirements.
+#1491490 by DamienMcKenna: Changed to use hook_form_FORM_ID_alter().
+#1491514 by DamienMcKenna: Show minipanel name in menu edit form if the title
+  is blank.
+#1199790 by DamienMcKenna: Rewrote how the menus were identified, allowing all
+  menus to be used and not just the primary & secondary links.
+#1491398 by DamienMckenna: Improved default settings so the popup looks more
+  like a popup menu rather than a tooltip.
+#1496980 by DamienMcKenna: Slight cleanup.
+#1199790 by DamienMcKenna: Follow-up to avoid enabling any shortcut sets that
+  may exist.
+#1441214 by DamienMcKenna: Added a note to README.txt about menu link titles
+  not working as tooltips due to how qTip works.
+#1425046 by DamienMcKenna, jwilson3: Hover class could get stuck in certain
+  scenarios.
+#1233488 by DamienMcKenna, raiatea: z-index doesn't get set in certain
+  circumstances.
+
+
+Menu_MiniPanels 7.x-1.0-rc3, 2012-01-26
+---------------------------------------
+#1379542 by DamienMcKenna: Added note to README.txt about a known conflict
+  with the DivX Player.
+#1376860 by DamienMcKenna: Option to not output anything on admin pages.
+#1304560 by codycraven, Amitaibu, jwilson3, DamienMcKenna: Automatically
+  assign the "qtip-hover" class to the triggering menu link. Updated the
+  API.txt example accordingly.
+#1130664 by DamienMcKenna: Don't overwrite the $form['options'] element on the
+  menu item edit form as it breaks other modules.
+#1379542 by DamienMcKenna: Improved the README.txt note to be slightly more
+  accurate of the problem.
+
+
+Menu_MiniPanels 7.x-1.0-rc2, 2011-09-03
+---------------------------------------
+#1239292 by DamienMcKenna: Missed another line from rerolling the #1230622
+  patch that caused the settings page to break.
+#1116990 by kndr, DamienMcKenna: Added access to the qTips callbacks.
+#1251804 by DamienMcKenna: Indicate what qTip JS file is being used.
+#1238890 by DamienMcKenna: Leave a warning in hook_install() if the qTip JS
+  library is not installed.
+#1258150 by davidwhthomas: Incorrect usage of drupal_add_css() caused CSS
+  aggregation to not work.
+#1238882 by DamienMcKenna: Drush script to download the qTip script.
+#1264738 by DamienMcKenna: Restructured how the output is built so now it now
+  also works on 404 pages.
+
+
+Menu_MiniPanels 7.x-1.0-rc1, 2011-08-04
+---------------------------------------
+#1230622 by DamienMcKenna: Missed a line when I originally rerolled this patch.
+#943842 by DamienMcKenna: Allow the qTip file to be loaded from multiple paths
+  but cache the path to offset the performance hit.
+#943842 by DamienMcKenna: Now includes proper Libraries API support as the
+  first location checked for the qTip JS file.
+#1234654 by DamienMcKenna: Applied changes from the v6.x-1.1 release, including
+  #997476 (custom targets), #980592 (duplicate menus), #945886 (duplicate
+  minipanels) and #945884 (fixed JS regex); thanks to the respective
+  contributors for their patches. Also tidied up a few small things - comments,
+  output variables, etc. This update will require that configurations are
+  re-saved to add important extra values; a message is left via hook_update_N()
+  when updates are ran, and Watchdog will report errors on each page load until
+  the problems are resolved.
+
+
+Menu_MiniPanels 7.x-1.0-beta4, 2011-07-31
+-----------------------------------------
+#1230686 by davidwhthomas: Fatfingered the last patch.
+
+
+Menu_MiniPanels 7.x-1.0-beta3, 2011-07-30
+-----------------------------------------
+#1221566 by DamienMcKenna: Added hook_menu_minipanels_defaults_alter() to allow
+  the defaults to be customized.
+Indicated that the Length fields are stored in milliseconds.
+#1185506 by DamienMcKenna: The style Name field is actually required.
+#1230622 by davidwhthomas, DamienMcKenna: Separated admin functionality.
+#1148958 by lussoluca, DamienMcKenna: Added hook_menu_minipanels_style() and
+  hook_menu_minipanels_styles() to allow creation of custom styles.
+#1185506 by DamienMcKenna: Indicate which fields are really required, don't
+  output settings which are not required.
+#1230686 by muhleder, DamienMcKenna: Prevent duplicate content on DOM change.
+
+
+Menu_MiniPanels 7.x-1.0-beta2, 2011-01-22
+-----------------------------------------
+Corrected the spelling of "qTip".
+D7 uses the class name 'main-menu' for the main menu UL by default.
+Changed to using hook_page_alter() instead of template_preprocess_page() to
+  output the menus, seems like the correct option for D7.
+
+
+Menu_MiniPanels 7.x-1.0-beta1, 2011-01-22
+*****************************************
+Initial port to Drupal 7.
+Changed the module to load the qTip script from sites/all/libraries.
+Small optimization - split the JS into two files so less code is loaded for
+  most page views.
+Don't continue trying to load the menus if the qTip JS file has not been
+  installed.
+If no Mini Panels are available, show a message on the menu admin page.
+Fixed a JS error that would occur if some of the main menu items did not
+  contain a minipanel definition.
+Changed some labels to be less confusing.
+Changed the defaults so that the minipanel shows up underneath the menu,
+  rather than on top.
+
+
+Menu_MiniPanels 6.x-1.2, 2011-01-09
+-----------------------------------
+All users advised to upgrade from 1.1 and 1.0.
+
+NOTE: (If not already done in 1.1 upgrade) Manual update process required. If
+you are upgrading an existing site that uses Menu_MiniPanels, you'll need to
+edit and save (without changing options) each menu item that uses a
+menu_minipanel to make it work.
+
+Fix issue introduced in last update. Any menu item that didn't have a
+  specific element set was broken.
+#991246 - Additional fix. Moving minipanel rendering from init to footer,
+  broke panels css display, because minipanels were rendered after css had
+  already been added to page.
+
+
+Menu_MiniPanels 6.x-1.1, 2011-01-08
+-----------------------------------
+NOTE: Manual update process required. If you are upgrading an existing site
+that uses Menu_MiniPanels, you'll need to edit and save (without changing
+options) each menu item that uses a menu minipanel to make it work.
+
+#997476 - Suggestion from sammo. Add ability to set custom target for the
+  minipanel, to enable things like full width drop downs.
+#980592 - Not working when using same menu. When the same menu was added on the
+  same page (e.g primary links in a block), Drupal.settings was being set twice
+  and breaking javascript. Thus add a check if the mlid has already been added.
+  This also fixes an issue introduced in previous commit that meant minipanels
+  would only work with primary and secondary links.
+#945886 - Using the same minipanel for more than one menu item doesn't work.
+  This is fixed with some re-engineering to use the mlid in the
+  drupal.settings array and panel id. This fix will break existing sites until
+  the menu items are edited and resaved. The time required to write an
+  automated upgrade path is not justified when a few manual clicks will do.
+#945884 - Minipanels that had a system name containing a number weren't
+  working because the regex didn't have numbers in the character class.
+
+
+Menu_MiniPanels 6.x-1.0, 2010-10-16
+-----------------------------------
+Improved code as a result of a code review by @kiamlaluno.
+All sensible qTip configuration parameters implemented.

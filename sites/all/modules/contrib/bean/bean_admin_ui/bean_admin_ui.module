@@ -138,7 +138,7 @@ function _bean_admin_default_plugin() {
       'info_file' => TRUE,
       'class' => 'BeanCustom',
       'parent' => 'bean',
-      'file' => 'custom.inc',
+      'file' => 'BeanCustom.class.php',
       'path' => drupal_get_path('module', 'bean_admin_ui') . '/plugins',
     ),
   );

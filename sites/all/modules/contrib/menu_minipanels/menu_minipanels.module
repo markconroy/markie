@@ -1,0 +1,563 @@
+<?php
+/**
+ * @file
+ *
+ * Allows an administrator to specify a minipanel to be associated with a
+ * Drupal menu item. When that menu item is hovered or clicked (as per config),
+ * the minipanel content will be shown using the qTip javascript library.
+ *
+ * Technical Overview:
+ *
+ * Due to the Drupal 7 execution path it is necessary to do this in multiple
+ * steps:
+ * 1. The hook_theme_registry_alter() function is used to replace the existing
+ *    preprocess function for links and menu links.
+ * 2. When links or menu links are being displayed they will first be ran
+ *    through the preprocess function defined in step 2, this adds a class
+ *    to help identify the menu item; the final panel is rendered during this
+ *    process and statically cached for later retrieval.
+ * 3. The hook_page_alter() function loads the output previously generated and
+ *    appends it to the footer.
+ */
+
+/**
+ * Check different paths to find the qTips JS file's path.
+ *
+ * @return The path to the required qTips file relative to base_path() if
+ *   found, FALSE if the file is not found.
+ */
+function menu_minipanels_get_qtip_path() {
+  static $qtip_path = FALSE;
+
+  // Only proceed if the path wasn't compiled before.
+  if (empty($qtip_path)) {
+    $cid = 'menu_minipanels_qtip_path';
+    $cache = cache_get($cid);
+
+    // The path was previously cached, so just load that.
+    if (!empty($cache->data)) {
+      $qtip_path = $cache->data;
+    }
+
+    // There was no cached data, so get the path & cache it for later.
+    else {
+      $filename = 'jquery.qtip-1.0.0-rc3.min.js';
+      $module_path = drupal_get_path('module', 'menu_minipanels');
+
+      // An array of possible paths, in descending order of preference.
+      $possible_paths = array(
+        // Ideally should be stored here.
+        'sites/all/libraries/qtip',
+        // Legacy paths, including some possible incorrect ones, but the
+        // performance hit should be negligible.
+        $module_path . '/js/lib/qtip',
+        $module_path . '/js/lib',
+        $module_path . '/js/qtip',
+        $module_path . '/js',
+        $module_path . '/qtip',
+        $module_path,
+      );
+
+      // Proper Libraries API support.
+      if (function_exists('libraries_get_path')) {
+        $lib_path = libraries_get_path('qtip');
+        if (!empty($lib_path) && !in_array($lib_path, $possible_paths)) {
+          array_unshift($possible_paths, $lib_path);
+        }
+      }
+
+      // Check each of the paths.
+      foreach ($possible_paths as $path) {
+        // If the file exists, this is the one we'll use.
+        if (file_exists($path . '/' . $filename)) {
+          $qtip_path = $path . '/' . $filename;
+          break;
+        }
+      }
+
+      // Save the path for later.
+      if (!empty($qtip_path)) {
+        cache_set($cid, $qtip_path);
+      }
+      else {
+        watchdog('menu_minipanels', t('Menu Minipanels module is enabled, but the qTip library has not been downloaded. This module will not work without qTip! Please see README.txt for instructions on how to download qTip.'));
+      }
+    }
+  }
+
+  // Return the qTips JS file's path, or FALSE.
+  return $qtip_path;
+}
+
+/**
+ * Implements hook_help().
+ */
+function menu_minipanels_help($path, $arg) {
+  switch ($path) {
+    case 'admin/config/user-interface/menu_minipanels':
+      return '<p>'. t('The menu minipanels module integrates the very popular qTip tooltip library into Drupal. Visit the <a href="!reference_url">qTip reference</a> to learn about the various configuration options.', array('!reference_url' => 'http://craigsworks.com/projects/qtip/')) .'</p>';
+  }
+}
+
+/**
+ * Implements hook_menu().
+ */
+function menu_minipanels_menu() {
+  $items = array();
+  $items['admin/config/user-interface/menu_minipanels'] = array(
+    'title' => 'Menu MiniPanels',
+    'description' => 'Configure defaults for the Menu MiniPanels module.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' =>  array('menu_minipanels_admin'),
+    'access arguments' => array('administer site configuration'),
+    'file' => 'menu_minipanels.admin.inc',
+  );
+  $items['admin/config/user-interface/menu_minipanels/toggle'] = array(
+    'title' => 'Toggle menu',
+    'description' => '',
+    'page callback' => 'menu_minipanels_menu_toggle',
+    'page arguments' =>  array(5),
+    'access arguments' => array('administer site configuration'),
+    'file' => 'menu_minipanels.admin.inc',
+    'type' => MENU_CALLBACK,
+  );
+
+  return $items;
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ *
+ * Add the minipanel selector & associated settings to the menu item editor.
+ */
+function menu_minipanels_form_menu_edit_item_alter(&$form, $form_state, $form_id) {
+  // Check if this menu is enabled.
+  if (variable_get('menu_minipanels_' . $form['original_item']['#value']['menu_name'] . '_enabled', FALSE)) {
+    // Load minipanels.
+    ctools_include('plugins', 'panels');
+    $panel_minis = panels_mini_load_all();
+
+    // If no Mini Panels are found, leave a message.
+    if (empty($panel_minis)) {
+      drupal_set_message(t('No Mini Panels are available, some need to be added via the <a href="!link" title="Mini Panels administrator">Mini Panels admin</a> for the Menu_MiniPanels module to work.', array('!link' => url('admin/structure/mini-panels'))), 'warning');
+    }
+
+    // Mini Panels are available.
+    else {
+      // Load the admin code necessary for this.
+      module_load_include('inc', 'menu_minipanels', 'menu_minipanels.admin');
+
+      // Load the JS necessary for the admin.
+      drupal_add_js(drupal_get_path('module', 'menu_minipanels') . '/js/menu_minipanels_admin.js', array('scope' => 'footer'));
+
+      // The 'options' element already exists, just need to tweak it.
+      $form['options']['#tree'] = TRUE;
+      $form['options']['#type'] = 'markup';
+      $form['options']['#weight'] = '50';
+      unset($form['options']['#value']['attributes']);
+
+      // Create options for select box
+      $options = array('' => '- None -');
+      foreach ($panel_minis as $panel_mini) {
+        // If the admin title is empty, use the minipanel name.
+        if (!empty($panel_mini->admin_title)) {
+          $title = check_plain($panel_mini->admin_title);
+        }
+        else {
+          $title = check_plain($panel_mini->name);
+        }
+        $options[check_plain($panel_mini->name)] = check_plain($title);
+      }
+      asort($options);
+
+      $item = $form['original_item']['#value'];
+      $form['options']['minipanel'] = array(
+        '#type' => 'select',
+        '#title' => t('Menu minipanel'),
+        '#description' => t('Choose the minipanel to display.'),
+        '#default_value' => isset($item['options']['minipanel']) ? $item['options']['minipanel'] : '',
+        '#options' => $options,
+        '#required' => FALSE,
+      );
+
+      // Ensure the settings structure exists.
+      if (!isset($form['original_item']['#value']['options']['menu_minipanels_hover'])) {
+        $form['original_item']['#value']['options']['menu_minipanels_hover'] = array();
+      }
+
+      // Insert the custom fields.
+      _menu_minipanels_hover_settings_form($form['options'], $form['original_item']['#value']['options']['menu_minipanels_hover']);
+
+      // This is prepended to the array to ensure it is executed before
+      // menu_edit_item_submit.  If it is executed after menu_edit_item_submit,
+      // then the menu_minipanels_hover array will be saved to the database
+      // anyway, and the intercept would be pointless.
+      array_unshift($form['#submit'], 'menu_minipanels_menu_edit_item_submit');
+    }
+  }
+}
+
+/**
+ * If no minipanel is set, stop minipanel settings being saved.
+ */
+function menu_minipanels_menu_edit_item_submit($form, &$form_state) {
+  if (empty($form_state['values']['options']['minipanel'])) {
+    unset($form_state['values']['options']['menu_minipanels_hover']);
+  }
+  else {
+    // Store mlid for later use in uniquely identifiying menu configs in the
+    // Javascript.
+    $form_state['values']['options']['menu_minipanels_hover']['mlid'] = $form_state['values']['mlid'];
+  }
+}
+
+/**
+ * Implementation of hook_form_FORM_ID_alter().
+ */
+function menu_minipanels_form_menu_edit_menu_alter(&$form, &$form_state) {
+  // Control whether the menu is enabled.
+  $var_name = 'menu_minipanels_' . $form['menu_name']['#default_value'] . '_enabled';
+  $form['menu_minipanels'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Allow to be used with Menu_MiniPanels'),
+    '#default_value' => variable_get($var_name, FALSE),
+    '#description' => t('When this is enabled the Menu_MiniPanels options will be available when editing individual menu items. Disabling this for menus that don\'t need it will give a small performance gain.'),
+  );
+
+  $form['#submit'][] = 'menu_minipanels_form_menu_edit_menu_submit';
+
+  // Adjust the weight of the submit button so it shows at the end.
+  $form['submit']['#weight'] = 1000;
+}
+
+/**
+ * Submission callback for the menu_edit_menu form.
+ */
+function menu_minipanels_form_menu_edit_menu_submit($form, &$form_state) {
+  $var_name = 'menu_minipanels_' . $form_state['values']['menu_name'] . '_enabled';
+  if (!empty($form_state['values']['menu_minipanels'])) {
+    variable_set($var_name, TRUE);
+  }
+  else {
+    variable_set($var_name, FALSE);
+  }
+}
+
+/**
+ * Implements hook_theme_registry_alter().
+ *
+ * Theme preprocess functions aren't called if the theme is in a function.
+ *
+ * This hacks a preprocess function for theme_menu_link in a way that
+ * won't interfere with other themes or modules that override
+ * theme_menu_link.
+ *
+ * theme_menu_link is overriddeden because to print menus, themes and
+ * modules generally use menu_tree_output, and menu_tree_output calls
+ * theme_menu_link.
+ *
+ * This method *only* works if theme_menu_link is called *before*
+ * $closure is created in page_preprocess.
+ *
+ * If a theme calls theme('menu_tree') in a page.tpl.php for instance, this
+ * will not work.
+ *
+ * To get it to work, the theme will need to implement page_preprocess hook
+ * and add a variable to $vars, so that the theme_menu_link is called
+ * *before* $closure.
+ */
+function menu_minipanels_theme_registry_alter(&$vars) {
+  $vars['link']['old function'] = $vars['link']['function'];
+  $vars['link']['function'] = 'menu_minipanels__preprocess_link';
+}
+
+/**
+ * Ensure that we capture any mini panel menus. This is run on every page load.
+ * See @menu_minipanels_page_alter().
+ */
+function menu_minipanels_prepare_links($links) {
+  // Track whether the qTip code needs to be loaded.
+  $load_qtip = FALSE;
+
+  foreach ($links as $ctr => $link) {
+    if (!empty($link['minipanel'])) {
+      $load_qtip = TRUE;
+      _menu_minipanels_include($link['minipanel'], $link['menu_minipanels_hover']);
+    }
+  }
+
+  return $load_qtip;
+}
+
+/**
+ * Menu callback for theme_link.
+ * See @menu_minipanels_theme_registry_alter.
+ */
+function menu_minipanels__preprocess_link($link) {
+  $matches = array();
+  if (!empty($link['options']['minipanel'])) {
+    $prefix = '';
+    if (empty($link['options']['attributes'])) {
+      $link['options']['attributes'] = array();
+    }
+    if (empty($link['options']['attributes']['class'])) {
+      $link['options']['attributes']['class'] = array();
+    }
+    $link['options']['attributes']['class'][] = _menu_minipanels_include($link['options']['minipanel'], $link['options']['menu_minipanels_hover']);
+  }
+  $registry = theme_get_registry();
+  return $registry['link']['old function']($link);
+}
+
+/**
+ * Stores the generated output of all rendered minipanels. Will later be used
+ * by @menu_minipanels_preprocess_page to display the generated output.
+ *
+ * @param Int $mlid - the menu item id that needs the minipanel rendered.
+ * @param String $minipanel_name - the name of the minipanel to render.
+ */
+function menu_minipanels_panels($mlid = NULL, $minipanel_name = NULL) {
+  static $panels = array();
+  if ($minipanel_name != NULL) {
+    $panel = panels_mini_block_view($minipanel_name);
+    // Convert the block to a render array.
+    $panel['#markup'] = $panel['content'];
+    unset($panel['content']);
+    unset($panel['subject']);
+    // Wrap the minipanel.
+    $panel['#prefix'] = '<div class="menu-minipanels menu-minipanel-' . $mlid . '">';
+    $panel['#suffix'] = '</div>';
+    $panels[] = $panel;
+  }
+  else {
+    return $panels;
+  }
+}
+
+/**
+ * When a minipanel menu item is detected by our theme interception functions
+ * this function is used to add the appropriate configuration javascript
+ * and minipanel output.
+ *
+ * The javascript is added to the closure by drupal when hook_footer is called.
+ * The minipanel output is added to closure. See @menu_minipanels_footer
+ *
+ * @param $minipanel_name The name of the minipanel that is to show
+ * @param $menu_config The configuration array for qtip, as configued in menu item edit
+ */
+function _menu_minipanels_include($minipanel_name, $menu_config) {
+  // Early betas did not have this value and the menu settings need to be
+  // re-saved in order to be compatible.
+  if (!isset($menu_config['mlid'])) {
+    // Leave a warning message for the 
+    static $logged_warning = FALSE;
+    if (!$logged_warning) {
+      watchdog('Menu MiniPanels', t('Recent changes to the Menu MiniPanels module require that any menus with attached MiniPanels have their configuration re-saved.'), array(), WATCHDOG_WARNING, l('Menu configuration', 'admin/structure/menu'));
+      $logged_warning = TRUE;
+    }
+    return;
+  }
+
+  $mlid = $menu_config['mlid'];
+  
+  // The same panel/mlid may be added multiple times, if the same menu is added
+  // to a page more than once, i.e. the primary links, plus primary links also
+  // added as a block.
+  static $added = array();
+  if (!isset($added[$mlid])) {
+    $added[$mlid] = TRUE;
+  }
+  else {
+    return _menu_minipanels_link_class_name($mlid);
+  }
+
+  // qTip interprets the absence of the 'position' array element as 'false'.
+  // specifying 'false' doesn't work.
+  if ($menu_config['position']['target'] == 'element') {
+    unset($menu_config['position']['target']);
+  }
+  // qTip interprets the absence of the 'tip' array element as 'don't display a tip'
+  // specifying 'false' doesn't work.
+  if ($menu_config['style']['tip'] == 'none') {
+    unset($menu_config['style']['tip']);
+  }
+
+  // Remove blank values.
+  if (isset($menu_config['hide']['effect']['length']) && $menu_config['hide']['effect']['length'] == '') {
+    unset($menu_config['hide']['effect']['length']);
+  }
+  if (isset($menu_config['hide']['effect']['delay']) && $menu_config['hide']['effect']['delay'] == '') {
+    unset($menu_config['hide']['effect']['delay']);
+  }
+  if (isset($menu_config['show']['effect']['delay']) && $menu_config['show']['effect']['delay'] == '') {
+    unset($menu_config['show']['effect']['delay']);
+  }
+  if (isset($menu_config['show']['effect']['length']) && $menu_config['show']['effect']['length'] == '') {
+    unset($menu_config['show']['effect']['length']);
+  }
+  if (isset($menu_config['style']['border']['color']) && $menu_config['style']['border']['color'] == '') {
+    unset($menu_config['style']['border']['color']);
+  }
+  if (isset($menu_config['style']['border']['radius']) && $menu_config['style']['border']['radius'] == '') {
+    unset($menu_config['style']['border']['radius']);
+  }
+  if (isset($menu_config['style']['border']['width']) && $menu_config['style']['border']['width'] == '') {
+    unset($menu_config['style']['border']['width']);
+  }
+  if (isset($menu_config['style']['border']) && empty($menu_config['style']['border'])) {
+    unset($menu_config['style']['border']);
+  }
+  if (isset($menu_config['style']['width']['max']) && $menu_config['style']['width']['max'] == '') {
+    unset($menu_config['style']['width']['max']);
+  }
+  if (isset($menu_config['style']['width']['min']) && $menu_config['style']['width']['min'] == '') {
+    unset($menu_config['style']['width']['min']);
+  }
+  if (isset($menu_config['style']['width']) && empty($menu_config['style']['width'])) {
+    unset($menu_config['style']['width']);
+  }
+  if (isset($menu_config['position']['container']) && empty($menu_config['position']['container'])) {
+    unset($menu_config['position']['container']);
+  }
+  // Must have all both for this to work correctly.
+  if ((isset($menu_config['position']['adjust']['x']) && empty($menu_config['position']['adjust']['x']))
+    || (isset($menu_config['position']['adjust']['y']) && empty($menu_config['position']['adjust']['y']))) {
+    unset($menu_config['position']['adjust']['x']);
+    unset($menu_config['position']['adjust']['y']);
+  }
+  if (empty($menu_config['position']['adjust'])) {
+    unset($menu_config['position']['adjust']);
+  }
+
+  $settings = array(
+    'menuMinipanels' => array(
+    	'panels' => array(
+        'panel_' . $mlid => $menu_config,
+      )
+    )
+  );
+  drupal_add_js($settings, 'setting');
+
+  // Load the necessary style JS file.
+  module_invoke_all('menu_minipanels_style', $menu_config);
+
+  menu_minipanels_panels($mlid, $minipanel_name);
+  return _menu_minipanels_link_class_name($mlid);
+}
+
+/**
+ * Seperated out as it may be called independantly by our function
+ * that intercepts theme_links
+ */
+function _menu_minipanels_link_class_name($minipanel_name) {
+  return 'menu-minipanel menu-minipanel-' . $minipanel_name;
+}
+
+/**
+ * Implements hook_page_alter().
+ *
+ * This function does two things:
+ * 1. Prepare the links.
+ * 2. Build the output.
+ * This probably means the module could be refactored.
+ */
+function menu_minipanels_page_alter(&$page) {
+  // Optionally ignore certain pages.
+  if (menu_minipanels_excluded_path()) {
+    return;
+  }
+
+  // Add js + css
+
+  // The main qTip script file should be stored in sites/all/libraries/qtip.
+  $qtip_path = menu_minipanels_get_qtip_path();
+
+  // If the qTip script isn't found, no point in continuing.
+  if ($qtip_path === FALSE) {
+    return;
+  }
+
+  // Load each of the menus that are configured for menu_minipanels. It is safe
+  // to use menu_get_names() here as the data is cached, and it won't be
+  // possible that the shortcut sets have been accidentally added.
+  $load_requirements = FALSE;
+  $enabled_menus = array();
+  foreach (menu_get_names() as $menu) {
+    if (variable_get('menu_minipanels_' . $menu . '_enabled', FALSE)) {
+      $enabled_menus[] = $menu;
+
+      // Loop through each level of the menu tree and see whether qTip needs to
+      // be loaded.
+      $level = 0;
+      while ($items = menu_navigation_links($menu, $level)) {
+        if (menu_minipanels_prepare_links($items)) {
+          $load_requirements = TRUE;
+        }
+        $level++;
+      }
+    }
+  }
+
+  // If the main menu is enabled and the main & secondary menus both point to
+  // the same menu, load the second level of that menu.
+  $primary_menu = variable_get('menu_main_links_source', 'main-menu');
+  $secondary_menu = variable_get('menu_secondary_links_source', 'user-menu');
+  if (in_array($primary_menu, $enabled_menus) && $primary_menu == $secondary_menu) {
+    if (menu_minipanels_prepare_links(menu_navigation_links($primary_menu, 1))) {
+      $load_requirements = TRUE;
+    }
+  }
+
+  // If menus are actually needed, load the required scripts & CSS.
+  if ($load_requirements) {
+    // The path to this module.
+    $path = drupal_get_path('module', 'menu_minipanels');
+
+    // Load the module's custom CSS.
+    drupal_add_css($path . '/css/menu_minipanels.css');
+
+    // This module's custom JS.
+    drupal_add_js($path . '/js/menu_minipanels.js', array('scope' => 'footer', 'weight' => -100));
+
+    // Optional callbacks.
+    if (variable_get('menu_minipanels_default_callbacks', TRUE)) {
+      drupal_add_js($path . '/js/menu_minipanels.callbacks.js');
+    }
+
+    // Load the qTip script.
+    drupal_add_js($qtip_path, array('scope' => 'footer', 'weight' => -99));
+
+    // Load the output.
+    $page['page_bottom']['menu_minipanels'] = menu_minipanels_panels();
+  }
+}
+
+/**
+ * Check if current path should be excluded.
+ */
+function menu_minipanels_excluded_path() {
+  // By default don't exclude the page.
+  $exclude_path_match = FALSE;
+
+  // By default ignore the admin pages.
+  $exclude_paths = drupal_strtolower(variable_get('menu_minipanels_exclude_paths', "admin\nadmin/*"));
+
+  // Don't bother checking anything if the setting is empty.
+  if (!empty($exclude_paths)) {
+    // Check the current raw path first.
+    $exclude_path_match = drupal_match_path($_GET['q'], $exclude_paths);
+
+    // If there isn't already a patch, check for a possible alias.
+    if (!$exclude_path_match) {
+      // Get the current path.
+      $path = drupal_strtolower(drupal_get_path_alias($_GET['q']));
+
+      // If the path *is* different to the current raw URL, check it too.
+      if ($path != $_GET['q']) {
+        $exclude_path_match = drupal_match_path($path, $exclude_paths);
+      }
+    }
+  }
+
+  return $exclude_path_match;
+}
