@@ -35,7 +35,7 @@ $white:        #ffffff; // White
 $black:        #000000; // Black
 $defcol:       #DD4814; // Orange - menu bar
 $defcol1:      #F4F4F4; // Background grey colour
-$defcol1_dark:    darken($defcol1, 75%);
+$defcol1_dark: darken($defcol1, 75%); // Dark grey - used for top border in menu
 
 
 $thead:          $medium_dark;
