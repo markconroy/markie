@@ -1,0 +1,14 @@
+name = Mark's Test Content Type
+description = A feature to create a "Slider Block" BEAN
+core = 7.x
+package = Mark.ie Features - Content  hello
+dependencies[] = features
+dependencies[] = image
+dependencies[] = text
+features[features_api][] = api:2
+features[field_base][] = body
+features[field_base][] = field_addd_test_image
+features[field_instance][] = node-mark_s_test-body
+features[field_instance][] = node-mark_s_test-field_addd_test_image
+features[node][] = mark_s_test
+project path = sites/all/modules/custom/custom_features
