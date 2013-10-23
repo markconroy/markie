@@ -1,7 +1,0 @@
-<?php
-/**
- * @file
- * Code for the Mark's Test Content Type feature.
- */
-
-include_once 'mark_s_test_content_type.features.inc';
