@@ -1,0 +1,10 @@
+name = Content Type - Articles
+description = A feature to create the "Articles" content type.
+core = 7.x
+package = Mark.ie Features - Content Types
+dependencies[] = features
+features[features_api][] = api:2
+features[field_base][] = field_art_body
+features[field_instance][] = node-artlcles-field_art_body
+features[node][] = artlcles
+project path = sites/all/modules/custom/custom_features
