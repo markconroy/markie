@@ -550,8 +550,9 @@ a {
  */
 
 .nav {
+  border-bottom: .5em solid $defcol;
   clear: both;
-  margin: 10px 0;
+  margin: 0;
 
   ul,
   ul.menu {
@@ -572,9 +573,12 @@ a {
   ul.menu li a {
     color: $defcol1;
     display: block;
-    white-space: nowrap;
+    font-weight: 700;
+    letter-spacing: .15em;
     padding: 1em;
     text-decoration: none;
+    text-transform: uppercase;
+    white-space: nowrap;
 
     &:visited {}
 
@@ -582,6 +586,7 @@ a {
     &:focus {
       background: $defcol1_dark;
       color: $defcol1;
+      @include border-radius(0 0 1em 1em);
     }
   }
 
