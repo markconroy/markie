@@ -7,5 +7,6 @@ dependencies[] = field_group
 features[ctools][] = field_group:field_group:1
 features[features_api][] = api:2
 features[field_group][] = group_art_basic_info|node|artlcles|form
+features[field_group][] = group_art_meta_info|node|artlcles|form
 features[field_group][] = group_bp_basic_info|node|page|form
 project path = sites/all/modules/custom/custom_features
