@@ -25,7 +25,7 @@ $panel_prefix = isset($panel_prefix) ? $panel_prefix : '';
 $panel_suffix = isset($panel_suffix) ? $panel_suffix : '';
 ?>
 <?php print $panel_prefix; ?>
-<div class="one-column at-panel panel-display clearfix" <?php if (!empty($css_id)): print "id=\"$css_id\""; endif; ?>>
+<div class="at-panel panel-display one-column clearfix" <?php if (!empty($css_id)): print "id=\"$css_id\""; endif; ?>>
   <div class="region region-one-main">
     <div class="region-inner clearfix">
       <?php print $content['one_main']; ?>

@@ -77,7 +77,6 @@ function drush_adaptivetheme($name = NULL, $machine_name = NULL) {
   // Alter the contents of the .info file based on the command options.
   $alterations = array(
     '= AT Subtheme' => '= ' . $name,
-    '= adaptivetheme' => '= ""', // attempt to strip out the project name added by the drupal packing script
   );
   if ($description = drush_get_option('description')) {
     $alterations['Starter subtheme for Adaptivetheme. Copy this subtheme to get started building your own Drupal theme. For help see our <b><a href="http://adaptivethemes.com/documentation/adaptivethemes-documentation" title="Adaptivethemes.com - Rocking the hardest since 2006">documentation</a></b>. If you have a problem and need additional help please use the <b><a href="http://drupal.org/project/issues/adaptivetheme">issue queue</a></b>.'] = $description;

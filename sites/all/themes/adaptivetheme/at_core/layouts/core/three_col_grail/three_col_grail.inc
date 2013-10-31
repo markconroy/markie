@@ -32,7 +32,7 @@ function three_col_grail() {                     // - function name must be iden
     'type'      => 'page_layout',                // - type, tell the system this is a page_layout, not optional!
     'admin css' => 'three_col_grail.admin.css',  // - admin css, optional, in AT Core three_col_grail.admin.css loads all the CSS for all layouts.
     'device_groups' => array(                    // - device_groups, define which device groups this layout can work with, can be one or more of:
-      'bigscreen',                               //   'bigscreen', 'tablet_landscape', 'tablet_portrait', 'smalltouch_landscape'
+      'bigscreen',                               //   'bigscreen', 'tablet_landscape', 'tablet_portrait', 'smartphone_landscape'
       'tablet_landscape',                        //   What you enter here will dictate the device groups it shows for in theme settings.
      ),
   );

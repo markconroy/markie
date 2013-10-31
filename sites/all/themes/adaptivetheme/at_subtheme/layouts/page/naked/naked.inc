@@ -36,7 +36,7 @@ function naked() {
       'bigscreen',
       'tablet_landscape',
       'tablet_portrait',
-      'smalltouch_landscape',
+      'smartphone_landscape',
     ),
   );
 

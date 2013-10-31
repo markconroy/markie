@@ -28,24 +28,18 @@ require_once($path_to_at_core . '/inc/plugins.inc');
  * @param $sidebar_first, an arbitrary numeric value.
  * @param $sidebar_second, an arbitrary numeric value.
  * @param $sidebar_unit, one of px, em or %.
- * @param $theme_name, the active theme.
  *
  * @see three_col_grail_layout() for an example of a builder function with docs.
  */
-function at_build_page_layout($method, $sidebar_first, $sidebar_second, $sidebar_unit, $theme_name = NULL) {
-  // Use the passed in theme_name, else grab it from global $theme_key
-  if ($theme_name == NULL) {
-    global $theme_key;
-    $theme_name = $theme_key;
-  }
-
+function at_build_page_layout($method, $sidebar_first, $sidebar_second, $sidebar_unit) {
+  global $theme_name;
   $output = '';
 
   // We need to invoke at_load_plugins() to get the function names, this is
   // rather expensive but we're in a submit function so IMO this is OK.
   at_load_plugins($theme_name, $plugin_type = 'page_layout');
 
-  $builder_functions = responsive_page_layouts_data_structure($theme_name);
+  $builder_functions = responsive_page_layouts_data_structure();
 
   foreach ($builder_functions as $function_prefix => $redundant_values) {
     if ($method === $function_prefix) {

@@ -14,7 +14,7 @@ function one_col_vert() {
     'type'     => 'page_layout',
     'device_groups' => array(
       'tablet_portrait',
-      'smalltouch_landscape',
+      'smartphone_landscape',
      ),
   );
 

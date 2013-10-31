@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Provides frequently used functions that load something, ususally CSS or JS
@@ -15,8 +14,8 @@
  * @param $filepath, path to the missing file.
  * @param $theme_name, the active theme.
  */
-function at_load_failure($filepath, $theme_name) {
-  $message = t('<p>One or more CSS files were not found or does not exist: <em>!files_list</em>. Did you delete any files or change a file name? You may need to save the theme settings or check all files names are correct in your theme. Please view the <a href="!docs_link" target="_blank">online documentation</a>.</p>', array('!files_list' => $filepath, '!docs_link' => 'http://adaptivethemes.com/documentation/file-generation-system'));
+function load_failure($filepath, $theme_name) {
+  $message = t('<p>One or more CSS files were not found or does not exist: <em>!files_list</em>. Did you delete the public files directory or change a file name? You probably need to save the theme settings to generate the files. Please view the <a href="!docs_link" target="_blank">online documentation</a>.</p>', array('!files_list' => $filepath, '!docs_link' => 'http://adaptivethemes.com/documentation/file-generation-system'));
 
   if (!empty($filepath)) {
     watchdog($theme_name, 'CSS file missing or not found @filename', array('@filename' => $filepath), WATCHDOG_ERROR);
@@ -45,7 +44,7 @@ function at_load_failure($filepath, $theme_name) {
  * @param $path
  * @param $theme_name
  */
-function at_load_layout_css($path, $theme_name) {
+function load_layout_css($path, $theme_name) {
 
   // Get the info file data
   $info = at_get_info($theme_name);
@@ -54,7 +53,9 @@ function at_load_layout_css($path, $theme_name) {
   $load_ie8_css = TRUE;
 
   // Load the default layout if Standard layout is default or responsive styles are disabled
-  if (at_get_setting('global_default_layout', $theme_name) === 'standard-layout' || at_get_setting('disable_responsive_styles', $theme_name) === 1) {
+  if (
+    at_get_setting('global_default_layout', $theme_name) === 'standard-layout' ||
+    at_get_setting('disable_responsive_styles', $theme_name) === 1) {
     $file = $theme_name . '.default.layout.css';
     $filepath = $path . '/' . $file;
     if (file_exists($filepath)) {
@@ -67,7 +68,7 @@ function at_load_layout_css($path, $theme_name) {
       );
     }
     else {
-      at_load_failure($filepath, $theme_name);
+      load_failure($filepath, $theme_name);
     }
   }
 
@@ -77,19 +78,20 @@ function at_load_layout_css($path, $theme_name) {
     // Responsiveness is not disabled, load the responsive layout
     $filepath = $path . '/' . $theme_name . '.responsive.layout.css';
     $media_query = 'only screen'; // keyword "only" hide this from unsupporting user agents
-    at_load_subtheme_responsive_styles($filepath, $media_query, $theme_name, $weight = 0);
+    load_subtheme_responsive_styles($filepath, $media_query, $theme_name, $weight = 0);
 
     // The lt-ie9.layout.css stylesheet loads under specific conditions:
     // 1. Responsive capabilities are ON
     // 2. Mobile first is ON
     // 3. Respond.js is OFF
+    // Note this excludes IEMobile 7, screw you IEMobile 7
     if (at_get_setting('global_default_layout', $theme_name) !== 'standard-layout') {
       if (at_get_setting('load_respondjs', $theme_name) === 0) {
         $load_ie8_css = FALSE;
         $filepath = $path . '/' . $theme_name . '.lt-ie9.layout.css';
         $ie_style['media'] = 'screen';
-        $ie_style['condition'] = 'lt IE 9';
-        at_load_conditional_styles($filepath, $ie_style, $theme_name);
+        $ie_style['condition'] = '(lt IE 9)&(!IEMobile 7)';
+        load_conditional_styles($filepath, $ie_style, $theme_name);
       }
     }
   }
@@ -103,7 +105,7 @@ function at_load_layout_css($path, $theme_name) {
       $filepath = $path . '/' . $theme_name . '.lt-ie8.layout.css';
       $ie_style['media'] = 'screen';
       $ie_style['condition'] = 'lt IE 8';
-      at_load_conditional_styles($filepath, $ie_style, $theme_name);
+      load_conditional_styles($filepath, $ie_style, $theme_name);
     }
   }
 }
@@ -121,7 +123,7 @@ function at_load_layout_css($path, $theme_name) {
  * @param $path
  * @param $theme_name
  */
-function at_load_responsive_css($path, $theme_name) {
+function load_responsive_css($path, $theme_name) {
 
   // Set the mode, when CSS is aggregated by Drupal Production mode is TRUE
   $mode = variable_get('preprocess_css', '') == 1 ? TRUE : FALSE;
@@ -135,7 +137,7 @@ function at_load_responsive_css($path, $theme_name) {
   // - 2: Responsiveness is not disabled
   //
   // When in production mode these files are aggregated into one file
-  // and loaded using at_load_subtheme_responsive_styles().
+  // and loaded using load_subtheme_responsive_styles().
   //
   // You can disable responsive capability using the theme settings - look under
   // the Global settings. Do not delete or alter this - use the theme setting!
@@ -145,12 +147,8 @@ function at_load_responsive_css($path, $theme_name) {
     // The file names must match the files in your themes CSS directory, if
     // you change them you must update to match.
     $files = array(
-      // Maintian backwards compatibility with older themes that use smartphone
-      'responsive.smartphone.portrait'  => at_get_setting('smalltouch_portrait_media_query', $theme_name) ? at_get_setting('smalltouch_portrait_media_query', $theme_name) : at_get_setting('smartphone_portrait_media_query', $theme_name),
-      'responsive.smartphone.landscape' => at_get_setting('smalltouch_landscape_media_query', $theme_name) ? at_get_setting('smalltouch_landscape_media_query', $theme_name) : at_get_setting('smartphone_landscape_media_query', $theme_name),
-      // Standard files for the 7.x-3.2 and beyond
-      'responsive.smalltouch.portrait'  => at_get_setting('smalltouch_portrait_media_query', $theme_name),
-      'responsive.smalltouch.landscape' => at_get_setting('smalltouch_landscape_media_query', $theme_name),
+      'responsive.smartphone.portrait'  => at_get_setting('smartphone_portrait_media_query', $theme_name),
+      'responsive.smartphone.landscape' => at_get_setting('smartphone_landscape_media_query', $theme_name),
       'responsive.tablet.portrait'      => at_get_setting('tablet_portrait_media_query', $theme_name),
       'responsive.tablet.landscape'     => at_get_setting('tablet_landscape_media_query', $theme_name),
       'responsive.desktop'              => at_get_setting('bigscreen_media_query', $theme_name),
@@ -163,14 +161,14 @@ function at_load_responsive_css($path, $theme_name) {
     }
 
     // Loop over the files array and load each CSS file.
-    // at_load_subtheme_responsive_styles() takes three parameters:
+    // load_subtheme_responsive_styles() takes three parameters:
     // - $css_file - the name of the css file
     // - $media_query - the media query from theme settings
     // - $theme_name - to generate the path-to-theme for drupal_add_css()
     foreach ($files as $key => $value) {
       $filepath = drupal_get_path('theme', $theme_name) . '/css/' . $key . '.css';
       $media_query = $value;
-      at_load_subtheme_responsive_styles($filepath, $media_query, $theme_name, $weight = 100);
+      load_subtheme_responsive_styles($filepath, $media_query, $theme_name, $weight = 100);
     }
   }
 
@@ -181,7 +179,7 @@ function at_load_responsive_css($path, $theme_name) {
   elseif ($mode == TRUE) {
     $filepath = $path . '/' . $theme_name . '.responsive.styles.css';
     $media_query = 'only screen'; // keyword "only" should hide this from older user agents
-    at_load_subtheme_responsive_styles($filepath, $media_query, $theme_name, $weight = 100);
+    load_subtheme_responsive_styles($filepath, $media_query, $theme_name, $weight = 100);
   }
 }
 
@@ -190,7 +188,7 @@ function at_load_responsive_css($path, $theme_name) {
  *
  * @param $theme_name
  */
-function at_load_extensions_css($theme_name) {
+function load_extensions_css($theme_name) {
   global $path_to_at_core;
   $settings_css = array();
   // Heading settings
@@ -235,11 +233,11 @@ function at_load_extensions_css($theme_name) {
  * @param $path
  * @param $theme_name
  */
-function at_load_fonts($path, $theme_name) {
+function load_fonts($path, $theme_name) {
   // Google fonts
   $google_font_string = drupal_static(__FUNCTION__, array());
   if (empty($google_font_string)) {
-    $google_font_string = at_load_google_fonts($theme_name);
+    $google_font_string = load_google_fonts($theme_name);
   }
   if (!empty($google_font_string)) {
     drupal_add_css($google_font_string, array(
@@ -261,7 +259,7 @@ function at_load_fonts($path, $theme_name) {
     );
   }
   else {
-    at_load_failure($filepath, $theme_name);
+    load_failure($filepath, $theme_name);
   }
 }
 
@@ -271,7 +269,7 @@ function at_load_fonts($path, $theme_name) {
  * @param $path
  * @param $theme_name
  */
-function at_load_custom_css($path, $theme_name) {
+function load_custom_css($path, $theme_name) {
   $filepath = $path . '/' . $theme_name . '.custom.css';
   if (file_exists($filepath)) {
     drupal_add_css($filepath, array(
@@ -284,107 +282,55 @@ function at_load_custom_css($path, $theme_name) {
     );
   }
   else {
-    at_load_failure($filepath, $theme_name);
+    load_failure($filepath, $theme_name);
   }
 }
 
 /**
- * Load Polyfill Scripts
- * Conditional scripts are returned to the preprocess function - in AT Core that
- * means adaptivetheme_preprocess_html() and adaptivetheme_preprocess_maintenance_page().
- * There are two sources for conditional scripts - the subtheme info file and
- * AT Core itself can load html5.js and respond.js.
- * Unconditional scripts (those not printed within an IE conditioanl comment)
- * load directly via drupal_add_js in this function, while the conditional scripts
- * are returned as an array to preprocess, then rendered in process. This is done
- * to allow themers to manipulate the data structure in preprocess if they feel
- * the need to.
+ * Return an array of file names.
  *
  * @param $theme_name
  */
-function at_load_polyfills($theme_name) {
+function load_polyfills($theme_name) {
   global $path_to_at_core;
 
   // Get the info file data
   $info = at_get_info($theme_name);
 
   // Build an array of polyfilling scripts
-  $polyfills = drupal_static('adaptivetheme_preprocess_html_polyfills_array');
-  if (empty($polyfills)) {
-
-    $theme_path = drupal_get_path('theme', $theme_name);
-    $polyfills_array = array();
-
+  $polyfills_array = drupal_static('adaptivetheme_preprocess_html_polyfills_array');
+  if (empty($polyfills_array)) {
     // Info file loaded conditional scripts
+    $theme_path = drupal_get_path('theme', $theme_name);
     if (array_key_exists('ie_scripts', $info)) {
       foreach ($info['ie_scripts'] as $condition => $ie_scripts_path) {
         foreach ($ie_scripts_path as $key => $value) {
           $filepath = $theme_path . '/' . $value;
-          $polyfills_array['ie'][$condition][] = at_theme_conditional_script($filepath);
+          $polyfills_array['info'][$condition][] = at_theme_conditional_script($filepath);
         }
       }
     }
-
-    // AT Core Conditional Scripts
-    if (at_get_setting('load_html5js') === 1) {
-      $polyfills_array['ie']['lt IE 9'][] = at_theme_conditional_script($path_to_at_core . '/scripts/html5.js');
+    // AT Core Polyfills
+    $polly = '';
+    $polly_settings_array = array(
+      'load_respondjs',
+      'load_html5js',
+      'load_scalefixjs', // loaded directly by polly_wants_a_cracker(), its never returned
+      'load_onmediaqueryjs', // loaded directly by polly_wants_a_cracker(), its never returned
+    );
+    foreach ($polly_settings_array as $polly_setting) {
+      $polly[$polly_setting] = at_get_setting($polly_setting, $theme_name);
     }
-    if (at_get_setting('load_respondjs') === 1) {
-      $polyfills_array['ie']['lt IE 9'][] = at_theme_conditional_script($path_to_at_core . '/scripts/respond.js');
-    }
-
-    // AT Core Un-conditional Scripts
-    if (at_get_setting('load_scalefixjs') === 1) {
-      $polyfills_array['all'][] = 'scripts/scalefix.js';
-    }
-    if (at_get_setting('load_onmediaqueryjs') === 1) {
-      $polyfills_array['all'][] = 'scripts/onmediaquery.js';
-    }
-    if (at_get_setting('load_matchmediajs') === 1) {
-      $polyfills_array['all'][] = 'scripts/matchMedia.js';
-      $polyfills_array['all'][] = 'scripts/matchMedia.addListener.js';
-    }
-
-    // Load Polyfills
-    if (!empty($polyfills_array)) {
-
-      // Default query string for cache control finger printing
-      $query_string = variable_get('css_js_query_string', '0');
-
-      // "all" - no conditional comment needed, use drupal_add_js()
-      if (isset($polyfills_array['all'])) {
-        foreach ($polyfills_array['all'] as $script) {
-          drupal_add_js($path_to_at_core . '/' . $script, array(
-            'type' => 'file',
-            'scope' => 'header',
-            'group' => JS_THEME,
-            'preprocess' => TRUE,
-            'cache' => TRUE,
-            )
-          );
-        }
+    $backed_crackers = polly_wants_a_cracker($polly, $theme_name);
+    foreach ($backed_crackers as $cupboard => $flavors) {
+      foreach ($flavors as $key => $value) {
+        $filepath = $path_to_at_core . '/' . $value;
+        $polyfills_array['at_core'][$cupboard][] = at_theme_conditional_script($filepath);
       }
-
-      // IE conditional scripts, we need some semblance of structered data...
-      if (isset($polyfills_array['ie'])) {
-        $polyfills = array();
-        foreach ($polyfills_array['ie'] as $conditional_comment => $scripts) {
-          $ie_script = array(
-            '#type' => 'markup',
-            '#markup' => implode("\n", $scripts),
-            '#prefix' => "<!--[if " . $conditional_comment . "]>\n",
-            '#suffix' => "\n<![endif]-->\n",
-          );
-          $polyfills[$conditional_comment] = $ie_script;
-        }
-      }
-    }
-    else {
-      $polyfills = '';
     }
   }
 
-  return $polyfills;
+  return $polyfills_array;
 }
 
 
@@ -393,7 +339,7 @@ function at_load_polyfills($theme_name) {
  *
  * @param $theme_name
  */
-function at_load_debuggers($theme_name) {
+function load_debuggers($theme_name) {
   global $path_to_at_core;
 
   // Do some debugging/development stuff
@@ -422,14 +368,6 @@ function at_load_debuggers($theme_name) {
       'cache' => TRUE,
       )
     );
-    drupal_add_css($path_to_at_core . '/css/debug-windowsize.css', array(
-      'preprocess' => FALSE,
-      'group' => CSS_THEME,
-      'media' => 'screen',
-      'every_page' => FALSE,
-      'weight' => 2000,
-      )
-    );
   }
 }
 
@@ -448,7 +386,7 @@ function at_load_debuggers($theme_name) {
  * @param $theme_name, the active theme.
  * @param $weight, optional.
  */
-function at_load_subtheme_responsive_styles($filepath, $media_query, $theme_name, $weight = 0) {
+function load_subtheme_responsive_styles($filepath, $media_query, $theme_name, $weight = 0) {
   if (file_exists($filepath)) {
     drupal_add_css($filepath, array(
       'preprocess' => variable_get('preprocess_css', '') == 1 ? TRUE : FALSE,
@@ -468,7 +406,7 @@ function at_load_subtheme_responsive_styles($filepath, $media_query, $theme_name
  *
  * @param $theme_name, the active theme.
  */
-function at_load_subtheme_conditional_styles($theme_name) {
+function load_subtheme_conditional_styles($theme_name) {
   $info = drupal_static(__FUNCTION__, array());
   if (empty($info)) {
     // Get the info file data
@@ -489,7 +427,7 @@ function at_load_subtheme_conditional_styles($theme_name) {
             $ie_style['condition'] = $condition;
             $ie_style['path'] = $ie_styles_path;
             $filepath = drupal_get_path('theme', $theme_name) . '/' . $ie_style['path'];
-            at_load_conditional_styles($filepath, $ie_style, $theme_name);
+            load_conditional_styles($filepath, $ie_style, $theme_name);
           }
         }
       }
@@ -508,7 +446,7 @@ function at_load_subtheme_conditional_styles($theme_name) {
  * @param $theme_name, the active theme.
  * @param $weight, optional.
  */
-function at_load_conditional_styles($filepath, $ie_style, $theme_name, $weight = 0) {
+function load_conditional_styles($filepath, $ie_style, $theme_name, $weight = 0) {
   if (file_exists($filepath)) {
     drupal_add_css($filepath, array(
       'group' => CSS_THEME,
@@ -523,7 +461,7 @@ function at_load_conditional_styles($filepath, $ie_style, $theme_name, $weight =
     );
   }
   else {
-    at_load_failure($filepath, $theme_name);
+    load_failure($filepath, $theme_name);
   }
 }
 
@@ -538,7 +476,7 @@ function at_load_conditional_styles($filepath, $ie_style, $theme_name, $weight =
  * @param $scope, header or footer.
  * @param $weight, optional.
  */
-function at_load_subtheme_script($filepath, $theme_name, $scope, $weight = NULL) {
+function load_subtheme_script($filepath, $theme_name, $scope, $weight = NULL) {
   $filepath = drupal_get_path('theme', $theme_name) . '/' . $filepath;
   if (file_exists($filepath)) {
     drupal_add_js($filepath, array(
@@ -576,6 +514,96 @@ function at_theme_conditional_script($filepath) {
 }
 
 /**
+ * Return themed scripts in Conditional Comments.
+ * Since Drupal 7 does not (yet) support the 'browser' option in drupal_add_js()
+ * Adaptivetheme provides a way to load scripts inside conditional comments.
+ * This function will return a string for printing into a template, its
+ * akin to a real theme_function but its not.
+ *
+ * @param $ie_scripts, an array of themed scripts.
+ */
+function at_theme_conditional_scripts($ie_scripts) {
+  $themed_scripts = drupal_static(__FUNCTION__, array());
+  if (empty($themed_scripts)) {
+    $cc_scripts = array();
+
+    foreach ($ie_scripts as $conditional_comment => $conditional_scripts) {
+      $cc_scripts[] = '<!--[if ' . $conditional_comment . ']>' . "\n" . $conditional_scripts . "\n" . '<![endif]-->' . "\n";
+    }
+    $themed_scripts = implode("\n", $cc_scripts);
+  }
+
+  return $themed_scripts;
+}
+
+/**
+ * Polyfills.
+ * This function does two seperate operations. First it attaches a condition
+ * to each Polyfill which can be either an IE conditional comment or 'all'.
+ * Polyfills with 'all' are loaded immediatly via drupal_add_js(), those with
+ * an IE CC are returned for further processing. This function is hard coded
+ * to support only those scripts supplied by the core theme, if you need to load
+ * a script for IE use the info file feature.
+ *
+ * @param $polly
+ * @param $theme_name
+ */
+function polly_wants_a_cracker($polly, $theme_name) {
+  global $path_to_at_core;
+
+  $baked_crackers = drupal_static(__FUNCTION__, array());
+  if (empty($baked_crackers)) {
+    if (in_array(1, $polly)) {
+
+      $crackers = array();
+
+      // Respond.js
+      if ($polly['load_respondjs'] === 1 && at_get_setting('disable_responsive_styles', $theme_name) === 0) {
+        $crackers['ie']['lt IE 9'][] = 'scripts/respond.js';
+      }
+      // HTML5 Shiv
+      if ($polly['load_html5js'] === 1) {
+        $crackers['ie']['lt IE 9'][] = 'scripts/html5.js';
+      }
+      // Scalefix.js
+      if ($polly['load_scalefixjs'] === 1) {
+        $crackers['all'][] = 'scripts/scalefix.js';
+      }
+      // OnMediaQuery.js
+      if ($polly['load_onmediaqueryjs'] === 1) {
+        $crackers['all'][] = 'scripts/onmediaquery.js';
+      }
+
+      // Load Polyfills
+      if (!empty($crackers)) {
+
+        // We need the default query string for cache control finger printing
+        $query_string = variable_get('css_js_query_string', '0');
+
+        // "all" - no conditional comment needed, use drupal_add_js()
+        if (isset($crackers['all'])) {
+          foreach ($crackers['all'] as $script) {
+            drupal_add_js($path_to_at_core . '/' . $script, array(
+              'type' => 'file',
+              'scope' => 'header',
+              'group' => JS_THEME,
+              'preprocess' => TRUE,
+              'cache' => TRUE,
+              )
+            );
+          }
+        }
+        if (isset($crackers['ie'])) {
+          $baked_crackers = $crackers['ie'];
+        }
+      }
+    }
+  }
+
+  return $baked_crackers;
+}
+
+/**
  * Google Font loader.
  * Adaptivetheme can load websafe fonts, Google fonts, custom font stacks and
  * integrate with @font-your-face module. All can be configured in the "Fonts"
@@ -585,7 +613,7 @@ function at_theme_conditional_script($filepath) {
  *
  * @param $theme_name
  */
-function at_load_google_fonts($theme_name) {
+function load_google_fonts($theme_name) {
   $google_font_string = drupal_static(__FUNCTION__, array());
   if (empty($google_font_string)) {
 
@@ -650,84 +678,9 @@ function at_load_google_fonts($theme_name) {
   return $google_font_string;
 }
 
-/**
- * Add js settings for the layout type and media query
- */
-function at_load_layout_js_settings($theme_name) {
-  $breakpoints = array(
-    'bigscreen',
-    'tablet_landscape',
-    'tablet_portrait',
-    'smalltouch_landscape',
-    'smalltouch_portrait',
-  );
-  $cfg = array();
-  foreach ($breakpoints as $breakpoint) {
-    $layout = at_get_setting($breakpoint . '_layout', $theme_name);
-    $media_query = at_get_setting($breakpoint . '_media_query', $theme_name);
-    if ($layout) {
-      $layout = str_replace('_', '-', $layout);
-      $cfg[$theme_name]['layout_settings'][$breakpoint] = $layout;
-    }
-    if ($media_query) {
-      check_plain($media_query);
-      $cfg[$theme_name]['media_query_settings'][$breakpoint] = $media_query;
-    }
-  }
-  drupal_add_js(array('adaptivetheme' => $cfg), 'setting');
-}
-
-/**
- * Return JS and CSS for the Menu Toggle for mobile.
- */
-function at_load_menu_toggle($path, $theme_name) {
-  // Add JS settings for each enabled option (breakpoint)
-  $menu_toggle_settings = array(
-    'menu_toggle_tablet_portrait',
-    'menu_toggle_tablet_landscape',
-  );
-  $cfg = array();
-  foreach ($menu_toggle_settings as $toggle_setting) {
-    $setting = at_get_setting($toggle_setting, $theme_name);
-    if ($setting == 1) {
-      $cfg[$theme_name]['menu_toggle_settings'][$toggle_setting] = 'true';
-    }
-    else {
-      $cfg[$theme_name]['menu_toggle_settings'][$toggle_setting] = 'false';
-    }
-  }
-  drupal_add_js(array('adaptivetheme' => $cfg), 'setting');
-
-  // Load the JS file
-  $path_to_at_core = drupal_get_path('theme', 'adaptivetheme');
-  drupal_add_js($path_to_at_core . '/scripts/menu-toggle.js', array(
-    'type' => 'file',
-    'scope' => 'header',
-    'group' => JS_THEME,
-    'weight'=> 999,
-    'preprocess' => TRUE,
-    'cache' => TRUE,
-    )
-  );
-
-  // Load the generated CSS
-  $filepath = $path . '/' . $theme_name . '.menutoggle.css';
-  if (file_exists($filepath)) {
-    drupal_add_css($filepath, array(
-      'preprocess' => TRUE,
-      'group' => CSS_THEME,
-      'media' => 'all',
-      'every_page' => TRUE,
-      'weight' => 99,
-      )
-    );
-  }
-}
-
 //
 // Functions to maintain 7.x-2.x backward compatibility,
 // DO NOT use these for 7.x-3.x or greater.
-// Note to self - do not namespace these, that will certainly break existing sites.
 //
 // Load sub-theme media queries, 7.x-2.x backward compatibility
 function load_subtheme_media_queries($files, $theme_name) {
@@ -745,7 +698,7 @@ function load_subtheme_media_queries($files, $theme_name) {
       );
     }
     else {
-      at_load_failure($filepath, $theme_name);
+      load_failure($filepath, $theme_name);
     }
   }
 }
@@ -768,7 +721,7 @@ function load_subtheme_ie_styles($files, $theme_name) {
       );
     }
     else {
-      at_load_failure($filepath, $theme_name);
+      load_failure($filepath, $theme_name);
     }
   }
 }

@@ -42,9 +42,6 @@ function adaptivetheme_theme($existing, $type, $theme, $path) {
  * @see adaptivetheme_process_menubar()
  */
 function adaptivetheme_menubar($vars) {
-
-  //dsm($vars);
-
   $output = '';
   $output .= '<div id="' . $vars['menubar_id'] . '" class="' . $vars['classes'] . '"' . $vars['attributes'] . '>';
   $output .= '<nav ' . $vars['content_attributes'] . '>';
@@ -81,6 +78,7 @@ function _theme_menu_variables($menu, $type) {
 function adaptivetheme_breadcrumb($vars) {
   global $theme_key;
   $theme_name = $theme_key;
+
   $breadcrumb = $vars['breadcrumb'];
 
   if (at_get_setting('breadcrumb_display', $theme_name) == 1) {
@@ -101,9 +99,7 @@ function adaptivetheme_breadcrumb($vars) {
 
       // Push the page title onto the end of the breadcrumb array
       if (at_get_setting('breadcrumb_title', $theme_name) == 1) {
-        if ($page_title = drupal_get_title()) {
-          $breadcrumb[] = '<span class="crumb-title">' . $page_title . '</span>';
-        }
+        $breadcrumb[] = '<span class="crumb-title">' . drupal_get_title() . '</span>';
       }
 
       $class = 'crumb';
@@ -120,15 +116,15 @@ function adaptivetheme_breadcrumb($vars) {
         $output .= '<h2 class="element-invisible">' . t('You are here') . '</h2>';
       }
       $output .= '<ol id="crumbs" class="clearfix">';
-      foreach ($breadcrumb as $key => $crumb) {
+      foreach ($breadcrumb as $key => $val) {
         if ($key == $last && count($breadcrumb) != 1) {
           $class = 'crumb crumb-last';
         }
         if ($key == 0) {
-          $output .= '<li class="' . $class . ' crumb-first">' . $crumb . '</li>';
+          $output .= '<li class="' . $class . ' crumb-first">' . $val . '</li>';
         }
         else {
-          $output .= '<li class="' . $class . '"><span class="crumb-separator">' . $separator . '</span>' . $crumb . '</li>';
+          $output .= '<li class="' . $class . '"><span class="crumb-sepreator">' . $separator . '</span>' . $val . '</li>';
         }
       }
       $output .= '</ol></nav></div>';
@@ -164,11 +160,8 @@ function adaptivetheme_status_messages($vars) {
     'error' => t('Error message'),
     'warning' => t('Warning message'),
   );
-
-  $output .= "<div id=\"messages\">";
-
   foreach (drupal_get_messages($display) as $type => $messages) {
-    $output .= "<div class=\"messages $type\">";
+    $output .= "<div id=\"messages\"><div class=\"messages $type\">";
     if (!empty($status_heading[$type])) {
       $output .= '<h2 class="element-invisible">' . $status_heading[$type] . "</h2>";
     }
@@ -182,11 +175,8 @@ function adaptivetheme_status_messages($vars) {
     else {
       $output .= $messages[0];
     }
-    $output .= "</div>";
+    $output .= "</div></div>";
   }
-
-  $output .= "</div>";
-
   return $output;
 }
 
@@ -217,14 +207,7 @@ function adaptivetheme_item_list($vars) {
   $type = $vars['type'];
   $attributes = $vars['attributes'];
 
-  // If a class exists use it on the wrapper, for Drupal core this mainly applies
-  // to the pager, so you get the wrapper class .item-list-pager
-  if (isset($attributes['class'])) {
-    $output = '<div class="item-list item-list-' . $attributes['class'][0] . '">';
-  }
-  else {
-    $output = '<div class="item-list">';
-  }
+  $output = '<div class="item-list">';
 
   if (isset($title) && $title !== '') {
     $output .= '<h3>' . $title . '</h3>';
@@ -236,7 +219,6 @@ function adaptivetheme_item_list($vars) {
     foreach ($items as $i => $item) {
       $attributes = array();
       $children = array();
-      $data = '';
       if (is_array($item)) {
         foreach ($item as $key => $value) {
           if ($key == 'data') {
@@ -338,13 +320,6 @@ if (!function_exists('dhtml_menu_init')) {
       unset($element['#localized_options']['attributes']['title']);
     }
 
-    // Possible feature to show menu descriptions in span elements
-    //if ($element['#original_link']['menu_name'] == "main-menu" && isset($element['#localized_options']['attributes']['title'])){
-    //  $element['#title'] = '<span class="title">' . $element['#title'] . '</span>';
-    //  $element['#title'] .= '<span class="description">' . $element['#localized_options']['attributes']['title'] . '</span>';
-    //  $element['#localized_options']['html'] = TRUE;
-    //}
-
     $output = l($element['#title'], $element['#href'], $element['#localized_options']);
     return '<li' . drupal_attributes($element['#attributes']) . '>' . $output . $sub_menu . "</li>";
   }
@@ -414,26 +389,29 @@ function adaptivetheme_links($vars) {
     $i = 1;
 
     foreach ($links as $key => $link) {
-
-      // Extra menu classes
       if (at_get_setting('extra_menu_classes')) {
         $class = array($key);
+      }
+      if (at_get_setting('extra_menu_classes')) {
         if ($i == 1) {
           $class[] = 'first';
         }
         if ($i == $num_links) {
           $class[] = 'last';
         }
+      }
+      if (at_get_setting('extra_menu_classes')) {
         if (isset($link['href']) && ($link['href'] == $_GET['q'] || ($link['href'] == '<front>' && drupal_is_front_page()))
             && (empty($link['language']) || $link['language']->language == $language_url->language)) {
           $class[] = 'active';
         }
+      }
+      if (at_get_setting('extra_menu_classes')) {
         $output .= '<li' . drupal_attributes(array('class' => $class)) . '>';
       }
       else {
         $output .= '<li>';
       }
-
       if (isset($link['href'])) {
         if (at_get_setting('menu_item_span_elements')) {
           $link['title'] = '<span>' . $link['title'] . '</span>';

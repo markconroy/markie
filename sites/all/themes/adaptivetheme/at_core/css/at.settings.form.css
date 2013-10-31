@@ -2,6 +2,10 @@
    This is crafted to work with Seven and AT Admin themes,
    other admin themes could spit the dummy with these styles. */
 .theme-settings-header {
+  background: #e5e5e5;
+  padding: 10px;
+  -moz-border-radius: 3px 3px 0 0;
+  -webkit-border-radius: 3px 3px 0 0;
   border-radius: 3px 3px 0 0;
 }
 .theme-settings-header h1 {
@@ -75,21 +79,20 @@ div.vertical-tabs .vertical-tabs-panes {
 #edit-pagestyles fieldset p {
   margin-bottom: 0;
 }
-div.vertical-tabs .vertical-tabs-panes .form-type-checkbox label,
-div.vertical-tabs .vertical-tabs-panes .form-type-radios label {
+.vertical-tabs-panes .form-type-checkbox label,
+.vertical-tabs-panes .form-type-radios label {
   float: none;
   width: auto;
 }
-.no-extensions-enabled,
-div.vertical-tabs .vertical-tabs-panes fieldset fieldset {
+.vertical-tabs-panes fieldset fieldset {
   background: #ededed;
   border: 0;
   margin: 1px 0;
 }
-div.vertical-tabs .vertical-tabs-panes fieldset fieldset .fieldset-wrapper {
+.vertical-tabs-panes fieldset fieldset .fieldset-wrapper {
   padding-top: 10px;
 }
-div.vertical-tabs .vertical-tabs-panes fieldset fieldset .fieldset-wrapper .fieldset-description {
+.vertical-tabs-panes fieldset fieldset .fieldset-wrapper .fieldset-description {
   padding-bottom: 5px;
 }
 fieldset.at-layout-form div.form-item  label[for*="-media-query"] {
@@ -98,14 +101,13 @@ fieldset.at-layout-form div.form-item  label[for*="-media-query"] {
 fieldset.at-layout-form div.form-item[class*="-media-query"] .description {
   padding-top: 3px;
 }
-.no-extensions-enabled {
-  padding: 10px;
+.vertical-tabs .form-type-textfield input {
 }
 
 /* Hide text in form labels where needed
    Kellum Method: http://www.zeldman.com/2012/03/01/replacing-the-9999px-hack-new-image-replacement */
 fieldset.at-layout-form div.form-type-radio label,
-div.smalltouch-portrait-layout,
+div.smartphone-portrait-layout,
 .panel-option-lists .form-radios label  {
   text-indent: 100%;
   white-space: nowrap;
@@ -168,7 +170,7 @@ fieldset.at-layout-form div[class*="set-max-width"] input  {
   width: auto;
 }
 fieldset.at-layout-form div.form-type-radio label,
-div.smalltouch-portrait-layout  {
+div.smartphone-portrait-layout  {
   background-repeat: no-repeat;
   margin-top: 4px;
   height: 60px;
@@ -177,7 +179,7 @@ div.smalltouch-portrait-layout  {
   float: none;
   text-align: center;
 }
-div.smalltouch-portrait-layout  {
+div.smartphone-portrait-layout  {
   float: left;
   margin: 15px 15px 0 0;
 }
@@ -206,9 +208,6 @@ fieldset#edit-portrait--2 > .fieldset-wrapper {
 #edit-debug p.warning {
   background: url(images/warning.png) no-repeat left center;
   padding-left: 25px;
-}
-.field-description-info {
-  color: #666;
 }
 
 /* Conditional messages for sidebars */
@@ -263,7 +262,7 @@ fieldset[id*="message-wrapper"] .fieldset-wrapper .description {
   display: table-cell;
   vertical-align: middle;
 }
-div.vertical-tabs .vertical-tabs-panes .panel-option-lists .fieldset-wrapper > .form-item > label {
+.panel-option-lists .fieldset-wrapper > .form-item > label {
   font-weight: 400;
   width: 22.5%;
 }
@@ -363,7 +362,7 @@ fieldset#edit-font .fieldset-wrapper .fieldset-wrapper {
   clip: rect(1px 1px 1px 1px);
   clip: rect(1px, 1px, 1px, 1px);
   position: absolute;
-  overflow: hidden;
+  overflow: 0;
 }
 #edit-site-name-font-style .form-type-select label {
   position: static !important;
@@ -469,7 +468,7 @@ input[disabled] {
 /* Revert the decision to fix hidden fieldset legends in vertical tabs until
    its safe to fix this properly, we have many workarounds for this that need to be
    reverted and its not really safe to do that until we're well past 7.13 */
-div.vertical-tabs fieldset.vertical-tabs-pane fieldset legend {
+fieldset.vertical-tabs-pane fieldset legend {
   display: none;
 }
 abbr.form-required,
@@ -502,45 +501,11 @@ html.js fieldset.collapsible fieldset .fieldset-legend {
   display: block;
   position: static;
 }
-
-
 #edit-context-regions fieldset .fieldset-wrapper {
   padding: 30px 15px 15px 1px;
 }
-
-#edit-context-regions fieldset fieldset .fieldset-wrapper {
-  padding: 0 15px 0 1px;
-}
-
 .admin-theme-adaptivetheme-admin #edit-context-regions fieldset .fieldset-wrapper {
   padding-left: 15px;
-}
-.detection {
-  color: green;
-}
-.no-detection {
-  color: red;
-}
-
-div[class*=form-item-unset-region-options],
-div[class*=form-item-move-region-options],
-fieldset[id*=edit-region-options] .form-type-select {
-  border-left: 13px solid #ddd;
-  margin: 0;
-  padding: 0 0 0 10px;
-}
-
-fieldset[id*=edit-region-options] .form-type-select {
-  padding: 10px 0 0 10px;
-}
-
-#edit-context-regions fieldset fieldset legend,
-div[class*=form-item-unset-region-options] label:first-child,
-div[class*=form-item-move-region-options] label:first-child {
-  clip: rect(1px 1px 1px 1px);
-  clip: rect(1px, 1px, 1px, 1px);
-  position: absolute;
-  overflow: hidden;
 }
 
 
@@ -602,21 +567,20 @@ div[class*=form-item-move-region-options] label:first-child {
 }
 
 /* Wrangel Seven to look half decent */
-.admin-theme-seven div.vertical-tabs .font-element-wrapper .fieldset-legend,
-.admin-theme-seven div.vertical-tabs .panel-option-lists .fieldset-legend {
+.admin-theme-seven .font-element-wrapper .fieldset-legend,
+.admin-theme-seven .panel-option-lists .fieldset-legend {
   position: static;
 }
 .admin-theme-seven .panel-option-lists .form-type-radio {
   margin-right: 20px;
 }
-.admin-theme-seven div.smalltouch-portrait-layout {
+.admin-theme-seven div.smartphone-portrait-layout {
   margin-top: 7px;
 }
-.admin-theme-seven div.vertical-tabs fieldset,
-.admin-theme-seven div.vertical-tabs fieldset fieldset,
-.admin-theme-seven div.vertical-tabs .fieldset-wrapper,
-.admin-theme-seven div.vertical-tabs legend
-.admin-theme-seven div.vertical-tabs .fieldset-legend {
+.admin-theme-seven fieldset,
+.admin-theme-seven .fieldset-wrapper,
+.admin-theme-seven legend
+.admin-theme-seven .fieldset-legend {
   margin: 0;
   padding: 0;
 }

@@ -12,7 +12,7 @@
  * @param $vars, passed in the adaptivetheme_preprocess_html()
  * @param $theme_name, the active theme.
  */
-function at_generate_html_classes(&$vars, $theme_name) {
+function generate_html_classes(&$vars, $theme_name) {
   $classes_array = &drupal_static(__FUNCTION__, array());
   if (empty($classes_array)) {
 
@@ -30,17 +30,6 @@ function at_generate_html_classes(&$vars, $theme_name) {
        $classes_array[] = 'debug-panels';
     }
 
-    // Base theme classes, I use these to aid in debugging clients themes, you
-    // could use them to hook a specific minor version. Note that version is
-    // only included in Drupal.org archives, its missing when you clone GIT.
-    $info = at_get_info('adaptivetheme');
-    if (isset($info['release'])) {
-      $classes_array[] = 'atr-' . $info['release'];
-    }
-    if (isset($info['version'])) {
-      $classes_array[] = 'atv-' . $info['version'];
-    }
-
     // Extra Classes
     if (at_get_setting('extra_page_classes', $theme_name) === 1) {
 
@@ -56,10 +45,22 @@ function at_generate_html_classes(&$vars, $theme_name) {
         $classes_array[] = 'site-name-' . drupal_html_class($head_title);
       }
 
-      // Classes for theming based on section
+      // Classes for theming based on context
       if (!$vars['is_front']) {
-        $path = drupal_get_path_alias(check_plain($_GET['q']));
+        // Add unique class for each page.
+        $path = drupal_get_path_alias($_GET['q']);
+        // Add unique class for each website section.
         list($section, ) = explode('/', $path, 2);
+        $arg = explode('/', $_GET['q']);
+        if ($arg[0] === 'node') {
+          if (isset($arg[1]) && $arg[1] === 'add') {
+            $section = 'node-add';
+          }
+          elseif (isset($arg[2]) && is_numeric($arg[1]) && ($arg[2] === 'edit' || $arg[2] === 'delete')) {
+            $section = 'node-' . $arg[2];
+          }
+        }
+        $section = check_plain($section);
         $classes_array[] = drupal_html_class('section-' . $section);
       }
     }
@@ -89,7 +90,7 @@ function at_generate_html_classes(&$vars, $theme_name) {
  * @param $vars, passed in the adaptivetheme_preprocess_page()
  * @param $theme_name, the active theme.
  */
-function at_generate_page_classes(&$vars, $theme_name) {
+function generate_page_classes(&$vars, $theme_name) {
   $classes_array = &drupal_static(__FUNCTION__, array());
   if (empty($classes_array)) {
 
@@ -188,11 +189,6 @@ function at_generate_page_classes(&$vars, $theme_name) {
         }
       }
     }
-
-    // Page class for at menu toggle
-    if (at_get_setting('enable_menu_toggle', $theme_name) === 1) {
-      $classes_array[] = 'at-mt';
-    }
   }
 
   return $classes_array;
@@ -202,7 +198,6 @@ function at_generate_page_classes(&$vars, $theme_name) {
  * Add classes for platforms and browsers.
  * This is very simple and can never replace something like WURFL or Mobile
  * Smart, in the future I intend to build a module to replace this.
- * Note - this is too dangerous to namespace since legacy themes use it.
  *
  * @param null $ua
  */
@@ -318,7 +313,6 @@ function css_browser_selector($ua = NULL) {
  * load a body class for the active color scheme, very useful for CSS tweaks
  * required for a particular scheme. This is not enabled by default, you have to
  * call it in template_preprocess_html(). Mostly ripped from Color module.
- * Note - this is too dangerous to namespace since legacy themes use it.
  *
  * @param $theme_name
  */
@@ -355,20 +349,4 @@ function get_color_scheme_name($theme_name) {
   }
 
   return $scheme_name;
-}
-
-/**
- * Generate default classes for Panels layouts
- * Done because for some unknown reason setting these
- * in template_preprocess does not work, aka the variable
- * does not appear in the panel layout preprocess function.
- */
-function at_panels_classes_array() {
-  $output = array(
-    'at-panel',
-    'panel-display',
-    'clearfix',
-  );
-
-  return $output;
 }

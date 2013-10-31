@@ -110,8 +110,8 @@ changes immediately, as per normal CSS development.
 There are five of these responsive stylesheets - one for each break point set
 in the theme settings:
 
-  - responsive.smalltouch.landscape.css
-  - responsive.smalltouch.portrait.css
+  - responsive.smartphone.landscape.css
+  - responsive.smartphone.portrait.css
   - responsive.tablet.landscape.css
   - responsive.tablet.portrait.css
   - responsive.desktop.css

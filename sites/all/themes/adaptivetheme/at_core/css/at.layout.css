@@ -17,7 +17,7 @@
 }
 
 
-/* Ensure the content column is the full width of its container */
+/* Ensure the content column is always the full width of its container */
 #content-column,
 .content-column {
   width: 100%;

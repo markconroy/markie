@@ -14,7 +14,7 @@ function one_col_stack() {
     'type'     => 'page_layout',
     'device_groups' => array(
       'tablet_portrait',
-      'smalltouch_landscape',
+      'smartphone_landscape',
      ),
   );
 
@@ -23,7 +23,7 @@ function one_col_stack() {
 
 /**
  * CSS Builder for the one_col_stack layout.
- * Note: this is the only layout for smalltouch portrait, and for mobile first.
+ * Note: this is the only layout for smartphone portrait, and for mobile first.
  * All columns and regions are 100% width, stacked.
  *
  * @param $sidebar_first, an arbitary numeric value.

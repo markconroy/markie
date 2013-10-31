@@ -10,73 +10,78 @@
  * media queries you set in theme settings (by adding the font-family
  * declarations to the responsive layout CSS).
  *
- * SEE: https://github.com/JoshBarr/js-media-queries
+ * SEE: https://github.com/JoshBarr/js-media-queries (really, go look, lots of
+ * useful documentation available).
  *
  * IMPORTANT: do not rename or move this file, or change the directory name!
  */
 var queries = [
+  // README! The following are examples, remove what you don't need!
 
-  /*
-   * Smalltouch
-   */
+
+  // Smartphone
   {
-    context: ['smalltouch_portrait', 'smalltouch_landscape'], // portrait and landscape
+    context: ['smartphone_portrait', 'smartphone_landscape'],
     call_in_each_context: false,
     callback: function() {
-      // console.log('smalltouch');
-
-      // Example: this will remove the search block in smartphones
-      // el = document.getElementById("block-search-form");
-      // el.parentNode.removeChild(element);
+      // Debug
+      console.log('smartphone');
     }
   },
+  // portrait only
   {
-    context: 'smalltouch_portrait', // portrait only
+    context: 'smartphone_portrait',
     callback: function() {
-      //console.log('smalltouch portrait');
+      // Debug
+      console.log('smartphone portrait');
     }
   },
+  // landscape only
   {
-    context: 'smalltouch_landscape', // landscape only
+    context: 'smartphone_landscape',
     callback: function() {
-      //console.log('smalltouch_landscape ');
+      // Debug
+      console.log('smartphone_landscape ');
     }
   },
 
 
-  /*
-   * Tablet
-   */
+  // Tablet
   {
-    context: ['tablet_portrait', 'tablet_landscape'], // portrait and landscape
+    context: ['tablet_portrait', 'tablet_landscape'],
     call_in_each_context: false,
     callback: function() {
-      //console.log('tablet');
+      // Debug
+      console.log('tablet');
     }
   },
+  // portrait only
   {
-    context: 'tablet_portrait', // portrait only
+    context: 'tablet_portrait',
     callback: function() {
-      //console.log('tablet_portrait');
+      // Debug
+      console.log('tablet_portrait');
     }
   },
+  // landscape only
   {
-    context: 'tablet_landscape', // landscape only
+    context: 'tablet_landscape',
     callback: function() {
-      //console.log("tablet_landscape");
+      // Debug
+      console.log('tablet_landscape');
     }
   },
 
 
-  /*
-   * Standard desktop layout
-   */
+  // Standard desktop context
   {
     context: 'standard',
     callback: function() {
-      //console.log("standard desktop");
+      // Debug
+      console.log('standard desktop');
     }
   },
 ];
 
+// Go!
 MQ.init(queries);

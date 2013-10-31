@@ -24,14 +24,13 @@ regions[two_33_66_bottom] = AT Two column 33/66 - bottom
 
  */
 ?>
-
+<!-- Two column 33-66 -->
 <?php if (
   $page['two_33_66_top'] ||
   $page['two_33_66_first'] ||
   $page['two_33_66_second'] ||
   $page['two_33_66_bottom']
   ): ?>
-  <!-- Two column 33-66 Gpanel -->
   <div class="at-panel gpanel panel-display two-33-66 clearfix">
     <?php print render($page['two_33_66_top']); ?>
     <?php print render($page['two_33_66_first']); ?>

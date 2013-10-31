@@ -24,14 +24,13 @@ regions[two_50_bottom] = AT Two column 50/50 - bottom
 
  */
 ?>
-
+<!-- Two column 2x50 -->
 <?php if (
   $page['two_50_top'] ||
   $page['two_50_first'] ||
   $page['two_50_second'] ||
   $page['two_50_bottom']
   ): ?>
-  <!-- Two column 2x50 Gpanel -->
   <div class="at-panel gpanel panel-display two-50 clearfix">
     <?php print render($page['two_50_top']); ?>
     <?php print render($page['two_50_first']); ?>

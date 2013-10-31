@@ -287,6 +287,9 @@ ol#crumbs a:active {
   font-weight: 700;
   background-color: #bbb;
   color: #fff;
+  -khtml-border-radius: 4px;
+  -moz-border-radius: 4px;
+  -webkit-border-radius: 4px;
   border-radius: 4px;
 }
 .item-list ul.pager li.pager-current {
@@ -460,6 +463,9 @@ div.admin-panel {
   margin: 0 0 .75em;
   padding: 0;
   border: 1px solid #d7d7d7;
+  -khtml-border-radius: 3px;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
   border-radius: 3px;
 }
 div.admin .left,
@@ -552,11 +558,14 @@ ul.primary li a {
   text-transform: uppercase;
   text-decoration: none;
   white-space: normal;
+  -moz-border-radius: 6px 6px 0 0;
+  -webkit-border-top-left-radius: 6px;
+  -webkit-border-top-right-radius: 6px;
   border-radius: 6px 6px 0 0;
-  -webkit-transition: background 0.2s ease-in;
   -moz-transition: background 0.2s ease-in;
-  -o-transition: background 0.2s ease-in;
-  -ms-transition: background 0.2s ease-in;
+  -webkit-transition: background 0.2s ease-in;
+	-o-transition: background 0.2s ease-in;
+	-ms-transition: background 0.2s ease-in;
   transition: background 0.2s ease-in;
 }
 ul.primary li a:hover {
@@ -578,6 +587,8 @@ ul.primary li.active a:focus {
   ul.primary li a {
     float: none;
     margin-bottom: 6px;
+    -moz-border-radius: 6px;
+    -webkit-border-radius: 6px;
     border-radius: 6px;
   }
 }
@@ -705,7 +716,7 @@ body div.tabledrag-changed-warning {
   width: 90%;
 }
 #system-theme-settings .button-wrapper {
-  clear: both;
+clear:both;
   display: block;
 }
 .section-admin table {
@@ -763,7 +774,7 @@ a.tabledrag-handle .handle {
   width: 90px;
 }
 #system-modules table th[colspan*="3"] {
-  width: 260px;
+  width: 260x;
 }
 #system-modules table .odd .permissions,
 #system-modules table .odd .help,
@@ -786,6 +797,9 @@ a.tabledrag-handle .handle {
 div.messages {
   background-position: 8px 5px;
   margin: 10px;
+  -khtml-border-radius: 2px;
+  -moz-border-radius: 2px;
+  -webkit-border-radius: 2px;
   border-radius: 2px;
 }
 #block-system-help {
@@ -793,6 +807,9 @@ div.messages {
   border: 0;
   margin: 10px 10px 0;
   padding: 0;
+  -khtml-border-radius: 2px;
+  -moz-border-radius: 2px;
+  -webkit-border-radius: 2px;
   border-radius: 2px;
 }
 .block-region {
@@ -806,6 +823,9 @@ div.messages {
   margin-bottom: 10px;
   margin-top: 5px;
   padding: 3px 6px 1px;
+  -webkit-border-radius: 6px;
+  -moz-border-radius: 6px;
+  -khtml-border-radius: 6px;
   border-radius: 6px;
 
 }
@@ -902,6 +922,9 @@ form {
   padding: 0;
 }
 input {
+  -khtml-border-radius: 2px;
+  -moz-border-radius: 2px;
+  -webkit-border-radius: 2px;
   border-radius: 2px;
 }
 .form-actions {
@@ -999,9 +1022,13 @@ input.teaser-button {
   margin: 3px 10px 3px 0;
   outline: 1px solid #9babb0;
   padding: 2px 6px;
-  -webkit-background-size: 100% 200%;
   -moz-background-size: 100% 200%;
+  -webkit-background-size: 100% 200%;
   background-size: 100% 200%;
+  -moz-outline-radius: 4px;
+  -khtml-border-radius: 4px;
+  -moz-border-radius: 4px;
+  -webkit-border-radius: 4px;
   border-radius: 4px;
 }
 .ajax-new-content input.form-submit,
@@ -1089,6 +1116,12 @@ fieldset fieldset fieldset .fieldset-wrapper {
   padding: 10px 15px;
 }
 .filter-wrapper {
+  -khtml-border-radius-topright: 0;
+  -khtml-border-radius-topleft: 0;
+  -moz-border-radius-topright: 0;
+  -moz-border-radius-topleft: 0;
+  -webkit-border-top-left-radius: 0;
+  -webkit-border-top-right-radius: 0;
   border-top-left-radius: 0;
   border-top-right-radius: 0;
 }
@@ -1099,12 +1132,22 @@ fieldset.collapsed {
   background: transparent;
   margin-bottom: 0;
   padding-bottom: 0;
+  -khtml-border-radius: 0;
+  -moz-border-radius: 0;
+  -webkit-border-radius: 0;
   border-radius: 0;
 }
 fieldset#edit-body-und-0-format {
+  -khtml-border-radius: 0 0 3px 3px;
+  -moz-border-radius: 0 0 3px 3px;
+  -webkit-border-top-right-radius: 0;
+  -webkit-border-top-left-radius: 0;
   border-radius: 0 0 3px 3px;
 }
 .vertical-tabs fieldset {
+  -khtml-border-radius: 0;
+  -moz-border-radius: 0;
+  -webkit-border-radius: 0;
   border-radius: 0;
   background: #fff;
 }
@@ -1121,6 +1164,9 @@ legend {
   display: block;
   padding: 7px 1%;
   width: 98%;
+  -khtml-border-radius: 2px;
+  -moz-border-radius: 2px;
+  -webkit-border-radius: 2px;
   border-radius: 2px;
 }
 fieldset legend,
@@ -1173,6 +1219,7 @@ textarea:focus {
   border-width: 0 1px 1px 1px;
   border-color: #d7d7d7;
   border-style: solid;
+  -moz-border-radius: 0 0 3px 3px;
   border-radius: 0 0 3px 3px;
 }
 .text-format-wrapper .description {
@@ -1277,11 +1324,13 @@ ul.action-links li a {
   margin: 0 10px 0 0;
   padding: 0 10px;
   text-shadow: 0 1px 1px #fff;
+  -moz-border-radius: 12px;
+  -webkit-border-radius: 12px;
   border-radius: 12px;
-  -webkit-transition: background 0.2s ease-in;
   -moz-transition: background 0.2s ease-in;
-  -o-transition: background 0.2s ease-in;
-  -ms-transition: background 0.2s ease-in;
+  -webkit-transition: background 0.2s ease-in;
+	-o-transition: background 0.2s ease-in;
+	-ms-transition: background 0.2s ease-in;
   transition: background 0.2s ease-in;
 }
 ul.action-links li a:before {
@@ -1381,6 +1430,12 @@ ul.action-links li a:focus {
   line-height: 1.7;
   padding: 1px 10px 2px 10px;
   text-decoration: none;
+  -khtml-border-radius: 0 0 10px 10px;
+  -moz-border-radius: 0 0 10px 10px;
+  -webkit-border-top-left-radius: 0;
+  -webkit-border-top-right-radius: 0;
+  -webkit-border-bottom-left-radius: 10px;
+  -webkit-border-bottom-right-radius: 10px;
   border-radius: 0 0 10px 10px;
 }
 #skip-link a:hover,
@@ -1560,9 +1615,13 @@ ul.action-links li a:focus {
   line-height: 1.5;
   padding: 3px 5px 0;
   margin: 0;
+  -moz-border-radius: 2px;
+  -webkit-border-radius: 2px;
   border-radius: 2px;
 }
 .views-displays ul.secondary li.open a {
+  -moz-border-radius: 2px 2px 0 0 !important;
+  -webkit-border-radius: 2px 2px 0 0 !important;
   border-radius: 2px 2px 0 0 !important;
 }
 .views-admin .icon.add {
@@ -1605,6 +1664,8 @@ ul.action-links li a:focus {
   font-size: 0.823em;
   padding-bottom: 2px;
   padding-top: 2px;
+  -moz-border-radius: 4px;
+  -webkit-border-radius: 4px;
   border-radius: 4px;
 }
 .views-display-top .ctools-button-processed,
@@ -1617,6 +1678,7 @@ ul.action-links li a:focus {
   color: #666;
 }
 .views-ui-dialog #views-ajax-popup {
+  -moz-box-shadow: 0 4px 4px 4px rgba(0,0,0,0.4);
   -webkit-box-shadow: 0 4px 4px 4px rgba(0,0,0,0.4);
   box-shadow: 0 4px 4px 4px rgba(0,0,0,0.4);
 }
@@ -1697,8 +1759,8 @@ ul.action-links li a:focus {
   background-image: none;
 }
 #page-manager-edit .page-manager-tabs #page-manager-page-summary  ul.page-manager-operations {
-  border-right: 1px solid #ddd;
-  border-bottom: 0;
+    border-right: 1px solid #ddd;
+    border-bottom: 0;
 }
 #page-manager-edit .page-manager-tabs #page-manager-page-summary  ul.page-manager-operations li {
   border-color: #ddd;
@@ -1782,7 +1844,7 @@ ul.action-links li a:focus {
 
 /* Admin menu */
 #admin-menu, #admin-menu ul {
-  font-size: x-small;
+  font-size: small-x;
   line-height: 1.3;
 }
 
@@ -1912,6 +1974,9 @@ table.context-admin td.ctools-export-ui-operations {
   padding: 0 16px;
   text-decoration: none;
   white-space: normal;
+  -moz-border-radius: 6px 6px 0 0;
+  -webkit-border-top-left-radius: 6px;
+  -webkit-border-top-right-radius: 6px;
   border-radius: 6px 6px 0 0;
 }
 .view-fontyourface-browse ul.tabs li a:hover,
@@ -1976,3 +2041,16 @@ table.context-admin td.ctools-export-ui-operations {
 input[type="radio"],
 input[type="checkbox"] {
 }
+
+
+
+
+
+
+
+
+
+
+
+
+

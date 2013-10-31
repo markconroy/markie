@@ -26,7 +26,7 @@ regions[six_sixth]  = AT Six column 6x16 - 6
 
  */
 ?>
-
+<!-- Six column -->
 <?php if (
   $page['six_first'] ||
   $page['six_second'] ||
@@ -35,7 +35,6 @@ regions[six_sixth]  = AT Six column 6x16 - 6
   $page['six_fifth'] ||
   $page['six_sixth']
   ): ?>
-  <!-- Six column Gpanel -->
   <div class="at-panel gpanel panel-display six-6x16 clearfix">
     <div class="panel-row row-1 clearfix">
       <?php print render($page['six_first']); ?>

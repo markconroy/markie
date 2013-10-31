@@ -26,11 +26,8 @@
  * - $primary_local_tasks: Split local tasks - primary.
  * - $secondary_local_tasks: Split local tasks - secondary.
  * - $tag: Prints the wrapper element for the main content.
- * - $is_mobile: Mixed, requires the Mobile Detect or Browscap module to return
- *   TRUE for mobile.  Note that tablets are also considered mobile devices.  
- *   Returns NULL if the feature could not be detected.
- * - $is_tablet: Mixed, requires the Mobile Detect to return TRUE for tablets.
- *   Returns NULL if the feature could not be detected.
+ * - $is_mobile: Bool, requires the Browscap module to return TRUE for mobile
+ *   devices. Use to test for a mobile context.
  * - *_attributes: attributes for various site elements, usually holds id, class
  *   or role attributes.
  *

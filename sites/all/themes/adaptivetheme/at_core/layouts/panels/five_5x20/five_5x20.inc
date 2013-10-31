@@ -138,17 +138,14 @@ function adaptivetheme_five_5x20_panels_layouts() {
  * Preprocess variables for five-5x20.tpl.php
  */
 function template_preprocess_five_5x20(&$vars) {
- /**
-  * We need to initialize these variables when Panels is displaying the template.
-  * These are used primarily when the template is being rendered via Display suite
-  * as a "node" so we can programatically wrap the layout in <article> elements
-  * with appropriate classes and id.
-  *
-  * Note that in Display Suite layout plugin preprocess and process functions are
-  * not fired, instead we need to use the functions for the template being
-  * modified by DS, such as node, user or search. AT Core sets these prefix and
-  * suffix vars for nodes in adaptivetheme_process_node().
-  */
+  // We need to initialize these variables when Panels is displaying the template.
+  // These are used primarily when the template is being rendered via Display suite
+  // as a "node" so we can programatically wrap the layout in <article> elements
+  // with appropriate classes and id.
   $vars['panel_prefix'] = '';
   $vars['panel_suffix'] = '';
+
+  // Set up attributes array
+  $vars['attributes_array']['id'][] = $vars['css_id'];
+  //<?php if (!empty($css_id)) { print "id=\"$css_id\""; }
 }

@@ -29,7 +29,6 @@ figure,
 footer,
 header,
 hgroup,
-main,
 nav,
 section,
 summary {
@@ -550,9 +549,7 @@ table {
 .attribution,
 .at-panel .rounded-corner,
 .block-panels-mini > .block-title,
-.rendered-by-ds .panel-display .region-inner,
-div.messages,
-.at-gutter {
+div.messages {
   margin-left: $gutter-width;
   margin-right: $gutter-width;
 }

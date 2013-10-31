@@ -25,7 +25,7 @@ regions[three_25_25_50_bottom] = AT Three column 25/25/50 - bottom
 
  */
 ?>
-
+<!-- Three column 25-25-50 -->
 <?php if (
   $page['three_25_25_50_top'] ||
   $page['three_25_25_50_first'] ||
@@ -33,7 +33,6 @@ regions[three_25_25_50_bottom] = AT Three column 25/25/50 - bottom
   $page['three_25_25_50_third'] ||
   $page['three_25_25_50_bottom']
   ): ?>
-  <!-- Three column 25-25-50 Gpanel -->
   <div class="at-panel gpanel panel-display three-25-25-50 clearfix">
     <?php print render($page['three_25_25_50_top']); ?>
     <?php print render($page['three_25_25_50_first']); ?>

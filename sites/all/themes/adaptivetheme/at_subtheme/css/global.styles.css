@@ -114,14 +114,9 @@ var {
  * ========================================================================== */
 
 /*
- * Outer wrappers:
- * - #page-wrapper: body > #page-wrapper
- * - #page: body > #page-wrapper > #page
- * - .container: body > #page-wrapper > #page.container
- *
- * The .container class holds the page width value from theme settings.
+ * Page wrapper, includes the .container class which sets the overall page or section width
+ * Main wrapper in page.tpl.php, the .container class sets the width of the page, do not add width to it!
  */
-#page-wrapper {}
 #page {}
 #page .container {}
 
@@ -141,14 +136,12 @@ var {
 #content-column {}
 
 /*
- * Wraps the main-content-header, the content region and feed-icons. Use this
- * wrapper to style the entire main content column
+ * Wraps the main-content-header, the content region and feed-icons. Use this wrapper to style the entire main content column
  */
 #main-content {}
 
 /*
- * Wraps the content region, avoid applying styles to this wrapper, its used
- * mainly for position and invisible gutters and can be problematic to style
+ * Wraps the content region, avoid applying styles to this wrapper, its used mainly for position and invisible gutters and can be problematic to style
  */
 #content {}
 
@@ -166,9 +159,14 @@ var {
  * Full Width Wrappers
  * These are used in the optional page--full-width-wrappers.tpl.php template.
  * All have internal .container classes. In the full width wrapper template the
- * .container classes set the width or max-width - you can style this but never
- * add any width/margin/padding/borders etc to .container
+ * .container classes set the width or max-width of the contained element - you
+ * can style this but never add any width/margin/padding/borders etc to .container
  */
+/*
+ * Wraps #page
+ */
+#page-wrapper {}
+#page-wrapper .container {}
 
 /*
  * Wraps the leaderboard
@@ -330,8 +328,7 @@ var {
 .more-link {}
 
 /*
- * Generic styles for links. See the ul.links declaration in node and comment
- * stylesheets
+ * Generic styles for links. See the ul.links declaration in node and comment stylesheets
  */
 ul.links {
   margin: 0;
@@ -353,7 +350,6 @@ ul.links li {
  */
 .search-results {
   margin: 0;
-  padding: 0;
 }
 
 
@@ -362,8 +358,7 @@ ul.links li {
  * ========================================================================== */
 
 /*
- * Standard region wrapper, don't add width to any regions, you will bork the
- * layout - no margin, padding or borders etc
+ * Standard region wrapper, don't add width to any regions, you will bork the layout - no margin, padding or borders etc
  */
 .region {}
 
@@ -597,32 +592,6 @@ ul.sf-menu a:active {
 }
 
 
-
-
-/* =============================================================================
- *   Menu Toggles
- * ========================================================================== */
-
-.at-mt .at-menu-toggle,
-.at-mt .at-menu-toggle ul,
-.at-mt .at-menu-toggle ul.menu {
-  margin-top: 0;
-  margin-bottom: 0;
-  padding: 0;
-}
-
-.at-mt .at-menu-toggle-button {
-  margin: 0;
-}
-
-.at-mt .at-menu-toggle ul a {
-  padding: 0 10px;
-  white-space: nowrap;
-}
-
-
-
-
 /* =============================================================================
  *   Menus, usually blocks
  * ========================================================================== */
@@ -683,7 +652,7 @@ ul.menu li.last {}
 .book-navigation .page-next {}
 
 .book-navigation .page-up {
-  /* Prevent text wrapping to a new line, assumes the string is two chars */
+  /* Prevent text wrapping to a new line, assumes English "up" is used (two characters) */
   min-width: 2em;
   white-space: nowrap;
 }
@@ -740,8 +709,6 @@ ul.menu li.last {}
 
 #breadcrumb a:hover,
 #breadcrumb a:focus {}
-
-#breadcrumb .crumb-separator {}
 
 
 /* =============================================================================
@@ -935,18 +902,12 @@ ul.action-links li {}
 .field-label-above {}
 
 /*
- * When labels are set to inline in field display settings the clearfix class is
- * automatically added
+ * When labels are set to inline in field display settings the clearfix class is automatically added
  */
 .field-label-inline {}
 
-.field-label-inline .field-label {
-  margin: 0;
-}
-
 /*
- * Labels are h2 in Adaptivetheme. Use a strong selector to mitigate unwanted
- * ineritance issues
+ * Labels are h2 in Adaptivetheme. Use a strong selector to mitigate unwanted ineritance issues
  */
 .field-label {
   font-size: 1em;
@@ -955,8 +916,6 @@ ul.action-links li {}
   line-height: inherit;
   margin-bottom: 0;
 }
-
-
 
 
 /*
@@ -1117,8 +1076,7 @@ ul.action-links li {}
 }
 
 /*
- * Inner wrapper for most blocks, good for margin, padding and borders,
- * block_system_main does not have it
+ * Inner wrapper for most blocks, good for margin, padding and borders, block_system_main does not have it
  */
 .block-inner {}
 
@@ -1645,15 +1603,14 @@ tr.even td.active {
  */
 #forum td {}
 
-#forum td.created,
-#forum td.posts,
-#forum td.topics,
-#forum td.last-reply,
-#forum td.replies,
-#forum td.pager {
+#forum td .created,
+#forum td .posts,
+#forum td .topics,
+#forum td .last-reply,
+#forum td .replies,
+#forum td .pager {
   white-space: normal;
 }
-
 
 
 /* =============================================================================
