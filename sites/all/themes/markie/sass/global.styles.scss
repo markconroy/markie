@@ -2,6 +2,7 @@
 // _base.scss imports _custom.scss (variables and mixins) and other partials.
 @import "base";
 @import "fonts";
+@import "custom_views";
 
 /*
  * @file
@@ -550,11 +551,7 @@ a {
  */
 
 .nav {
-<<<<<<< HEAD
-  border-bottom: .5em solid $defcol;
-=======
   border-bottom: .5em solid $orange;
->>>>>>> theme
   clear: both;
   margin: 0;
 
@@ -588,13 +585,8 @@ a {
 
     &:hover,
     &:focus {
-<<<<<<< HEAD
-      background: $defcol1_dark;
-      color: $defcol1;
-=======
       background: $grey_dark;
       color: $grey_light;
->>>>>>> theme
       @include border-radius(0 0 1em 1em);
     }
   }
