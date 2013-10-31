@@ -5,13 +5,16 @@
  // Articles Main Wrapper
 
  .views-articles-main-page-wrapper {
-
+ 	border-left: .2em solid $orange;
+ 	margin-bottom: 3em;
+ 	padding: 0 0 1.4em 1em;
  }
 
  // Articles Main Title
   .views-articles-main-page-title {
+
   	a {
- 		color: $dark_grey;
+ 		color: $orange;
 
  		&:focus,
  		&:hover {
@@ -21,10 +24,24 @@
  }
  // Articles Main Body
   .views-articles-main-page-body {
- 	color: $white;
+
  }
 
  // Articles Main Read More Link
   .views-articles-main-page-link {
+  	a {
+  		background: $orange;
+  		color: $white;
+  		padding: 1em;
+  		width: 120px;
+  		text-align: center;
+  		@include border-radius(.7em);
+  		
+
+  		&:focus,
+  		&:hover {
+  			background: $grey_dark;
+  		}
+  	}
 
  }

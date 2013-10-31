@@ -2,6 +2,7 @@
 // _base.scss imports _custom.scss (variables and mixins) and other partials.
 @import "base";
 @import "fonts";
+@import "custom_views";
 
 /*
  * @file
@@ -202,7 +203,19 @@ var {
 /*
  * Footer wrapper
  */
-#footer {}
+#footer {
+  color: $white;
+
+  a {
+    color: $white;
+    text-decoration: underline;
+
+    &:focus,
+    &:hover {
+      text-decoration: none;
+    }
+  }
+}
 
 
 /*
@@ -522,6 +535,7 @@ ul.links {
  * ========================================================================== */
 
 a {
+  color: $orange;
   text-decoration: none;
 
   &:link,
@@ -531,9 +545,7 @@ a {
   &.active {}
 
   &:hover,
-  &:focus {
-    text-decoration: underline;
-  }
+  &:focus {}
 }
 
 
