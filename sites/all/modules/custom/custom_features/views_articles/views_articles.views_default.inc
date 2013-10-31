@@ -49,6 +49,7 @@ function views_articles_views_default_views() {
   $handler->display->display_options['fields']['field_art_body']['exclude'] = TRUE;
   $handler->display->display_options['fields']['field_art_body']['alter']['strip_tags'] = TRUE;
   $handler->display->display_options['fields']['field_art_body']['alter']['trim'] = TRUE;
+  $handler->display->display_options['fields']['field_art_body']['alter']['preserve_tags'] = '<p> <br> <em>';
   $handler->display->display_options['fields']['field_art_body']['element_label_colon'] = FALSE;
   /* Field: Content: Link */
   $handler->display->display_options['fields']['view_node']['id'] = 'view_node';
