@@ -203,7 +203,19 @@ var {
 /*
  * Footer wrapper
  */
-#footer {}
+#footer {
+  color: $white;
+
+  a {
+    color: $white;
+    text-decoration: underline;
+
+    &:focus,
+    &:hover {
+      text-decoration: none;
+    }
+  }
+}
 
 
 /*
@@ -523,6 +535,7 @@ ul.links {
  * ========================================================================== */
 
 a {
+  color: $orange;
   text-decoration: none;
 
   &:link,
@@ -532,9 +545,7 @@ a {
   &.active {}
 
   &:hover,
-  &:focus {
-    text-decoration: underline;
-  }
+  &:focus {}
 }
 
 
