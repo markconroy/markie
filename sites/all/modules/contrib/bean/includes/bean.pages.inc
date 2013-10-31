@@ -116,16 +116,20 @@ function bean_list() {
 
     // Build a list of all the accessible operations for the current bean.
     $operations = array();
-    $operations['edit'] = array(
-      'title' => t('edit'),
-      'href' => 'block/' . $bean->delta . '/edit',
-      'query' => $destination,
-    );
-    $operations['delete'] = array(
-      'title' => t('delete'),
-      'href' => 'block/' . $bean->delta . '/delete',
-      'query' => $destination,
-    );
+    if (bean_access('edit', $bean)) {
+      $operations['edit'] = array(
+        'title' => t('edit'),
+        'href' => 'block/' . $bean->delta . '/edit',
+        'query' => $destination,
+      );
+    }
+    if (bean_access('delete', $bean)) {
+      $operations['delete'] = array(
+        'title' => t('delete'),
+        'href' => 'block/' . $bean->delta . '/delete',
+        'query' => $destination,
+      );
+    }
     // Render an unordered list of operations links.
     $rows[$bean->bid]['operations'] = array(
       'data' => array(
@@ -216,7 +220,7 @@ function bean_form($form, &$form_state, Bean $bean, $type = NULL) {
   $form['title'] = array(
     '#type' => 'textfield',
     '#title' => t('Title'),
-    '#description' => t('The Title of the block.'),
+    '#description' => t('The Title of the block. The &lt;em&gt;, &lt;strong&gt;, &lt;i&gt; and &lt;b&gt; HTML tags are allowed, all others will be filtered out.'),
     '#default_value' => $bean->title,
     '#weight' => -9,
   );

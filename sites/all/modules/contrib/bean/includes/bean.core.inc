@@ -359,7 +359,7 @@ class Bean extends Entity {
     $this->plugin->submit($this);
 
     $return = parent::save();
-    bean_reset();
+    bean_reset(TRUE, TRUE);
 
     return $return;
   }
@@ -388,6 +388,11 @@ class Bean extends Entity {
       }
       else {
         $delta = drupal_clean_css_identifier(strtolower($this->label));;
+      }
+
+      // Add 'bean-' prefix when it's need to avoid a purely numeric delta.
+      if (is_numeric($delta)) {
+        $delta = 'bean-' . $delta;
       }
 
       $this->delta = substr($delta, 0, $max_length);
@@ -478,6 +483,17 @@ class BeanEntityAPIController extends EntityAPIControllerExportable {
       }
     }
     parent::delete($ids, $transaction);
+  }
+
+  protected function saveRevision($entity) {
+    global $user;
+
+    $org_uid = $entity->uid;
+    $entity->uid = $user->uid;
+    $return = parent::saveRevision($entity);
+    $entity->uid = $org_uid;
+
+    return $return;
   }
 }
 

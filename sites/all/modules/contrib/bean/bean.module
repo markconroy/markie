@@ -32,6 +32,7 @@ function bean_entity_info() {
       'label callback' => 'entity_class_label',
       'uri callback' => 'entity_class_uri',
       'access callback' => 'bean_access',
+      'view callback' => 'bean_view_callback',
       'module' => 'bean',
       'metadata controller class' => 'BeanMetadataController',
       'view modes' => array(
@@ -371,7 +372,7 @@ function bean_fetch_plugin_info($plugin = NULL) {
 /**
  * Reset the static variables and caches.
  */
-function bean_reset($skip_menu_rebuild = FALSE) {
+function bean_reset($skip_menu_rebuild = FALSE, $rehash_blocks= FALSE) {
   // Clear ctools cache.
   ctools_include('plugins');
   ctools_get_plugins_reset();
@@ -387,6 +388,12 @@ function bean_reset($skip_menu_rebuild = FALSE) {
   ctools_plugin_get_plugin_type_info(TRUE);
   if (!$skip_menu_rebuild) {
     menu_rebuild();
+  }
+
+  // Rehashes blocks for active themes. This will populate the blocks table and allow
+  // modules like blockreference to work properly.
+  if ($rehash_blocks) {
+    block_flush_caches();
   }
 }
 
@@ -436,7 +443,7 @@ function bean_load_plugin_class($plugin_key = NULL) {
  */
 function bean_check_plugin_class($class) {
   $ref_class = new ReflectionClass($class);
-  if (in_array('BeanTypePluginInterface', $ref_class->getInterfaceNames())) {
+  if ($ref_class->isInstantiable() && in_array('BeanTypePluginInterface', $ref_class->getInterfaceNames())) {
     return TRUE;
   }
 
@@ -776,6 +783,18 @@ function bean_view(Bean $bean, $view_mode = 'default', $langcode = NULL) {
 }
 
 /**
+ * View callback
+ */
+function bean_view_callback($entities, $view_mode, $langcode, $entity_type) {
+  $render = array();
+  foreach($entities as $key => $entity) {
+    $id = entity_id($entity_type, $entity);
+    $render[$entity_type][$id] = bean_view($entity, $view_mode, $langcode);
+  }
+  return $render;
+}
+
+/**
  * Implements hook_block_info().
  */
 function bean_block_info() {
@@ -808,7 +827,7 @@ function bean_block_view($delta = '') {
 
     $return = array(
       'content' => $content,
-      'subject' => isset($bean->title) ? $bean->title : '',
+      'subject' => isset($bean->title) ? filter_xss($bean->title, $allowed_tags = array('em', 'strong', 'i', 'b')) : '',
     );
   }
 
