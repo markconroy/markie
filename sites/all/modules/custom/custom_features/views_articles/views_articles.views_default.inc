@@ -47,6 +47,7 @@ function views_articles_views_default_views() {
   $handler->display->display_options['fields']['field_art_body']['field'] = 'field_art_body';
   $handler->display->display_options['fields']['field_art_body']['label'] = '';
   $handler->display->display_options['fields']['field_art_body']['exclude'] = TRUE;
+  $handler->display->display_options['fields']['field_art_body']['alter']['max_length'] = '250';
   $handler->display->display_options['fields']['field_art_body']['alter']['strip_tags'] = TRUE;
   $handler->display->display_options['fields']['field_art_body']['alter']['trim'] = TRUE;
   $handler->display->display_options['fields']['field_art_body']['alter']['preserve_tags'] = '<p> <br> <em>';
