@@ -40,11 +40,11 @@
  */
 
 html {
-  background: $defcol1;
+  background: $grey_light;
 }
 
 body {
-  color: $defcol1_dark;
+  color: $grey_dark;
   font-family: $sans-serif-small; // Set from _custom.scss font variables
   font-size: 87.5%;
 }
@@ -232,7 +232,7 @@ var {
  */
 #header-wrapper {
   /* Debug styles, is this working */
-  background: $defcol1;
+  background: $grey_light;
   .container {}
 }
 
@@ -242,7 +242,7 @@ var {
  */
 #nav-wrapper {
   @include nav-borders;
-  background: $defcol;
+  background: $orange;
   .container {}
 }
 
@@ -293,7 +293,7 @@ var {
 #footer-wrapper {
   /* Debug styles, is this working? */
   @include nav-borders;
-  background: $defcol;
+  background: $orange;
 
   .container {}
 }
@@ -550,7 +550,11 @@ a {
  */
 
 .nav {
+<<<<<<< HEAD
   border-bottom: .5em solid $defcol;
+=======
+  border-bottom: .5em solid $orange;
+>>>>>>> theme
   clear: both;
   margin: 0;
 
@@ -571,7 +575,7 @@ a {
 
   li a,
   ul.menu li a {
-    color: $defcol1;
+    color: $grey_light;
     display: block;
     font-weight: 700;
     letter-spacing: .15em;
@@ -584,8 +588,13 @@ a {
 
     &:hover,
     &:focus {
+<<<<<<< HEAD
       background: $defcol1_dark;
       color: $defcol1;
+=======
+      background: $grey_dark;
+      color: $grey_light;
+>>>>>>> theme
       @include border-radius(0 0 1em 1em);
     }
   }

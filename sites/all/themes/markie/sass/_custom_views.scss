@@ -1,0 +1,30 @@
+/*
+ * Begin styling for Articles Page views
+ */
+
+ // Articles Main Wrapper
+
+ .views-articles-main-page-wrapper {
+
+ }
+
+ // Articles Main Title
+  .views-articles-main-page-title {
+  	a {
+ 		color: $orange;
+
+ 		&:focus,
+ 		&:hover {
+ 			color: $grey_dark;
+ 		}
+ 	}
+ }
+ // Articles Main Body
+  .views-articles-main-page-body {
+ 	color: $white;
+ }
+
+ // Articles Main Read More Link
+  .views-articles-main-page-link {
+
+ }
