@@ -33,9 +33,9 @@ $medium_dark:  #e5e5e5; // table thead
 $debug:        rgba(255, 192, 203, 0.5); // Full width wrapper test
 $white:        #ffffff; // White
 $black:        #000000; // Black
-$defcol:       #DD4814; // Orange - menu bar
-$defcol1:      #F4F4F4; // Background grey colour
-$defcol1_dark: darken($defcol1, 75%); // Dark grey - used for top border in menu
+$orange:       #DD4814; // Orange - menu bar
+$grey_light:      #F4F4F4; // Background grey colour
+$grey_dark: darken($grey_light, 75%); // Dark grey - used for top border in menu
 
 
 $thead:          $medium_dark;
@@ -201,6 +201,6 @@ $gutter-width: 10px;
 // 
 @mixin nav-borders {
   border-bottom: 2px $white solid;
-  border-top: 2px $defcol1_dark solid;
+  border-top: 2px $grey_dark solid;
 
 }
