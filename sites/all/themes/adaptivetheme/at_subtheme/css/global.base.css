@@ -23,6 +23,7 @@ figure,
 footer,
 header,
 hgroup,
+main,
 nav,
 section,
 summary {
@@ -485,6 +486,7 @@ table {
 .attribution,
 .at-panel .rounded-corner,
 .block-panels-mini > .block-title,
+.rendered-by-ds .panel-display .region-inner,
 div.messages {
   margin-left: 10px;
   margin-right: 10px;

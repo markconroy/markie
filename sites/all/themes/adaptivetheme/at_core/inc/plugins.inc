@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @file
  * AT's liteweight plugin sub-system.
@@ -23,6 +24,7 @@ function at_get_plugins($theme_name) {
       $plugins = $plugins_cache->data;
     }
     else {
+      $plugins_list = array();
       $themes_info = at_get_info_trail($theme_name);
       // Look for and get all the plugins
       if (!empty($themes_info)) {
@@ -108,7 +110,7 @@ function at_get_plugins_files($theme_name) {
 function at_load_plugins($theme_name, $plugin_type) {
   $plugin_data_structures = array();
   $plugins_list = at_get_plugins_files($theme_name);
-
+  $plugins_array = array();
   foreach ($plugins_list as $plugin_provider => $plugin_types) {
     $plugin_providers[] = $plugin_provider;
     foreach ($plugin_types as $type => $plugins) {
@@ -176,10 +178,15 @@ function at_load_plugins($theme_name, $plugin_type) {
  * This returns the full data structures for all page layout plugins. Because
  * this can be a lot of data and appears to be computationally expensive to get
  * it is cached in the cache table.
+ *
+ * @param $theme_name, the active theme.
  */
-function responsive_page_layouts_data_structure() {
-  global $theme_key;
-  $theme_name = $theme_key;
+function responsive_page_layouts_data_structure($theme_name = NULL) {
+  // Use the passed in theme_name, else grab it from the global variable
+  if ($theme_name == NULL) {
+    global $theme_key;
+    $theme_name = $theme_key;
+  }
 
   $page_data_structure = drupal_static(__FUNCTION__, array());
   if (empty($page_data_structure)) {
@@ -187,9 +194,7 @@ function responsive_page_layouts_data_structure() {
       $page_data_structure = $cache->data;
     }
     else {
-
       $data_structure = at_load_plugins($theme_name, $plugin_type = 'page_layout');
-
       foreach ($data_structure as $plugin => $datum) {
         foreach ($datum as $method => $layout) {
           $page_data_structure[$method] = $layout;
@@ -211,56 +216,29 @@ function responsive_page_layouts_data_structure() {
 function responsive_panels_data_structure() {
   global $theme_key;
   $theme_name = $theme_key;
-
   $panels_data_structure = drupal_static(__FUNCTION__, array());
   if (empty($panels_data_structure)) {
     if ($cache = cache_get('at_panels_data_structure')) {
       $panels_data_structure = $cache->data;
     }
     else {
-
       $data_structure = at_load_plugins($theme_name, $plugin_type = 'panels');
-
+      // If this theme doesn't define any Panels layouts, use those
+      // provided by at_core.
+      if (empty($data_structure)) {
+        $data_structure = at_load_plugins('adaptivetheme', $plugin_type = 'panels');
+      }
       foreach ($data_structure as $plugin => $datum) {
         foreach ($datum as $key => $value) {
           $type = $value['type'];
           $panels_data_structure[$type][] = $datum;
         }
       }
-      if (empty($panels_data_structure)) {
-        return; // fail silently
-      }
+
       cache_set('at_panels_data_structure', $panels_data_structure, 'cache');
     }
   }
-
   return $panels_data_structure;
-}
-
-/**
- * Return just the plugin names.
- * This is used primarily in one place - adaptivetheme_process_node() so we can
- * search for matches against Display Suite template suggestions, sounds weird
- * buts a work-around for a bug in Display Suite.
- *
- * @see adaptivetheme_process_node()
- * @see http://drupal.org/node/1514216
- * TODO: marked for removal due to new features in Display Suite.
- */
-function responsive_panels_plugin_names() {
-  $plugin_names = drupal_static(__FUNCTION__, array());
-  if (empty($plugin_names)) {
-    $data_structure = responsive_panels_data_structure();
-    foreach ($data_structure as $key => $value) {
-      foreach ($value as $type => $sub_types) {
-        foreach ($sub_types as $k => $v) {
-          $plugin_names[] = $k;
-        }
-      }
-    }
-  }
-
-  return $plugin_names;
 }
 
 /**
@@ -425,21 +403,21 @@ function gpanel_regions() {
       'three_inset_right' => array(
         'title' => t('AT Inset right'),
         'regions' => array(
-          'threecol_inset_right_sidebar',
-          'threecol_inset_right_top',
-          'threecol_inset_right_middle',
-          'threecol_inset_right_inset',
-          'threecol_inset_right_bottom',
+          'three_inset_right_sidebar',
+          'three_inset_right_top',
+          'three_inset_right_middle',
+          'three_inset_right_inset',
+          'three_inset_right_bottom',
         ),
       ),
       'three_inset_left' => array(
         'title' => t('AT Inset left'),
         'regions' => array(
-          'threecol_inset_left_sidebar',
-          'threecol_inset_left_top',
-          'threecol_inset_left_middle',
-          'threecol_inset_left_inset',
-          'threecol_inset_left_bottom',
+          'three_inset_left_sidebar',
+          'three_inset_left_top',
+          'three_inset_left_middle',
+          'three_inset_left_inset',
+          'three_inset_left_bottom',
         ),
       ),
       'three_50_25_25' => array(

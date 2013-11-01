@@ -25,14 +25,15 @@ regions[five_fifth]  = AT Five column 5x20 - 5
 
  */
 ?>
-<!-- Five column Gpanel -->
+
 <?php if (
   $page['five_first'] ||
   $page['five_second'] ||
   $page['five_third'] ||
   $page['five_fourth'] ||
   $page['five_fifth']
-): ?>
+  ): ?>
+  <!-- Five column Gpanel -->
   <div class="at-panel gpanel panel-display five-5x20 clearfix">
     <div class="panel-row row-1 clearfix">
       <?php print render($page['five_first']); ?>

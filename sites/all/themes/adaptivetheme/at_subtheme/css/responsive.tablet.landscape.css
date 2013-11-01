@@ -7,3 +7,8 @@
  *
  * - Read the _README file in this directory, it contains useful help and other information.
  */
+
+/* Increase the body font size on tablet devices */
+body {
+  font-size: 93.8%;
+}

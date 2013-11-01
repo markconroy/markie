@@ -25,27 +25,35 @@
 
 
 /*
- * Smartphone sizes and up
+ * Smalltouch sizes and up
  */
 /* @media only screen and (min-width: 320px) {} */
 
 
 /*
- * Smartphone sizes and down
+ * Smalltouch sizes and down
  */
 @media only screen and (max-width: 480px) {
   
   /* 
-   * Float Region blocks example:
-   * In smaller screen sizes we can remove the float and widths so all blocks
-   * stack instead of displaying horizonally. The selector used here is an
+   * Float Region Blocks - custom media query CSS example:
+   * 
+   * Float regions blocks is an Extension you can enable in the appearance
+   * settings for your theme. This feature allows you to automatically float
+   * blocks in regions, you can switch it on and off depending on your
+   * requirements. For design purposes you many want to remove the floats for
+   * devices where the entire theme is just one column - for example small
+   * mobile phones. The following CSS is inside the custom media query:
+   *
+   *   @media only screen and (max-width: 480px){}
+   *
+   * This will target devices with a maximum width of 480px - most small phones.
+   * In these smaller screen sizes we can remove the float and widths so all
+   * blocks stack instead of displaying horizonally. The selector used is an
    * "attribute selector" which will match on any float block class. Use your
    * inspector or Firebug to get the classes from the page output if you need
    * more granular control over block alignment and stacking.
-   * 
-   * "Float Region blocks" is an extension for floating blocks in regions, see
-   * your themes appearance settings, under the Extensions tab.
-   */ 
+   */
   .region[class*="float-blocks"] .block {
     float: none;
     width: 100%;

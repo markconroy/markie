@@ -7,7 +7,7 @@
 
   All layouts are responsive and are controlled via theme settings in your
   sub-theme. You can select layout options for each device group - this means
-  the layout of the panel can change for tablets or smartphones to better
+  the layout of the panel can change for tablets or smalltouchs to better
   suit the smaller size of those screens.
   
   Note: regular Panels layouts or those supplied by another theme or module, 

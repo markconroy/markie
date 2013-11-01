@@ -25,7 +25,7 @@ $panel_prefix = isset($panel_prefix) ? $panel_prefix : '';
 $panel_suffix = isset($panel_suffix) ? $panel_suffix : '';
 ?>
 <?php print $panel_prefix; ?>
-<div class="at-panel panel-display three-50-25-25 clearfix" <?php if (!empty($css_id)): print "id=\"$css_id\""; endif; ?>>
+<div class="three-50-25-25 at-panel panel-display clearfix" <?php if (!empty($css_id)): print "id=\"$css_id\""; endif; ?>>
   <?php if ($content['three_50_25_25_top']): ?>
     <div class="region region-three-50-25-25-top region-conditional-stack">
       <div class="region-inner clearfix">

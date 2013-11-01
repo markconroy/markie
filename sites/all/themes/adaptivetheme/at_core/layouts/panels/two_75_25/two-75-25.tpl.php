@@ -12,7 +12,7 @@
  *   added by Adaptivetheme in the appropriate process function.
  * - $panel_suffix: closing element for the $prefix.
  *
- * @see adaptivetheme_preprocess_six_6x16()
+ * @see adaptivetheme_preprocess_two_75_25()
  * @see adaptivetheme_preprocess_node()
  * @see adaptivetheme_process_node()
  */
@@ -25,42 +25,30 @@ $panel_prefix = isset($panel_prefix) ? $panel_prefix : '';
 $panel_suffix = isset($panel_suffix) ? $panel_suffix : '';
 ?>
 <?php print $panel_prefix; ?>
-<div class="six-6x16 at-panel panel-display clearfix" <?php if (!empty($css_id)): print "id=\"$css_id\""; endif; ?>>
-  <div class="panel-row row-1 clearfix">
-    <div class="region region-six-first">
+<div class="two-75-25 at-panel panel-display clearfix" <?php if (!empty($css_id)): print "id=\"$css_id\""; endif; ?>>
+  <?php if ($content['two_75_25_top']): ?>
+    <div class="region region-two-75-25-top region-conditional-stack">
       <div class="region-inner clearfix">
-        <?php print $content['six_first']; ?>
+        <?php print $content['two_75_25_top']; ?>
       </div>
     </div>
-    <div class="region region-six-second">
-      <div class="region-inner clearfix">
-        <?php print $content['six_second']; ?>
-      </div>
-    </div>
-  </div>
-  <div class="panel-row row-2 clearfix">
-    <div class="region region-six-third">
-      <div class="region-inner clearfix">
-        <?php print $content['six_third']; ?>
-      </div>
-    </div>
-    <div class="region region-six-fourth">
-      <div class="region-inner clearfix">
-        <?php print $content['six_fourth']; ?>
-      </div>
+  <?php endif; ?>
+  <div class="region region-two-75-25-first">
+    <div class="region-inner clearfix">
+      <?php print $content['two_75_25_first']; ?>
     </div>
   </div>
-  <div class="panel-row row-3 clearfix">
-    <div class="region region-six-fifth">
-      <div class="region-inner clearfix">
-        <?php print $content['six_fifth']; ?>
-      </div>
-    </div>
-    <div class="region region-six-sixth">
-      <div class="region-inner clearfix">
-        <?php print $content['six_sixth']; ?>
-      </div>
+  <div class="region region-two-75-25-second">
+    <div class="region-inner clearfix">
+      <?php print $content['two_75_25_second']; ?>
     </div>
   </div>
+  <?php if ($content['two_75_25_bottom']): ?>
+    <div class="region region-two-75-25-bottom region-conditional-stack">
+      <div class="region-inner clearfix">
+        <?php print $content['two_75_25_bottom']; ?>
+      </div>
+    </div>
+  <?php endif; ?>
 </div>
 <?php print $panel_suffix; ?>

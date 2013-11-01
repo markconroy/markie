@@ -9,8 +9,11 @@
  * wrapper and content wrapper.
  *
  * Adaptivetheme variables:
- * - $is_mobile: Bool, requires the Browscap module to return TRUE for mobile
- *   devices. Use to test for a mobile context.
+ * - $is_mobile: Mixed, requires the Mobile Detect or Browscap module to return
+ *   TRUE for mobile.  Note that tablets are also considered mobile devices.  
+ *   Returns NULL if the feature could not be detected.
+ * - $is_tablet: Mixed, requires the Mobile Detect to return TRUE for tablets.
+ *   Returns NULL if the feature could not be detected.
  * - $tag: top level wrapper element, section or div.
  *
  * Variables available:
@@ -27,9 +30,7 @@
  *   data including the contexts and all of the other panes being displayed.
  */
 ?>
-<?php if ($pane_prefix): ?>
-  <?php print $pane_prefix; ?>
-<?php endif; ?>
+<?php if (isset($pane_prefix)): print $pane_prefix; endif; ?>
 <<?php print $tag . $attributes . $id; ?>>
   <div class="block-inner clearfix">
     <?php if ($admin_links): ?>
@@ -66,6 +67,4 @@
 
   </div>
 </<?php print $tag; ?>>
-<?php if ($pane_suffix): ?>
-  <?php print $pane_suffix; ?>
-<?php endif; ?>
+<?php if (isset($pane_suffix)): print $pane_suffix; endif; ?>

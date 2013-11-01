@@ -15,30 +15,29 @@ function adaptivetheme_html_head_alter(&$head_elements) {
   // charset utf-8
   $head_elements['system_meta_content_type']['#attributes'] = array('charset' => 'utf-8');
 
-  // Metatags for mobile
-  // X-UA-Compatible
-  if (at_get_setting('chrome_edge', $theme_name) === 1) {
-    $head_elements['adaptivetheme_meta_x_ua_compatible'] = array(
+  // IE Document Mode
+  if ($adaptivetheme_meta_ie_document_mode = at_get_setting('adaptivetheme_meta_ie_document_mode', $theme_name)) {
+    $head_elements['adaptivetheme_meta_ie_document_mode'] = array(
       '#type' => 'html_tag',
       '#tag' => 'meta',
       '#attributes' => array(
         'http-equiv' => "X-UA-Compatible",
-        'content' => "IE=edge, chrome=1",
+        'content' => $adaptivetheme_meta_ie_document_mode,
       ),
-      '#weight' => 1,
+      '#weight' => -999, // 1 less than the charset
     );
   }
 
   // cleartype
-  if (at_get_setting('clear_type', $theme_name) === 1) {
-    $head_elements['adaptivetheme_meta_cleartype'] = array(
+  if (at_get_setting('adaptivetheme_meta_clear_type', $theme_name) === 1) {
+    $head_elements['adaptivetheme_meta_clear_type'] = array(
       '#type' => 'html_tag',
       '#tag' => 'meta',
       '#attributes' => array(
         'http-equiv' => "cleartype",
         'content' => "on",
       ),
-      '#weight' => 2,
+      '#weight' => -998,
     );
   }
 
@@ -54,7 +53,7 @@ function adaptivetheme_html_head_alter(&$head_elements) {
           'name' => 'viewport',
           'content' => check_plain($adaptivetheme_meta_viewport),
         ),
-        '#weight' => 3,
+        '#weight' => 1,
       );
     }
 
@@ -67,7 +66,7 @@ function adaptivetheme_html_head_alter(&$head_elements) {
           'name' => "MobileOptimized",
           'content' => check_plain($adaptivetheme_meta_mobileoptimized),
         ),
-        '#weight' => 4,
+        '#weight' => 2,
       );
     }
 
@@ -80,20 +79,20 @@ function adaptivetheme_html_head_alter(&$head_elements) {
           'name' => "HandheldFriendly",
           'content' => check_plain($adaptivetheme_meta_handheldfriendly),
         ),
-        '#weight' => 5,
+        '#weight' => 3,
       );
     }
 
     // apple-mobile-web-app-capable
     if ($adaptivetheme_meta_apple_mobile_web_app_capable = at_get_setting('adaptivetheme_meta_apple_mobile_web_app_capable', $theme_name)) {
-    $head_elements['adaptivetheme_meta_apple_mobile_web_app_capable'] = array(
-      '#type' => 'html_tag',
-      '#tag' => 'meta',
-      '#attributes' => array(
-        'name' => "apple-mobile-web-app-capable",
-        'content' => check_plain($adaptivetheme_meta_apple_mobile_web_app_capable),
-      ),
-      '#weight' => 6,
+      $head_elements['adaptivetheme_meta_apple_mobile_web_app_capable'] = array(
+        '#type' => 'html_tag',
+        '#tag' => 'meta',
+        '#attributes' => array(
+          'name' => "apple-mobile-web-app-capable",
+          'content' => check_plain($adaptivetheme_meta_apple_mobile_web_app_capable),
+        ),
+        '#weight' => 4,
       );
     }
   }
@@ -164,11 +163,24 @@ function adaptivetheme_html_head_alter(&$head_elements) {
  * hook_js_alter()
  */
 function adaptivetheme_js_alter(&$javascript) {
+  global $theme_key;
+
   // Use our own vesion of vertical-tabs.js for better error handling
   // @see http://drupal.org/node/607752
   if (isset($javascript['misc/vertical-tabs.js'])) {
     $file = drupal_get_path('theme', 'adaptivetheme') . '/scripts/vertical-tabs.js';
     $javascript['misc/vertical-tabs.js'] = drupal_js_defaults($file);
+  }
+
+  // Combine JS files into one per type
+  if (at_get_setting('combine_js_files', $theme_key) === 1) {
+    uasort($javascript, 'drupal_sort_css_js');
+    $weight = 0;
+    foreach ($javascript as $name => $script) {
+      $javascript[$name]['group'] = -100;
+      $javascript[$name]['weight'] = ++$weight;
+      $javascript[$name]['every_page'] = 1;
+    }
   }
 }
 
@@ -222,6 +234,26 @@ function adaptivetheme_css_alter(&$css) {
       }
     }
   }
+
+  // Combine CSS files into one per type, this is not perfect
+  if (at_get_setting('combine_css_files', $theme_key) === 1) {
+    uasort($css, 'drupal_sort_css_js');
+    $print = array();
+    $weight = 0;
+    foreach ($css as $name => $style) {
+      // Leave  the conditional stylesheets untouched
+      if ($css[$name]['browsers']['!IE']) {
+        $css[$name]['group'] = 0;
+        $css[$name]['weight'] = $weight++;
+        $css[$name]['every_page'] = TRUE;
+      }
+      if ($css[$name]['media'] == 'print') {
+        $print[$name] = $css[$name];
+        unset($css[$name]);
+      }
+    }
+    $css = array_merge($css, $print);
+  }
 }
 
 /**
@@ -230,9 +262,6 @@ function adaptivetheme_css_alter(&$css) {
 function adaptivetheme_page_alter(&$page) {
   global $theme_key;
   $theme_name = $theme_key;
-
-  // Is this a mobile context?
-  $page['is_mobile'] = at_get_browser();
 
   // Get the menu item
   $menu_item = menu_get_item();
@@ -264,6 +293,20 @@ function adaptivetheme_page_alter(&$page) {
     $block_regions = system_region_list($GLOBALS['theme'], REGIONS_VISIBLE);
   }
 
+  // Setup the detection environment
+  $detection = variable_get('at_detection', 0);
+  if ($detection == 1) {
+    $browscap_detect = variable_get('at_browscap_detect', 0);
+    $mobile_detect = variable_get('at_mobile_detect', 0);
+    $browser = at_get_browser();
+    $page['is_mobile'] = $browser['is_mobile'];
+    $page['is_tablet'] = $browser['is_tablet'];
+  }
+  else {
+    $page['is_mobile'] = FALSE;
+    $page['is_tablet'] = FALSE;
+  }
+
   // Look in each visible region for blocks
   foreach ($block_regions as $region => $name) {
     if (!empty($page[$region])) {
@@ -275,7 +318,7 @@ function adaptivetheme_page_alter(&$page) {
       }
 
       if ($blocks) {
-        
+
         // Set a bool for the last class for blocks feature
         $page[$region][$blocks[0]]['#block']->last_in_region = TRUE;
 
@@ -284,49 +327,33 @@ function adaptivetheme_page_alter(&$page) {
         if (at_get_setting('enable_extensions', $theme_name) === 1) {
           if (at_get_setting('enable_context_regions') === 1) {
 
-            if ($page['is_mobile'] == TRUE && $region !== 'content') {
-
-              // Get the target region if set, check blocks can move and its not set to unset
-              if (($target_region = at_get_setting('move_' . $region)) && ($target_region !== 'do_not_move') && (at_get_setting('unset_' . $region) !== 1)) {
-
-                // Sanitize possible vector
-                $target_region = check_plain($target_region);
-
-                // Initialize the classes array
-                $classes = array();
-
-                // Move each block
-                foreach ($blocks as $block) {
-
-                  // If the $target_region is empty the region markup does not print
-                  // so we need to generate it manually. This is bad because it
-                  // cannot account for region specific template suggestions and
-                  // Adaptivethemes own region prefix and suffix wrappers.
-                  if (empty($page[$target_region])) {
-                    $classes[] = 'region';
-                    $classes[] = 'region-' . $target_region;
-                    if ($target_region == 'sidebar_first' || $target_region == 'sidebar_second') {
-                      $classes[] = 'sidebar';
-                    }
-                    $classes = implode(' ', $classes);
-                    $page[$target_region]['#prefix'] = '<div class="' .  $classes . '"><div class="region-inner clearfix">';
-                    $page[$target_region]['#suffix'] = '</div></div>';
-                  }
-
-                  // Move the blocks to the target region
-                  $page[$target_region][$block] = $page[$region][$block];
-
-                  // Unset the original block
-                  unset($page[$region][$block]);
+            // UNSET
+            if (at_get_setting('unset_' . $region) === 1) {
+              if (at_get_setting('unset_options_' . $region) == 'unset_smalltouch') {
+                if ($page['is_mobile'] === TRUE && $page['is_tablet'] === FALSE) {
+                  unset($page[$region]);
                 }
-
-                // Unset the region, all blocks are now moved
-                unset($page[$region]);
               }
+              else {
+                // this is the all option
+                if ($page['is_mobile'] === TRUE) {
+                  unset($page[$region]);
+                }
+              }
+            }
 
-              // Unset unwanted regions in mobile
-              if (at_get_setting('unset_' . $region) === 1) {
-                unset($page[$region]);
+            // MOVE
+            if (at_get_setting('move_region_' . $region) === 1) {
+              if (at_get_setting('move_options_' . $region) == 'move_smalltouch') {
+                if ($page['is_mobile'] === TRUE && $page['is_tablet'] === FALSE) {
+                  $page = at_move_regions($page, $region, $blocks);
+                }
+              }
+              else {
+                // this is the all option
+                if ($page['is_mobile'] === TRUE) {
+                  $page = at_move_regions($page, $region, $blocks);
+                }
               }
             }
           }
@@ -345,6 +372,49 @@ function adaptivetheme_page_alter(&$page) {
       }
     }
   }
+}
+
+// Abstrat move regions processing
+function at_move_regions($page, $region, $blocks) {
+  // Get the target region if set, check blocks can move and its not set to unset
+  if (($target_region = at_get_setting('move_' . $region)) && ($target_region !== 'do_not_move') && (at_get_setting('unset_' . $region) !== 1)) {
+
+    // Sanitize possible vector
+    $target_region = check_plain($target_region);
+
+    // Initialize the classes array
+    $classes = array();
+
+    // Move each block
+    foreach ($blocks as $block) {
+
+      // If the $target_region is empty the region markup does not print
+      // so we need to generate it manually. This is bad because it
+      // cannot account for region specific template suggestions and
+      // Adaptivethemes own region prefix and suffix wrappers.
+      if (empty($page[$target_region])) {
+        $classes[] = 'region';
+        $classes[] = 'region-' . str_replace('_', '-', $target_region);
+        if ($target_region == 'sidebar_first' || $target_region == 'sidebar_second') {
+          $classes[] = 'sidebar';
+        }
+        $classes = implode(' ', $classes);
+        $page[$target_region]['#prefix'] = '<div class="' .  $classes . '"><div class="region-inner clearfix">';
+        $page[$target_region]['#suffix'] = '</div></div>';
+      }
+
+      // Move the blocks to the target region
+      $page[$target_region][$block] = $page[$region][$block];
+
+      // Unset the original block
+      unset($page[$region][$block]);
+    }
+
+    // Unset the region, all blocks are now moved
+    unset($page[$region]);
+  }
+
+  return $page;
 }
 
 /**

@@ -36,8 +36,11 @@
  * - $field_view_mode: The view mode so we can test for it inside a template.
  * - $image_caption_teaser: Boolean value to test for a theme setting.
  * - $image_caption_full: Boolean value to test for a theme setting.
- * - $is_mobile: Bool, requires the Browscap module to return TRUE for mobile
- *   devices. Use to test for a mobile context.
+ * - $is_mobile: Mixed, requires the Mobile Detect or Browscap module to return
+ *   TRUE for mobile.  Note that tablets are also considered mobile devices.  
+ *   Returns NULL if the feature could not be detected.
+ * - $is_tablet: Mixed, requires the Mobile Detect to return TRUE for tablets.
+ *   Returns NULL if the feature could not be detected.
  *
  * Available variables:
  * - $items: An array of field values. Use render() to output them.

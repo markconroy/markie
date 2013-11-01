@@ -30,7 +30,7 @@
  *   Base
  * ========================================================================== */
 
-/* 
+/*
  * To preserve theme settings never apply font properties to the HTML element.
  * This is critically important if you are using the Responsive JavaScript
  * feature as this relies on being able to set a pseudo font family on the HTML
@@ -147,11 +147,21 @@ var {
  * ========================================================================== */
 
 /*
- * Page wrapper, includes the .container class which sets the overall page or section width
- * Main wrapper in page.tpl.php, the .container class sets the width of the page, do not add width to it!
+ * Outer wrappers:
+ * - #page-wrapper: body > #page-wrapper
+ * - #page: body > #page-wrapper > #page
+ * - .container: body > #page-wrapper > #page.container
+ *
+ * The .container class holds the page width value from theme settings. You can
+ * style the .container class but do not add width such as border, padding,
+ * margins etc.
  */
+
+#page-wrapper {}
+
+
 #page  {
-  .container {}
+  &.container {}
 }
 
 
@@ -174,13 +184,15 @@ var {
 
 
 /*
- * Wraps the main-content-header, the content region and feed-icons. Use this wrapper to style the entire main content column
+ * Wraps the main-content-header, the content region and feed-icons. Use this
+ * wrapper to style the entire main content column
  */
 #main-content {}
 
 
 /*
- * Wraps the content region, avoid applying styles to this wrapper, its used mainly for position and invisible gutters and can be problematic to style
+ * Wraps the content region, avoid applying styles to this wrapper, its used
+ * mainly for position and invisible gutters and can be problematic to style
  */
 #content {}
 
@@ -201,17 +213,9 @@ var {
  * Full Width Wrappers
  * These are used in the optional page--full-width-wrappers.tpl.php template.
  * All have internal .container classes. In the full width wrapper template the
- * .container classes set the width or max-width of the contained element - you
- * can style this but never add any width/margin/padding/borders etc to .container
+ * .container classes set the width or max-width - you can style this but never
+ * add any width/margin/padding/borders etc to .container
  */
-
-/*
- * Wraps #page
- */
-#page-wrapper {
-  .container {}
-}
-
 
 /*
  * Wraps the leaderboard
@@ -422,6 +426,7 @@ ul.links {
  */
 .search-results {
   margin: 0;
+  padding: 0;
 }
 
 
@@ -563,9 +568,9 @@ a {
     display: block;
     white-space: nowrap;
     padding: 0 10px;
-    
+
     &:visited {}
-    
+
     &:hover,
     &:focus {}
   }
@@ -680,6 +685,30 @@ ul.sf-menu {
 
 
 /* =============================================================================
+ *   Menu Toggles
+ * ========================================================================== */
+// .at-mt is a page class
+.at-mt {
+  .at-menu-toggle,
+  .at-menu-toggle ul,
+  .at-menu-toggle ul.menu {
+    margin-top: 0;
+    margin-bottom: 0;
+    padding: 0;
+  }
+
+  .at-menu-toggle-button {
+    margin: 0;
+  }
+
+  .at-menu-toggle ul a {
+    padding: 0 10px;
+    white-space: nowrap;
+  }
+}
+
+
+/* =============================================================================
  *   Menus, usually blocks
  * ========================================================================== */
 
@@ -724,10 +753,10 @@ ul.menu {
 
 /* If li.content exists it's a problem, so reset the padding */
 .block .menu li.content {
-  padding: 0;   
+  padding: 0;
 }
 
- 
+
 /* =============================================================================
  *   Book navigation menu
  * ========================================================================== */
@@ -745,7 +774,7 @@ ul.menu {
     min-width: 2em;
     white-space: nowrap;
   }
-  
+
   .menu {
     margin-left: 0;
   }
@@ -1006,8 +1035,13 @@ ul.action-links {
 /*
  * When labels are set to inline in field display settings the clearfix class is automatically added
  */
-.field-label-inline {}
+.field-label-inline {
 
+  /* Remove the margin on inline field lables to preserve vertical formatting */
+  .field-label {
+    margin: 0;
+  }
+}
 
 /*
  * Labels are h2 in Adaptivetheme. Use a strong selector to mitigate unwanted ineritance issues
@@ -1152,7 +1186,7 @@ ul.action-links {
 
 
 /*
- * Image Alignment Theme Settings - included here so you can easily override 
+ * Image Alignment Theme Settings - included here so you can easily override
  */
 
 /*
@@ -1605,7 +1639,7 @@ ul.action-links {
 /*
  * Wrapper for a form element (or group of form elements) and its label
  */
-.form-item { 
+.form-item {
 
   input.error,
   textarea.error,
@@ -1617,7 +1651,7 @@ ul.action-links {
     font-weight: 700;
   }
 
-  label.option { 
+  label.option {
   }
 
   .description {
@@ -1642,7 +1676,7 @@ ul.action-links {
 /*
  * The submit button
  */
-.form-submit { 
+.form-submit {
 }
 
 
@@ -1663,14 +1697,14 @@ fieldset {
 /*
  * Tips for Drupal's input formats
  */
-.tips { 
+.tips {
 }
 
 
 /*
  * Buttons used by contrib modules like Media
  */
-a.button { 
+a.button {
   @include appearance(button);
 }
 
@@ -1790,13 +1824,13 @@ tr {
  * Core sets white-space to nowrap, which makes no sense
  */
 #forum td {
-  .created,
-  .posts,
-  .topics,
-  .last-reply,
-  .replies,
-  .pager {
-     white-space: normal;
+  &.created,
+  &.posts,
+  &.topics,
+  &.last-reply,
+  &.replies,
+  &.pager {
+    white-space: normal;
   }
 }
 

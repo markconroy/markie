@@ -15,8 +15,11 @@
  * is available for showing the account picture.
  *
  * Adaptivetheme variables:
- * - $is_mobile: Bool, requires the Browscap module to return TRUE for mobile
- *   devices. Use to test for a mobile context.
+ * - $is_mobile: Mixed, requires the Mobile Detect or Browscap module to return
+ *   TRUE for mobile.  Note that tablets are also considered mobile devices.  
+ *   Returns NULL if the feature could not be detected.
+ * - $is_tablet: Mixed, requires the Mobile Detect to return TRUE for tablets.
+ *   Returns NULL if the feature could not be detected.
  *
  * Available variables:
  *   - $user_profile: An array of profile items. Use render() to print them.
@@ -35,6 +38,6 @@
  * @see template_preprocess_user_profile()
  */
 ?>
-<article class="profile"<?php print $attributes; ?>>
+<article id="user-<?php print $user->uid; ?>" class="<?php print $classes; ?>"<?php print $attributes; ?>>
   <?php print render($user_profile); ?>
 </article>

@@ -16,8 +16,11 @@
  * - $primary_local_tasks: Split local tasks - primary.
  * - $secondary_local_tasks: Split local tasks - secondary.
  * - $tag: Prints the wrapper element for the main content.
- * - $is_mobile: Bool, requires the Browscap module to return TRUE for mobile
- *   devices. Use to test for a mobile context.
+ * - $is_mobile: Mixed, requires the Mobile Detect or Browscap module to return
+ *   TRUE for mobile.  Note that tablets are also considered mobile devices.
+ *   Returns NULL if the feature could not be detected.
+ * - $is_tablet: Mixed, requires the Mobile Detect to return TRUE for tablets.
+ *   Returns NULL if the feature could not be detected.
  * - *_attributes: attributes for various site elements, usually holds id, class
  *   or role attributes.
  *
@@ -88,136 +91,139 @@
  * @see adaptivetheme_process_page()
  */
 ?>
-<div id="page" class="container <?php print $classes; ?>">
+<div id="page-wrapper">
+  <div id="page" class="container <?php print $classes; ?>">
 
-  <!-- region: Leaderboard -->
-  <?php print render($page['leaderboard']); ?>
+    <!-- !Leaderboard Region -->
+    <?php print render($page['leaderboard']); ?>
 
-  <header<?php print $header_attributes; ?>>
+    <header<?php print $header_attributes; ?>>
 
-    <?php if ($site_logo || $site_name || $site_slogan): ?>
-      <!-- start: Branding -->
-      <div<?php print $branding_attributes; ?>>
+      <?php if ($site_logo || $site_name || $site_slogan): ?>
+        <!-- !Branding -->
+        <div<?php print $branding_attributes; ?>>
 
-        <?php if ($site_logo): ?>
-          <div id="logo">
-            <?php print $site_logo; ?>
-          </div>
-        <?php endif; ?>
-
-        <?php if ($site_name || $site_slogan): ?>
-          <!-- start: Site name and Slogan hgroup -->
-          <hgroup<?php print $hgroup_attributes; ?>>
-
-            <?php if ($site_name): ?>
-              <h1<?php print $site_name_attributes; ?>><?php print $site_name; ?></h1>
-            <?php endif; ?>
-
-            <?php if ($site_slogan): ?>
-              <h2<?php print $site_slogan_attributes; ?>><?php print $site_slogan; ?></h2>
-            <?php endif; ?>
-
-          </hgroup><!-- /end #name-and-slogan -->
-        <?php endif; ?>
-
-      </div><!-- /end #branding -->
-    <?php endif; ?>
-
-    <!-- region: Header -->
-    <?php print render($page['header']); ?>
-
-  </header>
-
-  <!-- Navigation elements -->
-  <?php print render($page['menu_bar']); ?>
-  <?php if ($primary_navigation): print $primary_navigation; endif; ?>
-  <?php if ($secondary_navigation): print $secondary_navigation; endif; ?>
-
-  <!-- Breadcrumbs -->
-  <?php if ($breadcrumb): print $breadcrumb; endif; ?>
-
-  <!-- Messages and Help -->
-  <?php print $messages; ?>
-  <?php print render($page['help']); ?>
-
-  <!-- region: Secondary Content -->
-  <?php print render($page['secondary_content']); ?>
-
-  <div id="columns" class="columns clearfix">
-    <div id="content-column" class="content-column" role="main">
-      <div class="content-inner">
-
-        <!-- region: Highlighted -->
-        <?php print render($page['highlighted']); ?>
-
-        <<?php print $tag; ?> id="main-content">
-
-          <?php print render($title_prefix); // Does nothing by default in D7 core ?>
-
-          <?php if ($title || $primary_local_tasks || $secondary_local_tasks || $action_links = render($action_links)): ?>
-            <header<?php print $content_header_attributes; ?>>
-
-              <?php if ($title): ?>
-                <h1 id="page-title">
-                  <?php print $title; ?>
-                </h1>
-              <?php endif; ?>
-
-              <?php if ($primary_local_tasks || $secondary_local_tasks || $action_links): ?>
-                <div id="tasks">
-
-                  <?php if ($primary_local_tasks): ?>
-                    <ul class="tabs primary clearfix"><?php print render($primary_local_tasks); ?></ul>
-                  <?php endif; ?>
-
-                  <?php if ($secondary_local_tasks): ?>
-                    <ul class="tabs secondary clearfix"><?php print render($secondary_local_tasks); ?></ul>
-                  <?php endif; ?>
-
-                  <?php if ($action_links = render($action_links)): ?>
-                    <ul class="action-links clearfix"><?php print $action_links; ?></ul>
-                  <?php endif; ?>
-
-                </div>
-              <?php endif; ?>
-
-            </header>
-          <?php endif; ?>
-
-          <!-- region: Main Content -->
-          <?php if ($content = render($page['content'])): ?>
-            <div id="content" class="region">
-              <?php print $content; ?>
+          <?php if ($site_logo): ?>
+            <div id="logo">
+              <?php print $site_logo; ?>
             </div>
           <?php endif; ?>
 
-          <!-- Feed icons (RSS, Atom icons etc -->
-          <?php print $feed_icons; ?>
+          <?php if ($site_name || $site_slogan): ?>
+            <!-- !Site name and Slogan -->
+            <hgroup<?php print $hgroup_attributes; ?>>
 
-          <?php print render($title_suffix); // Prints page level contextual links ?>
+              <?php if ($site_name): ?>
+                <h1<?php print $site_name_attributes; ?>><?php print $site_name; ?></h1>
+              <?php endif; ?>
 
-        </<?php print $tag; ?>><!-- /end #main-content -->
+              <?php if ($site_slogan): ?>
+                <h2<?php print $site_slogan_attributes; ?>><?php print $site_slogan; ?></h2>
+              <?php endif; ?>
 
-        <!-- region: Content Aside -->
-        <?php print render($page['content_aside']); ?>
+            </hgroup>
+          <?php endif; ?>
 
-      </div><!-- /end .content-inner -->
-    </div><!-- /end #content-column -->
+        </div>
+      <?php endif; ?>
 
-    <!-- regions: Sidebar first and Sidebar second -->
-    <?php $sidebar_first = render($page['sidebar_first']); print $sidebar_first; ?>
-    <?php $sidebar_second = render($page['sidebar_second']); print $sidebar_second; ?>
+      <!-- !Header Region -->
+      <?php print render($page['header']); ?>
 
-  </div><!-- /end #columns -->
+    </header>
 
-  <!-- region: Tertiary Content -->
-  <?php print render($page['tertiary_content']); ?>
+    <!-- !Navigation -->
+    <?php print render($page['menu_bar']); ?>
+    <?php if ($primary_navigation): print $primary_navigation; endif; ?>
+    <?php if ($secondary_navigation): print $secondary_navigation; endif; ?>
 
-  <!-- region: Footer -->
-  <?php if ($page['footer']): ?>
-    <footer<?php print $footer_attributes; ?>>
-      <?php print render($page['footer']); ?>
-    </footer>
-  <?php endif; ?>
+    <!-- !Breadcrumbs -->
+    <?php if ($breadcrumb): print $breadcrumb; endif; ?>
 
+    <!-- !Messages and Help -->
+    <?php print $messages; ?>
+    <?php print render($page['help']); ?>
+
+    <!-- !Secondary Content Region -->
+    <?php print render($page['secondary_content']); ?>
+
+    <div id="columns" class="columns clearfix">
+      <div id="content-column" class="content-column" role="main">
+        <div class="content-inner">
+
+          <!-- !Highlighted region -->
+          <?php print render($page['highlighted']); ?>
+
+          <<?php print $tag; ?> id="main-content">
+
+            <?php print render($title_prefix); // Does nothing by default in D7 core ?>
+
+            <!-- !Main Content Header -->
+            <?php if ($title || $primary_local_tasks || $secondary_local_tasks || $action_links = render($action_links)): ?>
+              <header<?php print $content_header_attributes; ?>>
+
+                <?php if ($title): ?>
+                  <h1 id="page-title">
+                    <?php print $title; ?>
+                  </h1>
+                <?php endif; ?>
+
+                <?php if ($primary_local_tasks || $secondary_local_tasks || $action_links): ?>
+                  <div id="tasks">
+
+                    <?php if ($primary_local_tasks): ?>
+                      <ul class="tabs primary clearfix"><?php print render($primary_local_tasks); ?></ul>
+                    <?php endif; ?>
+
+                    <?php if ($secondary_local_tasks): ?>
+                      <ul class="tabs secondary clearfix"><?php print render($secondary_local_tasks); ?></ul>
+                    <?php endif; ?>
+
+                    <?php if ($action_links = render($action_links)): ?>
+                      <ul class="action-links clearfix"><?php print $action_links; ?></ul>
+                    <?php endif; ?>
+
+                  </div>
+                <?php endif; ?>
+
+              </header>
+            <?php endif; ?>
+
+            <!-- !Main Content -->
+            <?php if ($content = render($page['content'])): ?>
+              <div id="content" class="region">
+                <?php print $content; ?>
+              </div>
+            <?php endif; ?>
+
+            <!-- !Feed Icons -->
+            <?php print $feed_icons; ?>
+
+            <?php print render($title_suffix); // Prints page level contextual links ?>
+
+          </<?php print $tag; ?>><!-- /end #main-content -->
+
+          <!-- !Content Aside Region-->
+          <?php print render($page['content_aside']); ?>
+
+        </div><!-- /end .content-inner -->
+      </div><!-- /end #content-column -->
+
+      <!-- !Sidebar Regions -->
+      <?php $sidebar_first = render($page['sidebar_first']); print $sidebar_first; ?>
+      <?php $sidebar_second = render($page['sidebar_second']); print $sidebar_second; ?>
+
+    </div><!-- /end #columns -->
+
+    <!-- !Tertiary Content Region -->
+    <?php print render($page['tertiary_content']); ?>
+
+    <!-- !Footer -->
+    <?php if ($page['footer']): ?>
+      <footer<?php print $footer_attributes; ?>>
+        <?php print render($page['footer']); ?>
+      </footer>
+    <?php endif; ?>
+
+  </div>
 </div>

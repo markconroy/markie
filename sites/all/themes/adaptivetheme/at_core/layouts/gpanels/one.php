@@ -21,8 +21,9 @@ regions[one_main] = AT One column
 
  */
 ?>
-<!-- One column -->
+
 <?php if ($page['one_main']): ?>
+  <!-- One column -->
   <div class="at-panel gpanel panel-display one-column clearfix">
     <?php print render($page['one_main']); ?>
   </div>

@@ -11,8 +11,11 @@
  *   settings.
  * - $skip_link_target: prints an ID for the skip navigation target, set in
  *   theme settings.
- * - $is_mobile: Bool, requires the Browscap module to return TRUE for mobile
- *   devices. Use to test for a mobile context.
+ * - $is_mobile: Mixed, requires the Mobile Detect or Browscap module to return
+ *   TRUE for mobile.  Note that tablets are also considered mobile devices.
+ *   Returns NULL if the feature could not be detected.
+ * - $is_tablet: Mixed, requires the Mobile Detect to return TRUE for tablets.
+ *   Returns NULL if the feature could not be detected.
  *
  * Available Variables:
  * - $css: An array of CSS files for the current page.
@@ -45,6 +48,10 @@
  * - $classes String of classes that can be used to style contextually through
  *   CSS.
  *
+ * Notes:
+ * - Skip link "nocontent" class is for exluding the element from inclusion in
+ *   a Google Custom Search index - http://www.google.com/cse
+ *
  * @see template_preprocess()
  * @see template_preprocess_html()
  * @see template_process()
@@ -52,11 +59,10 @@
  * @see adaptivetheme_process_html()
  */
 ?><!DOCTYPE html>
-<!--[if IEMobile 7]><html class="iem7"<?php print $html_attributes; ?>><![endif]-->
-<!--[if lte IE 6]><html class="lt-ie9 lt-ie8 lt-ie7"<?php print $html_attributes; ?>><![endif]-->
-<!--[if (IE 7)&(!IEMobile)]><html class="lt-ie9 lt-ie8"<?php print $html_attributes; ?>><![endif]-->
+<!--[if lt IE 7]><html class="lt-ie9 lt-ie8 lt-ie7"<?php print $html_attributes; ?>><![endif]-->
+<!--[if IE 7]><html class="lt-ie9 lt-ie8"<?php print $html_attributes; ?>><![endif]-->
 <!--[if IE 8]><html class="lt-ie9"<?php print $html_attributes; ?>><![endif]-->
-<!--[if (gte IE 9)|(gt IEMobile 7)]><!--><html<?php print $html_attributes . $rdf_namespaces; ?>><!--<![endif]-->
+<!--[if gt IE 8]><!--><html<?php print $html_attributes . $rdf_namespaces; ?>><!--<![endif]-->
 <head>
 <?php print $head; ?>
 <title><?php print $head_title; ?></title>
@@ -65,7 +71,7 @@
 <?php print $polyfills; ?>
 </head>
 <body class="<?php print $classes; ?>"<?php print $attributes; ?>>
-  <div id="skip-link">
+  <div id="skip-link" class="nocontent">
     <a href="<?php print $skip_link_target; ?>" class="element-invisible element-focusable"><?php print t('Skip to main content'); ?></a>
   </div>
   <?php print $page_top; ?>

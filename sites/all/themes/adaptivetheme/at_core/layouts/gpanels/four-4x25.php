@@ -24,13 +24,14 @@ regions[four_fourth] = AT Four column 4x25 - 4
 
  */
 ?>
-<!-- Four column Gpanel -->
+
 <?php if (
   $page['four_first'] ||
   $page['four_second'] ||
   $page['four_third'] ||
   $page['four_fourth']
   ): ?>
+  <!-- Four column Gpanel -->
   <div class="at-panel gpanel panel-display four-4x25 clearfix">
     <div class="panel-row row-1 clearfix">
       <?php print render($page['four_first']); ?>
