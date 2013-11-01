@@ -52,6 +52,7 @@ function field_groups_field_group_info() {
     'weight' => '1',
     'children' => array(
       0 => 'field_art_topics',
+      1 => 'field_art_site_section',
     ),
     'format_type' => 'tab',
     'format_settings' => array(
