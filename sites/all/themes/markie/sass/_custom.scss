@@ -199,15 +199,19 @@ $gutter-width: 10px;
 //
 // My Custom Mixins
 // 
+
+// Mixin for borders at the top and bottom of the nav bar
 @mixin nav-borders {
   border-bottom: 2px $white solid;
   border-top: 2px $grey_dark solid;
 }
 
+// Mixin to put an orange border inside input elements on the frontend
 @mixin form-border {
   border: 1px solid $orange;
 }
 
+// Mixin used for submit buttons (and other button styles if needed)
 @mixin submit-button {
   background: $orange;
   border: .1em solid $grey_dark;
@@ -219,5 +223,36 @@ $gutter-width: 10px;
   &:hover {
     background: $grey_dark;
     color: $grey_light;
+  }
+}
+
+// Mixin used for menus on smart phones and tablets (if needed)
+@mixin mobile-menu {
+   /* The toggle link */
+  h2 {
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    
+    a {
+      background: $orange;
+      color: $grey_light;
+      padding: .2em 1em;
+    }
+  }
+
+  /* Menu items */
+  ul.menu li a {
+    background: $orange;
+    color: $grey_light;
+    border-bottom: .1em solid $grey_light;
+
+    &:focus,
+    &:hover {
+      background: $grey_dark;
+      border-left: .1em solid $grey_light;
+      border-right: .1em solid $grey_light;
+      color: $grey_light;
+      @include border-radius(0);
+    }
   }
 }

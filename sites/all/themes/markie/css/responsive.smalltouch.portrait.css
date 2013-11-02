@@ -24,18 +24,32 @@ body {
   /* The toggle link */
   /* Menu items */
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/responsive\.smalltouch\.portrait\.scss}line{font-family:\0000328}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/_custom\.scss}line{font-family:\00003232}}
 .at-mt .at-menu-toggle h2 {
   margin-bottom: 5px;
+  text-transform: uppercase;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/responsive\.smalltouch\.portrait\.scss}line{font-family:\0000331}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/_custom\.scss}line{font-family:\00003236}}
 .at-mt .at-menu-toggle h2 a {
-  background: #eee;
-  border: 2px solid #ccc;
-  padding: 2px 10px;
+  background: #dd4814;
+  color: #f4f4f4;
+  padding: .2em 1em;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/responsive\.smalltouch\.portrait\.scss}line{font-family:\0000339}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/_custom\.scss}line{font-family:\00003244}}
 .at-mt .at-menu-toggle ul.menu li a {
-  background: #eee;
-  border-bottom: 1px solid #fff;
+  background: #dd4814;
+  color: #f4f4f4;
+  border-bottom: 0.1em solid #f4f4f4;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/_custom\.scss}line{font-family:\00003250}}
+.at-mt .at-menu-toggle ul.menu li a:focus, .at-mt .at-menu-toggle ul.menu li a:hover {
+  background: #353535;
+  border-left: 0.1em solid #f4f4f4;
+  border-right: 0.1em solid #f4f4f4;
+  color: #f4f4f4;
+  -webkit-border-radius: 0;
+  -moz-border-radius: 0;
+  -ms-border-radius: 0;
+  -o-border-radius: 0;
+  border-radius: 0;
 }
