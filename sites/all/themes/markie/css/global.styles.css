@@ -41,6 +41,26 @@
 }
 
 /*
+ * Begin styling for Twitter Block on the Home Page view
+ */
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/_custom_views\.scss}line{font-family:\0000353}}
+div.view-tweets li {
+  list-style: none;
+  margin-left: -.8em;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/_custom_views\.scss}line{font-family:\0000359}}
+div.view-tweets .views-row {
+  min-height: 5em;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/_custom_views\.scss}line{font-family:\0000364}}
+.views-field-profile-image-url {
+  float: left;
+  margin: .4em .4em .4em 0;
+}
+
+/*
  * @file
  * global.styles
  *

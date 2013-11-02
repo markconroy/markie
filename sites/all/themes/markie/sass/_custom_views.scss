@@ -43,5 +43,26 @@
   			background: $grey_dark;
   		}
   	}
-
  }
+
+/*
+ * Begin styling for Twitter Block on the Home Page view
+ */
+
+// The Twitter list item
+ div.view-tweets li {
+    list-style: none;
+   	margin-left: -.8em;
+}
+
+// Each row in the Tweets list
+div.view-tweets .views-row {
+    min-height: 5em;
+}
+
+// The Twitter profile image
+ .views-field-profile-image-url {
+    float: left;
+    margin: .4em .4em .4em 0;
+}
+
