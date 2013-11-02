@@ -93,6 +93,20 @@ function views_articles_views_default_views() {
 
   /* Display: Page: Articles */
   $handler = $view->new_display('page', 'Page: Articles', 'page');
+  $handler->display->display_options['metatags'] = array(
+    'description' => array(
+      'value' => 'Articles by Mark Conroy - Drupal developer, author, public speaker - Drupal, Literature, Education themed posts.',
+    ),
+    'keywords' => array(
+      'value' => 'drupal, literature, education, web design, sass',
+    ),
+    'twitter:creator' => array(
+      'value' => '@markconroy',
+    ),
+    'twitter:creator:id' => array(
+      'value' => '16218176',
+    ),
+  );
   $handler->display->display_options['path'] = 'articles';
   $handler->display->display_options['menu']['type'] = 'normal';
   $handler->display->display_options['menu']['title'] = 'Articles';

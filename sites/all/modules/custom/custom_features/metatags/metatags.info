@@ -1,0 +1,13 @@
+name = Metatags
+description = A feature to create the site metatags
+core = 7.x
+package = Mark.ie Features - General
+dependencies[] = metatag
+features[features_api][] = api:2
+features[metatag][] = global
+features[metatag][] = global:frontpage
+features[metatag][] = node
+features[metatag][] = taxonomy_term
+features[metatag][] = user
+features[metatag][] = view
+project path = sites/all/modules/custom/custom_features
