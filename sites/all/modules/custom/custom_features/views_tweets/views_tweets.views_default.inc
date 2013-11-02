@@ -253,6 +253,12 @@ function views_tweets_views_default_views() {
   $handler->display->display_options['defaults']['row_options'] = FALSE;
   $handler->display->display_options['defaults']['fields'] = FALSE;
   /* Field: Broken/missing handler */
+  $handler->display->display_options['fields']['profile_image_url']['id'] = 'profile_image_url';
+  $handler->display->display_options['fields']['profile_image_url']['table'] = 'twitter_account';
+  $handler->display->display_options['fields']['profile_image_url']['field'] = 'profile_image_url';
+  $handler->display->display_options['fields']['profile_image_url']['label'] = '';
+  $handler->display->display_options['fields']['profile_image_url']['element_label_colon'] = FALSE;
+  /* Field: Broken/missing handler */
   $handler->display->display_options['fields']['text']['id'] = 'text';
   $handler->display->display_options['fields']['text']['table'] = 'twitter';
   $handler->display->display_options['fields']['text']['field'] = 'text';
