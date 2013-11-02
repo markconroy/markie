@@ -2,7 +2,7 @@
  * Begin styling for Articles Page views
  */
 
- // Articles Main Wrapper
+ // Articles Main Page Wrapper
 
  .views-articles-main-page-wrapper {
  	border-left: .2em solid $orange;
@@ -10,7 +10,7 @@
  	padding: 0 0 1.4em 1em;
  }
 
- // Articles Main Titles
+ // Articles Main Page Titles
   .views-articles-main-page-title {
 
   	a {
@@ -22,12 +22,12 @@
  		}
  	}
  }
- // Articles Main Body
+ // Articles Main Page Body
   .views-articles-main-page-body {
 
  }
 
- // Articles Main Read More Link
+ // Articles Main Page Read More Link
   .views-articles-main-page-link {
   	a {
   		background: $orange;
@@ -44,6 +44,20 @@
   		}
   	}
  }
+
+/*
+ * Begin styling for Articles Home Page view
+ */
+
+// Articles Home Page View Title
+.views-articles-home-block-title {
+	a {
+		&:focus,
+		&:hover {
+			color: $grey_dark;
+		}
+	}
+}
 
 /*
  * Begin styling for Twitter Block on the Home Page view
