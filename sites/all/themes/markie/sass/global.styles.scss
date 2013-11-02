@@ -1579,6 +1579,15 @@ ul.action-links {
   }
 }
 
+// Comment Form Input Fields
+.comment-form .form-text {
+    width: 234px;
+}
+
+// Remove Text Format Tips
+.filter-wrapper {
+  display: none;
+}
 
 /*
  * Wrapper for a single comment
