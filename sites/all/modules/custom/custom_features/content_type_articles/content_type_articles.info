@@ -17,4 +17,5 @@ features[node][] = artlcles
 features_exclude[taxonomy][topics] = topics
 features_exclude[taxonomy][website_section] = website_section
 features_exclude[dependencies][field_groups] = field_groups
+features_exclude[dependencies][taxonomies] = taxonomies
 project path = sites/all/modules/custom/custom_features

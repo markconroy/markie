@@ -1,0 +1,10 @@
+name = Pages - Home Page
+description = A feature to create the homepage
+core = 7.x
+package = Mark.ie Features - Pages
+dependencies[] = ctools
+dependencies[] = page_manager
+features[ctools][] = page_manager:pages_default:1
+features[features_api][] = api:2
+features[page_manager_pages][] = home_page
+project path = sites/all/modules/custom/custom_features

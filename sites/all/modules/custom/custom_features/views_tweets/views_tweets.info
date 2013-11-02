@@ -2,6 +2,7 @@ name = Views - Tweets
 description = A feature to create the "Tweets" view.
 core = 7.x
 package = Mark.ie Features - Views
+dependencies[] = twitter
 dependencies[] = views
 features[ctools][] = views:views_default:3.0
 features[features_api][] = api:2

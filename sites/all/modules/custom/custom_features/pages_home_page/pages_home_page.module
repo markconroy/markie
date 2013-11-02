@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the Pages - Home Page feature.
+ */
+
+include_once 'pages_home_page.features.inc';
