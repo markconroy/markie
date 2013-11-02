@@ -1677,6 +1677,13 @@ ul.action-links {
  */
 .form-item {
 
+  input {
+    @include form-border;
+  }
+  textarea {
+    @include form-border;
+  }
+
   input.error,
   textarea.error,
   select.error {
@@ -1713,6 +1720,7 @@ ul.action-links {
  * The submit button
  */
 .form-submit {
+  @include submit-button;
 }
 
 

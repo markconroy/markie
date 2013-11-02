@@ -202,5 +202,22 @@ $gutter-width: 10px;
 @mixin nav-borders {
   border-bottom: 2px $white solid;
   border-top: 2px $grey_dark solid;
+}
 
+@mixin form-border {
+  border: 1px solid $orange;
+}
+
+@mixin submit-button {
+  background: $orange;
+  border: .1em solid $grey_dark;
+  margin-right: 1em;
+  padding: 1em;
+  @include border-radius(.8em);
+
+  &:focus,
+  &:hover {
+    background: $grey_dark;
+    color: $grey_light;
+  }
 }
