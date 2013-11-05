@@ -436,9 +436,15 @@ a {
   padding: 1em;
   text-decoration: none;
   text-transform: uppercase;
+  transition: all linear 0.4s;
   white-space: nowrap;
+  -webkit-border-radius: 0 0 1em 1em;
+  -moz-border-radius: 0 0 1em 1em;
+  -ms-border-radius: 0 0 1em 1em;
+  -o-border-radius: 0 0 1em 1em;
+  border-radius: 0 0 1em 1em;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003598}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003600}}
 .nav li a:hover, .nav li a:focus,
 .nav ul.menu li a:hover,
 .nav ul.menu li a:focus {
@@ -450,7 +456,7 @@ a {
   -o-border-radius: 0 0 1em 1em;
   border-radius: 0 0 1em 1em;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003605}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003607}}
 .nav .block {
   margin-bottom: 0;
 }
@@ -458,11 +464,11 @@ a {
 /* =============================================================================
  *   Superfish
  * ========================================================================== */
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003615}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003617}}
 ul.sf-menu {
   margin-bottom: 0;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003618}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003620}}
 ul.sf-menu a {
   border-left: 0;
   border-top: 0;
@@ -471,11 +477,11 @@ ul.sf-menu a {
   height: 2.5em;
   line-height: 2.5em;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003632}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003634}}
 ul.sf-menu li:hover, ul.sf-menu li.sfHover {
   outline: 0;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003640}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003642}}
 ul.sf-menu a:focus, ul.sf-menu a:hover, ul.sf-menu a:active {
   outline: 0;
 }
@@ -483,12 +489,12 @@ ul.sf-menu a:focus, ul.sf-menu a:hover, ul.sf-menu a:active {
 /*
  * Superfish blocks
  */
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003654}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003656}}
 .block-superfish ul {
   margin: 0 !important;
   padding: 0 !important;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003665}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003667}}
 .block-superfish li {
   margin: 0 !important;
   padding: 0 !important;
@@ -497,22 +503,22 @@ ul.sf-menu a:focus, ul.sf-menu a:hover, ul.sf-menu a:active {
 /*
  * Vertical style
  */
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003675}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003677}}
 .sf-vertical {
   width: 100%;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003678}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003680}}
 .sf-vertical li {
   width: 100%;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003684}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003686}}
 .sf-vertical li:hover ul, .sf-vertical li.sfHover ul {
   left: 100%;
   top: 0;
   margin: 0;
   padding: 0;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003691}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003693}}
 .sf-vertical li a {
   padding: 0 10px;
 }
@@ -520,7 +526,7 @@ ul.sf-menu a:focus, ul.sf-menu a:hover, ul.sf-menu a:active {
 /*
  * Navbar style
  */
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003701}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003703}}
 .sf-navbar {
   padding-bottom: 0 !important;
 }
@@ -528,7 +534,7 @@ ul.sf-menu a:focus, ul.sf-menu a:hover, ul.sf-menu a:active {
 /*
  * Sensible padding for the default style
  */
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003709}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003711}}
 .sf-menu.sf-style-default a {
   padding: 0 10px;
 }
@@ -536,7 +542,7 @@ ul.sf-menu a:focus, ul.sf-menu a:hover, ul.sf-menu a:active {
 /* =============================================================================
  *   Menu Toggles
  * ========================================================================== */
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003721}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003723}}
 .at-mt .at-menu-toggle,
 .at-mt .at-menu-toggle ul,
 .at-mt .at-menu-toggle ul.menu {
@@ -544,11 +550,11 @@ ul.sf-menu a:focus, ul.sf-menu a:hover, ul.sf-menu a:active {
   margin-bottom: 0;
   padding: 0;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003727}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003729}}
 .at-mt .at-menu-toggle-button {
   margin: 0;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003731}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003733}}
 .at-mt .at-menu-toggle ul a {
   padding: 0 10px;
   white-space: nowrap;
@@ -557,21 +563,21 @@ ul.sf-menu a:focus, ul.sf-menu a:hover, ul.sf-menu a:active {
 /* =============================================================================
  *   Menus, usually blocks
  * ========================================================================== */
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003742}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003744}}
 ul.menu {
   padding-left: 15px;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003745}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003747}}
 ul.menu ul {
   padding-left: 15px;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003753}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003755}}
 ul.menu li {
   margin: 0;
 }
 
 /* If li.content exists it's a problem, so reset the padding */
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003782}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003784}}
 .block .menu li.content {
   padding: 0;
 }
@@ -579,13 +585,13 @@ ul.menu li {
 /* =============================================================================
  *   Book navigation menu
  * ========================================================================== */
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003799}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003801}}
 .book-navigation .page-up {
   /* Prevent text wrapping to a new line, assumes English "up" is used (two characters) */
   min-width: 2em;
   white-space: nowrap;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003805}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003807}}
 .book-navigation .menu {
   margin-left: 0;
 }
@@ -593,31 +599,31 @@ ul.menu li {
 /* =============================================================================
  *   Breadcrumbs
  * ========================================================================== */
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003815}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003817}}
 #breadcrumb {
   margin: 10px 0;
   /* If the label is set to show in theme settings the label class is added */
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003819}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003821}}
 #breadcrumb .breadcrumb-label {
   font-size: 1em;
   display: inline;
   padding-right: 10px;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003824}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003826}}
 #breadcrumb .breadcrumb-label:after {
   content: ":";
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003829}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003831}}
 #breadcrumb ol {
   margin: 0;
   padding: 0;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003834}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003836}}
 #breadcrumb .with-breadcrumb-label ol {
   display: inline;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003838}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003840}}
 #breadcrumb li {
   list-style: none;
   display: inline;
@@ -626,31 +632,31 @@ ul.menu li {
 /* =============================================================================
  *   Pagers
  * ========================================================================== */
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003865}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003867}}
 ul.pager {
   clear: both;
   margin: 0;
   text-align: center;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003872}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003874}}
 .item-list ul.pager li {
   margin: 0;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003877}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003879}}
 ul.pager li {
   background-image: none;
   display: inline;
   list-style-type: none;
   padding: .5em;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003883}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003885}}
 ul.pager li.pager-current {
   font-weight: 700;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003889}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003891}}
 .block ul.pager li {
   margin: 0;
 }
@@ -661,7 +667,7 @@ ul.pager li.pager-current {
 /* =============================================================================
  *   Skip Navigation
  * ========================================================================== */
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003926}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003928}}
 #skip-link {
   left: 50%;
   margin-left: -6.5em;
@@ -671,7 +677,7 @@ ul.pager li.pager-current {
   width: 12em;
   z-index: 50;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003935}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003937}}
 #skip-link a {
   background: #444;
   background: rgba(0, 0, 0, 0.6);
@@ -682,7 +688,7 @@ ul.pager li.pager-current {
   text-align: center;
   text-decoration: none;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003946}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003948}}
 #skip-link a:link, #skip-link a:visited {
   background: #444;
   background: rgba(0, 0, 0, 0.6);
@@ -693,7 +699,7 @@ ul.pager li.pager-current {
   text-align: center;
   text-decoration: none;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003958}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003960}}
 #skip-link a:hover, #skip-link a:focus, #skip-link a:active {
   outline: 0;
 }
@@ -701,24 +707,24 @@ ul.pager li.pager-current {
 /* =============================================================================
  *   Tabs (local tasks)
  * ========================================================================== */
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003969}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003971}}
 #tasks {
   margin-bottom: 15px;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003974}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003976}}
 ul.primary {
   border-bottom-color: #cccccc;
   margin: 20px 0;
   padding: 0 0 0 5px;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003979}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003981}}
 ul.primary li {
   display: block;
   float: left;
   margin: 0 1px -1px;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003984}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003986}}
 ul.primary li a {
   background-color: whitesmoke;
   border-color: #cccccc;
@@ -729,12 +735,12 @@ ul.primary li a {
   height: 1.5em;
   line-height: 1.5em;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003995}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\00003997}}
 ul.primary li a:hover, ul.primary li a:focus {
   background-color: #eeeeee;
   border-color: #cccccc;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031005}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031007}}
 ul.primary li.active a,
 ul.primary li.active a:hover,
 ul.primary li.active a:focus {
@@ -742,19 +748,19 @@ ul.primary li.active a:focus {
   border-bottom-color: white;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031013}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031015}}
 ul.secondary {
   border-bottom: 1px solid #cccccc;
   margin: 1em 0 0;
   padding: 0 .3em 1em;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031018}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031020}}
 ul.secondary li {
   border-right: 0;
   list-style: none;
   padding: 0 10px 0 0;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031025}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031027}}
 ul.secondary li a:hover, ul.secondary li a.active {
   border-bottom: none;
   text-decoration: underline;
@@ -763,7 +769,7 @@ ul.secondary li a:hover, ul.secondary li a.active {
 /* =============================================================================
  *   Action links
  * ========================================================================== */
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031038}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031040}}
 ul.action-links {
   margin: 20px 0 0;
   list-style: none;
@@ -781,11 +787,11 @@ ul.action-links {
 /*
  * When labels are set to inline in field display settings the clearfix class is automatically added
  */
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031065}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031067}}
 .field-label-inline {
   /* Remove the margin on inline field lables to preserve vertical formatting */
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031068}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031070}}
 .field-label-inline .field-label {
   margin: 0;
 }
@@ -793,7 +799,7 @@ ul.action-links {
 /*
  * Labels are h2 in Adaptivetheme. Use a strong selector to mitigate unwanted ineritance issues
  */
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031076}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031078}}
 .field-label {
   font-size: 1em;
   font-weight: 700;
@@ -811,17 +817,17 @@ ul.action-links {
 /*
  * Taxonomy
  */
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031105}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031107}}
 .field-type-taxonomy-term-reference {
   /* The same bottom margin as p, blockquote, ul, ol and dl */
   margin-bottom: 1.5em;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031110}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031112}}
 .field-type-taxonomy-term-reference.field-label-inline .field-items {
   margin: 0;
   padding: 0;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031115}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031117}}
 .field-type-taxonomy-term-reference.field-label-inline .field-item {
   display: inline;
   list-style: none;
@@ -879,7 +885,7 @@ ul.action-links {
 /*
  * Float left setting
  */
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031230}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031232}}
 .ia-l .field-type-image figure,
 .iat-l .field-type-image figure {
   margin: 5px 20px 15px 0;
@@ -888,7 +894,7 @@ ul.action-links {
 /*
  * Centered setting
  */
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031239}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031241}}
 .ia-c .field-type-image figure,
 .iat-c .field-type-image figure {
   margin: 5px auto 15px;
@@ -897,19 +903,19 @@ ul.action-links {
 /*
  * Float right setting
  */
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031248}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031250}}
 .ia-r .field-type-image figure,
 .iat-r .field-type-image figure {
   margin: 5px 0 15px 20px;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031253}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031255}}
 .field-name-ds-user-picture {
   float: left;
   margin-right: 1em;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031259}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031261}}
 .field-name-field-art-site-section {
   clear: both;
 }
@@ -920,7 +926,7 @@ ul.action-links {
 /*
  * Main wrapper for most blocks, block_system_main does not have it
  */
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031270}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031272}}
 .block {
   margin-bottom: 20px;
 }
@@ -943,7 +949,7 @@ ul.action-links {
 /*
  * Block title
  */
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031308}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031310}}
 .block-title {
   margin: 0;
 }
@@ -954,12 +960,12 @@ ul.action-links {
 /*
  * Match item list and block menu margin and padding
  */
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031325}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031327}}
 .block-content ul,
 .block-content ol {
   padding: 0 0 0 15px;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031329}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031331}}
 .block-content li {
   margin: 0;
   padding: 0;
@@ -1049,11 +1055,11 @@ ul.action-links {
 /* =============================================================================
  *   Node Styling
  * ========================================================================== */
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031502}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031504}}
 .node {
   margin-bottom: 20px;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031519}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031521}}
 .node .node-title {
   margin: 0;
 }
@@ -1069,25 +1075,25 @@ ul.action-links {
 /*
  * Wrapper for the list of comments and its titles
  */
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031577}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031579}}
 #comments {
   margin: 1.5em 0;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031581}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031583}}
 #comments h2.comment-title {
   margin: 0;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031585}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031587}}
 #comments h2.comment-form {
   margin: 0;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031592}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031594}}
 .comment-form .form-text {
   width: 234px;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031597}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031599}}
 .filter-wrapper {
   display: none;
 }
@@ -1095,7 +1101,7 @@ ul.action-links {
 /*
  * Wrapper for a single comment
  */
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031604}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031606}}
 .comment {
   margin-bottom: 20px;
 }
@@ -1103,7 +1109,7 @@ ul.action-links {
 /*
  * Comment title
  */
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031635}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031637}}
 .comment-title {
   margin: 0;
 }
@@ -1117,7 +1123,7 @@ ul.action-links {
 /*
  * "New" marker for comments that are new for the current user
  */
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031667}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031669}}
 .new {
   color: #cc0000;
 }
@@ -1125,7 +1131,7 @@ ul.action-links {
 /*
  * Nested comments are indented
  */
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031675}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031677}}
 .indented {
   margin-left: 40px;
 }
@@ -1136,25 +1142,25 @@ ul.action-links {
 /*
  * Wrapper for a form element (or group of form elements) and its label
  */
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031689}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031691}}
 .form-item input {
   border: 1px solid #dd4814;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031692}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031694}}
 .form-item textarea {
   border: 1px solid #dd4814;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031698}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031700}}
 .form-item input.error,
 .form-item textarea.error,
 .form-item select.error {
   border: 1px solid #cc0000;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031702}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031704}}
 .form-item label {
   font-weight: 700;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031709}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031711}}
 .form-item .description {
   font-size: 0.85em;
 }
@@ -1162,7 +1168,7 @@ ul.action-links {
 /*
  * Highlight marks and form required mark
  */
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031723}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031725}}
 .marker,
 .form-required {
   color: #cc0000;
@@ -1171,7 +1177,7 @@ ul.action-links {
 /*
  * The submit button
  */
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031731}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031733}}
 .form-submit {
   background: #dd4814;
   border: 0.1em solid #353535;
@@ -1189,7 +1195,7 @@ ul.action-links {
   color: #f4f4f4;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031738}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031740}}
 .container-inline div,
 .container-inline label {
   display: inline;
@@ -1198,7 +1204,7 @@ ul.action-links {
 /*
  * Define consistent borders
  */
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031746}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031748}}
 fieldset {
   border: 1px solid #cccccc;
 }
@@ -1209,7 +1215,7 @@ fieldset {
 /*
  * Buttons used by contrib modules like Media
  */
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031760}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031762}}
 a.button {
   -webkit-appearance: button;
   -moz-appearance: button;
@@ -1219,7 +1225,7 @@ a.button {
 /*
  * Password confirmation
  */
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031769}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031771}}
 .password-parent,
 .confirm-parent {
   margin: 0;
@@ -1228,18 +1234,18 @@ a.button {
 /* =============================================================================
  *   Tables
  * ========================================================================== */
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031778}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031780}}
 table {
   margin: 10px 0;
   padding: 0;
   width: 100%;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031783}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031785}}
 table.sticky-header {
   z-index: 10;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031794}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031796}}
 table,
 thead,
 tbody,
@@ -1249,27 +1255,27 @@ td {
   border-color: #cccccc;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031801}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031803}}
 table,
 td,
 th {
   vertical-align: middle;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031808}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031810}}
 caption,
 th,
 td {
   text-align: left;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031813}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031815}}
 thead tr {
   font-weight: 700;
   background-color: #e5e5e5;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031820}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031822}}
 td,
 th {
   border-bottom: 0;
@@ -1277,29 +1283,29 @@ th {
   padding: 5px 7px;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031830}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031832}}
 tbody tr {
   border-top: 1px solid #cccccc;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031835}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031837}}
 tr {
   /* Table row striping */
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031837}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031839}}
 tr.odd {
   background: white;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031844}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031846}}
 tr.info, tr.even, tr:nth-child(2n+2) {
   border-bottom: 0;
   background-color: whitesmoke;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031853}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031855}}
 tr.odd td.active {
   background-color: #eeeeee;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031857}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031859}}
 tr.even td.active {
   background-color: #ebebeb;
 }
@@ -1308,7 +1314,7 @@ tr.even td.active {
  * Forum tables
  * Core sets white-space to nowrap, which makes no sense
  */
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031885}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031887}}
 #forum td.created, #forum td.posts, #forum td.topics, #forum td.last-reply, #forum td.replies, #forum td.pager {
   white-space: normal;
 }
@@ -1316,12 +1322,12 @@ tr.even td.active {
 /* =============================================================================
  *   Messages
  * ========================================================================== */
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031896}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031898}}
 div.messages {
   margin-bottom: 10px;
   margin-top: 10px;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031901}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031903}}
 div.messages ul {
   margin-top: 0;
   margin-bottom: 0;
@@ -1330,7 +1336,7 @@ div.messages ul {
 /*
  * Unpublished nodes
  */
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031942}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031944}}
 .node-unpublished p.unpublished,
 .comment-unpublished p.unpublished {
   color: pink;
@@ -1356,28 +1362,28 @@ div.messages ul {
 /* =============================================================================
  *    Maintenance pages
  * ========================================================================== */
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031953}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031955}}
 .maintenance-page .container {
   padding: 40px 0;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031958}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031960}}
 .maintenance-page #site-name,
 .maintenance-page #page-title {
   margin: 0;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031965}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031967}}
 .db-offline .container {
   margin: 0 auto;
   padding: 40px 0;
   width: 100%;
   max-width: 960px;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031972}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031974}}
 .db-offline div.messages {
   margin: 20px 0 0;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031976}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031978}}
 .db-offline #content {
   padding: 20px 0;
 }
@@ -1388,7 +1394,7 @@ div.messages ul {
 /*
  * Admin menu overrides
  */
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031989}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031991}}
 #admin-menu {
   margin: 0;
   padding: 0;
@@ -1397,7 +1403,7 @@ div.messages ul {
 /*
  * Devel Module
  */
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000031998}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000032000}}
 .dev-query {
   background: #eeeeee;
   padding: 30px;
@@ -1406,11 +1412,11 @@ div.messages ul {
 /*
  * Styleguide module tweaks
  */
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000032007}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000032009}}
 #styleguide-header {
   padding: 0 10px;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000032010}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/markconroy\/htdocs\/mark\.ie\/sites\/all\/themes\/markie\/sass\/global\.styles\.scss}line{font-family:\000032012}}
 #styleguide-header .item-list {
   font-family: inherit;
   margin: 0 20px 20px 0;

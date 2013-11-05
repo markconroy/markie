@@ -590,7 +590,9 @@ a {
     padding: 1em;
     text-decoration: none;
     text-transform: uppercase;
+    transition: all linear 0.4s;
     white-space: nowrap;
+    @include border-radius(0 0 1em 1em);
 
     &:visited {}
 
