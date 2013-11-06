@@ -14,7 +14,7 @@ body {
 	background-repeat: no-repeat;*/
 	width: 120px;
 	height: 100px;
-	margin-left: 0px;
+	margin-left: 10px;
 }
 
 
@@ -26,7 +26,7 @@ body {
 	color: white;
 	width: 150px;
 	height: 1000px;
-	margin-left: -20px;
+	margin-left: -40px;
 }
 
 @media only screen and (min-width: 951px) {
@@ -230,7 +230,7 @@ body {
 	background-image: url('images/main-soldier-banner.png');
 	background-repeat: no-repeat;
 	background-attachment:fixed;
-	background-position: 0px 560px;
+	background-position: 0px 540px;
 	 
 	}
 }
