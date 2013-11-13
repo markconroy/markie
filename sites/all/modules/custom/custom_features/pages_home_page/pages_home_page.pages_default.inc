@@ -141,7 +141,7 @@ function pages_home_page_default_page_manager_pages() {
       'url' => '',
       'display' => 'block',
       'override_title' => 1,
-      'override_title_text' => 'Twitter @markconroy',
+      'override_title_text' => '',
     );
     $pane->cache = array();
     $pane->style = array(
