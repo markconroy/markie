@@ -53,6 +53,7 @@ function field_groups_field_group_info() {
     'children' => array(
       0 => 'field_art_topics',
       1 => 'field_art_site_section',
+      2 => 'field_art_follow_on_twitter',
     ),
     'format_type' => 'tab',
     'format_settings' => array(
