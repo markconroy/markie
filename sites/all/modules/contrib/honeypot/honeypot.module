@@ -2,7 +2,6 @@
 
 /**
  * @file
- *
  * Honeypot module, for deterring spam bots from completing Drupal forms.
  */
 
@@ -126,11 +125,11 @@ function honeypot_get_protected_forms() {
 /**
  * Form builder function to add different types of protection to forms.
  *
- * @param $options (array)
+ * @param array $options
  *   Array of options to be added to form. Currently accepts 'honeypot' and
  *   'time_restriction'.
  *
- * @return $form_elements
+ * @return array
  *   Returns elements to be placed in a form's elements array to prevent spam.
  */
 function honeypot_add_form_protection(&$form, &$form_state, $options = array()) {
@@ -160,9 +159,10 @@ function honeypot_add_form_protection(&$form, &$form_state, $options = array()) 
       '#element_validate' => array('_honeypot_honeypot_validate'),
       '#prefix' => '<div class="' . $honeypot_class . '">',
       '#suffix' => '</div>',
+      // Hide honeypot.
       '#attached' => array(
         'css' => array(
-          '.' . $honeypot_class . ' { display: none !important; }' => array('type' => 'inline'), // Hide honeypot.
+          '.' . $honeypot_class . ' { display: none !important; }' => array('type' => 'inline'),
         ),
       ),
     );
@@ -207,7 +207,12 @@ function _honeypot_honeypot_validate($element, &$form_state) {
 /**
  * Validate honeypot's time restriction field.
  */
-function _honeypot_time_restriction_validate($form, &$form_state) {
+function _honeypot_time_restriction_validate($element, &$form_state) {
+  // Don't do anything if the triggering element is a preview button.
+  if ($form_state['triggering_element']['#value'] == t('Preview')) {
+    return;
+  }
+
   // Get the time value.
   $honeypot_time = $form_state['values']['honeypot_time'];
 
@@ -227,9 +232,9 @@ function _honeypot_time_restriction_validate($form, &$form_state) {
 /**
  * Log blocked form submissions.
  *
- * @param $form_id
+ * @param string $form_id
  *   Form ID for the form on which submission was blocked.
- * @param $type
+ * @param string $type
  *   String indicating the reason the submission was blocked. Allowed values:
  *     - honeypot: If honeypot field was filled in.
  *     - honeypot_time: If form was completed before the configured time limit.
@@ -238,18 +243,17 @@ function _honeypot_log($form_id, $type) {
   honeypot_log_failure($form_id, $type);
   if (variable_get('honeypot_log', 0)) {
     $variables = array(
-        '%form'  => $form_id,
-        '@cause' => ($type == 'honeypot') ? t('submission of a value in the honeypot field') : t('submission of the form in less than minimum required time'),
+      '%form'  => $form_id,
+      '@cause' => ($type == 'honeypot') ? t('submission of a value in the honeypot field') : t('submission of the form in less than minimum required time'),
     );
     watchdog('honeypot', 'Blocked submission of %form due to @cause.', $variables);
   }
-  return;
 }
 
 /**
  * Look up the time limit for the current user.
  *
- * @param $form_values
+ * @param array $form_values
  *   Array of form values (optional).
  */
 function honeypot_get_time_limit($form_values = array()) {
@@ -283,9 +287,9 @@ function honeypot_get_time_limit($form_values = array()) {
 /**
  * Log the failed submision with timestamp.
  *
- * @param $form_id
+ * @param string $form_id
  *   Form ID for the rejected form submission.
- * @param $type
+ * @param string $type
  *   String indicating the reason the submission was blocked. Allowed values:
  *     - honeypot: If honeypot field was filled in.
  *     - honeypot_time: If form was completed before the configured time limit.
