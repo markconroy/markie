@@ -211,6 +211,10 @@ Some modules are available that extend Metatag with additional functionality:
   https://drupal.org/project/node_form_panes
   Create custom node-edit forms and control the location of the Metatag fields.
 
+* Textimage
+  https://drupal.org/project/textimage
+  Supports using Textimage's custom tokens in meta tag fields.
+
 
 Credits / Contact
 ------------------------------------------------------------------------------

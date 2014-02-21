@@ -34,7 +34,6 @@ function metatag_metatag_config_default() {
   $config->api_version = 1;
   $config->disabled = FALSE;
   $config->config = array(
-    'title' => array('value' => variable_get('site_slogan') ? '[site:name] | [site:slogan]' : '[site:name]'),
     'canonical' => array('value' => '[site:url]'),
     'shortlink' => array('value' => '[site:url]'),
   );
@@ -45,7 +44,6 @@ function metatag_metatag_config_default() {
   $config->api_version = 1;
   $config->disabled = FALSE;
   $config->config = array(
-    'title' => array('value' => variable_get('site_slogan') ? '[site:name] | [site:slogan]' : '[site:name]'),
     'canonical' => array('value' => '[site:url]'),
     'shortlink' => array('value' => '[site:url]'),
   );

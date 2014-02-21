@@ -8,9 +8,9 @@ dependencies[] = metatag
 dependencies[] = panels
 dependencies[] = token
 
-; Information added by Drupal.org packaging script on 2014-01-16
-version = "7.x-1.0-beta8"
+; Information added by Drupal.org packaging script on 2014-01-19
+version = "7.x-1.0-beta9"
 core = "7.x"
 project = "metatag"
-datestamp = "1389847405"
+datestamp = "1390103307"
 

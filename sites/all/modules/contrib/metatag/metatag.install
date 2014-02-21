@@ -225,7 +225,6 @@ function metatag_uninstall() {
   variable_del('metatag_tag_admin_pages');
 
   // Temp variables, just in case they weren't removed already.
-  variable_del('metatag_skip_update_7015');
   variable_del('metatag_skip_update_7017');
 }
 
@@ -940,10 +939,7 @@ function metatag_update_7014() {
  * keys accordingly.
  */
 function metatag_update_7015() {
-  if (!variable_get('metatag_skip_update_7015', FALSE)) {
-    // Make sure this update script isn't executed more than once.
-    variable_set('metatag_skip_update_7015', TRUE);
-
+  if (!db_field_exists('metatag', 'revision_id')) {
     // Tell update 7017 that it isn't needed.
     variable_set('metatag_skip_update_7017', TRUE);
 
@@ -966,7 +962,7 @@ function metatag_update_7015() {
     drupal_set_message(t('Added the {metatag}.revision_id field.'));
   }
   else {
-    variable_del('metatag_skip_update_7015');
+    drupal_set_message(t('The {metatag}.revision_id field has already been added, nothing to do.'));
   }
 }
 
@@ -975,6 +971,11 @@ function metatag_update_7015() {
  * update 7017.
  */
 function metatag_update_7016() {
+  // It's possible that 7015 was not executed if the site had been updated to
+  // an early dev release, so make sure the revision_id field exists.
+  metatag_update_7015();
+
+  // Run the update.
   db_query("UPDATE {metatag} SET revision_id = 0 WHERE revision_id IS NULL");
 }
 
@@ -1015,7 +1016,11 @@ function metatag_update_7017() {
 }
 
 /**
- * Update the revision ID for each record. This may take some time.
+ * Update the revision ID for each record. This may take some time. Should any
+ * nodes be discovered with a meta tag record for both revision_id 0 and the
+ * correct revision_id, the "0" value will be deleted; if this is not the
+ * desired result the {metatag} table must be manually pruned to have the
+ * correct records prior to letting this update run.
  */
 function metatag_update_7018(&$sandbox) {
   // Process records in small groups.
@@ -1116,14 +1121,44 @@ function metatag_update_7018(&$sandbox) {
 
       // Don't bother updating records if the revision_id is 0.
       if (!empty($revision_id)) {
-        // Update the metatag record.
-        db_update('metatag')
-          ->fields(array('revision_id' => $revision_id))
-          ->condition('entity_type', $entity_type)
-          ->condition('entity_id', $entity_id)
-          ->condition('revision_id', 0)
-          ->condition('language', $language)
-          ->execute();
+        $exists = db_query("SELECT entity_id
+            FROM {metatag}
+            WHERE entity_type = :entity_type
+            AND entity_id = :entity_id
+            AND revision_id = :revision_id
+            AND language = :language",
+          array(
+            ':entity_type' => $entity_type,
+            ':entity_id' => $entity_id,
+            ':revision_id' => $revision_id,
+            ':language' => $language,
+          ))->fetchObject();
+        // There isn't already a record for the revision_id, so update the
+        // metatag record.
+        if (!$exists) {
+          db_update('metatag')
+            ->fields(array('revision_id' => $revision_id))
+            ->condition('entity_type', $entity_type)
+            ->condition('entity_id', $entity_id)
+            ->condition('revision_id', 0)
+            ->condition('language', $language)
+            ->execute();
+        }
+        // The record exists, so delete the old one under the grounds that the
+        // one with a revision_id is newer.
+        // Disclaimer: this is completely arbitrary, without providing a UI to
+        // let the site maintainer/builder choose which of the two records to
+        // keep, we're stuck with a bad scenario. Thankfully this should not
+        // happen very often and would only affect sites that were running a
+        // dev release. Also, sorry :(
+        else {
+          db_delete('metatag')
+            ->condition('entity_type', $entity_type)
+            ->condition('entity_id', $entity_id)
+            ->condition('revision_id', 0)
+            ->condition('language', $language)
+            ->execute();
+        }
 
         // Nodes can have multiple revisions, so create new {metatag} records
         // for each of the other revisions.
@@ -1154,16 +1189,16 @@ function metatag_update_7018(&$sandbox) {
                     array(
                       ':entity_type' => $entity_type,
                       ':entity_id' => $entity_id,
-                      ':revision_id' => $revision_id,
+                      ':revision_id' => $vid,
                       ':language' => $language,
                     ))->fetchObject();
                   if (!$exists) {
                     $node = node_load($entity_id, $vid);
                     $record = new StdClass();
-                    $record->entity_type = 'node';
-                    $record->entity_id = $node->nid;
-                    $record->revision_id = $node->vid;
-                    $record->language = $node->language;
+                    $record->entity_type = $entity_type;
+                    $record->entity_id = $entity_id;
+                    $record->revision_id = $vid;
+                    $record->language = $language;
                     $record->data = $metatags->data;
                     drupal_write_record('metatag', $record);
                   }

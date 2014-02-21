@@ -1,3 +1,19 @@
+Metatag 7.x-1.0-beta9, 2014-01-18
+---------------------------------
+#2174363 by DamienMcKenna: Changed update 7018 to avoid attempting to create
+  duplicate records when updating; instead should there be a collision the
+  record with revision_id 0 will be deleted.
+#2176351 by DamienMcKenna: 403 and 404 error pages will use the global default
+  for the page title instead of copying the homepage's.
+#2175843 by DamienMcKenna: It was possible to get to update 7016 without the
+  revision_id field existing, so make sure it exists.
+#2081787 by attila.fekete: Don't let Metatag:Views overwrite the frontpage meta
+  tag config, matching how Metatag:Panels works.
+#2176375 by DamienMcKenna: Added note to README.txt about the Textimage module's
+  compatibility with Metatag.
+#2170771 by DamieMcKenna: Added support for the og:image:secure_url meta tag.
+
+
 Metatag 7.x-1.0-beta8, 2014-01-15
 ---------------------------------
 #1995284 by DamienMcKenna: Replace $_SERVER['REQUEST_URI'] with request_uri().
