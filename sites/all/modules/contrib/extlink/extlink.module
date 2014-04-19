@@ -1,5 +1,7 @@
 <?php
-
+/**
+ * Implements hook_menu().
+ */
 function extlink_menu() {
   $items = array();
   $items['admin/config/user-interface/extlink'] = array(
@@ -14,14 +16,16 @@ function extlink_menu() {
 }
 
 /**
- * Implementation of hook_init().
+ * Implements hook_page_build().
  */
 function extlink_page_build() {
   $path = drupal_get_path('module', 'extlink');
   drupal_add_js($path .'/extlink.js', array('every_page' => TRUE));
   drupal_add_js(array('extlink' => array(
     'extTarget'     => variable_get('extlink_target', 0),
+    'extTargetValue'=> variable_get('extlink_target_value', ''),
     'extClass'      => variable_get('extlink_class', 'ext'),
+    'extImgClass'   => variable_get('extlink_img_class', 0),
     'extSubdomains' => variable_get('extlink_subdomains', 1),
     'extExclude'    => variable_get('extlink_exclude', ''),
     'extInclude'    => variable_get('extlink_include', ''),
@@ -46,10 +50,18 @@ function extlink_admin_settings() {
 
   $form['extlink_mailto_class'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Place an icon next to mailto links'),
+    '#title' => t('Place an icon next to mailto links.'),
     '#return_value' => 'mailto',
     '#default_value' => variable_get('extlink_mailto_class', 'mailto'),
     '#description' => t('Places an !icon icon next to mailto links.', array('!icon' => theme('image',array('path' => drupal_get_path('module', 'extlink') . '/mailto.png', 'alt' => t('Email links icon'))))),
+  );
+
+  $form['extlink_img_class'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Place an icon next to image links.'),
+    '#return_value' => TRUE,
+    '#default_value' => variable_get('extlink_img_class', FALSE),
+    '#description' => t('If checked, images wrapped in an anchor tag will be treated as external links.'),
   );
 
   $form['extlink_subdomains'] = array(
@@ -61,9 +73,23 @@ function extlink_admin_settings() {
 
   $form['extlink_target'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Open external links in a new window'),
+    '#title' => t('Open external links in a new window.'),
     '#return_value' => '_blank',
     '#default_value' => variable_get('extlink_target', 0),
+  );
+  
+  $form['extlink_target_value'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Target value for new window.'),
+    '#rows' => 1,
+    '#default_value' => variable_get('extlink_target_value', '_blank'),
+    '#wysiwyg' => FALSE,
+    '#states' => array(
+      // Only show this field when user opts to open in new window.
+      'visible' => array(
+        ':input[name="extlink_target"]' => array('checked' => TRUE),
+      ),
+    ),
   );
 
   $form['extlink_alert'] = array(
@@ -88,16 +114,16 @@ function extlink_admin_settings() {
   );
 
   $patterns = array(
-    '<em>(example\.com)</em> ' . t('Matches example.com.'),
-    '<em>(example\.com)|(example\.net)</em> ' . t('Multiple patterns can be strung together by using a pipe. Matches example.com OR example.net.'),
-    '<em>(links/goto/[0-9]+/[0-9]+)</em> ' . t('Matches links that go through the <a href="http://drupal.org/project/links">Links module</a> redirect.'),
+    '<code>(example\.com)</code> ' . t('Matches example.com.'),
+    '<code>(example\.com)|(example\.net)</code> ' . t('Multiple patterns can be strung together by using a pipe. Matches example.com OR example.net.'),
+    '<code>(links/goto/[0-9]+/[0-9]+)</code> ' . t('Matches links that go through the <a href="http://drupal.org/project/links">Links module</a> redirect.'),
   );
 
   $wildcards = array(
-    '<em>.</em> ' . t('Matches any character.'),
-    '<em>?</em> ' . t('The previous character or set is optional.'),
-    '<em>\d</em> ' . t('Matches any digit (0-9).'),
-    '<em>[a-z]</em> ' . t('Brackets may be used to match a custom set of characters. This matches any alphabetic letter.'),
+    '<code>.</code> ' . t('Matches any character.'),
+    '<code>?</code> ' . t('The previous character or set is optional.'),
+    '<code>\d</code> ' . t('Matches any digit (0-9).'),
+    '<code>[a-z]</code> ' . t('Brackets may be used to match a custom set of characters. This matches any alphabetic letter.'),
   );
 
   $form['patterns'] = array(
@@ -112,7 +138,7 @@ function extlink_admin_settings() {
       theme('item_list', array('items' => $patterns)) .
       t('Common special characters:') .
       theme('item_list', array('items' => $wildcards)) .
-      '<p>' . t('All special characters (<em>^ $ . ? ( ) | * +</em>) must also be escaped with backslashes. Patterns are not case-sensitive. Any <a href="http://www.javascriptkit.com/javatutors/redev2.shtml">pattern supported by JavaScript</a> may be used.') . '</p>',
+      '<p>' . t('All special characters (!characters) must also be escaped with backslashes. Patterns are not case-sensitive. Any <a href="http://www.javascriptkit.com/javatutors/redev2.shtml">pattern supported by JavaScript</a> may be used.', array('!characters' => '<code>^ $ . ? ( ) | * +</code>')) . '</p>',
   );
 
   $form['patterns']['extlink_exclude'] = array(

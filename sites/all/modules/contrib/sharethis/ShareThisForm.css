@@ -242,3 +242,7 @@
 .stbc_hcount { margin-top: -244px; }
 .stbc_vcount { margin-top: -315px; }
 .stbc_button { margin-top: -166px; }
+
+st_cns_container {
+    margin-top: -15px;
+}

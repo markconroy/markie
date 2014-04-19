@@ -59,6 +59,37 @@ var drupal_st = {
 	},
 	setupServiceText: function () {
 		jQuery("#edit-sharethis-service-option").css({display:"none"});
+
+		if(jQuery('input[name=sharethis_callesi]').val() == 1){
+			//alert("esi called");
+			drupal_st.getGlobalCNSConfig();
+		}else{
+			//alert("settings found");
+		}
+	},
+	odjs: function(scriptSrc,callBack){
+		this.head=document.getElementsByTagName('head')[0];
+		this.scriptSrc=scriptSrc;
+		this.script=document.createElement('script');
+		this.script.setAttribute('type', 'text/javascript');
+		this.script.setAttribute('src', this.scriptSrc);
+		this.script.onload=callBack;
+		this.script.onreadystatechange=function(){
+			if(this.readyState == "complete" || (scriptSrc.indexOf("checkOAuth.esi") !=-1 && this.readyState == "loaded")){
+				callBack();
+			}
+		};
+		this.head.appendChild(this.script);
+	},
+	getGlobalCNSConfig: function (){
+		try {
+			drupal_st.odjs((("https:" == document.location.protocol) ? "https://wd-edge.sharethis.com/button/getDefault.esi?cb=drupal_st.cnsCallback" : "http://wd-edge.sharethis.com/button/getDefault.esi?cb=drupal_st.cnsCallback"));
+		} catch(err){
+			drupal_st.cnsCallback(err);
+		}
+	},
+	updateDoNotHash: function (){
+		jQuery('input[name=sharethis_callesi]').val(0);
 	},
 	// Function to add various events to our html form elements
 	addEvents: function() {
@@ -72,6 +103,8 @@ var drupal_st = {
 		jQuery("#edit-sharethis-button-option-stbc-button").click(drupal_st.button);
 		
 		jQuery(".st_formButtonSave").click(drupal_st.updateOptions);
+
+		jQuery('#st_cns_settings').find('input').live('click', drupal_st.updateDoNotHash);
 	},
 	serviceCallback: function() {
 		var services = stlib_picker.getServices("myPicker");
@@ -82,6 +115,39 @@ var drupal_st = {
 		}
 		outputString = outputString.substring(0, outputString.length-1);
 		jQuery("#edit-sharethis-service-option").attr("value", outputString);
+	},
+	to_boolean: function(str) {
+		return str === true || jQuery.trim(str).toLowerCase() === 'true';
+	},
+	cnsCallback: function(response){
+		if((response instanceof Error) || (response == "" || (typeof(response) == "undefined"))){
+			// Setting default config
+			response = '{"doNotHash": true, "doNotCopy": true, "hashAddressBar": false}';
+			response = jQuery.parseJSON(response);
+		}
+
+		var obj = {
+				doNotHash: drupal_st.to_boolean(response.doNotHash),
+				doNotCopy: drupal_st.to_boolean(response.doNotCopy),
+				hashAddressBar: drupal_st.to_boolean(response.hashAddressBar)
+		};
+
+		if(obj.doNotHash == false || obj.doNotHash === "false"){
+			if(obj.doNotCopy === true || obj.doNotCopy == "true"){
+				jQuery(jQuery('#st_cns_settings').find('input')[0]).removeAttr("checked");
+			}else{
+				jQuery(jQuery('#st_cns_settings').find('input')[0]).attr("checked",true);
+			}
+			if(obj.hashAddressBar === true || obj.hashAddressBar == "true"){
+				jQuery(jQuery('#st_cns_settings').find('input')[1]).attr("checked",true);
+			}else{
+				jQuery(jQuery('#st_cns_settings').find('input')[1]).removeAttr("checked");
+			}
+		}else{
+			jQuery('#st_cns_settings').find('input').each(function( index ){
+				jQuery(this).removeAttr("checked");
+			});
+		}
 	}
 };
 //After the page is loaded, we want to add events to dynamically created elements.

@@ -1,5 +1,5 @@
 name = ShareThis
-description = Add the <a href="http://sharethis.com/">ShareThis</a> widget to nodes on your site.
+description = Add the <a href="http://www.sharethis.com/">ShareThis</a> widget to nodes on your site.
 core = 7.x
 package = Sharing
 configure = admin/config/services/sharethis
@@ -7,9 +7,9 @@ configure = admin/config/services/sharethis
 ; Views handlers
 files[] = views/sharethis_handler_field_link.inc
 
-; Information added by drupal.org packaging script on 2012-10-10
-version = "7.x-2.5"
+; Information added by Drupal.org packaging script on 2014-04-11
+version = "7.x-2.6"
 core = "7.x"
 project = "sharethis"
-datestamp = "1349883717"
+datestamp = "1397215755"
 
