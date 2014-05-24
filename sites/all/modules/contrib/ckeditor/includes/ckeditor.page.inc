@@ -35,6 +35,23 @@
  */
 function ckeditor_help_delegate($path, $arg) {
   global $base_url;
+  $is_url = false;
+  $ckeditor_url = ckeditor_path('local');
+  if ($ckeditor_url == '<URL>') {
+    $ckeditor_url = ckeditor_path('url');
+    $is_url = true;
+  }
+
+  $do_not_touch_configjs = '';
+  if (!$is_url) {
+    $do_not_touch_configjs = '<p>' .
+          t('It is recommended to not edit the !ckeditor_config_file (!ckeditor_config_path) configuration file that is distributed with CKEditor, because you may overwrite it accidentally when you update the editor.', array(
+            '!ckeditor_config_path' => '<code>' . $ckeditor_url . '/config.js</code>',
+            '!ckeditor_config_file' => '<code>config.js</code>',
+              )
+          ) .
+          '</p>';
+  }
   switch ($path) {
     case 'admin/config/content/help#description':
       $output = t('Enables the use of CKEditor (a rich text WYSIWYG editor) instead of plain text fields.');
@@ -46,13 +63,7 @@ function ckeditor_help_delegate($path, $arg) {
             '!ckeditor_module_config' => '<code>' . ckeditor_module_path('local') . '/ckeditor.config.js</code>',
               )
           ) .
-          '</p><p>' .
-          t('It is recommended to not edit the !ckeditor_config_file (!ckeditor_config_path) configuration file that is distributed with CKEditor, because you may overwrite it accidentally when you update the editor.', array(
-            '!ckeditor_config_path' => '<code>' . ckeditor_path('local') . '/config.js</code>',
-            '!ckeditor_config_file' => '<code>config.js</code>',
-              )
-          ) .
-          '</p>';
+          '</p>'.$do_not_touch_configjs;
       break;
 
     case 'admin/config/content/ckeditor/editg':
@@ -70,7 +81,7 @@ function ckeditor_help_delegate($path, $arg) {
           '</p><p>' .
           t('Useful links: !ckeditorlink | !devguidelink | !userguidelink.', array(
             '!ckeditorlink' => l(t('CKEditor website'), 'http://ckeditor.com'),
-            '!devguidelink' => l(t('Developer\'s Guide'), 'http://docs.cksource.com/CKEditor_3.x/Developers_Guide'),
+            '!devguidelink' => l(t('CKEditor for Drupal 7 Documentation'), 'http://docs.cksource.com/CKEditor_for_Drupal/Open_Source/Drupal_7'),
             '!userguidelink' => l(t('User\'s Guide'), 'http://docs.cksource.com/CKEditor_3.x/Users_Guide')
               )
           ) .
@@ -90,7 +101,7 @@ function ckeditor_help_delegate($path, $arg) {
           '<p>' .
           t('Useful links: !ckeditorlink | !devguidelink | !userguidelink.', array(
             '!ckeditorlink' => l(t('CKEditor website'), 'http://ckeditor.com'),
-            '!devguidelink' => l(t('Developer\'s Guide'), 'http://docs.cksource.com/CKEditor_3.x/Developers_Guide'),
+            '!devguidelink' => l(t('CKEditor for Drupal 7 Documentation'), 'http://docs.cksource.com/CKEditor_for_Drupal/Open_Source/Drupal_7'),
             '!userguidelink' => l(t('User\'s Guide'), 'http://docs.cksource.com/CKEditor_3.x/Users_Guide')
               )
           ) .
@@ -111,7 +122,7 @@ function ckeditor_help_delegate($path, $arg) {
               )
           ) .
           '<br /><code>' .
-          htmlspecialchars('<a> <p> <span> <div> <h1> <h2> <h3> <h4> <h5> <h6> <img> <map> <area> <hr> <br> <br /> <ul> <ol> <li> <dl> <dt> <dd> <table> <tbody> <th> <tr> <td> <em> <b> <u> <i> <strong> <del> <ins> <sub> <sup> <quote> <blockquote> <pre> <address> <code> <cite> <embed> <object> <param> <strike> <caption> <iframe>') .
+          htmlspecialchars('<a> <p> <span> <div> <h1> <h2> <h3> <h4> <h5> <h6> <img> <map> <area> <hr> <br> <br /> <ul> <ol> <li> <dl> <dt> <dd> <table> <caption> <tbody> <tr> <td> <em> <b> <u> <i> <strong> <del> <ins> <sub> <sup> <quote> <blockquote> <pre> <address> <code> <cite> <embed> <object> <param> <strike>') .
           '</code><br />' .
           t('<strong>Note:</strong> be careful when granting users access to create tags like %iframe.<br />If you are going to use CKEditor with the <strong>Filtered HTML</strong> input format, please read the "Setting up filters" section in the !readme file.', array(
             '%iframe' => '<iframe>',
@@ -137,7 +148,7 @@ function ckeditor_help_delegate($path, $arg) {
           '</h3>' .
           '<p>' .
           t('Take a look at !listlink when installing CKEditor.', array(
-            '!listlink' => l(t('the list of common problems'), 'http://docs.cksource.com/CKEditor_for_Drupal/Troubleshooting')
+            '!listlink' => l(t('the list of common problems'), 'http://docs.cksource.com/CKEditor_for_Drupal/Open_Source/Drupal_7/Troubleshooting')
               )
           ) .
           ' ' .
@@ -147,9 +158,37 @@ function ckeditor_help_delegate($path, $arg) {
           ) .
           ' ' .
           t('More information about how to customize CKEditor for your theme can be found !herelink.', array(
-            '!herelink' => l(t('here'), 'http://drupal.ckeditor.com/tricks')
+            '!herelink' => l(t('here'), 'http://docs.cksource.com/CKEditor_for_Drupal/Open_Source/Drupal_7/Tricks')
               )
           ) .
+          '</p>' .
+          '<h3>' .
+          t('Plugins: Code Snippet and MathJax') .
+          '</h3>' .
+          '<p>' .
+          t('Code Snippet and MathJax are special plugins for CKEditor that are using external JavaScript libraries to style content inside editing area. The result that is returned by CKEditor is just an HTML tag that needs to again processed by a filter (either server side or client side) in order to display it properly to the user.') .
+          '</p>' .
+          '<h4><a name="mathjax"></a>' .
+          t('MathJax (Mathematical Formulas)') .
+          '</h4>' .
+          '<p>' .
+          t('With mathjax plugin, CKEditor produces LaTeX code surrounded by !code. In order to have it properly rendered on your site you might need to add !mathjax on your website, the simplest way to do this is to add this to your theme: !script', array(
+            '!code' => '<code>'.htmlspecialchars('<span class="math-tex"></span>').'</code>',
+            '!mathjax' => l('MathJax', 'http://www.mathjax.org/'),
+            '!script' => '<br /><code>'.htmlspecialchars('<script src="http://cdn.mathjax.org/mathjax/2.2-latest/MathJax.js?config=TeX-AMS_HTML" type="text/javascript"></script>').'</code>'
+          )) .
+          '</p>' .
+          '<h4><a name="codesnippet"></a>' .
+          t('Code Snippet') .
+          '</h4>' .
+          '<p>' .
+          t('With codesnippet plugin, CKEditor produces code snippets surrounded by !code. <strong>Note:</strong> You might need to add !highlight on your website so that the displayed code was rendered nicely as in CKEditor. The simplest way to do this is to add this to your theme: !script', array(
+            '!highlight' => l('highlight.js', 'http://highlightjs.org/'),
+            '!code' => '<code>'.htmlspecialchars('<pre><code></code></pre>').'</code>',
+            '!script' => '<br /><code>'.htmlspecialchars('<link rel="stylesheet" href="http://cdn.ckeditor.com/4.4.0/full-all/plugins/codesnippet/lib/highlight/styles/default.css">').'<br />'.
+htmlspecialchars('<script src="http://cdn.ckeditor.com/4.4.0/full-all/plugins/codesnippet/lib/highlight/highlight.pack.js" type="text/javascript"></script>').'<br />'.
+htmlspecialchars('<script>hljs.initHighlightingOnLoad();</script>').'</code>'
+          )) .
           '</p>' .
           '<h3>' .
           t('Uploading images and files') .
@@ -216,6 +255,7 @@ function ckeditor_filter_xss() {
       preg_match_all("|</?([a-z][a-z0-9]*)(?:\b[^>]*)>|i", $text, $matches);
       if ($matches[1]) {
         $tags = array_unique(array_merge($matches[1], array('!--')));
+        $tags = array_map('strtolower', $tags);
         $text = filter_xss($text, $tags);
       }
       continue;

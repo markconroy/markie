@@ -23,8 +23,8 @@ function extlink_page_build() {
   drupal_add_js($path .'/extlink.js', array('every_page' => TRUE));
   drupal_add_js(array('extlink' => array(
     'extTarget'     => variable_get('extlink_target', 0),
-    'extTargetValue'=> variable_get('extlink_target_value', ''),
     'extClass'      => variable_get('extlink_class', 'ext'),
+    'extLabel'      => check_plain(variable_get('extlink_label', t('(link is external)'))),
     'extImgClass'   => variable_get('extlink_img_class', 0),
     'extSubdomains' => variable_get('extlink_subdomains', 1),
     'extExclude'    => variable_get('extlink_exclude', ''),
@@ -33,8 +33,9 @@ function extlink_page_build() {
     'extCssExplicit' => variable_get('extlink_css_explicit', ''),
     'extAlert'      => variable_get('extlink_alert', 0),
     'extAlertText'  => variable_get('extlink_alert_text', 'This link will take you to an external web site. We are not responsible for their content.'),
-    'mailtoClass'   => variable_get('extlink_mailto_class', 'mailto'))), 'setting'
-  );
+    'mailtoClass'   => variable_get('extlink_mailto_class', 'mailto'),
+    'mailtoLabel'   => check_plain(variable_get('extlink_mailto_label', t('(link sends e-mail)'))),
+  )), 'setting');
 }
 
 function extlink_admin_settings() {
@@ -58,10 +59,10 @@ function extlink_admin_settings() {
 
   $form['extlink_img_class'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Place an icon next to image links.'),
+    '#title' => t('Place an icon next to image external links.'),
     '#return_value' => TRUE,
     '#default_value' => variable_get('extlink_img_class', FALSE),
-    '#description' => t('If checked, images wrapped in an anchor tag will be treated as external links.'),
+    '#description' => t('Treats images wrapped in external link anchor tags the same as text links.'),
   );
 
   $form['extlink_subdomains'] = array(
@@ -76,20 +77,6 @@ function extlink_admin_settings() {
     '#title' => t('Open external links in a new window.'),
     '#return_value' => '_blank',
     '#default_value' => variable_get('extlink_target', 0),
-  );
-  
-  $form['extlink_target_value'] = array(
-    '#type' => 'textarea',
-    '#title' => t('Target value for new window.'),
-    '#rows' => 1,
-    '#default_value' => variable_get('extlink_target_value', '_blank'),
-    '#wysiwyg' => FALSE,
-    '#states' => array(
-      // Only show this field when user opts to open in new window.
-      'visible' => array(
-        ':input[name="extlink_target"]' => array('checked' => TRUE),
-      ),
-    ),
   );
 
   $form['extlink_alert'] = array(
