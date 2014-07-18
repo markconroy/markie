@@ -266,7 +266,7 @@ function ckeditor_admin_global_profile_form($form, $form_state, $mode = 'add') {
     '#description' => t(
         'The path to CKEditor (the WYSIWYG rich text editor downloaded from !ckeditorcom). Provide a path relative to the document root, unless CKEditor is located on an external URL. In such case enter the full URL to a folder with CKEditor.<br />The simplest way to have the editor running is to use CDN, to use it set: !cdn', array(
       '!ckeditorcom' => l(t('ckeditor.com'), 'http://ckeditor.com/download'),
-      '!cdn' => '<strong>//cdn.ckeditor.com/4.4.0/full-all</strong>'
+      '!cdn' => '<strong>//cdn.ckeditor.com/4.4.3/full-all</strong>'
         )
     ) .
     '<br /><br /> ' .

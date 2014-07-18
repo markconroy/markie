@@ -1,9 +1,16 @@
-7.x-1.x dev
+2013-07-15
+New stable release 7.x-1.15
+
+Updated the default URL to CKEditor CDN to use the 4.4.3 version.
+[#2175565] removed ckeditor.make added in 7.x-1.14.
+
+2013-05-08
+New stable release 7.x-1.14
 
 [#2255129] by wwalc: Introduced support for the codesnippet and mathjax plugins.
 [#1762328] by wwalc: IMPORTANT: <code> tags are no longer protected by default.
 [#1327898] by grasmash: Adding new ckeditor_security_filter_alter() hook.
-[#2175565] by hswong3i: Download Library with ckeditor.make for Simple Profile Integration.
+[#2175565] by hswong3i: Download Library with ckeditor.make for Simple Profile Integration. (removed in 7.x-1.15)
 [#2249139] by wwalc: Use CKEditor 4.4.0 from CKEditor CDN (http://cdn.ckeditor.com) by default.
 [#1370894] by uberhacker, mgifford, Devin Carlson: Conditionally load ckeditor.css only when necessary.
 [#1960808] by valkum, wwalc: Avoid using arg() in code.

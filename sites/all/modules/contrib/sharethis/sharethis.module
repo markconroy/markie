@@ -598,7 +598,7 @@ function theme_sharethis($variables) {
     }
     // Only show the display text if the type is set.
     if (!empty($type)) {
-      $attributes['displaytext'] = check_plain($display);
+      $attributes['displayText'] = check_plain($display);
     }
     // Render the span tag.
     $st_spans .= theme('html_tag', array(

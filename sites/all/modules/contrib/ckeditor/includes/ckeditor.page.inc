@@ -185,8 +185,8 @@ function ckeditor_help_delegate($path, $arg) {
           t('With codesnippet plugin, CKEditor produces code snippets surrounded by !code. <strong>Note:</strong> You might need to add !highlight on your website so that the displayed code was rendered nicely as in CKEditor. The simplest way to do this is to add this to your theme: !script', array(
             '!highlight' => l('highlight.js', 'http://highlightjs.org/'),
             '!code' => '<code>'.htmlspecialchars('<pre><code></code></pre>').'</code>',
-            '!script' => '<br /><code>'.htmlspecialchars('<link rel="stylesheet" href="http://cdn.ckeditor.com/4.4.0/full-all/plugins/codesnippet/lib/highlight/styles/default.css">').'<br />'.
-htmlspecialchars('<script src="http://cdn.ckeditor.com/4.4.0/full-all/plugins/codesnippet/lib/highlight/highlight.pack.js" type="text/javascript"></script>').'<br />'.
+            '!script' => '<br /><code>'.htmlspecialchars('<link rel="stylesheet" href="http://cdn.ckeditor.com/4.4.3/full-all/plugins/codesnippet/lib/highlight/styles/default.css">').'<br />'.
+htmlspecialchars('<script src="http://cdn.ckeditor.com/4.4.3/full-all/plugins/codesnippet/lib/highlight/highlight.pack.js" type="text/javascript"></script>').'<br />'.
 htmlspecialchars('<script>hljs.initHighlightingOnLoad();</script>').'</code>'
           )) .
           '</p>' .
