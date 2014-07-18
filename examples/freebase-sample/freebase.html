@@ -1,6 +1,17 @@
-$(function() {
-  $("#myinput").suggest({
-    key: "YOUR-API-KEY-GOES-HERE",
-    filter:'(all type:/film/director)'
-  });
-});
+<!DOCTYPE HTML>
+<html>
+<head>
+  <title>Freebase</title>
+    <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/freebase/suggest/4_1/suggest.min.css" />
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.js"></script>
+    <script type="text/javascript" src="https://www.gstatic.com/freebase/suggest/4_1/suggest.min.js"></script>
+    <script type="text/javascript">
+    $(function() {
+      $("#myinput").suggest("key" : "<AIzaSyCqj7NZod5SeNV-QJADK-NTDjl1oeTZqh4>"{filter:'(all type:/film/director)'});
+    });
+    </script>
+</head>
+<body>
+  <input type="text" id="myinput"/>
+</body>
+</html>
