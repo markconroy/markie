@@ -11,7 +11,7 @@ that is used within social networks when visitors link to your site,
 particularly the Open Graph submodule for use with Facebook, LinkedIn, etc (see
 below).
 
-This version of the module only works with Drupal 7.15 and newer.
+This version of the module only works with Drupal 7.28 and newer.
 
 
 Features
@@ -72,6 +72,8 @@ The primary features include:
 * The Transliteration and Imagecache Token modules (see below) are highly
   recommended when using image meta tags, e.g. og:image.
 
+* Several advanced options may be controlled via the Advanced Settings page.
+
 
 Configuration
 ------------------------------------------------------------------------------
@@ -113,6 +115,9 @@ page" configuration will show up in the Translate Interface admin page
 
 Fine Tuning
 ------------------------------------------------------------------------------
+All of these may be controlled from the advanced settings page:
+admin/config/search/metatags/settings
+
 * By default Metatag will load the global default values for all pages that do
   not have meta tags assigned via the normal entity display or via Metatag
   Context. This may be disabled by setting the variable 'metatag_load_all_pages'
@@ -162,6 +167,11 @@ Full API documentation is available in metatag.api.php.
 To enable Metatag support in custom entities, add 'metatag' => TRUE to either
 the entity or bundle definition in hook_entity_info(); see metatag.api.php for
 further details and example code.
+
+The meta tags for a given entity object (node, etc) can be obtained as follows:
+  $metatags = metatags_get_entity_metatags($entity_id, $entity_type, $langcode);
+The result will be a nested array of meta tag structures ready for either output
+via drupal_render(), or examining to identify the actual text values.
 
 
 Troubleshooting / Known Issues

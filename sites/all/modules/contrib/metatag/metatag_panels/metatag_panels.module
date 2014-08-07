@@ -117,6 +117,13 @@ function metatag_panels_ctools_render_alter($info, $page, $context) {
     $tokens[$task_context->keyword] = $task_context->data;
   }
 
+  // Because of page execution order, sometimes the page title does not get set
+  // by Panels in time for metatags to use it, so we'll explicitly set it here
+  // if we need to.
+  if (!empty($info['title'])) {
+    drupal_set_title($info['title'], PASS_THROUGH);
+  }
+
   // Build the Metatag.
   $options = array(
     'instance' => 'panels:' . $handler->name,

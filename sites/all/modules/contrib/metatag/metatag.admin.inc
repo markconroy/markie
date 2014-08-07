@@ -536,3 +536,106 @@ function metatag_bulk_revert_batch_finished($success, $results, $operations) {
       array('@operation' => $error_operation[0], '@args' => print_r($error_operation[0], TRUE))));
   }
 }
+
+/**
+ * Misc settings page.
+ */
+function metatag_admin_settings_form() {
+  $form = array();
+
+  $form['#attached'] = array(
+    'js' => array(
+      drupal_get_path('module', 'metatag') . '/metatag.admin.js',
+    ),
+    'css' => array(
+      drupal_get_path('module', 'metatag') . '/metatag.admin.css',
+    ),
+  );
+
+  $form['advanced'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Advanced settings'),
+    '#collapsible' => TRUE,
+    '#collapsed' => FALSE,
+  );
+
+  $form['advanced']['metatag_load_all_pages'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Output meta tags even if only global settings apply'),
+    '#description' => t('By default Metatag will load the global default values for all pages that do not have meta tags assigned via the normal entity display or via Metatag Context. This may be disabled so that meta tags will only be output on pages that specifically have meta tags configured for them.'),
+    '#default_value' => variable_get('metatag_load_all_pages', TRUE),
+  );
+
+  $form['advanced']['metatag_tag_admin_pages'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Output meta tags on admin pages'),
+    '#description' => t('By default meta tags will not be output on admin pages, but it may be beneficial for some sites to do so.'),
+    '#default_value' => variable_get('metatag_tag_admin_pages', FALSE),
+  );
+
+  $form['advanced']['metatag_extended_permissions'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Advanced permissions'),
+    '#description' => t('Optionally add a permission for each individual meta tag. This provides tremendous flexibility for the editorial process, at the expense of making the permissions configuration more tedious.'),
+    '#default_value' => variable_get('metatag_extended_permissions', FALSE),
+  );
+
+  $form['entities'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Master controls for all entities'),
+    '#description' => t('By enabling and disabling items here, it is possible to control which entities (e.g. nodes, taxonomy terms) and bundles (e.g. content types, vocabularies) will have meta tags available to them.<br />Note: the entities first have to have meta tags enabled via hook_entity_info; see the API documentation for full details.'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+  );
+
+  foreach (entity_get_info() as $entity_name => $entity_info) {
+    // Only show entities that have been enabled via the hooks.
+    if (!empty($entity_info['metatags'])) {
+      $form['entities']['metatag_enable_' . $entity_name] = array(
+        '#type' => 'checkbox',
+        '#title' => t($entity_info['label']),
+        '#default_value' => variable_get('metatag_enable_' . $entity_name, TRUE),
+        '#description' => t('Enable meta tags for all pages this entity type.'),
+      );
+
+      if (!empty($entity_info['bundles'])) {
+        $desc_added = FALSE;
+        foreach ($entity_info['bundles'] as $bundle_name => $bundle_info) {
+          // Some entities, e.g. User, (core) File, have a bundle with the same
+          // name as the entity, so
+          if ($bundle_name != $entity_name) {
+            // Add an extra line to the description introducing the entity
+            // bundles.
+            if (!$desc_added) {
+              $form['entities']['metatag_enable_' . $entity_name]['#disabled'] = TRUE;
+              $form['entities']['metatag_enable_' . $entity_name]['#default_value'] = TRUE;
+              $form['entities']['metatag_enable_' . $entity_name]['#description'] =  t('Each bundle for this entity must be controlled individually.');
+              $desc_added = TRUE;
+            }
+            $form['entities']['metatag_enable_' . $entity_name . '__' . $bundle_name] = array(
+              '#type' => 'checkbox',
+              '#title' => t($bundle_info['label']),
+              '#default_value' => variable_get('metatag_enable_' . $entity_name . '__' . $bundle_name, isset($bundle_info['metatags']) ? $bundle_info['metatags'] : TRUE),
+              '#attributes' => array(
+                // Add some theming that'll indent this bundle.
+                'class' => array('metatag-bundle-checkbox'),
+              ),
+            );
+          }
+        }
+      }
+    }
+  }
+
+  // Extra submission logic.
+  $form['#submit'][] = 'metatag_admin_settings_form_submit';
+
+  return system_settings_form($form);
+}
+
+/**
+ * Form API submission callback for metatag_admin_settings_form().
+ */
+function metatag_admin_settings_form_submit() {
+  cache_clear_all('entity_info:', 'cache', TRUE);
+}

@@ -1,3 +1,30 @@
+Metatag 7.x-1.0-rc2, 2014-08-05
+-------------------------------
+#1904266 by mvwensen, DamienMcKenna: Added the dcterms.modified meta tag.
+#2202031 by DamienMcKenna: Don't double-encode output, handle &nbsp; specially.
+#2026343 by DamienMcKenna, skruf, valkum, wxman: Added many more Open Graph meta
+  tags.
+#2164919 by DamienMcKenna: Added an Advanced Settings page.
+#2241083 by DamienMcKenna: API structure for definiting field dependencies;
+  currently limited to hiding/showing fields, can be expanded later with
+  validation logic. Initial implementation for some Open Graph and Twitter Cards
+  meta tags.
+#2307523 by leewillis77, DamienMcKenna: Additional arguments for two
+  drupal_alter hooks.
+#2241083 by rooby: Refactored meta tag output generation using a new function,
+  metatag_generate_entity_metatags(), allowing for the tags to be independently
+  obtained for a given entity.
+#2262159 by DamienMcKenna: Bumped core requirement to 7.28, removed the
+  [node:summary] fix that's no longer needed.
+#2306449 by DamienMcKenna: Not having the Transliteration or Imagecache Token
+  modules installed no longer reports an error in hook_requirements().
+#1328562 by andremolnar, Greg Boggs, DamienMcKenna: Improved form descriptions.
+#1918706 by theunraveler, DamienMcKenna, Zekvyrin, JeroenT: [current-page:title]
+  didn't work correctly on Panels pages.
+#2153977 by paolomainardi, DamienMcKenna: Fix for translations of base entity
+  type configuration when there is no bundle configuration.
+
+
 Metatag 7.x-1.0-rc1, 2014-07-12
 -------------------------------
 By DamienMcKenna: Small improvement to the comment on update 7007.

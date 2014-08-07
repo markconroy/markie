@@ -213,6 +213,14 @@ function metatag_twitter_cards_metatag_info() {
     'element' => array(
       '#theme' => 'metatag_twitter_cards',
     ),
+    'dependencies' => array(
+      array(
+        'dependency' => 'twitter:image:src',
+        'attribute' => 'value',
+        'condition' => 'filled',
+        'value' => TRUE,
+      ),
+    ),
     'devel_generate' => array(
       'type' => 'integer',
     ),
@@ -225,6 +233,14 @@ function metatag_twitter_cards_metatag_info() {
     'weight' => ++$weight,
     'element' => array(
       '#theme' => 'metatag_twitter_cards',
+    ),
+    'dependencies' => array(
+      array(
+        'dependency' => 'twitter:image:src',
+        'attribute' => 'value',
+        'condition' => 'filled',
+        'value' => TRUE,
+      ),
     ),
     'devel_generate' => array(
       'type' => 'integer',

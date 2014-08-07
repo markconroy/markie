@@ -20,24 +20,14 @@ function metatag_requirements($phase) {
       list($minor, $suffix) = explode('-', $minor);
     }
 
-    // Releases of Drupal older than 7.15 did not have entity_language(), which
-    // is now required.
-    if ($minor < 15) {
+    // Releases of Drupal older than 7.28 did not have entity_language(), which
+    // is now required, and had a broken [node:summary] token.
+    if ($minor < 28) {
       $requirements['metatag'] = array(
         'severity' => REQUIREMENT_WARNING,
         'title' => 'Metatag',
-        'value' => $t('Upgrade Drupal core to v7.15 or newer'),
-        'description' => $t("This older version of Drupal core is missing functionality necessary for the module's multilingual support, it must be upgraded to at least version 7.15."),
-      );
-    }
-    // Releases of Drupal older than 7.17 did not trigger hook_entity_view on
-    // term pages, so recommend updating.
-    elseif ($minor < 17) {
-      $requirements['metatag'] = array(
-        'severity' => REQUIREMENT_WARNING,
-        'title' => 'Metatag',
-        'value' => $t('Upgrade Drupal core to v7.17 or newer'),
-        'description' => $t('Your older version of Drupal core is missing functionality necessary for taxonomy term pages to work correctly, it is strongly recommended to upgrade to the latest release.'),
+        'value' => $t('Upgrade Drupal core to v7.28 or newer'),
+        'description' => $t("This older version of Drupal core is missing functionality necessary for the module's multilingual support and contains a broken [node:summary] token, it must be upgraded to version 7.28 or newer."),
       );
     }
     // Everything's OK.
@@ -46,7 +36,7 @@ function metatag_requirements($phase) {
         'severity' => REQUIREMENT_OK,
         'title' => 'Metatag',
         'value' => $t('Drupal core is compatible'),
-        'description' => $t('Older versions of Drupal core were missing functionality necessary for taxonomy term pages to work correctly, but this version <em>will</em> work correctly.'),
+        'description' => $t('Older versions of Drupal core contained bugs that made them incompatible with Metatag, but this version will work correctly.'),
       );
     }
 
@@ -99,10 +89,10 @@ function metatag_requirements($phase) {
     // paths for use with image meta tags.
     if (!module_exists('transliteration')) {
       $requirements['metatag_transliteration'] = array(
-        'severity' => REQUIREMENT_WARNING,
+        'severity' => REQUIREMENT_INFO,
         'title' => 'Metatag',
-        'value' => $t('The Transliteration module is not installed.'),
-        'description' => $t("It is highly recommended to install the <a href=\"@url\">Transliteration module</a> to clean up filenames of uploaded files that may be used with image meta tags.", array('@url' => 'https://drupal.org/project/transliteration')),
+        'value' => $t('The Transliteration module is recommended.'),
+        'description' => $t("It is recommended to install the <a href=\"@url\">Transliteration module</a> to clean up filenames of uploaded files that may be used with image meta tags.", array('@url' => 'https://drupal.org/project/transliteration')),
       );
     }
 
@@ -110,10 +100,10 @@ function metatag_requirements($phase) {
     // tokens easier to do.
     if (!module_exists('imagecache_token')) {
       $requirements['metatag_imagecache_token'] = array(
-        'severity' => REQUIREMENT_WARNING,
+        'severity' => REQUIREMENT_INFO,
         'title' => 'Metatag',
-        'value' => $t('The Imagecache Token module is not installed.'),
-        'description' => $t("It is highly recommended to install the <a href=\"@url\">Imagecache Token module</a> to make it easier to control image meta tags, e.g. og:image.", array('@url' => 'https://drupal.org/project/imagecache_token')),
+        'value' => $t('The Imagecache Token module is recommended.'),
+        'description' => $t("It is recommended to install the <a href=\"@url\">Imagecache Token module</a> to make it easier to control image meta tags, e.g. og:image.", array('@url' => 'https://drupal.org/project/imagecache_token')),
       );
     }
 
@@ -1469,4 +1459,11 @@ function metatag_update_7027() {
       drupal_set_message(t('Converted the "copyright" meta tag for @count configurations to the correct "rights" meta tag.', array('@count' => $counter)));
     }
   }
+}
+
+/**
+ * Clear the menu cache so the new Advanced Settings page will be picked up.
+ */
+function metatag_update_7028() {
+  variable_set('menu_rebuild_needed', TRUE);
 }
