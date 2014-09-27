@@ -44,9 +44,6 @@ function metatags_metatag_export_default() {
       'generator' => array(
         'value' => 'Drupal 7 (http://drupal.org)',
       ),
-      'copyright' => array(
-        'value' => '',
-      ),
       'image_src' => array(
         'value' => 'http://www.mark.ie/sites/default/files/mark_conroy_image_thumbnail.jpg',
       ),
@@ -58,9 +55,6 @@ function metatags_metatag_export_default() {
       ),
       'publisher' => array(
         'value' => '',
-      ),
-      'author' => array(
-        'value' => 'http://www.mark.ie/about',
       ),
       'original-source' => array(
         'value' => '',
@@ -89,9 +83,6 @@ function metatags_metatag_export_default() {
       'twitter:description' => array(
         'value' => 'Welcome to mark.ie - the website of Drupal developer, educationalist, public speaker, author and literature enthusiast. ',
       ),
-      'twitter:image' => array(
-        'value' => '',
-      ),
       'twitter:image:width' => array(
         'value' => '',
       ),
@@ -111,6 +102,12 @@ function metatags_metatag_export_default() {
         'value' => '',
       ),
       'twitter:player:stream:content_type' => array(
+        'value' => '',
+      ),
+      'twitter:image:src' => array(
+        'value' => '',
+      ),
+      'rights' => array(
         'value' => '',
       ),
     ),
