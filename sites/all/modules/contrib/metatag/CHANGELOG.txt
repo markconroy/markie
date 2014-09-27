@@ -1,3 +1,27 @@
+Metatag 7.x-1.0, 2014-09-17
+---------------------------
+#2319389 by DamienMcKenna: Additional Open Graph meta tags, for videos.
+#2169575 by gvorbeck: Workbench Moderation v2 doesn't need any hackery, so
+  removed the message in hook_requirements().
+#2140189 by ttkaminski, DamienMcKenna: Added an index to {metatag} table for the
+  'type' and 'revision_id' fields.
+#1391554 by DamienMcKenna: Handle scenarios where the legacy "metatags" module
+  had been installed.
+#2325459 by DamienMcKenna: Used JSHint to correct some minor JS bugs.
+#2326197 by Dave Reid: metatag_generate_entity_metatags() cache can be bypassed.
+By DamienMcKenna: Updated the og:image size guidelines.
+By DamienMcKenna: Remove the redundant metatag_taxonomy_term_view_alter().
+By DamienMcKenna: Support Twitter Cards fieldset in Metatag:Context.
+#1778286 by alberto56: Removed the deprecated metatag_ui module.
+#2331677 by othermachines: Updates 7025 and 7027 attempted to update the wrong
+  tables.
+#2330823 by othermachines: Remove the deprecated G+ Author meta tag.
+#2186155 by DamienMcKenna, grahamC, JeroenT: Resolved problems when saving an
+  entity directly rather than via entity form.
+By DamienMcKenna: Corrected the namespace prefix for OG video meta tags.
+#2186155 by DamienMcKenna: Follow-up to fix a number of scenarios.
+
+
 Metatag 7.x-1.0-rc2, 2014-08-05
 -------------------------------
 #1904266 by mvwensen, DamienMcKenna: Added the dcterms.modified meta tag.

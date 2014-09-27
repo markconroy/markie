@@ -66,8 +66,8 @@ The primary features include:
 * Integrates with Devel_Generate, part of the Devel module, to automatically
   generate meta tags for generated nodes, via the Metatag:Devel submodule.
 
-* Integrates with Workbench Moderation v1 allowing meta tags on nodes to be
-  managed through the workflow process.
+* Integrates with Workbench Moderation (both v1 and v2) allowing meta tags on
+  nodes to be managed through the workflow process.
 
 * The Transliteration and Imagecache Token modules (see below) are highly
   recommended when using image meta tags, e.g. og:image.
