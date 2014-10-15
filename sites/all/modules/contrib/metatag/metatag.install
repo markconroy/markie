@@ -15,7 +15,7 @@ function metatag_requirements($phase) {
   if ($phase == 'install') {
     // Handle scenarios where the site had the legacy "metatags" module
     // installed but then had Metatag installed on top of it.
-    if (function_exists('db_table_exists') && function_exists('db_field_exists') && function_exists('db_query')) {
+    if (function_exists('db_table_exists') && function_exists('db_field_exists') && function_exists('db_query') && Database::isActiveConnection()) {
       // Check if the primary table already exists.
       if (db_table_exists('metatag')) {
         // Check to see if all of the fields exist in the table. If one of the
@@ -276,6 +276,10 @@ function metatag_uninstall() {
   // Used to note that the schema for the main {metatag} table were sufficiently
   // updated.
   variable_del('metatag_has_revision_id');
+
+  // Used to force an entity's default language values to be used if nothing
+  // else matched.
+  variable_del('metatag_entity_no_lang_default');
 }
 
 /**
@@ -1533,91 +1537,15 @@ function metatag_update_7032() {
 }
 
 /**
- * Remove the 'author' meta tag from entity configurations.
+ * These originally removed the 'author' meta tag, but it was subsequently
+ * decided that this was not the correct approach, that the meta tag should not
+ * be removed after all.
+ *
+ * @see https://www.drupal.org/node/2330823
  */
 function metatag_update_7033() {
-  // Find all {metatag} records that contained an entry for the old meta tag.
-  $records = db_query("SELECT entity_type, entity_id, revision_id, language, data
-    FROM {metatag}
-    WHERE data LIKE '%author%'");
-
-  $none_message = t('No Metatag entity records needed to have the "author" meta tag removed.');
-
-  if ($records->rowCount() == 0) {
-    return $none_message;
-  }
-  else {
-    $keys = array('entity_type', 'entity_id', 'revision_id', 'language');
-
-    // Loop over the values and correct them.
-    $counter = 0;
-    $num_deleted = 0;
-    foreach ($records as $record) {
-      $record->data = unserialize($record->data);
-      if (isset($record->data['author'])) {
-        unset($record->data['author']);
-        drupal_write_record('metatag', $record, $keys);
-        $counter++;
-      }
-      // If 'author' was the only configuration, delete this record.
-      if (empty($record->data)) {
-        $num_deleted += db_delete('metatag')
-          ->condition('entity_id', $record->entity_id)
-          ->execute();
-      }
-    }
-    if ($counter == 0) {
-      return $none_message;
-    }
-    else {
-      $message = t('Removed the "author" meta tag for @count entity record(s).', array('@count' => $counter));
-      if ($num_deleted > 0) {
-        $message .= '&nbsp;' . t('Also deleted @count meta tag record(s) for entities that had no other configurations.', array('@count' => $num_deleted));
-      }
-      return $message;
-    }
-  }
 }
-
-/**
- * Remove the 'author' meta tag from default configurations.
- */
 function metatag_update_7034() {
-  // Find all {metatag_config} records that contained an entry for the old meta
-  // tag.
-  $records = db_query("SELECT cid, config
-    FROM {metatag_config}
-    WHERE config LIKE '%author%'");
-
-  $none_message = t('No Metatag configuration records found for "author" meta tag.');
-
-  if ($records->rowCount() == 0) {
-    return $none_message;
-  }
-  else {
-    // Loop over the values and correct them.
-    $counter = 0;
-    foreach ($records as $record) {
-      $record->config = unserialize($record->config);
-      if (isset($record->config['author'])) {
-        unset($record->config['author']);
-        drupal_write_record('metatag_config', $record, 'cid');
-        $counter++;
-      }
-    }
-    if ($counter == 0) {
-      return $none_message;
-    }
-    else {
-      return t('Removed the "author" meta tag from @count default configuration(s).', array('@count' => $counter));
-    }
-  }
 }
-
-/**
- * Clear the Metatag cache.
- */
 function metatag_update_7035() {
-  cache_clear_all('*', 'cache_metatag', TRUE);
-  return t('All Metatag caches cleared.');
 }

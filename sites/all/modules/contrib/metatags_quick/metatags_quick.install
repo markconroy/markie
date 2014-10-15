@@ -1,0 +1,236 @@
+<?php
+/**
+ * @file
+ * Defines schema for metatags_quick fields
+ */
+
+/**
+ * Implements hook_schema().
+ * 
+ */
+function metatags_quick_schema() {
+  $schema['metatags_quick_path_based'] = array(
+    'description' => 'Path based meta tags',
+    'fields' => array(
+      'id'  => array(
+        'type' => 'serial',
+        'not null' => TRUE,
+        'description' => 'Entity id',
+      ),
+      'path'  => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'description' => 'The path of the page to apply meta tags to',
+      ),
+      'lang'  => array(
+        'type' => 'varchar',
+        'length' => 8,
+        'not null' => TRUE,
+        'description' => 'Language code',
+      ),
+    ),
+    'primary key' => array('id'),
+    'unique keys' => array(
+      'lang_path' => array('lang', 'path'),
+    ),
+  );
+  return $schema;
+}
+
+function metatags_quick_install() {
+  variable_set('metatags_quick_default_field_length', 160);
+  drupal_set_message(t('Meta tags (quick) installed. To start, please visit !here',
+    array('!here' => l(t('module settings screen'), 'admin/config/search/metatags_quick'))), 'status');
+}
+
+function metatags_quick_uninstall() {
+  // Delete fields handled by module.
+  $fields = field_read_fields(array(), array('include_inactive' => 1));
+  foreach ($fields as $key => $field) {
+    if ($field['module'] == 'metatags_quick') {
+      field_delete_field($key);
+      field_purge_field($field);
+    }
+  }
+  
+  variable_del('metatags_quick_settings');
+  variable_del('metatags_quick_use_path_based');
+  variable_del('metatags_quick_default_field_length');
+}
+
+/**
+ * Implements hook_field_schema().
+ * 
+ */
+function metatags_quick_field_schema($field) {
+  if(!isset($field['settings']['max_length'])) {
+    $field['settings']['max_length'] = 255;
+  }
+  return array(
+    'columns' => array(
+      'metatags_quick' => array(
+        'type' => 'varchar',
+        'length' => $field['settings']['max_length'],
+        'not null' => FALSE,
+      ),
+    ),
+  );
+}
+
+/**
+ * Install metatags_quick_path_based table (upgrade from 7.x-1.x)
+ */
+function metatags_quick_update_7002() {
+  drupal_install_schema('metatags_quick');
+}
+
+/**
+ * Add id field to metatags_quick_path_based
+ */
+function metatags_quick_update_7003() {
+  if (!db_field_exists('metatags_quick_path_based', 'id')) {
+    db_drop_primary_key('metatags_quick_path_based');
+    db_drop_index('metatags_quick_path_based', 'field_config');
+    db_add_field('metatags_quick_path_based', 'id', array(
+      'type' => 'serial',
+      'not null' => TRUE,
+      'description' => 'Entity id',
+      ),
+      array('primary key' => array('id', 'path', 'lang', ), )
+    );
+    db_drop_field('metatags_quick_path_based', 'fid');
+    db_drop_field('metatags_quick_path_based', 'value');
+  }
+}
+
+/**
+ * Change primary key to id field and add unique index on path and lang.
+ */
+function metatags_quick_update_7004() {
+  /*
+   * Normally we'd use db_drop_primary_key()/db_add_primary_key(), but MySQL
+   * wont let us drop the primary key if it's an autoincrement field. Altering
+   * like this, however, works.
+   *
+   * This will fail on SQLite, as its ALTER TABLE is rather simplified, but as
+   * this change is introduced because of SQLites failure to install in the
+   * first place, that's irrelevant. PostgreSQL seems to support the same
+   * syntax, so it should work.
+   */
+  if (db_driver() == 'mysql') {
+    db_query('ALTER TABLE {metatags_quick_path_based} DROP PRIMARY KEY, ADD PRIMARY KEY (`id`)');
+  }
+  if (!db_index_exists('metatags_quick_path_based', 'lang_path')) {
+    db_add_unique_key('metatags_quick_path_based', 'lang_path', array('lang', 'path'));
+  }
+}
+
+/**
+ * Ensure the field language of path based fields is set to LANGUAGE_NONE.
+ */
+function metatags_quick_update_7005(&$sandbox) {
+  // Use a sandbox to be able to process huge amounts of data.
+  if (!isset($sandbox['progress'])) {
+    $sandbox['progress'] = 0;
+    $sandbox['current_id'] = 0;
+    // Count items.
+    $sandbox['max'] = db_query("SELECT COUNT(DISTINCT id) FROM {metatags_quick_path_based}")->fetchField();
+  }
+
+  // Process twenty entities at a time.
+  $limit = 20;
+
+  // Fetch the entities to process in this run.
+  $query = new EntityFieldQuery();
+  $query->entityCondition('entity_type', 'metatags_path_based')
+    ->propertyOrderBy('id')
+    ->propertyCondition('id', $sandbox['current_id'], '>')
+    ->range(0, $limit);
+
+  $result = $query->execute();
+
+  if (isset($result['metatags_path_based'])) {
+    $item_ids = array_keys($result['metatags_path_based']);
+    $items = entity_load('metatags_path_based', $item_ids);
+    foreach ($items as $item) {
+      // Iterate over all fields and ensure there's used only LANGUAGE_NONE as
+      // language.
+      $field_infos = field_info_instances('metatags_path_based', 'metatags_path_based');
+      foreach ($field_infos as $field_name => $field_info) {
+        foreach ($item->{$field_name} as $language => $values) {
+          // If the language is different from LANGUAGE_NONE move the values to
+          // LANGUAGE_NONE and remove the "invalid" language.
+          if ($language != LANGUAGE_NONE) {
+            $item->{$field_name}[LANGUAGE_NONE] = $values;
+            unset($item->{$field_name}[$language]);
+          }
+        }
+      }
+      entity_save('metatags_path_based', $item);
+
+      $sandbox['progress']++;
+      $sandbox['current_mlid'] = $item->id;
+    }
+  }
+
+  $sandbox['#finished'] = empty($sandbox['max']) ? 1 : ($sandbox['progress'] / $sandbox['max']);
+}
+
+/**
+ * Ensure all existing metatags_quick fields have the default display formatter if set.
+ */
+function metatags_quick_update_7006() {
+  $module_path = drupal_get_path('module', 'metatags_quick');
+  include_once $module_path . '/known_tags.inc';
+  $known_tags = _metatags_quick_known_fields();
+
+  // Get the known tag names and formatters
+  $known_tag_names_and_formatters = array();
+  foreach ($known_tags as $tagkey => $tagvalue) {
+    if (isset($tagvalue['formatter'])) {
+      $this_name_and_formatter = array('name' => 'meta_' . $tagkey, 'formatter' => $tagvalue['formatter']);
+      array_push($known_tag_names_and_formatters , $this_name_and_formatter);
+    }
+  }
+
+
+  // Get info on all instances
+  $metatags_quick_fields = field_info_field_map();
+  $metatags_quick_instances = array();
+
+
+  // Loop to get name, entity, bundle and formatter
+  foreach ($known_tag_names_and_formatters as $nfkey => $nfvalue) {
+    // Within this loop through the metatags_quick_fields
+    foreach ($metatags_quick_fields as $key => $value) {
+      // If the type is metatags_quick and if the name == the known_tags_name_and_formatter key (nfkey)
+      if (($value['type'] == 'metatags_quick') && ($key == $nfvalue['name'])) {
+        foreach ($value['bundles'] as $thiskey => $thisvalue) {
+          $this_instance = array('name' => $key , 'entity' => $thiskey , 'bundle' => $thisvalue , 'formatter' => $nfvalue['formatter']);
+          array_push($metatags_quick_instances , $this_instance );
+        }
+      }
+    }
+  }
+
+  foreach ($metatags_quick_instances as $instance => $value) {
+    $name = $value['name'];
+    if (is_array($value['entity'])) {
+        foreach ($value['entity'] as $entity) {
+          $this_entity = $entity;
+        }
+    }
+    else {
+      $this_entity = $value['entity'];
+    }
+      foreach ($value['bundle'] as $bundle) {
+        $this_bundle = $bundle;
+        $field = field_info_instance($this_entity, $name, $this_bundle);
+        $field['display']['default']['type'] = $value['formatter'];
+        field_update_instance($field);
+      }
+  }
+
+
+}

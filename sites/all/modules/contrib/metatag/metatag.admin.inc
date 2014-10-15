@@ -309,8 +309,8 @@ function metatag_config_edit_form($form, &$form_state, $config) {
   $form['metatags']['#type'] = 'container';
 
   // Make the token browser available.
-  $form['metatags']['#prefix'] = $form['metatags']['#description'];
-  unset($form['metatags']['#description']);
+  $form['metatags']['#prefix'] = $form['metatags'][LANGUAGE_NONE]['#description'];
+  unset($form['metatags'][LANGUAGE_NONE]['#description']);
 
   $form['actions']['#type'] = 'actions';
   $form['actions']['save'] = array(
@@ -332,8 +332,8 @@ function metatag_config_edit_form_submit($form, &$form_state) {
   form_state_values_clean($form_state);
   $config = (object) $form_state['values'];
   // @todo Consider renaming the config field from 'config' to 'metatags'
-  $config->config = $config->metatags;
-  unset($config->metatags);
+  $config->config = $config->metatags[LANGUAGE_NONE];
+  unset($config->metatags[LANGUAGE_NONE]);
   metatag_config_save($config);
 
   $label = metatag_config_instance_label($config->instance);
@@ -580,6 +580,13 @@ function metatag_admin_settings_form() {
     '#default_value' => variable_get('metatag_extended_permissions', FALSE),
   );
 
+  $form['advanced']['metatag_entity_no_lang_default'] = array(
+    '#type' => 'checkbox',
+    '#title' => t("Don't load entity's default language values if no languages match"),
+    '#description' => t("On a site with multiple languages it is possible for an entity to not have meta tag values assigned for the language of the current page. By default the meta tags for an entity's default language value will be used in this scenario, with the canonical URL pointing to the URL. This option may be disabled, i.e. to only load meta tags for languages that specifically have them assigned, otherwise using defaults."),
+    '#default_value' => variable_get('metatag_entity_no_lang_default', FALSE),
+  );
+
   $form['entities'] = array(
     '#type' => 'fieldset',
     '#title' => t('Master controls for all entities'),
@@ -638,4 +645,6 @@ function metatag_admin_settings_form() {
  */
 function metatag_admin_settings_form_submit() {
   cache_clear_all('entity_info:', 'cache', TRUE);
+  cache_clear_all('*', 'cache_metatag', TRUE);
+  drupal_set_message(t('The Metatag cache has been cleared, so all meta tags can be reloaded.'));
 }

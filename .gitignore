@@ -5,5 +5,16 @@ sites/*/settings*.php
 sites/*/files
 sites/*/private
 
-# Ignore DS_Store
+# Ignore Temporary folder
+.tmp/
+.tmp/*
+
+# Ignore sass-cache
+profiles/adfl/themes/adflzen/.sass-cache/*
+*.scssc
+
+# Ignore DS_Store Files
 *.DS_Store
+
+# Ignore DBs
+.dbs

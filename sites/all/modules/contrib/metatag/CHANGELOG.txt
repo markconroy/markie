@@ -1,3 +1,51 @@
+Metatag 7.x-1.4, 2014-10-09
+---------------------------
+#2353079 by DamienMcKenna: Fixed Views integration, for real this time.
+#2344877 by DamienMcKenna: Fixed Panels integration, for real this time.
+
+
+Metatag 7.x-1.3, 2014-10-07
+---------------------------
+#2350967 by das-peter, DamienMcKenna: Fatal error occurred loading any View that
+  did not have meta tags assigned.
+#2344877 by DamienMcKenna, Mau Palantír, libelle2000: Fixed Panels integration.
+By DamienMcKenna: metatag_metatags_load()'s documentation was incorrect.
+#2347193 by DamienMcKenna: Updated Feeds integration to be compatible with the
+  new data structures in 1.0, and revision_id problems.
+
+
+Metatag 7.x-1.2, 2014-10-04
+---------------------------
+#2343909 by DamienMcKenna: Unable to update meta tags on nodes that didn't
+  contain translations.
+#2185791 by DamienMcKenna: Improved logic for deciding which meta tag values
+  to use for the current language; new advanced option allows loading of the
+  entity's default language's values if nothing else matches.
+#2346159 by DamienMcKenna: Fixed tag dependencies, which were broken in 1.0.
+#2346153 by DamienMcKenna: Added Twitter app 'name' tags, misc improvements to
+  Twitter Cards code.
+#2185791 by DamienMcKenna: Changed the no-values-to-load entity language default
+  logic so that the default language values will be loaded unless disabled.
+#1304038 by DamienMcKenna: Indicate in the README.txt how to disable output for
+  the three meta tags output by Drupal core by default.
+#2350129 by DamienMcKenna: Added a Drush command for clearing Metatag's caches.
+#2341795 by DamienMcKenna: Updated Metatag:Views to be compatible with the new
+  form data structure in 1.0.
+#2292043 by eric.chenchao, DamienMcKenna: Added Google+ 'itemprop' meta tags.
+#2341795 by DamienMcKenna: Fixed Views previews.
+#2289139 by maijs, DamienMcKenna: Allow each Views display to have different
+  meta tag values.
+
+
+Metatag 7.x-1.1, 2014-09-18
+---------------------------
+#2340639 by agoradesign: Additional check needed in hook_requirements to avoid
+  breaking installation profiles.
+#2340337 by DamienMcKenna: Config system updated for the new language-based
+  data handling.
+#2330823 by DamienMcKenna: REVERT: Remove the deprecated G+ Author meta tag.
+
+
 Metatag 7.x-1.0, 2014-09-17
 ---------------------------
 #2319389 by DamienMcKenna: Additional Open Graph meta tags, for videos.

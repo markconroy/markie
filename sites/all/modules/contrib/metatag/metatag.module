@@ -379,11 +379,12 @@ function metatag_config_cache_clear() {
  * Load an entity's tags.
  *
  * @param $entity_type
- *   The entity type to load
+ *   The entity type to load.
  * @param $entity_id
- *   The ID of the entity to load
+ *   The ID of the entity to load.
+ *
  * @return
- *   An array of tag data keyed by language.
+ *   An array of tag data keyed by revision ID and language.
  */
 function metatag_metatags_load($entity_type, $entity_id) {
   $metatags = metatag_metatags_load_multiple($entity_type, array($entity_id));
@@ -394,11 +395,12 @@ function metatag_metatags_load($entity_type, $entity_id) {
  * Load tags for multiple entities.
  *
  * @param $entity_type
- *   The entity type to load
+ *   The entity type to load.
  * @param $entity_ids
- *   The list of entity IDs
+ *   The list of entity IDs.
+ *
  * @return
- *   An array of tag data, keyed by ID.
+ *   An array of tag data, keyed by entity ID, revision ID and language.
  */
 function metatag_metatags_load_multiple($entity_type, array $entity_ids, array $revision_ids = array()) {
   // Double check entity IDs are numeric thanks to Entity API module.
@@ -889,22 +891,32 @@ function metatag_generate_entity_metatags($entity, $entity_type, $langcode = NUL
   // Determine the language this entity actually uses.
   $entity_language = metatag_entity_get_language($entity_type, $entity);
 
-  // The requested language is different to the entity's language, look for
-  // a language elsewhere.
-  if ($entity_language != $langcode) {
-    // No language was defined for the entity.
-    if ($entity_language == LANGUAGE_NONE) {
-      $langcode = LANGUAGE_NONE;
-    }
-    else {
-      $enabled_languages = field_content_languages();
-      foreach (field_language($entity_type, $entity) as $field => $lang) {
-        // Only accept actual language values that are properly enabled.
-        if ($lang != LANGUAGE_NONE && in_array($lang, $enabled_languages)) {
-          $langcode = $lang;
-        }
-      }
-    }
+  // If no language was requested, try the language defined for this page
+  // request.
+  if (empty($langcode)) {
+    $langcode = $GLOBALS['language_content']->language;
+  }
+
+  // This entity doesn't have any languages defined, i.e. it uses 'und'. This
+  // can't conflict with loading the wrong language as entities either have no
+  // language or they have specific one(s), they can't have both.
+  if ($entity_language == LANGUAGE_NONE) {
+    $langcode = LANGUAGE_NONE;
+  }
+
+  // If there are no meta tags for the currently identified language, and there
+  // *are* meta tags defined for the entity's default language, use the entity's
+  // default language's values, unless the "Don't load entity's default
+  // language values if no languages match" option is enabled on the advanced
+  // settings page.
+  elseif (empty($entity->metatags[$langcode]) && !empty($entity->metatags[$entity_language]) && !variable_get('metatag_entity_no_lang_default', FALSE)) {
+    $langcode = $entity_language;
+  }
+
+  // Other scenarios.
+  else {
+    // There's no need to do anything else - either there are meta tag values
+    // created for the requested language or there aren't.
   }
 
   $cid = FALSE;
@@ -1247,36 +1259,30 @@ function metatag_metatags_form(array &$form, $instance, array $metatags = array(
 }
 
 /**
- * Form submit handler; unset meta tag values that equal their default values.
+ * Form API submission callback.
+ *
+ * Unset meta tag values that equal their default values, and load any
+ * additional meta tag values for other languages so that they can be properly
+ * saved later on.
+ *
+ * @see metatag_metatags_save()
  */
 function metatag_metatags_form_submit($form, &$form_state) {
-  // Work out the language to use, default to NONE.
-  $langcode = LANGUAGE_NONE;
-  if (isset($form['#entity_type'])) {
-    $entity_info = entity_get_info();
-    if (!empty($entity_info[$form['#entity_type']]['translation']['locale'])) {
-      // The language to use for this form.
-      $langcode = $GLOBALS['language_content']->language;
+  if (!empty($form_state['values']['metatags'])) {
+    // Unset meta tag values that equal their default values.
+    foreach ($form_state['values']['metatags'] as $langcode => $values) {
+      if (!empty($form['metatags'][$langcode]['#metatag_defaults'])) {
+        metatag_filter_values_from_defaults($form_state['values']['metatags'][$langcode], $form['metatags'][$langcode]['#metatag_defaults']);
+      }
     }
 
     // Need to load the entity's values for other languages, otherwise they will
     // be incorrectly deleted later on.
-    if (isset($form['#entity']) && isset($form['#entity']->metatags)) {
-      $entity = $form['#entity'];
-      $metatags = $entity->metatags;
-      unset($metatags[$langcode]);
-      if (!empty($metatags)) {
-        foreach ($metatags as $lang => $values) {
-          $form_state['values']['metatags'][$lang] = $values;
+    if (isset($form['#entity']) && !empty($form['#entity']->metatags)) {
+      foreach ($form['#entity']->metatags as $langcode => $values) {
+        if (!isset($form_state['values']['metatags'][$langcode])) {
+          $form_state['values']['metatags'][$langcode] = $values;
         }
-      }
-    }
-  }
-
-  if (!empty($form_state['values']['metatags'])) {
-    foreach ($form_state['values']['metatags'] as $langcode => $values) {
-      if (!empty($form['metatags'][$langcode]['#metatag_defaults'])) {
-        metatag_filter_values_from_defaults($form_state['values']['metatags'][$langcode], $form['metatags'][$langcode]['#metatag_defaults']);
       }
     }
   }

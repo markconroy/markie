@@ -183,7 +183,7 @@ class DrupalTextMetaTag extends DrupalDefaultMetaTag {
     // @see https://api.drupal.org/drupal_process_states
     if (!empty($this->info['dependencies'])) {
       foreach ($this->info['dependencies'] as $specs) {
-        $form['value']['#states']['visible'][':input[name="metatags[' . $specs['dependency'] . '][' . $specs['attribute'] . ']"]'] = array(
+        $form['value']['#states']['visible'][':input[name*="[' . $specs['dependency'] . '][' . $specs['attribute'] . ']"]'] = array(
           $specs['condition'] => $specs['value'],
         );
       }
