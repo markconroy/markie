@@ -18,3 +18,5 @@ profiles/adfl/themes/adflzen/.sass-cache/*
 
 # Ignore DBs
 .dbs
+.backups
+backups

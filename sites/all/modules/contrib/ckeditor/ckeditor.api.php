@@ -103,3 +103,12 @@ function hook_ckeditor_settings_alter(&$settings, $conf) {
 function hook_ckeditor_default_settings_alter(&$settings) {
   $settings['show_toggle'] = 'f';
 }
+
+/**
+ * Hook to extend CKEditor security allowed tags list.
+ *
+ * This hook is invoked from ckeditor_filter_xss() where text is filtered from potentially insecure tags.
+ */
+function hook_ckeditor_filter_xss_allowed_tags() {
+  // Return an array of additional allowed tags
+}

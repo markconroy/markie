@@ -223,10 +223,10 @@ htmlspecialchars('<script>hljs.initHighlightingOnLoad();</script>').'</code>'
  * AJAX callback - XSS filter
  */
 function ckeditor_filter_xss() {
-  header('Content-Type: text/html; charset=utf-8');
+  header('Content-Type: text/plain; charset=utf-8');
   $GLOBALS['devel_shutdown'] = FALSE;
 
-  if (!isset($_POST['text']) || !is_string($_POST['text']) || !isset($_POST['input_format']) || !is_string($_POST['input_format']) || !isset($_POST['token']) || !drupal_valid_token($_POST['token'], 'ckeditorAjaxCall', TRUE)) {
+  if (!isset($_POST['text']) || !is_string($_POST['text']) || !isset($_POST['input_format']) || !is_string($_POST['input_format']) || !isset($_POST['token']) || !drupal_valid_token($_POST['token'], 'ckeditorAjaxCall', FALSE)) {
     exit;
   }
 
@@ -236,7 +236,6 @@ function ckeditor_filter_xss() {
   }
 
   module_load_include('inc', 'ckeditor', 'includes/ckeditor.lib');
-  $profile = ckeditor_get_profile($_POST['input_format']);
 
   $text = $_POST['text'];
   $filters = filter_get_filters();
@@ -250,12 +249,42 @@ function ckeditor_filter_xss() {
       continue;
     }
 
-    //Call default CKEditor built-in filter
+    // Built-in filter module, a special case where we would like to strip XSS and nothing more
     if ($name == 'filter_html' && $security_filters['filters']['filter_html'] == 1) {
       preg_match_all("|</?([a-z][a-z0-9]*)(?:\b[^>]*)>|i", $text, $matches);
       if ($matches[1]) {
-        $tags = array_unique(array_merge($matches[1], array('!--')));
-        $tags = array_map('strtolower', $tags);
+
+        // Sources of inspiration:
+        // http://www.w3.org/TR/html4/index/elements.html
+        // http://www.w3.org/TR/html-markup/elements.html
+        // https://developer.mozilla.org/en-US/docs/Web/HTML/Element
+
+        $base_allowed_tags = array('a','abbr','acronym','address','area','article','aside','audio','b','base','basefont',
+          'bdi','bdo','big','blockquote','body','br','button','canvas','caption','center','cite','code','col','colgroup',
+          'command','datalist','dd','del','details','dfn','dialog','dir','div','dl','dt','em','fieldset','figcaption',
+          'figure','font','footer','form','h1','h2','h3','h4','h5','h6','head','header','hgroup','hr','html','i','img',
+          'input','ins','isindex','kbd','keygen','label','legend','li','main','map','mark','menu','menuitem','meter',
+          'nav','noframes','noscript','ol','optgroup','option','output','p','param','pre','progress','q','rp','rt',
+          'ruby','s','samp','section','select','small','source','span','strike','strong','sub','summary','sup','table',
+          'tbody','td','textarea','tfoot','th','thead','time','title','tr','track','tt','u','ul','var','video','wbr',
+        );
+
+        // Get tags allowed in filter settings
+        $filter_allowed_tags = preg_split('/\s+|<|>/', $object->settings['allowed_html'], -1, PREG_SPLIT_NO_EMPTY);
+
+        // Combine allowed tags
+        $tags = array_merge($base_allowed_tags, $filter_allowed_tags);
+
+        // Tags provided by hook
+        $hooks_allowed_tags = module_invoke_all('ckeditor_filter_xss_allowed_tags');
+        if (!empty($hooks_allowed_tags) && is_array($hooks_allowed_tags)){
+          foreach($hooks_allowed_tags as $tag ){
+            if (!empty($tag) && is_string($tag) && !in_array($tag,$tags)){
+              array_push($tags,$tag);
+            }
+          }
+        }
+
         $text = filter_xss($text, $tags);
       }
       continue;
