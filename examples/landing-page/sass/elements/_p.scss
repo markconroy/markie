@@ -1,0 +1,7 @@
+/**
+* Styling for the paragraph element.
+*/
+
+p {
+  @include rem(margin, .75rem 0);
+}
