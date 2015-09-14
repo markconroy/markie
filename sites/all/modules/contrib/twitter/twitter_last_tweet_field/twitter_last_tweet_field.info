@@ -1,9 +1,8 @@
-name = Twitter Mock
-description = Sets up a mock web server to simulate API calls on tests
+name = Twitter Last Tweet Field
+description = Show the last tweet from one of the configured Twitter accounts.
 core = 7.x
-hidden = TRUE
 dependencies[] = twitter
-dependencies[] = simpletest
+dependencies[] = field
 
 ; Information added by Drupal.org packaging script on 2015-09-04
 version = "7.x-5.10"
