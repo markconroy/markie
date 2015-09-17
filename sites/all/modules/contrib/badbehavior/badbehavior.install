@@ -1,0 +1,180 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the Bad Behavior module.
+ */
+
+/**
+ * Implements hook_schema().
+ */
+function badbehavior_schema() {
+  $schema['bad_behavior_log'] = array(
+    'description' => 'Stores hit logs for the Bad Behavior module.',
+    'fields' => array(
+      'id' => array(
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'ip' => array(
+        'type' => 'text',
+        'not null' => TRUE,
+      ),
+      'date' => array(
+        'mysql_type' => 'DATETIME',
+        'pgsql_type' => 'TIMESTAMP WITHOUT TIMEZONE',
+        'not null' => TRUE,
+        'default' => '1970-01-01 00:00:00',
+      ),
+      'request_method' => array(
+        'type' => 'text',
+        'not null' => TRUE,
+      ),
+      'request_uri' => array(
+        'type' => 'text',
+        'not null' => TRUE,
+      ),
+      'server_protocol' => array(
+        'type' => 'text',
+        'not null' => TRUE,
+      ),
+      'http_headers' => array(
+        'type' => 'text',
+        'not null' => TRUE,
+      ),
+      'user_agent' => array(
+        'type' => 'text',
+        'not null' => TRUE,
+      ),
+      'request_entity' => array(
+        'type' => 'text',
+        'not null' => TRUE,
+      ),
+      'key' => array(
+        'type' => 'text',
+        'not null' => TRUE,
+      ),
+    ),
+    'primary key' => array('id'),
+    'indexes' => array(
+      'ip' => array(array('ip', 15)),
+      'user_agent' => array(array('user_agent', 10)),
+    ),
+  );
+
+  return $schema;
+}
+
+/**
+ * Implements hook_requirements().
+ */
+function badbehavior_requirements($phase) {
+  $requirements = array();
+  if ($phase == 'runtime') {
+    if (badbehavior_load_includes()) {
+      if (BB2_VERSION == '2.2.15') {
+        $requirements['badbehavior'] = array(
+          'value' => BB2_VERSION,
+          'severity' => REQUIREMENT_OK,
+        );
+      }
+      else {
+        $requirements['badbehavior'] = array(
+          'value' => BB2_VERSION,
+          'severity' => REQUIREMENT_WARNING,
+          'description' => t('Bad Behavior files are installed, but are not the recommended version (2.2.15). See the <code>!readme</code> for exact installation details.', array('!readme' => l(t('README.txt'), $base_url . drupal_get_path('module', 'badbehavior') . '/README.txt'))),
+        );
+      }
+    }
+    else {
+      $requirements['badbehavior'] = array(
+        'value' => t('Missing BadBehavior library'),
+        'severity' => REQUIREMENT_ERROR,
+        'description' => t('Required Bad Behavior files are not found. See the <code>!readme</code> for installation details.', array('!readme' => l(t('README.txt'), $base_url . drupal_get_path('module', 'badbehavior') . '/README.txt'))),
+      );
+    }
+    $requirements['badbehavior']['title'] = t('Bad Behavior');
+  }
+  return $requirements;
+}
+
+/**
+ * Implements hook_install().
+ */
+function badbehavior_install() {
+  // Set module weight for the badbehavior module
+  $thestatus = array();
+  $thestatus[] =   db_update('system')
+    ->fields(array(
+      'weight' => -999,
+    ))
+    ->condition('type', 'module', '=')
+    ->condition('name', 'badbehavior', '=')
+    ->execute();
+  // If there is one FALSE value in the status array, there was an error.
+  if (array_search(FALSE, $thestatus) !== FALSE) {
+    drupal_set_message(st('Setting the module weight of Bad Behavior failed.'), 'error');
+  }
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function badbehavior_uninstall() {
+  variable_del('badbehavior_mail');
+  variable_del('badbehavior_email');
+  variable_del('badbehavior_logging');
+  variable_del('badbehavior_log_timeformat');
+  variable_del('badbehavior_strict');
+  variable_del('badbehavior_strict_mode_enable');
+  variable_del('badbehavior_offsite_forms');
+  variable_del('badbehavior_httpbl_age');
+  variable_del('badbehavior_httpbl_key');
+  variable_del('badbehavior_httpbl_quicklink');
+  variable_del('badbehavior_httpbl_quicklinktext');
+  variable_del('badbehavior_httpbl_threat');
+  variable_del('badbehavior_reverse_proxy');
+  variable_del('badbehavior_reverse_proxy_header');
+  variable_del('badbehavior_verbose_logging_enable');
+  variable_del('badbehavior_db_installed');
+  cache_clear_all('variables', 'cache');
+}
+
+/**
+ * Rename variables.
+ *
+ * Implements hook_update_N().
+ */
+function badbehavior_update_7100() {
+  $mail = variable_get('badbehavior_email', variable_get('site_mail', ini_get('sendmail_from')));
+  variable_set('badbehavior_mail', $mail);
+  variable_del('badbehavior_email');
+
+  $verbose = variable_get('badbehavior_verbose_logging_enable', 0);
+  variable_set('badbehavior_logging', $verbose ? 'verbose' : 1);
+  variable_del('badbehavior_verbose_logging_enable');
+
+  $strict = variable_get('badbehavior_strict_mode_enable', 0);
+  variable_set('badbehavior_strict', $strict);
+  variable_del('badbehavior_strict_mode_enable');
+
+  return;
+}
+
+/**
+ * Reset module weight for earliest possible loading position.
+ *
+ * Implements hook_update_N().
+ */
+function badbehavior_update_7300() {
+  $retfun = array();
+  $retfun[] = db_update('system')
+    ->fields(array(
+      'weight' => -999,
+    ))
+    ->condition('type', 'module', '=')
+    ->condition('name', 'badbehavior', '=')
+    ->execute();
+  return;
+}
+

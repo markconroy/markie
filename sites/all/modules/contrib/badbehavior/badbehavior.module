@@ -1,0 +1,302 @@
+<?php
+
+/**
+ * @file
+ * Integrates Bad Behavior with Drupal
+ */
+// Point BB scripts path to new universal libraries directory.
+define('BB2_CWD', './sites/all/libraries/bad-behavior');
+
+/**
+ * Implements hook_help().
+ */
+function badbehavior_help($path, $arg) {
+  $output = '';
+  switch ($path) {
+    case "admin/reports/badbehavior":
+      $output .= '<p>' . t("The Bad Behavior module examines HTTP requests from visitors to your web site, and any suspicious requests are logged for later review. Suspicious visitors are shown an error page with instructions on how to view the site without triggering the bad behavior error messages.") . '</p>';
+    break;
+  }
+  return $output;
+}
+
+/**
+ * Implements hook_permission().
+ */
+function badbehavior_permission() {
+  return array(
+    'administer bad behavior' => array(
+      'title' => t('Administer Bad Behavior'),
+      'description' => t('Perform administration tasks for the Bad Behavior module.'),
+    ),
+    'bypass bad behavior protection' => array(
+      'title' => t('Bypass Bad Behavior protection'),
+      'description' => t('Don\'t examine the HTTP requests from users with this permission.'),
+    )
+  );
+}
+
+/**
+ * Implements hook_menu().
+ */
+function badbehavior_menu() {
+  $items['admin/config/system/badbehavior'] = array(
+    'title' => 'Bad Behavior',
+    'description' => 'Configure automatic spam blocking for your site.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('badbehavior_settings_form'),
+    'access arguments' => array('administer bad behavior'),
+    'file' => 'badbehavior.admin.inc',
+  );
+  $items['admin/reports/badbehavior'] = array(
+    'title' => 'Bad Behavior',
+    'description' => 'Examine the spam blocking logs for your web site.',
+    'page callback' => 'badbehavior_overview',
+    'access arguments' => array('administer bad behavior'),
+    'file' => 'badbehavior.admin.inc',
+  );
+  $items['admin/reports/badbehavior/event'] = array(
+    'title' => 'Details',
+    'page callback' => 'badbehavior_event',
+    'access arguments' => array('administer bad behavior'),
+    'type' => MENU_CALLBACK,
+    'file' => 'badbehavior.admin.inc',
+  );
+  return $items;
+}
+/**
+ * Implements hook_boot().
+ *
+ * Stops Bad Behavior from loading on non-cached pages if we are running Drupal
+ * from the command line (Drush), or if we are logged in.
+ */
+function badbehavior_boot() {
+  if (!drupal_is_cli() && !$GLOBALS['user']->uid) {
+    badbehavior_start_badbehavior();
+  }
+}
+
+/**
+ * Implements hook_init().
+ *
+ * Stops Bad Behavior from loading on all pages if we are running Drupal
+ * from the command line (Drush), or if we are logged in.
+ */
+function badbehavior_init() {
+  if (!drupal_is_cli() && !$GLOBALS['user']->uid) {
+    badbehavior_start_badbehavior();
+  }
+}
+
+function badbehavior_start_badbehavior() {
+  if (function_exists('user_access') && user_access('bypass bad behavior protection')) {
+    return;
+  }
+  elseif (badbehavior_load_includes()) {
+    bb2_install();
+    bb2_start(bb2_read_settings());
+  }
+}
+
+/**
+ * Load BadBehavior library files.
+ *
+ * Check to make sure the main Bad Behavior files (external content) exist
+ * and require them for the module to actually work. The default location
+ * is /sites/all/libraries/bad-behavior/bad-behavior/
+ *
+ * @return bool
+ * Returns TRUE if files exist and are read, otherwise returns FALSE
+ */
+function badbehavior_load_includes() {
+  if (is_file(BB2_CWD . '/bad-behavior/core.inc.php') &&
+      is_file(BB2_CWD . '/bad-behavior/responses.inc.php') &&
+      is_file(BB2_CWD . '/bad-behavior-mysql.php')) {
+    require_once(BB2_CWD . '/bad-behavior/core.inc.php');
+    require_once(BB2_CWD . '/bad-behavior/responses.inc.php');
+    require_once(BB2_CWD . '/bad-behavior-mysql.php');
+    return TRUE;
+  }
+  else {
+    return FALSE;
+  }
+}
+
+/**
+ * Return current time in the format preferred by your database.
+ *
+ * @return string
+ */
+function bb2_db_date() {
+   return gmdate('Y-m-d H:i:s'); // Example is MySQL format
+}
+
+/**
+ * Escape a string for database usage
+ *
+ * @param string $string
+ *
+ * @return string
+ */
+function bb2_db_escape($string) {
+    return db_escape_field($string);
+}
+
+/**
+ * Someone doesn't like PHP's error handling?
+ *
+ * @param int $errno
+ * @param string $string
+ */
+function badbehavior_db_errortrap($errno, $string) {
+}
+
+/**
+ * Run a query and return the results, if any.
+ *
+ * @param type $query
+ * @return object
+ */
+function bb2_db_query($query) {
+  set_error_handler('badbehavior_db_errortrap');
+  // Remove security-sensitive data
+  $query = badbehavior_strip_passwords($query);
+  $result = db_query($query);
+  restore_error_handler();
+  if ($result == FALSE) {
+    return FALSE;
+  }
+  else {
+    return $result->rowCount();
+  }
+}
+
+/**
+ * Return all rows in a particular query.
+ *
+ * @return object
+ */
+function bb2_db_rows($result) {
+  return $result;
+}
+
+/**
+ * Fetch the admin's email address.
+ *
+ * @return string
+ */
+function bb2_email() {
+  return variable_get('badbehavior_mail', variable_get('site_mail', ini_get('sendmail_from')));
+}
+
+/**
+ * Retrieve settings from database.
+ *
+ * @return array
+ */
+function bb2_read_settings() {
+  $logging = variable_get('badbehavior_logging', 1);
+  return array(
+    'log_table' => '{bad_behavior_log}',
+    'display_stats' => FALSE,
+    'eu_cookie' => FALSE,
+    'reverse_proxy' => variable_get('badbehavior_reverse_proxy', variable_get('reverse_proxy', 0)),
+    'reverse_proxy_header' => variable_get('badbehavior_reverse_proxy_header', variable_get('reverse_proxy_header', 'X-Forwarded-For')),
+    'reverse_proxy_addresses' => variable_get('reverse_proxy_addresses', array()),
+    'strict' => variable_get('badbehavior_strict', 0),
+    'verbose' => $logging == 'verbose',
+    'logging' => !empty($logging),
+    'httpbl_key' => variable_get('badbehavior_httpbl_key', ''),
+    'httpbl_threat' => variable_get('badbehavior_httpbl_threat', 25),
+    'httpbl_maxage' => variable_get('badbehavior_httpbl_age', 30),
+    'offsite_forms' => variable_get('badbehavior_offsite_forms', 'FALSE'),
+  );
+}
+
+/**
+ * Installation of Bad Behavior
+ */
+function bb2_install() {
+  if (variable_get('badbehavior_db_installed', 0) != BB2_VERSION) {
+    bb2_db_query(bb2_table_structure('{bad_behavior_log}'));
+    variable_set('badbehavior_db_installed', BB2_VERSION);
+  }
+}
+
+/**
+ * Return the top-level relative path of wherever we are (for cookies).
+ *
+ * @return string
+ */
+function bb2_relative_path() {
+  global $base_path;
+  return $base_path;
+}
+
+/**
+ * Converts dates in BB log screen output to server's time zone.
+ *
+ * @param $bbdate
+ *
+ * @return string
+ */
+function bb2_convertdate($bbdate) {
+  $timestamp = strtotime($bbdate . ' UTC');
+  if (variable_get('badbehavior_log_timeformat', '24') == '24') {
+    return format_date($timestamp, 'custom', 'Y-m-d H:i:s');
+  }
+  else {
+    return format_date($timestamp, 'custom', 'Y-m-d g:i:s a');
+  }
+}
+
+/**
+ * Implements hook_page_build().
+ *
+ * Adds a hidden Project Honey Pot QuickLink link to the footer of every page.
+ */
+function badbehavior_page_build(&$page) {
+  if (variable_get('badbehavior_httpbl_quicklink', '')) {
+    $page['page_bottom']['badbehavior']= array(
+      '#type' => 'markup',
+      '#markup' => '<span style="display: none !important; opacity: 0.0;"><a href="' . variable_get('badbehavior_httpbl_quicklink', '') .
+        '" rel="nofollow">' . variable_get('badbehavior_httpbl_quicklinktext', 'Customize This') . '</a></span>' . "\n"
+    );
+  }
+}
+
+/**
+ * Strip out reporting of values from forms containing sensitive data
+ * Looking for query like this:
+ * INSERT INTO `{bad_behavior_log}` (....,`request_entity`,...) VALUES (...,'request_entity_post_values',...)
+ * where request_entity_post_values contains specific strings.
+ * The only string coded for by default is 'form_iduser_login' which is found in login form
+ * post data (after escaping).
+ *
+ * @param string $query
+ */
+function badbehavior_strip_passwords($query) {
+  if (preg_match('/INSERT INTO (.*)`request_entity`/', $query)) {
+    $prohibit = variable_get('badbehavior_hide_post_strings', array('form_iduser_login'));
+    $matches = array();
+    if (preg_match('/INSERT INTO (.*) \((.*)\) VALUES \((.*)\)/', $query, $matches)) {
+      if (trim($matches[1]) == '`{bad_behavior_log}`') {
+        $fields = explode(',', $matches[2]);
+        $values = explode(',', $matches[3]);
+        foreach ($fields as $i => $f) {
+          if (trim($f) == '`request_entity`') {
+            foreach ($prohibit as $txt) {
+              if (strstr($values[$i], $txt) !== false) {
+                $values[$i] = "'(hidden)'";
+                break;
+              }
+            }
+          }
+        }
+        // reconstruct the query
+        $query = 'INSERT INTO '.$matches[1].' ('.join(',', $fields).') VALUES ('.join(',', $values).')';
+      }
+    }
+  }
+  return $query;
+}
