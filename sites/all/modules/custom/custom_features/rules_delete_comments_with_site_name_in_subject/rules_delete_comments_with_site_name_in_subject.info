@@ -1,0 +1,10 @@
+name = Rules - Delete Comments with Site Name in Subject
+description = A rule to auto delete comments that have the site name in their subject - anti-spam.
+core = 7.x
+package = Rules
+dependencies[] = comment
+dependencies[] = entity
+dependencies[] = rules
+features[features_api][] = api:2
+features[rules_config][] = rules_delete_comments_with_site_name_in_them
+project path = sites/all/modules/custom/custom_features
