@@ -137,6 +137,55 @@ function views_articles_views_default_views() {
 </div>';
   $handler->display->display_options['fields']['nothing']['element_label_colon'] = FALSE;
   $handler->display->display_options['block_description'] = 'Articles: Homepage';
+
+  /* Display: Page: JSON */
+  $handler = $view->new_display('page', 'Page: JSON', 'page_1');
+  $handler->display->display_options['defaults']['style_plugin'] = FALSE;
+  $handler->display->display_options['style_plugin'] = 'views_json';
+  $handler->display->display_options['style_options']['plaintext_output'] = 1;
+  $handler->display->display_options['style_options']['remove_newlines'] = 0;
+  $handler->display->display_options['style_options']['jsonp_prefix'] = '';
+  $handler->display->display_options['style_options']['using_views_api_mode'] = 0;
+  $handler->display->display_options['style_options']['object_arrays'] = 0;
+  $handler->display->display_options['style_options']['numeric_strings'] = 0;
+  $handler->display->display_options['style_options']['bigint_string'] = 0;
+  $handler->display->display_options['style_options']['pretty_print'] = 0;
+  $handler->display->display_options['style_options']['unescaped_slashes'] = 0;
+  $handler->display->display_options['style_options']['unescaped_unicode'] = 0;
+  $handler->display->display_options['style_options']['char_encoding'] = array();
+  $handler->display->display_options['defaults']['style_options'] = FALSE;
+  $handler->display->display_options['defaults']['row_plugin'] = FALSE;
+  $handler->display->display_options['defaults']['row_options'] = FALSE;
+  $handler->display->display_options['defaults']['fields'] = FALSE;
+  /* Field: Content: Title */
+  $handler->display->display_options['fields']['title']['id'] = 'title';
+  $handler->display->display_options['fields']['title']['table'] = 'node';
+  $handler->display->display_options['fields']['title']['field'] = 'title';
+  $handler->display->display_options['fields']['title']['alter']['word_boundary'] = FALSE;
+  $handler->display->display_options['fields']['title']['alter']['ellipsis'] = FALSE;
+  $handler->display->display_options['fields']['title']['element_label_colon'] = FALSE;
+  /* Field: Content: Body */
+  $handler->display->display_options['fields']['field_art_body']['id'] = 'field_art_body';
+  $handler->display->display_options['fields']['field_art_body']['table'] = 'field_data_field_art_body';
+  $handler->display->display_options['fields']['field_art_body']['field'] = 'field_art_body';
+  $handler->display->display_options['fields']['field_art_body']['label'] = 'Summary';
+  $handler->display->display_options['fields']['field_art_body']['alter']['max_length'] = '250';
+  $handler->display->display_options['fields']['field_art_body']['alter']['strip_tags'] = TRUE;
+  $handler->display->display_options['fields']['field_art_body']['alter']['trim'] = TRUE;
+  $handler->display->display_options['fields']['field_art_body']['alter']['preserve_tags'] = '<p> <br> <em>';
+  $handler->display->display_options['fields']['field_art_body']['element_label_colon'] = FALSE;
+  $handler->display->display_options['fields']['field_art_body']['type'] = 'text_trimmed';
+  $handler->display->display_options['fields']['field_art_body']['settings'] = array(
+    'trim_length' => '200',
+  );
+  /* Field: Content: Link */
+  $handler->display->display_options['fields']['view_node']['id'] = 'view_node';
+  $handler->display->display_options['fields']['view_node']['table'] = 'views_entity_node';
+  $handler->display->display_options['fields']['view_node']['field'] = 'view_node';
+  $handler->display->display_options['fields']['view_node']['label'] = 'Read More';
+  $handler->display->display_options['fields']['view_node']['element_label_colon'] = FALSE;
+  $handler->display->display_options['fields']['view_node']['text'] = 'Hungry for More?';
+  $handler->display->display_options['path'] = 'articles/feed/json';
   $export['articles'] = $view;
 
   return $export;
