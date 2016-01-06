@@ -1,0 +1,21 @@
+<?php
+/**
+ * @file Module file to output nodes as JSON
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function json_node_menu() {
+  $items['node/%node/json'] = array(
+    'page callback' => 'json_node_endpoint',
+    'page arguments' => array(1),
+    'access arguments' => array('access content'),
+  );
+  return $items;
+}
+
+// Output each node as a JSON object
+function json_node_endpoint($node) {
+  drupal_json_output($node);
+}
