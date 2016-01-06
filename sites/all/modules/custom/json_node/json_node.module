@@ -10,7 +10,8 @@ function json_node_menu() {
   $items['node/%node/json'] = array(
     'page callback' => 'json_node_endpoint',
     'page arguments' => array(1),
-    'access arguments' => array('access content'),
+    'access callback' => 'node_access',
+    'access arguments' => array('view', 1),
   );
   return $items;
 }
