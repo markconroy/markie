@@ -158,7 +158,7 @@ function field_base_features_export_render($module, $data, $export = NULL) {
         unset($field['storage']);
       }
       // If we still have a storage declaration here it means that a non-default
-      // storage type was altered into to the field definition. And noone would
+      // storage type was altered into to the field definition. And no one would
       // never need to change the 'details' key, so don't render it.
       if (isset($field['storage']['details'])) {
         unset($field['storage']['details']);
@@ -170,10 +170,10 @@ function field_base_features_export_render($module, $data, $export = NULL) {
       $field_identifier = features_var_export($identifier);
       if (features_field_export_needs_wrap($field_prefix, $field_identifier)) {
         $code[] = rtrim($field_prefix);
-        $code[] = "  // {$field_identifier}";
+        $code[] = "  // {$field_identifier}.";
       }
       else {
-        $code[] = $field_prefix . $field_identifier;
+        $code[] = $field_prefix . $field_identifier . '.';
       }
       $code[] = "  \$field_bases[{$field_identifier}] = {$field_export};";
       $code[] = "";
@@ -201,10 +201,10 @@ function field_instance_features_export_render($module, $data, $export = NULL) {
       $instance_identifier = features_var_export($identifier);
       if (features_field_export_needs_wrap($instance_prefix, $instance_identifier)) {
         $code[] = rtrim($instance_prefix);
-        $code[] = "  // {$instance_identifier}";
+        $code[] = "  // {$instance_identifier}.";
       }
       else {
-        $code[] = $instance_prefix . $instance_identifier;
+        $code[] = $instance_prefix . $instance_identifier . '.';
       }
       $code[] = "  \$field_instances[{$instance_identifier}] = {$field_export};";
       $code[] = "";
@@ -274,12 +274,23 @@ function field_base_features_rebuild($module) {
       // Create or update field.
       if (isset($existing_fields[$field['field_name']])) {
         $existing_field = $existing_fields[$field['field_name']];
-        if ($field + $existing_field !== $existing_field) {
-          field_update_field($field);
+        $array_diff_result = drupal_array_diff_assoc_recursive($field + $existing_field, $existing_field);
+        if (!empty($array_diff_result)) {
+          try {
+            field_update_field($field);
+          }
+          catch (FieldException $e) {
+            watchdog('features', 'Attempt to update field %label failed: %message', array('%label' => $field['field_name'], '%message' => $e->getMessage()), WATCHDOG_ERROR);
+          }
         }
       }
       else {
-        field_create_field($field);
+        try {
+          field_create_field($field);
+        }
+        catch (FieldException $e) {
+          watchdog('features', 'Attempt to create field %label failed: %message', array('%label' => $field['field_name'], '%message' => $e->getMessage()), WATCHDOG_ERROR);
+        }
         $existing_fields[$field['field_name']] = $field;
       }
       variable_set('menu_rebuild_needed', TRUE);
@@ -409,7 +420,7 @@ function field_features_export_render($module, $data, $export = NULL) {
         unset($field['field_config']['storage']);
       }
       // If we still have a storage declaration here it means that a non-default
-      // storage type was altered into to the field definition. And noone would
+      // storage type was altered into to the field definition. And no one would
       // never need to change the 'details' key, so don't render it.
       if (isset($field['field_config']['storage']['details'])) {
         unset($field['field_config']['storage']['details']);
@@ -483,7 +494,8 @@ function field_features_rebuild($module) {
       $field_config = $field['field_config'];
       if (isset($existing_fields[$field_config['field_name']])) {
         $existing_field = $existing_fields[$field_config['field_name']];
-        if ($field_config + $existing_field !== $existing_field) {
+        $array_diff_result = drupal_array_diff_assoc_recursive($field_config + $existing_field, $existing_field);
+        if (!empty($array_diff_result)) {
           try {
             field_update_field($field_config);
           }
@@ -560,5 +572,6 @@ function features_field_load($identifier) {
  * @see https://www.drupal.org/node/1354
  */
 function features_field_export_needs_wrap($prefix, $identifier) {
-  return (strlen($prefix) + strlen($identifier) > 80);
+  // Check for 79 characters, since the comment ends with a full stop.
+  return (strlen($prefix) + strlen($identifier) > 79);
 }
