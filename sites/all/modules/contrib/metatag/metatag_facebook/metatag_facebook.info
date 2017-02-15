@@ -2,11 +2,15 @@ name = Metatag: Facebook
 description = "Provides support for Facebook's custom meta tags."
 package = SEO
 core = 7.x
-dependencies[] = metatag
+dependencies[] = metatag:metatag
 
-; Information added by Drupal.org packaging script on 2015-05-29
-version = "7.x-1.5"
+; Tests.
+files[] = tests/metatag_facebook.test
+files[] = tests/metatag_facebook.tags.test
+
+; Information added by Drupal.org packaging script on 2017-02-15
+version = "7.x-1.21"
 core = "7.x"
 project = "metatag"
-datestamp = "1432910283"
+datestamp = "1487171290"
 

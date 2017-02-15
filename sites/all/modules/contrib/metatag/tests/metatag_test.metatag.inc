@@ -2,6 +2,10 @@
 
 /**
  * Implements hook_metatag_config_default().
+ *
+ * @todo Expand to cover more meta tags.
+ *
+ * @see MetatagTestHelper::getTestDefaults()
  */
 function metatag_test_metatag_config_default() {
   $configs = array();
@@ -20,9 +24,9 @@ function metatag_test_metatag_config_default() {
   $config->api_version = 1;
   $config->disabled = FALSE;
   $config->config = array(
-    'description' => array('value' => 'Test foo description'),
-    'abstract' => array('value' => 'Test foo abstract'),
     'title' => array('value' => 'Test title'),
+    'abstract' => array('value' => 'Test foo abstract'),
+    'description' => array('value' => 'Test foo description'),
     'test:foo' => array('value' => 'foobar'),
   );
   $configs[$config->instance] = $config;
@@ -43,11 +47,18 @@ function metatag_test_metatag_config_default_alter(array &$configs) {
  * Implements hook_metatag_info().
  */
 function metatag_test_metatag_info() {
+  $info['groups']['testing'] = array(
+    'label' => t('Testing'),
+    'form' => array(
+      '#weight' => 100,
+    ),
+  );
+
   $info['test:foo'] = array(
     'label' => t('Foo meta tag'),
     'description' => t('Testing metatag.'),
     'class' => 'DrupalTextMetaTag',
-    'group' => t('Testing'),
+    'group' => 'testing',
   );
 
   return $info;
