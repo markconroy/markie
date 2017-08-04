@@ -69,6 +69,7 @@
 <?php print $styles; ?>
 <?php print $scripts; ?>
 <?php print $polyfills; ?>
+<link rel="manifest" href="/manifest.json">
 <meta name="msapplication-TileColor" content="#ffffff" />
 <meta name="msapplication-TileImage" content="/themes/custom/patternlab/images/favicons/ms-icon-144x144.png" />
 <meta name="theme-color" content="#ffffff" />
