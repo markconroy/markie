@@ -1,6 +1,6 @@
 var CACHE = 'markie';
 
-var item_1 = '/node/34';
+var item_1 = '/articles/web-design/should-i-add-slider-or-carousel-my-website';
 
 self.addEventListener('install', function(evt) {
   console.log('The service worker is being installed.');
