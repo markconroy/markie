@@ -1,5 +1,7 @@
 var CACHE = 'markie';
 
+var item_1 = '/node/34';
+
 self.addEventListener('install', function(evt) {
   console.log('The service worker is being installed.');
   evt.waitUntil(precache());
@@ -19,7 +21,8 @@ function precache() {
       '/about',
       '/articles',
       '/articles/drupal/simple-plan-everyone-get-free-t-shirt-drupalcon',
-      '/articles/nevermind-25-years-old-today'
+      '/articles/nevermind-25-years-old-today',
+      item_1
     ]);
   });
 }
