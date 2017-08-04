@@ -1,7 +1,7 @@
 {
   "name": "Mark.ie",
   "short_name": "Mark.ie",
-  "start_url": "/?home=true",
+  "start_url": "/",
   "icons": [
     {
       "src": "/favicons/android-icon-36x36.png",
