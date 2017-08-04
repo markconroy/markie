@@ -69,7 +69,6 @@
 <?php print $styles; ?>
 <?php print $scripts; ?>
 <?php print $polyfills; ?>
-<link rel="manifest" href="/manifest.json">
 <meta name="msapplication-TileColor" content="#ffffff" />
 <meta name="msapplication-TileImage" content="/themes/custom/patternlab/images/favicons/ms-icon-144x144.png" />
 <meta name="theme-color" content="#ffffff" />
@@ -88,6 +87,7 @@
 <link rel="icon" sizes="16x16" href="/favicons/favicon-16x16.png" type="image/png" />
 <link rel="icon" sizes="16x16" href="/favicons/favicon.ico" type="image/png" />
 <meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="/manifest.json">
 </head>
 <body class="<?php print $classes; ?>"<?php print $attributes; ?>>
   <div id="skip-link" class="nocontent">
