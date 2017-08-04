@@ -7,6 +7,9 @@ self.addEventListener('install', e => {
     caches.open(cacheName).then(cache => {
       return cache.addAll([
         '/',
+        '/about',
+        '/articles',
+        '/articles/drupal/simple-plan-everyone-get-free-t-shirt-drupalcon',
         '/pwa/offline.css'
       ]).then(() => self.skipWaiting());
     })
