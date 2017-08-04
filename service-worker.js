@@ -1,30 +1,43 @@
-const cacheName = 'v1::static';
+var CACHE = 'markie';
 
-self.addEventListener('install', e => {
-  // once the SW is installed, go ahead and fetch the resources
-  // to make this work offline
-  e.waitUntil(
-    caches.open(cacheName).then(cache => {
-      return cache.addAll([
-        '/',
-        '/about',
-        '/articles',
-        '/articles/drupal/simple-plan-everyone-get-free-t-shirt-drupalcon',
-        '/pwa/offline.css'
-      ]).then(() => self.skipWaiting());
-    })
-  );
+self.addEventListener('install', function(evt) {
+  console.log('The service worker is being installed.');
+  evt.waitUntil(precache());
 });
 
-// when the browser fetches a url, either response with
-// the cached object or go ahead and fetch the actual url
-self.addEventListener('fetch', event => {
-  event.respondWith(
-    // ensure we check the *right* cache to match against
-    caches.open(cacheName).then(cache => {
-      return cache.match(event.request).then(res => {
-        return res || fetch(event.request)
-      });
-    })
-  );
+self.addEventListener('fetch', function(evt) {
+  console.log('The service worker is serving the asset.');
+  evt.respondWith(fromNetwork(evt.request, 400).catch(function () {
+    return fromCache(evt.request);
+  }));
 });
+
+function precache() {
+  return caches.open(CACHE).then(function (cache) {
+    return cache.addAll([
+      '/',
+      '/about',
+      '/articles',
+      '/articles/drupal/simple-plan-everyone-get-free-t-shirt-drupalcon',
+      '/articles/nevermind-25-years-old-today'
+    ]);
+  });
+}
+
+function fromNetwork(request, timeout) {
+  return new Promise(function (fulfill, reject) {
+    var timeoutId = setTimeout(reject, timeout);
+    fetch(request).then(function (response) {
+      clearTimeout(timeoutId);
+      fulfill(response);
+    }, reject);
+  });
+}
+
+function fromCache(request) {
+  return caches.open(CACHE).then(function (cache) {
+    return cache.match(request).then(function (matching) {
+      return matching || Promise.reject('no-match');
+    });
+  });
+}
