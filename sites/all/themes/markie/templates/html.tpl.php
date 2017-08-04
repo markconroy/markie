@@ -96,5 +96,6 @@
   <?php print $page_top; ?>
   <?php print $page; ?>
   <?php print $page_bottom; ?>
+  <script src="/pwa/custom.js"></script>
 </body>
 </html>
