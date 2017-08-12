@@ -8,7 +8,7 @@ self.addEventListener('install', e => {
   // once the SW is installed, go ahead and fetch the resources
   // to make this work offline
   e.waitUntil(
-    caches.open(markie_cache).then(cache => {
+    caches.open(cacheName).then(cache => {
       return cache.addAll([
         '/',
         '/about',
@@ -25,7 +25,7 @@ self.addEventListener('install', e => {
 self.addEventListener('fetch', event => {
   event.respondWith(
     // ensure we check the *right* cache to match against
-    caches.open(markie_cache).then(cache => {
+    caches.open(cacheName).then(cache => {
       return cache.match(event.request).then(res => {
         return res || fetch(event.request)
       });
