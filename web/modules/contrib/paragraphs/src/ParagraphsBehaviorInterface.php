@@ -101,10 +101,10 @@ interface ParagraphsBehaviorInterface extends PluginFormInterface, ConfigurableP
   public function view(array &$build, Paragraph $paragraph, EntityViewDisplayInterface $display, $view_mode);
 
   /**
-   * Returns if the plugin can be used for the provided paragraphs type.
+   * Returns if the plugin can be used for the provided Paragraphs type.
    *
    * @param \Drupal\paragraphs\Entity\ParagraphsType $paragraphs_type
-   *   The paragraphs type entity that should be checked.
+   *   The Paragraphs type entity that should be checked.
    *
    * @return bool
    *   TRUE if the formatter can be used, FALSE otherwise.

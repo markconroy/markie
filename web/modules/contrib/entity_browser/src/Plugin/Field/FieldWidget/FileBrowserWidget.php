@@ -16,6 +16,7 @@ use Drupal\entity_browser\FieldWidgetDisplayManager;
 use Drupal\image\Entity\ImageStyle;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Drupal\Core\Session\AccountInterface;
 
 /**
  * Entity browser file widget.
@@ -86,9 +87,11 @@ class FileBrowserWidget extends EntityReferenceBrowserWidget {
    *   The entity display repository service.
    * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
    *   The module handler service.
+   * @param \Drupal\Core\Session\AccountInterface $current_user
+   *   The current user.
    */
-  public function __construct($plugin_id, $plugin_definition, FieldDefinitionInterface $field_definition, array $settings, array $third_party_settings, EntityTypeManagerInterface $entity_type_manager, EventDispatcherInterface $event_dispatcher, FieldWidgetDisplayManager $field_display_manager, ConfigFactoryInterface $config_factory, EntityDisplayRepositoryInterface $display_repository, ModuleHandlerInterface $module_handler) {
-    parent::__construct($plugin_id, $plugin_definition, $field_definition, $settings, $third_party_settings, $entity_type_manager, $event_dispatcher, $field_display_manager, $module_handler);
+  public function __construct($plugin_id, $plugin_definition, FieldDefinitionInterface $field_definition, array $settings, array $third_party_settings, EntityTypeManagerInterface $entity_type_manager, EventDispatcherInterface $event_dispatcher, FieldWidgetDisplayManager $field_display_manager, ConfigFactoryInterface $config_factory, EntityDisplayRepositoryInterface $display_repository, ModuleHandlerInterface $module_handler, AccountInterface $current_user) {
+    parent::__construct($plugin_id, $plugin_definition, $field_definition, $settings, $third_party_settings, $entity_type_manager, $event_dispatcher, $field_display_manager, $module_handler, $current_user);
     $this->entityTypeManager = $entity_type_manager;
     $this->fieldDisplayManager = $field_display_manager;
     $this->configFactory = $config_factory;
@@ -110,7 +113,8 @@ class FileBrowserWidget extends EntityReferenceBrowserWidget {
       $container->get('plugin.manager.entity_browser.field_widget_display'),
       $container->get('config.factory'),
       $container->get('entity_display.repository'),
-      $container->get('module_handler')
+      $container->get('module_handler'),
+      $container->get('current_user')
     );
   }
 
@@ -243,7 +247,10 @@ class FileBrowserWidget extends EntityReferenceBrowserWidget {
       // Check to see if this entity has an edit form. If not, the edit button
       // will only throw an exception.
       if (!$entity->getEntityType()->getFormClass('edit')) {
-        $can_edit = FALSE;
+        $edit_button_access = FALSE;
+      }
+      elseif ($has_file_entity) {
+        $edit_button_access = $can_edit && $entity->access('update', $this->currentUser);
       }
 
       $entity_id = $entity->id();
@@ -350,7 +357,7 @@ class FileBrowserWidget extends EntityReferenceBrowserWidget {
             'data-entity-id' => $entity->getEntityTypeId() . ':' . $entity->id(),
             'data-row-id' => $delta,
           ],
-          '#access' => $can_edit,
+          '#access' => $edit_button_access,
         ],
         'remove_button' => [
           '#type' => 'submit',
@@ -462,14 +469,14 @@ class FileBrowserWidget extends EntityReferenceBrowserWidget {
       $extensions = isset($settings['file_extensions']) ? $settings['file_extensions'] : implode(' ', $supported_extensions);
       $extensions = array_intersect(explode(' ', $extensions), $supported_extensions);
       $validators['file_validate_extensions'] = [implode(' ', $extensions)];
+
+      // Add resolution validation.
+      if (!empty($settings['max_resolution']) || !empty($settings['min_resolution'])) {
+        $validators['entity_browser_file_validate_image_resolution'] = [$settings['max_resolution'], $settings['min_resolution']];
+      }
     }
     elseif (!empty($settings['file_extensions'])) {
       $validators['file_validate_extensions'] = [$settings['file_extensions']];
-    }
-
-    // Add resolution validation.
-    if ($settings['max_resolution'] || $settings['min_resolution']) {
-      $validators['entity_browser_file_validate_image_resolution'] = [$settings['max_resolution'], $settings['min_resolution']];
     }
 
     return $validators;

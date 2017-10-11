@@ -33,7 +33,7 @@ class ParagraphsConfigTest extends ParagraphsTestBase {
     ]);
 
     // Add a paragraphed content type.
-    $this->addParagraphedContentType('paragraphed_test', 'paragraphs_field');
+    $this->addParagraphedContentType('paragraphed_test', 'paragraphs_field', 'entity_reference_paragraphs');
     $this->addParagraphsType('paragraph_type_test');
     $this->addParagraphsType('text');
 
@@ -52,14 +52,15 @@ class ParagraphsConfigTest extends ParagraphsTestBase {
 
     // Create a node with a paragraph.
     $this->drupalPostAjaxForm('node/add/paragraphed_test', [], 'paragraphs_field_paragraph_type_test_add_more');
-    $this->drupalPostForm(NULL, ['title[0][value]' => 'paragraphed_title'], t('Save and publish'));
+    $edit = ['title[0][value]' => 'paragraphed_title'];
+    $this->drupalPostForm(NULL, $edit, t('Save'));
 
     // Attempt to add a translation.
     $node = $this->drupalGetNodeByTitle('paragraphed_title');
     $this->drupalGet('node/' . $node->id() . '/translations');
     $this->clickLink(t('Add'));
     // Save the translation.
-    $this->drupalPostForm(NULL, [], t('Save and keep published (this translation)'));
+   $this->drupalPostForm(NULL, [], t('Save (this translation)'));
     $this->assertText('paragraphed_test paragraphed_title has been updated.');
   }
 
@@ -78,7 +79,7 @@ class ParagraphsConfigTest extends ParagraphsTestBase {
     $this->drupalGet('admin/config/regional/content-language');
     $this->assertText('(* unsupported) Paragraphs fields do not support translation.');
 
-    $this->addParagraphedContentType('paragraphed_test', 'paragraphs_field');
+    $this->addParagraphedContentType('paragraphed_test', 'paragraphs_field', 'entity_reference_paragraphs');
 
     // Check error message is not displayed.
     $this->drupalGet('admin/config/regional/content-language');
@@ -132,6 +133,38 @@ class ParagraphsConfigTest extends ParagraphsTestBase {
   }
 
   /**
+   * Tests required Paragraphs field.
+   */
+  public function testRequiredParagraphsField() {
+    $this->loginAsAdmin();
+
+    // Add a Paragraph content type and 2 Paragraphs types.
+    $this->addParagraphedContentType('paragraphed_test', 'paragraphs', 'entity_reference_paragraphs');
+    $this->addParagraphsType('paragraph_type_test');
+    $this->addParagraphsType('text');
+
+    // Make the paragraphs field required and save configuration.
+    $this->drupalGet('admin/structure/types/manage/paragraphed_test/fields/node.paragraphed_test.paragraphs');
+    $edit = [
+      'required' => TRUE,
+    ];
+    $this->drupalPostForm(NULL, $edit, 'Save settings');
+    $this->assertText('Saved paragraphs configuration.');
+
+    // Assert that the field is displayed in the form as required.
+    $this->drupalGet('node/add/paragraphed_test');
+    $this->assertRaw('<strong class="form-required" data-drupal-selector="edit-paragraphs-title">');
+    $edit = [
+      'title[0][value]' => 'test_title',
+    ];
+    $this->drupalPostForm(NULL, $edit, t('Save'));
+    $this->assertText('paragraphs field is required.');
+    $this->drupalPostAjaxForm(NULL, [], 'paragraphs_paragraph_type_test_add_more');
+    $this->drupalPostForm(NULL, $edit, t('Save'));
+    $this->assertText('paragraphed_test test_title has been created.');
+  }
+
+  /**
    * Tests that we can use paragraphs widget only for paragraphs.
    */
   public function testAvoidUsingParagraphsWithWrongEntity() {
@@ -156,6 +189,52 @@ class ParagraphsConfigTest extends ParagraphsTestBase {
     $this->drupalGet('admin/structure/types/manage/article/form-display');
     $this->assertNoOption('edit-fields-field-node-reference-type', 'entity_reference_paragraphs');
     $this->assertNoOption('edit-fields-field-node-reference-type', 'paragraphs');
+  }
+
+  /**
+   * Test included Paragraph types.
+   */
+  public function testIncludedParagraphTypes() {
+    $this->loginAsAdmin();
+    // Add a Paragraph content type and 2 Paragraphs types.
+    $this->addParagraphedContentType('paragraphed_test', 'paragraphs', 'entity_reference_paragraphs');
+    $this->addParagraphsType('paragraph_type_test');
+    $this->addParagraphsType('text');
+
+    $this->drupalGet('admin/structure/types/manage/paragraphed_test/fields/node.paragraphed_test.paragraphs');
+    $edit = [
+      'settings[handler_settings][negate]' => 0,
+      'settings[handler_settings][target_bundles_drag_drop][paragraph_type_test][enabled]' => 1,
+    ];
+    $this->drupalPostForm(NULL, $edit, 'Save settings');
+    $this->assertText('Saved paragraphs configuration.');
+
+    $this->drupalGet('node/add/paragraphed_test');
+    $this->assertText('Add paragraph_type_test');
+    $this->assertNoText('Add text');
+  }
+
+  /**
+   * Test excluded Paragraph types.
+   */
+  public function testExcludedParagraphTypes() {
+    $this->loginAsAdmin();
+    // Add a Paragraph content type and 2 Paragraphs types.
+    $this->addParagraphedContentType('paragraphed_test', 'paragraphs', 'entity_reference_paragraphs');
+    $this->addParagraphsType('paragraph_type_test');
+    $this->addParagraphsType('text');
+
+    $this->drupalGet('admin/structure/types/manage/paragraphed_test/fields/node.paragraphed_test.paragraphs');
+    $edit = [
+      'settings[handler_settings][negate]' => 1,
+      'settings[handler_settings][target_bundles_drag_drop][text][enabled]' => 1,
+    ];
+    $this->drupalPostForm(NULL, $edit, 'Save settings');
+    $this->assertText('Saved paragraphs configuration.');
+
+    $this->drupalGet('node/add/paragraphed_test');
+    $this->assertText('Add paragraph_type_test');
+    $this->assertNoText('Add text');
   }
 
 }

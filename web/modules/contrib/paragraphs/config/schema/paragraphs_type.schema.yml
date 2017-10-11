@@ -8,6 +8,12 @@ paragraphs.paragraphs_type.*:
     label:
       type: label
       label: 'Label'
+    icon_uuid:
+      type: string
+      label: 'Icon uuid'
+    description:
+      type: text
+      label: 'Description'
     behavior_plugins:
       type: sequence
       label: 'Plugins'
@@ -29,8 +35,10 @@ paragraphs.behavior.settings.*:
   type: paragraphs.behavior.settings_base
 
 entity_reference_selection.default:paragraph:
-  type: entity_reference_selection
+  type: entity_reference_selection.default
   mapping:
+    negate:
+      type: integer
     target_bundles_drag_drop:
       type: sequence
       sequence:
@@ -75,6 +83,10 @@ field.widget.settings.paragraphs:
     title_plural:
       type: string
     edit_mode:
+      type: string
+    closed_mode:
+      type: string
+    autocollapse:
       type: string
     add_mode:
       type: string

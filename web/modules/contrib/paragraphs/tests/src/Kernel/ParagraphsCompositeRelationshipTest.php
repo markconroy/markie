@@ -34,6 +34,7 @@ class ParagraphsCompositeRelationshipTest extends KernelTestBase {
     'field',
     'entity_reference_revisions',
     'language',
+    'file',
   );
 
   /**

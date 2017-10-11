@@ -3,10 +3,13 @@
 namespace Drupal\paragraphs\Entity;
 
 use Drupal\Component\Utility\NestedArray;
+use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Field\ChangedFieldItemList;
+use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\TypedData\TranslatableInterface;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\entity_reference_revisions\EntityNeedsSaveInterface;
@@ -75,14 +78,23 @@ use Drupal\user\UserInterface;
  *   }
  * )
  */
-class Paragraph extends ContentEntityBase implements ParagraphInterface, EntityNeedsSaveInterface {
+class Paragraph extends ContentEntityBase implements ParagraphInterface {
 
   use EntityNeedsSaveTrait;
 
   /**
    * The behavior plugin data for the paragraph entity.
+   *
+   * @var array
    */
   protected $unserializedBehaviorSettings;
+
+  /**
+   * Number of summaries.
+   *
+   * @var int
+   */
+  protected $summaryCount;
 
   /**
    * {@inheritdoc}
@@ -142,10 +154,7 @@ class Paragraph extends ContentEntityBase implements ParagraphInterface, EntityN
   }
 
   /**
-   * Gets all the behavior settings.
-   *
-   * @return array
-   *   The array of behavior settings.
+   * {@inheritdoc}
    */
   public function getAllBehaviorSettings() {
     if ($this->unserializedBehaviorSettings === NULL) {
@@ -158,20 +167,7 @@ class Paragraph extends ContentEntityBase implements ParagraphInterface, EntityN
   }
 
   /**
-   * Gets the behavior setting of an specific plugin.
-   *
-   * @param string $plugin_id
-   *   The plugin ID for which to get the settings.
-   * @param string|array $key
-   *   Values are stored as a multi-dimensional associative array. If $key is a
-   *   string, it will return $values[$key]. If $key is an array, each element
-   *   of the array will be used as a nested key. If $key = array('foo', 'bar')
-   *   it will return $values['foo']['bar'].
-   * @param mixed $default
-   *   (optional) The default value if the specified key does not exist.
-   *
-   * @return mixed
-   *   The value for the given key.
+   * {@inheritdoc}
    */
   public function &getBehaviorSetting($plugin_id, $key, $default = NULL) {
     $settings = $this->getAllBehaviorSettings();
@@ -184,10 +180,7 @@ class Paragraph extends ContentEntityBase implements ParagraphInterface, EntityN
   }
 
   /**
-   * Sets all the behavior settings of a plugin.
-   *
-   * @param array $settings
-   *   The behavior settings from the form.
+   * {@inheritdoc}
    */
   public function setAllBehaviorSettings(array $settings) {
     // Set behavior settings fields.
@@ -195,12 +188,7 @@ class Paragraph extends ContentEntityBase implements ParagraphInterface, EntityN
   }
 
   /**
-   * Sets the behavior settings of a plugin.
-   *
-   * @param string $plugin_id
-   *   The plugin ID for which to set the settings.
-   * @param array $settings
-   *   The behavior settings from the form.
+   * {@inheritdoc}
    */
   public function setBehaviorSettings($plugin_id, array $settings) {
     // Set behavior settings fields.
@@ -325,7 +313,7 @@ class Paragraph extends ContentEntityBase implements ParagraphInterface, EntityN
 
     $fields['type'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Type'))
-      ->setDescription(t('The paragraphs type.'))
+      ->setDescription(t('The Paragraphs type.'))
       ->setSetting('target_type', 'paragraphs_type')
       ->setReadOnly(TRUE);
 
@@ -428,5 +416,257 @@ class Paragraph extends ContentEntityBase implements ParagraphInterface, EntityN
    }
    return $duplicate;
  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getSummary(array $options = []) {
+    $show_behavior_summary = isset($options['show_behavior_summary']) ? $options['show_behavior_summary'] : TRUE;
+    $depth_limit = isset($options['depth_limit']) ? $options['depth_limit'] : 1;
+    $this->summaryCount = 0;
+    $summary = [];
+
+    foreach ($this->getFieldDefinitions() as $field_name => $field_definition) {
+      if ($field_definition->getType() == 'image' || $field_definition->getType() == 'file') {
+        $file_summary = $this->getFileSummary($field_name);
+        if ($file_summary != '') {
+          $summary[] = $file_summary;
+        }
+      }
+
+      $text_summary = $this->getTextSummary($field_name, $field_definition);
+      if ($text_summary != '') {
+        $summary[] = $text_summary;
+      }
+
+      if ($field_definition->getType() == 'entity_reference_revisions') {
+        // Decrease the depth, since we are entering a nested paragraph.
+        $nested_summary = $this->getNestedSummary($field_name, [
+          'show_behavior_summary' => $show_behavior_summary,
+          'depth_limit' => $depth_limit - 1
+        ]);
+        if ($nested_summary != '') {
+          $summary[] = $nested_summary;
+        }
+      }
+
+      if ($field_type = $field_definition->getType() == 'entity_reference') {
+        if (!in_array($field_name, ['type', 'uid', 'revision_uid'])) {
+          if ($this->get($field_name)->entity) {
+            $summary[] = $this->get($field_name)->entity->label();
+          }
+        }
+      }
+
+      // Add the Block admin label referenced by block_field.
+      if ($field_definition->getType() == 'block_field') {
+        if (!empty($this->get($field_name)->first())) {
+          $block_admin_label = $this->get($field_name)->first()->getBlock()->getPluginDefinition()['admin_label'];
+          $summary[] = $block_admin_label;
+        }
+      }
+    }
+
+    if ($show_behavior_summary) {
+      $paragraphs_type = $this->getParagraphType();
+      foreach ($paragraphs_type->getEnabledBehaviorPlugins() as $plugin_id => $plugin) {
+        if ($plugin_summary = $plugin->settingsSummary($this)) {
+          $summary = array_merge($summary, $plugin_summary);
+        }
+      }
+    }
+
+    if ($this->summaryCount) {
+      array_unshift($summary, (string) \Drupal::translation()->formatPlural($this->summaryCount, '1 child', '@count children'));
+    }
+
+    $collapsed_summary_text = implode(', ', $summary);
+    return strip_tags($collapsed_summary_text);
+  }
+
+  /**
+   * Returns an array of field names to skip in ::isChanged.
+   *
+   * @return array
+   *   An array of field names.
+   */
+  protected function getFieldsToSkipFromChangedCheck() {
+    // A list of revision fields which should be skipped from the comparision.
+    $fields = [
+      $this->getEntityType()->getKey('revision'),
+      'revision_uid',
+      'revision_log',
+      'revision_log_message',
+    ];
+
+    return $fields;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function isChanged() {
+    if ($this->isNew()) {
+      return TRUE;
+    }
+
+    // $this->original only exists during save. If it exists we re-use it here
+    // for performance reasons.
+    /** @var \Drupal\paragraphs\ParagraphInterface $original */
+    $original = $this->original ?: NULL;
+    if (!$original) {
+      $original = $this->entityTypeManager()->getStorage($this->getEntityTypeId())->loadRevision($this->getLoadedRevisionId());
+    }
+
+    // If the current revision has just been added, we have a change.
+    if ($original->isNewRevision()) {
+      return TRUE;
+    }
+
+    // The list of fields to skip from the comparision.
+    $skip_fields = $this->getFieldsToSkipFromChangedCheck();
+
+    // Compare field item current values with the original ones to determine
+    // whether we have changes. We skip also computed fields as comparing them
+    // with their original values might not be possible or be meaningless.
+    foreach ($this->getFieldDefinitions() as $field_name => $definition) {
+      if (in_array($field_name, $skip_fields, TRUE)) {
+        continue;
+      }
+      $field = $this->get($field_name);
+      // When saving entities in the user interface, the changed timestamp is
+      // automatically incremented by ContentEntityForm::submitForm() even if
+      // nothing was actually changed. Thus, the changed time needs to be
+      // ignored when determining whether there are any actual changes in the
+      // entity.
+      if (!($field instanceof ChangedFieldItemList) && !$definition->isComputed()) {
+        $items = $field->filterEmptyItems();
+        $original_items = $original->get($field_name)->filterEmptyItems();
+        if (!$items->equals($original_items)) {
+          return TRUE;
+        }
+      }
+    }
+
+    return FALSE;
+  }
+
+  /**
+   * Returns summary for file paragraph.
+   *
+   * @param string $field_name
+   *   Field name from field definition.
+   *
+   * @return string
+   *   Summary for image.
+   */
+  protected function getFileSummary($field_name) {
+    $summary = '';
+    if ($this->get($field_name)->entity) {
+      foreach ($this->get($field_name) as $file_key => $file_value) {
+
+        $text = '';
+        if ($file_value->description != '') {
+          $text = $file_value->description;
+        }
+        elseif ($file_value->title != '') {
+          $text = $file_value->title;
+        }
+        elseif ($file_value->alt != '') {
+          $text = $file_value->alt;
+        }
+        elseif ($file_value->entity->getFileName()) {
+          $text = $file_value->entity->getFileName();
+        }
+
+        if (strlen($text) > 150) {
+          $text = Unicode::truncate($text, 150);
+        }
+
+        $summary = $text;
+      }
+    }
+
+    return trim($summary);
+  }
+
+  /**
+   * Returns summary for nested paragraphs.
+   *
+   * @param string $field_name
+   *   Field definition id for paragraph.
+   * @param array $options
+   *   (optional) An associative array of additional options.
+   *   See \Drupal\paragraphs\ParagraphInterface::getSummary() for all of the
+   *   available options.
+   *
+   * @return string
+   *   Short summary for nested Paragraphs type
+   *   or NULL if the summary is empty.
+   */
+  protected function getNestedSummary($field_name, array $options) {
+    $summary = [];
+    if ($options['depth_limit'] >= 0) {
+      foreach ($this->get($field_name) as $item) {
+        $entity = $item->entity;
+        if ($entity instanceof ParagraphInterface) {
+          $summary[] = $entity->getSummary($options);
+          $this->summaryCount++;
+        }
+      }
+    }
+
+    $summary = array_filter($summary);
+
+    if (empty($summary)) {
+      return NULL;
+    }
+
+    $paragraph_summary = implode(', ', $summary);
+    return $paragraph_summary;
+  }
+
+  /**
+   * Returns summary for all text type paragraph.
+   *
+   * @param string $field_name
+   *   Field definition id for paragraph.
+   * @param \Drupal\Core\Field\FieldDefinitionInterface $field_definition
+   *   Field definition for paragraph.
+   *
+   * @return string
+   *   Short summary for text paragraph.
+   */
+  public function getTextSummary($field_name, FieldDefinitionInterface $field_definition) {
+    $text_types = [
+      'text_with_summary',
+      'text',
+      'text_long',
+      'list_string',
+      'string',
+    ];
+
+    $excluded_text_types = [
+      'parent_id',
+      'parent_type',
+      'parent_field_name',
+    ];
+
+    $summary = '';
+    if (in_array($field_definition->getType(), $text_types)) {
+      if (in_array($field_name, $excluded_text_types)) {
+        return $summary;
+      }
+
+      $text = $this->get($field_name)->value;
+      if (strlen($text) > 150) {
+        $text = Unicode::truncate($text, 150);
+      }
+
+      $summary = $text;
+    }
+
+    return trim($summary);
+  }
 
 }

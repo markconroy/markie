@@ -3,6 +3,7 @@
 namespace Drupal\paragraphs\Tests\Experimental;
 
 use Drupal\field_ui\Tests\FieldUiTestTrait;
+use Drupal\paragraphs\Entity\Paragraph;
 
 /**
  * Tests paragraphs behavior plugins.
@@ -24,7 +25,7 @@ class ParagraphsExperimentalBehaviorsTest extends ParagraphsExperimentalTestBase
    * Tests the behavior plugins for paragraphs.
    */
   public function testBehaviorPluginsFields() {
-    $this->addParagraphedContentType('paragraphed_test', 'field_paragraphs');
+    $this->addParagraphedContentType('paragraphed_test');
     $this->loginAsAdmin(['create paragraphed_test content', 'edit any paragraphed_test content']);
 
     // Add a Paragraph type.
@@ -73,6 +74,18 @@ class ParagraphsExperimentalBehaviorsTest extends ParagraphsExperimentalTestBase
     $this->drupalPostForm('admin/structure/paragraphs_type/' . $paragraph_type, $edit, t('Save'));
     $this->assertText('Saved the text_paragraph Paragraphs type.');
 
+    $this->drupalGet('node/add/paragraphed_test');
+
+    // Behavior plugin settings is not available to users without
+    // "edit behavior plugin settings" permission.
+    $this->assertNoFieldByName('field_paragraphs[0][behavior_plugins][test_text_color][text_color]', 'green');
+
+    $this->loginAsAdmin([
+      'create paragraphed_test content',
+      'edit any paragraphed_test content',
+      'edit behavior plugin settings',
+    ]);
+
     // Create a node with a Paragraph.
     $this->drupalGet('node/add/paragraphed_test');
     $this->assertFieldByName('field_paragraphs[0][behavior_plugins][test_text_color][text_color]', 'green');
@@ -83,7 +96,11 @@ class ParagraphsExperimentalBehaviorsTest extends ParagraphsExperimentalTestBase
       'field_paragraphs[0][subform][field_text][0][value]' => 'amazing_plugin_test',
       'field_paragraphs[0][behavior_plugins][test_text_color][text_color]' => $plugin_text,
     ];
-    $this->drupalPostForm(NULL, $edit, t('Save and publish'));
+    // Assert that the behavior form is after the dropbutton.
+    $behavior_xpath = $this->xpath("//div[@id = 'edit-field-paragraphs-0-top']/following-sibling::*[1][@id = 'edit-field-paragraphs-0-behavior-plugins-test-text-color']");
+    $this->assertNotEqual($behavior_xpath, FALSE, 'Behavior form position incorrect');
+
+    $this->drupalPostForm(NULL, $edit, t('Save'));
     // Asserting that the error message is shown.
     $this->assertText('The only allowed values are blue and red.');
     // Updating the text color to an allowed value.
@@ -91,7 +108,7 @@ class ParagraphsExperimentalBehaviorsTest extends ParagraphsExperimentalTestBase
     $edit = [
       'field_paragraphs[0][behavior_plugins][test_text_color][text_color]' => $plugin_text,
     ];
-    $this->drupalPostForm(NULL, $edit, t('Save and publish'));
+    $this->drupalPostForm(NULL, $edit, t('Save'));
     // Assert that the class has been added to the element.
     $this->assertRaw('class="red_plugin_text');
 
@@ -105,13 +122,31 @@ class ParagraphsExperimentalBehaviorsTest extends ParagraphsExperimentalTestBase
       'field_paragraphs[0][behavior_plugins][test_text_color][text_color]' => $updated_text,
       'field_paragraphs[0][behavior_plugins][test_bold_text][bold_text]' => TRUE,
     ];
-    $this->drupalPostForm(NULL, $edit, t('Save and keep published'));
+    $this->drupalPostForm(NULL, $edit, t('Save'));
     $this->assertNoRaw('class="red_plugin_text');
     $this->assertRaw('class="blue_plugin_text bold_plugin_text');
     $this->clickLink('Edit');
     // Assert the plugin fields populate the stored values.
     $this->assertFieldByName('field_paragraphs[0][behavior_plugins][test_text_color][text_color]', $updated_text);
     $this->assertFieldByName('field_paragraphs[0][behavior_plugins][test_bold_text][bold_text]', TRUE);
+
+    $this->loginAsAdmin([
+      'edit any paragraphed_test content',
+    ]);
+
+    $node = $this->getNodeByTitle('paragraphs_plugins_test');
+    $this->drupalGet('node/' . $node->id() . '/edit');
+
+    $this->assertNoFieldByName('field_paragraphs[0][behavior_plugins][test_text_color][text_color]', $updated_text);
+    $this->assertNoFieldByName('field_paragraphs[0][behavior_plugins][test_bold_text][bold_text]', TRUE);
+
+    $this->drupalPostForm(NULL, [], t('Save'));
+
+    // Make sure that values don't change if a user without the 'edit behavior
+    // plugin settings' permission saves a node with paragraphs and enabled
+    // behaviors.
+    $this->assertRaw('class="blue_plugin_text bold_plugin_text');
+    $this->assertNoRaw('class="red_plugin_text');
 
     // Test plugin applicability. Add a paragraph type.
     $paragraph_type = 'text_paragraph_test';
@@ -142,16 +177,31 @@ class ParagraphsExperimentalBehaviorsTest extends ParagraphsExperimentalTestBase
       'title[0][value]' => 'paragraph with no fields',
       'field_paragraphs[0][subform][field_text_test][0][value]' => 'my behavior plugin does not have any field',
     ];
-    $this->drupalPostForm(NULL, $edit, t('Save and publish'));
+    $this->drupalPostForm(NULL, $edit, t('Save'));
     $this->assertRaw('dummy_plugin_text');
+
+    // Tests behavior plugin on paragraph type with no fields.
+    $this->addParagraphsType('fieldless');
+    $this->drupalPostForm('admin/structure/paragraphs_type/fieldless', ['behavior_plugins[test_dummy_behavior][enabled]' => TRUE], t('Save'));
+
+    $this->drupalGet('node/add/paragraphed_test');
+    $this->drupalPostAjaxForm(NULL, [], 'field_paragraphs_fieldless_add_more');
+    $edit = ['title[0][value]' => t('Fieldless')];
+    $this->drupalPostForm(NULL, $edit, t('Save'));
+
+    $this->assertResponse(200);
   }
 
   /**
    * Tests the behavior plugins summary for paragraphs closed mode.
    */
   public function testCollapsedSummary() {
-    $this->addParagraphedContentType('paragraphed_test', 'field_paragraphs');
-    $this->loginAsAdmin(['create paragraphed_test content', 'edit any paragraphed_test content']);
+    $this->addParagraphedContentType('paragraphed_test');
+    $this->loginAsAdmin([
+      'create paragraphed_test content',
+      'edit any paragraphed_test content',
+      'edit behavior plugin settings',
+    ]);
 
     // Add a text paragraph type.
     $paragraph_type = 'text_paragraph';
@@ -178,6 +228,10 @@ class ParagraphsExperimentalBehaviorsTest extends ParagraphsExperimentalTestBase
     // Add a node and enabled plugins.
     $this->drupalPostAjaxForm('node/add/paragraphed_test', [], 'field_paragraphs_nested_paragraph_add_more');
     $this->drupalPostAjaxForm(NULL, [], 'field_paragraphs_1_subform_paragraphs_text_paragraph_add_more');
+
+    $this->assertField('field_paragraphs[0][behavior_plugins][test_bold_text][bold_text]');
+    $this->assertField('field_paragraphs[1][behavior_plugins][test_bold_text][bold_text]');
+
     $edit = [
       'title[0][value]' => 'collapsed_test',
       'field_paragraphs[0][subform][field_text][0][value]' => 'first_paragraph',
@@ -185,20 +239,36 @@ class ParagraphsExperimentalBehaviorsTest extends ParagraphsExperimentalTestBase
       'field_paragraphs[1][subform][paragraphs][0][subform][field_text][0][value]' => 'nested_paragraph',
       'field_paragraphs[1][behavior_plugins][test_bold_text][bold_text]' => TRUE,
     ];
-    $this->drupalPostForm(NULL, $edit, t('Save and publish'));
+    $this->drupalPostForm(NULL, $edit, t('Save'));
 
     // Assert that the summary includes the text of the behavior plugins.
     $this->clickLink('Edit');
     $this->assertRaw('class="paragraphs-collapsed-description">first_paragraph, Text color: blue, Bold: Yes');
-    $this->assertRaw('class="paragraphs-collapsed-description">nested_paragraph, Text color: blue, Bold: No, Bold: Yes');
+    $this->assertRaw('class="paragraphs-collapsed-description">1 child, nested_paragraph, Text color: blue, Bold: No, Bold: Yes');
+
+    // Add an empty nested paragraph.
+    $this->drupalPostAjaxForm('node/add/paragraphed_test', [], 'field_paragraphs_nested_paragraph_add_more');
+    $edit = [
+      'title[0][value]' => 'collapsed_test',
+    ];
+    $this->drupalPostForm(NULL, $edit, t('Save'));
+
+    // Check an empty nested paragraph summary.
+    $this->clickLink('Edit');
+    $this->assertRaw('class="paragraphs-collapsed-description">');
+
   }
 
   /**
    * Tests the behavior plugins subform state submit.
    */
   public function testBehaviorSubform() {
-    $this->addParagraphedContentType('paragraphed_test', 'field_paragraphs');
-    $this->loginAsAdmin(['create paragraphed_test content', 'edit any paragraphed_test content']);
+    $this->addParagraphedContentType('paragraphed_test');
+    $this->loginAsAdmin([
+      'create paragraphed_test content',
+      'edit any paragraphed_test content',
+      'edit behavior plugin settings',
+    ]);
 
     // Add a text paragraph type.
     $paragraph_type = 'text_paragraph';
@@ -235,15 +305,19 @@ class ParagraphsExperimentalBehaviorsTest extends ParagraphsExperimentalTestBase
       'field_paragraphs[1][subform][field_text][0][value]' => 'first_paragraph',
       'field_paragraphs[1][behavior_plugins][test_bold_text][bold_text]' => TRUE,
     ];
-    $this->drupalPostForm(NULL, $edit, t('Save and publish'));
+    $this->drupalPostForm(NULL, $edit, t('Save'));
 
     $this->clickLink('Edit');
     $edit = [
       'field_paragraphs[0][_weight]' => 1,
+      'field_paragraphs[1][behavior_plugins][test_bold_text][bold_text]' => FALSE,
+      'field_paragraphs[1][behavior_plugins][test_text_color][text_color]' => 'red',
       'field_paragraphs[1][_weight]' => 0,
     ];
-    $this->drupalPostForm(NULL, $edit, t('Save and keep published'));
+    $this->drupalPostForm(NULL, $edit, t('Save'));
     $this->assertNoErrorsLogged();
+    $this->clickLink('Edit');
+    $this->assertFieldByName('field_paragraphs[0][behavior_plugins][test_text_color][text_color]', 'red');
 
   }
 }

@@ -11,8 +11,8 @@ test_dependencies:
   - paragraphs:paragraphs
 configure: entity.entity_browser.collection
 
-# Information added by Drupal.org packaging script on 2017-04-20
-version: '8.x-1.0'
+# Information added by Drupal.org packaging script on 2017-09-19
+version: '8.x-1.3'
 core: '8.x'
 project: 'entity_browser'
-datestamp: 1492678157
+datestamp: 1505838852

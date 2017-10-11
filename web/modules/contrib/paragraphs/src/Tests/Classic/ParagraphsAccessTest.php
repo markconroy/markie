@@ -95,7 +95,7 @@ class ParagraphsAccessTest extends ParagraphsTestBase {
     $image_url = file_url_transform_relative($img1_url);
     $this->assertRaw($image_url, 'Image was found in preview');
     $this->clickLink(t('Back to content editing'));
-    $this->drupalPostForm(NULL,  [], 'Save and publish');
+    $this->drupalPostForm(NULL, [], t('Save'));
 
     $node = $this->drupalGetNodeByTitle('Security test node');
 
@@ -130,7 +130,7 @@ class ParagraphsAccessTest extends ParagraphsTestBase {
       'title[0][value]' => 'delete_permissions',
       'field_paragraphs_demo[0][subform][field_text_demo][0][value]' => 'Test',
     ];
-    $this->drupalPostForm(NULL, $edit, 'Save and publish');
+    $this->drupalPostForm(NULL, $edit, t('Save'));
     // Edit the node.
     $this->clickLink(t('Edit'));
     // Check the remove button is present.
@@ -138,7 +138,7 @@ class ParagraphsAccessTest extends ParagraphsTestBase {
     // Delete the Paragraph and save.
     $this->drupalPostAjaxForm(NULL, [], 'field_paragraphs_demo_0_remove');
     $this->drupalPostAjaxForm(NULL, [], 'field_paragraphs_demo_0_confirm_remove');
-    $this->drupalPostForm(NULL, [], t('Save and keep published'));
+    $this->drupalPostForm(NULL, [], t('Save'));
     $node = $this->getNodeByTitle('delete_permissions');
     $this->assertUrl('node/' . $node->id());
   }

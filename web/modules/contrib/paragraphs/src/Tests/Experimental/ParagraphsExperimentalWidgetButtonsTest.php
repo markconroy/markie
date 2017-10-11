@@ -3,6 +3,7 @@
 namespace Drupal\paragraphs\Tests\Experimental;
 
 use Drupal\field_ui\Tests\FieldUiTestTrait;
+use Drupal\Tests\paragraphs\FunctionalJavascript\ParagraphsTestBaseTrait;
 
 /**
  * Tests paragraphs experimental widget buttons.
@@ -12,12 +13,22 @@ use Drupal\field_ui\Tests\FieldUiTestTrait;
 class ParagraphsExperimentalWidgetButtonsTest extends ParagraphsExperimentalTestBase {
 
   use FieldUiTestTrait;
+  use ParagraphsTestBaseTrait;
+
+  /**
+   * Modules to enable.
+   *
+   * @var array
+   */
+  public static $modules = [
+    'paragraphs_test',
+  ];
 
   /**
    * Tests the widget buttons of paragraphs.
    */
   public function testWidgetButtons() {
-    $this->addParagraphedContentType('paragraphed_test', 'field_paragraphs');
+    $this->addParagraphedContentType('paragraphed_test');
 
     $this->loginAsAdmin(['create paragraphed_test content', 'edit any paragraphed_test content']);
     // Add a Paragraph type.
@@ -40,16 +51,16 @@ class ParagraphsExperimentalWidgetButtonsTest extends ParagraphsExperimentalTest
       'field_paragraphs[0][subform][field_text][0][value]' => $text,
     ];
     $this->drupalPostAjaxForm(NULL, [], 'field_paragraphs_text_paragraph_add_more');
-    $this->drupalPostForm(NULL, $edit, t('Save and publish'));
+    $this->drupalPostForm(NULL, $edit, t('Save'));
     $node = $this->drupalGetNodeByTitle('paragraphs_mode_test');
 
-    // Test the 'Open' mode.
+    // Test the 'Open' edit mode.
     $this->drupalGet('node/' . $node->id() . '/edit');
     $this->assertFieldByName('field_paragraphs[0][subform][field_text][0][value]', $text);
-    $this->drupalPostForm(NULL, [], t('Save and keep published'));
+    $this->drupalPostForm(NULL, [], t('Save'));
     $this->assertText($text);
 
-    // Test the 'Closed' mode.
+    // Test the 'Closed' edit mode.
     $this->setParagraphsWidgetMode('paragraphed_test', 'field_paragraphs', 'closed');
     $this->drupalGet('node/' . $node->id() . '/edit');
     // Click "Edit" button.
@@ -63,14 +74,14 @@ class ParagraphsExperimentalWidgetButtonsTest extends ParagraphsExperimentalTest
     $edit = ['field_paragraphs[1][subform][field_text][0][value]' => $closed_mode_text];
     $this->drupalPostAjaxForm(NULL, $edit, 'field_paragraphs_1_collapse');
     // Verify that we have warning message for each paragraph.
-    $this->assertNoUniqueText('You have unsaved changes on this Paragraph item.');
+    $this->assertEqual(2, count($this->xpath("//*[contains(@class, 'paragraphs-icon-changed')]")));
     $this->assertRaw('<div class="paragraphs-collapsed-description">' . $closed_mode_text);
-    $this->drupalPostForm(NULL, [], t('Save and keep published'));
+    $this->drupalPostForm(NULL, [], t('Save'));
     $this->assertText('paragraphed_test ' . $node->label() . ' has been updated.');
     $this->assertText($closed_mode_text);
 
-    // Test the 'Preview' mode.
-    $this->setParagraphsWidgetMode('paragraphed_test', 'field_paragraphs', 'preview');
+    // Test the 'Preview' closed mode.
+    $this->setParagraphsWidgetSettings('paragraphed_test', 'field_paragraphs', ['closed_mode' => 'preview']);
     $this->drupalGet('node/' . $node->id() . '/edit');
     // Click "Edit" button.
     $this->drupalPostAjaxForm(NULL, [], 'field_paragraphs_0_edit');
@@ -80,8 +91,9 @@ class ParagraphsExperimentalWidgetButtonsTest extends ParagraphsExperimentalTest
     // Click "Collapse" button.
     $this->drupalPostAjaxForm(NULL, $edit, 'field_paragraphs_0_collapse');
     $this->assertText('You have unsaved changes on this Paragraph item.');
+    $this->assertEqual(1, count($this->xpath("//*[contains(@class, 'paragraphs-icon-changed')]")));
     $this->assertText($preview_mode_text);
-    $this->drupalPostForm(NULL, [], t('Save and keep published'));
+    $this->drupalPostForm(NULL, [], t('Save'));
     $this->assertText('paragraphed_test ' . $node->label() . ' has been updated.');
     $this->assertText($preview_mode_text);
 
@@ -89,7 +101,7 @@ class ParagraphsExperimentalWidgetButtonsTest extends ParagraphsExperimentalTest
     $this->drupalGet('node/' . $node->id() . '/edit');
     // Click "Remove" button.
     $this->drupalPostAjaxForm(NULL, [], 'field_paragraphs_0_remove');
-    $this->drupalPostForm(NULL, [], t('Save and keep published'));
+    $this->drupalPostForm(NULL, [], t('Save'));
     $this->assertText('paragraphed_test ' . $node->label() . ' has been updated.');
     $this->assertNoText($preview_mode_text);
   }
@@ -98,7 +110,7 @@ class ParagraphsExperimentalWidgetButtonsTest extends ParagraphsExperimentalTest
    * Tests if buttons are present for each widget mode.
    */
   public function testButtonsVisibility() {
-    $this->addParagraphedContentType('paragraphed_test', 'field_paragraphs');
+    $this->addParagraphedContentType('paragraphed_test');
 
     $this->loginAsAdmin(['create paragraphed_test content', 'edit any paragraphed_test content']);
     // Add a Paragraph type.
@@ -121,28 +133,28 @@ class ParagraphsExperimentalWidgetButtonsTest extends ParagraphsExperimentalTest
       'field_paragraphs[0][subform][field_text][0][value]' => $text,
     ];
     $this->drupalPostAjaxForm(NULL, [], 'field_paragraphs_text_paragraph_add_more');
-    $this->drupalPostForm(NULL, $edit, t('Save and publish'));
+    $this->drupalPostForm(NULL, $edit, t('Save'));
     $node = $this->drupalGetNodeByTitle('paragraphs_mode_test');
 
     // Checking visible buttons on "Open" mode.
     $this->drupalGet('node/' . $node->id() . '/edit');
-    $this->assertText('Collapse');
-    $this->assertText('Remove');
-    $this->assertText('Duplicate');
+    $this->assertField('field_paragraphs_0_collapse');
+    $this->assertField('field_paragraphs_0_remove');
+    $this->assertField('field_paragraphs_0_duplicate');
 
     // Checking visible buttons on "Closed" mode.
     $this->setParagraphsWidgetMode('paragraphed_test', 'field_paragraphs', 'closed');
     $this->drupalGet('node/' . $node->id() . '/edit');
-    $this->assertText('Edit');
-    $this->assertText('Remove');
-    $this->assertText('Duplicate');
+    $this->assertField('field_paragraphs_0_edit');
+    $this->assertField('field_paragraphs_0_remove');
+    $this->assertField('field_paragraphs_0_duplicate');
 
     // Checking visible buttons on "Preview" mode.
     $this->setParagraphsWidgetMode('paragraphed_test', 'field_paragraphs', 'closed');
     $this->drupalGet('node/' . $node->id() . '/edit');
-    $this->assertText('Edit');
-    $this->assertText('Remove');
-    $this->assertText('Duplicate');
+    $this->assertField('field_paragraphs_0_edit');
+    $this->assertField('field_paragraphs_0_remove');
+    $this->assertField('field_paragraphs_0_duplicate');
 
     // Checking always show collapse and edit actions.
     $this->addParagraphsType('nested_paragraph');
@@ -161,5 +173,15 @@ class ParagraphsExperimentalWidgetButtonsTest extends ParagraphsExperimentalTest
     // Collapse is present on each nesting level.
     $this->assertFieldByName('field_paragraphs_2_collapse');
     $this->assertFieldByName('field_paragraphs_2_subform_field_nested_0_collapse');
+
+    // Tests hook_paragraphs_widget_actions_alter.
+    $this->drupalGet('node/add/paragraphed_test');
+    $this->drupalPostForm(NULL, NULL, t('Add text'));
+    $this->assertNoField('edit-field-paragraphs-0-top-links-test-button');
+    \Drupal::state()->set('paragraphs_test_dropbutton', TRUE);
+    $this->drupalGet('node/add/paragraphed_test');
+    $this->drupalPostForm(NULL, NULL, t('Add text'));
+    $this->assertNoField('edit-field-paragraphs-0-top-links-test-button');
   }
+
 }

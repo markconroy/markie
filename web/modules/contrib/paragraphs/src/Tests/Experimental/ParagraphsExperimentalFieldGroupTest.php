@@ -29,7 +29,7 @@ class ParagraphsExperimentalFieldGroupTest extends ParagraphsExperimentalTestBas
     $content_type = 'paragraphed_test';
 
     // Add a Paragraphed test content type.
-    $this->addParagraphedContentType($content_type, 'field_paragraphs');
+    $this->addParagraphedContentType($content_type);
 
     $this->addParagraphsType($paragraph_type);
     $this->addParagraphsType('text');
@@ -66,7 +66,7 @@ class ParagraphsExperimentalFieldGroupTest extends ParagraphsExperimentalTestBas
       'title[0][value]' => 'paragraphed_title',
       'field_paragraphs[0][subform][field_text][0][value]' => 'paragraph_value',
     ];
-    $this->drupalPostForm(NULL, $edit, t('Save and publish'));
+    $this->drupalPostForm(NULL, $edit, t('Save'));
   }
 
 }

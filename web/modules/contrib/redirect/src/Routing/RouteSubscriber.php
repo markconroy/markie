@@ -17,6 +17,9 @@ class RouteSubscriber extends RouteSubscriberBase {
     if ($route = $collection->get('image.style_public')) {
       $route->setDefault('_disable_route_normalizer', TRUE);
     }
+    if ($route = $collection->get('image.style_private')) {
+      $route->setDefault('_disable_route_normalizer', TRUE);
+    }
     if ($route = $collection->get('system.files')) {
       $route->setDefault('_disable_route_normalizer', TRUE);
     }

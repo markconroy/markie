@@ -6,6 +6,7 @@ use Drupal\Component\Utility\NestedArray;
 use Drupal\Component\Utility\Html;
 use Drupal\Core\Entity\Entity\EntityFormDisplay;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityReferenceSelection\SelectionPluginManagerInterface;
 use Drupal\Core\Entity\RevisionableInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldFilteredMarkup;
@@ -18,6 +19,7 @@ use Drupal\node\Entity\Node;
 use Drupal\paragraphs;
 use Drupal\paragraphs\ParagraphInterface;
 use Symfony\Component\Validator\ConstraintViolationInterface;
+use Drupal\paragraphs\Plugin\EntityReferenceSelection\ParagraphSelection;
 
 
 /**
@@ -131,7 +133,7 @@ class InlineParagraphsWidget extends WidgetBase {
     $elements['add_mode'] = array(
       '#type' => 'select',
       '#title' => $this->t('Add mode'),
-      '#description' => $this->t('The way to add new paragraphs.'),
+      '#description' => $this->t('The way to add new Paragraphs.'),
       '#options' => array(
         'select' => $this->t('Select list'),
         'button' => $this->t('Buttons'),
@@ -321,7 +323,13 @@ class InlineParagraphsWidget extends WidgetBase {
           $entity_langcode = $paragraphs_entity->language()->getId();
           $source = $form_state->get(['content_translation', 'source']);
           $source_langcode = $source ? $source->getId() : $entity_langcode;
-          $paragraphs_entity = $paragraphs_entity->getTranslation($source_langcode);
+          // Make sure the source language version is used if available. It is a
+          // valid scenario to have no paragraphs items in the source version of
+          // the host and fetching the translation without this check could lead
+          // to an exception.
+          if ($paragraphs_entity->hasTranslation($source_langcode)) {
+            $paragraphs_entity = $paragraphs_entity->getTranslation($source_langcode);
+          }
           // The paragraphs entity has no content translation source field if
           // no paragraph entity field is translatable, even if the host is.
           if ($paragraphs_entity->hasField('content_translation_source')) {
@@ -424,6 +432,7 @@ class InlineParagraphsWidget extends WidgetBase {
               '#weight' => 499,
               '#submit' => array(array(get_class($this), 'paragraphsItemSubmit')),
               '#delta' => $delta,
+              '#limit_validation_errors' => [array_merge($parents, [$field_name, 'add_more'])],
               '#ajax' => array(
                 'callback' => array(get_class($this), 'itemAjax'),
                 'wrapper' => $widget_state['ajax_wrapper_id'],
@@ -666,7 +675,7 @@ class InlineParagraphsWidget extends WidgetBase {
         $element['subform'] = array();
         $element['behavior_plugins'] = [];
         if ($paragraphs_entity) {
-          $summary = $this->addCollapsedSummary($paragraphs_entity);
+          $summary = $paragraphs_entity->getSummary();
           $element['top']['paragraph_summary']['fields_info'] = [
             '#markup' => $summary,
             '#prefix' => '<div class="paragraphs-collapsed-description">',
@@ -698,40 +707,26 @@ class InlineParagraphsWidget extends WidgetBase {
     return $element;
   }
 
+  /**
+   * Returns the sorted allowed types for a entity reference field.
+   *
+   * @return array
+   *   A list of arrays keyed by the paragraph type machine name with the following properties.
+   *     - label: The label of the paragraph type.
+   *     - weight: The weight of the paragraph type.
+   */
   public function getAllowedTypes() {
 
     $return_bundles = array();
-
-    $target_type = $this->getFieldSetting('target_type');
-    $bundles = \Drupal::service('entity_type.bundle.info')->getBundleInfo($target_type);
-
-    if ($this->getSelectionHandlerSetting('target_bundles') !== NULL) {
-      $bundles = array_intersect_key($bundles, $this->getSelectionHandlerSetting('target_bundles'));
-    }
-
-    // Support for the paragraphs reference type.
-    $drag_drop_settings = $this->getSelectionHandlerSetting('target_bundles_drag_drop');
-    if ($drag_drop_settings) {
-      $max_weight = count($bundles);
-
-      foreach ($drag_drop_settings as $bundle_info) {
-        if (isset($bundle_info['weight']) && $bundle_info['weight'] && $bundle_info['weight'] > $max_weight) {
-          $max_weight = $bundle_info['weight'];
-        }
-      }
-
-      // Default weight for new items.
-      $weight = $max_weight + 1;
-      foreach ($bundles as $machine_name => $bundle) {
-        $return_bundles[$machine_name] = array(
-          'label' => $bundle['label'],
-          'weight' => isset($drag_drop_settings[$machine_name]['weight']) ? $drag_drop_settings[$machine_name]['weight'] : $weight,
-        );
-        $weight++;
-      }
+    /** @var \Drupal\Core\Entity\EntityReferenceSelection\SelectionPluginManagerInterface $selection_manager */
+    $selection_manager = \Drupal::service('plugin.manager.entity_reference_selection');
+    $handler = $selection_manager->getSelectionHandler($this->fieldDefinition);
+    if ($handler instanceof ParagraphSelection) {
+      $return_bundles = $handler->getSortedAllowedTypes();
     }
     // Support for other reference types.
     else {
+      $bundles = \Drupal::service('entity_type.bundle.info')->getBundleInfo($this->getFieldSetting('target_type'));
       $weight = 0;
       foreach ($bundles as $machine_name => $bundle) {
         if (!count($this->getSelectionHandlerSetting('target_bundles'))
@@ -747,7 +742,6 @@ class InlineParagraphsWidget extends WidgetBase {
       }
     }
 
-    uasort($return_bundles, 'Drupal\Component\Utility\SortArray::sortByWeightElement');
 
     return $return_bundles;
   }
@@ -850,30 +844,33 @@ class InlineParagraphsWidget extends WidgetBase {
     $field_state['real_item_count'] = $this->realItemCount;
     static::setWidgetState($this->fieldParents, $field_name, $form_state, $field_state);
 
+    $elements += [
+      '#element_validate' => [[$this, 'multipleElementValidate']],
+      '#required' => $this->fieldDefinition->isRequired(),
+      '#field_name' => $field_name,
+      '#cardinality' => $cardinality,
+      '#max_delta' => $max - 1,
+    ];
+
     if ($this->realItemCount > 0) {
       $elements += array(
         '#theme' => 'field_multiple_value_form',
-        '#field_name' => $field_name,
-        '#cardinality' => $cardinality,
         '#cardinality_multiple' => $is_multiple,
-        '#required' => $this->fieldDefinition->isRequired(),
         '#title' => $title,
         '#description' => $description,
-        '#max_delta' => $max-1,
       );
     }
     else {
+      $classes = $this->fieldDefinition->isRequired() ? ['form-required'] : [];
       $elements += [
         '#type' => 'container',
         '#theme_wrappers' => ['container'],
-        '#field_name' => $field_name,
-        '#cardinality' => $cardinality,
         '#cardinality_multiple' => TRUE,
-        '#max_delta' => $max-1,
         'title' => [
           '#type' => 'html_tag',
           '#tag' => 'strong',
           '#value' => $title,
+          '#attributes' => ['class' => $classes],
         ],
         'text' => [
           '#type' => 'container',
@@ -884,6 +881,10 @@ class InlineParagraphsWidget extends WidgetBase {
           ]
         ],
       ];
+
+      if ($this->fieldDefinition->isRequired()) {
+        $elements['title']['#attributes']['class'][] = 'form-required';
+      }
 
       if ($description) {
         $elements['description'] = [
@@ -1233,28 +1234,37 @@ class InlineParagraphsWidget extends WidgetBase {
   }
 
   /**
+   * Special handling to validate form elements with multiple values.
+   *
+   * @param array $elements
+   *   An associative array containing the substructure of the form to be
+   *   validated in this call.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The current state of the form.
+   * @param array $form
+   *   The complete form array.
+   */
+  public function multipleElementValidate(array $elements, FormStateInterface $form_state, array $form) {
+    $field_name = $this->fieldDefinition->getName();
+    $widget_state = static::getWidgetState($elements['#field_parents'], $field_name, $form_state);
+
+    $remove_mode_item_count = $this->getNumberOfParagraphsInMode($widget_state, 'remove');
+    $non_remove_mode_item_count = $widget_state['real_item_count'] - $remove_mode_item_count;
+
+    if ($elements['#required'] && $non_remove_mode_item_count < 1) {
+      $form_state->setError($elements, t('@name field is required.', ['@name' => $this->fieldDefinition->getLabel()]));
+    }
+
+    static::setWidgetState($elements['#field_parents'], $field_name, $form_state, $widget_state);
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function massageFormValues(array $values, array $form, FormStateInterface $form_state) {
-    $entity = $form_state->getFormObject()->getEntity();
     $field_name = $this->fieldDefinition->getName();
     $widget_state = static::getWidgetState($form['#parents'], $field_name, $form_state);
     $element = NestedArray::getValue($form_state->getCompleteForm(), $widget_state['array_parents']);
-
-    $new_revision = FALSE;
-    if ($entity instanceof RevisionableInterface) {
-      if ($entity->isNewRevision()) {
-        $new_revision = TRUE;
-      }
-      // Most of the time we don't know yet if the host entity is going to be
-      // saved as a new revision using RevisionableInterface::isNewRevision().
-      // Most entity types (at least nodes) however use a boolean property named
-      // "revision" to indicate whether a new revision should be saved. Use that
-      // property.
-      elseif ($entity->getEntityType()->hasKey('revision') && $form_state->getValue('revision')) {
-        $new_revision = TRUE;
-      }
-    }
 
     foreach ($values as $delta => &$item) {
       if (isset($widget_state['paragraphs'][$item['_original_delta']]['entity'])
@@ -1266,7 +1276,6 @@ class InlineParagraphsWidget extends WidgetBase {
         if ($widget_state['paragraphs'][$item['_original_delta']]['mode'] == 'edit') {
           $display->extractFormValues($paragraphs_entity, $element[$item['_original_delta']]['subform'], $form_state);
         }
-        $paragraphs_entity->setNewRevision($new_revision);
         // A content entity form saves without any rebuild. It needs to set the
         // language to update it in case of language change.
         $langcode_key = $paragraphs_entity->getEntityType()->getKey('langcode');
@@ -1414,50 +1423,30 @@ class InlineParagraphsWidget extends WidgetBase {
   }
 
   /**
-   * @param \Drupal\paragraphs\Entity\Paragraph $paragraphs_entity
-   *   Entity where to extract the values.
+   * Counts the number of paragraphs in a certain mode in a form substructure.
    *
-   * @return string $collapsed_summary_text
-   *   The text without tags to return.
+   * @param array $widget_state
+   *   The widget state for the form substructure containing information about
+   *   the paragraphs within.
+   * @param string $mode
+   *   The mode to look for.
+   *
+   * @return int
+   *   The number of paragraphs is the given mode.
    */
-  public function addCollapsedSummary(paragraphs\Entity\Paragraph $paragraphs_entity) {
-    $text_types = ['text_with_summary', 'text', 'text_long', 'list_string'];
-    $summary = [];
-    foreach ($paragraphs_entity->getFieldDefinitions() as $key => $value) {
-      if ($value->getType() == 'image') {
-        if ($paragraphs_entity->get($key)->entity) {
-          foreach ($paragraphs_entity->get($key) as $image_key => $image_value) {
-            if ($image_value->title != '') {
-              $text = $image_value->title;
-            }
-            elseif ($image_value->alt != '') {
-              $text = $image_value->alt;
-            }
-            elseif ($text = $image_value->entity->filename->value) {
-              $text = $image_value->entity->filename->value;
-            }
-            if (strlen($text) > 50) {
-              $text = strip_tags(substr($text, 0, 150));
-            }
-            $summary[] = $text;
-          }
-        }
-      }
-      if (in_array($value->getType(), $text_types)) {
-        $text = $paragraphs_entity->get($key)->value;
-        if (strlen($text) > 50) {
-          $text = strip_tags(substr($text, 0, 150));
-        }
-        $summary[] = $text;
-      }
-      if ($field_type = $value->getType() == 'entity_reference_revisions') {
-        if ($paragraphs_entity->get($key) && $paragraphs_entity->get($key)->entity) {
-          $summary[] = $this->addCollapsedSummary($paragraphs_entity->get($key)->entity);
-        }
+  protected function getNumberOfParagraphsInMode(array $widget_state, $mode) {
+    if (!isset($widget_state['paragraphs'])) {
+      return 0;
+    }
+
+    $paragraphs_count = 0;
+    foreach ($widget_state['paragraphs'] as $paragraph) {
+      if ($paragraph['mode'] == $mode) {
+        $paragraphs_count++;
       }
     }
-    $collapsed_summary_text = implode(', ', $summary);
-    return strip_tags($collapsed_summary_text);
+
+    return $paragraphs_count;
   }
 
   /**

@@ -10,13 +10,14 @@ use Drupal\field_ui\Tests\FieldUiTestTrait;
 use Drupal\node\Entity\NodeType;
 use Drupal\paragraphs\Entity\ParagraphsType;
 use Drupal\simpletest\WebTestBase;
+use Drupal\Tests\paragraphs\FunctionalJavascript\ParagraphsTestBaseTrait;
 
 /**
  * Base class for tests.
  */
 abstract class ParagraphsTestBase extends WebTestBase {
 
-  use FieldUiTestTrait;
+  use FieldUiTestTrait, ParagraphsCoreVersionUiTestTrait, ParagraphsTestBaseTrait;
 
   /**
    * Drupal user object created by loginAsAdmin().
@@ -58,7 +59,6 @@ abstract class ParagraphsTestBase extends WebTestBase {
     $this->drupalPlaceBlock('page_title_block');
 
     $this->admin_permissions = [
-      'administer nodes',
       'administer content types',
       'administer node fields',
       'administer paragraphs types',
@@ -93,89 +93,6 @@ abstract class ParagraphsTestBase extends WebTestBase {
     $this->admin_user = $this->drupalCreateUser($permissions);
     $this->drupalLogin($this->admin_user);
     return $this->admin_user;
-  }
-
-  /**
-   * Adds a content type with a Paragraphs field.
-   *
-   * @param string $content_type_name
-   *   Content type name to be used.
-   * @param string $paragraphs_field_name
-   *   Paragraphs field name to be used.
-   */
-  protected function addParagraphedContentType($content_type_name, $paragraphs_field_name) {
-    // Create the content type.
-    $node_type = NodeType::create([
-      'type' => $content_type_name,
-      'name' => $content_type_name,
-    ]);
-    $node_type->save();
-
-    $this->addParagraphsField($content_type_name, $paragraphs_field_name, 'node');
-  }
-
-  /**
-   * Adds a Paragraphs field to a given $entity_type.
-   *
-   * @param string $entity_type_name
-   *   Entity type name to be used.
-   * @param string $paragraphs_field_name
-   *   Paragraphs field name to be used.
-   * @param string $entity_type
-   *   Entity type where to add the field.
-   */
-  protected function addParagraphsField($entity_type_name, $paragraphs_field_name, $entity_type) {
-    // Add a paragraphs field.
-    $field_storage = FieldStorageConfig::create([
-      'field_name' => $paragraphs_field_name,
-      'entity_type' => $entity_type,
-      'type' => 'entity_reference_revisions',
-      'cardinality' => '-1',
-      'settings' => [
-        'target_type' => 'paragraph',
-      ],
-    ]);
-    $field_storage->save();
-    $field = FieldConfig::create([
-      'field_storage' => $field_storage,
-      'bundle' => $entity_type_name,
-      'settings' => [
-        'handler' => 'default:paragraph',
-        'handler_settings' => ['target_bundles' => NULL],
-      ],
-    ]);
-    $field->save();
-
-    $form_display = EntityFormDisplay::create([
-      'targetEntityType' => $entity_type,
-      'bundle' => $entity_type_name,
-      'mode' => 'default',
-      'status' => TRUE,
-    ])
-      ->setComponent($paragraphs_field_name, ['type' => 'entity_reference_paragraphs']);
-    $form_display->save();
-
-    $view_display = EntityViewDisplay::create([
-      'targetEntityType' => $entity_type,
-      'bundle' => $entity_type_name,
-      'mode' => 'default',
-      'status' => TRUE,
-    ])->setComponent($paragraphs_field_name, ['type' => 'entity_reference_revisions_entity_view']);
-    $view_display->save();
-  }
-
-  /**
-   * Adds a Paragraphs type.
-   *
-   * @param string $paragraphs_type_name
-   *   Paragraph type name used to create.
-   */
-  protected function addParagraphsType($paragraphs_type_name) {
-    $paragraphs_type = ParagraphsType::create([
-      'id' => $paragraphs_type_name,
-      'label' => $paragraphs_type_name,
-    ]);
-    $paragraphs_type->save();
   }
 
   /**
@@ -277,6 +194,8 @@ abstract class ParagraphsTestBase extends WebTestBase {
    *   Paragraphs field to change the mode.
    * @param string $mode
    *   Mode to be set. ('closed', 'preview' or 'open').
+   *   'preview' is only allowed in the classic widget. Use
+   *   setParagraphsWidgetSettings for the experimental widget, instead.
    */
   protected function setParagraphsWidgetMode($content_type, $paragraphs_field, $mode) {
     $this->drupalGet('admin/structure/types/manage/' . $content_type . '/form-display');

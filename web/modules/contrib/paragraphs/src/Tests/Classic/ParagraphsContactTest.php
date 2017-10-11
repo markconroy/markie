@@ -36,7 +36,7 @@ class ParagraphsContactTest extends ParagraphsTestBase {
     $contact_form = ContactForm::create(['id' => 'test_contact_form']);
     $contact_form->save();
     // Add a paragraphs field to the contact form.
-    $this->addParagraphsField($contact_form->id(), 'paragraphs', 'contact_message');
+    $this->addParagraphsField($contact_form->id(), 'paragraphs', 'contact_message', 'entity_reference_paragraphs');
 
     // Add a paragraph to the contact form.
     $this->drupalGet('contact/test_contact_form');

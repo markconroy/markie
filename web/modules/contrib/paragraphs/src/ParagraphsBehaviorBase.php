@@ -3,6 +3,7 @@
 namespace Drupal\paragraphs;
 
 use Drupal\Component\Plugin\PluginBase;
+use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Entity\EntityFieldManager;
 use Drupal\Core\Field\FieldConfigInterface;
 use Drupal\Core\Form\FormStateInterface;
@@ -118,7 +119,7 @@ abstract class ParagraphsBehaviorBase extends PluginBase implements ParagraphsBe
    * {@inheritdoc}
    */
   public function buildBehaviorForm(ParagraphInterface $paragraph, array &$form, FormStateInterface $form_state) {
-    return [];
+    return $form;
   }
 
   /**
@@ -130,7 +131,43 @@ abstract class ParagraphsBehaviorBase extends PluginBase implements ParagraphsBe
    * {@inheritdoc}
    */
   public function submitBehaviorForm(ParagraphInterface $paragraph, array &$form, FormStateInterface $form_state) {
-    $paragraph->setBehaviorSettings($this->getPluginId(), $form_state->getValues());
+    $filtered_values = $this->filterBehaviorFormSubmitValues($paragraph, $form, $form_state);
+
+    $paragraph->setBehaviorSettings($this->getPluginId(), $filtered_values);
+  }
+
+  /**
+   * Removes default behavior form values before storing the user-set ones.
+   *
+   * Default implementation considers a value to be default if and only if it is
+   * an empty value. Behavior plugins that do not consider all empty values to
+   * be default should override this method or
+   * \Drupal\paragraphs\ParagraphsBehaviorBase::submitBehaviorForm.
+   *
+   * @param \Drupal\paragraphs\ParagraphInterface $paragraph
+   *   The paragraph.
+   * @param array $form
+   *   An associative array containing the initial structure of the plugin form.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The current state of the form.
+   *
+   * @return array
+   *   An associative array of values submitted to the form with all empty
+   *   leaves removed. Subarrays that only contain empty leaves are also
+   *   removed.
+   */
+  protected function filterBehaviorFormSubmitValues(ParagraphInterface $paragraph, array &$form, FormStateInterface $form_state) {
+    // Keeps removing empty leaves, until there are none left. So if a subarray
+    // only contains empty leaves, that subarray itself will be removed.
+    $new_array = $form_state->getValues();
+
+    do {
+      $old_array = $new_array;
+      $new_array = NestedArray::filter($old_array);
+    }
+    while ($new_array !== $old_array);
+
+    return $new_array;
   }
 
   /**

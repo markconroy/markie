@@ -28,7 +28,7 @@ class ParagraphsExperimentalPreviewTest extends ParagraphsExperimentalTestBase {
    */
   public function testParagraphsPreview() {
     // Create paragraph type Headline + Block.
-    $this->addParagraphedContentType('article', 'field_paragraphs');
+    $this->addParagraphedContentType('article');
     $this->loginAsAdmin([
       'administer node display',
       'create article content',
@@ -63,7 +63,7 @@ class ParagraphsExperimentalPreviewTest extends ParagraphsExperimentalTestBase {
     $paragraph_1 = $this->xpath('//*[@id="edit-field-paragraphs-0-subform-field-text-0-value"]')[0];
     $this->assertEqual($paragraph_1['value'], $test_text_1);
 
-    $this->drupalPostForm(NULL, $edit, t('Save and publish'));
+    $this->drupalPostForm(NULL, $edit, t('Save'));
 
     $this->clickLink('Edit');
     $this->drupalPostAjaxForm(NULL, array(), 'field_paragraphs_text_add_more');
@@ -92,7 +92,7 @@ class ParagraphsExperimentalPreviewTest extends ParagraphsExperimentalTestBase {
     $paragraph_2 = $this->xpath('//*[@id="edit-field-paragraphs-1-subform-field-text-0-value"]')[0];
     $this->assertEqual($paragraph_1['value'], $test_text_1);
     $this->assertEqual($paragraph_2['value'], $new_test_text_2);
-    $this->drupalPostForm(NULL, [], t('Save and keep published'));
+    $this->drupalPostForm(NULL, [], t('Save'));
 
     $this->assertRaw($test_text_1);
     $this->assertRaw($new_test_text_2);

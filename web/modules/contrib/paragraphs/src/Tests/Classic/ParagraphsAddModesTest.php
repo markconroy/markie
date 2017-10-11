@@ -19,7 +19,7 @@ class ParagraphsAddModesTest extends ParagraphsTestBase {
    */
   public function testNoDefaultValue() {
     $this->loginAsAdmin();
-    $this->addParagraphedContentType('paragraphed_test', 'paragraphs_field');
+    $this->addParagraphedContentType('paragraphed_test', 'paragraphs_field', 'entity_reference_paragraphs');
 
     // Edit the field.
     $this->drupalGet('admin/structure/types/manage/paragraphed_test/fields');
@@ -33,13 +33,13 @@ class ParagraphsAddModesTest extends ParagraphsTestBase {
   }
 
   /**
-   * Tests the field creation when no paragraphs types are available.
+   * Tests the field creation when no Paragraphs types are available.
    */
   public function testEmptyAllowedTypes() {
     $this->loginAsAdmin();
-    $this->addParagraphedContentType('paragraphed_test', 'paragraphs');
+    $this->addParagraphedContentType('paragraphed_test', 'paragraphs', 'entity_reference_paragraphs');
 
-    // Edit the field and save when there are no paragraphs types available.
+    // Edit the field and save when there are no Paragraphs types available.
     $this->drupalGet('admin/structure/types/manage/paragraphed_test/fields');
     $this->clickLink(t('Edit'));
     $this->drupalPostForm(NULL, [], t('Save settings'));
@@ -51,11 +51,11 @@ class ParagraphsAddModesTest extends ParagraphsTestBase {
    */
   public function testDropDownMode() {
     $this->loginAsAdmin();
-    // Add two paragraph types.
+    // Add two Paragraph types.
     $this->addParagraphsType('btext');
     $this->addParagraphsType('dtext');
 
-    $this->addParagraphedContentType('paragraphed_test', 'paragraphs');
+    $this->addParagraphedContentType('paragraphed_test', 'paragraphs', 'entity_reference_paragraphs');
     // Enter to the field config since the weight is set through the form.
     $this->drupalGet('admin/structure/types/manage/paragraphed_test/fields/node.paragraphed_test.paragraphs');
     $this->drupalPostForm(NULL, [], 'Save settings');
@@ -85,11 +85,11 @@ class ParagraphsAddModesTest extends ParagraphsTestBase {
    */
   public function testSelectMode() {
     $this->loginAsAdmin();
-    // Add two paragraph types.
+    // Add two Paragraph types.
     $this->addParagraphsType('btext');
     $this->addParagraphsType('dtext');
 
-    $this->addParagraphedContentType('paragraphed_test', 'paragraphs');
+    $this->addParagraphedContentType('paragraphed_test', 'paragraphs', 'entity_reference_paragraphs');
     // Enter to the field config since the weight is set through the form.
     $this->drupalGet('admin/structure/types/manage/paragraphed_test/fields/node.paragraphed_test.paragraphs');
     $this->drupalPostForm(NULL, [], 'Save settings');
@@ -153,7 +153,7 @@ class ParagraphsAddModesTest extends ParagraphsTestBase {
    * Tests if setting for default paragraph type is working properly.
    */
   public function testSettingDefaultParagraphType() {
-    $this->addParagraphedContentType('paragraphed_test', 'paragraphs');
+    $this->addParagraphedContentType('paragraphed_test', 'paragraphs', 'entity_reference_paragraphs');
     $this->loginAsAdmin([
       'administer content types',
       'administer node form display',
@@ -189,7 +189,8 @@ class ParagraphsAddModesTest extends ParagraphsTestBase {
     // Check if default type is created only for new host
     $this->setDefaultParagraphType('paragraphed_test', 'paragraphs', 'paragraphs_settings_edit', 'text_image');
     $this->removeDefaultParagraphType('paragraphed_test');
-    $this->drupalPostForm(NULL, ['title[0][value]' => 'New Host'], 'Save and publish');
+    $edit = ['title[0][value]' => 'New Host'];
+    $this->drupalPostForm(NULL, $edit, t('Save'));
     $this->drupalGet('node/1/edit');
     $this->assertText('No Paragraph added yet.');
   }
@@ -198,7 +199,7 @@ class ParagraphsAddModesTest extends ParagraphsTestBase {
    * Tests the default paragraph type behavior for a field with a single type.
    */
   public function testDefaultParagraphTypeWithSingleType() {
-    $this->addParagraphedContentType('paragraphed_test', 'paragraphs');
+    $this->addParagraphedContentType('paragraphed_test', 'paragraphs', 'entity_reference_paragraphs');
     $this->loginAsAdmin([
       'administer content types',
       'administer node form display',

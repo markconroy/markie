@@ -11,7 +11,7 @@ paragraphs.type_add:
   path: '/admin/structure/paragraphs_type/add'
   defaults:
     _entity_form: 'paragraphs_type.add'
-    _title: 'Add paragraphs type'
+    _title: 'Add Paragraphs type'
   requirements:
     _permission: 'administer paragraphs types'
 

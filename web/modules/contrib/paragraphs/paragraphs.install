@@ -206,3 +206,10 @@ function paragraphs_update_8011() {
   $storage_definition->setRevisionable(TRUE);
   \Drupal::entityDefinitionUpdateManager()->updateFieldStorageDefinition($storage_definition);
 }
+
+/**
+ * Install file module.
+ */
+function paragraphs_update_8012() {
+  \Drupal::service('module_installer')->install(['file']);
+}
