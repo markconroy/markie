@@ -6,10 +6,13 @@ dependencies:
     - core.entity_view_mode.node.teaser
     - field.field.node.article.comment
     - field.field.node.article.field_building_blocks
+    - field.field.node.article.field_intro
     - field.field.node.article.field_main_image
+    - field.field.node.article.field_site_section
     - field.field.node.article.field_tags
     - node.type.article
   module:
+    - text
     - user
 _core:
   default_config_hash: 4NcL2hSQZBpJbYtNuh5jC6kyQTcAc1m5bQpTegEWEso
@@ -18,6 +21,13 @@ targetEntityType: node
 bundle: article
 mode: teaser
 content:
+  field_intro:
+    type: text_default
+    weight: 1
+    region: content
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
   field_main_image:
     type: entity_reference_entity_view
     weight: 0
@@ -27,20 +37,13 @@ content:
       view_mode: teaser
       link: false
     third_party_settings: {  }
-  field_tags:
-    type: entity_reference_label
-    weight: 2
-    region: content
-    settings:
-      link: true
-    third_party_settings: {  }
-    label: above
   links:
-    weight: 3
+    weight: 2
     region: content
     settings: {  }
     third_party_settings: {  }
 hidden:
   comment: true
   field_building_blocks: true
-  field_intro: true
+  field_site_section: true
+  field_tags: true
