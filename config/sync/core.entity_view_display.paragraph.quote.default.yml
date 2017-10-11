@@ -1,0 +1,24 @@
+uuid: a0719cf2-2e30-4c25-97f4-141ecc69b06f
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.paragraph.quote.field_p_quote_quote
+    - paragraphs.paragraphs_type.quote
+  module:
+    - text
+_core:
+  default_config_hash: vaXLG8G3i4SjwdC36yOnmB_SXWVrPbxmdB8hORgK51Y
+id: paragraph.quote.default
+targetEntityType: paragraph
+bundle: quote
+mode: default
+content:
+  field_p_quote_quote:
+    weight: 0
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    type: text_default
+    region: content
+hidden: {  }

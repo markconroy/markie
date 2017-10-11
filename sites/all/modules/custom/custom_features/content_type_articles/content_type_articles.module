@@ -1,7 +1,0 @@
-<?php
-/**
- * @file
- * Code for the Content Type - Articles feature.
- */
-
-include_once 'content_type_articles.features.inc';

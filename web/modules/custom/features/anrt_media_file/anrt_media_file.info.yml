@@ -1,0 +1,14 @@
+name: 'Media: File'
+description: 'A feature to create a media file upload bundle.'
+type: module
+core: 8.x
+dependencies:
+  - crop
+  - entity_browser
+  - entity_browser_entity_form
+  - field
+  - file
+  - image
+  - media_entity
+  - user
+  - views

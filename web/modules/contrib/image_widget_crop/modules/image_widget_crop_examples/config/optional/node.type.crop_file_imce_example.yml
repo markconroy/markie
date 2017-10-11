@@ -1,0 +1,17 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - menu_ui
+third_party_settings:
+  menu_ui:
+    available_menus:
+      - main
+    parent: 'main:'
+name: 'Crop File IMCE Example'
+type: crop_file_imce_example
+description: 'Implementation of ImageWidgetCrop using File (core) with IMCE integration.'
+help: ''
+new_revision: true
+preview_mode: 0
+display_submitted: true

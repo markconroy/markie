@@ -1,0 +1,25 @@
+uuid: ef85bd25-9b3c-4939-b38b-0c26bd00b709
+langcode: en
+status: true
+dependencies:
+  module:
+    - crop
+_core:
+  default_config_hash: GTJVJNwetylOi7MSWUVWNSO50-4WtRcxqjBhQysQVU4
+name: widescreen_television
+label: 'Widescreen Television'
+effects:
+  6666736e-4301-48da-9c18-c1045954720a:
+    uuid: 6666736e-4301-48da-9c18-c1045954720a
+    id: crop_crop
+    weight: 1
+    data:
+      crop_type: widescreen_television
+  f64917ac-a2d8-45dd-8c46-a6195b09f258:
+    uuid: f64917ac-a2d8-45dd-8c46-a6195b09f258
+    id: image_scale
+    weight: 2
+    data:
+      width: 1600
+      height: null
+      upscale: true

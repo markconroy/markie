@@ -1,0 +1,35 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.paragraph.preview
+    - field.field.paragraph.image_with_text.field_p_it_alignment
+    - field.field.paragraph.image_with_text.field_p_it_image
+    - field.field.paragraph.image_with_text.field_p_it_text
+    - paragraphs.paragraphs_type.image_with_text
+  module:
+    - text
+id: paragraph.image_with_text.preview
+targetEntityType: paragraph
+bundle: image_with_text
+mode: preview
+content:
+  field_p_it_image:
+    weight: 0
+    label: hidden
+    settings:
+      link: true
+      view_mode: default
+    third_party_settings: {  }
+    type: entity_reference_entity_view
+    region: content
+  field_p_it_text:
+    weight: 1
+    label: hidden
+    settings:
+      trim_length: 140
+    third_party_settings: {  }
+    type: text_trimmed
+    region: content
+hidden:
+  field_p_it_alignment: true

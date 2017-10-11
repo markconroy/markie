@@ -1,0 +1,62 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.media.image.field_image_crop
+    - image.style.thumbnail
+    - media_entity.bundle.image
+  module:
+    - image
+    - user
+_core:
+  default_config_hash: u69HtEYqBnRchkIuSJYhIMNZ33D0Uui_GwauVOcK8Ws
+id: media.image.default
+targetEntityType: media
+bundle: image
+mode: default
+content:
+  created:
+    label: hidden
+    type: timestamp
+    weight: 0
+    settings:
+      date_format: medium
+      custom_date_format: ''
+      timezone: ''
+    third_party_settings: {  }
+    region: content
+  field_image_crop:
+    weight: 2
+    label: above
+    settings:
+      image_style: small_16_9
+      image_link: ''
+    third_party_settings: {  }
+    type: image
+    region: content
+  name:
+    label: hidden
+    type: string
+    weight: -5
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    region: content
+  thumbnail:
+    type: image
+    weight: 1
+    label: hidden
+    settings:
+      image_style: thumbnail
+      image_link: ''
+    third_party_settings: {  }
+    region: content
+  uid:
+    label: hidden
+    type: author
+    weight: 0
+    settings: {  }
+    third_party_settings: {  }
+    region: content
+hidden:
+  langcode: true

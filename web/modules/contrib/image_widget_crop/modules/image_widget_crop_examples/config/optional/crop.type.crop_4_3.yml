@@ -1,0 +1,13 @@
+langcode: en
+status: true
+dependencies: {  }
+_core:
+  default_config_hash: We4ikTM-maDNX3IFQtY2u9bSEPl80nNCsNuyhuJJLMo
+label: 'Crop 4:3'
+id: crop_4_3
+description: ''
+aspect_ratio: '4:3'
+soft_limit_width: null
+soft_limit_height: null
+hard_limit_width: null
+hard_limit_height: null

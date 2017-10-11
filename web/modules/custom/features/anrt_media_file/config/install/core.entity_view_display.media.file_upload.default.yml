@@ -1,0 +1,25 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.media.file_upload.field_m_file_file
+    - media_entity.bundle.file_upload
+  module:
+    - file
+id: media.file_upload.default
+targetEntityType: media
+bundle: file_upload
+mode: default
+content:
+  field_m_file_file:
+    weight: 0
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    type: file_default
+    region: content
+hidden:
+  created: true
+  name: true
+  thumbnail: true
+  uid: true

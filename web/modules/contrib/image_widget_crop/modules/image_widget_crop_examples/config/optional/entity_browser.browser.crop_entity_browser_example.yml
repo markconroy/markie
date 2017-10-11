@@ -1,0 +1,44 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - views.view.crop_entity_browser_example
+  module:
+    - media_entity_image
+    - views
+_core:
+  default_config_hash: KlXjtRRC4QohES_Crwe3_y20g04FdUCVWMVV586wyTs
+name: crop_entity_browser_example
+label: 'Crop Entity Browser Example'
+display: modal
+display_configuration:
+  width: '650'
+  height: '500'
+  link_text: 'Select entities'
+  auto_open: false
+selection_display: no_display
+selection_display_configuration: { }
+widget_selector: tabs
+widget_selector_configuration: {  }
+widgets:
+  b3d7ac0e-ddab-46db-b76c-273be53ecd81:
+    settings:
+      view: crop_entity_browser_example
+      view_display: crop_entity_browser_example
+      submit_text: 'Select media'
+      auto_select: false
+    uuid: b3d7ac0e-ddab-46db-b76c-273be53ecd81
+    weight: 1
+    label: 'List Média (image)'
+    id: view
+  e28c4727-1eea-49a4-97a4-0b2b5f379c4a:
+    settings:
+      extensions: 'jpg jpeg png gif'
+      media_bundle: image
+      upload_location: 'public://'
+      multiple: true
+      submit_text: 'Select media'
+    uuid: e28c4727-1eea-49a4-97a4-0b2b5f379c4a
+    weight: 2
+    label: 'New Média (Image)'
+    id: media_entity_image_upload

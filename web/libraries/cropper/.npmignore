@@ -1,0 +1,14 @@
+# Files to ignore
+
+build
+docs
+examples
+test
+/_*
+/.*
+*.map
+bower.json
+postcss.config.json
+rollup.config.js
+CONTRIBUTING.md
+ISSUE_TEMPLATE.md

@@ -1,7 +1,0 @@
-<?php
-/**
- * @file
- * Code for the Pages - Contact feature.
- */
-
-include_once 'pages_contact.features.inc';

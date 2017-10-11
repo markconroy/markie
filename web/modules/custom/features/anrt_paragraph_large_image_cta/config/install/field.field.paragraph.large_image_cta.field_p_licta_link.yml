@@ -1,0 +1,22 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.paragraph.field_p_licta_link
+    - paragraphs.paragraphs_type.large_image_cta
+  module:
+    - link
+id: paragraph.large_image_cta.field_p_licta_link
+field_name: field_p_licta_link
+entity_type: paragraph
+bundle: large_image_cta
+label: 'CTA Link'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  link_type: 17
+  title: 2
+field_type: link

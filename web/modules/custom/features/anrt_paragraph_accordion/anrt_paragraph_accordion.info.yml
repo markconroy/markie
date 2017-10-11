@@ -1,0 +1,9 @@
+name: 'Paragraph: Accordion'
+description: 'A feature to create an Accordion paragraph type.'
+type: module
+core: 8.x
+dependencies:
+  - entity_reference_revisions
+  - field
+  - paragraphs
+  - text

@@ -1,0 +1,19 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - crop
+    - media_entity_image
+third_party_settings:
+  crop:
+    image_field: field_m_image_image
+id: image
+label: Image
+description: 'We use this media bundle to add images to our website.'
+type: image
+queue_thumbnail_downloads: false
+new_revision: false
+type_configuration:
+  source_field: field_m_image_image
+  gather_exif: false
+field_map: {  }

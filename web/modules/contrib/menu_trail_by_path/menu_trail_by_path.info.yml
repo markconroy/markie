@@ -1,0 +1,12 @@
+type: module
+name: Menu Trail By Path
+description: Expand menus and set active-trail according to the current path.
+package: Other
+# core: 8.x
+# version: 8.x-1.0
+
+# Information added by Drupal.org packaging script on 2016-12-17
+version: '8.x-1.1'
+core: '8.x'
+project: 'menu_trail_by_path'
+datestamp: 1482006784

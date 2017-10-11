@@ -1,0 +1,28 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - image.style.teaser_narrow
+    - image.style.teaser_wide
+  theme:
+    - bartik
+id: teaser
+label: Teaser
+image_style_mappings:
+  -
+    breakpoint_id: bartik.large
+    multiplier: 1x
+    image_mapping_type: image_style
+    image_mapping: teaser_wide
+  -
+    breakpoint_id: bartik.medium
+    multiplier: 1x
+    image_mapping_type: image_style
+    image_mapping: teaser_wide
+  -
+    breakpoint_id: bartik.small
+    multiplier: 1x
+    image_mapping_type: image_style
+    image_mapping: teaser_narrow
+breakpoint_group: bartik
+fallback_image_style: teaser_wide

@@ -1,0 +1,24 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.paragraph.preview
+    - field.field.paragraph.tiled_layout.field_p_tl_tiles
+    - paragraphs.paragraphs_type.tiled_layout
+  module:
+    - entity_reference_revisions
+id: paragraph.tiled_layout.preview
+targetEntityType: paragraph
+bundle: tiled_layout
+mode: preview
+content:
+  field_p_tl_tiles:
+    type: entity_reference_revisions_entity_view
+    weight: 0
+    label: hidden
+    settings:
+      view_mode: preview
+      link: ''
+    third_party_settings: {  }
+    region: content
+hidden: {  }

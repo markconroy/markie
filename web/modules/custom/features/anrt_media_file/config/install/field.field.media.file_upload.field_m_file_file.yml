@@ -1,0 +1,26 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.media.field_m_file_file
+    - media_entity.bundle.file_upload
+  module:
+    - file
+id: media.file_upload.field_m_file_file
+field_name: field_m_file_file
+entity_type: media
+bundle: file_upload
+label: File
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  file_directory: 'media/file-uploads/[date:custom:Y]-[date:custom:m]'
+  file_extensions: 'txt pdf doc docx xls xlsx ppt pptx odt ods odp png jpg jpeg gif'
+  max_filesize: ''
+  description_field: true
+  handler: 'default:file'
+  handler_settings: {  }
+field_type: file

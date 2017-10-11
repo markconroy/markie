@@ -1,0 +1,10 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - node.type.crop_media_example
+id: node.crop_media_example
+target_entity_type_id: node
+target_bundle: crop_media_example
+default_langcode: site_default
+language_alterable: false

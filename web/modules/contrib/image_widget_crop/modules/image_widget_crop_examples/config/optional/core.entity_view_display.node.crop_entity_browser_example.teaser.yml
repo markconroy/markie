@@ -1,0 +1,32 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.node.teaser
+    - field.field.node.crop_entity_browser_example.body
+    - field.field.node.crop_entity_browser_example.field_image_crop_entity_browser
+    - node.type.crop_entity_browser_example
+  module:
+    - text
+    - user
+_core:
+  default_config_hash: l3aJlRZKNAAjOYCNRrBJGRplEqwXQkDzhbd29IQ-L4Q
+id: node.crop_entity_browser_example.teaser
+targetEntityType: node
+bundle: crop_entity_browser_example
+mode: teaser
+content:
+  body:
+    label: hidden
+    type: text_summary_or_trimmed
+    weight: 101
+    settings:
+      trim_length: 600
+    third_party_settings: {  }
+    region: content
+  links:
+    weight: 100
+    region: content
+hidden:
+  field_image_crop_entity_browser: true
+  langcode: true

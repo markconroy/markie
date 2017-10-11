@@ -1,0 +1,6 @@
+{
+  "name": "drupal/menu_trail_by_path",
+  "description": "Expand menus and set active-trail according to the current path.",
+  "type": "drupal-module",
+  "license": "MIT"
+}

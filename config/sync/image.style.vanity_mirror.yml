@@ -1,0 +1,25 @@
+uuid: 2d340bd3-dbc1-4020-a90a-2dcb6da8ab3e
+langcode: en
+status: true
+dependencies:
+  module:
+    - crop
+_core:
+  default_config_hash: TFQsBR1UxqrfatphwzC5jwa197GUqL4koc7us1pfZiA
+name: vanity_mirror
+label: 'Vanity Mirror'
+effects:
+  84956906-756e-442b-8958-ede5666c5ab3:
+    uuid: 84956906-756e-442b-8958-ede5666c5ab3
+    id: crop_crop
+    weight: 1
+    data:
+      crop_type: vanity_mirror
+  b66b738a-0d30-4937-9fb4-28fad10d8abf:
+    uuid: b66b738a-0d30-4937-9fb4-28fad10d8abf
+    id: image_scale
+    weight: 2
+    data:
+      width: 600
+      height: null
+      upscale: true

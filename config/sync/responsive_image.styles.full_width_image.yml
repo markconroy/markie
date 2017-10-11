@@ -1,0 +1,32 @@
+uuid: e6d9de88-b830-431e-8226-60d3d80e1dcd
+langcode: en
+status: true
+dependencies:
+  config:
+    - image.style.square
+    - image.style.traditional_television
+    - image.style.widescreen_television
+  theme:
+    - bartik
+_core:
+  default_config_hash: 9YuuxMK_pW6vAtFBpDnaMA0ZHUFeOtjZJwtRVOwO4UA
+id: full_width_image
+label: 'Full Width Image'
+image_style_mappings:
+  -
+    breakpoint_id: bartik.large
+    multiplier: 1x
+    image_mapping_type: image_style
+    image_mapping: widescreen_television
+  -
+    breakpoint_id: bartik.medium
+    multiplier: 1x
+    image_mapping_type: image_style
+    image_mapping: traditional_television
+  -
+    breakpoint_id: bartik.small
+    multiplier: 1x
+    image_mapping_type: image_style
+    image_mapping: square
+breakpoint_group: bartik
+fallback_image_style: widescreen_television

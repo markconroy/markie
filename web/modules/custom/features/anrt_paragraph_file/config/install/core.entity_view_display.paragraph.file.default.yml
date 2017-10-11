@@ -1,0 +1,20 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.paragraph.file.field_p_file_file
+    - paragraphs.paragraphs_type.file
+id: paragraph.file.default
+targetEntityType: paragraph
+bundle: file
+mode: default
+content:
+  field_p_file_file:
+    weight: 0
+    label: hidden
+    settings:
+      link: true
+    third_party_settings: {  }
+    type: entity_reference_label
+    region: content
+hidden: {  }

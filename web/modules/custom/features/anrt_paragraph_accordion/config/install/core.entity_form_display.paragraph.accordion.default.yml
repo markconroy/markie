@@ -1,0 +1,29 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.paragraph.accordion.field_p_a_item
+    - paragraphs.paragraphs_type.accordion
+  module:
+    - paragraphs
+id: paragraph.accordion.default
+targetEntityType: paragraph
+bundle: accordion
+mode: default
+content:
+  field_p_a_item:
+    type: entity_reference_paragraphs
+    weight: 0
+    settings:
+      title: 'Accordion Item'
+      title_plural: 'Accordion Items'
+      edit_mode: preview
+      add_mode: dropdown
+      form_display_mode: default
+      default_paragraph_type: accordion_item
+    third_party_settings: {  }
+    region: content
+hidden:
+  created: true
+  status: true
+  uid: true

@@ -1,6 +1,14 @@
-# Ignore configuration files that may contain sensitive information.
-sites/*/settings*.php
+# Ignore sensitive information
+/web/sites/*/settings.php
+/web/sites/*/settings.php
+/web/sites/*/settings.local.php
+/web/sites/default/settings.local.php
 
-# Ignore paths that contain user-generated content.
-sites/*/files
-sites/*/private
+# Ignore Drupal's file directory
+/web/sites/*/files/
+
+# Ignore SimpleTest multi-site environment.
+/web/sites/simpletest
+
+# Ignore local services.yml file
+web/sites/default/development.services.yml

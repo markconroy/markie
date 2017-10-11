@@ -1,0 +1,6 @@
+langcode: en
+status: true
+dependencies: {  }
+id: image_with_text
+label: 'Image with Text'
+behavior_plugins: {  }

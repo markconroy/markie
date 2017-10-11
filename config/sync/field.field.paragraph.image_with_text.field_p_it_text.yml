@@ -1,0 +1,23 @@
+uuid: ef4a5893-7b17-4a47-b709-a31a74681b32
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.paragraph.field_p_it_text
+    - paragraphs.paragraphs_type.image_with_text
+  module:
+    - text
+_core:
+  default_config_hash: 0MhNH3yKsHNIOhbUJxtDAArCHX7Mk-Qd3J3qXSFQdck
+id: paragraph.image_with_text.field_p_it_text
+field_name: field_p_it_text
+entity_type: paragraph
+bundle: image_with_text
+label: Text
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: text_long

@@ -1,0 +1,25 @@
+uuid: e5dbce8e-6d9e-4fa5-a4ed-6059fc07d5bf
+langcode: en
+status: true
+dependencies:
+  module:
+    - crop
+_core:
+  default_config_hash: VP4OffHIUtIsXaAu5PghINsZjscatRfYSVdssLTcnT8
+name: traditional_television
+label: 'Traditional Television'
+effects:
+  bcbb3d3f-32dc-4204-90d0-693bdd438d91:
+    uuid: bcbb3d3f-32dc-4204-90d0-693bdd438d91
+    id: crop_crop
+    weight: 1
+    data:
+      crop_type: traditional_television
+  2389cdba-eb4b-4942-8af4-fe031c89f183:
+    uuid: 2389cdba-eb4b-4942-8af4-fe031c89f183
+    id: image_scale
+    weight: 2
+    data:
+      width: 960
+      height: null
+      upscale: true

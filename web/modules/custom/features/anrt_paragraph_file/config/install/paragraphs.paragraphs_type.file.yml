@@ -1,0 +1,6 @@
+langcode: en
+status: true
+dependencies: {  }
+id: file
+label: File
+behavior_plugins: {  }

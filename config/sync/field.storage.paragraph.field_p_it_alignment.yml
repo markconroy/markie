@@ -1,0 +1,29 @@
+uuid: c523f9f5-99ef-4ce8-bfd9-9e13d349e22c
+langcode: en
+status: true
+dependencies:
+  module:
+    - options
+    - paragraphs
+_core:
+  default_config_hash: okt5lMbutgp9lpeXKq_AWSoh2-dHRHhik8vSNKeBFWM
+id: paragraph.field_p_it_alignment
+field_name: field_p_it_alignment
+entity_type: paragraph
+type: list_string
+settings:
+  allowed_values:
+    -
+      value: left
+      label: 'Image Left, Text Right'
+    -
+      value: right
+      label: 'Image Right, Text Left'
+  allowed_values_function: ''
+module: options
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

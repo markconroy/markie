@@ -1,0 +1,23 @@
+uuid: ef732764-5c22-4e79-84cb-3cba0e0da7f9
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.paragraph.field_p_it_alignment
+    - paragraphs.paragraphs_type.image_with_text
+  module:
+    - options
+_core:
+  default_config_hash: CB9GI7R0pTT-4Yg2oglffrKF21NKt9KZ4njBGR7GdWw
+id: paragraph.image_with_text.field_p_it_alignment
+field_name: field_p_it_alignment
+entity_type: paragraph
+bundle: image_with_text
+label: Alignment
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: list_string

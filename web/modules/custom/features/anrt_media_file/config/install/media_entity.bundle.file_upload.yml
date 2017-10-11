@@ -1,0 +1,16 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - crop
+third_party_settings:
+  crop:
+    image_field: null
+id: file_upload
+label: 'File Upload'
+description: 'We use this media type to upload files to our website.'
+type: generic
+queue_thumbnail_downloads: false
+new_revision: false
+type_configuration: {  }
+field_map: {  }

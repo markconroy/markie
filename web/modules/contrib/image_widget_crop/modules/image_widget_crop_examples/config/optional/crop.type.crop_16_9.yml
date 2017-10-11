@@ -1,0 +1,13 @@
+langcode: en
+status: true
+dependencies: {  }
+_core:
+  default_config_hash: IaQ5Z1SFZ9nEJDymlXEVIuV9Hioc3k_QnG_fa1iSxqE
+label: 'Crop 16:9'
+id: crop_16_9
+description: ''
+aspect_ratio: '16:9'
+soft_limit_width: null
+soft_limit_height: null
+hard_limit_width: null
+hard_limit_height: null

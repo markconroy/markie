@@ -1,0 +1,6 @@
+name: 'Image Crop Types'
+description: 'A feature to create some default crop types, based (mostly) on television screen dimensions.'
+type: module
+core: 8.x
+dependencies:
+  - crop

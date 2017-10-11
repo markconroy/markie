@@ -1,0 +1,9 @@
+uuid: b5ec219a-935a-4bf9-9b77-12e8ee24a78a
+langcode: en
+status: true
+dependencies: {  }
+_core:
+  default_config_hash: vnFORggcCGo3wRaEO0xMnmqJcK9qm1lCtVO69bl0lbs
+id: video
+label: Video
+behavior_plugins: {  }

@@ -1,0 +1,11 @@
+name: 'Paragraph: Image'
+description: 'A feature to create an Image paragraph bundle.'
+type: module
+core: 8.x
+dependencies:
+  - anrt_media_image
+  - entity_browser_entity_form
+  - field
+  - inline_entity_form
+  - media_entity
+  - paragraphs

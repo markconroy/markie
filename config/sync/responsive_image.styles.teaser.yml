@@ -1,0 +1,31 @@
+uuid: ae3b6332-de37-40e3-af91-96bd9dda5896
+langcode: en
+status: true
+dependencies:
+  config:
+    - image.style.teaser_narrow
+    - image.style.teaser_wide
+  theme:
+    - bartik
+_core:
+  default_config_hash: _Gwh3HD2Ep5vj_eWB-WW2SN5aWGqjrWxShjNxI8YpBE
+id: teaser
+label: Teaser
+image_style_mappings:
+  -
+    breakpoint_id: bartik.wide
+    multiplier: 1x
+    image_mapping_type: image_style
+    image_mapping: teaser_wide
+  -
+    breakpoint_id: bartik.narrow
+    multiplier: 1x
+    image_mapping_type: image_style
+    image_mapping: teaser_narrow
+  -
+    breakpoint_id: bartik.mobile
+    multiplier: 1x
+    image_mapping_type: image_style
+    image_mapping: teaser_narrow
+breakpoint_group: bartik
+fallback_image_style: teaser_wide

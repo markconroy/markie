@@ -1,0 +1,29 @@
+/**
+ * @file
+ * This is the styling for .cta class.
+ */
+
+
+.cta {
+  a {
+    @include rem(padding, 2rem 0);
+    @include border-radius(5px);
+    @extend %transition;
+    background: $white;
+    border: 1px solid $black;
+    color: $col1;
+    display: block;
+    margin: auto;
+    text-decoration: none;
+    text-transform: uppercase;
+    width: 300px;
+    &:focus,
+    &:hover {
+      background: $col2;
+      color: $white;
+    }
+    @include breakpoint($small) {
+      margin: 0;
+    }
+  }
+}

@@ -1,0 +1,50 @@
+uuid: 9278021d-d31e-4f53-b778-e1eb82822301
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_building_blocks
+    - node.type.page
+    - paragraphs.paragraphs_type.image
+    - paragraphs.paragraphs_type.image_with_text
+    - paragraphs.paragraphs_type.quote
+    - paragraphs.paragraphs_type.text
+    - paragraphs.paragraphs_type.video
+  module:
+    - entity_reference_revisions
+id: node.page.field_building_blocks
+field_name: field_building_blocks
+entity_type: node
+bundle: page
+label: 'Building Blocks'
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:paragraph'
+  handler_settings:
+    target_bundles:
+      text: text
+      image: image
+      image_with_text: image_with_text
+      quote: quote
+      video: video
+    target_bundles_drag_drop:
+      text:
+        enabled: true
+        weight: -11
+      image:
+        enabled: true
+        weight: -10
+      image_with_text:
+        enabled: true
+        weight: -9
+      quote:
+        enabled: true
+        weight: -8
+      video:
+        enabled: true
+        weight: -7
+field_type: entity_reference_revisions

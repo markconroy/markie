@@ -1,0 +1,11 @@
+langcode: en
+status: true
+dependencies: {  }
+label: 'Vanity Mirror (9:16)'
+id: vanity_mirror
+description: 'This crop type crops images into a portrait format, like a vanity mirror - 9:16, basically it''s a widescreen television turned on its side!'
+aspect_ratio: '9:16'
+soft_limit_width: null
+soft_limit_height: null
+hard_limit_width: null
+hard_limit_height: null

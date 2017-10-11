@@ -1,4 +1,0 @@
-name = JSON
-description = "Outputs nodes as JSON at node/nid/json"
-package = Services
-core = 7.x

@@ -1,0 +1,19 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - menu_ui
+third_party_settings:
+  menu_ui:
+    available_menus:
+      - main
+    parent: 'main:'
+_core:
+  default_config_hash: WelJr3yIdetjeMZ1qOtAKZhgU79xsCh_ChMfAvCBOYM
+name: 'Crop Entity Browser Example'
+type: crop_entity_browser_example
+description: 'Implementation of ImageWidgetCrop with Entity Browser integration.'
+help: ''
+new_revision: true
+preview_mode: 0
+display_submitted: true

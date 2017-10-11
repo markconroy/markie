@@ -1,0 +1,32 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.node.teaser
+    - field.field.node.crop_media_example.body
+    - field.field.node.crop_media_example.field_image_crop_media
+    - node.type.crop_media_example
+  module:
+    - text
+    - user
+_core:
+  default_config_hash: Qoxkv28L3CRfyvF9vh-8Jy-NNPmr_67b2p0MCcEYp3A
+id: node.crop_media_example.teaser
+targetEntityType: node
+bundle: crop_media_example
+mode: teaser
+content:
+  body:
+    label: hidden
+    type: text_summary_or_trimmed
+    weight: 101
+    settings:
+      trim_length: 600
+    third_party_settings: {  }
+    region: content
+  links:
+    weight: 100
+    region: content
+hidden:
+  field_image_crop_media: true
+  langcode: true

@@ -1,0 +1,5 @@
+application:
+  autowire:
+    commands:
+      forced: {}
+      name: {}

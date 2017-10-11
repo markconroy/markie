@@ -1,0 +1,13 @@
+langcode: en
+status: true
+dependencies: {  }
+_core:
+  default_config_hash: wozJdSjHwix5kgNAj53AvVs9hsyp-o5v5oGAbKhzDLU
+label: 'Free crop'
+id: crop_free_ratio
+description: ''
+aspect_ratio: ''
+soft_limit_width: null
+soft_limit_height: null
+hard_limit_width: null
+hard_limit_height: null
