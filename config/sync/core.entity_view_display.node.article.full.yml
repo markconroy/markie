@@ -61,3 +61,4 @@ content:
     third_party_settings: {  }
 hidden:
   comment: true
+  field_site_section: true
