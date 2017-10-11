@@ -1,18 +1,21 @@
-uuid: e295c009-2640-4e53-87dc-db1564adaeef
+uuid: 7fcc97a7-2141-47f4-bab7-d1e70b784539
 langcode: en
 status: true
 dependencies:
   config:
     - core.entity_view_mode.node.teaser
     - node.type.article
-    - system.menu.main
+    - taxonomy.vocabulary.tags
+  content:
+    - 'taxonomy_term:tags:adef13b5-82f4-4de8-90ba-d0d355e38122'
   module:
     - node
+    - taxonomy
     - user
-id: articles
-label: Articles
+id: drupal_planet
+label: 'Drupal Planet'
 module: views
-description: 'A view to list the articles I have written.'
+description: 'A view to list the Drupal Planet entries'
 tag: ''
 base_table: node_field_data
 base_field: nid
@@ -142,6 +145,14 @@ display:
           entity_type: node
           entity_field: type
           plugin_id: bundle
+        tid:
+          id: tid
+          table: taxonomy_index
+          field: tid
+          value:
+            - 6
+          vid: tags
+          plugin_id: taxonomy_index_tid
       sorts:
         created:
           id: created
@@ -158,7 +169,7 @@ display:
           expose:
             label: ''
           granularity: second
-      title: Blog
+      title: 'Drupal Planet'
       header: {  }
       footer: {  }
       empty: {  }
@@ -171,6 +182,27 @@ display:
         - 'languages:language_content'
         - 'languages:language_interface'
         - url.query_args
+        - user
+        - 'user.node_grants:view'
+        - user.permissions
+      tags: {  }
+  feed_1:
+    display_plugin: feed
+    id: feed_1
+    display_title: Feed
+    position: 2
+    display_options:
+      display_extenders: {  }
+      row:
+        type: node_rss
+        options: {  }
+      path: planet/feed
+    cache_metadata:
+      max-age: -1
+      contexts:
+        - 'languages:language_content'
+        - 'languages:language_interface'
+        - user
         - 'user.node_grants:view'
         - user.permissions
       tags: {  }
@@ -181,18 +213,14 @@ display:
     position: 1
     display_options:
       display_extenders: {  }
-      path: blog
-      menu:
-        type: normal
-        title: Blog
-        menu_name: main
-        weight: -48
+      path: planet
     cache_metadata:
       max-age: -1
       contexts:
         - 'languages:language_content'
         - 'languages:language_interface'
         - url.query_args
+        - user
         - 'user.node_grants:view'
         - user.permissions
       tags: {  }

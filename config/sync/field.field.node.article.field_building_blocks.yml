@@ -5,6 +5,7 @@ dependencies:
   config:
     - field.storage.node.field_building_blocks
     - node.type.article
+    - paragraphs.paragraphs_type.file
     - paragraphs.paragraphs_type.image
     - paragraphs.paragraphs_type.image_with_text
     - paragraphs.paragraphs_type.quote
@@ -31,6 +32,7 @@ settings:
       image_with_text: image_with_text
       quote: quote
       video: video
+      file: file
     target_bundles_drag_drop:
       text:
         enabled: true
@@ -47,4 +49,7 @@ settings:
       video:
         enabled: true
         weight: -7
+      file:
+        enabled: true
+        weight: 12
 field_type: entity_reference_revisions

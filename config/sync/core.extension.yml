@@ -4,9 +4,11 @@ module:
   anrt_entity_browsers: 0
   anrt_image_crop_types: 0
   anrt_image_styles: 0
+  anrt_media_file: 0
   anrt_media_image: 0
   anrt_media_video: 0
   anrt_media_view_modes: 0
+  anrt_paragraph_file: 0
   anrt_paragraph_image: 0
   anrt_paragraph_image_with_text: 0
   anrt_paragraph_quote: 0

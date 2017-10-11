@@ -43,3 +43,4 @@ content:
 hidden:
   comment: true
   field_building_blocks: true
+  field_intro: true

@@ -1,0 +1,41 @@
+uuid: c991e76c-32f7-42f7-bfa0-5744b4b2ff35
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.media.file_upload.field_m_file_file
+    - media_entity.bundle.file_upload
+  module:
+    - file
+    - path
+_core:
+  default_config_hash: hZ3Npx6qBV4Ybudeu1w99wt7uRsSHmEEuzzUJR9d6M8
+id: media.file_upload.default
+targetEntityType: media
+bundle: file_upload
+mode: default
+content:
+  field_m_file_file:
+    weight: 1
+    settings:
+      progress_indicator: throbber
+    third_party_settings: {  }
+    type: file_generic
+    region: content
+  name:
+    type: string_textfield
+    weight: 0
+    region: content
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  path:
+    type: path
+    weight: 30
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+hidden:
+  created: true
+  uid: true

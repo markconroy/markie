@@ -1,0 +1,28 @@
+uuid: 1e6542b7-04af-4e5e-a1f8-885071dcd5a2
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.media.file_upload.field_m_file_file
+    - media_entity.bundle.file_upload
+  module:
+    - file
+_core:
+  default_config_hash: qjHbHUGe0wNi08egprnsJ52iTPjaEX8FZE1v4hOytG4
+id: media.file_upload.default
+targetEntityType: media
+bundle: file_upload
+mode: default
+content:
+  field_m_file_file:
+    weight: 0
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    type: file_default
+    region: content
+hidden:
+  created: true
+  name: true
+  thumbnail: true
+  uid: true
