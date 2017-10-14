@@ -7,10 +7,20 @@ _core:
 id: node
 label: Content
 tags:
+  canonical_url: '[current-page:url]'
   description: '[node:field_intro]'
+  image_src: '[node:field_main_image]'
   title: '[node:title] | [site:name] | Lead Frontend Drupal Developer'
   article_author: 'https://www.facebook.com/markconroy'
+  og_description: '[node:field_intro]'
+  og_image: '[node:field_main_image]'
+  og_image_secure_url: '[node:field_main_image]'
+  og_image_url: '[node:field_main_image]'
+  og_see_also: 'https://mark.ie/blog'
   twitter_cards_creator: '@markconroy'
   twitter_cards_creator_id: '16218176'
+  twitter_cards_description: '[node:field_intro]'
+  twitter_cards_image: '[node:field_main_image]'
+  twitter_cards_page_url: '[node:url]'
   twitter_cards_site: '@markconroy'
   twitter_cards_site_id: '16218176'
