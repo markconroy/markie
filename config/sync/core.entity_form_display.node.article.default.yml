@@ -7,6 +7,7 @@ dependencies:
     - field.field.node.article.field_building_blocks
     - field.field.node.article.field_intro
     - field.field.node.article.field_main_image
+    - field.field.node.article.field_metatags
     - field.field.node.article.field_site_section
     - field.field.node.article.field_tags
     - node.type.article
@@ -14,6 +15,7 @@ dependencies:
     - comment
     - entity_browser_entity_form
     - inline_entity_form
+    - metatag
     - paragraphs
     - path
     - text
@@ -70,6 +72,12 @@ content:
       entity_browser_entity_form:
         entity_browser_id: image_entity_browser
     type: inline_entity_form_complex
+    region: content
+  field_metatags:
+    weight: 26
+    settings: {  }
+    third_party_settings: {  }
+    type: metatag_firehose
     region: content
   field_site_section:
     weight: 5

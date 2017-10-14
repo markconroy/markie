@@ -8,6 +8,8 @@ dependencies:
     - field.field.node.article.field_building_blocks
     - field.field.node.article.field_intro
     - field.field.node.article.field_main_image
+    - field.field.node.article.field_metatags
+    - field.field.node.article.field_site_section
     - field.field.node.article.field_tags
     - node.type.article
   module:
@@ -41,8 +43,8 @@ content:
     weight: 0
     label: hidden
     settings:
-      link: true
-      view_mode: default
+      view_mode: full_width
+      link: false
     third_party_settings: {  }
     type: entity_reference_entity_view
     region: content
@@ -61,4 +63,5 @@ content:
     third_party_settings: {  }
 hidden:
   comment: true
+  field_metatags: true
   field_site_section: true

@@ -8,12 +8,14 @@ dependencies:
     - field.field.node.article.field_building_blocks
     - field.field.node.article.field_intro
     - field.field.node.article.field_main_image
+    - field.field.node.article.field_metatags
     - field.field.node.article.field_site_section
     - field.field.node.article.field_tags
     - node.type.article
   module:
     - comment
     - entity_reference_revisions
+    - metatag
     - text
     - user
 _core:
@@ -55,6 +57,13 @@ content:
       link: true
     third_party_settings: {  }
     type: entity_reference_label
+    region: content
+  field_metatags:
+    weight: 115
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    type: metatag_empty_formatter
     region: content
   field_site_section:
     weight: 114

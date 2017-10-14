@@ -1,0 +1,19 @@
+uuid: 4bc9c6fb-a2f4-48eb-9df5-ea0cf7496d6e
+langcode: en
+status: true
+dependencies:
+  module:
+    - metatag
+    - node
+id: node.field_metatags
+field_name: field_metatags
+entity_type: node
+type: metatag
+settings: {  }
+module: metatag
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

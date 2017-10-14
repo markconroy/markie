@@ -14,6 +14,7 @@ tags:
   og_image_url: '[node:field_main_image]'
   og_site_name: Mark.ie
   og_title: '[current-page:title]'
+  og_url: '[current-page:url]'
   twitter_cards_creator: '@markconroy'
   twitter_cards_creator_id: '16218176'
   twitter_cards_description: '[node:field_intro]'

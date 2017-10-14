@@ -5,8 +5,10 @@ dependencies:
   config:
     - field.field.node.page.field_building_blocks
     - field.field.node.page.field_intro
+    - field.field.node.page.field_metatags
     - node.type.page
   module:
+    - metatag
     - paragraphs
     - path
     - text
@@ -42,6 +44,12 @@ content:
       placeholder: ''
     third_party_settings: {  }
     type: text_textarea
+    region: content
+  field_metatags:
+    weight: 123
+    settings: {  }
+    third_party_settings: {  }
+    type: metatag_firehose
     region: content
   path:
     type: path
