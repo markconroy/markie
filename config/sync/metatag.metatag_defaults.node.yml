@@ -1,0 +1,16 @@
+uuid: 4e9fcb5a-83ed-4256-9d44-8846728ceaa8
+langcode: en
+status: true
+dependencies: {  }
+_core:
+  default_config_hash: ydpmSCtxLjO9xqkBxObkeYx0Bf2dkW-d8bB_6Q1Ggjs
+id: node
+label: Content
+tags:
+  description: '[node:field_intro]'
+  title: '[node:title] | [site:name] | Lead Frontend Drupal Developer'
+  article_author: 'https://www.facebook.com/markconroy'
+  twitter_cards_creator: '@markconroy'
+  twitter_cards_creator_id: '16218176'
+  twitter_cards_site: '@markconroy'
+  twitter_cards_site_id: '16218176'
