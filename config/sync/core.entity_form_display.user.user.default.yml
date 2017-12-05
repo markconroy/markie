@@ -1,4 +1,3 @@
-uuid: a6e0cf32-9a79-4f6e-8ee2-17b8d85c900e
 langcode: en
 status: true
 dependencies:
@@ -8,8 +7,6 @@ dependencies:
   module:
     - image
     - user
-_core:
-  default_config_hash: K-1rBM8mTIkFp9RqOC2tMRUukOQ1xbRCfSKK8dEddnA
 id: user.user.default
 targetEntityType: user
 bundle: user

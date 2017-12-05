@@ -1,17 +1,8 @@
-uuid: d3aad871-901b-4362-ab90-bd06d997ac86
 langcode: en
 status: true
 dependencies: {  }
-_core:
-  default_config_hash: yBqw6UD3j0MM1yoDSVDif7nw4SNdoS2e385nw--3ysk
 id: front
 label: 'Front page'
 tags:
   canonical_url: '[site:url]'
-  content_language: en
-  description: 'Welcome to Mark.ie. The web-home of Lead Frontend Drupal Developer, Drupal Core Developer, and DrupalCon speaker Mark Conroy.'
   shortlink: '[site:url]'
-  title: '[site:name] | Lead Frontend Drupal Developer Ireland'
-  og_image: 'https://mark.ie/sites/default/files/media/images/2017-10/markconroy-frontend.jpg'
-  og_image_secure_url: 'https://mark.ie/sites/default/files/media/images/2017-10/markconroy-frontend.jpg'
-  og_site_name: Mark.ie

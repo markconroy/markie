@@ -1,19 +1,12 @@
-uuid: 2d88e6d9-a296-4bdf-9ab5-82b0ec39cd95
 langcode: en
 status: true
 dependencies:
   config:
     - field.field.node.page.field_building_blocks
-    - field.field.node.page.field_intro
-    - field.field.node.page.field_metatags
     - node.type.page
   module:
-    - metatag
     - paragraphs
     - path
-    - text
-_core:
-  default_config_hash: sb0qCkzU_8mNq29NehYAU8jCBXWPLeX0UN8sYFVGVcw
 id: node.page.default
 targetEntityType: node
 bundle: page
@@ -26,7 +19,8 @@ content:
     settings: {  }
     third_party_settings: {  }
   field_building_blocks:
-    weight: 122
+    type: entity_reference_paragraphs
+    weight: 121
     settings:
       title: 'Building Block'
       title_plural: 'Building Blocks'
@@ -35,21 +29,6 @@ content:
       form_display_mode: default
       default_paragraph_type: _none
     third_party_settings: {  }
-    type: entity_reference_paragraphs
-    region: content
-  field_intro:
-    weight: 121
-    settings:
-      rows: 5
-      placeholder: ''
-    third_party_settings: {  }
-    type: text_textarea
-    region: content
-  field_metatags:
-    weight: 123
-    settings: {  }
-    third_party_settings: {  }
-    type: metatag_firehose
     region: content
   path:
     type: path

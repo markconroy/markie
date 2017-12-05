@@ -1,11 +1,8 @@
-uuid: f949a093-9bb0-428f-aaa3-c2e60e3972f0
 langcode: en
 status: true
 dependencies:
   module:
     - crop
-_core:
-  default_config_hash: 37gIW-sA8Ikn4sBCjqsTsSeGpdHJB6RklyQ6HGSVDdQ
 name: teaser_narrow
 label: 'Teaser Narrow'
 effects:

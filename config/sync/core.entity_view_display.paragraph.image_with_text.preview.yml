@@ -1,4 +1,3 @@
-uuid: 689c69b6-6e8b-458e-b70e-9bada1413183
 langcode: en
 status: true
 dependencies:
@@ -10,8 +9,6 @@ dependencies:
     - paragraphs.paragraphs_type.image_with_text
   module:
     - text
-_core:
-  default_config_hash: aZEYY9PpQOK60iWIVhfwsP6mEG0QX2uPuheUB9mJZaw
 id: paragraph.image_with_text.preview
 targetEntityType: paragraph
 bundle: image_with_text
@@ -21,8 +18,8 @@ content:
     weight: 0
     label: hidden
     settings:
-      link: true
-      view_mode: default
+      view_mode: preview
+      link: false
     third_party_settings: {  }
     type: entity_reference_entity_view
     region: content

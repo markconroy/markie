@@ -1,25 +1,8 @@
-uuid: 326b42f3-80c9-432d-946f-6fcc07efc820
 langcode: en
 status: true
 dependencies: {  }
-_core:
-  default_config_hash: 5rOnjIF_aDyGBmfXNhJnkPXxQMlem0CmVmggV-TF3Fg
 id: global
 label: Global
 tags:
-  title: '[current-page:title] | [site:name] - Lead Frontend Drupal Developer Ireland'
-  article_author: 'https://www.facebook.com/markconroy'
-  og_image: '[node:field_main_image]'
-  og_image_secure_url: '[node:field_main_image]'
-  og_image_url: '[node:field_main_image]'
-  og_site_name: Mark.ie
-  og_title: '[current-page:title]'
-  og_url: '[current-page:url]'
-  twitter_cards_creator: '@markconroy'
-  twitter_cards_creator_id: '16218176'
-  twitter_cards_description: '[node:field_intro]'
-  twitter_cards_image: '[node:field_main_image]'
-  twitter_cards_page_url: '[current-page:url]'
-  twitter_cards_site: '@markconroy'
-  twitter_cards_site_id: '16218176'
-  twitter_cards_title: '[current-page:title]'
+  canonical_url: '[current-page:url]'
+  title: '[current-page:title] | [site:name]'

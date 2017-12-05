@@ -1,0 +1,16 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.paragraph.section_break.field_p_sbr_hr
+    - paragraphs.paragraphs_type.section_break
+id: paragraph.section_break.default
+targetEntityType: paragraph
+bundle: section_break
+mode: default
+content: {  }
+hidden:
+  created: true
+  field_p_sbr_hr: true
+  status: true
+  uid: true

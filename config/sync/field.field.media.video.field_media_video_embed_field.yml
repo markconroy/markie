@@ -1,4 +1,3 @@
-uuid: ec0209fc-0d0b-4754-9882-e1f1af4cf0e3
 langcode: en
 status: true
 dependencies:
@@ -7,8 +6,6 @@ dependencies:
     - media_entity.bundle.video
   module:
     - video_embed_field
-_core:
-  default_config_hash: s0fRdH-ukYES8apuij2fc5yhq2n4h6XBOWj8kG74Ma0
 id: media.video.field_media_video_embed_field
 field_name: field_media_video_embed_field
 entity_type: media

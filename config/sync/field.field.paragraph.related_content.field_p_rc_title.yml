@@ -1,0 +1,18 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.paragraph.field_p_rc_title
+    - paragraphs.paragraphs_type.related_content
+id: paragraph.related_content.field_p_rc_title
+field_name: field_p_rc_title
+entity_type: paragraph
+bundle: related_content
+label: Title
+description: 'Add an optional title to appear above the related content. E.g. ''<strong>Related News</strong>'' or ''<strong>Related Content</strong>'' or ''<strong>Read More Like This</strong>'' etc'
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

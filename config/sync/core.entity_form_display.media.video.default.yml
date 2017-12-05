@@ -1,4 +1,3 @@
-uuid: ebf8940c-300d-44f7-89dc-4bc82c691483
 langcode: en
 status: true
 dependencies:
@@ -6,10 +5,7 @@ dependencies:
     - field.field.media.video.field_media_video_embed_field
     - media_entity.bundle.video
   module:
-    - path
     - video_embed_field
-_core:
-  default_config_hash: 0Jz8m5oAn_dHxKFLX-CtqDG3E2dcQP4AcZ9STHTj208
 id: media.video.default
 targetEntityType: media
 bundle: video
@@ -29,12 +25,7 @@ content:
       size: 60
       placeholder: ''
     third_party_settings: {  }
-  path:
-    type: path
-    weight: 30
-    region: content
-    settings: {  }
-    third_party_settings: {  }
 hidden:
   created: true
+  path: true
   uid: true

@@ -1,9 +1,8 @@
-uuid: 15b80a27-f2a1-489d-929d-ce8df31758ea
 langcode: en
 status: true
 dependencies: {  }
-_core:
-  default_config_hash: PCHAYyY88jKp-Zl6nY35nVGIvOY0ypSYnYWisw7FyC8
 id: file
 label: File
+icon_uuid: null
+description: null
 behavior_plugins: {  }

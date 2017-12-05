@@ -1,0 +1,29 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.paragraph.tiled_layout.field_p_tl_tiles
+    - paragraphs.paragraphs_type.tiled_layout
+  module:
+    - paragraphs
+id: paragraph.tiled_layout.default
+targetEntityType: paragraph
+bundle: tiled_layout
+mode: default
+content:
+  field_p_tl_tiles:
+    type: entity_reference_paragraphs
+    weight: 0
+    settings:
+      title: Tile
+      title_plural: Tiles
+      edit_mode: preview
+      add_mode: dropdown
+      form_display_mode: default
+      default_paragraph_type: tile
+    third_party_settings: {  }
+    region: content
+hidden:
+  created: true
+  status: true
+  uid: true

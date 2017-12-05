@@ -1,0 +1,14 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - crop
+name: user_defined
+label: 'User Defined'
+effects:
+  d20242d5-d41c-41bb-97cd-ca6fdcbc5c16:
+    uuid: d20242d5-d41c-41bb-97cd-ca6fdcbc5c16
+    id: crop_crop
+    weight: 1
+    data:
+      crop_type: user_defined

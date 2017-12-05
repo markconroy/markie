@@ -1,0 +1,8 @@
+langcode: en
+status: true
+dependencies: {  }
+id: related_content
+label: 'Related Content'
+icon_uuid: null
+description: ''
+behavior_plugins: {  }

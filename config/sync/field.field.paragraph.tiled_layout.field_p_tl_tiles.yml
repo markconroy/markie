@@ -1,0 +1,47 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.paragraph.field_p_tl_tiles
+    - paragraphs.paragraphs_type.tile
+    - paragraphs.paragraphs_type.tiled_layout
+  module:
+    - entity_reference_revisions
+id: paragraph.tiled_layout.field_p_tl_tiles
+field_name: field_p_tl_tiles
+entity_type: paragraph
+bundle: tiled_layout
+label: Tiles
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:paragraph'
+  handler_settings:
+    target_bundles:
+      tile: tile
+    target_bundles_drag_drop:
+      file:
+        weight: 8
+        enabled: false
+      image:
+        weight: 9
+        enabled: false
+      quote:
+        weight: 10
+        enabled: false
+      text:
+        weight: 11
+        enabled: false
+      tile:
+        enabled: true
+        weight: 12
+      tiled_layout:
+        weight: 13
+        enabled: false
+      video:
+        weight: 14
+        enabled: false
+field_type: entity_reference_revisions

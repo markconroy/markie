@@ -1,11 +1,8 @@
-uuid: bdb0041d-8bbd-4f7b-bdb5-7fb66dd38264
 langcode: en
 status: true
 dependencies:
   module:
     - media_entity
-_core:
-  default_config_hash: LpYN5OIYB2g6thZU1Rhrm92tPgEuAKTL1jpFkUOQPhc
 id: media.teaser
 label: Teaser
 targetEntityType: media

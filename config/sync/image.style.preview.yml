@@ -1,0 +1,22 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - crop
+name: preview
+label: Preview
+effects:
+  3af7ece3-d7e6-49c4-9abe-0384996773c4:
+    uuid: 3af7ece3-d7e6-49c4-9abe-0384996773c4
+    id: crop_crop
+    weight: 1
+    data:
+      crop_type: traditional_television
+  391c50a1-a661-4255-8ecd-f5e4b9bbd4c1:
+    uuid: 391c50a1-a661-4255-8ecd-f5e4b9bbd4c1
+    id: image_scale
+    weight: 2
+    data:
+      width: 200
+      height: null
+      upscale: true

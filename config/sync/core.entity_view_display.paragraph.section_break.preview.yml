@@ -1,0 +1,23 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.paragraph.preview
+    - field.field.paragraph.section_break.field_p_sbr_hr
+    - paragraphs.paragraphs_type.section_break
+id: paragraph.section_break.preview
+targetEntityType: paragraph
+bundle: section_break
+mode: preview
+content:
+  field_p_sbr_hr:
+    type: boolean
+    weight: 0
+    region: content
+    label: hidden
+    settings:
+      format: default
+      format_custom_false: ''
+      format_custom_true: ''
+    third_party_settings: {  }
+hidden: {  }

@@ -1,13 +1,10 @@
-uuid: 2d340bd3-dbc1-4020-a90a-2dcb6da8ab3e
 langcode: en
 status: true
 dependencies:
   module:
     - crop
-_core:
-  default_config_hash: TFQsBR1UxqrfatphwzC5jwa197GUqL4koc7us1pfZiA
 name: vanity_mirror
-label: 'Vanity Mirror'
+label: 'Vanity Mirror (9:16)'
 effects:
   84956906-756e-442b-8958-ede5666c5ab3:
     uuid: 84956906-756e-442b-8958-ede5666c5ab3

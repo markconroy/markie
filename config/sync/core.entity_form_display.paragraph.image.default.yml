@@ -1,22 +1,20 @@
-uuid: 4df50f76-fd6c-4bae-b81a-b6c4ab9d2eee
 langcode: en
 status: true
 dependencies:
   config:
     - field.field.paragraph.image.field_p_image_image
+    - field.field.paragraph.image.field_p_image_style
     - paragraphs.paragraphs_type.image
   module:
     - entity_browser_entity_form
     - inline_entity_form
-_core:
-  default_config_hash: 8OlWJoeTazob-1gniEau0hHAljHSmPIcwOQ8aqg519Y
 id: paragraph.image.default
 targetEntityType: paragraph
 bundle: image
 mode: default
 content:
   field_p_image_image:
-    weight: 0
+    weight: 1
     settings:
       form_mode: default
       override_labels: true
@@ -29,6 +27,12 @@ content:
       entity_browser_entity_form:
         entity_browser_id: image_entity_browser
     type: inline_entity_form_complex
+    region: content
+  field_p_image_style:
+    weight: 0
+    settings: {  }
+    third_party_settings: {  }
+    type: options_select
     region: content
 hidden:
   created: true

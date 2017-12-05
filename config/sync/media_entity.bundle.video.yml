@@ -1,4 +1,3 @@
-uuid: fbdfe68b-30b7-4271-9038-cb1e6f0dfc74
 langcode: en
 status: true
 dependencies:
@@ -8,8 +7,6 @@ dependencies:
 third_party_settings:
   crop:
     image_field: null
-_core:
-  default_config_hash: k1QNah6ShpvS_xKHjleu8YVjzM7tAxJsHu1xOP-_VnM
 id: video
 label: Video
 description: 'We use this media bundle to add videos to our website.'

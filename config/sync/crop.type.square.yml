@@ -1,9 +1,6 @@
-uuid: 0008a029-3b3e-4b81-97c6-cad94ded2039
 langcode: en
 status: true
 dependencies: {  }
-_core:
-  default_config_hash: A93ANygUZ6iSUl6Fnq4TiqPerKpHli9C0BIs_Ospq7k
 label: 'Square (1:1)'
 id: square
 description: 'This crop type crops images into squares - 1:1 ratio.'

@@ -1,0 +1,33 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.paragraph.preview
+    - field.field.paragraph.large_image_cta.field_p_licta_image
+    - field.field.paragraph.large_image_cta.field_p_licta_link
+    - field.field.paragraph.large_image_cta.field_p_licta_title
+    - paragraphs.paragraphs_type.large_image_cta
+id: paragraph.large_image_cta.preview
+targetEntityType: paragraph
+bundle: large_image_cta
+mode: preview
+content:
+  field_p_licta_image:
+    weight: 1
+    label: hidden
+    settings:
+      view_mode: preview
+      link: false
+    third_party_settings: {  }
+    type: entity_reference_entity_view
+    region: content
+  field_p_licta_title:
+    weight: 0
+    label: hidden
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: content
+hidden:
+  field_p_licta_link: true

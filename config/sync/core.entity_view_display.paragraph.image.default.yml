@@ -1,12 +1,10 @@
-uuid: 1ea2e1ab-ea27-4458-9503-9145fc0c4977
 langcode: en
 status: true
 dependencies:
   config:
     - field.field.paragraph.image.field_p_image_image
+    - field.field.paragraph.image.field_p_image_style
     - paragraphs.paragraphs_type.image
-_core:
-  default_config_hash: ttlZU-3m4TKK3gwGhDzSSkZ1C4rnZFIT7HM0-yZmDVU
 id: paragraph.image.default
 targetEntityType: paragraph
 bundle: image
@@ -21,4 +19,5 @@ content:
     third_party_settings: {  }
     type: entity_reference_entity_view
     region: content
-hidden: {  }
+hidden:
+  field_p_image_style: true

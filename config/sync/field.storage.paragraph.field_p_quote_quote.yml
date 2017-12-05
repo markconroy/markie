@@ -1,12 +1,9 @@
-uuid: 3f068b9e-605d-4242-aee5-ce28a2cd587b
 langcode: en
 status: true
 dependencies:
   module:
     - paragraphs
     - text
-_core:
-  default_config_hash: E_dDUVE0dk_wQGtNp31Dn2maZWagNyvAaqZhbYAogNs
 id: paragraph.field_p_quote_quote
 field_name: field_p_quote_quote
 entity_type: paragraph

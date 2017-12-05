@@ -1,4 +1,3 @@
-uuid: 2b6c8848-dbd6-4b8e-b0a1-366ba2ad703d
 langcode: en
 status: true
 dependencies:
@@ -8,8 +7,6 @@ dependencies:
   module:
     - entity_browser_entity_form
     - inline_entity_form
-_core:
-  default_config_hash: FHu56euB2Pm06-jim_irD3vCDIY5DCVeMfIZHKN4vtE
 id: paragraph.file.default
 targetEntityType: paragraph
 bundle: file

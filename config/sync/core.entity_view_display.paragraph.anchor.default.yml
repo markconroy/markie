@@ -1,0 +1,13 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.paragraph.anchor.field_p_anchor_anchor
+    - paragraphs.paragraphs_type.anchor
+id: paragraph.anchor.default
+targetEntityType: paragraph
+bundle: anchor
+mode: default
+content: {  }
+hidden:
+  field_p_anchor_anchor: true

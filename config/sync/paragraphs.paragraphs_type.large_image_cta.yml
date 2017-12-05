@@ -1,0 +1,8 @@
+langcode: en
+status: true
+dependencies: {  }
+id: large_image_cta
+label: 'Large Image CTA'
+icon_uuid: null
+description: null
+behavior_plugins: {  }

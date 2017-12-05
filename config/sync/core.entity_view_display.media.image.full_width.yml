@@ -1,4 +1,3 @@
-uuid: ff8a7af9-3ac2-4837-8e04-dc8295e3798d
 langcode: en
 status: true
 dependencies:
@@ -9,8 +8,6 @@ dependencies:
     - responsive_image.styles.full_width_image
   module:
     - responsive_image
-_core:
-  default_config_hash: gDzZe51kUauMWHFXNVPnYjLmTnsN8FvrlvvvqlTgraI
 id: media.image.full_width
 targetEntityType: media
 bundle: image

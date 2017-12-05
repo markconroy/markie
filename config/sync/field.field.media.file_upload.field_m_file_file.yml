@@ -1,4 +1,3 @@
-uuid: 7aee7b07-9451-4298-bc69-14f93347883b
 langcode: en
 status: true
 dependencies:
@@ -7,8 +6,6 @@ dependencies:
     - media_entity.bundle.file_upload
   module:
     - file
-_core:
-  default_config_hash: xDcdZCNcxAMNdAviUPkE09X7esFWIepBxmx0rdQtGeE
 id: media.file_upload.field_m_file_file
 field_name: field_m_file_file
 entity_type: media

@@ -1,11 +1,8 @@
-uuid: ef85bd25-9b3c-4939-b38b-0c26bd00b709
 langcode: en
 status: true
 dependencies:
   module:
     - crop
-_core:
-  default_config_hash: GTJVJNwetylOi7MSWUVWNSO50-4WtRcxqjBhQysQVU4
 name: widescreen_television
 label: 'Widescreen Television'
 effects:

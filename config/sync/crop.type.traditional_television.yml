@@ -1,9 +1,6 @@
-uuid: 0c549bc9-309f-4285-a053-e9f30555aa9e
 langcode: en
 status: true
 dependencies: {  }
-_core:
-  default_config_hash: 836rTmZvlcAOB1c-mAyKjAT2B8magsSEVKmKZuQClBM
 label: 'Traditional Television (4:3)'
 id: traditional_television
 description: 'This crop type emulates the dimensions of a television your grandmother may have had - 4:3.'

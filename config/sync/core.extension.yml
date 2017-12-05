@@ -1,28 +1,16 @@
 module:
   admin_toolbar: 0
   admin_toolbar_tools: 0
-  anrt_entity_browsers: 0
-  anrt_image_crop_types: 0
-  anrt_image_styles: 0
-  anrt_media_file: 0
-  anrt_media_image: 0
-  anrt_media_video: 0
-  anrt_media_view_modes: 0
-  anrt_paragraph_file: 0
-  anrt_paragraph_image: 0
-  anrt_paragraph_image_with_text: 0
-  anrt_paragraph_quote: 0
-  anrt_paragraph_text: 0
-  anrt_paragraph_video: 0
   automated_cron: 0
+  big_pipe: 0
   block: 0
   block_content: 0
   breakpoint: 0
   ckeditor: 0
-  color: 0
   comment: 0
   components: 0
   config: 0
+  config_update: 0
   contact: 0
   contextual: 0
   crop: 0
@@ -30,6 +18,7 @@ module:
   ctools: 0
   datetime: 0
   dblog: 0
+  devel: 0
   dynamic_page_cache: 0
   editor: 0
   entity: 0
@@ -37,6 +26,7 @@ module:
   entity_browser_entity_form: 0
   entity_reference_revisions: 0
   field: 0
+  field_group: 0
   field_ui: 0
   file: 0
   filter: 0
@@ -45,6 +35,8 @@ module:
   image: 0
   image_widget_crop: 0
   inline_entity_form: 0
+  inline_form_errors: 0
+  kint: 0
   link: 0
   media_entity: 0
   media_entity_browser: 0
@@ -52,9 +44,9 @@ module:
   menu_trail_by_path: 0
   menu_ui: 0
   metatag: 0
-  metatag_hreflang: 0
   metatag_open_graph: 0
   metatag_twitter_cards: 0
+  mgv: 0
   node: 0
   options: 0
   page_cache: 0
@@ -65,6 +57,7 @@ module:
   redirect_404: 0
   responsive_image: 0
   search: 0
+  seven_ui: 0
   shortcut: 0
   system: 0
   taxonomy: 0
@@ -72,6 +65,7 @@ module:
   token: 0
   toolbar: 0
   tour: 0
+  twig_tweak: 0
   update: 0
   user: 0
   video_embed_field: 0
@@ -87,6 +81,5 @@ theme:
   classy: 0
   bartik: 0
   seven: 0
+  patternlab: 0
 profile: standard
-_core:
-  default_config_hash: R4IF-ClDHXxblLcG0L7MgsLvfBIMAvi_skumNFQwkDc

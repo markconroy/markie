@@ -1,0 +1,8 @@
+langcode: en
+status: true
+dependencies: {  }
+id: section_break
+label: 'Section Break'
+icon_uuid: null
+description: ''
+behavior_plugins: {  }
