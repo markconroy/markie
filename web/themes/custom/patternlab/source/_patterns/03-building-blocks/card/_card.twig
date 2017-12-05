@@ -1,0 +1,35 @@
+{#
+
+This file lays out the HTML needed for a 'Card' building block/paragraph bundle.
+
+Classes set here are also set in the corresponding .json file.
+The ones in that file are used in patternlab, the ones in this array are used
+in Drupal.
+
+#}
+
+{%
+set classes = [
+  'card'
+]
+%}
+
+<div{{ attributes.addClass(classes) }}>
+
+  {% if title %}
+    <h2>{{ title }}</h2>
+  {% endif %}
+
+  {% if image %}
+    {{ image }}
+  {% endif %}
+
+  {% if text %}
+    {{ text }}
+  {% endif %}
+
+  {% if link_text %}
+    <a href="{{ link_url }}">{{ link_text }}</a>
+  {% endif %}
+
+</div>

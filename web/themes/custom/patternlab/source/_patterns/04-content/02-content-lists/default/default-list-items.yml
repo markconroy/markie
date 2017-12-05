@@ -1,0 +1,33 @@
+title: false
+
+rows:
+  row_1:
+    attributes:
+      Attribute():
+        class:
+    content:
+      include():
+        pattern: content-teaser
+  row_2:
+    attributes:
+      Attribute():
+        class:
+    content:
+      include():
+        pattern: content-teaser-alt
+  row_3:
+    attributes:
+      Attribute():
+        class:
+    content:
+      include():
+        pattern: content-teaser
+  row_4:
+    attributes:
+      Attribute():
+        class:
+    content:
+      include():
+        pattern: content-teaser-alt
+
+default_row_class: true

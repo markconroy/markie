@@ -1,0 +1,24 @@
+{% extends "@building-blocks/single-image/single-image.twig" %}
+
+{% block content %}
+
+  {% set image_file_path = content.field_p_image_image[0]['#media'].field_m_image_image.entity.uri.value %}
+  {% set image_file_alt = content.field_p_image_image[0]['#media'].field_m_image_image.0.alt %}
+  {% set image_style = paragraph.field_p_image_style.value %}
+
+  {#
+    We allow users to choose image styles that we pre-define in the CMS.
+    We then use Twig Tweak module to load the image using the image style.
+  #}
+  {% if image_style == 'a' %}
+    <img src="{{ image_file_path | image_style('square') }}" alt="{{ image_file_alt }}">
+    {% elseif image_style == 'b' %}
+      <img src="{{ image_file_path | image_style('traditional_television') }}" alt="{{ image_file_alt }}">
+    {% elseif image_style == 'c' %}
+      <img src="{{ image_file_path | image_style('widescreen_television') }}" alt="{{ image_file_alt }}">
+    {% elseif image_style == 'd' %}
+      <img src="{{ image_file_path | image_style('vanity_mirror') }}" alt="{{ image_file_alt }}">
+    {% elseif image_style == 'e' %}
+      <img src="{{ image_file_path | image_style('user_defined') }}" alt="{{ image_file_alt }}">
+  {% endif %}
+{% endblock %}

@@ -1,0 +1,23 @@
+/**
+ * @file
+ * This file is used to style items in node--view-mode-full.
+ *
+ * Items here are generic and may be overridden by more specific styling.
+ */
+
+.node--view-mode-full > h1 {
+  @extend .layout-contained--small;
+  margin-bottom: $base-line-height;
+  @include breakpoint($bp--medium) {
+    margin-top: $base-line-height * 2
+  }
+}
+
+.node--view-mode-full > .field--name-field-intro {
+  @extend .layout-contained--small;
+  @extend .text--large;
+}
+
+.node--view-mode-full .node__meta {
+  margin-top: $base-line-height;
+}

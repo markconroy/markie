@@ -1,0 +1,15 @@
+{% extends "@page-sections/site-layout.twig" %}
+
+{% block page_title %}
+  {% if page_title %}
+    {% include 'page-sections-page-title' with {
+      page_title: page_title
+      }
+      only
+    %}
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+  {{ content }}
+{% endblock %}

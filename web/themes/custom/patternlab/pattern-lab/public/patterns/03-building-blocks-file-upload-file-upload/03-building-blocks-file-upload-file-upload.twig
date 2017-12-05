@@ -1,0 +1,14 @@
+{%
+set classes = [
+  "file-upload",
+]
+%}
+<div class="padding">
+  <div class="layout-contained--small">
+    <div{{ attributes.addClass(classes) }}>
+      {% block content %}
+        {% include '_file-upload--sample.twig' %}
+      {% endblock %}
+    </div>
+  </div>
+</div>

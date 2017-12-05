@@ -1,0 +1,18 @@
+{
+  "attributes": {
+    "Attribute()": {
+      "class": [
+        "card"
+      ]
+    }
+  },
+  "title": "Hello, this is a card",
+  "text": "This is the text of the card. It's a bit longer than the title.",
+  "image": {
+    "include()": {
+      "pattern": "basic-elements-image-thumbnail"
+    }
+  },
+  "link_text": "Read more",
+  "link_url": "http://www.google.com"
+}

@@ -1,0 +1,11 @@
+attributes:
+  Attribute():
+    class:
+
+contents:
+  item_1:
+    include():
+      pattern: site-blocks-menu-block-departments
+  item_2:
+    include():
+      pattern: site-blocks-external-links

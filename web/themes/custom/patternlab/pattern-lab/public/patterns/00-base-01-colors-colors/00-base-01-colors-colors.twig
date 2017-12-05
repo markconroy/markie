@@ -1,0 +1,94 @@
+<h2>Primary Colours</h2>
+<ul class="sg-colors">
+  {% for item in items %}
+    {% if (('primary' in item.name)) %}
+      <li>
+        <div class="sg-swatch bg-primary{% if item.name|slice(12,5)|length > 0 %} bg-primary--{{ item.name|slice(12,5) }}{% endif %}"></div>
+        <div class="sg-info">
+          <span>{{item.value}}</span>
+          <code>{{item.name}}</code>
+          {% if item.comment %}<div class="comment">{{ item.comment }}</div>{% endif %}
+        </div>
+      </li>
+    {% endif %}
+  {% endfor %}
+</ul>
+
+<h2>Secondary Colours</h2>
+<ul class="sg-colors">
+  {% for item in items %}
+    {% if (('secondary' in item.name)) %}
+      <li>
+        <div class="sg-swatch bg-secondary{% if item.name|slice(12,5)|length > 0 %} bg-secondary--{{ item.name|slice(14,5) }}{% endif %}"></div>
+        <div class="sg-info">
+          <span>{{item.value}}</span>
+          <code>{{item.name}}</code>
+          {% if item.comment %}<div class="comment">{{ item.comment }}</div>{% endif %}
+        </div>
+      </li>
+    {% endif %}
+  {% endfor %}
+</ul>
+
+<h2>Tertiary Colours</h2>
+<ul class="sg-colors">
+  {% for item in items %}
+    {% if (('tertiary' in item.name)) %}
+      <li>
+        <div class="sg-swatch bg-tertiary{% if item.name|slice(13,5)|length > 0 %} bg-tertiary--{{ item.name|slice(13,5) }}{% endif %}"></div>
+        <div class="sg-info">
+          <span>{{item.value}}</span>
+          <code>{{item.name}}</code>
+          {% if item.comment %}<div class="comment">{{ item.comment }}</div>{% endif %}
+        </div>
+      </li>
+    {% endif %}
+  {% endfor %}
+</ul>
+
+<h2>Greys</h2>
+<ul class="sg-colors greys">
+
+  {% for item in items %}
+    {% if 'white' in item.name %}
+      <li>
+        <div class="sg-swatch bg-white"></div>
+        <div class="sg-info">
+          <span>{{item.value}}</span>
+          <code>{{item.name}}</code>
+          {% if item.comment %}<div class="comment">{{ item.comment }}</div>{% endif %}
+        </div>
+      </li>
+    {% endif %}
+  {% endfor %}
+
+  {% for item in items %}
+    {% if 'grey' in item.name %}
+      <li>
+        <div class="sg-swatch bg-grey{% if item.name|slice(9,10)|length > 0 %} bg-grey--{{ item.name|slice(9,10) }}{% endif %}"></div>
+        <div class="sg-info">
+          <span>{{item.value}}</span>
+          <code>{{item.name}}</code>
+          {% if item.comment %}<div class="comment">{{ item.comment }}</div>{% endif %}
+        </div>
+      </li>
+    {% endif %}
+  {% endfor %}
+
+  {% for item in items %}
+    {% if 'black' in item.name %}
+      <li>
+        <div class="sg-swatch bg-black"></div>
+        <div class="sg-info">
+          <span>{{item.value}}</span>
+          <code>{{item.name}}</code>
+          {% if item.comment %}<div class="comment">{{ item.comment }}</div>{% endif %}
+        </div>
+      </li>
+    {% endif %}
+  {% endfor %}
+
+</ul>
+{% if meta %}
+  <p> <small>{{ meta.description }}</small> </p>
+{% endif %}

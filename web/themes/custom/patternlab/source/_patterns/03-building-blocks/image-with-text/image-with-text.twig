@@ -1,0 +1,27 @@
+{#
+  This pattern is used to create the HTML for the "Image with Text" paragraph
+  bundle.
+#}
+
+{%
+set classes = [
+  'image-with-text',
+  'layout-contained',
+  paragraph.field_p_it_alignment.value,
+]
+%}
+
+<div class="image-with-text__bg image-with-text__bg--{{ paragraph.field_p_it_style.value }}">
+  <div{{ attributes.addClass(classes) }}>
+
+    <div class="image-with-text__image">
+      {{ content.field_p_it_image }}
+    </div>
+
+    <div class="padding image-with-text__text">
+      {{ content.field_p_it_text }}
+      {{ content.field_p_it_cta }}
+    </div>
+
+  </div>
+</div>

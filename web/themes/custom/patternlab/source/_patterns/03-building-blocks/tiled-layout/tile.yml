@@ -1,0 +1,27 @@
+attributes:
+  Attribute():
+    class:
+
+paragraph:
+  field_p_tile_title:
+    value: true
+  field_p_tile_text:
+    value: false
+  field_p_tile_link:
+    value: true
+  field_p_tile_image:
+    value: false
+  field_p_tile_bg_colour:
+    value: bg--1
+  field_p_tile_size:
+    value: small
+
+content:
+  field_p_tile_title: <div class="tile__title">This is the Tile's Title</div>
+  field_p_tile_link: http://www.example.com
+  field_p_tile_text: <p class="tile__text">This is the tile text field varius blandit sit amet non magna. Mget risus varius blandit sit amet non magn.</p>
+  field_p_tile_image:
+    small:
+      src: http://placeimg.com/600/600/nature
+    large:
+      src: http://placeimg.com/600/1200/nature

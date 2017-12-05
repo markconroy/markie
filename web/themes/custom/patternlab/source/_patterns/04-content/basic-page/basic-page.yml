@@ -1,0 +1,39 @@
+attributes:
+  Attribute():
+    class:
+
+node:
+  bundle: page
+  isPublished: true
+
+view_mode: full
+
+label: <span class="field--name-title">Drupal Camp Dublin is Next Week - Last Chance for Tickets</span>
+
+content:
+  field_intro: <div class="field--name-field-intro"><p>Seems like just yesterday since we held DrupalCon in Dublin, now we're back with our annual Drupal Camp Dublin.</p></div>
+  field_building_blocks:
+    item_1:
+      include():
+        pattern: building-blocks-text-paragraph-x1
+    item_0:
+      include():
+        pattern: building-blocks-section-break
+    item_2:
+      include():
+        pattern: building-blocks-video
+    item_3:
+      include():
+        pattern: building-blocks-text-paragraph-x2
+    item_4:
+      include():
+        pattern: building-blocks-image-with-text
+    item_5:
+      include():
+        pattern: building-blocks-text-paragraph-x2
+    item_6:
+      include():
+        pattern: building-blocks-quote
+    item_7:
+      include():
+        pattern: building-blocks-call-to-action

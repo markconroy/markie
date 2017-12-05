@@ -1,0 +1,18 @@
+.call-to-action {
+  text-align: center;
+}
+
+.call-to-action .field--name-field-p-cta-link a {
+  background: $c-tertiary;
+  border-bottom: 5px solid $c-tertiary--dark;
+  border-radius: 0.5rem;
+  color: $c-black;
+  display: inline-block;
+  padding: 1rem 3rem;
+  text-decoration: none;
+  transition: $trans-move__time;
+  &:focus,
+  &:hover {
+    background: $c-tertiary--dark;
+  }
+}

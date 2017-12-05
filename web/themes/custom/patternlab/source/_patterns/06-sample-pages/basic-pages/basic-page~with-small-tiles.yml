@@ -1,0 +1,3 @@
+content:
+  include():
+    pattern: content-basic-page-with-small-tiles

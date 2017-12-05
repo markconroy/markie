@@ -1,0 +1,42 @@
+.file-upload {
+  @include breakpoint($bp--large) {
+    margin-left: -5px;
+  }
+}
+
+.file-upload .field--name-field-p-file-file .field__item {
+  margin-bottom: $base-line-height;
+  &:last-of-type {
+    margin-bottom: 0;
+  }
+}
+
+.file-upload__item {
+  background: $c-white;
+  border-left: 5px solid $c-grey--darkest;
+  display: flex;
+  padding: 2rem;
+}
+
+.file-upload__item a {
+  text-decoration: none;
+  &:focus,
+  &:hover {
+    color: $c-grey--darkest;
+    text-decoration: underline;
+  }
+}
+
+.file-upload__item .file {
+  flex: 1 0 50%;
+}
+
+.file-upload__item .file__icon {
+  flex: 0 0 30px;
+  margin-right: 1rem;
+}
+
+.file-upload__item .file__meta {
+  font-size: $fs--14px;
+  margin-left: 1rem;
+}

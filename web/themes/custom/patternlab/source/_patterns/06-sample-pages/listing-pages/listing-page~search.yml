@@ -1,0 +1,4 @@
+page_title: Search Results Page
+content:
+  include():
+    pattern: content-default-search

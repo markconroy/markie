@@ -1,0 +1,19 @@
+label: <span class="field--name-title">This is a Basic Page with a Video</span>
+
+content:
+  field_building_blocks:
+    item_1:
+      include():
+        pattern: building-blocks-text-paragraph-x3
+    item_2:
+      include():
+        pattern: 'building-blocks-video'
+    item_3:
+      include():
+        pattern: building-blocks-text-paragraph-x3
+    item_4:
+      include():
+        pattern: 'building-blocks-call-to-action'
+    item_5:
+    item_6:
+    item_7:

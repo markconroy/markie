@@ -1,0 +1,28 @@
+.header {
+  background: $c-white;
+  border-bottom: 1px solid $c-grey--light;
+  padding-bottom: $base-line-height;
+  padding-top: $base-line-height;
+}
+
+.header__inner {
+  display: flex;
+  justify-content: space-between;
+  @include breakpoint($bp--xlarge) {
+    align-items: center;
+  }
+}
+
+.header .branding {
+  flex: 0 0 60%;
+  @include breakpoint($bp--xlarge) {
+    flex-basis: 50%;
+  }
+}
+
+.header .main-navigation {
+  flex: 0 0 40%;
+  @include breakpoint($bp--xlarge) {
+    flex-basis: 50%;
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "attributes": {
+    "Attribute()": {
+      "class": [
+        "card-list"
+      ]
+    }
+  },
+  "card_list": {
+    "one": {
+      "include()": {
+        "pattern": "building-blocks-card"
+      }
+    },
+    "two": {
+      "include()": {
+        "pattern": "building-blocks-card-no-text"
+      }
+    },
+    "three": {
+      "include()": {
+        "pattern": "building-blocks-card-no-title"
+      }
+    }
+  }
+}

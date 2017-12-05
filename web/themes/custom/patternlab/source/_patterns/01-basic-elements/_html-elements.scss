@@ -1,0 +1,19 @@
+* {
+  box-sizing: border-box;
+  &::after,
+  &::before {
+    box-sizing: inherit;
+  }
+}
+
+// This will adjust the base HTML font size fluidly between the xsmall and
+// xxlarge breakpoints to a font size between 14px minimum to 18px maximum.
+html {
+  @include fluid-type(font-size, $bp--xsmall, $bp--xxlarge, 14px, $base-font-size);
+  color: $c-grey--darkest;
+}
+
+body {
+  background: $c-grey--lightest;
+    font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif;
+}

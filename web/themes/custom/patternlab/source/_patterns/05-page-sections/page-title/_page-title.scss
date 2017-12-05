@@ -1,0 +1,15 @@
+.page-title {
+  text-align: center;
+}
+
+.block-page-title-block {
+  margin-bottom: $base-line-height;
+  margin-top: $base-line-height;
+  @include breakpoint($bp--medium) {
+    margin-bottom: $base-line-height * 1; // 1 instead of two because we already have bottom space from h1 line height.
+    margin-top: $base-line-height * 2
+  }
+  @include breakpoint($bp--xlarge) {
+    margin-top: $base-line-height * 3
+  }
+}

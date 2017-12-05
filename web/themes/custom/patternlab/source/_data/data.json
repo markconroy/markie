@@ -1,0 +1,78 @@
+{
+  "url": "https://www.mark.ie",
+  "title": "Faker.words(2, true)",
+  "text": "Faker.words(3, true)",
+  "site_name": "Mark.ie",
+  "site_slogan": "Lead Frontend Drupal Developer",
+  "img": {
+    "thumbnail": "http://placeimg.com/300/300/people",
+    "avatar": "http://placeimg.com/600/600/people",
+    "square": "http://placeimg.com/600/600/nature",
+    "rectangle": "http://placeimg.com/1200/900/tech",
+    "landscape": "http://placeimg.com/1200/900/tech",
+    "landscapeWide": "http://placeimg.com/1280/640/tech"
+  },
+  "image_alt": "Alt text will go here to describe the image for screen readers",
+  "headline": {
+    "short": "Faker.words(3, true)",
+    "medium": "Faker.words(7, true)"
+  },
+  "excerpt": {
+    "short": "Faker.sentence",
+    "medium": "Faker.sentences(2, true)",
+    "long": "Faker.paragraph"
+  },
+  "description": "Faker.paragraphs(2, true)",
+  "url": "http://example.com",
+  "name": {
+    "titleMale": "Faker.title('male')",
+    "titleFemale": "Faker.title('female')",
+    "first": "Faker.firstName",
+    "middle": "Faker.firstName",
+    "last": "Faker.lastName"
+  },
+  "email": "Faker.email",
+  "username": "Faker.userName",
+  "year": {
+    "long": "Faker.year",
+    "short": "Faker.numberBetween(01, 99)"
+  },
+  "month": {
+    "long": "Faker.monthName",
+    "digit": "Faker.month"
+  },
+  "dayofweek": "Faker.dayOfWeek",
+  "day": "Faker.numberBetween(1, 30)",
+  "hour": {
+    "long": "Faker.numberBetween(1, 99)",
+    "short": "Faker.numberBetween(1, 9)",
+    "ampm": "Faker.amPm"
+  },
+  "minute": "Faker.numberBetween(1, 59)",
+  "seconds": "Faker.numberBetween(1, 59)",
+  "attributes": {
+    "Attribute()": {
+      "class": []
+    }
+  },
+  "content_attributes": {
+    "Attribute()": {
+      "class": []
+    }
+  },
+  "title_attributes": {
+    "Attribute()": {
+      "class": []
+    }
+  },
+  "rows": {
+    "Attribute()": {
+      "class": []
+    }
+  },
+  "teaser": {
+    "Attribute()": {
+      "class": []
+    }
+  }
+}

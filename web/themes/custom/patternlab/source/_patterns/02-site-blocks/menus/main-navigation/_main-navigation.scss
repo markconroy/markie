@@ -1,0 +1,46 @@
+.main-navigation {
+  text-align: right;
+}
+
+.main-navigation .menu-toggle {
+  background: $c-white;
+  border: none;
+  color: $c-grey--darkest;
+  cursor: pointer;
+  @include breakpoint($bp--large) {
+    margin-top: 1rem;
+  }
+  @include breakpoint($bp--xlarge) {
+    display: none;
+  }
+}
+
+.main-navigation .main-navigation__menu {
+  display: none;
+}
+
+.main-navigation .menu {
+  margin: 0;
+  padding: 0;
+  @include breakpoint($bp--xlarge) {
+    display: flex;
+    justify-content: end;
+    justify-content: flex-end;
+  }
+}
+
+.main-navigation .menu-item {
+  font-size: $fs--14px;
+  list-style: none;
+  margin: 0 .5rem;
+  padding: 0;
+}
+
+.main-navigation .menu-item a {
+  color: $c-grey--darkest;
+  text-decoration: none;
+  &:focus,
+  &:hover {
+    text-decoration: underline;
+  }
+}

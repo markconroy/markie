@@ -1,0 +1,9 @@
+attributes:
+  Attribute():
+    class:
+title: false
+rows:
+  include():
+    pattern: content-default-list-items
+
+exposed: false

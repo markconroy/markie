@@ -1,0 +1,159 @@
+/* Background Colours */
+$c-bg--1: $c-primary;
+$c-bg--2: $c-secondary;
+$c-bg--3: $c-tertiary;
+
+$bg-colours:
+(bg--1, $c-bg--1),
+(bg--2, $c-bg--2),
+(bg--3, $c-bg--3);
+
+.tiled-layout {
+  @include breakpoint($bp--large) {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0 -20px;
+  }
+}
+
+
+.tile {
+  position: relative;
+  height: 300px;
+  margin: 0 0 26px;
+  @include breakpoint($bp--large) {
+    height: 330px;
+    margin: 0 13px 26px;
+    &.small {
+      width: calc(33.334% - 26px); // I need to use calc so I can get the spaces between items (double value of the margin left/right)
+    }
+    &.medium {
+      width: calc(66.667% - 26px); // I need to use calc so I can get the spaces between items (double value of the margin left/right)
+      .inner {
+        max-width: 66%;
+      }
+    }
+    &.medium.has-image .inner {
+      max-width: 100%;
+    }
+    &.large {
+      width: calc(100% - 26px); // I need to use calc so I can get the spaces between items (double value of the margin left/right)
+      .inner {
+        max-width: 66%;
+      }
+    }
+  }
+  .inner {
+    bottom: 0;
+    left: 0;
+    padding: $base-line-height * 1.5;
+    position: absolute;
+    width: 100%;
+  }
+}
+
+// Create a background colour class for each background option.
+@each $bg-colour, $colour in $bg-colours {
+  .#{$bg-colour}.tile {
+    background: $colour;
+    background: linear-gradient($colour, darken($colour, 15%));
+    &.has-image {
+      .inner,
+      .title-only {
+        background: $colour;
+        background: linear-gradient($colour, darken($colour, 15%));
+      }
+    }
+  }
+}
+
+.tile .tile__background {
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  bottom: 0;
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+
+// Change colour of tile items depending on what background was chosen
+.tile {
+  &.bg--1,
+  &.bg--1 a {
+    color: $c-grey--darkest;
+  }
+  &.bg--2,
+  &.bg--2 a {
+    color: $c-white;
+    .title-only {
+      color: $c-white;
+    }
+  }
+  &.bg--3,
+  &.bg--3 a {
+    color: $c-white;
+    .title-only {
+      color: $c-white;
+    }
+  }
+}
+
+.tile .tile__title {
+  font-weight: bold;
+  margin-bottom: 1rem;
+}
+
+.tile .tile__text {
+  margin-bottom: 0;
+}
+
+// If the text field is not filled in, centre the title in the tile and make the
+// font larger.
+.tile .title-only {
+  @extend .h2;
+  align-items: center;
+  bottom: 0;
+  display: flex;
+  left: 0;
+  justify-content: center;
+  margin-bottom: 0;
+  padding: $base-line-height * 1.5;
+  position: absolute;
+  right: 0;
+  top: 0;
+  overflow: hidden;
+  text-align: center;
+  .tile__title {
+    font-weight: normal;
+    margin-bottom: 0;
+  }
+}
+
+// If the tile has an image, layout changes.
+.tile.has-image .title-only {
+  display: block;
+  margin-bottom: 0;
+  padding: 0;
+  text-align: left;
+  top: auto;
+}
+
+.tile.has-image .tile__title {
+  margin-bottom: 0;
+  padding: 1rem;
+}
+
+.tile.has-image .tile__text {
+  line-height: 1.2;
+  margin-bottom: 0;
+  padding: 0 1rem 1rem;
+}
+
+.tile.has-image .inner {
+  bottom: 0px;
+  left: 0px;
+  padding: 0;
+  position: absolute;
+}

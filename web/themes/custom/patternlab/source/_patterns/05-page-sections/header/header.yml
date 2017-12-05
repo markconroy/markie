@@ -1,0 +1,11 @@
+attributes:
+  Attribute():
+    class:
+
+contents:
+  item_1:
+    include():
+      pattern: 'site-blocks-branding'
+  item_2:
+    include():
+      pattern: 'site-blocks-main-navigation'

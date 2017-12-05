@@ -1,0 +1,20 @@
+content:
+  field_p_tl_tiles:
+    item_1:
+      include():
+        pattern: building-blocks-tile
+    item_2:
+      include():
+        pattern: building-blocks-tile-small-title
+    item_3:
+      include():
+        pattern: building-blocks-tile-small-title-text
+    item_4:
+      include():
+        pattern: building-blocks-tile-small-title
+    item_5:
+      include():
+        pattern: building-blocks-tile-small-title-text
+    item_6:
+      include():
+        pattern: building-blocks-tile-small-title-image

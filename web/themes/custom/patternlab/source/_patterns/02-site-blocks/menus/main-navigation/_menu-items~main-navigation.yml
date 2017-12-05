@@ -1,0 +1,19 @@
+items:
+  item_1:
+    title: 'Home'
+    url: 'http://www.example.com'
+    attributes:
+      Attribute():
+        class:
+  item_2:
+    title: 'About Me'
+    url: 'http://www.example.com'
+    attributes:
+      Attribute():
+        class:
+  item_3:
+    title: 'Contact Me'
+    url: 'http://www.example.com'
+    attributes:
+      Attribute():
+        class:

@@ -1,0 +1,97 @@
+{
+  "items": [
+    {
+      "name": "$c-primary",
+      "value": "#ff2c2c",
+      "comment": "Red"
+    },
+    {
+      "name": "$c-primary--light",
+      "value": "lighten($c-primary, 15%)",
+      "comment": "Light Red"
+    },
+    {
+      "name": "$c-primary--dark",
+      "value": "darken($c-primary, 15%)",
+      "comment": "Dark Red"
+    },
+    {
+      "name": "$c-secondary",
+      "value": "#002a2a",
+      "comment": "Blue"
+    },
+    {
+      "name": "$c-secondary--light",
+      "value": "lighten($c-secondary, 15%)",
+      "comment": "Light Blue"
+    },
+    {
+      "name": "$c-secondary--dark",
+      "value": "darken($c-secondary, 15%)",
+      "comment": "Dark Blue"
+    },
+    {
+      "name": "$c-tertiary",
+      "value": "#9acd32",
+      "comment": "Green"
+    },
+    {
+      "name": "$c-tertiary--light",
+      "value": "lighten($c-tertiary, 15%)",
+      "comment": "Light Green"
+    },
+    {
+      "name": "$c-tertiary--dark",
+      "value": "darken($c-tertiary, 15%)",
+      "comment": "Dark Green"
+    },
+    {
+      "name": "$c-white",
+      "value": "white",
+      "comment": "White"
+    },
+    {
+      "name": "$c-grey--lightest",
+      "value": "#fafafa",
+      "comment": "Lightest Grey"
+    },
+    {
+      "name": "$c-grey--lighter",
+      "value": "#eaeaea",
+      "comment": "Lighter Grey"
+    },
+    {
+      "name": "$c-grey--light",
+      "value": "hsl(0, 0%, 60%)",
+      "comment": "Light Grey"
+    },
+    {
+      "name": "$c-grey",
+      "value": "hsl(0, 0%, 48%)",
+      "comment": "Grey"
+    },
+    {
+      "name": "$c-grey--dark",
+      "value": "hsl(0, 0%, 40%)",
+      "comment": "Dark Grey"
+    },
+    {
+      "name": "$c-grey--darker",
+      "value": "hsl(0, 0%, 20%)",
+      "comment": "Darker Grey"
+    },
+    {
+      "name": "$c-grey--darkest",
+      "value": "hsl(0, 0%, 16.1%)",
+      "comment": "Darkest Grey"
+    },
+    {
+      "name": "$c-black",
+      "value": "black",
+      "comment": "Black"
+    }
+  ],
+  "meta": {
+    "description": "To add to these items, use Sass variables that start with <code>$c-</code> in <code>source/_patterns/00-base/01-colors/_color-vars.scss</code>"
+  }
+}

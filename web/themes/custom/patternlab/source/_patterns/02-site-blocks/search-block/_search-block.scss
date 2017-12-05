@@ -1,0 +1,34 @@
+.block-search .block__title,
+.block-search .form-item label {
+  @extend .visually-hidden;
+}
+
+.block-search form .form--inline {
+  display: flex;
+  margin-top: 4px;
+  @include breakpoint($bp--large) {
+    width: 200px;
+  }
+}
+
+.block-search .form-item-keywords .form-text {
+  background-color: $c-grey--lightest;
+  border: none;
+  padding: .5rem;
+  @include breakpoint($bp--large) {
+    width: 180px;
+  }
+}
+
+.block-search .button {
+  background-color: $c-grey--lightest;
+  border: none;
+  margin: 5px 0 0 0;
+  padding: 0;
+}
+
+.block-search .border-gradient {
+  background: $c-grey--darkest;
+  background: linear-gradient(to right, transparent, $c-grey--darkest);
+  height: 1px;
+}

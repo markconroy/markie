@@ -1,0 +1,44 @@
+p {
+  // See code for `html` in _html-elements.scss;
+}
+
+a {
+  color: $c-grey--darkest;
+  &:focus,
+  &:hover {
+    color: $c-primary;
+  }
+}
+
+// inline code wrappers, Markdown style
+code {
+  &:before {
+    content: '`';
+  }
+  &:after {
+    content: '`';
+  }
+  // don't show it when in a block of code
+  pre & {
+    &:after,
+    &:before {
+      content: '';
+    }
+  }
+}
+
+.text--large {
+  @extend .padding;
+  @include fluid-type(font-size, $bp--xsmall, $bp--xxlarge, $base-font-size, $base-font-size * 1.6);
+  color: $c-grey--darkest;
+  font-family: $ff--alternate;
+  line-height: $base-line-height * 1.5;
+  margin-bottom: $base-line-height;
+  @include breakpoint($bp--medium) {
+    // margin-bottom: $base-line-height * 2;
+  }
+  @include breakpoint($bp--xlarge) {
+    line-height: $base-line-height * 2;
+    // margin-bottom: $base-line-height * 3;
+  }
+}

@@ -1,0 +1,17 @@
+label: <span class="field--name-title">This is a Basic Page with a Grid of Small and Medium Tiles</span>
+
+content:
+  field_building_blocks:
+    item_1:
+      include():
+        pattern: building-blocks-text-paragraph-x1
+    item_2:
+      include():
+        pattern: building-blocks-tiled-layout-small-items
+    item_3:
+      include():
+        pattern: building-blocks-text-paragraph-x3
+    item_4:
+    item_5:
+    item_6:
+    item_7:

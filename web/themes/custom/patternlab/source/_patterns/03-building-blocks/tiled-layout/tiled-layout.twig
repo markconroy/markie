@@ -1,0 +1,18 @@
+{%
+set classes = [
+  "tiled-layout",
+  "padding"
+]
+%}
+
+<div class="layout-contained">
+  <div{{ attributes.addClass(classes) }}>
+
+    {% block content %}
+      {% for tiled_item in content.field_p_tl_tiles %}
+        {{ tiled_item }}
+      {% endfor %}
+    {% endblock %}
+
+  </div>
+</div>

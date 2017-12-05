@@ -1,0 +1,76 @@
+.h1--special {
+  color: $c-primary;
+  font-family: $ff--alternate;
+  font-size: $base-font-size;
+  font-weight: normal;
+  line-height: $base-line-height * 2;
+  @include breakpoint($bp--xlarge) {
+    font-size: $base-font-size * 4.611;
+    line-height: $base-line-height * 4; // 6 rem
+  }
+}
+
+h1, .h1 {
+  color: $c-primary;
+  font-family: $ff--alternate;
+  font-size: $base-font-size * 1.3;
+  font-weight: normal;
+  line-height: $base-font-size * 1.667;
+  @include breakpoint($bp--small) {
+    font-size: $base-font-size * 1.6875;
+    line-height: $base-font-size * 2.625;
+  }
+  @include breakpoint($bp--xlarge) {
+    font-size: $base-font-size * 2.778;
+    line-height: $base-line-height * 3;
+  }
+}
+
+h2, .h2 {
+  color: $c-secondary;
+  font-family: $ff--alternate;
+  font-size: $base-font-size * 1.3;
+  font-weight: normal;
+  @include breakpoint($bp--xlarge) {
+    font-size: $base-font-size * 1.667;
+    line-height: $base-line-height * 2;
+  }
+  &.node__title a {
+    color: $c-primary;
+    &:focus,
+    &:hover {
+      color: $c-secondary;
+    }
+  }
+}
+
+h3, .h3 {
+  color: $c-secondary;
+  font-family: $ff--alternate;
+  font-weight: normal;
+}
+
+h4, .h4 {
+  color: $c-secondary;
+  font-family: $ff--alternate;
+  font-weight: normal;
+}
+
+h5, .h5 {
+  color: $c-secondary;
+  font-family: $ff--alternate;
+  font-weight: normal;
+}
+
+h6, .h6 {
+  color: $c-secondary;
+  font-weight: normal;
+}
+
+ul, ol, p {
+  + h2, + .h2,
+  + h3, + .h3,
+  + h4, + .h4 {
+    margin-top: $base-line-height * 2;
+  }
+}

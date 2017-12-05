@@ -1,0 +1,19 @@
+.section-break hr {
+  background: $c-primary;
+  border: 0;
+  height: 5px;
+  margin: auto;
+  width: 100px;
+}
+
+.sb--1 hr {
+  background: $c-primary;
+}
+
+.sb--2 hr {
+  background: $c-secondary;
+}
+
+.sb--3 hr {
+  background: $c-tertiary;
+}
