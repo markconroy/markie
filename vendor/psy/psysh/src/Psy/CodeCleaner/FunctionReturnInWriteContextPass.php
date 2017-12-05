@@ -19,6 +19,7 @@ use PhpParser\Node\Expr\FuncCall;
 use PhpParser\Node\Expr\Isset_;
 use PhpParser\Node\Expr\MethodCall;
 use PhpParser\Node\Expr\StaticCall;
+use PhpParser\Node\Stmt\Unset_;
 use Psy\Exception\FatalErrorException;
 
 /**
@@ -53,17 +54,17 @@ class FunctionReturnInWriteContextPass extends CodeCleanerPass
         if ($node instanceof Array_ || $this->isCallNode($node)) {
             $items = $node instanceof Array_ ? $node->items : $node->args;
             foreach ($items as $item) {
-                if ($item->byRef && $this->isCallNode($item->value)) {
+                if ($item && $item->byRef && $this->isCallNode($item->value)) {
                     throw new FatalErrorException(self::EXCEPTION_MESSAGE, 0, E_ERROR, null, $node->getLine());
                 }
             }
-        } elseif ($node instanceof Isset_) {
+        } elseif ($node instanceof Isset_ || $node instanceof Unset_) {
             foreach ($node->vars as $var) {
                 if (!$this->isCallNode($var)) {
                     continue;
                 }
 
-                $msg = $this->isPhp55 ? self::PHP55_MESSAGE : self::EXCEPTION_MESSAGE;
+                $msg = ($node instanceof Isset_ && $this->isPhp55) ? self::PHP55_MESSAGE : self::EXCEPTION_MESSAGE;
                 throw new FatalErrorException($msg, 0, E_ERROR, null, $node->getLine());
             }
         } elseif ($node instanceof Empty_ && !$this->isPhp55 && $this->isCallNode($node->expr)) {

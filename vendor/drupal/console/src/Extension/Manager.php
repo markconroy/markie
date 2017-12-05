@@ -369,9 +369,9 @@ class Manager
     public function checkExtensions(array $extensions, $type = 'module')
     {
         $checkextensions = [
-          'local_extensions' => [],
-          'drupal_extensions' => [],
-          'no_extensions' => [],
+            'local_extensions' => [],
+            'drupal_extensions' => [],
+            'no_extensions' => [],
         ];
 
         $local_extensions = $this->discoverExtension($type)

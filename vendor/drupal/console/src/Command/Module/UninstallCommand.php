@@ -16,9 +16,9 @@ use Drupal\Console\Core\Command\Command;
 use Drupal\Console\Command\Shared\ProjectDownloadTrait;
 use Drupal\Console\Core\Style\DrupalStyle;
 use Drupal\Console\Utils\Site;
-use Drupal\Core\ProxyClass\Extension\ModuleInstaller;
+use Drupal\Core\Extension\ModuleInstallerInterface;
 use Drupal\Console\Core\Utils\ChainQueue;
-use Drupal\Core\Config\ConfigFactory;
+use Drupal\Core\Config\ConfigFactoryInterface;
 
 class UninstallCommand extends Command
 {
@@ -60,9 +60,9 @@ class UninstallCommand extends Command
      */
     public function __construct(
         Site $site,
-        ModuleInstaller $moduleInstaller,
+        ModuleInstallerInterface $moduleInstaller,
         ChainQueue $chainQueue,
-        ConfigFactory $configFactory,
+        ConfigFactoryInterface $configFactory,
         Manager $extensionManager
     ) {
         $this->site = $site;
@@ -170,11 +170,22 @@ class UninstallCommand extends Command
         }
 
         if (!$force = $input->getOption('force')) {
-            $profile = drupal_get_profile();
+
+            // Get a list of installed profiles that will be excluded when calculating
+            // the dependency tree.
+            if (\Drupal::hasService('profile_handler')) {
+                // #1356276 adds the profile_handler service but it hasn't been committed
+                // to core yet so we need to check if it exists.
+                $profiles = \Drupal::service('profile_handler')->getProfileInheritance();
+            }
+            else {
+                $profiles[drupal_get_profile()] = [];
+            }
+
             $dependencies = [];
             while (list($module) = each($moduleList)) {
                 foreach (array_keys($moduleData[$module]->required_by) as $dependency) {
-                    if (isset($installedModules[$dependency]) && !isset($moduleList[$dependency]) && $dependency != $profile) {
+                    if (isset($installedModules[$dependency]) && !isset($moduleList[$dependency]) && (!array_key_exists($dependency, $profiles))) {
                         $dependencies[] = $dependency;
                     }
                 }

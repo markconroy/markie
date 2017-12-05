@@ -45,6 +45,11 @@ services:
     arguments: ['@config.factory', '@theme_handler']
     tags:
       - { name: drupal.command }
+  console.theme_keys_debug:
+    class: Drupal\Console\Command\Debug\ThemeKeysCommand
+    arguments: ['@theme.registry']
+    tags:
+      - { name: drupal.command }
   console.router_debug:
     class: Drupal\Console\Command\Debug\RouterCommand
     arguments: ['@router.route_provider']
@@ -135,5 +140,10 @@ services:
       - { name: drupal.command }
   console.feature_debug:
     class: Drupal\Console\Command\Debug\FeaturesCommand
+    tags:
+      - { name: drupal.command }
+  console.roles_debug:
+    class: Drupal\Console\Command\Debug\RolesCommand
+    arguments: ['@console.drupal_api']
     tags:
       - { name: drupal.command }

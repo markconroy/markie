@@ -144,9 +144,17 @@ if (!function_exists('Psy\info')) {
 
         // Use an explicit, fresh update check here, rather than relying on whatever is in $config.
         $checker = new GitHubChecker();
+        $updateAvailable = null;
+        $latest = null;
+        try {
+            $updateAvailable = !$checker->isLatest();
+            $latest = $checker->getLatest();
+        } catch (\Exception $e) {
+        }
+
         $updates = array(
-            'update available'       => !$checker->isLatest(),
-            'latest release version' => $checker->getLatest(),
+            'update available'       => $updateAvailable,
+            'latest release version' => $latest,
             'update check interval'  => $config->getUpdateCheck(),
             'update cache file'      => $prettyPath($config->getUpdateCheckCacheFile()),
         );
@@ -177,6 +185,11 @@ if (!function_exists('Psy\info')) {
             'pcntl available' => function_exists('pcntl_signal'),
             'posix available' => function_exists('posix_getpid'),
         );
+
+        $disabledFuncs = array_map('trim', explode(',', ini_get('disable_functions')));
+        if (in_array('pcntl_signal', $disabledFuncs) || in_array('pcntl_fork', $disabledFuncs)) {
+            $pcntl['pcntl disabled'] = true;
+        }
 
         $history = array(
             'history file'     => $prettyPath($config->getHistoryFile()),
@@ -220,6 +233,7 @@ if (!function_exists('Psy\info')) {
         $autocomplete = array(
             'tab completion enabled' => $config->getTabCompletion(),
             'custom matchers'        => array_map('get_class', $config->getTabCompletionMatchers()),
+            'bracketed paste'        => $config->useBracketedPaste(),
         );
 
         return array_merge($core, compact('updates', 'pcntl', 'readline', 'history', 'docs', 'autocomplete'));

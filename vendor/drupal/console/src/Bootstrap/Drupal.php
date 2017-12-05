@@ -6,12 +6,15 @@ use Doctrine\Common\Annotations\AnnotationRegistry;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\HttpFoundation\Request;
+use Drupal\Component\FileCache\FileCacheFactory;
+use Drupal\Core\Site\Settings;
 use Drupal\Console\Core\Style\DrupalStyle;
 use Drupal\Console\Core\Utils\ArgvInputReader;
 use Drupal\Console\Core\Bootstrap\DrupalConsoleCore;
 use Drupal\Console\Core\Utils\DrupalFinder;
+use Drupal\Console\Core\Bootstrap\DrupalInterface;
 
-class Drupal
+class Drupal implements DrupalInterface
 {
     protected $autoload;
 
@@ -72,11 +75,6 @@ class Drupal
                 }
             }
 
-            $rebuildServicesFile = false;
-            if ($command=='cache:rebuild' || $command=='cr') {
-                $rebuildServicesFile = true;
-            }
-
             if ($debug) {
                 $io->writeln('➤ Creating request');
             }
@@ -132,10 +130,8 @@ class Drupal
             $drupalKernel->addServiceModifier(
                 new DrupalServiceModifier(
                     $this->drupalFinder->getComposerRoot(),
-                    $this->drupalFinder->getDrupalRoot(),
                     'drupal.command',
-                    'drupal.generator',
-                    $rebuildServicesFile
+                    'drupal.generator'
                 )
             );
 
@@ -143,15 +139,28 @@ class Drupal
                 $io->writeln("\r\033[K\033[1A\r<info>✔</info>");
                 $io->writeln('➤ Rebuilding container');
             }
-            $drupalKernel->invalidateContainer();
-            $drupalKernel->rebuildContainer();
-            $drupalKernel->boot();
 
+            // Fix an exception of FileCacheFactory not prefix not set when
+            // container is build and looks that as we depend on cache for
+            // AddServicesCompilerPass but container is not ready this prefix
+            // needs to be set manually to allow use of the cache files.
+            FileCacheFactory::setPrefix($this->drupalFinder->getDrupalRoot());
+
+            // Invalidate container to ensure rebuild of any cached state
+            // when boot is processed.
+            $drupalKernel->invalidateContainer();
+
+            // Load legacy libraries, modules, register stream wrapper, and push
+            // request to request stack but without trigger processing of '/'
+            // request that invokes hooks like hook_page_attachments().
+            $drupalKernel->boot();
+            $drupalKernel->preHandle($request);
             if ($debug) {
                 $io->writeln("\r\033[K\033[1A\r<info>✔</info>");
             }
 
             $container = $drupalKernel->getContainer();
+
             $container->set(
                 'console.root',
                 $this->drupalFinder->getComposerRoot()
@@ -168,14 +177,6 @@ class Drupal
                     $this->drupalFinder->getComposerRoot()
                 );
 
-            $consoleExtendConfigFile = $this->drupalFinder
-                ->getComposerRoot() . DRUPAL_CONSOLE
-                    .'/extend.console.config.yml';
-            if (file_exists($consoleExtendConfigFile)) {
-                $container->get('console.configuration_manager')
-                    ->importConfigurationFile($consoleExtendConfigFile);
-            }
-
             $container->get('console.renderer')
                 ->setSkeletonDirs(
                     [
@@ -186,15 +187,28 @@ class Drupal
 
             return $container;
         } catch (\Exception $e) {
-            if ($command == 'list') {
-                $io->error($e->getMessage());
-            }
             $drupal = new DrupalConsoleCore(
                 $this->drupalFinder->getComposerRoot(),
                 $this->drupalFinder->getDrupalRoot()
             );
             $container = $drupal->boot();
             $container->set('class_loader', $this->autoload);
+
+            $notifyErrorCodes = [
+                0,
+                1045,
+                1049,
+                2002,
+            ];
+
+            if (in_array($e->getCode(), $notifyErrorCodes)) {
+                $messageParser = $container->get('console.message_parser');
+                $messageParser->addMessage(
+                    $container,
+                    'error',
+                    $e->getMessage()
+                );
+            }
 
             return $container;
         }
