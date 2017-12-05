@@ -1,0 +1,24 @@
+<?php
+
+/**
+ * @file
+ * This is a small module to make the D8 node edit page more like the D7 verion.
+ */
+
+/**
+ * Implements hook_preprocess_page().
+ */
+function seven_ui_preprocess_page(&$variables) {
+  if (\Drupal::theme()->getActiveTheme()->getName() == 'seven') {
+    $variables['#attached']['library'][] = 'seven_ui/seven_ui';
+  }
+}
+
+/**
+ * Implements hook_preprocess_views_view().
+ */
+function seven_ui_preprocess_views_view(&$variables) {
+  if ($variables['view']->id() === 'media_entity_browser') {
+    $variables['view_array']['#attached']['library'][] = 'seven_ui/media-entity-browser-overrides';
+  }
+}

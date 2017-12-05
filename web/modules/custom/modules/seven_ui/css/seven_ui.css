@@ -1,0 +1,32 @@
+/**
+ * @file
+ * Styles for node edit pages.
+ *
+ * These are edited from node.module.css.
+ */
+
+.layout-region-node-main,
+.layout-region-node-footer {
+  width: 100%;
+  padding-right: 0; /* LTR */
+  box-sizing: border-box;
+}
+
+[dir="rtl"] .layout-region-node-main,
+[dir="rtl"] .layout-region-node-footer {
+  float: right;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.layout-region-node-secondary {
+  width: 100%;
+}
+
+[dir="rtl"] .layout-region-node-secondary {
+  float: left;
+}
+
+.vertical-tabs {
+  overflow: visible !important;
+}

@@ -1,0 +1,4 @@
+name: Seven UI
+core: 8.x
+description: A simple module to recreate the UI of the Seven theme (from Drupal 7.)
+type: module
