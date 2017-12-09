@@ -6,3 +6,6 @@ core:
   js:
     dest/script.js:
       preprocess: true
+  dependencies:
+    - core/jquery
+    - core/drupal
