@@ -517,7 +517,7 @@ class ContainerTest extends TestCase {
     $configurator = $this->prophesize('\Drupal\Tests\Component\DependencyInjection\MockConfiguratorInterface');
     $configurator->configureService(Argument::type('object'))
       ->shouldBeCalled(1)
-      ->will(function($args) use ($container) {
+      ->will(function ($args) use ($container) {
         $args[0]->setContainer($container);
       });
     $container->set('configurator', $configurator->reveal());
@@ -778,7 +778,8 @@ class ContainerTest extends TestCase {
     $services['invalid_argument_service'] = [
       'class' => '\Drupal\Tests\Component\DependencyInjection\MockService',
       'arguments' => $this->getCollection([
-        1, // Test passing non-strings, too.
+        // Test passing non-strings, too.
+        1,
         (object) [
           'type' => 'invalid',
         ],
@@ -1042,7 +1043,7 @@ class MockInstantiationService {
 class MockService {
 
   /**
-   * @var ContainerInterface
+   * @var \Symfony\Component\DependencyInjection\ContainerInterface
    */
   protected $container;
 
@@ -1080,7 +1081,7 @@ class MockService {
   /**
    * Sets the container object.
    *
-   * @param ContainerInterface $container
+   * @param \Symfony\Component\DependencyInjection\ContainerInterface $container
    *   The container to inject via setter injection.
    */
   public function setContainer(ContainerInterface $container) {
@@ -1090,7 +1091,7 @@ class MockService {
   /**
    * Gets the container object.
    *
-   * @return ContainerInterface
+   * @return \Symfony\Component\DependencyInjection\ContainerInterface
    *   The internally set container.
    */
   public function getContainer() {

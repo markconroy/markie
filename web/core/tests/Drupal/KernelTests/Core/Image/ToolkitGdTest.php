@@ -214,18 +214,22 @@ class ToolkitGdTest extends KernelTestBase {
     ];
 
     // Systems using non-bundled GD2 don't have imagerotate. Test if available.
-    if (function_exists('imagerotate')) {
+    // @todo Remove the version check once
+    //   https://www.drupal.org/project/drupal/issues/2670966 is resolved.
+    if (function_exists('imagerotate') && (version_compare(phpversion(), '7.0.26') < 0)) {
       $operations += [
         'rotate_5' => [
           'function' => 'rotate',
-          'arguments' => ['degrees' => 5, 'background' => '#FF00FF'], // Fuchsia background.
+          // Fuchsia background.
+          'arguments' => ['degrees' => 5, 'background' => '#FF00FF'],
           'width' => 41,
           'height' => 23,
           'corners' => array_fill(0, 4, $this->fuchsia),
         ],
         'rotate_90' => [
           'function' => 'rotate',
-          'arguments' => ['degrees' => 90, 'background' => '#FF00FF'], // Fuchsia background.
+          // Fuchsia background.
+          'arguments' => ['degrees' => 90, 'background' => '#FF00FF'],
           'width' => 20,
           'height' => 40,
           'corners' => [$this->transparent, $this->red, $this->green, $this->blue],

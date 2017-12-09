@@ -204,8 +204,10 @@ class SqlContentEntityStorageSchema implements DynamicallyFieldableEntityStorage
 
     $current_schema = $this->getSchemaFromStorageDefinition($storage_definition);
     $this->processFieldStorageSchema($current_schema);
+    $installed_schema = $this->loadFieldSchemaData($original);
+    $this->processFieldStorageSchema($installed_schema);
 
-    return $current_schema != $this->loadFieldSchemaData($original);
+    return $current_schema != $installed_schema;
   }
 
   /**
@@ -1529,7 +1531,7 @@ class SqlContentEntityStorageSchema implements DynamicallyFieldableEntityStorage
             // involving them. Only indexes for which all columns exist are
             // actually created.
             $create = FALSE;
-            $specifier_columns = array_map(function($item) {
+            $specifier_columns = array_map(function ($item) {
               return is_string($item) ? $item : reset($item);
             }, $specifier);
             if (!isset($column_names) || array_intersect($specifier_columns, $column_names)) {
@@ -1580,7 +1582,7 @@ class SqlContentEntityStorageSchema implements DynamicallyFieldableEntityStorage
       foreach ($index_keys as $key => $drop_method) {
         if (!empty($schema[$key])) {
           foreach ($schema[$key] as $name => $specifier) {
-            $specifier_columns = array_map(function($item) {
+            $specifier_columns = array_map(function ($item) {
               return is_string($item) ? $item : reset($item);
             }, $specifier);
             if (!isset($column_names) || array_intersect($specifier_columns, $column_names)) {

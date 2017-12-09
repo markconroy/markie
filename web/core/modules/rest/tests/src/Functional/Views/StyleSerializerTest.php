@@ -124,7 +124,6 @@ class StyleSerializerTest extends ViewTestBase {
 
     $this->assertIdentical($actual_json, json_encode($expected), 'The expected JSON output was found.');
 
-
     // Test that the rendered output and the preview output are the same.
     $view->destroy();
     $view->setDisplay('rest_export_1');
@@ -667,7 +666,7 @@ class StyleSerializerTest extends ViewTestBase {
 
     $result = Json::decode($this->drupalGet('test/serialize/node-field', ['query' => ['_format' => 'json']]));
     $this->assertEqual(count($result[2]['body']), $node->body->count(), 'Expected count of values');
-    $this->assertEqual($result[2]['body'], array_map(function($item) {
+    $this->assertEqual($result[2]['body'], array_map(function ($item) {
       return $item['value'];
     }, $node->body->getValue()), 'Expected raw body values found.');
   }

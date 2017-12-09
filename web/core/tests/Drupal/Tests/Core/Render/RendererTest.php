@@ -65,9 +65,7 @@ class RendererTest extends RendererTestBase {
   public function providerTestRenderBasic() {
     $data = [];
 
-
     // Part 1: the most simplistic render arrays possible, none using #theme.
-
 
     // Pass a NULL.
     $data[] = [NULL, ''];
@@ -179,7 +177,7 @@ class RendererTest extends RendererTestBase {
     $data[] = [
       [
         '#markup' => 'foo',
-        '#pre_render' => [function($elements) {
+        '#pre_render' => [function ($elements) {
           $elements['#markup'] .= '<script>alert("bar");</script>';
           return $elements;
         }
@@ -192,7 +190,7 @@ class RendererTest extends RendererTestBase {
       [
         '#markup' => 'foo',
         '#allowed_tags' => ['script'],
-        '#pre_render' => [function($elements) {
+        '#pre_render' => [function ($elements) {
           $elements['#markup'] .= '<script>alert("bar");</script>';
           return $elements;
         }
@@ -205,7 +203,7 @@ class RendererTest extends RendererTestBase {
     $data[] = [
       [
         '#plain_text' => 'foo',
-        '#pre_render' => [function($elements) {
+        '#pre_render' => [function ($elements) {
           $elements['#plain_text'] .= '<script>alert("bar");</script>';
           return $elements;
         }
@@ -216,7 +214,6 @@ class RendererTest extends RendererTestBase {
 
     // Part 2: render arrays using #theme and #theme_wrappers.
 
-
     // Tests that #theme and #theme_wrappers can co-exist on an element.
     $build = [
       '#theme' => 'common_test_foo',
@@ -225,12 +222,12 @@ class RendererTest extends RendererTestBase {
       '#theme_wrappers' => ['container'],
       '#attributes' => ['class' => ['baz']],
     ];
-    $setup_code_type_link = function() {
+    $setup_code_type_link = function () {
       $this->setupThemeContainer();
       $this->themeManager->expects($this->at(0))
         ->method('render')
         ->with('common_test_foo', $this->anything())
-        ->willReturnCallback(function($theme, $vars) {
+        ->willReturnCallback(function ($theme, $vars) {
           return $vars['#foo'] . $vars['#bar'];
         });
     };
@@ -250,12 +247,12 @@ class RendererTest extends RendererTestBase {
       '#url' => 'https://www.drupal.org',
       '#title' => 'bar',
     ];
-    $setup_code_type_link = function() {
+    $setup_code_type_link = function () {
       $this->setupThemeContainer();
       $this->themeManager->expects($this->at(0))
         ->method('render')
         ->with('link', $this->anything())
-        ->willReturnCallback(function($theme, $vars) {
+        ->willReturnCallback(function ($theme, $vars) {
           $attributes = new Attribute(['href' => $vars['#url']] + (isset($vars['#attributes']) ? $vars['#attributes'] : []));
           return '<a' . (string) $attributes . '>' . $vars['#title'] . '</a>';
         });
@@ -287,7 +284,7 @@ class RendererTest extends RendererTestBase {
         'container',
       ],
     ];
-    $setup_code = function() {
+    $setup_code = function () {
       $this->setupThemeContainer($this->any());
     };
     $data[] = [$build, '<div class="foo"><div class="bar"></div>' . "\n" . '</div>' . "\n", $setup_code];
@@ -297,21 +294,19 @@ class RendererTest extends RendererTestBase {
       '#theme_wrappers' => [['container']],
       '#attributes' => ['class' => ['foo']],
     ];
-    $setup_code = function() {
+    $setup_code = function () {
       $this->setupThemeContainerMultiSuggestion($this->any());
     };
     $data[] = [$build, '<div class="foo"></div>' . "\n", $setup_code];
 
-
     // Part 3: render arrays using #markup as a fallback for #theme hooks.
-
 
     // Theme suggestion is not implemented, #markup should be rendered.
     $build = [
       '#theme' => ['suggestionnotimplemented'],
       '#markup' => 'foo',
     ];
-    $setup_code = function() {
+    $setup_code = function () {
       $this->themeManager->expects($this->once())
         ->method('render')
         ->with(['suggestionnotimplemented'], $this->anything())
@@ -326,7 +321,7 @@ class RendererTest extends RendererTestBase {
         '#markup' => 'foo',
       ],
     ];
-    $setup_code = function() {
+    $setup_code = function () {
       $this->themeManager->expects($this->once())
         ->method('render')
         ->with(['suggestionnotimplemented'], $this->anything())
@@ -340,7 +335,7 @@ class RendererTest extends RendererTestBase {
       '#markup' => 'foo',
     ];
     $theme_function_output = $this->randomContextValue();
-    $setup_code = function() use ($theme_function_output) {
+    $setup_code = function () use ($theme_function_output) {
       $this->themeManager->expects($this->once())
         ->method('render')
         ->with(['common_test_empty'], $this->anything())
@@ -357,9 +352,7 @@ class RendererTest extends RendererTestBase {
     ];
     $data[] = [$build, $theme_function_output, $setup_code];
 
-
     // Part 4: handling of #children and child renderable elements.
-
 
     // #theme is implemented so the values of both #children and 'child' will
     // be ignored - it is the responsibility of the theme hook to render these
@@ -369,7 +362,7 @@ class RendererTest extends RendererTestBase {
       '#children' => 'baz',
       'child' => ['#markup' => 'boo'],
     ];
-    $setup_code = function() {
+    $setup_code = function () {
       $this->themeManager->expects($this->once())
         ->method('render')
         ->with('common_test_foo', $this->anything())
@@ -388,7 +381,7 @@ class RendererTest extends RendererTestBase {
         '#markup' => 'boo',
       ],
     ];
-    $setup_code = function() {
+    $setup_code = function () {
       $this->themeManager->expects($this->never())
         ->method('render');
     };
@@ -404,7 +397,7 @@ class RendererTest extends RendererTestBase {
         '#markup' => 'boo',
       ],
     ];
-    $setup_code = function() {
+    $setup_code = function () {
       $this->themeManager->expects($this->never())
         ->method('render');
     };
@@ -494,7 +487,7 @@ class RendererTest extends RendererTestBase {
    */
   public function testRenderWithAccessCallbackCallable($access) {
     $build = [
-      '#access_callback' => function() use ($access) {
+      '#access_callback' => function () use ($access) {
         return $access;
       }
     ];
@@ -513,7 +506,7 @@ class RendererTest extends RendererTestBase {
   public function testRenderWithAccessPropertyAndCallback($access) {
     $build = [
       '#access' => $access,
-      '#access_callback' => function() {
+      '#access_callback' => function () {
         return TRUE;
       }
     ];
@@ -625,7 +618,7 @@ class RendererTest extends RendererTestBase {
     $this->themeManager->expects($matcher ?: $this->at(1))
       ->method('render')
       ->with('container', $this->anything())
-      ->willReturnCallback(function($theme, $vars) {
+      ->willReturnCallback(function ($theme, $vars) {
         return '<div' . (string) (new Attribute($vars['#attributes'])) . '>' . $vars['#children'] . "</div>\n";
       });
   }
@@ -634,7 +627,7 @@ class RendererTest extends RendererTestBase {
     $this->themeManager->expects($matcher ?: $this->at(1))
       ->method('render')
       ->with(['container'], $this->anything())
-      ->willReturnCallback(function($theme, $vars) {
+      ->willReturnCallback(function ($theme, $vars) {
         return '<div' . (string) (new Attribute($vars['#attributes'])) . '>' . $vars['#children'] . "</div>\n";
       });
   }
