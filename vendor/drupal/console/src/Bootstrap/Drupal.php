@@ -7,7 +7,7 @@ use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\HttpFoundation\Request;
 use Drupal\Component\FileCache\FileCacheFactory;
-use Drupal\Core\Site\Settings;
+use Drupal\Core\Database\Database;
 use Drupal\Console\Core\Style\DrupalStyle;
 use Drupal\Console\Core\Utils\ArgvInputReader;
 use Drupal\Console\Core\Bootstrap\DrupalConsoleCore;
@@ -35,6 +35,11 @@ class Drupal implements DrupalInterface
         $this->drupalFinder = $drupalFinder;
     }
 
+    /**
+     * Boot the Drupal object
+     *
+     * @return \Symfony\Component\DependencyInjection\ContainerBuilder
+     */
     public function boot()
     {
         $output = new ConsoleOutput();
@@ -54,11 +59,8 @@ class Drupal implements DrupalInterface
 
         if (!class_exists('Drupal\Core\DrupalKernel')) {
             $io->error('Class Drupal\Core\DrupalKernel does not exist.');
-            $drupal = new DrupalConsoleCore(
-                $this->drupalFinder->getComposerRoot(),
-                $this->drupalFinder->getDrupalRoot()
-            );
-            return $drupal->boot();
+
+            return $this->bootDrupalConsoleCore();
         }
 
         try {
@@ -161,12 +163,24 @@ class Drupal implements DrupalInterface
 
             $container = $drupalKernel->getContainer();
 
+            if ($this->shouldRedirectToDrupalCore($container)) {
+                $container = $this->bootDrupalConsoleCore();
+                $container->set('class_loader', $this->autoload);
+
+                return $container;
+            }
+
             $container->set(
                 'console.root',
                 $this->drupalFinder->getComposerRoot()
             );
 
             AnnotationRegistry::registerLoader([$this->autoload, "loadClass"]);
+
+            // Load configuration from directory
+            $container->get('console.configuration_manager')
+                ->loadConfiguration($this->drupalFinder->getComposerRoot())
+                ->getConfiguration();
 
             $configuration = $container->get('console.configuration_manager')
                 ->getConfiguration();
@@ -185,13 +199,14 @@ class Drupal implements DrupalInterface
                     ]
                 );
 
+            $container->set(
+                'console.cache_key',
+                $drupalKernel->getContainerKey()
+            );
+
             return $container;
         } catch (\Exception $e) {
-            $drupal = new DrupalConsoleCore(
-                $this->drupalFinder->getComposerRoot(),
-                $this->drupalFinder->getDrupalRoot()
-            );
-            $container = $drupal->boot();
+            $container = $this->bootDrupalConsoleCore();
             $container->set('class_loader', $this->autoload);
 
             $notifyErrorCodes = [
@@ -202,15 +217,49 @@ class Drupal implements DrupalInterface
             ];
 
             if (in_array($e->getCode(), $notifyErrorCodes)) {
-                $messageParser = $container->get('console.message_parser');
-                $messageParser->addMessage(
-                    $container,
-                    'error',
-                    $e->getMessage()
+                $messageManager = $container->get('console.message_manager');
+                $messageManager->error(
+                    $e->getMessage(),
+                    $e->getCode()
                 );
             }
 
             return $container;
         }
+    }
+
+    /**
+     * Builds and boot a DrupalConsoleCore object
+     *
+     * @return \Symfony\Component\DependencyInjection\ContainerBuilder
+     */
+    protected function bootDrupalConsoleCore()
+    {
+        $drupal = new DrupalConsoleCore(
+            $this->drupalFinder->getComposerRoot(),
+            $this->drupalFinder->getDrupalRoot()
+        );
+
+        return $drupal->boot();
+    }
+
+    /**
+     * Validate if flow should redirect to DrupalCore
+     *
+     * @param  $container
+     * @return bool
+     */
+    protected function shouldRedirectToDrupalCore($container)
+    {
+        if (!Database::getConnectionInfo()) {
+            return true;
+        }
+
+        if (!$container->has('database')) {
+            return true;
+        }
+
+
+        return !$container->get('database')->schema()->tableExists('sessions');
     }
 }

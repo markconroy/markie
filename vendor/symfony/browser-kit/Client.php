@@ -42,6 +42,7 @@ abstract class Client
 
     private $maxRedirects = -1;
     private $redirectCount = 0;
+    private $redirects = array();
     private $isMainRequest = true;
 
     /**
@@ -324,6 +325,8 @@ abstract class Client
         }
 
         if ($this->followRedirects && $this->redirect) {
+            $this->redirects[serialize($this->history->current())] = true;
+
             return $this->crawler = $this->followRedirect();
         }
 
@@ -440,7 +443,11 @@ abstract class Client
      */
     public function back()
     {
-        return $this->requestFromRequest($this->history->back(), false);
+        do {
+            $request = $this->history->back();
+        } while (array_key_exists(serialize($request), $this->redirects));
+
+        return $this->requestFromRequest($request, false);
     }
 
     /**
@@ -450,7 +457,11 @@ abstract class Client
      */
     public function forward()
     {
-        return $this->requestFromRequest($this->history->forward(), false);
+        do {
+            $request = $this->history->forward();
+        } while (array_key_exists(serialize($request), $this->redirects));
+
+        return $this->requestFromRequest($request, false);
     }
 
     /**

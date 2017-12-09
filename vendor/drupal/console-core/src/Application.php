@@ -46,7 +46,6 @@ class Application extends BaseApplication
      */
     protected $drupal;
 
-
     /**
      * @var bool
      */
@@ -102,10 +101,7 @@ class Application extends BaseApplication
     public function doRun(InputInterface $input, OutputInterface $output)
     {
         $io = new DrupalStyle($input, $output);
-        $messages = [];
-        if ($this->container->hasParameter('console.messages')) {
-            $messages = $this->container->getParameter('console.messages');
-        }
+        $messageManager = $this->container->get('console.message_manager');
         $this->commandName = $this->getCommandName($input)?:'list';
 
         $clear = $this->container->get('console.configuration_manager')
@@ -146,13 +142,13 @@ class Application extends BaseApplication
 
             if (array_key_exists($this->commandName, $mappings)) {
                 $commandNameMap = $mappings[$this->commandName];
-                $messages[] =[
-                    'warning' => sprintf(
+                $messageManager->warning(
+                    sprintf(
                         $this->trans('application.errors.renamed-command'),
                         $this->commandName,
                         $commandNameMap
                     )
-                ];
+                );
                 $this->add(
                     $this->find($commandNameMap)->setAliases([$this->commandName])
                 );
@@ -165,13 +161,13 @@ class Application extends BaseApplication
                     $this->find($drushCommand)->setAliases([$this->commandName])
                 );
                 $isValidCommand = true;
-                $messages[] = [
-                    'warning' => sprintf(
+                $messageManager->warning(
+                    sprintf(
                         $this->trans('application.errors.drush-command'),
                         $this->commandName,
                         $drushCommand
                     )
-                ];
+                );
             }
 
             if (!$isValidCommand) {
@@ -204,10 +200,11 @@ class Application extends BaseApplication
                 )
             );
         }
+        $messages = $messageManager->getMessages();
 
-        foreach ($messages as $key => $message) {
-            $type = key($message);
-            $io->$type($message);
+        foreach ($messages as $message) {
+            $type = $message['type'];
+            $io->$type($message['message']);
         }
 
         return $code;
@@ -611,17 +608,186 @@ class Application extends BaseApplication
             ->loadExtendConfiguration();
     }
 
+
+    public function getData()
+    {
+        $singleCommands = [
+            'about',
+            'chain',
+            'check',
+            'exec',
+            'help',
+            'init',
+            'list',
+            'shell',
+            'server'
+        ];
+
+        $languages = $this->container->get('console.configuration_manager')
+            ->getConfiguration()
+            ->get('application.languages');
+
+        $data = [];
+        foreach ($singleCommands as $singleCommand) {
+            $data['commands']['misc'][] = $this->commandData($singleCommand);
+        }
+
+        $namespaces = array_filter(
+            $this->getNamespaces(), function ($item) {
+                return (strpos($item, ':')<=0);
+            }
+        );
+        sort($namespaces);
+        array_unshift($namespaces, 'misc');
+
+        foreach ($namespaces as $namespace) {
+            $commands = $this->all($namespace);
+            usort(
+                $commands, function ($cmd1, $cmd2) {
+                    return strcmp($cmd1->getName(), $cmd2->getName());
+                }
+            );
+
+            foreach ($commands as $command) {
+                if (method_exists($command, 'getModule')) {
+                    if ($command->getModule() == 'Console') {
+                        $data['commands'][$namespace][] = $this->commandData(
+                            $command->getName()
+                        );
+                    }
+                } else {
+                    $data['commands'][$namespace][] = $this->commandData(
+                        $command->getName()
+                    );
+                }
+            }
+        }
+
+        $input = $this->getDefinition();
+        $options = [];
+        foreach ($input->getOptions() as $option) {
+            $options[] = [
+                'name' => $option->getName(),
+                'description' => $this->trans('application.options.'.$option->getName())
+            ];
+        }
+        $arguments = [];
+        foreach ($input->getArguments() as $argument) {
+            $arguments[] = [
+                'name' => $argument->getName(),
+                'description' => $this->trans('application.arguments.'.$argument->getName())
+            ];
+        }
+
+        $data['application'] = [
+            'namespaces' => $namespaces,
+            'options' => $options,
+            'arguments' => $arguments,
+            'languages' => $languages,
+            'messages' => [
+                'title' => $this->trans('application.gitbook.messages.title'),
+                'note' =>  $this->trans('application.gitbook.messages.note'),
+                'note_description' =>  $this->trans('application.gitbook.messages.note-description'),
+                'command' =>  $this->trans('application.gitbook.messages.command'),
+                'options' => $this->trans('application.gitbook.messages.options'),
+                'option' => $this->trans('application.gitbook.messages.option'),
+                'details' => $this->trans('application.gitbook.messages.details'),
+                'arguments' => $this->trans('application.gitbook.messages.arguments'),
+                'argument' => $this->trans('application.gitbook.messages.argument'),
+                'examples' => $this->trans('application.gitbook.messages.examples')
+            ],
+            'examples' => []
+        ];
+
+        return $data;
+    }
+
+    private function commandData($commandName)
+    {
+        if (!$this->has($commandName)) {
+            return [];
+        }
+
+        $command = $this->find($commandName);
+
+        $input = $command->getDefinition();
+        $options = [];
+        foreach ($input->getOptions() as $option) {
+            $options[$option->getName()] = [
+                'name' => $option->getName(),
+                'description' => $this->trans($option->getDescription()),
+            ];
+        }
+
+        $arguments = [];
+        foreach ($input->getArguments() as $argument) {
+            $arguments[$argument->getName()] = [
+                'name' => $argument->getName(),
+                'description' => $this->trans($argument->getDescription()),
+            ];
+        }
+
+        $commandKey = str_replace(':', '.', $command->getName());
+
+        $examples = [];
+        for ($i = 0; $i < 5; $i++) {
+            $description = sprintf(
+                'commands.%s.examples.%s.description',
+                $commandKey,
+                $i
+            );
+            $execution = sprintf(
+                'commands.%s.examples.%s.execution',
+                $commandKey,
+                $i
+            );
+
+            if ($description != $this->trans($description)) {
+                $examples[] = [
+                    'description' => $this->trans($description),
+                    'execution' => $this->trans($execution)
+                ];
+            } else {
+                break;
+            }
+        }
+
+        $data = [
+            'name' => $command->getName(),
+            'description' => $command->getDescription(),
+            'options' => $options,
+            'arguments' => $arguments,
+            'examples' => $examples,
+            'aliases' => $command->getAliases(),
+            'key' => $commandKey,
+            'dashed' => str_replace(':', '-', $command->getName()),
+            'messages' => [
+                'usage' =>  $this->trans('application.gitbook.messages.usage'),
+                'options' => $this->trans('application.gitbook.messages.options'),
+                'option' => $this->trans('application.gitbook.messages.option'),
+                'details' => $this->trans('application.gitbook.messages.details'),
+                'arguments' => $this->trans('application.gitbook.messages.arguments'),
+                'argument' => $this->trans('application.gitbook.messages.argument'),
+                'examples' => $this->trans('application.gitbook.messages.examples')
+            ],
+        ];
+
+        return $data;
+    }
+
     /**
      * @return DrupalInterface
      */
-    public function getDrupal() {
+    public function getDrupal()
+    {
         return $this->drupal;
     }
 
     /**
      * @param DrupalInterface $drupal
      */
-    public function setDrupal($drupal) {
+    public function setDrupal($drupal)
+    {
         $this->drupal = $drupal;
     }
 
