@@ -1,0 +1,19 @@
+{%
+set classes = [
+  "above-header"
+]
+%}
+
+<div{{ attributes.addClass(classes) }}>
+  <div class="layout-contained padding">
+    <div class="above-header__inner">
+
+      {% block content %}
+        {% for content in contents %}
+          {{ content }}
+        {% endfor %}
+      {% endblock %}
+
+    </div>
+  </div>
+</div>
