@@ -14,11 +14,55 @@ dependencies:
   module:
     - comment
     - entity_browser_entity_form
+    - field_group
     - inline_entity_form
     - metatag
     - paragraphs
-    - path
     - text
+third_party_settings:
+  field_group:
+    group_content:
+      children:
+        - group_default_items
+        - group_building_blocks
+      parent_name: ''
+      weight: 0
+      format_type: tabs
+      format_settings:
+        id: ''
+        classes: ''
+        direction: vertical
+      label: Content
+    group_default_items:
+      children:
+        - title
+        - field_intro
+        - field_main_image
+        - field_site_section
+        - field_tags
+      parent_name: group_content
+      weight: 20
+      format_type: tab
+      format_settings:
+        id: ''
+        classes: ''
+        formatter: closed
+        description: ''
+        required_fields: true
+      label: 'Default Items'
+    group_building_blocks:
+      children:
+        - field_building_blocks
+      parent_name: group_content
+      weight: 21
+      format_type: tab
+      format_settings:
+        id: ''
+        classes: ''
+        formatter: closed
+        description: ''
+        required_fields: true
+      label: 'Building Blocks'
 _core:
   default_config_hash: buc38w3gxCqFnjINJhMiJvPpj9jWflKvlKDyBVMPVvw
 id: node.article.default
@@ -28,26 +72,26 @@ mode: default
 content:
   comment:
     type: comment_default
-    weight: 10
+    weight: 2
     region: content
     settings: {  }
     third_party_settings: {  }
   created:
     type: datetime_timestamp
-    weight: 7
+    weight: 1
     region: content
     settings: {  }
     third_party_settings: {  }
   field_building_blocks:
     type: entity_reference_paragraphs
-    weight: 3
+    weight: 4
     settings:
       title: Paragraph
       title_plural: Paragraphs
-      edit_mode: open
+      edit_mode: preview
       add_mode: dropdown
       form_display_mode: default
-      default_paragraph_type: ''
+      default_paragraph_type: _none
     third_party_settings: {  }
     region: content
   field_intro:
@@ -59,7 +103,7 @@ content:
     type: text_textarea
     region: content
   field_main_image:
-    weight: 1
+    weight: 3
     settings:
       form_mode: default
       override_labels: true
@@ -74,68 +118,43 @@ content:
     type: inline_entity_form_complex
     region: content
   field_metatags:
-    weight: 26
+    weight: 4
     settings: {  }
     third_party_settings: {  }
     type: metatag_firehose
     region: content
   field_site_section:
-    weight: 5
+    weight: 4
     settings: {  }
     third_party_settings: {  }
     type: options_select
     region: content
   field_tags:
     type: entity_reference_autocomplete_tags
-    weight: 4
+    weight: 5
     region: content
     settings:
       match_operator: CONTAINS
       size: 60
       placeholder: ''
-    third_party_settings: {  }
-  path:
-    type: path
-    weight: 11
-    region: content
-    settings: {  }
-    third_party_settings: {  }
-  promote:
-    type: boolean_checkbox
-    settings:
-      display_label: true
-    weight: 8
-    region: content
     third_party_settings: {  }
   status:
     type: boolean_checkbox
     settings:
       display_label: true
-    weight: 12
-    region: content
-    third_party_settings: {  }
-  sticky:
-    type: boolean_checkbox
-    settings:
-      display_label: true
-    weight: 9
+    weight: 3
     region: content
     third_party_settings: {  }
   title:
     type: string_textfield
-    weight: 0
+    weight: 1
     region: content
     settings:
       size: 60
       placeholder: ''
     third_party_settings: {  }
-  uid:
-    type: entity_reference_autocomplete
-    weight: 6
-    region: content
-    settings:
-      match_operator: CONTAINS
-      size: 60
-      placeholder: ''
-    third_party_settings: {  }
-hidden: {  }
+hidden:
+  path: true
+  promote: true
+  sticky: true
+  uid: true
