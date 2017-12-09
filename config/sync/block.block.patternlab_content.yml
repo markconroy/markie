@@ -1,3 +1,4 @@
+uuid: 9ea1e135-00e3-4285-9556-75dcdc6f1f0d
 langcode: en
 status: true
 dependencies:
@@ -5,6 +6,8 @@ dependencies:
     - system
   theme:
     - patternlab
+_core:
+  default_config_hash: 9EoWV2Lot6FVSr50t4hoKgiz1LIXYWNG-IIPYsWxBqo
 id: patternlab_content
 theme: patternlab
 region: content

@@ -1,6 +1,9 @@
+uuid: 8b61668c-8d58-4989-b410-9d5d072555ba
 langcode: en
 status: true
 dependencies: {  }
+_core:
+  default_config_hash: RfT0ld8NiKqfp2jJvowJh7bjuEevKJ9g-ysGQBwWyxU
 label: 'Vanity Mirror (9:16)'
 id: vanity_mirror
 description: 'This crop type crops images into a portrait format, like a vanity mirror - 9:16, basically it''s a widescreen television turned on its side!'

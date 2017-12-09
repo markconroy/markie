@@ -1,3 +1,4 @@
+uuid: 1eee548a-a9b8-478a-a19b-3048e6da7492
 langcode: en
 status: true
 dependencies:
@@ -5,6 +6,8 @@ dependencies:
     - field.storage.paragraph.field_p_it_image
     - media_entity.bundle.image
     - paragraphs.paragraphs_type.image_with_text
+_core:
+  default_config_hash: V3tjLCxdlSElP6WWJp_yzAA2-jYEW-ftZuK57mtSB7c
 id: paragraph.image_with_text.field_p_it_image
 field_name: field_p_it_image
 entity_type: paragraph

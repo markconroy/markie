@@ -1,8 +1,11 @@
+uuid: b4c2f9b8-0ec3-46f8-9e51-54a858bfb331
 langcode: en
 status: true
 dependencies:
   theme:
     - patternlab
+_core:
+  default_config_hash: X9I1OB0W3WlWtrK-CNcg6hNWwa8wficanpH8pYnDZDE
 id: patternlab_local_tasks
 theme: patternlab
 region: tabs

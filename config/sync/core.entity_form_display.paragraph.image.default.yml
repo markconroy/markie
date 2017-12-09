@@ -1,3 +1,4 @@
+uuid: 4df50f76-fd6c-4bae-b81a-b6c4ab9d2eee
 langcode: en
 status: true
 dependencies:
@@ -8,6 +9,8 @@ dependencies:
   module:
     - entity_browser_entity_form
     - inline_entity_form
+_core:
+  default_config_hash: 8OlWJoeTazob-1gniEau0hHAljHSmPIcwOQ8aqg519Y
 id: paragraph.image.default
 targetEntityType: paragraph
 bundle: image

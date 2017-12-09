@@ -1,8 +1,11 @@
+uuid: 69e1fbd5-25cf-4d58-bd01-a6db09e3d977
 langcode: en
 status: true
 dependencies:
   module:
     - crop
+_core:
+  default_config_hash: HtAyXcmmxEeJtSmBeVLzZeJvvnBBpMprRfn8MPZAojQ
 name: square
 label: Square
 effects:

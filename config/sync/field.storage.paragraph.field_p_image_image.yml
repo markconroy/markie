@@ -1,9 +1,12 @@
+uuid: edb61bac-b802-4da1-8b52-c59744dfac69
 langcode: en
 status: true
 dependencies:
   module:
     - media_entity
     - paragraphs
+_core:
+  default_config_hash: cOSSptnZrFe313EhKyYB-yZQFU3Tyb_wEnaf9i5K2zE
 id: paragraph.field_p_image_image
 field_name: field_p_image_image
 entity_type: paragraph

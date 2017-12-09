@@ -1,3 +1,4 @@
+uuid: 3936f150-373e-4352-88e8-94f7340885a3
 langcode: en
 status: true
 dependencies:
@@ -8,6 +9,8 @@ dependencies:
     - responsive_image.styles.teaser
   module:
     - responsive_image
+_core:
+  default_config_hash: gDzZe51kUauMWHFXNVPnYjLmTnsN8FvrlvvvqlTgraI
 id: media.image.teaser
 targetEntityType: media
 bundle: image

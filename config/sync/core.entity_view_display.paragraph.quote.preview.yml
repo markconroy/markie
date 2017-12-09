@@ -1,3 +1,4 @@
+uuid: 65167e31-110f-42c8-b7b3-d66be9fba755
 langcode: en
 status: true
 dependencies:
@@ -7,6 +8,8 @@ dependencies:
     - paragraphs.paragraphs_type.quote
   module:
     - text
+_core:
+  default_config_hash: _OBpcwvkEhIBh0nPRbvIIhhpjrgo6flFNAxNIv94ySQ
 id: paragraph.quote.preview
 targetEntityType: paragraph
 bundle: quote

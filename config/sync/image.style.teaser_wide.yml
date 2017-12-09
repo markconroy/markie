@@ -1,8 +1,11 @@
+uuid: 52c4d3d6-1450-4f04-a499-fd6808de0671
 langcode: en
 status: true
 dependencies:
   module:
     - crop
+_core:
+  default_config_hash: yvdOcSkjOMfdByFfFxekd22BRt43iiNQlhET_mvPi0Y
 name: teaser_wide
 label: 'Teaser Wide'
 effects:

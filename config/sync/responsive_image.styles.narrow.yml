@@ -1,3 +1,4 @@
+uuid: 8eb79e19-da57-4bd3-8304-4e0b5a147276
 langcode: en
 status: true
 dependencies:
@@ -5,6 +6,8 @@ dependencies:
     - image.style.max_1300x1300
     - image.style.max_325x325
     - image.style.max_650x650
+_core:
+  default_config_hash: xAduWBNBoi9WKBMCoVIKSueNYqPK84SiiZwQYKPbkaE
 id: narrow
 label: Narrow
 image_style_mappings:

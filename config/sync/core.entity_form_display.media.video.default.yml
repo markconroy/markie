@@ -1,3 +1,4 @@
+uuid: ebf8940c-300d-44f7-89dc-4bc82c691483
 langcode: en
 status: true
 dependencies:
@@ -6,6 +7,8 @@ dependencies:
     - media_entity.bundle.video
   module:
     - video_embed_field
+_core:
+  default_config_hash: 0Jz8m5oAn_dHxKFLX-CtqDG3E2dcQP4AcZ9STHTj208
 id: media.video.default
 targetEntityType: media
 bundle: video

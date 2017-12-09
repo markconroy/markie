@@ -1,3 +1,4 @@
+uuid: b59eaf17-b2e5-482e-99ce-8ea6471858f4
 langcode: und
 status: true
 dependencies:
@@ -9,6 +10,8 @@ dependencies:
     - image
     - media_entity
     - user
+_core:
+  default_config_hash: NZsBE7xrBkDjS1WFwny8xUgy885hVgiZVOTL6WoFSwU
 id: media_browser_files
 label: 'Media Browser Files'
 module: views

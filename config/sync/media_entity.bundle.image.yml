@@ -1,3 +1,4 @@
+uuid: 9ad0fe27-9c92-4234-b1bf-a71bbe073f86
 langcode: en
 status: true
 dependencies:
@@ -7,6 +8,8 @@ dependencies:
 third_party_settings:
   crop:
     image_field: field_m_image_image
+_core:
+  default_config_hash: '-leiRL8tebxUTabPPWlE1poR7mBIpPmqxorWbsLq860'
 id: image
 label: Image
 description: 'We use this media bundle to add images to our website.'

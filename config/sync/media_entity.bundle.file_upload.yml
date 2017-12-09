@@ -1,3 +1,4 @@
+uuid: 6ac1d205-455d-4512-a448-3b7116c7a27f
 langcode: en
 status: true
 dependencies:
@@ -6,6 +7,8 @@ dependencies:
 third_party_settings:
   crop:
     image_field: null
+_core:
+  default_config_hash: bO8X3mEkcp4QiFUAR1h4KD4poKxzngwVU6QzuJlJzFQ
 id: file_upload
 label: 'File Upload'
 description: 'We use this media type to upload files to our website.'

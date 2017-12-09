@@ -1,8 +1,11 @@
+uuid: e5dbce8e-6d9e-4fa5-a4ed-6059fc07d5bf
 langcode: en
 status: true
 dependencies:
   module:
     - crop
+_core:
+  default_config_hash: VP4OffHIUtIsXaAu5PghINsZjscatRfYSVdssLTcnT8
 name: traditional_television
 label: 'Traditional Television'
 effects:

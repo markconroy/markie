@@ -1,3 +1,4 @@
+uuid: 1e5fe6b5-a729-46d2-b4cc-8e1c21d82d78
 langcode: en
 status: true
 dependencies:
@@ -5,6 +6,8 @@ dependencies:
     - search
   theme:
     - bartik
+_core:
+  default_config_hash: za-39d5WDUg6XvbyqSnuVYEeq6QM4qKJxW8MnoAha5A
 id: bartik_search
 theme: bartik
 region: sidebar_first

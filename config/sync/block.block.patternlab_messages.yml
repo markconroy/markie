@@ -1,3 +1,4 @@
+uuid: d74ada23-f9c4-4aa2-a556-e767b475e69f
 langcode: en
 status: true
 dependencies:
@@ -5,10 +6,12 @@ dependencies:
     - system
   theme:
     - patternlab
+_core:
+  default_config_hash: KHQIJ7Vfl25lTjzIc7qIvnuistt-Mw2O0kG4jCofmkI
 id: patternlab_messages
 theme: patternlab
 region: highlighted
-weight: -5
+weight: -4
 provider: null
 plugin: system_messages_block
 settings:

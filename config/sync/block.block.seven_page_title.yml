@@ -1,8 +1,11 @@
+uuid: cab0b2a2-e030-47c7-b3e1-810528c240cc
 langcode: en
 status: true
 dependencies:
   theme:
     - seven
+_core:
+  default_config_hash: ZSpc3IoSaLd0PkB02nxjVPBMztIdsTdHek9SiGaqZ_c
 id: seven_page_title
 theme: seven
 region: header

@@ -1,3 +1,4 @@
+uuid: 4425349b-2598-459c-9da9-3f8876dd292b
 langcode: en
 status: true
 dependencies:
@@ -5,6 +6,8 @@ dependencies:
     - core.entity_view_mode.paragraph.preview
     - field.field.paragraph.file.field_p_file_file
     - paragraphs.paragraphs_type.file
+_core:
+  default_config_hash: C6uRi4KsQ4dOjEkeu2rX4QHAi-mq-6CInbT-7PB6DdM
 id: paragraph.file.preview
 targetEntityType: paragraph
 bundle: file

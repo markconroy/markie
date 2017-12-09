@@ -1,3 +1,4 @@
+uuid: 6a7a28ed-3a50-45fc-b7d3-1ce3c00ecb77
 langcode: en
 status: true
 dependencies:
@@ -7,6 +8,8 @@ dependencies:
     - node.type.page
   module:
     - user
+_core:
+  default_config_hash: cSv5lDnbIgDug475Hdz3woED2XMqYv3awI-J9u1JLbY
 id: node.page.teaser
 targetEntityType: node
 bundle: page
@@ -14,4 +17,6 @@ mode: teaser
 content: {  }
 hidden:
   field_building_blocks: true
+  field_intro: true
+  field_metatags: true
   links: true

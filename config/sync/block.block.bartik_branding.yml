@@ -1,3 +1,4 @@
+uuid: 6177da65-73c5-4fbf-87f7-a4d280c1d57e
 langcode: en
 status: true
 dependencies:
@@ -5,6 +6,8 @@ dependencies:
     - system
   theme:
     - bartik
+_core:
+  default_config_hash: NDwadleLD3YVSbDUaakxyYZyINYtkFtOVGShfq4kWy8
 id: bartik_branding
 theme: bartik
 region: header

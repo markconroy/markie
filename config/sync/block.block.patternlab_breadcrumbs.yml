@@ -1,3 +1,4 @@
+uuid: 56d96187-fad9-46bc-a84c-e10d38a30918
 langcode: en
 status: true
 dependencies:
@@ -5,6 +6,8 @@ dependencies:
     - system
   theme:
     - patternlab
+_core:
+  default_config_hash: oXUb3JZR2WW5VOdw4HrhRicCsq51mCgLfRyvheG68ck
 id: patternlab_breadcrumbs
 theme: patternlab
 region: breadcrumb

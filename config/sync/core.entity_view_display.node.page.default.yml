@@ -1,3 +1,4 @@
+uuid: 7c751f67-df31-4388-affd-d15b5811872c
 langcode: en
 status: true
 dependencies:
@@ -7,6 +8,8 @@ dependencies:
   module:
     - entity_reference_revisions
     - user
+_core:
+  default_config_hash: g1S3_GLaxq4l3I9RIca5Mlz02MxI2KmOquZpHw59akM
 id: node.page.default
 targetEntityType: node
 bundle: page
@@ -26,4 +29,6 @@ content:
     region: content
     settings: {  }
     third_party_settings: {  }
-hidden: {  }
+hidden:
+  field_intro: true
+  field_metatags: true

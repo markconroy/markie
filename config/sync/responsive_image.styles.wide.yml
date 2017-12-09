@@ -1,3 +1,4 @@
+uuid: 5cffd3ef-5656-4446-b200-b771d8076568
 langcode: en
 status: true
 dependencies:
@@ -6,6 +7,8 @@ dependencies:
     - image.style.max_2600x2600
     - image.style.max_325x325
     - image.style.max_650x650
+_core:
+  default_config_hash: waBU_eXNHzwqmAXPugM2-ZD5Cuvzw_OGwPfSITxymOE
 id: wide
 label: Wide
 image_style_mappings:

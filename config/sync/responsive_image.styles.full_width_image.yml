@@ -1,3 +1,4 @@
+uuid: e6d9de88-b830-431e-8226-60d3d80e1dcd
 langcode: en
 status: true
 dependencies:
@@ -7,6 +8,8 @@ dependencies:
     - image.style.widescreen_television
   theme:
     - patternlab
+_core:
+  default_config_hash: 9YuuxMK_pW6vAtFBpDnaMA0ZHUFeOtjZJwtRVOwO4UA
 id: full_width_image
 label: 'Full Width Image'
 image_style_mappings:

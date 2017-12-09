@@ -1,6 +1,9 @@
+uuid: 4e9fcb5a-83ed-4256-9d44-8846728ceaa8
 langcode: en
 status: true
 dependencies: {  }
+_core:
+  default_config_hash: ydpmSCtxLjO9xqkBxObkeYx0Bf2dkW-d8bB_6Q1Ggjs
 id: node
 label: Content
 tags:

@@ -1,3 +1,4 @@
+uuid: 2d88e6d9-a296-4bdf-9ab5-82b0ec39cd95
 langcode: en
 status: true
 dependencies:
@@ -7,6 +8,8 @@ dependencies:
   module:
     - paragraphs
     - path
+_core:
+  default_config_hash: sb0qCkzU_8mNq29NehYAU8jCBXWPLeX0UN8sYFVGVcw
 id: node.page.default
 targetEntityType: node
 bundle: page
@@ -74,4 +77,6 @@ content:
       size: 60
       placeholder: ''
     third_party_settings: {  }
-hidden: {  }
+hidden:
+  field_intro: true
+  field_metatags: true

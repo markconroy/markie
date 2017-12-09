@@ -1,9 +1,12 @@
+uuid: 818c737d-af71-441d-b3c2-5c3044a669e1
 langcode: en
 status: true
 dependencies:
   config:
     - field.field.paragraph.file.field_p_file_file
     - paragraphs.paragraphs_type.file
+_core:
+  default_config_hash: 3Uf5wUaWnIUxWCxjCiNw0lZ6f5xaqOUc0Fn-2B2D6MA
 id: paragraph.file.default
 targetEntityType: paragraph
 bundle: file

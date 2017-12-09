@@ -1,3 +1,4 @@
+uuid: a4390082-4015-44b2-b62c-f8e4f69db28c
 langcode: en
 status: true
 dependencies:
@@ -10,6 +11,8 @@ dependencies:
     - entity_browser_entity_form
     - inline_entity_form
     - text
+_core:
+  default_config_hash: xrQSgOFzT-nMaeStjpd2ss3IRaainIrw2XzLWw-8jns
 id: paragraph.image_with_text.default
 targetEntityType: paragraph
 bundle: image_with_text

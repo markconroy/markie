@@ -1,3 +1,4 @@
+uuid: 7c3d18a6-4813-479f-a985-8cb463396c4e
 langcode: en
 status: true
 dependencies:
@@ -6,6 +7,8 @@ dependencies:
   module:
     - entity_browser_entity_form
     - views
+_core:
+  default_config_hash: uUtWwEwix7CEdsZXgVtK6Tz8XvFHtqQMk6m5htN4ru8
 name: files_entity_browser
 label: 'Files Entity Browser'
 display: modal
