@@ -26,6 +26,11 @@ set classes = [
   {{ title_suffix }}
 
   {{ content.field_intro }}
+  {% if content.field_main_image %}
+    <div class="layout-contained--medium">
+      {{ content.field_main_image }}
+    </div>
+  {% endif %}
 
   {% block building_blocks %}
     <div class="building-blocks">

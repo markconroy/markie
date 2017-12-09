@@ -17,4 +17,4 @@ display_submitted: true
 label: 'A Blog Post by Mark Conroy, all about PatternLab and Drupal'
 
 content:
-  field_listing_snippet: <div class="field--name-field-listing-snippet"><p>Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Curabitur blandit tempus porttitor. Sed posuere consectetur est at lobortis. Maecenas faucibus mollis interdum.</p></div>
+  field_intro: <div class="field--name-field-listing-snippet"><p>Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Curabitur blandit tempus porttitor. Sed posuere consectetur est at lobortis. Maecenas faucibus mollis interdum.</p></div>
