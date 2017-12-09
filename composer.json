@@ -62,8 +62,7 @@
         "fengyuanchen/cropper": "3.0.0-beta",
         "drupal/entity": "1.0-beta1",
         "drupal/mgv": "1.8",
-        "drupal/menu_trail_by_path": "1.1",
-        "drupal/features": "3.5"
+        "drupal/menu_trail_by_path": "1.1"
     },
     "require-dev": {
         "behat/mink": "~1.7",
