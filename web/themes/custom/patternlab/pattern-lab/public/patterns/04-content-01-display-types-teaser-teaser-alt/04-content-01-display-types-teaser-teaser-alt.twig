@@ -8,7 +8,7 @@ set classes = [
   view_mode ? 'node--view-mode-' ~ view_mode|clean_class,
 ]
 %}
-<div{{ attributes.addClass(classes) }}>
+<article{{ attributes.addClass(classes) }}>
 
   {% if display_submitted %}
     <footer class="node__meta">
@@ -24,4 +24,4 @@ set classes = [
 
   {{ content.field_intro }}
 
-</div>
+</article>
