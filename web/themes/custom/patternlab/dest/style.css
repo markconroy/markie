@@ -1626,6 +1626,10 @@ body {
   margin-top: 23.4px;
 }
 
+.node--view-mode-teaser {
+  margin-bottom: 1rem;
+}
+
 .node--view-mode-teaser .node__meta {
   display: -ms-flexbox;
   display: flex;
@@ -1651,7 +1655,7 @@ body {
   text-decoration: underline;
 }
 
-.node--view-mode-teaser .field--name-field-listing-snippet p:last-of-type {
+.field--name-field-listing-snippet p:last-of-type {
   margin-bottom: 0;
 }
 
