@@ -1,3 +1,7 @@
+.node--view-mode-teaser {
+  margin-bottom: 1rem
+}
+
 .node--view-mode-teaser .node__meta {
   display: flex;
   font-size: $fs--14px;
@@ -19,7 +23,7 @@
   }
 }
 
-.node--view-mode-teaser .field--name-field-listing-snippet p:last-of-type {
+ .field--name-field-listing-snippet p:last-of-type {
   margin-bottom: 0;
 }
 
