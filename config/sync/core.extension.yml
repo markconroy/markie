@@ -7,6 +7,7 @@ module:
   block_content: 0
   breakpoint: 0
   ckeditor: 0
+  ckmod: 0
   comment: 0
   components: 0
   config: 0
@@ -17,7 +18,6 @@ module:
   ctools: 0
   datetime: 0
   dblog: 0
-  devel: 0
   dynamic_page_cache: 0
   editor: 0
   entity: 0
@@ -35,7 +35,6 @@ module:
   image_widget_crop: 0
   inline_entity_form: 0
   inline_form_errors: 0
-  kint: 0
   link: 0
   media_entity: 0
   media_entity_browser: 0
