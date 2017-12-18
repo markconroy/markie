@@ -1,0 +1,10 @@
+<?php
+
+/**
+ * @file
+ * This is a small module to make the ckeditor layout a bit more modern looking.
+ */
+
+function ckmod_preprocess_page(&$variables) {
+  $variables['#attached']['library'][] = 'ckmod/ckmod';
+}
