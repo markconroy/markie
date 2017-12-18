@@ -6,8 +6,6 @@
 .form-type-textarea .cke_top {
   background: transparent;
   border: 0;
-  margin: auto;
-  max-width: 500px;
   padding: 0;
 }
 
@@ -17,11 +15,6 @@
   border-top-width: 0;
   padding: 7px 7px 1px;
   margin: 0 9px;
-}
-
-.form-type-textarea .cke_toolbox {
-  display: flex;
-  justify-content: space-between;
 }
 
 .form-type-textarea .cke_editable {
