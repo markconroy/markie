@@ -5,11 +5,18 @@ dependencies:
   config:
     - field.storage.node.field_building_blocks
     - node.type.article
+    - paragraphs.paragraphs_type.accordion
+    - paragraphs.paragraphs_type.anchor
+    - paragraphs.paragraphs_type.call_to_action
     - paragraphs.paragraphs_type.file
     - paragraphs.paragraphs_type.image
     - paragraphs.paragraphs_type.image_with_text
+    - paragraphs.paragraphs_type.large_image_cta
     - paragraphs.paragraphs_type.quote
+    - paragraphs.paragraphs_type.related_content
+    - paragraphs.paragraphs_type.section_break
     - paragraphs.paragraphs_type.text
+    - paragraphs.paragraphs_type.tiled_layout
     - paragraphs.paragraphs_type.video
   module:
     - entity_reference_revisions
@@ -26,30 +33,65 @@ default_value_callback: ''
 settings:
   handler: 'default:paragraph'
   handler_settings:
+    negate: 0
     target_bundles:
       text: text
       image: image
       image_with_text: image_with_text
       quote: quote
       video: video
+      section_break: section_break
+      call_to_action: call_to_action
       file: file
+      related_content: related_content
+      anchor: anchor
+      accordion: accordion
+      large_image_cta: large_image_cta
+      tiled_layout: tiled_layout
     target_bundles_drag_drop:
       text:
         enabled: true
-        weight: -11
+        weight: -31
       image:
         enabled: true
-        weight: -10
+        weight: -30
       image_with_text:
         enabled: true
-        weight: -9
+        weight: -29
       quote:
         enabled: true
-        weight: -8
+        weight: -28
       video:
         enabled: true
-        weight: -7
+        weight: -27
+      section_break:
+        enabled: true
+        weight: -26
+      call_to_action:
+        enabled: true
+        weight: -25
       file:
         enabled: true
-        weight: 12
+        weight: -24
+      related_content:
+        enabled: true
+        weight: -23
+      anchor:
+        enabled: true
+        weight: -22
+      accordion:
+        enabled: true
+        weight: -21
+      large_image_cta:
+        enabled: true
+        weight: -20
+      tiled_layout:
+        enabled: true
+        weight: -19
+      accordion_item:
+        weight: -18
+        enabled: false
+      tile:
+        weight: -17
+        enabled: false
 field_type: entity_reference_revisions

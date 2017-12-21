@@ -40,10 +40,10 @@ settings:
       image_with_text: image_with_text
       quote: quote
       video: video
+      section_break: section_break
       call_to_action: call_to_action
       file: file
       related_content: related_content
-      section_break: section_break
       anchor: anchor
       accordion: accordion
       large_image_cta: large_image_cta
@@ -51,47 +51,47 @@ settings:
     target_bundles_drag_drop:
       text:
         enabled: true
-        weight: -21
+        weight: -31
       image:
         enabled: true
-        weight: -20
+        weight: -30
       image_with_text:
         enabled: true
-        weight: -19
+        weight: -29
       quote:
         enabled: true
-        weight: -18
+        weight: -28
       video:
         enabled: true
-        weight: -17
-      call_to_action:
-        enabled: true
-        weight: -16
-      file:
-        enabled: true
-        weight: -15
-      related_content:
-        enabled: true
-        weight: -14
+        weight: -27
       section_break:
         enabled: true
-        weight: -13
+        weight: -26
+      call_to_action:
+        enabled: true
+        weight: -25
+      file:
+        enabled: true
+        weight: -24
+      related_content:
+        enabled: true
+        weight: -23
       anchor:
         enabled: true
-        weight: -12
+        weight: -22
       accordion:
         enabled: true
-        weight: 16
-      accordion_item:
-        weight: 17
-        enabled: false
+        weight: -21
       large_image_cta:
         enabled: true
-        weight: 23
-      tile:
-        weight: 28
-        enabled: false
+        weight: -20
       tiled_layout:
         enabled: true
-        weight: 29
+        weight: -19
+      accordion_item:
+        weight: -18
+        enabled: false
+      tile:
+        weight: -17
+        enabled: false
 field_type: entity_reference_revisions
