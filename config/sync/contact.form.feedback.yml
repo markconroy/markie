@@ -7,7 +7,7 @@ _core:
 id: feedback
 label: 'Website feedback'
 recipients:
-  - support@annertech.com
+  - mark@mark.ie
 reply: ''
 weight: 0
 message: 'Your message has been sent.'
