@@ -24,4 +24,4 @@ content:
         pattern: building-blocks-text-paragraph-x3-with-headings
     item_1:
       include():
-        pattern: building-blocks-file-uploads
+        pattern: building-blocks-video

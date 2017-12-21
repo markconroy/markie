@@ -23,6 +23,3 @@ content:
     item_0:
       include():
         pattern: building-blocks-text-paragraph-x3-with-headings
-    item_1:
-      include():
-        pattern: building-blocks-file-uploads
