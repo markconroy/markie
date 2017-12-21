@@ -1369,7 +1369,7 @@ body {
   border: 0;
   height: 5px;
   margin: auto;
-  width: 100px;
+  width: 33%;
 }
 
 .sb--1 hr {
@@ -1772,6 +1772,22 @@ body {
 @media (min-width: 768px) {
   .view-filters .views-exposed-form .form--inline {
     max-width: none;
+  }
+}
+
+.node--type-article.node--view-mode-full .field--name-field-main-image {
+  margin-bottom: 23.4px;
+}
+
+@media (min-width: 640px) {
+  .node--type-article.node--view-mode-full .field--name-field-main-image {
+    margin-bottom: 46.8px;
+  }
+}
+
+@media (min-width: 768px) {
+  .node--type-article.node--view-mode-full .field--name-field-main-image {
+    margin-bottom: 70.2px;
   }
 }
 

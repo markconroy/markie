@@ -136,6 +136,13 @@
 })(jQuery, Drupal);
 "use strict";
 
+(function articleScript($, Drupal) {
+  Drupal.behaviors.article = {
+    attach: function attach(context) {}
+  };
+})(jQuery, Drupal);
+"use strict";
+
 (function basicpageScript($, Drupal) {
   Drupal.behaviors.basicpage = {
     attach: function attach(context) {}
