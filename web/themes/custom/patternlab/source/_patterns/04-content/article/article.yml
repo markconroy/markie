@@ -1,0 +1,28 @@
+attributes:
+  Attribute():
+    class:
+
+node:
+  bundle: article
+  isPublished: true
+  created:
+    value: 1511941986
+  changed:
+    value: 1512127363
+
+view_mode: full
+
+display_submitted: true
+
+label: This is the title of an article
+
+content:
+  field_intro: <div class="field--name-field-intro"><p>Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Curabitur blandit tempus porttitor. Sed posuere consectetur est at lobortis. Maecenas faucibus mollis interdum. Donec sed odio dui. Donec ullamcorper nulla non metus auctor fringilla.</p></div>
+  field_main_image: <div class="field--name-field-main-image"><img src="https://placeimg.com/1600/900/nature"></div>
+  field_building_blocks:
+    item_0:
+      include():
+        pattern: building-blocks-text-paragraph-x3-with-headings
+    item_1:
+      include():
+        pattern: building-blocks-file-uploads

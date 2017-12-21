@@ -1,0 +1,9 @@
+.node--type-article.node--view-mode-full .field--name-field-main-image {
+  margin-bottom: $base-line-height;
+  @include breakpoint($bp--medium) {
+    margin-bottom: $base-line-height * 2;
+  }
+  @include breakpoint($bp--large) {
+    margin-bottom: $base-line-height * 3;
+  }
+}
