@@ -5,6 +5,7 @@ dependencies:
   config:
     - field.field.paragraph.image_with_text.field_p_it_alignment
     - field.field.paragraph.image_with_text.field_p_it_image
+    - field.field.paragraph.image_with_text.field_p_it_style
     - field.field.paragraph.image_with_text.field_p_it_text
     - paragraphs.paragraphs_type.image_with_text
   module:
@@ -25,7 +26,7 @@ content:
     type: options_select
     region: content
   field_p_it_image:
-    weight: 1
+    weight: 2
     settings:
       form_mode: default
       override_labels: true
@@ -39,8 +40,14 @@ content:
         entity_browser_id: image_entity_browser
     type: inline_entity_form_complex
     region: content
+  field_p_it_style:
+    weight: 1
+    settings: {  }
+    third_party_settings: {  }
+    type: options_select
+    region: content
   field_p_it_text:
-    weight: 2
+    weight: 3
     settings:
       rows: 5
       placeholder: ''

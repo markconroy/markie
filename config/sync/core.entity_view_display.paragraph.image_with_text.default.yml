@@ -5,6 +5,7 @@ dependencies:
   config:
     - field.field.paragraph.image_with_text.field_p_it_alignment
     - field.field.paragraph.image_with_text.field_p_it_image
+    - field.field.paragraph.image_with_text.field_p_it_style
     - field.field.paragraph.image_with_text.field_p_it_text
     - paragraphs.paragraphs_type.image_with_text
   module:
@@ -34,3 +35,4 @@ content:
     region: content
 hidden:
   field_p_it_alignment: true
+  field_p_it_style: true

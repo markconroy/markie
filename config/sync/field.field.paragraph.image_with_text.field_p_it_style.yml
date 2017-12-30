@@ -1,0 +1,23 @@
+uuid: 79c00bb1-9319-4f82-8546-aa901555e6ac
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.paragraph.field_p_it_style
+    - paragraphs.paragraphs_type.image_with_text
+  module:
+    - options
+id: paragraph.image_with_text.field_p_it_style
+field_name: field_p_it_style
+entity_type: paragraph
+bundle: image_with_text
+label: 'Background Style'
+description: ''
+required: false
+translatable: false
+default_value:
+  -
+    value: light
+default_value_callback: ''
+settings: {  }
+field_type: list_string
