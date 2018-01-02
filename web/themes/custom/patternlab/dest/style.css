@@ -1792,12 +1792,7 @@ body {
 }
 
 .above-header__inner {
-  -ms-flex-align: center;
-      align-items: center;
-  display: -ms-flexbox;
-  display: flex;
-  -ms-flex-pack: justify;
-      justify-content: space-between;
+  padding-top: 18px;
 }
 
 .below-header {

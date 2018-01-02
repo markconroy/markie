@@ -4,15 +4,21 @@ set classes = [
 ]
 %}
 
+<div class="themed-border">
+  <div class="themed-border__item bg-primary"></div>
+  <div class="themed-border__item bg-secondary"></div>
+  <div class="themed-border__item bg-tertiary"></div>
+</div>
+
 <div{{ attributes.addClass(classes) }}>
   <div class="layout-contained padding">
     <div class="above-header__inner">
 
-      {% block content %}
-        {% for content in contents %}
+      <div class="layout-contained--small">
+        {% block content %}
           {{ content }}
-        {% endfor %}
-      {% endblock %}
+        {% endblock %}
+      </div>
 
     </div>
   </div>
