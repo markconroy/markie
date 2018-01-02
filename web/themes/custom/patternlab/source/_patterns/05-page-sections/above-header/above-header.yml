@@ -2,10 +2,4 @@ attributes:
   Attribute():
     class:
 
-contents:
-  item_1:
-    include():
-      pattern: site-blocks-language-switcher
-  item_2:
-    include():
-      pattern: site-blocks-search-block
+content: <p>I am available for hire</p>
