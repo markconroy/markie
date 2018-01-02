@@ -1,0 +1,25 @@
+uuid: 8d580296-2443-46c7-8de4-65b5d613a79f
+langcode: en
+status: true
+dependencies:
+  content:
+    - 'block_content:basic:17330dd7-e585-4a0c-ab8e-72bd477127c8'
+  module:
+    - block_content
+  theme:
+    - patternlab
+id: availableforhire
+theme: patternlab
+region: above_header
+weight: 0
+provider: null
+plugin: 'block_content:17330dd7-e585-4a0c-ab8e-72bd477127c8'
+settings:
+  id: 'block_content:17330dd7-e585-4a0c-ab8e-72bd477127c8'
+  label: 'Available for Hire'
+  provider: block_content
+  label_display: '0'
+  status: true
+  info: ''
+  view_mode: full
+visibility: {  }
