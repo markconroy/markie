@@ -5,6 +5,7 @@ namespace Drupal\redirect\Form;
 use Drupal\Component\Utility\UrlHelper;
 use Drupal\Core\Entity\ContentEntityForm;
 use Drupal\Core\Language\Language;
+use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Routing\MatchingRouteNotFoundException;
 use Drupal\Core\Url;
 use Drupal\redirect\Entity\Redirect;
@@ -64,6 +65,14 @@ class RedirectForm extends ContentEntityForm {
     $form = parent::form($form, $form_state);
     /** @var \Drupal\redirect\Entity\Redirect $redirect */
     $redirect = $this->entity;
+
+    // Only add the configured languages and a single key for all languages.
+    if (isset($form['language']['widget'][0]['value']))  {
+      foreach (\Drupal::languageManager()->getLanguages(LanguageInterface::STATE_CONFIGURABLE) as $langcode => $language) {
+        $form['language']['widget'][0]['value']['#options'][$langcode] = $language->getName();
+      }
+      $form['language']['widget'][0]['value']['#options'][LanguageInterface::LANGCODE_NOT_SPECIFIED] = t('- All languages -');
+    }
 
     $default_code = $redirect->getStatusCode() ? $redirect->getStatusCode() : \Drupal::config('redirect.settings')->get('default_status_code');
 

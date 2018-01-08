@@ -228,7 +228,7 @@
   Drupal.ImageWidgetCropType.prototype.selectors = {
     image: '[data-drupal-iwc=image]',
     reset: '[data-drupal-iwc=reset]',
-    table: '[data-drupal-iwc=table]', // @todo is this even used anymore?
+    table: '[data-drupal-iwc=table]',
     values: {
       applied: '[data-drupal-iwc-value=applied]',
       height: '[data-drupal-iwc-value=height]',
@@ -410,12 +410,10 @@
       .one('visible.iwc', this.initializeCropper.bind(this))
       .on('hidden.iwc', function () {
         this.visible = false;
-      }.bind(this))
-    ;
+      }.bind(this));
 
     this.$reset
-      .on('click.iwc', this.reset.bind(this))
-    ;
+      .on('click.iwc', this.reset.bind(this));
 
     // Star polling visibility of the image that should be able to be cropped.
     this.pollVisibility(this.$image);
@@ -425,6 +423,13 @@
 
     // Trigger the initial summaryUpdate event.
     this.$wrapper.trigger('summaryUpdated');
+    var isIE = /*@cc_on!@*/false || !!document.documentMode;
+    if (isIE) {
+      var $image = this.$image;
+      $('.image-data__crop-wrapper > summary').on('click', function () {
+        setTimeout(function () {$image.trigger('visible.iwc')}, 100);
+      });
+    }
   };
 
   /**
@@ -463,8 +468,7 @@
       .on('built.iwc.cropper', this.built.bind(this))
       .on('cropend.iwc.cropper', this.cropEnd.bind(this))
       .on('cropmove.iwc.cropper', this.cropMove.bind(this))
-      .cropper(this.options)
-    ;
+      .cropper(this.options);
 
     this.cropper = this.$image.data('cropper');
     this.options = this.cropper.options;
@@ -484,9 +488,8 @@
    * @param {HTMLElement|jQuery} element
    *   The element to poll.
    *
-   * @todo Perhaps replace once vertical tabs have proper events?
-   *
-   * @see https://www.drupal.org/node/2653570
+   * Replace once vertical tabs have proper events ?
+   * When following issue are fixed @see https://www.drupal.org/node/2653570.
    */
   Drupal.ImageWidgetCropType.prototype.pollVisibility = function (element) {
     var $element = $(element);
@@ -646,7 +649,7 @@
     if (!this.values.hasOwnProperty(name) || !this.values[name][0]) {
       return;
     }
-    value = value ? parseInt(value, 10) : 0;
+    value = value ? parseFloat(value) : 0;
     if (delta && name !== 'applied') {
       value = Math.round(value * delta);
     }

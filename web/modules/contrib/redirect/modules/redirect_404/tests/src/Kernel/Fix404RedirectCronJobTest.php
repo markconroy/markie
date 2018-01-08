@@ -2,7 +2,6 @@
 
 namespace Drupal\Tests\redirect_404\Kernel;
 
-use Drupal\Core\Database\Database;
 use Drupal\KernelTests\KernelTestBase;
 
 /**
@@ -46,13 +45,13 @@ class Fix404RedirectCronJobTest extends KernelTestBase {
       ->save();
 
     // Check that there are 6 rows in the redirect_404 table.
-    $result = db_query("SELECT COUNT(*) as rows FROM {redirect_404}")->fetchField();
+    $result = db_query("SELECT COUNT(*) FROM {redirect_404}")->fetchField();
     $this->assertEquals(6, $result);
 
     // Run cron to drop 3 rows from the redirect_404 test table.
     redirect_404_cron();
 
-    $result = db_query("SELECT COUNT(*) as rows FROM {redirect_404}")->fetchField();
+    $result = db_query("SELECT COUNT(*) FROM {redirect_404}")->fetchField();
     $this->assertEquals(3, $result);
 
     // Check there are only 3 rows with more count in the redirect_404 table.
@@ -86,13 +85,13 @@ class Fix404RedirectCronJobTest extends KernelTestBase {
       ->save();
 
     // Check that there are 6 rows in the redirect_404 table.
-    $result = db_query("SELECT COUNT(*) as rows FROM {redirect_404}")->fetchField();
+    $result = db_query("SELECT COUNT(*) FROM {redirect_404}")->fetchField();
     $this->assertEquals(6, $result);
 
     // Run cron to drop just 1 row from the redirect_404 test table.
     redirect_404_cron();
 
-    $result = db_query("SELECT COUNT(*) as rows FROM {redirect_404}")->fetchField();
+    $result = db_query("SELECT COUNT(*) FROM {redirect_404}")->fetchField();
     $this->assertEquals(5, $result);
 
     // Check only the row with least count has been removed from the table.

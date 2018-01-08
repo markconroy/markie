@@ -5,7 +5,9 @@
  * Provides extra menu links for the core drupal toolbar.
  */
 
+use Drupal\Core\Link;
 use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Core\Url;
 
 /**
  * Implements hook_toolbar().
@@ -32,10 +34,21 @@ function admin_toolbar_tools_toolbar() {
 function admin_toolbar_tools_help($route_name, RouteMatchInterface $route_match) {
   switch ($route_name) {
     case 'help.page.admin_toolbar_tools':
+      $url = Url::fromUri('https://www.drupal.org/project/admin_toolbar');
+      $external_link = Link::fromTextAndUrl(t('Admin Toolbar'), $url);
+      $external_link2 = Link::fromTextAndUrl(t('Toolbar'), $url);
+      $url = Url::fromUri('https://www.drupal.org/node/2713693');
+      $external_link3 = Link::fromTextAndUrl(t('online documentation for Admin Toolbar'), $url);
       $output = '';
-      $output .= '<p>' . t('The Admin Toolbar Extra Tools module comes packaged with the <a href="https://www.drupal.org/project/admin_toolbar"> Admin Toolbar</a> module and adds functionality to it. The additional functionality is accessed thru extra links on the main administration <a href="https://www.drupal.org/project/toolbar">Toolbar</a>.  Some links to Admin Toolbar Extra Tools administration pages are located at the bottom of this page. For more information, see the <a href="https://www.drupal.org/node/2713693">online documentation for Admin Toolbar</a>') . '</p>';
+      $output .= '<p>';
+      $output .= t('The Admin Toolbar Extra Tools module comes packaged with the :link module and adds functionality to it. The additional functionality is accessed thru extra links on the main administration :link2.  Some links to Admin Toolbar Extra Tools administration pages are located at the bottom of this page. For more information, see the :link3', [
+        ':link' => $external_link,
+        ':link2' => $external_link2,
+        ':link3' => $external_link3,
+      ]);
+      $output .= '</p>';
       $output .= '<h3>' . t('Uses') . '</h3>';
-      $output .= '<p>' . t('To use Admin Toolbar Extra Tools just install it like any other module.  There is no other configuration required. The Admin Toolbar functionality can be further extended by installing complimentary modules.  See <a href="https://www.drupal.org/project/admin_toolbar">Admin Toolbar</a> for a complete listing of these complimentary modules.') . '</p>';
+      $output .= '<p>' . t('To use Admin Toolbar Extra Tools just install it like any other module.  There is no other configuration required. The Admin Toolbar functionality can be further extended by installing complimentary modules.  See :link for a complete listing of these complimentary modules.', [':link' => $external_link]) . '</p>';
 
       return $output;
   }
@@ -64,8 +77,18 @@ function admin_toolbar_tools_menu_links_discovered_alter(&$links) {
     }
   }
 
+  // Adding a menu link to clean the Views cache.
+  if ($moduleHandler->moduleExists('views')) {
+    $links['admin_toolbar_tools.flush_views'] = [
+      'title' => t('Flush views cache'),
+      'route_name' => 'admin_toolbar_tools.flush_views',
+      'menu_name' => 'admin',
+      'parent' => 'admin_toolbar_tools.flush',
+    ];
+  }
+
   // Adds common links to entities.
-  foreach ($content_entities as $module_name => $entities) {
+  foreach ($content_entities as $entities) {
     $content_entity_bundle = $entities['content_entity_bundle'];
     $content_entity = $entities['content_entity'];
     foreach ($entityTypeManager->getStorage($content_entity_bundle)->loadMultiple() as $machine_name => $bundle) {
@@ -510,6 +533,123 @@ function admin_toolbar_tools_menu_links_discovered_alter(&$links) {
       ];
     }
   }
+
+  // Add menu links for local tasks that sit below any admin menu link routes.
+  $manager = \Drupal::service('plugin.manager.menu.local_task');
+  foreach ($links as $key => $link) {
+
+    // Ignore menu links that have no route name.
+    if (empty($link['route_name'])) {
+      continue;
+    }
+
+    // Ignore links that are not in the admin menu, include parents in the
+    // check as they inherit the menu name from the parent if not set.
+    $link_to_check = $link;
+    do {
+      // @todo Use configuration for admin menu name once added in
+      // https://www.drupal.org/node/1869638.
+      if (isset($link_to_check['menu_name'])) {
+        // If the link belongs to the admin menu, then skip this loop and
+        // look for local tasks.
+        if ($link_to_check['menu_name'] === 'admin') {
+          break;
+        }
+        else {
+          // If it is explicitly not in the admin menu, skip.
+          continue 2;
+        }
+      }
+
+      if (!empty($link_to_check['parent']) && isset($links[$link_to_check['parent']])) {
+        $link_to_check = $links[$link_to_check['parent']];
+      }
+      else {
+        // No parent and we found no menu_name, skip.
+        continue 2;
+      }
+    } while ($link_to_check);
+
+    $route = $link['route_name'];
+    $route_local_tasks = $manager->getLocalTasksForRoute($route);
+    if (empty($route_local_tasks[0])) {
+      continue;
+    }
+
+    foreach ($route_local_tasks[0] as $task_plugin) {
+      $definition = $task_plugin->getPluginDefinition();
+      $local_route = $definition['route_name'];
+      if (empty($local_route)) {
+        continue;
+      }
+      $exists = FALSE;
+      $param = FALSE;
+      if (isset($link['route_parameters'])) {
+        $param = $link['route_parameters'];
+      }
+      // Check if local task has an already registered link in toolbar.
+      foreach ($links as $link2) {
+        // Route_name that could be a 'class'.
+        if (!(isset($link2['route_name']) && ($link2['route_name'] == $local_route))) {
+          continue;
+        }
+        // If route are equal, the parameters could be different.
+        // @todo: check if this is true.
+        if ($param) {
+          if (isset($link2['route_parameters']) && ($param == $link2['route_parameters'])) {
+            $exists = TRUE;
+            break;
+          }
+        }
+        else {
+          $exists = TRUE;
+          break;
+        }
+      }
+      $parent = FALSE;
+
+      if ($exists) {
+        continue;
+      }
+
+      $title = $definition['title'];
+      $title = $param ? $title . ' ' . $link['title'] : $title;
+
+      // The following code is to choose the parent of the added link.
+      // If the parent of the current tab also has the tab as local task
+      // for example: "Content" has "File" as task" and and
+      // "Content>Comment" also has "File" as a tab then we decide to
+      // set this one as parent of the added link if not the current tab
+      // will be the parent.
+      if (!empty($link['parent']) && isset($links[$link['parent']])) {
+        $parentlink = $links[$link['parent']];
+        $parentlink_route = $parentlink['route_name'];
+        $parent_primary = $manager->getLocalTasks($parentlink_route, 0);
+        foreach ($parent_primary['tabs'] as $parent_tab) {
+          if ($parent_tab['#link']['url']) {
+            $parent_route = $parent_tab['#link']['url']->getRouteName();
+            if ($parent_route == $local_route) {
+              $parent = $link['parent'];
+              break;
+            }
+          }
+        }
+      }
+      $parent = $parent ? $parent : $key;
+      // Make sure the key of the route is unique.
+      $links[$key . '_' . $local_route] = [
+        'title' => $title,
+        'route_name' => $local_route,
+        'menu_name' => 'admin',
+        'parent' => $parent,
+        'att' => TRUE,
+      ];
+      if ($param) {
+        $links[$key . '_' . $local_route]['route_parameters'] = $param;
+      }
+    }
+  }
+
 }
 
 /**

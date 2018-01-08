@@ -39,7 +39,7 @@ class Redirect404LogSuppressorTest extends Redirect404TestBase {
     // Create users with specific permissions.
     $this->adminUser = $this->drupalCreateUser([
       'administer redirect settings',
-      'access site reports',
+      'administer redirects',
     ]);
     $this->webUser = $this->drupalCreateUser([]);
   }

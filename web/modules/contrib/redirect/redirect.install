@@ -212,3 +212,13 @@ function redirect_update_8107() {
     }
   }
 }
+
+/**
+ * Removes unnecessary settings.
+ */
+function redirect_update_8108() {
+  $config = \Drupal::configFactory()->getEditable('redirect.settings');
+  $config->clear('canonical');
+  $config->clear('content_location_header');
+  $config->save();
+}

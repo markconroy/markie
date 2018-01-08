@@ -5,12 +5,12 @@ namespace Drupal\redirect\EventSubscriber;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Path\PathMatcherInterface;
 use Drupal\Core\Routing\RequestHelper;
+use Drupal\Core\Routing\TrustedRedirectResponse;
 use Drupal\Core\Routing\UrlGeneratorInterface;
 use Drupal\redirect\RedirectChecker;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 
 /**
  * Normalizes GET requests performing a redirect if required.
@@ -125,7 +125,7 @@ class RouteNormalizerRequestSubscriber implements EventSubscriberInterface {
       $original_uri = urldecode($original_uri);
       $redirect_uri = urldecode($redirect_uri);
       if ($redirect_uri != $original_uri) {
-        $response = new RedirectResponse($redirect_uri, $this->config->get('default_status_code'));
+        $response = new TrustedRedirectResponse($redirect_uri, $this->config->get('default_status_code'));
         $response->headers->set('X-Drupal-Route-Normalizer', 1);
         $event->setResponse($response);
         // Disable page cache for redirects as that results in unpredictable

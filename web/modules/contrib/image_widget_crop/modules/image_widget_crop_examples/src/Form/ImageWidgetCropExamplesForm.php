@@ -52,14 +52,14 @@ class ImageWidgetCropExamplesForm extends ConfigFormBase {
    *   The factory for configuration objects.
    * @param \Drupal\file\FileUsage\FileUsageInterface $file_usage
    *   File usage service.
-   * @param \Drupal\image_widget_crop\ImageWidgetCropInterface $image_widget_crop_manager
+   * @param \Drupal\image_widget_crop\ImageWidgetCropInterface $iwc_manager
    *   The ImageWidgetCrop manager service.
    */
-  public function __construct(ConfigFactoryInterface $config_factory, FileUsageInterface $file_usage, ImageWidgetCropInterface $image_widget_crop_manager) {
+  public function __construct(ConfigFactoryInterface $config_factory, FileUsageInterface $file_usage, ImageWidgetCropInterface $iwc_manager) {
     parent::__construct($config_factory);
     $this->settings = $this->config('image_widget_crop_examples.settings');
     $this->fileUsage = $file_usage;
-    $this->imageWidgetCropManager = $image_widget_crop_manager;
+    $this->imageWidgetCropManager = $iwc_manager;
   }
 
   /**
@@ -98,14 +98,14 @@ class ImageWidgetCropExamplesForm extends ConfigFormBase {
       '#default_value' => $this->settings->get('settings.title'),
     ];
 
-    $form['file'] = array(
-      '#title' => t('Background Pictures'),
+    $form['file'] = [
+      '#title' => $this->t('Background Pictures'),
       '#type' => 'managed_file',
-      '#description' => t('The uploaded image will be displayed on this page using the image style choosen below.'),
+      '#description' => $this->t('The uploaded image will be displayed on this page using the image style choosen below.'),
       '#default_value' => $this->settings->get('settings.file'),
       '#upload_location' => 'public://image_widget_crop_examples/pictures',
       '#multiple' => FALSE,
-    );
+    ];
 
     // In this example we haven't an ajax form element to load it after upload,
     // we need to upload file, save and crop file to provide a more simple,
@@ -114,7 +114,8 @@ class ImageWidgetCropExamplesForm extends ConfigFormBase {
     if ($fid) {
       /* @var \Drupal\file\FileInterface $file */
       $file = File::load($fid);
-      // @TODO The key of element are hardcoded into buildCropToForm function, ATM that is mendatory but can change easily.
+      // The key of element are hardcoded into buildCropToForm function,
+      // ATM that is mendatory but can change easily.
       $form['image_crop'] = [
         '#type' => 'image_crop',
         '#file' => $file,

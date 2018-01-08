@@ -22,6 +22,13 @@ class SqlRedirectNotFoundStorageTest extends UnitTestCase {
   protected $database;
 
   /**
+   * Mock config factory.
+   *
+   * @var \Drupal\Core\Config\ConfigFactoryInterface|\PHPUnit_Framework_MockObject_MockObject
+   */
+  protected $configFactory;
+
+  /**
    * {@inheritdoc}
    */
   protected function setUp() {
@@ -49,6 +56,23 @@ class SqlRedirectNotFoundStorageTest extends UnitTestCase {
       ->method('merge');
     $storage = new SqlRedirectNotFoundStorage($this->database, $this->getConfigFactoryStub());
     $storage->logRequest("Caf\xc3", LanguageInterface::LANGCODE_DEFAULT);
+  }
+
+  /**
+   * Tests that all logs are kept if row limit config is "All".
+   */
+  public function testPurgeOldRequests() {
+    $this->configFactory = $this->getConfigFactoryStub(
+      [
+        'redirect_404.settings' => [
+          'row_limit' => 0,
+        ],
+      ]
+    );
+    $storage = new SqlRedirectNotFoundStorage($this->database, $this->configFactory);
+    $storage->purgeOldRequests();
+    $this->database->expects($this->never())
+      ->method('select');
   }
 
 }

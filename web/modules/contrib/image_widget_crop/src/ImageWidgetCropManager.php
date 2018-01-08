@@ -69,55 +69,50 @@ class ImageWidgetCropManager implements ImageWidgetCropInterface {
    * {@inheritdoc}
    */
   public function applyCrop(array $properties, $field_value, CropType $crop_type) {
-    // Get Original sizes and position of crop zone.
     $crop_properties = $this->getCropOriginalDimension($field_value, $properties);
-    // Get all imagesStyle used this crop_type.
-    $image_styles = $this->getImageStylesByCrop($crop_type->id());
-
-    $this->saveCrop(
-      $crop_properties,
-      $field_value,
-      $image_styles,
-      $crop_type,
-      FALSE
-    );
+    if (!empty($crop_properties)) {
+      $this->saveCrop(
+        $crop_properties,
+        $field_value,
+        $crop_type,
+        FALSE
+      );
+    }
   }
 
   /**
    * {@inheritdoc}
    */
   public function updateCrop(array $properties, $field_value, CropType $crop_type) {
-    // Get Original sizes and position of crop zone.
     $crop_properties = $this->getCropOriginalDimension($field_value, $properties);
+    if (!empty($crop_properties)) {
+      $image_styles = $this->getImageStylesByCrop($crop_type->id());
 
-    // Get all imagesStyle used this crop_type.
-    $image_styles = $this->getImageStylesByCrop($crop_type->id());
+      if (!empty($image_styles)) {
+        $crops = $this->loadImageStyleByCrop($image_styles, $crop_type, $field_value['file-uri']);
+      }
 
-    if (!empty($image_styles)) {
-      $crops = $this->loadImageStyleByCrop($image_styles, $crop_type, $field_value['file-uri']);
-    }
-
-    // If any crop exist add new crop.
-    if (empty($crops)) {
-      $this->saveCrop($crop_properties, $field_value, $image_styles, $crop_type);
-      return;
-    }
-
-    /** @var \Drupal\crop\Entity\Crop $crop */
-    foreach ($crops as $crop) {
-      if (!$this->cropHasChanged($crop_properties, array_merge($crop->position(), $crop->size()))) {
+      if (empty($crops)) {
+        $this->saveCrop($crop_properties, $field_value, $crop_type);
         return;
       }
 
-      $this->updateCropProperties($crop, $crop_properties);
-      drupal_set_message(t('The crop "@cropType" were successfully updated for image "@filename".', ['@cropType' => $crop_type->label(), '@filename' => $this->fileStorage->load($field_value['file-id'])->getFilename()]));
+      /** @var \Drupal\crop\Entity\Crop $crop */
+      foreach ($crops as $crop) {
+        if (!$this->cropHasChanged($crop_properties, array_merge($crop->position(), $crop->size()))) {
+          return;
+        }
+
+        $this->updateCropProperties($crop, $crop_properties);
+        drupal_set_message(t('The crop "@cropType" were successfully updated for image "@filename".', ['@cropType' => $crop_type->label(), '@filename' => $this->fileStorage->load($field_value['file-id'])->getFilename()]));
+      }
     }
   }
 
   /**
    * {@inheritdoc}
    */
-  public function saveCrop(array $crop_properties, $field_value, array $image_styles, CropType $crop_type, $notify = TRUE) {
+  public function saveCrop(array $crop_properties, $field_value, CropType $crop_type, $notify = TRUE) {
     $values = [
       'type' => $crop_type->id(),
       'entity_id' => $field_value['file-id'],
@@ -129,7 +124,6 @@ class ImageWidgetCropManager implements ImageWidgetCropInterface {
       'height' => $crop_properties['height'],
     ];
 
-    // Save crop with previous values.
     /** @var \Drupal\crop\CropInterface $crop */
     $crop = $this->cropStorage->create($values);
     $crop->save();
@@ -178,7 +172,7 @@ class ImageWidgetCropManager implements ImageWidgetCropInterface {
       drupal_set_message(t('The file "@file" is not valid, your crop is not applied.', [
         '@file' => $field_values['file-uri'],
       ]), 'error');
-      return NULL;
+      return $crop_coordinates;
     }
 
     // Get Center coordinate of crop zone on original image.
@@ -282,28 +276,7 @@ class ImageWidgetCropManager implements ImageWidgetCropInterface {
    * {@inheritdoc}
    */
   public function cropHasChanged(array $crop_properties, array $old_crop) {
-    if (!empty(array_diff_assoc($crop_properties, $old_crop))) {
-      return TRUE;
-    }
-    return FALSE;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getAvailableCropImageStyle(array $styles) {
-    $available_styles = [];
-    foreach ($styles as $style_id => $style_label) {
-      $style_loaded = $this->imageStyleStorage->loadByProperties(['name' => $style_id]);
-      /** @var \Drupal\image\Entity\ImageStyle $image_style */
-      $image_style = $style_loaded[$style_id];
-      $effect_data = $this->getEffectData($image_style, 'width');
-      if (!empty($effect_data)) {
-        $available_styles[$style_id] = $style_label;
-      }
-    }
-
-    return $available_styles;
+    return !empty(array_diff_assoc($crop_properties, $old_crop));
   }
 
   /**
@@ -399,10 +372,8 @@ class ImageWidgetCropManager implements ImageWidgetCropInterface {
    * {@inheritdoc}
    */
   public function buildCropToForm(FormStateInterface $form_state) {
-    /** @var \Drupal\file_entity\Entity\FileEntity $entity */
     if ($entity = $form_state->getFormObject()->getEntity()) {
       $form_state_values = $form_state->getValues();
-      // @TODO Do not hardcode key of element to "image_crop" check #type of element instead like \Drupal\Core\Form\FormBuilder::doBuildForm.
       if (is_array($form_state_values['image_crop']) && isset($form_state_values['image_crop']['crop_wrapper'])) {
         // Parse all values and get properties associate with the crop type.
         foreach ($form_state_values['image_crop']['crop_wrapper'] as $crop_type_name => $properties) {

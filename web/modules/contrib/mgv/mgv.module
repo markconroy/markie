@@ -21,48 +21,11 @@
  * 4.4) Email - {{ global_variables.social_sharing.email }}
  */
 
-use Drupal\Core\Url;
-use Symfony\Cmf\Component\Routing\RouteObjectInterface;
-
 /**
  * Implements hook_template_preprocess_default_variables_alter().
  */
 function mgv_template_preprocess_default_variables_alter(&$variables) {
-  // Print the current path. This could be useful if you want to do a redirect
-  // after a form is submitted, e.g. ?destination={{ current_path }}.
-  $current_path = \Drupal::service('path.current')->getPath();
-  $variables['global_variables']['current_path'] = $current_path;
-
-  // Print the Base URL - for example, if you need to construct a link to share
-  // on social media.
-  global $base_url;
-  $variables['global_variables']['base_url'] = $base_url;
-
-  // Print the current page's title. This could be useful if you want to add
-  // the current page title as a breadcrumb.
-  $request = \Drupal::request();
-  if ($route = $request->attributes->get(RouteObjectInterface::ROUTE_OBJECT)) {
-    $variables['global_variables']['current_page_title'] = \Drupal::service('title_resolver')->getTitle($request, $route);
-  }
-
-  // Site Information Page Global Variables.
-  //
-  // Print the Site Name. For example, you might want to have a
-  // Copyright "My Site Name" message in the footer.
-  $config_system_site = \Drupal::config('system.site');
-  $variables['global_variables']['site_name'] = $config_system_site->get('name');
-
-  // Print the Site Slogan.
-  $variables['global_variables']['site_slogan'] = $config_system_site->get('slogan');
-
-  // Print the Site Email.
-  $variables['global_variables']['site_mail'] = $config_system_site->get('mail');
-
-  // Print the Site logo's URL. - we are only printing the URL so you can add
-  // custom alt (and other) attributes to the image if you wish.
-  $theme_name = \Drupal::theme()->getActiveTheme()->getName();
-  $variables['global_variables']['logo'] = theme_get_setting('logo.url', $theme_name);
-
-  // Social Sharing
-  include 'includes/social-sharing.php';
+  /* @var \Drupal\mgv\MgvPluginManager $variables_manager */
+  $variables_manager = \Drupal::service('plugin.manager.mgv');
+  $variables['global_variables'] = $variables_manager->getVariables();
 }

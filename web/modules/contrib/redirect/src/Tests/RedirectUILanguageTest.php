@@ -36,6 +36,17 @@ class RedirectUILanguageTest extends RedirectUITest {
   public function testLanguageSpecificRedirects() {
     $this->drupalLogin($this->adminUser);
 
+    $this->drupalGet('admin/config/search/redirect/add');
+    $this->assertOption('edit-language-0-value', 'en');
+    $this->assertOption('edit-language-0-value', 'de');
+    $this->assertOption('edit-language-0-value', 'es');
+    $this->assertOption('edit-language-0-value', 'und');
+    $this->assertNoOption('edit-language-0-value', 'zxx');
+    $this->assertOptionByText('edit-language-0-value', 'English');
+    $this->assertOptionByText('edit-language-0-value', 'German');
+    $this->assertOptionByText('edit-language-0-value', 'Spanish');
+    $this->assertOptionByText('edit-language-0-value', '- All languages -');
+
     // Add a redirect for english.
     $this->drupalPostForm('admin/config/search/redirect/add', array(
       'redirect_source[0][path]' => 'langpath',

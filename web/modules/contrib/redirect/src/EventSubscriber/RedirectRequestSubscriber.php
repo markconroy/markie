@@ -129,7 +129,7 @@ class RedirectRequestSubscriber implements EventSubscriberInterface {
     // Do the inbound processing so that for example language prefixes are
     // removed.
     $path = $this->pathProcessor->processInbound($request->getPathInfo(), $request);
-    $path = ltrim($path, '/');
+    $path = trim($path, '/');
 
     $this->context->fromRequest($request);
 

@@ -16,6 +16,7 @@ use Drupal\simpletest\WebTestBase;
 class EntityReferenceRevisionsAutocompleteTest extends WebTestBase {
 
   use FieldUiTestTrait;
+  use EntityReferenceRevisionsCoreVersionUiTestTrait;
 
   /**
    * Modules to enable.
@@ -91,7 +92,7 @@ class EntityReferenceRevisionsAutocompleteTest extends WebTestBase {
       'body[0][value]' => 'Revision 1',
       'field_entity_reference_revisions[0][target_id]' => $block_label . ' (' . $block->id() . ')',
     );
-    $this->drupalPostForm('node/add/article', $edit, t('Save and publish'));
+    $this->drupalPostNodeForm('node/add/article', $edit, t('Save and publish'));
     $this->assertText($title);
     $this->assertText(Html::escape($block_content));
 

@@ -3,8 +3,8 @@ type: module
 description: Provides some extra Twig functions and filters.
 # core: 8.x
 
-# Information added by Drupal.org packaging script on 2017-03-19
-version: '8.x-1.6'
+# Information added by Drupal.org packaging script on 2017-09-15
+version: '8.x-1.9'
 core: '8.x'
 project: 'twig_tweak'
-datestamp: 1489930085
+datestamp: 1505464447

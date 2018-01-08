@@ -34,7 +34,6 @@ class ImageWidgetCropTest extends WebTestBase {
     'crop',
     'image',
     'image_widget_crop',
-    'file_entity',
   ];
 
   /**
@@ -49,8 +48,6 @@ class ImageWidgetCropTest extends WebTestBase {
       'access content overview',
       'administer content types',
       'edit any crop_test content',
-      'edit any image files',
-      'administer files',
     ]);
     $this->drupalLogin($this->user);
   }
@@ -105,6 +102,7 @@ class ImageWidgetCropTest extends WebTestBase {
     $this->assertNoText('Alternative text');
     $this->assertNoFieldByName('field_image_crop_test_0_remove_button');
 
+    $image = [];
     // Upload an image in field_image_crop_test_0.
     $image['files[field_image_crop_test_0]'] = $this->container->get('file_system')->realpath('public://image-test.jpg');
     $this->drupalPostAjaxForm(NULL, $image, $this->getButtonName('//input[@type="submit" and @value="Upload" and @data-drupal-selector="edit-field-image-crop-test-0-upload-button"]'));
@@ -149,58 +147,6 @@ class ImageWidgetCropTest extends WebTestBase {
   }
 
   /**
-   * Tests integration with file_entity module.
-   */
-  public function testFileEntityIntegration() {
-    $this->createImageField('field_image_file_entity', 'crop_test', 'file_editable');
-
-    $image = current($this->drupalGetTestFiles('image'));
-    $image = File::create((array) $image);
-    $image->save();
-
-    $node_title = $this->randomMachineName();
-    $this->drupalGet('node/add/crop_test');
-    $edit = [
-      'title[0][value]' => $node_title,
-      'files[field_image_file_entity_0]' => \Drupal::service('file_system')
-        ->realpath('public://image-test.jpg'),
-    ];
-    $this->drupalPostForm(NULL, $edit, 'Save');
-
-    $node = $this->drupalGetNodeByTitle($node_title);
-
-    $this->drupalGet('node/' . $node->id() . '/edit');
-    $ajax_response = $this->drupalPostAjaxForm(NULL, [], ['file_editable_2' => t('Edit')]);
-    $this->assertTrue(preg_match('/Crop image/', $ajax_response[3]['data']), 'Cropping tool is available on inline edit.');
-
-    // Create a sample crop type.
-    $crop_type = CropType::create([
-      'label' => '16_9',
-      'id' => '16_9',
-      'aspect_ratio' => '16:9',
-    ]);
-    $crop_type->save();
-
-    // Add a created crop type to an image style.
-    $crop_image_style = ImageStyle::load('large');
-    $crop_image_style->addImageEffect([
-      'id' => 'crop_crop',
-      'data' => ['crop_type' => '16_9'],
-    ]);
-    $crop_image_style->save();
-
-    // Assert that crop widget is displayed by default, even if there are no
-    // crop types selected in the global image widget crop configuration.
-    $image_widget_crop_settings = \Drupal::config('image_widget_crop.settings')->get('crop_list');
-    $this->assertEqual($image_widget_crop_settings, []);
-    $this->drupalGet('file/' . $image->id() . '/edit');
-    $this->assertRaw('edit-image-crop-crop-wrapper-16-9');
-    $this->assertRaw('16_9');
-
-    $this->assertText('Crop image', 'Cropping tool available on file edit.');
-  }
-
-  /**
    * Gets IEF button name.
    *
    * @param string $xpath
@@ -211,6 +157,7 @@ class ImageWidgetCropTest extends WebTestBase {
    */
   protected function getButtonName($xpath) {
     $retval = '';
+
     /** @var \SimpleXMLElement[] $elements */
     if ($elements = $this->xpath($xpath)) {
       foreach ($elements[0]->attributes() as $name => $value) {

@@ -166,30 +166,34 @@ class CropFunctionalTest extends WebTestBase {
     $crop = Crop::create($values);
     $crop->save();
 
+    // Test that the hash is appended both when a URL is created and passed
+    // through file_create_url() and when a URL is created, without additional
+    // file_create_url() calls.
+    $shortened_hash = substr(md5(implode($crop->position()) . implode($crop->anchor())), 0, 8);
+
     // Build an image style derivative for the file URI.
     $image_style_uri = $this->testStyle->buildUri($file_uri);
-    // Build an image style URL.
-    $image_style_url = $this->testStyle->buildUrl($image_style_uri);
-    // This triggers crop_file_url_alter().
-    $altered_image_style_url = file_create_url($image_style_url);
+    $image_style_uri_url = file_create_url($image_style_uri);
+    $this->assertTrue(strpos($image_style_uri_url, $shortened_hash) !== FALSE, 'The image style URL contains a shortened hash.');
 
-    $shortened_hash = substr(md5(implode($crop->position()) . implode($crop->anchor())), 0, 8);
-    $this->assertTrue(strpos($altered_image_style_url, $shortened_hash) !== FALSE, 'The image style URL contains a shortened hash.');
+    // Build an image style URL.
+    $image_style_url = $this->testStyle->buildUrl($file_uri);
+    $this->assertTrue(strpos($image_style_url, $shortened_hash) !== FALSE, 'The image style URL contains a shortened hash.');
 
     // Update the crop to assert the hash has changed.
     $crop->setPosition('80', '80')->save();
     $old_hash = $shortened_hash;
     $new_hash = substr(md5(implode($crop->position()) . implode($crop->anchor())), 0, 8);
-    $altered_image_style_url = file_create_url($image_style_url);
-    $this->assertFalse(strpos($altered_image_style_url, $old_hash) !== FALSE, 'The image style URL does not contain the old hash.');
-    $this->assertTrue(strpos($altered_image_style_url, $new_hash) !== FALSE, 'The image style URL contains an updated hash.');
+    $image_style_url = $this->testStyle->buildUrl($file_uri);
+    $this->assertFalse(strpos($image_style_url, $old_hash) !== FALSE, 'The image style URL does not contain the old hash.');
+    $this->assertTrue(strpos($image_style_url, $new_hash) !== FALSE, 'The image style URL contains an updated hash.');
 
     // Delete the file and the crop entity associated,
     // the crop entity are auto cleaned by crop_file_delete().
     $file->delete();
 
-    // Check if crop entity are correctly deleted.
-    $this->assertFalse(Crop::cropExists($file_uri), 'The Crop entity are correctly deleted after file delete.');
+    // Check that the crop entity is correctly deleted.
+    $this->assertFalse(Crop::cropExists($file_uri), 'The Crop entity was correctly deleted after file delete.');
   }
 
 }

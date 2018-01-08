@@ -1,14 +1,5 @@
 services:
   twig_tweak.twig_extension:
     class: Drupal\twig_tweak\TwigExtension
-    arguments:
-      - '@entity_type.manager'
-      - '@token'
-      - '@config.factory'
-      - '@current_route_match'
-      - '@menu.link_tree'
-      - '@request_stack'
-      - '@title_resolver'
-      - '@form_builder'
     tags:
       - { name: twig.extension }

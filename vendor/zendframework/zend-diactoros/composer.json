@@ -18,8 +18,8 @@
   },
   "extra": {
     "branch-alias": {
-      "dev-master": "1.6-dev",
-      "dev-develop": "1.7-dev"
+      "dev-master": "1.7.x-dev",
+      "dev-develop": "1.8.x-dev"
     }
   },
   "require": {
@@ -54,10 +54,10 @@
       "@cs-check",
       "@test"
     ],
-    "upload-coverage": "coveralls -v",
     "cs-check": "phpcs",
     "cs-fix": "phpcbf",
     "test": "phpunit --colors=always",
-    "test-coverage": "phpunit --colors=always --coverage-clover clover.xml"
+    "test-coverage": "phpunit --colors=always --coverage-clover clover.xml",
+    "upload-coverage": "php-coveralls -v"
   }
 }

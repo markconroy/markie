@@ -181,11 +181,7 @@ class CropEffect extends ConfigurableImageEffectBase implements ContainerFactory
    * {@inheritdoc}
    */
   public function transformDimensions(array &$dimensions, $uri) {
-    /** @var \Drupal\Core\Image\Image $image */
-    $image = $this->imageFactory->get($uri);
-
-    /** @var \Drupal\crop\CropInterface $crop */
-    $crop = $this->getCrop($image);
+    $crop = Crop::findCrop($uri, $this->configuration['crop_type']);
     if (!$crop instanceof CropInterface) {
       return;
     }

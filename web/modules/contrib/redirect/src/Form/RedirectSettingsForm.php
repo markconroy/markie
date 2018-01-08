@@ -61,11 +61,6 @@ class RedirectSettingsForm extends ConfigFormBase {
       '#description' => $this->t('Enabling this will automatically redirect to the canonical URL of any page. That includes redirecting to an alias if existing, removing trainling slashes, ensure the language prefix is set and similar clean-up.'),
       '#default_value' => $config->get('route_normalizer_enabled'),
     );
-    $form['globals']['redirect_canonical'] = array(
-      '#type' => 'checkbox',
-      '#title' => $this->t('Redirect from non-canonical URLs to the canonical URLs.'),
-      '#default_value' => $config->get('canonical'),
-    );
     $form['globals']['redirect_ignore_admin_path'] = array(
       '#type' => 'checkbox',
       '#title' => $this->t('Allow redirections on admin paths.'),
@@ -76,13 +71,6 @@ class RedirectSettingsForm extends ConfigFormBase {
       '#title' => $this->t('Check access to the redirected page'),
       '#description' => $this->t('This helps to stop redirection on protected pages and avoids giving away <em>secret</em> URL\'s. <strong>By default this feature is disabled to avoid any unexpected behavior</strong>'),
       '#default_value' => $config->get('access_check'),
-    );
-
-    $form['globals']['redirect_content_location_header'] = array(
-      '#type' => 'checkbox',
-      '#title' => $this->t('Set Content Location Header'),
-      '#description' => $this->t('If enabled, will add a <a href=":canonical">Content-Location</a> header.', array(':canonical' => 'http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.14')),
-      '#default_value' => $config->get('content_location_header'),
     );
 
     return parent::buildForm($form, $form_state);

@@ -134,6 +134,23 @@ class RedirectRepository {
   }
 
   /**
+   * Finds redirects based on the destination URI.
+   *
+   * @param string[] $destination_uri
+   *   List of destination URIs, for example ['internal:/node/123'].
+   *
+   * @return \Drupal\redirect\Entity\Redirect[]
+   *   Array of redirect entities.
+   */
+  public function findByDestinationUri(array $destination_uri) {
+    $storage = $this->manager->getStorage('redirect');
+    $ids = $storage->getQuery()
+      ->condition('redirect_redirect.uri', $destination_uri, 'IN')
+      ->execute();
+    return $storage->loadMultiple($ids);
+  }
+
+  /**
    * Load redirect entity by id.
    *
    * @param int $redirect_id

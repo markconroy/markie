@@ -21,7 +21,7 @@ interface ImageWidgetCropInterface {
    *   and the size of thumbnail image.
    * @param array|mixed $field_value
    *   An array of values for the contained properties of image_crop widget.
-   * @param CropType $crop_type
+   * @param \Drupal\crop\Entity\CropType $crop_type
    *   The entity CropType.
    */
   public function applyCrop(array $properties, $field_value, CropType $crop_type);
@@ -34,7 +34,7 @@ interface ImageWidgetCropInterface {
    *   and the size of thumbnail image.
    * @param array|mixed $field_value
    *   An array of values contain properties of image_crop widget.
-   * @param CropType $crop_type
+   * @param \Drupal\crop\Entity\CropType $crop_type
    *   The entity CropType.
    */
   public function updateCrop(array $properties, $field_value, CropType $crop_type);
@@ -46,9 +46,7 @@ interface ImageWidgetCropInterface {
    *   The properties of the crop applied to the original image (dimensions).
    * @param array|mixed $field_value
    *   An array of values for the contained properties of image_crop widget.
-   * @param array $image_styles
-   *   The list of imagesStyle available for this crop.
-   * @param CropType $crop_type
+   * @param \Drupal\crop\Entity\CropType $crop_type
    *   The entity CropType.
    * @param bool $notify
    *   Show notification after actions (default TRUE).
@@ -56,7 +54,6 @@ interface ImageWidgetCropInterface {
   public function saveCrop(
     array $crop_properties,
     $field_value,
-    array $image_styles,
     CropType $crop_type,
     $notify = TRUE
   );
@@ -81,7 +78,7 @@ interface ImageWidgetCropInterface {
    * @param array $crop_selection
    *   Coordinates of crop selection (width & height).
    *
-   * @return array<string,double>
+   * @return arraystringinteger
    *   Coordinates (x-axis & y-axis) of crop selection zone.
    */
   public function getAxisCoordinates(array $axis, array $crop_selection);
@@ -94,8 +91,9 @@ interface ImageWidgetCropInterface {
    * @param array $properties
    *   The original height of image.
    *
-   * @return null|array
-   *   The data dimensions (width & height) into this ImageStyle.
+   * @return array
+   *   The data dimensions (width & height) into this ImageStyle or,
+   *   empty array is the image isn't a valid file.
    */
   public function getCropOriginalDimension(array $field_values, array $properties);
 
@@ -150,7 +148,7 @@ interface ImageWidgetCropInterface {
    *
    * @param array $image_styles
    *   All ImageStyle for this current CROP.
-   * @param CropType $crop_type
+   * @param \Drupal\crop\Entity\CropType $crop_type
    *   The entity CropType.
    * @param string $file_uri
    *   Uri of uploded file.
@@ -175,23 +173,12 @@ interface ImageWidgetCropInterface {
   public function cropHasChanged(array $crop_properties, array $old_crop);
 
   /**
-   * Verify if ImageStyle is correctly configured.
-   *
-   * @param array $styles
-   *   The list of available ImageStyle.
-   *
-   * @return array<integer>
-   *   The list of styles filtred.
-   */
-  public function getAvailableCropImageStyle(array $styles);
-
-  /**
    * Verify if the crop is used by a ImageStyle.
    *
-   * @param array $crop_list
+   * @param string[] $crop_list
    *   The list of existent Crop Type.
    *
-   * @return array<integer>
+   * @return arrayinteger
    *   The list of Crop Type filtred.
    */
   public function getAvailableCropType(array $crop_list);
@@ -202,7 +189,7 @@ interface ImageWidgetCropInterface {
    * @param \Drupal\crop\Entity\Crop $crop
    *   All crops attached to this file based on URI.
    *
-   * @return array<array>
+   * @return arrayarray
    *   Get all crop zone properties (x, y, height, width),
    */
   public static function getCropProperties(Crop $crop);

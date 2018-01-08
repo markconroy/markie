@@ -34,7 +34,6 @@ class Fix404RedirectUILanguageTest extends Redirect404TestBase {
   protected $adminPermissions = [
     'administer redirects',
     'administer redirect settings',
-    'access site reports',
     'access content',
     'bypass node access',
     'create url aliases',

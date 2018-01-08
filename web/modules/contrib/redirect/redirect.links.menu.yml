@@ -6,9 +6,9 @@ redirect.list:
   menu_name: admin
 
 redirect.add:
-  title: 'Add redirects'
+  title: 'Add redirect'
   parent: redirect.list
-  route_name: redirect.list
+  route_name: redirect.add
   menu_name: admin
 
 redirect.settings:

@@ -21,7 +21,7 @@ class ImageWidgetCropExamplesTest extends WebTestBase {
   public static $modules = [
     'menu_ui',
     'path',
-    'media_entity',
+    'media',
   ];
 
   /**

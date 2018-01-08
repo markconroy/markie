@@ -22,7 +22,7 @@ display:
       access:
         type: perm
         options:
-          perm: 'access site reports'
+          perm: 'administer redirects'
       cache:
         type: none
         options: {  }

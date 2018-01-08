@@ -4,10 +4,12 @@ namespace Drupal\image_widget_crop\Form;
 
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Config\ConfigFactoryInterface;
-use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\ConfigFormBase;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\crop\Entity\CropType;
 use Drupal\image_widget_crop\ImageWidgetCropInterface;
+use GuzzleHttp\ClientInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -32,17 +34,37 @@ class CropWidgetForm extends ConfigFormBase {
   protected $imageWidgetCropManager;
 
   /**
+   * The module handler to use to load modules.
+   *
+   * @var \Drupal\Core\Extension\ModuleHandlerInterface
+   */
+  protected $moduleHandler;
+
+  /**
+   * The HTTP client to fetch the feed data with.
+   *
+   * @var \GuzzleHttp\ClientInterface
+   */
+  protected $httpClient;
+
+  /**
    * Constructs a CropWidgetForm object.
    *
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
    *   The factory for configuration objects.
    * @param \Drupal\image_widget_crop\ImageWidgetCropInterface $iwc_manager
    *   The ImageWidgetCrop manager service.
+   * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
+   *   The module handler to use to load modules.
+   * @param \GuzzleHttp\ClientInterface $http_client
+   *   The Guzzle HTTP client.
    */
-  public function __construct(ConfigFactoryInterface $config_factory, ImageWidgetCropInterface $iwc_manager) {
+  public function __construct(ConfigFactoryInterface $config_factory, ImageWidgetCropInterface $iwc_manager, ModuleHandlerInterface $module_handler, ClientInterface $http_client) {
     parent::__construct($config_factory);
     $this->settings = $this->config('image_widget_crop.settings');
     $this->imageWidgetCropManager = $iwc_manager;
+    $this->moduleHandler = $module_handler;
+    $this->httpClient = $http_client;
   }
 
   /**
@@ -51,7 +73,9 @@ class CropWidgetForm extends ConfigFormBase {
   public static function create(ContainerInterface $container) {
     return new static (
       $container->get('config.factory'),
-      $container->get('image_widget_crop.manager')
+      $container->get('image_widget_crop.manager'),
+      $container->get('module_handler'),
+      $container->get('http_client')
     );
   }
 
@@ -74,8 +98,8 @@ class CropWidgetForm extends ConfigFormBase {
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
     $url = 'https://cdnjs.com/libraries/cropper';
-    $cdn_js = 'https://cdnjs.cloudflare.com/ajax/libs/cropper/2.3.4/cropper.min.js';
-    $cdn_css = 'https://cdnjs.cloudflare.com/ajax/libs/cropper/2.3.4/cropper.min.css';
+    $cdn_js = IMAGE_WIDGET_CROP_JS_CDN;
+    $cdn_css = IMAGE_WIDGET_CROP_CSS_CDN;
 
     $form['library'] = [
       '#type' => 'details',
@@ -104,7 +128,7 @@ class CropWidgetForm extends ConfigFormBase {
     ];
 
     // Indicate which files are used when custom urls are not set.
-    if (\Drupal::moduleHandler()->moduleExists('libraries')
+    if ($this->moduleHandler->moduleExists('libraries')
       && ($info = libraries_detect('cropper')) && $info['installed']) {
       $form['library']['library_url']['#attributes']['placeholder'] = $info['library path'] . '/dist/' . key($info['files']['js']);
       $form['library']['css_url']['#attributes']['placeholder'] = $info['library path'] . '/dist/' . key($info['files']['css']);
@@ -116,13 +140,13 @@ class CropWidgetForm extends ConfigFormBase {
 
     $form['image_crop'] = [
       '#type' => 'details',
-      '#title' => t('General configuration'),
+      '#title' => $this->t('General configuration'),
     ];
 
     $form['image_crop']['crop_preview_image_style'] = [
       '#title' => $this->t('Crop preview image style'),
       '#type' => 'select',
-      '#options' => $this->imageWidgetCropManager->getAvailableCropImageStyle(image_style_options(FALSE)),
+      '#options' => image_style_options(FALSE),
       '#default_value' => $this->settings->get('settings.crop_preview_image_style'),
       '#description' => $this->t('The preview image will be shown while editing the content.'),
       '#weight' => 15,
@@ -177,24 +201,24 @@ class CropWidgetForm extends ConfigFormBase {
         'css' => $form_state->getValue('css_url'),
       ];
       if (empty($files['library']) || empty($files['css'])) {
-        $form_state->setErrorByName('plugin', t('Please provide both a library and a CSS file when using custom URLs.'));
+        $form_state->setErrorByName('plugin', $this->t('Please provide both a library and a CSS file when using custom URLs.'));
       }
       else {
         foreach ($files as $type => $file) {
           // Verify that both files exist.
           $is_local = parse_url($file, PHP_URL_SCHEME) === NULL && strpos($file, '//') !== 0;
           if ($is_local && !file_exists($file)) {
-            $form_state->setErrorByName($type . '_url', t('The provided local file does not exist.'));
+            $form_state->setErrorByName($type . '_url', $this->t('The provided local file does not exist.'));
           }
           elseif (!$is_local) {
             try {
-              $result = \Drupal::httpClient()->request('GET', $file);
+              $result = $this->httpClient->request('GET', $file);
               if ($result->getStatusCode() != 200) {
                 throw new \Exception($result->getReasonPhrase(), 1);
               }
             }
             catch (\Exception $e) {
-              $form_state->setErrorByName($type . '_url', t('The remote URL for the library does not appear to be valid: @message.', [
+              $form_state->setErrorByName($type . '_url', $this->t('The remote URL for the library does not appear to be valid: @message.', [
                 '@message' => $e->getMessage(),
               ]), 'error');
             }

@@ -2,6 +2,41 @@
 
 All notable changes to this project will be documented in this file, in reverse chronological order by release.
 
+## 1.7.0 - 2018-01-04
+
+### Added
+
+- [#285](https://github.com/zendframework/zend-diactoros/pull/285) adds a new
+  custom response type, `Zend\Diactoros\Response\XmlResponse`, for generating
+  responses representing XML. Usage is the same as with the `HtmlResponse` or
+  `TextResponse`; the response generated will have a `Content-Type:
+  application/xml` header by default.
+
+- [#280](https://github.com/zendframework/zend-diactoros/pull/280) adds the
+  response status code/phrase pairing "103 Early Hints" to the
+  `Response::$phrases` property. This is a new status proposed via
+  [RFC 8297](https://datatracker.ietf.org/doc/rfc8297/).
+
+- [#279](https://github.com/zendframework/zend-diactoros/pull/279) adds explicit
+  support for PHP 7.2; previously, we'd allowed build failures, though none
+  occured; we now require PHP 7.2 builds to pass.
+
+### Changed
+
+- Nothing.
+
+### Deprecated
+
+- Nothing.
+
+### Removed
+
+- Nothing.
+
+### Fixed
+
+- Nothing.
+
 ## 1.6.1 - 2017-10-12
 
 ### Added

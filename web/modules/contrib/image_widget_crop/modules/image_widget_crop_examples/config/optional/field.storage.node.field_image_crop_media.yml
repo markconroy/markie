@@ -1,11 +1,10 @@
+uuid: c601d521-e9b6-45f5-ac75-307e86c1da8a
 langcode: en
 status: true
 dependencies:
   module:
-    - media_entity
+    - media
     - node
-_core:
-  default_config_hash: qyVwL-ccmULrT8szXCmDmuxnyM_pptChdlfQ6aTmxcU
 id: node.field_image_crop_media
 field_name: field_image_crop_media
 entity_type: node

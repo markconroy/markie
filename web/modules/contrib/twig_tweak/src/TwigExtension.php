@@ -3,109 +3,19 @@
 namespace Drupal\twig_tweak;
 
 use Drupal\Core\Block\TitleBlockPluginInterface;
-use Drupal\Core\Config\ConfigFactoryInterface;
-use Drupal\Core\Controller\TitleResolverInterface;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Form\FormBuilderInterface;
-use Drupal\Core\Menu\MenuLinkTreeInterface;
-use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Site\Settings;
-use Drupal\Core\Utility\Token;
+use Drupal\Core\Url;
 use Drupal\image\Entity\ImageStyle;
 use Symfony\Cmf\Component\Routing\RouteObjectInterface;
-use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
  * Twig extension with some useful functions and filters.
+ *
+ * As version 1.7 all dependencies are instantiated on demand for performance
+ * reasons.
  */
 class TwigExtension extends \Twig_Extension {
-
-  /**
-   * The entity type manager.
-   *
-   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
-   */
-  protected $entityTypeManager;
-
-  /**
-   * The token service.
-   *
-   * @var \Drupal\Core\Utility\Token
-   */
-  protected $token;
-
-  /**
-   * The configuration factory.
-   *
-   * @var \Drupal\Core\Config\ConfigFactoryInterface
-   */
-  protected $configFactory;
-
-  /**
-   * The route match.
-   *
-   * @var \Drupal\Core\Routing\RouteMatchInterface
-   */
-  protected $routeMatch;
-
-  /**
-   * The menu link tree service.
-   *
-   * @var \Drupal\Core\Menu\MenuLinkTreeInterface
-   */
-  protected $menuTree;
-
-  /**
-   * The request stack.
-   *
-   * @var \Symfony\Component\HttpFoundation\RequestStack
-   */
-  protected $requestStack;
-
-  /**
-   * The title resolver.
-   *
-   * @var \Drupal\Core\Controller\TitleResolverInterface
-   */
-  protected $titleResolver;
-
-  /**
-   * The form builder.
-   *
-   * @var \Drupal\Core\Form\FormBuilderInterface
-   */
-  protected $formBuilder;
-
-  /**
-   * TwigExtension constructor.
-   *
-   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
-   *   The entity type manager.
-   * @param \Drupal\Core\Utility\Token $token
-   *   The token service.
-   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
-   *   The configuration factory.
-   * @param \Drupal\Core\Routing\RouteMatchInterface $route_match
-   *   The route match.
-   * @param \Drupal\Core\Menu\MenuLinkTreeInterface $menu_tree
-   *   The menu tree service.
-   * @param \Symfony\Component\HttpFoundation\RequestStack $request_stack
-   *   The request stack.
-   * @param \Drupal\Core\Controller\TitleResolverInterface $title_resolver
-   *   The title resolver.
-   * @param \Drupal\Core\Form\FormBuilderInterface $form_builder
-   *   The form builder.
-   */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager, Token $token, ConfigFactoryInterface $config_factory, RouteMatchInterface $route_match, MenuLinkTreeInterface $menu_tree, RequestStack $request_stack, TitleResolverInterface $title_resolver, FormBuilderInterface $form_builder) {
-    $this->entityTypeManager = $entity_type_manager;
-    $this->token = $token;
-    $this->configFactory = $config_factory;
-    $this->routeMatch = $route_match;
-    $this->menuTree = $menu_tree;
-    $this->requestStack = $request_stack;
-    $this->titleResolver = $title_resolver;
-    $this->formBuilder = $form_builder;
-  }
 
   /**
    * {@inheritdoc}
@@ -126,6 +36,8 @@ class TwigExtension extends \Twig_Extension {
       // Wrap drupal_set_message() because it returns some value which is not
       // suitable for Twig template.
       new \Twig_SimpleFunction('drupal_set_message', [$this, 'drupalSetMessage']),
+      new \Twig_SimpleFunction('drupal_title', [$this, 'drupalTitle']),
+      new \Twig_SimpleFunction('drupal_url', [$this, 'drupalUrl']),
     ];
   }
 
@@ -137,6 +49,8 @@ class TwigExtension extends \Twig_Extension {
       new \Twig_SimpleFilter('token_replace', [$this, 'tokenReplaceFilter']),
       new \Twig_SimpleFilter('preg_replace', [$this, 'pregReplaceFilter']),
       new \Twig_SimpleFilter('image_style', [$this, 'imageStyle']),
+      new \Twig_SimpleFilter('transliterate', [$this, 'transliterate']),
+      new \Twig_SimpleFilter('check_markup', [$this, 'checkMarkup']),
     ];
     // PHP filter should be enabled in settings.php file.
     if (Settings::get('twig_tweak_enable_php_filter')) {
@@ -157,14 +71,18 @@ class TwigExtension extends \Twig_Extension {
    *
    * @param mixed $id
    *   The ID of the block to render.
+   * @param bool $check_access
+   *   (Optional) Indicates that access check is required.
    *
    * @return null|array
    *   A render array for the block or NULL if the block does not exist.
    */
-  public function drupalBlock($id) {
-    $block = $this->entityTypeManager->getStorage('block')->load($id);
-    return $block ?
-      $this->entityTypeManager->getViewBuilder('block')->view($block) : '';
+  public function drupalBlock($id, $check_access = TRUE) {
+    $entity_type_manager = \Drupal::entityTypeManager();
+    $block = $entity_type_manager->getStorage('block')->load($id);
+    if ($block && (!$check_access || $this->entityAccess($block))) {
+      return $entity_type_manager->getViewBuilder('block')->view($block);
+    }
   }
 
   /**
@@ -180,24 +98,28 @@ class TwigExtension extends \Twig_Extension {
    *   A render array to display the region content.
    */
   public function drupalRegion($region, $theme = NULL) {
-    $blocks = $this->entityTypeManager->getStorage('block')->loadByProperties([
+    $entity_type_manager = \Drupal::entityTypeManager();
+    $blocks = $entity_type_manager->getStorage('block')->loadByProperties([
       'region' => $region,
-      'theme'  => $theme ?: $this->configFactory->get('system.theme')->get('default'),
+      'theme'  => $theme ?: \Drupal::config('system.theme')->get('default'),
     ]);
 
-    $view_builder = $this->entityTypeManager->getViewBuilder('block');
+    $view_builder = $entity_type_manager->getViewBuilder('block');
 
     $build = [];
+
     /* @var $blocks \Drupal\block\BlockInterface[] */
     foreach ($blocks as $id => $block) {
-      $block_plugin = $block->getPlugin();
-      if ($block_plugin instanceof TitleBlockPluginInterface) {
-        $request = $this->requestStack->getCurrentRequest();
-        if ($route = $request->attributes->get(RouteObjectInterface::ROUTE_OBJECT)) {
-          $block_plugin->setTitle($this->titleResolver->getTitle($request, $route));
+      if ($this->entityAccess($block)) {
+        $block_plugin = $block->getPlugin();
+        if ($block_plugin instanceof TitleBlockPluginInterface) {
+          $request = \Drupal::request();
+          if ($route = $request->attributes->get(RouteObjectInterface::ROUTE_OBJECT)) {
+            $block_plugin->setTitle(\Drupal::service('title_resolver')->getTitle($request, $route));
+          }
         }
+        $build[$id] = $view_builder->view($block);
       }
-      $build[$id] = $view_builder->view($block);
     }
 
     return $build;
@@ -220,14 +142,14 @@ class TwigExtension extends \Twig_Extension {
    *   A render array for the entity or NULL if the entity does not exist.
    */
   public function drupalEntity($entity_type, $id = NULL, $view_mode = NULL, $langcode = NULL) {
-    $entity = $id ?
-      $this->entityTypeManager->getStorage($entity_type)->load($id) :
-      $this->routeMatch->getParameter($entity_type);
-    if ($entity) {
-      $render_controller = $this->entityTypeManager->getViewBuilder($entity_type);
+    $entity_type_manager = \Drupal::entityTypeManager();
+    $entity = $id
+      ? $entity_type_manager->getStorage($entity_type)->load($id)
+      : \Drupal::routeMatch()->getParameter($entity_type);
+    if ($entity && $this->entityAccess($entity)) {
+      $render_controller = $entity_type_manager->getViewBuilder($entity_type);
       return $render_controller->view($entity, $view_mode, $langcode);
     }
-    return NULL;
   }
 
   /**
@@ -248,16 +170,18 @@ class TwigExtension extends \Twig_Extension {
    *   A render array for the field or NULL if the value does not exist.
    */
   public function drupalField($field_name, $entity_type, $id = NULL, $view_mode = 'default', $langcode = NULL) {
-    $entity = $id ?
-      $this->entityTypeManager->getStorage($entity_type)->load($id) :
-      $this->routeMatch->getParameter($entity_type);
-    if ($langcode && $entity->hasTranslation($langcode)) {
-      $entity = $entity->getTranslation($langcode);
+    /** @var \Drupal\Core\Entity\ContentEntityInterface $entity */
+    $entity = $id
+      ? \Drupal::entityTypeManager()->getStorage($entity_type)->load($id)
+      : \Drupal::routeMatch()->getParameter($entity_type);
+    if ($entity && $this->entityAccess($entity)) {
+      if ($langcode && $entity->hasTranslation($langcode)) {
+        $entity = $entity->getTranslation($langcode);
+      }
+      if (isset($entity->{$field_name})) {
+        return $entity->{$field_name}->view($view_mode);
+      }
     }
-    if (isset($entity->{$field_name})) {
-      return $entity->{$field_name}->view($view_mode);
-    }
-    return NULL;
   }
 
   /**
@@ -274,7 +198,9 @@ class TwigExtension extends \Twig_Extension {
    *   A render array for the menu.
    */
   public function drupalMenu($menu_name, $level = 1, $depth = 0) {
-    $parameters = $this->menuTree->getCurrentRouteMenuTreeParameters($menu_name);
+    /** @var \Drupal\Core\Menu\MenuLinkTreeInterface $menu_tree */
+    $menu_tree = \Drupal::service('menu.link_tree');
+    $parameters = $menu_tree->getCurrentRouteMenuTreeParameters($menu_name);
 
     // Adjust the menu tree parameters based on the block's configuration.
     $parameters->setMinDepth($level);
@@ -283,16 +209,16 @@ class TwigExtension extends \Twig_Extension {
     // Hence this is a relative depth that we must convert to an actual
     // (absolute) depth, that may never exceed the maximum depth.
     if ($depth > 0) {
-      $parameters->setMaxDepth(min($level + $depth - 1, $this->menuTree->maxDepth()));
+      $parameters->setMaxDepth(min($level + $depth - 1, $menu_tree->maxDepth()));
     }
 
-    $tree = $this->menuTree->load($menu_name, $parameters);
+    $tree = $menu_tree->load($menu_name, $parameters);
     $manipulators = [
       ['callable' => 'menu.default_tree_manipulators:checkAccess'],
       ['callable' => 'menu.default_tree_manipulators:generateIndexAndSort'],
     ];
-    $tree = $this->menuTree->transform($tree, $manipulators);
-    return $this->menuTree->build($tree);
+    $tree = $menu_tree->transform($tree, $manipulators);
+    return $menu_tree->build($tree);
   }
 
   /**
@@ -300,12 +226,16 @@ class TwigExtension extends \Twig_Extension {
    *
    * @param string $form_id
    *   The form ID.
+   * @param ...
+   *   Additional arguments are passed to form constructor.
    *
    * @return array
    *   A render array to represent the form.
    */
   public function drupalForm($form_id) {
-    return $this->formBuilder->getForm($form_id);
+    $form_builder = \Drupal::formBuilder();
+    $args = func_get_args();
+    return call_user_func_array([$form_builder, 'getForm'], $args);
   }
 
   /**
@@ -329,7 +259,7 @@ class TwigExtension extends \Twig_Extension {
    * @see \Drupal\Core\Utility\Token::replace()
    */
   public function drupalToken($token, array $data = [], array $options = []) {
-    return $this->token->replace("[$token]", $data, $options);
+    return \Drupal::token()->replace("[$token]", $data, $options);
   }
 
   /**
@@ -344,16 +274,16 @@ class TwigExtension extends \Twig_Extension {
    *   The data that was requested.
    */
   public function drupalConfig($name, $key) {
-    return $this->configFactory->get($name)->get($key);
+    return \Drupal::config($name)->get($key);
   }
 
   /**
    * Dumps information about variables.
    */
-  public function drupalDump() {
+  public function drupalDump($var) {
     $var_dumper = '\Symfony\Component\VarDumper\VarDumper';
     if (class_exists($var_dumper)) {
-      call_user_func($var_dumper . '::dump', func_get_args());
+      call_user_func($var_dumper . '::dump', $var);
     }
     else {
       trigger_error('Could not dump the variable because symfony/var-dumper component is not installed.', E_USER_WARNING);
@@ -392,6 +322,42 @@ class TwigExtension extends \Twig_Extension {
   }
 
   /**
+   * Returns a title for the current route.
+   *
+   * @return array
+   *   A render array to represent page title.
+   */
+  public function drupalTitle() {
+    $title = \Drupal::service('title_resolver')->getTitle(
+      \Drupal::request(),
+      \Drupal::routeMatch()->getRouteObject()
+    );
+    $build['#markup'] = render($title);
+    $build['#cache']['contexts'] = ['url'];
+    return $build;
+  }
+
+  /**
+   * Generates a URL from internal path.
+   *
+   * @param string $user_input
+   *   User input for a link or path.
+   * @param array $options
+   *   (optional) An array of options.
+   *
+   * @return \Drupal\Core\Url
+   *   A new Url object based on user input.
+   *
+   * @see \Drupal\Core\Url::fromUserInput()
+   */
+  public function drupalUrl($user_input, array $options = []) {
+    if (!in_array($user_input[0], ['/', '#', '?'])) {
+      $user_input = '/' . $user_input;
+    }
+    return Url::fromUserInput($user_input, $options);
+  }
+
+  /**
    * Replaces all tokens in a given string with appropriate values.
    *
    * @param string $text
@@ -401,7 +367,7 @@ class TwigExtension extends \Twig_Extension {
    *   The entered HTML text with tokens replaced.
    */
   public function tokenReplaceFilter($text) {
-    return $this->token->replace($text);
+    return \Drupal::token()->replace($text);
   }
 
   /**
@@ -418,7 +384,12 @@ class TwigExtension extends \Twig_Extension {
    *   The new text if matches are found, otherwise unchanged text.
    */
   public function pregReplaceFilter($text, $pattern, $replacement) {
-    return preg_replace("/$pattern/", $replacement, $text);
+    // BC layer. Before version 8.x-1.8 the pattern was without delimiters.
+    // @todo Remove this in Drupal 9.
+    if (strpos($pattern, '/') !== 0) {
+      return preg_replace("/$pattern/", $replacement, $text);
+    }
+    return preg_replace($pattern, $replacement, $text);
   }
 
   /**
@@ -434,9 +405,57 @@ class TwigExtension extends \Twig_Extension {
    *   in an <img> tag. Requesting the URL will cause the image to be created.
    */
   public function imageStyle($path, $style) {
+    /** @var \Drupal\Image\ImageStyleInterface $image_style */
     if ($image_style = ImageStyle::load($style)) {
       return file_url_transform_relative($image_style->buildUrl($path));
     }
+  }
+
+  /**
+   * Transliterates text from Unicode to US-ASCII.
+   *
+   * @param string $string
+   *   The string to transliterate.
+   * @param string $langcode
+   *   (optional) The language code of the language the string is in. Defaults
+   *   to 'en' if not provided. Warning: this can be unfiltered user input.
+   * @param string $unknown_character
+   *   (optional) The character to substitute for characters in $string without
+   *   transliterated equivalents. Defaults to '?'.
+   * @param int $max_length
+   *   (optional) If provided, return at most this many characters, ensuring
+   *   that the transliteration does not split in the middle of an input
+   *   character's transliteration.
+   *
+   * @return string
+   *   $string with non-US-ASCII characters transliterated to US-ASCII
+   *   characters, and unknown characters replaced with $unknown_character.
+   */
+  public function transliterate($string, $langcode = 'en', $unknown_character = '?', $max_length = NULL) {
+    return \Drupal::transliteration()->transliterate($string, $langcode, $unknown_character, $max_length);
+  }
+
+  /**
+   * Runs all the enabled filters on a piece of text.
+   *
+   * @param string $text
+   *   The text to be filtered.
+   * @param string|null $format_id
+   *   (optional) The machine name of the filter format to be used to filter the
+   *   text. Defaults to the fallback format. See filter_fallback_format().
+   * @param string $langcode
+   *   (optional) The language code of the text to be filtered.
+   * @param array $filter_types_to_skip
+   *   (optional) An array of filter types to skip, or an empty array (default)
+   *   to skip no filter types.
+   *
+   * @return \Drupal\Component\Render\MarkupInterface
+   *   The filtered text.
+   *
+   * @see check_markup()
+   */
+  public function checkMarkup($text, $format_id = NULL, $langcode = '', array $filter_types_to_skip = []) {
+    return check_markup($text, $format_id, $langcode, $filter_types_to_skip);
   }
 
   /**
@@ -456,6 +475,23 @@ class TwigExtension extends \Twig_Extension {
     $output = ob_get_contents();
     ob_end_clean();
     return $output;
+  }
+
+  /**
+   * Checks view access to a given entity.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $entity
+   *   Entity to check access.
+   *
+   * @return bool
+   *   The access check result.
+   *
+   * @TODO Remove "check_access" option in 9.x.
+   */
+  protected function entityAccess(EntityInterface $entity) {
+    // Prior version 8.x-1.7 entity access was not checked. The "check_access"
+    // option provides a workaround for possible BC issues.
+    return !Settings::get('twig_tweak_check_access', TRUE) || $entity->access('view');
   }
 
 }

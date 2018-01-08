@@ -5,14 +5,12 @@
  * Contains image_widget_crop.module.
  */
 
-use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Entity\FieldableEntityInterface;
+define('IMAGE_WIDGET_CROP_JS_CDN', 'https://cdnjs.cloudflare.com/ajax/libs/cropper/2.3.4/cropper.min.js');
+define('IMAGE_WIDGET_CROP_CSS_CDN', 'https://cdnjs.cloudflare.com/ajax/libs/cropper/2.3.4/cropper.min.css');
+
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
-use Drupal\crop\Entity\Crop;
-use Drupal\crop\Entity\CropType;
-use Drupal\file\Entity\File;
-use Drupal\file\Plugin\Field\FieldType\FileFieldItemList;
 
 /**
  * Implements hook_help().
@@ -74,22 +72,24 @@ function image_widget_crop_library_info_alter(&$libraries, $extension) {
   }
 
   $config = \Drupal::config('image_widget_crop.settings');
-  $js  = $config->get('settings.library_url');
+  $js = $config->get('settings.library_url');
   $css = $config->get('settings.css_url');
   // Explicit configuration takes priority.
   if (!empty($js) && !empty($css)) {
-    $files = ['js' => $js, 'css' =>  $css];
+    $files = ['js' => $js, 'css' => $css];
     foreach ($files as $type => $file_path) {
       // Evaluate if the path are an local or external.
       $is_local = parse_url($file_path, PHP_URL_SCHEME) === NULL && strpos($file_path, '//') !== 0;
-      // In that location $file_path are placed on root of module not in drupal root.
+      // In that location $file_path are placed on root of module.
+      // not in drupal root.
       $data = ($is_local && substr($file_path, 0, 1) !== '/') ? '/' . $file_path : $file_path;
       if ($type === 'js') {
         $libraries['cropper'][$type][$data] = [
           'type' => $is_local ? 'file' : 'external',
           'minified' => TRUE,
         ];
-      } else {
+      }
+      else {
         $libraries['cropper'][$type]['component'][$data] = [
           'type' => $is_local ? 'file' : 'external',
           'minified' => TRUE,
@@ -124,23 +124,22 @@ function image_widget_crop_library_info_alter(&$libraries, $extension) {
   }
   else {
     // Fallback to CDN.
-    $js  = 'https://cdnjs.cloudflare.com/ajax/libs/cropper/2.3.4/cropper.min.js';
+    $js = IMAGE_WIDGET_CROP_JS_CDN;
     $libraries['cropper']['js'][$js] = [
       'type' => 'external',
       'minified' => TRUE,
     ];
-    $css = 'https://cdnjs.cloudflare.com/ajax/libs/cropper/2.3.4/cropper.min.css';
+    $css = IMAGE_WIDGET_CROP_CSS_CDN;
     $libraries['cropper']['css']['component'][$css] = [
       'type' => 'external',
       'minified' => TRUE,
     ];
     $libraries['cropper']['version'] = 'web-hosted';
-    $libraries['cropper.integration']['js'] = [];
   }
 }
 
 /**
- * Implements hook_form_alter().
+ * Implements hook_form_FORM_ID_alter().
  */
 function image_widget_crop_form_file_form_alter(&$form, FormStateInterface $form_state, $form_id) {
   /** @var \Drupal\file_entity\Entity\FileEntity $file */

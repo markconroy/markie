@@ -26,11 +26,9 @@
     }
   ],
   "require": {
-    "drupal/crop": "1.x"
+    "drupal/crop": "1.0 - 2.0"
   },
   "require-dev": {
-    "drupal/media_entity_image": "1.x-dev",
-    "drupal/imce": "1.x-dev",
     "drupal/entity_browser": "1.x-dev",
     "drupal/ctools": "3.x-dev"
   }

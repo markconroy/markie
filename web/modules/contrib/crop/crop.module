@@ -6,7 +6,7 @@
  *
  * Provides storage and API for image crops.
  */
-
+use Drupal\Component\Utility\UrlHelper;
 use \Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StreamWrapper\PublicStream;
 use Drupal\crop\Entity\Crop;
@@ -38,11 +38,11 @@ function template_preprocess_crop_crop_summary(&$variables) {
 }
 
 /**
- * Implements hook_form_BASE_ID_alter().
+ * Implements hook_form_FORM_ID_alter().
  *
- * Adds crop configuraiton fields to media bundle form.
+ * Adds crop configuration fields to media bundle form.
  */
-function crop_form_media_bundle_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+function crop_form_media_bundle_edit_form_alter(array &$form, FormStateInterface $form_state, $form_id) {
   /** @var \Drupal\media_entity\MediaBundleInterface $bundle */
   $bundle = $form['#entity'];
   $options = [];
@@ -114,18 +114,20 @@ function crop_file_delete(FileInterface $file) {
  */
 function crop_file_url_alter(&$uri) {
   // Process only files that are stored in "styles" directory.
-  if (strpos($uri, PublicStream::basePath() . '/styles/') !== FALSE) {
-    // Handle the case of multiple "/styles/" in URI.
-    $uri_parts = explode('/styles/', $uri);
-    $image_style_part = end($uri_parts);
+  if (strpos($uri, '/styles/') !== FALSE && preg_match('/\/styles\/(.*?)\/(.*?)\/(.+)/', $uri, $match)) {
     // Match image style, schema, file subdirectory and file name.
-    preg_match("/(.*?)\/(.*?)\/(.*+)/", $image_style_part, $match);
     // Get the image style ID.
     $image_style = $match[1];
     // Get the file path without query parameter.
-    $parsed_uri = parse_url($match[3]);
+    $parsed_uri = UrlHelper::parse($match[3]);
     // Get the file URI using parsed schema and file path.
     $file_uri = $match[2] . '://' . $parsed_uri['path'];
+
+    // Prevent double hashing, if there is a hash argument already, do not add
+    // it again.
+    if (!empty($parsed_uri['query']['h'])) {
+      return;
+    }
 
     /** @var \Drupal\image\Entity\ImageStyle $image_style */
     if (!$image_style = ImageStyle::load($image_style)) {
@@ -148,7 +150,25 @@ function crop_file_url_alter(&$uri) {
       // Found a crop for this image, append a hash of it to the URL,
       // so that browsers reload the image and CDNs and proxies can be bypassed.
       $shortened_hash = substr(md5(implode($crop->position()) . implode($crop->anchor())), 0, 8);
-      $uri .= '&h=' . $shortened_hash;
+
+      // If the URI has a schema and that is not http, https or data, convert
+      // the URI to the external URL. Otherwise the appended query argument
+      // will be encoded.
+      // @see file_create_url()
+      $scheme = \Drupal::service('file_system')->uriScheme($uri);
+      if ($scheme && !in_array($scheme, ['http', 'https', 'data'])) {
+        if ($wrapper = \Drupal::service('stream_wrapper_manager')->getViaUri($uri)) {
+          $uri = $wrapper->getExternalUrl();
+        }
+      }
+
+      // Append either with a ? or a & if there are existing query arguments.
+      if (strpos($uri, '?') === FALSE) {
+        $uri .= '?h=' . $shortened_hash;
+      }
+      else {
+        $uri .= '&h=' . $shortened_hash;
+      }
     }
   }
 }

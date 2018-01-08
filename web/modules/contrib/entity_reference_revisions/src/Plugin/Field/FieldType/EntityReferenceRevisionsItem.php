@@ -179,7 +179,7 @@ class EntityReferenceRevisionsItem extends EntityReferenceItem implements Option
         // If the entity has been saved and we're trying to set both the
         // target_id and the entity values with a non-null target ID, then the
         // value for target_id should match the ID of the entity value.
-        if (!$this->entity->isNew() && $values['target_id'] !== NULL && ($entity_id !== $values['target_id'])) {
+        if (!$this->entity->isNew() && $values['target_id'] !== NULL && ($entity_id != $values['target_id'])) {
           throw new \InvalidArgumentException('The target id and entity passed to the entity reference item do not match.');
         }
       }
@@ -361,11 +361,52 @@ class EntityReferenceRevisionsItem extends EntityReferenceItem implements Option
       }
     }
   }
- /**
- * {@inheritdoc}
- */
+
+  /**
+   * {@inheritdoc}
+   */
   public static function onDependencyRemoval(FieldDefinitionInterface $field_definition, array $dependencies) {
-    return FALSE;
+    $changed = FALSE;
+    $entity_manager = \Drupal::entityManager();
+    $target_entity_type = $entity_manager->getDefinition($field_definition->getFieldStorageDefinition()
+      ->getSetting('target_type'));
+    $handler_settings = $field_definition->getSetting('handler_settings');
+
+    // Update the 'target_bundles' handler setting if a bundle config dependency
+    // has been removed.
+    if (!empty($handler_settings['target_bundles'])) {
+      if ($bundle_entity_type_id = $target_entity_type->getBundleEntityType()) {
+        if ($storage = $entity_manager->getStorage($bundle_entity_type_id)) {
+          foreach ($storage->loadMultiple($handler_settings['target_bundles']) as $bundle) {
+            if (isset($dependencies[$bundle->getConfigDependencyKey()][$bundle->getConfigDependencyName()])) {
+              unset($handler_settings['target_bundles'][$bundle->id()]);
+              $changed = TRUE;
+
+              // In case we deleted the only target bundle allowed by the field
+              // we can log a message because the behaviour of the field will
+              // have changed.
+              if ($handler_settings['target_bundles'] === []) {
+                \Drupal::logger('entity_reference_revisions')
+                  ->notice('The %target_bundle bundle (entity type: %target_entity_type) was deleted. As a result, the %field_name entity reference revisions field (entity_type: %entity_type, bundle: %bundle) no longer specifies a specific target bundle. The field will now accept any bundle and may need to be adjusted.', [
+                    '%target_bundle' => $bundle->label(),
+                    '%target_entity_type' => $bundle->getEntityType()
+                      ->getBundleOf(),
+                    '%field_name' => $field_definition->getName(),
+                    '%entity_type' => $field_definition->getTargetEntityTypeId(),
+                    '%bundle' => $field_definition->getTargetBundle()
+                  ]);
+              }
+            }
+          }
+        }
+      }
+    }
+
+    if ($changed) {
+      $field_definition->setSetting('handler_settings', $handler_settings);
+    }
+
+    return $changed;
   }
 
   /**

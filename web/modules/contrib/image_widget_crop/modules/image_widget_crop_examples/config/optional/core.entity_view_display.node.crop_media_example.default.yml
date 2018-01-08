@@ -1,3 +1,4 @@
+uuid: 5f122f82-d8e0-46a7-bb89-6e393749a699
 langcode: en
 status: true
 dependencies:
@@ -8,8 +9,6 @@ dependencies:
   module:
     - text
     - user
-_core:
-  default_config_hash: HpPefVmzDmvJriZYa6KY_taql49Ri7pmbJgTcxqoiF0
 id: node.crop_media_example.default
 targetEntityType: node
 bundle: crop_media_example
@@ -18,19 +17,23 @@ content:
   body:
     label: hidden
     type: text_default
-    weight: 1
+    weight: 101
     settings: {  }
     third_party_settings: {  }
     region: content
   field_image_crop_media:
-    weight: 0
-    label: above
+    weight: 102
+    label: hidden
     settings:
-      view_mode: full
-      link: false
+      link: true
+      view_mode: default
     third_party_settings: {  }
     type: entity_reference_entity_view
     region: content
+  links:
+    weight: 100
+    region: content
+    settings: {  }
+    third_party_settings: {  }
 hidden:
   langcode: true
-  links: true

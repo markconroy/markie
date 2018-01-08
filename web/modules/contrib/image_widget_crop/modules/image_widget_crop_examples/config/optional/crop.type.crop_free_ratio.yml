@@ -1,8 +1,9 @@
+uuid: 85dc72a5-d5e7-4f6b-81a1-7a1143120176
 langcode: en
 status: true
 dependencies: {  }
 _core:
-  default_config_hash: wozJdSjHwix5kgNAj53AvVs9hsyp-o5v5oGAbKhzDLU
+  default_config_hash: Kbc-8guEt8XkA7-17ZfuaaxamujUU6RYPrfhGDIyDAs
 label: 'Free crop'
 id: crop_free_ratio
 description: ''

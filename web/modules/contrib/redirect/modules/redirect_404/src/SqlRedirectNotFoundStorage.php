@@ -92,6 +92,11 @@ class SqlRedirectNotFoundStorage implements RedirectNotFoundStorageInterface {
   public function purgeOldRequests() {
     $row_limit = $this->configFactory->get('redirect_404.settings')->get('row_limit');
 
+    // In admin form 0 used as value for 'All' label.
+    if ($row_limit == 0) {
+      return;
+    }
+
     $query = $this->database->select('redirect_404', 'r404');
     $query->fields('r404', ['timestamp']);
     // On databases known to support log(), use it to calculate a logarithmic

@@ -2,43 +2,91 @@
 
 namespace Drupal\admin_toolbar_tools\Controller;
 
+use Drupal\Component\Datetime\Time;
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\CronInterface;
-use Drupal\Core\Routing\TrustedRedirectResponse;
-use Drupal\Component\Datetime\Time;
-use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 use Drupal\Core\Menu\ContextualLinkManager;
 use Drupal\Core\Menu\LocalActionManager;
 use Drupal\Core\Menu\LocalTaskManager;
 use Drupal\Core\Menu\MenuLinkManager;
+use Drupal\Core\Plugin\CachedDiscoveryClearerInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
- * Class ToolbarController
+ * Class ToolbarController.
  *
  * @package Drupal\admin_toolbar_tools\Controller
  */
 class ToolbarController extends ControllerBase {
 
   /**
-   * The cron service.
+   * A cron instance.
    *
-   * @var $cron \Drupal\Core\CronInterface
+   * @var \Drupal\Core\CronInterface
    */
   protected $cron;
+
+  /**
+   * A menu link manager instance.
+   *
+   * @var \Drupal\Core\Menu\MenuLinkManager
+   */
   protected $menuLinkManager;
+
+  /**
+   * A context link manager instance.
+   *
+   * @var \Drupal\Core\Menu\ContextualLinkManager
+   */
   protected $contextualLinkManager;
+
+  /**
+   * A local task manager instance.
+   *
+   * @var \Drupal\Core\Menu\LocalTaskManager
+   */
   protected $localTaskLinkManager;
+
+  /**
+   * A local action manager instance.
+   *
+   * @var \Drupal\Core\Menu\LocalActionManager
+   */
   protected $localActionLinkManager;
+
+  /**
+   * A cache backend interface instance.
+   *
+   * @var \Drupal\Core\Cache\CacheBackendInterface
+   */
   protected $cacheRender;
+
+  /**
+   * A date time instance.
+   *
+   * @var \Drupal\Component\Datetime\Time
+   */
   protected $time;
 
   /**
-   * Constructs a CronController object.
+   * A request stack symfony instance.
    *
-   * @param \Drupal\Core\CronInterface $cron
-   *   The cron service.
+   * @var \Symfony\Component\HttpFoundation\RequestStack
+   */
+  protected $requestStack;
+
+  /**
+   * A plugin cache clear instance.
+   *
+   * @var \Drupal\Core\Plugin\CachedDiscoveryClearerInterface
+   */
+  protected $pluginCacheClearer;
+
+  /**
+   * {@inheritdoc}
    */
   public function __construct(CronInterface $cron,
                               MenuLinkManager $menuLinkManager,
@@ -46,7 +94,9 @@ class ToolbarController extends ControllerBase {
                               LocalTaskManager $localTaskLinkManager,
                               LocalActionManager $localActionLinkManager,
                               CacheBackendInterface $cacheRender,
-                              Time $time) {
+                              Time $time,
+                              RequestStack $request_stack,
+                              CachedDiscoveryClearerInterface $plugin_cache_clearer) {
     $this->cron = $cron;
     $this->menuLinkManager = $menuLinkManager;
     $this->contextualLinkManager = $contextualLinkManager;
@@ -54,6 +104,8 @@ class ToolbarController extends ControllerBase {
     $this->localActionLinkManager = $localActionLinkManager;
     $this->cacheRender = $cacheRender;
     $this->time = $time;
+    $this->requestStack = $request_stack;
+    $this->pluginCacheClearer = $plugin_cache_clearer;
   }
 
   /**
@@ -67,15 +119,17 @@ class ToolbarController extends ControllerBase {
       $container->get('plugin.manager.menu.local_task'),
       $container->get('plugin.manager.menu.local_action'),
       $container->get('cache.render'),
-      $container->get('datetime.time')
+      $container->get('datetime.time'),
+      $container->get('request_stack'),
+      $container->get('plugin.cache_clearer')
     );
   }
 
   /**
    * Reload the previous page.
    */
-  public function reload_page() {
-    $request = \Drupal::request();
+  public function reloadPage() {
+    $request = $this->requestStack->getCurrentRequest();
     if ($request->server->get('HTTP_REFERER')) {
       return $request->server->get('HTTP_REFERER');
     }
@@ -90,83 +144,57 @@ class ToolbarController extends ControllerBase {
   public function flushAll() {
     drupal_flush_all_caches();
     drupal_set_message($this->t('All caches cleared.'));
-    return new RedirectResponse($this->reload_page());
+    return new RedirectResponse($this->reloadPage());
   }
 
   /**
    * Flushes css and javascript caches.
    */
-  public function flush_js_css() {
-    \Drupal::state()
+  public function flushJsCss() {
+    $this->state()
       ->set('system.css_js_query_string', base_convert($this->time->getCurrentTime(), 10, 36));
     drupal_set_message($this->t('CSS and JavaScript cache cleared.'));
-    return new RedirectResponse($this->reload_page());
+    return new RedirectResponse($this->reloadPage());
   }
 
   /**
    * Flushes plugins caches.
    */
-  public function flush_plugins() {
-    \Drupal::service('plugin.cache_clearer')->clearCachedDefinitions();
+  public function flushPlugins() {
+    $this->pluginCacheClearer->clearCachedDefinitions();
     drupal_set_message($this->t('Plugins cache cleared.'));
-    return new RedirectResponse($this->reload_page());
+    return new RedirectResponse($this->reloadPage());
   }
 
   /**
    * Resets all static caches.
    */
-  public function flush_static() {
+  public function flushStatic() {
     drupal_static_reset();
     drupal_set_message($this->t('Static cache cleared.'));
-    return new RedirectResponse($this->reload_page());
+    return new RedirectResponse($this->reloadPage());
   }
 
   /**
    * Clears all cached menu data.
    */
-  public function flush_menu() {
+  public function flushMenu() {
     menu_cache_clear_all();
     $this->menuLinkManager->rebuild();
     $this->contextualLinkManager->clearCachedDefinitions();
     $this->localTaskLinkManager->clearCachedDefinitions();
     $this->localActionLinkManager->clearCachedDefinitions();
     drupal_set_message($this->t('Routing and links cache cleared.'));
-    return new RedirectResponse($this->reload_page());
+    return new RedirectResponse($this->reloadPage());
   }
 
   /**
-   * Links to drupal.org home page.
+   * Clears all cached views data.
    */
-  public function drupal_org() {
-    $response = new TrustedRedirectResponse("https://www.drupal.org");
-    $response->send();
-    return $response;
-  }
-
-  /**
-   * Displays the administration link Development.
-   */
-  public function development() {
-    return new RedirectResponse('/admin/structure/menu/');
-  }
-
-  /**
-   * Access to Drupal 8 changes.
-   * (list changes of the different versions of drupal core).
-   */
-  public function list_changes() {
-    $response = new TrustedRedirectResponse("https://www.drupal.org/list-changes");
-    $response->send();
-    return $response;
-  }
-
-  /**
-   * Adds a link to the Drupal 8 documentation.
-   */
-  public function documentation() {
-    $response = new TrustedRedirectResponse("https://api.drupal.org/api/drupal/8");
-    $response->send();
-    return $response;
+  public function flushViews() {
+    views_invalidate_cache();
+    drupal_set_message($this->t('Views cache cleared.'));
+    return new RedirectResponse($this->reloadPage());
   }
 
   /**
@@ -175,7 +203,7 @@ class ToolbarController extends ControllerBase {
   public function runCron() {
     $this->cron->run();
     drupal_set_message($this->t('Cron ran successfully.'));
-    return new RedirectResponse($this->reload_page());
+    return new RedirectResponse($this->reloadPage());
   }
 
   /**
@@ -184,7 +212,7 @@ class ToolbarController extends ControllerBase {
   public function cacheRender() {
     $this->cacheRender->invalidateAll();
     drupal_set_message($this->t('Render cache cleared.'));
-    return new RedirectResponse($this->reload_page());
+    return new RedirectResponse($this->reloadPage());
   }
 
 }

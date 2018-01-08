@@ -13,7 +13,7 @@ function image_widget_crop_requirements($phase) {
   $config = \Drupal::config('image_widget_crop.settings');
   $files = [
     'js' => $config->get('settings.library_url'),
-    'css' => $config->get('settings.css_url')
+    'css' => $config->get('settings.css_url'),
   ];
 
   foreach ($files as $type => $file) {
@@ -23,10 +23,10 @@ function image_widget_crop_requirements($phase) {
       && \Drupal::moduleHandler()->moduleExists('libraries')
       && ($info = libraries_detect('cropper'))
       && (!file_exists($info['library path'] . '/dist/cropper.min.' . $type) && !file_exists($info['library path'] . '/cropper.min.' . $type))) {
-        $error[] = t("<strong>:type</strong> file : Libraries module is active but an error detected with your cropper libraries configuration. To use cropper library with <i>'libraries'</i> module you must have the following structure <i>`:libraries_cropper`</i>", [
-          ':type' => strtoupper($type),
-          ':libraries_cropper' => '/libraries/cropper/dist/cropper.min.' . $type
-        ]);
+      $error[] = t("<strong>:type</strong> file : Libraries module is active but an error detected with your cropper libraries configuration. To use cropper library with <i>'libraries'</i> module you must have the following structure <i>`:libraries_cropper`</i>", [
+        ':type' => strtoupper($type),
+        ':libraries_cropper' => '/libraries/cropper/dist/cropper.min.' . $type,
+      ]);
     }
   }
 

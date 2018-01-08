@@ -1,8 +1,9 @@
+uuid: 78adb3ec-6cca-4a9c-819c-c4d3176d75b0
 langcode: en
 status: true
 dependencies: {  }
 _core:
-  default_config_hash: We4ikTM-maDNX3IFQtY2u9bSEPl80nNCsNuyhuJJLMo
+  default_config_hash: JoHPakgri5VV6asdempmdDzR2Cgh0JyPU70mo5GAsvM
 label: 'Crop 4:3'
 id: crop_4_3
 description: ''

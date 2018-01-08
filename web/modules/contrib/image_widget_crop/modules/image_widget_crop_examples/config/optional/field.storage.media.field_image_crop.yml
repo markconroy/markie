@@ -4,7 +4,7 @@ dependencies:
   module:
     - file
     - image
-    - media_entity
+    - media
 _core:
   default_config_hash: btq565KZulvPv1tSzc083Zg_GFywzak2BE3WglKkybE
 id: media.field_image_crop

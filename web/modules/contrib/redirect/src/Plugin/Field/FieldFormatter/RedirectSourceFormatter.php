@@ -26,7 +26,7 @@ class RedirectSourceFormatter extends FormatterBase {
 
     foreach ($items as $delta => $item) {
       $elements[$delta] = array(
-        '#markup' => $item->getUrl()->toString(),
+        '#markup' => urldecode($item->getUrl()->toString()),
       );
     }
 
