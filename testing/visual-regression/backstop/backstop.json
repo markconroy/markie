@@ -30,7 +30,7 @@
       "postInteractionWait": "",
       "selectors": [
         ".above-header",
-        "header",
+        "header#header",
         "footer.footer",
         ".credits"
       ],
