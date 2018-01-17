@@ -160,7 +160,7 @@ class CropEffect extends ConfigurableImageEffectBase implements ContainerFactory
   /**
    * Gets crop entity for the image.
    *
-   * @param ImageInterface $image
+   * @param \Drupal\Core\Image\ImageInterface $image
    *   Image object.
    *
    * @return \Drupal\Core\Entity\EntityInterface|\Drupal\crop\CropInterface|false
@@ -190,6 +190,19 @@ class CropEffect extends ConfigurableImageEffectBase implements ContainerFactory
     // The new image will have the exact dimensions defined for the crop effect.
     $dimensions['width'] = $size['width'];
     $dimensions['height'] = $size['height'];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function calculateDependencies() {
+    $dependencies = parent::calculateDependencies();
+
+    if (isset($this->configuration['crop_type']) && $crop_type = $this->typeStorage->load($this->configuration['crop_type'])) {
+      $dependencies[$crop_type->getConfigDependencyKey()] = [$crop_type->getConfigDependencyName()];
+    }
+
+    return $dependencies;
   }
 
 }

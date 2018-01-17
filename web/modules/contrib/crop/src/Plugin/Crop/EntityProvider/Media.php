@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\crop_media_entity\Plugin\Crop\EntityProvider;
+namespace Drupal\crop\Plugin\Crop\EntityProvider;
 
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
@@ -9,15 +9,15 @@ use Drupal\crop\EntityProviderBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Media entity crop integration.
+ * Media crop integration.
  *
  * @CropEntityProvider(
  *   entity_type = "media",
  *   label = @Translation("Media"),
- *   description = @Translation("Provides crop integration for media entity.")
+ *   description = @Translation("Provides crop integration for Media.")
  * )
  */
-class MediaEntity extends EntityProviderBase implements ContainerFactoryPluginInterface {
+class Media extends EntityProviderBase implements ContainerFactoryPluginInterface {
 
   /**
    * Entity type manager service.
@@ -27,7 +27,7 @@ class MediaEntity extends EntityProviderBase implements ContainerFactoryPluginIn
   protected $entityTypeManager;
 
   /**
-   * Constructs media entity integration plugin.
+   * Constructs media integration plugin.
    *
    * @param array $configuration
    *   A configuration array containing information about the plugin instance.
@@ -59,9 +59,12 @@ class MediaEntity extends EntityProviderBase implements ContainerFactoryPluginIn
    * {@inheritdoc}
    */
   public function uri(EntityInterface $entity) {
-    /** @var \Drupal\media_entity\MediaBundleInterface $bundle */
-    $bundle = $this->entityTypeManager->getStorage('media_bundle')->load($entity->bundle());
-    $image_field = $bundle->getThirdPartySetting('crop', 'image_field');
+
+    $bundle_entity_type = $entity->getEntityType()->getBundleEntityType();
+    /** @var \Drupal\Core\Config\Entity\ConfigEntityBase $entity_type */
+    $entity_type = $this->entityTypeManager->getStorage($bundle_entity_type)->load($entity->bundle());
+
+    $image_field = $entity_type->getThirdPartySetting('crop', 'image_field');
 
     if ($entity->{$image_field}->first()->isEmpty()) {
       return FALSE;

@@ -55,7 +55,7 @@ class CropTypeDeleteForm extends EntityConfirmFormBase {
    * {@inheritdoc}
    */
   public function getQuestion() {
-    return t('Are you sure you want to delete the crop type %type?', array('%type' => $this->entity->label()));
+    return t('Are you sure you want to delete the crop type %type?', ['%type' => $this->entity->label()]);
   }
 
   /**
@@ -84,7 +84,7 @@ class CropTypeDeleteForm extends EntityConfirmFormBase {
       $form['#title'] = $this->getQuestion();
       $form['description'] = [
         '#prefix' => '<p>',
-        '#markup' => $this->translation->formatPlural($count, '%type is used by 1 piece of content on your site. You can not remove this content type until you have removed all of the %type content.', '%type is used by @count pieces of content on your site. You may not remove %type until you have removed all of the %type content.', array('%type' => $this->entity->label())),
+        '#markup' => $this->translation->formatPlural($count, '%type is used by 1 piece of content on your site. You can not remove this content type until you have removed all of the %type content.', '%type is used by @count pieces of content on your site. You may not remove %type until you have removed all of the %type content.', ['%type' => $this->entity->label()]),
         '#suffix' => '</p>',
       ];
       return $form;
@@ -98,7 +98,7 @@ class CropTypeDeleteForm extends EntityConfirmFormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $this->entity->delete();
-    $t_args = array('%name' => $this->entity->label());
+    $t_args = ['%name' => $this->entity->label()];
     drupal_set_message($this->t('The crop type %name has been deleted.', $t_args));
     $this->logger('crop')->notice('Deleted crop type %name.', $t_args);
 
