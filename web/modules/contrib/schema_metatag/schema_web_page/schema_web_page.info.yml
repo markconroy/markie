@@ -1,0 +1,13 @@
+name: Schema.org WebPage
+type: module
+description: Adds Schema.org/WebPage to the JSON LD array. Creates WebPage, ItemPage, AboutPage, CheckoutPage, ContactPage, CollectionPage, ProfilePage, SearchResultsPage.
+# core: 8.x
+package: SEO
+dependencies:
+  - schema_metatag
+
+# Information added by Drupal.org packaging script on 2017-08-06
+version: '8.x-1.0-rc4'
+core: '8.x'
+project: 'schema_metatag'
+datestamp: 1501977846

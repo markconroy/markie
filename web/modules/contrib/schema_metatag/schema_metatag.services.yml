@@ -1,0 +1,5 @@
+services:
+  schema_metatag.schema_metatag_manager:
+    class: Drupal\schema_metatag\SchemaMetatagManager
+    arguments: []
+

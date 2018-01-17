@@ -1,0 +1,24 @@
+<?php
+
+/**
+ * @file
+ * Contains schema_article_example.module.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function schema_article_example_help($route_name, RouteMatchInterface $route_match) {
+  $output = '';
+  switch ($route_name) {
+    case 'help.page.schema_article_example':
+      $output = 'Example of how to add more fields to the Schema.org Article group, adds "Typical Age Range" to existing Article group.';
+      break;
+
+    default:
+      break;
+  }
+  return $output;
+}
