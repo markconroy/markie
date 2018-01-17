@@ -133,7 +133,7 @@ class PluginSkeletonCommand extends ContainerAwareCommand
         $plugins = $this->getPlugins();
 
         // @see use Drupal\Console\Command\ConfirmationTrait::confirmGeneration
-        if (!$this->confirmGeneration($io)) {
+        if (!$this->confirmGeneration($io, $input)) {
             return 1;
         }
 
@@ -180,12 +180,8 @@ class PluginSkeletonCommand extends ContainerAwareCommand
     {
         $io = new DrupalStyle($input, $output);
 
-        $module = $input->getOption('module');
-        if (!$module) {
-            // @see Drupal\Console\Command\ModuleTrait::moduleQuestion
-            $module = $this->moduleQuestion($io);
-            $input->setOption('module', $module);
-        }
+        // --module option
+        $this->getModuleOption();
 
         $pluginId = $input->getOption('plugin-id');
         if (!$pluginId) {

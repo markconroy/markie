@@ -107,7 +107,7 @@ class PostUpdateCommand extends Command
         $io = new DrupalStyle($input, $output);
 
         // @see use Drupal\Console\Command\Shared\ConfirmationTrait::confirmGeneration
-        if (!$this->confirmGeneration($io)) {
+        if (!$this->confirmGeneration($io, $input)) {
             return 1;
         }
 
@@ -130,12 +130,8 @@ class PostUpdateCommand extends Command
         $this->site->loadLegacyFile('/core/includes/update.inc');
         $this->site->loadLegacyFile('/core/includes/schema.inc');
 
-        $module = $input->getOption('module');
-        if (!$module) {
-            // @see Drupal\Console\Command\Shared\ModuleTrait::moduleQuestion
-            $module = $this->moduleQuestion($io);
-            $input->setOption('module', $module);
-        }
+        // --module option
+        $this->getModuleOption();
 
         $postUpdateName = $input->getOption('post-update-name');
         if (!$postUpdateName) {

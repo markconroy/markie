@@ -159,7 +159,7 @@ class PluginMigrateSourceCommand extends ContainerAwareCommand
         $io = new DrupalStyle($input, $output);
 
         // @see use Drupal\Console\Command\Shared\ConfirmationTrait::confirmGeneration
-        if (!$this->confirmGeneration($io)) {
+        if (!$this->confirmGeneration($io, $input)) {
             return 1;
         }
 
@@ -189,12 +189,8 @@ class PluginMigrateSourceCommand extends ContainerAwareCommand
     {
         $io = new DrupalStyle($input, $output);
 
-        $module = $input->getOption('module');
-        if (!$module) {
-            // @see Drupal\Console\Command\Shared\ModuleTrait::moduleQuestion
-            $module = $this->moduleQuestion($io);
-            $input->setOption('module', $module);
-        }
+        // 'module-name' option.
+        $module = $this->getModuleOption();
 
         $class = $input->getOption('class');
         if (!$class) {

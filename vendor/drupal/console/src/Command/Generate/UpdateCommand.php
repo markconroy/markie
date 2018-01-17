@@ -18,6 +18,7 @@ use Drupal\Console\Core\Style\DrupalStyle;
 use Drupal\Console\Extension\Manager;
 use Drupal\Console\Core\Utils\ChainQueue;
 use Drupal\Console\Utils\Site;
+use Drupal\Console\Utils\Validator;
 
 /**
  * Class UpdateCommand
@@ -30,13 +31,13 @@ class UpdateCommand extends Command
     use ConfirmationTrait;
 
     /**
- * @var Manager
-*/
+     * @var Manager
+     */
     protected $extensionManager;
 
     /**
- * @var UpdateGenerator
-*/
+     * @var UpdateGenerator
+     */
     protected $generator;
 
     /**
@@ -49,6 +50,10 @@ class UpdateCommand extends Command
      */
     protected $chainQueue;
 
+    /**
+     * @var Validator
+     */
+    protected $validator;
 
     /**
      * UpdateCommand constructor.
@@ -62,12 +67,14 @@ class UpdateCommand extends Command
         Manager $extensionManager,
         UpdateGenerator $generator,
         Site $site,
-        ChainQueue $chainQueue
+        ChainQueue $chainQueue,
+        Validator $validator
     ) {
         $this->extensionManager = $extensionManager;
         $this->generator = $generator;
         $this->site = $site;
         $this->chainQueue = $chainQueue;
+        $this->validator = $validator;
         parent::__construct();
     }
 
@@ -99,7 +106,7 @@ class UpdateCommand extends Command
         $io = new DrupalStyle($input, $output);
 
         // @see use Drupal\Console\Command\Shared\ConfirmationTrait::confirmGeneration
-        if (!$this->confirmGeneration($io)) {
+        if (!$this->confirmGeneration($io, $input)) {
             return 1;
         }
 
@@ -131,12 +138,8 @@ class UpdateCommand extends Command
         $this->site->loadLegacyFile('/core/includes/update.inc');
         $this->site->loadLegacyFile('/core/includes/schema.inc');
 
-        $module = $input->getOption('module');
-        if (!$module) {
-            // @see Drupal\Console\Command\Shared\ModuleTrait::moduleQuestion
-            $module = $this->moduleQuestion($io);
-            $input->setOption('module', $module);
-        }
+        // --module option
+        $module = $this->getModuleOption();
 
         $lastUpdateSchema = $this->getLastUpdate($module);
         $nextUpdateSchema = $lastUpdateSchema ? ($lastUpdateSchema + 1): 8001;

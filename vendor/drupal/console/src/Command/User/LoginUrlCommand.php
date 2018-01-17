@@ -52,21 +52,12 @@ class LoginUrlCommand extends UserBase
      */
     protected function interact(InputInterface $input, OutputInterface $output)
     {
-        $io = new DrupalStyle($input, $output);
-
-        $user = $input->getArgument('user');
-        if (!$user) {
-            $user = $io->ask(
-                $this->trans('commands.user.login.url.questions.user')
-            );
-
-            $input->setArgument('user', $user);
-        }
+        $this->getUserArgument();
     }
 
     /**
-   * {@inheritdoc}
-   */
+     * {@inheritdoc}
+     */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $io = new DrupalStyle($input, $output);

@@ -15,3 +15,5 @@ tags:
   og_image: 'https://mark.ie/sites/default/files/media/images/2017-10/markconroy-frontend.jpg'
   og_image_secure_url: 'https://mark.ie/sites/default/files/media/images/2017-10/markconroy-frontend.jpg'
   og_site_name: Mark.ie
+  schema_web_page_breadcrumb: 'Yes'
+  schema_web_page_type: WebPage

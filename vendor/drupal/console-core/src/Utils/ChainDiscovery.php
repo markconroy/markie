@@ -31,6 +31,9 @@ class ChainDiscovery
      */
     private $directories = [];
 
+    const INLINE_REGEX = '/{{(.*?)}}/';
+    const ENV_REGEX =  '/%env\((.*?)\)%/';
+
     /**
      * ChainDiscovery constructor.
      *
@@ -44,13 +47,14 @@ class ChainDiscovery
         $this->appRoot = $appRoot;
         $this->configurationManager = $configurationManager;
 
-        $this->addDirectories(
-            [
-                $this->configurationManager->getHomeDirectory() . DIRECTORY_SEPARATOR . '.console'. DIRECTORY_SEPARATOR .'chain',
-                $this->appRoot . DIRECTORY_SEPARATOR . 'console'. DIRECTORY_SEPARATOR .'chain',
-                $this->appRoot . DIRECTORY_SEPARATOR . '.console'. DIRECTORY_SEPARATOR .'chain',
-            ]
+        $directories = array_map(
+            function ($item) {
+                return $item . 'chain/';
+            },
+            $configurationManager->getConfigurationDirectories(true)
         );
+
+        $this->addDirectories($directories);
     }
 
     /**
@@ -78,7 +82,7 @@ class ChainDiscovery
                 ->in($directory);
             foreach ($finder as $file) {
                 $chainFiles[$file->getPath()][] = sprintf(
-                    '%s/%s',
+                    '%s%s',
                     $directory,
                     $file->getBasename()
                 );
@@ -141,7 +145,6 @@ class ChainDiscovery
     public function getFileContents($file)
     {
         $contents = file_get_contents($file);
-
         // Remove lines with comments.
         $contents = preg_replace('![ \t]*#.*[ \t]*[\r|\r\n|\n]!', PHP_EOL, $contents);
         //  Strip blank lines
@@ -150,10 +153,11 @@ class ChainDiscovery
         return $contents;
     }
 
-    private function extractPlaceHolders($chainContent, $identifier)
-    {
+    private function extractPlaceHolders(
+        $chainContent,
+        $regex
+    ) {
         $placeHoldersExtracted = [];
-        $regex = '/\\'.$identifier.'{{(.*?)}}/';
         preg_match_all(
             $regex,
             $chainContent,
@@ -169,7 +173,10 @@ class ChainDiscovery
 
     public function extractInlinePlaceHolders($chainContent)
     {
-        $extractedInlinePlaceHolders = $this->extractPlaceHolders($chainContent, '%');
+        $extractedInlinePlaceHolders = $this->extractPlaceHolders(
+            $chainContent,
+            $this::INLINE_REGEX
+        );
         $extractedVars = $this->extractVars($chainContent);
 
         $inlinePlaceHolders = [];
@@ -186,10 +193,11 @@ class ChainDiscovery
 
     public function extractEnvironmentPlaceHolders($chainContent)
     {
-        return $this->extractPlaceHolders($chainContent, '$');
+        return $this->extractPlaceHolders($chainContent, $this::ENV_REGEX);
     }
 
-    public function extractVars($chainContent) {
+    public function extractVars($chainContent)
+    {
         $chain = Yaml::parse($chainContent);
         if (!array_key_exists('vars', $chain)) {
             return [];
