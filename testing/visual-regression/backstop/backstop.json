@@ -1,14 +1,24 @@
 {
-  "id": "mark.ie",
+  "id": "DTTAS",
   "viewports": [
     {
-      "label": "phone",
+      "label": "small",
       "width": 320,
       "height": 480
     },
     {
-      "label": "tablet",
+      "label": "medium",
+      "width": 768,
+      "height": 768
+    },
+    {
+      "label": "large",
       "width": 1024,
+      "height": 768
+    },
+    {
+      "label": "xlarge",
+      "width": 1200,
       "height": 768
     }
   ],
@@ -16,27 +26,85 @@
   "onReadyScript": "chromy/onReady.js",
   "scenarios": [
     {
-      "label": "Global Items",
+      "label": "01_01__Rendered_Page__Basic_Page",
       "cookiePath": "backstop_data/engine_scripts/cookies.json",
-      "url": "http://mark.loc",
+      "url": "../../../web/themes/custom/patternlab/pattern-lab/public/patterns/06-sample-pages-basic-pages-basic-page/06-sample-pages-basic-pages-basic-page.html",
       "referenceUrl": "",
       "readyEvent": "",
       "readySelector": "",
       "delay": 0,
-      "hideSelectors": [],
+      "hideSelectors": [".image-with-text__image img"],
       "removeSelectors": [],
       "hoverSelector": "",
       "clickSelector": "",
       "postInteractionWait": "",
-      "selectors": [
-        ".above-header",
-        "header#header",
-        "footer.footer",
-        ".credits"
-      ],
+      "selectors": [],
       "selectorExpansion": true,
       "misMatchThreshold" : 0.1,
       "requireSameDimensions": true
+    },
+    {
+      "label": "02_01__Region__Above_Header",
+      "url": "../../../web/themes/custom/patternlab/pattern-lab/public/patterns/05-page-sections-above-header-above-header/05-page-sections-above-header-above-header.html"
+    },
+    {
+      "label": "02_02__Region__Header",
+      "url": "http://mark.loc",
+      "selectors": [
+        "header.header"
+      ]
+    },
+    {
+      "label": "02_04__Region__Footer",
+      "url": "../../../web/themes/custom/patternlab/pattern-lab/public/patterns/05-page-sections-footer-footer/05-page-sections-footer-footer.html"
+    },
+    {
+      "label": "02_05__Region__Credits",
+      "url": "../../../web/themes/custom/patternlab/pattern-lab/public/patterns/05-page-sections-credits-credits/05-page-sections-credits-credits.html"
+    },
+    {
+      "label": "02_06__Region__Page_Title",
+      "url": "../../../web/themes/custom/patternlab/pattern-lab/public/patterns/05-page-sections-page-title-page-title/05-page-sections-page-title-page-title.html"
+    },
+    {
+      "label": "02_07__Region__Tabs",
+      "url": "../../../web/themes/custom/patternlab/pattern-lab/public/patterns/05-page-sections-tabs-tabs/05-page-sections-tabs-tabs.html"
+    },
+    {
+      "label": "03_01__Building_Block__Section_Break",
+      "url": "../../../web/themes/custom/patternlab/pattern-lab/public/patterns/03-building-blocks-section-break-section-break/03-building-blocks-section-break-section-break.html"
+    },
+    {
+      "label": "03_02__Building_Block__Text",
+      "url": "../../../web/themes/custom/patternlab/pattern-lab/public/patterns/03-building-blocks-text-text/03-building-blocks-text-text.html"
+    },
+    {
+      "label": "03_03__Building_Block__Image_With_Text",
+      "url": "../../../web/themes/custom/patternlab/pattern-lab/public/patterns/03-building-blocks-image-with-text-image-with-text/03-building-blocks-image-with-text-image-with-text.html",
+      "hideSelectors": [".image-with-text__image img"]
+    },
+    {
+      "label": "03_04__Building_Block__Image_With_Text_Right",
+      "url": "../../../web/themes/custom/patternlab/pattern-lab/public/patterns/03-building-blocks-image-with-text-image-with-text-right/03-building-blocks-image-with-text-image-with-text-right.html",
+      "hideSelectors": [".image-with-text__image img"]
+    },
+    {
+      "label": "03_05__Building_Block__Tiled_Layout",
+      "url": "../../../web/themes/custom/patternlab/pattern-lab/public/patterns/03-building-blocks-tiled-layout-tiled-layout/03-building-blocks-tiled-layout-tiled-layout.html",
+      "hideSelectors": [".tile__background--image"]
+    },
+    {
+      "label": "03_06__Building_Block__Call_to_Action",
+      "url": "../../../web/themes/custom/patternlab/pattern-lab/public/patterns/03-building-blocks-call-to-action-call-to-action/03-building-blocks-call-to-action-call-to-action.html"
+    },
+    {
+      "label": "03_07__Building_Block__Video",
+      "url": "../../../web/themes/custom/patternlab/pattern-lab/public/patterns/03-building-blocks-video-video/03-building-blocks-video-video.html",
+      "hideSelectors": [".ytp-gradient-top"]
+    },
+    {
+      "label": "03_08__Building_Block__File_Upload",
+      "url": "../../../web/themes/custom/patternlab/pattern-lab/public/patterns/03-building-blocks-file-upload-file-uploads/03-building-blocks-file-upload-file-uploads.html"
     }
   ],
   "paths": {
