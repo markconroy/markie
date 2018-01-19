@@ -1626,6 +1626,23 @@ body {
   margin-top: 23.4px;
 }
 
+.field--name-field-tags {
+  margin-bottom: 1rem;
+}
+
+.field--type-text-long a {
+  color: #ff2c2c;
+}
+
+.field--type-text-long a:focus, .field--type-text-long a:hover {
+  color: #292929;
+}
+
+.field--name-field-tags .field__item {
+  display: inline;
+  margin-right: .5rem;
+}
+
 .node--view-mode-teaser {
   margin-bottom: 1rem;
 }

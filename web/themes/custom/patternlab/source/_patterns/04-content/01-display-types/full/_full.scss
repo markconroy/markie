@@ -21,3 +21,20 @@
 .node--view-mode-full .node__meta {
   margin-top: $base-line-height;
 }
+
+.field--name-field-tags {
+  margin-bottom: 1rem;
+}
+
+.field--type-text-long a {
+  color: $c-primary;
+  &:focus,
+  &:hover {
+    color: $c-grey--darkest;
+  }
+}
+
+.field--name-field-tags .field__item {
+  display: inline;
+  margin-right: .5rem;
+}
