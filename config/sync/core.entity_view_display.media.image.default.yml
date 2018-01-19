@@ -4,6 +4,7 @@ status: true
 dependencies:
   config:
     - field.field.media.image.field_m_image_image
+    - field.field.media.image.field_media_tags
     - media_entity.bundle.image
   module:
     - image
@@ -25,6 +26,7 @@ content:
     region: content
 hidden:
   created: true
+  field_media_tags: true
   name: true
   thumbnail: true
   uid: true

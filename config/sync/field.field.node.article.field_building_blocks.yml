@@ -17,6 +17,7 @@ dependencies:
     - paragraphs.paragraphs_type.section_break
     - paragraphs.paragraphs_type.text
     - paragraphs.paragraphs_type.tiled_layout
+    - paragraphs.paragraphs_type.tweet
     - paragraphs.paragraphs_type.video
   module:
     - entity_reference_revisions
@@ -40,6 +41,7 @@ settings:
       image_with_text: image_with_text
       quote: quote
       video: video
+      tweet: tweet
       section_break: section_break
       call_to_action: call_to_action
       file: file
@@ -51,47 +53,50 @@ settings:
     target_bundles_drag_drop:
       text:
         enabled: true
-        weight: -31
+        weight: -33
       image:
         enabled: true
-        weight: -30
+        weight: -32
       image_with_text:
         enabled: true
-        weight: -29
+        weight: -31
       quote:
         enabled: true
-        weight: -28
+        weight: -30
       video:
         enabled: true
-        weight: -27
+        weight: -29
+      tweet:
+        enabled: true
+        weight: -28
       section_break:
         enabled: true
-        weight: -26
+        weight: -27
       call_to_action:
         enabled: true
-        weight: -25
+        weight: -26
       file:
         enabled: true
-        weight: -24
+        weight: -25
       related_content:
         enabled: true
-        weight: -23
+        weight: -24
       anchor:
         enabled: true
-        weight: -22
+        weight: -23
       accordion:
         enabled: true
-        weight: -21
+        weight: -22
       large_image_cta:
         enabled: true
-        weight: -20
+        weight: -21
       tiled_layout:
         enabled: true
-        weight: -19
+        weight: -20
       accordion_item:
-        weight: -18
+        weight: -19
         enabled: false
       tile:
-        weight: -17
+        weight: -18
         enabled: false
 field_type: entity_reference_revisions

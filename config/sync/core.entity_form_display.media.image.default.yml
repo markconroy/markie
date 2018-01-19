@@ -4,6 +4,7 @@ status: true
 dependencies:
   config:
     - field.field.media.image.field_m_image_image
+    - field.field.media.image.field_media_tags
     - image.style.thumbnail
     - media_entity.bundle.image
   module:
@@ -32,6 +33,15 @@ content:
       show_crop_area: false
     third_party_settings: {  }
     type: image_widget_crop
+    region: content
+  field_media_tags:
+    weight: 3
+    settings:
+      match_operator: CONTAINS
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: entity_reference_autocomplete_tags
     region: content
   name:
     type: string_textfield

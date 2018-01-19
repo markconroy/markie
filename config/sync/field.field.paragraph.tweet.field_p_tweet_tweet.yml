@@ -1,0 +1,28 @@
+uuid: c7a77680-509a-488c-a6f3-7279c0870625
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.paragraph.field_p_tweet_tweet
+    - media_entity.bundle.tweet
+    - paragraphs.paragraphs_type.tweet
+id: paragraph.tweet.field_p_tweet_tweet
+field_name: field_p_tweet_tweet
+entity_type: paragraph
+bundle: tweet
+label: Tweet
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:media'
+  handler_settings:
+    target_bundles:
+      tweet: tweet
+    sort:
+      field: _none
+    auto_create: false
+    auto_create_bundle: ''
+field_type: entity_reference

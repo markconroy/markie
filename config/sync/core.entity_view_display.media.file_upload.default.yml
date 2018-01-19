@@ -4,6 +4,7 @@ status: true
 dependencies:
   config:
     - field.field.media.file_upload.field_m_file_file
+    - field.field.media.file_upload.field_media_tags
     - media_entity.bundle.file_upload
   module:
     - file
@@ -23,6 +24,7 @@ content:
     region: content
 hidden:
   created: true
+  field_media_tags: true
   name: true
   thumbnail: true
   uid: true

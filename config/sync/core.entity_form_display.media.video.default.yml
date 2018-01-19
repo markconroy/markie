@@ -3,6 +3,7 @@ langcode: en
 status: true
 dependencies:
   config:
+    - field.field.media.video.field_media_tags
     - field.field.media.video.field_media_video_embed_field
     - media_entity.bundle.video
   module:
@@ -14,6 +15,15 @@ targetEntityType: media
 bundle: video
 mode: default
 content:
+  field_media_tags:
+    weight: 3
+    settings:
+      match_operator: CONTAINS
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: entity_reference_autocomplete_tags
+    region: content
   field_media_video_embed_field:
     type: video_embed_field_textfield
     weight: 1

@@ -3,6 +3,7 @@ langcode: en
 status: true
 dependencies:
   config:
+    - field.field.media.video.field_media_tags
     - field.field.media.video.field_media_video_embed_field
     - media_entity.bundle.video
   module:
@@ -27,6 +28,7 @@ content:
     region: content
 hidden:
   created: true
+  field_media_tags: true
   name: true
   thumbnail: true
   uid: true

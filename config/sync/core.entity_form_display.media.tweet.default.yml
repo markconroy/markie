@@ -1,29 +1,26 @@
-uuid: c991e76c-32f7-42f7-bfa0-5744b4b2ff35
+uuid: b02b9340-8c02-41a1-a5ee-e431cacc5936
 langcode: en
 status: true
 dependencies:
   config:
-    - field.field.media.file_upload.field_m_file_file
-    - field.field.media.file_upload.field_media_tags
-    - media_entity.bundle.file_upload
-  module:
-    - file
-_core:
-  default_config_hash: hZ3Npx6qBV4Ybudeu1w99wt7uRsSHmEEuzzUJR9d6M8
-id: media.file_upload.default
+    - field.field.media.tweet.field_m_tweet_link
+    - field.field.media.tweet.field_media_tags
+    - media_entity.bundle.tweet
+id: media.tweet.default
 targetEntityType: media
-bundle: file_upload
+bundle: tweet
 mode: default
 content:
-  field_m_file_file:
-    weight: 1
+  field_m_tweet_link:
+    weight: 3
     settings:
-      progress_indicator: throbber
+      size: 60
+      placeholder: ''
     third_party_settings: {  }
-    type: file_generic
+    type: string_textfield
     region: content
   field_media_tags:
-    weight: 3
+    weight: 4
     settings:
       match_operator: CONTAINS
       size: 60

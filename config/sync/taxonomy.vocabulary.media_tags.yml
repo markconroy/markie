@@ -1,0 +1,9 @@
+uuid: 83876c7f-d662-4c27-880d-5a26b343fda9
+langcode: en
+status: true
+dependencies: {  }
+name: 'Media Tags'
+vid: media_tags
+description: 'A vocabulary to tag media items, so I might be able to find some of them in the future.'
+hierarchy: 0
+weight: 0
