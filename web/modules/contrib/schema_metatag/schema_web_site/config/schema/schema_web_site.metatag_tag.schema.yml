@@ -1,0 +1,19 @@
+# The 'type' should be "label" for short meta tags and "text" for ones which
+# could get longer, especially ones which use a textarea field instead of a
+# textfield.
+
+metatag.metatag_tag.schema_web_site_id:
+  type: text
+  label: '@id'
+metatag.metatag_tag.schema_web_site_name:
+  type: text
+  label: 'name'
+metatag.metatag_tag.schema_web_site_publisher:
+  type: text
+  label: 'publisher'
+metatag.metatag_tag.schema_web_site_type:
+  type: text
+  label: '@type'
+metatag.metatag_tag.schema_web_site_url:
+  type: text
+  label: 'url'

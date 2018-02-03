@@ -3,23 +3,19 @@
 namespace Drupal\schema_metatag\Plugin\metatag\Tag;
 
 use Drupal\schema_metatag\SchemaMetatagManager;
-use \Drupal\schema_metatag\Plugin\metatag\Tag\SchemaAddressBase;
 
 /**
  * Schema.org Place items should extend this class.
  */
 abstract class SchemaPlaceBase extends SchemaAddressBase {
 
-  /**
-   * Traits provide re-usable form elements.
-   */
   use SchemaAddressTrait;
   use SchemaGeoTrait;
 
   /**
    * The top level keys on this form.
    */
-  function form_keys() {
+  public static function formKeys() {
     return [
       '@type',
       'name',
@@ -30,21 +26,15 @@ abstract class SchemaPlaceBase extends SchemaAddressBase {
   }
 
   /**
-   * Generate a form element for this meta tag.
-   *
-   * We need multiple values, so create a tree of values and
-   * stored the serialized value as a string.
+   * {@inheritdoc}
    */
-
   public function form(array $element = []) {
 
     $value = SchemaMetatagManager::unserialize($this->value());
 
     // Get the id for the nested @type element.
     $selector = $this->visibilitySelector() . '[@type]';
-    $visibility = ['visible' => [
-      ":input[name='$selector']" => ['value' => 'Place']]
-    ];
+    $visibility = ['visible' => [":input[name='$selector']" => ['value' => 'Place']]];
 
     $form['#type'] = 'fieldset';
     $form['#description'] = $this->description();
@@ -90,7 +80,7 @@ abstract class SchemaPlaceBase extends SchemaAddressBase {
       'visibility_selector' => $this->visibilitySelector() . '[address][@type]',
     ];
 
-    $form['address'] = $this->postal_address_form($input_values);
+    $form['address'] = $this->postalAddressForm($input_values);
     $form['address']['#states'] = $visibility;
 
     $input_values = [
@@ -101,10 +91,39 @@ abstract class SchemaPlaceBase extends SchemaAddressBase {
       'visibility_selector' => $this->visibilitySelector() . '[geo][@type]',
     ];
 
-    $form['geo'] = $this->geo_form($input_values);
+    $form['geo'] = $this->geoForm($input_values);
     $form['geo']['#states'] = $visibility;
 
     return $form;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function testValue() {
+    $items = [];
+    $keys = self::formKeys();
+    foreach ($keys as $key) {
+      switch ($key) {
+        case 'address':
+          $items[$key] = SchemaAddressBase::testValue();
+          break;
+
+        case 'geo':
+          $items[$key] = SchemaGeoBase::testValue();
+          break;
+
+        case '@type':
+          $items[$key] = 'Place';
+          break;
+
+        default:
+          $items[$key] = parent::testDefaultValue(2, ' ');
+          break;
+
+      }
+    }
+    return $items;
   }
 
 }

@@ -2,7 +2,7 @@
 
 namespace Drupal\schema_web_site\Plugin\metatag\Tag;
 
-use \Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
+use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaTypeBase;
 
 /**
  * Provides a plugin for the 'schema_web_page_type' meta tag.
@@ -23,24 +23,15 @@ use \Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
  *   multiple = FALSE
  * )
  */
-class SchemaWebSiteType extends SchemaNameBase {
+class SchemaWebSiteType extends SchemaTypeBase {
 
   /**
-   * Generate a form element for this meta tag.
+   * {@inheritdoc}
    */
-  public function form(array $element = []) {
-    $form = [
-      '#type' => 'select',
-      '#title' => $this->label(),
-      '#description' => $this->description(),
-      '#empty_option' => t('- None -'),
-      '#empty_value' => '',
-      '#options' => [
-        'WebSite' => $this->t('WebSite'),
-      ],
-      '#default_value' => $this->value(),
+  public static function labels() {
+    return [
+      'WebSite',
     ];
-    return $form;
   }
 
 }

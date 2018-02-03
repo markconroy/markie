@@ -2,7 +2,7 @@
 
 namespace Drupal\schema_web_site\Plugin\metatag\Group;
 
-use \Drupal\schema_metatag\Plugin\metatag\Group\SchemaGroupBase;
+use Drupal\schema_metatag\Plugin\metatag\Group\SchemaGroupBase;
 
 /**
  * Provides a plugin for the 'WebSite' meta tag group.

@@ -2,7 +2,7 @@
 
 namespace Drupal\schema_event\Plugin\metatag\Tag;
 
-use \Drupal\schema_metatag\Plugin\metatag\Tag\SchemaImageBase;
+use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaImageBase;
 
 /**
  * Provides a plugin for the 'image' meta tag.
@@ -26,7 +26,7 @@ use \Drupal\schema_metatag\Plugin\metatag\Tag\SchemaImageBase;
 class SchemaEventImage extends SchemaImageBase {
 
   /**
-   * Generate a form element for this meta tag.
+   * {@inheritdoc}
    */
   public function form(array $element = []) {
     $form = parent::form($element);

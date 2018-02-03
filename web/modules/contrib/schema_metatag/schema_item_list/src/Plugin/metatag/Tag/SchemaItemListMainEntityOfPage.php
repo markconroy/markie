@@ -2,7 +2,7 @@
 
 namespace Drupal\schema_item_list\Plugin\metatag\Tag;
 
-use \Drupal\schema_metatag\Plugin\metatag\Tag\SchemaMainEntityOfPageBase;
+use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaMainEntityOfPageBase;
 
 /**
  * Provides a plugin for the 'schema_item_list' meta tag.

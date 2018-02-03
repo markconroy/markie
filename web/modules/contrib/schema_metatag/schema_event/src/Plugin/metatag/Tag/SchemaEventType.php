@@ -2,7 +2,7 @@
 
 namespace Drupal\schema_event\Plugin\metatag\Tag;
 
-use \Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
+use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaTypeBase;
 
 /**
  * Provides a plugin for the 'type' meta tag.
@@ -23,30 +23,13 @@ use \Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
  *   multiple = FALSE
  * )
  */
-class SchemaEventType extends SchemaNameBase {
+class SchemaEventType extends SchemaTypeBase {
 
   /**
-   * Generate a form element for this meta tag.
+   * {@inheritdoc}
    */
-  public function form(array $element = []) {
-    $form = [
-      '#type' => 'select',
-      '#title' => $this->label(),
-      '#description' => $this->description(),
-      '#empty_option' => t('- None -'),
-      '#empty_value' => '',
-      '#options' => $this->types(),
-      '#default_value' => $this->value(),
-    ];
-    return $form;
-  }
-
-
-  /**
-   * Return a list of organization types.
-   */
-  private function types() {
-    $types = [
+  public static function labels() {
+    return [
       'Event',
       'BusinessEvent',
       'ChildrensEvent',
@@ -61,6 +44,8 @@ class SchemaEventType extends SchemaNameBase {
       'LiteraryEvent',
       'MusicEvent',
       'PublicationEvent',
+      '- BroadcastEvent',
+      '- OnDemandEvent',
       'SaleEvent',
       'ScreeningEvent',
       'SocialEvent',
@@ -68,6 +53,6 @@ class SchemaEventType extends SchemaNameBase {
       'TheaterEvent',
       'VisualArtsEvent',
     ];
-    return array_combine($types, $types);
   }
+
 }

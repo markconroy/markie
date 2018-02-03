@@ -2,7 +2,7 @@
 
 namespace Drupal\schema_web_page\Plugin\metatag\Tag;
 
-use \Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
+use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaTypeBase;
 
 /**
  * Provides a plugin for the 'schema_web_page_type' meta tag.
@@ -23,31 +23,24 @@ use \Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
  *   multiple = FALSE
  * )
  */
-class SchemaWebPageType extends SchemaNameBase {
+class SchemaWebPageType extends SchemaTypeBase {
 
   /**
-   * Generate a form element for this meta tag.
+   * {@inheritdoc}
    */
-  public function form(array $element = []) {
-    $form = [
-      '#type' => 'select',
-      '#title' => $this->label(),
-      '#description' => $this->description(),
-      '#empty_option' => t('- None -'),
-      '#empty_value' => '',
-      '#options' => [
-        'WebPage' => $this->t('WebPage'),
-        'ItemPage' => $this->t('ItemPage'),
-        'AboutPage' => $this->t('AboutPage'),
-        'CheckoutPage' => $this->t('CheckoutPage'),
-        'ContactPage' => $this->t('ContactPage'),
-        'CollectionPage' => $this->t('CollectionPage'),
-        'ProfilePage' => $this->t('ProfilePage'),
-        'SearchResultsPage' => $this->t('SearchResultsPage'),
-      ],
-      '#default_value' => $this->value(),
+  public static function labels() {
+    return [
+      'WebPage',
+      'ItemPage',
+      'AboutPage',
+      'CheckoutPage',
+      'ContactPage',
+      'CollectionPage',
+      '- ImageGallery',
+      '- VideoGallery',
+      'ProfilePage',
+      'SearchResultsPage',
     ];
-    return $form;
   }
 
 }

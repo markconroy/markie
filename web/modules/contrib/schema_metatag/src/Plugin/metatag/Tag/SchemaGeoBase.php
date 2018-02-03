@@ -9,17 +9,11 @@ use Drupal\schema_metatag\SchemaMetatagManager;
  */
 abstract class SchemaGeoBase extends SchemaNameBase {
 
-  /**
-   * Traits provide re-usable form elements.
-   */
   use SchemaGeoTrait;
   use SchemaPivotTrait;
 
   /**
-   * Generate a form element for this meta tag.
-   *
-   * We need multiple values, so create a tree of values and
-   * stored the serialized value as a string.
+   * {@inheritdoc}
    */
   public function form(array $element = []) {
 
@@ -33,16 +27,34 @@ abstract class SchemaGeoBase extends SchemaNameBase {
       'visibility_selector' => $this->visibilitySelector() . '[@type]',
     ];
 
-    $form = $this->geo_form($input_values);
+    $form = $this->geoForm($input_values);
 
-    $form['pivot'] = $this->pivot_form($value);
-    $form['pivot']['#states'] = ['invisible' => [
-      ':input[name="' . $input_values['visibility_selector'] . '"]' => [
-			  'value' => '']
-      ]
-    ];
+    $form['pivot'] = $this->pivotForm($value);
+    $selector = ':input[name="' . $input_values['visibility_selector'] . '"]';
+    $form['pivot']['#states'] = ['invisible' => [$selector => ['value' => '']]];
 
     return $form;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function testValue() {
+    $items = [];
+    $keys = self::geoFormKeys();
+    foreach ($keys as $key) {
+      switch ($key) {
+        case '@type':
+          $items[$key] = 'GeoCoordinates';
+          break;
+
+        default:
+          $items[$key] = parent::testDefaultValue(1, '');
+          break;
+
+      }
+    }
+    return $items;
   }
 
 }

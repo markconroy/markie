@@ -9,14 +9,11 @@ use Drupal\schema_metatag\SchemaMetatagManager;
  */
 abstract class SchemaOfferBase extends SchemaNameBase {
 
-  /**
-   * Traits provide re-usable form elements.
-   */
   use SchemaOfferTrait;
   use SchemaPivotTrait;
 
   /**
-   * Generate a form element for this meta tag.
+   * {@inheritdoc}
    */
   public function form(array $element = []) {
     $value = SchemaMetatagManager::unserialize($this->value());
@@ -29,16 +26,34 @@ abstract class SchemaOfferBase extends SchemaNameBase {
       'visibility_selector' => $this->visibilitySelector() . '[@type]',
     ];
 
-    $form = $this->offer_form($input_values);
+    $form = $this->offerForm($input_values);
 
-    $form['pivot'] = $this->pivot_form($value);
-    $form['pivot']['#states'] = ['invisible' => [
-      ':input[name="' . $input_values['visibility_selector'] . '"]' => [
-			  'value' => '']
-      ]
-    ];
+    $form['pivot'] = $this->pivotForm($value);
+    $selector = ':input[name="' . $input_values['visibility_selector'] . '"]';
+    $form['pivot']['#states'] = ['invisible' => [$selector => ['value' => '']]];
 
     return $form;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function testValue() {
+    $items = [];
+    $keys = self::offerFormKeys();
+    foreach ($keys as $key) {
+      switch ($key) {
+        case '@type':
+          $items[$key] = 'Offer';
+          break;
+
+        default:
+          $items[$key] = parent::testDefaultValue(2, ' ');
+          break;
+
+      }
+    }
+    return $items;
   }
 
 }

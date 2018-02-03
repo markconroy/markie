@@ -2,7 +2,7 @@
 
 namespace Drupal\schema_article_example\Plugin\metatag\Tag;
 
-use \Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
+use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
 
 /**
  * Provides a plugin for the 'schema_article_age_range' meta tag.

@@ -2,7 +2,7 @@
 
 namespace Drupal\schema_event\Plugin\metatag\Tag;
 
-use \Drupal\schema_metatag\Plugin\metatag\Tag\SchemaPersonOrgBase;
+use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaPersonOrgBase;
 
 /**
  * Provides a plugin for the 'performer' meta tag.
@@ -26,12 +26,12 @@ use \Drupal\schema_metatag\Plugin\metatag\Tag\SchemaPersonOrgBase;
 class SchemaEventPerformer extends SchemaPersonOrgBase {
 
   /**
-   * Generate a form element for this meta tag.
+   * {@inheritdoc}
    */
   public function form(array $element = []) {
     $form = parent::form($element);
-    $form['name']['#description'] = $this->t('The name of the performer');
-    $form['url']['#description'] = $this->t('The URL of the performer\'s website.');
+    $form['name']['#description'] = $this->t("The name of the performer");
+    $form['url']['#description'] = $this->t("The URL of the performer's website.");
     return $form;
   }
 

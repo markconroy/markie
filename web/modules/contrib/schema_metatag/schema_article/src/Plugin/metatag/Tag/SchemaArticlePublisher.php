@@ -2,7 +2,7 @@
 
 namespace Drupal\schema_article\Plugin\metatag\Tag;
 
-use \Drupal\schema_metatag\Plugin\metatag\Tag\SchemaPersonOrgBase;
+use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaPersonOrgBase;
 
 /**
  * Provides a plugin for the 'publisher' meta tag.
@@ -26,7 +26,7 @@ use \Drupal\schema_metatag\Plugin\metatag\Tag\SchemaPersonOrgBase;
 class SchemaArticlePublisher extends SchemaPersonOrgBase {
 
   /**
-   * Generate a form element for this meta tag.
+   * {@inheritdoc}
    */
   public function form(array $element = []) {
     $form = parent::form($element);

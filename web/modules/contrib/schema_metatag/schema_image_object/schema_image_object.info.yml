@@ -1,0 +1,13 @@
+name: Schema.org Image Object
+type: module
+description: Adds Schema.org/ImageObject to the JSON LD array.
+# core: 8.x
+package: SEO
+dependencies:
+  - schema_metatag
+
+# Information added by Drupal.org packaging script on 2018-02-03
+version: '8.x-1.0'
+core: '8.x'
+project: 'schema_metatag'
+datestamp: 1517694184

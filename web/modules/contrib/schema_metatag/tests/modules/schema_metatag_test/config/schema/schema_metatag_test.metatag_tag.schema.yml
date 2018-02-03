@@ -1,0 +1,52 @@
+# The 'type' should be "label" for short meta tags and "text" for ones which
+# could get longer, especially ones which use a textarea field instead of a
+# textfield.
+
+metatag.metatag_tag.schema_metatag_test_address:
+  type: text
+  label: 'address'
+metatag.metatag_tag.schema_metatag_test_aggregate_rating:
+  type: text
+  label: 'aggregateRating'
+metatag.metatag_tag.schema_metatag_test_date:
+  type: text
+  label: 'date'
+metatag.metatag_tag.schema_metatag_test_duration:
+  type: text
+  label: 'duration'
+metatag.metatag_tag.schema_metatag_test_geo:
+  type: text
+  label: 'geo'
+metatag.metatag_tag.schema_metatag_test_has_part:
+  type: text
+  label: 'hasPart'
+metatag.metatag_tag.schema_metatag_test_has_part_multiple:
+  type: text
+  label: 'hasPartMultiple'
+metatag.metatag_tag.schema_metatag_test_image:
+  type: text
+  label: 'image'
+metatag.metatag_tag.schema_metatag_test_is_accessible_for_free:
+  type: text
+  label: 'isAccessibleForFree'
+metatag.metatag_tag.schema_metatag_test_item_list_element:
+  type: text
+  label: 'itemListElement'
+metatag.metatag_tag.schema_metatag_test_main_entity_of_page:
+  type: text
+  label: 'mainEntityOfPage'
+metatag.metatag_tag.schema_metatag_test_name:
+  type: text
+  label: 'name'
+metatag.metatag_tag.schema_metatag_test_offer:
+  type: text
+  label: 'offer'
+metatag.metatag_tag.schema_metatag_test_organization:
+  type: text
+  label: 'organization'
+metatag.metatag_tag.schema_metatag_test_place:
+  type: text
+  label: 'place'
+metatag.metatag_tag.schema_metatag_test_type:
+  type: label
+  label: '@type'

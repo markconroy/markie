@@ -9,16 +9,10 @@ use Drupal\schema_metatag\SchemaMetatagManager;
  */
 abstract class SchemaImageBase extends SchemaNameBase {
 
-  /**
-   * Traits provide re-usable form elements.
-   */
   use SchemaImageTrait;
 
   /**
-   * Generate a form element for this meta tag.
-   *
-   * We need multiple values, so create a tree of values and
-   * stored the serialized value as a string.
+   * {@inheritdoc}
    */
   public function form(array $element = []) {
 
@@ -32,9 +26,34 @@ abstract class SchemaImageBase extends SchemaNameBase {
       'visibility_selector' => $this->visibilitySelector() . '[@type]',
     ];
 
-    $form = $this->image_form($input_values);
+    $form = $this->imageForm($input_values);
 
     return $form;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function testValue() {
+    $items = [];
+    $keys = self::imageFormKeys();
+    foreach ($keys as $key) {
+      switch ($key) {
+        case '@type':
+          $items[$key] = 'ImageObject';
+          break;
+
+        case 'representativeOfPage':
+          $items[$key] = 'True';
+          break;
+
+        default:
+          $items[$key] = parent::testDefaultValue(1, '');
+          break;
+
+      }
+    }
+    return $items;
   }
 
 }

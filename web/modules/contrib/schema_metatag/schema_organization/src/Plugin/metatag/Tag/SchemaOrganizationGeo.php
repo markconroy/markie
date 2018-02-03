@@ -2,7 +2,7 @@
 
 namespace Drupal\schema_organization\Plugin\metatag\Tag;
 
-use \Drupal\schema_metatag\Plugin\metatag\Tag\SchemaGeoBase;
+use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaGeoBase;
 
 /**
  * Provides a plugin for the 'schema_organization_geo' meta tag.

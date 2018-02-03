@@ -2,9 +2,15 @@
 
 namespace Drupal\schema_metatag\Plugin\metatag\Tag;
 
+/**
+ * Schema.org pivot trait.
+ */
 trait SchemaPivotTrait {
 
-  public function pivot_form($value) {
+  /**
+   * The form element.
+   */
+  public function pivotForm($value) {
 
     $form = [
       '#type' => 'select',
@@ -22,4 +28,5 @@ trait SchemaPivotTrait {
 
     return $form;
   }
+
 }

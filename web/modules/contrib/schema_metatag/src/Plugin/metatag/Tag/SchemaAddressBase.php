@@ -9,24 +9,18 @@ use Drupal\schema_metatag\SchemaMetatagManager;
  */
 abstract class SchemaAddressBase extends SchemaNameBase {
 
-  /**
-   * Traits provide re-usable form elements.
-   */
   use SchemaAddressTrait;
   use SchemaPivotTrait;
 
   /**
    * The top level keys on this form.
    */
-  public function form_keys() {
-    return ['pivot'] + $this->postal_address_form_keys();
+  public static function formKeys() {
+    return ['pivot'] + self::postalAddressFormKeys();
   }
 
   /**
-   * Generate a form element for this meta tag.
-   *
-   * We need multiple values, so create a tree of values and
-   * stored the serialized value as a string.
+   * {@inheritdoc}
    */
   public function form(array $element = []) {
 
@@ -39,16 +33,35 @@ abstract class SchemaAddressBase extends SchemaNameBase {
       'visibility_selector' => $this->visibilitySelector() . '[@type]',
     ];
 
-    $form = $this->postal_address_form($input_values);
+    $form = $this->postalAddressForm($input_values);
 
-    $form['pivot'] = $this->pivot_form($value);
-    $form['pivot']['#states'] = ['invisible' => [
-      ':input[name="' . $input_values['visibility_selector'] . '"]' => [
-			  'value' => '']
-      ]
-    ];
+    $form['pivot'] = $this->pivotForm($value);
+
+    $selector = ':input[name="' . $input_values['visibility_selector'] . '"]';
+    $form['pivot']['#states'] = ['invisible' => [$selector => ['value' => '']]];
 
     return $form;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function testValue() {
+    $items = [];
+    $keys = self::postalAddressFormKeys();
+    foreach ($keys as $key) {
+      switch ($key) {
+        case '@type':
+          $items[$key] = 'PostalAddress';
+          break;
+
+        default:
+          $items[$key] = parent::testDefaultValue(2, ' ');
+          break;
+
+      }
+    }
+    return $items;
   }
 
 }

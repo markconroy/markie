@@ -2,7 +2,7 @@
 
 namespace Drupal\schema_event\Plugin\metatag\Tag;
 
-use \Drupal\schema_metatag\Plugin\metatag\Tag\SchemaPlaceBase;
+use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaPlaceBase;
 
 /**
  * Provides a plugin for the 'schema_event_location' meta tag.

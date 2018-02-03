@@ -2,7 +2,7 @@
 
 namespace Drupal\schema_event\Plugin\metatag\Tag;
 
-use \Drupal\schema_metatag\Plugin\metatag\Tag\SchemaOfferBase;
+use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaOfferBase;
 
 /**
  * Provides a plugin for the 'offers' meta tag.

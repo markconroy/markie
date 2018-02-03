@@ -2,14 +2,17 @@
 
 namespace Drupal\schema_metatag\Plugin\metatag\Tag;
 
+/**
+ * Schema.org Person/Organization trait.
+ */
 trait SchemaPersonOrgTrait {
 
-  /**
-   * Traits provide re-usable form elements, like postal_address.
-   */
   use SchemaImageTrait;
 
- public function person_org_form_keys() {
+  /**
+   * Form keys.
+   */
+  public static function personOrgFormKeys() {
     return [
       '@type',
       '@id',
@@ -20,7 +23,10 @@ trait SchemaPersonOrgTrait {
     ];
   }
 
-  public function person_org_input_values() {
+  /**
+   * Input values.
+   */
+  public function personOrgInputValues() {
     return [
       'title' => '',
       'description' => '',
@@ -30,19 +36,18 @@ trait SchemaPersonOrgTrait {
     ];
   }
 
-  public function person_org_form($input_values) {
+  /**
+   * The form element.
+   */
+  public function personOrgForm($input_values) {
 
-    $input_values += $this->person_org_input_values();
+    $input_values += $this->personOrgInputValues();
     $value = $input_values['value'];
 
     // Get the id for the nested @type element.
-    $selector = $this->visibilitySelector() . '[@type]';
-    $visibility = ['invisible' => [
-      ":input[name='$selector']" => ['value' => '']]
-    ];
-    $org_visibility = ['visible' => [
-      ":input[name='$selector']" => ['value' => 'Organization']]
-    ];
+    $selector = ':input[name=' . $this->visibilitySelector() . '[@type]]';
+    $visibility = ['invisible' => [$selector => ['value' => '']]];
+    $org_visibility = ['visible' => [$selector => ['value' => 'Organization']]];
 
     $form['#type'] = 'fieldset';
     $form['#title'] = $input_values['title'];
@@ -113,9 +118,10 @@ trait SchemaPersonOrgTrait {
     ];
 
     // Display the logo only for Organization.
-    $form['logo'] = $this->image_form($input_values);
+    $form['logo'] = $this->imageForm($input_values);
     $form['logo']['#states'] = $org_visibility;
 
     return $form;
   }
+
 }

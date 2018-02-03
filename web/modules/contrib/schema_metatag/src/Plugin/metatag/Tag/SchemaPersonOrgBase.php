@@ -9,21 +9,18 @@ use Drupal\schema_metatag\SchemaMetatagManager;
  */
 abstract class SchemaPersonOrgBase extends SchemaNameBase {
 
-  /**
-   * Traits provide re-usable form elements.
-   */
   use SchemaPersonOrgTrait;
   use SchemaPivotTrait;
 
   /**
    * The top level keys on this form.
    */
-  function form_keys() {
-    return ['pivot'] + $this->person_org_form_keys();
+  public function formKeys() {
+    return ['pivot'] + self::personOrgFormKeys();
   }
 
   /**
-   * Generate a form element for this meta tag.
+   * {@inheritdoc}
    */
   public function form(array $element = []) {
 
@@ -37,16 +34,41 @@ abstract class SchemaPersonOrgBase extends SchemaNameBase {
       'visibility_selector' => $this->visibilitySelector() . '[@type]',
     ];
 
-    $form = $this->person_org_form($input_values);
-    $form['pivot'] = $this->pivot_form($value);
-    $form['pivot'] = $this->pivot_form($value);
-    $form['pivot']['#states'] = ['invisible' => [
-      ':input[name="' . $input_values['visibility_selector'] . '"]' => [
-			  'value' => '']
-      ]
-    ];
+    $form = $this->personOrgForm($input_values);
+    $form['pivot'] = $this->pivotForm($value);
+    $form['pivot'] = $this->pivotForm($value);
+    $selector = ':input[name="' . $input_values['visibility_selector'] . '"]';
+    $form['pivot']['#states'] = ['invisible' => [$selector => ['value' => '']]];
 
     return $form;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function testValue() {
+    $items = [];
+    $keys = self::personOrgFormKeys();
+    foreach ($keys as $key) {
+      switch ($key) {
+        case 'pivot':
+          break;
+
+        case 'logo':
+          $items[$key] = SchemaImageBase::testValue();
+          break;
+
+        case '@type':
+          $items[$key] = 'Organization';
+          break;
+
+        default:
+          $items[$key] = parent::testDefaultValue(2, ' ');
+          break;
+
+      }
+    }
+    return $items;
   }
 
 }

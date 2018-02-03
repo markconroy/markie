@@ -1,0 +1,37 @@
+<?php
+
+namespace Drupal\schema_recipe\Plugin\metatag\Tag;
+
+use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
+
+/**
+ * Provides a plugin for the 'schema_recipe_recipe_yield' meta tag.
+ *
+ * - 'id' should be a globally unique id.
+ * - 'name' should match the Schema.org element name.
+ * - 'group' should match the id of the group that defines the Schema.org type.
+ *
+ * @MetatagTag(
+ *   id = "schema_recipe_recipe_yield",
+ *   label = @Translation("recipeYield"),
+ *   description = @Translation("The quantity produced by the recipe (for example, number of people served, number of servings, etc)."),
+ *   name = "recipeYield",
+ *   group = "schema_recipe",
+ *   weight = 2,
+ *   type = "string",
+ *   secure = FALSE,
+ *   multiple = FALSE
+ * )
+ */
+class SchemaRecipeRecipeYield extends SchemaNameBase {
+
+  /**
+   * Generate a form element for this meta tag.
+   */
+  public function form(array $element = []) {
+    $form = parent::form($element);
+    $form['#attributes']['placeholder'] = '[node:field_yield]';
+    return $form;
+  }
+
+}

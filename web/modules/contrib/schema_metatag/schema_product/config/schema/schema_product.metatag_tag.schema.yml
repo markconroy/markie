@@ -1,0 +1,21 @@
+# The 'type' should be "label" for short meta tags and "text" for ones which
+# could get longer, especially ones which use a textarea field instead of a
+# textfield.
+metatag.metatag_tag.schema_product_aggregate_rating:
+  type: text
+  label: 'aggregateRating'
+metatag.metatag_tag.schema_product_description:
+  type: text
+  label: 'description'
+metatag.metatag_tag.schema_product_image:
+  type: text
+  label: 'image'
+metatag.metatag_tag.schema_product_name:
+  type: text
+  label: 'name'
+metatag.metatag_tag.schema_product_offers:
+  type: text
+  label: 'offers'
+metatag.metatag_tag.schema_product_type:
+  type: text
+  label: '@type'

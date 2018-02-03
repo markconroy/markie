@@ -2,7 +2,7 @@
 
 namespace Drupal\schema_organization\Plugin\metatag\Group;
 
-use \Drupal\schema_metatag\Plugin\metatag\Group\SchemaGroupBase;
+use Drupal\schema_metatag\Plugin\metatag\Group\SchemaGroupBase;
 
 /**
  * Provides a plugin for the 'Organization' meta tag group.

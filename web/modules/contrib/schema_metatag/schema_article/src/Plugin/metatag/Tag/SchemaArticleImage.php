@@ -2,7 +2,7 @@
 
 namespace Drupal\schema_article\Plugin\metatag\Tag;
 
-use \Drupal\schema_metatag\Plugin\metatag\Tag\SchemaImageBase;
+use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaImageBase;
 
 /**
  * Provides a plugin for the 'image' meta tag.

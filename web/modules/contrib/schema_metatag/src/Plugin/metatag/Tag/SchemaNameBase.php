@@ -2,14 +2,13 @@
 
 namespace Drupal\schema_metatag\Plugin\metatag\Tag;
 
-use \Drupal\metatag\Plugin\metatag\Tag\MetaNameBase;
+use Drupal\metatag\Plugin\metatag\Tag\MetaNameBase;
 use Drupal\schema_metatag\SchemaMetatagManager;
 
 /**
  * All Schema.org tags should extend this class.
  */
 abstract class SchemaNameBase extends MetaNameBase {
-
 
   /**
    * The #states base visibility selector for this element.
@@ -19,7 +18,7 @@ abstract class SchemaNameBase extends MetaNameBase {
   }
 
   /**
-   * Add group info and identify tags that use the schema.org definitions.
+   * {@inheritdoc}
    */
   public function output() {
     $value = SchemaMetatagManager::unserialize($this->value());
@@ -34,7 +33,7 @@ abstract class SchemaNameBase extends MetaNameBase {
 
       // If the item is an array of values,
       // walk the array and process the values.
-      array_walk_recursive($value, 'self::process_item');
+      array_walk_recursive($value, 'static::processItem');
 
       // See if any nested items need to be pivoted.
       // If pivot is set to 0, it would have been removed as an empty value.
@@ -46,16 +45,16 @@ abstract class SchemaNameBase extends MetaNameBase {
     }
     // Process a simple string.
     else {
-     $this->process_item($value);
+      $this->processItem($value);
     }
     $output = [
       '#tag' => 'meta',
       '#attributes' => [
         'name' => $this->name,
-        'content' => $value,
+        'content' => static::outputValue($value),
         'group' => $this->group,
         'schema_metatag' => TRUE,
-      ]
+      ],
     ];
 
     return $output;
@@ -79,12 +78,11 @@ abstract class SchemaNameBase extends MetaNameBase {
   }
 
   /**
-   * @inherit
+   * {@inheritdoc}
    */
-  protected function process_item(&$value, $key = 0) {
-
+  protected function processItem(&$value, $key = 0) {
     // Parse out the image URL, if needed.
-    $value = $this->parseImageURLValue($value);
+    $value = $this->parseImageUrlValue($value);
 
     $value = trim($value);
 
@@ -97,10 +95,12 @@ abstract class SchemaNameBase extends MetaNameBase {
   }
 
   /**
+   * Parse the image url out of image markup.
+   *
    * A copy of the base method of the same name, but where $value is passed
    * in instead of assumed to be $this->value().
    */
-  protected function parseImageURLValue($value) {
+  protected function parseImageUrlValue($value) {
 
     // If this contains embedded image tags, extract the image URLs.
     if ($this->type() === 'image') {
@@ -136,4 +136,64 @@ abstract class SchemaNameBase extends MetaNameBase {
 
     return $value;
   }
+
+  /**
+   * Transform input value to its display output.
+   *
+   * Tags that need to transform the output to something different than the
+   * stored value should extend this method and do the transformation here.
+   *
+   * @param mixed $input_value
+   *   Input value, could be either a string or array. This will be the
+   *   unserialized value stored in the tag configuration, after token
+   *   replacement.
+   *
+   * @return mixed
+   *   Return the (possibly expanded) value which will be rendered in JSON-LD.
+   */
+  public static function outputValue($input_value) {
+    return $input_value;
+  }
+
+  /**
+   * Provide a test value for the property that will validate.
+   *
+   * Tags like @type that contain values other than simple strings, for
+   * instance a list of allowed options, should extend this method and return
+   * a valid value.
+   *
+   * @return mixed
+   *   Return the test value, either a string or array, depending on the
+   *   property.
+   */
+  public static function testValue() {
+    return static::testDefaultValue(2, ' ');
+  }
+
+  /**
+   * Provide a random test value.
+   *
+   * A helper function to create a random test value. Use the delimiter to
+   * create comma-separated values, or a few "words" separated by spaces.
+   *
+   * @param int $count
+   *   Number of "words".
+   * @param int $delimiter
+   *   Delimiter used to connect "words".
+   *
+   * @return mixed
+   *   Return the test value, either a string or array, depending on the
+   *   property.
+   */
+  public static function testDefaultValue($count = NULL, $delimiter = NULL) {
+    $items = [];
+    $min = 1;
+    $max = isset($count) ? $count : 2;
+    $delimiter = isset($delimiter) ? $delimiter : ' ';
+    for ($i = $min; $i <= $max; $i++) {
+      $items[] = SchemaMetatagManager::randomMachineName();
+    }
+    return implode($delimiter, $items);
+  }
+
 }

@@ -2,7 +2,7 @@
 
 namespace Drupal\schema_item_list\Plugin\metatag\Tag;
 
-use \Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
+use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaTypeBase;
 
 /**
  * Provides a plugin for the 'schema_item_list_type' meta tag.
@@ -23,24 +23,13 @@ use \Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
  *   multiple = FALSE
  * )
  */
-class SchemaItemListType extends SchemaNameBase {
+class SchemaItemListType extends SchemaTypeBase {
 
   /**
-   * Generate a form element for this meta tag.
+   * {@inheritdoc}
    */
-  public function form(array $element = []) {
-    $form = [
-      '#type' => 'select',
-      '#title' => $this->label(),
-      '#description' => $this->description(),
-      '#empty_option' => t('- None -'),
-      '#empty_value' => '',
-      '#options' => [
-        'ItemList' => $this->t('ItemList'),
-      ],
-      '#default_value' => $this->value(),
-    ];
-    return $form;
+  public static function labels() {
+    return ['ItemList'];
   }
 
 }

@@ -2,7 +2,7 @@
 
 namespace Drupal\schema_article\Plugin\metatag\Tag;
 
-use \Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
+use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
 
 /**
  * Provides a plugin for the 'schema_article_about' meta tag.
@@ -26,7 +26,7 @@ use \Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
 class SchemaArticleAbout extends SchemaNameBase {
 
   /**
-   * Generate a form element for this meta tag.
+   * {@inheritdoc}
    */
   public function form(array $element = []) {
     $form = parent::form($element);

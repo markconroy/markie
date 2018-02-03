@@ -2,7 +2,7 @@
 
 namespace Drupal\schema_article\Plugin\metatag\Tag;
 
-use \Drupal\schema_metatag\Plugin\metatag\Tag\SchemaMainEntityOfPageBase;
+use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaMainEntityOfPageBase;
 
 /**
  * Provides a plugin for the 'schema_article_main_entity_of_page' meta tag.
