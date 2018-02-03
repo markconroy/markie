@@ -1,11 +1,9 @@
-name: Crop API
-description: 'Provides storage and API for image crops.'
+name: Media entity crop
+description: 'Deprecated.'
 # core: 8.x
 package: Media
 type: module
-dependencies:
-  - image
-  - user
+hidden: true
 
 # Information added by Drupal.org packaging script on 2018-01-19
 version: '8.x-1.5'

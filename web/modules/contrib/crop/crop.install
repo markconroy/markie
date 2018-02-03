@@ -59,3 +59,12 @@ function crop_update_8002() {
   \Drupal::service('config.installer')
     ->installDefaultConfig('module', 'crop');
 }
+
+/**
+ * Uninstall deprecated sub-module from active instance.
+ */
+function crop_update_8003() {
+  if (\Drupal::moduleHandler()->moduleExists('crop_media_entity')) {
+    \Drupal::service('module_installer')->uninstall(['crop_media_entity']);
+  }
+}
