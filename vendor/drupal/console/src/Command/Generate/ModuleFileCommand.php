@@ -15,7 +15,6 @@ use Drupal\Console\Generator\ModuleFileGenerator;
 use Drupal\Console\Command\Shared\ConfirmationTrait;
 use Drupal\Console\Command\Shared\ModuleTrait;
 use Drupal\Console\Extension\Manager;
-use Drupal\Console\Core\Style\DrupalStyle;
 use Drupal\Console\Utils\Validator;
 
 /**
@@ -83,21 +82,18 @@ class ModuleFileCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $io = new DrupalStyle($input, $output);
-
-        // @see use Drupal\Console\Command\Shared\ConfirmationTrait::confirmGeneration
-        if (!$this->confirmGeneration($io, $input)) {
+        // @see use Drupal\Console\Command\Shared\ConfirmationTrait::confirmOperation
+        if (!$this->confirmOperation()) {
             return 1;
         }
 
         $machine_name =  $input->getOption('module');
         $file_path =  $this->extensionManager->getModule($machine_name)->getPath();
-        $generator = $this->generator;
 
-        $generator->generate(
-            $machine_name,
-            $file_path
-        );
+        $this->generator->generate([
+            'machine_name' => $machine_name,
+            'file_path' => $file_path,
+        ]);
     }
 
 
@@ -106,8 +102,6 @@ class ModuleFileCommand extends Command
      */
     protected function interact(InputInterface $input, OutputInterface $output)
     {
-        $io = new DrupalStyle($input, $output);
-
         // --module option
         $this->getModuleOption();
     }

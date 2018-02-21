@@ -10,6 +10,11 @@ namespace Drupal\Console\Generator;
 use Drupal\Console\Core\Generator\Generator;
 use Drupal\Console\Extension\Manager;
 
+/**
+ * Class AjaxCommandGenerator
+ *
+ * @package Drupal\Console\Generator
+ */
 class AjaxCommandGenerator extends Generator
 {
     /**
@@ -18,7 +23,7 @@ class AjaxCommandGenerator extends Generator
     protected $extensionManager;
 
     /**
-     * AuthenticationProviderGenerator constructor.
+     * AjaxCommandGenerator constructor.
      *
      * @param Manager $extensionManager
      */
@@ -28,29 +33,32 @@ class AjaxCommandGenerator extends Generator
         $this->extensionManager = $extensionManager;
     }
 
-    public function generate($module, $class, $method)
+    /**
+     * {@inheritdoc}
+     */
+    public function generate(array $parameters)
     {
-        $parameters = [
-                'class_name' => $class,
-                'module' => $module,
-              'method' => $method
-        ];
+        $class = $parameters['class_name'];
+        $module = $parameters['module'];
+        $js_name = $parameters['js_name'];
 
+        $moduleInstance = $this->extensionManager->getModule($module);
+        $moduleDir = $moduleInstance->getPath();
         $this->renderFile(
             'module/src/Ajax/ajax-command.php.twig',
-            $this->extensionManager->getModule($module)->getAjaxPath().'/'.$class.'.php',
+            $moduleInstance->getAjaxPath() . '/' . $class . '.php',
             $parameters
         );
 
         $this->renderFile(
             'module/js/commands.php.twig',
-            $this->extensionManager->getModule($module)->getPath().'/js'.'/'.'custom.js',
+            $moduleDir . '/js/' .$js_name. '.js',
             $parameters
         );
 
         $this->renderFile(
             'module/module-libraries.yml.twig',
-            $this->extensionManager->getModule($module)->getPath().'/'.$module.'.libraries.yml',
+            $moduleDir . '/' . $module . '.libraries.yml',
             $parameters
         );
     }

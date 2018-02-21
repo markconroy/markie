@@ -14,8 +14,8 @@ use Drupal\Core\Database\Connection;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Datetime\DateFormatterInterface;
 use Drupal\Console\Utils\DrupalApi;
+use Drupal\Console\Utils\Validator;
 use Drupal\Console\Command\Shared\ConfirmationTrait;
-use Drupal\Console\Core\Style\DrupalStyle;
 
 class DeleteCommand extends Command
 {
@@ -41,6 +41,10 @@ class DeleteCommand extends Command
      */
     protected $drupalApi;
 
+    /**
+     * @var Validator
+     */
+    protected $validator;
 
     /**
      * DeleteCommand constructor.
@@ -49,17 +53,20 @@ class DeleteCommand extends Command
      * @param EntityTypeManagerInterface $entityTypeManager
      * @param DateFormatterInterface     $dateFormatter
      * @param DrupalApi                  $drupalApi
+     * @param Validator                  $validator
      */
     public function __construct(
         Connection $database,
         EntityTypeManagerInterface $entityTypeManager,
         DateFormatterInterface $dateFormatter,
-        DrupalApi $drupalApi
+        DrupalApi $drupalApi,
+        Validator $validator
     ) {
         $this->database = $database;
         $this->entityTypeManager = $entityTypeManager;
         $this->dateFormatter = $dateFormatter;
         $this->drupalApi = $drupalApi;
+        $this->validator = $validator;
         parent::__construct();
     }
 
@@ -84,13 +91,17 @@ class DeleteCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $io = new DrupalStyle($input, $output);
+        // @see use Drupal\Console\Command\Shared\ConfirmationTrait::confirmOperation
+        if (!$this->confirmOperation()) {
+            return 1;
+        }
 
         $roles = $input->getArgument('roles');
+        foreach ($roles as $roleItem) {
+            $this->validator->validateRoleExistence($roleItem, $this->drupalApi->getRoles());
+        }
 
-        $role = $this->deleteRole(
-            $roles
-        );
+        $role = $this->deleteRole($roles);
 
         $tableHeader = [
             $this->trans('commands.role.delete.messages.role-id'),
@@ -98,19 +109,19 @@ class DeleteCommand extends Command
         ];
 
         if ($role['success']) {
-            $io->success(
+            $this->getIo()->success(
                 sprintf(
                     $this->trans('commands.role.delete.messages.role-created')
                 )
             );
 
-            $io->table($tableHeader, $role['success']);
+            $this->getIo()->table($tableHeader, $role['success']);
 
             return 0;
         }
 
         if ($role['error']) {
-            $io->error($role['error']['error']);
+            $this->getIo()->error($role['error']['error']);
 
             return 1;
         }
@@ -121,23 +132,30 @@ class DeleteCommand extends Command
      */
     protected function interact(InputInterface $input, OutputInterface $output)
     {
-        $io = new DrupalStyle($input, $output);
-
         $rolename = $input->getArgument('roles');
         if (!$rolename) {
             $roles_collection = [];
-            $roles = array_keys($this->drupalApi->getRoles());
-            $io->writeln($this->trans('commands.common.questions.roles.message'));
+            $siteRoles = $this->drupalApi->getRoles();
+            $roles = array_keys($siteRoles);
+            $this->getIo()->writeln($this->trans('commands.common.questions.roles.message'));
             while (true) {
-                $role = $io->choiceNoList(
+                $role = $this->getIo()->choiceNoList(
                     $this->trans('commands.common.questions.roles.name'),
                     $roles,
-                    null,
+                    '',
                     true
                 );
                 $role = trim($role);
-                if (empty($role)) {
+                if (empty($role) || is_numeric($role)) {
                     break;
+                }
+
+                if (!array_key_exists($role, $siteRoles)) {
+                    $this->getIo()->error(sprintf(
+                        $this->trans('commands.role.delete.messages.invalid-machine-name'),
+                        $role
+                    ));
+                    continue;
                 }
 
                 array_push($roles_collection, $role);

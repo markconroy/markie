@@ -11,6 +11,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Application as BaseApplication;
+use Symfony\Component\Console\Input\ArrayInput;
 use Drupal\Console\Core\EventSubscriber\DefaultValueEventListener;
 use Drupal\Console\Core\EventSubscriber\ShowGenerateChainListener;
 use Drupal\Console\Core\EventSubscriber\ShowTipsListener;
@@ -60,7 +61,7 @@ class Application extends BaseApplication
      * @param string             $version
      */
     public function __construct(
-        ContainerInterface$container,
+        ContainerInterface $container,
         $name,
         $version
     ) {
@@ -112,28 +113,13 @@ class Application extends BaseApplication
             $output->write(sprintf("\033\143"));
         }
 
-        $this->registerGenerators();
-        $this->registerCommands();
-        $this->registerEvents();
-        $this->registerExtendCommands();
+        $this->loadCommands();
 
         /**
          * @var ConfigurationManager $configurationManager
          */
         $configurationManager = $this->container
             ->get('console.configuration_manager');
-
-        $config = $configurationManager->getConfiguration()
-            ->get('application.extras.config')?:'true';
-        if ($config === 'true') {
-            $this->registerCommandsFromAutoWireConfiguration();
-        }
-
-        $chains = $configurationManager->getConfiguration()
-            ->get('application.extras.chains')?:'true';
-        if ($chains === 'true') {
-            $this->registerChainCommands();
-        }
 
         if (!$this->has($this->commandName)) {
             $isValidCommand = false;
@@ -170,6 +156,18 @@ class Application extends BaseApplication
                 );
             }
 
+            $namespaces = $this->getNamespaces();
+            if (in_array($this->commandName, $namespaces)) {
+                $input = new ArrayInput(
+                    [
+                        'command' => 'list',
+                        'namespace' => $this->commandName
+                    ]
+                );
+                $this->commandName = 'list';
+                $isValidCommand = true;
+            }
+
             if (!$isValidCommand) {
                 $io->error(
                     sprintf(
@@ -187,14 +185,66 @@ class Application extends BaseApplication
             $output
         );
 
-        $messages = $messageManager->getMessages();
+        // Propagate Drupal messages.
+        $this->addDrupalMessages($messageManager);
 
-        foreach ($messages as $message) {
-            $type = $message['type'];
-            $io->$type($message['message']);
+        if ($this->showMessages($input)) {
+            $messages = $messageManager->getMessages();
+
+            foreach ($messages as $message) {
+                $showBy = $message['showBy'];
+                if ($showBy!=='all' && $showBy!==$this->commandName) {
+                    continue;
+                }
+                $type = $message['type'];
+                $io->$type($message['message']);
+            }
         }
 
+
         return $code;
+    }
+
+    public function loadCommands()
+    {
+        $this->registerGenerators();
+        $this->registerCommands();
+        $this->registerEvents();
+        $this->registerExtendCommands();
+
+        /**
+         * @var ConfigurationManager $configurationManager
+         */
+        $configurationManager = $this->container
+            ->get('console.configuration_manager');
+
+        $config = $configurationManager->getConfiguration()
+            ->get('application.extras.config')?:'true';
+        if ($config === 'true') {
+            $this->registerCommandsFromAutoWireConfiguration();
+        }
+
+        $chains = $configurationManager->getConfiguration()
+            ->get('application.extras.chains')?:'true';
+        if ($chains === 'true') {
+            $this->registerChainCommands();
+        }
+    }
+
+    /**
+     * @param InputInterface $input
+     *
+     * @return bool
+     */
+    private function showMessages(InputInterface $input)
+    {
+        $format = $input->hasOption('format')?$input->getOption('format'):'txt';
+
+        if ($format !== 'txt') {
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -372,9 +422,10 @@ class Application extends BaseApplication
             ->get('application.commands.aliases')?:[];
 
         $invalidCommands = [];
-        if ($this->container->has('console.invalid_commands')) {
-            $invalidCommands = (array)$this->container
-                ->get('console.invalid_commands');
+        if ($this->container->has('console.key_value_storage')) {
+            $invalidCommands = $this->container
+                ->get('console.key_value_storage')
+                ->get('invalid_commands', []);
         }
 
         foreach ($consoleCommands as $name => $tags) {
@@ -465,6 +516,12 @@ class Application extends BaseApplication
             if (method_exists($generator, 'setCountCodeLines')) {
                 $generator->setCountCodeLines(
                     $this->container->get('console.count_code_lines')
+                );
+            }
+
+            if (method_exists($generator, 'setDrupalFinder')) {
+                $generator->setDrupalFinder(
+                    $this->container->get('console.drupal_finder')
                 );
             }
         }
@@ -578,12 +635,11 @@ class Application extends BaseApplication
             try {
                 $file = $chainCommand['file'];
                 $description = $chainCommand['description'];
-                $placeHolders = $chainCommand['placeholders'];
                 $command = new ChainCustomCommand(
                     $name,
                     $description,
-                    $placeHolders,
-                    $file
+                    $file,
+                    $chainDiscovery
                 );
                 $this->add($command);
             } catch (\Exception $e) {
@@ -600,7 +656,6 @@ class Application extends BaseApplication
         $this->container->get('console.configuration_manager')
             ->loadExtendConfiguration();
     }
-
 
     public function getData()
     {
@@ -793,6 +848,42 @@ class Application extends BaseApplication
     public function getContainer()
     {
         return $this->container;
+    }
+
+    /**
+     * Add Drupal system messages.
+     */
+    protected function addDrupalMessages($messageManager) {
+        if (function_exists('drupal_get_messages')) {
+            $drupalMessages = drupal_get_messages();
+            foreach ($drupalMessages as $type => $messages) {
+                foreach ($messages as $message) {
+                    $method = $this->getMessageMethod($type);
+                    $messageManager->{$method}((string)$message);
+                }
+            }
+        }
+    }
+
+    /**
+     * Gets method name for MessageManager.
+     *
+     * @param string $type
+     *   Type of the message.
+     *
+     * @return string
+     *   Name of the method
+     */
+    protected function getMessageMethod($type) {
+        $methodName = 'info';
+        switch ($type) {
+            case 'error':
+            case 'warning':
+                $methodName = $type;
+                break;
+        }
+
+        return $methodName;
     }
 
     /**

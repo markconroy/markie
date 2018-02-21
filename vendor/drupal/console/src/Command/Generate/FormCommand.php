@@ -7,6 +7,8 @@
 
 namespace Drupal\Console\Command\Generate;
 
+use Drupal\Console\Command\Shared\ArrayInputTrait;
+use Drupal\Console\Utils\TranslatorManager;
 use Drupal\Console\Utils\Validator;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -16,7 +18,6 @@ use Drupal\Console\Command\Shared\ModuleTrait;
 use Drupal\Console\Command\Shared\MenuTrait;
 use Drupal\Console\Command\Shared\FormTrait;
 use Drupal\Console\Core\Command\ContainerAwareCommand;
-use Drupal\Console\Core\Style\DrupalStyle;
 use Drupal\Console\Generator\FormGenerator;
 use Drupal\Console\Extension\Manager;
 use Drupal\Console\Core\Utils\ChainQueue;
@@ -26,27 +27,28 @@ use Drupal\Core\Routing\RouteProviderInterface;
 
 abstract class FormCommand extends ContainerAwareCommand
 {
-    use ModuleTrait;
-    use ServicesTrait;
+    use ArrayInputTrait;
     use FormTrait;
     use MenuTrait;
+    use ModuleTrait;
+    use ServicesTrait;
 
     private $formType;
     private $commandName;
 
     /**
- * @var Manager
-*/
+     * @var Manager
+     */
     protected $extensionManager;
 
     /**
- * @var FormGenerator
-*/
+     * @var FormGenerator
+     */
     protected $generator;
 
     /**
- * @var ChainQueue
-*/
+     * @var ChainQueue
+     */
     protected $chainQueue;
 
     /**
@@ -73,6 +75,7 @@ abstract class FormCommand extends ContainerAwareCommand
     /**
      * FormCommand constructor.
      *
+     * @param TranslatorManager      $translator
      * @param Manager                $extensionManager
      * @param FormGenerator          $generator
      * @param ChainQueue             $chainQueue
@@ -82,6 +85,7 @@ abstract class FormCommand extends ContainerAwareCommand
      * @param RouteProviderInterface $routeProvider
      */
     public function __construct(
+        TranslatorManager $translator,
         Manager $extensionManager,
         FormGenerator $generator,
         ChainQueue $chainQueue,
@@ -90,6 +94,7 @@ abstract class FormCommand extends ContainerAwareCommand
         ElementInfoManager $elementInfoManager,
         RouteProviderInterface $routeProvider
     ) {
+        $this->setTranslator($translator);
         $this->extensionManager = $extensionManager;
         $this->generator = $generator;
         $this->chainQueue = $chainQueue;
@@ -160,7 +165,7 @@ abstract class FormCommand extends ContainerAwareCommand
             ->addOption(
                 'inputs',
                 null,
-                InputOption::VALUE_OPTIONAL,
+                InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY,
                 $this->trans('commands.common.options.inputs')
             )
             ->addOption(
@@ -211,14 +216,31 @@ abstract class FormCommand extends ContainerAwareCommand
         $menu_parent = $input->getOption('menu-parent');
         $menu_link_title = $input->getOption('menu-link-title');
         $menu_link_desc = $input->getOption('menu-link-desc');
+        $inputs = $input->getOption('inputs');
+        $noInteraction = $input->getOption('no-interaction');
+        // Parse nested data.
+        if ($noInteraction) {
+            $inputs = $this->explodeInlineArray($inputs);
+        }
 
         // if exist form generate config file
-        $inputs = $input->getOption('inputs');
         $build_services = $this->buildServices($services);
 
-        $this
-            ->generator
-            ->generate($module, $class_name, $form_id, $form_type, $build_services, $config_file, $inputs, $path, $menu_link_gen, $menu_link_title, $menu_parent, $menu_link_desc);
+        $this->generator->generate([
+          'class_name' => $class_name,
+          'services' => $build_services,
+          'config_file' => $config_file,
+          'inputs' => $inputs,
+          'module_name' => $module,
+          'form_id' => $form_id,
+          'form_type' => $form_type,
+          'path' => $path,
+          'route_name' => $class_name,
+          'menu_link_title' => $menu_link_title,
+          'menu_parent' => $menu_parent,
+          'menu_link_desc' => $menu_link_desc,
+          'menu_link_gen' => $menu_link_gen,
+        ]);
 
         $this->chainQueue->addCommand('router:rebuild', []);
     }
@@ -228,15 +250,13 @@ abstract class FormCommand extends ContainerAwareCommand
      */
     protected function interact(InputInterface $input, OutputInterface $output)
     {
-        $io = new DrupalStyle($input, $output);
-
         // --module option
         $module = $this->getModuleOption();
 
         // --class option
         $className = $input->getOption('class');
         if (!$className) {
-            $className = $io->ask(
+            $className = $this->getIo()->ask(
                 $this->trans('commands.generate.form.questions.class'),
                 'DefaultForm',
                 function ($className) {
@@ -249,7 +269,7 @@ abstract class FormCommand extends ContainerAwareCommand
         // --form-id option
         $formId = $input->getOption('form-id');
         if (!$formId) {
-            $formId = $io->ask(
+            $formId = $this->getIo()->ask(
                 $this->trans('commands.generate.form.questions.form-id'),
                 $this->stringConverter->camelCaseToMachineName($className)
             );
@@ -258,14 +278,14 @@ abstract class FormCommand extends ContainerAwareCommand
 
         // --services option
         // @see use Drupal\Console\Command\Shared\ServicesTrait::servicesQuestion
-        $services = $this->servicesQuestion($io);
+        $services = $this->servicesQuestion();
         $input->setOption('services', $services);
         
         // --config_file option
         $config_file = $input->getOption('config-file');
 
         if (!$config_file) {
-            $config_file = $io->confirm(
+            $config_file = $this->getIo()->confirm(
                 $this->trans('commands.generate.form.questions.config-file'),
                 true
             );
@@ -276,9 +296,12 @@ abstract class FormCommand extends ContainerAwareCommand
         $inputs = $input->getOption('inputs');
         if (!$inputs) {
             // @see \Drupal\Console\Command\Shared\FormTrait::formQuestion
-            $inputs = $this->formQuestion($io);
+            $inputs = $this->formQuestion();
             $input->setOption('inputs', $inputs);
+        } else {
+            $inputs= $this->explodeInlineArray($inputs);
         }
+        $input->setOption('inputs', $inputs);
 
         $path = $input->getOption('path');
         if (!$path) {
@@ -296,7 +319,7 @@ abstract class FormCommand extends ContainerAwareCommand
                     $this->stringConverter->camelCaseToMachineName($this->stringConverter->removeSuffix($className))
                 );
             }
-            $path = $io->ask(
+            $path = $this->getIo()->ask(
                 $this->trans('commands.generate.form.questions.path'),
                 $form_path,
                 function ($path) {
@@ -319,7 +342,7 @@ abstract class FormCommand extends ContainerAwareCommand
 
         // --link option for links.menu
         if ($this->formType == 'ConfigFormBase') {
-            $menu_options = $this->menuQuestion($io, $className);
+            $menu_options = $this->menuQuestion($className);
             $menu_link_gen = $input->getOption('menu-link-gen');
             $menu_link_title = $input->getOption('menu-link-title');
             $menu_parent = $input->getOption('menu-parent');

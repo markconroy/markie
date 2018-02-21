@@ -15,7 +15,6 @@ use Drupal\Console\Generator\PluginFieldFormatterGenerator;
 use Drupal\Console\Command\Shared\ModuleTrait;
 use Drupal\Console\Command\Shared\ConfirmationTrait;
 use Drupal\Console\Core\Command\Command;
-use Drupal\Console\Core\Style\DrupalStyle;
 use Drupal\Core\Field\FieldTypePluginManager;
 use Drupal\Console\Extension\Manager;
 use Drupal\Console\Core\Utils\StringConverter;
@@ -133,10 +132,8 @@ class PluginFieldFormatterCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $io = new DrupalStyle($input, $output);
-
-        // @see use Drupal\Console\Command\Shared\ConfirmationTrait::confirmGeneration
-        if (!$this->confirmGeneration($io, $input)) {
+        // @see use Drupal\Console\Command\Shared\ConfirmationTrait::confirmOperation
+        if (!$this->confirmOperation()) {
             return 1;
         }
 
@@ -146,7 +143,13 @@ class PluginFieldFormatterCommand extends Command
         $plugin_id = $input->getOption('plugin-id');
         $field_type = $input->getOption('field-type');
 
-        $this->generator->generate($module, $class_name, $label, $plugin_id, $field_type);
+        $this->generator->generate([
+            'module' => $module,
+            'class_name' => $class_name,
+            'label' => $label,
+            'plugin_id' => $plugin_id,
+            'field_type' => $field_type,
+        ]);
 
         $this->chainQueue->addCommand('cache:rebuild', ['cache' => 'discovery']);
 
@@ -155,15 +158,13 @@ class PluginFieldFormatterCommand extends Command
 
     protected function interact(InputInterface $input, OutputInterface $output)
     {
-        $io = new DrupalStyle($input, $output);
-
         // --module option
         $this->getModuleOption();
 
         // --class option
         $class = $input->getOption('class');
         if (!$class) {
-            $class = $io->ask(
+            $class = $this->getIo()->ask(
                 $this->trans('commands.generate.plugin.fieldformatter.questions.class'),
                 'ExampleFieldFormatter',
                 function ($class) {
@@ -176,7 +177,7 @@ class PluginFieldFormatterCommand extends Command
         // --plugin label option
         $label = $input->getOption('label');
         if (!$label) {
-            $label = $io->ask(
+            $label = $this->getIo()->ask(
                 $this->trans('commands.generate.plugin.fieldformatter.questions.label'),
                 $this->stringConverter->camelCaseToHuman($class)
             );
@@ -186,7 +187,7 @@ class PluginFieldFormatterCommand extends Command
         // --name option
         $plugin_id = $input->getOption('plugin-id');
         if (!$plugin_id) {
-            $plugin_id = $io->ask(
+            $plugin_id = $this->getIo()->ask(
                 $this->trans('commands.generate.plugin.fieldformatter.questions.plugin-id'),
                 $this->stringConverter->camelCaseToUnderscore($class)
             );
@@ -204,7 +205,7 @@ class PluginFieldFormatterCommand extends Command
                 }
             }
 
-            $field_type = $io->choice(
+            $field_type = $this->getIo()->choice(
                 $this->trans('commands.generate.plugin.fieldwidget.questions.field-type'),
                 $field_type_options
             );

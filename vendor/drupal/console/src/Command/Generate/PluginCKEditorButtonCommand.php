@@ -15,7 +15,6 @@ use Drupal\Console\Core\Command\Command;
 use Drupal\Console\Generator\PluginCKEditorButtonGenerator;
 use Drupal\Console\Command\Shared\ModuleTrait;
 use Drupal\Console\Command\Shared\ConfirmationTrait;
-use Drupal\Console\Core\Style\DrupalStyle;
 use Drupal\Console\Core\Utils\ChainQueue;
 use Drupal\Console\Extension\Manager;
 use Drupal\Console\Core\Utils\StringConverter;
@@ -24,7 +23,6 @@ class PluginCKEditorButtonCommand extends Command
 {
     use ModuleTrait;
     use ConfirmationTrait;
-
 
     /**
      * @var ChainQueue
@@ -126,10 +124,8 @@ class PluginCKEditorButtonCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $io = new DrupalStyle($input, $output);
-
-        // @see use Drupal\Console\Command\Shared\ConfirmationTrait::confirmGeneration
-        if (!$this->confirmGeneration($io, $input)) {
+        // @see use Drupal\Console\Command\Shared\ConfirmationTrait::confirmOperation
+        if (!$this->confirmOperation()) {
             return 1;
         }
 
@@ -140,9 +136,14 @@ class PluginCKEditorButtonCommand extends Command
         $button_name = $input->getOption('button-name');
         $button_icon_path = $input->getOption('button-icon-path');
 
-        $this
-            ->generator
-            ->generate($module, $class_name, $label, $plugin_id, $button_name, $button_icon_path);
+        $this->generator->generate([
+          'module' => $module,
+          'class_name' => $class_name,
+          'label' => $label,
+          'plugin_id' => $plugin_id,
+          'button_name' => $button_name,
+          'button_icon_path' => $button_icon_path,
+        ]);
 
         $this->chainQueue->addCommand('cache:rebuild', ['cache' => 'discovery'], false);
 
@@ -151,15 +152,13 @@ class PluginCKEditorButtonCommand extends Command
 
     protected function interact(InputInterface $input, OutputInterface $output)
     {
-        $io = new DrupalStyle($input, $output);
-
         // --module option
         $module = $this->getModuleOption();
 
         // --class option
         $class_name = $input->getOption('class');
         if (!$class_name) {
-            $class_name = $io->ask(
+            $class_name = $this->getIo()->ask(
                 $this->trans('commands.generate.plugin.ckeditorbutton.questions.class'),
                 'DefaultCKEditorButton',
                 function ($class_name) {
@@ -172,7 +171,7 @@ class PluginCKEditorButtonCommand extends Command
         // --label option
         $label = $input->getOption('label');
         if (!$label) {
-            $label = $io->ask(
+            $label = $this->getIo()->ask(
                 $this->trans('commands.generate.plugin.ckeditorbutton.questions.label'),
                 $this->stringConverter->camelCaseToHuman($class_name)
             );
@@ -182,7 +181,7 @@ class PluginCKEditorButtonCommand extends Command
         // --plugin-id option
         $plugin_id = $input->getOption('plugin-id');
         if (!$plugin_id) {
-            $plugin_id = $io->ask(
+            $plugin_id = $this->getIo()->ask(
                 $this->trans('commands.generate.plugin.ckeditorbutton.questions.plugin-id'),
                 $this->stringConverter->camelCaseToLowerCase($label)
             );
@@ -192,7 +191,7 @@ class PluginCKEditorButtonCommand extends Command
         // --button-name option
         $button_name = $input->getOption('button-name');
         if (!$button_name) {
-            $button_name = $io->ask(
+            $button_name = $this->getIo()->ask(
                 $this->trans('commands.generate.plugin.ckeditorbutton.questions.button-name'),
                 $this->stringConverter->anyCaseToUcFirst($plugin_id)
             );
@@ -202,7 +201,7 @@ class PluginCKEditorButtonCommand extends Command
         // --button-icon-path option
         $button_icon_path = $input->getOption('button-icon-path');
         if (!$button_icon_path) {
-            $button_icon_path = $io->ask(
+            $button_icon_path = $this->getIo()->ask(
                 $this->trans('commands.generate.plugin.ckeditorbutton.questions.button-icon-path'),
                 drupal_get_path('module', $module) . '/js/plugins/' . $plugin_id . '/images/icon.png'
             );

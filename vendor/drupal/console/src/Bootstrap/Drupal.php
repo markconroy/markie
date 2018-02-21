@@ -210,6 +210,11 @@ class Drupal implements DrupalInterface
                 );
 
             $container->set(
+                'console.drupal_finder',
+                $this->drupalFinder
+            );
+
+            $container->set(
                 'console.cache_key',
                 $drupalKernel->getContainerKey()
             );
@@ -234,6 +239,7 @@ class Drupal implements DrupalInterface
                 $messageManager->error(
                     $e->getMessage(),
                     $e->getCode(),
+                    'list',
                     'site:install'
                 );
             }
@@ -251,7 +257,8 @@ class Drupal implements DrupalInterface
     {
         $drupal = new DrupalConsoleCore(
             $this->drupalFinder->getComposerRoot(),
-            $this->drupalFinder->getDrupalRoot()
+            $this->drupalFinder->getDrupalRoot(),
+            $this->drupalFinder
         );
 
         return $drupal->boot();

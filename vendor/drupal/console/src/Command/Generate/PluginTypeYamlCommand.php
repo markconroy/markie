@@ -14,13 +14,9 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Drupal\Console\Command\Shared\ServicesTrait;
 use Drupal\Console\Command\Shared\ModuleTrait;
-use Drupal\Console\Command\Shared\FormTrait;
-use Drupal\Console\Command\Shared\ConfirmationTrait;
 use Drupal\Console\Core\Command\Command;
-use Drupal\Console\Core\Style\DrupalStyle;
 use Drupal\Console\Extension\Manager;
 use Drupal\Console\Core\Utils\StringConverter;
-use Drupal\Console\Core\Utils\ChainQueue;
 
 /**
  * Class PluginTypeYamlCommand
@@ -31,8 +27,6 @@ class PluginTypeYamlCommand extends Command
 {
     use ServicesTrait;
     use ModuleTrait;
-    use FormTrait;
-    use ConfirmationTrait;
 
     /**
      * @var Manager
@@ -118,20 +112,23 @@ class PluginTypeYamlCommand extends Command
         $plugin_name = $input->getOption('plugin-name');
         $plugin_file_name = $input->getOption('plugin-file-name');
 
-        $this->generator->generate($module, $class_name, $plugin_name, $plugin_file_name);
+        $this->generator->generate([
+            'module' => $module,
+            'class_name' => $class_name,
+            'plugin_name' => $plugin_name,
+            'plugin_file_name' => $plugin_file_name,
+        ]);
     }
 
     protected function interact(InputInterface $input, OutputInterface $output)
     {
-        $io = new DrupalStyle($input, $output);
-
         // --module option
         $this->getModuleOption();
 
         // --class option
         $class_name = $input->getOption('class');
         if (!$class_name) {
-            $class_name = $io->ask(
+            $class_name = $this->getIo()->ask(
                 $this->trans('commands.generate.plugin.type.yaml.options.class'),
                 'ExamplePlugin',
                 function ($class) {
@@ -144,7 +141,7 @@ class PluginTypeYamlCommand extends Command
         // --plugin-name option
         $plugin_name = $input->getOption('plugin-name');
         if (!$plugin_name) {
-            $plugin_name = $io->ask(
+            $plugin_name = $this->getIo()->ask(
                 $this->trans('commands.generate.plugin.type.yaml.options.plugin-name'),
                 $this->stringConverter->camelCaseToUnderscore($class_name)
             );
@@ -154,7 +151,7 @@ class PluginTypeYamlCommand extends Command
         // --plugin-file-name option
         $plugin_file_name = $input->getOption('plugin-file-name');
         if (!$plugin_file_name) {
-            $plugin_file_name = $io->ask(
+            $plugin_file_name = $this->getIo()->ask(
                 $this->trans('commands.generate.plugin.type.yaml.options.plugin-file-name'),
                 strtr($plugin_name, '_-', '..')
             );

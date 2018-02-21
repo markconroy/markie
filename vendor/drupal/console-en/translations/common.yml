@@ -13,13 +13,13 @@ questions:
     module: 'Enter the module name'
     extension: 'Enter the extension name'
     extension-type: 'Enter the extension type'
-    confirm: 'Do you confirm generation?'
-    canceled: 'Command generation canceled.'
+    confirm: 'Do you want proceed with the operation?'
+    canceled: 'The operation was cancelled.'
     events:
         message: "\nType the event name or use keyup or keydown.\nThis is optional, press <info>enter</info> to <info>continue</info>\n"
         name: 'Enter event name'
     services:
-        confirm: 'Do you want to load services from the container'
+        confirm: 'Do you want to load services from the container?'
         message: "\nType the service name or use keyup or keydown.\nThis is optional, press <info>enter</info> to <info>continue</info>\n"
         name: 'Enter your service'
     roles:
@@ -39,6 +39,7 @@ questions:
         weight: 'Weight for input item'
         title: 'Title'
         fieldset: 'Fieldset'
+        new-field: 'Enter a new field properties'
 errors:
     module-dependency: 'Missing module dependency "%s" is not installed. Try module:install to install it.'
     class-name-empty: 'The Class name can not be empty'
@@ -53,3 +54,4 @@ messages:
     drupal-core: 'Drupal Core'
     move-phar: 'Accessing console from anywhere on your system'
     quick-start: 'Download, install and serve Drupal 8'
+    available-field-types: 'Available types: <comment>%s</comment>'

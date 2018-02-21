@@ -7,9 +7,6 @@
 
 namespace Drupal\Console\Command\Shared;
 
-use Drupal\Console\Core\Style\DrupalStyle;
-use Symfony\Component\Console\Input\InputInterface;
-
 /**
  * Class ConfirmationTrait
  *
@@ -18,29 +15,34 @@ use Symfony\Component\Console\Input\InputInterface;
 trait ConfirmationTrait
 {
     /**
-     * @param  DrupalStyle    $io
-     *   Console interface.
-     * @param  InputInterface $input
-     *   Input interface.
      *
      * @return bool
      */
-    public function confirmGeneration(DrupalStyle $io, InputInterface $input)
+    public function confirmOperation()
     {
+        $input = $this->getIo()->getInput();
         $yes = $input->hasOption('yes') ? $input->getOption('yes') : false;
         if ($yes) {
             return $yes;
         }
 
-        $confirmation = $io->confirm(
+        $confirmation = $this->getIo()->confirm(
             $this->trans('commands.common.questions.confirm'),
             true
         );
 
         if (!$confirmation) {
-            $io->warning($this->trans('commands.common.messages.canceled'));
+            $this->getIo()->warning($this->trans('commands.common.messages.canceled'));
         }
 
         return $confirmation;
+    }
+
+    /**
+     * @deprecated
+     */
+    public function confirmGeneration()
+    {
+        return $this->confirmOperation();
     }
 }

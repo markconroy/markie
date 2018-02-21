@@ -94,7 +94,7 @@ class ConfigurationManager
         return $this->configuration;
     }
 
-    public function readSite($siteFile)
+    private function readSite($siteFile)
     {
         if (!file_exists($siteFile)) {
             return [];
@@ -110,20 +110,31 @@ class ConfigurationManager
      */
     public function readTarget($target)
     {
-        if (!array_key_exists($target, $this->sites)) {
+        $site = $target;
+        $environment = null;
+        $exploded = explode('.', $target, 2);
+
+        if (count($exploded)>1) {
+            $site = $exploded[0];
+            $environment = $exploded[1];
+        }
+
+        $sites = $this->getSites();
+        if (!array_key_exists($site, $sites)) {
             return [];
         }
 
-        $targetInformation = $this->sites[$target];
+        $targetInformation = $sites[$site];
 
-        if (array_key_exists('host', $targetInformation) && $targetInformation['host'] != 'local') {
-            $targetInformation['remote'] = true;
+        if ($environment) {
+            if (!array_key_exists($environment, $sites[$site])) {
+                return [];
+            }
+
+            $targetInformation = $sites[$site][$environment];
         }
 
-        return array_merge(
-            $this->configuration->get('application.remote'),
-            $targetInformation
-        );
+        return $targetInformation;
     }
 
     /**
@@ -143,10 +154,7 @@ class ConfigurationManager
     {
         $sitesDirectories = array_map(
             function ($directory) {
-                return sprintf(
-                    '%s/sites',
-                    $directory
-                );
+                return $directory . 'sites';
             },
             $this->getConfigurationDirectories()
         );
@@ -157,6 +165,8 @@ class ConfigurationManager
                 return is_dir($directory);
             }
         );
+
+        $sitesDirectories = array_unique($sitesDirectories);
 
         return $sitesDirectories;
     }
@@ -386,6 +396,11 @@ class ConfigurationManager
         }
 
         $sitesDirectories = $this->getSitesDirectories();
+
+        if (!$sitesDirectories) {
+            return [];
+        }
+
         $finder = new Finder();
         $finder->in($sitesDirectories);
         $finder->name("*.yml");
@@ -398,9 +413,26 @@ class ConfigurationManager
                 continue;
             }
 
+            $this->sites[$siteName] = [
+                'file' => $site->getRealPath()
+            ];
+
             foreach ($environments as $environment => $config) {
-                $site = $siteName . '.' . $environment;
-                $this->sites[$site] = $config;
+                if (!array_key_exists('type', $config)) {
+                    throw new \UnexpectedValueException("The 'type' parameter is required in sites configuration.");
+                }
+                if ($config['type'] !== 'local') {
+                    if (array_key_exists('host', $config)) {
+                        $targetInformation['remote'] = true;
+                    }
+
+                    $config = array_merge(
+                        $this->configuration->get('application.remote')?:[],
+                        $config
+                    );
+                }
+
+                $this->sites[$siteName][$environment] = $config;
             }
         }
 

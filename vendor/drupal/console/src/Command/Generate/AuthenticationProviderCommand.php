@@ -13,11 +13,9 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Drupal\Console\Command\Shared\ServicesTrait;
 use Drupal\Console\Command\Shared\ModuleTrait;
-use Drupal\Console\Command\Shared\FormTrait;
 use Drupal\Console\Core\Command\Command;
 use Drupal\Console\Generator\AuthenticationProviderGenerator;
 use Drupal\Console\Command\Shared\ConfirmationTrait;
-use Drupal\Console\Core\Style\DrupalStyle;
 use Drupal\Console\Core\Utils\StringConverter;
 use Drupal\Console\Extension\Manager;
 
@@ -25,7 +23,6 @@ class AuthenticationProviderCommand extends Command
 {
     use ServicesTrait;
     use ModuleTrait;
-    use FormTrait;
     use ConfirmationTrait;
 
     /**
@@ -96,10 +93,8 @@ class AuthenticationProviderCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $io = new DrupalStyle($input, $output);
-
-        // @see use Drupal\Console\Command\Shared\ConfirmationTrait::confirmGeneration
-        if (!$this->confirmGeneration($io, $input)) {
+        // @see use Drupal\Console\Command\Shared\ConfirmationTrait::confirmOperation
+        if (!$this->confirmOperation()) {
             return 1;
         }
 
@@ -107,15 +102,17 @@ class AuthenticationProviderCommand extends Command
         $class = $this->validator->validateClassName($input->getOption('class'));
         $provider_id = $input->getOption('provider-id');
 
-        $this->generator->generate($module, $class, $provider_id);
+        $this->generator->generate([
+            'module' => $module,
+            'class' => $class,
+            'provider_id' => $provider_id,
+        ]);
 
         return 0;
     }
 
     protected function interact(InputInterface $input, OutputInterface $output)
     {
-        $io = new DrupalStyle($input, $output);
-
         $stringUtils = $this->stringConverter;
 
         // --module option
@@ -124,7 +121,7 @@ class AuthenticationProviderCommand extends Command
         // --class option
         $class = $input->getOption('class');
         if (!$class) {
-            $class = $io->ask(
+            $class = $this->getIo()->ask(
                 $this->trans(
                     'commands.generate.authentication.provider.questions.class'
                 ),
@@ -138,7 +135,7 @@ class AuthenticationProviderCommand extends Command
         // --provider-id option
         $provider_id = $input->getOption('provider-id');
         if (!$provider_id) {
-            $provider_id = $io->ask(
+            $provider_id = $this->getIo()->ask(
                 $this->trans('commands.generate.authentication.provider.questions.provider-id'),
                 $stringUtils->camelCaseToUnderscore($class),
                 function ($value) use ($stringUtils) {
