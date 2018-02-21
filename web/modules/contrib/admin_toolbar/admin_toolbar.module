@@ -8,6 +8,7 @@
 use Drupal\Core\Menu\MenuTreeParameters;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Url;
+use Drupal\Component\Utility\Html;
 
 /**
  * Implements hook_toolbar_alter().
@@ -90,7 +91,7 @@ function toolbar_tools_menu_navigation_links(array $tree) {
 
     $element->options['attributes']['class'][] = 'toolbar-icon';
     $string = strtolower(str_replace(['.', ' ', '_'], ['-', '-', '-'], $definition['id']));
-    $element->options['attributes']['class'][] = 'toolbar-icon-' . $string;
+    $element->options['attributes']['class'][] = Html::cleanCssIdentifier('toolbar-icon-' . $string);
     $element->options['attributes']['title'] = $link->getDescription();
   }
   return $tree;

@@ -1,7 +1,30 @@
-Admin Toolbar 8.1.22, 2017-XX-XX
+Admin Toolbar 8.1.23, 2018-02-06
+--------------------------------
+Changes since 8.1.22:
+
+- #2924266 by sunlix, romainj, adriancid, samerali: Add a menu link for the
+  media module.
+- #2941184 by daniel.nitsche, adriancid: Remove unwanted comment from
+  admin.toolbar.css.
+- #2912503 by Amsteri, m.abdulqader: Right to left language direction support.
+- #2937982 by romainj, adriancid: Auto-generation of menu links conflicts with
+  other modules.
+- #2932873 by vaplas, saravanaprasanth, adriancid: Horizontal mode only works if
+  the page is loaded in horizontal mode.
+- #2935311 by romainj, adriancid: Use the $entityTypeManager variable instead of
+  the \Drupal::entityTypeManager service.
+- #2935449 by adriancid: Add the release information for the 1.22 version in the 
+  CHANGELOG.txt.
+- #2932476 by romainj: toolbar.tree library should have a dependency to the
+  core/drupal library.
+- #2931503 by K3vin_nl: Admin toolbar generates invalid class names.
+
+Admin Toolbar 8.1.22, 2018-01-02
 --------------------------------
 Changes since 8.1.21:
 
+- #2929053 by kkuhnen, eme, adriancid: admin_toolbar.js should use Drupal
+  behaviors.
 - #2929061 by romainj, dsnopek, adriancid: admin_toolbar_links_access_filter
   doesn't do anything unless admin_toolbar is enabled.
 - #2928836 by eme: One extra pixel line under the admin toolbar.
