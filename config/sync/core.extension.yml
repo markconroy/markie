@@ -1,6 +1,7 @@
 module:
   admin_toolbar: 0
   admin_toolbar_tools: 0
+  anrt_entity_browsers: 0
   automated_cron: 0
   big_pipe: 0
   block: 0
@@ -59,6 +60,7 @@ module:
   schema_metatag: 0
   schema_web_page: 0
   search: 0
+  settings_tray: 0
   seven_ui: 0
   shortcut: 0
   system: 0
