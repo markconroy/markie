@@ -3363,69 +3363,6 @@
         }
     },
     {
-        "name": "drupal/pathauto",
-        "version": "1.0.0",
-        "version_normalized": "1.0.0.0",
-        "source": {
-            "type": "git",
-            "url": "https://git.drupal.org/project/pathauto",
-            "reference": "8.x-1.0"
-        },
-        "dist": {
-            "type": "zip",
-            "url": "https://ftp.drupal.org/files/projects/pathauto-8.x-1.0.zip",
-            "reference": "8.x-1.0",
-            "shasum": "4c82a5689a18421c8c73fcc8be7b333bb21ae02a"
-        },
-        "require": {
-            "drupal/core": "*",
-            "drupal/ctools": "*",
-            "drupal/token": "*"
-        },
-        "type": "drupal-module",
-        "extra": {
-            "branch-alias": {
-                "dev-1.x": "1.x-dev"
-            },
-            "drupal": {
-                "version": "8.x-1.0",
-                "datestamp": "1493468044",
-                "security-coverage": {
-                    "status": "covered",
-                    "message": "Covered by Drupal's security advisory policy"
-                }
-            }
-        },
-        "installation-source": "dist",
-        "notification-url": "https://packages.drupal.org/8/downloads",
-        "license": [
-            "GPL-2.0+"
-        ],
-        "authors": [
-            {
-                "name": "Berdir",
-                "homepage": "https://www.drupal.org/user/214652"
-            },
-            {
-                "name": "Dave Reid",
-                "homepage": "https://www.drupal.org/user/53892"
-            },
-            {
-                "name": "Freso",
-                "homepage": "https://www.drupal.org/user/27504"
-            },
-            {
-                "name": "greggles",
-                "homepage": "https://www.drupal.org/user/36762"
-            }
-        ],
-        "description": "Provides a mechanism for modules to automatically generate aliases for the content they manage.",
-        "homepage": "https://www.drupal.org/project/pathauto",
-        "support": {
-            "source": "http://cgit.drupalcode.org/pathauto"
-        }
-    },
-    {
         "name": "drupal/video_embed_field",
         "version": "1.5.0",
         "version_normalized": "1.5.0.0",
@@ -4961,55 +4898,6 @@
             "source": "https://www.drupal.org/project/image_widget_crop",
             "issues": "https://www.drupal.org/project/issues/image_widget_crop",
             "irc": "irc://irc.freenode.org/drupal-contribute"
-        }
-    },
-    {
-        "name": "drupal/mgv",
-        "version": "1.9.0",
-        "version_normalized": "1.9.0.0",
-        "source": {
-            "type": "git",
-            "url": "https://git.drupal.org/project/mgv",
-            "reference": "8.x-1.9"
-        },
-        "dist": {
-            "type": "zip",
-            "url": "https://ftp.drupal.org/files/projects/mgv-8.x-1.9.zip",
-            "reference": "8.x-1.9",
-            "shasum": "9b73751517fe059b32743c3ff5ca1e349cbecbb4"
-        },
-        "require": {
-            "drupal/core": "~8.0"
-        },
-        "type": "drupal-module",
-        "extra": {
-            "branch-alias": {
-                "dev-1.x": "1.x-dev"
-            },
-            "drupal": {
-                "version": "8.x-1.9",
-                "datestamp": "1498139642",
-                "security-coverage": {
-                    "status": "covered",
-                    "message": "Covered by Drupal's security advisory policy"
-                }
-            }
-        },
-        "installation-source": "dist",
-        "notification-url": "https://packages.drupal.org/8/downloads",
-        "license": [
-            "GPL-2.0+"
-        ],
-        "authors": [
-            {
-                "name": "markconroy",
-                "homepage": "https://www.drupal.org/user/336910"
-            }
-        ],
-        "description": "Some extra global variables to make your life a little easier.",
-        "homepage": "https://www.drupal.org/project/mgv",
-        "support": {
-            "source": "http://cgit.drupalcode.org/mgv"
         }
     },
     {
@@ -8120,5 +8008,117 @@
             }
         ],
         "description": "Initialize Symfony Console commands from annotated command class methods."
+    },
+    {
+        "name": "drupal/pathauto",
+        "version": "1.1.0",
+        "version_normalized": "1.1.0.0",
+        "source": {
+            "type": "git",
+            "url": "https://git.drupal.org/project/pathauto",
+            "reference": "8.x-1.1"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://ftp.drupal.org/files/projects/pathauto-8.x-1.1.zip",
+            "reference": "8.x-1.1",
+            "shasum": "3e24c9ff419c1f4bbe9d638eb7477a2169777a11"
+        },
+        "require": {
+            "drupal/core": "*",
+            "drupal/ctools": "*",
+            "drupal/token": "*"
+        },
+        "type": "drupal-module",
+        "extra": {
+            "branch-alias": {
+                "dev-1.x": "1.x-dev"
+            },
+            "drupal": {
+                "version": "8.x-1.1",
+                "datestamp": "1520092685",
+                "security-coverage": {
+                    "status": "covered",
+                    "message": "Covered by Drupal's security advisory policy"
+                }
+            }
+        },
+        "installation-source": "dist",
+        "notification-url": "https://packages.drupal.org/8/downloads",
+        "license": [
+            "GPL-2.0-or-later"
+        ],
+        "authors": [
+            {
+                "name": "Berdir",
+                "homepage": "https://www.drupal.org/user/214652"
+            },
+            {
+                "name": "Dave Reid",
+                "homepage": "https://www.drupal.org/user/53892"
+            },
+            {
+                "name": "Freso",
+                "homepage": "https://www.drupal.org/user/27504"
+            },
+            {
+                "name": "greggles",
+                "homepage": "https://www.drupal.org/user/36762"
+            }
+        ],
+        "description": "Provides a mechanism for modules to automatically generate aliases for the content they manage.",
+        "homepage": "https://www.drupal.org/project/pathauto",
+        "support": {
+            "source": "http://cgit.drupalcode.org/pathauto"
+        }
+    },
+    {
+        "name": "drupal/mgv",
+        "version": "1.11.0",
+        "version_normalized": "1.11.0.0",
+        "source": {
+            "type": "git",
+            "url": "https://git.drupal.org/project/mgv",
+            "reference": "8.x-1.11"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://ftp.drupal.org/files/projects/mgv-8.x-1.11.zip",
+            "reference": "8.x-1.11",
+            "shasum": "d747683626851cd43fb9983cf7ef68dafb97113d"
+        },
+        "require": {
+            "drupal/core": "~8.0"
+        },
+        "type": "drupal-module",
+        "extra": {
+            "branch-alias": {
+                "dev-1.x": "1.x-dev"
+            },
+            "drupal": {
+                "version": "8.x-1.11",
+                "datestamp": "1520254084",
+                "security-coverage": {
+                    "status": "covered",
+                    "message": "Covered by Drupal's security advisory policy"
+                }
+            }
+        },
+        "installation-source": "dist",
+        "notification-url": "https://packages.drupal.org/8/downloads",
+        "license": [
+            "GPL-2.0-or-later"
+        ],
+        "authors": [
+            {
+                "name": "markconroy",
+                "homepage": "https://www.drupal.org/user/336910"
+            }
+        ],
+        "description": "Some extra global variables to make your life a little easier.",
+        "homepage": "https://www.drupal.org/project/mgv",
+        "support": {
+            "source": "http://cgit.drupalcode.org/mgv"
+        }
     }
 ]

@@ -43,7 +43,7 @@
         "drupal/entity_reference_revisions": "1.4",
         "drupal/field_group": "1.0",
         "drupal/paragraphs": "1.2",
-        "drupal/pathauto": "1.0",
+        "drupal/pathauto": "1.1",
         "drupal/redirect": "1.0",
         "drupal/video_embed_field": "1.5",
         "drupal/xmlsitemap": "1.0-alpha2",
@@ -64,7 +64,7 @@
         "drupal/image_widget_crop": "2.1",
         "fengyuanchen/cropper": "3.0.0-beta",
         "drupal/entity": "1.0-beta1",
-        "drupal/mgv": "1.9",
+        "drupal/mgv": "1.11",
         "drupal/menu_trail_by_path": "1.1"
     },
     "require-dev": {

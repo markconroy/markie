@@ -8,7 +8,10 @@
  * 1) Paths
  * 1.1) Current Path - {{ global_variables.current_path }}
  * 1.2) Base URL - {{ global_variables.base_url }}
- * 2) Current Page Title {{ global_variables.current_page_title }}
+ * 2) Current Items
+ * 2.1) Current Page Title {{ global_variables.current_page_title }}
+ * 2.2) Current Langcode {{ global_variables.current_langcode }}
+ * 2.3) Current Langname {{ global_variables.current_langname }}
  * 3) Site Information Page Global variables
  * 3.1) Site Name - {{ global_variables.site_name }}
  * 3.2) Site Slogan - {{ global_variables.site_slogan }}
