@@ -1,5 +1,10 @@
 # Change Log
 
+### 2.8.3 - 23 Feb 2018
+
+- BUGFIX: Do not shift off the command name unless it is there. (#139)
+- Use test scenarios to test multiple versions of Symfony. (#136, #137)
+
 ### 2.8.2 - 29 Nov 2017
 
 - Allow Symfony 4 components.
