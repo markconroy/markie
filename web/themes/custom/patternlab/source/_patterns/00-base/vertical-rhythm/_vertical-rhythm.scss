@@ -6,9 +6,13 @@ $base-font-size:   18px; // The font size set on the root html element.
 $base-line-height: 1.3 * $base-font-size; // This line-height determines the basic unit of vertical rhythm.
 
 html {
+  box-sizing: border-box;
   font-size: $base-font-size;
   line-height: $base-line-height;
-  * {
+  *,
+  *:before,
+  *:after {
+    box-sizing: inherit;
     margin-top: 0;
   }
 }
