@@ -23,3 +23,6 @@ content:
     item_0:
       include():
         pattern: building-blocks-text-paragraph-x3-with-headings
+  comment:
+    include():
+      pattern: content-article-comment-form

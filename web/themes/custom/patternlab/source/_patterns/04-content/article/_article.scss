@@ -7,3 +7,29 @@
     margin-bottom: $base-line-height * 3;
   }
 }
+
+.comment-form {
+  margin-bottom: $base-line-height;
+  @include breakpoint($bp--medium) {
+    margin-bottom: $base-line-height * 2;
+  }
+  @include breakpoint($bp--large) {
+    margin-bottom: $base-line-height * 3;
+  }
+}
+
+.comment-form .form-item {
+  margin-bottom: $base-line-height;
+}
+
+.comment-form label {
+  display: block;
+  font-weight: bold;
+}
+
+.comment-form .form-text,
+.comment-form textarea {
+  max-width: 100%;
+  padding: .5rem 1rem;
+  width: 100%;
+}
