@@ -1841,6 +1841,10 @@ body {
   width: 100%;
 }
 
+.comment-form .filter-wrapper {
+  display: none;
+}
+
 .above-header__inner {
   padding-top: 18px;
 }
