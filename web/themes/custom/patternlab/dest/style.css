@@ -71,6 +71,18 @@
   background: black;
 }
 
+.bg-primary,
+.bg-secondary {
+  color: white;
+}
+
+.bg-primary.bulky,
+.bg-secondary.bulky,
+.bg-tertiary.bulky {
+  margin-bottom: 24px;
+  padding: 1rem;
+}
+
 .demo-transition.transition-opacity {
   transition: opacity 0.3s ease-in;
 }
