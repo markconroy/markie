@@ -14,17 +14,10 @@
   border-left: 5px solid $c-tertiary;
   font-family: $ff--alternate;
   font-size: 1.25rem;
-  line-height: $base-line-height * 1.25;
   margin-left: auto;
   margin-right: auto;
   overflow: hidden;
   padding-left: 2rem;
-  @include breakpoint($bp--medium) {
-    line-height: $base-line-height * 1.5;
-  }
-  @include breakpoint($bp--xlarge) {
-    line-height: $base-line-height * 2;
-  }
 }
 
 .quote blockquote p:last-of-type {

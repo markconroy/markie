@@ -4,13 +4,13 @@ html {
   @include fluid-type(font-size, $bp--xsmall, $bp--xxlarge, 14px, $base-font-size);
   box-sizing: border-box;
   color: $c-grey--darkest;
+  font-size: $base-font-size;
 }
 
-* {
-  &::after,
-  &::before {
-    box-sizing: inherit;
-  }
+*,
+&::after,
+&::before {
+  box-sizing: inherit;
 }
 
 body {

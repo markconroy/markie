@@ -3,10 +3,8 @@
   font-family: $ff--alternate;
   font-size: $base-font-size;
   font-weight: normal;
-  line-height: $base-line-height * 2;
   @include breakpoint($bp--xlarge) {
     font-size: $base-font-size * 4.611;
-    line-height: $base-line-height * 4; // 6 rem
   }
 }
 
@@ -15,14 +13,11 @@ h1, .h1 {
   font-family: $ff--alternate;
   font-size: $base-font-size * 1.3;
   font-weight: normal;
-  line-height: $base-font-size * 1.667;
   @include breakpoint($bp--small) {
     font-size: $base-font-size * 1.6875;
-    line-height: $base-font-size * 2.625;
   }
   @include breakpoint($bp--xlarge) {
     font-size: $base-font-size * 2.778;
-    line-height: $base-line-height * 3;
   }
 }
 
@@ -33,7 +28,6 @@ h2, .h2 {
   font-weight: normal;
   @include breakpoint($bp--xlarge) {
     font-size: $base-font-size * 1.667;
-    line-height: $base-line-height * 2;
   }
   &.node__title a {
     color: $c-primary;
