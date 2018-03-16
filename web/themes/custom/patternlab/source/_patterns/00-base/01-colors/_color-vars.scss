@@ -45,3 +45,15 @@ $theme-colours:
     background: $colour;
   }
 }
+
+.bg-primary,
+.bg-secondary {
+  color: $c-white;
+}
+
+.bg-primary.bulky,
+.bg-secondary.bulky,
+.bg-tertiary.bulky {
+  margin-bottom: $base-line-height;
+  padding: 1rem;
+}
