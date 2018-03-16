@@ -843,6 +843,35 @@ body {
   margin-bottom: 0;
 }
 
+.breadcrumb ol {
+  list-style: none;
+  margin-bottom: 0;
+  padding-left: 0;
+}
+
+.breadcrumb li {
+  display: inline-block;
+  font-size: .75rem;
+  padding: .5rem 0;
+}
+
+.breadcrumb li:after {
+  content: "»";
+  margin: .15rem;
+}
+
+.breadcrumb li:last-of-type:after {
+  content: '';
+}
+
+.breadcrumb li a {
+  text-decoration: none;
+}
+
+.breadcrumb li a:focus, .breadcrumb li a:hover {
+  text-decoration: underline;
+}
+
 .main-navigation {
   text-align: right;
 }
@@ -1609,7 +1638,7 @@ body {
 }
 
 .node--view-mode-full .node__meta {
-  margin-top: 23.4px;
+  margin-top: 46.8px;
 }
 
 .field--name-field-tags {
@@ -1897,6 +1926,10 @@ body {
   .below-header .menu--external-links .menu-item {
     min-width: 200px;
   }
+}
+
+.region-breadcrumbs {
+  padding: .5rem 0;
 }
 
 .credits {
