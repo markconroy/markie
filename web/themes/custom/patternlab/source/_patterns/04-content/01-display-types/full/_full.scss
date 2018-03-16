@@ -20,6 +20,9 @@
 
 .node--view-mode-full .node__meta {
   margin-top: $base-line-height;
+  @include breakppoint($bp--large) {
+    margin-top: $base-line-height * 3;
+  }
 }
 
 .field--name-field-tags {

@@ -6,6 +6,7 @@
  */
 
 use Drupal\Core\Form\FormStateInterface;
+use Symfony\Cmf\Component\Routing\RouteObjectInterface;
 
 /**
  * Implements hook_page_attachments_alter().
@@ -30,4 +31,18 @@ function patternlab_form_views_exposed_form_alter(array &$form, FormStateInterfa
   $form['keywords']['#attributes']['placeholder'] = t('Enter Search Keywords');
   $form['created']['#attributes']['placeholder'] = t('Initial Publication Date');
   $form['changed']['#attributes']['placeholder'] = t('Updated Date');
+}
+
+/**
+ * Implements hook_preprocess_breadcrumb().
+ */
+function patternlab_preprocess_breadcrumb(&$variables) {
+  // We are creating a variable for the Current Page Title, to allow us to print
+  // it after the breadcrumbs loop has run.
+  $request = \Drupal::request();
+  if ($route = $request->attributes->get(RouteObjectInterface::ROUTE_OBJECT)) {
+    $variables['current_page_title'] = \Drupal::service('title_resolver')->getTitle($request, $route);
+  }
+  // Since we are printing the 'Current Page Title', we don't cache breadcrumbs.
+  $variables['#cache']['contexts'][] = 'url';
 }
