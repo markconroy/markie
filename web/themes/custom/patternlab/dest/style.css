@@ -616,6 +616,36 @@ sub {
   bottom: -0.25rem;
 }
 
+html {
+  font-size: 14px;
+  box-sizing: border-box;
+  color: #292929;
+  font-size: 18px;
+}
+
+@media screen and (min-width: 380px) {
+  html {
+    font-size: calc(14px + 4 * (100vw - 380px) / 790);
+  }
+}
+
+@media screen and (min-width: 1170px) {
+  html {
+    font-size: 18px;
+  }
+}
+
+*,
+::after,
+::before {
+  box-sizing: inherit;
+}
+
+body {
+  background: #fafafa;
+  font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif;
+}
+
 @font-face {
   font-family: "LatoRegular";
   src: url("../fonts/Lato-Regular.woff2") format("woff2"), url("../fonts/Lato-Regular.woff") format("woff"), url("../fonts/Lato-Regular.ttf") format("truetype");
@@ -753,36 +783,6 @@ pre code:after, pre code:before {
   .text--large, .node--view-mode-full > .field--name-field-intro {
     font-size: 28.8px;
   }
-}
-
-html {
-  font-size: 14px;
-  box-sizing: border-box;
-  color: #292929;
-  font-size: 18px;
-}
-
-@media screen and (min-width: 380px) {
-  html {
-    font-size: calc(14px + 4 * (100vw - 380px) / 790);
-  }
-}
-
-@media screen and (min-width: 1170px) {
-  html {
-    font-size: 18px;
-  }
-}
-
-*,
-::after,
-::before {
-  box-sizing: inherit;
-}
-
-body {
-  background: #fafafa;
-  font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif;
 }
 
 @font-face {
@@ -1638,7 +1638,13 @@ body {
 }
 
 .node--view-mode-full .node__meta {
-  margin-top: 46.8px;
+  margin-top: 23.4px;
+}
+
+@media (min-width: 768px) {
+  .node--view-mode-full .node__meta {
+    margin-top: 70.2px;
+  }
 }
 
 .field--name-field-tags {
