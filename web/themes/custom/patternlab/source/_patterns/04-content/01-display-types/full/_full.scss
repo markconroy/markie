@@ -20,7 +20,7 @@
 
 .node--view-mode-full .node__meta {
   margin-top: $base-line-height;
-  @include breakppoint($bp--large) {
+  @include breakpoint($bp--large) {
     margin-top: $base-line-height * 3;
   }
 }
