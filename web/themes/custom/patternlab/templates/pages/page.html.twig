@@ -43,7 +43,7 @@
  * @see html.html.twig
  */
 #}
-{% if page.tabs|render|striptags|trim is not empty %}
+{% if page.tabs %}
   <div class="layout-tabs">
     <div class="layout-contained">
       {{ page.tabs }}
@@ -118,7 +118,7 @@
           {% if not (node or (theme_hook_suggestions.0 == 'page__taxonomy')) %}
             {{ page.page_title }}
           {% endif %}
-          
+
           {{ page.content }}
         </div>{# /.layout-content #}
 
