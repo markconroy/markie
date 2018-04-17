@@ -249,13 +249,6 @@
 })(jQuery, Drupal);
 "use strict";
 
-(function teaserScript($, Drupal) {
-  Drupal.behaviors.teaser = {
-    attach: function attach(context) {}
-  };
-})(jQuery, Drupal);
-"use strict";
-
 (function fullScript($, Drupal) {
   Drupal.behaviors.full = {
     attach: function attach(context) {}
@@ -265,6 +258,13 @@
 
 (function defaultScript($, Drupal) {
   Drupal.behaviors.default = {
+    attach: function attach(context) {}
+  };
+})(jQuery, Drupal);
+"use strict";
+
+(function teaserScript($, Drupal) {
+  Drupal.behaviors.teaser = {
     attach: function attach(context) {}
   };
 })(jQuery, Drupal);
