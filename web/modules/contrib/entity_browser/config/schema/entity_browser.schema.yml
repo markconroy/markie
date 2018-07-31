@@ -169,6 +169,9 @@ field.widget.settings.entity_browser_entity_reference:
     field_widget_remove:
       type: boolean
       label: 'Field widget remove'
+    field_widget_replace:
+      type: boolean
+      label: 'Field widget replace'
     open:
       type: boolean
       label: 'Open'
@@ -211,6 +214,9 @@ field.widget.settings.entity_browser_file:
     field_widget_remove:
       type: boolean
       label: 'Field widget remove'
+    field_widget_replace:
+      type: boolean
+      label: 'Field widget replace'
     open:
       type: boolean
       label: 'Open'

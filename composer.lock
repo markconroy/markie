@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "e36167d7406da3219ba5903549f803c7",
+    "content-hash": "95acf7e687025c2004d803e20b4314ee",
     "packages": [
         {
             "name": "alchemy/zippy",
@@ -2015,17 +2015,17 @@
         },
         {
             "name": "drupal/entity_browser",
-            "version": "1.4.0",
+            "version": "1.5.0",
             "source": {
                 "type": "git",
                 "url": "https://git.drupal.org/project/entity_browser",
-                "reference": "8.x-1.4"
+                "reference": "8.x-1.5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://ftp.drupal.org/files/projects/entity_browser-8.x-1.4.zip",
-                "reference": "8.x-1.4",
-                "shasum": "4375e996b8d1e103ca5daf9ce352e2af9cab568f"
+                "url": "https://ftp.drupal.org/files/projects/entity_browser-8.x-1.5.zip",
+                "reference": "8.x-1.5",
+                "shasum": "6d12a9eea0fa9a50ef942ea51b29b772c4a76f6a"
             },
             "require": {
                 "drupal/core": "~8.0"
@@ -2044,8 +2044,8 @@
                     "dev-8.x-1.x": "8.1.x-dev"
                 },
                 "drupal": {
-                    "version": "8.x-1.4",
-                    "datestamp": "1512033785",
+                    "version": "8.x-1.5",
+                    "datestamp": "1528140780",
                     "security-coverage": {
                         "status": "covered",
                         "message": "Covered by Drupal's security advisory policy"

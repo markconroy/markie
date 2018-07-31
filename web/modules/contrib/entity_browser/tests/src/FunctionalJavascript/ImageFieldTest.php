@@ -70,6 +70,7 @@ class ImageFieldTest extends EntityBrowserJavascriptTestBase {
         'open' => TRUE,
         'field_widget_edit' => FALSE,
         'field_widget_remove' => TRUE,
+        'field_widget_replace' => TRUE,
         'selection_mode' => EntityBrowserElement::SELECTION_MODE_APPEND,
         'view_mode' => 'default',
         'preview_image_style' => 'thumbnail',
@@ -149,6 +150,25 @@ class ImageFieldTest extends EntityBrowserJavascriptTestBase {
     // Image filename should not be present.
     $this->assertSession()->pageTextNotContains('example.jpg');
     $this->assertSession()->linkExists('Select entities');
+    // Test the Replace functionality.
+    file_unmanaged_copy(\Drupal::root() . '/core/modules/simpletest/files/image-test.jpg', 'public://example2.jpg');
+    $image2 = File::create(['uri' => 'public://example2.jpg']);
+    $image2->save();
+    \Drupal::service('file.usage')->add($image2, 'entity_browser', 'test', '1');
+    $this->drupalGet('node/1/edit');
+    $this->assertSession()->buttonExists('Replace');
+    $this->getSession()->getPage()->pressButton('Replace');
+    $this->waitForAjaxToFinish();
+    $this->getSession()->switchToIFrame('entity_browser_iframe_test_entity_browser_iframe_view');
+    $this->getSession()->getPage()->checkField('entity_browser_select[file:' . $image2->id() . ']');
+    $this->getSession()->getPage()->pressButton('Select entities');
+    $this->getSession()->getPage()->pressButton('Use selected');
+    $this->getSession()->wait(1000);
+    $this->getSession()->switchToIFrame();
+    $this->waitForAjaxToFinish();
+    // Initial image should not be present, the new one should be there instead.
+    $this->assertSession()->pageTextNotContains('example.jpg');
+    $this->assertSession()->pageTextContains('example2.jpg');
   }
 
   /**
