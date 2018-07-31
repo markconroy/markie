@@ -2,35 +2,31 @@
 
 namespace Drupal\entity;
 
-use Drupal\Core\Entity\EntityHandlerInterface;
-use Drupal\Core\Entity\EntityPublishedInterface;
-use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
-use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\user\EntityOwnerInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides generic entity permissions which are cached per user.
  *
- * This includes:
+ * Intended for content entity types, since config entity types usually rely
+ * on a single "administer" permission.
  *
+ * Provided permissions:
  * - administer $entity_type
  * - access $entity_type overview
- * - view an ($bundle) $entity_type
+ * - view any ($bundle) $entity_type
  * - view own ($bundle) $entity_type
  * - view own unpublished $entity_type
  * - update (own|any) ($bundle) $entity_type
  * - delete (own|any) ($bundle) $entity_type
  * - create $bundle $entity_type
  *
- * As this class supports "view own ($bundle) $entity_type" it is just cacheable
- * per user, which might harm performance of sites. Given that please use 
- * \Drupal\entity\EntityPermissionProvider unless you need the feature, or your
- * entity type is not really user facing (commerce orders for example).
+ * Important:
+ * Provides "view own ($bundle) $entity_type" permissions, which require
+ * caching pages per user. This can significantly increase the size of caches,
+ * impacting site performance. Use \Drupal\entity\EntityPermissionProvider
+ * if those permissions are not necessary.
  *
- * Intended for content entity types, since config entity types usually rely
- * on a single "administer" permission.
  * Example annotation:
  * @code
  *  handlers = {

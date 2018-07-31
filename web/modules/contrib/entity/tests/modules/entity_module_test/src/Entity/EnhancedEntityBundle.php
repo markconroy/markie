@@ -4,7 +4,7 @@ namespace Drupal\entity_module_test\Entity;
 
 use Drupal\Core\Config\Entity\ConfigEntityBundleBase;
 use Drupal\Core\Entity\EntityDescriptionInterface;
-use Drupal\entity\Entity\RevisionableEntityBundleInterface;
+use Drupal\Core\Entity\RevisionableEntityBundleInterface;
 
 /**
  * Provides bundles for the test entity.
@@ -15,6 +15,9 @@ use Drupal\entity\Entity\RevisionableEntityBundleInterface;
  *   admin_permission = "administer entity_test_enhanced",
  *   config_prefix = "entity_test_enhanced_bundle",
  *   bundle_of = "entity_test_enhanced",
+ *   handlers = {
+ *     "access" = "\Drupal\entity\BundleEntityAccessControlHandler",
+ *   },
  *   entity_keys = {
  *     "id" = "id",
  *     "label" = "label"

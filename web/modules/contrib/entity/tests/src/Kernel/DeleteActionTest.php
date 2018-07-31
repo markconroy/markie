@@ -11,6 +11,7 @@ use Drupal\KernelTests\KernelTestBase;
 
 /**
  * Tests the delete entity action.
+ *
  * @group entity
  */
 class DeleteActionTest extends KernelTestBase {
@@ -25,8 +26,9 @@ class DeleteActionTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['action', 'node', 'entity_module_test', 'entity',
-                            'user', 'system'];
+  public static $modules = [
+    'action', 'node', 'entity_module_test', 'entity', 'user', 'system',
+  ];
 
   /**
    * {@inheritdoc}
@@ -74,8 +76,8 @@ class DeleteActionTest extends KernelTestBase {
 
     $action->execute($entities);
     // Confirm that the entity ids and langcodes are now in the tempstore.
-    $tempstore = \Drupal::service('user.private_tempstore')->get('entity_delete_multiple_confirm');
-    $selection = $tempstore->get($this->user->id());
+    $tempstore = \Drupal::service('tempstore.private')->get('entity_delete_multiple_confirm');
+    $selection = $tempstore->get($this->user->id() . ':entity_test_enhanced');
     $this->assertEquals(array_keys($entities), array_keys($selection));
     $this->assertEquals([['en' => 'en'], ['en' => 'en']], array_values($selection));
   }
