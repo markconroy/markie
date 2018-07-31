@@ -1,22 +1,26 @@
 <?php
 
-namespace Drupal\admin_toolbar_tools\Tests;
+namespace Drupal\Tests\admin_toolbar\Functional;
 
-use Drupal\simpletest\WebTestBase;
+use Drupal\Tests\BrowserTestBase;
 
 /**
- * Tests for the existence of Admin Toolbar tools new links.
+ * Test the existence of Admin Toolbar module.
  *
  * @group admin_toolbar
  */
-class AdminToolbarToolsAlterTest extends WebTestBase {
+class AdminToolbarAlterTest extends BrowserTestBase {
 
   /**
    * Modules to enable.
    *
    * @var array
    */
-  public static $modules = ['toolbar', 'admin_toolbar', 'admin_toolbar_tools'];
+  protected static $modules = [
+    'toolbar',
+    'breakpoint',
+    'admin_toolbar',
+  ];
 
   /**
    * A test user with permission to access the administrative toolbar.
@@ -30,21 +34,21 @@ class AdminToolbarToolsAlterTest extends WebTestBase {
    */
   protected function setUp() {
     parent::setUp();
+
     // Create and log in an administrative user.
     $this->adminUser = $this->drupalCreateUser([
       'access toolbar',
       'access administration pages',
-      'administer site configuration',
     ]);
     $this->drupalLogin($this->adminUser);
   }
 
   /**
-   * Tests for the hover of sub menus.
+   * Tests for a the hover of sub menus.
    */
-  public function testAdminToolbarTools() {
-    // Assert that special menu items are present in the HTML.
-    $this->assertRaw('class="toolbar-icon toolbar-icon-admin-toolbar-tools-flush"');
+  public function testAdminToolbar() {
+    // Assert that expanded links are present in the HTML.
+    $this->assertRaw('class="toolbar-icon toolbar-icon-user-admin-index"');
   }
 
 }

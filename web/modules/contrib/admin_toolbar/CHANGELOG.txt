@@ -1,6 +1,33 @@
-Admin Toolbar 8.1.23, 2018-02-06
---------------------------------
-Changes since 8.1.22:
+Admin Toolbar 8.x-1.24, 2018-05-28
+----------------------------------
+Changes since 8.x-1.23:
+
+- #2973131 by adriancid: Don't refer to Drupal in the help page.
+- #2975170 by adriancid: Add composer.json file to submodules.
+- #2975165 by Gamewalker, adriancid: datetime.time services is not found in
+  ToolbarController.
+- #2971466 by recrit, adriancid, acbramley: Add media links incorrectly set to
+  "node.add.".
+- #2972553 by dww, adriancid: Add static cache to speed up
+  admin_toolbar_links_access_filter_user_has_admin_role().
+- #2971435 by adriancid: Module help page for Admin Toolbar Extra Tools module 
+  doesn't show the links.
+- #2971398 by adriancid: Add the docblock to the ToolbarController constructor.
+- #2969686 by adriancid, Vidushi Mehta: Add a menu link to clean the twig cache.
+- #2969325 by adriancid: Fix the module version in the CHANGELOG.txt.
+- #2961450 by adriancid: Convert the AdminToolbarAlterTest test class to
+  PHPUnit.
+- #2961445 by adriancid: Convert the AdminToolbarToolsAlterTest test class to
+  PHPUnit.
+- #2959684 by adriancid: Remove recommended modules section from README.txt.
+- #2959647 by adriancid: Use interfaces instead of classes to inject 
+  dependencies.
+- #2952643 by romainj, if-jds, adriancid: Add Item for Files under Content Menu.
+- #2944463 by adriancid: Update the composer.json file.
+
+Admin Toolbar 8.x-1.23, 2018-02-06
+----------------------------------
+Changes since 8.x-1.22:
 
 - #2924266 by sunlix, romainj, adriancid, samerali: Add a menu link for the
   media module.
@@ -19,9 +46,9 @@ Changes since 8.1.22:
   core/drupal library.
 - #2931503 by K3vin_nl: Admin toolbar generates invalid class names.
 
-Admin Toolbar 8.1.22, 2018-01-02
---------------------------------
-Changes since 8.1.21:
+Admin Toolbar 8.x-1.22, 2018-01-02
+----------------------------------
+Changes since 8.x-1.21:
 
 - #2929053 by kkuhnen, eme, adriancid: admin_toolbar.js should use Drupal
   behaviors.
@@ -42,9 +69,9 @@ Changes since 8.1.21:
 - #2925128 by adriancid: Create the module help page for the Admin Toolbar Links
   Access Filter submodule.
 
-Admin Toolbar 8.1.21, 2017-11-20
---------------------------------
-Changes since 8.1.20:
+Admin Toolbar 8.x-1.21, 2017-11-20
+----------------------------------
+Changes since 8.x-1.20:
 
 - #2923580 by sylus, adriancid: Unsupported operand types in 
   ToolbarHandler::lazyBuilder().
@@ -87,9 +114,9 @@ Changes since 8.1.20:
 - #2909003 by eme: fix z-index for CKEditor.
 - #2504449 by robin.ingelbrecht, rwam, eme: Un-hover delay.
 
-Admin Toolbar 8.1.20, 2017-09-07
---------------------------------
-Changes since 8.1.19:
+Admin Toolbar 8.x-1.20, 2017-09-07
+----------------------------------
+Changes since 8.x-1.19:
 
 - #2887439 by romainj: Fix test.
 - #2759135 by Johnny vd Laar, miiimooo, chegor, romainj: Content type, 
@@ -106,9 +133,9 @@ Changes since 8.1.19:
 - #2870404 by romainj: Add a link to the Webprofiler settings page.
 - #2706643 by esod, romainj, Keenegan, DamienMcKenna: Use short array syntax.
 
-Admin Toolbar 8.1.19, 2017-04-06
---------------------------------
-Changes since 8.1.18:
+Admin Toolbar 8.x-1.19, 2017-04-06
+----------------------------------
+Changes since 8.x-1.18:
 
 - #2706643 by esod, romainj, Keenegan, DamienMcKenna: Use short array syntax.
 - #2781745 by minakshiPh, eelkeblok, romainj, akhilavnair_zyxware: Drupal coding
@@ -117,9 +144,9 @@ Changes since 8.1.18:
 - #2841512 by Chi, romainj: User error: Redirects to external URLs are not
   allowed by default.
 
-Admin Toolbar 8.1.18, 2016-12-01
---------------------------------
-Changes since 8.1.17:
+Admin Toolbar 8.x-1.18, 2016-12-01
+----------------------------------
+Changes since 8.x-1.17:
 
 - #2830677 by vaplas, romainj: z-index for sub menu.
 - by romainj: Get rid of the Hello popup.
@@ -130,9 +157,9 @@ Changes since 8.1.17:
 - #2518202 by james.williams, chegor, eme, romainj, DuneBL: Change default link
   to taxonomy.
 
-Admin Toolbar 8.1.17, 2016-08-19
---------------------------------
-Changes since 8.1.16:
+Admin Toolbar 8.x-1.17, 2016-08-19
+----------------------------------
+Changes since 8.x-1.16:
 
 - #2779251 by romainj, DuneBL: Wrong integration of field_collection delete 
   form.
@@ -150,9 +177,9 @@ Changes since 8.1.16:
 - #2707747 by Balu Ertl, nevergone, eme, esod: D8 logo not rendered with smooth
   antialiasing.
 
-Admin Toolbar 8.1.16, 2016-07-28
---------------------------------
-Changes since 8.1.15:
+Admin Toolbar 8.x-1.16, 2016-07-28
+----------------------------------
+Changes since 8.x-1.15:
 
 - #2723209 by andrewmacpherson, colan, mattshoaf: Enabling admin_toolbar_tools
   causes Devel Settings to disappear from the main configuration page.
@@ -185,9 +212,9 @@ Changes since 8.1.15:
 - by romainj: Fixes issue #2731663 by canceling the move of the Logout menu
   link.
 
-Admin Toolbar 8.1.15, 2016-05-23
---------------------------------
-Changes since 8.1.14:
+Admin Toolbar 8.x-1.15, 2016-05-23
+----------------------------------
+Changes since 8.x-1.14:
 
 - by matio89: add RTL in admin.toolbar.css.
 - by romainj: Changes Devel menu item titles.
@@ -208,9 +235,9 @@ Changes since 8.1.14:
 - by eme: fix issue #2658896 and refactor and fix chevron-right.svg.
 - by eme: fix Issue #2493037.
 
-Admin Toolbar 8.1.14, 2016-02-08
---------------------------------
-Changes since 8.1.13:
+Admin Toolbar 8.x-1.14, 2016-02-08
+----------------------------------
+Changes since 8.x-1.13:
 
 - by matio89: Correction differents bugs(problem white page when installing a
   new module).
@@ -218,17 +245,17 @@ Changes since 8.1.13:
 - by matio89: resolving the dependecies problem(dependencies of others modules).
 - by matio89: Correction route of entities.
 
-Admin Toolbar 8.1.13, 2016-02-02
---------------------------------
-Changes since 8.1.12:
+Admin Toolbar 8.x-1.13, 2016-02-02
+----------------------------------
+Changes since 8.x-1.12:
 
 - by matio89: Admin toolbar is compatible with 8.0.2.
 - by matio89: Commmit dev version compatible with drupal 8.0.2.
 - by matio89: New version of admin toolbar compatible with 8.0.2.
 
-Admin Toolbar 8.1.12, 2016-01-15
---------------------------------
-Changes since 8.1.11:
+Admin Toolbar 8.x-1.12, 2016-01-15
+----------------------------------
+Changes since 8.x-1.11:
 
 - by matio89: Correction AdminToolbaToolsAlterTest.
 - #2493037 by mimran: Empty elements in #toolbar-bar.
@@ -236,9 +263,9 @@ Changes since 8.1.11:
 - #2635154 by Lukas von Blarer: Too general CSS selectors.
 - by eme: Fix chevron right in local state.
 
-Admin Toolbar 8.1.11, 2015-12-11
---------------------------------
-Changes since 8.1.10:
+Admin Toolbar 8.x-1.11, 2015-12-11
+----------------------------------
+Changes since 8.x-1.10:
 
 - #2620430 by Vagelis, NarendraR: Typo.
 - #2632888 by JamesK: Add dependency on node module.
@@ -255,46 +282,46 @@ Changes since 8.1.10:
   login link.
 - by matio89: Correction the login link on the site when in a logged-out state.
 
-Admin Toolbar 8.1.10, 2015-08-07
---------------------------------
-Changes since 8.1.9:
+Admin Toolbar 8.x-1.10, 2015-08-07
+----------------------------------
+Changes since 8.x-1.9:
 
 - #2546939 by jonhattan: Add dependency on toolbar module.
 
-Admin Toolbar 8.1.9, 2015-07-22
--------------------------------
-Changes since 8.1.8:
+Admin Toolbar 8.x-1.9, 2015-07-22
+---------------------------------
+Changes since 8.x-1.8:
 
 - #2537016 by matio89: Removing dependance for user & system.
 - #2533420 by Dave Reid, twistor: Chase HEAD changes in toolbar.
 - #2537016 by twistor: Rewrite admin_toolbar_tools.module
 - by matio89: Correction all bugs and add new security features.
 
-Admin Toolbar 8.1.8, 2015-06-22
--------------------------------
-Changes since 8.1.7:
+Admin Toolbar 8.x-1.8, 2015-06-22
+---------------------------------
+Changes since 8.x-1.7:
 
 - correction not found route.
 - #2493037 by bobrov1989: Empty elements in #toolbar-bar.
 - by fethi: icones.
 
-Admin Toolbar 8.1.7, 2015-06-22
--------------------------------
-Changes since 8.1.6:
+Admin Toolbar 8.x-1.7, 2015-06-22
+---------------------------------
+Changes since 8.x-1.6:
 
 - correction not found route.
 - #2493037 by bobrov1989: Empty elements in #toolbar-bar.
 - by fethi: icones.
 
-Admin Toolbar 8.1.6, 2015-06-03
--------------------------------
-Changes since 8.1.5:
+Admin Toolbar 8.x-1.6, 2015-06-03
+---------------------------------
+Changes since 8.x-1.5:
 
 - by matio89: correction admin_toolbar.
 
-Admin Toolbar 8.1.5, 2015-06-03
--------------------------------
-Changes since 8.1.4:
+Admin Toolbar 8.x-1.5, 2015-06-03
+---------------------------------
+Changes since 8.x-1.4:
 
 - by matio89: test if module update exist or no to display install and update
   module.
@@ -302,36 +329,36 @@ Changes since 8.1.4:
 - by matio89: compatibility with Drupal 8 béta 11.
 - by  fethi: Change the colors used to match the Seven styleguide.
 
-Admin Toolbar 8.1.4, 2015-05-20
--------------------------------
-Changes since 8.1.3:
+Admin Toolbar 8.x-1.4, 2015-05-20
+---------------------------------
+Changes since 8.x-1.3:
 
 - by matio89: correction add/node.
 
-Admin Toolbar 8.1.3, 2015-05-19
--------------------------------
-Changes since 8.1.2:
+Admin Toolbar 8.x-1.3, 2015-05-19
+---------------------------------
+Changes since 8.x-1.2:
 
 - by matio89: add new functionalities.
 - by matio89: add administration devel link.
 - by matio89: correction reload page.
 - by matio89: correction redirect to the same page.
 
-Admin Toolbar 8.1.2, 2015-05-19
--------------------------------
-Changes since 8.1.1:
+Admin Toolbar 8.x-1.2, 2015-05-19
+---------------------------------
+Changes since 8.x-1.1:
 
 - by matio89: add new functionalities.
 - by matio89: add administration devel link.
 - by matio89: correction reload page.
 - by matio89: correction redirect to the same page.
 
-Admin Toolbar 8.1.1, 2015-05-19
--------------------------------
-Changes since 8.1.0:
+Admin Toolbar 8.x-1.1, 2015-05-19
+---------------------------------
+Changes since 8.x-1.0:
 
 - by matio89: add new functionalities.
 
-Admin Toolbar 8.1.0, 2015-05-07
--------------------------------
+Admin Toolbar 8.x-1.0, 2015-05-07
+---------------------------------
 - Initial release.

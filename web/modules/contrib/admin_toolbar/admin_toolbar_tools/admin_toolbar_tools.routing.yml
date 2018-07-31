@@ -61,6 +61,15 @@ admin_toolbar_tools.flush_views:
     _permission: 'administer site configuration'
     _csrf_token: 'TRUE'
 
+admin_toolbar_tools.flush_twig:
+  path: '/admin/flush/twig'
+  defaults:
+    _controller: '\Drupal\admin_toolbar_tools\Controller\ToolbarController::flushTwig'
+    _title: 'Twig'
+  requirements:
+    _permission: 'administer site configuration'
+    _csrf_token: 'TRUE'
+
 admin_toolbar.run.cron:
   path: '/run-cron'
   defaults:

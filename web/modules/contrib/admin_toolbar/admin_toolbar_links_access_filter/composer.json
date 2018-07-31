@@ -1,6 +1,6 @@
 {
-  "name": "drupal/admin_toolbar",
-  "description": "Provides a drop-down menu interface to the core Drupal Toolbar.",
+  "name": "drupal/admin_toolbar_links_access_filter",
+  "description": "Provides a workaround for the common problem that users with 'Use the administration pages and help' permission see menu links they don't have access permission for. Once the issue https://www.drupal.org/node/296693 be solved, this module will be deprecated.",
   "type": "drupal-module",
   "keywords": ["Drupal", "Toolbar"],
   "homepage": "http://drupal.org/project/admin_toolbar",
@@ -31,5 +31,8 @@
   "support": {
     "issues": "https://www.drupal.org/project/issues/admin_toolbar",
     "source": "http://cgit.drupalcode.org/admin_toolbar"
+  },
+  "require": {
+    "drupal/admin_toolbar": "^1"
   }
 }

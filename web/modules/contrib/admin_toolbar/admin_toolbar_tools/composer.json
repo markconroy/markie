@@ -1,6 +1,6 @@
 {
-  "name": "drupal/admin_toolbar",
-  "description": "Provides a drop-down menu interface to the core Drupal Toolbar.",
+  "name": "drupal/admin_toolbar_tools",
+  "description": "Adds menu links to the Admin Toolbar.",
   "type": "drupal-module",
   "keywords": ["Drupal", "Toolbar"],
   "homepage": "http://drupal.org/project/admin_toolbar",
@@ -31,5 +31,9 @@
   "support": {
     "issues": "https://www.drupal.org/project/issues/admin_toolbar",
     "source": "http://cgit.drupalcode.org/admin_toolbar"
+  },
+  "require": {
+    "drupal/admin_toolbar": "^1",
+    "drupal/core": "~8.3"
   }
 }

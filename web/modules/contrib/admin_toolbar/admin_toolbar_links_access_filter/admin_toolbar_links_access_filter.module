@@ -20,7 +20,7 @@ function admin_toolbar_links_access_filter_help($route_name, RouteMatchInterface
     case 'help.page.admin_toolbar_links_access_filter':
       $output = '';
       $output .= '<h3>' . t('About') . '</h3>';
-      $output .= '<p>' . t("The Admin Toolbar Links Access Filter module Provides a workaround for the common problem that users with <em>Use the administration pages and help</em> permission see menu links they don't have access permission for. Once the issue <a href='@url'>Hide empty admin categories</a> be solved, this module will be deprecated.", ['@url' => Url::fromUri('https://www.drupal.org/node/296693')->toString()]) . '</p>';
+      $output .= '<p>' . t('The Admin Toolbar Links Access Filter module provides a workaround for the common problem that users with <em>Use the administration pages and help</em> permission see menu links they done not have access permission for.') . '</p>';
 
       return $output;
   }
@@ -184,10 +184,17 @@ function admin_toolbar_links_access_filter_is_overview_page($route_name) {
  *   assigned, FALSE otherwise.
  */
 function admin_toolbar_links_access_filter_user_has_admin_role(AccountInterface $account) {
-  foreach ($account->getRoles() as $role_id) {
-    if (Role::load($role_id)->isAdmin()) {
-      return TRUE;
+  static $user_has_admin_role = [];
+  $uid = $account->id();
+  if (!isset($user_has_admin_role[$uid])) {
+    $roles = Role::loadMultiple($account->getRoles());
+    foreach ($roles as $role) {
+      if ($role->isAdmin()) {
+        $user_has_admin_role[$uid] = TRUE;
+        break;
+      }
+      $user_has_admin_role[$uid] = FALSE;
     }
   }
-  return FALSE;
+  return $user_has_admin_role[$uid];
 }

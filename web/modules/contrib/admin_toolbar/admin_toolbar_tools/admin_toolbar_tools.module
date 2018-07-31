@@ -5,7 +5,6 @@
  * Provides extra menu links for the core drupal toolbar.
  */
 
-use Drupal\Core\Link;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Url;
 
@@ -34,21 +33,12 @@ function admin_toolbar_tools_toolbar() {
 function admin_toolbar_tools_help($route_name, RouteMatchInterface $route_match) {
   switch ($route_name) {
     case 'help.page.admin_toolbar_tools':
-      $url = Url::fromUri('https://www.drupal.org/project/admin_toolbar');
-      $external_link = Link::fromTextAndUrl(t('Admin Toolbar'), $url);
-      $external_link2 = Link::fromTextAndUrl(t('Toolbar'), $url);
-      $url = Url::fromUri('https://www.drupal.org/node/2713693');
-      $external_link3 = Link::fromTextAndUrl(t('online documentation for Admin Toolbar'), $url);
       $output = '';
       $output .= '<p>';
-      $output .= t('The Admin Toolbar Extra Tools module comes packaged with the :link module and adds functionality to it. The additional functionality is accessed thru extra links on the main administration :link2.  Some links to Admin Toolbar Extra Tools administration pages are located at the bottom of this page. For more information, see the :link3', [
-        ':link' => $external_link,
-        ':link2' => $external_link2,
-        ':link3' => $external_link3,
-      ]);
+      $output .= t('The Admin Toolbar Extra Tools module comes packaged with the <a href=":admin-toolbar">Admin Toolbar</a> module and adds functionality to it. The additional functionality is accessed thru extra links on the main administration Toolbar. Some links to Admin Toolbar Extra Tools administration pages are located at the bottom of this page.</a>', [':admin-toolbar' => Url::fromRoute('help.page', ['name' => 'admin_toolbar'])->toString()]);
       $output .= '</p>';
       $output .= '<h3>' . t('Uses') . '</h3>';
-      $output .= '<p>' . t('To use Admin Toolbar Extra Tools just install it like any other module.  There is no other configuration required. The Admin Toolbar functionality can be further extended by installing complimentary modules.  See :link for a complete listing of these complimentary modules.', [':link' => $external_link]) . '</p>';
+      $output .= '<p>' . t('To use Admin Toolbar Extra Tools just install it like any other module. There is no other configuration required.') . '</p>';
 
       return $output;
   }
@@ -85,6 +75,15 @@ function admin_toolbar_tools_menu_links_discovered_alter(&$links) {
       'menu_name' => 'admin',
       'parent' => 'admin_toolbar_tools.flush',
     ];
+    // Adding a menu link to Files.
+    if ($moduleHandler->moduleExists('file') && in_array('view.files.page_1', $routes)) {
+      $links['admin_toolbar_tools.view.files'] = [
+        'title' => t('Files'),
+        'route_name' => 'view.files.page_1',
+        'menu_name' => 'admin',
+        'parent' => 'system.admin_content',
+      ];
+    }
   }
 
   // Adds common links to entities.
@@ -568,7 +567,7 @@ function admin_toolbar_tools_menu_links_discovered_alter(&$links) {
     ];
     // Add node links for each media type.
     foreach (\Drupal::entityTypeManager()->getStorage('media_type')->loadMultiple() as $type) {
-      $links['node.add.' . $type->id()] = [
+      $links['media.add.' . $type->id()] = [
         'title' => t($type->label()),
         'route_name' => 'entity.media.add_form',
         'parent' => 'admin_toolbar_tools.add_media',

@@ -63,6 +63,12 @@ admin_toolbar_tools.flush_menu:
   parent: admin_toolbar_tools.flush
   menu_name: admin
 
+admin_toolbar_tools.flush_twig:
+  title: 'Flush twig cache'
+  route_name: admin_toolbar_tools.flush_twig
+  parent: admin_toolbar_tools.flush
+  menu_name: admin
+
 admin_toolbar_tools.flush_rendercache:
   title: 'Flush render cache'
   route_name: admin_toolbar_tools.flush_rendercache
