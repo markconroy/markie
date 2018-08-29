@@ -20,6 +20,7 @@ settings:
             - Bold
             - Italic
             - Strike
+            - JustifyCenter
         -
           name: Linking
           items:
