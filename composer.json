@@ -45,7 +45,7 @@
         "drupal/entity_reference_revisions": "1.4",
         "drupal/field_group": "1.0",
         "drupal/focal_point": "1.0-beta4",
-        "drupal/honeypot": "1.27",
+        "drupal/honeypot": "1.28.0",
         "drupal/image_widget_crop": "2.1",
         "drupal/inline_entity_form": "1.0-beta1",
         "drupal/media_entity": "1.7",
