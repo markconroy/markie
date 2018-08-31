@@ -918,10 +918,10 @@ pre code:after, pre code:before {
 }
 
 .main-navigation .menu-toggle {
-  background: white;
-  border: none;
-  color: #292929;
   cursor: pointer;
+  color: #292929;
+  border: none;
+  background: white;
 }
 
 @media (min-width: 768px) {
@@ -956,15 +956,15 @@ pre code:after, pre code:before {
 }
 
 .main-navigation .menu-item {
-  font-size: 14px;
-  list-style: none;
-  margin: 0 .5rem;
+  margin: 0 0.5rem;
   padding: 0;
+  list-style: none;
+  font-size: 14px;
 }
 
 .main-navigation .menu-item a {
-  color: #292929;
   text-decoration: none;
+  color: #292929;
 }
 
 .main-navigation .menu-item a:focus, .main-navigation .menu-item a:hover {
