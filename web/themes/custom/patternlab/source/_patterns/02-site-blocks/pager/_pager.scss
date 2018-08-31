@@ -1,0 +1,19 @@
+.pager__items {
+  display: flex;
+  justify-content: space-around;
+  padding: 0;
+}
+
+.pager__item {
+  padding: 0;
+  list-style: none;
+}
+
+.pager__item a {
+  text-decoration: none;
+}
+
+.pager__item.is-active a {
+  text-decoration: underline;
+  font-weight: bold;
+}
