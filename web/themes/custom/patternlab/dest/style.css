@@ -617,22 +617,9 @@ sub {
 }
 
 html {
-  font-size: 14px;
   box-sizing: border-box;
   color: #292929;
-  font-size: 18px;
-}
-
-@media screen and (min-width: 380px) {
-  html {
-    font-size: calc(14px + 4 * (100vw - 380px) / 790);
-  }
-}
-
-@media screen and (min-width: 1170px) {
-  html {
-    font-size: 18px;
-  }
+  font-size: 1rem;
 }
 
 *,
@@ -918,16 +905,12 @@ pre code:after, pre code:before {
 }
 
 .main-navigation .menu-toggle {
+  margin-top: 1rem;
   cursor: pointer;
   color: #292929;
   border: none;
   background: white;
-}
-
-@media (min-width: 768px) {
-  .main-navigation .menu-toggle {
-    margin-top: 1rem;
-  }
+  font-size: 1rem;
 }
 
 @media (min-width: 1024px) {
@@ -956,13 +939,14 @@ pre code:after, pre code:before {
 }
 
 .main-navigation .menu-item {
-  margin: 0 0.5rem;
+  margin: 0.25rem 0.5rem;
   padding: 0;
   list-style: none;
-  font-size: 14px;
 }
 
 .main-navigation .menu-item a {
+  display: block;
+  padding: 0.25rem 0;
   text-decoration: none;
   color: #292929;
 }
@@ -1058,6 +1042,28 @@ pre code:after, pre code:before {
 
 .messages--error p.error {
   color: #a51b00;
+}
+
+.pager__items {
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-pack: distribute;
+      justify-content: space-around;
+  padding: 0;
+}
+
+.pager__item {
+  padding: 0;
+  list-style: none;
+}
+
+.pager__item a {
+  text-decoration: none;
+}
+
+.pager__item.is-active a {
+  text-decoration: underline;
+  font-weight: bold;
 }
 
 .block-search form .form--inline {
@@ -2015,10 +2021,10 @@ pre code:after, pre code:before {
 }
 
 .header {
-  background: white;
-  border-bottom: 1px solid #999999;
-  padding-bottom: 23.4px;
   padding-top: 23.4px;
+  padding-bottom: 23.4px;
+  border-bottom: 1px solid #999999;
+  background: white;
 }
 
 .header__inner {
@@ -2036,27 +2042,13 @@ pre code:after, pre code:before {
 }
 
 .header .branding {
-  -ms-flex: 0 0 60%;
-      flex: 0 0 60%;
-}
-
-@media (min-width: 1024px) {
-  .header .branding {
-    -ms-flex-preferred-size: 50%;
-        flex-basis: 50%;
-  }
+  -ms-flex: 0 0 50%;
+      flex: 0 0 50%;
 }
 
 .header .main-navigation {
-  -ms-flex: 0 0 40%;
-      flex: 0 0 40%;
-}
-
-@media (min-width: 1024px) {
-  .header .main-navigation {
-    -ms-flex-preferred-size: 50%;
-        flex-basis: 50%;
-  }
+  -ms-flex: 0 0 50%;
+      flex: 0 0 50%;
 }
 
 .page-title {

@@ -39,6 +39,13 @@
 })(jQuery, Drupal);
 "use strict";
 
+(function pagerScript($, Drupal) {
+  Drupal.behaviors.pager = {
+    attach: function attach(context) {}
+  };
+})(jQuery, Drupal);
+"use strict";
+
 (function searchblockScript($, Drupal) {
   Drupal.behaviors.searchblock = {
     attach: function attach(context) {}
@@ -218,17 +225,16 @@
     attach: function attach(context) {}
   };
 })(jQuery, Drupal);
-'use strict';
+"use strict";
 
 (function messagesScript($, Drupal) {
   Drupal.behaviors.menu_block_main_navigation = {
     attach: function attach(context) {
-      var $menuToggle = $('.menu-toggle');
-      var $mainMenu = $('.main-navigation .main-navigation__menu');
+      var $menuToggle = $(".menu-toggle");
+      var $mainMenu = $(".main-navigation .main-navigation__menu");
 
       function mainMenu() {
-
-        if ($(window).width() > 1024) {
+        if ($(window).width() > 1023) {
           $mainMenu.show();
         } else {
           $mainMenu.hide();
