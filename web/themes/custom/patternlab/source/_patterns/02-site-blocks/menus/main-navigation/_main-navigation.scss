@@ -3,10 +3,10 @@
 }
 
 .main-navigation .menu-toggle {
-  background: $c-white;
-  border: none;
-  color: $c-grey--darkest;
   cursor: pointer;
+  color: $c-grey--darkest;
+  border: none;
+  background: $c-white;
   @include breakpoint($bp--large) {
     margin-top: 1rem;
   }
@@ -30,15 +30,15 @@
 }
 
 .main-navigation .menu-item {
-  font-size: $fs--14px;
-  list-style: none;
-  margin: 0 .5rem;
+  margin: 0 0.5rem;
   padding: 0;
+  list-style: none;
+  font-size: $fs--14px;
 }
 
 .main-navigation .menu-item a {
-  color: $c-grey--darkest;
   text-decoration: none;
+  color: $c-grey--darkest;
   &:focus,
   &:hover {
     text-decoration: underline;
