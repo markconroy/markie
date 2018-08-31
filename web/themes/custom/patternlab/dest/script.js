@@ -256,15 +256,15 @@
 })(jQuery, Drupal);
 "use strict";
 
-(function defaultScript($, Drupal) {
-  Drupal.behaviors.default = {
+(function teaserScript($, Drupal) {
+  Drupal.behaviors.teaser = {
     attach: function attach(context) {}
   };
 })(jQuery, Drupal);
 "use strict";
 
-(function teaserScript($, Drupal) {
-  Drupal.behaviors.teaser = {
+(function defaultScript($, Drupal) {
+  Drupal.behaviors.default = {
     attach: function attach(context) {}
   };
 })(jQuery, Drupal);

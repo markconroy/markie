@@ -39,24 +39,20 @@ $theme-colours: (primary, $c-primary),
 (grey--darkest, $c-grey--darkest),
 (black, $c-black);
 
-@each $theme-colour, $colour in $theme-colours
-{
-    .bg-#{$theme-colour}
-    {
-        background: $colour;
-    }
+@each $theme-colour, $colour in $theme-colours {
+  .bg-#{$theme-colour} {
+    background: $colour;
+  }
 }
 
 .bg-primary,
-.bg-secondary
-{
-    color: $c-white;
+.bg-secondary {
+  color: $c-white;
 }
 
 .bg-primary.bulky,
 .bg-secondary.bulky,
-.bg-tertiary.bulky
-{
-    margin-bottom: $base-line-height;
-    padding: 1rem;
+.bg-tertiary.bulky {
+  margin-bottom: $base-line-height;
+  padding: 1rem;
 }
