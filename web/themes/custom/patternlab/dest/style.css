@@ -662,80 +662,121 @@ body {
 
 @media (min-width: 1024px) {
   .h1--special {
-    font-size: 82.998px;
+    font-size: 4.611rem;
   }
 }
 
-h1, .h1 {
+h1,
+.h1 {
   color: #e61313;
   font-family: serif;
-  font-size: 23.4px;
+  font-size: 1.3rem;
   font-weight: normal;
 }
 
 @media (min-width: 500px) {
-  h1, .h1 {
-    font-size: 30.375px;
+  h1,
+  .h1 {
+    font-size: 1.6875rem;
   }
 }
 
 @media (min-width: 1024px) {
-  h1, .h1 {
-    font-size: 50.004px;
+  h1,
+  .h1 {
+    font-size: 2.778rem;
   }
 }
 
-h2, .h2, .tile .title-only {
+h2,
+.h2,
+.tile .title-only {
   color: #002a2a;
   font-family: serif;
-  font-size: 23.4px;
+  font-size: 1.3rem;
   font-weight: normal;
 }
 
 @media (min-width: 1024px) {
-  h2, .h2, .tile .title-only {
-    font-size: 30.006px;
+  h2,
+  .h2,
+  .tile .title-only {
+    font-size: 1.667rem;
   }
 }
 
-h2.node__title a, .h2.node__title a, .tile .node__title.title-only a {
+h2.node__title a,
+.h2.node__title a, .tile .node__title.title-only a {
   color: #e61313;
 }
 
-h2.node__title a:focus, h2.node__title a:hover, .h2.node__title a:focus, .tile .node__title.title-only a:focus, .h2.node__title a:hover, .tile .node__title.title-only a:hover {
+h2.node__title a:focus, h2.node__title a:hover,
+.h2.node__title a:focus, .tile .node__title.title-only a:focus,
+.h2.node__title a:hover, .tile .node__title.title-only a:hover {
   color: #002a2a;
 }
 
-h3, .h3 {
-  color: #002a2a;
-  font-family: serif;
-  font-weight: normal;
-}
-
-h4, .h4 {
+h3,
+.h3 {
   color: #002a2a;
   font-family: serif;
+  font-size: 1rem;
   font-weight: normal;
 }
 
-h5, .h5 {
+@media (min-width: 1024px) {
+  h3,
+  .h3 {
+    font-size: 1.4rem;
+  }
+}
+
+h4,
+.h4 {
   color: #002a2a;
   font-family: serif;
+  font-size: 1rem;
   font-weight: normal;
 }
 
-h6, .h6 {
+h5,
+.h5 {
   color: #002a2a;
+  font-family: serif;
+  font-size: 0.8rem;
   font-weight: normal;
 }
 
-ul + h2, ul + .h2, .tile ul + .title-only,
-ul + h3, ul + .h3,
-ul + h4, ul + .h4, ol + h2, ol + .h2, .tile ol + .title-only,
-ol + h3, ol + .h3,
-ol + h4, ol + .h4, p + h2, p + .h2, .tile p + .title-only,
-p + h3, p + .h3,
-p + h4, p + .h4 {
+h6,
+.h6 {
+  text-transform: uppercase;
+  text-transform: uppercase;
+  color: #002a2a;
+  font-size: 0.66rem;
+  font-weight: bold;
+}
+
+ul + h2,
+ul + .h2, .tile
+ul + .title-only,
+ul + h3,
+ul + .h3,
+ul + h4,
+ul + .h4,
+ol + h2,
+ol + .h2, .tile
+ol + .title-only,
+ol + h3,
+ol + .h3,
+ol + h4,
+ol + .h4,
+p + h2,
+p + .h2, .tile
+p + .title-only,
+p + h3,
+p + .h3,
+p + h4,
+p + .h4 {
   margin-top: 46.8px;
 }
 
