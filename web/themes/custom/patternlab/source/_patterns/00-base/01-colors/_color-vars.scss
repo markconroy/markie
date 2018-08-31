@@ -1,4 +1,4 @@
-$c-primary: #ff2c2c; // Red
+$c-primary: #e61313; // Red
 $c-primary--light: lighten($c-primary, 15%); // Light Red
 $c-primary--dark: darken($c-primary, 15%); // Dark Red
 
@@ -20,8 +20,7 @@ $c-grey--darker: hsl(0, 0%, 20%); // Darker Grey
 $c-grey--darkest: hsl(0, 0%, 16.1%); // Darkest Grey
 $c-black: black; // Black
 
-$theme-colours:
-(primary, $c-primary),
+$theme-colours: (primary, $c-primary),
 (primary--light, $c-primary--light),
 (primary--dark, $c-primary--dark),
 (secondary, $c-secondary),
@@ -40,20 +39,24 @@ $theme-colours:
 (grey--darkest, $c-grey--darkest),
 (black, $c-black);
 
-@each $theme-colour, $colour in $theme-colours {
-  .bg-#{$theme-colour} {
-    background: $colour;
-  }
+@each $theme-colour, $colour in $theme-colours
+{
+    .bg-#{$theme-colour}
+    {
+        background: $colour;
+    }
 }
 
 .bg-primary,
-.bg-secondary {
-  color: $c-white;
+.bg-secondary
+{
+    color: $c-white;
 }
 
 .bg-primary.bulky,
 .bg-secondary.bulky,
-.bg-tertiary.bulky {
-  margin-bottom: $base-line-height;
-  padding: 1rem;
+.bg-tertiary.bulky
+{
+    margin-bottom: $base-line-height;
+    padding: 1rem;
 }
