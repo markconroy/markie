@@ -4,6 +4,8 @@ status: true
 dependencies:
   config:
     - field.field.node.page.field_building_blocks
+    - field.field.node.page.field_intro
+    - field.field.node.page.field_metatags
     - node.type.page
   module:
     - entity_reference_revisions
