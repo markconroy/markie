@@ -1,9 +1,0 @@
-paragraph:
-  field_p_tile_title:
-    value: false
-  field_p_tile_text:
-    value: true
-  field_p_tile_size:
-    value: medium
-  field_p_tile_bg_colour:
-    value: bg--1

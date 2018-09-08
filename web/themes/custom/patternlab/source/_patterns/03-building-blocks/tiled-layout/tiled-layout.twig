@@ -1,18 +1,25 @@
 {%
 set classes = [
   "tiled-layout",
-  "padding"
 ]
 %}
 
-<div class="layout-contained">
+<div class="layout-contained padding-horizontal">
   <div{{ attributes.addClass(classes) }}>
 
-    {% block content %}
-      {% for tiled_item in content.field_p_tl_tiles %}
-        {{ tiled_item }}
+    {% block tiles %}
+      {% for tile in tiles %}
+        {{ tile }}
       {% endfor %}
     {% endblock %}
 
   </div>
 </div>
+{% block content_variable %}
+  {#
+    This allows the cache_context to bubble up for us, without having to
+    individually list every field in
+    {{ content|without('field_name', 'field_other_field', 'field_etc') }}
+  #}
+  {% set catch_cache = content|render %}
+{% endblock %}

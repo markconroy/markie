@@ -1,0 +1,40 @@
+tiles:
+  - join():
+    - include():
+        pattern: "building-blocks-tile"
+        with:
+          tile_image: '<img src="https://placeimg.com/440/220/tech">'
+          tile_style: 'primary'
+          tile_size: 'small'
+    - include():
+        pattern: "building-blocks-tile"
+        with:
+          tile_style: 'secondary'
+          tile_size: 'small'
+          tile_link_url: link.sample-pages-basic-page
+          tile_title: 'Linked Image Tile'
+          tile_image: '<img src="https://placeimg.com/440/220/tech">'
+    - include():
+        pattern: "building-blocks-tile"
+        with:
+          tile_style: 'primary'
+          tile_size: 'small'
+          tile_image: '<img src="https://placeimg.com/440/220/nature">'
+    - include():
+        pattern: "building-blocks-tile"
+        with:
+          tile_style: 'secondary'
+          tile_size: 'small'
+          tile_image: '<img src="https://placeimg.com/440/220/people">'
+    - include():
+        pattern: "building-blocks-tile"
+        with:
+          tile_style: 'primary'
+          tile_size: 'small'
+          tile_image: '<img src="https://placeimg.com/440/220/people">'
+    - include():
+        pattern: "building-blocks-tile"
+        with:
+          tile_style: 'secondary'
+          tile_size: 'small'
+          tile_image: '<img src="https://placeimg.com/440/220/people">'

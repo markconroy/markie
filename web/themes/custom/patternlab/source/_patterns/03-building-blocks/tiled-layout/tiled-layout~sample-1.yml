@@ -1,0 +1,22 @@
+tiles:
+  - join():
+    - include():
+        pattern: "building-blocks-tile"
+        with:
+          tile_style: 'primary'
+          tile_size: 'full'
+    - include():
+        pattern: "building-blocks-tile"
+        with:
+          tile_size: 'medium'
+          tile_style: 'tertiary'
+    - include():
+        pattern: "building-blocks-tile"
+        with:
+          tile_size: 'medium'
+          tile_style: tertiary
+    - include():
+        pattern: "building-blocks-tile"
+        with:
+          tile_style: 'primary'
+          tile_size: 'full'

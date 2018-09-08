@@ -1,17 +1,11 @@
-label: <span class="field--name-title">This is a Basic Page with a Tiled Layout Component</span>
-
-content:
-  field_building_blocks:
-    item_1:
-      include():
-        pattern: building-blocks-text-paragraph-x1
-    item_2:
-      include():
+label: 'This is a Basic Page with a Tiled Layout Component'
+building_blocks:
+  - join():
+    - include():
+        pattern: 'building-blocks-text-paragraph-x2'
+  - join():
+    - include():
         pattern: building-blocks-tiled-layout
-    item_3:
-      include():
-        pattern: building-blocks-text-paragraph-x3
-    item_4:
-    item_5:
-    item_6:
-    item_7:
+  - join():
+    - include():
+        pattern: 'building-blocks-text-paragraph-x2'

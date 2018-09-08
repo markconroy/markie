@@ -1,18 +1,15 @@
-content:
-  field_p_tl_tiles:
-    item_1:
-      include():
-        pattern: building-blocks-tile-small-title
-    item_2:
-      include():
-        pattern: building-blocks-tile-medium-title
-    item_3:
-      include():
-        pattern: building-blocks-tile-large-title-text-image
-    item_4:
-      include():
-        pattern: building-blocks-tile
-    item_5:
-      include():
-        pattern: building-blocks-tile-medium-title-text-image
-    item_6:
+tiles:
+  - join():
+    - include():
+        pattern: "building-blocks-tile"
+        with:
+          tile_size: 'medium'
+          tile_link_url: link.sample-pages-basic-page
+          tile_style: 'tertiary'
+    - include():
+        pattern: "building-blocks-tile"
+        with:
+          tile_title: 'Getting Stuff done with PatternLab'
+          tile_text: '<em>Help others to integrate Drupal with PatternLab the ''right'' way</em>'
+          tile_size: 'medium'
+          tile_style: 'secondary'
