@@ -32,13 +32,6 @@
 })(jQuery, Drupal);
 "use strict";
 
-(function messagesScript($, Drupal) {
-  Drupal.behaviors.messages = {
-    attach: function attach(context) {}
-  };
-})(jQuery, Drupal);
-"use strict";
-
 (function pagerScript($, Drupal) {
   Drupal.behaviors.pager = {
     attach: function attach(context) {}
@@ -48,6 +41,13 @@
 
 (function searchblockScript($, Drupal) {
   Drupal.behaviors.searchblock = {
+    attach: function attach(context) {}
+  };
+})(jQuery, Drupal);
+"use strict";
+
+(function messagesScript($, Drupal) {
+  Drupal.behaviors.messages = {
     attach: function attach(context) {}
   };
 })(jQuery, Drupal);

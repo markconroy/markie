@@ -15,11 +15,14 @@ set classes = [
     <h1{{ title_attributes.addClass('padding') }}>{{ label }}</h1>
   {{ title_suffix }}
 
-  {{ content.field_intro }}
+  {% if intro %}
+    {{ intro }}
+  {% endif %}
+
 
   {% block building_blocks %}
     <div class="building-blocks">
-      {% for building_block in content.field_building_blocks %}
+      {% for building_block in building_blocks %}
         <div class="building-block">
           {{ building_block }}
         </div>

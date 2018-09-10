@@ -25,16 +25,19 @@ set classes = [
     <h1{{ title_attributes.addClass('padding') }}>{{ label }}</h1>
   {{ title_suffix }}
 
-  {{ content.field_intro }}
-  {% if content.field_main_image %}
+  {% if intro %}
+    {{ intro }}
+  {% endif %}
+
+  {% if main_image %}
     <div class="layout-contained--medium">
-      {{ content.field_main_image }}
+      {{ main_image }}
     </div>
   {% endif %}
 
   {% block building_blocks %}
     <div class="building-blocks">
-      {% for building_block in content.field_building_blocks %}
+      {% for building_block in building_blocks %}
         <div class="building-block">
           {{ building_block }}
         </div>
