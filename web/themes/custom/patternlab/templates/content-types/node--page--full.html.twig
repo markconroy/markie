@@ -1,5 +1,11 @@
-{% extends '@content/basic-page/basic-page.twig' %}
+{% if node.field_intro.value %}
+  {% set intro = content.field_intro %}
+{% endif %}
+
+{% embed '@content/basic-page/basic-page.twig' %}
 
 {% block building_blocks %}
   {{ content.field_building_blocks }}
 {% endblock %}
+
+{% endembed %}

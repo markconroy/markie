@@ -1,21 +1,18 @@
 label: <span class="field--name-title">This is a Basic Page with Image with Text Building Block </span>
 
-content:
-  field_building_blocks:
-    item_1:
-      include():
+building_blocks:
+  - join():
+    - include():
         pattern: building-blocks-text-paragraph-x3-with-headings
-    item_2:
-      include():
+  - join():
+    - include():
         pattern: building-blocks-image-with-text
-    item_3:
-      include():
+  - join():
+    - include():
         pattern: building-blocks-text-paragraph-x3
-    item_4:
-      include():
+  - join():
+    - include():
         pattern: building-blocks-image-with-text-right
-    item_5:
-      include():
+  - join():
+    - include():
         pattern: building-blocks-text-paragraph-x3
-    item_6:
-    item_7:

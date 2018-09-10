@@ -1,5 +1,15 @@
-{% extends '@content/article/article.twig' %}
+{% if node.field_intro.value %}
+  {% set intro = content.field_intro %}
+{% endif %}
+
+{% if node.field_main_image.value %}
+  {% set main_image = content.field_main_image %}
+{% endif %}
+
+{% embed '@content/article/article.twig' %}
 
 {% block building_blocks %}
   {{ content.field_building_blocks }}
 {% endblock %}
+
+{% endembed %}
