@@ -1,0 +1,33 @@
+uuid: 3e0a0592-daa3-4c6e-90a3-3c52c56f73e5
+langcode: en
+status: true
+dependencies:
+  config:
+    - views.view.related_articles
+  module:
+    - ctools
+    - views
+  theme:
+    - patternlab
+id: views_block__related_articles_block_1
+theme: patternlab
+region: content
+weight: 0
+provider: null
+plugin: 'views_block:related_articles-block_1'
+settings:
+  id: 'views_block:related_articles-block_1'
+  label: ''
+  provider: views
+  label_display: visible
+  views_label: ''
+  items_per_page: none
+  context_mapping: {  }
+visibility:
+  'entity_bundle:node':
+    id: 'entity_bundle:node'
+    bundles:
+      article: article
+    negate: false
+    context_mapping:
+      node: '@node.node_route_context:node'
