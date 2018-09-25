@@ -1824,6 +1824,43 @@ a.tile--tertiary:hover .tile__text {
   }
 }
 
+.indented {
+  margin-right: -1rem;
+  margin-left: 1rem;
+}
+
+@media (min-width: 640px) {
+  .indented {
+    margin-right: -3rem;
+    margin-left: 3rem;
+  }
+}
+
+.comment {
+  margin-bottom: 23.4px;
+  padding: 1rem;
+  border: 1px solid #7a7a7a;
+  border-left: 4px solid #7a7a7a;
+}
+
+.comment.by-node-author {
+  padding: 1rem;
+  border-left: 4px solid #e61313;
+  background-color: rgba(230, 19, 19, 0.1);
+}
+
+.comment .field--name-comment-body {
+  margin-right: 1rem;
+  margin-left: 1rem;
+}
+
+@media (min-width: 640px) {
+  .comment .field--name-comment-body {
+    margin-right: 3rem;
+    margin-left: 3rem;
+  }
+}
+
 .comment-form {
   margin-bottom: 23.4px;
 }
@@ -1851,9 +1888,9 @@ a.tile--tertiary:hover .tile__text {
 
 .comment-form .form-text,
 .comment-form textarea {
-  max-width: 100%;
-  padding: .5rem 1rem;
   width: 100%;
+  max-width: 100%;
+  padding: 0.5rem 1rem;
 }
 
 .comment-form .filter-wrapper {

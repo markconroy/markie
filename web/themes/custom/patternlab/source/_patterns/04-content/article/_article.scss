@@ -8,6 +8,37 @@
   }
 }
 
+.indented {
+  margin-right: -1rem;
+  margin-left: 1rem;
+  @include breakpoint($bp--medium) {
+    margin-right: -3rem;
+    margin-left: 3rem;
+  }
+}
+
+.comment {
+  margin-bottom: $base-line-height;
+  padding: 1rem;
+  border: 1px solid $c-grey;
+  border-left: 4px solid $c-grey;
+}
+
+.comment.by-node-author {
+  padding: 1rem;
+  border-left: 4px solid $c-primary;
+  background-color: rgba($c-primary, 0.1);
+}
+
+.comment .field--name-comment-body {
+  margin-right: 1rem;
+  margin-left: 1rem;
+  @include breakpoint($bp--medium) {
+    margin-right: 3rem;
+    margin-left: 3rem;
+  }
+}
+
 .comment-form {
   margin-bottom: $base-line-height;
   @include breakpoint($bp--medium) {
@@ -29,9 +60,9 @@
 
 .comment-form .form-text,
 .comment-form textarea {
-  max-width: 100%;
-  padding: .5rem 1rem;
   width: 100%;
+  max-width: 100%;
+  padding: 0.5rem 1rem;
 }
 
 .comment-form .filter-wrapper {

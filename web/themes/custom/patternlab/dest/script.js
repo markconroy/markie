@@ -32,8 +32,8 @@
 })(jQuery, Drupal);
 "use strict";
 
-(function pagerScript($, Drupal) {
-  Drupal.behaviors.pager = {
+(function messagesScript($, Drupal) {
+  Drupal.behaviors.messages = {
     attach: function attach(context) {}
   };
 })(jQuery, Drupal);
@@ -46,8 +46,8 @@
 })(jQuery, Drupal);
 "use strict";
 
-(function messagesScript($, Drupal) {
-  Drupal.behaviors.messages = {
+(function pagerScript($, Drupal) {
+  Drupal.behaviors.pager = {
     attach: function attach(context) {}
   };
 })(jQuery, Drupal);
@@ -89,13 +89,6 @@
 
 (function imagewithtextScript($, Drupal) {
   Drupal.behaviors.imagewithtext = {
-    attach: function attach(context) {}
-  };
-})(jQuery, Drupal);
-"use strict";
-
-(function largeimagectaScript($, Drupal) {
-  Drupal.behaviors.largeimagecta = {
     attach: function attach(context) {}
   };
 })(jQuery, Drupal);
@@ -201,6 +194,13 @@
 
 (function pagetitleScript($, Drupal) {
   Drupal.behaviors.pagetitle = {
+    attach: function attach(context) {}
+  };
+})(jQuery, Drupal);
+"use strict";
+
+(function largeimagectaScript($, Drupal) {
+  Drupal.behaviors.largeimagecta = {
     attach: function attach(context) {}
   };
 })(jQuery, Drupal);
