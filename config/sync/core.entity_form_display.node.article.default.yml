@@ -18,6 +18,7 @@ dependencies:
     - inline_entity_form
     - metatag
     - paragraphs
+    - path
     - text
 third_party_settings:
   field_group:
@@ -138,6 +139,12 @@ content:
       size: 60
       placeholder: ''
     third_party_settings: {  }
+  path:
+    type: path
+    weight: 6
+    region: content
+    settings: {  }
+    third_party_settings: {  }
   status:
     type: boolean_checkbox
     settings:
@@ -154,12 +161,11 @@ content:
       placeholder: ''
     third_party_settings: {  }
   url_redirects:
-    weight: 50
+    weight: 5
+    region: content
     settings: {  }
     third_party_settings: {  }
-    region: content
 hidden:
-  path: true
   promote: true
   sticky: true
   uid: true
