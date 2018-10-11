@@ -7,7 +7,7 @@ use Drupal\path\Plugin\Field\FieldType\PathFieldItemList;
 class PathautoFieldItemList extends PathFieldItemList {
 
   /**
-   * @inheritDoc
+   * @{inheritdoc}
    */
   protected function delegateMethod($method) {
     // @todo Workaround until this is fixed, see
@@ -27,7 +27,7 @@ class PathautoFieldItemList extends PathFieldItemList {
   }
 
   /**
-   * @inheritDoc
+   * @{inheritdoc}
    */
   protected function computeValue() {
     parent::computeValue();
@@ -36,14 +36,6 @@ class PathautoFieldItemList extends PathFieldItemList {
     if ($this->getEntity()->isNew()) {
       $this->list[0]->set('pathauto', PathautoState::CREATE);
     }
-  }
-
-  /**
-   * @inheritDoc
-   */
-  public function delete() {
-    \Drupal::service('pathauto.alias_storage_helper')->deleteEntityPathAll($this->getEntity());
-    $this->first()->get('pathauto')->purge();
   }
 
 }
