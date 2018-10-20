@@ -1184,8 +1184,8 @@ a:focus, a:hover {
 
 @media (min-width: 768px) {
   .code-block {
-    margin-top: -5rem;
-    margin-bottom: -4rem;
+    margin-top: -4rem;
+    margin-bottom: -3rem;
   }
 }
 
