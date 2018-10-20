@@ -1183,6 +1183,13 @@ a:focus, a:hover {
 }
 
 @media (min-width: 768px) {
+  .code-block {
+    margin-top: -5rem;
+    margin-bottom: -4rem;
+  }
+}
+
+@media (min-width: 768px) {
   .file-upload {
     margin-left: -5px;
   }
