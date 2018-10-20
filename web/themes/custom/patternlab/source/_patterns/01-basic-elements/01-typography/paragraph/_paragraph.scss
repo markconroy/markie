@@ -10,27 +10,16 @@ a {
   }
 }
 
-// inline code wrappers, Markdown style
-code {
-  &:before {
-    content: '`';
-  }
-  &:after {
-    content: '`';
-  }
-  // don't show it when in a block of code
-  pre & {
-    &:after,
-    &:before {
-      content: '';
-    }
-  }
-}
-
 .text--large {
+  @include fluid-type(
+    font-size,
+    $bp--xsmall,
+    $bp--xxlarge,
+    $base-font-size,
+    $base-font-size * 1.6
+  );
   @extend .padding;
-  @include fluid-type(font-size, $bp--xsmall, $bp--xxlarge, $base-font-size, $base-font-size * 1.6);
+  margin-bottom: $base-line-height;
   color: $c-grey--darkest;
   font-family: $ff--alternate;
-  margin-bottom: $base-line-height;
 }
