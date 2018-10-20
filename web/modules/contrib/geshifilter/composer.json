@@ -1,0 +1,9 @@
+{
+    "name": "drupal/geshi",
+    "description": "Provides a filter to highlight source code using the GeSHi library (Generic Syntax Highlighter).",
+    "type": "drupal-module",
+    "license": "GPL-2.0+",
+    "require": {
+        "geshi/geshi": "^1.0"
+    }
+}

@@ -1,0 +1,113 @@
+<?php
+
+/**
+ * @file
+ * Installation and uninstallation functions for the GeSHi filter.
+ */
+
+// Necessary for URL.
+// use Drupal\geshifilter\Controller\GeshiFilterConflicts;.
+use Drupal\Core\Url;
+
+use Drupal\geshifilter\GeshiFilterCss;
+use Drupal\geshifilter\GeshiFilter;
+
+/**
+ * Implements hook_install().
+ */
+function geshifilter_install() {
+  drupal_set_message(t('GeSHi filter is installed. You should now @configure-geshi
+    and enable it in the desired @text-formats.',
+    [
+      // Geshifilter`s route seems to be unknown at this point, so use
+      // Url::fromUri() with base: scheme instead Url::fromRoute().
+      '@configure-geshi' => \Drupal::l(t('configure the GeSHi filter'), Url::fromUri('base:admin/config/content/formats/geshifilter')),
+      '@text-formats' => \Drupal::l(t('text formats'), Url::fromUri('base:admin/config/content/formats')),
+    ]
+  ));
+}
+
+/**
+ * Implements hook_requirements().
+ */
+function geshifilter_requirements($phase) {
+  $config = \Drupal::config('geshifilter.settings');
+  $requirements = [];
+  if ($phase == 'runtime') {
+    // Check if GeSHi library is available.
+    $geshi_library = GeshiFilter::loadGeshi();
+    if (!$geshi_library['loaded']) {
+      $requirements['geshifilter_library'] = [
+        'title' => 'GeSHi filter',
+        'value' => t('GeSHi library not found'),
+        'description' => t('GeSHi library not found. Read the <em>INSTALLATION</em> section of <a href=":readme_url">README.txt</a> for information on how to fix this error.', [
+          ':readme_url' => Url::fromUri('http://cgit.drupalcode.org/geshifilter/tree/README.txt', [
+            'query' => [
+              'h' => '8.x-1.x',
+            ],
+          ])->toString(),
+        ]),
+        'severity' => REQUIREMENT_ERROR,
+      ];
+    }
+    elseif (($version = explode('.', GESHI_VERSION)) && !($version[0] == '1' && $version[1] == '0')) {
+      $requirements['geshifilter_library'] = [
+        'title' => 'GeSHi filter',
+        'value' => t('GeSHi library invalid version.'),
+        'description' => t('The detected version of GeSHi library (%version) is not supported. A version from the 1.0.x branch is required. Read the <em>INSTALLATION</em> section of <a href=":readme_url">README.txt</a> for information on how to fix this error.', [
+          '%version' => GESHI_VERSION,
+          ':readme_url' => Url::fromUri('http://cgit.drupalcode.org/geshifilter/tree/README.txt', [
+            'query' => [
+              'h' => '8.x-1.x',
+            ],
+          ])->toString(),
+        ]),
+        'severity' => REQUIREMENT_ERROR,
+      ];
+    }
+    else {
+      $requirements['geshifilter_library'] = [
+        'title' => 'GeSHi filter',
+        // GESHI_VERSION is defined in GeSHi library.
+        'value' => t('Found GeSHi library version %version', [
+          '%version' => GESHI_VERSION,
+        ]),
+        'severity' => REQUIREMENT_OK,
+        'description' => t('The detected version of GeSHi library is supported.'),
+      ];
+    }
+
+    // Warn if GeSHi filter is configured to automatically managed external
+    // stylesheet when it's not possible.
+    if ($config->get('css_mode') == Geshifilter::CSS_CLASSES_AUTOMATIC && !GeshifilterCss::managedExternalStylesheetPossible()) {
+      $requirements['geshifilter_css_mode'] = [
+        'title' => 'GeSHi filter CSS mode',
+        'value' => t('GeSHi filter can not automatically manage an external style sheet when the download method is private. Read the <em>INSTALLATION</em> section of <a href=":readme_url">README.txt</a> for information on how to fix this error.', [
+          ':readme_url' => Url::fromUri('http://cgit.drupalcode.org/geshifilter/tree/README.txt', [
+            'query' => [
+              'h' => '8.x-1.x',
+            ],
+          ])->toString(),
+        ]),
+        'severity' => REQUIREMENT_ERROR,
+        'description' => t('Change the CSS mode of the <a href=":geshi">GeSHi filter</a> or change the <a href=":filesystem">download mode</a> to public.', [
+          ':geshi' => URL::fromRoute('geshifilter.settings')->toString(),
+          ':filesystem' => URL::fromRoute('system.file_system_settings')->toString(),
+        ]),
+      ];
+    }
+
+    // // Check for filter conflicts.
+    // if (count(GeshiFilterConflicts::listConflicts()) > 0) {
+    // $requirements[] = array(
+    // 'title' => 'GeSHi filter',
+    // 'value' => t('Some filter conflicts were detected.'),
+    // 'description' => \Drupal::l('View and resolve the detected
+    // filter conflicts',
+    // URL::fromRoute('geshifilter.settings_filter_conflicts')),
+    // 'severity' => REQUIREMENT_ERROR,
+    // );
+    // }.
+  }
+  return $requirements;
+}

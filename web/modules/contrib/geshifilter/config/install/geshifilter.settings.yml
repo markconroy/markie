@@ -1,0 +1,60 @@
+# Use a specific options for each filter format.
+use_format_specific_options: false
+
+# Default highlighting mode when no language is set.
+# The default value is GeshiFilter::DEFAULT_DONOTHING.
+default_highlighting: 'GESHIFILTER_DEFAULT_DONOTHING'
+
+# Default line numbering.
+# - 0 no line numbers.
+default_line_numbering: 0
+
+# Use the function highlight_string for php code.
+use_highlight_string_for_php: false
+
+# Create links for keywords in some languages.
+enable_keyword_urls: true
+
+# Decode html entities.
+# Would be better use TRUE, but we use FALSE to keep as it work on Drupal 7.
+decode_entities: FALSE
+
+# Mode used for css:
+# - 1 Inline CSS style attributes.
+# - 2 Use CSS classes and an automatically managed external CSS style sheet.
+# - 3 Only add CSS classes to the markup.
+css_mode: 1
+
+# Container used in code for output.
+code_container: '2'
+
+# Tags used in blocks for language.
+tags: 'code blockcode'
+
+# Style for tags for geshifilter, example [cpp], [[cpp]], <cpp>.
+# - 1 <> (<cpp>).
+# - 2 [] ([cpp]).
+# - 4 [[]] ([[CPP]]).
+# - 8 <?PHP php block .
+# - 16 ```cpp Markdown code block.
+tag_styles:
+  1: 1
+  2: 2
+  4: 0
+  8: 0
+  16: 0
+
+# Tab width, the default from geshi is 8.
+tab_width: 8
+
+# Default languages and tags.
+language:
+  php:
+    enabled: TRUE
+    tags: 'php'
+  cpp:
+    enabled: TRUE
+    tags: 'cpp'
+  java:
+    enabled: TRUE
+    tags: 'java'

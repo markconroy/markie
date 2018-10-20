@@ -1,0 +1,12 @@
+; Drush Make (http://drupal.org/project/drush_make)
+api = 2
+core = 7.x
+
+; Dependencies
+
+projects[geshi][type] = library
+projects[geshi][download][type] = file
+projects[geshi][download][sha1] = d24d844264f47c76cc5dce6bdbdb745ebaf6bef8
+projects[geshi][download][url] = http://sourceforge.net/projects/geshi/files/geshi/GeSHi%201.0.8.11/GeSHi-1.0.8.11.tar.gz/download
+
+projects[libraries] = 2

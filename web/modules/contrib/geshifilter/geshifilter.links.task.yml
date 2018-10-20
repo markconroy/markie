@@ -1,0 +1,37 @@
+# Settings: admin/config/content/formats/geshifilter
+geshifilter.settings_tab:
+  route_name: geshifilter.settings
+  title: 'Settings'
+  base_route: geshifilter.settings_tab
+  weight: -1
+
+# Disabled now, see https://www.drupal.org/node/2619612.
+# Filter Conflicts: admin/config/content/formats/geshifilter/filterconflicts
+# geshifilter.settings_filter_conflicts:
+#  route_name: geshifilter.settings_filter_conflicts
+#  title: 'Filter conflicts'
+#  base_route: geshifilter.settings_tab
+
+# Enabled languages: admin/config/content/formats/geshifilter/languages
+geshifilter.settings_languages_tab:
+  route_name: geshifilter.settings_languages
+  title: 'Languages'
+  base_route: geshifilter.settings_tab
+
+# Enabled languages: sub tab
+geshifilter.settings_languages_sub_tab:
+  route_name: geshifilter.settings_languages
+  title: 'Enabled'
+  parent_id: geshifilter.settings_languages_tab
+
+# Disabled Languages: admin/config/content/formats/geshifilter/languages/disabled
+geshifilter.settings_languages_disabled_tab:
+  route_name: geshifilter.settings_languages_disabled
+  title: 'Disabled'
+  parent_id: geshifilter.settings_languages_tab
+
+#All Languages: admin/config/content/formats/geshifilter/languages/all
+geshifilter.settings_languages_all_tab:
+  route_name: geshifilter.settings_languages_all
+  title: 'All'
+  parent_id: geshifilter.settings_languages_tab

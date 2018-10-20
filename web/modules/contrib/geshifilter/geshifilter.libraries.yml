@@ -1,0 +1,5 @@
+geshifilter:
+  version: VERSION
+  css:
+    component:
+      assets/css/geshifilter.css: {}

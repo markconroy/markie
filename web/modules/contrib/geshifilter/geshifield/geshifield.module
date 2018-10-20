@@ -1,0 +1,48 @@
+<?php
+
+/**
+ * @file
+ * Defines a CCK field for source code with GeSHi syntax highlighting.
+ *
+ * @todo: is the GeSHi CSS file always loaded when needed?
+ */
+
+use Drupal\geshifilter\GeshiFilterProcess;
+
+/**
+ * Implements hook_theme().
+ */
+function geshifield_theme() {
+  return [
+    'geshifield_default' => [
+      'function' => 'geshifield_formatter_default',
+      'render element' => 'geshifield',
+    ],
+  ];
+}
+
+/**
+ * Format the field.
+ *
+ * This function get the sorcecode and language and format it using geshi.
+ *
+ * @param array $variables
+ *   Variables disponible for theme.
+ *
+ * @return string
+ *   The HTML to show the code formated with geshi.
+ */
+function geshifield_formatter_default(array $variables) {
+  $language = $variables['geshifield']['#language'];
+  $sourcecode = $variables['geshifield']['#sourcecode'];
+  $output = '';
+  module_load_include('inc', 'geshifilter', 'geshifilter.pages');
+  if ($sourcecode) {
+    $output .= GeshiFilterProcess::geshiProcess($sourcecode, $language);
+  }
+  $elements = [];
+  $elements[] = [
+    '#markup' => $output,
+  ];
+  return $output;
+}

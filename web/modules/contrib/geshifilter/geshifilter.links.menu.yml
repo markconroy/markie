@@ -1,0 +1,6 @@
+# This is the link to GeshiFilter settings in admin/config.
+geshifilter.settings:
+  title: 'Geshifilter'
+  description: 'Configure Geshifilter module.'
+  parent: system.admin_config_content
+  route_name: geshifilter.settings

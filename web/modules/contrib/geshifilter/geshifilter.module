@@ -1,0 +1,103 @@
+<?php
+
+/**
+ * @file
+ * An input filter for syntax highlighting using the GeSHi library.
+ */
+
+// Necessary for URL.
+use Drupal\geshifilter\GeshiFilterCss;
+use Drupal\geshifilter\GeshiFilter;
+use Drupal\Core\Url;
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function geshifilter_help($route_name, RouteMatchInterface $route_match) {
+  $config = \Drupal::config('geshifilter.settings');
+  switch ($route_name) {
+    case 'geshifilter.settings':
+    case 'help.page.geshifilter':
+      $output = '<p>' . t('The GeSHi filter module provides a filter for syntax
+        highlighting of inline source code or blocks of source code based on the
+        PHP library <a href=":GeSHi">GeSHi (Generic Syntax Highlighter)</a>.</p>',
+          [
+            ':GeSHi' => URL::fromUri('http://qbnz.com/highlighter/')->toString(),
+          ]);
+      if ($route_name == 'help.page.geshifilter') {
+        $output .= '<p>' . t('The GeSHi filter module for Drupal requires the
+          GeSHi library (version 1.0.x) to work. The GeSHi filter is actually
+          just a Drupal wrapper module around the GeSHi library. Because of
+          <a href=":!repositorypolicies">drupal.org repository policies</a>
+          however, the GeSHi library is not included in the GeSHi filter
+          package, so you should <a href=":geshi">download</a> and install the
+          GeSHi library separately.', [
+            ':repositorypolicies' => URL::fromUri('http://drupal.org/node/66113')->toString(),
+            ':geshi' => URL::fromUri('http://qbnz.com/highlighter/')->toString(),
+          ])
+          . '</p>';
+        $output .= t('<p>Quick overview of how to set up and use the GeSHi filter:</p><ul><li>Install the GeSHi library and specify its path on the <a href=":geshifilter_settings">GeSHi filter administration page</a>.</li><li>Configure the <a href=":geshifilter_settings">general GeSHi filter settings</a>.</li><li><a href=":geshifilter_languages">Enable the relevant languages</a> for your site and set their language tags if needed.</li><li>Enable the GeSHi filter in the desired <a href=":inputformats">text formats</a>.</li><li>Use the text format during content submission as described in the <a href=":filtertips">filter tips</a>.</li></ul>', [
+          ':geshifilter_settings' => URL::fromRoute('geshifilter.settings')->toString(),
+          ':geshifilter_languages' => URL::fromRoute('geshifilter.settings_languages_all')->toString(),
+          ':inputformats' => URL::fromRoute('filter.admin_overview')->toString(),
+          ':filtertips' => URL::fromRoute('filter.tips_all')->toString(),
+        ]);
+      }
+      return $output;
+
+    case 'geshifilter.settings_languages':
+    case 'geshifilter.settings_languages_all':
+    case 'geshifilter.settings_languages_disabled':
+      $output = '<p>' . t('Here you can enable/disable the desired languages to
+        use. It is suggested to disable languages that are not relevant for you
+        site not only to avoid unnecessary cluttering of the GeSHi filter
+        configuration pages and the <a href=":filtertips">filter tips</a>, but also to make the GeSHi
+        filter processing lighter.', [
+          ':filtertips' => URL::fromRoute('filter.tips_all')->toString(),
+        ])
+        . '</p>';
+      if (!$config->get('use_format_specific_options', FALSE)) {
+        $output .= '<p>' . t('You can also define the language specific tags here.') . '</p>';
+      }
+      return $output;
+  }
+}
+
+/**
+ * Implements hook_libraries_info().
+ */
+function geshifilter_libraries_info() {
+  return [
+    'geshi' => [
+      'title' => 'GeSHi - Generic Syntax Highlighter for PHP',
+      'vendor url' => 'http://sourceforge.net/projects/geshi',
+      'download url' => 'http://sourceforge.net/projects/geshi/files/geshi',
+      'version arguments' => [
+        'file' => 'geshi.php',
+        'pattern' => "/define\('GESHI_VERSION', '(.*)'\);/",
+        'lines' => 50,
+      ],
+      'files' => [
+        'php' => [
+          'geshi.php',
+        ],
+      ],
+    ],
+  ];
+}
+
+/**
+ * Implements hook_library_info_alter().
+ */
+function geshifilter_library_info_alter(&$libraries, $extension) {
+  if ($extension == 'geshifilter') {
+    $config = \Drupal::config('geshifilter.settings');
+    // Add the language CSS file if CSS classes are used for code styling.
+    if ($config->get('css_mode') == GeshiFilter::CSS_CLASSES_AUTOMATIC) {
+      $css = drupal_realpath(GeshiFilterCss::languageCssPath());
+      $name = substr($css, strlen(DRUPAL_ROOT));
+      $libraries['geshifilter']['css']['component'][$name] = [];
+    }
+  }
+}
