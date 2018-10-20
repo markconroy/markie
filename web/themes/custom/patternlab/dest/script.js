@@ -39,15 +39,15 @@
 })(jQuery, Drupal);
 "use strict";
 
-(function searchblockScript($, Drupal) {
-  Drupal.behaviors.searchblock = {
+(function pagerScript($, Drupal) {
+  Drupal.behaviors.pager = {
     attach: function attach(context) {}
   };
 })(jQuery, Drupal);
 "use strict";
 
-(function pagerScript($, Drupal) {
-  Drupal.behaviors.pager = {
+(function searchblockScript($, Drupal) {
+  Drupal.behaviors.searchblock = {
     attach: function attach(context) {}
   };
 })(jQuery, Drupal);
@@ -89,6 +89,13 @@
 
 (function imagewithtextScript($, Drupal) {
   Drupal.behaviors.imagewithtext = {
+    attach: function attach(context) {}
+  };
+})(jQuery, Drupal);
+"use strict";
+
+(function largeimagectaScript($, Drupal) {
+  Drupal.behaviors.largeimagecta = {
     attach: function attach(context) {}
   };
 })(jQuery, Drupal);
@@ -199,13 +206,6 @@
 })(jQuery, Drupal);
 "use strict";
 
-(function largeimagectaScript($, Drupal) {
-  Drupal.behaviors.largeimagecta = {
-    attach: function attach(context) {}
-  };
-})(jQuery, Drupal);
-"use strict";
-
 (function tabsScript($, Drupal) {
   Drupal.behaviors.tabs = {
     attach: function attach(context) {}
@@ -255,15 +255,15 @@
 })(jQuery, Drupal);
 "use strict";
 
-(function fullScript($, Drupal) {
-  Drupal.behaviors.full = {
+(function teaserScript($, Drupal) {
+  Drupal.behaviors.teaser = {
     attach: function attach(context) {}
   };
 })(jQuery, Drupal);
 "use strict";
 
-(function teaserScript($, Drupal) {
-  Drupal.behaviors.teaser = {
+(function fullScript($, Drupal) {
+  Drupal.behaviors.full = {
     attach: function attach(context) {}
   };
 })(jQuery, Drupal);
