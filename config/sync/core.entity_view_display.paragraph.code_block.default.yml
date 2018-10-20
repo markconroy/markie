@@ -1,0 +1,22 @@
+uuid: e9686821-0948-4e8a-9b2b-b6f148938e61
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.paragraph.code_block.field_p_cb_code_block
+    - paragraphs.paragraphs_type.code_block
+  module:
+    - text
+id: paragraph.code_block.default
+targetEntityType: paragraph
+bundle: code_block
+mode: default
+content:
+  field_p_cb_code_block:
+    weight: 0
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    type: text_default
+    region: content
+hidden: {  }

@@ -8,6 +8,7 @@ dependencies:
     - paragraphs.paragraphs_type.accordion
     - paragraphs.paragraphs_type.anchor
     - paragraphs.paragraphs_type.call_to_action
+    - paragraphs.paragraphs_type.code_block
     - paragraphs.paragraphs_type.file
     - paragraphs.paragraphs_type.image
     - paragraphs.paragraphs_type.image_with_text
@@ -36,6 +37,7 @@ settings:
     negate: 0
     target_bundles:
       text: text
+      code_block: code_block
       image: image
       image_with_text: image_with_text
       quote: quote
@@ -51,47 +53,53 @@ settings:
     target_bundles_drag_drop:
       text:
         enabled: true
-        weight: -31
+        weight: -35
+      code_block:
+        enabled: true
+        weight: -34
       image:
         enabled: true
-        weight: -30
+        weight: -33
       image_with_text:
         enabled: true
-        weight: -29
+        weight: -32
       quote:
         enabled: true
-        weight: -28
+        weight: -31
       video:
         enabled: true
-        weight: -27
+        weight: -30
       section_break:
         enabled: true
-        weight: -26
+        weight: -29
       call_to_action:
         enabled: true
-        weight: -25
+        weight: -28
       file:
         enabled: true
-        weight: -24
+        weight: -27
       related_content:
         enabled: true
-        weight: -23
+        weight: -26
       anchor:
         enabled: true
-        weight: -22
+        weight: -25
       accordion:
         enabled: true
-        weight: -21
+        weight: -24
       large_image_cta:
         enabled: true
-        weight: -20
+        weight: -23
       tiled_layout:
         enabled: true
-        weight: -19
+        weight: -22
       accordion_item:
-        weight: -18
+        weight: -21
         enabled: false
       tile:
-        weight: -17
+        weight: -20
+        enabled: false
+      tweet:
+        weight: -19
         enabled: false
 field_type: entity_reference_revisions
