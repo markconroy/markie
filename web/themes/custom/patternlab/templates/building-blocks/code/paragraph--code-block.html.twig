@@ -1,0 +1,5 @@
+{% if paragraph.field_p_cb_code_block.value %}
+  {% set code = content.field_p_cb_code_block %}
+{% endif %}
+
+{% include "@building-blocks/code-block/_code-block.twig" %}
