@@ -3,7 +3,11 @@
 namespace Drupal\paragraphs\Tests\Experimental;
 
 use Drupal\field_ui\Tests\FieldUiTestTrait;
+use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\Tests\paragraphs\FunctionalJavascript\ParagraphsTestBaseTrait;
+use Drupal\field\Entity\FieldConfig;
+use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\node\Entity\NodeType;
 
 /**
  * Tests paragraphs experimental widget buttons.
@@ -22,6 +26,8 @@ class ParagraphsExperimentalWidgetButtonsTest extends ParagraphsExperimentalTest
    */
   public static $modules = [
     'paragraphs_test',
+    'language',
+    'content_translation',
   ];
 
   /**
@@ -112,7 +118,14 @@ class ParagraphsExperimentalWidgetButtonsTest extends ParagraphsExperimentalTest
   public function testButtonsVisibility() {
     $this->addParagraphedContentType('paragraphed_test');
 
-    $this->loginAsAdmin(['create paragraphed_test content', 'edit any paragraphed_test content']);
+    $this->loginAsAdmin([
+      'create paragraphed_test content',
+      'edit any paragraphed_test content',
+      'administer content translation',
+      'administer languages',
+      'create content translations',
+      'translate any entity',
+    ]);
     // Add a Paragraph type.
     $paragraph_type = 'text_paragraph';
     $this->addParagraphsType($paragraph_type);
@@ -182,6 +195,110 @@ class ParagraphsExperimentalWidgetButtonsTest extends ParagraphsExperimentalTest
     $this->drupalGet('node/add/paragraphed_test');
     $this->drupalPostForm(NULL, NULL, t('Add text'));
     $this->assertNoField('edit-field-paragraphs-0-top-links-test-button');
+
+    ConfigurableLanguage::createFromLangcode('sr')->save();
+
+    // Enable translation for test content.
+    $this->drupalGet('admin/config/regional/content-language');
+    $edit = [
+      'entity_types[node]' => TRUE,
+      'settings[node][paragraphed_test][translatable]' => TRUE,
+    ];
+    $this->drupalPostForm(NULL, $edit, 'Save configuration');
+
+    // Check that operation is hidden during translation.
+    $this->drupalGet('sr/node/' . $node->id() . '/translations/add/en/sr');
+    $this->assertNoField('edit-field-paragraphs-1-top-actions-dropdown-actions-test-button');
+
+    // Check that "Duplicate" is hidden during translation.
+    $this->assertNoField('field_paragraphs_0_duplicate');
+    $this->assertNoRaw('value="Duplicate"');
+  }
+
+  /**
+   * Tests buttons visibility exception.
+   */
+  public function testButtonsVisibilityException() {
+    // Hide the button if field is required, cardinality is one and just one
+    // paragraph type is allowed.
+    $content_type_name = 'paragraphed_test';
+    $paragraphs_field_name = 'field_paragraphs';
+    $widget_type = 'paragraphs';
+    $entity_type = 'node';
+
+    // Create the content type.
+    $node_type = NodeType::create([
+      'type' => $content_type_name,
+      'name' => $content_type_name,
+    ]);
+    $node_type->save();
+
+    $field_storage = FieldStorageConfig::loadByName($content_type_name, $paragraphs_field_name);
+    if (!$field_storage) {
+      // Add a paragraphs field.
+      $field_storage = FieldStorageConfig::create([
+        'field_name' => $paragraphs_field_name,
+        'entity_type' => $entity_type,
+        'type' => 'entity_reference_revisions',
+        'cardinality' => '1',
+        'settings' => [
+          'target_type' => 'paragraph',
+        ],
+      ]);
+      $field_storage->save();
+    }
+    $field = FieldConfig::create([
+      'field_storage' => $field_storage,
+      'bundle' => $content_type_name,
+      'required' => TRUE,
+      'settings' => [
+        'handler' => 'default:paragraph',
+        'handler_settings' => ['target_bundles' => NULL],
+      ],
+    ]);
+    $field->save();
+
+    $form_display = entity_get_form_display($entity_type, $content_type_name, 'default')
+      ->setComponent($paragraphs_field_name, ['type' => $widget_type]);
+    $form_display->save();
+
+    $view_display = entity_get_display($entity_type, $content_type_name, 'default')
+      ->setComponent($paragraphs_field_name, ['type' => 'entity_reference_revisions_entity_view']);
+    $view_display->save();
+
+    $this->loginAsAdmin([
+      'create paragraphed_test content',
+      'edit any paragraphed_test content',
+      'administer content translation',
+      'administer languages',
+      'create content translations',
+      'translate any entity',
+    ]);
+    // Add a Paragraph type.
+    $paragraph_type = 'text_paragraph';
+    $this->addParagraphsType($paragraph_type);
+
+    // Add a text field to the text_paragraph type.
+    static::fieldUIAddNewField('admin/structure/paragraphs_type/' . $paragraph_type, 'text', 'Text', 'text_long', [], []);
+    $edit = [
+      'fields[field_paragraphs][type]' => 'paragraphs',
+    ];
+    $this->drupalPostForm('admin/structure/types/manage/paragraphed_test/form-display', $edit, t('Save'));
+
+    // Checking hidden button on "Open" mode.
+    $this->drupalGet('node/add/paragraphed_test');
+    $this->assertNoField('field_paragraphs_0_remove');
+    $this->assertFieldByName('field_paragraphs[0][subform][field_text][0][value]', '');
+
+    // Checking hidden button on "Closed" mode.
+    $this->setParagraphsWidgetMode('paragraphed_test', 'field_paragraphs', 'closed');
+    $this->drupalGet('node/add/paragraphed_test');
+    $this->assertNoField('field_paragraphs_0_remove');
+    $this->assertFieldByName('field_paragraphs[0][subform][field_text][0][value]', '');
+
+    // Checking that the "Duplicate" button is not shown when cardinality is 1.
+    $this->drupalGet('node/add/paragraphed_test');
+    $this->assertNoField('field_paragraphs_0_duplicate');
   }
 
 }

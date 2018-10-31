@@ -4,6 +4,7 @@
 //
 
 @import "variables";
+@import "summary";
 
 .paragraphs {
   // Paragraphs state information icons.
@@ -54,13 +55,28 @@
   }
 }
 
-.paragraph-type-info {
-  display: flex;
-}
-
 .paragraphs-tabs-wrapper {
   .paragraphs-tabs {
     display: none;
+  }
+}
+
+.paragraph-bullet {
+  text-align: center;
+  &:after {
+    content: "\25cf";
+    padding: 0 10px;
+    color: #777;
+    font-size: 0.75em;
+    line-height: 3.5em;
+  }
+}
+
+@media (min-width: map-get($grid-breakpoints, 'md')) {
+  .paragraph-bullet {
+    &:after {
+      line-height: 2.5em;
+    }
   }
 }
 
@@ -122,14 +138,18 @@
     }
   }
 
-  .paragraph-type-top {
+  .paragraph-top {
     display: grid;
     grid-template-columns: 100px auto 1fr auto;
     grid-template-rows: auto;
     grid-gap: $gutter-top $gutter-top;
     align-items: center;
 
-    .paragraph-type-title {
+    @media (min-width: map-get($grid-breakpoints, 'lg')) {
+      grid-template-columns: 150px auto 1fr auto;
+    }
+
+    .paragraph-type {
       grid-column: 1 / 2;
       // PostCSS autoprefixer does not support -ms-grid-column and some other
       // attributes that we need. This support will not be improved so we need
@@ -138,13 +158,13 @@
       grid-row: 1 / span 1;
     }
 
-    .paragraph-type-info {
+    .paragraph-info {
       grid-column: 2 / 3;
       -ms-grid-column: 2;
       grid-row: 1 / span 1;
     }
 
-    .paragraph-type-summary {
+    .paragraph-summary {
       grid-column: 1 / 5;
       -ms-grid-column: 1;
       -ms-grid-column-span: 5;
@@ -179,23 +199,6 @@
   }
 
   .paragraphs-collapsed-description {
-    position: relative;
-    height: 1.538em;
-    overflow: hidden;
-    color: #777;
-    word-break: break-all;
-
-    // Fade out text element.
-    &::after {
-      display: block;
-      position: absolute;
-      top: 0;
-      right: 0;
-      width: 3em;
-      background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, #fff 100%);
-      content: "\00a0";
-    }
-
     @at-root .draggable:hover .paragraphs-collapsed-description {
       &::after {
         background: linear-gradient(to right, rgba(247, 252, 255, 0) 0%, #f7fcff 100%);
@@ -216,6 +219,9 @@
   }
 
   .paragraph-type {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
     &-title {
       display: flex;
       flex-basis: 100px;

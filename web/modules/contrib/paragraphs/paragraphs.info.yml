@@ -8,6 +8,7 @@ configure: entity.paragraphs_type.collection
 dependencies:
   - entity_reference_revisions:entity_reference_revisions
   - drupal:file
+  - 'drupal:system (>= 8.5)'
 test_dependencies:
   - diff:diff
   - replicate:replicate
@@ -15,8 +16,8 @@ test_dependencies:
   - field_group:field_group
   - block_field:block_field
 
-# Information added by Drupal.org packaging script on 2017-09-19
-version: '8.x-1.2'
+# Information added by Drupal.org packaging script on 2018-10-31
+version: '8.x-1.5'
 core: '8.x'
 project: 'paragraphs'
-datestamp: 1505802547
+datestamp: 1541001786

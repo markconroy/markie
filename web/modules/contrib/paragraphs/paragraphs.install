@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Installation hooks for paragraphs module.
+ * Installation hooks for Paragraphs module.
  */
 
 use Drupal\Core\Entity\EntityTypeInterface;
@@ -212,4 +212,47 @@ function paragraphs_update_8011() {
  */
 function paragraphs_update_8012() {
   \Drupal::service('module_installer')->install(['file']);
+}
+
+/**
+ * Set the 'published' entity key and set show published setting to FALSE.
+ */
+function paragraphs_update_8013() {
+  $definition_update_manager = \Drupal::entityDefinitionUpdateManager();
+  $entity_type = $definition_update_manager->getEntityType('paragraph');
+  $keys = $entity_type->getKeys();
+  $keys['published'] = 'status';
+  $entity_type->set('entity_keys', $keys);
+  $definition_update_manager->updateEntityType($entity_type);
+
+  // Explicitly disable the show_unpublished setting on existing sites and
+  // notify users about it.
+  $config = \Drupal::configFactory()->getEditable('paragraphs.settings');
+  $config->set('show_unpublished', FALSE);
+  return t('Paragraphs can now display unpublished Paragraphs to users with the "View unpublished paragraphs" permission. Enable it on Adminstration > Configuration > Content > Paragraphs and grant to permission to use it.');
+}
+
+/**
+ * Update the status field.
+ */
+function paragraphs_update_8014() {
+  // The status field was promoted to an entity key in paragraphs_update_8013(),
+  // which makes it NOT NULL in the default SQL storage, which means its storage
+  // definition needs to be updated as well.
+  $entity_definition_update_manager = \Drupal::service('entity.definition_update_manager');
+  $entity_definition_update_manager->updateFieldStorageDefinition($entity_definition_update_manager->getFieldStorageDefinition('status', 'paragraph'));
+}
+
+/**
+ * Remove the base field overrides for moderation_state field.
+ */
+function paragraphs_update_8015() {
+  $config_factory = \Drupal::configFactory();
+  $names = $config_factory->listAll('core.base_field_override.paragraph.');
+  foreach ($names as $name) {
+    $config = $config_factory->getEditable($name);
+    if ($config->get('field_name') === 'moderation_state') {
+      $config->delete();
+    }
+  }
 }

@@ -43,6 +43,9 @@ class ParagraphsExperimentalContactTest extends ParagraphsExperimentalTestBase {
     // Check that the paragraph is displayed.
     $this->assertText('paragraphs_contact');
     $this->drupalPostAjaxForm(NULL, [], 'paragraphs_0_remove');
-    $this->assertText('No Paragraph added yet.');
+    $elements = $this->xpath('//table[starts-with(@id, :id)]/tbody', [':id' => 'paragraphs-values']);
+    $header = $this->xpath('//table[starts-with(@id, :id)]/thead', [':id' => 'paragraphs-values']);
+    $this->assertEqual($elements, []);
+    $this->assertNotEqual($header, []);
   }
 }

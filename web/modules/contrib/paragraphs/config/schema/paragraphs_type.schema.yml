@@ -88,9 +88,15 @@ field.widget.settings.paragraphs:
       type: string
     autocollapse:
       type: string
+    closed_mode_threshold:
+      type: integer
     add_mode:
       type: string
     form_display_mode:
       type: string
     default_paragraph_type:
       type: string
+    features:
+      type: sequence
+      sequence:
+        type: string

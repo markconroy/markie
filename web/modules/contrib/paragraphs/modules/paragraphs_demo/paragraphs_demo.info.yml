@@ -13,13 +13,16 @@ dependencies:
   - search_api:search_api
   - drupal:views
   - drupal:taxonomy
+  - paragraphs:paragraphs_library
+  - drupal:entity_browser
+  - drupal:content_moderation
 hidden: false
 name: Paragraphs Demo
 package: Paragraphs
 type: module
 
-# Information added by Drupal.org packaging script on 2017-09-19
-version: '8.x-1.2'
+# Information added by Drupal.org packaging script on 2018-10-31
+version: '8.x-1.5'
 core: '8.x'
 project: 'paragraphs'
-datestamp: 1505802547
+datestamp: 1541001786

@@ -28,12 +28,34 @@ class ParagraphsSummaryFormatter extends EntityReferenceFormatterBase {
     $elements = [];
     foreach ($this->getEntitiesToView($items, $langcode) as $delta => $entity) {
       if ($entity->id()) {
+        $summary = $entity->getSummary();
         $elements[$delta] = [
-          '#markup' => $entity->getSummary(),
+          '#type' => 'container',
+          '#attributes' => [
+            'class' => ['paragraph-formatter']
+          ]
+        ];
+        $elements[$delta]['info'] = [
+          '#type' => 'container',
+          '#attributes' => [
+            'class' => ['paragraph-info']
+          ]
+        ];
+        $elements[$delta]['info'] += $entity->getIcons();
+        $elements[$delta]['summary'] = [
+          '#type' => 'container',
+          '#attributes' => [
+            'class' => ['paragraph-summary']
+          ]
+        ];
+        $elements[$delta]['summary']['description'] = [
+          '#markup' => $summary,
+          '#prefix' => '<div class="paragraphs-collapsed-description">',
+          '#suffix' => '</div>',
         ];
       }
     }
-
+    $elements['#attached']['library'][] = 'paragraphs/drupal.paragraphs.formatter';
     return $elements;
   }
 

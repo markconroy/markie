@@ -2,7 +2,6 @@
 
 namespace Drupal\paragraphs_demo\Tests;
 
-use Drupal\filter\Entity\FilterFormat;
 use Drupal\paragraphs\Tests\Classic\ParagraphsCoreVersionUiTestTrait;
 use Drupal\simpletest\WebTestBase;
 
@@ -39,11 +38,14 @@ class ParagraphsDemoTest extends WebTestBase {
    * Asserts demo paragraphs have been created.
    */
   protected function testConfigurationsAndCreation() {
-    $basic_html_format = FilterFormat::create(array(
-      'format' => 'basic_html',
-      'name' => 'Basic HTML',
-    ));
-    $basic_html_format->save();
+
+    // Assert that the demo page is displayed to anymous users.
+    $this->drupalGet('');
+    $this->assertText('Paragraphs is the new way of content creation!');
+    $this->assertText('Apart from the included Paragraph types');
+    $this->assertText('A search api example can be found');
+    $this->assertText('This is content from the library. We can reuse it multiple times without duplicating it.');
+
     $admin_user = $this->drupalCreateUser(array(
       'administer site configuration',
       'create paragraphed_content_demo content',
@@ -51,6 +53,12 @@ class ParagraphsDemoTest extends WebTestBase {
       'delete any paragraphed_content_demo content',
       'administer content translation',
       'create content translations',
+      'bypass node access',
+      'use editorial transition create_new_draft',
+      'use editorial transition publish',
+      'use editorial transition archived_published',
+      'use editorial transition archived_draft',
+      'use editorial transition archive',
       'administer languages',
       'administer content types',
       'administer node fields',
@@ -60,7 +68,8 @@ class ParagraphsDemoTest extends WebTestBase {
       'administer paragraph display',
       'administer paragraph form display',
       'administer node form display',
-      $basic_html_format->getPermissionName(),
+      'administer paragraphs library',
+      'use text format basic_html',
     ));
 
     $this->drupalLogin($admin_user);
@@ -129,12 +138,13 @@ class ParagraphsDemoTest extends WebTestBase {
     $this->assertNoFieldChecked('edit-settings-handler-settings-target-bundles-drag-drop-text-enabled');
 
     $this->drupalGet('node/add/paragraphed_content_demo');
-    $this->assertRaw('<strong data-drupal-selector="edit-field-paragraphs-demo-title">Paragraphs</strong>', 'Field name is present on the page.');
+    $this->assertRaw('<h4 class="label">Paragraphs</h4>', 'Field name is present on the page.');
     $this->drupalPostForm(NULL, NULL, t('Add Text'));
     $this->assertNoRaw('<strong data-drupal-selector="edit-field-paragraphs-demo-title">Paragraphs</strong>', 'Field name for empty field is not present on the page.');
     $this->assertRaw('<h4 class="label">Paragraphs</h4>', 'Field name appears in the table header.');
     $edit = array(
       'title[0][value]' => 'Paragraph title',
+      'moderation_state[0][state]' => 'published',
       'field_paragraphs_demo[0][subform][field_text_demo][0][value]' => 'Paragraph text',
     );
     $this->drupalPostForm(NULL, $edit, t('Add User'));
@@ -161,6 +171,18 @@ class ParagraphsDemoTest extends WebTestBase {
     // For now, this indicates that it is using the EXPERIMENTAL widget.
     $this->drupalGet('node/1/edit');
     $this->assertFieldByName('field_paragraphs_demo_3_subform_field_paragraphs_demo_0_duplicate');
+
+    // Check the library paragraph.
+    $this->drupalGet('admin/content/paragraphs');
+    $this->assertText('Library item');
+    $this->assertText('This is content from the library.');
+
+    // Assert anonymous users cannot update library items.
+    $this->drupalLogout();
+    $this->drupalGet('admin/content/paragraphs/1/edit');
+    $this->assertResponse(403);
+    $this->drupalGet('admin/content/paragraphs/1/delete');
+    $this->assertResponse(403);
   }
 
 }

@@ -4,7 +4,11 @@ namespace Drupal\paragraphs\Entity;
 
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Component\Utility\Unicode;
+use Drupal\Core\Entity\ContentEntityInterface;
+use Drupal\Core\Entity\Entity\EntityFormDisplay;
+use Drupal\Core\Entity\EntityPublishedTrait;
 use Drupal\Core\Entity\EntityStorageInterface;
+use Drupal\Core\Entity\RevisionLogEntityTrait;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityTypeInterface;
@@ -14,6 +18,7 @@ use Drupal\Core\TypedData\TranslatableInterface;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\entity_reference_revisions\EntityNeedsSaveInterface;
 use Drupal\entity_reference_revisions\EntityNeedsSaveTrait;
+use Drupal\field\FieldConfigInterface;
 use Drupal\paragraphs\ParagraphInterface;
 use Drupal\user\UserInterface;
 
@@ -50,7 +55,11 @@ use Drupal\user\UserInterface;
  *     "uuid" = "uuid",
  *     "bundle" = "type",
  *     "langcode" = "langcode",
- *     "revision" = "revision_id"
+ *     "revision" = "revision_id",
+ *     "published" = "status"
+ *   },
+ *   revision_metadata_keys = {
+ *     "revision_user" = "revision_uid",
  *   },
  *   bundle_entity_type = "paragraphs_type",
  *   field_ui_base_route = "entity.paragraphs_type.edit_form",
@@ -81,6 +90,7 @@ use Drupal\user\UserInterface;
 class Paragraph extends ContentEntityBase implements ParagraphInterface {
 
   use EntityNeedsSaveTrait;
+  use EntityPublishedTrait;
 
   /**
    * The behavior plugin data for the paragraph entity.
@@ -117,6 +127,16 @@ class Paragraph extends ContentEntityBase implements ParagraphInterface {
   /**
    * {@inheritdoc}
    */
+  public function setParentEntity(ContentEntityInterface $parent, $parent_field_name) {
+    $this->set('parent_type', $parent->getEntityTypeId());
+    $this->set('parent_id', $parent->id());
+    $this->set('parent_field_name', $parent_field_name);
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function label() {
     $label = '';
     if ($parent = $this->getParentEntity()) {
@@ -125,6 +145,9 @@ class Paragraph extends ContentEntityBase implements ParagraphInterface {
       foreach ($values as $key => $value) {
         if ($value->entity->id() == $this->id()) {
           $label = $parent->label() . ' > ' . $value->getFieldDefinition()->getLabel();
+        } else {
+          // A previous or draft revision or a deleted stale Paragraph.
+          $label = $parent->label() . ' > ' . $value->getFieldDefinition()->getLabel() . ' (previous revision)';
         }
       }
     }
@@ -294,28 +317,7 @@ class Paragraph extends ContentEntityBase implements ParagraphInterface {
    * {@inheritdoc}
    */
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
-    $fields['id'] = BaseFieldDefinition::create('integer')
-      ->setLabel(t('ID'))
-      ->setDescription(t('The ID of the Paragraphs entity.'))
-      ->setReadOnly(TRUE)
-      ->setSetting('unsigned', TRUE);
-
-    $fields['uuid'] = BaseFieldDefinition::create('uuid')
-      ->setLabel(t('UUID'))
-      ->setDescription(t('The UUID of the paragraphs entity.'))
-      ->setReadOnly(TRUE);
-
-    $fields['revision_id'] = BaseFieldDefinition::create('integer')
-      ->setLabel(t('Revision ID'))
-      ->setDescription(t('The paragraphs entity revision ID.'))
-      ->setReadOnly(TRUE)
-      ->setSetting('unsigned', TRUE);
-
-    $fields['type'] = BaseFieldDefinition::create('entity_reference')
-      ->setLabel(t('Type'))
-      ->setDescription(t('The Paragraphs type.'))
-      ->setSetting('target_type', 'paragraphs_type')
-      ->setReadOnly(TRUE);
+    $fields = parent::baseFieldDefinitions($entity_type);
 
     $fields['langcode'] = BaseFieldDefinition::create('language')
       ->setLabel(t('Language code'))
@@ -331,7 +333,7 @@ class Paragraph extends ContentEntityBase implements ParagraphInterface {
       ->setDefaultValueCallback('Drupal\paragraphs\Entity\Paragraph::getCurrentUserId')
       ->setTranslatable(TRUE)
       ->setDisplayOptions('form', array(
-        'type' => 'hidden',
+        'region' => 'hidden',
         'weight' => 0,
       ))
       ->setDisplayConfigurable('form', TRUE);
@@ -349,7 +351,7 @@ class Paragraph extends ContentEntityBase implements ParagraphInterface {
       ->setRevisionable(TRUE)
       ->setTranslatable(TRUE)
       ->setDisplayOptions('form', array(
-        'type' => 'hidden',
+        'region' => 'hidden',
         'weight' => 0,
       ))
       ->setDisplayConfigurable('form', TRUE);
@@ -358,7 +360,6 @@ class Paragraph extends ContentEntityBase implements ParagraphInterface {
       ->setLabel(t('Revision user ID'))
       ->setDescription(t('The user ID of the author of the current revision.'))
       ->setSetting('target_type', 'user')
-      ->setQueryable(FALSE)
       ->setRevisionable(TRUE);
 
     $fields['parent_id'] = BaseFieldDefinition::create('string')
@@ -425,8 +426,20 @@ class Paragraph extends ContentEntityBase implements ParagraphInterface {
     $depth_limit = isset($options['depth_limit']) ? $options['depth_limit'] : 1;
     $this->summaryCount = 0;
     $summary = [];
+    $components = entity_get_form_display('paragraph', $this->getType(), 'default')->getComponents();
+    uasort($components, 'Drupal\Component\Utility\SortArray::sortByWeightElement');
+    foreach (array_keys($components) as $field_name) {
+      // Components can be extra fields, check if the field really exists.
+      if (!$this->hasField($field_name)) {
+        continue;
+      }
+      $field_definition = $this->getFieldDefinition($field_name);
+      // We do not add content to the summary from base fields, skip them
+      // keeps performance while building the paragraph summary.
+      if (!($field_definition instanceof FieldConfigInterface) || !$this->get($field_name)->access('view')) {
+        continue;
+      }
 
-    foreach ($this->getFieldDefinitions() as $field_name => $field_definition) {
       if ($field_definition->getType() == 'image' || $field_definition->getType() == 'file') {
         $file_summary = $this->getFileSummary($field_name);
         if ($file_summary != '') {
@@ -451,10 +464,11 @@ class Paragraph extends ContentEntityBase implements ParagraphInterface {
       }
 
       if ($field_type = $field_definition->getType() == 'entity_reference') {
-        if (!in_array($field_name, ['type', 'uid', 'revision_uid'])) {
-          if ($this->get($field_name)->entity) {
-            $summary[] = $this->get($field_name)->entity->label();
-          }
+        if ($this->get($field_name)->entity && $this->get($field_name)->entity->access('view label')) {
+          $entity = $this->get($field_name)->entity;
+          // Switch to the entity translation in the current context if exists.
+          $entity = \Drupal::service('entity.repository')->getTranslationFromContext($entity, $this->activeLangcode);
+          $summary[] = $entity->label();
         }
       }
 
@@ -463,6 +477,18 @@ class Paragraph extends ContentEntityBase implements ParagraphInterface {
         if (!empty($this->get($field_name)->first())) {
           $block_admin_label = $this->get($field_name)->first()->getBlock()->getPluginDefinition()['admin_label'];
           $summary[] = $block_admin_label;
+        }
+      }
+
+      if ($field_definition->getType() == 'link') {
+        if (!empty($this->get($field_name)->first())) {
+          // If title is not set, fallback to the uri.
+          if ($title = $this->get($field_name)->title) {
+            $summary[] = $title;
+          }
+          else {
+            $summary[] = $this->get($field_name)->uri;
+          }
         }
       }
     }
@@ -476,12 +502,39 @@ class Paragraph extends ContentEntityBase implements ParagraphInterface {
       }
     }
 
-    if ($this->summaryCount) {
-      array_unshift($summary, (string) \Drupal::translation()->formatPlural($this->summaryCount, '1 child', '@count children'));
-    }
-
     $collapsed_summary_text = implode(', ', $summary);
     return strip_tags($collapsed_summary_text);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getIcons(array $options = []) {
+    $show_behavior_info = isset($options['show_behavior_icon']) ? $options['show_behavior_icon'] : TRUE;
+    $icons = [];
+
+    // For now we depend here on the fact that summaryCount is already
+    // initialized. That means that getSummary() should be called before
+    // getIcons().
+    // @todo - should we fix this dependency somehow?
+    if ($this->summaryCount) {
+      $icons['count'] = [
+        '#markup' => $this->summaryCount,
+        '#prefix' => '<span class="paragraphs-badge" title="' . (string) \Drupal::translation()->formatPlural($this->summaryCount, '1 child', '@count children') . '">',
+        '#suffix' => '</span>',
+      ];
+    }
+
+    if ($show_behavior_info) {
+      $paragraphs_type = $this->getParagraphType();
+      foreach ($paragraphs_type->getEnabledBehaviorPlugins() as $plugin_id => $plugin) {
+        if ($plugin_info = $plugin->settingsIcon($this)) {
+          $icons = array_merge($icons, $plugin_info);
+        }
+      }
+    }
+
+    return $icons;
   }
 
   /**
@@ -494,9 +547,7 @@ class Paragraph extends ContentEntityBase implements ParagraphInterface {
     // A list of revision fields which should be skipped from the comparision.
     $fields = [
       $this->getEntityType()->getKey('revision'),
-      'revision_uid',
-      'revision_log',
-      'revision_log_message',
+      'revision_uid'
     ];
 
     return $fields;
@@ -610,6 +661,8 @@ class Paragraph extends ContentEntityBase implements ParagraphInterface {
       foreach ($this->get($field_name) as $item) {
         $entity = $item->entity;
         if ($entity instanceof ParagraphInterface) {
+          // Switch to the entity translation in the current context if exists.
+          $entity = \Drupal::service('entity.repository')->getTranslationFromContext($entity, $this->activeLangcode);
           $summary[] = $entity->getSummary($options);
           $this->summaryCount++;
         }
@@ -655,7 +708,7 @@ class Paragraph extends ContentEntityBase implements ParagraphInterface {
     $summary = '';
     if (in_array($field_definition->getType(), $text_types)) {
       if (in_array($field_name, $excluded_text_types)) {
-        return $summary;
+        return '';
       }
 
       $text = $this->get($field_name)->value;
@@ -663,10 +716,14 @@ class Paragraph extends ContentEntityBase implements ParagraphInterface {
         $text = Unicode::truncate($text, 150);
       }
 
-      $summary = $text;
+      $summary = trim(strip_tags($text));
+      if (empty($summary)) {
+        // Tease raw HTML to have at least some summary.
+        $summary = htmlspecialchars(trim($text));
+      }
     }
 
-    return trim($summary);
+    return $summary;
   }
 
 }

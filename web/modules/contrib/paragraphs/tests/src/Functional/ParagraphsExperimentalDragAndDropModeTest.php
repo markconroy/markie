@@ -100,7 +100,7 @@ class ParagraphsExperimentalDragAndDropModeTest extends BrowserTestBase {
     ]);
     $paragraph->save();
 
-    // Add test content with paragraph container and the third text paragraph.
+    // Add test content with paragraph container.
     $node = Node::create([
       'type' => 'paragraphed_test',
       'title' => 'Paragraphs Test',
@@ -143,6 +143,7 @@ class ParagraphsExperimentalDragAndDropModeTest extends BrowserTestBase {
 
     // Check the new structure of the node and its paragraphs.
     \Drupal::entityTypeManager()->getStorage('node')->resetCache();
+    \Drupal::entityTypeManager()->getStorage('paragraph')->resetCache();
     $node = Node::load($node->id());
     $this->assertEquals(count($node->get('field_paragraphs')), 2);
 
@@ -226,8 +227,8 @@ class ParagraphsExperimentalDragAndDropModeTest extends BrowserTestBase {
     $this->drupalPostForm(NULL, [], 'Complete drag & drop');
 
     // Ensure the summary is displayed correctly for the collapsed paragraphs.
-    $this->assertSession()->elementTextNotContains('css', '.field--name-field-paragraphs tbody tr:nth-of-type(1) .paragraph-type-summary', 'Test text 1');
-    $this->assertSession()->elementTextContains('css', '.field--name-field-paragraphs tbody tr:nth-of-type(2) .paragraph-type-summary', 'Test text 1');
+    $this->assertSession()->elementTextNotContains('css', '.field--name-field-paragraphs tbody tr:nth-of-type(1) .paragraph-summary', 'Test text 1');
+    $this->assertSession()->elementTextContains('css', '.field--name-field-paragraphs tbody tr:nth-of-type(2) .paragraph-summary', 'Test text 1');
 
     // Ensure that the summary was updated correctly when going back to drag and
     // drop mode.
@@ -241,6 +242,7 @@ class ParagraphsExperimentalDragAndDropModeTest extends BrowserTestBase {
     // Check that the parent of the text paragraph is the second paragraph
     // container.
     \Drupal::entityTypeManager()->getStorage('node')->resetCache();
+    \Drupal::entityTypeManager()->getStorage('paragraph')->resetCache();
     $node = Node::load($node->id());
     $this->assertEquals(count($node->get('field_paragraphs')), 2);
 
@@ -470,6 +472,7 @@ class ParagraphsExperimentalDragAndDropModeTest extends BrowserTestBase {
     // Check that the parent of the text paragraph is the second paragraph
     // container.
     \Drupal::entityTypeManager()->getStorage('node')->resetCache();
+    \Drupal::entityTypeManager()->getStorage('paragraph')->resetCache();
     $node = Node::load($node->id());
     $this->assertEquals(count($node->get('field_paragraphs')), 2);
 
@@ -564,6 +567,7 @@ class ParagraphsExperimentalDragAndDropModeTest extends BrowserTestBase {
     // Check that the parent of the text paragraph is the second paragraph
     // container.
     \Drupal::entityTypeManager()->getStorage('node')->resetCache();
+    \Drupal::entityTypeManager()->getStorage('paragraph')->resetCache();
     $node = Node::load($node->id());
     $this->assertEquals(count($node->get('field_paragraphs')), 3);
 
@@ -656,6 +660,7 @@ class ParagraphsExperimentalDragAndDropModeTest extends BrowserTestBase {
     // Check that the parent of the text paragraph is the second paragraph
     // container.
     \Drupal::entityTypeManager()->getStorage('node')->resetCache();
+    \Drupal::entityTypeManager()->getStorage('paragraph')->resetCache();
     $node = Node::load($node->id());
     $this->assertEquals(count($node->get('field_paragraphs')), 1);
 
@@ -667,6 +672,211 @@ class ParagraphsExperimentalDragAndDropModeTest extends BrowserTestBase {
     $text_paragraph_2 = $paragraph_1->get('paragraphs_container_paragraphs')->entity;
     $this->assertEquals($text_paragraph_2->get('parent_id')->value, $paragraph_1->id());
     $this->assertEquals($text_paragraph_2->get('parent_type')->value, 'paragraph');
+  }
+
+  /**
+   * Tests emptying a top level container.
+   */
+  public function testChangeParagraphMoveAllFromTopLevelContainer() {
+    // Create text paragraph.
+    $text_paragraph_1 = Paragraph::create([
+      'type' => 'text',
+      'field_text' => [
+        'value' => 'Test text 1',
+        'format' => 'plain_text',
+      ],
+    ]);
+    $text_paragraph_1->save();
+
+    // Create a second text paragraph.
+    $text_paragraph_2 = Paragraph::create([
+      'type' => 'text',
+      'field_text' => [
+        'value' => 'Test text 2.',
+        'format' => 'plain_text',
+      ],
+    ]);
+    $text_paragraph_2->save();
+
+    // Create container that contains the two text paragraphs.
+    $paragraph = Paragraph::create([
+      'type' => 'paragraphs_container',
+      'paragraphs_container_paragraphs' => [$text_paragraph_1, $text_paragraph_2],
+    ]);
+    $paragraph->save();
+
+    // Add test node with paragraph container.
+    $node = Node::create([
+      'type' => 'paragraphed_test',
+      'title' => 'Paragraphs Test',
+      'field_paragraphs' => [$paragraph],
+    ]);
+    $node->save();
+
+    // Check that the parent of the second text paragraph is the paragraph
+    // container.
+    $text_paragraph_2 = Paragraph::load($text_paragraph_2->id());
+    $this->assertEquals($text_paragraph_2->get('parent_id')->value, $paragraph->id());
+    $this->assertEquals($text_paragraph_2->get('parent_type')->value, 'paragraph');
+
+    $this->drupalGet('/node/' . $node->id() . '/edit');
+    $this->drupalPostForm(NULL, [], 'Drag & drop');
+
+    $assert_session = $this->assertSession();
+    $assert_session->hiddenFieldValueEquals('field_paragraphs[dragdrop][field_paragraphs][list][0][dragdrop][paragraphs_container_paragraphs][list][0][_path]', 'field_paragraphs][0][paragraphs_container_paragraphs');
+    $assert_session->hiddenFieldValueEquals('field_paragraphs[dragdrop][field_paragraphs][list][0][dragdrop][paragraphs_container_paragraphs][list][1][_path]', 'field_paragraphs][0][paragraphs_container_paragraphs');
+
+    // Change the path of both text paragraphs to the node as their parent.
+    $assert_session
+      ->hiddenFieldExists('field_paragraphs[dragdrop][field_paragraphs][list][0][dragdrop][paragraphs_container_paragraphs][list][0][_path]')
+      ->setValue('field_paragraphs');
+    $assert_session
+      ->hiddenFieldExists('field_paragraphs[dragdrop][field_paragraphs][list][0][dragdrop][paragraphs_container_paragraphs][list][1][_path]')
+      ->setValue('field_paragraphs');
+    $assert_session
+      ->hiddenFieldExists('field_paragraphs[dragdrop][field_paragraphs][list][0][dragdrop][paragraphs_container_paragraphs][list][0][_weight]')
+      ->setValue(0);
+    $assert_session
+      ->hiddenFieldExists('field_paragraphs[dragdrop][field_paragraphs][list][0][dragdrop][paragraphs_container_paragraphs][list][1][_weight]')
+      ->setValue(1);
+    $assert_session
+      ->hiddenFieldExists('field_paragraphs[dragdrop][field_paragraphs][list][0][_weight]')
+      ->setValue(2);
+
+    $this->drupalPostForm(NULL, [], 'Complete drag & drop');
+    $this->drupalPostForm(NULL, [], 'Save');
+
+    // Check the new structure of the node and its paragraphs.
+    \Drupal::entityTypeManager()->getStorage('node')->resetCache();
+    \Drupal::entityTypeManager()->getStorage('paragraph')->resetCache();
+    $node = Node::load($node->id());
+    $this->assertEquals(3, count($node->get('field_paragraphs')));
+
+    $this->assertEquals($node->get('field_paragraphs')->get(0)->target_id, $text_paragraph_1->id());
+    $text_paragraph_1 = $node->get('field_paragraphs')->get(0)->entity;
+    $this->assertEquals('node', $text_paragraph_1->get('parent_type')->value);
+    $this->assertEquals($node->id(), $text_paragraph_1->get('parent_id')->value);
+
+    $this->assertEquals($node->get('field_paragraphs')->get(1)->target_id, $text_paragraph_2->id());
+    $text_paragraph_2 = $node->get('field_paragraphs')->get(1)->entity;
+    $this->assertEquals('node', $text_paragraph_2->get('parent_type')->value);
+    $this->assertEquals($node->id(), $text_paragraph_2->get('parent_id')->value);
+
+    $this->assertEquals($node->get('field_paragraphs')->get(2)->target_id, $paragraph->id());
+    $paragraph = $node->get('field_paragraphs')->get(2)->entity;
+    $this->assertEquals('node', $paragraph->get('parent_type')->value);
+    $this->assertEquals($node->id(), $paragraph->get('parent_id')->value);
+
+    $this->assertEquals(0, count($paragraph->get('paragraphs_container_paragraphs')));
+  }
+
+  /**
+   * Tests emptying a nested container.
+   */
+  public function testChangeParagraphMoveAllFromNestedContainer() {
+    // Create text paragraph.
+    $text_paragraph_1 = Paragraph::create([
+      'type' => 'text',
+      'field_text' => [
+        'value' => 'Test text 1',
+        'format' => 'plain_text',
+      ],
+    ]);
+    $text_paragraph_1->save();
+
+    // Create a second text paragraph.
+    $text_paragraph_2 = Paragraph::create([
+      'type' => 'text',
+      'field_text' => [
+        'value' => 'Test text 2.',
+        'format' => 'plain_text',
+      ],
+    ]);
+    $text_paragraph_2->save();
+
+    // Create a nested container that contains the two text paragraphs.
+    $nested_container = Paragraph::create([
+      'type' => 'paragraphs_container',
+      'paragraphs_container_paragraphs' => [$text_paragraph_1, $text_paragraph_2],
+    ]);
+    $nested_container->save();
+
+    // Create a container that contains the first two text paragraphs.
+    $container = Paragraph::create([
+      'type' => 'paragraphs_container',
+      'paragraphs_container_paragraphs' => [$nested_container],
+    ]);
+    $container->save();
+
+    // Add test node with paragraph container.
+    $node = Node::create([
+      'type' => 'paragraphed_test',
+      'title' => 'Paragraphs Test',
+      'field_paragraphs' => [$container],
+    ]);
+    $node->save();
+
+    // Check that the parent of the second text paragraph is the nested
+    // container.
+    $text_paragraph_2 = Paragraph::load($text_paragraph_2->id());
+    $this->assertEquals($text_paragraph_2->get('parent_id')->value, $nested_container->id());
+    $this->assertEquals($text_paragraph_2->get('parent_type')->value, 'paragraph');
+
+    $this->drupalGet('/node/' . $node->id() . '/edit');
+    $this->drupalPostForm(NULL, [], 'Drag & drop');
+
+    $assert_session = $this->assertSession();
+    $assert_session->hiddenFieldValueEquals('field_paragraphs[dragdrop][field_paragraphs][list][0][dragdrop][paragraphs_container_paragraphs][list][0][dragdrop][paragraphs_container_paragraphs][list][0][_path]', 'field_paragraphs][0][paragraphs_container_paragraphs][0][paragraphs_container_paragraphs');
+    $assert_session->hiddenFieldValueEquals('field_paragraphs[dragdrop][field_paragraphs][list][0][dragdrop][paragraphs_container_paragraphs][list][0][dragdrop][paragraphs_container_paragraphs][list][1][_path]', 'field_paragraphs][0][paragraphs_container_paragraphs][0][paragraphs_container_paragraphs');
+
+    // Change the path of both text paragraphs to the top container as their
+    // parent with the nested container in the middle.
+    $assert_session
+      ->hiddenFieldExists('field_paragraphs[dragdrop][field_paragraphs][list][0][dragdrop][paragraphs_container_paragraphs][list][0][dragdrop][paragraphs_container_paragraphs][list][0][_path]')
+      ->setValue('field_paragraphs][0][paragraphs_container_paragraphs');
+    $assert_session
+      ->hiddenFieldExists('field_paragraphs[dragdrop][field_paragraphs][list][0][dragdrop][paragraphs_container_paragraphs][list][0][dragdrop][paragraphs_container_paragraphs][list][1][_path]')
+      ->setValue('field_paragraphs][0][paragraphs_container_paragraphs');
+    $assert_session
+      ->hiddenFieldExists('field_paragraphs[dragdrop][field_paragraphs][list][0][dragdrop][paragraphs_container_paragraphs][list][0][dragdrop][paragraphs_container_paragraphs][list][0][_weight]')
+      ->setValue(0);
+    $assert_session
+      ->hiddenFieldExists('field_paragraphs[dragdrop][field_paragraphs][list][0][dragdrop][paragraphs_container_paragraphs][list][0][_weight]')
+      ->setValue(1);
+    $assert_session
+      ->hiddenFieldExists('field_paragraphs[dragdrop][field_paragraphs][list][0][dragdrop][paragraphs_container_paragraphs][list][0][dragdrop][paragraphs_container_paragraphs][list][1][_weight]')
+      ->setValue(2);
+
+    $this->drupalPostForm(NULL, [], 'Complete drag & drop');
+    $this->drupalPostForm(NULL, [], 'Save');
+
+    // Check the new structure of the node and its paragraphs.
+    \Drupal::entityTypeManager()->getStorage('node')->resetCache();
+    \Drupal::entityTypeManager()->getStorage('paragraph')->resetCache();
+    $node = Node::load($node->id());
+    $this->assertEquals(1, count($node->get('field_paragraphs')));
+
+    $this->assertEquals($container->id(), $node->get('field_paragraphs')->get(0)->target_id);
+    $container = $node->get('field_paragraphs')->get(0)->entity;
+    $this->assertEquals('node', $container->get('parent_type')->value);
+    $this->assertEquals($node->id(), $container->get('parent_id')->value);
+
+    $this->assertEquals(3, count($container->get('paragraphs_container_paragraphs')));
+    $this->assertEquals($text_paragraph_1->id(), $container->get('paragraphs_container_paragraphs')->get(0)->target_id);
+    $text_paragraph_1 = $container->get('paragraphs_container_paragraphs')->get(0)->entity;
+    $this->assertEquals('paragraph', $text_paragraph_1->get('parent_type')->value);
+    $this->assertEquals($container->id(), $text_paragraph_1->get('parent_id')->value);
+
+    $this->assertEquals($nested_container->id(), $container->get('paragraphs_container_paragraphs')->get(1)->target_id);
+    $nested_container = $container->get('paragraphs_container_paragraphs')->get(1)->entity;
+    $this->assertEquals('paragraph', $nested_container->get('parent_type')->value);
+    $this->assertEquals($container->id(), $nested_container->get('parent_id')->value);
+    $this->assertEquals(count($nested_container->get('paragraphs_container_paragraphs')), 0);
+
+    $this->assertEquals($text_paragraph_2->id(), $container->get('paragraphs_container_paragraphs')->get(2)->target_id);
+    $text_paragraph_2 = $container->get('paragraphs_container_paragraphs')->get(2)->entity;
+    $this->assertEquals('paragraph', $text_paragraph_2->get('parent_type')->value);
+    $this->assertEquals($container->id(), $text_paragraph_2->get('parent_id')->value);
   }
 
 }

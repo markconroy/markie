@@ -86,6 +86,32 @@ class ParagraphsExperimentalDuplicateFeatureTest extends ParagraphsExperimentalT
     $this->assertFieldByName('field_paragraphs[1][subform][field_text][0][value]', 'C');
     $this->assertFieldByName('field_paragraphs[2][subform][field_text][0][value]', 'C');
     $this->assertFieldByName('field_paragraphs[3][subform][field_text][0][value]', 'B');
+    // Check that the duplicate action is present.
+    $this->assertField('field_paragraphs_0_duplicate');
+
+    // Disable show duplicate action.
+    $this->drupalGet('admin/structure/types/manage/paragraphed_test/form-display');
+    $this->assertText('Features: Duplicate, Collapse / Edit all');
+    $this->drupalPostAjaxForm(NULL, [], 'field_paragraphs_settings_edit');
+    $this->drupalPostForm(NULL, ['fields[field_paragraphs][settings_edit_form][settings][features][duplicate]' => FALSE], t('Update'));
+    $this->assertText('Features: Collapse / Edit all');
+    $this->drupalPostForm(NULL, [], 'Save');
+    $this->drupalGet('node/' . $node->id() . '/edit');
+    // Check that the duplicate action is not present.
+    $this->assertNoField('field_paragraphs_0_duplicate');
+    $this->assertFieldByName('field_paragraphs[0][subform][field_text][0][value]', 'A');
+
+    // Enable show duplicate action.
+    $this->drupalGet('admin/structure/types/manage/paragraphed_test/form-display');
+    $this->assertText('Features: Collapse / Edit all');
+    $this->drupalPostAjaxForm(NULL, [], 'field_paragraphs_settings_edit');
+    $this->drupalPostForm(NULL, ['fields[field_paragraphs][settings_edit_form][settings][features][duplicate]' => TRUE], t('Update'));
+    $this->assertText('Features: Duplicate, Collapse / Edit all');
+    $this->drupalPostForm(NULL, [], 'Save');
+    $this->drupalGet('node/' . $node->id() . '/edit');
+    // Check that the duplicate action is present.
+    $this->assertField('field_paragraphs_0_duplicate');
+    $this->assertFieldByName('field_paragraphs[0][subform][field_text][0][value]', 'A');
   }
 
   /**

@@ -5,11 +5,15 @@
  * Contains paragraphs.module
  */
 
-use Drupal\Core\Field\FieldConfigInterface;
 use Drupal\Core\Url;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\field\FieldStorageConfigInterface;
+use Drupal\field\Plugin\migrate\source\d7\Field;
+use Drupal\field\Plugin\migrate\source\d7\FieldInstance;
+use Drupal\field\Plugin\migrate\source\d7\ViewMode;
+use Drupal\migrate_drupal\Plugin\migrate\FieldMigration;
 use Drupal\paragraphs\Entity\ParagraphsType;
+use Drupal\paragraphs\Plugin\migrate\field\FieldCollection;
 use Drupal\Core\Render\Element;
 
 /**
@@ -235,6 +239,17 @@ function paragraphs_form_language_content_settings_form_alter(&$form, \Drupal\Co
       }
     }
   }
+
+  // Update the description on the hide untranslatable fields checkbox.
+  if (isset($form['settings']['paragraph'])) {
+    $paragraph_untranslatable_hide_description = t('Paragraph types that are used in moderated content requires non-translatable fields to be edited in the original language form and this must be checked.');
+    foreach (Element::children($form['settings']['paragraph']) as $bundle) {
+      if (!empty($form['settings']['paragraph'][$bundle]['settings']['content_translation']['untranslatable_fields_hide'])) {
+        $form['settings']['paragraph'][$bundle]['settings']['content_translation']['untranslatable_fields_hide']['#description'] = $paragraph_untranslatable_hide_description;
+      }
+    }
+  }
+
   $form['settings']['paragraphs_message'] = array(
     '#type' => 'container',
     '#markup' => $message_text,
@@ -330,7 +345,7 @@ function template_preprocess_paragraphs_actions(&$variables) {
  * Implements hook_preprocess_HOOK() for field_multiple_value_form().
  */
 function paragraphs_preprocess_field_multiple_value_form(&$variables) {
-  if (count($variables['element']['#field_parents']) === 0 && isset($variables['table']['#rows'])) {
+  if (!empty($variables['table']['#header']) && isset($variables['table']['#rows'])) {
     // Find paragraph_actions and move to header.
     // @see template_preprocess_field_multiple_value_form()
     if (!empty($variables['table']['#rows'][0]['data'][1]['data']['#paragraphs_header'])) {
@@ -339,6 +354,34 @@ function paragraphs_preprocess_field_multiple_value_form(&$variables) {
         'button' => $variables['table']['#rows'][0]['data'][1]['data'],
       ];
       unset($variables['table']['#rows'][0]);
+    }
+
+    // Add the paragraph type as a class to every row.
+    if (isset($variables['element'][0]['#paragraph_type'])) {
+      foreach ($variables['table']['#rows'] as $key => $row) {
+        if (isset($row['data'][1]['data']['#paragraph_type'])) {
+          $variables['table']['#rows'][$key]['class'][] = 'paragraph-type--' . str_replace('_', '-', $row['data'][1]['data']['#paragraph_type']);
+        }
+      }
+    }
+  }
+
+  // Remove the drag handler if we are translating, if the field's cardinality
+  // is 1 or if there are no paragraphs added. Passing through this will not
+  // only remove the drag handler but also the order column that is empty when
+  // no paragraphs are added and when the field is single value.
+  if ((isset($variables['element']['#allow_reference_changes']) && !$variables['element']['#allow_reference_changes']) || (isset($variables['element']['#cardinality']) && $variables['element']['#cardinality'] == 1) || (isset($variables['table']['#rows']) && count($variables['table']['#rows']) == 0)) {
+    if (isset($variables['table']['#tabledrag'])) {
+      // Remove the tabledrag.
+      unset($variables['table']['#tabledrag']);
+      unset($variables['table']['#header'][1]);
+      foreach ($variables['table']['#rows'] as $key => $value) {
+        $variables['table']['#rows'][$key]['data'][0]['class'][] = 'paragraph-bullet';
+        // Restore the removed weight and give access FALSE.
+        $variables['table']['#rows'][$key]['data'][1]['data']['_weight'] = $value['data'][2]['data'];
+        unset($variables['table']['#rows'][$key]['data'][2]);
+        $variables['table']['#rows'][$key]['data'][1]['data']['_weight']['#access'] = FALSE;
+      }
     }
   }
 }
@@ -362,7 +405,7 @@ function paragraphs_libraries_info() {
         // characters long.
         'file' => 'Sortable.min.js',
         'pattern' => '/\.version="(.*?)"/',
-        'lines' => 2,
+        'lines' => 5,
         'cols' => 20000
       ]
     ],
@@ -421,4 +464,117 @@ function paragraphs_library_info_alter(&$libraries, $extension) {
   }
 
   return $libraries;
+}
+
+/**
+ * Implements hook_migration_plugins_alter().
+ *
+ * @todo refactor/rethink this when
+ * https://www.drupal.org/project/drupal/issues/2904765 is resolved
+ */
+function paragraphs_migration_plugins_alter(array &$migrations) {
+  foreach ($migrations as $key => &$migration) {
+    /** @var \Drupal\migrate\Plugin\MigrationPluginManager $migration_plugin_manager */
+    $migration_plugin_manager = \Drupal::service('plugin.manager.migration');
+    $migration_stub = $migration_plugin_manager->createStubMigration($migration);
+    /** @var \Drupal\migrate\Plugin\MigrateSourcePluginManager $source_plugin_manager */
+    $source_plugin_manager = \Drupal::service('plugin.manager.migrate.source');
+    $source = NULL;
+    $configuration = $migration['source'];
+    $source = $source_plugin_manager->createInstance($migration['source']['plugin'], $configuration, $migration_stub);
+    if ($source) {
+      if (is_a($migration['class'], FieldMigration::class, TRUE)) {
+
+        // Field storage.
+        if (is_a($source, Field::class)) {
+          _paragraphs_migration_entity_type_adjust($migration);
+        }
+
+        // Field instance.
+        if (is_a($source, FieldInstance::class)) {
+          _paragraphs_migration_entity_type_adjust($migration);
+          _paragraphs_migration_bundle_adjust($migration);
+          $migration['migration_dependencies']['optional']['d7_field_collection_type'] = 'd7_field_collection_type';
+          $migration['migration_dependencies']['optional']['d7_paragraphs_type'] = 'd7_paragraphs_type';
+        }
+      }
+
+      // View Modes.
+      if (is_a($source, ViewMode::class)) {
+        _paragraphs_migration_entity_type_adjust($migration, 'targetEntityType');
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_entity_type_alter().
+ */
+function paragraphs_entity_type_alter(array &$entity_types) {
+  /** @var $entity_types \Drupal\Core\Entity\EntityTypeInterface[] */
+  // Remove the handler class for moderation as it is managed by the host.
+  $entity_types['paragraph']->setHandlerClass('moderation', '');
+}
+
+/**
+ * Remove 'field_' prefix from field collection bundles.
+ *
+ * @param array $migration
+ *   The migration configuration to process.
+ */
+function _paragraphs_migration_bundle_adjust(array &$migration) {
+
+  if (!isset($migration['process']['bundle'])) {
+    $migration['process']['bundle'] = [];
+  }
+
+  $bundle_process = $migration['process']['bundle'];
+
+  // Try to play nice with other modules altering this, and don't replace
+  // it outright unless it's unchanged.
+  if (array_key_exists('plugin', $bundle_process)) {
+    $bundle_process = [$bundle_process];
+  }
+  $bundle_process['paragraphs'] = [
+    'plugin' => 'paragraphs_process_on_value',
+    'source_value' => 'entity_type',
+    'expected_value' => 'field_collection_item',
+    'process' => [
+      'plugin' => 'substr',
+      'start' => FieldCollection::FIELD_COLLECTION_PREFIX_LENGTH,
+    ],
+  ];
+  $migration['process']['bundle'] = $bundle_process;
+}
+
+/**
+ * Map field_collection_item and 'paragraphs_item' fields to 'paragraph'.
+ *
+ * @param array $migration
+ *   Thei migration to process.
+ * @param string $destination
+ *   The process destination.
+ */
+function _paragraphs_migration_entity_type_adjust(array &$migration, $destination = 'entity_type') {
+  $entity_type_process = $migration['process'][$destination];
+
+  // Try to play with other modules altering this, and don't replace it
+  // outright unless it's unchanged.
+  if (!is_array($entity_type_process)) {
+    $entity_type_process = [
+      [
+        'plugin' => 'get',
+        'source' => 'entity_type',
+      ],
+    ];
+  }
+  $entity_type_process['paragraphs'] = [
+    'plugin' => 'static_map',
+    'map' => [
+      'field_collection_item' => 'paragraph',
+      'paragraphs_item' => 'paragraph',
+    ],
+    'bypass' => TRUE,
+  ];
+  $migration['process'][$destination] = $entity_type_process;
 }
