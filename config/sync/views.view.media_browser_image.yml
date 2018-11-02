@@ -5,10 +5,12 @@ dependencies:
   config:
     - image.style.media_entity_browser_thumbnail
     - media_entity.bundle.image
+    - taxonomy.vocabulary.media_tags
   module:
     - entity_browser
     - image
     - media_entity
+    - taxonomy
     - user
 id: media_browser_image
 label: 'Media Browser Image'
@@ -513,6 +515,51 @@ display:
           entity_type: media
           entity_field: name
           plugin_id: string
+        field_media_tags_target_id:
+          id: field_media_tags_target_id
+          table: media__field_media_tags
+          field: field_media_tags_target_id
+          relationship: none
+          group_type: group
+          admin_label: ''
+          operator: and
+          value: {  }
+          group: 1
+          exposed: true
+          expose:
+            operator_id: field_media_tags_target_id_op
+            label: 'Tagged With:'
+            description: ''
+            use_operator: false
+            operator: field_media_tags_target_id_op
+            identifier: field_media_tags
+            required: false
+            remember: false
+            multiple: false
+            remember_roles:
+              authenticated: authenticated
+              anonymous: '0'
+              administrator: '0'
+            reduce: false
+          is_grouped: false
+          group_info:
+            label: ''
+            description: ''
+            identifier: ''
+            optional: true
+            widget: select
+            multiple: false
+            remember: false
+            default_group: All
+            default_group_multiple: {  }
+            group_items: {  }
+          reduce_duplicates: false
+          type: textfield
+          limit: true
+          vid: media_tags
+          hierarchy: false
+          error_message: true
+          plugin_id: taxonomy_index_tid
         langcode:
           id: langcode
           table: media_field_data
@@ -572,6 +619,7 @@ display:
         - 'languages:language_interface'
         - url
         - url.query_args
+        - user
         - user.permissions
       tags: {  }
   entity_browser_1:
@@ -589,5 +637,6 @@ display:
         - 'languages:language_interface'
         - url
         - url.query_args
+        - user
         - user.permissions
       tags: {  }
