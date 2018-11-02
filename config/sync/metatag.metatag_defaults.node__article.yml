@@ -5,15 +5,16 @@ dependencies: {  }
 id: node__article
 label: 'Content: Article'
 tags:
-  schema_article_image: 'a:4:{s:5:"@type";s:11:"ImageObject";s:3:"url";s:62:"[node:field_main_image:entity:field_m_image_image:default:url]";s:5:"width";s:0:"";s:6:"height";s:0:"";}'
-  schema_article_description: '[node:field_intro]'
+  schema_article_image: 'a:5:{s:5:"@type";s:11:"ImageObject";s:20:"representativeOfPage";s:4:"True";s:3:"url";s:62:"[node:field_main_image:entity:field_m_image_image:default:url]";s:5:"width";s:0:"";s:6:"height";s:0:"";}'
   schema_article_author: 'a:7:{s:5:"@type";s:6:"Person";s:3:"@id";s:10:"markconroy";s:4:"name";s:11:"Mark Conroy";s:3:"url";s:37:"https://www.mark.ie/about-mark-conroy";s:6:"sameAs";s:110:"https://www.twitter.com/markconroy,https://www.linkedin.com/in/conroymark/,https://www.facebook.com/markconroy";s:4:"logo";a:0:{}s:5:"pivot";s:0:"";}'
-  schema_article_main_entity_of_page: '[current-page:url]'
-  schema_article_type: BlogPosting
   schema_article_date_modified: '[node:changed:html_datetime]'
-  schema_article_date_published: '[node:created:html_datetime]'
   schema_article_about: '[node:field_tags]'
-  schema_article_publisher: 'a:7:{s:5:"@type";s:6:"Person";s:3:"@id";s:10:"markconroy";s:4:"name";s:11:"Mark Conroy";s:3:"url";s:37:"https://www.mark.ie/about-mark-conroy";s:6:"sameAs";s:110:"https://www.twitter.com/markconroy,https://www.linkedin.com/in/conroymark/,https://www.facebook.com/markconroy";s:4:"logo";a:0:{}s:5:"pivot";s:0:"";}'
+  schema_article_date_published: '[node:created:html_datetime]'
+  schema_article_type: BlogPosting
+  schema_article_name: '[node:title]'
   schema_article_headline: '[node:title]'
-  schema_web_page_breadcrumb: 'Yes'
+  schema_article_main_entity_of_page: '[current-page:url]'
+  schema_article_publisher: 'a:7:{s:5:"@type";s:6:"Person";s:3:"@id";s:10:"markconroy";s:4:"name";s:11:"Mark Conroy";s:3:"url";s:37:"https://www.mark.ie/about-mark-conroy";s:6:"sameAs";s:110:"https://www.twitter.com/markconroy,https://www.linkedin.com/in/conroymark/,https://www.facebook.com/markconroy";s:4:"logo";a:0:{}s:5:"pivot";s:0:"";}'
+  schema_article_description: '[node:field_intro]'
   schema_web_page_type: WebPage
+  schema_web_page_breadcrumb: 'Yes'

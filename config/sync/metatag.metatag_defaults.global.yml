@@ -8,19 +8,33 @@ id: global
 label: Global
 tags:
   title: '[current-page:title] | [site:name] - Lead Frontend Drupal Developer Ireland'
+  og_url: '[current-page:url]'
+  article_author: 'https://www.facebook.com/markconroy'
+  og_image_secure_url: '[node:field_main_image:entity:field_m_image_image]'
+  og_site_name: Mark.ie
+  og_image: '[node:field_main_image:entity:field_m_image_image]'
   og_title: '[current-page:title]'
   og_image_url: '[node:field_main_image:entity:field_m_image_image]'
-  og_url: '[current-page:url]'
-  og_image: '[node:field_main_image:entity:field_m_image_image]'
-  og_image_secure_url: '[node:field_main_image:entity:field_m_image_image]'
-  article_author: 'https://www.facebook.com/markconroy'
-  og_site_name: Mark.ie
+  twitter_cards_site_id: '16218176'
   twitter_cards_image: '[node:field_main_image:entity:field_m_image_image]'
   twitter_cards_creator_id: '16218176'
-  twitter_cards_site_id: '16218176'
+  twitter_cards_creator: '@markconroy'
+  twitter_cards_title: '[current-page:title]'
+  twitter_cards_type: summary
   twitter_cards_description: '[node:field_intro]'
   twitter_cards_page_url: '[current-page:url]'
-  twitter_cards_type: summary
-  twitter_cards_title: '[current-page:title]'
-  twitter_cards_creator: '@markconroy'
   twitter_cards_site: '@markconroy'
+  schema_article_image: 'a:5:{s:5:"@type";s:11:"ImageObject";s:20:"representativeOfPage";s:4:"True";s:3:"url";s:62:"[node:field_main_image:entity:field_m_image_image:default:url]";s:5:"width";s:0:"";s:6:"height";s:0:"";}'
+  schema_article_author: 'a:7:{s:5:"@type";s:6:"Person";s:3:"@id";s:10:"markconroy";s:4:"name";s:11:"Mark Conroy";s:3:"url";s:37:"https://www.mark.ie/about-mark-conroy";s:6:"sameAs";s:110:"https://www.twitter.com/markconroy,https://www.linkedin.com/in/conroymark/,https://www.facebook.com/markconroy";s:4:"logo";a:0:{}s:5:"pivot";s:0:"";}'
+  schema_article_date_modified: '[node:created:html_datetime].'
+  schema_article_about: '[node:field_tags]'
+  schema_article_date_published: '[node:created:html_datetime]'
+  schema_article_type: Article
+  schema_article_name: '[node:title]'
+  schema_article_headline: '[node:title]'
+  schema_article_main_entity_of_page: '[current-page:url]'
+  schema_article_publisher: 'a:7:{s:5:"@type";s:6:"Person";s:3:"@id";s:10:"markconroy";s:4:"name";s:11:"Mark Conroy";s:3:"url";s:37:"https://www.mark.ie/about-mark-conroy";s:6:"sameAs";s:110:"https://www.twitter.com/markconroy,https://www.linkedin.com/in/conroymark/,https://www.facebook.com/markconroy";s:4:"logo";a:0:{}s:5:"pivot";s:0:"";}'
+  schema_article_description: '[node:field_intro]'
+  schema_web_page_type: WebPage
+  schema_web_page_id: markconroy
+  schema_web_page_breadcrumb: 'Yes'
