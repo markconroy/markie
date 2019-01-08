@@ -25,6 +25,19 @@
 })(jQuery, Drupal);
 "use strict";
 
+(function addtocalendarScript($, Drupal) {
+  Drupal.behaviors.addtocalendar = {
+    attach: function attach(context) {
+      var addToCalendarTrigger = $(".add-to-calendar__trigger");
+
+      addToCalendarTrigger.unbind("click").click(function () {
+        $(this).parent(".add-to-calendar").find(".add-to-calendar__items").slideToggle();
+      });
+    }
+  };
+})(jQuery, Drupal);
+"use strict";
+
 (function breadcrumbsScript($, Drupal) {
   Drupal.behaviors.breadcrumbs = {
     attach: function attach(context) {}
