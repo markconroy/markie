@@ -1,37 +1,40 @@
 @font-face {
   font-family: $icon-font-base-name;
-  src: url("#{$icon-font-path}#{$icon-font-base-name}.eot");
-  src: /* stylelint-disable-line declaration-colon-space-after */
-    url("#{$icon-font-path}#{$icon-font-base-name}.eot?#iefix") format("eot"),
-    url("#{$icon-font-path}#{$icon-font-base-name}.woff") format("woff"),
-    url("#{$icon-font-path}#{$icon-font-base-name}.ttf") format("truetype"),
-    url("#{$icon-font-path}#{$icon-font-base-name}.svg#icons") format("svg");
   font-weight: normal;
   font-style: normal;
+
+  src: url("#{$icon-font-path}#{$icon-font-base-name}.eot");
+  src: /* stylelint-disable-line declaration-colon-space-after */
+  url("#{$icon-font-path}#{$icon-font-base-name}.eot?#iefix") format("eot"),
+  url("#{$icon-font-path}#{$icon-font-base-name}.woff") format("woff"),
+  url("#{$icon-font-path}#{$icon-font-base-name}.ttf") format("truetype"),
+  url("#{$icon-font-path}#{$icon-font-base-name}.svg#icons") format("svg");
 }
 
 @mixin font-icon-base() {
-  font-family: $icon-font-base-name;
   display: inline-block;
   vertical-align: middle;
-  line-height: 1;
-  font-weight: normal;
-  font-style: normal;
-  speak: none;
   text-decoration: inherit;
   text-transform: none;
+  font-family: $icon-font-base-name;
+  font-weight: normal;
+  font-style: normal;
+  line-height: 1;
+
+  speak: none;
   text-rendering: optimizeLegibility;
 }
 
 @mixin font-icon-replace($pseudo) {
   position: relative;
   right: 9999px;
-  &:#{$pseudo} { /* stylelint-disable-line */
+  &:#{$pseudo} {
+    /* stylelint-disable-line */
     position: absolute;
-    height: 100%;
-    text-align: center;
     top: 0;
     right: -9999px;
+    height: 100%;
+    text-align: center;
   }
 }
 
@@ -56,12 +59,12 @@
   $color: inherit,
   $block: false
 ) {
-  &:#{$pseudo} { /* stylelint-disable-line */
-
+  &:#{$pseudo} {
+    /* stylelint-disable-line */
     @include font-icon-base();
     content: map-get($font-icons, $icon);
-    font-size: $size;
     color: $color;
+    font-size: $size;
 
     @content;
   }
