@@ -50,6 +50,7 @@
     "drupal/honeypot": "1.27",
     "drupal/image_widget_crop": "2.1",
     "drupal/inline_entity_form": "1.0-beta1",
+    "drupal/jsonapi": "^2.0",
     "drupal/media_entity": "1.7",
     "drupal/media_entity_browser": "1.0-beta3",
     "drupal/media_entity_image": "1.2",
