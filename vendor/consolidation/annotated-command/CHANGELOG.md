@@ -1,5 +1,36 @@
 # Change Log
 
+### 2.11.0
+
+- Make injection of InputInterface / OutputInterface general-purpose (#179)
+
+### 2.10.2 - 20 Dec 2018
+
+- Fix commands that have a @param annotation for their InputInterface/OutputInterface params (#176)
+
+### 2.10.1 - 13 Dec 2018
+
+- Add stdin handler convenience class
+- Add setter to AnnotationData to suppliment existing array acces
+- Update to Composer Test Scenarios 3
+
+### 2.10.0 - 14 Nov 2018
+
+- Add a new data type, CommandResult (#167)
+
+### 2.9.0 & 2.9.1 - 19 Sept 2018
+
+- Improve commandfile discovery for extensions installed via Composer. (#156)
+
+### 2.8.5 - 18 Aug 2018
+
+- Add dependencies.yml for dependencies.io
+- Fix warning in AnnotatedCommandFactory when getCommandInfoListFromCache called with null.
+
+### 2.8.4 - 25 May 2018
+
+- Use g1a/composer-test-scenarios for better PHP version matrix testing.
+
 ### 2.8.3 - 23 Feb 2018
 
 - BUGFIX: Do not shift off the command name unless it is there. (#139)

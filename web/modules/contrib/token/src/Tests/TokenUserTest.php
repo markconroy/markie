@@ -2,6 +2,7 @@
 
 namespace Drupal\token\Tests;
 
+use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Session\AnonymousUserSession;
 use Drupal\field\Entity\FieldStorageConfig;
 
@@ -24,7 +25,7 @@ class TokenUserTest extends TokenTestBase {
    *
    * @var array
    */
-  public static $modules = array('token_user_picture');
+  public static $modules = ['token_user_picture'];
 
   /**
    * {@inheritdoc}
@@ -32,10 +33,17 @@ class TokenUserTest extends TokenTestBase {
   public function setUp() {
     parent::setUp();
 
-    $this->account = $this->drupalCreateUser(['administer users', 'administer account settings', 'access content']);
+    $this->account = $this->drupalCreateUser([
+      'administer users',
+      'administer account settings',
+      'access content',
+    ]);
     $this->drupalLogin($this->account);
   }
 
+  /**
+   * Tests the user releated tokens.
+   */
   public function testUserTokens() {
     // Enable user pictures.
     \Drupal::state()->set('user_pictures', 1);
@@ -49,7 +57,7 @@ class TokenUserTest extends TokenTestBase {
 
     // Add a user picture to the account.
     $image = current($this->drupalGetTestFiles('image'));
-    $edit = array('files[user_picture_0]' => drupal_realpath($image->uri));
+    $edit = ['files[user_picture_0]' => \Drupal::service('file_system')->realpath($image->uri)];
     $this->drupalPostForm('user/' . $this->account->id() . '/edit', $edit, t('Save'));
 
     $storage = \Drupal::entityTypeManager()->getStorage('user');
@@ -65,14 +73,14 @@ class TokenUserTest extends TokenTestBase {
     ];
     /** @var \Drupal\Core\Render\RendererInterface $renderer */
     $renderer = \Drupal::service('renderer');
-    $user_tokens = array(
+    $user_tokens = [
       'picture' => $renderer->renderPlain($picture),
       'picture:fid' => $this->account->user_picture->target_id,
       'picture:size-raw' => 125,
       'ip-address' => NULL,
       'roles' => implode(', ', $this->account->getRoles()),
-    );
-    $this->assertTokens('user', array('user' => $this->account), $user_tokens);
+    ];
+    $this->assertTokens('user', ['user' => $this->account], $user_tokens);
 
     // Remove the simpletest-created user role.
     $roles = $this->account->getRoles();
@@ -84,29 +92,32 @@ class TokenUserTest extends TokenTestBase {
     $storage->resetCache();
     $this->account = $storage->load($this->account->id());
 
-    $user_tokens = array(
+    $user_tokens = [
       'picture' => NULL,
       'picture:fid' => NULL,
       'ip-address' => NULL,
       'roles' => 'authenticated',
-      'roles:keys' => (string) DRUPAL_AUTHENTICATED_RID,
-    );
-    $this->assertTokens('user', array('user' => $this->account), $user_tokens);
+      'roles:keys' => AccountInterface::AUTHENTICATED_ROLE,
+    ];
+    $this->assertTokens('user', ['user' => $this->account], $user_tokens);
 
     // The ip address token should work for the current user token type.
-    $tokens = array(
+    $tokens = [
       'ip-address' => \Drupal::request()->getClientIp(),
-    );
-    $this->assertTokens('current-user', array(), $tokens);
+    ];
+    $this->assertTokens('current-user', [], $tokens);
 
     $anonymous = new AnonymousUserSession();
-    $tokens = array(
+    $tokens = [
       'roles' => 'anonymous',
-      'roles:keys' => (string) DRUPAL_ANONYMOUS_RID,
-    );
-    $this->assertTokens('user', array('user' => $anonymous), $tokens);
+      'roles:keys' => AccountInterface::ANONYMOUS_ROLE,
+    ];
+    $this->assertTokens('user', ['user' => $anonymous], $tokens);
   }
 
+  /**
+   * Test user account settings.
+   */
   public function testUserAccountSettings() {
     $this->drupalGet('admin/config/people/accounts');
     $this->assertText('The list of available tokens that can be used in e-mails is provided below.');

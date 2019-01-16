@@ -25,11 +25,12 @@ class DateTest extends KernelTestBase {
   }
 
   function testDateTokens() {
-    $tokens = array(
+    $tokens = [
       'token_module_test' => '1984',
       'invalid_format' => NULL,
-    );
+    ];
 
-    $this->assertTokens('date', array('date' => 453859200), $tokens);
+    $this->assertTokens('date', ['date' => 453859200], $tokens);
   }
+
 }

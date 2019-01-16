@@ -61,12 +61,12 @@ class TreeBuilder implements TreeBuilderInterface {
       $token_types = array_merge($token_types, $this->tokenService->getGlobalTokenTypes());
     }
 
-    $element = array(
-      /*'#cache' => array(
-        'cid' => 'tree-rendered:' . hash('sha256', serialize(array('token_types' => $token_types, 'global_types' => NULL) + $variables)),
-        'tags' => array(Token::TOKEN_INFO_CACHE_TAG),
-      ),*/
-    );
+    $element = [
+      /*'#cache' => [
+        'cid' => 'tree-rendered:' . hash('sha256', serialize(['token_types' => $token_types, 'global_types' => NULL] + $variables)),
+        'tags' => [Token::TOKEN_INFO_CACHE_TAG],
+      ],*/
+    ];
 
     // @todo Find a way to use the render cache for this.
     /*if ($cached_output = token_render_cache_get($element)) {

@@ -35,6 +35,7 @@ class Parser
     private $refs = array();
     private $skippedLineNumbers = array();
     private $locallySkippedLineNumbers = array();
+    private $refsBeingParsed = array();
 
     public function __construct()
     {
@@ -212,6 +213,7 @@ class Parser
 
                 if (isset($values['value']) && self::preg_match('#^&(?P<ref>[^ ]+) *(?P<value>.*)#u', $values['value'], $matches)) {
                     $isRef = $matches['ref'];
+                    $this->refsBeingParsed[] = $isRef;
                     $values['value'] = $matches['value'];
                 }
 
@@ -244,6 +246,7 @@ class Parser
                 }
                 if ($isRef) {
                     $this->refs[$isRef] = end($data);
+                    array_pop($this->refsBeingParsed);
                 }
             } elseif (
                 self::preg_match('#^(?P<key>(?:![^\s]++\s++)?(?:'.Inline::REGEX_QUOTED_STRING.'|(?:!?!php/const:)?[^ \'"\[\{!].*?)) *\:(\s++(?P<value>.+))?$#u', rtrim($this->currentLine), $values)
@@ -287,6 +290,10 @@ class Parser
                     if (isset($values['value'][0]) && '*' === $values['value'][0]) {
                         $refName = substr(rtrim($values['value']), 1);
                         if (!array_key_exists($refName, $this->refs)) {
+                            if (false !== $pos = array_search($refName, $this->refsBeingParsed, true)) {
+                                throw new ParseException(sprintf('Circular reference [%s, %s] detected for reference "%s".', implode(', ', \array_slice($this->refsBeingParsed, $pos)), $refName, $refName), $this->currentLineNb + 1, $this->currentLine, $this->filename);
+                            }
+
                             throw new ParseException(sprintf('Reference "%s" does not exist.', $refName), $this->getRealCurrentLineNb() + 1, $this->currentLine, $this->filename);
                         }
 
@@ -340,6 +347,7 @@ class Parser
                     }
                 } elseif ('<<' !== $key && isset($values['value']) && self::preg_match('#^&(?P<ref>[^ ]++) *+(?P<value>.*)#u', $values['value'], $matches)) {
                     $isRef = $matches['ref'];
+                    $this->refsBeingParsed[] = $isRef;
                     $values['value'] = $matches['value'];
                 }
 
@@ -395,6 +403,7 @@ class Parser
                 }
                 if ($isRef) {
                     $this->refs[$isRef] = $data[$key];
+                    array_pop($this->refsBeingParsed);
                 }
             } else {
                 // multiple documents are not supported
@@ -500,6 +509,7 @@ class Parser
         $parser->totalNumberOfLines = $this->totalNumberOfLines;
         $parser->skippedLineNumbers = $skippedLineNumbers;
         $parser->refs = &$this->refs;
+        $parser->refsBeingParsed = $this->refsBeingParsed;
 
         return $parser->doParse($yaml, $flags);
     }
@@ -549,11 +559,6 @@ class Parser
     private function getNextEmbedBlock($indentation = null, $inSequence = false)
     {
         $oldLineIndentation = $this->getCurrentLineIndentation();
-        $blockScalarIndentations = array();
-
-        if ($this->isBlockScalarHeader()) {
-            $blockScalarIndentations[] = $oldLineIndentation;
-        }
 
         if (!$this->moveToNextLine()) {
             return;
@@ -612,29 +617,8 @@ class Parser
 
         $isItUnindentedCollection = $this->isStringUnIndentedCollectionItem();
 
-        if (empty($blockScalarIndentations) && $this->isBlockScalarHeader()) {
-            $blockScalarIndentations[] = $this->getCurrentLineIndentation();
-        }
-
-        $previousLineIndentation = $this->getCurrentLineIndentation();
-
         while ($this->moveToNextLine()) {
             $indent = $this->getCurrentLineIndentation();
-
-            // terminate all block scalars that are more indented than the current line
-            if (!empty($blockScalarIndentations) && $indent < $previousLineIndentation && '' !== trim($this->currentLine)) {
-                foreach ($blockScalarIndentations as $key => $blockScalarIndentation) {
-                    if ($blockScalarIndentation >= $indent) {
-                        unset($blockScalarIndentations[$key]);
-                    }
-                }
-            }
-
-            if (empty($blockScalarIndentations) && !$this->isCurrentLineComment() && $this->isBlockScalarHeader()) {
-                $blockScalarIndentations[] = $indent;
-            }
-
-            $previousLineIndentation = $indent;
 
             if ($isItUnindentedCollection && !$this->isCurrentLineEmpty() && !$this->isStringUnIndentedCollectionItem() && $newIndent === $indent) {
                 $this->moveToPreviousLine();
@@ -715,6 +699,10 @@ class Parser
             }
 
             if (!array_key_exists($value, $this->refs)) {
+                if (false !== $pos = array_search($value, $this->refsBeingParsed, true)) {
+                    throw new ParseException(sprintf('Circular reference [%s, %s] detected for reference "%s".', implode(', ', \array_slice($this->refsBeingParsed, $pos)), $value, $value), $this->currentLineNb + 1, $this->currentLine, $this->filename);
+                }
+
                 throw new ParseException(sprintf('Reference "%s" does not exist.', $value), $this->currentLineNb + 1, $this->currentLine, $this->filename);
             }
 
@@ -1052,16 +1040,6 @@ class Parser
     private function isStringUnIndentedCollectionItem()
     {
         return '-' === rtrim($this->currentLine) || 0 === strpos($this->currentLine, '- ');
-    }
-
-    /**
-     * Tests whether or not the current line is the header of a block scalar.
-     *
-     * @return bool
-     */
-    private function isBlockScalarHeader()
-    {
-        return (bool) self::preg_match('~'.self::BLOCK_SCALAR_HEADER_PATTERN.'$~', $this->currentLine);
     }
 
     /**

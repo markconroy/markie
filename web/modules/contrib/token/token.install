@@ -9,7 +9,7 @@
  * Implements hook_requirements().
  */
 function token_requirements($phase = 'runtime') {
-  $requirements = array();
+  $requirements = [];
 
   if ($phase == 'runtime') {
     // Check for various token definition problems.
@@ -24,11 +24,11 @@ function token_requirements($phase = 'runtime') {
           '#items' => $problems,
         ];
 
-        $requirements['token-' . $problem_key] = array(
+        $requirements['token-' . $problem_key] = [
           'title' => $problem['label'],
           'value' => \Drupal::service('renderer')->renderPlain($build),
           'severity' => $problem['severity'],
-        );
+        ];
       }
     }
   }
@@ -51,12 +51,12 @@ function token_install() {
     $storage = \Drupal::entityTypeManager()->getStorage('entity_view_mode');
     // Add a token view mode if it does not already exist.
     if (!$storage->load("$entity_type.token")) {
-      $storage->create(array(
+      $storage->create([
         'targetEntityType' => $entity_type,
         'id' => "$entity_type.token",
         'status' => TRUE,
         'label' => t('Token'),
-      ))->save();
+      ])->save();
     }
   }
 }
@@ -65,7 +65,7 @@ function token_install() {
  * Build a list of Drupal 6 tokens and their Drupal 7 token names.
  */
 function _token_upgrade_token_list() {
-  $tokens = array(
+  $tokens = [
     // Global tokens
     'user-name' => 'current-user:name',
     'user-id' => 'current-user:id',
@@ -142,7 +142,7 @@ function _token_upgrade_token_list() {
     //'date-in-tz' => '',
     'account-url' => 'user:url',
     'account-edit' => 'user:edit-url',
-  );
+  ];
 
   // Account for date tokens which need to be expanded.
   $tokens += _token_upgrade_token_date_list('site-', 'site:date');
@@ -160,8 +160,8 @@ function _token_upgrade_token_list() {
  * Build a list of Drupal 6 date tokens and their Drupal 7 token names.
  */
 function _token_upgrade_token_date_list($old_token, $new_token) {
-  $tokens = array();
-  $formats = array(
+  $tokens = [];
+  $formats = [
     'yyyy' => 'Y',
     'yy' => 'y',
     'month' => 'F',
@@ -174,7 +174,7 @@ function _token_upgrade_token_date_list($old_token, $new_token) {
     'ddd' => 'D',
     'dd' => 'd',
     'd' => 'j',
-  );
+  ];
   foreach ($formats as $token_format => $date_format) {
     $tokens[$old_token . $token_format] = "$new_token:custom:$date_format";
   }
@@ -198,7 +198,7 @@ function _token_upgrade_token_date_list($old_token, $new_token) {
  *
  * @see _token_upgrade_token_list()
  */
-function token_update_token_text($text, $updates = array(), $leading = '[', $trailing = ']') {
+function token_update_token_text($text, $updates = [], $leading = '[', $trailing = ']') {
   $updates += _token_upgrade_token_list();
   $regex = '/' . preg_quote($leading, '/') . '([^\s]*)' . preg_quote($trailing, '/') . '/';
   preg_match_all($regex, $text, $matches);
@@ -220,7 +220,7 @@ function token_update_token_text($text, $updates = array(), $leading = '[', $tra
  */
 function token_get_token_problems() {
   // @todo Improve the duplicate checking to report which modules are the offenders.
-  //$token_info = array();
+  //$token_info = [];
   //foreach (module_implements('token_info') as $module) {
   //  $module_token_info = module_invoke($module, 'token_info');
   //  if (in_array($module, _token_core_supported_modules())) {
@@ -230,7 +230,7 @@ function token_get_token_problems() {
   //    if (is_array($module_token_info['types'])) {
   //      foreach (array_keys($module_token_info['types']) as $type) {
   //        if (is_array($module_token_info['types'][$type])) {
-  //          $module_token_info['types'][$type] += array('module' => $module);
+  //          $module_token_info['types'][$type] += ['module' => $module];
   //        }
   //      }
   //    }
@@ -246,28 +246,28 @@ function token_get_token_problems() {
   //}
 
   $token_info = \Drupal::token()->getInfo();
-  $token_problems = array(
-    'not-array' => array(
+  $token_problems = [
+    'not-array' => [
       'label' => t('Tokens or token types not defined as arrays'),
       'severity' => REQUIREMENT_ERROR,
-    ),
-    'missing-info' => array(
+    ],
+    'missing-info' => [
       'label' => t('Tokens or token types missing name property'),
       'severity' => REQUIREMENT_WARNING,
-    ),
-    'type-no-tokens' => array(
+    ],
+    'type-no-tokens' => [
       'label' => t('Token types do not have any tokens defined'),
       'severity' => REQUIREMENT_INFO,
-    ),
-    'tokens-no-type' => array(
+    ],
+    'tokens-no-type' => [
       'label' => t('Token types are not defined but have tokens'),
       'severity' => REQUIREMENT_INFO,
-    ),
-    'duplicate' => array(
+    ],
+    'duplicate' => [
       'label' => t('Token or token types are defined by multiple modules'),
       'severity' => REQUIREMENT_ERROR,
-    ),
-  );
+    ],
+  ];
 
   // Check token types for problems.
   foreach ($token_info['types'] as $type => $type_info) {

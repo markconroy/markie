@@ -339,7 +339,8 @@ All four methods can either return the changed node or not return at all (i.e. `
 case the current node is not changed.
 
 The `enterNode()` method can additionally return the value `NodeTraverser::DONT_TRAVERSE_CHILDREN`,
-which instructs the traverser to skip all children of the current node.
+which instructs the traverser to skip all children of the current node. To furthermore prevent subsequent
+visitors from visiting the current node, `NodeTraverser::DONT_TRAVERSE_CURRENT_AND_CHILDREN` can be used instead.
 
 The `leaveNode()` method can additionally return the value `NodeTraverser::REMOVE_NODE`, in which
 case the current node will be removed from the parent array. Furthermore it is possible to return
@@ -409,7 +410,7 @@ $files = new \RegexIterator($files, '/\.php$/');
 foreach ($files as $file) {
     try {
         // read the file that should be converted
-        $code = file_get_contents($file);
+        $code = file_get_contents($file->getPathName());
 
         // parse
         $stmts = $parser->parse($code);

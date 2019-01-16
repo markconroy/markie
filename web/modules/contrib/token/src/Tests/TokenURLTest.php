@@ -16,7 +16,7 @@ class TokenURLTest extends TokenTestBase {
    *
    * @var array
    */
-  public static $modules = array('node');
+  public static $modules = ['node'];
 
   /**
    * {@inheritdoc}
@@ -27,25 +27,25 @@ class TokenURLTest extends TokenTestBase {
   }
 
   function testURLTokens() {
-    $url = new Url('entity.node.canonical', array('node' => 1));
-    $tokens = array(
+    $url = new Url('entity.node.canonical', ['node' => 1]);
+    $tokens = [
       'absolute' => $url->setAbsolute()->toString(),
       'relative' => $url->setAbsolute(FALSE)->toString(),
       'path' => '/first-node',
-      'brief' => preg_replace(array('!^https?://!', '!/$!'), '', $url->setAbsolute()->toString()),
+      'brief' => preg_replace(['!^https?://!', '!/$!'], '', $url->setAbsolute()->toString()),
       'args:value:0' => 'first-node',
       'args:value:1' => NULL,
       'args:value:N' => NULL,
       'unaliased' => $url->setAbsolute()->setOption('alias', TRUE)->toString(),
       'unaliased:relative' => $url->setAbsolute(FALSE)->setOption('alias', TRUE)->toString(),
       'unaliased:path' => '/node/1',
-      'unaliased:brief' => preg_replace(array('!^https?://!', '!/$!'), '', $url->setAbsolute()->setOption('alias', TRUE)->toString()),
+      'unaliased:brief' => preg_replace(['!^https?://!', '!/$!'], '', $url->setAbsolute()->setOption('alias', TRUE)->toString()),
       'unaliased:args:value:0' => 'node',
       'unaliased:args:value:1' => '1',
       'unaliased:args:value:2' => NULL,
       // Deprecated tokens.
       'alias' => '/first-node',
-    );
-    $this->assertTokens('url', array('url' => new Url('entity.node.canonical', array('node' => 1))), $tokens);
+    ];
+    $this->assertTokens('url', ['url' => new Url('entity.node.canonical', ['node' => 1])], $tokens);
   }
 }

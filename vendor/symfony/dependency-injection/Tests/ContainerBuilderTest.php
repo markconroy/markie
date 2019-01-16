@@ -559,7 +559,7 @@ class ContainerBuilderTest extends TestCase
         $config->setDefinition('baz', new Definition('BazClass'));
         $config->setAlias('alias_for_foo', 'foo');
         $container->merge($config);
-        $this->assertEquals(array('service_container', 'foo', 'bar', 'baz'), array_keys($container->getDefinitions()), '->merge() merges definitions already defined ones');
+        $this->assertEquals(array('foo', 'bar', 'service_container', 'baz'), array_keys($container->getDefinitions()), '->merge() merges definitions already defined ones');
 
         $aliases = $container->getAliases();
         $this->assertArrayHasKey('alias_for_foo', $aliases);
@@ -1379,6 +1379,17 @@ class ContainerBuilderTest extends TestCase
 
         $foo5 = $container->get('foo5');
         $this->assertSame($foo5, $foo5->bar->foo);
+
+        $manager = $container->get('manager');
+        $this->assertEquals(new \stdClass(), $manager);
+
+        $manager = $container->get('manager2');
+        $this->assertEquals(new \stdClass(), $manager);
+
+        $foo6 = $container->get('foo6');
+        $this->assertEquals((object) array('bar6' => (object) array()), $foo6);
+
+        $this->assertInstanceOf(\stdClass::class, $container->get('root'));
     }
 
     public function provideAlmostCircular()
@@ -1472,6 +1483,22 @@ class ContainerBuilderTest extends TestCase
 
         $container->set('foo', (object) array(123));
         $this->assertEquals((object) array('foo' => (object) array(123)), $container->get('bar'));
+    }
+
+    public function testDecoratedSelfReferenceInvolvingPrivateServices()
+    {
+        $container = new ContainerBuilder();
+        $container->register('foo', 'stdClass')
+            ->setPublic(false)
+            ->setProperty('bar', new Reference('foo'));
+        $container->register('baz', 'stdClass')
+            ->setPublic(false)
+            ->setProperty('inner', new Reference('baz.inner'))
+            ->setDecoratedService('foo');
+
+        $container->compile();
+
+        $this->assertSame(array('service_container'), array_keys($container->getDefinitions()));
     }
 }
 

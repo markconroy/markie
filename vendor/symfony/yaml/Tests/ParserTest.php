@@ -2099,6 +2099,10 @@ YAML;
             $this->markTestSkipped('chmod is not supported on Windows');
         }
 
+        if (!getenv('USER') || 'root' === getenv('USER')) {
+            $this->markTestSkipped('This test will fail if run under superuser');
+        }
+
         $file = __DIR__.'/Fixtures/not_readable.yml';
         chmod($file, 0200);
 
@@ -2171,6 +2175,48 @@ YAML;
 foo: { &foo { a: Steve, <<: *foo} }
 EOE;
         $this->parser->parse($yaml);
+    }
+
+    /**
+     * @dataProvider circularReferenceProvider
+     * @expectedException \Symfony\Component\Yaml\Exception\ParseException
+     * @expectedExceptionMessage Circular reference [foo, bar, foo] detected
+     */
+    public function testDetectCircularReferences($yaml)
+    {
+        $this->parser->parse($yaml, Yaml::PARSE_CUSTOM_TAGS);
+    }
+
+    public function circularReferenceProvider()
+    {
+        $tests = array();
+
+        $yaml = <<<YAML
+foo:
+    - &foo
+      - &bar
+        bar: foobar
+        baz: *foo
+YAML;
+        $tests['sequence'] = array($yaml);
+
+        $yaml = <<<YAML
+foo: &foo
+    bar: &bar
+        foobar: baz
+        baz: *foo
+YAML;
+        $tests['mapping'] = array($yaml);
+
+        $yaml = <<<YAML
+foo: &foo
+    bar: &bar
+        foobar: baz
+        <<: *foo
+YAML;
+        $tests['mapping with merge key'] = array($yaml);
+
+        return $tests;
     }
 
     /**

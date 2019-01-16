@@ -26,6 +26,9 @@ class NamespacePassTest extends CodeCleanerTestCase
 
     public function testProcess()
     {
+        $this->parseAndTraverse('');
+        $this->assertNull($this->cleaner->getNamespace());
+
         $this->parseAndTraverse('array_merge()');
         $this->assertNull($this->cleaner->getNamespace());
 
@@ -40,7 +43,7 @@ class NamespacePassTest extends CodeCleanerTestCase
         // A new block namespace clears out the current namespace...
         $this->parseAndTraverse('namespace Gamma { array_merge(); }');
 
-        if (defined('PhpParser\\Node\\Stmt\\Namespace_::KIND_SEMICOLON')) {
+        if (\defined('PhpParser\\Node\\Stmt\\Namespace_::KIND_SEMICOLON')) {
             $this->assertNull($this->cleaner->getNamespace());
         } else {
             // But not for PHP-Parser < v3.1.2 :(

@@ -35,6 +35,12 @@
           else if (typeof(CKEDITOR) != 'undefined' && CKEDITOR.currentInstance) {
             CKEDITOR.currentInstance.insertHtml(content);
           }
+          // Direct CodeMirror support.
+          else if (typeof(CodeMirror) != 'undefined' && drupalSettings.tokenFocusedField && $(drupalSettings.tokenFocusedField).parents('.CodeMirror').length) {
+            var editor = $(drupalSettings.tokenFocusedField).parents('.CodeMirror')[0].CodeMirror;
+            editor.replaceSelection(content);
+            editor.focus();
+          }
           // WYSIWYG support, should work in all editors if available.
           else if (Drupal.wysiwyg && Drupal.wysiwyg.activeId) {
             Drupal.wysiwyg.instances[Drupal.wysiwyg.activeId].insert(content)

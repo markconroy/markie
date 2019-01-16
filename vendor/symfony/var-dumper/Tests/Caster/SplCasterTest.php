@@ -35,7 +35,7 @@ SplFileInfo {
   aTime: %s-%s-%d %d:%d:%d
   mTime: %s-%s-%d %d:%d:%d
   cTime: %s-%s-%d %d:%d:%d
-  inode: %d
+  inode: %i
   size: %d
   perms: 0%d
   owner: %d
@@ -85,7 +85,7 @@ SplFileObject {
   aTime: %s-%s-%d %d:%d:%d
   mTime: %s-%s-%d %d:%d:%d
   cTime: %s-%s-%d %d:%d:%d
-  inode: %d
+  inode: %i
   size: %d
   perms: 0%d
   owner: %d
@@ -105,7 +105,7 @@ SplFileObject {
   maxLineLen: 0
   fstat: array:26 [
     "dev" => %d
-    "ino" => %d
+    "ino" => %i
     "nlink" => %d
     "rdev" => 0
     "blksize" => %i
@@ -144,4 +144,70 @@ EOTXT;
             array(\SplDoublyLinkedList::IT_MODE_LIFO | \SplDoublyLinkedList::IT_MODE_DELETE, 'IT_MODE_LIFO | IT_MODE_DELETE'),
         );
     }
+
+    public function testCastObjectStorageIsntModified()
+    {
+        $var = new \SplObjectStorage();
+        $var->attach(new \stdClass());
+        $var->rewind();
+        $current = $var->current();
+
+        $this->assertDumpMatchesFormat('%A', $var);
+        $this->assertSame($current, $var->current());
+    }
+
+    public function testCastObjectStorageDumpsInfo()
+    {
+        $var = new \SplObjectStorage();
+        $var->attach(new \stdClass(), new \DateTime());
+
+        $this->assertDumpMatchesFormat('%ADateTime%A', $var);
+    }
+
+    public function testCastArrayObject()
+    {
+        if (\defined('HHVM_VERSION')) {
+            $this->markTestSkipped('HHVM as different internal details.');
+        }
+        $var = new \ArrayObject(array(123));
+        $var->foo = 234;
+
+        $expected = <<<EOTXT
+ArrayObject {
+  +"foo": 234
+  flag::STD_PROP_LIST: false
+  flag::ARRAY_AS_PROPS: false
+  iteratorClass: "ArrayIterator"
+  storage: array:1 [
+    0 => 123
+  ]
+}
+EOTXT;
+        $this->assertDumpEquals($expected, $var);
+    }
+
+    public function testArrayIterator()
+    {
+        if (\defined('HHVM_VERSION')) {
+            $this->markTestSkipped('HHVM as different internal details.');
+        }
+        $var = new MyArrayIterator(array(234));
+
+        $expected = <<<EOTXT
+Symfony\Component\VarDumper\Tests\Caster\MyArrayIterator {
+  -foo: 123
+  flag::STD_PROP_LIST: false
+  flag::ARRAY_AS_PROPS: false
+  storage: array:1 [
+    0 => 234
+  ]
+}
+EOTXT;
+        $this->assertDumpEquals($expected, $var);
+    }
+}
+
+class MyArrayIterator extends \ArrayIterator
+{
+    private $foo = 123;
 }

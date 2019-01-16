@@ -64,14 +64,14 @@ class CommentTest extends KernelTestBase {
     // Fix http://example.com/index.php/comment/1 fails 'url:path' test.
     $parent_comment_path = $parent_comment->url();
 
-    $tokens = array(
-      'url' => $parent_comment->urlInfo('canonical', ['fragment' => "comment-{$parent_comment->id()}"])->setAbsolute()->toString(),
-      'url:absolute' => $parent_comment->urlInfo('canonical', ['fragment' => "comment-{$parent_comment->id()}"])->setAbsolute()->toString(),
-      'url:relative' => $parent_comment->urlInfo('canonical', ['fragment' => "comment-{$parent_comment->id()}"])->toString(),
+    $tokens = [
+      'url' => $parent_comment->toUrl('canonical', ['fragment' => "comment-{$parent_comment->id()}"])->setAbsolute()->toString(),
+      'url:absolute' => $parent_comment->toUrl('canonical', ['fragment' => "comment-{$parent_comment->id()}"])->setAbsolute()->toString(),
+      'url:relative' => $parent_comment->toUrl('canonical', ['fragment' => "comment-{$parent_comment->id()}"])->toString(),
       'url:path' => $parent_comment_path,
       'parent:url:absolute' => NULL,
-    );
-    $this->assertTokens('comment', array('comment' => $parent_comment), $tokens);
+    ];
+    $this->assertTokens('comment', ['comment' => $parent_comment], $tokens);
 
     $comment = Comment::create([
       'entity_id' => $node->id(),
@@ -86,16 +86,16 @@ class CommentTest extends KernelTestBase {
     $comment->save();
 
     // Fix http://example.com/index.php/comment/1 fails 'url:path' test.
-    $comment_path = Url::fromRoute('entity.comment.canonical', array('comment' => $comment->id()))->toString();
+    $comment_path = Url::fromRoute('entity.comment.canonical', ['comment' => $comment->id()])->toString();
 
-    $tokens = array(
-      'url' => $comment->urlInfo('canonical', ['fragment' => "comment-{$comment->id()}"])->setAbsolute()->toString(),
-      'url:absolute' => $comment->urlInfo('canonical', ['fragment' => "comment-{$comment->id()}"])->setAbsolute()->toString(),
-      'url:relative' => $comment->urlInfo('canonical', ['fragment' => "comment-{$comment->id()}"])->toString(),
+    $tokens = [
+      'url' => $comment->toUrl('canonical', ['fragment' => "comment-{$comment->id()}"])->setAbsolute()->toString(),
+      'url:absolute' => $comment->toUrl('canonical', ['fragment' => "comment-{$comment->id()}"])->setAbsolute()->toString(),
+      'url:relative' => $comment->toUrl('canonical', ['fragment' => "comment-{$comment->id()}"])->toString(),
       'url:path' => $comment_path,
-      'parent:url:absolute' => $parent_comment->urlInfo('canonical', ['fragment' => "comment-{$parent_comment->id()}"])->setAbsolute()->toString(),
-    );
-    $this->assertTokens('comment', array('comment' => $comment), $tokens);
+      'parent:url:absolute' => $parent_comment->toUrl('canonical', ['fragment' => "comment-{$parent_comment->id()}"])->setAbsolute()->toString(),
+    ];
+    $this->assertTokens('comment', ['comment' => $comment], $tokens);
   }
 
 }
