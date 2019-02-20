@@ -1425,7 +1425,8 @@
         "keywords": [
             "mock",
             "xunit"
-        ]
+        ],
+        "abandoned": true
     },
     {
         "name": "phpunit/php-timer",
@@ -8354,17 +8355,17 @@
     },
     {
         "name": "drupal/core",
-        "version": "8.6.6",
-        "version_normalized": "8.6.6.0",
+        "version": "8.6.10",
+        "version_normalized": "8.6.10.0",
         "source": {
             "type": "git",
             "url": "https://github.com/drupal/core.git",
-            "reference": "6736973f399a3a9ac8ecd41f3a159e1153f7ee39"
+            "reference": "59568ac02948cf075ee8543e6c6d4386ad8daec1"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/drupal/core/zipball/6736973f399a3a9ac8ecd41f3a159e1153f7ee39",
-            "reference": "6736973f399a3a9ac8ecd41f3a159e1153f7ee39",
+            "url": "https://api.github.com/repos/drupal/core/zipball/59568ac02948cf075ee8543e6c6d4386ad8daec1",
+            "reference": "59568ac02948cf075ee8543e6c6d4386ad8daec1",
             "shasum": ""
         },
         "require": {
@@ -8537,7 +8538,7 @@
             "symfony/debug": "^3.4.0",
             "symfony/phpunit-bridge": "^3.4.3"
         },
-        "time": "2019-01-15T17:41:52+00:00",
+        "time": "2019-02-20T18:35:01+00:00",
         "type": "drupal-core",
         "extra": {
             "merge-plugin": {
