@@ -32,7 +32,7 @@ class HttpExceptionNormalizerTest extends UnitTestCase {
     $current_user->hasPermission('access site reports')->willReturn(TRUE);
     $normalizer = new HttpExceptionNormalizer($current_user->reveal());
     $normalized = $normalizer->normalize($exception, 'api_json');
-    $normalized = $normalized->rasterizeValue();
+    $normalized = $normalized->getNormalization();
     $error = $normalized[0];
     $this->assertNotEmpty($error['meta']);
     $this->assertNotEmpty($error['source']);
@@ -40,13 +40,14 @@ class HttpExceptionNormalizerTest extends UnitTestCase {
     $this->assertEquals(403, $error['status']);
     $this->assertEquals('Forbidden', $error['title']);
     $this->assertEquals('lorem', $error['detail']);
-    $this->assertNull($error['meta']['trace'][1]['args'][0]);
+    $this->assertArrayHasKey('trace', $error['meta']);
+    $this->assertNotEmpty($error['meta']['trace']);
 
     $current_user = $this->prophesize(AccountInterface::class);
     $current_user->hasPermission('access site reports')->willReturn(FALSE);
     $normalizer = new HttpExceptionNormalizer($current_user->reveal());
     $normalized = $normalizer->normalize($exception, 'api_json');
-    $normalized = $normalized->rasterizeValue();
+    $normalized = $normalized->getNormalization();
     $error = $normalized[0];
     $this->assertTrue(empty($error['meta']));
     $this->assertTrue(empty($error['source']));

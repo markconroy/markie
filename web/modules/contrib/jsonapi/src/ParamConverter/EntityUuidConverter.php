@@ -25,9 +25,13 @@ class EntityUuidConverter extends EntityConverter {
   public function convert($value, $definition, $name, array $defaults) {
     $entity_type_id = $this->getEntityTypeFromDefaults($definition, $name, $defaults);
     // @see https://www.drupal.org/project/drupal/issues/2624770
-    $entity_type_manager = isset($this->entityTypeManager) ? $this->entityTypeManager : $this->entityManager;
+    $entity_type_manager = isset($this->entityTypeManager)
+      ? $this->entityTypeManager
+      : $this->entityManager;
+    $uuid_key = $entity_type_manager->getDefinition($entity_type_id)
+      ->getKey('uuid');
     if ($storage = $entity_type_manager->getStorage($entity_type_id)) {
-      if (!$entities = $storage->loadByProperties(['uuid' => $value])) {
+      if (!$entities = $storage->loadByProperties([$uuid_key => $value])) {
         return NULL;
       }
       $entity = reset($entities);

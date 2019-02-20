@@ -76,6 +76,14 @@ class MediaTest extends ResourceTestBase {
   /**
    * {@inheritdoc}
    */
+  protected function setUpRevisionAuthorization($method) {
+    parent::setUpRevisionAuthorization($method);
+    $this->grantPermissionsToTestedRole(['view all media revisions']);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   protected function createEntity() {
     if (!MediaType::load('camelids')) {
       // Create a "Camelids" media type.
@@ -296,6 +304,13 @@ class MediaTest extends ResourceTestBase {
       default:
         return '';
     }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function getEditorialPermissions() {
+    return array_merge(parent::getEditorialPermissions(), ['view any unpublished content']);
   }
 
   /**

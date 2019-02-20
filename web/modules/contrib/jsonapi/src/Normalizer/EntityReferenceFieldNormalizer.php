@@ -2,15 +2,12 @@
 
 namespace Drupal\jsonapi\Normalizer;
 
-use Drupal\Core\Cache\CacheableMetadata;
-use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Entity\EntityRepositoryInterface;
 use Drupal\Core\Field\EntityReferenceFieldItemListInterface;
-use Drupal\Core\TypedData\TypedDataInternalPropertiesHelper;
-use Drupal\jsonapi\Normalizer\Value\NullFieldNormalizerValue;
-use Drupal\jsonapi\ResourceType\ResourceTypeRepositoryInterface;
-use Drupal\jsonapi\JsonApiResource\EntityCollection;
-use Drupal\serialization\Normalizer\CacheableNormalizerInterface;
+use Drupal\jsonapi\JsonApiResource\ResourceIdentifier;
+use Drupal\jsonapi\JsonApiResource\ResourceIdentifierInterface;
+use Drupal\jsonapi\LinkManager\LinkManager;
+use Drupal\jsonapi\Normalizer\Value\CacheableNormalization;
+use Drupal\jsonapi\ResourceType\ResourceType;
 
 /**
  * Normalizer class specific for entity reference field objects.
@@ -25,132 +22,105 @@ class EntityReferenceFieldNormalizer extends FieldNormalizer {
   protected $supportedInterfaceOrClass = EntityReferenceFieldItemListInterface::class;
 
   /**
-   * The entity repository.
+   * The link manager.
    *
-   * @var \Drupal\Core\Entity\EntityRepositoryInterface
+   * @var \Drupal\jsonapi\LinkManager\LinkManager
    */
-  protected $entityRepository;
+  protected $linkManager;
 
   /**
    * Instantiates a EntityReferenceFieldNormalizer object.
    *
-   * @param \Drupal\jsonapi\ResourceType\ResourceTypeRepositoryInterface $resource_type_repository
-   *   The JSON:API resource type repository.
-   * @param \Drupal\Core\Entity\EntityRepositoryInterface $entity_repository
-   *   The entity repository.
+   * @param \Drupal\jsonapi\LinkManager\LinkManager $link_manager
+   *   The link manager.
    */
-  public function __construct(ResourceTypeRepositoryInterface $resource_type_repository, EntityRepositoryInterface $entity_repository) {
-    $this->resourceTypeRepository = $resource_type_repository;
-    $this->entityRepository = $entity_repository;
+  public function __construct(LinkManager $link_manager) {
+    $this->linkManager = $link_manager;
   }
 
   /**
    * {@inheritdoc}
    */
   public function normalize($field, $format = NULL, array $context = []) {
-    /* @var \Drupal\Core\Field\FieldItemListInterface $field */
-
-    $field_access = $field->access('view', $context['account'], TRUE);
-    if (!$field_access->isAllowed()) {
-      return new NullFieldNormalizerValue($field_access, 'relationships');
-    }
-
-    $cacheabilty = CacheableMetadata::createFromObject($field_access);
-
+    assert($field instanceof EntityReferenceFieldItemListInterface);
     // Build the relationship object based on the Entity Reference and normalize
     // that object instead.
-    $main_property = $field->getItemDefinition()->getMainPropertyName();
     $definition = $field->getFieldDefinition();
     $cardinality = $definition
       ->getFieldStorageDefinition()
       ->getCardinality();
-    $entity_list_metadata = [];
-    $entity_list = [];
-    foreach ($field->filterEmptyItems() as $item) {
-      // A non-empty entity reference field that refers to a non-existent entity
-      // is not a data integrity problem. For example, Term entities' "parent"
-      // entity reference field uses target_id zero to refer to the non-existent
-      // "<root>" term. And references to entities that no longer exist are not
-      // cleaned up by Drupal; hence we map it to a "missing" resource.
-      if ($item->get('entity')->getValue() === NULL) {
-        if ($field->getFieldDefinition()->getFieldStorageDefinition()->getSetting('target_type') === 'taxonomy_term' && $item->get('target_id')->getCastedValue() === 0) {
-          $entity_list[] = NULL;
-          $entity_list_metadata[] = [
-            'links' => [
-              'help' => [
-                'href' => 'https://www.drupal.org/docs/8/modules/json-api/core-concepts#virtual',
-                'meta' => [
-                  'about' => "Usage and meaning of the 'virtual' resource identifier.",
-                ],
-              ],
-            ],
-          ];
-        }
-        else {
-          $entity_list[] = FALSE;
-          $entity_list_metadata[] = [
-            'links' => [
-              'help' => [
-                'href' => 'https://www.drupal.org/docs/8/modules/json-api/core-concepts#missing',
-                'meta' => [
-                  'about' => "Usage and meaning of the 'missing' resource identifier.",
-                ],
-              ],
-            ],
-          ];
-        }
-        continue;
-      }
-
-      // Prepare a list of additional properties stored by the field.
-      $metadata = [];
-      /** @var \Drupal\Core\TypedData\TypedDataInterface[] $properties */
-      $properties = TypedDataInternalPropertiesHelper::getNonInternalProperties($item);
-
-      // This normalizer leaves JSON:API normalizer land and enters the land of
-      // Drupal core's serialization system. That system was never designed with
-      // cacheability in mind, and hence bubbles cacheability out of band. This
-      // must catch it, and pass it to the value object that JSON:API uses.
-      // @see \Drupal\jsonapi\Normalizer\FieldItemNormalizer::normalize()
-      $context[CacheableNormalizerInterface::SERIALIZATION_CONTEXT_CACHEABILITY] = new CacheableMetadata();
-      foreach ($properties as $property_key => $property) {
-        if ($property_key !== $main_property) {
-          $metadata[$property_key] = $this->serializer->normalize($property, $format, $context);
-        }
-      }
-      $cacheabilty = $cacheabilty->merge($context[CacheableNormalizerInterface::SERIALIZATION_CONTEXT_CACHEABILITY]);
-      unset($context[CacheableNormalizerInterface::SERIALIZATION_CONTEXT_CACHEABILITY]);
-      $entity_list_metadata[] = $metadata;
-
-      // Get the referenced entity.
-      $entity = $item->get('entity')->getValue();
-
-      if ($this->isInternalResourceType($entity)) {
-        continue;
-      }
-
-      // And get the translation in the requested language.
-      $entity_list[] = $this->entityRepository->getTranslationFromContext($entity);
-    }
-    $entity_collection = new EntityCollection($entity_list, $cardinality);
-    $relationship = new Relationship($this->resourceTypeRepository, $field->getName(), $entity_collection, $field->getEntity(), $cacheabilty, $cardinality, $main_property, $entity_list_metadata);
-    return $this->serializer->normalize($relationship, $format, $context);
+    $resource_identifiers = array_filter(ResourceIdentifier::toResourceIdentifiers($field->filterEmptyItems()), function (ResourceIdentifierInterface $resource_identifier) {
+      return !$resource_identifier->getResourceType()->isInternal();
+    });
+    $context['field_name'] = $field->getName();
+    $normalized_items = CacheableNormalization::aggregate($this->serializer->normalize($resource_identifiers, $format, $context));
+    assert($context['resource_object'] instanceof ResourceIdentifierInterface);
+    $resource_type = $context['resource_object']->getResourceType();
+    $field_name = $resource_type->getPublicName($field->getName());
+    $links = $this->getLinks($resource_type, $field_name, $field->getEntity()->uuid());
+    $normalization = $normalized_items->getNormalization();
+    return (new CacheableNormalization($normalized_items, [
+      // Empty 'to-one' relationships must be NULL.
+      // Empty 'to-many' relationships must be an empty array.
+      // @link http://jsonapi.org/format/#document-resource-object-linkage
+      'data' => $cardinality === 1 ? array_shift($normalization) : $normalization,
+      'links' => $links,
+    ]));
   }
 
   /**
-   * Determines if the given entity is of an internal resource type.
+   * Gets the links for the relationship.
    *
-   * @param \Drupal\Core\Entity\EntityInterface $entity
-   *   The entity for which to check the internal status.
+   * @param \Drupal\jsonapi\ResourceType\ResourceType $resource_type
+   *   The JSON:API resource type on which the relationship being normalized
+   *   resides.
+   * @param string $field_name
+   *   The field name for the relationship.
+   * @param string $host_entity_id
+   *   The ID of the entity on which the relationship resides.
+   *
+   * @return array
+   *   An array of links to be rasterized.
+   */
+  protected function getLinks(ResourceType $resource_type, $field_name, $host_entity_id) {
+    $relationship_field_name = $resource_type->getPublicName($field_name);
+    $route_parameters = [
+      'related' => $relationship_field_name,
+    ];
+    $links['self']['href'] = $this->linkManager->getEntityLink(
+      $host_entity_id,
+      $resource_type,
+      $route_parameters,
+      "$relationship_field_name.relationship.get"
+    );
+    $resource_types = $resource_type->getRelatableResourceTypesByField($field_name);
+    if (static::hasNonInternalResourceType($resource_types)) {
+      $links['related']['href'] = $this->linkManager->getEntityLink(
+        $host_entity_id,
+        $resource_type,
+        $route_parameters,
+        "$relationship_field_name.related"
+      );
+    }
+    return $links;
+  }
+
+  /**
+   * Determines if a given list of resource types contains a non-internal type.
+   *
+   * @param \Drupal\jsonapi\ResourceType\ResourceType[] $resource_types
+   *   The JSON:API resource types to evaluate.
    *
    * @return bool
-   *   TRUE if the entity's resource type is internal, FALSE otherwise.
+   *   FALSE if every resource type is internal, TRUE otherwise.
    */
-  protected function isInternalResourceType(EntityInterface $entity) {
-    return ($resource_type = $this->resourceTypeRepository->get(
-      $entity->getEntityTypeId(),
-      $entity->bundle()
-    )) && $resource_type->isInternal();
+  protected static function hasNonInternalResourceType(array $resource_types) {
+    foreach ($resource_types as $resource_type) {
+      if (!$resource_type->isInternal()) {
+        return TRUE;
+      }
+    }
+    return FALSE;
   }
 
 }

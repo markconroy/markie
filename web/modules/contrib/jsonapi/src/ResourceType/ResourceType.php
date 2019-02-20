@@ -10,7 +10,7 @@ namespace Drupal\jsonapi\ResourceType;
  *
  * @see \Drupal\jsonapi\ResourceType\ResourceTypeRepository
  *
- * @deprecated
+ * @internal
  */
 class ResourceType {
 
@@ -62,6 +62,13 @@ class ResourceType {
    * @var bool
    */
   protected $isMutable;
+
+  /**
+   * Whether this resource type's resources are versionable.
+   *
+   * @var bool
+   */
+  protected $isVersionable;
 
   /**
    * The list of fields on the underlying entity type + bundle.
@@ -178,7 +185,7 @@ class ResourceType {
    * represented here because it is impossible to determine them without an
    * instance of config available.
    *
-   * @todo Refactor this in Drupal 9 if https://www.drupal.org/project/drupal/issues/2949021 lands, then `config_export` will be guaranteed to exist, and this won't need an instance anymore.
+   * @todo Refactor this in Drupal 9, because thanks to https://www.drupal.org/project/drupal/issues/2949021, `config_export` will be guaranteed to exist, and this won't need an instance anymore.
    *
    * @param string $field_name
    *   The internal field name.
@@ -270,6 +277,16 @@ class ResourceType {
   }
 
   /**
+   * Whether resources of this resource type are versionable.
+   *
+   * @return bool
+   *   TRUE if the resource type's resources are versionable. FALSE otherwise.
+   */
+  public function isVersionable() {
+    return $this->isVersionable;
+  }
+
+  /**
    * Instantiates a ResourceType object.
    *
    * @param string $entity_type_id
@@ -284,16 +301,19 @@ class ResourceType {
    *   (optional) Whether the resource type is locatable.
    * @param bool $is_mutable
    *   (optional) Whether the resource type is mutable.
+   * @param bool $is_versionable
+   *   (optional) Whether the resource type is versionable.
    * @param array $field_mapping
    *   (optional) The field mapping to use.
    */
-  public function __construct($entity_type_id, $bundle, $deserialization_target_class, $internal = FALSE, $is_locatable = TRUE, $is_mutable = TRUE, array $field_mapping = []) {
+  public function __construct($entity_type_id, $bundle, $deserialization_target_class, $internal = FALSE, $is_locatable = TRUE, $is_mutable = TRUE, $is_versionable = FALSE, array $field_mapping = []) {
     $this->entityTypeId = $entity_type_id;
     $this->bundle = $bundle;
     $this->deserializationTargetClass = $deserialization_target_class;
     $this->internal = $internal;
     $this->isLocatable = $is_locatable;
     $this->isMutable = $is_mutable;
+    $this->isVersionable = $is_versionable;
 
     $this->typeName = $this->bundle === '?'
       ? 'unknown'

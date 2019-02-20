@@ -14,6 +14,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Url;
 use Drupal\taxonomy\TermInterface;
+use Drupal\Component\Utility\Html;
 
 /**
  * Implements hook_help().
@@ -79,9 +80,9 @@ function metatag_form_field_config_edit_form_alter(&$form, FormStateInterface $f
 
     // Step through the default value structure and erase any '#default_value'
     // items that are found.
-    foreach ($form['default_value']['widget'][0] as $key => &$outer) {
+    foreach ($form['default_value']['widget'][0] as &$outer) {
       if (is_array($outer)) {
-        foreach ($outer as $key => &$inner) {
+        foreach ($outer as &$inner) {
           if (is_array($inner) && isset($inner['#default_value'])) {
             if (is_array($inner['#default_value'])) {
               $inner['#default_value'] = [];
@@ -111,21 +112,50 @@ function metatag_page_attachments(array &$attachments) {
   if (is_null($metatag_attachments)) {
     // Load the meta tags from the route.
     $metatag_attachments = metatag_get_tags_from_route();
-    if (!$metatag_attachments) {
-      return NULL;
+  }
+  if (!$metatag_attachments) {
+    return NULL;
+  }
+
+  // Trigger hook_metatags_attachments_alter().
+  // Allow modules to rendered metatags prior to attaching.
+  \Drupal::service('module_handler')->alter('metatags_attachments', $metatag_attachments);
+
+  // If any Metatag items were found, append them.
+  if (!empty($metatag_attachments['#attached']['html_head'])) {
+    if (empty($attachments['#attached'])) {
+      $attachments['#attached'] = [];
+    }
+    if (empty($attachments['#attached']['html_head'])) {
+      $attachments['#attached']['html_head'] = [];
     }
 
-    // If any Metatag items were found, append them.
-    if (!empty($metatag_attachments['#attached']['html_head'])) {
-      if (empty($attachments['#attached'])) {
-        $attachments['#attached'] = [];
+    $head_links = [];
+    foreach ($metatag_attachments['#attached']['html_head'] as $item) {
+      $attachments['#attached']['html_head'][] = $item;
+
+      // Also add a HTTP header "Link:" for canonical URLs and shortlinks.
+      // See HtmlResponseAttachmentsProcessor::processHtmlHeadLink() for the
+      // implementation of the functionality in core.
+      if (in_array($item[1], ['canonical_url', 'shortlink'])) {
+        $attributes = $item[0]['#attributes'];
+
+        $href = '<' . Html::escape($attributes['href']) . '>';
+        unset($attributes['href']);
+        if ($param = drupal_http_header_attributes($attributes)) {
+          $href .= ';' . $param;
+        }
+        $head_links[] = $href;
       }
-      if (empty($attachments['#attached']['html_head'])) {
-        $attachments['#attached']['html_head'] = [];
-      }
-      foreach ($metatag_attachments['#attached']['html_head'] as $item) {
-        $attachments['#attached']['html_head'][] = $item;
-      }
+    }
+
+    // If any HTTP Header items were found, add them too.
+    if (!empty($head_links)) {
+      $attachments['#attached']['http_header'][] = [
+        'Link',
+        implode(', ', $head_links),
+        FALSE,
+      ];
     }
   }
 }
@@ -167,7 +197,30 @@ function metatag_entity_view_alter(array &$build, EntityInterface $entity, Entit
     return;
   }
 
+  // Panelized entities still use the original entity's controller, but with
+  // custom built entities. In those cases hook_entity_view_alter might be
+  // called too early, where meta links are not yet set.
+  // @see \Drupal\node\Controller\NodeController::view
+  if ($display->getThirdPartySetting('panelizer', 'enable', FALSE)) {
+    $build['#pre_render'][] = '_metatag_panelizer_pre_render';
+    return;
+  }
+
   _metatag_remove_duplicate_entity_tags($build);
+}
+
+/**
+ * Pre render callback for entities processed by Panelizer.
+ *
+ * @param array $element
+ *   The render array being processed.
+ *
+ * @return array
+ *   The filtered render array.
+ */
+function _metatag_panelizer_pre_render(array $element) {
+  _metatag_remove_duplicate_entity_tags($element);
+  return $element;
 }
 
 /**
@@ -181,7 +234,7 @@ function _metatag_remove_duplicate_entity_tags(array &$build) {
   // rel="shortlink" tag attached.
   // If metatag provides them, remove the ones built with the entity.
   if (isset($build['#attached']['html_head_link'])) {
-    $metatag_attachments = drupal_static('metatag_attachments');
+    $metatag_attachments = &drupal_static('metatag_attachments');
     if (is_null($metatag_attachments)) {
       // Load the meta tags from the route.
       $metatag_attachments = metatag_get_tags_from_route();
@@ -338,7 +391,7 @@ function metatag_preprocess_html(&$variables) {
     return NULL;
   }
 
-  $attachments = drupal_static('metatag_attachments');
+  $attachments = &drupal_static('metatag_attachments');
   if (is_null($attachments)) {
     $attachments = metatag_get_tags_from_route();
   }
@@ -351,18 +404,10 @@ function metatag_preprocess_html(&$variables) {
   if (!empty($attachments['#attached']['html_head'])) {
     foreach ($attachments['#attached']['html_head'] as $key => $attachment) {
       if (!empty($attachment[1]) && $attachment[1] == 'title') {
-        // It's safe to access the value directly because it was already
-        // processed in MetatagManager::generateElements().
-        $variables['head_title_array'] = [];
         // Empty head_title to avoid the site name and slogan to be appended to
         // the meta title.
         $variables['head_title'] = [];
         $variables['head_title']['title'] = html_entity_decode($attachment[0]['#attributes']['content'], ENT_QUOTES);
-        // Original:
-        // $variables['head_title_array']['title'] =
-        //   $attachment[0]['#attributes']['content'];
-        // $variables['head_title'] = implode(' | ',
-        //   $variables['head_title_array']);
         break;
       }
     }
@@ -373,7 +418,7 @@ function metatag_preprocess_html(&$variables) {
  * Load the meta tags by processing the route parameters.
  *
  * @return mixed
- *   Array of metatags or NULL.
+ *   Array of meta tags or NULL.
  */
 function metatag_get_tags_from_route($entity = NULL) {
   $metatag_manager = \Drupal::service('metatag.manager');
@@ -388,7 +433,14 @@ function metatag_get_tags_from_route($entity = NULL) {
   if (!$entity) {
     $entity = metatag_get_route_entity();
   }
+
   if (!empty($entity) && $entity instanceof ContentEntityInterface) {
+    // If content entity does not have an ID the page is likely an "Add" page,
+    // so do not generate meta tags for entity which has not been created yet.
+    if (!$entity->id()) {
+      return NULL;
+    }
+
     foreach ($metatag_manager->tagsFromEntity($entity) as $tag => $data) {
       $metatags[$tag] = $data;
     }
@@ -397,9 +449,14 @@ function metatag_get_tags_from_route($entity = NULL) {
   // Trigger hook_metatags_alter().
   // Allow modules to override tags or the entity used for token replacements.
   $context = [
-    'entity' => $entity,
+    'entity' => &$entity,
   ];
   \Drupal::service('module_handler')->alter('metatags', $metatags, $context);
+
+  // If the entity was changed above, use that for generating the meta tags.
+  if (isset($context['entity'])) {
+    $entity = $context['entity'];
+  }
 
   return $metatag_manager->generateElements($metatags, $entity);
 }
@@ -468,10 +525,10 @@ function metatag_entity_base_field_info(EntityTypeInterface $entity_type) {
   if (!empty($base_table) && $canonical_template_exists && !in_array($original_class, $classes_to_skip)) {
     $fields['metatag'] = BaseFieldDefinition::create('map')
       ->setLabel(t('Metatags'))
-      ->setDescription(t('The metatags for the entity.'))
+      ->setDescription(t('The meta tags for the entity.'))
       ->setClass('\Drupal\metatag\Plugin\Field\MetatagEntityFieldItemList')
-      ->setQueryable(FALSE)
       ->setComputed(TRUE)
+      ->setTranslatable(TRUE)
       ->setTargetEntityTypeId($entity_type->id());
   }
 
@@ -498,7 +555,7 @@ function metatag_entity_diff($old_entity, $new_entity, $context) {
   $entity_type = $context['entity_type'];
   $options = variable_get('diff_additional_options_' . $entity_type, []);
   if (!empty($options['metatag']) && metatag_entity_supports_metatags($entity_type)) {
-    // Find metatags that are set on either the new or old entity.
+    // Find meta tags that are set on either the new or old entity.
     $tags = [];
     foreach (['old' => $old_entity, 'new' => $new_entity] as $entity_key => $entity) {
       $language = metatag_entity_get_language($entity_type, $entity);
@@ -525,4 +582,24 @@ function metatag_entity_diff($old_entity, $new_entity, $context) {
     }
   }
   return $result;
+}
+
+/**
+ * Turn the meta tags for an entity into a human readable structure.
+ *
+ * @param object $entity
+ *   The entity object.
+ *
+ * @return array
+ *   All of the meta tags in a nested structure.
+ */
+function metatag_generate_entity_metatags($entity) {
+  $values = [];
+  $raw = metatag_get_tags_from_route($entity);
+  if (!empty($raw['#attached']['html_head'])) {
+    foreach ($raw['#attached']['html_head'] as $tag) {
+      $values[$tag[1]] = $tag[0];
+    }
+  }
+  return $values;
 }

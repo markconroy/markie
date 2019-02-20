@@ -12,35 +12,19 @@ use Drupal\serialization\Normalizer\NormalizerBase as SerializationNormalizerBas
 abstract class NormalizerBase extends SerializationNormalizerBase {
 
   /**
-   * The formats that the Normalizer can handle.
-   *
-   * @var array
+   * {@inheritdoc}
    */
-  protected $formats = ['api_json'];
+  protected $format = 'api_json';
 
   /**
    * {@inheritdoc}
    */
-  public function supportsNormalization($data, $format = NULL) {
-    return in_array($format, $this->formats, TRUE) && parent::supportsNormalization($data, $format);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function supportsDenormalization($data, $type, $format = NULL) {
-    if (in_array($format, $this->formats, TRUE) && (class_exists($this->supportedInterfaceOrClass) || interface_exists($this->supportedInterfaceOrClass))) {
-      $target = new \ReflectionClass($type);
-      $supported = new \ReflectionClass($this->supportedInterfaceOrClass);
-      if ($supported->isInterface()) {
-        return $target->implementsInterface($this->supportedInterfaceOrClass);
-      }
-      else {
-        return ($target->getName() == $this->supportedInterfaceOrClass || $target->isSubclassOf($this->supportedInterfaceOrClass));
-      }
-    }
-
-    return FALSE;
+  protected function checkFormat($format = NULL) {
+    // The parent implementation allows format-specific normalizers to be used
+    // for formatless normalization. The JSON:API module wants to be cautious.
+    // Hence it only allows its normalizers to be used for the JSON:API format,
+    // to avoid JSON:API-specific normalizations showing up in the REST API.
+    return $format === $this->format;
   }
 
 }

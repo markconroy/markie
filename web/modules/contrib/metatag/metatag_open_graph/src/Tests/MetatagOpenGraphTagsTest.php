@@ -22,12 +22,17 @@ class MetatagOpenGraphTagsTest extends MetatagTagsTestBase {
     'article_publisher',
     'article_section',
     'article_tag',
+    'book_author',
+    'book_isbn',
+    'book_releasedate',
+    'book_tag',
     'og_country_name',
     'og_description',
     'og_determiner',
     'og_email',
     'og_fax_number',
     'og_image',
+    'og_image_alt',
     'og_image_height',
     'og_image_secure_url',
     'og_image_type',
@@ -80,6 +85,7 @@ class MetatagOpenGraphTagsTest extends MetatagTagsTestBase {
     // Replace the first underline with a colon.
     $tag_name = str_replace('og_', 'og:', $tag_name);
     $tag_name = str_replace('article_', 'article:', $tag_name);
+    $tag_name = str_replace('book_', 'book:', $tag_name);
 
     // Some tags have an additional underline that turns into a colon.
     $tag_name = str_replace('og:image_', 'og:image:', $tag_name);

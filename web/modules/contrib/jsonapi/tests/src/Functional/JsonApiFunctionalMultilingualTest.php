@@ -49,8 +49,12 @@ class JsonApiFunctionalMultilingualTest extends JsonApiFunctionalTestBase {
   public function testReadMultilingual() {
     $this->createDefaultContent(5, 5, TRUE, TRUE, static::IS_MULTILINGUAL, FALSE);
 
+    // Different databases have different sort orders, so a sort is required so
+    // test expectations do not need to vary per database.
+    $default_sort = ['sort' => 'drupal_internal__nid'];
+
     // Test reading an individual entity.
-    $output = Json::decode($this->drupalGet('/ca/jsonapi/node/article/' . $this->nodes[0]->uuid(), ['query' => ['include' => 'field_tags,field_image']]));
+    $output = Json::decode($this->drupalGet('/ca/jsonapi/node/article/' . $this->nodes[0]->uuid(), ['query' => ['include' => 'field_tags,field_image'] + $default_sort]));
     $this->assertEquals($this->nodes[0]->getTranslation('ca')->getTitle(), $output['data']['attributes']['title']);
 
     $included_tags = array_filter($output['included'], function ($entry) {
@@ -61,11 +65,11 @@ class JsonApiFunctionalMultilingualTest extends JsonApiFunctionalTestBase {
     // TODO figure out how to fetcht the alt text of an image.
     $this->assertEquals($tag_name, reset($included_tags)['attributes']['name']);
 
-    $output = Json::decode($this->drupalGet('/ca/jsonapi/node/article/' . $this->nodes[0]->uuid()));
+    $output = Json::decode($this->drupalGet('/ca/jsonapi/node/article/' . $this->nodes[0]->uuid(), ['query' => $default_sort]));
     $this->assertEquals($this->nodes[0]->getTranslation('ca')->getTitle(), $output['data']['attributes']['title']);
 
     // Test reading a collection of entities.
-    $output = Json::decode($this->drupalGet('/ca/jsonapi/node/article'));
+    $output = Json::decode($this->drupalGet('/ca/jsonapi/node/article', ['query' => $default_sort]));
     $this->assertEquals($this->nodes[0]->getTranslation('ca')->getTitle(), $output['data'][0]['attributes']['title']);
   }
 

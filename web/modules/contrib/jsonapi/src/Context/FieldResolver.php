@@ -397,8 +397,6 @@ class FieldResolver {
       else {
         // If the property is not a reference property, then all
         // remaining parts must be further property specifiers.
-        // @todo: to provide a better DX, we should actually validate that the
-        // remaining parts are in fact valid properties.
         if (!static::isCandidateDefinitionReferenceProperty($parts[0], $candidate_definitions)) {
           // If a field property is specified on a field with only one property
           // defined, throw an error because in the JSON:API output, it does not
@@ -519,7 +517,7 @@ class FieldResolver {
    */
   protected function isMemberFilterable($external_name, array $resource_types) {
     return array_reduce($resource_types, function ($carry, ResourceType $resource_type) use ($external_name) {
-      // @todo: remove the next line and uncomment the following on in https://www.drupal.org/project/jsonapi/issues/3017047.
+      // @todo: remove the next line and uncomment the following one in https://www.drupal.org/project/jsonapi/issues/3017047.
       return $carry ?: $external_name === 'id' || $resource_type->isFieldEnabled($resource_type->getInternalName($external_name));
       /*return $carry ?: in_array($external_name, ['id', 'type']) || $resource_type->isFieldEnabled($resource_type->getInternalName($external_name));*/
     }, FALSE);

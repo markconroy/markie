@@ -29,6 +29,23 @@ class RelationshipFieldAccess implements AccessInterface {
   const ROUTE_REQUIREMENT_KEY = '_jsonapi_relationship_field_access';
 
   /**
+   * The JSON:API entity access checker.
+   *
+   * @var \Drupal\jsonapi\Access\EntityAccessChecker
+   */
+  protected $entityAccessChecker;
+
+  /**
+   * RelationshipFieldAccess constructor.
+   *
+   * @param \Drupal\jsonapi\Access\EntityAccessChecker $entity_access_checker
+   *   The JSON:API entity access checker.
+   */
+  public function __construct(EntityAccessChecker $entity_access_checker) {
+    $this->entityAccessChecker = $entity_access_checker;
+  }
+
+  /**
    * Checks access to the relationship field on the given route.
    *
    * @param \Symfony\Component\HttpFoundation\Request $request
@@ -50,8 +67,9 @@ class RelationshipFieldAccess implements AccessInterface {
       $entity = $request->get('entity');
       $internal_name = $resource_type->getInternalName($relationship_field_name);
       if ($entity instanceof FieldableEntityInterface && $entity->hasField($internal_name)) {
-        $entity_access = $entity->access($entity_operation, $account, TRUE);
+        $entity_access = $this->entityAccessChecker->checkEntityAccess($entity, $entity_operation, $account);
         $field_access = $entity->get($internal_name)->access($field_operation, $account, TRUE);
+        // Ensure that access is respected for different entity revisions.
         $access_result = $entity_access->andIf($field_access);
         if (!$access_result->isAllowed()) {
           $reason = "The current user is not allowed to {$field_operation} this relationship.";

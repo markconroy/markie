@@ -49,13 +49,12 @@ class NodeTest extends ResourceTestBase {
    */
   protected static $patchProtectedFieldNames = [
     'revision_timestamp' => NULL,
-    // @todo This is a relationship, and cannot be tested in the same way. Fix in https://www.drupal.org/project/jsonapi/issues/2939810.
-    // 'revision_uid' => NULL,
     'created' => "The 'administer nodes' permission is required.",
     'changed' => NULL,
     'promote' => "The 'administer nodes' permission is required.",
     'sticky' => "The 'administer nodes' permission is required.",
     'path' => "The following permissions are required: 'create url aliases' OR 'administer url aliases'.",
+    'revision_uid' => NULL,
   ];
 
   /**
@@ -83,6 +82,14 @@ class NodeTest extends ResourceTestBase {
         $this->grantPermissionsToTestedRole(['access content', 'delete any camelids content']);
         break;
     }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function setUpRevisionAuthorization($method) {
+    parent::setUpRevisionAuthorization($method);
+    $this->grantPermissionsToTestedRole(['view all revisions']);
   }
 
   /**
@@ -252,26 +259,7 @@ class NodeTest extends ResourceTestBase {
 
     // PATCH request: 403 when creating URL aliases unauthorized.
     $response = $this->request('PATCH', $url, $request_options);
-    // @todo Remove $expected + assertResourceResponse() in favor of the commented line below once https://www.drupal.org/project/jsonapi/issues/2943176 lands.
-    $expected_document = [
-      'jsonapi' => static::$jsonApiMember,
-      'errors' => [
-        [
-          'title' => 'Forbidden',
-          'status' => 403,
-          'detail' => "The current user is not allowed to PATCH the selected field (path). The following permissions are required: 'create url aliases' OR 'administer url aliases'.",
-          'links' => [
-            'info' => ['href' => HttpExceptionNormalizer::getInfoUrl(403)],
-            'via' => ['href' => $url->setAbsolute()->toString()],
-          ],
-          'source' => [
-            'pointer' => '/data/attributes/path',
-          ],
-        ],
-      ],
-    ];
-    $this->assertResourceResponse(403, $expected_document, $response);
-    /* $this->assertResourceErrorResponse(403, "The current user is not allowed to PATCH the selected field (path). The following permissions are required: 'create url aliases' OR 'administer url aliases'.", $response, '/data/attributes/path'); */
+    $this->assertResourceErrorResponse(403, "The current user is not allowed to PATCH the selected field (path). The following permissions are required: 'create url aliases' OR 'administer url aliases'.", $url, $response, '/data/attributes/path');
 
     // Grant permission to create URL aliases.
     $this->grantPermissionsToTestedRole(['create url aliases']);
@@ -322,7 +310,7 @@ class NodeTest extends ResourceTestBase {
       $expected_document,
       $response,
       ['4xx-response', 'http_response', 'node:1'],
-      ['user.permissions'],
+      ['url.query_args:resourceVersion', 'url.site', 'user.permissions'],
       FALSE,
       'MISS'
     );

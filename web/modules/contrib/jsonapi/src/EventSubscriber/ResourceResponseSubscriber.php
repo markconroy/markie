@@ -4,9 +4,8 @@ namespace Drupal\jsonapi\EventSubscriber;
 
 use Drupal\Core\Cache\CacheableResponse;
 use Drupal\Core\Cache\CacheableResponseInterface;
-use Drupal\jsonapi\Normalizer\Value\JsonApiDocumentTopLevelNormalizerValue;
+use Drupal\jsonapi\Normalizer\Value\CacheableNormalization;
 use Drupal\jsonapi\ResourceResponse;
-use Drupal\jsonapi\ResourceType\ResourceType;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -25,12 +24,11 @@ use Symfony\Component\Serializer\SerializerInterface;
  * \Drupal\rest\EventSubscriber\ResourceResponseSubscriber
  *
  * but with a few differences:
- * 1. It has the @jsonapi.serializer_do_not_use_removal_imminent service
- *    injected instead of @serializer
+ * 1. It has the @jsonapi.serializer service injected instead of @serializer
  * 2. It has the @current_route_match service no longer injected
  * 3. It hardcodes the format to 'api_json'
- * 4. It adds the JsonApiDocumentTopLevelNormalizerValue value object returned
- *    by JSON:API normalization to the response object.
+ * 4. It adds the CacheableNormalization object returned by JSON:API
+ *    normalization to the response object.
  * 5. It flattens only to a cacheable response if the HTTP method is cacheable.
  */
 class ResourceResponseSubscriber implements EventSubscriberInterface {
@@ -117,11 +115,11 @@ class ResourceResponseSubscriber implements EventSubscriberInterface {
       $jsonapi_doc_object = $serializer->normalize($data, $format, $context);
       // Having just normalized the data, we can associate its cacheability with
       // the response object.
-      assert($jsonapi_doc_object instanceof JsonApiDocumentTopLevelNormalizerValue);
+      assert($jsonapi_doc_object instanceof CacheableNormalization);
       $response->addCacheableDependency($jsonapi_doc_object);
       // Finally, encode the normalized data (JSON:API's encoder rasterizes it
       // automatically).
-      $response->setContent($serializer->encode($jsonapi_doc_object, $format));
+      $response->setContent($serializer->encode($jsonapi_doc_object->getNormalization(), $format));
       $response->headers->set('Content-Type', $request->getMimeType($format));
     }
   }
@@ -136,14 +134,10 @@ class ResourceResponseSubscriber implements EventSubscriberInterface {
    *   The generated context.
    */
   protected static function generateContext(Request $request) {
-    $resource_type = $request->get('resource_type');
-    assert($resource_type instanceof ResourceType || $resource_type === NULL);
-
     // Build the expanded context.
     $context = [
       'account' => NULL,
       'sparse_fieldset' => NULL,
-      'resource_type' => $resource_type,
     ];
     if ($request->query->get('fields')) {
       $context['sparse_fieldset'] = array_map(function ($item) {

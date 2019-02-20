@@ -11,7 +11,7 @@
 function metatag_install() {
   // Don't display the message during site installation, it looks funny.
   if (!drupal_installation_attempted()) {
-    drupal_set_message(t("To adjust global defaults, go to admin/config/search/metatag. If you need to set metatags for a specific entity, edit its bundle and add the Metatag field."));
+    drupal_set_message(t("To adjust global defaults, go to admin/config/search/metatag. If you need to set meta tags for a specific entity, edit its bundle and add the Metatag field."));
   }
 }
 
@@ -59,7 +59,7 @@ function metatag_update_8101() {
     ->getStorage('field_storage_config')
     ->loadByProperties(['type' => 'metatag']);
 
-  foreach ($field_storage_configs as $key => $field_storage) {
+  foreach ($field_storage_configs as $field_storage) {
     $field_name = $field_storage->getName();
 
     // Get the individual fields (field instances) associated with bundles.
@@ -75,7 +75,6 @@ function metatag_update_8101() {
       // Get the default value for this field on this bundle.
       $field_default_tags_value = $field->getDefaultValueLiteral();
       $field_default_tags_value = $field_default_tags_value[0]['value'];
-      $field_default_tags = unserialize($field_default_tags_value);
 
       // Determine the table and "value" field names.
       $field_table = "node__" . $field_name;
@@ -112,7 +111,7 @@ function metatag_update_8102(&$sandbox) {
       ->getStorage('field_storage_config')
       ->loadByProperties(['type' => 'metatag']);
 
-    foreach ($field_storage_configs as $key => $field_storage) {
+    foreach ($field_storage_configs as $field_storage) {
       $field_name = $field_storage->getName();
 
       // Get the individual fields (field instances) associated with bundles.
@@ -286,7 +285,7 @@ function metatag_update_8103() {
     ->getStorage('field_storage_config')
     ->loadByProperties(['type' => 'metatag']);
 
-  foreach ($field_storage_configs as $key => $field_storage) {
+  foreach ($field_storage_configs as $field_storage) {
     $field_name = $field_storage->getName();
 
     // Get the individual fields (field instances) associated with bundles.

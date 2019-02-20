@@ -1,3 +1,117 @@
+Metatag 8.x-1.8, 2019-02-20
+---------------------------
+By samuel.mortenson, Berdir, DamienMcKenna: Fix data property definition.
+
+
+Metatag 8.x-1.7, 2018-08-31
+---------------------------
+#2994979 by DamienMcKenna, dspachos, ynotpeanutbutter, oxy86, IT-Cru, kdeds,
+  zenimagine: Fixed backwards compatibility break when support for multiple-
+  value tags was added.
+#2990923 by th_tushar, DamienMcKenna: Fixed  coding standards.
+
+
+Metatag 8.x-1.6, 2018-08-21
+---------------------------
+#2961777 by thejimbirch, Baysaa: "Geographical position" (geo.position) should
+  use semi-colon instead of comma.
+#2964626 by idebr: og:image:secure_url allows for multiple values.
+#2865267 by DamienMcKenna, okonvicka, aldibier: <title> tags empty after
+  installing Metatag.
+#2962426 by dragonwize: Image URL double encoded.
+#2973277 by mvantuch, DamienMcKenna: Support for og:image:alt.
+#2977002 by DamienMcKenna, maxoid: Enable testing on the two og product meta
+  tags.
+#2977545 by pmelab, bappa.sarkar, DamienMcKenna: GraphQL throws an error due to
+  Metatag's use of a custom data structure.
+#2925714 by acbramley, vakulrai, Berdir, nkoporec: Replace deprecated
+  BaseFieldDefinition ::setQueryable.
+#2957411 by pmelab: Field item empty check on empty arrays.
+#2958743 by DamienMcKenna, AdamEvertsson, StepanISK, trong.nguyen.tcec,
+  chiefme, quixxel, rjg, CProfessionals: Ignore update.php requests when
+  loading entities; error message when updating from 8.x-1.0 to 8.x-1.5.
+#2961918 by thejimbirch, Michelle: Add the site.webmanifest meta tag.
+#2895577 by plopesc, drupallogic: Error loading
+  /admin/config/search/metatag?page=1.
+#2943954 by thejimbirch, DamienMcKenna: Document an approach to simplify
+  overriding meta tags on a per-entity basis.
+#2968902 by DamienMcKenna, Berdir: Default user page title token should use
+  [user:display-name].
+#2977197 by justin., DamienMcKenna: Allow modules to override the entity used
+  for token replacements.
+#2691313 by KarenS, carstenG, DamienMcKenna, Michelle, marysmech: New option to
+  control which meta tag groups are used on each form.
+#2563657 by plopesc, scotthooker, dawehner, ryanissamson, KevinVb, dobrzyns,
+  PieterDC, peter.keppert, piggito, DamienMcKenna, Grayle, kunal.kursija,
+  Citizen Dan, al0a, kaushashah, yohanaraujo07@gmail.com, markandrewsutton,
+  fuzzyjared, igalafate, PascoS, rybchynski: Panels / Page Manager
+  integration.
+#2989295 by JKerschner: Coding style improvements.
+#2987852 by Chris Burge: Allow meta tags to be altered before page attachment.
+#2989543 by JKerschner: Remove unused variables and imports.
+#2753595 by sinn, thejimbirch: W3C validation error on xmlns attribute.
+#2988072 by juanolalla: Allow contex entity to be overriden in alter hook.
+#2628934 by nikunjkotecha, smaz, e.escribano, idebr, DamienMcKenna,
+  ZapevalovAnton, caspervoogt: Full support for meta tags that allow multiple
+  values.
+#2987904 by thejimbirch: Remove groups redundantly stored in the main module.
+#2987107 by ziomizar: Add support for bubbeable metadata in the MetatagToken
+  service.
+#2978106 by Rolf van de Krol: Translated metatags not showing in normalized
+  entity representations (i.e. REST).
+#2799861 by kalpaitch, DamienMcKenna, dmitry.yankouski, ckaotik: Canonical links
+  repeated when using Panels pages.
+#2532596 by alzz, DamienMcKenna, thejimbirch: Add new meta tag: google.
+
+
+Metatag 8.x-1.5, 2018-03-29
+---------------------------
+#2932596 by yo30, Punk_UnDeaD: Wrong method in abstract class LinkSizesBase.
+#2933940 by DamienMcKenna: og:image must be at least 200x200 otherwise it is
+  ignored by Facebook.
+#2936371 by gaurav.kapoor: Unused variable in metatag defaults class revert
+  function.
+#2923080 by DamienMcKenna, pingwin4eg, pazhyn: Undefined offset: 1 in
+  metatag_mobile_page_attachments_alter.
+#2930037 by smurrayatwork, rbayliss, moshe weitzman: Missing ampersand with
+  drupal_static causes multiple calls to metatag_get_tags_from_route().
+#2899234 by DamienMcKenna, JeffM2001, twang, heddn, edurenye, ShaunDychko:
+  Missing dependency (drupal:serialization) / Fatal error: Class NormalizerBase
+  not found.
+#2945799 by DamienMcKenna, webfaqtory: Undefined variable: tag_id in
+  MetatagManager->sortedGroupsWithTags().
+#2953313 by DamienMcKenna: Add a function for getting the meta tags in a human
+  readable format - metatag_generate_entity_metatags().
+#2953635 by DamienMcKenna: MetatagStringTest has the wrong @group.
+#2937683 by prafullsranjan, DamienMcKenna: Further improve module's coding
+  standards compliance.
+#2939608 by alberto56: Invalid argument supplied for foreach() in
+  MetatagNormalizer.
+#2936876 by bonus, DamienMcKenna: Add support for Pinterest meta namespace.
+#2938025 by DamienMcKenna, Oliver Eyton-Williams: Incorrect rel attribute on
+  hreflang tags.
+#2954214 by DamienMcKenna: composer.json improvements.
+#2908119 by LEalex, DamienMcKenna, jeffam, BenStallings: Set "link" HTTP header
+  for canonical URL and shortlink tags.
+#2954169 by yasmeensalah, DamienMcKenna: Translations of description meta tags
+  shouldn't be limited to 128 characters.
+#2897450 by edurenye: Add product:price:amount and product:price:currency OG
+  tags.
+#2922581 by roborew: Metatag causes error when used with Replication Modules to
+  deploy content.
+#2947493 by DamienMcKenna, kala4ek: Adding forms of custom entities are broken.
+#2828607 by pingevt, DamienMcKenna: Add OG book meta tags.
+#2954522 by DamienMcKenna: Correct spelling of "meta tags".
+#2809351 by DamienMcKenna, thejimbirch: Add the advanced Dublin Core meta tags.
+#2956199 by DamienMcKenna: Remove separate admin pages for Views integration.
+#2956227 by DamienMcKenna: Test improvements from 2883718-20.
+#2900368 by plopesc: Don't allow certain defaults to be removed.
+#2840751 by ocastle, ElegguaDP, Wim Leers, keopx, adamzimmermann:
+  Protocol-relative URLs are broken.
+#2925974 by keopx, ocastle, DamienMcKenna, Wim Leers, mangy.fox: Twitter Cards
+  (and others) require absolute URLs.
+
+
 Metatag 8.x-1.4, 2017-12-21
 ---------------------------
 #2882769 by DamienMcKenna: Added a hook_requirements() message about the
@@ -11,7 +125,7 @@ Metatag 8.x-1.4, 2017-12-21
   import fails: route does not exist.
 #2932316 by DamienMcKenna, Sophie.SK: Error on main defaults page if no config
   objects exist.
-#2932361 by DamienMcKenna: Improve coding standards on Metatags 8.x-1.x.
+#2932361 by DamienMcKenna: Improve coding standards on Metatag 8.x-1.x.
 #2930001 by Aurif3x, DamienMcKenna: New meta tag: Set-Cookie.
 #2810635 by DamienMcKenna: Automatically add hreflang meta tags for each enabled
   language.
@@ -73,7 +187,7 @@ By DamienMcKenna: Don't list Drupal core as a dependency in composer.json.
 Metatag 8.x-1.1, 2017-05-31
 ---------------------------
 #2852737 by DamienMcKenna: Added CodeClimate config files.
-#2853252 by dawehner: Ensure the metatags are ordered correctly.
+#2853252 by dawehner: Ensure the meta tags are ordered correctly.
 #2856454 by dbungard: Improvements to UI text, meta tag descriptions, etc.
 #2781485 by kalpaitch: Changed MetatagManager to use the instance name rather
   than plugin ID to identify plugin instances.

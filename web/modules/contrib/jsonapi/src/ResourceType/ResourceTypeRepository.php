@@ -95,13 +95,11 @@ class ResourceTypeRepository implements ResourceTypeRepositoryInterface {
   public function all() {
     $cached = $this->staticCache->get('jsonapi.resource_types', FALSE);
     if ($cached === FALSE) {
-      $entity_type_ids = array_keys($this->entityTypeManager->getDefinitions());
       $resource_types = [];
-      foreach ($entity_type_ids as $entity_type_id) {
-        $resource_types = array_merge($resource_types, array_map(function ($bundle) use ($entity_type_id) {
-          $entity_type = $this->entityTypeManager->getDefinition($entity_type_id);
+      foreach ($this->entityTypeManager->getDefinitions() as $entity_type) {
+        $resource_types = array_merge($resource_types, array_map(function ($bundle) use ($entity_type) {
           return $this->createResourceType($entity_type, $bundle);
-        }, array_keys($this->entityTypeBundleInfo->getBundleInfo($entity_type_id))));
+        }, array_keys($this->entityTypeBundleInfo->getBundleInfo($entity_type->id()))));
       }
       foreach ($resource_types as $resource_type) {
         $relatable_resource_types = $this->calculateRelatableResourceTypes($resource_type, $resource_types);
@@ -132,6 +130,7 @@ class ResourceTypeRepository implements ResourceTypeRepositoryInterface {
       $entity_type->isInternal(),
       static::isLocatableResourceType($entity_type, $bundle),
       static::isMutableResourceType($entity_type, $bundle),
+      static::isVersionableResourceType($entity_type),
       static::getFieldMapping($raw_fields, $entity_type, $bundle)
     );
   }
@@ -313,6 +312,21 @@ class ResourceTypeRepository implements ResourceTypeRepositoryInterface {
   protected static function isLocatableResourceType(EntityTypeInterface $entity_type, $bundle) {
     assert(is_string($bundle) && !empty($bundle), 'A bundle ID is required. Bundleless entity types should pass the entity type ID again.');
     return $entity_type->getStorageClass() !== ContentEntityNullStorage::class;
+  }
+
+  /**
+   * Whether an entity type is a versionable resource type.
+   *
+   * @param \Drupal\Core\Entity\EntityTypeInterface $entity_type
+   *   The entity type to assess.
+   *
+   * @return bool
+   *   TRUE if the entity type is versionable, FALSE otherwise.
+   */
+  protected static function isVersionableResourceType(EntityTypeInterface $entity_type) {
+    // @todo: remove the following line and uncomment the next one when revisions have standardized access control. For now, it is unsafe to support all revisionable entity types.
+    return in_array($entity_type->id(), ['node', 'media']);
+    /* return $entity_type->isRevisionable(); */
   }
 
   /**

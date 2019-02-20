@@ -5,13 +5,6 @@
  * Contains metatag_open_graph.module.
  */
 
-use Drupal\Core\Entity\ContentEntityInterface;
-use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
-use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Routing\RouteMatchInterface;
-use Drupal\Core\Url;
-
 /**
  * Implements template_preprocess_html().
  */
@@ -28,17 +21,9 @@ function metatag_open_graph_preprocess_html(&$variables) {
   $namespaces = [];
   if (!\Drupal::moduleHandler()->moduleExists('rdf')) {
     $namespaces = [
-      'xmlns:dc' => 'http://purl.org/dc/terms/',
-      'xmlns:og' => 'http://ogp.me/ns#',
+      'prefix' => 'og: http://ogp.me/ns#',
     ];
   }
-
-  // Namespaces for OpenGraph.
-  $namespaces['xmlns:article'] = "http://ogp.me/ns/article#";
-  $namespaces['xmlns:book'] = "http://ogp.me/ns/book#";
-  $namespaces['xmlns:product'] = "http://ogp.me/ns/product#";
-  $namespaces['xmlns:profile'] = "http://ogp.me/ns/profile#";
-  $namespaces['xmlns:video'] = "http://ogp.me/ns/video#";
 
   // Namespaces for Google+.
   if (isset($variables['itemtype'])) {

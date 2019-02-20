@@ -91,7 +91,7 @@ trait MetatagHelperTrait {
    *   be automatically generated. If the 'name' item is not present the 'vid'
    *   will be used.
    *
-   * @return Drupal\taxonomy\Entity\Vocabulary
+   * @return \Drupal\taxonomy\Entity\Vocabulary
    *   A fully formatted vocabulary object.
    */
   private function createVocabulary(array $values = []) {

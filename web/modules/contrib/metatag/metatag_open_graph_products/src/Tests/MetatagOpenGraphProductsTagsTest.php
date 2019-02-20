@@ -5,7 +5,7 @@ namespace Drupal\metatag_open_graph_products\Tests;
 use Drupal\metatag\Tests\MetatagTagsTestBase;
 
 /**
- * Tests that each of the Metatag Open Graph tags work correctly.
+ * Tests that each of the Metatag Open Graph Product tags work correctly.
  *
  * @group metatag
  */
@@ -14,7 +14,10 @@ class MetatagOpenGraphProductsTagsTest extends MetatagTagsTestBase {
   /**
    * {@inheritdoc}
    */
-  private $tags = [];
+  private $tags = [
+    'product_price_amount',
+    'product_price_currency',
+  ];
 
   /**
    * {@inheritdoc}
@@ -38,18 +41,8 @@ class MetatagOpenGraphProductsTagsTest extends MetatagTagsTestBase {
    * Each of these meta tags has a different tag name vs its internal name.
    */
   private function getTestTagName($tag_name) {
-    // Replace the first underline with a colon.
-    $tag_name = str_replace('og_', 'og:', $tag_name);
-    $tag_name = str_replace('article_', 'article:', $tag_name);
-
-    // Some tags have an additional underline that turns into a colon.
-    $tag_name = str_replace('og:image_', 'og:image:', $tag_name);
-    $tag_name = str_replace('og:video_', 'og:video:', $tag_name);
-
-    // Additional fixes.
-    if ($tag_name == 'og:locale_alternative') {
-      $tag_name = 'og:locale:alternate';
-    }
+    // Replace the underlines with a colon.
+    $tag_name = str_replace('_', ':', $tag_name);
 
     return $tag_name;
   }

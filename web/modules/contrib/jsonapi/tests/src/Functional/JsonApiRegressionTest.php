@@ -765,4 +765,83 @@ class JsonApiRegressionTest extends JsonApiFunctionalTestBase {
     $this->assertSame('2018-12-20T05:00:00+11:00', $doc['data']['attributes']['when_exactly']);
   }
 
+  /**
+   * Ensure includes are respected even when POSTing.
+   *
+   * @see https://www.drupal.org/project/jsonapi/issues/3026030
+   */
+  public function testPostToIncludeUrlDoesNotReturnIncludeFromIssue3026030() {
+    // Set up data model.
+    $this->drupalCreateContentType(['type' => 'page']);
+    $this->rebuildAll();
+
+    // Test.
+    $user = $this->drupalCreateUser(['bypass node access']);
+    $url = Url::fromUri('internal:/jsonapi/node/page?include=uid');
+    $request_options = [
+      RequestOptions::HEADERS => [
+        'Content-Type' => 'application/vnd.api+json',
+        'Accept' => 'application/vnd.api+json',
+      ],
+      RequestOptions::AUTH => [$user->getUsername(), $user->pass_raw],
+      RequestOptions::JSON => [
+        'data' => [
+          'type' => 'node--page',
+          'attributes' => [
+            'title' => 'test',
+          ],
+        ],
+      ],
+    ];
+    $response = $this->request('POST', $url, $request_options);
+    $this->assertSame(201, $response->getStatusCode());
+    $doc = Json::decode((string) $response->getBody());
+    $this->assertArrayHasKey('included', $doc);
+    $this->assertSame($user->label(), $doc['included'][0]['attributes']['name']);
+  }
+
+  /**
+   * Ensure includes are respected even when PATCHing.
+   *
+   * @see https://www.drupal.org/project/jsonapi/issues/3026030
+   */
+  public function testPatchToIncludeUrlDoesNotReturnIncludeFromIssue3026030() {
+    // Set up data model.
+    $this->drupalCreateContentType(['type' => 'page']);
+    $this->rebuildAll();
+
+    // Create data.
+    $user = $this->drupalCreateUser(['bypass node access']);
+    $page = Node::create([
+      'title' => 'original',
+      'type' => 'page',
+      'uid' => $user->id(),
+    ]);
+    $page->save();
+
+    // Test.
+    $url = Url::fromUri(sprintf('internal:/jsonapi/node/page/%s/?include=uid', $page->uuid()));
+    $request_options = [
+      RequestOptions::HEADERS => [
+        'Content-Type' => 'application/vnd.api+json',
+        'Accept' => 'application/vnd.api+json',
+      ],
+      RequestOptions::AUTH => [$user->getUsername(), $user->pass_raw],
+      RequestOptions::JSON => [
+        'data' => [
+          'type' => 'node--page',
+          'id' => $page->uuid(),
+          'attributes' => [
+            'title' => 'modified',
+          ],
+        ],
+      ],
+    ];
+    $response = $this->request('PATCH', $url, $request_options);
+    $this->assertSame(200, $response->getStatusCode());
+    $doc = Json::decode((string) $response->getBody());
+    $this->assertArrayHasKey('included', $doc);
+    $this->assertSame($user->label(), $doc['included'][0]['attributes']['name']);
+  }
+
 }

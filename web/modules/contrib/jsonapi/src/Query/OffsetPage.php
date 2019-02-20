@@ -2,6 +2,9 @@
 
 namespace Drupal\jsonapi\Query;
 
+use Drupal\Core\Cache\CacheableMetadata;
+use Drupal\Core\Http\Exception\CacheableBadRequestHttpException;
+
 /**
  * Value object for containing the requested offset and page parameters.
  *
@@ -89,6 +92,33 @@ class OffsetPage {
    */
   public function getSize() {
     return $this->size;
+  }
+
+  /**
+   * Creates an OffsetPage object from a query parameter.
+   *
+   * @param mixed $parameter
+   *   The `page` query parameter from the Symfony request object.
+   *
+   * @return \Drupal\jsonapi\Query\OffsetPage
+   *   An OffsetPage object with defaults.
+   */
+  public static function createFromQueryParameter($parameter) {
+    if (!is_array($parameter)) {
+      $cacheability = (new CacheableMetadata())->addCacheContexts(['url.query_args:page']);
+      throw new CacheableBadRequestHttpException($cacheability, 'The page parameter needs to be an array.');
+    }
+
+    $expanded = $parameter + [
+      static::OFFSET_KEY => static::DEFAULT_OFFSET,
+      static::SIZE_KEY => static::SIZE_MAX,
+    ];
+
+    if ($expanded[static::SIZE_KEY] > static::SIZE_MAX) {
+      $expanded[static::SIZE_KEY] = static::SIZE_MAX;
+    }
+
+    return new static($expanded[static::OFFSET_KEY], $expanded[static::SIZE_KEY]);
   }
 
 }

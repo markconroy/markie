@@ -48,3 +48,13 @@ entity.metatag_defaults.revert_form:
     _permission: 'administer meta tags'
   options:
     _admin_route: TRUE
+
+metatag.settings:
+  path: '/admin/config/search/metatag/settings'
+  defaults:
+    _form: '\Drupal\metatag\Form\MetatagSettingsForm'
+    _title: 'Configure the Metatag module'
+  requirements:
+    _permission: 'administer meta tags'
+  options:
+    _admin_route: TRUE

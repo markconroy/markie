@@ -163,9 +163,11 @@ class ExternalNormalizersTest extends BrowserTestBase {
     $response = $client->request('POST', Url::fromRoute('jsonapi.entity_test--entity_test.collection.post')->setAbsolute(TRUE)->toString(), $request_options);
     $document = Json::decode((string) $response->getBody());
     $this->assertSame(static::VALUE_OVERRIDDEN, $document['data']['attributes']['field_test']);
-    $entities = $this->container->get('entity_type.manager')
+    $entity_type_manager = $this->container->get('entity_type.manager');
+    $uuid_key = $entity_type_manager->getDefinition('entity_test')->getKey('uuid');
+    $entities = $entity_type_manager
       ->getStorage('entity_test')
-      ->loadByProperties(['uuid' => $document['data']['id']]);
+      ->loadByProperties([$uuid_key => $document['data']['id']]);
     $created_entity = reset($entities);
     $this->assertSame($expected_value_jsonapi_denormalization, $created_entity->field_test->value);
   }

@@ -4,6 +4,7 @@ namespace Drupal\jsonapi\EventSubscriber;
 
 use Drupal\jsonapi\JsonApiResource\ErrorCollection;
 use Drupal\jsonapi\JsonApiResource\JsonApiDocumentTopLevel;
+use Drupal\jsonapi\JsonApiResource\LinkCollection;
 use Drupal\jsonapi\JsonApiResource\NullEntityCollection;
 use Drupal\jsonapi\ResourceResponse;
 use Drupal\jsonapi\Routing\Routes;
@@ -53,7 +54,7 @@ class DefaultExceptionSubscriber extends SerializationDefaultExceptionSubscriber
   protected function setEventResponse(GetResponseForExceptionEvent $event, $status) {
     /* @var \Symfony\Component\HttpKernel\Exception\HttpException $exception */
     $exception = $event->getException();
-    $response = new ResourceResponse(new JsonApiDocumentTopLevel(new ErrorCollection([$exception]), new NullEntityCollection(), []), $exception->getStatusCode(), $exception->getHeaders());
+    $response = new ResourceResponse(new JsonApiDocumentTopLevel(new ErrorCollection([$exception]), new NullEntityCollection(), new LinkCollection([])), $exception->getStatusCode(), $exception->getHeaders());
     $response->addCacheableDependency($exception);
     $event->setResponse($response);
   }

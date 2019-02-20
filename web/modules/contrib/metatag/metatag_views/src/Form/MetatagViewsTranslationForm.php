@@ -36,33 +36,43 @@ class MetatagViewsTranslationForm extends FormBase {
   protected $languageManager;
 
   /**
+   * The Views manager.
+   *
    * @var \Drupal\Core\Entity\EntityStorageInterface
    */
   protected $viewsManager;
 
   /**
+   * The Metatag token service.
+   *
    * @var \Drupal\metatag\MetatagToken
    */
   protected $tokenService;
 
   /**
+   * The Metatag tag plugin manager.
+   *
    * @var \Drupal\metatag\MetatagTagPluginManager
    */
   protected $tagPluginManager;
 
   /**
-   * View entity object.
+   * The View entity object.
    *
    * @var \Drupal\views\ViewEntityInterface
    */
   protected $view;
 
   /**
+   * View ID.
+   *
    * @var string
    */
   protected $viewId;
 
   /**
+   * View display ID.
+   *
    * @var string
    */
   protected $displayId = 'default';
@@ -156,7 +166,7 @@ class MetatagViewsTranslationForm extends FormBase {
     $this->language = $this->languageManager->getLanguage($langcode);
     $this->sourceLanguage = $this->view->language();
 
-    // Get metatags from the view entity.
+    // Get meta tags from the view entity.
     $form['#tree'] = TRUE;
     $form['#attached']['library'][] = 'config_translation/drupal.config_translation.admin';
 
@@ -179,7 +189,7 @@ class MetatagViewsTranslationForm extends FormBase {
   }
 
   /**
-   * Add the translation form element for metatags available in the source.
+   * Add the translation form element for meta tags available in the source.
    */
   public function form(array $element, array $translated_values) {
     $translated_values = $this->clearMetatagViewsDisallowedValues($translated_values);

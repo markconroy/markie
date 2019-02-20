@@ -99,7 +99,9 @@ trait ResourceResponseTestTrait {
       ];
     }
     // All collections should be 200, without regard for the status of the
-    // individual resources in those collections.
+    // individual resources in those collections, which means any '4xx-response'
+    // cache tags on the individual responses should also be omitted.
+    $merged_cacheability->setCacheTags(array_diff($merged_cacheability->getCacheTags(), ['4xx-response']));
     return (new ResourceResponse($merged_document, 200))->addCacheableDependency($merged_cacheability);
   }
 
@@ -189,7 +191,11 @@ trait ResourceResponseTestTrait {
       ];
     }
 
-    return static::decorateExpectedResponseForIncludedFields(ResourceResponse::create($individual_document), $resource_data['responses']);
+    $basic_cacheability = (new CacheableMetadata())
+      ->addCacheTags($this->getExpectedCacheTags())
+      ->addCacheContexts($this->getExpectedCacheContexts());
+    return static::decorateExpectedResponseForIncludedFields(ResourceResponse::create($individual_document), $resource_data['responses'])
+      ->addCacheableDependency($basic_cacheability);
   }
 
   /**
@@ -508,7 +514,7 @@ trait ResourceResponseTestTrait {
       'jsonapi' => static::$jsonApiMember,
       'errors' => [$error],
     ], 403))
-      ->addCacheableDependency((new CacheableMetadata())->addCacheTags(['4xx-response', 'http_response']))
+      ->addCacheableDependency((new CacheableMetadata())->addCacheTags(['4xx-response', 'http_response'])->addCacheContexts(['url.site']))
       ->addCacheableDependency($access);
   }
 
@@ -524,14 +530,23 @@ trait ResourceResponseTestTrait {
    * @return \Drupal\jsonapi\ResourceResponse
    *   The empty collection ResourceResponse.
    */
-  protected static function getEmptyCollectionResponse($cardinality, $self_link) {
-    return new ResourceResponse([
+  protected function getEmptyCollectionResponse($cardinality, $self_link) {
+    // If the entity type is revisionable, add a resource version cache context.
+    $cache_contexts = Cache::mergeContexts([
+      // Cache contexts for JSON:API URL query parameters.
+      'url.query_args:fields',
+      'url.query_args:include',
+      // Drupal defaults.
+      'url.site',
+    ], $this->entity->getEntityType()->isRevisionable() ? ['url.query_args:resourceVersion'] : []);
+    $cacheability = (new CacheableMetadata())->addCacheContexts($cache_contexts)->addCacheTags(['http_response']);
+    return (new ResourceResponse([
       // Empty to-one relationships should be NULL and empty to-many
       // relationships should be an empty array.
       'data' => $cardinality === 1 ? NULL : [],
       'jsonapi' => static::$jsonApiMember,
       'links' => ['self' => ['href' => $self_link]],
-    ]);
+    ]))->addCacheableDependency($cacheability);
   }
 
   /**

@@ -175,14 +175,14 @@ class BlockTest extends ResourceTestBase {
         'http_response',
         'user:2',
       ])
-      ->setCacheContexts(['user.roles']);
+      ->setCacheContexts(['url.site', 'user.roles']);
   }
 
   /**
    * {@inheritdoc}
    */
-  protected static function getExpectedCollectionCacheability(array $collection, array $sparse_fieldset = NULL, AccountInterface $account, $filtered = FALSE) {
-    return parent::getExpectedCollectionCacheability($collection, $sparse_fieldset, $account, $filtered)
+  protected static function getExpectedCollectionCacheability(AccountInterface $account, array $collection, array $sparse_fieldset = NULL, $filtered = FALSE) {
+    return parent::getExpectedCollectionCacheability($account, $collection, $sparse_fieldset, $filtered)
       ->addCacheTags(['user:2'])
       ->addCacheContexts(['user.roles']);
   }

@@ -2,7 +2,7 @@
 
 namespace Drupal\jsonapi\JsonApiResource;
 
-use Drupal\Component\Assertion\Inspector;
+use Drupal\Core\Field\EntityReferenceFieldItemListInterface;
 
 /**
  * Represents a JSON:API document's "top level".
@@ -18,7 +18,7 @@ class JsonApiDocumentTopLevel {
   /**
    * The data to normalize.
    *
-   * @var \Drupal\Core\Entity\EntityInterface|\Drupal\jsonapi\JsonApiResource\EntityCollection|\Drupal\jsonapi\LabelOnlyEntity|\Drupal\jsonapi\JsonApiResource\ErrorCollection
+   * @var \Drupal\jsonapi\JsonApiResource\ResourceIdentifierInterface|\Drupal\jsonapi\JsonApiResource\EntityCollection|\Drupal\jsonapi\JsonApiResource\ErrorCollection|\Drupal\Core\Field\EntityReferenceFieldItemListInterface
    */
   protected $data;
 
@@ -32,7 +32,7 @@ class JsonApiDocumentTopLevel {
   /**
    * The links.
    *
-   * @var string[]
+   * @var \Drupal\jsonapi\JsonApiResource\LinkCollection
    */
   protected $links;
 
@@ -46,34 +46,30 @@ class JsonApiDocumentTopLevel {
   /**
    * Instantiates a JsonApiDocumentTopLevel object.
    *
-   * @param \Drupal\Core\Entity\EntityInterface|\Drupal\jsonapi\JsonApiResource\EntityCollection|\Drupal\jsonapi\LabelOnlyEntity|\Drupal\jsonapi\JsonApiResource\ErrorCollection $data
-   *   The data to normalize. It can be either a straight up entity or a
-   *   collection of entities.
+   * @param \Drupal\jsonapi\JsonApiResource\ResourceIdentifierInterface|\Drupal\jsonapi\JsonApiResource\EntityCollection|\Drupal\jsonapi\JsonApiResource\ErrorCollection|\Drupal\Core\Field\EntityReferenceFieldItemListInterface $data
+   *   The data to normalize. It can be either a ResourceObject, or a stand-in
+   *   for one, or a collection of the same.
    * @param \Drupal\jsonapi\JsonApiResource\EntityCollection $includes
    *   An EntityCollection object containing resources to be included in the
    *   response document or NULL if there should not be includes.
-   * @param string[] $links
-   *   The URLs to which the top-level document should link. Keys are strings.
-   *   Values are URLs.
+   * @param \Drupal\jsonapi\JsonApiResource\LinkCollection $links
+   *   A collection of links to resources related to the top-level document.
    * @param array $meta
    *   (optional) The metadata to normalize.
    */
-  public function __construct($data, EntityCollection $includes, array $links, array $meta = []) {
+  public function __construct($data, EntityCollection $includes, LinkCollection $links, array $meta = []) {
+    assert($data instanceof ResourceIdentifierInterface || $data instanceof EntityCollection || $data instanceof ErrorCollection || $data instanceof EntityReferenceFieldItemListInterface);
     assert(!$data instanceof ErrorCollection || $includes instanceof NullEntityCollection);
-    assert(Inspector::assertAll(function ($link) {
-      return is_array($link) || isset($link['href']) && is_string($link['href']);
-    }, $links));
-
     $this->data = $data;
     $this->includes = $includes;
-    $this->links = $links;
+    $this->links = $links->withContext($this);
     $this->meta = $meta;
   }
 
   /**
    * Gets the data.
    *
-   * @return \Drupal\Core\Entity\EntityInterface|\Drupal\jsonapi\JsonApiResource\EntityCollection|\Drupal\jsonapi\LabelOnlyEntity|\Drupal\jsonapi\JsonApiResource\ErrorCollection
+   * @return \Drupal\jsonapi\JsonApiResource\ResourceObject|\Drupal\jsonapi\JsonApiResource\EntityCollection|\Drupal\jsonapi\JsonApiResource\LabelOnlyResourceObject|\Drupal\jsonapi\JsonApiResource\ErrorCollection
    *   The data.
    */
   public function getData() {
@@ -83,7 +79,7 @@ class JsonApiDocumentTopLevel {
   /**
    * Gets the links.
    *
-   * @return string[]
+   * @return \Drupal\jsonapi\JsonApiResource\LinkCollection
    *   The top-level links.
    */
   public function getLinks() {

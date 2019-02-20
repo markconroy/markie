@@ -29,12 +29,11 @@ class TestCoverageTest extends BrowserTestBase {
     $stable_core_modules = array_filter($all_modules, function ($module) {
       // Filter out contrib, hidden, testing, and experimental modules. We also
       // don't need to enable modules that are already enabled.
-      return
-        $module->origin === 'core' &&
-        empty($module->info['hidden']) &&
-        $module->status == FALSE &&
-        $module->info['package'] !== 'Testing' &&
-        $module->info['package'] !== 'Core (Experimental)';
+      return $module->origin === 'core'
+        && empty($module->info['hidden'])
+        && $module->status == FALSE
+        && $module->info['package'] !== 'Testing'
+        && $module->info['package'] !== 'Core (Experimental)';
     });
 
     $this->container->get('module_installer')->install(array_keys($stable_core_modules));

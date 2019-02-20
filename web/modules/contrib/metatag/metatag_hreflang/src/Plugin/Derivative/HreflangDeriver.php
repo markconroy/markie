@@ -5,8 +5,6 @@ namespace Drupal\metatag_hreflang\Plugin\Derivative;
 use Drupal\Component\Plugin\Derivative\DeriverBase;
 use Drupal\Core\Language\Language;
 use Drupal\Core\Language\LanguageInterface;
-use Drupal\Core\Plugin\Discovery\ContainerDeriverInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Create a new hreflang tag plugin for each enabled language.
@@ -33,7 +31,7 @@ class HreflangDeriver extends DeriverBase {
       }
 
       // The base definition includes the annotations defined in the plugin,
-      // i.e. HreflangPerLanguage. Each one may be overridden
+      // i.e. HreflangPerLanguage. Each one may be overridden.
       $derivative = $base_plugin_definition;
 
       // Here we fill in any missing keys on the layout annotation.

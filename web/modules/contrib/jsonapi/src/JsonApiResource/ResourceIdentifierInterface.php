@@ -30,4 +30,12 @@ interface ResourceIdentifierInterface {
    */
   public function getTypeName();
 
+  /**
+   * Gets the resource identifier's JSON:API resource type.
+   *
+   * @return \Drupal\jsonapi\ResourceType\ResourceType
+   *   The JSON:API resource type.
+   */
+  public function getResourceType();
+
 }

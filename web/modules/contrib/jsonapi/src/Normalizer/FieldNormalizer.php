@@ -2,13 +2,10 @@
 
 namespace Drupal\jsonapi\Normalizer;
 
-use Drupal\Component\Assertion\Inspector;
-use Drupal\Core\Field\EntityReferenceFieldItemList;
+use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemListInterface;
-use Drupal\jsonapi\Normalizer\Value\FieldItemNormalizerValue;
-use Drupal\jsonapi\Normalizer\Value\FieldNormalizerValue;
-use Drupal\jsonapi\Normalizer\Value\NullFieldNormalizerValue;
+use Drupal\jsonapi\Normalizer\Value\CacheableNormalization;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 
 /**
@@ -26,48 +23,19 @@ class FieldNormalizer extends NormalizerBase implements DenormalizerInterface {
   protected $supportedInterfaceOrClass = FieldItemListInterface::class;
 
   /**
-   * The formats that the Normalizer can handle.
-   *
-   * @var array
-   */
-  protected $formats = ['api_json'];
-
-  /**
    * {@inheritdoc}
    */
   public function normalize($field, $format = NULL, array $context = []) {
     /* @var \Drupal\Core\Field\FieldItemListInterface $field */
+    $normalized_items = $this->normalizeFieldItems($field, $format, $context);
 
-    $access = $field->access('view', $context['account'], TRUE);
-    $property_type = static::isRelationship($field) ? 'relationships' : 'attributes';
+    $cardinality = $field->getFieldDefinition()
+      ->getFieldStorageDefinition()
+      ->getCardinality();
 
-    if ($access->isAllowed()) {
-      $normalized_field_items = $this->normalizeFieldItems($field, $format, $context);
-      assert(Inspector::assertAll(function ($v) {
-        return $v instanceof FieldItemNormalizerValue;
-      }, $normalized_field_items));
-
-      $cardinality = $field->getFieldDefinition()
-        ->getFieldStorageDefinition()
-        ->getCardinality();
-      return new FieldNormalizerValue($access, $normalized_field_items, $cardinality, $property_type);
-    }
-    else {
-      return new NullFieldNormalizerValue($access, $property_type);
-    }
-  }
-
-  /**
-   * Checks if the passed field is a relationship field.
-   *
-   * @param mixed $field
-   *   The field.
-   *
-   * @return bool
-   *   TRUE if it's a JSON:API relationship.
-   */
-  protected static function isRelationship($field) {
-    return $field instanceof EntityReferenceFieldItemList || $field instanceof Relationship;
+    return $cardinality === 1
+      ? array_shift($normalized_items) ?: new CacheableNormalization(new CacheableMetadata(), NULL)
+      : CacheableNormalization::aggregate($normalized_items);
   }
 
   /**

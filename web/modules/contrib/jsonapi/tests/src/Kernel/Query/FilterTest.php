@@ -4,13 +4,14 @@ namespace Drupal\Tests\jsonapi\Kernel\Query;
 
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Http\Exception\CacheableBadRequestHttpException;
-use Drupal\jsonapi\Normalizer\EntityConditionGroupNormalizer;
-use Drupal\jsonapi\Normalizer\EntityConditionNormalizer;
-use Drupal\jsonapi\Normalizer\FilterNormalizer;
+use Drupal\jsonapi\Context\FieldResolver;
+use Drupal\jsonapi\Query\Filter;
+use Drupal\jsonapi\ResourceType\ResourceType;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
 use Drupal\Tests\image\Kernel\ImageFieldCreationTrait;
 use Drupal\Tests\jsonapi\Kernel\JsonapiKernelTestBase;
+use Prophecy\Argument;
 
 /**
  * @coversDefaultClass \Drupal\jsonapi\Query\Filter
@@ -40,13 +41,6 @@ class FilterTest extends JsonapiKernelTestBase {
   ];
 
   /**
-   * The filter denormalizer.
-   *
-   * @var \Symfony\Component\Serializer\Normalizer\DenormalizerInterface
-   */
-  protected $normalizer;
-
-  /**
    * A node storage instance.
    *
    * @var \Drupal\Core\Entity\EntityStorageInterface
@@ -73,12 +67,8 @@ class FilterTest extends JsonapiKernelTestBase {
       ['colors' => ['orange'], 'shapes' => ['square'], 'title' => 'DONT_FIND'],
     ]);
 
-    $this->normalizer = new FilterNormalizer(
-      $this->container->get('jsonapi.field_resolver'),
-      new EntityConditionNormalizer(),
-      new EntityConditionGroupNormalizer()
-    );
     $this->nodeStorage = $this->container->get('entity_type.manager')->getStorage('node');
+    $this->fieldResolver = $this->container->get('jsonapi.field_resolver');
   }
 
   /**
@@ -86,13 +76,8 @@ class FilterTest extends JsonapiKernelTestBase {
    */
   public function testInvalidFilterPathDueToMissingPropertyName() {
     $this->setExpectedException(CacheableBadRequestHttpException::class, 'Invalid nested filtering. The field `colors`, given in the path `colors` is incomplete, it must end with one of the following specifiers: `value`, `format`, `processed`.');
-    $normalized = [
-      'colors' => '',
-    ];
-    $this->normalizer->denormalize($normalized, Filter::class, NULL, [
-      'entity_type_id' => 'node',
-      'bundle' => 'painting',
-    ]);
+    $resource_type = new ResourceType('node', 'painting', NULL);
+    Filter::createFromQueryParameter(['colors' => ''], $resource_type, $this->fieldResolver);
   }
 
   /**
@@ -100,13 +85,8 @@ class FilterTest extends JsonapiKernelTestBase {
    */
   public function testInvalidFilterPathDueToMissingPropertyNameReferenceFieldWithMetaProperties() {
     $this->setExpectedException(CacheableBadRequestHttpException::class, 'Invalid nested filtering. The field `photo`, given in the path `photo` is incomplete, it must end with one of the following specifiers: `id`, `meta.alt`, `meta.title`, `meta.width`, `meta.height`.');
-    $normalized = [
-      'photo' => '',
-    ];
-    $this->normalizer->denormalize($normalized, Filter::class, NULL, [
-      'entity_type_id' => 'node',
-      'bundle' => 'painting',
-    ]);
+    $resource_type = new ResourceType('node', 'painting', NULL);
+    Filter::createFromQueryParameter(['photo' => ''], $resource_type, $this->fieldResolver);
   }
 
   /**
@@ -114,13 +94,8 @@ class FilterTest extends JsonapiKernelTestBase {
    */
   public function testInvalidFilterPathDueMissingMetaPrefixReferenceFieldWithMetaProperties() {
     $this->setExpectedException(CacheableBadRequestHttpException::class, 'Invalid nested filtering. The property `alt`, given in the path `photo.alt` belongs to the meta object of a relationship and must be preceded by `meta`.');
-    $normalized = [
-      'photo.alt' => '',
-    ];
-    $this->normalizer->denormalize($normalized, Filter::class, NULL, [
-      'entity_type_id' => 'node',
-      'bundle' => 'painting',
-    ]);
+    $resource_type = new ResourceType('node', 'painting', NULL);
+    Filter::createFromQueryParameter(['photo.alt' => ''], $resource_type, $this->fieldResolver);
   }
 
   /**
@@ -128,13 +103,8 @@ class FilterTest extends JsonapiKernelTestBase {
    */
   public function testInvalidFilterPathDueToMissingPropertyNameReferenceFieldWithoutMetaProperties() {
     $this->setExpectedException(CacheableBadRequestHttpException::class, 'Invalid nested filtering. The field `uid`, given in the path `uid` is incomplete, it must end with one of the following specifiers: `id`.');
-    $normalized = [
-      'uid' => '',
-    ];
-    $this->normalizer->denormalize($normalized, Filter::class, NULL, [
-      'entity_type_id' => 'node',
-      'bundle' => 'painting',
-    ]);
+    $resource_type = new ResourceType('node', 'painting', NULL);
+    Filter::createFromQueryParameter(['uid' => ''], $resource_type, $this->fieldResolver);
   }
 
   /**
@@ -142,13 +112,8 @@ class FilterTest extends JsonapiKernelTestBase {
    */
   public function testInvalidFilterPathDueToNonexistentProperty() {
     $this->setExpectedException(CacheableBadRequestHttpException::class, 'Invalid nested filtering. The property `foobar`, given in the path `colors.foobar`, does not exist. Must be one of the following property names: `value`, `format`, `processed`.');
-    $normalized = [
-      'colors.foobar' => '',
-    ];
-    $this->normalizer->denormalize($normalized, Filter::class, NULL, [
-      'entity_type_id' => 'node',
-      'bundle' => 'painting',
-    ]);
+    $resource_type = new ResourceType('node', 'painting', NULL);
+    Filter::createFromQueryParameter(['colors.foobar' => ''], $resource_type, $this->fieldResolver);
   }
 
   /**
@@ -156,13 +121,8 @@ class FilterTest extends JsonapiKernelTestBase {
    */
   public function testInvalidFilterPathDueToElidedSoleProperty() {
     $this->setExpectedException(CacheableBadRequestHttpException::class, 'Invalid nested filtering. The property `value`, given in the path `promote.value`, does not exist. Filter by `promote`, not `promote.value` (the JSON:API module elides property names from single-property fields).');
-    $normalized = [
-      'promote.value' => '',
-    ];
-    $this->normalizer->denormalize($normalized, Filter::class, NULL, [
-      'entity_type_id' => 'node',
-      'bundle' => 'painting',
-    ]);
+    $resource_type = new ResourceType('node', 'painting', NULL);
+    Filter::createFromQueryParameter(['promote.value' => ''], $resource_type, $this->fieldResolver);
   }
 
   /**
@@ -190,14 +150,11 @@ class FilterTest extends JsonapiKernelTestBase {
       return (string) $p->getValue($entity_query);
     };
 
+    $resource_type = new ResourceType('node', 'painting', NULL);
     foreach ($data as $case) {
-      $normalized = $case[0];
+      $parameter = $case[0];
       $expected_query = $case[1];
-      // Denormalize the test filter into the object we want to test.
-      $filter = $this->normalizer->denormalize($normalized, Filter::class, NULL, [
-        'entity_type_id' => 'node',
-        'bundle' => 'painting',
-      ]);
+      $filter = Filter::createFromQueryParameter($parameter, $resource_type, $this->fieldResolver);
 
       $query = $this->nodeStorage->getQuery();
 
@@ -334,6 +291,117 @@ class FilterTest extends JsonapiKernelTestBase {
         'type' => 'painting',
       ], $painting))->save();
     }
+  }
+
+  /**
+   * @covers ::createFromQueryParameter
+   * @dataProvider parameterProvider
+   */
+  public function testCreateFromQueryParameter($case, $expected) {
+    $resource_type = new ResourceType('foo', 'bar', NULL);
+    $actual = Filter::createFromQueryParameter($case, $resource_type, $this->getFieldResolverMock($resource_type));
+    $conditions = $actual->root()->members();
+    for ($i = 0; $i < count($case); $i++) {
+      $this->assertEquals($expected[$i]['path'], $conditions[$i]->field());
+      $this->assertEquals($expected[$i]['value'], $conditions[$i]->value());
+      $this->assertEquals($expected[$i]['operator'], $conditions[$i]->operator());
+    }
+  }
+
+  /**
+   * Data provider for testCreateFromQueryParameter.
+   */
+  public function parameterProvider() {
+    return [
+      'shorthand' => [
+        ['uid' => ['value' => 1]],
+        [['path' => 'uid', 'value' => 1, 'operator' => '=']],
+      ],
+      'extreme shorthand' => [
+        ['uid' => 1],
+        [['path' => 'uid', 'value' => 1, 'operator' => '=']],
+      ],
+    ];
+  }
+
+  /**
+   * @covers ::createFromQueryParameter
+   */
+  public function testCreateFromQueryParameterNested() {
+    $parameter = [
+      'or-group' => ['group' => ['conjunction' => 'OR']],
+      'nested-or-group' => [
+        'group' => ['conjunction' => 'OR', 'memberOf' => 'or-group'],
+      ],
+      'nested-and-group' => [
+        'group' => ['conjunction' => 'AND', 'memberOf' => 'or-group'],
+      ],
+      'condition-0' => [
+        'condition' => [
+          'path' => 'field0',
+          'value' => 'value0',
+          'memberOf' => 'nested-or-group',
+        ],
+      ],
+      'condition-1' => [
+        'condition' => [
+          'path' => 'field1',
+          'value' => 'value1',
+          'memberOf' => 'nested-or-group',
+        ],
+      ],
+      'condition-2' => [
+        'condition' => [
+          'path' => 'field2',
+          'value' => 'value2',
+          'memberOf' => 'nested-and-group',
+        ],
+      ],
+      'condition-3' => [
+        'condition' => [
+          'path' => 'field3',
+          'value' => 'value3',
+          'memberOf' => 'nested-and-group',
+        ],
+      ],
+    ];
+    $resource_type = new ResourceType('foo', 'bar', NULL);
+    $filter = Filter::createFromQueryParameter($parameter, $resource_type, $this->getFieldResolverMock($resource_type));
+    $root = $filter->root();
+
+    // Make sure the implicit root group was added.
+    $this->assertEquals($root->conjunction(), 'AND');
+
+    // Ensure the or-group and the and-group were added correctly.
+    $members = $root->members();
+
+    // Ensure the OR group was added.
+    $or_group = $members[0];
+    $this->assertEquals($or_group->conjunction(), 'OR');
+    $or_group_members = $or_group->members();
+
+    // Make sure the nested OR group was added with the right conditions.
+    $nested_or_group = $or_group_members[0];
+    $this->assertEquals($nested_or_group->conjunction(), 'OR');
+    $nested_or_group_members = $nested_or_group->members();
+    $this->assertEquals($nested_or_group_members[0]->field(), 'field0');
+    $this->assertEquals($nested_or_group_members[1]->field(), 'field1');
+
+    // Make sure the nested AND group was added with the right conditions.
+    $nested_and_group = $or_group_members[1];
+    $this->assertEquals($nested_and_group->conjunction(), 'AND');
+    $nested_and_group_members = $nested_and_group->members();
+    $this->assertEquals($nested_and_group_members[0]->field(), 'field2');
+    $this->assertEquals($nested_and_group_members[1]->field(), 'field3');
+  }
+
+  /**
+   * Provides a mock field resolver.
+   */
+  protected function getFieldResolverMock(ResourceType $resource_type) {
+    $field_resolver = $this->prophesize(FieldResolver::class);
+    $field_resolver->resolveInternalEntityQueryPath($resource_type->getEntityTypeId(), $resource_type->getBundle(), Argument::any())->willReturnArgument(2);
+    return $field_resolver->reveal();
   }
 
 }

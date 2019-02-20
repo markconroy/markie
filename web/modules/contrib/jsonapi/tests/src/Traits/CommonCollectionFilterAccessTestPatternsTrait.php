@@ -105,6 +105,7 @@ trait CommonCollectionFilterAccessTestPatternsTrait {
     $expected_cache_contexts = [
       'url.query_args:filter',
       'url.query_args:sort',
+      'url.site',
       'user.permissions',
     ];
     $this->assertResourceErrorResponse(403, $message, $collection_filter_url, $response, FALSE, $expected_cache_tags, $expected_cache_contexts, FALSE, 'MISS');

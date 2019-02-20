@@ -13,7 +13,7 @@ use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
  *
  * @internal
  * @see \Drupal\serialization\Normalizer\DateTimeNormalizer
- * @todo Remove when JSON:API requires Drupal 8.7.
+ * @todo Remove when JSON:API requires a version of Drupal core that includes https://www.drupal.org/project/drupal/issues/2926508.
  */
 class DateTimeNormalizer extends NormalizerBase implements DenormalizerInterface {
 

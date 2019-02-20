@@ -3,8 +3,6 @@
 namespace Drupal\Tests\jsonapi\Unit\Routing;
 
 use Drupal\Core\Entity\EntityInterface;
-use Drupal\jsonapi\JsonApiResource\JsonApiDocumentTopLevel;
-use Drupal\jsonapi\Normalizer\Relationship;
 use Drupal\jsonapi\ResourceType\ResourceType;
 use Drupal\jsonapi\ResourceType\ResourceTypeRepository;
 use Drupal\jsonapi\Routing\Routes;
@@ -93,7 +91,6 @@ class RoutesTest extends UnitTestCase {
     $this->assertSame('entity_type_1--bundle_1_1', $route->getDefault(Routes::RESOURCE_TYPE_KEY));
     $this->assertEquals(['POST'], $route->getMethods());
     $this->assertSame(Routes::CONTROLLER_SERVICE_NAME . ':createIndividual', $route->getDefault(RouteObjectInterface::CONTROLLER_NAME));
-    $this->assertSame('Drupal\jsonapi\JsonApiResource\JsonApiDocumentTopLevel', $route->getDefault('serialization_class'));
   }
 
   /**
@@ -121,7 +118,6 @@ class RoutesTest extends UnitTestCase {
     $this->assertSame('entity_type_1--bundle_1_1', $route->getDefault(Routes::RESOURCE_TYPE_KEY));
     $this->assertEquals(['PATCH'], $route->getMethods());
     $this->assertSame(Routes::CONTROLLER_SERVICE_NAME . ':patchIndividual', $route->getDefault(RouteObjectInterface::CONTROLLER_NAME));
-    $this->assertSame(JsonApiDocumentTopLevel::class, $route->getDefault('serialization_class'));
     $this->assertSame(['lorem', 'ipsum'], $route->getOption('_auth'));
     $this->assertEquals([
       'entity' => ['type' => 'entity:entity_type_1'],
@@ -180,7 +176,6 @@ class RoutesTest extends UnitTestCase {
       'entity' => ['type' => 'entity:entity_type_1'],
       'resource_type' => ['type' => 'jsonapi_resource_type'],
     ], $route->getOption('parameters'));
-    $this->assertSame(Relationship::class, $route->getDefault('serialization_class'));
   }
 
   /**

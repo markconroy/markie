@@ -5,6 +5,8 @@ namespace Drupal\jsonapi\LinkManager;
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Routing\UrlGeneratorInterface;
 use Drupal\Core\Url;
+use Drupal\jsonapi\JsonApiResource\LinkCollection;
+use Drupal\jsonapi\JsonApiResource\Link;
 use Drupal\jsonapi\ResourceType\ResourceType;
 use Drupal\jsonapi\Query\OffsetPage;
 use Symfony\Component\HttpFoundation\Request;
@@ -14,8 +16,9 @@ use Drupal\Core\Http\Exception\CacheableBadRequestHttpException;
  * Class to generate links and queries for entities.
  *
  * @deprecated
+ * @internal
  *
- * @todo Make this take cacheability into account in https://www.drupal.org/project/jsonapi/issues/2952714.
+ * @todo Remove this as part of https://www.drupal.org/project/jsonapi/issues/2994193
  */
 class LinkManager {
 
@@ -73,16 +76,16 @@ class LinkManager {
    *   The query parameters to use. Leave it empty to get the query from the
    *   request object.
    *
-   * @return string
+   * @return \Drupal\Core\Url
    *   The full URL.
    */
   public function getRequestLink(Request $request, $query = NULL) {
     if ($query === NULL) {
-      return $request->getUri();
+      return Url::fromUri($request->getUri());
     }
 
     $uri_without_query_string = $request->getSchemeAndHttpHost() . $request->getBaseUrl() . $request->getPathInfo();
-    return Url::fromUri($uri_without_query_string)->setOption('query', $query)->toString();
+    return Url::fromUri($uri_without_query_string)->setOption('query', $query);
   }
 
   /**
@@ -90,53 +93,49 @@ class LinkManager {
    *
    * @param \Symfony\Component\HttpFoundation\Request $request
    *   The request object.
+   * @param \Drupal\jsonapi\Query\OffsetPage $page_param
+   *   The current pagination parameter for the requested collection.
    * @param array $link_context
    *   An associative array with extra data to build the links.
    *
-   * @throws \Symfony\Component\HttpKernel\Exception\BadRequestHttpException
-   *   When the offset and size are invalid.
-   *
-   * @return string[]
-   *   An array of URLs, with:
+   * @return \Drupal\jsonapi\JsonApiResource\LinkCollection
+   *   An LinkCollection, with:
    *   - a 'next' key if it is not the last page;
    *   - 'prev' and 'first' keys if it's not the first page.
    */
-  public function getPagerLinks(Request $request, array $link_context = []) {
+  public function getPagerLinks(Request $request, OffsetPage $page_param, array $link_context = []) {
+    $pager_links = new LinkCollection([]);
     if (!empty($link_context['total_count']) && !$total = (int) $link_context['total_count']) {
-      return [];
+      return $pager_links;
     }
-    $params = $request->get('_json_api_params');
-    if ($page_param = $params[OffsetPage::KEY_NAME]) {
-      /* @var \Drupal\jsonapi\Query\OffsetPage $page_param */
-      $offset = $page_param->getOffset();
-      $size = $page_param->getSize();
-    }
-    else {
-      // Apply the defaults.
-      $offset = OffsetPage::DEFAULT_OFFSET;
-      $size = OffsetPage::SIZE_MAX;
-    }
+    /* @var \Drupal\jsonapi\Query\OffsetPage $page_param */
+    $offset = $page_param->getOffset();
+    $size = $page_param->getSize();
     if ($size <= 0) {
       $cacheability = (new CacheableMetadata())->addCacheContexts(['url.query_args:page']);
       throw new CacheableBadRequestHttpException($cacheability, sprintf('The page size needs to be a positive integer.'));
     }
     $query = (array) $request->query->getIterator();
-    $links = [];
     // Check if this is not the last page.
     if ($link_context['has_next_page']) {
-      $links['next']['href'] = $this->getRequestLink($request, $this->getPagerQueries('next', $offset, $size, $query));
+      $next_url = $this->getRequestLink($request, $this->getPagerQueries('next', $offset, $size, $query));
+      $pager_links = $pager_links->withLink('next', new Link(new CacheableMetadata(), $next_url, ['next']));
 
       if (!empty($total)) {
-        $links['last']['href'] = $this->getRequestLink($request, $this->getPagerQueries('last', $offset, $size, $query, $total));
+        $last_url = $this->getRequestLink($request, $this->getPagerQueries('last', $offset, $size, $query, $total));
+        $pager_links = $pager_links->withLink('last', new Link(new CacheableMetadata(), $last_url, ['last']));
       }
     }
+
     // Check if this is not the first page.
     if ($offset > 0) {
-      $links['first']['href'] = $this->getRequestLink($request, $this->getPagerQueries('first', $offset, $size, $query));
-      $links['prev']['href'] = $this->getRequestLink($request, $this->getPagerQueries('prev', $offset, $size, $query));
+      $first_url = $this->getRequestLink($request, $this->getPagerQueries('first', $offset, $size, $query));
+      $pager_links = $pager_links->withLink('first', new Link(new CacheableMetadata(), $first_url, ['first']));
+      $prev_url = $this->getRequestLink($request, $this->getPagerQueries('prev', $offset, $size, $query));
+      $pager_links = $pager_links->withLink('prev', new Link(new CacheableMetadata(), $prev_url, ['prev']));
     }
 
-    return $links;
+    return $pager_links;
   }
 
   /**

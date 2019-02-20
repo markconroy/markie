@@ -4,3 +4,8 @@ entity.metatag_defaults.collection:
   route_name: entity.metatag_defaults.collection
   description: 'Configure Metatag defaults.'
   parent: system.admin_config_search
+metatag.settings:
+  title: 'Settings'
+  route_name: metatag.settings
+  description: 'Configure Metatag defaults.'
+  parent: entity.metatag_defaults.collection

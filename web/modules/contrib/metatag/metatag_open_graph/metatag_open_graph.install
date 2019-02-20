@@ -6,11 +6,10 @@
  */
 
 use Drupal\Core\Entity\ContentEntityBase;
-use Drupal\Core\Language\LanguageInterface;
 use Drupal\metatag\Entity\MetatagDefaults;
 
 /**
- * Implementsations of hook_update_N().
+ * Implementations of hook_update_N().
  */
 
 /**

@@ -46,10 +46,6 @@ class CommentTest extends ResourceTestBase {
    */
   protected static $patchProtectedFieldNames = [
     'status' => "The 'administer comments' permission is required.",
-    // @todo These are relationships, and cannot be tested in the same way. Fix in https://www.drupal.org/project/jsonapi/issues/2939810.
-    // 'pid' => NULL,
-    // 'entity_id' => NULL,
-    // 'uid' => NULL,
     'name' => "The 'administer comments' permission is required.",
     'homepage' => "The 'administer comments' permission is required.",
     'created' => "The 'administer comments' permission is required.",
@@ -57,6 +53,10 @@ class CommentTest extends ResourceTestBase {
     'thread' => NULL,
     'entity_type' => NULL,
     'field_name' => NULL,
+    // @todo Uncomment this after https://www.drupal.org/project/drupal/issues/1847608 lands. Until then, it's impossible to test this.
+    // 'pid' => NULL,
+    'uid' => "The 'administer comments' permission is required.",
+    'entity_id' => NULL,
   ];
 
   /**
@@ -65,6 +65,20 @@ class CommentTest extends ResourceTestBase {
    * @var \Drupal\comment\CommentInterface
    */
   protected $entity;
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setUp() {
+    parent::setUp();
+
+    // @todo Remove this when only Drupal >= 8.7 is supported; validation order changed in 8.7.
+    if (floatval(\Drupal::VERSION) < 8.7) {
+      $tmp = static::$patchProtectedFieldNames['uid'];
+      unset(static::$patchProtectedFieldNames['uid']);
+      static::$patchProtectedFieldNames['uid'] = $tmp;
+    }
+  }
 
   /**
    * {@inheritdoc}
@@ -327,10 +341,17 @@ class CommentTest extends ResourceTestBase {
     // @todo Remove the try/catch in https://www.drupal.org/node/2820364.
     try {
       $response = $this->request('POST', $url, $request_options);
-      $this->assertResourceErrorResponse(422, 'entity_id: This value should not be null.', NULL, $response, '/data/attributes/entity_id');
+      if (floatval(\Drupal::VERSION) >= 8.7) {
+        $this->assertResourceErrorResponse(422, 'entity_id: This value should not be null.', NULL, $response, '/data/attributes/entity_id');
+      }
     }
     catch (\Exception $e) {
-      $this->assertSame("Error: Call to a member function get() on null\nDrupal\\comment\\Plugin\\Validation\\Constraint\\CommentNameConstraintValidator->getAnonymousContactDetailsSetting()() (Line: 96)\n", $e->getMessage());
+      if (version_compare(phpversion(), '7.0') >= 0) {
+        $this->assertSame("Error: Call to a member function get() on null\nDrupal\\comment\\Plugin\\Validation\\Constraint\\CommentNameConstraintValidator->getAnonymousContactDetailsSetting()() (Line: 96)\n", $e->getMessage());
+      }
+      else {
+        $this->assertSame(500, $response->getStatusCode());
+      }
     }
 
     // DX: 422 when missing 'field_name' field.
@@ -446,12 +467,26 @@ class CommentTest extends ResourceTestBase {
   /**
    * {@inheritdoc}
    */
-  protected static function getExpectedCollectionCacheability(array $collection, array $sparse_fieldset = NULL, AccountInterface $account, $filtered = FALSE) {
-    $cacheability = parent::getExpectedCollectionCacheability($collection, $sparse_fieldset, $account, $filtered);
+  protected static function getExpectedCollectionCacheability(AccountInterface $account, array $collection, array $sparse_fieldset = NULL, $filtered = FALSE) {
+    $cacheability = parent::getExpectedCollectionCacheability($account, $collection, $sparse_fieldset, $filtered);
     if ($filtered) {
       $cacheability->addCacheTags(['state:jsonapi__entity_test_filter_access_blacklist']);
     }
     return $cacheability;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function testPatchIndividual() {
+    // Ensure ::getModifiedEntityForPatchTesting() can pick an alternative value
+    // for the 'entity_id' field.
+    EntityTest::create([
+      'name' => $this->randomString(),
+      'type' => 'bar',
+    ])->save();
+
+    return parent::testPatchIndividual();
   }
 
 }

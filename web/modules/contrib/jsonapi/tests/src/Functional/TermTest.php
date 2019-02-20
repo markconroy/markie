@@ -7,7 +7,6 @@ use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Url;
-use Drupal\jsonapi\ResourceResponse;
 use Drupal\taxonomy\Entity\Term;
 use Drupal\taxonomy\Entity\Vocabulary;
 use Drupal\Tests\jsonapi\Traits\CommonCollectionFilterAccessTestPatternsTrait;
@@ -304,32 +303,6 @@ class TermTest extends ResourceTestBase {
       ];
     }
     return $data;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  protected function getExpectedRelatedResponses(array $relationship_field_names, array $request_options, EntityInterface $entity = NULL) {
-    $responses = parent::getExpectedRelatedResponses($relationship_field_names, $request_options, $entity);
-    if ($responses['parent']->getStatusCode() === 404 && floatval(\Drupal::VERSION) >= 8.6) {
-      $responses['parent'] = new ResourceResponse([
-        'data' => [],
-        'jsonapi' => [
-          'meta' => [
-            'links' => [
-              'self' => ['href' => 'http://jsonapi.org/format/1.0/'],
-            ],
-          ],
-          'version' => '1.0',
-        ],
-        'links' => [
-          'self' => [
-            'href' => static::getRelatedLink(static::toResourceIdentifier($this->entity), 'parent'),
-          ],
-        ],
-      ]);
-    }
-    return $responses;
   }
 
   /**

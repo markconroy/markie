@@ -3,9 +3,7 @@
 namespace Drupal\jsonapi\JsonApiResource;
 
 use Drupal\Component\Assertion\Inspector;
-use Drupal\Core\Entity\EntityInterface;
 use Drupal\jsonapi\Exception\EntityAccessDeniedHttpException;
-use Drupal\jsonapi\LabelOnlyEntity;
 
 /**
  * Wrapper to normalize collections with multiple entities.
@@ -15,11 +13,11 @@ use Drupal\jsonapi\LabelOnlyEntity;
 class EntityCollection implements \IteratorAggregate, \Countable {
 
   /**
-   * Entity storage.
+   * Various representations of entities.
    *
-   * @var \Drupal\Core\Entity\EntityInterface[]
+   * @var \Drupal\jsonapi\JsonApiResource\ResourceIdentifierInterface[]
    */
-  protected $entities;
+  protected $resourceObjects;
 
   /**
    * The number of resources permitted in this collection.
@@ -45,7 +43,7 @@ class EntityCollection implements \IteratorAggregate, \Countable {
   /**
    * Instantiates a EntityCollection object.
    *
-   * @param \Drupal\Core\Entity\EntityInterface|null[]|false[] $resources
+   * @param \Drupal\jsonapi\JsonApiResource\ResourceIdentifierInterface[] $resources
    *   The resources for the collection.
    * @param int $cardinality
    *   The number of resources that this collection may contain. Related
@@ -54,16 +52,10 @@ class EntityCollection implements \IteratorAggregate, \Countable {
    *   cardinality.
    */
   public function __construct(array $resources, $cardinality = -1) {
-    assert(Inspector::assertAll(function ($entity) {
-        return $entity === NULL
-        || $entity === FALSE
-        || $entity instanceof EntityInterface
-        || $entity instanceof LabelOnlyEntity
-        || $entity instanceof EntityAccessDeniedHttpException;
-    }, $resources));
+    assert(Inspector::assertAllObjects($resources, ResourceIdentifierInterface::class));
     assert($cardinality >= -1 && $cardinality !== 0, 'Cardinality must be -1 for unlimited cardinality or a positive integer.');
     assert($cardinality === -1 || count($resources) <= $cardinality, 'If cardinality is not unlimited, the number of given resources must not exceed the cardinality of the collection.');
-    $this->entities = array_values($resources);
+    $this->resourceObjects = array_values($resources);
     $this->cardinality = $cardinality;
   }
 
@@ -74,7 +66,7 @@ class EntityCollection implements \IteratorAggregate, \Countable {
    *   An \ArrayIterator instance
    */
   public function getIterator() {
-    return new \ArrayIterator($this->entities);
+    return new \ArrayIterator($this->resourceObjects);
   }
 
   /**
@@ -84,7 +76,7 @@ class EntityCollection implements \IteratorAggregate, \Countable {
    *   The number of parameters
    */
   public function count() {
-    return count($this->entities);
+    return count($this->resourceObjects);
   }
 
   /**
@@ -108,7 +100,7 @@ class EntityCollection implements \IteratorAggregate, \Countable {
    *   The array of entities.
    */
   public function toArray() {
-    return $this->entities;
+    return $this->resourceObjects;
   }
 
   /**
@@ -171,15 +163,9 @@ class EntityCollection implements \IteratorAggregate, \Countable {
   public static function deduplicate(EntityCollection $collection) {
     $deduplicated = [];
     foreach ($collection as $resource) {
-      if ($resource instanceof EntityInterface) {
-        $resource_identifier = ResourceIdentifier::fromEntity($resource);
-        $dedupe_key = $resource_identifier->getTypeName() . ':' . $resource_identifier->getId();
-      }
-      else {
-        $dedupe_key = $resource->getTypeName() . ':' . $resource->getId();
-        if ($resource instanceof EntityAccessDeniedHttpException && ($error = $resource->getError()) && !is_null($error['relationship_field'])) {
-          $dedupe_key .= ':' . $error['relationship_field'];
-        }
+      $dedupe_key = $resource->getTypeName() . ':' . $resource->getId();
+      if ($resource instanceof EntityAccessDeniedHttpException && ($error = $resource->getError()) && !is_null($error['relationship_field'])) {
+        $dedupe_key .= ':' . $error['relationship_field'];
       }
       $deduplicated[$dedupe_key] = $resource;
     }

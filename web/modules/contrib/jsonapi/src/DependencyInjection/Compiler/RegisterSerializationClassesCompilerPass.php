@@ -9,11 +9,10 @@ use Symfony\Component\DependencyInjection\Reference;
 /**
  * Adds services tagged JSON:API-only normalizers to the Serializer.
  *
- * Services tagged with 'jsonapi_normalizer_do_not_use_removal_imminent' will be
- * added to the JSON:API serializer. As should be clear by the service tag,
- * *no* extensions should provide these services. They will not work in the
- * future. The proper way to affect JSON:API output is to implement DataType
- * level normalizers and/or implement computed entity fields.
+ * Services tagged with 'jsonapi_normalizer' will be added to the JSON:API
+ * serializer. No extensions can provide such services.
+ *
+ * JSON:API does respect generic (non-JSON:API) DataType-level normalizers.
  *
  * @see jsonapi.api.php
  *
@@ -26,14 +25,21 @@ class RegisterSerializationClassesCompilerPass extends DrupalRegisterSerializati
    *
    * @const string
    */
-  const OVERRIDDEN_SERVICE_ID = 'jsonapi.serializer_do_not_use_removal_imminent';
+  const OVERRIDDEN_SERVICE_ID = 'jsonapi.serializer';
 
   /**
    * The service tag that only JSON:API normalizers should use.
    *
    * @const string
    */
-  const OVERRIDDEN_SERVICE_TAG = 'jsonapi_normalizer_do_not_use_removal_imminent';
+  const OVERRIDDEN_SERVICE_NORMALIZER_TAG = 'jsonapi_normalizer';
+
+  /**
+   * The service tag that only JSON:API encoders should use.
+   *
+   * @const string
+   */
+  const OVERRIDDEN_SERVICE_ENCODER_TAG = 'jsonapi_encoder';
 
   /**
    * The ID for the JSON:API format.
@@ -48,8 +54,8 @@ class RegisterSerializationClassesCompilerPass extends DrupalRegisterSerializati
    * This code is copied from the class parent with two modifications. The
    * service id has been changed and the service tag has been updated.
    *
-   * ID: 'serializer' -> 'jsonapi.serializer_do_not_use_removal_imminent'
-   * Tag: 'normalizer' -> 'jsonapi_normalizer_do_not_use_removal_imminent'
+   * ID: 'serializer' -> 'jsonapi.serializer'
+   * Tag: 'normalizer' -> 'jsonapi_normalizer'
    *
    * @param \Symfony\Component\DependencyInjection\ContainerBuilder $container
    *   The container to process.
@@ -58,20 +64,14 @@ class RegisterSerializationClassesCompilerPass extends DrupalRegisterSerializati
     $definition = $container->getDefinition(static::OVERRIDDEN_SERVICE_ID);
 
     // Retrieve registered Normalizers and Encoders from the container.
-    foreach ($container->findTaggedServiceIds(static::OVERRIDDEN_SERVICE_TAG) as $id => $attributes) {
+    foreach ($container->findTaggedServiceIds(static::OVERRIDDEN_SERVICE_NORMALIZER_TAG) as $id => $attributes) {
       // Normalizers are not an API: mark private.
       $container->getDefinition($id)->setPublic(FALSE);
-
-      // If there is a BC key present, pass this to determine if the normalizer
-      // should be skipped.
-      if (isset($attributes[0]['bc']) && $this->normalizerBcSettingIsEnabled($attributes[0]['bc'], $attributes[0]['bc_config_name'])) {
-        continue;
-      }
 
       $priority = isset($attributes[0]['priority']) ? $attributes[0]['priority'] : 0;
       $normalizers[$priority][] = new Reference($id);
     }
-    foreach ($container->findTaggedServiceIds('encoder') as $id => $attributes) {
+    foreach ($container->findTaggedServiceIds(static::OVERRIDDEN_SERVICE_ENCODER_TAG) as $id => $attributes) {
       // Encoders are not an API: mark private.
       $container->getDefinition($id)->setPublic(FALSE);
 
@@ -87,15 +87,6 @@ class RegisterSerializationClassesCompilerPass extends DrupalRegisterSerializati
       $definition->replaceArgument(1, $this->sort($encoders));
     }
 
-    // Set the JSON:API format and format_provider.
-    $container->setParameter(
-      static::OVERRIDDEN_SERVICE_ID . '.formats',
-      [static::FORMAT]
-    );
-    $container->setParameter(
-      static::OVERRIDDEN_SERVICE_ID . '.format_providers',
-      [static::FORMAT => 'jsonapi']
-    );
   }
 
 }

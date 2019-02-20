@@ -2,7 +2,6 @@
 
 namespace Drupal\jsonapi\Encoder;
 
-use Drupal\jsonapi\Normalizer\Value\ValueExtractorInterface;
 use Drupal\serialization\Encoder\JsonEncoder as SerializationJsonEncoder;
 
 /**
@@ -18,20 +17,5 @@ class JsonEncoder extends SerializationJsonEncoder {
    * @var string
    */
   protected static $format = ['api_json'];
-
-  /**
-   * {@inheritdoc}
-   *
-   * @see http://jsonapi.org/format/#errors
-   */
-  public function encode($data, $format, array $context = []) {
-    // Make sure that any auto-normalizable object gets normalized before
-    // encoding. This is specially important to generate the errors in partial
-    // success responses.
-    if ($data instanceof ValueExtractorInterface) {
-      $data = $data->rasterizeValue();
-    }
-    return parent::encode($data, $format, $context);
-  }
 
 }

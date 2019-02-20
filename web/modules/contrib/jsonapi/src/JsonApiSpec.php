@@ -96,6 +96,13 @@ class JsonApiSpec {
   const RESERVED_QUERY_PARAMETERS = 'filter|sort|page|fields|include';
 
   /**
+   * The query parameter for providing a version (revision) value.
+   *
+   * @var string
+   */
+  const VERSION_QUERY_PARAMETER = 'resourceVersion';
+
+  /**
    * Gets the reserved (official) JSON:API query parameters.
    *
    * @return string[]

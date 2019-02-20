@@ -25,25 +25,31 @@ class JsonApiFunctionalTest extends JsonApiFunctionalTestBase {
     // Unpublish the last entity, so we can check access.
     $this->nodes[60]->setUnpublished()->save();
 
+    // Different databases have different sort orders, so a sort is required so
+    // test expectations do not need to vary per database.
+    $default_sort = ['sort' => 'drupal_internal__nid'];
+
     // 0. HEAD request allows a client to verify that JSON:API is installed.
     $this->httpClient->request('HEAD', $this->buildUrl('/jsonapi/node/article'));
     $this->assertSession()->statusCodeEquals(200);
     // 1. Load all articles (1st page).
-    $collection_output = Json::decode($this->drupalGet('/jsonapi/node/article'));
+    $collection_output = Json::decode($this->drupalGet('/jsonapi/node/article', [
+      'query' => $default_sort,
+    ]));
     $this->assertSession()->statusCodeEquals(200);
     $this->assertEquals(OffsetPage::SIZE_MAX, count($collection_output['data']));
     $this->assertSession()
       ->responseHeaderEquals('Content-Type', 'application/vnd.api+json');
     // 2. Load all articles (Offset 3).
     $collection_output = Json::decode($this->drupalGet('/jsonapi/node/article', [
-      'query' => ['page' => ['offset' => 3]],
+      'query' => ['page' => ['offset' => 3]] + $default_sort,
     ]));
     $this->assertSession()->statusCodeEquals(200);
     $this->assertEquals(OffsetPage::SIZE_MAX, count($collection_output['data']));
     $this->assertContains('page%5Boffset%5D=53', $collection_output['links']['next']['href']);
     // 3. Load all articles (1st page, 2 items)
     $collection_output = Json::decode($this->drupalGet('/jsonapi/node/article', [
-      'query' => ['page' => ['limit' => 2]],
+      'query' => ['page' => ['limit' => 2]] + $default_sort,
     ]));
     $this->assertSession()->statusCodeEquals(200);
     $this->assertEquals(2, count($collection_output['data']));
@@ -54,7 +60,7 @@ class JsonApiFunctionalTest extends JsonApiFunctionalTestBase {
           'limit' => 2,
           'offset' => 2,
         ],
-      ],
+      ] + $default_sort,
     ]));
     $this->assertSession()->statusCodeEquals(200);
     $this->assertEquals(2, count($collection_output['data']));
@@ -149,12 +155,14 @@ class JsonApiFunctionalTest extends JsonApiFunctionalTestBase {
     );
 
     // 11. Includes with relationships.
+    $this->drupalGet('/jsonapi/node/article/' . $uuid . '/relationships/uid');
     $single_output = Json::decode($this->drupalGet('/jsonapi/node/article/' . $uuid . '/relationships/uid', [
       'query' => ['include' => 'uid'],
     ]));
     $this->assertSession()->statusCodeEquals(200);
     $this->assertEquals('user--user', $single_output['data']['type']);
     $this->assertArrayHasKey('related', $single_output['links']);
+    $this->assertArrayHasKey('included', $single_output);
     $first_include = reset($single_output['included']);
     $this->assertEquals(
       'user--user',
@@ -167,7 +175,7 @@ class JsonApiFunctionalTest extends JsonApiFunctionalTestBase {
     $this->nodes[1]->set('status', FALSE);
     $this->nodes[1]->save();
     $single_output = Json::decode($this->drupalGet('/jsonapi/node/article', [
-      'query' => ['page' => ['limit' => 2]],
+      'query' => ['page' => ['limit' => 2]] + $default_sort,
     ]));
     $this->assertSession()->statusCodeEquals(200);
     $this->assertEquals(1, count($single_output['data']));
@@ -224,7 +232,7 @@ class JsonApiFunctionalTest extends JsonApiFunctionalTestBase {
       ],
     ];
     $this->drupalGet('/jsonapi/node/article', [
-      'query' => ['filter' => $filter],
+      'query' => ['filter' => $filter] + $default_sort,
     ]);
     $this->assertSession()->statusCodeEquals(400);
     // 16. Test filtering on the same field.
@@ -246,7 +254,7 @@ class JsonApiFunctionalTest extends JsonApiFunctionalTestBase {
       ],
     ];
     $single_output = Json::decode($this->drupalGet('/jsonapi/node/article', [
-      'query' => ['filter' => $filter, 'include' => 'field_tags'],
+      'query' => ['filter' => $filter, 'include' => 'field_tags'] + $default_sort,
     ]));
     $this->assertSession()->statusCodeEquals(200);
     $this->assertGreaterThanOrEqual(2, count($single_output['included']));
@@ -277,7 +285,7 @@ class JsonApiFunctionalTest extends JsonApiFunctionalTestBase {
       ],
     ];
     $single_output = Json::decode($this->drupalGet('/jsonapi/node/article', [
-      'query' => ['filter' => $filter],
+      'query' => ['filter' => $filter] + $default_sort,
     ]));
     $this->assertSession()->statusCodeEquals(200);
     $this->assertGreaterThanOrEqual(1, count($single_output['data']));
@@ -389,7 +397,7 @@ class JsonApiFunctionalTest extends JsonApiFunctionalTestBase {
       ],
     ];
     $collection_output = Json::decode($this->drupalGet('/jsonapi/node/article', [
-      'query' => ['filter' => $filter],
+      'query' => ['filter' => $filter] + $default_sort,
     ]));
     $this->assertSession()->statusCodeEquals(200);
     $this->assertGreaterThanOrEqual(OffsetPage::SIZE_MAX, count($collection_output['data']));
@@ -403,7 +411,7 @@ class JsonApiFunctionalTest extends JsonApiFunctionalTestBase {
       ],
     ];
     $collection_output = Json::decode($this->drupalGet('/jsonapi/node/article', [
-      'query' => ['filter' => $filter],
+      'query' => ['filter' => $filter] + $default_sort,
     ]));
     $this->assertSession()->statusCodeEquals(200);
     $this->assertGreaterThanOrEqual(OffsetPage::SIZE_MAX, count($collection_output['data']));
@@ -421,7 +429,7 @@ class JsonApiFunctionalTest extends JsonApiFunctionalTestBase {
       ],
     ];
     $collection_output = Json::decode($this->drupalGet('/jsonapi/node/article', [
-      'query' => ['filter' => $filter],
+      'query' => ['filter' => $filter] + $default_sort,
     ]));
     $this->assertSession()->statusCodeEquals(200);
     $this->assertGreaterThanOrEqual(OffsetPage::SIZE_MAX, count($collection_output['data']));
@@ -448,7 +456,7 @@ class JsonApiFunctionalTest extends JsonApiFunctionalTestBase {
       ],
     ];
     $collection_output = Json::decode($this->drupalGet('/jsonapi/node/article', [
-      'query' => ['filter' => $filter],
+      'query' => ['filter' => $filter] + $default_sort,
     ]));
     $this->assertSession()->statusCodeEquals(200);
     $this->assertGreaterThanOrEqual(OffsetPage::SIZE_MAX, count($collection_output['data']));
@@ -489,7 +497,7 @@ class JsonApiFunctionalTest extends JsonApiFunctionalTestBase {
       ],
     ];
     $collection_output = Json::decode($this->drupalGet('/jsonapi/node/article', [
-      'query' => ['filter' => $filter],
+      'query' => ['filter' => $filter] + $default_sort,
     ]));
     $this->assertSession()->statusCodeEquals(200);
     $this->assertEquals(0, count($collection_output['data']));

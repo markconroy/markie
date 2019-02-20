@@ -4,10 +4,10 @@ namespace Drupal\Tests\jsonapi\Functional;
 
 use Drupal\Component\Serialization\Json;
 use Drupal\Component\Utility\NestedArray;
+use Drupal\Core\Cache\Cache;
 use Drupal\Core\Url;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
-use Drupal\jsonapi\Normalizer\HttpExceptionNormalizer;
 use Drupal\node\Entity\Node;
 use Drupal\user\Entity\User;
 use GuzzleHttp\RequestOptions;
@@ -152,6 +152,19 @@ class UserTest extends ResourceTestBase {
   /**
    * {@inheritdoc}
    */
+  protected function getExpectedCacheContexts(array $sparse_fieldset = NULL) {
+    $cache_contexts = parent::getExpectedCacheContexts($sparse_fieldset);
+    if ($sparse_fieldset === NULL || in_array('mail', $sparse_fieldset)) {
+      if (floatval(\Drupal::VERSION) >= 8.7) {
+        $cache_contexts = Cache::mergeContexts($cache_contexts, ['user']);
+      }
+    }
+    return $cache_contexts;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   protected function getPostDocument() {
     return [
       'data' => [
@@ -211,29 +224,14 @@ class UserTest extends ResourceTestBase {
 
     // DX: 422 when changing email without providing the password.
     $response = $this->request('PATCH', $url, $request_options);
-    // @todo Remove $expected + assertResourceResponse() in favor of the commented line below once https://www.drupal.org/project/jsonapi/issues/2943176 lands.
-    $expected_document = [
-      'jsonapi' => static::$jsonApiMember,
-      'errors' => [
-        [
-          'title' => 'Unprocessable Entity',
-          'status' => 422,
-          'detail' => 'mail: Your current password is missing or incorrect; it\'s required to change the Email.',
-          'source' => [
-            'pointer' => '/data/attributes/mail',
-          ],
-        ],
-      ],
-    ];
-    $this->assertResourceResponse(422, $expected_document, $response);
-    /* $this->assertResourceErrorResponse(422, 'Unprocessable Entity', 'mail: Your current password is missing or incorrect; it\'s required to change the Email.', $response, '/data/attributes/mail'); */
+    $this->assertResourceErrorResponse(422, 'mail: Your current password is missing or incorrect; it\'s required to change the Email.', NULL, $response, '/data/attributes/mail');
 
     $normalization['data']['attributes']['pass']['existing'] = 'wrong';
     $request_options[RequestOptions::BODY] = Json::encode($normalization);
 
     // DX: 422 when changing email while providing a wrong password.
     $response = $this->request('PATCH', $url, $request_options);
-    $this->assertResourceResponse(422, $expected_document, $response);
+    $this->assertResourceErrorResponse(422, 'mail: Your current password is missing or incorrect; it\'s required to change the Email.', NULL, $response, '/data/attributes/mail');
 
     $normalization['data']['attributes']['pass']['existing'] = $this->account->passRaw;
     $request_options[RequestOptions::BODY] = Json::encode($normalization);
@@ -251,22 +249,7 @@ class UserTest extends ResourceTestBase {
 
     // DX: 422 when changing password without providing the current password.
     $response = $this->request('PATCH', $url, $request_options);
-    // @todo Remove $expected + assertResourceResponse() in favor of the commented line below once https://www.drupal.org/project/jsonapi/issues/2943176 lands.
-    $expected_document = [
-      'jsonapi' => static::$jsonApiMember,
-      'errors' => [
-        [
-          'title' => 'Unprocessable Entity',
-          'status' => 422,
-          'detail' => 'pass: Your current password is missing or incorrect; it\'s required to change the Password.',
-          'source' => [
-            'pointer' => '/data/attributes/pass',
-          ],
-        ],
-      ],
-    ];
-    $this->assertResourceResponse(422, $expected_document, $response);
-    /* $this->assertResourceErrorResponse(422, 'Unprocessable Entity', 'pass: Your current password is missing or incorrect; it\'s required to change the Password.', $response, '/data/attributes/pass'); */
+    $this->assertResourceErrorResponse(422, 'pass: Your current password is missing or incorrect; it\'s required to change the Password.', NULL, $response, '/data/attributes/pass');
 
     $normalization['data']['attributes']['pass']['existing'] = $this->account->passRaw;
     $request_options[RequestOptions::BODY] = Json::encode($normalization);
@@ -294,26 +277,7 @@ class UserTest extends ResourceTestBase {
 
     // DX: 403 when modifying username without required permission.
     $response = $this->request('PATCH', $url, $request_options);
-    // @todo Remove $expected + assertResourceResponse() in favor of the commented line below once https://www.drupal.org/project/jsonapi/issues/2943176 lands.
-    $expected_document = [
-      'jsonapi' => static::$jsonApiMember,
-      'errors' => [
-        [
-          'title' => 'Forbidden',
-          'status' => 403,
-          'detail' => 'The current user is not allowed to PATCH the selected field (name).',
-          'links' => [
-            'info' => ['href' => HttpExceptionNormalizer::getInfoUrl(403)],
-            'via' => ['href' => $url->setAbsolute()->toString()],
-          ],
-          'source' => [
-            'pointer' => '/data/attributes/name',
-          ],
-        ],
-      ],
-    ];
-    $this->assertResourceResponse(403, $expected_document, $response);
-    /* $this->assertResourceErrorResponse(403, 'Forbidden', 'The current user is not allowed to PATCH the selected field (name).', $response, '/data/attributes/name'); */
+    $this->assertResourceErrorResponse(403, 'The current user is not allowed to PATCH the selected field (name).', $url, $response, '/data/attributes/name');
 
     $this->grantPermissionsToTestedRole(['change own username']);
 
@@ -360,6 +324,7 @@ class UserTest extends ResourceTestBase {
     // we must use $this->account, not $this->entity.
     $request_options = [];
     $request_options[RequestOptions::HEADERS]['Accept'] = 'application/vnd.api+json';
+    $request_options[RequestOptions::HEADERS]['Content-Type'] = 'application/vnd.api+json';
     $request_options = NestedArray::mergeDeep($request_options, $this->getAuthenticationRequestOptions());
 
     $normalization = $original_normalization;
@@ -376,27 +341,10 @@ class UserTest extends ResourceTestBase {
     $response = $this->request('PATCH', $url, $request_options);
     // Ensure the email address has not changed.
     $this->assertEquals('admin@example.com', $this->entityStorage->loadUnchanged(1)->getEmail());
-    $expected_document = [
-      'errors' => [
-        [
-          'title' => 'Forbidden',
-          'status' => 403,
-          'detail' => 'The current user is not allowed to PATCH the selected field (uid). The entity ID cannot be changed',
-          'links' => [
-            'info' => ['href' => HttpExceptionNormalizer::getInfoUrl(403)],
-            'via' => ['href' => $url->setAbsolute()->toString()],
-          ],
-          'id' => '/user--user/' . $this->account->uuid(),
-          'source' => [
-            'pointer' => '/data/attributes/uid',
-          ],
-        ],
-      ],
-    ];
-    // @todo Uncomment this assertion in https://www.drupal.org/project/jsonapi/issues/2939810.
-    // $this->assertResourceResponse(403, $expected_document, $response);
-    // @todo Remove $expected + assertResourceResponse() in favor of the commented line below once https://www.drupal.org/project/jsonapi/issues/2943176 lands.
-    /* $this->assertResourceErrorResponse(403, 'Forbidden', 'The current user is not allowed to PATCH the selected field (uid). The entity ID cannot be changed', $response, '/data/attributes/uid'); */
+    $expected_message = floatval(\Drupal::VERSION) < 8.6
+      ? 'The current user is not allowed to PATCH the selected field (uid). The entity ID cannot be changed'
+      : 'The current user is not allowed to PATCH the selected field (uid). The entity ID cannot be changed.';
+    $this->assertResourceErrorResponse(403, $expected_message, $url, $response, '/data/attributes/uid');
   }
 
   /**
@@ -419,7 +367,7 @@ class UserTest extends ResourceTestBase {
     // Grant permission to role that both users use.
     $this->grantPermissionsToTestedRole(['access user profiles']);
 
-    $collection_url = Url::fromRoute('jsonapi.user--user.collection');
+    $collection_url = Url::fromRoute('jsonapi.user--user.collection', [], ['query' => ['sort' => 'drupal_internal__uid']]);
     // @todo Remove line below in favor of commented line in https://www.drupal.org/project/jsonapi/issues/2878463.
     $user_a_url = Url::fromRoute(sprintf('jsonapi.user--user.individual'), ['entity' => $user_a->uuid()]);
     /* $user_a_url = $user_a->toUrl('jsonapi'); */
@@ -470,14 +418,15 @@ class UserTest extends ResourceTestBase {
     $this->grantPermissionsToTestedRole(['administer users']);
 
     $response = $this->request('GET', $collection_url, $request_options);
-    $this->assertResourceErrorResponse(400, "Filtering on config entities is not supported by Drupal's entity API. You tried to filter on a Role config entity.", $collection_url, $response, FALSE, ['4xx-response', 'http_response'], ['url.path', 'url.query_args:filter'], FALSE, 'MISS');
+    $expected_cache_contexts = ['url.path', 'url.query_args:filter', 'url.site'];
+    $this->assertResourceErrorResponse(400, "Filtering on config entities is not supported by Drupal's entity API. You tried to filter on a Role config entity.", $collection_url, $response, FALSE, ['4xx-response', 'http_response'], $expected_cache_contexts, FALSE, 'MISS');
   }
 
   /**
    * Tests that the collection contains the anonymous user.
    */
   public function testCollectionContainsAnonymousUser() {
-    $url = Url::fromRoute('jsonapi.user--user.collection');
+    $url = Url::fromRoute('jsonapi.user--user.collection', [], ['query' => ['sort' => 'drupal_internal__uid']]);
     $request_options = [];
     $request_options[RequestOptions::HEADERS]['Accept'] = 'application/vnd.api+json';
     $request_options = NestedArray::mergeDeep($request_options, $this->getAuthenticationRequestOptions());

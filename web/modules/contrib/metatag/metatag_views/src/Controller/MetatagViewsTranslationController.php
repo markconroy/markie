@@ -4,7 +4,6 @@ namespace Drupal\metatag_views\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Entity\EntityStorageInterface;
-use Drupal\Core\Language\Language;
 use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Url;
 use Drupal\metatag\MetatagManagerInterface;
@@ -16,11 +15,15 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class MetatagViewsTranslationController extends ControllerBase {
 
   /**
+   * The View storage interface.
+   *
    * @var \Drupal\Core\Entity\EntityStorageInterface
    */
   protected $viewStorage;
 
   /**
+   * The Metatag manager.
+   *
    * @var \Drupal\metatag\MetatagManagerInterface
    */
   protected $metatagManager;
@@ -68,7 +71,6 @@ class MetatagViewsTranslationController extends ControllerBase {
     $config_name = $view->getConfigDependencyName();
     $config_path = 'display.' . $display_id . '.display_options.display_extenders.metatag_display_extender.metatags';
 
-    $access_manager = \Drupal::service('access_manager');
     $configuration = \Drupal::service('config.factory')->get($config_name);
     $config_source = $configuration->getOriginal($config_path, FALSE);
 

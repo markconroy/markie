@@ -7,4 +7,4 @@ namespace Drupal\jsonapi\Normalizer\Value;
  *
  * @internal
  */
-class HttpExceptionNormalizerValue extends FieldNormalizerValue {}
+class HttpExceptionNormalizerValue extends CacheableNormalization {}
