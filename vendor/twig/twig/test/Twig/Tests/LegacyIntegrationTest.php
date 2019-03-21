@@ -9,7 +9,10 @@
  * file that was distributed with this source code.
  */
 
-class Twig_Tests_LegacyIntegrationTest extends Twig_Test_IntegrationTestCase
+use Twig\Extension\AbstractExtension;
+use Twig\Test\IntegrationTestCase;
+
+class Twig_Tests_LegacyIntegrationTest extends IntegrationTestCase
 {
     public function getExtensions()
     {
@@ -20,7 +23,7 @@ class Twig_Tests_LegacyIntegrationTest extends Twig_Test_IntegrationTestCase
 
     public function getFixturesDir()
     {
-        return dirname(__FILE__).'/LegacyFixtures/';
+        return __DIR__.'/LegacyFixtures/';
     }
 
     public function getTests($name, $legacyTests = false)
@@ -33,7 +36,7 @@ class Twig_Tests_LegacyIntegrationTest extends Twig_Test_IntegrationTestCase
     }
 }
 
-class LegacyTwigTestExtension extends Twig_Extension
+class LegacyTwigTestExtension extends AbstractExtension
 {
     public function getTests()
     {
