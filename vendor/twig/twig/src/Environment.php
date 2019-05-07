@@ -41,11 +41,11 @@ use Twig\TokenParser\TokenParserInterface;
  */
 class Environment
 {
-    const VERSION = '1.38.2';
-    const VERSION_ID = 13802;
-    const MAJOR_VERSION = 2;
-    const MINOR_VERSION = 38;
-    const RELEASE_VERSION = 2;
+    const VERSION = '1.40.1';
+    const VERSION_ID = 14001;
+    const MAJOR_VERSION = 1;
+    const MINOR_VERSION = 40;
+    const RELEASE_VERSION = 1;
     const EXTRA_VERSION = '';
 
     protected $charset;
@@ -83,7 +83,6 @@ class Environment
     private $runtimeLoaders = [];
     private $runtimes = [];
     private $optionsHash;
-    private $loading = [];
 
     /**
      * Constructor.
@@ -471,6 +470,7 @@ class Environment
                 $this->cache->load($key);
             }
 
+            $source = null;
             if (!class_exists($cls, false)) {
                 $loader = $this->getLoader();
                 if (!$loader instanceof SourceContextLoaderInterface) {
@@ -507,22 +507,7 @@ class Environment
             $this->initRuntime();
         }
 
-        if (isset($this->loading[$cls])) {
-            throw new RuntimeError(sprintf('Circular reference detected for Twig template "%s", path: %s.', $name, implode(' -> ', array_merge($this->loading, [$name]))));
-        }
-
-        $this->loading[$cls] = $name;
-
-        try {
-            $this->loadedTemplates[$cls] = new $cls($this);
-            unset($this->loading[$cls]);
-        } catch (\Exception $e) {
-            unset($this->loading[$cls]);
-
-            throw $e;
-        }
-
-        return $this->loadedTemplates[$cls];
+        return $this->loadedTemplates[$cls] = new $cls($this);
     }
 
     /**
@@ -531,15 +516,21 @@ class Environment
      * This method should not be used as a generic way to load templates.
      *
      * @param string $template The template name
+     * @param string $name     An optional name of the template to be used in error messages
      *
      * @return TemplateWrapper A template instance representing the given template name
      *
      * @throws LoaderError When the template cannot be found
      * @throws SyntaxError When an error occurred during compilation
      */
-    public function createTemplate($template)
+    public function createTemplate($template, $name = null)
     {
-        $name = sprintf('__string_template__%s', hash('sha256', $template, false));
+        $hash = hash('sha256', $template, false);
+        if (null !== $name) {
+            $name = sprintf('%s (string template %s)', $name, $hash);
+        } else {
+            $name = sprintf('__string_template__%s', $hash);
+        }
 
         $loader = new ChainLoader([
             new ArrayLoader([$name => $template]),
@@ -597,7 +588,7 @@ class Environment
      *
      * @param string|Template|\Twig\TemplateWrapper|array $names A template or an array of templates to try consecutively
      *
-     * @return TemplateWrapper
+     * @return TemplateWrapper|Template
      *
      * @throws LoaderError When none of the templates can be found
      * @throws SyntaxError When an error occurred during compilation
@@ -605,13 +596,23 @@ class Environment
     public function resolveTemplate($names)
     {
         if (!\is_array($names)) {
-            return $this->load($names);
+            $names = [$names];
         }
 
         foreach ($names as $name) {
+            if ($name instanceof Template) {
+                return $name;
+            }
+            if ($name instanceof TemplateWrapper) {
+                return $name;
+            }
+
             try {
-                return $this->load($name);
+                return $this->loadTemplate($name);
             } catch (LoaderError $e) {
+                if (1 === \count($names)) {
+                    throw $e;
+                }
             }
         }
 

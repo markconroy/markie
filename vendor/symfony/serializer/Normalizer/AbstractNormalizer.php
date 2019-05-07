@@ -330,9 +330,15 @@ abstract class AbstractNormalizer extends SerializerAwareNormalizer implements N
 
             return $object;
         }
+        // clean up even if no match
+        unset($context[static::OBJECT_TO_POPULATE]);
 
         $constructor = $this->getConstructor($data, $class, $context, $reflectionClass, $allowedAttributes);
         if ($constructor) {
+            if (true !== $constructor->isPublic()) {
+                return $reflectionClass->newInstanceWithoutConstructor();
+            }
+
             $constructorParameters = $constructor->getParameters();
 
             $params = [];
@@ -391,7 +397,7 @@ abstract class AbstractNormalizer extends SerializerAwareNormalizer implements N
                 }
                 $parameterClass = $parameter->getClass()->getName();
 
-                return $this->serializer->denormalize($parameterData, $parameterClass, $format, $this->createChildContext($context, $parameterName));
+                return $this->serializer->denormalize($parameterData, $parameterClass, $format, $this->createChildContext($context, $parameterName, $format));
             }
 
             return $parameterData;
@@ -401,14 +407,15 @@ abstract class AbstractNormalizer extends SerializerAwareNormalizer implements N
     }
 
     /**
-     * @param array  $parentContext
-     * @param string $attribute
+     * @param array       $parentContext
+     * @param string      $attribute     Attribute name
+     * @param string|null $format
      *
      * @return array
      *
      * @internal
      */
-    protected function createChildContext(array $parentContext, $attribute)
+    protected function createChildContext(array $parentContext, $attribute/*, string $format = null */)
     {
         if (isset($parentContext[self::ATTRIBUTES][$attribute])) {
             $parentContext[self::ATTRIBUTES] = $parentContext[self::ATTRIBUTES][$attribute];

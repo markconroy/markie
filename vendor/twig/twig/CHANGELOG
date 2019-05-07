@@ -1,3 +1,43 @@
+* 1.40.1 (2019-04-29)
+
+* fixed regression in NodeTraverser
+
+* 1.40.0 (2019-04-28)
+
+ * allowed Twig\NodeVisitor\NodeVisitorInterface::leaveNode() to return "null" instead of "false" (same meaning)
+ * added the "apply" tag as a replacement for the "filter" tag
+ * allowed Twig\Loader\FilesystemLoader::findTemplate() to return "null" instead of "false" (same meaning)
+ * added support for "Twig\Markup" instances in the "in" test
+ * fixed Lexer when using custom options containing the # char
+ * fixed "import" when macros are stored in a template string
+
+* 1.39.1 (2019-04-16)
+
+ * fixed EscaperNodeVisitor
+
+* 1.39.0 (2019-04-16)
+
+ * added Traversable support for the length filter
+ * fixed some wrong location in error messages
+ * made exception creation faster
+ * made escaping on ternary expressions (?: and ??) more fine-grained
+ * added the possibility to give a nice name to string templates (template_from_string function)
+ * fixed the "with" behavior to always include the globals (for consistency with the "include" and "embed" tags)
+ * fixed "include" with "ignore missing" when an error loading occurs in the included template
+ * added support for a new whitespace trimming option ({%~ ~%}, {{~ ~}}, {#~ ~#})
+
+* 1.38.4 (2019-03-23)
+
+ * fixed CheckToStringNode implementation (broken when a function/filter is variadic)
+
+* 1.38.3 (2019-03-21)
+
+ * fixed the spaceless filter so that it behaves like the spaceless tag
+ * fixed BC break on Environment::resolveTemplate()
+ * fixed the bundled Autoloader to also load namespaced classes
+ * allowed Traversable objects to be used in the "with" tag
+ * allowed Traversable objects to be used in the "with" argument of the "include" and "embed" tags
+
 * 1.38.2 (2019-03-12)
 
  * added TemplateWrapper::getTemplateName()

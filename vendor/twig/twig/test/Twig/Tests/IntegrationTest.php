@@ -34,7 +34,7 @@ class Twig_Tests_IntegrationTest extends IntegrationTestCase
 {
     public function getExtensions()
     {
-        $policy = new SecurityPolicy([], [], [], [], []);
+        $policy = new SecurityPolicy([], [], [], [], ['dump']);
 
         return [
             new DebugExtension(),
@@ -343,5 +343,42 @@ class IteratorAggregateStub implements \IteratorAggregate
     public function getIterator()
     {
         return new \ArrayIterator($this->data);
+    }
+}
+
+class SimpleIteratorForTesting implements Iterator
+{
+    private $data = [1, 2, 3, 4, 5, 6, 7];
+    private $key = 0;
+
+    public function current()
+    {
+        return $this->key;
+    }
+
+    public function next()
+    {
+        ++$this->key;
+    }
+
+    public function key()
+    {
+        return $this->key;
+    }
+
+    public function valid()
+    {
+        return isset($this->data[$this->key]);
+    }
+
+    public function rewind()
+    {
+        $this->key = 0;
+    }
+
+    public function __toString()
+    {
+        // for testing, make sure string length returned is not the same as the `iterator_count`
+        return str_repeat('X', iterator_count($this) + 10);
     }
 }

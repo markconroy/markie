@@ -227,7 +227,10 @@ abstract class Template implements \Twig_TemplateInterface
 
                 throw $e;
             } catch (\Exception $e) {
-                throw new RuntimeError(sprintf('An exception has been thrown during the rendering of a template ("%s").', $e->getMessage()), -1, $template->getSourceContext(), $e);
+                $e = new RuntimeError(sprintf('An exception has been thrown during the rendering of a template ("%s").', $e->getMessage()), -1, $template->getSourceContext(), $e);
+                $e->guess();
+
+                throw $e;
             }
         } elseif (false !== $parent = $this->getParent($context)) {
             $parent->displayBlock($name, $context, array_merge($this->blocks, $blocks), false);
@@ -340,6 +343,9 @@ abstract class Template implements \Twig_TemplateInterface
         return array_unique($names);
     }
 
+    /**
+     * @return Template|TemplateWrapper
+     */
     protected function loadTemplate($template, $templateName = null, $line = null, $index = null)
     {
         try {
@@ -352,7 +358,7 @@ abstract class Template implements \Twig_TemplateInterface
             }
 
             if ($template === $this->getTemplateName()) {
-                $class = get_class($this);
+                $class = \get_class($this);
                 if (false !== $pos = strrpos($class, '___', -1)) {
                     $class = substr($class, 0, $pos);
                 }
@@ -378,6 +384,16 @@ abstract class Template implements \Twig_TemplateInterface
 
             throw $e;
         }
+    }
+
+    /**
+     * @internal
+     *
+     * @return Template
+     */
+    protected function unwrap()
+    {
+        return $this;
     }
 
     /**
@@ -438,7 +454,10 @@ abstract class Template implements \Twig_TemplateInterface
 
             throw $e;
         } catch (\Exception $e) {
-            throw new RuntimeError(sprintf('An exception has been thrown during the rendering of a template ("%s").', $e->getMessage()), -1, $this->getSourceContext(), $e);
+            $e = new RuntimeError(sprintf('An exception has been thrown during the rendering of a template ("%s").', $e->getMessage()), -1, $this->getSourceContext(), $e);
+            $e->guess();
+
+            throw $e;
         }
     }
 
