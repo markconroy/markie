@@ -115,6 +115,10 @@ class ComposerStaticInitd5e203a99322773263afacdcbc43d70a
             'GuzzleHttp\\' => 11,
             'Goutte\\' => 7,
         ),
+        'E' => 
+        array (
+            'Egulias\\EmailValidator\\' => 23,
+        ),
         'D' => 
         array (
             'Drupal\\Driver\\' => 14,
@@ -361,6 +365,10 @@ class ComposerStaticInitd5e203a99322773263afacdcbc43d70a
         array (
             0 => __DIR__ . '/..' . '/fabpot/goutte/Goutte',
         ),
+        'Egulias\\EmailValidator\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/egulias/email-validator/EmailValidator',
+        ),
         'Drupal\\Driver\\' => 
         array (
             0 => __DIR__ . '/../..' . '/web/drivers/lib/Drupal/Driver',
@@ -476,13 +484,13 @@ class ComposerStaticInitd5e203a99322773263afacdcbc43d70a
             array (
                 0 => __DIR__ . '/..' . '/phpspec/prophecy/src',
             ),
+            'PEAR' => 
+            array (
+                0 => __DIR__ . '/..' . '/pear/pear_exception',
+            ),
         ),
         'E' => 
         array (
-            'Egulias\\' => 
-            array (
-                0 => __DIR__ . '/..' . '/egulias/email-validator/src',
-            ),
             'EasyRdf_' => 
             array (
                 0 => __DIR__ . '/..' . '/easyrdf/easyrdf/lib',
@@ -521,7 +529,22 @@ class ComposerStaticInitd5e203a99322773263afacdcbc43d70a
             array (
                 0 => __DIR__ . '/..' . '/drush/drush/lib',
             ),
+            'Console' => 
+            array (
+                0 => __DIR__ . '/..' . '/pear/console_getopt',
+            ),
         ),
+        'A' => 
+        array (
+            'Archive_Tar' => 
+            array (
+                0 => __DIR__ . '/..' . '/pear/archive_tar',
+            ),
+        ),
+    );
+
+    public static $fallbackDirsPsr0 = array (
+        0 => __DIR__ . '/..' . '/pear/pear-core-minimal/src',
     );
 
     public static $classMap = array (
@@ -997,6 +1020,7 @@ class ComposerStaticInitd5e203a99322773263afacdcbc43d70a
             $loader->prefixLengthsPsr4 = ComposerStaticInitd5e203a99322773263afacdcbc43d70a::$prefixLengthsPsr4;
             $loader->prefixDirsPsr4 = ComposerStaticInitd5e203a99322773263afacdcbc43d70a::$prefixDirsPsr4;
             $loader->prefixesPsr0 = ComposerStaticInitd5e203a99322773263afacdcbc43d70a::$prefixesPsr0;
+            $loader->fallbackDirsPsr0 = ComposerStaticInitd5e203a99322773263afacdcbc43d70a::$fallbackDirsPsr0;
             $loader->classMap = ComposerStaticInitd5e203a99322773263afacdcbc43d70a::$classMap;
 
         }, null, ClassLoader::class);
