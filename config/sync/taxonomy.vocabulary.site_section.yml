@@ -5,5 +5,4 @@ dependencies: {  }
 name: 'Site Section'
 vid: site_section
 description: ''
-hierarchy: 0
 weight: 0

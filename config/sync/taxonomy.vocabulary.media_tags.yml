@@ -5,5 +5,4 @@ dependencies: {  }
 name: 'Media Tags'
 vid: media_tags
 description: 'A vocabulary to tag media items, so I might be able to find some of them in the future.'
-hierarchy: 0
 weight: 0
