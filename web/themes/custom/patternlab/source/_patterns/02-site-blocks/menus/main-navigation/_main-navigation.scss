@@ -8,7 +8,7 @@
   color: $c-grey--darkest;
   border: none;
   background: $c-white;
-  font-size: 1rem;
+  font-size: 1.5rem;
   @include breakpoint($bp--xlarge) {
     display: none;
   }
@@ -32,6 +32,12 @@
   margin: 0.25rem 0.5rem;
   padding: 0;
   list-style: none;
+  text-transform: uppercase;
+  font-weight: bold;
+  @include breakpoint($bp--xlarge) {
+    display: flex;
+    align-items: center;
+  }
 }
 
 .main-navigation .menu-item a {
@@ -43,4 +49,7 @@
   &:hover {
     text-decoration: underline;
   }
+}
+.main-navigation .menu-item a {
+  @include animated_link($c-primary);
 }

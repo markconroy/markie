@@ -1,11 +1,29 @@
-.branding {
-  &__logo {
-    max-width: 414px;
+
+.branding__logo {
+  max-width: 415px;
+}
+.branding__name {
+  margin-bottom: 0;
+  line-height: 1;
+  a {
+    @include animated_link($c-primary);
+    position: relative;
+    top: 2px;
+    display: inline-block;
+    padding: 1rem 1rem 0.5rem;
+    text-decoration: none;
+    border: 2px solid $c-secondary;
+    border-bottom: 0;
+    background-color: $c-tertiary;
+    &:focus,
+    &:hover {
+      top: 2px;
+    }
   }
-  &__name {
-    margin-bottom: 0;
-  }
-  &__slogan {
-    margin-bottom: 0;
-  }
+}
+.branding__slogan {
+  margin-bottom: 0;
+  padding: 1rem;
+  border: 2px solid $c-secondary;
+  background-color: $c-tertiary;
 }
