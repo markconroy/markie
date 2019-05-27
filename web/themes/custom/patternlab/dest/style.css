@@ -2116,8 +2116,8 @@ a.tile--tertiary:hover .tile__text {
   .credits__inner {
     display: -ms-flexbox;
     display: flex;
-    -ms-flex-pack: end;
-        justify-content: flex-end;
+    -ms-flex-pack: justify;
+        justify-content: space-between;
   }
 }
 
