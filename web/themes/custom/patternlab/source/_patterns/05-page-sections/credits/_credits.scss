@@ -10,6 +10,6 @@
   text-align: center;
   @include breakpoint($bp--large) {
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
   }
 }
