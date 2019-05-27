@@ -1,5 +1,6 @@
 .branding-block {
   transform: rotate(-0.5deg);
+  text-align: center;
 }
 
 .branding__logo {
@@ -14,7 +15,6 @@
     padding: 1rem 1rem 0.5rem;
     transition: 0.3s;
     transition: $trans;
-    text-align: center;
     text-decoration: none;
     text-transform: uppercase;
     color: $c-white;
