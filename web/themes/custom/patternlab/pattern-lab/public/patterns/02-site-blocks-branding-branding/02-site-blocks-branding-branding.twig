@@ -18,12 +18,12 @@
   {% endif %}
 
   {% if site_name %}
-    <div class="branding__name h2">
+    <p class="branding__name h2">
       <a href="{{ path('<front>') }}" title="{{ 'Home'|t }}" rel="home">{{ site_name }}</a>
-    </div>
+    </p>
   {% endif %}
 
   {% if site_slogan %}
-    <div class="branding__slogan h6">{{ site_slogan }}</div>
+    <p class="branding__slogan h6">{{ site_slogan }}</p>
   {% endif %}
 </div>
