@@ -3,6 +3,7 @@ p {
 }
 
 a {
+  transition: $trans;
   color: $c-grey--darkest;
   &:focus,
   &:hover {
@@ -11,14 +12,14 @@ a {
 }
 
 .text--large {
-  @include fluid-type(
-    font-size,
-    $bp--xsmall,
-    $bp--xxlarge,
-    $base-font-size,
-    $base-font-size * 1.6
-  );
   @extend .padding;
+  @include fluid-type(
+  font-size,
+  $bp--xsmall,
+  $bp--xxlarge,
+  $base-font-size,
+  $base-font-size * 1.6
+  );
   margin-bottom: $base-line-height;
   color: $c-grey--darkest;
   font-family: $ff--alternate;

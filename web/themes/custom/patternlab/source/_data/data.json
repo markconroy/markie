@@ -1,8 +1,8 @@
 {
-  "url": "https://www.mark.ie",
+  "url": "https://mark.ie",
   "title": "Faker.words(2, true)",
   "text": "Faker.words(3, true)",
-  "site_name": "Mark.ie",
+  "site_name": "Mark Conroy",
   "site_slogan": "Lead Frontend Drupal Developer",
   "img": {
     "thumbnail": "http://placeimg.com/300/300/people",
@@ -23,7 +23,6 @@
     "long": "Faker.paragraph"
   },
   "description": "Faker.paragraphs(2, true)",
-  "url": "http://example.com",
   "name": {
     "titleMale": "Faker.title('male')",
     "titleFemale": "Faker.title('female')",

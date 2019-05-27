@@ -942,6 +942,7 @@ a:focus, a:hover {
 
 .branding-block {
   transform: rotate(-0.5deg);
+  text-align: center;
 }
 
 .branding__logo {
