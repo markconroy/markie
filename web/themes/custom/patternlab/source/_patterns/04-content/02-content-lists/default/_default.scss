@@ -10,21 +10,11 @@
 .default-list .views-row {
   @extend .layout-contained--small;
   @extend .padding;
-  &:before {
-    background: $c-grey--darkest;
-    content: "";
-    display: block;
-    height: 1px;
-    width: 100%;
-  }
-  &:last-of-type {
-    &:after {
-      background: $c-grey--darkest;
-      content: "";
-      display: block;
-      height: 1px;
-      width: 100%;
-    }
+  margin-bottom: 3rem;
+  transform: rotate(-0.75deg);
+  border: 2px solid $c-secondary;
+  &:nth-of-type(2n+1) {
+    transform: rotate(0.5deg);
   }
 }
 
@@ -38,8 +28,8 @@
 .view-filters .views-exposed-form .form-item {
   margin-bottom: 1rem;
   @include breakpoint($bp--large) {
-    margin-bottom: 0;
     margin-right: 1rem;
+    margin-bottom: 0;
   }
 }
 .view-filters .views-exposed-form .form-item > label {
@@ -48,23 +38,23 @@
 
 .view-filters .views-exposed-form input {
   @include fluid-type(font-size, $bp--xsmall, $bp--xxlarge, 12px, 14px);
-  border: 1px solid $c-grey--darkest;
-  border-radius: 5px;
+  max-width: 220px;
   height: 54px;
   padding: 0 1rem;
-  max-width: 220px;
+  border: 1px solid $c-grey--darkest;
+  border-radius: 5px;
   &:focus,
   &:hover {
     border: 1px solid $c-grey--darkest;
   }
   &.form-submit {
-    background: $c-grey--darkest;
-    color: $c-white;
     cursor: pointer;
+    color: $c-white;
+    background: $c-grey--darkest;
     &:focus,
     &:hover {
-      background: $c-black;
       border: 1px solid $c-grey--darkest;
+      background: $c-black;
     }
   }
 }
@@ -73,8 +63,8 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  margin: auto;
   max-width: 220px;
+  margin: auto;
   @include breakpoint($bp--large) {
     max-width: none;
   }
