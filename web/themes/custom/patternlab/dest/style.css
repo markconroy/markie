@@ -479,7 +479,7 @@
   margin-top: 5px;
 }
 
-.padding, .text--large, .node--view-mode-full > .field--name-field-intro, .default-list .views-row {
+.padding, .text--large, .node--view-mode-full > .field--name-field-intro, .default-list .view-content, .default-list .views-row {
   padding: 0 16px;
 }
 
@@ -784,6 +784,7 @@ img {
 }
 
 a {
+  transition: 0.3s;
   color: #292929;
 }
 
@@ -939,33 +940,41 @@ a:focus, a:hover {
   text-decoration: underline;
 }
 
+.branding-block {
+  transform: rotate(-0.5deg);
+}
+
 .branding__logo {
   max-width: 415px;
 }
 
 .branding__name {
+  width: 250px;
   margin-bottom: 0;
   line-height: 1;
 }
 
 .branding__name a {
-  display: inline-block;
+  display: block;
   padding: 1rem 1rem 0.5rem;
   transition: 0.3s;
+  transition: 0.3s;
+  text-align: center;
   text-decoration: none;
   text-transform: uppercase;
+  color: white;
   border: 2px solid #002a2a;
   border-bottom: 0;
+  background-color: #002a2a;
   font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif;
 }
 
 .branding__name a:focus, .branding__name a:hover {
   text-decoration: underline;
-  color: white;
-  background-color: #002a2a;
 }
 
 .branding__slogan {
+  width: 250px;
   margin-bottom: 0;
   padding: 1rem;
   border: 2px solid #002a2a;
@@ -1858,6 +1867,8 @@ a.tile--tertiary:hover .tile__text {
   margin-bottom: 3rem;
   transform: rotate(-0.75deg);
   border: 2px solid #002a2a;
+  background-color: rgba(0, 42, 42, 0.05);
+  box-shadow: 1px 2px 1px 2px #002a2a;
 }
 
 .default-list .views-row:nth-of-type(2n+1) {
