@@ -165,7 +165,7 @@
   flex-wrap: wrap;
   margin-right: -1rem;
   margin-left: -1rem;
-   > * {
+  > * {
     margin-right: 1rem;
     margin-left: 1rem;
   }
@@ -173,4 +173,31 @@
 
 .flex-default {
   @include flex-default;
+}
+
+@mixin animated_link($colour) {
+  position: relative;
+  @include breakpoint($bp--xlarge) {
+    &::after {
+      position: absolute;
+      left: 50%;
+      width: 0;
+      height: 2px;
+      margin-top: 2rem;
+      content: "";
+      transition: 0.3s;
+      transition-timing-function: cubic-bezier(1, -0.65, 0, 2.31);
+      transform: translateX(-50%);
+      background: $colour;
+    }
+    &:hover,
+    &:focus {
+      top: -2px;
+      text-decoration: none;
+      outline: none;
+      &:after {
+        width: calc(100% - 1.5rem);
+      }
+    }
+  }
 }
