@@ -949,49 +949,26 @@ a:focus, a:hover {
 }
 
 .branding__name a {
-  position: relative;
-  position: relative;
-  top: 2px;
   display: inline-block;
   padding: 1rem 1rem 0.5rem;
+  transition: 0.3s;
   text-decoration: none;
+  text-transform: uppercase;
   border: 2px solid #002a2a;
   border-bottom: 0;
-  background-color: #9acd32;
-}
-
-@media (min-width: 1024px) {
-  .branding__name a::after {
-    position: absolute;
-    left: 50%;
-    width: 0;
-    height: 2px;
-    margin-top: 2rem;
-    content: "";
-    transition: 0.3s;
-    transition-timing-function: cubic-bezier(1, -0.65, 0, 2.31);
-    transform: translateX(-50%);
-    background: #e61313;
-  }
-  .branding__name a:hover, .branding__name a:focus {
-    top: -2px;
-    text-decoration: none;
-    outline: none;
-  }
-  .branding__name a:hover:after, .branding__name a:focus:after {
-    width: calc(100% - 1.5rem);
-  }
+  font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif;
 }
 
 .branding__name a:focus, .branding__name a:hover {
-  top: 2px;
+  text-decoration: underline;
+  color: white;
+  background-color: #002a2a;
 }
 
 .branding__slogan {
   margin-bottom: 0;
   padding: 1rem;
   border: 2px solid #002a2a;
-  background-color: #9acd32;
 }
 
 .breadcrumb ol {
