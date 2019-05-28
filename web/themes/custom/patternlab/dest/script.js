@@ -23,6 +23,47 @@
     attach: function attach(context) {}
   };
 })(jQuery, Drupal);
+"use strict";
+
+(function addtocalendarScript($, Drupal) {
+  Drupal.behaviors.addtocalendar = {
+    attach: function attach(context) {
+      var addToCalendarTrigger = $(".add-to-calendar__trigger");
+
+      addToCalendarTrigger.unbind("click").click(function () {
+        $(this).parent(".add-to-calendar").find(".add-to-calendar__items").slideToggle();
+      });
+    }
+  };
+})(jQuery, Drupal);
+"use strict";
+
+(function breadcrumbsScript($, Drupal) {
+  Drupal.behaviors.breadcrumbs = {
+    attach: function attach(context) {}
+  };
+})(jQuery, Drupal);
+"use strict";
+
+(function messagesScript($, Drupal) {
+  Drupal.behaviors.messages = {
+    attach: function attach(context) {}
+  };
+})(jQuery, Drupal);
+"use strict";
+
+(function pagerScript($, Drupal) {
+  Drupal.behaviors.pager = {
+    attach: function attach(context) {}
+  };
+})(jQuery, Drupal);
+"use strict";
+
+(function searchblockScript($, Drupal) {
+  Drupal.behaviors.searchblock = {
+    attach: function attach(context) {}
+  };
+})(jQuery, Drupal);
 'use strict';
 
 (function accordionScript($, Drupal) {
@@ -129,15 +170,15 @@
 })(jQuery, Drupal);
 "use strict";
 
-(function aboveheaderScript($, Drupal) {
-  Drupal.behaviors.aboveheader = {
+(function basicpageScript($, Drupal) {
+  Drupal.behaviors.basicpage = {
     attach: function attach(context) {}
   };
 })(jQuery, Drupal);
 "use strict";
 
-(function basicpageScript($, Drupal) {
-  Drupal.behaviors.basicpage = {
+(function aboveheaderScript($, Drupal) {
+  Drupal.behaviors.aboveheader = {
     attach: function attach(context) {}
   };
 })(jQuery, Drupal);
@@ -185,47 +226,6 @@
 })(jQuery, Drupal);
 "use strict";
 
-(function addtocalendarScript($, Drupal) {
-  Drupal.behaviors.addtocalendar = {
-    attach: function attach(context) {
-      var addToCalendarTrigger = $(".add-to-calendar__trigger");
-
-      addToCalendarTrigger.unbind("click").click(function () {
-        $(this).parent(".add-to-calendar").find(".add-to-calendar__items").slideToggle();
-      });
-    }
-  };
-})(jQuery, Drupal);
-"use strict";
-
-(function breadcrumbsScript($, Drupal) {
-  Drupal.behaviors.breadcrumbs = {
-    attach: function attach(context) {}
-  };
-})(jQuery, Drupal);
-"use strict";
-
-(function messagesScript($, Drupal) {
-  Drupal.behaviors.messages = {
-    attach: function attach(context) {}
-  };
-})(jQuery, Drupal);
-"use strict";
-
-(function pagerScript($, Drupal) {
-  Drupal.behaviors.pager = {
-    attach: function attach(context) {}
-  };
-})(jQuery, Drupal);
-"use strict";
-
-(function searchblockScript($, Drupal) {
-  Drupal.behaviors.searchblock = {
-    attach: function attach(context) {}
-  };
-})(jQuery, Drupal);
-"use strict";
-
 (function imageScript($, Drupal) {
   Drupal.behaviors.image = {
     attach: function attach(context) {}
@@ -235,27 +235,6 @@
 
 (function paragraphScript($, Drupal) {
   Drupal.behaviors.paragraph = {
-    attach: function attach(context) {}
-  };
-})(jQuery, Drupal);
-"use strict";
-
-(function fullScript($, Drupal) {
-  Drupal.behaviors.full = {
-    attach: function attach(context) {}
-  };
-})(jQuery, Drupal);
-"use strict";
-
-(function teaserScript($, Drupal) {
-  Drupal.behaviors.teaser = {
-    attach: function attach(context) {}
-  };
-})(jQuery, Drupal);
-"use strict";
-
-(function defaultScript($, Drupal) {
-  Drupal.behaviors.default = {
     attach: function attach(context) {}
   };
 })(jQuery, Drupal);
@@ -285,6 +264,27 @@
         mainMenu();
       });
     }
+  };
+})(jQuery, Drupal);
+"use strict";
+
+(function fullScript($, Drupal) {
+  Drupal.behaviors.full = {
+    attach: function attach(context) {}
+  };
+})(jQuery, Drupal);
+"use strict";
+
+(function teaserScript($, Drupal) {
+  Drupal.behaviors.teaser = {
+    attach: function attach(context) {}
+  };
+})(jQuery, Drupal);
+"use strict";
+
+(function defaultScript($, Drupal) {
+  Drupal.behaviors.default = {
+    attach: function attach(context) {}
   };
 })(jQuery, Drupal);
 //# sourceMappingURL=script.js.map
