@@ -1870,6 +1870,7 @@ a.tile--tertiary:hover .tile__text {
   margin-bottom: 3rem;
   transform: rotate(-0.75deg);
   border: 2px solid #002a2a;
+  border-radius: 0.5rem;
   background-color: rgba(0, 42, 42, 0.05);
   box-shadow: 1px 2px 1px 2px #002a2a;
 }
