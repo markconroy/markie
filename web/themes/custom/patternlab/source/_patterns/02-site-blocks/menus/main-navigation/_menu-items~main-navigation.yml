@@ -1,19 +1,25 @@
 items:
-  item_1:
-    title: 'Home'
-    url: 'http://www.example.com'
+  -
+    title: 'About'
+    url: link.sample-pages-basic-page
     attributes:
       Attribute():
         class:
-  item_2:
-    title: 'About Me'
-    url: 'http://www.example.com'
+  -
+    title: 'Blog'
+    url: link.sample-pages-listing-page
     attributes:
       Attribute():
         class:
-  item_3:
+  -
+    title: 'My PatternLab'
+    url: link.base-colors
+    attributes:
+      Attribute():
+        class:
+  -
     title: 'Contact Me'
-    url: 'http://www.example.com'
+    url: link.sample-pages-basic-page
     attributes:
       Attribute():
         class:

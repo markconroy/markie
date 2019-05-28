@@ -35,8 +35,10 @@
   text-transform: uppercase;
   font-weight: bold;
   @include breakpoint($bp--xlarge) {
-    display: flex;
-    align-items: center;
+    transform: rotate(-2deg);
+    &:nth-of-type(2n+1) {
+      transform: rotate(1.5deg);
+    }
   }
 }
 
@@ -44,12 +46,11 @@
   display: block;
   padding: 0.25rem 0;
   text-decoration: none;
-  color: $c-grey--darkest;
   &:focus,
   &:hover {
     text-decoration: underline;
   }
 }
 .main-navigation .menu-item a {
-  @include animated_link($c-primary);
+  @include animated_link($c-secondary);
 }

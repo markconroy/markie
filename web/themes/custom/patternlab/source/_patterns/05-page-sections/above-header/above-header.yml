@@ -2,4 +2,4 @@ attributes:
   Attribute():
     class:
 
-content: <p>I am available for hire</p>
+content: '<p style="text-align:center">I''m available. <a href="https://mark.ie/contact">Contact me</a> to start the conversation!</p>'

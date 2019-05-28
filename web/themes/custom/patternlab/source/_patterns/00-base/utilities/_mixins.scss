@@ -175,8 +175,11 @@
   @include flex-default;
 }
 
-@mixin animated_link($colour) {
+@mixin animated_link($default-colour: null, $hover-colour: null) {
   position: relative;
+  text-decoration: none;
+  color: $c-primary;
+  color: $default-colour;
   @include breakpoint($bp--xlarge) {
     &::after {
       position: absolute;
@@ -188,7 +191,6 @@
       transition: 0.3s;
       transition-timing-function: cubic-bezier(1, -0.65, 0, 2.31);
       transform: translateX(-50%);
-      background: $colour;
     }
     &:hover,
     &:focus {
@@ -197,6 +199,8 @@
       outline: none;
       &:after {
         width: calc(100% - 1.5rem);
+        background-color: $c-primary;
+        background-color: $hover-colour;
       }
     }
   }

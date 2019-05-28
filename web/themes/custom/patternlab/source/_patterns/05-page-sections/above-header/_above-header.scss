@@ -1,3 +1,13 @@
 .above-header__inner {
   padding-top: $base-font-size;
+  padding-bottom: $base-font-size;
+}
+
+.above-header p:last-of-type {
+  margin-bottom: 0;
+}
+
+.above-header a {
+  @include animated_link(null, $c-primary);
+  font-weight: bold;
 }
