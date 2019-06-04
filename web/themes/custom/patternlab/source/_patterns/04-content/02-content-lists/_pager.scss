@@ -1,0 +1,47 @@
+.pager__items {
+  @include flex-default;
+  justify-content: center;
+  margin-top: $base-line-height;
+  margin-right: 0;
+  margin-left: 0;
+  padding: 0;
+}
+.pager__item {
+  display: flex;
+  margin-bottom: 0.5rem;
+  list-style-type: none;
+}
+
+.pager__item a {
+  display: inline-block;
+  padding: 0.5rem 1.1rem;
+  text-decoration: none;
+  color: $c-grey--darkest;
+  border-radius: 1.5rem;
+  background-color: $c-grey--light;
+  &:focus,
+  &:hover {
+    text-decoration: underline;
+    color: $c-white;
+    background-color: $c-grey--darkest;
+  }
+}
+
+.pager__item--first,
+.pager__item--last,
+.pager__item--previous,
+.pager__item--next {
+  a {
+    border: 1px solid $c-grey;
+    background-color: $c-white;
+  }
+}
+
+.pager__item.is-active a {
+  background-color: $c-primary;
+  &:hover,
+  &:focus {
+    color: $c-white;
+    background-color: $c-grey--darkest;
+  }
+}
