@@ -21,23 +21,23 @@ $c-grey--darkest: hsl(0, 0%, 16.1%); // Darkest Grey
 $c-black: black; // Black
 
 $theme-colours: (primary, $c-primary),
-(primary--light, $c-primary--light),
-(primary--dark, $c-primary--dark),
-(secondary, $c-secondary),
-(secondary--light, $c-secondary--light),
-(secondary--dark, $c-secondary--dark),
-(tertiary, $c-tertiary),
-(tertiary--light, $c-tertiary--light),
-(tertiary--dark, $c-tertiary--dark),
-(white, $c-white),
-(grey, $c-grey),
-(grey--lightest, $c-grey--lightest),
-(grey--lighter, $c-grey--lighter),
-(grey--light, $c-grey--light),
-(grey--dark, $c-grey--dark),
-(grey--darker, $c-grey--darker),
-(grey--darkest, $c-grey--darkest),
-(black, $c-black);
+  (primary--light, $c-primary--light),
+  (primary--dark, $c-primary--dark),
+  (secondary, $c-secondary),
+  (secondary--light, $c-secondary--light),
+  (secondary--dark, $c-secondary--dark),
+  (tertiary, $c-tertiary),
+  (tertiary--light, $c-tertiary--light),
+  (tertiary--dark, $c-tertiary--dark),
+  (white, $c-white),
+  (grey, $c-grey),
+  (grey--lightest, $c-grey--lightest),
+  (grey--lighter, $c-grey--lighter),
+  (grey--light, $c-grey--light),
+  (grey--dark, $c-grey--dark),
+  (grey--darker, $c-grey--darker),
+  (grey--darkest, $c-grey--darkest),
+  (black, $c-black);
 
 @each $theme-colour, $colour in $theme-colours {
   .bg-#{$theme-colour} {
