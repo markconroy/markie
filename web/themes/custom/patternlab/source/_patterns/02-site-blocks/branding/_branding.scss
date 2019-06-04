@@ -11,10 +11,13 @@
   margin-bottom: 0;
   line-height: 1;
   a {
+    position: relative;
+    bottom: -2px;
     display: block;
-    padding: 1rem 1rem 0.5rem;
+    padding: 1rem;
     transition: 0.3s;
     transition: $trans;
+    transform: rotate(-3deg);
     text-decoration: none;
     text-transform: uppercase;
     color: $c-white;
