@@ -184,13 +184,6 @@
 })(jQuery, Drupal);
 "use strict";
 
-(function belowheaderScript($, Drupal) {
-  Drupal.behaviors.belowheader = {
-    attach: function attach(context) {}
-  };
-})(jQuery, Drupal);
-"use strict";
-
 (function breadcrumbsScript($, Drupal) {
   Drupal.behaviors.breadcrumbs = {
     attach: function attach(context) {}
@@ -214,6 +207,13 @@
 
 (function pagetitleScript($, Drupal) {
   Drupal.behaviors.pagetitle = {
+    attach: function attach(context) {}
+  };
+})(jQuery, Drupal);
+"use strict";
+
+(function belowheaderScript($, Drupal) {
+  Drupal.behaviors.belowheader = {
     attach: function attach(context) {}
   };
 })(jQuery, Drupal);

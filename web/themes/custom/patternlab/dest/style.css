@@ -479,7 +479,7 @@
   margin-top: 5px;
 }
 
-.padding, .text--large, .node--view-mode-full > .field--name-field-intro, .default-list .view-content, .default-list .views-row {
+.padding, .text--large, .node--view-mode-full > .field--name-field-intro, .default-list .view-content {
   padding: 0 16px;
 }
 
@@ -645,6 +645,21 @@ html {
 body {
   background: #fafafa;
   font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif;
+}
+
+::-moz-selection {
+  color: black;
+  background: #9acd32;
+}
+
+::selection {
+  color: black;
+  background: #9acd32;
+}
+
+::-moz-selection {
+  color: black;
+  background: #9acd32;
 }
 
 @font-face {
@@ -956,10 +971,13 @@ a:focus, a:hover {
 }
 
 .branding__name a {
+  position: relative;
+  bottom: -2px;
   display: block;
-  padding: 1rem 1rem 0.5rem;
+  padding: 1rem;
   transition: 0.3s;
   transition: 0.3s;
+  transform: rotate(-3deg);
   text-decoration: none;
   text-transform: uppercase;
   color: white;
@@ -1849,6 +1867,65 @@ a.tile--tertiary:hover .tile__text {
   }
 }
 
+.pager__items {
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-wrap: wrap;
+      flex-wrap: wrap;
+  margin-right: -1rem;
+  margin-left: -1rem;
+  -ms-flex-pack: center;
+      justify-content: center;
+  margin-top: 23.4px;
+  margin-right: 0;
+  margin-left: 0;
+  padding: 0;
+}
+
+.pager__items > * {
+  margin-right: 1rem;
+  margin-left: 1rem;
+}
+
+.pager__item {
+  display: -ms-flexbox;
+  display: flex;
+  margin-bottom: 0.5rem;
+  list-style-type: none;
+}
+
+.pager__item a {
+  display: inline-block;
+  padding: 0.5rem 1.1rem;
+  text-decoration: none;
+  color: #292929;
+  border-radius: 1.5rem;
+  background-color: #999999;
+}
+
+.pager__item a:focus, .pager__item a:hover {
+  text-decoration: underline;
+  color: white;
+  background-color: #292929;
+}
+
+.pager__item--first a,
+.pager__item--last a,
+.pager__item--previous a,
+.pager__item--next a {
+  border: 1px solid #7a7a7a;
+  background-color: white;
+}
+
+.pager__item.is-active a {
+  background-color: #e61313;
+}
+
+.pager__item.is-active a:hover, .pager__item.is-active a:focus {
+  color: white;
+  background-color: #292929;
+}
+
 .default-list .view-content {
   margin-bottom: 23.4px;
 }
@@ -1867,11 +1944,11 @@ a.tile--tertiary:hover .tile__text {
 
 .default-list .views-row {
   position: relative;
-  margin-bottom: 3rem;
+  padding: 3rem 1rem;
   transform: rotate(-0.75deg);
   border: 2px solid #002a2a;
   border-radius: 0.5rem;
-  background-color: rgba(0, 42, 42, 0.05);
+  background-color: #fafafa;
   box-shadow: 1px 2px 1px 2px #002a2a;
 }
 
