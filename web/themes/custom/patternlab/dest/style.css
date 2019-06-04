@@ -1900,7 +1900,7 @@ a.tile--tertiary:hover .tile__text {
   text-decoration: none;
   color: #292929;
   border-radius: 1.5rem;
-  background-color: #999999;
+  background-color: #eaeaea;
 }
 
 .pager__item a:focus, .pager__item a:hover {
@@ -1918,10 +1918,13 @@ a.tile--tertiary:hover .tile__text {
 }
 
 .pager__item.is-active a {
+  text-decoration: none;
+  color: white;
   background-color: #e61313;
 }
 
 .pager__item.is-active a:hover, .pager__item.is-active a:focus {
+  text-decoration: underline;
   color: white;
   background-color: #292929;
 }
