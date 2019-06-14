@@ -22,12 +22,6 @@
   {% set tags = content.field_tags %}
 {% endif %}
 
-{% if node.field_speaking_where.value %}
-  {% set intro = content.field_speaking_where %}
-{% endif %}
-
-
-
 {% embed '@content/speaking/speaking.twig' %}
 
   {% block building_blocks %}
