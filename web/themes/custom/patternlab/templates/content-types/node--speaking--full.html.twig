@@ -10,6 +10,10 @@
   {% set speaking_date = content.field_speaking_date %}
 {% endif %}
 
+{% if node.field_speaking_where.value %}
+  {% set location = content.field_speaking_where %}
+{% endif %}
+
 {% if node.field_main_video.value %}
   {% set speaking_video = content.field_main_video %}
 {% endif %}
