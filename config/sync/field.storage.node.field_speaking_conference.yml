@@ -1,0 +1,20 @@
+uuid: acd0f1a0-1278-4fb7-8d58-47c9e47f29e7
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+    - taxonomy
+id: node.field_speaking_conference
+field_name: field_speaking_conference
+entity_type: node
+type: entity_reference
+settings:
+  target_type: taxonomy_term
+module: core
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

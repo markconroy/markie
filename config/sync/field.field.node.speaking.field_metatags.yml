@@ -1,0 +1,23 @@
+uuid: 5fe09eab-3f37-407f-a718-689fe4b21a53
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_metatags
+    - node.type.speaking
+  module:
+    - metatag
+id: node.speaking.field_metatags
+field_name: field_metatags
+entity_type: node
+bundle: speaking
+label: Metatags
+description: ''
+required: false
+translatable: true
+default_value:
+  -
+    value: 'a:3:{s:20:"schema_article_image";s:195:"a:5:{s:5:"@type";s:11:"ImageObject";s:20:"representativeOfPage";s:4:"True";s:3:"url";s:62:"[node:field_main_image:entity:field_m_image_image:default:url]";s:5:"width";s:0:"";s:6:"height";s:0:"";}";s:21:"schema_article_author";s:312:"a:7:{s:5:"@type";s:6:"Person";s:3:"@id";s:10:"markconroy";s:4:"name";s:11:"Mark Conroy";s:3:"url";s:37:"https://www.mark.ie/about-mark-conroy";s:6:"sameAs";s:110:"https://www.twitter.com/markconroy,https://www.linkedin.com/in/conroymark/,https://www.facebook.com/markconroy";s:4:"logo";a:0:{}s:5:"pivot";s:0:"";}";s:24:"schema_article_publisher";s:312:"a:7:{s:5:"@type";s:6:"Person";s:3:"@id";s:10:"markconroy";s:4:"name";s:11:"Mark Conroy";s:3:"url";s:37:"https://www.mark.ie/about-mark-conroy";s:6:"sameAs";s:110:"https://www.twitter.com/markconroy,https://www.linkedin.com/in/conroymark/,https://www.facebook.com/markconroy";s:4:"logo";a:0:{}s:5:"pivot";s:0:"";}";}'
+default_value_callback: ''
+settings: {  }
+field_type: metatag

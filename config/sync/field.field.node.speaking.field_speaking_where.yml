@@ -1,0 +1,19 @@
+uuid: 727d125c-4ea8-48cd-af2c-a0be18900766
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_speaking_where
+    - node.type.speaking
+id: node.speaking.field_speaking_where
+field_name: field_speaking_where
+entity_type: node
+bundle: speaking
+label: Where
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

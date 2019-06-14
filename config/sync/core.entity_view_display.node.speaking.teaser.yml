@@ -1,0 +1,20 @@
+uuid: 090101b9-9ec3-4828-8ec3-58d3cda0e7d7
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.node.teaser
+    - node.type.speaking
+  module:
+    - user
+id: node.speaking.teaser
+targetEntityType: node
+bundle: speaking
+mode: teaser
+content:
+  links:
+    weight: 100
+    settings: {  }
+    third_party_settings: {  }
+    region: content
+hidden: {  }

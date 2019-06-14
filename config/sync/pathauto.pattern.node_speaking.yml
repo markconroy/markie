@@ -1,0 +1,22 @@
+uuid: 3277925b-b0fe-47c9-8979-9b175116072e
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+id: node_speaking
+label: 'Node: Speaking'
+type: 'canonical_entities:node'
+pattern: 'speaking/[node:field_speaking_date:date:custom:Y]-[node:field_speaking_conference]-[node:title]'
+selection_criteria:
+  ad3d06d7-39f8-462c-8026-0686f6e3d128:
+    id: node_type
+    bundles:
+      speaking: speaking
+    negate: false
+    context_mapping:
+      node: node
+    uuid: ad3d06d7-39f8-462c-8026-0686f6e3d128
+selection_logic: and
+weight: -5
+relationships: {  }

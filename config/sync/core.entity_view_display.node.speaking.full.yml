@@ -1,0 +1,106 @@
+uuid: 0300348d-85f4-4cb2-9453-334089f6e12c
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.node.full
+    - field.field.node.speaking.field_building_blocks
+    - field.field.node.speaking.field_intro
+    - field.field.node.speaking.field_main_image
+    - field.field.node.speaking.field_main_video
+    - field.field.node.speaking.field_metatags
+    - field.field.node.speaking.field_speaking_conference
+    - field.field.node.speaking.field_speaking_date
+    - field.field.node.speaking.field_speaking_where
+    - field.field.node.speaking.field_tags
+    - node.type.speaking
+  module:
+    - datetime
+    - entity_reference_revisions
+    - metatag
+    - text
+    - user
+id: node.speaking.full
+targetEntityType: node
+bundle: speaking
+mode: full
+content:
+  field_building_blocks:
+    weight: 101
+    label: hidden
+    settings:
+      view_mode: default
+      link: ''
+    third_party_settings: {  }
+    type: entity_reference_revisions_entity_view
+    region: content
+  field_intro:
+    weight: 105
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    type: text_default
+    region: content
+  field_main_image:
+    weight: 102
+    label: hidden
+    settings:
+      link: true
+    third_party_settings: {  }
+    type: entity_reference_label
+    region: content
+  field_main_video:
+    weight: 106
+    label: hidden
+    settings:
+      view_mode: full_width
+      link: false
+    third_party_settings: {  }
+    type: entity_reference_entity_view
+    region: content
+  field_metatags:
+    weight: 104
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    type: metatag_empty_formatter
+    region: content
+  field_speaking_conference:
+    weight: 109
+    label: hidden
+    settings:
+      link: false
+    third_party_settings: {  }
+    type: entity_reference_label
+    region: content
+  field_speaking_date:
+    weight: 107
+    label: hidden
+    settings:
+      timezone_override: ''
+      format_type: date_month_year
+    third_party_settings: {  }
+    type: datetime_default
+    region: content
+  field_speaking_where:
+    weight: 108
+    label: hidden
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: content
+  field_tags:
+    weight: 103
+    label: hidden
+    settings:
+      link: true
+    third_party_settings: {  }
+    type: entity_reference_label
+    region: content
+  links:
+    weight: 100
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+hidden: {  }

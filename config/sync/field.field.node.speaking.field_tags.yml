@@ -1,0 +1,29 @@
+uuid: a60a1187-237e-498a-8273-ac9175ffbe85
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_tags
+    - node.type.speaking
+    - taxonomy.vocabulary.tags
+id: node.speaking.field_tags
+field_name: field_tags
+entity_type: node
+bundle: speaking
+label: Tags
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:taxonomy_term'
+  handler_settings:
+    target_bundles:
+      tags: tags
+    sort:
+      field: name
+      direction: asc
+    auto_create: true
+    auto_create_bundle: site_section
+field_type: entity_reference
