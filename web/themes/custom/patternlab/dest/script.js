@@ -149,15 +149,15 @@
 })(jQuery, Drupal);
 "use strict";
 
-(function videoScript($, Drupal) {
-  Drupal.behaviors.video = {
+(function tiledlayoutScript($, Drupal) {
+  Drupal.behaviors.tiledlayout = {
     attach: function attach(context) {}
   };
 })(jQuery, Drupal);
 "use strict";
 
-(function tiledlayoutScript($, Drupal) {
-  Drupal.behaviors.tiledlayout = {
+(function videoScript($, Drupal) {
+  Drupal.behaviors.video = {
     attach: function attach(context) {}
   };
 })(jQuery, Drupal);
@@ -170,15 +170,15 @@
 })(jQuery, Drupal);
 "use strict";
 
-(function speakingScript($, Drupal) {
-  Drupal.behaviors.speaking = {
+(function basicpageScript($, Drupal) {
+  Drupal.behaviors.basicpage = {
     attach: function attach(context) {}
   };
 })(jQuery, Drupal);
 "use strict";
 
-(function basicpageScript($, Drupal) {
-  Drupal.behaviors.basicpage = {
+(function speakingScript($, Drupal) {
+  Drupal.behaviors.speaking = {
     attach: function attach(context) {}
   };
 })(jQuery, Drupal);
@@ -275,15 +275,15 @@
 })(jQuery, Drupal);
 "use strict";
 
-(function teaserScript($, Drupal) {
-  Drupal.behaviors.teaser = {
+(function fullScript($, Drupal) {
+  Drupal.behaviors.full = {
     attach: function attach(context) {}
   };
 })(jQuery, Drupal);
 "use strict";
 
-(function fullScript($, Drupal) {
-  Drupal.behaviors.full = {
+(function teaserScript($, Drupal) {
+  Drupal.behaviors.teaser = {
     attach: function attach(context) {}
   };
 })(jQuery, Drupal);
