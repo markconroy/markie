@@ -1,5 +1,6 @@
 {%
 set classes = [
+  'full',
   'node',
   'node--type-' ~ node.bundle|clean_class,
   node.isPromoted ? 'node--promoted',
@@ -26,7 +27,9 @@ set classes = [
   {{ title_suffix }}
 
   {% if intro %}
-    {{ intro }}
+    <div class="full__intro">
+      {{ intro }}
+    </div>
   {% endif %}
 
   {% if main_image %}
@@ -51,9 +54,12 @@ set classes = [
       <a href="https://twitter.com/markconroy?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow @markconroy</a><script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
     </div>
   </div>
+
   <div class="layout-contained--small padding">
-    {{ content.field_tags }}
-  </div>
+      <div class="full__tags">
+        {{ content.field_tags }}
+      </div>
+    </div>
 
   <div class="layout-contained--small padding">
     {{ content.comment }}

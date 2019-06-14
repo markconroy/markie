@@ -20,3 +20,11 @@ $spacing--l: 20px;
 .padding {
   padding: 0 $base-font-size;
 }
+.padding-horizontal {
+  padding-right: $base-font-size;
+  padding-left: $base-font-size;
+}
+.padding-vertical {
+  padding-top: $base-font-size;
+  padding-bottom: $base-font-size;
+}

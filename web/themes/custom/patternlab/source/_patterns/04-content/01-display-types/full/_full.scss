@@ -1,31 +1,31 @@
 /**
  * @file
- * This file is used to style items in node--view-mode-full.
+ * This file is used to style items in full.
  *
  * Items here are generic and may be overridden by more specific styling.
  */
 
-.node--view-mode-full > h1 {
+.full > h1 {
   @extend .layout-contained--small;
   margin-bottom: $base-line-height;
   @include breakpoint($bp--medium) {
-    margin-top: $base-line-height * 2
+    margin-top: $base-line-height * 2;
   }
 }
 
-.node--view-mode-full > .field--name-field-intro {
+.full__intro {
   @extend .layout-contained--small;
   @extend .text--large;
 }
 
-.node--view-mode-full .node__meta {
+.full .node__meta {
   margin-top: $base-line-height;
   @include breakpoint($bp--large) {
     margin-top: $base-line-height * 3;
   }
 }
 
-.field--name-field-tags {
+.full__tags {
   margin-bottom: 1rem;
 }
 
@@ -37,7 +37,7 @@
   }
 }
 
-.field--name-field-tags .field__item {
+.full__tags .field__item {
   display: inline;
-  margin-right: .5rem;
+  margin-right: 0.5rem;
 }
