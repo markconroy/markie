@@ -17,6 +17,7 @@
     padding: 1rem;
     transition: 0.3s;
     transition: $trans;
+    transition: $trans;
     transform: rotate(-3deg);
     text-decoration: none;
     text-transform: uppercase;
@@ -27,6 +28,7 @@
     font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif;
     &:focus,
     &:hover {
+      transform: rotate(0);
       text-decoration: underline;
     }
   }
