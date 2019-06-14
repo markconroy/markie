@@ -992,6 +992,7 @@ a:focus, a:hover {
   padding: 1rem;
   transition: 0.3s;
   transition: 0.3s;
+  transition: 0.3s;
   transform: rotate(-3deg);
   text-decoration: none;
   text-transform: uppercase;
@@ -1003,6 +1004,7 @@ a:focus, a:hover {
 }
 
 .branding__name a:focus, .branding__name a:hover {
+  transform: rotate(0);
   text-decoration: underline;
 }
 
