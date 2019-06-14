@@ -149,13 +149,6 @@
 })(jQuery, Drupal);
 "use strict";
 
-(function tiledlayoutScript($, Drupal) {
-  Drupal.behaviors.tiledlayout = {
-    attach: function attach(context) {}
-  };
-})(jQuery, Drupal);
-"use strict";
-
 (function videoScript($, Drupal) {
   Drupal.behaviors.video = {
     attach: function attach(context) {}
@@ -163,8 +156,22 @@
 })(jQuery, Drupal);
 "use strict";
 
+(function tiledlayoutScript($, Drupal) {
+  Drupal.behaviors.tiledlayout = {
+    attach: function attach(context) {}
+  };
+})(jQuery, Drupal);
+"use strict";
+
 (function articleScript($, Drupal) {
   Drupal.behaviors.article = {
+    attach: function attach(context) {}
+  };
+})(jQuery, Drupal);
+"use strict";
+
+(function speakingScript($, Drupal) {
+  Drupal.behaviors.speaking = {
     attach: function attach(context) {}
   };
 })(jQuery, Drupal);
@@ -179,6 +186,13 @@
 
 (function aboveheaderScript($, Drupal) {
   Drupal.behaviors.aboveheader = {
+    attach: function attach(context) {}
+  };
+})(jQuery, Drupal);
+"use strict";
+
+(function belowheaderScript($, Drupal) {
+  Drupal.behaviors.belowheader = {
     attach: function attach(context) {}
   };
 })(jQuery, Drupal);
@@ -207,13 +221,6 @@
 
 (function pagetitleScript($, Drupal) {
   Drupal.behaviors.pagetitle = {
-    attach: function attach(context) {}
-  };
-})(jQuery, Drupal);
-"use strict";
-
-(function belowheaderScript($, Drupal) {
-  Drupal.behaviors.belowheader = {
     attach: function attach(context) {}
   };
 })(jQuery, Drupal);

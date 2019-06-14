@@ -115,7 +115,7 @@
   max-width: 1024px;
 }
 
-.layout-contained--small, .node--view-mode-full > h1, .node--view-mode-full > .field--name-field-intro, .default-list .views-row {
+.layout-contained--small, .full > h1, .full__intro, .default-list .views-row {
   margin: auto;
   max-width: 768px;
 }
@@ -479,8 +479,18 @@
   margin-top: 5px;
 }
 
-.padding, .text--large, .node--view-mode-full > .field--name-field-intro, .default-list .view-content {
+.padding, .text--large, .full__intro, .default-list .view-content {
   padding: 0 16px;
+}
+
+.padding-horizontal {
+  padding-right: 16px;
+  padding-left: 16px;
+}
+
+.padding-vertical {
+  padding-top: 16px;
+  padding-bottom: 16px;
 }
 
 .float-left {
@@ -592,7 +602,7 @@ h1, .h1 {
   margin-bottom: 23.4px;
 }
 
-h2, .h2 {
+h2, .h2, .speaking__meta-item {
   margin-bottom: 23.4px;
 }
 
@@ -705,7 +715,8 @@ h1,
 }
 
 h2,
-.h2 {
+.h2,
+.speaking__meta-item {
   color: #002a2a;
   font-family: serif;
   font-size: 1.3rem;
@@ -714,19 +725,20 @@ h2,
 
 @media (min-width: 1024px) {
   h2,
-  .h2 {
+  .h2,
+  .speaking__meta-item {
     font-size: 1.667rem;
   }
 }
 
 h2.node__title a,
-.h2.node__title a {
+.h2.node__title a, .node__title.speaking__meta-item a {
   color: #e61313;
 }
 
 h2.node__title a:focus, h2.node__title a:hover,
-.h2.node__title a:focus,
-.h2.node__title a:hover {
+.h2.node__title a:focus, .node__title.speaking__meta-item a:focus,
+.h2.node__title a:hover, .node__title.speaking__meta-item a:hover {
   color: #002a2a;
 }
 
@@ -772,18 +784,21 @@ h6,
 
 ul + h2,
 ul + .h2,
+ul + .speaking__meta-item,
 ul + h3,
 ul + .h3,
 ul + h4,
 ul + .h4,
 ol + h2,
 ol + .h2,
+ol + .speaking__meta-item,
 ol + h3,
 ol + .h3,
 ol + h4,
 ol + .h4,
 p + h2,
 p + .h2,
+p + .speaking__meta-item,
 p + h3,
 p + .h3,
 p + h4,
@@ -807,7 +822,7 @@ a:focus, a:hover {
   color: #e61313;
 }
 
-.text--large, .node--view-mode-full > .field--name-field-intro {
+.text--large, .full__intro {
   font-size: 18px;
   margin-bottom: 23.4px;
   color: #292929;
@@ -815,13 +830,13 @@ a:focus, a:hover {
 }
 
 @media screen and (min-width: 380px) {
-  .text--large, .node--view-mode-full > .field--name-field-intro {
+  .text--large, .full__intro {
     font-size: calc(18px + 10.8 * (100vw - 380px) / 790);
   }
 }
 
 @media screen and (min-width: 1170px) {
-  .text--large, .node--view-mode-full > .field--name-field-intro {
+  .text--large, .full__intro {
     font-size: 28.8px;
   }
 }
@@ -1783,31 +1798,31 @@ a.tile--tertiary:hover .tile__text {
 
 /**
  * @file
- * This file is used to style items in node--view-mode-full.
+ * This file is used to style items in full.
  *
  * Items here are generic and may be overridden by more specific styling.
  */
-.node--view-mode-full > h1 {
+.full > h1 {
   margin-bottom: 23.4px;
 }
 
 @media (min-width: 640px) {
-  .node--view-mode-full > h1 {
+  .full > h1 {
     margin-top: 46.8px;
   }
 }
 
-.node--view-mode-full .node__meta {
+.full .node__meta {
   margin-top: 23.4px;
 }
 
 @media (min-width: 768px) {
-  .node--view-mode-full .node__meta {
+  .full .node__meta {
     margin-top: 70.2px;
   }
 }
 
-.field--name-field-tags {
+.full__tags {
   margin-bottom: 1rem;
 }
 
@@ -1819,9 +1834,9 @@ a.tile--tertiary:hover .tile__text {
   color: #292929;
 }
 
-.field--name-field-tags .field__item {
+.full__tags .field__item {
   display: inline;
-  margin-right: .5rem;
+  margin-right: 0.5rem;
 }
 
 .node--view-mode-teaser {
@@ -1957,7 +1972,6 @@ a.tile--tertiary:hover .tile__text {
 
 @media (min-width: 1024px) {
   .default-list .views-row {
-    position: relative;
     left: 8px;
   }
 }
@@ -2133,6 +2147,37 @@ a.tile--tertiary:hover .tile__text {
 
 .comment-form .filter-wrapper {
   display: none;
+}
+
+.speaking__video {
+  margin-bottom: 46.8px;
+}
+
+.speaking__meta {
+  margin-top: 46.8px;
+  margin-bottom: 46.8px;
+  padding: 3rem 1rem 1rem;
+  transform: rotate(-0.75deg);
+  border: 2px solid #002a2a;
+  border-radius: 0.5rem;
+  background-color: #fafafa;
+  box-shadow: 1px 2px 1px 2px #002a2a;
+  font-weight: bold;
+}
+
+.speaking__meta-item {
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-pack: center;
+      justify-content: center;
+  -ms-flex-align: center;
+      align-items: center;
+  transform: rotate(0.75deg);
+}
+
+.speaking__meta-item-label {
+  width: 75px;
+  color: #e61313;
 }
 
 .above-header__inner {

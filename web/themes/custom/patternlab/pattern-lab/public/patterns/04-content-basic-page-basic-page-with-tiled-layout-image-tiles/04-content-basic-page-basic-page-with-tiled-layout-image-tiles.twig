@@ -1,6 +1,7 @@
 {%
 set classes = [
-  "basic-page",
+  'full',
+  'basic-page',
   'node',
   'node--type-' ~ node.bundle|clean_class,
   node.isPromoted ? 'node--promoted',
@@ -10,13 +11,15 @@ set classes = [
 ]
 %}
 
-<div{{ attributes.addClass(classes) }}>
+<article{{ attributes.addClass(classes) }}>
   {{ title_prefix }}
     <h1{{ title_attributes.addClass('padding') }}>{{ label }}</h1>
   {{ title_suffix }}
 
   {% if intro %}
-    {{ intro }}
+    <div class="full__intro">
+      {{ intro }}
+    </div>
   {% endif %}
 
 
@@ -30,4 +33,4 @@ set classes = [
     </div>
   {% endblock %}
 
-</div>
+</article>
