@@ -5,29 +5,35 @@
 }
 
 .video .video__item {
+  padding: 0.5rem;
+  transform: rotate(-0.75deg);
+  border: 3px solid $c-secondary;
+  background-color: $c-tertiary;
   @include breakpoint($bp--xlarge) {
-    box-shadow: 0 2px 4px 0 rgba(0,0,0,0.50);
     margin: auto -10px;
-    padding: 10px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 4px 0 rgba(0,0,0,0.50);
   }
 }
 
 .video .video-embed-field-responsive-video {
   position: relative;
   &:after {
-    content: '';
     display: block;
     padding-bottom: 56.25%;
+    content: "";
   }
 }
 
 .video .video-embed-field-responsive-video iframe {
-	position: absolute;
-	top: 0;
-	right: 0;
-	bottom: 0;
-	left: 0;
-	width: 100%;
-	height: 100%;
-	margin: 0;
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  transform: rotate(0.75deg);
+  box-shadow: 3px 3px 5px 1px rgba(0,0,0,0.50);
 }
