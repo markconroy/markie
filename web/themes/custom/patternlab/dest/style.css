@@ -980,7 +980,7 @@ a:focus, a:hover {
 }
 
 .branding__name {
-  width: 250px;
+  max-width: 250px;
   margin-bottom: 0;
   line-height: 1;
 }
@@ -989,7 +989,7 @@ a:focus, a:hover {
   position: relative;
   bottom: -2px;
   display: block;
-  padding: 1rem;
+  padding: 0.5rem;
   transition: 0.3s;
   transition: 0.3s;
   transition: 0.3s;
@@ -1003,16 +1003,28 @@ a:focus, a:hover {
   font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif;
 }
 
+@media (min-width: 640px) {
+  .branding__name a {
+    padding: 1rem;
+  }
+}
+
 .branding__name a:focus, .branding__name a:hover {
   transform: rotate(0);
   text-decoration: underline;
 }
 
 .branding__slogan {
-  width: 250px;
+  max-width: 250px;
   margin-bottom: 0;
-  padding: 1rem;
+  padding: 0.5rem;
   border: 2px solid #002a2a;
+}
+
+@media (min-width: 640px) {
+  .branding__slogan {
+    padding: 1rem;
+  }
 }
 
 .breadcrumb ol {
@@ -2364,11 +2376,6 @@ a.tile--tertiary:hover .tile__text {
 }
 
 .header .branding {
-  -ms-flex: 0 0 50%;
-      flex: 0 0 50%;
-}
-
-.header .main-navigation {
   -ms-flex: 0 0 50%;
       flex: 0 0 50%;
 }
