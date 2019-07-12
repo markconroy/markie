@@ -7,14 +7,14 @@
   max-width: 415px;
 }
 .branding__name {
-  width: 250px;
+  max-width: 250px;
   margin-bottom: 0;
   line-height: 1;
   a {
     position: relative;
     bottom: -2px;
     display: block;
-    padding: 1rem;
+    padding: 0.5rem;
     transition: 0.3s;
     transition: $trans;
     transition: $trans;
@@ -26,6 +26,10 @@
     border-bottom: 0;
     background-color: $c-secondary;
     font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif;
+    // font-size: 1rem;
+    @include breakpoint($bp--medium) {
+      padding: 1rem;
+    }
     &:focus,
     &:hover {
       transform: rotate(0);
@@ -34,8 +38,11 @@
   }
 }
 .branding__slogan {
-  width: 250px;
+  max-width: 250px;
   margin-bottom: 0;
-  padding: 1rem;
+  padding: 0.5rem;
   border: 2px solid $c-secondary;
+  @include breakpoint($bp--medium) {
+    padding: 1rem;
+  }
 }
