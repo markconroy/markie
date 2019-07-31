@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "e89c4722f91ace33613c50a45ad170dd",
+    "content-hash": "fb87f00cf636c595e86dad30594cfd71",
     "packages": [
         {
             "name": "alchemy/zippy",
@@ -3568,20 +3568,24 @@
         },
         {
             "name": "drupal/xmlsitemap",
-            "version": "1.0.0-alpha2",
+            "version": "1.0.0-alpha3",
             "source": {
                 "type": "git",
                 "url": "https://git.drupalcode.org/project/xmlsitemap.git",
-                "reference": "8.x-1.0-alpha2"
+                "reference": "8.x-1.0-alpha3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://ftp.drupal.org/files/projects/xmlsitemap-8.x-1.0-alpha2.zip",
-                "reference": "8.x-1.0-alpha2",
-                "shasum": "72576d8e40b747a71bd45577f9ab503a4a9d035e"
+                "url": "https://ftp.drupal.org/files/projects/xmlsitemap-8.x-1.0-alpha3.zip",
+                "reference": "8.x-1.0-alpha3",
+                "shasum": "5318e0eaa1710f5d02021b406135e1a1b038ed4f"
             },
             "require": {
-                "drupal/core": "~8.0"
+                "drupal/core": "~8.0",
+                "ext-xmlwriter": "*"
+            },
+            "require-dev": {
+                "drupal/robotstxt": "^1.0"
             },
             "type": "drupal-module",
             "extra": {
@@ -3589,8 +3593,8 @@
                     "dev-1.x": "1.x-dev"
                 },
                 "drupal": {
-                    "version": "8.x-1.0-alpha2",
-                    "datestamp": "1464192275",
+                    "version": "8.x-1.0-alpha3",
+                    "datestamp": "1538607180",
                     "security-coverage": {
                         "status": "not-covered",
                         "message": "Alpha releases are not covered by Drupal security advisories."
@@ -3599,7 +3603,7 @@
             },
             "notification-url": "https://packages.drupal.org/8/downloads",
             "license": [
-                "GPL-2.0+"
+                "GPL-2.0-or-later"
             ],
             "authors": [
                 {
@@ -3619,16 +3623,16 @@
                     "homepage": "https://www.drupal.org/user/2628879"
                 },
                 {
-                    "name": "earnie",
-                    "homepage": "https://www.drupal.org/user/86710"
-                },
-                {
                     "name": "juampynr",
                     "homepage": "https://www.drupal.org/user/682736"
                 },
                 {
                     "name": "paulmckibben",
                     "homepage": "https://www.drupal.org/user/279003"
+                },
+                {
+                    "name": "pifagor",
+                    "homepage": "https://www.drupal.org/user/2375692"
                 },
                 {
                     "name": "tadityar",
@@ -3639,10 +3643,11 @@
                     "homepage": "https://www.drupal.org/user/1835276"
                 }
             ],
-            "description": "Creates an XML sitemap conforming to the <a href=\"http://sitemaps.org/\">sitemaps.org protocol</a>.",
+            "description": "Creates XML sitemaps for the site",
             "homepage": "https://www.drupal.org/project/xmlsitemap",
             "support": {
-                "source": "http://cgit.drupalcode.org/xmlsitemap"
+                "source": "http://cgit.drupalcode.org/xmlsitemap",
+                "issues": "http://drupal.org/project/issues/xmlsitemap"
             }
         },
         {
@@ -3878,7 +3883,9 @@
             "version": "3.0.0-beta",
             "dist": {
                 "type": "zip",
-                "url": "https://github.com/fengyuanchen/cropper/archive/v3.0.0-beta.zip"
+                "url": "https://github.com/fengyuanchen/cropper/archive/v3.0.0-beta.zip",
+                "reference": null,
+                "shasum": null
             },
             "require": {
                 "composer/installers": "~1.0"

@@ -63,7 +63,7 @@
     "drupal/schema_metatag": "1.0",
     "drupal/twig_tweak": "1.9",
     "drupal/video_embed_field": "1.5",
-    "drupal/xmlsitemap": "1.0-alpha2",
+    "drupal/xmlsitemap": "1.0.0-alpha3",
     "drush/drush": "~8.0",
     "fengyuanchen/cropper": "3.0.0-beta",
     "webflo/drupal-finder": "^1.0.0",
