@@ -40,7 +40,7 @@
     "drupal/core": "^8.0.0",
     "drupal/crop": "1.5",
     "drupal/devel": "1.2",
-    "drupal/entity": "1.0-beta4",
+    "drupal/entity": "1.0.0-rc3",
     "drupal/entity_browser": "1.5",
     "drupal/entity_reference_revisions": "1.4",
     "drupal/field_group": "1.0",
