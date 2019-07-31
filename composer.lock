@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "e89c4722f91ace33613c50a45ad170dd",
+    "content-hash": "5c12bd9f8b6b3e11febd8c276ae3e5f0",
     "packages": [
         {
             "name": "alchemy/zippy",
@@ -3089,17 +3089,17 @@
         },
         {
             "name": "drupal/mgv",
-            "version": "1.11.0",
+            "version": "1.13.0",
             "source": {
                 "type": "git",
                 "url": "https://git.drupalcode.org/project/mgv.git",
-                "reference": "8.x-1.11"
+                "reference": "8.x-1.13"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://ftp.drupal.org/files/projects/mgv-8.x-1.11.zip",
-                "reference": "8.x-1.11",
-                "shasum": "d747683626851cd43fb9983cf7ef68dafb97113d"
+                "url": "https://ftp.drupal.org/files/projects/mgv-8.x-1.13.zip",
+                "reference": "8.x-1.13",
+                "shasum": "28d9d0ffc2d70270abd48ffc4739ac589650c3e1"
             },
             "require": {
                 "drupal/core": "~8.0"
@@ -3110,8 +3110,8 @@
                     "dev-1.x": "1.x-dev"
                 },
                 "drupal": {
-                    "version": "8.x-1.11",
-                    "datestamp": "1520254084",
+                    "version": "8.x-1.13",
+                    "datestamp": "1561538889",
                     "security-coverage": {
                         "status": "covered",
                         "message": "Covered by Drupal's security advisory policy"
@@ -3131,7 +3131,7 @@
             "description": "Some extra global variables to make your life a little easier.",
             "homepage": "https://www.drupal.org/project/mgv",
             "support": {
-                "source": "http://cgit.drupalcode.org/mgv"
+                "source": "https://git.drupalcode.org/project/mgv"
             }
         },
         {
@@ -3878,7 +3878,9 @@
             "version": "3.0.0-beta",
             "dist": {
                 "type": "zip",
-                "url": "https://github.com/fengyuanchen/cropper/archive/v3.0.0-beta.zip"
+                "url": "https://github.com/fengyuanchen/cropper/archive/v3.0.0-beta.zip",
+                "reference": null,
+                "shasum": null
             },
             "require": {
                 "composer/installers": "~1.0"
