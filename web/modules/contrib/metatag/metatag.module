@@ -278,6 +278,12 @@ function metatag_is_current_route_supported() {
     return FALSE;
   }
 
+  // Skip everything if the site is in maintenance mode.
+  $route_match = \Drupal::routeMatch();
+  if (\Drupal::service('maintenance_mode')->applies($route_match)) {
+    return FALSE;
+  }
+
   return TRUE;
 }
 
