@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "e89c4722f91ace33613c50a45ad170dd",
+    "content-hash": "b57eb50f72267bcb0fa61f374dcc0167",
     "packages": [
         {
             "name": "alchemy/zippy",
@@ -2312,21 +2312,21 @@
         },
         {
             "name": "drupal/focal_point",
-            "version": "1.0.0-beta4",
+            "version": "1.0.0",
             "source": {
                 "type": "git",
                 "url": "https://git.drupalcode.org/project/focal_point.git",
-                "reference": "8.x-1.0-beta4"
+                "reference": "8.x-1.0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://ftp.drupal.org/files/projects/focal_point-8.x-1.0-beta4.zip",
-                "reference": "8.x-1.0-beta4",
-                "shasum": "5c196948872af0621f1004d07c7d5aec583c11db"
+                "url": "https://ftp.drupal.org/files/projects/focal_point-8.x-1.0.zip",
+                "reference": "8.x-1.0",
+                "shasum": "dec88d870aaa21e99984d6328ccf95b8120ee472"
             },
             "require": {
                 "drupal/core": "*",
-                "drupal/crop": "^1.0.0-alpha2"
+                "drupal/crop": "*"
             },
             "require-dev": {
                 "drupal/crop": "*"
@@ -2337,17 +2337,17 @@
                     "dev-1.x": "1.x-dev"
                 },
                 "drupal": {
-                    "version": "8.x-1.0-beta4",
-                    "datestamp": "1507560540",
+                    "version": "8.x-1.0",
+                    "datestamp": "1553270584",
                     "security-coverage": {
-                        "status": "not-covered",
-                        "message": "Beta releases are not covered by Drupal security advisories."
+                        "status": "covered",
+                        "message": "Covered by Drupal's security advisory policy"
                     }
                 }
             },
             "notification-url": "https://packages.drupal.org/8/downloads",
             "license": [
-                "GPL-2.0+"
+                "GPL-2.0-or-later"
             ],
             "authors": [
                 {
@@ -2358,7 +2358,7 @@
             "description": "Allows users to specify the focal point of an image for use during cropping.",
             "homepage": "https://www.drupal.org/project/focal_point",
             "support": {
-                "source": "http://cgit.drupalcode.org/focal_point"
+                "source": "https://git.drupalcode.org/project/focal_point"
             }
         },
         {
@@ -3878,7 +3878,9 @@
             "version": "3.0.0-beta",
             "dist": {
                 "type": "zip",
-                "url": "https://github.com/fengyuanchen/cropper/archive/v3.0.0-beta.zip"
+                "url": "https://github.com/fengyuanchen/cropper/archive/v3.0.0-beta.zip",
+                "reference": null,
+                "shasum": null
             },
             "require": {
                 "composer/installers": "~1.0"
