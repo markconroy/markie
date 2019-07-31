@@ -282,6 +282,15 @@ class MediaLibraryStateTest extends KernelTestBase {
   }
 
   /**
+   * @covers ::fromRequest
+   */
+  public function testFromRequestQueryLess() {
+    $this->setExpectedException(\InvalidArgumentException::class, 'The opener ID parameter is required and must be a string.');
+    $state = MediaLibraryState::fromRequest(new Request());
+    $this->assertInstanceOf(MediaLibraryState::class, $state);
+  }
+
+  /**
    * Data provider for testFromRequest().
    *
    * @return array
@@ -340,6 +349,16 @@ class MediaLibraryStateTest extends KernelTestBase {
     ];
 
     return $test_data;
+  }
+
+  /**
+   * @covers ::getOpenerParameters
+   */
+  public function testOpenerParameters() {
+    $state = MediaLibraryState::create('test', ['file'], 'file', -1, [
+      'foo' => 'baz',
+    ]);
+    $this->assertSame(['foo' => 'baz'], $state->getOpenerParameters());
   }
 
 }

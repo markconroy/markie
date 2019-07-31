@@ -1847,17 +1847,17 @@
     },
     {
         "name": "drupal/core",
-        "version": "8.7.1",
-        "version_normalized": "8.7.1.0",
+        "version": "8.7.5",
+        "version_normalized": "8.7.5.0",
         "source": {
             "type": "git",
             "url": "https://github.com/drupal/core.git",
-            "reference": "969f24810fb31eac71dd624de593f551bd6dc2a3"
+            "reference": "12cea52c782bb76e666c54c2a65cd3946daa3613"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/drupal/core/zipball/969f24810fb31eac71dd624de593f551bd6dc2a3",
-            "reference": "969f24810fb31eac71dd624de593f551bd6dc2a3",
+            "url": "https://api.github.com/repos/drupal/core/zipball/12cea52c782bb76e666c54c2a65cd3946daa3613",
+            "reference": "12cea52c782bb76e666c54c2a65cd3946daa3613",
             "shasum": ""
         },
         "require": {
@@ -1882,7 +1882,7 @@
             "ext-xml": "*",
             "guzzlehttp/guzzle": "^6.2.1",
             "masterminds/html5": "^2.1",
-            "paragonie/random_compat": "^1.0|^2.0",
+            "paragonie/random_compat": "^1.0|^2.0|^9.99.99",
             "pear/archive_tar": "^1.4",
             "php": "^5.5.9|>=7.0.8",
             "stack/builder": "^1.0",
@@ -2034,7 +2034,7 @@
             "symfony/debug": "^3.4.0",
             "symfony/phpunit-bridge": "^3.4.3"
         },
-        "time": "2019-05-08T16:00:55+00:00",
+        "time": "2019-07-16T16:24:57+00:00",
         "type": "drupal-core",
         "extra": {
             "merge-plugin": {
