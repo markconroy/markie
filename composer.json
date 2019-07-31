@@ -46,7 +46,7 @@
     "drupal/field_group": "1.0",
     "drupal/focal_point": "1.0-beta4",
     "drupal/geshifilter": "^1.2",
-    "drupal/google_analytics": "2.3",
+    "drupal/google_analytics": "2.4.0",
     "drupal/honeypot": "1.27",
     "drupal/image_widget_crop": "2.1",
     "drupal/inline_entity_form": "1.0-beta1",
