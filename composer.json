@@ -62,7 +62,7 @@
     "drupal/redirect": "1.0",
     "drupal/schema_metatag": "1.0",
     "drupal/twig_tweak": "1.9",
-    "drupal/video_embed_field": "1.5",
+    "drupal/video_embed_field": "1.6.0",
     "drupal/xmlsitemap": "1.0-alpha2",
     "drush/drush": "~8.0",
     "fengyuanchen/cropper": "3.0.0-beta",
