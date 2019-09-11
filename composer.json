@@ -44,7 +44,7 @@
     "drupal/entity_browser": "1.5",
     "drupal/entity_reference_revisions": "1.4",
     "drupal/field_group": "1.0",
-    "drupal/focal_point": "1.0-beta4",
+    "drupal/focal_point": "1.1.0",
     "drupal/geshifilter": "^1.2",
     "drupal/google_analytics": "2.3",
     "drupal/honeypot": "1.27",
