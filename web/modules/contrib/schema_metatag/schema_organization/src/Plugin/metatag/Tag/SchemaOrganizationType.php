@@ -14,10 +14,10 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaTypeBase;
  * @MetatagTag(
  *   id = "schema_organization_type",
  *   label = @Translation("@type"),
- *   description = @Translation("The type of organization."),
+ *   description = @Translation("REQUIRED. The type of organization."),
  *   name = "@type",
  *   group = "schema_organization",
- *   weight = -5,
+ *   weight = -10,
  *   type = "string",
  *   secure = FALSE,
  *   multiple = FALSE

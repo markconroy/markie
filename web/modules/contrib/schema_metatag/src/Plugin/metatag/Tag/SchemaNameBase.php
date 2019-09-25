@@ -8,7 +8,7 @@ use Drupal\schema_metatag\SchemaMetatagManager;
 /**
  * All Schema.org tags should extend this class.
  */
-abstract class SchemaNameBase extends MetaNameBase {
+class SchemaNameBase extends MetaNameBase {
 
   /**
    * The #states base visibility selector for this element.
@@ -21,26 +21,28 @@ abstract class SchemaNameBase extends MetaNameBase {
    * {@inheritdoc}
    */
   public function output() {
+
     $value = SchemaMetatagManager::unserialize($this->value());
+
+    // If this is a complex array of value, process the array.
+    if (is_array($value)) {
+
+      // Clean out empty values.
+      $value = SchemaMetatagManager::arrayTrim($value);
+    }
+
     if (empty($value)) {
       return '';
     }
     // If this is a complex array of value, process the array.
     elseif (is_array($value)) {
 
-      // Clean out empty values.
-      $value = array_filter($value);
-
       // If the item is an array of values,
       // walk the array and process the values.
       array_walk_recursive($value, 'static::processItem');
 
-      // See if any nested items need to be pivoted.
-      // If pivot is set to 0, it would have been removed as an empty value.
-      if (array_key_exists('pivot', $value)) {
-        unset($value['pivot']);
-        $value = SchemaMetatagManager::pivot($value);
-      }
+      // Recursively pivot each branch of the array.
+      $value = static::pivotItem($value);
 
     }
     // Process a simple string.
@@ -80,9 +82,44 @@ abstract class SchemaNameBase extends MetaNameBase {
   /**
    * {@inheritdoc}
    */
+  public static function pivotItem($array) {
+    // See if any nested items need to be pivoted.
+    // If pivot is set to 0, it would have been removed as an empty value.
+    if (array_key_exists('pivot', $array)) {
+      unset($array['pivot']);
+      $array = SchemaMetatagManager::pivot($array);
+    }
+    foreach ($array as $key => &$value) {
+      if (is_array($value)) {
+        $value = static::pivotItem($value);
+      }
+    }
+    return $array;
+  }
+
+  /**
+   * Nested elements that cannot be exploded.
+   *
+   * @return array
+   *   Array of keys that might contain commas, or otherwise cannot be exploded.
+   */
+  protected function neverExplode() {
+    return [
+      'streetAddress',
+      'reviewBody',
+      'recipeInstructions',
+    ];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   protected function processItem(&$value, $key = 0) {
+
+    $explode = $key === 0 ? $this->multiple() : !in_array($key, $this->neverExplode());
+
     // Parse out the image URL, if needed.
-    $value = $this->parseImageUrlValue($value);
+    $value = $this->parseImageUrlValue($value, $explode);
 
     $value = trim($value);
 
@@ -90,8 +127,13 @@ abstract class SchemaNameBase extends MetaNameBase {
     if ($this->secure() && strpos($value, 'http://') !== FALSE) {
       $value = str_replace('http://', 'https://', $value);
     }
-
-    $value = $this->multiple() ? SchemaMetatagManager::explode($value) : $value;
+    if ($explode) {
+      $value = SchemaMetatagManager::explode($value);
+      // Clean out any empty values that might have been added by explode().
+      if (is_array($value)) {
+        $value = array_filter($value);
+      }
+    }
   }
 
   /**
@@ -100,7 +142,7 @@ abstract class SchemaNameBase extends MetaNameBase {
    * A copy of the base method of the same name, but where $value is passed
    * in instead of assumed to be $this->value().
    */
-  protected function parseImageUrlValue($value) {
+  protected function parseImageUrlValue($value, $explode) {
 
     // If this contains embedded image tags, extract the image URLs.
     if ($this->type() === 'image') {
@@ -112,7 +154,7 @@ abstract class SchemaNameBase extends MetaNameBase {
       }
 
       if (strip_tags($value) != $value) {
-        if ($this->multiple()) {
+        if ($explode) {
           $values = explode(',', $value);
         }
         else {
@@ -156,7 +198,7 @@ abstract class SchemaNameBase extends MetaNameBase {
   }
 
   /**
-   * Provide a test value for the property that will validate.
+   * Provide a test input value for the property that will validate.
    *
    * Tags like @type that contain values other than simple strings, for
    * instance a list of allowed options, should extend this method and return
@@ -168,6 +210,45 @@ abstract class SchemaNameBase extends MetaNameBase {
    */
   public static function testValue() {
     return static::testDefaultValue(2, ' ');
+  }
+
+  /**
+   * Provide a test output value for the input value.
+   *
+   * Tags that return values in a different format than the input, like
+   * values that are exploded, should extend this method and return
+   * a valid value.
+   *
+   * @param mixed $items
+   *   The input value, either a string or an array.
+   *
+   * @return mixed
+   *   Return the correct output value.
+   */
+  public static function processedTestValue($items) {
+    return $items;
+  }
+
+  /**
+   * Explode a test value.
+   *
+   * For test values, emulates the extra processing a multiple value would get.
+   *
+   * @param array $items
+   *   The input value, either a string or an array.
+   *
+   * @return mixed
+   *   Return the correct output value.
+   */
+  public static function processTestExplodeValue($items) {
+    if (!is_array($items)) {
+      $items = SchemaMetatagManager::explode($items);
+      // Clean out any empty values that might have been added by explode().
+      if (is_array($items)) {
+        $value = array_filter($items);
+      }
+    }
+    return $items;
   }
 
   /**

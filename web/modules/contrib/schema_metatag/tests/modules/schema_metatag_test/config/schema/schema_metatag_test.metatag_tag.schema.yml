@@ -1,13 +1,15 @@
 # The 'type' should be "label" for short meta tags and "text" for ones which
 # could get longer, especially ones which use a textarea field instead of a
 # textfield.
-
 metatag.metatag_tag.schema_metatag_test_address:
   type: text
   label: 'address'
 metatag.metatag_tag.schema_metatag_test_aggregate_rating:
   type: text
   label: 'aggregateRating'
+metatag.metatag_tag.schema_metatag_test_review:
+  type: text
+  label: 'review'
 metatag.metatag_tag.schema_metatag_test_date:
   type: text
   label: 'date'
@@ -26,9 +28,6 @@ metatag.metatag_tag.schema_metatag_test_has_part_multiple:
 metatag.metatag_tag.schema_metatag_test_image:
   type: text
   label: 'image'
-metatag.metatag_tag.schema_metatag_test_is_accessible_for_free:
-  type: text
-  label: 'isAccessibleForFree'
 metatag.metatag_tag.schema_metatag_test_item_list_element:
   type: text
   label: 'itemListElement'
@@ -48,5 +47,47 @@ metatag.metatag_tag.schema_metatag_test_place:
   type: text
   label: 'place'
 metatag.metatag_tag.schema_metatag_test_type:
-  type: label
+  type: text
   label: '@type'
+metatag.metatag_tag.schema_metatag_test_thing:
+  type: text
+  label: 'thing'
+metatag.metatag_tag.schema_metatag_test_event:
+  type: text
+  label: 'event'
+metatag.metatag_tag.schema_metatag_test_entry_point:
+  type: text
+  label: 'entryPoint'
+metatag.metatag_tag.schema_metatag_test_action:
+  type: text
+  label: 'action'
+metatag.metatag_tag.schema_metatag_test_creative_work:
+  type: text
+  label: 'creativeWork'
+metatag.metatag_tag.schema_metatag_test_member_of:
+  type: text
+  label: 'memberOf'
+metatag.metatag_tag.schema_metatag_test_nutrition_information:
+  type: text
+  label: 'nutritionInformation'
+metatag.metatag_tag.schema_metatag_test_opening_hours_specification:
+  type: text
+  label: 'openingHoursSpecification'
+metatag.metatag_tag.schema_metatag_test_contact_point:
+  type: text
+  label: 'contactPoint'
+metatag.metatag_tag.schema_metatag_test_speakable:
+  type: text
+  label: 'speakable'
+metatag.metatag_tag.schema_metatag_test_id_reference:
+  type: text
+  label: 'idReference'
+metatag.metatag_tag.schema_metatag_test_how_to_step:
+  type: text
+  label: 'howToStep'
+metatag.metatag_tag.schema_metatag_test_question:
+  type: text
+  label: 'question'
+metatag.metatag_tag.schema_metatag_test_answer:
+  type: text
+  label: 'answer'

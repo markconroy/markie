@@ -14,7 +14,7 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
  * @MetatagTag(
  *   id = "schema_product_name",
  *   label = @Translation("name"),
- *   description = @Translation("The name of the product."),
+ *   description = @Translation("REQUIRED BY GOOGLE. The name of the product."),
  *   name = "name",
  *   group = "schema_product",
  *   weight = 0,
@@ -24,14 +24,5 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
  * )
  */
 class SchemaProductName extends SchemaNameBase {
-
-  /**
-   * Generate a form element for this meta tag.
-   */
-  public function form(array $element = []) {
-    $form = parent::form($element);
-    $form['#attributes']['placeholder'] = '[node:title]';
-    return $form;
-  }
 
 }

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "530906639fd261b7f7d1cd877966fa52",
+    "content-hash": "8f6e8942af0e9845f1b3ddc68212878f",
     "packages": [
         {
             "name": "alchemy/zippy",
@@ -1185,17 +1185,17 @@
         },
         {
             "name": "drupal/admin_toolbar",
-            "version": "1.24.0",
+            "version": "1.27.0",
             "source": {
                 "type": "git",
                 "url": "https://git.drupalcode.org/project/admin_toolbar.git",
-                "reference": "8.x-1.24"
+                "reference": "8.x-1.27"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://ftp.drupal.org/files/projects/admin_toolbar-8.x-1.24.zip",
-                "reference": "8.x-1.24",
-                "shasum": "682ffa443a1e339583022eb6adbb00c1103ea6d4"
+                "url": "https://ftp.drupal.org/files/projects/admin_toolbar-8.x-1.27.zip",
+                "reference": "8.x-1.27",
+                "shasum": "fed1fbbdf8f805b1da63d73e7e2c54750f354d61"
             },
             "require": {
                 "drupal/core": "*"
@@ -1206,8 +1206,8 @@
                     "dev-1.x": "1.x-dev"
                 },
                 "drupal": {
-                    "version": "8.x-1.24",
-                    "datestamp": "1527523080",
+                    "version": "8.x-1.27",
+                    "datestamp": "1558553350",
                     "security-coverage": {
                         "status": "covered",
                         "message": "Covered by Drupal's security advisory policy"
@@ -3337,17 +3337,17 @@
         },
         {
             "name": "drupal/schema_metatag",
-            "version": "1.0.0",
+            "version": "1.4.0",
             "source": {
                 "type": "git",
                 "url": "https://git.drupalcode.org/project/schema_metatag.git",
-                "reference": "8.x-1.0"
+                "reference": "8.x-1.4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://ftp.drupal.org/files/projects/schema_metatag-8.x-1.0.zip",
-                "reference": "8.x-1.0",
-                "shasum": "f5cfcfb623fd60512f83885cc419a9fac17add47"
+                "url": "https://ftp.drupal.org/files/projects/schema_metatag-8.x-1.4.zip",
+                "reference": "8.x-1.4",
+                "shasum": "5d0a677608e30a7c8ffb43d98759b19cf5be17f6"
             },
             "require": {
                 "drupal/core": "~8.0",
@@ -3356,7 +3356,7 @@
             "require-dev": {
                 "drupal/metatag_views": "*",
                 "drupal/schema_article": "*",
-                "drupal/votingapi": "*"
+                "drupal/schema_organization": "*"
             },
             "type": "drupal-module",
             "extra": {
@@ -3364,8 +3364,8 @@
                     "dev-1.x": "1.x-dev"
                 },
                 "drupal": {
-                    "version": "8.x-1.0",
-                    "datestamp": "1517694180",
+                    "version": "8.x-1.4",
+                    "datestamp": "1563033785",
                     "security-coverage": {
                         "status": "covered",
                         "message": "Covered by Drupal's security advisory policy"

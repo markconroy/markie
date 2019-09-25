@@ -1,0 +1,7 @@
+schema_audit.page:
+  path: '/admin/config/development/schema-metatag'
+  defaults:
+    _title: 'Schema Metatag Report Page'
+    _controller: '\Drupal\schema_audit\Controller\SchemaAuditRouteController::page'
+  requirements:
+    _permission: 'administer meta tags'

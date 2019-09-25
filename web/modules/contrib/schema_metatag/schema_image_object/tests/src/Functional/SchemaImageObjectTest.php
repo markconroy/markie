@@ -32,6 +32,7 @@ class SchemaImageObjectTest extends SchemaMetatagTagsTestBase {
    */
   public $schemaTags = [
     'schema_image_object_aggregate_rating' => 'SchemaImageObjectAggregateRating',
+    'schema_image_object_review' => 'SchemaImageObjectReview',
     'schema_image_object_description' => 'SchemaImageObjectDescription',
     'schema_image_object_height' => 'SchemaImageObjectHeight',
     'schema_image_object_name' => 'SchemaImageObjectName',

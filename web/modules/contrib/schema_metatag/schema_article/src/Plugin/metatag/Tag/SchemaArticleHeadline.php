@@ -14,7 +14,7 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
  * @MetatagTag(
  *   id = "schema_article_headline",
  *   label = @Translation("headline"),
- *   description = @Translation("Headline of the article."),
+ *   description = @Translation("REQUIRED BY GOOGLE. Headline of the article."),
  *   name = "headline",
  *   group = "schema_article",
  *   weight = 0,
@@ -24,14 +24,5 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
  * )
  */
 class SchemaArticleHeadline extends SchemaNameBase {
-
-  /**
-   * {@inheritdoc}
-   */
-  public function form(array $element = []) {
-    $form = parent::form($element);
-    $form['#attributes']['placeholder'] = '[node:title]';
-    return $form;
-  }
 
 }

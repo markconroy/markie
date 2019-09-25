@@ -14,10 +14,10 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaTypeBase;
  * @MetatagTag(
  *   id = "schema_person_type",
  *   label = @Translation("@type"),
- *   description = @Translation("The type of person (fixed by standard)."),
+ *   description = @Translation("REQUIRED. The type of person (fixed by standard)."),
  *   name = "@type",
  *   group = "schema_person",
- *   weight = -99,
+ *   weight = -10,
  *   type = "string",
  *   secure = FALSE,
  *   multiple = FALSE

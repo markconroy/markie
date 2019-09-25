@@ -14,7 +14,7 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaGeoBase;
  * @MetatagTag(
  *   id = "schema_organization_geo",
  *   label = @Translation("geo"),
- *   description = @Translation("The geographic coordinates of a place or event."),
+ *   description = @Translation("RECOMMENDED BY GOOGLE. The geographic coordinates of a place or event."),
  *   name = "geo",
  *   group = "schema_organization",
  *   weight = 10,

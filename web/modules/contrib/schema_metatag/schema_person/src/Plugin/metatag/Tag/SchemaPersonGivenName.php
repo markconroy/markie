@@ -17,7 +17,7 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
  *   description = @Translation("Given name. In the U.S., the first name of a Person. This can be used along with familyName instead of the name property."),
  *   name = "givenName",
  *   group = "schema_person",
- *   weight = -40,
+ *   weight = -6,
  *   type = "string",
  *   secure = FALSE,
  *   multiple = FALSE

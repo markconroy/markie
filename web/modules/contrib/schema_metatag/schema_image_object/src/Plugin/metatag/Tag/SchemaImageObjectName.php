@@ -17,7 +17,7 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
  *   description = @Translation("The title of the image."),
  *   name = "name",
  *   group = "schema_image_object",
- *   weight = -40,
+ *   weight = 0,
  *   type = "string",
  *   secure = FALSE,
  *   multiple = FALSE

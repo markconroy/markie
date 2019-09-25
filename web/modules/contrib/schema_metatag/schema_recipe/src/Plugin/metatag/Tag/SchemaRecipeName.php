@@ -14,7 +14,7 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
  * @MetatagTag(
  *   id = "schema_recipe_name",
  *   label = @Translation("name"),
- *   description = @Translation("Name (the name of the recipe, which isn’t necessarily the name of the node)."),
+ *   description = @Translation("REQUIRED BY GOOGLE. Name of the recipe."),
  *   name = "name",
  *   group = "schema_recipe",
  *   weight = 0,
@@ -24,14 +24,5 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
  * )
  */
 class SchemaRecipeName extends SchemaNameBase {
-
-  /**
-   * Generate a form element for this meta tag.
-   */
-  public function form(array $element = []) {
-    $form = parent::form($element);
-    $form['#attributes']['placeholder'] = '[node:title]';
-    return $form;
-  }
 
 }

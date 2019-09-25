@@ -17,7 +17,7 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
  *   description = @Translation("The price range of products of the organization."),
  *   name = "priceRange",
  *   group = "schema_organization",
- *   weight = 11,
+ *   weight = 5,
  *   type = "string",
  *   secure = FALSE,
  *   multiple = FALSE

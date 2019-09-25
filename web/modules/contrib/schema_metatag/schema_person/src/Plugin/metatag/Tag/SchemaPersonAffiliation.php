@@ -17,7 +17,7 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaPersonOrgBase;
  *   description = @Translation("An organization that this person is affiliated with. For example, a school/university, a club, or a team."),
  *   name = "affiliation",
  *   group = "schema_person",
- *   weight = 25,
+ *   weight = 11,
  *   type = "string",
  *   secure = FALSE,
  *   multiple = FALSE

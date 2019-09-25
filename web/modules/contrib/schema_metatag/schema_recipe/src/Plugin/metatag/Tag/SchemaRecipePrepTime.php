@@ -14,7 +14,7 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaDurationBase;
  * @MetatagTag(
  *   id = "schema_recipe_prep_time",
  *   label = @Translation("prepTime"),
- *   description = @Translation("Prep Time (the name of the recipe, which isn’t necessarily the name of the node)."),
+ *   description = @Translation("RECOMMENDED BY GOOGLE. The length of time it takes to prepare the recipe for dish, in ISO 8601 format."),
  *   name = "prepTime",
  *   group = "schema_recipe",
  *   weight = 3,
@@ -24,14 +24,5 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaDurationBase;
  * )
  */
 class SchemaRecipePrepTime extends SchemaDurationBase {
-
-  /**
-   * Generate a form element for this meta tag.
-   */
-  public function form(array $element = []) {
-    $form = parent::form($element);
-    $form['#attributes']['placeholder'] = '';
-    return $form;
-  }
 
 }

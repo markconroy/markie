@@ -1,0 +1,4 @@
+audit-table:
+  css:
+    theme:
+      css/style.css: {}

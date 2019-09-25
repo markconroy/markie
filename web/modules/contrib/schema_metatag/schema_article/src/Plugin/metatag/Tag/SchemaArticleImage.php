@@ -14,7 +14,7 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaImageBase;
  * @MetatagTag(
  *   id = "schema_article_image",
  *   label = @Translation("image"),
- *   description = @Translation("The primary image for this item."),
+ *   description = @Translation("REQUIRED BY GOOGLE. The primary image for this item."),
  *   name = "image",
  *   group = "schema_article",
  *   weight = 2,
@@ -24,5 +24,5 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaImageBase;
  * )
  */
 class SchemaArticleImage extends SchemaImageBase {
-  // Nothing here yet. Just a placeholder class for a plugin.
+
 }

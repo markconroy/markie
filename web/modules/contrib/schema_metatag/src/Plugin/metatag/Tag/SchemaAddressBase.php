@@ -7,10 +7,9 @@ use Drupal\schema_metatag\SchemaMetatagManager;
 /**
  * Schema.org PostalAddress items should extend this class.
  */
-abstract class SchemaAddressBase extends SchemaNameBase {
+class SchemaAddressBase extends SchemaNameBase {
 
   use SchemaAddressTrait;
-  use SchemaPivotTrait;
 
   /**
    * The top level keys on this form.
@@ -30,15 +29,14 @@ abstract class SchemaAddressBase extends SchemaNameBase {
       'description' => $this->description(),
       'value' => $value,
       '#required' => isset($element['#required']) ? $element['#required'] : FALSE,
-      'visibility_selector' => $this->visibilitySelector() . '[@type]',
+      'visibility_selector' => $this->visibilitySelector(),
     ];
 
     $form = $this->postalAddressForm($input_values);
 
-    $form['pivot'] = $this->pivotForm($value);
-
-    $selector = ':input[name="' . $input_values['visibility_selector'] . '"]';
-    $form['pivot']['#states'] = ['invisible' => [$selector => ['value' => '']]];
+    if (empty($this->multiple())) {
+      unset($form['pivot']);
+    }
 
     return $form;
   }

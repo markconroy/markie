@@ -2,7 +2,7 @@
 
 namespace Drupal\schema_recipe\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaAggregateRatingBase;
+use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaRatingBase;
 
 /**
  * Provides a plugin for the 'schema_recipe_aggregate_rating' meta tag.
@@ -14,24 +14,15 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaAggregateRatingBase;
  * @MetatagTag(
  *   id = "schema_recipe_aggregate_rating",
  *   label = @Translation("aggregateRating"),
- *   description = @Translation("AggregateRating (the numeric AggregateRating of the recipe)."),
+ *   description = @Translation("RECOMMENDED BY GOOGLE. The overall rating, based on a collection of reviews or ratings, of the item."),
  *   name = "aggregateRating",
  *   group = "schema_recipe",
- *   weight = 10,
+ *   weight = 11,
  *   type = "string",
  *   secure = FALSE,
- *   multiple = FALSE
+ *   multiple = TRUE
  * )
  */
-class SchemaRecipeAggregateRating extends SchemaAggregateRatingBase {
-
-  /**
-   * Generate a form element for this meta tag.
-   */
-  public function form(array $element = []) {
-    $form = parent::form($element);
-    $form['#attributes']['placeholder'] = '';
-    return $form;
-  }
+class SchemaRecipeAggregateRating extends SchemaRatingBase {
 
 }

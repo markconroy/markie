@@ -14,7 +14,7 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaItemListElementViewsBase;
  * @MetatagTag(
  *   id = "schema_item_list_item_list_element",
  *   label = @Translation("itemListElement"),
- *   description = @Translation(""),
+ *   description = @Translation("REQUIRED BY GOOGLE. "),
  *   name = "itemListElement",
  *   group = "schema_item_list",
  *   weight = 1,

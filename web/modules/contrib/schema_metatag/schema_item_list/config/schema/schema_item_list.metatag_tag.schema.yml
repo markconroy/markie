@@ -5,9 +5,6 @@
 metatag.metatag_tag.schema_item_list_item_list_element:
   type: text
   label: 'itemListElement'
-metatag.metatag_tag.schema_item_list_id:
-  type: text
-  label: '@id'
 metatag.metatag_tag.schema_item_list_main_entity_of_page:
   type: text
   label: 'mainEntityOfPage'

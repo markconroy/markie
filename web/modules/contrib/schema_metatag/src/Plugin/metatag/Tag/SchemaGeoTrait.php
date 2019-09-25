@@ -2,10 +2,14 @@
 
 namespace Drupal\schema_metatag\Plugin\metatag\Tag;
 
+use Drupal\schema_metatag\SchemaMetatagManager;
+
 /**
  * Schema.org Geo trait.
  */
 trait SchemaGeoTrait {
+
+  use SchemaPivotTrait;
 
   /**
    * Form keys.
@@ -19,30 +23,28 @@ trait SchemaGeoTrait {
   }
 
   /**
-   * Input values.
-   */
-  public function geoInputValues() {
-    return [
-      'title' => '',
-      'description' => '',
-      'value' => [],
-      '#required' => FALSE,
-      'visibility_selector' => '',
-    ];
-  }
-
-  /**
    * The form element.
    */
   public function geoForm($input_values) {
 
-    $input_values += $this->geoInputValues();
+    $input_values += SchemaMetatagManager::defaultInputValues();
     $value = $input_values['value'];
+
+    // Get the id for the nested @type element.
+    $selector = ':input[name="' . $input_values['visibility_selector'] . '[@type]"]';
+    $visibility = ['invisible' => [$selector => ['value' => '']]];
+    $selector2 = SchemaMetatagManager::altSelector($selector);
+    $visibility2 = ['invisible' => [$selector2 => ['value' => '']]];
+    $visibility['invisible'] = [$visibility['invisible'], $visibility2['invisible']];
 
     $form['#type'] = 'fieldset';
     $form['#title'] = $input_values['title'];
     $form['#description'] = $input_values['description'];
     $form['#tree'] = TRUE;
+
+    // Add a pivot option to the form.
+    $form['pivot'] = $this->pivotForm($value);
+    $form['pivot']['#states'] = $visibility;
 
     $form['@type'] = [
       '#type' => 'select',
@@ -54,6 +56,7 @@ trait SchemaGeoTrait {
         'GeoCoordinates' => $this->t('GeoCoordinates'),
       ],
       '#required' => $input_values['#required'],
+      '#weight' => -10,
     ];
 
     $form['latitude'] = [
@@ -74,19 +77,12 @@ trait SchemaGeoTrait {
       '#description' => $this->t("The longitude of a location. For example -122.08585 (WGS 84)."),
     ];
 
-    // Add #states to show/hide the fields based on the value of @type,
-    // if a selector was provided.
-    if (!empty($input_values['visibility_selector'])) {
-      $selector = ':input[name="' . $input_values['visibility_selector'] . '"]';
-      $visibility = ['visible' => [$selector => ['value' => 'GeoCoordinates']]];
-      $keys = self::geoFormKeys();
-      foreach ($keys as $key) {
-        if ($key != '@type') {
-          $form[$key]['#states'] = $visibility;
-        }
+    $keys = static::geoFormKeys();
+    foreach ($keys as $key) {
+      if ($key != '@type') {
+        $form[$key]['#states'] = $visibility;
       }
     }
-
     return $form;
   }
 

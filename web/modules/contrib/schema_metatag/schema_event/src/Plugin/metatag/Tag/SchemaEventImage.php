@@ -14,7 +14,7 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaImageBase;
  * @MetatagTag(
  *   id = "schema_event_image",
  *   label = @Translation("image"),
- *   description = @Translation("The primary image for this item."),
+ *   description = @Translation("RECOMMENDED BY GOOGLE. The primary image for this item."),
  *   name = "image",
  *   group = "schema_event",
  *   weight = 1,
@@ -24,14 +24,5 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaImageBase;
  * )
  */
 class SchemaEventImage extends SchemaImageBase {
-
-  /**
-   * {@inheritdoc}
-   */
-  public function form(array $element = []) {
-    $form = parent::form($element);
-    $form['#attributes']['placeholder'] = '[node:field_event_image:url]';
-    return $form;
-  }
 
 }

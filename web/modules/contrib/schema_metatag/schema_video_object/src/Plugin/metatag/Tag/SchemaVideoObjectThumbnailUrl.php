@@ -14,7 +14,7 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
  * @MetatagTag(
  *   id = "schema_video_object_thumbnail_url",
  *   label = @Translation("thumbnailUrl"),
- *   description = @Translation("The thumbnail URL of the video."),
+ *   description = @Translation("REQUIRED BY GOOGLE. The thumbnail URL(s) of the video(s)."),
  *   name = "thumbnailUrl",
  *   group = "schema_video_object",
  *   weight = -1,

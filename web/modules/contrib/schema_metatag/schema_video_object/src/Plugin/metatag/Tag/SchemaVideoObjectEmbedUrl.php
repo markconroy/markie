@@ -14,7 +14,7 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
  * @MetatagTag(
  *   id = "schema_video_object_embed_url",
  *   label = @Translation("embedUrl"),
- *   description = @Translation("A URL pointing to a player for the specific video. Usually this is the information in the src element of an <embed> tag."),
+ *   description = @Translation("RECOMMENDED BY GOOGLE. A URL pointing to a player for the specific video. Usually this is the information in the src element of an <embed> tag."),
  *   name = "embedUrl",
  *   group = "schema_video_object",
  *   weight = 0,

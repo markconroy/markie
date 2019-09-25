@@ -1,0 +1,10 @@
+services:
+  schema_audit.schema_client:
+    class: Drupal\schema_audit\SchemaClient
+    arguments: ['@http_client', '@module_handler']
+  schema_audit.google_client:
+    class: Drupal\schema_audit\GoogleClient
+    arguments: []
+  schema_audit.drupal_client:
+    class: Drupal\schema_audit\DrupalClient
+    arguments: []

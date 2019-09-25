@@ -31,13 +31,13 @@ class SchemaEventTest extends SchemaMetatagTagsTestBase {
    * {@inheritdoc}
    */
   public $schemaTags = [
-    'schema_event_actor' => 'SchemaEventActor',
     'schema_event_aggregate_rating' => 'SchemaEventAggregateRating',
+    'schema_event_review' => 'SchemaEventReview',
     'schema_event_description' => 'SchemaEventDescription',
     'schema_event_door_time' => 'SchemaEventDoorTime',
     'schema_event_end_date' => 'SchemaEventEndDate',
     'schema_event_image' => 'SchemaEventImage',
-    'schema_event_is_accessible_for_free' => 'SchemaEventIsAccessibleForFree',
+    'schema_event_id' => 'SchemaEventId',
     'schema_event_location' => 'SchemaEventLocation',
     'schema_event_name' => 'SchemaEventName',
     'schema_event_offers' => 'SchemaEventOffers',
@@ -45,6 +45,7 @@ class SchemaEventTest extends SchemaMetatagTagsTestBase {
     'schema_event_start_date' => 'SchemaEventStartDate',
     'schema_event_type' => 'SchemaEventType',
     'schema_event_url' => 'SchemaEventUrl',
+    'schema_event_is_accessible_for_free' => 'SchemaEventIsAccessibleForFree',
   ];
 
 }

@@ -32,7 +32,6 @@ class SchemaItemListTest extends SchemaMetatagTagsTestBase {
    */
   public $schemaTags = [
     'schema_item_list_item_list_element' => 'SchemaItemListItemListElement',
-    'schema_item_list_id' => 'SchemaItemListId',
     'schema_item_list_main_entity_of_page' => 'SchemaItemListMainEntityOfPage',
     'schema_item_list_type' => 'SchemaItemListType',
   ];

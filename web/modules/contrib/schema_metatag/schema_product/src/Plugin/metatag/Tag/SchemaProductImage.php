@@ -14,7 +14,7 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaImageBase;
  * @MetatagTag(
  *   id = "schema_product_image",
  *   label = @Translation("image"),
- *   description = @Translation("The primary image for this item."),
+ *   description = @Translation("REQUIRED BY GOOGLE. The primary image for this item."),
  *   name = "image",
  *   group = "schema_product",
  *   weight = 2,

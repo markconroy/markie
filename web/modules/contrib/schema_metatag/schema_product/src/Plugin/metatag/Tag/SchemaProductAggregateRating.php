@@ -2,10 +2,10 @@
 
 namespace Drupal\schema_product\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaAggregateRatingBase;
+use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaRatingBase;
 
 /**
- * Provides a plugin for the 'schema_service_aggregate_rating' meta tag.
+ * Provides a plugin for the 'schema_product_aggregate_rating' meta tag.
  *
  * - 'id' should be a globally unique id.
  * - 'name' should match the Schema.org element name.
@@ -13,16 +13,16 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaAggregateRatingBase;
  *
  * @MetatagTag(
  *   id = "schema_product_aggregate_rating",
- *   label = @Translation("AggregateRating"),
- *   description = @Translation("AggregateRating (the numeric AggregateRating of the item)."),
+ *   label = @Translation("aggregateRating"),
+ *   description = @Translation("RECOMMENDED BY GOOGLE. The overall rating, based on a collection of reviews or ratings, of the item."),
  *   name = "aggregateRating",
  *   group = "schema_product",
  *   weight = 11,
  *   type = "string",
  *   secure = FALSE,
- *   multiple = FALSE
+ *   multiple = TRUE
  * )
  */
-class SchemaProductAggregateRating extends SchemaAggregateRatingBase {
+class SchemaProductAggregateRating extends SchemaRatingBase {
 
 }

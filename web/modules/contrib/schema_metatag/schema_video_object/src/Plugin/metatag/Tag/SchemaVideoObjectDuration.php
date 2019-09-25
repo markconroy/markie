@@ -14,7 +14,7 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaDurationBase;
  * @MetatagTag(
  *   id = "schema_video_object_duration",
  *   label = @Translation("duration"),
- *   description = @Translation("The video duration in seconds. This will be converted by schema_video_object into the ISO 8601 format."),
+ *   description = @Translation("RECOMMENDED BY GOOGLE. The video duration in seconds or ISO 8601 format, i.e. PT1H30M."),
  *   name = "duration",
  *   group = "schema_video_object",
  *   weight = 0,

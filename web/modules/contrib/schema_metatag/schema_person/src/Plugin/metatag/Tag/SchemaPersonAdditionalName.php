@@ -17,7 +17,7 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
  *   description = @Translation("An additional name for a Person, can be used for a middle name."),
  *   name = "additionalName",
  *   group = "schema_person",
- *   weight = -30,
+ *   weight = -5,
  *   type = "string",
  *   secure = FALSE,
  *   multiple = TRUE

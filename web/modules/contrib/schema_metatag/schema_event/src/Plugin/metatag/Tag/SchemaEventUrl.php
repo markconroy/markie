@@ -25,13 +25,4 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
  */
 class SchemaEventUrl extends SchemaNameBase {
 
-  /**
-   * {@inheritdoc}
-   */
-  public function form(array $element = []) {
-    $form = parent::form($element);
-    $form['#attributes']['placeholder'] = '[node:url:absolute]';
-    return $form;
-  }
-
 }

@@ -55,17 +55,15 @@ abstract class SchemaMetatagTagsTestBase extends BrowserTestBase {
    *   The key used in the JSON array for this tag.
    */
   public function getKey($tag_name) {
-    $replace = [
-      '_type' => '_@type',
-      '_id' => '_@id',
-    ];
-    $key = strtr($tag_name, $replace);
-    $key = str_replace($this->moduleName . '_', '', $key);
+    $key = str_replace($this->moduleName . '_', '', $tag_name);
     $parts = explode('_', $key);
     foreach ($parts as $i => $part) {
       $parts[$i] = $i > 0 ? ucfirst($part) : $part;
     }
     $key = implode($parts);
+    if (in_array($key, ['type', 'id'])) {
+      $key = '@' . $key;
+    }
     return $key;
   }
 
@@ -118,6 +116,7 @@ abstract class SchemaMetatagTagsTestBase extends BrowserTestBase {
 
       // Configure all the tag values and post the results.
       $expected_output_values = $raw_values = $form_values = [];
+      $form_values = [];
       foreach ($this->schemaTags as $tag_name => $class_name) {
 
         // Transform the tag_name to the camelCase key used in the form.
@@ -130,8 +129,12 @@ abstract class SchemaMetatagTagsTestBase extends BrowserTestBase {
         // config form.
         $class = $this->schemaTagsNamespace . $class_name;
         $test_value = $class::testValue();
+        // Store the input value.
         $raw_values[$tag_name] = $test_value;
-        $expected_output_values[$key] = $class::outputValue($test_value);
+        // Adjust the input value as necessary to transform it to the
+        // expected output value, and store that.
+        $processed_value = $class::processedTestValue($test_value);
+        $expected_output_values[$key] = $class::outputValue($processed_value);
 
         // Rewrite the test values to match the way the form elements are
         // structured.
@@ -147,23 +150,32 @@ abstract class SchemaMetatagTagsTestBase extends BrowserTestBase {
               foreach ($value as $key2 => $value2) {
                 if (is_array($value2)) {
                   foreach ($value2 as $key3 => $value3) {
-                    $keys = implode('][', [$key, $key2, $key3]);
-                    $form_values[$tag_name . '[' . $keys . ']'] = $value3;
+                    if (is_array($value3)) {
+                      foreach ($value3 as $key4 => $value4) {
+                        $keystring = implode('][', [$key, $key2, $key3, $key4]);
+                        $form_values[$tag_name . '[' . $keystring . ']'] = $value4;
+                      }
+                    }
+                    else {
+                      $keystring = implode('][', [$key, $key2, $key3]);
+                      $form_values[$tag_name . '[' . $keystring . ']'] = $value3;
+                    }
                   }
                 }
                 else {
-                  $keys = implode('][', [$key, $key2]);
-                  $form_values[$tag_name . '[' . $keys . ']'] = $value2;
+                  $keystring = implode('][', [$key, $key2]);
+                  $form_values[$tag_name . '[' . $keystring . ']'] = $value2;
                 }
               }
             }
             else {
-              $keys = implode('][', [$key]);
-              $form_values[$tag_name . '[' . $keys . ']'] = $value;
+              $keystring = implode('][', [$key]);
+              $form_values[$tag_name . '[' . $keystring . ']'] = $value;
             }
           }
         }
       }
+
       $this->drupalPostForm(NULL, $form_values, 'Save');
       $this->assertSession()->pageTextContains($save_message, 'Configuration successfully posted.');
 

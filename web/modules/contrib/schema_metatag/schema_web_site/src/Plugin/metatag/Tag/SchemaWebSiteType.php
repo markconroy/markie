@@ -14,7 +14,7 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaTypeBase;
  * @MetatagTag(
  *   id = "schema_web_site_type",
  *   label = @Translation("@type"),
- *   description = @Translation("The type of web site."),
+ *   description = @Translation("REQUIRED. The type of web site."),
  *   name = "@type",
  *   group = "schema_web_site",
  *   weight = -5,

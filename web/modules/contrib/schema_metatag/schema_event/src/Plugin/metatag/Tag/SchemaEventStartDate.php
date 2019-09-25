@@ -14,7 +14,7 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaDateBase;
  * @MetatagTag(
  *   id = "schema_event_start_date",
  *   label = @Translation("startDate"),
- *   description = @Translation("Date and time when the event starts."),
+ *   description = @Translation("REQUIRED BY GOOGLE. Date and time when the event starts."),
  *   name = "startDate",
  *   group = "schema_event",
  *   weight = 3,
@@ -24,13 +24,5 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaDateBase;
  * )
  */
 class SchemaEventStartDate extends SchemaDateBase {
-
-  /**
-   * {@inheritdoc}
-   */
-  public function form(array $element = []) {
-    $form = parent::form($element);
-    return $form;
-  }
 
 }

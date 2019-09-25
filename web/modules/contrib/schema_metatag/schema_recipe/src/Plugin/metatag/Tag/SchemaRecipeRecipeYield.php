@@ -14,7 +14,7 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
  * @MetatagTag(
  *   id = "schema_recipe_recipe_yield",
  *   label = @Translation("recipeYield"),
- *   description = @Translation("The quantity produced by the recipe (for example, number of people served, number of servings, etc)."),
+ *   description = @Translation("RECOMMENDED BY GOOGLE. The quantity produced by the recipe (for example, number of people served, number of servings, etc)."),
  *   name = "recipeYield",
  *   group = "schema_recipe",
  *   weight = 2,
@@ -24,14 +24,5 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
  * )
  */
 class SchemaRecipeRecipeYield extends SchemaNameBase {
-
-  /**
-   * Generate a form element for this meta tag.
-   */
-  public function form(array $element = []) {
-    $form = parent::form($element);
-    $form['#attributes']['placeholder'] = '[node:field_yield]';
-    return $form;
-  }
 
 }

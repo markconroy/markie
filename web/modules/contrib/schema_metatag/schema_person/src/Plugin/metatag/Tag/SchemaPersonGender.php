@@ -17,7 +17,7 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
  *   description = @Translation("Gender of the person."),
  *   name = "gender",
  *   group = "schema_person",
- *   weight = -15,
+ *   weight = 0,
  *   type = "string",
  *   secure = FALSE,
  *   multiple = FALSE

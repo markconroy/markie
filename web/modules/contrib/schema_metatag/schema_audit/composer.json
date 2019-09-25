@@ -1,0 +1,8 @@
+{
+  "name": "drupal/schema_audit",
+  "type": "drupal-module",
+  "description": "A module to audit Schema.org options.",
+  "keywords": ["Drupal"],
+  "license": "GPL-2.0+",
+  "minimum-stability": "dev"
+}

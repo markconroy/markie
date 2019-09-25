@@ -14,10 +14,10 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
  * @MetatagTag(
  *   id = "schema_image_object_url",
  *   label = @Translation("url"),
- *   description = @Translation("Absolute URL of the image. If using tokens include the image preset name, and the URL attribute. [node:field_name:image_preset_name:url]. If using referenced entities like Media or Paragraphs, your token would look like [node:field_name:entity:field_name:image_preset_name:url]."),
+ *   description = @Translation("Absolute URL of the image, i.e. [node:field_name:image_preset_name:url]."),
  *   name = "url",
  *   group = "schema_image_object",
- *   weight = -45,
+ *   weight = 0,
  *   type = "string",
  *   secure = FALSE,
  *   multiple = TRUE

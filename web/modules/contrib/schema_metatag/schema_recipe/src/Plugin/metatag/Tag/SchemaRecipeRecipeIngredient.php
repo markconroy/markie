@@ -14,7 +14,7 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
  * @MetatagTag(
  *   id = "schema_recipe_recipe_ingredient",
  *   label = @Translation("recipeIngredient"),
- *   description = @Translation("A list of single ingredients used in the recipe, e.g. sugar, flour or garlic."),
+ *   description = @Translation("RECOMMENDED BY GOOGLE. A list of single ingredients used in the recipe, e.g. sugar, flour or garlic."),
  *   name = "recipeIngredient",
  *   group = "schema_recipe",
  *   weight = 5,
@@ -24,14 +24,5 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
  * )
  */
 class SchemaRecipeRecipeIngredient extends SchemaNameBase {
-
-  /**
-   * Generate a form element for this meta tag.
-   */
-  public function form(array $element = []) {
-    $form = parent::form($element);
-    $form['#attributes']['placeholder'] = '[node:field_ingredient]';
-    return $form;
-  }
 
 }

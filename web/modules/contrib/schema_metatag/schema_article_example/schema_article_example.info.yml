@@ -4,10 +4,10 @@ description: Example of how to add more fields to Schema.org.
 # core: 8.x
 package: SEO
 dependencies:
-  - schema_article
+  - schema_metatag:schema_article
 
-# Information added by Drupal.org packaging script on 2018-02-03
-version: '8.x-1.0'
+# Information added by Drupal.org packaging script on 2019-07-13
+version: '8.x-1.4'
 core: '8.x'
 project: 'schema_metatag'
-datestamp: 1517694184
+datestamp: 1563033787

@@ -14,7 +14,7 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
  * @MetatagTag(
  *   id = "schema_video_object_name",
  *   label = @Translation("name"),
- *   description = @Translation("The title of the video."),
+ *   description = @Translation("REQUIRED BY GOOGLE. The title of the video."),
  *   name = "name",
  *   group = "schema_video_object",
  *   weight = -1,

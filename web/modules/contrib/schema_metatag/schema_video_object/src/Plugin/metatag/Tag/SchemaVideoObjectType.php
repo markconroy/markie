@@ -14,7 +14,7 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaTypeBase;
  * @MetatagTag(
  *   id = "schema_video_object_type",
  *   label = @Translation("@type"),
- *   description = @Translation("The type of this VideoObject"),
+ *   description = @Translation("REQUIRED. The type of VideoObject"),
  *   name = "@type",
  *   group = "schema_video_object",
  *   weight = -10,

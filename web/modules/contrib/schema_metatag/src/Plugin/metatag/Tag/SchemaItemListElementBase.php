@@ -7,7 +7,7 @@ use Drupal\schema_metatag\SchemaMetatagManager;
 /**
  * All Schema.org itemListElement tags should extend this class.
  */
-abstract class SchemaItemListElementBase extends SchemaNameBase {
+class SchemaItemListElementBase extends SchemaNameBase {
 
   /**
    * {@inheritdoc}
@@ -26,15 +26,34 @@ abstract class SchemaItemListElementBase extends SchemaNameBase {
     $values = static::getItems($input_value);
     if (!empty($values) && is_array($values)) {
       foreach ($values as $key => $value) {
-        // Complex arrays of values are displayed as ListItem objects, otherwise
-        // values are presented in a simple list.
         if (is_array($value)) {
-          $items[] = [
-            '@type' => 'ListItem',
-            'position' => $key,
-            'item' => $value,
-          ];
+          // Maps to Google all-in-one page view.
+          if (array_key_exists('@type', $value)) {
+            $items[] = [
+              '@type' => 'ListItem',
+              'position' => $key,
+              'item' => $value,
+            ];
+          }
+          // Maps to Google summary list view.
+          elseif (array_key_exists('url', $value)) {
+            $items[] = [
+              '@type' => 'ListItem',
+              'position' => $key,
+              'url' => $value['url'],
+            ];
+          }
+          // Maps to breadcrumb list.
+          elseif (array_key_exists('name', $value) && array_key_exists('item', $value)) {
+            $items[] = [
+              '@type' => 'ListItem',
+              'position' => $key,
+              'name' => $value['name'],
+              'item' => $value['item'],
+            ];
+          }
         }
+        // Alternative simple list.
         else {
           $items[] = $value;
         }

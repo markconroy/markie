@@ -14,7 +14,7 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaDateBase;
  * @MetatagTag(
  *   id = "schema_recipe_date_published",
  *   label = @Translation("datePublished"),
- *   description = @Translation("Date the recipe was published."),
+ *   description = @Translation("RECOMMENDED BY GOOGLE. Date the recipe was published."),
  *   name = "datePublished",
  *   group = "schema_recipe",
  *   weight = 3,
@@ -24,14 +24,5 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaDateBase;
  * )
  */
 class SchemaRecipeDatePublished extends SchemaDateBase {
-
-  /**
-   * Generate a form element for this meta tag.
-   */
-  public function form(array $element = []) {
-    $form = parent::form($element);
-    $form['#attributes']['placeholder'] = '[node:created:html_datetime]';
-    return $form;
-  }
 
 }

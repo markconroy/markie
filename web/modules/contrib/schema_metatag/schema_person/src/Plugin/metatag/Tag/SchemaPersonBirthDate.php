@@ -17,7 +17,7 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaDateBase;
  *   description = @Translation("Date of birth of the person in ISO 8601 format, 2017-12-31."),
  *   name = "birthDate",
  *   group = "schema_person",
- *   weight = -20,
+ *   weight = 0,
  *   type = "string",
  *   secure = FALSE,
  *   multiple = FALSE

@@ -14,7 +14,7 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaMainEntityOfPageBase;
  * @MetatagTag(
  *   id = "schema_article_main_entity_of_page",
  *   label = @Translation("mainEntityOfPage"),
- *   description = @Translation(""),
+ *   description = @Translation("RECOMMENDED BY GOOGLE. The canonical URL of the article page. Specify mainEntityOfPage when the article is the primary topic of the article page."),
  *   name = "mainEntityOfPage",
  *   group = "schema_article",
  *   weight = 10,
@@ -24,5 +24,5 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaMainEntityOfPageBase;
  * )
  */
 class SchemaArticleMainEntityOfPage extends SchemaMainEntityOfPageBase {
-  // Nothing here yet. Just a placeholder class for a plugin.
+
 }

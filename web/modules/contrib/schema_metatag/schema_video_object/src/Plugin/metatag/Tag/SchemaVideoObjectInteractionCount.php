@@ -14,7 +14,7 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
  * @MetatagTag(
  *   id = "schema_video_object_interaction_count",
  *   label = @Translation("interactionCount"),
- *   description = @Translation("The number of times the video has been viewed."),
+ *   description = @Translation("RECOMMENDED BY GOOGLE. The number of times the video has been viewed."),
  *   name = "interactionCount",
  *   group = "schema_video_object",
  *   weight = 0,

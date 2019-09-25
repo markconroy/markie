@@ -14,10 +14,10 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaTypeBase;
  * @MetatagTag(
  *   id = "schema_event_type",
  *   label = @Translation("@type"),
- *   description = @Translation("The type of event (fixed by standard)."),
+ *   description = @Translation("REQUIRED. The type of event."),
  *   name = "@type",
  *   group = "schema_event",
- *   weight = -5,
+ *   weight = -10,
  *   type = "string",
  *   secure = FALSE,
  *   multiple = FALSE

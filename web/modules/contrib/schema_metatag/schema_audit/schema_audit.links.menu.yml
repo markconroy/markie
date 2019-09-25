@@ -1,0 +1,6 @@
+schema_audit.settings:
+  title: 'Schema.org Metatag'
+  route_name: schema_audit.page
+  description: 'Audit Schema.org objects and properties to compare them to Drupal.'
+  parent: system.admin_config_development
+  weight: 99

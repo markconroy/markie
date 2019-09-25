@@ -14,10 +14,10 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
  * @MetatagTag(
  *   id = "schema_person_name",
  *   label = @Translation("name"),
- *   description = @Translation("The name of the person."),
+ *   description = @Translation("REQUIRED BY GOOGLE. The name of the person."),
  *   name = "name",
  *   group = "schema_person",
- *   weight = -45,
+ *   weight = -7,
  *   type = "string",
  *   secure = FALSE,
  *   multiple = FALSE

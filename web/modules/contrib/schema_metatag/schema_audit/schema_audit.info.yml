@@ -1,0 +1,11 @@
+name: Schema.org Audit
+type: module
+description: A module to audit Schema.org and compare to Schema Metatag.
+# core: 8.x
+package: Development
+
+# Information added by Drupal.org packaging script on 2019-07-13
+version: '8.x-1.4'
+core: '8.x'
+project: 'schema_metatag'
+datestamp: 1563033787

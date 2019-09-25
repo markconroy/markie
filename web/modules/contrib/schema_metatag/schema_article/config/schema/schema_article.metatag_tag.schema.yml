@@ -36,8 +36,17 @@ metatag.metatag_tag.schema_article_name:
   type: text
   label: 'name'
 metatag.metatag_tag.schema_article_publisher:
-  type: label
+  type: text
   label: 'publisher'
 metatag.metatag_tag.schema_article_type:
-  type: label
+  type: text
   label: '@type'
+metatag.metatag_tag.schema_article_aggregate_rating:
+  type: text
+  label: 'aggregateRating'
+metatag.metatag_tag.schema_article_review:
+  type: text
+  label: 'review'
+metatag.metatag_tag.schema_article_speakable:
+  type: text
+  label: 'speakable'

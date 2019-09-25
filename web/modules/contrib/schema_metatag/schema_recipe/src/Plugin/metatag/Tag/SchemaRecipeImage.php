@@ -14,7 +14,7 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaImageBase;
  * @MetatagTag(
  *   id = "schema_recipe_image",
  *   label = @Translation("image"),
- *   description = @Translation("The primary image for this item."),
+ *   description = @Translation("RECOMMENDED BY GOOGLE. The primary image for this item."),
  *   name = "image",
  *   group = "schema_recipe",
  *   weight = 8,
@@ -24,14 +24,5 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaImageBase;
  * )
  */
 class SchemaRecipeImage extends SchemaImageBase {
-
-  /**
-   * Generate a form element for this meta tag.
-   */
-  public function form(array $element = []) {
-    $form = parent::form($element);
-    $form['#attributes']['placeholder'] = '';
-    return $form;
-  }
 
 }

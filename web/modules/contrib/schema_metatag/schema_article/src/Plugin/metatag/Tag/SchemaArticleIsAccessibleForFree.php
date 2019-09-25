@@ -2,7 +2,7 @@
 
 namespace Drupal\schema_article\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaIsAccessibleForFreeBase;
+use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaTrueFalseBase;
 
 /**
  * Provides a plugin for the 'schema_article_is_accessible_for_free' meta tag.
@@ -14,7 +14,9 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaIsAccessibleForFreeBase;
  * @MetatagTag(
  *   id = "schema_article_is_accessible_for_free",
  *   label = @Translation("isAccessibleForFree"),
- *   description = @Translation(""),
+ *   description = @Translation("RECOMMENDED BY GOOGLE. Use for <a href="":url"">Paywalled content</a>.", arguments = {
+ *     ":url" = "https://developers.google.com/search/docs/data-types/paywalled-content",
+ *   }),
  *   name = "isAccessibleForFree",
  *   group = "schema_article",
  *   weight = 4,
@@ -23,6 +25,6 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaIsAccessibleForFreeBase;
  *   multiple = FALSE
  * )
  */
-class SchemaArticleIsAccessibleForFree extends SchemaIsAccessibleForFreeBase {
+class SchemaArticleIsAccessibleForFree extends SchemaTrueFalseBase {
 
 }

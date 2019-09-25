@@ -17,7 +17,7 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
  *   description = @Translation("The email address of the person."),
  *   name = "email",
  *   group = "schema_person",
- *   weight = 5,
+ *   weight = 0,
  *   type = "string",
  *   secure = FALSE,
  *   multiple = FALSE

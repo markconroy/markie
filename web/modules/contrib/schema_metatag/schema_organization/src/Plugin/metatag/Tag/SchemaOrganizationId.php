@@ -14,7 +14,7 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
  * @MetatagTag(
  *   id = "schema_organization_id",
  *   label = @Translation("@id"),
- *   description = @Translation("Globally unique @id, usually a url, used to to link other properties to this object."),
+ *   description = @Translation("REQUIRED BY GOOGLE. Globally unique @id, usually a url, used to to link other properties to this object."),
  *   name = "@id",
  *   group = "schema_organization",
  *   weight = -1,

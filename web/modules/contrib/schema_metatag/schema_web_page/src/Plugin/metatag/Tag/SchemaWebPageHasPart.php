@@ -14,7 +14,9 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaHasPartBase;
  * @MetatagTag(
  *   id = "schema_web_page_has_part",
  *   label = @Translation("hasPart"),
- *   description = @Translation(""),
+ *   description = @Translation("Use for <a href="":url"">Paywalled content</a>.", arguments = {
+ *     ":url" = "https://developers.google.com/search/docs/data-types/paywalled-content",
+ *   }),
  *   name = "hasPart",
  *   group = "schema_web_page",
  *   weight = 4,

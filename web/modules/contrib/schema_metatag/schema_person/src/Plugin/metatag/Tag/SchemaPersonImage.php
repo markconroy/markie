@@ -17,7 +17,7 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaImageBase;
  *   description = @Translation("The primary image for the person."),
  *   name = "image",
  *   group = "schema_person",
- *   weight = 20,
+ *   weight = 1,
  *   type = "image",
  *   secure = FALSE,
  *   multiple = FALSE

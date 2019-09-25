@@ -2,12 +2,16 @@
 
 namespace Drupal\schema_metatag\Plugin\metatag\Tag;
 
+use Drupal\schema_metatag\SchemaMetatagManager;
+
 /**
  * Schema.org Person/Organization trait.
  */
 trait SchemaPersonOrgTrait {
 
-  use SchemaImageTrait;
+  use SchemaImageTrait, SchemaPivotTrait {
+    SchemaPivotTrait::pivotForm insteadof SchemaImageTrait;
+  }
 
   /**
    * Form keys.
@@ -24,35 +28,32 @@ trait SchemaPersonOrgTrait {
   }
 
   /**
-   * Input values.
-   */
-  public function personOrgInputValues() {
-    return [
-      'title' => '',
-      'description' => '',
-      'value' => [],
-      '#required' => FALSE,
-      'visibility_selector' => '',
-    ];
-  }
-
-  /**
    * The form element.
    */
   public function personOrgForm($input_values) {
 
-    $input_values += $this->personOrgInputValues();
+    $input_values += SchemaMetatagManager::defaultInputValues();
     $value = $input_values['value'];
 
     // Get the id for the nested @type element.
-    $selector = ':input[name=' . $this->visibilitySelector() . '[@type]]';
+    $selector = ':input[name="' . $input_values['visibility_selector'] . '[@type]"]';
     $visibility = ['invisible' => [$selector => ['value' => '']]];
+    $selector2 = SchemaMetatagManager::altSelector($selector);
+    $visibility2 = ['invisible' => [$selector2 => ['value' => '']]];
+    $visibility['invisible'] = [$visibility['invisible'], $visibility2['invisible']];
+
     $org_visibility = ['visible' => [$selector => ['value' => 'Organization']]];
+    $org_visibility2 = ['visible' => [$selector2 => ['value' => 'Organization']]];
+    $org_visibility['visible'] = [$org_visibility['visible'], $org_visibility2['visible']];
 
     $form['#type'] = 'fieldset';
     $form['#title'] = $input_values['title'];
     $form['#description'] = $input_values['description'];
     $form['#tree'] = TRUE;
+
+    // Add a pivot option to the form.
+    $form['pivot'] = $this->pivotForm($value);
+    $form['pivot']['#states'] = $visibility;
 
     $form['@type'] = [
       '#type' => 'select',
@@ -64,7 +65,8 @@ trait SchemaPersonOrgTrait {
         'Person' => $this->t('Person'),
         'Organization' => $this->t('Organization'),
       ],
-      '#required' => isset($element['#required']) ? $element['#required'] : FALSE,
+      '#required' => $input_values['#required'],
+      '#weight' => -10,
     ];
 
     $form['@id'] = [
@@ -72,9 +74,8 @@ trait SchemaPersonOrgTrait {
       '#title' => $this->t('@id'),
       '#default_value' => !empty($value['@id']) ? $value['@id'] : '',
       '#maxlength' => 255,
-      '#required' => isset($element['#required']) ? $element['#required'] : FALSE,
+      '#required' => $input_values['#required'],
       '#description' => $this->t("Globally unique @id of the person or organization, usually a url, used to to link other properties to this object."),
-      '#states' => $visibility,
     ];
 
     $form['name'] = [
@@ -82,10 +83,8 @@ trait SchemaPersonOrgTrait {
       '#title' => $this->t('name'),
       '#default_value' => !empty($value['name']) ? $value['name'] : '',
       '#maxlength' => 255,
-      '#required' => isset($element['#required']) ? $element['#required'] : FALSE,
-      '#description' => $this->t("Name of the person or organization."),
-      '#attributes' => ['placeholder' => '[node:author:display-name]'],
-      '#states' => $visibility,
+      '#required' => $input_values['#required'],
+      '#description' => $this->t("Name of the person or organization, i.e. [node:author:display-name]."),
     ];
 
     $form['url'] = [
@@ -93,10 +92,8 @@ trait SchemaPersonOrgTrait {
       '#title' => $this->t('url'),
       '#default_value' => !empty($value['url']) ? $value['url'] : '',
       '#maxlength' => 255,
-      '#required' => isset($element['#required']) ? $element['#required'] : FALSE,
-      '#description' => $this->t("Absolute URL of the canonical Web page, like the URL of the author's profile page or the organization's official website."),
-      '#attributes' => ['placeholder' => '[node:author:url]'],
-      '#states' => $visibility,
+      '#required' => $input_values['#required'],
+      '#description' => $this->t("Absolute URL of the canonical Web page, like the URL of the author's profile page or the organization's official website, i.e. [node:author:url]."),
     ];
 
     $form['sameAs'] = [
@@ -104,17 +101,23 @@ trait SchemaPersonOrgTrait {
       '#title' => $this->t('sameAs'),
       '#default_value' => !empty($value['sameAs']) ? $value['sameAs'] : '',
       '#maxlength' => 255,
-      '#required' => isset($element['#required']) ? $element['#required'] : FALSE,
+      '#required' => $input_values['#required'],
       '#description' => $this->t("Comma separated list of URLs for the person's or organization's official social media profile page(s)."),
-      '#states' => $visibility,
     ];
+
+    $keys = static::personOrgFormKeys();
+    foreach ($keys as $key) {
+      if ($key != '@type') {
+        $form[$key]['#states'] = $visibility;
+      }
+    }
 
     $input_values = [
       'title' => $this->t('Logo'),
       'description' => 'The logo of the organization. For AMP pages, Google requires a image no larger than 600 x 60.',
       'value' => !empty($value['logo']) ? $value['logo'] : [],
-      '#required' => isset($element['#required']) ? $element['#required'] : FALSE,
-      'visibility_selector' => $this->getPluginId() . '[logo][@type]',
+      '#required' => $input_values['#required'],
+      'visibility_selector' => $input_values['visibility_selector'] . '[logo]',
     ];
 
     // Display the logo only for Organization.

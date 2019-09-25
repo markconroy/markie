@@ -14,7 +14,7 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaOfferBase;
  * @MetatagTag(
  *   id = "schema_product_offers",
  *   label = @Translation("offers"),
- *   description = @Translation("Offers associated with the product."),
+ *   description = @Translation("RECOMMENDED BY GOOGLE. Offers associated with the product."),
  *   name = "offers",
  *   group = "schema_product",
  *   weight = 6,

@@ -17,7 +17,7 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
  *   description = @Translation("The job title of the person (for example, Financial Manager)."),
  *   name = "jobTitle",
  *   group = "schema_person",
- *   weight = -10,
+ *   weight = 0,
  *   type = "string",
  *   secure = FALSE,
  *   multiple = FALSE

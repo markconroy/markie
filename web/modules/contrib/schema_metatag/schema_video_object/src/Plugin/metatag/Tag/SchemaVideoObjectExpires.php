@@ -14,7 +14,7 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaDateBase;
  * @MetatagTag(
  *   id = "schema_video_object_expires",
  *   label = @Translation("expires"),
- *   description = @Translation("If applicable, the date after which the video will no longer be available, in ISO 8601 format. Don't supply this information if your video does not expire."),
+ *   description = @Translation("RECOMMENDED BY GOOGLE. If applicable, the date after which the video will no longer be available, in ISO 8601 format. Don't supply this information if your video does not expire."),
  *   name = "expires",
  *   group = "schema_video_object",
  *   weight = 0,

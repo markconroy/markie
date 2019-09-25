@@ -2,7 +2,7 @@
 
 namespace Drupal\schema_video_object\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaAggregateRatingBase;
+use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaRatingBase;
 
 /**
  * Provides a plugin for the 'schema_video_object_aggregate_rating' meta tag.
@@ -13,16 +13,16 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaAggregateRatingBase;
  *
  * @MetatagTag(
  *   id = "schema_video_object_aggregate_rating",
- *   label = @Translation("AggregateRating"),
- *   description = @Translation("AggregateRating (the numeric AggregateRating of the item)."),
+ *   label = @Translation("aggregateRating"),
+ *   description = @Translation("The overall rating, based on a collection of reviews or ratings, of the item."),
  *   name = "aggregateRating",
  *   group = "schema_video_object",
  *   weight = 11,
  *   type = "string",
  *   secure = FALSE,
- *   multiple = FALSE
+ *   multiple = TRUE
  * )
  */
-class SchemaVideoObjectAggregateRating extends SchemaAggregateRatingBase {
+class SchemaVideoObjectAggregateRating extends SchemaRatingBase {
 
 }

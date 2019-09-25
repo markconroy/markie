@@ -14,7 +14,7 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
  * @MetatagTag(
  *   id = "schema_recipe_recipe_category",
  *   label = @Translation("recipeCategory"),
- *   description = @Translation("The category of the recipe—for example, appetizer, entree, etc."),
+ *   description = @Translation("RECOMMENDED BY GOOGLE. The category of the recipe—for example, appetizer, entree, etc."),
  *   name = "recipeCategory",
  *   group = "schema_recipe",
  *   weight = 6,
@@ -24,14 +24,5 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
  * )
  */
 class SchemaRecipeRecipeCategory extends SchemaNameBase {
-
-  /**
-   * Generate a form element for this meta tag.
-   */
-  public function form(array $element = []) {
-    $form = parent::form($element);
-    $form['#attributes']['placeholder'] = '[node:field_category]';
-    return $form;
-  }
 
 }

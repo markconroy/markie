@@ -17,7 +17,7 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
  *   description = @Translation("The telephone number of the person."),
  *   name = "telephone",
  *   group = "schema_person",
- *   weight = 10,
+ *   weight = 0,
  *   type = "string",
  *   secure = FALSE,
  *   multiple = TRUE

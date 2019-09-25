@@ -15,6 +15,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Drupal\Core\PhpStorage\PhpStorageFactory;
+use Drupal\Core\Template\TwigEnvironment;
 
 /**
  * Class ToolbarController.
@@ -87,6 +88,20 @@ class ToolbarController extends ControllerBase {
   protected $pluginCacheClearer;
 
   /**
+   * The cache menu instance.
+   *
+   * @var \Drupal\Core\Cache\CacheBackendInterface
+   */
+  protected $cacheMenu;
+
+  /**
+   * A TwigEnvironment instance.
+   *
+   * @var \Drupal\Core\Template\TwigEnvironment
+   */
+  protected $twig;
+
+  /**
    * Constructs a ToolbarController object.
    *
    * @param \Drupal\Core\CronInterface $cron
@@ -107,6 +122,10 @@ class ToolbarController extends ControllerBase {
    *   A request stack symfony instance.
    * @param \Drupal\Core\Plugin\CachedDiscoveryClearerInterface $plugin_cache_clearer
    *   A plugin cache clear instance.
+   * @param \Drupal\Core\Cache\CacheBackendInterface $cache_menu
+   *   A cache menu instance.
+   * @param \Drupal\Core\Template\TwigEnvironment $twig
+   *   A TwigEnvironment instance.
    */
   public function __construct(CronInterface $cron,
                               MenuLinkManagerInterface $menuLinkManager,
@@ -116,7 +135,9 @@ class ToolbarController extends ControllerBase {
                               CacheBackendInterface $cacheRender,
                               TimeInterface $time,
                               RequestStack $request_stack,
-                              CachedDiscoveryClearerInterface $plugin_cache_clearer) {
+                              CachedDiscoveryClearerInterface $plugin_cache_clearer,
+                              CacheBackendInterface $cache_menu,
+                              TwigEnvironment $twig) {
     $this->cron = $cron;
     $this->menuLinkManager = $menuLinkManager;
     $this->contextualLinkManager = $contextualLinkManager;
@@ -126,6 +147,8 @@ class ToolbarController extends ControllerBase {
     $this->time = $time;
     $this->requestStack = $request_stack;
     $this->pluginCacheClearer = $plugin_cache_clearer;
+    $this->cacheMenu = $cache_menu;
+    $this->twig = $twig;
   }
 
   /**
@@ -141,7 +164,9 @@ class ToolbarController extends ControllerBase {
       $container->get('cache.render'),
       $container->get('datetime.time'),
       $container->get('request_stack'),
-      $container->get('plugin.cache_clearer')
+      $container->get('plugin.cache_clearer'),
+      $container->get('cache.menu'),
+      $container->get('twig')
     );
   }
 
@@ -162,8 +187,8 @@ class ToolbarController extends ControllerBase {
    * Flushes all caches.
    */
   public function flushAll() {
+    $this->messenger()->addMessage($this->t('All caches cleared.'));
     drupal_flush_all_caches();
-    drupal_set_message($this->t('All caches cleared.'));
     return new RedirectResponse($this->reloadPage());
   }
 
@@ -173,7 +198,7 @@ class ToolbarController extends ControllerBase {
   public function flushJsCss() {
     $this->state()
       ->set('system.css_js_query_string', base_convert($this->time->getCurrentTime(), 10, 36));
-    drupal_set_message($this->t('CSS and JavaScript cache cleared.'));
+    $this->messenger()->addMessage($this->t('CSS and JavaScript cache cleared.'));
     return new RedirectResponse($this->reloadPage());
   }
 
@@ -182,7 +207,7 @@ class ToolbarController extends ControllerBase {
    */
   public function flushPlugins() {
     $this->pluginCacheClearer->clearCachedDefinitions();
-    drupal_set_message($this->t('Plugins cache cleared.'));
+    $this->messenger()->addMessage($this->t('Plugins cache cleared.'));
     return new RedirectResponse($this->reloadPage());
   }
 
@@ -191,7 +216,7 @@ class ToolbarController extends ControllerBase {
    */
   public function flushStatic() {
     drupal_static_reset();
-    drupal_set_message($this->t('Static cache cleared.'));
+    $this->messenger()->addMessage($this->t('Static cache cleared.'));
     return new RedirectResponse($this->reloadPage());
   }
 
@@ -199,12 +224,12 @@ class ToolbarController extends ControllerBase {
    * Clears all cached menu data.
    */
   public function flushMenu() {
-    menu_cache_clear_all();
+    $this->cacheMenu->invalidateAll();
     $this->menuLinkManager->rebuild();
     $this->contextualLinkManager->clearCachedDefinitions();
     $this->localTaskLinkManager->clearCachedDefinitions();
     $this->localActionLinkManager->clearCachedDefinitions();
-    drupal_set_message($this->t('Routing and links cache cleared.'));
+    $this->messenger()->addMessage($this->t('Routing and links cache cleared.'));
     return new RedirectResponse($this->reloadPage());
   }
 
@@ -213,7 +238,7 @@ class ToolbarController extends ControllerBase {
    */
   public function flushViews() {
     views_invalidate_cache();
-    drupal_set_message($this->t('Views cache cleared.'));
+    $this->messenger()->addMessage($this->t('Views cache cleared.'));
     return new RedirectResponse($this->reloadPage());
   }
 
@@ -221,10 +246,8 @@ class ToolbarController extends ControllerBase {
    * Clears the twig cache.
    */
   public function flushTwig() {
-    // @todo Update once Drupal 8.6 will be released.
-    // @see https://www.drupal.org/node/2908461
-    PhpStorageFactory::get('twig')->deleteAll();
-    drupal_set_message($this->t('Twig cache cleared.'));
+    $this->twig->invalidate();
+    $this->messenger()->addMessage($this->t('Twig cache cleared.'));
     return new RedirectResponse($this->reloadPage());
   }
 
@@ -233,7 +256,7 @@ class ToolbarController extends ControllerBase {
    */
   public function runCron() {
     $this->cron->run();
-    drupal_set_message($this->t('Cron ran successfully.'));
+    $this->messenger()->addMessage($this->t('Cron ran successfully.'));
     return new RedirectResponse($this->reloadPage());
   }
 
@@ -242,7 +265,7 @@ class ToolbarController extends ControllerBase {
    */
   public function cacheRender() {
     $this->cacheRender->invalidateAll();
-    drupal_set_message($this->t('Render cache cleared.'));
+    $this->messenger()->addMessage($this->t('Render cache cleared.'));
     return new RedirectResponse($this->reloadPage());
   }
 

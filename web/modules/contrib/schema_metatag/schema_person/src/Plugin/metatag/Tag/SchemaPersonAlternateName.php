@@ -17,7 +17,7 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
  *   description = @Translation("An alias for the person."),
  *   name = "alternateName",
  *   group = "schema_person",
- *   weight = -25,
+ *   weight = -5,
  *   type = "string",
  *   secure = FALSE,
  *   multiple = FALSE

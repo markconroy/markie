@@ -32,11 +32,13 @@ class SchemaServiceTest extends SchemaMetatagTagsTestBase {
    */
   public $schemaTags = [
     'schema_service_aggregate_rating' => 'SchemaServiceAggregateRating',
+    'schema_service_review' => 'SchemaServiceReview',
     'schema_service_description' => 'SchemaServiceDescription',
     'schema_service_image' => 'SchemaServiceImage',
     'schema_service_name' => 'SchemaServiceName',
     'schema_service_offers' => 'SchemaServiceOffers',
     'schema_service_type' => 'SchemaServiceType',
+    'schema_service_brand' => 'SchemaServiceBrand',
   ];
 
 }

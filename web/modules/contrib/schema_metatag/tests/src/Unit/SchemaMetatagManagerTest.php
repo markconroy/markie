@@ -19,7 +19,7 @@ class SchemaMetatagManagerTest extends UnitTestCase {
    */
   public function testPivot($original, $desired) {
     $processed = SchemaMetatagManager::pivot($original);
-    $this->assertEquals($processed, $desired);
+    $this->assertEquals($desired, $processed);
   }
 
   /**
@@ -28,7 +28,7 @@ class SchemaMetatagManagerTest extends UnitTestCase {
    */
   public function testExplode($original, $desired) {
     $processed = SchemaMetatagManager::explode($original);
-    $this->assertEquals($processed, $desired);
+    $this->assertEquals($desired, $processed);
   }
 
   /**
@@ -41,7 +41,7 @@ class SchemaMetatagManagerTest extends UnitTestCase {
       return;
     }
     $processed = SchemaMetatagManager::arrayTrim($original);
-    $this->assertEquals($processed, $desired);
+    $this->assertEquals($desired, $processed);
   }
 
   /**
@@ -54,7 +54,7 @@ class SchemaMetatagManagerTest extends UnitTestCase {
       return;
     }
     $processed = SchemaMetatagManager::unserialize($original_serialized);
-    $this->assertEquals($processed, $desired);
+    $this->assertEquals($desired, $processed);
   }
 
   /**
@@ -67,7 +67,7 @@ class SchemaMetatagManagerTest extends UnitTestCase {
       return;
     }
     $processed = SchemaMetatagManager::serialize($original);
-    $this->assertEquals($processed, $desired_serialized);
+    $this->assertEquals($desired_serialized, $processed);
   }
 
   /**
@@ -84,13 +84,28 @@ class SchemaMetatagManagerTest extends UnitTestCase {
     $processed = SchemaMetatagManager::recomputeSerializedLength($replaced);
     $unserialized = unserialize($processed);
     $this->assertTrue(is_array($unserialized));
-    $this->assertTrue(array_key_exists('ReallyBigOrganization', $unserialized['@type']));
+    $this->assertTrue(in_array('ReallyBigOrganization', $unserialized));
+  }
+
+  /**
+   * @covers ::encodeJsonld
+   *
+   * @dataProvider jsonData
+   */
+  public function testEncodeJsonld($original, $desired) {
+    $processed = SchemaMetatagManager::encodeJsonld($original);
+    // Elmininate spacing and line breaks that don't matter.
+    $processed = str_replace(["\n", '  '], "", $processed);
+    $this->assertEquals($desired, $processed);
   }
 
   /**
    * Provides pivot data.
    *
    * @return array
+   *  - name: name of the data set.
+   *    - original: original data.
+   *    - desired: desired result.
    */
   public function pivotData() {
     $values = [
@@ -118,6 +133,12 @@ class SchemaMetatagManagerTest extends UnitTestCase {
    * Provides array data.
    *
    * @return array
+   *  - name: name of the data set.
+   *    - tests: array of the tests this data set applies to.
+   *    - original: original data array.
+   *    - original_serialized: serialized version of original data.
+   *    - desired: desired result as array.
+   *    - desired_serialized: desired result, serialized.
    */
   public function arrayData() {
     $values['Dirty input'] = [
@@ -146,25 +167,98 @@ class SchemaMetatagManagerTest extends UnitTestCase {
         'recompute',
       ],
       [
-        '@type' => [
-          'Organization' => [
-            'name' => 'test',
-            'description' => 'more text',
-          ],
+        '@type' => 'Organization',
+        'memberOf' => [
+          '@type' => 'Organization',
+          'name' => 'test',
+          'description' => 'more text',
         ],
       ],
-      'a:1:{s:5:"@type";a:1:{s:12:"Organization";a:2:{s:4:"name";s:4:"test";s:11:"description";s:9:"more text";}}}',
+      'a:2:{s:5:"@type";s:12:"Organization";s:8:"memberOf";a:3:{s:5:"@type";s:12:"Organization";s:4:"name";s:4:"test";s:11:"description";s:9:"more text";}}',
       [
-        '@type' => [
-          'Organization' => [
-            'name' => 'test',
-            'description' => 'more text',
+        '@type' => 'Organization',
+        'memberOf' => [
+          '@type' => 'Organization',
+          'name' => 'test',
+          'description' => 'more text',
+        ],
+      ],
+      'a:2:{s:5:"@type";s:12:"Organization";s:8:"memberOf";a:3:{s:5:"@type";s:12:"Organization";s:4:"name";s:4:"test";s:11:"description";s:9:"more text";}}',
+    ];
+    $values['Nested array 2 levels deep'] = [
+      [
+        'arraytrim',
+        'serialize',
+        'unserialize',
+        'explode',
+        'recompute',
+      ],
+      [
+        '@type' => 'Organization',
+        'publishedIn' => [
+          '@type' => 'CreativeWork',
+          'name' => 'test',
+          'description' => 'more text',
+          'level3' => [
+            '@type' => 'Book',
+            'name' => 'Book Name',
           ],
         ],
       ],
-      'a:1:{s:5:"@type";a:1:{s:12:"Organization";a:2:{s:4:"name";s:4:"test";s:11:"description";s:9:"more text";}}}',
+      'a:2:{s:5:"@type";s:12:"Organization";s:11:"publishedIn";a:4:{s:5:"@type";s:12:"CreativeWork";s:4:"name";s:4:"test";s:11:"description";s:9:"more text";s:6:"level3";a:2:{s:5:"@type";s:4:"Book";s:4:"name";s:9:"Book Name";}}}',
+      [
+        '@type' => 'Organization',
+        'publishedIn' => [
+          '@type' => 'CreativeWork',
+          'name' => 'test',
+          'description' => 'more text',
+          'level3' => [
+            '@type' => 'Book',
+            'name' => 'Book Name',
+          ],
+        ],
+      ],
+      'a:2:{s:5:"@type";s:12:"Organization";s:11:"publishedIn";a:4:{s:5:"@type";s:12:"CreativeWork";s:4:"name";s:4:"test";s:11:"description";s:9:"more text";s:6:"level3";a:2:{s:5:"@type";s:4:"Book";s:4:"name";s:9:"Book Name";}}}',
     ];
-    $values['Empty array'] = [
+    $values['Nested array with nested type only'] = [
+      [
+        'arraytrim',
+        'serialize',
+        'unserialize',
+        'explode',
+        'recompute',
+      ],
+      [
+        '@type' => 'Organization',
+        'publishedIn' => [
+          '@type' => 'CreativeWork',
+        ],
+        'anotherThing' => [
+          '@type' => 'Thing',
+          'name' => 'test',
+          'description' => 'more text',
+          'level3' => [
+            '@type' => 'Book',
+            'name' => 'Book Name',
+          ],
+        ],
+      ],
+      'a:3:{s:5:"@type";s:12:"Organization";s:11:"publishedIn";a:1:{s:5:"@type";s:12:"CreativeWork";}s:12:"anotherThing";a:4:{s:5:"@type";s:5:"Thing";s:4:"name";s:4:"test";s:11:"description";s:9:"more text";s:6:"level3";a:2:{s:5:"@type";s:4:"Book";s:4:"name";s:9:"Book Name";}}}',
+      [
+        '@type' => 'Organization',
+        'anotherThing' => [
+          '@type' => 'Thing',
+          'name' => 'test',
+          'description' => 'more text',
+          'level3' => [
+            '@type' => 'Book',
+            'name' => 'Book Name',
+          ],
+        ],
+      ],
+      'a:2:{s:5:"@type";s:12:"Organization";s:12:"anotherThing";a:4:{s:5:"@type";s:5:"Thing";s:4:"name";s:4:"test";s:11:"description";s:9:"more text";s:6:"level3";a:2:{s:5:"@type";s:4:"Book";s:4:"name";s:9:"Book Name";}}}',
+    ];
+    $values['Empty nested array'] = [
       [
         'arraytrim',
         'serialize',
@@ -172,36 +266,71 @@ class SchemaMetatagManagerTest extends UnitTestCase {
         'explode',
       ],
       [
-        '@type' => [
-          'Organization' => [
-            'name' => '',
-            'description' => '',
-          ],
+        'name' => [],
+        'Organization' => [
+          '@type' => '',
+          'name' => '',
         ],
       ],
-      'a:1:{s:5:"@type";a:1:{s:12:"Organization";a:2:{s:4:"name";s:0:"";s:11:"description";s:0:"";}}}',
+      'a:2:{s:4:"name";a:0:{}s:12:"Organization";a:2:{s:5:"@type";s:0:"";s:4:"name";s:0:"";}}',
       [],
       '',
     ];
-    $values['Empty parts'] = [
+    $values['Missing type to empty array'] = [
+      [
+        'arraytrim',
+        'serialize',
+        'unserialize',
+        'explode',
+      ],
+      [
+        'organization' => [
+          '@type' => '',
+          'name' => 'test',
+          'description' => 'test2',
+        ],
+      ],
+      'a:1:{s:12:"organization";a:3:{s:5:"@type";s:0:"";s:4:"name";s:4:"test";s:11:"description";s:5:"test2";}}',
+      [],
+      '',
+    ];
+    $values['Type only to empty array'] = [
+      [
+        'arraytrim',
+        'serialize',
+        'unserialize',
+        'explode',
+      ],
+      [
+        'organization' => [
+          '@type' => 'Organization',
+          'name' => '',
+          'description' => '',
+        ],
+      ],
+      'a:1:{s:12:"organization";a:3:{s:5:"@type";s:12:"Organization";s:4:"name";s:0:"";s:11:"description";s:0:"";}}',
+      [],
+      '',
+    ];
+    $values['Array with empty parts'] = [
       ['recompute'],
       [
-        '@type' => [
-          'Organization' => [
-            'name' => 'test',
-            'description' => '',
-          ],
+        '@type' => 'Organization',
+        'memberOf' => [
+          '@type' => 'Organization',
+          'name' => '',
+          'description' => 'more text',
         ],
       ],
-      'a:1:{s:5:"@type";a:1:{s:12:"Organization";a:2:{s:4:"name";s:4:"test";s:11:"description";s:0:"";}}}',
+      'a:2:{s:5:"@type";s:12:"Organization";s:8:"memberOf";a:3:{s:5:"@type";s:12:"Organization";s:4:"name";s:0:"";s:11:"description";s:9:"more text";}}',
       [
-        '@type' => [
-          'Organization' => [
-            'description' => 'more text',
-          ],
+        '@type' => 'Organization',
+        'memberOf' => [
+          '@type' => 'Organization',
+          'description' => 'more text',
         ],
       ],
-      'a:1:{s:5:"@type";a:1:{s:12:"Organization";a:1:{s:11:"description";s:9:"more text";}}}',
+      'a:2:{s:5:"@type";s:12:"Organization";s:8:"memberOf";a:3:{s:5:"@type";s:12:"Organization";s:11:"description";s:9:"more text";}}',
     ];
     return $values;
   }
@@ -210,6 +339,9 @@ class SchemaMetatagManagerTest extends UnitTestCase {
    * Provides string data.
    *
    * @return array
+   *  - name: name of the data set.
+   *    - original: original data.
+   *    - desired: desired result.
    */
   public function stringData() {
     $values = [
@@ -220,6 +352,34 @@ class SchemaMetatagManagerTest extends UnitTestCase {
       'Needs trimming' => [
         ' First, Second , Third',
         ['First', 'Second', 'Third'],
+      ],
+    ];
+    return $values;
+  }
+
+  /**
+   * Provides json data.
+   *
+   * @return array
+   *  - name: name of the data set.
+   *    - original: original data.
+   *    - desired: desired result.
+   */
+  public function jsonData() {
+    $values = [
+      'Encode simple json' => [
+        [
+          "@type" => "Article",
+          "description" => "Curabitur arcu erat, accumsan id imperdiet et, porttitor at sem. Donec sollicitudin molestie malesuada. Donec sollicitudin molestie malesuada. Donec rutrum congue leo eget malesuada. Nulla quis lorem ut libero malesuada feugiat.",
+        ],
+        '{"@type": "Article","description": "Curabitur arcu erat, accumsan id imperdiet et, porttitor at sem. Donec sollicitudin molestie malesuada. Donec sollicitudin molestie malesuada. Donec rutrum congue leo eget malesuada. Nulla quis lorem ut libero malesuada feugiat."}',
+      ],
+      'Encode json with unicode' => [
+        [
+          "@type" => "Article",
+          "description" => "База данни грешка.",
+        ],
+        '{"@type": "Article","description": "База данни грешка."}',
       ],
     ];
     return $values;

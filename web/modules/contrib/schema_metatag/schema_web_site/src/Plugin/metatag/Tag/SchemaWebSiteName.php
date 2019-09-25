@@ -25,13 +25,4 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
  */
 class SchemaWebSiteName extends SchemaNameBase {
 
-  /**
-   * Generate a form element for this meta tag.
-   */
-  public function form(array $element = []) {
-    $form = parent::form($element);
-    $form['#attributes']['placeholder'] = '[site:name]';
-    return $form;
-  }
-
 }

@@ -2,10 +2,14 @@
 
 namespace Drupal\schema_metatag\Plugin\metatag\Tag;
 
+use Drupal\schema_metatag\SchemaMetatagManager;
+
 /**
  * Schema.org PostalAddress trait.
  */
 trait SchemaAddressTrait {
+
+  use SchemaPivotTrait;
 
   /**
    * Form keys.
@@ -22,30 +26,28 @@ trait SchemaAddressTrait {
   }
 
   /**
-   * Input values.
-   */
-  public function postalAddressInputValues() {
-    return [
-      'title' => '',
-      'description' => '',
-      'value' => [],
-      '#required' => FALSE,
-      'visibility_selector' => '',
-    ];
-  }
-
-  /**
    * The form element.
    */
   public function postalAddressForm($input_values) {
 
-    $input_values += $this->postalAddressInputValues();
+    $input_values += SchemaMetatagManager::defaultInputValues();
     $value = $input_values['value'];
+
+    // Get the id for the nested @type element.
+    $selector = ':input[name="' . $input_values['visibility_selector'] . '[@type]"]';
+    $visibility = ['invisible' => [$selector => ['value' => '']]];
+    $selector2 = SchemaMetatagManager::altSelector($selector);
+    $visibility2 = ['invisible' => [$selector2 => ['value' => '']]];
+    $visibility['invisible'] = [$visibility['invisible'], $visibility2['invisible']];
 
     $form['#type'] = 'fieldset';
     $form['#title'] = $input_values['title'];
     $form['#description'] = $input_values['description'];
     $form['#tree'] = TRUE;
+
+    // Add a pivot option to the form.
+    $form['pivot'] = $this->pivotForm($value);
+    $form['pivot']['#states'] = $visibility;
 
     $form['@type'] = [
       '#type' => 'select',
@@ -57,6 +59,7 @@ trait SchemaAddressTrait {
         'PostalAddress' => $this->t('PostalAddress'),
       ],
       '#required' => $input_values['#required'],
+      '#weight' => -10,
     ];
 
     $form['streetAddress'] = [
@@ -104,16 +107,10 @@ trait SchemaAddressTrait {
       '#description' => $this->t('The country. For example, USA. You can also provide the two-letter ISO 3166-1 alpha-2 country code.'),
     ];
 
-    // Add #states to show/hide the fields based on the value of @type,
-    // if a selector was provided.
-    if (!empty($input_values['visibility_selector'])) {
-      $keys = $this->postalAddressFormKeys();
-      $selector = ':input[name="' . $input_values['visibility_selector'] . '"]';
-      $visibility = ['visible' => [$selector => ['value' => 'PostalAddress']]];
-      foreach ($keys as $key) {
-        if ($key != '@type') {
-          $form[$key]['#states'] = $visibility;
-        }
+    $keys = static::postalAddressFormKeys();
+    foreach ($keys as $key) {
+      if ($key != '@type') {
+        $form[$key]['#states'] = $visibility;
       }
     }
 

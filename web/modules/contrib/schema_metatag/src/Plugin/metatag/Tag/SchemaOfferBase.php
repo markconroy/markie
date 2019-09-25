@@ -7,10 +7,9 @@ use Drupal\schema_metatag\SchemaMetatagManager;
 /**
  * Provides a plugin for the 'schema_offer_base' meta tag.
  */
-abstract class SchemaOfferBase extends SchemaNameBase {
+class SchemaOfferBase extends SchemaNameBase {
 
   use SchemaOfferTrait;
-  use SchemaPivotTrait;
 
   /**
    * {@inheritdoc}
@@ -23,14 +22,14 @@ abstract class SchemaOfferBase extends SchemaNameBase {
       'description' => $this->description(),
       'value' => $value,
       '#required' => isset($element['#required']) ? $element['#required'] : FALSE,
-      'visibility_selector' => $this->visibilitySelector() . '[@type]',
+      'visibility_selector' => $this->visibilitySelector(),
     ];
 
     $form = $this->offerForm($input_values);
 
-    $form['pivot'] = $this->pivotForm($value);
-    $selector = ':input[name="' . $input_values['visibility_selector'] . '"]';
-    $form['pivot']['#states'] = ['invisible' => [$selector => ['value' => '']]];
+    if (empty($this->multiple())) {
+      unset($form['pivot']);
+    }
 
     return $form;
   }
@@ -47,8 +46,29 @@ abstract class SchemaOfferBase extends SchemaNameBase {
           $items[$key] = 'Offer';
           break;
 
+        case 'eligibleRegion':
+        case 'ineligibleRegion':
+          $items[$key] = SchemaCountryBase::testValue();
+          break;
+
         default:
           $items[$key] = parent::testDefaultValue(2, ' ');
+          break;
+
+      }
+    }
+    return $items;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function processedTestValue($items) {
+    foreach ($items as $key => $value) {
+      switch ($key) {
+        case 'eligibleRegion':
+        case 'ineligibleRegion':
+          $items[$key] = SchemaCountryBase::processedTestValue($items[$key]);
           break;
 
       }

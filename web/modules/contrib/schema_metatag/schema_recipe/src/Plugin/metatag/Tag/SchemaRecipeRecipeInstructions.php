@@ -14,7 +14,7 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
  * @MetatagTag(
  *   id = "schema_recipe_recipe_instructions",
  *   label = @Translation("recipeInstructions"),
- *   description = @Translation("Steps in making the recipe, in the form of a single item (document, video, etc.) or an ordered list with HowToStep and/or HowToSection items."),
+ *   description = @Translation("RECOMMENDED BY GOOGLE. Steps in making the recipe."),
  *   name = "recipeInstructions",
  *   group = "schema_recipe",
  *   weight = 5,
@@ -24,14 +24,5 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
  * )
  */
 class SchemaRecipeRecipeInstructions extends SchemaNameBase {
-
-  /**
-   * Generate a form element for this meta tag.
-   */
-  public function form(array $element = []) {
-    $form = parent::form($element);
-    $form['#attributes']['placeholder'] = '[node:field_instruction]';
-    return $form;
-  }
 
 }

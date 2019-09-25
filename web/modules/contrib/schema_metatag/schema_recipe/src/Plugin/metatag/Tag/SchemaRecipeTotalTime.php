@@ -14,7 +14,7 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaDurationBase;
  * @MetatagTag(
  *   id = "schema_recipe_total_time",
  *   label = @Translation("totalTime"),
- *   description = @Translation("Total Time (The total time required to perform instructions or a direction (including time to prepare the supplies), in ISO 8601 duration format."),
+ *   description = @Translation("RECOMMENDED BY GOOGLE. Total Time (The total time required to perform instructions or a direction (including time to prepare the supplies), in ISO 8601 duration format."),
  *   name = "totalTime",
  *   group = "schema_recipe",
  *   weight = 4,
@@ -24,14 +24,5 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaDurationBase;
  * )
  */
 class SchemaRecipeTotalTime extends SchemaDurationBase {
-
-  /**
-   * Generate a form element for this meta tag.
-   */
-  public function form(array $element = []) {
-    $form = parent::form($element);
-    $form['#attributes']['placeholder'] = '';
-    return $form;
-  }
 
 }

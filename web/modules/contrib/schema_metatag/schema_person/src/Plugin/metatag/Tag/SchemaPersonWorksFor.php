@@ -17,22 +17,12 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaPersonOrgBase;
  *   description = @Translation("Organizations that the person works for."),
  *   name = "worksFor",
  *   group = "schema_person",
- *   weight = 35,
+ *   weight = 11,
  *   type = "string",
  *   secure = FALSE,
  *   multiple = FALSE
  * )
  */
 class SchemaPersonWorksFor extends SchemaPersonOrgBase {
-
-  /**
-   * Generate a form element for this meta tag.
-   */
-  public function form(array $element = []) {
-    $form = parent::form($element);
-    $form['name']['#attributes']['placeholder'] = '[site:name]';
-    $form['url']['#attributes']['placeholder'] = '[site:url]';
-    return $form;
-  }
 
 }

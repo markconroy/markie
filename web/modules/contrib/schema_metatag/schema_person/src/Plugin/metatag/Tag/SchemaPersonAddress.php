@@ -17,7 +17,7 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaAddressBase;
  *   description = @Translation("Physical address of the person."),
  *   name = "address",
  *   group = "schema_person",
- *   weight = 0,
+ *   weight = 1,
  *   type = "string",
  *   secure = FALSE,
  *   multiple = FALSE

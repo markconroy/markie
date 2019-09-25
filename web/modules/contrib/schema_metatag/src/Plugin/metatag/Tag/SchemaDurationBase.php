@@ -5,7 +5,7 @@ namespace Drupal\schema_metatag\Plugin\metatag\Tag;
 /**
  * Provides a plugin for the 'schema_duration_base' meta tag.
  */
-abstract class SchemaDurationBase extends SchemaNameBase {
+class SchemaDurationBase extends SchemaNameBase {
 
   /**
    * {@inheritdoc}

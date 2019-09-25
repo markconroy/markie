@@ -32,6 +32,7 @@ class SchemaRecipeTest extends SchemaMetatagTagsTestBase {
    */
   public $schemaTags = [
     'schema_recipe_aggregate_rating' => 'SchemaRecipeAggregateRating',
+    'schema_recipe_review' => 'SchemaRecipeReview',
     'schema_recipe_author' => 'SchemaRecipeAuthor',
     'schema_recipe_cook_time' => 'SchemaRecipeCookTime',
     'schema_recipe_date_published' => 'SchemaRecipeDatePublished',
@@ -45,6 +46,8 @@ class SchemaRecipeTest extends SchemaMetatagTagsTestBase {
     'schema_recipe_recipe_yield' => 'SchemaRecipeRecipeYield',
     'schema_recipe_total_time' => 'SchemaRecipeTotalTime',
     'schema_recipe_type' => 'SchemaRecipeType',
+    'schema_recipe_nutrition' => 'SchemaRecipeNutrition',
+    'schema_recipe_recipe_cuisine' => 'SchemaRecipeRecipeCuisine',
   ];
 
 }

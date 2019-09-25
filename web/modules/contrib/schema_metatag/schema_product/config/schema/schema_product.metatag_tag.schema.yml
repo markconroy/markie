@@ -1,9 +1,6 @@
 # The 'type' should be "label" for short meta tags and "text" for ones which
 # could get longer, especially ones which use a textarea field instead of a
 # textfield.
-metatag.metatag_tag.schema_product_aggregate_rating:
-  type: text
-  label: 'aggregateRating'
 metatag.metatag_tag.schema_product_description:
   type: text
   label: 'description'
@@ -19,3 +16,12 @@ metatag.metatag_tag.schema_product_offers:
 metatag.metatag_tag.schema_product_type:
   type: text
   label: '@type'
+metatag.metatag_tag.schema_product_aggregate_rating:
+  type: text
+  label: 'aggregateRating'
+metatag.metatag_tag.schema_product_review:
+  type: text
+  label: 'review'
+metatag.metatag_tag.schema_product_brand:
+  type: text
+  label: 'brand'

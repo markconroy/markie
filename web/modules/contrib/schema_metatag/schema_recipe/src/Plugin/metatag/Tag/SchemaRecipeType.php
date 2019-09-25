@@ -14,10 +14,10 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaTypeBase;
  * @MetatagTag(
  *   id = "schema_recipe_type",
  *   label = @Translation("@type"),
- *   description = @Translation("The type of recipe."),
+ *   description = @Translation("REQUIRED. The type of recipe."),
  *   name = "@type",
  *   group = "schema_recipe",
- *   weight = -5,
+ *   weight = -10,
  *   type = "string",
  *   secure = FALSE,
  *   multiple = FALSE

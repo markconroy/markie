@@ -14,7 +14,7 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaDurationBase;
  * @MetatagTag(
  *   id = "schema_recipe_cook_time",
  *   label = @Translation("cookTime"),
- *   description = @Translation("Cook Time (The time it takes to actually cook the dish, in ISO 8601 duration format.)."),
+ *   description = @Translation("RECOMMENDED BY GOOGLE. Cook Time (The time it takes to actually cook the dish, in ISO 8601 duration format.)."),
  *   name = "cookTime",
  *   group = "schema_recipe",
  *   weight = 4,
@@ -24,14 +24,5 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaDurationBase;
  * )
  */
 class SchemaRecipeCookTime extends SchemaDurationBase {
-
-  /**
-   * Generate a form element for this meta tag.
-   */
-  public function form(array $element = []) {
-    $form = parent::form($element);
-    $form['#attributes']['placeholder'] = '';
-    return $form;
-  }
 
 }

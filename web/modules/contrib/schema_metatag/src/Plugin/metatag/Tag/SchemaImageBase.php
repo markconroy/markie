@@ -7,7 +7,7 @@ use Drupal\schema_metatag\SchemaMetatagManager;
 /**
  * Schema.org Image items should extend this class.
  */
-abstract class SchemaImageBase extends SchemaNameBase {
+class SchemaImageBase extends SchemaNameBase {
 
   use SchemaImageTrait;
 
@@ -23,10 +23,14 @@ abstract class SchemaImageBase extends SchemaNameBase {
       'description' => $this->description(),
       'value' => SchemaMetatagManager::unserialize($this->value()),
       '#required' => isset($element['#required']) ? $element['#required'] : FALSE,
-      'visibility_selector' => $this->visibilitySelector() . '[@type]',
+      'visibility_selector' => $this->visibilitySelector(),
     ];
 
     $form = $this->imageForm($input_values);
+
+    if (empty($this->multiple())) {
+      unset($form['pivot']);
+    }
 
     return $form;
   }

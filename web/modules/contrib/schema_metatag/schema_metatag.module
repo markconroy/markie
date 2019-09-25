@@ -7,6 +7,7 @@
 
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\schema_metatag\SchemaMetatagManager;
+use Drupal\Core\Form\FormStateInterface;
 
 /**
  * Implements hook_help().
@@ -41,7 +42,7 @@ function schema_metatag_page_attachments_alter(array &$attachments) {
   if (count($items) > 0) {
     $jsonld = SchemaMetatagManager::encodeJsonld($items);
     if (!empty($jsonld)) {
-      $attachments['#attached']['html_head']['schema_metatag'] = [
+      $attachments['#attached']['html_head'][] = [
         [
           '#type' => 'html_tag',
           '#tag' => 'script',

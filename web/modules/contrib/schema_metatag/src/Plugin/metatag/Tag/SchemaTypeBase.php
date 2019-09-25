@@ -5,7 +5,7 @@ namespace Drupal\schema_metatag\Plugin\metatag\Tag;
 /**
  * Provides a plugin for the 'schema_type_base' meta tag.
  */
-abstract class SchemaTypeBase extends SchemaNameBase {
+class SchemaTypeBase extends SchemaNameBase {
 
   /**
    * Return a list of object labels.

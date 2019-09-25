@@ -32,6 +32,7 @@ class SchemaVideoObjectTest extends SchemaMetatagTagsTestBase {
    */
   public $schemaTags = [
     'schema_video_object_aggregate_rating' => 'SchemaVideoObjectAggregateRating',
+    'schema_video_object_review' => 'SchemaVideoObjectReview',
     'schema_video_object_content_url' => 'SchemaVideoObjectContentUrl',
     'schema_video_object_description' => 'SchemaVideoObjectDescription',
     'schema_video_object_duration' => 'SchemaVideoObjectDuration',
@@ -39,11 +40,11 @@ class SchemaVideoObjectTest extends SchemaMetatagTagsTestBase {
     'schema_video_object_expires' => 'SchemaVideoObjectExpires',
     'schema_video_object_id' => 'SchemaVideoObjectId',
     'schema_video_object_interaction_count' => 'SchemaVideoObjectInteractionCount',
-    'schema_video_object_main_entity_of_page' => 'SchemaVideoObjectMainEntityOfPage',
     'schema_video_object_name' => 'SchemaVideoObjectName',
     'schema_video_object_thumbnail_url' => 'SchemaVideoObjectThumbnailUrl',
     'schema_video_object_type' => 'SchemaVideoObjectType',
     'schema_video_object_upload_date' => 'SchemaVideoObjectUploadDate',
+    'schema_video_object_transcript' => 'SchemaVideoObjectTranscript',
   ];
 
 }

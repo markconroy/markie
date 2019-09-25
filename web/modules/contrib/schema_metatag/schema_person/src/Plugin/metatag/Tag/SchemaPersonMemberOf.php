@@ -2,7 +2,7 @@
 
 namespace Drupal\schema_person\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaPersonOrgBase;
+use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaProgramMembershipBase;
 
 /**
  * Provides a plugin for the 'schema_person_member_of' meta tag.
@@ -14,25 +14,16 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaPersonOrgBase;
  * @MetatagTag(
  *   id = "schema_person_member_of",
  *   label = @Translation("memberOf"),
- *   description = @Translation("An Organization (or ProgramMembership) to which this Person or Organization belongs."),
+ *   description = @Translation("An Organization (or ProgramMembership) to which this Person belongs."),
  *   name = "memberOf",
  *   group = "schema_person",
- *   weight = 30,
+ *   weight = 11,
  *   type = "string",
  *   secure = FALSE,
  *   multiple = FALSE
  * )
  */
-class SchemaPersonMemberOf extends SchemaPersonOrgBase {
+class SchemaPersonMemberOf extends SchemaProgramMembershipBase {
 
-  /**
-   * Generate a form element for this meta tag.
-   */
-  public function form(array $element = []) {
-    $form = parent::form($element);
-    $form['name']['#attributes']['placeholder'] = '[site:name]';
-    $form['url']['#attributes']['placeholder'] = '[site:url]';
-    return $form;
-  }
 
 }

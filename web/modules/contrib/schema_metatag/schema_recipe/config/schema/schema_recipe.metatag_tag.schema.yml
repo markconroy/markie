@@ -1,10 +1,6 @@
 # The 'type' should be "label" for short meta tags and "text" for ones which
 # could get longer, especially ones which use a textarea field instead of a
 # textfield.
-
-metatag.metatag_tag.schema_recipe_aggregate_rating:
-  type: text
-  label: 'aggregateRating'
 metatag.metatag_tag.schema_recipe_author:
   type: text
   label: 'author'
@@ -44,3 +40,15 @@ metatag.metatag_tag.schema_recipe_total_time:
 metatag.metatag_tag.schema_recipe_type:
   type: text
   label: '@type'
+metatag.metatag_tag.schema_recipe_aggregate_rating:
+  type: text
+  label: 'aggregateRating'
+metatag.metatag_tag.schema_recipe_review:
+  type: text
+  label: 'review'
+metatag.metatag_tag.schema_recipe_nutrition:
+  type: text
+  label: 'nutrition'
+metatag.metatag_tag.schema_recipe_recipe_cuisine:
+  type: text
+  label: 'recipeCuisine'

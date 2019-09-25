@@ -14,10 +14,10 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaTypeBase;
  * @MetatagTag(
  *   id = "schema_image_object_type",
  *   label = @Translation("@type"),
- *   description = @Translation("The type of this ImageObject."),
+ *   description = @Translation("REQUIRED. The type of this ImageObject."),
  *   name = "@type",
  *   group = "schema_image_object",
- *   weight = -99,
+ *   weight = -10,
  *   type = "string",
  *   secure = FALSE,
  *   multiple = FALSE

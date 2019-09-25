@@ -10,7 +10,10 @@ use Drupal\schema_metatag\Plugin\metatag\Group\SchemaGroupBase;
  * @MetatagGroup(
  *   id = "schema_video_object",
  *   label = @Translation("Schema.org: VideoObject"),
- *   description = @Translation("See Schema.org definitions for this Schema type at <a href="":url"">:url</a>.", arguments = { ":url" = "http://schema.org/VideoObject"}),
+ *   description = @Translation("See Schema.org definitions for this Schema type at <a href="":url"">:url</a>. Also see <a href="":url2"">Google's requirements</a>.", arguments = {
+ *     ":url" = "https://schema.org/VideoObject",
+ *     ":url2" = "https://developers.google.com/search/docs/data-types/video",
+ *   }),
  *   weight = 10,
  * )
  */

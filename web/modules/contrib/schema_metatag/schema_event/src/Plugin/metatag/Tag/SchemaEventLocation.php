@@ -14,7 +14,7 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaPlaceBase;
  * @MetatagTag(
  *   id = "schema_event_location",
  *   label = @Translation("location"),
- *   description = @Translation("The location of the event."),
+ *   description = @Translation("REQUIRED BY GOOGLE. The location of the event."),
  *   name = "location",
  *   group = "schema_event",
  *   weight = 5,

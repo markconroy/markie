@@ -14,7 +14,7 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
  * @MetatagTag(
  *   id = "schema_organization_name",
  *   label = @Translation("name"),
- *   description = @Translation("The name of the organization."),
+ *   description = @Translation("REQUIRED BY GOOGLE. The name of the organization."),
  *   name = "name",
  *   group = "schema_organization",
  *   weight = 1,
@@ -24,14 +24,5 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
  * )
  */
 class SchemaOrganizationName extends SchemaNameBase {
-
-  /**
-   * Generate a form element for this meta tag.
-   */
-  public function form(array $element = []) {
-    $form = parent::form($element);
-    $form['#attributes']['placeholder'] = '[site:name]';
-    return $form;
-  }
 
 }

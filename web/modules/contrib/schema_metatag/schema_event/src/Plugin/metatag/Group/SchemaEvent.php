@@ -10,10 +10,13 @@ use Drupal\schema_metatag\Plugin\metatag\Group\SchemaGroupBase;
  * @MetatagGroup(
  *   id = "schema_event",
  *   label = @Translation("Schema.org: Event"),
- *   description = @Translation("See Schema.org definitions for this Schema type at <a href="":url"">:url</a>.", arguments = { ":url" = "http://schema.org/Event"}),
+ *   description = @Translation("See Schema.org definitions for this Schema type at <a href="":url"">:url</a>. Also see <a href="":url2"">Google's requirements</a>.", arguments = {
+ *     ":url" = "https://schema.org/Event",
+ *     ":url2" = "https://developers.google.com/search/docs/data-types/event",
+ *   }),
  *   weight = 10,
  * )
  */
 class SchemaEvent extends SchemaGroupBase {
-  // Nothing here yet. Just a placeholder class for a plugin.
+
 }

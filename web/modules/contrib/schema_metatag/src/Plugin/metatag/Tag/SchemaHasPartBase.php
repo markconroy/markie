@@ -11,14 +11,31 @@ use Drupal\schema_metatag\SchemaMetatagManager;
  *
  * @see https://developers.google.com/search/docs/data-types/paywalled-content
  */
-abstract class SchemaHasPartBase extends SchemaNameBase {
+class SchemaHasPartBase extends SchemaNameBase {
+
+  use SchemaHasPartTrait;
 
   /**
    * {@inheritdoc}
    */
   public function form(array $element = []) {
-    $form = parent::form($element);
-    $form['#description'] = $this->t('Comma-separated list of class names of the parts of the web page that are not free. Do NOT surround class names with quotation marks! Also fill out "isAccessibleForFree".');
+
+    $value = SchemaMetatagManager::unserialize($this->value());
+
+    $input_values = [
+      'title' => $this->label(),
+      'description' => $this->description(),
+      'value' => $value,
+      '#required' => isset($element['#required']) ? $element['#required'] : FALSE,
+      'visibility_selector' => $this->visibilitySelector(),
+    ];
+
+    $form = $this->hasPartForm($input_values);
+
+    if (empty($this->multiple())) {
+      unset($form['pivot']);
+    }
+
     return $form;
   }
 
@@ -26,24 +43,41 @@ abstract class SchemaHasPartBase extends SchemaNameBase {
    * {@inheritdoc}
    */
   public static function testValue() {
-    return parent::testDefaultValue(3, ',');
+    $items = [];
+    $keys = self::hasPartFormKeys();
+    foreach ($keys as $key) {
+      switch ($key) {
+
+        case '@type':
+          $items[$key] = 'WebPageElement';
+          break;
+
+        case 'potentialAction':
+          $items[$key] = SchemaActionBase::testValue();
+          break;
+
+        default:
+          $items[$key] = parent::testDefaultValue(1, '');
+          break;
+
+      }
+    }
+    return $items;
   }
 
   /**
    * {@inheritdoc}
    */
-  public static function outputValue($input_value) {
-    if (is_string($input_value)) {
-      $input_value = SchemaMetatagManager::explode($input_value);
+  public static function processedTestValue($items) {
+    foreach ($items as $key => $value) {
+      switch ($key) {
+        case 'potentialAction':
+          $items[$key] = SchemaActionBase::processedTestValue($items[$key]);
+          break;
+
+      }
     }
-    foreach ((array) $input_value as $class_name) {
-      $items[] = [
-        '@type' => 'WebPageElement',
-        'isAccessibleForFree' => 'False',
-        'cssSelector' => '.' . $class_name,
-      ];
-    }
-    return !empty($items) ? $items : '';
+    return $items;
   }
 
 }

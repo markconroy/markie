@@ -1,0 +1,19 @@
+table.schema-audit td {
+  vertical-align: top;
+  padding: 0;
+  padding-left: 5px;
+  border-right: #999 solid 1px;
+}
+table.schema-audit .item-list ul li, .menu-item {
+  list-style: none;
+}
+table.schema-audit td.first {
+  border-top: #000 solid 2px;
+}
+table.schema-audit td.selected {
+  background-color: #dedede;
+}
+table.schema-audit td.checkbox {
+  text-align: center;
+  padding: 0;
+}

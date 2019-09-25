@@ -14,7 +14,7 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaDateBase;
  * @MetatagTag(
  *   id = "schema_article_date_published",
  *   label = @Translation("datePublished"),
- *   description = @Translation("Date the article was published."),
+ *   description = @Translation("REQUIRED BY GOOGLE. Date the article was published."),
  *   name = "datePublished",
  *   group = "schema_article",
  *   weight = 3,
@@ -24,14 +24,5 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaDateBase;
  * )
  */
 class SchemaArticleDatePublished extends SchemaDateBase {
-
-  /**
-   * {@inheritdoc}
-   */
-  public function form(array $element = []) {
-    $form = parent::form($element);
-    $form['#attributes']['placeholder'] = '[node:created:html_datetime]';
-    return $form;
-  }
 
 }

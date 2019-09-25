@@ -25,14 +25,4 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaPersonOrgBase;
  */
 class SchemaWebSitePublisher extends SchemaPersonOrgBase {
 
-  /**
-   * Generate a form element for this meta tag.
-   */
-  public function form(array $element = []) {
-    $form = parent::form($element);
-    $form['name']['#attributes']['placeholder'] = '[site:name]';
-    $form['url']['#attributes']['placeholder'] = '[site:url]';
-    return $form;
-  }
-
 }

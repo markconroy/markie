@@ -14,7 +14,7 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaPersonOrgBase;
  * @MetatagTag(
  *   id = "schema_article_publisher",
  *   label = @Translation("publisher"),
- *   description = @Translation("Publisher of the article."),
+ *   description = @Translation("REQUIRED BY GOOGLE. Publisher of the article."),
  *   name = "publisher",
  *   group = "schema_article",
  *   weight = 6,
@@ -24,15 +24,5 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaPersonOrgBase;
  * )
  */
 class SchemaArticlePublisher extends SchemaPersonOrgBase {
-
-  /**
-   * {@inheritdoc}
-   */
-  public function form(array $element = []) {
-    $form = parent::form($element);
-    $form['name']['#attributes']['placeholder'] = '[site:name]';
-    $form['url']['#attributes']['placeholder'] = '[site:url]';
-    return $form;
-  }
 
 }

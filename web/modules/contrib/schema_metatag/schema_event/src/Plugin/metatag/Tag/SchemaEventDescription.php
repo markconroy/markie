@@ -14,7 +14,7 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
  * @MetatagTag(
  *   id = "schema_event_description",
  *   label = @Translation("description"),
- *   description = @Translation("A description of the event."),
+ *   description = @Translation("RECOMMENDED BY GOOGLE. A description of the event."),
  *   name = "description",
  *   group = "schema_event",
  *   weight = 1,
@@ -24,14 +24,5 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
  * )
  */
 class SchemaEventDescription extends SchemaNameBase {
-
-  /**
-   * {@inheritdoc}
-   */
-  public function form(array $element = []) {
-    $form = parent::form($element);
-    $form['#attributes']['placeholder'] = '[node:summary]';
-    return $form;
-  }
 
 }

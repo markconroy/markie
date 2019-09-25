@@ -14,10 +14,10 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaTypeBase;
  * @MetatagTag(
  *   id = "schema_item_list_type",
  *   label = @Translation("@type"),
- *   description = @Translation("The type of item list."),
+ *   description = @Translation("REQUIRED. The type of item list."),
  *   name = "@type",
  *   group = "schema_item_list",
- *   weight = -5,
+ *   weight = -10,
  *   type = "string",
  *   secure = FALSE,
  *   multiple = FALSE

@@ -14,7 +14,7 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaDateBase;
  * @MetatagTag(
  *   id = "schema_video_object_upload_date",
  *   label = @Translation("uploadDate"),
- *   description = @Translation("The date the video was first published, in ISO 8601 format."),
+ *   description = @Translation("REQUIRED BY GOOGLE. The date the video was first published, in ISO 8601 format."),
  *   name = "uploadDate",
  *   group = "schema_video_object",
  *   weight = -1,

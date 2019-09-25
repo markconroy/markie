@@ -14,24 +14,15 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
  * @MetatagTag(
  *   id = "schema_organization_url",
  *   label = @Translation("url"),
- *   description = @Translation("The url of the organization."),
+ *   description = @Translation("RECOMMENDED BY GOOGLE. The url of the organization."),
  *   name = "url",
  *   group = "schema_organization",
- *   weight = 2,
+ *   weight = 1,
  *   type = "string",
  *   secure = FALSE,
  *   multiple = FALSE
  * )
  */
 class SchemaOrganizationUrl extends SchemaNameBase {
-
-  /**
-   * Generate a form element for this meta tag.
-   */
-  public function form(array $element = []) {
-    $form = parent::form($element);
-    $form['#attributes']['placeholder'] = '[site:url]';
-    return $form;
-  }
 
 }

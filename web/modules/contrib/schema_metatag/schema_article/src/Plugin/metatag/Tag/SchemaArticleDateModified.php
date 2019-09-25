@@ -14,7 +14,7 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaDateBase;
  * @MetatagTag(
  *   id = "schema_article_date_modified",
  *   label = @Translation("dateModified"),
- *   description = @Translation("Date the article was last modified."),
+ *   description = @Translation("RECOMMENDED BY GOOGLE. Date the article was last modified."),
  *   name = "dateModified",
  *   group = "schema_article",
  *   weight = 4,
@@ -24,14 +24,5 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaDateBase;
  * )
  */
 class SchemaArticleDateModified extends SchemaDateBase {
-
-  /**
-   * {@inheritdoc}
-   */
-  public function form(array $element = []) {
-    $form = parent::form($element);
-    $form['#attributes']['placeholder'] = '[node:changed:html_datetime]';
-    return $form;
-  }
 
 }

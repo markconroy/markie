@@ -17,7 +17,7 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
  *   description = @Translation("The width of the image."),
  *   name = "width",
  *   group = "schema_image_object",
- *   weight = -30,
+ *   weight = 5,
  *   type = "string",
  *   secure = FALSE,
  *   multiple = TRUE

@@ -10,7 +10,10 @@ use Drupal\schema_metatag\Plugin\metatag\Group\SchemaGroupBase;
  * @MetatagGroup(
  *   id = "schema_web_page",
  *   label = @Translation("Schema.org: WebPage"),
- *   description = @Translation("See Schema.org definitions for this Schema type at <a href="":url"">:url</a>.", arguments = { ":url" = "http://schema.org/WebPage"}),
+ *   description = @Translation("See Schema.org definitions for this Schema type at <a href="":url"">:url</a>. Also see <a href="":url2"">Google's requirements</a>.", arguments = {
+ *     ":url" = "https://schema.org/WebPage",
+ *     ":url2" = "https://developers.google.com/search/docs/data-types/article",
+ *   }),
  *   weight = 10,
  * )
  */

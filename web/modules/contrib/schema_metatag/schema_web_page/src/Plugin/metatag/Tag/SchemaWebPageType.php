@@ -14,10 +14,10 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaTypeBase;
  * @MetatagTag(
  *   id = "schema_web_page_type",
  *   label = @Translation("@type"),
- *   description = @Translation("The type of web page."),
+ *   description = @Translation("REQUIRED. The type of web page."),
  *   name = "@type",
  *   group = "schema_web_page",
- *   weight = -5,
+ *   weight = -10,
  *   type = "string",
  *   secure = FALSE,
  *   multiple = FALSE

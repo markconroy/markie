@@ -7,10 +7,9 @@ use Drupal\schema_metatag\SchemaMetatagManager;
 /**
  * Schema.org Geo items should extend this class.
  */
-abstract class SchemaGeoBase extends SchemaNameBase {
+class SchemaGeoBase extends SchemaNameBase {
 
   use SchemaGeoTrait;
-  use SchemaPivotTrait;
 
   /**
    * {@inheritdoc}
@@ -24,14 +23,14 @@ abstract class SchemaGeoBase extends SchemaNameBase {
       'description' => $this->description(),
       'value' => $value,
       '#required' => isset($element['#required']) ? $element['#required'] : FALSE,
-      'visibility_selector' => $this->visibilitySelector() . '[@type]',
+      'visibility_selector' => $this->visibilitySelector(),
     ];
 
     $form = $this->geoForm($input_values);
 
-    $form['pivot'] = $this->pivotForm($value);
-    $selector = ':input[name="' . $input_values['visibility_selector'] . '"]';
-    $form['pivot']['#states'] = ['invisible' => [$selector => ['value' => '']]];
+    if (empty($this->multiple())) {
+      unset($form['pivot']);
+    }
 
     return $form;
   }

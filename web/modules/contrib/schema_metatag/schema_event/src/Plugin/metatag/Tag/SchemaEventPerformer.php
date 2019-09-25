@@ -14,7 +14,7 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaPersonOrgBase;
  * @MetatagTag(
  *   id = "schema_event_performer",
  *   label = @Translation("performer"),
- *   description = @Translation("The performer on the event."),
+ *   description = @Translation("RECOMMENDED BY GOOGLE. The performer on the event."),
  *   name = "performer",
  *   group = "schema_event",
  *   weight = 10,
@@ -24,15 +24,5 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaPersonOrgBase;
  * )
  */
 class SchemaEventPerformer extends SchemaPersonOrgBase {
-
-  /**
-   * {@inheritdoc}
-   */
-  public function form(array $element = []) {
-    $form = parent::form($element);
-    $form['name']['#description'] = $this->t("The name of the performer");
-    $form['url']['#description'] = $this->t("The URL of the performer's website.");
-    return $form;
-  }
 
 }

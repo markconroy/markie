@@ -14,7 +14,7 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaDateBase;
  * @MetatagTag(
  *   id = "schema_event_end_date",
  *   label = @Translation("endDate"),
- *   description = @Translation("Date and time when the event ends."),
+ *   description = @Translation("RECOMMENDED BY GOOGLE. Date and time when the event ends."),
  *   name = "endDate",
  *   group = "schema_event",
  *   weight = 4,
@@ -24,13 +24,5 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaDateBase;
  * )
  */
 class SchemaEventEndDate extends SchemaDateBase {
-
-  /**
-   * {@inheritdoc}
-   */
-  public function form(array $element = []) {
-    $form = parent::form($element);
-    return $form;
-  }
 
 }
