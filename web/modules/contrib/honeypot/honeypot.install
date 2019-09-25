@@ -61,6 +61,7 @@ function honeypot_install() {
 function honeypot_uninstall() {
   // Clear the bootstrap cache.
   \Drupal::cache('bootstrap')->deleteAll();
+  \Drupal::configFactory()->getEditable('honeypot.settings.yml')->delete();
 }
 
 /**

@@ -7,6 +7,27 @@
 
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Component\Utility\Crypt;
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function honeypot_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    case 'help.page.honeypot':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('The Honeypot module uses both the honeypot and timestamp methods of deterring spam bots from completing forms on your Drupal site. These methods are effective against many spam bots, and are not as intrusive as CAPTCHAs or other methods which punish the user. For more information, see the <a href=":url">online documentation for the Honeypot module</a>.', [':url' => 'https://www.drupal.org/docs/8/modules/honeypot']) . '</p>';
+      $output .= '<h3>' . t('Uses') . '</h3>';
+      $output .= '<dl>';
+      $output .= '<dt>' . t('Configuring Honeypot') . '</dt>';
+      $output .= '<dd>' . t('All settings for this module are on the Honeypot configuration page, under the Configuration section, in the Content authoring settings. You can visit the configuration page directly from the Honeypot configuration link below. The configuration settings are described in the <a href=":url">online documentation for the Honeypot module</a>.', [':url' => 'https://www.drupal.org/docs/8/modules/honeypot/using-honeypot']) . '</dd>';
+      $output .= '<dt>' . t('Setting up Honeypot in your own forms') . '</dt>';
+      $output .= '<dd>' . t('Honeypot protection can be bypassed for certain user roles. For instance, site administrators, who just might be able to fill out a form in less than 5 seconds.  And, Honeypot protection can be enabled only for certain forms. Or, it can protect all forms on the site. Finally, honeypot protection can be used in any of your own forms by simply including a little code snippet included on the module\'s project page.') . '</dd>';
+      $output .= '</dl>';
+      return $output;
+  }
+}
 
 /**
  * Implements hook_cron().
@@ -15,7 +36,7 @@ function honeypot_cron() {
   // Delete {honeypot_user} entries older than the value of honeypot_expire.
   $expire_limit = \Drupal::config('honeypot.settings')->get('expire');
   \Drupal::database()->delete('honeypot_user')
-    ->condition('timestamp', REQUEST_TIME - $expire_limit, '<')
+    ->condition('timestamp', \Drupal::time()->getRequestTime() - $expire_limit, '<')
     ->execute();
 }
 
@@ -43,7 +64,7 @@ function honeypot_form_alter(&$form, FormStateInterface $form_state, $form_id) {
   if ($protect_all_forms && !in_array($form_id, $unprotected_forms)) {
     // Don't protect system forms - only admins should have access, and system
     // forms may be programmatically submitted by drush and other modules.
-    if (strpos($form_id, 'system_') === FALSE && strpos($form_id, 'search_') === FALSE && strpos($form_id, 'views_exposed_form_') === FALSE) {
+    if (preg_match('/[^a-zA-Z]system_/', $form_id) === 0 && preg_match('/[^a-zA-Z]search_/', $form_id) === 0 && preg_match('/[^a-zA-Z]views_exposed_form_/', $form_id) === 0) {
       honeypot_add_form_protection($form, $form_state, ['honeypot', 'time_restriction']);
     }
   }
@@ -147,7 +168,7 @@ function honeypot_add_form_protection(&$form, FormStateInterface $form_state, ar
     $input = $form_state->getUserInput();
     if (empty($input['honeypot_time'])) {
       $identifier = Crypt::randomBytesBase64();
-      \Drupal::service('keyvalue.expirable')->get('honeypot_time_restriction')->set($identifier, time(), 3600*24);
+      \Drupal::service('keyvalue.expirable')->get('honeypot_time_restriction')->setWithExpire($identifier, time(), 3600*24);
     }
     else {
       $identifier = $input['honeypot_time'];
@@ -215,10 +236,10 @@ function _honeypot_time_restriction_validate($element, FormStateInterface $form_
 
   // Make sure current time - (time_limit + form time value) is greater than 0.
   // If not, throw an error.
-  if (!$honeypot_time || REQUEST_TIME < ($honeypot_time + $time_limit)) {
+  if (!$honeypot_time || \Drupal::time()->getRequestTime() < ($honeypot_time + $time_limit)) {
     _honeypot_log($form_state->getValue('form_id'), 'honeypot_time');
     $time_limit = honeypot_get_time_limit();
-    \Drupal::service('keyvalue.expirable')->get('honeypot_time_restriction')->set($identifier, REQUEST_TIME, 3600*24);
+    \Drupal::service('keyvalue.expirable')->get('honeypot_time_restriction')->setWithExpire($identifier, \Drupal::time()->getRequestTime(), 3600*24);
     $form_state->setErrorByName('', t('There was a problem with your form submission. Please wait @limit seconds and try again.', ['@limit' => $time_limit]));
   }
 }
@@ -263,7 +284,7 @@ function honeypot_get_time_limit(array $form_values = []) {
     $uid = $account->id();
     $query = \Drupal::database()->select('honeypot_user', 'hu')
       ->condition('uid', $uid)
-      ->condition('timestamp', REQUEST_TIME - $expire_time, '>');
+      ->condition('timestamp', \Drupal::time()->getRequestTime() - $expire_time, '>');
 
     // For anonymous users, take the hostname into account.
     if ($uid === 0) {
@@ -273,7 +294,7 @@ function honeypot_get_time_limit(array $form_values = []) {
     $number = $query->countQuery()->execute()->fetchField();
 
     // Don't add more than 30 days' worth of extra time.
-    $honeypot_time_limit = (int) min($honeypot_time_limit + exp($number) - 1, 2592000);
+    $honeypot_time_limit = (int) min($honeypot_time_limit + exp($number) - 1, $expire_time);
     // TODO - Only accepts two args.
     $additions = \Drupal::moduleHandler()->invokeAll('honeypot_time_limit', [
       $honeypot_time_limit,
@@ -306,7 +327,7 @@ function honeypot_log_failure($form_id, $type) {
     ->fields([
       'uid' => $uid,
       'hostname' => Drupal::request()->getClientIp(),
-      'timestamp' => REQUEST_TIME,
+      'timestamp' => \Drupal::time()->getRequestTime(),
     ])
     ->execute();
 
