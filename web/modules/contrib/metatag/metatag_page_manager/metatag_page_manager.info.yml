@@ -1,14 +1,13 @@
 name: Metatag Page Manager
 type: module
 description: Provides metatag support for Page Manager variants.
-# core: 8.x
+core: 8.x
 package: SEO
 dependencies:
   - page_manager:page_manager
   - metatag:metatag
 
-# Information added by Drupal.org packaging script on 2019-07-24
-version: '8.x-1.9'
-core: '8.x'
+# Information added by Drupal.org packaging script on 2019-08-29
+version: '8.x-1.10'
 project: 'metatag'
-datestamp: 1563986001
+datestamp: 1567099988

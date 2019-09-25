@@ -11,7 +11,7 @@ use Drupal\Console\Core\Utils\ChainQueue;
 use Drupal\Console\Core\Utils\StringConverter;
 use Drupal\Console\Extension\Manager;
 use Drupal\metatag\Generator\MetatagTagGenerator;
-use Drupal\metatag\MetatagManager;
+use Drupal\metatag\MetatagManagerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -34,7 +34,7 @@ class GenerateTagCommand extends Command {
   /**
    * The Metatag manager.
    *
-   * @var \Drupal\metatag\MetatagManager
+   * @var \Drupal\metatag\MetatagManagerInterface
    */
   protected $metatagManager;
 
@@ -69,7 +69,7 @@ class GenerateTagCommand extends Command {
   /**
    * The GenerateTagCommand constructor.
    *
-   * @param \Drupal\metatag\MetatagManager $metatagManager
+   * @param \Drupal\metatag\MetatagManagerInterface $metatagManager
    *   The metatag manager object.
    * @param \Drupal\metatag\Generator\MetatagTagGenerator $generator
    *   The tag generator object.
@@ -81,7 +81,7 @@ class GenerateTagCommand extends Command {
    *   The chain queue object.
    */
   public function __construct(
-      MetatagManager $metatagManager,
+      MetatagManagerInterface $metatagManager,
       MetatagTagGenerator $generator,
       Manager $extensionManager,
       StringConverter $stringConverter,

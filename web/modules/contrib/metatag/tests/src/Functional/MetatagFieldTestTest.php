@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\metatag\Tests;
+namespace Drupal\Tests\metatag\Functional;
 
 /**
  * Ensure that the Metatag field works correctly for the test entity.

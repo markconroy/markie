@@ -1,15 +1,15 @@
 <?php
 
-namespace Drupal\metatag\Tests;
+namespace Drupal\Tests\metatag\Functional;
 
-use Drupal\simpletest\WebTestBase;
+use Drupal\Tests\BrowserTestBase;
 
 /**
  * Ensures that meta tags do not allow xss vulnerabilities.
  *
  * @group metatag
  */
-class MetatagXssTest extends WebTestBase {
+class MetatagXssTest extends BrowserTestBase {
 
   /**
    * String that causes an alert when page titles aren't filtered for xss.

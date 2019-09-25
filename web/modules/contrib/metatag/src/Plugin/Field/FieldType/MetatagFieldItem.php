@@ -63,7 +63,7 @@ class MetatagFieldItem extends FieldItemBase {
     parent::preSave();
 
     // Merge field defaults on top of global ones.
-    $default_tags = metatag_get_default_tags();
+    $default_tags = metatag_get_default_tags($this->getEntity());
 
     // Get the value about to be saved.
     $current_value = $this->value;

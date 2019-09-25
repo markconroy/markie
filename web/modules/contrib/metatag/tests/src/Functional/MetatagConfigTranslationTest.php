@@ -1,15 +1,15 @@
 <?php
 
-namespace Drupal\metatag\Tests;
+namespace Drupal\Tests\metatag\Functional;
 
-use Drupal\simpletest\WebTestBase;
+use Drupal\Tests\BrowserTestBase;
 
 /**
  * Ensures that the Metatag config translations work correctly.
  *
  * @group metatag
  */
-class MetatagConfigTranslationTest extends WebTestBase {
+class MetatagConfigTranslationTest extends BrowserTestBase {
 
   /**
    * Profile to use.

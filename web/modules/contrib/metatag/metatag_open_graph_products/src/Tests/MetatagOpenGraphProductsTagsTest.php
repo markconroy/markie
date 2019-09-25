@@ -1,8 +1,8 @@
 <?php
 
-namespace Drupal\metatag_open_graph_products\Tests;
+namespace Drupal\Tests\metatag_open_graph_products\Functional;
 
-use Drupal\metatag\Tests\MetatagTagsTestBase;
+use Drupal\Tests\metatag\Functional\MetatagTagsTestBase;
 
 /**
  * Tests that each of the Metatag Open Graph Product tags work correctly.

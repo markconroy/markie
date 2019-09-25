@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\metatag_page_manager\Tests\Functional;
+namespace Drupal\Tests\metatag_page_manager\Functional;
 
 use Drupal\page_manager\Entity\Page;
 use Drupal\page_manager\Entity\PageVariant;

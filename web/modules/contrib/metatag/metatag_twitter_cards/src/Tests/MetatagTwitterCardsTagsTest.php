@@ -1,8 +1,8 @@
 <?php
 
-namespace Drupal\metatag_twitter_cards\Tests;
+namespace Drupal\Tests\metatag_twitter_cards\Functional;
 
-use Drupal\metatag\Tests\MetatagTagsTestBase;
+use Drupal\Tests\metatag\Functional\MetatagTagsTestBase;
 
 /**
  * Tests that each of the Metatag Twitter Cards tags work correctly.

@@ -1,3 +1,40 @@
+Metatag 8.x-1.10, 2019-08-29
+----------------------------
+#2971271 by subson, idebr, nkoporec, DamienMcKenna, Michelle: Replace
+  drupal_set_message().
+#2997834 by thejimbirch, volkswagenchick: itemprop="itemprop:description"
+  instead of itemprop="description".
+#3025142 by thejimbirch, bum-dee-dum, volkswagenchick: Add meta tag: Pocket site
+  verification.
+#3005466 by dbgilbert, DamienMcKenna, thejimbirch: Allow multiple Google
+  verification tags.
+#1498762 by DamienMcKenna, thejimbirch, vipul tulse: Add new meta tag: Rating.
+#3000748 by robpowell, DamienMcKenna: Allow dev-level dependencies to be used.
+#3045460 by Berdir: MetatagFirehose::formElement() should pass current entity
+  explicitly to metatag_get_default_tags().
+#3046976 by idebr, chr.fritsch: Schema for entity_type_groups is incorrect.
+By samuel.mortenson, Berdir, DamienMcKenna: Test coverage for data handling.
+#3048615 by thalles, idebr: Replace MetatagManager by MetatagManagerInterface.
+#3048566 by thejimbirch, sean_e_dietrich: Pinterest and Yandex URLs in
+  Verification need updating.
+#3042739 by DamienMcKenna: Fix tests on Metatag 8.x-1.x branch.
+#2820214 by DamienMcKenna, Lendude, KarenS, idebr: Update tests to use
+  BrowserTestBase instead of WebTestBase.
+#3073826 by chr.fritsch: Move tests in /tests/Functional folder.
+#3071678 by idebr, DamienMcKenna: metatag_defaults @ConfigEntityType annotation
+  is missing a config_export key.
+#3076572 by davps: Metatag manager - incorrect default tags for an entity.
+#2898941 by thejimbirch, cindytwilliams, feddovdm: Expand the referrer-policy
+  dropdown.
+#3059963 by jzech: Improve description for Open Graph.
+#2563649 by DamienMcKenna, Jo Fitzgerald, marvil07, pobster, oliverpolden,
+  WidgetsBurritos, socketwench, marcelovani, Benia, heddn, Steven Jones,
+  benjifisher, mglaman, tedfordgif, mikeryan, a.milkovsky, drupalninja99, cruno,
+  ccarrascal, PapaGrande, pcranston: Migrations: Metatag-D7 basic entities.
+#3077784 by davps: Fix compatibility / tests against core 8.8.x.
+#3045560 by DamienMcKenna, heddn: Add a .migrate_drupal.yml file.
+
+
 Metatag 8.x-1.9, 2019-07-24
 ---------------------------
 By DamienMcKenna, anton.shloma: Improved maintenance mode identification.

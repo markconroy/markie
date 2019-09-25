@@ -1,18 +1,17 @@
 <?php
 
-namespace Drupal\metatag\Tests;
+namespace Drupal\Tests\metatag\Functional;
 
 use Drupal\metatag\MetatagManager;
 use Drupal\metatag\Entity\MetatagDefaults;
-use Drupal\simpletest\WebTestBase;
-use Drupal\Tests\metatag\Functional\MetatagHelperTrait;
+use Drupal\Tests\BrowserTestBase;
 
 /**
  * Tests the Metatag administration.
  *
  * @group metatag
  */
-class MetatagAdminTest extends WebTestBase {
+class MetatagAdminTest extends BrowserTestBase {
 
   use MetatagHelperTrait;
 
@@ -168,16 +167,11 @@ class MetatagAdminTest extends WebTestBase {
     $this->assertFieldByName('id');
 
     // Compile a list of entities from the list.
-    $xpath = $this->xpath("//select[@name='id']");
-    $this->verbose('<pre>' . print_r($xpath, TRUE) . '</pre>');
+    $options = $this->cssSelect('select[name="id"] option');
     $types = [];
-    foreach ($xpath[0]->children() as $item) {
-      if (!empty($item->option)) {
-        $data = (array) $item->option;
-        $types[$data['@attributes']['value']] = $data[0];
-      }
+    foreach ($options as $option) {
+      $types[$option->getAttribute('value')] = $option->getAttribute('value');
     }
-    $this->verbose('<pre>' . print_r($types, TRUE) . '</pre>');
 
     // Check through the values that are in the 'select' list, make sure that
     // unwanted items are not present.
@@ -479,7 +473,7 @@ class MetatagAdminTest extends WebTestBase {
     $this->assertLinkByHref('/admin/config/search/metatag/taxonomy_term');
     // User entity not visible because it has been pushed to the next page.
     $this->assertNoLinkByHref('/admin/config/search/metatag/user');
-    $this->clickLinkPartialName('Next');
+    $this->clickLink('Next');
 
     // Go to next page and confirm that parents are loaded and user us present.
     $this->assertLinkByHref('/admin/config/search/metatag/global');

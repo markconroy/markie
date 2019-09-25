@@ -11,7 +11,7 @@ use Drupal\metatag\Plugin\metatag\Tag\MetaItempropBase;
  *   id = "google_plus_name",
  *   label = @Translation("Name"),
  *   description = @Translation("Content title."),
- *   name = "itemprop:name",
+ *   name = "name",
  *   group = "google_plus",
  *   weight = 1,
  *   type = "label",

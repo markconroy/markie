@@ -3,7 +3,7 @@
 namespace Drupal\Tests\metatag\Functional;
 
 /**
- * Verify that enabling WebProfiler don't cause the site to blow up.
+ * Verify that enabling WebProfiler won't cause the site to blow up.
  *
  * @group metatag
  */

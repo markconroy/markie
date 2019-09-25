@@ -1,8 +1,8 @@
 <?php
 
-namespace Drupal\metatag_pinterest\Tests;
+namespace Drupal\Tests\metatag_pinterest\Functional;
 
-use Drupal\metatag\Tests\MetatagTagsTestBase;
+use Drupal\Tests\metatag\Functional\MetatagTagsTestBase;
 
 /**
  * Tests that each of the Metatag Pinterest tags work correctly.

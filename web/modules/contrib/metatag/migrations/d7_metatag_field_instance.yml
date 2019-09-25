@@ -1,0 +1,23 @@
+id: d7_metatag_field_instance
+label: Metatag field instance
+migration_tags:
+  - Drupal 7
+source:
+  plugin: d7_metatag_field_instance
+  source_module: metatag
+  ignore_map: true
+  constants:
+    field_name: field_metatag
+    label: Metatags
+process:
+  entity_type: entity_type
+  field_name: 'constants/field_name'
+  bundle: bundle
+  label: 'constants/label'
+destination:
+  plugin: entity:field_config
+migration_dependencies:
+  required:
+    - d7_metatag_field
+    - d7_node_type
+    - d7_taxonomy_vocabulary

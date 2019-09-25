@@ -1,0 +1,21 @@
+id: d7_metatag_field_instance_widget_settings
+label: Metatag field instance widget settings
+migration_tags:
+  - Drupal 7
+source:
+  plugin: d7_metatag_field_instance
+  source_module: metatag
+  ignore_map: true
+  constants:
+    form_mode: default
+    field_name: field_metatag
+process:
+  bundle: bundle
+  form_mode: 'constants/form_mode'
+  field_name: 'constants/field_name'
+  entity_type: entity_type
+destination:
+  plugin: component_entity_form_display
+migration_dependencies:
+  required:
+    - d7_metatag_field_instance

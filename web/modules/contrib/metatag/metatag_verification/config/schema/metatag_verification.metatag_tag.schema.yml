@@ -20,6 +20,9 @@ metatag.metatag_tag.norton_safe_web:
 metatag.metatag_tag.pinterest:
   type: label
   label: 'Site validation: Pinterest'
+metatag.metatag_tag.pocket:
+  type: label
+  label: 'Site validation: Pocket'
 metatag.metatag_tag.yahoo:
   type: label
   label: 'Site validation: Yahoo'

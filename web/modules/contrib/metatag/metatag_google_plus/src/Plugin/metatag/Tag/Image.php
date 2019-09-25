@@ -11,7 +11,7 @@ use Drupal\metatag\Plugin\metatag\Tag\MetaItempropBase;
  *   id = "google_plus_image",
  *   label = @Translation("Image"),
  *   description = @Translation("The URL of an image which should represent the content. For best results use an image that is at least 1200 x 630 pixels in size, but at least 600 x 316 pixels is a recommended minimum. Supports PNG, JPEG and GIF formats."),
- *   name = "itemprop:image",
+ *   name = "image",
  *   group = "google_plus",
  *   weight = 3,
  *   type = "image",

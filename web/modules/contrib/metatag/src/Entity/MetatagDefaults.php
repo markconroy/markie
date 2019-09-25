@@ -35,6 +35,11 @@ use Drupal\metatag\MetatagDefaultsInterface;
  *     "delete-form" = "/admin/config/search/metatag/{metatag_defaults}/delete",
  *     "revert-form" = "/admin/config/search/metatag/{metatag_defaults}/revert",
  *     "collection" = "/admin/config/search/metatag"
+ *   },
+ *   config_export = {
+ *     "id",
+ *     "label",
+ *     "tags"
  *   }
  * )
  */

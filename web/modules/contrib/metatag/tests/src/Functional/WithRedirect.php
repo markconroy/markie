@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\metatag\Tests;
+namespace Drupal\Tests\metatag\Functional;
 
 /**
  * Tests the Metatag administration when Redirect is installed.

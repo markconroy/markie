@@ -1,0 +1,20 @@
+id: d7_metatag_field
+label: Metatag field
+migration_tags:
+  - Drupal 7
+source:
+  plugin: d7_metatag_field
+  ignore_map: true
+  constants:
+    status: true
+    langcode: und
+    field_name: field_metatag
+    type: metatag
+process:
+  entity_type: entity_type
+  status: 'constants/status'
+  langcode: 'constants/langcode'
+  field_name: 'constants/field_name'
+  type: 'constants/type'
+destination:
+  plugin: entity:field_storage_config

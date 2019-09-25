@@ -97,6 +97,17 @@ class MetatagDefaultsForm extends EntityForm {
       $form = $metatag_manager->form($values, $form);
     }
 
+    $form['status'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Active'),
+      '#default_value' => $metatag_defaults->status(),
+    ];
+    if ($metatag_defaults_id === 'global') {
+      // Disabling global prevents any metatags from working.
+      // Warn users about this.
+      $form['status']['#description'] = $this->t('Warning: disabling the Global default metatag will prevent any metatags from being used.');
+    }
+
     return $form;
   }
 
@@ -144,6 +155,8 @@ class MetatagDefaultsForm extends EntityForm {
    */
   public function save(array $form, FormStateInterface $form_state) {
     $metatag_defaults = $this->entity;
+
+    $metatag_defaults->setStatus($form_state->getValue('status'));
 
     // Set the label on new defaults.
     if ($metatag_defaults->isNew()) {
@@ -203,13 +216,13 @@ class MetatagDefaultsForm extends EntityForm {
 
     switch ($status) {
       case SAVED_NEW:
-        drupal_set_message($this->t('Created the %label Metatag defaults.', [
+        $this->messenger()->addMessage($this->t('Created the %label Metatag defaults.', [
           '%label' => $metatag_defaults->label(),
         ]));
         break;
 
       default:
-        drupal_set_message($this->t('Saved the %label Metatag defaults.', [
+        $this->messenger()->addMessage($this->t('Saved the %label Metatag defaults.', [
           '%label' => $metatag_defaults->label(),
         ]));
     }

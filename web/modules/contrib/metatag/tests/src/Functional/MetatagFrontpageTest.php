@@ -1,19 +1,16 @@
 <?php
 
-namespace Drupal\metatag\Tests;
+namespace Drupal\Tests\metatag\Functional;
 
-use Drupal\simpletest\WebTestBase;
+use Drupal\Tests\BrowserTestBase;
 
 /**
  * Ensures that meta tags are rendering correctly on home page.
  *
  * @group metatag
  */
-class MetatagFrontpageTest extends WebTestBase {
+class MetatagFrontpageTest extends BrowserTestBase {
 
-  // Use the helper functions from the Functional trait. This is pretty safe but
-  // remember to rewrite all of these WebTestBase tests using BrowserTestBase
-  // before the next millenium.
   use MetatagHelperTrait;
 
   /**
@@ -75,7 +72,7 @@ class MetatagFrontpageTest extends WebTestBase {
     foreach ($edit as $metatag => $metatag_value) {
       $xpath = $this->xpath("//meta[@name='" . $metatag . "']");
       $this->assertEqual(count($xpath), 1, 'Exactly one ' . $metatag . ' meta tag found.');
-      $value = (string) $xpath[0]['content'];
+      $value = $xpath[0]->getAttribute('content');
       $this->assertEqual($value, $metatag_value);
     }
 
@@ -85,7 +82,7 @@ class MetatagFrontpageTest extends WebTestBase {
     foreach ($edit as $metatag => $metatag_value) {
       $xpath = $this->xpath("//meta[@name='" . $metatag . "']");
       $this->assertEqual(count($xpath), 1, 'Exactly one ' . $metatag . ' meta tag found.');
-      $value = (string) $xpath[0]['content'];
+      $value = $xpath[0]->getAttribute('content');
       $this->assertEqual($value, $metatag_value);
     }
 
@@ -105,7 +102,7 @@ class MetatagFrontpageTest extends WebTestBase {
     foreach ($edit as $metatag => $metatag_value) {
       $xpath = $this->xpath("//meta[@name='" . $metatag . "']");
       $this->assertEqual(count($xpath), 1, 'Exactly one ' . $metatag . ' meta tag found.');
-      $value = (string) $xpath[0]['content'];
+      $value = $xpath[0]->getAttribute('content');
       $this->assertEqual($value, $metatag_value);
     }
   }
@@ -134,7 +131,7 @@ class MetatagFrontpageTest extends WebTestBase {
     foreach ($edit as $metatag => $metatag_value) {
       $xpath = $this->xpath("//meta[@name='" . $metatag . "']");
       $this->assertEqual(count($xpath), 1, 'Exactly one ' . $metatag . ' meta tag found.');
-      $value = (string) $xpath[0]['content'];
+      $value = $xpath[0]->getAttribute('content');
       $this->assertEqual($value, $metatag_value);
     }
 
@@ -164,7 +161,7 @@ class MetatagFrontpageTest extends WebTestBase {
     foreach ($edit as $metatag => $metatag_value) {
       $xpath = $this->xpath("//meta[@name='" . $metatag . "']");
       $this->assertEqual(count($xpath), 1, 'Exactly one ' . $metatag . ' meta tag found.');
-      $value = (string) $xpath[0]['content'];
+      $value = $xpath[0]->getAttribute('content');
       $this->assertEqual($value, $metatag_value);
     }
   }

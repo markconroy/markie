@@ -1,15 +1,15 @@
 <?php
 
-namespace Drupal\metatag\Tests;
+namespace Drupal\Tests\metatag\Functional;
 
-use Drupal\simpletest\WebTestBase;
+use Drupal\Tests\BrowserTestBase;
 
 /**
  * Verify that different meta tag API options are supported.
  *
  * @group metatag
  */
-class MetatagTagTypesTest extends WebTestBase {
+class MetatagTagTypesTest extends BrowserTestBase {
 
   /**
    * Profile to use.

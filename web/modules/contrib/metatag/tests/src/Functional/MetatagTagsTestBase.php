@@ -1,15 +1,15 @@
 <?php
 
-namespace Drupal\metatag\Tests;
+namespace Drupal\Tests\metatag\Functional;
 
 use Drupal\Component\Render\FormattableMarkup;
-use Drupal\simpletest\WebTestBase;
+use Drupal\Tests\BrowserTestBase;
 use Symfony\Component\DependencyInjection\Container;
 
 /**
  * Base class to test all of the meta tags that are in a specific module.
  */
-abstract class MetatagTagsTestBase extends WebTestBase {
+abstract class MetatagTagsTestBase extends BrowserTestBase {
 
   use MetatagHelperTrait;
 

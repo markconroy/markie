@@ -1,14 +1,14 @@
 <?php
 
-namespace Drupal\metatag\Tests;
+namespace Drupal\Tests\metatag\Functional;
 
 use Drupal\Core\Cache\Cache;
-use Drupal\simpletest\WebTestBase;
+use Drupal\Tests\BrowserTestBase;
 
 /**
  * Base class for ensuring that the Metatag field works correctly.
  */
-abstract class MetatagFieldTestBase extends WebTestBase {
+abstract class MetatagFieldTestBase extends BrowserTestBase {
 
   /**
    * Profile to use.

@@ -7,7 +7,7 @@ use Drupal\Core\Field\WidgetBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
-use Drupal\metatag\MetatagManager;
+use Drupal\metatag\MetatagManagerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -26,7 +26,7 @@ class MetatagFirehose extends WidgetBase implements ContainerFactoryPluginInterf
   /**
    * Instance of MetatagManager service.
    *
-   * @var \Drupal\metatag\MetatagManager
+   * @var \Drupal\metatag\MetatagManagerInterface
    */
   protected $metatagManager;
 
@@ -47,7 +47,7 @@ class MetatagFirehose extends WidgetBase implements ContainerFactoryPluginInterf
   /**
    * {@inheritdoc}
    */
-  public function __construct($plugin_id, $plugin_definition, FieldDefinitionInterface $field_definition, array $settings, array $third_party_settings, MetatagManager $manager) {
+  public function __construct($plugin_id, $plugin_definition, FieldDefinitionInterface $field_definition, array $settings, array $third_party_settings, MetatagManagerInterface $manager) {
     parent::__construct($plugin_id, $plugin_definition, $field_definition, $settings, $third_party_settings);
     $this->metatagManager = $manager;
   }
@@ -57,7 +57,7 @@ class MetatagFirehose extends WidgetBase implements ContainerFactoryPluginInterf
    */
   public function formElement(FieldItemListInterface $items, $delta, array $element, array &$form, FormStateInterface $form_state) {
     $item = $items[$delta];
-    $default_tags = metatag_get_default_tags();
+    $default_tags = metatag_get_default_tags($items->getEntity());
 
     // Retrieve the values for each metatag from the serialized array.
     $values = [];

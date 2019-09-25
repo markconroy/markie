@@ -1,8 +1,8 @@
 <?php
 
-namespace Drupal\metatag_mobile\Tests;
+namespace Drupal\Tests\metatag_mobile\Functional;
 
-use Drupal\metatag\Tests\MetatagTagsTestBase;
+use Drupal\Tests\metatag\Functional\MetatagTagsTestBase;
 
 /**
  * Tests that each of the Metatag mobile tags work correctly.

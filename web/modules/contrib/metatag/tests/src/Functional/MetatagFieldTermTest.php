@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\metatag\Tests;
+namespace Drupal\Tests\metatag\Functional;
 
 /**
  * Ensures that the Metatag field works correctly on taxonomy terms.

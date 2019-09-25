@@ -1,10 +1,10 @@
 <?php
 
-namespace Drupal\metatag\Tests;
+namespace Drupal\Tests\metatag\Functional;
 
 use Drupal\entity_test\Entity\EntityTest;
 use Drupal\metatag\Entity\MetatagDefaults;
-use Drupal\simpletest\WebTestBase;
+use Drupal\Tests\BrowserTestBase;
 
 /**
  * Tests custom route integration.
@@ -13,7 +13,7 @@ use Drupal\simpletest\WebTestBase;
  *
  * @see hook_metatag_route_entity()
  */
-class MetatagCustomRouteTest extends WebTestBase {
+class MetatagCustomRouteTest extends BrowserTestBase {
 
   /**
    * {@inheritdoc}
@@ -51,7 +51,7 @@ class MetatagCustomRouteTest extends WebTestBase {
     $this->assertResponse(200);
     $xpath = $this->xpath("//meta[@name='keywords']");
     $this->assertEqual(count($xpath), 1);
-    $this->assertEqual((string) $xpath[0]->attributes()['content'], 'test');
+    $this->assertEqual($xpath[0]->getAttribute('content'), 'test');
   }
 
 }

@@ -1,15 +1,15 @@
 <?php
 
-namespace Drupal\metatag\Tests;
+namespace Drupal\Tests\metatag\Functional;
 
-use Drupal\simpletest\WebTestBase;
+use Drupal\Tests\BrowserTestBase;
 
 /**
  * Ensures that the Metatag field works correctly.
  *
  * @group metatag
  */
-class MetatagStringTest extends WebTestBase {
+class MetatagStringTest extends BrowserTestBase {
 
   /**
    * Admin user.
@@ -163,7 +163,7 @@ class MetatagStringTest extends WebTestBase {
     $this->assertResponse(200);
 
     // Again, with xpath the HTML entities will be parsed automagically.
-    $xpath_title = (string) current($this->xpath("//title"));
+    $xpath_title = current($this->xpath("//title"))->getText();
     $this->assertEqual($xpath_title, $title_original);
     $this->assertNotEqual($xpath_title, $title_encoded);
     $this->assertNotEqual($xpath_title, $title_encodeded);
@@ -177,9 +177,9 @@ class MetatagStringTest extends WebTestBase {
 
     // Again, with xpath the HTML entities will be parsed automagically.
     $xpath = $this->xpath("//meta[@name='description']");
-    $this->assertEqual($xpath[0]['content'], $desc_original);
-    $this->assertNotEqual($xpath[0]['content'], $desc_encoded);
-    $this->assertNotEqual($xpath[0]['content'], $desc_encodeded);
+    $this->assertEqual($xpath[0]->getAttribute('content'), $desc_original);
+    $this->assertNotEqual($xpath[0]->getAttribute('content'), $desc_encoded);
+    $this->assertNotEqual($xpath[0]->getAttribute('content'), $desc_encodeded);
   }
 
   /**
@@ -229,7 +229,7 @@ class MetatagStringTest extends WebTestBase {
     $this->assertResponse(200);
 
     // Again, with xpath the HTML entities will be parsed automagically.
-    $xpath_title = (string) current($this->xpath("//title"));
+    $xpath_title = current($this->xpath("//title"))->getText();
     $this->assertEqual($xpath_title, $title_original);
     $this->assertNotEqual($xpath_title, $title_encoded);
     $this->assertNotEqual($xpath_title, $title_encodeded);
@@ -240,7 +240,7 @@ class MetatagStringTest extends WebTestBase {
     $this->assertRaw('<title>' . $title_encoded . '</title>', 'Confirmed the node title tag is encoded.');
     // Again, with xpath the HTML entities will be parsed automagically.
     $xpath = $this->xpath("//meta[@name='description']");
-    $value = (string) $xpath[0]['content'];
+    $value = $xpath[0]->getAttribute('content');
     $this->assertEqual($value, $desc_original);
     $this->assertNotEqual($value, $desc_encoded);
     $this->assertNotEqual($value, $desc_encodeded);
@@ -300,7 +300,7 @@ class MetatagStringTest extends WebTestBase {
 
     // With xpath the HTML entities will be parsed automagically.
     $xpath = $this->xpath("//meta[@name='description']");
-    $value = (string) $xpath[0]['content'];
+    $value = $xpath[0]->getAttribute('content');
     $this->assertEqual($value, $desc_original);
     $this->assertNotEqual($value, $desc_encoded);
     $this->assertNotEqual($value, $desc_encodeded);

@@ -57,3 +57,16 @@ function hook_metatags_attachments_alter(array &$metatag_attachments) {
     }
   }
 }
+
+/**
+ * Allow the list of Metatag D7's tags to be changed.
+ *
+ * This is only used when migrating meta tags from Metatag-D7.
+ *
+ * @param array $tags_map
+ *   An array of D7 tag names mapped against the D8 tag's IDs.
+ */
+function hook_metatag_migrate_metatagd7_tags_map_alter(array $tags_map) {
+  // This tag was renamed in D8.
+  $tags_map['custom:tag'] = 'custom_tag';
+}

@@ -1,8 +1,8 @@
 <?php
 
-namespace Drupal\metatag_favicons\Tests;
+namespace Drupal\Tests\metatag_favicons\Functional;
 
-use Drupal\metatag\Tests\MetatagTagsTestBase;
+use Drupal\Tests\metatag\Functional\MetatagTagsTestBase;
 
 /**
  * Tests that each of the Metatag Favicons tags work correctly.

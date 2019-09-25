@@ -1,15 +1,15 @@
 <?php
 
-namespace Drupal\metatag\Tests;
+namespace Drupal\Tests\metatag\Functional;
 
-use Drupal\simpletest\WebTestBase;
+use Drupal\Tests\BrowserTestBase;
 
 /**
  * Ensures that meta tags are rendering correctly on forum pages.
  *
  * @group metatag
  */
-class MetatagForumTest extends WebTestBase {
+class MetatagForumTest extends BrowserTestBase {
 
   /**
    * {@inheritdoc}

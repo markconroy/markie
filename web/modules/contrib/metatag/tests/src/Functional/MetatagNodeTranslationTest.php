@@ -1,16 +1,16 @@
 <?php
 
-namespace Drupal\metatag\Tests;
+namespace Drupal\Tests\metatag\Functional;
 
 use Drupal\language\Entity\ConfigurableLanguage;
-use Drupal\simpletest\WebTestBase;
+use Drupal\Tests\BrowserTestBase;
 
 /**
  * Ensures that meta tag values are translated correctly on nodes.
  *
  * @group metatag
  */
-class MetatagNodeTranslationTest extends WebTestBase {
+class MetatagNodeTranslationTest extends BrowserTestBase {
 
   /**
    * Modules to enable.
@@ -144,7 +144,7 @@ class MetatagNodeTranslationTest extends WebTestBase {
 
     $xpath = $this->xpath("//meta[@name='description']");
     $this->assertEqual(count($xpath), 1, 'Exactly one description meta tag found.');
-    $value = (string) $xpath[0]['content'];
+    $value = $xpath[0]->getAttribute('content');
     $this->assertEqual($value, 'French summary.');
 
     $this->drupalGet('node/1/translations/add/en/es');
@@ -164,7 +164,7 @@ class MetatagNodeTranslationTest extends WebTestBase {
     $this->assertResponse(200);
     $xpath = $this->xpath("//meta[@name='description']");
     $this->assertEqual(count($xpath), 1, 'Exactly one description meta tag found.');
-    $value = (string) $xpath[0]['content'];
+    $value = $xpath[0]->getAttribute('content');
     $this->assertEqual($value, 'Spanish summary.');
     $this->assertNotEqual($value, 'French summary.');
 
@@ -186,7 +186,7 @@ class MetatagNodeTranslationTest extends WebTestBase {
 
     $xpath = $this->xpath("//meta[@name='description']");
     $this->assertEqual(count($xpath), 1, 'Exactly one description meta tag found.');
-    $value = (string) $xpath[0]['content'];
+    $value = $xpath[0]->getAttribute('content');
     $this->assertEqual($value, 'Overridden French description.');
     $this->assertNotEqual($value, 'Spanish summary.');
     $this->assertNotEqual($value, 'French summary.');
@@ -201,7 +201,7 @@ class MetatagNodeTranslationTest extends WebTestBase {
 
     $xpath = $this->xpath("//meta[@name='description']");
     $this->assertEqual(count($xpath), 1, 'Exactly one description meta tag found.');
-    $value = (string) $xpath[0]['content'];
+    $value = $xpath[0]->getAttribute('content');
     $this->assertEqual($value, 'Overridden Spanish description.');
     $this->assertNotEqual($value, 'Spanish summary.');
     $this->assertNotEqual($value, 'French summary.');
