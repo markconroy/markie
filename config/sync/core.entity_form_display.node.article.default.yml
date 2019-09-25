@@ -93,13 +93,13 @@ content:
       closed_mode: preview
       autocollapse: none
       closed_mode_threshold: 0
-      add_mode: modal
+      add_mode: dropdown
       form_display_mode: default
       default_paragraph_type: _none
       features:
         duplicate: duplicate
         collapse_edit_all: collapse_edit_all
-        add_above: '0'
+        add_above: add_above
     third_party_settings: {  }
     region: content
   field_intro:

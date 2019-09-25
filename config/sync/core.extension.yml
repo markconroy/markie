@@ -58,7 +58,9 @@ module:
   redirect_404: 0
   responsive_image: 0
   schema_article: 0
+  schema_image_object: 0
   schema_metatag: 0
+  schema_person: 0
   schema_web_page: 0
   search: 0
   settings_tray: 0
