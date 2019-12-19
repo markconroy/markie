@@ -66,11 +66,9 @@ abstract class FileValidatorTest extends ConstraintValidatorTestCase
         $this->assertNoViolation();
     }
 
-    /**
-     * @expectedException \Symfony\Component\Validator\Exception\UnexpectedTypeException
-     */
     public function testExpectsStringCompatibleTypeOrFile()
     {
+        $this->expectException('Symfony\Component\Validator\Exception\UnexpectedTypeException');
         $this->validator->validate(new \stdClass(), new File());
     }
 
@@ -222,11 +220,9 @@ abstract class FileValidatorTest extends ConstraintValidatorTestCase
         $this->assertNoViolation();
     }
 
-    /**
-     * @expectedException \Symfony\Component\Validator\Exception\ConstraintDefinitionException
-     */
     public function testInvalidMaxSize()
     {
+        $this->expectException('Symfony\Component\Validator\Exception\ConstraintDefinitionException');
         $constraint = new File([
             'maxSize' => '1abc',
         ]);
@@ -291,11 +287,11 @@ abstract class FileValidatorTest extends ConstraintValidatorTestCase
         $file
             ->expects($this->once())
             ->method('getPathname')
-            ->will($this->returnValue($this->path));
+            ->willReturn($this->path);
         $file
             ->expects($this->once())
             ->method('getMimeType')
-            ->will($this->returnValue('image/jpg'));
+            ->willReturn('image/jpg');
 
         $constraint = new File([
             'mimeTypes' => ['image/png', 'image/jpg'],
@@ -315,11 +311,11 @@ abstract class FileValidatorTest extends ConstraintValidatorTestCase
         $file
             ->expects($this->once())
             ->method('getPathname')
-            ->will($this->returnValue($this->path));
+            ->willReturn($this->path);
         $file
             ->expects($this->once())
             ->method('getMimeType')
-            ->will($this->returnValue('image/jpg'));
+            ->willReturn('image/jpg');
 
         $constraint = new File([
             'mimeTypes' => ['image/*'],
@@ -339,11 +335,11 @@ abstract class FileValidatorTest extends ConstraintValidatorTestCase
         $file
             ->expects($this->once())
             ->method('getPathname')
-            ->will($this->returnValue($this->path));
+            ->willReturn($this->path);
         $file
             ->expects($this->once())
             ->method('getMimeType')
-            ->will($this->returnValue('application/pdf'));
+            ->willReturn('application/pdf');
 
         $constraint = new File([
             'mimeTypes' => ['image/png', 'image/jpg'],
@@ -369,11 +365,11 @@ abstract class FileValidatorTest extends ConstraintValidatorTestCase
         $file
             ->expects($this->once())
             ->method('getPathname')
-            ->will($this->returnValue($this->path));
+            ->willReturn($this->path);
         $file
             ->expects($this->once())
             ->method('getMimeType')
-            ->will($this->returnValue('application/pdf'));
+            ->willReturn('application/pdf');
 
         $constraint = new File([
             'mimeTypes' => ['image/*', 'image/jpg'],
@@ -454,7 +450,7 @@ abstract class FileValidatorTest extends ConstraintValidatorTestCase
             $reflection = new \ReflectionClass(\get_class(new FileValidator()));
             $method = $reflection->getMethod('factorizeSizes');
             $method->setAccessible(true);
-            list($sizeAsString, $limit, $suffix) = $method->invokeArgs(new FileValidator(), [0, UploadedFile::getMaxFilesize(), false]);
+            list(, $limit, $suffix) = $method->invokeArgs(new FileValidator(), [0, UploadedFile::getMaxFilesize(), false]);
 
             // it correctly parses the maxSize option and not only uses simple string comparison
             // 1000M should be bigger than the ini value

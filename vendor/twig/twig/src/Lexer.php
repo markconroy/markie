@@ -47,7 +47,7 @@ class Lexer implements \Twig_LexerInterface
     const STATE_INTERPOLATION = 4;
 
     const REGEX_NAME = '/[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*/A';
-    const REGEX_NUMBER = '/[0-9]+(?:\.[0-9]+)?/A';
+    const REGEX_NUMBER = '/[0-9]+(?:\.[0-9]+)?([Ee][\+\-][0-9]+)?/A';
     const REGEX_STRING = '/"([^#"\\\\]*(?:\\\\.[^#"\\\\]*)*)"|\'([^\'\\\\]*(?:\\\\.[^\'\\\\]*)*)\'/As';
     const REGEX_DQ_STRING_DELIM = '/"/A';
     const REGEX_DQ_STRING_PART = '/[^#"\\\\]*(?:(?:\\\\.|#(?!\{))[^#"\\\\]*)*/As';
@@ -262,7 +262,7 @@ class Lexer implements \Twig_LexerInterface
             if ($this->options['whitespace_trim'] === $this->positions[2][$this->position][0]) {
                 // whitespace_trim detected ({%-, {{- or {#-)
                 $text = rtrim($text);
-            } else {
+            } elseif ($this->options['whitespace_line_trim'] === $this->positions[2][$this->position][0]) {
                 // whitespace_line_trim detected ({%~, {{~ or {#~)
                 // don't trim \r and \n
                 $text = rtrim($text, " \t\0\x0B");
@@ -333,8 +333,13 @@ class Lexer implements \Twig_LexerInterface
             }
         }
 
+        // arrow function
+        if ('=' === $this->code[$this->cursor] && '>' === $this->code[$this->cursor + 1]) {
+            $this->pushToken(Token::ARROW_TYPE, '=>');
+            $this->moveCursor('=>');
+        }
         // operators
-        if (preg_match($this->regexes['operator'], $this->code, $match, 0, $this->cursor)) {
+        elseif (preg_match($this->regexes['operator'], $this->code, $match, 0, $this->cursor)) {
             $this->pushToken(Token::OPERATOR_TYPE, preg_replace('/\s+/', ' ', $match[0]));
             $this->moveCursor($match[0]);
         }

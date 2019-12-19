@@ -11,8 +11,10 @@
 
 namespace Symfony\Component\Serializer\Tests\Encoder;
 
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Serializer\Encoder\XmlEncoder;
+use Symfony\Component\Serializer\Exception\NotEncodableValueException;
 use Symfony\Component\Serializer\Normalizer\CustomNormalizer;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\Serializer;
@@ -59,12 +61,10 @@ class XmlEncoderTest extends TestCase
         $this->assertEquals($expected, $this->encoder->encode($obj, 'xml'));
     }
 
-    /**
-     * @expectedException        \Symfony\Component\Serializer\Exception\UnexpectedValueException
-     * @expectedExceptionMessage Document types are not allowed.
-     */
     public function testDocTypeIsNotAllowed()
     {
+        $this->expectException('Symfony\Component\Serializer\Exception\UnexpectedValueException');
+        $this->expectExceptionMessage('Document types are not allowed.');
         $this->encoder->decode('<?xml version="1.0"?><!DOCTYPE foo><foo></foo>', 'foo');
     }
 
@@ -304,6 +304,17 @@ XML;
             ],
         ];
         $this->assertSame($expected, $data);
+    }
+
+    public function testDoesNotTypeCastStringsStartingWith0()
+    {
+        $source = <<<XML
+<?xml version="1.0"?>
+<document a="018"></document>
+XML;
+
+        $data = $this->encoder->decode($source, 'xml');
+        $this->assertSame('018', $data['@a']);
     }
 
     public function testEncode()
@@ -548,30 +559,22 @@ XML;
         $this->assertEquals($expected, $this->encoder->decode($xml, 'xml'));
     }
 
-    /**
-     * @expectedException \Symfony\Component\Serializer\Exception\UnexpectedValueException
-     */
     public function testDecodeInvalidXml()
     {
+        $this->expectException('Symfony\Component\Serializer\Exception\UnexpectedValueException');
         $this->encoder->decode('<?xml version="1.0"?><invalid><xml>', 'xml');
     }
 
-    /**
-     * @expectedException \Symfony\Component\Serializer\Exception\UnexpectedValueException
-     */
     public function testPreventsComplexExternalEntities()
     {
+        $this->expectException('Symfony\Component\Serializer\Exception\UnexpectedValueException');
         $this->encoder->decode('<?xml version="1.0"?><!DOCTYPE scan[<!ENTITY test SYSTEM "php://filter/read=convert.base64-encode/resource=XmlEncoderTest.php">]><scan>&test;</scan>', 'xml');
     }
 
     public function testDecodeEmptyXml()
     {
-        if (method_exists($this, 'expectException')) {
-            $this->expectException('Symfony\Component\Serializer\Exception\UnexpectedValueException');
-            $this->expectExceptionMessage('Invalid XML data, it can not be empty.');
-        } else {
-            $this->setExpectedException('Symfony\Component\Serializer\Exception\UnexpectedValueException', 'Invalid XML data, it can not be empty.');
-        }
+        $this->expectException('Symfony\Component\Serializer\Exception\UnexpectedValueException');
+        $this->expectExceptionMessage('Invalid XML data, it can not be empty.');
         $this->encoder->decode(' ', 'xml');
     }
 
@@ -677,6 +680,14 @@ XML;
         $this->assertEquals($this->createXmlWithDateTimeField(), $actualXml);
     }
 
+    public function testNotEncodableValueExceptionMessageForAResource()
+    {
+        $this->expectException(NotEncodableValueException::class);
+        $this->expectExceptionMessage('An unexpected value could not be serialized: stream resource');
+
+        (new XmlEncoder())->encode(tmpfile(), 'xml');
+    }
+
     /**
      * @return XmlEncoder
      */
@@ -690,7 +701,7 @@ XML;
     }
 
     /**
-     * @return \PHPUnit_Framework_MockObject_MockObject|NormalizerInterface
+     * @return MockObject|NormalizerInterface
      */
     private function createMockDateTimeNormalizer()
     {

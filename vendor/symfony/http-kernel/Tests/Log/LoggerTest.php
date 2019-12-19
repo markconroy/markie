@@ -34,7 +34,7 @@ class LoggerTest extends TestCase
 
     protected function setUp()
     {
-        $this->tmpFile = sys_get_temp_dir().\DIRECTORY_SEPARATOR.'log';
+        $this->tmpFile = tempnam(sys_get_temp_dir(), 'log');
         $this->logger = new Logger(LogLevel::DEBUG, $this->tmpFile);
     }
 
@@ -107,27 +107,21 @@ class LoggerTest extends TestCase
         $this->assertSame([], $this->getLogs());
     }
 
-    /**
-     * @expectedException \Psr\Log\InvalidArgumentException
-     */
     public function testThrowsOnInvalidLevel()
     {
+        $this->expectException('Psr\Log\InvalidArgumentException');
         $this->logger->log('invalid level', 'Foo');
     }
 
-    /**
-     * @expectedException \Psr\Log\InvalidArgumentException
-     */
     public function testThrowsOnInvalidMinLevel()
     {
+        $this->expectException('Psr\Log\InvalidArgumentException');
         new Logger('invalid');
     }
 
-    /**
-     * @expectedException \Psr\Log\InvalidArgumentException
-     */
     public function testInvalidOutput()
     {
+        $this->expectException('Psr\Log\InvalidArgumentException');
         new Logger(LogLevel::DEBUG, '/');
     }
 
@@ -145,11 +139,11 @@ class LoggerTest extends TestCase
         if (method_exists($this, 'createPartialMock')) {
             $dummy = $this->createPartialMock(DummyTest::class, ['__toString']);
         } else {
-            $dummy = $this->getMock(DummyTest::class, ['__toString']);
+            $dummy = $this->createPartialMock(DummyTest::class, ['__toString']);
         }
         $dummy->expects($this->atLeastOnce())
             ->method('__toString')
-            ->will($this->returnValue('DUMMY'));
+            ->willReturn('DUMMY');
 
         $this->logger->warning($dummy);
 

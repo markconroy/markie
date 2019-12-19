@@ -90,11 +90,9 @@ class ControllerResolverTest extends TestCase
         $this->assertInstanceOf('Symfony\Component\HttpKernel\Tests\Controller\ControllerResolverTest', $controller);
     }
 
-    /**
-     * @expectedException \InvalidArgumentException
-     */
     public function testGetControllerOnObjectWithoutInvokeMethod()
     {
+        $this->expectException('InvalidArgumentException');
         $resolver = $this->createControllerResolver();
 
         $request = Request::create('/');
@@ -118,12 +116,8 @@ class ControllerResolverTest extends TestCase
     public function testGetControllerOnNonUndefinedFunction($controller, $exceptionName = null, $exceptionMessage = null)
     {
         $resolver = $this->createControllerResolver();
-        if (method_exists($this, 'expectException')) {
-            $this->expectException($exceptionName);
-            $this->expectExceptionMessage($exceptionMessage);
-        } else {
-            $this->setExpectedException($exceptionName, $exceptionMessage);
-        }
+        $this->expectException($exceptionName);
+        $this->expectExceptionMessage($exceptionMessage);
 
         $request = Request::create('/');
         $request->attributes->set('_controller', $controller);
@@ -226,7 +220,7 @@ class ControllerResolverTest extends TestCase
     public function testCreateControllerCanReturnAnyCallable()
     {
         $mock = $this->getMockBuilder('Symfony\Component\HttpKernel\Controller\ControllerResolver')->setMethods(['createController'])->getMock();
-        $mock->expects($this->once())->method('createController')->will($this->returnValue('Symfony\Component\HttpKernel\Tests\Controller\some_controller_function'));
+        $mock->expects($this->once())->method('createController')->willReturn('Symfony\Component\HttpKernel\Tests\Controller\some_controller_function');
 
         $request = Request::create('/');
         $request->attributes->set('_controller', 'foobar');
@@ -234,11 +228,11 @@ class ControllerResolverTest extends TestCase
     }
 
     /**
-     * @expectedException \RuntimeException
      * @group legacy
      */
     public function testIfExceptionIsThrownWhenMissingAnArgument()
     {
+        $this->expectException('RuntimeException');
         $resolver = new ControllerResolver();
         $request = Request::create('/');
 

@@ -63,7 +63,7 @@ class GetSetMethodNormalizerTest extends TestCase
             ->expects($this->once())
             ->method('normalize')
             ->with($object, 'any')
-            ->will($this->returnValue('string_object'))
+            ->willReturn('string_object')
         ;
 
         $this->assertEquals(
@@ -319,11 +319,9 @@ class GetSetMethodNormalizerTest extends TestCase
         );
     }
 
-    /**
-     * @expectedException \InvalidArgumentException
-     */
     public function testUncallableCallbacks()
     {
+        $this->expectException('InvalidArgumentException');
         $this->normalizer->setCallbacks(['bar' => null]);
 
         $obj = new GetConstructorDummy('baz', 'quux', true);
@@ -406,12 +404,10 @@ class GetSetMethodNormalizerTest extends TestCase
         ];
     }
 
-    /**
-     * @expectedException \Symfony\Component\Serializer\Exception\LogicException
-     * @expectedExceptionMessage Cannot normalize attribute "object" because the injected serializer is not a normalizer
-     */
     public function testUnableToNormalizeObjectAttribute()
     {
+        $this->expectException('Symfony\Component\Serializer\Exception\LogicException');
+        $this->expectExceptionMessage('Cannot normalize attribute "object" because the injected serializer is not a normalizer');
         $serializer = $this->getMockBuilder('Symfony\Component\Serializer\SerializerInterface')->getMock();
         $this->normalizer->setSerializer($serializer);
 
@@ -422,11 +418,9 @@ class GetSetMethodNormalizerTest extends TestCase
         $this->normalizer->normalize($obj, 'any');
     }
 
-    /**
-     * @expectedException \Symfony\Component\Serializer\Exception\CircularReferenceException
-     */
     public function testUnableToNormalizeCircularReference()
     {
+        $this->expectException('Symfony\Component\Serializer\Exception\CircularReferenceException');
         $serializer = new Serializer([$this->normalizer]);
         $this->normalizer->setSerializer($serializer);
         $this->normalizer->setCircularReferenceLimit(2);
@@ -753,43 +747,6 @@ class GetConstructorArgsWithDefaultValueDummy
     public function otherMethod()
     {
         throw new \RuntimeException('Dummy::otherMethod() should not be called');
-    }
-}
-
-class GetCamelizedDummy
-{
-    private $kevinDunglas;
-    private $fooBar;
-    private $bar_foo;
-
-    public function __construct($kevinDunglas = null)
-    {
-        $this->kevinDunglas = $kevinDunglas;
-    }
-
-    public function getKevinDunglas()
-    {
-        return $this->kevinDunglas;
-    }
-
-    public function setFooBar($fooBar)
-    {
-        $this->fooBar = $fooBar;
-    }
-
-    public function getFooBar()
-    {
-        return $this->fooBar;
-    }
-
-    public function setBar_foo($bar_foo)
-    {
-        $this->bar_foo = $bar_foo;
-    }
-
-    public function getBar_foo()
-    {
-        return $this->bar_foo;
     }
 }
 

@@ -34,12 +34,12 @@ class ChainEncoderTest extends TestCase
 
         $this->encoder1
             ->method('supportsEncoding')
-            ->will($this->returnValueMap([
+            ->willReturnMap([
                 [self::FORMAT_1, [], true],
                 [self::FORMAT_2, [], false],
                 [self::FORMAT_3, [], false],
                 [self::FORMAT_3, ['foo' => 'bar'], true],
-            ]));
+            ]);
 
         $this->encoder2 = $this
             ->getMockBuilder('Symfony\Component\Serializer\Encoder\EncoderInterface')
@@ -47,11 +47,11 @@ class ChainEncoderTest extends TestCase
 
         $this->encoder2
             ->method('supportsEncoding')
-            ->will($this->returnValueMap([
+            ->willReturnMap([
                 [self::FORMAT_1, [], false],
                 [self::FORMAT_2, [], true],
                 [self::FORMAT_3, [], false],
-            ]));
+            ]);
 
         $this->chainEncoder = new ChainEncoder([$this->encoder1, $this->encoder2]);
     }
@@ -72,11 +72,9 @@ class ChainEncoderTest extends TestCase
         $this->chainEncoder->encode(['foo' => 123], self::FORMAT_2);
     }
 
-    /**
-     * @expectedException \Symfony\Component\Serializer\Exception\RuntimeException
-     */
     public function testEncodeUnsupportedFormat()
     {
+        $this->expectException('Symfony\Component\Serializer\Exception\RuntimeException');
         $this->chainEncoder->encode(['foo' => 123], self::FORMAT_3);
     }
 
@@ -86,23 +84,6 @@ class ChainEncoderTest extends TestCase
         $this->assertTrue($this->chainEncoder->needsNormalization(self::FORMAT_2));
     }
 
-    /**
-     * @dataProvider booleanProvider
-     */
-    public function testNeedsNormalizationChainNormalizationAware($bool)
-    {
-        $chainEncoder = $this
-            ->getMockBuilder('Symfony\Component\Serializer\Tests\Encoder\ChainNormalizationAwareEncoder')
-            ->getMock();
-
-        $chainEncoder->method('supportsEncoding')->willReturn(true);
-        $chainEncoder->method('needsNormalization')->willReturn($bool);
-
-        $sut = new ChainEncoder([$chainEncoder]);
-
-        $this->assertEquals($bool, $sut->needsNormalization(self::FORMAT_1));
-    }
-
     public function testNeedsNormalizationNormalizationAware()
     {
         $encoder = new NormalizationAwareEncoder();
@@ -110,18 +91,6 @@ class ChainEncoderTest extends TestCase
 
         $this->assertFalse($sut->needsNormalization(self::FORMAT_1));
     }
-
-    public function booleanProvider()
-    {
-        return [
-            [true],
-            [false],
-        ];
-    }
-}
-
-class ChainNormalizationAwareEncoder extends ChainEncoder implements NormalizationAwareInterface
-{
 }
 
 class NormalizationAwareEncoder implements EncoderInterface, NormalizationAwareInterface

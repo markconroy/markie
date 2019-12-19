@@ -132,11 +132,9 @@ class PropertyNormalizerTest extends TestCase
         );
     }
 
-    /**
-     * @expectedException \InvalidArgumentException
-     */
     public function testUncallableCallbacks()
     {
+        $this->expectException('InvalidArgumentException');
         $this->normalizer->setCallbacks(['bar' => null]);
 
         $obj = new PropertyConstructorDummy('baz', 'quux');
@@ -320,11 +318,9 @@ class PropertyNormalizerTest extends TestCase
         ];
     }
 
-    /**
-     * @expectedException \Symfony\Component\Serializer\Exception\CircularReferenceException
-     */
     public function testUnableToNormalizeCircularReference()
     {
+        $this->expectException('Symfony\Component\Serializer\Exception\CircularReferenceException');
         $serializer = new Serializer([$this->normalizer]);
         $this->normalizer->setSerializer($serializer);
         $this->normalizer->setCircularReferenceLimit(2);
@@ -379,12 +375,10 @@ class PropertyNormalizerTest extends TestCase
         $this->assertEquals('out_of_scope', PropertyDummy::$outOfScope);
     }
 
-    /**
-     * @expectedException \Symfony\Component\Serializer\Exception\LogicException
-     * @expectedExceptionMessage Cannot normalize attribute "bar" because the injected serializer is not a normalizer
-     */
     public function testUnableToNormalizeObjectAttribute()
     {
+        $this->expectException('Symfony\Component\Serializer\Exception\LogicException');
+        $this->expectExceptionMessage('Cannot normalize attribute "bar" because the injected serializer is not a normalizer');
         $serializer = $this->getMockBuilder('Symfony\Component\Serializer\SerializerInterface')->getMock();
         $this->normalizer->setSerializer($serializer);
 
@@ -494,18 +488,6 @@ class PropertyConstructorDummy
     public function getBar()
     {
         return $this->bar;
-    }
-}
-
-class PropertyCamelizedDummy
-{
-    private $kevinDunglas;
-    public $fooBar;
-    public $bar_foo;
-
-    public function __construct($kevinDunglas = null)
-    {
-        $this->kevinDunglas = $kevinDunglas;
     }
 }
 

@@ -29,7 +29,7 @@ use Symfony\Component\Validator\Mapping\PropertyMetadata;
  */
 abstract class ConstraintValidatorTestCase extends TestCase
 {
-    use TestCaseSetUpTearDownTrait;
+    use ForwardCompatTestTrait;
 
     /**
      * @var ExecutionContextInterface
@@ -109,7 +109,7 @@ abstract class ConstraintValidatorTestCase extends TestCase
         $validator->expects($this->any())
             ->method('inContext')
             ->with($context)
-            ->will($this->returnValue($contextualValidator));
+            ->willReturn($contextualValidator);
 
         return $context;
     }
@@ -174,10 +174,11 @@ abstract class ConstraintValidatorTestCase extends TestCase
         $validator->expects($this->at(2 * $i))
             ->method('atPath')
             ->with($propertyPath)
-            ->will($this->returnValue($validator));
+            ->willReturn($validator);
         $validator->expects($this->at(2 * $i + 1))
             ->method('validate')
-            ->with($value, $this->logicalOr(null, [], $this->isInstanceOf('\Symfony\Component\Validator\Constraints\Valid')), $group);
+            ->with($value, $this->logicalOr(null, [], $this->isInstanceOf('\Symfony\Component\Validator\Constraints\Valid')), $group)
+            ->willReturn($validator);
     }
 
     protected function expectValidateValueAt($i, $propertyPath, $value, $constraints, $group = null)
@@ -186,10 +187,11 @@ abstract class ConstraintValidatorTestCase extends TestCase
         $contextualValidator->expects($this->at(2 * $i))
             ->method('atPath')
             ->with($propertyPath)
-            ->will($this->returnValue($contextualValidator));
+            ->willReturn($contextualValidator);
         $contextualValidator->expects($this->at(2 * $i + 1))
             ->method('validate')
-            ->with($value, $constraints, $group);
+            ->with($value, $constraints, $group)
+            ->willReturn($contextualValidator);
     }
 
     protected function assertNoViolation()

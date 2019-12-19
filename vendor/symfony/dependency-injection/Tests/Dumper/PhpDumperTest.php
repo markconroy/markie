@@ -30,6 +30,7 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBag;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\DependencyInjection\ServiceLocator;
 use Symfony\Component\DependencyInjection\Tests\Fixtures\CustomDefinition;
+use Symfony\Component\DependencyInjection\Tests\Fixtures\ScalarFactory;
 use Symfony\Component\DependencyInjection\Tests\Fixtures\StubbedTranslator;
 use Symfony\Component\DependencyInjection\Tests\Fixtures\TestServiceSubscriber;
 use Symfony\Component\DependencyInjection\TypedReference;
@@ -149,10 +150,10 @@ class PhpDumperTest extends TestCase
 
     /**
      * @dataProvider provideInvalidParameters
-     * @expectedException \InvalidArgumentException
      */
     public function testExportParameters($parameters)
     {
+        $this->expectException('InvalidArgumentException');
         $container = new ContainerBuilder(new ParameterBag($parameters));
         $container->compile();
         $dumper = new PhpDumper($container);
@@ -235,7 +236,7 @@ class PhpDumperTest extends TestCase
         $class = 'Symfony_DI_PhpDumper_Test_Unsupported_Characters';
         $container = new ContainerBuilder();
         $container->setParameter("'", 'oh-no');
-        $container->register("foo*/oh-no", 'FooClass')->setPublic(true);
+        $container->register('foo*/oh-no', 'FooClass')->setPublic(true);
         $container->register('bar$', 'FooClass')->setPublic(true);
         $container->register('bar$!', 'FooClass')->setPublic(true);
         $container->compile();
@@ -283,11 +284,11 @@ class PhpDumperTest extends TestCase
 
     /**
      * @dataProvider provideInvalidFactories
-     * @expectedException \Symfony\Component\DependencyInjection\Exception\RuntimeException
-     * @expectedExceptionMessage Cannot dump definition
      */
     public function testInvalidFactories($factory)
     {
+        $this->expectException('Symfony\Component\DependencyInjection\Exception\RuntimeException');
+        $this->expectExceptionMessage('Cannot dump definition');
         $container = new ContainerBuilder();
         $def = new Definition('stdClass');
         $def->setPublic(true);
@@ -447,12 +448,10 @@ class PhpDumperTest extends TestCase
         $this->assertStringEqualsFile(__FILE__, $container->getParameter('random'));
     }
 
-    /**
-     * @expectedException \Symfony\Component\DependencyInjection\Exception\EnvParameterException
-     * @expectedExceptionMessage Environment variables "FOO" are never used. Please, check your container's configuration.
-     */
     public function testUnusedEnvParameter()
     {
+        $this->expectException('Symfony\Component\DependencyInjection\Exception\EnvParameterException');
+        $this->expectExceptionMessage('Environment variables "FOO" are never used. Please, check your container\'s configuration.');
         $container = new ContainerBuilder();
         $container->getParameter('env(FOO)');
         $container->compile();
@@ -460,12 +459,10 @@ class PhpDumperTest extends TestCase
         $dumper->dump();
     }
 
-    /**
-     * @expectedException \Symfony\Component\DependencyInjection\Exception\ParameterCircularReferenceException
-     * @expectedExceptionMessage Circular reference detected for parameter "env(resolve:DUMMY_ENV_VAR)" ("env(resolve:DUMMY_ENV_VAR)" > "env(resolve:DUMMY_ENV_VAR)").
-     */
     public function testCircularDynamicEnv()
     {
+        $this->expectException('Symfony\Component\DependencyInjection\Exception\ParameterCircularReferenceException');
+        $this->expectExceptionMessage('Circular reference detected for parameter "env(resolve:DUMMY_ENV_VAR)" ("env(resolve:DUMMY_ENV_VAR)" > "env(resolve:DUMMY_ENV_VAR)").');
         $container = new ContainerBuilder();
         $container->setParameter('foo', '%bar%');
         $container->setParameter('bar', '%env(resolve:DUMMY_ENV_VAR)%');
@@ -545,12 +542,8 @@ class PhpDumperTest extends TestCase
         $dumper = new PhpDumper($container);
 
         $message = 'Circular reference detected for service "foo", path: "foo -> bar -> foo". Try running "composer require symfony/proxy-manager-bridge".';
-        if (method_exists($this, 'expectException')) {
-            $this->expectException(ServiceCircularReferenceException::class);
-            $this->expectExceptionMessage($message);
-        } else {
-            $this->setExpectedException(ServiceCircularReferenceException::class, $message);
-        }
+        $this->expectException(ServiceCircularReferenceException::class);
+        $this->expectExceptionMessage($message);
 
         $dumper->dump();
     }
@@ -841,6 +834,13 @@ class PhpDumperTest extends TestCase
         $this->assertEquals((object) ['bar6' => (object) []], $foo6);
 
         $this->assertInstanceOf(\stdClass::class, $container->get('root'));
+
+        $manager3 = $container->get('manager3');
+        $listener3 = $container->get('listener3');
+        $this->assertSame($manager3, $listener3->manager);
+
+        $listener4 = $container->get('listener4');
+        $this->assertInstanceOf('stdClass', $listener4);
     }
 
     public function provideAlmostCircular()
@@ -886,7 +886,7 @@ class PhpDumperTest extends TestCase
             ->setPublic(true)
             ->addArgument($baz);
 
-        $passConfig = $container->getCompiler()->getPassConfig();
+        $container->getCompiler()->getPassConfig();
         $container->compile();
 
         $dumper = new PhpDumper($container);
@@ -978,7 +978,6 @@ class PhpDumperTest extends TestCase
         $container->compile();
 
         $dumper = new PhpDumper($container);
-        $dump = $dumper->dump();
         $this->assertStringEqualsFile(self::$fixturesPath.'/php/services_adawson.php', $dumper->dump());
     }
 
@@ -1114,6 +1113,49 @@ class PhpDumperTest extends TestCase
         $container = new \Symfony_DI_PhpDumper_Test_Reference_With_Lower_Case_Id();
 
         $this->assertEquals((object) ['foo' => (object) []], $container->get('Bar'));
+    }
+
+    public function testScalarService()
+    {
+        $container = new ContainerBuilder();
+        $container->register('foo', 'string')
+            ->setPublic(true)
+            ->setFactory([ScalarFactory::class, 'getSomeValue'])
+        ;
+
+        $container->compile();
+
+        $dumper = new PhpDumper($container);
+        eval('?>'.$dumper->dump(['class' => 'Symfony_DI_PhpDumper_Test_Scalar_Service']));
+
+        $container = new \Symfony_DI_PhpDumper_Test_Scalar_Service();
+
+        $this->assertTrue($container->has('foo'));
+        $this->assertSame('some value', $container->get('foo'));
+    }
+
+    public function testAliasCanBeFoundInTheDumpedContainerWhenBothTheAliasAndTheServiceArePublic()
+    {
+        $container = new ContainerBuilder();
+
+        $container->register('foo', 'stdClass')->setPublic(true);
+        $container->setAlias('bar', 'foo')->setPublic(true);
+
+        $container->compile();
+
+        // Bar is found in the compiled container
+        $service_ids = $container->getServiceIds();
+        $this->assertContains('bar', $service_ids);
+
+        $dumper = new PhpDumper($container);
+        $dump = $dumper->dump(['class' => 'Symfony_DI_PhpDumper_AliasesCanBeFoundInTheDumpedContainer']);
+        eval('?>'.$dump);
+
+        $container = new \Symfony_DI_PhpDumper_AliasesCanBeFoundInTheDumpedContainer();
+
+        // Bar should still be found in the compiled container
+        $service_ids = $container->getServiceIds();
+        $this->assertContains('bar', $service_ids);
     }
 }
 

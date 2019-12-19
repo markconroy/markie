@@ -120,11 +120,9 @@ class SsiTest extends TestCase
         $this->assertEquals('<?php echo "<?"; ?>php <?php echo "<?"; ?> <?php echo "<%"; ?> <?php echo "<s"; ?>cript language=php>', $response->getContent());
     }
 
-    /**
-     * @expectedException \RuntimeException
-     */
     public function testProcessWhenNoSrcInAnSsi()
     {
+        $this->expectException('RuntimeException');
         $ssi = new Ssi();
 
         $request = Request::create('/');
@@ -160,11 +158,9 @@ class SsiTest extends TestCase
         $this->assertEquals('foo', $ssi->handle($cache, '/', '/alt', true));
     }
 
-    /**
-     * @expectedException \RuntimeException
-     */
     public function testHandleWhenResponseIsNot200()
     {
+        $this->expectException('RuntimeException');
         $ssi = new Ssi();
         $response = new Response('foo');
         $response->setStatusCode(404);
@@ -196,7 +192,7 @@ class SsiTest extends TestCase
         $cache = $this->getMockBuilder('Symfony\Component\HttpKernel\HttpCache\HttpCache')->setMethods(['getRequest', 'handle'])->disableOriginalConstructor()->getMock();
         $cache->expects($this->any())
               ->method('getRequest')
-              ->will($this->returnValue($request))
+              ->willReturn($request)
         ;
         if (\is_array($response)) {
             $cache->expects($this->any())
@@ -206,7 +202,7 @@ class SsiTest extends TestCase
         } else {
             $cache->expects($this->any())
                   ->method('handle')
-                  ->will($this->returnValue($response))
+                  ->willReturn($response)
             ;
         }
 

@@ -194,6 +194,9 @@ class CoreExtension extends AbstractExtension
             new TwigFilter('sort', 'twig_sort_filter'),
             new TwigFilter('merge', 'twig_array_merge'),
             new TwigFilter('batch', 'twig_array_batch'),
+            new TwigFilter('filter', 'twig_array_filter'),
+            new TwigFilter('map', 'twig_array_map'),
+            new TwigFilter('reduce', 'twig_array_reduce'),
 
             // string/array filters
             new TwigFilter('reverse', 'twig_reverse_filter', ['needs_environment' => true]),
@@ -787,7 +790,7 @@ function twig_join_filter($value, $glue = '', $and = null)
  */
 function twig_split_filter(Environment $env, $value, $delimiter, $limit = null)
 {
-    if (!empty($delimiter)) {
+    if (\strlen($delimiter) > 0) {
         return null === $limit ? explode($delimiter, $value) : explode($delimiter, $value, $limit);
     }
 
@@ -939,6 +942,9 @@ function twig_in_filter($value, $compare)
 {
     if ($value instanceof Markup) {
         $value = (string) $value;
+    }
+    if ($compare instanceof Markup) {
+        $compare = (string) $compare;
     }
 
     if (\is_array($compare)) {
@@ -1501,6 +1507,10 @@ function twig_test_empty($value)
         return 0 == \count($value);
     }
 
+    if ($value instanceof \Traversable) {
+        return !iterator_count($value);
+    }
+
     if (\is_object($value) && method_exists($value, '__toString')) {
         return '' === (string) $value;
     }
@@ -1681,5 +1691,38 @@ function twig_array_batch($items, $size, $fill = null, $preserveKeys = true)
     }
 
     return $result;
+}
+
+function twig_array_filter($array, $arrow)
+{
+    if (\is_array($array)) {
+        if (\PHP_VERSION_ID >= 50600) {
+            return array_filter($array, $arrow, \ARRAY_FILTER_USE_BOTH);
+        }
+
+        return array_filter($array, $arrow);
+    }
+
+    // the IteratorIterator wrapping is needed as some internal PHP classes are \Traversable but do not implement \Iterator
+    return new \CallbackFilterIterator(new \IteratorIterator($array), $arrow);
+}
+
+function twig_array_map($array, $arrow)
+{
+    $r = [];
+    foreach ($array as $k => $v) {
+        $r[$k] = $arrow($v, $k);
+    }
+
+    return $r;
+}
+
+function twig_array_reduce($array, $arrow, $initial = null)
+{
+    if (!\is_array($array)) {
+        $array = iterator_to_array($array);
+    }
+
+    return array_reduce($array, $arrow, $initial);
 }
 }

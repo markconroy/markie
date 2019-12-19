@@ -45,16 +45,14 @@ class ContainerConstraintValidatorFactoryTest extends TestCase
         $this->assertSame($validator, $factory->getInstance(new DummyConstraint()));
     }
 
-    /**
-     * @expectedException \Symfony\Component\Validator\Exception\ValidatorException
-     */
     public function testGetInstanceInvalidValidatorClass()
     {
+        $this->expectException('Symfony\Component\Validator\Exception\ValidatorException');
         $constraint = $this->getMockBuilder(Constraint::class)->getMock();
         $constraint
             ->expects($this->once())
             ->method('validatedBy')
-            ->will($this->returnValue('Fully\\Qualified\\ConstraintValidator\\Class\\Name'));
+            ->willReturn('Fully\\Qualified\\ConstraintValidator\\Class\\Name');
 
         $factory = new ContainerConstraintValidatorFactory(new Container());
         $factory->getInstance($constraint);
