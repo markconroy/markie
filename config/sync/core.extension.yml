@@ -1,4 +1,6 @@
 module:
+  admin_toolbar: 0
+  admin_toolbar_tools: 0
   anrt_entity_browsers: 0
   automated_cron: 0
   big_pipe: 0
