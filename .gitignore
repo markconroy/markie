@@ -12,3 +12,6 @@
 
 # Ignore local services.yml file
 web/sites/default/development.services.yml
+
+# Ignore Docksal
+.docksal/
