@@ -1573,16 +1573,16 @@
         },
         {
             "name": "drupal/core",
-            "version": "8.7.7",
+            "version": "8.7.10",
             "source": {
                 "type": "git",
                 "url": "https://github.com/drupal/core.git",
-                "reference": "32e1d7a67bbc28f07dc43d9ff692c0e90a4aeb92"
+                "reference": "02400f3ac4970b218dc63064895b3cbbe8576ad9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/drupal/core/zipball/32e1d7a67bbc28f07dc43d9ff692c0e90a4aeb92",
-                "reference": "32e1d7a67bbc28f07dc43d9ff692c0e90a4aeb92",
+                "url": "https://api.github.com/repos/drupal/core/zipball/02400f3ac4970b218dc63064895b3cbbe8576ad9",
+                "reference": "02400f3ac4970b218dc63064895b3cbbe8576ad9",
                 "shasum": ""
             },
             "require": {
@@ -1620,7 +1620,7 @@
                 "symfony/http-kernel": "~3.4.14",
                 "symfony/polyfill-iconv": "^1.0",
                 "symfony/process": "~3.4.0",
-                "symfony/psr-http-message-bridge": "^1.0",
+                "symfony/psr-http-message-bridge": "^1.1.2",
                 "symfony/routing": "~3.4.0",
                 "symfony/serializer": "~3.4.0",
                 "symfony/translation": "~3.4.0",
@@ -1814,7 +1814,7 @@
                 "GPL-2.0-or-later"
             ],
             "description": "Drupal is an open source content management platform powering millions of websites and applications.",
-            "time": "2019-09-04T10:26:35+00:00"
+            "time": "2019-11-13T23:20:55+00:00"
         },
         {
             "name": "drupal/crop",
