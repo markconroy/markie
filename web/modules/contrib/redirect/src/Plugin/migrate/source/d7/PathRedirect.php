@@ -15,7 +15,7 @@ use Drupal\migrate_drupal\Plugin\migrate\source\DrupalSqlBase;
  *
  * @MigrateSource(
  *   id = "d7_path_redirect",
- *   source_provider = "redirect"
+ *   source_module = "redirect"
  * )
  */
 class PathRedirect extends DrupalSqlBase {

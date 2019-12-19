@@ -2,6 +2,7 @@ id: d7_path_redirect
 label: Path Redirect
 migration_tags:
   - Drupal 7
+  - Content
 source:
   plugin: d7_path_redirect
 process:

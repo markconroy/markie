@@ -41,24 +41,24 @@ class RedirectSourceItem extends FieldItemBase {
    * {@inheritdoc}
    */
   public static function schema(FieldStorageDefinitionInterface $field_definition) {
-    return array(
-      'columns' => array(
-        'path' => array(
+    return [
+      'columns' => [
+        'path' => [
           'description' => 'The source path',
           'type' => 'varchar',
           'length' => 2048,
-        ),
-        'query' => array(
+        ],
+        'query' => [
           'description' => 'Serialized array of path queries',
           'type' => 'blob',
           'size' => 'big',
           'serialize' => TRUE,
-        ),
-      ),
-      'indexes' => array(
-        'path' => array(array('path', 50)),
-      ),
-    );
+        ],
+      ],
+      'indexes' => [
+        'path' => [['path', 50]],
+      ],
+    ];
   }
 
   /**

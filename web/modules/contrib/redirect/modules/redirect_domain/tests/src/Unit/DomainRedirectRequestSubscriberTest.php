@@ -75,7 +75,7 @@ class DomainRedirectRequestSubscriberTest extends UnitTestCase {
     $config_factory = $this->getConfigFactoryStub($data);
 
     // Create a mock path matcher.
-    $route_match = $this->getMock(RouteMatchInterface::class);
+    $route_match = $this->createMock(RouteMatchInterface::class);
     $path_matcher = new PathMatcher($config_factory, $route_match);
 
     $subscriber = new DomainRedirectRequestSubscriber(

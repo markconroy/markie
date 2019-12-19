@@ -3567,21 +3567,21 @@
     },
     {
         "name": "drupal/redirect",
-        "version": "1.0.0",
-        "version_normalized": "1.0.0.0",
+        "version": "1.5.0",
+        "version_normalized": "1.5.0.0",
         "source": {
             "type": "git",
             "url": "https://git.drupalcode.org/project/redirect.git",
-            "reference": "8.x-1.0"
+            "reference": "8.x-1.5"
         },
         "dist": {
             "type": "zip",
-            "url": "https://ftp.drupal.org/files/projects/redirect-8.x-1.0.zip",
-            "reference": "8.x-1.0",
-            "shasum": "93021b77f225a3035fbee361a21850a36a8cd684"
+            "url": "https://ftp.drupal.org/files/projects/redirect-8.x-1.5.zip",
+            "reference": "8.x-1.5",
+            "shasum": "7940acfb28bd802235d159f1c7a9a58e89dd3d15"
         },
         "require": {
-            "drupal/core": "~8"
+            "drupal/core": "^8.7.7 || ^9"
         },
         "type": "drupal-module",
         "extra": {
@@ -3589,8 +3589,8 @@
                 "dev-1.x": "1.x-dev"
             },
             "drupal": {
-                "version": "8.x-1.0",
-                "datestamp": "1513767485",
+                "version": "8.x-1.5",
+                "datestamp": "1576656784",
                 "security-coverage": {
                     "status": "covered",
                     "message": "Covered by Drupal's security advisory policy"
@@ -3610,12 +3610,16 @@
             {
                 "name": "Dave Reid",
                 "homepage": "https://www.drupal.org/user/53892"
+            },
+            {
+                "name": "pifagor",
+                "homepage": "https://www.drupal.org/user/2375692"
             }
         ],
         "description": "Allows users to redirect from old URLs to new URLs.",
         "homepage": "https://www.drupal.org/project/redirect",
         "support": {
-            "source": "http://cgit.drupalcode.org/redirect"
+            "source": "https://git.drupalcode.org/project/redirect"
         }
     },
     {

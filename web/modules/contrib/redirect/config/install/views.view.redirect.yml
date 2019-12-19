@@ -38,7 +38,7 @@ display:
       exposed_form:
         type: basic
         options:
-          submit_button: Apply
+          submit_button: Filter
           reset_button: false
           reset_button_label: Reset
           exposed_sorts_label: 'Sort by'
@@ -575,6 +575,8 @@ display:
         - url.query_args
         - user.permissions
       cacheable: false
+      max-age: 0
+      tags: {  }
   page_1:
     display_plugin: page
     id: page_1
@@ -591,3 +593,5 @@ display:
         - url.query_args
         - user.permissions
       cacheable: false
+      max-age: 0
+      tags: {  }

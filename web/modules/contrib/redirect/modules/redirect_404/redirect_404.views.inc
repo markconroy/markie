@@ -60,6 +60,18 @@ function redirect_404_views_data() {
     ],
   ];
 
+  $data['redirect_404']['daily_count'] = [
+    'title' => t('Daily count'),
+    'help' => t('The number of requests with that path and language in a day.'),
+    'field' => [
+      'id' => 'numeric',
+      'click sortable' => TRUE,
+    ],
+    'filter' => [
+      'id' => 'numeric',
+    ],
+  ];
+
   $data['redirect_404']['timestamp'] = [
     'title' => t('Timestamp'),
     'help' => t('The timestamp of the last request with that path and language.'),

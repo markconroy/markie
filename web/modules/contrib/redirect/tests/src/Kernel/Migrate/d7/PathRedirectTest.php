@@ -21,7 +21,7 @@ class PathRedirectTest extends MigrateDrupalTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = array('redirect', 'link');
+  public static $modules = ['redirect', 'link'];
 
   /**
    * {@inheritdoc}
@@ -51,7 +51,7 @@ class PathRedirectTest extends MigrateDrupalTestBase {
     $redirect = Redirect::load($id);
     $this->assertSame($this->getMigration('d7_path_redirect')
       ->getIdMap()
-      ->lookupDestinationID([$id]), [$redirect->id()]);
+      ->lookupDestinationIds([$id]), [[$redirect->id()]]);
     $this->assertSame($source_url, $redirect->getSourceUrl());
     $this->assertSame($redirect_url, $redirect->getRedirectUrl()
       ->toUriString());
@@ -63,6 +63,6 @@ class PathRedirectTest extends MigrateDrupalTestBase {
    */
   public function testPathRedirect() {
     $this->assertEntity(5, '/test/source/url', 'base:test/redirect/url', '301');
-    $this->assertEntity(7, '/test/source/url2', 'http://test/external/redirect/url?foo=bar&biz=buz', '307');
+    $this->assertEntity(7, '/test/source/url2', 'http://test/external/redirect/url?foo=bar&biz=buz#fragment-1', '307');
   }
 }

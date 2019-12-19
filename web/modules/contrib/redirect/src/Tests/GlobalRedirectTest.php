@@ -2,10 +2,12 @@
 
 namespace Drupal\redirect\Tests;
 
-use Drupal\Component\Utility\SafeMarkup;
+use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Language\Language;
 use Drupal\simpletest\WebTestBase;
 use Drupal\language\Entity\ConfigurableLanguage;
+use Drupal\taxonomy\Entity\Term;
+use Drupal\taxonomy\Entity\Vocabulary;
 
 /**
  * Global redirect test cases.
@@ -102,7 +104,7 @@ class GlobalRedirectTest extends WebTestBase {
     \Drupal::service('path.alias_storage')->save('/admin/config/system/site-information', '/site-info');
 
     // Create a taxonomy term for the forum.
-    $term = entity_create('taxonomy_term', [
+    $term = Term::create([
       'name' => 'Test Forum Term',
       'vid' => 'forums',
       'langcode' => Language::LANGCODE_NOT_SPECIFIED,
@@ -111,13 +113,13 @@ class GlobalRedirectTest extends WebTestBase {
     $this->forumTerm = $term;
 
     // Create another taxonomy vocabulary with a term.
-    $vocab = entity_create('taxonomy_vocabulary', [
+    $vocab = Vocabulary::create([
       'name' => 'test vocab',
       'vid' => 'test-vocab',
       'langcode' => Language::LANGCODE_NOT_SPECIFIED,
     ]);
     $vocab->save();
-    $term = entity_create('taxonomy_term', [
+    $term = Term::create([
       'name' => 'Test Term',
       'vid' => $vocab->id(),
       'langcode' => Language::LANGCODE_NOT_SPECIFIED,
@@ -162,7 +164,7 @@ class GlobalRedirectTest extends WebTestBase {
     $this->assertRedirect('node-alias', '<front>');
 
     // Test post request.
-    $this->drupalPost('Test-node', 'application/json', array());
+    $this->drupalPost('Test-node', 'application/json', []);
     // Does not do a redirect, stays in the same path.
     $this->assertEqual(basename($this->getUrl()), 'Test-node');
 
@@ -223,7 +225,7 @@ class GlobalRedirectTest extends WebTestBase {
       'language_configuration[content_translation]' => TRUE,
     ];
     $this->drupalPostForm('admin/structure/types/manage/page', $edit, t('Save content type'));
-    $this->assertRaw(t('The content type %type has been updated.', array('%type' => 'Page')), 'Basic page content type has been updated.');
+    $this->assertRaw(t('The content type %type has been updated.', ['%type' => 'Page']), 'Basic page content type has been updated.');
 
     $spanish_node = $this->drupalCreateNode([
       'type' => 'page',
@@ -252,11 +254,11 @@ class GlobalRedirectTest extends WebTestBase {
     $headers = $this->drupalGetHeaders(TRUE);
 
     $ending_url = isset($headers[0]['location']) ? $headers[0]['location'] : NULL;
-    $message = SafeMarkup::format('Testing redirect from %from to %to. Ending url: %url', array(
+    $message = new FormattableMarkup('Testing redirect from %from to %to. Ending url: %url', [
       '%from' => $path,
       '%to' => $expected_ending_url,
       '%url' => $ending_url,
-    ));
+    ]);
 
 
     if ($expected_ending_url == '<front>') {
@@ -272,5 +274,25 @@ class GlobalRedirectTest extends WebTestBase {
     $this->assertEqual($expected_ending_url, $ending_url);
 
     $this->assertEqual($headers[0][':status'], $expected_ending_status);
+  }
+
+  /**
+   * @inheritdoc}
+   */
+  protected function drupalHead($path, array $options = [], array $headers = []) {
+    // Always just use getAbsolutePath() so that generating the link does not
+    // alter special requests.
+    $url = $this->getAbsoluteUrl($path);
+    $out = $this->curlExec([CURLOPT_NOBODY => TRUE, CURLOPT_URL => $url, CURLOPT_HTTPHEADER => $headers]);
+    // Ensure that any changes to variables in the other thread are picked up.
+    $this->refreshVariables();
+
+    if ($this->dumpHeaders) {
+      $this->verbose('GET request to: ' . $path .
+        '<hr />Ending URL: ' . $this->getUrl() .
+        '<hr />Headers: <pre>' . Html::escape(var_export(array_map('trim', $this->headers), TRUE)) . '</pre>');
+    }
+
+    return $out;
   }
 }

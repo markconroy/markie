@@ -22,12 +22,12 @@ class RedirectSourceFormatter extends FormatterBase {
    * {@inheritdoc}
    */
   public function viewElements(FieldItemListInterface $items, $langcode) {
-    $elements = array();
+    $elements = [];
 
     foreach ($items as $delta => $item) {
-      $elements[$delta] = array(
+      $elements[$delta] = [
         '#markup' => urldecode($item->getUrl()->toString()),
-      );
+      ];
     }
 
     return $elements;

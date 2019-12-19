@@ -43,6 +43,9 @@ class PathRedirect extends ProcessPluginBase {
         // Add it to the end of the url.
         $uri .= '?' . http_build_query($options['query']);
       }
+      if (!empty($options['fragment'])) {
+        $uri .= '#' . $options['fragment'];
+      }
     }
 
     return $uri;

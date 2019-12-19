@@ -4,7 +4,7 @@ namespace Drupal\redirect;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Database\Connection;
-use Drupal\Core\Entity\EntityManagerInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Language\Language;
 use Drupal\redirect\Entity\Redirect;
 use Drupal\redirect\Exception\RedirectLoopException;
@@ -12,7 +12,7 @@ use Drupal\redirect\Exception\RedirectLoopException;
 class RedirectRepository {
 
   /**
-   * @var \Drupal\Core\Entity\EntityManagerInterface
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
    */
   protected $manager;
 
@@ -36,12 +36,12 @@ class RedirectRepository {
   /**
    * Constructs a \Drupal\redirect\EventSubscriber\RedirectRequestSubscriber object.
    *
-   * @param \Drupal\Core\Entity\EntityManagerInterface $manager
-   *   The entity manager service.
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $manager
+   *   The entity type manager.
    * @param \Drupal\Core\Database\Connection $connection
    *   The database connection.
    */
-  public function __construct(EntityManagerInterface $manager, Connection $connection, ConfigFactoryInterface $config_factory) {
+  public function __construct(EntityTypeManagerInterface $manager, Connection $connection, ConfigFactoryInterface $config_factory) {
     $this->manager = $manager;
     $this->connection = $connection;
     $this->config = $config_factory->get('redirect.settings');
@@ -63,6 +63,7 @@ class RedirectRepository {
    * @throws \Drupal\redirect\Exception\RedirectLoopException
    */
   public function findMatchingRedirect($source_path, array $query = [], $language = Language::LANGCODE_NOT_SPECIFIED) {
+    $source_path = ltrim($source_path, '/');
     $hashes = [Redirect::generateHash($source_path, $query, $language)];
     if ($language != Language::LANGCODE_NOT_SPECIFIED) {
       $hashes[] = Redirect::generateHash($source_path, $query, Language::LANGCODE_NOT_SPECIFIED);
@@ -98,6 +99,8 @@ class RedirectRepository {
       return $redirect;
     }
 
+    // Reset found redirects.
+    $this->foundRedirects = [];
     return NULL;
   }
 
@@ -111,10 +114,12 @@ class RedirectRepository {
    */
   protected function findByRedirect(Redirect $redirect, $language) {
     $uri = $redirect->getRedirectUrl();
-    $baseUrl = \Drupal::request()->getBaseUrl();
-    $path = ltrim(substr($uri->toString(), strlen($baseUrl)), '/');
+    $base_url = \Drupal::request()->getBaseUrl();
+    $generated_url = $uri->toString(TRUE);
+    $path = ltrim(substr($generated_url->getGeneratedUrl(), strlen($base_url)), '/');
     $query = $uri->getOption('query') ?: [];
-    return $this->findMatchingRedirect($path, $query, $language);
+    $return_value = $this->findMatchingRedirect($path, $query, $language);
+    return $return_value ? $return_value->addCacheableDependency($generated_url) : $return_value;
   }
 
   /**

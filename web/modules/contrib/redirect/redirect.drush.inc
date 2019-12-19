@@ -4,21 +4,21 @@
  * @file
  * Drush integration for the redirect module.
  */
-
+use Drupal\Component\Utility\Environment;
 /**
  * Implements hook_drush_command().
  */
 function redirect_drush_command() {
-  $items['generate-redirects'] = array(
+  $items['generate-redirects'] = [
     'description' => 'Create redirects.',
-    'drupal dependencies' => array('devel_generate'),
-    'arguments' => array(
+    'drupal dependencies' => ['devel_generate'],
+    'arguments' => [
       'count' => 'Number of redirects to generate.',
-    ),
-    'options' => array(
+    ],
+    'options' => [
       'delete' => 'Delete all redirects before generating new ones.',
-    ),
-  );
+    ],
+  ];
 
   return $items;
 }
@@ -53,7 +53,7 @@ function redirect_run_unprogressive_batch() {
   }
 
   // Attempt to increase the execution time.
-  drupal_set_time_limit(240);
+  Environment::setTimeLimit(240);
 
   // Build the batch array.
   $batch = call_user_func_array($batch_callback, $args);

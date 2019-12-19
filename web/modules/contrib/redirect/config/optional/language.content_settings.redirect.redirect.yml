@@ -1,5 +1,8 @@
+langcode: en
 status: true
-dependencies: {  }
+dependencies:
+  module:
+    - redirect
 id: redirect.redirect
 target_entity_type_id: redirect
 target_bundle: redirect

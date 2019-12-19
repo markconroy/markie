@@ -24,7 +24,7 @@ class RouteNormalizerRequestSubscriberTest extends UnitTestCase {
   protected function setUp() {
     parent::setUp();
 
-    $kill_switch = $this->getMock('\Drupal\Core\PageCache\ResponsePolicy\KillSwitch');
+    $kill_switch = $this->createMock('\Drupal\Core\PageCache\ResponsePolicy\KillSwitch');
     $kill_switch->expects($this->any())
       ->method('trigger')
       ->withAnyParameters()

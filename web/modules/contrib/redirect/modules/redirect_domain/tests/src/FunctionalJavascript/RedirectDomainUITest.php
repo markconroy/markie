@@ -1,15 +1,15 @@
 <?php
 
-namespace Drupal\redirect_domain\Tests;
+namespace Drupal\Tests\redirect_domain\FunctionalJavascript;
 
-use Drupal\simpletest\WebTestBase;
+use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
 
 /**
  * Tests the UI for domain redirect.
  *
  * @group redirect_domain
  */
-class RedirectDomainUITest extends WebTestBase {
+class RedirectDomainUITest extends WebDriverTestBase {
 
   /**
    * Modules to enable.
@@ -19,6 +19,11 @@ class RedirectDomainUITest extends WebTestBase {
   public static $modules = [
     'redirect_domain',
   ];
+
+  /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
 
   /**
    * Tests domain redirect.
@@ -38,18 +43,18 @@ class RedirectDomainUITest extends WebTestBase {
     $this->assertFieldByName('redirects[0][destination]');
 
     // Add another field for new domain redirect.
-    $this->drupalPostAjaxForm(NULL, [], ['op' => t('Add another')]);
+    $page = $this->getSession()->getPage();
+    $page->pressButton('Add another');
+    $this->assertSession()->assertWaitOnAjaxRequest();
 
     // Add two new domain redirects.
-    $edit = [
-      'redirects[0][from]' => 'foo.example.org',
-      'redirects[0][sub_path]' => '//sub-path',
-      'redirects[0][destination]' => 'www.example.org/foo',
-      'redirects[1][from]' => 'bar.example.org',
-      'redirects[1][sub_path]' => '',
-      'redirects[1][destination]' => 'www.example.org/bar',
-    ];
-    $this->drupalPostForm(NULL, $edit, t('Save'));
+    $page->fillField('redirects[0][from]', 'foo.example.org');
+    $page->fillField('redirects[0][sub_path]', '//sub-path');
+    $page->fillField('redirects[0][destination]', 'www.example.org/foo');
+    $page->fillField('redirects[1][from]', 'bar.example.org');
+    $page->fillField('redirects[1][sub_path]', '');
+    $page->fillField('redirects[1][destination]', 'www.example.org/bar');
+    $page->pressButton('Save');
 
     // Check the new domain redirects.
     $this->assertFieldByName('redirects[0][from]', 'foo.example.org');

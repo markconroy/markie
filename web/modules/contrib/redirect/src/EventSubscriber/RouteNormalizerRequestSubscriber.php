@@ -128,12 +128,6 @@ class RouteNormalizerRequestSubscriber implements EventSubscriberInterface {
         $response = new TrustedRedirectResponse($redirect_uri, $this->config->get('default_status_code'));
         $response->headers->set('X-Drupal-Route-Normalizer', 1);
         $event->setResponse($response);
-        // Disable page cache for redirects as that results in unpredictable
-        // behavior, e.g. when a trailing ? without query parameters is
-        // involved.
-        // @todo Remove when https://www.drupal.org/node/2761639 is fixed in
-        //   Drupal core.
-        \Drupal::service('page_cache_kill_switch')->trigger();
       }
     }
   }
@@ -142,7 +136,7 @@ class RouteNormalizerRequestSubscriber implements EventSubscriberInterface {
    * {@inheritdoc}
    */
   static function getSubscribedEvents() {
-    $events[KernelEvents::REQUEST][] = array('onKernelRequestRedirect', 30);
+    $events[KernelEvents::REQUEST][] = ['onKernelRequestRedirect', 30];
     return $events;
   }
 

@@ -2,11 +2,13 @@
 
 namespace Drupal\redirect\Plugin\Field\FieldWidget;
 
+use Drupal\Component\Utility\NestedArray;
 use Drupal\Component\Utility\UrlHelper;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\WidgetBase;
 use Drupal\Core\Url;
 use Drupal\Core\Form\FormStateInterface;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;
 
 /**
@@ -37,25 +39,25 @@ class RedirectSourceWidget extends WidgetBase {
     if ($items[$delta]->query) {
       $default_url_value .= '?' . http_build_query($items[$delta]->query);
     }
-    $element['path'] = array(
+    $element['path'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Path'),
       '#placeholder' => $this->getSetting('placeholder_url'),
       '#default_value' => $default_url_value,
       '#maxlength' => 2048,
       '#required' => $element['#required'],
-      '#field_prefix' => Url::fromRoute('<front>', array(), array('absolute' => TRUE))->toString(),
-      '#attributes' => array('data-disable-refocus' => 'true'),
-    );
+      '#field_prefix' => Url::fromRoute('<front>', [], ['absolute' => TRUE])->toString(),
+      '#attributes' => ['data-disable-refocus' => 'true'],
+    ];
 
     // If creating new URL add checks.
     if ($items->getEntity()->isNew()) {
-      $element['status_box'] = array(
+      $element['status_box'] = [
         '#prefix' => '<div id="redirect-link-status">',
         '#suffix' => '</div>',
-      );
+      ];
 
-      $source_path = $form_state->getValue(array('redirect_source', 0, 'path'));
+      $source_path = $form_state->getValue(['redirect_source', 0, 'path']);
       if ($source_path) {
         $source_path = trim($source_path);
 
@@ -63,12 +65,15 @@ class RedirectSourceWidget extends WidgetBase {
         // @todo - Hmm... exception driven logic. Find a better way how to
         //   determine if we have a valid path.
         try {
-          \Drupal::service('router')->match('/' . $form_state->getValue(array('redirect_source', 0, 'path')));
-          $element['status_box'][]['#markup'] = '<div class="messages messages--warning">' . t('The source path %path is likely a valid path. It is preferred to <a href="@url-alias">create URL aliases</a> for existing paths rather than redirects.',
-              array('%path' => $source_path, '@url-alias' => Url::fromRoute('path.admin_add')->toString())) . '</div>';
+          \Drupal::service('router')->match('/' . $form_state->getValue(['redirect_source', 0, 'path']));
+          $element['status_box'][]['#markup'] = '<div class="messages messages--warning">' . $this->t('The source path %path is likely a valid path. It is preferred to <a href="@url-alias">create URL aliases</a> for existing paths rather than redirects.',
+              ['%path' => $source_path, '@url-alias' => Url::fromRoute('path.admin_add')->toString()]) . '</div>';
         }
         catch (ResourceNotFoundException $e) {
           // Do nothing, expected behaviour.
+        }
+        catch (AccessDeniedHttpException $e) {
+          // @todo Source lookup results in an access denied, deny access?
         }
 
         // Warning about the path being already redirected.
@@ -80,15 +85,15 @@ class RedirectSourceWidget extends WidgetBase {
           $redirects = $repository->findBySourcePath($path);
           if (!empty($redirects)) {
             $redirect = array_shift($redirects);
-            $element['status_box'][]['#markup'] = '<div class="messages messages--warning">' . t('The base source path %source is already being redirected. Do you want to <a href="@edit-page">edit the existing redirect</a>?', array('%source' => $source_path, '@edit-page' => $redirect->url('edit-form'))) . '</div>';
+            $element['status_box'][]['#markup'] = '<div class="messages messages--warning">' . $this->t('The base source path %source is already being redirected. Do you want to <a href="@edit-page">edit the existing redirect</a>?', ['%source' => $source_path, '@edit-page' => $redirect->toUrl('edit-form')->toString()]) . '</div>';
           }
         }
       }
 
-      $element['path']['#ajax'] = array(
+      $element['path']['#ajax'] = [
         'callback' => 'redirect_source_link_get_status_messages',
         'wrapper' => 'redirect-link-status',
-      );
+      ];
     }
 
     return $element;

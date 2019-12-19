@@ -67,7 +67,7 @@ class Fix404IgnoreController extends ControllerBase {
     if (empty($ignored_paths) || !strpos($path, $ignored_paths)) {
       $this->redirectStorage->resolveLogRequest($path, $langcode);
 
-      drupal_set_message($this->t('Resolved the path %path in the database. Please check the ignored list and save the settings.', [
+      $this->messenger()->addMessage($this->t('Resolved the path %path in the database. Please check the ignored list and save the settings.', [
         '%path' => $path,
       ]));
     }

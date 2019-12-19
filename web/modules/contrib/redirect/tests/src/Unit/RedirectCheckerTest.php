@@ -21,7 +21,7 @@ class RedirectCheckerTest extends UnitTestCase {
    */
   public function testCanRedirect() {
 
-    $config = array('redirect.settings' => array('ignore_admin_path' => FALSE, 'access_check' => TRUE));
+    $config = ['redirect.settings' => ['ignore_admin_path' => FALSE, 'access_check' => TRUE]];
 
     $state = $this->getMockBuilder('Drupal\Core\State\StateInterface')
       ->getMock();

@@ -6,7 +6,7 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\ConfirmFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
-use Drupal\user\PrivateTempStoreFactory;
+use Drupal\Core\TempStore\PrivateTempStoreFactory;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Drupal\Core\Session\AccountInterface;
@@ -48,7 +48,7 @@ class RedirectDeleteMultipleForm extends ConfirmFormBase {
   /**
    * Constructs a RedirectDeleteMultiple form object.
    *
-   * @param \Drupal\user\PrivateTempStoreFactory $temp_store_factory
+   * @param \Drupal\Core\TempStore\PrivateTempStoreFactory $temp_store_factory
    *   The tempstore factory.
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   The entity type manager.
@@ -69,7 +69,7 @@ class RedirectDeleteMultipleForm extends ConfirmFormBase {
    */
   public static function create(ContainerInterface $container) {
     return new static(
-      $container->get('user.private_tempstore'),
+      $container->get('tempstore.private'),
       $container->get('entity_type.manager'),
       $container->get('current_user'),
       $container->get('string_translation')
@@ -101,7 +101,7 @@ class RedirectDeleteMultipleForm extends ConfirmFormBase {
    * {@inheritdoc}
    */
   public function getConfirmText() {
-    return t('Delete');
+    return $this->t('Delete');
   }
 
   /**
@@ -132,7 +132,7 @@ class RedirectDeleteMultipleForm extends ConfirmFormBase {
       $this->privateTempStoreFactory->get('redirect_multiple_delete_confirm')->delete($this->currentUser->id());
       $count = count($this->redirects);
       $this->logger('redirect')->notice('Deleted @count redirects.', ['@count' => $count]);
-      drupal_set_message($this->stringTranslation->formatPlural($count, 'Deleted 1 redirect.', 'Deleted @count redirects.'));
+      $this->messenger()->addMessage($this->stringTranslation->formatPlural($count, 'Deleted 1 redirect.', 'Deleted @count redirects.'));
     }
     $form_state->setRedirect('redirect.list');
   }

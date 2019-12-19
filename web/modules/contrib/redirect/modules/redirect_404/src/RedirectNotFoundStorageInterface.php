@@ -50,4 +50,9 @@ interface RedirectNotFoundStorageInterface {
    */
   public function purgeOldRequests();
 
+  /**
+   * Resets the daily counts of 404 request logs.
+   */
+  public function resetDailyCount();
+
 }

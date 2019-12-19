@@ -7,7 +7,9 @@
 
 use Drupal\Component\Utility\Random;
 use Drupal\devel_generate\DevelGenerateBase;
+use Drupal\node\NodeInterface;
 use Drupal\redirect\Entity\Redirect;
+use Drupal\Core\Database\Database;
 
 /**
  * @file
@@ -15,21 +17,21 @@ use Drupal\redirect\Entity\Redirect;
  */
 
 function redirect_generate_form() {
-  $form['count'] = array(
+  $form['count'] = [
     '#type' => 'textfield',
     '#title' => t('How many URL redirects would you like to generate?'),
     '#default_value' => 50,
     '#size' => 4,
-  );
-  $form['delete'] = array(
+  ];
+  $form['delete'] = [
     '#type' => 'checkbox',
     '#title' => t('Delete all URL redirects before generating new URL redirects.'),
     '#default_value' => FALSE,
-  );
-  $form['submit'] = array(
+  ];
+  $form['submit'] = [
     '#type' => 'submit',
     '#value' => t('Generate'),
-  );
+  ];
 
   return $form;
 }
@@ -42,28 +44,28 @@ function redirect_generate_form_submit(&$form, &$form_state) {
 
 function redirect_generate_redirects_batch_info($count, $delete = FALSE) {
   if ($delete) {
-    $operations[] = array('redirect_generate_batch_delete', array());
+    $operations[] = ['redirect_generate_batch_delete', []];
   }
 
-  $operations[] = array('redirect_generate_batch_generate', array($count));
+  $operations[] = ['redirect_generate_batch_generate', [$count]];
 
-  return array(
+  return [
     'operations' => $operations,
     'finished' => 'redirect_generate_batch_finished',
     'file' => drupal_get_path('module', 'redirect') . '/redirect.generate.inc',
-  );
+  ];
 }
 
 function redirect_generate_batch_delete(array &$context) {
   if (empty($context['sandbox'])) {
-    $context['sandbox'] = array();
+    $context['sandbox'] = [];
     $context['sandbox']['progress'] = 0;
     $context['sandbox']['current_rid'] = 0;
-    $context['sandbox']['max'] = db_query('SELECT COUNT(DISTINCT rid) FROM {redirect}')->fetchField();
+    $context['sandbox']['max'] = Database::getConnection()->query('SELECT COUNT(DISTINCT rid) FROM {redirect}')->fetchField();
   }
 
   $limit = 20;
-  $rids = db_query_range("SELECT rid FROM {redirect} WHERE rid > :rid ORDER BY rid", 0, $limit, array(':rid' => $context['sandbox']['current_rid']))->fetchCol();
+  $rids = Database::getConnection()->queryRange("SELECT rid FROM {redirect} WHERE rid > :rid ORDER BY rid", 0, $limit, [':rid' => $context['sandbox']['current_rid']])->fetchCol();
   foreach (redirect_repository()->loadMultiple($rids) as $redirect) {
     $redirect->delete();
   }
@@ -71,7 +73,7 @@ function redirect_generate_batch_delete(array &$context) {
   // Update our progress information.
   $context['sandbox']['progress'] += count($rids);
   $context['sandbox']['current_rid'] = end($rids);
-  $context['message'] = t('Deleted URL redirect @rid.', array('@rid' => end($rids)));
+  $context['message'] = t('Deleted URL redirect @rid.', ['@rid' => end($rids)]);
 
   // Inform the batch engine that we are not finished,
   // and provide an estimation of the completion level we reached.
@@ -82,12 +84,12 @@ function redirect_generate_batch_delete(array &$context) {
 
 function redirect_generate_batch_generate($num, array &$context) {
   if (empty($context['sandbox'])) {
-    $context['sandbox'] = array();
+    $context['sandbox'] = [];
     $context['sandbox']['progress'] = 0;
     $context['sandbox']['max'] = $num;
     $query = \Drupal::database()->select('node', 'n');
     $query->addField('n', 'nid');
-    $query->condition('n.status', NODE_PUBLISHED);
+    $query->condition('n.status', NodeInterface::PUBLISHED);
     $query->addTag('node_access');
     $context['sandbox']['nids'] = $query->execute()->fetchAllKeyed(0, 0);
   }
@@ -96,7 +98,7 @@ function redirect_generate_batch_generate($num, array &$context) {
 
   $limit = 20;
   $types = array_keys(redirect_status_code_options());
-  $languages = \Drupal::moduleHandler()->moduleExists('locale') ? array_keys(\Drupal::languageManager()->getLanguages()) : array();
+  $languages = \Drupal::moduleHandler()->moduleExists('locale') ? array_keys(\Drupal::languageManager()->getLanguages()) : [];
 
   for ($i = 0; $i < min($limit, $context['sandbox']['max'] - $context['sandbox']['progress']); $i++) {
     $rand = mt_rand(0, 100);
@@ -104,8 +106,8 @@ function redirect_generate_batch_generate($num, array &$context) {
     $redirect = Redirect::create();
 
     $source = _redirect_generate_url();
-    $source_options = array();
-    $redirect_options = array();
+    $source_options = [];
+    $redirect_options = [];
 
     if ($context['sandbox']['nids'] && $rand >= 40) {
       $redirect_target = 'node/' . array_rand($context['sandbox']['nids']);
@@ -128,7 +130,7 @@ function redirect_generate_batch_generate($num, array &$context) {
       $redirect->setLanguage($languages[array_rand($languages)]);
     }
 
-    $query = array();
+    $query = [];
     if ($rand <= 30) {
       $query = _redirect_generate_querystring();
     }
@@ -141,10 +143,10 @@ function redirect_generate_batch_generate($num, array &$context) {
     if (mt_rand(0, 1)) {
     $query = \Drupal::database();
     $query->update('redirect')
-      ->fields(array(
+      ->fields([
         'count' => mt_rand(1, 500),
-        'access' => mt_rand(REQUEST_TIME - 31536000, REQUEST_TIME),
-      ))
+        'access' => mt_rand(Drupal::time()->getRequestTime() - 31536000, Drupal::time()->getRequestTime()),
+      ])
       ->condition('rid', $redirect->id())
       ->execute();
     }
@@ -165,20 +167,20 @@ function redirect_generate_batch_generate($num, array &$context) {
 
 function redirect_generate_batch_finished($success, $results, $operations) {
   if ($success) {
-    drupal_set_message(\Drupal::translation()->formatPlural(count($results), 'One URL redirect created.', '@count URL redirects created.'));
+    \Drupal::messenger()->addMessage(\Drupal::translation()->formatPlural(count($results), 'One URL redirect created.', '@count URL redirects created.'));
   }
   else {
     // An error occurred.
     // $operations contains the operations that remained unprocessed.
     $error_operation = reset($operations);
-    drupal_set_message(t('An error occurred while processing @operation with arguments : @args', array('@operation' => $error_operation[0], '@args' => print_r($error_operation[0], TRUE))));
+    \Drupal::messenger()->addMessage(t('An error occurred while processing @operation with arguments : @args', ['@operation' => $error_operation[0], '@args' => print_r($error_operation[0], TRUE)]));
   }
 }
 
 function _redirect_generate_url($external = FALSE, $max_levels = 2) {
-  $url = array();
+  $url = [];
   if ($external) {
-    $tlds = array('com', 'net', 'org');
+    $tlds = ['com', 'net', 'org'];
     $url[] = 'http://www.example.'. $tlds[array_rand($tlds)];
   }
   $max_levels = mt_rand($external ? 0 : 1, $max_levels);
@@ -189,6 +191,6 @@ function _redirect_generate_url($external = FALSE, $max_levels = 2) {
 }
 
 function _redirect_generate_querystring() {
-  $query = array(DevelGenerateBase::generateWord(mt_rand(1, 3)) => DevelGenerateBase::generateWord(mt_rand(2, 4)));
+  $query = [DevelGenerateBase::generateWord(mt_rand(1, 3)) => DevelGenerateBase::generateWord(mt_rand(2, 4))];
   return $query;
 }

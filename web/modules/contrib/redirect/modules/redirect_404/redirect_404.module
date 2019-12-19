@@ -18,6 +18,14 @@ function redirect_404_cron() {
   /** @var \Drupal\redirect_404\SqlRedirectNotFoundStorage $redirect_storage */
   $redirect_storage = \Drupal::service('redirect.not_found_storage');
   $redirect_storage->purgeOldRequests();
+
+  $last_daily_reset = \Drupal::state()->get('redirect_404.last_daily_reset', 0);
+
+  if (date('d', $last_daily_reset) != date('d')) {
+    $redirect_storage->resetDailyCount();
+
+    \Drupal::state()->set('redirect_404.last_daily_reset', \Drupal::time()->getRequestTime());
+  }
 }
 
 /**
