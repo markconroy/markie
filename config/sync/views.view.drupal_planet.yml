@@ -19,7 +19,6 @@ description: 'A view to list the Drupal Planet entries'
 tag: ''
 base_table: node_field_data
 base_field: nid
-core: 8.x
 display:
   default:
     display_plugin: default
@@ -135,6 +134,8 @@ display:
           id: status
           expose:
             operator: ''
+            operator_limit_selection: false
+            operator_list: {  }
           group: 1
         type:
           id: type
@@ -145,6 +146,9 @@ display:
           entity_type: node
           entity_field: type
           plugin_id: bundle
+          expose:
+            operator_limit_selection: false
+            operator_list: {  }
         tid:
           id: tid
           table: taxonomy_index
@@ -153,6 +157,9 @@ display:
             - 6
           vid: tags
           plugin_id: taxonomy_index_tid
+          expose:
+            operator_limit_selection: false
+            operator_list: {  }
       sorts:
         created:
           id: created
