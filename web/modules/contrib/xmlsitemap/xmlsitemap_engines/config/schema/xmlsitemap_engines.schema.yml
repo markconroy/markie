@@ -15,4 +15,4 @@ xmlsitemap_engines.settings:
       label: 'Url engines'
     minimum_lifetime:
       type: integer
-      label: 'Minumum lifetime for sitemaps'
+      label: 'Minimum lifetime for sitemaps'

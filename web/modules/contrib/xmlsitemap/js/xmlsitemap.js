@@ -1,11 +1,15 @@
+/**
+ * @file
+ * Default JavaScript file for XML sitemap.
+ */
 
-(function($, Drupal) {
+(function ($, Drupal) {
 
-  "use strict";
+  'use strict';
 
   Drupal.behaviors.xmlsitemapFieldsetSummaries = {
-    attach: function(context) {
-      $('fieldset#edit-xmlsitemap', context).drupalSetSummary(function(context) {
+    attach: function (context) {
+      $('fieldset#edit-xmlsitemap', context).drupalSetSummary(function (context) {
         var vals = [];
 
         // Inclusion select field.

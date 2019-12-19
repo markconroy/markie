@@ -16,7 +16,7 @@ interface XmlSitemapGeneratorInterface {
    *
    * @param string $path
    *   An internal Drupal path.
-   * @param Drupal\Core\Language\LanguageInterface $language
+   * @param string $language
    *   A language code to use when looking up the paths.
    */
   public function getPathAlias($path, $language);
@@ -30,8 +30,9 @@ interface XmlSitemapGeneratorInterface {
    * Get how much memory was used.
    *
    * @param bool $start
+   *   Start value.
    *
-   * @return integer
+   * @return int
    *   Used memory.
    */
   public function getMemoryUsage($start = FALSE);
@@ -42,7 +43,7 @@ interface XmlSitemapGeneratorInterface {
    * This function just makes a guess. It does not take into account
    * the currently loaded modules.
    *
-   * @return integer
+   * @return int
    *   Optimal memory limit.
    */
   public function getOptimalMemoryLimit();
@@ -50,7 +51,7 @@ interface XmlSitemapGeneratorInterface {
   /**
    * Calculate the optimal memory level for sitemap generation.
    *
-   * @param $new_limit
+   * @param int $new_limit
    *   An optional PHP memory limit in bytes. If not provided, the value of
    *   getOptimalMemoryLimit() will be used.
    */
@@ -59,9 +60,9 @@ interface XmlSitemapGeneratorInterface {
   /**
    * Generate one page (chunk) of the sitemap.
    *
-   * @param $sitemap
+   * @param XmlSitemapInterface $sitemap
    *   An unserialized data array for an XML sitemap.
-   * @param $page
+   * @param string $page
    *   An integer of the specific page of the sitemap to generate.
    */
   public function generatePage(XmlSitemapInterface $sitemap, $page);
@@ -70,41 +71,44 @@ interface XmlSitemapGeneratorInterface {
    * Generates one chunk of the sitemap.
    *
    * @param \Drupal\xmlsitemap\XmlSitemapInterface $sitemap
-   *   An unserialized data array for an XML sitemap.
+   *   The XML sitemap config entity.
    * @param \Drupal\xmlsitemap\XmlSitemapWriter $writer
    *   XML writer object.
-   * @param int $pageAn integer of the specific page of the sitemap to generate.
-   *   An integer of the specific page of the sitemap to generate.
+   * @param int $chunk
+   *   Chunk value.
    */
   public function generateChunk(XmlSitemapInterface $sitemap, XmlSitemapWriter $writer, $chunk);
 
   /**
    * Generate the index sitemap.
    *
-   * @param $sitemap
-   *   An unserialized data array for an XML sitemap.
+   * @param \Drupal\xmlsitemap\XmlSitemapInterface $sitemap
+   *   The XML sitemap config entity.
+   * @param int|null $pages
+   *   The number of pages to write in the sitemap. Defaults to the value of
+   *   $sitemap->getChunks().
    */
-  public function generateIndex(XmlSitemapInterface $sitemap);
+  public function generateIndex(XmlSitemapInterface $sitemap, $pages = NULL);
 
   /**
    * Batch callback; generate all pages of a sitemap.
    *
    * @param string $smid
    *   Sitemap id.
-   * @param array $context
+   * @param array|\ArrayAccess $context
    *   Sitemap context.
    */
-  public function regenerateBatchGenerate($smid, array &$context);
+  public function regenerateBatchGenerate($smid, &$context);
 
   /**
    * Batch callback; generate the index page of a sitemap.
    *
    * @param string $smid
    *   Sitemap id.
-   * @param array $context
+   * @param array|\ArrayAccess $context
    *   Sitemap context.
    */
-  public function regenerateBatchGenerateIndex($smid, array &$context);
+  public function regenerateBatchGenerateIndex($smid, &$context);
 
   /**
    * Batch callback; sitemap regeneration finished.
@@ -115,10 +119,11 @@ interface XmlSitemapGeneratorInterface {
    *   Results for the regeneration process.
    * @param array $operations
    *   Operations performed.
-   * @param int $elapsedTime elapsed.
+   * @param int $elapsed
+   *   Elapsed.
    *   Time elapsed.
    */
-  public function regenerateBatchFinished($success, $results, $operations, $elapsed);
+  public function regenerateBatchFinished($success, array $results, array $operations, $elapsed);
 
   /**
    * Batch callback; clear sitemap links for entites.
@@ -127,7 +132,7 @@ interface XmlSitemapGeneratorInterface {
    *   Entity types to rebuild.
    * @param bool $save_custom
    *   Save custom data.
-   * @param array $context
+   * @param array|\ArrayAccess $context
    *   Context to be rebuilt.
    */
   public function rebuildBatchClear(array $entity_type_ids, $save_custom, &$context);
@@ -137,7 +142,7 @@ interface XmlSitemapGeneratorInterface {
    *
    * @param string $entity_type_id
    *   Entity type to be rebuilt.
-   * @param array $context
+   * @param array|\ArrayAccess $context
    *   Context to be rebuilt.
    */
   public function rebuildBatchFetch($entity_type_id, &$context);
@@ -151,10 +156,11 @@ interface XmlSitemapGeneratorInterface {
    *   Results for the regeneration process.
    * @param array $operations
    *   Operations performed.
-   * @param int $elapsedTime elapsed.
+   * @param int $elapsed
+   *   Elapsed.
    *   Time elapsed.
    */
-  public function rebuildBatchFinished($success, $results, $operations, $elapsed);
+  public function rebuildBatchFinished($success, array $results, array $operations, $elapsed);
 
   /**
    * Set variables during the batch process.
@@ -163,4 +169,5 @@ interface XmlSitemapGeneratorInterface {
    *   Variables to be set.
    */
   public function batchVariableSet(array $variables);
+
 }

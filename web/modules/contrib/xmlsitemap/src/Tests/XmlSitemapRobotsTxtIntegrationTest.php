@@ -22,12 +22,13 @@ class XmlSitemapRobotsTxtIntegrationTest extends XmlSitemapTestBase {
    */
   public function testRobotsTxt() {
     // Request the un-clean robots.txt path so this will work in case there is
-    // still the robots.txt file in the root directory.
-    if (file_exists(DRUPAL_ROOT . '/robots.txt')) {
-      $this->error(t('Unable to proceed with configured robots.txt tests: A local file already exists at @s, so the menu override in this module will never run.', array('@s' => DRUPAL_ROOT . '/robots.txt')));
-      return;
-    }
-    $this->drupalGet('/robots.txt');
+    // still the robots.txt file in the root directory. In order to bypass the
+    // local robots.txt file we need to rebuild the container and use a Request
+    // with clean URLs disabled.
+    $this->container = $this->kernel->rebuildContainer();
+    $this->prepareRequestForGenerator(FALSE);
+
+    $this->drupalGet('robots.txt');
     $this->assertRaw('Sitemap: ' . Url::fromRoute('xmlsitemap.sitemap_xml', [], ['absolute' => TRUE])->toString());
   }
 

@@ -3880,21 +3880,28 @@
     },
     {
         "name": "drupal/xmlsitemap",
-        "version": "1.0.0-alpha2",
-        "version_normalized": "1.0.0.0-alpha2",
+        "version": "1.0.0-rc1",
+        "version_normalized": "1.0.0.0-RC1",
         "source": {
             "type": "git",
             "url": "https://git.drupalcode.org/project/xmlsitemap.git",
-            "reference": "8.x-1.0-alpha2"
+            "reference": "8.x-1.0-rc1"
         },
         "dist": {
             "type": "zip",
-            "url": "https://ftp.drupal.org/files/projects/xmlsitemap-8.x-1.0-alpha2.zip",
-            "reference": "8.x-1.0-alpha2",
-            "shasum": "72576d8e40b747a71bd45577f9ab503a4a9d035e"
+            "url": "https://ftp.drupal.org/files/projects/xmlsitemap-8.x-1.0-rc1.zip",
+            "reference": "8.x-1.0-rc1",
+            "shasum": "9b88caa55f9a45b8c89a1284d2db739fbf0c830f"
         },
         "require": {
-            "drupal/core": "~8.0"
+            "drupal/core": "~8.0",
+            "ext-xmlwriter": "*"
+        },
+        "require-dev": {
+            "drupal/robotstxt": "^1.0"
+        },
+        "suggest": {
+            "drush/drush": "Command-line regenerating and rebuilding sitemaps."
         },
         "type": "drupal-module",
         "extra": {
@@ -3902,18 +3909,23 @@
                 "dev-1.x": "1.x-dev"
             },
             "drupal": {
-                "version": "8.x-1.0-alpha2",
-                "datestamp": "1464192275",
+                "version": "8.x-1.0-rc1",
+                "datestamp": "1576705685",
                 "security-coverage": {
                     "status": "not-covered",
-                    "message": "Alpha releases are not covered by Drupal security advisories."
+                    "message": "RC releases are not covered by Drupal security advisories."
+                }
+            },
+            "drush": {
+                "services": {
+                    "drush.services.yml": "^9 || ^10"
                 }
             }
         },
         "installation-source": "dist",
         "notification-url": "https://packages.drupal.org/8/downloads",
         "license": [
-            "GPL-2.0+"
+            "GPL-2.0-or-later"
         ],
         "authors": [
             {
@@ -3933,16 +3945,16 @@
                 "homepage": "https://www.drupal.org/user/2628879"
             },
             {
-                "name": "earnie",
-                "homepage": "https://www.drupal.org/user/86710"
-            },
-            {
                 "name": "juampynr",
                 "homepage": "https://www.drupal.org/user/682736"
             },
             {
                 "name": "paulmckibben",
                 "homepage": "https://www.drupal.org/user/279003"
+            },
+            {
+                "name": "pifagor",
+                "homepage": "https://www.drupal.org/user/2375692"
             },
             {
                 "name": "tadityar",
@@ -3953,10 +3965,11 @@
                 "homepage": "https://www.drupal.org/user/1835276"
             }
         ],
-        "description": "Creates an XML sitemap conforming to the <a href=\"http://sitemaps.org/\">sitemaps.org protocol</a>.",
+        "description": "Creates XML sitemaps for the site",
         "homepage": "https://www.drupal.org/project/xmlsitemap",
         "support": {
-            "source": "http://cgit.drupalcode.org/xmlsitemap"
+            "source": "http://cgit.drupalcode.org/xmlsitemap",
+            "issues": "http://drupal.org/project/issues/xmlsitemap"
         }
     },
     {

@@ -10,5 +10,5 @@
  */
 function xmlsitemap_custom_uninstall() {
   \Drupal::moduleHandler()->load('xmlsitemap');
-  \Drupal::service('xmlsitemap.link_storage')->deleteMultiple(array('type' => 'custom'));
+  \Drupal::service('xmlsitemap.link_storage')->deleteMultiple(['type' => 'custom']);
 }

@@ -6,7 +6,7 @@ xmlsitemap.settings:
   mapping:
     minimum_lifetime:
       type: integer
-      label: 'Minumum lifetime of an xmlsitemap xml file'
+      label: 'Minimum lifetime of an xmlsitemap xml file'
     xsl:
       type: integer
       label: 'Check XSL functionality'
@@ -37,12 +37,6 @@ xmlsitemap.settings:
     clean_url:
       type: integer
       label: 'Insert clean urls into sitemap'
-    cron_threshold_error:
-      type: integer
-      label: 'Threshold error for cron job'
-    cron_threshold_warning:
-      type: integer
-      label: 'Threshold warning for cron job'
     disable_cron_regeneration:
       type: boolean
       label: 'Disable cron generation of sitemap files'
@@ -64,7 +58,7 @@ xmlsitemap.settings.*.*:
       type: integer
       label: 'Change frequency of the bundle'
 
-xmlsitemap.*:
+xmlsitemap.xmlsitemap.*:
   type: config_entity
   label: 'Sitemap'
   mapping:
@@ -74,18 +68,6 @@ xmlsitemap.*:
     label:
       type: string
       label: 'Sitemap label'
-    chunks:
-      type: integer
-      label: 'Number of chunks'
-    links:
-      type: integer
-      label: 'Number of links'
-    max_filesize:
-      type: integer
-      label: 'Maximum filesize of the sitemap'
     context:
       type: ignore
       label: 'Context of the sitemap'
-    updated:
-      type: integer
-      label: 'Last time sitemap was updated'

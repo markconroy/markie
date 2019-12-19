@@ -2,10 +2,8 @@
 
 namespace Drupal\xmlsitemap\Tests;
 
-use Drupal\Component\Utility\Unicode;
-use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\Language\LanguageInterface;
 use Drupal\taxonomy\Entity\Vocabulary;
-use Drupal\user\Entity\Role;
 
 /**
  * Tests the generation of taxonomy links.
@@ -25,15 +23,17 @@ class XmlSitemapTaxonomyFunctionalTest extends XmlSitemapTestBase {
   protected function setUp() {
     parent::setUp();
 
-    xmlsitemap_link_bundle_enable('taxonomy_vocabulary', 'taxonomy_vocabulary');
+    // Add a vocabulary.
+    $vocabulary = Vocabulary::create([
+      'name' => 'Tags',
+      'description' => $this->randomMachineName(),
+      'vid' => 'tags',
+      'langcode' => LanguageInterface::LANGCODE_NOT_SPECIFIED,
+      'help' => '',
+    ]);
+    $vocabulary->save();
 
-    // allow anonymous user to view user profiles
-    $user_role = Role::load(AccountInterface::ANONYMOUS_ROLE);
-    $user_role->grantPermission('administer taxonomy');
-    $user_role->save();
-
-    $this->admin_user = $this->drupalCreateUser(array('administer taxonomy', 'administer xmlsitemap'));
-    $this->normal_user = $this->drupalCreateUser(array('access content'));
+    $this->admin_user = $this->drupalCreateUser(['administer taxonomy', 'administer xmlsitemap']);
   }
 
   /**
@@ -41,34 +41,32 @@ class XmlSitemapTaxonomyFunctionalTest extends XmlSitemapTestBase {
    */
   public function testTaxonomySettings() {
     $this->drupalLogin($this->admin_user);
-    $this->drupalGet('admin/structure/taxonomy/add');
-    $this->assertField('xmlsitemap[status]');
-    $this->assertField('xmlsitemap[priority]');
-    $edit = array(
-      'name' => $this->randomMachineName(),
-      'vid' => Unicode::strtolower($this->randomMachineName()),
-      'xmlsitemap[status]' => '1',
-      'xmlsitemap[priority]' => '1.0',
-    );
-    $this->drupalPostForm(NULL, $edit, t('Save'));
-    $this->assertText("Created new vocabulary {$edit['name']}.");
 
-    $vocabulary = Vocabulary::load($edit['vid']);
+    // Enable XML Sitemap settings for our vocabulary.
+    $settings = [
+      'status' => '1',
+      'priority' => '1.0',
+    ];
+    xmlsitemap_link_bundle_settings_save('taxonomy_term', 'tags', $settings);
 
-    xmlsitemap_link_bundle_enable('taxonomy_term', $vocabulary->id());
-
-    $this->drupalGet('admin/structure/taxonomy/manage/' . $vocabulary->id() . '/add');
+    $this->drupalGet('admin/structure/taxonomy/manage/tags/add');
     $this->assertResponse(200);
     $this->assertField('xmlsitemap[status]');
     $this->assertField('xmlsitemap[priority]');
     $this->assertField('xmlsitemap[changefreq]');
 
-    $edit = array(
-      'name[0][value]' => $this->randomMachineName(),
+    $term_name = $this->randomMachineName();
+    $edit = [
+      'name[0][value]' => $term_name,
       'xmlsitemap[status]' => 'default',
       'xmlsitemap[priority]' => 'default',
-    );
+    ];
     $this->drupalPostForm(NULL, $edit, t('Save'));
+
+    $term = taxonomy_term_load_multiple_by_name($term_name, 'tags')[1];
+    $link = \Drupal::service('xmlsitemap.link_storage')->load('taxonomy_term', $term->id());
+    $this->assertEqual((int) $link['status'], 1);
+    $this->assertEqual((int) $link['priority'], 1);
   }
 
 }

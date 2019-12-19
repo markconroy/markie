@@ -10,26 +10,32 @@ use Drupal\xmlsitemap\XmlSitemapInterface;
  *
  * @ConfigEntityType(
  *   id = "xmlsitemap",
- *   label = @Translation("XmlSitemap"),
+ *   label = @Translation("XML sitemap"),
  *   handlers = {
+ *     "storage" = "Drupal\xmlsitemap\XmlSitemapStorage",
  *     "list_builder" = "Drupal\xmlsitemap\XmlSitemapListBuilder",
  *     "form" = {
  *       "add" = "Drupal\xmlsitemap\Form\XmlSitemapForm",
  *       "edit" = "Drupal\xmlsitemap\Form\XmlSitemapForm",
- *       "delete" = "Drupal\xmlsitemap\Form\XmlSitemapDeleteForm"
- *     }
+ *       "delete" = "Drupal\xmlsitemap\Form\XmlSitemapDeleteForm",
+ *     },
  *   },
  *   config_prefix = "xmlsitemap",
  *   admin_permission = "administer site configuration",
  *   entity_keys = {
  *     "id" = "id",
  *     "uuid" = "uuid",
- *     "label" = "label"
+ *     "label" = "label",
  *   },
  *   links = {
  *     "edit-form" = "/admin/config/search/xmlsitemap/{xmlsitemap}/edit",
- *     "delete-form" = "/admin/config/search/xmlsitemap/{xmlsitemap}/delete"
- *   }
+ *     "delete-form" = "/admin/config/search/xmlsitemap/{xmlsitemap}/delete",
+ *   },
+ *   config_export = {
+ *     "id",
+ *     "label",
+ *     "context",
+ *   },
  * )
  */
 class XmlSitemap extends ConfigEntityBase implements XmlSitemapInterface {

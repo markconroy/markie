@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * @file
+ * Main file for the XML sitemap engines.
+ */
+
 use Drupal\Component\Utility\UrlHelper;
 use Drupal\Core\Routing\RouteMatchInterface;
 use GuzzleHttp\Exception\RequestException;
@@ -10,12 +15,12 @@ use Drupal\Core\Url;
  * Implements hook_hook_info().
  */
 function xmlsitemap_engines_hook_info() {
-  $hooks['xmlsitemap_engine_info'] = array(
+  $hooks['xmlsitemap_engine_info'] = [
     'group' => 'xmlsitemap',
-  );
-  $hooks['xmlsitemap_engine_info_alter'] = array(
+  ];
+  $hooks['xmlsitemap_engine_info_alter'] = [
     'group' => 'xmlsitemap',
-  );
+  ];
   return $hooks;
 }
 
@@ -42,6 +47,9 @@ function xmlsitemap_engines_cron() {
   }
 }
 
+/**
+ * Check if can submit.
+ */
 function xmlsitemap_engines_can_submit() {
   // Skip if the site is offline since search engines will not be able to
   // access the site's content.
@@ -56,6 +64,9 @@ function xmlsitemap_engines_can_submit() {
   return TRUE;
 }
 
+/**
+ * Submit access.
+ */
 function xmlsitemap_engines_submit_access() {
   if (!xmlsitemap_engines_can_submit()) {
     return FALSE;
@@ -71,7 +82,7 @@ function xmlsitemap_engines_submit_access() {
   }
 
   // Skip if the time since last submission is less than the minimum lifetime.
-  if ((REQUEST_TIME - $submitted_last) < $minimum_lifetime) {
+  if ((\Drupal::time()->getRequestTime() - $submitted_last) < $minimum_lifetime) {
     return FALSE;
   }
 
@@ -85,7 +96,7 @@ function xmlsitemap_engines_submit_access() {
  *   An optional array of XML sitemap IDs. If not provided, it will load all
  *   existing XML sitemaps.
  */
-function xmlsitemap_engines_submit_engines(array $smids = array()) {
+function xmlsitemap_engines_submit_engines(array $smids = []) {
   if (empty($smids)) {
     $smids = FALSE;
   }
@@ -106,7 +117,7 @@ function xmlsitemap_engines_submit_engines(array $smids = array()) {
     xmlsitemap_engines_submit_sitemaps($custom_url, $sitemaps);
   }
 
-  \Drupal::state()->set('xmlsitemap_engines_submit_last', REQUEST_TIME);
+  \Drupal::state()->set('xmlsitemap_engines_submit_last', \Drupal::time()->getRequestTime());
 }
 
 /**
@@ -119,15 +130,15 @@ function xmlsitemap_engines_submit_engines(array $smids = array()) {
  */
 function xmlsitemap_engines_submit_sitemaps($url, array $sitemaps) {
   foreach ($sitemaps as $sitemap) {
-    $sitemap_path = UrlHelper::isExternal($sitemap->uri['path']) ? $sitemap->uri['path'] : 'base://' . $sitemap->uri['path'];
+    $sitemap_path = UrlHelper::isExternal($sitemap->uri['path']) ? $sitemap->uri['path'] : 'base:/' . $sitemap->uri['path'];
     $sitemap_url = Url::fromUri($sitemap_path, $sitemap->uri['options'])->toString();
     $submit_url = xmlsitemap_engines_prepare_url($url, $sitemap_url);
     try {
       $request = \Drupal::httpClient()->get($submit_url);
-      \Drupal::logger('xmlsitemap')->notice('Submitted the sitemap to %url and received response @code.', array('%url' => $submit_url, '@code' => $request->getStatusCode()));
+      \Drupal::logger('xmlsitemap')->notice('Submitted the sitemap to %url and received response @code.', ['%url' => $submit_url, '@code' => $request->getStatusCode()]);
     }
     catch (RequestException $ex) {
-      \Drupal::logger('xmlsitemap')->alert('Submitted the sitemap to %url and received response @code.', array('%url' => $submit_url, '@code' => '404'));
+      \Drupal::logger('xmlsitemap')->alert('Submitted the sitemap to %url and received response @code.', ['%url' => $submit_url, '@code' => '404']);
     }
   }
 }
@@ -169,10 +180,10 @@ function xmlsitemap_engines_get_engine_info($engine = NULL) {
     else {
       // Fetch the results of all hook_xmlsitemap_engine_info() implementations.
       $engines = \Drupal::moduleHandler()->invokeAll('xmlsitemap_engine_info');
-      // Allow other modulse to alter the engine info.
+      // Allow other modules to alter the engine info.
       \Drupal::moduleHandler()->alter('xmlsitemap_engine_info', $engines);
       // Cache by language since engine names are translated.
-      \Drupal::cache()->set('xmlsitemap:engines:' . $language->getId(), $engines, Cache::PERMANENT, array('xmlsitemap'));
+      \Drupal::cache()->set('xmlsitemap:engines:' . $language->getId(), $engines, Cache::PERMANENT, ['xmlsitemap']);
     }
   }
 
@@ -188,16 +199,16 @@ function xmlsitemap_engines_get_engine_info($engine = NULL) {
  * Implements hook_xmlsitemap_engine_info().
  */
 function xmlsitemap_engines_xmlsitemap_engine_info() {
-  $engines['google'] = array(
+  $engines['google'] = [
     'name' => t('Google'),
-    'url' => 'http://www.google.com/webmasters/tools/ping?sitemap=[sitemap]',
-    'help url' => 'http://www.google.com/support/webmasters/bin/answer.py?hl=en&answer=156184',
-  );
-  $engines['bing'] = array(
+    'url' => 'https://www.google.com/ping?sitemap=[sitemap]',
+    'help url' => 'https://www.google.com/support/webmasters/bin/answer.py?hl=en&answer=156184',
+  ];
+  $engines['bing'] = [
     'name' => t('Bing'),
-    'url' => 'http://www.bing.com/webmaster/ping.aspx?siteMap=[sitemap]',
-    'help url' => 'http://www.bing.com/webmaster',
-  );
+    'url' => 'https://www.bing.com/ping?sitemap=[sitemap]',
+    'help url' => 'https://www.bing.com/webmaster/help/how-to-submit-sitemaps-82a15bd4',
+  ];
   return $engines;
 }
 
@@ -205,10 +216,10 @@ function xmlsitemap_engines_xmlsitemap_engine_info() {
  * Internal default state variables.
  */
 function xmlsitemap_engines_state_variables() {
-  $variables = array(
+  $variables = [
     'xmlsitemap_engines_submit_last' => 0,
     'xmlsitemap_engines_submit_updated' => TRUE,
-  );
+  ];
   return $variables;
 }
 
@@ -217,11 +228,11 @@ function xmlsitemap_engines_state_variables() {
  */
 function xmlsitemap_engines_xmlsitemap_sitemap_operations() {
   if (xmlsitemap_engines_can_submit()) {
-    $operations['xmlsitemap_engines_submit'] = array(
+    $operations['xmlsitemap_engines_submit'] = [
       'label' => t('Submit to search engines'),
       'action past' => t('Submitted'),
       'callback' => 'xmlsitemap_engines_submit_engines',
-    );
+    ];
     return $operations;
   }
 }

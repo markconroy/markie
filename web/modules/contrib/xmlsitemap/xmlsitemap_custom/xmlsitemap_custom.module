@@ -9,9 +9,9 @@
  * Implements hook_xmlsitemap_link_info().
  */
 function xmlsitemap_custom_xmlsitemap_link_info() {
-  return array(
-    'custom' => array(
+  return [
+    'custom' => [
       'label' => t('Custom links'),
-    ),
-  );
+    ],
+  ];
 }

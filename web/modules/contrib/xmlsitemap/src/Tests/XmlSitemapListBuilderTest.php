@@ -3,6 +3,7 @@
 namespace Drupal\xmlsitemap\Tests;
 
 use Drupal\language\Entity\ConfigurableLanguage;
+use Drupal\xmlsitemap\Entity\XmlSitemap;
 
 /**
  * Tests the sitemaps list builder.
@@ -22,7 +23,13 @@ class XmlSitemapListBuilderTest extends XmlSitemapTestBase {
   protected function setUp() {
     parent::setUp();
 
-    $this->admin_user = $this->drupalCreateUser(array('administer languages', 'access administration pages', 'administer site configuration', 'administer xmlsitemap', 'access content'));
+    $this->admin_user = $this->drupalCreateUser([
+      'administer languages',
+      'access administration pages',
+      'administer site configuration',
+      'administer xmlsitemap',
+      'access content',
+    ]);
     $this->drupalLogin($this->admin_user);
 
     $this->languageManager = \Drupal::languageManager();
@@ -35,13 +42,13 @@ class XmlSitemapListBuilderTest extends XmlSitemapTestBase {
       // Add a new language.
       ConfigurableLanguage::createFromLangcode('en')->save();
     }
-    $edit = array(
+    $edit = [
       'site_default_language' => 'en',
-    );
+    ];
     $this->drupalPostForm('admin/config/regional/language', $edit, t('Save configuration'));
 
     // Enable URL language detection and selection.
-    $edit = array('language_interface[enabled][language-url]' => '1');
+    $edit = ['language_interface[enabled][language-url]' => '1'];
     $this->drupalPostForm('admin/config/regional/language/detection', $edit, t('Save settings'));
   }
 
@@ -50,7 +57,7 @@ class XmlSitemapListBuilderTest extends XmlSitemapTestBase {
    */
   public function testDefaultSitemap() {
     $this->drupalLogin($this->admin_user);
-    $context = array();
+    $context = [];
     $id = xmlsitemap_sitemap_get_context_hash($context);
 
     $this->drupalGet('admin/config/search/xmlsitemap');
@@ -62,22 +69,22 @@ class XmlSitemapListBuilderTest extends XmlSitemapTestBase {
    */
   public function testMoreSitemaps() {
     $this->drupalLogin($this->admin_user);
-    $edit = array(
+    $edit = [
       'label' => 'English',
       'context[language]' => 'en',
-    );
+    ];
     $this->drupalPostForm('admin/config/search/xmlsitemap/add', $edit, t('Save'));
-    $context = array('language' => 'en');
+    $context = ['language' => 'en'];
     $id = xmlsitemap_sitemap_get_context_hash($context);
     $this->assertText(t('Saved the English sitemap.'));
     $this->assertText($id);
 
-    $edit = array(
+    $edit = [
       'label' => 'French',
       'context[language]' => 'fr',
-    );
+    ];
     $this->drupalPostForm('admin/config/search/xmlsitemap/add', $edit, t('Save'));
-    $context = array('language' => 'fr');
+    $context = ['language' => 'fr'];
     $id = xmlsitemap_sitemap_get_context_hash($context);
     $this->assertText(t('Saved the French sitemap.'));
     $this->assertText($id);
@@ -85,21 +92,14 @@ class XmlSitemapListBuilderTest extends XmlSitemapTestBase {
     $this->drupalPostForm('admin/config/search/xmlsitemap/add', $edit, t('Save'));
     $this->assertText(t('There is another sitemap saved with the same context.'));
 
-    $edit = array(
-      'label' => 'Undefined',
-      'context[language]' => 'und',
-    );
-    $this->drupalPostForm('admin/config/search/xmlsitemap/add', $edit, t('Save'));
-    $this->assertText(t('There is another sitemap saved with the same context.'));
-
-    $sitemaps = entity_load_multiple('xmlsitemap');
+    $sitemaps = XmlSitemap::loadMultiple();
     foreach ($sitemaps as $sitemap) {
       $label = $sitemap->label();
-      $this->drupalPostForm("admin/config/search/xmlsitemap/{$sitemap->id()}/delete", array(), t('Delete'));
-      $this->assertRaw(t("Sitemap %label has been deleted.", array('%label' => $label)));
+      $this->drupalPostForm("admin/config/search/xmlsitemap/{$sitemap->id()}/delete", [], t('Delete'));
+      $this->assertRaw(t("Sitemap %label has been deleted.", ['%label' => $label]));
     }
 
-    $sitemaps = entity_load_multiple('xmlsitemap');
+    $sitemaps = XmlSitemap::loadMultiple();
     $this->assertEqual(count($sitemaps), 0, t('No more sitemaps.'));
   }
 

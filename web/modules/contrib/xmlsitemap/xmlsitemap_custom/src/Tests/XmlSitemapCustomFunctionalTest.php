@@ -38,7 +38,7 @@ class XmlSitemapCustomFunctionalTest extends XmlSitemapTestBase {
 
     $this->aliasStorage = \Drupal::service('path.alias_storage');
     $this->linkStorage = \Drupal::service('xmlsitemap.link_storage');
-    $this->admin_user = $this->drupalCreateUser(array('access content', 'administer xmlsitemap'));
+    $this->admin_user = $this->drupalCreateUser(['access content', 'administer xmlsitemap']);
     $this->drupalLogin($this->admin_user);
   }
 
@@ -54,23 +54,23 @@ class XmlSitemapCustomFunctionalTest extends XmlSitemapTestBase {
     $this->clickLink(t('Add custom link'));
 
     // Test an invalid path.
-    $edit['loc'] = 'invalid-testing-path';
+    $edit['loc'] = '/invalid-testing-path';
     $this->drupalPostForm(NULL, $edit, t('Save'));
-    $this->assertText(t('The custom link @link is either invalid or it cannot be accessed by anonymous users.', array('@link' => $edit['loc'])));
-    $this->assertNoSitemapLink(array('type' => 'custom', 'loc' => $edit['loc']));
+    $this->assertText(t('The custom link @link is either invalid or it cannot be accessed by anonymous users.', ['@link' => $edit['loc']]));
+    $this->assertNoSitemapLink(['type' => 'custom', 'loc' => $edit['loc']]);
 
     // Test a path not accessible to anonymous user.
-    $edit['loc'] = 'admin/people/people';
+    $edit['loc'] = '/admin/people';
     $this->drupalPostForm(NULL, $edit, t('Save'));
-    $this->assertText(t('The custom link @link is either invalid or it cannot be accessed by anonymous users.', array('@link' => $edit['loc'])));
-    $this->assertNoSitemapLink(array('type' => 'custom', 'loc' => $edit['loc']));
+    $this->assertText(t('The custom link @link is either invalid or it cannot be accessed by anonymous users.', ['@link' => $edit['loc']]));
+    $this->assertNoSitemapLink(['type' => 'custom', 'loc' => $edit['loc']]);
 
     // Test that the current page, which should not give a false positive for
     // $menu_item['access'] since the result has been cached already.
-    $edit['loc'] = 'admin/config/search/xmlsitemap/custom/add';
+    $edit['loc'] = '/admin/config/search/xmlsitemap/custom/add';
     $this->drupalPostForm(NULL, $edit, t('Save'));
-    $this->assertText(t('The custom link @link is either invalid or it cannot be accessed by anonymous users.', array('@link' => $edit['loc'])));
-    $this->assertNoSitemapLink(array('type' => 'custom', 'loc' => $edit['loc']));
+    $this->assertText(t('The custom link @link is either invalid or it cannot be accessed by anonymous users.', ['@link' => $edit['loc']]));
+    $this->assertNoSitemapLink(['type' => 'custom', 'loc' => $edit['loc']]);
   }
 
   /**
@@ -78,28 +78,29 @@ class XmlSitemapCustomFunctionalTest extends XmlSitemapTestBase {
    */
   public function testCustomFileLinks() {
     // Test an invalid file.
-    $edit['loc'] = $this->randomMachineName();
+    $edit['loc'] = '/' . $this->randomMachineName();
     $this->drupalPostForm('admin/config/search/xmlsitemap/custom/add', $edit, t('Save'));
-    $this->assertText(t('The custom link @link is either invalid or it cannot be accessed by anonymous users.', array('@link' => $edit['loc'])));
-    $this->assertNoSitemapLink(array('type' => 'custom', 'loc' => $edit['loc']));
+    $this->assertText(t('The custom link @link is either invalid or it cannot be accessed by anonymous users.', ['@link' => $edit['loc']]));
+    $this->assertNoSitemapLink(['type' => 'custom', 'loc' => $edit['loc']]);
 
-    // Test an unaccessible file .
-    $edit['loc'] = '.htaccess';
+    // Test an inaccessible file.
+    $edit['loc'] = '/.htaccess';
     $this->drupalPostForm('admin/config/search/xmlsitemap/custom/add', $edit, t('Save'));
-    $this->assertText(t('The custom link @link is either invalid or it cannot be accessed by anonymous users.', array('@link' => $edit['loc'])));
-    $this->assertNoSitemapLink(array('type' => 'custom', 'loc' => $edit['loc']));
+    $this->assertText(t('The custom link @link is either invalid or it cannot be accessed by anonymous users.', ['@link' => $edit['loc']]));
+    $this->assertNoSitemapLink(['type' => 'custom', 'loc' => $edit['loc']]);
+
     // Test a valid file.
-    $edit['loc'] = 'core/misc/drupal.js';
+    $edit['loc'] = '/core/misc/drupal.js';
     $this->drupalPostForm('admin/config/search/xmlsitemap/custom/add', $edit, t('Save'));
-    $this->assertText(t('The custom link for @link was saved.', array('@link' => $edit['loc'])));
-    $links = $this->linkStorage->loadMultiple(array('type' => 'custom', 'loc' => $edit['loc']));
+    $this->assertText(t('The custom link for @link was saved.', ['@link' => $edit['loc']]));
+    $links = $this->linkStorage->loadMultiple(['type' => 'custom', 'loc' => $edit['loc']]);
     $this->assertEqual(count($links), 1, t('Custom link saved in the database.'));
 
-    //Test a duplicate url.
-    $edit['loc'] = 'core/misc/drupal.js';
+    // Test a duplicate url.
+    $edit['loc'] = '/core/misc/drupal.js';
     $this->drupalPostForm('admin/config/search/xmlsitemap/custom/add', $edit, t('Save'));
-    $this->assertText(t('There is already an existing link in the sitemap with the path @link.', array('@link' => $edit['loc'])));
-    $links = $this->linkStorage->loadMultiple(array('type' => 'custom', 'loc' => $edit['loc']));
+    $this->assertText(t('There is already an existing link in the sitemap with the path @link.', ['@link' => $edit['loc']]));
+    $links = $this->linkStorage->loadMultiple(['type' => 'custom', 'loc' => $edit['loc']]);
     $this->assertEqual(count($links), 1, t('Custom link saved in the database.'));
   }
 

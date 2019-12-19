@@ -1,0 +1,27 @@
+{
+    "name": "drupal/xmlsitemap",
+    "description": "Creates XML sitemaps for the site",
+    "type": "drupal-module",
+    "license": "GPL-2.0-or-later",
+    "homepage": "https://www.drupal.org/project/xmlsitemap",
+    "support": {
+        "issues": "http://drupal.org/project/issues/xmlsitemap",
+        "source": "http://cgit.drupalcode.org/xmlsitemap"
+    },
+    "require": {
+        "ext-xmlwriter": "*"
+    },
+    "require-dev": {
+        "drupal/robotstxt": "^1.0"
+    },
+    "suggest": {
+        "drush/drush": "Command-line regenerating and rebuilding sitemaps."
+    },
+    "extra": {
+        "drush": {
+             "services": {
+                 "drush.services.yml": "^9 || ^10"
+             }
+        }
+    }
+}

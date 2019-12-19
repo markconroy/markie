@@ -29,7 +29,7 @@ class XmlSitemapEnginesTestController extends ControllerBase {
       throw new NotFoundHttpException();
     }
     else {
-      \Drupal::logger('xmlsitemap')->debug('Recieved ping for @sitemap.', array('@sitemap' => $query));
+      \Drupal::logger('xmlsitemap')->debug('Received ping for @sitemap.', ['@sitemap' => $query]);
     }
     return new Response('', 200);
   }

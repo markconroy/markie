@@ -23,24 +23,31 @@ class XmlSitemapMultilingualNodeTest extends XmlSitemapMultilingualTestBase {
   protected function setUp() {
     parent::setUp();
 
-    $this->admin_user = $this->drupalCreateUser(array('administer nodes', 'administer languages', 'administer content types', 'access administration pages', 'create page content', 'edit own page content'));
+    $this->admin_user = $this->drupalCreateUser([
+      'administer nodes',
+      'administer languages',
+      'administer content types',
+      'access administration pages',
+      'create page content',
+      'edit own page content',
+    ]);
     $this->drupalLogin($this->admin_user);
 
     xmlsitemap_link_bundle_enable('node', 'article');
 
     xmlsitemap_link_bundle_enable('node', 'page');
 
-    // allow anonymous user to view user profiles
+    // Allow anonymous user to view user profiles.
     $user_role = Role::load(AccountInterface::ANONYMOUS_ROLE);
     $user_role->grantPermission('access content');
     $user_role->save();
 
     // Set "Basic page" content type to use multilingual support.
-    $edit = array(
+    $edit = [
       'language_configuration[language_alterable]' => TRUE,
-    );
+    ];
     $this->drupalPostForm('admin/structure/types/manage/page', $edit, t('Save content type'));
-    $this->assertRaw(t('The content type %type has been updated.', array('%type' => 'Basic page')), 'Basic page content type has been updated.');
+    $this->assertRaw(t('The content type %type has been updated.', ['%type' => 'Basic page']), 'Basic page content type has been updated.');
   }
 
   /**
@@ -48,14 +55,16 @@ class XmlSitemapMultilingualNodeTest extends XmlSitemapMultilingualTestBase {
    */
   public function testNodeLanguageData() {
     $this->drupalLogin($this->admin_user);
-    $node = $this->drupalCreateNode(array());
+    $node = $this->drupalCreateNode([]);
 
-    $this->drupalPostForm('node/' . $node->id() . '/edit', array('langcode[0][value]' => 'en'), t('Save and keep published'));
-    $link = $this->assertSitemapLink('node', $node->id(), array('status' => 0, 'access' => 1));
+    $this->drupalPostForm('node/' . $node->id() . '/edit', [
+      'langcode[0][value]' => 'en',
+    ], t('Save'));
+    $link = $this->assertSitemapLink('node', $node->id(), ['status' => 0, 'access' => 1]);
     $this->assertIdentical($link['language'], 'en');
 
-    $this->drupalPostForm('node/' . $node->id() . '/edit', array('langcode[0][value]' => 'fr'), t('Save and keep published'));
-    $link = $this->assertSitemapLink('node', $node->id(), array('status' => 0, 'access' => 1));
+    $this->drupalPostForm('node/' . $node->id() . '/edit', ['langcode[0][value]' => 'fr'], t('Save'));
+    $link = $this->assertSitemapLink('node', $node->id(), ['status' => 0, 'access' => 1]);
     $this->assertIdentical($link['language'], 'fr');
   }
 

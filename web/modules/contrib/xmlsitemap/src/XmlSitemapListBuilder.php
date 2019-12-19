@@ -4,11 +4,12 @@ namespace Drupal\xmlsitemap;
 
 use Drupal\Core\Config\Entity\ConfigEntityListBuilder;
 use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
+use Drupal\core\Language\LanguageInterface;
 use Drupal\Core\Language\LanguageManagerInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides a listing of XmlSitemap.
@@ -52,7 +53,10 @@ class XmlSitemapListBuilder extends ConfigEntityListBuilder {
    */
   public static function createInstance(ContainerInterface $container, EntityTypeInterface $entity_type) {
     return new static(
-        $entity_type, $container->get('entity.manager')->getStorage($entity_type->id()), $container->get('module_handler'), $container->get('language_manager')
+      $entity_type,
+      $container->get('entity.manager')->getStorage($entity_type->id()),
+      $container->get('module_handler'),
+      $container->get('language_manager')
     );
   }
 
@@ -80,11 +84,20 @@ class XmlSitemapListBuilder extends ConfigEntityListBuilder {
    * {@inheritdoc}
    */
   public function buildRow(EntityInterface $entity) {
-    $row['label'] = $this->getLabel($entity);
+    /** @var \Drupal\xmlsitemap\XmlSitemapInterface $entity */
+    $row['label'] = $entity->label();
     if ($this->moduleHandler->moduleExists('language')) {
-      if (isset($entity->context['language'])) {
-        $language = $this->languageManager->getLanguage($entity->context['language']);
-        $row['language'] = $language->getName();
+      if (isset($entity->getContext()['language'])) {
+        $language = $this->languageManager->getLanguage($entity->getContext()['language']);
+        // In some cases ::getLanguage() can return NULL value.
+        if (!is_null($language) && ($language instanceof LanguageInterface)) {
+          $row['language'] = $language->getName();
+        }
+        else {
+          \Drupal::logger('xmlsitemap')->notice('Cannot determine language for sitemap @id', ['@id' => $entity->id()]);
+          // Set as default row value.
+          $row['language'] = $this->t('Undefined');
+        }
       }
       else {
         $row['language'] = $this->t('Undefined');
@@ -99,10 +112,13 @@ class XmlSitemapListBuilder extends ConfigEntityListBuilder {
    * {@inheritdoc}
    */
   public function getOperations(EntityInterface $entity) {
+    /** @var \Drupal\xmlsitemap\XmlSitemapInterface $entity */
     $operations = parent::getOperations($entity);
+
     if (isset($operations['translate'])) {
       unset($operations['translate']);
     }
+
     return $operations;
   }
 
