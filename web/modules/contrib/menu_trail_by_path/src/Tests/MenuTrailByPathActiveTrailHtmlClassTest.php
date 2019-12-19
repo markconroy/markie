@@ -5,7 +5,9 @@ namespace Drupal\menu_trail_by_path\Tests;
 use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Url;
 use Drupal\menu_link_content\Entity\MenuLinkContent;
+use Drupal\menu_trail_by_path\MenuTrailByPathActiveTrail;
 use Drupal\simpletest\WebTestBase;
+use Drupal\system\Entity\Menu;
 use Drupal\system\Tests\Menu\AssertMenuActiveTrailTrait;
 
 /**
@@ -102,6 +104,39 @@ class MenuTrailByPathActiveTrailHtmlClassTest extends WebTestBase {
         $this->menuUrlBasePath('User password') => 'User password',
       ], TRUE
     );
+
+    // Change the global setting to use the core implementation.
+    $this->config('menu_trail_by_path.settings')
+      ->set('trail_source', MenuTrailByPathActiveTrail::MENU_TRAIL_CORE)
+      ->save();
+    $this->rebuildAll();
+
+    $this->drupalGet(clone $this->menuUrls['User password']);
+    $this->assertMenuActiveTrail(
+      [
+        $this->menuUrlBasePath('User password') => 'User password',
+      ], TRUE
+    );
+
+    // Change the global setting to use the core implementation.
+    $this->config('menu_trail_by_path.settings')
+      ->set('trail_source', MenuTrailByPathActiveTrail::MENU_TRAIL_DISABLED)
+      ->save();
+    $this->rebuildAll();
+
+    $this->drupalGet(clone $this->menuUrls['User password']);
+    $this->assertNoRaw('menu-item--active-trail');
+
+    // Set a menu specific setting to override the default.
+    $menu = Menu::load('main');
+    $menu->setThirdPartySetting('menu_trail_by_path', 'trail_source', MenuTrailByPathActiveTrail::MENU_TRAIL_PATH);
+    $menu->save();
+    $this->drupalGet(clone $this->menuUrls['User password']);
+    $this->assertMenuActiveTrail(
+      [
+        $this->menuUrlBasePath('User password') => 'User password',
+      ], TRUE
+    );
   }
 
   /**
@@ -180,13 +215,22 @@ class MenuTrailByPathActiveTrailHtmlClassTest extends WebTestBase {
     $node3 = $this->drupalCreateNode();
     \Drupal::service('path.alias_storage')->save('/node/' . $node3->id(), '/news/category-a/item-a');
 
-    $this->drupalGet(Url::fromUri('entity:node/' . $node3->id()));
+    $this->drupalGet($node3->toUrl());
     $this->assertMenuActiveTrail(
       [
         $this->menuUrlBasePath('News') => 'News',
         $this->menuUrlBasePath('News » Category A') => 'Category A',
       ], FALSE
     );
+
+    // Change the global setting to use the core implementation.
+    $this->config('menu_trail_by_path.settings')
+      ->set('trail_source', MenuTrailByPathActiveTrail::MENU_TRAIL_CORE)
+      ->save();
+    $this->rebuildAll();
+
+    $this->drupalGet($node3->toUrl());
+    $this->assertNoRaw('menu-item--active-trail');
   }
 
   /**

@@ -20,5 +20,6 @@ class MenuTrailByPathServiceProvider extends ServiceProviderBase {
     $definition->addArgument(new Reference('menu_trail_by_path.menu_helper'));
     $definition->addArgument(new Reference('router.request_context'));
     $definition->addArgument(new Reference('language_manager'));
+    $definition->addArgument(new Reference('config.factory'));
   }
 }

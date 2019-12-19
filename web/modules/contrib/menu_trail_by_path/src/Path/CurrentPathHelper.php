@@ -3,6 +3,7 @@
 namespace Drupal\menu_trail_by_path\Path;
 
 use Drupal\Component\Utility\UrlHelper;
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Routing\RequestContext;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Url;
@@ -14,13 +15,21 @@ class CurrentPathHelper implements PathHelperInterface {
   protected $routeMatch;
 
   /**
+   * The configuration object.
+   *
+   * @var \Drupal\Core\Config\ImmutableConfig
+   */
+  protected $config;
+
+  /**
    * @var \Drupal\Core\Routing\RequestContext
    */
   private $context;
 
-  public function __construct(RouteMatchInterface $route_match, RequestContext $context) {
+  public function __construct(RouteMatchInterface $route_match, RequestContext $context, ConfigFactoryInterface $config_factory) {
     $this->routeMatch = $route_match;
     $this->context    = $context;
+    $this->config = $config_factory->get('menu_trail_by_path.settings');
   }
 
   /**
@@ -57,13 +66,26 @@ class CurrentPathHelper implements PathHelperInterface {
   }
 
   /**
+   * {@inheritdoc}
+   */
+  public function getPathElements() {
+    $path = trim($this->context->getPathInfo(), '/');
+    $path_elements = explode('/', $path);
+
+    // Limit the maximum number of path parts.
+    if (is_array($path_elements) && $max_path_parts = $this->config->get('max_path_parts')) {
+      return array_splice($path_elements, 0, $max_path_parts);
+    }
+
+    return $path_elements;
+  }
+
+  /**
    * @return \Drupal\Core\Url[]
    */
   protected function getCurrentPathUrls() {
     $urls = [];
-
-    $path = trim($this->context->getPathInfo(), '/');
-    $path_elements = explode('/', $path);
+    $path_elements = $this->getPathElements();
 
     while (count($path_elements) > 1) {
       array_pop($path_elements);
@@ -88,6 +110,7 @@ class CurrentPathHelper implements PathHelperInterface {
       return Url::fromUri('base:' . $relativeUri);
     }
 
+    $relativeUri = str_replace('//', '/', $relativeUri);
     return Url::fromUserInput($relativeUri);
   }
 }

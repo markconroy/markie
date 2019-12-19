@@ -2930,17 +2930,17 @@
         },
         {
             "name": "drupal/menu_trail_by_path",
-            "version": "1.1.0",
+            "version": "1.2.0",
             "source": {
                 "type": "git",
                 "url": "https://git.drupalcode.org/project/menu_trail_by_path.git",
-                "reference": "8.x-1.1"
+                "reference": "8.x-1.2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://ftp.drupal.org/files/projects/menu_trail_by_path-8.x-1.1.zip",
-                "reference": "8.x-1.1",
-                "shasum": "52261e3ad3630e88bfc2a147e3056844f5584f62"
+                "url": "https://ftp.drupal.org/files/projects/menu_trail_by_path-8.x-1.2.zip",
+                "reference": "8.x-1.2",
+                "shasum": "be2a067da1cb125d658ce0da9c7a2add3989b91f"
             },
             "require": {
                 "drupal/core": "~8.0"
@@ -2951,8 +2951,8 @@
                     "dev-1.x": "1.x-dev"
                 },
                 "drupal": {
-                    "version": "8.x-1.1",
-                    "datestamp": "1482006782",
+                    "version": "8.x-1.2",
+                    "datestamp": "1576100584",
                     "security-coverage": {
                         "status": "covered",
                         "message": "Covered by Drupal's security advisory policy"
@@ -2965,12 +2965,20 @@
             ],
             "authors": [
                 {
+                    "name": "Berdir",
+                    "homepage": "https://www.drupal.org/user/214652"
+                },
+                {
                     "name": "SeriousMatters",
                     "homepage": "https://www.drupal.org/user/290439"
                 },
                 {
                     "name": "davy-r",
                     "homepage": "https://www.drupal.org/user/3278771"
+                },
+                {
+                    "name": "mbovan",
+                    "homepage": "https://www.drupal.org/user/3149657"
                 },
                 {
                     "name": "redndahead",
@@ -2980,7 +2988,7 @@
             "description": "Expand menus and set active-trail according to the current path.",
             "homepage": "https://www.drupal.org/project/menu_trail_by_path",
             "support": {
-                "source": "http://cgit.drupalcode.org/menu_trail_by_path"
+                "source": "https://git.drupalcode.org/project/menu_trail_by_path"
             }
         },
         {
