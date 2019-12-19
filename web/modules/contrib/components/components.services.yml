@@ -4,3 +4,9 @@ services:
     arguments: ['@app.root', '@module_handler', '@theme_handler']
     tags:
       - { name: twig.loader, priority: 200 }
+
+  components.twig.extension:
+    class: Drupal\components\Template\TwigExtension
+    arguments: ['@renderer']
+    tags:
+      - { name: twig.extension, priority: 150 }

@@ -37,6 +37,10 @@ class ComponentLibraryLoader extends \Twig_Loader_Filesystem {
     // namespace in this Twig loader.
     parent::__construct();
 
+    // Retrieve config settings for module to determine prefixed namespaces.
+    // See Drupal\components\Form\ComponentsSettingsForm.php
+    $config = \Drupal::config('components.settings');
+
     // The Drupal\Core\Template\Loader\FilesystemLoader makes a Twig namespace
     // for each module and theme, so we re-create that list here.
     $existing_namespaces = array();
@@ -52,14 +56,22 @@ class ComponentLibraryLoader extends \Twig_Loader_Filesystem {
         'method' => 'listInfo',
       ),
     );
-    foreach($extension_types as $type => $extension_type) {
+    foreach ($extension_types as $type => $extension_type) {
       foreach ($extension_type['handler']->{$extension_type['method']}() as $name => $extension) {
         $existing_namespaces[] = $name;
 
+        // If type is 'module' we need to get the info.
+        if ($type == 'module') {
+          $info = system_get_info($type, $name);
+        }
+        else {
+          $info = $extension->info;
+        }
+
         // For each library listed in the .info file's component-libraries
         // section, determine the namespace and the path.
-        if (isset($extension->info['component-libraries'])) {
-          foreach ($extension->info['component-libraries'] as $namespace => $library) {
+        if (isset($info['component-libraries'])) {
+          foreach ($info['component-libraries'] as $namespace => $library) {
             $paths = isset($library['paths']) ? $library['paths'] : array();
 
             // Allow paths to be an array or a string.
@@ -70,6 +82,12 @@ class ComponentLibraryLoader extends \Twig_Loader_Filesystem {
             // Add the extension's path to the library paths.
             foreach ($paths as $key => $path) {
               $paths[$key] = $extension->getPath() . '/' . $path;
+            }
+
+            // Prefix the namespace with original name.
+            // Prevents overriding components with duplicate valid namespaces.
+            if (!empty($config->get('namespace_prefix'))) {
+              $namespace = "{$name}_{$namespace}";
             }
 
             $this->libraries[] = array(
@@ -84,41 +102,12 @@ class ComponentLibraryLoader extends \Twig_Loader_Filesystem {
       }
     }
 
-    // Since the components module does not have any Twig templates, we can
-    // safely let a component library override its namespace.
-    $existing_namespaces = array_diff($existing_namespaces, array('components'));
-
-    $overridden_namespaces = array();
-
-    // Decide if we should register each component library found.
+    // Register the library paths.
     foreach ($this->libraries as &$library) {
-      // The component library's paths must exist.
-      if (empty($library['paths'])) {
-        $library['error'] = 'Paths are not defined.';
-      }
-      else {
+      if (isset($library['paths'])) {
         foreach ($library['paths'] as $path) {
-          if (!$library['error'] && !is_dir($path)) {
-            $library['error'] = 'Path does not exist: "' . $path . '"';
-          }
+          $this->addPath($path, $library['namespace']);
         }
-      }
-
-      // Don't override an existing namespace.
-      if (!$library['error']) {
-        // Allow a theme or module to override its own namespace.
-        if ($library['namespace'] === $library['name'] && !in_array($library['name'], $overridden_namespaces)) {
-          $overridden_namespaces[] = $library['name'];
-        }
-        elseif (in_array($library['namespace'], $existing_namespaces)) {
-          $library['error'] = 'Namespace already exists.';
-        }
-      }
-
-      // Register the Twig namespace if no errors.
-      if (!$library['error']) {
-        $this->setPaths($library['paths'], $library['namespace']);
-        $existing_namespaces[] = $library['namespace'];
       }
     }
   }
