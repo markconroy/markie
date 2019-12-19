@@ -5,7 +5,6 @@ namespace Drupal\paragraphs\Plugin\Field\FieldFormatter;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\Plugin\Field\FieldFormatter\EntityReferenceFormatterBase;
-use Drupal\paragraphs\Entity\Paragraph;
 use Drupal\paragraphs\ParagraphInterface;
 
 /**
@@ -28,7 +27,6 @@ class ParagraphsSummaryFormatter extends EntityReferenceFormatterBase {
     $elements = [];
     foreach ($this->getEntitiesToView($items, $langcode) as $delta => $entity) {
       if ($entity->id()) {
-        $summary = $entity->getSummary();
         $elements[$delta] = [
           '#type' => 'container',
           '#attributes' => [
@@ -49,9 +47,8 @@ class ParagraphsSummaryFormatter extends EntityReferenceFormatterBase {
           ]
         ];
         $elements[$delta]['summary']['description'] = [
-          '#markup' => $summary,
-          '#prefix' => '<div class="paragraphs-collapsed-description">',
-          '#suffix' => '</div>',
+          '#theme' => 'paragraphs_summary',
+          '#summary' => $entity->getSummaryItems(),
         ];
       }
     }

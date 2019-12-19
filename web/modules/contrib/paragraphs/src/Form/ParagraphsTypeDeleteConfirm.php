@@ -56,7 +56,7 @@ class ParagraphsTypeDeleteConfirm extends EntityDeleteForm {
 
       // Delete existing entities.
       $storage->delete($paragraphs);
-      drupal_set_message($this->formatPlural(count($paragraphs), 'Entity is successfully deleted.', 'All @count entities are successfully deleted.'));
+      $this->messenger()->addMessage($this->formatPlural(count($paragraphs), 'Entity is successfully deleted.', 'All @count entities are successfully deleted.'));
     }
 
     // Set form to rebuild.

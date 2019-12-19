@@ -13,8 +13,10 @@ use Drupal\workflows\Entity\Workflow;
  * Implements hook_install().
  */
 function paragraphs_demo_install() {
-  // Ensure the translation fields are created in the database.
-  \Drupal::service('entity.definition_update_manager')->applyUpdates();
+  if (version_compare(\Drupal::VERSION, '8.6.99', '<=')) {
+    // Ensure the translation fields are created in the database.
+    \Drupal::service('entity.definition_update_manager')->applyUpdates();
+  }
 
   // Create three paragraphs to structure the content.
   $paragraph = Paragraph::create([

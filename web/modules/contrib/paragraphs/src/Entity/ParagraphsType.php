@@ -14,7 +14,15 @@ use Drupal\paragraphs\ParagraphsTypeInterface;
  * @ConfigEntityType(
  *   id = "paragraphs_type",
  *   label = @Translation("Paragraphs type"),
+ *   label_collection = @Translation("Paragraphs types"),
+ *   label_singular = @Translation("Paragraphs type"),
+ *   label_plural = @Translation("Paragraphs types"),
+ *   label_count = @PluralTranslation(
+ *     singular = "@count Paragraphs type",
+ *     plural = "@count Paragraphs types",
+ *   ),
  *   handlers = {
+ *     "access" = "Drupal\paragraphs\ParagraphsTypeAccessControlHandler",
  *     "list_builder" = "Drupal\paragraphs\Controller\ParagraphsTypeListBuilder",
  *     "form" = {
  *       "add" = "Drupal\paragraphs\Form\ParagraphsTypeForm",
@@ -144,6 +152,29 @@ class ParagraphsType extends ConfigEntityBundleBase implements ParagraphsTypeInt
   /**
    * {@inheritdoc}
    */
+  public function onDependencyRemoval(array $dependencies) {
+    $changed = parent::onDependencyRemoval($dependencies);
+    $behavior_plugins = $this->getBehaviorPlugins();
+    foreach ($dependencies['module'] as $module) {
+      /** @var \Drupal\Component\Plugin\PluginInspectionInterface $plugin */
+      foreach ($behavior_plugins as $instance_id => $plugin) {
+        $definition = (array) $plugin->getPluginDefinition();
+        // If a module providing a behavior plugin is being uninstalled,
+        // remove the plugin and dependency so this paragraph bundle is not
+        // deleted too.
+        if (isset($definition['provider']) && $definition['provider'] === $module) {
+          unset($this->behavior_plugins[$instance_id]);
+          $this->getBehaviorPlugins()->removeInstanceId($instance_id);
+          $changed = TRUE;
+        }
+      }
+    }
+    return $changed;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getEnabledBehaviorPlugins() {
     return $this->getBehaviorPlugins()->getEnabled();
   }
@@ -210,14 +241,11 @@ class ParagraphsType extends ConfigEntityBundleBase implements ParagraphsTypeInt
    *   The file entity's UUID.
    *
    * @return \Drupal\file\FileInterface|null
-   *  The file entity. NULL if the UUID is invalid.
+   *   The file entity. NULL if the UUID is invalid.
    */
   protected function getFileByUuid($uuid) {
-    $files = $this->entityTypeManager()
-      ->getStorage('file')
-      ->loadByProperties(['uuid' => $uuid]);
-    if ($files) {
-      return current($files);
+    if ($id = \Drupal::service('paragraphs_type.uuid_lookup')->get($uuid)) {
+      return $this->entityTypeManager()->getStorage('file')->load($id);
     }
 
     return NULL;

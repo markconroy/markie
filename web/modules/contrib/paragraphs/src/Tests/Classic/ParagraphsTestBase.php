@@ -3,12 +3,7 @@
 namespace Drupal\paragraphs\Tests\Classic;
 
 use Drupal\Core\Entity\Entity\EntityFormDisplay;
-use Drupal\Core\Entity\Entity\EntityViewDisplay;
-use Drupal\field\Entity\FieldConfig;
-use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\field_ui\Tests\FieldUiTestTrait;
-use Drupal\node\Entity\NodeType;
-use Drupal\paragraphs\Entity\ParagraphsType;
 use Drupal\simpletest\WebTestBase;
 use Drupal\Tests\paragraphs\FunctionalJavascript\ParagraphsTestBaseTrait;
 

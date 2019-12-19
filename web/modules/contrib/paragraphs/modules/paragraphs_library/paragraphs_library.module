@@ -156,21 +156,6 @@ function paragraphs_library_views_pre_render(ViewExecutable $view) {
 }
 
 /**
- * Implements hook_form_FORM_ID_alter().
- */
-function paragraphs_library_form_paragraphs_library_item_edit_form_alter(&$form, FormStateInterface $form_state, $form_id) {
-  $library_item = $form_state->getFormObject()->getEntity();
-  $usage_data = \Drupal::service('entity_usage.usage')->listSources($library_item);
-
-  if ($usage_data) {
-    $usage_count = _paragraphs_library_count_usage($usage_data);
-    \Drupal::messenger()->addWarning(\Drupal::translation()->formatPlural($usage_count, 'Library item is used 1 time.', 'Library item is used @count times.', [
-      '@count' => $usage_count,
-    ]));
-  }
-}
-
-/**
  * Counts the usage across all entities.
  *
  * @param array $usage_data
@@ -256,7 +241,7 @@ function paragraphs_library_library_item_unlink_submit(array $form, FormStateInt
   // Make a copy of the paragraph. Use the Replicate module, if it is enabled.
   /** @var \Drupal\Core\Entity\EntityInterface $original_paragraph */
   if (\Drupal::hasService('replicate.replicator')) {
-    $duplicate_paragraph = \Drupal::getContainer()->get('replicate.replicator')->replicateEntity($original_paragraph);
+    $duplicate_paragraph = \Drupal::getContainer()->get('replicate.replicator')->cloneEntity($original_paragraph);
   }
   else {
     $duplicate_paragraph = $original_paragraph->createDuplicate();

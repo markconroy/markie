@@ -2431,18 +2431,18 @@
     },
     {
         "name": "drupal/entity_reference_revisions",
-        "version": "1.4.0",
-        "version_normalized": "1.4.0.0",
+        "version": "1.7.0",
+        "version_normalized": "1.7.0.0",
         "source": {
             "type": "git",
             "url": "https://git.drupalcode.org/project/entity_reference_revisions.git",
-            "reference": "8.x-1.4"
+            "reference": "8.x-1.7"
         },
         "dist": {
             "type": "zip",
-            "url": "https://ftp.drupal.org/files/projects/entity_reference_revisions-8.x-1.4.zip",
-            "reference": "8.x-1.4",
-            "shasum": "0d5e159ab52fe8e5aa7c27e7ccfc0299e1af4d72"
+            "url": "https://ftp.drupal.org/files/projects/entity_reference_revisions-8.x-1.7.zip",
+            "reference": "8.x-1.7",
+            "shasum": "4e3b849b0d984cd3c0a4330c9aa4cb16bf1f79f6"
         },
         "require": {
             "drupal/core": "~8.0"
@@ -2456,8 +2456,8 @@
                 "dev-1.x": "1.x-dev"
             },
             "drupal": {
-                "version": "8.x-1.4",
-                "datestamp": "1515143885",
+                "version": "8.x-1.7",
+                "datestamp": "1570284187",
                 "security-coverage": {
                     "status": "covered",
                     "message": "Covered by Drupal's security advisory policy"
@@ -2467,9 +2467,13 @@
         "installation-source": "dist",
         "notification-url": "https://packages.drupal.org/8/downloads",
         "license": [
-            "GPL-2.0+"
+            "GPL-2.0-or-later"
         ],
         "authors": [
+            {
+                "name": "Berdir",
+                "homepage": "https://www.drupal.org/user/214652"
+            },
             {
                 "name": "Frans",
                 "homepage": "https://www.drupal.org/user/514222"
@@ -2486,7 +2490,7 @@
         "description": "Adds a Entity Reference field type with revision support.",
         "homepage": "https://www.drupal.org/project/entity_reference_revisions",
         "support": {
-            "source": "http://cgit.drupalcode.org/entity_reference_revisions"
+            "source": "https://git.drupalcode.org/project/entity_reference_revisions"
         }
     },
     {
@@ -3422,18 +3426,18 @@
     },
     {
         "name": "drupal/paragraphs",
-        "version": "1.6.0",
-        "version_normalized": "1.6.0.0",
+        "version": "1.10.0",
+        "version_normalized": "1.10.0.0",
         "source": {
             "type": "git",
             "url": "https://git.drupalcode.org/project/paragraphs.git",
-            "reference": "8.x-1.6"
+            "reference": "8.x-1.10"
         },
         "dist": {
             "type": "zip",
-            "url": "https://ftp.drupal.org/files/projects/paragraphs-8.x-1.6.zip",
-            "reference": "8.x-1.6",
-            "shasum": "cd93e244f3a78dabdcf362adc31e59aad25b3fae"
+            "url": "https://ftp.drupal.org/files/projects/paragraphs-8.x-1.10.zip",
+            "reference": "8.x-1.10",
+            "shasum": "12f96d90940df1c870bbe4cb97a8260169045911"
         },
         "require": {
             "drupal/core": "~8",
@@ -3443,9 +3447,9 @@
             "drupal/block_field": "~1.0",
             "drupal/ctools": "3.x-dev",
             "drupal/diff": "~1.0",
-            "drupal/entity_browser": "1.x-dev",
+            "drupal/entity_browser": "2.x-dev",
             "drupal/entity_usage": "2.x-dev",
-            "drupal/field_group": "~1.0",
+            "drupal/field_group": "3.x-dev",
             "drupal/inline_entity_form": "~1.0",
             "drupal/paragraphs-paragraphs_library": "*",
             "drupal/replicate": "~1.0",
@@ -3461,8 +3465,8 @@
                 "dev-1.x": "1.x-dev"
             },
             "drupal": {
-                "version": "8.x-1.6",
-                "datestamp": "1550692525",
+                "version": "8.x-1.10",
+                "datestamp": "1572617586",
                 "security-coverage": {
                     "status": "covered",
                     "message": "Covered by Drupal's security advisory policy"
@@ -3492,6 +3496,10 @@
                 "homepage": "https://www.drupal.org/user/1853532"
             },
             {
+                "name": "jstoller",
+                "homepage": "https://www.drupal.org/user/99012"
+            },
+            {
                 "name": "miro_dietiker",
                 "homepage": "https://www.drupal.org/user/227761"
             }
@@ -3499,7 +3507,7 @@
         "description": "Enables the creation of Paragraphs entities.",
         "homepage": "https://www.drupal.org/project/paragraphs",
         "support": {
-            "source": "http://cgit.drupalcode.org/paragraphs"
+            "source": "https://git.drupalcode.org/project/paragraphs"
         }
     },
     {

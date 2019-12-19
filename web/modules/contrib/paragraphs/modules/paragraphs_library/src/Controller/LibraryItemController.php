@@ -6,9 +6,7 @@ use Drupal\Component\Utility\Xss;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Datetime\DateFormatterInterface;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
-use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Url;
 use Drupal\paragraphs_library\Entity\LibraryItem;
 use Drupal\paragraphs_library\LibraryItemInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -191,4 +189,5 @@ class LibraryItemController extends ControllerBase implements ContainerInjection
       ->execute();
     return array_keys($result);
   }
+
 }

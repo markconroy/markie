@@ -17,6 +17,13 @@ use Drupal\user\UserInterface;
  * @ContentEntityType(
  *   id = "paragraphs_library_item",
  *   label = @Translation("Paragraphs library item"),
+ *   label_collection = @Translation("Paragraphs library items"),
+ *   label_singular = @Translation("Paragraphs library item"),
+ *   label_plural = @Translation("Paragraphs library items"),
+ *   label_count = @PluralTranslation(
+ *     singular = "@count Paragraphs library item",
+ *     plural = "@count Paragraphs library items",
+ *   ),
  *   handlers = {
  *     "view_builder" = "Drupal\Core\Entity\EntityViewBuilder",
  *     "list_builder" = "Drupal\Core\Entity\EntityListBuilder",
@@ -255,19 +262,18 @@ class LibraryItem extends EditorialContentEntityBase implements LibraryItemInter
     }
     $duplicate_paragraph->save();
 
-    $label = static::buildLabel($paragraph);
     $library_item = static::create([
-      'label' => $label,
       'paragraphs' => $duplicate_paragraph,
+      'langcode' => $paragraph->language()->getId(),
     ]);
 
-    // Add a translation for each translation the paragraph has, the only
-    // translatable element is the label. The referenced paragraph keeps the
-    // existing translations.
-    foreach ($duplicate_paragraph->getTranslationLanguages(FALSE) as $langcode => $language) {
-      $library_item->addTranslation($langcode, [
-        'label' => static::buildLabel($duplicate_paragraph->getTranslation($langcode))
-      ] + $library_item->toArray());
+    // Build the label in each available translation and ensure the translations
+    // exist.
+    foreach ($duplicate_paragraph->getTranslationLanguages() as $langcode => $language) {
+      if (!$library_item->hasTranslation($langcode)) {
+        $library_item->addTranslation($langcode, $library_item->toArray());
+      }
+      $library_item->getTranslation($langcode)->set('label', static::buildLabel($duplicate_paragraph->getTranslation($langcode)));
     }
 
     return $library_item;
@@ -282,8 +288,8 @@ class LibraryItem extends EditorialContentEntityBase implements LibraryItemInter
    * @return string
    */
   protected static function buildLabel(ParagraphInterface $paragraph) {
-    $summary = $paragraph->getSummary(['show_behavior_summary' => FALSE]);
-    $summary = Unicode::truncate($summary, 50);
+    $summary = $paragraph->getSummaryItems(['show_behavior_summary' => FALSE]);
+    $summary = Unicode::truncate(implode(', ', $summary['content']), 50);
     return $paragraph->getParagraphType()->label() . ': ' . $summary;
   }
 

@@ -53,9 +53,9 @@ entity_reference_selection.default:paragraph:
     edit_mode:
       type: string
     title:
-      type: string
+      type: label
     title_plural:
-      type: string
+      type: label
     default_paragraph_type:
       type: string
 
@@ -63,9 +63,9 @@ field.widget.settings.entity_reference_paragraphs:
   type: mapping
   mapping:
     title:
-      type: string
+      type: label
     title_plural:
-      type: string
+      type: label
     edit_mode:
       type: string
     add_mode:
@@ -79,9 +79,9 @@ field.widget.settings.paragraphs:
   type: mapping
   mapping:
     title:
-      type: string
+      type: label
     title_plural:
-      type: string
+      type: label
     edit_mode:
       type: string
     closed_mode:

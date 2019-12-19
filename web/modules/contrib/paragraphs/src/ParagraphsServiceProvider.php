@@ -15,7 +15,7 @@ class ParagraphsServiceProvider extends ServiceProviderBase {
   /**
    * {@inheritdoc}
    */
-  public function alter(ContainerBuilder $container) {
+  public function register(ContainerBuilder $container) {
     $modules = $container->getParameter('container.modules');
     // Check for installed Replicate module.
     if (isset($modules['replicate']) ) {

@@ -6,7 +6,6 @@
  */
 
 use Drupal\Core\Entity\Entity\EntityFormDisplay;
-use Drupal\Core\Entity\Entity\EntityViewDisplay;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\paragraphs_library\Entity\LibraryItem;
@@ -43,6 +42,20 @@ function paragraphs_library_install() {
   if (is_array($tabs_enabled) && !in_array('paragraphs_library_item', $tabs_enabled)) {
     $tabs_enabled[] = 'paragraphs_library_item';
     $entity_usage_config->set('local_task_enabled_entity_types', $tabs_enabled)
+      ->save();
+  }
+
+  // Enable the usage warning message on edit and delete forms.
+  $edit_warning_enabled = $entity_usage_config->get('edit_warning_message_entity_types') ?: [];
+  if (!in_array('paragraphs_library_item', $edit_warning_enabled)) {
+    $edit_warning_enabled[] = 'paragraphs_library_item';
+    $entity_usage_config->set('edit_warning_message_entity_types', $edit_warning_enabled)
+      ->save();
+  }
+  $delete_warning_enabled = $entity_usage_config->get('delete_warning_message_entity_types') ?: [];
+  if (!in_array('paragraphs_library_item', $delete_warning_enabled)) {
+    $delete_warning_enabled[] = 'paragraphs_library_item';
+    $entity_usage_config->set('delete_warning_message_entity_types', $delete_warning_enabled)
       ->save();
   }
 }
@@ -86,7 +99,6 @@ function paragraphs_library_update_8001() {
     ])
     ->setRevisionable(TRUE)
     ->setTranslatable(TRUE);
-
 
   $default_langcode_field = BaseFieldDefinition::create('boolean')
     ->setLabel(t('Default translation'))
@@ -336,6 +348,25 @@ function paragraphs_library_update_8101() {
   if (is_array($tabs_enabled) && !in_array('paragraphs_library_item', $tabs_enabled)) {
     $tabs_enabled[] = 'paragraphs_library_item';
     $entity_usage_config->set('local_task_enabled_entity_types', $tabs_enabled)
+      ->save();
+  }
+}
+
+/**
+ * Enable the usage warning message on edit and delete forms.
+ */
+function paragraphs_library_update_8102() {
+  $entity_usage_config = \Drupal::configFactory()->getEditable('entity_usage.settings');
+  $edit_warning_enabled = $entity_usage_config->get('edit_warning_message_entity_types') ?: [];
+  if (!in_array('paragraphs_library_item', $edit_warning_enabled)) {
+    $edit_warning_enabled[] = 'paragraphs_library_item';
+    $entity_usage_config->set('edit_warning_message_entity_types', $edit_warning_enabled)
+      ->save();
+  }
+  $delete_warning_enabled = $entity_usage_config->get('delete_warning_message_entity_types') ?: [];
+  if (!in_array('paragraphs_library_item', $delete_warning_enabled)) {
+    $delete_warning_enabled[] = 'paragraphs_library_item';
+    $entity_usage_config->set('delete_warning_message_entity_types', $delete_warning_enabled)
       ->save();
   }
 }

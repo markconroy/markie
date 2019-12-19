@@ -176,14 +176,6 @@
   line-height: 1.538em;
 }
 
-.paragraphs-dragdrop__item .paragraphs-summary-wrapper > .paragraphs-collapsed-description {
-  -webkit-box-flex: 1;
-  -webkit-flex-grow: 1;
-      -ms-flex-positive: 1;
-          flex-grow: 1;
-  font-style: italic;
-}
-
 .paragraphs-dragdrop__handle {
   display: -webkit-box;
   display: -webkit-flex;

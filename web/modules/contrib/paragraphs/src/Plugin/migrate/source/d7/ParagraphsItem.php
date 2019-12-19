@@ -78,7 +78,7 @@ class ParagraphsItem extends FieldableEntity {
       'item_id' => $this->t('The paragraph_item id'),
       'revision_id' => $this->t('The paragraph_item revision id'),
       'bundle' => $this->t('The paragraph bundle'),
-      'field_name' => $this - t('The paragrpah field_name'),
+      'field_name' => $this->t('The paragraph field_name'),
     ];
 
     return $fields;

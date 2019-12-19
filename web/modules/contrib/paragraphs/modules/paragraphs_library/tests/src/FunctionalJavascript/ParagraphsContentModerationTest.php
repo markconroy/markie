@@ -4,17 +4,16 @@ namespace Drupal\Tests\paragraphs_library\FunctionalJavascript;
 
 use Behat\Mink\Element\Element;
 use Drupal\field_ui\Tests\FieldUiTestTrait;
-use Drupal\FunctionalJavascriptTests\JavascriptTestBase;
+use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
 use Drupal\Tests\paragraphs\FunctionalJavascript\ParagraphsTestBaseTrait;
 use Drupal\Tests\paragraphs\Traits\ParagraphsLastEntityQueryTrait;
-use Drupal\workflows\Entity\Workflow;
 
 /**
  * Tests Paragraphs, Paragraphs Library and Content Moderation integration.
  *
  * @group paragraphs_library
  */
-class ParagraphsContentModerationTest extends JavascriptTestBase {
+class ParagraphsContentModerationTest extends WebDriverTestBase {
 
   use ParagraphsTestBaseTrait, FieldUiTestTrait, ParagraphsLastEntityQueryTrait;
 
@@ -193,6 +192,8 @@ class ParagraphsContentModerationTest extends JavascriptTestBase {
     $this->assertNotNull($textfield);
     $page->fillField('field_paragraphs[1][subform][field_text][0][value]', 'Direct paragraph text 2');
     $page->selectFieldOption('moderation_state[0][state]', 'published');
+    $page->clickLink('Revision information');
+    $page->find('css', 'a[href="#edit-revision-information"]')->click();
     $page->fillField('revision_log[0][value]', 'Node revision #2 - This is a special version!');
     $page->pressButton('Save');
     $assert_session->pageTextContains('paragraphed_moderated_test Host page 1 (rev 2) has been updated.');
@@ -220,6 +221,7 @@ class ParagraphsContentModerationTest extends JavascriptTestBase {
     $this->assertNotNull($textfield);
     $page->fillField('field_paragraphs[2][subform][field_text][0][value]', 'Direct paragraph text 3');
     $page->selectFieldOption('moderation_state[0][state]', 'published');
+    $page->find('css', 'a[href="#edit-revision-information"]')->click();
     $page->fillField('revision_log[0][value]', 'Node revision #3');
     $page->pressButton('Save');
     $assert_session->pageTextContains('paragraphed_moderated_test Host page 1 (rev 3) has been updated.');
@@ -259,6 +261,7 @@ class ParagraphsContentModerationTest extends JavascriptTestBase {
     $paragraph3_confirm_remove_button->press();
     $assert_session->assertWaitOnAjaxRequest();
     $page->selectFieldOption('moderation_state[0][state]', 'draft');
+    $page->find('css', 'a[href="#edit-revision-information"]')->click();
     $page->fillField('revision_log[0][value]', 'Node revision #4');
     $page->pressButton('Save');
     // The admin is currently at /node/*/latest.
@@ -360,6 +363,7 @@ class ParagraphsContentModerationTest extends JavascriptTestBase {
     $this->drupalGet("/node/$host_node_id/edit");
     $page->fillField('title[0][value]', 'Host page 1 (rev 6)');
     $page->selectFieldOption('moderation_state[0][state]', 'published');
+    $page->find('css', 'a[href="#edit-revision-information"]')->click();
     $page->fillField('revision_log[0][value]', 'Node revision #6');
     $page->pressButton('Save');
     $assert_session->pageTextContains('paragraphed_moderated_test Host page 1 (rev 6) has been updated.');
@@ -442,6 +446,7 @@ class ParagraphsContentModerationTest extends JavascriptTestBase {
     $page->fillField('paragraphs[0][subform][field_text][0][value]', 'This is the low-level text.');
     // This is published initially.
     $page->selectFieldOption('moderation_state[0][state]', 'published');
+    $page->find('css', 'a[href="#edit-revision-information"]')->click();
     $page->fillField('revision_log[0][value]', 'Child initial revision.');
     $page->pressButton('Save');
     $assert_session->pageTextContains('Paragraph Child library item has been created.');
@@ -462,6 +467,7 @@ class ParagraphsContentModerationTest extends JavascriptTestBase {
     $page->fillField('paragraphs[0][subform][field_nested_paragraphs][0][target_id]', "Child library item ($child_library_item_id)");
     // Let's make this initially a draft.
     $page->selectFieldOption('moderation_state[0][state]', 'draft');
+    $page->find('css', 'a[href="#edit-revision-information"]')->click();
     $page->fillField('revision_log[0][value]', 'Rich item initial revision.');
     $page->pressButton('Save');
     $assert_session->pageTextContains('Paragraph Rich library item has been created.');
@@ -483,7 +489,7 @@ class ParagraphsContentModerationTest extends JavascriptTestBase {
     $assert_session->pageTextContains('Rich library item');
     $table = $assert_session->elementExists('css', 'table.views-table');
     $rich_item_row = $this->getTableRowWithText($table, 'Rich library item');
-    $rich_item_checkbox = $assert_session->elementExists('css', 'input[type="checkbox"]', $rich_item_row);
+    $rich_item_checkbox = $assert_session->elementExists('css', 'input[type="radio"]', $rich_item_row);
     $rich_item_checkbox->click();
     $page->pressButton('Select reusable paragraph');
     $session->wait(1000);
@@ -491,6 +497,7 @@ class ParagraphsContentModerationTest extends JavascriptTestBase {
     $assert_session->assertWaitOnAjaxRequest();
     // Save the node as published.
     $page->selectFieldOption('moderation_state[0][state]', 'published');
+    $page->find('css', 'a[href="#edit-revision-information"]')->click();
     $page->fillField('revision_log[0][value]', 'Node initial revision');
     $page->pressButton('Save');
 
@@ -507,6 +514,7 @@ class ParagraphsContentModerationTest extends JavascriptTestBase {
     $this->drupalGet("/admin/content/paragraphs/{$rich_library_item_id}/edit");
     $page->fillField('paragraphs[0][subform][field_intermediate_text][0][value]', 'First level text - published');
     $page->selectFieldOption('moderation_state[0][state]', 'published');
+    $page->find('css', 'a[href="#edit-revision-information"]')->click();
     $page->fillField('revision_log[0][value]', 'Rich item first published revision.');
     $page->pressButton('Save');
     $assert_session->pageTextContains('Paragraph Rich library item has been updated.');
@@ -520,6 +528,7 @@ class ParagraphsContentModerationTest extends JavascriptTestBase {
     $this->drupalGet("/admin/content/paragraphs/{$child_library_item_id}/edit");
     $page->fillField('paragraphs[0][subform][field_text][0][value]', 'The low-level text has been modified (pending approval).');
     $page->selectFieldOption('moderation_state[0][state]', 'draft');
+    $page->find('css', 'a[href="#edit-revision-information"]')->click();
     $page->fillField('revision_log[0][value]', 'Child item unapproved changes.');
     $page->pressButton('Save');
     $assert_session->pageTextContains('Paragraph Child library item has been updated.');
@@ -534,6 +543,7 @@ class ParagraphsContentModerationTest extends JavascriptTestBase {
     $this->drupalGet("/admin/content/paragraphs/{$child_library_item_id}/edit");
     $page->fillField('paragraphs[0][subform][field_text][0][value]', 'The low-level text has been modified (approved!).');
     $page->selectFieldOption('moderation_state[0][state]', 'published');
+    $page->find('css', 'a[href="#edit-revision-information"]')->click();
     $page->fillField('revision_log[0][value]', 'Child item approved changes.');
     $page->pressButton('Save');
     $assert_session->pageTextContains('Paragraph Child library item has been updated.');

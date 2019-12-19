@@ -4,7 +4,6 @@ namespace Drupal\Tests\entity_reference_revisions\Kernel\Plugin\Derivative;
 
 use Drupal\entity_reference_revisions\Plugin\migrate\destination\EntityReferenceRevisions;
 use Drupal\KernelTests\KernelTestBase;
-use Drupal\migrate\Plugin\MigrationPluginManager;
 use Drupal\migrate\Plugin\MigrateDestinationPluginManager;
 
 /**

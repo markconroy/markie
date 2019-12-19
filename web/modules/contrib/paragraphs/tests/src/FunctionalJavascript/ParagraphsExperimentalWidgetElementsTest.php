@@ -2,7 +2,7 @@
 
 namespace Drupal\Tests\paragraphs\FunctionalJavascript;
 
-use Drupal\FunctionalJavascriptTests\JavascriptTestBase;
+use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
 use Drupal\language\Entity\ConfigurableLanguage;
 
 /**
@@ -10,7 +10,7 @@ use Drupal\language\Entity\ConfigurableLanguage;
  *
  * @group paragraphs
  */
-class ParagraphsExperimentalWidgetElementsTest extends JavascriptTestBase {
+class ParagraphsExperimentalWidgetElementsTest extends WebDriverTestBase {
 
   use LoginAdminTrait;
   use ParagraphsTestBaseTrait;

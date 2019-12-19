@@ -18,7 +18,10 @@
     var $add_more_wrapper = $button.closest('table')
       .siblings('.clearfix')
       .find('.paragraphs-add-dialog');
-    var delta = $button.closest('tr').index();
+
+    // Find delta for row without interference of unrelated table rows.
+    var $anchorRow = $button.closest('tr');
+    var delta = $anchorRow.parent().find('> .draggable').index($anchorRow);
 
     // Set delta before opening of dialog.
     var $delta = $add_more_wrapper.closest('.clearfix')

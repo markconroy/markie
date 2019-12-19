@@ -73,7 +73,7 @@ class ParagraphsBehaviorPluginsTest extends KernelTestBase {
 
     // Check the text color plugin settings summary.
     $plugin = $paragraph->getParagraphType()->getBehaviorPlugins()->getEnabled();
-    $this->assertEquals($plugin['test_text_color']->settingsSummary($paragraph)[0], 'Text color: red');
+    $this->assertEquals($plugin['test_text_color']->settingsSummary($paragraph)[0], ['label' => 'Text color', 'value' => 'red']);
 
     // Update the value of an specific plugin.
     $paragraph->setBehaviorSettings('test_text_color', ['text_color' => 'blue']);
@@ -85,8 +85,41 @@ class ParagraphsBehaviorPluginsTest extends KernelTestBase {
 
     // Check the text color plugin settings summary.
     $plugin = $paragraph->getParagraphType()->getBehaviorPlugins()->getEnabled();
-    $this->assertEquals($plugin['test_text_color']->settingsSummary($paragraph)[0], 'Text color: blue');
+    $this->assertEquals($plugin['test_text_color']->settingsSummary($paragraph)[0], ['label' => 'Text color', 'value' => 'blue']);
 
+  }
+
+  /**
+   * Tests uninstalling a behavior plugin providing module.
+   *
+   * @throws \Drupal\Core\Entity\EntityStorageException
+   */
+  public function testBehaviorUninstall() {
+    // Create a paragraph type.
+    $paragraph_type = ParagraphsType::create([
+      'label' => 'test_text',
+      'id' => 'test_text',
+      'behavior_plugins' => [
+        'test_text_color' => [
+          'enabled' => TRUE,
+        ],
+      ],
+    ]);
+    $paragraph_type->save();
+    $dependencies = $paragraph_type->getDependencies();
+    $plugins = $paragraph_type->getBehaviorPlugins()->getInstanceIds();
+    $this->assertSame(['module' => ['paragraphs_test']], $dependencies);
+    $this->assertSame(['test_text_color' => 'test_text_color'], $plugins);
+
+    // Uninstall plugin providing module.
+    $this->container->get('config.manager')->uninstall('module', 'paragraphs_test');
+
+    $paragraph_type = ParagraphsType::load('test_text');
+    $this->assertNotNull($paragraph_type);
+    $dependencies = $paragraph_type->getDependencies();
+    $plugins = $paragraph_type->getBehaviorPlugins()->getInstanceIds();
+    $this->assertSame([], $dependencies);
+    $this->assertSame([], $plugins);
   }
 
 }

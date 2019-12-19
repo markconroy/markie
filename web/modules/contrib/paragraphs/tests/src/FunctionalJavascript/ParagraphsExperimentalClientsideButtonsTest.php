@@ -2,9 +2,9 @@
 
 namespace Drupal\Tests\paragraphs\FunctionalJavascript;
 
-use Drupal\field_ui\Tests\FieldUiTestTrait;
-use Drupal\FunctionalJavascriptTests\JavascriptTestBase;
-use Drupal\paragraphs\Tests\Classic\ParagraphsCoreVersionUiTestTrait;
+use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
+use Drupal\Tests\field_ui\Traits\FieldUiTestTrait;
+use Drupal\Tests\paragraphs\Traits\ParagraphsCoreVersionUiTestTrait;
 use Drupal\Tests\paragraphs\Traits\ParagraphsLastEntityQueryTrait;
 
 /**
@@ -12,7 +12,7 @@ use Drupal\Tests\paragraphs\Traits\ParagraphsLastEntityQueryTrait;
  *
  * @group paragraphs
  */
-class ParagraphsExperimentalClientsideButtonsTest extends JavascriptTestBase {
+class ParagraphsExperimentalClientsideButtonsTest extends WebDriverTestBase {
 
   use LoginAdminTrait;
   use FieldUiTestTrait;
@@ -86,10 +86,15 @@ class ParagraphsExperimentalClientsideButtonsTest extends JavascriptTestBase {
     // Add a Paragraph type.
     $this->addParagraphsType('text');
     // Add a text field to the text_paragraph type.
-    static::fieldUIAddNewField('admin/structure/paragraphs_type/text', 'text', 'Text', 'string', [], []);
+    $this->drupalGet('admin/structure/paragraphs_type/text/fields/add-field');
+    $page->selectFieldOption('new_storage_type', 'string');
+    $page->fillField('label', 'Text');
+    $this->assertSession()->waitForElementVisible('css', '#edit-name-machine-name-suffix .link');
+    $page->pressButton('Edit');
+    $page->fillField('field_name', 'text');
+    $page->pressButton('Save and continue');
     // Add a paragraphed test.
     $this->drupalGet('node/add/paragraphed_test');
-
     // Add 3 paragraphs.
     $page->pressButton('Add Paragraph');
     $assert_session->assertWaitOnAjaxRequest();
@@ -159,6 +164,15 @@ class ParagraphsExperimentalClientsideButtonsTest extends JavascriptTestBase {
     $dialog = $page->find('xpath', '//div[contains(@class, "ui-dialog")]');
     $dialog->pressButton('text');
     $assert_session->assertWaitOnAjaxRequest();
+    $page->fillField('field_paragraphs[3][subform][field_text][0][value]', 'Paragraph added above');
+
+    // Add a new paragraph in order to test that the new paragraph is added at the bottom.
+    $page->pressButton('Add Paragraph');
+    $assert_session->assertWaitOnAjaxRequest();
+    $dialog = $page->find('xpath', '//div[contains(@class, "ui-dialog")]');
+    $dialog->pressButton('text');
+    $assert_session->assertWaitOnAjaxRequest();
+    $page->fillField('field_paragraphs[4][subform][field_text][0][value]', 'New paragraph');
 
     // First row after insertion.
     $first_row = $assert_session->elementExists('css', '#field-paragraphs-add-more-wrapper tr.draggable:nth-of-type(1)');
@@ -169,7 +183,7 @@ class ParagraphsExperimentalClientsideButtonsTest extends JavascriptTestBase {
     // Second row after insertion.
     $second_row = $assert_session->elementExists('css', '#field-paragraphs-add-more-wrapper tr.draggable:nth-of-type(2)');
     $text_input_second_row = $assert_session->elementExists('css', 'input.form-text', $second_row);
-    $this->assertEquals('', $text_input_second_row->getValue());
+    $this->assertEquals('Paragraph added above', $text_input_second_row->getValue());
     $delta_paragraph2 = $assert_session->elementExists('css', 'td.delta-order select', $second_row)->getValue();
     $this->assertEquals(1, $delta_paragraph2);
     // Third row after insertion.
@@ -184,6 +198,11 @@ class ParagraphsExperimentalClientsideButtonsTest extends JavascriptTestBase {
     $this->assertEquals('Third text', $text_input_fourth_row->getValue());
     $delta_paragraph4 = $assert_session->elementExists('css', 'td.delta-order select', $fourth_row)->getValue();
     $this->assertEquals(3, $delta_paragraph4);
+    $fifth_row = $assert_session->elementExists('css', '#field-paragraphs-add-more-wrapper tr.draggable:nth-of-type(5)');
+    $text_input_fifth_row = $assert_session->elementExists('css', 'input.form-text', $fifth_row);
+    $this->assertEquals('New paragraph', $text_input_fifth_row->getValue());
+    $delta_paragraph5 = $assert_session->elementExists('css', 'td.delta-order select', $fifth_row)->getValue();
+    $this->assertEquals(4, $delta_paragraph5);
 
     // Let's have more fun with some nested paragraphs.
     $this->addParagraphsType('rich_paragraph');

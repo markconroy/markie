@@ -3,7 +3,7 @@
 namespace Drupal\Tests\paragraphs_library\FunctionalJavascript;
 
 use Drupal\language\Entity\ConfigurableLanguage;
-use Drupal\Tests\entity_browser\FunctionalJavascript\EntityBrowserJavascriptTestBase;
+use Drupal\Tests\entity_browser\FunctionalJavascript\EntityBrowserWebDriverTestBase;
 use Drupal\Tests\paragraphs\FunctionalJavascript\ParagraphsTestBaseTrait;
 
 /**
@@ -11,7 +11,7 @@ use Drupal\Tests\paragraphs\FunctionalJavascript\ParagraphsTestBaseTrait;
  *
  * @group paragraphs_library
  */
-class ParagraphsLibraryItemEntityBrowserTest extends EntityBrowserJavascriptTestBase {
+class ParagraphsLibraryItemEntityBrowserTest extends EntityBrowserWebDriverTestBase {
 
   use ParagraphsTestBaseTrait;
 
@@ -87,7 +87,8 @@ class ParagraphsLibraryItemEntityBrowserTest extends EntityBrowserJavascriptTest
     $this->waitForAjaxToFinish();
     $this->getSession()->switchToIFrame('entity_browser_iframe_paragraphs_library_items');
     $this->waitForAjaxToFinish();
-    $this->getSession()->getPage()->checkField('edit-entity-browser-select-paragraphs-library-item1');
+    $style_selector = $this->getSession()->getPage()->find('css', 'input[value="paragraphs_library_item:1"].form-radio');
+    $style_selector->click();
     $this->getSession()->switchToIFrame();
 
     $drop = <<<JS
@@ -128,6 +129,90 @@ JS;
     // Check that there is only one translation of the paragraph listed.
     $rows = $this->xpath('//*[@id="entity-browser-paragraphs-library-items-form"]/div[1]/div[2]/table/tbody/tr');
     $this->assertTrue(count($rows) == 1);
+
+    // Add a text paragraph in a new library item.
+    $this->drupalGet('admin/content/paragraphs/add/default');
+    $element = $this->getSession()->getPage()->find('xpath', '//*[contains(@class, "dropbutton-toggle")]');
+    $element->click();
+    $button = $this->getSession()->getPage()->findButton('Add text');
+    $button->press();
+    $this->waitForAjaxToFinish();
+    $this->getSession()->getPage()->fillField('label[0][value]', 'Inner library item');
+    $this->getSession()->getPage()->fillField('paragraphs[0][subform][field_text][0][value]', 'This is a reusable text.');
+    $this->submitForm([], 'Save');
+    // Add a library item inside a library item.
+    $this->drupalGet('admin/content/paragraphs/add/default');
+    $this->getSession()->getPage()->fillField('label[0][value]', 'Outside library item');
+    $button = $this->getSession()->getPage()->findButton('Add From library');
+    $button->press();
+    $this->waitForAjaxToFinish();
+    $this->getSession()->getPage()->pressButton('Select reusable paragraph');
+    $this->waitForAjaxToFinish();
+    $this->getSession()->switchToIFrame('entity_browser_iframe_paragraphs_library_items');
+    $this->waitForAjaxToFinish();
+    $style_selector = $this->getSession()->getPage()->find('css', 'input[value="paragraphs_library_item:2"].form-radio');
+    $style_selector->click();
+    $this->getSession()->switchToIFrame();
+    $drop = <<<JS
+    jQuery('input[type=submit][value="Select reusable paragraph"]', window.frames['entity_browser_iframe_paragraphs_library_items'].document).trigger('click')
+JS;
+    $this->getSession()->evaluateScript($drop);
+    sleep(1);
+    $this->waitForAjaxToFinish();
+    // Edit the inside library item after adding it.
+    $this->getSession()->getPage()->pressButton('Edit');
+    $this->waitForAjaxToFinish();
+    $this->assertSession()->fieldExists('paragraphs[0][subform][field_text][0][value]');
+    $this->getSession()->getPage()->fillField('paragraphs[0][subform][field_text][0][value]', 'This is a reusable text UPDATED.');
+    $save_button = $this->assertSession()->elementExists('css', '.ui-dialog .ui-dialog-buttonset button');
+    $save_button->press();
+    $this->waitForAjaxToFinish();
+    $this->assertSession()->elementContains('css', '.paragraphs-collapsed-description .paragraphs-content-wrapper', 'This is a reusable text UPDATED.');
+    $this->submitForm([], 'Save');
+    // Edit the outside library item.
+    $this->getSession()->getPage()->clickLink('Outside library item');
+    $this->getSession()->getPage()->clickLink('Edit');
+    $this->assertSession()->elementContains('css', '.paragraphs-collapsed-description .paragraphs-content-wrapper', 'This is a reusable text UPDATED.');
+    // Edit the inner library item and assert the fields and values.
+    $this->getSession()->getPage()->pressButton('Edit');
+    $this->waitForAjaxToFinish();
+    $this->assertSession()->fieldExists('paragraphs[0][subform][field_text][0][value]');
+
+    // Add a node with the outside library item.
+    $this->drupalGet('node/add');
+    $title = $this->assertSession()->fieldExists('Title');
+    $title->setValue('Overlay node');
+    $this->getSession()->getPage()->pressButton('Add From library');
+    $this->waitForAjaxToFinish();
+    $this->getSession()->getPage()->pressButton('Select reusable paragraph');
+    $this->waitForAjaxToFinish();
+    $this->getSession()->switchToIFrame('entity_browser_iframe_paragraphs_library_items');
+    $this->waitForAjaxToFinish();
+    $style_selector = $this->getSession()->getPage()->find('css', 'input[value="paragraphs_library_item:3"].form-radio');
+    $this->assertTrue($style_selector->isVisible());
+    $style_selector->click();
+    $this->getSession()->switchToIFrame();
+    $drop = <<<JS
+    jQuery('input[type=submit][value="Select reusable paragraph"]', window.frames['entity_browser_iframe_paragraphs_library_items'].document).trigger('click')
+JS;
+    $this->getSession()->evaluateScript($drop);
+    sleep(1);
+    $this->waitForAjaxToFinish();
+    $this->assertSession()->elementContains('css', '.paragraphs-collapsed-description .paragraphs-content-wrapper', 'Inner library item');
+    $this->submitForm([], 'Save');
+    $this->assertSession()->pageTextContains('paragraphed_test Overlay node has been created.');
+    // Edit the node.
+    $node = $this->getNodeByTitle('Overlay node');
+    $this->drupalGet('node/' . $node->id() . '/edit');
+    // Edit the Outside library item.
+    $this->getSession()->getPage()->pressButton('Edit');
+    $this->waitForAjaxToFinish();
+    // Edit the inner library item and assert its fields.
+    $modal_form = $this->getSession()->getPage()->find('css', '.ui-dialog .paragraphs-library-item-form');
+    $save_button = $modal_form->find('css', '.edit-button');
+    $save_button->press();
+    $this->waitForAjaxToFinish();
+    $this->assertSession()->fieldExists('paragraphs[0][subform][field_text][0][value]');
   }
 
 }

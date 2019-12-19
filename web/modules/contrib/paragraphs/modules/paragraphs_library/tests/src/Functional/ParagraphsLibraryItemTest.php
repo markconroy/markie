@@ -2,11 +2,11 @@
 
 namespace Drupal\Tests\paragraphs_library\Functional;
 
-use Drupal\field_ui\Tests\FieldUiTestTrait;
 use Drupal\node\Entity\Node;
 use Drupal\paragraphs\Entity\Paragraph;
 use Drupal\paragraphs\Entity\ParagraphsType;
 use Drupal\Tests\BrowserTestBase;
+use Drupal\Tests\field_ui\Traits\FieldUiTestTrait;
 use Drupal\Tests\paragraphs\FunctionalJavascript\ParagraphsTestBaseTrait;
 
 /**
@@ -318,6 +318,41 @@ class ParagraphsLibraryItemTest extends BrowserTestBase {
     // with possibly a generic label (just with the entity ID or similar). In
     // both cases this test will need to be updated.
     $assert_session->elementNotExists('css', 'table tbody tr');
+  }
+
+  /**
+   * Test if the usage warning message shows up, when deleting a library item.
+   */
+  public function testLibraryItemDeleteWarningMessage() {
+    $page = $this->getSession()->getPage();
+    $assert_session = $this->assertSession();
+
+    // Create a paragraph in the library.
+    $this->drupalGet('admin/content/paragraphs/add/default');
+    $page->pressButton('Add text');
+
+    $edit = [
+      'label[0][value]' => 'Test usage warning message',
+      'paragraphs[0][subform][field_text][0][value]' => 'Example text.',
+    ];
+    $this->drupalPostForm(NULL, $edit, 'Save');
+    $assert_session->pageTextContains('Paragraph Test usage warning message has been created.');
+
+    // Create content with referenced paragraph.
+    $this->drupalGet('node/add/paragraphed_test');
+    $page->pressButton('Add From library');
+    $edit = [
+      'title[0][value]' => 'Test content',
+      'field_paragraphs[0][subform][field_reusable_paragraph][0][target_id]' => 'Test usage warning message',
+    ];
+    $this->drupalPostForm(NULL, $edit, 'Save');
+
+    $node = $this->drupalGetNodeByTitle('Test content');
+    $library_item = $node->get('field_paragraphs')->entity->get('field_reusable_paragraph')->entity;
+
+    // Check if there is a warning message on the delete form.
+    $this->drupalGet('/admin/content/paragraphs/' . $library_item->id() . '/delete');
+    $assert_session->pageTextContains('There are recorded usages of this entity.');
   }
 
 }

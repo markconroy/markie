@@ -10,33 +10,24 @@
   text-align: center;
   white-space: nowrap;
   vertical-align: baseline;
+  margin: 3px 0;
 }
 
 .paragraphs-badge:empty {
   display: none;
 }
 
-.paragraph-info {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-box-align: center;
-  -webkit-align-items: center;
-      -ms-flex-align: center;
-          align-items: center;
-}
-
-.js .paragraphs-collapsed-description {
+.js .paragraphs-description .paragraphs-content-wrapper,
+.js .paragraphs-description .paragraphs-plugin-wrapper {
   position: relative;
   height: 1.538em;
   overflow: hidden;
-  color: #777;
   word-break: break-all;
   line-height: 1.538em;
 }
 
-.js .paragraphs-collapsed-description::after {
+.js .paragraphs-description .paragraphs-content-wrapper::after,
+.js .paragraphs-description .paragraphs-plugin-wrapper::after {
   display: block;
   position: absolute;
   top: 0;
@@ -45,6 +36,36 @@
   background: -webkit-gradient(linear, left top, right top, from(rgba(255, 255, 255, 0)), to(#fff));
   background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, #fff 100%);
   content: "\00a0";
+}
+
+.js .paragraphs-description .summary-plugin-label::after {
+  content: ": ";
+}
+
+.js .paragraphs-description .summary-content {
+  color: #666666;
+}
+
+.js .paragraphs-description .summary-plugin {
+  padding-right: 5px;
+  font-size: 0.7rem;
+  color: #888888;
+}
+
+.js .paragraphs-description .summary-plugin:not(:last-child) {
+  border-right: 2px solid #e5e3de;
+}
+
+.js .paragraphs-description .summary-plugin:not(:first-child) {
+  padding: 0 5px;
+}
+
+.js .behavior-active .paragraphs-expanded-description .paragraphs-plugin-wrapper {
+  display: none;
+}
+
+.js .content-active .paragraphs-expanded-description .paragraphs-content-wrapper {
+  display: none;
 }
 
 .paragraph-formatter {

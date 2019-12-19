@@ -61,7 +61,12 @@ class TestBoldTextBehavior extends ParagraphsBehaviorBase {
    */
   public function settingsSummary(Paragraph $paragraph) {
     $bold_setting = $paragraph->getBehaviorSetting($this->getPluginId(), 'bold_text');
-    return [$bold_setting ? $this->t('Bold: Yes') : $this->t('Bold: No')];
+    return [
+      [
+        'label' => $this->t('Bold'),
+        'value' => $bold_setting ? $this->t('Yes') : $this->t('No')
+      ]
+    ];
   }
 
   /**

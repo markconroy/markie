@@ -6,8 +6,6 @@ use Drupal\Component\Utility\NestedArray;
 use Drupal\Component\Utility\Html;
 use Drupal\Core\Entity\Entity\EntityFormDisplay;
 use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Entity\EntityReferenceSelection\SelectionPluginManagerInterface;
-use Drupal\Core\Entity\RevisionableInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldFilteredMarkup;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
@@ -15,12 +13,9 @@ use Drupal\Core\Field\WidgetBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Render\Element;
-use Drupal\node\Entity\Node;
-use Drupal\paragraphs;
 use Drupal\paragraphs\ParagraphInterface;
 use Symfony\Component\Validator\ConstraintViolationInterface;
 use Drupal\paragraphs\Plugin\EntityReferenceSelection\ParagraphSelection;
-
 
 /**
  * Plugin implementation of the 'entity_reference paragraphs' widget.
@@ -648,7 +643,12 @@ class InlineParagraphsWidget extends WidgetBase {
         ];
 
         field_group_attach_groups($element['subform'], $context);
-        $element['subform']['#pre_render'][] = 'field_group_form_pre_render';
+        if (function_exists('field_group_form_pre_render')) {
+          $element['subform']['#pre_render'][] = 'field_group_form_pre_render';
+        }
+        if (function_exists('field_group_form_process')) {
+          $element['subform']['#process'][] = 'field_group_form_process';
+        }
       }
 
       if ($item_mode == 'edit') {
@@ -699,11 +699,9 @@ class InlineParagraphsWidget extends WidgetBase {
         $element['subform'] = array();
         $element['behavior_plugins'] = [];
         if ($paragraphs_entity) {
-          $summary = $paragraphs_entity->getSummary();
           $element['top']['paragraph_summary']['fields_info'] = [
-            '#markup' => $summary,
-            '#prefix' => '<div class="paragraphs-collapsed-description">',
-            '#suffix' => '</div>',
+            '#theme' => 'paragraphs_summary',
+            '#summary' => $paragraphs_entity->getSummaryItems(),
           ];
         }
       }
@@ -765,7 +763,6 @@ class InlineParagraphsWidget extends WidgetBase {
         }
       }
     }
-
 
     return $return_bundles;
   }
@@ -1004,6 +1001,7 @@ class InlineParagraphsWidget extends WidgetBase {
     $access_control_handler = $entity_type_manager->getAccessControlHandler($target_type);
     $dragdrop_settings = $this->getSelectionHandlerSetting('target_bundles_drag_drop');
 
+    $this->accessOptions = [];
     foreach ($bundles as $machine_name => $bundle) {
       if ($dragdrop_settings || (empty($this->getSelectionHandlerSetting('target_bundles'))
           || in_array($machine_name, $this->getSelectionHandlerSetting('target_bundles')))) {
@@ -1328,7 +1326,8 @@ class InlineParagraphsWidget extends WidgetBase {
       }
       // If our mode is remove don't save or reference this entity.
       // @todo: Maybe we should actually delete it here?
-      elseif($widget_state['paragraphs'][$item['_original_delta']]['mode'] == 'remove' || $widget_state['paragraphs'][$item['_original_delta']]['mode'] == 'removed') {
+      elseif(isset($widget_state['paragraphs'][$item['_original_delta']]['mode'])
+        && in_array($widget_state['paragraphs'][$item['_original_delta']]['mode'], ['remove', 'removed'])) {
         $item['target_id'] = NULL;
         $item['target_revision_id'] = NULL;
       }

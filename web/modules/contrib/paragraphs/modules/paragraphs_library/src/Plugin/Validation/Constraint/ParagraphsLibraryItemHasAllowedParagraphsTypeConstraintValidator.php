@@ -94,22 +94,24 @@ class ParagraphsLibraryItemHasAllowedParagraphsTypeConstraintValidator extends C
         /** @var \Drupal\paragraphs_library\LibraryItemInterface $library_item_entity */
         foreach ($paragraph->get($field_name) as $entity_reference_item) {
           // Get the Paragraphs type of the library item.
-          $library_item_entity = $entity_reference_item->entity;
-          $used_paragraphs_type = $library_item_entity->get('paragraphs')->entity->getType();
+          if ($library_item_entity = $entity_reference_item->entity) {
+            if ($used_paragraphs = $library_item_entity->get('paragraphs')->entity) {
+              $used_paragraphs_type = $used_paragraphs->getType();
+              // Check if the Paragraphs type of the item is not allowed in the
+              // field holding the parent Paragraph.
+              if (in_array($used_paragraphs_type, $allowed_paragraphs_types)) {
+                continue;
+              }
 
-          // Check if the Paragraphs type of the item is not allowed in the
-          // field holding the parent Paragraph.
-          if (in_array($used_paragraphs_type, $allowed_paragraphs_types)) {
-            continue;
+              $paragraphs_type_entity = $this->entityTypeManager->getStorage('paragraphs_type')->load($used_paragraphs_type);
+
+              $this->context->addViolation($constraint->message, [
+                '@library_item_field_label' => $field_definition->getLabel(),
+                '@paragraphs_type_label' => $paragraphs_type_entity->label(),
+                '@paragraph_field_label' => $value->getFieldDefinition()->getLabel(),
+              ]);
+            }
           }
-
-          $paragraphs_type_entity = $this->entityTypeManager->getStorage('paragraphs_type')->load($used_paragraphs_type);
-
-          $this->context->addViolation($constraint->message, [
-            '@library_item_field_label' => $field_definition->getLabel(),
-            '@paragraphs_type_label' => $paragraphs_type_entity->label(),
-            '@paragraph_field_label' => $value->getFieldDefinition()->getLabel(),
-          ]);
 
         }
       }

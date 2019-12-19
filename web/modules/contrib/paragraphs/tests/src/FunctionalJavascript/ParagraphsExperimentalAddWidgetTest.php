@@ -3,16 +3,16 @@
 namespace Drupal\Tests\paragraphs\FunctionalJavascript;
 
 use Drupal\Core\Entity\Entity\EntityFormDisplay;
-use Drupal\field_ui\Tests\FieldUiTestTrait;
-use Drupal\FunctionalJavascriptTests\JavascriptTestBase;
-use Drupal\paragraphs\Tests\Classic\ParagraphsCoreVersionUiTestTrait;
+use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
+use Drupal\Tests\field_ui\Traits\FieldUiTestTrait;
+use Drupal\Tests\paragraphs\Traits\ParagraphsCoreVersionUiTestTrait;
 
 /**
  * Test paragraphs user interface.
  *
  * @group paragraphs
  */
-class ParagraphsExperimentalAddWidgetTest extends JavascriptTestBase {
+class ParagraphsExperimentalAddWidgetTest extends WebDriverTestBase {
 
   use LoginAdminTrait;
   use FieldUiTestTrait;
@@ -83,15 +83,24 @@ class ParagraphsExperimentalAddWidgetTest extends JavascriptTestBase {
     $icon_two = $this->addParagraphsTypeIcon('text');
 
     // Add a text field to the text_paragraph type.
-    static::fieldUIAddNewField('admin/structure/paragraphs_type/' . $paragraph_type, 'text', 'Text', 'text_long', [], []);
+    $this->drupalGet('admin/structure/paragraphs_type/' . $paragraph_type . '/fields/add-field');
+    $page->selectFieldOption('new_storage_type', 'text_long');
+    $page->fillField('label', 'Text');
+    $this->assertSession()->waitForElementVisible('css', '#edit-name-machine-name-suffix .link');
+    $page->pressButton('Edit');
+    $page->fillField('field_name', 'text');
+    $page->pressButton('Save and continue');
 
     // Create paragraph type Nested test.
     $this->addParagraphsType('nested_test');
 
-    static::fieldUIAddNewField('admin/structure/paragraphs_type/nested_test', 'paragraphs', 'Paragraphs', 'entity_reference_revisions', [
-      'settings[target_type]' => 'paragraph',
-      'cardinality' => '-1',
-    ], []);
+    $this->drupalGet('/admin/structure/paragraphs_type/nested_test/fields/add-field');
+    $page->selectFieldOption('new_storage_type', 'field_ui:entity_reference_revisions:paragraph');
+    $page->fillField('label', 'Paragraphs');
+    $this->assertSession()->waitForElementVisible('css', '#edit-name-machine-name-suffix .link');
+    $page->pressButton('Edit');
+    $page->fillField('field_name', 'paragraphs');
+    $page->pressButton('Save and continue');
 
     // Set the settings for the field in the nested paragraph.
     $component = [
@@ -136,11 +145,10 @@ class ParagraphsExperimentalAddWidgetTest extends JavascriptTestBase {
     ];
     $this->drupalPostForm(NULL, $edit, t('Save'));
 
-
     // Check the created paragraphed test.
-    $this->assertText('paragraphed_test Example title has been created.');
-    $this->assertRaw('paragraph--type--nested-test');
-    $this->assertRaw('paragraph--type--text');
+    $this->assertSession()->pageTextContainsOnce('paragraphed_test Example title has been created.');
+    $this->assertSession()->elementTextContains('css', '.paragraph--type--nested-test', 'Paragraphs');
+    $this->assertSession()->elementTextContains('css', '.paragraph--type--text', '');
 
     // Add a paragraphs field with another paragraphs widget title to the
     // paragraphed_test content type.
@@ -198,16 +206,40 @@ class ParagraphsExperimentalAddWidgetTest extends JavascriptTestBase {
     $this->addParagraphsType('test_3');
 
     // Add a text field to the text_paragraph type.
-    static::fieldUIAddNewField('admin/structure/paragraphs_type/test_1', 'text_1', 'Text', 'text_long', [], []);
-    static::fieldUIAddNewField('admin/structure/paragraphs_type/test_2', 'text_2', 'Text', 'text_long', [], []);
-    static::fieldUIAddNewField('admin/structure/paragraphs_type/test_3', 'text_3', 'Text', 'text_long', [], []);
+    $this->drupalGet('admin/structure/paragraphs_type/test_1/fields/add-field');
+    $page->selectFieldOption('new_storage_type', 'text_long');
+    $page->fillField('label', 'Text');
+    $this->assertSession()->waitForElementVisible('css', '#edit-name-machine-name-suffix .link');
+    $page->pressButton('Edit');
+    $page->fillField('field_name', 'text_1');
+    $page->pressButton('Save and continue');
+
+    $this->drupalGet('admin/structure/paragraphs_type/test_2/fields/add-field');
+    $page->selectFieldOption('new_storage_type', 'text_long');
+    $page->fillField('label', 'Text');
+    $this->assertSession()->waitForElementVisible('css', '#edit-name-machine-name-suffix .link');
+    $page->pressButton('Edit');
+    $page->fillField('field_name', 'text_2');
+    $page->pressButton('Save and continue');
+
+    $this->drupalGet('admin/structure/paragraphs_type/test_3/fields/add-field');
+    $page->selectFieldOption('new_storage_type', 'text_long');
+    $page->fillField('label', 'Text');
+    $this->assertSession()->waitForElementVisible('css', '#edit-name-machine-name-suffix .link');
+    $page->pressButton('Edit');
+    $page->fillField('field_name', 'test_3');
+    $page->pressButton('Save and continue');
 
     // Create paragraph type Nested test.
     $this->addParagraphsType('test_nested');
-    static::fieldUIAddNewField('admin/structure/paragraphs_type/test_nested', 'paragraphs', 'Paragraphs', 'entity_reference_revisions', [
-      'settings[target_type]' => 'paragraph',
-      'cardinality' => '-1',
-    ], []);
+
+    $this->drupalGet('/admin/structure/paragraphs_type/test_nested/fields/add-field');
+    $page->selectFieldOption('new_storage_type', 'field_ui:entity_reference_revisions:paragraph');
+    $page->fillField('label', 'Paragraphs');
+    $this->assertSession()->waitForElementVisible('css', '#edit-name-machine-name-suffix .link');
+    $page->pressButton('Edit');
+    $page->fillField('field_name', 'paragraphs');
+    $page->pressButton('Save and continue');
 
     // Set the settings for the field in the nested paragraph.
     $component = [

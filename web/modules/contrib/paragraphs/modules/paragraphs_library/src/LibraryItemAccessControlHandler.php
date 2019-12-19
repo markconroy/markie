@@ -19,13 +19,6 @@ class LibraryItemAccessControlHandler extends EntityAccessControlHandler {
    * {@inheritdoc}
    */
   protected function checkAccess(EntityInterface $library_item, $operation, AccountInterface $account) {
-    if ($operation == 'delete') {
-      $usage_data = \Drupal::service('entity_usage.usage')->listSources($library_item);
-      if ($usage_data) {
-        return AccessResult::forbidden();
-      }
-    }
-
     // In case a library item is unpublished, only allow access if a user has
     // administrative permission. Ensure to collect the required cacheability
     // metadata and combine both the published and the referenced access check
