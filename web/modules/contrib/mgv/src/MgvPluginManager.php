@@ -16,7 +16,7 @@ use Drupal\mgv\Plugin\GlobalVariableInterface;
  *
  * @Annotation
  */
-class MgvPluginManager extends DefaultPluginManager {
+class MgvPluginManager extends DefaultPluginManager implements MgvPluginManagerInterface {
 
   /**
    * Variables list.
@@ -49,10 +49,7 @@ class MgvPluginManager extends DefaultPluginManager {
   }
 
   /**
-   * Returns all the variables.
-   *
-   * @return array[mixed]
-   *   Variables list.
+   * {@inheritdoc}
    */
   public function getVariables() {
     if (empty($this->variables)) {
@@ -78,15 +75,7 @@ class MgvPluginManager extends DefaultPluginManager {
   }
 
   /**
-   * Create namespaced value of given global variable id and instance.
-   *
-   * @param string $plugin_id
-   *   Plugin id.
-   * @param \Drupal\mgv\Plugin\GlobalVariableInterface $variable
-   *   Plugin instance.
-   *
-   * @return array|mixed
-   *   Generated value.
+   * {@inheritdoc}
    */
   public function getNamespacedValue($plugin_id, GlobalVariableInterface $variable) {
     $value = $variable->getValue();

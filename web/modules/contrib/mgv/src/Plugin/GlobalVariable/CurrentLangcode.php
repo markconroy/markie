@@ -21,7 +21,7 @@ class CurrentLangcode extends GlobalVariable {
   public function getValue() {
     // Print the current langcode. This could be useful if you want to do a
     // "Back to Search" type feature, but need to ensure you keep the current
-    // selected language e.g. /fr/node/123 and /ga/node/123
+    // selected language e.g. "/fr/node/123" and "/ga/node/123".
     return \Drupal::languageManager()->getCurrentLanguage()->getId();
   }
 

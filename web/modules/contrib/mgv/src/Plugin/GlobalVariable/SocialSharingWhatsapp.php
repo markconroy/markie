@@ -2,16 +2,17 @@
 
 namespace Drupal\mgv\Plugin\GlobalVariable;
 
+use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\Url;
 use Drupal\mgv\Plugin\GlobalVariable;
 
 /**
- * Class SocialSharingTwitter.
+ * Class SocialSharingWhatsapp.
  *
  * @package Drupal\mgv\Plugin\GlobalVariable
  *
  * @Mgv(
- *   id = "social_sharing\twitter",
+ *   id = "social_sharing\whatsapp",
  *   variableDependencies={
  *     "current_page_title",
  *     "current_path",
@@ -19,7 +20,7 @@ use Drupal\mgv\Plugin\GlobalVariable;
  *   }
  * );
  */
-class SocialSharingTwitter extends GlobalVariable {
+class SocialSharingWhatsapp extends GlobalVariable {
 
   /**
    * {@inheritdoc}
@@ -28,20 +29,18 @@ class SocialSharingTwitter extends GlobalVariable {
     // Social Sharing Global Variables
     //
     // To use this, you need to wrap the variable in an anchor tag, such as:
-    // <a href="{{ global_variables.social_sharing.twitter }}">Twitter</a>
+    // <a href="{{ global_variables.social_sharing.whatsapp }}">Whatsapp</a>
     //
-    // Share the current page on Twitter.
+    // Share the current page on Whatsapp.
     return Url::fromUri(
-      'https://twitter.com/share',
+      'whatsapp://send',
       [
         'absolute' => TRUE,
-        'https' => TRUE,
         'query' => [
-          'url' => $this->getDependency('base_url') . $this->getDependency('current_path'),
-          'text' => $this->getDependency('current_page_title'),
+          'text' => $this->getDependency('current_page_title') . ' - ' .  $this->getDependency('base_url') . $this->getDependency('current_path'),
         ],
-      ])
+      ]
+    )
       ->toUriString();
   }
-
 }

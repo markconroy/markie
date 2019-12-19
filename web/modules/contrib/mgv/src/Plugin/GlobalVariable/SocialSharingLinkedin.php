@@ -2,7 +2,6 @@
 
 namespace Drupal\mgv\Plugin\GlobalVariable;
 
-use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\Url;
 use Drupal\mgv\Plugin\GlobalVariable;
 

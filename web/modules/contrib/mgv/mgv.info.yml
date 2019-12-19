@@ -1,10 +1,9 @@
 name: More Global Variables
-# core: 8.x
+core: 8.x
 description: Some extra global variables to make your life a little easier.
 type: module
 
-# Information added by Drupal.org packaging script on 2018-03-05
-version: '8.x-1.11'
-core: '8.x'
+# Information added by Drupal.org packaging script on 2019-10-03
+version: '8.x-1.14'
 project: 'mgv'
-datestamp: 1520254086
+datestamp: 1570108692
