@@ -1,34 +1,36 @@
 version: "3"
 
 services:
-
-  honeypot:
-    image: geerlingguy/drupal-vm
+  drupal:
+    image: geerlingguy/drupal
     container_name: honeypot
+    environment:
+      DRUPAL_DATABASE_HOST: 'mysql'
+      DRUPAL_DATABASE_PORT: '3306'
+      DRUPAL_DATABASE_NAME: 'drupal'
+      DRUPAL_DATABASE_USERNAME: 'drupal'
+      DRUPAL_DATABASE_PASSWORD: 'drupal'
+      DRUPAL_HASH_SALT: 'fe918c992fb1bcfa01f32303c8b21f3d0a0'
+      DRUPAL_DOWNLOAD_IF_NOT_PRESENT: 'true'
+      DRUPAL_DOWNLOAD_METHOD: 'composer'
+      DRUPAL_PROJECT_ROOT: /var/www/html
+      APACHE_DOCUMENT_ROOT: /var/www/html/web
     ports:
-      - 80:80
-      - 443:443
-    privileged: true
-    extra_hosts:
-      local.drupalhoneypot.com: 127.0.0.1
-    dns:
-      - 8.8.8.8
-      - 8.8.4.4
+      - "80:80"
+    restart: always
     volumes:
-      # Switch to the commented line once Docker CE stable has the feature.
-      - ./:/opt/honeypot/:rw
-      # - ./:/opt/honeypot/:rw,delegated
-    command: /lib/systemd/systemd
-    networks:
-      honeypot:
-        ipv4_address: 192.168.22.33
+      - ./:/opt/honeypot/:rw,delegated
 
-networks:
-
-  honeypot:
-    driver: bridge
-    driver_opts:
-      ip: 192.168.22.1
-    ipam:
-      config:
-        - subnet: "192.168.22.0/16"
+  mysql:
+    image: mysql:5.7
+    container_name: drupal-mysql
+    command: ['--max_allowed_packet=32505856']
+    environment:
+      MYSQL_RANDOM_ROOT_PASSWORD: 'yes'
+      MYSQL_DATABASE: drupal
+      MYSQL_USER: drupal
+      MYSQL_PASSWORD: drupal
+    ports:
+      - "3306:3306"
+    volumes:
+      - /var/lib/mysql

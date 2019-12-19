@@ -1,15 +1,23 @@
 <?php
 
-namespace Drupal\honeypot\Tests;
+namespace Drupal\Tests\honeypot\Functional;
 
-use Drupal\simpletest\WebTestBase;
+use Drupal\Component\Serialization\Json;
+use Drupal\Tests\BrowserTestBase;
 
 /**
  * Test programmatic submission of forms protected by Honeypot.
  *
  * @group honeypot
  */
-class HoneypotFormProgrammaticSubmissionTest extends WebTestBase {
+class HoneypotFormProgrammaticSubmissionTest extends BrowserTestBase {
+
+  /**
+   * Default theme.
+   *
+   * @var string
+   */
+  protected $defaultTheme = 'stark';
 
   /**
    * Modules to enable.
@@ -40,9 +48,9 @@ class HoneypotFormProgrammaticSubmissionTest extends WebTestBase {
    */
   public function testProgrammaticFormSubmission() {
     $result = $this->drupalGet('/honeypot_test/submit_form');
-    $form_errors = (array) json_decode($result);
-    $this->assertNoRaw('There was a problem with your form submission. Please wait 6 seconds and try again.');
-    $this->assertFalse($form_errors, 'The were no validation errors when submitting the form.');
+    $form_errors = (array) Json::decode($result);
+    $this->assertSession()->responseNotContains('There was a problem with your form submission. Please wait 6 seconds and try again.');
+    $this->assertEmpty($form_errors, 'The were no validation errors when submitting the form.');
   }
 
 }

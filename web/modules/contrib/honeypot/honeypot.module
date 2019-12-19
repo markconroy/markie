@@ -140,6 +140,7 @@ function honeypot_add_form_protection(&$form, FormStateInterface $form_state, ar
     $honeypot_class = $honeypot_element . '-textfield';
     $form[$honeypot_element] = [
       '#theme_wrappers' => [
+        'form_element',
         'container' => [
           '#id' => NULL,
           '#attributes' => [
@@ -206,7 +207,7 @@ function _honeypot_honeypot_validate($element, FormStateInterface $form_state) {
   $honeypot_value = $element['#value'];
 
   // Make sure it's empty.
-  if (!empty($honeypot_value)) {
+  if (!empty($honeypot_value) || $honeypot_value == '0') {
     _honeypot_log($form_state->getValue('form_id'), 'honeypot');
     $form_state->setErrorByName('', t('There was a problem with your form submission. Please refresh the page and try again.'));
   }

@@ -1,24 +1,49 @@
 <?php
 
-namespace Drupal\honeypot\Tests;
+namespace Drupal\Tests\honeypot\Functional;
 
-use Drupal\simpletest\WebTestBase;
 use Drupal\comment\Tests\CommentTestTrait;
 use Drupal\comment\Plugin\Field\FieldType\CommentItemInterface;
 use Drupal\contact\Entity\ContactForm;
+use Drupal\Tests\BrowserTestBase;
+use Drupal\user\UserInterface;
 
 /**
  * Test Honeypot spam protection functionality.
  *
  * @group honeypot
  */
-class HoneypotFormTest extends WebTestBase {
+class HoneypotFormTest extends BrowserTestBase {
 
   use CommentTestTrait;
 
+  /**
+   * Admin user.
+   *
+   * @var \Drupal\user\UserInterface
+   */
   protected $adminUser;
+
+  /**
+   * Site visitor.
+   *
+   * @var \Drupal\user\UserInterface
+   */
   protected $webUser;
+
+  /**
+   * Node object.
+   *
+   * @var \Drupal\node\NodeInterface
+   */
   protected $node;
+
+  /**
+   * Default theme.
+   *
+   * @var string
+   */
+  protected $defaultTheme = 'stark';
 
   /**
    * Modules to enable.
@@ -28,7 +53,7 @@ class HoneypotFormTest extends WebTestBase {
   public static $modules = ['honeypot', 'node', 'comment', 'contact'];
 
   /**
-   * Setup before test.
+   * {@inheritdoc}
    */
   public function setUp() {
     // Enable modules required for this test.
@@ -47,7 +72,7 @@ class HoneypotFormTest extends WebTestBase {
     // Set up other required configuration.
     $user_config = \Drupal::configFactory()->getEditable('user.settings');
     $user_config->set('verify_mail', TRUE);
-    $user_config->set('register', USER_REGISTER_VISITORS);
+    $user_config->set('register', UserInterface::REGISTER_VISITORS);
     $user_config->save();
 
     // Create an Article node type.
@@ -89,7 +114,7 @@ class HoneypotFormTest extends WebTestBase {
    */
   public function testUserLoginNotProtected() {
     $this->drupalGet('user');
-    $this->assertNoText('id="edit-url" name="url"', 'Honeypot not enabled on user login form.');
+    $this->assertSession()->responseNotContains('id="edit-url" name="url"');
   }
 
   /**
@@ -102,7 +127,7 @@ class HoneypotFormTest extends WebTestBase {
     $this->drupalPostForm('user/register', $edit, t('Create new account'));
 
     // Form should have been submitted successfully.
-    $this->assertText(t('A welcome message with further instructions has been sent to your email address.'), 'User registered successfully.');
+    $this->assertSession()->pageTextContains('A welcome message with further instructions has been sent to your email address.');
   }
 
   /**
@@ -116,7 +141,7 @@ class HoneypotFormTest extends WebTestBase {
     $this->drupalPostForm('user/register', $edit, t('Create new account'));
 
     // Form should have error message.
-    $this->assertText(t('There was a problem with your form submission. Please refresh the page and try again.'), 'Registration form protected by honeypot.');
+    $this->assertSession()->pageTextContains('There was a problem with your form submission. Please refresh the page and try again.');
   }
 
   /**
@@ -142,7 +167,23 @@ class HoneypotFormTest extends WebTestBase {
     $this->drupalPostForm('user/register', $edit, t('Create new account'));
 
     // Form should have error message.
-    $this->assertText(t('There was a problem with your form submission. Please wait 6 seconds and try again.'), 'Registration form protected by time limit.');
+    $this->assertSession()->pageTextContains('There was a problem with your form submission. Please wait 6 seconds and try again.');
+  }
+
+  /**
+   * Test that any (not-strict-empty) value triggers protection.
+   */
+  public function testStrictEmptinessOnHoneypotField() {
+    // Initialise the form values.
+    $edit['name'] = $this->randomMachineName();
+    $edit['mail'] = $edit['name'] . '@example.com';
+
+    // Any value that is not strictly empty should trigger Honeypot.
+    foreach (['0', ' '] as $value) {
+      $edit['url'] = $value;
+      $this->drupalPostForm('user/register', $edit, t('Create new account'));
+      $this->assertText(t('There was a problem with your form submission. Please refresh the page and try again.'), "Honeypot protection is triggered when the honeypot field contains '{$value}'.");
+    }
   }
 
   /**
@@ -160,7 +201,7 @@ class HoneypotFormTest extends WebTestBase {
     // Set up form and submit it.
     $edit["comment_body[0][value]"] = $comment;
     $this->drupalPostForm('comment/reply/node/' . $this->node->id() . '/comment', $edit, t('Save'));
-    $this->assertText(t('Your comment has been queued for review'), 'Comment posted successfully.');
+    $this->assertSession()->pageTextContains('Your comment has been queued for review');
   }
 
   /**
@@ -176,7 +217,7 @@ class HoneypotFormTest extends WebTestBase {
     $edit["comment_body[0][value]"] = $comment;
     $edit['url'] = 'http://www.example.com/';
     $this->drupalPostForm('comment/reply/node/' . $this->node->id() . '/comment', $edit, t('Save'));
-    $this->assertText(t('There was a problem with your form submission. Please refresh the page and try again.'), 'Comment posted successfully.');
+    $this->assertSession()->pageTextContains('There was a problem with your form submission. Please refresh the page and try again.');
   }
 
   /**
@@ -188,7 +229,7 @@ class HoneypotFormTest extends WebTestBase {
 
     // Get the comment reply form and ensure there's no 'url' field.
     $this->drupalGet('comment/reply/node/' . $this->node->id() . '/comment');
-    $this->assertNoText('id="edit-url" name="url"', 'Honeypot home page field not shown.');
+    $this->assertSession()->responseNotContains('id="edit-url" name="url"');
   }
 
   /**
@@ -204,7 +245,7 @@ class HoneypotFormTest extends WebTestBase {
     // Set up the form and submit it.
     $edit["title[0][value]"] = 'Test Page';
     $this->drupalPostForm('node/add/article', $edit, t('Save'));
-    $this->assertText(t('There was a problem with your form submission.'), 'Honeypot node form timestamp protection works.');
+    $this->assertSession()->pageTextContains('There was a problem with your form submission.');
   }
 
   /**
@@ -217,7 +258,7 @@ class HoneypotFormTest extends WebTestBase {
     // Post a node form using the 'Preview' button and make sure it's allowed.
     $edit["title[0][value]"] = 'Test Page';
     $this->drupalPostForm('node/add/article', $edit, t('Preview'));
-    $this->assertNoText(t('There was a problem with your form submission.'), 'Honeypot not blocking node form previews.');
+    $this->assertSession()->pageTextNotContains('There was a problem with your form submission.');
   }
 
   /**
@@ -227,7 +268,10 @@ class HoneypotFormTest extends WebTestBase {
     $this->drupalLogin($this->adminUser);
 
     // Disable 'protect_all_forms'.
-    \Drupal::configFactory()->getEditable('honeypot.settings')->set('protect_all_forms', FALSE)->save();
+    \Drupal::configFactory()
+      ->getEditable('honeypot.settings')
+      ->set('protect_all_forms', FALSE)
+      ->save();
 
     // Create a Website feedback contact form.
     $feedback_form = ContactForm::create([
@@ -248,7 +292,7 @@ class HoneypotFormTest extends WebTestBase {
 
     $this->drupalLogin($this->webUser);
     $this->drupalGet('contact/feedback');
-    $this->assertField('url', 'Honeypot field is added to Contact form.');
+    $this->assertSession()->fieldExists('url');
   }
 
 }

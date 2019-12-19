@@ -1,17 +1,29 @@
 <?php
 
-namespace Drupal\honeypot\Tests;
+namespace Drupal\Tests\honeypot\Functional;
 
-use Drupal\simpletest\WebTestBase;
+use Drupal\Tests\BrowserTestBase;
 
 /**
  * Test Honeypot spam protection admin form functionality.
  *
  * @group honeypot
  */
-class HoneypotAdminFormTest extends WebTestBase {
+class HoneypotAdminFormTest extends BrowserTestBase {
 
+  /**
+   * Admin user.
+   *
+   * @var \Drupal\user\UserInterface
+   */
   protected $adminUser;
+
+  /**
+   * Default theme.
+   *
+   * @var string
+   */
+  protected $defaultTheme = 'stark';
 
   /**
    * Modules to enable.
@@ -46,14 +58,14 @@ class HoneypotAdminFormTest extends WebTestBase {
     $this->drupalPostForm('admin/config/content/honeypot', $edit, t('Save configuration'));
 
     // Form should have been submitted successfully.
-    $this->assertText(t('The configuration options have been saved.'), 'Honeypot element name assertion works for valid names.');
+    $this->assertSession()->pageTextContains('The configuration options have been saved.');
 
     // Set up form and submit it.
     $edit['element_name'] = "test-1";
     $this->drupalPostForm('admin/config/content/honeypot', $edit, t('Save configuration'));
 
     // Form should have been submitted successfully.
-    $this->assertText(t('The configuration options have been saved.'), 'Honeypot element name assertion works for valid names with dashes and numbers.');
+    $this->assertSession()->pageTextContains('The configuration options have been saved.');
   }
 
   /**
@@ -68,7 +80,7 @@ class HoneypotAdminFormTest extends WebTestBase {
     $this->drupalPostForm('admin/config/content/honeypot', $edit, t('Save configuration'));
 
     // Form submission should fail.
-    $this->assertText(t('The element name must start with a letter.'), 'Honeypot element name assertion works for invalid names.');
+    $this->assertSession()->pageTextContains('The element name must start with a letter.');
   }
 
   /**
@@ -83,14 +95,14 @@ class HoneypotAdminFormTest extends WebTestBase {
     $this->drupalPostForm('admin/config/content/honeypot', $edit, t('Save configuration'));
 
     // Form submission should fail.
-    $this->assertText(t('The element name cannot contain spaces or other special characters.'), 'Honeypot element name assertion works for invalid names with special characters.');
+    $this->assertSession()->pageTextContains('The element name cannot contain spaces or other special characters.');
 
     // Set up form and submit it.
     $edit['element_name'] = "space in name";
     $this->drupalPostForm('admin/config/content/honeypot', $edit, t('Save configuration'));
 
     // Form submission should fail.
-    $this->assertText(t('The element name cannot contain spaces or other special characters.'), 'Honeypot element name assertion works for invalid names with spaces.');
+    $this->assertSession()->pageTextContains('The element name cannot contain spaces or other special characters.');
   }
 
 }

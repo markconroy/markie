@@ -12,6 +12,7 @@ use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Cache\CacheBackendInterface;
+use Drupal\Core\Messenger\MessengerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -48,6 +49,13 @@ class HoneypotSettingsController extends ConfigFormBase {
   protected $cache;
 
   /**
+   * The Messenger service.
+   *
+   * @var \Drupal\Core\Messenger\MessengerInterface
+   */
+  protected $messenger;
+
+  /**
    * Constructs a settings controller.
    *
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
@@ -60,13 +68,16 @@ class HoneypotSettingsController extends ConfigFormBase {
    *   The entity type bundle info service.
    * @param \Drupal\Core\Cache\CacheBackendInterface $cache_backend
    *   The cache backend interface.
+   * @param \Drupal\Core\Messenger\MessengerInterface $messenger
+   *   The messenger service.
    */
-  public function __construct(ConfigFactoryInterface $config_factory, ModuleHandlerInterface $module_handler, EntityTypeManagerInterface $entity_type_manager, EntityTypeBundleInfoInterface $entity_type_bundle_info, CacheBackendInterface $cache_backend) {
+  public function __construct(ConfigFactoryInterface $config_factory, ModuleHandlerInterface $module_handler, EntityTypeManagerInterface $entity_type_manager, EntityTypeBundleInfoInterface $entity_type_bundle_info, CacheBackendInterface $cache_backend, MessengerInterface $messenger) {
     parent::__construct($config_factory);
     $this->moduleHandler = $module_handler;
     $this->entityTypeManager = $entity_type_manager;
     $this->entityTypeBundleInfo = $entity_type_bundle_info;
     $this->cache = $cache_backend;
+    $this->messenger = $messenger;
   }
 
   /**
@@ -78,7 +89,8 @@ class HoneypotSettingsController extends ConfigFormBase {
       $container->get('module_handler'),
       $container->get('entity_type.manager'),
       $container->get('entity_type.bundle.info'),
-      $container->get('cache.default')
+      $container->get('cache.default'),
+      $container->get('messenger')
     );
   }
 
@@ -323,7 +335,7 @@ class HoneypotSettingsController extends ConfigFormBase {
     $this->cache->delete('honeypot_protected_forms');
 
     // Tell the user the settings have been saved.
-    drupal_set_message($this->t('The configuration options have been saved.'));
+    $this->messenger->addMessage($this->t('The configuration options have been saved.'));
   }
 
 }
