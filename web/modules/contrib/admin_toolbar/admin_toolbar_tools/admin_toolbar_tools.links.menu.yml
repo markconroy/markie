@@ -74,3 +74,7 @@ admin_toolbar_tools.flush_rendercache:
   route_name: admin_toolbar_tools.flush_rendercache
   parent: admin_toolbar_tools.flush
   menu_name: admin
+
+admin_toolbar_tools.extra_links:
+  deriver: \Drupal\admin_toolbar_tools\Plugin\Derivative\ExtraLinks
+  menu_name: admin

@@ -1,0 +1,9 @@
+services:
+  admin_toolbar_tools.search_links:
+    class: Drupal\admin_toolbar_tools\SearchLinks
+    arguments:
+     - '@entity_type.manager'
+     - '@module_handler'
+     - '@router.route_provider'
+     - '@cache_contexts_manager'
+     - '@cache.toolbar'

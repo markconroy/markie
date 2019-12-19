@@ -6,7 +6,6 @@
  */
 
 use Drupal\Core\Session\AccountInterface;
-use Drupal\Core\Url;
 use Drupal\user\Entity\Role;
 use Symfony\Component\Routing\Exception\RouteNotFoundException;
 use Drupal\Core\Routing\RouteMatchInterface;
@@ -74,7 +73,8 @@ function admin_toolbar_links_access_filter_filter_non_accessible_links(array &$i
     }
 
     // Check, if user has access rights to the route.
-    if (!\Drupal::accessManager()->checkNamedRoute($route_name, $route_params)) {
+    if (!\Drupal::accessManager()
+      ->checkNamedRoute($route_name, $route_params)) {
       unset($items[$route]);
     }
     else {
@@ -82,7 +82,8 @@ function admin_toolbar_links_access_filter_filter_non_accessible_links(array &$i
         // Recursively call this function for the child items.
         admin_toolbar_links_access_filter_filter_non_accessible_links($items[$route]['below']);
       }
-      if (empty($items[$route]['below']) && \Drupal::moduleHandler()->moduleExists('admin_toolbar')) {
+      if (empty($items[$route]['below']) && \Drupal::moduleHandler()
+        ->moduleExists('admin_toolbar')) {
 
         // Every child item has been cleared out.
         // Now check, if the given route represents an overview page only,
@@ -97,43 +98,6 @@ function admin_toolbar_links_access_filter_filter_non_accessible_links(array &$i
           // Let's remove the expanded flag.
           $items[$route]['is_expanded'] = FALSE;
         }
-      }
-    }
-  }
-}
-
-/**
- * Implements template_preprocess_admin_block_content().
- */
-function admin_toolbar_links_access_filter_admin_block_content(&$variables) {
-  if (!admin_toolbar_links_access_filter_user_has_admin_role($variables['user'])) {
-    foreach ($variables['content'] as $key => &$item) {
-      if (isset($item['url']) && $item['url'] instanceof Url) {
-        /* @var \Drupal\Core\Url $url */
-        $url = $item['url'];
-        if ($url->access()) {
-          continue;
-        }
-        unset($variables['content'][$key]);
-      }
-
-      // The key is structured in the form: "ID title route",
-      // concatenated with spaces.
-      $key_parts = explode(' ', $key);
-      $route = end($key_parts);
-
-      // Special handling for Views pages, as they are not defined
-      // system routes.
-      // @TODO check the permission for Views + find a generic way for similar
-      // cases. Best way would be to get the link entity somehow to properly
-      // check permissions.
-      if (strpos($route, 'views_view:') === 0) {
-        continue;
-      }
-
-      // Check, if user has access rights to the route.
-      if (!\Drupal::accessManager()->checkNamedRoute($route)) {
-        unset($variables['content'][$key]);
       }
     }
   }

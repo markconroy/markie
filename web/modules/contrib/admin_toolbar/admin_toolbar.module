@@ -17,7 +17,8 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
 function admin_toolbar_toolbar_alter(&$items) {
   $items['administration']['tray']['toolbar_administration']['#pre_render'] = ['admin_toolbar_prerender_toolbar_administration_tray'];
   $items['administration']['#attached']['library'][] = 'admin_toolbar/toolbar.tree';
-
+  $admin_toolbar_tools = \Drupal::service('module_handler')
+    ->moduleExists('admin_toolbar_tools');
   $items['administration_search'] = [
     "#type" => "toolbar_item",
     'tab' => [
@@ -37,12 +38,18 @@ function admin_toolbar_toolbar_alter(&$items) {
         '#size' => 60,
         '#attributes' => [
           'id' => 'admin-toolbar-search-input',
+          'aria-labelledby' => 'toolbar-item-administration-search',
         ],
       ],
     ],
     '#attached' => [
       'library' => [
         'admin_toolbar/search',
+      ],
+      'drupalSettings' => [
+        'adminToolbarSearch' => [
+          'loadExtraLinks' => $admin_toolbar_tools,
+        ],
       ],
     ],
     '#wrapper_attributes' => [
@@ -61,13 +68,11 @@ function admin_toolbar_help($route_name, RouteMatchInterface $route_match) {
         ':toolbar' => Url::fromRoute('help.page', ['name' => 'toolbar'])->toString(),
         ':automated_cron' => (\Drupal::moduleHandler()->moduleExists('automated_cron')) ? Url::fromRoute('help.page', ['name' => 'automated_cron'])->toString() : '#',
       ];
-
       $output = '';
       $output .= '<h3>' . t('About') . '</h3>';
       $output .= '<p>' . t('The Admin Toolbar module enhances the <a href=":toolbar">Toolbar</a> module by providing fast access to all the administrative links at the top of your site. Admin Toolbar remains a very "lightweight" module by closely integrating with all Toolbar functionality. It can be used in conjunction with all the sub modules included on Admin Toolbar, for quick access to system commands such as Flush all caches, <a href=":automated_cron">Run cron</a>, Run Updates, etc.', $variables) . '</p>';
       $output .= '<h3>' . t('Uses') . '</h3>';
       $output .= '<p>' . t('The Admin Toolbar greatly improves the user experience for those who regularly interact with the site Toolbar by providing fast, full access to all links in the site Toolbar without having to click to get there.') . '</p>';
-
       return $output;
   }
 }
@@ -98,7 +103,6 @@ function admin_toolbar_prerender_toolbar_administration_tray(array $element) {
   ];
   $tree = $menu_tree->transform($tree, $manipulators);
   $element['administration_menu'] = $menu_tree->build($tree);
-
   return $element;
 }
 
@@ -117,10 +121,8 @@ function toolbar_tools_menu_navigation_links(array $tree) {
       toolbar_tools_menu_navigation_links($element->subtree);
     }
     $link = $element->link;
-
     // Get the non-localized title to make the icon class.
     $definition = $link->getPluginDefinition();
-
     $element->options['attributes']['class'][] = 'toolbar-icon';
     $string = strtolower(str_replace(['.', ' ', '_'], ['-', '-', '-'], $definition['id']));
     $element->options['attributes']['class'][] = Html::cleanCssIdentifier('toolbar-icon-' . $string);

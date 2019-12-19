@@ -33,7 +33,7 @@
     "source": "http://cgit.drupalcode.org/admin_toolbar"
   },
   "require": {
-    "drupal/admin_toolbar": "^1",
-    "drupal/core": "~8.6"
+    "drupal/admin_toolbar": "^2",
+    "drupal/core": "~8.7"
   }
 }
