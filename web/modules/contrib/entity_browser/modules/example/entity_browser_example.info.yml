@@ -11,8 +11,8 @@ dependencies:
   - drupal:node
   - drupal:image
 
-# Information added by Drupal.org packaging script on 2018-06-04
-version: '8.x-1.5'
+# Information added by Drupal.org packaging script on 2019-07-04
+version: '8.x-1.8'
 core: '8.x'
 project: 'entity_browser'
-datestamp: 1528140785
+datestamp: 1562241187

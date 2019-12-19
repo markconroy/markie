@@ -70,7 +70,7 @@ class DropDown extends WidgetSelectorBase {
    *
    * @param array $form
    *   Form.
-   * @param FormStateInterface $form_state
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
    *   Form state object.
    *
    * @return array

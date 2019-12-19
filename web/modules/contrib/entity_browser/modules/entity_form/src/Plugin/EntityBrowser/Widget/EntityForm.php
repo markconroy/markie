@@ -16,7 +16,7 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Drupal\Core\Entity\EntityDisplayRepositoryInterface;
 
 /**
- * Uses a view to provide entity listing in a browser's widget.
+ * Provides entity form widget.
  *
  * @EntityBrowserWidget(
  *   id = "entity_form",
@@ -107,7 +107,7 @@ class EntityForm extends WidgetBase {
 
     // Pretend to be IEFs submit button.
     $form['#submit'] = [['Drupal\inline_entity_form\ElementSubmit', 'trigger']];
-    $form['actions']['submit']['#ief_submit_trigger']  = TRUE;
+    $form['actions']['submit']['#ief_submit_trigger'] = TRUE;
     $form['actions']['submit']['#ief_submit_trigger_all'] = TRUE;
 
     $form['inline_entity_form'] = [

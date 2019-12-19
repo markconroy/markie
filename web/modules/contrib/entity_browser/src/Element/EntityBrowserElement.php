@@ -7,6 +7,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Element\FormElement;
 use Drupal\entity_browser\Entity\EntityBrowser;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Component\Utility\NestedArray;
 
 /**
  * Provides an Entity Browser form element.
@@ -148,9 +149,18 @@ class EntityBrowserElement extends FormElement {
     // Propagate selection if edit selection mode is used.
     $entity_browser_preselected_entities = [];
     if ($element['#selection_mode'] === static::SELECTION_MODE_EDIT) {
-      $entity_browser->getSelectionDisplay()->checkPreselectionSupport();
-
-      $entity_browser_preselected_entities = $element['#default_value'];
+      if ($entity_browser->getSelectionDisplay()->supportsPreselection()) {
+        $entity_browser_preselected_entities = $element['#default_value'];
+      }
+      else {
+        $field_element = NestedArray::getValue($complete_form, array_slice($element['#array_parents'], 0, -1));
+        $tparams = [
+          '@field_name' => !empty($field_element['#title']) ? $field_element['#title'] : $element['#custom_hidden_id'],
+          '%selection_mode' => static::getSelectionModeOptions()[static::SELECTION_MODE_EDIT],
+          '@browser_link' => $entity_browser->toLink($entity_browser->label(), 'edit-form')->toString(),
+        ];
+        \Drupal::messenger()->addWarning(t('There is a configuration problem with field "@field_name". The selection mode %selection_mode requires an entity browser with a selection display plugin that supports preselection.  Either change the selection mode or update the @browser_link entity browser to use a selection display plugin that supports preselection.', $tparams));
+      }
     }
 
     $default_value = implode(' ', array_map(
@@ -171,7 +181,7 @@ class EntityBrowserElement extends FormElement {
         '#markup' => is_string($element['#entity_browser']) ? t('Entity browser @browser not found.', ['@browser' => $element['#entity_browser']]) : t('Entity browser not found.'),
       ];
     }
-    // Display entity_browser
+    // Display entity_browser.
     else {
       $display = $entity_browser->getDisplay();
       $display->setUuid(sha1(implode('-', array_merge([$complete_form['#build_id']], $element['#parents']))));
@@ -245,7 +255,8 @@ class EntityBrowserElement extends FormElement {
     return array_map(
       function ($item) {
         list($entity_type, $entity_id) = explode(':', $item);
-        return \Drupal::entityTypeManager()->getStorage($entity_type)->load($entity_id);
+        $entity = \Drupal::entityTypeManager()->getStorage($entity_type)->load($entity_id);
+        return \Drupal::service('entity.repository')->getTranslationFromContext($entity);
       },
       $ids
     );

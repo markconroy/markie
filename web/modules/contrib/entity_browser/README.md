@@ -1,20 +1,16 @@
-# Entity Browser Module
-
-[![Build Status](https://travis-ci.org/drupal-media/entity_browser.svg?branch=8.x-1.x)](https://travis-ci.org/drupal-media/entity_browser) [![Scrutinizer](https://img.shields.io/scrutinizer/g/drupal-media/entity_browser.svg)](https://scrutinizer-ci.com/g/drupal-media/entity_browser)
+Entity Browser Module
 
 Provides standardized interface to list, create and select entities.
 
 ## Requirements
 
 * Latest dev release of Drupal 8.x.
-* [Chaos tool set](https://drupal.org/project/ctools) (soft dependency for configuration UI)
 
 ## Configuration
 
 Module ships with a simple configuration UI which allows you to create, edit
-and delete entity browsers. It depends on
-[Chaos tool set](https://drupal.org/project/ctools). Enable it and navigate to
-/admin/config/content/entity_browser.
+and delete entity browsers. Navigate to
+/admin/config/content/entity_browser to use the UI.
 
 In order to use this configuration for testing or to help you contribute just 
 enable "Entity Browser example" module (entity_browser_example).

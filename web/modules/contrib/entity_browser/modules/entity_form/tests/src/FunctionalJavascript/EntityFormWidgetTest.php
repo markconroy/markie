@@ -5,14 +5,14 @@ namespace Drupal\Tests\entity_browser_entity_form\FunctionalJavascript;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
-use Drupal\FunctionalJavascriptTests\JavascriptTestBase;
+use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
 
 /**
  * Class for Entity browser entity form Javascript functional tests.
  *
  * @group entity_browser_entity_form
  */
-class EntityFormWidgetTest extends JavascriptTestBase {
+class EntityFormWidgetTest extends WebDriverTestBase {
 
   /**
    * Modules to enable.
@@ -21,7 +21,6 @@ class EntityFormWidgetTest extends JavascriptTestBase {
    */
   public static $modules = [
     'entity_browser_entity_form_test',
-    'ctools',
     'views',
     'block',
     'node',
@@ -103,12 +102,12 @@ class EntityFormWidgetTest extends JavascriptTestBase {
     $this->assertSession()->buttonNotExists('Save entity');
     $this->assertSession()->buttonExists('Save node');
 
-    // Make sure that the widget works correctly with the field widget
+    // Make sure that the widget works correctly with the field widget.
     $this->drupalGet('node/add/foo');
     $this->getSession()->getPage()->clickLink('Select entities');
     $this->getSession()->switchToIFrame('entity_browser_iframe_entity_browser_test_entity_form');
     $this->getSession()->getPage()->fillField('inline_entity_form[title][0][value]', 'War is peace');
-    $this->getSession()->getPage()->pressButton('Save node');
+    $this->assertSession()->buttonExists('Save node')->press();
 
     // Switch back to the main page.
     $this->getSession()->switchToIFrame();
@@ -116,7 +115,7 @@ class EntityFormWidgetTest extends JavascriptTestBase {
 
     $this->assertSession()->pageTextContains('War is peace');
     $this->getSession()->getPage()->fillField('title[0][value]', 'Freedom is slavery');
-    $this->getSession()->getPage()->pressButton('Save');
+    $this->assertSession()->buttonExists('Save')->press();
 
     $parent_node = $this->container->get('entity_type.manager')
       ->getStorage('node')
@@ -132,8 +131,8 @@ class EntityFormWidgetTest extends JavascriptTestBase {
     $this->getSession()->getPage()->clickLink('Select entities');
     $this->getSession()->switchToIFrame('entity_browser_iframe_entity_browser_test_entity_form');
     $this->getSession()->getPage()->fillField('inline_entity_form[title][0][value]', 'War is peace');
-    $this->getSession()->getPage()->pressButton('Save node');
-    $this->getSession()->getPage()->pressButton('Use selected');
+    $this->assertSession()->buttonExists('Save node')->press();
+    $this->assertSession()->buttonExists('Use selected')->press();
 
     // Switch back to the main page.
     $this->getSession()->switchToIFrame();
@@ -141,7 +140,7 @@ class EntityFormWidgetTest extends JavascriptTestBase {
 
     $this->assertSession()->pageTextContains('War is peace');
     $this->getSession()->getPage()->fillField('title[0][value]', 'Ignorance is strength');
-    $this->getSession()->getPage()->pressButton('Save');
+    $this->assertSession()->buttonExists('Save')->press();
 
     $parent_node = $this->container->get('entity_type.manager')
       ->getStorage('node')

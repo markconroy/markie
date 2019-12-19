@@ -11,7 +11,7 @@ use Drupal\field\Entity\FieldStorageConfig;
  *
  * @group entity_browser
  */
-class PagerElementTest extends EntityBrowserJavascriptTestBase {
+class PagerElementTest extends EntityBrowserWebDriverTestBase {
 
   /**
    * Modules to enable.
@@ -43,7 +43,6 @@ class PagerElementTest extends EntityBrowserJavascriptTestBase {
         'target_type' => 'node',
       ],
     ])->save();
-
 
     FieldConfig::create([
       'field_name' => 'field_reference_pager',
