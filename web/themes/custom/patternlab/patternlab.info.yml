@@ -68,4 +68,4 @@ component-libraries:
       - source/_patterns/05-page-sections
   sample-pages:
     paths:
-      - source/_patterns/05-sample-pages
+      - source/_patterns/06-sample-pages
