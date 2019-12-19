@@ -3412,18 +3412,18 @@
     },
     {
         "name": "drupal/mgv",
-        "version": "1.11.0",
-        "version_normalized": "1.11.0.0",
+        "version": "1.14.0",
+        "version_normalized": "1.14.0.0",
         "source": {
             "type": "git",
             "url": "https://git.drupalcode.org/project/mgv.git",
-            "reference": "8.x-1.11"
+            "reference": "8.x-1.14"
         },
         "dist": {
             "type": "zip",
-            "url": "https://ftp.drupal.org/files/projects/mgv-8.x-1.11.zip",
-            "reference": "8.x-1.11",
-            "shasum": "d747683626851cd43fb9983cf7ef68dafb97113d"
+            "url": "https://ftp.drupal.org/files/projects/mgv-8.x-1.14.zip",
+            "reference": "8.x-1.14",
+            "shasum": "0a9835ace0d6dbdafd0c712f0feb8845e4a1dd4c"
         },
         "require": {
             "drupal/core": "~8.0"
@@ -3434,8 +3434,8 @@
                 "dev-1.x": "1.x-dev"
             },
             "drupal": {
-                "version": "8.x-1.11",
-                "datestamp": "1520254084",
+                "version": "8.x-1.14",
+                "datestamp": "1570108688",
                 "security-coverage": {
                     "status": "covered",
                     "message": "Covered by Drupal's security advisory policy"
@@ -3456,7 +3456,7 @@
         "description": "Some extra global variables to make your life a little easier.",
         "homepage": "https://www.drupal.org/project/mgv",
         "support": {
-            "source": "http://cgit.drupalcode.org/mgv"
+            "source": "https://git.drupalcode.org/project/mgv"
         }
     },
     {
