@@ -1288,7 +1288,7 @@
                 },
                 "drupal": {
                     "version": "8.x-1.0",
-                    "datestamp": "1461060840",
+                    "datestamp": "1556870881",
                     "security-coverage": {
                         "status": "covered",
                         "message": "Covered by Drupal's security advisory policy"
@@ -1297,7 +1297,7 @@
             },
             "notification-url": "https://packages.drupal.org/8/downloads",
             "license": [
-                "GPL-2.0+"
+                "GPL-2.0-or-later"
             ],
             "authors": [
                 {
@@ -1312,7 +1312,7 @@
             "description": "Registers “component libraries” defined in modules and themes with the Twig system",
             "homepage": "https://www.drupal.org/project/components",
             "support": {
-                "source": "http://cgit.drupalcode.org/components"
+                "source": "https://git.drupalcode.org/project/components"
             }
         },
         {
@@ -1857,6 +1857,10 @@
                     "homepage": "https://www.drupal.org/user/3260690"
                 },
                 {
+                    "name": "phenaproxima",
+                    "homepage": "https://www.drupal.org/user/205645"
+                },
+                {
                     "name": "slashrsm",
                     "homepage": "https://www.drupal.org/user/744628"
                 },
@@ -1868,7 +1872,7 @@
             "description": "Provides storage and API for image crops.",
             "homepage": "https://www.drupal.org/project/crop",
             "support": {
-                "source": "http://cgit.drupalcode.org/crop",
+                "source": "https://git.drupalcode.org/project/crop",
                 "issues": "https://www.drupal.org/project/issues/crop"
             }
         },
@@ -1896,7 +1900,7 @@
                 },
                 "drupal": {
                     "version": "8.x-3.0",
-                    "datestamp": "1493401742",
+                    "datestamp": "1549603381",
                     "security-coverage": {
                         "status": "covered",
                         "message": "Covered by Drupal's security advisory policy"
@@ -1932,6 +1936,10 @@
                     "name": "Daniel Wehner (dawehner)",
                     "homepage": "https://www.drupal.org/u/dawehner",
                     "role": "Maintainer"
+                },
+                {
+                    "name": "joelpittet",
+                    "homepage": "https://www.drupal.org/user/160302"
                 },
                 {
                     "name": "merlinofchaos",
@@ -2027,6 +2035,10 @@
                     "homepage": "https://www.drupal.org/node/3236/committers"
                 },
                 {
+                    "name": "pcambra",
+                    "homepage": "https://www.drupal.org/user/122101"
+                },
+                {
                     "name": "salvis",
                     "homepage": "https://www.drupal.org/user/82964"
                 },
@@ -2067,7 +2079,7 @@
                 },
                 "drupal": {
                     "version": "8.x-1.0-beta4",
-                    "datestamp": "1528452184",
+                    "datestamp": "1539272580",
                     "security-coverage": {
                         "status": "not-covered",
                         "message": "Beta releases are not covered by Drupal security advisories."
@@ -2103,7 +2115,7 @@
             "description": "Provides expanded entity APIs, which will be moved to Drupal core one day.",
             "homepage": "http://drupal.org/project/entity",
             "support": {
-                "source": "http://cgit.drupalcode.org/entity"
+                "source": "https://git.drupalcode.org/project/entity"
             }
         },
         {
@@ -2138,7 +2150,7 @@
                 },
                 "drupal": {
                     "version": "8.x-1.5",
-                    "datestamp": "1528140780",
+                    "datestamp": "1536328684",
                     "security-coverage": {
                         "status": "covered",
                         "message": "Covered by Drupal's security advisory policy"
@@ -2166,12 +2178,20 @@
                     "role": "contributor"
                 },
                 {
+                    "name": "Drupal Media Team",
+                    "homepage": "https://www.drupal.org/user/3260690"
+                },
+                {
                     "name": "Primsi",
                     "homepage": "https://www.drupal.org/user/282629"
                 },
                 {
                     "name": "marcingy",
                     "homepage": "https://www.drupal.org/user/77320"
+                },
+                {
+                    "name": "oknate",
+                    "homepage": "https://www.drupal.org/user/471638"
                 },
                 {
                     "name": "samuel.mortenson",
@@ -2217,7 +2237,7 @@
                 },
                 "drupal": {
                     "version": "8.x-1.4",
-                    "datestamp": "1515143885",
+                    "datestamp": "1527241084",
                     "security-coverage": {
                         "status": "covered",
                         "message": "Covered by Drupal's security advisory policy"
@@ -2226,9 +2246,13 @@
             },
             "notification-url": "https://packages.drupal.org/8/downloads",
             "license": [
-                "GPL-2.0+"
+                "GPL-2.0-or-later"
             ],
             "authors": [
+                {
+                    "name": "Berdir",
+                    "homepage": "https://www.drupal.org/user/214652"
+                },
                 {
                     "name": "Frans",
                     "homepage": "https://www.drupal.org/user/514222"
@@ -2245,7 +2269,7 @@
             "description": "Adds a Entity Reference field type with revision support.",
             "homepage": "https://www.drupal.org/project/entity_reference_revisions",
             "support": {
-                "source": "http://cgit.drupalcode.org/entity_reference_revisions"
+                "source": "https://git.drupalcode.org/project/entity_reference_revisions"
             }
         },
         {
@@ -2308,7 +2332,7 @@
             "description": "Provides the field_group module.",
             "homepage": "https://www.drupal.org/project/field_group",
             "support": {
-                "source": "http://cgit.drupalcode.org/field_group"
+                "source": "https://git.drupalcode.org/project/field_group"
             }
         },
         {
@@ -2348,7 +2372,7 @@
             },
             "notification-url": "https://packages.drupal.org/8/downloads",
             "license": [
-                "GPL-2.0+"
+                "GPL-2.0-or-later"
             ],
             "authors": [
                 {
@@ -2359,7 +2383,7 @@
             "description": "Allows users to specify the focal point of an image for use during cropping.",
             "homepage": "https://www.drupal.org/project/focal_point",
             "support": {
-                "source": "http://cgit.drupalcode.org/focal_point"
+                "source": "https://git.drupalcode.org/project/focal_point"
             }
         },
         {
@@ -2415,7 +2439,7 @@
             "description": "Provides a filter to highlight source code using the GeSHi library (Generic Syntax Highlighter).",
             "homepage": "https://www.drupal.org/project/geshifilter",
             "support": {
-                "source": "http://cgit.drupalcode.org/geshifilter"
+                "source": "https://git.drupalcode.org/project/geshifilter"
             }
         },
         {
@@ -2446,7 +2470,7 @@
                 },
                 "drupal": {
                     "version": "8.x-2.3",
-                    "datestamp": "1531469021",
+                    "datestamp": "1548968580",
                     "security-coverage": {
                         "status": "covered",
                         "message": "Covered by Drupal's security advisory policy"
@@ -2498,7 +2522,7 @@
                 },
                 "drupal": {
                     "version": "8.x-1.29",
-                    "datestamp": "1536179280",
+                    "datestamp": "1576274288",
                     "security-coverage": {
                         "status": "covered",
                         "message": "Covered by Drupal's security advisory policy"
@@ -2571,7 +2595,7 @@
                 },
                 "drupal": {
                     "version": "8.x-2.1",
-                    "datestamp": "1510136887",
+                    "datestamp": "1530698921",
                     "security-coverage": {
                         "status": "covered",
                         "message": "Covered by Drupal's security advisory policy"
@@ -2641,7 +2665,7 @@
                 },
                 "drupal": {
                     "version": "8.x-1.0-beta1",
-                    "datestamp": "1477868343",
+                    "datestamp": "1527030784",
                     "security-coverage": {
                         "status": "not-covered",
                         "message": "Beta releases are not covered by Drupal security advisories."
@@ -2662,6 +2686,22 @@
                     "homepage": "https://www.drupal.org/user/99340"
                 },
                 {
+                    "name": "geek.merlin aka axel.rutz",
+                    "homepage": "https://www.drupal.org/user/229048"
+                },
+                {
+                    "name": "joachim",
+                    "homepage": "https://www.drupal.org/user/107701"
+                },
+                {
+                    "name": "kaythay",
+                    "homepage": "https://www.drupal.org/user/2182186"
+                },
+                {
+                    "name": "oknate",
+                    "homepage": "https://www.drupal.org/user/471638"
+                },
+                {
                     "name": "rszrama",
                     "homepage": "https://www.drupal.org/user/49344"
                 },
@@ -2677,7 +2717,7 @@
             "description": "Provides a widget for inline management (creation, modification, removal) of referenced entities.",
             "homepage": "https://www.drupal.org/project/inline_entity_form",
             "support": {
-                "source": "http://cgit.drupalcode.org/inline_entity_form"
+                "source": "https://git.drupalcode.org/project/inline_entity_form"
             }
         },
         {
@@ -2709,7 +2749,7 @@
                 },
                 "drupal": {
                     "version": "8.x-1.7",
-                    "datestamp": "1510737185",
+                    "datestamp": "1532693881",
                     "security-coverage": {
                         "status": "covered",
                         "message": "Covered by Drupal's security advisory policy"
@@ -2718,7 +2758,7 @@
             },
             "notification-url": "https://packages.drupal.org/8/downloads",
             "license": [
-                "GPL-2.0+"
+                "GPL-2.0-or-later"
             ],
             "authors": [
                 {
@@ -2777,7 +2817,7 @@
             "description": "Media entity API.",
             "homepage": "https://www.drupal.org/project/media_entity",
             "support": {
-                "source": "http://cgit.drupalcode.org/media_entity"
+                "source": "https://git.drupalcode.org/project/media_entity"
             }
         },
         {
@@ -2815,13 +2855,13 @@
                     "datestamp": "1487741885",
                     "security-coverage": {
                         "status": "not-covered",
-                        "message": "Project has not opted into security advisory coverage!"
+                        "message": "Beta releases are not covered by Drupal security advisories."
                     }
                 }
             },
             "notification-url": "https://packages.drupal.org/8/downloads",
             "license": [
-                "GPL-2.0+"
+                "GPL-2.0-or-later"
             ],
             "authors": [
                 {
@@ -2844,7 +2884,7 @@
             "description": "This module provides an Entity Browser for Media Entity.",
             "homepage": "https://www.drupal.org/project/media_entity_browser",
             "support": {
-                "source": "http://cgit.drupalcode.org/media_entity_browser"
+                "source": "https://git.drupalcode.org/project/media_entity_browser"
             }
         },
         {
@@ -2875,7 +2915,7 @@
                 },
                 "drupal": {
                     "version": "8.x-1.2",
-                    "datestamp": "1470170939",
+                    "datestamp": "1525218780",
                     "security-coverage": {
                         "status": "covered",
                         "message": "Covered by Drupal's security advisory policy"
@@ -2894,6 +2934,14 @@
                 {
                     "name": "Primsi",
                     "homepage": "https://www.drupal.org/user/282629"
+                },
+                {
+                    "name": "marcoscano",
+                    "homepage": "https://www.drupal.org/user/1288796"
+                },
+                {
+                    "name": "phenaproxima",
+                    "homepage": "https://www.drupal.org/user/205645"
                 },
                 {
                     "name": "slashrsm",
@@ -2938,7 +2986,7 @@
                 },
                 "drupal": {
                     "version": "8.x-1.3",
-                    "datestamp": "1478549339",
+                    "datestamp": "1552578185",
                     "security-coverage": {
                         "status": "covered",
                         "message": "Covered by Drupal's security advisory policy"
@@ -2947,7 +2995,7 @@
             },
             "notification-url": "https://packages.drupal.org/8/downloads",
             "license": [
-                "GPL-2.0+"
+                "GPL-2.0-or-later"
             ],
             "authors": [
                 {
@@ -2970,7 +3018,7 @@
             "description": "Media entity Twitter provider.",
             "homepage": "https://www.drupal.org/project/media_entity_twitter",
             "support": {
-                "source": "http://cgit.drupalcode.org/media_entity_twitter"
+                "source": "https://git.drupalcode.org/project/media_entity_twitter"
             }
         },
         {
@@ -2997,7 +3045,7 @@
                 },
                 "drupal": {
                     "version": "8.x-1.1",
-                    "datestamp": "1482006782",
+                    "datestamp": "1576100584",
                     "security-coverage": {
                         "status": "covered",
                         "message": "Covered by Drupal's security advisory policy"
@@ -3010,12 +3058,20 @@
             ],
             "authors": [
                 {
+                    "name": "Berdir",
+                    "homepage": "https://www.drupal.org/user/214652"
+                },
+                {
                     "name": "SeriousMatters",
                     "homepage": "https://www.drupal.org/user/290439"
                 },
                 {
                     "name": "davy-r",
                     "homepage": "https://www.drupal.org/user/3278771"
+                },
+                {
+                    "name": "mbovan",
+                    "homepage": "https://www.drupal.org/user/3149657"
                 },
                 {
                     "name": "redndahead",
@@ -3025,7 +3081,7 @@
             "description": "Expand menus and set active-trail according to the current path.",
             "homepage": "https://www.drupal.org/project/menu_trail_by_path",
             "support": {
-                "source": "http://cgit.drupalcode.org/menu_trail_by_path"
+                "source": "https://git.drupalcode.org/project/menu_trail_by_path"
             }
         },
         {
@@ -3184,7 +3240,7 @@
                 },
                 "drupal": {
                     "version": "8.x-1.6",
-                    "datestamp": "1550692525",
+                    "datestamp": "1553087589",
                     "security-coverage": {
                         "status": "covered",
                         "message": "Covered by Drupal's security advisory policy"
@@ -3213,6 +3269,10 @@
                     "homepage": "https://www.drupal.org/user/1853532"
                 },
                 {
+                    "name": "jstoller",
+                    "homepage": "https://www.drupal.org/user/99012"
+                },
+                {
                     "name": "miro_dietiker",
                     "homepage": "https://www.drupal.org/user/227761"
                 }
@@ -3220,7 +3280,7 @@
             "description": "Enables the creation of Paragraphs entities.",
             "homepage": "https://www.drupal.org/project/paragraphs",
             "support": {
-                "source": "http://cgit.drupalcode.org/paragraphs"
+                "source": "https://git.drupalcode.org/project/paragraphs"
             }
         },
         {
@@ -3308,7 +3368,7 @@
                 },
                 "drupal": {
                     "version": "8.x-1.0",
-                    "datestamp": "1513767485",
+                    "datestamp": "1520897880",
                     "security-coverage": {
                         "status": "covered",
                         "message": "Covered by Drupal's security advisory policy"
@@ -3327,12 +3387,16 @@
                 {
                     "name": "Dave Reid",
                     "homepage": "https://www.drupal.org/user/53892"
+                },
+                {
+                    "name": "pifagor",
+                    "homepage": "https://www.drupal.org/user/2375692"
                 }
             ],
             "description": "Allows users to redirect from old URLs to new URLs.",
             "homepage": "https://www.drupal.org/project/redirect",
             "support": {
-                "source": "http://cgit.drupalcode.org/redirect"
+                "source": "https://git.drupalcode.org/project/redirect"
             }
         },
         {
@@ -3456,7 +3520,7 @@
             "description": "Provides a user interface for the Token API and some missing core tokens.",
             "homepage": "https://www.drupal.org/project/token",
             "support": {
-                "source": "http://cgit.drupalcode.org/token"
+                "source": "https://git.drupalcode.org/project/token"
             }
         },
         {
@@ -3543,7 +3607,7 @@
                 },
                 "drupal": {
                     "version": "8.x-1.x",
-                    "datestamp": "1493246342",
+                    "datestamp": "1557724385",
                     "security-coverage": {
                         "status": "covered",
                         "message": "Covered by Drupal's security advisory policy"
@@ -3572,7 +3636,7 @@
             "description": "A pluggable field type for storing videos from external video hosts such as Vimeo and YouTube.",
             "homepage": "https://www.drupal.org/project/video_embed_field",
             "support": {
-                "source": "http://cgit.drupalcode.org/video_embed_field"
+                "source": "https://git.drupalcode.org/project/video_embed_field"
             }
         },
         {
@@ -3599,7 +3663,7 @@
                 },
                 "drupal": {
                     "version": "8.x-1.0-alpha2",
-                    "datestamp": "1464192275",
+                    "datestamp": "1538607180",
                     "security-coverage": {
                         "status": "not-covered",
                         "message": "Alpha releases are not covered by Drupal security advisories."
@@ -3608,7 +3672,7 @@
             },
             "notification-url": "https://packages.drupal.org/8/downloads",
             "license": [
-                "GPL-2.0+"
+                "GPL-2.0-or-later"
             ],
             "authors": [
                 {
@@ -3628,16 +3692,16 @@
                     "homepage": "https://www.drupal.org/user/2628879"
                 },
                 {
-                    "name": "earnie",
-                    "homepage": "https://www.drupal.org/user/86710"
-                },
-                {
                     "name": "juampynr",
                     "homepage": "https://www.drupal.org/user/682736"
                 },
                 {
                     "name": "paulmckibben",
                     "homepage": "https://www.drupal.org/user/279003"
+                },
+                {
+                    "name": "pifagor",
+                    "homepage": "https://www.drupal.org/user/2375692"
                 },
                 {
                     "name": "tadityar",
@@ -3651,7 +3715,7 @@
             "description": "Creates an XML sitemap conforming to the <a href=\"http://sitemaps.org/\">sitemaps.org protocol</a>.",
             "homepage": "https://www.drupal.org/project/xmlsitemap",
             "support": {
-                "source": "http://cgit.drupalcode.org/xmlsitemap"
+                "source": "https://git.drupalcode.org/project/xmlsitemap"
             }
         },
         {
@@ -4375,33 +4439,29 @@
         },
         {
             "name": "paragonie/random_compat",
-            "version": "v2.0.18",
+            "version": "v9.99.99",
             "source": {
                 "type": "git",
                 "url": "https://github.com/paragonie/random_compat.git",
-                "reference": "0a58ef6e3146256cc3dc7cc393927bcc7d1b72db"
+                "reference": "84b4dfb120c6f9b4ff7b3685f9b8f1aa365a0c95"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/paragonie/random_compat/zipball/0a58ef6e3146256cc3dc7cc393927bcc7d1b72db",
-                "reference": "0a58ef6e3146256cc3dc7cc393927bcc7d1b72db",
+                "url": "https://api.github.com/repos/paragonie/random_compat/zipball/84b4dfb120c6f9b4ff7b3685f9b8f1aa365a0c95",
+                "reference": "84b4dfb120c6f9b4ff7b3685f9b8f1aa365a0c95",
                 "shasum": ""
             },
             "require": {
-                "php": ">=5.2.0"
+                "php": "^7"
             },
             "require-dev": {
-                "phpunit/phpunit": "4.*|5.*"
+                "phpunit/phpunit": "4.*|5.*",
+                "vimeo/psalm": "^1"
             },
             "suggest": {
                 "ext-libsodium": "Provides a modern crypto API that can be used to generate random bytes."
             },
             "type": "library",
-            "autoload": {
-                "files": [
-                    "lib/random.php"
-                ]
-            },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
@@ -4420,7 +4480,7 @@
                 "pseudorandom",
                 "random"
             ],
-            "time": "2019-01-03T20:59:08+00:00"
+            "time": "2018-07-02T15:55:56+00:00"
         },
         {
             "name": "pear/archive_tar",
@@ -5695,16 +5755,16 @@
         },
         {
             "name": "symfony/http-foundation",
-            "version": "v3.4.27",
+            "version": "v3.4.36",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/http-foundation.git",
-                "reference": "fa02215233be8de1c2b44617088192f9e8db3512"
+                "reference": "d2d0cfe8e319d9df44c4cca570710fcf221d4593"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/http-foundation/zipball/fa02215233be8de1c2b44617088192f9e8db3512",
-                "reference": "fa02215233be8de1c2b44617088192f9e8db3512",
+                "url": "https://api.github.com/repos/symfony/http-foundation/zipball/d2d0cfe8e319d9df44c4cca570710fcf221d4593",
+                "reference": "d2d0cfe8e319d9df44c4cca570710fcf221d4593",
                 "shasum": ""
             },
             "require": {
@@ -5745,7 +5805,7 @@
             ],
             "description": "Symfony HttpFoundation Component",
             "homepage": "https://symfony.com",
-            "time": "2019-05-01T08:04:33+00:00"
+            "time": "2019-11-28T12:52:59+00:00"
         },
         {
             "name": "symfony/http-kernel",
@@ -5955,16 +6015,16 @@
         },
         {
             "name": "symfony/polyfill-mbstring",
-            "version": "v1.11.0",
+            "version": "v1.13.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/polyfill-mbstring.git",
-                "reference": "fe5e94c604826c35a32fa832f35bd036b6799609"
+                "reference": "7b4aab9743c30be783b73de055d24a39cf4b954f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/polyfill-mbstring/zipball/fe5e94c604826c35a32fa832f35bd036b6799609",
-                "reference": "fe5e94c604826c35a32fa832f35bd036b6799609",
+                "url": "https://api.github.com/repos/symfony/polyfill-mbstring/zipball/7b4aab9743c30be783b73de055d24a39cf4b954f",
+                "reference": "7b4aab9743c30be783b73de055d24a39cf4b954f",
                 "shasum": ""
             },
             "require": {
@@ -5976,7 +6036,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.11-dev"
+                    "dev-master": "1.13-dev"
                 }
             },
             "autoload": {
@@ -6010,20 +6070,20 @@
                 "portable",
                 "shim"
             ],
-            "time": "2019-02-06T07:57:58+00:00"
+            "time": "2019-11-27T14:18:11+00:00"
         },
         {
             "name": "symfony/polyfill-php70",
-            "version": "v1.11.0",
+            "version": "v1.13.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/polyfill-php70.git",
-                "reference": "bc4858fb611bda58719124ca079baff854149c89"
+                "reference": "af23c7bb26a73b850840823662dda371484926c4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/polyfill-php70/zipball/bc4858fb611bda58719124ca079baff854149c89",
-                "reference": "bc4858fb611bda58719124ca079baff854149c89",
+                "url": "https://api.github.com/repos/symfony/polyfill-php70/zipball/af23c7bb26a73b850840823662dda371484926c4",
+                "reference": "af23c7bb26a73b850840823662dda371484926c4",
                 "shasum": ""
             },
             "require": {
@@ -6033,7 +6093,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.11-dev"
+                    "dev-master": "1.13-dev"
                 }
             },
             "autoload": {
@@ -6069,7 +6129,7 @@
                 "portable",
                 "shim"
             ],
-            "time": "2019-02-06T07:57:58+00:00"
+            "time": "2019-11-27T13:56:44+00:00"
         },
         {
             "name": "symfony/process",
@@ -7479,7 +7539,7 @@
             "time": "2016-12-01T10:57:30+00:00"
         },
         {
-            "name": "mikey179/vfsStream",
+            "name": "mikey179/vfsstream",
             "version": "v1.6.5",
             "source": {
                 "type": "git",
