@@ -32,6 +32,6 @@ class AliasType extends Plugin {
    *
    * @var string[]
    */
-  public $types = array();
+  public $types = [];
 
 }

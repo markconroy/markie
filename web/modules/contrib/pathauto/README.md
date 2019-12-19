@@ -1,8 +1,19 @@
-#Pathauto
+CONTENTS OF THIS FILE
+---------------------
 
-If you are developing for this module, have a look at pathauto.api.php.
+ * Introduction
+ * Benefits
+ * Requirements
+ * Recommended Modules
+ * Installation
+ * Configuration
+ * Notices
+ * Faqs
+ * Maintainers
 
-##Description
+
+INTRODUCTION
+------------
 
 The Pathauto module provides support functions for other modules to
 automatically generate aliases based on appropriate criteria, with a
@@ -11,20 +22,59 @@ central settings path for site administrators.
 Implementations are provided for core entity types: content, taxonomy terms,
 and users (including blogs and forum pages).
 
-Pathauto also provides a way to delete large numbers of aliases.  This feature
-is available at  Administer > Configuration > Search and metadata > URL aliases >
-Delete aliases.
+Pathauto also provides a way to delete large numbers of aliases.This feature
+is available at Administer > Configuration > Search and metadata > URL aliases > Delete aliases.
 
-##Benefits
+
+BENEFITS
+--------
 
 Besides making the page address more reflective of its content than
 "node/138", it's important to know that modern search engines give
 heavy weight to search terms which appear in a page's URL. By
 automatically using keywords based directly on the page content in the URL,
-relevant search engine hits for your page can be significantly
-enhanced.
+relevant search engine hits for your page can be significantly enhanced.
 
-##Notices
+
+REQUIREMENTS
+------------
+
+This module requires the following module:
+
+ * Token - https://www.drupal.org/project/token
+ * CTools - https://www.drupal.org/project/ctools
+
+
+RECOMMENDED MODULES
+-------------------
+
+ * Redirect - https://www.drupal.org/project/redirect
+ * Sub-pathauto (Sub-path URL Aliases) -
+   https://www.drupal.org/project/subpathauto
+
+
+INSTALLATION
+------------
+
+Install the module as you would normally install a
+contributed Drupal module. Visit https://www.drupal.org/node/1897420 for
+further information. Note that there are two dependencies.
+
+
+CONFIGURATION
+-------------
+
+   1. Navigate to Administration > Extend and enable the Pathauto module.
+   2. Configure the module at admin/config/search/path/patterns - add a new
+      pattern by creating and clicking "Add Pathauto pattern".
+   3. Fill out "Path pattern" with fx [node:title], choose which content
+      types this applies to,give it a label (the name) and save it.
+   4. When you save new content from now on, it should automatically be
+      assigned an alternative URL.
+
+
+NOTICES
+-------
 
 Pathauto just adds URL aliases to content, users, and taxonomy terms.
 Because it's an alias, the standard Drupal URL (for example node/123 or
@@ -38,32 +88,27 @@ site. If this applies to you, please note that you will need to update any
 hard coded links in your content or blocks.
 
 If you use the "system path" (i.e. node/10) for menu items and settings like
-that, Drupal will replace it with the url_alias.
+that, Drupal will replace it with the url alias.
 
-For external links, you might want to consider the Path Redirect or
-Global Redirect modules, which allow you to set forwarding either per item or
-across the site to your aliased URLs.
 
-###URLs (not) Getting Replaced With Aliases:
-Please bear in mind that only URLs passed through Drupal's Drupal's URL and
-Link APIs will be replaced with their aliases during page output. If
-a module or your template contains hardcoded links, such as
-'href="node/$node->nid"', those won't get replaced with their corresponding
-aliases.
+FAQs
+----
 
-## Disabling Pathauto for a specific content type (or taxonomy)
+* URLs (not) Getting Replaced With Aliases?
+   Please bear in mind that only URLs passed through Drupal's Drupal's URL and
+   Link APIs will be replaced with their aliases during page output. If
+   a module or your template contains hardcoded links, such as
+   'href="node/$node->nid"', those won't get replaced with their corresponding
+   aliases.
 
-When the pattern for a content type is left blank, the default pattern will be
-used. But if the default pattern is also blank, Pathauto will be disabled
-for that content type.
+* Disabling Pathauto for a specific content type (or taxonomy)?
+   When the pattern for a content type is left blank, the default pattern will
+   be used. But if the default pattern is also blank, Pathauto will be disabled
+   for that content type.
 
-## Installing Pathauto
-1. Install the module as normal, note that there are two dependencies.
-2. Configure the module at admin/config/search/path/patterns - add a new pattern by creating by clicking "Add Pathauto pattern".
-3. Fill out "Path pattern" with fx [node:title], choose which content types this applies to, give it a label (the name) and save it.
-4. When you save new content from now on, it should automatically be assigned an alternative URL
 
-##Credits:
+MAINTAINERS
+-----------
 
 The original module combined the functionality of Mike Ryan's autopath with
 Tommy Sundstrom's path_automatic.
@@ -77,7 +122,5 @@ Other suggestions and patches contributed by the Drupal community.
 
 Current maintainers:
 
-- Dave Reid - http://www.davereid.net
-- Greg Knaddison - http://www.knaddison.com
-- Mike Ryan - http://mikeryan.name
-- Frederik 'Freso' S. Olesen - http://freso.dk
+ * Dave Reid - http://www.davereid.net
+ * Sascha Grossenbacher - https://www.drupal.org/u/berdir

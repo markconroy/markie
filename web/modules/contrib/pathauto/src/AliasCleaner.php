@@ -10,11 +10,14 @@ use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Language\LanguageManagerInterface;
+use Drupal\Core\StringTranslation\StringTranslationTrait;
 
 /**
  * Provides an alias cleaner.
  */
 class AliasCleaner implements AliasCleanerInterface {
+
+  use StringTranslationTrait;
 
   /**
    * The config factory.
@@ -47,11 +50,11 @@ class AliasCleaner implements AliasCleanerInterface {
   /**
    * Calculated settings cache.
    *
-   * @todo Split this up into separate properties.
-   *
    * @var array
+   *
+   * @todo Split this up into separate properties.
    */
-  protected $cleanStringCache = array();
+  protected $cleanStringCache = [];
 
   /**
    * Transliteration service.
@@ -155,20 +158,20 @@ class AliasCleaner implements AliasCleanerInterface {
   /**
    * {@inheritdoc}
    */
-  public function cleanString($string, array $options = array()) {
+  public function cleanString($string, array $options = []) {
     if (empty($this->cleanStringCache)) {
       // Generate and cache variables used in this method.
       $config = $this->configFactory->get('pathauto.settings');
-      $this->cleanStringCache = array(
+      $this->cleanStringCache = [
         'separator' => $config->get('separator'),
-        'strings' => array(),
+        'strings' => [],
         'transliterate' => $config->get('transliterate'),
-        'punctuation' => array(),
+        'punctuation' => [],
         'reduce_ascii' => (bool) $config->get('reduce_ascii'),
         'ignore_words_regex' => FALSE,
         'lowercase' => (bool) $config->get('case'),
         'maxlength' => min($config->get('max_component_length'), $this->aliasStorageHelper->getAliasSchemaMaxLength()),
-      );
+      ];
 
       // Generate and cache the punctuation replacements for strtr().
       $punctuation = $this->getPunctuationCharacters();
@@ -191,7 +194,7 @@ class AliasCleaner implements AliasCleanerInterface {
 
       // Generate and cache the ignored words regular expression.
       $ignore_words = $config->get('ignore_words');
-      $ignore_words_regex = preg_replace(array('/^[,\s]+|[,\s]+$/', '/[,\s]+/'), array('', '\b|\b'), $ignore_words);
+      $ignore_words_regex = preg_replace(['/^[,\s]+|[,\s]+$/', '/[,\s]+/'], ['', '\b|\b'], $ignore_words);
       if ($ignore_words_regex) {
         $this->cleanStringCache['ignore_words_regex'] = '\b' . $ignore_words_regex . '\b';
         if (function_exists('mb_eregi_replace')) {
@@ -272,7 +275,6 @@ class AliasCleaner implements AliasCleanerInterface {
     return $output;
   }
 
-
   /**
    * {@inheritdoc}
    */
@@ -285,39 +287,39 @@ class AliasCleaner implements AliasCleanerInterface {
         $this->punctuationCharacters = $cache->data;
       }
       else {
-        $punctuation = array();
-        $punctuation['double_quotes']      = array('value' => '"', 'name' => t('Double quotation marks'));
-        $punctuation['quotes']             = array('value' => '\'', 'name' => t("Single quotation marks (apostrophe)"));
-        $punctuation['backtick']           = array('value' => '`', 'name' => t('Back tick'));
-        $punctuation['comma']              = array('value' => ',', 'name' => t('Comma'));
-        $punctuation['period']             = array('value' => '.', 'name' => t('Period'));
-        $punctuation['hyphen']             = array('value' => '-', 'name' => t('Hyphen'));
-        $punctuation['underscore']         = array('value' => '_', 'name' => t('Underscore'));
-        $punctuation['colon']              = array('value' => ':', 'name' => t('Colon'));
-        $punctuation['semicolon']          = array('value' => ';', 'name' => t('Semicolon'));
-        $punctuation['pipe']               = array('value' => '|', 'name' => t('Vertical bar (pipe)'));
-        $punctuation['left_curly']         = array('value' => '{', 'name' => t('Left curly bracket'));
-        $punctuation['left_square']        = array('value' => '[', 'name' => t('Left square bracket'));
-        $punctuation['right_curly']        = array('value' => '}', 'name' => t('Right curly bracket'));
-        $punctuation['right_square']       = array('value' => ']', 'name' => t('Right square bracket'));
-        $punctuation['plus']               = array('value' => '+', 'name' => t('Plus sign'));
-        $punctuation['equal']              = array('value' => '=', 'name' => t('Equal sign'));
-        $punctuation['asterisk']           = array('value' => '*', 'name' => t('Asterisk'));
-        $punctuation['ampersand']          = array('value' => '&', 'name' => t('Ampersand'));
-        $punctuation['percent']            = array('value' => '%', 'name' => t('Percent sign'));
-        $punctuation['caret']              = array('value' => '^', 'name' => t('Caret'));
-        $punctuation['dollar']             = array('value' => '$', 'name' => t('Dollar sign'));
-        $punctuation['hash']               = array('value' => '#', 'name' => t('Number sign (pound sign, hash)'));
-        $punctuation['at']                 = array('value' => '@', 'name' => t('At sign'));
-        $punctuation['exclamation']        = array('value' => '!', 'name' => t('Exclamation mark'));
-        $punctuation['tilde']              = array('value' => '~', 'name' => t('Tilde'));
-        $punctuation['left_parenthesis']   = array('value' => '(', 'name' => t('Left parenthesis'));
-        $punctuation['right_parenthesis']  = array('value' => ')', 'name' => t('Right parenthesis'));
-        $punctuation['question_mark']      = array('value' => '?', 'name' => t('Question mark'));
-        $punctuation['less_than']          = array('value' => '<', 'name' => t('Less-than sign'));
-        $punctuation['greater_than']       = array('value' => '>', 'name' => t('Greater-than sign'));
-        $punctuation['slash']              = array('value' => '/', 'name' => t('Slash'));
-        $punctuation['back_slash']         = array('value' => '\\', 'name' => t('Backslash'));
+        $punctuation                      = [];
+        $punctuation['double_quotes']     = ['value' => '"', 'name' => $this->t('Double quotation marks')];
+        $punctuation['quotes']            = ['value' => '\'', 'name' => $this->t("Single quotation marks (apostrophe)")];
+        $punctuation['backtick']          = ['value' => '`', 'name' => $this->t('Back tick')];
+        $punctuation['comma']             = ['value' => ',', 'name' => $this->t('Comma')];
+        $punctuation['period']            = ['value' => '.', 'name' => $this->t('Period')];
+        $punctuation['hyphen']            = ['value' => '-', 'name' => $this->t('Hyphen')];
+        $punctuation['underscore']        = ['value' => '_', 'name' => $this->t('Underscore')];
+        $punctuation['colon']             = ['value' => ':', 'name' => $this->t('Colon')];
+        $punctuation['semicolon']         = ['value' => ';', 'name' => $this->t('Semicolon')];
+        $punctuation['pipe']              = ['value' => '|', 'name' => $this->t('Vertical bar (pipe)')];
+        $punctuation['left_curly']        = ['value' => '{', 'name' => $this->t('Left curly bracket')];
+        $punctuation['left_square']       = ['value' => '[', 'name' => $this->t('Left square bracket')];
+        $punctuation['right_curly']       = ['value' => '}', 'name' => $this->t('Right curly bracket')];
+        $punctuation['right_square']      = ['value' => ']', 'name' => $this->t('Right square bracket')];
+        $punctuation['plus']              = ['value' => '+', 'name' => $this->t('Plus sign')];
+        $punctuation['equal']             = ['value' => '=', 'name' => $this->t('Equal sign')];
+        $punctuation['asterisk']          = ['value' => '*', 'name' => $this->t('Asterisk')];
+        $punctuation['ampersand']         = ['value' => '&', 'name' => $this->t('Ampersand')];
+        $punctuation['percent']           = ['value' => '%', 'name' => $this->t('Percent sign')];
+        $punctuation['caret']             = ['value' => '^', 'name' => $this->t('Caret')];
+        $punctuation['dollar']            = ['value' => '$', 'name' => $this->t('Dollar sign')];
+        $punctuation['hash']              = ['value' => '#', 'name' => $this->t('Number sign (pound sign, hash)')];
+        $punctuation['at']                = ['value' => '@', 'name' => $this->t('At sign')];
+        $punctuation['exclamation']       = ['value' => '!', 'name' => $this->t('Exclamation mark')];
+        $punctuation['tilde']             = ['value' => '~', 'name' => $this->t('Tilde')];
+        $punctuation['left_parenthesis']  = ['value' => '(', 'name' => $this->t('Left parenthesis')];
+        $punctuation['right_parenthesis'] = ['value' => ')', 'name' => $this->t('Right parenthesis')];
+        $punctuation['question_mark']     = ['value' => '?', 'name' => $this->t('Question mark')];
+        $punctuation['less_than']         = ['value' => '<', 'name' => $this->t('Less-than sign')];
+        $punctuation['greater_than']      = ['value' => '>', 'name' => $this->t('Greater-than sign')];
+        $punctuation['slash']             = ['value' => '/', 'name' => $this->t('Slash')];
+        $punctuation['back_slash']        = ['value' => '\\', 'name' => $this->t('Backslash')];
 
         // Allow modules to alter the punctuation list and cache the result.
         $this->moduleHandler->alter('pathauto_punctuation_chars', $punctuation);
@@ -332,12 +334,12 @@ class AliasCleaner implements AliasCleanerInterface {
   /**
    * {@inheritdoc}
    */
-  public function cleanTokenValues(&$replacements, $data = array(), $options = array()) {
+  public function cleanTokenValues(&$replacements, $data = [], $options = []) {
     foreach ($replacements as $token => $value) {
       // Only clean non-path tokens.
       $config = $this->configFactory->get('pathauto.settings');
       $safe_tokens = implode('|', (array) $config->get('safe_tokens'));
-      if (!preg_match('/:(' . $safe_tokens . ')(:|\]$)/', $token)) {
+      if (!preg_match('/(\[|\:)(' . $safe_tokens . ')(:|\]$)/', $token)) {
         $replacements[$token] = $this->cleanString($value, $options);
       }
     }
@@ -347,7 +349,7 @@ class AliasCleaner implements AliasCleanerInterface {
    * {@inheritdoc}
    */
   public function resetCaches() {
-    $this->cleanStringCache = array();
+    $this->cleanStringCache = [];
   }
 
 }

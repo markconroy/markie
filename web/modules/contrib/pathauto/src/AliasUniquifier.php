@@ -90,7 +90,7 @@ class AliasUniquifier implements AliasUniquifierInterface {
     do {
       // Append an incrementing numeric suffix until we find a unique alias.
       $unique_suffix = $separator . $i;
-      $alias = Unicode::truncate($original_alias, $maxlength - Unicode::strlen($unique_suffix), TRUE) . $unique_suffix;
+      $alias = Unicode::truncate($original_alias, $maxlength - mb_strlen($unique_suffix), TRUE) . $unique_suffix;
       $i++;
     } while ($this->isReserved($alias, $source, $langcode));
   }
@@ -114,11 +114,11 @@ class AliasUniquifier implements AliasUniquifierInterface {
       return TRUE;
     }
     // Finally check if any other modules have reserved the alias.
-    $args = array(
+    $args = [
       $alias,
       $source,
       $langcode,
-    );
+    ];
     $implementations = $this->moduleHandler->getImplementations('pathauto_is_alias_reserved');
     foreach ($implementations as $module) {
 

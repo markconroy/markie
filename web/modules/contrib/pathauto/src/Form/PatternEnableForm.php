@@ -15,7 +15,7 @@ class PatternEnableForm extends EntityConfirmFormBase {
    * {@inheritdoc}
    */
   public function getQuestion() {
-    return $this->t('Are you sure you want to enable the pattern %label?', array('%label' => $this->entity->label()));
+    return $this->t('Are you sure you want to enable the pattern %label?', ['%label' => $this->entity->label()]);
   }
 
   /**

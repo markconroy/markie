@@ -65,7 +65,7 @@ class VerboseMessenger implements MessengerInterface {
       $this->isVerbose = $config->get('verbose') && $this->account->hasPermission('notify of path changes');
     }
 
-    if (!$this->isVerbose || (isset($op) && in_array($op, array('bulkupdate', 'return')))) {
+    if (!$this->isVerbose || (isset($op) && in_array($op, ['bulkupdate', 'return']))) {
       return FALSE;
     }
 

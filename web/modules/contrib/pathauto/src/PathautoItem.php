@@ -42,7 +42,7 @@ class PathautoItem extends PathItem {
   public function isEmpty() {
     // Make sure that the pathauto state flag does not get lost if just that is
     // changed.
-    return !$this->alias && !$this->get('pathauto')->hasValue();
+    return parent::isEmpty() && !$this->get('pathauto')->hasValue();
   }
 
 }

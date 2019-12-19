@@ -5,5 +5,8 @@ langcode: en
 type: node
 plugin: pathauto_update_alias
 dependencies:
+  enforced:
+    module:
+      - node
   module:
-    - node
+    - pathauto

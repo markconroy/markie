@@ -147,16 +147,16 @@ class EntityAliasTypeBase extends ContextAwarePluginBase implements AliasTypeInt
     $id_key = $entity_type->getKey('id');
 
     $query = $this->database->select($entity_type->get('base_table'), 'base_table');
-    $query->leftJoin('url_alias', 'ua', "CONCAT('" . $this->getSourcePrefix() . "' , base_table.$id_key) = ua.source");
+    $query->leftJoin($this->getTableInfo()['table'], 'pa', "CONCAT('" . $this->getSourcePrefix() . "' , base_table.$id_key) = pa.{$this->getTableInfo()['fields']['path']}");
     $query->addField('base_table', $id_key, 'id');
 
     switch ($action) {
       case 'create':
-        $query->isNull('ua.source');
+        $query->isNull("pa.{$this->getTableInfo()['fields']['path']}");
         break;
 
       case 'update':
-        $query->isNotNull('ua.source');
+        $query->isNotNull("pa.{$this->getTableInfo()['fields']['path']}");
         break;
 
       case 'all':
@@ -190,7 +190,7 @@ class EntityAliasTypeBase extends ContextAwarePluginBase implements AliasTypeInt
     $context['sandbox']['count'] += count($ids);
     $context['sandbox']['current'] = !empty($ids) ? max($ids) : 0;
     $context['results']['updates'] += $updates;
-    $context['message'] = $this->t('Updated alias for %label @id.', array('%label' => $entity_type->getLabel(), '@id' => end($ids)));
+    $context['message'] = $this->t('Updated alias for %label @id.', ['%label' => $entity_type->getLabel(), '@id' => end($ids)]);
 
     if ($context['sandbox']['count'] != $context['sandbox']['total']) {
       $context['finished'] = $context['sandbox']['count'] / $context['sandbox']['total'];
@@ -210,11 +210,11 @@ class EntityAliasTypeBase extends ContextAwarePluginBase implements AliasTypeInt
     $id_key = $entity_type->getKey('id');
 
     $query = $this->database->select($entity_type->get('base_table'), 'base_table');
-    $query->innerJoin('url_alias', 'ua', "CONCAT('" . $this->getSourcePrefix() . "' , base_table.$id_key) = ua.source");
+    $query->innerJoin($this->getTableInfo()['table'], 'pa', "CONCAT('" . $this->getSourcePrefix() . "' , base_table.$id_key) = pa.{$this->getTableInfo()['fields']['path']}");
     $query->addField('base_table', $id_key, 'id');
-    $query->addField('ua', 'pid');
-    $query->condition('ua.pid', $context['sandbox']['current'], '>');
-    $query->orderBy('ua.pid');
+    $query->addField('pa', $this->getTableInfo()['fields']['id']);
+    $query->condition("pa.{$this->getTableInfo()['fields']['id']}}", $context['sandbox']['current'], '>');
+    $query->orderBy("pa.{$this->getTableInfo()['fields']['id']}}");
     $query->addTag('pathauto_bulk_delete');
     $query->addMetaData('entity', $this->getEntityTypeId());
 
@@ -263,8 +263,8 @@ class EntityAliasTypeBase extends ContextAwarePluginBase implements AliasTypeInt
    * @return int
    *   The number of updated URL aliases.
    */
-  protected function bulkUpdate(array $ids, array $options = array()) {
-    $options += array('message' => FALSE);
+  protected function bulkUpdate(array $ids, array $options = []) {
+    $options += ['message' => FALSE];
     $updates = 0;
 
     $entities = $this->entityTypeManager->getStorage($this->getEntityTypeId())->loadMultiple($ids);
@@ -337,6 +337,40 @@ class EntityAliasTypeBase extends ContextAwarePluginBase implements AliasTypeInt
     // relevant for alias type plugins.
     $this->context[$name] = new Context($this->getContextDefinition($name), $value);
     return $this;
+  }
+
+  /**
+   * Returns information about the path alias table and field names.
+   *
+   * @return array
+   *   An array with the following structure:
+   *   - table: the name of the table where path aliases are stored;
+   *   - fields: an array containing the mapping of path alias properties to
+   *     their table column names.
+   */
+  private function getTableInfo() {
+    if (version_compare(\Drupal::VERSION, '8.8', '<')) {
+      return [
+        'table' => 'url_alias',
+        'fields' => [
+          'id' => 'pid',
+          'path' => 'source',
+          'alias' => 'alias',
+          'langcode' => 'langcode',
+        ],
+      ];
+    }
+    else {
+      return [
+        'table' => 'path_alias',
+        'fields' => [
+          'id' => 'id',
+          'path' => 'path',
+          'alias' => 'alias',
+          'langcode' => 'langcode',
+        ],
+      ];
+    }
   }
 
 }

@@ -98,7 +98,7 @@ class ForumAliasType extends EntityAliasTypeBase implements ContainerFactoryPlug
     if (parent::applies($object)) {
       /** @var \Drupal\taxonomy\TermInterface $object */
       $vid = $this->configFactory->get('forum.settings')->get('vocabulary');
-      return $object->getVocabularyId() == $vid;
+      return $object->bundle() == $vid;
     }
     return FALSE;
   }

@@ -3,9 +3,9 @@
 namespace Drupal\pathauto;
 
 use Drupal\Core\Field\FieldItemListInterface;
-use Drupal\path\Plugin\Field\FieldWidget\PathWidget;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
+use Drupal\path\Plugin\Field\FieldWidget\PathWidget;
 
 /**
  * Extends the core path widget.
@@ -40,6 +40,11 @@ class PathautoWidget extends PathWidget {
 
     $pattern = \Drupal::service('pathauto.generator')->getPatternByEntity($entity);
     if (empty($pattern)) {
+      // Explicitly turn off pathauto here.
+      $element['pathauto'] = [
+        '#type' => 'value',
+        '#value' => PathautoState::SKIP,
+      ];
       return $element;
     }
 
@@ -50,17 +55,17 @@ class PathautoWidget extends PathWidget {
       $description = $this->t('Uncheck this to create a custom alias below.');
     }
 
-    $element['pathauto'] = array(
+    $element['pathauto'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Generate automatic URL alias'),
       '#default_value' => $entity->path->pathauto,
       '#description' => $description,
       '#weight' => -1,
-    );
+    ];
 
     // Add JavaScript that will disable the path textfield when the automatic
     // alias checkbox is checked.
-    $element['alias']['#states']['disabled']['input[name="path[' . $delta . '][pathauto]"]'] = array('checked' => TRUE);
+    $element['alias']['#states']['disabled']['input[name="path[' . $delta . '][pathauto]"]'] = ['checked' => TRUE];
 
     // Override path.module's vertical tabs summary.
     $element['alias']['#attached']['library'] = ['pathauto/widget'];

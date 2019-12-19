@@ -15,6 +15,15 @@ entity.pathauto_pattern.add_form:
   requirements:
     _permission: 'administer pathauto'
 
+entity.pathauto_pattern.duplicate_form:
+  path: '/admin/config/search/path/patterns/{pathauto_pattern}/duplicate'
+  defaults:
+    _entity_form: 'pathauto_pattern.duplicate'
+    _title: 'Duplicate Pathauto pattern'
+    tempstore_id: 'pathauto.pattern'
+  requirements:
+    _permission: 'administer pathauto'
+
 pathauto.settings.form:
   path: '/admin/config/search/path/settings'
   defaults:

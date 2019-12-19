@@ -16,27 +16,6 @@ use Drupal\pathauto\Entity\PathautoPattern;
 function pathauto_install() {
   // Set the weight to 1.
   module_set_weight('pathauto', 1);
-
-  // Ensure the url_alias table exists.
-  _pathauto_ensure_url_alias_table_exists();
-}
-
-/**
- * Helper function to ensure the url_alias table exists.
- *
- * Only necessary on Drupal 8.1.x.
- *
- * @see https://www.drupal.org/node/2704821
- */
-function _pathauto_ensure_url_alias_table_exists() {
-  $alias_storage = \Drupal::service('path.alias_storage');
-  if (method_exists($alias_storage, 'schemaDefinition')) {
-    $database_schema = \Drupal::database()->schema();
-    if (!$database_schema->tableExists($alias_storage::TABLE)) {
-      $schema_definition = $alias_storage->schemaDefinition();
-      $database_schema->createTable($alias_storage::TABLE, $schema_definition);
-    }
-  }
 }
 
 /**
@@ -79,7 +58,7 @@ function pathauto_update_8001() {
 function pathauto_update_8100() {
   \Drupal::service('module_installer')->install(['ctools']);
 
-  $messages = array();
+  $messages = [];
   /** @var \Drupal\Core\Entity\EntityTypeBundleInfoInterface $entity_bundle_info */
   $entity_bundle_info = \Drupal::service('entity_type.bundle.info');
   $entity_type_manager = \Drupal::entityTypeManager();
@@ -96,10 +75,10 @@ function pathauto_update_8100() {
   foreach ($patterns as $entity_type => $entity_patterns) {
     if (!array_key_exists($entity_type, $entity_types)) {
       // We found an unknown entity type. Report it.
-      $messages[] = t('Entity of type @type was not processed. It defines the following patterns: @patterns', array(
+      $messages[] = t('Entity of type @type was not processed. It defines the following patterns: @patterns', [
         '@type' => $entity_type,
         '@patterns' => print_r($entity_patterns, TRUE),
-      ));
+      ]);
       continue;
     }
     $entity_label = $entity_types[$entity_type]->getLabel();
@@ -139,9 +118,9 @@ function pathauto_update_8100() {
           // Add the bundle condition.
           $pattern->addSelectionCondition([
             'id' => 'entity_bundle:' . $entity_type,
-            'bundles' => array($bundle => $bundle),
+            'bundles' => [$bundle => $bundle],
             'negate' => FALSE,
-            'context_mapping' => [ $entity_type => $entity_type ],
+            'context_mapping' => [$entity_type => $entity_type],
           ]);
 
           $pattern->save();
@@ -160,11 +139,11 @@ function pathauto_update_8100() {
           }
           // Validate bundle, langcode and language.
           if (!isset($bundle_info[$extracted_bundle]) || ($langcode == NULL) || ($language == NULL)) {
-            $messages[] = t('Unrecognized entity bundle @entity:@bundle was not processed. It defines the following patterns: @patterns', array(
+            $messages[] = t('Unrecognized entity bundle @entity:@bundle was not processed. It defines the following patterns: @patterns', [
               '@entity' => $entity_type,
               '@bundle' => $bundle,
               '@patterns' => print_r($entity_patterns, TRUE),
-            ));
+            ]);
             continue;
           }
 
@@ -181,16 +160,16 @@ function pathauto_update_8100() {
           // Add the bundle condition.
           $pattern->addSelectionCondition([
             'id' => 'entity_bundle:' . $entity_type,
-            'bundles' => array($extracted_bundle => $extracted_bundle),
+            'bundles' => [$extracted_bundle => $extracted_bundle],
             'negate' => FALSE,
-            'context_mapping' => [ $entity_type => $entity_type ],
+            'context_mapping' => [$entity_type => $entity_type],
           ]);
 
           // Add the language condition.
           $language_mapping = $entity_type . ':' . $entity_type_manager->getDefinition($entity_type)->getKey('langcode') . ':language';
           $pattern->addSelectionCondition([
             'id' => 'language',
-            'langcodes' => [ $langcode => $langcode ],
+            'langcodes' => [$langcode => $langcode],
             'negate' => FALSE,
             'context_mapping' => [
               'language' => $language_mapping,
@@ -286,7 +265,7 @@ function pathauto_update_8104() {
  * Ensure the url_alias table exists.
  */
 function pathauto_update_8105() {
-  _pathauto_ensure_url_alias_table_exists();
+  // This update function is not needed anymore.
 }
 
 /**

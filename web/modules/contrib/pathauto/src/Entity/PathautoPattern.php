@@ -21,6 +21,7 @@ use Drupal\pathauto\PathautoPatternInterface;
  *     "list_builder" = "Drupal\pathauto\PathautoPatternListBuilder",
  *     "form" = {
  *       "default" = "Drupal\pathauto\Form\PatternEditForm",
+ *       "duplicate" = "Drupal\pathauto\Form\PatternDuplicateForm",
  *       "delete" = "Drupal\Core\Entity\EntityDeleteForm",
  *       "enable" = "Drupal\pathauto\Form\PatternEnableForm",
  *       "disable" = "Drupal\pathauto\Form\PatternDisableForm"
@@ -57,7 +58,8 @@ use Drupal\pathauto\PathautoPatternInterface;
  *     "edit-form" = "/admin/config/search/path/patterns/{pathauto_pattern}",
  *     "delete-form" = "/admin/config/search/path/patterns/{pathauto_pattern}/delete",
  *     "enable" = "/admin/config/search/path/patterns/{pathauto_pattern}/enable",
- *     "disable" = "/admin/config/search/path/patterns/{pathauto_pattern}/disable"
+ *     "disable" = "/admin/config/search/path/patterns/{pathauto_pattern}/disable",
+ *     "duplicate-form" = "/admin/config/search/path/patterns/{pathauto_pattern}/duplicate"
  *   }
  * )
  */

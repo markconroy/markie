@@ -67,7 +67,7 @@ interface AliasCleanerInterface {
    * @return string
    *   The cleaned string.
    */
-  public function cleanString($string, array $options = array());
+  public function cleanString($string, array $options = []);
 
   /**
    * Return an array of arrays for punctuation values.
@@ -93,7 +93,7 @@ interface AliasCleanerInterface {
    * @param array $options
    *   An array of options used to generate the replacements.
    */
-  public function cleanTokenValues(&$replacements, $data = array(), $options = array());
+  public function cleanTokenValues(&$replacements, $data = [], $options = []);
 
   /**
    * Resets internal caches.

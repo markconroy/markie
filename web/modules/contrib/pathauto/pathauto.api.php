@@ -152,7 +152,7 @@ function hook_pathauto_alias_alter(&$alias, array &$context) {
  */
 function hook_pathauto_punctuation_chars_alter(array &$punctuation) {
   // Add the trademark symbol.
-  $punctuation['trademark'] = array('value' => '™', 'name' => t('Trademark symbol'));
+  $punctuation['trademark'] = ['value' => '™', 'name' => t('Trademark symbol')];
 
   // Remove the dollar sign.
   unset($punctuation['dollar']);

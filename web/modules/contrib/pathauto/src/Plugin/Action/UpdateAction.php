@@ -22,7 +22,7 @@ class UpdateAction extends ActionBase {
    */
   public function execute($entity = NULL) {
     $entity->path->pathauto = PathautoState::CREATE;
-    \Drupal::service('pathauto.generator')->updateEntityAlias($entity, 'bulkupdate', array('message' => TRUE));
+    \Drupal::service('pathauto.generator')->updateEntityAlias($entity, 'bulkupdate', ['message' => TRUE]);
   }
 
   /**

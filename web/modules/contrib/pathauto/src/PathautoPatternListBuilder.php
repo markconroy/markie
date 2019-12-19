@@ -39,13 +39,33 @@ class PathautoPatternListBuilder extends DraggableListBuilder {
   public function buildRow(EntityInterface $entity) {
     /* @var \Drupal\pathauto\PathautoPatternInterface $entity */
     $row['label'] = $entity->label();
-    $row['patern']['#markup'] = $entity->getPattern();
+    $row['pattern']['#markup'] = $entity->getPattern();
     $row['type']['#markup'] = $entity->getAliasType()->getLabel();
     $row['conditions']['#theme'] = 'item_list';
     foreach ($entity->getSelectionConditions() as $condition) {
       $row['conditions']['#items'][] = $condition->summary();
     }
     return $row + parent::buildRow($entity);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getDefaultOperations(EntityInterface $entity) {
+    /** @var \Drupal\Core\Config\Entity\ConfigEntityInterface $entity */
+    $operations = parent::getDefaultOperations($entity);
+
+    if (!$entity->hasLinkTemplate('duplicate-form')) {
+      return $operations;
+    }
+
+    $operations['duplicate'] = [
+      'title' => t('Duplicate'),
+      'weight' => 0,
+      'url' => $this->ensureDestination($entity->toUrl('duplicate-form')),
+    ];
+
+    return $operations;
   }
 
 }
