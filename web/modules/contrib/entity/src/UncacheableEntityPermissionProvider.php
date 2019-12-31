@@ -14,10 +14,10 @@ use Drupal\user\EntityOwnerInterface;
  * Provided permissions:
  * - administer $entity_type
  * - access $entity_type overview
- * - view any ($bundle) $entity_type
- * - view own ($bundle) $entity_type
  * - view own unpublished $entity_type
+ * - view (own|any) ($bundle) $entity_type
  * - update (own|any) ($bundle) $entity_type
+ * - duplicate (own|any) ($bundle) $entity_type
  * - delete (own|any) ($bundle) $entity_type
  * - create $bundle $entity_type
  *
@@ -69,8 +69,8 @@ class UncacheableEntityPermissionProvider extends EntityPermissionProviderBase {
       ];
     }
     else {
-      $permissions["view any {$entity_type_id}"] = [
-        'title' => $this->t('View any @type', [
+      $permissions["view {$entity_type_id}"] = [
+        'title' => $this->t('View @type', [
           '@type' => $plural_label,
         ]),
       ];
@@ -95,14 +95,21 @@ class UncacheableEntityPermissionProvider extends EntityPermissionProviderBase {
     $has_owner = $entity_type->entityClassImplements(EntityOwnerInterface::class);
     $plural_label = $entity_type->getPluralLabel();
 
-    $permissions["view any {$entity_type_id}"] = [
-      'title' => $this->t('View any @type', [
-        '@type' => $plural_label,
-      ]),
-    ];
     if ($has_owner) {
+      $permissions["view any {$entity_type_id}"] = [
+        'title' => $this->t('View any @type', [
+          '@type' => $plural_label,
+        ]),
+      ];
       $permissions["view own {$entity_type_id}"] = [
         'title' => $this->t('View own @type', [
+          '@type' => $plural_label,
+        ]),
+      ];
+    }
+    else {
+      $permissions["view {$entity_type_id}"] = [
+        'title' => $this->t('View @type', [
           '@type' => $plural_label,
         ]),
       ];
@@ -124,8 +131,8 @@ class UncacheableEntityPermissionProvider extends EntityPermissionProviderBase {
         ];
       }
       else {
-        $permissions["view any {$bundle_name} {$entity_type_id}"] = [
-          'title' => $this->t('@bundle: View any @type', [
+        $permissions["view {$bundle_name} {$entity_type_id}"] = [
+          'title' => $this->t('@bundle: View @type', [
             '@bundle' => $bundle_info['label'],
             '@type' => $plural_label,
           ]),
