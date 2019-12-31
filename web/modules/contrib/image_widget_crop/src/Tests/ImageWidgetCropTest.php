@@ -2,9 +2,6 @@
 
 namespace Drupal\image_widget_crop\Tests;
 
-use Drupal\crop\Entity\CropType;
-use Drupal\file\Entity\File;
-use Drupal\image\Entity\ImageStyle;
 use Drupal\node\Entity\Node;
 use Drupal\simpletest\WebTestBase;
 
@@ -57,7 +54,7 @@ class ImageWidgetCropTest extends WebTestBase {
    */
   public function testCropUi() {
     // Test that when a crop has more than one usage we have a warning.
-    $this->createImageField('field_image_crop_test', 'crop_test', 'image_widget_crop', [], [], ['crop_list' => ['crop_16_9' => 'crop_16_9']]);
+    $this->createImageField('field_image_crop_test', 'crop_test', 'image_widget_crop', [], [], ['crop_list' => ['crop_16_9' => 'crop_16_9'], 'crop_types_required' => []]);
     $this->drupalGetTestFiles('image');
 
     $this->drupalGet('node/add/crop_test');
@@ -90,7 +87,7 @@ class ImageWidgetCropTest extends WebTestBase {
    */
   public function testImageWidgetCrop() {
     // Test that crop widget works properly.
-    $this->createImageField('field_image_crop_test', 'crop_test', 'image_widget_crop', [], [], ['crop_list' => ['crop_16_9' => 'crop_16_9']]);
+    $this->createImageField('field_image_crop_test', 'crop_test', 'image_widget_crop', [], [], ['crop_list' => ['crop_16_9' => 'crop_16_9'], 'crop_types_required' => []]);
     $this->drupalGetTestFiles('image');
 
     $this->drupalGet('node/add/crop_test');

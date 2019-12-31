@@ -17,8 +17,8 @@ dependencies:
 theme:
   - bartik
 
-# Information added by Drupal.org packaging script on 2017-11-08
-version: '8.x-2.1'
+# Information added by Drupal.org packaging script on 2018-07-04
+version: '8.x-2.2'
 core: '8.x'
 project: 'image_widget_crop'
-datestamp: 1510138593
+datestamp: 1530698928

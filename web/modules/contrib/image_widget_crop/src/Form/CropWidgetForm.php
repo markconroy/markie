@@ -181,6 +181,17 @@ class CropWidgetForm extends ConfigFormBase {
       '#default_value' => $this->settings->get('settings.show_default_crop'),
     ];
 
+    $form['image_crop']['crop_types_required'] = [
+      '#title' => $this->t('Set Crop Type as required'),
+      '#type' => 'select',
+      '#options' => $this->imageWidgetCropManager->getAvailableCropType(CropType::getCropTypeNames()),
+      '#empty_option' => $this->t("- Any crop selected -"),
+      '#default_value' => $this->settings->get('settings.crop_types_required'),
+      '#multiple' => TRUE,
+      '#description' => $this->t('Set active crop as required.'),
+      '#weight' => 16,
+    ];
+
     return parent::buildForm($form, $form_state);
   }
 
@@ -245,7 +256,8 @@ class CropWidgetForm extends ConfigFormBase {
       ->set("settings.show_default_crop", $form_state->getValue('show_default_crop'))
       ->set("settings.show_crop_area", $form_state->getValue('show_crop_area'))
       ->set("settings.warn_multiple_usages", $form_state->getValue('warn_multiple_usages'))
-      ->set("settings.crop_list", $form_state->getValue('crop_list'));
+      ->set("settings.crop_list", $form_state->getValue('crop_list'))
+      ->set("settings.crop_types_required", $form_state->getValue('crop_types_required'));
     $this->settings->save();
   }
 

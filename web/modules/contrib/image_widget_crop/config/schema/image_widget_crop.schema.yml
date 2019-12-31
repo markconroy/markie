@@ -18,6 +18,11 @@ field.widget.settings.image_widget_crop:
       label: 'The preview image will be cropped'
       sequence:
         type: string
+    crop_types_required:
+      type: sequence
+      label: 'Required crop types'
+      sequence:
+        type: string
     warn_multiple_usages:
       type: boolean
       label: 'Warn user when a file have multiple usages'
@@ -47,6 +52,11 @@ image_widget_crop.settings:
         crop_list:
           type: sequence
           label: 'The preview image will be cropped'
+          sequence:
+            type: string
+        crop_types_required:
+          type: sequence
+          label: 'Required crop types'
           sequence:
             type: string
         warn_multiple_usages:
