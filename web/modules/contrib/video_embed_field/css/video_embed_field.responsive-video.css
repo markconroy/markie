@@ -22,3 +22,25 @@
 .video-embed-field-responsive-modal {
   max-width: 100%;
 }
+
+.video-embed-field-lazy {
+  cursor: pointer;
+  position: relative;
+}
+
+.video-embed-field-lazy img {
+  width: 100%;
+}
+
+.video-embed-field-lazy-play {
+  height: 72px;
+  width: 72px;
+  left: 50%;
+  top: 50%;
+  margin-left: -36px;
+  margin-top: -36px;
+  position: absolute;
+  background: url("icons/play.svg") no-repeat;
+  cursor: pointer;
+  background-size: 72px 72px;
+}

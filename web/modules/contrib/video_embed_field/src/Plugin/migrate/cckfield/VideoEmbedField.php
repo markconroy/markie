@@ -11,7 +11,9 @@ use Drupal\migrate_drupal\Plugin\migrate\cckfield\CckFieldPluginBase;
  *
  * @MigrateCckField(
  *   id = "video_embed_field",
- *   core = {7}
+ *   core = {7},
+ *   source_module = "video_embed_field",
+ *   destination_module = "video_embed_field",
  * )
  */
 class VideoEmbedField extends CckFieldPluginBase {

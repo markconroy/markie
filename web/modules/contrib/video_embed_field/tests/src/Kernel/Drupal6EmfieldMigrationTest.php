@@ -14,6 +14,11 @@ class Drupal6EmfieldMigrationTest extends MigrateDrupal6TestBase {
   use EntityLoadTrait;
 
   /**
+   * @var bool
+   */
+  protected $strictConfigSchema = FALSE;
+
+  /**
    * {@inheritdoc}
    */
   public static $modules = [

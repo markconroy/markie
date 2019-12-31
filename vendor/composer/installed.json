@@ -3850,18 +3850,18 @@
     },
     {
         "name": "drupal/video_embed_field",
-        "version": "1.5.0",
-        "version_normalized": "1.5.0.0",
+        "version": "1.6.0",
+        "version_normalized": "1.6.0.0",
         "source": {
             "type": "git",
             "url": "https://git.drupalcode.org/project/video_embed_field.git",
-            "reference": "8.x-1.5"
+            "reference": "8.x-1.6"
         },
         "dist": {
             "type": "zip",
-            "url": "https://ftp.drupal.org/files/projects/video_embed_field-8.x-1.5.zip",
-            "reference": "8.x-1.5",
-            "shasum": "f54d470ef7f863604e51e6ae98cd40ef25de5f79"
+            "url": "https://ftp.drupal.org/files/projects/video_embed_field-8.x-1.6.zip",
+            "reference": "8.x-1.6",
+            "shasum": "e5e6dc6baa538b54da1413f7c6a2f4c040c5fa05"
         },
         "require": {
             "drupal/core": "*"
@@ -3878,7 +3878,7 @@
             },
             "drupal": {
                 "version": "8.x-1.x",
-                "datestamp": "1493246342",
+                "datestamp": "1557724631",
                 "security-coverage": {
                     "status": "covered",
                     "message": "Covered by Drupal's security advisory policy"
@@ -3908,7 +3908,7 @@
         "description": "A pluggable field type for storing videos from external video hosts such as Vimeo and YouTube.",
         "homepage": "https://www.drupal.org/project/video_embed_field",
         "support": {
-            "source": "http://cgit.drupalcode.org/video_embed_field"
+            "source": "https://git.drupalcode.org/project/video_embed_field"
         }
     },
     {

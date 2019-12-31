@@ -30,6 +30,7 @@ class VideoTextfield extends WidgetBase {
       '#maxlength' => $this->getFieldSetting('max_length'),
       '#attributes' => ['class' => ['js-text-full', 'text-full']],
       '#allowed_providers' => $this->getFieldSetting('allowed_providers'),
+      '#theme' => 'input__video',
     ];
     return $element;
   }

@@ -1,11 +1,12 @@
 <?php
 
 namespace Drupal\video_embed_field;
+use Drupal\Component\Plugin\PluginInspectionInterface;
 
 /**
  * Providers an interface for embed providers.
  */
-interface ProviderPluginInterface {
+interface ProviderPluginInterface extends PluginInspectionInterface {
 
   /**
    * Check if the plugin is applicable to the user input.

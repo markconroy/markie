@@ -254,15 +254,31 @@ class ProviderUrlParseTest extends UnitTestCase {
     return [
       'Simple Timeindex' => [
         'https://www.youtube.com/watch?v=fdbFVWupSsw&t=15',
-        '15',
+        15,
+      ],
+      'Timeindex with Seconds' => [
+        'https://www.youtube.com/watch?v=q25eaJHpXFo&t=15s',
+        15,
+      ],
+      'Timeindex with Minutes and Seconds' => [
+        'https://www.youtube.com/watch?v=q25eaJHpXFo&t=42m25s',
+        2545,
+      ],
+      'Timeindex with Hours, Minutes and Seconds' => [
+        'https://www.youtube.com/watch?v=q25eaJHpXFo&t=1h11m14s',
+        4274,
+      ],
+      'Timeindex with other params' => [
+        'https://www.youtube.com/watch?v=q25eaJHpXFo&t=1h11m14s&some_param=nothing',
+        4274,
       ],
       'No Timeindex' => [
         'https://www.youtube.com/watch?v=fdbFVWupSsw',
-        '0',
+        0,
       ],
       'Invalid Timeindex' => [
         'https://www.youtube.com/watch?v=fdbFVWupSsw&t=time',
-        '0',
+        0,
       ],
     ];
   }

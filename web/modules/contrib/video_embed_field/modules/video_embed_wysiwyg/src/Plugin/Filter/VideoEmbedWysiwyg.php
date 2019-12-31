@@ -2,6 +2,7 @@
 
 namespace Drupal\video_embed_wysiwyg\Plugin\Filter;
 
+use Drupal\Component\Utility\Html;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\filter\FilterProcessResult;
@@ -89,18 +90,20 @@ class VideoEmbedWysiwyg extends FilterBase implements ContainerFactoryPluginInte
       $autoplay = $this->currentUser->hasPermission('never autoplay videos') ? FALSE : $embed_data['settings']['autoplay'];
       $embed_code = $provider->renderEmbedCode($embed_data['settings']['width'], $embed_data['settings']['height'], $autoplay);
 
+      $embed_code = [
+        '#type' => 'container',
+        '#attributes' => [
+          'class' => [Html::cleanCssIdentifier(sprintf('video-embed-field-provider-%s', $provider->getPluginId()))],
+        ],
+        'children' => $embed_code,
+      ];
+
       // Add the container to make the video responsive if it's been
       // configured as such. This usually is attached to field output in the
       // case of a formatter, but a custom container must be used where one is
       // not present.
       if ($embed_data['settings']['responsive']) {
-        $embed_code = [
-          '#type' => 'container',
-          '#attributes' => [
-            'class' => ['video-embed-field-responsive-video'],
-          ],
-          'children' => $embed_code,
-        ];
+        $embed_code['#attributes']['class'][] = 'video-embed-field-responsive-video';
       }
 
       // Replace the JSON settings with a video.

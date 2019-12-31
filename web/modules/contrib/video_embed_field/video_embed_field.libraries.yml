@@ -2,7 +2,15 @@ colorbox:
   js:
     js/video-embed-field.colorbox.js: {}
   dependencies:
+    - system/drupal.system
     - colorbox/colorbox
+
+lazy-load:
+  js:
+    js/video-embed-field.lazyLoad.js: {}
+  dependencies:
+    - system/drupal.system
+    - video_embed_field/responsive-video
 
 responsive-video:
   css:

@@ -2,6 +2,7 @@
 
 namespace Drupal\video_embed_field\Plugin\Field\FieldFormatter;
 
+use Drupal\Component\Utility\Html;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FormatterBase;
 use Drupal\Core\Field\FieldItemListInterface;
@@ -100,14 +101,16 @@ class Video extends FormatterBase implements ContainerFactoryPluginInterface {
         $element[$delta] = $provider->renderEmbedCode($this->getSetting('width'), $this->getSetting('height'), $autoplay);
         $element[$delta]['#cache']['contexts'][] = 'user.permissions';
 
+        $element[$delta] = [
+          '#type' => 'container',
+          '#attributes' => ['class' => [Html::cleanCssIdentifier(sprintf('video-embed-field-provider-%s', $provider->getPluginId()))]],
+          'children' => $element[$delta],
+        ];
+
         // For responsive videos, wrap each field item in it's own container.
         if ($this->getSetting('responsive')) {
-          $element[$delta] = [
-            '#type' => 'container',
-            '#attached' => ['library' => ['video_embed_field/responsive-video']],
-            '#attributes' => ['class' => ['video-embed-field-responsive-video']],
-            'children' => $element[$delta],
-          ];
+          $element[$delta]['#attached']['library'][] = 'video_embed_field/responsive-video';
+          $element[$delta]['#attributes']['class'][] = 'video-embed-field-responsive-video';
         }
       }
 

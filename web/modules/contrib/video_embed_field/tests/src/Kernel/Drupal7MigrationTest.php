@@ -14,6 +14,11 @@ class Drupal7MigrationTest extends MigrateDrupal7TestBase {
   use EntityLoadTrait;
 
   /**
+   * @var bool
+   */
+  protected $strictConfigSchema = FALSE;
+
+  /**
    * {@inheritdoc}
    */
   public static $modules = [
