@@ -1,0 +1,4 @@
+administer antibot configuration:
+  title: 'Administer antibot configuration'
+  description: 'Access to the Antibot configurations'
+  restrict access: true

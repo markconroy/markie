@@ -1,0 +1,145 @@
+<?php
+
+use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Core\Path\PathMatcherInterface;
+use Drupal\Core\Form\FormStateInterface;
+
+/**
+ * Implements hook_help().
+ */
+function antibot_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    // Main module help for the antibot module.
+    case 'help.page.antibot':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('Prevent forms from being submitted without JavaScript enabled') . '</p>';
+      return $output;
+  }
+}
+
+/**
+ * Implements hook_theme().
+ */
+function antibot_theme($existing, $type, $theme, $path) {
+  $items = [];
+  $items['antibot_no_js'] = [
+    'template'  => 'antibot-no-js',
+    'variables' => [
+      'message' => NULL,
+    ],
+    'path' => $path . '/templates',
+  ];
+  return $items;
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function antibot_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  // Load module config.
+  $config = \Drupal::config('antibot.settings');
+
+  // Get the configured active form IDs for antibot.
+  if ($form_ids = $config->get('form_ids')) {
+    // Check if this form is a match.
+    if (\Drupal::service('path.matcher')->matchPath($form_id, implode("\n", $form_ids))) {
+      // Enable protection for this form.
+      antibot_protect_form($form);
+
+      // Determine if we should display the form ID.
+      if ($config->get('show_form_ids')) {
+        // Check if the user has permission to view these messages.
+        if (\Drupal::currentUser()->hasPermission('administer site configuration')) {
+          // Set a message with the form ID and status.
+          drupal_set_message("{$form_id}: " . t('active'));
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Helper function to enable Antibot protection for a given form.
+ *
+ * @param array &$form
+ *   The form to enable Antibot protection on.
+ */
+function antibot_protect_form(array &$form) {
+  // Generate a key for this form.
+  $key = md5($form['#form_id']);
+
+  // Store the key in the form.
+  $form['#antibot_key'] = $key;
+
+  // Add a hidden value which will receive the key via JS.
+  // The point of this is to add an additonal layer of protection for remotely
+  // POSTed forms. Since the key will not be present in that scenario, the
+  // remote post will fail.
+  $form['antibot_key'] = [
+    '#type' => 'hidden',
+    '#value' => '',
+  ];
+
+  // Provide a message in the event that the user does not have JavaScript.
+  $form['antibot_no_js'] = [
+    '#theme' => 'antibot_no_js',
+    '#message' => t('You must have JavaScript enabled to use this form.'),
+    '#weight' => -500,
+  ];
+
+  // Add a pre-render function.
+  $form['#pre_render'][] = 'antibot_form_pre_render';
+
+  // Add validation for the key.
+  $form['#validate'][] = 'antibot_form_validation';
+}
+
+/**
+ * Validation callback for Antibot-enabled forms.
+ *
+ * @see antibot_form_alter().
+ */
+function antibot_form_validation($form, FormStateInterface $form_state) {
+  // Get the user input.
+  $input = $form_state->getUserInput();
+
+  // Extract the submitted key.
+  $submitted_key = isset($input['antibot_key']) ? $input['antibot_key'] : NULL;
+
+  // Check if the key is missing or is not a match.
+  if (!$submitted_key || ($submitted_key != $form['#antibot_key'])) {
+    $form_state->setErrorByName('', t('Submission failed. Please reload the page, ensure JavaScript is enabled and try again.'));
+  }
+}
+
+/**
+ * Pre-render callback for Antibot-enabled forms.
+ *
+ * @see antibot_form_alter().
+ */
+function antibot_form_pre_render(array $build) {
+  // Add the Antibot library.
+  $build['#attached']['library'][] = 'antibot/antibot.form';
+
+  // Store the form ID that the JS can replace the action path along with the
+  // form key.
+  $build['#attached']['drupalSettings']['antibot']['forms'][$build['#id']] = [
+    'id' => $build['#id'],
+    'key' => $build['#antibot_key'],
+  ];
+
+  // Store the action placeholder as an attribute so that it converts
+  // during the building of the form. This is needed because in Drupal 8
+  // the form action is a placeholder that is not added until the very
+  // last moment, in order to keep the form cacheable.
+  $build['#attributes']['data-action'] = $build['#action'];
+
+  // Change the action so the submission does not go through
+  $build['#action'] = base_path() . 'antibot';
+
+  // Add a class to the form.
+  $build['#attributes']['class'][] = 'antibot';
+
+  return $build;
+}
