@@ -6,13 +6,10 @@ media_entity_twitter.settings:
       type: string
       label: 'Base folder for thumbnails'
 
-media_entity.bundle.type.twitter:
-  type: mapping
-  label: 'Twitter type configuration'
+media.source.twitter:
+  type: media.source.field_aware
+  label: '"Twitter" media source configuration'
   mapping:
-    source_field:
-      type: string
-      label: 'Field with embed code/URL'
     use_twitter_api:
       type: boolean
       label: 'Whether to use twitter api or not'

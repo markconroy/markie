@@ -3,9 +3,11 @@
 namespace Drupal\media_entity_twitter\Plugin\Validation\Constraint;
 
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
-use Drupal\media_entity\EmbedCodeValueTrait;
-use Drupal\media_entity_twitter\Plugin\MediaEntity\Type\Twitter;
+use Drupal\Core\Field\FieldItemListInterface;
+use Drupal\media_entity_twitter\Plugin\media\Source\Twitter;
+use Drupal\Core\Field\FieldItemInterface;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\ClientException;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
@@ -14,8 +16,6 @@ use Symfony\Component\Validator\ConstraintValidator;
  * Validates the TweetVisible constraint.
  */
 class TweetVisibleConstraintValidator extends ConstraintValidator implements ContainerInjectionInterface {
-
-  use EmbedCodeValueTrait;
 
   /**
    * The HTTP client to fetch the feed data with.
@@ -45,15 +45,29 @@ class TweetVisibleConstraintValidator extends ConstraintValidator implements Con
    * {@inheritdoc}
    */
   public function validate($value, Constraint $constraint) {
-    $value = $this->getEmbedCode($value);
-    if (!isset($value)) {
-      return;
+    $data = '';
+    if (is_string($value)) {
+      $data = $value;
     }
-
-    $matches = [];
-
+    elseif ($value instanceof FieldItemListInterface) {
+      $fieldtype = $value->getFieldDefinition()->getType();
+      $field_value = $value->getValue();
+      if ($fieldtype == 'link') {
+        $data = empty($field_value[0]['uri']) ? "" : $field_value[0]['uri'];
+      }
+      else {
+        $data = empty($field_value[0]['value']) ? "" : $field_value[0]['value'];
+      }
+    }
+    elseif ($value instanceof FieldItemInterface) {
+      $class = get_class($value);
+      $property = $class::mainPropertyName();
+      if ($property) {
+        $data = $value->{$property};
+      }
+    }
     foreach (Twitter::$validationRegexp as $pattern => $key) {
-      if (preg_match($pattern, $value, $item_matches)) {
+      if (preg_match($pattern, $data, $item_matches)) {
         $matches[] = $item_matches;
       }
     }
@@ -64,7 +78,13 @@ class TweetVisibleConstraintValidator extends ConstraintValidator implements Con
     }
 
     // Fetch content from the given url.
-    $response = $this->httpClient->get($matches[0][0], ['allow_redirects' => FALSE]);
+    try {
+      $response = $this->httpClient->get($matches[0][0], ['allow_redirects' => FALSE]);
+    }
+    catch (ClientException $e) {
+      $this->context->addViolation($constraint->message);
+      return;
+    }
 
     if ($response->getStatusCode() == 302 && ($location = $response->getHeader('location'))) {
       $effective_url_parts = parse_url($location[0]);

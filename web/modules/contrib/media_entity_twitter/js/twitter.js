@@ -2,24 +2,24 @@
  * @file
  */
 
-(function ($, Drupal) {
+(function (Drupal) {
   "use strict";
 
   Drupal.behaviors.twitterMediaEntity = {
     attach: function (context) {
-      function _init () {
-        twttr.widgets.load(context);
+      function _init() {
+        twttr.widgets.load((context && context.nodeType === 1) ? context : null);
       }
 
       // If the tweet is being embedded in a CKEditor's iFrame the widgets
       // library might not have been loaded yet.
       if (typeof twttr == 'undefined') {
-        $.getScript('//platform.twitter.com/widgets.js', _init);
+        var script = document.createElement("script");
+        script.src = '//platform.twitter.com/widgets.js';
+        document.head.appendChild(script);
       }
-      else {
-        _init();
-      }
+      _init();
     }
   };
 
-})(jQuery, Drupal);
+})(Drupal);

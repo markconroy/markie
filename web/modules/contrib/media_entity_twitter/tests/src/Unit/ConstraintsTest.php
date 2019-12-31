@@ -166,7 +166,9 @@ class ConstraintsTest extends UnitTestCase {
   public function testBadUrlsOnVisibleConstraint($embed_code) {
 
     $http_client = $this->getMock('\GuzzleHttp\Client');
-    $http_client->expects($this->never())->method('get');
+    $http_client->expects($this->never())
+      ->method('__call')
+      ->with('get', [$embed_code, ['allow_redirects' => FALSE]]);
 
     $execution_context = $this->getMockBuilder('\Drupal\Core\TypedData\Validation\ExecutionContext')
       ->disableOriginalConstructor()

@@ -12,7 +12,7 @@ interface TweetFetcherInterface {
    *
    * @param int $id
    *   The tweet ID.
-
+   *
    * @return array
    *   The tweet information.
    *
@@ -35,7 +35,7 @@ interface TweetFetcherInterface {
    *
    * @param string $consumer_key
    *   The consumer key.
-   * @param $consumer_secret
+   * @param string $consumer_secret
    *   The consumer secret.
    * @param string $oauth_access_token
    *   The OAuth access token.

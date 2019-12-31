@@ -35,7 +35,7 @@ class TweetFetcher implements TweetFetcherInterface {
   /**
    * TweetFetcher constructor.
    *
-   * @param \Drupal\Core\Cache\CacheBackendInterface|NULL $cache
+   * @param \Drupal\Core\Cache\CacheBackendInterface|null $cache
    *   (optional) A cache bin for storing fetched tweets.
    */
   public function __construct(CacheBackendInterface $cache = NULL) {
@@ -59,7 +59,7 @@ class TweetFetcher implements TweetFetcherInterface {
 
     // Query Twitter's API.
     $response = $this->twitter
-      ->setGetfield('?id=' . $id)
+      ->setGetfield('?id=' . $id . '&tweet_mode=extended')
       ->buildOAuth('https://api.twitter.com/1.1/statuses/show.json', 'GET')
       ->performRequest();
 

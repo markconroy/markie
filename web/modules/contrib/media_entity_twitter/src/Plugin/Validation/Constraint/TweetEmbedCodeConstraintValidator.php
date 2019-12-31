@@ -2,8 +2,9 @@
 
 namespace Drupal\media_entity_twitter\Plugin\Validation\Constraint;
 
-use Drupal\media_entity\EmbedCodeValueTrait;
-use Drupal\media_entity_twitter\Plugin\MediaEntity\Type\Twitter;
+use Drupal\media_entity_twitter\Plugin\media\Source\Twitter;
+use Drupal\Core\Field\FieldItemList;
+use Drupal\Core\Field\FieldItemInterface;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 
@@ -12,24 +13,42 @@ use Symfony\Component\Validator\ConstraintValidator;
  */
 class TweetEmbedCodeConstraintValidator extends ConstraintValidator {
 
-  use EmbedCodeValueTrait;
-
   /**
    * {@inheritdoc}
    */
   public function validate($value, Constraint $constraint) {
-    $value = $this->getEmbedCode($value);
-    if (!isset($value)) {
-      return;
+    $data = '';
+    if (is_string($value)) {
+      $data = $value;
     }
-
-    foreach (Twitter::$validationRegexp as $pattern => $key) {
-      if (preg_match($pattern, $value)) {
-        return;
+    elseif ($value instanceof FieldItemList) {
+      $fieldtype = $value->getFieldDefinition()->getType();
+      $field_value = $value->getValue();
+      if ($fieldtype == 'link') {
+        $data = empty($field_value[0]['uri']) ? "" : $field_value[0]['uri'];
+      }
+      else {
+        $data = empty($field_value[0]['value']) ? "" : $field_value[0]['value'];
       }
     }
-
-    $this->context->addViolation($constraint->message);
+    elseif ($value instanceof FieldItemInterface) {
+      $class = get_class($value);
+      $property = $class::mainPropertyName();
+      if ($property) {
+        $data = $value->{$property};
+      }
+    }
+    if ($data) {
+      $matches = [];
+      foreach (Twitter::$validationRegexp as $pattern => $key) {
+        if (preg_match($pattern, $data, $item_matches)) {
+          $matches[] = $item_matches;
+        }
+      }
+      if (empty($matches)) {
+        $this->context->addViolation($constraint->message);
+      }
+    }
   }
 
 }

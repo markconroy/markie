@@ -15,7 +15,7 @@ class TwitterApiException extends \Exception {
    *   and 'code' elements.
    * @param int $code
    *   (optional) The general error code for the exception.
-   * @param \Exception|NULL $previous
+   * @param \Exception|null $previous
    *   (optional) The previous exception.
    *
    * @see https://dev.twitter.com/overview/api/response-codes

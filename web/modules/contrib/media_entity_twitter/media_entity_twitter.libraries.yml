@@ -4,7 +4,6 @@ integration:
     'js/twitter.js': {}
   dependencies:
     - core/drupal
-    - core/jquery
     - media_entity_twitter/twttr.widgets
 twttr.widgets:
   remote: //platform.twitter.com/widgets.js
