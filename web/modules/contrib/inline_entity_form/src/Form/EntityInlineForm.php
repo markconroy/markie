@@ -182,8 +182,45 @@ class EntityInlineForm implements InlineFormInterface {
         }
       }
     }
+
+    // Determine the children of the entity form before it has been altered.
+    $children_before = Element::children($entity_form);
+
     // Allow other modules to alter the form.
     $this->moduleHandler->alter('inline_entity_form_entity_form', $entity_form, $form_state);
+
+    // Determine the children of the entity form after it has been altered.
+    $children_after = Element::children($entity_form);
+
+    // Ensure that any new children added have #tree, #parents, #array_parents
+    // and handle setting the proper #group if it's referencing a local element.
+    // Note: the #tree, #parents and #array_parents code is a direct copy from
+    // \Drupal\Core\Form\FormBuilder::doBuildForm.
+    $children_diff = array_diff($children_after, $children_before);
+    foreach ($children_diff as $child) {
+      // Don't squash an existing tree value.
+      if (!isset($entity_form[$child]['#tree'])) {
+        $entity_form[$child]['#tree'] = $entity_form['#tree'];
+      }
+
+      // Don't squash existing parents value.
+      if (!isset($entity_form[$child]['#parents'])) {
+        // Check to see if a tree of child elements is present. If so,
+        // continue down the tree if required.
+        $entity_form[$child]['#parents'] = $entity_form[$child]['#tree'] && $entity_form['#tree'] ? array_merge($entity_form['#parents'], [$child]) : [$child];
+      }
+
+      // Ensure #array_parents follows the actual form structure.
+      $array_parents = $entity_form['#array_parents'];
+      $array_parents[] = $child;
+      $entity_form[$child]['#array_parents'] = $array_parents;
+
+      // Detect if there is a #group and it specifies a local element. If so,
+      // change it to use the proper local element's #parents group name.
+      if (isset($entity_form[$child]['#group']) && isset($entity_form[$entity_form[$child]['#group']])) {
+        $entity_form[$child]['#group'] = implode('][', $entity_form[$entity_form[$child]['#group']]['#parents']);
+      }
+    }
 
     return $entity_form;
   }
@@ -203,7 +240,7 @@ class EntityInlineForm implements InlineFormInterface {
       $form_display->validateFormValues($entity, $entity_form, $form_state);
       $entity->setValidationRequired(FALSE);
 
-      foreach($form_state->getErrors() as $name => $message) {
+      foreach ($form_state->getErrors() as $name => $message) {
         // $name may be unknown in $form_state and
         // $form_state->setErrorByName($name, $message) may suppress the error message.
         $form_state->setError($triggering_element, $message);

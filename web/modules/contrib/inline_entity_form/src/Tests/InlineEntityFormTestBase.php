@@ -140,7 +140,7 @@ abstract class InlineEntityFormTestBase extends WebTestBase {
    * in inline_entity_form_test module.
    *
    * @param $form_display
-   *  The form display to check.
+   *   The form display to check.
    */
   protected function checkFormDisplayFields($form_display, $prefix) {
     $form_display_fields = [
@@ -171,7 +171,7 @@ abstract class InlineEntityFormTestBase extends WebTestBase {
       ],
     ];
     if ($fields = $form_display_fields[$form_display]) {
-      $this->assert('debug', 'Checking form dispaly: '. $form_display);
+      $this->assert('debug', 'Checking form dispaly: ' . $form_display);
       foreach ($fields['expected'] as $expected_field) {
         $this->assertFieldByName($prefix . $expected_field);
       }

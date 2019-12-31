@@ -43,7 +43,7 @@ interface InlineFormInterface extends EntityHandlerInterface {
   public function getEntityLabel(EntityInterface $entity);
 
   /**
-   * Gets the fields used to represent an entity in the IEF table.
+   * Gets the columns used to represent an entity in the IEF table.
    *
    * Modules can alter the output of this method through
    * hook_inline_entity_form_table_fields_alter().
@@ -52,14 +52,20 @@ interface InlineFormInterface extends EntityHandlerInterface {
    *   An array of allowed bundles for this widget.
    *
    * @return array
-   *   An array of fields keyed by field name. Each field is represented by an
-   *   associative array containing the following keys:
-   *   - type: 'label', 'field' or 'callback'.
+   *   An array of data about table columns keyed by column name. Each column is
+   *   represented by an associative array containing the following keys:
+   *   - type: One of 'label', 'field' or 'callback', which indicates how this
+   *     column should be handled:
+   *      - 'label': The entity's label.
+   *      - 'field': A field value from the entity. The name of the field is
+   *        given by the key in this array.
+   *      - 'callback': A callback, given by the 'callback' property.
+   *     See theme_inline_entity_form_entity_table() for the handling of these.
    *   - label: the title of the table field's column in the IEF table.
    *   - weight: the sort order of the column in the IEF table.
-   *   - display_options: (optional) used for 'field' type table fields, an
+   *   - display_options: (optional) used for 'field' type table columns, an
    *     array of display settings. See EntityViewBuilderInterface::viewField().
-   *   - callback: for 'callback' type table fields, a callable that returns a
+   *   - callback: for 'callback' type table columns, a callable that returns a
    *     renderable array.
    *   - callback_arguments: (optional) an array of additional arguments to pass
    *     to the callback. The entity and the theme variables are always passed

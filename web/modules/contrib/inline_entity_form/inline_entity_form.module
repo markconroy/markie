@@ -72,14 +72,21 @@ function inline_entity_form_reference_form($reference_form, &$form_state) {
   $ief_id = $reference_form['#ief_id'];
   /** @var \Drupal\field\Entity\FieldConfig $instance */
   $instance = $form_state->get(['inline_entity_form', $ief_id, 'instance']);
+  $selection_settings = [
+    'match_operator' => $reference_form['#match_operator'],
+  ] + $instance->getSetting('handler_settings');
 
   $reference_form['#title'] = t('Add existing @type_singular', ['@type_singular' => $labels['singular']]);
+
   $reference_form['entity_id'] = [
     '#type' => 'entity_autocomplete',
-    '#title' => t('@label', ['@label' => ucwords($labels['singular'])]),
+    // @todo Use bundle defined singular/plural labels as soon as
+    //   https://www.drupal.org/node/2765065 is committed.
+    // @see https://www.drupal.org/node/2765065
+    '#title' => t('@label', ['@label' => ucfirst($labels['singular'])]),
     '#target_type' => $instance->getSetting('target_type'),
     '#selection_handler' => $instance->getSetting('handler'),
-    '#selection_settings' => $instance->getSetting('handler_settings'),
+    '#selection_settings' => $selection_settings,
     '#required' => TRUE,
     '#maxlength' => 255,
   ];
@@ -125,7 +132,7 @@ function inline_entity_form_reference_form($reference_form, &$form_state) {
  * Validates the form for adding existing entities.
  *
  * @param array $reference_form
- *  The reference entity form.
+ *   The reference entity form.
  * @param \Drupal\Core\Form\FormStateInterface $form_state
  *   The form state of the parent form.
  */
@@ -158,7 +165,7 @@ function inline_entity_form_reference_form_validate(&$reference_form, FormStateI
  * Adds the specified entity to the IEF form state.
  *
  * @param array $reference_form
- *  The reference entity form.
+ *   The reference entity form.
  * @param \Drupal\Core\Form\FormStateInterface $form_state
  *   The form state of the parent form.
  */
@@ -334,10 +341,10 @@ function theme_inline_entity_form_entity_table($variables) {
   // Add header columns for each field.
   $first = TRUE;
   foreach ($fields as $field_name => $field) {
-    $column = ['data' => $field['label']];
+    $column = ['data' => $field['label'], 'class' => ['inline-entity-form-' . $entity_type . '-' . $field_name]];
     // The first column gets a special class.
     if ($first) {
-      $column['class'] = ['ief-first-column-header'];
+      $column['class'][] = 'ief-first-column-header';
       $first = FALSE;
     }
     $header[] = $column;
@@ -363,7 +370,6 @@ function theme_inline_entity_form_entity_table($variables) {
     }
 
     foreach ($fields as $field_name => $field) {
-      $data = '';
       if ($field['type'] == 'label') {
         $data = $variables['form'][$key]['#label'];
       }
@@ -384,6 +390,9 @@ function theme_inline_entity_form_entity_table($variables) {
         }
 
         $data = call_user_func_array($field['callback'], $arguments);
+      }
+      else {
+        $data = t('N/A');
       }
 
       $cells[] = ['data' => $data, 'class' => ['inline-entity-form-' . $entity_type . '-' . $field_name]];

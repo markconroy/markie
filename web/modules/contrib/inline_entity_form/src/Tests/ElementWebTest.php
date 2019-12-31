@@ -67,7 +67,7 @@ class ElementWebTest extends InlineEntityFormTestBase {
       $this->assertNodeByTitle($title, 'ief_test_custom');
 
       if ($node = $this->getNodeByTitle($title)) {
-        $this->drupalGet("ief-edit-test/{$node->id()}/$form_mode_possibility");
+        $this->drupalGet("ief-test/$form_mode_possibility/{$node->id()}");
         $this->assertFieldByName('inline_entity_form[title][0][value]', $title, 'Node title appears in form.');
         $this->checkFormDisplayFields("node.ief_test_custom.$form_mode_possibility", 'inline_entity_form');
         $this->assertFieldByName('inline_entity_form[positive_int][0][value]', 11, 'Positive int field appears in form.');

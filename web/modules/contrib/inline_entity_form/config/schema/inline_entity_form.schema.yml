@@ -25,6 +25,12 @@ field.widget.settings.inline_entity_form_simple:
     match_operator:
       type: string
       label: "Match operator"
+    collapsible:
+      type: boolean
+      label: "Collapsible"
+    collapsed:
+      type: boolean
+      label: "Collapsed by default"
 
 field.widget.settings.inline_entity_form_complex:
   type: mapping
@@ -51,3 +57,12 @@ field.widget.settings.inline_entity_form_complex:
     match_operator:
       type: string
       label: "Match operator"
+    allow_duplicate:
+      type: boolean
+      label: "Allow duplicate"
+    collapsible:
+      type: boolean
+      label: "Collapsible"
+    collapsed:
+      type: boolean
+      label: "Collapsed by default"

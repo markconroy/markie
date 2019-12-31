@@ -21,7 +21,7 @@ class TranslationHelper {
    * @return \Drupal\Core\Entity\ContentEntityInterface
    *   The prepared entity.
    *
-   * @see \Drupal\Core\Entity\ContentEntityForm::initFormLangcodes().
+   * @see \Drupal\Core\Entity\ContentEntityForm::initFormLangcodes()
    */
   public static function prepareEntity(ContentEntityInterface $entity, FormStateInterface $form_state) {
     $form_langcode = $form_state->get('langcode');
@@ -34,6 +34,9 @@ class TranslationHelper {
       // Create a translation from the source language values.
       $source = $form_state->get(['content_translation', 'source']);
       $source_langcode = $source ? $source->getId() : $entity_langcode;
+      if (!$entity->hasTranslation($source_langcode)) {
+        $entity->addTranslation($source_langcode, $entity->toArray());
+      }
       $source_translation = $entity->getTranslation($source_langcode);
       $entity->addTranslation($form_langcode, $source_translation->toArray());
       $translation = $entity->getTranslation($form_langcode);
@@ -97,7 +100,7 @@ class TranslationHelper {
    * @return bool
    *   TRUE if translating is in progress, FALSE otherwise.
    *
-   * @see \Drupal\Core\Entity\ContentEntityForm::initFormLangcodes().
+   * @see \Drupal\Core\Entity\ContentEntityForm::initFormLangcodes()
    */
   public static function isTranslating(FormStateInterface $form_state) {
     $form_langcode = $form_state->get('langcode');

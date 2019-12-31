@@ -134,8 +134,8 @@ class SimpleWidgetWebTest extends InlineEntityFormTestBase {
       $child_node = $this->getNodeByTitle($child_title);
       if ($this->assertNotNull($child_node)) {
         $this->assertEqual($host_node->single[0]->target_id, $child_node->id(), 'Child node is referenced');
-        $this->assertEqual($child_node->positive_int[0]->value,1, 'Child node int field correct.');
-        $this->assertEqual($child_node->bundle(),'ief_test_custom', 'Child node is correct bundle.');
+        $this->assertEqual($child_node->positive_int[0]->value, 1, 'Child node int field correct.');
+        $this->assertEqual($child_node->bundle(), 'ief_test_custom', 'Child node is correct bundle.');
       }
     }
   }

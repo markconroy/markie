@@ -56,7 +56,7 @@ class TranslationTest extends InlineEntityFormTestBase {
     /** @var \Drupal\Core\Entity\Display\EntityFormDisplayInterface $display */
     $display = $form_display_storage->load('node.ief_test_complex.default');
     $component = $display->getComponent('multi');
-    $component['settings']['allow_existing'] = TRUe;
+    $component['settings']['allow_existing'] = TRUE;
     $display->setComponent('multi', $component)->save();
   }
 

@@ -66,7 +66,7 @@ class ComplexWidgetWebTest extends InlineEntityFormTestBase {
    */
   public function testEmptyFieldIEF() {
     // Don't allow addition of existing nodes.
-    $this->setAllowExisting(FALSE);
+    $this->updateSetting('allow_existing', FALSE);
     $this->drupalGet($this->formContentAddUrl);
 
     $this->assertFieldByName('multi[form][inline_entity_form][title][0][value]', NULL, 'Title field on inline form exists.');
@@ -75,7 +75,7 @@ class ComplexWidgetWebTest extends InlineEntityFormTestBase {
     $this->assertFieldByXpath('//input[@type="submit" and @value="Create node"]', NULL, 'Found "Create node" submit button');
 
     // Allow addition of existing nodes.
-    $this->setAllowExisting(TRUE);
+    $this->updateSetting('allow_existing', TRUE);
     $this->drupalGet($this->formContentAddUrl);
 
     $this->assertNoFieldByName('multi[form][inline_entity_form][title][0][value]', NULL, 'Title field does not appear.');
@@ -107,7 +107,7 @@ class ComplexWidgetWebTest extends InlineEntityFormTestBase {
    */
   public function testEntityCreation() {
     // Allow addition of existing nodes.
-    $this->setAllowExisting(TRUE);
+    $this->updateSetting('allow_existing', TRUE);
     $this->drupalGet($this->formContentAddUrl);
 
     $this->drupalPostAjaxForm(NULL, [], $this->getButtonName('//input[@type="submit" and @value="Add new node" and @data-drupal-selector="edit-multi-actions-ief-add"]'));
@@ -183,7 +183,6 @@ class ComplexWidgetWebTest extends InlineEntityFormTestBase {
     foreach ($required_possibilities as $required) {
       $this->setupNestedComplexForm($required);
 
-
       $nested3_title = 'nested3 title steps ' . ($required ? 'required' : 'not required');
       $nested2_title = 'nested2 title steps ' . ($required ? 'required' : 'not required');
       $nested1_title = 'nested1 title steps ' . ($required ? 'required' : 'not required');
@@ -213,10 +212,9 @@ class ComplexWidgetWebTest extends InlineEntityFormTestBase {
    * Checks that nested IEF entity references can be edit and saved.
    *
    * @param \Drupal\node\Entity\Node $node
-   *  Top level node of type ief_test_nested1 to check.
+   *   Top level node of type ief_test_nested1 to check.
    * @param bool $ajax_submit
-   *  Whether IEF form widgets should be submitted via AJax or left open.
-   *
+   *   Whether IEF form widgets should be submitted via AJAX or left open.
    */
   protected function checkNestedEntityEditing(Node $node, $ajax_submit = TRUE) {
     $this->drupalGet("node/{$node->id()}/edit");
@@ -225,14 +223,14 @@ class ComplexWidgetWebTest extends InlineEntityFormTestBase {
     /** @var \Drupal\node\Entity\Node $level_2_node */
     $level_2_node = $node->test_ref_nested1->entity->test_ref_nested2->entity;
     $level_2_node_update_title = $level_2_node->getTitle() . ' - updated';
-    //edit-test-ref-nested1-entities-0-actions-ief-entity-edit
+    // edit-test-ref-nested1-entities-0-actions-ief-entity-edit
     $this->drupalPostAjaxForm(NULL, [], $this->getButtonName('//input[@type="submit" and @data-drupal-selector="edit-test-ref-nested1-entities-0-actions-ief-entity-edit"]'));
-    //edit-test-ref-nested1-form-inline-entity-form-entities-0-form-test-ref-nested2-entities-0-actions-ief-entity-edit
+    // edit-test-ref-nested1-form-inline-entity-form-entities-0-form-test-ref-nested2-entities-0-actions-ief-entity-edit
     $this->drupalPostAjaxForm(NULL, [], $this->getButtonName('//input[@type="submit" and @data-drupal-selector="edit-test-ref-nested1-form-inline-entity-form-entities-0-form-test-ref-nested2-entities-0-actions-ief-entity-edit"]'));
     $edit['test_ref_nested1[form][inline_entity_form][entities][0][form][test_ref_nested2][form][inline_entity_form][entities][0][form][title][0][value]'] = $level_2_node_update_title;
     if ($ajax_submit) {
       // Close IEF Forms with AJAX posts
-      //edit-test-ref-nested1-form-inline-entity-form-entities-0-form-test-ref-nested2-form-inline-entity-form-entities-0-form-actions-ief-edit-save
+      // edit-test-ref-nested1-form-inline-entity-form-entities-0-form-test-ref-nested2-form-inline-entity-form-entities-0-form-actions-ief-edit-save
       $this->drupalPostAjaxForm(NULL, $edit, $this->getButtonName('//input[@type="submit" and @data-drupal-selector="edit-test-ref-nested1-form-inline-entity-form-entities-0-form-test-ref-nested2-form-inline-entity-form-entities-0-form-actions-ief-edit-save"]'));
       $this->drupalPostAjaxForm(NULL, [], $this->getButtonName('//input[@type="submit" and @data-drupal-selector="edit-test-ref-nested1-form-inline-entity-form-entities-0-form-actions-ief-edit-save"]'));
       $this->drupalPostForm(NULL, [], t('Save'));
@@ -278,7 +276,7 @@ class ComplexWidgetWebTest extends InlineEntityFormTestBase {
    */
   public function testEntityEditingAndRemoving() {
     // Allow addition of existing nodes.
-    $this->setAllowExisting(TRUE);
+    $this->updateSetting('allow_existing', TRUE);
 
     // Create three ief_reference_type entities.
     $referenceNodes = $this->createReferenceContent(3);
@@ -291,7 +289,7 @@ class ComplexWidgetWebTest extends InlineEntityFormTestBase {
     $parent_node = $this->drupalGetNodeByTitle('Some title');
 
     // Edit the second entity.
-    $this->drupalGet('node/'. $parent_node->id() .'/edit');
+    $this->drupalGet('node/' . $parent_node->id() . '/edit');
     $cell = $this->xpath('//table[@id="ief-entity-table-edit-multi-entities"]/tbody/tr[@class="ief-row-entity draggable even"]/td[@class="inline-entity-form-node-label"]');
     $title = (string) $cell[0];
 
@@ -315,7 +313,7 @@ class ComplexWidgetWebTest extends InlineEntityFormTestBase {
     $this->assertTrue($node->last_name->value == 'Doe', 'Last name in reference node changed to Doe');
 
     // Delete the second entity.
-    $this->drupalGet('node/'. $parent_node->id() .'/edit');
+    $this->drupalGet('node/' . $parent_node->id() . '/edit');
     $cell = $this->xpath('//table[@id="ief-entity-table-edit-multi-entities"]/tbody/tr[@class="ief-row-entity draggable even"]/td[@class="inline-entity-form-node-label"]');
     $title = (string) $cell[0];
 
@@ -335,13 +333,13 @@ class ComplexWidgetWebTest extends InlineEntityFormTestBase {
     $this->assertTrue(empty($deleted_node), 'The inline entity was deleted from the site.');
 
     // Checks that entity does nor appear in IEF.
-    $this->drupalGet('node/'. $parent_node->id() .'/edit');
+    $this->drupalGet('node/' . $parent_node->id() . '/edit');
     $this->assertNoText($title, 'Deleted inline entity is not present on the page after saving parent.');
 
     // Delete the third entity reference only, don't delete the node. The third
     // entity now is second referenced entity because the second one was deleted
     // in previous step.
-    $this->drupalGet('node/'. $parent_node->id() .'/edit');
+    $this->drupalGet('node/' . $parent_node->id() . '/edit');
     $cell = $this->xpath('//table[@id="ief-entity-table-edit-multi-entities"]/tbody/tr[@class="ief-row-entity draggable even"]/td[@class="inline-entity-form-node-label"]');
     $title = (string) $cell[0];
 
@@ -356,7 +354,7 @@ class ComplexWidgetWebTest extends InlineEntityFormTestBase {
     $this->assertResponse(200, 'Saving parent node was successful.');
 
     // Checks that entity does nor appear in IEF.
-    $this->drupalGet('node/'. $parent_node->id() . '/edit');
+    $this->drupalGet('node/' . $parent_node->id() . '/edit');
     $this->assertNoText($title, 'Deleted inline entity is not present on the page after saving parent.');
 
     // Checks that entity is not deleted.
@@ -369,7 +367,7 @@ class ComplexWidgetWebTest extends InlineEntityFormTestBase {
    */
   public function testReferencingExistingEntities() {
     // Allow addition of existing nodes.
-    $this->setAllowExisting(TRUE);
+    $this->updateSetting('allow_existing', TRUE);
 
     // Create three ief_reference_type entities.
     $referenceNodes = $this->createReferenceContent(3);
@@ -417,10 +415,10 @@ class ComplexWidgetWebTest extends InlineEntityFormTestBase {
     $this->assertResponse(200, 'Saving parent for was successful.');
 
     // Check if entities are referenced.
-    $this->drupalGet('node/'. $parent_node->id() .'/edit');
+    $this->drupalGet('node/' . $parent_node->id() . '/edit');
     for ($i = 2; $i <= 3; $i++) {
       $cell = $this->xpath('//table[@id="ief-entity-table-edit-multi-entities"]/tbody/tr[' . $i . ']/td[@class="inline-entity-form-node-label"]');
-      $this->assertTrue($cell[0] == 'Some reference ' . $i, 'Found reference node title "Some reference ' . $i .'" in the IEF table.');
+      $this->assertTrue($cell[0] == 'Some reference ' . $i, 'Found reference node title "Some reference ' . $i . '" in the IEF table.');
     }
     // Check if all remaining nodes from all bundles are referenced.
     $count = 2;
@@ -432,12 +430,48 @@ class ComplexWidgetWebTest extends InlineEntityFormTestBase {
   }
 
   /**
+   * Tests if referencing an existing entity works without submitting the form.
+   */
+  public function testReferencingExistingEntitiesNoSubmit() {
+    // Allow addition of existing nodes.
+    $this->updateSetting('allow_existing', TRUE);
+    $title = $this->randomMachineName();
+
+    $this->drupalCreateNode([
+      'type' => 'ief_reference_type',
+      'title' => $title,
+      'first_name' => $this->randomMachineName(),
+      'last_name' => $this->randomMachineName(),
+    ]);
+    $node = $this->drupalGetNodeByTitle($title);
+    $this->assertTrue($node, 'Created ief_reference_type node "' . $node->label() . '"');;
+
+    $this->drupalGet($this->formContentAddUrl);
+    $this->drupalPostAjaxForm(NULL, [], $this->getButtonName('//input[@type="submit" and @value="Add existing node" and @data-drupal-selector="edit-multi-actions-ief-add-existing"]'));
+    $this->assertResponse(200, 'Opening inline form for existing entity was successful.');
+
+    $parent_title = $this->randomMachineName();
+    $edit = [
+      'multi[form][entity_id]' => $node->getTitle() . ' (' . $node->id() . ')',
+      'title[0][value]' => $parent_title,
+    ];
+
+    // Create ief_test_complex node.
+    $this->assertFieldByName('multi[form][entity_id]', NULL, 'Existing entity reference autocomplete field found.');
+    $this->drupalPostForm(NULL, $edit, t('Save'));
+    $this->assertResponse(200, 'Submission of parent entity was successful.');
+    $this->assertNoText(t("This value should not be null."), "The error message 'This value should not be null.' was not found in the page.");
+    $node = $this->drupalGetNodeByTitle($parent_title);
+    $this->assertTrue($node, 'Created ief_reference_type node.');
+  }
+
+  /**
    * Test if invalid values get correct validation messages in reference existing entity form.
    *
    * Also checks if existing entity reference form can be canceled.
    */
   public function testReferenceExistingValidation() {
-    $this->setAllowExisting(TRUE);
+    $this->updateSetting('allow_existing', TRUE);
 
     $this->drupalGet('node/add/ief_test_complex');
     $this->checkExistingValidationExpectation('', 'Node field is required.');
@@ -466,11 +500,49 @@ class ComplexWidgetWebTest extends InlineEntityFormTestBase {
   }
 
   /**
+   * Tests if duplicating entities works.
+   */
+  public function testDuplicatingEntities() {
+    $this->updateSetting('allow_duplicate', TRUE);
+
+    $referenceNodes = $this->createReferenceContent(2);
+    $this->drupalCreateNode([
+      'type' => 'ief_test_complex',
+      'title' => 'Some title',
+      'multi' => array_values($referenceNodes),
+    ]);
+    /** @var \Drupal\node\NodeInterface $node */
+    $parent_node = $this->drupalGetNodeByTitle('Some title');
+
+    $this->drupalGet('node/' . $parent_node->id() . '/edit');
+    $this->drupalPostAjaxForm(NULL, [], $this->getButtonName('//input[@type="submit" and @id="edit-multi-entities-0-actions-ief-entity-duplicate"]'));
+    $this->assertResponse(200, 'Opening inline duplicate form was successful.');
+
+    $edit = [
+      'multi[form][inline_entity_form][entities][0][form][title][0][value]' => 'Duplicate!',
+      'multi[form][inline_entity_form][entities][0][form][first_name][0][value]' => 'Bojan',
+    ];
+    $this->drupalPostAjaxForm(NULL, $edit, $this->getButtonName('//input[@type="submit" and @data-drupal-selector="edit-multi-form-inline-entity-form-entities-0-form-actions-ief-duplicate-save"]'));
+    $this->assertResponse(200, 'Saving inline duplicate form was successful.');
+
+    $this->assertText('Some reference 1');
+    $this->assertText('Some reference 2');
+    $this->assertText('Duplicate!');
+    $this->drupalPostForm(NULL, [], t('Save'));
+    $this->assertResponse(200, 'Saving parent entity was successful.');
+
+    // Confirm a duplicate was made.
+    $duplicate = Node::load(4);
+    $this->assertEqual($duplicate->label(), 'Duplicate!');
+    $this->assertEqual($duplicate->first_name->value, 'Bojan');
+  }
+
+  /**
    * Tests if a referenced content can be edited while the referenced content is
    * newer than the referencing parent node.
    */
   public function testEditedInlineEntityValidation() {
-    $this->setAllowExisting(TRUE);
+    $this->updateSetting('allow_existing', TRUE);
 
     // Create referenced content.
     $referenced_nodes = $this->createReferenceContent(1);
@@ -551,16 +623,18 @@ class ComplexWidgetWebTest extends InlineEntityFormTestBase {
   }
 
   /**
-   * Sets allow_existing IEF setting.
+   * Updates an IEF setting and saves the underlying entity display.
    *
-   * @param bool $flag
-   *   "allow_existing" flag to be set.
+   * @param string $name
+   *   The name of the setting.
+   * @param mixed $value
+   *   The value to set.
    */
-  protected function setAllowExisting($flag) {
+  protected function updateSetting($name, $value) {
     /** @var \Drupal\Core\Entity\Display\EntityFormDisplayInterface $display */
     $display = $this->entityFormDisplayStorage->load('node.ief_test_complex.default');
     $component = $display->getComponent('multi');
-    $component['settings']['allow_existing'] = $flag;
+    $component['settings'][$name] = $value;
     $display->setComponent('multi', $component)->save();
   }
 
@@ -589,7 +663,7 @@ class ComplexWidgetWebTest extends InlineEntityFormTestBase {
    * Gets the form.
    * Opens the inline entity forms if they are not required.
    *
-   * @param boolean $required
+   * @param bool $required
    *   Whether the fields are required.
    * @param array $permissions
    *   (optional) Permissions to sign testing user in with. You may pass in an
@@ -653,9 +727,9 @@ class ComplexWidgetWebTest extends InlineEntityFormTestBase {
    * Checks that an invalid value for an existing node will be display the expected error.
    *
    * @param $existing_node_text
-   *  The text to enter into the existing node text field.
+   *   The text to enter into the existing node text field.
    * @param $expected_error
-   *  The error message that is expected to be shown.
+   *   The error message that is expected to be shown.
    */
   protected function checkExistingValidationExpectation($existing_node_text, $expected_error) {
     $edit = [
