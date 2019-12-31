@@ -5,6 +5,7 @@ dependencies:
   config:
     - core.entity_view_mode.media.media_library
     - image.style.media_library
+    - taxonomy.vocabulary.media_tags
   enforced:
     module:
       - media_library
@@ -12,6 +13,7 @@ dependencies:
     - image
     - media
     - media_library
+    - taxonomy
     - user
 _core:
   default_config_hash: dHOSWSHbMJNke0ZBGh1O5KrnwynSOCOpQycITW-pwfs
@@ -409,6 +411,53 @@ display:
           entity_type: media
           entity_field: langcode
           plugin_id: language
+        field_media_tags_target_id:
+          id: field_media_tags_target_id
+          table: media__field_media_tags
+          field: field_media_tags_target_id
+          relationship: none
+          group_type: group
+          admin_label: ''
+          operator: or
+          value: {  }
+          group: 1
+          exposed: true
+          expose:
+            operator_id: field_media_tags_target_id_op
+            label: 'Media Tags'
+            description: ''
+            use_operator: false
+            operator: field_media_tags_target_id_op
+            operator_limit_selection: false
+            operator_list: {  }
+            identifier: media-tags
+            required: false
+            remember: false
+            multiple: false
+            remember_roles:
+              authenticated: authenticated
+              anonymous: '0'
+              administrator: '0'
+            reduce: false
+          is_grouped: false
+          group_info:
+            label: ''
+            description: ''
+            identifier: ''
+            optional: true
+            widget: select
+            multiple: false
+            remember: false
+            default_group: All
+            default_group_multiple: {  }
+            group_items: {  }
+          reduce_duplicates: false
+          type: textfield
+          limit: true
+          vid: media_tags
+          hierarchy: false
+          error_message: true
+          plugin_id: taxonomy_index_tid
       sorts:
         created:
           id: created
@@ -481,7 +530,20 @@ display:
         - 'url.query_args:sort_by'
         - user
         - user.permissions
-      tags: {  }
+      tags:
+        - 'config:core.entity_view_display.media.file_upload.default'
+        - 'config:core.entity_view_display.media.file_upload.media_library'
+        - 'config:core.entity_view_display.media.image.default'
+        - 'config:core.entity_view_display.media.image.full_width'
+        - 'config:core.entity_view_display.media.image.media_library'
+        - 'config:core.entity_view_display.media.image.preview'
+        - 'config:core.entity_view_display.media.image.teaser'
+        - 'config:core.entity_view_display.media.image.traditional_television'
+        - 'config:core.entity_view_display.media.tweet.default'
+        - 'config:core.entity_view_display.media.tweet.media_library'
+        - 'config:core.entity_view_display.media.video.default'
+        - 'config:core.entity_view_display.media.video.media_library'
+        - 'config:core.entity_view_display.media.video.preview'
   page:
     display_plugin: page
     id: page
@@ -778,7 +840,20 @@ display:
         - 'url.query_args:sort_by'
         - user
         - user.permissions
-      tags: {  }
+      tags:
+        - 'config:core.entity_view_display.media.file_upload.default'
+        - 'config:core.entity_view_display.media.file_upload.media_library'
+        - 'config:core.entity_view_display.media.image.default'
+        - 'config:core.entity_view_display.media.image.full_width'
+        - 'config:core.entity_view_display.media.image.media_library'
+        - 'config:core.entity_view_display.media.image.preview'
+        - 'config:core.entity_view_display.media.image.teaser'
+        - 'config:core.entity_view_display.media.image.traditional_television'
+        - 'config:core.entity_view_display.media.tweet.default'
+        - 'config:core.entity_view_display.media.tweet.media_library'
+        - 'config:core.entity_view_display.media.video.default'
+        - 'config:core.entity_view_display.media.video.media_library'
+        - 'config:core.entity_view_display.media.video.preview'
   widget:
     display_plugin: page
     id: widget
@@ -1025,6 +1100,53 @@ display:
           entity_type: media
           entity_field: default_langcode
           plugin_id: boolean
+        field_media_tags_target_id:
+          id: field_media_tags_target_id
+          table: media__field_media_tags
+          field: field_media_tags_target_id
+          relationship: none
+          group_type: group
+          admin_label: ''
+          operator: or
+          value: {  }
+          group: 1
+          exposed: true
+          expose:
+            operator_id: field_media_tags_target_id_op
+            label: 'Media Tags'
+            description: ''
+            use_operator: false
+            operator: field_media_tags_target_id_op
+            operator_limit_selection: false
+            operator_list: {  }
+            identifier: media-tags
+            required: false
+            remember: false
+            multiple: false
+            remember_roles:
+              authenticated: authenticated
+              anonymous: '0'
+              administrator: '0'
+            reduce: false
+          is_grouped: false
+          group_info:
+            label: ''
+            description: ''
+            identifier: ''
+            optional: true
+            widget: select
+            multiple: false
+            remember: false
+            default_group: All
+            default_group_multiple: {  }
+            group_items: {  }
+          reduce_duplicates: false
+          type: textfield
+          limit: true
+          vid: media_tags
+          hierarchy: false
+          error_message: true
+          plugin_id: taxonomy_index_tid
       filter_groups:
         operator: AND
         groups:
@@ -1097,8 +1219,22 @@ display:
         - url
         - url.query_args
         - 'url.query_args:sort_by'
+        - user
         - user.permissions
-      tags: {  }
+      tags:
+        - 'config:core.entity_view_display.media.file_upload.default'
+        - 'config:core.entity_view_display.media.file_upload.media_library'
+        - 'config:core.entity_view_display.media.image.default'
+        - 'config:core.entity_view_display.media.image.full_width'
+        - 'config:core.entity_view_display.media.image.media_library'
+        - 'config:core.entity_view_display.media.image.preview'
+        - 'config:core.entity_view_display.media.image.teaser'
+        - 'config:core.entity_view_display.media.image.traditional_television'
+        - 'config:core.entity_view_display.media.tweet.default'
+        - 'config:core.entity_view_display.media.tweet.media_library'
+        - 'config:core.entity_view_display.media.video.default'
+        - 'config:core.entity_view_display.media.video.media_library'
+        - 'config:core.entity_view_display.media.video.preview'
   widget_table:
     display_plugin: page
     id: widget_table
@@ -1313,6 +1449,53 @@ display:
           entity_type: media
           entity_field: default_langcode
           plugin_id: boolean
+        field_media_tags_target_id:
+          id: field_media_tags_target_id
+          table: media__field_media_tags
+          field: field_media_tags_target_id
+          relationship: none
+          group_type: group
+          admin_label: ''
+          operator: or
+          value: {  }
+          group: 1
+          exposed: true
+          expose:
+            operator_id: field_media_tags_target_id_op
+            label: 'Media Tags'
+            description: ''
+            use_operator: false
+            operator: field_media_tags_target_id_op
+            operator_limit_selection: false
+            operator_list: {  }
+            identifier: media-tags
+            required: false
+            remember: false
+            multiple: false
+            remember_roles:
+              authenticated: authenticated
+              anonymous: '0'
+              administrator: '0'
+            reduce: false
+          is_grouped: false
+          group_info:
+            label: ''
+            description: ''
+            identifier: ''
+            optional: true
+            widget: select
+            multiple: false
+            remember: false
+            default_group: All
+            default_group_multiple: {  }
+            group_items: {  }
+          reduce_duplicates: false
+          type: textfield
+          limit: true
+          vid: media_tags
+          hierarchy: false
+          error_message: true
+          plugin_id: taxonomy_index_tid
       filter_groups:
         operator: AND
         groups:
@@ -1385,5 +1568,6 @@ display:
         - url
         - url.query_args
         - 'url.query_args:sort_by'
+        - user
         - user.permissions
       tags: {  }
