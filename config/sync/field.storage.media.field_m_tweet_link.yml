@@ -3,7 +3,7 @@ langcode: en
 status: true
 dependencies:
   module:
-    - media_entity
+    - media
 id: media.field_m_tweet_link
 field_name: field_m_tweet_link
 entity_type: media

@@ -2,17 +2,30 @@
 
 namespace Drupal\Tests\video_embed_media\Kernel;
 
-use Drupal\media_entity\Entity\Media;
-use Drupal\media_entity\Entity\MediaBundle;
-use Drupal\Tests\video_embed_field\Kernel\KernelTestBase;
-use Drupal\video_embed_media\Plugin\MediaEntity\Type\VideoEmbedField;
+use Drupal\Core\File\FileSystemInterface;
+use Drupal\media\Entity\Media;
+use Drupal\Tests\media\Kernel\MediaKernelTestBase;
 
 /**
  * Test the provided fields.
  *
  * @group video_embed_media
  */
-class ProvidedFieldsTest extends KernelTestBase {
+class ProvidedFieldsTest extends MediaKernelTestBase {
+
+  /**
+   * The plugin under test.
+   *
+   * @var \Drupal\video_embed_media\Plugin\media\Source\VideoEmbedField
+   */
+  protected $plugin;
+
+  /**
+   * The created media type.
+   *
+   * @var \Drupal\media\Entity\MediaType;
+   */
+  protected $entityType;
 
   /**
    * Modules to enable.
@@ -21,17 +34,8 @@ class ProvidedFieldsTest extends KernelTestBase {
    */
   public static $modules = [
     'video_embed_media',
-    'media_entity',
-    'file',
-    'views',
+    'video_embed_field',
   ];
-
-  /**
-   * The media video plugin manager.
-   *
-   * @var \Drupal\media_entity\MediaTypeManager
-   */
-  protected $mediaVideoPlugin;
 
   /**
    * Test cases for ::testProvidedFields().
@@ -75,7 +79,13 @@ class ProvidedFieldsTest extends KernelTestBase {
    * Test the default thumbnail.
    */
   public function testDefaultThumbnail() {
-    $this->assertEquals('public://media-icons/generic/video.png', $this->mediaVideoPlugin->getDefaultThumbnail());
+    $source_field = $this->plugin->getSourceFieldDefinition($this->entityType);
+    $field_name = $source_field->getName();
+    $entity = Media::create([
+      'bundle' => $this->entityType->id(),
+      $field_name => [['value' => 'https://vimeo.com/channels/staffpicks/153786080-fake-url']],
+    ]);
+    $this->assertEquals('public://media-icons/generic/video.png', $this->plugin->getMetadata($entity, 'thumbnail_uri'));
   }
 
   /**
@@ -84,26 +94,34 @@ class ProvidedFieldsTest extends KernelTestBase {
    * @dataProvider providedFieldsTestCases
    */
   public function testProvidedFields($input, $field, $expected) {
+    $source_field = $this->plugin->getSourceFieldDefinition($this->entityType);
+    $field_name = $source_field->getName();
     $entity = Media::create([
-      'bundle' => 'video',
-      VideoEmbedField::VIDEO_EMBED_FIELD_DEFAULT_NAME => [['value' => $input]],
+      'bundle' => $this->entityType->id(),
+      $field_name => [['value' => $input]],
     ]);
-    $actual = $this->mediaVideoPlugin->getField($entity, $field);
+
+    // The 'image_local_url' returns path to the local image only if it actually
+    // exists. Otherwise the default image is returned.
+    if ($field == 'image_local_uri') {
+      touch($expected);
+    }
+
+    $actual = $this->plugin->getMetadata($entity, $field);
     $this->assertEquals($expected, $actual);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function setup() {
-    parent::setup();
-    $this->installConfig(['media_entity']);
-    $this->mediaVideoPlugin = $this->container->get('plugin.manager.media_entity.type')->createInstance('video_embed_field', []);
-    $bundle = MediaBundle::create([
-      'id' => 'video',
-      'type' => 'video_embed_field',
-    ]);
-    $bundle->save();
+  public function setUp() {
+    parent::setUp();
+    $this->entityType = $this->createMediaType('video_embed_field');
+
+    $this->plugin = $this->entityType->getSource();
+
+    $dir = 'public://video_thumbnails';
+    $this->container->get('file_system')->prepareDirectory($dir, FileSystemInterface::CREATE_DIRECTORY | FileSystemInterface::MODIFY_PERMISSIONS);
   }
 
 }

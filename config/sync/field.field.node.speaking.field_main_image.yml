@@ -4,7 +4,7 @@ status: true
 dependencies:
   config:
     - field.storage.node.field_main_image
-    - media_entity.bundle.image
+    - media.type.image
     - node.type.speaking
 id: node.speaking.field_main_image
 field_name: field_main_image

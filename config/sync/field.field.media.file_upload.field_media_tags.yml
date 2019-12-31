@@ -4,7 +4,7 @@ status: true
 dependencies:
   config:
     - field.storage.media.field_media_tags
-    - media_entity.bundle.file_upload
+    - media.type.file_upload
     - taxonomy.vocabulary.media_tags
 id: media.file_upload.field_media_tags
 field_name: field_media_tags

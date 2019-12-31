@@ -4,7 +4,7 @@ status: true
 dependencies:
   config:
     - field.storage.media.field_media_tags
-    - media_entity.bundle.tweet
+    - media.type.tweet
     - taxonomy.vocabulary.media_tags
 id: media.tweet.field_media_tags
 field_name: field_media_tags

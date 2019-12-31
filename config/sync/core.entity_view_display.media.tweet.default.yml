@@ -5,7 +5,7 @@ dependencies:
   config:
     - field.field.media.tweet.field_m_tweet_link
     - field.field.media.tweet.field_media_tags
-    - media_entity.bundle.tweet
+    - media.type.tweet
   module:
     - media_entity_twitter
 id: media.tweet.default

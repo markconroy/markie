@@ -4,11 +4,11 @@ status: true
 dependencies:
   config:
     - image.style.media_entity_browser_thumbnail
-    - media_entity.bundle.file_upload
+    - media.type.file_upload
   module:
     - entity_browser
     - image
-    - media_entity
+    - media
     - user
 _core:
   default_config_hash: NZsBE7xrBkDjS1WFwny8xUgy885hVgiZVOTL6WoFSwU

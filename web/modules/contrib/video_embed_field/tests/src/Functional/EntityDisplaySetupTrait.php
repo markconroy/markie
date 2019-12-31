@@ -3,8 +3,8 @@
 namespace Drupal\Tests\video_embed_field\Functional;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
-use Drupal\simpletest\ContentTypeCreationTrait;
-use Drupal\simpletest\NodeCreationTrait;
+use Drupal\Tests\node\Traits\ContentTypeCreationTrait;
+use Drupal\Tests\node\Traits\NodeCreationTrait;
 
 /**
  * A trait for manipulating entity display.
@@ -63,8 +63,8 @@ trait EntityDisplaySetupTrait {
       'bundle' => $this->contentTypeName,
       'settings' => [],
     ])->save();
-    $this->entityDisplay = entity_get_display('node', $this->contentTypeName, 'default');
-    $this->entityFormDisplay = entity_get_form_display('node', $this->contentTypeName, 'default');
+    $this->entityDisplay = $this->container->get('entity_display.repository')->getViewDisplay('node', $this->contentTypeName, 'default');
+    $this->entityFormDisplay = $this->container->get('entity_display.repository')->getFormDisplay('node', $this->contentTypeName, 'default');
   }
 
   /**

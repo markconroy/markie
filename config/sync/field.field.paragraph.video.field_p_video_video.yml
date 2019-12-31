@@ -4,7 +4,7 @@ status: true
 dependencies:
   config:
     - field.storage.paragraph.field_p_video_video
-    - media_entity.bundle.video
+    - media.type.video
     - paragraphs.paragraphs_type.video
 _core:
   default_config_hash: G71tI4XvE3KSkeuDQ_4hMCFjuA8OMcR6rVUvZGqKdz8

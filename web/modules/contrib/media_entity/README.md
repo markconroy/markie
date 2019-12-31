@@ -1,70 +1,48 @@
-## About Media entity
+# Upgrade path from Media Entity to Media (core)
 
-[![Travis](https://img.shields.io/travis/drupal-media/media_entity.svg)]() [![Scrutinizer](https://img.shields.io/scrutinizer/g/drupal-media/media_entity.svg)]()
+This version of Media Entity is intended **only** to be used as a bridge to
+move to the new "Media" module included in Drupal core (>= 8.6.0). While the
+storage of media entities is the same, some aspects of the API have changed.
+Because of that, if you have an existing site using Media Entity 1.x, you need
+to follow the upgrade path indicated below in order to move to Media in core.
 
-Media entity provides a 'base' entity for media. This is a very basic entity
-which can reference to all kinds of media-objects (local files, YouTube
-videos, Tweets, Instagram photos, ...). Media entity provides a relation between
-Drupal and the media resource. You can reference to/use this entity within any
-other Drupal entity.
+## Upgrade instructions
+1. Backup your code and your database
+2. Test that you can successfully roll-back from the backup!
+3. Upgrade the codebase with:
+  - Core: >= **8.6.x**
+  - Media Entity: **8.x-2.x**
+  - All media entity providers: **8.x-2.x** (or use patches from #2860796: Plan for
+  contributed modules with Media Entity API in core). Note that the modules
+  Media Entity Image and Media Entity Document, if present, don't need to be
+  updated. Their configs will be updated by the main Media Entity updates.
+  - All modules that depend on or interact with Media Entity: **8.x-2.x**
+  - The new contrib module **Media Entity Actions**: **8.x-1.x**
+  - Note: If your site uses media entities with the "Generic" provider, make
+  sure you download to your codebase the **Media Entity Generic** module as
+  well.
+4. Clear your caches.
+5. (Optional) Check that all requirements for the upgrade are met with
+  `drush mecu`.
+  **IMPORTANT**: Please note that if you are running DB updates with Drush 9
+  (between 9.0.0-alpha1 and 9.0.0-beta7), you are **strongly** encouraged to
+  use this command prior to running the updates. Drush 9 will not run the
+  requirements validation and will try to run the updates even if your site has
+  some of the requisites misconfigured. Executing the updates in that scenario
+  will likely break your site. This was fixed in Drush 9.0.0-beta8. Drush 8
+  users don't need to worry about this.
+6. Run the DB Updates, either by visiting `/update.php`, or using `drush updb`.
+7. Double-check **Media Entity** is uninstalled, and remove it from the
+  codebase. Remove also **Media Entity Image** / **Document**, if present.
+8. Run your automated tests, if any, or manually verify that all media-related
+  functionality on your site works as expected.
 
-This module attempts to provide the base storage component for the Drupal 8
-media ecosystem.
-
-Project page: https://drupal.org/project/media_entity
-
-## Official documentation
-
-You will find all the documentation about this module on the [official handbook](https://drupal-media.gitbooks.io/drupal8-guide/content/modules/media_entity/intro.html).
-
-## Contribute
-
-Our current development focus can be seen in [the roadmap issue](https://www.drupal.org/node/2577453).
-
-Development is generally done via [GitHub pull requests](https://github.com/drupal-media/media_entity/pulls).
-Every pull request should be linked to an [issue in drupal.org issue queue](http://drupal.org/project/issues/media_entity)
-and vice-versa. 
-
-If you prefer usual patch-based workflow feel free to submit a patch. We started
-using GitHub mostly for easier review process. However, there are not strong opinions
-about that. Any contribution in any shape or form will be treated equally.
-
-## Media provider modules
-
-There are already several media provider modules that extend functionality of
-Media entity:
-
-- [Image](https://drupal.org/project/media_entity_image)
-- [Audio](https://drupal.org/project/media_entity_audio)
-- [Slideshow](https://drupal.org/project/media_entity_slideshow)
-- [Video embed field](https://drupal.org/project/video_embed_field)
-- [Twitter](https://drupal.org/project/media_entity_twitter)
-- [Instagram](https://drupal.org/project/media_entity_instagram)
-- [Document](https://drupal.org/project/media_entity_document)
-- [Slideshare](https://drupal.org/project/media_entity_slideshare)
-- [Video (local)](https://drupal.org/project/media_entity_video)
-- [Tumblr](https://drupal.org/project/media_entity_tumblr)
-- [Facebook](https://drupal.org/project/media_entity_facebook)
-- [Audio embed field (sandbox)](https://drupal.org/sandbox/vilepickle/2784301)
-
-## Other modules that integrate with media entity
-
-- [Entity browser](https://drupal.org/project/entity_browser): Provides entity browser
-  widget that supports uploading [Media entity images](https://drupal.org/project/media_entity_image).
-- [DropzoneJS](https://drupal.org/project/dropzonejs): Extends entity browser [image
-  upload widget](https://drupal.org/project/media_entity_image) with [DropzoneJS
-  upload library](http://www.dropzonejs.com).
-- [Slick media](https://drupal.org/project/slick_media): Provides integration
-between [Slick carousel](https://drupal.org/project/slick) and Media entity. Slick media allows richer slideshows/carousel
-  with a mix of text, image and video.
-- [Brightcove](https://github.com/dawehner/media_entity_brightcove)
-
-## Maintainers
-- Janez Urevc ([@slashrsm](https://github.com/slashrsm)) https://drupal.org/user/744628
-- Primož Hmeljak ([@primsi](https://github.com/primsi)) https://drupal.org/user/282629
-- Nguyễn Hải Nam (@jcisio) https://drupal.org/user/210762
-- Boris Gordon (@boztek) https://drupal.org/user/134410
-
-## Get in touch
-- http://groups.drupal.org/media
-- IRC: #drupal-media @ Freenode
+**Known issues concerning the upgrade path:**
+- If your existing site relies on the EXIF image metadata handling, please check
+ https://drupal.org/node/2927481 before proceeding with the upgrade.
+- Entity Browser has a 2.x branch that has new features for media in core, for
+ example the widget that was formerly present in the "Media Entity Image"
+ module. However, if you intend to upgrade Entity Browser to the 2.x branch, you
+ should do that only after performing the main Media Entity upgrades. There is
+ currently a bug preventing the Media Entity upgrade if the Entity Browser 2.x
+ is present in the codebase.

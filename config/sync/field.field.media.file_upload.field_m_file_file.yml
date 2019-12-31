@@ -4,7 +4,7 @@ status: true
 dependencies:
   config:
     - field.storage.media.field_m_file_file
-    - media_entity.bundle.file_upload
+    - media.type.file_upload
   module:
     - file
 _core:

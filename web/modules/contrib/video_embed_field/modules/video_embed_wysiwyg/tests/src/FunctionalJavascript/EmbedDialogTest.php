@@ -2,15 +2,15 @@
 
 namespace Drupal\Tests\video_embed_wysiwyg\FunctionalJavascript;
 
-use Drupal\FunctionalJavascriptTests\JavascriptTestBase;
-use Drupal\simpletest\ContentTypeCreationTrait;
+use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
+use Drupal\Tests\node\Traits\ContentTypeCreationTrait;
 
 /**
  * Test the dialog form.
  *
  * @group video_embed_wysiwyg
  */
-class EmbedDialogTest extends JavascriptTestBase {
+class EmbedDialogTest extends WebDriverTestBase {
 
   use ContentTypeCreationTrait;
 
@@ -48,12 +48,13 @@ class EmbedDialogTest extends JavascriptTestBase {
 
     // Assert access is denied without enabling the filter.
     $this->drupalGet('video-embed-wysiwyg/dialog/plain_text');
-    $this->assertEquals(403, $this->getSession()->getStatusCode());
+    $this->assertSession()->pageTextContains('Access denied');
 
     // Enable the filter.
     $this->drupalGet('admin/config/content/formats/manage/plain_text');
     $this->find('[name="editor[editor]"]')->setValue('ckeditor');
     $this->assertSession()->assertWaitOnAjaxRequest();
+    $this->getSession()->getDriver()->executeScript("jQuery('.form-item-editor-settings-toolbar-button-groups').show();");
     $this->submitForm([
       'filters[video_embed_wysiwyg][status]' => TRUE,
       'filters[filter_html_escape][status]' => FALSE,
@@ -62,7 +63,7 @@ class EmbedDialogTest extends JavascriptTestBase {
 
     // Visit the modal again.
     $this->drupalGet('video-embed-wysiwyg/dialog/plain_text');
-    $this->assertEquals(200, $this->getSession()->getStatusCode());
+    $this->assertSession()->pageTextNotContains('Access denied');
   }
 
   /**
@@ -77,8 +78,6 @@ class EmbedDialogTest extends JavascriptTestBase {
     // Assert all the form fields appear on the modal.
     $this->assertSession()->pageTextContains('Autoplay');
     $this->assertSession()->pageTextContains('Responsive Video');
-    $this->assertSession()->pageTextContains('Width');
-    $this->assertSession()->pageTextContains('Height');
     $this->assertSession()->pageTextContains('Video URL');
 
     // Attempt to submit the modal with no values.

@@ -2,15 +2,15 @@
  * @media-entity media_entity_browser.view.css
  */
 
-.view-media-entity-browser .pager {
+.view-media-entity-browser-view .pager {
   padding: 20px;
 }
 
-.view-media-entity-browser .view-content {
+.view-media-entity-browser-view .view-content {
   overflow: hidden;
 }
 
-.view-media-entity-browser .views-row {
+.view-media-entity-browser-view .views-row {
   box-sizing: border-box;
   position: relative;
   width: 100%;
@@ -21,33 +21,33 @@
 }
 
 @media screen and (min-width:37.5em) { /* 600px */
-  .view-media-entity-browser .views-row {
+  .view-media-entity-browser-view .views-row {
     width: 50%;
     float: left;
   }
 }
 
 @media screen and (min-width:62.5em) { /* 1000px */
-  .view-media-entity-browser .views-row {
+  .view-media-entity-browser-view .views-row {
     width: 33.333%;
   }
 }
 
-.view-media-entity-browser .views-row.checked {
+.view-media-entity-browser-view .views-row.checked {
   border: 2px solid #37802f;
 }
 
-.view-media-entity-browser .views-row img {
+.view-media-entity-browser-view .views-row img {
   vertical-align: bottom;
   width: 100%;
   height: auto;
 }
 
-.view-media-entity-browser .views-row img::selection {
+.view-media-entity-browser-view .views-row img::selection {
   background: transparent;
 }
 
-.view-media-entity-browser .views-row .views-field-entity-browser-select {
+.view-media-entity-browser-view .views-row .views-field-entity-browser-select {
   position: absolute !important;
   height: 1px;
   width: 1px;
@@ -55,20 +55,20 @@
   clip: rect(1px, 1px, 1px, 1px);
 }
 
-.view-media-entity-browser .views-row:after {
+.view-media-entity-browser-view .views-row:after {
   content: " ";
   width: 100%;
   height: 100%;
   top: 0;
   left: 0;
   position: absolute;
-  background: transparent url("/core/misc/icons/73b355/check.svg") no-repeat center center;
+  background: transparent url("../images/check.svg") no-repeat center center;
   background-size: 0;
   -webkit-transition: all 0.2s;
   transition: all 0.2s;
 }
 
-.view-media-entity-browser .views-row.checked:after {
+.view-media-entity-browser-view .views-row.checked:after {
   background-size: 80px 80px;
 }
 
@@ -111,14 +111,4 @@
 input[type="submit"][name="filter"] {
   margin-left: 10px;
   margin-top: 30px;
-}
-
-.media-entity-browser-actions {
-  position: fixed;
-  bottom: 0;
-  z-index: 2;
-  padding: 10px;
-  width: 100%;
-  background: white;
-  border-top: 1px solid #b8b8b8;
 }

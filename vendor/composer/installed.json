@@ -2492,6 +2492,77 @@
         }
     },
     {
+        "name": "drupal/entity_browser_entity_form",
+        "version": "1.8.0",
+        "version_normalized": "1.8.0.0",
+        "require": {
+            "drupal/core": "~8.0",
+            "drupal/entity_browser": "self.version",
+            "drupal/inline_entity_form": "*"
+        },
+        "type": "metapackage",
+        "extra": {
+            "branch-alias": {
+                "dev-1.x": "1.x-dev"
+            },
+            "drupal": {
+                "version": "8.x-1.8",
+                "datestamp": "1562512245",
+                "security-coverage": {
+                    "status": "covered",
+                    "message": "Covered by Drupal's security advisory policy"
+                }
+            }
+        },
+        "notification-url": "https://packages.drupal.org/8/downloads",
+        "license": [
+            "GPL-2.0-or-later"
+        ],
+        "authors": [
+            {
+                "name": "Berdir",
+                "homepage": "https://www.drupal.org/user/214652"
+            },
+            {
+                "name": "Dave Reid",
+                "homepage": "https://www.drupal.org/user/53892"
+            },
+            {
+                "name": "Devin Carlson",
+                "homepage": "https://www.drupal.org/user/290182"
+            },
+            {
+                "name": "Drupal Media Team",
+                "homepage": "https://www.drupal.org/user/3260690"
+            },
+            {
+                "name": "Primsi",
+                "homepage": "https://www.drupal.org/user/282629"
+            },
+            {
+                "name": "marcingy",
+                "homepage": "https://www.drupal.org/user/77320"
+            },
+            {
+                "name": "oknate",
+                "homepage": "https://www.drupal.org/user/471638"
+            },
+            {
+                "name": "samuel.mortenson",
+                "homepage": "https://www.drupal.org/user/2582268"
+            },
+            {
+                "name": "slashrsm",
+                "homepage": "https://www.drupal.org/user/744628"
+            }
+        ],
+        "description": "Entity browser inline entity form integration.",
+        "homepage": "https://www.drupal.org/project/entity_browser",
+        "support": {
+            "source": "https://git.drupalcode.org/project/entity_browser"
+        }
+    },
+    {
         "name": "drupal/entity_reference_revisions",
         "version": "1.7.0",
         "version_normalized": "1.7.0.0",
@@ -3023,45 +3094,49 @@
     },
     {
         "name": "drupal/media_entity",
-        "version": "1.7.0",
-        "version_normalized": "1.7.0.0",
+        "version": "2.0.0-beta5",
+        "version_normalized": "2.0.0.0-beta5",
         "source": {
             "type": "git",
             "url": "https://git.drupalcode.org/project/media_entity.git",
-            "reference": "8.x-1.7"
+            "reference": "8.x-2.0-beta5"
         },
         "dist": {
             "type": "zip",
-            "url": "https://ftp.drupal.org/files/projects/media_entity-8.x-1.7.zip",
-            "reference": "8.x-1.7",
-            "shasum": "5f7ccdf1db07732f3c94e642e60d88746e73cc86"
+            "url": "https://ftp.drupal.org/files/projects/media_entity-8.x-2.0-beta5.zip",
+            "reference": "8.x-2.0-beta5",
+            "shasum": "3dd97166938a3fedea2c9742638d4b5946c7d11b"
         },
         "require": {
             "drupal/core": "*",
             "drupal/entity": "*"
         },
         "require-dev": {
-            "drupal/entity": "*",
-            "drupal/inline_entity_form": "*"
+            "drupal/media_entity_document": "*",
+            "drupal/media_entity_embeddable_video": "*",
+            "drupal/media_entity_generic": "*",
+            "drupal/media_entity_image": "*",
+            "drupal/media_entity_image_exif": "*",
+            "drupal/media_entity_pinterest": "*"
         },
         "type": "drupal-module",
         "extra": {
             "branch-alias": {
-                "dev-1.x": "1.x-dev"
+                "dev-2.x": "2.x-dev"
             },
             "drupal": {
-                "version": "8.x-1.7",
-                "datestamp": "1510737185",
+                "version": "8.x-2.0-beta5",
+                "datestamp": "1561542187",
                 "security-coverage": {
-                    "status": "covered",
-                    "message": "Covered by Drupal's security advisory policy"
+                    "status": "not-covered",
+                    "message": "Beta releases are not covered by Drupal security advisories."
                 }
             }
         },
         "installation-source": "dist",
         "notification-url": "https://packages.drupal.org/8/downloads",
         "license": [
-            "GPL-2.0+"
+            "GPL-2.0-or-later"
         ],
         "authors": [
             {
@@ -3120,53 +3195,55 @@
         "description": "Media entity API.",
         "homepage": "https://www.drupal.org/project/media_entity",
         "support": {
-            "source": "http://cgit.drupalcode.org/media_entity"
+            "source": "https://git.drupalcode.org/project/media_entity"
         }
     },
     {
         "name": "drupal/media_entity_browser",
-        "version": "1.0.0-beta3",
-        "version_normalized": "1.0.0.0-beta3",
+        "version": "2.0.0-alpha2",
+        "version_normalized": "2.0.0.0-alpha2",
         "source": {
             "type": "git",
             "url": "https://git.drupalcode.org/project/media_entity_browser.git",
-            "reference": "8.x-1.0-beta3"
+            "reference": "8.x-2.0-alpha2"
         },
         "dist": {
             "type": "zip",
-            "url": "https://ftp.drupal.org/files/projects/media_entity_browser-8.x-1.0-beta3.zip",
-            "reference": "8.x-1.0-beta3",
-            "shasum": "f6f9f13bb0aa6bfd0a61667a47ca60c5282341d5"
+            "url": "https://ftp.drupal.org/files/projects/media_entity_browser-8.x-2.0-alpha2.zip",
+            "reference": "8.x-2.0-alpha2",
+            "shasum": "41fea535c0770caa2fc4eca7216bbafb796b4d17"
         },
         "require": {
-            "drupal/core": "~8.0",
+            "drupal/core": "*",
             "drupal/entity_browser": "*",
-            "drupal/media_entity": "*"
+            "drupal/entity_browser_entity_form": "*",
+            "drupal/inline_entity_form": "*"
         },
         "require-dev": {
             "drupal/ctools": "*",
-            "drupal/entity_browser": "*",
-            "drupal/media_entity": "*",
-            "drupal/video_embed_field": "*"
+            "drupal/entity_browser": "^2",
+            "drupal/entity_browser_entity_form": "^2",
+            "drupal/inline_entity_form": "^1",
+            "drupal/video_embed_field": "^2"
         },
         "type": "drupal-module",
         "extra": {
             "branch-alias": {
-                "dev-1.x": "1.x-dev"
+                "dev-2.x": "2.x-dev"
             },
             "drupal": {
-                "version": "8.x-1.0-beta3",
-                "datestamp": "1487741885",
+                "version": "8.x-2.0-alpha2",
+                "datestamp": "1558337585",
                 "security-coverage": {
                     "status": "not-covered",
-                    "message": "Project has not opted into security advisory coverage!"
+                    "message": "Alpha releases are not covered by Drupal security advisories."
                 }
             }
         },
         "installation-source": "dist",
         "notification-url": "https://packages.drupal.org/8/downloads",
         "license": [
-            "GPL-2.0+"
+            "GPL-2.0-or-later"
         ],
         "authors": [
             {
@@ -3186,10 +3263,10 @@
                 "homepage": "https://www.drupal.org/user/1068918"
             }
         ],
-        "description": "This module provides an Entity Browser for Media Entity.",
+        "description": "This module provides an Entity Browser for Media.",
         "homepage": "https://www.drupal.org/project/media_entity_browser",
         "support": {
-            "source": "http://cgit.drupalcode.org/media_entity_browser"
+            "source": "https://git.drupalcode.org/project/media_entity_browser"
         }
     },
     {
@@ -3971,40 +4048,40 @@
     },
     {
         "name": "drupal/video_embed_field",
-        "version": "1.6.0",
-        "version_normalized": "1.6.0.0",
+        "version": "2.2.0",
+        "version_normalized": "2.2.0.0",
         "source": {
             "type": "git",
             "url": "https://git.drupalcode.org/project/video_embed_field.git",
-            "reference": "8.x-1.6"
+            "reference": "8.x-2.2"
         },
         "dist": {
             "type": "zip",
-            "url": "https://ftp.drupal.org/files/projects/video_embed_field-8.x-1.6.zip",
-            "reference": "8.x-1.6",
-            "shasum": "e5e6dc6baa538b54da1413f7c6a2f4c040c5fa05"
+            "url": "https://ftp.drupal.org/files/projects/video_embed_field-8.x-2.2.zip",
+            "reference": "8.x-2.2",
+            "shasum": "1e76eeefb27f4166d3d119e8c27469bbf12c0f06"
         },
         "require": {
-            "drupal/core": "*"
+            "drupal/core": "^8.7.0"
         },
         "require-dev": {
             "drupal/colorbox": "*",
             "drupal/media_entity": "*",
-            "drupal/media_entity_embeddable_video": "*"
+            "drupal/media_entity_embeddable_video": "*",
+            "drupal/video_embed_media": "*"
         },
         "type": "drupal-module",
         "extra": {
             "branch-alias": {
-                "dev-1.x": "1.x-dev"
+                "dev-2.x": "2.x-dev"
             },
             "drupal": {
-                "version": "8.x-1.x",
-                "datestamp": "1557724631",
+                "version": "8.x-2.2",
+                "datestamp": "1564103585",
                 "security-coverage": {
                     "status": "covered",
                     "message": "Covered by Drupal's security advisory policy"
-                },
-                "package": "Field types"
+                }
             }
         },
         "installation-source": "dist",

@@ -4,7 +4,7 @@ status: true
 dependencies:
   config:
     - field.storage.media.field_m_tweet_link
-    - media_entity.bundle.tweet
+    - media.type.tweet
 id: media.tweet.field_m_tweet_link
 field_name: field_m_tweet_link
 entity_type: media

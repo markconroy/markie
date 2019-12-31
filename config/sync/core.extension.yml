@@ -39,9 +39,9 @@ module:
   inline_entity_form: 0
   inline_form_errors: 0
   link: 0
-  media_entity: 0
+  media: 0
   media_entity_browser: 0
-  media_entity_image: 0
+  media_entity_generic: 0
   media_entity_twitter: 0
   menu_trail_by_path: 0
   menu_ui: 0

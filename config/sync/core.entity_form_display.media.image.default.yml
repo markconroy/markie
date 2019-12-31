@@ -6,7 +6,7 @@ dependencies:
     - field.field.media.image.field_m_image_image
     - field.field.media.image.field_media_tags
     - image.style.thumbnail
-    - media_entity.bundle.image
+    - media.type.image
   module:
     - image_widget_crop
 _core:

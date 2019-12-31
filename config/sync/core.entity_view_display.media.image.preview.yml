@@ -5,8 +5,9 @@ dependencies:
   config:
     - core.entity_view_mode.media.preview
     - field.field.media.image.field_m_image_image
+    - field.field.media.image.field_media_tags
     - image.style.preview
-    - media_entity.bundle.image
+    - media.type.image
   module:
     - image
 id: media.image.preview
@@ -25,6 +26,7 @@ content:
     region: content
 hidden:
   created: true
+  field_media_tags: true
   name: true
   thumbnail: true
   uid: true

@@ -1,20 +1,24 @@
-name: Media entity
+name: Media entity (2.x)
 description: 'Media entity API.'
 type: module
 package: Media
 # core: 8.x
+test_dependencies:
+  - media_entity_document:media_entity_document
+  - media_entity_embeddable_video:media_entity_embeddable_video
+  - media_entity_generic:media_entity_generic
+  - media_entity_image:media_entity_image
+  - media_entity_image_exif:media_entity_image_exif
+  - media_entity_pinterest:media_entity_pinterest
 dependencies:
   - drupal:image
   - drupal:user
   - drupal:views
   - entity:entity
-  - drupal:system
-test_dependencies:
-  - entity:entity
-  - inline_entity_form:inline_entity_form
+  - drupal:system (>=8.6)
 
-# Information added by Drupal.org packaging script on 2017-11-15
-version: '8.x-1.7'
+# Information added by Drupal.org packaging script on 2019-06-26
+version: '8.x-2.0-beta5'
 core: '8.x'
 project: 'media_entity'
-datestamp: 1510737188
+datestamp: 1561542194

@@ -3,7 +3,7 @@ status: true
 dependencies:
   module:
     - entity_embed
-    - media_entity
+    - media
 label: 'Media Entity Embed'
 id: media_entity_embed
 type_id: entity

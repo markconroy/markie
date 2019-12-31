@@ -2,7 +2,7 @@
 
 namespace Drupal\Tests\video_embed_field\FunctionalJavascript;
 
-use Drupal\FunctionalJavascriptTests\JavascriptTestBase;
+use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
 use Drupal\Tests\video_embed_field\Functional\EntityDisplaySetupTrait;
 
 /**
@@ -10,7 +10,7 @@ use Drupal\Tests\video_embed_field\Functional\EntityDisplaySetupTrait;
  *
  * @group video_embed_field
  */
-class LazyLoadFormatterTest extends JavascriptTestBase {
+class LazyLoadFormatterTest extends WebDriverTestBase {
 
   use EntityDisplaySetupTrait;
 
@@ -44,7 +44,7 @@ class LazyLoadFormatterTest extends JavascriptTestBase {
     $this->click('.video-embed-field-lazy');
     $this->assertSession()->elementExists('css', '.video-embed-field-lazy .video-embed-field-responsive-video');
     // Make sure the right library files are loaded on the page.
-    $this->assertSession()->elementContains('css', 'style', 'video_embed_field/css/video_embed_field.responsive-video.css');
+    $this->assertSession()->elementExists('css', 'link[href*="video_embed_field.responsive-video.css"]');
   }
 
 }

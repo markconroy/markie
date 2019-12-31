@@ -5,7 +5,7 @@ dependencies:
   config:
     - field.field.media.video.field_media_tags
     - field.field.media.video.field_media_video_embed_field
-    - media_entity.bundle.video
+    - media.type.video
   module:
     - video_embed_field
 _core:
@@ -38,6 +38,13 @@ content:
     settings:
       size: 60
       placeholder: ''
+    third_party_settings: {  }
+  status:
+    type: boolean_checkbox
+    settings:
+      display_label: true
+    weight: 100
+    region: content
     third_party_settings: {  }
 hidden:
   created: true

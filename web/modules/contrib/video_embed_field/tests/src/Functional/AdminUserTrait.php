@@ -2,7 +2,7 @@
 
 namespace Drupal\Tests\video_embed_field\Functional;
 
-use Drupal\simpletest\UserCreationTrait;
+use Drupal\Tests\user\Traits\UserCreationTrait;
 
 /**
  * Create admin users.

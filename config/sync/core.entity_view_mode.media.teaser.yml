@@ -3,7 +3,7 @@ langcode: en
 status: true
 dependencies:
   module:
-    - media_entity
+    - media
 _core:
   default_config_hash: LpYN5OIYB2g6thZU1Rhrm92tPgEuAKTL1jpFkUOQPhc
 id: media.teaser

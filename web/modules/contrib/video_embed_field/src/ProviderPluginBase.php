@@ -2,6 +2,7 @@
 
 namespace Drupal\video_embed_field;
 
+use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Plugin\PluginBase;
 use GuzzleHttp\ClientInterface;
@@ -41,9 +42,14 @@ abstract class ProviderPluginBase extends PluginBase implements ProviderPluginIn
   protected $httpClient;
 
   /**
+   * @var \Drupal\Core\File\FileSystemInterface
+   */
+  protected $fileSystem;
+
+  /**
    * Create a plugin with the given input.
    *
-   * @param string $configuration
+   * @param array $configuration
    *   The configuration of the plugin.
    * @param string $plugin_id
    *   The plugin id.
@@ -72,6 +78,19 @@ abstract class ProviderPluginBase extends PluginBase implements ProviderPluginIn
    */
   protected function getVideoId() {
     return $this->videoId;
+  }
+
+  /**
+   * Get the file system service.
+   *
+   * @return \Drupal\Core\File\FileSystemInterface
+   *   The file system service.
+   */
+  protected function getFileSystem() {
+    if (!isset($this->fileSystem)) {
+      $this->fileSystem = \Drupal::service('file_system');
+    }
+    return $this->fileSystem;
   }
 
   /**
@@ -122,10 +141,10 @@ abstract class ProviderPluginBase extends PluginBase implements ProviderPluginIn
   public function downloadThumbnail() {
     $local_uri = $this->getLocalThumbnailUri();
     if (!file_exists($local_uri)) {
-      file_prepare_directory($this->thumbsDirectory, FILE_CREATE_DIRECTORY);
+      $this->getFileSystem()->prepareDirectory($this->thumbsDirectory, FileSystemInterface::CREATE_DIRECTORY);
       try {
         $thumbnail = $this->httpClient->request('GET', $this->getRemoteThumbnailUrl());
-        file_unmanaged_save_data((string) $thumbnail->getBody(), $local_uri);
+        $this->getFileSystem()->saveData((string) $thumbnail->getBody(), $local_uri);
       }
       catch (\Exception $e) {
       }

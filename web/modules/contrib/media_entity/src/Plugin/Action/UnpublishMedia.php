@@ -2,12 +2,13 @@
 
 namespace Drupal\media_entity\Plugin\Action;
 
+use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Action\ActionBase;
 use Drupal\Core\Session\AccountInterface;
-use Drupal\media_entity\Entity\Media;
+use Drupal\media\MediaInterface;
 
 /**
- * Unpublishes a media entity.
+ * Unpublishes a media item.
  *
  * @Action(
  *   id = "media_unpublish_action",
@@ -20,19 +21,14 @@ class UnpublishMedia extends ActionBase {
   /**
    * {@inheritdoc}
    */
-  public function execute(Media $entity = NULL) {
-    $entity->setPublished(FALSE)->save();
-  }
+  public function execute(MediaInterface $entity = NULL) {}
 
   /**
    * {@inheritdoc}
    */
   public function access($object, AccountInterface $account = NULL, $return_as_object = FALSE) {
-    /** @var \Drupal\media_entity\MediaInterface $object */
-    $result = $object->access('update', $account, TRUE)
-      ->andIf($object->status->access('edit', $account, TRUE));
-
-    return $return_as_object ? $result : $result->isAllowed();
+    $access = AccessResult::allowed();
+    return $return_as_object ? $access : $access->isAllowed();
   }
 
 }

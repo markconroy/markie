@@ -4,7 +4,7 @@ status: true
 dependencies:
   config:
     - field.storage.paragraph.field_p_tweet_tweet
-    - media_entity.bundle.tweet
+    - media.type.tweet
     - paragraphs.paragraphs_type.tweet
 id: paragraph.tweet.field_p_tweet_tweet
 field_name: field_p_tweet_tweet

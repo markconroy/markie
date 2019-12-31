@@ -3,7 +3,7 @@
 namespace Drupal\Tests\video_embed_field\Kernel;
 
 use Drupal\entity_test\Entity\EntityTest;
-use Drupal\simpletest\UserCreationTrait;
+use Drupal\Tests\user\Traits\UserCreationTrait;
 use Drupal\video_embed_field\Plugin\Validation\Constraint\VideoEmbedConstraint;
 
 /**
