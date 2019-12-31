@@ -11,14 +11,15 @@ use Drupal\Core\Form\FormStateInterface;
 /**
  * Extends the base entity form with revision support in the UI.
  *
- * @deprecated Use \Drupal\Core\Entity\ContentEntityForm instead.
+ * @deprecated in favor of \Drupal\Core\Entity\ContentEntityForm. Use that
+ *   instead.
  */
 class RevisionableContentEntityForm extends ContentEntityForm {
 
   /**
    * The entity being used by this form.
    *
-   * @var \Drupal\Core\Entity\ContentEntityInterface|\Drupal\Core\Entity\RevisionLogInterface
+   * @var \Drupal\Core\Entity\EntityInterface|\Drupal\Core\Entity\RevisionableInterface|\Drupal\entity\Revision\EntityRevisionLogInterface
    */
   protected $entity;
 
@@ -48,8 +49,7 @@ class RevisionableContentEntityForm extends ContentEntityForm {
    *   The bundle entity, or NULL if there is none.
    */
   protected function getBundleEntity() {
-    if ($this->entity->getEntityType()->getBundleEntityType()) {
-      $bundle_key = $this->entity->getEntityType()->getKey('bundle');
+    if ($bundle_key = $this->entity->getEntityType()->getKey('bundle')) {
       return $this->entity->{$bundle_key}->referencedEntities()[0];
     }
     return NULL;

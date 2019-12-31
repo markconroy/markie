@@ -3,6 +3,7 @@
 namespace Drupal\Tests\entity\Functional;
 
 use Drupal\entity_module_test\Entity\EnhancedEntity;
+use Drupal\entity_module_test\Entity\EnhancedEntityBundle;
 use Drupal\Tests\block\Traits\BlockCreationTrait;
 use Drupal\Tests\BrowserTestBase;
 
@@ -31,6 +32,11 @@ class CollectionRouteAccessTest extends BrowserTestBase {
    */
   protected function setUp() {
     parent::setUp();
+
+    EnhancedEntityBundle::create([
+      'id' => 'default',
+      'label' => 'Default',
+    ])->save();
 
     $this->placeBlock('local_tasks_block');
     $this->placeBlock('system_breadcrumb_block');

@@ -13,10 +13,9 @@ use Drupal\Core\Entity\EntityTypeInterface;
  * Provided permissions:
  * - administer $entity_type
  * - access $entity_type overview
- * - view own unpublished $entity_type
  * - view ($bundle) $entity_type
+ * - view own unpublished $entity_type
  * - update (own|any) ($bundle) $entity_type
- * - duplicate (own|any) ($bundle) $entity_type
  * - delete (own|any) ($bundle) $entity_type
  * - create $bundle $entity_type
  *

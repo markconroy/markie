@@ -59,7 +59,7 @@ class RevisionOverviewController extends ControllerBase {
    * {@inheritdoc}
    */
   protected function hasDeleteRevisionAccess(EntityInterface $entity) {
-    return $this->currentUser()->hasPermission("delete all {$entity->getEntityTypeId()} revisions");
+    return $this->currentUser()->hasPermission("delete all {$entity->id()} revisions");
   }
 
   /**
@@ -68,7 +68,7 @@ class RevisionOverviewController extends ControllerBase {
   protected function buildRevertRevisionLink(EntityInterface $entity_revision) {
     if ($entity_revision->hasLinkTemplate('revision-revert-form')) {
       return [
-        'title' => $this->t('Revert'),
+        'title' => t('Revert'),
         'url' => $entity_revision->toUrl('revision-revert-form'),
       ];
     }
@@ -80,7 +80,7 @@ class RevisionOverviewController extends ControllerBase {
   protected function buildDeleteRevisionLink(EntityInterface $entity_revision) {
     if ($entity_revision->hasLinkTemplate('revision-delete-form')) {
       return [
-        'title' => $this->t('Delete'),
+        'title' => t('Delete'),
         'url' => $entity_revision->toUrl('revision-delete-form'),
       ];
     }

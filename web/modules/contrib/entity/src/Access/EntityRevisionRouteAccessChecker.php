@@ -26,7 +26,7 @@ class EntityRevisionRouteAccessChecker implements AccessInterface {
    *
    * @var array
    */
-  protected $accessCache = [];
+  protected $accessCache = array();
 
   /**
    * The currently active route match object.

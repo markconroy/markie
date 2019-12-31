@@ -2284,21 +2284,21 @@
     },
     {
         "name": "drupal/entity",
-        "version": "1.0.0-rc3",
-        "version_normalized": "1.0.0.0-RC3",
+        "version": "1.0.0-beta4",
+        "version_normalized": "1.0.0.0-beta4",
         "source": {
             "type": "git",
             "url": "https://git.drupalcode.org/project/entity.git",
-            "reference": "8.x-1.0-rc3"
+            "reference": "8.x-1.0-beta4"
         },
         "dist": {
             "type": "zip",
-            "url": "https://ftp.drupal.org/files/projects/entity-8.x-1.0-rc3.zip",
-            "reference": "8.x-1.0-rc3",
-            "shasum": "6b4ccc0231c52ed9594502a0718057f53d98404d"
+            "url": "https://ftp.drupal.org/files/projects/entity-8.x-1.0-beta4.zip",
+            "reference": "8.x-1.0-beta4",
+            "shasum": "00c1ae1fd4942285564af4325c0c98f895dac754"
         },
         "require": {
-            "drupal/core": "^8.6"
+            "drupal/core": "~8.5"
         },
         "type": "drupal-module",
         "extra": {
@@ -2306,11 +2306,11 @@
                 "dev-1.x": "1.x-dev"
             },
             "drupal": {
-                "version": "8.x-1.0-rc3",
-                "datestamp": "1559579884",
+                "version": "8.x-1.0-beta4",
+                "datestamp": "1528452184",
                 "security-coverage": {
                     "status": "not-covered",
-                    "message": "RC releases are not covered by Drupal security advisories."
+                    "message": "Beta releases are not covered by Drupal security advisories."
                 }
             }
         },
@@ -2344,7 +2344,7 @@
         "description": "Provides expanded entity APIs, which will be moved to Drupal core one day.",
         "homepage": "http://drupal.org/project/entity",
         "support": {
-            "source": "https://git.drupalcode.org/project/entity"
+            "source": "http://cgit.drupalcode.org/entity"
         }
     },
     {
