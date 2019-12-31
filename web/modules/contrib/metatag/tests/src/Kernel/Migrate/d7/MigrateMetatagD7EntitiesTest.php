@@ -70,7 +70,7 @@ class MigrateMetatagD7EntitiesTest extends MigrateDrupal7TestBase {
    */
   protected function setUp() {
     parent::setUp();
-    $this->loadFixture(__DIR__ . '/../../../../fixtures/metatag_d7_entities.php');
+    $this->loadFixture(__DIR__ . '/../../../../fixtures/d7_metatag_entities.php');
 
     $this->installEntitySchema('node');
     $this->installEntitySchema('comment');

@@ -58,6 +58,7 @@ class MetatagOpenGraphTagsTest extends MetatagTagsTestBase {
     'og_video_secure_url',
     'og_video_type',
     'og_video_width',
+    'og_video_duration',
   ];
 
   /**

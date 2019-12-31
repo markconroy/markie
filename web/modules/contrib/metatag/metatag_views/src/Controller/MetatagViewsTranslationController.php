@@ -141,7 +141,9 @@ class MetatagViewsTranslationController extends ControllerBase {
         '#links' => $operations,
         // Even if the mapper contains multiple language codes, the source
         // configuration can still be edited.
+        // {@code}
         // '#access' => ($langcode == $original_langcode) || $operations_access,
+        // {@endcode}
       ];
     }
 

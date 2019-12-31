@@ -21,14 +21,14 @@ function metatag_open_graph_preprocess_html(&$variables) {
   $namespaces = [];
   if (!\Drupal::moduleHandler()->moduleExists('rdf')) {
     $namespaces = [
-      'prefix' => 'og: http://ogp.me/ns#',
+      'prefix' => 'og: https://ogp.me/ns#',
     ];
   }
 
   // Namespaces for Google+.
   if (isset($variables['itemtype'])) {
     $namespaces['itemscope'] = '';
-    $namespaces['itemtype'] = "http://schema.org/{$variables['itemtype']}";
+    $namespaces['itemtype'] = "https://schema.org/{$variables['itemtype']}";
   }
 
   // Append each namespace.

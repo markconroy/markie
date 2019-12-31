@@ -22,6 +22,17 @@ function metatag_requirements($phase) {
   $requirements = [];
 
   if ($phase == 'runtime') {
+    // Note that no meta tags will be output while the site is in maintenance
+    // mode.
+    if (\Drupal::state()->get('system.maintenance_mode')) {
+      $requirements['metatag_maintenance_mode'] = [
+        'severity' => REQUIREMENT_WARNING,
+        'title' => 'Metatag',
+        'value' => t('Not enabled while in maintenance mode'),
+        'description' => t('Please note that while the site is in maintenance mode none of the usual meta tags will be output.'),
+      ];
+    }
+
     // Recommend the Schema.org Metatag module.
     if (!\Drupal::moduleHandler()->moduleExists('schema_metatag')) {
       $requirements['metatag_schema'] = [

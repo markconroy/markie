@@ -10,7 +10,7 @@ use Drupal\metatag\Plugin\metatag\Group\GroupBase;
  * @MetatagGroup(
  *   id = "open_graph",
  *   label = @Translation("Open Graph"),
- *   description = @Translation("The <a href='http://ogp.me/'>Open Graph meta tags</a> are used to control how Facebook, Pinterest, LinkedIn and other social networking sites interpret the site's content."),
+ *   description = @Translation("The <a href='https://ogp.me/'>Open Graph meta tags</a> are used to control how Facebook, Pinterest, LinkedIn and other social networking sites interpret the site's content."),
  *   weight = 3
  * )
  */

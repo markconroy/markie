@@ -145,7 +145,6 @@ class MetatagStringTest extends BrowserTestBase {
     // Set up a node without explicit metatag description. This causes the
     // global default to be used, which contains a token (node:summary). The
     // token value should be correctly translated.
-
     // Create a node.
     $this->drupalGet('node/add/page');
     $this->assertResponse(200);
@@ -213,7 +212,6 @@ class MetatagStringTest extends BrowserTestBase {
     // Set up a node without explicit metatag description. This causes the
     // global default to be used, which contains a token (node:summary). The
     // token value should be correctly translated.
-
     // Create a node.
     $this->drupalGet('node/add/page');
     $this->assertResponse(200);
@@ -283,7 +281,6 @@ class MetatagStringTest extends BrowserTestBase {
     // Set up a node without explicit metatag description. This causes the
     // global default to be used, which contains a token (node:summary). The
     // token value should be correctly translated.
-
     // Create a node.
     $this->drupalGet('node/add/page');
     $this->assertResponse(200);

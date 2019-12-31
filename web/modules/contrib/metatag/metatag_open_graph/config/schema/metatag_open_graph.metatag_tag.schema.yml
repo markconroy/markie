@@ -86,6 +86,9 @@ metatag.metatag_tag.og_url:
 metatag.metatag_tag.og_video:
   type: label
   label: 'Open Graph: Video URL'
+metatag.metatag_tag.og_video_duration:
+  type: label
+  label: 'Open Graph: Video duration'
 metatag.metatag_tag.og_video_height:
   type: label
   label: 'Open Graph: Video height'

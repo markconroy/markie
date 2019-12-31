@@ -22,6 +22,7 @@ class MetatagVerificationTagsTest extends MetatagTagsTestBase {
     'pinterest',
     'pocket',
     'yandex',
+    'zoom_domain_verification'
   ];
 
   /**
@@ -56,6 +57,9 @@ class MetatagVerificationTagsTest extends MetatagTagsTestBase {
     }
     elseif ($tag_name == 'yandex') {
       $tag_name = 'yandex-verification';
+    }
+    elseif ($tag_name == 'zoom_domain_verification') {
+      $tag_name = 'zoom-domain-verification';
     }
 
     return $tag_name;

@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\facebook\Plugin\metatag\Group;
+namespace Drupal\metatag_facebook\Plugin\metatag\Group;
 
 use Drupal\metatag\Plugin\metatag\Group\GroupBase;
 

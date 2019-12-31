@@ -180,7 +180,9 @@ abstract class MetatagTagsTestBase extends BrowserTestBase {
         // Look for a custom method named "{$tag_name}TestOutputXpath", if
         // found use that method to get the xpath definition for this meta tag,
         // otherwise it defaults to just looking for a meta tag matching:
+        // {@code}
         // <$testTag $testNameAttribute=$tag_name $testValueAttribute=$value />
+        // {@endcode}
         $method = $this->getMethodFromTagCallback($tag_name, 'TestOutputXpath');
         if (method_exists($this, $method)) {
           $xpath_string = $this->$method();

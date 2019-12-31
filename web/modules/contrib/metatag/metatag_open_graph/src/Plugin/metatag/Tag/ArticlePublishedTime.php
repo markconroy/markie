@@ -10,7 +10,7 @@ use Drupal\metatag\Plugin\metatag\Tag\MetaPropertyBase;
  * @MetatagTag(
  *   id = "article_published_time",
  *   label = @Translation("Article publication date & time"),
- *   description = @Translation("The date this content was published on, with an optional time value. Needs to be in <a href='http://en.wikipedia.org/wiki/ISO_8601'>ISO 8601</a> format."),
+ *   description = @Translation("The date this content was published on, with an optional time value. Needs to be in <a href='https://en.wikipedia.org/wiki/ISO_8601'>ISO 8601</a> format."),
  *   name = "article:published_time",
  *   group = "open_graph",
  *   weight = 32,

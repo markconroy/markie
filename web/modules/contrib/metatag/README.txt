@@ -91,6 +91,10 @@ The primary features include:
 * Integration with DrupalConsole [1] to provide a quick method of generating new
   meta tags.
 
+* A report page at /admin/reports/metatag-plugins which shows all of the meta
+  tag plugins provided on the site, and indication as to which module provides
+  them.
+
 
 Standard usage scenario
 --------------------------------------------------------------------------------
@@ -113,6 +117,8 @@ Standard usage scenario
    5.5 If the site supports multiple languages, and translations have been
        enabled for this entity, select "Users may translate this field" to use
        Drupal's translation system.
+
+Please note: no meta tags will be output while the site is in maintenance mode.
 
 
 Simplify the content administration experience
@@ -243,7 +249,7 @@ Two migration processes are supported:
 
     This is set up in metatag_migration_plugins_alter() and then leverages code
     in metatag_migrate_prepare_row() and
-    \Drupal\metatag\Plugin\migrate\process\d7\MetatagD7Entities to do the actual
+    \Drupal\metatag\Plugin\migrate\process\d7\MetatagEntities to do the actual
     data migration.
 
  2. A custom migration using Migrate Plus [3] and possibly Migrate Tools [4].
@@ -255,16 +261,16 @@ Two migration processes are supported:
 .......................................
 process:
   field_metatag:
-    plugin: metatag_d7_entities
-    source: pseudo_metatag_d7_entities
+    plugin: d7_metatag_entities
+    source: pseudo_d7_metatag_entities
 .......................................
 
-    The important items are the plugin "metatag_d7_entities" and the source
-    value of "pseudo_metatag_d7_entities", if these are not present the
+    The important items are the plugin "d7_metatag_entities" and the source
+    value of "pseudo_d7_metatag_entities", if these are not present the
     migration will not work as expected.
 
     This is handled by metatag_migrate_prepare_row() and
-    \Drupal\metatag\Plugin\migrate\process\d7\MetatagD7Entities.
+    \Drupal\metatag\Plugin\migrate\process\d7\MetatagEntities.
 
 
 DrupalConsole integration
@@ -285,6 +291,30 @@ There is also a command for generating meta tag groups:
   drupal generate:plugin:metatag:group
 
 Again, this provides a guided process to create a new group.
+
+
+Known issue with testing infrastructure
+--------------------------------------------------------------------------------
+Thanks to contributions from the community, the Metatag module has an extensive
+collection of tests to ensure proposed changes avoid breaking the module.
+
+Part of this includes a test that confirms the separate Schema.org Metatag
+module suite continues to work. This test is specifically designed with the
+drupal.org testing platform in mind. Projects which have their own testing
+infrastructure might run into errors like the following:
+
+`Fatal error: Class 'Drupal\Tests\schema_web_page\Functional\SchemaWebPageTest'
+not found in SchemaMetatagTest.php on line 17`
+
+To resolve this, add "schema_metatag" as a "require-dev" item in the project's
+custom composer.json. This can be done by running the following in the
+project's root:
+
+  composer require --dev drupal/schema_metatag
+
+This will update composer.json and composer.lock as well as download the
+dependency. When `composer install` is run on a production deployment and the
+`--no-dev` flag is provided it will skip installing the dev requirements.
 
 
 Related modules

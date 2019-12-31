@@ -125,7 +125,6 @@ class MetatagNodeTranslationTest extends BrowserTestBase {
     // Set up a node without explicit metatag description. This causes the
     // global default to be used, which contains a token (node:summary). The
     // token value should be correctly translated.
-
     // Load the node form.
     $this->drupalGet('node/add/metatag_node');
     $this->assertResponse(200);

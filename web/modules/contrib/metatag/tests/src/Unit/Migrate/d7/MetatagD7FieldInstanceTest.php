@@ -60,7 +60,6 @@ class MetatagD7FieldInstanceTest extends MigrateSqlSourceTestCase {
     // $migration->expects($this->any())
     // ->method('getHighWater')
     // ->will($this->returnValue(static::ORIGINAL_HIGH_WATER));
-
     // Setup the plugin.
     $plugin_class = static::PLUGIN_CLASS;
     $plugin = new $plugin_class($this->migrationConfiguration['source'], $this->migrationConfiguration['source']['plugin'], [], $migration, $state, $entity_manager, $entity_type_bundle_info);

@@ -58,3 +58,12 @@ metatag.settings:
     _permission: 'administer meta tags'
   options:
     _admin_route: TRUE
+
+# A custom report that shows all meta tags and what module they come from.
+metatag.reports_plugins:
+  path: '/admin/reports/metatag-plugins'
+  defaults:
+    _controller: '\Drupal\metatag\Controller\MetatagController::reportPlugins'
+    _title: 'Metatag plugins'
+  requirements:
+    _permission: 'administer meta tags'

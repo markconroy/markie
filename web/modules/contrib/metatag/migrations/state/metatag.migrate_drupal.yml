@@ -28,52 +28,45 @@ finished:
 not_finished:
   6:
     # Nodewords.
-    # Per-entity data: https://www.drupal.org/project/metatag/issues/3045641
-    # Configuration: https://www.drupal.org/project/metatag/issues/3045640
+    # @todo Entity data: https://www.drupal.org/project/metatag/issues/3045641
+    # @todo Configuration: https://www.drupal.org/project/metatag/issues/3045640
     nodewords: metatag
 
     # Page title.
-    # https://www.drupal.org/project/metatag/issues/3077729
+    # @todo https://www.drupal.org/project/metatag/issues/3077729
     page_title: metatag
 
   7:
     # Metatag.
-    # Configuration: https://www.drupal.org/project/metatag/issues/2563651
-    # Missing meta tags:
-    # * https://www.drupal.org/project/metatag/issues/3077772
-    # * https://www.drupal.org/project/metatag/issues/3077773
-    # * https://www.drupal.org/project/metatag/issues/3077774
-    # * https://www.drupal.org/project/metatag/issues/3077776
+    # @todo Configuration: https://www.drupal.org/project/metatag/issues/2563651
     metatag: metatag
-    # Not all of the meta tags of these submodules have been ported yet.
-    # https://www.drupal.org/project/metatag/issues/3077778
+    # @todo Missings tags: https://www.drupal.org/project/metatag/issues/3077778
     metatag_hreflang: metatag
-    # https://www.drupal.org/project/metatag/issues/3077780
-    # https://www.drupal.org/project/metatag/issues/3077781
     metatag_mobile: metatag
-    # https://www.drupal.org/project/metatag/issues/3077782
+    # @todo Missings tags: https://www.drupal.org/project/metatag/issues/3077782
     metatag_opengraph: metatag
-    # https://www.drupal.org/project/metatag/issues/2835925
+    # @todo Missings tags: https://www.drupal.org/project/metatag/issues/2835925
     metatag_opengraph_products: metatag
 
     # These will need custom work.
-    # https://www.drupal.org/project/metatag/issues/2563653
+    # @todo https://www.drupal.org/project/metatag/issues/2563653
     metatag_context: metatag_context
-    # https://www.drupal.org/project/metatag/issues/2563659
+    # @todo https://www.drupal.org/project/metatag/issues/2563659
     metatag_panels: metatag_panels
-    # https://www.drupal.org/project/metatag/issues/2563661
+    # @todo https://www.drupal.org/project/metatag/issues/2563661
     metatag_views: metatag_views
 
     # Page title.
-    # Per-entity data: https://www.drupal.org/project/metatag/issues/3077729
-    # Configuration: https://www.drupal.org/project/metatag/issues/3077730
+    # @todo Entity data: https://www.drupal.org/project/metatag/issues/3077729
+    # @todo Configuration: https://www.drupal.org/project/metatag/issues/3077730
     page_title: metatag
 
     # Easy meta.
-    # https://www.drupal.org/project/metatag/issues/2847536
+    # @todo https://www.drupal.org/project/metatag/issues/2847536
     easy_meta: metatag
 
     # Metatags Quick
-    # Per-entity data: 
-    # Configuration: https://www.drupal.org/project/metatag/issues/2618898
+    # @todo Entity data: https://www.drupal.org/project/metatag/issues/2618898
+    # @todo Configuration: https://www.drupal.org/project/metatag/issues/3082398
+    # @todo Path-based: https://www.drupal.org/project/metatag/issues/3082401
     metatags_quick: metatag

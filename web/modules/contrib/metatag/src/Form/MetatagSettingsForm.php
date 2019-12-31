@@ -28,6 +28,8 @@ class MetatagSettingsForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
+    drupal_set_message($this->t('Please note that while the site is in maintenance mode none of the usual meta tags will be output.'));
+
     $settings = $this->config('metatag.settings')->get('entity_type_groups');
 
     $form['entity_type_groups'] = [

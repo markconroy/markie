@@ -5,6 +5,9 @@
 metatag.metatag_tag.abstract:
   type: text
   label: 'Abstract'
+metatag.metatag_tag.cache_control:
+  type: label
+  label: 'Cache control'
 metatag.metatag_tag.canonical_url:
   type: label
   label: 'Canonical URL'
@@ -14,6 +17,9 @@ metatag.metatag_tag.content_language:
 metatag.metatag_tag.description:
   type: text
   label: 'Description'
+metatag.metatag_tag.expires:
+  type: label
+  label: 'Expires'
 metatag.metatag_tag.generator:
   type: label
   label: 'Generator'
@@ -26,18 +32,33 @@ metatag.metatag_tag.keywords:
 metatag.metatag_tag.news_keywords:
   type: label
   label: 'Google News Keywords'
+metatag.metatag_tag.next:
+  type: label
+  label: 'Next page URL'
 metatag.metatag_tag.original_source:
   type: label
   label: 'Original source'
+metatag.metatag_tag.pragma:
+  type: label
+  label: 'Pragma'
+metatag.metatag_tag.prev:
+  type: label
+  label: 'Previous page URL'
 metatag.metatag_tag.rating:
   type: label
   label: 'Rating'
-metatag.metatag_tag.rights:
-  type: label
-  label: 'Rights'
 metatag.metatag_tag.referrer:
   type: label
   label: 'Referrer policy'
+metatag.metatag_tag.refresh:
+  type: label
+  label: 'Refresh'
+metatag.metatag_tag.revisit_after:
+  type: label
+  label: 'Revisit After'
+metatag.metatag_tag.rights:
+  type: label
+  label: 'Rights'
 metatag.metatag_tag.robots:
   type: label
   label: 'Robots'

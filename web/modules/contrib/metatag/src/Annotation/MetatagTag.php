@@ -81,6 +81,13 @@ class MetatagTag extends Plugin {
   public $multiple;
 
   /**
+   * True if the tag should use a text area.
+   *
+   * @var bool
+   */
+  public $long;
+
+  /**
    * True if the URL value(s) must be absolute.
    *
    * @var bool

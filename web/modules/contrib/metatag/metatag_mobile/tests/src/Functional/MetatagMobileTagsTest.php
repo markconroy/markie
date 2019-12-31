@@ -15,6 +15,7 @@ class MetatagMobileTagsTest extends MetatagTagsTestBase {
    * {@inheritdoc}
    */
   private $tags = [
+    'alternate_handheld',
     'android_app_link_alternative',
     'android_manifest',
     'apple_itunes_app',

@@ -206,7 +206,9 @@ class MetatagXssTest extends BrowserTestBase {
     $this->drupalPostForm(NULL, $edit, $save_label);
 
     // Check the body text.
+    // {@code}
     // $this->assertNoTitle($this->xssTitleString);
+    // {@endcode}
     $this->assertNoRaw($this->xssTitleString);
   }
 

@@ -14,25 +14,10 @@ namespace Drupal\metatag\Plugin\metatag\Tag;
  *   weight = 2,
  *   type = "label",
  *   secure = FALSE,
- *   multiple = FALSE
+ *   multiple = FALSE,
+ *   long = TRUE,
  * )
  */
 class Description extends MetaNameBase {
-
-  /**
-   * Generate a form element for this meta tag.
-   */
-  public function form(array $element = []) {
-    $form = [
-      '#type' => 'textarea',
-      '#title' => $this->label(),
-      '#default_value' => $this->value(),
-      '#row' => 2,
-      '#required' => isset($element['#required']) ? $element['#required'] : FALSE,
-      '#description' => $this->description(),
-      '#element_validate' => [[get_class($this), 'validateTag']],
-    ];
-    return $form;
-  }
 
 }

@@ -11,11 +11,11 @@ use Drupal\migrate\Row;
  * Migrate data from Metatag-D7.
  *
  * @MigrateProcessPlugin(
- *   id = "metatag_d7_entities",
+ *   id = "d7_metatag_entities",
  *   handle_multiples = TRUE
  * )
  */
-class MetatagD7Entities extends ProcessPluginBase {
+class MetatagEntities extends ProcessPluginBase {
 
   /**
    * {@inheritdoc}
@@ -86,13 +86,11 @@ class MetatagD7Entities extends ProcessPluginBase {
     $map = [
       // From the main Metatag module.
       'abstract' => 'abstract',
-      // @todo https://www.drupal.org/project/metatag/issues/3077772
-      // 'cache-control' => '',
+      'cache-control' => 'cache_control',
       'canonical' => 'canonical_url',
       'content-language' => 'content_language',
       'description' => 'description',
-      // @todo https://www.drupal.org/project/metatag/issues/3077772
-      // 'expires' => '',
+      'expires' => 'expires',
       'generator' => 'generator',
       'geo.placename' => 'geo_placename',
       'geo.position' => 'geo_position',
@@ -101,19 +99,14 @@ class MetatagD7Entities extends ProcessPluginBase {
       'image_src' => 'image_src',
       'keywords' => 'keywords',
       'news_keywords' => 'news_keywords',
-      // @todo https://www.drupal.org/project/metatag/issues/3077773
-      // 'next' => '',
+      'next' => 'next',
       'original-source' => 'original_source',
-      // @todo https://www.drupal.org/project/metatag/issues/3077772
-      // 'pragma' => '',
-      // @todo https://www.drupal.org/project/metatag/issues/3077773
-      // 'prev' => '',
+      'pragma' => 'pragma',
+      'prev' => 'prev',
       'rating' => 'rating',
       'referrer' => 'referrer',
-      // @todo https://www.drupal.org/project/metatag/issues/3077774
-      // 'refresh' => '',
-      // @todo https://www.drupal.org/project/metatag/issues/3077776
-      // 'revisit-after' => '',
+      'refresh' => 'refresh',
+      'revisit-after' => 'revisit_after',
       'rights' => 'rights',
       'robots' => 'robots',
       'set_cookie' => 'set_cookie',
@@ -254,12 +247,13 @@ class MetatagD7Entities extends ProcessPluginBase {
       'hreflang_xdefault' => 'hreflang_xdefault',
       // @todo https://www.drupal.org/project/metatag/issues/3077778
       // 'hreflang_' . $langcode => 'hreflang_per_language',
-
       // From metatag_mobile.metatag.inc:
-      // @todo https://www.drupal.org/project/metatag/issues/3077780
-      // 'alternate_handheld' => '',
-      // @todo https://www.drupal.org/project/metatag/issues/3077781
-      //'amphtml' => '',
+      'alternate_handheld' => 'alternate_handheld',
+      // This won't be added, it should be handled by the system implementing
+      // the AMP specification. Also, AMP is dramatic overreach by Google to
+      // reshape and replatform the web to its monetary goals, and is an abuse
+      // of its monopolistic power over the internet.
+      // 'amphtml' => '',
       'android-app-link-alternative' => 'android_app_link_alternative',
       'android-manifest' => 'android_manifest',
       'apple-itunes-app' => 'apple_itunes_app',
@@ -294,7 +288,7 @@ class MetatagD7Entities extends ProcessPluginBase {
       'x-ua-compatible' => 'x_ua_compatible',
 
       // From metatag_opengraph.metatag.inc:
-      // https://www.drupal.org/project/metatag/issues/3077782
+      // @todo https://www.drupal.org/project/metatag/issues/3077782
       'article:author' => 'article_author',
       'article:expiration_time' => 'article_expiration_time',
       'article:modified_time' => 'article_modified_time',
@@ -337,6 +331,8 @@ class MetatagD7Entities extends ProcessPluginBase {
       'og:updated_time' => 'og_updated_time',
       'og:url' => 'og_url',
       // @todo '' => 'og_video',
+      // @todo https://www.drupal.org/project/metatag/issues/3089445
+      // @todo '' => 'og_video_duration',
       'og:video:height' => 'og_video_height',
       'og:video:secure_url' => 'og_video_secure_url',
       'og:video:type' => 'og_video_type',
@@ -356,7 +352,7 @@ class MetatagD7Entities extends ProcessPluginBase {
       // @todo 'video:writer' => '',
 
       // From metatag_opengraph_products.metatag.inc:
-      // https://www.drupal.org/project/metatag/issues/2835925
+      // @todo https://www.drupal.org/project/metatag/issues/2835925
       'product:price:amount' => 'product_price_amount',
       'product:price:currency' => 'product_price_currency',
       // @todo 'product:availability' => '',
@@ -385,6 +381,7 @@ class MetatagD7Entities extends ProcessPluginBase {
       // @todo 'product:condition' => '',
 
       // Pinterest.
+      // @todo https://www.drupal.org/project/metatag/issues/2957361
       // @todo '' => 'pinterest_id',
       // @todo '' => 'pinterest_description',
       // @todo '' => 'pinterest_nohover',
@@ -437,8 +434,9 @@ class MetatagD7Entities extends ProcessPluginBase {
       'msvalidate.01' => 'google',
       'norton-safeweb-site-verification' => 'norton_safe_web',
       'p:domain_verify' => 'pinterest',
-      // @todo '' => 'pocket',
+      'pocket-site-verification' => 'pocket',
       'yandex-verification' => 'yandex',
+      'zoom-domain-verification' => 'zoom-domain-verification',
     ];
 
     // Trigger hook_metatag_migrate_metatagd7_tags_map_alter().

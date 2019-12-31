@@ -74,6 +74,13 @@ abstract class MetaNameBase extends PluginBase {
   protected $multiple;
 
   /**
+   * True if the tag should use a text area.
+   *
+   * @var bool
+   */
+  protected $long;
+
+  /**
    * True if the URL value(s) must be absolute.
    *
    * @var bool
@@ -118,6 +125,7 @@ abstract class MetaNameBase extends PluginBase {
     $this->type = $plugin_definition['type'];
     $this->secure = $plugin_definition['secure'];
     $this->multiple = $plugin_definition['multiple'];
+    $this->long = !empty($plugin_definition['long']);
     $this->absoluteUrl = !empty($plugin_definition['absolute_url']);
     $this->request = \Drupal::request();
   }
@@ -213,6 +221,16 @@ abstract class MetaNameBase extends PluginBase {
   }
 
   /**
+   * Whether or not this meta tag should use a text area.
+   *
+   * @return bool
+   *   Whether or not this meta tag should use a text area.
+   */
+  public function isLong() {
+    return $this->long;
+  }
+
+  /**
    * Whether or not this meta tag must output required absolute URLs.
    *
    * @return bool
@@ -243,7 +261,7 @@ abstract class MetaNameBase extends PluginBase {
    */
   public function form(array $element = []) {
     $form = [
-      '#type' => 'textfield',
+      '#type' => $this->isLong() ? 'textarea' : 'textfield',
       '#title' => $this->label(),
       '#default_value' => $this->value(),
       '#maxlength' => 255,

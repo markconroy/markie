@@ -2,6 +2,8 @@
 
 namespace Drupal\metatag_mobile\Plugin\metatag\Group;
 
+use Drupal\metatag\Plugin\metatag\Group\GroupBase;
+
 /**
  * Provides a plugin for the 'Mobile & UI Adjustments' meta tag group.
  *

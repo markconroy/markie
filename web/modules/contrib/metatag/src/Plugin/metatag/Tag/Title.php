@@ -24,6 +24,7 @@ class Title extends MetaNameBase {
    *
    * @todo Override the existing title tag X-)
    */
+  // {@code}
   // public function output() {
   //   if (empty($this->value)) {
   //     // If there is no value, we don't want a tag output.
@@ -39,5 +40,6 @@ class Title extends MetaNameBase {
   //
   //   return $element;
   // }
+  // {@endcode}
 
 }

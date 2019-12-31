@@ -22,7 +22,7 @@ use Drupal\views\Views;
  * @return array|null
  *   The meta tags if set, null otherwise.
  */
-function metatag_get_view_tags($view, $display_id = NULL) {
+function metatag_get_view_tags($view, $display_id = NULL, $args = []) {
   if (empty($view)) {
     return;
   }
@@ -36,6 +36,8 @@ function metatag_get_view_tags($view, $display_id = NULL) {
     return;
   }
   $view->setDisplay($display_id);
+  $view->setArguments($args);
+  $view->buildTitle();
 
   // And get the list of extenders for this display.
   $extenders = $view->getDisplay()->getExtenders();
@@ -58,9 +60,26 @@ function metatag_views_metatags_alter(array &$metatags, array &$context) {
 
   $view = $context['entity']->getExecutable();
   // If display_id is not available, will default to Master display.
-  $display_id = \Drupal::routeMatch()->getParameter('display_id');
-  if ($tags = metatag_get_view_tags($view, $display_id)) {
-    // Apply view overrides.
+  $route_match = \Drupal::routeMatch();
+  $display_id = $route_match->getParameter('display_id');
+
+  $args = [];
+  $route = $route_match->getRouteObject();
+  $map = $route->hasOption('_view_argument_map') ? $route->getOption('_view_argument_map') : [];
+  foreach ($map as $attribute => $parameter_name) {
+    if (isset($map[$attribute])) {
+      $attribute = $map[$attribute];
+    }
+    if (!$arg = $route_match->getRawParameter($attribute)) {
+      $arg = $route_match->getParameter($attribute);
+    }
+    if (isset($arg)) {
+      $args[] = $arg;
+    }
+  }
+
+  // Apply view overrides.
+  if ($tags = metatag_get_view_tags($view, $display_id, $args)) {
     $metatags = array_merge($metatags, $tags);
   }
 }

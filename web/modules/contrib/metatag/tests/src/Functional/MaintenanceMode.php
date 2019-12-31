@@ -3,7 +3,6 @@
 namespace Drupal\Tests\metatag\Functional;
 
 use Drupal\Core\Cache\Cache;
-use Drupal\rest\RestResourceConfigInterface;
 use Drupal\Tests\BrowserTestBase;
 
 /**

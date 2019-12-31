@@ -29,3 +29,6 @@ metatag.metatag_tag.yahoo:
 metatag.metatag_tag.yandex:
   type: label
   label: 'Site validation: Yandex'
+metatag.metatag_tag.zoom_domain_verification:
+  type: label
+  label: 'Site validation: Zoom'

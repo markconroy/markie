@@ -6,7 +6,7 @@ package: Testing
 dependencies:
   - metatag:metatag
 
-# Information added by Drupal.org packaging script on 2019-08-29
-version: '8.x-1.10'
+# Information added by Drupal.org packaging script on 2019-12-20
+version: '8.x-1.11'
 project: 'metatag'
-datestamp: 1567099988
+datestamp: 1576870688

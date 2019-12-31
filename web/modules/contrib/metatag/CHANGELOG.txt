@@ -1,3 +1,50 @@
+Metatag 8.x-1.11, 2019-12-20
+----------------------------
+#3074603 by jrockowitz, thejimbirch, cindytwilliams, DamienMcKenna: Add
+  og:video:duration tag.
+#3084547 by baikho, DamienMcKenna, SerShevchyk: Move submodule tests in
+  /tests/Functional folder.
+#3082119 by thejimbirch, cindytwilliams, DamienMcKenna: Add option name in
+  ROBOTS selector.
+#3052628 by Neslee Canil Pinto, cindytwilliams, DamienMcKenna: Capitalize the
+  name of the favicons submodule.
+#3077780 by thejimbirch, volkswagenchick, DamienMcKenna: Add new meta tag:
+  Google's new "handheld" link alternate URL.
+#3077773 by gueguerreiro, cindytwilliams, DamienMcKenna: Add new meta tags:
+  rel=prev / rel=next.
+#3077774 by thejimbirch, cindytwilliams, DamienMcKenna: Add new meta tag:
+  Refresh.
+#3077776 by DamienMcKenna, thejimbirch, cindytwilliams: Add new meta tag:
+  Revisit-After.
+#3077772 by DamienMcKenna, thejimbirch, volkswagenchick, cindytwilliams: Add new
+  meta tags: pragma, cache-control, expires.
+#3001387 by mbovan, Berdir, kell.mcnaughton, DamienMcKenna: Extend meta tag
+  definition to allow some tags to use a textarea instead of text field, e.g.
+  og:description.
+#2908527 by lapek, DamienMcKenna, christian.rolf, DrColossos: Views overwritten
+  title in contextual filter.
+#3087329 by Martijn de Wit, DamienMcKenna: Use HTTPS links instead of HTTP to
+  external sites in metatag_open_graph.module.
+#3057582 by jrearick, DamienMcKenna, Dave Reid, sunset_bill, dspachos:
+  SchemaWebPageTest not found.
+#3080314 by matteodem, DamienMcKenna: Load metatag defaults based on entity
+  language.
+#3072165 by vuil, DamienMcKenna: Coding standards improvements.
+#3074350 by jrockowitz, DamienMcKenna: Create Meta plugin report.
+#3074350 by DamienMcKenna: Follow-up to fix some API mismatches.
+#3096936 by DamienMcKenna, thejimbirch, rubyji: Add new tag: Zoom domain
+  verification.
+#3101288 by chr.fritsch: Fix namespace and imports.
+#3090002 by DamienMcKenna: Rename migrate plugins to follow naming conventions.
+#3099168 by jedihe, DamienMcKenna, docans: Remove "title" meta tag, leave the
+  regular title tag.
+#3101567 by DamienMcKenna: Update migrations/state/metatag.migrate_drupal.yml
+  for recent changes.
+#3080665 by DamienMcKenna, Chris Matthews: Add status message when site is in
+  maintenance mode that no meta data will be output.
+#3087677 by DamienMcKenna: Update MetatagD7Entities for new meta tags in 7.x.
+
+
 Metatag 8.x-1.10, 2019-08-29
 ----------------------------
 #2971271 by subson, idebr, nkoporec, DamienMcKenna, Michelle: Replace
