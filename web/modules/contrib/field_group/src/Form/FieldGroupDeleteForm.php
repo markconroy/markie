@@ -4,7 +4,9 @@ namespace Drupal\field_group\Form;
 
 use Drupal\Core\Form\ConfirmFormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\field_group\FieldgroupUi;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides a form for removing a fieldgroup from a bundle.
@@ -14,9 +16,35 @@ class FieldGroupDeleteForm extends ConfirmFormBase {
   /**
    * The fieldgroup to delete.
    *
-   * @var stdClass
+   * @var object
    */
   protected $fieldGroup;
+
+  /**
+   * The messenger.
+   *
+   * @var \Drupal\Core\Messenger\MessengerInterface
+   */
+  protected $messenger;
+
+  /**
+   * FieldGroupDeleteForm constructor.
+   *
+   * @param \Drupal\Core\Messenger\MessengerInterface $messenger
+   *   The messenger.
+   */
+  public function __construct(MessengerInterface $messenger) {
+    $this->messenger = $messenger;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container) {
+    return new static(
+      $container->get('messenger')
+    );
+  }
 
   /**
    * {@inheritdoc}
@@ -25,6 +53,9 @@ class FieldGroupDeleteForm extends ConfirmFormBase {
     return 'field_group_delete_form';
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function buildForm(array $form, FormStateInterface $form_state, $field_group_name = NULL, $entity_type_id = NULL, $bundle = NULL, $context = NULL) {
 
     if ($context == 'form') {
@@ -46,12 +77,12 @@ class FieldGroupDeleteForm extends ConfirmFormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    $bundles = entity_get_bundles();
+    $bundles = \Drupal::service('entity_type.bundle.info')->getAllBundleInfo();
     $bundle_label = $bundles[$this->fieldGroup->entity_type][$this->fieldGroup->bundle]['label'];
 
     field_group_group_delete($this->fieldGroup);
 
-    drupal_set_message(t('The group %group has been deleted from the %type content type.', array('%group' => t($this->fieldGroup->label), '%type' => $bundle_label)));
+    $this->messenger->addMessage(t('The group %group has been deleted from the %type content type.', ['%group' => t($this->fieldGroup->label), '%type' => $bundle_label]));
 
     // Redirect.
     $form_state->setRedirectUrl($this->getCancelUrl());
@@ -62,7 +93,7 @@ class FieldGroupDeleteForm extends ConfirmFormBase {
    * {@inheritdoc}
    */
   public function getQuestion() {
-    return $this->t('Are you sure you want to delete the group %group?', array('%group' => t($this->fieldGroup->label)));
+    return $this->t('Are you sure you want to delete the group %group?', ['%group' => t($this->fieldGroup->label)]);
   }
 
   /**

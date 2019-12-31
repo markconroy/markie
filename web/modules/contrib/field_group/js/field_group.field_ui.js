@@ -68,15 +68,15 @@
     this.tableDrag = data.tableDrag;
 
     // Attach change listener to the 'group format' select.
-    this.$formatSelect = $('select.field-group-type', row);
-    this.$formatSelect.change(Drupal.fieldUIOverview.onChange);
+    this.$regionSelect = $(row).find('select.field-region');
+    this.$regionSelect.on('change', Drupal.fieldUIOverview.onChange);
 
     return this;
   };
 
   Drupal.fieldUIDisplayOverview.group.prototype = {
-    getRegion: function () {
-      return (this.$formatSelect.val() === 'hidden') ? 'hidden' : 'content';
+    getRegion: function getRegion() {
+      return this.$regionSelect.val();
     },
 
     regionChange: function (region, recurse) {
@@ -84,28 +84,13 @@
       // Default recurse to true.
       recurse = (typeof recurse === 'undefined') || recurse;
 
-      // When triggered by a row drag, the 'format' select needs to be adjusted to
+      // When triggered by a row drag, the 'region' select needs to be adjusted to
       // the new region.
-      var currentValue = this.$formatSelect.val();
-      var value;
-      switch (region) {
-        case 'visible':
-          if (currentValue === 'hidden') {
-            // Restore the group format back to 'fieldset'.
-            value = 'fieldset';
-          }
-          break;
-
-        default:
-          value = 'hidden';
-          break;
-      }
-      if (typeof value !== 'undefined') {
-        this.$formatSelect.val(value);
-      }
+      region = region.replace(/-/g, '_');
+      this.$regionSelect.val(region);
 
       var refreshRows = {};
-      refreshRows[this.name] = this.$formatSelect.get(0);
+      refreshRows[this.name] = this.$regionSelect.get(0);
 
       if (recurse) {
         this.regionChangeFields(region, this, refreshRows);

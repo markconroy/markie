@@ -1,0 +1,13 @@
+<?php
+
+/**
+ * @file
+ * Update hooks for the Field Group module.
+ */
+
+/**
+ * Removed in favor of hook_post_update script.
+ */
+function field_group_update_8301() {
+  // @see field_group_post_update_0001().
+}

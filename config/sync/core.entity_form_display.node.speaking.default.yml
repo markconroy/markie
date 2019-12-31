@@ -37,6 +37,7 @@ third_party_settings:
         classes: ''
         direction: vertical
       label: Content
+      region: content
     group_default_items:
       children:
         - title
@@ -53,6 +54,7 @@ third_party_settings:
         description: ''
         required_fields: true
       label: 'Default Items'
+      region: content
     group_building_blocks:
       children:
         - field_building_blocks
@@ -66,6 +68,7 @@ third_party_settings:
         description: ''
         required_fields: true
       label: 'Building Blocks'
+      region: content
     group_meta_data:
       children:
         - field_speaking_conference
@@ -82,6 +85,7 @@ third_party_settings:
         description: ''
         required_fields: true
       label: 'Meta Data'
+      region: content
 id: node.speaking.default
 targetEntityType: node
 bundle: speaking

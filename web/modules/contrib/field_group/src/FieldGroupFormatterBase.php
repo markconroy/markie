@@ -3,6 +3,7 @@
 namespace Drupal\field_group;
 
 use Drupal\Core\Field\PluginSettingsBase;
+use Drupal\Core\Form\FormStateInterface;
 
 /**
  * Base class for 'Fieldgroup formatter' plugin implementations.
@@ -13,7 +14,8 @@ abstract class FieldGroupFormatterBase extends PluginSettingsBase implements Fie
 
   /**
    * The group this formatter needs to render.
-   * @var stdClass
+   *
+   * @var object
    */
   protected $group;
 
@@ -52,15 +54,15 @@ abstract class FieldGroupFormatterBase extends PluginSettingsBase implements Fie
    *   The plugin_id for the formatter.
    * @param mixed $plugin_definition
    *   The plugin implementation definition.
-   * @param $group
+   * @param \stdClass $group
    *   The group object.
    * @param array $settings
    *   The formatter settings.
    * @param string $label
    *   The formatter label.
    */
-  public function __construct($plugin_id, $plugin_definition, $group, array $settings, $label) {
-    parent::__construct(array(), $plugin_id, $plugin_definition);
+  public function __construct($plugin_id, $plugin_definition, \stdClass $group, array $settings, $label) {
+    parent::__construct([], $plugin_id, $plugin_definition);
 
     $this->group = $group;
     $this->settings = $settings;
@@ -70,7 +72,9 @@ abstract class FieldGroupFormatterBase extends PluginSettingsBase implements Fie
 
   /**
    * Get the current label.
+   *
    * @return string
+   *   The current label.
    */
   public function getLabel() {
     return $this->label;
@@ -81,29 +85,31 @@ abstract class FieldGroupFormatterBase extends PluginSettingsBase implements Fie
    */
   public function settingsForm() {
 
-    $form = array();
-    $form['label'] = array(
+    $class = get_class($this);
+
+    $form = [];
+    $form['label'] = [
       '#type' => 'textfield',
       '#title' => t('Field group label'),
       '#default_value' => $this->label,
       '#weight' => -5,
-    );
+    ];
 
-    $form['id'] = array(
+    $form['id'] = [
       '#title' => t('ID'),
       '#type' => 'textfield',
       '#default_value' => $this->getSetting('id'),
       '#weight' => 10,
-      '#element_validate' => array('field_group_validate_id'),
-    );
+      '#element_validate' => [[$class, 'validateId']],
+    ];
 
-    $form['classes'] = array(
+    $form['classes'] = [
       '#title' => t('Extra CSS classes'),
       '#type' => 'textfield',
       '#default_value' => $this->getSetting('classes'),
       '#weight' => 11,
-      '#element_validate' => array('field_group_validate_css_class'),
-    );
+      '#element_validate' => [[$class, 'validateCssClass']],
+    ];
 
     return $form;
 
@@ -114,18 +120,18 @@ abstract class FieldGroupFormatterBase extends PluginSettingsBase implements Fie
    */
   public function settingsSummary() {
 
-    $summary = array();
+    $summary = [];
 
     if ($this->getSetting('formatter')) {
       $summary[] = $this->pluginDefinition['label'] . ': ' . $this->getSetting('formatter');
     }
 
     if ($this->getSetting('id')) {
-      $summary[] = $this->t('Id: @id', array('@id' => $this->getSetting('id')));
+      $summary[] = $this->t('Id: @id', ['@id' => $this->getSetting('id')]);
     }
 
     if ($this->getSetting('classes')) {
-      $summary[] = \Drupal::translation()->translate('Extra CSS classes: @classes', array('@classes' => $this->getSetting('classes')));
+      $summary[] = \Drupal::translation()->translate('Extra CSS classes: @classes', ['@classes' => $this->getSetting('classes')]);
     }
 
     return $summary;
@@ -142,10 +148,10 @@ abstract class FieldGroupFormatterBase extends PluginSettingsBase implements Fie
    * {@inheritdoc}
    */
   public static function defaultContextSettings($context) {
-    return array(
+    return [
       'classes' => '',
       'id' => '',
-    );
+    ];
   }
 
   /**
@@ -153,7 +159,7 @@ abstract class FieldGroupFormatterBase extends PluginSettingsBase implements Fie
    */
   protected function getClasses() {
 
-    $classes = array();
+    $classes = [];
     // Add a required-fields class to trigger the js.
     if ($this->getSetting('required_fields')) {
       $classes[] = 'required-fields';
@@ -174,6 +180,51 @@ abstract class FieldGroupFormatterBase extends PluginSettingsBase implements Fie
     $element['#group_name'] = $this->group->group_name;
     $element['#entity_type'] = $this->group->entity_type;
     $element['#bundle'] = $this->group->bundle;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function process(&$element, $processed_object) {
+
+    $element['#group_name'] = $this->group->group_name;
+    $element['#entity_type'] = $this->group->entity_type;
+    $element['#bundle'] = $this->group->bundle;
+
+    // BC: Call the pre render layer to not break contrib plugins.
+    return $this->preRender($element, $processed_object);
+  }
+
+  /**
+   * Validate the entered css class from the submitted format settings.
+   *
+   * @param array $element
+   *   The validated element.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The state of the form.
+   */
+  public static function validateCssClass(array $element, FormStateInterface $form_state) {
+    $form_state_values = $form_state->getValues();
+    $plugin_name = $form_state->get('plugin_settings_edit');
+    if (!empty($form_state_values['fields'][$plugin_name]['settings_edit_form']['settings']['classes']) && !preg_match('!^[A-Za-z0-9-_ ]+$!', $form_state_values['fields'][$plugin_name]['settings_edit_form']['settings']['classes'])) {
+      $form_state->setError($element, t('The css class must include only letters, numbers, underscores and dashes.'));
+    }
+  }
+
+  /**
+   * Validate the entered id attribute from the submitted format settings.
+   *
+   * @param array $element
+   *   The validated element.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The state of the form.
+   */
+  public static function validateId(array $element, FormStateInterface $form_state) {
+    $form_state_values = $form_state->getValues();
+    $plugin_name = $form_state->get('plugin_settings_edit');
+    if (!empty($form_state_values['fields'][$plugin_name]['settings_edit_form']['settings']['id']) && !preg_match('!^[A-Za-z0-9-_]+$!', $form_state_values['fields'][$plugin_name]['settings_edit_form']['settings']['id'])) {
+      $form_state->setError($element, t('The id must include only letters, numbers, underscores and dashes.'));
+    }
   }
 
 }

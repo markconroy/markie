@@ -34,6 +34,7 @@ third_party_settings:
         classes: ''
         direction: vertical
       label: Content
+      region: content
     group_default_items:
       children:
         - title
@@ -51,6 +52,7 @@ third_party_settings:
         description: ''
         required_fields: true
       label: 'Default Items'
+      region: content
     group_building_blocks:
       children:
         - field_building_blocks
@@ -64,6 +66,7 @@ third_party_settings:
         description: ''
         required_fields: true
       label: 'Building Blocks'
+      region: content
 _core:
   default_config_hash: buc38w3gxCqFnjINJhMiJvPpj9jWflKvlKDyBVMPVvw
 id: node.article.default
