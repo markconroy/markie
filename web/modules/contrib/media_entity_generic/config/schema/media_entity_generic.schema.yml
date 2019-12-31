@@ -1,0 +1,3 @@
+media.source.generic:
+  type: media.source.field_aware
+  label: '"Generic" media source configuration'

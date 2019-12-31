@@ -1,0 +1,29 @@
+<?php
+
+/**
+ * @file
+ * Install, uninstall and update hooks for Media Entity Generic module.
+ */
+
+/**
+ * Implements hook_requirements().
+ */
+function media_entity_generic_requirements($phase) {
+  $requirements = [];
+
+  // Prevent installation if Media Entity 1.x is enabled.
+  if (\Drupal::moduleHandler()->moduleExists('media_entity')) {
+    $info = system_get_info('module', 'media_entity');
+    if (version_compare($info['version'], '8.x-2') < 0) {
+      $requirements['media_entity_generic_incompatibility'] = [
+        'title' => t('Media'),
+        'description' => t('The Media Entity Generic module is not compatible with contrib <a href=":url">Media Entity</a> 1.x branch. You don\'t need to enable this module manually, when performing the upgrade to Media in core, this module will be automatically enabled.', [
+          ':url' => 'https://drupal.org/project/media_entity',
+        ]),
+        'severity' => REQUIREMENT_ERROR,
+      ];
+    }
+  }
+
+  return $requirements;
+}

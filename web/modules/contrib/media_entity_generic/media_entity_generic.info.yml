@@ -1,0 +1,13 @@
+name: Media Generic
+description: 'Provides a generic Media source plugin.'
+type: module
+package: Media
+# core: 8.x
+dependencies:
+  - drupal:media (>= 8.4.0)
+
+# Information added by Drupal.org packaging script on 2019-04-04
+version: '8.x-1.0'
+core: '8.x'
+project: 'media_entity_generic'
+datestamp: 1554383298
