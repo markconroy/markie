@@ -26,14 +26,14 @@ class Image extends MediaTypeBase {
   /**
    * The image factory service..
    *
-   * @var \Drupal\Core\Image\ImageFactory;
+   * @var \Drupal\Core\Image\ImageFactory
    */
   protected $imageFactory;
 
   /**
    * The exif data.
    *
-   * @var array.
+   * @var array
    */
   protected $exif;
 
@@ -184,6 +184,9 @@ class Image extends MediaTypeBase {
       '#options' => [
         0 => $this->t('No'),
         1 => $this->t('Yes'),
+      ],
+      '#ajax' => [
+        'callback' => '::ajaxTypeProviderData',
       ],
       '#disabled' => (function_exists('exif_read_data')) ? FALSE : TRUE,
     ];

@@ -18,6 +18,7 @@ widget_selector_configuration: {  }
 widgets:
   3d078004-0b1f-4663-9a5f-2af662e4c892:
     settings:
+      submit_text: 'Select'
       extensions: 'jpg jpeg png gif'
       media_bundle: media_bundle_for_images
       upload_location: 'public://'

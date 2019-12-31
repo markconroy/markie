@@ -13,11 +13,11 @@
   "repositories": [
     {
       "type": "composer",
-      "url": "https://packagist.drupal-composer.org"
+      "url": "https://packages.drupal.org/8"
     }
   ],
   "require": {
     "drupal/core": "~8.1",
-    "drupal/media_entity": "~1.0 || ~8.1.0"
+    "drupal/media_entity": "~1.0 || ~8.1.0 || ~2.0"
   }
 }

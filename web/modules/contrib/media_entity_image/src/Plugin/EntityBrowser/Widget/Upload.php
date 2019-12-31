@@ -13,7 +13,8 @@ use Drupal\media_entity\MediaInterface;
  * @EntityBrowserWidget(
  *   id = "media_entity_image_upload",
  *   label = @Translation("Upload images"),
- *   description = @Translation("Upload widget that creates media entity images.")
+ *   description = @Translation("Upload widget that creates media entity images."),
+ *   auto_select = FALSE
  * )
  */
 class Upload extends FileUpload {
@@ -79,7 +80,9 @@ class Upload extends FileUpload {
       $images = $this->prepareEntities($form, $form_state);
       array_walk(
         $images,
-        function (MediaInterface $media) { $media->save(); }
+        function (MediaInterface $media) {
+          $media->save();
+        }
       );
 
       $this->selectEntities($images, $form_state);
