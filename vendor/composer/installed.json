@@ -2526,59 +2526,6 @@
         }
     },
     {
-        "name": "drupal/focal_point",
-        "version": "1.0.0-beta4",
-        "version_normalized": "1.0.0.0-beta4",
-        "source": {
-            "type": "git",
-            "url": "https://git.drupalcode.org/project/focal_point.git",
-            "reference": "8.x-1.0-beta4"
-        },
-        "dist": {
-            "type": "zip",
-            "url": "https://ftp.drupal.org/files/projects/focal_point-8.x-1.0-beta4.zip",
-            "reference": "8.x-1.0-beta4",
-            "shasum": "5c196948872af0621f1004d07c7d5aec583c11db"
-        },
-        "require": {
-            "drupal/core": "*",
-            "drupal/crop": "^1.0.0-alpha2"
-        },
-        "require-dev": {
-            "drupal/crop": "*"
-        },
-        "type": "drupal-module",
-        "extra": {
-            "branch-alias": {
-                "dev-1.x": "1.x-dev"
-            },
-            "drupal": {
-                "version": "8.x-1.0-beta4",
-                "datestamp": "1507560540",
-                "security-coverage": {
-                    "status": "not-covered",
-                    "message": "Beta releases are not covered by Drupal security advisories."
-                }
-            }
-        },
-        "installation-source": "dist",
-        "notification-url": "https://packages.drupal.org/8/downloads",
-        "license": [
-            "GPL-2.0+"
-        ],
-        "authors": [
-            {
-                "name": "bleen",
-                "homepage": "https://www.drupal.org/user/77375"
-            }
-        ],
-        "description": "Allows users to specify the focal point of an image for use during cropping.",
-        "homepage": "https://www.drupal.org/project/focal_point",
-        "support": {
-            "source": "http://cgit.drupalcode.org/focal_point"
-        }
-    },
-    {
         "name": "drupal/geshifilter",
         "version": "1.2.0",
         "version_normalized": "1.2.0.0",
