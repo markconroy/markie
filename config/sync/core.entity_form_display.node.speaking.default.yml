@@ -15,7 +15,6 @@ dependencies:
     - node.type.speaking
   module:
     - datetime
-    - entity_browser_entity_form
     - field_group
     - media_library
     - metatag
@@ -134,9 +133,7 @@ content:
     weight: 4
     settings:
       media_types: {  }
-    third_party_settings:
-      entity_browser_entity_form:
-        entity_browser_id: _none
+    third_party_settings: {  }
     type: media_library_widget
     region: content
   field_metatags:

@@ -9,7 +9,6 @@ dependencies:
     - field.field.paragraph.image_with_text.field_p_it_text
     - paragraphs.paragraphs_type.image_with_text
   module:
-    - entity_browser_entity_form
     - media_library
     - text
 _core:
@@ -29,9 +28,7 @@ content:
     weight: 2
     settings:
       media_types: {  }
-    third_party_settings:
-      entity_browser_entity_form:
-        entity_browser_id: image_entity_browser
+    third_party_settings: {  }
     type: media_library_widget
     region: content
   field_p_it_style:

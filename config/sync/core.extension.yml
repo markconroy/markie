@@ -1,7 +1,6 @@
 module:
   admin_toolbar: 0
   admin_toolbar_tools: 0
-  anrt_entity_browsers: 0
   antibot: 0
   automated_cron: 0
   big_pipe: 0
@@ -21,8 +20,6 @@ module:
   dynamic_page_cache: 0
   editor: 0
   entity: 0
-  entity_browser: 0
-  entity_browser_entity_form: 0
   entity_reference_revisions: 0
   field: 0
   field_group: 0
@@ -40,7 +37,6 @@ module:
   inline_form_errors: 0
   link: 0
   media: 0
-  media_entity_browser: 0
   media_entity_generic: 0
   media_entity_twitter: 0
   media_library: 0

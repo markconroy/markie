@@ -13,7 +13,6 @@ dependencies:
     - node.type.article
   module:
     - comment
-    - entity_browser_entity_form
     - field_group
     - media_library
     - metatag
@@ -117,9 +116,7 @@ content:
     weight: 3
     settings:
       media_types: {  }
-    third_party_settings:
-      entity_browser_entity_form:
-        entity_browser_id: image_entity_browser
+    third_party_settings: {  }
     type: media_library_widget
     region: content
   field_metatags:

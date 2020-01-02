@@ -11,7 +11,6 @@ dependencies:
     - field.field.paragraph.tile.field_p_tile_title
     - paragraphs.paragraphs_type.tile
   module:
-    - entity_browser_entity_form
     - link
     - media_library
 id: paragraph.tile.default
@@ -29,9 +28,7 @@ content:
     weight: 5
     settings:
       media_types: {  }
-    third_party_settings:
-      entity_browser_entity_form:
-        entity_browser_id: image_entity_browser
+    third_party_settings: {  }
     type: media_library_widget
     region: content
   field_p_tile_link:

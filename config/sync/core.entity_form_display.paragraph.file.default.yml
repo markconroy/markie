@@ -6,7 +6,6 @@ dependencies:
     - field.field.paragraph.file.field_p_file_file
     - paragraphs.paragraphs_type.file
   module:
-    - entity_browser_entity_form
     - media_library
 _core:
   default_config_hash: FHu56euB2Pm06-jim_irD3vCDIY5DCVeMfIZHKN4vtE
@@ -19,9 +18,7 @@ content:
     weight: 0
     settings:
       media_types: {  }
-    third_party_settings:
-      entity_browser_entity_form:
-        entity_browser_id: files_entity_browser
+    third_party_settings: {  }
     type: media_library_widget
     region: content
 hidden:

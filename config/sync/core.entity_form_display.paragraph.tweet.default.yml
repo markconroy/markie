@@ -6,7 +6,6 @@ dependencies:
     - field.field.paragraph.tweet.field_p_tweet_tweet
     - paragraphs.paragraphs_type.tweet
   module:
-    - entity_browser_entity_form
     - media_library
 id: paragraph.tweet.default
 targetEntityType: paragraph
@@ -17,9 +16,7 @@ content:
     weight: 0
     settings:
       media_types: {  }
-    third_party_settings:
-      entity_browser_entity_form:
-        entity_browser_id: media_entity_browser
+    third_party_settings: {  }
     type: media_library_widget
     region: content
 hidden:
