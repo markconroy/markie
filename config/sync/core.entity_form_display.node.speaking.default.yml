@@ -3,7 +3,6 @@ langcode: en
 status: true
 dependencies:
   config:
-    - entity_browser.browser.video_entity_browser
     - field.field.node.speaking.field_building_blocks
     - field.field.node.speaking.field_intro
     - field.field.node.speaking.field_main_image
@@ -16,8 +15,9 @@ dependencies:
     - node.type.speaking
   module:
     - datetime
-    - entity_browser
+    - entity_browser_entity_form
     - field_group
+    - media_library
     - metatag
     - paragraphs
     - path
@@ -126,32 +126,18 @@ content:
   field_main_image:
     weight: 3
     settings:
-      entity_browser: image_entity_browser
-      field_widget_display: rendered_entity
-      field_widget_edit: true
-      field_widget_remove: true
-      selection_mode: selection_append
-      field_widget_display_settings:
-        view_mode: preview
-      field_widget_replace: false
-      open: false
+      media_types: {  }
     third_party_settings: {  }
-    type: entity_browser_entity_reference
+    type: media_library_widget
     region: content
   field_main_video:
     weight: 4
     settings:
-      entity_browser: video_entity_browser
-      field_widget_display: rendered_entity
-      field_widget_edit: true
-      field_widget_remove: true
-      selection_mode: selection_append
-      field_widget_display_settings:
-        view_mode: preview
-      field_widget_replace: false
-      open: false
-    third_party_settings: {  }
-    type: entity_browser_entity_reference
+      media_types: {  }
+    third_party_settings:
+      entity_browser_entity_form:
+        entity_browser_id: _none
+    type: media_library_widget
     region: content
   field_metatags:
     weight: 12

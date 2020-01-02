@@ -7,7 +7,7 @@ dependencies:
     - paragraphs.paragraphs_type.file
   module:
     - entity_browser_entity_form
-    - inline_entity_form
+    - media_library
 _core:
   default_config_hash: FHu56euB2Pm06-jim_irD3vCDIY5DCVeMfIZHKN4vtE
 id: paragraph.file.default
@@ -18,17 +18,11 @@ content:
   field_p_file_file:
     weight: 0
     settings:
-      form_mode: default
-      override_labels: true
-      label_singular: File
-      label_plural: Files
-      allow_new: true
-      allow_existing: true
-      match_operator: CONTAINS
+      media_types: {  }
     third_party_settings:
       entity_browser_entity_form:
         entity_browser_id: files_entity_browser
-    type: inline_entity_form_complex
+    type: media_library_widget
     region: content
 hidden:
   created: true
