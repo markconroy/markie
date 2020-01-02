@@ -2397,172 +2397,6 @@
         }
     },
     {
-        "name": "drupal/entity_browser",
-        "version": "1.8.0",
-        "version_normalized": "1.8.0.0",
-        "source": {
-            "type": "git",
-            "url": "https://git.drupalcode.org/project/entity_browser.git",
-            "reference": "8.x-1.8"
-        },
-        "dist": {
-            "type": "zip",
-            "url": "https://ftp.drupal.org/files/projects/entity_browser-8.x-1.8.zip",
-            "reference": "8.x-1.8",
-            "shasum": "6c7c09bc13a1f07250938db7e2766f9194d70712"
-        },
-        "require": {
-            "drupal/core": "~8.0"
-        },
-        "require-dev": {
-            "drupal/embed": "~1.0",
-            "drupal/entity_embed": "~1.0",
-            "drupal/entityqueue": "~1.0",
-            "drupal/inline_entity_form": "~1.0",
-            "drupal/media_entity": "~1.0",
-            "drupal/paragraphs": "~1.0",
-            "drupal/token": "~1.0"
-        },
-        "type": "drupal-module",
-        "extra": {
-            "branch-alias": {
-                "dev-1.x": "1.x-dev"
-            },
-            "drupal": {
-                "version": "8.x-1.8",
-                "datestamp": "1562512245",
-                "security-coverage": {
-                    "status": "covered",
-                    "message": "Covered by Drupal's security advisory policy"
-                }
-            }
-        },
-        "installation-source": "dist",
-        "notification-url": "https://packages.drupal.org/8/downloads",
-        "license": [
-            "GPL-2.0+"
-        ],
-        "authors": [
-            {
-                "name": "Janez Urevc",
-                "homepage": "https://github.com/slashrsm",
-                "role": "Maintainer"
-            },
-            {
-                "name": "Primoz Hmeljak",
-                "homepage": "https://github.com/primsi",
-                "role": "Maintainer"
-            },
-            {
-                "name": "See other contributors",
-                "homepage": "https://www.drupal.org/node/1943336/committers",
-                "role": "contributor"
-            },
-            {
-                "name": "Drupal Media Team",
-                "homepage": "https://www.drupal.org/user/3260690"
-            },
-            {
-                "name": "Primsi",
-                "homepage": "https://www.drupal.org/user/282629"
-            },
-            {
-                "name": "marcingy",
-                "homepage": "https://www.drupal.org/user/77320"
-            },
-            {
-                "name": "oknate",
-                "homepage": "https://www.drupal.org/user/471638"
-            },
-            {
-                "name": "samuel.mortenson",
-                "homepage": "https://www.drupal.org/user/2582268"
-            },
-            {
-                "name": "slashrsm",
-                "homepage": "https://www.drupal.org/user/744628"
-            }
-        ],
-        "description": "Entity browsing and selecting component.",
-        "homepage": "http://drupal.org/project/entity_browser",
-        "support": {
-            "source": "https://git.drupalcode.org/project/entity_browser",
-            "issues": "https://www.drupal.org/project/issues/entity_browser",
-            "irc": "irc://irc.freenode.org/drupal-contribute"
-        }
-    },
-    {
-        "name": "drupal/entity_browser_entity_form",
-        "version": "1.8.0",
-        "version_normalized": "1.8.0.0",
-        "require": {
-            "drupal/core": "~8.0",
-            "drupal/entity_browser": "self.version",
-            "drupal/inline_entity_form": "*"
-        },
-        "type": "metapackage",
-        "extra": {
-            "branch-alias": {
-                "dev-1.x": "1.x-dev"
-            },
-            "drupal": {
-                "version": "8.x-1.8",
-                "datestamp": "1562512245",
-                "security-coverage": {
-                    "status": "covered",
-                    "message": "Covered by Drupal's security advisory policy"
-                }
-            }
-        },
-        "notification-url": "https://packages.drupal.org/8/downloads",
-        "license": [
-            "GPL-2.0-or-later"
-        ],
-        "authors": [
-            {
-                "name": "Berdir",
-                "homepage": "https://www.drupal.org/user/214652"
-            },
-            {
-                "name": "Dave Reid",
-                "homepage": "https://www.drupal.org/user/53892"
-            },
-            {
-                "name": "Devin Carlson",
-                "homepage": "https://www.drupal.org/user/290182"
-            },
-            {
-                "name": "Drupal Media Team",
-                "homepage": "https://www.drupal.org/user/3260690"
-            },
-            {
-                "name": "Primsi",
-                "homepage": "https://www.drupal.org/user/282629"
-            },
-            {
-                "name": "marcingy",
-                "homepage": "https://www.drupal.org/user/77320"
-            },
-            {
-                "name": "oknate",
-                "homepage": "https://www.drupal.org/user/471638"
-            },
-            {
-                "name": "samuel.mortenson",
-                "homepage": "https://www.drupal.org/user/2582268"
-            },
-            {
-                "name": "slashrsm",
-                "homepage": "https://www.drupal.org/user/744628"
-            }
-        ],
-        "description": "Entity browser inline entity form integration.",
-        "homepage": "https://www.drupal.org/project/entity_browser",
-        "support": {
-            "source": "https://git.drupalcode.org/project/entity_browser"
-        }
-    },
-    {
         "name": "drupal/entity_reference_revisions",
         "version": "1.7.0",
         "version_normalized": "1.7.0.0",
@@ -3196,77 +3030,6 @@
         "homepage": "https://www.drupal.org/project/media_entity",
         "support": {
             "source": "https://git.drupalcode.org/project/media_entity"
-        }
-    },
-    {
-        "name": "drupal/media_entity_browser",
-        "version": "2.0.0-alpha2",
-        "version_normalized": "2.0.0.0-alpha2",
-        "source": {
-            "type": "git",
-            "url": "https://git.drupalcode.org/project/media_entity_browser.git",
-            "reference": "8.x-2.0-alpha2"
-        },
-        "dist": {
-            "type": "zip",
-            "url": "https://ftp.drupal.org/files/projects/media_entity_browser-8.x-2.0-alpha2.zip",
-            "reference": "8.x-2.0-alpha2",
-            "shasum": "41fea535c0770caa2fc4eca7216bbafb796b4d17"
-        },
-        "require": {
-            "drupal/core": "*",
-            "drupal/entity_browser": "*",
-            "drupal/entity_browser_entity_form": "*",
-            "drupal/inline_entity_form": "*"
-        },
-        "require-dev": {
-            "drupal/ctools": "*",
-            "drupal/entity_browser": "^2",
-            "drupal/entity_browser_entity_form": "^2",
-            "drupal/inline_entity_form": "^1",
-            "drupal/video_embed_field": "^2"
-        },
-        "type": "drupal-module",
-        "extra": {
-            "branch-alias": {
-                "dev-2.x": "2.x-dev"
-            },
-            "drupal": {
-                "version": "8.x-2.0-alpha2",
-                "datestamp": "1558337585",
-                "security-coverage": {
-                    "status": "not-covered",
-                    "message": "Alpha releases are not covered by Drupal security advisories."
-                }
-            }
-        },
-        "installation-source": "dist",
-        "notification-url": "https://packages.drupal.org/8/downloads",
-        "license": [
-            "GPL-2.0-or-later"
-        ],
-        "authors": [
-            {
-                "name": "Sam152",
-                "homepage": "https://www.drupal.org/user/1485048"
-            },
-            {
-                "name": "benjy",
-                "homepage": "https://www.drupal.org/user/1852732"
-            },
-            {
-                "name": "larowlan",
-                "homepage": "https://www.drupal.org/user/395439"
-            },
-            {
-                "name": "rikki_iki",
-                "homepage": "https://www.drupal.org/user/1068918"
-            }
-        ],
-        "description": "This module provides an Entity Browser for Media.",
-        "homepage": "https://www.drupal.org/project/media_entity_browser",
-        "support": {
-            "source": "https://git.drupalcode.org/project/media_entity_browser"
         }
     },
     {
@@ -8994,7 +8757,8 @@
             "http",
             "psr",
             "psr-7"
-        ]
+        ],
+        "abandoned": "laminas/laminas-diactoros"
     },
     {
         "name": "zendframework/zend-escaper",
@@ -9041,7 +8805,8 @@
             "ZendFramework",
             "escaper",
             "zf"
-        ]
+        ],
+        "abandoned": "laminas/laminas-escaper"
     },
     {
         "name": "zendframework/zend-feed",
@@ -9106,7 +8871,8 @@
             "ZendFramework",
             "feed",
             "zf"
-        ]
+        ],
+        "abandoned": "laminas/laminas-feed"
     },
     {
         "name": "zendframework/zend-stdlib",
@@ -9154,6 +8920,7 @@
             "ZendFramework",
             "stdlib",
             "zf"
-        ]
+        ],
+        "abandoned": "laminas/laminas-stdlib"
     }
 ]
