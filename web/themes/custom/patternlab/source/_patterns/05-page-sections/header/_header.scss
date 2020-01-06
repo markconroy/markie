@@ -19,8 +19,8 @@
 
 .header .branding {
   flex: 0 0 50%;
+  @include breakpoint($bp--xlarge) {
+    flex-basis: 265px;
+  }
 }
 
-.header .main-navigation {
-  // flex: 0 0 50%;
-}
