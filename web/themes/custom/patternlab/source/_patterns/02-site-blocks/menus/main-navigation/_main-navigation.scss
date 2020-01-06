@@ -36,6 +36,7 @@
   font-weight: bold;
   @include breakpoint($bp--xlarge) {
     transform: rotate(-2deg);
+    margin: 0.25rem 0.75rem;
     &:nth-of-type(2n+1) {
       transform: rotate(1.5deg);
     }
