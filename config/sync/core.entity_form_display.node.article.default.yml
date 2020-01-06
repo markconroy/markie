@@ -13,9 +13,8 @@ dependencies:
     - node.type.article
   module:
     - comment
-    - entity_browser_entity_form
     - field_group
-    - inline_entity_form
+    - media_library
     - metatag
     - paragraphs
     - path
@@ -116,17 +115,9 @@ content:
   field_main_image:
     weight: 3
     settings:
-      form_mode: default
-      override_labels: true
-      label_singular: Image
-      label_plural: Images
-      allow_new: true
-      allow_existing: true
-      match_operator: CONTAINS
-    third_party_settings:
-      entity_browser_entity_form:
-        entity_browser_id: image_entity_browser
-    type: inline_entity_form_complex
+      media_types: {  }
+    third_party_settings: {  }
+    type: media_library_widget
     region: content
   field_metatags:
     weight: 4

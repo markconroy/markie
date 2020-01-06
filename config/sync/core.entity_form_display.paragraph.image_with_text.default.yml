@@ -9,8 +9,7 @@ dependencies:
     - field.field.paragraph.image_with_text.field_p_it_text
     - paragraphs.paragraphs_type.image_with_text
   module:
-    - entity_browser_entity_form
-    - inline_entity_form
+    - media_library
     - text
 _core:
   default_config_hash: xrQSgOFzT-nMaeStjpd2ss3IRaainIrw2XzLWw-8jns
@@ -28,17 +27,9 @@ content:
   field_p_it_image:
     weight: 2
     settings:
-      form_mode: default
-      override_labels: true
-      label_singular: Image
-      label_plural: Images
-      allow_new: true
-      allow_existing: true
-      match_operator: CONTAINS
-    third_party_settings:
-      entity_browser_entity_form:
-        entity_browser_id: image_entity_browser
-    type: inline_entity_form_complex
+      media_types: {  }
+    third_party_settings: {  }
+    type: media_library_widget
     region: content
   field_p_it_style:
     weight: 1

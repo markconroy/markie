@@ -7,11 +7,29 @@ dependencies:
     - field.field.media.video.field_media_tags
     - field.field.media.video.field_media_video_embed_field
     - media.type.video
+  module:
+    - video_embed_field
 id: media.video.media_library
 targetEntityType: media
 bundle: video
 mode: media_library
 content:
+  field_media_tags:
+    type: entity_reference_autocomplete_tags
+    weight: 2
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  field_media_video_embed_field:
+    type: video_embed_field_textfield
+    weight: 1
+    region: content
+    settings: {  }
+    third_party_settings: {  }
   name:
     type: string_textfield
     settings:
@@ -20,10 +38,14 @@ content:
     weight: 0
     third_party_settings: {  }
     region: content
+  status:
+    type: boolean_checkbox
+    weight: 3
+    region: content
+    settings:
+      display_label: true
+    third_party_settings: {  }
 hidden:
   created: true
-  field_media_tags: true
-  field_media_video_embed_field: true
   path: true
-  status: true
   uid: true

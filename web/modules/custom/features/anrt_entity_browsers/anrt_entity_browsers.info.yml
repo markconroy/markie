@@ -1,6 +1,0 @@
-name: Anrt Entity Browsers
-type: module
-description: Simple module to attach the media_entity_browser/view library to our custom entity browser views.
-core: 8.x
-dependencies:
-  - media_entity_browser
