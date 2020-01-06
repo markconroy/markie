@@ -2373,6 +2373,13 @@ a.tile--tertiary:hover .tile__text {
       flex: 0 0 50%;
 }
 
+@media (min-width: 1024px) {
+  .header .branding {
+    -ms-flex-preferred-size: 265px;
+        flex-basis: 265px;
+  }
+}
+
 .page-title {
   text-align: center;
 }
