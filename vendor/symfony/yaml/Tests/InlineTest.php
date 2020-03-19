@@ -58,6 +58,7 @@ class InlineTest extends TestCase
             ['!php/const PHP_INT_MAX', PHP_INT_MAX],
             ['[!php/const PHP_INT_MAX]', [PHP_INT_MAX]],
             ['{ foo: !php/const PHP_INT_MAX }', ['foo' => PHP_INT_MAX]],
+            ['{ !php/const PHP_INT_MAX: foo }', [PHP_INT_MAX => 'foo']],
             ['!php/const NULL', null],
         ];
     }
@@ -93,6 +94,7 @@ class InlineTest extends TestCase
             ['!php/const:PHP_INT_MAX', PHP_INT_MAX],
             ['[!php/const:PHP_INT_MAX]', [PHP_INT_MAX]],
             ['{ foo: !php/const:PHP_INT_MAX }', ['foo' => PHP_INT_MAX]],
+            ['{ !php/const:PHP_INT_MAX: foo }', [PHP_INT_MAX => 'foo']],
             ['!php/const:NULL', null],
         ];
     }
@@ -780,5 +782,64 @@ class InlineTest extends TestCase
         $this->expectException('Symfony\Component\Yaml\Exception\ParseException');
         $this->expectExceptionMessage('Unexpected end of line, expected one of ",}" at line 1 (near "{abc: \'def\'").');
         Inline::parse("{abc: 'def'");
+    }
+
+    /**
+     * @dataProvider getTestsForOctalNumbers
+     */
+    public function testParseOctalNumbers($expected, $yaml)
+    {
+        self::assertSame($expected, Inline::parse($yaml));
+    }
+
+    public function getTestsForOctalNumbers()
+    {
+        return [
+            'positive octal number' => [28, '034'],
+            'negative octal number' => [-28, '-034'],
+        ];
+    }
+
+    /**
+     * @dataProvider phpObjectTagWithEmptyValueProvider
+     */
+    public function testPhpObjectWithEmptyValue($expected, $value)
+    {
+        $this->assertSame($expected, Inline::parse($value, Yaml::PARSE_OBJECT));
+    }
+
+    public function phpObjectTagWithEmptyValueProvider()
+    {
+        return [
+            [false, '!php/object'],
+            [false, '!php/object '],
+            [false, '!php/object  '],
+            [[false], '[!php/object]'],
+            [[false], '[!php/object ]'],
+            [[false, 'foo'], '[!php/object  , foo]'],
+        ];
+    }
+
+    /**
+     * @dataProvider phpConstTagWithEmptyValueProvider
+     */
+    public function testPhpConstTagWithEmptyValue($expected, $value)
+    {
+        $this->assertSame($expected, Inline::parse($value, Yaml::PARSE_CONSTANT));
+    }
+
+    public function phpConstTagWithEmptyValueProvider()
+    {
+        return [
+            ['', '!php/const'],
+            ['', '!php/const '],
+            ['', '!php/const  '],
+            [[''], '[!php/const]'],
+            [[''], '[!php/const ]'],
+            [['', 'foo'], '[!php/const  , foo]'],
+            [['' => 'foo'], '{!php/const: foo}'],
+            [['' => 'foo'], '{!php/const : foo}'],
+            [['' => 'foo', 'bar' => 'ccc'], '{!php/const  : foo, bar: ccc}'],
+        ];
     }
 }

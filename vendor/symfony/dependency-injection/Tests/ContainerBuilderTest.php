@@ -1090,7 +1090,7 @@ class ContainerBuilderTest extends TestCase
         $container->set('a', new \stdClass());
     }
 
-    public function testThrowsExceptionWhenAddServiceOnACompiledContainer()
+    public function testNoExceptionWhenAddServiceOnACompiledContainer()
     {
         $container = new ContainerBuilder();
         $container->compile();
@@ -1238,7 +1238,7 @@ class ContainerBuilderTest extends TestCase
         $container = new ContainerBuilder();
 
         $container->register(A::class)->setPublic(true);
-        $bDefinition = $container->register('b', __NAMESPACE__.'\B');
+        $bDefinition = $container->register('b', B::class);
         $bDefinition->setAutowired(true);
         $bDefinition->setPublic(true);
 
