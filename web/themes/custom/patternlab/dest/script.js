@@ -23,47 +23,6 @@
     attach: function attach(context) {}
   };
 })(jQuery, Drupal);
-"use strict";
-
-(function addtocalendarScript($, Drupal) {
-  Drupal.behaviors.addtocalendar = {
-    attach: function attach(context) {
-      var addToCalendarTrigger = $(".add-to-calendar__trigger");
-
-      addToCalendarTrigger.unbind("click").click(function () {
-        $(this).parent(".add-to-calendar").find(".add-to-calendar__items").slideToggle();
-      });
-    }
-  };
-})(jQuery, Drupal);
-"use strict";
-
-(function breadcrumbsScript($, Drupal) {
-  Drupal.behaviors.breadcrumbs = {
-    attach: function attach(context) {}
-  };
-})(jQuery, Drupal);
-"use strict";
-
-(function messagesScript($, Drupal) {
-  Drupal.behaviors.messages = {
-    attach: function attach(context) {}
-  };
-})(jQuery, Drupal);
-"use strict";
-
-(function pagerScript($, Drupal) {
-  Drupal.behaviors.pager = {
-    attach: function attach(context) {}
-  };
-})(jQuery, Drupal);
-"use strict";
-
-(function searchblockScript($, Drupal) {
-  Drupal.behaviors.searchblock = {
-    attach: function attach(context) {}
-  };
-})(jQuery, Drupal);
 'use strict';
 
 (function accordionScript($, Drupal) {
@@ -86,15 +45,15 @@
 })(jQuery, Drupal);
 "use strict";
 
-(function calltoactionScript($, Drupal) {
-  Drupal.behaviors.calltoaction = {
+(function fileuploadScript($, Drupal) {
+  Drupal.behaviors.fileupload = {
     attach: function attach(context) {}
   };
 })(jQuery, Drupal);
 "use strict";
 
-(function fileuploadScript($, Drupal) {
-  Drupal.behaviors.fileupload = {
+(function calltoactionScript($, Drupal) {
+  Drupal.behaviors.calltoaction = {
     attach: function attach(context) {}
   };
 })(jQuery, Drupal);
@@ -135,6 +94,13 @@
 })(jQuery, Drupal);
 "use strict";
 
+(function videoScript($, Drupal) {
+  Drupal.behaviors.video = {
+    attach: function attach(context) {}
+  };
+})(jQuery, Drupal);
+"use strict";
+
 (function singleimageScript($, Drupal) {
   Drupal.behaviors.singleimage = {
     attach: function attach(context) {}
@@ -156,8 +122,42 @@
 })(jQuery, Drupal);
 "use strict";
 
-(function videoScript($, Drupal) {
-  Drupal.behaviors.video = {
+(function addtocalendarScript($, Drupal) {
+  Drupal.behaviors.addtocalendar = {
+    attach: function attach(context) {
+      var addToCalendarTrigger = $(".add-to-calendar__trigger");
+
+      addToCalendarTrigger.unbind("click").click(function () {
+        $(this).parent(".add-to-calendar").find(".add-to-calendar__items").slideToggle();
+      });
+    }
+  };
+})(jQuery, Drupal);
+"use strict";
+
+(function messagesScript($, Drupal) {
+  Drupal.behaviors.messages = {
+    attach: function attach(context) {}
+  };
+})(jQuery, Drupal);
+"use strict";
+
+(function pagerScript($, Drupal) {
+  Drupal.behaviors.pager = {
+    attach: function attach(context) {}
+  };
+})(jQuery, Drupal);
+"use strict";
+
+(function searchblockScript($, Drupal) {
+  Drupal.behaviors.searchblock = {
+    attach: function attach(context) {}
+  };
+})(jQuery, Drupal);
+"use strict";
+
+(function breadcrumbsScript($, Drupal) {
+  Drupal.behaviors.breadcrumbs = {
     attach: function attach(context) {}
   };
 })(jQuery, Drupal);
@@ -170,15 +170,15 @@
 })(jQuery, Drupal);
 "use strict";
 
-(function basicpageScript($, Drupal) {
-  Drupal.behaviors.basicpage = {
+(function speakingScript($, Drupal) {
+  Drupal.behaviors.speaking = {
     attach: function attach(context) {}
   };
 })(jQuery, Drupal);
 "use strict";
 
-(function speakingScript($, Drupal) {
-  Drupal.behaviors.speaking = {
+(function basicpageScript($, Drupal) {
+  Drupal.behaviors.basicpage = {
     attach: function attach(context) {}
   };
 })(jQuery, Drupal);
@@ -198,20 +198,6 @@
 })(jQuery, Drupal);
 "use strict";
 
-(function breadcrumbsScript($, Drupal) {
-  Drupal.behaviors.breadcrumbs = {
-    attach: function attach(context) {}
-  };
-})(jQuery, Drupal);
-"use strict";
-
-(function footerScript($, Drupal) {
-  Drupal.behaviors.footer = {
-    attach: function attach(context) {}
-  };
-})(jQuery, Drupal);
-"use strict";
-
 (function headerScript($, Drupal) {
   Drupal.behaviors.header = {
     attach: function attach(context) {}
@@ -221,6 +207,20 @@
 
 (function pagetitleScript($, Drupal) {
   Drupal.behaviors.pagetitle = {
+    attach: function attach(context) {}
+  };
+})(jQuery, Drupal);
+"use strict";
+
+(function breadcrumbsScript($, Drupal) {
+  Drupal.behaviors.breadcrumbs = {
+    attach: function attach(context) {}
+  };
+})(jQuery, Drupal);
+"use strict";
+
+(function footerScript($, Drupal) {
+  Drupal.behaviors.footer = {
     attach: function attach(context) {}
   };
 })(jQuery, Drupal);

@@ -657,11 +657,6 @@ body {
   font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif;
 }
 
-::-moz-selection {
-  color: black;
-  background: #9acd32;
-}
-
 ::selection {
   color: black;
   background: #9acd32;
@@ -991,8 +986,6 @@ a:focus, a:hover {
   display: block;
   padding: 0.5rem;
   transition: 0.3s;
-  transition: 0.3s;
-  transition: 0.3s;
   transform: rotate(-3deg);
   text-decoration: none;
   text-transform: uppercase;
@@ -1105,6 +1098,7 @@ a:focus, a:hover {
 @media (min-width: 1024px) {
   .main-navigation .menu-item {
     transform: rotate(-2deg);
+    margin: 0.25rem 0.75rem;
   }
   .main-navigation .menu-item:nth-of-type(2n+1) {
     transform: rotate(1.5deg);
@@ -2378,6 +2372,13 @@ a.tile--tertiary:hover .tile__text {
 .header .branding {
   -ms-flex: 0 0 50%;
       flex: 0 0 50%;
+}
+
+@media (min-width: 1024px) {
+  .header .branding {
+    -ms-flex-preferred-size: 265px;
+        flex-basis: 265px;
+  }
 }
 
 .page-title {

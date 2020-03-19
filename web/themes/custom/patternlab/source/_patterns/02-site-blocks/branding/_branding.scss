@@ -15,8 +15,6 @@
     bottom: -2px;
     display: block;
     padding: 0.5rem;
-    transition: 0.3s;
-    transition: $trans;
     transition: $trans;
     transform: rotate(-3deg);
     text-decoration: none;
@@ -26,7 +24,6 @@
     border-bottom: 0;
     background-color: $c-secondary;
     font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif;
-    // font-size: 1rem;
     @include breakpoint($bp--medium) {
       padding: 1rem;
     }
