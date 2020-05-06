@@ -16,6 +16,11 @@ class CToolsWizardTest extends BrowserTestBase {
   public static $modules = ['ctools', 'ctools_wizard_test'];
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * Test wizard Multistep form.
    */
   public function testWizardSteps() {
@@ -115,13 +120,13 @@ class CToolsWizardTest extends BrowserTestBase {
     $this->assertSession()->pageTextContains('Test Config Entity 123');
 
     // Edit the entity again and make sure the values are what we expect.
-    $this->clickLink(t('Edit'));
+    $this->clickLink($this->t('Edit'));
     $this->assertSession()->pageTextContains('Existing entity');
     $this->assertSession()->fieldValueEquals('label', 'Test Config Entity 123');
-    $this->clickLink(t('Form One'));
+    $this->clickLink($this->t('Form One'));
     $this->assertSession()->fieldValueEquals('one', 'The first bit');
     $previous = $this->getUrl();
-    $this->clickLink(t('Show on dialog'));
+    $this->clickLink($this->t('Show on dialog'));
     $this->assertSession()->responseContains('Value from one: The first bit');
     $this->drupalGet($previous);
     // Change the value for 'one'.
@@ -134,8 +139,8 @@ class CToolsWizardTest extends BrowserTestBase {
 
     // Edit the entity again and make sure the change stuck.
     $this->assertSession()->addressEquals('admin/structure/ctools_wizard_test_config_entity');
-    $this->clickLink(t('Edit'));
-    $this->clickLink(t('Form One'));
+    $this->clickLink($this->t('Edit'));
+    $this->clickLink($this->t('Form One'));
     $this->assertSession()->fieldValueEquals('one', 'New value');
   }
 
