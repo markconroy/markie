@@ -1,8 +1,9 @@
 <?php
 
-namespace Drupal\token\Tests\Tree;
+namespace Drupal\Tests\token\Functional\Tree;
 
-use Drupal\token\Tests\TokenTestBase;
+use Drupal\Component\Serialization\Json;
+use Drupal\Tests\token\Functional\TokenTestBase;
 
 /**
  * Test token autocomplete.
@@ -25,7 +26,11 @@ class AutocompleteTest extends TokenTestBase {
     $url_prefix = "token/autocomplete/node/";
 
     $url = $url_prefix . 'Title of [nod';
-    $response = $this->drupalGetJSON($url);
+    $response = Json::decode($this->drupalGet($url, [
+      'query' => [
+        '_format' => 'json',
+      ],
+    ]));
 
     $this->assertTrue(isset($response['[node:nid]']));
     $this->assertTrue(isset($response['[node:author]']));
@@ -33,7 +38,11 @@ class AutocompleteTest extends TokenTestBase {
     $this->assertTrue(isset($response['[node:url:']));
 
     $url = $url_prefix . 'Title of [node:url:';
-    $response = $this->drupalGetJSON($url);
+    $response = Json::decode($this->drupalGet($url, [
+      'query' => [
+        '_format' => 'json',
+      ],
+    ]));
 
     $this->assertTrue(isset($response['[node:url:path]']));
     $this->assertTrue(isset($response['[node:url:absolute]']));
@@ -46,7 +55,11 @@ class AutocompleteTest extends TokenTestBase {
     $url_prefix = "token/autocomplete/user/";
 
     $url = $url_prefix . 'Name of the [us';
-    $response = $this->drupalGetJSON($url);
+    $response = Json::decode($this->drupalGet($url, [
+      'query' => [
+        '_format' => 'json',
+      ],
+    ]));
 
     $this->assertTrue(isset($response['[user:uid]']));
     $this->assertTrue(isset($response['[user:original]']));
@@ -54,7 +67,11 @@ class AutocompleteTest extends TokenTestBase {
     $this->assertTrue(isset($response['[user:url:']));
 
     $url = $url_prefix . 'Title of [user:original:';
-    $response = $this->drupalGetJSON($url);
+    $response = Json::decode($this->drupalGet($url, [
+      'query' => [
+        '_format' => 'json',
+      ],
+    ]));
 
     $this->assertTrue(isset($response['[user:original:uid]']));
   }

@@ -1,6 +1,8 @@
 <?php
 
-namespace Drupal\token\Tests\Tree;
+namespace Drupal\Tests\token\Functional\Tree;
+
+use Behat\Mink\Element\NodeElement;
 
 /**
  * Helper trait to assert tokens in token tree browser.
@@ -15,8 +17,8 @@ trait TokenTreeTestTrait {
    */
   protected function getTokenGroups() {
     $groups = $this->xpath('//tr[contains(@class, "token-group")]/td[1]');
-    return array_map(function ($item) {
-      return (string) $item;
+    return array_map(function (NodeElement $item) {
+      return (string) $item->getText();
     }, $groups);
   }
 
@@ -27,18 +29,15 @@ trait TokenTreeTestTrait {
    *   The name of the token group.
    * @param string $message
    *   (optional) A message to display with the assertion.
-   * @param string $group
-   *   (optional) The group this message is in, which is displayed in a column
-   *   in test output.
    */
-  protected function assertTokenGroup($token_group, $message = '', $group = 'Other') {
+  protected function assertTokenGroup($token_group, $message = '') {
     $groups = $this->getTokenGroups();
 
     if (!$message) {
       $message = "Token group $token_group found.";
     }
 
-    $this->assertTrue(in_array($token_group, $groups), $message, $group);
+    $this->assertTrue(in_array($token_group, $groups), $message);
   }
 
   /**
@@ -49,18 +48,15 @@ trait TokenTreeTestTrait {
    *   The name of the token group.
    * @param string $message
    *   (optional) A message to display with the assertion.
-   * @param string $group
-   *   (optional) The group this message is not in, which is displayed in a
-   *   column in test output.
    */
-  protected function assertTokenNotGroup($token_group, $message = '', $group = 'Other') {
+  protected function assertTokenNotGroup($token_group, $message = '') {
     $groups = $this->getTokenGroups();
 
     if (!$message) {
       $message = "Token group $token_group not found.";
     }
 
-    $this->assertFalse(in_array($token_group, $groups), $message, $group);
+    $this->assertFalse(in_array($token_group, $groups), $message);
   }
 
   /**
@@ -72,18 +68,15 @@ trait TokenTreeTestTrait {
    *   (optional) The parent CSS identifier of this token.
    * @param string $message
    *   (optional) A message to display with the assertion.
-   * @param string $group
-   *   (optional) The group this message is in, which is displayed in a column
-   *   in test output.
    */
-  protected function assertTokenInTree($token, $parent = '', $message = '', $group = 'Other') {
+  protected function assertTokenInTree($token, $parent = '', $message = '') {
     $xpath = $this->getXpathForTokenInTree($token, $parent);
 
     if (!$message) {
       $message = "Token $token found.";
     }
 
-    $this->assertIdentical(1, count($this->xpath($xpath)), $message, $group);
+    $this->assertCount(1, $this->xpath($xpath), $message);
   }
 
   /**
@@ -95,18 +88,15 @@ trait TokenTreeTestTrait {
    *   (optional) The parent CSS identifier of this token.
    * @param string $message
    *   (optional) A message to display with the assertion.
-   * @param string $group
-   *   (optional) The group this message is in, which is displayed in a column
-   *   in test output.
    */
-  protected function assertTokenNotInTree($token, $parent = '', $message = '', $group = 'Other') {
+  protected function assertTokenNotInTree($token, $parent = '', $message = '') {
     $xpath = $this->getXpathForTokenInTree($token, $parent);
 
     if (!$message) {
       $message = "Token $token not found.";
     }
 
-    $this->assertIdentical(0, count($this->xpath($xpath)), $message, $group);
+    $this->assertCount(0, $this->xpath($xpath), $message);
   }
 
   /**

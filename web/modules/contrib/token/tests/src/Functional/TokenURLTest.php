@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\token\Tests;
+namespace Drupal\Tests\token\Functional;
 
 use Drupal\Core\Url;
 

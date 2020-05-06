@@ -1,10 +1,12 @@
 <?php
 
-namespace Drupal\token\Tests;
+namespace Drupal\Tests\token\Functional;
 
+use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Session\AnonymousUserSession;
 use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\Tests\TestFileCreationTrait;
 
 /**
  * Tests user tokens.
@@ -12,6 +14,8 @@ use Drupal\field\Entity\FieldStorageConfig;
  * @group token
  */
 class TokenUserTest extends TokenTestBase {
+
+  use TestFileCreationTrait;
 
   /**
    * The user account.
@@ -50,13 +54,13 @@ class TokenUserTest extends TokenTestBase {
     \Drupal::state()->set('user_picture_file_size', '');
 
     // Set up the pictures directory.
-    $picture_path = file_default_scheme() . '://' . \Drupal::state()->get('user_picture_path', 'pictures');
-    if (!file_prepare_directory($picture_path, FILE_CREATE_DIRECTORY)) {
+    $picture_path = 'public://' . \Drupal::state()->get('user_picture_path', 'pictures');
+    if (!\Drupal::service('file_system')->prepareDirectory($picture_path, FileSystemInterface::CREATE_DIRECTORY)) {
       $this->fail('Could not create directory ' . $picture_path . '.');
     }
 
     // Add a user picture to the account.
-    $image = current($this->drupalGetTestFiles('image'));
+    $image = current($this->getTestFiles('image'));
     $edit = ['files[user_picture_0]' => \Drupal::service('file_system')->realpath($image->uri)];
     $this->drupalPostForm('user/' . $this->account->id() . '/edit', $edit, t('Save'));
 

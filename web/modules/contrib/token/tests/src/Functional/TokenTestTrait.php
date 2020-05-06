@@ -1,15 +1,18 @@
 <?php
 
-namespace Drupal\token\Tests;
+namespace Drupal\Tests\token\Functional;
 
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Language\Language;
 use Drupal\Core\Render\BubbleableMetadata;
+use Drupal\Tests\Traits\Core\PathAliasTestTrait;
 
 /**
  * Helper test trait with some added functions for testing.
  */
 trait TokenTestTrait {
+
+  use PathAliasTestTrait;
 
   function assertToken($type, array $data, $token, $expected, array $options = []) {
     return $this->assertTokens($type, $data, [$token => $expected], $options);
@@ -28,10 +31,10 @@ trait TokenTestTrait {
         $this->fail(t("Token value for @token was not generated.", ['@type' => $type, '@token' => $token]));
       }
       elseif (!empty($options['regex'])) {
-        $this->assertTrue(preg_match('/^' . $expected . '$/', $replacements[$token]), t("Token value for @token was '@actual', matching regular expression pattern '@expected'.", ['@type' => $type, '@token' => $token, '@actual' => $replacements[$token], '@expected' => $expected]));
+        $this->assertEquals(1, preg_match('/^' . $expected . '$/', $replacements[$token]), t("Token value for @token was '@actual', matching regular expression pattern '@expected'.", ['@type' => $type, '@token' => $token, '@actual' => $replacements[$token], '@expected' => $expected]));
       }
       else {
-        $this->assertEqual($replacements[$token], $expected, t("Token value for @token was '@actual', expected value '@expected'.", ['@type' => $type, '@token' => $token, '@actual' => $replacements[$token], '@expected' => $expected]));
+        $this->assertEquals($expected, $replacements[$token], t("Token value for @token was '@actual', expected value '@expected'.", ['@type' => $type, '@token' => $token, '@actual' => $replacements[$token], '@expected' => $expected]));
       }
     }
 
@@ -57,13 +60,7 @@ trait TokenTestTrait {
   }
 
   function saveAlias($source, $alias, $language = Language::LANGCODE_NOT_SPECIFIED) {
-    $alias = [
-      'source' => $source,
-      'alias' => $alias,
-      'language' => $language,
-    ];
-    \Drupal::service('path.alias_storage')->save($alias['source'], $alias['alias']);
-    return $alias;
+    return $this->createPathAlias($source, $alias, $language);
   }
 
   function saveEntityAlias($entity_type, EntityInterface $entity, $alias, $language = Language::LANGCODE_NOT_SPECIFIED) {
@@ -103,7 +100,7 @@ trait TokenTestTrait {
         $this->fail(t('Failed to generate token @token.', ['@token' => $token]));
       }
       else {
-        $this->assertIdentical($result['values'][$token], (string) $expected, t("Token value for @token was '@actual', expected value '@expected'.", ['@token' => $token, '@actual' => $result['values'][$token], '@expected' => $expected]));
+        $this->assertSame($result['values'][$token], (string) $expected, t("Token value for @token was '@actual', expected value '@expected'.", ['@token' => $token, '@actual' => $result['values'][$token], '@expected' => $expected]));
       }
     }
   }

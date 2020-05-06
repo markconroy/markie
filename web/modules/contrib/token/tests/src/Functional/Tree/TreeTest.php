@@ -1,9 +1,9 @@
 <?php
 
-namespace Drupal\token\Tests\Tree;
+namespace Drupal\Tests\token\Functional\Tree;
 
 use Drupal\Component\Serialization\Json;
-use Drupal\token\Tests\TokenTestBase;
+use Drupal\Tests\token\Functional\TokenTestBase;
 
 /**
  * Tests token tree page.
@@ -96,7 +96,7 @@ class TreeTest extends TokenTestBase {
     // Request with show_restricted set to TRUE to show restricted tokens and
     // check for them.
     $this->drupalGet($this->getTokenTreeUrl(['token_types' => ['user'], 'show_restricted' => TRUE]));
-    $this->assertEqual('MISS', $this->drupalGetHeader('x-drupal-dynamic-cache'), 'Cache was not hit');
+    $this->assertEquals('MISS', $this->drupalGetHeader('x-drupal-dynamic-cache'), 'Cache was not hit');
     $this->assertTokenInTree('[user:one-time-login-url]', 'user');
     $this->assertTokenInTree('[user:original:cancel-url]', 'user--original');
   }
@@ -138,7 +138,7 @@ class TreeTest extends TokenTestBase {
     $this->drupalGet('token_module_test/browse');
     $this->assertTitle('Available Tokens | Drupal');
     $links = $this->xpath('//a[contains(@href, :href)]/@href', [':href' => 'token/tree']);
-    $link = $this->getAbsoluteUrl((string) current($links));
+    $link = $this->getAbsoluteUrl(current($links)->getText());
     if (!empty($options)) {
       $options = Json::encode($options);
       $link = str_replace('options=%5B%5D', 'options=' . urlencode($options), $link);

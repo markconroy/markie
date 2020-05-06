@@ -1,8 +1,8 @@
 <?php
 
-namespace Drupal\token\Tests\Tree;
+namespace Drupal\Tests\token\Functional\Tree;
 
-use Drupal\token\Tests\TokenTestBase;
+use Drupal\Tests\token\Functional\TokenTestBase;
 
 /**
  * Tests token tree on help page.

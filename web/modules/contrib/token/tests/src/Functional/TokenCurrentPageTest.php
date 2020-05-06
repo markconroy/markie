@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\token\Tests;
+namespace Drupal\Tests\token\Functional;
 
 use Drupal\Core\Url;
 
@@ -19,6 +19,9 @@ class TokenCurrentPageTest extends TokenTestBase {
   public static $modules = ['node'];
 
   function testCurrentPageTokens() {
+    // Cache clear is necessary because the frontpage was already cached by an
+    // initial request.
+    $this->rebuildAll();
     $tokens = [
       '[current-page:title]' => t('Log in'),
       '[current-page:url]' => Url::fromRoute('user.login', [], ['absolute' => TRUE])->toString(),

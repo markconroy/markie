@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\token\Tests;
+namespace Drupal\Tests\token\Functional;
 
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
@@ -88,7 +88,7 @@ class TokenFieldUiTest extends TokenTestBase {
       'bundle' => 'article',
     ])->save();
 
-    entity_get_form_display('node', 'article', 'default')
+    \Drupal::service('entity_display.repository')->getFormDisplay('node', 'article', 'default')
       ->setComponent('field_body', [
         'type' => 'text_textarea_with_summary',
         'settings' => [
@@ -127,8 +127,9 @@ class TokenFieldUiTest extends TokenTestBase {
    */
   public function testImageFieldTokens() {
     // Generate 2 different test images.
-    file_unmanaged_copy(\Drupal::root() . '/core/misc/druplicon.png', 'public://example1.png');
-    file_unmanaged_copy(\Drupal::root() . '/core/misc/loading.gif', 'public://example2.gif');
+    $file_system = \Drupal::service('file_system');
+    $file_system->copy(\Drupal::root() . '/core/misc/druplicon.png', 'public://example1.png');
+    $file_system->copy(\Drupal::root() . '/core/misc/loading.gif', 'public://example2.gif');
 
     // Resize the test images so that they will be scaled down during token
     // replacement.
@@ -261,22 +262,22 @@ class TokenFieldUiTest extends TokenTestBase {
 
     // Test one of the image style's token info for cardinality 1 image field.
     $token_info = $token_service->getTokenInfo('node-field_image', 'thumbnail');
-    $this->assertEqual('Thumbnail (100×100)', $token_info['name']);
-    $this->assertEqual('Represents the image in the given image style.', $token_info['description']);
+    $this->assertEquals('Thumbnail (100×100)', $token_info['name']);
+    $this->assertEquals('Represents the image in the given image style.', $token_info['description']);
 
     // Test one of the image style's token info for a multivalued image field.
     $token_info = $token_service->getTokenInfo('node-multivalued_field_image', 'medium');
-    $this->assertEqual('Medium (220×220)', $token_info['name']);
-    $this->assertEqual('Represents the image in the given image style.', $token_info['description']);
+    $this->assertEquals('Medium (220×220)', $token_info['name']);
+    $this->assertEquals('Represents the image in the given image style.', $token_info['description']);
 
     // Test few of the image styles' properties token info.
     $token_info = $token_service->getTokenInfo('image_with_image_style', 'mimetype');
-    $this->assertEqual('MIME type', $token_info['name']);
-    $this->assertEqual('The MIME type (image/png, image/bmp, etc.) of the image.', $token_info['description']);
+    $this->assertEquals('MIME type', $token_info['name']);
+    $this->assertEquals('The MIME type (image/png, image/bmp, etc.) of the image.', $token_info['description']);
 
     $token_info = $token_service->getTokenInfo('image_with_image_style', 'filesize');
-    $this->assertEqual('File size', $token_info['name']);
-    $this->assertEqual('The file size of the image.', $token_info['description']);
+    $this->assertEquals('File size', $token_info['name']);
+    $this->assertEquals('The file size of the image.', $token_info['description']);
   }
 
 }
