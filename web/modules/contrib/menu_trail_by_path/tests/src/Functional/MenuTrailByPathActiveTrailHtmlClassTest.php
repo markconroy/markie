@@ -1,30 +1,41 @@
 <?php
 
-namespace Drupal\menu_trail_by_path\Tests;
+namespace Drupal\Tests\menu_trail_by_path\Functional;
 
-use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Url;
 use Drupal\menu_link_content\Entity\MenuLinkContent;
 use Drupal\menu_trail_by_path\MenuTrailByPathActiveTrail;
-use Drupal\simpletest\WebTestBase;
 use Drupal\system\Entity\Menu;
-use Drupal\system\Tests\Menu\AssertMenuActiveTrailTrait;
+use Drupal\Tests\BrowserTestBase;
+use Drupal\Tests\system\Functional\Menu\AssertMenuActiveTrailTrait;
+use Drupal\Tests\Traits\Core\PathAliasTestTrait;
 
 /**
  * Tests that the menu links have the correct css-classes.
  *
  * @group menu_trail_by_path
  */
-class MenuTrailByPathActiveTrailHtmlClassTest extends WebTestBase {
+class MenuTrailByPathActiveTrailHtmlClassTest extends BrowserTestBase {
 
   use AssertMenuActiveTrailTrait;
+  use PathAliasTestTrait;
 
   /**
    * Modules to install.
    *
    * {@inheritdoc}
    */
-  public static $modules = ['node', 'block', 'menu_link_content', 'menu_trail_by_path'];
+  public static $modules = [
+    'node',
+    'block',
+    'menu_link_content',
+    'menu_trail_by_path',
+  ];
+
+  /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'classy';
 
   /**
    * Array key's should be the menu title's, if multi-level than separated by ' » '.
@@ -44,10 +55,6 @@ class MenuTrailByPathActiveTrailHtmlClassTest extends WebTestBase {
   protected function setUp() {
     parent::setUp();
 
-    // Set theme
-    \Drupal::service('theme_handler')->install(['classy']);
-    \Drupal::service('theme_handler')->setDefault('classy');
-
     // Create user
     $this->authenticatedUser = $this->drupalCreateUser();
 
@@ -56,9 +63,10 @@ class MenuTrailByPathActiveTrailHtmlClassTest extends WebTestBase {
 
     // Create nodes
     $node1 = $this->drupalCreateNode();
-    \Drupal::service('path.alias_storage')->save('/node/' . $node1->id(), '/news');
+    $this->createPathAlias('/node/' . $node1->id(), '/news');
+
     $node2 = $this->drupalCreateNode();
-    \Drupal::service('path.alias_storage')->save('/node/' . $node2->id(), '/news/category-a');
+    $this->createPathAlias('/node/' . $node2->id(), '/news/category-a');
 
     // Set menuUrls
     $this->menuUrls = [
@@ -266,7 +274,7 @@ class MenuTrailByPathActiveTrailHtmlClassTest extends WebTestBase {
 
   /**
    * Helper for getting the base: "link_path" that assertMenuActiveTrail expects.
-   * 
+   *
    * @param $name
    * @return string
    */
@@ -274,4 +282,5 @@ class MenuTrailByPathActiveTrailHtmlClassTest extends WebTestBase {
     $url = $this->menuUrls[$name];
     return '/' . preg_replace('/^' . preg_quote(base_path(), '/') . '/', '', $url->toString());
   }
+
 }
