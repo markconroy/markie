@@ -640,33 +640,6 @@ sub {
   bottom: -0.25rem;
 }
 
-html {
-  box-sizing: border-box;
-  color: #292929;
-  font-size: 1rem;
-}
-
-*,
-::after,
-::before {
-  box-sizing: inherit;
-}
-
-body {
-  background: #fafafa;
-  font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif;
-}
-
-::selection {
-  color: black;
-  background: #9acd32;
-}
-
-::-moz-selection {
-  color: black;
-  background: #9acd32;
-}
-
 @font-face {
   font-family: "LatoRegular";
   src: url("../fonts/Lato-Regular.woff2") format("woff2"), url("../fonts/Lato-Regular.woff") format("woff"), url("../fonts/Lato-Regular.ttf") format("truetype");
@@ -834,6 +807,33 @@ a:focus, a:hover {
   .text--large, .full__intro {
     font-size: 28.8px;
   }
+}
+
+html {
+  box-sizing: border-box;
+  color: #292929;
+  font-size: 1rem;
+}
+
+*,
+::after,
+::before {
+  box-sizing: inherit;
+}
+
+body {
+  background: #fafafa;
+  font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif;
+}
+
+::selection {
+  color: black;
+  background: #9acd32;
+}
+
+::-moz-selection {
+  color: black;
+  background: #9acd32;
 }
 
 @font-face {
@@ -1856,47 +1856,27 @@ a.tile--tertiary:hover .tile__text {
   margin-right: 0.5rem;
 }
 
-.node--view-mode-teaser {
-  margin-bottom: 1rem;
-}
-
-.node--view-mode-teaser .node__meta {
+.teaser__meta {
   display: -ms-flexbox;
   display: flex;
-  margin-top: 23.4px;
-  font-size: 14px;
+  font-weight: bold;
 }
 
-@media (min-width: 768px) {
-  .node--view-mode-teaser .node__meta {
-    margin-top: 46.8px;
-  }
-}
-
-.node--view-mode-teaser > .node__title {
+.teaser__title {
   margin-top: 23.4px;
 }
 
-.node--view-mode-teaser > .node__title a {
+.teaser__title a {
   text-decoration: none;
+  color: #e61313;
 }
 
-.node--view-mode-teaser > .node__title a:focus, .node--view-mode-teaser > .node__title a:hover {
+.teaser__title a:focus, .teaser__title a:hover {
   text-decoration: underline;
 }
 
-.field--name-field-listing-snippet p:last-of-type {
+.teaser .field--name-field-listing-snippet p:last-of-type {
   margin-bottom: 0;
-}
-
-.node--view-mode-teaser .field--name-field-listing-snippet {
-  margin-bottom: 23.4px;
-}
-
-@media (min-width: 640px) {
-  .node--view-mode-teaser .field--name-field-listing-snippet {
-    margin-bottom: 46.8px;
-  }
 }
 
 .pager__items {
@@ -1979,7 +1959,7 @@ a.tile--tertiary:hover .tile__text {
 
 .default-list .views-row {
   position: relative;
-  padding: 3rem 1rem;
+  padding: 2rem;
   transform: rotate(-0.75deg);
   border: 2px solid #002a2a;
   border-radius: 0.5rem;
