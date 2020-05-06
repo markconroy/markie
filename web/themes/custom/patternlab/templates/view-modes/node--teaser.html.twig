@@ -1,1 +1,13 @@
-{% extends '@content/01-display-types/teaser/teaser.twig' %}
+{% if node.bundle == 'speaking' %}
+  {% set content_type = 'speaking' %}
+{% endif %}
+
+{% if node.field_speaking_conference.value %}
+  {% set speaking_event = node.field_speaking_conference.entity.name.value %}
+{% endif %}
+
+{% if node.field_speaking_date.value %}
+  {% set speaking_date = node.field_speaking_date.value %}
+{% endif %}
+
+{% include '@content/01-display-types/teaser/teaser.twig' %}

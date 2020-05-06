@@ -1,35 +1,21 @@
-.node--view-mode-teaser {
-  margin-bottom: 1rem;
-}
-
-.node--view-mode-teaser .node__meta {
+.teaser__meta {
   display: flex;
-  margin-top: $base-line-height;
-  font-size: $fs--14px;
-  @include breakpoint($bp--large) {
-    margin-top: $base-line-height * 2;
-  }
+  font-weight: bold;
 }
 
-.node--view-mode-teaser > .node__title {
+.teaser__title {
   margin-top: $base-line-height;
 }
 
-.node--view-mode-teaser > .node__title a {
+.teaser__title a {
   text-decoration: none;
+  color: $c-primary;
   &:focus,
   &:hover {
     text-decoration: underline;
   }
 }
 
-.field--name-field-listing-snippet p:last-of-type {
+.teaser .field--name-field-listing-snippet p:last-of-type {
   margin-bottom: 0;
-}
-
-.node--view-mode-teaser .field--name-field-listing-snippet {
-  margin-bottom: $base-line-height;
-  @include breakpoint($bp--medium) {
-    margin-bottom: $base-line-height * 2;
-  }
 }

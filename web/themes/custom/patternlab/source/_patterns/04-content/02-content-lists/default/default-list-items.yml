@@ -14,7 +14,7 @@ rows:
         class:
     content:
       include():
-        pattern: content-teaser-alt
+        pattern: content-teaser-speaking
   row_3:
     attributes:
       Attribute():
@@ -28,6 +28,6 @@ rows:
         class:
     content:
       include():
-        pattern: content-teaser-alt
+        pattern: content-teaser-speaking
 
 default_row_class: true
