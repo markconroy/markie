@@ -17,22 +17,29 @@ use Drupal\Tests\migrate_drupal\Kernel\d7\MigrateDrupal7TestBase;
  *
  * @group metatag
  */
-class MigrateMetatagD7EntitiesTest extends MigrateDrupal7TestBase {
+class MetatagEntitiesTest extends MigrateDrupal7TestBase {
 
   /**
    * {@inheritdoc}
    */
   public static $modules = [
+    // Core modules.
+    // @see testAvailableConfigEntities
     'comment',
     'datetime',
     'filter',
     'image',
     'link',
+    'menu_link_content',
     'menu_ui',
     'node',
     'taxonomy',
     'telephone',
     'text',
+
+    // Contrib modules.
+    'token',
+
     // This module.
     'metatag',
   ];
@@ -75,6 +82,7 @@ class MigrateMetatagD7EntitiesTest extends MigrateDrupal7TestBase {
     $this->installEntitySchema('node');
     $this->installEntitySchema('comment');
     $this->installEntitySchema('taxonomy_term');
+    $this->installEntitySchema('menu_link_content');
     $this->installConfig(static::$modules);
     $this->installSchema('node', ['node_access']);
     $this->installSchema('system', ['sequences']);

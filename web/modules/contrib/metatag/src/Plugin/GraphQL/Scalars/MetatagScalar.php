@@ -2,7 +2,7 @@
 
 namespace Drupal\metatag\Plugin\GraphQL\Scalars;
 
-use Drupal\graphql\Plugin\GraphQL\Scalars\Internal\StringScalar;
+use Drupal\graphql\Plugin\GraphQL\DataProducer\DataProducerPluginBase;
 
 /**
  * Metatag module dummy type.
@@ -16,5 +16,5 @@ use Drupal\graphql\Plugin\GraphQL\Scalars\Internal\StringScalar;
  *   type = "string"
  * )
  */
-class MetatagScalar extends StringScalar {
+class MetatagScalar extends DataProducerPluginBase {
 }
