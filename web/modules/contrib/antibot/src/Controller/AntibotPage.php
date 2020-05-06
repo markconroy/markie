@@ -1,13 +1,7 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\antibot\Controller\AntibotPage.
- */
-
 namespace Drupal\antibot\Controller;
 
-use Drupal\Core\Url;
 use Drupal\Core\Controller\ControllerBase;
 
 /**

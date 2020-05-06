@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains Drupal\antibot\Form\AntibotSettings.
- */
-
 namespace Drupal\antibot\Form;
 
 use Drupal\Core\Form\ConfigFormBase;
@@ -61,19 +56,12 @@ class AntibotSettings extends ConfigFormBase {
   /**
    * {@inheritdoc}
    */
-  public function validateForm(array &$form, FormStateInterface $form_state) {
-    parent::validateForm($form, $form_state);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     parent::submitForm($form, $form_state);
 
     $this->config('antibot.settings')
       ->set('form_ids', explode("\r\n", $form_state->getValue('form_ids')))
-      ->set('show_form_ids', $form_state->getValue('show_form_ids'))
+      ->set('show_form_ids', (bool) $form_state->getValue('show_form_ids'))
       ->save();
   }
 

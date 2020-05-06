@@ -1,8 +1,7 @@
 form_ids:
-  - comment_comment_form
+  - comment_*
   - user_login_form
   - user_pass
   - user_register_form
-  - contact_message_feedback_form
-  - contact_message_personal_form
+  - contact_*
 show_form_ids: false
