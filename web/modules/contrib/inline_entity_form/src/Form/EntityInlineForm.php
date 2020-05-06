@@ -3,6 +3,7 @@
 namespace Drupal\inline_entity_form\Form;
 
 use Drupal\Core\Entity\ContentEntityInterface;
+use Drupal\Core\Entity\ContentEntityTypeInterface;
 use Drupal\Core\Entity\Entity\EntityFormDisplay;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
@@ -90,7 +91,7 @@ class EntityInlineForm implements InlineFormInterface {
    * {@inheritdoc}
    */
   public function getEntityTypeLabels() {
-    $lowercase_label = $this->entityType->getLowercaseLabel();
+    $lowercase_label = $this->entityType->getSingularLabel();
     return [
       'singular' => $lowercase_label,
       'plural' => t('@entity_type entities', ['@entity_type' => $lowercase_label]),
@@ -180,6 +181,14 @@ class EntityInlineForm implements InlineFormInterface {
         if (isset($entity_form[$field_name]) && $field_name != $langcode_key) {
           $entity_form[$field_name]['#access'] = $definition->isTranslatable();
         }
+      }
+    }
+
+    // Hide the log message field for revisionable entity types. It cannot be
+    // disabled in UI and does not make sense in inline entity form context.
+    if (($this->entityType instanceof ContentEntityTypeInterface)) {
+      if ($log_message_key = $this->entityType->getRevisionMetadataKey('revision_log_message')) {
+        $entity_form[$log_message_key]['#access'] = FALSE;
       }
     }
 

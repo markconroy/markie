@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\inline_entity_form\Tests;
+namespace Drupal\Tests\inline_entity_form\FunctionalJavascript;
 
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 
@@ -22,6 +22,9 @@ class ComplexSimpleWidgetTest extends InlineEntityFormTestBase {
     'field_ui',
   ];
 
+  /**
+   * {@inheritdoc}
+   */
   protected function setUp() {
     parent::setUp();
 
@@ -32,13 +35,17 @@ class ComplexSimpleWidgetTest extends InlineEntityFormTestBase {
       'view own unpublished content',
     ]);
     $this->drupalLogin($this->user);
-    $this->fieldConfigStorage = $this->container->get('entity_type.manager')->getStorage('field_config');
+    $this->fieldConfigStorage = $this->container
+      ->get('entity_type.manager')
+      ->getStorage('field_config');
   }
 
   /**
    * Test a Simple IEF widget inside of Complex IEF widget.
    */
   public function testSimpleInComplex() {
+    $page = $this->getSession()->getPage();
+    $assert_session = $this->assertSession();
     $outer_required_options = [
       TRUE,
       FALSE,
@@ -53,7 +60,6 @@ class ComplexSimpleWidgetTest extends InlineEntityFormTestBase {
     /** @var \Drupal\Core\Field\FieldConfigInterface $field_config */
     $field_config = $this->fieldConfigStorage->load('node.ief_complex_simple.ief_complex_outer');
     foreach ($outer_required_options as $outer_required_option) {
-      $edit = [];
       $field_config->setRequired($outer_required_option);
       $field_config->save();
       foreach ($cardinality_options as $cardinality => $limit) {
@@ -64,44 +70,50 @@ class ComplexSimpleWidgetTest extends InlineEntityFormTestBase {
         $outer_title_field = 'ief_complex_outer[form][inline_entity_form][title][0][value]';
         $inner_title_field = 'ief_complex_outer[form][inline_entity_form][single][0][inline_entity_form][title][0][value]';
         if (!$outer_required_option) {
-          $this->assertText('Complex Outer', 'Complex Inline entity field widget title found.');
+          $assert_session->pageTextContains('Complex Outer');
           // Field should not be available before ajax submit.
-          $this->assertNoFieldByName($outer_title_field, NULL);
-          $this->drupalPostAjaxForm(NULL, [], $this->getButtonName('//input[@type="submit" and @value="Add new node" and @data-drupal-selector="edit-ief-complex-outer-actions-ief-add"]'));
+          $assert_session->fieldNotExists($outer_title_field);
+          $assert_session
+            ->elementExists('xpath', '//input[@type="submit" and @value="Add new node" and @data-drupal-selector="edit-ief-complex-outer-actions-ief-add"]')
+            ->press();
+          $this->assertNotEmpty($assert_session->waitForField($outer_title_field));
         }
-        $this->assertFieldByName($outer_title_field, NULL);
-        // Simple widget is required so should always show up. No need for add submit.
-        $this->assertFieldByName($inner_title_field, NULL);
-
-        $edit[$outer_title_field] = $outer_title = $this->randomMachineName(8);
-        $edit[$inner_title_field] = $inner_title = $this->randomMachineName(8);
+        $outer_title = $this->randomMachineName(8);
+        $inner_title = $this->randomMachineName(8);
+        $assert_session->fieldExists($outer_title_field)->setValue($outer_title);
+        // Simple widget is required so should always show up. No need for
+        // add submit.
+        $assert_session->fieldExists($inner_title_field)->setValue($inner_title);
         $create_outer_button_selector = '//input[@type="submit" and @value="Create node" and @data-drupal-selector="edit-ief-complex-outer-form-inline-entity-form-actions-ief-add-save"]';
-        $this->drupalPostAjaxForm(NULL, $edit, $this->getButtonName($create_outer_button_selector));
-        // After ajax submit the ief title fields should be gone.
-        $this->assertNoFieldByName($outer_title_field, NULL);
-        $this->assertNoFieldByName($inner_title_field, NULL);
-        $this->assertEqual('', $this->getButtonName($create_outer_button_selector), 'Create node button not found after Ajax submit.');
+        $assert_session->elementExists('xpath', $create_outer_button_selector)->press();
+        // After Ajax submit the ief title fields should be gone.
+        $this->assertNotEmpty($assert_session->waitForButton('Edit'));
+        $assert_session->fieldNotExists($outer_title_field);
+        $assert_session->fieldNotExists($inner_title_field);
+        $assert_session->elementNotExists('xpath', $create_outer_button_selector);
 
-        // The nodes should not actually be saved at this point
+        // The nodes should not actually be saved at this point.
         $this->assertNoNodeByTitle($outer_title, 'Outer node was not created when widget submitted.');
         $this->assertNoNodeByTitle($inner_title, 'Inner node was not created when widget submitted.');
 
         $host_title = $this->randomMachineName(8);
-        $edit = ['title[0][value]' => $host_title];
-        $this->drupalPostForm(NULL, $edit, t('Save'));
-        $this->assertText("$host_title has been created.");
-        $this->assertText($outer_title);
+        $page->fillField('title[0][value]', $host_title);
+        $page->pressButton('Save');
+        $assert_session->pageTextContains("$host_title has been created.");
+        $assert_session->pageTextContains($outer_title);
 
         // Check the nodes were created correctly.
         $host_node = $this->drupalGetNodeByTitle($host_title);
-        if ($this->assertNotNull($host_node->ief_complex_outer->entity, 'Outer node was created.')) {
+        $this->assertNotNull($host_node->ief_complex_outer->entity, 'Outer node was created.');
+        if (isset($host_node->ief_complex_outer->entity)) {
           $outer_node = $host_node->ief_complex_outer->entity;
-          $this->assertEqual($outer_title, $outer_node->label(), "Outer node's title looks correct.");
-          $this->assertEqual('ief_simple_single', $outer_node->bundle(), "Outer node's type looks correct.");
-          if ($this->assertNotNull($outer_node->single->entity, 'Inner node was created')) {
+          $this->assertEquals($outer_title, $outer_node->label(), "Outer node's title looks correct.");
+          $this->assertEquals('ief_simple_single', $outer_node->bundle(), "Outer node's type looks correct.");
+          $this->assertNotNull($outer_node->single->entity, 'Inner node was created');
+          if (isset($outer_node->single->entity)) {
             $inner_node = $outer_node->single->entity;
-            $this->assertEqual($inner_title, $inner_node->label(), "Inner node's title looks correct.");
-            $this->assertEqual('ief_test_custom', $inner_node->bundle(), "Inner node's type looks correct.");
+            $this->assertEquals($inner_title, $inner_node->label(), "Inner node's title looks correct.");
+            $this->assertEquals('ief_test_custom', $inner_node->bundle(), "Inner node's type looks correct.");
           }
         }
       }
