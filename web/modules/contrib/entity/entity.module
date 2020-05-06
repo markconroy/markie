@@ -5,10 +5,13 @@
  * Provides expanded entity APIs.
  */
 
+use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Database\Query\SelectInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Session\AccountInterface;
 use Drupal\entity\BundlePlugin\BundlePluginHandler;
+use Drupal\entity\QueryAccess\Condition;
 use Drupal\entity\QueryAccess\EntityQueryAlter;
 use Drupal\entity\QueryAccess\ViewsQueryAlter;
 use Drupal\views\Plugin\views\query\QueryPluginBase;
@@ -141,4 +144,52 @@ function entity_views_query_alter(ViewExecutable $view, QueryPluginBase $query) 
       ->getInstanceFromDefinition(ViewsQueryAlter::class)
       ->alter($query, $view);
   }
+}
+
+/**
+ * Implements hook_jsonapi_entity_filter_access().
+ *
+ * Controls access to JSON:API filtering for entity types with a query_access
+ * handler. Only maps condition groups consisting of "owner" and/or "published"
+ * field conditions.
+ */
+function entity_jsonapi_entity_filter_access(EntityTypeInterface $entity_type, AccountInterface $account) {
+  if (!$entity_type->hasHandlerClass('query_access')) {
+    return [];
+  }
+  /** @var \Drupal\entity\QueryAccess\QueryAccessHandlerInterface $query_access */
+  $query_access = \Drupal::entityTypeManager()->getHandler($entity_type->id(), 'query_access');
+  $conditions = $query_access->getConditions('view', $account);
+  if ($conditions->isAlwaysFalse()) {
+    return [];
+  }
+
+  $allowed = AccessResult::allowed()->addCacheableDependency($conditions);
+  $result = [];
+  if ($conditions->count() === 0) {
+    $result[JSONAPI_FILTER_AMONG_ALL] = $allowed;
+  }
+  elseif ($conditions->count() === 1 || $conditions->getConjunction() === 'OR') {
+    $published_key = $entity_type->getKey('published');
+    $owner_key = $entity_type->getKey('owner');
+    foreach ($conditions->getConditions() as $condition) {
+      if (!($condition instanceof Condition)) {
+        // Nested condition groups imply logic that is too complex to be mapped.
+        return [];
+      }
+
+      if ($published_key && $condition->getField() === $published_key && $condition->getOperator() === '=' && (string) $condition->getValue() === '1') {
+        $result[JSONAPI_FILTER_AMONG_PUBLISHED] = $allowed;
+      }
+      elseif ($owner_key && $condition->getField() === $owner_key && $condition->getOperator() === '=' && $condition->getValue() === $account->id()) {
+        $result[JSONAPI_FILTER_AMONG_OWN] = $allowed;
+      }
+      else {
+        // Unsupported condition, no access can be granted.
+        return [];
+      }
+    }
+  }
+
+  return $result;
 }
