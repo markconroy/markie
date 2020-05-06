@@ -2,7 +2,9 @@
 
 namespace Drupal\twig_tweak;
 
+use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Block\TitleBlockPluginInterface;
+use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Site\Settings;
 use Drupal\Core\Url;
@@ -80,8 +82,16 @@ class TwigExtension extends \Twig_Extension {
   public function drupalBlock($id, $check_access = TRUE) {
     $entity_type_manager = \Drupal::entityTypeManager();
     $block = $entity_type_manager->getStorage('block')->load($id);
-    if ($block && (!$check_access || $this->entityAccess($block))) {
-      return $entity_type_manager->getViewBuilder('block')->view($block);
+    if ($block) {
+      $access = $check_access ? $this->entityAccess($block) : AccessResult::allowed();
+      if ($access->isAllowed()) {
+        $build = $entity_type_manager->getViewBuilder('block')->view($block);
+        CacheableMetadata::createFromRenderArray($build)
+          ->merge(CacheableMetadata::createFromObject($block))
+          ->merge(CacheableMetadata::createFromObject($access))
+          ->applyTo($build);
+        return $build;
+      }
     }
   }
 
@@ -108,9 +118,13 @@ class TwigExtension extends \Twig_Extension {
 
     $build = [];
 
+    $cache_metadata = new CacheableMetadata();
+
     /* @var $blocks \Drupal\block\BlockInterface[] */
     foreach ($blocks as $id => $block) {
-      if ($this->entityAccess($block)) {
+      $access = $this->entityAccess($block);
+      $cache_metadata = $cache_metadata->merge(CacheableMetadata::createFromObject($access));
+      if ($access->isAllowed()) {
         $block_plugin = $block->getPlugin();
         if ($block_plugin instanceof TitleBlockPluginInterface) {
           $request = \Drupal::request();
@@ -120,6 +134,10 @@ class TwigExtension extends \Twig_Extension {
         }
         $build[$id] = $view_builder->view($block);
       }
+    }
+
+    if ($build) {
+      $cache_metadata->applyTo($build);
     }
 
     return $build;
@@ -146,9 +164,18 @@ class TwigExtension extends \Twig_Extension {
     $entity = $id
       ? $entity_type_manager->getStorage($entity_type)->load($id)
       : \Drupal::routeMatch()->getParameter($entity_type);
-    if ($entity && $this->entityAccess($entity)) {
-      $render_controller = $entity_type_manager->getViewBuilder($entity_type);
-      return $render_controller->view($entity, $view_mode, $langcode);
+    if ($entity) {
+      $access = $this->entityAccess($entity);
+      if ($access->isAllowed()) {
+        $build = $entity_type_manager
+          ->getViewBuilder($entity_type)
+          ->view($entity, $view_mode, $langcode);
+        CacheableMetadata::createFromRenderArray($build)
+          ->merge(CacheableMetadata::createFromObject($entity))
+          ->merge(CacheableMetadata::createFromObject($access))
+          ->applyTo($build);
+        return $build;
+      }
     }
   }
 
@@ -174,12 +201,20 @@ class TwigExtension extends \Twig_Extension {
     $entity = $id
       ? \Drupal::entityTypeManager()->getStorage($entity_type)->load($id)
       : \Drupal::routeMatch()->getParameter($entity_type);
-    if ($entity && $this->entityAccess($entity)) {
-      if ($langcode && $entity->hasTranslation($langcode)) {
-        $entity = $entity->getTranslation($langcode);
-      }
-      if (isset($entity->{$field_name})) {
-        return $entity->{$field_name}->view($view_mode);
+    if ($entity) {
+      $access = $this->entityAccess($entity);
+      if ($access->isAllowed()) {
+        if ($langcode && $entity->hasTranslation($langcode)) {
+          $entity = $entity->getTranslation($langcode);
+        }
+        if (isset($entity->{$field_name})) {
+          $build = $entity->{$field_name}->view($view_mode);
+          CacheableMetadata::createFromRenderArray($build)
+            ->merge(CacheableMetadata::createFromObject($access))
+            ->merge(CacheableMetadata::createFromObject($entity))
+            ->applyTo($build);
+          return $build;
+        }
       }
     }
   }
@@ -312,11 +347,9 @@ class TwigExtension extends \Twig_Extension {
    *
    * @return array
    *   A render array to disable caching.
-   *
-   * @see drupal_set_message()
    */
   public function drupalSetMessage($message = NULL, $type = 'status', $repeat = FALSE) {
-    drupal_set_message($message, $type, $repeat);
+    \Drupal::messenger()->addMessage($message, $type, $repeat);
     $build['#cache']['max-age'] = 0;
     return $build;
   }
@@ -483,7 +516,7 @@ class TwigExtension extends \Twig_Extension {
    * @param \Drupal\Core\Entity\EntityInterface $entity
    *   Entity to check access.
    *
-   * @return bool
+   * @return \Drupal\Core\Access\AccessResultInterface
    *   The access check result.
    *
    * @TODO Remove "check_access" option in 9.x.
@@ -491,7 +524,8 @@ class TwigExtension extends \Twig_Extension {
   protected function entityAccess(EntityInterface $entity) {
     // Prior version 8.x-1.7 entity access was not checked. The "check_access"
     // option provides a workaround for possible BC issues.
-    return !Settings::get('twig_tweak_check_access', TRUE) || $entity->access('view');
+    return Settings::get('twig_tweak_check_access', TRUE) ?
+      $entity->access('view', NULL, TRUE) : AccessResult::allowed();
   }
 
 }

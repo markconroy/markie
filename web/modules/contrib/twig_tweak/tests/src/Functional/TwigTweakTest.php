@@ -15,6 +15,11 @@ class TwigTweakTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
+  protected $defaultTheme = 'classy';
+
+  /**
+   * {@inheritdoc}
+   */
   public static $modules = [
     'twig_tweak',
     'twig_tweak_test',
@@ -73,7 +78,6 @@ class TwigTweakTest extends BrowserTestBase {
     // Test region.
     $xpath = '//div[@class = "tt-region"]';
     $xpath .= '/div[contains(@class, "block-page-title-block") and h1[@class="page-title" and text() = "Log in"]]';
-    $xpath .= '/following-sibling::div[@class="messages messages--warning" and contains(., "Hi!")]';
     $xpath .= '/following-sibling::div[contains(@class, "block-system-powered-by-block")]/span[. = "Powered by Drupal"]';
     $this->assertByXpath($xpath);
 

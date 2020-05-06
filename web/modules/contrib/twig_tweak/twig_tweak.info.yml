@@ -1,10 +1,9 @@
 name: Twig tweak
 type: module
 description: Provides some extra Twig functions and filters.
-# core: 8.x
+core: 8.x
 
-# Information added by Drupal.org packaging script on 2017-09-15
-version: '8.x-1.9'
-core: '8.x'
+# Information added by Drupal.org packaging script on 2020-02-28
+version: '8.x-1.10'
 project: 'twig_tweak'
-datestamp: 1505464447
+datestamp: 1582883091
