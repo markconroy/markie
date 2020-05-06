@@ -5,6 +5,7 @@ namespace Drupal\media_entity_twitter\Plugin\Field\FieldFormatter;
 use Drupal\Core\Field\FieldItemInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\FormatterBase;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\media_entity_twitter\Plugin\media\Source\Twitter;
 
 /**
@@ -19,6 +20,47 @@ use Drupal\media_entity_twitter\Plugin\media\Source\Twitter;
  * )
  */
 class TwitterEmbedFormatter extends FormatterBase {
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function defaultSettings() {
+    $settings['conversation'] = FALSE;
+
+    return $settings;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function settingsForm(array $form, FormStateInterface $form_state) {
+    $form = parent::settingsForm($form, $form_state);
+
+    $form['conversation'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Show previous tweet?'),
+      '#description' => $this->t('If the requested tweet was a reply to another one, this option will display a summary of the previous tweet too. By default only the requested tweet will be displayed.'),
+      '#default_value' => $this->getSetting('conversation'),
+    ];
+
+    return $form;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function settingsSummary() {
+    $summary = [];
+
+    if ($this->getSetting('conversation')) {
+      $summary[] = $this->t('Show previous tweet, if applicable.');
+    }
+    else {
+      $summary[] = $this->t('Do not show previous tweet, if applicable.');
+    }
+
+    return $summary;
+  }
 
   /**
    * Extracts the embed code from a field item.
@@ -67,10 +109,16 @@ class TwitterEmbedFormatter extends FormatterBase {
           '#path' => 'https://twitter.com/' . $matches['user'] . '/statuses/' . $matches['id'],
           '#attributes' => [
             'class' => ['twitter-tweet', 'element-hidden'],
-            'data-conversation' => 'none',
             'lang' => 'en',
           ],
         ];
+
+        // If the option was not selected to show the conversation, then pass
+        // the API option to disable the conversation.
+        // @see https://developer.twitter.com/en/docs/twitter-for-websites/embedded-tweets/overview
+        if (!$this->getSetting('conversation')) {
+          $element[$delta]['#attributes']['data-conversation'] = 'none';
+        }
       }
     }
 

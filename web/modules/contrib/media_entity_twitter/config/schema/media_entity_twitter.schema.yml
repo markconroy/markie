@@ -28,3 +28,11 @@ media.source.twitter:
     generate_thumbnails:
       type: boolean
       label: 'Enable automatic thumbnail generation'
+
+field.formatter.settings.twitter_embed:
+  type: mapping
+  label: 'Twitter field display format settings'
+  mapping:
+    conversation:
+      type: boolean
+      label: 'Show previous tweet'

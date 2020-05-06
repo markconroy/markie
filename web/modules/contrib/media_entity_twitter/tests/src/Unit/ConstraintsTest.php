@@ -96,7 +96,7 @@ class ConstraintsTest extends UnitTestCase {
     $constraint = new TweetVisibleConstraint();
     $this->assertEquals('Referenced tweet is not publicly visible.', $constraint->message, 'Correct constraint message found.');
 
-    $http_client = $this->getMock('\GuzzleHttp\Client');
+    $http_client = $this->createMock('\GuzzleHttp\Client');
     $http_client->expects($this->once())
       ->method('__call')
       ->with('get', [$embed_code, ['allow_redirects' => FALSE]])
@@ -127,12 +127,12 @@ class ConstraintsTest extends UnitTestCase {
    * Provides test data for testTweetVisibleConstraint().
    */
   public function visibleProvider() {
-    $visible_response = $this->getMock('\GuzzleHttp\Psr7\Response');
+    $visible_response = $this->createMock('\GuzzleHttp\Psr7\Response');
     $visible_response->expects($this->any())
       ->method('getStatusCode')
       ->will($this->returnValue(200));
 
-    $invisible_response = $this->getMock('\GuzzleHttp\Psr7\Response');
+    $invisible_response = $this->createMock('\GuzzleHttp\Psr7\Response');
     $invisible_response->expects($this->once())
       ->method('getStatusCode')
       ->will($this->returnValue(302));
@@ -165,7 +165,7 @@ class ConstraintsTest extends UnitTestCase {
    */
   public function testBadUrlsOnVisibleConstraint($embed_code) {
 
-    $http_client = $this->getMock('\GuzzleHttp\Client');
+    $http_client = $this->createMock('\GuzzleHttp\Client');
     $http_client->expects($this->never())
       ->method('__call')
       ->with('get', [$embed_code, ['allow_redirects' => FALSE]]);

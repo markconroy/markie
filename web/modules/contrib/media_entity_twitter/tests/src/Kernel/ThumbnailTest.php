@@ -2,6 +2,7 @@
 
 namespace Drupal\Tests\media_entity_twitter\Kernel;
 
+use Drupal\Core\File\FileSystemInterface;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\KernelTests\KernelTestBase;
@@ -61,7 +62,7 @@ class ThumbnailTest extends KernelTestBase {
     $this->installEntitySchema('media');
     $this->installConfig(['media_entity_twitter', 'system']);
 
-    $this->tweetFetcher = $this->getMock(TweetFetcherInterface::class);
+    $this->tweetFetcher = $this->createMock(TweetFetcherInterface::class);
     $this->container->set('media_entity_twitter.tweet_fetcher', $this->tweetFetcher);
 
     MediaType::create([
@@ -106,7 +107,7 @@ class ThumbnailTest extends KernelTestBase {
       ->get('media_entity_twitter.settings')
       ->get('local_images');
 
-    file_prepare_directory($dir, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS);
+    \Drupal::service('file_system')->prepareDirectory($dir, FileSystemInterface::CREATE_DIRECTORY| FileSystemInterface::MODIFY_PERMISSIONS);
   }
 
   /**
