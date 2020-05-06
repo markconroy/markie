@@ -11,6 +11,7 @@ use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\ChangedFieldItemList;
+use Drupal\Core\Field\EntityReferenceFieldItemListInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Render\Markup;
 use Drupal\Core\TypedData\TranslatableInterface;
@@ -415,11 +416,11 @@ class Paragraph extends ContentEntityBase implements ParagraphInterface {
  public function createDuplicate() {
    $duplicate = parent::createDuplicate();
    // Loop over entity fields and duplicate nested paragraphs.
-   foreach ($duplicate->getFields() as $field) {
-     if ($field->getFieldDefinition()->getType() == 'entity_reference_revisions') {
-       if ($field->getFieldDefinition()->getTargetEntityTypeId() == "paragraph") {
-         foreach ($field as $item) {
-           $item->entity = $item->entity->createDuplicate();
+   foreach ($duplicate->getFields() as $fieldItemList) {
+     if ($fieldItemList instanceof EntityReferenceFieldItemListInterface && $fieldItemList->getSetting('target_type') === $this->getEntityTypeId()) {
+       foreach ($fieldItemList as $delta => $item) {
+         if ($item->entity) {
+           $fieldItemList[$delta] = $item->entity->createDuplicate();
          }
        }
      }

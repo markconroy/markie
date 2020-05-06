@@ -1,12 +1,12 @@
 drupal.paragraphs.admin:
   dependencies:
-      - core/jquery
-      - core/drupal
-      - core/drupalSettings
-      - core/jquery.once
-      - core/jquery.form
-      - core/drupal.ajax
-      - core/drupal.dropbutton
+    - core/jquery
+    - core/drupal
+    - core/drupalSettings
+    - core/jquery.once
+    - core/jquery.form
+    - core/drupal.ajax
+    - core/drupal.dropbutton
   css:
     theme:
       css/paragraphs.admin.css: {}
@@ -68,10 +68,12 @@ drupal.paragraphs.modal:
     theme:
       css/paragraphs.modal.css: {}
   dependencies:
+    - core/drupal.dialog
     - core/drupal.dialog.ajax
     - core/jquery.once
-    - core/jquery.ui.tabs
 
+# This library will be deleted in paragraphs_library_info_alter when
+# core/sortable is available.
 sortable:
   website: https://github.com/RubaXa/Sortable
   license:
@@ -89,7 +91,10 @@ paragraphs-dragdrop:
   dependencies:
     - core/jquery
     - core/drupal
-    - paragraphs/sortable
+    # Sortable is only in core from 8.8+. When the library is not available, the
+    # dependency will be changed with paragraphs/sortable in
+    # paragraphs_library_info_alter.
+    - core/sortable
 
 drupal.paragraphs.formatter:
   css:

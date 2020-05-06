@@ -99,6 +99,46 @@ class ParagraphsTypesTest extends ParagraphsTestBase {
   }
 
   /**
+   * Tests the paragraph type default icon settings.
+   */
+  public function testParagraphTypeDefaultIcon() {
+    /** @var \Drupal\Core\Entity\EntityRepositoryInterface $entity_repository */
+    $entity_repository = \Drupal::service('entity.repository');
+
+    $admin_user = $this->drupalCreateUser([
+      'administer paragraphs types',
+      'access files overview',
+    ]);
+    $this->drupalLogin($admin_user);
+    // Add the paragraph type with icon.
+    $this->drupalGet('admin/structure/paragraphs_type/add');
+    $this->assertText('Paragraph type icon');
+    $test_files = $this->getTestFiles('image');
+    $fileSystem = \Drupal::service('file_system');
+    $edit = [
+      'label' => 'Test paragraph type',
+      'id' => 'test_paragraph_type_icon',
+      'files[icon_file]' => $fileSystem->realpath($test_files[0]->uri),
+    ];
+    $this->drupalPostForm(NULL, $edit, t('Save and manage fields'));
+    $this->assertText('Saved the Test paragraph type Paragraphs type.');
+
+    // Check if the icon is created from defaults if not exists.
+    $paragraph_type = ParagraphsType::load('test_paragraph_type_icon');
+    $file = $entity_repository->loadEntityByUuid('file', $paragraph_type->get('icon_uuid'));
+    $file->delete();
+    $this->resetAll();
+    $this->drupalGet('admin/structure/paragraphs_type');
+    // New default icon name.
+    $default_icon_name = 'test_paragraph_type_icon-default-icon.png';
+    $this->assertRaw($default_icon_name);
+    $this->clickLink('Edit');
+    $this->assertText($default_icon_name);
+    $file = $entity_repository->loadEntityByUuid('file', $paragraph_type->get('icon_uuid'));
+    $this->assertTrue($file);
+  }
+
+  /**
    * Test the paragraph type description settings.
    */
   public function testParagraphTypeDescription() {
@@ -123,7 +163,7 @@ class ParagraphsTypesTest extends ParagraphsTestBase {
     $this->assertText('Description');
     $this->assertText($description_text);
     $this->assertRaw($description_markup);
-    //Check if description is at Description column
+    // Check if description is at Description column.
     $header_position = count($this->xpath('//table/thead/tr/th[.="Description"]/preceding-sibling::th'));
     $row_position = count($this->xpath('//table/tbody/tr/td[.="' . $description_text . '"]/preceding-sibling::td'));
     $this->assertEqual($header_position, $row_position);

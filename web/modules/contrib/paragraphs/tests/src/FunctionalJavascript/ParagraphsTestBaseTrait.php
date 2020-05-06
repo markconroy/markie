@@ -126,7 +126,9 @@ trait ParagraphsTestBaseTrait {
 
     // Create a copy of the image, so that multiple file entities don't
     // reference the same file.
-    $copy_uri = file_unmanaged_copy($uri);
+    /** @var \Drupal\Core\File\FileSystemInterface $file_system */
+    $file_system = \Drupal::service('file_system');
+    $copy_uri = $file_system->copy($uri, 'public://' . $file_system->basename($uri));
 
     // Create a new file entity.
     $file_entity = File::create([

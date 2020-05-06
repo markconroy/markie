@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\paragraphs_type_permissions\Tests;
+namespace Drupal\Tests\paragraphs_type_permissions\Functional;
 
 use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\Tests\BrowserTestBase;
@@ -19,11 +19,9 @@ class ParagraphsTypePermissionsTest extends BrowserTestBase {
   use FieldUiTestTrait, ParagraphsCoreVersionUiTestTrait, ParagraphsTestBaseTrait;
 
   /**
-   * Modules to enable.
-   *
-   * @var array
+   * {@inheritdoc}
    */
-  public static $modules = array(
+  protected static $modules = array(
     'content_translation',
     'image',
     'field',
@@ -33,6 +31,11 @@ class ParagraphsTypePermissionsTest extends BrowserTestBase {
     'node',
     'paragraphs_type_permissions',
   );
+
+  /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
 
   /**
    * {@inheritdoc}
@@ -140,11 +143,11 @@ class ParagraphsTypePermissionsTest extends BrowserTestBase {
     $this->drupalPostForm(NULL, NULL, t('Add images'));
     $this->drupalPostForm(NULL, NULL, t('Add text'));
 
-    $image_text = $this->drupalGetTestFiles('image')[0];
+    $image_text = $this->getTestFiles('image')[0];
     $this->drupalPostForm(NULL, [
       'files[field_paragraphs_demo_0_subform_field_image_demo_0]' => $image_text->uri,
     ], t('Upload'));
-    $images = $this->drupalGetTestFiles('image')[1];
+    $images = $this->getTestFiles('image')[1];
     $this->drupalPostForm(NULL, [
       'files[field_paragraphs_demo_1_subform_field_images_demo_0][]' => $images->uri,
     ], t('Upload'));

@@ -11,6 +11,9 @@ paragraphs.paragraphs_type.*:
     icon_uuid:
       type: string
       label: 'Icon uuid'
+    icon_default:
+      type: string
+      label: 'Default icon'
     description:
       type: text
       label: 'Description'

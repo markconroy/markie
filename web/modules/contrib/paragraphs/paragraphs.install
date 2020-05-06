@@ -446,3 +446,13 @@ function paragraphs_update_8021() {
     }
   }
 }
+
+/**
+ * Ensure that the parent indexes are added to the revision data table.
+ */
+function paragraphs_update_8022() {
+  $manager = \Drupal::entityDefinitionUpdateManager();
+
+  // Regenerate entity type indexes.
+  $manager->updateEntityType($manager->getEntityType('paragraph'));
+}

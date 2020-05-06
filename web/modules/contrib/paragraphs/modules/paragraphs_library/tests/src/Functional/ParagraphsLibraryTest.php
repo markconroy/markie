@@ -35,7 +35,7 @@ class ParagraphsLibraryTest extends ParagraphsExperimentalTestBase {
    */
   public function testLibraryItems() {
     // Set default theme.
-    \Drupal::service('theme_handler')->install(['bartik']);
+    \Drupal::service('theme_installer')->install(['bartik']);
     $this->config('system.theme')->set('default', 'bartik')->save();
     $this->loginAsAdmin(['create paragraphed_test content', 'edit any paragraphed_test content', 'administer paragraphs library']);
 
@@ -409,7 +409,7 @@ class ParagraphsLibraryTest extends ParagraphsExperimentalTestBase {
     ]);
     $this->drupalLogin($user);
     $this->drupalGet('admin/content/paragraphs');
-    $paragraph_type = $this->xpath('//*[contains(@class, "view-paragraphs-library")]/div[contains(@class, "view-content")]/table/tbody/tr/td[2]');
+    $paragraph_type = $this->xpath('//table/tbody/tr/td[2]');
     $this->assertEqual(trim(strip_tags($paragraph_type[0]->getText())), 'nested_test');
   }
 

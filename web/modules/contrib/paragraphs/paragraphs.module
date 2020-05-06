@@ -395,6 +395,11 @@ function paragraphs_preprocess_field_multiple_value_form(&$variables) {
  * Implements hook_libraries_info().
  */
 function paragraphs_libraries_info() {
+  // Drupal 8.8+ has the sortable library in core, so we don't need to provide custom library information here.
+  if (version_compare(\Drupal::VERSION, '8.8', '>=')) {
+    return [];
+  }
+
   $libraries = [
     'Sortable' => [
       'name' => 'Sortable',
@@ -424,6 +429,18 @@ function paragraphs_libraries_info() {
 function paragraphs_library_info_alter(&$libraries, $extension) {
   if ($extension != 'paragraphs') {
     return;
+  }
+
+  if (version_compare(\Drupal::VERSION, '8.8', '>=')) {
+    // When core/sortable is available, the paragraphs/sortable library can be removed.
+    unset($libraries['sortable']);
+    return $libraries;
+  }
+  else {
+    // If the core/sortable is not available, the paragraphs/sortable library should be used as a dependency of
+    // paragraphs-dragdrop instead.
+    $library_core_dep_key = array_search('core/sortable', $libraries['paragraphs-dragdrop']['dependencies']);
+    $libraries['paragraphs-dragdrop']['dependencies'][$library_core_dep_key] = 'paragraphs/sortable';
   }
 
   if (\Drupal::moduleHandler()->moduleExists('libraries')) {

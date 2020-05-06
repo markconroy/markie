@@ -3,7 +3,7 @@
 namespace Drupal\paragraphs\Tests\Experimental;
 
 use Drupal\Core\Entity\Entity\EntityFormDisplay;
-use Drupal\field_ui\Tests\FieldUiTestTrait;
+use Drupal\Tests\field_ui\Traits\FieldUiTestTrait;
 use Drupal\paragraphs\Tests\Classic\ParagraphsTestBase;
 use Drupal\Tests\paragraphs\FunctionalJavascript\ParagraphsTestBaseTrait;
 
