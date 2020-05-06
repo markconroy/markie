@@ -112,10 +112,10 @@ class FieldGroupAddForm extends FormBase {
     $this->context = $context;
 
     if ($context == 'form') {
-      $this->mode = \Drupal::request()->get('form_mode_name');
+      $this->mode = $this->getRequest()->get('form_mode_name');
     }
     else {
-      $this->mode = \Drupal::request()->get('view_mode_name');
+      $this->mode = $this->getRequest()->get('view_mode_name');
     }
 
     if (empty($this->mode)) {

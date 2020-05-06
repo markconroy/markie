@@ -6,7 +6,7 @@ core: 8.x
 dependencies:
   - field_group:field_group
 
-# Information added by Drupal.org packaging script on 2019-11-19
-version: '8.x-3.0-rc2'
+# Information added by Drupal.org packaging script on 2020-01-28
+version: '8.x-3.0'
 project: 'field_group'
-datestamp: 1574200246
+datestamp: 1580250789

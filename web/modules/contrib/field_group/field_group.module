@@ -260,6 +260,35 @@ function field_group_inline_entity_form_entity_form_alter(&$entity_form, FormSta
 }
 
 /**
+ * Implements hook_form_layout_builder_update_block_alter().
+ */
+function field_group_form_layout_builder_update_block_alter(&$form, FormStateInterface $form_state) {
+  // Attach fieldgroups to the layout builder form for custom block types.
+  if (!isset($form['settings']['block_form']['#block'])) {
+    return;
+  }
+
+  $context = [
+    'entity_type' => $form['settings']['block_form']['#block']->getEntityTypeId(),
+    'bundle' => $form['settings']['block_form']['#block']->bundle(),
+    'entity' => $form['settings']['block_form']['#block'],
+    'display_context' => 'form',
+    'mode' => 'default',
+  ];
+
+  field_group_attach_groups($form['settings']['block_form'], $context);
+  $form['settings']['block_form']['#process'][] = 'field_group_form_process';
+}
+
+/**
+ * Implements hook_form_layout_builder_add_block_alter().
+ */
+function field_group_form_layout_builder_add_block_alter(&$form, FormStateInterface $form_state) {
+  // Call the update hook.
+  field_group_form_layout_builder_update_block_alter($form, $form_state);
+}
+
+/**
  * Implements hook_entity_view_alter().
  */
 function field_group_entity_view_alter(&$build, EntityInterface $entity, EntityDisplayInterface $display) {
@@ -344,9 +373,10 @@ function field_group_form_process(array &$element, FormStateInterface $form_stat
       $element[$group_name]['#parents'] = $parents;
       $group_children_parent_group = implode('][', $parents);
       foreach ($group->children as $child) {
-        if (!isset($element[$child]['#group'])) {
-          $element[$child]['#group'] = $group_children_parent_group;
+        if (!empty($element[$child]['#field_group_ignore'])) {
+          continue;
         }
+        $element[$child]['#group'] = $group_children_parent_group;
       }
     }
 
@@ -885,7 +915,7 @@ function field_group_group_save($group, $display = NULL) {
  *
  * @throws \Drupal\Core\Entity\EntityStorageException
  */
-function field_group_group_delete($group) {
+function field_group_delete_field_group($group) {
   if ($group->context == 'form') {
     $display = EntityFormDisplay::load($group->entity_type . '.' . $group->bundle . '.' . $group->mode);
   }

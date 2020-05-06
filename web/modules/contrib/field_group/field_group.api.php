@@ -65,21 +65,13 @@ function hook_field_group_pre_render_alter(array &$element, &$group, &$rendering
 }
 
 /**
- * Alter the pre_rendered build of the form.
+ * Alter the pre_rendered build of the entity view.
  *
  * @param array $element
  *   Group being rendered.
  */
 function hook_field_group_build_pre_render_alter(array &$element) {
-  $form_id = $element['#form_id'];
-  if ($form_id == 'my_example_form' && isset($element['group_example'])) {
-    // Add form states to the field group.
-    $element['group_example']['#states'] = [
-      'visible' => [
-        ':input[name="field_are_you_ok"]' => ['value' => 'yes'],
-      ],
-    ];
-  }
+  $element['#fieldgroups']['my_group']['region'] = 'new_region';
 }
 
 /**
