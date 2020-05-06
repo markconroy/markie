@@ -48,7 +48,7 @@ function admin_toolbar_tools_help($route_name, RouteMatchInterface $route_match)
  * Implements hook_entity_insert().
  */
 function admin_toolbar_tools_entity_insert(EntityInterface $entity) {
-  $entities = \Drupal::service('admin_toolbar_tools.search_links')->getRebuildEntityTypes();
+  $entities = \Drupal::service('admin_toolbar_tools.helper')->getRebuildEntityTypes();
   if (in_array($entity->getEntityTypeId(), $entities)) {
     \Drupal::service('plugin.manager.menu.link')->rebuild();
   }
@@ -58,7 +58,7 @@ function admin_toolbar_tools_entity_insert(EntityInterface $entity) {
  * Implements hook_entity_update().
  */
 function admin_toolbar_tools_entity_update(EntityInterface $entity) {
-  $entities = \Drupal::service('admin_toolbar_tools.search_links')->getRebuildEntityTypes();
+  $entities = \Drupal::service('admin_toolbar_tools.helper')->getRebuildEntityTypes();
   if (in_array($entity->getEntityTypeId(), $entities)) {
     \Drupal::service('plugin.manager.menu.link')->rebuild();
   }
@@ -68,7 +68,7 @@ function admin_toolbar_tools_entity_update(EntityInterface $entity) {
  * Implements hook_entity_delete().
  */
 function admin_toolbar_tools_entity_delete(EntityInterface $entity) {
-  $entities = \Drupal::service('admin_toolbar_tools.search_links')->getRebuildEntityTypes();
+  $entities = \Drupal::service('admin_toolbar_tools.helper')->getRebuildEntityTypes();
   if (in_array($entity->getEntityTypeId(), $entities)) {
     \Drupal::service('plugin.manager.menu.link')->rebuild();
   }

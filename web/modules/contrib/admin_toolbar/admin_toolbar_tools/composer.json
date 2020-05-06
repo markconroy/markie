@@ -26,7 +26,7 @@
       "name": "Mohamed Anis Taktak (matio89)",
       "homepage": "https://www.drupal.org/u/matio89",
       "role": "Maintainer"
-    }    
+    }
   ],
   "support": {
     "issues": "https://www.drupal.org/project/issues/admin_toolbar",
@@ -34,6 +34,6 @@
   },
   "require": {
     "drupal/admin_toolbar": "^2",
-    "drupal/core": "~8.7"
+    "drupal/core": "^8.8.0 || ^9.0"
   }
 }

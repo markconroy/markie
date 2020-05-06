@@ -29,18 +29,16 @@ class AdminToolbarToolsSortTest extends BrowserTestBase {
   ];
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * A test user with permission to access the administrative toolbar.
    *
    * @var \Drupal\user\UserInterface
    */
   protected $adminUser;
-
-  /**
-   * {@inheritdoc}
-   */
-  protected function setUp() {
-    parent::setUp();
-  }
 
   /**
    * Tests that menu updates on entity add/update/delete.

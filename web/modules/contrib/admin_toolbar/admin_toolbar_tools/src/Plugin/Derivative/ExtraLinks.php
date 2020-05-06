@@ -52,7 +52,7 @@ class ExtraLinks extends DeriverBase implements ContainerDeriverInterface {
   /**
    * {@inheritdoc}
    */
-  public function __construct($base_plugin_id, EntityTypeManagerInterface $entity_type_manager, ModuleHandlerInterface $module_handler, RouteProviderInterface $route_provider, ThemeHandlerInterface $theme_handler) {
+  public function __construct(EntityTypeManagerInterface $entity_type_manager, ModuleHandlerInterface $module_handler, RouteProviderInterface $route_provider, ThemeHandlerInterface $theme_handler) {
     $this->entityTypeManager = $entity_type_manager;
     $this->moduleHandler = $module_handler;
     $this->routeProvider = $route_provider;
@@ -64,7 +64,6 @@ class ExtraLinks extends DeriverBase implements ContainerDeriverInterface {
    */
   public static function create(ContainerInterface $container, $base_plugin_id) {
     return new static(
-      $base_plugin_id,
       $container->get('entity_type.manager'),
       $container->get('module_handler'),
       $container->get('router.route_provider'),
@@ -96,7 +95,7 @@ class ExtraLinks extends DeriverBase implements ContainerDeriverInterface {
       $content_entity_bundle_storage = $this->entityTypeManager->getStorage($content_entity_bundle);
       $bundles_ids = $content_entity_bundle_storage->getQuery()->pager(self::MAX_BUNDLE_NUMBER)->execute();
       $bundles = $this->entityTypeManager->getStorage($content_entity_bundle)->loadMultiple($bundles_ids);
-      if (count($bundles) == self::MAX_BUNDLE_NUMBER) {
+      if (count($bundles) == self::MAX_BUNDLE_NUMBER && $this->routeExists('entity.' . $content_entity_bundle . '.collection')) {
         $links[$content_entity_bundle . '.collection'] = [
           'title' => $this->t('All types'),
           'route_name' => 'entity.' . $content_entity_bundle . '.collection',
@@ -130,8 +129,8 @@ class ExtraLinks extends DeriverBase implements ContainerDeriverInterface {
             $content_entity_bundle_root = $key;
           }
           else {
-            $links[$key]['parent'] = $content_entity_bundle_root;
-            $links[$key]['title'] = t('Edit');
+            $links[$key]['parent'] = $base_plugin_definition['id'] . ':' . $content_entity_bundle_root;
+            $links[$key]['title'] = $this->t('Edit');
           }
         }
         if ($this->moduleHandler->moduleExists('field_ui')) {
@@ -191,23 +190,23 @@ class ExtraLinks extends DeriverBase implements ContainerDeriverInterface {
       'parent' => 'entity.user.collection',
     ] + $base_plugin_definition;
     $links['user.admin_permissions'] = [
-      'title' => t('Permissions'),
+      'title' => $this->t('Permissions'),
       'route_name' => 'user.admin_permissions',
       'parent' => 'entity.user.collection',
     ] + $base_plugin_definition;
     $links['entity.user_role.collection'] = [
-      'title' => t('Roles'),
+      'title' => $this->t('Roles'),
       'route_name' => 'entity.user_role.collection',
       'parent' => 'entity.user.collection',
     ] + $base_plugin_definition;
     $links['user.logout'] = [
-      'title' => t('Logout'),
+      'title' => $this->t('Logout'),
       'route_name' => 'user.logout',
       'parent' => 'admin_toolbar_tools.help',
       'weight' => 10,
     ] + $base_plugin_definition;
     $links['user.role_add'] = [
-      'title' => t('Add role'),
+      'title' => $this->t('Add role'),
       'route_name' => 'user.role_add',
       'parent' => $base_plugin_definition['id'] . ':entity.user_role.collection',
       'weight' => -5,

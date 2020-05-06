@@ -1,8 +1,8 @@
 {
-  "name": "drupal/admin_toolbar",
-  "description": "Provides a drop-down menu interface to the core Drupal Toolbar.",
+  "name": "drupal/admin_toolbar_search",
+  "description": "Provides search of admin toolbar items.",
   "type": "drupal-module",
-  "keywords": ["Drupal", "Toolbar"],
+  "keywords": ["Drupal", "Toolbar", "Search"],
   "homepage": "http://drupal.org/project/admin_toolbar",
   "license": "GPL-2.0+",
   "authors": [
@@ -33,6 +33,7 @@
     "source": "http://cgit.drupalcode.org/admin_toolbar"
   },
   "require": {
+    "drupal/admin_toolbar": "^2",
     "drupal/core": "^8.8.0 || ^9.0"
   }
 }

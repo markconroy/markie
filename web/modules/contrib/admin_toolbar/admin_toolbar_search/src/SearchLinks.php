@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\admin_toolbar_tools;
+namespace Drupal\admin_toolbar_search;
 
 use Drupal\admin_toolbar_tools\Plugin\Derivative\ExtraLinks;
 use Drupal\Core\Cache\Cache;
@@ -57,7 +57,18 @@ class SearchLinks {
   protected $toolbarCache;
 
   /**
-   * {@inheritdoc}
+   * Constructs a SearchLinks object.
+   *
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
+   *   The entity type manager.
+   * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
+   *   The module handler.
+   * @param \Drupal\Core\Routing\RouteProviderInterface $route_provider
+   *   The route provider.
+   * @param \Drupal\Core\Cache\Context\CacheContextsManager $cache_context_manager
+   *   The cache contexts manager.
+   * @param \Drupal\Core\Cache\CacheBackendInterface $toolbar_cache
+   *   Cache backend instance to use.
    */
   public function __construct(EntityTypeManagerInterface $entity_type_manager, ModuleHandlerInterface $module_handler, RouteProviderInterface $route_provider, CacheContextsManager $cache_context_manager, CacheBackendInterface $toolbar_cache) {
     $this->entityTypeManager = $entity_type_manager;
@@ -68,10 +79,10 @@ class SearchLinks {
   }
 
   /**
-   * Get extra links for admin toolbar search feature.
+   * Gets extra links for admin toolbar search feature.
    *
    * @return array
-   *   An array of link data.
+   *   An array of link data for the JSON used for search.
    *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
@@ -239,7 +250,7 @@ class SearchLinks {
   }
 
   /**
-   * Get a list of content entities.
+   * Gets a list of content entities.
    *
    * @return array
    *   An array of metadata about content entities.
@@ -256,19 +267,6 @@ class SearchLinks {
       }
     }
     return $content_entities;
-  }
-
-  /**
-   * Get an array of entity types that should trigger a menu rebuild.
-   *
-   * @return array
-   *   An array of entity machine names.
-   */
-  public function getRebuildEntityTypes() {
-    $types = ['menu'];
-    $content_entities = $this->getBundleableEntitiesList();
-    $types = array_merge($types, array_column($content_entities, 'content_entity_bundle'));
-    return $types;
   }
 
   /**

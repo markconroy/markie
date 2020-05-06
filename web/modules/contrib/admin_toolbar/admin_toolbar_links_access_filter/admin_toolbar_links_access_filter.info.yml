@@ -3,12 +3,12 @@ description: Provides a workaround for the common problem that users with 'Use t
 package: Administration
 
 type: module
-core: 8.x
+core_version_requirement: ^8.8.0 || ^9.0
 
 dependencies:
   - admin_toolbar:admin_toolbar
 
-# Information added by Drupal.org packaging script on 2019-10-29
-version: '8.x-2.0'
+# Information added by Drupal.org packaging script on 2020-03-24
+version: '8.x-2.2'
 project: 'admin_toolbar'
-datestamp: 1572370993
+datestamp: 1585017182
