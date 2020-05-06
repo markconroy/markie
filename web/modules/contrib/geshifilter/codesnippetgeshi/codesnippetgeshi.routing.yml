@@ -1,0 +1,6 @@
+codesnippetgeshi.ajax:
+  path: '/codesnippetgeshi/ajax'
+  defaults:
+    _controller: '\Drupal\codesnippetgeshi\Controller\GeshiController::ajax'
+  requirements:
+    _permission: 'access content'

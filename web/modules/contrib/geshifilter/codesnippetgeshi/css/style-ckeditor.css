@@ -1,0 +1,6 @@
+/*
+ * Add a background color to code blocks, so they are more visible.
+ */
+pre code {
+  background-color: #c6ff00;
+}

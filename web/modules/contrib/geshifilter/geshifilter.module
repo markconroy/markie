@@ -95,8 +95,7 @@ function geshifilter_library_info_alter(&$libraries, $extension) {
     $config = \Drupal::config('geshifilter.settings');
     // Add the language CSS file if CSS classes are used for code styling.
     if ($config->get('css_mode') == GeshiFilter::CSS_CLASSES_AUTOMATIC) {
-      $css = drupal_realpath(GeshiFilterCss::languageCssPath());
-      $name = substr($css, strlen(DRUPAL_ROOT));
+      $name = file_create_url(GeshiFilterCss::languageCssPath());
       $libraries['geshifilter']['css']['component'][$name] = [];
     }
   }

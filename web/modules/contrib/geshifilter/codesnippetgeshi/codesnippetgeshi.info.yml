@@ -1,10 +1,9 @@
-name: 'GeSHi field'
-description: 'Provides a field for source code with GeSHI syntax highlighting.'
+name: codesnippetgeshi
 type: module
-package: Filters
+description: "Integrate the plugin CodeSnippetGeshi from CKEditor in Drupal. It provides a better way to edit code for Geshifilter module."
 core: 8.x
+package: Filters
 dependencies:
-  - field
   - geshifilter
 
 # Information added by Drupal.org packaging script on 2020-05-02
