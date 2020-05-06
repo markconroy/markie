@@ -12,6 +12,11 @@ class AutoplayPermissionTest extends BrowserTestBase {
 
   use EntityDisplaySetupTrait;
 
+  /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
   public static $modules = [
     'video_embed_field',
     'node',

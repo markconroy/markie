@@ -3,6 +3,7 @@
 namespace Drupal\Tests\video_embed_field\Kernel;
 
 use Drupal\Core\Entity\Entity\EntityViewDisplay;
+use Drupal\Core\File\FileSystemInterface;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\KernelTests\KernelTestBase as CoreKernelTestBase;
@@ -32,6 +33,7 @@ abstract class KernelTestBase extends CoreKernelTestBase {
    * @var array
    */
   public static $modules = [
+    'colorbox',
     'user',
     'system',
     'field',
@@ -68,9 +70,6 @@ abstract class KernelTestBase extends CoreKernelTestBase {
       'field_name' => $this->fieldName,
       'bundle' => $this->entityTypeId,
     ])->save();
-
-    // Fake colorbox being enabled for the purposes of testing.
-    $this->container->get('module_handler')->addModule('colorbox', NULL);
 
     // Use a HTTP mock which won't attempt to download anything.
     $this->container->set('http_client', new MockHttpClient());

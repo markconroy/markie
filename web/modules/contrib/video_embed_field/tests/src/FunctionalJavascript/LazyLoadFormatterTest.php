@@ -17,6 +17,11 @@ class LazyLoadFormatterTest extends WebDriverTestBase {
   /**
    * {@inheritdoc}
    */
+  protected $defaultTheme = 'stark';
+
+  /**
+   * {@inheritdoc}
+   */
   public static $modules = [
     'node',
     'video_embed_field',

@@ -18,7 +18,7 @@ function video_embed_media_install() {
   $destination = \Drupal::config('media.settings')->get('icon_base_uri');
   $file_system->prepareDirectory($destination, FileSystemInterface::CREATE_DIRECTORY | FileSystemInterface::MODIFY_PERMISSIONS);
 
-  $files = file_scan_directory($icon_folder, '/.*\.(svg|png|jpg|jpeg|gif)$/');
+  $files = $file_system->scanDirectory($icon_folder, '/.*\.(svg|png|jpg|jpeg|gif)$/');
   foreach ($files as $file) {
     // We don't want to copy the icons when they already exist. The icons could
     // be placed manually, so we don't want to replace the existing files.

@@ -1,22 +1,22 @@
 <?php
 
-namespace Drupal\video_embed_field\Plugin\migrate\cckfield;
+namespace Drupal\video_embed_field\Plugin\migrate\field;
 
 use Drupal\migrate\Plugin\MigrationInterface;
 use Drupal\migrate\Row;
 use Drupal\migrate_drupal\Plugin\migrate\field\FieldPluginBase;
 
 /**
- * Plugin to migrate from the Drupal 7 video_embed_field module.
+ * Plugin to migrate from the Drupal 6 emfield module.
  *
- * @MigrateCckField(
- *   id = "video_embed_field",
- *   core = {7},
- *   source_module = "video_embed_field",
+ * @MigrateField(
+ *   id = "emvideo",
+ *   core = {6},
+ *   source_module = "emfield",
  *   destination_module = "video_embed_field",
  * )
  */
-class VideoEmbedField extends FieldPluginBase {
+class EmvideoField extends FieldPluginBase {
 
   /**
    * {@inheritdoc}
@@ -31,8 +31,8 @@ class VideoEmbedField extends FieldPluginBase {
   public function getFieldFormatterMap() {
     return [
       'default' => 'video_embed_field_video',
-      'video_embed_field' => 'video_embed_field_video',
-      'video_embed_field_thumbnail' => 'video_embed_field_thumbnail',
+      'video' => 'video_embed_field_video',
+      'thumbnail' => 'video_embed_field_thumbnail',
     ];
   }
 
@@ -41,7 +41,7 @@ class VideoEmbedField extends FieldPluginBase {
    */
   public function getFieldWidgetMap() {
     return [
-      'video_embed_field_video' => 'video_embed_field_textfield',
+      'emvideo_textfields' => 'video_embed_field_textfield',
     ];
   }
 
@@ -53,7 +53,7 @@ class VideoEmbedField extends FieldPluginBase {
       'plugin' => 'sub_process',
       'source' => $field_name,
       'process' => [
-        'value' => 'video_url',
+        'value' => 'embed',
       ],
     ];
     $migration->mergeProcessOfProperty($field_name, $process);

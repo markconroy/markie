@@ -17,6 +17,11 @@ class TextFormatConfigurationTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
+  protected $defaultTheme = 'stark';
+
+  /**
+   * {@inheritdoc}
+   */
   public static $modules = [
     'video_embed_field',
     'video_embed_wysiwyg',

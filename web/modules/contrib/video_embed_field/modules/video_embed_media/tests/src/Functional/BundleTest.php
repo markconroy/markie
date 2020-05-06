@@ -15,6 +15,11 @@ class BundleTest extends MediaFunctionalTestBase {
   use AdminUserTrait;
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * Modules to install.
    *
    * @var array
@@ -25,20 +30,13 @@ class BundleTest extends MediaFunctionalTestBase {
   ];
 
   /**
-   * {@inheritdoc}
-   */
-  protected function setUp() {
-    parent::setUp();
-  }
-
-  /**
    * Test the dialog form.
    */
   public function testMediaBundleCreation() {
     $this->drupalLogin($this->adminUser);
 
     // Create bundle and modify form display.
-    $media_type = $this->createMediaType('video_embed_field', ['bundle' => 'video_bundle']);
+    $media_type = $this->createMediaType('video_embed_field', ['id' => 'video_bundle']);
     $source = $media_type->getSource();
     $source_field = $source->getSourceFieldDefinition($media_type);
     if ($source_field->isDisplayConfigurable('form')) {

@@ -15,6 +15,11 @@ class EmbedDialogTest extends WebDriverTestBase {
   use ContentTypeCreationTrait;
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * Modules to install.
    *
    * @var array
