@@ -38,7 +38,7 @@ class SocialSharingEmail extends GlobalVariable {
         'query' => [
           'subject' => $this->getDependency('current_page_title'),
           'body' => $this->t(
-            'Check this out from @sitename: :base_ur:current_path',
+            'Check this out from @sitename: :base_url:current_path',
             [
               '@sitename' => $this->getDependency('site_name'),
               ':base_url' => $this->getDependency('base_url'),

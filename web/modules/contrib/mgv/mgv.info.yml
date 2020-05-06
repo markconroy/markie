@@ -3,7 +3,7 @@ core: 8.x
 description: Some extra global variables to make your life a little easier.
 type: module
 
-# Information added by Drupal.org packaging script on 2019-10-03
-version: '8.x-1.14'
+# Information added by Drupal.org packaging script on 2020-01-27
+version: '8.x-1.15'
 project: 'mgv'
-datestamp: 1570108692
+datestamp: 1580140689
