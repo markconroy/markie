@@ -1,9 +1,10 @@
 <?php
 
-namespace Drupal\image_widget_crop\Tests;
+namespace Drupal\Tests\image_widget_crop\FunctionalJavascript;
 
+use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
 use Drupal\node\Entity\Node;
-use Drupal\simpletest\WebTestBase;
+use Drupal\Tests\TestFileCreationTrait;
 
 /**
  * Minimal test case for the image_widget_crop module.
@@ -12,7 +13,11 @@ use Drupal\simpletest\WebTestBase;
  *
  * @ingroup media
  */
-class ImageWidgetCropTest extends WebTestBase {
+class ImageWidgetCropTest extends WebDriverTestBase {
+
+  use TestFileCreationTrait {
+    getTestFiles as drupalGetTestFiles;
+  }
 
   /**
    * User with permissions to create content.
@@ -60,9 +65,9 @@ class ImageWidgetCropTest extends WebTestBase {
     $this->drupalGet('node/add/crop_test');
     $edit = [
       'title[0][value]' => $this->randomMachineName(),
-      'files[field_image_crop_test_0]' => \Drupal::service('file_system')->realpath('public://image-test.jpg'),
     ];
-    $this->drupalPostAjaxForm(NULL, $edit, $this->getButtonName('//input[@type="submit" and @value="Upload" and @data-drupal-selector="edit-field-image-crop-test-0-upload-button"]'));
+    $this->getSession()->getPage()->attachFileToField('files[field_image_crop_test_0]', $this->container->get('file_system')->realpath('public://image-test.jpg'));
+    $this->drupalPostForm(NULL, $edit, 'Save');
 
     $node = Node::create([
       'title' => '2nd node using it',
@@ -77,8 +82,7 @@ class ImageWidgetCropTest extends WebTestBase {
     $usage->add(\Drupal::service('entity_type.manager')->getStorage('file')->load(1), 'image_widget_crop', 'node', $node->id());
 
     $this->drupalGet('node/1/edit');
-
-    $this->assertRaw(t('This crop definition affects more usages of this image'));
+    $this->assertSession()->responseContains(t('This crop definition affects more usages of this image'));
 
   }
 
@@ -94,21 +98,20 @@ class ImageWidgetCropTest extends WebTestBase {
 
     // Assert that there is no crop widget, neither 'Alternative text' text
     // filed nor 'Remove' button yet.
-    $raw = '<summary role="button" aria-controls="edit-field-image-crop-test-0-image-crop-crop-wrapper" aria-expanded="false" aria-pressed="false">Crop image</summary>';
-    $this->assertNoRaw($raw);
-    $this->assertNoText('Alternative text');
-    $this->assertNoFieldByName('field_image_crop_test_0_remove_button');
+    $assert_session = $this->assertSession();
+    $assert_session->elementNotExists('css', 'summary:contains(Crop image)');
+    $assert_session->pageTextNotContains('Alternative text');
+    $assert_session->fieldNotExists('field_image_crop_test_0_remove_button');
 
-    $image = [];
     // Upload an image in field_image_crop_test_0.
-    $image['files[field_image_crop_test_0]'] = $this->container->get('file_system')->realpath('public://image-test.jpg');
-    $this->drupalPostAjaxForm(NULL, $image, $this->getButtonName('//input[@type="submit" and @value="Upload" and @data-drupal-selector="edit-field-image-crop-test-0-upload-button"]'));
+    $this->getSession()->getPage()->attachFileToField('files[field_image_crop_test_0]', $this->container->get('file_system')->realpath('public://image-test.jpg'));
 
     // Assert that now crop widget and 'Alternative text' text field appear and
     // that 'Remove' button exists.
-    $this->assertRaw($raw);
-    $this->assertText('Alternative text');
-    $this->assertFieldByName('field_image_crop_test_0_remove_button');
+    $assert_session->assertWaitOnAjaxRequest();
+    $assert_session->elementExists('css', 'summary:contains(Crop image)');
+    $assert_session->pageTextContains('Alternative text');
+    $assert_session->buttonExists('Remove');
 
     // Set title and 'Alternative text' text field and save.
     $title = $this->randomMachineName();
@@ -117,7 +120,7 @@ class ImageWidgetCropTest extends WebTestBase {
       'field_image_crop_test[0][alt]' => $this->randomMachineName(),
     ];
     $this->drupalPostForm(NULL, $edit, 'Save');
-    $this->assertText('Crop test ' . $title . ' has been created.');
+    $assert_session->pageTextContains('Crop test ' . $title . ' has been created.');
     $url = $this->getUrl();
     $nid = substr($url, -1, strrpos($url, '/'));
 
@@ -125,22 +128,21 @@ class ImageWidgetCropTest extends WebTestBase {
     $this->drupalGet('node/' . $nid . '/edit');
 
     // Verify that the 'Remove' button works properly.
-    $this->assertText('Alternative text');
-    $this->drupalPostForm(NULL, NULL, 'Remove');
-    $this->assertNoText('Alternative text');
+    $assert_session->pageTextContains('Alternative text');
+    $this->getSession()->getPage()->pressButton('Remove');
+    $assert_session->assertWaitOnAjaxRequest();
+    $assert_session->pageTextNotContains('Alternative text');
 
-    // Re-upload the image and set the 'Alternative text'.
-    $this->drupalPostAjaxForm(NULL, $image, $this->getButtonName('//input[@type="submit" and @value="Upload" and @data-drupal-selector="edit-field-image-crop-test-0-upload-button"]'));
+    $this->getSession()->getPage()->attachFileToField('files[field_image_crop_test_0]', $this->container->get('file_system')->realpath('public://image-test.jpg'));
 
     // Verify that the 'Preview' button works properly.
     $this->drupalPostForm(NULL, $edit, 'Preview');
-    $this->assertLink('Back to content editing');
+    $assert_session->linkExists('Back to content editing');
     $this->clickLink('Back to content editing');
 
     // Verify that there is an image style preview.
-    $this->assertFieldByName('field_image_crop_test[0][width]', '40');
-    $this->assertFieldByName('field_image_crop_test[0][height]', '20');
-
+    $assert_session->hiddenFieldValueEquals('field_image_crop_test[0][width]', '40');
+    $assert_session->hiddenFieldValueEquals('field_image_crop_test[0][height]', '20');
   }
 
   /**

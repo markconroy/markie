@@ -192,6 +192,23 @@ class CropWidgetForm extends ConfigFormBase {
       '#weight' => 16,
     ];
 
+    $form['image_crop']['notify'] = [
+      '#type' => 'details',
+      '#title' => $this->t('Cropping Notifications'),
+    ];
+
+    $form['image_crop']['notify']['notify_apply'] = [
+      '#title' => $this->t('Crop apply'),
+      '#type' => 'checkbox',
+      '#default_value' => $this->settings->get('settings.notify_apply'),
+    ];
+
+    $form['image_crop']['notify']['notify_update'] = [
+      '#title' => $this->t('Crop update'),
+      '#type' => 'checkbox',
+      '#default_value' => $this->settings->get('settings.notify_update'),
+    ];
+
     return parent::buildForm($form, $form_state);
   }
 
@@ -202,6 +219,8 @@ class CropWidgetForm extends ConfigFormBase {
    *   An associative array containing the structure of the form.
    * @param \Drupal\Core\Form\FormStateInterface $form_state
    *   The current state of the form.
+   *
+   * @throws \GuzzleHttp\Exception\GuzzleException
    */
   public function validateForm(array &$form, FormStateInterface $form_state) {
     parent::validateForm($form, $form_state);
@@ -231,7 +250,7 @@ class CropWidgetForm extends ConfigFormBase {
             catch (\Exception $e) {
               $form_state->setErrorByName($type . '_url', $this->t('The remote URL for the library does not appear to be valid: @message.', [
                 '@message' => $e->getMessage(),
-              ]), 'error');
+              ]));
             }
           }
         }
@@ -249,6 +268,9 @@ class CropWidgetForm extends ConfigFormBase {
     // library or vice-versa.
     Cache::invalidateTags(['library_info']);
 
+    // Set Default (CDN) libraries urls if empty.
+    $this->setDefaultLibrariesUrls($form_state);
+
     $this->settings
       ->set("settings.library_url", $form_state->getValue('library_url'))
       ->set("settings.css_url", $form_state->getValue('css_url'))
@@ -257,8 +279,23 @@ class CropWidgetForm extends ConfigFormBase {
       ->set("settings.show_crop_area", $form_state->getValue('show_crop_area'))
       ->set("settings.warn_multiple_usages", $form_state->getValue('warn_multiple_usages'))
       ->set("settings.crop_list", $form_state->getValue('crop_list'))
-      ->set("settings.crop_types_required", $form_state->getValue('crop_types_required'));
+      ->set("settings.crop_types_required", $form_state->getValue('crop_types_required'))
+      ->set("settings.notify_apply", $form_state->getValue('notify_apply'))
+      ->set("settings.notify_update", $form_state->getValue('notify_update'));
     $this->settings->save();
+  }
+
+  /**
+   * Set the default state of cropper libraries files url.
+   *
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The current state of the form.
+   */
+  public function setDefaultLibrariesUrls(FormStateInterface $form_state) {
+    if (empty($form_state->getValue('library_url')) || empty($form_state->getValue('css_url'))) {
+      $form_state->setValue('library_url', $form_state->getCompleteForm()['library']['library_url']['#attributes']['placeholder']);
+      $form_state->setValue('css_url', $form_state->getCompleteForm()['library']['css_url']['#attributes']['placeholder']);
+    }
   }
 
 }

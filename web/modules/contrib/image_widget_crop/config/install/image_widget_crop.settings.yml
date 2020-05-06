@@ -6,3 +6,5 @@ settings:
   crop_types_required: []
   warn_multiple_usages: FALSE
   show_default_crop: TRUE
+  notify_apply: FALSE
+  notify_update: TRUE

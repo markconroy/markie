@@ -31,7 +31,7 @@ class ImageWidgetCropExamplesTest extends BrowserTestBase {
     parent::setUp();
     // Theme needs to be set before enabling image_widget_crop_examples because
     // of dependency.
-    \Drupal::service('theme_handler')->install(['bartik']);
+    \Drupal::service('theme_installer')->install(['bartik']);
     $this->config('system.theme')
       ->set('default', 'bartik')
       ->save();

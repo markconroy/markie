@@ -68,3 +68,9 @@ image_widget_crop.settings:
         show_crop_area:
           type: boolean
           label: 'Always expand crop area'
+        notify_apply:
+          type: boolean
+          label: 'Notify when crop applied'
+        notify_update:
+          type: boolean
+          label: 'Notify when are crop updated'
