@@ -30,7 +30,7 @@ class HtmlDumper extends CliDumper
     protected $colors = true;
     protected $headerIsDumped = false;
     protected $lastDepth = -1;
-    protected $styles = array(
+    protected $styles = [
         'default' => 'background-color:#18171B; color:#FF8400; line-height:1.2em; font:12px Menlo, Monaco, Consolas, monospace; word-wrap: break-word; white-space: pre-wrap; position:relative; z-index:99999; word-break: break-all',
         'num' => 'font-weight:bold; color:#1299DA',
         'const' => 'font-weight:bold',
@@ -44,14 +44,14 @@ class HtmlDumper extends CliDumper
         'key' => 'color:#56DB3A',
         'index' => 'color:#1299DA',
         'ellipsis' => 'color:#FF8400',
-    );
+    ];
 
-    private $displayOptions = array(
+    private $displayOptions = [
         'maxDepth' => 1,
         'maxStringLength' => 160,
         'fileLinkFormat' => null,
-    );
-    private $extraDisplayOptions = array();
+    ];
+    private $extraDisplayOptions = [];
 
     /**
      * {@inheritdoc}
@@ -108,7 +108,7 @@ class HtmlDumper extends CliDumper
     /**
      * {@inheritdoc}
      */
-    public function dump(Data $data, $output = null, array $extraDisplayOptions = array())
+    public function dump(Data $data, $output = null, array $extraDisplayOptions = [])
     {
         $this->extraDisplayOptions = $extraDisplayOptions;
         $result = parent::dump($data, $output);
@@ -438,7 +438,7 @@ return function (root, x) {
                     return this.current();
                 }
                 this.idx = this.idx < (this.nodes.length - 1) ? this.idx + 1 : 0;
-        
+
                 return this.current();
             },
             previous: function () {
@@ -446,7 +446,7 @@ return function (root, x) {
                     return this.current();
                 }
                 this.idx = this.idx > 0 ? this.idx - 1 : (this.nodes.length - 1);
-        
+
                 return this.current();
             },
             isEmpty: function () {
@@ -483,14 +483,10 @@ return function (root, x) {
             <input type="text" class="sf-dump-search-input">
             <span class="sf-dump-search-count">0 of 0<\/span>
             <button type="button" class="sf-dump-search-input-previous" tabindex="-1">
-                <svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M1683 1331l-166 165q-19 19-45 19t-45-19l-531-531-531 531q-19 19-45 19t-45-19l-166-165q-19-19-19-45.5t19-45.5l742-741q19-19 45-19t45 19l742 741q19 19 19 45.5t-19 45.5z"\/>
-                <\/svg>
+                <svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1683 1331l-166 165q-19 19-45 19t-45-19L896 965l-531 531q-19 19-45 19t-45-19l-166-165q-19-19-19-45.5t19-45.5l742-741q19-19 45-19t45 19l742 741q19 19 19 45.5t-19 45.5z"\/><\/svg>
             <\/button>
             <button type="button" class="sf-dump-search-input-next" tabindex="-1">
-                <svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M1683 808l-742 741q-19 19-45 19t-45-19l-742-741q-19-19-19-45.5t19-45.5l166-165q19-19 45-19t45 19l531 531 531-531q19-19 45-19t45 19l166 165q19 19 19 45.5t-19 45.5z"\/>
-                <\/svg>
+                <svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1683 808l-742 741q-19 19-45 19t-45-19L109 808q-19-19-19-45.5t19-45.5l166-165q19-19 45-19t45 19l531 531 531-531q19-19 45-19t45 19l166 165q19 19 19 45.5t-19 45.5z"\/><\/svg>
             <\/button>
         ';
         root.insertBefore(search, root.firstChild);
@@ -526,11 +522,11 @@ return function (root, x) {
                     "sf-dump-protected",
                     "sf-dump-private",
                 ].map(xpathHasClass).join(' or ');
-                
+
                 var xpathResult = doc.evaluate('.//span[' + classMatches + '][contains(translate(child::text(), ' + xpathString(searchQuery.toUpperCase()) + ', ' + xpathString(searchQuery.toLowerCase()) + '), ' + xpathString(searchQuery.toLowerCase()) + ')]', root, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
 
                 while (node = xpathResult.iterateNext()) state.nodes.push(node);
-                
+
                 showCurrent(state);
             }, 400);
         });
@@ -785,7 +781,7 @@ EOHTML
     /**
      * {@inheritdoc}
      */
-    protected function style($style, $value, $attr = array())
+    protected function style($style, $value, $attr = [])
     {
         if ('' === $value) {
             return '';
@@ -873,7 +869,7 @@ EOHTML
         }
 
         if (-1 === $depth) {
-            $args = array('"'.$this->dumpId.'"');
+            $args = ['"'.$this->dumpId.'"'];
             if ($this->extraDisplayOptions) {
                 $args[] = json_encode($this->extraDisplayOptions, JSON_FORCE_OBJECT);
             }
@@ -895,7 +891,7 @@ EOHTML
         $options = $this->extraDisplayOptions + $this->displayOptions;
 
         if ($fmt = $options['fileLinkFormat']) {
-            return \is_string($fmt) ? strtr($fmt, array('%f' => $file, '%l' => $line)) : $fmt->format($file, $line);
+            return \is_string($fmt) ? strtr($fmt, ['%f' => $file, '%l' => $line]) : $fmt->format($file, $line);
         }
 
         return false;

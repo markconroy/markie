@@ -14,6 +14,10 @@ namespace Unish;
 class EnDisUnListInfoCase extends CommandUnishTestCase {
 
   public function testEnDisUnList() {
+    // TODO: enable test when devel available for Drupal 9
+    if (UNISH_DRUPAL_MAJOR_VERSION >= 9) {
+      $this->markTestSkipped('Drupal 9 version of devel not available yet.');
+    }
     $sites = $this->setUpDrupal(1, TRUE);
     $options_no_pipe = array(
       'yes' => NULL,
@@ -71,8 +75,21 @@ class EnDisUnListInfoCase extends CommandUnishTestCase {
     }
 
     // Test the testing install profile theme is installed.
-    $themeToCheck = UNISH_DRUPAL_MAJOR_VERSION >= 8 ? 'classy' : (UNISH_DRUPAL_MAJOR_VERSION == 7 ? 'bartik' : 'garland');
-    $this->assertTrue(in_array($themeToCheck, $list), 'Themes are in the pm-list');
+    $themeToCheck = 'garland';
+    if (UNISH_DRUPAL_MAJOR_VERSION >= 7) {
+      $themeToCheck = 'bartik';
+    }
+    if (UNISH_DRUPAL_MAJOR_VERSION >= 8) {
+      $themeToCheck = 'classy';
+      // UNISH_DRUPAL_MINOR_VERSION is something like ".8.0-alpha1".
+      if (UNISH_DRUPAL_MINOR_VERSION[1] >= 8) {
+        $themeToCheck = 'stark';
+      }
+    }
+    if (UNISH_DRUPAL_MAJOR_VERSION >= 9) {
+      $themeToCheck = 'stark';
+    }
+    $this->assertContains($themeToCheck, $list, 'Themes are in the pm-list');
 
     // Test cache was cleared after enabling a module.
     $table = UNISH_DRUPAL_MAJOR_VERSION >= 8 ? 'router' : 'menu_router';
@@ -112,6 +129,9 @@ class EnDisUnListInfoCase extends CommandUnishTestCase {
     }
 
     if (UNISH_DRUPAL_MAJOR_VERSION !=6) {
+      if (substr(UNISH_DRUPAL_MINOR_VERSION, 0, 2) == '.4') {
+        $this->markTestSkipped("panels module broken with Drupal 8.4.x");
+      }
       // Test that pm-enable downloads missing projects and dependencies.
       $this->drush('pm-enable', array('panels'), $options + array('resolve-dependencies' => TRUE));
       $this->drush('pm-list', array(), $options + array('status' => 'enabled'));

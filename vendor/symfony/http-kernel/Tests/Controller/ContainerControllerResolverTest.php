@@ -229,7 +229,7 @@ class ContainerControllerResolverTest extends ControllerResolverTest
      */
     public function testGetControllerOnNonUndefinedFunction($controller, $exceptionName = null, $exceptionMessage = null)
     {
-        // All this logic needs to be duplicated, since calling parent::testGetControllerOnNonUndefinedFunction will override the expected excetion and not use the regex
+        // All this logic needs to be duplicated, since calling parent::testGetControllerOnNonUndefinedFunction will override the expected exception and not use the regex
         $resolver = $this->createControllerResolver();
         $this->expectException($exceptionName);
         $this->expectExceptionMessageRegExp($exceptionMessage);
@@ -248,7 +248,7 @@ class ContainerControllerResolverTest extends ControllerResolverTest
             [
                 'Symfony\Component\HttpKernel\Tests\Controller\ControllerResolverTest::bar',
                 \InvalidArgumentException::class,
-                '/.?[cC]ontroller(.*?) for URI "\/" is not callable\.( Expected method(.*) Available methods)?/',
+                '/.?[cC]ontroller(.*?) for URI "\/" is not callable:( Expected method(.*) Available methods)?/',
             ],
         ];
     }

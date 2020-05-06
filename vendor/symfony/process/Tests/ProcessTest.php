@@ -263,7 +263,7 @@ class ProcessTest extends TestCase
     public function testInvalidInput($value)
     {
         $this->expectException('Symfony\Component\Process\Exception\InvalidArgumentException');
-        $this->expectExceptionMessage('Symfony\Component\Process\Process::setInput only accepts strings, Traversable objects or stream resources.');
+        $this->expectExceptionMessage('"Symfony\Component\Process\Process::setInput" only accepts strings, Traversable objects or stream resources.');
         $process = $this->getProcess('foo');
         $process->setInput($value);
     }
@@ -936,7 +936,7 @@ class ProcessTest extends TestCase
         $process = $this->getProcess('foo');
 
         $this->expectException('Symfony\Component\Process\Exception\LogicException');
-        $this->expectExceptionMessage(sprintf('Process must be started before calling %s.', $method));
+        $this->expectExceptionMessage(sprintf('Process must be started before calling "%s()".', $method));
 
         $process->{$method}();
     }

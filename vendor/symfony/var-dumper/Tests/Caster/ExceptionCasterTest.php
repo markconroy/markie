@@ -36,7 +36,7 @@ class ExceptionCasterTest extends TestCase
 
     public function testDefaultSettings()
     {
-        $ref = array('foo');
+        $ref = ['foo'];
         $e = $this->getTestException('foo', $ref);
 
         $expectedDump = <<<'EODUMP'
@@ -52,12 +52,11 @@ Exception {
       › }
     }
     %s%eTests%eCaster%eExceptionCasterTest.php:40 { …}
-    Symfony\Component\VarDumper\Tests\Caster\ExceptionCasterTest->testDefaultSettings() {}
 %A
 EODUMP;
 
         $this->assertDumpMatchesFormat($expectedDump, $e);
-        $this->assertSame(array('foo'), $ref);
+        $this->assertSame(['foo'], $ref);
     }
 
     public function testSeek()
@@ -71,8 +70,7 @@ EODUMP;
     ›     return new \Exception(''.$msg);
     › }
   }
-  %s%eTests%eCaster%eExceptionCasterTest.php:65 { …}
-  Symfony\Component\VarDumper\Tests\Caster\ExceptionCasterTest->testSeek() {}
+  %s%eTests%eCaster%eExceptionCasterTest.php:64 { …}
 %A
 EODUMP;
 
@@ -96,8 +94,7 @@ Exception {
       ›     return new \Exception(''.$msg);
       › }
     }
-    %s%eTests%eCaster%eExceptionCasterTest.php:84 { …}
-    Symfony\Component\VarDumper\Tests\Caster\ExceptionCasterTest->testNoArgs() {}
+    %s%eTests%eCaster%eExceptionCasterTest.php:82 { …}
 %A
 EODUMP;
 
@@ -166,19 +163,19 @@ EODUMP;
     {
         require_once \dirname(__DIR__).'/Fixtures/Twig.php';
 
-        $f = array(
-            new FrameStub(array(
+        $f = [
+            new FrameStub([
                 'file' => \dirname(__DIR__).'/Fixtures/Twig.php',
                 'line' => 20,
                 'class' => '__TwigTemplate_VarDumperFixture_u75a09',
-            )),
-            new FrameStub(array(
+            ]),
+            new FrameStub([
                 'file' => \dirname(__DIR__).'/Fixtures/Twig.php',
                 'line' => 21,
                 'class' => '__TwigTemplate_VarDumperFixture_u75a09',
                 'object' => new \__TwigTemplate_VarDumperFixture_u75a09(null, __FILE__),
-            )),
-        );
+            ]),
+        ];
 
         $expectedDump = <<<'EODUMP'
 array:2 [
