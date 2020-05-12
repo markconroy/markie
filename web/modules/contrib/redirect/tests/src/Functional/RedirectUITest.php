@@ -94,7 +94,7 @@ class RedirectUITest extends BrowserTestBase {
     $redirect = $this->repository->findMatchingRedirect('node_test_alias', [], Language::LANGCODE_NOT_SPECIFIED);
     $this->assertTrue(empty($redirect));
 
-    \Drupal::service('path.alias_manager')->cacheClear();
+    \Drupal::service('path_alias.manager')->cacheClear();
     $redirect = $this->repository->findMatchingRedirect('node_test_alias_updated', [], Language::LANGCODE_NOT_SPECIFIED);
 
     $this->drupalGet('node/' . $node->id() . '/edit');

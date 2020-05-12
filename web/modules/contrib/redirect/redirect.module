@@ -5,22 +5,12 @@
  * The redirect module.
  */
 
-/**
- * @defgroup redirect_api Redirection API
- * @{
- * Functions related to URL redirects.
- *
- * @} End of "defgroup redirect_api".
- */
-use Drupal\Component\Utility\UrlHelper;
-use Drupal\Core\Cache\Cache;
 use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Field\FieldItemList;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Language\Language;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Url;
-use Drupal\Core\Site\Settings;
+use Drupal\path_alias\PathAliasInterface;
 use Drupal\redirect\Entity\Redirect;
 use Symfony\Component\Routing\Exception\RouteNotFoundException;
 use Drupal\Core\Database\Query\Condition;
@@ -94,63 +84,39 @@ function redirect_entity_delete(EntityInterface $entity) {
 }
 
 /**
- * Implements hook_path_update().
- *
- * Will create redirect from the old path alias to the new one.
+ * Implements hook_ENTITY_TYPE_update() for path_alias.
  */
-function redirect_path_update(array $path) {
-  if (!\Drupal::config('redirect.settings')->get('auto_redirect')) {
+function redirect_path_alias_update(PathAliasInterface $path_alias) {
+  $config = \Drupal::config('redirect.settings');
+  if (!$config->get('auto_redirect')) {
     return;
   }
-  $original_path = $path['original'];
+
+  /** @var \Drupal\path_alias\PathAliasInterface $original_path_alias */
+  $original_path_alias = $path_alias->original;
 
   // Delete all redirects having the same source as this alias.
-  redirect_delete_by_path($path['alias'], $path['langcode'], FALSE);
-  if ($original_path['alias'] != $path['alias']) {
-    if (!redirect_repository()->findMatchingRedirect($original_path['alias'], [], $original_path['langcode'])) {
+  redirect_delete_by_path($path_alias->getAlias(), $path_alias->language()->getId(), FALSE);
+
+  // Create redirect from the old path alias to the new one.
+  if ($original_path_alias->getAlias() != $path_alias->getAlias()) {
+    if (!redirect_repository()->findMatchingRedirect($original_path_alias->getAlias(), [], $original_path_alias->language()->getId())) {
       $redirect = Redirect::create();
-      $redirect->setSource($original_path['alias']);
-      $redirect->setRedirect($path['source']);
-      $redirect->setLanguage($original_path['langcode']);
-      $redirect->setStatusCode(\Drupal::config('redirect.settings')->get('default_status_code'));
+      $redirect->setSource($original_path_alias->getAlias());
+      $redirect->setRedirect($path_alias->getPath());
+      $redirect->setLanguage($original_path_alias->language()->getId());
+      $redirect->setStatusCode($config->get('default_status_code'));
       $redirect->save();
     }
   }
 }
 
 /**
- * Implements hook_path_insert().
+ * Implements hook_ENTITY_TYPE_insert() for path_alias.
  */
-function redirect_path_insert(array $path) {
+function redirect_path_alias_insert(PathAliasInterface $path_alias) {
   // Delete all redirects having the same source as this alias.
-  redirect_delete_by_path($path['alias'], $path['langcode'], FALSE);
-}
-
-/**
- * Implements hook_path_delete().
- */
-function redirect_path_delete($path) {
-  if (!\Drupal::config('redirect.settings')->get('auto_redirect')) {
-    return;
-  }
-  elseif (isset($path['redirect']) && !$path['redirect']) {
-    return;
-  }
-  elseif (empty($path)) {
-    // @todo Remove this condition and allow $path to use an array type hint
-    // when http://drupal.org/node/1025904 is fixed.
-    return;
-  }
-
-  // Redirect from a deleted alias to the system path.
-  //if (!redirect_load_by_source($path['alias'], $path['language'])) {
-  //  $redirect = new stdClass();
-  //  redirect_create($redirect);
-  //  $redirect->source = $path['alias'];
-  //  $redirect->redirect = $path['source'];
-  //  $redirect->language = $path['language'];
-  //  redirect_save($redirect);
-  //}
+  redirect_delete_by_path($path_alias->getAlias(), $path_alias->language()->getId(), FALSE);
 }
 
 /**
@@ -258,60 +224,6 @@ function redirect_sort_recursive(&$array, $callback = 'sort') {
   return $result;
 }
 
-/**
- * Build the URL of a redirect for display purposes only.
- */
-function redirect_url($path, array $options = [], $clean_url = NULL) {
-  // @todo - deal with removal of clean_url config. See
-  //    https://drupal.org/node/1659580
-  if (!isset($clean_url)) {
-    //$clean_url = variable_get('clean_url', 0);
-  }
-
-  if ($path == '') {
-    $path = '<front>';
-  }
-
-  if (!isset($options['alter']) || !empty($options['alter'])) {
-    \Drupal::moduleHandler()->alter('redirect_url', $path, $options);
-  }
-
-  // The base_url might be rewritten from the language rewrite in domain mode.
-  if (!isset($options['base_url'])) {
-    // @todo - is this correct? See https://drupal.org/node/1798832.
-    if (isset($options['https']) && Settings::get('mixed_mode_sessions', FALSE)) {
-      if ($options['https'] === TRUE) {
-        $options['base_url'] = $GLOBALS['base_secure_url'];
-        $options['absolute'] = TRUE;
-      }
-      elseif ($options['https'] === FALSE) {
-        $options['base_url'] = $GLOBALS['base_insecure_url'];
-        $options['absolute'] = TRUE;
-      }
-    }
-    else {
-      $options['base_url'] = $GLOBALS['base_url'];
-    }
-  }
-
-  if (empty($options['absolute']) || url_is_external($path)) {
-    $url = $path;
-  }
-  else {
-    $url = $options['base_url'] . base_path() . $path;
-  }
-
-  if (isset($options['query'])) {
-    $url .= $clean_url ? '?' : '&';
-    $url .= UrlHelper::buildQuery($options['query']);
-  }
-  if (isset($options['fragment'])) {
-    $url .= '#' . $options['fragment'];
-  }
-
-  return $url;
-}
-
 function redirect_status_code_options($code = NULL) {
   $codes = [
     300 => t('300 Multiple Choices'),
@@ -338,30 +250,6 @@ function redirect_is_current_page_404() {
 }
 
 /**
- * uasort callback; Compare redirects based on language neutrality and rids.
- */
-function _redirect_uasort($a, $b) {
-  $a_weight = isset($a->weight) ? $a->weight : 0;
-  $b_weight = isset($b->weight) ? $b->weight : 0;
-  if ($a_weight != $b_weight) {
-    // First sort by weight (case sensitivity).
-    return $a_weight > $b_weight;
-  }
-  elseif ($a->language != $b->language) {
-    // Then sort by language specific over language neutral.
-    return $a->language == Language::LANGCODE_NOT_SPECIFIED;
-  }
-  elseif (!empty($a->source_options['query']) != !empty($b->source_options['query'])) {
-    // Then sort by redirects that do not have query strings over ones that do.
-    return empty($a->source_options['query']);
-  }
-  else {
-    // Lastly sort by the highest redirect ID.
-    return $a->rid < $b->rid;
-  }
-}
-
-/**
  * Implements hook_form_FORM_ID_alter() on behalf of locale.module.
  */
 function locale_form_redirect_edit_form_alter(array &$form, FormStateInterface $form_state) {
@@ -372,36 +260,6 @@ function locale_form_redirect_edit_form_alter(array &$form, FormStateInterface $
     '#default_value' => $form['language']['#value'],
     '#description' => t('A redirect set for a specific language will always be used when requesting this page in that language, and takes precedence over redirects set for <em>All languages</em>.'),
   ];
-}
-
-/**
- * Fetch an array of redirect bulk operations.
- *
- * @see hook_redirect_operations()
- * @see hook_redirect_operations_alter()
- */
-function redirect_get_redirect_operations() {
-  $operations = &drupal_static(__FUNCTION__);
-
-  if (!isset($operations)) {
-    $operations = \Drupal::moduleHandler()->invokeAll('redirect_operations');
-    \Drupal::moduleHandler()->alter('redirect_operations', $operations);
-  }
-
-  return $operations;
-}
-
-/**
- * Implements hook_redirect_operations().
- */
-function redirect_redirect_operations() {
-  $operations['delete'] = [
-    'action' => t('Delete'),
-    'action_past' => t('Deleted'),
-    'callback' => 'redirect_delete_multiple',
-    'confirm' => TRUE,
-  ];
-  return $operations;
 }
 
 /**

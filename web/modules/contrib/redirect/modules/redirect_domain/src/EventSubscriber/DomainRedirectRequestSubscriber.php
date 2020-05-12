@@ -80,9 +80,16 @@ class DomainRedirectRequestSubscriber implements EventSubscriberInterface {
       $protocol = $request->getScheme() . '://';
       $destination = NULL;
 
+      // Prior to being saved the source domain value has any periods replaced
+      // with a colon, which makes it suitable for use as a key. In order to
+      // match against those values the current hostname must be similarly
+      // converted.
+      // @see \Drupal\redirect_domain\Form\RedirectDomainForm::submitForm()
+      $converted_host = str_replace('.', ':', $host);
+
       // Checks if there is a redirect domain in the configuration.
-      if (isset($domains[str_replace('.', ':', $host)])) {
-        foreach ($domains[str_replace('.', ':', $host)] as $item) {
+      if (isset($domains[$converted_host])) {
+        foreach ($domains[$converted_host] as $item) {
           if ($this->pathMatcher->matchPath($path, $item['sub_path'])) {
             $destination = $item['destination'];
             break;

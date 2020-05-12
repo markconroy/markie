@@ -1,20 +1,24 @@
 <?php
 
-namespace Drupal\redirect\Tests;
+namespace Drupal\Tests\redirect\Functional;
 
-use Drupal\Component\Render\FormattableMarkup;
+use Behat\Mink\Driver\GoutteDriver;
+use Drupal\Core\Cache\Cache;
 use Drupal\Core\Language\Language;
-use Drupal\simpletest\WebTestBase;
 use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\taxonomy\Entity\Term;
 use Drupal\taxonomy\Entity\Vocabulary;
+use Drupal\Tests\BrowserTestBase;
+use Drupal\Tests\Traits\Core\PathAliasTestTrait;
 
 /**
  * Global redirect test cases.
  *
  * @group redirect
  */
-class GlobalRedirectTest extends WebTestBase {
+class GlobalRedirectTest extends BrowserTestBase {
+
+  use PathAliasTestTrait;
 
   /**
    * Modules to enable.
@@ -65,6 +69,31 @@ class GlobalRedirectTest extends WebTestBase {
   /**
    * {@inheritdoc}
    */
+  protected $defaultTheme = 'stark';
+
+  /**
+   * {@inheritdoc}
+   */
+  protected $minkDefaultDriverClass = GoutteDriver::class;
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function initMink() {
+    $session = parent::initMink();
+
+    /** @var \Behat\Mink\Driver\GoutteDriver $driver */
+    $driver = $session->getDriver();
+    // Since we are testing low-level redirect stuff, the HTTP client should
+    // NOT automatically follow redirects sent by the server.
+    $driver->getClient()->followRedirects(FALSE);
+
+    return $session;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   protected function setUp() {
     parent::setUp();
 
@@ -101,7 +130,7 @@ class GlobalRedirectTest extends WebTestBase {
 
     // Create an alias for the create story path - this is used in the
     // "redirect with permissions testing" test.
-    \Drupal::service('path.alias_storage')->save('/admin/config/system/site-information', '/site-info');
+    $this->createPathAlias('/admin/config/system/site-information', '/site-info');
 
     // Create a taxonomy term for the forum.
     $term = Term::create([
@@ -134,14 +163,12 @@ class GlobalRedirectTest extends WebTestBase {
    * Will test the redirects.
    */
   public function testRedirects() {
-
-    // First test that the good stuff can be switched off.
+    // First, test that redirects can be disabled.
     $this->config->set('route_normalizer_enabled', FALSE)->save();
-    $this->assertRedirect('index.php/node/' . $this->node->id(), NULL, 'HTTP/1.1 200 OK');
-    $this->assertRedirect('index.php/test-node', NULL, 'HTTP/1.1 200 OK');
-    $this->assertRedirect('test-node/', NULL, 'HTTP/1.1 200 OK');
-    $this->assertRedirect('Test-node/', NULL, 'HTTP/1.1 200 OK');
-
+    $this->assertNoRedirect('index.php/node/' . $this->node->id());
+    $this->assertNoRedirect('index.php/test-node');
+    $this->assertNoRedirect('test-node/');
+    $this->assertNoRedirect('Test-node/');
     $this->config->set('route_normalizer_enabled', TRUE)->save();
 
     // Test alias normalization.
@@ -157,20 +184,35 @@ class GlobalRedirectTest extends WebTestBase {
 
     // Test front page redirects.
     $this->config('system.site')->set('page.front', '/node')->save();
-    $this->assertRedirect('node', '<front>');
+    $this->assertRedirect('node', '/');
 
     // Test front page redirects with an alias.
-    \Drupal::service('path.alias_storage')->save('/node', '/node-alias');
-    $this->assertRedirect('node-alias', '<front>');
+    $this->createPathAlias('/node', '/node-alias');
+    $this->assertRedirect('node-alias', '/');
 
-    // Test post request.
-    $this->drupalPost('Test-node', 'application/json', []);
+    // Test a POST request. It should stay on the same path and not try to
+    // redirect. Because Mink does not provide methods to do plain POSTs, we
+    // need to use the underlying Guzzle HTTP client directly.
+    /** @var \Behat\Mink\Driver\GoutteDriver $driver */
+    $driver = $this->getSession()->getDriver();
+    $response = $driver->getClient()
+      ->getClient()
+      ->post($this->getAbsoluteUrl('Test-node'), [
+        // Do not follow redirects. This way, we can assert that the server did
+        // not even _try_ to redirect us
+        'allow_redirects' => FALSE,
+        'headers' => [
+          'Accept' => 'application/json',
+        ],
+      ]);
     // Does not do a redirect, stays in the same path.
-    $this->assertEqual(basename($this->getUrl()), 'Test-node');
+    $this->assertSame(200, $response->getStatusCode());
+    $this->assertEmpty($response->getHeader('Location'));
+    $this->assertStringNotContainsString('http-equiv="refresh', (string) $response->getBody());
 
     // Test the access checking.
     $this->config->set('access_check', TRUE)->save();
-    $this->assertRedirect('admin/config/system/site-information', NULL, 'HTTP/1.1 403 Forbidden');
+    $this->assertNoRedirect('admin/config/system/site-information', 403);
 
     $this->config->set('access_check', FALSE)->save();
     // @todo - here it seems that the access check runs prior to our redirecting
@@ -181,11 +223,14 @@ class GlobalRedirectTest extends WebTestBase {
     $this->assertRedirect('Test-node?&foo&.bar=baz', 'test-node?&foo&.bar=baz');
 
     // Test alias normalization with trailing ?.
-    $this->assertRedirect('test-node?', 'test-node');
+    // @todo \GuzzleHttp\Psr7\Uri strips away the trailing ?, this should
+    //   actually be a redirect but can't be tested with Guzzle. Improve in
+    //   https://www.drupal.org/project/redirect/issues/3119503.
+    $this->assertNoRedirect('test-node?');
     $this->assertRedirect('Test-node?', 'test-node');
 
     // Test alias normalization still works without trailing ?.
-    $this->assertRedirect('test-node', NULL, 'HTTP/1.1 200 OK');
+    $this->assertNoRedirect('test-node');
     $this->assertRedirect('Test-node', 'test-node');
 
     // Login as user with admin privileges.
@@ -199,7 +244,7 @@ class GlobalRedirectTest extends WebTestBase {
     $this->assertRedirect('Test-node', 'test-node');
 
     $this->config->set('ignore_admin_path', TRUE)->save();
-    $this->assertRedirect('admin/config/system/site-information', NULL, 'HTTP/1.1 200 OK');
+    $this->assertNoRedirect('admin/config/system/site-information');
 
     // Test alias normalization again with ignore_admin_path true.
     $this->assertRedirect('Test-node', 'test-node');
@@ -225,7 +270,7 @@ class GlobalRedirectTest extends WebTestBase {
       'language_configuration[content_translation]' => TRUE,
     ];
     $this->drupalPostForm('admin/structure/types/manage/page', $edit, t('Save content type'));
-    $this->assertRaw(t('The content type %type has been updated.', ['%type' => 'Page']), 'Basic page content type has been updated.');
+    $this->assertRaw(t('The content type %type has been updated.', ['%type' => 'Page']));
 
     $spanish_node = $this->drupalCreateNode([
       'type' => 'page',
@@ -239,60 +284,54 @@ class GlobalRedirectTest extends WebTestBase {
   }
 
   /**
-   * Asserts the redirect from $path to the $expected_ending_url.
+   * Visits a path and asserts that it is a redirect.
    *
    * @param string $path
    *   The request path.
-   * @param $expected_ending_url
+   * @param string $expected_destination
    *   The path where we expect it to redirect. If NULL value provided, no
    *   redirect is expected.
-   * @param string $expected_ending_status
+   * @param int $status_code
    *   The status we expect to get with the first request.
+   *
+   * @throws \Behat\Mink\Exception\ExpectationException
    */
-  public function assertRedirect($path, $expected_ending_url, $expected_ending_status = 'HTTP/1.1 301 Moved Permanently') {
-    $this->drupalHead($GLOBALS['base_url'] . '/' . $path);
-    $headers = $this->drupalGetHeaders(TRUE);
-
-    $ending_url = isset($headers[0]['location']) ? $headers[0]['location'] : NULL;
-    $message = new FormattableMarkup('Testing redirect from %from to %to. Ending url: %url', [
-      '%from' => $path,
-      '%to' => $expected_ending_url,
-      '%url' => $ending_url,
-    ]);
-
-
-    if ($expected_ending_url == '<front>') {
-      $expected_ending_url = $GLOBALS['base_url'] . '/';
-    }
-    elseif (!empty($expected_ending_url)) {
-      $expected_ending_url = $GLOBALS['base_url'] . '/' . $expected_ending_url;
-    }
-    else {
-      $expected_ending_url = NULL;
-    }
-
-    $this->assertEqual($expected_ending_url, $ending_url);
-
-    $this->assertEqual($headers[0][':status'], $expected_ending_status);
-  }
-
-  /**
-   * @inheritdoc}
-   */
-  protected function drupalHead($path, array $options = [], array $headers = []) {
+  public function assertRedirect($path, $expected_destination, $status_code = 301) {
     // Always just use getAbsolutePath() so that generating the link does not
     // alter special requests.
     $url = $this->getAbsoluteUrl($path);
-    $out = $this->curlExec([CURLOPT_NOBODY => TRUE, CURLOPT_URL => $url, CURLOPT_HTTPHEADER => $headers]);
+    $this->getSession()->visit($url);
+
     // Ensure that any changes to variables in the other thread are picked up.
     $this->refreshVariables();
 
-    if ($this->dumpHeaders) {
-      $this->verbose('GET request to: ' . $path .
-        '<hr />Ending URL: ' . $this->getUrl() .
-        '<hr />Headers: <pre>' . Html::escape(var_export(array_map('trim', $this->headers), TRUE)) . '</pre>');
-    }
-
-    return $out;
+    $assert_session = $this->assertSession();
+    $assert_session->responseHeaderEquals('Location', $this->getAbsoluteUrl($expected_destination));
+    $assert_session->statusCodeEquals($status_code);
   }
+
+  /**
+   * Visits a path and asserts that it is NOT a redirect.
+   *
+   * @param string $path
+   *   The path to visit.
+   * @param int $status_code
+   *   (optional) The expected HTTP status code. Defaults to 200.
+   *
+   * @throws \Behat\Mink\Exception\ExpectationException
+   */
+  protected function assertNoRedirect($path, $status_code = 200) {
+    $url = $this->getAbsoluteUrl($path);
+    $this->getSession()->visit($url);
+
+    $assert_session = $this->assertSession();
+    $assert_session->statusCodeEquals($status_code);
+    $assert_session->responseHeaderEquals('Location', NULL);
+    $assert_session->responseNotContains('http-equiv="refresh');
+    $assert_session->addressEquals($path);
+
+    // Ensure that any changes to variables in the other thread are picked up.
+    $this->refreshVariables();
+  }
+
 }

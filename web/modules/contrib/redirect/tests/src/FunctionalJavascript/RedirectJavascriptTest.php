@@ -147,7 +147,7 @@ class RedirectJavascriptTest extends WebDriverTestBase {
     $this->assertRaw(
       t(
         'The source path %path is likely a valid path. It is preferred to <a href="@url-alias">create URL aliases</a> for existing paths rather than redirects.',
-        ['%path' => 'node', '@url-alias' => Url::fromRoute('path.admin_add')->toString()]
+        ['%path' => 'node', '@url-alias' => Url::fromRoute('entity.path_alias.add_form')->toString()]
       )
     );
 

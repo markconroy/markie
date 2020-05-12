@@ -2,22 +2,19 @@
 
 namespace Drupal\redirect\EventSubscriber;
 
-use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Language\LanguageManagerInterface;
-use Drupal\Core\Logger\RfcLogLevel;
-use Drupal\Core\Path\AliasManagerInterface;
 use Drupal\Core\PathProcessor\InboundPathProcessorInterface;
 use Drupal\Core\Routing\TrustedRedirectResponse;
 use Drupal\Core\Url;
+use Drupal\path_alias\AliasManagerInterface;
 use Drupal\redirect\Exception\RedirectLoopException;
 use Drupal\redirect\RedirectChecker;
 use Drupal\redirect\RedirectRepository;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -42,7 +39,7 @@ class RedirectRequestSubscriber implements EventSubscriberInterface {
   protected $config;
 
   /**
-   * @var \Drupal\Core\Path\AliasManager
+   * @var \Drupal\path_alias\AliasManagerInterface
    */
   protected $aliasManager;
 
@@ -82,7 +79,7 @@ class RedirectRequestSubscriber implements EventSubscriberInterface {
    *   The language manager service.
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config
    *   The config.
-   * @param \Drupal\Core\Path\AliasManagerInterface $alias_manager
+   * @param \Drupal\path_alias\AliasManagerInterface $alias_manager
    *   The alias manager service.
    * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
    *   The module handler service.

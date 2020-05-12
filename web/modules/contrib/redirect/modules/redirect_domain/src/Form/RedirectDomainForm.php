@@ -150,6 +150,7 @@ class RedirectDomainForm extends ConfigFormBase {
       foreach ($redirects as $redirect) {
         if (!empty($redirect['from']) && !empty($redirect['destination'])) {
           // Replace '.' with ':' for an eligible key.
+          // @see \Drupal\redirect_domain\EventSubscriber\DomainRedirectRequestSubscriber::onKernelRequestCheckDomainRedirect()
           $redirect['from'] = str_replace('.', ':', $redirect['from']);
           $domain_redirects[$redirect['from']][] = [
             'sub_path' => '/' . ltrim($redirect['sub_path'], '/'),

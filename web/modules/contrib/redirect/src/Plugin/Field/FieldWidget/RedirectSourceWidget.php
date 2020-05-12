@@ -67,7 +67,7 @@ class RedirectSourceWidget extends WidgetBase {
         try {
           \Drupal::service('router')->match('/' . $form_state->getValue(['redirect_source', 0, 'path']));
           $element['status_box'][]['#markup'] = '<div class="messages messages--warning">' . $this->t('The source path %path is likely a valid path. It is preferred to <a href="@url-alias">create URL aliases</a> for existing paths rather than redirects.',
-              ['%path' => $source_path, '@url-alias' => Url::fromRoute('path.admin_add')->toString()]) . '</div>';
+              ['%path' => $source_path, '@url-alias' => Url::fromRoute('entity.path_alias.add_form')->toString()]) . '</div>';
         }
         catch (ResourceNotFoundException $e) {
           // Do nothing, expected behaviour.
