@@ -242,8 +242,6 @@ class InlineEntityFormComplex extends InlineEntityFormBase implements ContainerF
       $element['#open'] = !$this->getSetting('collapsed');
     }
 
-    $element['#attached']['library'][] = 'inline_entity_form/widget';
-
     $this->prepareFormState($form_state, $items, $element['#translating']);
     $entities = $form_state->get(['inline_entity_form', $this->getIefId(), 'entities']);
 
@@ -526,6 +524,9 @@ class InlineEntityFormComplex extends InlineEntityFormBase implements ContainerF
       }
     }
     else {
+      // Make a delta key bigger than all existing ones, without assuming that
+      // the keys are strictly consecutive.
+      $new_key = $entities ? max(array_keys($entities)) + 1 : 0;
       // There's a form open, show it.
       if ($form_state->get(['inline_entity_form', $this->getIefId(), 'form']) == 'add') {
         $element['form'] = [
@@ -535,9 +536,9 @@ class InlineEntityFormComplex extends InlineEntityFormBase implements ContainerF
             'add',
             $this->determineBundle($form_state),
             $parent_langcode,
-            NULL,
-            array_merge($parents, ['inline_entity_form'])
-          )
+            $new_key,
+            array_merge($parents, [$new_key])
+          ),
         ];
         $element['form']['inline_entity_form']['#process'] = [
           ['\Drupal\inline_entity_form\Element\InlineEntityForm', 'processEntityForm'],
@@ -553,7 +554,7 @@ class InlineEntityFormComplex extends InlineEntityFormBase implements ContainerF
           '#ief_id' => $this->getIefId(),
           // Used by Field API and controller methods to find the relevant
           // values in $form_state.
-          '#parents' => array_merge($parents),
+          '#parents' => array_merge($parents, [$new_key]),
           '#entity_type' => $target_type,
           '#ief_labels' => $this->getEntityTypeLabels(),
           '#match_operator' => $this->getSetting('match_operator'),

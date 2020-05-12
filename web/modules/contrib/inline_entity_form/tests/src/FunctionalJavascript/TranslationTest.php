@@ -56,6 +56,11 @@ class TranslationTest extends InlineEntityFormTestBase {
    * Tests translating inline entities.
    */
   public function testTranslation() {
+    // Get the xpath selectors for the fields in this test.
+    $first_nested_title_field_xpath = $this->getXpathForNthInputByLabelText('Title', 2);
+    $first_name_field_xpath = $this->getXpathForNthInputByLabelText('First name', 1);
+    $last_name_field_xpath = $this->getXpathForNthInputByLabelText('Last name', 1);
+
     $assert_session = $this->assertSession();
     $page = $this->getSession()->getPage();
     // Create a German node with a French translation.
@@ -75,7 +80,7 @@ class TranslationTest extends InlineEntityFormTestBase {
     $multi_fieldset = $assert_session->elementExists('css', 'fieldset[data-drupal-selector="edit-multi"]');
     $multi_fieldset->pressButton('Add existing node');
     // Reference the German node.
-    $this->assertNotEmpty($field = $assert_session->waitForField('multi[form][entity_id]'));
+    $this->assertNotEmpty($field = $assert_session->waitForElement('xpath', $this->getXpathForAutoCompleteInput()));
     $field->setValue('Kann ein KÃ¤nguru hÃ¶her als ein Haus springen? (' . $first_inline_node->id() . ')');
     $page->pressButton('Add node');
     $this->waitForRowByTitle('Kann ein KÃ¤nguru hÃ¶her als ein Haus springen?');
@@ -83,9 +88,9 @@ class TranslationTest extends InlineEntityFormTestBase {
     // Add a new English inline node.
     $multi_fieldset->pressButton('Add new node');
     $this->assertNotEmpty($create_button = $assert_session->waitForButton('Create node'));
-    $page->fillField('multi[form][inline_entity_form][title][0][value]', 'Can a kangaroo jump higher than a house?');
-    $page->fillField('multi[form][inline_entity_form][first_name][0][value]', 'John');
-    $page->fillField('multi[form][inline_entity_form][last_name][0][value]', 'Smith');
+    $assert_session->elementExists('xpath', $first_nested_title_field_xpath)->setValue('Can a kangaroo jump higher than a house?');
+    $assert_session->elementExists('xpath', $first_name_field_xpath)->setValue('John');
+    $assert_session->elementExists('xpath', $last_name_field_xpath)->setValue('Smith');
     $create_button->press();
     $this->waitForRowByTitle('Can a kangaroo jump higher than a house?');
     $this->assertRowByTitle('Kann ein KÃ¤nguru hÃ¶her als ein Haus springen?');
@@ -131,15 +136,15 @@ class TranslationTest extends InlineEntityFormTestBase {
     // Edit the first referenced translation.
     $first_reference->getParent()->pressButton('Edit');
     $this->assertNotEmpty($update_button = $assert_session->waitForButton('Update node'));
-    $page->fillField('multi[form][inline_entity_form][entities][0][form][title][0][value]', "Un kangourou peut-il sauter plus haut qu'une maison? - mis Ã  jour");
-    $page->fillField('multi[form][inline_entity_form][entities][0][form][first_name][0][value]', 'Damien');
+    $assert_session->elementExists('xpath', $first_nested_title_field_xpath)->setValue("Un kangourou peut-il sauter plus haut qu'une maison? - mis Ã  jour");
+    $assert_session->elementExists('xpath', $first_name_field_xpath)->setValue('Damien');
     $update_button->press();
     $this->waitForRowByTitle("Un kangourou peut-il sauter plus haut qu'une maison? - mis Ã  jour");
     // Edit the second referenced translation.
     $second_reference->getParent()->pressButton('Edit');
     $this->assertNotEmpty($update_button = $assert_session->waitForButton('Update node'));
-    $page->fillField('multi[form][inline_entity_form][entities][1][form][title][0][value]', 'tous les animaux qui sautent');
-    $page->fillField('multi[form][inline_entity_form][entities][1][form][first_name][0][value]', 'Jacques');
+    $assert_session->elementExists('xpath', $first_nested_title_field_xpath)->setValue('tous les animaux qui sautent');
+    $assert_session->elementExists('xpath', $first_name_field_xpath)->setValue('Jacques');
     $update_button->press();
     $this->waitForRowByTitle('tous les animaux qui sautent');
     $page->pressButton('Save (this translation)');

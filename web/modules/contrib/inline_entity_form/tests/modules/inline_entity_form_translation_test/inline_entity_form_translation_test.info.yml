@@ -8,7 +8,7 @@ dependencies:
   - drupal:language
   - drupal:content_translation
 
-# Information added by Drupal.org packaging script on 2020-02-14
-version: '8.x-1.0-rc3'
+# Information added by Drupal.org packaging script on 2020-05-12
+version: '8.x-1.0-rc6'
 project: 'inline_entity_form'
-datestamp: 1581640485
+datestamp: 1589280849

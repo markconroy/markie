@@ -40,6 +40,10 @@ class ElementWebTest extends InlineEntityFormTestBase {
    * Tests IEF on a custom form.
    */
   public function testCustomForm() {
+    // Get the xpath selectors for the fields in this test.
+    $title_field_xpath = $this->getXpathForNthInputByLabelText('Title', 1);
+    $positive_int_field_xpath = $this->getXpathForNthInputByLabelText('Positive int', 1);
+
     $assert_session = $this->assertSession();
     $page = $this->getSession()->getPage();
 
@@ -57,14 +61,14 @@ class ElementWebTest extends InlineEntityFormTestBase {
       // Fix in https://www.drupal.org/project/inline_entity_form/issues/3100883
       $this->assertNoNodeByTitle($title);
 
-      $page->fillField('inline_entity_form[title][0][value]', $title);
-      $page->fillField('inline_entity_form[positive_int][0][value]', -1);
+      $assert_session->elementExists('xpath', $title_field_xpath)->setValue($title);
+      $assert_session->elementExists('xpath', $positive_int_field_xpath)->setValue(-1);
 
       $page->pressButton('Save');
       $assert_session->pageTextNotContains("Created Content $title");
       $this->assertNoNodeByTitle($title);
 
-      $page->fillField('inline_entity_form[positive_int][0][value]', 11);
+      $assert_session->elementExists('xpath', $positive_int_field_xpath)->setValue(11);
       $page->pressButton('Save');
       $assert_session->pageTextContains("Created Content $title");
       $this->assertNodeByTitle($title, 'ief_test_custom');
@@ -72,10 +76,10 @@ class ElementWebTest extends InlineEntityFormTestBase {
 
       $this->drupalGet("ief-test/$form_mode_possibility/{$node->id()}");
       // Assert node title appears in form.
-      $assert_session->fieldExists('inline_entity_form[title][0][value]');
+      $assert_session->elementExists('xpath', $title_field_xpath);
       $this->checkFormDisplayFields("node.ief_test_custom.$form_mode_possibility", 'inline_entity_form');
-      $assert_session->fieldValueEquals('inline_entity_form[positive_int][0][value]', 11);
-      $page->fillField('inline_entity_form[title][0][value]', $title . ' - updated');
+      $this->assertSame('11', $assert_session->elementExists('xpath', $positive_int_field_xpath)->getValue());
+      $assert_session->elementExists('xpath', $title_field_xpath)->setValue($title . ' - updated');
       $page->pressButton('Update');
       $this->assertNodeByTitle($title . ' - updated', 'ief_test_custom');
     }

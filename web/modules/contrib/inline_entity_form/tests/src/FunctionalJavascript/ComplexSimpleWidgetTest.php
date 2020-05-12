@@ -55,6 +55,9 @@ class ComplexSimpleWidgetTest extends InlineEntityFormTestBase {
       2 => 2,
       FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED => 3,
     ];
+    $first_title_field_xpath = $this->getXpathForNthInputByLabelText('Title', 1);
+    $outer_title_field_xpath = $this->getXpathForNthInputByLabelText('Title', 2);
+    $inner_title_field_xpath = $this->getXpathForNthInputByLabelText('Title', 3);
     /** @var \Drupal\field\FieldStorageConfigInterface $field_storage */
     $field_storage = $this->fieldStorageConfigStorage->load('node.ief_complex_outer');
     /** @var \Drupal\Core\Field\FieldConfigInterface $field_config */
@@ -67,29 +70,27 @@ class ComplexSimpleWidgetTest extends InlineEntityFormTestBase {
         $field_storage->save();
 
         $this->drupalGet('node/add/ief_complex_simple');
-        $outer_title_field = 'ief_complex_outer[form][inline_entity_form][title][0][value]';
-        $inner_title_field = 'ief_complex_outer[form][inline_entity_form][single][0][inline_entity_form][title][0][value]';
         if (!$outer_required_option) {
           $assert_session->pageTextContains('Complex Outer');
           // Field should not be available before ajax submit.
-          $assert_session->fieldNotExists($outer_title_field);
+          $assert_session->elementNotExists('xpath', $outer_title_field_xpath);
           $assert_session
-            ->elementExists('xpath', '//input[@type="submit" and @value="Add new node" and @data-drupal-selector="edit-ief-complex-outer-actions-ief-add"]')
+            ->elementExists('xpath', '//input[@type="submit" and @value="Add new node"]')
             ->press();
-          $this->assertNotEmpty($assert_session->waitForField($outer_title_field));
+          $this->assertNotEmpty($assert_session->waitForElement('xpath', $outer_title_field_xpath));
         }
         $outer_title = $this->randomMachineName(8);
         $inner_title = $this->randomMachineName(8);
-        $assert_session->fieldExists($outer_title_field)->setValue($outer_title);
+        $assert_session->elementExists('xpath', $outer_title_field_xpath)->setValue($outer_title);
         // Simple widget is required so should always show up. No need for
         // add submit.
-        $assert_session->fieldExists($inner_title_field)->setValue($inner_title);
-        $create_outer_button_selector = '//input[@type="submit" and @value="Create node" and @data-drupal-selector="edit-ief-complex-outer-form-inline-entity-form-actions-ief-add-save"]';
+        $assert_session->elementExists('xpath', $inner_title_field_xpath)->setValue($inner_title);
+        $create_outer_button_selector = '//input[@type="submit" and @value="Create node"]';
         $assert_session->elementExists('xpath', $create_outer_button_selector)->press();
         // After Ajax submit the ief title fields should be gone.
         $this->assertNotEmpty($assert_session->waitForButton('Edit'));
-        $assert_session->fieldNotExists($outer_title_field);
-        $assert_session->fieldNotExists($inner_title_field);
+        $assert_session->elementNotExists('xpath', $outer_title_field_xpath);
+        $assert_session->elementNotExists('xpath', $inner_title_field_xpath);
         $assert_session->elementNotExists('xpath', $create_outer_button_selector);
 
         // The nodes should not actually be saved at this point.
@@ -97,7 +98,7 @@ class ComplexSimpleWidgetTest extends InlineEntityFormTestBase {
         $this->assertNoNodeByTitle($inner_title, 'Inner node was not created when widget submitted.');
 
         $host_title = $this->randomMachineName(8);
-        $page->fillField('title[0][value]', $host_title);
+        $assert_session->elementExists('xpath', $first_title_field_xpath)->setValue($host_title);
         $page->pressButton('Save');
         $assert_session->pageTextContains("$host_title has been created.");
         $assert_session->pageTextContains($outer_title);

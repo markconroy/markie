@@ -273,7 +273,7 @@ abstract class InlineEntityFormBase extends WidgetBase implements ContainerFacto
     else {
       $form_mode_label = $this->t('Default');
     }
-    $summary[] = t('Form mode: @mode', ['@mode' => $form_mode_label]);
+    $summary[] = $this->t('Form mode: @mode', ['@mode' => $form_mode_label]);
     if ($this->getSetting('override_labels')) {
       $summary[] = $this->t(
         'Overriden labels are used: %singular and %plural',

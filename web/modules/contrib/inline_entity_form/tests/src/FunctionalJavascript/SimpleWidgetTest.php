@@ -41,6 +41,16 @@ class SimpleWidgetTest extends InlineEntityFormTestBase {
    * Tests simple IEF widget with different cardinality options.
    */
   public function testSimpleCardinalityOptions() {
+    // Get the xpath selectors for the fields in this test.
+    $title_field_xpath = $this->getXpathForNthInputByLabelText('Title', 1);
+    $first_nested_title_field_xpath = $this->getXpathForNthInputByLabelText('Title', 2);
+    $second_nested_title_field_xpath = $this->getXpathForNthInputByLabelText('Title', 3);
+    $third_nested_title_field_xpath = $this->getXpathForNthInputByLabelText('Title', 4);
+    $fourth_nested_title_field_xpath = $this->getXpathForNthInputByLabelText('Title', 5);
+    $first_positive_int_field_xpath = $this->getXpathForNthInputByLabelText('Positive int', 1);
+    $second_positive_int_field_xpath = $this->getXpathForNthInputByLabelText('Positive int', 2);
+    $third_positive_int_field_xpath = $this->getXpathForNthInputByLabelText('Positive int', 3);
+
     $page = $this->getSession()->getPage();
     $assert_session = $this->assertSession();
     $this->drupalLogin($this->user);
@@ -64,9 +74,9 @@ class SimpleWidgetTest extends InlineEntityFormTestBase {
       if ($cardinality === 1) {
         // With cardinality 1, one item should already be on the page.
         $assert_session->buttonNotExists('Add another item');
-        $page->fillField('title[0][value]', 'Host node');
-        $page->fillField('single[0][inline_entity_form][title][0][value]', 'Nested single node');
-        $page->fillField('single[0][inline_entity_form][positive_int][0][value]', 42);
+        $assert_session->elementExists('xpath', $title_field_xpath)->setValue('Host node');
+        $assert_session->elementExists('xpath', $first_nested_title_field_xpath)->setValue('Nested single node');
+        $assert_session->elementExists('xpath', $first_positive_int_field_xpath)->setValue(42);
         $page->pressButton('Save');
         $assert_session->pageTextContains('IEF single simple Host node has been created.');
         $host_node = $this->getNodeByTitle('Host node');
@@ -74,11 +84,11 @@ class SimpleWidgetTest extends InlineEntityFormTestBase {
       elseif ($cardinality === 2) {
         // With cardinality 2, two items should already be on the page.
         $assert_session->buttonNotExists('Add another item');
-        $page->fillField('title[0][value]', 'Host node 2');
-        $page->fillField('single[0][inline_entity_form][title][0][value]', 'Nested single node 2');
-        $page->fillField('single[0][inline_entity_form][positive_int][0][value]', 42);
-        $page->fillField('single[1][inline_entity_form][title][0][value]', 'Nested single node 3');
-        $page->fillField('single[1][inline_entity_form][positive_int][0][value]', 42);
+        $assert_session->elementExists('xpath', $title_field_xpath)->setValue('Host node 2');
+        $assert_session->elementExists('xpath', $first_nested_title_field_xpath)->setValue('Nested single node 2');
+        $assert_session->elementExists('xpath', $first_positive_int_field_xpath)->setValue(42);
+        $assert_session->elementExists('xpath', $second_nested_title_field_xpath)->setValue('Nested single node 3');
+        $assert_session->elementExists('xpath', $second_positive_int_field_xpath)->setValue(42);
         $page->pressButton('Save');
         $assert_session->pageTextContains('IEF single simple Host node 2 has been created.');
         $host_node = $this->getNodeByTitle('Host node 2');
@@ -86,26 +96,26 @@ class SimpleWidgetTest extends InlineEntityFormTestBase {
       elseif ($cardinality === FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED) {
         // With unlimited cardinality, one item should already be on the page,
         // and an 'Add another item' button should appear.
-        $page->fillField('title[0][value]', 'Host node 3');
-        $page->fillField('single[0][inline_entity_form][title][0][value]', 'Nested single node 4');
-        $page->fillField('single[0][inline_entity_form][positive_int][0][value]', 42);
-        $assert_session->fieldNotExists('single[1][inline_entity_form][title][0][value]');
+        $assert_session->elementExists('xpath', $title_field_xpath)->setValue('Host node 3');
+        $assert_session->elementExists('xpath', $first_nested_title_field_xpath)->setValue('Nested single node 4');
+        $assert_session->elementExists('xpath', $first_positive_int_field_xpath)->setValue(42);
+        $assert_session->elementNotExists('xpath', $second_positive_int_field_xpath);
 
         // Press the 'add another item' button and add a second item.
         $assert_session->buttonExists('Add another item')->press();
-        $this->assertNotEmpty($assert_session->waitForField('single[1][inline_entity_form][title][0][value]'));
+        $this->assertNotEmpty($assert_session->waitForElement('xpath', $second_nested_title_field_xpath));
         // Assert an extra item isn't added at the same time.
-        $assert_session->fieldNotExists('single[2][inline_entity_form][title][0][value]');
-        $page->fillField('single[1][inline_entity_form][title][0][value]', 'Nested single node 5');
-        $page->fillField('single[1][inline_entity_form][positive_int][0][value]', 42);
+        $assert_session->elementNotExists('xpath', $third_nested_title_field_xpath);
+        $assert_session->elementExists('xpath', $second_nested_title_field_xpath)->setValue('Nested single node 5');
+        $assert_session->elementExists('xpath', $second_positive_int_field_xpath)->setValue(42);
 
         // Press the 'add another item' button and add a third item.
         $assert_session->buttonExists('Add another item')->press();
-        $this->assertNotEmpty($assert_session->waitForField('single[2][inline_entity_form][title][0][value]'));
+        $this->assertNotEmpty($assert_session->waitForElement('xpath', $third_nested_title_field_xpath));
         // Assert an extra item isn't added at the same time.
-        $assert_session->fieldNotExists('single[3][inline_entity_form][title][0][value]');
-        $page->fillField('single[2][inline_entity_form][title][0][value]', 'Nested single node 6');
-        $page->fillField('single[2][inline_entity_form][positive_int][0][value]', 42);
+        $assert_session->elementNotExists('xpath', $fourth_nested_title_field_xpath);
+        $assert_session->elementExists('xpath', $third_nested_title_field_xpath)->setValue('Nested single node 6');
+        $assert_session->elementExists('xpath', $third_positive_int_field_xpath)->setValue(42);
         $page->pressButton('Save');
         $assert_session->pageTextContains('IEF single simple Host node 3 has been created.');
         $host_node = $this->getNodeByTitle('Host node 3');
@@ -118,6 +128,11 @@ class SimpleWidgetTest extends InlineEntityFormTestBase {
    * Test Validation on Simple Widget.
    */
   public function testSimpleValidation() {
+    // Get the xpath selectors for the fields in this test.
+    $title_field_xpath = $this->getXpathForNthInputByLabelText('Title', 1);
+    $nested_title_field_xpath = $this->getXpathForNthInputByLabelText('Title', 2);
+    $positive_int_field_xpath = $this->getXpathForNthInputByLabelText('Positive int', 1);
+
     $page = $this->getSession()->getPage();
     $assert_session = $this->assertSession();
     $this->drupalLogin($this->user);
@@ -131,7 +146,7 @@ class SimpleWidgetTest extends InlineEntityFormTestBase {
     // Assert positive int field found.
     $assert_session->pageTextContains('Positive int');
 
-    $page->fillField('title[0][value]', $host_node_title);
+    $assert_session->elementExists('xpath', $title_field_xpath)->setValue($host_node_title);
     $page->pressButton('Save');
 
     // Assert title validation fires on Inline Entity Form widget.
@@ -140,15 +155,15 @@ class SimpleWidgetTest extends InlineEntityFormTestBase {
     $this->assertSession()->addressEquals('node/add/ief_simple_single');
 
     $child_title = 'Child node ' . $this->randomString();
-    $page->fillField('single[0][inline_entity_form][title][0][value]', $child_title);
-    $page->fillField('single[0][inline_entity_form][positive_int][0][value]', -1);
+    $assert_session->elementExists('xpath', $nested_title_field_xpath)->setValue($child_title);
+    $assert_session->elementExists('xpath', $positive_int_field_xpath)->setValue(-1);
     $page->pressButton('Save');
     // Assert field validation fires on Inline Entity Form widget.
     $assert_session->pageTextNotContains('IEF single simple Host Validation Node has been created.');
     // Assert that we're still on form due to to validation error.
     $this->assertSession()->addressEquals('node/add/ief_simple_single');
 
-    $page->fillField('single[0][inline_entity_form][positive_int][0][value]', 1);
+    $assert_session->elementExists('xpath', $positive_int_field_xpath)->setValue(1);
     $page->pressButton('Save');
     // Assert title validation passes on Inline Entity Form widget.
     $assert_session->pageTextNotContains('Title field is required.');
@@ -178,30 +193,38 @@ class SimpleWidgetTest extends InlineEntityFormTestBase {
    * Tests if the entity create access works in the simple widget.
    */
   public function testSimpleCreateAccess() {
+    // Get the xpath selectors for the fields in this test.
+    $nested_title_field_xpath = $this->getXpathForNthInputByLabelText('Title', 2);
+
     $assert_session = $this->assertSession();
     // Create a user who does not have access to create ief_test_custom nodes.
     $this->drupalLogin($this->createUser([
       'create ief_simple_single content',
     ]));
     $this->drupalGet('node/add/ief_simple_single');
-    $assert_session->fieldNotExists('single[0][inline_entity_form][title][0][value]');
+    $assert_session->elementNotExists('xpath', $nested_title_field_xpath);
     // Now test with a user has access to create ief_test_custom nodes.
     $this->drupalLogin($this->user);
     $this->drupalGet('node/add/ief_simple_single');
-    $assert_session->fieldExists('single[0][inline_entity_form][title][0][value]');
+    $assert_session->elementExists('xpath', $nested_title_field_xpath);
   }
 
   /**
    * Ensures that an entity without bundles can be used with the simple widget.
    */
   public function testEntityWithoutBundle() {
+    // Get the xpath selectors for the fields in this test.
+    $title_field_xpath = $this->getXpathForNthInputByLabelText('Title', 1);
+    $name_field_xpath = $this->getXpathForNthInputByLabelText('Name', 1);
+
+    $assert_session = $this->assertSession();
     $page = $this->getSession()->getPage();
     $this->drupalLogin($this->user);
     $this->drupalGet('node/add/ief_simple_entity_no_bundle');
-    $page->fillField('title[0][value]', 'Node title');
-    $page->fillField('field_ief_entity_no_bundle[0][inline_entity_form][name][0][value]', 'Entity title');
+    $assert_session->elementExists('xpath', $title_field_xpath)->setValue('Node title');
+    $assert_session->elementExists('xpath', $name_field_xpath)->setValue('Entity title');
     $page->pressButton('Save');
-    $this->assertSession()->pageTextContains('IEF simple entity no bundle Node title has been created.');
+    $assert_session->pageTextContains('IEF simple entity no bundle Node title has been created.');
     $this->assertNodeByTitle('Node title', 'ief_simple_entity_no_bundle');
     $this->assertEntityByLabel('Entity title', 'entity_test__without_bundle');
   }
