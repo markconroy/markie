@@ -1,0 +1,19 @@
+{%
+set classes = [
+  "sidebar",
+  "sidebar-first"
+]
+%}
+
+<aside{{ attributes.addClass(classes) }} role="complementary">
+  {{ sidebar_content }}
+</aside>
+
+{% block content_variable %}
+  {#
+    This allows the cache_context to bubble up for us, without having to
+    individually list every field in
+    {{ content|without('field_name', 'field_other_field', 'field_etc') }}
+  #}
+  {% set catch_cache = content|render %}
+{% endblock %}

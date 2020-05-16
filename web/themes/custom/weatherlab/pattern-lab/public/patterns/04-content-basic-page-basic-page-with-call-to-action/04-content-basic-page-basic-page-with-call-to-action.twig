@@ -1,0 +1,44 @@
+{%
+set classes = [
+  "basic-page",
+  "full",
+  'node',
+  'node--type-' ~ node.bundle|clean_class,
+  node.isPromoted ? 'node--promoted',
+  node.isSticky ? 'node--sticky',
+  not node.isPublished ? 'node--unpublished',
+  view_mode ? 'node--view-mode-' ~ view_mode|clean_class,
+]
+%}
+
+<article{{ attributes.addClass(classes) }}>
+  {{ title_prefix }}
+    <h1{{ title_attributes.addClass('full__title layout-contained padding-horizontal') }}>{{ label }}</h1>
+  {{ title_suffix }}
+
+  {% if introduction %}
+    <div class="full__introduction layout-contained padding-horizontal">
+      {{ introduction }}
+    </div>
+  {% endif %}
+
+  {% block building_blocks %}
+    <div class="building-blocks">
+      {% for building_block in building_blocks %}
+        <div class="building-block">
+          {{ building_block }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endblock %}
+
+</article>
+
+{% block content_variable %}
+  {#
+    This allows the cache_context to bubble up for us, without having to
+    individually list every field in
+    {{ content|without('field_name', 'field_other_field', 'field_etc') }}
+  #}
+  {% set catch_cache = content|render %}
+{% endblock %}

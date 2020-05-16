@@ -1,0 +1,9 @@
+.dialog-off-canvas-main-canvas {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.dialog-off-canvas-main-canvas > * {
+  width: 100%;
+}

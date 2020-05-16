@@ -1,0 +1,72 @@
+core:
+  css:
+    theme:
+      dist/style.css:
+        media: screen
+        preprocess: true
+
+print:
+  css:
+    theme:
+      components/css/print.css:
+        media: print
+
+accordion:
+  js:
+    dist/03-building-blocks/accordion/accordion.js: {}
+  dependencies:
+    - core/drupal
+
+header:
+  js:
+    dist/05-page-sections/header/header.js: {}
+
+mobile_menu:
+  js:
+    dist/02-site-components/menus/main-navigation/menu-block-main-navigation.js: {}
+  dependencies:
+    - core/jquery
+    - core/drupal
+
+menu_sub_items:
+  js:
+    dist/02-site-components/menus/menu-items.js: {}
+  dependencies:
+    - core/jquery
+    - core/drupal
+
+unite_gallery:
+  header: true
+  js:
+    components/_custom-vendor/unitegallery/js/unitegallery.min.js: {}
+  css:
+    theme:
+      components/_custom-vendor/unitegallery/css/unite-gallery.css: {}
+  dependencies:
+    - core/jquery
+    - core/drupal
+
+unite_gallery_default_theme:
+  header: true
+  js:
+    components/_custom-vendor/unitegallery/themes/default/ug-theme-default.js: {}
+  css:
+    theme:
+      components/_custom-vendor/unitegallery/themes/default/ug-theme-default.css: {}
+  dependencies:
+    - weatherlab/unite_gallery
+
+gallery:
+  js:
+    dist/03-building-blocks/gallery/gallery.js: {}
+  dependencies:
+    - weatherlab/unite_gallery
+    - weatherlab/unite_gallery_default_theme
+
+hero-media:
+  js:
+    dist/03-building-blocks/hero-media/hero-media.js: {}
+  dependencies:
+    - core/drupal
+    - core/drupal.dialog
+    - core/drupal.dialog.ajax

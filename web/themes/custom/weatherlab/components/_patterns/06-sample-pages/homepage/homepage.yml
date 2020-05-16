@@ -1,0 +1,19 @@
+this_page_content:
+  include():
+    pattern: 'sample-pages-site-layout'
+    with:
+      site_header:
+        include():
+          pattern: 'page-sections-header'
+      page_content:
+        include():
+          pattern: content-homepage
+      site_footer_pre:
+        include():
+          pattern: 'page-sections-footer-pre'
+      site_footer:
+        include():
+          pattern: 'page-sections-footer'
+      credits:
+        include():
+          pattern: 'page-sections-credits'

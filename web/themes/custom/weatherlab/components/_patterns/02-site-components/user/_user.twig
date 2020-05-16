@@ -1,0 +1,14 @@
+{% 
+  set classes = [
+    'profile',
+    'layout-contained',
+    'layout-contained--medium',
+    'padding-horizontal',
+  ] 
+%}
+
+<article{{ attributes.addClass(classes) }}>
+  {% if user_content %}
+    {{- user_content -}}
+  {% endif %}
+</article>

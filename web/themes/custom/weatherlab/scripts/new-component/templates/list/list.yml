@@ -1,0 +1,7 @@
+css_classes: 'list--<%- name %> layout-contained padding-horizontal'
+
+title: false
+
+rows:
+  include():
+    pattern: content-list-items-<%- name %>

@@ -1,0 +1,9 @@
+.footer-pre {
+  @include breakpoint($bp--xlarge) {
+    display: none;
+  }
+}
+
+body.js-header .footer-pre {
+  display: none;
+}

@@ -1,0 +1,17 @@
+label: 'This is a Basic Page with Image with Text Building Block'
+building_blocks:
+  - join():
+    - include():
+        pattern: 'building-blocks-text'
+  - join():
+    - include():
+        pattern: building-blocks-image-with-text
+  - join():
+    - include():
+        pattern: 'building-blocks-text-paragraph-x2'
+  - join():
+    - include():
+        pattern: building-blocks-image-with-text-right
+  - join():
+    - include():
+        pattern: 'building-blocks-text-paragraph-x2'

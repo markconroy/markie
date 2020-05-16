@@ -1,0 +1,6 @@
+block_type: false
+block_classes: false
+
+label: false
+
+block_content: 'Hello <%- cleanName %> Block'

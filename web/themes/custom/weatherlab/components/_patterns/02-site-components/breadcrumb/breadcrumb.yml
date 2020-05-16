@@ -1,0 +1,10 @@
+attributes:
+  Attribute():
+    class:
+
+breadcrumb:
+  -
+    text: 'Home'
+    url: link.sample-pages-basic-page
+
+current_page_title: Current Page Title

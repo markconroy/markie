@@ -1,0 +1,12 @@
+label: 'This is a Basic Page with a Quote Building Block'
+
+building_blocks:
+  - join():
+    - include():
+        pattern: building-blocks-text-paragraph-x2
+  - join():
+    - include():
+        pattern: building-blocks-quote
+  - join():
+    - include():
+        pattern: building-blocks-text-paragraph-x2

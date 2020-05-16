@@ -1,0 +1,39 @@
+configuration:
+  label_display: false
+  label: 'Housekeeping'
+derivative_plugin_id: 'housekeeping'
+content:
+  include():
+    pattern: 'site-components-menu-items'
+    with:
+      items:
+        -
+          title: 'Terms of Use'
+          url: "link.sample-pages-basic-page-no-hero"
+          attributes:
+            Attribute():
+              class:
+        -
+          title: 'Privacy Policy'
+          url: "link.sample-pages-basic-page-no-hero"
+          attributes:
+            Attribute():
+              class:
+        -
+          title: 'Cookie Policy'
+          url: "link.sample-pages-basic-page-no-hero"
+          attributes:
+            Attribute():
+              class:
+        -
+          title: 'Accessibility'
+          url: "link.sample-pages-basic-page-no-hero"
+          attributes:
+            Attribute():
+              class:
+        -
+          title: 'Site Map'
+          url: "link.sample-pages-basic-page-no-hero"
+          attributes:
+            Attribute():
+              class:

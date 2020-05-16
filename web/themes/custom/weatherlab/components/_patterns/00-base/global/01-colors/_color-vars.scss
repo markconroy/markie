@@ -1,0 +1,44 @@
+$c-primary: hsl(202, 100%, 31%); // Blue
+$c-primary--light: lighten($c-primary, 15%); // Light Blue
+$c-primary--dark: darken($c-primary, 15%); // Dark Blue
+$c-secondary: hsl(332, 77%, 47%); // Pink
+$c-secondary--light: lighten($c-secondary, 15%); // Light Pink
+$c-secondary--dark: darken($c-secondary, 15%); // Dark Pink
+$c-tertiary: hsl(72, 62%, 38%); // Green
+$c-tertiary--light: lighten($c-tertiary, 15%); // Light Green
+$c-tertiary--dark: darken($c-tertiary, 15%); // Dark Green
+
+$c-white: white; // White
+$c-grey--lightest: hsl(0, 0%, 100%); // Lightest Grey
+$c-grey--lighter: hsl(60, 9%, 96%); // Lighter Grey
+$c-grey--light: hsl(51, 7%, 79%); // Light Grey
+$c-grey: hsl(56, 7%, 59%); // Grey
+$c-grey--dark: hsl(56, 7%, 40%); // Dark Grey
+$c-grey--darker: hsl(214, 21%, 22%); // Darker Grey
+$c-grey--darkest: hsl(0, 0%, 0%); // Darkest Grey
+$c-black: hsl(0, 0%, 0%); // Black
+
+$theme-colours: (primary, $c-primary),
+  (primary--light, $c-primary--light),
+  (primary--dark, $c-primary--dark),
+  (secondary, $c-secondary),
+  (secondary--light, $c-secondary--light),
+  (secondary--dark, $c-secondary--dark),
+  (tertiary, $c-tertiary),
+  (tertiary--light, $c-tertiary--light),
+  (tertiary--dark, $c-tertiary--dark),
+  (white, $c-white),
+  (grey--lightest, $c-grey--lightest),
+  (grey--lighter, $c-grey--lighter),
+  (grey--light, $c-grey--light),
+  (grey, $c-grey),
+  (grey--dark, $c-grey--dark),
+  (grey--darker, $c-grey--darker),
+  (grey--darkest, $c-grey--darkest),
+  (black, $c-black);
+
+@each $theme-colour, $colour in $theme-colours {
+  .bg-#{$theme-colour} {
+    background: $colour;
+  }
+}

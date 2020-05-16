@@ -1,0 +1,42 @@
+tiles:
+  - join():
+    - include():
+        pattern: "building-blocks-tile"
+        with:
+          tile_style: 'primary'
+          tile_size: 'large'
+    - include():
+        pattern: "building-blocks-tile"
+        with:
+          tile_size: 'small'
+          tile_style: 'quaternary'
+    - include():
+        pattern: "building-blocks-tile"
+        with:
+          tile_size: 'small'
+          tile_style: 'quaternary'
+    - include():
+        pattern: "building-blocks-tile"
+        with:
+          tile_size: 'large'
+          tile_style: 'primary'
+    - include():
+        pattern: "building-blocks-tile"
+        with:
+          tile_style: 'primary'
+          tile_size: 'large'
+    - include():
+        pattern: "building-blocks-tile"
+        with:
+          tile_style: 'quaternary'
+          tile_size: 'small'
+    - include():
+        pattern: "building-blocks-tile"
+        with:
+          tile_style: 'quaternary'
+          tile_size: 'small'
+    - include():
+        pattern: "building-blocks-tile"
+        with:
+          tile_style: 'primary'
+          tile_size: 'large'

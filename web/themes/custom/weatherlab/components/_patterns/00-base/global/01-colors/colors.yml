@@ -1,0 +1,43 @@
+items:
+  - name: $c-primary
+    value: 'hsl(202, 100%, 31%)'
+  - name: $c-primary--light
+    value: 'lighten($c-primary, 15%)'
+  - name: $c-primary--dark
+    value: 'darken($c-primary, 15%)'
+  - name: $c-secondary
+    value: 'hsl(332, 77%, 47%)'
+  - name: $c-secondary--light
+    value: 'lighten($c-secondary, 15%)'
+  - name: $c-secondary--dark
+    value: 'darken($c-secondary, 15%)'
+  - name: $c-tertiary
+    value: 'hsl(72, 62%, 38%)'
+  - name: $c-tertiary--light
+    value: 'lighten($c-tertiary, 15%)'
+  - name: $c-tertiary--dark
+    value: 'darken($c-tertiary, 15%)'
+  - name: $c-white
+    value: white
+  - name: $c-grey--lightest
+    value: 'hsl(0, 0%, 100%)'
+  - name: $c-grey--lighter
+    value: 'hsl(60, 9%, 96%)'
+  - name: $c-grey--light
+    value: 'hsl(51, 7%, 79%)'
+  - name: $c-grey
+    value: 'hsl(56, 7%, 59%)'
+  - name: $c-grey--dark
+    value: 'hsl(56, 7%, 40%)'
+  - name: $c-grey--darker
+    value: 'hsl(214, 21%, 22%)'
+  - name: $c-grey--darkest
+    value: 'hsl(0, 0%, 0%)'
+  - name: $c-black
+    value: 'hsl(0, 0%, 0%)'
+  - name: $theme-colours
+    value: '(primary, $c-primary),'
+meta:
+  description: >-
+    To add to these items, use Sass variables that start with <code>$</code> in
+    <code>.//components/_patterns/00-base/global/01-colors/_color-vars.scss</code>

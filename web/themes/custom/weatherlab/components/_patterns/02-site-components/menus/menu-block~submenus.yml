@@ -1,0 +1,16 @@
+attributes:
+  Attribute():
+    class:
+
+content:
+  include():
+    pattern: 'site-components-menu-items-submenus'
+
+# Include menu-items.js and enable processing of menu by it.
+submenu: true
+
+# Provide a label for menu open buttons.
+menu_open_label: 'Open menu'
+
+# Provide a label for menu close buttons.
+menu_close_label: 'Close menu'

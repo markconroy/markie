@@ -1,0 +1,72 @@
+.add-to-calendar__trigger {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 2rem;
+  cursor: pointer;
+  transition: $trans;
+  color: $c-primary;
+  border: 2px solid $c-primary;
+  border-radius: 2rem;
+  background-color: $c-white;
+  font-size: 1rem;
+
+  svg {
+    position: relative;
+    top: -1px; // to position it with the bottom of non-hanging characters (o, a, u, h, x, etc.)
+    width: 1rem;
+    height: auto;
+    fill: $c-primary;
+  }
+
+  svg path {
+    fill: $c-primary;
+  }
+
+  &:focus,
+  &:hover {
+    color: $c-white;
+    border-color: $c-secondary;
+    background-color: $c-secondary;
+
+    svg {
+      fill: $c-white;
+    }
+
+    svg path {
+      fill: $c-white;
+    }
+  }
+}
+
+.add-to-calendar__trigger-icon {
+  margin-right: 0.5rem;
+  line-height: 0;
+}
+
+.add-to-calendar__items {
+  display: none;
+  padding: 1rem;
+}
+
+.add-to-calendar__item {
+  display: flex;
+  align-items: center;
+  margin-right: -3px;
+  margin-bottom: 1rem;
+  margin-left: -3px;
+  line-height: 1;
+
+  > * {
+    margin-right: 3px;
+    margin-left: 3px;
+  }
+}
+
+.add-to-calendar a {
+  text-decoration: none;
+
+  &:focus,
+  &:hover {
+    text-decoration: underline;
+  }
+}

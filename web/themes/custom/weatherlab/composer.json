@@ -1,0 +1,37 @@
+{
+    "name": "anrt-tools/weatherlab",
+    "description": "Patternlab based Drupal 8 theme built on Emulsify",
+    "type": "drupal-custom-theme",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Mark Conroy",
+            "email": "mark@annertech.com"
+        },
+        {
+            "name": "Tom Bamford",
+            "email": "tom@annertech.com"
+        },
+        {
+            "name": "Mike King",
+            "email": "mike@annertech.com"
+        }
+    ],
+    "repositories": {
+        "drupal": {
+            "type": "composer",
+            "url": "https://packages.drupal.org/8"
+        }
+    },
+    "require": {
+        "drupal-pattern-lab/add-attributes-twig-extension": "^1.0",
+        "drupal-pattern-lab/bem-twig-extension": "^1.0",
+        "drupal-pattern-lab/attach-library-twig-extension": "^1.0",
+        "drupal-pattern-lab/unified-twig-extensions": "^0.1"
+    },
+    "require-dev": {},
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "scripts": {},
+    "extra": []
+}

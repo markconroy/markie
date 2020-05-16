@@ -1,0 +1,16 @@
+.credits {
+  padding-top: $base-line-height;
+}
+
+.credits a {
+  text-decoration: none;
+}
+
+.credits__inner {
+  text-align: center;
+
+  @include breakpoint($bp--large) {
+    display: flex;
+    justify-content: flex-end;
+  }
+}

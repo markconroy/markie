@@ -1,0 +1,4 @@
+tile_link_url: link.sample-pages-basic-page
+tile_image: false
+tile_title: 'This Tile is a Link'
+tile_text: 'Clicking on this tile will bring you to a sample page.'

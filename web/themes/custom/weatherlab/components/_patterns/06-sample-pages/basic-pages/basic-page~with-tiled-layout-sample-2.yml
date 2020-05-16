@@ -1,0 +1,7 @@
+this_page_content:
+  include():
+    pattern: 'sample-pages-site-layout'
+    with:
+      page_content:
+        include():
+          pattern: content-basic-page-with-tiled-layout-sample-2

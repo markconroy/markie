@@ -1,0 +1,15 @@
+contents:
+  - join():
+    - include():
+        pattern: 'building-blocks-gallery-item'
+  - join():
+    - include():
+        pattern: 'building-blocks-gallery-item-no-2'
+  - join():
+    - include():
+        pattern: 'building-blocks-gallery-item-no-3'
+  - join():
+    - include():
+        pattern: 'building-blocks-gallery-item-no-4'
+
+gallery_unique_id: 'annertech'

@@ -1,0 +1,9 @@
+{% if paragraph.field_p_quote_quote.value %}
+  {% set quote = content.field_p_quote_quote %}
+{% endif %}
+
+{% if paragraph.field_p_quote_author.value %}
+  {% set quote_author = paragraph.field_p_quote_author.value %}
+{% endif %}
+
+{% include "@building-blocks/quote/quote.twig" %}

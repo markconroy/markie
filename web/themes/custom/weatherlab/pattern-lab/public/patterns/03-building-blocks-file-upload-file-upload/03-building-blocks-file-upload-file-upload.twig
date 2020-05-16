@@ -1,0 +1,25 @@
+{%
+set classes = [
+  "file-upload",
+  "bg-grey--lightest"
+]
+%}
+
+<div{{ attributes.addClass(classes) }}>
+  <div class="layout-contained layout-contained--medium padding-horizontal">
+    {% block files %}
+      {% for file in files %}
+        {{ file }}
+      {% endfor %}
+    {% endblock %}
+  </div>
+</div>
+
+{% block content_variable %}
+  {#
+    This allows the cache_context to bubble up for us, without having to
+    individually list every field in
+    {{ content|without('field_name', 'field_other_field', 'field_etc') }}
+  #}
+  {% set catch_cache = content|render %}
+{% endblock %}

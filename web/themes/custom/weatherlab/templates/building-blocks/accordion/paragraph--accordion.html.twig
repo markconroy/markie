@@ -1,0 +1,5 @@
+{% if paragraph.field_p_a_item.value %}
+  {% set accordion_items = content.field_p_a_item %}
+{% endif %}
+
+{% include "@building-blocks/accordion/accordion.twig" %}

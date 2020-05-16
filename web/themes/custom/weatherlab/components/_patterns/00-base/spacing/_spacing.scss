@@ -1,0 +1,108 @@
+$spacing--sm: 5px;
+$spacing--l: 20px;
+
+.u-spacing-down {
+  margin-bottom: $spacing--l;
+}
+
+.u-spacing-up {
+  margin-top: $spacing--l;
+}
+
+.u-gap-down {
+  margin-bottom: $spacing--sm;
+}
+
+.u-gap-up {
+  margin-top: $spacing--sm;
+}
+
+@mixin padding {
+  padding: $base-font-size;
+}
+
+.padding {
+  @include padding;
+}
+
+@mixin padding-horizontal {
+  padding-right: $base-font-size;
+  padding-left: $base-font-size;
+}
+
+.padding-horizontal {
+  @include padding-horizontal;
+}
+
+@mixin padding-vertical {
+  padding-top: $base-font-size;
+  padding-bottom: $base-font-size;
+}
+
+.padding-vertical {
+  @include padding-vertical;
+}
+
+@mixin margin-bottom {
+  margin-bottom: $base-line-height;
+
+  @include breakpoint($bp--medium) {
+    margin-bottom: $base-line-height * 2;
+  }
+
+  @include breakpoint($bp--large) {
+    margin-bottom: $base-line-height * 3;
+  }
+}
+
+.margin-bottom {
+  @include margin-bottom;
+}
+
+@mixin margin-top {
+  margin-top: $base-line-height;
+
+  @include breakpoint($bp--medium) {
+    margin-top: $base-line-height * 2;
+  }
+
+  @include breakpoint($bp--large) {
+    margin-top: $base-line-height * 3;
+  }
+}
+
+.margin-top {
+  @include margin-top;
+}
+
+@mixin padding-bottom {
+  padding-bottom: $base-line-height;
+
+  @include breakpoint($bp--medium) {
+    padding-bottom: $base-line-height * 2;
+  }
+
+  @include breakpoint($bp--large) {
+    padding-bottom: $base-line-height * 3;
+  }
+}
+
+.padding-bottom {
+  @include padding-bottom;
+}
+
+@mixin padding-top {
+  padding-top: $base-line-height;
+
+  @include breakpoint($bp--medium) {
+    padding-top: $base-line-height * 2;
+  }
+
+  @include breakpoint($bp--large) {
+    padding-top: $base-line-height * 3;
+  }
+}
+
+.padding-top {
+  @include padding-top;
+}

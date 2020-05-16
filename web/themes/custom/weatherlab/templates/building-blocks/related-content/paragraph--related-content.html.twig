@@ -1,0 +1,9 @@
+{% if paragraph.field_p_rc_title.value %}
+  {% set related_content_title = content.field_p_rc_title %}
+{% endif %}
+
+{% embed "@building-blocks/related-content/related-content.twig" %}
+  {% block related_items %}
+    {{ content.field_p_rc_content }}
+  {% endblock %}
+{% endembed %}

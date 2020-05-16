@@ -1,0 +1,9 @@
+list_block:
+  include():
+    pattern: 'site-components-block'
+    with:
+      block_classes: 'layout-contained layout-contained--medium'
+      label: 'Latest News Posts'
+      block_content:
+        include():
+          pattern: 'content-list-teasers'

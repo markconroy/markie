@@ -1,0 +1,64 @@
+tiles:
+  - join():
+    - include():
+        pattern: "building-blocks-tile"
+        with:
+          tile_image: 
+            include():
+              pattern: basic-elements-image
+              with:
+                image_source: '../../../../components/images/sample/responsive-images/annertech-team/annertech-team-16x9.jpg'
+          tile_style: 'secondary'
+          tile_size: 'small'
+    - include():
+        pattern: "building-blocks-tile"
+        with:
+          tile_style: 'primary'
+          tile_size: 'small'
+          tile_link_url: link.sample-pages-basic-page
+          tile_title: 'Linked Image Tile'
+          tile_image: 
+            include():
+              pattern: basic-elements-image
+              with:
+                image_source: '../../../../components/images/sample/responsive-images/annertech-team/annertech-team-16x9.jpg'
+    - include():
+        pattern: "building-blocks-tile"
+        with:
+          tile_style: 'primary'
+          tile_size: 'small'
+          tile_image: 
+            include():
+              pattern: basic-elements-image
+              with:
+                image_source: '../../../../components/images/sample/responsive-images/annertech-team/annertech-team-16x9.jpg'
+    - include():
+        pattern: "building-blocks-tile"
+        with:
+          tile_style: 'secondary'
+          tile_size: 'small'
+          tile_image: 
+            include():
+              pattern: basic-elements-image
+              with:
+                image_source: '../../../../components/images/sample/responsive-images/annertech-team/annertech-team-16x9.jpg'
+    - include():
+        pattern: "building-blocks-tile"
+        with:
+          tile_style: 'secondary'
+          tile_size: 'small'
+          tile_image: 
+            include():
+              pattern: basic-elements-image
+              with:
+                image_source: '../../../../components/images/sample/responsive-images/annertech-team/annertech-team-16x9.jpg'
+    - include():
+        pattern: "building-blocks-tile"
+        with:
+          tile_style: 'secondary'
+          tile_size: 'small'
+          tile_image: 
+            include():
+              pattern: basic-elements-image
+              with:
+                image_source: '../../../../components/images/sample/responsive-images/annertech-team/annertech-team-16x9.jpg'

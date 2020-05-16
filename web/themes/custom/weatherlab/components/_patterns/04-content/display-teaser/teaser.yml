@@ -1,0 +1,15 @@
+pl_class: true
+
+node:
+  bundle: page
+  isPublished: true
+  created:
+    value: 1511941986
+  changed:
+    value: 1512127363
+
+url: link.sample-pages-page
+
+label: 'This is the title'
+
+content: 'The teaser content will go here'

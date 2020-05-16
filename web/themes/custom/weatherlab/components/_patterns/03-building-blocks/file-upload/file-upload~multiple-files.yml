@@ -1,0 +1,38 @@
+files:
+  - join():
+    - include():
+        pattern: 'building-blocks-file-upload-file'
+        with:
+          file_type: 'pdf'
+    - include():
+        pattern: 'building-blocks-file-upload-file'
+        with:
+          file_type: 'Flash'
+    - include():
+        pattern: 'building-blocks-file-upload-file'
+        with:
+          file_type: 'flash'
+    - include():
+        pattern: 'building-blocks-file-upload-file'
+        with:
+          file_type: 'Audio'
+    - include():
+        pattern: 'building-blocks-file-upload-file'
+        with:
+          file_type: 'audio'
+    - include():
+        pattern: 'building-blocks-file-upload-file'
+        with:
+          file_type: 'doc'
+    - include():
+        pattern: 'building-blocks-file-upload-file'
+        with:
+          file_type: 'xls'
+    - include():
+        pattern: 'building-blocks-file-upload-file'
+        with:
+          file_type: 'ppt'
+    - include():
+        pattern: 'building-blocks-file-upload-file'
+        with:
+          file_type: 'txt'

@@ -1,0 +1,84 @@
+{%
+set classes = [
+  "header",
+  "bg-grey--lighter"
+]
+%}
+{# Translatable strings #}
+{% set menu_expanded_label = 'Menu is expanded, click to close'|t %}
+{% set menu_hidden_label = 'Menu is hidden, click to show it'|t %}
+{% set menu_expand_text = 'Menu'|t %}
+{% set menu_hide_text = 'Close'|t %}
+
+{{ attach_library('weatherlab/header') }}
+
+<header {{ attributes.addClass(classes) }} role="banner">
+  <div class="layout-contained padding-horizontal">
+    <div class="header__inner">
+
+      {% if header_branding %}
+        <div class="header__branding">
+          {{ header_branding }}
+        </div>
+      {% endif %}
+
+      <div class="header__content">
+
+        {% if header_search %}
+          <div class="header__search">
+            {{ header_search }}
+          </div>
+        {% endif %}
+
+        {% if header_menu %}
+          <div class="header__menu-toggle">
+            <a href="#footer-pre" class="button menu-toggle__link">{{ menu_expand_text }}</a>
+            <button
+              aria-expanded="false"
+              aria-label="{{ menu_hidden_label }}"
+              class="button menu-toggle__button"
+              data-menu-expanded-label="{{ menu_expanded_label }}"
+              data-menu-hidden-label="{{ menu_hidden_label }}"
+              data-menu-expand-text="{{ menu_expand_text }}"
+              data-menu-hide-text="{{ menu_hide_text }}"
+              hidden
+            >{{ menu_expand_text }}</button>
+          </div>
+          <div class="header__menu">
+            {{ header_menu }}
+          </div>
+        {% endif %}
+
+      </div>
+
+    </div>
+  </div>
+
+  {#
+    We use this div so we can slide the menu in/out when the toggle button is clicked.
+    It's like a poor man's region!
+  #}
+  <div class="header__off-canvas header__off-canvas--is-off-canvas">
+
+    {% if header_search %}
+      <div class="header__search">
+        {{ header_search }}
+      </div>
+    {% endif %}
+
+    <div class="header__menu">
+      {{ header_menu }}
+    </div>
+
+  </div>
+
+</header>
+
+{% block content_variable %}
+  {#
+        This allows the cache_context to bubble up for us, without having to
+        individually list every field in
+        {{ content|without('field_name', 'field_other_field', 'field_etc') }}
+        #}
+  {% set catch_cache = content|render %}
+{% endblock %}

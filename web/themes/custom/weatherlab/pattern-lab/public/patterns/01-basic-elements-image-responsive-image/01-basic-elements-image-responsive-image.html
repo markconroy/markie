@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html class="pl">
+  <head>
+    <title>This is a Title</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width" />
+
+    <!-- Component styles -->
+    <link rel="stylesheet" href="../../../../dist/style.css?1589659798" media="all" />
+
+    <!-- Drupal-specific usage -->
+    <!-- example using symlinking -->
+    <!-- cd web/themes/custom/weatherlab/components/js -->
+    <!-- Symlink Drupal core js files: -->
+    <!-- ln -s ../../../../../core/assets/vendor/domready/ready.min.js ./ -->
+    <!-- ln -s ../../../../../core/misc/drupal.js ./ -->
+    <!-- ln -s ../../../../../core/assets/vendor/jquery.ui/ui/core-min.js ./ -->
+    <!-- Symlink custom-vendor files example: -->
+    <!-- ln -s ../_custom-vendor/library-name/js/library-file.js -->
+
+    <!-- UNCOMMENT AS NECESSARY -->
+    <!-- <script src="../../js/ready.min.js"></script> -->
+    <!-- <script src="../../js/drupal.js"></script> -->
+    <script src="../../js/ready.min.js"></script>
+    <script src="../../js/jquery.min.js"></script>
+    <script src="../../js/jquery.once.min.js"></script>
+    <script src="../../js/drupal.js"></script>
+    <script src="../../js/debounce.js"></script>
+    <script src="../../js/unitegallery.min.js"></script>
+    <script>var drupalSettings = {};</script>
+
+    <!-- Begin Pattern Lab (Required for Pattern Lab to run properly) -->
+    <!-- never cache patterns -->
+<meta http-equiv="cache-control" content="max-age=0" />
+<meta http-equiv="cache-control" content="no-cache" />
+<meta http-equiv="expires" content="0" />
+<meta http-equiv="expires" content="Tue, 01 Jan 1980 1:00:00 GMT" />
+<meta http-equiv="pragma" content="no-cache" />
+
+<link rel="stylesheet" href="../../styleguide/css/styleguide.min.css?1589659798" media="all">
+<link rel="stylesheet" href="../../styleguide/css/prism-typeahead.min.css?1589659798" media="all" />
+    <!-- End Pattern Lab -->
+
+  </head>
+  <body class="body">
+    <!-- for js not found errors in Pattern Lab -->
+  	<div class="visually-hidden">
+  		<div id="tabs" class="tabs"></div>
+  	</div>
+<img srcset="../../../../components/images/sample/responsive-images/annertech-team/annertech-team-1x1.jpg 639w, ../../../../components/images/sample/responsive-images/annertech-team/annertech-team-4x3.jpg 1023w, ../../../../components/images/sample/responsive-images/annertech-team/annertech-team-16x9.jpg 1440w" sizes="(max-width: 600px) 100vw, (max-width: 960px) 100vw" src="../../../../components/images/sample/responsive-images/annertech-team/annertech-team-4x3.jpg" alt="Alt text will go here to describe the image for screen readers">
+
+  <!--DO NOT REMOVE-->
+  <script type="text/json" id="sg-pattern-data-footer" class="sg-pattern-data">
+  {"cssEnabled":false,"lineage":[],"lineageR":[],"patternBreadcrumb":{"patternType":"basic elements","patternSubtype":"image"},"patternDesc":"<p>This is a very simple implementation of a responsive image pattern.<\/p>\n\n<p>It allows us to see that different image dimensions can be used for different screen sizes.<\/p>\n\n<p>To include this pattern in another one, simple add a variation of the following in the YML file:<\/p>\n\n<pre><code class=\"yaml\">hero_image:\n  join():\n    - include():\n        pattern: 'basic-elements-responsive-image'\n        with:\n          image_src_sets:\n            join():\n              - '..\/..\/..\/..\/components\/images\/sample\/responsive-images\/annertech-team\/annertech-team-1x1.jpg 639w, '\n              - '..\/..\/..\/..\/components\/images\/sample\/responsive-images\/annertech-team\/annertech-team-4x3.jpg 1023w, '\n              - '..\/..\/..\/..\/components\/images\/sample\/responsive-images\/annertech-team\/annertech-team-16x9.jpg 1440w'\n          image_src: '..\/..\/..\/..\/components\/images\/sample\/responsive-images\/annertech-team\/annertech-team-4x3.jpg'\n          image_alt: 'Image description'\n<\/code><\/pre>\n\n<p>We need the \"image_src\" variable to use as the default image src attribute, for browsers that don't support responsive images such as IE11.<\/p>","patternExtension":"twig","patternName":"Responsive Image (resolution switching)","patternPartial":"basic-elements-responsive-image","patternState":"","extraOutput":[]}
+</script>
+
+<script>
+  /*!
+  * scriptLoader - v0.1
+  *
+  * Copyright (c) 2014 Dave Olsen, http://dmolsen.com
+  * Licensed under the MIT license
+  *
+  */
+  
+  var scriptLoader = {
+    run: function(js,cb,target) {
+      var s  = document.getElementById(target+'-'+cb);
+      for (var i = 0; i < js.length; i++) {
+        var src = (typeof js[i] != 'string') ? js[i].src : js[i];
+        var c   = document.createElement('script');
+        c.src   = '../../'+src+'?'+cb;
+        if (typeof js[i] != 'string') {
+          if (js[i].dep !== undefined) {
+            c.onload = function(dep,cb,target) {
+              return function() {
+                scriptLoader.run(dep,cb,target);
+              }
+            }(js[i].dep,cb,target);
+          }
+        }
+        s.parentNode.insertBefore(c,s);
+      }
+    }
+  }
+</script>
+
+<script id="pl-js-polyfill-insert-1589659798">
+  (function() {
+    if (self != top) {
+      var cb = '1589659798';
+      var js = [];
+      if (typeof document !== 'undefined' && !('classList' in document.documentElement)) {
+        js.push('styleguide/bower_components/classList.min.js');
+      }
+      scriptLoader.run(js,cb,'pl-js-polyfill-insert');
+    }
+  })();
+</script>
+
+<script id="pl-js-insert-1589659798">
+  (function() {
+    if (self != top) {
+      var cb = '1589659798';
+      var js = [ { 'src': 'styleguide/bower_components/jwerty.min.js', 'dep': [ 'styleguide/js/patternlab-pattern.min.js' ] } ];
+      scriptLoader.run(js,cb,'pl-js-insert');
+    }
+  })();
+</script>
+
+  <!-- See _00-head.twig for Drupal & jQuery scripts -->
+
+  <!-- This makes attach_library work wherever it is in the document flow. -->
+  <script src="../../js/reload-scripts.js"></script>
+
+  </body>
+</html>

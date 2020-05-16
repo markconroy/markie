@@ -1,0 +1,43 @@
+{%
+  set classes = [
+    'branding-block'
+  ]
+%}
+<div{{ attributes.addClass(classes) }}>
+
+  {{ title_prefix }}
+  {% if label %}
+    <h2{{ title_attributes }}>{{ label }}</h2>
+  {% endif %}
+  {{ title_suffix }}
+  {% if site_logo %}
+    <div class="branding__logo">
+      <a href="{{ url }}" title="{{ 'Home'|t }}" rel="home">
+        {% include '@basic-elements/icons/_svg.twig'
+          with {
+            svgpath : '@basic-elements/icons/svg/logo.svg'
+          }
+        %}
+      </a>
+    </div>
+  {% endif %}
+
+  {% if site_name %}
+    <div class="branding__name visually-hidden">
+      <a href="{{ url }}" title="{{ 'Home'|t }}" rel="home">{{ site_name }}</a>
+    </div>
+  {% endif %}
+
+  {% if site_slogan %}
+    <div class="branding__slogan">{{ site_slogan }}</div>
+  {% endif %}
+</div>
+
+{% block content_variable %}
+  {#
+    This allows the cache_context to bubble up for us, without having to
+    individually list every field in
+    {{ content|without('field_name', 'field_other_field', 'field_etc') }}
+  #}
+  {% set catch_cache = content|render %}
+{% endblock %}

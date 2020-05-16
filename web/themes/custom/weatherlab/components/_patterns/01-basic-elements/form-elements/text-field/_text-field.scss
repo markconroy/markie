@@ -1,0 +1,31 @@
+@mixin text_field($border-colour: $c-primary, $colour: $c-grey--darkest, $background-colour: $c-white) {
+  @include fluid-type(font-size, $bp--xsmall, $bp--xxlarge, 12px, 16px);
+
+  display: inline-block;
+  height: 36px; // Explicit height needed for IE11
+  padding-right: 1rem;
+  padding-left: 1rem;
+  transition: $trans;
+  color: $colour;
+  border: 1px solid;
+  border-color: $border-colour;
+  background-color: $background-colour;
+
+  &:active,
+  &:focus,
+  &:hover {
+    box-shadow: inset 0.5rem 0 0 0 $border-colour;
+  }
+
+  &::placeholder {
+    color: $border-colour;
+  }
+}
+
+.form-text,
+.form-search,
+.form-email,
+.form-tel,
+.form-textarea {
+  @include text_field($c-primary, $c-grey--darkest, $c-white);
+}

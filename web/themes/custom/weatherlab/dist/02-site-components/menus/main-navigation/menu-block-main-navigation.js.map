@@ -1,0 +1,1 @@
+{"version":3,"sources":["02-site-components/menus/main-navigation/menu-block-main-navigation.js"],"names":[],"mappings":"AAAA;AACA;AACA;AAEA;AACA;AACA","sourcesContent":["// (function messagesScript($, Drupal) {\n//   Drupal.behaviors.menu_block_main_navigation = {\n//     attach(context) {\n\n//     },\n//   };\n// }(jQuery, Drupal));\n"],"file":"menu-block-main-navigation.js"}

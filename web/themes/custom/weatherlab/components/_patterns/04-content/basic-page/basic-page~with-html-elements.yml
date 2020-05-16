@@ -1,0 +1,6 @@
+label: 'This is a Basic Page with a Demo of HTML Elements'
+
+building_blocks:
+  - join():
+    - include():
+        pattern: building-blocks-text-with-html-elements

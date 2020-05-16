@@ -1,0 +1,64 @@
+#sliding-popup {
+  padding-top: $base-line-height;
+  padding-bottom: $base-line-height;
+  background: $c-primary;
+  font-family: $ff--regular;
+}
+
+#sliding-popup * {
+  font-weight: normal;
+}
+
+.eu-cookie-compliance-content {
+  @extend .layout-contained;
+  @extend .padding-horizontal;
+}
+
+#sliding-popup h2 {
+  font-size: 1rem;
+}
+
+#sliding-popup p {
+  font-size: 0.75rem;
+}
+
+.eu-cookie-compliance-more-button {
+  font-family: $ff--regular;
+  font-size: 0.75rem;
+}
+
+.eu-cookie-compliance-secondary-button {
+  padding: 0.5rem 1rem 0.25rem;
+  color: $c-black;
+  border-radius: 1rem;
+  background-color: $c-white;
+
+  &:focus,
+  &:hover {
+    color: $c-white;
+    background-color: $c-black;
+    background-image: none;
+  }
+}
+
+.eu-cookie-compliance-default-button,
+.eu-cookie-compliance-hide-button,
+.eu-cookie-compliance-more-button-thank-you,
+.eu-cookie-withdraw-button {
+  color: $c-white;
+  border: 0;
+  background-color: $c-primary;
+  background-image: none;
+  box-shadow: none;
+  text-shadow: none;
+  font-family: $ff--regular;
+
+  &:focus,
+  &:hover {
+    text-decoration: underline;
+    background-color: $c-primary;
+    background-image: none;
+    box-shadow: none;
+    text-shadow: none;
+  }
+}

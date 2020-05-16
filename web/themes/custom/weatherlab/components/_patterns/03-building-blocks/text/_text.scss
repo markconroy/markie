@@ -1,0 +1,7 @@
+.text > * + h2,
+.text > * + h3,
+.text > * + h4,
+.text > * + h5,
+.text > * + h6 {
+  margin-top: $base-line-height * 2;
+}

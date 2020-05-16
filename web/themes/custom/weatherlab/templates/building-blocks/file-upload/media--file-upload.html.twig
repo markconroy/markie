@@ -1,0 +1,38 @@
+{% set file_download_link = file_url(content.field_m_file_file.0['#file'].uri.value) %}
+{% set file_name = content.field_m_file_file.0['#description'] %}
+{% set file_type = content.field_m_file_file.0['#file'].filemime.value|preg_replace('/(?:application\\/)/', '') %}
+
+{% if 'audio' in file_type %}
+  {% set file_type = 'Audio' %}
+{% endif %}
+
+{% if 'flash' in file_type %}
+  {% set file_type = 'Flash' %}
+{% endif %}
+
+{% if 'excel' in file_type %}
+{% set file_type = 'Excel' %}
+{% endif %}
+{% if 'spreadsheet' in file_type %}
+  {% set file_type = 'Excel' %}
+{% endif %}
+
+{% if 'image' in file_type %}
+  {% set file_type = 'Image' %}
+{% endif %}
+
+{% if 'video' in file_type %}
+  {% set file_type = 'Video' %}
+{% endif %}
+
+{% if 'opendocument.text' in file_type %}
+  {% set file_type = 'Text' %}
+{% endif %}
+{% if 'msword' in file_type %}
+  {% set file_type = 'Text' %}
+{% endif %}
+{% if 'wordprocessing' in file_type %}
+  {% set file_type = 'Text' %}
+{% endif %}
+
+{% include "@building-blocks/file-upload/_file-upload-file.twig" %}

@@ -1,0 +1,22 @@
+.related-content__title {
+  margin-bottom: $base-line-height;
+  text-align: center;
+  font-family: $ff--alternate;
+  font-size: 1.5rem;
+  font-weight: $fw--bold;
+}
+
+.related-content__items {
+  > * {
+    margin-bottom: $base-line-height;
+
+    @include breakpoint($bp--medium) {
+      width: calc(50% - 2rem);
+      margin-bottom: 0;
+    }
+  }
+
+  @include breakpoint($bp--medium) {
+    @include flex-default;
+  }
+}

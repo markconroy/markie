@@ -1,0 +1,44 @@
+title: false
+default_row_class: true
+
+rows:
+  -
+    attributes:
+      Attribute():
+        class:
+    content:
+      include():
+        pattern: content-teaser
+        with:
+          pl_class: false
+          label: 'This is Title 1'
+  -
+    attributes:
+      Attribute():
+        class:
+    content:
+      include():
+        pattern: content-teaser
+        with:
+          pl_class: false
+          label: 'This is Title 2'
+  -
+    attributes:
+      Attribute():
+        class:
+    content:
+      include():
+        pattern: content-teaser
+        with:
+          pl_class: false
+          label: 'This is Title 3'
+  -
+    attributes:
+      Attribute():
+        class:
+    content:
+      include():
+        pattern: content-teaser
+        with:
+          pl_class: false
+          label: 'This is Title 4'

@@ -1,0 +1,40 @@
+{% if pl_class %}
+  <div class="layout-contained layout-contained--small padding-horizontal margin-top">
+{% endif %}
+
+{%
+set classes = [
+  "teaser",
+  node.isPromoted ? 'node--promoted',
+  node.isSticky ? 'node--sticky',
+  not node.isPublished ? 'node--unpublished',
+]
+%}
+
+<article{{ attributes.addClass(classes) }}>
+
+  {{ title_prefix }}
+    {% set teaser_title_element = teaser_title_element|default('h2') %}
+    <{{ teaser_title_element }}{{ title_attributes.addClass('teaser__title') }}>
+      <a href="{{ url }}" rel="bookmark">{{ label }}</a>
+    </{{ teaser_title_element }}>
+  {{ title_suffix }}
+
+  <div{{ content_attributes.addClass('teaser__content') }}>
+    {{ content }}
+  </div>
+
+</article>
+
+{% block content_variable %}
+  {#
+    This allows the cache_context to bubble up for us, without having to
+    individually list every field in
+    {{ content|without('field_name', 'field_other_field', 'field_etc') }}
+  #}
+  {% set catch_cache = content|render %}
+{% endblock %}
+
+{% if pl_class %}
+  </div>
+{% endif %}

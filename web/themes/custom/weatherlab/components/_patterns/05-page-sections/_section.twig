@@ -1,0 +1,39 @@
+{# 
+  This is a base region template for Drupal, with some "sensible defaults" just in case
+  any new regions are added in Drupal, and/or a region that isn't themed yet gets used
+  in Drupal.
+#}
+
+{#
+/**
+ * @file
+ * Theme override to display a region.
+ *
+ * Available variables:
+ * - content: The content for this region, typically blocks.
+ * - attributes: HTML attributes for the region <div>.
+ * - region: The name of the region variable as defined in the theme's
+ *   .info.yml file.
+ *
+ * @see template_preprocess_region()
+ */
+#}
+
+{# 
+  Add a css_classes variable here and setting some defaults. This will allow us to easily 
+  override/remove these classes if we need to - such as for the region--content.html.twig template.
+#}
+
+{%
+  set classes = [
+    'section',
+    'section-' ~ region|clean_class,
+    css_classes ? css_classes
+  ]
+%}
+
+{% if section_content %}
+  <section{{ attributes.addClass(classes) }}>
+    {{ section_content }}
+  </section>
+{% endif %}

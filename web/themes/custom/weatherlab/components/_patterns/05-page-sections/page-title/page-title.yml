@@ -1,0 +1,10 @@
+page_title_content:
+  include():
+    pattern: 'site-components-block'
+    with:
+      block_type: 'page-title-block' # Needs to be set here again, so the CSS class is available
+      block_content:
+        include():
+          pattern: 'site-components-page-title-content'
+          with:
+            page_title: 'This Is a New Title'

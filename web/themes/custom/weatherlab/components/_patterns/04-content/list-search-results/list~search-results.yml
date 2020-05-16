@@ -1,0 +1,17 @@
+id: search
+display_id: page_1
+layout_contained: false
+padding: false
+
+title: false
+rows:
+  include():
+    pattern: content-list-items-search-results
+
+exposed:
+  include():
+    pattern: content-exposed-form
+
+header: <div class="view-header">10 of 93 Results Found</div>
+
+footer: false

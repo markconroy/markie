@@ -1,0 +1,90 @@
+name: Annertech Pattern Lab
+type: theme
+description: 'An Annertech starter-theme, based on the Phase2 implementation of Pattern Lab.'
+base theme: classy
+core: 8.x
+
+ckeditor_stylesheets:
+  - dist/wysiwyg.css
+
+# Libraries
+libraries:
+  - weatherlab/core
+  - weatherlab/print
+
+libraries-override:
+  # Remove Classy's libraries completely.
+  classy/base: false
+  classy/book-navigation: false
+  classy/file:
+    css:
+      component:
+        css/components/file.css: false
+  classy/forum: false
+  classy/image-widget: false
+  classy/indented: false
+  classy/messages: false
+  classy/node: false
+  classy/search-results: false
+  core/normalize: false
+  # We will provide our own CSS for jQuery Ui.
+  core/jquery.ui.accordion:
+    css:
+      component:
+        assets/vendor/jquery.ui/themes/base/accordion.css: false
+  core/jquery.ui:
+    css:
+      component:
+        assets/vendor/jquery.ui/themes/base/core.css: false
+      theme:
+        assets/vendor/jquery.ui/themes/base/theme.css: false
+
+regions:
+  above_header: 'Above Header'
+  header: Header
+  below_header: 'Below Header'
+  page_top: 'Page top'
+  page_bottom: 'Page bottom'
+  tabs: 'Tabs'
+  highlighted: Highlighted
+  page_title: 'Page Title'
+  breadcrumb: Breadcrumb
+  content_plus_one: 'Content Plus One'
+  content_plus_two: 'Content Plus Two'
+  content: Content
+  sidebar_first: 'Sidebar First'
+  sidebar_second: 'Sidebar Second'
+  content_minus_one: 'Content Minus One'
+  content_minus_two: 'Content Minus Two'
+  footer_pre: 'Pre Footer'
+  footer: Footer
+  copyright_minus_one: 'Copyright Minus One'
+  hidden: Hidden
+
+# MUST install `components` module: `drush dl components && drush en components -y`
+# For compatibility with Pattern Lab templates; this list must
+# always be the folders immediately under the `$sourceDir` patterns folder
+# `$sourceDir` = defined in `pattern-lab/config/config.yml` under `sourceDir
+# patterns folder = `$sourceDir` + `_patterns/`
+component-libraries:
+  base:
+    paths:
+      - components/_patterns/00-base
+  basic-elements:
+    paths:
+      - components/_patterns/01-basic-elements
+  site-components:
+    paths:
+      - components/_patterns/02-site-components
+  building-blocks:
+    paths:
+      - components/_patterns/03-building-blocks
+  content:
+    paths:
+      - components/_patterns/04-content
+  page-sections:
+    paths:
+      - components/_patterns/05-page-sections
+  sample-pages:
+    paths:
+      - components/_patterns/06-sample-pages

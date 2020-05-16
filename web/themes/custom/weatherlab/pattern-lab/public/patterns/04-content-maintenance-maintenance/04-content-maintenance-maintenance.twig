@@ -1,0 +1,45 @@
+{%
+set classes = [
+  "maintenance-page",
+  "padding-top",
+  "padding-bottom",
+  "padding-horizontal",
+]
+%}
+
+<div {{ attributes.addClass(classes) }}>
+
+  <div class="maintenance-page__wrapper layout-contained layout-contained--large">
+    <header class="maintenance-page__header">
+
+      <div class="maintenance-page--branding-logo">
+        <a href="{{ url }}" title="{{ 'Home'|t }}" rel="home">
+          {% include '@basic-elements/icons/_svg.twig'
+            with {
+              svgpath : '@basic-elements/icons/svg/logo.svg'
+            }
+          %}
+        </a>
+      </div>
+    
+      {% if site_name %}
+        <div class="maintenance-page__name-and-slogan">
+          {% if site_name %}
+            <h1 class="maintenance-page__site-name">
+              <a href="{{ front_page }}" title="{{ 'Home'|t }}" rel="home">{{ site_name }}</a>
+            </h1>
+          {% endif %}
+        </div>
+      {% endif %}
+      
+    </header>
+
+    <div class="maintenance-page__content">
+      {% if title %}
+        <h2>{{ title }}</h2>
+      {% endif %}
+      <p>{{ page_body }}</p>
+    </div>
+  </div>
+  
+</div>

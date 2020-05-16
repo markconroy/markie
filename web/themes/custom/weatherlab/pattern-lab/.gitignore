@@ -1,0 +1,5 @@
+.DS_Store
+export/*
+# public/* Pattern-lab should be publicly viewable
+source/styleguide/*
+vendor/*

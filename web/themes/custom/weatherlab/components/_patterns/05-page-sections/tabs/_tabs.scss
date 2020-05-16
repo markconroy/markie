@@ -1,0 +1,41 @@
+/**
+ * @file
+ * This file is used to style the tabs region.
+ */
+
+.layout-tabs {
+  background: $c-black;
+}
+
+.layout-tabs ul.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0;
+  padding-left: 0;
+}
+
+.layout-tabs li {
+  margin: 0;
+  list-style: none;
+}
+
+.layout-tabs li a {
+  display: inline-block;
+  padding: 0.66rem 1rem;
+  text-decoration: none;
+  color: black;
+  background-color: lightgrey;
+  font-weight: bold;
+
+  &.is-active {
+    color: white;
+    background: green;
+  }
+
+  &:focus,
+  &:hover {
+    text-decoration: underline;
+    color: $c-black;
+    background-color: white;
+  }
+}

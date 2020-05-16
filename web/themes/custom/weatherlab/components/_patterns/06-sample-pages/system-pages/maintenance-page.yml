@@ -1,0 +1,13 @@
+this_page_content:
+  include():
+    pattern: 'sample-pages-site-layout'
+    with:
+      site_header: false
+      site_breadcrumbs: false
+      page_content:
+        include():
+          pattern: 'content-maintenance'
+      site_footer_pre: false
+      site_footer: false
+      site_housekeeping: false
+      credits: false

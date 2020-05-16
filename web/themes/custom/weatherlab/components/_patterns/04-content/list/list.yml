@@ -1,0 +1,28 @@
+# This css_classes variable is the variable that we can replicate in the Views UI to add the same classes.
+# Use this to set your views listing type, such as `list--grid list--grid-3-columns`
+css_classes: false
+
+# The title variable is only used in Drupal for Admin pages to list views. 
+# It should always be set as false in PL, or else `title` from data.json will print here.
+title: false
+
+# This is the views row formatter. We default to "Unformatted Row" for our setup.
+rows:
+  include():
+    pattern: content-list-items
+
+# It easiest way to work with exposed forms, is to create it in Drupal, then copy the HTML that generates 
+# into a .twig file in your list directory, and call it as a variable. This keeps the .yml file clean.
+exposed:
+  include():
+    pattern: content-exposed-form
+
+# If your view has a header, you can replcate the markup here.
+# For example, `<p>10 of 93 Results Found</p>`
+header: false
+
+# If your view has a footer, you can replcate the markup here.
+# For example, `<p>10 of 93 Results Found</p>`
+footer: false
+
+pager: false

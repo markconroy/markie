@@ -1,0 +1,15 @@
+{%
+  set classes = [
+    '<%- name %>',
+    'section',
+    'section--' ~ '<%- name %>',
+    'section--' ~ region|clean_class,
+    css_classes ? css_classes
+  ]
+%}
+
+{% if section_content %}
+  <section{{ attributes.addClass(classes) }}>
+    {{ <%- snakeName %>_content }}
+  </section>
+{% endif %}

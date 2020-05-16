@@ -1,0 +1,124 @@
+// Theming individual tiles
+
+.tile {
+  width: 100%;
+  margin-bottom: $base-line-height;
+  padding: $base-line-height;
+  border-top: 0.5rem solid $c-primary;
+  background-color: $c-grey--lighter;
+}
+
+a.tile {
+  text-decoration: none;
+
+  &:focus,
+  &:hover {
+    background-color: $c-primary;
+    background-image: linear-gradient($c-primary, darken($c-primary, 15%));
+  }
+}
+
+.tile--has-image {
+  padding: 0;
+  padding-bottom: $base-line-height;
+  background-color: $c-white;
+}
+
+.tile--small {
+  @include breakpoint($bp--medium) {
+    width: calc(33% - 2rem);
+  }
+}
+
+.tile--medium {
+  @include breakpoint($bp--medium) {
+    width: calc(50% - 2rem);
+  }
+}
+
+.tile--large {
+  @include breakpoint($bp--medium) {
+    width: calc(66% - 2rem);
+  }
+}
+
+.tile--full {
+  @include breakpoint($bp--medium) {
+    width: calc(100% - 2rem);
+  }
+}
+
+.tile--primary {
+  border-top-color: $c-primary;
+}
+
+.tile--secondary {
+  border-top-color: $c-secondary;
+}
+
+.tile--tertiary {
+  border-top-color: $c-tertiary;
+}
+
+.tile__text {
+  color: $c-grey--dark;
+
+  p:last-of-type {
+    margin-bottom: 0;
+  }
+}
+
+a.tile--primary {
+  &:focus,
+  &:hover {
+    background-color: $c-primary;
+    background-image: linear-gradient($c-primary, darken($c-primary, 15%));
+  }
+}
+
+a.tile--secondary {
+  &:focus,
+  &:hover {
+    background-color: $c-secondary;
+    background-image: linear-gradient($c-secondary, darken($c-secondary, 15%));
+
+    .tile__text {
+      color: $c-white;
+    }
+  }
+}
+
+.tile__title {
+  color: $c-grey--darker;
+  font-family: $ff--alternate;
+}
+
+a.tile--tertiary {
+  &:focus,
+  &:hover {
+    background-color: $c-tertiary;
+    background-image: linear-gradient($c-tertiary, darken($c-tertiary, 15%));
+
+    .tile__title,
+    .tile__text {
+      color: $c-white;
+    }
+  }
+}
+
+.tile__image {
+  margin-bottom: $base-line-height;
+}
+
+.tile__image img {
+  width: 100%;
+  height: auto;
+}
+
+// Theming the Tiled Layout container
+
+.tiled-layout {
+  @include flex-default;
+
+  justify-content: center;
+}

@@ -1,0 +1,11 @@
+label: 'This is a Basic Page with a Tiled Layout Component'
+building_blocks:
+  - join():
+    - include():
+        pattern: 'building-blocks-text-paragraph-x2'
+  - join():
+    - include():
+        pattern: building-blocks-tiled-layout
+  - join():
+    - include():
+        pattern: 'building-blocks-text-paragraph-x2'

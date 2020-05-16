@@ -1,0 +1,34 @@
+{%
+set classes = [
+  "homepage"
+]
+%}
+
+<article{{ attributes.addClass(classes) }}>
+
+  {{ title_prefix }}
+    <h1 class="homepage__title">
+      {{ homepage_title }}
+    </h1>
+  {{ title_suffix }}
+  
+  {% block building_blocks %}
+    <div class="building-blocks">
+      {% for building_block in building_blocks %}
+        <div class="building-block">
+          {{ building_block }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endblock %}
+
+</article>
+
+{% block content_variable %}
+  {#
+    This allows the cache_context to bubble up for us, without having to
+    individually list every field in
+    {{ content|without('field_name', 'field_other_field', 'field_etc') }}
+  #}
+  {% set catch_cache = content|render %}
+{% endblock %}

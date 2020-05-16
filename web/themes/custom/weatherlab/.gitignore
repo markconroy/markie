@@ -1,0 +1,25 @@
+# Ignore compiled files.
+# vendor
+build
+
+# Pattern Lab (ignored initially)
+# pattern-lab
+# Override the pattern-lab/.gitignore
+!pattern-lab/public/
+!pattern-lab/public/*
+
+# Twig helper functions
+#**/add_attributes.function.php
+#**/bem.function.php
+#**/pl_attach-library.function.php (contains override path to js files)
+
+# NPM
+node_modules
+npm-debug.log
+
+# Git deploy
+.publish
+
+.DS_Store
+
+local.gulp-config.js

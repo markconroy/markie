@@ -1,0 +1,22 @@
+.maintenance-page {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 100vh;
+  background-color: $c-primary;
+}
+.maintenance-page__wrapper {
+  padding: 1.5rem;
+  text-align: center;
+  border: 1px solid $c-primary;
+  background-color: $c-white;
+}
+
+.maintenance-page__header svg {
+  max-width: 200px;
+  margin-bottom: $base-line-height;
+}
+
+.maintenance-page__content p:nth-last-child(1) {
+  margin-bottom: 0;
+}

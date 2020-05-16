@@ -1,0 +1,8 @@
+{% set related_items = [] %}
+{% for item in items %}
+  {% set related_items = related_items|merge([item.content]) %}
+{% endfor %}
+
+{% for related_item in related_items %}
+  {{ related_item }}
+{% endfor %}

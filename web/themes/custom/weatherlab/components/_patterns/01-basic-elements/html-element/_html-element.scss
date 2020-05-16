@@ -1,0 +1,20 @@
+// This will adjust the base HTML font size fluidly between the xsmall and
+// xxlarge breakpoints to a font size between 14px minimum to 18px maximum.
+
+html {
+  @include fluid-type(font-size, $bp--xsmall, $bp--xxlarge, $base-font-size, $base-font-size);
+
+  color: $c-grey--dark;
+  font-family: $ff--regular;
+}
+
+::selection {
+  color: $c-black;
+  background: $c-primary;
+  background: rgba($c-primary, 0.75);
+}
+::-moz-selection {
+  color: $c-black;
+  background: $c-primary;
+  background: rgba($c-primary, 0.75);
+}

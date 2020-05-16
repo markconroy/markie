@@ -1,0 +1,13 @@
+tiles:
+  - join():
+    - include():
+        pattern: "building-blocks-tile-with-link"
+        with:
+          tile_size: 'medium'
+    - include():
+        pattern: "building-blocks-tile"
+        with:
+          tile_title: 'Finding the Right Book'
+          tile_text: '<em>Help children to choose the ''right'' book to read</em>'
+          tile_size: 'medium'
+          tile_style: 'secondary'

@@ -1,0 +1,54 @@
+{% if pl_class %}
+  {# 
+    This div is needed here for the off-canvas dialog in Drupal to work.
+    I am adding it here, so we can layout the page template with flexbox consistently 
+    in both PL and Drupal (for example to have the footer at the bottom of the page).
+  #}
+
+  <div class="dialog-off-canvas-main-canvas">
+{% endif %}
+
+  {{ site_tabs }}
+
+  {{ site_above_header }}
+
+  {{ site_header }}
+
+  {{ site_below_header }}
+
+  {{ site_breadcrumbs }}
+
+  {{ page_title }}
+
+  {{ site_highlighted }}
+
+  {{ site_help }}
+
+  {{ site_content_plus_one }}
+
+  {{ site_content_plus_two }}
+
+  <main class="site-content" role="main">
+    <a id="main-content" tabindex="-1"></a>{# link is in html.html.twig #}
+    {{ page_content }}
+  </main>
+
+  {{ site_content_minus_one }}
+
+  {{ site_content_minus_two }}
+
+  {{ site_sidebar_first }}
+
+  {{ site_footer_pre }}
+
+  {{ site_footer }}
+
+  {{ site_housekeeping }}
+
+  {{ credits }}
+
+  {{ site_copyright_minus_one }}
+
+{% if pl_class %}
+  </div>
+{% endif %}

@@ -1,0 +1,35 @@
+{%
+set classes = [
+  "related-content",
+  "layout-contained",
+  "layout-contained--medium",
+  "padding-horizontal"
+]
+%}
+
+<div{{ attributes.addClass(classes) }}>
+
+  {% if related_content_title %}
+    <div class="related-content__title">
+      {{ related_content_title }}
+    </div>
+  {% endif %}
+
+  <div class="related-content__items">
+    {% block related_items %}
+      {% for related_item in related_items %}
+        {{ related_item }}
+      {% endfor %}
+    {% endblock %}
+  </div>
+
+</div>
+
+{% block content_variable %}
+  {#
+    This allows the cache_context to bubble up for us, without having to
+    individually list every field in
+    {{ content|without('field_name', 'field_other_field', 'field_etc') }}
+  #}
+  {% set catch_cache = content | render %}
+{% endblock %}

@@ -1,0 +1,14 @@
+header_branding:
+  join():
+  - include():
+      pattern: 'site-components-branding' 
+
+header_menu:
+  join():
+    - include():
+        pattern: 'site-components-menu-block-main-navigation'
+
+header_search:
+  join():
+    - include():
+        pattern: 'site-components-search'

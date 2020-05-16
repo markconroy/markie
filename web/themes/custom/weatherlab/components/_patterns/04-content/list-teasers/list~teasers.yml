@@ -1,0 +1,7 @@
+css_classes: 'list--teasers layout-contained padding-horizontal'
+
+title: false
+
+rows:
+  include():
+    pattern: content-list-items-teasers

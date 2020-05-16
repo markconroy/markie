@@ -1,0 +1,12 @@
+related_content_title: 'Read More Like This'
+related_items:
+  - join():
+    - include():
+        pattern: 'content-teaser'
+        with:
+          pl_class: false
+  - join():
+    - include():
+        pattern: 'content-teaser'
+        with:
+          pl_class: false

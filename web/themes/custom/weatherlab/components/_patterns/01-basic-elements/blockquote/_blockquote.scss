@@ -1,0 +1,9 @@
+blockquote {
+  padding: 1rem;
+  color: $c-black;
+  border-left: solid 5px $c-primary;
+  background-color: $c-grey--lighter;
+  font-size: 2rem;
+  font-weight: $fw--light;
+  font-style: italic;
+}

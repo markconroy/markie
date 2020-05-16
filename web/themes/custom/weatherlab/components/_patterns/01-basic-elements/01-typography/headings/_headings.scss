@@ -1,0 +1,50 @@
+h1,
+.h1,
+h2,
+.h2,
+h3,
+.h3,
+h4,
+.h4,
+h5,
+.h5,
+h6,
+.h6 {
+  color: $c-grey--darkest;
+  font-weight: $fw--heavy;
+}
+
+h1,
+.h1 {
+  @include fluid-type(font-size, $bp--xsmall, $bp--xxlarge, $fs--h1-small, $fs--h1-large);
+}
+
+h2,
+.h2 {
+  @include fluid-type(font-size, $bp--xsmall, $bp--xxlarge, $fs--h2-small, $fs--h2-large);
+}
+
+h3,
+.h3 {
+  @include fluid-type(font-size, $bp--xsmall, $bp--xxlarge, $fs--h3-small, $fs--h3-large);
+}
+
+h4,
+.h4 {
+  @include fluid-type(font-size, $bp--xsmall, $bp--xxlarge, $fs--h4-small, $fs--h4-large);
+
+  font-variant: small-caps;
+}
+
+h5,
+.h5 {
+  @include fluid-type(font-size, $bp--xsmall, $bp--xxlarge, $fs--h5-small, $fs--h5-large);
+
+  text-decoration: underline;
+  font-variant: small-caps;
+}
+
+h6,
+.h6 {
+  @include fluid-type(font-size, $bp--xsmall, $bp--xxlarge, $fs--h6-small, $fs--h6-large);
+}

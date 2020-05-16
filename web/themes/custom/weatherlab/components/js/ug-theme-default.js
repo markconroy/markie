@@ -1,0 +1,1 @@
+../_custom-vendor/unitegallery/themes/default/ug-theme-default.js

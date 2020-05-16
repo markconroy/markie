@@ -1,0 +1,29 @@
+configuration:
+  label_display: false
+  label: '<%- name %>'
+
+derivative_plugin_id: '<%- name %>'
+
+content:
+  include():
+    pattern: 'site-components-menu-items'
+    with:
+      items:
+        -
+          title: 'Item 1'
+          url: "link.sample-pages-basic-page"
+          attributes:
+            Attribute():
+              class:
+        -
+          title: 'Item 2'
+          url: "link.sample-pages-basic-page"
+          attributes:
+            Attribute():
+              class:
+        -
+          title: 'Item 3'
+          url: "link.sample-pages-basic-page"
+          attributes:
+            Attribute():
+              class:

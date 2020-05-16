@@ -1,0 +1,26 @@
+{#
+  The markup from this comes from the UniteGallery.net page
+  http://unitegallery.net/index.php?page=documentation#installing_the_gallery
+#}
+
+{% if gallery_item_image_link|length > 0 %}
+  <a href="{{ gallery_item_image_link }}">
+{% endif %}
+
+<img alt="{{ gallery_item_alt }}" src="{{ gallery_item_image_thumbnail }}"
+	data-image="{{ gallery_item_image }}"
+	data-description="{{ gallery_item_image_caption|raw }}"
+  style="display: none;">
+
+{% if gallery_item_image_link|length > 0 %}
+  </a>
+{% endif %}
+
+{% block content_variable %}
+  {#
+    This allows the cache_context to bubble up for us, without having to
+    individually list every field in
+    {{ content|without('field_name', 'field_other_field', 'field_etc') }}
+  #}
+  {% set catch_cache = content|render %}
+{% endblock %}

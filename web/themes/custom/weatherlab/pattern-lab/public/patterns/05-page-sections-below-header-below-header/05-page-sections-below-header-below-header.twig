@@ -1,0 +1,10 @@
+{%
+set classes = [
+  "below-header"
+]
+%}
+<section{{attributes.addClass(classes)}}>
+  {% block content %}
+    {{ content }}
+  {% endblock %}
+</section>

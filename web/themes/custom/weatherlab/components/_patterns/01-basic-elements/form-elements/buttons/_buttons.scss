@@ -1,0 +1,50 @@
+// This is a handy mixin for styling buttons or links like buttons.
+// You can set a background and a text colour.
+// When focussed or hovered, the background colour becomes the text colour, and vice versa.
+@mixin button($background-colour: $c-primary, $colour: $c-white) {
+  @include fluid-type(font-size, $bp--xsmall, $bp--xxlarge, 12px, 16px);
+
+  display: inline-block;
+  height: 36px;
+  padding-right: 1rem;
+  padding-left: 1rem;
+  cursor: pointer;
+  transition: $trans;
+  text-decoration: none;
+  letter-spacing: 1.3px;
+  color: $colour;
+  border: 1px solid;
+  border-color: $background-colour;
+  background-color: $background-colour;
+
+  &:focus,
+  &:hover {
+    text-decoration: underline;
+    color: $background-colour;
+    background-color: $colour;
+  }
+}
+
+input.button,
+button.button,
+a.button,
+input[type="submit"],
+.form-submit {
+  @include button();
+}
+
+a.button {
+  @include button();
+}
+
+a.button--primary {
+  @include button($c-primary, $c-white);
+}
+
+a.button--secondary {
+  @include button($c-secondary, $c-white);
+}
+
+a.button--tertiary {
+  @include button($c-tertiary, $c-white);
+}

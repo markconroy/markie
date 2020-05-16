@@ -1,0 +1,65 @@
+<?php
+
+/**
+ * @file
+ * Functions to support theming in the Pattern Lab theme.
+ */
+
+use Drupal\Core\Form\FormStateInterface;
+
+/**
+ * Implements hook_page_attachments_alter().
+ */
+function weatherlab_page_attachments_alter(array &$attachments) {
+  include 'includes/favicons.php';
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function weatherlab_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  // Set a new data-attribute, so we can use it later as a template suggestion.
+  if ($form['#id'] == 'search-block-form') {
+    $form['actions']['submit']['#attributes']['data-twig-suggestion'] = 'search_icon_submit';
+    $form['actions']['submit']['#attributes']['class'][] = 'search-box__button';
+  }
+}
+
+/**
+ * Implements hook_theme_suggestions_HOOK_alter().
+ */
+function weatherlab_theme_suggestions_input_alter(&$suggestions, array $variables) {
+  $element = $variables['element'];
+  if (isset($element['#attributes']['data-twig-suggestion'])) {
+    $suggestions[] = 'input__' . $element['#type'] . '__' . $element['#attributes']['data-twig-suggestion'];
+  }
+}
+
+/**
+ * Implements hook_theme_suggestions_page().
+ */
+function weatherlab_theme_suggestions_page_alter(&$suggestions, array $variables) {
+  $path_args = explode('/', trim(\Drupal::service('path.current')->getPath(), '/'));
+  $suggestions = theme_get_suggestions($path_args, 'page');
+  $http_error_suggestions = [
+    'system.401' => 'page__401',
+    'system.403' => 'page__403',
+    'system.404' => 'page__404',
+  ];
+  $route_name = \Drupal::routeMatch()->getRouteName();
+  if (isset($http_error_suggestions[$route_name])) {
+    $suggestions[] = $http_error_suggestions[$route_name];
+  }
+
+  return $suggestions;
+}
+
+/**
+ * Implements hook_block_alter().
+ */
+function weatherlab_theme_suggestions_block_alter(array &$suggestions, array $variables) {
+  // Allows us to have template suggestions per block type.
+  if (isset($variables['elements']['content']['#block_content'])) {
+    array_splice($suggestions, 1, 0, 'block__' . $variables['elements']['content']['#block_content']->bundle());
+  }
+}

@@ -1,0 +1,10 @@
+list_block:
+  include():
+    pattern: 'site-components-block'
+    with:
+      label: 'Latest Posts'
+      block_content:
+        include():
+          pattern: 'content-list'
+          with:
+            exposed: false

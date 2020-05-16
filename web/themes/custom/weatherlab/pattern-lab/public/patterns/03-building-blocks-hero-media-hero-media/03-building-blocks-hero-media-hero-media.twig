@@ -1,0 +1,96 @@
+{%
+  set classes = [
+    "hero-media",
+    hero_media_centered ? 'hero-media--centered',
+    hero_media_full ? 'hero-media--full' : 'layout-contained'
+  ]
+%}
+
+{{ attach_library('weatherlab/hero-media') }}
+
+{% if pl and hero_media_video %}
+  {# Patternlab specific to simulate Drupal Dialog #}
+  <div class="hero-media__modal" id="{{ random_id ~ '--video' }}">
+    <div class="ui-dialog ui-corner-all ui-widget ui-widget-content ui-front">
+      <div class="ui-dialog-titlebar ui-corner-all ui-widget-header ui-helper-clearfix">
+        <span id="ui-id-2" class="ui-dialog-title">TEST - Video - About Cancer Care Helpline</span>
+        <a href="#hero-media-container" class="ui-button ui-corner-all ui-widget ui-button-icon-only ui-dialog-titlebar-close" title="Close"><span class="ui-button-icon ui-icon ui-icon-closethick"></span><span class="ui-button-icon-space"> </span>Close</a>
+      </div>
+      <div class="ui-front ui-dialog-content ui-widget-content">
+        {{ hero_media_video }}
+      </div>
+    </div>
+    <div class="ui-widget-overlay ui-front" style="z-index: 99;"></div>
+  </div>
+{% endif %}
+
+<div{{ attributes.addClass(classes) }}>
+  {% if hero_media_video or hero_media_image %}
+    <div class="hero-media__media">
+
+      {% if hero_media_video %}
+      <div class="hero-media__video hero-media__hidden-item">
+        <div class="hero-media__video-item">
+          {{ hero_media_video }}
+        </div>
+      </div>
+      {% endif %}
+
+      {% if hero_media_image %}
+        <div class="hero-media__image hero-media__visible-item">
+          <span class="hero-media__image-overlay"></span>
+          {{ hero_media_image }}
+        </div>
+      {% endif %}
+
+    </div>
+  {% endif %}
+
+  <div class="hero-media__content hero-media__visible-item">
+    {% if hero_media_title %}
+      <h1 class="hero-media__title">{{ hero_media_title }}</h1>
+    {% endif %}
+
+    {% if hero_media_intro %}
+      <div class="hero-media__intro h3">{{ hero_media_intro }}</div>
+    {% endif %}
+
+    {% if hero_media_video or hero_media_cta_link %}
+      <div class="hero-media__cta">
+        {% if hero_media_video %}
+          {{ attach_library('weatherlab/hero_media') }}
+          <a href="{{ video_mid }}" class="hero-media__cta-button hero-media__cta-button--video use-ajax" data-dialog-type="modal" data-dialog-options="{&quot;width&quot;:854, &quot;dialogClass&quot;: &quot;hero-media__dialog&quot;}">
+          {{ 'Play the Video'|t }}
+          </a>
+        {% endif %}
+        {% if hero_media_cta_link %}
+          <a class="hero-media__cta-button" href="{{ hero_media_cta_link }}">{{ hero_media_cta_text }}</a>
+        {% endif %}
+      </div>
+    {% endif %}
+
+  </div>
+
+  <a class="hero-media__more be-text--xsmall">
+    <span class="hero-media__more-item hero-media__more-item--content">
+      {{ 'Discover More'|t }}
+    </span>
+    <span class="hero-media__more-item hero-media__more-item--icon">
+      {% include '@basic-elements/icons/_svg.twig'
+        with {
+          svgpath : '@basic-elements/icons/svg/ionicons/md-arrow-down.svg'
+        }
+      %}
+    </span>
+  </a>
+
+</div>
+
+{% block content_variable %}
+  {#
+    This allows the cache_context to bubble up for us, without having to
+    individually list every field in
+    {{ content|without('field_name', 'field_other_field', 'field_etc') }}
+  #}
+  {% set catch_cache = content|render %}
+{% endblock %}

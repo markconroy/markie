@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html class="{{ htmlClass }}">
+  <head>
+    <title>{{ title }}</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width" />
+
+    <!-- Component styles -->
+    <link rel="stylesheet" href="../../../../dist/style.css?{{ cacheBuster }}" media="all" />
+
+    <!-- Drupal-specific usage -->
+    <!-- example using symlinking -->
+    <!-- cd web/themes/custom/weatherlab/components/js -->
+    <!-- Symlink Drupal core js files: -->
+    <!-- ln -s ../../../../../core/assets/vendor/domready/ready.min.js ./ -->
+    <!-- ln -s ../../../../../core/misc/drupal.js ./ -->
+    <!-- ln -s ../../../../../core/assets/vendor/jquery.ui/ui/core-min.js ./ -->
+    <!-- Symlink custom-vendor files example: -->
+    <!-- ln -s ../_custom-vendor/library-name/js/library-file.js -->
+
+    <!-- UNCOMMENT AS NECESSARY -->
+    <!-- <script src="../../js/ready.min.js"></script> -->
+    <!-- <script src="../../js/drupal.js"></script> -->
+    <script src="../../js/ready.min.js"></script>
+    <script src="../../js/jquery.min.js"></script>
+    <script src="../../js/jquery.once.min.js"></script>
+    <script src="../../js/drupal.js"></script>
+    <script src="../../js/debounce.js"></script>
+    <script src="../../js/unitegallery.min.js"></script>
+    <script>var drupalSettings = {};</script>
+
+    <!-- Begin Pattern Lab (Required for Pattern Lab to run properly) -->
+    {{ patternLabHead | raw }}
+    <!-- End Pattern Lab -->
+
+  </head>
+  <body class="{{ bodyClass }}">
+    <!-- for js not found errors in Pattern Lab -->
+  	<div class="visually-hidden">
+  		<div id="tabs" class="tabs"></div>
+  	</div>
