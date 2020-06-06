@@ -17,6 +17,13 @@ class AntibotJavaScriptTest extends WebDriverTestBase {
   protected static $modules = ['antibot'];
 
   /**
+   * Default theme.
+   *
+   * @var string
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * Tests antibot in browsers with JavaScript.
    */
   public function testJavaScript() {

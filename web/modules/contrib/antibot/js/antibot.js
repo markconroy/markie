@@ -51,10 +51,10 @@
         // Iterate all antibot forms that we need to unlock.
         $.each(drupalSettings.antibot.forms, function (id, config) {
           // Switch the action.
-          $('form#' + id).attr('action', $('form#' + id).data('action'));
+          $('form#' + config.id).attr('action', $('form#' + config.id).data('action'));
 
           // Set the key.
-          $('form#' + id).find('input[name="antibot_key"]').val(config.key);
+          $('form#' + config.id).find('input[name="antibot_key"]').val(config.key);
         });
       }
       // Mark this user as being human.

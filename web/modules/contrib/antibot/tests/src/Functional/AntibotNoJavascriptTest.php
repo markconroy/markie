@@ -17,6 +17,13 @@ class AntibotNoJavascriptTest extends BrowserTestBase {
   protected static $modules = ['antibot'];
 
   /**
+   * Default theme.
+   *
+   * @var string
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * Tests antibot when JavaScript is disabled.
    *
    * BrowserTestBase tests are, by design, non-JavaScript tests so we're having

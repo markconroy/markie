@@ -5,6 +5,7 @@
  * Implements the antibot module.
  */
 
+use Drupal\antibot\AntibotFormAlter;
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Form\FormStateInterface;
@@ -101,6 +102,11 @@ function antibot_page_attachments(array &$page) {
  *   The form to enable Antibot protection on.
  */
 function antibot_protect_form(array &$form) {
+  // Stop if the form is already protected.
+  if (!empty($form['#antibot_key'])) {
+    return;
+  }
+
   // Generate a key for this form.
   $key = Crypt::hmacBase64($form['#form_id'], Settings::getHashSalt());
 
@@ -124,7 +130,7 @@ function antibot_protect_form(array &$form) {
   ];
 
   // Add a pre-render function.
-  $form['#pre_render'][] = 'antibot_form_pre_render';
+  $form['#pre_render'][] = [AntibotFormAlter::class, 'preRender'];
 
   // Add validation for the key.
   $form['#validate'][] = 'antibot_form_validation';
@@ -157,35 +163,4 @@ function antibot_form_validation($form, FormStateInterface $form_state) {
   if (!$submitted_key || ($submitted_key != $form['#antibot_key'])) {
     $form_state->setErrorByName('', t('Submission failed. Please reload the page, ensure JavaScript is enabled and try again.'));
   }
-}
-
-/**
- * Pre-render callback for Antibot-enabled forms.
- *
- * @see antibot_form_alter()
- */
-function antibot_form_pre_render(array $build) {
-  // Add the Antibot library.
-  $build['#attached']['library'][] = 'antibot/antibot.form';
-
-  // Store the form ID that the JS can replace the action path along with the
-  // form key.
-  $build['#attached']['drupalSettings']['antibot']['forms'][$build['#id']] = [
-    'id' => $build['#id'],
-    'key' => $build['#antibot_key'],
-  ];
-
-  // Store the action placeholder as an attribute so that it converts
-  // during the building of the form. This is needed because in Drupal 8
-  // the form action is a placeholder that is not added until the very
-  // last moment, in order to keep the form cacheable.
-  $build['#attributes']['data-action'] = $build['#action'];
-
-  // Change the action so the submission does not go through.
-  $build['#action'] = base_path() . 'antibot';
-
-  // Add a class to the form.
-  $build['#attributes']['class'][] = 'antibot';
-
-  return $build;
 }

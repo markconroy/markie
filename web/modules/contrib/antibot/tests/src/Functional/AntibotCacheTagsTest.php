@@ -18,6 +18,13 @@ class AntibotCacheTagsTest extends PageCacheTagsTestBase {
   public static $modules = ['antibot'];
 
   /**
+   * Default theme.
+   *
+   * @var string
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * Tests that form caches is invalidated when Antibot settings are updated.
    */
   public function testFormCacheInvalidation() {

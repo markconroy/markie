@@ -36,7 +36,7 @@ class AntibotSettings extends ConfigFormBase {
     $form['message'] = [
       '#type' => 'html_tag',
       '#tag' => 'h3',
-      '#value' => t('Antibot requires that a user has JavaScript enabled in order to use and submit a given form.'),
+      '#value' => $this->t('Antibot requires that a user has JavaScript enabled in order to use and submit a given form.'),
     ];
     $form['form_ids'] = [
       '#type' => 'textarea',
