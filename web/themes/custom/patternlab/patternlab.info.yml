@@ -2,7 +2,7 @@ name: Annertech Pattern Lab
 type: theme
 description: 'An Annertech starter-theme, based on the Phase2 implementation of Pattern Lab.'
 base theme: classy
-core: 8.x
+core_version_requirement: ^8 || ^9
 
 # Libraries
 libraries:
