@@ -183,7 +183,7 @@ abstract class ParagraphsTestBase extends BrowserTestBase {
     $this->drupalGet('node/add/' . $content_type);
     $this->drupalPostForm(NULL, [], 'Remove');
     $this->drupalPostForm(NULL, [], 'Confirm removal');
-    $this->assertNoText('No paragraphs added yet.');
+    $this->assertSession()->pageTextNotContains('No paragraphs added yet.');
   }
 
   /**

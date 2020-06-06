@@ -197,8 +197,8 @@ class ParagraphsLibraryItemTest extends BrowserTestBase {
       ->find('xpath', '(//tbody//tr)[2]//a')
       ->click();
     $revision_url = $this->getSession()->getCurrentUrl();
-    $this->assertContains('/node/' . $node->id() . '/revisions/', $revision_url);
-    $this->assertContains('view', $revision_url);
+    $this->assertStringContainsString('/node/' . $node->id() . '/revisions/', $revision_url);
+    $this->assertStringContainsString('view', $revision_url);
 
     // Check that the child text paragraph is still present in this revision.
     $this->assertSession()->pageTextContains('Test text 1');

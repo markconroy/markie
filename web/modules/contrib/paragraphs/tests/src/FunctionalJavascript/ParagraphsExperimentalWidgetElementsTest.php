@@ -87,7 +87,7 @@ class ParagraphsExperimentalWidgetElementsTest extends WebDriverTestBase {
     $this->drupalGet('node/' . $node->id() . '/translations/add/en/sr');
     $page = $this->getSession()->getPage();
     // Assert that the draghandle is not displayed.
-    $this->assertNull($page->find('css', '.tabledrag-handle'));
+    $this->assertEmpty($page->find('css', '.tabledrag-handle'));
   }
 
 }

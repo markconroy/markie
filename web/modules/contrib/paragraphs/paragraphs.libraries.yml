@@ -72,16 +72,6 @@ drupal.paragraphs.modal:
     - core/drupal.dialog.ajax
     - core/jquery.once
 
-# This library will be deleted in paragraphs_library_info_alter when
-# core/sortable is available.
-sortable:
-  website: https://github.com/RubaXa/Sortable
-  license:
-    name: MIT
-    url: https://github.com/RubaXa/Sortable/blob/master/README.md
-    gpl-compatible: true
-  js: { }
-
 paragraphs-dragdrop:
   css:
     theme:
@@ -91,9 +81,6 @@ paragraphs-dragdrop:
   dependencies:
     - core/jquery
     - core/drupal
-    # Sortable is only in core from 8.8+. When the library is not available, the
-    # dependency will be changed with paragraphs/sortable in
-    # paragraphs_library_info_alter.
     - core/sortable
 
 drupal.paragraphs.formatter:

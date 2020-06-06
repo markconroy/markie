@@ -150,18 +150,17 @@ class Paragraph extends ContentEntityBase implements ParagraphInterface {
     if (($parent = $this->getParentEntity()) && $parent->hasField($this->get('parent_field_name')->value)) {
       $parent_field = $this->get('parent_field_name')->value;
       $field = $parent->get($parent_field);
-      $found = FALSE;
-      foreach ($field as $key => $value) {
-        if ($value->entity->id() == $this->id()) {
-          $found = TRUE;
+      $label = $parent->label() . ' > ' . $field->getFieldDefinition()->getLabel();
+      // A previous or draft revision or a deleted stale Paragraph.
+      $postfix = ' (previous revision)';
+      foreach ($field as $value) {
+        if ($value->entity && $value->entity->getRevisionId() == $this->getRevisionId()) {
+          $postfix = '';
           break;
         }
       }
-      if ($found) {
-        $label = $parent->label() . ' > ' . $field->getFieldDefinition()->getLabel();
-      } else {
-        // A previous or draft revision or a deleted stale Paragraph.
-        $label = $parent->label() . ' > ' . $field->getFieldDefinition()->getLabel() . ' (previous revision)';
+      if ($postfix) {
+        $label .= $postfix;
       }
     }
     else {
@@ -452,7 +451,7 @@ class Paragraph extends ContentEntityBase implements ParagraphInterface {
 
     // Add content summary items.
     $this->summaryCount = 0;
-    $components = entity_get_form_display('paragraph', $this->getType(), 'default')->getComponents();
+    $components = \Drupal::service('entity_display.repository')->getFormDisplay('paragraph', $this->getType())->getComponents();
     uasort($components, 'Drupal\Component\Utility\SortArray::sortByWeightElement');
     foreach (array_keys($components) as $field_name) {
       // Components can be extra fields, check if the field really exists.
@@ -525,7 +524,7 @@ class Paragraph extends ContentEntityBase implements ParagraphInterface {
     // Add behaviors summary items.
     if ($show_behavior_summary) {
       $paragraphs_type = $this->getParagraphType();
-      foreach ($paragraphs_type->getEnabledBehaviorPlugins() as $plugin_id => $plugin) {
+      foreach ($paragraphs_type->getEnabledBehaviorPlugins() as $plugin) {
         if ($plugin_summary = $plugin->settingsSummary($this)) {
           foreach ($plugin_summary as $plugin_summary_element) {
             if (!is_array($plugin_summary_element)) {
@@ -561,7 +560,7 @@ class Paragraph extends ContentEntityBase implements ParagraphInterface {
 
     if ($show_behavior_info) {
       $paragraphs_type = $this->getParagraphType();
-      foreach ($paragraphs_type->getEnabledBehaviorPlugins() as $plugin_id => $plugin) {
+      foreach ($paragraphs_type->getEnabledBehaviorPlugins() as $plugin) {
         if ($plugin_info = $plugin->settingsIcon($this)) {
           $icons = array_merge($icons, $plugin_info);
         }
@@ -647,7 +646,7 @@ class Paragraph extends ContentEntityBase implements ParagraphInterface {
   protected function getFileSummary($field_name) {
     $summary = '';
     if ($this->get($field_name)->entity) {
-      foreach ($this->get($field_name) as $file_key => $file_value) {
+      foreach ($this->get($field_name) as $file_value) {
 
         $text = '';
         if ($file_value->description != '') {

@@ -133,11 +133,11 @@ class ParagraphsExperimentalAddWidgetTest extends WebDriverTestBase {
     // Verify that the paragraphs type icons are being displayed.
     $button_one = $this->assertSession()->buttonExists($paragraph_type);
     $button_two = $this->assertSession()->buttonExists('text');
-    $this->assertContains($icon_one->getFilename(), $button_one->getAttribute('style'));
-    $this->assertContains($icon_two->getFilename(), $button_two->getAttribute('style'));
+    $this->assertStringContainsString($icon_one->getFilename(), $button_one->getAttribute('style'));
+    $this->assertStringContainsString($icon_two->getFilename(), $button_two->getAttribute('style'));
 
     // Find the add button in the nested paragraph with xpath.
-    $element = $this->xpath('//div[contains(@class, "form-item")]/div/div[contains(@class, "paragraph-type-add-modal")]/input');
+    $element = $this->xpath('//div[contains(@class, "form-item")]/div/div/div[contains(@class, "paragraph-type-add-modal")]/input');
     $element[0]->click();
     $this->assertSession()->assertWaitOnAjaxRequest();
 

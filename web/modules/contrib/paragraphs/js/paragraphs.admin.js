@@ -51,19 +51,20 @@
   *   Paragraphs widget.
   */
   var switchActiveClass = function ($parTabs, $clickedTab, $parWidget) {
-      $parTabs.find('li').removeClass('is-active');
-      $clickedTab.parent('li').addClass('is-active');
-      $parWidget.removeClass('behavior-active content-active');
-      $($parWidget).find($clickedTab.attr('href')).addClass('is-active');
+    var $clickedTabParent = $clickedTab.parent();
 
-      if ($parWidget.find('#content').hasClass('is-active')) {
-        $parWidget.addClass('content-active');
-        $parWidget.find('.paragraphs-add-wrapper').parent().removeClass('hidden');
-      }
-      else if ($parWidget.find('#behavior').hasClass('is-active')) {
-        $parWidget.addClass('behavior-active');
-        $parWidget.find('.paragraphs-add-wrapper').parent().addClass('hidden');
-      }
+    $parTabs.find('li').removeClass('is-active');
+    $clickedTabParent.addClass('is-active');
+
+    $parWidget.removeClass('behavior-active content-active');
+    if ($clickedTabParent.attr('id') === 'content') {
+      $parWidget.addClass('content-active');
+      $parWidget.find('.paragraphs-add-wrapper').parent().removeClass('hidden');
+    }
+    else {
+      $parWidget.addClass('behavior-active');
+      $parWidget.find('.paragraphs-add-wrapper').parent().addClass('hidden');
+    }
   };
 
   /**

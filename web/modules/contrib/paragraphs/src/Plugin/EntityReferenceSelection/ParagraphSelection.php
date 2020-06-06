@@ -19,21 +19,23 @@ use Drupal\Component\Utility\NestedArray;
  * )
  */
 class ParagraphSelection extends DefaultSelection {
+  /**
+   * @inheritDoc
+   */
+  public function defaultConfiguration() {
+    return parent::defaultConfiguration() +  [
+      'negate' => 0,
+      'target_bundles_drag_drop' => [],
+    ];
+  }
+
 
   /**
    * {@inheritdoc}
    */
   public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
     $entity_type_id = $this->configuration['target_type'];
-    $selection_handler_settings = $this->configuration['handler_settings'] ?: array();
     $bundles = $this->entityTypeBundleInfo->getBundleInfo($entity_type_id);
-
-    // Merge-in default values.
-    $selection_handler_settings += array(
-      'target_bundles' => array(),
-      'negate' => 0,
-      'target_bundles_drag_drop' => array(),
-    );
 
     $bundle_options = array();
     $bundle_options_simple = array();
@@ -45,8 +47,8 @@ class ParagraphSelection extends DefaultSelection {
       $bundle_options_simple[$bundle_name] = $bundle_info['label'];
       $bundle_options[$bundle_name] = array(
         'label' => $bundle_info['label'],
-        'enabled' => isset($selection_handler_settings['target_bundles_drag_drop'][$bundle_name]['enabled']) ? $selection_handler_settings['target_bundles_drag_drop'][$bundle_name]['enabled'] : FALSE,
-        'weight' => isset($selection_handler_settings['target_bundles_drag_drop'][$bundle_name]['weight']) ? $selection_handler_settings['target_bundles_drag_drop'][$bundle_name]['weight'] : $weight,
+        'enabled' => $this->configuration['target_bundles_drag_drop'][$bundle_name]['enabled'] ?? FALSE,
+        'weight' => $this->configuration['target_bundles_drag_drop'][$bundle_name]['weight'] ?? $weight,
       );
       $weight++;
     }
@@ -59,14 +61,14 @@ class ParagraphSelection extends DefaultSelection {
         0 => $this->t('Include the selected below'),
       ],
       '#title' => $this->t('Which Paragraph types should be allowed?'),
-      '#default_value' => isset($selection_handler_settings['negate']) ? $selection_handler_settings['negate'] : 0,
+      '#default_value' => $this->configuration['negate'],
     ];
 
     // Kept for compatibility with other entity reference widgets.
     $form['target_bundles'] = array(
       '#type' => 'checkboxes',
       '#options' => $bundle_options_simple,
-      '#default_value' => isset($selection_handler_settings['target_bundles']) ? $selection_handler_settings['target_bundles'] : array(),
+      '#default_value' => $this->configuration['target_bundles'] ?? [],
       '#access' => FALSE,
     );
 
@@ -180,18 +182,18 @@ class ParagraphSelection extends DefaultSelection {
     $return_bundles = [];
 
     $bundles = $this->entityTypeBundleInfo->getBundleInfo('paragraph');
-    if (!empty($this->configuration['handler_settings']['target_bundles'])) {
-      if (isset($this->configuration['handler_settings']['negate']) && $this->configuration['handler_settings']['negate'] == '1') {
-        $bundles = array_diff_key($bundles, $this->configuration['handler_settings']['target_bundles']);
+    if (!empty($this->configuration['target_bundles'])) {
+      if (isset($this->configuration['negate']) && $this->configuration['negate'] == '1') {
+        $bundles = array_diff_key($bundles, $this->configuration['target_bundles']);
       }
       else {
-        $bundles = array_intersect_key($bundles, $this->configuration['handler_settings']['target_bundles']);
+        $bundles = array_intersect_key($bundles, $this->configuration['target_bundles']);
       }
     }
 
     // Support for the paragraphs reference type.
-    if (!empty($this->configuration['handler_settings']['target_bundles_drag_drop'])) {
-      $drag_drop_settings = $this->configuration['handler_settings']['target_bundles_drag_drop'];
+    if (!empty($this->configuration['target_bundles_drag_drop'])) {
+      $drag_drop_settings = $this->configuration['target_bundles_drag_drop'];
       $max_weight = count($bundles);
 
       foreach ($drag_drop_settings as $bundle_info) {
@@ -245,14 +247,13 @@ class ParagraphSelection extends DefaultSelection {
    */
   protected function buildEntityQuery($match = NULL, $match_operator = 'CONTAINS') {
     $target_type = $this->configuration['target_type'];
-    $handler_settings = $this->configuration['handler_settings'];
     $entity_type = $this->entityTypeManager->getDefinition($target_type);
 
     $query = $this->entityTypeManager->getStorage($target_type)->getQuery();
 
     // If 'target_bundles' is NULL, all bundles are referenceable, no further
     // conditions are needed.
-    if (isset($handler_settings['target_bundles']) && is_array($handler_settings['target_bundles'])) {
+    if (is_array($this->configuration['target_bundles'])) {
       $target_bundles = array_keys($this->getSortedAllowedTypes());
 
       // If 'target_bundles' is an empty array, no bundle is referenceable,
@@ -278,8 +279,8 @@ class ParagraphSelection extends DefaultSelection {
     $query->addMetaData('entity_reference_selection_handler', $this);
 
     // Add the sort option.
-    if (!empty($handler_settings['sort'])) {
-      $sort_settings = $handler_settings['sort'];
+    if (!empty($this->configuration['sort'])) {
+      $sort_settings = $this->configuration['sort'];
       if ($sort_settings['field'] != '_none') {
         $query->sort($sort_settings['field'], $sort_settings['direction']);
       }

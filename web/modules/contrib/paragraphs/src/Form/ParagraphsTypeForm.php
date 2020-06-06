@@ -213,8 +213,8 @@ class ParagraphsTypeForm extends EntityForm {
           }
         }
         else {
-          // The plugin is not enabled, reset to default configuration.
-          $behavior_plugin->setConfiguration([]);
+          // The plugin is not enabled, remove it from the paragraphs type.
+          $paragraphs_type->getBehaviorPlugins()->removeInstanceId($id);
         }
       }
     }

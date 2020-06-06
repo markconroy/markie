@@ -16,6 +16,7 @@ use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Form\SubformState;
 use Drupal\Core\Render\Element;
 use Drupal\Core\TypedData\TranslationStatusInterface;
+use Drupal\field_group\FormatterHelper;
 use Drupal\paragraphs\ParagraphInterface;
 use Drupal\paragraphs\Plugin\EntityReferenceSelection\ParagraphSelection;
 use Symfony\Component\Validator\ConstraintViolationInterface;
@@ -562,7 +563,7 @@ class ParagraphsWidget extends WidgetBase {
         $element['top']['type']['label'] = ['#markup' => $bundle_info['label']];
 
         // Type icon and label bundle.
-        if ($icon_url = $paragraphs_entity->type->entity->getIconUrl()) {
+        if ($icon_url = $paragraphs_entity->getParagraphType()->getIconUrl()) {
           $element['top']['type']['icon'] = [
             '#theme' => 'image',
             '#uri' => $icon_url,
@@ -601,6 +602,9 @@ class ParagraphsWidget extends WidgetBase {
             'wrapper' => $widget_state['ajax_wrapper_id'],
           ],
           '#access' => $this->duplicateButtonAccess($paragraphs_entity),
+          '#attributes' => [
+            'class' => ['button--small'],
+          ],
         ];
 
         // Force the closed mode when the user cannot edit the Paragraph.
@@ -625,6 +629,9 @@ class ParagraphsWidget extends WidgetBase {
             ],
             '#access' => $this->removeButtonAccess($paragraphs_entity),
             '#paragraphs_mode' => 'remove',
+            '#attributes' => [
+              'class' => ['button--small'],
+            ],
           ];
         }
 
@@ -720,7 +727,7 @@ class ParagraphsWidget extends WidgetBase {
 
         $context = [
           'form' => $form,
-          'widget' => self::getWidgetState($parents, $field_name, $form_state, $widget_state),
+          'widget' => self::getWidgetState($parents, $field_name, $form_state),
           'items' => $items,
           'delta' => $delta,
           'element' => $element,
@@ -760,10 +767,13 @@ class ParagraphsWidget extends WidgetBase {
         ];
 
         field_group_attach_groups($element['subform'], $context);
-        if (function_exists('field_group_form_pre_render')) {
+        if (method_exists(FormatterHelper::class, 'formProcess')) {
+          $element['subform']['#process'][] = [FormatterHelper::class, 'formProcess'];
+        }
+        elseif (function_exists('field_group_form_pre_render')) {
           $element['subform']['#pre_render'][] = 'field_group_form_pre_render';
         }
-        if (function_exists('field_group_form_process')) {
+        elseif (function_exists('field_group_form_process')) {
           $element['subform']['#process'][] = 'field_group_form_process';
         }
       }
@@ -836,6 +846,7 @@ class ParagraphsWidget extends WidgetBase {
             $element['behavior_plugins'][$plugin_id] = [
               '#type' => 'container',
               '#group' => implode('][', array_merge($element_parents, ['paragraph_behavior'])),
+              '#parents' => array_merge(array_slice($element_parents, 0, -1), ['behavior_plugins', $plugin_id]),
             ];
             $subform_state = SubformState::createForSubform($element['behavior_plugins'][$plugin_id], $form, $form_state);
             if ($plugin_form = $plugin->buildBehaviorForm($paragraphs_entity, $element['behavior_plugins'][$plugin_id], $subform_state)) {
@@ -927,7 +938,6 @@ class ParagraphsWidget extends WidgetBase {
         'class' => [
           'paragraph-type-add-modal',
           'first-button',
-          'paragraphs-add-wrapper',
         ],
       ],
       '#access' => $this->allowReferenceChanges(),
@@ -942,6 +952,7 @@ class ParagraphsWidget extends WidgetBase {
         'class' => [
           'paragraph-type-add-modal-button',
           'js-show',
+          'button--small',
         ],
       ],
     ];
@@ -1187,6 +1198,8 @@ class ParagraphsWidget extends WidgetBase {
 
     if (($this->realItemCount < $cardinality || $cardinality == FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED) && !$form_state->isProgrammed() && $this->allowReferenceChanges()) {
       $elements['add_more'] = $this->buildAddActions();
+      // Add the class to hide the add actions in the Behavior perspective.
+      $elements['add_more']['#attributes']['class'][] = 'paragraphs-add-wrapper';
     }
 
     $elements['#allow_reference_changes'] = $this->allowReferenceChanges();
@@ -1553,7 +1566,7 @@ class ParagraphsWidget extends WidgetBase {
   protected function buildDropbutton(array $elements = []) {
     $build = [
       '#type' => 'container',
-      '#attributes' => ['class' => ['paragraphs-dropbutton-wrapper', 'paragraphs-add-wrapper']],
+      '#attributes' => ['class' => ['paragraphs-dropbutton-wrapper']],
     ];
 
     $operations = [];
@@ -1594,7 +1607,7 @@ class ParagraphsWidget extends WidgetBase {
         '#type' => 'submit',
         '#name' => $this->fieldIdPrefix . '_' . $machine_name . '_add_more',
         '#value' => $add_mode == 'modal' ? $label : $this->t('Add @type', ['@type' => $label]),
-        '#attributes' => ['class' => ['field-add-more-submit', 'paragraphs-add-wrapper']],
+        '#attributes' => ['class' => ['field-add-more-submit']],
         '#limit_validation_errors' => [array_merge($this->fieldParents, [$this->fieldDefinition->getName(), 'add_more'])],
         '#submit' => [[get_class($this), 'addMoreSubmit']],
         '#ajax' => [
@@ -1609,15 +1622,21 @@ class ParagraphsWidget extends WidgetBase {
       }
     }
 
-    // Determine if buttons should be rendered as dropbuttons.
-    if (count($options) > 1 && $add_mode == 'dropdown') {
-      $add_more_elements = $this->buildDropbutton($add_more_elements);
+    // Define the way how buttons are rendered and add them to a container.
+    if ($add_mode == 'dropdown') {
+      if (count($add_more_elements) > 1) {
+        $add_more_elements = $this->buildDropbutton($add_more_elements);
+      }
+      else {
+        $add_more_elements['#attributes']['class'][] = 'paragraphs-dropbutton-wrapper';
+      }
       $add_more_elements['#suffix'] = $this->t('to %type', ['%type' => $this->fieldDefinition->getLabel()]);
     }
     elseif ($add_mode == 'modal') {
       $this->buildModalAddForm($add_more_elements);
       $add_more_elements['add_modal_form_area']['#suffix'] = '<span class="paragraphs-add-suffix">' . $this->t('to %type', ['%type' => $this->fieldDefinition->getLabel()]) . '</span>';
     }
+    $add_more_elements['#type'] = 'container';
     $add_more_elements['#weight'] = 1;
 
     return $add_more_elements;
@@ -1637,9 +1656,6 @@ class ParagraphsWidget extends WidgetBase {
 
     $add_more_elements = [
       '#type' => 'container',
-      '#attributes' => [
-        'class' => ['paragraphs-add-wrapper'],
-      ],
     ];
 
     $add_more_elements['add_more_select'] = [
@@ -2716,12 +2732,8 @@ class ParagraphsWidget extends WidgetBase {
 
     $cardinality = $this->fieldDefinition->getFieldStorageDefinition()->getCardinality();
 
-    // Hide the button if field cardinality is one.
-    if ($cardinality == 1) {
-      return FALSE;
-    }
-
-    return TRUE;
+    // Hide the button if field cardinality is reached.
+    return !($cardinality !== FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED && $this->realItemCount === $cardinality);
   }
 
   /**

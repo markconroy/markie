@@ -21,7 +21,7 @@ name: Paragraphs Demo
 package: Paragraphs
 type: module
 
-# Information added by Drupal.org packaging script on 2020-02-16
-version: '8.x-1.11'
+# Information added by Drupal.org packaging script on 2020-05-21
+version: '8.x-1.12'
 project: 'paragraphs'
-datestamp: 1581850832
+datestamp: 1590061337
