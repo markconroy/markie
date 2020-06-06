@@ -36,7 +36,7 @@ class CropEffectTest extends CropUnitTestBase {
       'height' => '50',
     ];
     /** @var \Drupal\crop\CropInterface $crop */
-    $crop = $this->container->get('entity.manager')->getStorage('crop')->create($values);
+    $crop = $this->container->get('entity_type.manager')->getStorage('crop')->create($values);
     $crop->save();
 
     $derivative_uri = $this->testStyle->buildUri($file->getFileUri());

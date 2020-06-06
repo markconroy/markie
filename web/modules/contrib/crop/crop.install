@@ -5,7 +5,35 @@
  * Install, update and uninstall functions for the Crop API module.
  */
 
+use Drupal\crop\CropStorageSchema;
 use Drupal\crop\Entity\Crop;
+
+/**
+ * Implements hook_requirements().
+ */
+function crop_requirements($phase) {
+  $requirements = [];
+
+  // This branch of Crop API shouldn't be used with media_entity 1.x enabled.
+  $incompatible = FALSE;
+  if (\Drupal::moduleHandler()->moduleExists('media_entity')) {
+    $info = \Drupal::service('extension.list.module')->getExtensionInfo('media_entity');
+    if (version_compare($info['version'], '8.x-2') < 0) {
+      $incompatible = TRUE;
+    }
+  }
+
+  if ($incompatible) {
+    $requirements['crop_media'] = [
+      'title' => t('Crop API'),
+      'value' => t('This branch of Crop API is not compatible with the version of Media Entity installed.'),
+      'description' => t('This branch of Crop API is not compatible with the version of Media Entity installed.'),
+      'severity' => REQUIREMENT_ERROR,
+    ];
+  }
+
+  return $requirements;
+}
 
 /**
  * Delete orphaned crop entities.
@@ -63,8 +91,21 @@ function crop_update_8002() {
 /**
  * Uninstall deprecated sub-module from active instance.
  */
-function crop_update_8003() {
+function crop_update_8004() {
   if (\Drupal::moduleHandler()->moduleExists('crop_media_entity')) {
     \Drupal::service('module_installer')->uninstall(['crop_media_entity']);
   }
+}
+
+/**
+ * Add index on type and uri.
+ */
+function crop_update_8005() {
+  $manager = \Drupal::entityDefinitionUpdateManager();
+  // Get the current crop entity type definition, ensure the storage schema
+  // class is set.
+  $entity_type = $manager->getEntityType('crop')
+    ->setHandlerClass('storage_schema', CropStorageSchema::class);
+  // Regenerate entity type indexes.
+  $manager->updateEntityType($entity_type);
 }

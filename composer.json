@@ -39,7 +39,7 @@
     "drupal/components": "^1.0",
     "drupal/console": "^1.0.1",
     "drupal/core": "^8.0.0",
-    "drupal/crop": "^1.5",
+    "drupal/crop": "^2.0",
     "drupal/devel": "^1.2",
     "drupal/entity": "^1.0-beta4",
     "drupal/entity_reference_revisions": "^1.4",
@@ -81,10 +81,7 @@
   "minimum-stability": "dev",
   "prefer-stable": true,
   "config": {
-    "sort-packages": true,
-    "platform": {
-      "php": "7.0.8"
-    }
+    "sort-packages": true
   },
   "autoload": {
     "classmap": [
