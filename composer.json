@@ -41,7 +41,6 @@
     "drupal/core": "^8.0.0",
     "drupal/crop": "^2.0",
     "drupal/devel": "^1.2",
-    "drupal/devel_entity_updates": "^3.0",
     "drupal/entity": "^1.0-beta4",
     "drupal/entity_reference_revisions": "^1.4",
     "drupal/field_group": "^3.0",
