@@ -2,10 +2,8 @@ name: 'Google Analytics test'
 type: module
 description: 'Support module for Google Analytics testing.'
 package: Testing
-# core: 8.x
 
-# Information added by Drupal.org packaging script on 2019-01-31
-version: '8.x-2.4'
-core: '8.x'
+# Information added by Drupal.org packaging script on 2020-06-04
+version: '8.x-2.5'
 project: 'google_analytics'
-datestamp: 1548968592
+datestamp: 1591298498

@@ -1,15 +1,15 @@
 <?php
 
-namespace Drupal\google_analytics\Tests;
+namespace Drupal\Tests\google_analytics\Functional;
 
-use Drupal\simpletest\WebTestBase;
+use Drupal\Tests\BrowserTestBase;
 
 /**
  * Test uninstall functionality of Google Analytics module.
  *
  * @group Google Analytics
  */
-class GoogleAnalyticsUninstallTest extends WebTestBase {
+class GoogleAnalyticsUninstallTest extends BrowserTestBase {
 
   /**
    * Modules to enable.
@@ -17,6 +17,11 @@ class GoogleAnalyticsUninstallTest extends WebTestBase {
    * @var array
    */
   public static $modules = ['google_analytics'];
+
+  /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
 
   /**
    * {@inheritdoc}
@@ -52,21 +57,20 @@ class GoogleAnalyticsUninstallTest extends WebTestBase {
     $this->drupalGet('');
 
     // Test if the directory and analytics.js exists.
-    $this->assertTrue(file_prepare_directory($cache_path), 'Cache directory "public://google_analytics" has been found.');
-    $this->assertTrue(file_exists($cache_path . '/analytics.js'), 'Cached analytics.js tracking file has been found.');
-    $this->assertTrue(file_exists($cache_path . '/analytics.js.gz'), 'Cached analytics.js.gz tracking file has been found.');
+    $this->assertDirectoryExists($cache_path, 'Cache directory "public://google_analytics" has been found.');
+    $this->assertFileExists($cache_path . '/analytics.js', 'Cached analytics.js tracking file has been found.');
+    $this->assertFileExists($cache_path . '/analytics.js.gz', 'Cached analytics.js.gz tracking file has been found.');
 
     // Uninstall the module.
     $edit = [];
     $edit['uninstall[google_analytics]'] = TRUE;
     $this->drupalPostForm('admin/modules/uninstall', $edit, t('Uninstall'));
-    $this->assertNoText(\Drupal::translation()->translate('Configuration deletions'), 'No configuration deletions listed on the module install confirmation page.');
+    $this->assertSession()->pageTextNotContains(\Drupal::translation()->translate('Configuration deletions'));
     $this->drupalPostForm(NULL, NULL, t('Uninstall'));
-    $this->assertText(t('The selected modules have been uninstalled.'), 'Modules status has been updated.');
+    $this->assertSession()->pageTextContains(t('The selected modules have been uninstalled.'));
 
     // Test if the directory and all files have been removed.
-    $this->assertFalse(file_scan_directory($cache_path, '/.*/'), 'Cached JavaScript files have been removed.');
-    $this->assertFalse(file_prepare_directory($cache_path), 'Cache directory "public://google_analytics" has been removed.');
+    $this->assertDirectoryNotExists($cache_path);
   }
 
 }

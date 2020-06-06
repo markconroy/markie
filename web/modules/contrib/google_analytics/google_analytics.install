@@ -58,6 +58,16 @@ function google_analytics_requirements($phase) {
         'value' => t('Debugging enabled'),
       ];
     }
+
+    // Raise warning if php code is being used.
+    if ($config->get('visibility.request_path_mode') && $config->get('visibility.request_path_mode') === '2') {
+      $requirements['google_analytics_php'] = [
+        'title' => t('Google Analytics module'),
+        'description' => t('Using PHP code in Google Analytics is deprecated and not available in Drupal 9. You must move your logic into a custom module, and change the <a href=":url">Page Visibility settings</a> to suppress this message.', [':url' => Url::fromRoute('google_analytics.admin_settings_form')->toString()]),
+        'severity' => REQUIREMENT_ERROR,
+        'value' => t('PHP code exists'),
+      ];
+    }
   }
 
   return $requirements;

@@ -7,7 +7,7 @@ visibility:
   request_path_pages: "/admin\n/admin/*\n/batch\n/node/add*\n/node/*/*\n/user/*/*"
   user_role_mode: 0
   user_role_roles: {  }
-  user_account_mode: 0
+  user_account_mode: 1
 track:
   outbound: true
   mailto: true

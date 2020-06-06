@@ -1,15 +1,15 @@
 <?php
 
-namespace Drupal\google_analytics\Tests;
+namespace Drupal\Tests\google_analytics\Functional;
 
-use Drupal\simpletest\WebTestBase;
+use Drupal\Tests\BrowserTestBase;
 
 /**
  * Test custom url functionality of Google Analytics module.
  *
  * @group Google Analytics
  */
-class GoogleAnalyticsCustomUrls extends WebTestBase {
+class GoogleAnalyticsCustomUrls extends BrowserTestBase {
 
   /**
    * Modules to enable.
@@ -17,6 +17,11 @@ class GoogleAnalyticsCustomUrls extends WebTestBase {
    * @var array
    */
   public static $modules = ['google_analytics'];
+
+  /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
 
   /**
    * {@inheritdoc}
@@ -44,13 +49,13 @@ class GoogleAnalyticsCustomUrls extends WebTestBase {
     $this->config('google_analytics.settings')->set('account', $ua_code)->save();
 
     $this->drupalGet('user/password', ['query' => ['name' => 'foo']]);
-    $this->assertRaw('ga("set", "page", "' . $base_path . 'user/password"');
+    $this->assertSession()->responseContains('ga("set", "page", "' . $base_path . 'user/password"');
 
     $this->drupalGet('user/password', ['query' => ['name' => 'foo@example.com']]);
-    $this->assertRaw('ga("set", "page", "' . $base_path . 'user/password"');
+    $this->assertSession()->responseContains('ga("set", "page", "' . $base_path . 'user/password"');
 
     $this->drupalGet('user/password');
-    $this->assertNoRaw('ga("set", "page",', '[testGoogleAnalyticsCustomUrls]: Custom url not set.');
+    $this->assertSession()->responseNotContains('ga("set", "page",');
   }
 
 }

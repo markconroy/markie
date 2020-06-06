@@ -12,8 +12,8 @@
 
 use Drupal\Component\Serialization\Json;
 use Drupal\Component\Utility\Crypt;
-use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Cache\Cache;
+use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Site\Settings;
@@ -119,8 +119,10 @@ function google_analytics_page_attachments(array &$page) {
       // Add debugging code.
       if ($debug) {
         $page['#attached']['library'][] = 'google_analytics/google_analytics.debug';
+        // phpcs:disable
         // Add the JS test in development to the page.
         // $page['#attached']['library'][] = 'google_analytics/google_analytics.test';
+        // phpcs:enable
       }
       else {
         $page['#attached']['library'][] = 'google_analytics/google_analytics';
@@ -209,7 +211,7 @@ function google_analytics_page_attachments(array &$page) {
           $google_analytics_custom_var['value'] = \Drupal::token()->replace($google_analytics_custom_var['value'], $types, ['clear' => TRUE]);
 
           // Suppress empty values.
-          if (!Unicode::strlen(trim($google_analytics_custom_var['value']))) {
+          if (!mb_strlen(trim($google_analytics_custom_var['value']))) {
             continue;
           }
 
@@ -217,7 +219,7 @@ function google_analytics_page_attachments(array &$page) {
           // A metric has no length limitation. It's not documented if this
           // limit means 150 bytes after url encoding or before.
           // See https://developers.google.com/analytics/devguides/collection/analyticsjs/field-reference#customs
-          if ($google_analytics_custom_type == 'dimension' && Unicode::strlen($google_analytics_custom_var['value']) > 150) {
+          if ($google_analytics_custom_type == 'dimension' && mb_strlen($google_analytics_custom_var['value']) > 150) {
             $google_analytics_custom_var['value'] = substr($google_analytics_custom_var['value'], 0, 150);
           }
 
@@ -457,15 +459,17 @@ function google_analytics_preprocess_item_list__search_results(&$variables) {
 
   // Only run on search results list.
   if ($config->get('track.site_search')) {
-    // There is no search result $variable available that hold the number of
-    // items found. The variable $variables['items'] has the current page items
-    // only. But the pager item mumber can tell the number of search results.
-    global $pager_total_items;
-
+    // Get the pager manager to give us the number of items returned.
+    /** @var \Drupal\Core\Pager\PagerManagerInterface $pager_manager */
+    $pager_manager = \Drupal::service('pager.manager');
+    $items = 0;
+    if ($pager_manager->getPager()) {
+      $items = $pager_manager->getPager()->getTotalItems();
+    }
     $variables['#attached']['html_head'][] = [
       [
         '#tag' => 'script',
-        '#value' => 'window.google_analytics_search_results = ' . intval($pager_total_items[0]) . ';',
+        '#value' => 'window.google_analytics_search_results = ' . $items . ';',
         '#weight' => JS_LIBRARY - 1,
       ],
       'google_analytics_search_script',
@@ -487,6 +491,7 @@ function google_analytics_preprocess_item_list__search_results(&$variables) {
 function _google_analytics_cache($location, $synchronize = FALSE) {
   $path = 'public://google_analytics';
   $file_destination = $path . '/' . basename($location);
+  $filesystem = \Drupal::service('file_system');
 
   if (!file_exists($file_destination) || $synchronize) {
     // Download the latest tracking code.
@@ -500,12 +505,12 @@ function _google_analytics_cache($location, $synchronize = FALSE) {
         $data_hash_local = Crypt::hashBase64(file_get_contents($file_destination));
         $data_hash_remote = Crypt::hashBase64($data);
         // Check that the files directory is writable.
-        if ($data_hash_local != $data_hash_remote && file_prepare_directory($path)) {
+        if ($data_hash_local != $data_hash_remote &&  $filesystem->prepareDirectory($path)) {
           // Save updated tracking code file to disk.
-          file_unmanaged_save_data($data, $file_destination, FILE_EXISTS_REPLACE);
+          $filesystem->saveData($data, $file_destination, FileSystemInterface::EXISTS_REPLACE);
           // Based on Drupal Core class AssetDumper.
           if (extension_loaded('zlib') && \Drupal::config('system.performance')->get('js.gzip')) {
-            file_unmanaged_save_data(gzencode($data, 9, FORCE_GZIP), $file_destination . '.gz', FILE_EXISTS_REPLACE);
+            $filesystem->saveData(gzencode($data, 9, FORCE_GZIP), $file_destination . '.gz', FileSystemInterface::EXISTS_REPLACE);
           }
           \Drupal::logger('google_analytics')->info('Locally cached tracking code file has been updated.');
 
@@ -516,13 +521,13 @@ function _google_analytics_cache($location, $synchronize = FALSE) {
       }
       else {
         // Check that the files directory is writable.
-        if (file_prepare_directory($path, FILE_CREATE_DIRECTORY)) {
+        if ($filesystem->prepareDirectory($path, FileSystemInterface::CREATE_DIRECTORY)) {
           // There is no need to flush JS here as core refreshes JS caches
           // automatically, if new files are added.
-          file_unmanaged_save_data($data, $file_destination, FILE_EXISTS_REPLACE);
+          $filesystem->saveData($data, $file_destination, FileSystemInterface::EXISTS_REPLACE);
           // Based on Drupal Core class AssetDumper.
           if (extension_loaded('zlib') && \Drupal::config('system.performance')->get('js.gzip')) {
-            file_unmanaged_save_data(gzencode($data, 9, FORCE_GZIP), $file_destination . '.gz', FILE_EXISTS_REPLACE);
+            $filesystem->saveData(gzencode($data, 9, FORCE_GZIP), $file_destination . '.gz', FileSystemInterface::EXISTS_REPLACE);
           }
           \Drupal::logger('google_analytics')->info('Locally cached tracking code file has been saved.');
 
@@ -546,9 +551,8 @@ function _google_analytics_cache($location, $synchronize = FALSE) {
  */
 function google_analytics_clear_js_cache() {
   $path = 'public://google_analytics';
-  if (file_prepare_directory($path)) {
-    file_scan_directory($path, '/.*/', ['callback' => 'file_unmanaged_delete']);
-    \Drupal::service('file_system')->rmdir($path);
+  if (is_dir($path)) {
+    \Drupal::service('file_system')->deleteRecursive($path);
 
     // Change query-strings on css/js files to enforce reload for all users.
     _drupal_flush_css_js();
@@ -649,11 +653,11 @@ function _google_analytics_visibility_pages() {
     if (!empty($visibility_request_path_pages)) {
       // Convert path to lowercase. This allows comparison of the same path
       // with different case. Ex: /Page, /page, /PAGE.
-      $pages = Unicode::strtolower($visibility_request_path_pages);
+      $pages = mb_strtolower($visibility_request_path_pages);
       if ($visibility_request_path_mode < 2) {
         // Compare the lowercase path alias (if any) and internal path.
         $path = \Drupal::service('path.current')->getPath();
-        $path_alias = Unicode::strtolower(\Drupal::service('path.alias_manager')->getAliasByPath($path));
+        $path_alias = mb_strtolower(\Drupal::service('path_alias.manager')->getAliasByPath($path));
         $page_match = \Drupal::service('path.matcher')->matchPath($path_alias, $pages) || (($path != $path_alias) && \Drupal::service('path.matcher')->matchPath($path, $pages));
         // When $visibility_request_path_mode has a value of 0, the tracking
         // code is displayed on all pages except those listed in $pages. When

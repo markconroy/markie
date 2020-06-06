@@ -5,11 +5,7 @@
   "homepage": "https://www.drupal.org/project/google_analytics",
   "authors": [
     {
-      "name": "hass",
-      "homepage": "https://www.drupal.org/u/hass"
-    },
-    {
-      "name": "See other contributors",
+      "name": "See contributors",
       "homepage":"https://www.drupal.org/node/49388/committers"
     }
   ],
@@ -17,8 +13,16 @@
     "issues": "https://www.drupal.org/project/issues/google_analytics",
     "source": "https://git.drupal.org/project/google_analytics.git"
   },
-  "license": "GPL-2.0+",
+  "license": "GPL-2.0-or-later",
   "require": {
-    "drupal/core": "~8.5"  
+    "drupal/core": "^8.8.6|^9.0"
+  },
+  "require-dev": {
+    "drupal/token": "^1.7"
+  },
+  "extra": {
+    "branch-alias": {
+      "dev-8.x-2.x": "2.x-dev"
+    }
   }
 }
