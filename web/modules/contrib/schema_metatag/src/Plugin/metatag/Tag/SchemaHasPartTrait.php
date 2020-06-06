@@ -194,7 +194,7 @@ trait SchemaHasPartTrait {
             'class' => 'SchemaNameBase',
             'formKeys' => '',
             'form' => '',
-            'description' => "Comma-separated list of class names of the parts of the web page that are not free, i.e. '.first-class,.second-class'. Do NOT surround class names with quotation marks!",
+            'description' => "List of class names of the parts of the web page that are not free, i.e. '.first-class', '.second-class'. Do NOT surround class names with quotation marks!",
           ],
         ];
 

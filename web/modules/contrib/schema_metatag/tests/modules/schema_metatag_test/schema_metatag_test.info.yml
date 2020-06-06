@@ -1,14 +1,13 @@
 name: 'Schema Metatag Tests'
 type: module
 description: 'Support module for testing handling of all the base tags.'
-# core: 8.x
+core_version_requirement: ^8 || ^9
 package: Testing
 hidden: true
 dependencies:
   - schema_metatag:schema_metatag
 
-# Information added by Drupal.org packaging script on 2019-07-13
-version: '8.x-1.4'
-core: '8.x'
+# Information added by Drupal.org packaging script on 2020-05-24
+version: '8.x-1.5'
 project: 'schema_metatag'
-datestamp: 1563033787
+datestamp: 1590323807

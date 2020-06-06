@@ -13,8 +13,8 @@ use Drupal\schema_metatag\Plugin\metatag\Group\SchemaGroupBase;
  *   description = @Translation("See Schema.org definitions for this Schema type at <a href="":url"">:url</a> and <a href="":url2"">:url2</a>, Google's recommendations at <a href="":google_url"">:google_url</a> and <a href="":google_url2"">:google_url2</a>.", arguments = {
  *     ":url" = "https://schema.org/QAPage",
  *     ":url2" = "https://schema.org/FAQPage",
- *     ":google_url" = "https://developers.google.com/search/docs/guides/qapage",
- *     ":google_url2" = "https://developers.google.com/search/docs/guides/faqpage",
+ *     ":google_url" = "https://developers.google.com/search/docs/data-types/qapage",
+ *     ":google_url2" = "https://developers.google.com/search/docs/data-types/faqpage",
  *   }),
  *   weight = 10,
  * )

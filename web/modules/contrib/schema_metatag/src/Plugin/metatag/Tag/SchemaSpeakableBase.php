@@ -34,6 +34,10 @@ class SchemaSpeakableBase extends SchemaNameBase {
 
     $form = $this->speakableForm($input_values);
 
+    if (empty($this->multiple())) {
+      unset($form['pivot']);
+    }
+
     return $form;
   }
 

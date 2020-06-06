@@ -20,7 +20,7 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaSpeakableBase;
  *   weight = 5,
  *   type = "string",
  *   secure = FALSE,
- *   multiple = FALSE
+ *   multiple = TRUE
  * )
  */
 class SchemaWebPageSpeakable extends SchemaSpeakableBase {

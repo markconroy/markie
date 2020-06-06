@@ -13,7 +13,7 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaMonetaryAmountBase;
  *
  * @MetatagTag(
  *   id = "schema_how_to_estimated_cost",
- *   label = @Translation("image"),
+ *   label = @Translation("estimatedCost"),
  *   description = @Translation("RECOMMENDED BY GOOGLE. The estimated cost of the supplies consumed when performing instructions."),
  *   name = "estimatedCost",
  *   group = "schema_how_to",
