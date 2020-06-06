@@ -1,0 +1,12 @@
+name: 'Upgrade Status Test module with theme functions'
+type: module
+description: 'Test module for testing theme function deprecation messages'
+core: 8.x
+core_version_requirement: ^8 || ^9
+package: Testing
+# version: VERSION
+
+# Information added by Drupal.org packaging script on 2020-06-02
+version: '8.x-2.7'
+project: 'upgrade_status'
+datestamp: 1591125754

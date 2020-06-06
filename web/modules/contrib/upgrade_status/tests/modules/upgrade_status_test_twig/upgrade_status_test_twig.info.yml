@@ -1,0 +1,12 @@
+name: 'Upgrade status test Twig'
+type: module
+description: 'Support module for upgrade status module testing.'
+package: Testing
+# version: VERSION
+core: 8.x
+core_version_requirement: ^8 || ^9
+
+# Information added by Drupal.org packaging script on 2020-06-02
+version: '8.x-2.7'
+project: 'upgrade_status'
+datestamp: 1591125754

@@ -1,0 +1,45 @@
+parameters:
+	autoload_files:
+		- drupal-autoloader.php
+	excludes_analyse:
+		- *.api.php
+		- */tests/fixtures/*.php
+	fileExtensions:
+		- module
+		- theme
+		- inc
+		- install
+		- profile
+		- engine
+	drupal:
+		drupal_root: '%currentWorkingDirectory%'
+		entityTypeStorageMapping:
+			node: Drupal\node\NodeStorage
+			taxonomy_term: Drupal\taxonomy\TermStorage
+			user: Drupal\user\UserStorage
+parametersSchema:
+	drupal: structure([
+		drupal_root: string()
+		entityTypeStorageMapping: arrayOf(string())
+	])
+rules:
+	- PHPStan\Rules\Classes\PluginManagerInspectionRule
+	- PHPStan\Rules\Drupal\Coder\DiscouragedFunctionsRule
+	- PHPStan\Rules\Drupal\GlobalDrupalDependencyInjectionRule
+	- PHPStan\Rules\Drupal\PluginManager\PluginManagerSetsCacheBackendRule
+	- PHPStan\Rules\Deprecations\AccessDeprecatedConstant
+services:
+	-
+		class: PHPStan\Drupal\ServiceMap
+
+	-
+		class: PHPStan\Type\EntityTypeManagerGetStorageDynamicReturnTypeExtension
+		arguments:
+			entityTypeStorageMapping: %drupal.entityTypeStorageMapping%
+		tags: [phpstan.broker.dynamicMethodReturnTypeExtension]
+	-
+		class: PHPStan\Type\ServiceDynamicReturnTypeExtension
+		tags: [phpstan.broker.dynamicMethodReturnTypeExtension]
+	-
+		class: PHPStan\Reflection\EntityFieldsViaMagicReflectionExtension
+		tags: [phpstan.broker.propertiesClassReflectionExtension]

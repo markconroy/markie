@@ -1,0 +1,13 @@
+name: 'Upgrade status test library'
+type: module
+description: 'Support module for upgrade status module testing.'
+package: Testing
+# version: VERSION
+core_version_requirement: ^8 || ^9
+dependencies:
+  - upgrade_status_test_twig
+
+# Information added by Drupal.org packaging script on 2020-06-02
+version: '8.x-2.7'
+project: 'upgrade_status'
+datestamp: 1591125754
