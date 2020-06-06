@@ -15,7 +15,7 @@ use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Controller\ControllerResolver;
-use Symfony\Component\HttpKernel\Tests\Fixtures\Controller\NullableController;
+use Symfony\Component\HttpKernel\Tests\Fixtures\Controller\LegacyNullableController;
 use Symfony\Component\HttpKernel\Tests\Fixtures\Controller\VariadicController;
 
 class ControllerResolverTest extends TestCase
@@ -247,13 +247,17 @@ class ControllerResolverTest extends TestCase
      */
     public function testGetNullableArguments()
     {
+        if (\PHP_VERSION_ID >= 80000) {
+            $this->markTestSkipped('PHP < 8 required.');
+        }
+
         $resolver = new ControllerResolver();
 
         $request = Request::create('/');
         $request->attributes->set('foo', 'foo');
         $request->attributes->set('bar', new \stdClass());
         $request->attributes->set('mandatory', 'mandatory');
-        $controller = [new NullableController(), 'action'];
+        $controller = [new LegacyNullableController(), 'action'];
         $this->assertEquals(['foo', new \stdClass(), 'value', 'mandatory'], $resolver->getArguments($request, $controller));
     }
 
@@ -263,11 +267,15 @@ class ControllerResolverTest extends TestCase
      */
     public function testGetNullableArgumentsWithDefaults()
     {
+        if (\PHP_VERSION_ID >= 80000) {
+            $this->markTestSkipped('PHP < 8 required.');
+        }
+
         $resolver = new ControllerResolver();
 
         $request = Request::create('/');
         $request->attributes->set('mandatory', 'mandatory');
-        $controller = [new NullableController(), 'action'];
+        $controller = [new LegacyNullableController(), 'action'];
         $this->assertEquals([null, null, 'value', 'mandatory'], $resolver->getArguments($request, $controller));
     }
 

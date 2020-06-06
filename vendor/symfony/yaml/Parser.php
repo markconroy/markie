@@ -619,8 +619,14 @@ class Parser
         }
 
         $isItUnindentedCollection = $this->isStringUnIndentedCollectionItem();
+        $isItComment = $this->isCurrentLineComment();
 
         while ($this->moveToNextLine()) {
+            if ($isItComment && !$isItUnindentedCollection) {
+                $isItUnindentedCollection = $this->isStringUnIndentedCollectionItem();
+                $isItComment = $this->isCurrentLineComment();
+            }
+
             $indent = $this->getCurrentLineIndentation();
 
             if ($isItUnindentedCollection && !$this->isCurrentLineEmpty() && !$this->isStringUnIndentedCollectionItem() && $newIndent === $indent) {
@@ -751,7 +757,8 @@ class Parser
                 $lines[] = trim($this->currentLine);
 
                 // quoted string values end with a line that is terminated with the quotation character
-                if ('' !== $this->currentLine && substr($this->currentLine, -1) === $quotation) {
+                $escapedLine = str_replace(['\\\\', '\\"'], '', $this->currentLine);
+                if ('' !== $escapedLine && substr($escapedLine, -1) === $quotation) {
                     break;
                 }
             }
