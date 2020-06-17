@@ -222,33 +222,6 @@
   margin-left: $pull;
 }
 
-/// Function: color-contrast
-/// =====================================================================
-/// https://codepen.io/Niklan/details/ZpAdNx/
-/// Calculate Colour contrast and set either dark or light colour.
-///
-/// Example usage:
-/// .bg-primary {
-///   color: color-contrast($c-primary);
-/// }
-///
-
-@function color-contrast(
-  $color,
-  $dark: $c-black,
-  $light: $c-white
-) {
-  @if $color == null {
-    @return null;
-  }
-
-  @else {
-    $yiq: (red($color) * 299 + green($color) * 587 + blue($color) * 114) / 1000;
-
-    @return if($yiq >= 128, $dark, $light);
-  }
-}
-
 /// Mixin - Flexbox Layout
 /// Gives us a default flexbox layout with 1rem spacing between items.
 /// This is handy if we only want flexbox on medium/large breakpoints.
@@ -331,8 +304,9 @@
   @include flex-default;
 }
 
-@mixin animated_link($default-colour: $c-primary, $hover-colour: $c-primary) {
+@mixin animated_link($default-colour: var(--color-secondary), $hover-colour: var(--color-secondary)) {
   position: relative;
+  top: 0;
   transition: $trans;
   text-decoration: none;
   color: $default-colour;

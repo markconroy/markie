@@ -8,7 +8,4 @@ header_menu:
     - include():
         pattern: 'site-components-menu-block-main-navigation'
 
-header_search:
-  join():
-    - include():
-        pattern: 'site-components-search'
+header_search: false

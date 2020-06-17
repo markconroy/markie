@@ -14,7 +14,7 @@
   width: 90%;
   max-width: 300px;
   padding: 0.5rem;
-  border: 1px solid $c-grey;
-  background: $c-white;
+  border: 1px solid var(--color-grey--dark);
+  background: var(--color-white);
   appearance: none;
 }

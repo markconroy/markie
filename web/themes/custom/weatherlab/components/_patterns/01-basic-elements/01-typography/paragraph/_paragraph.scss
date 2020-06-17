@@ -7,7 +7,7 @@ a {
   cursor: pointer;
   transition: $trans;
   text-decoration: underline;
-  color: $c-primary;
+  color: var(--color-secondary);
 
   &:focus,
   &:hover {

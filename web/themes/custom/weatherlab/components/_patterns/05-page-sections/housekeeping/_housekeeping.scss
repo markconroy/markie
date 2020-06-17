@@ -1,5 +1,5 @@
 .housekeeping {
-  background-color: $c-primary;
+  background-color: var(--color-secondary);
 }
 
 .housekeeping__content > * {
@@ -24,7 +24,7 @@
 }
 
 .housekeeping__content-first {
-  color: $c-white;
+  color: var(--color-white);
 }
 
 .housekeeping__content .menu {
@@ -41,12 +41,12 @@
 
   a {
     text-decoration: none;
-    color: $c-white;
+    color: var(--color-white);
 
     &:focus,
     &:hover {
       text-decoration: underline;
-      color: $c-white;
+      color: var(--color-white);
     }
   }
 }

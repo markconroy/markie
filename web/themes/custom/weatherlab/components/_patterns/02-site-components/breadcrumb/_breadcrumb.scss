@@ -6,9 +6,7 @@
 
 .breadcrumb__item {
   display: inline-block;
-  color: $c-secondary;
-  font-family: $ff--alternate;
-  font-weight: $fw--medium;
+  color: var(--color-secondary);
 }
 
 .breadcrumb__link {
@@ -16,15 +14,13 @@
   top: 0;
   transition: $trans;
   text-decoration: none;
-  color: $c-tertiary;
-  font-family: $ff--alternate;
-  font-weight: $fw--medium;
+  color: var(--color-primary);
 
   &:focus,
   &:hover {
     top: -2px;
     text-decoration: none;
-    color: $c-primary--dark;
+    color: var(--color-primary--dark);
   }
 }
 

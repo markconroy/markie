@@ -1,41 +1,55 @@
-$c-primary: hsl(202, 100%, 31%); // Blue
-$c-primary--light: lighten($c-primary, 15%); // Light Blue
-$c-primary--dark: darken($c-primary, 15%); // Dark Blue
-$c-secondary: hsl(332, 77%, 47%); // Pink
-$c-secondary--light: lighten($c-secondary, 15%); // Light Pink
-$c-secondary--dark: darken($c-secondary, 15%); // Dark Pink
-$c-tertiary: hsl(72, 62%, 38%); // Green
-$c-tertiary--light: lighten($c-tertiary, 15%); // Light Green
-$c-tertiary--dark: darken($c-tertiary, 15%); // Dark Green
+:root {
+  --color-primary: hsl(200, 100%, 30%);
+  --color-primary--light: hsl(200, 100%, 40%);
+  --color-primary--dark: hsl(200, 100%, 20%);
+  --color-secondary: hsl(330, 75%, 45%);
+  --color-secondary--light: hsl(330, 75%, 55%);
+  --color-secondary--dark: hsl(330, 75%, 35%);
+  --color-white: hsl(0, 0%, 100%);
+  --color-grey: hsl(0, 0%, 50%);
+  --color-grey--light: hsl(0, 0%, 75%);
+  --color-grey--dark: hsl(0, 0%, 25%);
+  --color-black: hsl(0, 0%, 0%);
+}
 
-$c-white: white; // White
-$c-grey--lightest: hsl(0, 0%, 100%); // Lightest Grey
-$c-grey--lighter: hsl(60, 9%, 96%); // Lighter Grey
-$c-grey--light: hsl(51, 7%, 79%); // Light Grey
-$c-grey: hsl(56, 7%, 59%); // Grey
-$c-grey--dark: hsl(56, 7%, 40%); // Dark Grey
-$c-grey--darker: hsl(214, 21%, 22%); // Darker Grey
-$c-grey--darkest: hsl(0, 0%, 0%); // Darkest Grey
-$c-black: hsl(0, 0%, 0%); // Black
+// var(--color-secondary): hsl(202, 100%, 31%); // Blue
+// var(--color-primary--dark): lighten(var(--color-secondary), 15%); // Light Blue
+// var(--color-primary--dark): hsl(210, 75%, 21%); // Dark Blue
+// var(--color-secondary): hsl(332, 77%, 47%); // Pink
+// var(--color-secondary)--light: lighten(var(--color-secondary), 15%); // Light Pink
+// var(--color-secondary)--dark: var(--color-secondary--dark); // Dark Pink
+// var(--color-primary): hsl(72, 62%, 38%); // Green
+// var(--color-primary)--light: lighten(var(--color-primary), 15%); // Light Green
+// var(--color-primary)--dark: var(--color-primary--dark); // Dark Green
 
-$theme-colours: (primary, $c-primary),
-  (primary--light, $c-primary--light),
-  (primary--dark, $c-primary--dark),
-  (secondary, $c-secondary),
-  (secondary--light, $c-secondary--light),
-  (secondary--dark, $c-secondary--dark),
-  (tertiary, $c-tertiary),
-  (tertiary--light, $c-tertiary--light),
-  (tertiary--dark, $c-tertiary--dark),
-  (white, $c-white),
-  (grey--lightest, $c-grey--lightest),
-  (grey--lighter, $c-grey--lighter),
-  (grey--light, $c-grey--light),
-  (grey, $c-grey),
-  (grey--dark, $c-grey--dark),
-  (grey--darker, $c-grey--darker),
-  (grey--darkest, $c-grey--darkest),
-  (black, $c-black);
+// var(--color-white): white; // White
+// var(--color-grey--light)est: hsl(0, 0%, 100%); // Lightest Grey
+// var(--color-grey--light)er: hsl(60, 9%, 96%); // Lighter Grey
+// var(--color-grey--light): hsl(51, 7%, 79%); // Light Grey
+// var(--color-grey--dark): hsl(56, 7%, 59%); // Grey
+// var(--color-grey--dark): hsl(56, 7%, 40%); // Dark Grey
+// var(--color-grey--dark): hsl(214, 21%, 22%); // Darker Grey
+// var(--color-grey--dark): hsl(0, 0%, 0%); // Darkest Grey
+// var(--color-black): hsl(0, 0%, 0%); // Black
+
+$theme-colours: (primary, var(--color-secondary)),
+  (primary--light, var(--color-primary--dark)),
+  (primary--dark, var(--color-primary--dark)),
+  (secondary, var(--color-secondary)),
+  (secondary--light, var(--color-secondary)--light),
+  (secondary--dark, var(--color-secondary)--dark),
+  (tertiary, var(--color-primary)),
+  (tertiary--light, var(--color-primary)--light),
+  (tertiary--dark, var(--color-primary)--dark),
+  (white, var(--color-white)),
+  (grey--lightest, var(--color-grey--light)est),
+  (grey--lighter, var(--color-grey--light)er),
+  (grey--light, var(--color-grey--light)),
+  (grey, var(--color-grey--dark)),
+  (grey--dark, var(--color-grey--dark)),
+  (grey--darker, var(--color-grey--dark)),
+  (grey--darkest, var(--color-grey--dark)),
+  (black, var(--color-black));
 
 @each $theme-colour, $colour in $theme-colours {
   .bg-#{$theme-colour} {

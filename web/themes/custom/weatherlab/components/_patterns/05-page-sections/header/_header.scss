@@ -1,25 +1,16 @@
-$branding-width: 200px;
-
 .header {
-  padding-top: 1rem;
-  padding-bottom: 1rem;
-
-  @include breakpoint($bp--xlarge) {
-    padding-top: 2rem;
-    padding-bottom: 2rem;
-  }
+  background-color: var(--color-primary);
 }
 
 .header__inner {
-  @include flex-default();
-
+  display: flex;
   align-items: center;
+  justify-content: space-between;
 }
 
 .header__branding {
   @include breakpoint($bp--xlarge);
 
-  width: calc(#{$branding-width} - 2rem);
   svg {
     height: 85px;
   }
@@ -31,7 +22,6 @@ $branding-width: 200px;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  width: calc(100% - #{$branding-width} - 2rem);
 
   > * {
     margin-left: auto;
@@ -93,7 +83,7 @@ $branding-width: 200px;
   flex-direction: column;
   width: 100vw;
   min-height: 100vh;
-  background-color: $c-white;
+  background-color: var(--color-white);
 
   > * {
     display: block;

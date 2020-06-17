@@ -5,17 +5,17 @@
   margin-left: auto;
   border: 0;
   border-radius: 3px;
-  background: $c-primary;
+  background: var(--color-secondary);
 }
 
 .section-break.primary hr {
-  background: $c-primary;
+  background: var(--color-secondary);
 }
 
 .section-break.secondary hr {
-  background: $c-secondary;
+  background: var(--color-secondary);
 }
 
 .section-break.tertiary hr {
-  background: $c-tertiary;
+  background: var(--color-primary);
 }

@@ -1,0 +1,20 @@
+.full__intro {
+  margin-bottom: $base-line-height * 2;
+}
+
+.full__tags .field__items {
+  display: flex;
+  flex-wrap: wrap;
+  > * {
+    margin-right: 1rem;
+  }
+  a {
+    color: var(--color-primary);
+  }
+}
+
+.full__follow-me {
+  margin-bottom: $base-line-height * 2;
+  padding: 1rem;
+  border: 3px solid var(--color-primary);
+}

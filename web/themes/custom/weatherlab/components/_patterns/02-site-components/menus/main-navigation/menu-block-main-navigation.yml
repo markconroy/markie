@@ -10,6 +10,8 @@ content:
   include():
     pattern: 'site-components-menu-items'
     with:
+      menu_id: 'main'
+      menu_name: 'main'
       items:
         -
           title: 'About Us'

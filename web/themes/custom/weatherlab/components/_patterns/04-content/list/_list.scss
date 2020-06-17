@@ -1,6 +1,6 @@
 .pager__items {
-  @include flex-default;
-
+  display: flex;
+  flex-wrap: wrap;
   justify-content: center;
   margin-top: $base-line-height;
   margin-right: 0;
@@ -10,7 +10,9 @@
 
 .pager__item {
   display: flex;
+  margin-right: 0.5rem;
   margin-bottom: 0.5rem;
+  margin-left: 0.5rem;
   list-style-type: none;
 }
 
@@ -18,9 +20,9 @@
   display: inline-block;
   padding: 0.5rem 1rem;
   text-decoration: none;
-  color: $c-primary;
+  color: var(--color-white);
   border-radius: 24px;
-  background-color: $c-grey--lightest;
+  background-color: var(--color-secondary);
 }
 
 .pager__item--first,
@@ -28,25 +30,26 @@
 .pager__item--previous,
 .pager__item--next {
   a {
-    border: 1px solid $c-grey--light;
-    background-color: $c-white;
+    color: var(--color-secondary);
+    border: 1px solid var(--color-grey--light);
+    background-color: var(--color-white);
   }
 }
 
 .pager__item a:focus,
 .pager__item a:hover {
   text-decoration: underline;
-  color: color-contrast($c-primary--light);
-  background-color: $c-primary--light;
+  color: var(--color-white);
+  background-color: var(--color-primary);
 }
 
 .pager__item.is-active a {
-  color: color-contrast($c-primary--light);
-  background-color: $c-primary--light;
+  color: var(--color-white);
+  background-color: var(--color-primary--dark);
 
   &:hover,
   &:focus {
-    color: color-contrast($c-primary);
-    background-color: $c-primary;
+    color: var(--color-white);
+    background-color: var(--color-secondary);
   }
 }

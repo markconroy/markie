@@ -1,15 +1,19 @@
-pl_class: true
+attributes:
+  Attribute():
+    class:
 
 node:
-  bundle: page
+  bundle: article
   isPublished: true
   created:
     value: 1511941986
   changed:
     value: 1512127363
 
-url: link.sample-pages-page
+view_mode: teaser
 
-label: 'This is the title'
+display_submitted: true
 
-content: 'The teaser content will go here'
+label: 'A Blog Post by Mark Conroy, all about PatternLab and Drupal'
+
+teaser_intro: <p>Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Curabitur blandit tempus porttitor. Sed posuere consectetur est at lobortis. Maecenas faucibus mollis interdum.</p>

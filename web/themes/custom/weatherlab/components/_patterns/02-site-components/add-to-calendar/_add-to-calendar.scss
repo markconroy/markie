@@ -4,10 +4,10 @@
   padding: 0.5rem 2rem;
   cursor: pointer;
   transition: $trans;
-  color: $c-primary;
-  border: 2px solid $c-primary;
+  color: var(--color-secondary);
+  border: 2px solid var(--color-secondary);
   border-radius: 2rem;
-  background-color: $c-white;
+  background-color: var(--color-white);
   font-size: 1rem;
 
   svg {
@@ -15,25 +15,25 @@
     top: -1px; // to position it with the bottom of non-hanging characters (o, a, u, h, x, etc.)
     width: 1rem;
     height: auto;
-    fill: $c-primary;
+    fill: var(--color-secondary);
   }
 
   svg path {
-    fill: $c-primary;
+    fill: var(--color-secondary);
   }
 
   &:focus,
   &:hover {
-    color: $c-white;
-    border-color: $c-secondary;
-    background-color: $c-secondary;
+    color: var(--color-white);
+    border-color: var(--color-secondary);
+    background-color: var(--color-secondary);
 
     svg {
-      fill: $c-white;
+      fill: var(--color-white);
     }
 
     svg path {
-      fill: $c-white;
+      fill: var(--color-white);
     }
   }
 }

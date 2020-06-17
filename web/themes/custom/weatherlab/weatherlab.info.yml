@@ -1,4 +1,4 @@
-name: Annertech Pattern Lab
+name: WeatherLab
 type: theme
 description: 'An Annertech starter-theme, based on the Phase2 implementation of Pattern Lab.'
 base theme: classy
@@ -58,7 +58,6 @@ regions:
   content_minus_two: 'Content Minus Two'
   footer_pre: 'Pre Footer'
   footer: Footer
-  copyright_minus_one: 'Copyright Minus One'
   hidden: Hidden
 
 # MUST install `components` module: `drush dl components && drush en components -y`

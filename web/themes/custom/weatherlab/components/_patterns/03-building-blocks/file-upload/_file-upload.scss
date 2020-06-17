@@ -10,7 +10,7 @@
   margin-left: auto;
   text-align: right;
   text-transform: uppercase;
-  color: $c-tertiary;
+  color: var(--color-primary);
   font-size: 10px;
   font-weight: $fw--bold;
 }
@@ -21,29 +21,29 @@
   padding-left: 1rem;
   transition: 0.2s;
   text-decoration: none;
-  color: $c-grey--darker;
-  background-color: $c-white;
+  color: var(--color-grey--dark);
+  background-color: var(--color-white);
 
   &--audio &__type {
-    color: $c-primary;
+    color: var(--color-secondary);
   }
 
   &--flash &__type {
-    color: $c-secondary;
+    color: var(--color-secondary);
   }
 
   &--pdf &__type {
-    color: $c-tertiary;
+    color: var(--color-primary);
   }
 
   &:focus,
   &:hover {
     text-decoration: underline;
-    color: $c-white;
-    background-color: $c-tertiary;
+    color: var(--color-white);
+    background-color: var(--color-primary);
 
     .file-upload-file__type {
-      color: $c-white;
+      color: var(--color-white);
     }
   }
 }
@@ -60,14 +60,14 @@
   width: 4rem;
   height: 100%;
   height: 4rem;
-  background-color: $c-tertiary;
+  background-color: var(--color-primary);
 
   svg {
     width: 1.5rem;
     height: 1.5rem;
 
     path {
-      fill: $c-white;
+      fill: var(--color-white);
     }
   }
 }
@@ -80,32 +80,32 @@
 .file-upload-file--audio {
   &:focus,
   &:hover {
-    background-color: $c-primary;
+    background-color: var(--color-secondary);
   }
 
   .file-upload-file__download-icon {
-    background-color: $c-primary;
+    background-color: var(--color-secondary);
   }
 }
 
 .file-upload-file--flash {
   &:focus,
   &:hover {
-    background-color: $c-secondary;
+    background-color: var(--color-secondary);
   }
 
   .file-upload-file__download-icon {
-    background-color: $c-secondary;
+    background-color: var(--color-secondary);
   }
 }
 
 .file-upload-file--pdf {
   &:focus,
   &:hover {
-    background-color: $c-tertiary;
+    background-color: var(--color-primary);
   }
 
   .file-upload-file__download-icon {
-    background-color: $c-tertiary;
+    background-color: var(--color-primary);
   }
 }

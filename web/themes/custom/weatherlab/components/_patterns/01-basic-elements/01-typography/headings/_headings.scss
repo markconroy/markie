@@ -10,7 +10,7 @@ h5,
 .h5,
 h6,
 .h6 {
-  color: $c-grey--darkest;
+  color: var(--color-grey--dark);
   font-weight: $fw--heavy;
 }
 

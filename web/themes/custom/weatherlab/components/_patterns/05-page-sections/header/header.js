@@ -8,7 +8,7 @@
       context = context || document;
 
       const menuToggleButton = document.querySelector('.header__menu-toggle .menu-toggle__button');
-
+      
       // If we've already processed the content and added the event listeners,
       // we don't need to continue.
       if (menuToggleButton.classList.contains('js-menu-toggle-button')) {

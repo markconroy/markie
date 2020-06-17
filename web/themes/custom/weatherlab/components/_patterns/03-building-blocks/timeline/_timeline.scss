@@ -46,7 +46,7 @@
 .timeline-item__bar {
   display: flex;
   padding-bottom: $base-line-height;
-  border-left: 2px dashed $c-primary;
+  border-left: 2px dashed var(--color-secondary);
 }
 
 .timeline-item__bar--small-screens {
@@ -74,7 +74,7 @@
   height: 1rem;
   content: "";
   border-radius: 1rem;
-  background-color: $c-primary;
+  background-color: var(--color-secondary);
 }
 
 // Need this at the end, so we don't have the bar on the last item overflowing.

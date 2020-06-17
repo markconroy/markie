@@ -11,17 +11,15 @@ rows:
         pattern: content-teaser
         with:
           pl_class: false
-          label: 'This is Title 1'
   -
     attributes:
       Attribute():
         class:
     content:
       include():
-        pattern: content-teaser
+        pattern: content-teaser-speaking
         with:
           pl_class: false
-          label: 'This is Title 2'
   -
     attributes:
       Attribute():

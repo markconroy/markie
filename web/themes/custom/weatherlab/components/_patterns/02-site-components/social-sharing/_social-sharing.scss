@@ -12,7 +12,7 @@
   list-style: none;
   text-align: center;
   border-radius: 1rem;
-  background-color: $c-grey--darker;
+  background-color: var(--color-grey--dark);
 
   svg {
     width: 1.3rem;
@@ -21,7 +21,7 @@
   }
 
   path {
-    fill: $c-white;
+    fill: var(--color-white);
   }
 }
 
@@ -38,7 +38,7 @@
 }
 
 .social-sharing__menu-item--email {
-  background-color: $c-grey--darker;
+  background-color: var(--color-grey--dark);
 }
 
 .social-sharing__menu-link {

@@ -2,19 +2,17 @@
 // xxlarge breakpoints to a font size between 14px minimum to 18px maximum.
 
 html {
-  @include fluid-type(font-size, $bp--xsmall, $bp--xxlarge, $base-font-size, $base-font-size);
-
-  color: $c-grey--dark;
+  color: var(--color-grey--dark);
   font-family: $ff--regular;
 }
 
 ::selection {
-  color: $c-black;
-  background: $c-primary;
-  background: rgba($c-primary, 0.75);
+  color: var(--color-black);
+  background: var(--color-secondary);
+  background: rgba(var(--color-secondary), 0.75);
 }
 ::-moz-selection {
-  color: $c-black;
-  background: $c-primary;
-  background: rgba($c-primary, 0.75);
+  color: var(--color-black);
+  background: var(--color-secondary);
+  background: rgba(var(--color-secondary), 0.75);
 }

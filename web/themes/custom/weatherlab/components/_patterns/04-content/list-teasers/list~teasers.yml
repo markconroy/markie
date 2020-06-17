@@ -1,4 +1,4 @@
-css_classes: 'list--teasers layout-contained padding-horizontal'
+css_classes: 'list--teasers layout-contained layout-contained--medium padding-horizontal'
 
 title: false
 

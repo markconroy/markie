@@ -1,6 +1,4 @@
 ---
-Title: Teaser
+title: Teaser View Mode
 ---
-The teaser display type is used to show a snippet of a page. It is usually used in listing pages, such as the search results page or a news list.
-
-Clicking on the title in a teaser will bring you to the details page of that item.
+The teaser view mode shows the default representation of a piece of content when viewed in as a 'teaser', such as for the search results page, or a list of articles.

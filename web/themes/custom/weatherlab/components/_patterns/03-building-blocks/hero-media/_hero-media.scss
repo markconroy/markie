@@ -34,7 +34,7 @@
   right: 0;
   bottom: 0;
   left: 0;
-  background: rgba($c-black, 0.1);
+  background: rgba(var(--color-black), 0.1);
 }
 
 .hero-media__hidden-item {
@@ -73,8 +73,8 @@
   left: 5%;
   width: 90%;
   transform: translateY(-45%);
-  color: $c-white;
-  text-shadow: 1px 1px 1px rgba($c-black, 0.5);
+  color: var(--color-white);
+  text-shadow: 1px 1px 1px rgba(var(--color-black), 0.5);
 
   @include breakpoint($bp--large) {
     left: 10%;
@@ -115,7 +115,7 @@
   width: 100%;
   text-align: center;
   text-transform: uppercase;
-  color: $c-white;
+  color: var(--color-white);
 
   .hero-media__more-item {
     display: block;
@@ -131,7 +131,7 @@
   }
 
   svg path {
-    fill: $c-white;
+    fill: var(--color-white);
   }
 
   &:focus,
@@ -152,13 +152,13 @@
   z-index: z("modal");
   width: auto;
   max-width: calc(90% - 2rem) !important;
-  color: $c-white;
+  color: var(--color-white);
   border: 0;
-  background: rgba($c-black, 0.6);
+  background: rgba(var(--color-black), 0.6);
   .ui-dialog-titlebar {
     padding: 0;
     border: none;
-    background: $c-black;
+    background: var(--color-black);
   }
   .ui-dialog-title {
     @include visually-hidden;
@@ -174,7 +174,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba($c-black, 0.6);
+  background-color: rgba(var(--color-black), 0.6);
   backdrop-filter: blur(3px);
 }
 .hero-media__dialog .ui-button-icon-only {
@@ -194,10 +194,10 @@
   text-align: center;
   vertical-align: middle;
   white-space: nowrap;
-  border: 2px solid $c-black;
+  border: 2px solid var(--color-black);
   border-radius: 100%;
   background: url(../components/_patterns/01-basic-elements/icons/svg/ionicons/ios-close-circle.svg) no-repeat center;
-  background-color: $c-white;
+  background-color: var(--color-white);
   background-size: 150%;
 
   &:hover,

@@ -26,4 +26,4 @@ $space-one-seventh: $space/7;
 $space-one-eighth: $space/8;
 
 // Box Shadows
-$box-shadow: 0 4px 8px -4px rgba($c-black, 0.3);
+$box-shadow: 0 4px 8px -4px rgba(var(--color-black), 0.3);

@@ -1,0 +1,71 @@
+{%
+set classes = [
+  'blog',
+  'full',
+  node.isPromoted ? 'node--promoted',
+  node.isSticky ? 'node--sticky',
+  not node.isPublished ? 'node--unpublished',
+]
+%}
+
+<article{{ attributes.addClass(classes) }}>
+
+  {% if display_submitted %}
+    <div class="layout-contained layout-contained--medium padding-horizontal">
+      <footer class="node__meta">
+        <div class="node__meta--published">
+          {{ 'Published: '|t }} {{ node.created.value|date("D d M Y") }}
+        </div>
+      </footer>
+    </div>
+  {% endif %}
+
+  {{ title_prefix }}
+  <h1{{title_attributes.addClass('layout-contained layout-contained--medium padding-horizontal')}}>{{ label }}</h1>
+  {{ title_suffix }}
+
+  {% if blog_intro %}
+    <div class="full__intro layout-contained layout-contained--medium padding-horizontal">
+      {{ blog_intro }}
+    </div>
+  {% endif %}
+
+  {% if main_image %}
+    <div class="layout-contained layout-contained--medium">
+      <div class="blog__main-image">
+        {{ main_image }}
+      </div>
+    </div>
+  {% endif %}
+
+  {% block building_blocks %}
+    <div class="building-blocks">
+      {% for building_block in building_blocks %}
+        <div class="building-block">
+          {{ building_block }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endblock %}
+
+  <div class="layout-contained layout-contained--medium padding-horizontal">
+    <div class="full__follow-me">
+      <p>If you like what I write, you might like to <a href="https://twitter.com/markconroy">follow me on Twitter @markconroy</a></p>
+      <a href="https://twitter.com/markconroy?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow @markconroy</a><script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+    </div>
+  </div>
+
+  <div class="layout-contained layout-contained--medium padding-horizontal">
+      <div class="full__tags">
+        {{ blog_tags }}
+      </div>
+    </div>
+
+  <div class="layout-contained layout-contained--medium padding-horizontal">
+    <div class="blog__comments">
+      <h2>{{ 'Comments'|t }}</h2>
+      {{ blog_comment }}
+    </div>
+  </div>
+
+</article>

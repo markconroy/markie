@@ -1,11 +1,17 @@
-// Theming individual tiles
+// Theming the Tiled Layout container
+.tiled-layout {
+  @include flex-default;
 
+  justify-content: center;
+}
+
+// Theming individual tiles
 .tile {
   width: 100%;
   margin-bottom: $base-line-height;
   padding: $base-line-height;
-  border-top: 0.5rem solid $c-primary;
-  background-color: $c-grey--lighter;
+  border-top: 0.5rem solid var(--color-secondary);
+  background-color: var(--color-grey--light)er;
 }
 
 a.tile {
@@ -13,15 +19,15 @@ a.tile {
 
   &:focus,
   &:hover {
-    background-color: $c-primary;
-    background-image: linear-gradient($c-primary, darken($c-primary, 15%));
+    background-color: var(--color-secondary);
+    background-image: linear-gradient(var(--color-secondary), var(--color-primary--dark));
   }
 }
 
 .tile--has-image {
   padding: 0;
   padding-bottom: $base-line-height;
-  background-color: $c-white;
+  background-color: var(--color-white);
 }
 
 .tile--small {
@@ -49,19 +55,19 @@ a.tile {
 }
 
 .tile--primary {
-  border-top-color: $c-primary;
+  border-top-color: var(--color-secondary);
 }
 
 .tile--secondary {
-  border-top-color: $c-secondary;
+  border-top-color: var(--color-secondary);
 }
 
 .tile--tertiary {
-  border-top-color: $c-tertiary;
+  border-top-color: var(--color-primary);
 }
 
 .tile__text {
-  color: $c-grey--dark;
+  color: var(--color-grey--dark);
 
   p:last-of-type {
     margin-bottom: 0;
@@ -71,37 +77,37 @@ a.tile {
 a.tile--primary {
   &:focus,
   &:hover {
-    background-color: $c-primary;
-    background-image: linear-gradient($c-primary, darken($c-primary, 15%));
+    background-color: var(--color-secondary);
+    background-image: linear-gradient(var(--color-secondary), var(--color-primary--dark));
   }
 }
 
 a.tile--secondary {
   &:focus,
   &:hover {
-    background-color: $c-secondary;
-    background-image: linear-gradient($c-secondary, darken($c-secondary, 15%));
+    background-color: var(--color-secondary);
+    background-image: linear-gradient(var(--color-secondary), var(--color-secondary--dark));
 
     .tile__text {
-      color: $c-white;
+      color: var(--color-white);
     }
   }
 }
 
 .tile__title {
-  color: $c-grey--darker;
+  color: var(--color-grey--dark);
   font-family: $ff--alternate;
 }
 
 a.tile--tertiary {
   &:focus,
   &:hover {
-    background-color: $c-tertiary;
-    background-image: linear-gradient($c-tertiary, darken($c-tertiary, 15%));
+    background-color: var(--color-primary);
+    background-image: linear-gradient(var(--color-primary), var(--color-primary--dark));
 
     .tile__title,
     .tile__text {
-      color: $c-white;
+      color: var(--color-white);
     }
   }
 }
@@ -113,12 +119,4 @@ a.tile--tertiary {
 .tile__image img {
   width: 100%;
   height: auto;
-}
-
-// Theming the Tiled Layout container
-
-.tiled-layout {
-  @include flex-default;
-
-  justify-content: center;
 }

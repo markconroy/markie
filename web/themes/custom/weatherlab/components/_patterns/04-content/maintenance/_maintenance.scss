@@ -3,13 +3,13 @@
   flex-direction: column;
   justify-content: center;
   min-height: 100vh;
-  background-color: $c-primary;
+  background-color: var(--color-secondary);
 }
 .maintenance-page__wrapper {
   padding: 1.5rem;
   text-align: center;
-  border: 1px solid $c-primary;
-  background-color: $c-white;
+  border: 1px solid var(--color-secondary);
+  background-color: var(--color-white);
 }
 
 .maintenance-page__header svg {

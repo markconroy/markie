@@ -1,3 +1,19 @@
-.teaser {
-  // Styles for Teaser display mode.
+.teaser__meta {
+  display: flex;
+  font-weight: bold;
+}
+
+.teaser__title a {
+  display: inline-block;
+  text-decoration: none;
+  color: var(--color-primary);
+  &:focus,
+  &:hover {
+    text-decoration: underline;
+    color: var(--color-secondary);
+  }
+}
+
+.teaser__intro p:last-of-type {
+  margin-bottom: 0;
 }

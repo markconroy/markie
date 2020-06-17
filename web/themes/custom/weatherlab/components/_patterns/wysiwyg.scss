@@ -17,7 +17,7 @@
 // overriding ckeditor-iframe.css
 body.cke_editable {
   padding: 10px;
-  color: $c-black;
+  color: var(--color-black);
   font-family: $ff--regular;
   font-size: 1rem;
 }

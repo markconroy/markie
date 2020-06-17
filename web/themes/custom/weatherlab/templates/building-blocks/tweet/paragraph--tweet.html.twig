@@ -1,0 +1,5 @@
+{% if paragraph.field_p_tweet_tweet.value %}
+  {% set tweet_content = content.field_p_tweet_tweet %}
+{% endif %}
+
+{% include "@building-blocks/tweet/tweet.twig" %}

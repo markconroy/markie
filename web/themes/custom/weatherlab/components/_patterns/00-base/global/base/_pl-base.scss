@@ -24,7 +24,7 @@
 
   .sg-subtype h2 {
     text-transform: uppercase;
-    background-color: $c-grey--darker;
+    background-color: var(--color-grey--dark);
     font-size: 3rem;
 
     a {
@@ -34,7 +34,7 @@
 
       display: block;
       text-decoration: none;
-      color: $c-white;
+      color: var(--color-white);
       line-height: 1;
     }
   }
@@ -70,7 +70,7 @@
     li {
       flex: 1 0 180px;
       margin: 0 0.5rem 1rem;
-      box-shadow: 1px 2px 5px $c-grey--lighter;
+      box-shadow: 1px 2px 5px var(--color-grey--light)er;
     }
 
     &__sample,

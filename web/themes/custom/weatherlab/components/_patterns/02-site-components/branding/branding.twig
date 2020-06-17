@@ -1,6 +1,6 @@
 {%
   set classes = [
-    'branding-block'
+    'branding'
   ]
 %}
 <div{{ attributes.addClass(classes) }}>
@@ -10,6 +10,7 @@
     <h2{{ title_attributes }}>{{ label }}</h2>
   {% endif %}
   {{ title_suffix }}
+
   {% if site_logo %}
     <div class="branding__logo">
       <a href="{{ url }}" title="{{ 'Home'|t }}" rel="home">
@@ -22,15 +23,12 @@
     </div>
   {% endif %}
 
-  {% if site_name %}
-    <div class="branding__name visually-hidden">
-      <a href="{{ url }}" title="{{ 'Home'|t }}" rel="home">{{ site_name }}</a>
+  <a class="branding__link" href="{{ url }}" title="{{ 'Home'|t }}" rel="home">
+    <div class="branding__name">
+      {{ site_name }}
     </div>
-  {% endif %}
-
-  {% if site_slogan %}
     <div class="branding__slogan">{{ site_slogan }}</div>
-  {% endif %}
+  </a>
 </div>
 
 {% block content_variable %}

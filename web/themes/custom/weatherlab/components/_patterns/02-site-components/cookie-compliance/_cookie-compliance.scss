@@ -1,7 +1,7 @@
 #sliding-popup {
   padding-top: $base-line-height;
   padding-bottom: $base-line-height;
-  background: $c-primary;
+  background: var(--color-secondary);
   font-family: $ff--regular;
 }
 
@@ -29,14 +29,14 @@
 
 .eu-cookie-compliance-secondary-button {
   padding: 0.5rem 1rem 0.25rem;
-  color: $c-black;
+  color: var(--color-black);
   border-radius: 1rem;
-  background-color: $c-white;
+  background-color: var(--color-white);
 
   &:focus,
   &:hover {
-    color: $c-white;
-    background-color: $c-black;
+    color: var(--color-white);
+    background-color: var(--color-black);
     background-image: none;
   }
 }
@@ -45,9 +45,9 @@
 .eu-cookie-compliance-hide-button,
 .eu-cookie-compliance-more-button-thank-you,
 .eu-cookie-withdraw-button {
-  color: $c-white;
+  color: var(--color-white);
   border: 0;
-  background-color: $c-primary;
+  background-color: var(--color-secondary);
   background-image: none;
   box-shadow: none;
   text-shadow: none;
@@ -56,7 +56,7 @@
   &:focus,
   &:hover {
     text-decoration: underline;
-    background-color: $c-primary;
+    background-color: var(--color-secondary);
     background-image: none;
     box-shadow: none;
     text-shadow: none;

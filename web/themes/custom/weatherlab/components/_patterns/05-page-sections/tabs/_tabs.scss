@@ -4,7 +4,7 @@
  */
 
 .layout-tabs {
-  background: $c-black;
+  background: var(--color-black);
 }
 
 .layout-tabs ul.tabs {
@@ -35,7 +35,7 @@
   &:focus,
   &:hover {
     text-decoration: underline;
-    color: $c-black;
+    color: var(--color-black);
     background-color: white;
   }
 }
