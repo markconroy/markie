@@ -11,16 +11,6 @@ set classes = [
 
   <div class="maintenance-page__wrapper layout-contained layout-contained--large">
     <header class="maintenance-page__header">
-
-      <div class="maintenance-page--branding-logo">
-        <a href="{{ url }}" title="{{ 'Home'|t }}" rel="home">
-          {% include '@basic-elements/icons/_svg.twig'
-            with {
-              svgpath : '@basic-elements/icons/svg/logo.svg'
-            }
-          %}
-        </a>
-      </div>
     
       {% if site_name %}
         <div class="maintenance-page__name-and-slogan">

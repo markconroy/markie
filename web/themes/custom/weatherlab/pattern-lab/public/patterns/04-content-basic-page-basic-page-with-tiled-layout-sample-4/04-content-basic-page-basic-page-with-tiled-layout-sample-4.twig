@@ -2,22 +2,25 @@
 set classes = [
   "basic-page",
   "full",
-  'node',
-  'node--type-' ~ node.bundle|clean_class,
   node.isPromoted ? 'node--promoted',
   node.isSticky ? 'node--sticky',
   not node.isPublished ? 'node--unpublished',
-  view_mode ? 'node--view-mode-' ~ view_mode|clean_class,
 ]
 %}
 
 <article{{ attributes.addClass(classes) }}>
   {{ title_prefix }}
-    <h1{{ title_attributes.addClass('full__title layout-contained padding-horizontal') }}>{{ label }}</h1>
+    <h1{{ title_attributes.addClass('full__title layout-contained layout-contained--medium padding-horizontal') }}>{{ label }}</h1>
   {{ title_suffix }}
 
+  {% if main_image %}
+    <div class="full__main-image">
+      {{ main_image }}
+    </div>
+  {% endif %}
+
   {% if introduction %}
-    <div class="full__introduction layout-contained padding-horizontal">
+    <div class="full__introduction layout-contained layout-contained--medium padding-horizontal">
       {{ introduction }}
     </div>
   {% endif %}

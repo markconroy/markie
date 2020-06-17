@@ -7,7 +7,7 @@
   Let's only render the breadcrumbs if there is more than 2 items,
   i.e. if we have more than just "Home" and "Landing Page", basically
 #}
-{% if breadcrumb|length > 1 %}
+{% if breadcrumb|length > 0 %}
   <nav class="breadcrumb" role="navigation" aria-labelledby="system-breadcrumb">
     <h2 id="system-breadcrumb" class="visually-hidden">{{ 'Breadcrumb'|t }}</h2>
    
