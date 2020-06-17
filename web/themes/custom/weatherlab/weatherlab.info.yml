@@ -1,6 +1,6 @@
 name: WeatherLab
 type: theme
-description: 'An Annertech starter-theme, based on the Phase2 implementation of Pattern Lab.'
+description: 'An Annertech starter-theme. It is changeable, like the weather.'
 base theme: classy
 core: 8.x
 
