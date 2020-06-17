@@ -249,7 +249,7 @@ display:
           entity_field: nid
           plugin_id: node_nid
       display_extenders: {  }
-      css_class: ''
+      css_class: 'list--teasers layout-contained layout-contained--medium padding-horizontal'
     cache_metadata:
       max-age: -1
       contexts:

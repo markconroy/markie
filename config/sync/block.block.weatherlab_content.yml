@@ -1,15 +1,15 @@
-uuid: 9ea1e135-00e3-4285-9556-75dcdc6f1f0d
+uuid: 855d2468-d3c6-4f80-84ee-158b00a3893a
 langcode: en
 status: true
 dependencies:
   module:
     - system
   theme:
-    - patternlab
+    - weatherlab
 _core:
   default_config_hash: 9EoWV2Lot6FVSr50t4hoKgiz1LIXYWNG-IIPYsWxBqo
-id: patternlab_content
-theme: patternlab
+id: weatherlab_content
+theme: weatherlab
 region: content
 weight: -3
 provider: null

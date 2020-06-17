@@ -296,6 +296,31 @@ display:
     display_options:
       path: node
       display_extenders: {  }
+      css_class: 'list--teasers layout-contained layout-contained--medium padding-horizontal'
+      defaults:
+        css_class: false
+        pager: false
+      pager:
+        type: full
+        options:
+          items_per_page: 4
+          offset: 0
+          id: 0
+          total_pages: 0
+          tags:
+            previous: '‹ Previous'
+            next: 'Next ›'
+            first: '« First'
+            last: 'Last »'
+          expose:
+            items_per_page: false
+            items_per_page_label: 'Items per page'
+            items_per_page_options: '5, 10, 25, 50'
+            items_per_page_options_all: false
+            items_per_page_options_all_label: '- All -'
+            offset: false
+            offset_label: Offset
+          quantity: 3
     display_plugin: page
     display_title: Page
     id: page_1

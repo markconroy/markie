@@ -1,13 +1,13 @@
-uuid: 851c802d-e46e-409b-9fab-b8f58a7667a3
+uuid: 79299d30-bb4c-4ae8-a101-7b22f6c88590
 langcode: en
 status: true
 dependencies:
   theme:
-    - patternlab
+    - weatherlab
 _core:
   default_config_hash: 13GQpeITIJsp1kyPniXtWZfyFH87vb1xxJCHifL4UeE
-id: patternlab_local_actions
-theme: patternlab
+id: weatherlab_local_actions
+theme: weatherlab
 region: content
 weight: -4
 provider: null

@@ -167,6 +167,7 @@ display:
       relationships: {  }
       arguments: {  }
       display_extenders: {  }
+      css_class: 'list--teasers layout-contained layout-contained--medium padding-horizontal'
     cache_metadata:
       max-age: -1
       contexts:

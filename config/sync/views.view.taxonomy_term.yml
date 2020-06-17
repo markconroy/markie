@@ -306,6 +306,9 @@ display:
         options: {  }
       path: taxonomy/term/%
       display_extenders: {  }
+      css_class: 'list--teasers layout-contained layout-contained--medium padding-horizontal'
+      defaults:
+        css_class: false
     cache_metadata:
       contexts:
         - 'languages:language_interface'

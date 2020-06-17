@@ -1,15 +1,15 @@
-uuid: 56d96187-fad9-46bc-a84c-e10d38a30918
+uuid: 123e7b78-626c-4333-8fce-ad54686a070f
 langcode: en
 status: true
 dependencies:
   module:
     - system
   theme:
-    - patternlab
+    - weatherlab
 _core:
   default_config_hash: oXUb3JZR2WW5VOdw4HrhRicCsq51mCgLfRyvheG68ck
-id: patternlab_breadcrumbs
-theme: patternlab
+id: weatherlab_breadcrumbs
+theme: weatherlab
 region: breadcrumb
 weight: -5
 provider: null

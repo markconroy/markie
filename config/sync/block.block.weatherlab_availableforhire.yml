@@ -1,4 +1,4 @@
-uuid: 8d580296-2443-46c7-8de4-65b5d613a79f
+uuid: a27a29c4-e07e-4d1d-b28c-35fb5af2472f
 langcode: en
 status: true
 dependencies:
@@ -7,9 +7,9 @@ dependencies:
   module:
     - block_content
   theme:
-    - patternlab
-id: availableforhire
-theme: patternlab
+    - weatherlab
+id: weatherlab_availableforhire
+theme: weatherlab
 region: above_header
 weight: 0
 provider: null

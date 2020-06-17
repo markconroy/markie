@@ -1,4 +1,4 @@
-uuid: f7bd9338-5b16-4550-b82c-7fce8bcd6e99
+uuid: c775890c-efc8-497d-a888-41cf40654c54
 langcode: en
 status: true
 dependencies:
@@ -7,9 +7,9 @@ dependencies:
   module:
     - system
   theme:
-    - patternlab
-id: patternlab_footer
-theme: patternlab
+    - weatherlab
+id: weatherlab_footer
+theme: weatherlab
 region: footer
 weight: -5
 provider: null
