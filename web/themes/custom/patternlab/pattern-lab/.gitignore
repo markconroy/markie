@@ -1,7 +1,0 @@
-.DS_Store
-.idea
-export/*
-packages/*
-# public/* (allowing this so we have it in the repo for clients)
-vendor/*
-source/styleguide/*

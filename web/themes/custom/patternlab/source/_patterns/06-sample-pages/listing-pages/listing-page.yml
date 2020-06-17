@@ -1,4 +1,0 @@
-page_title: Articles
-content:
-  include():
-    pattern: content-default

@@ -1,9 +1,0 @@
-label: <span class="field--name-title">This is a Basic Page with Related Content</span>
-
-building_blocks:
-  - join():
-    - include():
-        pattern: building-blocks-text-paragraph-x3
-  - join():
-    - include():
-        pattern: 'building-blocks-related-content'

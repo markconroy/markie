@@ -1,9 +1,0 @@
-.related-content {
-  background: $c-white;
-  padding-bottom: $base-line-height;
-  padding-top: $base-line-height * 2;
-  @include breakpoint($bp--medium) {
-    padding-bottom: $base-line-height * 2;
-    padding-top: $base-line-height * 3;
-  }
-}

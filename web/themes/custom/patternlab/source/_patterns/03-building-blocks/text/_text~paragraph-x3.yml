@@ -1,7 +1,0 @@
-attributes:
-  Attribute():
-    class:
-
-content:
-  include():
-    pattern: basic-elements-paragraph-x3

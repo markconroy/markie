@@ -1,6 +1,0 @@
-attributes:
-  Attribute():
-    class:
-
-content:
-  field_p_rc_content: <div class="clearfix text-formatted field field--name-field-p-rc-content field--type-text-long field--label-hidden field__item"><h2>Related Content</h2><p>You might be interested <a href="#">in this blog post</a>, but you might be even more interested in <a href="#">this blog listing page</a> and <a href="#">this "about Mark" page</a>.</div>
