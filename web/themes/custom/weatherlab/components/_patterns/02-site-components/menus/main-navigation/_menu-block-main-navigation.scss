@@ -20,7 +20,21 @@
 }
 
 .navigation--main .menu-item a {
-  @include animated_link(var(--color-white), var(--color-white));
+  text-decoration: none;
+  color: var(--color-primary);
+  &:focus,
+  &:hover {
+    text-decoration: underline;
+    color: var(--color-secondary);
+  }
 
-  color: var(--color-white);
+  @include breakpoint($bp--xlarge) {
+    @include animated_link(var(--color-white), var(--color-white));
+
+    color: var(--color-white);
+    &:focus,
+    &:hover {
+      color: var(--color-white);
+    }
+  }
 }

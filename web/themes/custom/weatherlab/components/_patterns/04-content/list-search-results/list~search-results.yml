@@ -1,7 +1,4 @@
-id: search
-display_id: page_1
-layout_contained: false
-padding: false
+css_classes: 'list--teasers list--exposed-form layout-contained layout-contained--medium padding-horizontal'
 
 title: false
 rows:
@@ -10,7 +7,7 @@ rows:
 
 exposed:
   include():
-    pattern: content-exposed-form
+    pattern: content-search-exposed-form
 
 header: <div class="view-header">10 of 93 Results Found</div>
 

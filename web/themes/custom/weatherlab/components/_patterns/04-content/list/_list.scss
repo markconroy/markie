@@ -1,3 +1,15 @@
+.list--exposed-form .view-filters {
+  margin-bottom: $base-line-height * 2;
+}
+
+.list--exposed-form .form--inline {
+  display: flex;
+}
+
+.view-header {
+  margin-bottom: $base-line-height * 2;
+}
+
 .pager__items {
   display: flex;
   flex-wrap: wrap;
