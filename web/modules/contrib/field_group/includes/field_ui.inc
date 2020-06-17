@@ -167,7 +167,6 @@ function field_group_field_ui_display_form_alter(&$form, FormStateInterface $for
     $settings = field_group_format_settings_form($group, $form, $form_state);
 
     $id = strtr($name, '_', '-');
-    $js_rows_data[$id] = ['type' => 'group', 'name' => $name];
     // A group cannot be selected as its own parent.
     $parent_options = $table['#parent_options'];
     $region = isset($group->region) && in_array($group->region, $params->available_regions) ? $group->region : $params->default_region;

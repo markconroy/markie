@@ -31,6 +31,7 @@
   padding: 0 1em;
   border: 0;
   background-color: unset;
+  box-shadow: unset;
 }
 
 .horizontal-tabs-pane > summary {

@@ -4,11 +4,12 @@ namespace Drupal\field_group\Element;
 
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Element;
+use Drupal\Core\Render\Element\RenderCallbackInterface;
 
 /**
  * Provides extra processing and pre rendering on the vertical tabs.
  */
-class VerticalTabs {
+class VerticalTabs implements RenderCallbackInterface {
 
   /**
    * Pre render the group to support #group parameter.

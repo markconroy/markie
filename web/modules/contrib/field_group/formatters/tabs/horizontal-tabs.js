@@ -1,4 +1,4 @@
-(function ($) {
+(function ($, Drupal) {
 
   'use strict';
 
@@ -56,9 +56,9 @@
             summaryElement = $this.find('> summary');
           }
 
-          var summary = summaryElement.clone().children().remove().end().text();
+          var summaryText = summaryElement.clone().children().remove().end().text().trim() || summaryElement.find('> span:first-child').text().trim();
           var horizontal_tab = new Drupal.horizontalTab({
-            title: $.trim(summary),
+            title: summaryText,
             details: $this
           });
           horizontal_tab.item.addClass('horizontal-tab-button-' + i);
@@ -178,7 +178,6 @@
       // Display the tab.
       this.item.removeClass('horizontal-tab-hidden');
       this.item.show();
-      alert('show');
 
       // Update .first marker for items. We need recurse from parent to retain the
       // actual DOM element order as jQuery implements sortOrder, but not as public
@@ -201,7 +200,6 @@
       // Hide this tab.
       this.item.addClass('horizontal-tab-hidden');
       this.item.hide();
-      alert('hide');
 
       // Update .first marker for items. We need recurse from parent to retain the
       // actual DOM element order as jQuery implements sortOrder, but not as public
@@ -253,4 +251,4 @@
     return tab;
   };
 
-})(jQuery, Modernizr);
+})(jQuery, Drupal);

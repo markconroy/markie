@@ -88,8 +88,8 @@ class FieldGroup extends DestinationBase {
    *   The entity display object.
    */
   protected function getEntity($entity_type, $bundle, $mode, $type) {
-    $function = $type == 'entity_form_display' ? 'entity_get_form_display' : 'entity_get_display';
-    return $function($entity_type, $bundle, $mode);
+    $function = $type == 'entity_form_display' ? 'getFormDisplay' : 'getViewDisplay';
+    return \Drupal::service('entity_display.repository')->$function($entity_type, $bundle, $mode);
   }
 
 }

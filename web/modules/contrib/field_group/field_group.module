@@ -16,6 +16,7 @@ use Drupal\Core\Form\ConfirmFormInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Element;
 use Drupal\field_group\Element\VerticalTabs;
+use Drupal\field_group\FormatterHelper;
 
 /**
  * Implements hook_help().
@@ -29,6 +30,24 @@ function field_group_help($route_name, RouteMatchInterface $route_match) {
       $output .= '<h3>' . t('More Information') . '</h3>';
       $output .= '<p>' . t('For more information about this module please visit the <a href="@link">module page</a>.', ['@link' => 'https://www.drupal.org/project/field_group']) . '</p>';
       return $output;
+  }
+}
+
+/**
+ * Implements hook_library_info_alter().
+ */
+function field_group_library_info_alter(&$libraries, $extension) {
+  // Swap jQuery.ui library if available.
+  // See https://www.drupal.org/project/field_group/issues/3109552 for more
+  // background on the logic.
+  if (version_compare(\Drupal::VERSION, 9) > 0 && $extension == 'field_group') {
+    if (\Drupal::moduleHandler()->moduleExists('jquery_ui_accordion')) {
+      $libraries['formatter.accordion']['dependencies'] = ['jquery_ui_accordion/accordion'];
+    }
+    else {
+      $libraries['formatter.accordion']['js'] = [];
+      $libraries['formatter.accordion']['dependencies'] = [];
+    }
   }
 }
 
@@ -235,7 +254,7 @@ function field_group_form_alter(array &$form, FormStateInterface $form_state) {
       ];
 
       field_group_attach_groups($form, $context);
-      $form['#process'][] = 'field_group_form_process';
+      $form['#process'][] = [FormatterHelper::class, 'formProcess'];
     }
   }
 
@@ -256,7 +275,7 @@ function field_group_inline_entity_form_entity_form_alter(&$entity_form, FormSta
   ];
 
   field_group_attach_groups($entity_form, $context);
-  field_group_form_process($entity_form);
+  FormatterHelper::formProcess($entity_form, $form_state);
 }
 
 /**
@@ -277,7 +296,7 @@ function field_group_form_layout_builder_update_block_alter(&$form, FormStateInt
   ];
 
   field_group_attach_groups($form['settings']['block_form'], $context);
-  $form['settings']['block_form']['#process'][] = 'field_group_form_process';
+  $form['settings']['block_form']['#process'][] = [FormatterHelper::class, 'formProcess'];
 }
 
 /**
@@ -317,7 +336,7 @@ function field_group_entity_view_alter(&$build, EntityInterface $entity, EntityD
 
     // If DS is enabled, no pre render is needed (DS adds fieldgroup preprocessing).
     if (!$ds_enabled) {
-      $build['#pre_render'][] = 'field_group_entity_view_pre_render';
+      $build['#pre_render'][] = [FormatterHelper::class, 'entityViewPrender'];
     }
   }
 }
@@ -349,72 +368,7 @@ function field_group_form_pre_render(array $element) {
  * @return array
  */
 function field_group_form_process(array &$element, FormStateInterface $form_state = NULL, array &$form = []) {
-  if (empty($element['#field_group_form_process'])) {
-    $element['#field_group_form_process'] = TRUE;
-    if (empty($element['#fieldgroups'])) {
-      return $element;
-    }
-
-    // Create all groups and keep a flat list of references to these groups.
-    $group_references = [];
-    foreach ($element['#fieldgroups'] as $group_name => $group) {
-      if (!isset($element[$group_name])) {
-        $element[$group_name] = [];
-      }
-
-      $group_parents = $element['#array_parents'];
-      $group_parents[] = empty($group->parent_name) ? $group->region : $group->parent_name;
-      $group_references[$group_name] = &$element[$group_name];
-      $element[$group_name]['#group'] = implode('][', $group_parents);
-
-      // Use array parents to set the group name. This will cover multilevel forms (eg paragraphs).
-      $parents = $element['#array_parents'];
-      $parents[] = $group_name;
-      $element[$group_name]['#parents'] = $parents;
-      $group_children_parent_group = implode('][', $parents);
-      foreach ($group->children as $child) {
-        if (!empty($element[$child]['#field_group_ignore'])) {
-          continue;
-        }
-        $element[$child]['#group'] = $group_children_parent_group;
-      }
-    }
-
-    foreach ($element['#fieldgroups'] as $group_name => $group) {
-      $field_group_element = &$element[$group_name];
-
-      // Let modules define their wrapping element.
-      // Note that the group element has no properties, only elements.
-      foreach (Drupal::moduleHandler()->getImplementations('field_group_form_process') as $module) {
-        // The intention here is to have the opportunity to alter the
-        // elements, as defined in hook_field_group_formatter_info.
-        // Note, implement $element by reference!
-        $function = $module . '_field_group_form_process';
-        $function($field_group_element, $group, $element);
-      }
-
-      // Allow others to alter the pre_render.
-      Drupal::moduleHandler()->alter('field_group_form_process', $field_group_element, $group, $element);
-    }
-
-    // Allow others to alter the complete processed build.
-    Drupal::moduleHandler()->alter('field_group_form_process_build', $element, $form_state, $form);
-  }
-
-  return $element;
-}
-
-/**
- * Pre render callback for rendering groups on entities without theme hook.
- *
- * @param array $element
- *   Entity being rendered.
- *
- * @return array
- */
-function field_group_entity_view_pre_render(array $element) {
-  field_group_build_entity_groups($element, 'view');
-  return $element;
+  return FormatterHelper::formProcess($element, $form_state, $form);
 }
 
 /**

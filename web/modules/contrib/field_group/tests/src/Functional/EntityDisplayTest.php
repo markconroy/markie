@@ -23,7 +23,7 @@ class EntityDisplayTest extends BrowserTestBase {
     'field_test',
     'field_ui',
     'field_group',
-    'field_group_test',
+    'field_group_test'
   ];
 
   /**
@@ -157,8 +157,8 @@ class EntityDisplayTest extends BrowserTestBase {
     $this->drupalGet('node/' . $this->node->id());
 
     // Test group ids and classes.
-    $this->assertTrue($this->xpath("//div[contains(@id, 'wrapper-id')]"), 'Wrapper id set on wrapper div');
-    $this->assertTrue($this->xpath("//div[contains(@class, 'test-class')]"), 'Test class set on wrapper div, class="' . $group->group_name . ' test-class');
+    $this->assertCount(1, $this->xpath("//div[contains(@id, 'wrapper-id')]"), 'Wrapper id set on wrapper div');
+    $this->assertCount(1, $this->xpath("//div[contains(@class, 'test-class')]"), 'Test class set on wrapper div, class="' . $group->group_name . ' test-class');
 
     // Test group label.
     $this->assertSession()->responseNotContains('<h3><span>' . $data['label'] . '</span></h3>');
@@ -178,8 +178,8 @@ class EntityDisplayTest extends BrowserTestBase {
     field_group_group_save($group);
 
     $this->drupalGet('node/' . $this->node->id());
-    $this->assertTrue($this->xpath("//div[contains(@class, 'speed-fast')]"), 'Speed class is set');
-    $this->assertTrue($this->xpath("//div[contains(@class, 'effect-blink')]"), 'Effect class is set');
+    $this->assertCount(1, $this->xpath("//div[contains(@class, 'speed-fast')]"), 'Speed class is set');
+    $this->assertCount(1, $this->xpath("//div[contains(@class, 'effect-blink')]"), 'Effect class is set');
   }
 
   /**
@@ -205,8 +205,8 @@ class EntityDisplayTest extends BrowserTestBase {
     $this->drupalGet('node/' . $this->node->id());
 
     // Test group ids and classes.
-    $this->assertTrue($this->xpath("//fieldset[contains(@id, 'fieldset-id')]"), 'Correct id set on the fieldset');
-    $this->assertTrue($this->xpath("//fieldset[contains(@class, 'test-class')]"), 'Test class set on the fieldset');
+    $this->assertCount(1, $this->xpath("//fieldset[contains(@id, 'fieldset-id')]"), 'Correct id set on the fieldset');
+    $this->assertCount(1, $this->xpath("//fieldset[contains(@class, 'test-class')]"), 'Test class set on the fieldset');
   }
 
   /**
@@ -264,16 +264,16 @@ class EntityDisplayTest extends BrowserTestBase {
     $this->drupalGet('node/' . $this->node->id());
 
     // Test properties.
-    $this->assertTrue($this->xpath("//div[contains(@class, 'test-class-wrapper')]"), 'Test class set on tabs wrapper');
-    $this->assertTrue($this->xpath("//details[contains(@class, 'test-class-2')]"), 'Test class set on second tab');
+    $this->assertCount(1, $this->xpath("//div[contains(@class, 'test-class-wrapper')]"), 'Test class set on tabs wrapper');
+    $this->assertCount(1, $this->xpath("//details[contains(@class, 'test-class-2')]"), 'Test class set on second tab');
     $this->assertSession()->responseContains('<div class="details-description">description of second tab</div>');
 
     // Test if correctly nested.
-    $this->assertTrue($this->xpath("//div[contains(@class, 'test-class-wrapper')]//details[contains(@class, 'test-class')]"), 'First tab is displayed as child of the wrapper.');
-    $this->assertTrue($this->xpath("//div[contains(@class, 'test-class-wrapper')]//details[contains(@class, 'test-class-2')]"), 'Second tab is displayed as child of the wrapper.');
+    $this->assertCount(2, $this->xpath("//div[contains(@class, 'test-class-wrapper')]//details[contains(@class, 'test-class')]"), 'First tab is displayed as child of the wrapper.');
+    $this->assertCount(1, $this->xpath("//div[contains(@class, 'test-class-wrapper')]//details[contains(@class, 'test-class-2')]"), 'Second tab is displayed as child of the wrapper.');
 
     // Test if it's a vertical tab.
-    $this->assertTrue($this->xpath('//div[@data-vertical-tabs-panes=""]'), 'Tabs are shown vertical.');
+    $this->assertCount(1, $this->xpath('//div[@data-vertical-tabs-panes=""]'), 'Tabs are shown vertical.');
 
     // Switch to horizontal.
     $tabs_group->format_settings['direction'] = 'horizontal';
@@ -282,7 +282,7 @@ class EntityDisplayTest extends BrowserTestBase {
     $this->drupalGet('node/' . $this->node->id());
 
     // Test if it's a horizontal tab.
-    $this->assertTrue($this->xpath('//div[@data-horizontal-tabs-panes=""]'), 'Tabs are shown horizontal.');
+    $this->assertCount(1, $this->xpath('//div[@data-horizontal-tabs-panes=""]'), 'Tabs are shown horizontal.');
   }
 
   /**
@@ -338,15 +338,15 @@ class EntityDisplayTest extends BrowserTestBase {
     $this->drupalGet('node/' . $this->node->id());
 
     // Test properties.
-    $this->assertTrue($this->xpath("//div[contains(@class, 'test-class-wrapper')]"), 'Test class set on tabs wrapper');
-    $this->assertTrue($this->xpath("//div[contains(@class, 'effect-bounceslide')]"), 'Correct effect is set on the accordion');
-    $this->assertTrue($this->xpath("//div[contains(@class, 'test-class')]"), 'Accordion item with test-class is shown');
-    $this->assertTrue($this->xpath("//div[contains(@class, 'test-class-2')]"), 'Accordion item with test-class-2 is shown');
-    $this->assertTrue($this->xpath("//h3[contains(@class, 'field-group-accordion-active')]"), 'Accordion item 2 was set active');
+    $this->assertCount(1, $this->xpath("//div[contains(@class, 'test-class-wrapper')]"), 'Test class set on tabs wrapper');
+    $this->assertCount(1, $this->xpath("//div[contains(@class, 'effect-bounceslide')]"), 'Correct effect is set on the accordion');
+    $this->assertCount(3, $this->xpath("//div[contains(@class, 'test-class')]"), 'Accordion item with test-class is shown');
+    $this->assertCount(1, $this->xpath("//div[contains(@class, 'test-class-2')]"), 'Accordion item with test-class-2 is shown');
+    $this->assertCount(1, $this->xpath("//h3[contains(@class, 'field-group-accordion-active')]"), 'Accordion item 2 was set active');
 
     // Test if correctly nested.
-    $this->assertTrue($this->xpath("//div[contains(@class, 'test-class-wrapper')]//div[contains(@class, 'test-class')]"), 'First item is displayed as child of the wrapper.');
-    $this->assertTrue($this->xpath("//div[contains(@class, 'test-class-wrapper')]//div[contains(@class, 'test-class-2')]"), 'Second item is displayed as child of the wrapper.');
+    $this->assertCount(2, $this->xpath("//div[contains(@class, 'test-class-wrapper')]//div[contains(@class, 'test-class')]"), 'First item is displayed as child of the wrapper.');
+    $this->assertCount(1, $this->xpath("//div[contains(@class, 'test-class-wrapper')]//div[contains(@class, 'test-class-2')]"), 'Second item is displayed as child of the wrapper.');
   }
 
 }

@@ -212,7 +212,7 @@ class FieldGroupAddForm extends FormBase {
     $group->bundle = $this->bundle;
     $group->mode = $this->mode;
 
-    $manager = \Drupal::service('plugin.manager.field_group.formatters');
+    $manager = $this->fieldGroupFormatterPluginManager;
     $plugin = $manager->getInstance([
       'format_type' => $form_state->getValue('group_formatter'),
       'configuration' => [
@@ -285,7 +285,7 @@ class FieldGroupAddForm extends FormBase {
       // Store new group information for any additional submit handlers.
       $groups_added = $form_state->get('groups_added');
       $groups_added['_add_new_group'] = $new_group->group_name;
-      $this->messenger->addMessage(t('New group %label successfully created.', ['%label' => $new_group->label]));
+      $this->messenger->addMessage($this->t('New group %label successfully created.', ['%label' => $new_group->label]));
 
       $form_state->setRedirectUrl(FieldgroupUi::getFieldUiRoute($new_group));
       \Drupal::cache()->invalidate('field_groups');
