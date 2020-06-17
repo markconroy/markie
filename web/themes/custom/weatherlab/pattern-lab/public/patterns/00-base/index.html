@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width" />
 
     <!-- Component styles -->
-    <link rel="stylesheet" href="../../../../dist/style.css?1592419225" media="all" />
+    <link rel="stylesheet" href="../../../../dist/style.css?1592419801" media="all" />
 
     <!-- Drupal-specific usage -->
     <!-- example using symlinking -->
@@ -36,8 +36,8 @@
 <meta http-equiv="expires" content="Tue, 01 Jan 1980 1:00:00 GMT" />
 <meta http-equiv="pragma" content="no-cache" />
 
-<link rel="stylesheet" href="../../styleguide/css/styleguide.min.css?1592419225" media="all">
-<link rel="stylesheet" href="../../styleguide/css/prism-typeahead.min.css?1592419225" media="all" />
+<link rel="stylesheet" href="../../styleguide/css/styleguide.min.css?1592419801" media="all">
+<link rel="stylesheet" href="../../styleguide/css/prism-typeahead.min.css?1592419801" media="all" />
     <!-- End Pattern Lab -->
 
   </head>
@@ -237,18 +237,66 @@
     
   <div class="sg-pattern-example"><div class="layout-contained padding-horizontal">
   <h2>Primary Colours</h2>
-  <ul class="sg-colors">  </ul>
+  <ul class="sg-colors">
+    <li>
+      <div style="background-color: var(--color-primary)" class="sg-colors__sample sg-swatch"></div>
+      <div class="sg-info"><span>Primary</span></div>
+    </li>
+    <li>
+      <div style="background-color: var(--color-primary--light)" class="sg-colors__sample sg-swatch"></div>
+      <div class="sg-info"><span>Primary Light</span></div>
+    </li>
+    <li>
+      <div style="background-color: var(--color-primary--dark)" class="sg-colors__sample sg-swatch"></div>
+      <div class="sg-info"><span>Primary Dark</span></div>
+    </li>
+  </ul>
 
   <h2>Secondary Colours</h2>
-  <ul class="sg-colors">  </ul>
-
-  <h2>Tertiary Colours</h2>
-  <ul class="sg-colors">  </ul>
-  <h2>Greys</h2>
-  <ul class="sg-colors greys">
+  <ul class="sg-colors">
+    <li>
+      <div style="background-color: var(--color-secondary)" class="sg-colors__sample sg-swatch"></div>
+      <div class="sg-info"><span>Secondary</span></div>
+    </li>
+    <li>
+      <div style="background-color: var(--color-secondary--light)" class="sg-colors__sample sg-swatch"></div>
+      <div class="sg-info"><span>Secondary Light</span></div>
+    </li>
+    <li>
+      <div style="background-color: var(--color-secondary--dark)" class="sg-colors__sample sg-swatch"></div>
+      <div class="sg-info"><span>Secondary Dark</span></div>
+    </li>
   </ul>
-</div>
 
+  <h2>Grey Colours</h2>
+  <ul class="sg-colors">
+    <li>
+      <div style="background-color: var(--color-grey)" class="sg-colors__sample sg-swatch"></div>
+      <div class="sg-info"><span>Grey</span></div>
+    </li>
+    <li>
+      <div style="background-color: var(--color-grey--light)" class="sg-colors__sample sg-swatch"></div>
+      <div class="sg-info"><span>Grey Light</span></div>
+    </li>
+    <li>
+      <div style="background-color: var(--color-grey--dark)" class="sg-colors__sample sg-swatch"></div>
+      <div class="sg-info"><span>Grey Dark</span></div>
+    </li>
+  </ul>
+
+  <h2>Black and White</h2>
+  <ul class="sg-colors">
+    <li>
+      <div style="background-color: var(--color-white)" class="sg-colors__sample sg-swatch"></div>
+      <div class="sg-info"><span>White</span></div>
+    </li>
+    <li>
+      <div style="background-color: var(--color-black)" class="sg-colors__sample sg-swatch"></div>
+      <div class="sg-info"><span>Black</span></div>
+    </li>
+  </ul>
+
+</div>
   </div>
   
   <script type="text/json" id="sg-pattern-data-base-colors" class="sg-pattern-data">{"lineage":[],"lineageR":[],"patternBreadcrumb":{"patternType":"base","patternSubtype":"global"},"patternDesc":"<p>Colors below are automatically pulled from <code>_color-vars.scss<\/code> if they are prefixed with <code>$c-<\/code> and can be used like so:<\/p>\n\n<pre><code class=\"scss\">.class {\n  color: $c-red;\n}\n<\/code><\/pre>","patternExtension":"twig","patternName":"Colors","patternPartial":"base-colors","patternState":""}
@@ -305,10 +353,10 @@
   }
 </script>
 
-<script id="pl-js-polyfill-insert-1592419225">
+<script id="pl-js-polyfill-insert-1592419801">
   (function() {
     if (self != top) {
-      var cb = '1592419225';
+      var cb = '1592419801';
       var js = [];
       if (typeof document !== 'undefined' && !('classList' in document.documentElement)) {
         js.push('styleguide/bower_components/classList.min.js');
@@ -318,10 +366,10 @@
   })();
 </script>
 
-<script id="pl-js-insert-1592419225">
+<script id="pl-js-insert-1592419801">
   (function() {
     if (self != top) {
-      var cb = '1592419225';
+      var cb = '1592419801';
       var js = [ { 'src': 'styleguide/bower_components/jwerty.min.js', 'dep': [ 'styleguide/js/patternlab-pattern.min.js' ] } ];
       scriptLoader.run(js,cb,'pl-js-insert');
     }
