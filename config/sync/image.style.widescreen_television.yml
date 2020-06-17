@@ -2,6 +2,8 @@ uuid: ef85bd25-9b3c-4939-b38b-0c26bd00b709
 langcode: en
 status: true
 dependencies:
+  config:
+    - crop.type.widescreen_television
   module:
     - crop
 _core:
@@ -23,3 +25,9 @@ effects:
       width: 1600
       height: null
       upscale: true
+  12a91eb8-0cca-4f13-b5a7-74f26f43b297:
+    uuid: 12a91eb8-0cca-4f13-b5a7-74f26f43b297
+    id: image_convert
+    weight: 3
+    data:
+      extension: jpg
