@@ -20,20 +20,16 @@ set classes = [
   {% endif %}
 
   {% if introduction %}
-    <div class="full__introduction layout-contained layout-contained--medium padding-horizontal">
+    <div class="full__intro layout-contained layout-contained--medium padding-horizontal">
       {{ introduction }}
     </div>
   {% endif %}
 
-  {% block building_blocks %}
-    <div class="building-blocks">
-      {% for building_block in building_blocks %}
-        <div class="building-block">
-          {{ building_block }}
-        </div>
-      {% endfor %}
+  {% if basic_page_body %}
+    <div class="layout-contained layout-contained--medium padding-horizontal">
+      {{ basic_page_body }}
     </div>
-  {% endblock %}
+  {% endif %}
 
 </article>
 
