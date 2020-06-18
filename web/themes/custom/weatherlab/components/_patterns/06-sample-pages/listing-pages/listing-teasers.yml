@@ -8,6 +8,19 @@ this_page_content:
       site_breadcrumbs:
         include():
           pattern: 'page-sections-breadcrumbs'
+      page_title:
+        include():
+          pattern: 'page-sections-page-title'
+          with:
+            page_title_content:
+              include():
+                pattern: 'site-components-block-page-title'
+                with:
+                  block_content:
+                    include():
+                      pattern: 'site-components-page-title-content'
+                      with:
+                        page_title: 'Blog'
       page_content:
         include():
           pattern: 'content-list-teasers'

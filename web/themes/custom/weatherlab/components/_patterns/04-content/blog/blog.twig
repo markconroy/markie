@@ -12,16 +12,14 @@ set classes = [
 
   {% if display_submitted %}
     <div class="layout-contained layout-contained--medium padding-horizontal">
-      <footer class="node__meta">
-        <div class="node__meta--published">
-          {{ 'Published: '|t }} {{ node.created.value|date("D d M Y") }}
-        </div>
+      <footer class="blog__meta">
+        {{ 'Published: '|t }} {{ node.created.value|date("D d M Y") }}
       </footer>
     </div>
   {% endif %}
 
   {{ title_prefix }}
-  <h1{{title_attributes.addClass('layout-contained layout-contained--medium padding-horizontal')}}>{{ label }}</h1>
+  <h1{{title_attributes.addClass('full__title layout-contained layout-contained--medium padding-horizontal')}}>{{ label }}</h1>
   {{ title_suffix }}
 
   {% if blog_intro %}
