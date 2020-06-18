@@ -10,13 +10,15 @@ h5,
 .h5,
 h6,
 .h6 {
-  color: var(--color-grey--dark);
+  color: var(--color-primary);
   font-weight: $fw--heavy;
 }
 
 h1,
 .h1 {
   @include fluid-type(font-size, $bp--xsmall, $bp--xxlarge, $fs--h1-small, $fs--h1-large);
+
+  color: var(--color-grey--dark);
 }
 
 h2,

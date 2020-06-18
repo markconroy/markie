@@ -5,6 +5,8 @@
 
 .full__intro {
   margin-bottom: $base-line-height * 2;
+  color: var(--color-primary);
+  font-weight: $fw--bold;
 }
 
 .full__tags .field__items {

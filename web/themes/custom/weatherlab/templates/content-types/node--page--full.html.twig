@@ -2,10 +2,8 @@
   {% set introduction = content.field_intro %}
 {% endif %}
 
-{% embed "@content/basic-page/basic-page.twig" %}
+{% if node.body.value %}
+  {% set basic_page_body = content.body %}
+{% endif %}
 
-{% block building_blocks %}
-  {{ content.field_building_blocks }}
-{% endblock %}
-
-{% endembed %}
+{% include "@content/basic-page/basic-page.twig" %}

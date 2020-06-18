@@ -7,7 +7,5 @@ view_mode: full
 label: 'What We Do'
 
 introduction: '<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit.</p>'
-building_blocks:
-  - join():
-    - include():
-        pattern: 'building-blocks-text-paragraph-x2'
+
+basic_page_body: '<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit.</p><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit.</p>'
