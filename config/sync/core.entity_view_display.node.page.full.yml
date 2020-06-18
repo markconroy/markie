@@ -5,9 +5,12 @@ dependencies:
   config:
     - core.entity_view_mode.node.full
     - field.field.node.page.field_building_blocks
+    - field.field.node.page.field_intro
+    - field.field.node.page.field_metatags
     - node.type.page
   module:
     - entity_reference_revisions
+    - text
     - user
 _core:
   default_config_hash: g1S3_GLaxq4l3I9RIca5Mlz02MxI2KmOquZpHw59akM
@@ -18,14 +21,20 @@ mode: full
 content:
   field_building_blocks:
     type: entity_reference_revisions_entity_view
-    weight: 0
+    weight: 1
     label: hidden
     settings:
       view_mode: default
       link: ''
     third_party_settings: {  }
     region: content
+  field_intro:
+    type: text_default
+    weight: 0
+    region: content
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
 hidden:
-  field_intro: true
   field_metatags: true
   links: true
