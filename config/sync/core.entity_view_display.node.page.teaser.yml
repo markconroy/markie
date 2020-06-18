@@ -4,7 +4,9 @@ status: true
 dependencies:
   config:
     - core.entity_view_mode.node.teaser
+    - field.field.node.page.body
     - field.field.node.page.field_building_blocks
+    - field.field.node.page.field_intro
     - node.type.page
   module:
     - user
@@ -16,7 +18,7 @@ bundle: page
 mode: teaser
 content: {  }
 hidden:
+  body: true
   field_building_blocks: true
   field_intro: true
-  field_metatags: true
   links: true

@@ -3,12 +3,11 @@ langcode: en
 status: true
 dependencies:
   config:
+    - field.field.node.page.body
     - field.field.node.page.field_building_blocks
     - field.field.node.page.field_intro
-    - field.field.node.page.field_metatags
     - node.type.page
   module:
-    - metatag
     - paragraphs
     - path
     - text
@@ -19,6 +18,16 @@ targetEntityType: node
 bundle: page
 mode: default
 content:
+  body:
+    weight: 26
+    settings:
+      rows: 9
+      summary_rows: 3
+      placeholder: ''
+      show_summary: false
+    third_party_settings: {  }
+    type: text_textarea_with_summary
+    region: content
   created:
     type: datetime_timestamp
     weight: 3
@@ -44,12 +53,6 @@ content:
     settings:
       rows: 5
       placeholder: ''
-    third_party_settings: {  }
-  field_metatags:
-    type: metatag_firehose
-    weight: 10
-    region: content
-    settings: {  }
     third_party_settings: {  }
   path:
     type: path

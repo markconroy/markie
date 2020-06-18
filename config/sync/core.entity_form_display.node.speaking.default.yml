@@ -7,7 +7,6 @@ dependencies:
     - field.field.node.speaking.field_intro
     - field.field.node.speaking.field_main_image
     - field.field.node.speaking.field_main_video
-    - field.field.node.speaking.field_metatags
     - field.field.node.speaking.field_speaking_conference
     - field.field.node.speaking.field_speaking_date
     - field.field.node.speaking.field_speaking_where
@@ -17,7 +16,6 @@ dependencies:
     - datetime
     - field_group
     - media_library
-    - metatag
     - paragraphs
     - path
     - text
@@ -109,8 +107,8 @@ content:
       form_display_mode: default
       default_paragraph_type: ''
       features:
-        duplicate: duplicate
         collapse_edit_all: collapse_edit_all
+        duplicate: duplicate
     third_party_settings: {  }
     type: paragraphs
     region: content
@@ -135,12 +133,6 @@ content:
       media_types: {  }
     third_party_settings: {  }
     type: media_library_widget
-    region: content
-  field_metatags:
-    weight: 12
-    settings: {  }
-    third_party_settings: {  }
-    type: metatag_firehose
     region: content
   field_speaking_conference:
     weight: 5
