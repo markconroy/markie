@@ -4,11 +4,9 @@ status: true
 dependencies:
   config:
     - field.field.node.page.body
-    - field.field.node.page.field_building_blocks
     - field.field.node.page.field_intro
     - node.type.page
   module:
-    - paragraphs
     - path
     - text
 _core:
@@ -34,18 +32,6 @@ content:
     region: content
     settings: {  }
     third_party_settings: {  }
-  field_building_blocks:
-    type: entity_reference_paragraphs
-    weight: 9
-    settings:
-      title: 'Building Block'
-      title_plural: 'Building Blocks'
-      edit_mode: preview
-      add_mode: dropdown
-      form_display_mode: default
-      default_paragraph_type: _none
-    third_party_settings: {  }
-    region: content
   field_intro:
     type: text_textarea
     weight: 1

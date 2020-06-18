@@ -4,7 +4,6 @@ status: true
 dependencies:
   config:
     - field.field.node.page.body
-    - field.field.node.page.field_building_blocks
     - field.field.node.page.field_intro
     - node.type.page
   module:
@@ -18,6 +17,5 @@ mode: default
 content: {  }
 hidden:
   body: true
-  field_building_blocks: true
   field_intro: true
   links: true
