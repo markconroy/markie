@@ -1,9 +1,0 @@
-/**
- * @file
- * This is the styling for .benefit classes.
- */
-
-.benefit {
-  @include rem(padding, 1rem);
-  @include rem(margin-bottom, .5rem);
-}
