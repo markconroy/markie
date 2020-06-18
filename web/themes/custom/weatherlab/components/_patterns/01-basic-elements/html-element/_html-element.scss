@@ -7,12 +7,10 @@ html {
 }
 
 ::selection {
-  color: var(--color-black);
+  color: var(--color-white);
   background: var(--color-secondary);
-  background: rgba(var(--color-secondary), 0.75);
 }
 ::-moz-selection {
-  color: var(--color-black);
+  color: var(--color-white);
   background: var(--color-secondary);
-  background: rgba(var(--color-secondary), 0.75);
 }
