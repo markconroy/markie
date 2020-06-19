@@ -5,6 +5,7 @@ dependencies:
   config:
     - field.field.media.image.field_m_image_image
     - field.field.media.image.field_media_tags
+    - image.style.user_defined
     - media.type.image
   module:
     - image
@@ -19,7 +20,7 @@ content:
     weight: 0
     label: hidden
     settings:
-      image_style: ''
+      image_style: user_defined
       image_link: ''
     third_party_settings: {  }
     type: image
