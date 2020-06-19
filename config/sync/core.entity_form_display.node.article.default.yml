@@ -3,6 +3,7 @@ langcode: en
 status: true
 dependencies:
   config:
+    - field.field.node.article.body
     - field.field.node.article.comment
     - field.field.node.article.field_building_blocks
     - field.field.node.article.field_intro
@@ -52,6 +53,7 @@ third_party_settings:
       region: content
     group_building_blocks:
       children:
+        - body
         - field_building_blocks
       parent_name: group_content
       weight: 21
@@ -71,6 +73,16 @@ targetEntityType: node
 bundle: article
 mode: default
 content:
+  body:
+    weight: 26
+    settings:
+      rows: 9
+      summary_rows: 3
+      placeholder: ''
+      show_summary: false
+    third_party_settings: {  }
+    type: text_textarea_with_summary
+    region: content
   comment:
     type: comment_default
     weight: 2
@@ -85,7 +97,7 @@ content:
     third_party_settings: {  }
   field_building_blocks:
     type: paragraphs
-    weight: 4
+    weight: 27
     settings:
       title: Paragraph
       title_plural: Paragraphs

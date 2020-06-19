@@ -1,6 +1,6 @@
 uuid: 3936f150-373e-4352-88e8-94f7340885a3
 langcode: en
-status: true
+status: false
 dependencies:
   config:
     - core.entity_view_mode.media.teaser

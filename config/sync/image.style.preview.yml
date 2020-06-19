@@ -2,22 +2,24 @@ uuid: e848c7a8-c0a7-4251-9d9b-eebadb3eba21
 langcode: en
 status: true
 dependencies:
+  config:
+    - crop.type.traditional_television
   module:
     - crop
 name: preview
 label: Preview
 effects:
-  3af7ece3-d7e6-49c4-9abe-0384996773c4:
-    uuid: 3af7ece3-d7e6-49c4-9abe-0384996773c4
-    id: crop_crop
-    weight: 1
-    data:
-      crop_type: traditional_television
   391c50a1-a661-4255-8ecd-f5e4b9bbd4c1:
     uuid: 391c50a1-a661-4255-8ecd-f5e4b9bbd4c1
     id: image_scale
-    weight: 2
+    weight: -9
     data:
       width: 200
       height: null
       upscale: true
+  867bbdb5-151f-4fa8-83dc-85e7f990b057:
+    uuid: 867bbdb5-151f-4fa8-83dc-85e7f990b057
+    id: crop_crop
+    weight: -10
+    data:
+      crop_type: traditional_television

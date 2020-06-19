@@ -2,6 +2,8 @@ uuid: ba274d5a-57d9-4919-8eda-abad46cfef95
 langcode: en
 status: true
 dependencies:
+  config:
+    - crop.type.user_defined
   module:
     - crop
 name: user_defined
@@ -13,3 +15,11 @@ effects:
     weight: 1
     data:
       crop_type: user_defined
+  d0c663a7-6668-442c-ac62-e368965d4115:
+    uuid: d0c663a7-6668-442c-ac62-e368965d4115
+    id: image_scale
+    weight: 2
+    data:
+      width: 600
+      height: null
+      upscale: false

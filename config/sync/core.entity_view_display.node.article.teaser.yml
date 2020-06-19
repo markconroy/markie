@@ -4,6 +4,7 @@ status: true
 dependencies:
   config:
     - core.entity_view_mode.node.teaser
+    - field.field.node.article.body
     - field.field.node.article.comment
     - field.field.node.article.field_building_blocks
     - field.field.node.article.field_intro
@@ -34,6 +35,7 @@ content:
     settings: {  }
     third_party_settings: {  }
 hidden:
+  body: true
   comment: true
   field_building_blocks: true
   field_main_image: true
