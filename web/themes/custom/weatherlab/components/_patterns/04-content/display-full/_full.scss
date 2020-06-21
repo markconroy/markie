@@ -9,6 +9,10 @@
   font-weight: $fw--bold;
 }
 
+.full__body {
+  margin-bottom: $base-line-height * 2;
+}
+
 .full__tags .field__items {
   display: flex;
   flex-wrap: wrap;

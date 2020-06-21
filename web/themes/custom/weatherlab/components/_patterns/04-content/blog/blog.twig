@@ -36,15 +36,21 @@ set classes = [
     </div>
   {% endif %}
 
-  {% block building_blocks %}
-    <div class="building-blocks">
-      {% for building_block in building_blocks %}
-        <div class="building-block">
-          {{ building_block }}
-        </div>
-      {% endfor %}
+  {% if blog_body %}
+    <div class="full__body blog__body layout-contained layout-contained--medium padding-horizontal">
+      {{ blog_body }}
     </div>
-  {% endblock %}
+    {% else %}
+    {% block building_blocks %}
+      <div class="building-blocks">
+        {% for building_block in building_blocks %}
+          <div class="building-block">
+            {{ building_block }}
+          </div>
+        {% endfor %}
+      </div>
+    {% endblock %}
+  {% endif %}
 
   <div class="layout-contained layout-contained--medium padding-horizontal">
     <div class="full__follow-me">

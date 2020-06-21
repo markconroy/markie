@@ -1,9 +1,13 @@
 {% if node.field_intro.value %}
-  {% set introduction = content.field_intro %}
+  {% set blog_intro = content.field_intro %}
 {% endif %}
 
 {% if node.field_main_image.value %}
   {% set main_image = content.field_main_image %}
+{% endif %}
+
+{% if node.body.value %}
+  {% set blog_body = content.body %}
 {% endif %}
 
 {% if node.field_tags.value %}

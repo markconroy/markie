@@ -18,6 +18,8 @@ blog_comment:
 
 main_image: <div class="field--name-field-main-image"><img src="https://placeimg.com/1600/900/nature"></div>
 
+blog_body: 'body here.'
+
 building_blocks:
   - join():
     - include():
