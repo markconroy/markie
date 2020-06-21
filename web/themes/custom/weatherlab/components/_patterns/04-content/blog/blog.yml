@@ -18,7 +18,7 @@ blog_comment:
 
 main_image: <div class="field--name-field-main-image"><img src="https://placeimg.com/1600/900/nature"></div>
 
-blog_body: 'body here.'
+blog_body: '<p>The body field, Nullam id dolor id nibh ultricies vehicula ut id elit. Etiam porta sem malesuada magna mollis euismod. Aenean lacinia bibendum nulla sed consectetur. Maecenas sed diam eget risus varius blandit sit amet non magna. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.</p>'
 
 building_blocks:
   - join():
