@@ -2,9 +2,6 @@ this_page_content:
   include():
     pattern: 'sample-pages-site-layout'
     with:
-      site_header:
-        include():
-          pattern: 'page-sections-header'
       site_breadcrumbs:
         include():
           pattern: 'page-sections-breadcrumbs'
