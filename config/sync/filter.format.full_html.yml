@@ -5,6 +5,7 @@ dependencies:
   module:
     - editor
     - geshifilter
+    - media
 _core:
   default_config_hash: hewPmBgni9jlDK_IjLxUx1HsTbinK-hdl0lOwjbteIY
 name: 'Full HTML'
@@ -52,3 +53,12 @@ filters:
     settings:
       general_tags: {  }
       per_language_settings: {  }
+  media_embed:
+    id: media_embed
+    provider: media
+    status: true
+    weight: 100
+    settings:
+      default_view_mode: default
+      allowed_media_types: {  }
+      allowed_view_modes: {  }
