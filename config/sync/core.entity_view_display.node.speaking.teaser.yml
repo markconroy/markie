@@ -4,7 +4,6 @@ status: true
 dependencies:
   config:
     - core.entity_view_mode.node.teaser
-    - field.field.node.speaking.field_building_blocks
     - field.field.node.speaking.field_intro
     - field.field.node.speaking.field_main_image
     - field.field.node.speaking.field_main_video
@@ -34,7 +33,6 @@ content:
     settings: {  }
     third_party_settings: {  }
 hidden:
-  field_building_blocks: true
   field_main_image: true
   field_main_video: true
   field_speaking_conference: true

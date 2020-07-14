@@ -4,7 +4,6 @@ status: true
 dependencies:
   config:
     - core.entity_view_mode.node.full
-    - field.field.node.speaking.field_building_blocks
     - field.field.node.speaking.field_intro
     - field.field.node.speaking.field_main_image
     - field.field.node.speaking.field_main_video
@@ -15,7 +14,6 @@ dependencies:
     - node.type.speaking
   module:
     - datetime
-    - entity_reference_revisions
     - text
     - user
 id: node.speaking.full
@@ -23,15 +21,6 @@ targetEntityType: node
 bundle: speaking
 mode: full
 content:
-  field_building_blocks:
-    weight: 101
-    label: hidden
-    settings:
-      view_mode: default
-      link: ''
-    third_party_settings: {  }
-    type: entity_reference_revisions_entity_view
-    region: content
   field_intro:
     weight: 105
     label: hidden

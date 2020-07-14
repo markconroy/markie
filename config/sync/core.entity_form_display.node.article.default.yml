@@ -5,7 +5,6 @@ dependencies:
   config:
     - field.field.node.article.body
     - field.field.node.article.comment
-    - field.field.node.article.field_building_blocks
     - field.field.node.article.field_intro
     - field.field.node.article.field_main_image
     - field.field.node.article.field_site_section
@@ -15,7 +14,6 @@ dependencies:
     - comment
     - field_group
     - media_library
-    - paragraphs
     - path
     - text
 third_party_settings:
@@ -95,25 +93,6 @@ content:
     region: content
     settings: {  }
     third_party_settings: {  }
-  field_building_blocks:
-    type: paragraphs
-    weight: 27
-    settings:
-      title: Paragraph
-      title_plural: Paragraphs
-      edit_mode: closed
-      closed_mode: preview
-      autocollapse: none
-      closed_mode_threshold: 0
-      add_mode: dropdown
-      form_display_mode: default
-      default_paragraph_type: _none
-      features:
-        add_above: add_above
-        collapse_edit_all: collapse_edit_all
-        duplicate: duplicate
-    third_party_settings: {  }
-    region: content
   field_intro:
     weight: 2
     settings:

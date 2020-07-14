@@ -3,7 +3,6 @@ langcode: en
 status: true
 dependencies:
   config:
-    - field.field.node.speaking.field_building_blocks
     - field.field.node.speaking.field_intro
     - field.field.node.speaking.field_main_image
     - field.field.node.speaking.field_main_video
@@ -14,7 +13,6 @@ dependencies:
     - node.type.speaking
   module:
     - datetime
-    - entity_reference_revisions
     - text
     - user
 id: node.speaking.default
@@ -22,15 +20,6 @@ targetEntityType: node
 bundle: speaking
 mode: default
 content:
-  field_building_blocks:
-    weight: 101
-    label: above
-    settings:
-      view_mode: default
-      link: ''
-    third_party_settings: {  }
-    type: entity_reference_revisions_entity_view
-    region: content
   field_intro:
     weight: 105
     label: above

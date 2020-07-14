@@ -1,9 +1,0 @@
-uuid: 5eb86c12-2454-48cb-8649-089d426e7397
-langcode: en
-status: true
-dependencies: {  }
-id: tweet
-label: Tweet
-icon_uuid: null
-description: 'We use this paragraph type to place Tweets in our Building Blocks.'
-behavior_plugins: {  }

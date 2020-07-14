@@ -6,7 +6,6 @@ dependencies:
     - core.entity_view_mode.node.teaser
     - field.field.node.article.body
     - field.field.node.article.comment
-    - field.field.node.article.field_building_blocks
     - field.field.node.article.field_intro
     - field.field.node.article.field_main_image
     - field.field.node.article.field_site_section
@@ -37,7 +36,6 @@ content:
 hidden:
   body: true
   comment: true
-  field_building_blocks: true
   field_main_image: true
   field_site_section: true
   field_tags: true

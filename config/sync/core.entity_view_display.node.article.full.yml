@@ -7,7 +7,6 @@ dependencies:
     - core.entity_view_mode.node.full
     - field.field.node.article.body
     - field.field.node.article.comment
-    - field.field.node.article.field_building_blocks
     - field.field.node.article.field_intro
     - field.field.node.article.field_main_image
     - field.field.node.article.field_site_section
@@ -15,7 +14,6 @@ dependencies:
     - node.type.article
   module:
     - comment
-    - entity_reference_revisions
     - text
     - user
 _core:
@@ -41,15 +39,6 @@ content:
       view_mode: default
       pager_id: 0
     third_party_settings: {  }
-  field_building_blocks:
-    type: entity_reference_revisions_entity_view
-    weight: 3
-    label: hidden
-    settings:
-      view_mode: default
-      link: ''
-    third_party_settings: {  }
-    region: content
   field_intro:
     type: text_default
     weight: 1

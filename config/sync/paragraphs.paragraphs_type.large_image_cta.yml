@@ -1,9 +1,0 @@
-uuid: e47fcdb3-8459-4ee9-b992-8aae8420bc93
-langcode: en
-status: true
-dependencies: {  }
-id: large_image_cta
-label: 'Large Image CTA'
-icon_uuid: null
-description: null
-behavior_plugins: {  }

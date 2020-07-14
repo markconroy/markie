@@ -1,9 +1,0 @@
-uuid: 7ccce377-7a62-4be8-89c5-2c242737fa35
-langcode: en
-status: true
-dependencies: {  }
-id: section_break
-label: 'Section Break'
-icon_uuid: null
-description: ''
-behavior_plugins: {  }

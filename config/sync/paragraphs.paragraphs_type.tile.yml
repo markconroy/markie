@@ -1,9 +1,0 @@
-uuid: 03c11d26-5ae0-49e3-a3b8-2e663b2a06ef
-langcode: en
-status: true
-dependencies: {  }
-id: tile
-label: Tile
-icon_uuid: null
-description: null
-behavior_plugins: {  }
