@@ -45,7 +45,6 @@
     "drupal/field_group": "^3.0",
     "drupal/geshifilter": "^1.2",
     "drupal/google_analytics": "^2.3",
-    "drupal/honeypot": "^1.27",
     "drupal/image_widget_crop": "^2.1",
     "drupal/inline_entity_form": "^1.0-beta1",
     "drupal/media_entity_generic": "^1.0",
