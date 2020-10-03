@@ -13,7 +13,7 @@ function media_entity_generic_requirements($phase) {
 
   // Prevent installation if Media Entity 1.x is enabled.
   if (\Drupal::moduleHandler()->moduleExists('media_entity')) {
-    $info = system_get_info('module', 'media_entity');
+    $info = \Drupal::service('extension.list.module')->getExtensionInfo('media_entity');
     if (version_compare($info['version'], '8.x-2') < 0) {
       $requirements['media_entity_generic_incompatibility'] = [
         'title' => t('Media'),
