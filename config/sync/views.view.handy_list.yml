@@ -1,6 +1,6 @@
 uuid: 0d278e75-c71a-42c5-b674-b6921e3e8807
 langcode: en
-status: false
+status: true
 dependencies:
   config:
     - core.entity_view_mode.node.teaser
@@ -416,91 +416,6 @@ display:
           entity_type: node
           entity_field: type
           plugin_id: bundle
-        field_building_blocks_target_id:
-          id: field_building_blocks_target_id
-          table: node__field_building_blocks
-          field: field_building_blocks_target_id
-          relationship: none
-          group_type: group
-          admin_label: ''
-          operator: 'not empty'
-          value:
-            min: ''
-            max: ''
-            value: ''
-          group: 1
-          exposed: false
-          expose:
-            operator_id: field_building_blocks_target_id_op
-            label: 'Building Blocks'
-            description: ''
-            use_operator: false
-            operator: field_building_blocks_target_id_op
-            operator_limit_selection: false
-            operator_list: {  }
-            identifier: field_building_blocks_target_id
-            required: false
-            remember: false
-            multiple: false
-            remember_roles:
-              authenticated: authenticated
-              anonymous: '0'
-              administrator: '0'
-            placeholder: ''
-            min_placeholder: ''
-            max_placeholder: ''
-          is_grouped: false
-          group_info:
-            label: ''
-            description: ''
-            identifier: ''
-            optional: true
-            widget: select
-            multiple: false
-            remember: false
-            default_group: All
-            default_group_multiple: {  }
-            group_items: {  }
-          plugin_id: numeric
-        body_value:
-          id: body_value
-          table: node__body
-          field: body_value
-          relationship: none
-          group_type: group
-          admin_label: ''
-          operator: empty
-          value: ''
-          group: 1
-          exposed: false
-          expose:
-            operator_id: ''
-            label: ''
-            description: ''
-            use_operator: false
-            operator: ''
-            operator_limit_selection: false
-            operator_list: {  }
-            identifier: ''
-            required: false
-            remember: false
-            multiple: false
-            remember_roles:
-              authenticated: authenticated
-            placeholder: ''
-          is_grouped: false
-          group_info:
-            label: ''
-            description: ''
-            identifier: ''
-            optional: true
-            widget: select
-            multiple: false
-            remember: false
-            default_group: All
-            default_group_multiple: {  }
-            group_items: {  }
-          plugin_id: string
       sorts:
         created:
           id: created
