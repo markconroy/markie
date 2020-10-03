@@ -1,7 +1,8 @@
 <?php
 
-namespace Drupal\xmlsitemap\Tests;
+namespace Drupal\Tests\xmlsitemap\Functional;
 
+use Drupal\Component\Render\FormattableMarkup;
 use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\xmlsitemap\Entity\XmlSitemap;
 
@@ -18,10 +19,19 @@ class XmlSitemapListBuilderTest extends XmlSitemapTestBase {
   public static $modules = ['language', 'locale', 'content_translation'];
 
   /**
+   * Entity type manager service.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected $entityTypeManager;
+
+  /**
    * {@inheritdoc}
    */
   protected function setUp() {
     parent::setUp();
+
+    $this->entityTypeManager = $this->container->get('entity_type.manager');
 
     $this->admin_user = $this->drupalCreateUser([
       'administer languages',
@@ -32,7 +42,7 @@ class XmlSitemapListBuilderTest extends XmlSitemapTestBase {
     ]);
     $this->drupalLogin($this->admin_user);
 
-    $this->languageManager = \Drupal::languageManager();
+    $this->languageManager = $this->container->get('language_manager');
     if (!$this->languageManager->getLanguage('fr')) {
       // Add a new language.
       ConfigurableLanguage::createFromLangcode('fr')->save();
@@ -61,7 +71,7 @@ class XmlSitemapListBuilderTest extends XmlSitemapTestBase {
     $id = xmlsitemap_sitemap_get_context_hash($context);
 
     $this->drupalGet('admin/config/search/xmlsitemap');
-    $this->assertText($id);
+    $this->assertSession()->pageTextContains($id);
   }
 
   /**
@@ -76,31 +86,31 @@ class XmlSitemapListBuilderTest extends XmlSitemapTestBase {
     $this->drupalPostForm('admin/config/search/xmlsitemap/add', $edit, t('Save'));
     $context = ['language' => 'en'];
     $id = xmlsitemap_sitemap_get_context_hash($context);
-    $this->assertText(t('Saved the English sitemap.'));
-    $this->assertText($id);
+    $this->assertSession()->pageTextContains('Saved the English sitemap.');
+    $this->assertSession()->pageTextContains($id);
 
     $edit = [
       'label' => 'French',
       'context[language]' => 'fr',
     ];
-    $this->drupalPostForm('admin/config/search/xmlsitemap/add', $edit, t('Save'));
+    $this->drupalPostForm('admin/config/search/xmlsitemap/add', $edit, 'Save');
     $context = ['language' => 'fr'];
     $id = xmlsitemap_sitemap_get_context_hash($context);
-    $this->assertText(t('Saved the French sitemap.'));
-    $this->assertText($id);
+    $this->assertSession()->pageTextContains('Saved the French sitemap.');
+    $this->assertSession()->pageTextContains($id);
 
     $this->drupalPostForm('admin/config/search/xmlsitemap/add', $edit, t('Save'));
-    $this->assertText(t('There is another sitemap saved with the same context.'));
+    $this->assertSession()->pageTextContains('There is another sitemap saved with the same context.');
 
     $sitemaps = XmlSitemap::loadMultiple();
     foreach ($sitemaps as $sitemap) {
       $label = $sitemap->label();
       $this->drupalPostForm("admin/config/search/xmlsitemap/{$sitemap->id()}/delete", [], t('Delete'));
-      $this->assertRaw(t("Sitemap %label has been deleted.", ['%label' => $label]));
+      $this->assertSession()->responseContains((string) new FormattableMarkup('Sitemap %label has been deleted.', ['%label' => $label]));
     }
 
     $sitemaps = XmlSitemap::loadMultiple();
-    $this->assertEqual(count($sitemaps), 0, t('No more sitemaps.'));
+    $this->assertEquals(0, count($sitemaps), 'No more sitemaps.');
   }
 
 }

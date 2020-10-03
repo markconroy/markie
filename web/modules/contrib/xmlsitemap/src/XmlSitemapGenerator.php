@@ -8,6 +8,7 @@ use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Database\Connection;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
+use Drupal\Core\File\Exception\DirectoryNotReadyException;
 use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Language\LanguageManagerInterface;
@@ -160,8 +161,8 @@ class XmlSitemapGenerator implements XmlSitemapGeneratorInterface {
    * {@inheritdoc}
    */
   public function getPathAlias($path, $language) {
-    $query = $this->connection->select('url_alias', 'u');
-    $query->fields('u', ['source', 'alias']);
+    $query = $this->connection->select('path_alias', 'u');
+    $query->fields('u', ['path', 'alias']);
     if (!isset(static::$aliases)) {
       $query->condition('langcode', LanguageInterface::LANGCODE_NOT_SPECIFIED, '=');
       static::$aliases[LanguageInterface::LANGCODE_NOT_SPECIFIED] = $query->execute()->fetchAllKeyed();
@@ -169,7 +170,7 @@ class XmlSitemapGenerator implements XmlSitemapGeneratorInterface {
     if ($language !== LanguageInterface::LANGCODE_NOT_SPECIFIED && static::$lastLanguage != $language) {
       unset(static::$aliases[static::$lastLanguage]);
       $query->condition('langcode', $language, '=');
-      $query->orderBy('pid');
+      $query->orderBy('id');
       static::$aliases[$language] = $query->execute()->fetchAllKeyed();
       static::$lastLanguage = $language;
     }
@@ -224,7 +225,7 @@ class XmlSitemapGenerator implements XmlSitemapGeneratorInterface {
 
       // Add memory for storing the url aliases.
       if ($this->config->get('prefetch_aliases')) {
-        $aliases = $this->connection->query("SELECT COUNT(pid) FROM {url_alias}")->fetchField();
+        $aliases = $this->connection->query("SELECT COUNT(id) FROM {path_alias}")->fetchField();
         $optimal_limit += $aliases * 250;
       }
     }
@@ -402,7 +403,9 @@ class XmlSitemapGenerator implements XmlSitemapGeneratorInterface {
       $context['sandbox']['max'] = XMLSITEMAP_MAX_SITEMAP_LINKS;
 
       // Clear the cache directory for this sitemap before generating any files.
-      xmlsitemap_check_directory($context['sandbox']['sitemap']);
+      if (!xmlsitemap_check_directory($context['sandbox']['sitemap'])) {
+        throw new DirectoryNotReadyException("The sitemap directory could not be created or is not writable.");
+      }
       xmlsitemap_clear_directory($context['sandbox']['sitemap']);
     }
 
@@ -523,17 +526,18 @@ class XmlSitemapGenerator implements XmlSitemapGeneratorInterface {
     }
 
     $info = $context['sandbox']['info'];
-    $entity_type = $this->entityTypeManager->getDefinition($entity_type_id);
 
     $query = $this->entityTypeManager->getStorage($entity_type_id)->getQuery();
-    $query->condition($entity_type->getKey('id'), $context['sandbox']['last_id'], '>');
-    if ($entity_type->hasKey('bundle')) {
-      $query->condition($entity_type->getKey('bundle'), $context['sandbox']['bundles'], 'IN');
+    $query->condition($info['entity keys']['id'], $context['sandbox']['last_id'], '>');
+    if (!empty($info['entity keys']['bundle'])) {
+      $query->condition($info['entity keys']['bundle'], $context['sandbox']['bundles'], 'IN');
     }
-    $query->addTag('xmlsitemap_link_bundle_access');
+
+    // Access for entities is checked individually for the anonymous user
+    // when each item is processed. We can skip the access check for the
+    // query.
+    $query->accessCheck(FALSE);
     $query->addTag('xmlsitemap_rebuild');
-    $query->addMetaData('entity_type_id', $entity_type_id);
-    $query->addMetaData('entity_info', $info);
 
     if (!isset($context['sandbox']['max'])) {
       $count_query = clone $query;
@@ -546,7 +550,7 @@ class XmlSitemapGenerator implements XmlSitemapGeneratorInterface {
     }
 
     // PostgreSQL cannot have the ORDERED BY in the count query.
-    $query->sort($entity_type->getKey('id'));
+    $query->sort($info['entity keys']['id']);
 
     // Get batch limit.
     $limit = $this->config->get('batch_limit');

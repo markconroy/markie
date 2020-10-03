@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\xmlsitemap\Tests;
+namespace Drupal\Tests\xmlsitemap\Functional;
 
 use Drupal\Core\Session\AccountInterface;
 use Drupal\user\Entity\Role;
@@ -18,18 +18,26 @@ class XmlSitemapMenuFunctionalTest extends XmlSitemapTestBase {
   public static $modules = ['menu_link_content', 'menu_ui'];
 
   /**
+   * Entity type bundle info service.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeBundleInfoInterface
+   */
+  protected $entityTypeBundleInfo;
+
+  /**
    * {@inheritdoc}
    */
   protected function setUp() {
     parent::setUp();
 
+    $this->entityTypeBundleInfo = $this->container->get('entity_type.bundle.info');
     // Allow anonymous user to administer menu links.
     $user_role = Role::load(AccountInterface::ANONYMOUS_ROLE);
     $user_role->grantPermission('administer menu');
     $user_role->grantPermission('access content');
     $user_role->save();
 
-    $bundles = \Drupal::service('entity_type.bundle.info')->getAllBundleInfo();
+    $bundles = $this->entityTypeBundleInfo->getAllBundleInfo();
     foreach ($bundles['menu_link_content'] as $bundle_id => $bundle) {
       xmlsitemap_link_bundle_enable('menu_link_content', $bundle_id);
     }
@@ -86,7 +94,7 @@ class XmlSitemapMenuFunctionalTest extends XmlSitemapTestBase {
    * {@inheritdoc}
    */
   public function tearDown() {
-    $bundles = \Drupal::service('entity_type.bundle.info')->getAllBundleInfo();
+    $bundles = $this->entityTypeBundleInfo->getAllBundleInfo();
     foreach ($bundles['menu_link_content'] as $bundle_id => $bundle) {
       xmlsitemap_link_bundle_delete('menu_link_content', $bundle_id);
     }

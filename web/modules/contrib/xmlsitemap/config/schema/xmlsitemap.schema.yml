@@ -43,6 +43,9 @@ xmlsitemap.settings:
     i18n_selection_mode:
       type: string
       label: 'Language selection mode'
+    metatag_exclude_noindex:
+      type: boolean
+      label: 'Exclude individual content that has the Robots meta tag with <em>Prevents search engines from indexing this page</em>.'
 
 xmlsitemap.settings.*.*:
   type: config_object

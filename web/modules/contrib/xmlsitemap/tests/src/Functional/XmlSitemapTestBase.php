@@ -1,16 +1,24 @@
 <?php
 
-namespace Drupal\xmlsitemap\Tests;
+namespace Drupal\Tests\xmlsitemap\Functional;
 
 use Drupal\Core\Logger\RfcLogLevel;
 use Drupal\Core\Url;
-use Drupal\simpletest\WebTestBase;
+use Drupal\Tests\BrowserTestBase;
+use Drupal\Tests\Traits\Core\CronRunTrait;
 use Drupal\xmlsitemap\Entity\XmlSitemap;
 
 /**
  * Helper test class with some added functions for testing.
  */
-abstract class XmlSitemapTestBase extends WebTestBase {
+abstract class XmlSitemapTestBase extends BrowserTestBase {
+
+  use CronRunTrait;
+
+  /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
 
   /**
    * Modules to enable.
@@ -72,16 +80,33 @@ abstract class XmlSitemapTestBase extends WebTestBase {
   protected $linkStorage;
 
   /**
+   * System time service.
+   *
+   * @var \Drupal\Component\Datetime\TimeInterface
+   */
+  protected $time;
+
+  /**
+   * Entity type manager service.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected $entityTypeManager;
+
+  /**
    * {@inheritdoc}
    */
   protected function setUp() {
     parent::setUp();
 
-    $this->state = \Drupal::state();
-    $this->config = \Drupal::configFactory()->getEditable('xmlsitemap.settings');
-    $this->moduleHandler = \Drupal::moduleHandler();
-    $this->languageManager = \Drupal::languageManager();
-    $this->linkStorage = \Drupal::service('xmlsitemap.link_storage');
+    $this->entityTypeManager = $this->container->get('entity_type.manager');
+
+    $this->state = $this->container->get('state');
+    $this->config = $this->container->get('config.factory')->getEditable('xmlsitemap.settings');
+    $this->moduleHandler = $this->container->get('module_handler');
+    $this->languageManager = $this->container->get('language_manager');
+    $this->linkStorage = $this->container->get('xmlsitemap.link_storage');
+    $this->time = $this->container->get('datetime.time');
 
     // Create the Article and Page content types.
     if ($this->profile != 'standard') {
@@ -134,17 +159,6 @@ abstract class XmlSitemapTestBase extends WebTestBase {
   }
 
   /**
-   * Check the files directory is created (massive fails if not done).
-   *
-   * @todo This can be removed when https://www.drupal.org/node/654752 is fixed.
-   */
-  protected function checkFilesDirectory() {
-    if (!xmlsitemap_check_directory()) {
-      $this->fail(t('Sitemap directory was found and writable for testing.'));
-    }
-  }
-
-  /**
    * Retrieves an XML sitemap.
    *
    * @param array $context
@@ -189,7 +203,7 @@ abstract class XmlSitemapTestBase extends WebTestBase {
     else {
       $link = $this->linkStorage->load($entity_type, $entity_id);
     }
-    $this->assertTrue(is_array($link), 'Link loaded.');
+    $this->assertIsArray($link, 'Link loaded.');
     return $link;
   }
 
@@ -231,13 +245,13 @@ abstract class XmlSitemapTestBase extends WebTestBase {
     $link = $this->linkStorage->load($entity_type, $entity_id);
 
     if (!$link) {
-      return $this->fail(t('Could not load sitemap link for @type @id.', ['@type' => $entity_type, '@id' => $entity_id]));
+      return $this->fail(sprintf('Could not load sitemap link for %s %s.', $entity_type, $entity_id));
     }
 
     foreach ($conditions as $key => $value) {
       if ($value === NULL || $link[$key] === NULL) {
         // For nullable fields, always check for identical values (===).
-        $this->assertIdentical($link[$key], $value, t('Identical values for @type @id link field @key.', [
+        $this->assertSame($value, $link[$key], t('Identical values for @type @id link field @key.', [
           '@type' => $entity_type,
           '@id' => $entity_id,
           '@key' => $key,
@@ -245,7 +259,7 @@ abstract class XmlSitemapTestBase extends WebTestBase {
       }
       else {
         // Otherwise check simple equality (==).
-        $this->assertEqual($link[$key], $value, t('Equal values for @type @id link field @key - @a - @b.', [
+        $this->assertEquals($value, $link[$key], t('Equal values for @type @id link field @key - @a - @b.', [
           '@type' => $entity_type,
           '@id' => $entity_id,
           '@key' => $key,
@@ -263,13 +277,13 @@ abstract class XmlSitemapTestBase extends WebTestBase {
     $link = $this->linkStorage->load($entity_type, $entity_id);
 
     if (!$link) {
-      return $this->fail(t('Could not load sitemap link for @type @id.', ['@type' => $entity_type, '@id' => $entity_id]));
+      return $this->fail(sprintf('Could not load sitemap link for %s %s.', $entity_type, $entity_id));
     }
 
     foreach ($conditions as $key => $value) {
       if ($value === NULL || $link[$key] === NULL) {
         // For nullable fields, always check for identical values (===).
-        $this->assertNotIdentical($link[$key], $value, t('Not identical values for @type @id link field @key.', [
+        $this->assertNotSame($value, $link[$key], t('Not identical values for @type @id link field @key.', [
           '@type' => $entity_type,
           '@id' => $entity_id,
           '@key' => $key,
@@ -277,7 +291,7 @@ abstract class XmlSitemapTestBase extends WebTestBase {
       }
       else {
         // Otherwise check simple equality (==).
-        $this->assertNotEqual($link[$key], $value, t('Not equal values for link @type @id field @key.', [
+        $this->assertNotEquals($value, $link[$key], t('Not equal values for link @type @id field @key.', [
           '@type' => $entity_type,
           '@id' => $entity_id,
           '@key' => $key,
@@ -293,7 +307,7 @@ abstract class XmlSitemapTestBase extends WebTestBase {
     $links = func_get_args();
     foreach ($links as $link) {
       $path = Url::fromUri('internal:' . $link['loc'], ['language' => xmlsitemap_language_load($link['language']), 'absolute' => TRUE])->toString();
-      $this->assertRaw($link['loc'], t('Link %path found in the sitemap.', ['%path' => $path]));
+      $this->assertSession()->responseContains($link['loc']);
     }
   }
 
@@ -304,7 +318,7 @@ abstract class XmlSitemapTestBase extends WebTestBase {
     $links = func_get_args();
     foreach ($links as $link) {
       $path = Url::fromUri('internal:' . $link['loc'], ['language' => xmlsitemap_language_load($link['language']), 'absolute' => TRUE])->toString();
-      $this->assertNoRaw($link['loc'], t('Link %path not found in the sitemap.', ['%path' => $path]));
+      $this->assertSession()->responseNotContains($link['loc']);
     }
   }
 
@@ -345,8 +359,8 @@ abstract class XmlSitemapTestBase extends WebTestBase {
         $this->config->set($variable, FALSE)->save();
       }
     }
-
-    return $this->assertEqual($value, $assert_value, "$variable is " . ($assert_value ? 'TRUE' : 'FALSE'));
+    $this->assertEquals($assert_value, $value, "$variable is " . ($assert_value ? 'TRUE' : 'FALSE'));
+    return $value == $assert_value;
   }
 
   /**
@@ -357,10 +371,10 @@ abstract class XmlSitemapTestBase extends WebTestBase {
   protected function assertXMLSitemapProblems($problem_text = FALSE) {
     // @codingStandardsIgnoreEnd
     $this->drupalGet('admin/config/search/xmlsitemap');
-    $this->assertText(t('One or more problems were detected with your XML sitemap configuration'));
+    $this->assertSession()->pageTextContains('One or more problems were detected with your XML sitemap configuration');
     if ($problem_text) {
-      $this->clickLink(t('status report'));
-      $this->assertText($problem_text);
+      $this->clickLink('status report');
+      $this->assertSession()->pageTextContains($problem_text);
     }
   }
 
@@ -372,7 +386,7 @@ abstract class XmlSitemapTestBase extends WebTestBase {
   protected function assertNoXMLSitemapProblems() {
     // @codingStandardsIgnoreEnd
     $this->drupalGet('admin/config/search/xmlsitemap');
-    $this->assertNoText(t('One or more problems were detected with your XML sitemap configuration'));
+    $this->assertSession()->pageTextNotContains('One or more problems were detected with your XML sitemap configuration');
   }
 
   /**
@@ -417,14 +431,14 @@ abstract class XmlSitemapTestBase extends WebTestBase {
    * Assert Watchdog Message.
    */
   protected function assertWatchdogMessage(array $conditions, $message = 'Watchdog message found.') {
-    $this->assertTrue($this->getWatchdogMessages($conditions), $message);
+    $this->assertNotEmpty($this->getWatchdogMessages($conditions), $message);
   }
 
   /**
    * Assert No Watchdog Message.
    */
   protected function assertNoWatchdogMessage(array $conditions, $message = 'Watchdog message not found.') {
-    $this->assertFalse($this->getWatchdogMessages($conditions), $message);
+    $this->assertEmpty($this->getWatchdogMessages($conditions), $message);
   }
 
   /**

@@ -10,17 +10,6 @@ namespace Drupal\Tests\xmlsitemap\Kernel;
 class DirectoryTest extends KernelTestBase {
 
   /**
-   * {@inheritdoc}
-   */
-  public static function setUpBeforeClass() {
-    parent::setUpBeforeClass();
-
-    // This is required to not fail the @covers for global functions.
-    // @todo Once xmlsitemap_clear_directory() is refactored to auto-loadable code, remove this require statement.
-    require_once __DIR__ . '/../../../xmlsitemap.module';
-  }
-
-  /**
    * Test xmlsitemap_clear_directory().
    *
    * @covers ::xmlsitemap_get_directory
@@ -40,23 +29,8 @@ class DirectoryTest extends KernelTestBase {
     $fileSystem->saveData('File unrelated to XML sitemap', 'public://file.txt');
     $fileSystem->saveData('Test contents', 'public://xmlsitemap/test/index.xml');
 
-    // Set the directory to an empty value.
-    \Drupal::configFactory()->getEditable('xmlsitemap.settings')->clear('path')->save();
-    drupal_static_reset('xmlsitemap_get_directory');
-    $result = xmlsitemap_clear_directory(NULL, TRUE);
-
-    // Test that nothing was deleted.
-    $this->assertFileExists('public://xmlsitemap/test/index.xml');
-    $this->assertDirectoryExists('public://not-xmlsitemap');
-    $this->assertFileExists('public://file.txt');
-    $this->assertFalse($result);
-
-    // Reset the value back to the default.
-    \Drupal::configFactory()->getEditable('xmlsitemap.settings')->set('path', 'xmlsitemap')->save();
-    drupal_static_reset('xmlsitemap_get_directory');
-    $result = xmlsitemap_clear_directory(NULL, TRUE);
-
     // Test that only the xmlsitemap directory was deleted.
+    $result = xmlsitemap_clear_directory(NULL, TRUE);
     $this->assertDirectoryNotExists('public://xmlsitemap/test');
     $this->assertDirectoryExists('public://not-xmlsitemap');
     $this->assertFileExists('public://file.txt');

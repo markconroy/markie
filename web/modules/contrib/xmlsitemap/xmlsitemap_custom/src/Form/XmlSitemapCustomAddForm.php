@@ -8,7 +8,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Http\ClientFactory;
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Language\LanguageManagerInterface;
-use Drupal\Core\Path\AliasManagerInterface;
+use Drupal\path_alias\AliasManagerInterface;
 use Drupal\Core\Url;
 use Drupal\xmlsitemap\XmlSitemapLinkStorageInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -35,7 +35,7 @@ class XmlSitemapCustomAddForm extends FormBase {
   /**
    * The alias manager service.
    *
-   * @var \Drupal\Core\Path\AliasManagerInterface
+   * @var \Drupal\path_alias\AliasManagerInterface
    */
   protected $aliasManager;
 
@@ -60,7 +60,7 @@ class XmlSitemapCustomAddForm extends FormBase {
    *   The database connection.
    * @param \Drupal\Core\Language\LanguageManagerInterface $language_manager
    *   The language manager service.
-   * @param \Drupal\Core\Path\AliasManagerInterface $alias_manager
+   * @param \Drupal\path_alias\AliasManagerInterface $alias_manager
    *   The path alias manager service.
    * @param \Drupal\Core\Http\ClientFactory $http_client_factory
    *   A Guzzle client object.
@@ -82,7 +82,7 @@ class XmlSitemapCustomAddForm extends FormBase {
     return new static(
       $container->get('database'),
       $container->get('language_manager'),
-      $container->get('path.alias_manager'),
+      $container->get('path_alias.manager'),
       $container->get('http_client_factory'),
       $container->get('xmlsitemap.link_storage')
     );

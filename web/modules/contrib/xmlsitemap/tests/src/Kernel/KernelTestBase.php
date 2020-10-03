@@ -20,6 +20,17 @@ abstract class KernelTestBase extends CoreKernelTestBase {
   /**
    * {@inheritdoc}
    */
+  public static function setUpBeforeClass() {
+    parent::setUpBeforeClass();
+
+    // This is required to not fail the @covers for global functions.
+    // @todo Once xmlsitemap_clear_directory() is refactored to auto-loadable code, remove this require statement.
+    require_once __DIR__ . '/../../../xmlsitemap.module';
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   protected function setUp() {
     parent::setUp();
 
@@ -29,34 +40,6 @@ abstract class KernelTestBase extends CoreKernelTestBase {
     // Install hooks are not run with kernel tests.
     xmlsitemap_install();
     $this->assertDirectoryExists('public://xmlsitemap');
-  }
-
-  /**
-   * {@inheritdoc}
-   *
-   * This method is only available in PHPUnit 6+.
-   */
-  public static function assertDirectoryExists($directory, $message = '') {
-    if (method_exists(get_parent_class(), 'assertDirectoryExists')) {
-      parent::assertDirectoryExists($directory, $message);
-    }
-    else {
-      parent::assertTrue(is_dir($directory), $message);
-    }
-  }
-
-  /**
-   * {@inheritdoc}
-   *
-   * This method is only available in PHPUnit 6+.
-   */
-  public static function assertDirectoryNotExists($directory, $message = '') {
-    if (method_exists(get_parent_class(), 'assertDirectoryNotExists')) {
-      parent::assertDirectoryNotExists($directory, $message);
-    }
-    else {
-      parent::assertFalse(is_dir($directory), $message);
-    }
   }
 
 }

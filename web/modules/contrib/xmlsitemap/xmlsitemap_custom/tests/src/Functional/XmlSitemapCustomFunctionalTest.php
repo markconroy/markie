@@ -1,8 +1,8 @@
 <?php
 
-namespace Drupal\xmlsitemap_custom\Tests;
+namespace Drupal\Tests\xmlsitemap_custom\Functional;
 
-use Drupal\xmlsitemap\Tests\XmlSitemapTestBase;
+use Drupal\Tests\xmlsitemap\Functional\XmlSitemapTestBase;
 
 /**
  * Tests the functionality of xmlsitemap_custom module.
@@ -19,16 +19,9 @@ class XmlSitemapCustomFunctionalTest extends XmlSitemapTestBase {
   /**
    * The alias storage handler.
    *
-   * @var \Drupal\Core\Path\AliasStorageInterface
+   * @var \Drupal\path_alias\AliasRepositoryInterface
    */
   protected $aliasStorage;
-
-  /**
-   * The xmlsitemap link storage handler.
-   *
-   * @var \Drupal\xmlsitemap\XmlSitemapLinkStorageInterface
-   */
-  protected $linkStorage;
 
   /**
    * {@inheritdoc}
@@ -36,8 +29,7 @@ class XmlSitemapCustomFunctionalTest extends XmlSitemapTestBase {
   protected function setUp() {
     parent::setUp();
 
-    $this->aliasStorage = \Drupal::service('path.alias_storage');
-    $this->linkStorage = \Drupal::service('xmlsitemap.link_storage');
+    $this->aliasStorage = $this->entityTypeManager->getStorage('path_alias');
     $this->admin_user = $this->drupalCreateUser(['access content', 'administer xmlsitemap']);
     $this->drupalLogin($this->admin_user);
   }
@@ -48,7 +40,13 @@ class XmlSitemapCustomFunctionalTest extends XmlSitemapTestBase {
   public function testCustomLinks() {
     $language = $this->languageManager->getCurrentLanguage();
     // Set a path alias for the node page.
-    $this->aliasStorage->save('/system/files', '/public-files', $language->getId());
+    $this->aliasStorage
+      ->create([
+        'path' => '/system/files',
+        'alias' => '/public-files',
+        'langcode' => $language->getId(),
+      ])
+      ->save();
 
     $this->drupalGet('admin/config/search/xmlsitemap/custom');
     $this->clickLink(t('Add custom link'));
@@ -56,20 +54,20 @@ class XmlSitemapCustomFunctionalTest extends XmlSitemapTestBase {
     // Test an invalid path.
     $edit['loc'] = '/invalid-testing-path';
     $this->drupalPostForm(NULL, $edit, t('Save'));
-    $this->assertText(t('The custom link @link is either invalid or it cannot be accessed by anonymous users.', ['@link' => $edit['loc']]));
+    $this->assertSession()->pageTextContains(t('The custom link @link is either invalid or it cannot be accessed by anonymous users.', ['@link' => $edit['loc']]));
     $this->assertNoSitemapLink(['type' => 'custom', 'loc' => $edit['loc']]);
 
     // Test a path not accessible to anonymous user.
     $edit['loc'] = '/admin/people';
     $this->drupalPostForm(NULL, $edit, t('Save'));
-    $this->assertText(t('The custom link @link is either invalid or it cannot be accessed by anonymous users.', ['@link' => $edit['loc']]));
+    $this->assertSession()->pageTextContains(t('The custom link @link is either invalid or it cannot be accessed by anonymous users.', ['@link' => $edit['loc']]));
     $this->assertNoSitemapLink(['type' => 'custom', 'loc' => $edit['loc']]);
 
     // Test that the current page, which should not give a false positive for
     // $menu_item['access'] since the result has been cached already.
     $edit['loc'] = '/admin/config/search/xmlsitemap/custom/add';
     $this->drupalPostForm(NULL, $edit, t('Save'));
-    $this->assertText(t('The custom link @link is either invalid or it cannot be accessed by anonymous users.', ['@link' => $edit['loc']]));
+    $this->assertSession()->pageTextContains(t('The custom link @link is either invalid or it cannot be accessed by anonymous users.', ['@link' => $edit['loc']]));
     $this->assertNoSitemapLink(['type' => 'custom', 'loc' => $edit['loc']]);
   }
 
@@ -80,28 +78,28 @@ class XmlSitemapCustomFunctionalTest extends XmlSitemapTestBase {
     // Test an invalid file.
     $edit['loc'] = '/' . $this->randomMachineName();
     $this->drupalPostForm('admin/config/search/xmlsitemap/custom/add', $edit, t('Save'));
-    $this->assertText(t('The custom link @link is either invalid or it cannot be accessed by anonymous users.', ['@link' => $edit['loc']]));
+    $this->assertSession()->pageTextContains(t('The custom link @link is either invalid or it cannot be accessed by anonymous users.', ['@link' => $edit['loc']]));
     $this->assertNoSitemapLink(['type' => 'custom', 'loc' => $edit['loc']]);
 
     // Test an inaccessible file.
     $edit['loc'] = '/.htaccess';
     $this->drupalPostForm('admin/config/search/xmlsitemap/custom/add', $edit, t('Save'));
-    $this->assertText(t('The custom link @link is either invalid or it cannot be accessed by anonymous users.', ['@link' => $edit['loc']]));
+    $this->assertSession()->pageTextContains(t('The custom link @link is either invalid or it cannot be accessed by anonymous users.', ['@link' => $edit['loc']]));
     $this->assertNoSitemapLink(['type' => 'custom', 'loc' => $edit['loc']]);
 
     // Test a valid file.
     $edit['loc'] = '/core/misc/drupal.js';
     $this->drupalPostForm('admin/config/search/xmlsitemap/custom/add', $edit, t('Save'));
-    $this->assertText(t('The custom link for @link was saved.', ['@link' => $edit['loc']]));
+    $this->assertSession()->pageTextContains(t('The custom link for @link was saved.', ['@link' => $edit['loc']]));
     $links = $this->linkStorage->loadMultiple(['type' => 'custom', 'loc' => $edit['loc']]);
-    $this->assertEqual(count($links), 1, t('Custom link saved in the database.'));
+    $this->assertEquals(1, count($links), t('Custom link saved in the database.'));
 
     // Test a duplicate url.
     $edit['loc'] = '/core/misc/drupal.js';
     $this->drupalPostForm('admin/config/search/xmlsitemap/custom/add', $edit, t('Save'));
-    $this->assertText(t('There is already an existing link in the sitemap with the path @link.', ['@link' => $edit['loc']]));
+    $this->assertSession()->pageTextContains(t('There is already an existing link in the sitemap with the path @link.', ['@link' => $edit['loc']]));
     $links = $this->linkStorage->loadMultiple(['type' => 'custom', 'loc' => $edit['loc']]);
-    $this->assertEqual(count($links), 1, t('Custom link saved in the database.'));
+    $this->assertEquals(1, count($links), t('Custom link saved in the database.'));
   }
 
 }

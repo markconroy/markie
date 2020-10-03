@@ -78,6 +78,9 @@ xmlsitemap.sitemap_xml:
   requirements:
     # Access is open because crawlers need to be able to access the sitemap.
     _access: 'TRUE'
+  options:
+    # Bypass the page cache for this route because it may contain large files.
+    no_cache: 'TRUE'
 
 xmlsitemap.sitemap_xsl:
   path: '/sitemap.xsl'

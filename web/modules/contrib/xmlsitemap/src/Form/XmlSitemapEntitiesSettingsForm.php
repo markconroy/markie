@@ -2,15 +2,15 @@
 
 namespace Drupal\xmlsitemap\Form;
 
-use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
-use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
+use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Entity\ContentEntityTypeInterface;
+use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\State\StateInterface;
 use Drupal\Core\Url;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Drupal\Core\State\StateInterface;
 
 /**
  * Configure what entities will be included in sitemap.
@@ -88,40 +88,41 @@ class XmlSitemapEntitiesSettingsForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
-    $entity_types = $this->entityTypeManager->getDefinitions();
-    $labels = [];
-    $default = [];
-    $bundles = $this->entityTypeBundleInfo->getAllBundleInfo();
+    $form = parent::buildForm($form, $form_state);
 
-    foreach ($entity_types as $entity_type_id => $entity_type) {
-      if (!$entity_type instanceof ContentEntityTypeInterface || !isset($bundles[$entity_type_id])) {
-        continue;
-      }
+    // Create the list of possible entity types.
+    /** @var \Drupal\Core\Entity\EntityTypeInterface[] $entity_types */
+    $entity_types = array_filter($this->entityTypeManager->getDefinitions(), 'xmlsitemap_is_entity_type_supported');
 
-      $labels[$entity_type_id] = $entity_type->getLabel() ?: $entity_type_id;
-    }
-
+    // Create the list of options as well as the default values based on which
+    // entity types have enabled configuration already.
+    $labels = array_map(function (EntityTypeInterface $entityType) {
+      return $entityType->getLabel();
+    }, $entity_types);
     asort($labels);
-
-    $form['#labels'] = $labels;
+    $defaults = array_keys(array_filter(array_map(function (EntityTypeInterface $entityType) {
+      return xmlsitemap_link_entity_check_enabled($entityType->id());
+    }, $entity_types)));
 
     $form['entity_types'] = [
       '#title' => $this->t('Custom sitemap entities settings'),
       '#type' => 'checkboxes',
       '#options' => $labels,
-      '#default_value' => $default,
+      '#default_value' => $defaults,
     ];
 
     $form['settings'] = ['#tree' => TRUE];
 
     foreach ($labels as $entity_type_id => $label) {
       $entity_type = $entity_types[$entity_type_id];
+      $bundle_label = $entity_type->getBundleLabel() ?: $label;
+      $bundles = $this->entityTypeBundleInfo->getBundleInfo($entity_type_id);
 
       $form['settings'][$entity_type_id] = [
         '#type' => 'container',
         '#entity_type' => $entity_type_id,
-        '#bundle_label' => $entity_type->getBundleLabel() ? $entity_type->getBundleLabel() : $label,
-        '#title' => $entity_type->getBundleLabel() ? $entity_type->getBundleLabel() : $label,
+        '#bundle_label' => $bundle_label,
+        '#title' => $bundle_label,
         '#states' => [
           'visible' => [
             ':input[name="entity_types[' . $entity_type_id . ']"]' => ['checked' => TRUE],
@@ -134,7 +135,7 @@ class XmlSitemapEntitiesSettingsForm extends ConfigFormBase {
           '#default_value' => [],
           '#header' => [
             [
-              'data' => $entity_type->getBundleLabel() ? $entity_type->getBundleLabel() : $label,
+              'data' => $bundle_label,
               'class' => ['bundle'],
             ],
             [
@@ -142,11 +143,11 @@ class XmlSitemapEntitiesSettingsForm extends ConfigFormBase {
               'class' => ['operations'],
             ],
           ],
-          '#empty' => $this->t('No content available.'),
         ],
+        '#access' => !empty($bundles),
       ];
 
-      foreach ($bundles[$entity_type_id] as $bundle => $bundle_info) {
+      foreach ($bundles as $bundle => $bundle_info) {
         $form['settings'][$entity_type_id][$bundle]['settings'] = [
           '#type' => 'item',
           '#label' => $bundle_info['label'],
@@ -171,15 +172,8 @@ class XmlSitemapEntitiesSettingsForm extends ConfigFormBase {
           ],
         ];
         $form['settings'][$entity_type_id]['types']['#default_value'][$bundle] = xmlsitemap_link_bundle_check_enabled($entity_type_id, $bundle);
-
-        if (xmlsitemap_link_bundle_check_enabled($entity_type_id, $bundle)) {
-          $default[$entity_type_id] = $entity_type_id;
-        }
       }
     }
-    $form['entity_types']['#default_value'] = $default;
-    $form = parent::buildForm($form, $form_state);
-    $form['actions']['submit']['#value'] = $this->t('Save');
 
     return $form;
   }

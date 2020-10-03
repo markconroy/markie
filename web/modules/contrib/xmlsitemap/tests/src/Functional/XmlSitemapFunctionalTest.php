@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\xmlsitemap\Tests;
+namespace Drupal\Tests\xmlsitemap\Functional;
 
 /**
  * Tests the generation of sitemaps.
@@ -32,14 +32,17 @@ class XmlSitemapFunctionalTest extends XmlSitemapTestBase {
     $this->drupalLogin($this->admin_user);
     $this->regenerateSitemap();
     $this->drupalGetSitemap();
-    $this->assertResponse(200);
+    $this->assertSession()->statusCodeEquals(200);
     $etag = $this->drupalGetHeader('etag');
     $last_modified = $this->drupalGetHeader('last-modified');
-    $this->assertTrue($etag, t('Etag header found.'));
-    $this->assertTrue($last_modified, t('Last-modified header found.'));
+    $this->assertNotEmpty($etag, t('Etag header found.'));
+    $this->assertNotEmpty($last_modified, t('Last-modified header found.'));
 
-    $this->drupalGetSitemap([], [], ['If-Modified-Since: ' . $last_modified, 'If-None-Match: ' . $etag]);
-    $this->assertResponse(304);
+    $this->drupalGetSitemap([], [], [
+      'If-Modified-Since' => $last_modified,
+      'If-None-Match' => $etag,
+    ]);
+    $this->assertSession()->statusCodeEquals(304);
   }
 
   /**
@@ -51,23 +54,23 @@ class XmlSitemapFunctionalTest extends XmlSitemapTestBase {
     // @codingStandardsIgnoreEnd
     $this->drupalLogin($this->admin_user);
     $edit = ['xmlsitemap_base_url' => ''];
-    $this->drupalPostForm('admin/config/search/xmlsitemap/settings', $edit, t('Save configuration'));
+    $this->drupalPostForm('admin/config/search/xmlsitemap/settings', $edit, 'Save configuration');
 
     $edit = ['xmlsitemap_base_url' => 'invalid'];
-    $this->drupalPostForm('admin/config/search/xmlsitemap/settings', $edit, t('Save configuration'));
-    $this->assertText(t('Invalid base URL.'));
+    $this->drupalPostForm('admin/config/search/xmlsitemap/settings', $edit, 'Save configuration');
+    $this->assertSession()->pageTextContains('Invalid base URL.');
 
     $edit = ['xmlsitemap_base_url' => 'http://example.com/ '];
-    $this->drupalPostForm('admin/config/search/xmlsitemap/settings', $edit, t('Save configuration'));
-    $this->assertText(t('Invalid base URL.'));
+    $this->drupalPostForm('admin/config/search/xmlsitemap/settings', $edit, 'Save configuration');
+    $this->assertSession()->pageTextContains('Invalid base URL.');
 
     $edit = ['xmlsitemap_base_url' => 'http://example.com/'];
-    $this->drupalPostForm('admin/config/search/xmlsitemap/settings', $edit, t('Save configuration'));
-    $this->assertText(t('The configuration options have been saved.'));
+    $this->drupalPostForm('admin/config/search/xmlsitemap/settings', $edit, 'Save configuration');
+    $this->assertSession()->pageTextContains('The configuration options have been saved.');
 
     $this->regenerateSitemap();
     $this->drupalGetSitemap([], ['base_url' => NULL]);
-    $this->assertRaw('<loc>http://example.com/</loc>');
+    $this->assertSession()->responseContains('<loc>http://example.com/</loc>');
   }
 
   /**
@@ -81,28 +84,28 @@ class XmlSitemapFunctionalTest extends XmlSitemapTestBase {
 
     // Test the rebuild flag.
     $this->drupalLogin($this->admin_user);
-    $this->state->set('xmlsitemap_generated_last', REQUEST_TIME);
+    $this->state->set('xmlsitemap_generated_last', $this->time->getRequestTime());
     $this->state->set('xmlsitemap_rebuild_needed', TRUE);
-    $this->assertXMLSitemapProblems(t('The XML sitemap data is out of sync and needs to be completely rebuilt.'));
-    $this->clickLink(t('completely rebuilt'));
-    $this->assertResponse(200);
+    $this->assertXMLSitemapProblems('The XML sitemap data is out of sync and needs to be completely rebuilt.');
+    $this->clickLink('completely rebuilt');
+    $this->assertSession()->statusCodeEquals(200);
     $this->state->set('xmlsitemap_rebuild_needed', FALSE);
     $this->assertNoXMLSitemapProblems();
 
     // Test the regenerate flag (and cron has run recently).
     $this->state->set('xmlsitemap_regenerate_needed', TRUE);
-    $this->state->set('xmlsitemap_generated_last', REQUEST_TIME - $cron_warning_threshold - 600);
-    $this->state->set('system.cron_last', REQUEST_TIME - $cron_warning_threshold + 600);
+    $this->state->set('xmlsitemap_generated_last', $this->time->getRequestTime() - $cron_warning_threshold - 600);
+    $this->state->set('system.cron_last', $this->time->getRequestTime() - $cron_warning_threshold + 600);
     $this->assertNoXMLSitemapProblems();
 
     // Test the regenerate flag (and cron hasn't run in a while).
     $this->state->set('xmlsitemap_regenerate_needed', TRUE);
     $this->state->set('system.cron_last', 0);
     $this->state->set('install_time', 0);
-    $this->state->set('xmlsitemap_generated_last', REQUEST_TIME - $cron_warning_threshold - 600);
-    $this->assertXMLSitemapProblems(t('The XML cached files are out of date and need to be regenerated. You can run cron manually to regenerate the sitemap files.'));
-    $this->clickLink(t('run cron manually'));
-    $this->assertResponse(200);
+    $this->state->set('xmlsitemap_generated_last', $this->time->getRequestTime() - $cron_warning_threshold - 600);
+    $this->assertXMLSitemapProblems('The XML cached files are out of date and need to be regenerated. You can run cron manually to regenerate the sitemap files.');
+    $this->clickLink('run cron manually');
+    $this->assertSession()->statusCodeEquals(200);
     $this->assertNoXMLSitemapProblems();
   }
 

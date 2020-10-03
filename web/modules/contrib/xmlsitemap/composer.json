@@ -6,12 +6,13 @@
     "homepage": "https://www.drupal.org/project/xmlsitemap",
     "support": {
         "issues": "http://drupal.org/project/issues/xmlsitemap",
-        "source": "http://cgit.drupalcode.org/xmlsitemap"
+        "source": "https://git.drupalcode.org/project/xmlsitemap"
     },
     "require": {
         "ext-xmlwriter": "*"
     },
     "require-dev": {
+        "drupal/metatag": "^1.0",
         "drupal/robotstxt": "^1.0"
     },
     "suggest": {

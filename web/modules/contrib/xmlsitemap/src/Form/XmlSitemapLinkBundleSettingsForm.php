@@ -134,6 +134,7 @@ class XmlSitemapLinkBundleSettingsForm extends ConfigFormBase {
     // we don't want these values to get saved as configuration, depending on
     // how the form saves the form values.
     $form_state->unsetValue('xmlsitemap');
+    $form_state->setRedirect('xmlsitemap.admin_settings');
     parent::submitForm($form, $form_state);
   }
 

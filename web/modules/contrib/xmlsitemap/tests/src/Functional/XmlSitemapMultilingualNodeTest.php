@@ -1,7 +1,8 @@
 <?php
 
-namespace Drupal\xmlsitemap\Tests;
+namespace Drupal\Tests\xmlsitemap\Functional;
 
+use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\user\Entity\Role;
 
@@ -46,8 +47,10 @@ class XmlSitemapMultilingualNodeTest extends XmlSitemapMultilingualTestBase {
     $edit = [
       'language_configuration[language_alterable]' => TRUE,
     ];
-    $this->drupalPostForm('admin/structure/types/manage/page', $edit, t('Save content type'));
-    $this->assertRaw(t('The content type %type has been updated.', ['%type' => 'Basic page']), 'Basic page content type has been updated.');
+    $this->drupalPostForm('admin/structure/types/manage/page', $edit, 'Save content type');
+    $this->assertSession()->responseContains((string) new FormattableMarkup('The content type %content_type has been updated.', [
+      '%content_type' => 'Basic page',
+    ]));
   }
 
   /**
@@ -61,11 +64,11 @@ class XmlSitemapMultilingualNodeTest extends XmlSitemapMultilingualTestBase {
       'langcode[0][value]' => 'en',
     ], t('Save'));
     $link = $this->assertSitemapLink('node', $node->id(), ['status' => 0, 'access' => 1]);
-    $this->assertIdentical($link['language'], 'en');
+    $this->assertSame('en', $link['language']);
 
     $this->drupalPostForm('node/' . $node->id() . '/edit', ['langcode[0][value]' => 'fr'], t('Save'));
     $link = $this->assertSitemapLink('node', $node->id(), ['status' => 0, 'access' => 1]);
-    $this->assertIdentical($link['language'], 'fr');
+    $this->assertSame('fr', $link['language']);
   }
 
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\xmlsitemap\Tests;
+namespace Drupal\Tests\xmlsitemap\Functional;
 
 use Drupal\Core\Entity\Entity\EntityFormDisplay;
 use Drupal\Core\Entity\Entity\EntityViewDisplay;
@@ -33,10 +33,19 @@ class XmlSitemapNodeFunctionalTest extends XmlSitemapTestBase {
   protected $nodes = [];
 
   /**
+   * Entity type manager interface.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected $entityTypeManager;
+
+  /**
    * {@inheritdoc}
    */
   protected function setUp() {
     parent::setUp();
+
+    $this->entityTypeManager = $this->container->get('entity_type.manager');
 
     $this->admin_user = $this->drupalCreateUser([
       'administer nodes',
@@ -174,15 +183,15 @@ class XmlSitemapNodeFunctionalTest extends XmlSitemapTestBase {
 
     $this->drupalLogin($this->normal_user);
     $this->drupalGet('node/' . $node->id() . '/edit');
-    $this->assertNoField('xmlsitemap[status]');
-    $this->assertNoField('xmlsitemap[priority]');
+    $this->assertSession()->fieldNotExists('xmlsitemap[status]');
+    $this->assertSession()->fieldNotExists('xmlsitemap[priority]');
 
     $edit = [
       'title[0][value]' => 'Test node title',
       'body[0][value]' => 'Test node body',
     ];
     $this->drupalPostForm('node/' . $node->id() . '/edit', $edit, t('Save'));
-    $this->assertText('Basic page Test node title has been updated.');
+    $this->assertSession()->pageTextContains('Basic page Test node title has been updated.');
     $this->assertSitemapLinkValues('node', $node->id(), [
       'access' => 1,
       'status' => 1,
@@ -193,17 +202,21 @@ class XmlSitemapNodeFunctionalTest extends XmlSitemapTestBase {
     ]);
 
     $this->drupalLogin($this->admin_user);
+
+    // Test fields are visible on the node add form.
+    $this->drupalGet('node/add/page');
+    $this->assertSession()->fieldExists('xmlsitemap[status]');
+    $this->assertSession()->fieldExists('xmlsitemap[priority]');
+    $this->assertSession()->fieldExists('xmlsitemap[changefreq]');
+
     $this->drupalGet('node/' . $node->id() . '/edit');
-    $this->assertField('xmlsitemap[status]');
-    $this->assertField('xmlsitemap[priority]');
-    $this->assertField('xmlsitemap[changefreq]');
     $edit = [
       'xmlsitemap[status]' => 1,
       'xmlsitemap[priority]' => 0.9,
       'xmlsitemap[changefreq]' => XMLSITEMAP_FREQUENCY_ALWAYS,
     ];
     $this->drupalPostForm('node/' . $node->id() . '/edit', $edit, t('Save'));
-    $this->assertText('Basic page Test node title has been updated.');
+    $this->assertSession()->pageTextContains('Basic page Test node title has been updated.');
     $this->assertSitemapLinkValues('node', $node->id(), [
       'access' => 1,
       'status' => 1,
@@ -218,7 +231,7 @@ class XmlSitemapNodeFunctionalTest extends XmlSitemapTestBase {
       'xmlsitemap[priority]' => 'default',
     ];
     $this->drupalPostForm('node/' . $node->id() . '/edit', $edit, t('Save'));
-    $this->assertText('Basic page Test node title has been updated.');
+    $this->assertSession()->pageTextContains('Basic page Test node title has been updated.');
     $this->assertSitemapLinkValues('node', $node->id(), [
       'access' => 1,
       'status' => 1,
@@ -246,7 +259,7 @@ class XmlSitemapNodeFunctionalTest extends XmlSitemapTestBase {
       'xmlsitemap[priority]' => '0.0',
     ];
     $this->drupalPostForm('admin/config/search/xmlsitemap/settings/node/page', $edit, t('Save configuration'));
-    $this->assertText('The configuration options have been saved.');
+    $this->assertSession()->pageTextContains('The configuration options have been saved.');
     $node = $this->drupalCreateNode();
     $this->assertSitemapLinkValues('node', $node->id(), ['status' => 0, 'priority' => 0.0]);
     $this->assertSitemapLinkValues('node', $node_old->id(), ['status' => 0, 'priority' => 0.0]);
@@ -256,8 +269,8 @@ class XmlSitemapNodeFunctionalTest extends XmlSitemapTestBase {
     $node_old->delete();
 
     $this->drupalPostForm('admin/structure/types/manage/page/delete', [], t('Delete'));
-    $this->assertText('The content type Basic page has been deleted.');
-    $this->assertFalse($this->linkStorage->loadMultiple(['type' => 'node', 'subtype' => 'page']), 'Nodes with deleted node type removed from {xmlsitemap}.');
+    $this->assertSession()->pageTextContains('The content type Basic page has been deleted.');
+    $this->assertEmpty($this->linkStorage->loadMultiple(['type' => 'node', 'subtype' => 'page']), 'Nodes with deleted node type removed from {xmlsitemap}.');
   }
 
   /**

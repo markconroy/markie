@@ -1,8 +1,9 @@
 <?php
 
-namespace Drupal\xmlsitemap\Tests;
+namespace Drupal\Tests\xmlsitemap\Functional;
 
 use Drupal\Core\Url;
+use Drupal\xmlsitemap\Entity\XmlSitemap;
 
 /**
  * Tests the robots.txt file existence.
@@ -28,8 +29,10 @@ class XmlSitemapRobotsTxtIntegrationTest extends XmlSitemapTestBase {
     $this->container = $this->kernel->rebuildContainer();
     $this->prepareRequestForGenerator(FALSE);
 
-    $this->drupalGet('robots.txt');
-    $this->assertRaw('Sitemap: ' . Url::fromRoute('xmlsitemap.sitemap_xml', [], ['absolute' => TRUE])->toString());
+    $this->assertNotEmpty(XmlSitemap::loadByContext());
+    $this->drupalGet(Url::fromRoute('robotstxt.content'));
+    $this->assertSession()->statusCodeEquals(200);
+    $this->assertSession()->responseContains('Sitemap: ' . Url::fromRoute('xmlsitemap.sitemap_xml', [], ['absolute' => TRUE])->toString());
   }
 
 }

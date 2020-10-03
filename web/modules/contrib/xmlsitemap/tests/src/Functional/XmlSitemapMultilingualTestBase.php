@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\xmlsitemap\Tests;
+namespace Drupal\Tests\xmlsitemap\Functional;
 
 use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\xmlsitemap\Entity\XmlSitemap;

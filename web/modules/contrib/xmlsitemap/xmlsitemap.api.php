@@ -21,19 +21,14 @@
 function hook_xmlsitemap_link_info() {
   return [
     'mymodule' => [
-      'label' => 'My module',
-      'base table' => 'mymodule',
-      'entity keys' => [
-        // Primary ID key on {base table}.
-        'id' => 'myid',
-        // Subtype key on {base table}.
-        'bundle' => 'mysubtype',
-      ],
-      'path callback' => 'mymodule_path',
+      'label' => 'My module items',
+      // If your items can be grouped into unique "bundles", add the following
+      // information.
       'bundle label' => t('Subtype name'),
       'bundles' => [
         'mysubtype1' => [
           'label' => t('My subtype 1'),
+          // If your bundles have an administrative UI, list it.
           'admin' => [
             'real path' => 'admin/settings/mymodule/mysubtype1/edit',
             'access arguments' => ['administer mymodule'],
@@ -47,11 +42,11 @@ function hook_xmlsitemap_link_info() {
       'xmlsitemap' => [
         // Callback function to take an array of IDs and save them as sitemap
         // links.
-        'process callback' => '',
+        'process callback' => 'mymodule_xmlsitemap_process_links',
         // Callback function used in batch API for rebuilding all links.
-        'rebuild callback' => '',
+        'rebuild callback' => 'mymodule_xmlsitemap_rebuild_links',
         // Callback function called from the XML sitemap settings page.
-        'settings callback' => '',
+        'settings callback' => 'mymodule_xmlsitemap_settings',
       ],
     ],
   ];

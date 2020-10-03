@@ -3,13 +3,15 @@
 namespace Drupal\xmlsitemap\Controller;
 
 use Drupal\Component\Serialization\Json;
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\State\StateInterface;
 use Drupal\xmlsitemap\Entity\XmlSitemap;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\DependencyInjection\ContainerInterface;
-use Drupal\Core\State\StateInterface;
-use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Class for Xml Sitemap Controller.
@@ -27,13 +29,23 @@ class XmlSitemapController extends ControllerBase {
   protected $state;
 
   /**
+   * The configuration factory.
+   *
+   * @var \Drupal\Core\Config\ConfigFactoryInterface
+   */
+  protected $configFactory;
+
+  /**
    * Constructs a new XmlSitemapController object.
    *
    * @param \Drupal\Core\State\StateInterface $state
    *   The state service.
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
+   *   The configuration factory.
    */
-  public function __construct(StateInterface $state) {
+  public function __construct(StateInterface $state, ConfigFactoryInterface $config_factory) {
     $this->state = $state;
+    $this->configFactory = $config_factory;
   }
 
   /**
@@ -41,7 +53,8 @@ class XmlSitemapController extends ControllerBase {
    */
   public static function create(ContainerInterface $container) {
     return new static(
-      $container->get('state')
+      $container->get('state'),
+      $container->get('config.factory')
     );
   }
 
@@ -51,11 +64,12 @@ class XmlSitemapController extends ControllerBase {
    * @param \Symfony\Component\HttpFoundation\Request $request
    *   The request object.
    *
-   * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
-   *
-   * @return \Symfony\Component\HttpFoundation\Response
+   * @return \Symfony\Component\HttpFoundation\BinaryFileResponse
    *   The sitemap in XML format or plain text if xmlsitemap_developer_mode flag
    *   is set.
+   *
+   * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
+   *   If the sitemap is not found or the sitemap file is not readable.
    */
   public function renderSitemapXml(Request $request) {
     $headers = [];
@@ -82,13 +96,59 @@ class XmlSitemapController extends ControllerBase {
       $headers['X-XmlSitemap-Cache-Hit'] = file_exists($file) ? 'HIT' : 'MISS';
     }
 
+    return $this->getSitemapResponse($file, $request, $headers);
+  }
+
+  /**
+   * Creates a response object that will output the sitemap file.
+   *
+   * @param string $file
+   *   File uri.
+   * @param \Symfony\Component\HttpFoundation\Request $request
+   *   The current request.
+   * @param array $headers
+   *   An array of response headers
+   *
+   * @return \Symfony\Component\HttpFoundation\BinaryFileResponse
+   *   The sitemap response object.
+   *
+   * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
+   *   If the sitemap is not found or the sitemap file is not readable.
+   */
+  public function getSitemapResponse($file, Request $request, array $headers = []) {
     if (!is_file($file) || !is_readable($file)) {
       $exception = new NotFoundHttpException();
       $exception->setHeaders($headers);
       throw $exception;
     }
 
-    return xmlsitemap_output_file(new Response(), $file, $headers);
+    $headers += [
+      'Content-Type' => 'text/xml; charset=utf-8',
+      'X-Robots-Tag' => 'noindex, follow',
+    ];
+
+    $lifetime = $this->configFactory->get('xmlsitemap.settings')->get('minimum_lifetime');
+
+    $response = new BinaryFileResponse($file, 200, $headers);
+    $response->setPrivate();
+    $response->headers->addCacheControlDirective('must-revalidate');
+
+    //if ($lifetime) {
+    //  $response->headers->addCacheControlDirective('max-age', $lifetime);
+    //}
+
+    // Manually set the etag value instead of hashing the contents of the file.
+    $last_modified = $response->getFile()->getMTime();
+    $response->setEtag(md5($last_modified));
+
+    // Set expiration using the minimum lifetime.
+    $response->setExpires(new \DateTime('@' . ($last_modified + $lifetime)));
+
+    // Because we do not want this page to be cached, we manually check the
+    // modified headers.
+    $response->isNotModified($request);
+
+    return $response;
   }
 
   /**
@@ -122,10 +182,10 @@ class XmlSitemapController extends ControllerBase {
     $xsl_content = strtr($xsl_content, $replacements);
 
     // Output the XSL content.
-    $response = new Response($xsl_content);
-    $response->headers->set('Content-type', 'application/xml; charset=utf-8');
-    $response->headers->set('X-Robots-Tag', 'noindex, nofollow');
-    return $response;
+    return new Response($xsl_content, 200, [
+      'Content-Type' => 'application/xml; charset=utf-8',
+      'X-Robots-Tag' => 'noindex, nofollow',
+    ]);
   }
 
 }

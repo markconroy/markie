@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\xmlsitemap\Tests;
+namespace Drupal\Tests\xmlsitemap\Functional;
 
 use Drupal\Core\Session\AccountInterface;
 use Drupal\entity_test\Entity\EntityTestMul;
@@ -38,15 +38,15 @@ class XmlSitemapEntityFunctionalTest extends XmlSitemapTestBase {
   public function testEntitiesSettingsForms() {
     $this->drupalLogin($this->admin_user);
     $this->drupalGet('admin/config/search/xmlsitemap/entities/settings');
-    $this->assertResponse(200);
-    $this->assertField('entity_types[entity_test_mul]');
-    $this->assertField('settings[entity_test_mul][types][entity_test_mul]');
+    $this->assertSession()->statusCodeEquals(200);
+    $this->assertSession()->fieldExists('entity_types[entity_test_mul]');
+    $this->assertSession()->fieldExists('settings[entity_test_mul][types][entity_test_mul]');
     $edit = [
       'entity_types[entity_test_mul]' => 1,
       'settings[entity_test_mul][types][entity_test_mul]' => 1,
     ];
-    $this->drupalPostForm(NULL, $edit, t('Save'));
-    $this->assertText(t('The configuration options have been saved.'));
+    $this->drupalPostForm(NULL, $edit, 'Save');
+    $this->assertSession()->pageTextContains('The configuration options have been saved.');
     $entity = EntityTestMul::create();
     $entity->save();
     $this->assertSitemapLinkValues('entity_test_mul', $entity->id(), [
@@ -68,10 +68,10 @@ class XmlSitemapEntityFunctionalTest extends XmlSitemapTestBase {
     $this->drupalLogin($this->admin_user);
     // Set priority and inclusion for entity_test_mul - entity_test_mul.
     $this->drupalGet('admin/config/search/xmlsitemap/settings/entity_test_mul/entity_test_mul');
-    $this->assertResponse(200);
-    $this->assertField('xmlsitemap[status]');
-    $this->assertField('xmlsitemap[priority]');
-    $this->assertField('xmlsitemap[changefreq]');
+    $this->assertSession()->statusCodeEquals(200);
+    $this->assertSession()->fieldExists('xmlsitemap[status]');
+    $this->assertSession()->fieldExists('xmlsitemap[priority]');
+    $this->assertSession()->fieldExists('xmlsitemap[changefreq]');
     $edit = [
       'xmlsitemap[status]' => 0,
       'xmlsitemap[priority]' => 0.3,
@@ -89,8 +89,8 @@ class XmlSitemapEntityFunctionalTest extends XmlSitemapTestBase {
 
     $this->regenerateSitemap();
     $this->drupalGetSitemap();
-    $this->assertResponse(200);
-    $this->assertNoRaw($entity->toUrl()->getInternalPath());
+    $this->assertSession()->statusCodeEquals(200);
+    $this->assertSession()->responseNotContains($entity->toUrl()->getInternalPath());
 
     $entity->delete();
     $this->assertNoSitemapLink('entity_test_mul');
@@ -112,8 +112,8 @@ class XmlSitemapEntityFunctionalTest extends XmlSitemapTestBase {
 
     $this->regenerateSitemap();
     $this->drupalGetSitemap();
-    $this->assertResponse(200);
-    $this->assertRaw($entity->toUrl()->getInternalPath());
+    $this->assertSession()->statusCodeEquals(200);
+    $this->assertSession()->responseContains($entity->toUrl()->getInternalPath());
 
     $id = $entity->id();
     $entity->delete();

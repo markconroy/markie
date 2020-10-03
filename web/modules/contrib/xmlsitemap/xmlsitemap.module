@@ -20,7 +20,7 @@ use Drupal\Core\Entity\ContentEntityFormInterface;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\ContentEntityTypeInterface;
 use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Entity\Query\QueryInterface;
+use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Language\LanguageInterface;
@@ -28,11 +28,10 @@ use Drupal\Core\Link;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Site\Settings;
 use Drupal\Core\Url;
+use Drupal\xmlsitemap\Controller\XmlSitemapController;
 use Drupal\xmlsitemap\Entity\XmlSitemap;
 use Drupal\xmlsitemap\XmlSitemapInterface;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * The maximum number of links in one sitemap chunk file.
@@ -105,7 +104,7 @@ function xmlsitemap_hook_info() {
     'xmlsitemap_sitemap_delete',
     'xmlsitemap_sitemap_link_url_options_alter',
     'query_xmlsitemap_generate_alter',
-    'query_xmlsitemap_link_bundle_access_alter',
+    'query_xmlsitemap_index_links_alter',
     'form_xmlsitemap_sitemap_edit_form_alter',
     'xmlsitemap_rebuild_clear',
   ];
@@ -418,11 +417,17 @@ function xmlsitemap_sitemap_get_file(XmlSitemapInterface $sitemap, $chunk = 'ind
  *
  * @param \Drupal\xmlsitemap\XmlSitemapInterface $sitemap
  *   The XML sitemap object.
+ *
+ * @return int
+ *   Maximum file size in the directory.
  */
 function xmlsitemap_sitemap_get_max_filesize(XmlSitemapInterface $sitemap) {
   $dir = xmlsitemap_get_directory($sitemap);
   $sitemap->setMaxFileSize(0);
-  foreach (file_scan_directory($dir, '/\.xml$/') as $file) {
+  /** @var \Drupal\Core\File\FileSystemInterface $file_system */
+  $file_system = \Drupal::service('file_system');
+  $files = $file_system->scanDirectory($dir, '/\.xml$/');
+  foreach ($files as $file) {
     $sitemap->setMaxFileSize(max($sitemap->getMaxFileSize(), filesize($file->uri)));
   }
   return $sitemap->getMaxFileSize();
@@ -470,13 +475,10 @@ function xmlsitemap_sitemap_uri(XmlSitemapInterface $sitemap) {
 function xmlsitemap_get_directory(XmlSitemapInterface $sitemap = NULL) {
   $directory = &drupal_static(__FUNCTION__);
   if (!isset($directory)) {
-    $directory = \Drupal::config('xmlsitemap.settings')->get('path');
+    $directory = \Drupal::config('xmlsitemap.settings')->get('path') ?: 'xmlsitemap';
   }
 
-  if (empty($directory)) {
-    return FALSE;
-  }
-  elseif ($sitemap != NULL && !empty($sitemap->id)) {
+  if ($sitemap != NULL && !empty($sitemap->id)) {
     return file_build_uri($directory . '/' . $sitemap->id);
   }
   else {
@@ -491,7 +493,7 @@ function xmlsitemap_check_directory(XmlSitemapInterface $sitemap = NULL) {
   $directory = xmlsitemap_get_directory($sitemap);
   /** @var \Drupal\Core\File\FileSystemInterface $filesystem */
   $filesystem = \Drupal::service('file_system');
-  $result = $filesystem->prepareDirectory($directory, $filesystem::CREATE_DIRECTORY | $filesystem::MODIFY_PERMISSIONS);
+  $result = $filesystem->prepareDirectory($directory, FileSystemInterface::CREATE_DIRECTORY | FileSystemInterface::MODIFY_PERMISSIONS);
   if (!$result) {
     \Drupal::logger('file system')->error('The directory %directory does not exist or is not writable.', ['%directory' => $directory]);
   }
@@ -538,12 +540,8 @@ function xmlsitemap_check_all_directories() {
  *   Returns TRUE is operation was successful, FALSE otherwise.
  */
 function xmlsitemap_clear_directory(XmlSitemapInterface $sitemap = NULL, $delete = FALSE) {
-  if ($directory = xmlsitemap_get_directory($sitemap)) {
-    return _xmlsitemap_delete_recursive($directory, $delete);
-  }
-  else {
-    return FALSE;
-  }
+  $directory = xmlsitemap_get_directory($sitemap);
+  return _xmlsitemap_delete_recursive($directory, $delete);
 }
 
 /**
@@ -572,7 +570,7 @@ function xmlsitemap_directory_move($old_dir, $new_dir, $replace = FileSystemInte
     return FALSE;
   }
 
-  $files = file_scan_directory($old_dir, '/.*/');
+  $files = $filesystem->scanDirectory($old_dir, '/.*/');
   foreach ($files as $file) {
     $file->uri_new = $new_dir . '/' . basename($file->filename);
     $success &= (bool) $filesystem->move($file->uri, $file->uri_new, $replace);
@@ -607,7 +605,7 @@ function _xmlsitemap_delete_recursive($path, $delete_root = FALSE) {
   if (is_dir($path)) {
     $dir = dir($path);
     while (($entry = $dir->read()) !== FALSE) {
-      if ($entry == '.' || $entry == '..') {
+      if ($entry === '.' || $entry === '..') {
         continue;
       }
       $entry_path = $path . '/' . $entry;
@@ -617,6 +615,74 @@ function _xmlsitemap_delete_recursive($path, $delete_root = FALSE) {
     return $delete_root ? $filesystem->rmdir($path) : TRUE;
   }
   return $filesystem->delete($path);
+}
+
+/**
+ * Implements hook_entity_type_build().
+ */
+function xmlsitemap_entity_type_build(array &$entity_types) {
+  // Mark some specific core entity types as not supported by XML sitemap.
+  // If a site wants to undo this, they may use hook_entity_type_alter().
+  $unsupported_types = [
+    // Custom blocks.
+    'block_content',
+    // Comments.
+    'comment',
+    // Shortcut items.
+    'shortcut',
+    // Custom Token module.
+    // @see https://www.drupal.org/project/token_custom/issues/3150038
+    'token_custom',
+  ];
+
+  /** @var $entity_types \Drupal\Core\Entity\EntityTypeInterface[] */
+  foreach ($unsupported_types as $entity_type_id) {
+    if (isset($entity_types[$entity_type_id])) {
+      $entity_types[$entity_type_id]->set('xmlsitemap', FALSE);
+    }
+  }
+}
+
+/**
+ * Determines if an entity type can be listed in the XML sitemap as links.
+ *
+ * @param \Drupal\Core\Entity\EntityTypeInterface $entity_type
+ *   The entity type.
+ *
+ * @return bool
+ *   TRUE if the entity type can be used, or FALSE otherwise.
+ */
+function xmlsitemap_is_entity_type_supported(EntityTypeInterface $entity_type) {
+  // If the XML sitemap status in the entity type annotation has been set then
+  // return that first. This will allow modules to bypass the logic below if
+  // needed.
+  $status = $entity_type->get('xmlsitemap');
+  if ($status !== NULL) {
+    return $status;
+  }
+
+  // Skip if the entity type is not a content entity type.
+  if (!($entity_type instanceof ContentEntityTypeInterface)) {
+    return FALSE;
+  }
+
+  // Skip if the entity type is internal (and not considered public).
+  if ($entity_type->isInternal()) {
+    return FALSE;
+  }
+
+  // Skip if the entity type does not have a canonical URL.
+  if (!$entity_type->hasLinkTemplate('canonical') && !$entity_type->getUriCallback()) {
+    return FALSE;
+  }
+
+  // Skip if the entity type as a bundle entity type but does not yet have
+  // any bundles created.
+  if ($entity_type->getBundleEntityType() && !\Drupal::service('entity_type.bundle.info')->getBundleInfo($entity_type->id())) {
+    return FALSE;
+  }
+
+  return TRUE;
 }
 
 /**
@@ -641,9 +707,7 @@ function xmlsitemap_get_link_info($type = NULL, $reset = FALSE) {
 
   if ($reset) {
     $link_info = NULL;
-    foreach (\Drupal::languageManager()->getLanguages() as $lang) {
-      \Drupal::cache()->delete('xmlsitemap:link_info:' . $lang->getId());
-    }
+    \Drupal::service('cache_tags.invalidator')->invalidateTags(['xmlsitemap']);
   }
 
   if (!isset($link_info)) {
@@ -654,36 +718,37 @@ function xmlsitemap_get_link_info($type = NULL, $reset = FALSE) {
     else {
       $link_info = [];
       $entity_types = \Drupal::entityTypeManager()->getDefinitions();
+
       foreach ($entity_types as $key => $entity_type) {
+        if (!xmlsitemap_is_entity_type_supported($entity_type)) {
+          continue;
+        }
+
         $link_info[$key] = [
           'label' => $entity_type->getLabel(),
           'type' => $entity_type->id(),
           'base table' => $entity_type->getBaseTable(),
           'bundles' => \Drupal::service('entity_type.bundle.info')->getBundleInfo($entity_type->id()),
+          'bundle label' => $entity_type->getBundleLabel(),
+          'entity keys' => [
+            'id' => $entity_type->getKey('id'),
+            'bundle' => $entity_type->getKey('bundle'),
+          ],
+          'xmlsitemap' => [
+            // Add in the default callbacks for entity types.
+            'process callback' => $entity_type->get('xmlsitemap')['process callback'] ?? 'xmlsitemap_xmlsitemap_process_entity_links',
+            'rebuild callback' => $entity_type->get('xmlsitemap')['process callback'] ?? 'xmlsitemap_rebuild_batch_fetch',
+          ],
         ];
-        $uri_callback = $entity_type->getUriCallback();
-        if (empty($uri_callback) || !isset($entity_type->xmlsitemap)) {
-          // Remove any non URL-able or XML sitemap un-supported entities.
-        }
-        foreach (\Drupal::service('entity_type.bundle.info')->getBundleInfo($entity_type->id()) as $bundle) {
-          if (!isset($bundle['xmlsitemap'])) {
-            // Remove any un-supported entity bundles.
-          }
-        }
       }
+
       $link_info = array_merge($link_info, \Drupal::moduleHandler()->invokeAll('xmlsitemap_link_info'));
       foreach ($link_info as $key => &$info) {
         $info += [
           'type' => $key,
           'base table' => FALSE,
           'bundles' => [],
-          'xmlsitemap' => [
-            'process callback' => 'xmlsitemap_xmlsitemap_process_entity_links',
-          ],
         ];
-        if (!isset($info['xmlsitemap']['rebuild callback']) && !empty($info['base table']) && $entity_types[$key]->getKey('id')) {
-          $info['xmlsitemap']['rebuild callback'] = 'xmlsitemap_rebuild_batch_fetch';
-        }
         foreach ($info['bundles'] as $bundle => &$bundle_info) {
           $bundle_info += [
             'xmlsitemap' => [],
@@ -692,9 +757,32 @@ function xmlsitemap_get_link_info($type = NULL, $reset = FALSE) {
         }
       }
       \Drupal::moduleHandler()->alter('xmlsitemap_link_info', $link_info);
-      ksort($link_info);
+
+      // Sort the entity types by label.
+      uasort($link_info, function ($a, $b) {
+        // Put frontpage first.
+        if ($a['type'] === 'frontpage') {
+          return -1;
+        }
+        if ($b['type'] === 'frontpage') {
+          return 1;
+        }
+        return strnatcmp($a['label'], $b['label']);
+      });
+
       // Cache by language since this info contains translated strings.
-      \Drupal::cache()->set($cid, $link_info, Cache::PERMANENT, ['xmlsitemap']);
+      // Also include entity type tags since this is tied to entity and bundle
+      // information.
+      \Drupal::cache()->set(
+        $cid,
+        $link_info,
+        Cache::PERMANENT,
+        [
+          'xmlsitemap',
+          'entity_types',
+          'entity_bundles',
+        ]
+      );
     }
   }
 
@@ -747,18 +835,13 @@ function xmlsitemap_get_link_type_indexed_status($entity_type_id, $bundle = '') 
 
   try {
     $query = \Drupal::entityQuery($entity_type_id);
-
-    if ($bundle) {
-      $query->condition($entity_type->getKey('bundle'), $bundle, '=');
+    if ($bundle && $entity_type->hasKey('bundle')) {
+      $query->condition($entity_type->getKey('bundle'), $bundle);
     }
-
-    $query->addTag('xmlsitemap_link_bundle_access');
+    // We are only using this for totals, so we can skip the access check.
+    $query->accessCheck(FALSE);
     $query->addTag('xmlsitemap_link_indexed_status');
-    $query->addMetaData('entity_type_id', $entity_type_id);
-    $query->addMetaData('bundle', $bundle);
-    $query->addMetaData('entity_info', $info);
-    $query->count();
-    $status['total'] = $query->execute();
+    $status['total'] = $query->count()->execute();
     return $status;
   }
   catch (\Exception $e) {
@@ -1458,7 +1541,12 @@ function xmlsitemap_run_unprogressive_batch() {
   $batch['progressive'] = FALSE;
 
   // Run the batch process.
-  batch_process();
+  if (PHP_SAPI === 'cli' && function_exists('drush_backend_batch_process')) {
+    drush_backend_batch_process();
+  }
+  else {
+    batch_process();
+  }
 
   $lock->release($batch_callback);
   return TRUE;
@@ -1514,10 +1602,12 @@ function xmlsitemap_form_alter(array &$form, FormStateInterface $form_state, $fo
   $form_object = $form_state->getFormObject();
   if ($form_object instanceof ContentEntityFormInterface) {
     $entity = $form_object->getEntity();
-    // Some entity types use 'default' for edit forms.
-    $has_edit_form = $entity->getEntityType()->hasHandlerClass('form', 'edit');
-    $operation = $has_edit_form ? 'edit' : 'default';
-    if ($form_object->getOperation() === $operation && xmlsitemap_link_bundle_check_enabled($entity->getEntityTypeId(), $entity->bundle())) {
+    // Some entity types use 'default' for add/edit forms.
+    $operations = ['default', 'edit'];
+    if ($entity->getEntityTypeId() === 'user') {
+      $operations[] = 'register';
+    }
+    if (in_array($form_object->getOperation(), $operations, TRUE) && xmlsitemap_link_bundle_check_enabled($entity->getEntityTypeId(), $entity->bundle())) {
       xmlsitemap_add_form_link_options($form, $entity->getEntityTypeId(), $entity->bundle(), $entity->id());
       $form['xmlsitemap']['#weight'] = 10;
     }
@@ -1530,38 +1620,56 @@ function xmlsitemap_form_alter(array &$form, FormStateInterface $form_state, $fo
 function xmlsitemap_xmlsitemap_index_links($limit) {
   $entity_type_manager = \Drupal::entityTypeManager();
   $entity_types = $entity_type_manager->getDefinitions();
-  $bundles = \Drupal::service('entity_type.bundle.info')->getAllBundleInfo();
   foreach ($entity_types as $entity_type_id => $entity_type) {
-    // Don't try to loop over non-content entity types or with no bundle
-    // defined.
-    if (!$entity_type instanceof ContentEntityTypeInterface || !isset($bundles[$entity_type_id])) {
+    // If an entity type is not supported it will not have link info.
+    $info = xmlsitemap_get_link_info($entity_type_id);
+    if (empty($info)) {
       continue;
     }
 
-    $entity_bundles = [];
-    foreach ($bundles[$entity_type_id] as $bundle => $bundle_info) {
-      if (!xmlsitemap_link_bundle_check_enabled($entity_type_id, $bundle)) {
-        continue;
-      }
-      $entity_bundles[] = $bundle;
-    }
-    if (empty($entity_bundles)) {
+    $bundles = xmlsitemap_get_link_type_enabled_bundles($entity_type_id);
+    if (empty($bundles)) {
       continue;
     }
 
     try {
       $query = $entity_type_manager->getStorage($entity_type_id)->getQuery();
       $query->range(0, $limit);
-      if ($entity_type->hasKey('bundle')) {
-        $bundle_key = $entity_type->getKey('bundle');
-        $query->condition($bundle_key, $entity_bundles, 'IN');
+      if (!empty($info['entity keys']['bundle'])) {
+        $query->condition($info['entity keys']['bundle'], $bundles, 'IN');
       }
-      $ids = $query->execute();
 
-      // Chunk the array into batch sizes.
-      $chunks = array_chunk($ids, \Drupal::config('xmlsitemap.settings')->get('batch_limit'));
-      foreach ($chunks as $chunk) {
-        xmlsitemap_xmlsitemap_process_entity_links($entity_type_id, $chunk);
+      // Perform a subquery against the xmlsitemap table to ensure that we are
+      // only looking for items that we have not already indexed.
+      $subquery = \Drupal::database()->select('xmlsitemap', 'x');
+      $subquery->addField('x', 'id');
+      $subquery->condition('type', $entity_type_id);
+      // If the storage for this entity type is against a SQL backend, perform
+      // a direct subquery condition to avoid needing to load all the IDs.
+      if ($query instanceof \Drupal\Core\Entity\Query\Sql\Query) {
+        $query->condition($info['entity keys']['id'], $subquery, 'NOT IN');
+      }
+      else {
+        $query->condition($info['entity keys']['id'], $subquery->execute()->fetchCol(), 'NOT IN');
+      }
+
+      // Access for entities is checked individually for the anonymous user
+      // when each item is processed. We can skip the access check for the
+      // query.
+      $query->accessCheck(FALSE);
+      $query->addTag('xmlsitemap_index_links');
+
+      if ($ids = $query->execute()) {
+        // Chunk the array into batch sizes.
+        $chunks = array_chunk($ids, \Drupal::config('xmlsitemap.settings')->get('batch_limit'));
+        foreach ($chunks as $chunk) {
+          $info['xmlsitemap']['process callback']($entity_type_id, $chunk);
+        }
+
+        \Drupal::logger('xmlsitemap')->info('Indexed @count new @type items.', [
+          '@count' => count($ids),
+          '@type' => $entity_type_id
+        ]);
       }
     }
     catch (\Exception $e) {
@@ -1922,24 +2030,6 @@ function xmlsitemap_xmlsitemap_sitemap_operations() {
 }
 
 /**
- * Implements hook_query_TAG_alter().
- *
- * @todo Check if this query alter is still needed.
- */
-function xmlsitemap_query_xmlsitemap_link_bundle_access_alter(AlterableInterface $query) {
-  if ($query instanceof QueryInterface && $entity_type_id = $query->getMetaData('entity_type_id')) {
-    $entity_type = \Drupal::entityTypeManager()->getDefinition($entity_type_id);
-    if ($entity_type->hasKey('bundle')) {
-      $bundle = $query->getMetaData('bundle');
-      if (empty($bundle)) {
-        $bundle = xmlsitemap_get_link_type_enabled_bundles($entity_type_id);
-      }
-      $query->condition($entity_type->getKey('bundle'), $bundle, is_array($bundle) ? 'IN' : '=');
-    }
-  }
-}
-
-/**
  * XML sitemap link type settings callback for frontpage link entity.
  *
  * @param array $form
@@ -2235,90 +2325,23 @@ function xmlsitemap_get_current_chunk(XmlSitemapInterface $sitemap, Request $req
  * @param array $headers
  *   Headers of the response.
  *
- * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
- *   Throws an exception when sitemap xml file does not exist.
+ * @return \Symfony\Component\HttpFoundation\BinaryFileResponse
+ *   The sitemap response object.
  *
- * @return \Symfony\Component\HttpFoundation\Response
- *   Complete response object.
+ * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
+ *   If the sitemap is not found or the sitemap file is not readable.
+ *
+ * @deprecated in xmlsitemap:8.x-1.0 and is removed from xmlsitemap:2.0.0. Use
+ *   \Drupal\xmlsitemap\Controller\XmlSitemapController::getSitemapResponse()
+ *   instead.
+ *
+ * @see https://www.drupal.org/project/xmlsitemap/issues/2869214
  */
 function xmlsitemap_output_file(Response $response, $file, array $headers = []) {
-  if (!file_exists($file) || !is_readable($file)) {
-    $exception = new NotFoundHttpException();
-    $exception->setHeaders($headers);
-    throw $exception;
-  }
-
-  $mtime = filemtime($file);
-  $last_modified = gmdate(DATE_RFC1123, $mtime);
-  $etag = '"' . md5($last_modified) . '"';
-
-  // See if the client has provided the required HTTP headers.
-  $request = \Drupal::request();
-  $if_modified_since = $request->server->has('HTTP_IF_MODIFIED_SINCE') ? stripslashes($request->server->get('HTTP_IF_MODIFIED_SINCE')) : FALSE;
-  $if_none_match = $request->server->has('HTTP_IF_NONE_MATCH') ? stripslashes($request->server->get('HTTP_IF_NONE_MATCH')) : FALSE;
-  if ($if_modified_since && $if_none_match && $if_none_match == $etag && $if_modified_since == $last_modified) {
-    $response->headers->add($headers);
-    $response->setNotModified();
-    // All 304 responses must send an etag if the 200 response for the same
-    // object contained an etag.
-    $response->headers->set('Etag', $etag);
-    return $response;
-  }
-
-  $headers += [
-    'Content-type' => 'text/xml; charset=utf-8',
-    'Content-length' => filesize($file),
-    'Last-modified' => $last_modified,
-    'Etag' => $etag,
-    'Expires' => gmdate(DATE_RFC1123, $mtime + \Drupal::config('xmlsitemap.settings')->get('minimum_lifetime')),
-    'Cache-Control' => 'must-revalidate',
-    'X-Robots-Tag' => 'noindex, follow',
-  ];
-  $response = xmlsitemap_transfer_file($response, $file, $headers);
-  return $response;
-}
-
-/**
- * Read a file and put content into response.
- *
- * @param \Symfony\Component\HttpFoundation\Response $response
- *   Response object.
- * @param string $uri
- *   File uri.
- * @param array $headers
- *   Response headers.
- *
- * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException::__construct
- *   Throws an exception when file is not readable.
- *
- * @return \Symfony\Component\HttpFoundation\Response
- *   Updated response.
- */
-function xmlsitemap_transfer_file(Response $response, $uri, array $headers) {
-  if (ob_get_level()) {
-    ob_end_clean();
-  }
-
-  foreach ($headers as $name => $value) {
-    $response->headers->set($name, $value);
-  }
-
-  $content = '';
-  // Attempt to increase time to transfer file.
-  Environment::setTimeLimit(240);
-  $scheme = file_default_scheme();
-  // Transfer file in 16 KB chunks to save memory usage.
-  if ($scheme && \Drupal::service('file_system')->validScheme($scheme) && $fd = fopen($uri, 'rb')) {
-    while (!feof($fd)) {
-      $content .= fread($fd, 1024 * 16);
-    }
-    fclose($fd);
-    $response->setContent($content);
-  }
-  else {
-    throw new NotFoundHttpException();
-  }
-  return $response;
+  @trigger_error(__FUNCTION__ . ' is deprecated in xmlsitemap:8.x-1.0 and will be removed in xmlsitemap:2.0.0. Use \Drupal\xmlsitemap\Controller\XmlSitemapController::getSitemapResponse. See https://www.drupal.org/project/xmlsitemap/issues/2869214', E_USER_DEPRECATED);
+  /** @var \Drupal\xmlsitemap\Controller\XmlSitemapController $controller */
+  $controller = \Drupal::classResolver(XmlSitemapController::class);
+  return $controller->getSitemapResponse($file, \Drupal::request(), $headers + $response->headers->all());
 }
 
 /**
@@ -2693,4 +2716,23 @@ function xmlsitemap_link_bundle_check_enabled($entity_type_id, $bundle_id) {
 function xmlsitemap_link_entity_check_enabled($entity_type_id) {
   $configuration = \Drupal::configFactory()->listAll("xmlsitemap.settings.{$entity_type_id}.");
   return !empty($configuration);
+}
+
+/**
+ * Implements hook_xmlsitemap_link_alter() on behalf of metatag.module.
+ */
+function metatag_xmlsitemap_link_alter(array &$link, array $context) {
+  $enabled = &drupal_static(__FUNCTION__);
+  if (!isset($enabled)) {
+    $enabled = \Drupal::config('xmlsitemap.settings')->get('metatag_exclude_noindex');
+  }
+
+  if ($enabled && !empty($context['entity']) && $context['entity'] instanceof ContentEntityInterface && $link['access']) {
+    /** @var \Drupal\metatag\MetatagManagerInterface $metatagManager */
+    $metatagManager = \Drupal::service('metatag.manager');
+    $metatags = $metatagManager->tagsFromEntity($context['entity']);
+    if (!empty($metatags['robots']) && strpos($metatags['robots'], 'noindex') !== FALSE) {
+      $link['access'] = FALSE;
+    }
+  }
 }

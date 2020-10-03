@@ -2,10 +2,13 @@
 
 namespace Drupal\xmlsitemap_engines_test\Controller;
 
+use Drupal\Component\Utility\UrlHelper;
 use Drupal\Core\Controller\ControllerBase;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Drupal\Component\Utility\UrlHelper;
 
 /**
  * Returns responses for xmlsitemap_engines_test.ping route.
@@ -13,23 +16,52 @@ use Drupal\Component\Utility\UrlHelper;
 class XmlSitemapEnginesTestController extends ControllerBase {
 
   /**
-   * Response for the xmlsitemap_engines_test.ping route.
+   * The logger.
    *
-   * @throws NotFoundHttpException
-   *   Throw a NotFoundHttpException if query url is not valid.
+   * @var \Psr\Log\LoggerInterface
+   */
+  protected $logger;
+
+  /**
+   * Constructs a XmlSitemapEnginesTestController object.
+   *
+   * @param \Psr\Log\LoggerInterface $logger
+   *   The logger.
+   */
+  public function __construct(LoggerInterface $logger) {
+    $this->logger = $logger;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container) {
+    return new static(
+      $container->get('logger.channel.xmlsitemap')
+    );
+  }
+
+  /**
+   * Callback for the xmlsitemap_engines_test.ping route.
+   *
+   * @param \Symfony\Component\HttpFoundation\Request $request
+   *   The request object.
    *
    * @return \Symfony\Component\HttpFoundation\Response
    *   A response with 200 code if the url query is valid.
+   *
+   * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
+   *   Throw a NotFoundHttpException if query url is not valid.
    */
-  public function render() {
-    $query = \Drupal::request()->query->get('sitemap');
+  public function render(Request $request) {
+    $query = $request->query->get('sitemap');
     if (empty($query) || !UrlHelper::isValid($query)) {
-      \Drupal::logger('xmlsitemap')->debug('No valid sitemap parameter provided.');
+      $this->logger->debug('No valid sitemap parameter provided.');
       // @todo Remove this? Causes an extra watchdog error to be handled.
       throw new NotFoundHttpException();
     }
     else {
-      \Drupal::logger('xmlsitemap')->debug('Received ping for @sitemap.', ['@sitemap' => $query]);
+      $this->logger->debug('Received ping for @sitemap.', ['@sitemap' => $query]);
     }
     return new Response('', 200);
   }

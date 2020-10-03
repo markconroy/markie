@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\xmlsitemap\Tests;
+namespace Drupal\Tests\xmlsitemap\Functional;
 
 use Drupal\Core\Session\AccountInterface;
 use Drupal\user\Entity\Role;
@@ -41,11 +41,11 @@ class XmlSitemapRebuildTest extends XmlSitemapTestBase {
   public function testSimpleRebuild() {
     $this->drupalLogin($this->admin_user);
     $this->drupalGet('admin/config/search/xmlsitemap/rebuild');
-    $this->assertResponse(200);
-    $this->assertText(t("This action rebuilds your site's XML sitemap and regenerates the cached files, and may be a lengthy process. If you just installed XML sitemap, this can be helpful to import all your site's content into the sitemap. Otherwise, this should only be used in emergencies."));
+    $this->assertSession()->statusCodeEquals(200);
+    $this->assertSession()->pageTextContains("This action rebuilds your site's XML sitemap and regenerates the cached files, and may be a lengthy process. If you just installed XML sitemap, this can be helpful to import all your site's content into the sitemap. Otherwise, this should only be used in emergencies.");
 
-    $this->drupalPostForm(NULL, [], t('Save configuration'));
-    $this->assertText('The sitemap links were rebuilt.');
+    $this->drupalPostForm(NULL, [], 'Save configuration');
+    $this->assertSession()->pageTextContains('The sitemap links were rebuilt.');
   }
 
   /**
@@ -61,7 +61,7 @@ class XmlSitemapRebuildTest extends XmlSitemapTestBase {
     $dummy_user = $this->drupalCreateUser([]);
     $this->drupalLogin($this->admin_user);
     $this->drupalPostForm('admin/config/search/xmlsitemap/rebuild', [], t('Save configuration'));
-    $this->assertText('The sitemap links were rebuilt.');
+    $this->assertSession()->pageTextContains('The sitemap links were rebuilt.');
     $this->assertSitemapLinkValues('user', $dummy_user->id(), [
       'status' => 1,
       'priority' => 0.4,
@@ -69,7 +69,7 @@ class XmlSitemapRebuildTest extends XmlSitemapTestBase {
       'access' => 1,
     ]);
     $this->drupalGet('sitemap.xml');
-    $this->assertRaw("user/{$dummy_user->id()}");
+    $this->assertSession()->responseContains("user/{$dummy_user->id()}");
   }
 
 }
