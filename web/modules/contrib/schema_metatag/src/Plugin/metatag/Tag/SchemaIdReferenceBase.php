@@ -2,8 +2,6 @@
 
 namespace Drupal\schema_metatag\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\SchemaMetatagManager;
-
 /**
  * Schema.org tags using an id reference items should extend this class.
  */
@@ -12,18 +10,11 @@ class SchemaIdReferenceBase extends SchemaNameBase {
   use SchemaIdReferenceTrait;
 
   /**
-   * The top level keys on this form.
-   */
-  public function formKeys() {
-    return ['pivot'] + self::idFormKeys();
-  }
-
-  /**
    * {@inheritdoc}
    */
   public function form(array $element = []) {
 
-    $value = SchemaMetatagManager::unserialize($this->value());
+    $value = $this->schemaMetatagManager()->unserialize($this->value());
 
     $input_values = [
       'title' => $this->label(),
@@ -47,7 +38,9 @@ class SchemaIdReferenceBase extends SchemaNameBase {
    */
   public static function testValue() {
     $items = [];
-    $keys = self::idFormKeys();
+    $keys = [
+      '@id',
+    ];
     foreach ($keys as $key) {
       switch ($key) {
         case 'pivot':

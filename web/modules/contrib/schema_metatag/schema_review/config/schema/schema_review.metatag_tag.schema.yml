@@ -2,7 +2,7 @@
 # could get longer, especially ones which use a textarea field instead of a
 # textfield.
 metatag.metatag_tag.schema_review_type:
-  type: text
+  type: string
   label: '@type'
 metatag.metatag_tag.schema_review_name:
   type: text

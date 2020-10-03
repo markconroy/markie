@@ -2,8 +2,6 @@
 
 namespace Drupal\schema_metatag\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\SchemaMetatagManager;
-
 /**
  * Schema.org Country trait.
  */
@@ -12,27 +10,25 @@ trait SchemaCountryTrait {
   use SchemaPivotTrait;
 
   /**
-   * Form keys.
+   * Return the SchemaMetatagManager.
+   *
+   * @return \Drupal\schema_metatag\SchemaMetatagManager
+   *   The Schema Metatag Manager service.
    */
-  public static function countryFormKeys() {
-    return [
-      '@type',
-      'name',
-    ];
-  }
+  abstract protected function schemaMetatagManager();
 
   /**
    * The form element.
    */
   public function countryForm($input_values) {
 
-    $input_values += SchemaMetatagManager::defaultInputValues();
+    $input_values += $this->schemaMetatagManager()->defaultInputValues();
     $value = $input_values['value'];
 
     // Get the id for the nested @type element.
     $selector = ':input[name="' . $input_values['visibility_selector'] . '[@type]"]';
     $visibility = ['invisible' => [$selector => ['value' => '']]];
-    $selector2 = SchemaMetatagManager::altSelector($selector);
+    $selector2 = $this->schemaMetatagManager()->altSelector($selector);
     $visibility2 = ['invisible' => [$selector2 => ['value' => '']]];
     $visibility['invisible'] = [$visibility['invisible'], $visibility2['invisible']];
 
@@ -65,14 +61,9 @@ trait SchemaCountryTrait {
       '#maxlength' => 255,
       '#required' => $input_values['#required'],
       '#description' => $this->t("The country. For example, USA. You can also provide the two-letter ISO 3166-1 alpha-2 country code."),
+      '#states' => $visibility,
     ];
 
-    $keys = static::countryFormKeys();
-    foreach ($keys as $key) {
-      if ($key != '@type') {
-        $form[$key]['#states'] = $visibility;
-      }
-    }
     return $form;
   }
 

@@ -11,7 +11,7 @@ metatag.metatag_tag.schema_image_object_name:
   type: text
   label: 'name'
 metatag.metatag_tag.schema_image_object_type:
-  type: text
+  type: string
   label: '@type'
 metatag.metatag_tag.schema_image_object_url:
   type: text

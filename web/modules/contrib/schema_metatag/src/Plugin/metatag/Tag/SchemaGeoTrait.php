@@ -2,8 +2,6 @@
 
 namespace Drupal\schema_metatag\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\SchemaMetatagManager;
-
 /**
  * Schema.org Geo trait.
  */
@@ -12,28 +10,25 @@ trait SchemaGeoTrait {
   use SchemaPivotTrait;
 
   /**
-   * Form keys.
+   * Return the SchemaMetatagManager.
+   *
+   * @return \Drupal\schema_metatag\SchemaMetatagManager
+   *   The Schema Metatag Manager service.
    */
-  public static function geoFormKeys() {
-    return [
-      '@type',
-      'latitude',
-      'longitude',
-    ];
-  }
+  abstract protected function schemaMetatagManager();
 
   /**
    * The form element.
    */
   public function geoForm($input_values) {
 
-    $input_values += SchemaMetatagManager::defaultInputValues();
+    $input_values += $this->schemaMetatagManager()->defaultInputValues();
     $value = $input_values['value'];
 
     // Get the id for the nested @type element.
     $selector = ':input[name="' . $input_values['visibility_selector'] . '[@type]"]';
     $visibility = ['invisible' => [$selector => ['value' => '']]];
-    $selector2 = SchemaMetatagManager::altSelector($selector);
+    $selector2 = $this->schemaMetatagManager()->altSelector($selector);
     $visibility2 = ['invisible' => [$selector2 => ['value' => '']]];
     $visibility['invisible'] = [$visibility['invisible'], $visibility2['invisible']];
 
@@ -66,6 +61,7 @@ trait SchemaGeoTrait {
       '#maxlength' => 255,
       '#required' => $input_values['#required'],
       '#description' => $this->t("The latitude of a location. For example 37.42242 (WGS 84)."),
+      '#states' => $visibility,
     ];
 
     $form['longitude'] = [
@@ -75,14 +71,9 @@ trait SchemaGeoTrait {
       '#maxlength' => 255,
       '#required' => $input_values['#required'],
       '#description' => $this->t("The longitude of a location. For example -122.08585 (WGS 84)."),
+      '#states' => $visibility,
     ];
 
-    $keys = static::geoFormKeys();
-    foreach ($keys as $key) {
-      if ($key != '@type') {
-        $form[$key]['#states'] = $visibility;
-      }
-    }
     return $form;
   }
 

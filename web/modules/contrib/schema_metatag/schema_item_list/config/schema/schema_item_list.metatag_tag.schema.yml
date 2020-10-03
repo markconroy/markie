@@ -9,5 +9,5 @@ metatag.metatag_tag.schema_item_list_main_entity_of_page:
   type: text
   label: 'mainEntityOfPage'
 metatag.metatag_tag.schema_item_list_type:
-  type: text
+  type: string
   label: '@type'

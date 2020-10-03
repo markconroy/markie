@@ -32,7 +32,7 @@ metatag.metatag_tag.schema_movie_production_company:
   type: text
   label: 'productionCompany'
 metatag.metatag_tag.schema_movie_type:
-  type: text
+  type: string
   label: '@type'
 metatag.metatag_tag.schema_movie_id:
   type: text

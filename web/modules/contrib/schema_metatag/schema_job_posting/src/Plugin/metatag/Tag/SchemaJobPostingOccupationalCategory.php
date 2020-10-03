@@ -23,6 +23,6 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
  *   multiple = FALSE
  * )
  */
-class SchemaJobPostingOccupationalCategory extends SchemaNameBase{
+class SchemaJobPostingOccupationalCategory extends SchemaNameBase {
 
 }

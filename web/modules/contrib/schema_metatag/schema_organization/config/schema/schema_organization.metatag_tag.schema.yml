@@ -35,7 +35,7 @@ metatag.metatag_tag.schema_organization_telephone:
   type: text
   label: 'telephone'
 metatag.metatag_tag.schema_organization_type:
-  type: text
+  type: string
   label: '@type'
 metatag.metatag_tag.schema_organization_url:
   type: text

@@ -17,7 +17,7 @@ class SchemaItemListElementBreadcrumbBase extends SchemaItemListElementBase {
       '#type' => 'select',
       '#title' => $this->label(),
       '#default_value' => $this->value(),
-      '#empty_option' => t('No'),
+      '#empty_option' => $this->t('No'),
       '#empty_value' => '',
       '#options' => [
         'Yes' => $this->t('Yes'),

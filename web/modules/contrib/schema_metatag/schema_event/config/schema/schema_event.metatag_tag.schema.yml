@@ -32,7 +32,7 @@ metatag.metatag_tag.schema_event_start_date:
   type: text
   label: 'startDate'
 metatag.metatag_tag.schema_event_type:
-  type: text
+  type: string
   label: '@type'
 metatag.metatag_tag.schema_event_url:
   type: text
@@ -46,3 +46,15 @@ metatag.metatag_tag.schema_event_review:
 metatag.metatag_tag.schema_event_is_accessible_for_free:
   type: text
   label: 'isAccessibleForFree'
+metatag.metatag_tag.schema_event_previous_start_date:
+  type: text
+  label: 'previousStartDate'
+metatag.metatag_tag.schema_event_event_status:
+  type: text
+  label: 'eventStatus'
+metatag.metatag_tag.schema_event_event_attendance_mode:
+  type: text
+  label: 'eventAttendanceMode'
+metatag.metatag_tag.schema_event_organizer:
+  type: text
+  label: 'organizer'

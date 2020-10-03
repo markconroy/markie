@@ -32,42 +32,10 @@ class SchemaOrganizationPotentialAction extends SchemaActionBase {
    */
   public function form(array $element = []) {
 
-    $this->actionTypes = ['TradeAction', 'OrganizeAction'];
-    $this->actions = ['OrderAction', 'ReserveAction'];
+    $this->actions = ['Action', 'TradeAction', 'OrganizeAction', 'OrderAction', 'ReserveAction'];
 
     $form = parent::form($element);
     return $form;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function testValue() {
-    $items = [];
-    $keys = self::actionFormKeys('OrganizeAction');
-    foreach ($keys as $key) {
-      switch ($key) {
-
-        case '@type':
-          $items[$key] = 'ReserveAction';
-          break;
-
-        case 'target':
-          $items[$key] = SchemaEntryPointBase::testValue();
-          break;
-
-        case 'result':
-          $items[$key] = SchemaThingBase::testValue();
-          break;
-
-        default:
-          $items[$key] = parent::testDefaultValue(1, '');
-          break;
-
-      }
-    }
-    return $items;
-
   }
 
 }

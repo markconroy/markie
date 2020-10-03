@@ -6,8 +6,6 @@
  */
 
 use Drupal\Core\Routing\RouteMatchInterface;
-use Drupal\schema_metatag\SchemaMetatagManager;
-use Drupal\Core\Form\FormStateInterface;
 
 /**
  * Implements hook_help().
@@ -36,11 +34,12 @@ function schema_metatag_page_attachments_alter(array &$attachments) {
   }
 
   // Collect tags added by Schema Metatag into structured data array.
-  $items = SchemaMetatagManager::parseJsonld($attachments['#attached']['html_head']);
+  $schema_metatag_manager = \Drupal::service('schema_metatag.schema_metatag_manager');
+  $items = $schema_metatag_manager->parseJsonld($attachments['#attached']['html_head']);
 
   // Turn the structured data array into JSON LD and add it to page head.
   if (count($items) > 0) {
-    $jsonld = SchemaMetatagManager::encodeJsonld($items);
+    $jsonld = $schema_metatag_manager->encodeJsonld($items);
     if (!empty($jsonld)) {
       $attachments['#attached']['html_head'][] = [
         [

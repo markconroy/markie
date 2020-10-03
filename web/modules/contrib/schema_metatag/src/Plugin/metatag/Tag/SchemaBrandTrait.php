@@ -2,8 +2,6 @@
 
 namespace Drupal\schema_metatag\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\SchemaMetatagManager;
-
 /**
  * Schema.org Brand trait.
  */
@@ -12,32 +10,25 @@ trait SchemaBrandTrait {
   use SchemaImageTrait;
 
   /**
-   * Form keys.
+   * Return the SchemaMetatagManager.
+   *
+   * @return \Drupal\schema_metatag\SchemaMetatagManager
+   *   The Schema Metatag Manager service.
    */
-  public static function brandFormKeys() {
-    return [
-      '@type',
-      '@id',
-      'name',
-      'description',
-      'url',
-      'sameAs',
-      'logo',
-    ];
-  }
+  abstract protected function schemaMetatagManager();
 
   /**
    * The form elements.
    */
   public function brandForm($input_values) {
 
-    $input_values += SchemaMetatagManager::defaultInputValues();
+    $input_values += $this->schemaMetatagManager()->defaultInputValues();
     $value = $input_values['value'];
 
     // Get the id for the nested @type element.
     $selector = ':input[name="' . $input_values['visibility_selector'] . '[@type]"]';
     $visibility = ['invisible' => [$selector => ['value' => '']]];
-    $selector2 = SchemaMetatagManager::altSelector($selector);
+    $selector2 = $this->schemaMetatagManager()->altSelector($selector);
     $visibility2 = ['invisible' => [$selector2 => ['value' => '']]];
     $visibility['invisible'] = [$visibility['invisible'], $visibility2['invisible']];
 
@@ -66,6 +57,7 @@ trait SchemaBrandTrait {
       '#maxlength' => 255,
       '#required' => $input_values['#required'],
       '#description' => $this->t("Globally unique @id of the brand, usually a url, used to to link other properties to this object."),
+      '#states' => $visibility,
     ];
 
     $form['name'] = [
@@ -75,6 +67,7 @@ trait SchemaBrandTrait {
       '#maxlength' => 255,
       '#required' => $input_values['#required'],
       '#description' => $this->t("Name of the brand."),
+      '#states' => $visibility,
     ];
 
     $form['description'] = [
@@ -84,6 +77,7 @@ trait SchemaBrandTrait {
       '#maxlength' => 255,
       '#required' => $input_values['#required'],
       '#description' => $this->t("Description of the brand."),
+      '#states' => $visibility,
     ];
 
     $form['url'] = [
@@ -93,6 +87,7 @@ trait SchemaBrandTrait {
       '#maxlength' => 255,
       '#required' => $input_values['#required'],
       '#description' => $this->t("Absolute URL of the canonical Web page, e.g. the URL of the brand's node or term page or brand website."),
+      '#states' => $visibility,
     ];
 
     $form['sameAs'] = [
@@ -102,6 +97,7 @@ trait SchemaBrandTrait {
       '#maxlength' => 255,
       '#required' => $input_values['#required'],
       '#description' => $this->t("Comma separated list of URLs for the person's or organization's official social media profile page(s)."),
+      '#states' => $visibility,
     ];
 
     $input_values = [
@@ -116,13 +112,7 @@ trait SchemaBrandTrait {
 
     // Display the logo for brand.
     $form['logo'] = $this->imageForm($input_values);
-
-    $keys = static::brandFormKeys();
-    foreach ($keys as $key) {
-      if ($key != '@type') {
-        $form[$key]['#states'] = $visibility;
-      }
-    }
+    $form['logo']['#states'] = $visibility;
 
     return $form;
   }

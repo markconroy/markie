@@ -14,7 +14,7 @@ metatag.metatag_tag.schema_web_page_is_accessible_for_free:
   type: text
   label: 'isAccessibleForFree'
 metatag.metatag_tag.schema_web_page_type:
-  type: text
+  type: string
   label: '@type'
 metatag.metatag_tag.schema_web_page_author:
   type: text
@@ -25,12 +25,6 @@ metatag.metatag_tag.schema_web_page_description:
 metatag.metatag_tag.schema_web_page_publisher:
   type: text
   label: 'publisher'
-metatag.metatag_tag.schema_web_page_speakable:
-  type: text
-  label: 'speakable'
-metatag.metatag_tag.schema_web_page_speakable:
-  type: text
-  label: 'speakable'
 metatag.metatag_tag.schema_web_page_speakable:
   type: text
   label: 'speakable'

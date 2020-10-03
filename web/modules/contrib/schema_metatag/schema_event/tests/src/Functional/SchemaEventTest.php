@@ -42,10 +42,14 @@ class SchemaEventTest extends SchemaMetatagTagsTestBase {
     'schema_event_name' => 'SchemaEventName',
     'schema_event_offers' => 'SchemaEventOffers',
     'schema_event_performer' => 'SchemaEventPerformer',
+    'schema_event_previous_start_date' => 'SchemaEventPreviousStartDate',
     'schema_event_start_date' => 'SchemaEventStartDate',
     'schema_event_type' => 'SchemaEventType',
     'schema_event_url' => 'SchemaEventUrl',
     'schema_event_is_accessible_for_free' => 'SchemaEventIsAccessibleForFree',
+    'schema_event_event_status' => 'SchemaEventEventStatus',
+    'schema_event_event_attendance_mode' => 'SchemaEventEventAttendanceMode',
+    'schema_event_organizer' => 'SchemaEventOrganizer',
   ];
 
 }

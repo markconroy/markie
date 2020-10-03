@@ -2,45 +2,37 @@
 
 namespace Drupal\schema_metatag\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\SchemaMetatagManager;
-
 /**
  * Schema.org place trait.
  */
 trait SchemaPlaceTrait {
 
-  use SchemaAddressTrait, SchemaGeoTrait, SchemaCountryTrait, SchemaPivotTrait {
+  use SchemaAddressTrait, SchemaGeoTrait, SchemaPivotTrait {
     SchemaPivotTrait::pivotForm insteadof SchemaAddressTrait;
     SchemaPivotTrait::pivotForm insteadof SchemaGeoTrait;
-    SchemaPivotTrait::pivotForm insteadof SchemaCountryTrait;
   }
 
   /**
-   * The top level keys on this form.
+   * Return the SchemaMetatagManager.
+   *
+   * @return \Drupal\schema_metatag\SchemaMetatagManager
+   *   The Schema Metatag Manager service.
    */
-  public static function placeFormKeys() {
-    return [
-      '@type',
-      'name',
-      'url',
-      'address',
-      'geo',
-    ];
-  }
+  abstract protected function schemaMetatagManager();
 
   /**
    * {@inheritdoc}
    */
   public function placeForm($input_values) {
 
-    $input_values += SchemaMetatagManager::defaultInputValues();
+    $input_values += $this->schemaMetatagManager()->defaultInputValues();
     $value = $input_values['value'];
 
     // Get the id for the nested @type element.
     $visibility_selector = $input_values['visibility_selector'];
     $selector = ':input[name="' . $visibility_selector . '[@type]"]';
     $visibility = ['invisible' => [$selector => ['value' => '']]];
-    $selector2 = SchemaMetatagManager::altSelector($selector);
+    $selector2 = $this->schemaMetatagManager()->altSelector($selector);
     $visibility2 = ['invisible' => [$selector2 => ['value' => '']]];
     $visibility['invisible'] = [$visibility['invisible'], $visibility2['invisible']];
 
@@ -61,7 +53,14 @@ trait SchemaPlaceTrait {
       '#empty_value' => '',
       '#options' => [
         'Place' => $this->t('Place'),
+        'VirtualLocation' => $this->t('VirtualLocation'),
         'AdministrativeArea' => $this->t('AdministrativeArea'),
+        'Country' => $this->t('- Country'),
+        'State' => $this->t('- State'),
+        'City' => $this->t('- City'),
+        'SchoolDistrict' => $this->t('- SchoolDistrict'),
+        'CivicStructure' => $this->t('CivicStructure'),
+        'LocalBusiness' => $this->t('LocalBusiness'),
       ],
       '#required' => $input_values['#required'],
       '#weight' => -10,
@@ -101,23 +100,12 @@ trait SchemaPlaceTrait {
       'title' => $this->t('GeoCoordinates'),
       'description' => 'The geo coordinates of the place.',
       'value' => !empty($value['geo']) ? $value['geo'] : [],
-      '#required' => isset($element['#required']) ? $element['#required'] : FALSE,
+      '#required' => $input_values['#required'],
       'visibility_selector' => $visibility_selector . '[geo]',
     ];
 
     $form['geo'] = $this->geoForm($input_values);
     $form['geo']['#states'] = $visibility;
-
-    $input_values = [
-      'title' => $this->t('Country'),
-      'description' => 'The country of the place.',
-      'value' => !empty($value['country']) ? $value['country'] : [],
-      '#required' => isset($element['#required']) ? $element['#required'] : FALSE,
-      'visibility_selector' => $visibility_selector . '[country]',
-    ];
-
-    $form['country'] = $this->countryForm($input_values);
-    $form['country']['#states'] = $visibility;
 
     return $form;
   }

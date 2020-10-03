@@ -2,8 +2,6 @@
 
 namespace Drupal\schema_metatag\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\SchemaMetatagManager;
-
 /**
  * Schema.org PostalAddress items should extend this class.
  */
@@ -12,18 +10,11 @@ class SchemaAddressBase extends SchemaNameBase {
   use SchemaAddressTrait;
 
   /**
-   * The top level keys on this form.
-   */
-  public static function formKeys() {
-    return ['pivot'] + self::postalAddressFormKeys();
-  }
-
-  /**
    * {@inheritdoc}
    */
   public function form(array $element = []) {
 
-    $value = SchemaMetatagManager::unserialize($this->value());
+    $value = $this->schemaMetatagManager()->unserialize($this->value());
     $input_values = [
       'title' => $this->label(),
       'description' => $this->description(),
@@ -46,7 +37,14 @@ class SchemaAddressBase extends SchemaNameBase {
    */
   public static function testValue() {
     $items = [];
-    $keys = self::postalAddressFormKeys();
+    $keys = [
+      '@type',
+      'streetAddress',
+      'addressLocality',
+      'addressRegion',
+      'postalCode',
+      'addressCountry',
+    ];
     foreach ($keys as $key) {
       switch ($key) {
         case '@type':

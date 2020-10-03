@@ -1,13 +1,14 @@
 name: Schema.org ItemList
 type: module
-description: Adds Schema.org/ItemList to the JSON LD array.
+description: 'Adds Schema.org/ItemList to the JSON LD array.'
 core_version_requirement: ^8 || ^9
+php: 7.2.0
 package: SEO
 dependencies:
   - schema_metatag:schema_metatag
   - metatag:metatag_views
 
-# Information added by Drupal.org packaging script on 2020-05-24
-version: '8.x-1.5'
+# Information added by Drupal.org packaging script on 2020-09-12
+version: '8.x-1.8'
 project: 'schema_metatag'
-datestamp: 1590323807
+datestamp: 1599905691

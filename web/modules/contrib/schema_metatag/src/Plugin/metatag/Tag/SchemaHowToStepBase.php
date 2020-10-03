@@ -2,8 +2,6 @@
 
 namespace Drupal\schema_metatag\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\SchemaMetatagManager;
-
 /**
  * Schema.org Step items should extend this class.
  */
@@ -16,13 +14,13 @@ class SchemaHowToStepBase extends SchemaNameBase {
    */
   public function form(array $element = []) {
 
-    $value = SchemaMetatagManager::unserialize($this->value());
+    $value = $this->schemaMetatagManager()->unserialize($this->value());
 
     $input_values = [
       'title' => $this->label(),
       'description' => $this->description(),
       'value' => $value,
-      '#required' => isset($options['#required']) ? $options['#required'] : FALSE,
+      '#required' => isset($value['#required']) ? $value['#required'] : FALSE,
       'visibility_selector' => $this->visibilitySelector(),
     ];
 
@@ -40,7 +38,13 @@ class SchemaHowToStepBase extends SchemaNameBase {
    */
   public static function testValue() {
     $items = [];
-    $keys = self::howToStepFormKeys();
+    $keys = [
+      '@type',
+      'name',
+      'text',
+      'url',
+      'image',
+    ];
     foreach ($keys as $key) {
       switch ($key) {
         case '@type':

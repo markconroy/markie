@@ -83,8 +83,8 @@ class SchemaMetatagManagerTest extends UnitTestCase {
     $replaced = str_replace('Organization', 'ReallyBigOrganization', $original_serialized);
     $processed = SchemaMetatagManager::recomputeSerializedLength($replaced);
     $unserialized = unserialize($processed);
-    $this->assertTrue(is_array($unserialized));
-    $this->assertTrue(in_array('ReallyBigOrganization', $unserialized));
+    $this->assertIsArray($unserialized);
+    $this->assertContains('ReallyBigOrganization', $unserialized);
   }
 
   /**
@@ -103,7 +103,7 @@ class SchemaMetatagManagerTest extends UnitTestCase {
    * Provides pivot data.
    *
    * @return array
-   *  - name: name of the data set.
+   *   - name: name of the data set.
    *    - original: original data.
    *    - desired: desired result.
    */
@@ -133,7 +133,7 @@ class SchemaMetatagManagerTest extends UnitTestCase {
    * Provides array data.
    *
    * @return array
-   *  - name: name of the data set.
+   *   - name: name of the data set.
    *    - tests: array of the tests this data set applies to.
    *    - original: original data array.
    *    - original_serialized: serialized version of original data.
@@ -339,7 +339,7 @@ class SchemaMetatagManagerTest extends UnitTestCase {
    * Provides string data.
    *
    * @return array
-   *  - name: name of the data set.
+   *   - name: name of the data set.
    *    - original: original data.
    *    - desired: desired result.
    */
@@ -361,7 +361,7 @@ class SchemaMetatagManagerTest extends UnitTestCase {
    * Provides json data.
    *
    * @return array
-   *  - name: name of the data set.
+   *   - name: name of the data set.
    *    - original: original data.
    *    - desired: desired result.
    */

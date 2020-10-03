@@ -2,8 +2,6 @@
 
 namespace Drupal\schema_metatag\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\SchemaMetatagManager;
-
 /**
  * Schema.org Person/Org items should extend this class.
  */
@@ -12,18 +10,11 @@ class SchemaPersonOrgBase extends SchemaNameBase {
   use SchemaPersonOrgTrait;
 
   /**
-   * The top level keys on this form.
-   */
-  public function formKeys() {
-    return ['pivot'] + self::personOrgFormKeys();
-  }
-
-  /**
    * {@inheritdoc}
    */
   public function form(array $element = []) {
 
-    $value = SchemaMetatagManager::unserialize($this->value());
+    $value = $this->schemaMetatagManager()->unserialize($this->value());
 
     $input_values = [
       'title' => $this->label(),
@@ -47,7 +38,14 @@ class SchemaPersonOrgBase extends SchemaNameBase {
    */
   public static function testValue() {
     $items = [];
-    $keys = self::personOrgFormKeys();
+    $keys = [
+      '@type',
+      '@id',
+      'name',
+      'url',
+      'sameAs',
+      'logo',
+    ];
     foreach ($keys as $key) {
       switch ($key) {
         case 'pivot':

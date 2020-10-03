@@ -3,6 +3,8 @@
 namespace Drupal\schema_metatag_test\Plugin\metatag\Tag;
 
 use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaActionBase;
+use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaEntryPointBase;
+use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaThingBase;
 
 /**
  * A metatag tag for testing.
@@ -26,11 +28,45 @@ class SchemaMetatagTestAction extends SchemaActionBase {
    */
   public function form(array $element = []) {
 
-    $this->actionTypes = ['ConsumeAction'];
-    $this->actions = ['WatchAction', 'ViewAction'];
+    $this->actions = ['Action', 'OrganizeAction'];
 
     $form = parent::form($element);
     return $form;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function testValue() {
+    $items = [];
+    $keys = [
+      '@type',
+      'result',
+      'target',
+    ];
+    foreach ($keys as $key) {
+      switch ($key) {
+
+        case '@type':
+          $items[$key] = 'OrganizeAction';
+          break;
+
+        case 'target':
+          $items[$key] = SchemaEntryPointBase::testValue();
+          break;
+
+        case 'result':
+          $items[$key] = SchemaThingBase::testValue();
+          break;
+
+        default:
+          $items[$key] = parent::testDefaultValue(1, '');
+          break;
+
+      }
+    }
+    return $items;
+
   }
 
 }

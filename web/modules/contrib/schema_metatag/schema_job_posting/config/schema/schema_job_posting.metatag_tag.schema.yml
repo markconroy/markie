@@ -41,7 +41,7 @@ metatag.metatag_tag.schema_job_posting_title:
   type: text
   label: 'title'
 metatag.metatag_tag.schema_job_posting_type:
-  type: text
+  type: string
   label: '@type'
 metatag.metatag_tag.schema_job_posting_valid_through:
   type: text

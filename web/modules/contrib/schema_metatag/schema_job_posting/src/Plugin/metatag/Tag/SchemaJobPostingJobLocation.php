@@ -23,6 +23,6 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaPlaceBase;
  *   multiple = TRUE
  * )
  */
-class SchemaJobPostingJobLocation extends SchemaPlaceBase{
+class SchemaJobPostingJobLocation extends SchemaPlaceBase {
 
 }

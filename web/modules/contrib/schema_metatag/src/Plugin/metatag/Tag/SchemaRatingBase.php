@@ -2,8 +2,6 @@
 
 namespace Drupal\schema_metatag\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\SchemaMetatagManager;
-
 /**
  * Provides a plugin to extend for the 'Rating' meta tag.
  */
@@ -15,7 +13,7 @@ class SchemaRatingBase extends SchemaNameBase {
    * {@inheritdoc}
    */
   public function form(array $element = []) {
-    $value = SchemaMetatagManager::unserialize($this->value());
+    $value = $this->schemaMetatagManager()->unserialize($this->value());
     $input_values = [
       'title' => $this->label(),
       'description' => $this->description(),
@@ -39,7 +37,13 @@ class SchemaRatingBase extends SchemaNameBase {
    */
   public static function testValue() {
     $items = [];
-    $keys = static::ratingFormKeys();
+    $keys = [
+      '@type',
+      'ratingValue',
+      'bestRating',
+      'worstRating',
+      'ratingCount',
+    ];
     foreach ($keys as $key) {
       switch ($key) {
         case '@type':
@@ -53,13 +57,6 @@ class SchemaRatingBase extends SchemaNameBase {
       }
     }
     return $items;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function outputValue($input_value) {
-    return $input_value;
   }
 
 }

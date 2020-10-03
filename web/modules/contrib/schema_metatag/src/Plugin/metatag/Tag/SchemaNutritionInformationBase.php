@@ -2,8 +2,6 @@
 
 namespace Drupal\schema_metatag\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\SchemaMetatagManager;
-
 /**
  * Schema.org NutritionInformation items should extend this class.
  */
@@ -16,7 +14,7 @@ class SchemaNutritionInformationBase extends SchemaNameBase {
    */
   public function form(array $element = []) {
 
-    $value = SchemaMetatagManager::unserialize($this->value());
+    $value = $this->schemaMetatagManager()->unserialize($this->value());
 
     $input_values = [
       'title' => $this->label(),
@@ -40,7 +38,21 @@ class SchemaNutritionInformationBase extends SchemaNameBase {
    */
   public static function testValue() {
     $items = [];
-    $keys = self::nutritionInformationFormKeys();
+    $keys = [
+      '@type',
+      'servingSize',
+      'calories',
+      'carbohydrateContent',
+      'cholesterolContent',
+      'fiberContent',
+      'proteinContent',
+      'sodiumContent',
+      'sugarContent',
+      'fatContent',
+      'saturatedFatContent',
+      'unsaturatedFatContent',
+      'transFatContent',
+    ];
     foreach ($keys as $key) {
       switch ($key) {
         case '@type':

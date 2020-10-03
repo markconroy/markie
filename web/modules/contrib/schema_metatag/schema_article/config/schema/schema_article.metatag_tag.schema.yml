@@ -39,7 +39,7 @@ metatag.metatag_tag.schema_article_publisher:
   type: text
   label: 'publisher'
 metatag.metatag_tag.schema_article_type:
-  type: text
+  type: string
   label: '@type'
 metatag.metatag_tag.schema_article_aggregate_rating:
   type: text

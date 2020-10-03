@@ -14,7 +14,7 @@ use Drupal\schema_metatag\Plugin\metatag\Group\SchemaGroupBase;
  *     ":url" = "https://schema.org/WebSite",
  *     ":url2" = "https://developers.google.com/search/docs/data-types/sitelinks-searchbox",
  *   }),
-  *   weight = 10,
+ *   weight = 10,
  * )
  */
 class SchemaWebSite extends SchemaGroupBase {

@@ -2,8 +2,6 @@
 
 namespace Drupal\schema_metatag\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\SchemaMetatagManager;
-
 /**
  * Schema.org OpeningHoursSpecification trait.
  */
@@ -13,32 +11,26 @@ trait SchemaOpeningHoursSpecificationTrait {
   }
 
   /**
-   * Form keys.
+   * Return the SchemaMetatagManager.
+   *
+   * @return \Drupal\schema_metatag\SchemaMetatagManager
+   *   The Schema Metatag Manager service.
    */
-  public static function openingHoursSpecificationFormKeys() {
-    return [
-      '@type',
-      'dayOfWeek',
-      'opens',
-      'closes',
-      'validFrom',
-      'validThrough',
-    ];
-  }
+  abstract protected function schemaMetatagManager();
 
   /**
    * The form element.
    */
   public function openingHoursSpecificationForm($input_values) {
 
-    $input_values += SchemaMetatagManager::defaultInputValues();
+    $input_values += $this->schemaMetatagManager()->defaultInputValues();
     $value = $input_values['value'];
 
     // Get the id for the nested @type element.
     $visibility_selector = $input_values['visibility_selector'];
     $selector = ':input[name="' . $visibility_selector . '[@type]"]';
     $visibility = ['invisible' => [$selector => ['value' => '']]];
-    $selector2 = SchemaMetatagManager::altSelector($selector);
+    $selector2 = $this->schemaMetatagManager()->altSelector($selector);
     $visibility2 = ['invisible' => [$selector2 => ['value' => '']]];
     $visibility['invisible'] = [$visibility['invisible'], $visibility2['invisible']];
 
@@ -71,6 +63,7 @@ trait SchemaOpeningHoursSpecificationTrait {
       '#maxlength' => 255,
       '#required' => $input_values['#required'],
       '#description' => $this->t("Comma-separated list of the names of the days of the week."),
+      '#states' => $visibility,
     ];
 
     $form['opens'] = [
@@ -80,6 +73,7 @@ trait SchemaOpeningHoursSpecificationTrait {
       '#maxlength' => 255,
       '#required' => $input_values['#required'],
       '#description' => $this->t("Matching comma-separated list of the time the business location opens each day, in hh:mm:ss format."),
+      '#states' => $visibility,
     ];
 
     $form['closes'] = [
@@ -89,6 +83,7 @@ trait SchemaOpeningHoursSpecificationTrait {
       '#maxlength' => 255,
       '#required' => $input_values['#required'],
       '#description' => $this->t("Matching comma-separated list of the time the business location closes each day, in hh:mm:ss format."),
+      '#states' => $visibility,
     ];
 
     $form['validFrom'] = [
@@ -98,6 +93,7 @@ trait SchemaOpeningHoursSpecificationTrait {
       '#maxlength' => 255,
       '#required' => $input_values['#required'],
       '#description' => $this->t("The date of a seasonal business closure, in YYYY-MM-DD format."),
+      '#states' => $visibility,
     ];
 
     $form['validThrough'] = [
@@ -107,14 +103,8 @@ trait SchemaOpeningHoursSpecificationTrait {
       '#maxlength' => 255,
       '#required' => $input_values['#required'],
       '#description' => $this->t("The date of a seasonal business closure, in YYYY-MM-DD format."),
+      '#states' => $visibility,
     ];
-
-    $keys = static::openingHoursSpecificationFormKeys();
-    foreach ($keys as $key) {
-      if ($key != '@type') {
-        $form[$key]['#states'] = $visibility;
-      }
-    }
 
     return $form;
   }

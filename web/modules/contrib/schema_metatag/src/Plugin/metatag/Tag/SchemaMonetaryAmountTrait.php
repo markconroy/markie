@@ -2,8 +2,6 @@
 
 namespace Drupal\schema_metatag\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\SchemaMetatagManager;
-
 /**
  * Schema.org MonentaryAmount trait.
  */
@@ -12,28 +10,25 @@ trait SchemaMonetaryAmountTrait {
   use SchemaPivotTrait;
 
   /**
-   * Form keys.
+   * Return the SchemaMetatagManager.
+   *
+   * @return \Drupal\schema_metatag\SchemaMetatagManager
+   *   The Schema Metatag Manager service.
    */
-  public static function monetaryAmountFormKeys() {
-    return [
-      '@type',
-      'currency',
-      'value',
-    ];
-  }
+  abstract protected function schemaMetatagManager();
 
   /**
    * Form.
    */
   public function monetaryAmountForm($input_values) {
 
-    $input_values += SchemaMetatagManager::defaultInputValues();
+    $input_values += $this->schemaMetatagManager()->defaultInputValues();
     $value = $input_values['value'];
 
     // Get the id for the nested @type element.
     $selector = ':input[name="' . $input_values['visibility_selector'] . '[@type]"]';
     $visibility = ['invisible' => [$selector => ['value' => '']]];
-    $selector2 = SchemaMetatagManager::altSelector($selector);
+    $selector2 = $this->schemaMetatagManager()->altSelector($selector);
     $visibility2 = ['invisible' => [$selector2 => ['value' => '']]];
     $visibility['invisible'] = [$visibility['invisible'], $visibility2['invisible']];
 
@@ -65,6 +60,7 @@ trait SchemaMonetaryAmountTrait {
       '#maxlength' => 255,
       '#required' => $input_values['#required'],
       '#description' => $this->t("The currency in which the monetary amount is expressed. Use 3-letter ISO 4217 format."),
+      '#states' => $visibility,
     ];
 
     $form['value']['#type'] = 'fieldset';
@@ -91,6 +87,7 @@ trait SchemaMonetaryAmountTrait {
       '#maxlength' => 255,
       '#required' => $input_values['#required'],
       '#description' => $this->t('The value.'),
+      '#states' => $visibility,
     ];
 
     $form['value']['minValue'] = [
@@ -100,6 +97,7 @@ trait SchemaMonetaryAmountTrait {
       '#maxlength' => 255,
       '#required' => $input_values['#required'],
       '#description' => $this->t('The minimum value.'),
+      '#states' => $visibility,
     ];
 
     $form['value']['maxValue'] = [
@@ -109,6 +107,7 @@ trait SchemaMonetaryAmountTrait {
       '#maxlength' => 255,
       '#required' => $input_values['#required'],
       '#description' => $this->t('The maximum value.'),
+      '#states' => $visibility,
     ];
 
     $form['value']['unitText'] = [
@@ -118,14 +117,8 @@ trait SchemaMonetaryAmountTrait {
       '#maxlength' => 255,
       '#required' => $input_values['#required'],
       '#description' => $this->t('The type of value. Should be one of HOUR, DAY, WEEK, MONTH, or YEAR.'),
+      '#states' => $visibility,
     ];
-
-    $keys = static::monetaryAmountFormKeys();
-    foreach ($keys as $key) {
-      if ($key != '@type') {
-        $form[$key]['#states'] = $visibility;
-      }
-    }
 
     return $form;
   }

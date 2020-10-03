@@ -31,9 +31,26 @@ class SchemaMovieType extends SchemaTypeBase {
   public static function labels() {
     return [
       'Movie',
-      'TVSeries',
-      'TVSeason',
-      'TVEpisode',
+      'Series',
+      '- EventSeries',
+      '- CreativeWorkSeries',
+      '-- BookSeries',
+      '-- MovieSeries',
+      '-- Periodical',
+      '--- ComicSeries',
+      '--- Newspaper',
+      '-- PodcastSeries',
+      '-- RadioSeries',
+      '-- TVSeries',
+      '-- VideoGameSeries',
+      'CreativeWorkSeason',
+      '- PodcastSeason',
+      '- RadioSeason',
+      '- TVSeason',
+      'Episode',
+      '- PodcastEpisode',
+      '- RadioEpisode',
+      '- TVEpisode',
     ];
   }
 

@@ -2,8 +2,6 @@
 
 namespace Drupal\schema_metatag\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\SchemaMetatagManager;
-
 /**
  * Schema.org CreativeWork items should extend this class.
  */
@@ -16,7 +14,7 @@ class SchemaCreativeWorkBase extends SchemaNameBase {
    */
   public function form(array $element = []) {
 
-    $value = SchemaMetatagManager::unserialize($this->value());
+    $value = $this->schemaMetatagManager()->unserialize($this->value());
 
     $input_values = [
       'title' => $this->label(),
@@ -40,12 +38,21 @@ class SchemaCreativeWorkBase extends SchemaNameBase {
    */
   public static function testValue() {
     $items = [];
-    $keys = self::creativeWorkFormKeys('CreativeWork');
+    $keys = [
+      '@type',
+      '@id',
+      'name',
+      'url',
+      'sameAs',
+      'datePublished',
+      'author',
+      'potentialAction',
+    ];
     foreach ($keys as $key) {
       switch ($key) {
 
         case '@type':
-          $items[$key] = 'CreativeWork';
+          $items[$key] = 'Book';
           break;
 
         case 'author':
@@ -83,4 +90,5 @@ class SchemaCreativeWorkBase extends SchemaNameBase {
     }
     return $items;
   }
+
 }

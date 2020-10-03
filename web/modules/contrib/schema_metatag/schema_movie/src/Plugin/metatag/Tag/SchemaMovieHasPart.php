@@ -25,9 +25,9 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaHasPartBase;
  */
 class SchemaMovieHasPart extends SchemaHasPartBase {
 
- /**
-  * Generate a form element for this meta tag.
-  */
+  /**
+   * Generate a form element for this meta tag.
+   */
   public function form(array $element = []) {
 
     $form = parent::form($element);
@@ -35,7 +35,7 @@ class SchemaMovieHasPart extends SchemaHasPartBase {
     // Limit potential actions to WatchAction.
     $form['potentialAction']['actionType']['#options'] = ['ConsumeAction' => 'ConsumeAction'];
     $form['potentialAction']['ConsumeAction']['@type']['#options'] = [
-      'WatchAction' => 'WatchAction',
+      'WatchAction' => $this->t('WatchAction'),
     ];
     return $form;
 

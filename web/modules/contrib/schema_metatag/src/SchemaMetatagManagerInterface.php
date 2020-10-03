@@ -63,8 +63,8 @@ interface SchemaMetatagManagerInterface {
    * Complex serialized value that might contain multiple
    * values. In this case we have to pivot the results.
    *
-   * @param array $content
-   *   The array to pivot.
+   * @param mixed $content
+   *   The value to pivot.
    *
    * @return array
    *   The pivoted array.
@@ -74,8 +74,8 @@ interface SchemaMetatagManagerInterface {
   /**
    * If the item is an array with numeric keys, count the keys.
    *
-   * @param array $item
-   *   The array to assess.
+   * @param mixed $item
+   *   The value to assess.
    *
    * @return int
    *   The number of numeric keys in the array.
@@ -96,8 +96,8 @@ interface SchemaMetatagManagerInterface {
   /**
    * Wrapper for serialize to prevent errors.
    *
-   * @param array $value
-   *   The array to serialize.
+   * @param mixed $value
+   *   The values to serialize.
    *
    * @return string
    *   The serialized value.
@@ -131,8 +131,8 @@ interface SchemaMetatagManagerInterface {
    *
    * If the result is an empty array, the nested array is completely empty.
    *
-   * @param array $array
-   *   The array to assess.
+   * @param mixed $array
+   *   The array or object to assess.
    *
    * @return array
    *   The original array with empty values removed.
@@ -147,8 +147,8 @@ interface SchemaMetatagManagerInterface {
    * See if the array has numeric keys (it's actually an array) or not (it's
    * an object that should have a @type or @id).
    *
-   * @param array $array
-   *   The array to assess.
+   * @param mixed $array
+   *   The value to assess.
    *
    * @return bool
    *   TRUE/FALSE.
@@ -198,5 +198,22 @@ interface SchemaMetatagManagerInterface {
    *   An array of default values.
    */
   public static function defaultInputValues();
+
+  /**
+   * Alternate visibility selector for the field element.
+   *
+   * This is necessary because the form elements on the general configuration
+   * form have different parents than the form elements in the metatags field
+   * widget. This function makes is possible to convert the #states visibility
+   * selectors for the general configuration form into the right pattern
+   * so they will work on the field widget.
+   *
+   * @param string $selector
+   *   The selector constructed for the main metatag form.
+   *
+   * @return string
+   *   A rewritten selector that will work in the field form.
+   */
+  public static function altSelector($selector);
 
 }

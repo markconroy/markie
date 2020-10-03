@@ -12,6 +12,11 @@ abstract class SchemaMetatagTagsTestBase extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
+  protected $defaultTheme = 'classy';
+
+  /**
+   * {@inheritdoc}
+   */
   protected static $modules = [
     // This is needed for the 'access content' permission.
     'node',
@@ -84,8 +89,8 @@ abstract class SchemaMetatagTagsTestBase extends BrowserTestBase {
 
     // Create a content type to test with.
     $this->createContentType(['type' => 'page']);
-    $node = $this->drupalCreateNode([
-      'title' => t('Node 1!'),
+    $this->drupalCreateNode([
+      'title' => 'Node 1!',
       'type' => 'page',
       'promote' => 1,
     ]);

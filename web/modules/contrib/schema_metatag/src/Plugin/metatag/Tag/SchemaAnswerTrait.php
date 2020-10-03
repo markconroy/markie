@@ -2,8 +2,6 @@
 
 namespace Drupal\schema_metatag\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\SchemaMetatagManager;
-
 /**
  * Schema.org Answer trait.
  */
@@ -14,32 +12,26 @@ trait SchemaAnswerTrait {
   }
 
   /**
-   * Form keys.
+   * Return the SchemaMetatagManager.
+   *
+   * @return \Drupal\schema_metatag\SchemaMetatagManager
+   *   The Schema Metatag Manager service.
    */
-  public static function answerFormKeys() {
-    return [
-      '@type',
-      'text',
-      'url',
-      'upvoteCount',
-      'dateCreated',
-      'author',
-    ];
-  }
+  abstract protected function schemaMetatagManager();
 
   /**
    * The form element.
    */
   public function answerForm($input_values) {
 
-    $input_values += SchemaMetatagManager::defaultInputValues();
+    $input_values += $this->schemaMetatagManager()->defaultInputValues();
     $value = $input_values['value'];
 
     // Get the id for the nested @type element.
     $visibility_selector = $input_values['visibility_selector'];
     $selector = ':input[name="' . $visibility_selector . '[@type]"]';
     $visibility = ['invisible' => [$selector => ['value' => '']]];
-    $selector2 = SchemaMetatagManager::altSelector($selector);
+    $selector2 = $this->schemaMetatagManager()->altSelector($selector);
     $visibility2 = ['invisible' => [$selector2 => ['value' => '']]];
     $visibility['invisible'] = [$visibility['invisible'], $visibility2['invisible']];
 
@@ -72,6 +64,8 @@ trait SchemaAnswerTrait {
       '#maxlength' => 255,
       '#required' => $input_values['#required'],
       '#description' => $this->t('REQUIRED BY GOOGLE. The full text of the answer.'),
+      '#states' => $visibility,
+
     ];
 
     $form['url'] = [
@@ -81,6 +75,7 @@ trait SchemaAnswerTrait {
       '#maxlength' => 255,
       '#required' => $input_values['#required'],
       '#description' => $this->t('STRONGLY RECOMMENDED BY GOOGLE. A URL that links directly to this answer.'),
+      '#states' => $visibility,
     ];
 
     $form['upvoteCount'] = [
@@ -90,6 +85,7 @@ trait SchemaAnswerTrait {
       '#maxlength' => 255,
       '#required' => $input_values['#required'],
       '#description' => $this->t("RECOMMENDED BY GOOGLE. The total number of votes that this answer has received."),
+      '#states' => $visibility,
     ];
 
     $form['dateCreated'] = [
@@ -99,24 +95,19 @@ trait SchemaAnswerTrait {
       '#maxlength' => 255,
       '#required' => $input_values['#required'],
       '#description' => $this->t('RECOMMENDED BY GOOGLE. The date at which the answer was added to the page, in ISO-8601 format.'),
+      '#states' => $visibility,
     ];
 
     $input_values = [
       'title' => $this->t('Author'),
       'description' => 'RECOMMENDED BY GOOGLE. The author of the answer.',
       'value' => !empty($value['author']) ? $value['author'] : [],
-      '#required' => isset($element['#required']) ? $element['#required'] : FALSE,
+      '#required' => $input_values['#required'],
       'visibility_selector' => $visibility_selector . '[author]',
     ];
 
     $form['author'] = $this->personOrgForm($input_values);
-
-    $keys = static::answerFormKeys();
-    foreach ($keys as $key) {
-      if ($key != '@type') {
-        $form[$key]['#states'] = $visibility;
-      }
-    }
+    $form['author']['#states'] = $visibility;
 
     return $form;
   }

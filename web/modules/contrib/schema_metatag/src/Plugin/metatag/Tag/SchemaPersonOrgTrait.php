@@ -2,8 +2,6 @@
 
 namespace Drupal\schema_metatag\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\SchemaMetatagManager;
-
 /**
  * Schema.org Person/Organization trait.
  */
@@ -14,37 +12,31 @@ trait SchemaPersonOrgTrait {
   }
 
   /**
-   * Form keys.
+   * Return the SchemaMetatagManager.
+   *
+   * @return \Drupal\schema_metatag\SchemaMetatagManager
+   *   The Schema Metatag Manager service.
    */
-  public static function personOrgFormKeys() {
-    return [
-      '@type',
-      '@id',
-      'name',
-      'url',
-      'sameAs',
-      'logo',
-    ];
-  }
+  abstract protected function schemaMetatagManager();
 
   /**
    * The form element.
    */
   public function personOrgForm($input_values) {
 
-    $input_values += SchemaMetatagManager::defaultInputValues();
+    $input_values += $this->schemaMetatagManager()->defaultInputValues();
     $value = $input_values['value'];
 
     // Get the id for the nested @type element.
     $selector = ':input[name="' . $input_values['visibility_selector'] . '[@type]"]';
     $visibility = ['invisible' => [$selector => ['value' => '']]];
-    $selector2 = SchemaMetatagManager::altSelector($selector);
+    $selector2 = $this->schemaMetatagManager()->altSelector($selector);
     $visibility2 = ['invisible' => [$selector2 => ['value' => '']]];
     $visibility['invisible'] = [$visibility['invisible'], $visibility2['invisible']];
 
-    $org_visibility = ['visible' => [$selector => ['value' => 'Organization']]];
-    $org_visibility2 = ['visible' => [$selector2 => ['value' => 'Organization']]];
-    $org_visibility['visible'] = [$org_visibility['visible'], $org_visibility2['visible']];
+    $org_visibility = ['invisible' => [$selector => ['value' => 'Person']]];
+    $org_visibility2 = ['invisible' => [$selector2 => ['value' => 'Person']]];
+    $org_visibility['invisible'] = [$org_visibility['invisible'], $org_visibility2['invisible']];
 
     $form['#type'] = 'fieldset';
     $form['#title'] = $input_values['title'];
@@ -64,6 +56,9 @@ trait SchemaPersonOrgTrait {
       '#options' => [
         'Person' => $this->t('Person'),
         'Organization' => $this->t('Organization'),
+        'GovernmentOrganization' => $this->t('GovernmentOrganization'),
+        'LocalBusiness' => $this->t('LocalBusiness'),
+        'MedicalOrganization' => $this->t('MedicalOrganization'),
       ],
       '#required' => $input_values['#required'],
       '#weight' => -10,
@@ -76,6 +71,7 @@ trait SchemaPersonOrgTrait {
       '#maxlength' => 255,
       '#required' => $input_values['#required'],
       '#description' => $this->t("Globally unique @id of the person or organization, usually a url, used to to link other properties to this object."),
+      '#states' => $visibility,
     ];
 
     $form['name'] = [
@@ -85,6 +81,7 @@ trait SchemaPersonOrgTrait {
       '#maxlength' => 255,
       '#required' => $input_values['#required'],
       '#description' => $this->t("Name of the person or organization, i.e. [node:author:display-name]."),
+      '#states' => $visibility,
     ];
 
     $form['url'] = [
@@ -94,6 +91,7 @@ trait SchemaPersonOrgTrait {
       '#maxlength' => 255,
       '#required' => $input_values['#required'],
       '#description' => $this->t("Absolute URL of the canonical Web page, like the URL of the author's profile page or the organization's official website, i.e. [node:author:url]."),
+      '#states' => $visibility,
     ];
 
     $form['sameAs'] = [
@@ -103,14 +101,8 @@ trait SchemaPersonOrgTrait {
       '#maxlength' => 255,
       '#required' => $input_values['#required'],
       '#description' => $this->t("Comma separated list of URLs for the person's or organization's official social media profile page(s)."),
+      '#states' => $visibility,
     ];
-
-    $keys = static::personOrgFormKeys();
-    foreach ($keys as $key) {
-      if ($key != '@type') {
-        $form[$key]['#states'] = $visibility;
-      }
-    }
 
     $input_values = [
       'title' => $this->t('Logo'),

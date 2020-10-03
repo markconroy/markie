@@ -2,8 +2,6 @@
 
 namespace Drupal\schema_metatag\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\SchemaMetatagManager;
-
 /**
  * Schema.org PostalAddress trait.
  */
@@ -12,31 +10,25 @@ trait SchemaAddressTrait {
   use SchemaPivotTrait;
 
   /**
-   * Form keys.
+   * Return the SchemaMetatagManager.
+   *
+   * @return \Drupal\schema_metatag\SchemaMetatagManager
+   *   The Schema Metatag Manager service.
    */
-  public static function postalAddressFormKeys() {
-    return [
-      '@type',
-      'streetAddress',
-      'addressLocality',
-      'addressRegion',
-      'postalCode',
-      'addressCountry',
-    ];
-  }
+  abstract protected function schemaMetatagManager();
 
   /**
    * The form element.
    */
   public function postalAddressForm($input_values) {
 
-    $input_values += SchemaMetatagManager::defaultInputValues();
+    $input_values += $this->schemaMetatagManager()->defaultInputValues();
     $value = $input_values['value'];
 
     // Get the id for the nested @type element.
     $selector = ':input[name="' . $input_values['visibility_selector'] . '[@type]"]';
     $visibility = ['invisible' => [$selector => ['value' => '']]];
-    $selector2 = SchemaMetatagManager::altSelector($selector);
+    $selector2 = $this->schemaMetatagManager()->altSelector($selector);
     $visibility2 = ['invisible' => [$selector2 => ['value' => '']]];
     $visibility['invisible'] = [$visibility['invisible'], $visibility2['invisible']];
 
@@ -69,6 +61,7 @@ trait SchemaAddressTrait {
       '#maxlength' => 255,
       '#required' => $input_values['#required'],
       '#description' => $this->t("The street address. For example, 1600 Amphitheatre Pkwy."),
+      '#states' => $visibility,
     ];
 
     $form['addressLocality'] = [
@@ -78,6 +71,7 @@ trait SchemaAddressTrait {
       '#maxlength' => 255,
       '#required' => $input_values['#required'],
       '#description' => $this->t("The locality. For example, Mountain View."),
+      '#states' => $visibility,
     ];
 
     $form['addressRegion'] = [
@@ -87,6 +81,7 @@ trait SchemaAddressTrait {
       '#maxlength' => 255,
       '#required' => $input_values['#required'],
       '#description' => $this->t("The region. For example, CA."),
+      '#states' => $visibility,
     ];
 
     $form['postalCode'] = [
@@ -96,6 +91,7 @@ trait SchemaAddressTrait {
       '#maxlength' => 255,
       '#required' => $input_values['#required'],
       '#description' => $this->t('The postal code. For example, 94043.'),
+      '#states' => $visibility,
     ];
 
     $form['addressCountry'] = [
@@ -105,14 +101,8 @@ trait SchemaAddressTrait {
       '#maxlength' => 255,
       '#required' => $input_values['#required'],
       '#description' => $this->t('The country. For example, USA. You can also provide the two-letter ISO 3166-1 alpha-2 country code.'),
+      '#states' => $visibility,
     ];
-
-    $keys = static::postalAddressFormKeys();
-    foreach ($keys as $key) {
-      if ($key != '@type') {
-        $form[$key]['#states'] = $visibility;
-      }
-    }
 
     return $form;
   }

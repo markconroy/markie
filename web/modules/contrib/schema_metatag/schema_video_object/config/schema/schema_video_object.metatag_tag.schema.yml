@@ -29,7 +29,7 @@ metatag.metatag_tag.schema_video_object_thumbnail_url:
   type: text
   label: 'thumbnailUrl'
 metatag.metatag_tag.schema_video_object_type:
-  type: text
+  type: string
   label: '@type'
 metatag.metatag_tag.schema_video_object_upload_date:
   type: text

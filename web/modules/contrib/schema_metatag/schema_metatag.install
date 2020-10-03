@@ -91,7 +91,7 @@ function schema_metatag_update_8104(&$sandbox) {
 /**
  * Fix broken review tags.
  *
- * itemReviewed and reviewBody were using the wrong classes. Previous values
+ * ItemReviewed and reviewBody were using the wrong classes. Previous values
  * need to be emptied out because they contain invalid data.
  */
 function schema_metatag_update_8105() {
@@ -114,7 +114,6 @@ function schema_metatag_update_8105() {
   }
   return (string) t("Fields on the Schema.org Review object have been emptied since the original values are invalid. Please re-configure them.");
 }
-
 
 /**
  * Delete unneeded tags.

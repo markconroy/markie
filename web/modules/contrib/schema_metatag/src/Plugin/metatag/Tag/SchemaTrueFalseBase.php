@@ -13,9 +13,9 @@ class SchemaTrueFalseBase extends SchemaNameBase {
   public function form(array $element = []) {
     $form = parent::form($element);
     $form['#type'] = 'select';
-    $form['#empty_option'] = t('- None -');
+    $form['#empty_option'] = $this->t('- None -');
     $form['#empty_value'] = '';
-    $form['#options'] = ['False' => 'False', 'True' => 'True'];
+    $form['#options'] = ['False' => $this->t('False'), 'True' => $this->t('True')];
     return $form;
   }
 

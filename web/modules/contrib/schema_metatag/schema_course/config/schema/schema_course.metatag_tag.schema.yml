@@ -20,5 +20,5 @@ metatag.metatag_tag.schema_course_provider:
   type: text
   label: 'provider'
 metatag.metatag_tag.schema_course_type:
-  type: text
+  type: string
   label: '@type'

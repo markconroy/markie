@@ -32,7 +32,7 @@ class SchemaMetatagManager implements SchemaMetatagManagerInterface {
     // and add JSON LD wrappers.
     $items = [];
     $group_key = 0;
-    foreach ($schema_metatags as $group_name => $data) {
+    foreach ($schema_metatags as $data) {
       if (empty($items)) {
         $items['@context'] = 'https://schema.org';
       }
@@ -114,7 +114,6 @@ class SchemaMetatagManager implements SchemaMetatagManagerInterface {
     $count = max(array_map([__CLASS__, 'countNumericKeys'], $content));
     $pivoted = [];
     $exploded = [];
-    $keys = array_keys($content);
     for ($i = 0; $i < $count; $i++) {
       foreach ($content as $key => $item) {
         // If a lower array is pivoted, pivot that first.
@@ -171,7 +170,7 @@ class SchemaMetatagManager implements SchemaMetatagManagerInterface {
   public static function explode($value) {
     $value = explode(',', $value);
     $value = array_map('trim', $value);
-    //$value = array_unique($value);
+    // $value = array_unique($value);
     if (count($value) == 1) {
       return $value[0];
     }
@@ -233,7 +232,6 @@ class SchemaMetatagManager implements SchemaMetatagManagerInterface {
     if (!is_string($value)) {
       return FALSE;
     }
-    $data = trim($value);
     if ('N' == $value) {
       return TRUE;
     }
@@ -355,23 +353,7 @@ class SchemaMetatagManager implements SchemaMetatagManagerInterface {
   }
 
   /**
-   * Alternate visibility selector for the field element.
-   *
-   * This is necessary because the form elements on the general configuration
-   * form have different parents than the form elements in the metatags field
-   * widget. This function makes is possible to convert the #states visibility
-   * selectors for the general configuration form into the right pattern
-   * so they will work on the field widget.
-   *
-   * @param string $selector
-   *   The selector constructed for the main metatag form.
-   * @param string $group
-   *   The group this part of the form belongs in.
-   * @param string $id
-   *   The id of the individual element.
-   *
-   * @return string
-   *   A rewritten selector that will work in the field form.
+   * {@inheritdoc}
    */
   public static function altSelector($selector) {
 
@@ -383,7 +365,7 @@ class SchemaMetatagManager implements SchemaMetatagManagerInterface {
     $regex = '/:input\[name="(\w+)\[/';
     preg_match($regex, $selector, $matches);
     $id = $matches[1];
-    foreach ($metatag_groups as $group_name => $group_info) {
+    foreach ($metatag_groups as $group_info) {
       if (!empty($group_info['tags'])) {
         if (array_key_exists($id, $group_info['tags'])) {
           $tag = $group_info['tags'][$id];
@@ -395,7 +377,7 @@ class SchemaMetatagManager implements SchemaMetatagManagerInterface {
     // Original pattern, general configuration form:
     // - schema_web_page_publisher[@type]
     // Alternate pattern, field widget form:
-    // - field_metatags[0][schema_web_page][schema_web_page_publisher][@type]
+    // - field_metatags[0][schema_web_page][schema_web_page_publisher][@type].
     $original = $id . '[';
     $alternate = 'field_metatags[0][' . $group . '][' . $id . '][';
     $new = str_replace($original, $alternate, $selector);

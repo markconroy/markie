@@ -47,7 +47,7 @@ metatag.metatag_tag.schema_person_telephone:
   type: text
   label: 'telephone'
 metatag.metatag_tag.schema_person_type:
-  type: text
+  type: string
   label: '@type'
 metatag.metatag_tag.schema_person_url:
   type: text

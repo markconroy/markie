@@ -2,8 +2,6 @@
 
 namespace Drupal\schema_metatag\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\SchemaMetatagManager;
-
 /**
  * Schema.org Place items should extend this class.
  */
@@ -16,7 +14,7 @@ class SchemaPlaceBase extends SchemaAddressBase {
    */
   public function form(array $element = []) {
 
-    $value = SchemaMetatagManager::unserialize($this->value());
+    $value = $this->schemaMetatagManager()->unserialize($this->value());
 
     $input_values = [
       'title' => $this->label(),
@@ -40,7 +38,13 @@ class SchemaPlaceBase extends SchemaAddressBase {
    */
   public static function testValue() {
     $items = [];
-    $keys = self::placeFormKeys();
+    $keys = [
+      '@type',
+      'name',
+      'url',
+      'address',
+      'geo',
+    ];
     foreach ($keys as $key) {
       switch ($key) {
         case 'address':

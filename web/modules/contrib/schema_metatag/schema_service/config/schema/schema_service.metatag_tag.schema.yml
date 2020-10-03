@@ -14,7 +14,7 @@ metatag.metatag_tag.schema_service_offers:
   type: text
   label: 'offers'
 metatag.metatag_tag.schema_service_type:
-  type: text
+  type: string
   label: '@type'
 metatag.metatag_tag.schema_service_aggregate_rating:
   type: text

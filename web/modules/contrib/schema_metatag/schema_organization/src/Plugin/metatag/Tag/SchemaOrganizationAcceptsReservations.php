@@ -5,7 +5,7 @@ namespace Drupal\schema_organization\Plugin\metatag\Tag;
 use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaTrueFalseBase;
 
 /**
- * Provides a plugin for the 'schema_organization_accepts_reservations' meta tag.
+ * Provides a plugin for 'schema_organization_accepts_reservations' meta tag.
  *
  * - 'id' should be a globally unique id.
  * - 'name' should match the Schema.org element name.

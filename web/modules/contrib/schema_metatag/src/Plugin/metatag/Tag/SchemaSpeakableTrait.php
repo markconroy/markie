@@ -2,35 +2,30 @@
 
 namespace Drupal\schema_metatag\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\SchemaMetatagManager;
-
 /**
  * Schema.org Speakable trait.
  */
 trait SchemaSpeakableTrait {
 
   /**
-   * Form keys.
+   * Return the SchemaMetatagManager.
+   *
+   * @return \Drupal\schema_metatag\SchemaMetatagManager
+   *   The Schema Metatag Manager service.
    */
-  public static function speakableFormKeys() {
-    return [
-      '@type',
-      'xpath',
-      'cssSelector',
-    ];
-  }
+  abstract protected function schemaMetatagManager();
 
   /**
    * The form element.
    */
   public function speakableForm($input_values) {
-    $input_values += SchemaMetatagManager::defaultInputValues();
+    $input_values += $this->schemaMetatagManager()->defaultInputValues();
     $value = $input_values['value'];
 
     // Get the id for the nested @type element.
     $selector = ':input[name="' . $input_values['visibility_selector'] . '[@type]"]';
     $visibility = ['invisible' => [$selector => ['value' => '']]];
-    $selector2 = SchemaMetatagManager::altSelector($selector);
+    $selector2 = $this->schemaMetatagManager()->altSelector($selector);
     $visibility2 = ['invisible' => [$selector2 => ['value' => '']]];
     $visibility['invisible'] = [$visibility['invisible'], $visibility2['invisible']];
 
@@ -48,7 +43,7 @@ trait SchemaSpeakableTrait {
       '#options' => [
         'SpeakableSpecification' => $this->t('SpeakableSpecification'),
       ],
-      '#description' => 'Please provide either xpath or cssSelector, not both.',
+      '#description' => $this->t('Please provide either xpath or cssSelector, not both.'),
     ];
 
     $form['xpath'] = [
@@ -58,6 +53,7 @@ trait SchemaSpeakableTrait {
       '#description' => $this->t('Separate xpaths by comma, as in: @example',
         ['@example' => '/html/head/title, /html/head/meta[@name=\'description\']/@content']
       ),
+      '#states' => $visibility,
     ];
 
     $form['cssSelector'] = [
@@ -67,14 +63,8 @@ trait SchemaSpeakableTrait {
       '#description' => $this->t('Separate selectors by comma, as in @example',
         ['@example' => '#title, #summary']
       ),
+      '#states' => $visibility,
     ];
-
-    $keys = self::speakableFormKeys();
-    foreach ($keys as $key) {
-      if ($key != '@type') {
-        $form[$key]['#states'] = $visibility;
-      }
-    }
 
     return $form;
   }

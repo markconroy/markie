@@ -2,8 +2,6 @@
 
 namespace Drupal\schema_metatag\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\SchemaMetatagManager;
-
 /**
  * Schema.org NutritionInformation trait.
  */
@@ -13,39 +11,26 @@ trait SchemaNutritionInformationTrait {
   }
 
   /**
-   * Form keys.
+   * Return the SchemaMetatagManager.
+   *
+   * @return \Drupal\schema_metatag\SchemaMetatagManager
+   *   The Schema Metatag Manager service.
    */
-  public static function nutritionInformationFormKeys() {
-    return [
-      '@type',
-      'servingSize',
-      'calories',
-      'carbohydrateContent',
-      'cholesterolContent',
-      'fiberContent',
-      'proteinContent',
-      'sodiumContent',
-      'sugarContent',
-      'fatContent',
-      'saturatedFatContent',
-      'unsaturatedFatContent',
-      'transFatContent',
-    ];
-  }
+  abstract protected function schemaMetatagManager();
 
   /**
    * The form element.
    */
   public function nutritionInformationForm($input_values) {
 
-    $input_values += SchemaMetatagManager::defaultInputValues();
+    $input_values += $this->schemaMetatagManager()->defaultInputValues();
     $value = $input_values['value'];
 
     // Get the id for the nested @type element.
     $visibility_selector = $input_values['visibility_selector'];
     $selector = ':input[name="' . $visibility_selector . '[@type]"]';
     $visibility = ['invisible' => [$selector => ['value' => '']]];
-    $selector2 = SchemaMetatagManager::altSelector($selector);
+    $selector2 = $this->schemaMetatagManager()->altSelector($selector);
     $visibility2 = ['invisible' => [$selector2 => ['value' => '']]];
     $visibility['invisible'] = [$visibility['invisible'], $visibility2['invisible']];
 
@@ -78,6 +63,7 @@ trait SchemaNutritionInformationTrait {
       '#maxlength' => 255,
       '#required' => $input_values['#required'],
       '#description' => $this->t("The serving size, in terms of the number of volume or mass."),
+      '#states' => $visibility,
     ];
 
     $form['calories'] = [
@@ -87,6 +73,7 @@ trait SchemaNutritionInformationTrait {
       '#maxlength' => 255,
       '#required' => $input_values['#required'],
       '#description' => $this->t("The number of calories."),
+      '#states' => $visibility,
     ];
 
     $form['carbohydrateContent'] = [
@@ -96,6 +83,7 @@ trait SchemaNutritionInformationTrait {
       '#maxlength' => 255,
       '#required' => $input_values['#required'],
       '#description' => $this->t("The number of grams of carbohydrates."),
+      '#states' => $visibility,
     ];
 
     $form['cholesterolContent'] = [
@@ -105,6 +93,7 @@ trait SchemaNutritionInformationTrait {
       '#maxlength' => 255,
       '#required' => $input_values['#required'],
       '#description' => $this->t("The number of milligrams of cholesterol."),
+      '#states' => $visibility,
     ];
 
     $form['fiberContent'] = [
@@ -114,6 +103,7 @@ trait SchemaNutritionInformationTrait {
       '#maxlength' => 255,
       '#required' => $input_values['#required'],
       '#description' => $this->t("The number of grams of fiber."),
+      '#states' => $visibility,
     ];
 
     $form['proteinContent'] = [
@@ -123,6 +113,7 @@ trait SchemaNutritionInformationTrait {
       '#maxlength' => 255,
       '#required' => $input_values['#required'],
       '#description' => $this->t("The number of grams of protein."),
+      '#states' => $visibility,
     ];
 
     $form['sodiumContent'] = [
@@ -132,6 +123,7 @@ trait SchemaNutritionInformationTrait {
       '#maxlength' => 255,
       '#required' => $input_values['#required'],
       '#description' => $this->t("The number of milligrams of sodium."),
+      '#states' => $visibility,
     ];
 
     $form['sugarContent'] = [
@@ -141,6 +133,7 @@ trait SchemaNutritionInformationTrait {
       '#maxlength' => 255,
       '#required' => $input_values['#required'],
       '#description' => $this->t("The number of grams of sugar."),
+      '#states' => $visibility,
     ];
 
     $form['fatContent'] = [
@@ -150,6 +143,7 @@ trait SchemaNutritionInformationTrait {
       '#maxlength' => 255,
       '#required' => $input_values['#required'],
       '#description' => $this->t("The number of grams of fat."),
+      '#states' => $visibility,
     ];
 
     $form['saturatedFatContent'] = [
@@ -159,6 +153,7 @@ trait SchemaNutritionInformationTrait {
       '#maxlength' => 255,
       '#required' => $input_values['#required'],
       '#description' => $this->t("The number of grams of saturated fat."),
+      '#states' => $visibility,
     ];
 
     $form['unsaturatedFatContent'] = [
@@ -168,6 +163,7 @@ trait SchemaNutritionInformationTrait {
       '#maxlength' => 255,
       '#required' => $input_values['#required'],
       '#description' => $this->t("The number of grams of unsaturated fat."),
+      '#states' => $visibility,
     ];
 
     $form['transFatContent'] = [
@@ -177,14 +173,8 @@ trait SchemaNutritionInformationTrait {
       '#maxlength' => 255,
       '#required' => $input_values['#required'],
       '#description' => $this->t("The number of grams of trans fat."),
+      '#states' => $visibility,
     ];
-
-    $keys = static::nutritionInformationFormKeys();
-    foreach ($keys as $key) {
-      if ($key != '@type') {
-        $form[$key]['#states'] = $visibility;
-      }
-    }
 
     return $form;
   }

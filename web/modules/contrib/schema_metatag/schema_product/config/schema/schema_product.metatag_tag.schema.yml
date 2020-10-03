@@ -10,11 +10,17 @@ metatag.metatag_tag.schema_product_image:
 metatag.metatag_tag.schema_product_name:
   type: text
   label: 'name'
+metatag.metatag_tag.schema_product_url:
+  type: text
+  label: 'url'
+metatag.metatag_tag.schema_product_category:
+  type: text
+  label: 'category'
 metatag.metatag_tag.schema_product_offers:
   type: text
   label: 'offers'
 metatag.metatag_tag.schema_product_type:
-  type: text
+  type: string
   label: '@type'
 metatag.metatag_tag.schema_product_aggregate_rating:
   type: text
@@ -25,3 +31,24 @@ metatag.metatag_tag.schema_product_review:
 metatag.metatag_tag.schema_product_brand:
   type: text
   label: 'brand'
+metatag.metatag_tag.schema_product_sku:
+  type: text
+  label: 'sku'
+metatag.metatag_tag.schema_product_gtin8:
+  type: text
+  label: 'gtin8'
+metatag.metatag_tag.schema_product_gtin12:
+  type: text
+  label: 'gtin12'
+metatag.metatag_tag.schema_product_gtin13:
+  type: text
+  label: 'gtin13'
+metatag.metatag_tag.schema_product_gtin14:
+  type: text
+  label: 'gtin14'
+metatag.metatag_tag.schema_product_isbn:
+  type: text
+  label: 'isbn'
+metatag.metatag_tag.schema_product_mpn:
+  type: text
+  label: 'mpn'

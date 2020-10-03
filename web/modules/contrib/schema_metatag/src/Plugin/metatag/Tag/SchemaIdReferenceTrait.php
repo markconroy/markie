@@ -2,8 +2,6 @@
 
 namespace Drupal\schema_metatag\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\SchemaMetatagManager;
-
 /**
  * Schema.org Id Reference pivot trait.
  */
@@ -12,26 +10,25 @@ trait SchemaIdReferenceTrait {
   use SchemaPivotTrait;
 
   /**
-   * Form keys.
+   * Return the SchemaMetatagManager.
+   *
+   * @return \Drupal\schema_metatag\SchemaMetatagManager
+   *   The Schema Metatag Manager service.
    */
-  public static function idFormKeys() {
-    return [
-      '@id',
-    ];
-  }
+  abstract protected function schemaMetatagManager();
 
   /**
    * The form element.
    */
   public function idForm($input_values) {
 
-    $input_values += SchemaMetatagManager::defaultInputValues();
+    $input_values += $this->schemaMetatagManager()->defaultInputValues();
     $value = $input_values['value'];
 
     // Get the id for the nested @type element.
     $selector = ':input[name="' . $input_values['visibility_selector'] . '[@id]"]';
     $visibility = ['invisible' => [$selector => ['value' => '']]];
-    $selector2 = SchemaMetatagManager::altSelector($selector);
+    $selector2 = $this->schemaMetatagManager()->altSelector($selector);
     $visibility2 = ['invisible' => [$selector2 => ['value' => '']]];
     $visibility['invisible'] = [$visibility['invisible'], $visibility2['invisible']];
 
@@ -52,13 +49,6 @@ trait SchemaIdReferenceTrait {
       '#required' => $input_values['#required'],
       '#description' => $this->t("Globally unique @id of the related node, usually a url, used to to link other properties to this object."),
     ];
-
-    $keys = static::idFormKeys();
-    foreach ($keys as $key) {
-      if ($key != '@id') {
-        $form[$key]['#states'] = $visibility;
-      }
-    }
 
     return $form;
   }

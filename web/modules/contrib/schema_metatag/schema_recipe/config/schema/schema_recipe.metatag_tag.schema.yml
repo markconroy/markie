@@ -38,7 +38,7 @@ metatag.metatag_tag.schema_recipe_total_time:
   type: text
   label: 'totalTime'
 metatag.metatag_tag.schema_recipe_type:
-  type: text
+  type: string
   label: '@type'
 metatag.metatag_tag.schema_recipe_aggregate_rating:
   type: text

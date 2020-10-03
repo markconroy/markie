@@ -2,8 +2,6 @@
 
 namespace Drupal\schema_metatag\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\SchemaMetatagManager;
-
 /**
  * Schema.org Speakable items should extend this class.
  */
@@ -12,17 +10,10 @@ class SchemaSpeakableBase extends SchemaNameBase {
   use SchemaSpeakableTrait;
 
   /**
-   * The top level keys on this form.
-   */
-  public function formKeys() {
-    return ['pivot'] + self::speakableFormKeys();
-  }
-
-  /**
    * {@inheritdoc}
    */
   public function form(array $element = []) {
-    $value = SchemaMetatagManager::unserialize($this->value());
+    $value = $this->schemaMetatagManager()->unserialize($this->value());
 
     $input_values = [
       'title' => $this->label(),
@@ -46,7 +37,11 @@ class SchemaSpeakableBase extends SchemaNameBase {
    */
   public static function testValue() {
     $items = [];
-    $keys = self::speakableFormKeys();
+    $keys = [
+      '@type',
+      'xpath',
+      'cssSelector',
+    ];
     foreach ($keys as $key) {
       switch ($key) {
         case 'pivot':

@@ -35,4 +35,3 @@ class SchemaJobPostingType extends SchemaTypeBase {
   }
 
 }
-

@@ -30,8 +30,7 @@ class SchemaMoviePotentialAction extends SchemaActionBase {
    */
   public function form(array $element = []) {
 
-    $this->actionTypes = ['ConsumeAction'];
-    $this->actions = ['WatchAction', 'ViewAction'];
+    $this->actions = ['Action', 'ConsumeAction', 'WatchAction', 'ViewAction'];
 
     $form = parent::form($element);
     return $form;

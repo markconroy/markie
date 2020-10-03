@@ -2,8 +2,6 @@
 
 namespace Drupal\schema_metatag\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\SchemaMetatagManager;
-
 /**
  * Schema.org MonetaryAmount should extend this class.
  */
@@ -16,7 +14,7 @@ class SchemaMonetaryAmountBase extends SchemaNameBase {
    */
   public function form(array $element = []) {
 
-    $value = SchemaMetatagManager::unserialize($this->value());
+    $value = $this->schemaMetatagManager()->unserialize($this->value());
 
     $input_values = [
       'title' => $this->label(),
@@ -40,7 +38,11 @@ class SchemaMonetaryAmountBase extends SchemaNameBase {
    */
   public static function testValue() {
     $items = [];
-    $keys = self::monetaryAmountFormKeys();
+    $keys = [
+      '@type',
+      'currency',
+      'value',
+    ];
     foreach ($keys as $key) {
       switch ($key) {
         case '@type':

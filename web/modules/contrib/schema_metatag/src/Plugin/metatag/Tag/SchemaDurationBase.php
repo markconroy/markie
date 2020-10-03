@@ -14,7 +14,7 @@ class SchemaDurationBase extends SchemaNameBase {
     $element = parent::output();
     if (!empty($element)) {
       $input_value = $element['#attributes']['content'];
-      $element['#attributes']['content'] = self::outputValue($input_value);
+      $element['#attributes']['content'] = static::outputValue($input_value);
     }
     return $element;
   }
@@ -24,7 +24,7 @@ class SchemaDurationBase extends SchemaNameBase {
    */
   public static function outputValue($input_value) {
     $is_integer = ctype_digit($input_value) || is_int($input_value);
-    if (!empty($element) && $is_integer && $input_value > 0) {
+    if (!empty($input_value) && $is_integer && $input_value > 0) {
       return 'PT' . $input_value . 'S';
     }
     return $input_value;

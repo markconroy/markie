@@ -29,7 +29,7 @@ class SchemaTypeBase extends SchemaNameBase {
       '#type' => 'select',
       '#title' => $this->label(),
       '#description' => $this->description(),
-      '#empty_option' => t('- None -'),
+      '#empty_option' => $this->t('- None -'),
       '#empty_value' => '',
       '#options' => $this->typeOptions(),
       '#default_value' => $this->value(),

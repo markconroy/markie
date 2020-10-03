@@ -17,7 +17,7 @@ metatag.metatag_tag.schema_book_same_as:
   type: text
   label: 'sameAs'
 metatag.metatag_tag.schema_book_type:
-  type: text
+  type: string
   label: '@type'
 metatag.metatag_tag.schema_book_url:
   type: text

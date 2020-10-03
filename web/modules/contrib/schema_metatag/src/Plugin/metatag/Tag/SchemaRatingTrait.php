@@ -2,8 +2,6 @@
 
 namespace Drupal\schema_metatag\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\SchemaMetatagManager;
-
 /**
  * Schema.org Rating trait.
  */
@@ -12,30 +10,25 @@ trait SchemaRatingTrait {
   use SchemaPivotTrait;
 
   /**
-   * Form keys.
+   * Return the SchemaMetatagManager.
+   *
+   * @return \Drupal\schema_metatag\SchemaMetatagManager
+   *   The Schema Metatag Manager service.
    */
-  public static function ratingFormKeys() {
-    return [
-      '@type',
-      'ratingValue',
-      'bestRating',
-      'worstRating',
-      'ratingCount',
-    ];
-  }
+  abstract protected function schemaMetatagManager();
 
   /**
    * The form element.
    */
   public function ratingForm($input_values) {
 
-    $input_values += SchemaMetatagManager::defaultInputValues();
+    $input_values += $this->schemaMetatagManager()->defaultInputValues();
     $value = $input_values['value'];
 
     // Get the id for the nested @type element.
     $selector = ':input[name="' . $input_values['visibility_selector'] . '[@type]"]';
     $visibility = ['invisible' => [$selector => ['value' => '']]];
-    $selector2 = SchemaMetatagManager::altSelector($selector);
+    $selector2 = $this->schemaMetatagManager()->altSelector($selector);
     $visibility2 = ['invisible' => [$selector2 => ['value' => '']]];
     $visibility['invisible'] = [$visibility['invisible'], $visibility2['invisible']];
 
@@ -66,8 +59,9 @@ trait SchemaRatingTrait {
       '#title' => $this->t('ratingValue'),
       '#default_value' => !empty($value['ratingValue']) ? $value['ratingValue'] : '',
       '#maxlength' => 255,
-      '#required' => isset($element['#required']) ? $element['#required'] : FALSE,
+      '#required' => $input_values['#required'],
       '#description' => $this->t('The numeric rating of the item.'),
+      '#states' => $visibility,
     ];
 
     $form['ratingCount'] = [
@@ -77,6 +71,7 @@ trait SchemaRatingTrait {
       '#maxlength' => 255,
       '#required' => $input_values['#required'],
       '#description' => $this->t('The number of ratings included. Only required for AggregateRating.'),
+      '#states' => $visibility,
     ];
 
     $form['bestRating'] = [
@@ -86,6 +81,7 @@ trait SchemaRatingTrait {
       '#maxlength' => 255,
       '#required' => $input_values['#required'],
       '#description' => $this->t('The highest rating value possible.'),
+      '#states' => $visibility,
     ];
 
     $form['worstRating'] = [
@@ -95,14 +91,8 @@ trait SchemaRatingTrait {
       '#maxlength' => 255,
       '#required' => $input_values['#required'],
       '#description' => $this->t('The lowest rating value possible.'),
+      '#states' => $visibility,
     ];
-
-    $keys = self::ratingFormKeys();
-    foreach ($keys as $key) {
-      if ($key != '@type') {
-        $form[$key]['#states'] = $visibility;
-      }
-    }
 
     return $form;
   }

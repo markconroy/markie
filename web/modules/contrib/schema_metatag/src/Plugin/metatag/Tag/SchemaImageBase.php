@@ -2,8 +2,6 @@
 
 namespace Drupal\schema_metatag\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\SchemaMetatagManager;
-
 /**
  * Schema.org Image items should extend this class.
  */
@@ -16,13 +14,13 @@ class SchemaImageBase extends SchemaNameBase {
    */
   public function form(array $element = []) {
 
-    $value = SchemaMetatagManager::unserialize($this->value());
+    $value = $this->schemaMetatagManager()->unserialize($this->value());
 
     $input_values = [
       'title' => $this->label(),
       'description' => $this->description(),
-      'value' => SchemaMetatagManager::unserialize($this->value()),
-      '#required' => isset($element['#required']) ? $element['#required'] : FALSE,
+      'value' => $this->schemaMetatagManager()->unserialize($this->value()),
+      '#required' => isset($value['#required']) ? $value['#required'] : FALSE,
       'visibility_selector' => $this->visibilitySelector(),
     ];
 
@@ -40,7 +38,13 @@ class SchemaImageBase extends SchemaNameBase {
    */
   public static function testValue() {
     $items = [];
-    $keys = self::imageFormKeys();
+    $keys = [
+      '@type',
+      'representativeOfPage',
+      'url',
+      'width',
+      'height',
+    ];
     foreach ($keys as $key) {
       switch ($key) {
         case '@type':
