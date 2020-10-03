@@ -8,7 +8,7 @@ core_version_requirement: ^8.8.0 || ^9.0
 dependencies:
   - admin_toolbar:admin_toolbar
 
-# Information added by Drupal.org packaging script on 2020-03-24
-version: '8.x-2.2'
+# Information added by Drupal.org packaging script on 2020-06-19
+version: '8.x-2.3'
 project: 'admin_toolbar'
-datestamp: 1585017182
+datestamp: 1592535601

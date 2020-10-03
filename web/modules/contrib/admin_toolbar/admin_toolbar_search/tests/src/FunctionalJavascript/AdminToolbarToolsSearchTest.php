@@ -97,14 +97,16 @@ class AdminToolbarToolsSearchTest extends AdminToolbarSearchTestBase {
    * Tests search functionality with admin_toolbar_tools enabled.
    */
   public function testToolbarSearch() {
-    $search_tab = '#toolbar-item-administration-search';
+    $search_tab = '#admin-toolbar-search-tab';
+    $search_toolbar_item = '#toolbar-item-administration-search';
     $search_tray = '#toolbar-item-administration-search-tray';
 
     $this->drupalLogin($this->adminUser);
     $assert_session = $this->assertSession();
     $assert_session->responseContains('admin.toolbar_search.css');
     $assert_session->responseContains('admin_toolbar_search.js');
-    $assert_session->waitForElementVisible('css', $search_tab)->click();
+    $assert_session->waitForElementVisible('css', $search_tab);
+    $assert_session->waitForElementVisible('css', $search_toolbar_item);
     $assert_session->waitForElementVisible('css', $search_tray);
 
     $this->assertSuggestionContains('basic', 'admin/config/system/site-information');

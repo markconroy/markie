@@ -48,6 +48,12 @@
         }
       });
 
+      // Always hide the dropdown menu on mobile.
+      if ($('#toolbar-item-administration-tray').hasClass('toolbar-tray-vertical')) {
+        $('#toolbar-item-administration').removeClass('is-active');
+        $('#toolbar-item-administration-tray').removeClass('is-active');
+      };
+
     }
   };
 })(jQuery, Drupal);

@@ -18,12 +18,3 @@
 .ui-autocomplete .ui-menu-item span.admin-toolbar-search-url {
   color: rgba(0, 0, 0, 0.50);
 }
-
-.admin-toolbar-search-autocomplete-list {
-  max-height: 300px;
-  overflow-y: scroll;
-}
-
-.admin-toolbar-search-autocomplete-list .ui-menu-item .ui-state-active {
-  margin: 0;
-}
