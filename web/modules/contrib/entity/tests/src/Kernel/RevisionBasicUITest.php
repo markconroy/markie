@@ -164,8 +164,8 @@ class RevisionBasicUITest extends KernelTestBase {
     $request = Request::create($revision->toUrl('revision')->toString());
     $response = $http_kernel->handle($request);
     $this->assertEquals(200, $response->getStatusCode());
-    $this->assertNotContains('rev 1', $response->getContent());
-    $this->assertContains('rev 2', $response->getContent());
+    $this->assertStringNotContainsString('rev 1', $response->getContent());
+    $this->assertStringContainsString('rev 2', $response->getContent());
   }
 
   public function testRevisionRevert() {

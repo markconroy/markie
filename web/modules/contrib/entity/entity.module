@@ -6,9 +6,11 @@
  */
 
 use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Config\Entity\ConfigEntityInterface;
 use Drupal\Core\Database\Query\SelectInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Entity\Sql\SqlEntityStorageInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\entity\BundlePlugin\BundlePluginHandler;
 use Drupal\entity\QueryAccess\Condition;
@@ -62,6 +64,25 @@ function entity_entity_type_build(array &$entity_types) {
 
       if (!$entity_type->hasHandlerClass('bundle_plugin')) {
         $entity_type->setHandlerClass('bundle_plugin', BundlePluginHandler::class);
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_entity_type_alter().
+ */
+function entity_entity_type_alter(array &$entity_types) {
+  /** @var $entity_types \Drupal\Core\Entity\EntityTypeInterface[] */
+  foreach ($entity_types as $entity_type_id => $entity_type) {
+    // Sets a default query_access handler for all entity types that have none.
+    if (!$entity_type->hasHandlerClass('query_access')) {
+      // Query access does not apply to config entities.
+      if (!$entity_type->entityClassImplements(ConfigEntityInterface::class)) {
+        // Query access only works for SQL storages.
+        if (is_subclass_of($entity_type->getStorageClass(), SqlEntityStorageInterface::class)) {
+          $entity_type->setHandlerClass('query_access', 'Drupal\entity\QueryAccess\EventOnlyQueryAccessHandler');
+        }
       }
     }
   }
