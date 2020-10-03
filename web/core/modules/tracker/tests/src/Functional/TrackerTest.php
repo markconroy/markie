@@ -91,7 +91,7 @@ class TrackerTest extends BrowserTestBase {
     $this->drupalGet('activity');
     $this->assertNoText($unpublished->label(), 'Unpublished node does not show up in the tracker listing.');
     $this->assertText($published->label(), 'Published node shows up in the tracker listing.');
-    $this->assertLink(t('My recent content'), 0, 'User tab shows up on the global tracker page.');
+    $this->assertSession()->linkExists(t('My recent content'), 0, 'User tab shows up on the global tracker page.');
 
     // Assert cache contexts, specifically the pager and node access contexts.
     $this->assertCacheContexts(['languages:language_interface', 'route', 'theme', 'url.query_args:' . MainContentViewSubscriber::WRAPPER_FORMAT, 'url.query_args.pagers:0', 'user.node_grants:view', 'user']);
@@ -208,14 +208,18 @@ class TrackerTest extends BrowserTestBase {
     $this->assertCacheTags($expected_tags);
     $this->assertCacheContexts(['languages:language_interface', 'route', 'theme', 'url.query_args:' . MainContentViewSubscriber::WRAPPER_FORMAT, 'url.query_args.pagers:0', 'user', 'user.node_grants:view']);
 
-    $this->assertLink($my_published->label());
-    $this->assertNoLink($unpublished->label());
+    $this->assertSession()->linkExists($my_published->label());
+    $this->assertSession()->linkNotExists($unpublished->label());
     // Verify that title and tab title have been set correctly.
     $this->assertText('Activity', 'The user activity tab has the name "Activity".');
     $this->assertTitle($this->user->getAccountName() . ' | Drupal');
 
     // Verify that unpublished comments are removed from the tracker.
-    $admin_user = $this->drupalCreateUser(['post comments', 'administer comments', 'access user profiles']);
+    $admin_user = $this->drupalCreateUser([
+      'post comments',
+      'administer comments',
+      'access user profiles',
+    ]);
     $this->drupalLogin($admin_user);
     $this->drupalPostForm('comment/1/edit', ['status' => CommentInterface::NOT_PUBLISHED], t('Save'));
     $this->drupalGet('user/' . $this->user->id() . '/activity');
@@ -349,7 +353,9 @@ class TrackerTest extends BrowserTestBase {
     // It's almost certainly too brittle.
     $pattern = '/' . preg_quote($node_one->getTitle()) . '.+' . preg_quote($node_two->getTitle()) . '/s';
     $this->verbose($pattern);
-    $this->assertPattern($pattern, 'Most recently commented on node appears at the top of tracker');
+    // Verify that the most recent comment on node appears at the top of
+    // tracker.
+    $this->assertPattern($pattern);
   }
 
   /**
@@ -418,7 +424,11 @@ class TrackerTest extends BrowserTestBase {
   public function testTrackerAdminUnpublish() {
     \Drupal::service('module_installer')->install(['views']);
     \Drupal::service('router.builder')->rebuild();
-    $admin_user = $this->drupalCreateUser(['access content overview', 'administer nodes', 'bypass node access']);
+    $admin_user = $this->drupalCreateUser([
+      'access content overview',
+      'administer nodes',
+      'bypass node access',
+    ]);
     $this->drupalLogin($admin_user);
 
     $node = $this->drupalCreateNode([

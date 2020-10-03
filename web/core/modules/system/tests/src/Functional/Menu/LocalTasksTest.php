@@ -2,7 +2,6 @@
 
 namespace Drupal\Tests\system\Functional\Menu;
 
-use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Component\Utility\Html;
 use Drupal\Core\Url;
 use Drupal\Tests\BrowserTestBase;
@@ -61,12 +60,7 @@ class LocalTasksTest extends BrowserTestBase {
     foreach ($routes as $index => $route_info) {
       list($route_name, $route_parameters) = $route_info;
       $expected = Url::fromRoute($route_name, $route_parameters)->toString();
-      $method = ($elements[$index]->getAttribute('href') == $expected ? 'pass' : 'fail');
-      $this->{$method}(new FormattableMarkup('Task @number href @value equals @expected.', [
-        '@number' => $index + 1,
-        '@value' => $elements[$index]->getAttribute('href'),
-        '@expected' => $expected,
-      ]));
+      $this->assertEquals($expected, $elements[$index]->getAttribute('href'), "Task " . ($index + 1) . "number href " . $elements[$index]->getAttribute('href') . " equals $expected.");
     }
   }
 
@@ -79,7 +73,7 @@ class LocalTasksTest extends BrowserTestBase {
    * @return bool
    *   TRUE if the local task exists on the page.
    */
-  protected function assertLocalTaskAppers($title) {
+  protected function assertLocalTaskAppears($title) {
     // SimpleXML gives us the unescaped text, not the actual escaped markup,
     // so use a pattern instead to check the raw content.
     // This behavior is a bug in libxml, see
@@ -116,9 +110,9 @@ class LocalTasksTest extends BrowserTestBase {
 
     // Verify that script tags are escaped on output.
     $title = Html::escape("Task 1 <script>alert('Welcome to the jungle!')</script>");
-    $this->assertLocalTaskAppers($title);
+    $this->assertLocalTaskAppears($title);
     $title = Html::escape("<script>alert('Welcome to the derived jungle!')</script>");
-    $this->assertLocalTaskAppers($title);
+    $this->assertLocalTaskAppears($title);
 
     // Verify that local tasks appear as defined in the router.
     $this->drupalGet(Url::fromRoute('menu_test.local_task_test_tasks_view'));
@@ -130,7 +124,7 @@ class LocalTasksTest extends BrowserTestBase {
     ]);
 
     $title = Html::escape("<script>alert('Welcome to the jungle!')</script>");
-    $this->assertLocalTaskAppers($title);
+    $this->assertLocalTaskAppears($title);
 
     // Ensure the view tab is active.
     $result = $this->xpath('//ul[contains(@class, "tabs")]//li[contains(@class, "active")]/a');

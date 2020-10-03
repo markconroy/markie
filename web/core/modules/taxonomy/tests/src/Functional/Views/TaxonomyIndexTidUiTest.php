@@ -57,7 +57,10 @@ class TaxonomyIndexTidUiTest extends UITestBase {
   protected function setUp($import_test_views = TRUE) {
     parent::setUp($import_test_views);
 
-    $this->adminUser = $this->drupalCreateUser(['administer taxonomy', 'administer views']);
+    $this->adminUser = $this->drupalCreateUser([
+      'administer taxonomy',
+      'administer views',
+    ]);
     $this->drupalLogin($this->adminUser);
 
     Vocabulary::create([
@@ -226,6 +229,43 @@ class TaxonomyIndexTidUiTest extends UITestBase {
     $this->drupalPostForm(NULL, [], t('Update preview'));
     $preview = $this->xpath("//div[@class='view-content']");
     $this->assertTrue(empty($preview), 'No results.');
+  }
+
+  /**
+   * Tests that an exposed taxonomy filter doesn't show unpublished terms.
+   */
+  public function testExposedUnpublishedFilterOptions() {
+    $this->terms[1][0]->setUnpublished()->save();
+    // Expose the filter.
+    $this->drupalPostForm('admin/structure/views/nojs/handler/test_filter_taxonomy_index_tid/default/filter/tid', [], 'Expose filter');
+    $edit = ['options[expose_button][checkbox][checkbox]' => TRUE];
+    $this->drupalPostForm(NULL, $edit, 'Apply');
+    $this->drupalPostForm(NULL, [], 'Save');
+    // Make sure the unpublished term is shown to the admin user.
+    $this->drupalGet('test-filter-taxonomy-index-tid');
+    $this->assertNotEmpty($this->cssSelect('option[value="' . $this->terms[0][0]->id() . '"]'));
+    $this->assertNotEmpty($this->cssSelect('option[value="' . $this->terms[1][0]->id() . '"]'));
+    $this->drupalLogout();
+    $this->drupalGet('test-filter-taxonomy-index-tid');
+    // Make sure the unpublished term isn't shown to the anonymous user.
+    $this->assertNotEmpty($this->cssSelect('option[value="' . $this->terms[0][0]->id() . '"]'));
+    $this->assertEmpty($this->cssSelect('option[value="' . $this->terms[1][0]->id() . '"]'));
+
+    // Tests that the term also isn't shown when not showing hierarchy.
+    $this->drupalLogin($this->adminUser);
+    $edit = [
+      'options[hierarchy]' => FALSE,
+    ];
+    $this->drupalPostForm('admin/structure/views/nojs/handler-extra/test_filter_taxonomy_index_tid/default/filter/tid', $edit, 'Apply');
+    $this->drupalPostForm(NULL, [], 'Save');
+    $this->drupalGet('test-filter-taxonomy-index-tid');
+    $this->assertNotEmpty($this->cssSelect('option[value="' . $this->terms[0][0]->id() . '"]'));
+    $this->assertNotEmpty($this->cssSelect('option[value="' . $this->terms[1][0]->id() . '"]'));
+    $this->drupalLogout();
+    $this->drupalGet('test-filter-taxonomy-index-tid');
+    // Make sure the unpublished term isn't shown to the anonymous user.
+    $this->assertNotEmpty($this->cssSelect('option[value="' . $this->terms[0][0]->id() . '"]'));
+    $this->assertEmpty($this->cssSelect('option[value="' . $this->terms[1][0]->id() . '"]'));
   }
 
 }

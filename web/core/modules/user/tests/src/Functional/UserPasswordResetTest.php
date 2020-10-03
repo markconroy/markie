@@ -109,7 +109,7 @@ class UserPasswordResetTest extends BrowserTestBase {
 
     // Check successful login.
     $this->drupalPostForm(NULL, NULL, t('Log in'));
-    $this->assertLink(t('Log out'));
+    $this->assertSession()->linkExists(t('Log out'));
     $this->assertTitle($this->account->getAccountName() . ' | Drupal');
 
     // Change the forgotten password.
@@ -188,7 +188,7 @@ class UserPasswordResetTest extends BrowserTestBase {
     $this->drupalPostForm(NULL, $edit, t('Submit'));
     $reset_url = $this->getResetURL();
     $this->drupalGet($reset_url . '/login');
-    $this->assertLink(t('Log out'));
+    $this->assertSession()->linkExists(t('Log out'));
     $this->assertTitle($this->account->getAccountName() . ' | Drupal');
 
     // Ensure blocked and deleted accounts can't access the user.reset.login
@@ -358,7 +358,7 @@ class UserPasswordResetTest extends BrowserTestBase {
     // Use the last password reset URL which was generated.
     $reset_url = $this->getResetURL();
     $this->drupalGet($reset_url . '/login');
-    $this->assertLink(t('Log out'));
+    $this->assertSession()->linkExists(t('Log out'));
     $this->assertTitle($this->account->getAccountName() . ' | Drupal');
     $this->drupalLogout();
 
@@ -391,28 +391,28 @@ class UserPasswordResetTest extends BrowserTestBase {
   }
 
   /**
-   * Helper function to make assertions about a password reset triggering user flood cotrol.
+   * Makes assertions about a password reset triggering user flood control.
    */
   public function assertPasswordUserFlood() {
     $this->assertText(t('Too many password recovery requests for this account. It is temporarily blocked. Try again later or contact the site administrator.'), 'User password reset flood error message shown.');
   }
 
   /**
-   * Helper function to make assertions about a password reset not triggering user flood control.
+   * Makes assertions about a password reset not triggering user flood control.
    */
   public function assertNoPasswordUserFlood() {
     $this->assertNoText(t('Too many password recovery requests for this account. It is temporarily blocked. Try again later or contact the site administrator.'), 'User password reset flood error message not shown.');
   }
 
   /**
-   * Helper function to make assertions about a password reset triggering IP flood cotrol.
+   * Makes assertions about a password reset triggering IP flood control.
    */
   public function assertPasswordIpFlood() {
     $this->assertText(t('Too many password recovery requests from your IP address. It is temporarily blocked. Try again later or contact the site administrator.'), 'IP password reset flood error message shown.');
   }
 
   /**
-   * Helper function to make assertions about a password reset not triggering IP flood control.
+   * Makes assertions about a password reset not triggering IP flood control.
    */
   public function assertNoPasswordIpFlood() {
     $this->assertNoText(t('Too many password recovery requests from your IP address. It is temporarily blocked. Try again later or contact the site administrator.'), 'IP password reset flood error message not shown.');
