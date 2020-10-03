@@ -93,8 +93,11 @@ EOT;
       // - If the database is on a remote server, create a wilcard user with %.
       //   We can't easily know what IP adderss or hostname would represent our server.
       $domain = ($this->db_spec['host'] == 'localhost') ? 'localhost' : '%';
-      $sql[] = sprintf('GRANT ALL PRIVILEGES ON %s.* TO \'%s\'@\'%s\'', $dbname, $this->db_spec['username'], $domain);
-      $sql[] = sprintf("IDENTIFIED BY '%s';", $this->db_spec['password']);
+      $user = sprintf("'%s'@'%s'", $this->db_spec['username'], $domain);
+      $sql[] = sprintf("DROP USER IF EXISTS %s;", $user);
+      $sql[] = sprintf("CREATE USER %s IDENTIFIED WITH mysql_native_password;", $user);
+      $sql[] = sprintf("SET PASSWORD FOR %s = PASSWORD('%s');", $user, $this->db_spec['password']);
+      $sql[] = sprintf('GRANT ALL PRIVILEGES ON %s.* TO %s;', $dbname, $user);
       $sql[] = 'FLUSH PRIVILEGES;';
     }
     return implode(' ', $sql);
@@ -115,6 +118,14 @@ EOT;
     $return = $this->query('SHOW TABLES;');
     $tables = drush_shell_exec_output();
     drush_set_context('DRUSH_SIMULATE', $current);
+    return $tables;
+  }
+
+  public function listTablesQuoted() {
+    $tables = $this->listTables();
+    foreach ($tables as &$table) {
+      $table = "`$table`";
+    }
     return $tables;
   }
 

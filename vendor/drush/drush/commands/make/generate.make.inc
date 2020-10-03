@@ -65,7 +65,7 @@ function _drush_make_generate_projects($all_extensions, $version_options) {
     }
   }
 
-  $install_profile = drush_drupal_major_version() >= 7 ? drupal_get_profile() : variable_get('install_profile', '');
+  $install_profile = drush_drupal_get_profile();
   if (!in_array($install_profile, array('default', 'standard', 'minimal', 'testing')) && $install_profile != '') {
     $projects[$install_profile]['type']
       = $projects[$install_profile]['_type'] = 'profile';
@@ -207,7 +207,7 @@ function _drush_generate_custom_project($name, $extension, $version_options) {
             drush_shell_cd_and_exec($repo_root, 'git branch');
             $output = drush_shell_exec_output();
             foreach ($output as $line) {
-              if ($line{0} == '*') {
+              if ($line[0] == '*') {
                 $branch = substr($line, 2);
                 if ($branch != "master") {
                   $project['download][branch'] = $branch;

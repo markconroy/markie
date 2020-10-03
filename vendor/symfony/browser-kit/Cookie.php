@@ -40,6 +40,7 @@ class Cookie
     protected $secure;
     protected $httponly;
     protected $rawValue;
+    private $samesite;
 
     /**
      * Sets a cookie.
@@ -52,8 +53,9 @@ class Cookie
      * @param bool        $secure       Indicates that the cookie should only be transmitted over a secure HTTPS connection from the client
      * @param bool        $httponly     The cookie httponly flag
      * @param bool        $encodedValue Whether the value is encoded or not
+     * @param string|null $samesite     The cookie samesite attribute
      */
-    public function __construct($name, $value, $expires = null, $path = null, $domain = '', $secure = false, $httponly = true, $encodedValue = false)
+    public function __construct(string $name, ?string $value, string $expires = null, string $path = null, string $domain = '', bool $secure = false, bool $httponly = true, bool $encodedValue = false, string $samesite = null)
     {
         if ($encodedValue) {
             $this->value = urldecode($value);
@@ -65,8 +67,9 @@ class Cookie
         $this->name = $name;
         $this->path = empty($path) ? '/' : $path;
         $this->domain = $domain;
-        $this->secure = (bool) $secure;
-        $this->httponly = (bool) $httponly;
+        $this->secure = $secure;
+        $this->httponly = $httponly;
+        $this->samesite = $samesite;
 
         if (null !== $expires) {
             $timestampAsDateTime = \DateTime::createFromFormat('U', $expires);
@@ -80,6 +83,8 @@ class Cookie
 
     /**
      * Returns the HTTP representation of the Cookie.
+     *
+     * @return string
      */
     public function __toString()
     {
@@ -104,6 +109,10 @@ class Cookie
 
         if ($this->httponly) {
             $cookie .= '; httponly';
+        }
+
+        if (null !== $this->samesite) {
+            $cookie .= '; samesite='.$this->samesite;
         }
 
         return $cookie;
@@ -138,6 +147,7 @@ class Cookie
             'secure' => false,
             'httponly' => false,
             'passedRawValue' => true,
+            'samesite' => null,
         ];
 
         if (null !== $url) {
@@ -186,16 +196,12 @@ class Cookie
             $values['domain'],
             $values['secure'],
             $values['httponly'],
-            $values['passedRawValue']
+            $values['passedRawValue'],
+            $values['samesite']
         );
     }
 
-    /**
-     * @param string $dateValue
-     *
-     * @return string|null
-     */
-    private static function parseDate($dateValue)
+    private static function parseDate(string $dateValue): ?string
     {
         // trim single quotes around date if present
         if (($length = \strlen($dateValue)) > 1 && "'" === $dateValue[0] && "'" === $dateValue[$length - 1]) {
@@ -304,5 +310,15 @@ class Cookie
     public function isExpired()
     {
         return null !== $this->expires && 0 != $this->expires && $this->expires < time();
+    }
+
+    /**
+     * Gets the samesite attribute of the cookie.
+     *
+     * @return string|null The cookie samesite attribute
+     */
+    public function getSameSite(): ?string
+    {
+        return $this->samesite;
     }
 }

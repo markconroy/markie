@@ -307,7 +307,7 @@ abstract class AbstractNormalizer extends SerializerAwareNormalizer implements N
             if (__CLASS__ !== static::class) {
                 $r = new \ReflectionMethod($this, __FUNCTION__);
                 if (__CLASS__ !== $r->getDeclaringClass()->getName()) {
-                    @trigger_error(sprintf('Method %s::%s() will have a 6th `string $format = null` argument in version 4.0. Not defining it is deprecated since Symfony 3.2.', static::class, __FUNCTION__), E_USER_DEPRECATED);
+                    @trigger_error(sprintf('Method %s::%s() will have a 6th `string $format = null` argument in version 4.0. Not defining it is deprecated since Symfony 3.2.', static::class, __FUNCTION__), \E_USER_DEPRECATED);
                 }
             }
 
@@ -388,7 +388,7 @@ abstract class AbstractNormalizer extends SerializerAwareNormalizer implements N
         try {
             if (\PHP_VERSION_ID < 70100 && null !== $parameterClass = $parameter->getClass()) {
                 $parameterClass = $parameterClass->name;
-            } elseif (\PHP_VERSION_ID >= 70100 && ($parameterType = $parameter->getType()) && !$parameterType->isBuiltin()) {
+            } elseif (\PHP_VERSION_ID >= 70100 && ($parameterType = $parameter->getType()) instanceof \ReflectionNamedType && !$parameterType->isBuiltin()) {
                 $parameterClass = $parameterType->getName();
                 new \ReflectionClass($parameterClass); // throws a \ReflectionException if the class doesn't exist
             } else {

@@ -5,6 +5,10 @@ namespace Drush\Role;
 use Drupal\user\Entity\Role;
 
 class Role8 extends Role7 {
+  public function anonymousRole() {
+    return \Drupal\user\RoleInterface::ANONYMOUS_ID;
+  }
+
   public function role_create($role_machine_name, $role_human_readable_name = '') {
     // In D6 and D7, when we create a new role, the role
     // machine name is specified, and the numeric rid is
@@ -25,7 +29,7 @@ class Role8 extends Role7 {
   }
 
   public function getPerms() {
-    $role = entity_load('user_role', $this->rid);
+    $role = Role::load($this->rid);
     $perms = $role->getPermissions();
     // $perms = user_role_permissions(array($this->rid => $this->name));
     return $perms;
@@ -48,7 +52,7 @@ class Role8 extends Role7 {
   }
 
   public function delete() {
-    $role = entity_load('user_role', $this->rid);
+    $role = Role::load($this->rid);
     $role->delete();
   }
 
