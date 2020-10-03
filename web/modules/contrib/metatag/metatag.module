@@ -144,6 +144,13 @@ function metatag_page_attachments(array &$attachments) {
 
     $head_links = [];
     foreach ($metatag_attachments['#attached']['html_head'] as $item) {
+      // Do not attach a title meta tag as this unnecessarily duplicates the
+      // title tag.
+      // @see metatag_preprocess_html()
+      if ($item[1] == 'title') {
+        continue;
+      }
+
       $attachments['#attached']['html_head'][] = $item;
 
       // Also add a HTTP header "Link:" for canonical URLs and shortlinks.
@@ -168,18 +175,6 @@ function metatag_page_attachments(array &$attachments) {
         implode(', ', $head_links),
         FALSE,
       ];
-    }
-  }
-
-  // Remove the erroneous "title" meta tag as the page title has already been
-  // overridden.
-  // @see metatag_preprocess_html()
-  if (!empty($attachments['#attached']['html_head'])) {
-    foreach ($attachments['#attached']['html_head'] as $ctr => $data) {
-      if (!empty($data[1]) && $data[1] == 'title') {
-        unset($attachments['#attached']['html_head'][$ctr]);
-        break;
-      }
     }
   }
 }
@@ -230,7 +225,9 @@ function metatag_entity_view_alter(array &$build, EntityInterface $entity, Entit
   // called too early, where meta links are not yet set.
   // @see \Drupal\node\Controller\NodeController::view
   if ($display->getThirdPartySetting('panelizer', 'enable', FALSE)) {
-    $build['#pre_render'][] = '_metatag_panelizer_pre_render';
+    $build['#pre_render'][] = function (array $element) {
+      return _metatag_panelizer_pre_render($element);
+    };
     return;
   }
 
@@ -425,20 +422,20 @@ function metatag_preprocess_html(&$variables) {
     return NULL;
   }
 
-  $attachments = &drupal_static('metatag_attachments');
-  if (is_null($attachments)) {
-    $attachments = metatag_get_tags_from_route();
+  $metatag_attachments = &drupal_static('metatag_attachments');
+  if (is_null($metatag_attachments)) {
+    $metatag_attachments = metatag_get_tags_from_route();
   }
 
-  if (!$attachments) {
+  if (!$metatag_attachments) {
     return NULL;
   }
 
   // Copy the "title" meta tag into the regular <title> tag. The redundant meta
-  // tag will be removed elsewhere.
+  // tag is never added to $variables['#attached'].
   // @see metatag_page_attachments()
-  if (!empty($attachments['#attached']['html_head'])) {
-    foreach ($attachments['#attached']['html_head'] as $attachment) {
+  if (!empty($metatag_attachments['#attached']['html_head'])) {
+    foreach ($metatag_attachments['#attached']['html_head'] as $attachment) {
       if (!empty($attachment[1]) && $attachment[1] == 'title') {
         // Empty head_title to avoid the site name and slogan to be appended to
         // the meta title.

@@ -26,9 +26,11 @@ class MetatagEntitiesTest extends MigrateDrupal7TestBase {
     // Core modules.
     // @see testAvailableConfigEntities
     'comment',
+    'content_translation',
     'datetime',
     'filter',
     'image',
+    'language',
     'link',
     'menu_link_content',
     'menu_ui',
@@ -76,8 +78,11 @@ class MetatagEntitiesTest extends MigrateDrupal7TestBase {
    * {@inheritdoc}
    */
   protected function setUp() {
+    if (version_compare(\Drupal::VERSION, '8.9', '<')) {
+      $this->markTestSkipped('This test requires at least Drupal 8.9');
+    }
     parent::setUp();
-    $this->loadFixture(__DIR__ . '/../../../../fixtures/d7_metatag_entities.php');
+    $this->loadFixture(__DIR__ . '/../../../../fixtures/d7_metatag.php');
 
     $this->installEntitySchema('node');
     $this->installEntitySchema('comment');
@@ -89,6 +94,7 @@ class MetatagEntitiesTest extends MigrateDrupal7TestBase {
     $this->installEntitySchema('metatag_defaults');
 
     $this->executeMigrations([
+      'language',
       'd7_metatag_field',
       'd7_node_type',
       'd7_taxonomy_vocabulary',
@@ -99,14 +105,11 @@ class MetatagEntitiesTest extends MigrateDrupal7TestBase {
       'd7_comment_type',
       'd7_field',
       'd7_field_instance',
+      'd7_language_content_settings',
     ]);
     $this->fileMigrationSetup();
     $this->executeMigrations([
-      'd7_node:test_content_type',
-      'd7_node:article',
-      'd7_node:forum',
-      'd7_node:blog',
-      'd7_node_revision:test_content_type',
+      'd7_node_complete',
       'd7_taxonomy_term',
     ]);
   }

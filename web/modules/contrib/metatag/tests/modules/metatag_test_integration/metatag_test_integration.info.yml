@@ -1,8 +1,7 @@
-name: 'Metatag: Verification'
+name: "Metatag: Test Integration"
 type: module
-description: Verifies ownership of a site for search engines and other services.
-core_version_requirement: '^8.7.7 || ^9'
-package: SEO
+description: Support module for integration with metatag module.
+package: Testing
 dependencies:
   - metatag:metatag
 

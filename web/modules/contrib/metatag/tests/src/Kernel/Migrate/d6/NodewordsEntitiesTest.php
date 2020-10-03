@@ -77,7 +77,7 @@ class NodewordsEntitiesTest extends MigrateDrupal6TestBase {
    */
   protected function setUp() {
     parent::setUp();
-    $this->loadFixture(__DIR__ . '/../../../../fixtures/d6_nodewords_entities.php');
+    $this->loadFixture(__DIR__ . '/../../../../fixtures/d6_nodewords.php');
 
     $this->installEntitySchema('user');
     $this->installEntitySchema('node');

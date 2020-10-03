@@ -1,3 +1,27 @@
+Metatag 8.x-1.14, 2020-08-11
+----------------------------
+#3129664 by phenaproxima: Fix failure in MetatagPageManagerTest.
+#3154149 by alexpott, DamienMcKenna, mrinalini9, rokzabukovec: Refactored
+  entity migration test to use new API added in 8.9.x; skip this test on 8.8.
+#3154891 by DamienMcKenna: Rename test fixtures to be one file per source
+  module.
+#3129863 by DamienMcKenna, kyuubi, azedan, lcontreras, havran, markie: Revert
+  compatibility with GraphQL 4 to avoid breaking existing sites.
+#3131380 by lolandese, volkswagenchick: License "GPL-2.0+" is a deprecated SPDX
+  license identifier.
+#3130250 by Andrew Gorokhovets: Typo in the comment class name
+  (MetatagViewsTranslationForm).
+#3134665 by Neslee Canil Pinto, rokzabukovec: Correct description of
+  OgImageWidth.php file.
+#3158613 by huzooka, DamienMcKenna, Wim Leers: Metatag field instance migration
+  source plugins report incorrect number of items.
+#3136075 by s_leu, fjgarlin, mirom, DamienMcKenna: D9 Compatibility -
+  pre_render should be method implementing TrustedCallbackInterface.
+#3153911 by alexpott, mrinalini9: Improve logic in metatag_page_attachments()
+  and make code comments more clear.
+#3077782 by DamienMcKenna, rokzabukovec, rahulrasgon: Add missing OG tags.
+
+
 Metatag 8.x-1.13, 2020-04-21
 ----------------------------
 #3123520 by DamienMcKenna, phenaproxima: Remove Schema.org Metatag dependency

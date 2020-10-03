@@ -26,6 +26,9 @@ class MetatagOpenGraphTagsTest extends MetatagTagsTestBase {
     'book_isbn',
     'book_release_date',
     'book_tag',
+    'og_audio',
+    'og_audio_secure_url',
+    'og_audio_type',
     'og_country_name',
     'og_description',
     'og_determiner',
@@ -53,6 +56,17 @@ class MetatagOpenGraphTagsTest extends MetatagTagsTestBase {
     'og_video_type',
     'og_video_width',
     'og_video_duration',
+    'profile_first_name',
+    'profile_gender',
+    'profile_last_name',
+    'profile_username',
+    'video_actor',
+    'video_actor_role',
+    'video_director',
+    'video_release_date',
+    'video_series',
+    'video_tag',
+    'video_writer',
     // @todo Fix these.
     // 'og_image',
     // 'og_image_secure_url',
@@ -88,10 +102,14 @@ class MetatagOpenGraphTagsTest extends MetatagTagsTestBase {
     $tag_name = str_replace('og_', 'og:', $tag_name);
     $tag_name = str_replace('article_', 'article:', $tag_name);
     $tag_name = str_replace('book_', 'book:', $tag_name);
+    $tag_name = str_replace('profile_', 'profile:', $tag_name);
+    $tag_name = str_replace('video_', 'video:', $tag_name);
 
     // Some tags have an additional underline that turns into a colon.
+    $tag_name = str_replace('og:audio_', 'og:audio:', $tag_name);
     $tag_name = str_replace('og:image_', 'og:image:', $tag_name);
     $tag_name = str_replace('og:video_', 'og:video:', $tag_name);
+    $tag_name = str_replace('video:actor_', 'video:actor:', $tag_name);
 
     // Additional fixes.
     if ($tag_name == 'og:locale_alternative') {

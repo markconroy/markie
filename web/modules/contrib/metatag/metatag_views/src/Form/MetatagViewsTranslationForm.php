@@ -14,7 +14,7 @@ use Drupal\metatag_views\MetatagViewsValuesCleanerTrait;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 
 /**
- * Class MetatagViewsEditForm.
+ * Defines a form for translating meta tags for views.
  *
  * @package Drupal\metatag_views\Form
  */
