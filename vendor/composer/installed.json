@@ -1704,6 +1704,38 @@
         ]
     },
     {
+        "name": "drupal-ckeditor-libraries-group/codesnippet",
+        "version": "4.14.1",
+        "version_normalized": "4.14.1.0",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/drupal-ckeditor-libraries-group/codesnippet.git",
+            "reference": "940d45c76cbfc4e2ff0d65c0b41ddd42660bc5d7"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/drupal-ckeditor-libraries-group/codesnippet/zipball/940d45c76cbfc4e2ff0d65c0b41ddd42660bc5d7",
+            "reference": "940d45c76cbfc4e2ff0d65c0b41ddd42660bc5d7",
+            "shasum": ""
+        },
+        "time": "2020-04-23T07:13:58+00:00",
+        "type": "drupal-library",
+        "installation-source": "dist",
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "GPL-2.0-or-later",
+            "LGPL-2.1-or-later",
+            "MPL-1.1"
+        ],
+        "description": "CKEditor 4 codesnippet plugin",
+        "homepage": "https://ckeditor.com/cke4/addon/codesnippet",
+        "keywords": [
+            "CKEditor",
+            "codesnippet",
+            "plugin"
+        ]
+    },
+    {
         "name": "drupal-composer/drupal-scaffold",
         "version": "2.6.1",
         "version_normalized": "2.6.1.0",
@@ -1874,6 +1906,66 @@
         "homepage": "https://www.drupal.org/project/antibot",
         "support": {
             "source": "https://git.drupalcode.org/project/antibot"
+        }
+    },
+    {
+        "name": "drupal/codesnippet",
+        "version": "1.7.0",
+        "version_normalized": "1.7.0.0",
+        "source": {
+            "type": "git",
+            "url": "https://git.drupalcode.org/project/codesnippet.git",
+            "reference": "8.x-1.7"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://ftp.drupal.org/files/projects/codesnippet-8.x-1.7.zip",
+            "reference": "8.x-1.7",
+            "shasum": "d620a6d1272e9811e19cc69524a991e271da142c"
+        },
+        "require": {
+            "drupal-ckeditor-libraries-group/codesnippet": "^4.5.11",
+            "drupal/core": "^8 || ^9"
+        },
+        "type": "drupal-module",
+        "extra": {
+            "drupal": {
+                "version": "8.x-1.7",
+                "datestamp": "1593798298",
+                "security-coverage": {
+                    "status": "covered",
+                    "message": "Covered by Drupal's security advisory policy"
+                }
+            }
+        },
+        "installation-source": "dist",
+        "notification-url": "https://packages.drupal.org/8/downloads",
+        "license": [
+            "GPL-2.0+"
+        ],
+        "authors": [
+            {
+                "name": "Kevin Quillen (kevinquillen)",
+                "homepage": "https://www.drupal.org/u/kevinquillen",
+                "role": "Maintainer"
+            },
+            {
+                "name": "kevinquillen",
+                "homepage": "https://www.drupal.org/user/317279"
+            },
+            {
+                "name": "szloredan",
+                "homepage": "https://www.drupal.org/user/3531611"
+            }
+        ],
+        "description": "Adds the CodeSnippet plugin to CKEditor.",
+        "homepage": "http://drupal.org/project/codesnippet",
+        "keywords": [
+            "Drupal"
+        ],
+        "support": {
+            "source": "http://cgit.drupalcode.org/codesnippet",
+            "issues": "http://drupal.org/project/issues/codesnippet"
         }
     },
     {

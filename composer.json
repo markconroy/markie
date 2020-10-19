@@ -36,6 +36,7 @@
     "drupal-composer/drupal-scaffold": "^2.2",
     "drupal/admin_toolbar": "^2.0",
     "drupal/antibot": "^1.2",
+    "drupal/codesnippet": "^1.7",
     "drupal/components": "^1.0",
     "drupal/console": "^1.0.1",
     "drupal/core": "^8.0.0",

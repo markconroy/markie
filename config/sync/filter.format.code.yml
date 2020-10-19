@@ -3,7 +3,7 @@ langcode: en
 status: true
 dependencies:
   module:
-    - geshifilter
+    - media
 name: Code
 format: code
 weight: 0
@@ -17,11 +17,12 @@ filters:
       allowed_html: '<code type> <codeblock type>'
       filter_html_help: false
       filter_html_nofollow: false
-  filter_geshifilter:
-    id: filter_geshifilter
-    provider: geshifilter
-    status: true
-    weight: 0
+  media_embed:
+    id: media_embed
+    provider: media
+    status: false
+    weight: 100
     settings:
-      general_tags: {  }
-      per_language_settings: {  }
+      default_view_mode: default
+      allowed_media_types: {  }
+      allowed_view_modes: {  }

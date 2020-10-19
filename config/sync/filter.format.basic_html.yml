@@ -4,7 +4,6 @@ status: true
 dependencies:
   module:
     - editor
-    - geshifilter
     - media
 _core:
   default_config_hash: P8ddpAIKtawJDi5SzOwCzVnnNYqONewSTJ6Xn0dW_aQ
@@ -18,7 +17,7 @@ filters:
     status: true
     weight: -10
     settings:
-      allowed_html: '<a href hreflang> <em> <strong> <cite> <blockquote cite> <code type> <blockcode type> <ul type> <ol type start> <li> <dl> <dt> <dd> <h2 id> <h3 id> <h4 id> <h5 id> <h6 id> <p> <br> <span> <img src alt data-entity-type data-entity-uuid data-align data-caption width height> <s> <drupal-media data-entity-type data-entity-uuid data-view-mode data-align data-caption alt title>'
+      allowed_html: '<a href hreflang> <em> <strong> <cite> <blockquote cite> <code class=""> <blockcode type> <ul type> <ol type start> <li> <dl> <dt> <dd> <h2 id> <h3 id> <h4 id> <h5 id> <h6 id> <p> <br> <span> <img src alt data-entity-type data-entity-uuid data-align data-caption width height> <s> <drupal-media data-entity-type data-entity-uuid data-view-mode data-align data-caption alt title> <pre class="">'
       filter_html_help: false
       filter_html_nofollow: false
   filter_align:
@@ -45,14 +44,6 @@ filters:
     status: true
     weight: 11
     settings: {  }
-  filter_geshifilter:
-    id: filter_geshifilter
-    provider: geshifilter
-    status: true
-    weight: 0
-    settings:
-      general_tags: {  }
-      per_language_settings: {  }
   media_embed:
     id: media_embed
     provider: media

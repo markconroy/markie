@@ -1,5 +1,7 @@
 <?php
 
+use Drupal\Core\Form\FormStateInterface;
+
 /**
  * @file
  * This is a small module to make the D8 node edit page more like the D7 verion.
@@ -22,3 +24,20 @@ function seven_ui_preprocess_views_view(&$variables) {
     $variables['view_array']['#attached']['library'][] = 'seven_ui/media-entity-browser-overrides';
   }
 }
+
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ * Add extra languages for CodeSnippet 
+ * @param $form
+ * @param FormStateInterface $form_state
+ * @param $form_id
+ */
+function seven_ui_form_filter_format_edit_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  if (isset($form['editor']['settings']['subform']['plugins']['codesnippet'])) {
+    $form['editor']['settings']['subform']['plugins']['codesnippet']['highlight_languages']['#options']['twig'] = 'Twig';
+    asort($form['editor']['settings']['subform']['plugins']['codesnippet']['highlight_languages']['#options']);
+  }
+}
+
+  
