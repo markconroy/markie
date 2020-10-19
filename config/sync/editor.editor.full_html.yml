@@ -45,12 +45,12 @@ settings:
           items:
             - Source
   plugins:
-    stylescombo:
-      styles: ''
     language:
       language_list: un
+    stylescombo:
+      styles: ''
     codesnippet:
-      highlight_style: vs
+      highlight_style: monokai_sublime
       highlight_languages:
         apache: apache
         bash: bash
