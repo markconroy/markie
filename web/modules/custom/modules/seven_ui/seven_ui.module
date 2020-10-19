@@ -36,6 +36,7 @@ function seven_ui_preprocess_views_view(&$variables) {
 function seven_ui_form_filter_format_edit_form_alter(&$form, FormStateInterface $form_state, $form_id) {
   if (isset($form['editor']['settings']['subform']['plugins']['codesnippet'])) {
     $form['editor']['settings']['subform']['plugins']['codesnippet']['highlight_languages']['#options']['twig'] = 'Twig';
+    $form['editor']['settings']['subform']['plugins']['codesnippet']['highlight_languages']['#options']['scss'] = 'SCSS';
     asort($form['editor']['settings']['subform']['plugins']['codesnippet']['highlight_languages']['#options']);
   }
 }

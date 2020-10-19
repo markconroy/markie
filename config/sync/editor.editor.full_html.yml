@@ -1,14 +1,12 @@
-uuid: 62a0260d-4e5f-4d61-bd0a-7606184a4118
+uuid: 9d0abeeb-67d8-4311-b576-3a4c1177a58a
 langcode: en
 status: true
 dependencies:
   config:
-    - filter.format.basic_html
+    - filter.format.full_html
   module:
     - ckeditor
-_core:
-  default_config_hash: AqlPmO16LvJI4D0Ih6u4GFQIzqr5OnLgAUSjcUGWk2g
-format: basic_html
+format: full_html
 editor: ckeditor
 settings:
   toolbar:
@@ -23,7 +21,7 @@ settings:
             - Strike
             - JustifyCenter
         -
-          name: Linking
+          name: Links
           items:
             - DrupalLink
             - DrupalUnlink
@@ -33,28 +31,31 @@ settings:
             - BulletedList
             - NumberedList
         -
-          name: 'Block Formatting'
+          name: Format
           items:
             - Format
-        -
-          name: Source
-          items:
-            - Source
         -
           name: Media
           items:
             - Blockquote
+            - DrupalImage
             - DrupalMediaLibrary
+        -
+          name: Tools
+          items:
+            - Source
   plugins:
     stylescombo:
       styles: ''
     language:
       language_list: un
     codesnippet:
-      highlight_style: monokai_sublime
+      highlight_style: arta
       highlight_languages:
         apache: apache
         bash: bash
+        cs: cs
+        cpp: cpp
         css: css
         coffeescript: coffeescript
         diff: diff
@@ -62,26 +63,24 @@ settings:
         http: http
         ini: ini
         json: json
+        java: java
         javascript: javascript
         makefile: makefile
         markdown: markdown
         nginx: nginx
         objectivec: objectivec
         php: php
+        perl: perl
         python: python
         ruby: ruby
         sql: sql
-        twig: twig
+        vbscript: vbscript
         xhtml: xhtml
         xml: xml
-        cs: 0
-        cpp: 0
-        java: 0
-        perl: 0
         scss: 0
-        vbscript: 0
+        twig: 0
 image_upload:
-  status: true
+  status: false
   scheme: public
   directory: inline-images
   max_size: ''
