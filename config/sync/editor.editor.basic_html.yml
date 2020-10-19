@@ -70,6 +70,7 @@ settings:
         php: php
         python: python
         ruby: ruby
+        scss: scss
         sql: sql
         twig: twig
         xhtml: xhtml
@@ -78,7 +79,6 @@ settings:
         cpp: 0
         java: 0
         perl: 0
-        scss: 0
         vbscript: 0
 image_upload:
   status: true
