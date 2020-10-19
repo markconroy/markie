@@ -37,6 +37,7 @@ function seven_ui_form_filter_format_edit_form_alter(&$form, FormStateInterface 
   if (isset($form['editor']['settings']['subform']['plugins']['codesnippet'])) {
     $form['editor']['settings']['subform']['plugins']['codesnippet']['highlight_languages']['#options']['twig'] = 'Twig';
     $form['editor']['settings']['subform']['plugins']['codesnippet']['highlight_languages']['#options']['scss'] = 'SCSS';
+    $form['editor']['settings']['subform']['plugins']['codesnippet']['highlight_languages']['#options']['yml'] = 'YAML';
     asort($form['editor']['settings']['subform']['plugins']['codesnippet']['highlight_languages']['#options']);
   }
 }
