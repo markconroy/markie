@@ -50,7 +50,7 @@ settings:
     language:
       language_list: un
     codesnippet:
-      highlight_style: arta
+      highlight_style: vs
       highlight_languages:
         apache: apache
         bash: bash
@@ -73,12 +73,13 @@ settings:
         perl: perl
         python: python
         ruby: ruby
+        scss: scss
         sql: sql
+        twig: twig
         vbscript: vbscript
         xhtml: xhtml
         xml: xml
-        scss: 0
-        twig: 0
+        yml: yml
 image_upload:
   status: false
   scheme: public

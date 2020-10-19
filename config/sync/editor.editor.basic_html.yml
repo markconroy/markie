@@ -75,6 +75,7 @@ settings:
         twig: twig
         xhtml: xhtml
         xml: xml
+        yml: yml
         cs: 0
         cpp: 0
         java: 0
