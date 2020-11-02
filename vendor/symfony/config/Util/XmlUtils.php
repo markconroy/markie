@@ -47,7 +47,7 @@ class XmlUtils
     public static function parse($content, $schemaOrCallable = null)
     {
         if (!\extension_loaded('dom')) {
-            throw new \RuntimeException('Extension DOM is required.');
+            throw new \LogicException('Extension DOM is required.');
         }
 
         $internalErrors = libxml_use_internal_errors(true);
@@ -86,7 +86,7 @@ class XmlUtils
             $e = null;
             if (\is_callable($schemaOrCallable)) {
                 try {
-                    $valid = \call_user_func($schemaOrCallable, $dom, $internalErrors);
+                    $valid = $schemaOrCallable($dom, $internalErrors);
                 } catch (\Exception $e) {
                     $valid = false;
                 }

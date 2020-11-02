@@ -2,13 +2,12 @@
 
 namespace Stack;
 
-use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\TerminableInterface;
 
-class StackedHttpKernelTest extends TestCase
+class StackedHttpKernelTest extends \PHPUnit_Framework_TestCase
 {
     /** @test */
     public function handleShouldDelegateToApp()
@@ -65,7 +64,7 @@ class StackedHttpKernelTest extends TestCase
 
     private function getHttpKernelMock(Response $response)
     {
-        $app = $this->createMock(HttpKernelInterface::class);
+        $app = $this->getMock('Symfony\Component\HttpKernel\HttpKernelInterface');
         $app->expects($this->any())
             ->method('handle')
             ->with($this->isInstanceOf('Symfony\Component\HttpFoundation\Request'))

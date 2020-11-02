@@ -28,14 +28,14 @@ class ConfigEditor extends FormBase {
     $config = $this->config($config_name);
 
     if ($config === FALSE || $config->isNew()) {
-      drupal_set_message(t('Config @name does not exist in the system.', array('@name' => $config_name)), 'error');
+      $this->messenger()->addError($this->t('Config @name does not exist in the system.', array('@name' => $config_name)));
       return;
     }
 
     $data = $config->getOriginal();
 
     if (empty($data)) {
-      drupal_set_message(t('Config @name exists but has no data.', array('@name' => $config_name)), 'warning');
+      $this->messenger()->addWarning($this->t('Config @name exists but has no data.', array('@name' => $config_name)));
       return;
     }
 
@@ -43,7 +43,7 @@ class ConfigEditor extends FormBase {
       $output = Yaml::encode($data);
     }
     catch (InvalidDataTypeException $e) {
-      drupal_set_message(t('Invalid data detected for @name : %error', array('@name' => $config_name, '%error' => $e->getMessage())), 'error');
+      $this->messenger()->addError($this->t('Invalid data detected for @name : %error', array('@name' => $config_name, '%error' => $e->getMessage())));
       return;
     }
 
@@ -69,11 +69,11 @@ class ConfigEditor extends FormBase {
       '#required' => TRUE,
     );
 
-    $form['actions'] = array('#type' => 'actions');
-    $form['actions']['submit'] = array(
+    $form['actions'] = ['#type' => 'actions'];
+    $form['actions']['submit'] = [
       '#type' => 'submit',
       '#value' => $this->t('Save'),
-    );
+    ];
     $form['actions']['cancel'] = array(
       '#type' => 'link',
       '#title' => $this->t('Cancel'),
@@ -112,13 +112,13 @@ class ConfigEditor extends FormBase {
     $values = $form_state->getValues();
     try {
       $this->configFactory()->getEditable($values['name'])->setData($values['parsed_value'])->save();
-      drupal_set_message($this->t('Configuration variable %variable was successfully saved.', array('%variable' => $values['name'])));
+      $this->messenger()->addMessage($this->t('Configuration variable %variable was successfully saved.', array('%variable' => $values['name'])));
       $this->logger('devel')->info('Configuration variable %variable was successfully saved.', array('%variable' => $values['name']));
 
       $form_state->setRedirectUrl(Url::fromRoute('devel.configs_list'));
     }
     catch (\Exception $e) {
-      drupal_set_message($e->getMessage(), 'error');
+      $this->messenger()->addError($e->getMessage());
       $this->logger('devel')->error('Error saving configuration variable %variable : %error.', array('%variable' => $values['name'], '%error' => $e->getMessage()));
     }
   }

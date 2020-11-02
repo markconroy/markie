@@ -1,0 +1,282 @@
+/**
+ * @file
+ * Styles used by the Upgrade Status module.
+ */
+
+.drupal-upgrade-status-form .button {
+  margin-left: 0;
+}
+[dir="rtl"] .drupal-upgrade-status-form .button {
+  margin-left: inherit;
+  margin-right: 0;
+}
+
+.upgrade-status-summary > summary {
+  background-color: #f5f5f2;
+  margin: 0 0 1em 0;
+  border-bottom: 1px solid #ccc;
+}
+
+.upgrade-status-summary table+h3 {
+  margin-top: 2em;
+}
+
+.upgrade-status-summary table {
+  margin-top: 1.2em;
+}
+
+.upgrade-status-summary th.project-label,
+.upgrade-status-summary th.requirement-label {
+  width: 60%;
+}
+
+.upgrade-status-summary th.update-info {
+  width: 20%;
+}
+
+.upgrade-status-summary th.status-info {
+  width: 20%;
+}
+
+.upgrade-status-summary-custom th.project-label {
+  width: 80%;
+}
+
+.upgrade-status-summary td.requirement-label {
+  font-weight: bold;
+}
+.upgrade-status-summary-environment th.status-info {
+  width: 40%;
+}
+
+.upgrade-status-error-list tr > td.status-info,
+.upgrade-status-summary tr > td.status-info {
+  padding-left: 35px; /* LTR */
+  background-repeat: no-repeat;
+  background-position-x: 10px; /* LTR */
+  background-position-y: center;
+}
+
+[dir="rtl"] .upgrade-status-error-list tr > td.status-info,
+[dir="rtl"] .upgrade-status-summary tr > td.status-info {
+  padding-left: 0;
+  padding-right: 35px; /* LTR */
+  /* @todo x background position for RTL */
+}
+
+.upgrade-status-error-list tr.known-errors,
+.upgrade-status-summary tr.known-errors {
+  background-color: #fcf4f2;
+  color: #a51b00;
+}
+
+.upgrade-status-error-list tr.known-errors > td.status-info,
+.upgrade-status-summary tr.known-errors > td.status-info {
+  background-image: url(../icons/error.svg);
+}
+
+.upgrade-status-error-list tr.known-warnings,
+.upgrade-status-summary tr.known-warnings {
+  background-color: #fdf8ed;
+  color: #734c00;
+}
+
+.upgrade-status-error-list tr.known-warnings > td.status-info,
+.upgrade-status-summary tr.known-warnings > td.status-info {
+  background-image: url(../icons/warning.svg);
+}
+
+.upgrade-status-error-list tr.known-later > td.status-info {
+  background-image: url(../icons/ex.svg);
+}
+
+.upgrade-status-error-list tr.no-known-error,
+.upgrade-status-summary tr.no-known-error {
+  background-color: #f3faef;
+  color: #325e1c;
+}
+
+.upgrade-status-error-list tr.no-known-error > td.status-info,
+.upgrade-status-summary tr.no-known-error > td.status-info {
+  background-image: url(../icons/check.svg);
+}
+
+.upgrade-status-error-list tr.rector-covered {
+  background-color: #f0f8ff;
+  color: #000;
+}
+
+.upgrade-status-error-list tr.rector-covered > td.status-info {
+  background-image: url(../icons/wrench.svg);
+}
+
+.upgrade-status-summary tr.not-scanned > td.status-info {
+  background-image: url(../icons/questionmark-disc.svg);
+}
+
+.list-description {
+  margin-bottom: 1em;
+}
+
+.upgrade-status-counters {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.upgrade-status-counters__item {
+  flex-grow: 1;
+  flex-shrink: 0;
+  flex-basis: 100%;
+  margin: 10px 0;
+}
+
+.upgrade-status-counter {
+  display: flex;
+  overflow-y: hidden;
+  box-sizing: border-box;
+  width: 100%;
+  border: 1px solid #e6e4df;
+  border-radius: 3px;
+  background: #fcfcfa;
+}
+
+.upgrade-status-counter__status-icon {
+  display: inline-block;
+  width: 60px;
+  height: 60px;
+  vertical-align: middle;
+  border-right: 1px solid #e6e4df; /* LTR */
+  border-left: 0; /* LTR */
+  background-color: #faf9f5;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1) inset;
+}
+
+[dir="rtl"] .upgrade-status-counter__status-icon {
+  border-right: 0;
+  border-left: 1px solid #e6e4df;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1) inset;
+}
+
+.upgrade-status-counter__status-icon:before {
+  display: block;
+  width: 100%;
+  height: 100%;
+  content: "";
+  background-repeat: no-repeat;
+  background-position: 50% center;
+  background-size: 25px;
+}
+
+.upgrade-status-counter__status-icon--error:before {
+  background-image: url(../icons/error.svg);
+}
+
+.upgrade-status-counter__status-icon--warning:before {
+  background-image: url(../icons/warning.svg);
+}
+
+.upgrade-status-counter__status-icon--checked:before {
+  background-image: url(../icons/check.svg);
+}
+
+.upgrade-status-counter__status-icon--not-scanned:before {
+  background-image: url(../icons/questionmark-disc.svg);
+}
+
+.upgrade-status-counter__status-title {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 6px;
+  vertical-align: middle;
+  text-transform: uppercase;
+  font-size: 1rem;
+  font-weight: bold;
+  line-height: 1em;
+}
+
+.upgrade-status-counter__title-count {
+  display: block;
+  margin-bottom: 2px;
+}
+
+.upgrade-status-counter__details {
+  display: block;
+  text-transform: none;
+  font-size: 12px;
+  font-weight: normal;
+}
+
+@media screen and (min-width: 61em) {
+  .upgrade-status-counters__item {
+    flex-basis: calc(50% - 10px);
+  }
+
+  .upgrade-status-counters__item:nth-child(2n) {
+    margin-left: 20px;
+  }
+
+  .upgrade-status-counter__status-icon,
+  .upgrade-status-counter {
+    height: 65px;
+  }
+
+  .upgrade-status-counter__status-icon {
+    width: 65px;
+  }
+
+  .upgrade-status-counter__status-title {
+    flex-grow: 1;
+    padding: 10px 3%;
+    font-size: 16px;
+  }
+
+  .upgrade-status-counter__status-icon:before {
+    background-size: 35px;
+  }
+}
+
+@media screen and (min-width: 75rem) {
+  .upgrade-status-counters__item {
+    flex-basis: calc(25% - 15px);
+  }
+
+  .upgrade-status-counters__item + .upgrade-status-counters__item {
+    margin-left: 20px;
+  }
+}
+
+.upgrade-status-ok-label,
+.upgrade-status-error-label {
+  margin-left: 1em;
+  padding: 3px;
+  border-radius: 3px;
+  background-color: #fb8800;
+  color: #fff;
+  font-size: 11px;
+  white-space: nowrap;
+}
+.upgrade-status-ok-label {
+  background-color: #7bae4a;
+}
+.upgrade-status-space {
+  margin: 0.5em 0;
+}
+.upgrade-status-space .upgrade-status-error-label,
+.upgrade-status-space .upgrade-status-ok-label {
+  margin-left: 0;
+}
+
+h3.upgrade-status-group {
+  margin: 30px 0 0 0;
+}
+div.upgrade-status-description {
+  margin-bottom: 10px;
+}
+.upgrade-status-error-list tr td:nth-child(1),
+.upgrade-status-error-list tr td:nth-child(3) {
+  width: 40%;
+}
+.upgrade-status-error-list tr td:nth-child(2) {
+  width: 10%;
+}

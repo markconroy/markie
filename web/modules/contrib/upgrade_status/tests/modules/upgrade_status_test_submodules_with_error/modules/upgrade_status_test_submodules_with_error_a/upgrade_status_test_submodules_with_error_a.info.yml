@@ -1,0 +1,13 @@
+name: 'Upgrade status test submodule with error'
+type: module
+description: 'Support module for upgrade status module testing.'
+package: Testing
+# version: VERSION
+core: 7.x
+dependencies:
+  - upgrade_status:upgrade_status_test_submodules_with_error
+
+# Information added by Drupal.org packaging script on 2020-10-09
+version: '8.x-2.11'
+project: 'upgrade_status'
+datestamp: 1602256223

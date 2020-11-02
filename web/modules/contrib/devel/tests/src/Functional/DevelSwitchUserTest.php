@@ -122,9 +122,9 @@ class DevelSwitchUserTest extends BrowserTestBase {
 
     // Ensure that block default configuration is effectively used. The block
     // default configuration is the following:
-    // - list_size : 12
-    // - include_anon : FALSE
-    // - show_form : TRUE
+    // - list_size : 12.
+    // - include_anon : FALSE.
+    // - show_form : TRUE.
     $this->assertSwitchUserSearchForm();
     $this->assertSwitchUserListCount(12);
     $this->assertSwitchUserListNoContainsUser($anonymous);
@@ -177,7 +177,8 @@ class DevelSwitchUserTest extends BrowserTestBase {
     $this->assertSwitchUserListContainsUser($this->webUser->getDisplayName());
     $this->assertSwitchUserListNoContainsUser($this->switchUser->getDisplayName());
 
-    // Ensure that anonymous user are prioritized if include_anon is set to true.
+    // Ensure that anonymous user are prioritized if include_anon is set to
+    // true.
     $this->setBlockConfiguration('include_anon', TRUE);
     $this->drupalGet('');
     $this->assertSwitchUserListCount(2);
@@ -272,7 +273,7 @@ class DevelSwitchUserTest extends BrowserTestBase {
    * @param int $uid
    *   The user ID for which to find a session record.
    *
-   * TODO find a cleaner way to do this check.
+   * @TODO find a cleaner way to do this check.
    */
   protected function assertSessionByUid($uid) {
     $query = \Drupal::database()->select('sessions');
@@ -300,7 +301,7 @@ class DevelSwitchUserTest extends BrowserTestBase {
    * @param int $uid
    *   The user ID to assert.
    *
-   * TODO find a cleaner way to do this check.
+   * @TODO find a cleaner way to do this check.
    */
   protected function assertNoSessionByUid($uid) {
     $query = \Drupal::database()->select('sessions');

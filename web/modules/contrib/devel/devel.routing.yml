@@ -96,16 +96,6 @@ devel.field_info_page:
   requirements:
     _permission: 'access devel information'
 
-devel.execute_php:
-  path: '/devel/php'
-  defaults:
-    _form: '\Drupal\devel\Form\ExecutePHP'
-    _title: 'Execute PHP code'
-  options:
-    _admin_route: TRUE
-  requirements:
-    _permission: 'execute php code'
-
 devel.session:
   path: '/devel/session'
   defaults:

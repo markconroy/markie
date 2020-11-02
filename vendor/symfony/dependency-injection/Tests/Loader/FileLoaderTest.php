@@ -76,7 +76,7 @@ class FileLoaderTest extends TestCase
                 ['foo', 'bar'],
             ],
             'mixedcase' => ['MixedCaseKey' => 'value'],
-            'constant' => \PHP_EOL,
+            'constant' => PHP_EOL,
             'bar' => '%foo%',
             'escape' => '@escapeme',
             'foo_bar' => new Reference('foo_bar'),
@@ -185,7 +185,7 @@ class FileLoaderTest extends TestCase
 
         $this->assertTrue($container->has(MissingParent::class));
 
-        $this->assertMatchesRegularExpression(
+        $this->assertRegExp(
             '{Class "?Symfony\\\\Component\\\\DependencyInjection\\\\Tests\\\\Fixtures\\\\Prototype\\\\BadClasses\\\\MissingClass"? not found}',
             $container->getDefinition(MissingParent::class)->getErrors()[0]
         );
@@ -194,7 +194,7 @@ class FileLoaderTest extends TestCase
     public function testRegisterClassesWithBadPrefix()
     {
         $this->expectException('Symfony\Component\DependencyInjection\Exception\InvalidArgumentException');
-        $this->expectExceptionMessageMatches('/Expected to find class "Symfony\\\Component\\\DependencyInjection\\\Tests\\\Fixtures\\\Prototype\\\Bar" in file ".+" while importing services from resource "Prototype\/Sub\/\*", but it was not found\! Check the namespace prefix used with the resource/');
+        $this->expectExceptionMessageRegExp('/Expected to find class "Symfony\\\Component\\\DependencyInjection\\\Tests\\\Fixtures\\\Prototype\\\Bar" in file ".+" while importing services from resource "Prototype\/Sub\/\*", but it was not found\! Check the namespace prefix used with the resource/');
         $container = new ContainerBuilder();
         $loader = new TestFileLoader($container, new FileLocator(self::$fixturesPath.'/Fixtures'));
 

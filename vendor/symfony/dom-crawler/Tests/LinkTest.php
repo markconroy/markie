@@ -16,22 +16,36 @@ use Symfony\Component\DomCrawler\Link;
 
 class LinkTest extends TestCase
 {
+    /**
+     * @expectedException \LogicException
+     */
     public function testConstructorWithANonATag()
     {
-        $this->expectException('LogicException');
         $dom = new \DOMDocument();
         $dom->loadHTML('<html><div><div></html>');
 
         new Link($dom->getElementsByTagName('div')->item(0), 'http://www.example.com/');
     }
 
-    public function testConstructorWithAnInvalidCurrentUri()
+    public function testBaseUriIsOptionalWhenLinkUrlIsAbsolute()
     {
-        $this->expectException('InvalidArgumentException');
+        $dom = new \DOMDocument();
+        $dom->loadHTML('<html><a href="https://example.com/foo">foo</a></html>');
+
+        $link = new Link($dom->getElementsByTagName('a')->item(0));
+        $this->assertSame('https://example.com/foo', $link->getUri());
+    }
+
+    /**
+     * @expectedException \InvalidArgumentException
+     */
+    public function testAbsoluteBaseUriIsMandatoryWhenLinkUrlIsRelative()
+    {
         $dom = new \DOMDocument();
         $dom->loadHTML('<html><a href="/foo">foo</a></html>');
 
-        new Link($dom->getElementsByTagName('a')->item(0), 'example.com');
+        $link = new Link($dom->getElementsByTagName('a')->item(0), 'example.com');
+        $link->getUri();
     }
 
     public function testGetNode()

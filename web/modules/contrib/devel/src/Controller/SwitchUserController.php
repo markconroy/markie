@@ -45,7 +45,7 @@ class SwitchUserController extends ControllerBase {
   protected $session;
 
   /**
-   * Constructs a new SwitchUserController object
+   * Constructs a new SwitchUserController object.
    *
    * @param \Drupal\Core\Session\AccountProxyInterface $account
    *   The current user.
@@ -82,8 +82,8 @@ class SwitchUserController extends ControllerBase {
   /**
    * Switches to a different user.
    *
-   * We don't call session_save_session() because we really want to change users.
-   * Usually unsafe!
+   * We don't call session_save_session() because we really want to change
+   * users. Usually unsafe!
    *
    * @param string $name
    *   The username to switch to, or NULL to log out.

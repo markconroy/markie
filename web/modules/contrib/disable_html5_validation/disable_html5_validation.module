@@ -1,0 +1,15 @@
+<?php
+
+/**
+ * @file
+ * Primary module hooks for disable_html5_validation module.
+ */
+
+use Drupal\Core\Form\FormStateInterface;
+
+/**
+ * Implements hook_form_alter().
+ */
+function disable_html5_validation_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  $form['#attributes']['novalidate'] = 'novalidate';
+}

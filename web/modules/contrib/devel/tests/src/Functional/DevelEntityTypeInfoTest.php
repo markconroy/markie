@@ -43,8 +43,8 @@ class DevelEntityTypeInfoTest extends BrowserTestBase {
    */
   public function testEntityInfoMenuLink() {
     $this->drupalPlaceBlock('system_menu_block:devel');
-    // Ensures that the entity type info link is present on the devel menu and that
-    // it points to the correct page.
+    // Ensures that the entity type info link is present on the devel menu and
+    // that it points to the correct page.
     $this->drupalGet('');
     $this->clickLink('Entity Info');
     $this->assertSession()->statusCodeEquals(200);
@@ -76,7 +76,8 @@ class DevelEntityTypeInfoTest extends BrowserTestBase {
     }, $headers);
     $this->assertSame($expected_headers, $actual_headers);
 
-    // Tests the presence of some (arbitrarily chosen) entity types in the table.
+    // Tests the presence of some (arbitrarily chosen) entity types in the
+    // table.
     $expected_types = [
       'date_format' => [
         'name' => 'Date format',
@@ -99,7 +100,7 @@ class DevelEntityTypeInfoTest extends BrowserTestBase {
       $row = $table->find('css', sprintf('tbody tr:contains("%s")', $entity_type_id));
       $this->assertNotNull($row);
 
-      /** @var $cells \Behat\Mink\Element\NodeElement[] */
+      /* @var $cells \Behat\Mink\Element\NodeElement[] */
       $cells = $row->findAll('css', 'td');
       $this->assertEquals(5, count($cells));
 

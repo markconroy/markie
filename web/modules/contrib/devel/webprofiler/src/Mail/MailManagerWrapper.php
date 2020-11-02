@@ -91,4 +91,14 @@ class MailManagerWrapper extends DefaultPluginManager implements MailManagerInte
 
     return $message;
   }
+
+  /**
+   * {@inheritdoc}
+   *
+   * Must call getInstance on the decorated MailManager.
+   * @see https://www.drupal.org/node/2625554
+   */
+  public function getInstance(array $options) {
+    return $this->mailManager->getInstance($options);
+  }
 }

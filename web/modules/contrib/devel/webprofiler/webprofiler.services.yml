@@ -46,7 +46,7 @@ services:
 
 # event subscribers
   webprofiler.profiler_listener:
-    class: Symfony\Component\HttpKernel\EventListener\ProfilerListener
+    class: Drupal\webprofiler\EventSubscriber\ProfilerSubscriber
     arguments: ['@profiler', '@request_stack', '@?webprofiler.matcher', '%webprofiler.only_exceptions%', '%webprofiler.only_master_requests%']
     tags:
       - { name: event_subscriber }

@@ -103,22 +103,15 @@ class TokenParser
         $groupRoot = '';
         $class = '';
         $alias = '';
-        $statements = [];
+        $statements = array();
         $explicitAlias = false;
         while (($token = $this->next())) {
-            if (!$explicitAlias && $token[0] === T_STRING) {
+            $isNameToken = $token[0] === T_STRING || $token[0] === T_NS_SEPARATOR;
+            if (!$explicitAlias && $isNameToken) {
                 $class .= $token[1];
                 $alias = $token[1];
-            } else if ($explicitAlias && $token[0] === T_STRING) {
-                $alias = $token[1];
-            } else if (\PHP_VERSION_ID >= 80000 && ($token[0] === T_NAME_QUALIFIED || $token[0] === T_NAME_FULLY_QUALIFIED)) {
-                $class .= $token[1];
-
-                $classSplit = explode('\\', $token[1]);
-                $alias = $classSplit[count($classSplit) - 1];
-            } else if ($token[0] === T_NS_SEPARATOR) {
-                $class .= '\\';
-                $alias = '';
+            } else if ($explicitAlias && $isNameToken) {
+                $alias .= $token[1];
             } else if ($token[0] === T_AS) {
                 $explicitAlias = true;
                 $alias = '';
@@ -152,7 +145,7 @@ class TokenParser
      */
     public function parseUseStatements($namespaceName)
     {
-        $statements = [];
+        $statements = array();
         while (($token = $this->next())) {
             if ($token[0] === T_USE) {
                 $statements = array_merge($statements, $this->parseUseStatement());
@@ -165,7 +158,7 @@ class TokenParser
             // Get fresh array for new namespace. This is to prevent the parser to collect the use statements
             // for a previous namespace with the same name. This is the case if a namespace is defined twice
             // or if a namespace with the same name is commented out.
-            $statements = [];
+            $statements = array();
         }
 
         return $statements;
@@ -179,10 +172,7 @@ class TokenParser
     public function parseNamespace()
     {
         $name = '';
-        while (($token = $this->next()) && ($token[0] === T_STRING || $token[0] === T_NS_SEPARATOR || (
-            \PHP_VERSION_ID >= 80000 &&
-            ($token[0] === T_NAME_QUALIFIED || $token[0] === T_NAME_FULLY_QUALIFIED)
-        ))) {
+        while (($token = $this->next()) && ($token[0] === T_STRING || $token[0] === T_NS_SEPARATOR)) {
             $name .= $token[1];
         }
 

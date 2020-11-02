@@ -10,6 +10,13 @@ trait DrupalDataCollectorTrait {
   /**
    * {@inheritdoc}
    */
+  public function reset() {
+    $this->data = array();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getPanelSummary() {
     return NULL;
   }
@@ -47,8 +54,6 @@ trait DrupalDataCollectorTrait {
    * @param $method
    *
    * @return array
-   *
-   * @throws \ReflectionException
    */
   public function getMethodData($class, $method) {
     $class = is_object($class) ? get_class($class) : $class;

@@ -12,7 +12,6 @@
 namespace Symfony\Component\Validator\Tests\Resources;
 
 use PHPUnit\Framework\TestCase;
-use PHPUnit\Util\Xml\Loader;
 
 class TranslationFilesTest extends TestCase
 {
@@ -21,11 +20,7 @@ class TranslationFilesTest extends TestCase
      */
     public function testTranslationFileIsValid($filePath)
     {
-        $loader = class_exists(Loader::class)
-            ? [new Loader(), 'loadFile']
-            : ['PHPUnit\Util\XML', 'loadfile'];
-
-        $loader($filePath, false, false, true);
+        \PHPUnit\Util\XML::loadfile($filePath, false, false, true);
 
         $this->addToAssertionCount(1);
     }

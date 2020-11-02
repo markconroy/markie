@@ -17,7 +17,7 @@ trait OutputUtilsTrait
      *
      * @access public
      */
-    public abstract function getOutputRaw();
+    abstract public function getOutputRaw();
 
     /**
      * Accessor for the last stderr output, non-trimmed.
@@ -27,7 +27,7 @@ trait OutputUtilsTrait
      *
      * @access public
      */
-    public abstract function getErrorOutputRaw();
+    abstract public function getErrorOutputRaw();
 
     /**
      * Get command output and simplify away things like full paths and extra
@@ -147,14 +147,14 @@ trait OutputUtilsTrait
      * @param string $key
      *   Optionally return only a top level element from the json object.
      *
-     * @return object
-     *   Decoded object.
+     * @return array
+     *   Decoded array.
      */
     public function getOutputFromJSON($key = null)
     {
         $output = $this->getOutput();
         $json = json_decode($output, true);
-        if (!$json) {
+        if (json_last_error() !== JSON_ERROR_NONE) {
             throw new \Exception("No json output received.\n\nOutput:\n\n$output\n\nStderr:\n\n" . $this->getErrorOutput());
         }
         if (isset($key)) {

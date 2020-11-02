@@ -3,6 +3,7 @@
 namespace Drupal\devel_generate\Plugin\DevelGenerate;
 
 use Drupal\comment\CommentManagerInterface;
+use Drupal\Component\Datetime\Time;
 use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Datetime\DateFormatterInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
@@ -86,11 +87,28 @@ class ContentDevelGenerate extends DevelGenerateBase implements ContainerFactory
   protected $dateFormatter;
 
   /**
+   * The Drush batch flag.
+   *
+   * @var bool
+   */
+  protected $drushBatch;
+
+  /**
+   * Provides system time.
+   *
+   * @var \Drupal\Core\Datetime\Time
+   */
+  protected $time;
+
+  /**
+   * The construct.
+   *
    * @param array $configuration
    *   A configuration array containing information about the plugin instance.
    * @param string $plugin_id
    *   The plugin ID for the plugin instance.
    * @param array $plugin_definition
+   *   The plugin implementation definition.
    * @param \Drupal\Core\Entity\EntityStorageInterface $node_storage
    *   The node storage.
    * @param \Drupal\Core\Entity\EntityStorageInterface $node_type_storage
@@ -105,8 +123,10 @@ class ContentDevelGenerate extends DevelGenerateBase implements ContainerFactory
    *   The url generator service.
    * @param \Drupal\Core\Datetime\DateFormatterInterface $date_formatter
    *   The date formatter service.
+   * @param \Drupal\Core\Datetime\Time $time
+   *   Provides system time.
    */
-  public function __construct(array $configuration, $plugin_id, array $plugin_definition, EntityStorageInterface $node_storage, EntityStorageInterface $node_type_storage, ModuleHandlerInterface $module_handler, CommentManagerInterface $comment_manager = NULL, LanguageManagerInterface $language_manager, UrlGeneratorInterface $url_generator, DateFormatterInterface $date_formatter) {
+  public function __construct(array $configuration, $plugin_id, array $plugin_definition, EntityStorageInterface $node_storage, EntityStorageInterface $node_type_storage, ModuleHandlerInterface $module_handler, CommentManagerInterface $comment_manager = NULL, LanguageManagerInterface $language_manager, UrlGeneratorInterface $url_generator, DateFormatterInterface $date_formatter, Time $time) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
 
     $this->moduleHandler = $module_handler;
@@ -116,6 +136,7 @@ class ContentDevelGenerate extends DevelGenerateBase implements ContainerFactory
     $this->languageManager = $language_manager;
     $this->urlGenerator = $url_generator;
     $this->dateFormatter = $date_formatter;
+    $this->time = $time;
   }
 
   /**
@@ -131,7 +152,8 @@ class ContentDevelGenerate extends DevelGenerateBase implements ContainerFactory
       $container->has('comment.manager') ? $container->get('comment.manager') : NULL,
       $container->get('language_manager'),
       $container->get('url_generator'),
-      $container->get('date.formatter')
+      $container->get('date.formatter'),
+      $container->get('datetime.time')
     );
   }
 
@@ -331,8 +353,12 @@ class ContentDevelGenerate extends DevelGenerateBase implements ContainerFactory
    * the number of elements is greater than 50.
    */
   private function generateBatchContent($values) {
-    // Setup the batch operations and save the variables.
-    $operations[] = array('devel_generate_operation', array($this, 'batchContentPreNode', $values));
+    // If it is drushBatch then this operation is already run in the
+    // self::validateDrushParams().
+    if (!$this->drushBatch) {
+      // Setup the batch operations and save the variables.
+      $operations[] = array('devel_generate_operation', array($this, 'batchContentPreNode', $values));
+    }
 
     // Add the kill operation.
     if ($values['kill']) {
@@ -351,7 +377,11 @@ class ContentDevelGenerate extends DevelGenerateBase implements ContainerFactory
       'finished' => 'devel_generate_batch_finished',
       'file' => drupal_get_path('module', 'devel_generate') . '/devel_generate.batch.inc',
     );
+
     batch_set($batch);
+    if ($this->drushBatch) {
+      drush_backend_batch_process();
+    }
   }
 
   public function batchContentPreNode($vars, &$context) {
@@ -361,12 +391,22 @@ class ContentDevelGenerate extends DevelGenerateBase implements ContainerFactory
   }
 
   public function batchContentAddNode($vars, &$context) {
-    $this->develGenerateContentAddNode($context['results']);
-    $context['results']['num']++;
+    if ($this->drushBatch) {
+      $this->develGenerateContentAddNode($vars);
+    }
+    else {
+      $this->develGenerateContentAddNode($vars);
+      $context['results']['num']++;
+    }
   }
 
   public function batchContentKill($vars, &$context) {
-    $this->contentKill($context['results']);
+    if ($this->drushBatch) {
+      $this->contentKill($vars);
+    }
+    else {
+      $this->contentKill($context['results']);
+    }
   }
 
   /**
@@ -409,6 +449,10 @@ class ContentDevelGenerate extends DevelGenerateBase implements ContainerFactory
     if (array_diff($node_types, $all_types)) {
       throw new \Exception(dt('One or more content types have been entered that don\'t exist on this site'));
     }
+    if ($values['num'] > 50) {
+      $this->drushBatch = TRUE;
+      $this->develGenerateContentPreNode($values);
+    }
 
     return $values;
   }
@@ -450,7 +494,7 @@ class ContentDevelGenerate extends DevelGenerateBase implements ContainerFactory
     }
     $users = $results['users'];
 
-    $node_type = array_rand(array_filter($results['node_types']));
+    $node_type = array_rand($results['node_types']);
     $uid = $users[array_rand($users)];
 
     $node = $this->nodeStorage->create(array(
@@ -461,7 +505,7 @@ class ContentDevelGenerate extends DevelGenerateBase implements ContainerFactory
       'revision' => mt_rand(0, 1),
       'status' => TRUE,
       'promote' => mt_rand(0, 1),
-      'created' => REQUEST_TIME - mt_rand(0, $results['time_range']),
+      'created' => $this->time->getRequestTime() - mt_rand(0, $results['time_range']),
       'langcode' => $this->getLangcode($results),
     ));
 

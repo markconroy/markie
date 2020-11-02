@@ -12,6 +12,7 @@ use Drupal\node\NodeInterface;
  * Implements hook_page_bottom().
  */
 function twig_tweak_test_page_bottom(array &$page_bottom) {
+  \Drupal::service('messenger')->addMessage('Hello world!');
   $page_bottom['twig_tweak_test']['#theme'] = 'twig_tweak_test';
 }
 

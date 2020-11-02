@@ -6,6 +6,7 @@ use Drupal\Component\Utility\Random;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\Plugin\PluginBase;
 
 /**
@@ -18,7 +19,7 @@ abstract class DevelGenerateBase extends PluginBase implements DevelGenerateBase
    *
    * @var array
    */
-  protected $settings = array();
+  protected $settings = [];
 
   /**
    * The random data generator.
@@ -57,7 +58,7 @@ abstract class DevelGenerateBase extends PluginBase implements DevelGenerateBase
    * {@inheritdoc}
    */
   public function settingsForm(array $form, FormStateInterface $form_state) {
-    return array();
+    return [];
   }
 
   /**
@@ -92,8 +93,11 @@ abstract class DevelGenerateBase extends PluginBase implements DevelGenerateBase
    *   The entity to be enriched with sample field values.
    */
   public static function populateFields(EntityInterface $entity) {
-    /** @var \Drupal\field\FieldConfigInterface[] $instances */
-    $instances = entity_load_multiple_by_properties('field_config', array('entity_type' => $entity->getEntityType()->id(), 'bundle' => $entity->bundle()));
+    /* @var \Drupal\field\FieldConfigInterface[] $instances */
+    $instances = entity_load_multiple_by_properties('field_config',[
+      'entity_type' => $entity->getEntityType()->id(),
+      'bundle' => $entity->bundle()
+      ]);
 
     if ($skips = function_exists('drush_get_option') ? drush_get_option('skip-fields', '') : @$_REQUEST['skip-fields']) {
       foreach (explode(',', $skips) as $skip) {
@@ -126,16 +130,17 @@ abstract class DevelGenerateBase extends PluginBase implements DevelGenerateBase
    * @param string $msg
    *   The message to display.
    * @param string $type
-   *   (optional) The message type, as defined by drupal_set_message(). Defaults
-   *   to 'status'
+   *   (optional) The message type, as defined in MessengerInterface. Defaults
+   *   to MessengerInterface::TYPE_STATUS
    */
-  protected function setMessage($msg, $type = 'status') {
-    $function = 'drupal_set_message';
+  protected function setMessage($msg, $type = MessengerInterface::TYPE_STATUS) {
     if (function_exists('drush_log')) {
-      $function = 'drush_log';
       $msg = strip_tags($msg);
+      drush_log($msg);
     }
-    $function($msg, $type);
+    else {
+      \Drupal::messenger()->addMessage($msg, $type);
+    }
   }
 
   /**

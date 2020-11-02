@@ -14,7 +14,7 @@ class TestRouteSubscriber extends RouteSubscriberBase {
    * {@inheritdoc}
    */
   protected function alterRoutes(RouteCollection $collection) {
-    \Drupal::state()->set('devel_test_route_rebuild','Router rebuild fired');
+    \Drupal::state()->set('devel_test_route_rebuild', 'Router rebuild fired');
   }
 
 }

@@ -19,7 +19,7 @@ class MultiConstraint implements ConstraintInterface
     /** @var ConstraintInterface[] */
     protected $constraints;
 
-    /** @var string|null */
+    /** @var string */
     protected $prettyString;
 
     /** @var bool */
@@ -27,7 +27,7 @@ class MultiConstraint implements ConstraintInterface
 
     /**
      * @param ConstraintInterface[] $constraints A set of constraints
-     * @param bool                  $conjunctive Whether the constraints should be treated as conjunctive or disjunctive
+     * @param bool $conjunctive Whether the constraints should be treated as conjunctive or disjunctive
      */
     public function __construct(array $constraints, $conjunctive = true)
     {
@@ -86,7 +86,7 @@ class MultiConstraint implements ConstraintInterface
     }
 
     /**
-     * @param string|null $prettyString
+     * @param string $prettyString
      */
     public function setPrettyString($prettyString)
     {

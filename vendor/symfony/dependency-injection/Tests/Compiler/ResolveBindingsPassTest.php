@@ -65,7 +65,7 @@ class ResolveBindingsPassTest extends TestCase
     public function testMissingParent()
     {
         $this->expectException('Symfony\Component\DependencyInjection\Exception\InvalidArgumentException');
-        $this->expectExceptionMessageMatches('/Unused binding "\$quz" in service [\s\S]+/');
+        $this->expectExceptionMessageRegExp('/Unused binding "\$quz" in service [\s\S]+/');
 
         $container = new ContainerBuilder();
 

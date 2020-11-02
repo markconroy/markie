@@ -210,33 +210,18 @@ class Feed
     /**
      * Set "explicit" flag
      *
-     * @see https://help.apple.com/itc/podcasts_connect/#/itcb54353390
-     *
      * @param  bool $value
      * @return $this
      * @throws Writer\Exception\InvalidArgumentException
      */
     public function setItunesExplicit($value)
     {
-        // "yes", "no" and "clean" are valid values for a previous version
-        if (! is_bool($value) && ! in_array($value, ['yes', 'no', 'clean'])) {
+        if (! in_array($value, ['yes', 'no', 'clean'])) {
             throw new Writer\Exception\InvalidArgumentException(
-                'invalid parameter: "explicit" must be a boolean value'
+                'invalid parameter: "explicit" may only be one of "yes", "no" or "clean"'
             );
         }
-
-        switch ($value) {
-            case 'yes':
-                $value = true;
-                break;
-
-            case 'no':
-            case 'clean':
-                $value = false;
-                break;
-        }
-
-        $this->data['explicit'] = $value ? 'true' : 'false';
+        $this->data['explicit'] = $value;
         return $this;
     }
 

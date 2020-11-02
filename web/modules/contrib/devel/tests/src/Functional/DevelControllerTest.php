@@ -16,7 +16,13 @@ class DevelControllerTest extends BrowserTestBase {
    *
    * @var array
    */
-  public static $modules = ['devel', 'node', 'entity_test', 'devel_entity_test', 'block'];
+  public static $modules = [
+    'devel',
+    'node',
+    'entity_test',
+    'devel_entity_test',
+    'block',
+  ];
 
   /**
    * {@inheritdoc}
@@ -58,7 +64,10 @@ class DevelControllerTest extends BrowserTestBase {
     $this->drupalLogin($web_user);
   }
 
-  function testRouteGeneration() {
+  /**
+   * Tests route generation.
+   */
+  public function testRouteGeneration() {
     // Test Devel load and render routes for entities with both route
     // definitions.
     $this->drupalGet('entity_test/' . $this->entity->id());
@@ -79,8 +88,8 @@ class DevelControllerTest extends BrowserTestBase {
     // definitions.
     $this->drupalGet('devel_entity_test_canonical/' . $this->entity_canonical->id());
     $this->assertText('Devel', 'Devel tab is present');
-    //TODO this fail since assertNoLinkByHref search by partial value.
-    //$this->assertNoLinkByHref('devel/devel_entity_test_canonical/' . $this->entity_canonical->id());
+    // TODO this fail since assertNoLinkByHref search by partial value.
+    // $this->assertNoLinkByHref('devel/devel_entity_test_canonical/' . $this->entity_canonical->id());
     $this->assertLinkByHref('devel/devel_entity_test_canonical/' . $this->entity_canonical->id() . '/render');
     $this->drupalGet('devel/devel_entity_test_canonical/' . $this->entity_canonical->id());
     $this->assertResponse(404);

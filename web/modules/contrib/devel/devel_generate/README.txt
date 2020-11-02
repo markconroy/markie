@@ -38,7 +38,7 @@ will want to directly inherit from Drupal\devel_generate\DevelGenerateBase.
 
 To give support for a new field type the field type base class should properly
 implements \Drupal\Core\Field\FieldItemInterface::generateSampleValue().
-Devel generate automatically use the values returned by this method during the
+Devel Generate automatically uses the values returned by this method during the
 generate process for generate placeholder field values. For more information
 see:
 https://api.drupal.org/api/drupal/core%21lib%21Drupal%21Core%21Field%21FieldItemInterface.php/function/FieldItemInterface::generateSampleValue

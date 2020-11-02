@@ -16,10 +16,10 @@ function devel_generate_operation(Drupal\devel_generate\DevelGenerateBaseInterfa
 function devel_generate_batch_finished($success, $results, $operations) {
 
   if ($success) {
-    $message = t('Finished @num elements created successfully.', array('@num' => $results['num']));
+    $message = t('Finished @num elements created successfully.', ['@num' => $results['num']]);
   }
   else {
     $message = t('Finished with an error.');
   }
-  drupal_set_message($message);
+  \Drupal::messenger()->addMessage($message);
 }

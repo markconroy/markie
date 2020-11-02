@@ -309,7 +309,7 @@ class BinaryFileResponseTest extends ResponseTestCase
         $response->prepare($request);
         $response->sendContent();
 
-        $this->assertFileDoesNotExist($path);
+        $this->assertFileNotExists($path);
     }
 
     public function testAcceptRangeOnUnsafeMethods()

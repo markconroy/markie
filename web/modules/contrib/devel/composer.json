@@ -38,8 +38,15 @@
   },
   "license": "GPL-2.0+",
   "minimum-stability": "dev",
-  "require": {},
-  "suggest": {
-    "symfony/var-dumper": "Pretty print complex values better with var-dumper available"
+  "require": {
+    "symfony/var-dumper": "~2.7|^3|^4"
+  },
+  "suggest": {},
+  "extra": {
+    "drush": {
+      "services": {
+        "drush.services.yml": "^9"
+      }
+    }
   }
 }

@@ -28,7 +28,7 @@ function kint() {
 function kint_trace() {
   kint_require();
   if (\Drupal::currentUser()->hasPermission('access kint')) {
-    call_user_func_array(array('Kint', 'trace'), array());
+    call_user_func_array(['Kint', 'trace'], []);
   }
 }
 
@@ -53,7 +53,7 @@ function ksm() {
   if (\Drupal::currentUser()->hasPermission('access kint')) {
     $args = func_get_args();
     $msg = @Kint::dump($args);
-    drupal_set_message(Markup::create($msg));
+    \Drupal::messenger()->addMessage(Markup::create($msg));
   }
 }
 

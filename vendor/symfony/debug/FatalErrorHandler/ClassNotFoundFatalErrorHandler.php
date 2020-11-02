@@ -29,34 +29,50 @@ class ClassNotFoundFatalErrorHandler implements FatalErrorHandlerInterface
      */
     public function handleError(array $error, FatalErrorException $exception)
     {
-        if (!preg_match('/^(Class|Interface|Trait) [\'"]([^\'"]+)[\'"] not found$/', $error['message'], $matches)) {
+        $messageLen = \strlen($error['message']);
+        $notFoundSuffix = '\' not found';
+        $notFoundSuffixLen = \strlen($notFoundSuffix);
+        if ($notFoundSuffixLen > $messageLen) {
             return null;
         }
-        $typeName = strtolower($matches[1]);
-        $fullyQualifiedClassName = $matches[2];
 
-        if (false !== $namespaceSeparatorIndex = strrpos($fullyQualifiedClassName, '\\')) {
-            $className = substr($fullyQualifiedClassName, $namespaceSeparatorIndex + 1);
-            $namespacePrefix = substr($fullyQualifiedClassName, 0, $namespaceSeparatorIndex);
-            $message = sprintf('Attempted to load %s "%s" from namespace "%s".', $typeName, $className, $namespacePrefix);
-            $tail = ' for another namespace?';
-        } else {
-            $className = $fullyQualifiedClassName;
-            $message = sprintf('Attempted to load %s "%s" from the global namespace.', $typeName, $className);
-            $tail = '?';
+        if (0 !== substr_compare($error['message'], $notFoundSuffix, -$notFoundSuffixLen)) {
+            return null;
         }
 
-        if ($candidates = $this->getClassCandidates($className)) {
-            $tail = array_pop($candidates).'"?';
-            if ($candidates) {
-                $tail = ' for e.g. "'.implode('", "', $candidates).'" or "'.$tail;
-            } else {
-                $tail = ' for "'.$tail;
+        foreach (['class', 'interface', 'trait'] as $typeName) {
+            $prefix = ucfirst($typeName).' \'';
+            $prefixLen = \strlen($prefix);
+            if (0 !== strpos($error['message'], $prefix)) {
+                continue;
             }
-        }
-        $message .= "\nDid you forget a \"use\" statement".$tail;
 
-        return new ClassNotFoundException($message, $exception);
+            $fullyQualifiedClassName = substr($error['message'], $prefixLen, -$notFoundSuffixLen);
+            if (false !== $namespaceSeparatorIndex = strrpos($fullyQualifiedClassName, '\\')) {
+                $className = substr($fullyQualifiedClassName, $namespaceSeparatorIndex + 1);
+                $namespacePrefix = substr($fullyQualifiedClassName, 0, $namespaceSeparatorIndex);
+                $message = sprintf('Attempted to load %s "%s" from namespace "%s".', $typeName, $className, $namespacePrefix);
+                $tail = ' for another namespace?';
+            } else {
+                $className = $fullyQualifiedClassName;
+                $message = sprintf('Attempted to load %s "%s" from the global namespace.', $typeName, $className);
+                $tail = '?';
+            }
+
+            if ($candidates = $this->getClassCandidates($className)) {
+                $tail = array_pop($candidates).'"?';
+                if ($candidates) {
+                    $tail = ' for e.g. "'.implode('", "', $candidates).'" or "'.$tail;
+                } else {
+                    $tail = ' for "'.$tail;
+                }
+            }
+            $message .= "\nDid you forget a \"use\" statement".$tail;
+
+            return new ClassNotFoundException($message, $exception);
+        }
+
+        return null;
     }
 
     /**

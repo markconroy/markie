@@ -50,7 +50,7 @@ class PsrHttpFactory implements HttpMessageFactoryInterface
     {
         $request = $this->serverRequestFactory->createServerRequest(
             $symfonyRequest->getMethod(),
-            $symfonyRequest->getUri(),
+            $symfonyRequest->getSchemeAndHttpHost().$symfonyRequest->getRequestUri(),
             $symfonyRequest->server->all()
         );
 
@@ -58,7 +58,12 @@ class PsrHttpFactory implements HttpMessageFactoryInterface
             $request = $request->withHeader($name, $value);
         }
 
-        $body = $this->streamFactory->createStreamFromResource($symfonyRequest->getContent(true));
+        if (PHP_VERSION_ID < 50600) {
+            $body = $this->streamFactory->createStreamFromFile('php://temp', 'wb+');
+            $body->write($symfonyRequest->getContent());
+        } else {
+            $body = $this->streamFactory->createStreamFromResource($symfonyRequest->getContent(true));
+        }
 
         $request = $request
             ->withBody($body)
@@ -84,7 +89,7 @@ class PsrHttpFactory implements HttpMessageFactoryInterface
      */
     private function getFiles(array $uploadedFiles)
     {
-        $files = [];
+        $files = array();
 
         foreach ($uploadedFiles as $key => $value) {
             if (null === $value) {
@@ -126,7 +131,7 @@ class PsrHttpFactory implements HttpMessageFactoryInterface
      */
     public function createResponse(Response $symfonyResponse)
     {
-        $response = $this->responseFactory->createResponse($symfonyResponse->getStatusCode(), Response::$statusTexts[$symfonyResponse->getStatusCode()] ?? '');
+        $response = $this->responseFactory->createResponse($symfonyResponse->getStatusCode());
 
         if ($symfonyResponse instanceof BinaryFileResponse) {
             $stream = $this->streamFactory->createStreamFromFile(
@@ -153,7 +158,7 @@ class PsrHttpFactory implements HttpMessageFactoryInterface
         $headers = $symfonyResponse->headers->all();
         $cookies = $symfonyResponse->headers->getCookies();
         if (!empty($cookies)) {
-            $headers['Set-Cookie'] = [];
+            $headers['Set-Cookie'] = array();
 
             foreach ($cookies as $cookie) {
                 $headers['Set-Cookie'][] = $cookie->__toString();

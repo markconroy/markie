@@ -47,7 +47,7 @@ class DevelModulesReinstallTest extends BrowserTestBase {
 
     $this->drupalGet('devel/reinstall');
 
-    // Prepare field data in an associative array
+    // Prepare field data in an associative array.
     $edit = [];
     foreach ($modules as $module) {
       $edit["reinstall[$module]"] = TRUE;

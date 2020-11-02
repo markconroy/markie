@@ -56,71 +56,71 @@ class DevelReinstall extends FormBase {
       return empty($modules[$module->getName()]->info['required']) && drupal_get_installed_schema_version($module->getName()) > SCHEMA_UNINSTALLED && $module->getName() !== 'devel';
     });
 
-    $form['filters'] = array(
+    $form['filters'] = [
       '#type' => 'container',
-      '#attributes' => array(
-        'class' => array('table-filter', 'js-show'),
-      ),
-    );
-    $form['filters']['text'] = array(
+      '#attributes' => [
+        'class' => ['table-filter', 'js-show'],
+      ],
+    ];
+    $form['filters']['text'] = [
       '#type' => 'search',
       '#title' => $this->t('Search'),
       '#size' => 30,
       '#placeholder' => $this->t('Enter module name'),
-      '#attributes' => array(
-        'class' => array('table-filter-text'),
+      '#attributes' => [
+        'class' => ['table-filter-text'],
         'data-table' => '#devel-reinstall-form',
         'autocomplete' => 'off',
         'title' => $this->t('Enter a part of the module name or description to filter by.'),
-      ),
-    );
+      ],
+    ];
 
     // Only build the rest of the form if there are any modules available to
-    // uninstall;
+    // uninstall.
     if (empty($uninstallable)) {
       return $form;
     }
 
-    $header = array(
+    $header = [
       'name' => $this->t('Name'),
       'description' => $this->t('Description'),
-    );
+    ];
 
-    $rows = array();
+    $rows = [];
 
     foreach ($uninstallable as $module) {
-      $name = $module->info['name'] ? : $module->getName();
+      $name = $module->info['name'] ?: $module->getName();
 
-      $rows[$module->getName()] = array(
-        'name' => array(
-          'data' => array(
+      $rows[$module->getName()] = [
+        'name' => [
+          'data' => [
             '#type' => 'inline_template',
             '#template' => '<label class="module-name table-filter-text-source">{{ module_name }}</label>',
-            '#context' => array('module_name' => $name),
-          )
-        ),
-        'description' => array(
+            '#context' => ['module_name' => $name],
+          ],
+        ],
+        'description' => [
           'data' => $module->info['description'],
-          'class' => array('description'),
-        ),
-      );
+          'class' => ['description'],
+        ],
+      ];
     }
 
-    $form['reinstall'] = array(
+    $form['reinstall'] = [
       '#type' => 'tableselect',
       '#header' => $header,
       '#options' => $rows,
       '#js_select' => FALSE,
       '#empty' => $this->t('No modules are available to uninstall.'),
-    );
+    ];
 
     $form['#attached']['library'][] = 'system/drupal.system.modules';
 
-    $form['actions'] = array('#type' => 'actions');
-    $form['actions']['submit'] = array(
+    $form['actions'] = ['#type' => 'actions'];
+    $form['actions']['submit'] = [
       '#type' => 'submit',
       '#value' => $this->t('Reinstall'),
-    );
+    ];
 
     return $form;
   }
@@ -144,10 +144,9 @@ class DevelReinstall extends FormBase {
       $reinstall = array_keys(array_filter($modules));
       $this->moduleInstaller->uninstall($reinstall, FALSE);
       $this->moduleInstaller->install($reinstall, FALSE);
-      drupal_set_message($this->t('Uninstalled and installed: %names.', array('%names' => implode(', ', $reinstall))));
-    }
-    catch (\Exception $e) {
-      drupal_set_message($this->t('Unable to reinstall modules. Error: %error.', array('%error' => $e->getMessage())), 'error');
+      $this->messenger()->addMessage($this->t('Uninstalled and installed: %names.', ['%names' => implode(', ', $reinstall)]));
+    } catch (\Exception $e) {
+      $this->messenger()->addError($this->t('Unable to reinstall modules. Error: %error.', ['%error' => $e->getMessage()]));
     }
   }
 

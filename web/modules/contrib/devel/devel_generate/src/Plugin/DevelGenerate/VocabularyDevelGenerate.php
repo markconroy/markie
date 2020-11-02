@@ -134,7 +134,7 @@ class VocabularyDevelGenerate extends DevelGenerateBase implements ContainerFact
 
       $vocabulary = $this->vocabularyStorage->create(array(
         'name' => $name,
-        'vid' => Unicode::strtolower($name),
+        'vid' => mb_strtolower($name),
         'langcode' => Language::LANGCODE_NOT_SPECIFIED,
         'description' => "Description of $name",
         'hierarchy' => 1,

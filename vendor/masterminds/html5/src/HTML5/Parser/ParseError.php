@@ -1,5 +1,4 @@
 <?php
-
 namespace Masterminds\HTML5\Parser;
 
 /**
