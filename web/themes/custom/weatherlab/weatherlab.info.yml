@@ -2,7 +2,7 @@ name: WeatherLab
 type: theme
 description: 'An Annertech starter-theme. It is changeable, like the weather.'
 base theme: classy
-core: 8.x
+core_version_requirement: ^8 || ^9
 
 ckeditor_stylesheets:
   - dist/wysiwyg.css
@@ -27,17 +27,6 @@ libraries-override:
   classy/node: false
   classy/search-results: false
   core/normalize: false
-  # We will provide our own CSS for jQuery Ui.
-  core/jquery.ui.accordion:
-    css:
-      component:
-        assets/vendor/jquery.ui/themes/base/accordion.css: false
-  core/jquery.ui:
-    css:
-      component:
-        assets/vendor/jquery.ui/themes/base/core.css: false
-      theme:
-        assets/vendor/jquery.ui/themes/base/theme.css: false
 
 regions:
   above_header: 'Above Header'
