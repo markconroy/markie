@@ -34,7 +34,6 @@ module:
   image_widget_crop: 0
   inline_entity_form: 0
   inline_form_errors: 0
-  jsonapi: 0
   link: 0
   media: 0
   media_entity_generic: 0
@@ -61,7 +60,6 @@ module:
   schema_person: 0
   schema_web_page: 0
   search: 0
-  serialization: 0
   settings_tray: 0
   seven_ui: 0
   shortcut: 0
