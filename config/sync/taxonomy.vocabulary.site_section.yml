@@ -1,8 +1,0 @@
-uuid: d48ca95f-82e5-47d7-93c7-b324a9269acb
-langcode: en
-status: true
-dependencies: {  }
-name: 'Site Section'
-vid: site_section
-description: ''
-weight: 0

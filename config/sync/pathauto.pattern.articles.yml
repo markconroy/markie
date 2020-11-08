@@ -5,18 +5,18 @@ dependencies:
   module:
     - node
 id: articles
-label: Articles
+label: 'Node: Article'
 type: 'canonical_entities:node'
-pattern: 'blog/[node:field_site_section]/[node:title]'
+pattern: 'blog/[node:title]'
 selection_criteria:
-  3bc9c9ea-8857-4c93-b8fe-6756a7e7d112:
+  b4c21cdf-3d17-43b1-bec8-f62c99764610:
     id: node_type
     bundles:
       article: article
     negate: false
     context_mapping:
       node: node
-    uuid: 3bc9c9ea-8857-4c93-b8fe-6756a7e7d112
+    uuid: b4c21cdf-3d17-43b1-bec8-f62c99764610
 selection_logic: and
 weight: -5
 relationships: {  }

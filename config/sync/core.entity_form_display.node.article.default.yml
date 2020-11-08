@@ -7,7 +7,6 @@ dependencies:
     - field.field.node.article.comment
     - field.field.node.article.field_intro
     - field.field.node.article.field_main_image
-    - field.field.node.article.field_site_section
     - field.field.node.article.field_tags
     - node.type.article
   module:
@@ -107,12 +106,6 @@ content:
       media_types: {  }
     third_party_settings: {  }
     type: media_library_widget
-    region: content
-  field_site_section:
-    weight: 4
-    settings: {  }
-    third_party_settings: {  }
-    type: options_select
     region: content
   field_tags:
     type: entity_reference_autocomplete_tags
