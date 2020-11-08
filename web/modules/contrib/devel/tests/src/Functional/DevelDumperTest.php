@@ -2,7 +2,6 @@
 
 namespace Drupal\Tests\devel\Functional;
 
-use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Tests\BrowserTestBase;
 
 /**
@@ -50,7 +49,7 @@ class DevelDumperTest extends BrowserTestBase {
       'chromephp',
       'var_dumper',
     ];
-    $available_dumpers = ['default', 'drupal_variable'];
+    $available_dumpers = ['default', 'drupal_variable', 'var_dumper'];
 
     foreach ($dumpers as $dumper) {
       $this->assertFieldByXPath('//input[@type="radio" and @name="dumper"]', $dumper);
@@ -111,7 +110,7 @@ class DevelDumperTest extends BrowserTestBase {
   /**
    * Test variable is dumped in page.
    */
-  function testDumpersOutput() {
+  public function testDumpersOutput() {
     $edit = [
       'dumper' => 'available_test_dumper',
     ];

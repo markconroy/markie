@@ -2,6 +2,7 @@
 
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\comment\Plugin\Field\FieldType\CommentItemInterface;
 use Drupal\Component\Utility\Random;
 use Drupal\devel_generate\DevelGenerateBase;
@@ -15,7 +16,7 @@ function devel_generate_menu_links_discovered_alter(&$links) {
   foreach ($devel_generate_plugins as $id => $plugin) {
     $label = $plugin['label'];
     $links["devel_generate.$id"] = array(
-      'title' => "Generate $label",
+      'title' => new TranslatableMarkup("Generate @label", ['@label' => $label]),
       'parent' => 'system.admin_config_development',
       'description' => $plugin['description'],
       'route_name' => "devel_generate.$id",
@@ -35,7 +36,7 @@ function devel_generate_entity_insert(EntityInterface $entity) {
   if ($entity->getEntityTypeId() != 'node' || !isset($entity->devel_generate)) {
     return;
   }
-  /** @var \Drupal\node\NodeInterface $entity */
+  /* @var \Drupal\node\NodeInterface $entity */
   $results = $entity->devel_generate;
 
   if (!empty($results['max_comments'])) {
@@ -53,7 +54,7 @@ function devel_generate_entity_insert(EntityInterface $entity) {
       'source' => '/node/' . $entity->id(),
       'alias' => '/node-' . $entity->id() . '-' . $entity->bundle(),
     );
-    \Drupal::service('path.alias_storage')->save($path['source'], $path['alias']);
+    \Drupal::service('path.alias_storage')->save($path['source'], $path['alias'], $entity->language()->getId());
   }
 
   // Add node statistics.
@@ -112,7 +113,7 @@ function devel_generate_add_comments(NodeInterface $node, FieldDefinitionInterfa
       'field_name' => $field_name,
       'name' => 'devel generate',
       'mail' => 'devel_generate@example.com',
-      'timestamp' => mt_rand($node->getCreatedTime(), REQUEST_TIME),
+      'timestamp' => mt_rand($node->getCreatedTime(), \Drupal::time()->getRequestTime()),
       'subject' => substr($random->sentences(mt_rand(2, $title_length), TRUE), 0, 63),
       'uid' => $users[array_rand($users)],
       'langcode' => $node->language()->getId(),
@@ -138,7 +139,7 @@ function devel_generate_add_statistics(NodeInterface $node) {
   $statistic = array(
     'nid' => $node->id(),
     'totalcount' => mt_rand(0, 500),
-    'timestamp' => REQUEST_TIME - mt_rand(0, $node->getCreatedTime()),
+    'timestamp' => \Drupal::time()->getRequestTime() - mt_rand(0, $node->getCreatedTime()),
   );
   $statistic['daycount'] = mt_rand(0, $statistic['totalcount']);
   db_insert('node_counter')->fields($statistic)->execute();

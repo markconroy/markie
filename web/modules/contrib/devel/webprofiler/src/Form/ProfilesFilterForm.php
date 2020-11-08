@@ -55,7 +55,7 @@ class ProfilesFilterForm extends FormBase {
     $form['actions'] = ['#type' => 'actions'];
     $form['actions']['filter'] = [
       '#type' => 'submit',
-      '#value' => t('Filter'),
+      '#value' => $this->t('Filter'),
       '#attributes' => ['class' => ['button--primary']],
       '#suffix' => '</div>',
     ];

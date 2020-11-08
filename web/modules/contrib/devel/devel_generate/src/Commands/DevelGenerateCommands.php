@@ -139,7 +139,7 @@ class DevelGenerateCommands extends DrushCommands {
    * @param $number_links Number of links to generate.
    * @param $max_depth Max link depth.
    * @param $max_width Max width of first level of links.
-   * @option kill Delete all content before generating new content.
+   * @option kill Delete any menus and menu links previously created by devel_generate before generating new ones.
    * @aliases genm
    * @validate-module-enabled menu_link_content
    */
@@ -152,8 +152,8 @@ class DevelGenerateCommands extends DrushCommands {
    *
    * @command devel-generate-content
    * @pluginId content
-   * @param $num Number of nodes to generate.
-   * @param $max_comments Maximum number of comments to generate.
+   * @param int $num Number of nodes to generate.
+   * @param int $max_comments Maximum number of comments to generate.
    * @option kill Delete all content before generating new content.
    * @option types A comma delimited list of content types to create. Defaults to page,article.
    * @option feedback An integer representing interval for insertion rate logging.
@@ -164,7 +164,6 @@ class DevelGenerateCommands extends DrushCommands {
    */
   public function content($num = 50, $max_comments = 0, $options = ['kill' => FALSE, 'types' => 'page,article', 'feedback' => 1000]) {
     $this->generate();
-    drush_backend_batch_process();
   }
 
 
@@ -177,7 +176,7 @@ class DevelGenerateCommands extends DrushCommands {
     $manager = $this->getManager();
     $args = $commandData->input()->getArguments();
     $commandName = array_shift($args);
-    /** @var DevelGenerateBaseInterface $instance */
+    /* @var DevelGenerateBaseInterface $instance */
     $instance = $manager->createInstance($commandData->annotationData()->get('pluginId'), array());
     $this->setPluginInstance($instance);
     $parameters = $instance->validateDrushParams($args, $commandData->input()->getOptions());

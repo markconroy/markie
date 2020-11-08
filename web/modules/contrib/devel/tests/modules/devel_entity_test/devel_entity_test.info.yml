@@ -5,12 +5,12 @@ package: Testing
 # version: VERSION
 # core: 8.x
 dependencies:
-  - field
-  - text
-  - entity_test
+  - drupal:field
+  - drupal:text
+  - drupal:entity_test
 
-# Information added by Drupal.org packaging script on 2017-10-05
-version: '8.x-1.2'
+# Information added by Drupal.org packaging script on 2019-05-02
+version: '8.x-2.1'
 core: '8.x'
 project: 'devel'
-datestamp: 1507197848
+datestamp: 1556799504

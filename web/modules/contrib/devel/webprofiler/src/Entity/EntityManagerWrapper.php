@@ -8,6 +8,8 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\EntityViewBuilderInterface;
 use Drupal\Core\Plugin\DefaultPluginManager;
 use Drupal\webprofiler\Entity\Decorators\Config\ConfigEntityStorageDecorator;
+use Drupal\webprofiler\Entity\Decorators\Config\ImageStyleStorageDecorator;
+use Drupal\webprofiler\Entity\Decorators\Config\DomainStorageDecorator;
 use Drupal\webprofiler\Entity\Decorators\Config\RoleStorageDecorator;
 use Drupal\webprofiler\Entity\Decorators\Config\ShortcutSetStorageDecorator;
 use Drupal\webprofiler\Entity\Decorators\Config\VocabularyStorageDecorator;
@@ -98,6 +100,12 @@ class EntityManagerWrapper extends DefaultPluginManager implements EntityTypeMan
         case 'shortcut_set':
           return new ShortcutSetStorageDecorator($handler);
           break;
+        case 'image_style':
+          return new ImageStyleStorageDecorator($handler);
+          break;
+        case 'domain':
+          return new DomainStorageDecorator($handler);
+          break;
         default:
           return new ConfigEntityStorageDecorator($handler);
           break;
@@ -151,6 +159,8 @@ class EntityManagerWrapper extends DefaultPluginManager implements EntityTypeMan
    */
   public function clearCachedDefinitions() {
     $this->entityManager->clearCachedDefinitions();
+    $this->loaded = NULL;
+    $this->rendered = NULL;
   }
 
   /**
@@ -234,6 +244,20 @@ class EntityManagerWrapper extends DefaultPluginManager implements EntityTypeMan
    */
   public function setContainer(ContainerInterface $container = NULL) {
     $this->entityManager->setContainer($container);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getActiveDefinition($entity_type_id) {
+    return $this->entityManager->getActiveDefinition($entity_type_id);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getActiveFieldStorageDefinitions($entity_type_id) {
+    return $this->entityManager->getActiveFieldStorageDefinitions($entity_type_id);
   }
 
 }

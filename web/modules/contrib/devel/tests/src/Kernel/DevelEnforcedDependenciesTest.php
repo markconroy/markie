@@ -36,7 +36,7 @@ class DevelEnforcedDependenciesTest extends KernelTestBase {
    * Tests devel menu enforced dependencies.
    */
   public function testMenuEnforcedDependencies() {
-    /** @var \Drupal\Core\Config\ConfigManagerInterface $config_manager */
+    /* @var \Drupal\Core\Config\ConfigManagerInterface $config_manager */
     $config_manager = $this->container->get('config.manager');
 
     // Ensure that the Devel menu has explicit enforced dependencies on devel
@@ -54,7 +54,7 @@ class DevelEnforcedDependenciesTest extends KernelTestBase {
       'id' => $block_id,
       'theme' => $this->config('system.theme')->get('default'),
       'label' => $this->randomMachineName(8),
-      'visibility' => array(),
+      'visibility' => [],
       'weight' => 0,
     ]);
     $block->save();

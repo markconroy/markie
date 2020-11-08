@@ -11,8 +11,6 @@
 
 namespace Symfony\Bridge\PsrHttpMessage\Factory;
 
-@trigger_error(sprintf('The "%s" class is deprecated since symfony/psr-http-message-bridge 1.2, use PsrHttpFactory instead.', DiactorosFactory::class), E_USER_DEPRECATED);
-
 use Psr\Http\Message\UploadedFileInterface;
 use Symfony\Bridge\PsrHttpMessage\HttpMessageFactoryInterface;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -30,8 +28,6 @@ use Zend\Diactoros\UploadedFile as DiactorosUploadedFile;
  * Builds Psr\HttpMessage instances using the Zend Diactoros implementation.
  *
  * @author Kévin Dunglas <dunglas@gmail.com>
- *
- * @deprecated since symfony/psr-http-message-bridge 1.2, use PsrHttpFactory instead
  */
 class DiactorosFactory implements HttpMessageFactoryInterface
 {
@@ -52,7 +48,12 @@ class DiactorosFactory implements HttpMessageFactoryInterface
             : \Zend\Diactoros\normalizeServer($symfonyRequest->server->all());
         $headers = $symfonyRequest->headers->all();
 
-        $body = new DiactorosStream($symfonyRequest->getContent(true));
+        if (PHP_VERSION_ID < 50600) {
+            $body = new DiactorosStream('php://temp', 'wb+');
+            $body->write($symfonyRequest->getContent());
+        } else {
+            $body = new DiactorosStream($symfonyRequest->getContent(true));
+        }
 
         $files = method_exists('Zend\Diactoros\ServerRequestFactory', 'normalizeFiles')
             ? DiactorosRequestFactory::normalizeFiles($this->getFiles($symfonyRequest->files->all()))
@@ -90,7 +91,7 @@ class DiactorosFactory implements HttpMessageFactoryInterface
      */
     private function getFiles(array $uploadedFiles)
     {
-        $files = [];
+        $files = array();
 
         foreach ($uploadedFiles as $key => $value) {
             if (null === $value) {
@@ -152,7 +153,7 @@ class DiactorosFactory implements HttpMessageFactoryInterface
         if (!isset($headers['Set-Cookie']) && !isset($headers['set-cookie'])) {
             $cookies = $symfonyResponse->headers->getCookies();
             if (!empty($cookies)) {
-                $headers['Set-Cookie'] = [];
+                $headers['Set-Cookie'] = array();
                 foreach ($cookies as $cookie) {
                     $headers['Set-Cookie'][] = $cookie->__toString();
                 }

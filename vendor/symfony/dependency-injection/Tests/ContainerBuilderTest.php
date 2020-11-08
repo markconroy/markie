@@ -846,12 +846,12 @@ class ContainerBuilderTest extends TestCase
             ->addTag('bar', ['bar' => 'bar'])
             ->addTag('foo', ['foofoo' => 'foofoo'])
         ;
-        $this->assertEquals([
+        $this->assertEquals($builder->findTaggedServiceIds('foo'), [
             'foo' => [
                 ['foo' => 'foo'],
                 ['foofoo' => 'foofoo'],
             ],
-        ], $builder->findTaggedServiceIds('foo'), '->findTaggedServiceIds() returns an array of service ids and its tag attributes');
+        ], '->findTaggedServiceIds() returns an array of service ids and its tag attributes');
         $this->assertEquals([], $builder->findTaggedServiceIds('foobar'), '->findTaggedServiceIds() returns an empty array if there is annotated services');
     }
 

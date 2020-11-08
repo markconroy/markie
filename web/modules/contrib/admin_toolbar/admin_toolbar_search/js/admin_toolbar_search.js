@@ -25,8 +25,8 @@
         source: function (request, response) {
           var data = $self.handleAutocomplete(request.term);
           if (!$self.extraFetched && drupalSettings.adminToolbarSearch.loadExtraLinks) {
-            $.getJSON( "/admin/admin-toolbar-search", function( data ) {
-              $(data).each(function() {
+            $.getJSON( Drupal.url( "admin/admin-toolbar-search" ), function( data ) {
+              $(data).each(function () {
                 var item = this;
                 item.label = this.labelRaw + ' ' + this.value;
                 $self.links.push(item);
@@ -66,7 +66,7 @@
       $(context).find('#admin-toolbar-search-input')
         .once('admin_toolbar_search')
         .each(function () {
-          $(this).focus(function() {
+          $(this).focus(function () {
             Drupal.behaviors.adminToolbarSearch.populateLinks($self);
           });
         });

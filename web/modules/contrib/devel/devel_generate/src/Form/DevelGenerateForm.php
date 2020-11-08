@@ -66,7 +66,7 @@ class DevelGenerateForm extends FormBase {
    *   A DevelGenerate plugin instance.
    */
   public function getPluginInstance($plugin_id) {
-    $instance = $this->develGenerateManager->createInstance($plugin_id, array());
+    $instance = $this->develGenerateManager->createInstance($plugin_id, []);
     return $instance;
   }
 
@@ -77,12 +77,12 @@ class DevelGenerateForm extends FormBase {
     $plugin_id = $this->getPluginIdFromRequest();
     $instance = $this->getPluginInstance($plugin_id);
     $form = $instance->settingsForm($form, $form_state);
-    $form['actions'] = array('#type' => 'actions');
-    $form['actions']['submit'] = array(
+    $form['actions'] = ['#type' => 'actions'];
+    $form['actions']['submit'] = [
       '#type' => 'submit',
       '#value' => $this->t('Generate'),
       '#button_type' => 'primary',
-    );
+    ];
 
     return $form;
   }
@@ -106,8 +106,8 @@ class DevelGenerateForm extends FormBase {
       $instance->generate($form_state->getValues());
     }
     catch (DevelGenerateException $e) {
-      $this->logger('DevelGenerate', $this->t('Failed to generate elements due to "%error".', array('%error' => $e->getMessage())));
-      drupal_set_message($this->t('Failed to generate elements due to "%error".', array('%error' => $e->getMessage())));
+      $this->logger('DevelGenerate', $this->t('Failed to generate elements due to "%error".', ['%error' => $e->getMessage()]));
+      $this->messenger()->addMessage($this->t('Failed to generate elements due to "%error".', ['%error' => $e->getMessage()]));
     }
   }
 

@@ -1014,7 +1014,7 @@ class QuestionHelperTest extends AbstractQuestionHelperTest
         $this->assertEquals('FooBundle', $dialog->ask($this->createStreamableInputInterfaceMock($inputStream), $this->createOutputInterface(), $question));
     }
 
-    public function testDisableStty()
+    public function testDisableSttby()
     {
         if (!Terminal::hasSttyAvailable()) {
             $this->markTestSkipped('`stty` is required to test autocomplete functionality');

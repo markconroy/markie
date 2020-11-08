@@ -63,38 +63,43 @@ class SettingsForm extends ConfigFormBase {
     $current_url = Url::createFromRequest($request);
     $devel_config = $this->config('devel.settings');
 
-    $form['page_alter'] = array('#type' => 'checkbox',
+    $form['page_alter'] = [
+      '#type' => 'checkbox',
       '#title' => t('Display $page array'),
       '#default_value' => $devel_config->get('page_alter'),
-      '#description' => t('Display $page array from <a href="http://api.drupal.org/api/function/hook_page_alter/7">hook_page_alter()</a> in the messages area of each page.'),
-    );
-    $form['raw_names'] = array('#type' => 'checkbox',
+      '#description' => t('Display $page array from <a href="https://api.drupal.org/api/drupal/core%21lib%21Drupal%21Core%21Render%21theme.api.php/function/hook_page_attachments_alter/8">hook_page_attachments_alter()</a> in the messages area of each page.'),
+    ];
+    $form['raw_names'] = [
+      '#type' => 'checkbox',
       '#title' => t('Display machine names of permissions and modules'),
       '#default_value' => $devel_config->get('raw_names'),
-      '#description' => t('Display the language-independent machine names of the permissions in mouse-over hints on the <a href=":permissions_url">Permissions</a> page and the module base file names on the Permissions and <a href=":modules_url">Modules</a> pages.', array(':permissions_url' => Url::fromRoute('user.admin_permissions')->toString(), ':modules_url' => Url::fromRoute('system.modules_list')->toString())),
-    );
-    $form['rebuild_theme'] = array(
+      '#description' => t('Display the language-independent machine names of the permissions in mouse-over hints on the <a href=":permissions_url">Permissions</a> page and the module base file names on the Permissions and <a href=":modules_url">Modules</a> pages.', [
+        ':permissions_url' => Url::fromRoute('user.admin_permissions')->toString(),
+        ':modules_url' => Url::fromRoute('system.modules_list')->toString(),
+      ]),
+    ];
+    $form['rebuild_theme'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Rebuild the theme registry on every page load'),
       '#description' => $this->t('New templates, theme overrides, and changes to the theme.info.yml need the theme registry to be rebuilt in order to appear on the site.'),
       '#default_value' => $devel_config->get('rebuild_theme'),
-    );
+    ];
 
     $error_handlers = devel_get_handlers();
-    $form['error_handlers'] = array(
+    $form['error_handlers'] = [
       '#type' => 'select',
       '#title' => t('Error handlers'),
-      '#options' => array(
+      '#options' => [
         DEVEL_ERROR_HANDLER_NONE => t('None'),
         DEVEL_ERROR_HANDLER_STANDARD => t('Standard Drupal'),
         DEVEL_ERROR_HANDLER_BACKTRACE_DPM => t('Kint backtrace in the message area'),
         DEVEL_ERROR_HANDLER_BACKTRACE_KINT => t('Kint backtrace above the rendered page'),
-      ),
+      ],
       '#multiple' => TRUE,
       '#default_value' => empty($error_handlers) ? DEVEL_ERROR_HANDLER_NONE : $error_handlers,
       '#description' => [
         [
-          '#markup' => $this->t('Select the error handler(s) to use, in case you <a href=":choose">choose to show errors on screen</a>.', [':choose' => $this->url('system.logging_settings')])
+          '#markup' => $this->t('Select the error handler(s) to use, in case you <a href=":choose">choose to show errors on screen</a>.', [':choose' => $this->url('system.logging_settings')]),
         ],
         [
           '#theme' => 'item_list',
@@ -108,12 +113,13 @@ class SettingsForm extends ConfigFormBase {
           '#markup' => $this->t('Depending on the situation, the theme, the size of the call stack and the arguments, etc., some handlers may not display their messages, or display them on the subsequent page. Select <em>Standard Drupal</em> <strong>and</strong> <em>Kint backtrace above the rendered page</em> to maximize your chances of not missing any messages.') . '<br />' .
             $this->t('Demonstrate the current error handler(s):') . ' ' .
             $this->l('notice', $current_url->setOption('query', ['demo' => 'notice'])) . ', ' .
-            $this->l('notice+warning', $current_url->setOption('query', ['demo' => 'warning'])). ', ' .
+            $this->l('notice+warning', $current_url->setOption('query', ['demo' => 'warning'])) . ', ' .
             $this->l('notice+warning+error', $current_url->setOption('query', ['demo' => 'error'])) . ' (' .
-            $this->t('The presentation of the @error is determined by PHP.', ['@error' => 'error']) . ')'
+            $this->t('The presentation of the @error is determined by PHP.', ['@error' => 'error']) . ')',
         ],
       ],
-    );
+    ];
+
     $form['error_handlers']['#size'] = count($form['error_handlers']['#options']);
     if ($request->query->has('demo')) {
       if ($request->getMethod() == 'GET') {
@@ -125,13 +131,16 @@ class SettingsForm extends ConfigFormBase {
     $dumper = $devel_config->get('devel_dumper');
     $default = $this->dumperManager->isPluginSupported($dumper) ? $dumper : $this->dumperManager->getFallbackPluginId(NULL);
 
-    $form['dumper'] = array(
+    $form['dumper'] = [
       '#type' => 'radios',
       '#title' => $this->t('Variables Dumper'),
       '#options' => [],
       '#default_value' => $default,
-      '#description' => $this->t('Select the debugging tool used for formatting and displaying the variables inspected through the debug functions of Devel. You can enable the <a href=":kint_install">Kint module</a> (shipped with Devel) and select the Kint debugging tool for an improved debugging experience. <strong>NOTE</strong>: Some of these plugins require external libraries for to be enabled. Learn how install external libraries with <a href=":url">Composer</a>.', [':url' => 'https://www.drupal.org/node/2404989', ':kint_install' => Url::fromRoute('system.modules_list')->toString()]),
-    );
+      '#description' => $this->t('Select the debugging tool used for formatting and displaying the variables inspected through the debug functions of Devel. You can enable the <a href=":kint_install">Kint module</a> (shipped with Devel) and select the Kint debugging tool for an improved debugging experience. <strong>NOTE</strong>: Some of these plugins require external libraries for to be enabled. Learn how install external libraries with <a href=":url">Composer</a>.', [
+        ':url' => 'https://www.drupal.org/node/2404989',
+        ':kint_install' => Url::fromRoute('system.modules_list')->toString(),
+      ]),
+    ];
 
     foreach ($this->dumperManager->getDefinitions() as $id => $definition) {
       $form['dumper']['#options'][$id] = $definition['label'];
@@ -145,7 +154,7 @@ class SettingsForm extends ConfigFormBase {
         '#context' => [
           'description' => $definition['description'],
           'supported' => $supported,
-        ]
+        ],
       ];
     }
 
@@ -169,7 +178,10 @@ class SettingsForm extends ConfigFormBase {
   }
 
   /**
+   * Demonstrates the capabilities of the error handler.
+   *
    * @param string $severity
+   *   The severity level for which demonstrate the error handler capabilities.
    */
   protected function demonstrateErrorHandlers($severity) {
     switch ($severity) {
@@ -178,11 +190,11 @@ class SettingsForm extends ConfigFormBase {
         break;
       case 'warning':
         $undefined = $undefined;
-        1/0;
+        1 / 0;
         break;
       case 'error':
         $undefined = $undefined;
-        1/0;
+        1 / 0;
         devel_undefined_function();
         break;
     }

@@ -2,7 +2,6 @@
 
 namespace Drupal\Tests\devel\Functional;
 
-use Drupal\Core\Url;
 use Drupal\Tests\BrowserTestBase;
 
 /**
@@ -67,7 +66,7 @@ class DevelEventInfoTest extends BrowserTestBase {
     $this->assertNotNull($table);
 
     // Ensures that the expected table headers are found.
-    /** @var $headers \Behat\Mink\Element\NodeElement[] */
+    /* @var $headers \Behat\Mink\Element\NodeElement[] */
     $headers = $table->findAll('css', 'thead th');
     $this->assertEquals(3, count($headers));
 
@@ -100,14 +99,14 @@ class DevelEventInfoTest extends BrowserTestBase {
       $this->assertEquals(1, count($event_header_row));
 
       // Ensures that all the event listener are listed in the table.
-      /** @var $event_rows \Behat\Mink\Element\NodeElement[] */
+      /* @var $event_rows \Behat\Mink\Element\NodeElement[] */
       $event_rows = $table->findAll('css', sprintf('tbody tr:contains("%s")', $event_name));
       // Remove the header row.
       array_shift($event_rows);
       $this->assertEquals(count($listeners), count($event_rows));
 
       foreach ($listeners as $index => $listener) {
-        /** @var $cells \Behat\Mink\Element\NodeElement[] */
+        /* @var $cells \Behat\Mink\Element\NodeElement[] */
         $cells = $event_rows[$index]->findAll('css', 'td');
         $this->assertEquals(3, count($cells));
 

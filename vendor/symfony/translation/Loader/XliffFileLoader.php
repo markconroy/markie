@@ -189,17 +189,15 @@ class XliffFileLoader implements LoaderInterface
     {
         $internalErrors = libxml_use_internal_errors(true);
 
-        if (\LIBXML_VERSION < 20900) {
-            $disableEntities = libxml_disable_entity_loader(false);
-            $isValid = @$dom->schemaValidateSource($schema);
-            libxml_disable_entity_loader($disableEntities);
-        } else {
-            $isValid = @$dom->schemaValidateSource($schema);
-        }
+        $disableEntities = libxml_disable_entity_loader(false);
 
-        if (!$isValid) {
+        if (!@$dom->schemaValidateSource($schema)) {
+            libxml_disable_entity_loader($disableEntities);
+
             throw new InvalidResourceException(sprintf('Invalid resource provided: "%s"; Errors: ', $file).implode("\n", $this->getXmlErrors($internalErrors)));
         }
+
+        libxml_disable_entity_loader($disableEntities);
 
         $dom->normalizeDocument();
 
@@ -264,7 +262,7 @@ class XliffFileLoader implements LoaderInterface
         $errors = [];
         foreach (libxml_get_errors() as $error) {
             $errors[] = sprintf('[%s %s] %s (in %s - line %d, column %d)',
-                \LIBXML_ERR_WARNING == $error->level ? 'WARNING' : 'ERROR',
+                LIBXML_ERR_WARNING == $error->level ? 'WARNING' : 'ERROR',
                 $error->code,
                 trim($error->message),
                 $error->file ?: 'n/a',

@@ -218,4 +218,12 @@ class ConfigEntityStorageDecorator extends EntityDecorator implements ConfigEnti
       $container->get('language_manager')
     );
   }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function restore(EntityInterface $entity) {
+    $this->getOriginalObject()->restore($entity);
+  }
+
 }

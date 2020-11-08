@@ -305,7 +305,7 @@ class MenuDevelGenerate extends DevelGenerateBase implements ContainerFactoryPlu
 
       $menu = $this->menuStorage->create(array(
         'label' => $name,
-        'id' => 'devel-' . Unicode::strtolower($name),
+        'id' => 'devel-' . mb_strtolower($name),
         'description' => $this->t('Description of @name', array('@name' => $name)),
       ));
 

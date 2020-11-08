@@ -1,0 +1,14 @@
+type: module
+name: 'Upgrade Status'
+description: 'Review Drupal 9 readiness of the environment and components of the site.'
+configure: upgrade_status.report
+package: Administration
+core: 8.x
+php: '7.1'
+dependencies:
+  - drupal:update
+
+# Information added by Drupal.org packaging script on 2020-10-09
+version: '8.x-2.11'
+project: 'upgrade_status'
+datestamp: 1602256223

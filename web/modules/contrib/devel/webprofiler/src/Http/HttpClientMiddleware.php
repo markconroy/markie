@@ -36,8 +36,18 @@ class HttpClientMiddleware {
     return function ($handler) {
       return function (RequestInterface $request, array $options) use ($handler) {
 
-        $options['on_stats'] = function (TransferStats $stats) use ($request) {
+        // If on_stats callback is already set then save it
+        // and call it after ours.
+        if (isset($options['on_stats'])) {
+          $next = $options['on_stats'];
+        }
+        else {
+          $next = function(TransferStats $stats) {};
+        }
+
+        $options['on_stats'] = function (TransferStats $stats) use ($request, $next) {
           $request->stats = $stats;
+          $next($stats);
         };
 
         return $handler($request, $options)->then(

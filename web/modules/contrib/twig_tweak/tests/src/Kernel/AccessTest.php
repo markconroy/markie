@@ -5,9 +5,12 @@ namespace Drupal\Tests\twig_tweak\Kernel;
 use Drupal\block\BlockViewBuilder;
 use Drupal\block\Entity\Block;
 use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Cache\Cache;
 use Drupal\Core\Entity\EntityStorageInterface;
+use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\file\Entity\File;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
@@ -44,8 +47,10 @@ class AccessTest extends KernelTestBase {
     'twig_tweak',
     'twig_tweak_test',
     'node',
+    'file',
     'user',
     'system',
+    'block',
   ];
 
   /**
@@ -81,13 +86,26 @@ class AccessTest extends KernelTestBase {
    */
   public function testDrupalEntity() {
 
-    // -- Unprivileged user.
+    // -- Unprivileged user with access check.
     $this->setUpCurrentUser(['name' => 'User 1']);
 
     $build = $this->twigExtension->drupalEntity('node', $this->node->id());
     self::assertNull($build);
 
-    // -- Privileged user.
+    // -- Unprivileged user without access check.
+    $build = $this->twigExtension->drupalEntity('node', $this->node->id(), NULL, NULL, FALSE);
+    self::assertArrayHasKey('#node', $build);
+    $expected_cache = [
+      'tags' => [
+        'node:1',
+        'node_view',
+      ],
+      'contexts' => [],
+      'max-age' => Cache::PERMANENT,
+    ];
+    self::assertSame($expected_cache, $build['#cache']);
+
+    // -- Privileged user with access check.
     $this->setUpCurrentUser(['name' => 'User 2'], ['access content']);
 
     $build = $this->twigExtension->drupalEntity('node', $this->node->id());
@@ -105,6 +123,19 @@ class AccessTest extends KernelTestBase {
       'max-age' => 50,
     ];
     self::assertSame($expected_cache, $build['#cache']);
+
+    // -- Privileged user without access check.
+    $build = $this->twigExtension->drupalEntity('node', $this->node->id(), NULL, NULL, FALSE);
+    self::assertArrayHasKey('#node', $build);
+    $expected_cache = [
+      'tags' => [
+        'node:1',
+        'node_view',
+      ],
+      'contexts' => [],
+      'max-age' => Cache::PERMANENT,
+    ];
+    self::assertSame($expected_cache, $build['#cache']);
   }
 
   /**
@@ -112,13 +143,23 @@ class AccessTest extends KernelTestBase {
    */
   public function testDrupalField() {
 
-    // -- Unprivileged user.
+    // -- Unprivileged user with access check.
     $this->setUpCurrentUser(['name' => 'User 1']);
 
     $build = $this->twigExtension->drupalField('title', 'node', $this->node->id());
     self::assertNull($build);
 
-    // -- Privileged user.
+    // -- Unprivileged user without access check.
+    $build = $this->twigExtension->drupalField('title', 'node', $this->node->id(), 'default', NULL, FALSE);
+    self::assertArrayHasKey('#items', $build);
+    $expected_cache = [
+      'contexts' => [],
+      'tags' => ['node:1'],
+      'max-age' => Cache::PERMANENT,
+    ];
+    self::assertSame($expected_cache, $build['#cache']);
+
+    // -- Privileged user with access check.
     $this->setUpCurrentUser(['name' => 'User 2'], ['access content']);
 
     $build = $this->twigExtension->drupalField('title', 'node', $this->node->id());
@@ -135,6 +176,159 @@ class AccessTest extends KernelTestBase {
       'max-age' => 50,
     ];
     self::assertSame($expected_cache, $build['#cache']);
+
+    // -- Privileged user without access check.
+    $build = $this->twigExtension->drupalField('title', 'node', $this->node->id(), 'default', NULL, FALSE);
+    self::assertArrayHasKey('#items', $build);
+    $expected_cache = [
+      'contexts' => [],
+      'tags' => ['node:1'],
+      'max-age' => Cache::PERMANENT,
+    ];
+    self::assertSame($expected_cache, $build['#cache']);
+  }
+
+  /**
+   * Test callback.
+   */
+  public function testDrupalEntityEditForm() {
+
+    // -- Unprivileged user with access check.
+    $this->setUpCurrentUser(['name' => 'User 1']);
+
+    $build = $this->twigExtension->drupalEntityForm('node', $this->node->id());
+    self::assertNull($build);
+
+    // -- Unprivileged user without access check.
+    $build = $this->twigExtension->drupalEntityForm('node', $this->node->id(), 'default', [], FALSE);
+    self::assertArrayHasKey('form_id', $build);
+    $expected_cache = [
+      'contexts' => ['user.roles:authenticated'],
+      'tags' => [
+        'config:core.entity_form_display.node.article.default',
+        'node:1',
+      ],
+      'max-age' => Cache::PERMANENT,
+    ];
+    self::assertSame($expected_cache, $build['#cache']);
+
+    // -- Privileged user with access check.
+    $this->setUpCurrentUser(['name' => 'User 2'], ['access content']);
+
+    $build = $this->twigExtension->drupalEntityForm('node', $this->node->id());
+    self::assertArrayHasKey('#form_id', $build);
+    $expected_cache = [
+      'contexts' => [
+        'user',
+        'user.permissions',
+        'user.roles:authenticated',
+      ],
+      'tags' => [
+        'config:core.entity_form_display.node.article.default',
+        'node:1',
+        'tag_from_twig_tweak_test_node_access',
+      ],
+      'max-age' => 50,
+    ];
+    self::assertSame($expected_cache, $build['#cache']);
+
+    // -- Privileged user without access check.
+    $build = $this->twigExtension->drupalEntityForm('node', $this->node->id(), 'default', [], FALSE);
+    self::assertArrayHasKey('#form_id', $build);
+    $expected_cache = [
+      'contexts' => ['user.roles:authenticated'],
+      'tags' => [
+        'config:core.entity_form_display.node.article.default',
+        'node:1',
+      ],
+      'max-age' => Cache::PERMANENT,
+    ];
+    self::assertSame($expected_cache, $build['#cache']);
+  }
+
+  /**
+   * Test callback.
+   */
+  public function testDrupalEntityAddForm() {
+
+    $node_values = ['type' => 'article'];
+
+    // -- Unprivileged user with access check.
+    $this->setUpCurrentUser(['name' => 'User 1']);
+
+    $build = $this->twigExtension->drupalEntityForm('node', NULL, 'default', $node_values);
+    self::assertNull($build);
+
+    // -- Unprivileged user without access check.
+    $build = $this->twigExtension->drupalEntityForm('node', NULL, 'default', $node_values, FALSE);
+    self::assertArrayHasKey('form_id', $build);
+    $expected_cache = [
+      'contexts' => ['user.roles:authenticated'],
+      'tags' => ['config:core.entity_form_display.node.article.default'],
+      'max-age' => Cache::PERMANENT,
+    ];
+    self::assertSame($expected_cache, $build['#cache']);
+
+    // -- Privileged user with access check.
+    $this->setUpCurrentUser(['name' => 'User 2'], ['access content', 'create article content']);
+
+    $build = $this->twigExtension->drupalEntityForm('node', NULL, 'default', $node_values);
+    self::assertArrayHasKey('form_id', $build);
+    $expected_cache = [
+      'contexts' => [
+        'user.permissions',
+        'user.roles:authenticated',
+      ],
+      'tags' => ['config:core.entity_form_display.node.article.default'],
+      'max-age' => Cache::PERMANENT,
+    ];
+    self::assertSame($expected_cache, $build['#cache']);
+
+    // -- Privileged user without access check.
+    $build = $this->twigExtension->drupalEntityForm('node', NULL, 'default', $node_values);
+    self::assertArrayHasKey('form_id', $build);
+    $expected_cache = [
+      'contexts' => [
+        'user.permissions',
+        'user.roles:authenticated',
+      ],
+      'tags' => ['config:core.entity_form_display.node.article.default'],
+      'max-age' => Cache::PERMANENT,
+    ];
+    self::assertSame($expected_cache, $build['#cache']);
+  }
+
+  /**
+   * Test callback.
+   *
+   * @see \Drupal\twig_tweak_test\Plugin\Block\FooBlock
+   */
+  public function testDrupalBlock() {
+
+    // -- Privileged user.
+    $this->setUpCurrentUser(['name' => 'User 1']);
+
+    $build = $this->twigExtension->drupalBlock('twig_tweak_test_foo');
+    $expected_content = [
+      '#markup' => 'Foo',
+      '#cache' => [
+        'contexts' => ['url'],
+        'tags' => ['tag_from_build'],
+      ],
+    ];
+    self::assertSame($expected_content, $build['content']);
+    $expected_cache = [
+      'contexts' => ['user'],
+      'tags' => ['tag_from_blockAccess'],
+      'max-age' => 35,
+    ];
+    self::assertSame($expected_cache, $build['#cache']);
+
+    // -- Unprivileged user.
+    $this->setUpCurrentUser(['name' => 'User 2']);
+
+    $build = $this->twigExtension->drupalBlock('twig_tweak_test_foo');
+    self::assertNull($build);
   }
 
   /**
@@ -178,6 +372,13 @@ class AccessTest extends KernelTestBase {
     $view_builder->expects($this->any())
       ->method('view')
       ->willReturn($content);
+    $entity_type = $this->createMock(EntityTypeInterface::class);
+    $entity_type->expects($this->any())
+      ->method('getListCacheTags')
+      ->willReturn([]);
+    $entity_type->expects($this->any())
+      ->method('getListCacheContexts')
+      ->willReturn([]);
 
     $entity_type_manager = $this->createMock(EntityTypeManagerInterface::class);
     $entity_type_manager->expects($this->any())
@@ -186,6 +387,9 @@ class AccessTest extends KernelTestBase {
     $entity_type_manager->expects($this->any())
       ->method('getViewBuilder')
       ->willReturn($view_builder);
+    $entity_type_manager->expects($this->any())
+      ->method('getDefinition')
+      ->willReturn($entity_type);
 
     $this->container->set('entity_type.manager', $entity_type_manager);
 
@@ -197,6 +401,8 @@ class AccessTest extends KernelTestBase {
           'tags' => ['tag_from_view'],
         ],
       ],
+      '#region' => 'bar',
+      '#theme_wrappers' => ['region'],
       '#cache' => [
         'contexts' => ['user'],
         'tags' => [
@@ -207,6 +413,154 @@ class AccessTest extends KernelTestBase {
       ],
     ];
     self::assertSame($expected_build, $build);
+  }
+
+  /**
+   * Test callback.
+   */
+  public function testDrupalImage() {
+
+    // @codingStandardsIgnoreStart
+    $create_image = function ($uri) {
+      $file = new class(['uri' => $uri], 'file') extends File {
+        public function access($operation, AccountInterface $account = NULL, $return_as_object = FALSE) {
+          $is_public = parse_url($this->getFileUri(), PHP_URL_SCHEME) == 'public';
+          $result = AccessResult::allowedIf($is_public);
+          $result->cachePerUser();
+          $result->addCacheTags(['tag_for_' . $this->getFileUri()]);
+          $result->setCacheMaxAge(123);
+          return $return_as_object ? $result : $result->isAllowed();
+        }
+        public function getPlugin() {
+          return NULL;
+        }
+      };
+      $file->setFileUri($uri);
+      return $file;
+    };
+    // @codingStandardsIgnoreEnd
+
+    $storage = $this->createMock(EntityStorageInterface::class);
+    $map = [
+      [
+        ['uri' => 'public://ocean.jpg'],
+        [$create_image('public://ocean.jpg')],
+      ],
+      [
+        ['uri' => 'private://sea.jpg'],
+        [$create_image('private://sea.jpg')],
+      ],
+    ];
+    $storage->method('loadByProperties')
+      ->will($this->returnValueMap($map));
+
+    $entity_type_manager = $this->createMock(EntityTypeManagerInterface::class);
+    $entity_type_manager->method('getStorage')->willReturn($storage);
+
+    $this->container->set('entity_type.manager', $entity_type_manager);
+
+    // -- Public image with access check.
+    $build = $this->twigExtension->drupalImage('public://ocean.jpg');
+    $expected_build = [
+      '#uri' => 'public://ocean.jpg',
+      '#attributes' => [],
+      '#theme' => 'image',
+      '#cache' => [
+        'contexts' => ['user'],
+        'tags' => ['tag_for_public://ocean.jpg'],
+        'max-age' => 123,
+      ],
+    ];
+    self::assertSame($expected_build, $build);
+
+    // -- Public image without access check.
+    $build = $this->twigExtension->drupalImage('public://ocean.jpg', NULL, [], NULL, FALSE);
+    $expected_build = [
+      '#uri' => 'public://ocean.jpg',
+      '#attributes' => [],
+      '#theme' => 'image',
+      '#cache' => [
+        'contexts' => [],
+        'tags' => [],
+        'max-age' => Cache::PERMANENT,
+      ],
+    ];
+    self::assertSame($expected_build, $build);
+
+    // -- Private image with access check.
+    $build = $this->twigExtension->drupalImage('private://sea.jpg');
+    self::assertNull($build);
+
+    // -- Private image without access check.
+    $build = $this->twigExtension->drupalImage('private://sea.jpg', NULL, [], NULL, FALSE);
+    $expected_build = [
+      '#uri' => 'private://sea.jpg',
+      '#attributes' => [],
+      '#theme' => 'image',
+      '#cache' => [
+        'contexts' => [],
+        'tags' => [],
+        'max-age' => Cache::PERMANENT,
+      ],
+    ];
+    self::assertSame($expected_build, $build);
+  }
+
+  /**
+   * Test callback.
+   */
+  public function testView() {
+
+    // -- Unprivileged user with access check.
+    $this->setUpCurrentUser(['name' => 'User 1']);
+
+    $build = $this->twigExtension->view($this->node);
+    self::assertNull($build);
+
+    // -- Unprivileged user without access check.
+    $build = $this->twigExtension->view($this->node, NULL, NULL, FALSE);
+    self::assertArrayHasKey('#node', $build);
+    $expected_cache = [
+      'tags' => [
+        'node:1',
+        'node_view',
+      ],
+      'contexts' => [],
+      'max-age' => Cache::PERMANENT,
+    ];
+    self::assertSame($expected_cache, $build['#cache']);
+
+    // -- Privileged user with access check.
+    $this->setUpCurrentUser(['name' => 'User 2'], ['access content']);
+
+    $build = $this->twigExtension->view($this->node, NULL);
+    self::assertArrayHasKey('#node', $build);
+    $expected_cache = [
+      'tags' => [
+        'node:1',
+        'node_view',
+        'tag_from_twig_tweak_test_node_access',
+      ],
+      'contexts' => [
+        'user',
+        'user.permissions',
+      ],
+      'max-age' => 50,
+    ];
+    self::assertSame($expected_cache, $build['#cache']);
+
+    // -- Privileged user without access check.
+    $build = $this->twigExtension->view($this->node, NULL, NULL, FALSE);
+    self::assertArrayHasKey('#node', $build);
+    $expected_cache = [
+      'tags' => [
+        'node:1',
+        'node_view',
+      ],
+      'contexts' => [],
+      'max-age' => Cache::PERMANENT,
+    ];
+    self::assertSame($expected_cache, $build['#cache']);
   }
 
 }

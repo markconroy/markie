@@ -165,10 +165,10 @@ function _drush_plugin_validate($params) {
 
   if (!isset($instance_and_values[$plugin_id])) {
 
-    /** @var DevelGeneratePluginManager $manager */
+    /* @var DevelGeneratePluginManager $manager */
     $manager = \Drupal::service('plugin.manager.develgenerate');
 
-    /** @var DevelGenerateBaseInterface $instance */
+    /* @var DevelGenerateBaseInterface $instance */
     $instance = $manager->createInstance($plugin_id, array());
 
     //Plugin instance suit params in order to fit for generateElements
@@ -188,7 +188,7 @@ function drush_devel_generate() {
   $plugin_id = array_shift($params);
   $instance_and_values = drupal_static('drush_devel_generate_generate_validate');
 
-  /** @var DevelGenerateBaseInterface $instance */
+  /* @var DevelGenerateBaseInterface $instance */
   $instance = $instance_and_values[$plugin_id]['instance'];
   $values = $instance_and_values[$plugin_id]['values'];
   $instance->generate($values);

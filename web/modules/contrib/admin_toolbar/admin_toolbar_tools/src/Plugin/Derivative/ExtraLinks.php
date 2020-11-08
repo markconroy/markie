@@ -111,7 +111,7 @@ class ExtraLinks extends DeriverBase implements ContainerDeriverInterface {
           // link.
           $content_entity_bundle_root = 'entity.' . $content_entity_bundle . '.overview_form.' . $machine_name;
           $links[$content_entity_bundle_root] = [
-            'title' => $this->t($bundle->label()),
+            'title' => $this->t('@label', ['@label' => $bundle->label()]),
             'route_name' => 'entity.' . $content_entity_bundle . '.overview_form',
             'parent' => 'entity.' . $content_entity_bundle . '.collection',
             'route_parameters' => [$content_entity_bundle => $machine_name],
@@ -120,7 +120,7 @@ class ExtraLinks extends DeriverBase implements ContainerDeriverInterface {
         if ($this->routeExists('entity.' . $content_entity_bundle . '.edit_form')) {
           $key = 'entity.' . $content_entity_bundle . '.edit_form.' . $machine_name;
           $links[$key] = [
-            'title' => $this->t($bundle->label()),
+            'title' => $this->t('@label', ['@label' => $bundle->label()]),
             'route_name' => 'entity.' . $content_entity_bundle . '.edit_form',
             'parent' => 'entity.' . $content_entity_bundle . '.collection',
             'route_parameters' => [$content_entity_bundle => $machine_name],
@@ -279,7 +279,7 @@ class ExtraLinks extends DeriverBase implements ContainerDeriverInterface {
       // Adds node links for each content type.
       foreach ($this->entityTypeManager->getStorage('node_type')->loadMultiple() as $type) {
         $links['node.add.' . $type->id()] = [
-          'title' => $this->t($type->label()),
+          'title' => $this->t('@label', ['@label' => $type->label()]),
           'route_name' => 'node.add',
           'parent' => $base_plugin_definition['id'] . ':node.add',
           'route_parameters' => ['node_type' => $type->id()],

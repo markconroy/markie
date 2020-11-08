@@ -224,10 +224,10 @@ class DefinitionTest extends TestCase
         $def->addTag('foo', ['foo' => 'bar']);
         $this->assertEquals([[], ['foo' => 'bar']], $def->getTag('foo'), '->addTag() can adds the same tag several times');
         $def->addTag('bar', ['bar' => 'bar']);
-        $this->assertEquals([
+        $this->assertEquals($def->getTags(), [
             'foo' => [[], ['foo' => 'bar']],
             'bar' => [['bar' => 'bar']],
-        ], $def->getTags(), '->getTags() returns all tags');
+        ], '->getTags() returns all tags');
     }
 
     public function testSetArgument()

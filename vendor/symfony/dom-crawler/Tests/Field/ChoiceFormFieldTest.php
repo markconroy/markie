@@ -19,7 +19,7 @@ class ChoiceFormFieldTest extends FormFieldTestCase
     {
         $node = $this->createNode('textarea', '');
         try {
-            new ChoiceFormField($node);
+            $field = new ChoiceFormField($node);
             $this->fail('->initialize() throws a \LogicException if the node is not an input or a select');
         } catch (\LogicException $e) {
             $this->assertTrue(true, '->initialize() throws a \LogicException if the node is not an input or a select');
@@ -27,7 +27,7 @@ class ChoiceFormFieldTest extends FormFieldTestCase
 
         $node = $this->createNode('input', '', ['type' => 'text']);
         try {
-            new ChoiceFormField($node);
+            $field = new ChoiceFormField($node);
             $this->fail('->initialize() throws a \LogicException if the node is an input with a type different from checkbox or radio');
         } catch (\LogicException $e) {
             $this->assertTrue(true, '->initialize() throws a \LogicException if the node is an input with a type different from checkbox or radio');

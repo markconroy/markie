@@ -52,7 +52,7 @@ class DevelRouteInfoTest extends BrowserTestBase {
     $page = $this->getSession()->getPage();
 
     // Ensures that the expected table headers are found.
-    /** @var $headers \Behat\Mink\Element\NodeElement[] */
+    /* @var $headers \Behat\Mink\Element\NodeElement[] */
     $headers = $page->findAll('css', 'table.devel-route-list thead th');
     $this->assertEquals(4, count($headers));
 
@@ -94,7 +94,7 @@ class DevelRouteInfoTest extends BrowserTestBase {
       $row = $page->find('css', sprintf('table.devel-route-list tbody tr:contains("%s")', $route_name));
       $this->assertNotNull($row);
 
-      /** @var $cells \Behat\Mink\Element\NodeElement[] */
+      /* @var $cells \Behat\Mink\Element\NodeElement[] */
       $cells = $row->findAll('css', 'td');
       $this->assertEquals(4, count($cells));
 

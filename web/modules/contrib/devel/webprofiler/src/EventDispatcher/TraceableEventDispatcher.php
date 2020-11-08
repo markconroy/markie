@@ -170,10 +170,18 @@ class TraceableEventDispatcher extends ContainerAwareEventDispatcher implements 
    * @param $priority
    */
   private function addCalledListener($definition, $event_name, $priority) {
-    $this->calledListeners[$event_name][$priority][] = [
-      'class' => get_class($definition['callable'][0]),
-      'method' => $definition['callable'][1],
-    ];
+    if ($this->isClosure($definition['callable'])) {
+      $this->calledListeners[$event_name][$priority][] = [
+        'class' => 'Closure',
+        'method' => '',
+      ];
+    }
+    else {
+      $this->calledListeners[$event_name][$priority][] = [
+        'class' => get_class($definition['callable'][0]),
+        'method' => $definition['callable'][1],
+      ];
+    }
 
     foreach ($this->notCalledListeners[$event_name][$priority] as $key => $listener) {
       if (isset($listener['service'])) {
@@ -182,12 +190,25 @@ class TraceableEventDispatcher extends ContainerAwareEventDispatcher implements 
         }
       }
       else {
-        if (get_class($listener['callable'][0]) == get_class($definition['callable'][0]) && $listener['callable'][1] == $definition['callable'][1]) {
-          unset($this->notCalledListeners[$event_name][$priority][$key]);
+        if ($this->isClosure($listener['callable'])) {
+          if (is_callable($listener['callable'], TRUE, $listenerCallableName) && is_callable($definition['callable'], TRUE, $definitionCallableName)) {
+            if ($listenerCallableName == $definitionCallableName) {
+              unset($this->notCalledListeners[$event_name][$priority][$key]);
+            }
+          }
+        }
+        else {
+          if (get_class($listener['callable'][0]) == get_class($definition['callable'][0]) && $listener['callable'][1] == $definition['callable'][1]) {
+            unset($this->notCalledListeners[$event_name][$priority][$key]);
+          }
         }
       }
 
     }
+  }
+
+  private function isClosure($t) {
+    return is_object($t) && ($t instanceof \Closure);
   }
 
 }

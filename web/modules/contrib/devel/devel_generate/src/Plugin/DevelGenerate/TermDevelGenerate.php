@@ -204,6 +204,9 @@ class TermDevelGenerate extends DevelGenerateBase implements ContainerFactoryPlu
 
       $term = $this->termStorage->create($values);
 
+      // A flag to let hook implementations know that this is a generated term.
+      $term->devel_generate = TRUE;
+
       // Populate all fields with sample values.
       $this->populateFields($term);
       $term->save();

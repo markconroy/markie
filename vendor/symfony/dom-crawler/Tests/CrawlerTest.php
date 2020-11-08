@@ -69,17 +69,21 @@ class CrawlerTest extends TestCase
         $this->assertEquals('Foo', $crawler->filterXPath('//body')->text(), '->add() adds nodes from a string');
     }
 
+    /**
+     * @expectedException \InvalidArgumentException
+     */
     public function testAddInvalidType()
     {
-        $this->expectException('InvalidArgumentException');
         $crawler = new Crawler();
         $crawler->add(1);
     }
 
+    /**
+     * @expectedException \InvalidArgumentException
+     * @expectedExceptionMessage Attaching DOM nodes from multiple documents in the same crawler is forbidden.
+     */
     public function testAddMultipleDocumentNode()
     {
-        $this->expectException('InvalidArgumentException');
-        $this->expectExceptionMessage('Attaching DOM nodes from multiple documents in the same crawler is forbidden.');
         $crawler = $this->createTestCrawler();
         $crawler->addHtmlContent('<html><div class="foo"></html>', 'UTF-8');
     }
@@ -765,18 +769,22 @@ HTML;
         }
     }
 
+    /**
+     * @expectedException \InvalidArgumentException
+     * @expectedExceptionMessage The selected node should be instance of DOMElement
+     */
     public function testInvalidLink()
     {
-        $this->expectException('InvalidArgumentException');
-        $this->expectExceptionMessage('The selected node should be instance of DOMElement');
         $crawler = $this->createTestCrawler('http://example.com/bar/');
         $crawler->filterXPath('//li/text()')->link();
     }
 
+    /**
+     * @expectedException \InvalidArgumentException
+     * @expectedExceptionMessage The selected node should be instance of DOMElement
+     */
     public function testInvalidLinks()
     {
-        $this->expectException('InvalidArgumentException');
-        $this->expectExceptionMessage('The selected node should be instance of DOMElement');
         $crawler = $this->createTestCrawler('http://example.com/bar/');
         $crawler->filterXPath('//li/text()')->link();
     }
@@ -835,7 +843,7 @@ HTML;
     public function testLinks()
     {
         $crawler = $this->createTestCrawler('http://example.com/bar/')->selectLink('Foo');
-        $this->assertIsArray($crawler->links(), '->links() returns an array');
+        $this->assertInternalType('array', $crawler->links(), '->links() returns an array');
 
         $this->assertCount(4, $crawler->links(), '->links() returns an array');
         $links = $crawler->links();
@@ -847,7 +855,7 @@ HTML;
     public function testImages()
     {
         $crawler = $this->createTestCrawler('http://example.com/bar/')->selectImage('Bar');
-        $this->assertIsArray($crawler->images(), '->images() returns an array');
+        $this->assertInternalType('array', $crawler->images(), '->images() returns an array');
 
         $this->assertCount(4, $crawler->images(), '->images() returns an array');
         $images = $crawler->images();
@@ -878,10 +886,12 @@ HTML;
         }
     }
 
+    /**
+     * @expectedException \InvalidArgumentException
+     * @expectedExceptionMessage The selected node should be instance of DOMElement
+     */
     public function testInvalidForm()
     {
-        $this->expectException('InvalidArgumentException');
-        $this->expectExceptionMessage('The selected node should be instance of DOMElement');
         $crawler = $this->createTestCrawler('http://example.com/bar/');
         $crawler->filterXPath('//li/text()')->form();
     }
@@ -989,9 +999,40 @@ HTML;
             $this->assertTrue(true, '->children() does not trigger a notice if the node has no children');
         } catch (\PHPUnit\Framework\Error\Notice $e) {
             $this->fail('->children() does not trigger a notice if the node has no children');
-        } catch (\PHPUnit\Framework\Error\Notice $e) {
+        } catch (\PHPUnit_Framework_Error_Notice $e) {
             $this->fail('->children() does not trigger a notice if the node has no children');
         }
+    }
+
+    public function testFilteredChildren()
+    {
+        $html = <<<'HTML'
+<!DOCTYPE html>
+<html lang="en">
+<body>
+    <div id="foo">
+        <div class="lorem">
+            <p class="lorem"></p>
+        </div>
+        <div class="lorem">
+            <span class="lorem"></span>
+        </div>
+        <span class="ipsum"></span>
+    </div>
+</body>
+</html>
+HTML;
+
+        $crawler = new Crawler($html);
+        $foo = $crawler->filter('#foo');
+
+        $this->assertEquals(3, $foo->children()->count());
+        $this->assertEquals(2, $foo->children('.lorem')->count());
+        $this->assertEquals(2, $foo->children('div')->count());
+        $this->assertEquals(2, $foo->children('div.lorem')->count());
+        $this->assertEquals(1, $foo->children('span')->count());
+        $this->assertEquals(1, $foo->children('span.ipsum')->count());
+        $this->assertEquals(1, $foo->children('.ipsum')->count());
     }
 
     public function testParents()
@@ -1050,6 +1091,7 @@ HTML;
             ['/basepath', '/registration', 'http://domain.com/registration', 'http://domain.com/registration', '<base> tag does work with a path and form action'],
             ['/basepath', '', 'http://domain.com/registration', 'http://domain.com/registration', '<base> tag does work with a path and empty form action'],
             ['http://base.com/', '/registration', 'http://base.com/registration', 'http://domain.com/registration', '<base> tag does work with a URL and form action'],
+            ['http://base.com/', 'http://base.com/registration', 'http://base.com/registration', null, '<base> tag does work with a URL and form action'],
             ['http://base.com', '', 'http://domain.com/path/form', 'http://domain.com/path/form', '<base> tag does work with a URL and an empty form action'],
             ['http://base.com/path', '/registration', 'http://base.com/registration', 'http://domain.com/path/form', '<base> tag does work with a URL and form action'],
         ];
@@ -1099,10 +1141,68 @@ HTML;
         $this->assertSame('input', $crawler->first()->nodeName());
     }
 
+    /**
+     * @expectedException \LogicException
+     */
     public function testEvaluateThrowsAnExceptionIfDocumentIsEmpty()
     {
-        $this->expectException('LogicException');
         (new Crawler())->evaluate('//form/input[1]');
+    }
+
+    /**
+     * @group legacy
+     * @expectedDeprecation The "Symfony\Component\DomCrawler\Crawler::children()" method will have a new "string $selector = null" argument in version 5.0, not defining it is deprecated since Symfony 4.2.
+     */
+    public function testInheritedClassCallChildrenWithoutArgument()
+    {
+        $dom = new \DOMDocument();
+        $dom->loadHTML('
+            <html>
+                <body>
+                    <a href="foo">Foo</a>
+                    <a href="/foo">   Fabien\'s Foo   </a>
+                    <a href="/foo">Fabien"s Foo</a>
+                    <a href="/foo">\' Fabien"s Foo</a>
+
+                    <a href="/bar"><img alt="Bar"/></a>
+                    <a href="/bar"><img alt="   Fabien\'s Bar   "/></a>
+                    <a href="/bar"><img alt="Fabien&quot;s Bar"/></a>
+                    <a href="/bar"><img alt="\' Fabien&quot;s Bar"/></a>
+
+                    <a href="?get=param">GetLink</a>
+
+                    <a href="/example">Klausi|Claudiu</a>
+
+                    <form action="foo" id="FooFormId">
+                        <input type="text" value="TextValue" name="TextName" />
+                        <input type="submit" value="FooValue" name="FooName" id="FooId" />
+                        <input type="button" value="BarValue" name="BarName" id="BarId" />
+                        <button value="ButtonValue" name="ButtonName" id="ButtonId" />
+                    </form>
+
+                    <input type="submit" value="FooBarValue" name="FooBarName" form="FooFormId" />
+                    <input type="text" value="FooTextValue" name="FooTextName" form="FooFormId" />
+
+                    <ul class="first">
+                        <li class="first">One</li>
+                        <li>Two</li>
+                        <li>Three</li>
+                    </ul>
+                    <ul>
+                        <li>One Bis</li>
+                        <li>Two Bis</li>
+                        <li>Three Bis</li>
+                    </ul>
+                    <div id="parent">
+                        <div id="child"></div>
+                        <div id="child2" xmlns:foo="http://example.com"></div>
+                    </div>
+                    <div id="sibling"><img /></div>
+                </body>
+            </html>
+        ');
+        $crawlerChild = new ClassThatInheritCrawler($dom);
+        $crawlerChild->children();
     }
 
     public function createTestCrawler($uri = null)
@@ -1189,5 +1289,13 @@ HTML;
         $domxpath = new \DOMXPath($dom);
 
         return $domxpath->query('//div');
+    }
+}
+
+class ClassThatInheritCrawler extends Crawler
+{
+    public function children()
+    {
+        parent::children();
     }
 }

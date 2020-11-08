@@ -1,10 +1,22 @@
 tests/phpunit.xml
 vendor
-/lib/Console_Table-*
 box.phar
 drush.phar
-isolation/
-#The mkdocs output directory.
+#The mkdocs output directory and generated file.
 site
+gh-pages
+mkdocs.yml
+#The Commands site output directory.
+docs/commands
+#The Doctum output directories
+api
+.doctum-cache
 # IDE config
 .idea/
+sut/*
+!sut/drush
+sut/drush/sites/*test.site.yml
+/sandbox/
+.env
+# Test fixtures
+sut/drush/sites/synctest.site.yml

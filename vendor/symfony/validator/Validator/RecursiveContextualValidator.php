@@ -680,10 +680,6 @@ class RecursiveContextualValidator implements ContextualValidatorInterface
 
         if ($value instanceof LazyProperty) {
             $value = $value->getPropertyValue();
-
-            if (null === $value) {
-                return;
-            }
         }
 
         if (\is_array($value)) {

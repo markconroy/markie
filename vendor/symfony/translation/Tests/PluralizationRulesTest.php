@@ -100,9 +100,9 @@ class PluralizationRulesTest extends TestCase
         foreach ($matrix as $langCode => $data) {
             $indexes = array_flip($data);
             if ($expectSuccess) {
-                $this->assertCount((int) $nplural, $indexes, "Langcode '$langCode' has '$nplural' plural forms.");
+                $this->assertEquals($nplural, \count($indexes), "Langcode '$langCode' has '$nplural' plural forms.");
             } else {
-                $this->assertNotCount((int) $nplural, $indexes, "Langcode '$langCode' has '$nplural' plural forms.");
+                $this->assertNotEquals((int) $nplural, \count($indexes), "Langcode '$langCode' has '$nplural' plural forms.");
             }
         }
     }

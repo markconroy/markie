@@ -31,7 +31,6 @@ class DevelTwigExtensionTest extends KernelTestBase {
    */
   public static $modules = ['devel', 'user', 'system'];
 
-
   /**
    * {@inheritdoc}
    */
@@ -70,7 +69,7 @@ class DevelTwigExtensionTest extends KernelTestBase {
    */
   public function testTwigExtensionLoaded() {
     $twig_service = \Drupal::service('twig');
-    $extension = $twig_service->getExtension('devel_debug');
+    $extension = $twig_service->getExtension(Debug::class);
     $this->assertEquals(get_class($extension), Debug::class, 'Debug Extension loaded successfully.');
   }
 
@@ -78,7 +77,7 @@ class DevelTwigExtensionTest extends KernelTestBase {
    * Tests that the Twig dump functions are registered properly.
    */
   public function testDumpFunctionsRegistered() {
-    /** @var \Twig_SimpleFunction[] $functions */
+    /* @var \Twig_SimpleFunction[] $functions */
     $functions = \Drupal::service('twig')->getFunctions();
 
     $dump_functions = ['devel_dump', 'kpr'];
@@ -106,8 +105,8 @@ class DevelTwigExtensionTest extends KernelTestBase {
   /**
    * Tests that the Twig function for XDebug integration is registered properly.
    */
-  public function testXDebugIntegrationFunctionsRegistered() {
-    /** @var \Twig_SimpleFunction $function */
+  public function testXdebugIntegrationFunctionsRegistered() {
+    /* @var \Twig_SimpleFunction $function */
     $function = \Drupal::service('twig')->getFunction('devel_breakpoint');
     $this->assertTrue($function instanceof \Twig_SimpleFunction);
     $this->assertEquals($function->getName(), 'devel_breakpoint');
@@ -134,7 +133,7 @@ class DevelTwigExtensionTest extends KernelTestBase {
       'twig_object' => new \stdClass(),
     ];
 
-    /** @var \Drupal\Core\Template\TwigEnvironment $environment */
+    /* @var \Drupal\Core\Template\TwigEnvironment $environment */
     $environment = \Drupal::service('twig');
 
     // Ensures that the twig extension does nothing if the current
@@ -147,7 +146,7 @@ class DevelTwigExtensionTest extends KernelTestBase {
     // Ensures that if no argument is passed to the function the twig context is
     // dumped.
     $output = (string) $environment->renderInline($template, $context);
-    $this->assertContains($expected_template_output,  $output);
+    $this->assertContains($expected_template_output, $output);
     $this->assertContainsDump($output, $context, 'Twig context');
 
     // Ensures that if an argument is passed to the function it is dumped.

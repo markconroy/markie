@@ -35,10 +35,11 @@ class ConfigsList extends FormBase {
       '#title_display' => 'invisible',
       '#default_value' => $filter,
     );
-    $form['filter']['show'] = array(
+    $form['filter']['actions'] = ['#type' => 'actions'];
+    $form['filter']['actions']['show'] = [
       '#type' => 'submit',
       '#value' => $this->t('Filter'),
-    );
+    ];
 
     $header = array(
       'name' => array('data' => $this->t('Name')),

@@ -65,7 +65,7 @@ class ClassNotFoundFatalErrorHandlerTest extends TestCase
         }
 
         $this->assertInstanceOf('Symfony\Component\Debug\Exception\ClassNotFoundException', $exception);
-        $this->assertMatchesRegularExpression($translatedMessage, $exception->getMessage());
+        $this->assertRegExp($translatedMessage, $exception->getMessage());
         $this->assertSame($error['type'], $exception->getSeverity());
         $this->assertSame($error['file'], $exception->getFile());
         $this->assertSame($error['line'], $exception->getLine());
@@ -85,15 +85,6 @@ class ClassNotFoundFatalErrorHandlerTest extends TestCase
                     'type' => 1,
                     'line' => 12,
                     'file' => 'foo.php',
-                    'message' => 'Class "WhizBangFactory" not found',
-                ],
-                "/^Attempted to load class \"WhizBangFactory\" from the global namespace.\nDid you forget a \"use\" statement\?$/",
-            ],
-            [
-                [
-                    'type' => 1,
-                    'line' => 12,
-                    'file' => 'foo.php',
                     'message' => 'Class \'WhizBangFactory\' not found',
                 ],
                 "/^Attempted to load class \"WhizBangFactory\" from the global namespace.\nDid you forget a \"use\" statement\?$/",
@@ -106,33 +97,6 @@ class ClassNotFoundFatalErrorHandlerTest extends TestCase
                     'message' => 'Class \'Foo\\Bar\\WhizBangFactory\' not found',
                 ],
                 "/^Attempted to load class \"WhizBangFactory\" from namespace \"Foo\\\\Bar\".\nDid you forget a \"use\" statement for another namespace\?$/",
-            ],
-            [
-                [
-                    'type' => 1,
-                    'line' => 12,
-                    'file' => 'foo.php',
-                    'message' => 'Class "Foo\\Bar\\WhizBangFactory" not found',
-                ],
-                "/^Attempted to load class \"WhizBangFactory\" from namespace \"Foo\\\\Bar\".\nDid you forget a \"use\" statement for another namespace\?$/",
-            ],
-            [
-                [
-                    'type' => 1,
-                    'line' => 12,
-                    'file' => 'foo.php',
-                    'message' => 'Interface "Foo\\Bar\\WhizBangInterface" not found',
-                ],
-                "/^Attempted to load interface \"WhizBangInterface\" from namespace \"Foo\\\\Bar\".\nDid you forget a \"use\" statement for another namespace\?$/",
-            ],
-            [
-                [
-                    'type' => 1,
-                    'line' => 12,
-                    'file' => 'foo.php',
-                    'message' => 'Trait "Foo\\Bar\\WhizBangTrait" not found',
-                ],
-                "/^Attempted to load trait \"WhizBangTrait\" from namespace \"Foo\\\\Bar\".\nDid you forget a \"use\" statement for another namespace\?$/",
             ],
             [
                 [

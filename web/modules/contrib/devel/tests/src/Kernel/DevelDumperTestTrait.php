@@ -8,23 +8,25 @@ namespace Drupal\Tests\devel\Kernel;
 trait DevelDumperTestTrait {
 
   /**
+   * Assertion for ensure dump content.
+   *
    * Asserts that the string passed in input is equals to the string
    * representation of a variable obtained exporting the data.
    *
    * Use \Drupal\devel\DevelDumperManager::export().
    *
-   * @param $dump
+   * @param string $dump
    *   The string that contains the dump output to test.
-   * @param $data
+   * @param mixed $data
    *   The variable to dump.
-   * @param null $name
+   * @param string $name
    *   (optional) The label to output before variable, defaults to NULL.
    * @param string $message
    *   (optional) A message to display with the assertion.
    */
   public function assertDumpExportEquals($dump, $data, $name = NULL, $message = '') {
     $output = $this->getDumperExportDump($data, $name);
-    $this->assertEqual(rtrim($dump), $output, $message);
+    $this->assertEquals(rtrim($dump), $output, $message);
   }
 
   /**
@@ -32,11 +34,11 @@ trait DevelDumperTestTrait {
    *
    * Use \Drupal\devel\DevelDumperManager::export().
    *
-   * @param $haystack
+   * @param string $haystack
    *   The string that contains the dump output to test.
-   * @param $data
+   * @param mixed $data
    *   The variable to dump.
-   * @param null $name
+   * @param string $name
    *   (optional) The label to output before variable, defaults to NULL.
    * @param string $message
    *   (optional) A message to display with the assertion.
@@ -47,23 +49,25 @@ trait DevelDumperTestTrait {
   }
 
   /**
+   * Assertion for ensure dump content.
+   *
    * Asserts that the string passed in input is equals to the string
    * representation of a variable obtained dumping the data.
    *
    * Use \Drupal\devel\DevelDumperManager::dump().
    *
-   * @param $dump
+   * @param string $dump
    *   The string that contains the dump output to test.
-   * @param $data
+   * @param mixed $data
    *   The variable to dump.
-   * @param null $name
+   * @param string $name
    *   (optional) The label to output before variable, defaults to NULL.
    * @param string $message
    *   (optional) A message to display with the assertion.
    */
   public function assertDumpEquals($dump, $data, $name = NULL, $message = '') {
     $output = $this->getDumperDump($data, $name);
-    $this->assertEqual(rtrim($dump), $output, $message);
+    $this->assertEquals(rtrim($dump), $output, $message);
   }
 
   /**
@@ -71,11 +75,11 @@ trait DevelDumperTestTrait {
    *
    * Use \Drupal\devel\DevelDumperManager::dump().
    *
-   * @param $haystack
+   * @param string $haystack
    *   The string that contains the dump output to test.
-   * @param $data
+   * @param mixed $data
    *   The variable to dump.
-   * @param null $name
+   * @param string $name
    *   (optional) The label to output before variable, defaults to NULL.
    * @param string $message
    *   (optional) A message to display with the assertion.

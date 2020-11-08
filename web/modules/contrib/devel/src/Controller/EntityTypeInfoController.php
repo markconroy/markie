@@ -60,19 +60,19 @@ class EntityTypeInfoController extends ControllerBase {
     foreach ($this->entityTypeManager()->getDefinitions() as $entity_type_id => $entity_type) {
       $row['id'] = [
         'data' => $entity_type->id(),
-        'class' => 'table-filter-text-source',
+        'filter' => TRUE,
       ];
       $row['name'] = [
         'data' => $entity_type->getLabel(),
-        'class' => 'table-filter-text-source',
+        'filter' => TRUE,
       ];
       $row['provider'] = [
         'data' => $entity_type->getProvider(),
-        'class' => 'table-filter-text-source',
+        'filter' => TRUE,
       ];
       $row['class'] = [
         'data' => $entity_type->getClass(),
-        'class' => 'table-filter-text-source',
+        'filter' => TRUE,
       ];
       $row['operations']['data'] = [
         '#type' => 'operations',
@@ -97,34 +97,17 @@ class EntityTypeInfoController extends ControllerBase {
 
     ksort($rows);
 
-    $output['#attached']['library'][] = 'system/drupal.system.modules';
-
-    $output['filters'] = [
-      '#type' => 'container',
-      '#attributes' => [
-        'class' => ['table-filter', 'js-show'],
-      ],
-    ];
-    $output['filters']['text'] = [
-      '#type' => 'search',
-      '#title' => $this->t('Search'),
-      '#size' => 30,
-      '#placeholder' => $this->t('Enter entity type id, provider or class'),
-      '#attributes' => [
-        'class' => ['table-filter-text'],
-        'data-table' => '.devel-filter-text',
-        'autocomplete' => 'off',
-        'title' => $this->t('Enter a part of the entity type id, provider or class to filter by.'),
-      ],
-    ];
     $output['entities'] = [
-      '#type' => 'table',
+      '#type' => 'devel_table_filter',
+      '#filter_label' => $this->t('Search'),
+      '#filter_placeholder' => $this->t('Enter entity type id, provider or class'),
+      '#filter_description' => $this->t('Enter a part of the entity type id, provider or class to filter by.'),
       '#header' => $headers,
       '#rows' => $rows,
       '#empty' => $this->t('No entity types found.'),
       '#sticky' => TRUE,
       '#attributes' => [
-        'class' => ['devel-entity-type-list', 'devel-filter-text'],
+        'class' => ['devel-entity-type-list'],
       ],
     ];
 

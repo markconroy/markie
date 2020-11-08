@@ -42,7 +42,7 @@ class ParserTest extends TestCase
 
         if ($deprecated) {
             set_error_handler(function ($type, $msg) use (&$deprecations) {
-                if (\E_USER_DEPRECATED !== $type) {
+                if (E_USER_DEPRECATED !== $type) {
                     restore_error_handler();
 
                     return \call_user_func_array('PHPUnit\Util\ErrorHandler::handleError', \func_get_args());
@@ -706,7 +706,7 @@ EOF;
     public function testMultipleDocumentsNotSupportedException()
     {
         $this->expectException('Symfony\Component\Yaml\Exception\ParseException');
-        $this->expectExceptionMessageMatches('/^Multiple documents are not supported.+/');
+        $this->expectExceptionMessageRegExp('/^Multiple documents are not supported.+/');
         Yaml::parse(<<<'EOL'
 # Ranking of 1998 home runs
 ---
@@ -1468,7 +1468,7 @@ EOT
     public function testParseInvalidBinaryData($data, $expectedMessage)
     {
         $this->expectException('Symfony\Component\Yaml\Exception\ParseException');
-        $this->expectExceptionMessageMatches($expectedMessage);
+        $this->expectExceptionMessageRegExp($expectedMessage);
 
         $this->parser->parse($data);
     }
@@ -2025,34 +2025,6 @@ YAML;
         $this->assertSame($expected, $this->parser->parse($yaml, Yaml::PARSE_CONSTANT | Yaml::PARSE_KEYS_AS_STRINGS));
     }
 
-    public function testPhpConstantTagMappingAsScalarKey()
-    {
-        $yaml = <<<YAML
-map1:
-  - foo: 'value_0'
-    !php/const 'Symfony\Component\Yaml\Tests\B::BAR': 'value_1'
-map2:
-  - !php/const 'Symfony\Component\Yaml\Tests\B::FOO': 'value_0'
-    bar: 'value_1'
-YAML;
-        $this->assertSame([
-            'map1' => [['foo' => 'value_0', 'bar' => 'value_1']],
-            'map2' => [['foo' => 'value_0', 'bar' => 'value_1']],
-        ], $this->parser->parse($yaml, Yaml::PARSE_CONSTANT));
-    }
-
-    public function testTagMappingAsScalarKey()
-    {
-        $yaml = <<<YAML
-map1:
-  - !!str 0: 'value_0'
-    !!str 1: 'value_1'
-YAML;
-        $this->assertSame([
-            'map1' => [['0' => 'value_0', '1' => 'value_1']],
-        ], $this->parser->parse($yaml));
-    }
-
     public function testMergeKeysWhenMappingsAreParsedAsObjects()
     {
         $yaml = <<<YAML
@@ -2105,14 +2077,14 @@ YAML;
     public function testParsingNonExistentFilesThrowsException()
     {
         $this->expectException('Symfony\Component\Yaml\Exception\ParseException');
-        $this->expectExceptionMessageMatches('#^File ".+/Fixtures/nonexistent.yml" does not exist\.$#');
+        $this->expectExceptionMessageRegExp('#^File ".+/Fixtures/nonexistent.yml" does not exist\.$#');
         $this->parser->parseFile(__DIR__.'/Fixtures/nonexistent.yml');
     }
 
     public function testParsingNotReadableFilesThrowsException()
     {
         $this->expectException('Symfony\Component\Yaml\Exception\ParseException');
-        $this->expectExceptionMessageMatches('#^File ".+/Fixtures/not_readable.yml" cannot be read\.$#');
+        $this->expectExceptionMessageRegExp('#^File ".+/Fixtures/not_readable.yml" cannot be read\.$#');
         if ('\\' === \DIRECTORY_SEPARATOR) {
             $this->markTestSkipped('chmod is not supported on Windows');
         }
@@ -2315,7 +2287,7 @@ YAML;
 parameters:
     abc
 
-# Comment
+# Comment 
 YAML;
 
         $this->assertSame(['parameters' => 'abc'], $this->parser->parse($yaml));
@@ -2361,33 +2333,6 @@ YAML;
             ],
             $this->parser->parse($yaml)
         );
-    }
-
-    /**
-     * This is a regression test for a bug where a YAML block with a nested multiline string using | was parsed without
-     * a trailing \n when a shorter YAML document was parsed before.
-     *
-     * When a shorter document was parsed before, the nested string did not have a \n at the end of the string, because
-     * the Parser thought it was the end of the file, even though it is not.
-     */
-    public function testParsingMultipleDocuments()
-    {
-        $shortDocument = 'foo: bar';
-        $longDocument = <<<YAML
-a:
-    b: |
-        row
-        row2
-c: d
-YAML;
-
-        // The first parsing set and fixed the totalNumberOfLines in the Parser before, so parsing the short document here
-        // to reproduce the issue. If the issue would not have been fixed, the next assertion will fail
-        $this->parser->parse($shortDocument);
-
-        // After the total number of lines has been reset the result will be the same as if a new parser was used
-        // (before, there was no \n after row2)
-        $this->assertSame(['a' => ['b' => "row\nrow2\n"], 'c' => 'd'], $this->parser->parse($longDocument));
     }
 }
 

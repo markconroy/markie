@@ -69,7 +69,7 @@ class DevelQueryDebugTest extends KernelTestBase {
     // permissions. We expect only one status message containing the SQL for
     // the debugged query.
     \Drupal::currentUser()->setAccount($this->develUser);
-    $expected_message = "SELECT u.uid AS uid\nFROM \n{users} u";
+    $expected_message = "SELECT u.uid AS uid\nFROM\n{users} u";
 
     $query = \Drupal::database()->select('users', 'u');
     $query->fields('u', ['uid']);
@@ -102,7 +102,7 @@ class DevelQueryDebugTest extends KernelTestBase {
     // permissions. We expect only one status message containing the SQL for
     // the debugged entity query.
     \Drupal::currentUser()->setAccount($this->develUser);
-    $expected_message = "SELECT base_table.uid AS uid, base_table.uid AS base_table_uid\nFROM \n{users} base_table";
+    $expected_message = "SELECT base_table.uid AS uid, base_table.uid AS base_table_uid\nFROM\n{users} base_table";
 
     $query = \Drupal::entityQuery('user');
     $query->addTag('debug');

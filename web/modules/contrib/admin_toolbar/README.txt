@@ -65,7 +65,7 @@ Current maintainers:
 This project has been sponsored by:
  * emerya
    Founded in 2009, emerya is a human-sized company, dedicated to the design and
-   implementation of web interfaces. Visit: http://http://emerya.fr/ for more
+   implementation of web interfaces. Visit: http://emerya.fr/ for more
    information.
  * trained people
     Trained People is a training company focused on Drupal.
