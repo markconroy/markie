@@ -2530,17 +2530,17 @@
     },
     {
         "name": "drupal/core",
-        "version": "8.9.7",
-        "version_normalized": "8.9.7.0",
+        "version": "8.9.9",
+        "version_normalized": "8.9.9.0",
         "source": {
             "type": "git",
             "url": "https://github.com/drupal/core.git",
-            "reference": "ded1be08c23f19211f9a2514a72e7defb1204efc"
+            "reference": "724ada1a6c497a663797c40e4ee3d0c7c618371d"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/drupal/core/zipball/ded1be08c23f19211f9a2514a72e7defb1204efc",
-            "reference": "ded1be08c23f19211f9a2514a72e7defb1204efc",
+            "url": "https://api.github.com/repos/drupal/core/zipball/724ada1a6c497a663797c40e4ee3d0c7c618371d",
+            "reference": "724ada1a6c497a663797c40e4ee3d0c7c618371d",
             "shasum": ""
         },
         "require": {
@@ -2707,7 +2707,7 @@
             "drupal/workflows": "self.version",
             "drupal/workspaces": "self.version"
         },
-        "time": "2020-10-07T19:37:20+00:00",
+        "time": "2020-11-17T22:05:46+00:00",
         "type": "drupal-core",
         "extra": {
             "drupal-scaffold": {
@@ -2763,8 +2763,8 @@
     },
     {
         "name": "drupal/core-composer-scaffold",
-        "version": "8.9.7",
-        "version_normalized": "8.9.7.0",
+        "version": "8.9.9",
+        "version_normalized": "8.9.9.0",
         "source": {
             "type": "git",
             "url": "https://github.com/drupal/core-composer-scaffold.git",
@@ -2812,17 +2812,17 @@
     },
     {
         "name": "drupal/core-recommended",
-        "version": "8.9.7",
-        "version_normalized": "8.9.7.0",
+        "version": "8.9.9",
+        "version_normalized": "8.9.9.0",
         "source": {
             "type": "git",
             "url": "https://github.com/drupal/core-recommended.git",
-            "reference": "7895ddd703101bdec91fb6ae58381036a9768e1f"
+            "reference": "875f16a071119e0b26cb8a2b6f44314107110f28"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/drupal/core-recommended/zipball/7895ddd703101bdec91fb6ae58381036a9768e1f",
-            "reference": "7895ddd703101bdec91fb6ae58381036a9768e1f",
+            "url": "https://api.github.com/repos/drupal/core-recommended/zipball/875f16a071119e0b26cb8a2b6f44314107110f28",
+            "reference": "875f16a071119e0b26cb8a2b6f44314107110f28",
             "shasum": ""
         },
         "require": {
@@ -2834,7 +2834,7 @@
             "doctrine/common": "v2.7.3",
             "doctrine/inflector": "v1.2.0",
             "doctrine/lexer": "1.0.2",
-            "drupal/core": "8.9.7",
+            "drupal/core": "8.9.9",
             "easyrdf/easyrdf": "0.9.1",
             "egulias/email-validator": "2.1.17",
             "guzzlehttp/guzzle": "6.5.4",
@@ -2885,7 +2885,7 @@
         "conflict": {
             "webflo/drupal-core-strict": "*"
         },
-        "time": "2020-10-07T19:37:20+00:00",
+        "time": "2020-11-17T22:05:46+00:00",
         "type": "metapackage",
         "notification-url": "https://packagist.org/downloads/",
         "license": [
