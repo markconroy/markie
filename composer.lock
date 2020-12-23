@@ -3091,17 +3091,17 @@
         },
         {
             "name": "drupal/entity",
-            "version": "1.1.0",
+            "version": "1.2.0",
             "source": {
                 "type": "git",
                 "url": "https://git.drupalcode.org/project/entity.git",
-                "reference": "8.x-1.1"
+                "reference": "8.x-1.2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://ftp.drupal.org/files/projects/entity-8.x-1.1.zip",
-                "reference": "8.x-1.1",
-                "shasum": "6009845bab8e76e23a0657cf898dc15365568e5c"
+                "url": "https://ftp.drupal.org/files/projects/entity-8.x-1.2.zip",
+                "reference": "8.x-1.2",
+                "shasum": "7e7cb12ea65d9f986b59935eda316387cf511079"
             },
             "require": {
                 "drupal/core": "^8.8 || ^9"
@@ -3109,8 +3109,8 @@
             "type": "drupal-module",
             "extra": {
                 "drupal": {
-                    "version": "8.x-1.1",
-                    "datestamp": "1595445791",
+                    "version": "8.x-1.2",
+                    "datestamp": "1606399149",
                     "security-coverage": {
                         "status": "covered",
                         "message": "Covered by Drupal's security advisory policy"
@@ -3566,34 +3566,34 @@
         },
         {
             "name": "drupal/metatag",
-            "version": "1.14.0",
+            "version": "1.15.0",
             "source": {
                 "type": "git",
                 "url": "https://git.drupalcode.org/project/metatag.git",
-                "reference": "8.x-1.14"
+                "reference": "8.x-1.15"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://ftp.drupal.org/files/projects/metatag-8.x-1.14.zip",
-                "reference": "8.x-1.14",
-                "shasum": "9bf9f1517ad015d0c93ca1460e284c557624aa90"
+                "url": "https://ftp.drupal.org/files/projects/metatag-8.x-1.15.zip",
+                "reference": "8.x-1.15",
+                "shasum": "7658d7286fdc075ea72a6ec36aea737b1182b5d8"
             },
             "require": {
-                "drupal/core": "^8.7.7 || ^9",
+                "drupal/core": "^8 || ^9",
                 "drupal/token": "^1.0"
             },
             "require-dev": {
                 "drupal/metatag_dc": "*",
                 "drupal/metatag_open_graph": "*",
-                "drupal/page_manager": "*",
+                "drupal/page_manager": "4.x-dev",
                 "drupal/panelizer": "4.x-dev",
                 "drupal/redirect": "1.x-dev"
             },
             "type": "drupal-module",
             "extra": {
                 "drupal": {
-                    "version": "8.x-1.14",
-                    "datestamp": "1597183852",
+                    "version": "8.x-1.15",
+                    "datestamp": "1607188979",
                     "security-coverage": {
                         "status": "covered",
                         "message": "Covered by Drupal's security advisory policy"
@@ -3847,26 +3847,26 @@
         },
         {
             "name": "drupal/token",
-            "version": "1.7.0",
+            "version": "1.9.0",
             "source": {
                 "type": "git",
                 "url": "https://git.drupalcode.org/project/token.git",
-                "reference": "8.x-1.7"
+                "reference": "8.x-1.9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://ftp.drupal.org/files/projects/token-8.x-1.7.zip",
-                "reference": "8.x-1.7",
-                "shasum": "c7e3a3757282e4c94e3c1fff08d01e22155cb853"
+                "url": "https://ftp.drupal.org/files/projects/token-8.x-1.9.zip",
+                "reference": "8.x-1.9",
+                "shasum": "a5d234382a1a0e4ba61d4c7a2fa10671ca656be4"
             },
             "require": {
-                "drupal/core": "^8.7.7 || ^9"
+                "drupal/core": "^8.8 || ^9"
             },
             "type": "drupal-module",
             "extra": {
                 "drupal": {
-                    "version": "8.x-1.7",
-                    "datestamp": "1589314266",
+                    "version": "8.x-1.9",
+                    "datestamp": "1608284866",
                     "security-coverage": {
                         "status": "covered",
                         "message": "Covered by Drupal's security advisory policy"
@@ -3880,7 +3880,7 @@
             },
             "notification-url": "https://packages.drupal.org/8/downloads",
             "license": [
-                "GPL-2.0+"
+                "GPL-2.0-or-later"
             ],
             "authors": [
                 {
@@ -3916,17 +3916,17 @@
         },
         {
             "name": "drupal/twig_tweak",
-            "version": "2.8.0",
+            "version": "2.9.0",
             "source": {
                 "type": "git",
                 "url": "https://git.drupalcode.org/project/twig_tweak.git",
-                "reference": "8.x-2.8"
+                "reference": "8.x-2.9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://ftp.drupal.org/files/projects/twig_tweak-8.x-2.8.zip",
-                "reference": "8.x-2.8",
-                "shasum": "11ae232159fc1139e00980736dff39bf2bfcfa6d"
+                "url": "https://ftp.drupal.org/files/projects/twig_tweak-8.x-2.9.zip",
+                "reference": "8.x-2.9",
+                "shasum": "c45ba1a41e323a432d1ff36d0a72344b88595a39"
             },
             "require": {
                 "drupal/core": "^8.7 || ^9.0",
@@ -3938,8 +3938,8 @@
             "type": "drupal-module",
             "extra": {
                 "drupal": {
-                    "version": "8.x-2.8",
-                    "datestamp": "1602156806",
+                    "version": "8.x-2.9",
+                    "datestamp": "1608093728",
                     "security-coverage": {
                         "status": "covered",
                         "message": "Covered by Drupal's security advisory policy"
