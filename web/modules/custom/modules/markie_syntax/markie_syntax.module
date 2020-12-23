@@ -1,0 +1,21 @@
+<?php
+
+use Drupal\Core\Form\FormStateInterface;
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ * Add extra languages for CodeSnippet 
+ * @param $form
+ * @param FormStateInterface $form_state
+ * @param $form_id
+ */
+function markie_syntax_form_filter_format_edit_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  if (isset($form['editor']['settings']['subform']['plugins']['codesnippet'])) {
+    $form['editor']['settings']['subform']['plugins']['codesnippet']['highlight_languages']['#options']['twig'] = 'Twig';
+    $form['editor']['settings']['subform']['plugins']['codesnippet']['highlight_languages']['#options']['scss'] = 'SCSS';
+    $form['editor']['settings']['subform']['plugins']['codesnippet']['highlight_languages']['#options']['yml'] = 'YAML';
+    asort($form['editor']['settings']['subform']['plugins']['codesnippet']['highlight_languages']['#options']);
+  }
+}
+
+  
