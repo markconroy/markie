@@ -33,6 +33,7 @@ module:
   image_widget_crop: 0
   inline_entity_form: 0
   inline_form_errors: 0
+  jsonapi: 0
   link: 0
   markie_syntax: 0
   media: 0
