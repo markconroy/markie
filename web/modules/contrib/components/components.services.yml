@@ -1,7 +1,7 @@
 services:
   components.info:
     class: Drupal\components\Template\ComponentsInfo
-    arguments: ['@extension.list.module', '@extension.list.theme']
+    arguments: ['@extension.list.module', '@extension.list.theme', '@module_handler', '@theme.manager', '@cache.default']
 
   components.twig.loader:
     class: Drupal\components\Template\Loader\ComponentsLoader

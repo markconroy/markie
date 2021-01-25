@@ -1,6 +1,6 @@
 {
     "name": "drupal/components",
-    "description": "Sets up folders of components defined by your theme or module",
+    "description": "Registers folders of components defined by your theme or module as Twig namespaces",
     "type": "drupal-module",
     "homepage": "https://drupal.org/project/components",
     "license": "GPL-2.0-or-later",

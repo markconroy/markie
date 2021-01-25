@@ -49,30 +49,14 @@ regions:
   footer: Footer
   hidden: Hidden
 
-# MUST install `components` module: `drush dl components && drush en components -y`
-# For compatibility with Pattern Lab templates; this list must
-# always be the folders immediately under the `$sourceDir` patterns folder
-# `$sourceDir` = defined in `pattern-lab/config/config.yml` under `sourceDir
-# patterns folder = `$sourceDir` + `_patterns/`
-component-libraries:
-  base:
-    paths:
-      - components/_patterns/00-base
-  basic-elements:
-    paths:
-      - components/_patterns/01-basic-elements
-  site-components:
-    paths:
-      - components/_patterns/02-site-components
-  building-blocks:
-    paths:
-      - components/_patterns/03-building-blocks
-  content:
-    paths:
-      - components/_patterns/04-content
-  page-sections:
-    paths:
-      - components/_patterns/05-page-sections
-  sample-pages:
-    paths:
-      - components/_patterns/06-sample-pages
+# Components module is needed for this part. Make sure it's enabled.
+components:
+  namespaces:
+    base: components/_patterns/00-base
+    basic-elements: components/_patterns/01-basic-elements
+    site-components: components/_patterns/02-site-components
+    building-blocks: components/_patterns/03-building-blocks
+    content: components/_patterns/04-content
+    page-sections: components/_patterns/05-page-sections
+    sample-pages: components/_patterns/06-sample-pages
+    drupal-custom-templates: templates/

@@ -30,7 +30,7 @@ packages:
     drupal/admin_toolbar: 2.4.0
     drupal/antibot: 1.4.0
     drupal/codesnippet: 1.7.0
-    drupal/components: 2.0.0-beta3
+    drupal/components: 2.1.0
     drupal/console: 1.9.5
     drupal/console-core: 1.9.6
     drupal/console-en: 1.9.5

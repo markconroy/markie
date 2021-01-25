@@ -34,6 +34,8 @@ class ComponentsLoaderTest extends UnitTestCase {
 
   /**
    * {@inheritdoc}
+   *
+   * @throws \Twig\Error\LoaderError
    */
   public function setUp() {
     parent::setUp();
@@ -86,8 +88,28 @@ class ComponentsLoaderTest extends UnitTestCase {
       ]);
     $this->componentsInfo
       ->expects($this->atLeastOnce())
-      ->method('getProtectedNamespaces')
-      ->willReturn(['system']);
+      ->method('isProtectedNamespace')
+      ->will($this->returnValueMap([
+        ['system', TRUE],
+        ['components', FALSE],
+        ['components_extras', FALSE],
+        ['earth', FALSE],
+        ['jupiter', FALSE],
+        ['jupiter_extras', FALSE],
+        ['luna', FALSE],
+        ['luna_extras', FALSE],
+        ['sol', FALSE],
+        ['sol_extras', FALSE],
+      ]));
+    $this->componentsInfo
+      ->expects($this->atLeastOnce())
+      ->method('getProtectedNamespaceExtensionInfo')
+      ->will($this->returnValueMap([
+        [
+          'system',
+          ['name' => 'System', 'type' => 'module', 'package' => 'Core'],
+        ],
+      ]));
 
     // Set up theme manager data.
     $themes = [
@@ -132,6 +154,8 @@ class ComponentsLoaderTest extends UnitTestCase {
    * Tests checking the active theme.
    *
    * @covers ::checkActiveTheme
+   *
+   * @throws \Twig\Error\LoaderError
    */
   public function testCheckActiveTheme() {
     $result = $this->systemUnderTest->checkActiveTheme();
@@ -144,6 +168,8 @@ class ComponentsLoaderTest extends UnitTestCase {
    * Tests prepending paths to a namespace.
    *
    * @covers ::setActiveTheme
+   *
+   * @throws \Twig\Error\LoaderError
    */
   public function testSetActiveTheme() {
     $namespaces = [
@@ -204,6 +230,8 @@ class ComponentsLoaderTest extends UnitTestCase {
    * Tests the use of the active theme cache.
    *
    * @covers ::setActiveTheme
+   *
+   * @throws \Twig\Error\LoaderError
    */
   public function testSetActiveThemeCache() {
     // Add a path to the sol namespace.
@@ -226,6 +254,8 @@ class ComponentsLoaderTest extends UnitTestCase {
    * Tests adding paths to a namespace.
    *
    * @covers ::addPath
+   *
+   * @throws \Twig\Error\LoaderError
    */
   public function testAddPath() {
     $expected = ['/sol/templates', '/test/templates'];
@@ -244,6 +274,8 @@ class ComponentsLoaderTest extends UnitTestCase {
    * Tests prepending paths to a namespace.
    *
    * @covers ::prependPath
+   *
+   * @throws \Twig\Error\LoaderError
    */
   public function testPrependPath() {
     $expected = ['/test/templates', '/sol/templates'];

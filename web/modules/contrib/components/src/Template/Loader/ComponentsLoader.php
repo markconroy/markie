@@ -58,6 +58,8 @@ class ComponentsLoader extends FilesystemLoader {
    *   The components info service.
    * @param \Drupal\Core\Theme\ThemeManagerInterface $theme_manager
    *   The theme manager service.
+   *
+   * @throws \Twig\Error\LoaderError
    */
   public function __construct(
     ComponentsInfo $components_info,
@@ -76,6 +78,8 @@ class ComponentsLoader extends FilesystemLoader {
    *
    * @return string
    *   The name of the active theme.
+   *
+   * @throws \Twig\Error\LoaderError
    */
   public function checkActiveTheme() {
     $active_theme = $this->themeManager->getActiveTheme();
@@ -93,6 +97,8 @@ class ComponentsLoader extends FilesystemLoader {
    *
    * @param \Drupal\Core\Theme\ActiveTheme $active_theme
    *   The active theme.
+   *
+   * @throws \Twig\Error\LoaderError
    */
   protected function setActiveTheme(ActiveTheme $active_theme) {
     $this->activeTheme = $active_theme->getName();
@@ -124,9 +130,6 @@ class ComponentsLoader extends FilesystemLoader {
     // paths in reverse order of the above priority.
     $this->paths = [];
 
-    // Get protected namespaces that should not be registered.
-    $protected_namespaces = $this->componentsInfo->getProtectedNamespaces();
-
     // Register shared namespaces.
     if (!isset($this->sharedNamespaces)) {
       $this->sharedNamespaces = [];
@@ -143,10 +146,14 @@ class ComponentsLoader extends FilesystemLoader {
       // Find module namespaces.
       foreach ($module_info as $moduleName => $info) {
         if (isset($info['namespaces'])) {
-          // Skip default namespaces.
-          unset($info['namespaces'][$moduleName]);
           foreach ($info['namespaces'] as $namespace => $paths) {
-            if (!in_array($namespace, $protected_namespaces)) {
+            // Skip protected namespaces and log a warning.
+            if ($this->componentsInfo->isProtectedNamespace($namespace)) {
+              $extensionInfo = $this->componentsInfo->getProtectedNamespaceExtensionInfo($namespace);
+              $this->componentsInfo->logWarning(sprintf('The %s module attempted to alter the protected Twig namespace, %s, owned by the %s %s. See https://www.drupal.org/node/3190969#s-extending-a-default-twig-namespace to fix this error.', $moduleName, $namespace, $extensionInfo['name'], $extensionInfo['type']));
+            }
+            // Skip default namespaces.
+            elseif ($namespace !== $moduleName) {
               if (!isset($this->sharedNamespaces[$namespace])) {
                 $this->sharedNamespaces[$namespace] = [];
               }
@@ -167,8 +174,13 @@ class ComponentsLoader extends FilesystemLoader {
     foreach (array_reverse($active_themes) as $theme_name) {
       if (isset($theme_info[$theme_name]) && isset($theme_info[$theme_name]['namespaces'])) {
         foreach ($theme_info[$theme_name]['namespaces'] as $namespace => $paths) {
-          // Skip default namespaces and protected namespaces.
-          if ($namespace !== $theme_name && !in_array($namespace, $protected_namespaces)) {
+          // Skip protected namespaces and log a warning.
+          if ($this->componentsInfo->isProtectedNamespace($namespace)) {
+            $extensionInfo = $this->componentsInfo->getProtectedNamespaceExtensionInfo($namespace);
+            $this->componentsInfo->logWarning(sprintf('The %s theme attempted to alter the protected Twig namespace, %s, owned by the %s %s. See https://www.drupal.org/node/3190969#s-extending-a-default-twig-namespace to fix this error.', $theme_name, $namespace, $extensionInfo['name'], $extensionInfo['type']));
+          }
+          // Skip default namespaces.
+          elseif ($namespace !== $theme_name) {
             // Save paths in the same order specified in the .info.yml file.
             foreach (array_reverse($paths) as $path) {
               $this->prependPath($path, $namespace);
@@ -178,17 +190,15 @@ class ComponentsLoader extends FilesystemLoader {
       }
     }
 
+    // Suppress warnings until the theme registry cache is rebuilt.
+    $this->componentsInfo->suppressWarnings();
+
     // Save the paths as a cache.
     $this->activeThemeNamespaces[$this->activeTheme] = $this->paths;
   }
 
   /**
-   * Adds a path where templates are stored.
-   *
-   * @param string $path
-   *   A path where to look for templates.
-   * @param string $namespace
-   *   (optional) A path namespace.
+   * {@inheritdoc}
    */
   public function addPath($path, $namespace = self::MAIN_NAMESPACE) {
     // Invalidate the cache.
@@ -197,12 +207,7 @@ class ComponentsLoader extends FilesystemLoader {
   }
 
   /**
-   * Prepends a path where templates are stored.
-   *
-   * @param string $path
-   *   A path where to look for templates.
-   * @param string $namespace
-   *   (optional) A path namespace.
+   * {@inheritdoc}
    */
   public function prependPath($path, $namespace = self::MAIN_NAMESPACE) {
     // Invalidate the cache.
@@ -220,6 +225,8 @@ class ComponentsLoader extends FilesystemLoader {
 
   /**
    * {@inheritdoc}
+   *
+   * @throws \Twig\Error\LoaderError
    */
   protected function findTemplate($name, $throw = TRUE) {
     // The active theme might change during the request, so we double check
