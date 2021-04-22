@@ -46,7 +46,7 @@ class ShowCommand extends ReflectingCommand
             ->setName('show')
             ->setDefinition([
                 new CodeArgument('target', CodeArgument::OPTIONAL, 'Function, class, instance, constant, method or property to show.'),
-                new InputOption('ex', null,  InputOption::VALUE_OPTIONAL, 'Show last exception context. Optionally specify a stack index.', 1),
+                new InputOption('ex', null, InputOption::VALUE_OPTIONAL, 'Show last exception context. Optionally specify a stack index.', 1),
             ])
             ->setDescription('Show the code for an object, class, constant, method or property.')
             ->setHelp(
@@ -114,7 +114,14 @@ HELP
             // If we didn't get a target and Reflector, maybe we got a filename?
             $target = $e->getTarget();
             if (\is_string($target) && \is_file($target) && $code = @\file_get_contents($target)) {
-                // @todo maybe set $__file to $target?
+                $file = \realpath($target);
+                if ($file !== $this->context->get('__file')) {
+                    $this->context->setCommandScopeVariables([
+                        '__file' => $file,
+                        '__dir'  => \dirname($file),
+                    ]);
+                }
+
                 return $output->page(CodeFormatter::formatCode($code));
             } else {
                 throw $e;
@@ -148,7 +155,7 @@ HELP
                 $index = 0;
             }
         } else {
-            $index = \max(0, \intval($input->getOption('ex')) - 1);
+            $index = \max(0, (int) $input->getOption('ex') - 1);
         }
 
         $trace = $exception->getTrace();
@@ -189,13 +196,13 @@ HELP
     private function replaceCwd($file)
     {
         if ($cwd = \getcwd()) {
-            $cwd = \rtrim($cwd, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+            $cwd = \rtrim($cwd, \DIRECTORY_SEPARATOR).\DIRECTORY_SEPARATOR;
         }
 
         if ($cwd === false) {
             return $file;
         } else {
-            return \preg_replace('/^' . \preg_quote($cwd, '/') . '/', '', $file);
+            return \preg_replace('/^'.\preg_quote($cwd, '/').'/', '', $file);
         }
     }
 

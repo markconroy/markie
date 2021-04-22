@@ -107,7 +107,7 @@ class ThumbnailTest extends KernelTestBase {
       ->get('media_entity_twitter.settings')
       ->get('local_images');
 
-    \Drupal::service('file_system')->prepareDirectory($dir, FileSystemInterface::CREATE_DIRECTORY| FileSystemInterface::MODIFY_PERMISSIONS);
+    \Drupal::service('file_system')->prepareDirectory($dir, FileSystemInterface::CREATE_DIRECTORY | FileSystemInterface::MODIFY_PERMISSIONS);
   }
 
   /**

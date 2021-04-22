@@ -6,7 +6,7 @@ components:
   # Allow themes to reuse this module's default namespace, "components".
   allow_default_namespace_reuse: true
 
-# Information added by Drupal.org packaging script on 2021-01-15
-version: '8.x-2.1'
+# Information added by Drupal.org packaging script on 2021-04-19
+version: '8.x-2.4'
 project: 'components'
-datestamp: 1610724977
+datestamp: 1618861607
