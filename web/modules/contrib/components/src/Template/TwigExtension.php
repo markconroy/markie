@@ -26,6 +26,9 @@ class TwigExtension extends AbstractExtension {
    */
   public function getFilters() {
     return [
+      'recursive_merge' => new TwigFilter('recursive_merge', [
+        'Drupal\components\Template\TwigExtension', 'recursiveMergeFilter',
+      ]),
       'set' => new TwigFilter('set', [
         'Drupal\components\Template\TwigExtension', 'setFilter',
       ]),
@@ -111,7 +114,7 @@ class TwigExtension extends AbstractExtension {
    * Recursively merges an array into the element, replacing existing values.
    *
    * @code
-   * {{ form|set( {'element': {'attributes': {'placeholder': 'Label'}}} ) }}
+   * {{ form|recursive_merge( {'element': {'attributes': {'placeholder': 'Label'}}} ) }}
    * @endcode
    *
    * @param array|iterable|\Traversable $element
@@ -125,12 +128,64 @@ class TwigExtension extends AbstractExtension {
    * @throws \Twig\Error\RuntimeError
    *   When $element is not an array or "Traversable".
    */
-  public static function setFilter($element, $array) {
+  public static function recursiveMergeFilter($element, $array) {
     if (!twig_test_iterable($element)) {
-      throw new RuntimeError(sprintf('The set filter only works with arrays or "Traversable", got "%s" as first argument.', gettype($element)));
+      throw new RuntimeError(sprintf('The recursive_merge filter only works on arrays or "Traversable" objects, got "%s".', gettype($element)));
     }
 
     return array_replace_recursive($element, $array);
+  }
+
+  /**
+   * Sets a deeply-nested property on an array.
+   *
+   * If the deeply-nested property exists, the existing data will be replaced
+   * with the new value.
+   *
+   * @code
+   * {{ form|set( 'element.#attributes.placeholder', 'Label' ) }}
+   * @endcode
+   *
+   * @param array|iterable|\Traversable $element
+   *   The parent renderable array to set into.
+   * @param string|iterable|array $at
+   *   The dotted-path to the deeply nested element to set. (Or an array value
+   *   to merge, if using the backwards-compatible 2.x syntax.)
+   * @param mixed $value
+   *   The value to set.
+   * @param string $path
+   *   The deprecated named argument that has been replaced with "at".
+   * @param iterable|array $array
+   *   The deprecated named argument for the backwards-compatible 2.x syntax.
+   *
+   * @return array
+   *   The merged renderable array.
+   *
+   * @throws \Twig\Error\RuntimeError
+   *   When $element is not an array or "Traversable".
+   */
+  public static function setFilter($element, $at = NULL, $value = NULL, $path = NULL, $array = NULL) {
+    if (!twig_test_iterable($element)) {
+      throw new RuntimeError(sprintf('The set filter only works on arrays or "Traversable" objects, got "%s".', gettype($element)));
+    }
+
+    // Backwards-compatibility with older 8.x-2.x versions of set filter.
+    if (!is_null($array)) {
+      $at = $array;
+    }
+    if (is_null($path) && is_null($at)) {
+      throw new RuntimeError('Value for argument "at" is required for filter "set".');
+    }
+    if (!is_null($path)) {
+      @trigger_error('The "set" filter’s named "path" argument is deprecated in components:8.x-2.4 and will be removed in components:3.0.0. The named argument has been renamed from "path" to "at". See https://www.drupal.org/project/components/issues/3209575', E_USER_DEPRECATED);
+      $at = $path;
+    }
+    if (!is_string($at)) {
+      @trigger_error('Calling the "set" filter with an array is deprecated in components:8.x-2.3 and will be removed in components:3.0.0. Update to the new syntax or use the "recursive_merge" filter instead. See https://www.drupal.org/project/components/issues/3209440', E_USER_DEPRECATED);
+      return self::recursiveMergeFilter($element, $at);
+    }
+
+    return self::addOrSetFilter($element, $at, $value, FALSE);
   }
 
   /**
@@ -141,15 +196,27 @@ class TwigExtension extends AbstractExtension {
    * the new value will be merged into the existing array.
    *
    * @code
-   * {{ form|add( 'element.attributes.class', 'new-class' ) }}
+   * {{ form|add( 'element.#attributes.class', 'new-class' ) }}
+   * @endcode
+   *
+   * Or using named arguments:
+   * @code
+   * {{ form|add( to='element.#attributes.class', value='new-class' ) }}
+   * {# We accept the plural form of "values" as a grammatical convenience. #}
+   * {{ form|add( to='element.#attributes.class', values=['new-class', 'new-class-2'] ) }}
    * @endcode
    *
    * @param array|iterable|\Traversable $element
    *   The parent renderable array to merge into.
-   * @param string $path
-   *   The dotted-path to the deeply nested element to replace.
+   * @param string $at
+   *   The dotted-path to the deeply nested element to modify.
    * @param mixed $value
-   *   The value to set.
+   *   The value to add.
+   * @param mixed $values
+   *   The values to add. If this named argument is used, the "value" argument
+   *   is ignored.
+   * @param string $path
+   *   The deprecated named argument that has been replaced with "at".
    *
    * @return array
    *   The merged renderable array.
@@ -157,11 +224,39 @@ class TwigExtension extends AbstractExtension {
    * @throws \Twig\Error\RuntimeError
    *   When $element is not an array or "Traversable".
    */
-  public static function addFilter($element, string $path, $value) {
+  public static function addFilter($element, string $at = NULL, $value = NULL, $values = NULL, $path = NULL) {
     if (!twig_test_iterable($element)) {
-      throw new RuntimeError(sprintf('The add filter only works with arrays or "Traversable", got "%s" as first argument.', gettype($element)));
+      throw new RuntimeError(sprintf('The add filter only works on arrays or "Traversable" objects, got "%s".', gettype($element)));
     }
 
+    // Backwards-compatibility with older 8.x-2.x versions of add filter.
+    if (is_null($path) && is_null($at)) {
+      throw new RuntimeError('Value for argument "at" is required for filter "add".');
+    }
+    if (!is_null($path)) {
+      @trigger_error('The "add" filter’s named "path" argument is deprecated in components:8.x-2.4 and will be removed in components:3.0.0. The named argument has been renamed from "path" to "at". See https://www.drupal.org/project/components/issues/3209575', E_USER_DEPRECATED);
+      $at = $path;
+    }
+
+    return self::addOrSetFilter($element, $at, !is_null($values) ? $values : $value, TRUE);
+  }
+
+  /**
+   * Helper function for the set/add filters.
+   *
+   * @param array|iterable|\Traversable $element
+   *   The parent renderable array to merge into.
+   * @param string $at
+   *   The dotted-path to the deeply nested element to replace.
+   * @param mixed $value
+   *   The value to set.
+   * @param bool $is_add_filter
+   *   Which filter is being called.
+   *
+   * @return array
+   *   The merged renderable array.
+   */
+  protected static function addOrSetFilter($element, string $at, $value, $is_add_filter = FALSE) {
     if ($element instanceof \ArrayAccess) {
       $filtered_element = clone $element;
     }
@@ -170,7 +265,7 @@ class TwigExtension extends AbstractExtension {
     }
 
     // Convert the dotted path into an array of keys.
-    $path = explode('.', $path);
+    $path = explode('.', $at);
     $last_path = array_pop($path);
 
     // Traverse the element down the path, creating arrays as needed.
@@ -182,8 +277,9 @@ class TwigExtension extends AbstractExtension {
       $child_element =& $child_element[$child_path];
     }
 
-    // If the targeted child element is an array, add the value to it.
-    if (isset($child_element[$last_path]) && is_array($child_element[$last_path])) {
+    // If this is the add() filter and if the targeted child element is an
+    // array, add the value to it.
+    if ($is_add_filter && isset($child_element[$last_path]) && is_array($child_element[$last_path])) {
       if (is_array($value)) {
         $child_element[$last_path] = array_merge($child_element[$last_path], $value);
       }

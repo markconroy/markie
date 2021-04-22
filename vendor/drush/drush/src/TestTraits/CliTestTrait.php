@@ -78,11 +78,11 @@ trait CliTestTrait
     /**
      * Actually runs the command.
      *
-     * @param string $command
+     * @param array|string $command
      *   The actual command line to run.
      * @param integer $expected_return
      *   The return code to expect
-     * @param sting cd
+     * @param string cd
      *   The directory to run the command in.
      * @param array $env
      *  Extra environment variables.
@@ -93,8 +93,25 @@ trait CliTestTrait
     {
         try {
             // Process uses a default timeout of 60 seconds, set it to 0 (none).
-            $this->process = new Process($command, $cd, $env, $input, 0);
-            $this->process->inheritEnvironmentVariables(true);
+            //
+            // symfony/process:3.4 array|string.
+            // symfony/process:4.1 array|string.
+            // symfony/process:4.2 array|::fromShellCommandline().
+            // symfony/process:5.x array|::fromShellCommandline().
+            if (!is_array($command) && method_exists(Process::class, 'fromShellCommandline')) {
+                $this->process = Process::fromShellCommandline((string) $command, $cd, $env, $input, 0);
+            } else {
+                $this->process = new Process($command, $cd, $env, $input, 0);
+            }
+
+            // Handle BC method of making env variables inherited. The default
+            // icn later versions is always inherit and this method disappears.
+            // @todo Remove this if() block once Symfony 3 support is dropped.
+            if (method_exists($this->process, 'inheritEnvironmentVariables')) {
+                set_error_handler(null);
+                $this->process->inheritEnvironmentVariables();
+                restore_error_handler();
+            }
             if ($this->timeout) {
                 $this->process->setTimeout($this->timeout)
                 ->setIdleTimeout($this->idleTimeout);

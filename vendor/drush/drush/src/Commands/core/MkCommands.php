@@ -28,8 +28,8 @@ class MkCommands extends DrushCommands implements SiteAliasManagerAwareInterface
      *
      * @command mk:docs
      * @bootstrap max
-     * @usage drush mk:docs --destination=commands/10.x
-     *   Build many .md files in the docs/commands/10.x directory.
+     * @usage drush mk:docs --destination=commands
+     *   Build many .md files in the docs/commands directory.
      */
     public function docs($options = ['destination' => self::REQ])
     {
@@ -175,6 +175,7 @@ EOT;
         $body = <<<EOT
 ---
 edit_url: https://github.com/drush-ops/drush/blob/10.x/$path
+command: {$command->getName()}
 ---
 
 EOT;
@@ -239,7 +240,7 @@ EOT;
     public static function argToArray(InputArgument $arg): iterable
     {
         return [
-            'name' => '--' . $arg->getName(),
+            'name' => $arg->getName(),
             'is_array' => $arg->isArray(),
             'is_required' => $arg->isRequired(),
         ];

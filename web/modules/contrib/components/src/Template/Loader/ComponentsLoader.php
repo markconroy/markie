@@ -45,11 +45,11 @@ class ComponentsLoader extends FilesystemLoader {
   protected $activeThemeNamespaces;
 
   /**
-   * Cache of namespaces that are valid for any active theme.
+   * Cache of module namespaces that are valid for any active theme.
    *
    * @var array
    */
-  protected $sharedNamespaces;
+  protected $moduleNamespaces;
 
   /**
    * Constructs a new ComponentsLoader object.
@@ -69,8 +69,6 @@ class ComponentsLoader extends FilesystemLoader {
 
     $this->componentsInfo = $components_info;
     $this->themeManager = $theme_manager;
-
-    $this->checkActiveTheme();
   }
 
   /**
@@ -80,6 +78,8 @@ class ComponentsLoader extends FilesystemLoader {
    *   The name of the active theme.
    *
    * @throws \Twig\Error\LoaderError
+   *
+   * @internal
    */
   public function checkActiveTheme() {
     $active_theme = $this->themeManager->getActiveTheme();
@@ -130,20 +130,19 @@ class ComponentsLoader extends FilesystemLoader {
     // paths in reverse order of the above priority.
     $this->paths = [];
 
-    // Register shared namespaces.
-    if (!isset($this->sharedNamespaces)) {
-      $this->sharedNamespaces = [];
+    // Register module namespaces.
+    if (!isset($this->moduleNamespaces)) {
+      $this->moduleNamespaces = [];
       $module_info = $this->componentsInfo->getAllModuleInfo();
 
-      // Find default namespaces.
-      $extensions_info = $module_info + $theme_info;
-      foreach ($extensions_info as $extensionName => $info) {
+      // Find default namespaces first.
+      foreach ($module_info as $extensionName => $info) {
         if (isset($info['namespaces']) && isset($info['namespaces'][$extensionName])) {
-          $this->sharedNamespaces[$extensionName] = $info['namespaces'][$extensionName];
+          $this->moduleNamespaces[$extensionName] = $info['namespaces'][$extensionName];
         }
       }
 
-      // Find module namespaces.
+      // Find other module namespaces.
       foreach ($module_info as $moduleName => $info) {
         if (isset($info['namespaces'])) {
           foreach ($info['namespaces'] as $namespace => $paths) {
@@ -154,19 +153,19 @@ class ComponentsLoader extends FilesystemLoader {
             }
             // Skip default namespaces.
             elseif ($namespace !== $moduleName) {
-              if (!isset($this->sharedNamespaces[$namespace])) {
-                $this->sharedNamespaces[$namespace] = [];
+              if (!isset($this->moduleNamespaces[$namespace])) {
+                $this->moduleNamespaces[$namespace] = [];
               }
               // Save paths in the same order specified in the .info.yml file.
               foreach (array_reverse($paths) as $path) {
-                array_unshift($this->sharedNamespaces[$namespace], $path);
+                array_unshift($this->moduleNamespaces[$namespace], $path);
               }
             }
           }
         }
       }
     }
-    foreach ($this->sharedNamespaces as $name => $paths) {
+    foreach ($this->moduleNamespaces as $name => $paths) {
       $this->setPaths($paths, $name);
     }
 
@@ -179,8 +178,7 @@ class ComponentsLoader extends FilesystemLoader {
             $extensionInfo = $this->componentsInfo->getProtectedNamespaceExtensionInfo($namespace);
             $this->componentsInfo->logWarning(sprintf('The %s theme attempted to alter the protected Twig namespace, %s, owned by the %s %s. See https://www.drupal.org/node/3190969#s-extending-a-default-twig-namespace to fix this error.', $theme_name, $namespace, $extensionInfo['name'], $extensionInfo['type']));
           }
-          // Skip default namespaces.
-          elseif ($namespace !== $theme_name) {
+          else {
             // Save paths in the same order specified in the .info.yml file.
             foreach (array_reverse($paths) as $path) {
               $this->prependPath($path, $namespace);
@@ -229,8 +227,8 @@ class ComponentsLoader extends FilesystemLoader {
    * @throws \Twig\Error\LoaderError
    */
   protected function findTemplate($name, $throw = TRUE) {
-    // The active theme might change during the request, so we double check
-    // before delivering a template.
+    // The active theme might change during the request, so we wait until the
+    // last possible moment to check before delivering a template.
     $this->checkActiveTheme();
 
     return parent::findTemplate($name, $throw);

@@ -11,5 +11,5 @@
     "type": "git",
     "url": "https://github.com/ckeditor/ckeditor4.git",
     "directory": "plugins/codesnippet"
-  }
+	}
 }

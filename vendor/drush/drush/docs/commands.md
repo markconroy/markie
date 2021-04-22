@@ -53,6 +53,9 @@ In order to alter an existing command info, follow the steps below:
 
 For an example, see the alterer class provided by the testing 'woot' module: `tests/functional/resources/modules/d8/woot/src/WootCommandInfoAlterer.php`.
 
+## Symfony Console Commands
+Drush lists and runs Symfony Console commands, in addition to more typical annotated commands. See [this test](https://github.com/drush-ops/drush/blob/eed106ae4510d5a2df89f8e7fd54b41ffb0aa5fa/tests/integration/AnnotatedCommandCase.php#L178-L180) and this [commandfile](https://github.com/drush-ops/drush/blob/049d2a4b36338178c0c7cf89b8e7caf9769524c9/tests/functional/resources/modules/d8/woot/src/Commands/GreetCommand.php). 
+
 ## Site-Wide Drush Commands
 Commandfiles that are installed in a Drupal site and are not bundled inside a Drupal module are called 'site-wide' commandfiles. Site-wide commands may either be added directly to the Drupal site's repository (e.g. for site-specific policy files), or via `composer require`. See the [examples/Commands](https://github.com/drush-ops/drush/tree/10.x/examples/Commands) folder for examples. In general, it's better to use modules to carry your Drush commands, as module-based commands may [participate in Drupal's dependency injection via the drush.services.yml](#specifying-the-services-file).
 
@@ -83,7 +86,12 @@ Using `require` in place of `conflict` is not recommended.
 A site-wide commandfile should have tests that run with each (major) version of Drush that is supported. You may model your test suite after the [example drush extension](https://github.com/drush-ops/example-drush-extension) project, which works on Drush ^8.2 and ^9.6.
 
 ## Global Drush Commands
-Commandfiles that are not part of any Drupal site are called 'global' commandfiles. Global commandfiles are not supported by default; in order to enable them, you must configure your `drush.yml` configuration file to add an `include` search location.
+
+Commandfiles that are not part of any Drupal site are called 'global' commandfiles.
+
+### Commands discovered by configuration
+
+Global commandfiles discoverable by configuration are not supported by default; in order to enable them, you must configure your `drush.yml` configuration file to add an `include` search location.
 
 For example:
 
@@ -107,3 +115,21 @@ It is recommended that you avoid global Drush commands, and favor site-wide comm
 
 !!! warning "Symlinked packages"
     While it is good practice to make your custom commands into a Composer package, please beware that symlinked packages (by using the composer repository type [Path](https://getcomposer.org/doc/05-repositories.md#path)) will **not** be discovered by Drush. When in development, it is recommended to [specify your package's](https://github.com/drush-ops/drush/blob/10.x/examples/example.drush.yml#L52-L67) path in your `drush.yml` to have quick access to your commands.
+
+### Auto-discovered commands
+
+_Note_: Global commands auto-discovery is experimental until Drush 10.5.0. 
+
+Such commands are auto-discovered by their class PSR4 namespace and class/file name suffix. Drush will auto-discover commands if:
+
+* The commands class is PSR4 auto-loadable.
+* The commands class namespace, relative to base namespace, is `Drush\Commands`. For instance, if a Drush command provider third party library maps this PSR4 autoload entry:
+  ```json
+  "autoload": {
+    "psr-4": {
+      "My\\Custom\\Library\\": "src"
+    }
+  }
+  ```
+  then the Drush global commands class namespace should be `My\Custom\Library\Drush\Commands` and the class file should be located under the `src/Drush/Commands` directory.
+* The class and file name ends with `*DrushCommands`, e.g. `FooDrushCommands`.

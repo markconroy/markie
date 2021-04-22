@@ -67,14 +67,14 @@ class TweetEmbedFormatterTest extends MediaFunctionalTestBase {
     ];
     $this->drupalPostForm(NULL, $edit_conf, t('Save and continue'));
     $this->assertSession()
-        ->responseContains('These settings apply to the <em class="placeholder">' . $edit_conf['label'] . '</em> field everywhere it is used.');
+      ->responseContains('These settings apply to the <em class="placeholder">' . $edit_conf['label'] . '</em> field everywhere it is used.');
     $edit = [
       'cardinality' => 'number',
       'cardinality_number' => '1',
     ];
     $this->drupalPostForm(NULL, $edit, t('Save field settings'));
     $this->assertSession()
-        ->responseContains('Updated field <em class="placeholder">' . $edit_conf['label'] . '</em> field settings.');
+      ->responseContains('Updated field <em class="placeholder">' . $edit_conf['label'] . '</em> field settings.');
 
     // Set the new string_long field type as required.
     $edit = [
@@ -82,7 +82,7 @@ class TweetEmbedFormatterTest extends MediaFunctionalTestBase {
     ];
     $this->drupalPostForm(NULL, $edit, t('Save settings'));
     $this->assertSession()
-        ->responseContains('Saved <em class="placeholder">' . $edit_conf['label'] . '</em> configuration.');
+      ->responseContains('Saved <em class="placeholder">' . $edit_conf['label'] . '</em> configuration.');
 
     // Assert that the new field types configurations have been successfully
     // saved.
@@ -139,7 +139,7 @@ class TweetEmbedFormatterTest extends MediaFunctionalTestBase {
     // Assert that the link url formatter exists on this page.
     $this->assertSession()->pageTextContains('Tweet URL');
     $this->assertSession()
-        ->responseContains('<a href="https://twitter.com/RamzyStinson/statuses/670650348319576064">', 'Link in embedded Tweet found.');
+      ->responseContains('<a href="https://twitter.com/RamzyStinson/statuses/670650348319576064">', 'Link in embedded Tweet found.');
 
     // Assert that the string_long code formatter exists on this page.
     $this->assertSession()->pageTextContains('Embed code');
