@@ -34,9 +34,9 @@ packages:
     drupal/console-core: 1.9.7
     drupal/console-en: v1.9.7
     drupal/console-extend-plugin: 0.9.5
-    drupal/core: 8.9.16
-    drupal/core-composer-scaffold: 8.9.16
-    drupal/core-recommended: 8.9.16
+    drupal/core: 8.9.17
+    drupal/core-composer-scaffold: 8.9.17
+    drupal/core-recommended: 8.9.17
     drupal/crop: 2.1.0
     drupal/ctools: 3.7.0
     drupal/devel: 2.1.0
@@ -85,7 +85,7 @@ packages:
     nette/utils: v3.2.2
     nikic/php-parser: v4.10.4
     paragonie/random_compat: v9.99.99
-    pear/archive_tar: 1.4.13
+    pear/archive_tar: 1.4.14
     pear/console_getopt: v1.4.3
     pear/pear-core-minimal: v1.10.10
     pear/pear_exception: v1.0.1
