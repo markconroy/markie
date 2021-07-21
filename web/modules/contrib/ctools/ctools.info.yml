@@ -4,7 +4,7 @@ description: 'Provides a number of utility and helper APIs for Drupal developers
 package: Chaos tool suite
 core_version_requirement: ^8.8 || ^9
 
-# Information added by Drupal.org packaging script on 2021-05-12
-version: '8.x-3.6'
+# Information added by Drupal.org packaging script on 2021-06-16
+version: '8.x-3.7'
 project: 'ctools'
-datestamp: 1620832815
+datestamp: 1623822132
