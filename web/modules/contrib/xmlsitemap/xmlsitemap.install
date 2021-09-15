@@ -316,7 +316,7 @@ function xmlsitemap_install() {
 
   $state_variables = xmlsitemap_state_variables();
   \Drupal::state()->setMultiple($state_variables);
-  $xmlsitemap_base_url = rtrim(Url::fromRoute('<front>', [], ['absolute' => TRUE])->toString(), '/');
+  $xmlsitemap_base_url = rtrim(Url::fromUri('base:', ['absolute' => TRUE])->toString(), '/');
   \Drupal::state()->set('xmlsitemap_base_url', $xmlsitemap_base_url);
   $context = xmlsitemap_get_current_context();
   $sitemap = \Drupal::entityTypeManager()->getStorage('xmlsitemap')->create([

@@ -1,7 +1,7 @@
 services:
   xmlsitemap_generator:
     class: Drupal\xmlsitemap\XmlSitemapGenerator
-    arguments: ['@config.factory', '@state', '@language_manager', '@logger.channel.xmlsitemap', '@module_handler', '@entity_type.manager', '@database', '@messenger', '@file_system', '@datetime.time']
+    arguments: ['@config.factory', '@state', '@language_manager', '@logger.channel.xmlsitemap', '@module_handler', '@entity_type.manager', '@database', '@messenger', '@file_system', '@datetime.time', '@entity.memory_cache']
     tags:
       - { name: xmlsitemap_generator }
   xmlsitemap.link_storage:

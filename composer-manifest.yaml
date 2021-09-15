@@ -57,7 +57,7 @@ packages:
     drupal/twig_tweak: 2.9.0
     drupal/upgrade_status: 2.11.0
     drupal/video_embed_field: 2.4.0
-    drupal/xmlsitemap: 1.0.0
+    drupal/xmlsitemap: 1.1.0
     drush/drush: 10.4.3
     easyrdf/easyrdf: 0.9.1
     egulias/email-validator: 2.1.17

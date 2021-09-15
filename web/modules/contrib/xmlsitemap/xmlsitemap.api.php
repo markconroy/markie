@@ -28,11 +28,6 @@ function hook_xmlsitemap_link_info() {
       'bundles' => [
         'mysubtype1' => [
           'label' => t('My subtype 1'),
-          // If your bundles have an administrative UI, list it.
-          'admin' => [
-            'real path' => 'admin/settings/mymodule/mysubtype1/edit',
-            'access arguments' => ['administer mymodule'],
-          ],
           'xmlsitemap' => [
             'status' => XMLSITEMAP_STATUS_DEFAULT,
             'priority' => XMLSITEMAP_PRIORITY_DEFAULT,

@@ -68,7 +68,7 @@ class XmlSitemapLinkStorage implements XmlSitemapLinkStorageInterface {
    * {@inheritdoc}
    */
   public function create(EntityInterface $entity) {
-    if (!isset($entity->xmlsitemap)) {
+    if (!isset($entity->xmlsitemap) || !is_array($entity->xmlsitemap)) {
       $entity->xmlsitemap = [];
       if ($entity->id() && $link = $this->load($entity->getEntityTypeId(), $entity->id())) {
         $entity->xmlsitemap = $link;

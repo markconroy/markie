@@ -630,6 +630,8 @@ function xmlsitemap_entity_type_build(array &$entity_types) {
     'comment',
     // Shortcut items.
     'shortcut',
+    // Redirects.
+    'redirect',
     // Custom Token module.
     // @see https://www.drupal.org/project/token_custom/issues/3150038
     'token_custom',
@@ -976,28 +978,13 @@ function xmlsitemap_link_bundle_delete($entity, $bundle, $delete_links = TRUE) {
  *
  * @return bool
  *   If TRUE, access is allowed, FALSE otherwise.
+ *
+ * @deprecated in xmlsitemap:8.x-1.1 and is removed from xmlsitemap:2.0.0.
+ *
+ * @see https://www.drupal.org/project/xmlsitemap/issues/3156088
  */
 function xmlsitemap_link_bundle_access($entity, $bundle = NULL) {
-  if (is_array($entity) && !isset($bundle)) {
-    $bundle = $entity;
-  }
-  else {
-    $bundle = xmlsitemap_link_bundle_load($entity, $bundle);
-  }
-
-  if (isset($bundle['info']['admin'])) {
-    $admin = $bundle['info']['admin'];
-    $admin += ['access arguments' => []];
-
-    if (!isset($admin['access callback']) && count($admin['access arguments']) == 1) {
-      $admin['access callback'] = 'user_access';
-    }
-
-    if (!empty($admin['access callback'])) {
-      return call_user_func_array($admin['access callback'], $admin['access arguments']);
-    }
-  }
-
+  @trigger_error(__FUNCTION__ . ' is deprecated in xmlsitemap:8.x-1.1 and will be removed in xmlsitemap:2.0.0. See https://www.drupal.org/project/xmlsitemap/issues/3156088', E_USER_DEPRECATED);
   return FALSE;
 }
 
@@ -1011,19 +998,14 @@ function xmlsitemap_link_bundle_access($entity, $bundle = NULL) {
  *
  * @return mixed
  *   Path of bundle, or FALSE if it does not exist.
+ *
+ * @deprecated in xmlsitemap:8.x-1.1 and is removed from xmlsitemap:2.0.0.
+ *
+ * @see https://www.drupal.org/project/xmlsitemap/issues/3156088
  */
 function xmlsitemap_get_bundle_path($entity, $bundle) {
-  $info = xmlsitemap_get_link_info($entity);
-
-  if (!empty($info['bundles'][$bundle]['admin']['real path'])) {
-    return $info['bundles'][$bundle]['admin']['real path'];
-  }
-  elseif (!empty($info['bundles'][$bundle]['admin']['path'])) {
-    return $info['bundles'][$bundle]['admin']['path'];
-  }
-  else {
-    return FALSE;
-  }
+  @trigger_error(__FUNCTION__ . ' is deprecated in xmlsitemap:8.x-1.1 and will be removed in xmlsitemap:2.0.0. See https://www.drupal.org/project/xmlsitemap/issues/3156088', E_USER_DEPRECATED);
+  return FALSE;
 }
 
 /**
@@ -1198,7 +1180,7 @@ function xmlsitemap_form_submit_flag_regenerate(array $form, FormStateInterface 
  *
  * @param array $form
  *   Form array.
- * @param string $entity
+ * @param string $entity_type
  *   Entity type id.
  * @param string $bundle
  *   Bundle id.
@@ -1207,14 +1189,12 @@ function xmlsitemap_form_submit_flag_regenerate(array $form, FormStateInterface 
  *
  * @todo Add changefreq overridability.
  */
-function xmlsitemap_add_form_link_options(array &$form, $entity, $bundle, $id) {
-  $info = xmlsitemap_get_link_info($entity);
-
-  if (!$link = \Drupal::service('xmlsitemap.link_storage')->load($entity, $id)) {
+function xmlsitemap_add_form_link_options(array &$form, $entity_type, $bundle, $id) {
+  if (!$link = \Drupal::service('xmlsitemap.link_storage')->load($entity_type, $id)) {
     $link = [];
   }
 
-  $bundle_info = xmlsitemap_link_bundle_load($entity, $bundle);
+  $bundle_info = xmlsitemap_link_bundle_load($entity_type, $bundle);
   $link += [
     'access' => 1,
     'status' => $bundle_info['status'],
@@ -1227,26 +1207,16 @@ function xmlsitemap_add_form_link_options(array &$form, $entity, $bundle, $id) {
   ];
 
   $currentUser = \Drupal::currentUser();
+  $admin_permission = \Drupal::entityTypeManager()->getDefinition($entity_type)->getAdminPermission();
   $form['xmlsitemap'] = [
     '#type' => 'details',
     '#tree' => TRUE,
     '#title' => t('XML sitemap'),
     '#collapsible' => TRUE,
     '#collapsed' => !$link['status_override'] && !$link['priority_override'],
-    '#access' => $currentUser->hasPermission('administer xmlsitemap') || xmlsitemap_link_bundle_access($bundle_info),
+    '#access' => $currentUser->hasPermission('administer xmlsitemap') || ($admin_permission && $currentUser->hasPermission($admin_permission)),
     '#group' => 'advanced',
   ];
-
-  if (xmlsitemap_link_bundle_access($bundle_info) && $path = xmlsitemap_get_bundle_path($entity, $bundle)) {
-    $form['xmlsitemap']['description'] = [
-      '#prefix' => '<div class="description">',
-      '#suffix' => '</div>',
-      '#markup' => t('The default XML sitemap settings for this @bundle can be changed <a href="@link-type">here</a>.', [
-        '@bundle' => mb_strtolower($info['bundle label']),
-        '@link-type' => Url::fromUri($path, ['query' => \Drupal::destination()->getAsArray()])->toString(),
-      ]),
-    ];
-  }
 
   // Show a warning if the link is not accessible and will not be included in
   // the sitemap.
@@ -1693,7 +1663,7 @@ function xmlsitemap_xmlsitemap_process_entity_links($entity_type_id, array $enti
     xmlsitemap_xmlsitemap_process_entity_link($entity);
   }
   // Reset the entity cache afterwards to clear out some memory.
-  \Drupal::entityTypeManager()->getStorage($entity_type_id)->resetCache();
+  \Drupal::service('entity.memory_cache')->deleteAll();
 }
 
 /**

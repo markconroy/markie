@@ -18,6 +18,7 @@ use Drupal\Core\State\StateInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\Url;
 use Psr\Log\LoggerInterface;
+use Drupal\Core\Cache\MemoryCache\MemoryCacheInterface;
 
 /**
  * XmlSitemap generator service class.
@@ -121,6 +122,13 @@ class XmlSitemapGenerator implements XmlSitemapGeneratorInterface {
   protected $time;
 
   /**
+   * The entity memory cache service.
+   *
+   * @var \Drupal\Core\Cache\MemoryCache\MemoryCacheInterface
+   */
+  protected $entityMemoryCache;
+
+  /**
    * Constructs a XmlSitemapGenerator object.
    *
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
@@ -143,8 +151,10 @@ class XmlSitemapGenerator implements XmlSitemapGeneratorInterface {
    *   The file system.
    * @param \Drupal\Component\Datetime\TimeInterface $time
    *   The time service.
+   * @param \Drupal\Core\Cache\MemoryCache\MemoryCacheInterface $memory_cache
+   *   The memory cache service.
    */
-  public function __construct(ConfigFactoryInterface $config_factory, StateInterface $state, LanguageManagerInterface $language_manager, LoggerInterface $logger, ModuleHandlerInterface $module_handler, EntityTypeManagerInterface $entity_type_manager, Connection $connection, MessengerInterface $messenger, FileSystemInterface $file_system, TimeInterface $time) {
+  public function __construct(ConfigFactoryInterface $config_factory, StateInterface $state, LanguageManagerInterface $language_manager, LoggerInterface $logger, ModuleHandlerInterface $module_handler, EntityTypeManagerInterface $entity_type_manager, Connection $connection, MessengerInterface $messenger, FileSystemInterface $file_system, TimeInterface $time, MemoryCacheInterface $memory_cache) {
     $this->config = $config_factory->getEditable('xmlsitemap.settings');
     $this->state = $state;
     $this->languageManager = $language_manager;
@@ -155,6 +165,7 @@ class XmlSitemapGenerator implements XmlSitemapGeneratorInterface {
     $this->messenger = $messenger;
     $this->fileSystem = $file_system;
     $this->time = $time;
+    $this->entityMemoryCache = $memory_cache;
   }
 
   /**
@@ -351,6 +362,12 @@ class XmlSitemapGenerator implements XmlSitemapGeneratorInterface {
 
       $writer->writeElement('url', $element);
     }
+
+    // The URL generation above still ends up loading the entity objects into
+    // memory because they are routed with internal: URIs. So after generating
+    // this page clear out the memory cache manually to help clear up space.
+    // @see https://www.drupal.org/project/xmlsitemap/issues/3132913
+    $this->entityMemoryCache->deleteAll();
 
     return $link_count;
   }

@@ -8,7 +8,7 @@ test_dependencies:
   - metatag:metatag
   - robotstxt:robotstxt
 
-# Information added by Drupal.org packaging script on 2020-06-29
-version: '8.x-1.0'
+# Information added by Drupal.org packaging script on 2021-09-10
+version: '8.x-1.1'
 project: 'xmlsitemap'
-datestamp: 1593451046
+datestamp: 1631307012

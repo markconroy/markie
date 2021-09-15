@@ -53,13 +53,13 @@
       "drupal/twig_tweak": "^2.6",
       "drupal/upgrade_status": "^2.9",
       "drupal/video_embed_field": "^2.0",
-      "drupal/xmlsitemap": "^1.0-alpha2",
       "drush/drush": "~10.0",
       "hirak/prestissimo": "^0.3.10",
       "joachim-n/composer-manifest": "^1.0",
       "platformsh/config-reader": "^2.3",
       "topfloor/composer-cleanup-vcs-dirs": "^1.0",
-      "zaporylie/composer-drupal-optimizations": "^1.1"
+      "zaporylie/composer-drupal-optimizations": "^1.1",
+    "drupal/xmlsitemap": "^1.0"
   },
   "require-dev": {
       "mglaman/phpstan-drupal": "^0.12.5",

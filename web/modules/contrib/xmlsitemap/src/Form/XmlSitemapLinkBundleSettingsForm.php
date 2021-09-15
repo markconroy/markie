@@ -72,16 +72,7 @@ class XmlSitemapLinkBundleSettingsForm extends ConfigFormBase {
     $this->bundle_type = $bundle;
     $request = $this->getRequest();
 
-    if (!$request->isXmlHttpRequest() && $admin_path = xmlsitemap_get_bundle_path($entity, $bundle)) {
-      // If this is a non-ajax form, redirect to the bundle administration page.
-      $destination = $this->getDestinationArray();
-      $request->query->remove('destination');
-      $url = Url::fromUri($admin_path, ['query' => [$destination]]);
-      return new RedirectResponse($url);
-    }
-    else {
-      $form['#title'] = $this->t('@bundle XML sitemap settings', ['@bundle' => $bundle]);
-    }
+    $form['#title'] = $this->t('@bundle XML sitemap settings', ['@bundle' => $bundle]);
 
     xmlsitemap_add_link_bundle_settings($form, $form_state, $entity, $bundle);
     $form['xmlsitemap']['#type'] = 'markup';

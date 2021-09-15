@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d6b4122ec3852a414ad717afb3709808",
+    "content-hash": "5f80be8d1c66ba15052745248467112e",
     "packages": [
         {
             "name": "alchemy/zippy",
@@ -4067,17 +4067,17 @@
         },
         {
             "name": "drupal/xmlsitemap",
-            "version": "1.0.0",
+            "version": "1.1.0",
             "source": {
                 "type": "git",
                 "url": "https://git.drupalcode.org/project/xmlsitemap.git",
-                "reference": "8.x-1.0"
+                "reference": "8.x-1.1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://ftp.drupal.org/files/projects/xmlsitemap-8.x-1.0.zip",
-                "reference": "8.x-1.0",
-                "shasum": "29395aa9eea8a58edefa3f9e0999d4d3a7f6b08f"
+                "url": "https://ftp.drupal.org/files/projects/xmlsitemap-8.x-1.1.zip",
+                "reference": "8.x-1.1",
+                "shasum": "f8b0a9c44931afc70ea908506ab6595d2468538f"
             },
             "require": {
                 "drupal/core": "^8.8 || ^9",
@@ -4093,8 +4093,8 @@
             "type": "drupal-module",
             "extra": {
                 "drupal": {
-                    "version": "8.x-1.0",
-                    "datestamp": "1593451044",
+                    "version": "8.x-1.1",
+                    "datestamp": "1631307009",
                     "security-coverage": {
                         "status": "covered",
                         "message": "Covered by Drupal's security advisory policy"
