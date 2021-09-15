@@ -58,7 +58,7 @@
       }).data("ui-autocomplete")._renderItem = (function (ul, item) {
         ul.addClass('admin-toolbar-search-autocomplete-list');
         return $("<li>")
-          .append('<div>' + item.labelRaw + ' <span class="admin-toolbar-search-url">' + item.value + '</span></div>')
+          .append('<div>' + item.labelRaw + '<span class="admin-toolbar-search-url">' + '</span></div>')
           .appendTo(ul);
       });
 
@@ -124,7 +124,7 @@
             $self.links.push({
               'value': this.href,
               'label': label + ' ' + this.href,
-              'labelRaw': label
+              'labelRaw': Drupal.checkPlain(label)
             });
           }
         });

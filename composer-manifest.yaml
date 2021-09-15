@@ -26,7 +26,7 @@ packages:
     doctrine/lexer: 1.0.2
     drupal-ckeditor-libraries-group/codesnippet: 4.16.0
     drupal-composer/drupal-security-advisories: '8.x-dev:04b45703b43f28054328aa2612f3fd0deab000cb'
-    drupal/admin_toolbar: 2.4.0
+    drupal/admin_toolbar: 2.5.0
     drupal/antibot: 1.4.0
     drupal/codesnippet: 1.7.0
     drupal/components: 2.4.0
