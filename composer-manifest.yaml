@@ -34,9 +34,9 @@ packages:
     drupal/console-core: 1.9.7
     drupal/console-en: v1.9.7
     drupal/console-extend-plugin: 0.9.5
-    drupal/core: 8.9.17
-    drupal/core-composer-scaffold: 8.9.17
-    drupal/core-recommended: 8.9.17
+    drupal/core: 8.9.19
+    drupal/core-composer-scaffold: 8.9.19
+    drupal/core-recommended: 8.9.19
     drupal/crop: 2.1.0
     drupal/ctools: 3.7.0
     drupal/devel: 2.1.0
