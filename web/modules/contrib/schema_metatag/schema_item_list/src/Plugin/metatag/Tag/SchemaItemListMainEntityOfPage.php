@@ -2,7 +2,7 @@
 
 namespace Drupal\schema_item_list\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaMainEntityOfPageBase;
+use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
 
 /**
  * Provides a plugin for the 'schema_item_list' meta tag.
@@ -20,9 +20,12 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaMainEntityOfPageBase;
  *   weight = 10,
  *   type = "string",
  *   secure = FALSE,
- *   multiple = FALSE
+ *   multiple = FALSE,
+ *   property_type = "url",
+ *   tree_parent = {},
+ *   tree_depth = -1,
  * )
  */
-class SchemaItemListMainEntityOfPage extends SchemaMainEntityOfPageBase {
-  // Nothing here yet. Just a placeholder class for a plugin.
+class SchemaItemListMainEntityOfPage extends SchemaNameBase {
+
 }

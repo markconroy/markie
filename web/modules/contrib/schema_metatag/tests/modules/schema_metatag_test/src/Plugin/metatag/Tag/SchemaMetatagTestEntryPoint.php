@@ -2,7 +2,7 @@
 
 namespace Drupal\schema_metatag_test\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaEntryPointBase;
+use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
 
 /**
  * A metatag tag for testing.
@@ -16,8 +16,14 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaEntryPointBase;
  *   weight = 0,
  *   type = "label",
  *   secure = FALSE,
- *   multiple = FALSE
+ *   multiple = FALSE,
+ *   property_type = "entry_point",
+ *   tree_parent = {
+ *     "EntryPoint",
+ *   },
+ *   tree_depth = -1,
  * )
  */
-class SchemaMetatagTestEntryPoint extends SchemaEntryPointBase {
+class SchemaMetatagTestEntryPoint extends SchemaNameBase {
+
 }

@@ -25,14 +25,6 @@ class SchemaQAPageTest extends SchemaMetatagTagsTestBase {
   /**
    * {@inheritdoc}
    */
-  public $schemaTagsNamespace = '\\Drupal\\schema_qa_page\\Plugin\\metatag\\Tag\\';
-
-  /**
-   * {@inheritdoc}
-   */
-  public $schemaTags = [
-    'schema_qa_page_main_entity' => 'SchemaQAPageMainEntity',
-    'schema_qa_page_type' => 'SchemaQAPageType',
-  ];
+  public $groupName = 'schema_qa_page';
 
 }

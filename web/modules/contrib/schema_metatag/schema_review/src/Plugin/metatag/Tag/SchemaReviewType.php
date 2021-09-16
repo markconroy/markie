@@ -2,7 +2,7 @@
 
 namespace Drupal\schema_review\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaTypeBase;
+use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
 
 /**
  * Provides a plugin for the 'type' meta tag.
@@ -20,22 +20,14 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaTypeBase;
  *   weight = -10,
  *   type = "string",
  *   secure = FALSE,
- *   multiple = FALSE
+ *   multiple = FALSE,
+ *   property_type = "type",
+ *   tree_parent = {
+ *     "Review",
+ *   },
+ *   tree_depth = -1,
  * )
  */
-class SchemaReviewType extends SchemaTypeBase {
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function labels() {
-    return [
-      'Review',
-      'UserReview',
-      'CriticReview',
-      'EmployerReview',
-      'ClaimReview',
-    ];
-  }
+class SchemaReviewType extends SchemaNameBase {
 
 }

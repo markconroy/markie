@@ -2,7 +2,7 @@
 
 namespace Drupal\schema_job_posting\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaPersonOrgBase;
+use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
 
 /**
  * Provides a plugin for the 'schema_job_posting_hiring_organization' meta tag.
@@ -20,9 +20,14 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaPersonOrgBase;
  *   weight = 0,
  *   type = "string",
  *   secure = FALSE,
- *   multiple = FALSE
+ *   multiple = FALSE,
+ *   property_type = "organization",
+ *   tree_parent = {
+ *     "Organization",
+ *   },
+ *   tree_depth = 2,
  * )
  */
-class SchemaJobPostingHiringOrganization extends SchemaPersonOrgBase {
+class SchemaJobPostingHiringOrganization extends SchemaNameBase {
 
 }

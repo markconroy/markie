@@ -2,7 +2,7 @@
 
 namespace Drupal\schema_organization\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaOpeningHoursSpecificationBase;
+use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
 
 /**
  * Provides a plugin for 'schema_organization_opening_hours_specification' tag.
@@ -20,9 +20,14 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaOpeningHoursSpecificationBase
  *   weight = 5,
  *   type = "string",
  *   secure = FALSE,
- *   multiple = TRUE
+ *   multiple = TRUE,
+ *   property_type = "opening_hours_specification",
+ *   tree_parent = {
+ *     "OpeningHoursSpecification",
+ *   },
+ *   tree_depth = 0,
  * )
  */
-class SchemaOrganizationOpeningHoursSpecification extends SchemaOpeningHoursSpecificationBase {
+class SchemaOrganizationOpeningHoursSpecification extends SchemaNameBase {
 
 }

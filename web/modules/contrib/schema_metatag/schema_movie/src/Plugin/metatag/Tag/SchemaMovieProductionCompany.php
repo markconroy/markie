@@ -2,7 +2,7 @@
 
 namespace Drupal\schema_movie\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaPersonOrgBase;
+use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
 
 /**
  * Provides a plugin for the 'schema_movie_production_company' meta tag.
@@ -20,9 +20,15 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaPersonOrgBase;
  *   weight = 15,
  *   type = "string",
  *   secure = FALSE,
- *   multiple = TRUE
+ *   multiple = TRUE,
+ *   property_type = "organization",
+ *   tree_parent = {
+ *     "Person",
+ *     "Organization",
+ *   },
+ *   tree_depth = 0,
  * )
  */
-class SchemaMovieProductionCompany extends SchemaPersonOrgBase {
-  // Nothing here yet. Just a placeholder class for a plugin.
+class SchemaMovieProductionCompany extends SchemaNameBase {
+
 }

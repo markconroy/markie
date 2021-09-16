@@ -2,7 +2,7 @@
 
 namespace Drupal\schema_how_to\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaHowToStepBase;
+use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
 
 /**
  * Provides a plugin for the 'schema_how_to_name' meta tag.
@@ -20,9 +20,14 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaHowToStepBase;
  *   weight = 10,
  *   type = "string",
  *   secure = FALSE,
- *   multiple = TRUE
+ *   multiple = TRUE,
+ *   property_type = "how_to_step",
+ *   tree_parent = {
+ *     "HowToStep",
+ *   },
+ *   tree_depth = -1,
  * )
  */
-class SchemaHowToStep extends SchemaHowToStepBase {
-  // Nothing here yet. Just a placeholder class for a plugin.
+class SchemaHowToStep extends SchemaNameBase {
+
 }

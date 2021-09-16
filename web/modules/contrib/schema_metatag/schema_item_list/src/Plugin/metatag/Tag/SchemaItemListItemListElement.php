@@ -2,7 +2,7 @@
 
 namespace Drupal\schema_item_list\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaItemListElementViewsBase;
+use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
 
 /**
  * Provides a plugin for the 'schema_item_list_element' meta tag.
@@ -20,9 +20,12 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaItemListElementViewsBase;
  *   weight = 1,
  *   type = "string",
  *   secure = FALSE,
- *   multiple = FALSE
+ *   multiple = FALSE,
+ *   property_type = "item_list_element",
+ *   tree_parent = {},
+ *   tree_depth = -1,
  * )
  */
-class SchemaItemListItemListElement extends SchemaItemListElementViewsBase {
+class SchemaItemListItemListElement extends SchemaNameBase {
 
 }

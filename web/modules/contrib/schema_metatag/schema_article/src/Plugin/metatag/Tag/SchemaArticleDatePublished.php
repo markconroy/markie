@@ -2,7 +2,7 @@
 
 namespace Drupal\schema_article\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaDateBase;
+use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
 
 /**
  * Provides a plugin for the 'datePublished' meta tag.
@@ -20,9 +20,12 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaDateBase;
  *   weight = 3,
  *   type = "string",
  *   secure = FALSE,
- *   multiple = FALSE
+ *   multiple = FALSE,
+ *   property_type = "date",
+ *   tree_parent = {},
+ *   tree_depth = -1,
  * )
  */
-class SchemaArticleDatePublished extends SchemaDateBase {
+class SchemaArticleDatePublished extends SchemaNameBase {
 
 }

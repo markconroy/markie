@@ -2,7 +2,7 @@
 
 namespace Drupal\schema_organization\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaTrueFalseBase;
+use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
 
 /**
  * Provides a plugin for 'schema_organization_accepts_reservations' meta tag.
@@ -20,9 +20,12 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaTrueFalseBase;
  *   weight = 5,
  *   type = "string",
  *   secure = FALSE,
- *   multiple = FALSE
+ *   multiple = FALSE,
+ *   property_type = "boolean",
+ *   tree_parent = {},
+ *   tree_depth = -1,
  * )
  */
-class SchemaOrganizationAcceptsReservations extends SchemaTrueFalseBase {
+class SchemaOrganizationAcceptsReservations extends SchemaNameBase {
 
 }

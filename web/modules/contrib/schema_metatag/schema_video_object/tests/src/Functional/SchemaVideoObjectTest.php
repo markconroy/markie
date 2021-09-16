@@ -25,26 +25,6 @@ class SchemaVideoObjectTest extends SchemaMetatagTagsTestBase {
   /**
    * {@inheritdoc}
    */
-  public $schemaTagsNamespace = '\\Drupal\\schema_video_object\\Plugin\\metatag\\Tag\\';
-
-  /**
-   * {@inheritdoc}
-   */
-  public $schemaTags = [
-    'schema_video_object_aggregate_rating' => 'SchemaVideoObjectAggregateRating',
-    'schema_video_object_review' => 'SchemaVideoObjectReview',
-    'schema_video_object_content_url' => 'SchemaVideoObjectContentUrl',
-    'schema_video_object_description' => 'SchemaVideoObjectDescription',
-    'schema_video_object_duration' => 'SchemaVideoObjectDuration',
-    'schema_video_object_embed_url' => 'SchemaVideoObjectEmbedUrl',
-    'schema_video_object_expires' => 'SchemaVideoObjectExpires',
-    'schema_video_object_id' => 'SchemaVideoObjectId',
-    'schema_video_object_interaction_count' => 'SchemaVideoObjectInteractionCount',
-    'schema_video_object_name' => 'SchemaVideoObjectName',
-    'schema_video_object_thumbnail_url' => 'SchemaVideoObjectThumbnailUrl',
-    'schema_video_object_type' => 'SchemaVideoObjectType',
-    'schema_video_object_upload_date' => 'SchemaVideoObjectUploadDate',
-    'schema_video_object_transcript' => 'SchemaVideoObjectTranscript',
-  ];
+  public $groupName = 'schema_video_object';
 
 }

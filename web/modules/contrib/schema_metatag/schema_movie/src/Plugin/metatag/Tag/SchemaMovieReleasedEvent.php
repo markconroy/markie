@@ -2,7 +2,7 @@
 
 namespace Drupal\schema_movie\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaEventBase;
+use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
 
 /**
  * Provides a plugin for the 'schema_movie_released_event' meta tag.
@@ -20,28 +20,14 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaEventBase;
  *   weight = 5,
  *   type = "string",
  *   secure = FALSE,
- *   multiple = TRUE
+ *   multiple = TRUE,
+ *   property_type = "event",
+ *   tree_parent = {
+ *     "PublicationEvent",
+ *   },
+ *   tree_depth = 0,
  * )
  */
-class SchemaMovieReleasedEvent extends SchemaEventBase {
-
-  /**
-   * Generate a form element for this meta tag.
-   */
-  public function form(array $element = []) {
-    $form = parent::form($element);
-
-    // This should only be a PublicationEvent.
-    unset($form['@type']['#options']['Event']);
-
-    // Highlight the fields that Google recommends.
-    $recommended = ['startDate', 'location'];
-    foreach ($recommended as $key) {
-      $description = $this->t('RECOMMENDED BY GOOGLE.') . ' ' . $form[$key]['#description'];
-      $form[$key]['#description'] = $description;
-    }
-
-    return $form;
-  }
+class SchemaMovieReleasedEvent extends SchemaNameBase {
 
 }

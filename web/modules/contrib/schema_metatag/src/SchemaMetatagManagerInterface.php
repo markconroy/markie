@@ -3,7 +3,7 @@
 namespace Drupal\schema_metatag;
 
 /**
- * Interface SchemaMetatagManagerInterface.
+ * The Schema Metatag Manager.
  *
  * @package Drupal\schema_metatag
  */
@@ -192,10 +192,27 @@ interface SchemaMetatagManagerInterface {
   public static function randomMachineName($length = 8);
 
   /**
-   * Default values for input into nested base elements.
+   * Default values for input into nested elements.
    *
    * @return array
    *   An array of default values.
+   *   - @var string 'title'
+   *       The title to use for the form element.
+   *   - @var string 'description'
+   *       The description to use for the form element.
+   *   - @var array 'value'
+   *       The current value of the form element.
+   *   - @var string 'visibility_selector'
+   *       The selector to use in assessing form element visibility, usually
+   *       the @type element.
+   *   - @var array 'tree_parent'
+   *       The top level to use for @type, defaults to ''.
+   *   - @var int 'tree_depth'
+   *       The depth to go in the tree hierarchy, defaults to -1.
+   *   - @var string 'type'
+   *       The form element type, defaults to 'textfield'.
+   *   - @var string 'multiple'
+   *       Whether multiple values should be allowed, defaults to FALSE.
    */
   public static function defaultInputValues();
 

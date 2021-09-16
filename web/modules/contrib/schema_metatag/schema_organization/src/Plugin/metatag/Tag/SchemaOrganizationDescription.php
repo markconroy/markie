@@ -20,25 +20,12 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
  *   weight = 1,
  *   type = "label",
  *   secure = FALSE,
- *   multiple = FALSE
+ *   multiple = FALSE,
+ *   property_type = "text",
+ *   tree_parent = {},
+ *   tree_depth = -1,
  * )
  */
 class SchemaOrganizationDescription extends SchemaNameBase {
-
-  /**
-   * Generate a form element for this meta tag.
-   */
-  public function form(array $element = []) {
-    $form = [
-      '#type' => 'textarea',
-      '#title' => $this->label(),
-      '#default_value' => $this->value(),
-      '#row' => 2,
-      '#required' => isset($element['#required']) ? $element['#required'] : FALSE,
-      '#description' => $this->description(),
-      '#element_validate' => [[get_class($this), 'validateTag']],
-    ];
-    return $form;
-  }
 
 }

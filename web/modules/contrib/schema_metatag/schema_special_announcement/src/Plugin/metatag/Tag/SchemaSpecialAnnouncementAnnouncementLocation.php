@@ -2,7 +2,7 @@
 
 namespace Drupal\schema_special_announcement\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaPlaceBase;
+use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
 
 /**
  * Provides a plugin for the 'announcementLocation' meta tag.
@@ -17,8 +17,13 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaPlaceBase;
  *   type = "label",
  *   secure = FALSE,
  *   multiple = TRUE,
+ *   property_type = "place",
+ *   tree_parent = {
+ *     "Place",
+ *   },
+ *   tree_depth = 2,
  * )
  */
-class SchemaSpecialAnnouncementAnnouncementLocation extends SchemaPlaceBase {
+class SchemaSpecialAnnouncementAnnouncementLocation extends SchemaNameBase {
 
 }

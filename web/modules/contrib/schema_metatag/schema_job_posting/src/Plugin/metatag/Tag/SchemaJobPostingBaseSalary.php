@@ -2,7 +2,7 @@
 
 namespace Drupal\schema_job_posting\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaMonetaryAmountBase;
+use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
 
 /**
  * Provides a plugin for the 'schema_job_posting_base_salary' meta tag.
@@ -20,9 +20,14 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaMonetaryAmountBase;
  *   weight = 0,
  *   type = "string",
  *   secure = FALSE,
- *   multiple = FALSE
+ *   multiple = FALSE,
+ *   property_type = "monetary_amount",
+ *   tree_parent = {
+ *     "MonetaryAmount",
+ *   },
+ *   tree_depth = -1,
  * )
  */
-class SchemaJobPostingBaseSalary extends SchemaMonetaryAmountBase {
+class SchemaJobPostingBaseSalary extends SchemaNameBase {
 
 }

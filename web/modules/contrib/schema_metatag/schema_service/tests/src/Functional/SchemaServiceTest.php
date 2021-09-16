@@ -25,20 +25,6 @@ class SchemaServiceTest extends SchemaMetatagTagsTestBase {
   /**
    * {@inheritdoc}
    */
-  public $schemaTagsNamespace = '\\Drupal\\schema_service\\Plugin\\metatag\\Tag\\';
-
-  /**
-   * {@inheritdoc}
-   */
-  public $schemaTags = [
-    'schema_service_aggregate_rating' => 'SchemaServiceAggregateRating',
-    'schema_service_review' => 'SchemaServiceReview',
-    'schema_service_description' => 'SchemaServiceDescription',
-    'schema_service_image' => 'SchemaServiceImage',
-    'schema_service_name' => 'SchemaServiceName',
-    'schema_service_offers' => 'SchemaServiceOffers',
-    'schema_service_type' => 'SchemaServiceType',
-    'schema_service_brand' => 'SchemaServiceBrand',
-  ];
+  public $groupName = 'schema_service';
 
 }

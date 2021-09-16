@@ -2,7 +2,7 @@
 
 namespace Drupal\schema_movie\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaHasPartBase;
+use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
 
 /**
  * Provides a plugin for the 'schema_movie_has_part' meta tag.
@@ -20,25 +20,14 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaHasPartBase;
  *   weight = 11,
  *   type = "string",
  *   secure = FALSE,
- *   multiple = TRUE
+ *   multiple = TRUE,
+ *   property_type = "clip",
+ *   tree_parent = {
+ *     "Clip",
+ *   },
+ *   tree_depth = -1,
  * )
  */
-class SchemaMovieHasPart extends SchemaHasPartBase {
-
-  /**
-   * Generate a form element for this meta tag.
-   */
-  public function form(array $element = []) {
-
-    $form = parent::form($element);
-
-    // Limit potential actions to WatchAction.
-    $form['potentialAction']['actionType']['#options'] = ['ConsumeAction' => 'ConsumeAction'];
-    $form['potentialAction']['ConsumeAction']['@type']['#options'] = [
-      'WatchAction' => $this->t('WatchAction'),
-    ];
-    return $form;
-
-  }
+class SchemaMovieHasPart extends SchemaNameBase {
 
 }

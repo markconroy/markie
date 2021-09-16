@@ -20,7 +20,10 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
  *   weight = 0,
  *   type = "string",
  *   secure = FALSE,
- *   multiple = TRUE
+ *   multiple = TRUE,
+ *   property_type = "url",
+ *   tree_parent = {},
+ *   tree_depth = -1,
  * )
  */
 class SchemaImageObjectUrl extends SchemaNameBase {

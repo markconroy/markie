@@ -2,7 +2,7 @@
 
 namespace Drupal\schema_person\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaBrandBase;
+use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
 
 /**
  * Provides a plugin for the 'schema_person_brand' meta tag.
@@ -20,9 +20,14 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaBrandBase;
  *   weight = 10,
  *   type = "string",
  *   secure = FALSE,
- *   multiple = FALSE
+ *   multiple = FALSE,
+ *   property_type = "brand",
+ *   tree_parent = {
+ *     "Brand",
+ *   },
+ *   tree_depth = 0,
  * )
  */
-class SchemaPersonBrand extends SchemaBrandBase {
+class SchemaPersonBrand extends SchemaNameBase {
 
 }

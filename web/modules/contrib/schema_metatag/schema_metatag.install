@@ -18,7 +18,12 @@ use Drupal\schema_metatag\SchemaMetatagManager;
  * The "MODULE_aggregate_rating" meta tag is renamed to "MODULE_rating".
  */
 function schema_metatag_update_8101() {
-  /* @var $configs Drupal\metatag\Entity\MetatagDefaults */
+
+  /**
+   * Metatag default values.
+   *
+   * @var Drupal\metatag\Entity\MetatagDefaults
+   */
   $configs = MetatagDefaults::loadMultiple();
 
   foreach ($configs as $config) {
@@ -53,7 +58,12 @@ function schema_metatag_update_8102() {
  * review:rating should be review:reviewRating.
  */
 function schema_metatag_update_8103() {
-  /* @var $configs Drupal\metatag\Entity\MetatagDefaults */
+
+  /**
+   * Metatag default values.
+   *
+   * @var Drupal\metatag\Entity\MetatagDefaults
+   */
   $configs = MetatagDefaults::loadMultiple();
 
   foreach ($configs as $config) {
@@ -83,7 +93,10 @@ function schema_metatag_update_8103() {
  * Uninstall the deprecated SchemaVotingAPI and SchemaProgramMembership modules.
  */
 function schema_metatag_update_8104(&$sandbox) {
-  \Drupal::service('module_installer')->uninstall(['schema_votingapi', 'schema_program_membership']);
+  \Drupal::service('module_installer')->uninstall([
+    'schema_votingapi',
+    'schema_program_membership',
+  ]);
   return (string) t("The Schema.org ProgramMembership and Schema.org VotingAPI modules have been deprecated and will be removed in a future release. They have been uninstalled");
 
 }
@@ -95,7 +108,12 @@ function schema_metatag_update_8104(&$sandbox) {
  * need to be emptied out because they contain invalid data.
  */
 function schema_metatag_update_8105() {
-  /* @var $configs Drupal\metatag\Entity\MetatagDefaults */
+
+  /**
+   * Metatag default values.
+   *
+   * @var Drupal\metatag\Entity\MetatagDefaults
+   */
   $configs = MetatagDefaults::loadMultiple();
 
   foreach ($configs as $config) {
@@ -119,7 +137,12 @@ function schema_metatag_update_8105() {
  * Delete unneeded tags.
  */
 function schema_metatag_update_8106() {
-  /* @var $configs Drupal\metatag\Entity\MetatagDefaults */
+
+  /**
+   * Metatag default values.
+   *
+   * @var Drupal\metatag\Entity\MetatagDefaults
+   */
   $configs = MetatagDefaults::loadMultiple();
 
   $delete = [
@@ -150,7 +173,12 @@ function schema_metatag_update_8106() {
  * Update the schema_product_brand tag.
  */
 function schema_metatag_update_8107() {
-  /* @var $configs Drupal\metatag\Entity\MetatagDefaults */
+
+  /**
+   * Metatag default values.
+   *
+   * @var Drupal\metatag\Entity\MetatagDefaults
+   */
   $configs = MetatagDefaults::loadMultiple();
 
   foreach ($configs as $config) {

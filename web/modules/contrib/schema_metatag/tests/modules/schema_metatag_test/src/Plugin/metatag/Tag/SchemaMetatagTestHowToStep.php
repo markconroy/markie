@@ -2,7 +2,7 @@
 
 namespace Drupal\schema_metatag_test\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaHowToStepBase;
+use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
 
 /**
  * A metatag tag for testing.
@@ -16,8 +16,14 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaHowToStepBase;
  *   weight = 0,
  *   type = "label",
  *   secure = FALSE,
- *   multiple = FALSE
+ *   multiple = FALSE,
+ *   property_type = "how_to_step",
+ *   tree_parent = {
+ *     "HowToStep",
+ *   },
+ *   tree_depth = -1,
  * )
  */
-class SchemaMetatagTestHowToStep extends SchemaHowToStepBase {
+class SchemaMetatagTestHowToStep extends SchemaNameBase {
+
 }

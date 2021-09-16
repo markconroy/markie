@@ -2,7 +2,7 @@
 
 namespace Drupal\schema_review\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaThingBase;
+use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
 
 /**
  * Provides a plugin for the 'schema_review_item_reviewed' meta tag.
@@ -20,9 +20,14 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaThingBase;
  *   weight = 1,
  *   type = "string",
  *   secure = FALSE,
- *   multiple = FALSE
+ *   multiple = FALSE,
+ *   property_type = "thing",
+ *   tree_parent = {
+ *     "Thing",
+ *   },
+ *   tree_depth = 2,
  * )
  */
-class SchemaReviewItemReviewed extends SchemaThingBase {
+class SchemaReviewItemReviewed extends SchemaNameBase {
 
 }

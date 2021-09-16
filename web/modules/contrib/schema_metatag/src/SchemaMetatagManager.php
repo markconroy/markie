@@ -5,7 +5,7 @@ namespace Drupal\schema_metatag;
 use Drupal\Component\Utility\Random;
 
 /**
- * Class SchemaMetatagManager.
+ * The SchemaMetatag Manager.
  *
  * @package Drupal\schema_metatag
  */
@@ -168,13 +168,15 @@ class SchemaMetatagManager implements SchemaMetatagManagerInterface {
    * {@inheritdoc}
    */
   public static function explode($value) {
-    $value = explode(',', $value);
-    $value = array_map('trim', $value);
-    // $value = array_unique($value);
-    if (count($value) == 1) {
-      return $value[0];
+    if (is_string($value)) {
+      $value = explode(',', $value);
     }
-
+    if (is_array($value)) {
+      $value = array_map('trim', $value);
+      if (count($value) == 1) {
+        return $value[0];
+      }
+    }
     return $value;
   }
 
@@ -345,10 +347,10 @@ class SchemaMetatagManager implements SchemaMetatagManagerInterface {
       'title' => '',
       'description' => '',
       'value' => [],
-      '#required' => FALSE,
       'visibility_selector' => '',
-      'actionTypes' => [],
-      'actions' => [],
+      'tree_parent' => [],
+      'tree_depth' => -1,
+      'multiple' => FALSE,
     ];
   }
 

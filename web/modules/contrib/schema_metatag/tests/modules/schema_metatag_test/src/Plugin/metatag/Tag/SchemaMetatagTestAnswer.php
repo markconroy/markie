@@ -2,7 +2,7 @@
 
 namespace Drupal\schema_metatag_test\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaAnswerBase;
+use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
 
 /**
  * A metatag tag for testing.
@@ -16,8 +16,14 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaAnswerBase;
  *   weight = 0,
  *   type = "label",
  *   secure = FALSE,
- *   multiple = FALSE
+ *   multiple = FALSE,
+ *   property_type = "answer",
+ *   tree_parent = {
+ *     "Answer",
+ *   },
+ *   tree_depth = -1,
  * )
  */
-class SchemaMetatagTestAnswer extends SchemaAnswerBase {
+class SchemaMetatagTestAnswer extends SchemaNameBase {
+
 }

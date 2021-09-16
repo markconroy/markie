@@ -2,7 +2,7 @@
 
 namespace Drupal\schema_organization\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaGeoBase;
+use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
 
 /**
  * Provides a plugin for the 'schema_organization_geo' meta tag.
@@ -20,9 +20,14 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaGeoBase;
  *   weight = 10,
  *   type = "string",
  *   secure = FALSE,
- *   multiple = FALSE
+ *   multiple = FALSE,
+ *   property_type = "geo_coordinates",
+ *   tree_parent = {
+ *     "GeoCoordinates",
+ *   },
+ *   tree_depth = 0,
  * )
  */
-class SchemaOrganizationGeo extends SchemaGeoBase {
+class SchemaOrganizationGeo extends SchemaNameBase {
 
 }

@@ -2,7 +2,7 @@
 
 namespace Drupal\schema_movie\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaCreativeWorkBase;
+use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
 
 /**
  * Provides a plugin for the 'partOfSeries' meta tag.
@@ -20,9 +20,14 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaCreativeWorkBase;
  *   weight = 10,
  *   type = "string",
  *   secure = FALSE,
- *   multiple = FALSE
+ *   multiple = FALSE,
+ *   property_type = "creative_work",
+ *   tree_parent = {
+ *     "Series",
+ *   },
+ *   tree_depth = -1,
  * )
  */
-class SchemaMoviePartOfSeries extends SchemaCreativeWorkBase {
+class SchemaMoviePartOfSeries extends SchemaNameBase {
 
 }

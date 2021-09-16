@@ -2,7 +2,7 @@
 
 namespace Drupal\schema_metatag_test\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaDateBase;
+use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
 
 /**
  * A metatag tag for testing.
@@ -16,8 +16,12 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaDateBase;
  *   weight = 0,
  *   type = "label",
  *   secure = FALSE,
- *   multiple = FALSE
+ *   multiple = FALSE,
+ *   property_type = "date",
+ *   tree_parent = {},
+ *   tree_depth = -1,
  * )
  */
-class SchemaMetatagTestDate extends SchemaDateBase {
+class SchemaMetatagTestDate extends SchemaNameBase {
+
 }

@@ -20,7 +20,10 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
  *   weight = 11,
  *   type = "string",
  *   secure = FALSE,
- *   multiple = FALSE
+ *   multiple = FALSE,
+ *   property_type = "url",
+ *   tree_parent = {},
+ *   tree_depth = -1,
  * )
  */
 class SchemaSpecialAnnouncementTravelBans extends SchemaNameBase {

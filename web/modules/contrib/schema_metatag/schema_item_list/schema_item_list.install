@@ -18,7 +18,11 @@ use Drupal\metatag\Entity\MetatagDefaults;
  * to the correct "schema_item_list_item_list_element".
  */
 function schema_item_list_update_8101() {
-  /* @var $configs Drupal\metatag\Entity\MetatagDefaults */
+
+  /**
+   * @var Drupal\metatag\Entity\MetatagDefaults
+   *   The Metatag defaults.
+   */
   $configs = MetatagDefaults::loadMultiple();
 
   foreach ($configs as $config) {

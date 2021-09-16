@@ -2,7 +2,7 @@
 
 namespace Drupal\schema_article\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaMainEntityOfPageBase;
+use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
 
 /**
  * Provides a plugin for the 'schema_article_main_entity_of_page' meta tag.
@@ -20,9 +20,12 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaMainEntityOfPageBase;
  *   weight = 10,
  *   type = "string",
  *   secure = FALSE,
- *   multiple = FALSE
+ *   multiple = FALSE,
+ *   property_type = "url",
+ *   tree_parent = {},
+ *   tree_depth = -1,
  * )
  */
-class SchemaArticleMainEntityOfPage extends SchemaMainEntityOfPageBase {
+class SchemaArticleMainEntityOfPage extends SchemaNameBase {
 
 }

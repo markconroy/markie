@@ -20,9 +20,12 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
  *   weight = -20,
  *   type = "string",
  *   secure = FALSE,
- *   multiple = FALSE
+ *   multiple = FALSE,
+ *   property_type = "text",
+ *   tree_parent = {},
+ *   tree_depth = -1,
  * )
  */
 class SchemaCourseEducationalCredentialAwarded extends SchemaNameBase {
-  // Nothing here yet. Just a placeholder class for a plugin.
+
 }

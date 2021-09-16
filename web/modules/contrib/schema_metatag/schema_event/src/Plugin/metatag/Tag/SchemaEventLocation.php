@@ -2,7 +2,7 @@
 
 namespace Drupal\schema_event\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaPlaceBase;
+use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
 
 /**
  * Provides a plugin for the 'schema_event_location' meta tag.
@@ -20,10 +20,15 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaPlaceBase;
  *   weight = 5,
  *   type = "string",
  *   secure = FALSE,
- *   multiple = TRUE
+ *   multiple = TRUE,
+ *   property_type = "place",
+ *   tree_parent = {
+ *     "Place",
+ *     "VirtualLocation",
+ *   },
+ *   tree_depth = 2,
  * )
  */
-class SchemaEventLocation extends SchemaPlaceBase {
-
+class SchemaEventLocation extends SchemaNameBase {
 
 }

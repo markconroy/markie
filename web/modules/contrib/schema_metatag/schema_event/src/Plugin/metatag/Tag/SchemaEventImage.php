@@ -2,7 +2,7 @@
 
 namespace Drupal\schema_event\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaImageBase;
+use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
 
 /**
  * Provides a plugin for the 'image' meta tag.
@@ -20,9 +20,14 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaImageBase;
  *   weight = 1,
  *   type = "image",
  *   secure = FALSE,
- *   multiple = FALSE
+ *   multiple = FALSE,
+ *   property_type = "image_object",
+ *   tree_parent = {
+ *     "ImageObject",
+ *   },
+ *   tree_depth = 0,
  * )
  */
-class SchemaEventImage extends SchemaImageBase {
+class SchemaEventImage extends SchemaNameBase {
 
 }

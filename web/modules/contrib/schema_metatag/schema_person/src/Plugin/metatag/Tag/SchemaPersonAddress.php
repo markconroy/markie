@@ -2,7 +2,7 @@
 
 namespace Drupal\schema_person\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaAddressBase;
+use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
 
 /**
  * Provides a plugin for the 'schema_person_address' meta tag.
@@ -20,9 +20,14 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaAddressBase;
  *   weight = 1,
  *   type = "string",
  *   secure = FALSE,
- *   multiple = FALSE
+ *   multiple = FALSE,
+ *   property_type = "postal_address",
+ *   tree_parent = {
+ *     "PostalAddress",
+ *   },
+ *   tree_depth = 0,
  * )
  */
-class SchemaPersonAddress extends SchemaAddressBase {
-  // Nothing here yet. Just a placeholder class for a plugin.
+class SchemaPersonAddress extends SchemaNameBase {
+
 }

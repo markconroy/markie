@@ -2,7 +2,7 @@
 
 namespace Drupal\schema_metatag_test\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaGovernmentServiceBase;
+use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
 
 /**
  * A metatag tag for testing.
@@ -16,8 +16,14 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaGovernmentServiceBase;
  *   weight = 0,
  *   type = "label",
  *   secure = FALSE,
- *   multiple = TRUE
+ *   multiple = TRUE,
+ *   property_type = "government_service",
+ *   tree_parent = {
+ *     "GovernmentService",
+ *   },
+ *   tree_depth = -1,
  * )
  */
-class SchemaMetatagTestGovermentService extends SchemaGovernmentServiceBase {
+class SchemaMetatagTestGovermentService extends SchemaNameBase {
+
 }

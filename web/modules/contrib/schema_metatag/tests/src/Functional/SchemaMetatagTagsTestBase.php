@@ -10,6 +10,20 @@ use Drupal\Tests\BrowserTestBase;
 abstract class SchemaMetatagTagsTestBase extends BrowserTestBase {
 
   /**
+   * The Property Type Manager.
+   *
+   * @var \Drupal\schema_metatag\Plugin\schema_metatag\PropertyTypeManage
+   */
+  protected $propertyTypeManager;
+
+  /**
+   * The Metatg Manager.
+   *
+   * @var \Drupal\metatag\MetatagTagPluginManager
+   */
+  protected $metatagTagManager;
+
+  /**
    * {@inheritdoc}
    */
   protected $defaultTheme = 'classy';
@@ -27,6 +41,7 @@ abstract class SchemaMetatagTagsTestBase extends BrowserTestBase {
 
     // This module.
     'schema_metatag',
+    'schema_metatag_test',
   ];
 
   /**
@@ -37,18 +52,81 @@ abstract class SchemaMetatagTagsTestBase extends BrowserTestBase {
   public $moduleName = '';
 
   /**
-   * The namespace of the tags which will be tested.
+   * The group being tested.
    *
    * @var string
    */
-  public $schemaTagsNamespace = '';
+  public $groupName = '';
 
   /**
-   * All of the individual tags which will be tested.
+   * All of the property types which will be tested.
    *
    * @var array
+   *   A key/value array of the id of the tag and the property type used to
+   *   create it.
+   *
+   * @see \Drupal\schema_metatag\Plugin\schema_metatag\PropertyTypeInterface.
    */
-  public $schemaTags = [];
+  public $propertyTypes = [];
+
+  /**
+   * Find all of the property types which will be tested.
+   */
+  public function getPropertyTypes() {
+    $property_types = [];
+    $definitions = $this->metatagTagManager()->getDefinitions();
+    foreach ($definitions as $tag_name => $definition) {
+      if ($definition['group'] == $this->groupName) {
+        $property_types[$tag_name] = $definition['property_type'];
+      }
+    }
+    return $property_types;
+  }
+
+  /**
+   * Specific tree parents for tests.
+   *
+   * @var array
+   *   A key/value array of the id of the tag and the tree parent used to
+   *   create it.
+   */
+  public $treeParent = [];
+
+  /**
+   * Find tree parents for tests.
+   */
+  public function getTreeParent() {
+    $property_types = [];
+    $definitions = $this->metatagTagManager()->getDefinitions();
+    foreach ($definitions as $tag_name => $definition) {
+      if ($definition['group'] == $this->groupName) {
+        if (!empty($definition['tree_parent'])) {
+          $property_types[$tag_name] = array_shift($definition['tree_parent']);
+        }
+      }
+    }
+    return $property_types;
+  }
+
+  /**
+   * The PropertyTypeManager.
+   *
+   * @var Drupal\schema_metatag\Plugin\schema_metatag\PropertyTypeManager
+   *   The Property Type Manager service.
+   */
+  public function propertyTypeManager() {
+    return $this->propertyTypeManager;
+  }
+
+  /**
+   * The Metatag Tag Manager.
+   *
+   * @var \Drupal\metatag\MetatagTagPluginManager
+   *   The Metatag Tag Manager service.
+   */
+  public function metatagTagManager() {
+    return $this->metatagTagManager;
+  }
 
   /**
    * Convert the tag_name into the camelCase key used in the JSON array.
@@ -76,7 +154,12 @@ abstract class SchemaMetatagTagsTestBase extends BrowserTestBase {
    * {@inheritdoc}
    */
   protected function setUp() {
+
     parent::setUp();
+    $this->propertyTypeManager = \Drupal::service('plugin.manager.schema_property_type');
+    $this->metatagTagManager = \Drupal::service('plugin.manager.metatag.tag');
+    $this->propertyTypes = $this->getPropertyTypes();
+    $this->treeParent = $this->getTreeParent();
 
     // Initiate session with a user who can manage metatags and access content.
     $permissions = [
@@ -105,7 +188,7 @@ abstract class SchemaMetatagTagsTestBase extends BrowserTestBase {
    */
   public function testTagsInputOutput() {
 
-    if (empty($this->schemaTags) || empty($this->schemaTagsNamespace)) {
+    if (empty($this->propertyTypes)) {
       $this->markTestSkipped('Not enough information to test.');
       return;
     }
@@ -122,24 +205,26 @@ abstract class SchemaMetatagTagsTestBase extends BrowserTestBase {
       // Configure all the tag values and post the results.
       $expected_output_values = $raw_values = $form_values = [];
       $form_values = [];
-      foreach ($this->schemaTags as $tag_name => $class_name) {
+      foreach ($this->propertyTypes as $tag_name => $property_type) {
 
         // Transform the tag_name to the camelCase key used in the form.
         $key = $this->getKey($tag_name);
 
-        // Find the name of the class that defines this property, and use it to
+        // Find the name of the property type and use it to
         // identify a valid test value, and determine what the rendered output
         // should look like. Store the rendered value so we can compare it to
         // the output. Store the raw value so we can check that it exists in the
         // config form.
-        $class = $this->schemaTagsNamespace . $class_name;
-        $test_value = $class::testValue();
+        $property_plugin = $this->propertyTypeManager()->createInstance($property_type);
+        $type = array_key_exists($tag_name, $this->treeParent) ? $this->treeParent[$tag_name] : $property_plugin->getTreeParent();
+        $test_type = is_array($type) ? array_shift($type) : $type;
+        $test_value = $property_plugin->testValue($test_type);
         // Store the input value.
         $raw_values[$tag_name] = $test_value;
         // Adjust the input value as necessary to transform it to the
         // expected output value, and store that.
-        $processed_value = $class::processedTestValue($test_value);
-        $expected_output_values[$key] = $class::outputValue($processed_value);
+        $processed_value = $property_plugin->processedTestValue($test_value);
+        $expected_output_values[$key] = $property_plugin->outputValue($processed_value);
 
         // Rewrite the test values to match the way the form elements are
         // structured.
@@ -186,7 +271,7 @@ abstract class SchemaMetatagTagsTestBase extends BrowserTestBase {
 
       // Load the config page to confirm the settings got saved.
       $this->drupalGet($config_path);
-      foreach ($this->schemaTags as $tag_name => $class) {
+      foreach ($this->propertyTypes as $tag_name => $property_type) {
         // Check that simple string test values exist in the form to see that
         // form values were saved accurately. Don't try to recurse through all
         // arrays, more complicated values will be tested from the JSON output
@@ -212,10 +297,11 @@ abstract class SchemaMetatagTagsTestBase extends BrowserTestBase {
       $output_values = $json['@graph'][0];
 
       // Compare input and output values.
-      foreach ($this->schemaTags as $tag_name => $class) {
+      foreach ($this->propertyTypes as $tag_name => $property_type) {
         $key = $this->getKey($tag_name);
         $this->assertEquals($output_values[$key], $expected_output_values[$key]);
       }
+
     }
 
     $this->drupalLogout();

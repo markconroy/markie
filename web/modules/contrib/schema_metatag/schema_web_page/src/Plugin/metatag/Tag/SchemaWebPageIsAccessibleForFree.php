@@ -2,7 +2,7 @@
 
 namespace Drupal\schema_web_page\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaTrueFalseBase;
+use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
 
 /**
  * Provides a plugin for the 'schema_web_page_is_accessible_for_free' meta tag.
@@ -22,9 +22,12 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaTrueFalseBase;
  *   weight = 4,
  *   type = "string",
  *   secure = FALSE,
- *   multiple = FALSE
+ *   multiple = FALSE,
+ *   property_type = "boolean",
+ *   tree_parent = {},
+ *   tree_depth = -1,
  * )
  */
-class SchemaWebPageIsAccessibleForFree extends SchemaTrueFalseBase {
+class SchemaWebPageIsAccessibleForFree extends SchemaNameBase {
 
 }

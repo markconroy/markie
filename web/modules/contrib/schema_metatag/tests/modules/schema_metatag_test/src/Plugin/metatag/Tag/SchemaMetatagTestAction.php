@@ -2,9 +2,7 @@
 
 namespace Drupal\schema_metatag_test\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaActionBase;
-use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaEntryPointBase;
-use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaThingBase;
+use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
 
 /**
  * A metatag tag for testing.
@@ -18,55 +16,14 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaThingBase;
  *   weight = 0,
  *   type = "label",
  *   secure = FALSE,
- *   multiple = FALSE
+ *   multiple = FALSE,
+ *   property_type = "action",
+ *   tree_parent = {
+ *     "Action",
+ *   },
+ *   tree_depth = -1,
  * )
  */
-class SchemaMetatagTestAction extends SchemaActionBase {
-
-  /**
-   * Generate a form element for this meta tag.
-   */
-  public function form(array $element = []) {
-
-    $this->actions = ['Action', 'OrganizeAction'];
-
-    $form = parent::form($element);
-    return $form;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function testValue() {
-    $items = [];
-    $keys = [
-      '@type',
-      'result',
-      'target',
-    ];
-    foreach ($keys as $key) {
-      switch ($key) {
-
-        case '@type':
-          $items[$key] = 'OrganizeAction';
-          break;
-
-        case 'target':
-          $items[$key] = SchemaEntryPointBase::testValue();
-          break;
-
-        case 'result':
-          $items[$key] = SchemaThingBase::testValue();
-          break;
-
-        default:
-          $items[$key] = parent::testDefaultValue(1, '');
-          break;
-
-      }
-    }
-    return $items;
-
-  }
+class SchemaMetatagTestAction extends SchemaNameBase {
 
 }

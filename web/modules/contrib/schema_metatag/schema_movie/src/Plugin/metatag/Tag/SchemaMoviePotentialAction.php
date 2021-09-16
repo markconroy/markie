@@ -2,7 +2,7 @@
 
 namespace Drupal\schema_movie\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaActionBase;
+use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
 
 /**
  * Provides a plugin for the 'schema_movie_potential_action' meta tag.
@@ -20,21 +20,15 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaActionBase;
  *   weight = 11,
  *   type = "string",
  *   secure = FALSE,
- *   multiple = TRUE
+ *   multiple = TRUE,
+ *   property_type = "action",
+ *   tree_parent = {
+ *     "WatchAction",
+ *     "ViewAction",
+ *   },
+ *   tree_depth = 0,
  * )
  */
-class SchemaMoviePotentialAction extends SchemaActionBase {
-
-  /**
-   * Generate a form element for this meta tag.
-   */
-  public function form(array $element = []) {
-
-    $this->actions = ['Action', 'ConsumeAction', 'WatchAction', 'ViewAction'];
-
-    $form = parent::form($element);
-    return $form;
-
-  }
+class SchemaMoviePotentialAction extends SchemaNameBase {
 
 }

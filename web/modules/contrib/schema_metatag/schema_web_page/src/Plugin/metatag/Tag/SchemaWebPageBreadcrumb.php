@@ -2,7 +2,7 @@
 
 namespace Drupal\schema_web_page\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaItemListElementBreadcrumbBase;
+use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
 
 /**
  * Provides a plugin for the 'schema_web_page_breadcrumb' meta tag.
@@ -20,10 +20,14 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaItemListElementBreadcrumbBase
  *   weight = 1,
  *   type = "string",
  *   secure = FALSE,
- *   multiple = FALSE
+ *   multiple = FALSE,
+ *   property_type = "breadcrumb_list",
+ *   tree_parent = {
+ *     "BreadcrumbList",
+ *   },
+ *   tree_depth = 0,
  * )
  */
-class SchemaWebPageBreadcrumb extends SchemaItemListElementBreadcrumbBase {
-
+class SchemaWebPageBreadcrumb extends SchemaNameBase {
 
 }

@@ -2,7 +2,7 @@
 
 namespace Drupal\schema_video_object\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaTypeBase;
+use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
 
 /**
  * Provides a plugin for the 'schema_video_object_type' meta tag.
@@ -20,18 +20,14 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaTypeBase;
  *   weight = -10,
  *   type = "string",
  *   secure = FALSE,
- *   multiple = FALSE
+ *   multiple = FALSE,
+ *   property_type = "type",
+ *   tree_parent = {
+ *     "VideoObject",
+ *   },
+ *   tree_depth = -1,
  * )
  */
-class SchemaVideoObjectType extends SchemaTypeBase {
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function labels() {
-    return [
-      'VideoObject',
-    ];
-  }
+class SchemaVideoObjectType extends SchemaNameBase {
 
 }

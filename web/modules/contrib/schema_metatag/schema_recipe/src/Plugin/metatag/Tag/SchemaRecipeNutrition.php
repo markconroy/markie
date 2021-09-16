@@ -2,7 +2,7 @@
 
 namespace Drupal\schema_recipe\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNutritionInformationBase;
+use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
 
 /**
  * Provides a plugin for the 'nutrition' meta tag.
@@ -20,9 +20,14 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNutritionInformationBase;
  *   weight = 8,
  *   type = "image",
  *   secure = FALSE,
- *   multiple = FALSE
+ *   multiple = FALSE,
+ *   property_type = "nutrition_information",
+ *   tree_parent = {
+ *     "NutritionInformation",
+ *   },
+ *   tree_depth = 0,
  * )
  */
-class SchemaRecipeNutrition extends SchemaNutritionInformationBase {
+class SchemaRecipeNutrition extends SchemaNameBase {
 
 }

@@ -2,7 +2,7 @@
 
 namespace Drupal\schema_web_page\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaPersonOrgBase;
+use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
 
 /**
  * Provides a plugin for the 'author' meta tag.
@@ -20,9 +20,15 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaPersonOrgBase;
  *   weight = 2,
  *   type = "string",
  *   secure = FALSE,
- *   multiple = TRUE
+ *   multiple = TRUE,
+ *   property_type = "organization",
+ *   tree_parent = {
+ *     "Person",
+ *     "Organization",
+ *   },
+ *   tree_depth = 0,
  * )
  */
-class SchemaWebPageAuthor extends SchemaPersonOrgBase {
+class SchemaWebPageAuthor extends SchemaNameBase {
 
 }

@@ -50,7 +50,7 @@ packages:
     drupal/mgv: 1.17.0
     drupal/pathauto: 1.8.0
     drupal/redirect: 1.6.0
-    drupal/schema_metatag: 1.8.0
+    drupal/schema_metatag: 2.2.0
     drupal/token: 1.9.0
     drupal/twig_tweak: 2.9.0
     drupal/upgrade_status: 2.11.0

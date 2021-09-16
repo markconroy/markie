@@ -2,7 +2,7 @@
 
 namespace Drupal\schema_event\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaPersonOrgBase;
+use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
 
 /**
  * Provides a plugin for the 'organizer' meta tag.
@@ -20,9 +20,15 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaPersonOrgBase;
  *   weight = 10,
  *   type = "string",
  *   secure = FALSE,
- *   multiple = FALSE
+ *   multiple = FALSE,
+ *   property_type = "organization",
+ *   tree_parent = {
+ *     "Person",
+ *     "Organization",
+ *   },
+ *   tree_depth = 0,
  * )
  */
-class SchemaEventOrganizer extends SchemaPersonOrgBase {
+class SchemaEventOrganizer extends SchemaNameBase {
 
 }

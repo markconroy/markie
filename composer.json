@@ -46,7 +46,7 @@
       "drupal/mgv": "^1.16",
       "drupal/pathauto": "^1.8",
       "drupal/redirect": "^1.6",
-      "drupal/schema_metatag": "^1.0",
+      "drupal/schema_metatag": "^2.0",
       "drupal/token": "^1.7",
       "drupal/twig_tweak": "^2.6",
       "drupal/upgrade_status": "^2.9",

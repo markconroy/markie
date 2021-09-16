@@ -2,7 +2,7 @@
 
 namespace Drupal\schema_person\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaPersonOrgBase;
+use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
 
 /**
  * Provides a plugin for the 'schema_person_works_for' meta tag.
@@ -20,9 +20,14 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaPersonOrgBase;
  *   weight = 11,
  *   type = "string",
  *   secure = FALSE,
- *   multiple = FALSE
+ *   multiple = FALSE,
+ *   property_type = "organization",
+ *   tree_parent = {
+ *     "Organization",
+ *   },
+ *   tree_depth = 0,
  * )
  */
-class SchemaPersonWorksFor extends SchemaPersonOrgBase {
+class SchemaPersonWorksFor extends SchemaNameBase {
 
 }

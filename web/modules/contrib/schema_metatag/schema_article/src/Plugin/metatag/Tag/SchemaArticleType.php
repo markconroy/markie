@@ -2,7 +2,7 @@
 
 namespace Drupal\schema_article\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaTypeBase;
+use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
 
 /**
  * Provides a plugin for the 'schema_article_description' meta tag.
@@ -20,25 +20,14 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaTypeBase;
  *   weight = -10,
  *   type = "string",
  *   secure = FALSE,
- *   multiple = FALSE
+ *   multiple = FALSE,
+ *   property_type = "type",
+ *   tree_parent = {
+ *     "Article",
+ *   },
+ *   tree_depth = -1,
  * )
  */
-class SchemaArticleType extends SchemaTypeBase {
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function labels() {
-    return [
-      'Article',
-      '- NewsArticle',
-      '- Report',
-      '- ScholarlyArticle',
-      '- SocialMediaPosting',
-      '-- BlogPosting',
-      '- TechArticle',
-      '-- APIReference',
-    ];
-  }
+class SchemaArticleType extends SchemaNameBase {
 
 }

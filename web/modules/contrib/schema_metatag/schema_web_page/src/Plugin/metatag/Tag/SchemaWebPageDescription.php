@@ -20,18 +20,12 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
  *   weight = 1,
  *   type = "string",
  *   secure = FALSE,
- *   multiple = FALSE
+ *   multiple = FALSE,
+ *   property_type = "text",
+ *   tree_parent = {},
+ *   tree_depth = -1,
  * )
  */
 class SchemaWebPageDescription extends SchemaNameBase {
-
-  /**
-   * {@inheritdoc}
-   */
-  public function form(array $element = []) {
-    $form = parent::form($element);
-    $form['#attributes']['placeholder'] = '[node:summary]';
-    return $form;
-  }
 
 }

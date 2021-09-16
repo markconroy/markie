@@ -2,7 +2,7 @@
 
 namespace Drupal\schema_course\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaTypeBase;
+use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
 
 /**
  * Provides a plugin for the 'schema_course_type' meta tag.
@@ -20,18 +20,14 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaTypeBase;
  *   weight = -50,
  *   type = "string",
  *   secure = FALSE,
- *   multiple = FALSE
+ *   multiple = FALSE,
+ *   property_type = "type",
+ *   tree_parent = {
+ *     "Course",
+ *   },
+ *   tree_depth = -1,
  * )
  */
-class SchemaCourseType extends SchemaTypeBase {
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function labels() {
-    return [
-      'Course',
-    ];
-  }
+class SchemaCourseType extends SchemaNameBase {
 
 }

@@ -2,7 +2,7 @@
 
 namespace Drupal\schema_place\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaGeoBase;
+use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
 
 /**
  * Provides a plugin for the 'schema_place_geo' meta tag.
@@ -20,9 +20,14 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaGeoBase;
  *   weight = 1,
  *   type = "string",
  *   secure = FALSE,
- *   multiple = FALSE
+ *   multiple = FALSE,
+ *   property_type = "geo_coordinates",
+ *   tree_parent = {
+ *     "GeoCoordinates",
+ *   },
+ *   tree_depth = 0,
  * )
  */
-class SchemaPlaceGeo extends SchemaGeoBase {
-  // Nothing here yet. Just a placeholder class for a plugin.
+class SchemaPlaceGeo extends SchemaNameBase {
+
 }

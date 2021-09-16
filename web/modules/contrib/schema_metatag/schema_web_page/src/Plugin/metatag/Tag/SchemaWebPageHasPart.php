@@ -2,7 +2,7 @@
 
 namespace Drupal\schema_web_page\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaHasPartBase;
+use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
 
 /**
  * Provides a plugin for the 'schema_web_page_has_part' meta tag.
@@ -22,9 +22,14 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaHasPartBase;
  *   weight = 4,
  *   type = "string",
  *   secure = FALSE,
- *   multiple = TRUE
+ *   multiple = TRUE,
+ *   property_type = "web_page_element",
+ *   tree_parent = {
+ *     "WebPageElement",
+ *   },
+ *   tree_depth = 0,
  * )
  */
-class SchemaWebPageHasPart extends SchemaHasPartBase {
+class SchemaWebPageHasPart extends SchemaNameBase {
 
 }

@@ -2,7 +2,7 @@
 
 namespace Drupal\schema_web_page\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaIdReferenceBase;
+use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
 
 /**
  * Provides a plugin for the 'schema_web_page_translation_of_work' meta tag.
@@ -20,9 +20,12 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaIdReferenceBase;
  *   weight = 12,
  *   type = "string",
  *   secure = FALSE,
- *   multiple = FALSE
+ *   multiple = FALSE,
+ *   property_type = "text",
+ *   tree_parent = {},
+ *   tree_depth = -1,
  * )
  */
-class SchemaWebPageTranslationOfWork extends SchemaIdReferenceBase {
+class SchemaWebPageTranslationOfWork extends SchemaNameBase {
 
 }

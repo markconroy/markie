@@ -2,7 +2,7 @@
 
 namespace Drupal\schema_article\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaRatingBase;
+use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
 
 /**
  * Provides a plugin for the 'schema_article_aggregate_rating' meta tag.
@@ -20,9 +20,14 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaRatingBase;
  *   weight = 11,
  *   type = "string",
  *   secure = FALSE,
- *   multiple = TRUE
+ *   multiple = TRUE,
+ *   property_type = "aggregate_rating",
+ *   tree_parent = {
+ *     "AggregateRating",
+ *   },
+ *   tree_depth = 0,
  * )
  */
-class SchemaArticleAggregateRating extends SchemaRatingBase {
+class SchemaArticleAggregateRating extends SchemaNameBase {
 
 }

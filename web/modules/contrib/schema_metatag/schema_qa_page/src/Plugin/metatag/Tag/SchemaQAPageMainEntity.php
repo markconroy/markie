@@ -2,7 +2,7 @@
 
 namespace Drupal\schema_qa_page\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaQuestionBase;
+use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
 
 /**
  * Provides a plugin for the 'schema_qa_page' meta tag.
@@ -20,9 +20,12 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaQuestionBase;
  *   weight = 10,
  *   type = "string",
  *   secure = FALSE,
- *   multiple = TRUE
+ *   multiple = TRUE,
+ *   property_type = "url",
+ *   tree_parent = {},
+ *   tree_depth = -1,
  * )
  */
-class SchemaQAPageMainEntity extends SchemaQuestionBase {
-  // Nothing here yet. Just a placeholder class for a plugin.
+class SchemaQAPageMainEntity extends SchemaNameBase {
+
 }

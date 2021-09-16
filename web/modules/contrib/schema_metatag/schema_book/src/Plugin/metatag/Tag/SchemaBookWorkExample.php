@@ -2,7 +2,7 @@
 
 namespace Drupal\schema_book\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaCreativeWorkBase;
+use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
 
 /**
  * Provides a plugin for the 'schema_book_work_example' meta tag.
@@ -20,9 +20,14 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaCreativeWorkBase;
  *   weight = 10,
  *   type = "string",
  *   secure = FALSE,
- *   multiple = TRUE
+ *   multiple = TRUE,
+ *   property_type = "book",
+ *   tree_parent = {
+ *     "Book",
+ *   },
+ *   tree_depth = 0,
  * )
  */
-class SchemaBookWorkExample extends SchemaCreativeWorkBase {
+class SchemaBookWorkExample extends SchemaNameBase {
 
 }

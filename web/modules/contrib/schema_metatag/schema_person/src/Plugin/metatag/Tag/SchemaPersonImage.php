@@ -2,7 +2,7 @@
 
 namespace Drupal\schema_person\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaImageBase;
+use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
 
 /**
  * Provides a plugin for the 'schema_person_image' meta tag.
@@ -20,18 +20,14 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaImageBase;
  *   weight = 1,
  *   type = "image",
  *   secure = FALSE,
- *   multiple = FALSE
+ *   multiple = FALSE,
+ *   property_type = "image_object",
+ *   tree_parent = {
+ *     "ImageObject",
+ *   },
+ *   tree_depth = 0,
  * )
  */
-class SchemaPersonImage extends SchemaImageBase {
-
-  /**
-   * Generate a form element for this meta tag.
-   */
-  public function form(array $element = []) {
-    $form = parent::form($element);
-    $form['#attributes']['placeholder'] = '[node:field_image:url]';
-    return $form;
-  }
+class SchemaPersonImage extends SchemaNameBase {
 
 }

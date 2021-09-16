@@ -2,7 +2,7 @@
 
 namespace Drupal\schema_organization\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaContactPointBase;
+use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
 
 /**
  * Provides a plugin for the 'schema_organization_contact_point' meta tag.
@@ -22,10 +22,14 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaContactPointBase;
  *   weight = 1.2,
  *   type = "string",
  *   secure = FALSE,
- *   multiple = TRUE
+ *   multiple = TRUE,
+ *   property_type = "contact_point",
+ *   tree_parent = {
+ *     "ContactPoint",
+ *   },
+ *   tree_depth = 0,
  * )
  */
-class SchemaOrganizationContactPoint extends SchemaContactPointBase {
+class SchemaOrganizationContactPoint extends SchemaNameBase {
 
-  // Nothing here yet. Just a placeholder class for a plugin.
 }

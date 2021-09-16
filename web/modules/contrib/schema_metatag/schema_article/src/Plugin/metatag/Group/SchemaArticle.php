@@ -14,7 +14,7 @@ use Drupal\schema_metatag\Plugin\metatag\Group\SchemaGroupBase;
  *     ":url" = "https://schema.org/Article",
  *     ":url2" = "https://developers.google.com/search/docs/data-types/article",
  *   }),
- *   weight = 10,
+ *   weight = 10
  * )
  */
 class SchemaArticle extends SchemaGroupBase {

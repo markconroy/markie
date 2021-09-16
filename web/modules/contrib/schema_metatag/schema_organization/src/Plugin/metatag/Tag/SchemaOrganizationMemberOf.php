@@ -2,7 +2,7 @@
 
 namespace Drupal\schema_organization\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaProgramMembershipBase;
+use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
 
 /**
  * Provides a plugin for the 'schema_organization_member_of' meta tag.
@@ -20,9 +20,14 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaProgramMembershipBase;
  *   weight = 10,
  *   type = "string",
  *   secure = FALSE,
- *   multiple = TRUE
+ *   multiple = TRUE,
+ *   property_type = "program_membership",
+ *   tree_parent = {
+ *     "ProgramMembership",
+ *   },
+ *   tree_depth = 0,
  * )
  */
-class SchemaOrganizationMemberOf extends SchemaProgramMembershipBase {
+class SchemaOrganizationMemberOf extends SchemaNameBase {
 
 }

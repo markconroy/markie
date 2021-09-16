@@ -2,7 +2,7 @@
 
 namespace Drupal\schema_course\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaPersonOrgBase;
+use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
 
 /**
  * Provides a plugin for the 'schema_course_provider' meta tag.
@@ -20,9 +20,14 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaPersonOrgBase;
  *   weight = -35,
  *   type = "string",
  *   secure = FALSE,
- *   multiple = TRUE
+ *   multiple = TRUE,
+ *   property_type = "organization",
+ *   tree_parent = {
+ *     "Organization",
+ *   },
+ *   tree_depth = 2,
  * )
  */
-class SchemaCourseProvider extends SchemaPersonOrgBase {
+class SchemaCourseProvider extends SchemaNameBase {
 
 }

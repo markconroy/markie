@@ -2,7 +2,7 @@
 
 namespace Drupal\schema_review\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaRatingBase;
+use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
 
 /**
  * Provides a plugin for the 'schema_review_review_rating' meta tag.
@@ -20,9 +20,14 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaRatingBase;
  *   weight = 11,
  *   type = "string",
  *   secure = FALSE,
- *   multiple = TRUE
+ *   multiple = TRUE,
+ *   property_type = "rating",
+ *   tree_parent = {
+ *     "Rating",
+ *   },
+ *   tree_depth = 0,
  * )
  */
-class SchemaReviewReviewRating extends SchemaRatingBase {
+class SchemaReviewReviewRating extends SchemaNameBase {
 
 }

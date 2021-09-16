@@ -2,7 +2,7 @@
 
 namespace Drupal\schema_image_object\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaTypeBase;
+use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
 
 /**
  * Provides a plugin for the 'type' meta tag.
@@ -20,18 +20,14 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaTypeBase;
  *   weight = -10,
  *   type = "string",
  *   secure = FALSE,
- *   multiple = FALSE
+ *   multiple = FALSE,
+ *   property_type = "type",
+ *   tree_parent = {
+ *     "ImageObject",
+ *   },
+ *   tree_depth = -1,
  * )
  */
-class SchemaImageObjectType extends SchemaTypeBase {
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function labels() {
-    return [
-      'ImageObject',
-    ];
-  }
+class SchemaImageObjectType extends SchemaNameBase {
 
 }

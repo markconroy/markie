@@ -2,7 +2,7 @@
 
 namespace Drupal\schema_product\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaOfferBase;
+use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
 
 /**
  * Provides a plugin for the 'offers' meta tag.
@@ -20,9 +20,12 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaOfferBase;
  *   weight = 6,
  *   type = "string",
  *   secure = FALSE,
- *   multiple = TRUE
+ *   multiple = TRUE,
+ *   property_type = "offer",
+ *   tree_parent = {},
+ *   tree_depth = 0,
  * )
  */
-class SchemaProductOffers extends SchemaOfferBase {
+class SchemaProductOffers extends SchemaNameBase {
 
 }

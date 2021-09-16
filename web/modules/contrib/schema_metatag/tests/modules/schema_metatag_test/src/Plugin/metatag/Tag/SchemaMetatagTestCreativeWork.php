@@ -2,7 +2,7 @@
 
 namespace Drupal\schema_metatag_test\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaCreativeWorkBase;
+use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
 
 /**
  * A metatag tag for testing.
@@ -16,8 +16,14 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaCreativeWorkBase;
  *   weight = 0,
  *   type = "label",
  *   secure = FALSE,
- *   multiple = FALSE
+ *   multiple = FALSE,
+ *   property_type = "creative_work",
+ *   tree_parent = {
+ *     "CreativeWork",
+ *   },
+ *   tree_depth = 2,
  * )
  */
-class SchemaMetatagTestCreativeWork extends SchemaCreativeWorkBase {
+class SchemaMetatagTestCreativeWork extends SchemaNameBase {
+
 }

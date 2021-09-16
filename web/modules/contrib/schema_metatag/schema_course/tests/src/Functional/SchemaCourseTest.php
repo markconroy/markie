@@ -25,19 +25,6 @@ class SchemaCourseTest extends SchemaMetatagTagsTestBase {
   /**
    * {@inheritdoc}
    */
-  public $schemaTagsNamespace = '\\Drupal\\schema_course\\Plugin\\metatag\\Tag\\';
-
-  /**
-   * {@inheritdoc}
-   */
-  public $schemaTags = [
-    'schema_course_course_code' => 'SchemaCourseCourseCode',
-    'schema_course_course_prerequisites' => 'SchemaCourseCoursePrerequisites',
-    'schema_course_description' => 'SchemaCourseDescription',
-    'schema_course_educational_credential_awarded' => 'SchemaCourseEducationalCredentialAwarded',
-    'schema_course_name' => 'SchemaCourseName',
-    'schema_course_provider' => 'SchemaCourseProvider',
-    'schema_course_type' => 'SchemaCourseType',
-  ];
+  public $groupName = 'schema_course';
 
 }

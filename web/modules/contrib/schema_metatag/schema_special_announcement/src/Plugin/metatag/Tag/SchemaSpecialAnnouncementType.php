@@ -2,7 +2,7 @@
 
 namespace Drupal\schema_special_announcement\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaTypeBase;
+use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
 
 /**
  * Provides a plugin for the 'schema_special_announcement_type' meta tag.
@@ -20,16 +20,14 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaTypeBase;
  *   weight = -10,
  *   type = "string",
  *   secure = FALSE,
- *   multiple = FALSE
+ *   multiple = FALSE,
+ *   property_type = "type",
+ *   tree_parent = {
+ *     "SpecialAnnouncement",
+ *   },
+ *   tree_depth = -1,
  * )
  */
-class SchemaSpecialAnnouncementType extends SchemaTypeBase {
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function labels() {
-    return ['SpecialAnnouncement'];
-  }
+class SchemaSpecialAnnouncementType extends SchemaNameBase {
 
 }

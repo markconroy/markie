@@ -2,7 +2,7 @@
 
 namespace Drupal\schema_movie\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaCreativeWorkBase;
+use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
 
 /**
  * Provides a plugin for the 'partOfSeason' meta tag.
@@ -20,10 +20,14 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaCreativeWorkBase;
  *   weight = 10,
  *   type = "string",
  *   secure = FALSE,
- *   multiple = FALSE
+ *   multiple = FALSE,
+ *   property_type = "creative_work_season",
+ *   tree_parent = {
+ *     "CreativeWorkSeason",
+ *   },
+ *   tree_depth = -1,
  * )
  */
-class SchemaMoviePartOfSeason extends SchemaCreativeWorkBase {
-
+class SchemaMoviePartOfSeason extends SchemaNameBase {
 
 }

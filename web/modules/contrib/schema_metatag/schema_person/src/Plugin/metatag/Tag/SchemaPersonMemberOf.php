@@ -2,7 +2,7 @@
 
 namespace Drupal\schema_person\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaProgramMembershipBase;
+use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
 
 /**
  * Provides a plugin for the 'schema_person_member_of' meta tag.
@@ -20,10 +20,14 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaProgramMembershipBase;
  *   weight = 11,
  *   type = "string",
  *   secure = FALSE,
- *   multiple = FALSE
+ *   multiple = FALSE,
+ *   property_type = "program_membership",
+ *   tree_parent = {
+ *     "ProgramMembership",
+ *   },
+ *   tree_depth = 0,
  * )
  */
-class SchemaPersonMemberOf extends SchemaProgramMembershipBase {
-
+class SchemaPersonMemberOf extends SchemaNameBase {
 
 }

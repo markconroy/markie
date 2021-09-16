@@ -2,8 +2,7 @@
 
 namespace Drupal\schema_web_site\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaActionBase;
-use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaEntryPointBase;
+use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
 
 /**
  * Provides a plugin for the 'schema_web_site_potential_action' meta tag.
@@ -21,20 +20,14 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaEntryPointBase;
  *   weight = 5,
  *   type = "string",
  *   secure = FALSE,
- *   multiple = TRUE
+ *   multiple = TRUE,
+ *   property_type = "action",
+ *   tree_parent = {
+ *     "SearchAction",
+ *   },
+ *   tree_depth = 0,
  * )
  */
-class SchemaWebSitePotentialAction extends SchemaActionBase {
-
-  /**
-   * Generate a form element for this meta tag.
-   */
-  public function form(array $element = []) {
-
-    $this->actions = ['Action', 'SearchAction'];
-
-    $form = parent::form($element);
-    return $form;
-  }
+class SchemaWebSitePotentialAction extends SchemaNameBase {
 
 }

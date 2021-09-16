@@ -2,7 +2,7 @@
 
 namespace Drupal\schema_how_to\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaImageBase;
+use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
 
 /**
  * Provides a plugin for the 'schema_how_to_image' meta tag.
@@ -20,9 +20,14 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaImageBase;
  *   weight = 10,
  *   type = "string",
  *   secure = FALSE,
- *   multiple = FALSE
+ *   multiple = FALSE,
+ *   property_type = "image_object",
+ *   tree_parent = {
+ *     "ImageObject",
+ *   },
+ *   tree_depth = 0,
  * )
  */
-class SchemaHowToImage extends SchemaImageBase {
-  // Nothing here yet. Just a placeholder class for a plugin.
+class SchemaHowToImage extends SchemaNameBase {
+
 }

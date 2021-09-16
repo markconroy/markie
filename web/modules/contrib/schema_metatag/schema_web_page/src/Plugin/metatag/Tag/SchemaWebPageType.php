@@ -2,7 +2,7 @@
 
 namespace Drupal\schema_web_page\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaTypeBase;
+use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
 
 /**
  * Provides a plugin for the 'schema_web_page_type' meta tag.
@@ -20,27 +20,14 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaTypeBase;
  *   weight = -10,
  *   type = "string",
  *   secure = FALSE,
- *   multiple = FALSE
+ *   multiple = FALSE,
+ *   property_type = "type",
+ *   tree_parent = {
+ *     "WebPage",
+ *   },
+ *   tree_depth = -1,
  * )
  */
-class SchemaWebPageType extends SchemaTypeBase {
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function labels() {
-    return [
-      'WebPage',
-      'ItemPage',
-      'AboutPage',
-      'CheckoutPage',
-      'ContactPage',
-      'CollectionPage',
-      '- ImageGallery',
-      '- VideoGallery',
-      'ProfilePage',
-      'SearchResultsPage',
-    ];
-  }
+class SchemaWebPageType extends SchemaNameBase {
 
 }

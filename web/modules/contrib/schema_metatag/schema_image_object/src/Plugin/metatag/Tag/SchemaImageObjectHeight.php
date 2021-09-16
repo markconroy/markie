@@ -20,9 +20,12 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
  *   weight = 5,
  *   type = "string",
  *   secure = FALSE,
- *   multiple = TRUE
+ *   multiple = TRUE,
+ *   property_type = "number",
+ *   tree_parent = {},
+ *   tree_depth = -1,
  * )
  */
 class SchemaImageObjectHeight extends SchemaNameBase {
-  // Nothing here yet. Just a placeholder class for a plugin.
+
 }

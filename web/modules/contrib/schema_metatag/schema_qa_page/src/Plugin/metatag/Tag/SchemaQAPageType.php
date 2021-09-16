@@ -2,7 +2,7 @@
 
 namespace Drupal\schema_qa_page\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaTypeBase;
+use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
 
 /**
  * Provides a plugin for the 'schema_qa_page_type' meta tag.
@@ -20,16 +20,15 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaTypeBase;
  *   weight = -10,
  *   type = "string",
  *   secure = FALSE,
- *   multiple = FALSE
+ *   multiple = FALSE,
+ *   property_type = "type",
+ *   tree_parent = {
+ *     "QAPage",
+ *     "FAQPage",
+ *   },
+ *   tree_depth = -1,
  * )
  */
-class SchemaQAPageType extends SchemaTypeBase {
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function labels() {
-    return ['QAPage', 'FAQPage'];
-  }
+class SchemaQAPageType extends SchemaNameBase {
 
 }

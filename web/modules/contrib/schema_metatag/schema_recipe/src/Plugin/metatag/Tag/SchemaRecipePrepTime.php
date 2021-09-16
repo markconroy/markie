@@ -2,7 +2,7 @@
 
 namespace Drupal\schema_recipe\Plugin\metatag\Tag;
 
-use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaDurationBase;
+use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaNameBase;
 
 /**
  * Provides a plugin for the 'prepTime' meta tag.
@@ -20,9 +20,12 @@ use Drupal\schema_metatag\Plugin\metatag\Tag\SchemaDurationBase;
  *   weight = 3,
  *   type = "string",
  *   secure = FALSE,
- *   multiple = FALSE
+ *   multiple = FALSE,
+ *   property_type = "duration",
+ *   tree_parent = {},
+ *   tree_depth = -1,
  * )
  */
-class SchemaRecipePrepTime extends SchemaDurationBase {
+class SchemaRecipePrepTime extends SchemaNameBase {
 
 }
