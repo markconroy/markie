@@ -4,7 +4,8 @@
 }
 
 #admin-toolbar-search-input {
-  min-height: 1rem;
+  min-height: 30px;
+  height: 100%;
   padding: 0 0.4rem;
   line-height: 1.75rem;
   margin: 0;

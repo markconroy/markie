@@ -21,7 +21,7 @@ abstract class AdminToolbarSearchTestBase extends WebDriverTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     'admin_toolbar_search',
     'node',
     'media',
@@ -47,7 +47,7 @@ abstract class AdminToolbarSearchTestBase extends WebDriverTestBase {
   /**
    * {@inheritdoc}
    */
-  public function setUp() {
+  public function setUp(): void {
     parent::setUp();
 
     $baby_names = [
@@ -119,7 +119,7 @@ abstract class AdminToolbarSearchTestBase extends WebDriverTestBase {
       return ($page->find('css', 'ul.ui-autocomplete')->isVisible() === TRUE);
     });
     $suggestions_markup = $page->find('css', 'ul.ui-autocomplete')->getHtml();
-    $this->assertContains($contains, $suggestions_markup);
+    $this->assertStringContainsString($contains, $suggestions_markup);
   }
 
   /**

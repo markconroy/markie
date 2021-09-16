@@ -9,6 +9,6 @@ dependencies:
   - admin_toolbar:admin_toolbar
 
 # Information added by Drupal.org packaging script on 2021-08-25
-version: '8.x-2.5'
+version: '3.0.2'
 project: 'admin_toolbar'
-datestamp: 1629883385
+datestamp: 1629882676

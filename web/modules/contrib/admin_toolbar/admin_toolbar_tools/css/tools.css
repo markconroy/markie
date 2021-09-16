@@ -18,6 +18,7 @@
 }
 
 .toolbar-icon-8 .toolbar-icon-admin-toolbar-tools-help:before {
+  box-sizing: content-box;
   background-image: url(../misc/icons/ffffff/drupal-8-logo.svg);
   padding-bottom: 0;
   padding-left: 4px;

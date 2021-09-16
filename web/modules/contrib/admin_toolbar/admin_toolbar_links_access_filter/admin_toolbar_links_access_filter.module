@@ -58,8 +58,8 @@ function admin_toolbar_links_access_filter_preprocess_menu(&$variables) {
  * Hides links from admin menu, if user doesn't have access rights.
  */
 function admin_toolbar_links_access_filter_filter_non_accessible_links(array &$items) {
-  foreach ($items as $route => &$item) {
-    $route_name = $route;
+  foreach ($items as $menu_id => &$item) {
+    $route_name = NULL;
     $route_params = [];
     if (!empty($item['original_link'])) {
       /** @var \Drupal\Core\Menu\MenuLinkBase $original_link */
@@ -71,18 +71,28 @@ function admin_toolbar_links_access_filter_filter_non_accessible_links(array &$i
       $route_name = $original_link->getRouteName();
       $route_params = $original_link->getRouteParameters();
     }
+    elseif (!empty($item['url'])) {
+      /** @var \Drupal\Core\Url $url */
+      $url = $item['url'];
+      if ($url->isExternal()) {
+        // Do not filter external URL at all.
+        continue;
+      }
+      $route_name = $url->getRouteName();
+      $route_params = $url->getRouteParameters();
+    }
 
     // Check, if user has access rights to the route.
     if (!\Drupal::accessManager()
       ->checkNamedRoute($route_name, $route_params)) {
-      unset($items[$route]);
+      unset($items[$menu_id]);
     }
     else {
-      if (!empty($items[$route]['below'])) {
+      if (!empty($items[$menu_id]['below'])) {
         // Recursively call this function for the child items.
-        admin_toolbar_links_access_filter_filter_non_accessible_links($items[$route]['below']);
+        admin_toolbar_links_access_filter_filter_non_accessible_links($items[$menu_id]['below']);
       }
-      if (empty($items[$route]['below']) && \Drupal::moduleHandler()
+      if (empty($items[$menu_id]['below']) && \Drupal::moduleHandler()
         ->moduleExists('admin_toolbar')) {
 
         // Every child item has been cleared out.
@@ -91,12 +101,17 @@ function admin_toolbar_links_access_filter_filter_non_accessible_links(array &$i
         // unset this item, as there aren't any children left.
         // This assumption is only valid, when the admin_toolbar module is
         // installed because otherwise we won't have child items at all.
-        if (admin_toolbar_links_access_filter_is_overview_page($route)) {
-          unset($items[$route]);
+        if (admin_toolbar_links_access_filter_is_overview_page($route_name)) {
+          unset($items[$menu_id]);
+        }
+        // If there are no sub-items and the parent does not have a link, then
+        // it is safe to remove it.
+        elseif ($route_name === '<nolink>') {
+          unset($items[$menu_id]);
         }
         else {
           // Let's remove the expanded flag.
-          $items[$route]['is_expanded'] = FALSE;
+          $items[$menu_id]['is_expanded'] = FALSE;
         }
       }
     }

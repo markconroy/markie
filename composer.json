@@ -26,7 +26,7 @@
       "composer/installers": "^1.9",
       "cweagans/composer-patches": "^1.6",
       "drupal-composer/drupal-security-advisories": "8.x-dev",
-      "drupal/admin_toolbar": "^2.3",
+      "drupal/admin_toolbar": "^3.0",
       "drupal/codesnippet": "^1.7",
       "drupal/components": "^2.0",
       "drupal/console": "^1.0.1",

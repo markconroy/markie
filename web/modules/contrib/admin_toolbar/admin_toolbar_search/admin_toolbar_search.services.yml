@@ -7,3 +7,4 @@ services:
      - '@router.route_provider'
      - '@cache_contexts_manager'
      - '@cache.toolbar'
+     - '@config.factory'

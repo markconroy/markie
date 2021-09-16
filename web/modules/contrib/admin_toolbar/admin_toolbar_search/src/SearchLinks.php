@@ -2,10 +2,10 @@
 
 namespace Drupal\admin_toolbar_search;
 
-use Drupal\admin_toolbar_tools\Plugin\Derivative\ExtraLinks;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Cache\Context\CacheContextsManager;
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Language\LanguageInterface;
@@ -57,6 +57,13 @@ class SearchLinks {
   protected $toolbarCache;
 
   /**
+   * The admin toolbar tools configuration.
+   *
+   * @var \Drupal\Core\Config\Config
+   */
+  protected $config;
+
+  /**
    * Constructs a SearchLinks object.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
@@ -69,13 +76,16 @@ class SearchLinks {
    *   The cache contexts manager.
    * @param \Drupal\Core\Cache\CacheBackendInterface $toolbar_cache
    *   Cache backend instance to use.
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
+   *   Config factory mservice.
    */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager, ModuleHandlerInterface $module_handler, RouteProviderInterface $route_provider, CacheContextsManager $cache_context_manager, CacheBackendInterface $toolbar_cache) {
+  public function __construct(EntityTypeManagerInterface $entity_type_manager, ModuleHandlerInterface $module_handler, RouteProviderInterface $route_provider, CacheContextsManager $cache_context_manager, CacheBackendInterface $toolbar_cache, ConfigFactoryInterface $config_factory) {
     $this->entityTypeManager = $entity_type_manager;
     $this->moduleHandler = $module_handler;
     $this->routeProvider = $route_provider;
     $this->cacheContextManager = $cache_context_manager;
     $this->toolbarCache = $toolbar_cache;
+    $this->config = $config_factory->get('admin_toolbar_tools.settings');
   }
 
   /**
@@ -88,6 +98,7 @@ class SearchLinks {
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
   public function getLinks() {
+    $max_bundle_number = $this->config->get('max_bundle_number');
     $additional_keys = $this->cacheContextManager->convertTokensToKeys([
       'languages:' . LanguageInterface::TYPE_INTERFACE,
       'user.permissions',
@@ -107,9 +118,9 @@ class SearchLinks {
     foreach ($content_entities as $entities) {
       $content_entity_bundle = $entities['content_entity_bundle'];
       $content_entity = $entities['content_entity'];
-      // Start at offset 10, since the toolbar has already loaded the first 10.
+      // Load the remaining items that were not loaded by the toolbar.
       $content_entity_bundle_storage = $this->entityTypeManager->getStorage($content_entity_bundle);
-      $bundles_ids = $content_entity_bundle_storage->getQuery()->range(ExtraLinks::MAX_BUNDLE_NUMBER)->execute();
+      $bundles_ids = $content_entity_bundle_storage->getQuery()->range($max_bundle_number)->execute();
       if (!empty($bundles_ids)) {
         $bundles = $this->entityTypeManager
           ->getStorage($content_entity_bundle)
@@ -206,7 +217,7 @@ class SearchLinks {
 
       $menus = $this->entityTypeManager->getStorage('menu')->loadMultiple();
       uasort($menus, [Menu::class, 'sort']);
-      $menus = array_slice($menus, ExtraLinks::MAX_BUNDLE_NUMBER);
+      $menus = array_slice($menus, $max_bundle_number);
 
       $cache_tags = Cache::mergeTags($cache_tags, ['config:menu_list']);
       foreach ($menus as $menu_id => $menu) {
