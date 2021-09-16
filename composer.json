@@ -38,7 +38,6 @@
       "drupal/devel": "^2.1",
       "drupal/disable_html5_validation": "^1.1",
       "drupal/entity": "^1.0.0",
-      "drupal/google_analytics": "^2.3",
       "drupal/image_widget_crop": "^2.3",
       "drupal/inline_entity_form": "^1.0",
       "drupal/media_entity_generic": "^1.0",
