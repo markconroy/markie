@@ -8,7 +8,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
 /**
- * Class AdminToolbarSearchController.
+ * Class AdminToolbarSearchController to the search functionality.
  *
  * @package Drupal\admin_toolbar_tools\Controller
  */

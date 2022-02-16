@@ -240,7 +240,7 @@ class SearchLinks {
           $url_string = $url->toString();
 
           $links[] = [
-            'labelRaw' => $this->t('Menus > @menu_label > ', ['@menu_label' => $menu->label()]) . $this->t('Add link'),
+            'labelRaw' => $this->t('Menus > @menu_label > Add link', ['@menu_label' => $menu->label()]),
             'value' => $url_string,
           ];
         }
@@ -255,7 +255,7 @@ class SearchLinks {
             $url_string = $url->toString();
 
             $links[] = [
-              'labelRaw' => $this->t('Menus > @menu_label > ', ['@menu_label' => $menu->label()]) . $this->t('Delete'),
+              'labelRaw' => $this->t('Menus > @menu_label > Delete', ['@menu_label' => $menu->label()]),
               'value' => $url_string,
             ];
           }
@@ -268,7 +268,7 @@ class SearchLinks {
             $url_string = $url->toString();
 
             $links[] = [
-              'labelRaw' => $this->t('Menus > @menu_label > ', ['@menu_label' => $menu->label()]) . $this->t('Devel'),
+              'labelRaw' => $this->t('Menus > @menu_label > Devel', ['@menu_label' => $menu->label()]),
               'value' => $url_string,
             ];
           }

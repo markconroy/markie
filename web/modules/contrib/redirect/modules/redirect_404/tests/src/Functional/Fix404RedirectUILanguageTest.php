@@ -95,8 +95,8 @@ class Fix404RedirectUILanguageTest extends Redirect404TestBase {
       'source' => 'testing',
     ];
     $parsed_url = UrlHelper::parse($this->getUrl());
-    $this->assertEqual(Url::fromRoute('redirect.add')->setAbsolute()->toString(), $parsed_url['path']);
-    $this->assertEqual($expected_query, $parsed_url['query']);
+    $this->assertEquals($parsed_url['path'], Url::fromRoute('redirect.add')->setAbsolute()->toString());
+    $this->assertEquals($parsed_url['query'], $expected_query);
     $this->assertFieldByName('redirect_source[0][path]', 'testing');
     $this->assertOptionSelected('edit-language-0-value', 'fr');
     // Save the redirect.
@@ -184,8 +184,8 @@ class Fix404RedirectUILanguageTest extends Redirect404TestBase {
       'source' => 'testing1',
     ];
     $parsed_url = UrlHelper::parse($this->getUrl());
-    $this->assertEqual(Url::fromRoute('redirect.add')->setAbsolute()->toString(), $parsed_url['path']);
-    $this->assertEqual($expected_query, $parsed_url['query']);
+    $this->assertEquals($parsed_url['path'], Url::fromRoute('redirect.add')->setAbsolute()->toString());
+    $this->assertEquals($parsed_url['query'], $expected_query);
     $this->assertFieldByName('redirect_source[0][path]', 'testing1');
     $this->assertOptionSelected('edit-language-0-value', 'en');
     $edit = ['redirect_redirect[0][uri]' => '/node'];

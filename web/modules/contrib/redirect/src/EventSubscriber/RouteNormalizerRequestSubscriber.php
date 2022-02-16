@@ -123,8 +123,7 @@ class RouteNormalizerRequestSubscriber implements EventSubscriberInterface {
 
       $original_uri = $request->getSchemeAndHttpHost() . $request->getRequestUri();
       $original_uri = urldecode($original_uri);
-      $redirect_uri = urldecode($redirect_uri);
-      if ($redirect_uri != $original_uri) {
+      if (urldecode($redirect_uri) != $original_uri) {
         $response = new TrustedRedirectResponse($redirect_uri, $this->config->get('default_status_code'));
         $response->headers->set('X-Drupal-Route-Normalizer', 1);
         $event->setResponse($response);

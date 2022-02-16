@@ -10,7 +10,7 @@ use Drupal\Core\Menu\MenuLinkManagerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Class AdminToolbarToolsSettingsForm.
+ * Settings form for AdminToobar Tools.
  *
  * @package Drupal\admin_toolbar_tools\Form
  */

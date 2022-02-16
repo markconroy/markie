@@ -98,7 +98,8 @@ class RouteNormalizerRequestSubscriberTest extends UnitTestCase {
     return [
       ['https://example.com/route-to-normalize', [], 'https://example.com/route-to-normalize', FALSE],
       ['https://example.com/route-to-normalize', ['key' => 'value'], 'https://example.com/route-to-normalize?key=value', FALSE],
-      ['https://example.com/index.php/', ['q' => 'node/1'], 'https://example.com/?q=node/1', TRUE],
+      ['https://example.com/index.php/', ['q' => 'node/1'], 'https://example.com/?q=node%2F1', TRUE],
+      ['https://example.com/index.php/', ['q' => 'node/1', 'p' => 'a+b'], 'https://example.com/?q=node%2F1&p=a%2Bb', TRUE],
     ];
   }
 

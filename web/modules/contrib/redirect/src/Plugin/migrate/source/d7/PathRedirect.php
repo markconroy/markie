@@ -36,15 +36,14 @@ class PathRedirect extends DrupalSqlBase {
   public function prepareRow(Row $row) {
     static $default_status_code;
     if (!isset($default_status_code)) {
-      $default_status_code = unserialize($this->getDatabase()
-        ->select('variable', 'v')
-        ->fields('v', ['value'])
-        ->condition('name', 'redirect_default_status_code')
-        ->execute()
-        ->fetchField());
+      // The default status code not necessarily saved to the source database.
+      // In this case, redirects should get the default value from the Drupal 7
+      // version's variable_get() calls, which is 301.
+      // @see https://git.drupalcode.org/project/redirect/-/blob/7f9531d08/redirect.admin.inc#L16
+      $default_status_code = $this->variableGet('redirect_default_status_code', 301);
     }
     $current_status_code = $row->getSourceProperty('status_code');
-    $status_code = $current_status_code != 0 ? $current_status_code : $default_status_code;
+    $status_code = !empty($current_status_code) ? $current_status_code : $default_status_code;
     $row->setSourceProperty('status_code', $status_code);
     return parent::prepareRow($row);
   }

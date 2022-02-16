@@ -85,6 +85,11 @@ class Redirect extends ContentEntityBase {
    * {@inheritdoc}
    */
   public function preSave(EntityStorageInterface $storage_controller) {
+    // Strip any trailing slashes as these are removed when looking for matching
+    // redirects.
+    // @see \Drupal\redirect\EventSubscriber\RedirectRequestSubscriber::onKernelRequestCheckRedirect()
+    $this->redirect_source->path = rtrim($this->redirect_source->path, '/');
+
     // Get the language code directly from the field as language() might not
     // be up to date if the language was just changed.
     $this->set('hash', Redirect::generateHash($this->redirect_source->path, (array) $this->redirect_source->query, $this->get('language')->value));
@@ -207,7 +212,7 @@ class Redirect extends ContentEntityBase {
   public function setRedirect($url, array $query = [], array $options = []) {
     $uri = $url . ($query ? '?' . UrlHelper::buildQuery($query) : '');
     $external = UrlHelper::isValid($url, TRUE);
-    $uri = ($external ? $url : 'internal:/' . ltrim($uri, '/'));
+    $uri = ($external ? $uri : 'internal:/' . ltrim($uri, '/'));
     $this->redirect_redirect->set(0, ['uri' => $uri, 'options' => $options]);
   }
 

@@ -20,13 +20,6 @@ class MetatagNoIndexTest extends KernelTestBase {
   use UserCreationTrait;
 
   /**
-   * The xmlsitemap link storage handler.
-   *
-   * @var \Drupal\xmlsitemap\XmlSitemapLinkStorageInterface
-   */
-  protected $linkStorage;
-
-  /**
    * The account object.
    *
    * @var \Drupal\user\UserInterface
@@ -36,7 +29,7 @@ class MetatagNoIndexTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     'field',
     'user',
     'token',
@@ -46,12 +39,12 @@ class MetatagNoIndexTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
-    $this->installConfig(['system', 'user', 'field', 'metatag']);
-    $this->installEntitySchema('user');
     $this->installSchema('system', ['sequences']);
+    $this->installEntitySchema('user');
+    $this->installConfig(['system', 'user', 'field', 'metatag']);
 
     // Allow anonymous user to view user profiles.
     $role = Role::load(AccountInterface::ANONYMOUS_ROLE);
@@ -78,12 +71,10 @@ class MetatagNoIndexTest extends KernelTestBase {
       'bundle' => 'user',
     ])->save();
 
-    $this->linkStorage = $this->container->get('xmlsitemap.link_storage');
     $this->account = $this->createUser();
 
     // Test that the user is visible in the sitemap by default.
-    $link = $this->linkStorage->load('user', $this->account->id());
-    $this->assertTrue($link['access'] && $link['status']);
+    $this->assertEntityVisibleInSitemap($this->account);
   }
 
   /**
@@ -95,17 +86,15 @@ class MetatagNoIndexTest extends KernelTestBase {
     $this->account->save();
 
     // Test that the user is not visible in the sitemap now.
-    $link = $this->linkStorage->load('user', $this->account->id());
-    $this->assertFalse($link['access'] && $link['status']);
+    $this->assertEntityNotVisibleInSitemap($this->account);
 
     // Disable the metatag noindex configuration.
-    $this->config('xmlsitemap.settings')->set('metatag_exclude_noindex', FALSE)->save(TRUE);
+    $this->config('xmlsitemap.settings')->set('metatag_exclude_noindex', FALSE)->save();
     drupal_static_reset('metatag_xmlsitemap_link_alter');
 
     // Test that the user is visible in the sitemap again.
     $this->account->save();
-    $link = $this->linkStorage->load('user', $this->account->id());
-    $this->assertTrue($link['access'] && $link['status']);
+    $this->assertEntityVisibleInSitemap($this->account);
   }
 
   /**
@@ -119,8 +108,7 @@ class MetatagNoIndexTest extends KernelTestBase {
 
     // Test that this hasn't changed the link availability.
     $this->account->save();
-    $link = $this->linkStorage->load('user', $this->account->id());
-    $this->assertTrue($link['access'] && $link['status']);
+    $this->assertEntityVisibleInSitemap($this->account);
   }
 
 }

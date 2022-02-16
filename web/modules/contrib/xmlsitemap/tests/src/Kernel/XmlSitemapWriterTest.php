@@ -19,7 +19,7 @@ class XmlSitemapWriterTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public function setUp() {
+  protected function setUp(): void {
     parent::setUp();
     $this->sitemap = XmlSitemap::create();
   }

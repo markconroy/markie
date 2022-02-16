@@ -29,5 +29,5 @@
 }
 
 .ui-autocomplete .ui-menu-item span.admin-toolbar-search-url {
-  color: rgba(0, 0, 0, 0.5);
+  display: none;
 }

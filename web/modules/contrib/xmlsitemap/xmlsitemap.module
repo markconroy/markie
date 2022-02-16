@@ -21,6 +21,8 @@ use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\ContentEntityTypeInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Entity\RevisionableInterface;
+use Drupal\Core\Entity\TranslatableInterface;
 use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Language\LanguageInterface;
@@ -1671,19 +1673,26 @@ function xmlsitemap_xmlsitemap_process_entity_links($entity_type_id, array $enti
  *
  * @param \Drupal\Core\Entity\EntityInterface $entity
  *   The entity object.
+ * @param bool $process_translations
+ *   If TRUE will also process all the translations on the entity. FALSE will
+ *   skip the translations and just process the entity itself.
  */
-function xmlsitemap_xmlsitemap_process_entity_link(EntityInterface $entity) {
+function xmlsitemap_xmlsitemap_process_entity_link(EntityInterface $entity, bool $process_translations = TRUE) {
+  // Ignore any non-default revision entity data (for example, unpublished
+  // future revisions of existing published content).
+  if ($entity instanceof RevisionableInterface && !$entity->isDefaultRevision()) {
+    return;
+  }
+
   /** @var \Drupal\xmlsitemap\XmlSitemapLinkStorageInterface $link_storage */
   $link_storage = \Drupal::service('xmlsitemap.link_storage');
 
-  if ($entity instanceof ContentEntityInterface) {
+  if ($process_translations && $entity instanceof TranslatableInterface) {
     // Generate an entry for each translation.
     $translation_languages = $entity->getTranslationLanguages();
     foreach ($translation_languages as $langcode => $language) {
       $translation = $entity->getTranslation($langcode);
-      $link = $link_storage->create($translation);
-      $context = [$link['type'] => $entity, 'entity' => $entity];
-      $link_storage->save($link, $context);
+      xmlsitemap_xmlsitemap_process_entity_link($translation, FALSE);
     }
 
     // Check if there are any removed language translations.

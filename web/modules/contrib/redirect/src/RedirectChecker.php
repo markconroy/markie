@@ -80,7 +80,7 @@ class RedirectChecker {
       // Do not redirect if this is other than GET request.
       $can_redirect = FALSE;
     }
-    elseif ($this->state->get('system.maintenance_mode') || defined('MAINTENANCE_MODE')) {
+    elseif (!$this->account->hasPermission('access site in maintenance mode') && ($this->state->get('system.maintenance_mode') || defined('MAINTENANCE_MODE'))) {
       // Do not redirect in offline or maintenance mode.
       $can_redirect = FALSE;
     }

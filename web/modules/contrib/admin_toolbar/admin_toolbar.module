@@ -14,12 +14,14 @@ use Drupal\Component\Utility\Html;
  * Implements hook_toolbar_alter().
  */
 function admin_toolbar_toolbar_alter(&$items) {
-  $items['administration']['tray']['toolbar_administration']['#pre_render'] = [[AdminToolbar::class, 'preRenderTray']];
+  $items['administration']['tray']['toolbar_administration']['#pre_render'] = [
+    [AdminToolbar::class, 'preRenderTray'],
+  ];
   $items['administration']['#attached']['library'][] = 'admin_toolbar/toolbar.tree';
   $hoverintent_functionality = \Drupal::config('admin_toolbar_tools.settings')->get('hoverintent_functionality');
   if ($hoverintent_functionality === TRUE) {
-  // Use jQuery hover() effect.
-  $items['administration']['#attached']['library'][] = 'admin_toolbar/toolbar.tree.hoverintent';
+    // Use jQuery hover() effect.
+    $items['administration']['#attached']['library'][] = 'admin_toolbar/toolbar.tree.hoverintent';
   }
   else {
     // User hoverIntent plugin.

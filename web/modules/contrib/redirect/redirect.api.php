@@ -5,6 +5,8 @@
  * Hooks provided by the Redirect module.
  */
 
+use Drupal\Core\Routing\TrustedRedirectResponse;
+
 /**
  * @defgroup redirect_api_hooks Redirect API Hooks
  * @{
@@ -52,6 +54,31 @@
  * @addtogroup hooks
  * @{
  */
+
+/**
+ * Act on a redirect response when it is triggered.
+ *
+ * This hook is invoked before the response is sent to the user. The redirect
+ * entity itself is sent as well for inspection.
+ *
+ * @param Drupal\Core\Routing\TrustedRedirectResponse $response
+ *   The generated redirect response object before it is delivered.
+ * @param \Drupal\redirect\Entity\Redirect $redirect
+ *   The redirect entity used to generate the response object.
+ *
+ * @ingroup redirect_api_hooks
+ */
+function hook_redirect_response_alter(TrustedRedirectResponse $response, \Drupal\redirect\Entity\Redirect $redirect) {
+  // Set a drupal message.
+  if (!$redirect->getRedirectUrl()->isExternal()) {
+    \Drupal::messenger()->addWarning(t('You are not being directed off-site.'));
+  }
+
+  // If `some condition`, send to Drupal.org.
+  if (FALSE) {
+    $response->setTrustedTargetUrl('http://drupal.org');
+  }
+}
 
 /**
  * Act on redirects being loaded from the database.
@@ -119,22 +146,6 @@ function hook_redirect_load_by_source_alter(array &$redirects, $source, array $c
  */
 function hook_redirect_prepare($redirect) {
 
-}
-
-/**
- * Act on a redirect being redirected.
- *
- * This hook is invoked from redirect_redirect() before the redirect callback
- * is invoked.
- *
- * @param $redirect
- *   The redirect that is being used for the redirect.
- *
- * @see redirect_redirect()
- * @see drupal_page_is_cacheable()
- * @ingroup redirect_api_hooks
- */
-function hook_redirect_alter($redirect) {
 }
 
 /**

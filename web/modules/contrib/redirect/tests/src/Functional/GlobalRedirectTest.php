@@ -2,7 +2,6 @@
 
 namespace Drupal\Tests\redirect\Functional;
 
-use Behat\Mink\Driver\GoutteDriver;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Language\Language;
 use Drupal\language\Entity\ConfigurableLanguage;
@@ -74,15 +73,10 @@ class GlobalRedirectTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  protected $minkDefaultDriverClass = GoutteDriver::class;
-
-  /**
-   * {@inheritdoc}
-   */
   protected function initMink() {
     $session = parent::initMink();
 
-    /** @var \Behat\Mink\Driver\GoutteDriver $driver */
+    /** @var \Behat\Mink\Driver\BrowserKitDriver $driver */
     $driver = $session->getDriver();
     // Since we are testing low-level redirect stuff, the HTTP client should
     // NOT automatically follow redirects sent by the server.
@@ -193,7 +187,7 @@ class GlobalRedirectTest extends BrowserTestBase {
     // Test a POST request. It should stay on the same path and not try to
     // redirect. Because Mink does not provide methods to do plain POSTs, we
     // need to use the underlying Guzzle HTTP client directly.
-    /** @var \Behat\Mink\Driver\GoutteDriver $driver */
+    /** @var \Behat\Mink\Driver\BrowserKitDriver $driver */
     $driver = $this->getSession()->getDriver();
     $response = $driver->getClient()
       ->getClient()

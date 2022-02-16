@@ -56,7 +56,7 @@ trait AssertRedirectTrait {
       $expected_ending_url = NULL;
     }
 
-    $this->assertEqual($expected_ending_url, $ending_url, $message);
+    $this->assertEquals($ending_url, $expected_ending_url, $message);
     return $response;
   }
 

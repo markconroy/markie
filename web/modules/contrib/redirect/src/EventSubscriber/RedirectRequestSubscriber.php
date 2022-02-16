@@ -122,7 +122,7 @@ class RedirectRequestSubscriber implements EventSubscriberInterface {
     }
 
     // Get URL info and process it to be used for hash generation.
-    parse_str($request->getQueryString(), $request_query);
+    $request_query = $request->query->all();
 
     if (strpos($request->getPathInfo(), '/system/files/') === 0 && !$request->query->has('file')) {
       // Private files paths are split by the inbound path processor and the
@@ -165,6 +165,10 @@ class RedirectRequestSubscriber implements EventSubscriberInterface {
       ];
       $response = new TrustedRedirectResponse($url->setAbsolute()->toString(), $redirect->getStatusCode(), $headers);
       $response->addCacheableDependency($redirect);
+
+      // Invoke hook_redirect_response_alter().
+      $this->moduleHandler->alter('redirect_response', $response, $redirect);
+
       $event->setResponse($response);
     }
   }

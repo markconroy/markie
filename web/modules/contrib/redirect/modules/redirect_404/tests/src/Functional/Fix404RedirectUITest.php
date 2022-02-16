@@ -33,8 +33,8 @@ class Fix404RedirectUITest extends Redirect404TestBase {
       'source' => 'non-existing0',
     ];
     $parsed_url = UrlHelper::parse($this->getUrl());
-    $this->assertEqual(Url::fromRoute('redirect.add')->setAbsolute()->toString(), $parsed_url['path']);
-    $this->assertEqual($expected_query, $parsed_url['query']);
+    $this->assertEquals($parsed_url['path'], Url::fromRoute('redirect.add')->setAbsolute()->toString());
+    $this->assertEquals($parsed_url['query'], $expected_query);
     $this->assertFieldByName('redirect_source[0][path]', 'non-existing0');
     // Save the redirect.
     $edit = ['redirect_redirect[0][uri]' => '/node'];
@@ -104,8 +104,8 @@ class Fix404RedirectUITest extends Redirect404TestBase {
       'destination' => $destination,
     ];
     $parsed_url = UrlHelper::parse($this->getUrl());
-    $this->assertEqual(Url::fromRoute('redirect.add')->setAbsolute()->toString(), $parsed_url['path']);
-    $this->assertEqual($expected_query, $parsed_url['query']);
+    $this->assertEquals($parsed_url['path'], Url::fromRoute('redirect.add')->setAbsolute()->toString());
+    $this->assertEquals($parsed_url['query'], $expected_query);
     $this->assertFieldByName('redirect_source[0][path]', 'non-existing2');
     $this->drupalPostForm(NULL, $edit, t('Save'));
     $this->assertUrl('admin/config/search/redirect/404');
@@ -130,7 +130,7 @@ class Fix404RedirectUITest extends Redirect404TestBase {
     // Set some pages to be ignored just for the test.
     $node_to_ignore = '/node/' . $node1->id() . '/test';
     $terms_to_ignore = '/term/*';
-    $pages = $node_to_ignore . "\r\n" . $terms_to_ignore;
+    $pages = $node_to_ignore . "\r\n" . $terms_to_ignore . "\n";
     \Drupal::configFactory()
       ->getEditable('redirect_404.settings')
       ->set('pages', $pages)
@@ -158,6 +158,7 @@ class Fix404RedirectUITest extends Redirect404TestBase {
     $this->clickLink('Ignore');
     $this->assertUrl('admin/config/search/redirect/settings?ignore=' . $path_to_ignore . $destination);
     $this->assertText('Resolved the path ' . $path_to_ignore . ' in the database. Please check the ignored list and save the settings.');
+    $this->assertSession()->fieldValueEquals('ignore_pages', $node_to_ignore . "\n/term/*\n/node/2/test");
     $this->assertSession()->elementContains('css', '#edit-ignore-pages', $node_to_ignore);
     $this->assertSession()->elementContains('css', '#edit-ignore-pages', $terms_to_ignore);
     $this->assertSession()->elementContains('css', '#edit-ignore-pages', $path_to_ignore);
@@ -180,6 +181,55 @@ class Fix404RedirectUITest extends Redirect404TestBase {
     $this->assertSession()->elementContains('css', '#edit-ignore-pages', $terms_to_ignore);
     $this->assertSession()->elementNotContains('css', '#edit-ignore-pages', $node_to_ignore);
     $this->assertSession()->elementNotContains('css', '#edit-ignore-pages', $path_to_ignore);
+
+    // Testing whitelines.
+    $this->drupalGet('llama_page');
+    $this->drupalGet('admin/config/search/redirect/404');
+    $this->assertText('llama_page');
+    $this->clickLink('Ignore');
+    $this->assertSession()->fieldValueEquals('ignore_pages', "/node/*\n/term/*\n/llama_page");
+    $this->getSession()->getPage()->pressButton('Save configuration');
+    $this->drupalGet('admin/config/search/redirect/settings');
+    $this->assertSession()->fieldValueEquals('ignore_pages', "/node/*\n/term/*\n/llama_page");
+  }
+
+  /**
+   * Tests the test_404_reset_submit button to remove all 404 entries.
+   */
+  public function test404ResetSubmit() {
+    // Go to non-existing paths:
+    $this->drupalGet('non-existing0');
+    $this->drupalGet('non-existing0?test=1');
+    $this->drupalGet('non-existing0?test=2');
+    $this->drupalGet('non-existing1');
+    $this->drupalGet('non-existing2');
+    // Go to the "Fix 404" page and check wheter these 404 entries exist:
+    $this->drupalGet('admin/config/search/redirect/404');
+    $this->assertText('non-existing0?test=1');
+    $this->assertText('non-existing0?test=2');
+    $this->assertText('non-existing0');
+    $this->assertText('non-existing1');
+    $this->assertText('non-existing2');
+
+    // Go to the "Settings" page, press the "Clear all 404 log entries" button:
+    $this->drupalGet('admin/config/search/redirect/settings');
+    $this->assertElementPresent('#edit-reset-404');
+    $this->getSession()->getPage()->pressButton('Clear all 404 log entries');
+    // Go to the "Fix 404" page and check wheter these 404 entries DO NOT exist:
+    $this->drupalGet('admin/config/search/redirect/404');
+    $this->assertNoText('non-existing0?test=1');
+    $this->assertNoText('non-existing0?test=2');
+    $this->assertNoText('non-existing0');
+    $this->assertNoText('non-existing1');
+    $this->assertNoText('non-existing2');
+
+    // Ensure new 404 entries are created after clearing:
+    $this->drupalGet('non-existing0');
+    $this->drupalGet('non-existing0?test=1');
+    // Go to the "Fix 404" page and check wheter these 404 entries exist:
+    $this->drupalGet('admin/config/search/redirect/404');
+    $this->assertText('non-existing0');
+    $this->assertText('non-existing0?test=1');
   }
 
 }

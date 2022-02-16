@@ -39,12 +39,12 @@ class RedirectForm extends ContentEntityForm {
         }
       }
 
-      $source_url = urldecode($this->getRequest()->get('source'));
+      $source_url = urldecode($this->getRequest()->get('source') ?? '');
       if (!empty($source_url)) {
         $redirect->setSource($source_url, $source_query);
       }
 
-      $redirect_url = urldecode($this->getRequest()->get('redirect'));
+      $redirect_url = urldecode($this->getRequest()->get('redirect') ?? '');
       if (!empty($redirect_url)) {
         try {
           $redirect->setRedirect($redirect_url, $redirect_query, $redirect_options);

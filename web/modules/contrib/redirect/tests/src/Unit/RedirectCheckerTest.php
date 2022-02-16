@@ -89,6 +89,19 @@ class RedirectCheckerTest extends UnitTestCase {
     $request = $this->getRequestStub('index.php', 'GET');
     $this->assertFalse($checker->canRedirect($request), 'Cannot redirect if maintenance mode is on');
 
+    // Maintenance mode is on, but user has access to view site in maintenance mode.
+    $accountWithMaintenanceModeAccess = $this->getMockBuilder('Drupal\Core\Session\AccountInterface')
+      ->getMock();
+    $accountWithMaintenanceModeAccess->expects($this->any())
+      ->method('hasPermission')
+      ->with('access site in maintenance mode')
+      ->will($this->returnValue(TRUE));
+
+    $checker = new RedirectChecker($this->getConfigFactoryStub($config), $state, $access, $accountWithMaintenanceModeAccess, $route_provider);
+
+    $request = $this->getRequestStub('index.php', 'GET');
+    $this->assertTrue($checker->canRedirect($request), 'Redirect should have worked, user has maintenance mode access.');
+
     // We are at a admin path.
     $state = $this->getMockBuilder('Drupal\Core\State\StateInterface')
       ->getMock();

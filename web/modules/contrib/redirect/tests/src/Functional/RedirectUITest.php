@@ -84,7 +84,7 @@ class RedirectUITest extends BrowserTestBase {
     $this->drupalPostForm('node/' . $node->id() . '/edit', ['path[0][alias]' => '/node_test_alias_updated'], t('Save'));
 
     $redirect = $this->repository->findMatchingRedirect('node_test_alias', [], Language::LANGCODE_NOT_SPECIFIED);
-    $this->assertEqual($redirect->getRedirectUrl()->toString(), Url::fromUri('base:node_test_alias_updated')->toString());
+    $this->assertEquals(Url::fromUri('base:node_test_alias_updated')->toString(), $redirect->getRedirectUrl()->toString());
     // Test if the automatically created redirect works.
     $this->assertRedirect('node_test_alias', 'node_test_alias_updated');
 
@@ -102,7 +102,7 @@ class RedirectUITest extends BrowserTestBase {
     $this->assertLinkByHref(Url::fromRoute('entity.redirect.edit_form', ['redirect' => $redirect->id()])->toString());
     $this->assertLinkByHref(Url::fromRoute('entity.redirect.delete_form', ['redirect' => $redirect->id()])->toString());
 
-    $this->assertEqual($redirect->getRedirectUrl()->toString(), Url::fromUri('base:node_test_alias')->toString());
+    $this->assertEquals(Url::fromUri('base:node_test_alias')->toString(), $redirect->getRedirectUrl()->toString());
     // Test if the automatically created redirect works.
     $this->assertRedirect('node_test_alias_updated', 'node_test_alias');
 
@@ -116,7 +116,7 @@ class RedirectUITest extends BrowserTestBase {
     $term = $this->createTerm($this->createVocabulary());
     $this->drupalPostForm('taxonomy/term/' . $term->id() . '/edit', ['path[0][alias]' => '/term_test_alias_updated'], t('Save'));
     $redirect = $this->repository->findMatchingRedirect('term_test_alias');
-    $this->assertEqual($redirect->getRedirectUrl()->toString(), Url::fromUri('base:term_test_alias_updated')->toString());
+    $this->assertEquals(Url::fromUri('base:term_test_alias_updated')->toString(), $redirect->getRedirectUrl()->toString());
     // Test if the automatically created redirect works.
     $this->assertRedirect('term_test_alias', 'term_test_alias_updated');
 
@@ -140,7 +140,7 @@ class RedirectUITest extends BrowserTestBase {
     $this->clickLink(t('Edit'));
     $this->drupalPostForm(NULL, [$alias_field => '/aaa_path_alias_updated'], t('Save'));
     $redirect = $this->repository->findMatchingRedirect('aaa_path_alias', [], 'en');
-    $this->assertEqual($redirect->getRedirectUrl()->toString(), Url::fromUri('base:aaa_path_alias_updated')->toString());
+    $this->assertEquals(Url::fromUri('base:aaa_path_alias_updated')->toString(), $redirect->getRedirectUrl()->toString());
     // Test if the automatically created redirect works.
     $this->assertRedirect('aaa_path_alias', 'aaa_path_alias_updated');
 
@@ -242,14 +242,14 @@ class RedirectUITest extends BrowserTestBase {
     // Note, self::assertCacheTag() cannot be used here since it only looks at
     // the final set of headers.
     $expected = 'http_response ' . implode(' ', $redirect1->getCacheTags());
-    $this->assertEqual($expected, $response->getHeader('x-drupal-cache-tags')[0], 'Redirect cache tags properly set.');
+    $this->assertEquals($expected, $response->getHeader('x-drupal-cache-tags')[0], 'Redirect cache tags properly set.');
 
     // First request should be a cache MISS.
-    $this->assertEqual($response->getHeader('x-drupal-cache')[0], 'MISS', 'First request to the redirect was not cached.');
+    $this->assertEquals('MISS', $response->getHeader('x-drupal-cache')[0], 'First request to the redirect was not cached.');
 
     // Second request should be cached.
     $response = $this->assertRedirect('test-redirect', 'node');
-    $this->assertEqual($response->getHeader('x-drupal-cache')[0], 'HIT', 'The second request to the redirect was cached.');
+    $this->assertEquals('HIT', $response->getHeader('x-drupal-cache')[0], 'The second request to the redirect was cached.');
 
     // Ensure that the redirect has been cleared from cache when deleted.
     $redirect1->delete();

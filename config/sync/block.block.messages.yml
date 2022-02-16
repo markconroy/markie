@@ -1,0 +1,20 @@
+uuid: fbfe38e2-c0b0-4176-b4dd-4cbd444dcc01
+langcode: en
+status: true
+dependencies:
+  module:
+    - system
+  theme:
+    - weatherlab
+id: messages
+theme: weatherlab
+region: highlighted
+weight: 0
+provider: null
+plugin: system_messages_block
+settings:
+  id: system_messages_block
+  label: Messages
+  provider: system
+  label_display: '0'
+visibility: {  }

@@ -58,8 +58,8 @@ class Redirect404LogSuppressorTest extends Redirect404TestBase {
     $this->assertResponse(403);
 
     // Assert the events are logged in the dblog reports.
-    $this->assertEqual(Database::getConnection()->query("SELECT COUNT(*) FROM {watchdog} WHERE type = 'page not found'")->fetchField(), 1);
-    $this->assertEqual(Database::getConnection()->query("SELECT COUNT(*) FROM {watchdog} WHERE type = 'access denied'")->fetchField(), 1);
+    $this->assertEquals(1, Database::getConnection()->query("SELECT COUNT(*) FROM {watchdog} WHERE type = 'page not found'")->fetchField());
+    $this->assertEquals(1, Database::getConnection()->query("SELECT COUNT(*) FROM {watchdog} WHERE type = 'access denied'")->fetchField());
 
     // Login as admin and enable suppress_404 to avoid logging the 404 event.
     $this->drupalLogin($this->adminUser);
@@ -75,8 +75,8 @@ class Redirect404LogSuppressorTest extends Redirect404TestBase {
 
     // Assert only the new access denied event is logged now.
     $this->drupalLogin($this->adminUser);
-    $this->assertEqual(Database::getConnection()->query("SELECT COUNT(*) FROM {watchdog} WHERE type = 'page not found'")->fetchField(), 1);
-    $this->assertEqual(Database::getConnection()->query("SELECT COUNT(*) FROM {watchdog} WHERE type = 'access denied'")->fetchField(), 2);
+    $this->assertEquals(1, Database::getConnection()->query("SELECT COUNT(*) FROM {watchdog} WHERE type = 'page not found'")->fetchField());
+    $this->assertEquals(2, Database::getConnection()->query("SELECT COUNT(*) FROM {watchdog} WHERE type = 'access denied'")->fetchField());
 
   }
 }
