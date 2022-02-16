@@ -8,3 +8,18 @@
 function ckmod_preprocess_page(&$variables) {
   $variables['#attached']['library'][] = 'ckmod/ckmod';
 }
+
+/**
+  * Implements hook_preprocess_HOOK().
+  */
+  function ckmod_preprocess_media(&$variables) {
+    /** @var \\Drupal\\media\\Entity\\Media $media */
+    $media = $variables['media'];
+    $media_id = $media->mid[0]->value;
+    $media_type = $media->bundle();
+
+    $media_source = $media->getSource()->getSourceFieldValue($media);
+    $variables['attributes']['data-media-source'] = $media_type;
+    $variables['attributes']['data-media-id'] = $media_id;
+    $variables['attributes']['data-media-source-file-id'] = $media_source;
+}
