@@ -11,6 +11,9 @@ use Symfony\Component\HttpFoundation\RequestMatcherInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
+/**
+ *
+ */
 class ProfilerSubscriber implements EventSubscriberInterface {
 
   protected $profiler;
@@ -30,13 +33,18 @@ class ProfilerSubscriber implements EventSubscriberInterface {
   protected $parents;
 
   /**
-   * @param Profiler $profiler A Profiler instance
-   * @param RequestStack $requestStack A RequestStack instance
-   * @param RequestMatcherInterface|null $matcher A RequestMatcher instance
-   * @param bool $onlyException True if the profiler only collects data when an
-   *   exception occurs, false otherwise
-   * @param bool $onlyMasterRequests True if the profiler only collects data
-   *   when the request is a master request, false otherwise
+   * @param \Symfony\Component\HttpKernel\Profiler\Profiler $profiler
+   *   A Profiler instance.
+   * @param \Symfony\Component\HttpFoundation\RequestStack $requestStack
+   *   A RequestStack instance.
+   * @param \Symfony\Component\HttpFoundation\RequestMatcherInterface|null $matcher
+   *   A RequestMatcher instance.
+   * @param bool $onlyException
+   *   True if the profiler only collects data when an
+   *   exception occurs, false otherwise.
+   * @param bool $onlyMasterRequests
+   *   True if the profiler only collects data
+   *   when the request is a master request, false otherwise.
    */
   public function __construct(Profiler $profiler, RequestStack $requestStack, RequestMatcherInterface $matcher = NULL, $onlyException = FALSE, $onlyMasterRequests = FALSE) {
     $this->profiler = $profiler;
@@ -89,8 +97,11 @@ class ProfilerSubscriber implements EventSubscriberInterface {
     $this->parents[$request] = $this->requestStack->getParentRequest();
   }
 
+  /**
+   *
+   */
   public function onKernelFinishRequest(FinishRequestEvent $event) {
-    // attach children to parents
+    // Attach children to parents.
     foreach ($this->profiles as $request) {
       if (NULL !== $parentRequest = $this->parents[$request]) {
         if (isset($this->profiles[$parentRequest])) {
@@ -99,7 +110,7 @@ class ProfilerSubscriber implements EventSubscriberInterface {
       }
     }
 
-    // save profiles
+    // Save profiles.
     foreach ($this->profiles as $request) {
       $this->profiler->saveProfile($this->profiles[$request]);
     }
@@ -108,6 +119,9 @@ class ProfilerSubscriber implements EventSubscriberInterface {
     $this->parents = new \SplObjectStorage();
   }
 
+  /**
+   *
+   */
   public static function getSubscribedEvents() {
     return [
       KernelEvents::RESPONSE => ['onKernelResponse', -100],
@@ -115,4 +129,5 @@ class ProfilerSubscriber implements EventSubscriberInterface {
       KernelEvents::FINISH_REQUEST => ['onKernelFinishRequest', -1024],
     ];
   }
+
 }

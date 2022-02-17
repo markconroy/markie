@@ -2,8 +2,6 @@ version: 2.1
 defaults: &defaults
   docker:
     - image: circleci/php:7.3-cli
-      environment:
-        BOX_VERSION: 3.6.0
   working_directory: ~/repo
 aliases:
   - &composer-cache
@@ -15,11 +13,13 @@ commands:
       - run:
           name: Install PHP Extensions
           command: sudo docker-php-ext-install gd
+      - run:
+          name: Disable Xdebug PHP extension
+          command: sudo rm /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
       - checkout
       - restore_cache:
           keys:
             - *composer-cache
-      - run: composer global require "hirak/prestissimo:^0.3"
   install-dependencies:
     steps:
       - run: composer install -n --prefer-dist
@@ -53,6 +53,9 @@ jobs:
     steps:
       - start-project
       - install-dependencies
+      - run:
+          name: phpspec/prophecy-phpunit fix
+          command: composer require --dev phpspec/prophecy-phpunit:^2
       - run:
           name: CodeSniffer
           command: ./vendor/bin/phpcs src
@@ -99,9 +102,6 @@ jobs:
     <<: *defaults
     steps:
       - start-project
-      - run:
-          name: Disable Xdebug PHP extension
-          command: sudo rm /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
       - create-drupal-project:
           project: 'drupal/legacy-project:^8@alpha'
       - local-require
@@ -133,3 +133,16 @@ workflows:
       - test_drupal
       - test_drupal_project
       # - test_upgrade_status
+  weekly:
+    triggers:
+      - schedule:
+          # Every thursday to run soon after patch and security updates on wednesdays.
+          cron: "0 0 * * 4"
+          filters:
+            branches:
+              only:
+                - master
+    jobs:
+      - build
+      - test_drupal
+      - test_drupal_project

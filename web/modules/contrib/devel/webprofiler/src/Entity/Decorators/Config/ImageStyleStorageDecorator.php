@@ -5,7 +5,7 @@ namespace Drupal\webprofiler\Entity\Decorators\Config;
 use Drupal\image\ImageStyleStorageInterface;
 
 /**
- * Class ImageStyleStorageDecorator
+ * Class ImageStyleStorageDecorator.
  */
 class ImageStyleStorageDecorator extends ConfigEntityStorageDecorator implements ImageStyleStorageInterface {
 

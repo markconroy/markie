@@ -72,7 +72,7 @@ class SwitchUserController extends ControllerBase {
   public static function create(ContainerInterface $container) {
     return new static(
       $container->get('current_user'),
-      $container->get('entity.manager')->getStorage('user'),
+      $container->get('entity_type.manager')->getStorage('user'),
       $container->get('module_handler'),
       $container->get('session_manager'),
       $container->get('session')

@@ -2,36 +2,19 @@
 
 namespace Drupal\Tests\devel\Functional;
 
-use Drupal\Tests\BrowserTestBase;
-
 /**
  * Tests event info pages and links.
  *
  * @group devel
  */
-class DevelEventInfoTest extends BrowserTestBase {
-
-  /**
-   * {@inheritdoc}
-   */
-  public static $modules = ['devel', 'block'];
-
-  /**
-   * The user for the test.
-   *
-   * @var \Drupal\user\UserInterface
-   */
-  protected $develUser;
+class DevelEventInfoTest extends DevelBrowserTestBase {
 
   /**
    * {@inheritdoc}
    */
   protected function setUp() {
     parent::setUp();
-
     $this->drupalPlaceBlock('page_title_block');
-
-    $this->develUser = $this->drupalCreateUser(['access devel information']);
     $this->drupalLogin($this->develUser);
   }
 
@@ -53,6 +36,7 @@ class DevelEventInfoTest extends BrowserTestBase {
    * Tests event info page.
    */
   public function testEventList() {
+    /** @var \Symfony\Component\EventDispatcher\EventDispatcherInterface $event_dispatcher */
     $event_dispatcher = \Drupal::service('event_dispatcher');
 
     $this->drupalGet('/devel/events');
@@ -120,7 +104,8 @@ class DevelEventInfoTest extends BrowserTestBase {
         $this->assertEquals($callable_name, $cell_callable->getText());
 
         $cell_methods = $cells[2];
-        $this->assertEquals($index, $cell_methods->getText());
+        $priority = $event_dispatcher->getListenerPriority($event_name, $listener);
+        $this->assertEquals($priority, $cell_methods->getText());
       }
     }
 

@@ -45,6 +45,10 @@ class RegexPlaceholderResolver extends AbstractPlaceholderResolver
      */
     public function resolvePlaceholder($placeholder)
     {
+        if (!is_string($placeholder)) {
+            return $placeholder;
+        }
+
         if ($this->getCache()->exists($placeholder)) {
             return $this->getCache()->get($placeholder);
         }
@@ -56,7 +60,7 @@ class RegexPlaceholderResolver extends AbstractPlaceholderResolver
             $newValue = preg_replace_callback(
                 $this->pattern,
                 array($this->placeholderResolverCallback, 'callback'),
-                $value
+                (string)$value
             );
             if ($newValue === $value) { break; }
             $value = $newValue;

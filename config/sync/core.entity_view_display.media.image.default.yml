@@ -17,13 +17,13 @@ bundle: image
 mode: default
 content:
   field_m_image_image:
-    weight: 0
+    type: image
     label: hidden
     settings:
-      image_style: user_defined
       image_link: ''
+      image_style: user_defined
     third_party_settings: {  }
-    type: image
+    weight: 0
     region: content
 hidden:
   created: true

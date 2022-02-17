@@ -6,7 +6,7 @@ use Drupal\domain\DomainStorageInterface;
 use Drupal\domain\DomainInterface;
 
 /**
- * Class DomainStorageDecorator
+ * Class DomainStorageDecorator.
  */
 class DomainStorageDecorator extends ConfigEntityStorageDecorator implements DomainStorageInterface {
 
@@ -86,4 +86,5 @@ class DomainStorageDecorator extends ConfigEntityStorageDecorator implements Dom
   public function getDefaultScheme() {
     return $this->getOriginalObject()->getDefaultScheme();
   }
+
 }

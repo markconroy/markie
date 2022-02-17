@@ -62,8 +62,8 @@ jobs:
           mkdir -p tools
           composer --working-dir=tools require roave/backward-compatibility-check:^5
 
-      - name: Run roave/backward-compatibility-check (Disabled for now; re-enable with release of 3.1.0)
-        run: echo ./tools/vendor/bin/roave-backward-compatibility-check --from=3.1.0
+      - name: Run roave/backward-compatibility-check
+        run: ./tools/vendor/bin/roave-backward-compatibility-check --from=3.1.0
 
   tests:
     name: Tests
@@ -99,6 +99,11 @@ jobs:
 
           - os: ubuntu-latest
             php-version: "8.0"
+            dependencies: highest
+            php-ini-values: assert.exception=1, zend.assertions=1, opcache.enable=1, opcache.enable_cli=1, opcache.optimization_level=-1, opcache.jit_buffer_size=4096M, opcache.jit=1205
+
+          - os: ubuntu-latest
+            php-version: "8.1"
             dependencies: highest
             php-ini-values: assert.exception=1, zend.assertions=1, opcache.enable=1, opcache.enable_cli=1, opcache.optimization_level=-1, opcache.jit_buffer_size=4096M, opcache.jit=1205
 

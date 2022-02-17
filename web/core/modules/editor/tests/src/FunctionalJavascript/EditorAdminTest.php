@@ -31,7 +31,7 @@ class EditorAdminTest extends WebDriverTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
     $this->user = $this->drupalCreateUser([
       'access administration pages',
@@ -54,6 +54,7 @@ class EditorAdminTest extends WebDriverTestBase {
     $this->assertNotEmpty($assert_session->waitForText('sulaco'));
     $page->selectFieldOption('editor[editor]', 'ckeditor');
     $this->assertNotEmpty($this->assertSession()->waitForElementVisible('css', 'ul.ckeditor-toolbar-group-buttons'));
+    $this->assertNotEmpty($this->assertSession()->waitForElementVisible('css', '#ckeditor-plugin-settings'));
     $page->pressButton('Save configuration');
 
     // Test that toggling the editor selection off and back on works.

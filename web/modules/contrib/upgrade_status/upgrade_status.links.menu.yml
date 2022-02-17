@@ -1,5 +1,0 @@
-upgrade_status.report:
-  title: 'Upgrade status'
-  description: 'Review current status of known Drupal 9 incompatibilities on the site.'
-  route_name: upgrade_status.report
-  parent: system.admin_reports

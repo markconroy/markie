@@ -80,6 +80,24 @@ class Plugin implements PluginInterface, EventSubscriberInterface, Capable {
   }
 
   /**
+   * Deactivation hook.
+   *
+   * @param Composer $composer
+   * @param IOInterface $io
+   */
+  public function deactivate(Composer $composer, IOInterface $io) {
+  }
+
+  /**
+   * Uninstall hook.
+   *
+   * @param Composer $composer
+   * @param IOInterface $io
+   */
+  public function uninstall(Composer $composer, IOInterface $io) {
+  }
+
+  /**
    * @param \Composer\Installer\PackageEvent $event
    */
   public function postPackageInstall(PackageEvent $event) {

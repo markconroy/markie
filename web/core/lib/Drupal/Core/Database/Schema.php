@@ -72,13 +72,13 @@ abstract class Schema implements PlaceholderInterface {
   /**
    * Get information about the table name and schema from the prefix.
    *
-   * @param
+   * @param string $table
    *   Name of table to look prefix up for. Defaults to 'default' because that's
    *   default key for prefix.
-   * @param $add_prefix
+   * @param bool $add_prefix
    *   Boolean that indicates whether the given table name should be prefixed.
    *
-   * @return
+   * @return array
    *   A keyed array with information about the schema, table name and prefix.
    */
   protected function getPrefixInfo($table = 'default', $add_prefix = TRUE) {
@@ -238,9 +238,9 @@ abstract class Schema implements PlaceholderInterface {
   /**
    * Check if a column exists in the given table.
    *
-   * @param $table
+   * @param string $table
    *   The name of the table in drupal (no prefixing).
-   * @param $column
+   * @param string $column
    *   The name of the column.
    *
    * @return
@@ -340,44 +340,6 @@ abstract class Schema implements PlaceholderInterface {
    *   by that name to begin with.
    */
   abstract public function dropField($table, $field);
-
-  /**
-   * Set the default value for a field.
-   *
-   * @param $table
-   *   The table to be altered.
-   * @param $field
-   *   The field to be altered.
-   * @param $default
-   *   Default value to be set. NULL for 'default NULL'.
-   *
-   * @throws \Drupal\Core\Database\SchemaObjectDoesNotExistException
-   *   If the specified table or field doesn't exist.
-   *
-   * @deprecated in drupal:8.7.0 and is removed from drupal:9.0.0. Instead,
-   *   call ::changeField() passing a full field specification.
-   *
-   * @see ::changeField()
-   */
-  abstract public function fieldSetDefault($table, $field, $default);
-
-  /**
-   * Set a field to have no default value.
-   *
-   * @param $table
-   *   The table to be altered.
-   * @param $field
-   *   The field to be altered.
-   *
-   * @throws \Drupal\Core\Database\SchemaObjectDoesNotExistException
-   *   If the specified table or field doesn't exist.
-   *
-   * @deprecated in drupal:8.7.0 and is removed from drupal:9.0.0. Instead,
-   *   call ::changeField() passing a full field specification.
-   *
-   * @see ::changeField()
-   */
-  abstract public function fieldSetNoDefault($table, $field);
 
   /**
    * Checks if an index exists in the given table.

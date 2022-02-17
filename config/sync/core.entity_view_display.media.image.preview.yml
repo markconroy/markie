@@ -16,13 +16,13 @@ bundle: image
 mode: preview
 content:
   field_m_image_image:
-    weight: 0
+    type: image
     label: hidden
     settings:
-      image_style: preview
       image_link: ''
+      image_style: preview
     third_party_settings: {  }
-    type: image
+    weight: 0
     region: content
 hidden:
   created: true

@@ -3,7 +3,7 @@
 namespace Drupal\webprofiler\DataCollector;
 
 /**
- * Class DrupalDataCollectorTrait
+ * Class DrupalDataCollectorTrait.
  */
 trait DrupalDataCollectorTrait {
 
@@ -11,7 +11,7 @@ trait DrupalDataCollectorTrait {
    * {@inheritdoc}
    */
   public function reset() {
-    $this->data = array();
+    $this->data = [];
   }
 
   /**
@@ -68,7 +68,8 @@ trait DrupalDataCollectorTrait {
         'file' => $reflectedMethod->getFilename(),
         'line' => $reflectedMethod->getStartLine(),
       ];
-    } catch (\ReflectionException $re) {
+    }
+    catch (\ReflectionException $re) {
       // TODO: handle the exception.
     } finally {
       return $data;
@@ -117,4 +118,5 @@ trait DrupalDataCollectorTrait {
 
     return $max;
   }
+
 }

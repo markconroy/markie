@@ -6,16 +6,6 @@ use Drupal\Component\Plugin\Discovery\DiscoveryInterface;
 use Drupal\devel_generate\DevelGeneratePluginManager;
 use Drupal\Tests\UnitTestCase;
 
-// Not sure what this is - Tests pass without it.
-if (!defined('DRUPAL_ROOT')) {
-  //Looping to find drupal root folder.
-  $current_dir = dirname(__DIR__);
-  while (!file_exists("$current_dir/index.php")) {
-    $current_dir = dirname($current_dir);
-  }
-  define('DRUPAL_ROOT', $current_dir);
-}
-
 /**
  * @coversDefaultClass \Drupal\devel_generate\DevelGeneratePluginManager
  * @group devel_generate
@@ -34,13 +24,14 @@ class DevelGenerateManagerTest extends UnitTestCase {
    *
    * @var array
    */
-  protected $definitions = array(
-    'devel_generate_example' => array(
+  protected $definitions = [
+    'devel_generate_example' => [
       'id' => 'devel_generate_example',
       'class' => 'Drupal\devel_generate_example\Plugin\DevelGenerate\ExampleDevelGenerate',
       'url' => 'devel_generate_example',
-    ),
-  );
+      'dependencies' => [],
+    ],
+  ];
 
   /**
    * {@inheritdoc}
@@ -48,7 +39,7 @@ class DevelGenerateManagerTest extends UnitTestCase {
   protected function setUp() {
     parent::setUp();
     // Mock a Discovery object to replace AnnotationClassDiscovery.
-    $this->discovery = $this->getMock('Drupal\Component\Plugin\Discovery\DiscoveryInterface');
+    $this->discovery = $this->createMock('Drupal\Component\Plugin\Discovery\DiscoveryInterface');
     $this->discovery->expects($this->any())
       ->method('getDefinitions')
       ->will($this->returnValue($this->definitions));
@@ -59,10 +50,10 @@ class DevelGenerateManagerTest extends UnitTestCase {
    * Test creating an instance of the DevelGenerateManager.
    */
   public function testCreateInstance() {
-    $namespaces = new \ArrayObject(array('Drupal\devel_generate_example' => realpath(dirname(__FILE__) . '/../../../modules/devel_generate_example/lib')));
-    $cache_backend = $this->getMock('Drupal\Core\Cache\CacheBackendInterface');
+    $namespaces = new \ArrayObject(['Drupal\devel_generate_example' => realpath(dirname(__FILE__) . '/../../../modules/devel_generate_example/lib')]);
+    $cache_backend = $this->createMock('Drupal\Core\Cache\CacheBackendInterface');
 
-    $module_handler = $this->getMock('Drupal\Core\Extension\ModuleHandlerInterface');
+    $module_handler = $this->createMock('Drupal\Core\Extension\ModuleHandlerInterface');
     $manager = new TestDevelGeneratePluginManager($namespaces, $cache_backend, $module_handler);
     $manager->setDiscovery($this->discovery);
 
@@ -81,6 +72,7 @@ class DevelGenerateManagerTest extends UnitTestCase {
  * constructor.
  */
 class TestDevelGeneratePluginManager extends DevelGeneratePluginManager {
+
   /**
    * Sets the discovery for the manager.
    *
@@ -90,4 +82,5 @@ class TestDevelGeneratePluginManager extends DevelGeneratePluginManager {
   public function setDiscovery(DiscoveryInterface $discovery) {
     $this->discovery = $discovery;
   }
+
 }

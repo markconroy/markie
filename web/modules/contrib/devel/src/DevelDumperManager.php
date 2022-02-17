@@ -104,7 +104,7 @@ class DevelDumperManager implements DevelDumperManagerInterface {
   public function debug($input, $name = NULL, $plugin_id = NULL) {
     $output = $this->createInstance($plugin_id)->export($input, $name) . "\n";
     // The temp directory does vary across multiple simpletest instances.
-    $file = file_directory_temp() . '/drupal_debug.txt';
+    $file = $this->config->get('debug_logfile');
     if (file_put_contents($file, $output, FILE_APPEND) === FALSE && $this->hasAccessToDevelInformation()) {
       $this->messenger()->addError($this->t('Devel was unable to write to %file.', ['%file' => $file]));
       return FALSE;

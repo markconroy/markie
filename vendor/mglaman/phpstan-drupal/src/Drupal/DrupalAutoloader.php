@@ -91,8 +91,7 @@ class DrupalAutoloader
 
         $this->moduleData = array_merge($this->extensionDiscovery->scan('module'), $profiles);
         usort($this->moduleData, static function (Extension $a, Extension $b) {
-            // blazy_test causes errors, ensure it is loaded last.
-            return $a->getName() === 'blazy_test' ? 10 : 0;
+            return strpos($a->getName(), '_test') !== false ? 10 : 0;
         });
         $this->themeData = $this->extensionDiscovery->scan('theme');
         $this->addTestNamespaces();
@@ -100,7 +99,11 @@ class DrupalAutoloader
         $this->addThemeNamespaces();
         $this->registerPs4Namespaces($this->namespaces);
         $this->loadLegacyIncludes();
-        require_once $this->drupalRoot . '/core/tests/bootstrap.php';
+
+        // @todo stop requiring the bootstrap.php and just copy what is needed.
+        if (interface_exists(\PHPUnit\Framework\Test::class)) {
+            require $this->drupalRoot . '/core/tests/bootstrap.php';
+        }
 
         foreach ($this->moduleData as $extension) {
             $this->loadExtension($extension);
@@ -167,7 +170,7 @@ class DrupalAutoloader
                 // and thinking these are real services for PHPStan's container.
                 if (isset($serviceDefinition['arguments']) && is_array($serviceDefinition['arguments'])) {
                     array_walk($serviceDefinition['arguments'], function (&$argument) : void {
-                        if (is_array($argument)) {
+                        if (is_array($argument) || !is_string($argument)) {
                             // @todo fix for @http_kernel.controller.argument_metadata_factory
                             $argument = '';
                         } else {

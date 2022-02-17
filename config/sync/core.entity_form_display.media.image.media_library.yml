@@ -16,10 +16,11 @@ bundle: image
 mode: media_library
 content:
   field_m_image_image:
+    type: image_widget_crop
     weight: 1
+    region: content
     settings:
-      show_default_crop: true
-      warn_multiple_usages: true
+      progress_indicator: throbber
       preview_image_style: thumbnail
       crop_preview_image_style: crop_thumbnail
       crop_list:
@@ -28,12 +29,11 @@ content:
         - user_defined
         - vanity_mirror
         - widescreen_television
-      progress_indicator: throbber
       crop_types_required: {  }
+      warn_multiple_usages: true
       show_crop_area: false
+      show_default_crop: true
     third_party_settings: {  }
-    type: image_widget_crop
-    region: content
   field_media_tags:
     type: entity_reference_autocomplete_tags
     weight: 2
@@ -46,12 +46,12 @@ content:
     third_party_settings: {  }
   name:
     type: string_textfield
+    weight: 0
+    region: content
     settings:
       size: 60
       placeholder: ''
-    weight: 0
     third_party_settings: {  }
-    region: content
   status:
     type: boolean_checkbox
     weight: 3

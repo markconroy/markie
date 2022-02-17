@@ -19,13 +19,13 @@ mode: full_width
 content:
   field_m_image_image:
     type: image
-    weight: 0
-    region: content
     label: hidden
     settings:
-      image_style: widescreen_television
       image_link: ''
+      image_style: widescreen_television
     third_party_settings: {  }
+    weight: 0
+    region: content
 hidden:
   created: true
   field_media_tags: true

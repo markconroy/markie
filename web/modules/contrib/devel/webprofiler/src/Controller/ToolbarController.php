@@ -14,7 +14,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Profiler\Profile;
 
 /**
- * Class ToolbarController
+ * Class ToolbarController.
  */
 class ToolbarController extends ControllerBase {
 
@@ -60,7 +60,7 @@ class ToolbarController extends ControllerBase {
   /**
    * Generates the toolbar.
    *
-   * @param Profile $profile
+   * @param \Symfony\Component\HttpKernel\Profiler\Profile $profile
    *
    * @return \Symfony\Component\HttpFoundation\Response
    *
@@ -76,7 +76,7 @@ class ToolbarController extends ControllerBase {
       $rendered .= $template->renderBlock('toolbar', [
         'collector' => $profile->getcollector($name),
         'token' => $profile->getToken(),
-        'name' => $name
+        'name' => $name,
       ]);
     }
 
@@ -107,4 +107,5 @@ class ToolbarController extends ControllerBase {
 
     return new JsonResponse(['success' => TRUE]);
   }
+
 }

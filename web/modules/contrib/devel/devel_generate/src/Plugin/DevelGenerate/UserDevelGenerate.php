@@ -81,7 +81,7 @@ class UserDevelGenerate extends DevelGenerateBase implements ContainerFactoryPlu
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
     return new static(
       $configuration, $plugin_id, $plugin_definition,
-      $container->get('entity.manager')->getStorage('user'),
+      $container->get('entity_type.manager')->getStorage('user'),
       $container->get('date.formatter'),
       $container->get('datetime.time')
     );
@@ -192,26 +192,14 @@ class UserDevelGenerate extends DevelGenerateBase implements ContainerFactoryPlu
   /**
    * {@inheritdoc}
    */
-  public function validateDrushParams($args, array $options = []) {
+  public function validateDrushParams(array $args, array $options = []) {
     $values = [
       'num' => array_shift($args),
       'time_range' => 0,
+      'roles' => StringUtils::csvToArray($options['roles']),
+      'kill' => $options['kill'],
+      'pass' => $options['pass'],
     ];
-
-    if ($this->isDrush8()) {
-      $values += [
-        'roles' => explode(',', drush_get_option('roles', '')),
-        'kill' => drush_get_option('kill'),
-        'pass' => drush_get_option('pass', NULL),
-      ];
-    }
-    else {
-      $values += [
-        'roles' => StringUtils::csvToArray($options['roles']),
-        'kill' => $options['kill'],
-        'pass' => $options['pass'],
-      ];
-    }
     return $values;
   }
 

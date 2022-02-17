@@ -36,7 +36,7 @@
     "irc": "irc://irc.freenode.org/drupal-contribute",
     "source": "http://cgit.drupalcode.org/devel"
   },
-  "license": "GPL-2.0+",
+  "license": "GPL-2.0-or-later",
   "minimum-stability": "dev",
   "require": {},
   "suggest": {
@@ -45,7 +45,7 @@
   "extra": {
     "drush": {
       "services": {
-        "drush.services.yml": "^9"
+        "drush.services.yml": "^9 || ^10"
       }
     }
   }
