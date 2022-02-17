@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "f4dc34dd7904d19b04ccb7a15f92b929",
+    "content-hash": "0b24528d1d21075f6010207059cf7891",
     "packages": [
         {
             "name": "alchemy/zippy",
@@ -3879,64 +3879,6 @@
             "homepage": "https://www.drupal.org/project/redirect",
             "support": {
                 "source": "https://git.drupalcode.org/project/redirect"
-            }
-        },
-        {
-            "name": "drupal/schema_metatag",
-            "version": "2.2.0",
-            "source": {
-                "type": "git",
-                "url": "https://git.drupalcode.org/project/schema_metatag.git",
-                "reference": "8.x-2.2"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://ftp.drupal.org/files/projects/schema_metatag-8.x-2.2.zip",
-                "reference": "8.x-2.2",
-                "shasum": "67443d138dd8fe3555e882f28f5b5abf9236a554"
-            },
-            "require": {
-                "drupal/core": "^8 || ^9",
-                "drupal/metatag": "^1.0"
-            },
-            "require-dev": {
-                "drupal/metatag_views": "*",
-                "drupal/schema_article": "*",
-                "drupal/schema_organization": "*"
-            },
-            "type": "drupal-module",
-            "extra": {
-                "drupal": {
-                    "version": "8.x-2.2",
-                    "datestamp": "1619640197",
-                    "security-coverage": {
-                        "status": "covered",
-                        "message": "Covered by Drupal's security advisory policy"
-                    }
-                }
-            },
-            "notification-url": "https://packages.drupal.org/8/downloads",
-            "license": [
-                "GPL-2.0+"
-            ],
-            "authors": [
-                {
-                    "name": "KarenS",
-                    "homepage": "https://www.drupal.org/user/45874"
-                },
-                {
-                    "name": "wells",
-                    "homepage": "https://www.drupal.org/user/2452278"
-                }
-            ],
-            "description": "Metatag implementation of Schema.org structured data (JSON-LD)",
-            "homepage": "https://www.drupal.org/project/schema_metatag",
-            "keywords": [
-                "Drupal"
-            ],
-            "support": {
-                "source": "http://cgit.drupalcode.org/schema_metatag",
-                "issues": "https://www.drupal.org/project/issues/schema_metatag"
             }
         },
         {
