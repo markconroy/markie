@@ -1,7 +1,7 @@
 parameters:
 	bootstrapFiles:
 		- drupal-autoloader.php
-	excludes_analyse:
+	excludePaths:
 		- '*.api.php'
 		- '*/tests/fixtures/*.php'
 	fileExtensions:
@@ -38,8 +38,11 @@ services:
 			entityTypeStorageMapping: %drupal.entityTypeStorageMapping%
 		tags: [phpstan.broker.dynamicMethodReturnTypeExtension]
 	-
-		class: PHPStan\Type\ServiceDynamicReturnTypeExtension
+		class: PHPStan\Type\ContainerDynamicReturnTypeExtension
 		tags: [phpstan.broker.dynamicMethodReturnTypeExtension]
+	-
+		class: PHPStan\Type\DrupalServiceDynamicReturnTypeExtension
+		tags: [phpstan.broker.dynamicStaticMethodReturnTypeExtension]
 	-
 		class: PHPStan\Reflection\EntityFieldsViaMagicReflectionExtension
 		tags: [phpstan.broker.propertiesClassReflectionExtension]
@@ -48,3 +51,27 @@ services:
 		tags: [phpstan.rules.rule]
 		arguments:
 			- %drupal.drupal_root%
+	-
+		class: PHPStan\Rules\Drupal\ModuleLoadInclude
+		tags: [phpstan.rules.rule]
+		arguments:
+			- %drupal.drupal_root%
+
+	-
+		class: PHPStan\Rules\Deprecations\PluginAnnotationContextDefinitionsRule
+		tags: [phpstan.rules.rule]
+
+	-
+		class: PHPStan\Rules\Deprecations\ConfigEntityConfigExportRule
+		tags: [phpstan.rules.rule]
+
+	-
+		class: PHPStan\Rules\Drupal\Tests\BrowserTestBaseDefaultThemeRule
+		tags: [phpstan.rules.rule]
+
+	-
+		class: PHPStan\Rules\Deprecations\GetDeprecatedServiceRule
+		tags: [phpstan.rules.rule]
+	-
+		class: PHPStan\Rules\Deprecations\StaticServiceDeprecatedServiceRule
+		tags: [phpstan.rules.rule]

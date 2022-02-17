@@ -4,6 +4,7 @@ namespace Drupal\devel\Controller;
 
 use Drupal\Component\Serialization\Json;
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\Entity\EntityLastInstalledSchemaRepositoryInterface;
 use Drupal\Core\Url;
 use Drupal\devel\DevelDumperManagerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -22,13 +23,21 @@ class EntityTypeInfoController extends ControllerBase {
   protected $dumper;
 
   /**
+   * The installed entity definition repository service.
+   *
+   * @var \Drupal\Core\Entity\EntityLastInstalledSchemaRepositoryInterface
+   */
+  protected $entityLastInstalledSchemaRepository;
+
+  /**
    * EntityTypeInfoController constructor.
    *
    * @param \Drupal\devel\DevelDumperManagerInterface $dumper
    *   The dumper service.
    */
-  public function __construct(DevelDumperManagerInterface $dumper) {
+  public function __construct(DevelDumperManagerInterface $dumper, EntityLastInstalledSchemaRepositoryInterface $entityLastInstalledSchemaRepository) {
     $this->dumper = $dumper;
+    $this->entityLastInstalledSchemaRepository = $entityLastInstalledSchemaRepository;
   }
 
   /**
@@ -36,7 +45,8 @@ class EntityTypeInfoController extends ControllerBase {
    */
   public static function create(ContainerInterface $container) {
     return new static(
-      $container->get('devel.dumper')
+      $container->get('devel.dumper'),
+      $container->get('entity.last_installed_schema.repository')
     );
   }
 
@@ -89,6 +99,18 @@ class EntityTypeInfoController extends ControllerBase {
               ]),
             ],
           ],
+          'fields' => [
+            'title' => $this->t('Fields'),
+            'url' => Url::fromRoute('devel.entity_info_page.fields', ['entity_type_id' => $entity_type_id]),
+            'attributes' => [
+              'class' => ['use-ajax'],
+              'data-dialog-type' => 'modal',
+              'data-dialog-options' => Json::encode([
+                'width' => 700,
+                'minHeight' => 500,
+              ]),
+            ],
+          ],
         ],
       ];
 
@@ -132,6 +154,27 @@ class EntityTypeInfoController extends ControllerBase {
     }
 
     return $this->dumper->exportAsRenderable($entity_type, $entity_type_id);
+  }
+
+  /**
+   * Returns a render array representation of the entity type field definitions.
+   *
+   * @param string $entity_type_id
+   *   The name of the entity type to retrieve.
+   *
+   * @return array
+   *   A render array containing the entity type field definitions.
+   *
+   * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
+   *   If the requested entity type is not defined.
+   */
+  public function entityTypeFields($entity_type_id) {
+    if (!$this->entityTypeManager()->getDefinition($entity_type_id, FALSE)) {
+      throw new NotFoundHttpException();
+    }
+
+    $field_storage_definitions = $this->entityLastInstalledSchemaRepository->getLastInstalledFieldStorageDefinitions($entity_type_id);
+    return $this->dumper->exportAsRenderable($field_storage_definitions, $entity_type_id);
   }
 
 }

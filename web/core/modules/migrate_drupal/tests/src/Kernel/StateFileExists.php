@@ -5,7 +5,6 @@ namespace Drupal\Tests\migrate_drupal\Kernel;
 use Drupal\Component\Discovery\YamlDiscovery;
 use Drupal\KernelTests\FileSystemModuleDiscoveryDataProviderTrait;
 use Drupal\migrate_drupal\MigrationConfigurationTrait;
-use Drupal\Tests\DeprecatedModulesTestTrait;
 
 /**
  * Tests that core modules have a migrate_drupal.yml file as needed.
@@ -19,19 +18,16 @@ use Drupal\Tests\DeprecatedModulesTestTrait;
  */
 class StateFileExists extends MigrateDrupalTestBase {
 
-  use DeprecatedModulesTestTrait;
   use FileSystemModuleDiscoveryDataProviderTrait;
   use MigrationConfigurationTrait;
 
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     // Test migrations states.
     'migrate_state_finished_test',
     'migrate_state_not_finished_test',
-    // Test missing migrate_drupal.yml.
-    'migrate_state_no_file_test',
   ];
 
   /**
@@ -70,9 +66,9 @@ class StateFileExists extends MigrateDrupalTestBase {
     'options',
     'path',
     'rdf',
+    'responsive_image',
     'search',
     'shortcut',
-    'simpletest',
     'statistics',
     'syslog',
     'system',
@@ -96,14 +92,14 @@ class StateFileExists extends MigrateDrupalTestBase {
     $this->enableModules($modules_to_enable);
 
     // Modules with a migrate_drupal.yml file.
-    $has_state_file = (new YamlDiscovery('migrate_drupal', array_map(function (&$value) {
+    $has_state_file = (new YamlDiscovery('migrate_drupal', array_map(function ($value) {
       return $value . '/migrations/state';
     }, $module_handler->getModuleDirectories())))->findAll();
 
     foreach ($this->stateFileRequired as $module) {
       $this->assertArrayHasKey($module, $has_state_file, sprintf("Module '%s' should have a migrate_drupal.yml file", $module));
     }
-    $this->assertEquals(count($this->stateFileRequired), count($has_state_file));
+    $this->assertSameSize($this->stateFileRequired, $has_state_file);
   }
 
 }

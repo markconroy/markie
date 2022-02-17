@@ -1,9 +1,9 @@
+first_day: 0
 country:
   default: IE
-first_day: 0
 timezone:
   default: Europe/Dublin
   user:
     configurable: true
-    warn: false
     default: 0
+    warn: false

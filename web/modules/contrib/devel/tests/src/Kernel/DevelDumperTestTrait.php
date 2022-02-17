@@ -44,8 +44,10 @@ trait DevelDumperTestTrait {
    *   (optional) A message to display with the assertion.
    */
   public function assertContainsDumpExport($haystack, $data, $name = NULL, $message = '') {
+    // As at 18.04.2020 assertContainsDumpExport() is not actually used in any
+    // devel tests in any current code branch.
     $output = $this->getDumperExportDump($data, $name);
-    $this->assertContains($output, (string) $haystack, $message);
+    $this->assertStringContainsString($output, (string) $haystack, $message);
   }
 
   /**
@@ -86,7 +88,7 @@ trait DevelDumperTestTrait {
    */
   public function assertContainsDump($haystack, $data, $name = NULL, $message = '') {
     $output = $this->getDumperDump($data, $name);
-    $this->assertContains($output, (string) $haystack, $message);
+    $this->assertStringContainsString($output, (string) $haystack, $message);
   }
 
   /**

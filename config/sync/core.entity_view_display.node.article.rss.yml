@@ -22,11 +22,11 @@ mode: rss
 content:
   field_intro:
     type: text_default
-    weight: 0
-    region: content
     label: hidden
     settings: {  }
     third_party_settings: {  }
+    weight: 0
+    region: content
 hidden:
   body: true
   comment: true

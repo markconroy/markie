@@ -14,7 +14,7 @@ class BlockContentPageViewTest extends BlockContentTestBase {
    *
    * @var array
    */
-  public static $modules = ['block_content_test'];
+  protected static $modules = ['block_content_test'];
 
   /**
    * {@inheritdoc}
@@ -34,7 +34,7 @@ class BlockContentPageViewTest extends BlockContentTestBase {
     // Ensure user was able to view the block.
     $this->assertSession()->statusCodeEquals(200);
     $this->drupalGet('<front>');
-    $this->assertRaw(t('This block is broken or missing. You may be missing content or you might need to enable the original module.'));
+    $this->assertSession()->pageTextContains('This block is broken or missing. You may be missing content or you might need to enable the original module.');
   }
 
 }

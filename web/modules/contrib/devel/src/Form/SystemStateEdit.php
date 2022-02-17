@@ -52,7 +52,7 @@ class SystemStateEdit extends FormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state, $state_name = '') {
-    // Get the old value
+    // Get the old value.
     $old_value = $this->state->get($state_name);
 
     if (!isset($old_value)) {
@@ -72,6 +72,7 @@ class SystemStateEdit extends FormBase {
     $form['value'] = [
       '#type' => 'item',
       '#title' => $this->t('Current value for %name', ['%name' => $state_name]),
+      // phpcs:ignore Drupal.Functions.DiscouragedFunctions
       '#markup' => kpr($old_value, TRUE),
     ];
 
@@ -88,14 +89,14 @@ class SystemStateEdit extends FormBase {
       }
     }
 
-    // Store in the form the name of the state variable
+    // Store in the form the name of the state variable.
     $form['state_name'] = [
       '#type' => 'value',
       '#value' => $state_name,
     ];
     // Set the transport format for the new value. Values:
     //  - plain
-    //  - yaml
+    //  - yaml.
     $form['transport'] = [
       '#type' => 'value',
       '#value' => $transport,
@@ -118,7 +119,7 @@ class SystemStateEdit extends FormBase {
     $form['actions']['cancel'] = [
       '#type' => 'link',
       '#title' => $this->t('Cancel'),
-      '#url' => Url::fromRoute('devel.state_system_page')
+      '#url' => Url::fromRoute('devel.state_system_page'),
     ];
 
     return $form;
@@ -131,7 +132,7 @@ class SystemStateEdit extends FormBase {
     $values = $form_state->getValues();
 
     if ($values['transport'] == 'yaml') {
-      // try to parse the new provided value
+      // Try to parse the new provided value.
       try {
         $parsed_value = Yaml::decode($values['new_value']);
         $form_state->setValue('parsed_value', $parsed_value);
@@ -150,7 +151,7 @@ class SystemStateEdit extends FormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    // Save the state
+    // Save the state.
     $values = $form_state->getValues();
     $this->state->set($values['state_name'], $values['parsed_value']);
 
@@ -175,7 +176,7 @@ class SystemStateEdit extends FormBase {
     if (is_array($data)) {
       // If the current object is an array, then check recursively.
       foreach ($data as $value) {
-        // If there is an object the whole container is "contaminated"
+        // If there is an object the whole container is "contaminated".
         if (!$this->checkObject($value)) {
           return FALSE;
         }

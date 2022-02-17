@@ -16,14 +16,14 @@ mode: preview
 content:
   field_media_video_embed_field:
     type: video_embed_field_video
-    weight: 0
     label: hidden
     settings:
-      width: 426
-      height: 240
       autoplay: false
       responsive: false
+      width: 426
+      height: 240
     third_party_settings: {  }
+    weight: 0
     region: content
 hidden:
   created: true

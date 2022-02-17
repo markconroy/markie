@@ -3,37 +3,21 @@
 namespace Drupal\Tests\devel\Functional;
 
 use Drupal\Core\Url;
-use Drupal\Tests\BrowserTestBase;
 
 /**
  * Tests routes info pages and links.
  *
  * @group devel
  */
-class DevelRouteInfoTest extends BrowserTestBase {
-
-  /**
-   * {@inheritdoc}
-   */
-  public static $modules = ['devel', 'devel_test', 'block'];
-
-  /**
-   * The user for the test.
-   *
-   * @var \Drupal\user\UserInterface
-   */
-  protected $develUser;
+class DevelRouteInfoTest extends DevelBrowserTestBase {
 
   /**
    * {@inheritdoc}
    */
   protected function setUp() {
     parent::setUp();
-
     $this->drupalPlaceBlock('system_menu_block:devel');
     $this->drupalPlaceBlock('page_title_block');
-
-    $this->develUser = $this->drupalCreateUser(['access devel information']);
     $this->drupalLogin($this->develUser);
   }
 
@@ -133,7 +117,7 @@ class DevelRouteInfoTest extends BrowserTestBase {
    */
   public function testRouteDetail() {
     $expected_title = 'Route detail';
-    $xpath_warning_messages = '//div[contains(@class, "messages--warning")]';
+    $xpath_warning_messages = '//div[@aria-label="Warning message"]';
 
     // Ensures that devel route detail link in the menu works properly.
     $url = $this->develUser->toUrl();

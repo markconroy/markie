@@ -7,10 +7,11 @@ use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 use Drupal\user\Entity\User;
+use Drupal\user\UserInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Defines a form that allows privileged users to generate entities.
+ * Define a form to allow the user to switch and become another user.
  */
 class SwitchUserForm extends FormBase {
 
@@ -66,7 +67,7 @@ class SwitchUserForm extends FormBase {
         'include_anonymous' => FALSE,
       ],
       '#process_default_value' => FALSE,
-      '#maxlength' => USERNAME_MAX_LENGTH,
+      '#maxlength' => UserInterface::USERNAME_MAX_LENGTH,
       '#title_display' => 'invisible',
       '#required' => TRUE,
       '#size' => '28',

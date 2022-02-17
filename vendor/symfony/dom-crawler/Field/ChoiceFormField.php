@@ -14,7 +14,7 @@ namespace Symfony\Component\DomCrawler\Field;
 /**
  * ChoiceFormField represents a choice form field.
  *
- * It is constructed from a HTML select tag, or a HTML checkbox, or radio inputs.
+ * It is constructed from an HTML select tag, or an HTML checkbox, or radio inputs.
  *
  * @author Fabien Potencier <fabien@symfony.com>
  */
@@ -113,7 +113,7 @@ class ChoiceFormField extends FormField
     /**
      * Sets the value of the field.
      *
-     * @param string|array $value The value of the field
+     * @param string|array|bool $value The value of the field
      *
      * @throws \InvalidArgumentException When value type provided is not correct
      */
@@ -133,11 +133,11 @@ class ChoiceFormField extends FormField
 
                 foreach ($value as $v) {
                     if (!$this->containsOption($v, $this->options)) {
-                        throw new \InvalidArgumentException(sprintf('Input "%s" cannot take "%s" as a value (possible values: %s).', $this->name, $v, implode(', ', $this->availableOptionValues())));
+                        throw new \InvalidArgumentException(sprintf('Input "%s" cannot take "%s" as a value (possible values: "%s").', $this->name, $v, implode('", "', $this->availableOptionValues())));
                     }
                 }
             } elseif (!$this->containsOption($value, $this->options)) {
-                throw new \InvalidArgumentException(sprintf('Input "%s" cannot take "%s" as a value (possible values: %s).', $this->name, $value, implode(', ', $this->availableOptionValues())));
+                throw new \InvalidArgumentException(sprintf('Input "%s" cannot take "%s" as a value (possible values: "%s").', $this->name, $value, implode('", "', $this->availableOptionValues())));
             }
 
             if ($this->multiple) {
@@ -154,8 +154,6 @@ class ChoiceFormField extends FormField
 
     /**
      * Adds a choice to the current ones.
-     *
-     * @param \DOMElement $node
      *
      * @throws \LogicException When choice provided is not multiple nor radio
      *
@@ -207,7 +205,7 @@ class ChoiceFormField extends FormField
         }
 
         if ('input' === $this->node->nodeName && 'checkbox' !== strtolower($this->node->getAttribute('type')) && 'radio' !== strtolower($this->node->getAttribute('type'))) {
-            throw new \LogicException(sprintf('A ChoiceFormField can only be created from an input tag with a type of checkbox or radio (given type is %s).', $this->node->getAttribute('type')));
+            throw new \LogicException(sprintf('A ChoiceFormField can only be created from an input tag with a type of checkbox or radio (given type is "%s").', $this->node->getAttribute('type')));
         }
 
         $this->value = null;

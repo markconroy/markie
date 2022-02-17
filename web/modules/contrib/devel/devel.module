@@ -5,6 +5,10 @@
  * This module holds functions useful for Drupal development.
  *
  * Please contribute!
+ *
+ * Devel is allowed to use its own functions kpr(), dpm() and dpq() so disable
+ * the coding standard which gives warnings for using these.
+ * phpcs:disable Drupal.Functions.DiscouragedFunctions
  */
 
 define('DEVEL_ERROR_HANDLER_NONE', 0);
@@ -12,7 +16,6 @@ define('DEVEL_ERROR_HANDLER_STANDARD', 1);
 define('DEVEL_ERROR_HANDLER_BACKTRACE_KINT', 2);
 define('DEVEL_ERROR_HANDLER_BACKTRACE_DPM', 4);
 
-use Drupal\Core\Database\Database;
 use Drupal\Core\Database\Query\AlterableInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormStateInterface;
@@ -201,7 +204,7 @@ function backtrace_error_handler($error_level, $message, $filename = NULL, $line
     if ($error_level & error_reporting()) {
       $types = drupal_error_levels();
       list($severity_msg, $severity_level) = $types[$error_level];
-      $backtrace = debug_backtrace();
+      $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
       $caller = Error::getLastCaller($backtrace);
 
       // We treat recoverable errors as fatal.
@@ -243,7 +246,7 @@ function backtrace_error_handler($error_level, $message, $filename = NULL, $line
     $types = drupal_error_levels();
     list($severity_msg, $severity_level) = $types[$error_level];
 
-    $backtrace = debug_backtrace();
+    $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
     $caller = Error::getLastCaller($backtrace);
     $variables = [
       '%type' => isset($types[$error_level]) ? $severity_msg : 'Unknown error',
@@ -387,18 +390,6 @@ function dfbt($label) {
   \Drupal::service('devel.dumper')->dump(FirePHP::TRACE, $label, 'firephp');
 }
 
-/**
- * Wrapper for DevelDumperManager::dump().
- *
- * Wrapper for ChromePHP Class log method.
- *
- * @see \Drupal\devel\DevelDumperManager::dump()
- */
-function dcp() {
-  $args = func_get_args();
-  \Drupal::service('devel.dumper')->dump($args, NULL, 'chromephp');
-}
-
 if (!function_exists('dd')) {
 
   /**
@@ -416,6 +407,7 @@ if (!function_exists('dd')) {
 }
 
 if (!function_exists('ddm')) {
+
   /**
    * Wrapper for DevelDumperManager::debug() to replace previous dd function.
    *
@@ -424,6 +416,61 @@ if (!function_exists('ddm')) {
   function ddm($data, $label = NULL) {
     return \Drupal::service('devel.dumper')->debug($data, $label, 'default');
   }
+
+}
+
+if (!function_exists('kint')) {
+
+  /**
+   * Prints passed argument(s) using Kint debug tool.
+   *
+   * Wrapper for DevelDumperManager::dump().
+   *
+   * @see \Drupal\devel\DevelDumperManager::dump()
+   */
+  function kint() {
+    $args = func_get_args();
+    if (count($args) == 1) {
+      // Pass a single argument directly, which works for any plug-in.
+      $args = $args[0];
+      $name = NULL;
+    }
+    else {
+      // Pass an array marked with a special name. The kint plug-in expands the
+      // arguments and prints each separately.
+      $name = '__ARGS__';
+    }
+
+    return \Drupal::service('devel.dumper')->dump($args, $name, 'kint');
+  }
+
+}
+
+if (!function_exists('ksm')) {
+
+  /**
+   * Prints passed argument(s) to the 'message' area of the page.
+   *
+   * Wrapper for DevelDumperManager::message().
+   *
+   * @see \Drupal\devel\DevelDumperManager::message()
+   */
+  function ksm() {
+    $args = func_get_args();
+    if (count($args) == 1) {
+      // Pass a single argument directly, which works for any plug-in.
+      $args = $args[0];
+      $name = NULL;
+    }
+    else {
+      // Pass an array marked with a special name. The kint plug-in expands the
+      // arguments and prints each separately.
+      $name = '__ARGS__';
+    }
+
+    return \Drupal::service('devel.dumper')->message($args, $name, MessengerInterface::TYPE_STATUS, 'kint');
+  }
+
 }
 
 /**
@@ -518,7 +565,7 @@ function dvr($input, $export = FALSE, $name = NULL) {
 function dargs($always = TRUE) {
   static $printed;
   if ($always || !$printed) {
-    $bt = debug_backtrace();
+    $bt = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
     print kpr($bt[1]['args'], TRUE);
     $printed = TRUE;
   }
@@ -529,7 +576,7 @@ function dargs($always = TRUE) {
  *
  * @param object $query
  *   An object that implements the SelectInterface interface.
- * @param boolean $return
+ * @param bool $return
  *   Whether to return the string. Default is FALSE, meaning to print it
  *   and return $query instead.
  * @param string $name
@@ -545,9 +592,9 @@ function dpq($query, $return = FALSE, $name = NULL) {
     }
     $sql = (string) $query;
     $quoted = [];
-    $connection = Database::getConnection();
+    $database = \Drupal::database();
     foreach ((array) $query->arguments() as $key => $val) {
-      $quoted[$key] = is_null($val) ? 'NULL' : $connection->quote($val);
+      $quoted[$key] = is_null($val) ? 'NULL' : $database->quote($val);
     }
     $sql = strtr($sql, $quoted);
     if ($return) {
@@ -586,7 +633,7 @@ function devel_render() {
  * @param $options
  *   Options to pass on to PHP's debug_backtrace().
  *
- * @return string|NULL
+ * @return string|null
  *   The formatted backtrace, if requested, or NULL.
  *
  * @see http://php.net/manual/en/function.debug-backtrace.php
@@ -661,8 +708,8 @@ function devel_form_user_admin_permissions_alter(&$form, FormStateInterface $for
       if (isset($form['permissions'][$key][0])) {
         $form['permissions'][$key][0]['#wrapper_attributes']['title'] = $key;
       }
-      elseif(isset($form['permissions'][$key]['description'])) {
-        $form['permissions'][$key]['description']['#wrapper_attributes']['title']  = $key;
+      elseif (isset($form['permissions'][$key]['description'])) {
+        $form['permissions'][$key]['description']['#wrapper_attributes']['title'] = $key;
       }
     }
   }

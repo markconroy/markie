@@ -50,7 +50,7 @@ class Translator implements TranslatorInterface
 
     public function __construct(ParserInterface $parser = null)
     {
-        $this->mainParser = $parser ?: new Parser();
+        $this->mainParser = $parser ?? new Parser();
 
         $this
             ->registerExtension(new Extension\NodeExtension())
@@ -63,11 +63,11 @@ class Translator implements TranslatorInterface
 
     public static function getXpathLiteral(string $element): string
     {
-        if (false === strpos($element, "'")) {
+        if (!str_contains($element, "'")) {
             return "'".$element."'";
         }
 
-        if (false === strpos($element, '"')) {
+        if (!str_contains($element, '"')) {
             return '"'.$element.'"';
         }
 

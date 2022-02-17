@@ -3,39 +3,23 @@
 namespace Drupal\Tests\devel\Functional;
 
 use Drupal\Core\Url;
-use Drupal\Tests\BrowserTestBase;
 
 /**
  * Tests container info pages and links.
  *
  * @group devel
  */
-class DevelContainerInfoTest extends BrowserTestBase {
+class DevelContainerInfoTest extends DevelBrowserTestBase {
 
   use DevelWebAssertHelper;
 
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['devel', 'devel_test', 'block'];
-
-  /**
-   * The user for tests.
-   *
-   * @var \Drupal\user\UserInterface
-   */
-  protected $develUser;
-
-  /**
-   * {@inheritdoc}
-   */
   protected function setUp() {
     parent::setUp();
-
     $this->drupalPlaceBlock('local_tasks_block');
     $this->drupalPlaceBlock('page_title_block');
-
-    $this->develUser = $this->drupalCreateUser(['access devel information']);
     $this->drupalLogin($this->develUser);
   }
 

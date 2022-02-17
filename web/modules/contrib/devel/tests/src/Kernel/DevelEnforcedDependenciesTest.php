@@ -61,8 +61,8 @@ class DevelEnforcedDependenciesTest extends KernelTestBase {
 
     // Ensure that the menu and block instance depend on devel module.
     $dependents = $config_manager->findConfigEntityDependents('module', ['devel']);
-    $this->assertTrue(isset($dependents['system.menu.devel']));
-    $this->assertTrue(isset($dependents['block.block.' . $block_id]));
+    $this->assertArrayHasKey('system.menu.devel', $dependents);
+    $this->assertArrayHasKey('block.block.' . $block_id, $dependents);
 
     $this->container->get('module_installer')->uninstall(['devel']);
 
@@ -73,8 +73,8 @@ class DevelEnforcedDependenciesTest extends KernelTestBase {
 
     // Ensure that no config entities depend on devel once uninstalled.
     $dependents = $config_manager->findConfigEntityDependents('module', ['devel']);
-    $this->assertFalse(isset($dependents['system.menu.devel']));
-    $this->assertFalse(isset($dependents['block.block.' . $block_id]));
+    $this->assertArrayNotHasKey('system.menu.devel', $dependents);
+    $this->assertArrayNotHasKey('block.block.' . $block_id, $dependents);
   }
 
 }

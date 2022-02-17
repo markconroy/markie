@@ -10,7 +10,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\DataCollector\RequestDataCollector as BaseRequestDataCollector;
 
 /**
- * Integrate _content into the RequestDataCollector
+ * Integrate _content into the RequestDataCollector.
  */
 class RequestDataCollector extends BaseRequestDataCollector implements DrupalDataCollectorInterface {
 
@@ -42,17 +42,16 @@ class RequestDataCollector extends BaseRequestDataCollector implements DrupalDat
   public function collect(Request $request, Response $response, \Exception $exception = NULL) {
     parent::collect($request, $response, $exception);
 
-    $controller = $this->controllerResolver->getController($request);
-
-    $this->data['controller'] = $this->getMethodData($controller[0], $controller[1]);
-    $this->data['access_check'] = $this->accessCheck;
+    if ($controller = $this->controllerResolver->getController($request)) {
+      $this->data['controller'] = $this->getMethodData($controller[0], $controller[1]);
+      $this->data['access_check'] = $this->accessCheck;
+    }
   }
 
   /**
    * @param $service_id
    * @param $callable
    * @param \Symfony\Component\HttpFoundation\Request $request
-   *
    */
   public function addAccessCheck($service_id, $callable, Request $request) {
     $this->accessCheck[$request->getPathInfo()][] = [
@@ -95,13 +94,12 @@ class RequestDataCollector extends BaseRequestDataCollector implements DrupalDat
     // whole way Web Profiler works to allow that. At the moment we just
     // retrieve the raw Data value and do some string manipulation to clean the
     // output a bit.
-
     $data = $this->data->getValue(TRUE);
     unset($data['request_attributes']['_route_params']);
     unset($data['request_attributes']['_access_result']);
 
     $route_object = [];
-    foreach($data['request_attributes']['_route_object'] as $key => $result) {
+    foreach ($data['request_attributes']['_route_object'] as $key => $result) {
       $key = str_replace("\0", '', $key);
       $key = str_replace('Symfony\Component\Routing\Route', 'Symfony\Component\Routing\Route::', $key);
       $route_object[$key] = $result;
@@ -110,4 +108,5 @@ class RequestDataCollector extends BaseRequestDataCollector implements DrupalDat
 
     return $data;
   }
+
 }
