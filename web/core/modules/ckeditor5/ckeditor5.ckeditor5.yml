@@ -62,7 +62,7 @@ ckeditor5_heading:
       - <h5>
       - <h6>
 
-ckeditor5_htmlSupport:
+ckeditor5_arbitraryHtmlSupport:
   ckeditor5:
     plugins: [htmlSupport.GeneralHtmlSupport]
     config:
@@ -81,6 +81,63 @@ ckeditor5_htmlSupport:
     library: core/ckeditor5.htmlSupport
     # @see \Drupal\ckeditor5\Plugin\CKEditor5PluginManagerInterface::getEnabledDefinitions()
     conditions: []
+
+ckeditor5_wildcardHtmlSupport:
+  ckeditor5:
+    plugins: [htmlSupport.GeneralHtmlSupport]
+  drupal:
+    label: Wildcard HTML support
+    # @see \Drupal\ckeditor5\Plugin\CKEditor5PluginManager::getCKEditor5PluginConfig()
+    elements: false
+    library: core/ckeditor5.htmlSupport
+    # @see \Drupal\ckeditor5\Plugin\CKEditor5PluginManagerInterface::getEnabledDefinitions()
+    conditions: []
+
+# https://html.spec.whatwg.org/multipage/dom.html#attr-dir
+ckeditor5_globalAttributeDir:
+  ckeditor5:
+    plugins: [htmlSupport.GeneralHtmlSupport]
+    config:
+      htmlSupport:
+        allow:
+          -
+            # @see \Drupal\ckeditor5\Plugin\CKEditor5Plugin\GlobalAttribute::getDynamicPluginConfig()
+            name: ~
+            attributes:
+              - key: dir
+                value:
+                  regexp:
+                    pattern: /^(ltr|rtl)$/
+  drupal:
+    label: Global `dir` attribute
+    class: \Drupal\ckeditor5\Plugin\CKEditor5Plugin\GlobalAttribute
+    # @see \Drupal\filter\Plugin\Filter\FilterHtml::getHTMLRestrictions()
+    elements:
+      - <* dir="ltr rtl">
+    library: core/ckeditor5.htmlSupport
+    conditions:
+      filter: filter_html
+
+# https://html.spec.whatwg.org/multipage/dom.html#attr-lang
+ckeditor5_globalAttributeLang:
+  ckeditor5:
+    plugins: [htmlSupport.GeneralHtmlSupport]
+    config:
+      htmlSupport:
+        allow:
+          -
+            # @see \Drupal\ckeditor5\Plugin\CKEditor5Plugin\GlobalAttribute::getDynamicPluginConfig()
+            name: ~
+            attributes: lang
+  drupal:
+    label: Global `lang` attribute
+    class: \Drupal\ckeditor5\Plugin\CKEditor5Plugin\GlobalAttribute
+    # @see \Drupal\filter\Plugin\Filter\FilterHtml::getHTMLRestrictions()
+    elements:
+      - <* lang>
+    library: core/ckeditor5.htmlSupport
+    conditions:
+      filter: filter_html
 
 ckeditor5_specialCharacters:
   ckeditor5:
@@ -106,7 +163,9 @@ ckeditor5_sourceEditing:
     class: \Drupal\ckeditor5\Plugin\CKEditor5Plugin\SourceEditing
     # This is the only CKEditor 5 plugin allowed to generate a superset of elements.
     # @see \Drupal\ckeditor5\Plugin\CKEditor5Plugin\SourceEditing::getElementsSubset()
-    elements: ['<*>']
+    # @see \Drupal\ckeditor5\Plugin\CKEditor5PluginDefinition::validateDrupalAspects()
+    # @see \Drupal\ckeditor5\Plugin\CKEditor5PluginManager::getProvidedElements()
+    elements: []
     library: core/ckeditor5.sourceEditing
     admin_library: ckeditor5/admin.sourceEditing
     toolbar_items:
@@ -166,6 +225,29 @@ ckeditor5_code:
         label: Code
     elements:
       - <code>
+
+ckeditor5_codeBlock:
+  ckeditor5:
+    plugins:
+      - codeBlock.CodeBlock
+      - htmlSupport.GeneralHtmlSupport
+    config:
+      # The CodeBlock plugin supports only `<pre><code>â€¦</code></pre>`.
+      # Configure GHS to support `<pre>â€¦</pre>` markup as well.
+      htmlSupport:
+        allow:
+          -
+            name: pre
+  drupal:
+    label: Code Block
+    library: ckeditor5/drupal.ckeditor5.codeBlock
+    admin_library: ckeditor5/admin.codeBlock
+    toolbar_items:
+      codeBlock:
+        label: Code Block
+    elements:
+      - <pre>
+      - <code class="language-*">
 
 ckeditor5_strikethrough:
   ckeditor5:
@@ -270,11 +352,21 @@ ckeditor5_linkMedia:
 
 ckeditor5_list:
   ckeditor5:
-    plugins: [list.List]
+    plugins:
+     - list.List
+     - list.ListProperties
+    config:
+      list:
+        properties:
+          reversed: true
+          startIndex: true
+          # @todo Make this configurable in https://www.drupal.org/project/drupal/issues/3274635
+          styles: false
   drupal:
     label: List
     library: core/ckeditor5.list
     admin_library: ckeditor5/admin.list
+    class: Drupal\ckeditor5\Plugin\CKEditor5Plugin\ListPlugin
     toolbar_items:
       bulletedList:
         label: Bulleted list
@@ -282,7 +374,7 @@ ckeditor5_list:
         label: Numbered list
     elements:
       - <ul>
-      - <ol>
+      - <ol reversed start>
       - <li>
 
 ckeditor5_horizontalLine:
@@ -321,7 +413,7 @@ ckeditor5_alignment:
       alignment:
         label: Text alignment
     elements:
-      - <$block class="text-align-left text-align-center text-align-right text-align-justify">
+      - <$text-container class="text-align-left text-align-center text-align-right text-align-justify">
 
 ckeditor5_alignment.left:
   ckeditor5: *alignment_ckeditor5_section
@@ -331,7 +423,7 @@ ckeditor5_alignment.left:
       "alignment:left":
         label: Align left
     elements:
-      - <$block class="text-align-left">
+      - <$text-container class="text-align-left">
     <<: *alignment_drupal_section
 
 ckeditor5_alignment.center:
@@ -342,7 +434,7 @@ ckeditor5_alignment.center:
       "alignment:center":
         label: Align center
     elements:
-      - <$block class="text-align-center">
+      - <$text-container class="text-align-center">
     <<: *alignment_drupal_section
 
 ckeditor5_alignment.right:
@@ -353,7 +445,7 @@ ckeditor5_alignment.right:
       "alignment:right":
         label: Align right
     elements:
-      - <$block class="text-align-right">
+      - <$text-container class="text-align-right">
     <<: *alignment_drupal_section
 
 ckeditor5_alignment.justify:
@@ -364,7 +456,7 @@ ckeditor5_alignment.justify:
       "alignment:justify":
         label: Justify
     elements:
-      - <$block class="text-align-justify">
+      - <$text-container class="text-align-justify">
     <<: *alignment_drupal_section
 
 ckeditor5_removeFormat:
@@ -393,9 +485,11 @@ ckeditor5_table:
     plugins:
       - table.Table
       - table.TableToolbar
+      - table.TableCaption
+      - table.PlainTableOutput
     config:
       table:
-        contentToolbar: [tableColumn, tableRow, mergeTableCells]
+        contentToolbar: [tableColumn, tableRow, mergeTableCells, toggleTableCaption]
   drupal:
     label: Table
     library: core/ckeditor5.table
@@ -406,11 +500,12 @@ ckeditor5_table:
     elements:
       - <table>
       - <tr>
-      - <td>
-      - <th>
+      - <td rowspan colspan>
+      - <th rowspan colspan>
       - <thead>
       - <tbody>
       - <tfoot>
+      - <caption>
 
 ckeditor5_image:
   ckeditor5:
@@ -420,7 +515,7 @@ ckeditor5_image:
       - drupalImage.DrupalImage
     config:
       image:
-        toolbar: [imageTextAlternative]
+        toolbar: [drupalImageAlternativeText]
   drupal:
     label: Image
     library: ckeditor5/drupal.ckeditor5.image
@@ -429,6 +524,27 @@ ckeditor5_image:
     conditions:
       toolbarItem: uploadImage
       imageUploadStatus: true
+
+ckeditor5_imageResize:
+  ckeditor5:
+    plugins:
+      - image.ImageResize
+    config:
+      image:
+        resizeUnit: '%'
+        resizeOptions:
+          -
+            name: 'resizeImage:original'
+            value: null
+        toolbar: [resizeImage]
+  drupal:
+    label: Image resize
+    class: \Drupal\ckeditor5\Plugin\CKEditor5Plugin\ImageResize
+    elements: false
+    conditions:
+      requiresConfiguration:
+        allow_resize: true
+      plugins: [ckeditor5_image]
 
 ckeditor5_imageCaption:
   ckeditor5:
@@ -453,12 +569,25 @@ ckeditor5_imageAlign:
     config:
       image:
         toolbar:
-          - name: 'imageStyle:icons'
-            items:
-              - 'imageStyle:alignLeft'
-              - 'imageStyle:alignCenter'
-              - 'imageStyle:alignRight'
-            defaultItem: 'imageStyle:alignCenter'
+          - '|'
+          - 'imageStyle:block'
+          - 'imageStyle:alignLeft'
+          - 'imageStyle:alignCenter'
+          - 'imageStyle:alignRight'
+          - 'imageStyle:inline'
+          - '|'
+        styles:
+          options:
+            - inline
+            - name: 'block'
+              icon: 'left'
+              title: 'Break text'
+            - name: 'alignLeft'
+              title: 'Align left and wrap text'
+            - name: 'alignCenter'
+              title: 'Align center and break text'
+            - name: 'alignRight'
+              title: 'Align right and wrap text'
   drupal:
     label: Image align
     elements:
@@ -501,6 +630,7 @@ media_media:
   ckeditor5:
     plugins:
       - drupalMedia.DrupalMedia
+      - drupalMedia.DrupalElementStyle
     config:
       drupalMedia:
         toolbar: [mediaImageTextAlternative]
@@ -514,9 +644,73 @@ media_media:
     library: ckeditor5/drupal.ckeditor5.media
     class: Drupal\ckeditor5\Plugin\CKEditor5Plugin\Media
     elements:
-      - <drupal-media data-entity-type data-entity-uuid alt>
+      - <drupal-media data-entity-type data-entity-uuid data-view-mode alt>
     conditions:
       filter: media_embed
+
+ckeditor5_drupalMediaCaption:
+  ckeditor5:
+    plugins:
+      - drupalMedia.DrupalMediaCaption
+    config:
+      drupalMedia:
+        toolbar: [toggleDrupalMediaCaption]
+  drupal:
+    label: Media caption
+    elements:
+      - <drupal-media data-caption>
+    conditions:
+      filter: filter_caption
+      plugins:
+        - media_media
+
+media_mediaAlign:
+  provider: media
+  ckeditor5:
+    plugins:
+      - drupalMedia.DrupalElementStyle
+    config:
+      drupalElementStyles:
+        align:
+          - name: 'right'
+            title: 'Align right and wrap text'
+            icon: 'objectRight'
+            attributeName: 'data-align'
+            attributeValue: 'right'
+            modelElements: [ 'drupalMedia' ]
+          - name: 'left'
+            title: 'Align left and wrap text'
+            icon: 'objectLeft'
+            attributeName: 'data-align'
+            attributeValue: 'left'
+            modelElements: [ 'drupalMedia' ]
+          - name: 'center'
+            title: 'Align center and break text'
+            icon: 'objectCenter'
+            attributeName: 'data-align'
+            attributeValue: 'center'
+            modelElements: ['drupalMedia']
+          - name: 'breakText'
+            title: 'Break text'
+            icon: 'objectBlockLeft'
+            isDefault: true
+            modelElements: [ 'drupalMedia' ]
+      drupalMedia:
+        toolbar:
+          - '|'
+          - 'drupalElementStyle:align:breakText'
+          - 'drupalElementStyle:align:left'
+          - 'drupalElementStyle:align:center'
+          - 'drupalElementStyle:align:right'
+          - '|'
+  drupal:
+    label: Media align
+    library: ckeditor5/drupal.ckeditor5.mediaAlign
+    elements:
+      - <drupal-media data-align>
+    conditions:
+      filter: filter_align
+      plugins: [media_media]
 
 media_library_mediaLibrary:
   provider: media_library

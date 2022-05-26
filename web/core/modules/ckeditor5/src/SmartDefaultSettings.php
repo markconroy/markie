@@ -10,7 +10,9 @@ use Drupal\ckeditor\CKEditorPluginManager;
 use Drupal\ckeditor5\Plugin\CKEditor5PluginDefinition;
 use Drupal\ckeditor5\Plugin\CKEditor5PluginElementsSubsetInterface;
 use Drupal\ckeditor5\Plugin\CKEditor5PluginManagerInterface;
+use Drupal\Component\Assertion\Inspector;
 use Drupal\Component\Plugin\PluginManagerInterface;
+use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\editor\EditorInterface;
 use Drupal\editor\Entity\Editor;
@@ -124,47 +126,59 @@ final class SmartDefaultSettings {
     $old_editor = $editor->id() ? Editor::load($editor->id()) : NULL;
     if ($old_editor && $old_editor->getEditor() === 'ckeditor') {
       $enabled_cke4_plugins = $this->getEnabledCkeditor4Plugins($old_editor);
-      [$upgraded_settings, $messages] = $this->createSettingsFromCKEditor4($old_editor->getSettings(), $enabled_cke4_plugins);
+      [$upgraded_settings, $messages] = $this->createSettingsFromCKEditor4($old_editor->getSettings(), $enabled_cke4_plugins, HTMLRestrictions::fromTextFormat($old_editor->getFilterFormat()));
       $editor->setSettings($upgraded_settings);
       $editor->setImageUploadSettings($old_editor->getImageUploadSettings());
     }
 
-    // First, add toolbar items based on HTML tags.
+    // Add toolbar items based on HTML tags and attributes.
     // NOTE: Helper updates $editor->settings by reference and returns info for the message.
-    $result = $this->addToolbarItemsToMatchHtmlTagsInFormat($text_format, $editor);
+    $result = $this->addToolbarItemsToMatchHtmlElementsInFormat($text_format, $editor);
     if ($result !== NULL) {
-      [$enabling_message_content, $unsupported] = $result;
+      [$enabling_message_content, $enabled_for_attributes_message_content, $missing] = $result;
+
+      // Distinguish between unsupported elements covering only tags or not.
+      $missing_attributes = new HTMLRestrictions(array_filter($missing->getAllowedElements()));
+      $unsupported = $missing->diff($missing_attributes);
+
       if ($enabling_message_content) {
-        $messages[] = $this->t('The following plugins were enabled to support tags that are allowed by this text format: %enabling_message_content.',
+        $messages[MessengerInterface::TYPE_STATUS][] = $this->t('The following plugins were enabled to support tags that are allowed by this text format: %enabling_message_content.',
           ['%enabling_message_content' => $enabling_message_content],
         );
       }
-      unset($unsupported['*']);
       // Warn user about unsupported tags.
-      if (!empty($unsupported)) {
-        $unsupported_string = implode(' ', HTMLRestrictionsUtilities::toReadableElements($unsupported));
-        $this->addTagsToSourceEditing($editor, $unsupported_string);
-        $messages[] = $this->t("The following tags were permitted by this format's filter configuration, but no plugin was available that supports them. To ensure the tags remain supported by this text format, the following were added to the Source Editing plugin's <em>Manually editable HTML tags</em>: @unsupported_string.", [
-          '@unsupported_string' => $unsupported_string,
+      if (!$unsupported->allowsNothing()) {
+        $this->addTagsToSourceEditing($editor, $unsupported);
+        $messages[MessengerInterface::TYPE_STATUS][] = $this->t("The following tags were permitted by this format's filter configuration, but no plugin was available that supports them. To ensure the tags remain supported by this text format, the following were added to the Source Editing plugin's <em>Manually editable HTML tags</em>: @unsupported_string.", [
+          '@unsupported_string' => $unsupported->toFilterHtmlAllowedTagsString(),
         ]);
       }
-    }
 
-    // Next, add more toolbar items to try to also support attributes on already
-    // supported tags that have still unsupported attributes.
-    $result = $this->addToolbarItemsToMatchHtmlAttributesInFormat($text_format, $editor);
-    if ($result !== NULL) {
-      [$enabled_for_attributes_message_content, $missing_attributes] = $result;
       if ($enabled_for_attributes_message_content) {
-        $messages[] = $this->t('The following plugins were enabled to support specific attributes that are allowed by this text format: %enabled_for_attributes_message_content.',
+        $messages[MessengerInterface::TYPE_STATUS][] = $this->t('The following plugins were enabled to support specific attributes that are allowed by this text format: %enabled_for_attributes_message_content.',
           ['%enabled_for_attributes_message_content' => $enabled_for_attributes_message_content],
         );
       }
       // Warn user about supported tags but missing attributes.
-      if ($missing_attributes) {
+      if (!$missing_attributes->allowsNothing()) {
         $this->addTagsToSourceEditing($editor, $missing_attributes);
-        $messages[] = $this->t("This format's HTML filters includes plugins that support the following tags, but not some of their attributes. To ensure these attributes remain supported by this text format, the following were added to the Source Editing plugin's <em>Manually editable HTML tags</em>: @missing_attributes.", [
-          '@missing_attributes' => $missing_attributes,
+        $messages[MessengerInterface::TYPE_STATUS][] = $this->t("This format's HTML filters includes plugins that support the following tags, but not some of their attributes. To ensure these attributes remain supported by this text format, the following were added to the Source Editing plugin's <em>Manually editable HTML tags</em>: @missing_attributes.", [
+          '@missing_attributes' => $missing_attributes->toFilterHtmlAllowedTagsString(),
+        ]);
+      }
+    }
+
+    if ($editor->getFilterFormat()->filters('filter_html')->status) {
+      $filter_html_restrictions = HTMLRestrictions::fromTextFormat($editor->getFilterFormat());
+      $fundamental = new HTMLRestrictions($this->pluginManager->getProvidedElements([
+        'ckeditor5_essentials',
+        'ckeditor5_paragraph',
+      ]));
+      $missing_tags = $fundamental->diff($filter_html_restrictions);
+      if (!$missing_tags->allowsNothing()) {
+        $editor->getFilterFormat()->setFilterConfig('filter_html', $filter_html_restrictions->merge($fundamental)->getAllowedElements());
+        $messages[MessengerInterface::TYPE_STATUS][] = $this->t("The following tag(s) were added to <em>Limit allowed HTML tags and correct faulty HTML</em>, because they are needed to provide fundamental CKEditor 5 functionality : @missing_tags.", [
+          '@missing_tags' => $missing_tags->toFilterHtmlAllowedTagsString(),
         ]);
       }
     }
@@ -179,15 +193,16 @@ final class SmartDefaultSettings {
     return [$editor, $messages];
   }
 
-  private function addTagsToSourceEditing(EditorInterface $editor, string $tags): array {
+  private function addTagsToSourceEditing(EditorInterface $editor, HTMLRestrictions $tags): array {
     $messages = [];
     $settings = $editor->getSettings();
     if (!isset($settings['toolbar']['items']) || !in_array('sourceEditing', $settings['toolbar']['items'])) {
-      $messages[] = $this->t('The <em>Source Editing</em> plugin was enabled to support tags and/or attributes that are not explicitly supported by any available CKEditor 5 plugins.');
+      $messages[MessengerInterface::TYPE_STATUS][] = $this->t('The <em>Source Editing</em> plugin was enabled to support tags and/or attributes that are not explicitly supported by any available CKEditor 5 plugins.');
       $settings['toolbar']['items'][] = 'sourceEditing';
     }
-    $source_editing_allowed_tags = $settings['plugins']['ckeditor5_sourceEditing']['allowed_tags'] ?? [];
-    $settings['plugins']['ckeditor5_sourceEditing']['allowed_tags'] = array_merge($source_editing_allowed_tags, HTMLRestrictionsUtilities::allowedElementsStringToPluginElementsArray($tags));
+    $allowed_tags_array = $settings['plugins']['ckeditor5_sourceEditing']['allowed_tags'] ?? [];
+    $allowed_tags_string = implode(' ', $allowed_tags_array);
+    $settings['plugins']['ckeditor5_sourceEditing']['allowed_tags'] = HTMLRestrictions::fromString($allowed_tags_string)->merge($tags)->toCKEditor5ElementsArray();
     $editor->setSettings($settings);
     return $messages;
   }
@@ -201,6 +216,9 @@ final class SmartDefaultSettings {
    * @param string[] $enabled_ckeditor4_plugins
    *   The list of enabled CKEditor 4 plugins: their settings will be mapped to
    *   the CKEditor 5 equivalents, if they have any.
+   * @param \Drupal\ckeditor5\HTMLRestrictions $text_format_html_restrictions
+   *   The restrictions of the text format, to allow an upgrade plugin to
+   *   inspect the text format's HTML restrictions to make a decision.
    *
    * @return array
    *   An array with two values:
@@ -211,7 +229,7 @@ final class SmartDefaultSettings {
    *   Thrown when an upgrade plugin is attempting to generate plugin settings
    *   for a CKEditor 4 plugin upgrade path that have already been generated.
    */
-  private function createSettingsFromCKEditor4(array $ckeditor4_settings, array $enabled_ckeditor4_plugins): array {
+  private function createSettingsFromCKEditor4(array $ckeditor4_settings, array $enabled_ckeditor4_plugins, HTMLRestrictions $text_format_html_restrictions): array {
     $settings = [
       'toolbar' => [
         'items' => [],
@@ -227,16 +245,16 @@ final class SmartDefaultSettings {
         $some_added = FALSE;
         foreach ($group['items'] as $cke4_button) {
           try {
-            $equivalent = $this->upgradePluginManager->mapCKEditor4ToolbarButtonToCKEditor5ToolbarItem($cke4_button);
+            $equivalent = $this->upgradePluginManager->mapCKEditor4ToolbarButtonToCKEditor5ToolbarItem($cke4_button, $text_format_html_restrictions);
           }
           catch (\OutOfBoundsException $e) {
-            $messages[] = $this->t('The CKEditor 4 button %button does not have a known upgrade path. If it allowed editing markup, then you can do so now through the Source Editing functionality.', [
+            $messages[MessengerInterface::TYPE_WARNING][] = $this->t('The CKEditor 4 button %button does not have a known upgrade path. If it allowed editing markup, then you can do so now through the Source Editing functionality.', [
               '%button' => $cke4_button,
             ]);
             continue;
           }
           if ($equivalent) {
-            $settings['toolbar']['items'][] = $equivalent;
+            $settings['toolbar']['items'] = array_merge($settings['toolbar']['items'], $equivalent);
             $some_added = TRUE;
           }
         }
@@ -268,7 +286,7 @@ final class SmartDefaultSettings {
         $settings['plugins'] += $cke5_plugin_settings;
       }
       catch (\OutOfBoundsException $e) {
-        $messages[] = $this->t('The %cke4_plugin_id plugin settings do not have a known upgrade path.', [
+        $messages[MessengerInterface::TYPE_WARNING][] = $this->t('The %cke4_plugin_id plugin settings do not have a known upgrade path.', [
           '%cke4_plugin_id' => $cke4_plugin_id,
         ]);
         continue;
@@ -327,255 +345,375 @@ final class SmartDefaultSettings {
   }
 
   /**
-   * Adds CKEditor 5 toolbar items to match the format's HTML tags.
+   * Computes net new needed elements when considering adding the given plugin.
    *
-   * @param \Drupal\filter\FilterFormatInterface $format
-   *   The text format for which to compute smart default settings.
-   * @param \Drupal\editor\EditorInterface $editor
-   *   The text editor config entity to update.
+   * @param \Drupal\ckeditor5\HTMLRestrictions $baseline
+   *   The set of HTML restrictions already supported.
+   * @param \Drupal\ckeditor5\HTMLRestrictions $needed
+   *   The set of HTML restrictions that are needed, that is: in addition to
+   *   $baseline.
+   * @param \Drupal\ckeditor5\Plugin\CKEditor5PluginDefinition $added_plugin
+   *   The CKEditor 5 plugin that is being evaluated to check if it would meet
+   *   some of the needs.
    *
-   * @return array|null
-   *   NULL when nothing happened, otherwise an array with two values:
-   *   1. a description (for use in a message) of which CKEditor 5 plugins were
-   *      enabled to match the HTML tags allowed by the text format.
-   *   2. the unsupported tags
+   * @return array
+   *   An array containing two values:
+   *   - a set of HTML restrictions that indicates the net new additions that
+   *     are needed
+   *   - a set of HTML restrictions that indicates the surplus additions (these
+   *     are elements that were not needed, but are added by this plugin)
    */
-  private function addToolbarItemsToMatchHtmlTagsInFormat(FilterFormatInterface $format, EditorInterface $editor): ?array {
-    $html_restrictions_needed_elements = $format->getHtmlRestrictions();
-    if ($html_restrictions_needed_elements === FALSE) {
-      return NULL;
-    }
-
-    // Add all buttons until we match or exceed the current text format
-    // restrictions.
-    $enabled_plugins = array_keys($this->pluginManager->getEnabledDefinitions($editor));
-    $provided_elements = $this->pluginManager->getProvidedElements($enabled_plugins);
-
-    // Automatically add the plugins that add support for the tags we want this
-    // CKEditor 5 instance to support.
-    $missing_tags = array_diff(array_keys($html_restrictions_needed_elements['allowed']), array_keys($provided_elements));
-    $to_add = [];
-    $unsupported = [];
-    foreach ($missing_tags as $tag) {
-      $id = $this->pluginManager->findPluginSupportingElement($tag);
-      if ($id) {
-        $to_add[$tag] = $id;
-      }
-      // Add any tag that isn't the "star protector" tag to the array of
-      // unsupported tags.
-      // @see the $star_protector variable in
-      // \Drupal\filter\Plugin\Filter\FilterHtml::getHTMLRestrictions
-      // @todo this can be an 'else' with no conditions after
-      // https://www.drupal.org/project/drupal/issues/3226368
-      elseif ($tag !== '__zqh6vxfbk3cg__') {
-        $unsupported[$tag] = $html_restrictions_needed_elements['allowed'][$tag];
-      }
-    }
-
-    $enabling_message_content = '';
-    $enabling_message_prep = [];
-    foreach ($to_add as $tag_name => $plugin_name) {
-      $enabling_message_prep[$plugin_name][] = $tag_name;
-    }
-
-    $editor_settings_to_update = $editor->getSettings();
-    $new_group_created = FALSE;
-    foreach ($enabling_message_prep as $plugin_id => $tag_names) {
-      $label = $this->pluginManager->getDefinition($plugin_id)->label();
-      $tags = array_reduce($tag_names, function ($carry, $item) {
-        return $carry . "<$item>";
-      });
-      $enabling_message_content .= "$label (for tags: $tags) ";
-      $definition = $this->pluginManager->getDefinition($plugin_id);
-      if ($definition->hasToolbarItems()) {
-        if (!$new_group_created) {
-          $editor_settings_to_update['toolbar']['items'][] = '|';
-          $new_group_created = TRUE;
-        }
-        $editor_settings_to_update['toolbar']['items'] = array_merge($editor_settings_to_update['toolbar']['items'], array_keys($definition->getToolbarItems()));
-      }
-    }
-
-    if (!empty($enabling_message_content)) {
-      $editor->setSettings($editor_settings_to_update);
-      $enabling_message_content = substr($enabling_message_content, 0, -1);
-      return [$enabling_message_content, $unsupported];
-    }
-    else {
-      return [NULL, $unsupported];
-    }
+  private static function computeNetNewElementsForPlugin(HTMLRestrictions $baseline, HTMLRestrictions $needed, CKEditor5PluginDefinition $added_plugin): array {
+    $plugin_support = HTMLRestrictions::fromString(implode(' ', $added_plugin->getElements()));
+    // Do not inspect just $plugin_support, but the union of that with the
+    // already supported elements: wildcard restrictions will only resolve
+    // if the concrete tags they support are also present.
+    $potential_future = $baseline->merge($plugin_support);
+    // This is the heart of the operation: intersect the potential future
+    // with what we need to achieve, then subtract what is already
+    // supported. This yields the net new elements.
+    $net_new = $potential_future->intersect($needed)->diff($baseline);
+    // But … we may compute too many.
+    $surplus_additions = $potential_future->diff($needed)->diff($baseline);
+    return [$net_new, $surplus_additions];
   }
 
   /**
-   * Adds CKEditor 5 toolbar items to match the format's HTML attributes.
+   * Computes a score for the given surplus compared to the given need.
    *
-   * @param \Drupal\filter\FilterFormatInterface $format
-   *   The text format for which to compute smart default settings.
-   * @param \Drupal\editor\EditorInterface $editor
-   *   The text editor config entity to update.
+   * @param \Drupal\ckeditor5\HTMLRestrictions $surplus
+   *   A surplus compared to what is needed.
+   * @param \Drupal\ckeditor5\HTMLRestrictions $needed
+   *   Exactly what is needed.
    *
-   * @return array|null
-   *   NULL when nothing happened, otherwise an array with two values:
-   *   1. a description (for use in a message) of which CKEditor 5 plugins were
-   *      enabled to match the HTML attributes allowed by the text format.
-   *   2. the unsupported attributes
+   * @return int
+   *   A surplus score. Lower is better. Scores are a positive integer.
+   *
+   * @see https://www.drupal.org/project/drupal/issues/3231328#comment-14444987
    */
-  private function addToolbarItemsToMatchHtmlAttributesInFormat(FilterFormatInterface $format, EditorInterface $editor): ?array {
-    $html_restrictions_needed_elements = $format->getHtmlRestrictions();
-    if ($html_restrictions_needed_elements === FALSE) {
-      return NULL;
+  private static function computeSurplusScore(HTMLRestrictions $surplus, HTMLRestrictions $needed): int {
+    // Compute a score for surplus elements, while taking into account how much
+    // impact each surplus element has:
+    $surplus_score = 0;
+    foreach ($surplus->getAllowedElements() as $tag_name => $attributes_config) {
+      // 10^6 per surplus tag.
+      if (!isset($needed->getAllowedElements()[$tag_name])) {
+        $surplus_score += pow(10, 6);
+      }
+
+      // 10^5 per surplus "any attributes allowed".
+      if ($attributes_config === TRUE) {
+        $surplus_score += pow(10, 5);
+      }
+
+      if (!is_array($attributes_config)) {
+        continue;
+      }
+
+      foreach ($attributes_config as $attribute_name => $attribute_config) {
+        // 10^4 per surplus wildcard attribute.
+        if (strpos($attribute_name, '*') !== FALSE) {
+          $surplus_score += pow(10, 4);
+        }
+        // 10^3 per surplus attribute.
+        else {
+          $surplus_score += pow(10, 3);
+        }
+
+        // 10^2 per surplus "any attribute values allowed".
+        if ($attribute_config === TRUE) {
+          $surplus_score += pow(10, 2);
+        }
+
+        if (!is_array($attribute_config)) {
+          continue;
+        }
+
+        foreach ($attribute_config as $allowed_attribute_value => $allowed_attribute_value_config) {
+          // 10^1 per surplus wildcard attribute value.
+          if (strpos($allowed_attribute_value, '*') !== FALSE) {
+            $surplus_score += pow(10, 1);
+          }
+          // 10^0 per surplus attribute value.
+          else {
+            $surplus_score += pow(10, 0);
+          }
+        }
+      }
     }
+    return $surplus_score;
+  }
 
-    $enabled_plugins = array_keys($this->pluginManager->getEnabledDefinitions($editor));
-    $provided_elements = $this->pluginManager->getProvidedElements($enabled_plugins);
-    $missing = HTMLRestrictionsUtilities::diffAllowedElements($editor->getFilterFormat()->getHtmlRestrictions()['allowed'], $provided_elements);
-    $supported_tags_with_unsupported_attributes = array_intersect_key($missing, $provided_elements);
-    $supported_tags_with_unsupported_attributes = array_filter($supported_tags_with_unsupported_attributes, function ($tag_config) {
-      return is_array($tag_config);
-    });
-
-    if (!empty($supported_tags_with_unsupported_attributes)) {
-      // This will be populated with plugins that aren't currently enabled, but
-      // provide element configuration that include attributes. I.e. they are
-      // the only plugins that can potentially address unsupported attributes
-      // in supported tags.
-      $disabled_plugins_with_attribute_config = [];
-      $all_plugins_definitions = $this->pluginManager->getDefinitions();
-      foreach ($all_plugins_definitions as $plugin_id => $definition) {
+  /**
+   * Finds candidates for the still needed restrictions among disabled plugins.
+   *
+   * @param \Drupal\ckeditor5\HTMLRestrictions $provided
+   *   The already provided HTML restrictions, thanks to already enabled
+   *   CKEditor 5 plugins.
+   * @param \Drupal\ckeditor5\HTMLRestrictions $still_needed
+   *   The still needed HTML restrictions, unmet by the already enabled CKEditor
+   *   5 plugins.
+   * @param \Drupal\ckeditor5\Plugin\CKEditor5PluginDefinition[] $disabled_plugin_definitions
+   *   The list of not yet enabled CKEditor 5 plugin definitions, amongst which
+   *   candidates must be found.
+   *
+   * @return array
+   *   A nested array with a tree structure covering:
+   *   1. tag name
+   *   2. concrete attribute name, `-attribute-none-` (meaning no attributes
+   *      allowed on this tag) or `-attribute-any-` (meaning any attribute
+   *      allowed on this tag).
+   *   3. (optional) attribute value (if concrete attribute name in previous
+   *      level), `TRUE` or `FALSE`
+   *   4. (optional) attribute value restriction
+   *   5. candidate CKEditor 5 plugin ID for the HTML elements in the hierarchy
+   *   and the surplus score as the value. In other words: the leaf of this is
+   *   always a leaf, and a selected CKEditor 5 plugin ID is always the parent
+   *   of a leaf.
+   */
+  private static function getCandidates(HTMLRestrictions $provided, HTMLRestrictions $still_needed, array $disabled_plugin_definitions): array {
+    $plugin_candidates = [];
+    if (!$still_needed->allowsNothing()) {
+      foreach ($disabled_plugin_definitions as $definition) {
         // Only proceed if the plugin has configured elements and the plugin
         // does not have conditions. In the future we could add support for
         // automatically enabling filters, but for now we assume that the filter
         // configuration cannot be modified.
-        if (!in_array($plugin_id, $enabled_plugins) && !$definition->hasConditions()) {
-          $plugins_provided_elements = $this->pluginManager->getProvidedElements([$plugin_id], NULL, TRUE);
-          if (!empty($plugins_provided_elements)) {
-            // Filter elements that do not have attribute configuration.
-            $elements_with_attribute_config = array_filter($plugins_provided_elements, function ($elements) {
-              return $elements !== FALSE;
-            });
-            if (!empty($elements_with_attribute_config)) {
-              foreach ($elements_with_attribute_config as $tag_name => $attribute_config) {
-                // If the 'tag' is a wildcard, add the attribute config to
-                // all qualifying tags.
-                if (substr($tag_name, 0, 1) === '$') {
-                  // An array of all the tags that match the wildcard value.
-                  $wildcard_tags = HTMLRestrictionsUtilities::getWildcardTags($tag_name);
+        if (!$definition->hasConditions() && $definition->hasElements()) {
+          [$net_new, $surplus_additions] = self::computeNetNewElementsForPlugin($provided, $still_needed, $definition);
+          if (!$net_new->allowsNothing()) {
+            $plugin_id = $definition->id();
+            $surplus_score = static::computeSurplusScore($surplus_additions, $still_needed);
+            foreach ($net_new->getAllowedElements() as $tag_name => $attributes_config) {
+              // Non-specific attribute restrictions: `FALSE` or `TRUE`.
+              // TRICKY: PHP does not support boolean array keys, so map these
+              // to a string. The string must not be a valid attribute name, so
+              // use a leading and trailing dash.
+              if (!is_array($attributes_config)) {
+                $non_specific_attribute = $attributes_config ? '-attributes-any-' : '-attributes-none-';
+                $plugin_candidates[$tag_name][$non_specific_attribute][$plugin_id] = $surplus_score;
+                continue;
+              }
 
-                  // Matching wildcard tags that are also tags that have
-                  // attribute config that is not yet supported.
-                  $wildcard_tags_in_config_missing_attributes = array_intersect_key(array_flip($wildcard_tags), $supported_tags_with_unsupported_attributes);
-                  foreach (array_keys($wildcard_tags_in_config_missing_attributes) as $wildcard_provided_tag) {
-                    $elements_with_attribute_config[$wildcard_provided_tag] = $attribute_config;
+              // With specific attribute restrictions: array.
+              foreach ($attributes_config as $attribute_name => $attribute_config) {
+                if (!is_array($attribute_config)) {
+                  $plugin_candidates[$tag_name][$attribute_name][$attribute_config][$plugin_id] = $surplus_score;
+                }
+                else {
+                  foreach ($attribute_config as $allowed_attribute_value => $allowed_attribute_value_config) {
+                    $plugin_candidates[$tag_name][$attribute_name][$allowed_attribute_value][$allowed_attribute_value_config][$plugin_id] = $surplus_score;
                   }
-
-                  // Remove the wildcard 'tag', as the tags it represents are
-                  // now accounted for.
-                  unset($elements_with_attribute_config[$tag_name]);
                 }
               }
-              $disabled_plugins_with_attribute_config[$plugin_id] = $elements_with_attribute_config;
+
+              // If this plugin supports unneeded attributes, it still makes a
+              // valid candidate for supporting the HTML tag.
+              $plugin_candidates[$tag_name]['-attributes-none-'][$plugin_id] = $surplus_score;
             }
           }
         }
       }
+    }
 
-      // This will contain plugins to be enabled if they provide support for the
-      // not-yet-supported attributes.
-      $plugins_to_enable_to_support_attribute_config = [];
-      foreach ($supported_tags_with_unsupported_attributes as $tag_name => $attributes_config) {
-        foreach ($attributes_config as $attribute_name => $attribute_config) {
-          // This means the existing config must allow all values of the
-          // attribute.
-          if ($attribute_config === TRUE) {
-            // See if there is a disabled plugin that will provide full use of
-            // the attribute for a given tag.
-            foreach ($disabled_plugins_with_attribute_config as $disabled_plugin_id => $disabled_plugin_elements_config) {
-              if (isset($disabled_plugin_elements_config[$tag_name][$attribute_name]) && $disabled_plugin_elements_config[$tag_name][$attribute_name] === TRUE) {
-                // Add this to the 'plugins to enable' array. Setting this value
-                // to TRUE instead of an array indicates to the message system
-                // that the attribute is allowed for the tag with any value.
-                $plugins_to_enable_to_support_attribute_config[$disabled_plugin_id][$attribute_name][$tag_name] = TRUE;
+    return $plugin_candidates;
+  }
 
-                // This attribute can be removed from the list of unsupported
-                // attributes for the tag.
-                unset($supported_tags_with_unsupported_attributes[$tag_name][$attribute_name]);
-              }
-            }
+  /**
+   * Selects best candidate for each of the still needed restrictions.
+   *
+   * @param array $candidates
+   *   The output of ::getCandidates().
+   * @param \Drupal\ckeditor5\HTMLRestrictions $still_needed
+   *   The still needed HTML restrictions, unmet by the already enabled CKEditor
+   *   5 plugins.
+   * @param string[] $already_supported_tags
+   *   A list of already supported HTML tags, necessary to select the best
+   *   matching candidate for elements still needed in $still_needed.
+   *
+   * @return array
+   *   A nested array with a tree structure, with each key a selected CKEditor 5
+   *   plugin ID and its values expressing the reason it was enabled.
+   */
+  private static function selectCandidate(array $candidates, HTMLRestrictions $still_needed, array $already_supported_tags): array {
+    assert(Inspector::assertAllStrings($already_supported_tags));
+
+    // Make a selection in the candidates: minimize the surplus count, to
+    // avoid generating surplus additions whenever possible.
+    $selected_plugins = [];
+    foreach ($still_needed->getAllowedElements() as $tag_name => $attributes_config) {
+      if (!isset($candidates[$tag_name])) {
+        // Sadly no plugin found for this tag.
+        continue;
+      }
+
+      // Non-specific attribute restrictions for tag.
+      if (is_bool($attributes_config)) {
+        $key = $attributes_config ? '-attributes-any-' : '-attributes-none-';
+        if (!isset($candidates[$tag_name][$key])) {
+          // Sadly no plugin found for this tag + unspecific attribute.
+          continue;
+        }
+        asort($candidates[$tag_name][$key]);
+        $selected_plugin_id = array_keys($candidates[$tag_name][$key])[0];
+        $selected_plugins[$selected_plugin_id][$key][$tag_name] = NULL;
+        continue;
+      }
+
+      // Specific attribute restrictions for tag.
+      foreach ($attributes_config as $attribute_name => $attribute_config) {
+        if (!isset($candidates[$tag_name][$attribute_name])) {
+          // Sadly no plugin found for this tag + attribute.
+          continue;
+        }
+        if (!is_array($attribute_config)) {
+          if (!isset($candidates[$tag_name][$attribute_name][$attribute_config])) {
+            // Sadly no plugin found for this tag + attribute + config.
+            continue;
           }
-          else {
-            // This condition is reached if the existing configuration has the
-            // attribute value restricted to specific values.
-            // @todo currently, this will enable plugins that allow ALL values
-            //   for an attribute. This means the attribute+value is now allowed
-            //   but additional attribute values are permitted as well. This may
-            //   need to be more selective
-            //   https://www.drupal.org/project/ckeditor5/issues/3231328.
-            foreach ($attribute_config as $allowed_attribute_value => $noop) {
-              foreach ($disabled_plugins_with_attribute_config as $disabled_plugin_id => $disabled_plugin_config) {
-                if (isset($disabled_plugin_config[$tag_name][$attribute_name])) {
-                  if ($disabled_plugin_config[$tag_name][$attribute_name] === TRUE) {
-                    unset($supported_tags_with_unsupported_attributes[$tag_name][$attribute_name]);
-                    $plugins_to_enable_to_support_attribute_config[$disabled_plugin_id][$attribute_name][$tag_name] = TRUE;
-                  }
-                  elseif (is_array($disabled_plugin_config[$tag_name][$attribute_name])) {
-                    foreach ($disabled_plugin_config[$tag_name][$attribute_name] as $disabled_plugin_attribute_name => $disabled_plugin_allowed_value) {
-                      if ($disabled_plugin_attribute_name === $allowed_attribute_value) {
-                        unset($supported_tags_with_unsupported_attributes[$tag_name][$attribute_name][$allowed_attribute_value]);
-                        if (empty($supported_tags_with_unsupported_attributes[$tag_name][$attribute_name])) {
-                          unset($supported_tags_with_unsupported_attributes[$tag_name][$attribute_name]);
-                        }
-                        $plugins_to_enable_to_support_attribute_config[$disabled_plugin_id][$attribute_name][$tag_name][] = $allowed_attribute_value;
-                      }
-                    }
-                  }
-                }
-              }
+          asort($candidates[$tag_name][$attribute_name][$attribute_config]);
+          $selected_plugin_id = array_keys($candidates[$tag_name][$attribute_name][$attribute_config])[0];
+          $selected_plugins[$selected_plugin_id][$attribute_name][$tag_name] = $attribute_config;
+          continue;
+        }
+        else {
+          foreach ($attribute_config as $allowed_attribute_value => $allowed_attribute_value_config) {
+            if (!isset($candidates[$tag_name][$attribute_name][$allowed_attribute_value][$allowed_attribute_value_config])) {
+              // Sadly no plugin found for this tag + attr + value + config.
+              continue;
             }
+            asort($candidates[$tag_name][$attribute_name][$allowed_attribute_value][$allowed_attribute_value_config]);
+            $selected_plugin_id = array_keys($candidates[$tag_name][$attribute_name][$allowed_attribute_value][$allowed_attribute_value_config])[0];
+            $selected_plugins[$selected_plugin_id][$attribute_name][$tag_name][$allowed_attribute_value] = $allowed_attribute_value_config;
+            continue;
           }
         }
       }
 
-      $supported_tags_with_unsupported_attributes = array_filter($supported_tags_with_unsupported_attributes);
-      $missing_attributes = implode(' ', HTMLRestrictionsUtilities::toReadableElements($supported_tags_with_unsupported_attributes));
+      // If we got to this point, no exact match was found. But selecting a
+      // plugin to support the tag at all (when it is not yet supported) is
+      // crucial to meet the user's expectations.
+      // For example: when `<blockquote cite>` is needed, select at least the
+      // plugin that can support `<blockquote>`, then only the `cite` attribute
+      // needs to be made possible using the `SourceEditing` plugin.
+      if (!in_array($tag_name, $already_supported_tags, TRUE) && isset($candidates[$tag_name]['-attributes-none-'])) {
+        asort($candidates[$tag_name]['-attributes-none-']);
+        $selected_plugin_id = array_keys($candidates[$tag_name]['-attributes-none-'])[0];
+        $selected_plugins[$selected_plugin_id]['-attributes-none-'][$tag_name] = NULL;
+      }
+    }
+
+    // The above selects all exact matches. It's possible the same plugin is
+    // selected for multiple reasons: for supporting the tag at all, but also
+    // for supporting more attributes on the tag. Whenever that scenario
+    // occurs, keep only the "tag" reason, since that is the most relevant one
+    // for the end user. Otherwise a single plugin being selected (and enabled)
+    // could generate multiple messages, which would be confusing and
+    // overwhelming for the user.
+    // For example: when `<a href>` is needed, supporting `<a>` is more
+    // relevant to be informed about as an end user than the plugin also being
+    // enabled to support the `href` attribute.
+    foreach ($selected_plugins as $selected_plugin_id => $reason) {
+      if (count($reason) > 1 && isset($reason['-attributes-none-'])) {
+        $selected_plugins[$selected_plugin_id] = array_intersect_key($reason, ['-attributes-none-' => TRUE]);
+      }
+    }
+
+    return $selected_plugins;
+  }
+
+  /**
+   * Adds CKEditor 5 toolbar items to match the format's HTML elements.
+   *
+   * @param \Drupal\filter\FilterFormatInterface $format
+   *   The text format for which to compute smart default settings.
+   * @param \Drupal\editor\EditorInterface $editor
+   *   The text editor config entity to update.
+   *
+   * @return array|null
+   *   NULL when nothing happened, otherwise an array with three values:
+   *   1. a description (for use in a message) of which CKEditor 5 plugins were
+   *      enabled to match the HTML tags allowed by the text format.
+   *   2. a description (for use in a message) of which CKEditor 5 plugins were
+   *      enabled to match the HTML attributes allowed by the text format.
+   *   3. the unsupported elements, in an HTMLRestrictions value object
+   */
+  private function addToolbarItemsToMatchHtmlElementsInFormat(FilterFormatInterface $format, EditorInterface $editor): ?array {
+    $html_restrictions_needed_elements = $format->getHtmlRestrictions();
+    if ($html_restrictions_needed_elements === FALSE) {
+      return NULL;
+    }
+
+    $all_definitions = $this->pluginManager->getDefinitions();
+    $enabled_definitions = $this->pluginManager->getEnabledDefinitions($editor);
+    $disabled_definitions = array_diff_key($all_definitions, $enabled_definitions);
+    $enabled_plugins = array_keys($enabled_definitions);
+    $provided_elements = $this->pluginManager->getProvidedElements($enabled_plugins);
+    $provided = new HTMLRestrictions($provided_elements);
+    $still_needed = HTMLRestrictions::fromTextFormat($format)->diff($provided);
+
+    if (!$still_needed->allowsNothing()) {
+      $plugin_candidates = self::getCandidates($provided, $still_needed, $disabled_definitions);
+      $selected_plugins = self::selectCandidate($plugin_candidates, $still_needed, array_keys($provided->getAllowedElements()));
 
       // If additional plugins need to be enable to support attribute config,
       // loop through the list to enable the plugins and build a UI message that
       // will convey this plugin-enabling to the user.
-      if (!empty($plugins_to_enable_to_support_attribute_config)) {
+      if (!empty($selected_plugins)) {
+        $enabled_for_tags_message_content = '';
         $enabled_for_attributes_message_content = '';
         $editor_settings_to_update = $editor->getSettings();
-        foreach ($plugins_to_enable_to_support_attribute_config as $plugin_id => $reason_why_enabled) {
+        // Create new group for all the added toolbar items.
+        $editor_settings_to_update['toolbar']['items'][] = '|';
+        foreach ($selected_plugins as $plugin_id => $reason_why_enabled) {
           $plugin_definition = $this->pluginManager->getDefinition($plugin_id);
           $label = $plugin_definition->label();
           if ($plugin_definition->hasToolbarItems()) {
+            [$net_new] = self::computeNetNewElementsForPlugin($provided, $still_needed, $plugin_definition);
             $editor_settings_to_update['toolbar']['items'] = array_merge($editor_settings_to_update['toolbar']['items'], array_keys($plugin_definition->getToolbarItems()));
             foreach ($reason_why_enabled as $attribute_name => $attribute_config) {
+              // Plugin was selected for tag.
+              if (in_array($attribute_name, ['-attributes-none-', '-attributes-any-'], TRUE)) {
+                $label = $plugin_definition->label();
+                $tags = array_reduce(array_keys($net_new->getAllowedElements()), function ($carry, $item) {
+                  return $carry . "<$item>";
+                });
+                $enabled_for_tags_message_content .= "$label (for tags: $tags) ";
+                // This plugin does not add attributes: continue to next plugin.
+                continue;
+              }
+              // Plugin was selected for attribute.
               $enabled_for_attributes_message_content .= "$label (";
               foreach ($attribute_config as $tag_name => $attribute_value_config) {
                 $enabled_for_attributes_message_content .= " for tag: <$tag_name> to support: $attribute_name";
                 if (is_array($attribute_value_config)) {
                   $enabled_for_attributes_message_content .= " with value(s): ";
-                  foreach ($attribute_value_config as $allowed_value) {
+                  foreach (array_keys($attribute_value_config) as $allowed_value) {
                     $enabled_for_attributes_message_content .= " $allowed_value,";
                   }
                   $enabled_for_attributes_message_content = substr($enabled_for_attributes_message_content, 0, -1) . '), ';
                 }
               }
             }
+
+            // Fewer attributes are still needed.
+            $still_needed = $still_needed->diff($net_new);
           }
         }
         $editor->setSettings($editor_settings_to_update);
-        // Some plugins enabled, maybe some missing attributes.
+        // Some plugins enabled, maybe some missing tags or attributes.
         return [
+          substr($enabled_for_tags_message_content, 0, -1),
           substr($enabled_for_attributes_message_content, 0, -2),
-          $missing_attributes,
+          $still_needed,
         ];
       }
       else {
-        // No plugins enabled, maybe some missing attributes.
+        // No plugins enabled, maybe some missing tags or attributes.
         return [
           NULL,
-          $missing_attributes,
+          NULL,
+          $still_needed,
         ];
       }
     }
@@ -640,7 +778,7 @@ final class SmartDefaultSettings {
         $subset_configuration = $this->upgradePluginManager->computeCKEditor5PluginSubsetConfiguration($plugin_name, $text_format);
       }
       catch (\OutOfBoundsException $e) {
-        $messages[] = $this->t('The CKEditor 5 plugin %button has a configurable subset of elements, but does not have a known upgrade path to configure that subset to match your text format. Hence it is now using its default configuration.', [
+        $messages[MessengerInterface::TYPE_WARNING][] = $this->t('The CKEditor 5 plugin %button has a configurable subset of elements, but does not have a known upgrade path to configure that subset to match your text format. Hence it is now using its default configuration.', [
           '%plugin' => $plugin_name,
         ]);
         continue;

@@ -44,6 +44,7 @@ class DevelTwigExtensionTest extends KernelTestBase {
 
     $devel_role = Role::create([
       'id' => 'admin',
+      'label' => 'Admin',
       'permissions' => ['access devel information'],
     ]);
     $devel_role->save();

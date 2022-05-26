@@ -5,7 +5,7 @@ package: Media
 type: module
 hidden: true
 
-# Information added by Drupal.org packaging script on 2020-03-26
-version: '8.x-2.1'
+# Information added by Drupal.org packaging script on 2022-02-18
+version: '8.x-2.2'
 project: 'crop'
-datestamp: 1585251788
+datestamp: 1645187495

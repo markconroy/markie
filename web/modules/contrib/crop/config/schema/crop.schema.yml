@@ -47,6 +47,9 @@ image.effect.crop_crop:
     crop_type:
       label: 'Crop type'
       type: string
+    automatic_crop_provider:
+      label: 'Automatic crop provider'
+      type: string
 
 crop.settings:
   type: config_object

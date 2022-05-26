@@ -636,6 +636,7 @@ class ContentDevelGenerate extends DevelGenerateBase implements ContainerFactory
       'title' => $title_prefix . $this->getRandom()->sentences(mt_rand(1, $results['title_length']), TRUE),
       'uid' => $uid,
       'revision' => mt_rand(0, 1),
+      'moderation_state' => 'published',
       'status' => TRUE,
       'promote' => mt_rand(0, 1),
       'created' => $this->time->getRequestTime() - mt_rand(0, $results['time_range']),

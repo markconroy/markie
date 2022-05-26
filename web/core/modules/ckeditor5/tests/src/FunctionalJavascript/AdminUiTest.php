@@ -2,6 +2,8 @@
 
 namespace Drupal\Tests\ckeditor5\FunctionalJavascript;
 
+// cspell:ignore sourceediting
+
 /**
  * Tests for CKEditor 5 in the admin UI.
  *
@@ -16,6 +18,9 @@ class AdminUiTest extends CKEditor5TestBase {
   protected static $modules = [
     'media_library',
     'ckeditor',
+    // @todo Remove in https://www.drupal.org/project/drupal/issues/3269657
+    'ckeditor5_plugin_elements_subset',
+    'ckeditor5_incompatible_filter_test',
   ];
 
   /**
@@ -68,9 +73,10 @@ class AdminUiTest extends CKEditor5TestBase {
 
     // Enable a filter that is incompatible with CKEditor 5, so validation is
     // triggered when attempting to switch.
+    $incompatible_filter_name = 'filters[filter_incompatible][status]';
     $number_ajax_instances_before = $this->getSession()->evaluateScript('Drupal.ajax.instances.length');
-    $this->assertTrue($page->hasUncheckedField('filters[filter_autop][status]'));
-    $page->checkField('filters[filter_autop][status]');
+    $this->assertTrue($page->hasUncheckedField($incompatible_filter_name));
+    $page->checkField($incompatible_filter_name);
     $this->assertEmpty($assert_session->waitForElement('css', '.ajax-progress-throbber'));
     $assert_session->assertWaitOnAjaxRequest();
     $number_ajax_instances_after = $this->getSession()->evaluateScript('Drupal.ajax.instances.length');
@@ -79,18 +85,20 @@ class AdminUiTest extends CKEditor5TestBase {
     $page->selectFieldOption('editor[editor]', 'ckeditor5');
     $assert_session->assertWaitOnAjaxRequest();
 
+    $filter_warning = 'CKEditor 5 only works with HTML-based text formats. The "A TYPE_MARKUP_LANGUAGE filter incompatible with CKEditor 5" (filter_incompatible) filter implies this text format is not HTML anymore.';
+
     // The presence of this validation error message confirms the AJAX callback
     // was invoked.
-    $assert_session->pageTextContains('CKEditor 5 only works with HTML-based text formats');
+    $assert_session->pageTextContains($filter_warning);
 
     // Disable the incompatible filter. This should trigger another AJAX rebuild
     // which will include the removal of the validation error as the issue has
     // been corrected.
-    $this->assertTrue($page->hasCheckedField('filters[filter_autop][status]'));
-    $page->uncheckField('filters[filter_autop][status]');
+    $this->assertTrue($page->hasCheckedField($incompatible_filter_name));
+    $page->uncheckField($incompatible_filter_name);
     $this->assertNotEmpty($assert_session->waitForElement('css', '.ajax-progress-throbber'));
     $assert_session->assertWaitOnAjaxRequest();
-    $assert_session->pageTextNotContains('CKEditor 5 only works with HTML-based text formats');
+    $assert_session->pageTextNotContains($filter_warning);
   }
 
   /**
@@ -147,27 +155,86 @@ class AdminUiTest extends CKEditor5TestBase {
     $this->addNewTextFormat($page, $assert_session);
     $this->drupalGet('admin/config/content/formats/manage/ckeditor5');
 
+    // Add the source editing plugin to the CKEditor 5 toolbar.
+    $this->assertNotEmpty($assert_session->waitForElement('css', '.ckeditor5-toolbar-item-sourceEditing'));
+    $this->triggerKeyUp('.ckeditor5-toolbar-item-sourceEditing', 'ArrowDown');
+    $assert_session->assertWaitOnAjaxRequest();
+
     $find_validation_error_messages = function () use ($page): array {
-      return $page->findAll('css', '[role=alert]:contains("CKEditor 5 only works with HTML-based text formats.")');
+      return $page->findAll('css', '[role=alert]:contains("The following tag(s) are already supported by enabled plugins and should not be added to the Source Editing "Manually editable HTML tags" field: Bold (<strong>).")');
     };
 
     // No validation errors when we start.
     $this->assertCount(0, $find_validation_error_messages());
 
-    // Enable a filter which is not compatible with CKEditor 5, to trigger a
+    // Configure Source Editing to allow editing `<strong>` to trigger
     // validation error.
-    $page->checkField('Convert URLs into links');
+    $assert_session->waitForText('Source editing');
+    $page->find('css', '[href^="#edit-editor-settings-plugins-ckeditor5-sourceediting"]')->click();
+    $assert_session->assertWaitOnAjaxRequest();
+    $assert_session->waitForText('Manually editable HTML tags');
+    $source_edit_tags_field = $assert_session->fieldExists('editor[settings][plugins][ckeditor5_sourceEditing][allowed_tags]');
+    $source_edit_tags_field->setValue('<strong>');
     $assert_session->assertWaitOnAjaxRequest();
     $this->assertCount(1, $find_validation_error_messages());
 
-    // Disable it: validation messages should be gone.
-    $page->uncheckField('Convert URLs into links');
+    // Revert Source Editing it: validation messages should be gone.
+    $source_edit_tags_field->setValue('');
     $assert_session->assertWaitOnAjaxRequest();
+    $this->assertCount(0, $find_validation_error_messages());
 
-    // Re-enable it: validation messages should be back.
-    $page->checkField('Convert URLs into links');
+    // Add `<strong>` again: validation messages should be back.
+    $source_edit_tags_field->setValue('<strong>');
     $assert_session->assertWaitOnAjaxRequest();
     $this->assertCount(1, $find_validation_error_messages());
+  }
+
+  /**
+   * Tests the plugin settings form section.
+   */
+  public function testPluginSettingsFormSection() {
+    $page = $this->getSession()->getPage();
+    $assert_session = $this->assertSession();
+
+    $this->createNewTextFormat($page, $assert_session);
+    $assert_session->assertWaitOnAjaxRequest();
+
+    // The default toolbar only enables the configurable heading plugin and the
+    // non-configurable bold and italic plugins.
+    $assert_session->fieldValueEquals('editor[settings][toolbar][items]', '["heading","bold","italic"]');
+    // The heading plugin config form should be present.
+    $assert_session->elementExists('css', '[data-drupal-selector="edit-editor-settings-plugins-ckeditor5-heading"]');
+
+    // Remove the heading plugin from the toolbar.
+    $this->triggerKeyUp('.ckeditor5-toolbar-item-heading', 'ArrowUp');
+    $assert_session->assertWaitOnAjaxRequest();
+
+    // The heading plugin config form should no longer be present.
+    $assert_session->elementNotExists('css', '[data-drupal-selector="edit-editor-settings-plugins-ckeditor5-heading"]');
+    // The plugin settings wrapper should still be present, but empty.
+    $assert_session->elementExists('css', '#plugin-settings-wrapper');
+    $assert_session->elementNotContains('css', '#plugin-settings-wrapper', '<div');
+
+    // Enable the source plugin.
+    $this->triggerKeyUp('.ckeditor5-toolbar-item-sourceEditing', 'ArrowDown');
+    $assert_session->assertWaitOnAjaxRequest();
+
+    // The source plugin config form should be present.
+    $assert_session->elementExists('css', '[data-drupal-selector="edit-editor-settings-plugins-ckeditor5-sourceediting"]');
+
+    // The filter-dependent configurable plugin should not be present.
+    // @todo Change to `media_media` plugin in https://www.drupal.org/project/drupal/issues/3269657
+    // cSpell:disable-next-line
+    $assert_session->elementNotExists('css', '[data-drupal-selector="edit-editor-settings-plugins-ckeditor5-plugin-elements-subset-sneakysuperset"]');
+
+    // Enable the filter that the configurable plugin depends on.
+    $this->assertTrue($page->hasUncheckedField('filters[media_embed][status]'));
+    $page->checkField('filters[media_embed][status]');
+    $assert_session->assertWaitOnAjaxRequest();
+
+    // The filter-dependent configurable plugin should be present.
+    // cSpell:disable-next-line
+    $assert_session->elementExists('css', '[data-drupal-selector="edit-editor-settings-plugins-ckeditor5-plugin-elements-subset-sneakysuperset"]');
   }
 
   /**

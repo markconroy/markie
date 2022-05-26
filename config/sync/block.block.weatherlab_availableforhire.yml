@@ -10,8 +10,8 @@ dependencies:
     - weatherlab
 id: weatherlab_availableforhire
 theme: weatherlab
-region: above_header
-weight: 0
+region: hidden
+weight: -6
 provider: null
 plugin: 'block_content:17330dd7-e585-4a0c-ab8e-72bd477127c8'
 settings:

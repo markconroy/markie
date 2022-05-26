@@ -4,10 +4,12 @@ declare(strict_types = 1);
 
 namespace Drupal\ckeditor5\Plugin\Validation\Constraint;
 
-use Drupal\ckeditor5\HTMLRestrictionsUtilities;
+use Drupal\ckeditor5\HTMLRestrictions;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\editor\EditorInterface;
 use Drupal\filter\FilterFormatInterface;
+use Drupal\filter\Plugin\Filter\FilterAutoP;
+use Drupal\filter\Plugin\Filter\FilterUrl;
 use Drupal\filter\Plugin\FilterInterface;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
@@ -74,6 +76,13 @@ class FundamentalCompatibilityConstraintValidator extends ConstraintValidator im
   /**
    * Checks no TYPE_MARKUP_LANGUAGE filters are present.
    *
+   * Two TYPE_MARKUP_LANGUAGE filters are exempted:
+   * - filter_autop: pointless but harmless to have enabled
+   * - filter_url: not recommended but also harmless to have enabled
+   *
+   * These two commonly enabled filters with a long history in Drupal are
+   * considered to be acceptable to have enabled.
+   *
    * @param \Drupal\filter\FilterFormatInterface $text_format
    *   The text format to validate.
    * @param \Drupal\ckeditor5\Plugin\Validation\Constraint\FundamentalCompatibilityConstraint $constraint
@@ -85,6 +94,9 @@ class FundamentalCompatibilityConstraintValidator extends ConstraintValidator im
       FilterInterface::TYPE_MARKUP_LANGUAGE
     );
     foreach ($markup_filters as $markup_filter) {
+      if ($markup_filter instanceof FilterAutoP || $markup_filter instanceof FilterUrl) {
+        continue;
+      }
       $this->context->buildViolation($constraint->noMarkupFiltersMessage)
         ->setParameter('%filter_label', $markup_filter->getLabel())
         ->setParameter('%filter_plugin_id', $markup_filter->getPluginId())
@@ -101,10 +113,11 @@ class FundamentalCompatibilityConstraintValidator extends ConstraintValidator im
    *   The constraint to validate.
    */
   private function checkHtmlRestrictionsAreCompatible(FilterFormatInterface $text_format, FundamentalCompatibilityConstraint $constraint): void {
-    $minimum_tags = array_keys($this->pluginManager->getProvidedElements(self::FUNDAMENTAL_CKEDITOR5_PLUGINS));
+    $fundamental = new HTMLRestrictions($this->pluginManager->getProvidedElements(self::FUNDAMENTAL_CKEDITOR5_PLUGINS));
 
+    // @todo Remove in favor of HTMLRestrictions::diff() in https://www.drupal.org/project/drupal/issues/3231336
     $html_restrictions = $text_format->getHtmlRestrictions();
-
+    $minimum_tags = array_keys($fundamental->getAllowedElements());
     $forbidden_minimum_tags = isset($html_restrictions['forbidden_tags'])
       ? array_diff($minimum_tags, $html_restrictions['forbidden_tags'])
       : [];
@@ -116,11 +129,12 @@ class FundamentalCompatibilityConstraintValidator extends ConstraintValidator im
         ->addViolation();
     }
 
-    $not_allowed_minimum_tags = isset($html_restrictions['allowed'])
-      ? array_diff($minimum_tags, array_keys($html_restrictions['allowed']))
-      : [];
-    if (!empty($not_allowed_minimum_tags)) {
-      $offending_filter = static::findHtmlRestrictorFilterNotAllowingTags($text_format, $minimum_tags);
+    // @todo Remove early return in https://www.drupal.org/project/drupal/issues/3231336
+    if (!isset($html_restrictions['allowed'])) {
+      return;
+    }
+    if (!$fundamental->diff(HTMLRestrictions::fromTextFormat($text_format))->allowsNothing()) {
+      $offending_filter = static::findHtmlRestrictorFilterNotAllowingTags($text_format, $fundamental);
       $this->context->buildViolation($constraint->nonAllowedElementsMessage)
         ->setParameter('%filter_label', $offending_filter->getLabel())
         ->setParameter('%filter_plugin_id', $offending_filter->getPluginId())
@@ -146,34 +160,23 @@ class FundamentalCompatibilityConstraintValidator extends ConstraintValidator im
     $provided = $this->pluginManager->getProvidedElements($enabled_plugins, $text_editor);
 
     foreach ($html_restrictor_filters as $filter_plugin_id => $filter) {
-      $restrictions = $filter->getHTMLRestrictions();
-      if (!isset($restrictions['allowed'])) {
-        // @todo Handle HTML restrictor filters that only set forbidden_tags
-        //   https://www.drupal.org/project/ckeditor5/issues/3231336.
-        continue;
-      }
+      $allowed = HTMLRestrictions::fromFilterPluginInstance($filter);
+      $provided = new HTMLRestrictions($provided);
+      $diff_allowed = $allowed->diff($provided);
+      $diff_elements = $provided->diff($allowed);
 
-      $allowed = $restrictions['allowed'];
-      // @todo Validate attributes allowed or forbidden on all elements
-      //   https://www.drupal.org/project/ckeditor5/issues/3231334.
-      if (isset($allowed['*'])) {
-        unset($allowed['*']);
-      }
-
-      $diff_allowed = HTMLRestrictionsUtilities::diffAllowedElements($allowed, $provided);
-      $diff_elements = HTMLRestrictionsUtilities::diffAllowedElements($provided, $allowed);
-
-      if (!empty($diff_allowed)) {
+      if (!$diff_allowed->allowsNothing()) {
         $this->context->buildViolation($constraint->notSupportedElementsMessage)
-          ->setParameter('@list', implode(' ', HTMLRestrictionsUtilities::toReadableElements($provided)))
-          ->setParameter('@diff', implode(' ', HTMLRestrictionsUtilities::toReadableElements($diff_allowed)))
+          ->setParameter('@list', implode(' ', $provided->toCKEditor5ElementsArray()))
+          ->setParameter('@diff', implode(' ', $diff_allowed->toCKEditor5ElementsArray()))
           ->atPath("filters.$filter_plugin_id")
           ->addViolation();
       }
-      elseif (!empty($diff_elements)) {
+
+      if (!$diff_elements->allowsNothing()) {
         $this->context->buildViolation($constraint->missingElementsMessage)
-          ->setParameter('@list', implode(' ', HTMLRestrictionsUtilities::toReadableElements($provided)))
-          ->setParameter('@diff', implode(' ', HTMLRestrictionsUtilities::toReadableElements($diff_elements)))
+          ->setParameter('@list', implode(' ', $provided->toCKEditor5ElementsArray()))
+          ->setParameter('@diff', implode(' ', $diff_elements->toCKEditor5ElementsArray()))
           ->atPath("filters.$filter_plugin_id")
           ->addViolation();
       }
@@ -255,15 +258,15 @@ class FundamentalCompatibilityConstraintValidator extends ConstraintValidator im
    *
    * @param \Drupal\filter\FilterFormatInterface $text_format
    *   A text format whose filters to check for compatibility.
-   * @param string[] $required_tags
-   *   A list of HTML tags that are required.
+   * @param \Drupal\ckeditor5\HTMLRestrictions $required
+   *   A set of HTML restrictions, listing required HTML tags.
    *
    * @return \Drupal\filter\Plugin\FilterInterface
    *   The filter plugin instance not allowing the required tags.
    *
    * @throws \InvalidArgumentException
    */
-  private static function findHtmlRestrictorFilterNotAllowingTags(FilterFormatInterface $text_format, array $required_tags): FilterInterface {
+  private static function findHtmlRestrictorFilterNotAllowingTags(FilterFormatInterface $text_format, HTMLRestrictions $required): FilterInterface {
     // Get HTML restrictor filters that actually restrict HTML.
     $filters = static::getFiltersInFormatOfType(
       $text_format,
@@ -274,9 +277,8 @@ class FundamentalCompatibilityConstraintValidator extends ConstraintValidator im
     );
 
     foreach ($filters as $filter) {
-      $restrictions = $filter->getHTMLRestrictions();
-
-      if (isset($restrictions['allowed']) && !empty(array_diff($required_tags, array_keys($restrictions['allowed'])))) {
+      // Return any filter not allowing >=1 of the required tags.
+      if (!$required->diff(HTMLRestrictions::fromFilterPluginInstance($filter))->allowsNothing()) {
         return $filter;
       }
     }

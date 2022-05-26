@@ -125,7 +125,7 @@ class CropFunctionalTest extends BrowserTestBase {
     $this->testStyle = $this->container->get('entity_type.manager')->getStorage('image_style')->loadUnchanged($this->testStyle->id());
     self::assertEquals($this->testStyle->getEffects()->count(), 1, 'One image effect added to test image style.');
     $effect_configuration = $this->testStyle->getEffects()->getIterator()->current()->getConfiguration();
-    self::assertEquals($effect_configuration['data'], ['crop_type' => $edit['id']], 'Manual crop effect uses correct image style.');
+    self::assertEquals($effect_configuration['data'], ['crop_type' => $edit['id'], 'automatic_crop_provider' => NULL], 'Manual crop effect uses correct image style.');
 
     // Tests the image URI is extended with shortened hash in case of image
     // style and corresponding crop existence.

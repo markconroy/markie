@@ -8,7 +8,7 @@ import {
   clickOutsideHandler,
 } from 'ckeditor5/src/ui';
 
-import { getSelectedDrupalMediaWidget } from '../utils';
+import { getClosestSelectedDrupalMediaWidget, isDrupalMedia } from '../utils';
 import {
   getBalloonPositionData,
   repositionContextualBalloon,
@@ -23,21 +23,21 @@ import TextAlternativeFormView from './ui/textalternativeformview';
  */
 export default class MediaImageTextAlternativeUi extends Plugin {
   /**
-   * @inheritDoc
+   * @inheritdoc
    */
   static get requires() {
     return [ContextualBalloon];
   }
 
   /**
-   * @inheritDoc
+   * @inheritdoc
    */
   static get pluginName() {
     return 'MediaImageTextAlternativeUi';
   }
 
   /**
-   * @inheritDoc
+   * @inheritdoc
    */
   init() {
     this._createButton();
@@ -45,7 +45,7 @@ export default class MediaImageTextAlternativeUi extends Plugin {
   }
 
   /**
-   * @inheritDoc
+   * @inheritdoc
    */
   destroy() {
     super.destroy();
@@ -64,7 +64,7 @@ export default class MediaImageTextAlternativeUi extends Plugin {
       const view = new ButtonView(locale);
 
       view.set({
-        label: Drupal.t('Override media image text alternative'),
+        label: Drupal.t('Override media image alternative text'),
         icon: icons.lowVision,
         tooltip: true,
       });
@@ -121,9 +121,10 @@ export default class MediaImageTextAlternativeUi extends Plugin {
       cancel();
     });
 
-    // Reposition the balloon or hide the form if an image widget is no longer selected.
+    // Reposition the balloon or hide the form if a media widget is no longer
+    // selected.
     this.listenTo(editor.ui, 'update', () => {
-      if (!getSelectedDrupalMediaWidget(viewDocument.selection)) {
+      if (!getClosestSelectedDrupalMediaWidget(viewDocument.selection)) {
         this._hideForm(true);
       } else if (this._isVisible) {
         repositionContextualBalloon(editor);
@@ -146,9 +147,11 @@ export default class MediaImageTextAlternativeUi extends Plugin {
     if (this._isVisible) {
       return;
     }
-
     const editor = this.editor;
     const command = editor.commands.get('mediaImageTextAlternative');
+    const metadataRepository = editor.plugins.get(
+      'DrupalMediaMetadataRepository',
+    );
     const labeledInput = this._form.labeledInput;
 
     this._form.disableCssTransitions();
@@ -167,6 +170,28 @@ export default class MediaImageTextAlternativeUi extends Plugin {
     // https://github.com/ckeditor/ckeditor5-image/issues/114
     labeledInput.fieldView.element.value = command.value || '';
     labeledInput.fieldView.value = labeledInput.fieldView.element.value;
+
+    this._form.defaultAltText = '';
+    const modelElement = editor.model.document.selection.getSelectedElement();
+
+    // Make sure that each time the panel shows up, the default alt text remains
+    // in sync with the value from the metadata repository.
+    if (isDrupalMedia(modelElement)) {
+      metadataRepository
+        .getMetadata(modelElement)
+        .then((metadata) => {
+          this._form.defaultAltText = metadata.imageSourceMetadata
+            ? metadata.imageSourceMetadata.alt
+            : '';
+        })
+        .catch((e) => {
+          // There isn't any UI indication for errors because this should be
+          // always called after the Drupal Media has been upcast, which would
+          // already display an error in the UI.
+          // @see module:drupalMedia/mediaimagetextalternative/mediaimagetextalternativeediting~MediaImageTextAlternativeEditing
+          console.warn(e.toString());
+        });
+    }
 
     this._form.labeledInput.fieldView.select();
 

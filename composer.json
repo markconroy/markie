@@ -49,7 +49,6 @@
       "drupal/twig_tweak": "^2.6",
       "drupal/video_embed_field": "^2.0",
       "drush/drush": "~10.0",
-      "hirak/prestissimo": "^0.3.10",
       "joachim-n/composer-manifest": "^1.0",
       "platformsh/config-reader": "^2.3",
       "topfloor/composer-cleanup-vcs-dirs": "^1.0",
@@ -104,5 +103,18 @@
               "type:drupal-custom-theme"
           ]
       }
+  },
+  "config": {
+    "allow-plugins": {
+      "composer/installers": true,
+      "cweagans/composer-patches": true,
+      "drupal/console-extend-plugin": true,
+      "drupal/core-composer-scaffold": true,
+      "drupal/core-project-message": true,
+      "hirak/prestissimo": true,
+      "joachim-n/composer-manifest": true,
+      "topfloor/composer-cleanup-vcs-dirs": true,
+      "zaporylie/composer-drupal-optimizations": true
+    }
   }
 }

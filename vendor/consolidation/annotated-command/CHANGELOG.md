@@ -1,5 +1,22 @@
 # Change Log
 
+### 4.5.5 - 26 April 2022
+
+- No functional change; new release to fix false positives in b/c check caused by lockfile problem.
+
+### 4.5.4 - 5 April 2022
+
+- Allow psr/log ^3
+
+### 4.5.3 - 1 April 2022
+
+- Check the type of the reflection object before attempting to call isBuiltin(). (#265)
+
+### 4.5.2 - 20 February 2022
+
+- Do not pass null to Symfony Command methods (#262)
+- CommandResult inheritance (#260)
+
 ### 4.5.1 - 29 December 2021
 
 - PHP 8.1

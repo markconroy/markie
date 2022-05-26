@@ -7,13 +7,16 @@
 
 declare(strict_types = 1);
 
+use Drupal\ckeditor5\HTMLRestrictions;
 use Drupal\ckeditor5\Plugin\Editor\CKEditor5;
+use Drupal\Component\Utility\UrlHelper;
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\InvokeCommand;
 use Drupal\Core\Ajax\MessageCommand;
 use Drupal\Core\Ajax\PrependCommand;
 use Drupal\Core\Ajax\ReplaceCommand;
 use Drupal\Core\Ajax\RemoveCommand;
+use Drupal\Core\Asset\AttachedAssetsInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Element;
 use Drupal\Core\Routing\RouteMatchInterface;
@@ -210,7 +213,7 @@ function ckeditor5_form_filter_format_form_alter(array &$form, FormStateInterfac
       }
 
       foreach ($plugins_config_form as $key => &$value) {
-        if (is_array($value) && strpos($key, '#') === FALSE) {
+        if (is_array($value) && strpos((string) $key, '#') === FALSE) {
           _add_ajax_listeners_to_plugin_inputs($value);
         }
       }
@@ -227,13 +230,44 @@ function ckeditor5_form_filter_format_form_alter(array &$form, FormStateInterfac
   $form['filter_settings']['#wrapper_attributes']['id'] = 'filter-settings-wrapper';
 
   // Add an ID to the editor settings vertical tabs wrapper so it can be easily
-  // targeted by JavaScript.
+  // targeted by JavaScript. If there are no configurable plugins, render an
+  // empty container with the same ID instead.
   // @todo consider moving this to editor.module when this module is moved to
   //   Drupal core https://www.drupal.org/project/ckeditor5/issues/3231322.
-  $form['editor']['settings']['subform']['plugin_settings']['#wrapper_attributes']['id'] = 'plugin-settings-wrapper';
+  if (!empty($form['editor']['settings']['subform']['plugins'])) {
+    $form['editor']['settings']['subform']['plugin_settings']['#wrapper_attributes']['id'] = 'plugin-settings-wrapper';
+  }
+  else {
+    $form['editor']['settings']['subform']['plugin_settings'] = [
+      '#type' => 'container',
+      '#attributes' => ['id' => 'plugin-settings-wrapper'],
+    ];
+  }
 
   $form['#after_build'][] = [CKEditor5::class, 'assessActiveTextEditorAfterBuild'];
   $form['#validate'][] = [CKEditor5::class, 'validateSwitchingToCKEditor5'];
+  array_unshift($form['actions']['submit']['#submit'], 'ckeditor5_filter_format_edit_form_submit');
+}
+
+/**
+ * Form submission handler for filter format forms.
+ */
+function ckeditor5_filter_format_edit_form_submit(array $form, FormStateInterface $form_state) {
+  $limit_allowed_html_tags = isset($form['filters']['settings']['filter_html']['allowed_html']);
+  $manually_editable_tags = $form_state->getValue(['editor', 'settings', 'plugins', 'ckeditor5_sourceEditing', 'allowed_tags']);
+  if ($limit_allowed_html_tags && is_array($manually_editable_tags)) {
+    // When "Manually editable tags" and "limit allowed HTML tags" are both
+    // configured, the former informs the value of the latter. This dependent
+    // value is typically updated via AJAX, but it's possible for "Manually
+    // editable tags" to update without triggering the AJAX rebuild. That value
+    // is recalculated here on save to ensure it happens even if the AJAX
+    // rebuild doesn't happen.
+    $manually_editable_tags_restrictions = HTMLRestrictions::fromString(implode($manually_editable_tags));
+    $format = $form_state->get('ckeditor5_validated_pair')->getFilterFormat();
+    $allowed_html = HTMLRestrictions::fromTextFormat($format);
+    $combined_tags_string = $manually_editable_tags_restrictions->merge($allowed_html)->toFilterHtmlAllowedTagsString();
+    $form_state->setValue(['filters', 'filter_html', 'settings', 'allowed_html'], $combined_tags_string);
+  }
 }
 
 /**
@@ -291,8 +325,11 @@ function _update_ckeditor5_html_filter(array $form, FormStateInterface $form_sta
   }
 
   // If switching to CKEditor 5 from another editor and there are errors in that
-  // switch, add an error class to the editor select, otherwise remove.
-  $response->addCommand(new InvokeCommand('[data-drupal-selector="edit-editor-editor"]', !$form_state->get('ckeditor5_is_active') && $form_state->get('ckeditor5_is_selected') && !empty($form_state->getErrors()) ? 'addClass' : 'removeClass', ['error']));
+  // switch, add an error class and attribute to the editor select, otherwise
+  // remove.
+  $ckeditor5_selected_but_errors = !$form_state->get('ckeditor5_is_active') && $form_state->get('ckeditor5_is_selected') && !empty($form_state->getErrors());
+  $response->addCommand(new InvokeCommand('[data-drupal-selector="edit-editor-editor"]', $ckeditor5_selected_but_errors ? 'addClass' : 'removeClass', ['error']));
+  $response->addCommand(new InvokeCommand('[data-drupal-selector="edit-editor-editor"]', $ckeditor5_selected_but_errors ? 'attr' : 'removeAttr', ['data-error-switching-to-ckeditor5', TRUE]));
 
   if (!function_exists('_add_attachments_to_editor_update_response')) {
 
@@ -324,6 +361,61 @@ function _update_ckeditor5_html_filter(array $form, FormStateInterface $form_sta
 }
 
 /**
+ * Returns a list of language codes supported by CKEditor 5.
+ *
+ * @param $lang
+ *   The Drupal langcode to match.
+ *
+ * @return array|mixed|string
+ *   The associated CKEditor 5 langcode.
+ */
+function _ckeditor5_get_langcode_mapping($lang = FALSE) {
+  // Cache the file system based language list calculation because this would
+  // be expensive to calculate all the time. The cache is cleared on core
+  // upgrades which is the only situation the CKEditor file listing should
+  // change.
+  $langcode_cache = \Drupal::cache()->get('ckeditor5.langcodes');
+  if (!empty($langcode_cache)) {
+    $langcodes = $langcode_cache->data;
+  }
+  if (empty($langcodes)) {
+    $langcodes = [];
+    // Collect languages included with CKEditor 5 based on file listing.
+    $files = scandir('core/assets/vendor/ckeditor5/ckeditor5-dll/translations');
+    foreach ($files as $file) {
+      if (str_ends_with($file, '.js')) {
+        $langcode = basename($file, '.js');
+        $langcodes[$langcode] = $langcode;
+      }
+    }
+    \Drupal::cache()->set('ckeditor5.langcodes', $langcodes);
+  }
+
+  // Get language mapping if available to map to Drupal language codes.
+  // This is configurable in the user interface and not expensive to get, so
+  // we don't include it in the cached language list.
+  $language_mappings = \Drupal::moduleHandler()->moduleExists('language') ? language_get_browser_drupal_langcode_mappings() : [];
+  foreach ($langcodes as $langcode) {
+    // If this language code is available in a Drupal mapping, use that to
+    // compute a possibility for matching from the Drupal langcode to the
+    // CKEditor langcode.
+    // For instance, CKEditor uses the langcode 'no' for Norwegian, Drupal
+    // uses 'nb'. This would then remove the 'no' => 'no' mapping and
+    // replace it with 'nb' => 'no'. Now Drupal knows which CKEditor
+    // translation to load.
+    if (isset($language_mappings[$langcode]) && !isset($langcodes[$language_mappings[$langcode]])) {
+      $langcodes[$language_mappings[$langcode]] = $langcode;
+      unset($langcodes[$langcode]);
+    }
+  }
+
+  if ($lang) {
+    return $langcodes[$lang] ?? 'en';
+  }
+  return $langcodes;
+}
+
+/**
  * Implements hook_library_info_alter().
  */
 function ckeditor5_library_info_alter(&$libraries, $extension) {
@@ -332,33 +424,152 @@ function ckeditor5_library_info_alter(&$libraries, $extension) {
     $libraries['drupal.filter.admin']['dependencies'][] = 'ckeditor5/drupal.ckeditor5.filter.admin';
   }
 
-  // If the 'ckeditor5/ie11.user.warnings' library is added as a dependency of
-  // other Ckeditor 5 libraries, it won't reliably work as the CKEditor 5 assets
-  // are loaded via AJAX, and the IE11-incompatible syntax in CKEditor 5 can
-  // prevent the AJAX call from successfully loading the functionality in
-  // 'ckeditor5/ie11.user.warnings'. Adding this as a dependency of
-  // 'system/base', as excessive as it may seem, is the most reliable way to
-  // assure it is loaded as part of the page request.
-  if ($extension === 'system') {
-    $libraries['base']['dependencies'][] = 'ckeditor5/ie11.user.warnings';
+  $moduleHandler = \Drupal::moduleHandler();
+
+  if ($extension === 'ckeditor5') {
+    // Add paths to stylesheets specified by a theme's ckeditor5-stylesheets
+    // config property.
+    $css = _ckeditor5_theme_css();
+    $libraries['drupal.ckeditor5.stylesheets'] = [
+      'css' => [
+        'theme' => array_fill_keys(array_values($css), []),
+      ],
+    ];
+
+    if ($moduleHandler->moduleExists('quickedit')) {
+      $libraries['drupal.ckeditor5']['dependencies'][] = 'ckeditor5/drupal.ckeditor5.quickedit-temporary-work-around';
+    }
   }
+
+  // Only add translation processing if the locale module is enabled.
+  if (!$moduleHandler->moduleExists('locale')) {
+    return;
+  }
+  // All possibles CKEditor 5 languages that can be used by Drupal.
+  $ckeditor_langcodes = array_values(_ckeditor5_get_langcode_mapping());
 
   if ($extension === 'core') {
     // Generate libraries for each of the CKEditor 5 translation files so that
     // the correct translation file can be attached depending on the current
+    // language. This makes sure that caching caches the appropriate language.
+    // Only create libraries for languages that have a mapping to Drupal.
+    foreach ($ckeditor_langcodes as $langcode) {
+      $libraries['ckeditor5.translations.' . $langcode] = [
+        'remote' => $libraries['ckeditor5']['remote'],
+        'version' => $libraries['ckeditor5']['version'],
+        'license' => $libraries['ckeditor5']['license'],
+        'dependencies' => [
+          'core/ckeditor5',
+          'core/ckeditor5.translations',
+        ],
+      ];
+    }
+  }
+
+  // Copied from \Drupal\Core\Asset\LibraryDiscoveryParser::buildByExtension().
+  if ($extension === 'core') {
+    $path = 'core';
+  }
+  else {
+    if ($moduleHandler->moduleExists($extension)) {
+      $extension_type = 'module';
+    }
+    else {
+      $extension_type = 'theme';
+    }
+    $path = \Drupal::getContainer()->get('extension.path.resolver')->getPath($extension_type, $extension);
+  }
+
+  foreach ($libraries as &$library) {
+    // The way to know if a library has a translation is to depend on the
+    // special "core/ckeditor5.translations" library.
+    if (empty($library['js']) || empty($library['dependencies']) || !in_array('core/ckeditor5.translations', $library['dependencies'])) {
+      continue;
+    }
+
+    foreach ($library['js'] as $file => $options) {
+      // Only look for translations on libraries defined with a relative path.
+      if (!empty($options['type']) && $options['type'] === 'external') {
+        continue;
+      }
+      // Path relative to the current extension folder.
+      $dirname = dirname($file);
+      // Path of the folder in the filesystem relative to the Drupal root.
+      $dir = $path . '/' . $dirname;
+      // Exclude protocol-free URI.
+      if (str_starts_with($dirname, '//')) {
+        continue;
+      }
+      // CKEditor 5 plugins are most likely added through composer and
+      // installed in the module exposing it. Suppose the file path is
+      // relative to the module and not in the /libraries/ folder.
+      // Collect translations based on filename, and add all existing
+      // translations files to the plugin library. Unnecessary translations
+      // will be filtered in ckeditor5_js_alter() hook.
+      $files = scandir("$dir/translations");
+      foreach ($files as $file) {
+        if (str_ends_with($file, '.js')) {
+          $langcode = basename($file, '.js');
+          // Only add languages that Drupal can understands.
+          if (in_array($langcode, $ckeditor_langcodes)) {
+            $library['js']["$dirname/translations/$langcode.js"] = [
+              // Used in ckeditor5_js_alter() to filter unwanted translations.
+              'ckeditor5_langcode' => $langcode,
+              'minified' => TRUE,
+              'preprocess' => TRUE,
+            ];
+          }
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_js_alter().
+ */
+function ckeditor5_js_alter(&$javascript, AttachedAssetsInterface $assets) {
+  // This file means CKEditor 5 translations are in use on the page.
+  // @see locale_js_alter()
+  $placeholder_file = 'core/assets/vendor/ckeditor5/translation.js';
+  // This file is used to get a weight that will make it possible to aggregate
+  // all translation files in a single aggregate.
+  $ckeditor_dll_file = 'core/assets/vendor/ckeditor5/ckeditor5-dll/ckeditor5-dll.js';
+  if (isset($javascript[$placeholder_file])) {
+    // Use the placeholder file weight to set all the translations files weights
+    // so they can be aggregated together as expected.
+    $default_weight = $javascript[$placeholder_file]['weight'];
+    if (isset($javascript[$ckeditor_dll_file])) {
+      $default_weight = $javascript[$ckeditor_dll_file]['weight'];
+    }
+    // The placeholder file is not a real file, remove it from the list.
+    unset($javascript[$placeholder_file]);
+
+    // When the locale module isn't installed there are no translations.
+    if (!\Drupal::moduleHandler()->moduleExists('locale')) {
+      return;
+    }
+
+    $language_interface = \Drupal::languageManager()->getCurrentLanguage()->getId();
+    $ckeditor5_language = _ckeditor5_get_langcode_mapping($language_interface);
+
+    // Remove all CKEditor 5 translations files that are not in the current
     // language.
-    $files = scandir('core/assets/vendor/ckeditor5/translations');
-    foreach ($files as $file) {
-      if ($file[0] !== '.' && preg_match('/\.js$/', $file)) {
-        $langcode = basename($file, '.js');
-        $libraries['ckeditor5.translations.' . $langcode] = [
-          'remote' => $libraries['ckeditor5']['remote'],
-          'version' => $libraries['ckeditor5']['version'],
-          'license' => $libraries['ckeditor5']['license'],
-          'js' => [
-            'assets/vendor/ckeditor5/translations/' . $file => ['preprocess' => FALSE, 'minified' => TRUE],
-          ],
-        ];
+    foreach ($javascript as $index => &$item) {
+      // This is not a CKEditor 5 translation file, skip it.
+      if (empty($item['ckeditor5_langcode'])) {
+        continue;
+      }
+      // This file is the correct translation for this page.
+      if ($item['ckeditor5_langcode'] === $ckeditor5_language) {
+        // Set the weight for the translation file to be able to have the
+        // translation files aggregated.
+        $item['weight'] = $default_weight;
+      }
+      // When the file doesn't match the langcode remove it from the page.
+      else {
+        // Remove files that don't match the language requested.
+        unset($javascript[$index]);
       }
     }
   }
@@ -395,4 +606,45 @@ function ckeditor5_config_schema_info_alter(&$definitions) {
   $definitions['ckeditor5_valid_pair__format_and_editor']['mapping']['filters'] = $definitions['filter.format.*']['mapping']['filters'];
   // @see @see editor.editor.*.image_upload
   $definitions['ckeditor5_valid_pair__format_and_editor']['mapping']['image_upload'] = $definitions['editor.editor.*']['mapping']['image_upload'];
+}
+
+/**
+ * Retrieves the default theme's CKEditor 5 stylesheets.
+ *
+ * Themes may specify CSS files for use within CKEditor 5 by including a
+ * "ckeditor5-stylesheets" key in their .info.yml file.
+ *
+ * @code
+ * ckeditor5-stylesheets:
+ *   - css/ckeditor.css
+ * @endcode
+ *
+ * @return string[]
+ *   A list of paths to CSS files.
+ */
+function _ckeditor5_theme_css($theme = NULL): array {
+  $css = [];
+  if (!isset($theme)) {
+    $theme = \Drupal::config('system.theme')->get('default');
+  }
+  if (isset($theme) && $theme_path = \Drupal::service('extension.list.theme')->getPath($theme)) {
+    $info = \Drupal::service('extension.list.theme')->getExtensionInfo($theme);
+    if (isset($info['ckeditor5-stylesheets'])) {
+      $css = $info['ckeditor5-stylesheets'];
+      foreach ($css as $key => $url) {
+        // CSS url is external or relative to Drupal root.
+        if (UrlHelper::isExternal($url) || $url[0] === '/') {
+          $css[$key] = $url;
+        }
+        // CSS url is relative to theme.
+        else {
+          $css[$key] = '/' . $theme_path . '/' . $url;
+        }
+      }
+    }
+    if (isset($info['base theme'])) {
+      $css = array_merge(_ckeditor5_theme_css($info['base theme']), $css);
+    }
+  }
+  return $css;
 }

@@ -1,5 +1,13 @@
 # Changelog
 
+### 3.1.5 2022-2-23
+
+* BUGFIX: Prevent runtime error with null on PHP 8.1 (#53)
+
+### 3.1.4 2022-2-21
+
+* Symfony 6 support
+
 ### 3.1.3 / 3.1.2 2022-1-3
 
 * PHP 8.1 support

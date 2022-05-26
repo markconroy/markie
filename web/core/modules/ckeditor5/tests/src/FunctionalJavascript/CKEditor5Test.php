@@ -8,11 +8,12 @@ use Drupal\editor\Entity\Editor;
 use Drupal\file\Entity\File;
 use Drupal\filter\Entity\FilterFormat;
 use Drupal\node\Entity\Node;
+use Drupal\Tests\ckeditor5\Traits\CKEditor5TestTrait;
 use Drupal\Tests\TestFileCreationTrait;
 use Drupal\user\RoleInterface;
 use Symfony\Component\Validator\ConstraintViolation;
 
-// cspell:ignore esque upcasted
+// cspell:ignore esque splitbutton upcasted
 
 /**
  * Tests for CKEditor5.
@@ -23,6 +24,7 @@ use Symfony\Component\Validator\ConstraintViolation;
 class CKEditor5Test extends CKEditor5TestBase {
 
   use TestFileCreationTrait;
+  use CKEditor5TestTrait;
 
   /**
    * {@inheritdoc}
@@ -85,7 +87,7 @@ class CKEditor5Test extends CKEditor5TestBase {
         'toolbar' => [
           'items' => ['uploadImage'],
         ],
-        'plugins' => [],
+        'plugins' => ['ckeditor5_imageResize' => ['allow_resize' => FALSE]],
       ],
       'image_upload' => [
         'status' => TRUE,
@@ -105,29 +107,29 @@ class CKEditor5Test extends CKEditor5TestBase {
     ));
 
     $this->drupalGet('node/add');
+    $this->waitForEditor();
     $page->fillField('title[0][value]', 'My test content');
+
+    // Ensure that CKEditor 5 is focused.
+    $this->click('.ck-content');
+
     $this->assertNotEmpty($image_upload_field = $page->find('css', '.ck-file-dialog-button input[type="file"]'));
     $image = $this->getTestFiles('image')[0];
     $image_upload_field->attachFile($this->container->get('file_system')->realpath($image->uri));
-    $assert_session->assertWaitOnAjaxRequest();
+    $assert_session->waitForElementVisible('css', '.ck-widget.image');
 
-    $this->click('.ck-widget.image');
-    $balloon_panel = $page->find('css', '.ck-balloon-panel');
-    $balloon_buttons = $balloon_panel->findAll('css', '[aria-label="Image toolbar"] button');
-    $this->assertSame('Change image text alternative', $balloon_buttons[0]->find('css', '.ck-button__label')->getHtml());
-    $balloon_buttons[0]->click();
-    $assert_session->waitForElementVisible('css', '.ck-balloon-panel .ck-text-alternative-form');
+    $this->assertNotEmpty($assert_session->waitForElementVisible('css', '.ck-balloon-panel .ck-text-alternative-form'));
     $alt_override_input = $page->find('css', '.ck-balloon-panel .ck-text-alternative-form input[type=text]');
     $this->assertSame('', $alt_override_input->getValue());
     $alt_override_input->setValue('</em> Kittens & llamas are cute');
-    $balloon_panel->pressButton('Save');
+    $this->getBalloonButton('Save')->click();
     $page->pressButton('Save');
 
     $uploaded_image = File::load(1);
     $image_uuid = $uploaded_image->uuid();
     $image_url = $this->container->get('file_url_generator')->generateString($uploaded_image->getFileUri());
     $this->drupalGet('node/1');
-    $assert_session->elementExists('xpath', sprintf('//img[@alt="</em> Kittens & llamas are cute" and @data-entity-uuid="%s" and @data-entity-type="file"]', $image_uuid));
+    $this->assertNotEmpty($assert_session->waitForElement('xpath', sprintf('//img[@alt="</em> Kittens & llamas are cute" and @data-entity-uuid="%s" and @data-entity-type="file"]', $image_uuid)));
 
     // Drupal CKEditor 5 integrations overrides the CKEditor 5 HTML writer to
     // escape ampersand characters (&) and the angle brackets (< and >). This is
@@ -378,6 +380,10 @@ class CKEditor5Test extends CKEditor5TestBase {
 
     $this->drupalGet('node/add');
     $page->fillField('title[0][value]', 'My test content');
+
+    // Ensure that CKEditor 5 is focused.
+    $this->click('.ck-content');
+
     $this->assertNotEmpty($image_upload_field = $page->find('css', '.ck-file-dialog-button input[type="file"]'));
     $image = $this->getTestFiles('image')[0];
     $image_upload_field->attachFile($this->container->get('file_system')->realpath($image->uri));
@@ -385,6 +391,13 @@ class CKEditor5Test extends CKEditor5TestBase {
     // upload has completed and the image has been downcast.
     // @see https://www.drupal.org/project/drupal/issues/3250587
     $this->assertNotEmpty($assert_session->waitForElement('css', '.ck-content img[data-entity-uuid]'));
+
+    // Add alt text to the image.
+    $this->assertNotEmpty($assert_session->waitForElementVisible('css', '.image.ck-widget > img'));
+    $this->assertNotEmpty($assert_session->waitForElementVisible('css', '.ck-balloon-panel .ck-text-alternative-form'));
+    $alt_override_input = $page->find('css', '.ck-balloon-panel .ck-text-alternative-form input[type=text]');
+    $alt_override_input->setValue('There is now alt text');
+    $this->getBalloonButton('Save')->click();
     $page->pressButton('Save');
 
     $uploaded_image = File::load(1);
@@ -394,7 +407,7 @@ class CKEditor5Test extends CKEditor5TestBase {
 
     // Ensure that width, height, and length attributes are not stored in the
     // database.
-    $this->assertEquals(sprintf('<img data-entity-uuid="%s" data-entity-type="file" src="%s">', $image_uuid, $image_url), Node::load(1)->get('body')->value);
+    $this->assertEquals(sprintf('<img data-entity-uuid="%s" data-entity-type="file" src="%s" alt="There is now alt text">', $image_uuid, $image_url), Node::load(1)->get('body')->value);
 
     // Ensure that data-entity-uuid and data-entity-type attributes are upcasted
     // correctly to CKEditor model.
@@ -433,30 +446,117 @@ class CKEditor5Test extends CKEditor5TestBase {
   }
 
   /**
-   * Ensures that images can have caption set.
+   * Tests list plugin.
    */
-  public function testImageCaption() {
+  public function testListPlugin() {
+    FilterFormat::create([
+      'format' => 'test_format',
+      'name' => 'CKEditor 5 with list',
+      'roles' => [RoleInterface::AUTHENTICATED_ID],
+    ])->save();
+    Editor::create([
+      'format' => 'test_format',
+      'editor' => 'ckeditor5',
+      'settings' => [
+        'toolbar' => [
+          'items' => ['sourceEditing', 'numberedList'],
+        ],
+        'plugins' => [
+          'ckeditor5_list' => [
+            'reversed' => FALSE,
+            'startIndex' => FALSE,
+          ],
+          'ckeditor5_sourceEditing' => [
+            'allowed_tags' => [],
+          ],
+        ],
+      ],
+    ])->save();
+    $this->assertSame([], array_map(
+      function (ConstraintViolation $v) {
+        return (string) $v->getMessage();
+      },
+      iterator_to_array(CKEditor5::validatePair(
+        Editor::load('test_format'),
+        FilterFormat::load('test_format')
+      ))
+    ));
+    $ordered_list_html = '<ol><li>apple</li><li>banana</li><li>cantaloupe</li></ol>';
+    $page = $this->getSession()->getPage();
+    $assert_session = $this->assertSession();
+    $this->drupalGet('node/add');
+    $page->fillField('title[0][value]', 'My test content');
+    $this->pressEditorButton('Source');
+    $source_text_area = $assert_session->waitForElement('css', '.ck-source-editing-area textarea');
+    $source_text_area->setValue($ordered_list_html);
+    // Click source again to make source inactive and have the numbered list
+    // splitbutton active.
+    $this->pressEditorButton('Source');
+    $numbered_list_dropdown_selector = '.ck-splitbutton__arrow';
+
+    // Check that there is no dropdown available for the numbered list because
+    // both reversed and startIndex are FALSE.
+    $assert_session->elementNotExists('css', $numbered_list_dropdown_selector);
+    // Save content so source content is kept after changing the editor config.
+    $page->pressButton('Save');
+    $edit_url = $this->getSession()->getCurrentURL() . '/edit';
+    $this->drupalGet($edit_url);
+    $this->waitForEditor();
+
+    // Enable the reversed functionality.
+    $editor = Editor::load('test_format');
+    $settings = $editor->getSettings();
+    $settings['plugins']['ckeditor5_list']['reversed'] = TRUE;
+    $editor->setSettings($settings);
+    $editor->save();
+    $this->getSession()->reload();
+    $this->waitForEditor();
+    $this->click($numbered_list_dropdown_selector);
+    $reversed_order_button_selector = '.ck.ck-button.ck-numbered-list-properties__reversed-order';
+    $assert_session->elementExists('css', $reversed_order_button_selector);
+    $assert_session->elementTextEquals('css', $reversed_order_button_selector, 'Reversed order');
+    $start_index_element_selector = '.ck.ck-numbered-list-properties__start-index';
+    $assert_session->elementNotExists('css', $start_index_element_selector);
+
+    // Have both the reversed and the start index enabled.
+    $editor = Editor::load('test_format');
+    $settings = $editor->getSettings();
+    $settings['plugins']['ckeditor5_list']['startIndex'] = TRUE;
+    $editor->setSettings($settings);
+    $editor->save();
+    $this->getSession()->reload();
+    $this->waitForEditor();
+    $this->click($numbered_list_dropdown_selector);
+    $assert_session->elementExists('css', $reversed_order_button_selector);
+    $assert_session->elementTextEquals('css', $reversed_order_button_selector, 'Reversed order');
+    $assert_session->elementExists('css', $start_index_element_selector);
+  }
+
+  /**
+   * Ensures that CKEditor 5 retains filter_html's allowed global attributes.
+   *
+   * FilterHtml always forbids the `style` and `on*` attributes, and always
+   * allows the `lang` attribute (with any value) and the `dir` attribute (with
+   * either `ltr` or `rtl` as value). It's important that those last two
+   * attributes are guaranteed to be retained.
+   *
+   * @see \Drupal\filter\Plugin\Filter\FilterHtml::getHTMLRestrictions()
+   * @see ckeditor5_globalAttributeDir
+   * @see ckeditor5_globalAttributeLang
+   * @see https://html.spec.whatwg.org/multipage/dom.html#global-attributes
+   */
+  public function testFilterHtmlAllowedGlobalAttributes(): void {
     $page = $this->getSession()->getPage();
     $assert_session = $this->assertSession();
 
     // Add a node with text rendered via the Plain Text format.
     $this->drupalGet('node/add');
-    $page->fillField('title[0][value]', 'My test content');
-    // Add image with data-caption. The foo attribute is added to be removed
-    // later by CKEditor to make sure CKEditor was able to downcast data.
-    $page->fillField('body[0][value]', '<img src="/sites/default/files/alpaca.jpg" data-caption="Alpacas &lt;em&gt;are&lt;/em&gt; cute" foo="bar">');
+    $page->fillField('title[0][value]', 'Multilingual Hello World');
+    // cSpell:disable-next-line
+    $page->fillField('body[0][value]', '<p dir="ltr" lang="en">Hello World</p><p dir="rtl" lang="ar">مرحبا بالعالم</p>');
     $page->pressButton('Save');
 
     $this->createNewTextFormat($page, $assert_session);
-    $this->assertNotEmpty($assert_session->waitForElement('css', '.ckeditor5-toolbar-item-uploadImage'));
-    $this->triggerKeyUp('.ckeditor5-toolbar-item-uploadImage', 'ArrowDown');
-    $assert_session->assertWaitOnAjaxRequest();
-    $page->clickLink('Image Upload');
-    $assert_session->waitForText('Enable image uploads');
-    $page->checkField('editor[settings][plugins][ckeditor5_imageUpload][status]');
-    $assert_session->assertWaitOnAjaxRequest();
-    $page->checkField('filters[filter_caption][status]');
-    $assert_session->assertWaitOnAjaxRequest();
     $this->saveNewTextFormat($page, $assert_session);
 
     $this->drupalGet('node/1/edit');
@@ -464,12 +564,12 @@ class CKEditor5Test extends CKEditor5TestBase {
     $this->assertNotEmpty($assert_session->waitForText('Change text format?'));
     $page->pressButton('Continue');
 
-    $this->assertNotEmpty($assert_session->waitForElement('css', '.ck-editor'));
+    $this->waitForEditor();
     $page->pressButton('Save');
 
-    $this->assertEquals('<img src="/sites/default/files/alpaca.jpg" data-caption="Alpacas &lt;em&gt;are&lt;/em&gt; cute">', Node::load(1)->get('body')->value);
-    $assert_session->elementExists('xpath', '//figure/img[@src="/sites/default/files/alpaca.jpg" and not(@data-caption)]');
-    $assert_session->responseContains('<figcaption>Alpacas <em>are</em> cute</figcaption>');
+    // @todo Remove the expected `xml:lang` attributes in https://www.drupal.org/project/drupal/issues/1333730
+    // cSpell:disable-next-line
+    $assert_session->responseContains('<p dir="ltr" lang="en" xml:lang="en">Hello World</p><p dir="rtl" lang="ar" xml:lang="ar">مرحبا بالعالم</p>');
   }
 
 }

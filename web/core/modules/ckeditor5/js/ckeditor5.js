@@ -5,9 +5,9 @@
 * @preserve
 **/
 
-function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) { symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); } keys.push.apply(keys, symbols); } return keys; }
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
 
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { _defineProperty(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
@@ -19,7 +19,7 @@ function _iterableToArrayLimit(arr, i) { var _i = arr == null ? null : typeof Sy
 
 function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
 
 function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
 
@@ -33,7 +33,11 @@ function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToAr
 
 function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
-(function (Drupal, debounce, CKEditor5, $) {
+(function (Drupal, debounce, CKEditor5, $, once) {
+  if (!CKEditor5) {
+    return;
+  }
+
   Drupal.CKEditor5Instances = new Map();
   var callbacks = new Map();
   var required = new Set();
@@ -88,6 +92,10 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
           value = _ref2[1];
 
       if (_typeof(value) === 'object') {
+        if (!value) {
+          return processed;
+        }
+
         if (value.hasOwnProperty('func')) {
           processed[key] = buildFunc(value);
         } else if (value.hasOwnProperty('regexp')) {
@@ -131,46 +139,63 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
     });
   }
 
-  var offCanvasCss = function offCanvasCss(element) {
-    element.parentNode.setAttribute('data-drupal-ck-style-fence', true);
+  function processRules(rulesGroup) {
+    try {
+      _toConsumableArray(rulesGroup.cssRules).forEach(ckeditor5SelectorProcessing);
+    } catch (e) {
+      console.warn("Stylesheet ".concat(rulesGroup.href, " not included in CKEditor reset due to the browser's CORS policy."));
+    }
+  }
 
-    if (!document.querySelector('#ckeditor5-off-canvas-reset')) {
-      var prefix = "#drupal-off-canvas [data-drupal-ck-style-fence]";
-      var existingCss = '';
+  function ckeditor5SelectorProcessing(rule) {
+    if (rule.cssRules) {
+      processRules(rule);
+    }
 
-      _toConsumableArray(document.styleSheets).forEach(function (sheet) {
-        if (!sheet.href || sheet.href && sheet.href.indexOf('off-canvas') === -1) {
-          try {
-            var rules = sheet.cssRules;
+    if (!rule.selectorText) {
+      return;
+    }
 
-            _toConsumableArray(rules).forEach(function (rule) {
-              var cssText = rule.cssText;
-              var selector = rule.cssText.split('{')[0];
-              cssText = cssText.replace(selector, selector.replace(/,/g, ", ".concat(prefix)));
-              existingCss += "".concat(prefix, " ").concat(cssText);
-            });
-          } catch (e) {
-            console.warn("Stylesheet ".concat(sheet.href, " not included in CKEditor reset due to the browser's CORS policy."));
-          }
+    var offCanvasId = '#drupal-off-canvas';
+    var CKEditorClass = '.ck';
+    var styleFence = '[data-drupal-ck-style-fence]';
+
+    if (rule.selectorText.includes(offCanvasId) || rule.selectorText.includes(CKEditorClass)) {
+      rule.selectorText = rule.selectorText.split(/,/g).map(function (selector) {
+        if (selector.includes(offCanvasId)) {
+          return "".concat(selector.trim(), ":not(").concat(styleFence, " *)");
         }
-      });
 
+        if (selector.includes(CKEditorClass)) {
+          return [selector.trim(), selector.trim().replace(CKEditorClass, "".concat(offCanvasId, " ").concat(styleFence, " ").concat(CKEditorClass))];
+        }
+
+        return selector;
+      }).flat().join(', ');
+    }
+  }
+
+  function offCanvasCss(element) {
+    var fenceName = 'data-drupal-ck-style-fence';
+    var editor = Drupal.CKEditor5Instances.get(element.getAttribute('data-ckeditor5-id'));
+    editor.ui.view.element.setAttribute(fenceName, '');
+
+    if (once('ckeditor5-off-canvas-reset', 'body').length) {
+      _toConsumableArray(document.styleSheets).forEach(processRules);
+
+      var prefix = "#drupal-off-canvas [".concat(fenceName, "]");
       var addedCss = ["".concat(prefix, " .ck.ck-content {display:block;min-height:5rem;}"), "".concat(prefix, " .ck.ck-content * {display:initial;background:initial;color:initial;padding:initial;}"), "".concat(prefix, " .ck.ck-content li {display:list-item}"), "".concat(prefix, " .ck.ck-content ol li {list-style-type: decimal}"), "".concat(prefix, " .ck[contenteditable], ").concat(prefix, " .ck[contenteditable] * {-webkit-user-modify: read-write;-moz-user-modify: read-write;}")];
       var blockSelectors = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'ol', 'ul', 'address', 'article', 'aside', 'blockquote', 'body', 'dd', 'div', 'dl', 'dt', 'fieldset', 'figcaption', 'figure', 'footer', 'form', 'header', 'hgroup', 'hr', 'html', 'legend', 'main', 'menu', 'pre', 'section', 'xmp'].map(function (blockElement) {
         return "".concat(prefix, " .ck.ck-content ").concat(blockElement);
       }).join(', \n');
       var blockCss = "".concat(blockSelectors, " { display: block; }");
-      var prefixedCss = [].concat(addedCss, [existingCss, blockCss]).join('\n');
-
-      var _offCanvasCss = document.createElement('style');
-
-      _offCanvasCss.innerHTML = prefixedCss;
-
-      _offCanvasCss.setAttribute('id', 'ckeditor5-off-canvas-reset');
-
-      document.body.appendChild(_offCanvasCss);
+      var prefixedCss = [].concat(addedCss, [blockCss]).join('\n');
+      var offCanvasCssStyle = document.createElement('style');
+      offCanvasCssStyle.textContent = prefixedCss;
+      offCanvasCssStyle.setAttribute('id', 'ckeditor5-off-canvas-reset');
+      document.body.appendChild(offCanvasCssStyle);
     }
-  };
+  }
 
   Drupal.editors.ckeditor5 = {
     attach: function attach(element, format) {
@@ -178,19 +203,21 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
       var _format$editorSetting = format.editorSettings,
           toolbar = _format$editorSetting.toolbar,
           plugins = _format$editorSetting.plugins,
-          pluginConfig = _format$editorSetting.config,
+          config = _format$editorSetting.config,
           language = _format$editorSetting.language;
       var extraPlugins = selectPlugins(plugins);
+      var pluginConfig = processConfig(config);
 
-      var config = _objectSpread({
+      var editorConfig = _objectSpread(_objectSpread({
         extraPlugins: extraPlugins,
-        toolbar: toolbar,
-        language: language
-      }, processConfig(pluginConfig));
+        toolbar: toolbar
+      }, pluginConfig), {}, {
+        language: _objectSpread(_objectSpread({}, pluginConfig.language), language)
+      });
 
       var id = setElementId(element);
       var ClassicEditor = editorClassic.ClassicEditor;
-      ClassicEditor.create(element, config).then(function (editor) {
+      ClassicEditor.create(element, editorConfig).then(function (editor) {
         Drupal.CKEditor5Instances.set(id, editor);
 
         if (element.hasAttribute('required')) {
@@ -310,26 +337,19 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
       dialogSettings.dialogClass = classes.join(' ');
       dialogSettings.autoResize = window.matchMedia('(min-width: 600px)').matches;
       dialogSettings.width = 'auto';
-      var $content = $("<div class=\"ckeditor5-dialog-loading\"><span style=\"top: -40px;\" class=\"ckeditor5-dialog-loading-link\">".concat(Drupal.t('Loading...'), "</span></div>"));
-      $content.appendTo($('body'));
       var ckeditorAjaxDialog = Drupal.ajax({
         dialog: dialogSettings,
         dialogType: 'modal',
         selector: '.ckeditor5-dialog-loading-link',
         url: url,
         progress: {
-          type: 'throbber'
+          type: 'fullscreen'
         },
         submit: {
           editor_object: {}
         }
       });
       ckeditorAjaxDialog.execute();
-      window.setTimeout(function () {
-        $content.find('span').animate({
-          top: '0px'
-        });
-      }, 1000);
       Drupal.ckeditor5.saveCallback = saveCallback;
     }
   };
@@ -367,4 +387,4 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
       Drupal.ckeditor5.saveCallback = null;
     }
   });
-})(Drupal, Drupal.debounce, CKEditor5, jQuery);
+})(Drupal, Drupal.debounce, CKEditor5, jQuery, once);

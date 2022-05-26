@@ -1,5 +1,9 @@
 # Change Log
 
+### 2.1.1: 2022-02-23:
+
+- psr/log ^2
+
 ### 2.1.0: 2022-01-29:
 
 - SettableOutputStreamInterface

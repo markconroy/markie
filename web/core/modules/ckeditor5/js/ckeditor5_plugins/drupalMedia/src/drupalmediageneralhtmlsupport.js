@@ -1,16 +1,17 @@
 /* eslint-disable import/no-extraneous-dependencies */
-// cSpell:words conversionutils datafilter
+// cSpell:words conversionutils datafilter eventinfo downcastdispatcher generalhtmlsupport
 import { Plugin } from 'ckeditor5/src/core';
 import { setViewAttributes } from '@ckeditor/ckeditor5-html-support/src/conversionutils';
 
 /**
- * View-to-model conversion helper preserving allowed attributes on the Drupal Media model.
+ * View-to-model conversion helper for Drupal Media.
+ * Used for preserving allowed attributes on the Drupal Media model.
  *
  * @param {module:html-support/datafilter~DataFilter} dataFilter
  *   The General HTML support data filter.
  *
  * @return {function}
- *   function that adds an event listener to upcastDispatcher.
+ *   Function that adds an event listener to upcastDispatcher.
  */
 function viewToModelDrupalMediaAttributeConverter(dataFilter) {
   return (dispatcher) => {
@@ -37,6 +38,8 @@ function viewToModelDrupalMediaAttributeConverter(dataFilter) {
 
         const viewMediaElement = data.viewItem;
         const viewContainerElement = viewMediaElement.parent;
+
+        preserveElementAttributes(viewMediaElement, 'htmlAttributes');
 
         if (viewContainerElement.is('element', 'a')) {
           preserveLinkAttributes(viewContainerElement);
@@ -71,13 +74,33 @@ function getDescendantElement(writer, containerElement, elementName) {
 }
 
 /**
+ * Model to view converter for the Drupal Media wrapper attributes.
+ *
+ * @param {module:utils/eventinfo~EventInfo} evt
+ *   An object containing information about the fired event.
+ * @param {Object} data
+ *   Additional information about the change.
+ * @param {module:engine/conversion/downcastdispatcher~DowncastDispatcher} conversionApi
+ *   Conversion interface to be used by the callback.
+ */
+function modelToDataAttributeConverter(evt, data, conversionApi) {
+  if (!conversionApi.consumable.consume(data.item, evt.name)) {
+    return;
+  }
+
+  const viewElement = conversionApi.mapper.toViewElement(data.item);
+
+  setViewAttributes(conversionApi.writer, data.attributeNewValue, viewElement);
+}
+
+/**
  * Model to editing view attribute converter.
  *
  * @return {function}
  *   A function that adds an event listener to downcastDispatcher.
  */
 function modelToEditingViewAttributeConverter() {
-  return (dispatcher) =>
+  return (dispatcher) => {
     dispatcher.on(
       'attribute:linkHref:drupalMedia',
       (evt, data, conversionApi) => {
@@ -105,16 +128,17 @@ function modelToEditingViewAttributeConverter() {
       },
       { priority: 'low' },
     );
+  };
 }
 
 /**
  * Model to data view attribute converter.
  *
  * @return {function}
- *   function that adds an event listener to downcastDispatcher.
+ *   Function that adds an event listener to downcastDispatcher.
  */
 function modelToDataViewAttributeConverter() {
-  return (dispatcher) =>
+  return (dispatcher) => {
     dispatcher.on(
       'attribute:linkHref:drupalMedia',
       (evt, data, conversionApi) => {
@@ -137,40 +161,76 @@ function modelToDataViewAttributeConverter() {
       },
       { priority: 'low' },
     );
+
+    dispatcher.on(
+      'attribute:htmlAttributes:drupalMedia',
+      modelToDataAttributeConverter,
+      { priority: 'low' },
+    );
+  };
 }
 
 /**
  * Integrates Drupal Media with General HTML Support.
  *
- * @internal
+ * @private
  */
 export default class DrupalMediaGeneralHtmlSupport extends Plugin {
   /**
    * @inheritdoc
    */
-  init() {
-    const { editor } = this;
+  constructor(editor) {
+    super(editor);
 
     // This plugin is only needed if General HTML Support plugin is loaded.
     if (!editor.plugins.has('GeneralHtmlSupport')) {
       return;
     }
+    // This plugin works only if `DataFilter` and `DataSchema` plugins are
+    // loaded. These plugins are dependencies of `GeneralHtmlSupport` meaning
+    // that these should be available always when `GeneralHtmlSupport` is
+    // enabled.
+    if (
+      !editor.plugins.has('DataFilter') ||
+      !editor.plugins.has('DataSchema')
+    ) {
+      console.error(
+        'DataFilter and DataSchema plugins are required for Drupal Media to integrate with General HTML Support plugin.',
+      );
+    }
 
     const { schema } = editor.model;
     const { conversion } = editor;
-    const dataFilter = editor.plugins.get('DataFilter');
+    const dataFilter = this.editor.plugins.get('DataFilter');
+    const dataSchema = this.editor.plugins.get('DataSchema');
 
-    schema.extend('drupalMedia', {
-      allowAttributes: ['htmlLinkAttributes'],
+    // This needs to be initialized in ::constructor() to ensure this runs
+    // before the General HTML Support has been initialized.
+    // @see module:html-support/generalhtmlsupport~GeneralHtmlSupport
+    dataSchema.registerBlockElement({
+      model: 'drupalMedia',
+      view: 'drupal-media',
     });
 
-    conversion
-      .for('upcast')
-      .add(viewToModelDrupalMediaAttributeConverter(dataFilter));
-    conversion
-      .for('editingDowncast')
-      .add(modelToEditingViewAttributeConverter());
-    conversion.for('dataDowncast').add(modelToDataViewAttributeConverter());
+    dataFilter.on('register:drupal-media', (evt, definition) => {
+      if (definition.model !== 'drupalMedia') {
+        return;
+      }
+
+      schema.extend('drupalMedia', {
+        allowAttributes: ['htmlLinkAttributes', 'htmlAttributes'],
+      });
+
+      conversion
+        .for('upcast')
+        .add(viewToModelDrupalMediaAttributeConverter(dataFilter));
+      conversion
+        .for('editingDowncast')
+        .add(modelToEditingViewAttributeConverter());
+      conversion.for('dataDowncast').add(modelToDataViewAttributeConverter());
+
+      evt.stop();
+    });
   }
 
   /**

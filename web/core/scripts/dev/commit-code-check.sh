@@ -157,7 +157,7 @@ cd "$TOP_LEVEL/core"
 # Ensure JavaScript development dependencies are installed.
 yarn check -s 2>/dev/null
 if [ "$?" -ne "0" ]; then
-  printf "Drupal's JavaScript development dependencies are not installed. Run 'yarn install' inside the core directory.\n"
+  printf "Drupal's JavaScript development dependencies are not installed or cannot be resolved. Run 'yarn install' inside the core directory, or 'yarn check -s' to list other errors.\n"
   DEPENDENCIES_NEED_INSTALLING=1;
 fi
 
@@ -286,7 +286,7 @@ for FILE in $FILES; do
   ############################################################################
   ### JAVASCRIPT FILES
   ############################################################################
-  if [[ -f "$TOP_LEVEL/$FILE" ]] && [[ $FILE =~ \.js$ ]] && [[ ! $FILE =~ ^core/tests/Drupal/Nightwatch ]] && [[ ! $FILE =~ ^core/assets/vendor/jquery.ui/ui ]] && [[ ! $FILE =~ ^core/modules/ckeditor5/js/ckeditor5_plugins ]]; then
+  if [[ -f "$TOP_LEVEL/$FILE" ]] && [[ $FILE =~ \.js$ ]] && [[ ! $FILE =~ ^core/tests/Drupal/Nightwatch ]] && [[ ! $FILE =~ /tests/src/Nightwatch/ ]] && [[ ! $FILE =~ ^core/modules/ckeditor5/js/ckeditor5_plugins ]]; then
     # Work out the root name of the JavaScript so we can ensure that the ES6
     # version has been compiled correctly.
     if [[ $FILE =~ \.es6\.js$ ]]; then
@@ -329,39 +329,6 @@ for FILE in $FILES; do
       # not really Drupal's.
       if ! [[ "$FILE" =~ ^core/assets/vendor ]] && ! [[ "$FILE" =~ ^core/modules/ckeditor5/js/build ]] && ! [[ "$FILE" =~ ^core/scripts/js ]] && ! [[ "$FILE" =~ ^core/scripts/css ]] && ! [[ "$FILE" =~ core/postcss.config.js ]] && ! [[ "$FILE" =~ webpack.config.js$ ]] && ! [[ -f "$TOP_LEVEL/$BASENAME.es6.js" ]] && ! [[ "$FILE" =~ core/modules/ckeditor5/tests/modules/ckeditor5_test/js/build/layercake.js ]]; then
         printf "${red}FAILURE${reset} $FILE does not have a corresponding $BASENAME.es6.js\n"
-        STATUS=1
-      fi
-    fi
-  elif [[ -f "$TOP_LEVEL/$FILE" ]] && [[ $FILE =~ \.js$ ]] && [[ $FILE =~ ^core/assets/vendor/jquery.ui/ui ]]; then
-    ## Check for minified file changes.
-    if [[ $FILE =~ -min\.js$ ]]; then
-      BASENAME=${FILE%-min.js}
-      contains_element "$BASENAME.js" "${FILES[@]}"
-      HASSRC=$?
-      if [ "$HASSRC" -ne "0" ]; then
-        COMPILE_CHECK=1
-      else
-        ## Source was also changed and will be checked.
-        COMPILE_CHECK=0
-      fi
-    else
-      ## Check for source changes.
-      BASENAME=${FILE%.js}
-      COMPILE_CHECK=1
-    fi
-    if [[ "$COMPILE_CHECK" == "1" ]] && [[ -f "$TOP_LEVEL/$BASENAME.js" ]]; then
-      cd "$TOP_LEVEL/core"
-      yarn run build:jqueryui --check --file "$TOP_LEVEL/$BASENAME.js"
-      CORRECTJS=$?
-      if [ "$CORRECTJS" -ne "0" ]; then
-        # The yarn run command will write any error output.
-        STATUS=1
-      fi
-      cd $TOP_LEVEL
-    else
-      # If there is no .js source file
-      if ! [[ -f "$TOP_LEVEL/$BASENAME.js" ]]; then
-        printf "${red}FAILURE${reset} $FILE does not have a corresponding $BASENAME.js\n"
         STATUS=1
       fi
     fi

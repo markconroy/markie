@@ -20,7 +20,7 @@ class CurrentPageTitle extends RawCurrentPageTitle {
     $value = parent::getValue();
     if (!empty($value)) {
       if (is_array($value)) {
-        $value = urlencode($value['#markup']);
+        $value = render($value);
       }
       elseif (is_object($value)) {
         $value = render($value);

@@ -44,11 +44,10 @@ for more info.
 - See [develCommandsTest.php](tests/src/Functional/DevelCommandsTest.php) for an example of Drush command testing. This uses [Drush Test Traits](https://www.drush.org/contribute/#drush-test-traits).
 
 #### Version Compatibility
-| Devel version | Drupal core | PHP | Drush |
-| ------ | ------ | ----- | ----- |
-| 4.x |8.8+ | 7.2+ | 9+
-| 8.x-2.x | 8.x |7.0+ | 8+
-
+| Devel version | Drupal core | PHP  | Drush |
+|---------------|-------------|------|-------|
+| 4.x           | 8.9+, 9, 10 | 7.2+ | 9+    |
+| 8.x-2.x       | 8.x         | 7.0+ | 8+    |
 
 #### Maintainers
 
