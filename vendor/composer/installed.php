@@ -5,7 +5,7 @@
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
-        'reference' => '3fd71331058b5f0d76672ab2fba364f73c06ca6b',
+        'reference' => 'a1634ac28cc4efd4634e965e21ec0dc0f1bddd36',
         'name' => 'markconroy/markie',
         'dev' => true,
     ),
@@ -1351,7 +1351,7 @@
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
-            'reference' => '3fd71331058b5f0d76672ab2fba364f73c06ca6b',
+            'reference' => 'a1634ac28cc4efd4634e965e21ec0dc0f1bddd36',
             'dev_requirement' => false,
         ),
         'masterminds/html5' => array(
