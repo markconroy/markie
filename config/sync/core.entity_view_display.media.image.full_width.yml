@@ -23,6 +23,8 @@ content:
     settings:
       image_link: ''
       image_style: widescreen_television
+      image_loading:
+        attribute: lazy
     third_party_settings: {  }
     weight: 0
     region: content
