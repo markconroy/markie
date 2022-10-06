@@ -25,13 +25,13 @@ class DirectoryTest extends KernelTestBase {
     $fileSystem->prepareDirectory($directory, $fileSystem::CREATE_DIRECTORY | $fileSystem::MODIFY_PERMISSIONS);
     $directory = 'public://xmlsitemap/test';
     $fileSystem->prepareDirectory($directory, $fileSystem::CREATE_DIRECTORY | $fileSystem::MODIFY_PERMISSIONS);
-    $fileSystem->saveData('File unrelated to XML sitemap', 'public://not-xmlsitemap/file.txt');
-    $fileSystem->saveData('File unrelated to XML sitemap', 'public://file.txt');
+    $fileSystem->saveData('File unrelated to XML Sitemap', 'public://not-xmlsitemap/file.txt');
+    $fileSystem->saveData('File unrelated to XML Sitemap', 'public://file.txt');
     $fileSystem->saveData('Test contents', 'public://xmlsitemap/test/index.xml');
 
     // Test that only the xmlsitemap directory was deleted.
     $result = xmlsitemap_clear_directory(NULL, TRUE);
-    $this->assertDirectoryNotExists('public://xmlsitemap/test');
+    $this->assertDirectoryDoesNotExist('public://xmlsitemap/test');
     $this->assertDirectoryExists('public://not-xmlsitemap');
     $this->assertFileExists('public://file.txt');
     $this->assertTrue($result);

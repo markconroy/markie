@@ -20,7 +20,7 @@ abstract class PathRedirectTestBase extends MigrateDrupalTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['redirect', 'link', 'path_alias'];
+  protected static $modules = ['redirect', 'link', 'path_alias'];
 
   /**
    * Asserts various aspects of a redirect entity.

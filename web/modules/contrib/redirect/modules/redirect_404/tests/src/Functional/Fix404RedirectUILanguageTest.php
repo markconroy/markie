@@ -25,7 +25,7 @@ class Fix404RedirectUILanguageTest extends Redirect404TestBase {
    *
    * @var array
    */
-  public static $modules = ['language'];
+  protected static $modules = ['language'];
 
   /**
    * Admin user's permissions for this test.
@@ -45,7 +45,7 @@ class Fix404RedirectUILanguageTest extends Redirect404TestBase {
   /**
    * {@inheritdoc}
    */
-  public function setUp() {
+  public function setUp(): void {
     parent::setUp();
 
     // Enable some languages for this test.
@@ -75,16 +75,16 @@ class Fix404RedirectUILanguageTest extends Redirect404TestBase {
 
     // Go to the "fix 404" page and check the listing.
     $this->drupalGet('admin/config/search/redirect/404');
-    $this->assertText('testing');
+    $this->assertSession()->pageTextContains('testing');
     $this->assertLanguageInTableBody('French');
     // Check the Language view filter uses the default language filter.
-    $this->assertOption('edit-langcode', 'All');
-    $this->assertOption('edit-langcode', 'en');
-    $this->assertOption('edit-langcode', 'de');
-    $this->assertOption('edit-langcode', 'es');
-    $this->assertOption('edit-langcode', 'fr');
-    $this->assertOption('edit-langcode', LanguageInterface::LANGCODE_NOT_SPECIFIED);
-    $this->clickLink(t('Add redirect'));
+    $this->assertSession()->optionExists('edit-langcode', 'All');
+    $this->assertSession()->optionExists('edit-langcode', 'en');
+    $this->assertSession()->optionExists('edit-langcode', 'de');
+    $this->assertSession()->optionExists('edit-langcode', 'es');
+    $this->assertSession()->optionExists('edit-langcode', 'fr');
+    $this->assertSession()->optionExists('edit-langcode', LanguageInterface::LANGCODE_NOT_SPECIFIED);
+    $this->clickLink('Add redirect');
 
     // Check if we generate correct Add redirect url and if the form is
     // pre-filled.
@@ -97,39 +97,39 @@ class Fix404RedirectUILanguageTest extends Redirect404TestBase {
     $parsed_url = UrlHelper::parse($this->getUrl());
     $this->assertEquals($parsed_url['path'], Url::fromRoute('redirect.add')->setAbsolute()->toString());
     $this->assertEquals($parsed_url['query'], $expected_query);
-    $this->assertFieldByName('redirect_source[0][path]', 'testing');
-    $this->assertOptionSelected('edit-language-0-value', 'fr');
+    $this->assertSession()->fieldValueEquals('redirect_source[0][path]', 'testing');
+    $this->assertSession()->optionExists('edit-language-0-value', 'fr');
     // Save the redirect.
     $edit = ['redirect_redirect[0][uri]' => '/node'];
-    $this->drupalPostForm(NULL, $edit, t('Save'));
-    $this->assertUrl('admin/config/search/redirect/404');
-    $this->assertText('There are no 404 errors to fix.');
+    $this->submitForm($edit, 'Save');
+    $this->assertSession()->addressEquals('admin/config/search/redirect/404');
+    $this->assertSession()->pageTextContains('There are no 404 errors to fix.');
     // Check if the redirect works as expected.
     $this->assertRedirect('fr/testing', 'fr/node', 301);
 
     // Test removing a redirect assignment, visit again the non existing page.
     $this->drupalGet('admin/config/search/redirect');
-    $this->assertText('testing');
+    $this->assertSession()->pageTextContains('testing');
     $this->assertLanguageInTableBody('French');
     $this->clickLink('Delete', 0);
-    $this->drupalPostForm(NULL, [], 'Delete');
-    $this->assertUrl('admin/config/search/redirect');
-    $this->assertText('There is no redirect yet.');
+    $this->submitForm([], 'Delete');
+    $this->assertSession()->addressEquals('admin/config/search/redirect');
+    $this->assertSession()->pageTextContains('There is no redirect yet.');
     $this->drupalGet('admin/config/search/redirect/404');
-    $this->assertText('There are no 404 errors to fix.');
+    $this->assertSession()->pageTextContains('There are no 404 errors to fix.');
     // Should be listed again in the 404 overview.
     $this->drupalGet('fr/testing');
     $this->drupalGet('admin/config/search/redirect/404');
     $this->assertLanguageInTableBody('French');
     // Check the error path visit count.
-    $this->assertFieldByXPath('//table/tbody/tr/td[2]', 2);
+    $this->assertSession()->elementTextContains('xpath', '//table/tbody/tr/td[2]', 2);
     $this->clickLink('Add redirect');
     // Save the redirect with a different langcode.
-    $this->assertFieldByName('redirect_source[0][path]', 'testing');
-    $this->assertOptionSelected('edit-language-0-value', 'fr');
+    $this->assertSession()->fieldValueEquals('redirect_source[0][path]', 'testing');
+    $this->assertSession()->optionExists('edit-language-0-value', 'fr');
     $edit['language[0][value]'] = 'es';
-    $this->drupalPostForm(NULL, $edit, 'Save');
-    $this->assertUrl('admin/config/search/redirect/404');
+    $this->submitForm($edit, 'Save');
+    $this->assertSession()->addressEquals('admin/config/search/redirect/404');
     // Should still be listed, redirecting to another language does not resolve
     // the path.
     $this->assertLanguageInTableBody('French');
@@ -147,34 +147,34 @@ class Fix404RedirectUILanguageTest extends Redirect404TestBase {
     $this->assertLanguageInTableBody('French');
     $this->assertLanguageInTableBody('English');
     $this->assertLanguageInTableBody('German');
-    $this->assertText('testing1');
-    $this->assertText('testing2');
-    $this->assertText('testing2?test=1');
-    $this->assertText('testing2?test=2');
+    $this->assertSession()->pageTextContains('testing1');
+    $this->assertSession()->pageTextContains('testing2');
+    $this->assertSession()->pageTextContains('testing2?test=1');
+    $this->assertSession()->pageTextContains('testing2?test=2');
 
     // Test the Language view filter.
     $this->drupalGet('admin/config/search/redirect/404', ['query' => ['langcode' => 'de']]);
-    $this->assertText('English');
+    $this->assertSession()->pageTextContains('English');
     $this->assertNoLanguageInTableBody('English');
     $this->assertLanguageInTableBody('German');
-    $this->assertNoText('testing1');
-    $this->assertText('testing2');
-    $this->assertText('testing2?test=1');
-    $this->assertText('testing2?test=2');
+    $this->assertSession()->pageTextNotContains('testing1');
+    $this->assertSession()->pageTextContains('testing2');
+    $this->assertSession()->pageTextContains('testing2?test=1');
+    $this->assertSession()->pageTextContains('testing2?test=2');
     $this->drupalGet('admin/config/search/redirect/404');
     $this->assertLanguageInTableBody('English');
     $this->assertLanguageInTableBody('German');
-    $this->assertText('testing1');
-    $this->assertText('testing2');
-    $this->assertText('testing2?test=1');
-    $this->assertText('testing2?test=2');
+    $this->assertSession()->pageTextContains('testing1');
+    $this->assertSession()->pageTextContains('testing2');
+    $this->assertSession()->pageTextContains('testing2?test=1');
+    $this->assertSession()->pageTextContains('testing2?test=2');
     $this->drupalGet('admin/config/search/redirect/404', ['query' => ['langcode' => 'en']]);
     $this->assertLanguageInTableBody('English');
     $this->assertNoLanguageInTableBody('German');
-    $this->assertText('testing1');
-    $this->assertNoText('testing2');
-    $this->assertNoText('testing2?test=1');
-    $this->assertNoText('testing2?test=2');
+    $this->assertSession()->pageTextContains('testing1');
+    $this->assertSession()->pageTextNotContains('testing2');
+    $this->assertSession()->pageTextNotContains('testing2?test=1');
+    $this->assertSession()->pageTextNotContains('testing2?test=2');
 
     // Assign a redirect to 'testing1'.
     $this->clickLink('Add redirect');
@@ -186,11 +186,11 @@ class Fix404RedirectUILanguageTest extends Redirect404TestBase {
     $parsed_url = UrlHelper::parse($this->getUrl());
     $this->assertEquals($parsed_url['path'], Url::fromRoute('redirect.add')->setAbsolute()->toString());
     $this->assertEquals($parsed_url['query'], $expected_query);
-    $this->assertFieldByName('redirect_source[0][path]', 'testing1');
-    $this->assertOptionSelected('edit-language-0-value', 'en');
+    $this->assertSession()->fieldValueEquals('redirect_source[0][path]', 'testing1');
+    $this->assertSession()->optionExists('edit-language-0-value', 'en');
     $edit = ['redirect_redirect[0][uri]' => '/node'];
-    $this->drupalPostForm(NULL, $edit, t('Save'));
-    $this->assertUrl('admin/config/search/redirect/404');
+    $this->submitForm($edit, 'Save');
+    $this->assertSession()->addressEquals('admin/config/search/redirect/404');
     $this->assertNoLanguageInTableBody('English');
     $this->assertLanguageInTableBody('German');
     $this->drupalGet('admin/config/search/redirect');

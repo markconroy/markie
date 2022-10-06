@@ -1,6 +1,6 @@
 /**
  * @file
- * JavaScript file for XML sitemap.
+ * JavaScript file for XML Sitemap.
  */
 
 (function ($) {

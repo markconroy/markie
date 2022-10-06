@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Main file for the XML sitemap engines.
+ * Main file for the XML Sitemap engines.
  */
 
 use Drupal\Component\Utility\UrlHelper;
@@ -93,8 +93,8 @@ function xmlsitemap_engines_submit_access() {
  * Submit the sitemaps to all the specified search engines.
  *
  * @param array $smids
- *   An optional array of XML sitemap IDs. If not provided, it will load all
- *   existing XML sitemaps.
+ *   An optional array of XML Sitemap IDs. If not provided, it will load all
+ *   existing XML Sitemaps.
  */
 function xmlsitemap_engines_submit_engines(array $smids = []) {
   if (empty($smids)) {
@@ -203,11 +203,6 @@ function xmlsitemap_engines_xmlsitemap_engine_info() {
     'name' => t('Google'),
     'url' => 'https://www.google.com/ping?sitemap=[sitemap]',
     'help url' => 'https://www.google.com/support/webmasters/bin/answer.py?hl=en&answer=156184',
-  ];
-  $engines['bing'] = [
-    'name' => t('Bing'),
-    'url' => 'https://www.bing.com/ping?sitemap=[sitemap]',
-    'help url' => 'https://www.bing.com/webmaster/help/how-to-submit-sitemaps-82a15bd4',
   ];
   return $engines;
 }

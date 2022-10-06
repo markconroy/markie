@@ -3,14 +3,16 @@
  * Enables syntax highlighting via HighlightJS on the HTML code tag.
  */
 
-(function ($, Drupal) {
+(function (Drupal) {
   'use strict';
 
   Drupal.behaviors.codesnippet = {
     attach: function (context, settings) {
       hljs.initHighlightingOnLoad();
-      $("pre code").css('overflow-x', 'auto');
+      context.querySelectorAll('pre code').forEach(element => {
+        element.style.overflowX = 'auto';
+      });
     }
   };
 
-})(jQuery, Drupal);
+})(Drupal);

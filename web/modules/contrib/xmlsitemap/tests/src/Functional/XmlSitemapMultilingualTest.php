@@ -15,18 +15,20 @@ class XmlSitemapMultilingualTest extends XmlSitemapMultilingualTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     $this->drupalLogin($this->admin_user);
     $edit = [
       'site_default_language' => 'en',
     ];
-    $this->drupalPostForm('admin/config/regional/language', $edit, t('Save configuration'));
+    $this->drupalGet('admin/config/regional/language');
+    $this->submitForm($edit, t('Save configuration'));
 
     // Enable URL language detection and selection.
     $edit = ['language_interface[enabled][language-url]' => '1'];
-    $this->drupalPostForm('admin/config/regional/language/detection', $edit, t('Save settings'));
+    $this->drupalGet('admin/config/regional/language/detection');
+    $this->submitForm($edit, t('Save settings'));
   }
 
   /**

@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Hooks provided by the XML sitemap module.
+ * Hooks provided by the XML Sitemap module.
  *
  * @ingroup xmlsitemap
  */
@@ -40,7 +40,7 @@ function hook_xmlsitemap_link_info() {
         'process callback' => 'mymodule_xmlsitemap_process_links',
         // Callback function used in batch API for rebuilding all links.
         'rebuild callback' => 'mymodule_xmlsitemap_rebuild_links',
-        // Callback function called from the XML sitemap settings page.
+        // Callback function called from the XML Sitemap settings page.
         'settings callback' => 'mymodule_xmlsitemap_settings',
       ],
     ],
@@ -62,10 +62,10 @@ function hook_xmlsitemap_link_alter(array &$link, array $context) {
 }
 
 /**
- * Inform modules that an XML sitemap link has been created.
+ * Inform modules that an XML Sitemap link has been created.
  *
  * @param array $link
- *   Associative array defining an XML sitemap link as passed into
+ *   Associative array defining an XML Sitemap link as passed into
  *   \Drupal\xmlsitemap\XmlSitemapLinkStorageInterface::save().
  * @param array $context
  *   An optional context array containing data related to the link.
@@ -83,10 +83,10 @@ function hook_xmlsitemap_link_insert(array $link, array $context) {
 }
 
 /**
- * Inform modules that an XML sitemap link has been updated.
+ * Inform modules that an XML Sitemap link has been updated.
  *
  * @param array $link
- *   Associative array defining an XML sitemap link as passed into
+ *   Associative array defining an XML Sitemap link as passed into
  *   \Drupal\xmlsitemap\XmlSitemapLinkStorageInterface::save().
  * @param array $context
  *   An optional context array containing data related to the link.
@@ -104,7 +104,7 @@ function hook_xmlsitemap_link_update(array $link, array $context) {
 }
 
 /**
- * Respond to XML sitemap link clearing and rebuilding.
+ * Respond to XML Sitemap link clearing and rebuilding.
  *
  * @param array $entity_type_ids
  *   An array of entity type IDs that are being rebuilt.
@@ -118,14 +118,14 @@ function hook_xmlsitemap_rebuild_clear(array $entity_type_ids, $save_custom) {
 }
 
 /**
- * Index links for the XML sitemaps.
+ * Index links for the XML Sitemaps.
  */
 function hook_xmlsitemap_index_links($limit) {
 
 }
 
 /**
- * Provide information about contexts available to XML sitemap.
+ * Provide information about contexts available to XML Sitemap.
  *
  * @see hook_xmlsitemap_context_info_alter()
  */
@@ -139,7 +139,7 @@ function hook_xmlsitemap_context_info() {
 }
 
 /**
- * Alter XML sitemap context info.
+ * Alter XML Sitemap context info.
  *
  * @see hook_xmlsitemap_context_info()
  */
@@ -173,21 +173,21 @@ function hook_xmlsitemap_context_alter(&$context) {
 }
 
 /**
- * Provide options for the url() function based on an XML sitemap context.
+ * Provide options for the url() function based on an XML Sitemap context.
  */
 function hook_xmlsitemap_context_url_options(array $context) {
 
 }
 
 /**
- * Alter the url() options based on an XML sitemap context.
+ * Alter the url() options based on an XML Sitemap context.
  */
 function hook_xmlsitemap_context_url_options_alter(array &$options, array $context) {
 
 }
 
 /**
- * Alter the content added to an XML sitemap for an individual element.
+ * Alter the content added to an XML Sitemap for an individual element.
  *
  * This hooks is called when the module is generating the XML content for the
  * sitemap and allows other modules to alter existing or add additional XML data
@@ -221,7 +221,7 @@ function hook_xmlsitemap_element_alter(array &$element, array $link, \Drupal\xml
 }
 
 /**
- * Alter the attributes used for the root element of the XML sitemap.
+ * Alter the attributes used for the root element of the XML Sitemap.
  *
  * For example add an xmlns:video attribute:
  *
@@ -263,20 +263,20 @@ function hook_query_xmlsitemap_generate_alter(QueryAlterableInterface $query) {
 }
 
 /**
- * Provide information about XML sitemap bulk operations.
+ * Provide information about XML Sitemap bulk operations.
  */
 function hook_xmlsitemap_sitemap_operations() {
 
 }
 
 /**
- * Respond to XML sitemap deletion.
+ * Respond to XML Sitemap deletion.
  *
  * This hook is invoked from xmlsitemap_sitemap_delete_multiple() after the XML
  * sitemap has been removed from the table in the database.
  *
  * @param \Drupal\xmlsitemap\XmlSitemapInterface $sitemap
- *   The XML sitemap object that was deleted.
+ *   The XML Sitemap object that was deleted.
  */
 function hook_xmlsitemap_sitemap_delete(\Drupal\xmlsitemap\XmlSitemapInterface $sitemap) {
   \Drupal::database()->query("DELETE FROM {mytable} WHERE smid = '%s'", $sitemap->smid);

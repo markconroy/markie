@@ -70,7 +70,7 @@ class XmlSitemapRebuildForm extends ConfigFormBase {
       }
       else {
         $request->query->set('destination', 'admin/config/search/xmlsitemap');
-        $this->messenger()->addWarning($this->t('A rebuild is not necessary. If you are just wanting to regenerate the XML sitemap files, you can <a href="@link-cron">run cron manually</a>.', [
+        $this->messenger()->addWarning($this->t('A rebuild is not necessary. If you are just wanting to regenerate the XML Sitemap files, you can <a href="@link-cron">run cron manually</a>.', [
           '@link-cron' => Url::fromRoute('system.run_cron', [], ['query' => $this->getDestinationArray()]),
         ]));
         $this->setRequest($request);

@@ -27,7 +27,7 @@ class XmlSitemapEnginesFunctionalTest extends XmlSitemapTestBase {
    *
    * @codingStandardsIgnoreEnd
    */
-  public static $modules = [
+  protected static $modules = [
     'path',
     'dblog',
     'xmlsitemap_engines',
@@ -37,7 +37,7 @@ class XmlSitemapEnginesFunctionalTest extends XmlSitemapTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
     $this->admin_user = $this->drupalCreateUser(['access content', 'administer xmlsitemap']);
     $this->config = $this->container->get('config.factory')->getEditable('xmlsitemap_engines.settings');
@@ -130,7 +130,8 @@ class XmlSitemapEnginesFunctionalTest extends XmlSitemapTestBase {
    */
   public function testPing() {
     $edit = ['engines[simpletest]' => TRUE];
-    $this->drupalPostForm('admin/config/search/xmlsitemap/engines', $edit, t('Save configuration'));
+    $this->drupalGet('admin/config/search/xmlsitemap/engines');
+    $this->submitForm($edit, t('Save configuration'));
     $this->assertSession()->pageTextContains(t('The configuration options have been saved.'));
 
     $this->submitEngines();
@@ -146,17 +147,20 @@ class XmlSitemapEnginesFunctionalTest extends XmlSitemapTestBase {
   public function testCustomURL() {
     // @codingStandardsIgnoreEnd
     $edit = ['custom_urls' => 'an-invalid-url'];
-    $this->drupalPostForm('admin/config/search/xmlsitemap/engines', $edit, t('Save configuration'));
+    $this->drupalGet('admin/config/search/xmlsitemap/engines');
+    $this->submitForm($edit, t('Save configuration'));
     $this->assertSession()->pageTextContains('Invalid URL an-invalid-url.');
     $this->assertSession()->pageTextNotContains('The configuration options have been saved.');
 
     $url = Url::fromUri('base://ping', ['absolute' => TRUE])->toString();
     $edit = ['custom_urls' => $url];
-    $this->drupalPostForm('admin/config/search/xmlsitemap/engines', $edit, t('Save configuration'));
+    $this->drupalGet('admin/config/search/xmlsitemap/engines');
+    $this->submitForm($edit, t('Save configuration'));
     $this->assertSession()->pageTextContains(t('The configuration options have been saved.'));
 
     $edit = ['custom_urls' => $this->submit_url];
-    $this->drupalPostForm('admin/config/search/xmlsitemap/engines', $edit, t('Save configuration'));
+    $this->drupalGet('admin/config/search/xmlsitemap/engines');
+    $this->submitForm($edit, t('Save configuration'));
     $this->assertSession()->pageTextContains(t('The configuration options have been saved.'));
 
     $this->submitEngines();

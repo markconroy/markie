@@ -173,13 +173,19 @@ interface FormWizardInterface extends FormInterface {
    */
   public function finish(array &$form, FormStateInterface $form_state);
 
-
+  /**
+   *
+   */
   public function ajaxSubmit(array $form, FormStateInterface $form_state);
 
-
+  /**
+   *
+   */
   public function ajaxPrevious(array $form, FormStateInterface $form_state);
 
-
+  /**
+   *
+   */
   public function ajaxFinish(array $form, FormStateInterface $form_state);
 
 }

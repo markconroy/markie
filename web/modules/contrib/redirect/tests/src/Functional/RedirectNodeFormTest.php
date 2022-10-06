@@ -30,7 +30,7 @@ class RedirectNodeFormTest extends BrowserTestBase {
    *
    * @var array
    */
-  public static $modules = ['node', 'redirect'];
+  protected static $modules = ['node', 'redirect'];
 
   /**
    * {@inheritdoc}
@@ -40,7 +40,7 @@ class RedirectNodeFormTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     // Create Basic page node type.
@@ -82,19 +82,19 @@ class RedirectNodeFormTest extends BrowserTestBase {
     $this->drupalGet('node/' . $node->id() . '/edit');
 
     // Make sure the redirect add button is not visible to this regular user.
-    $this->assertNoRaw('Add URL redirect');
+    $this->assertSession()->responseNotContains('Add URL redirect');
 
     // Now edit the same node as an admin user.
     $this->drupalLogin($this->adminUser);
     $this->drupalGet('node/' . $node->id() . '/edit');
 
     // Make sure the redirect add button is visible for the admin user.
-    $this->assertRaw('Add URL redirect');
+    $this->assertSession()->responseContains('Add URL redirect');
 
     // Make sure the link works as expected.
     $this->clickLink('Add URL redirect');
-    $this->assertUrl('admin/config/search/redirect/add');
-    $this->assertFieldsByValue($this->xpath("//input[@id = 'edit-redirect-redirect-0-uri']"), '/node/' . $node->id(), 'To: field correctly pre-filled.');
+    $this->assertSession()->addressEquals('admin/config/search/redirect/add');
+    $this->assertSession()->fieldValueEquals('edit-redirect-redirect-0-uri', '/node/' . $node->id());
   }
 
 }

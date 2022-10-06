@@ -15,12 +15,12 @@ class XmlSitemapRebuildTest extends XmlSitemapTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['path', 'help', 'block'];
+  protected static $modules = ['path', 'help', 'block'];
 
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     $this->admin_user = $this->drupalCreateUser([
@@ -42,9 +42,9 @@ class XmlSitemapRebuildTest extends XmlSitemapTestBase {
     $this->drupalLogin($this->admin_user);
     $this->drupalGet('admin/config/search/xmlsitemap/rebuild');
     $this->assertSession()->statusCodeEquals(200);
-    $this->assertSession()->pageTextContains("This action rebuilds your site's XML sitemap and regenerates the cached files, and may be a lengthy process. If you just installed XML sitemap, this can be helpful to import all your site's content into the sitemap. Otherwise, this should only be used in emergencies.");
+    $this->assertSession()->pageTextContains("This action rebuilds your site's XML Sitemap and regenerates the cached files, and may be a lengthy process. If you just installed XML Sitemap, this can be helpful to import all your site's content into the sitemap. Otherwise, this should only be used in emergencies.");
 
-    $this->drupalPostForm(NULL, [], 'Save configuration');
+    $this->submitForm([], 'Save configuration');
     $this->assertSession()->pageTextContains('The sitemap links were rebuilt.');
   }
 
@@ -60,7 +60,8 @@ class XmlSitemapRebuildTest extends XmlSitemapTestBase {
 
     $dummy_user = $this->drupalCreateUser([]);
     $this->drupalLogin($this->admin_user);
-    $this->drupalPostForm('admin/config/search/xmlsitemap/rebuild', [], t('Save configuration'));
+    $this->drupalGet('admin/config/search/xmlsitemap/rebuild');
+    $this->submitForm([], t('Save configuration'));
     $this->assertSession()->pageTextContains('The sitemap links were rebuilt.');
     $this->assertSitemapLinkValues('user', $dummy_user->id(), [
       'status' => 1,

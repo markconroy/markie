@@ -27,10 +27,10 @@ function xmlsitemap_requirements($phase) {
   if (!empty($missing_extensions)) {
     $items = ['#theme' => 'item_list', '#items' => $missing_extensions];
     $requirements['xmlsitemap_php_extensions'] = [
-      'title' => $t('XML sitemap PHP extensions'),
+      'title' => $t('XML Sitemap PHP extensions'),
       'value' => $t('Disabled'),
       'severity' => REQUIREMENT_ERROR,
-      'description' => $t("The XML sitemap module requires you to enable the PHP extensions in the following list (see the <a href=\"@xmlsitemap_requirements\">module's system requirements page</a> for more information): @extensions", [
+      'description' => $t("The XML Sitemap module requires you to enable the PHP extensions in the following list (see the <a href=\"@xmlsitemap_requirements\">module's system requirements page</a> for more information): @extensions", [
         '@xmlsitemap_requirements' => 'https://www.drupal.org/documentation/modules/xmlsitemap/requirements',
         '@extensions' => \Drupal::service('renderer')->renderPlain($items),
       ]),
@@ -42,16 +42,16 @@ function xmlsitemap_requirements($phase) {
     // the root directory.
     if (\Drupal::config('xmlsitemap.settings')->get('clean_url') && file_exists(DRUPAL_ROOT . '/sitemap.xml')) {
       $requirements['xmlsitemap_file'] = [
-        'title' => $t('XML sitemap'),
+        'title' => $t('XML Sitemap'),
         'value' => $t('Existing sitemap.xml file found.'),
         'severity' => REQUIREMENT_ERROR,
-        'description' => $t('The XML sitemap module cannot display its XML output if there is an existing sitemap.xml file in your website root.'),
+        'description' => $t('The XML Sitemap module cannot display its XML output if there is an existing sitemap.xml file in your website root.'),
       ];
     }
 
     // Check that the base directory and all its subdirectories are writable.
     $requirements['xmlsitemap_directory'] = [
-      'title' => $t('XML sitemap cache directory'),
+      'title' => $t('XML Sitemap cache directory'),
       'value' => $t('Writable'),
     ];
     if (!xmlsitemap_check_directory()) {
@@ -86,7 +86,7 @@ function xmlsitemap_requirements($phase) {
     $max_links_limit = XMLSITEMAP_MAX_SITEMAP_LINKS * XMLSITEMAP_MAX_SITEMAP_LINKS;
     if ($max_links > $max_links_limit) {
       $requirements['xmlsitemap_link_count'] = [
-        'title' => $t('XML sitemap link count'),
+        'title' => $t('XML Sitemap link count'),
         'value' => $max_links,
         'description' => $t('You have exceeded the number of links that your sitemap can contain (@num).', ['@num' => number_format($max_links)]),
         'severity' => REQUIREMENT_ERROR,
@@ -96,7 +96,7 @@ function xmlsitemap_requirements($phase) {
     // The maximum number of chunks in a sitemap.
     if ($max_chunks > XMLSITEMAP_MAX_SITEMAP_LINKS) {
       $requirements['xmlsitemap_chunk_count'] = [
-        'title' => $t('XML sitemap page count'),
+        'title' => $t('XML Sitemap page count'),
         'value' => $max_chunks,
         'description' => $t('You have exceeded the number of sitemap pages (@number).', ['@number' => number_format(XMLSITEMAP_MAX_SITEMAP_LINKS)]),
         'severity' => REQUIREMENT_ERROR,
@@ -108,7 +108,7 @@ function xmlsitemap_requirements($phase) {
 
     // Check maximum file size.
     $requirements['xmlsitemap_file_size'] = [
-      'title' => $t('XML sitemap maximum file size'),
+      'title' => $t('XML Sitemap maximum file size'),
       'value' => format_size($max_filesize),
     ];
     if ($max_filesize > XMLSITEMAP_MAX_SITEMAP_FILESIZE) {
@@ -123,7 +123,7 @@ function xmlsitemap_requirements($phase) {
     $generated_last = \Drupal::state()->get('xmlsitemap_generated_last', 0);
     $generated_ago = \Drupal::time()->getRequestTime() - $generated_last;
     $requirements['xmlsitemap_generated'] = [
-      'title' => $t('XML sitemap'),
+      'title' => $t('XML Sitemap'),
       'value' => $generated_last ? $t('Last attempted generation on @date (@interval ago).', [
         '@date' => \Drupal::service('date.formatter')->format($generated_last, 'small'),
         '@interval' => \Drupal::service('date.formatter')->formatInterval($generated_ago),
@@ -132,7 +132,7 @@ function xmlsitemap_requirements($phase) {
     ];
     if (\Drupal::state()->get('xmlsitemap_rebuild_needed')) {
       $requirements['xmlsitemap_generated']['severity'] = REQUIREMENT_ERROR;
-      $requirements['xmlsitemap_generated']['description'] = $t('The XML sitemap data is out of sync and needs to be <a href="@link-rebuild">completely rebuilt<a>.', ['@link-rebuild' => Url::fromRoute('xmlsitemap.admin_rebuild')->toString()]);
+      $requirements['xmlsitemap_generated']['description'] = $t('The XML Sitemap data is out of sync and needs to be <a href="@link-rebuild">completely rebuilt<a>.', ['@link-rebuild' => Url::fromRoute('xmlsitemap.admin_rebuild')->toString()]);
     }
     elseif (\Drupal::state()->get('xmlsitemap_regenerate_needed')) {
       $last_run = $generated_last;
@@ -171,7 +171,7 @@ function xmlsitemap_requirements($phase) {
 
     if (!$anonymous_accout->hasPermission('access user profiles') && xmlsitemap_link_bundle_check_enabled('user', 'user')) {
       $requirements['xmlsitemap_user_anonymous_permission'] = [
-        'title' => $t('XML sitemap user'),
+        'title' => $t('XML Sitemap user'),
         'value' => $t('Anonymous access to user profiles'),
         'description' => $t('In order to list user profile links in the sitemap, the anonymous user must have the <a href="@perm-link"><em>View user profiles</em> permission</a>.', [
           '@perm-link' => Url::fromRoute('entity.user_role.edit_permissions_form', ['user_role' => RoleInterface::ANONYMOUS_ID], ['fragment' => 'module-user'])->toString(),

@@ -52,7 +52,14 @@ class MetatagManagerTest extends KernelTestBase {
     $this->entityTypeManager = $this->container->get('entity_type.manager');
     $this->metatagManager = $this->container->get('metatag.manager');
 
-    $this->installConfig(['system', 'field', 'text', 'user', 'metatag', 'metatag_open_graph']);
+    $this->installConfig([
+      'system',
+      'field',
+      'text',
+      'user',
+      'metatag',
+      'metatag_open_graph',
+    ]);
     $this->installEntitySchema('user');
     $this->installSchema('user', ['users_data']);
   }
@@ -81,6 +88,7 @@ class MetatagManagerTest extends KernelTestBase {
     $tags = $this->metatagManager->generateElements([
       'og_image_width' => 100,
       'og_image_height' => 100,
+      // @todo Update this to use the metatag-logo.png file.
       'og_image_url' => 'https://www.example.com/example/foo.png',
     ]);
 

@@ -15,8 +15,8 @@ use Drupal\redirect\Exception\RedirectLoopException;
 use Drupal\redirect\RedirectChecker;
 use Drupal\redirect\RedirectRepository;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
-use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Routing\RequestContext;
 
@@ -105,10 +105,10 @@ class RedirectRequestSubscriber implements EventSubscriberInterface {
   /**
    * Handles the redirect if any found.
    *
-   * @param \Symfony\Component\HttpKernel\Event\GetResponseEvent $event
+   * @param \Symfony\Component\HttpKernel\Event\RequestEvent $event
    *   The event to process.
    */
-  public function onKernelRequestCheckRedirect(GetResponseEvent $event) {
+  public function onKernelRequestCheckRedirect(RequestEvent $event) {
     // Get a clone of the request. During inbound processing the request
     // can be altered. Allowing this here can lead to unexpected behavior.
     // For example the path_processor.files inbound processor provided by
@@ -176,12 +176,12 @@ class RedirectRequestSubscriber implements EventSubscriberInterface {
   /**
    * Prior to set the response it check if we can redirect.
    *
-   * @param \Symfony\Component\HttpKernel\Event\GetResponseEvent $event
+   * @param \Symfony\Component\HttpKernel\Event\RequestEvent $event
    *   The event object.
    * @param \Drupal\Core\Url $url
    *   The Url where we want to redirect.
    */
-  protected function setResponse(GetResponseEvent $event, Url $url) {
+  protected function setResponse(RequestEvent $event, Url $url) {
     $request = $event->getRequest();
     $this->context->fromRequest($request);
 

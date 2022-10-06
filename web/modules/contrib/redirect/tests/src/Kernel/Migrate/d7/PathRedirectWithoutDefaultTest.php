@@ -17,7 +17,7 @@ class PathRedirectWithoutDefaultTest extends PathRedirectTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
     $this->installEntitySchema('redirect');
     $this->loadFixture(__DIR__ . '/../../../../fixtures/drupal7-no-default.php');

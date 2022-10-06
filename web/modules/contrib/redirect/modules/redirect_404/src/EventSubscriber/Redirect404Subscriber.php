@@ -8,10 +8,10 @@ use Drupal\Core\Path\PathMatcherInterface;
 use Drupal\redirect_404\RedirectNotFoundStorageInterface;
 use Drupal\Core\Path\CurrentPathStack;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 
 /**
  * An EventSubscriber that listens to redirect 404 errors.
@@ -96,12 +96,12 @@ class Redirect404Subscriber implements EventSubscriberInterface {
   /**
    * Logs an exception of 404 Redirect errors.
    *
-   * @param GetResponseForExceptionEvent $event
+   * @param ExceptionEvent $event
    *   Is given by the event dispatcher.
    */
-  public function onKernelException(GetResponseForExceptionEvent $event) {
+  public function onKernelException(ExceptionEvent $event) {
     // Only log page not found (404) errors.
-    if ($event->getException() instanceof NotFoundHttpException) {
+    if ($event->getThrowable() instanceof NotFoundHttpException) {
       $path = $this->currentPath->getPath();
 
       // Ignore paths specified in the redirect settings.

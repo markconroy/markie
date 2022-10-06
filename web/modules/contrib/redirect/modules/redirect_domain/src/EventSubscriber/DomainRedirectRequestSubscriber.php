@@ -7,8 +7,8 @@ use Drupal\Core\Path\PathMatcherInterface;
 use Drupal\Core\Routing\TrustedRedirectResponse;
 use Drupal\Core\Url;
 use Drupal\redirect\RedirectChecker;
+use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
-use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
@@ -62,10 +62,10 @@ class DomainRedirectRequestSubscriber implements EventSubscriberInterface {
   /**
    * Handles the domain redirect if any found.
    *
-   * @param \Symfony\Component\HttpKernel\Event\GetResponseEvent $event
+   * @param \Symfony\Component\HttpKernel\Event\RequestEvent $event
    *   The event to process.
    */
-  public function onKernelRequestCheckDomainRedirect(GetResponseEvent $event) {
+  public function onKernelRequestCheckDomainRedirect(RequestEvent $event) {
     $request = clone $event->getRequest();
 
     if (!$this->redirectChecker->canRedirect($request)) {
@@ -111,12 +111,12 @@ class DomainRedirectRequestSubscriber implements EventSubscriberInterface {
   /**
    * Prior to set the response it check if we can redirect.
    *
-   * @param \Symfony\Component\HttpKernel\Event\GetResponseEvent $event
+   * @param \Symfony\Component\HttpKernel\Event\RequestEvent $event
    *   The event object.
    * @param \Drupal\Core\Url $url
    *   The Url where we want to redirect.
    */
-  protected function setResponse(GetResponseEvent $event, Url $url) {
+  protected function setResponse(RequestEvent $event, Url $url) {
     $request = $event->getRequest();
 
     parse_str($request->getQueryString(), $query);

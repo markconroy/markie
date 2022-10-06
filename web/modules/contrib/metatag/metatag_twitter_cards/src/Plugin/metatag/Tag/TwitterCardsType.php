@@ -32,23 +32,33 @@ class TwitterCardsType extends MetaNameBase {
       '#type' => 'select',
       '#title' => $this->label(),
       '#description' => $this->description(),
-      '#options' => [
-        'summary' => $this->t('Summary Card'),
-        'summary_large_image' => $this->t('Summary Card with large image'),
-        'photo' => $this->t('Photo Card'),
-        'gallery' => $this->t('Gallery Card'),
-        'app' => $this->t('App Card'),
-        'player' => $this->t('Player Card'),
-        'product' => $this->t('Product Card'),
-      ],
+      '#options' => $this->formValues(),
       '#empty_option' => $this->t('- None -'),
       '#empty_value' => '',
       '#default_value' => $this->value(),
-      '#required' => isset($element['#required']) ? $element['#required'] : FALSE,
+      '#required' => $element['#required'] ?? FALSE,
       '#element_validate' => [[get_class($this), 'validateTag']],
     ];
 
     return $form;
+  }
+
+  /**
+   * The list of select values.
+   *
+   * @return array
+   *   A list of values available for this select tag.
+   */
+  protected function formValues() {
+    return [
+      'summary' => $this->t('Summary Card'),
+      'summary_large_image' => $this->t('Summary Card with large image'),
+      'photo' => $this->t('Photo Card'),
+      'gallery' => $this->t('Gallery Card'),
+      'app' => $this->t('App Card'),
+      'player' => $this->t('Player Card'),
+      'product' => $this->t('Product Card'),
+    ];
   }
 
 }

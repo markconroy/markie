@@ -7,7 +7,7 @@ use Drupal\Core\Template\Attribute;
 use Drupal\Core\Url;
 
 /**
- * Extended class for writing XML sitemap files.
+ * Extended class for writing XML Sitemap files.
  */
 class XmlSitemapWriter extends \XMLWriter {
 
@@ -50,7 +50,7 @@ class XmlSitemapWriter extends \XMLWriter {
    * Constructors and XmlSitemapWriter object.
    *
    * @param \Drupal\xmlsitemap\XmlSitemapInterface $sitemap
-   *   The XML sitemap.
+   *   The XML Sitemap.
    * @param int|string $page
    *   The current page of the sitemap being generated.
    *
@@ -61,7 +61,7 @@ class XmlSitemapWriter extends \XMLWriter {
    */
   public function __construct(XmlSitemapInterface $sitemap, $page) {
     if ($page !== 'index' && !filter_var($page, FILTER_VALIDATE_INT)) {
-      throw new \InvalidArgumentException("Invalid XML sitemap page $page.");
+      throw new \InvalidArgumentException("Invalid XML Sitemap page $page.");
     }
 
     $this->sitemap = $sitemap;
@@ -82,6 +82,7 @@ class XmlSitemapWriter extends \XMLWriter {
    * @throws XmlSitemapGenerationException
    *   If the file URI cannot be opened.
    */
+  #[\ReturnTypeWillChange]
   public function openUri($uri) {
     $return = parent::openUri($uri);
     if (!$return) {
@@ -106,6 +107,7 @@ class XmlSitemapWriter extends \XMLWriter {
    * @return bool
    *   Returns TRUE on success.
    */
+  #[\ReturnTypeWillChange]
   public function startDocument($version = '1.0', $encoding = 'UTF-8', $standalone = NULL) {
     $this->setIndent(FALSE);
     $result = parent::startDocument($version, $encoding);
@@ -115,7 +117,7 @@ class XmlSitemapWriter extends \XMLWriter {
     if (\Drupal::config('xmlsitemap.settings')->get('xsl')) {
       $this->writeXsl();
     }
-    $this->startElement($this->isIndex() ? 'sitemapindex' : 'urlset', TRUE);
+    $result &= $this->startElement($this->isIndex() ? 'sitemapindex' : 'urlset', TRUE);
     return $result;
   }
 
@@ -172,20 +174,25 @@ class XmlSitemapWriter extends \XMLWriter {
    *   Element name.
    * @param bool $root
    *   Specify if it is root element or not.
+   *
+   * @return bool
+   *   Returns TRUE on success or FALSE on failure.
    */
+  #[\ReturnTypeWillChange]
   public function startElement($name, $root = FALSE) {
-    parent::startElement($name);
+    $return = parent::startElement($name);
 
-    if ($root) {
+    if ($return && $root) {
       foreach ($this->getRootAttributes() as $key => $value) {
-        $this->writeAttribute($key, $value);
+        $return &= $this->writeAttribute($key, $value);
       }
-      $this->writeRaw(PHP_EOL);
+      $return &= $this->writeRaw(PHP_EOL);
     }
+    return $return;
   }
 
   /**
-   * Writes an full XML sitemap element tag.
+   * Writes an full XML Sitemap element tag.
    *
    * @param string $name
    *   The element name.
@@ -205,17 +212,21 @@ class XmlSitemapWriter extends \XMLWriter {
    *   The element name.
    * @param string|array $content
    *   The element contents or an array of the elements' sub-elements.
+   *
+   * @return bool
+   *   Returns TRUE on success or FALSE on failure.
    */
+  #[\ReturnTypeWillChange]
   public function writeElement($name, $content = NULL) {
     if (is_array($content)) {
-      $this->startElement($name);
-      $this->writeRaw($this->formatXmlElements($content));
-      $this->endElement();
+      $return = $this->startElement($name);
+      $return &= $this->writeRaw($this->formatXmlElements($content));
+      $return &= $this->endElement();
     }
     else {
-      parent::writeElement($name, Html::escape(static::toString($content)));
+      $return = parent::writeElement($name, Html::escape(static::toString($content)));
     }
-    $this->writeRaw(PHP_EOL);
+    $return &= $this->writeRaw(PHP_EOL);
 
     // After a certain number of elements have been added, flush the buffer
     // to the output file.
@@ -223,6 +234,7 @@ class XmlSitemapWriter extends \XMLWriter {
     if (($this->sitemapElementCount % $this->linkCountFlush) == 0) {
       $this->flush();
     }
+    return $return;
   }
 
   /**
@@ -253,6 +265,7 @@ class XmlSitemapWriter extends \XMLWriter {
    * @return bool
    *   Returns TRUE on success.
    */
+  #[\ReturnTypeWillChange]
   public function endDocument() {
     $return = parent::endDocument();
 

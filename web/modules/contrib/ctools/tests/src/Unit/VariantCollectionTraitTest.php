@@ -2,6 +2,7 @@
 
 namespace Drupal\Tests\ctools\Unit;
 
+use Prophecy\PhpUnit\ProphecyTrait;
 use Drupal\Component\Plugin\PluginManagerInterface;
 use Drupal\Component\Uuid\UuidInterface;
 use Drupal\Core\DependencyInjection\ContainerBuilder;
@@ -19,8 +20,9 @@ use Drupal\Tests\UnitTestCase;
  */
 class VariantCollectionTraitTest extends UnitTestCase {
 
+  use ProphecyTrait;
   /**
-   * @var \Drupal\Component\Plugin\PluginManagerInterface|\PHPUnit_Framework_MockObject_MockObject
+   * @var \Drupal\Component\Plugin\PluginManagerInterface|\PHPUnit\Framework\MockObject\MockObject
    */
   protected $manager;
 
@@ -119,7 +121,7 @@ class VariantCollectionTraitTest extends UnitTestCase {
    * @depends testAddVariant
    */
   public function testGetVariant($data) {
-    list($trait_object, $uuid, $plugin) = $data;
+    [$trait_object, $uuid, $plugin] = $data;
     $this->manager->createInstance()->shouldNotBeCalled();
 
     $this->assertSame($plugin, $trait_object->getVariant($uuid));
@@ -132,7 +134,7 @@ class VariantCollectionTraitTest extends UnitTestCase {
    * @depends testGetVariant
    */
   public function testRemoveVariant($data) {
-    list($trait_object, $uuid) = $data;
+    [$trait_object, $uuid] = $data;
 
     $this->assertSame($trait_object, $trait_object->removeVariant($uuid));
     $this->assertFalse($trait_object->getVariants()->has($uuid));
@@ -145,7 +147,7 @@ class VariantCollectionTraitTest extends UnitTestCase {
    * @depends testRemoveVariant
    */
   public function testGetVariantException($data) {
-    list($trait_object, $uuid) = $data;
+    [$trait_object, $uuid] = $data;
     // Attempt to retrieve a variant that has been removed.
     $this->expectException('\Drupal\Component\Plugin\Exception\PluginNotFoundException');
     $this->expectExceptionMessage("Plugin ID 'test-uuid' was not found.");
@@ -153,7 +155,9 @@ class VariantCollectionTraitTest extends UnitTestCase {
   }
 
 }
-
+/**
+ *
+ */
 class TestVariantCollectionTrait {
   use VariantCollectionTrait;
 

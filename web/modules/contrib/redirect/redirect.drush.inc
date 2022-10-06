@@ -30,7 +30,7 @@ function drush_redirect_generate_redirects($count = NULL) {
   if (drush_generate_is_number($count) == FALSE) {
     return drush_set_error('DEVEL_GENERATE_INVALID_INPUT', t('Invalid number of redirects.'));
   }
-  module_load_include('inc', 'redirect', 'redirect.generate');
+  \Drupal::moduleHandler()->loadInclude('redirect', 'inc', 'redirect.generate');
   drush_generate_include_devel();
   redirect_run_unprogressive_batch('redirect_generate_redirects_batch_info', $count, drush_get_option('delete'));
 }

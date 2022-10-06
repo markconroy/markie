@@ -10,7 +10,7 @@ use Drupal\xmlsitemap\XmlSitemapInterface;
  *
  * @ConfigEntityType(
  *   id = "xmlsitemap",
- *   label = @Translation("XML sitemap"),
+ *   label = @Translation("XML Sitemap"),
  *   handlers = {
  *     "storage" = "Drupal\xmlsitemap\XmlSitemapStorage",
  *     "list_builder" = "Drupal\xmlsitemap\XmlSitemapListBuilder",
@@ -157,7 +157,7 @@ class XmlSitemap extends ConfigEntityBase implements XmlSitemapInterface {
   /**
    * {@inheritdoc}
    */
-  public function setChunks($chunks) {
+  public function setChunks(int $chunks) {
     $this->chunks = $chunks;
     return $this;
   }
@@ -165,7 +165,7 @@ class XmlSitemap extends ConfigEntityBase implements XmlSitemapInterface {
   /**
    * {@inheritdoc}
    */
-  public function setLinks($links) {
+  public function setLinks(int $links) {
     $this->links = $links;
     return $this;
   }
@@ -173,7 +173,7 @@ class XmlSitemap extends ConfigEntityBase implements XmlSitemapInterface {
   /**
    * {@inheritdoc}
    */
-  public function setMaxFileSize($max_filesize) {
+  public function setMaxFileSize(int $max_filesize) {
     $this->max_filesize = $max_filesize;
     return $this;
   }
@@ -189,7 +189,7 @@ class XmlSitemap extends ConfigEntityBase implements XmlSitemapInterface {
   /**
    * {@inheritdoc}
    */
-  public function setUpdated($updated) {
+  public function setUpdated(int $updated) {
     $this->updated = $updated;
     return $this;
   }
@@ -209,6 +209,18 @@ class XmlSitemap extends ConfigEntityBase implements XmlSitemapInterface {
     }
 
     return NULL;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function saveState(): void {
+    \Drupal::state()->set('xmlsitemap.' . $this->id(), [
+      'chunks' => $this->getChunks(),
+      'links' => $this->getLinks(),
+      'max_filesize' => $this->getMaxFileSize(),
+      'updated' => $this->getUpdated(),
+    ]);
   }
 
 }

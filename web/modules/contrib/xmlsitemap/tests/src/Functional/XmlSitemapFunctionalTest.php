@@ -12,12 +12,12 @@ class XmlSitemapFunctionalTest extends XmlSitemapTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['path', 'help'];
+  protected static $modules = ['path', 'help'];
 
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     $this->admin_user = $this->drupalCreateUser([
@@ -54,18 +54,22 @@ class XmlSitemapFunctionalTest extends XmlSitemapTestBase {
     // @codingStandardsIgnoreEnd
     $this->drupalLogin($this->admin_user);
     $edit = ['xmlsitemap_base_url' => ''];
-    $this->drupalPostForm('admin/config/search/xmlsitemap/settings', $edit, 'Save configuration');
+    $this->drupalGet('admin/config/search/xmlsitemap/settings');
+    $this->submitForm($edit, 'Save configuration');
 
     $edit = ['xmlsitemap_base_url' => 'invalid'];
-    $this->drupalPostForm('admin/config/search/xmlsitemap/settings', $edit, 'Save configuration');
+    $this->drupalGet('admin/config/search/xmlsitemap/settings');
+    $this->submitForm($edit, 'Save configuration');
     $this->assertSession()->pageTextContains('Invalid base URL.');
 
     $edit = ['xmlsitemap_base_url' => 'http://example.com/ '];
-    $this->drupalPostForm('admin/config/search/xmlsitemap/settings', $edit, 'Save configuration');
+    $this->drupalGet('admin/config/search/xmlsitemap/settings');
+    $this->submitForm($edit, 'Save configuration');
     $this->assertSession()->pageTextContains('Invalid base URL.');
 
     $edit = ['xmlsitemap_base_url' => 'http://example.com/'];
-    $this->drupalPostForm('admin/config/search/xmlsitemap/settings', $edit, 'Save configuration');
+    $this->drupalGet('admin/config/search/xmlsitemap/settings');
+    $this->submitForm($edit, 'Save configuration');
     $this->assertSession()->pageTextContains('The configuration options have been saved.');
 
     $this->regenerateSitemap();
@@ -86,7 +90,7 @@ class XmlSitemapFunctionalTest extends XmlSitemapTestBase {
     $this->drupalLogin($this->admin_user);
     $this->state->set('xmlsitemap_generated_last', $this->time->getRequestTime());
     $this->state->set('xmlsitemap_rebuild_needed', TRUE);
-    $this->assertXMLSitemapProblems('The XML sitemap data is out of sync and needs to be completely rebuilt.');
+    $this->assertXMLSitemapProblems('The XML Sitemap data is out of sync and needs to be completely rebuilt.');
     $this->clickLink('completely rebuilt');
     $this->assertSession()->statusCodeEquals(200);
     $this->state->set('xmlsitemap_rebuild_needed', FALSE);

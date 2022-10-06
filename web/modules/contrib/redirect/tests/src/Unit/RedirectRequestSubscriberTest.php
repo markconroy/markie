@@ -8,12 +8,11 @@ use Drupal\Core\Language\Language;
 use Drupal\path_alias\AliasManagerInterface;
 use Drupal\redirect\EventSubscriber\RedirectRequestSubscriber;
 use Drupal\Tests\UnitTestCase;
-use PHPUnit_Framework_MockObject_MockObject;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Event\GetResponseEvent;
-use Symfony\Component\HttpKernel\Event\PostResponseEvent;
+use Symfony\Component\HttpKernel\Event\RequestEvent;
+use Symfony\Component\HttpKernel\Event\TerminateEvent;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 
 /**
@@ -35,9 +34,7 @@ class RedirectRequestSubscriberTest extends UnitTestCase {
     // by the redirect entity and values from the accessed url.
     $final_query = $redirect_query + $request_query;
 
-    $url = $this->getMockBuilder('Drupal\Core\Url')
-      ->disableOriginalConstructor()
-      ->getMock();
+    $url = $this->createMock('Drupal\Core\Url');
 
     $url->expects($this->once())
       ->method('setAbsolute')
@@ -73,9 +70,7 @@ class RedirectRequestSubscriberTest extends UnitTestCase {
    */
   public function testRedirectLogicWithoutQueryRetaining($request_uri, $request_query, $redirect_uri) {
 
-    $url = $this->getMockBuilder('Drupal\Core\Url')
-      ->disableOriginalConstructor()
-      ->getMock();
+    $url = $this->createMock('Drupal\Core\Url');
 
     $url->expects($this->once())
       ->method('setAbsolute')
@@ -125,7 +120,7 @@ class RedirectRequestSubscriberTest extends UnitTestCase {
    * @param bool $retain_query
    *   Flag if to retain the query through the redirect.
    *
-   * @return \Symfony\Component\HttpKernel\Event\GetResponseEvent
+   * @return \Symfony\Component\HttpKernel\Event\RequestEvent
    *   THe response event.
    */
   protected function callOnKernelRequestCheckRedirect($redirect, $request_uri, $request_query, $retain_query) {
@@ -133,18 +128,14 @@ class RedirectRequestSubscriberTest extends UnitTestCase {
     $event = $this->getGetResponseEventStub($request_uri, http_build_query($request_query));
     $request = $event->getRequest();
 
-    $checker = $this->getMockBuilder('Drupal\redirect\RedirectChecker')
-      ->disableOriginalConstructor()
-      ->getMock();
+    $checker = $this->createMock('Drupal\redirect\RedirectChecker');
     $checker->expects($this->any())
       ->method('canRedirect')
       ->will($this->returnValue(TRUE));
 
     $context = $this->createMock('Symfony\Component\Routing\RequestContext');
 
-    $inbound_path_processor = $this->getMockBuilder('Drupal\Core\PathProcessor\InboundPathProcessorInterface')
-      ->disableOriginalConstructor()
-      ->getMock();
+    $inbound_path_processor = $this->createMock('Drupal\Core\PathProcessor\InboundPathProcessorInterface');
     $inbound_path_processor->expects($this->any())
       ->method('processInbound')
       ->with($request->getPathInfo(), $request)
@@ -189,13 +180,11 @@ class RedirectRequestSubscriberTest extends UnitTestCase {
    * @param $redirect
    *   The redirect object to be returned.
    *
-   * @return PHPUnit_Framework_MockObject_MockObject
+   * @return \PHPUnit\Framework\MockObject\MockObject
    *   The redirect repository.
    */
   protected function getRedirectRepositoryStub($method, $redirect) {
-    $repository = $this->getMockBuilder('Drupal\redirect\RedirectRepository')
-      ->disableOriginalConstructor()
-      ->getMock();
+    $repository = $this->createMock('Drupal\redirect\RedirectRepository');
 
     if ($method === 'findMatchingRedirect') {
       $repository->expects($this->any())
@@ -223,13 +212,11 @@ class RedirectRequestSubscriberTest extends UnitTestCase {
    * @param int $status_code
    *   The redirect status code.
    *
-   * @return PHPUnit_Framework_MockObject_MockObject
+   * @return \PHPUnit\Framework\MockObject\MockObject
    *   The mocked redirect object.
    */
   protected function getRedirectStub($url, $status_code = 301) {
-    $redirect = $this->getMockBuilder('Drupal\redirect\Entity\Redirect')
-      ->disableOriginalConstructor()
-      ->getMock();
+    $redirect = $this->createMock('Drupal\redirect\Entity\Redirect');
     $redirect->expects($this->once())
       ->method('getRedirectUrl')
       ->will($this->returnValue($url));
@@ -252,19 +239,16 @@ class RedirectRequestSubscriberTest extends UnitTestCase {
    * @param array $headers
    *   Headers to be set into the response.
    *
-   * @return \Symfony\Component\HttpKernel\Event\PostResponseEvent
+   * @return \Symfony\Component\HttpKernel\Event\TerminateEvent
    *   The post response event object.
    */
   protected function getPostResponseEvent($headers = []) {
-    $http_kernel = $this->getMockBuilder('\Symfony\Component\HttpKernel\HttpKernelInterface')
-      ->getMock();
-    $request = $this->getMockBuilder('Symfony\Component\HttpFoundation\Request')
-      ->disableOriginalConstructor()
-      ->getMock();
+    $http_kernel = $this->createMock('\Symfony\Component\HttpKernel\HttpKernelInterface');
+    $request = $this->createMock('Symfony\Component\HttpFoundation\Request');
 
     $response = new Response('', 301, $headers);
 
-    return new PostResponseEvent($http_kernel, $request, $response);
+    return new TerminateEvent($http_kernel, $request, $response);
   }
 
   /**
@@ -273,24 +257,22 @@ class RedirectRequestSubscriberTest extends UnitTestCase {
    * @param $path_info
    * @param $query_string
    *
-   * @return GetResponseEvent
+   * @return RequestEvent
    */
   protected function getGetResponseEventStub($path_info, $query_string) {
     $request = Request::create($path_info . '?' . $query_string, 'GET', [], [], [], ['SCRIPT_NAME' => 'index.php']);
 
-    $http_kernel = $this->getMockBuilder('\Symfony\Component\HttpKernel\HttpKernelInterface')
-      ->getMock();
-    return new GetResponseEvent($http_kernel, $request, HttpKernelInterface::MASTER_REQUEST);
+    $http_kernel = $this->createMock('\Symfony\Component\HttpKernel\HttpKernelInterface');
+    return new RequestEvent($http_kernel, $request, HttpKernelInterface::MASTER_REQUEST);
   }
 
   /**
    * Gets the language manager mock object.
    *
-   * @return \Drupal\language\ConfigurableLanguageManagerInterface|PHPUnit_Framework_MockObject_MockObject
+   * @return \Drupal\language\ConfigurableLanguageManagerInterface|\PHPUnit\Framework\MockObject\MockObject
    */
   protected function getLanguageManagerStub() {
-    $language_manager = $this->getMockBuilder('Drupal\language\ConfigurableLanguageManagerInterface')
-      ->getMock();
+    $language_manager = $this->createMock('Drupal\language\ConfigurableLanguageManagerInterface');
     $language_manager->expects($this->any())
       ->method('getCurrentLanguage')
       ->will($this->returnValue(new Language(['id' => 'en'])));

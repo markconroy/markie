@@ -130,7 +130,7 @@ class XmlSitemapSettingsForm extends ConfigFormBase {
     $form['xsl'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Include a stylesheet in the sitemaps for humans.'),
-      '#description' => $this->t('When enabled, this will add formatting and tables with sorting to make it easier to view the XML sitemap data instead of viewing raw XML output. Search engines will ignore this.'),
+      '#description' => $this->t('When enabled, this will add formatting and tables with sorting to make it easier to view the XML Sitemap data instead of viewing raw XML output. Search engines will ignore this.'),
       '#default_value' => $config->get('xsl'),
     ];
     $form['prefetch_aliases'] = [
@@ -196,8 +196,8 @@ class XmlSitemapSettingsForm extends ConfigFormBase {
       '#default_value' => $config->get('path'),
       '#size' => 30,
       '#maxlength' => 255,
-      '#description' => $this->t('Subdirectory where the sitemap data will be stored. This folder <strong>must not be shared</strong> with any other Drupal site or install using XML sitemap.'),
-      '#field_prefix' => file_build_uri(''),
+      '#description' => $this->t('Subdirectory where the sitemap data will be stored. This folder <strong>must not be shared</strong> with any other Drupal site or install using XML Sitemap.'),
+      '#field_prefix' => xmlsitemap_get_directory(),
       '#required' => TRUE,
     ];
     $base_url_override = Settings::get('xmlsitemap_base_url', FALSE);

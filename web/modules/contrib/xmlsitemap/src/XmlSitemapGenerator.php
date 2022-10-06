@@ -205,7 +205,7 @@ class XmlSitemapGenerator implements XmlSitemapGeneratorInterface {
     $this->setMemoryLimit();
 
     if ($this->state->get('xmlsitemap_developer_mode')) {
-      $this->logger->notice('Starting XML sitemap generation. Memory usage: @memory-peak.', [
+      $this->logger->notice('Starting XML Sitemap generation. Memory usage: @memory-peak.', [
         '@memory-peak' => format_size(memory_get_peak_usage(TRUE)),
       ]);
     }
@@ -229,7 +229,7 @@ class XmlSitemapGenerator implements XmlSitemapGeneratorInterface {
     $optimal_limit = &drupal_static(__FUNCTION__);
     if (!isset($optimal_limit)) {
       // Set the base memory amount from the provided core constant.
-      $optimal_limit = Bytes::toInt(DRUPAL_MINIMUM_PHP_MEMORY_LIMIT);
+      $optimal_limit = Bytes::toNumber(\Drupal::MINIMUM_PHP_MEMORY_LIMIT);
 
       // Add memory based on the chunk size.
       $optimal_limit += xmlsitemap_get_chunk_size() * 500;
@@ -252,7 +252,7 @@ class XmlSitemapGenerator implements XmlSitemapGeneratorInterface {
       if (!is_null($new_limit)) {
         $new_limit = $this->getOptimalMemoryLimit();
       }
-      if (Bytes::toInt($current_limit) < $new_limit) {
+      if (Bytes::toNumber($current_limit) < $new_limit) {
         return @ini_set('memory_limit', $new_limit);
       }
     }
@@ -318,7 +318,7 @@ class XmlSitemapGenerator implements XmlSitemapGeneratorInterface {
       // Ensure every link starts with a slash.
       // @see \Drupal\Core\Url::fromInternalUri()
       if ($link['loc'][0] !== '/') {
-        trigger_error("The XML sitemap link path {$link['loc']} for {$link['type']} {$link['id']} is invalid because it does not start with a slash.", E_USER_ERROR);
+        trigger_error("The XML Sitemap link path {$link['loc']} for {$link['type']} {$link['id']} is invalid because it does not start with a slash.", E_USER_ERROR);
         $link['loc'] = '/' . $link['loc'];
       }
 
@@ -457,7 +457,7 @@ class XmlSitemapGenerator implements XmlSitemapGeneratorInterface {
       $context['sandbox']['max'] = $sitemap->getChunks();
       $sitemap->setUpdated($this->time->getRequestTime());
       xmlsitemap_sitemap_get_max_filesize($sitemap);
-      xmlsitemap_sitemap_save($sitemap);
+      $sitemap->saveState();
 
       $context['finished'] = 1;
       return;
@@ -496,7 +496,7 @@ class XmlSitemapGenerator implements XmlSitemapGeneratorInterface {
       $this->messenger->addStatus($this->t('The sitemaps were regenerated.'));
 
       // Show a watchdog message that the sitemap was regenerated.
-      $this->logger->notice('Finished XML sitemap generation in @elapsed. Memory usage: @memory-peak.', ['@elapsed' => $elapsed, '@memory-peak' => format_size(memory_get_peak_usage(TRUE))]);
+      $this->logger->notice('Finished XML Sitemap generation in @elapsed. Memory usage: @memory-peak.', ['@elapsed' => $elapsed, '@memory-peak' => format_size(memory_get_peak_usage(TRUE))]);
     }
     else {
       $this->messenger->addError($this->t('The sitemaps were not successfully regenerated.'));

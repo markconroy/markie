@@ -6,19 +6,19 @@ use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\xmlsitemap\Entity\XmlSitemap;
 
 /**
- * Common base test class for XML sitemap internationalization tests.
+ * Common base test class for XML Sitemap internationalization tests.
  */
 abstract class XmlSitemapMultilingualTestBase extends XmlSitemapTestBase {
 
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['language', 'locale', 'content_translation'];
+  protected static $modules = ['language', 'locale', 'content_translation'];
 
   /**
    * Set up an administrative user account and testing keys.
    */
-  protected function setUp() {
+  protected function setUp(): void {
     // Call parent::setUp() allowing test cases to pass further modules.
     parent::setUp();
 

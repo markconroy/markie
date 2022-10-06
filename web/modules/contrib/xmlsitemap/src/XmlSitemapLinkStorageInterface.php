@@ -2,7 +2,9 @@
 
 namespace Drupal\xmlsitemap;
 
+use Drupal\Core\Database\Query\SelectInterface;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\Query\QueryInterface;
 
 /**
  * Provides an interface defining a XmlSitemapLinkStorage service.
@@ -137,5 +139,36 @@ interface XmlSitemapLinkStorageInterface {
    *   An array of sitemap link arrays.
    */
   public function loadMultiple(array $conditions = []);
+
+  /**
+   * Get a select query for entity XML sitemap link IDs.
+   *
+   * @param string $entity_type_id
+   *   The entity type ID.
+   * @param string[] $bundles
+   *   The entity bundle IDs.
+   *
+   * @return \Drupal\Core\Database\Query\SelectInterface
+   *   The select query.
+   */
+  public function getEntityLinkQuery(string $entity_type_id, array $bundles = []): SelectInterface;
+
+  /**
+   * Get an entity query for XML sitemap indexing or querying.
+   *
+   * @param string $entity_type_id
+   *   The entity type ID.
+   * @param string[] $bundles
+   *   The entity bundle IDs.
+   * @param null|\Drupal\Core\Database\Query\SelectInterface $subquery
+   *   The optional subquery on the xmlsitemap table to match against the
+   *   entity ID values.
+   * @param string $subquery_operator
+   *   The optional subquery operator. Possible values are 'IN' or 'NOT IN'.
+   *
+   * @return \Drupal\Core\Entity\Query\QueryInterface
+   *   The entity query object.
+   */
+  public function getEntityQuery(string $entity_type_id, array $bundles = [], SelectInterface $subquery = NULL, string $subquery_operator = 'IN'): QueryInterface;
 
 }

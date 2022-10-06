@@ -2,7 +2,7 @@
 
 xmlsitemap.settings:
   type: config_object
-  label: 'XML sitemap settings'
+  label: 'XML Sitemap settings'
   mapping:
     minimum_lifetime:
       type: integer
@@ -49,7 +49,7 @@ xmlsitemap.settings:
 
 xmlsitemap.settings.*.*:
   type: config_object
-  label: 'XML sitemap entity bundle settings'
+  label: 'XML Sitemap entity bundle settings'
   mapping:
     status:
       type: boolean

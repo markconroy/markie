@@ -129,7 +129,7 @@ function metatag_tokens($type, $tokens, array $data, array $options, BubbleableM
 
   switch ($type) {
     case 'current-page':
-      /** @var \Drupal\token\TokenInterface $token_service */
+      /** @var \Drupal\Core\Utility\Token $token_service */
       $token_service = \Drupal::token();
       $metatag_tokens = $token_service->findWithPrefix($tokens, 'metatag');
       if (!empty($metatag_tokens) && metatag_is_current_route_supported()) {
@@ -158,7 +158,7 @@ function metatag_tokens($type, $tokens, array $data, array $options, BubbleableM
         }
 
         if (!empty($metatag_fields)) {
-          /** @var \Drupal\token\TokenInterface $token_service */
+          /** @var \Drupal\Core\Utility\Token $token_service */
           $token_service = \Drupal::token();
           $metatag_tokens = [];
           foreach ($metatag_fields as $metatag_field) {
@@ -208,7 +208,7 @@ function metatag_tokens($type, $tokens, array $data, array $options, BubbleableM
         // For [metatag:tag_name:0], [metatag:tag_name:0:value] and
         // [metatag:tag_name:value] tokens.
         else {
-          list($tag_name, $delta) = explode(':', $name, 2);
+          [$tag_name, $delta] = explode(':', $name, 2);
           if (!is_numeric($delta)) {
             unset($delta);
           }
@@ -227,7 +227,7 @@ function metatag_tokens($type, $tokens, array $data, array $options, BubbleableM
         }
         else {
           if (is_array($processed_tags[$tag_name])) {
-            $replacements[$original] = implode(',', $processed_tags[$tag_name]);
+            $replacements[$original] = implode(',', array_filter($processed_tags[$tag_name]));
           }
           else {
             $replacements[$original] = $processed_tags[$tag_name];

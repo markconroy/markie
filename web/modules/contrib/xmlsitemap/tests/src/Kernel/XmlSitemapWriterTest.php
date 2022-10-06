@@ -30,7 +30,7 @@ class XmlSitemapWriterTest extends KernelTestBase {
    * @covers ::__construct
    */
   public function testInvalidPage() {
-    $this->expectExceptionObject(new \InvalidArgumentException("Invalid XML sitemap page invalid."));
+    $this->expectExceptionObject(new \InvalidArgumentException("Invalid XML Sitemap page invalid."));
     new XmlSitemapWriter($this->sitemap, 'invalid');
   }
 

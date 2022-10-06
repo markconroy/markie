@@ -17,7 +17,7 @@ class RedirectHooksTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['redirect_test'];
+  protected static $modules = ['redirect_test'];
 
   /**
    * {@inheritdoc}
@@ -32,7 +32,7 @@ class RedirectHooksTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  public function setUp() {
+  public function setUp(): void {
     parent::setUp();
 
     // Create two redirects.

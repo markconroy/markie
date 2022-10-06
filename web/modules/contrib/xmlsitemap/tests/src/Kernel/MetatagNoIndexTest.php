@@ -42,7 +42,6 @@ class MetatagNoIndexTest extends KernelTestBase {
   protected function setUp(): void {
     parent::setUp();
 
-    $this->installSchema('system', ['sequences']);
     $this->installEntitySchema('user');
     $this->installConfig(['system', 'user', 'field', 'metatag']);
 

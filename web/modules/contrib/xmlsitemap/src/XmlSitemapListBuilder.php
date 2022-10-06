@@ -72,7 +72,7 @@ class XmlSitemapListBuilder extends ConfigEntityListBuilder {
    * {@inheritdoc}
    */
   public function buildHeader() {
-    $header['label'] = $this->t('XmlSitemap');
+    $header['label'] = $this->t('XML Sitemap');
     if ($this->moduleHandler->moduleExists('language')) {
       $header['language'] = $this->t('Language');
     }

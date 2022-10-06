@@ -196,8 +196,7 @@ class Application extends SymfonyApplication implements LoggerAwareInterface, Co
         $command = $this->bootstrapAndFind($name);
         // Avoid exception when help is being built by https://github.com/bamarni/symfony-console-autocomplete.
         // @todo Find a cleaner solution.
-        $argv = Drush::config()->get('runtime.argv');
-        if (count($argv) > 1 && $argv[1] !== 'help') {
+        if (Drush::config()->get('runtime.argv')[1] !== 'help') {
             $this->checkObsolete($command);
         }
         return $command;

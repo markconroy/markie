@@ -10,7 +10,7 @@ use Drupal\redirect_domain\EventSubscriber\DomainRedirectRequestSubscriber;
 use Drupal\Tests\UnitTestCase;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\Event\GetResponseEvent;
+use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 
 /**
@@ -78,9 +78,7 @@ class DomainRedirectRequestSubscriberTest extends UnitTestCase {
     ];
 
     // Create a mock redirect checker.
-    $checker = $this->getMockBuilder(RedirectChecker::class)
-      ->disableOriginalConstructor()
-      ->getMock();
+    $checker = $this->createMock(RedirectChecker::class);
     $checker->expects($this->any())
       ->method('canRedirect')
       ->will($this->returnValue(TRUE));
@@ -128,15 +126,14 @@ class DomainRedirectRequestSubscriberTest extends UnitTestCase {
    * @param $query_string
    *   The query string in the url.
    *
-   * @return GetResponseEvent
+   * @return RequestEvent
    *   The response for the request.
    */
   protected function getGetResponseEventStub($path_info, $query_string) {
     $request = Request::create($path_info . '?' . $query_string, 'GET', [], [], [], ['SCRIPT_NAME' => 'index.php']);
 
-    $http_kernel = $this->getMockBuilder(HttpKernelInterface::class)
-      ->getMock();
-    return new GetResponseEvent($http_kernel, $request, HttpKernelInterface::MASTER_REQUEST);
+    $http_kernel = $this->createMock(HttpKernelInterface::class);
+    return new RequestEvent($http_kernel, $request, HttpKernelInterface::MASTER_REQUEST);
   }
 
   /**

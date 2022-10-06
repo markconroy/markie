@@ -34,7 +34,7 @@ class XmlSitemapForm extends EntityForm {
       '#title' => $this->t('Label'),
       '#maxlength' => 255,
       '#default_value' => $xmlsitemap->label(),
-      '#description' => $this->t('Label for the XML sitemap.'),
+      '#description' => $this->t('Label for the XML Sitemap.'),
       '#required' => TRUE,
     ];
     $form['context'] = [
@@ -44,7 +44,7 @@ class XmlSitemapForm extends EntityForm {
     if (!xmlsitemap_get_context_info()) {
       $form['context']['empty'] = [
         '#type' => 'markup',
-        '#markup' => '<p>' . $this->t('There are currently no XML sitemap contexts available.') . '</p>',
+        '#markup' => '<p>' . $this->t('There are currently no XML Sitemap contexts available.') . '</p>',
       ];
     }
 
@@ -84,6 +84,8 @@ class XmlSitemapForm extends EntityForm {
     }
     catch (EntityStorageException $ex) {
       $this->messenger()->addError($this->t('There is another sitemap saved with the same context.'));
+      $form_state->setRedirect('entity.xmlsitemap.add_form');
+      return;
     }
 
     $form_state->setRedirect('xmlsitemap.admin_search');

@@ -144,7 +144,7 @@ function redirect_update_8103() {
 
   // Only create if the redirect view doesn't exist and views is enabled.
   if (!View::load('redirect') && \Drupal::moduleHandler()->moduleExists('views')) {
-    $config_path = drupal_get_path('module', 'redirect') . '/config/install/views.view.redirect.yml';
+    $config_path = \Drupal::service('extension.list.module')->getPath('redirect') . '/config/install/views.view.redirect.yml';
     $data = Yaml::parse(file_get_contents($config_path));
     \Drupal::configFactory()->getEditable('views.view.redirect')->setData($data)->save(TRUE);
     $message = 'The new redirect view has been created.';

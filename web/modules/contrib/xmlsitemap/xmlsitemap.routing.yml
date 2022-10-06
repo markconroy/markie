@@ -2,7 +2,7 @@ xmlsitemap.admin_search:
   path: '/admin/config/search/xmlsitemap'
   defaults:
     _entity_list: 'xmlsitemap'
-    _title: 'XML sitemap'
+    _title: 'XML Sitemap'
   requirements:
     _permission: 'administer xmlsitemap'
 
@@ -10,7 +10,7 @@ xmlsitemap.admin_search_list:
   path: '/admin/config/search/xmlsitemap/list'
   defaults:
     _entity_list: 'xmlsitemap'
-    _title: 'XML sitemap'
+    _title: 'XML Sitemap'
   requirements:
     _permission: 'administer xmlsitemap'
 
@@ -18,7 +18,7 @@ entity.xmlsitemap.add_form:
   path: '/admin/config/search/xmlsitemap/add'
   defaults:
     _entity_form: 'xmlsitemap.add'
-    _title: 'Add new XML sitemap'
+    _title: 'Add new XML Sitemap'
   requirements:
     _permission: 'administer xmlsitemap'
 
@@ -26,7 +26,7 @@ entity.xmlsitemap.edit_form:
   path: '/admin/config/search/xmlsitemap/{xmlsitemap}/edit'
   defaults:
     _entity_form: 'xmlsitemap.edit'
-    _title: 'Edit XML sitemap'
+    _title: 'Edit XML Sitemap'
   requirements:
     _permission: 'administer xmlsitemap'
 
@@ -34,7 +34,7 @@ entity.xmlsitemap.delete_form:
   path: '/admin/config/search/xmlsitemap/{xmlsitemap}/delete'
   defaults:
     _entity_form: 'xmlsitemap.delete'
-    _title: 'Delete XML sitemap'
+    _title: 'Delete XML Sitemap'
   requirements:
     _permission: 'administer xmlsitemap'
 

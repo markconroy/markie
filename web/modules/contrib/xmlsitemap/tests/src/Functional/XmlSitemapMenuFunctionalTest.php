@@ -15,7 +15,7 @@ class XmlSitemapMenuFunctionalTest extends XmlSitemapTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['menu_link_content', 'menu_ui'];
+  protected static $modules = ['menu_link_content', 'menu_ui'];
 
   /**
    * Entity type bundle info service.
@@ -27,7 +27,7 @@ class XmlSitemapMenuFunctionalTest extends XmlSitemapTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     $this->entityTypeBundleInfo = $this->container->get('entity_type.bundle.info');
@@ -93,7 +93,7 @@ class XmlSitemapMenuFunctionalTest extends XmlSitemapTestBase {
   /**
    * {@inheritdoc}
    */
-  public function tearDown() {
+  public function tearDown(): void {
     $bundles = $this->entityTypeBundleInfo->getAllBundleInfo();
     foreach ($bundles['menu_link_content'] as $bundle_id => $bundle) {
       xmlsitemap_link_bundle_delete('menu_link_content', $bundle_id);

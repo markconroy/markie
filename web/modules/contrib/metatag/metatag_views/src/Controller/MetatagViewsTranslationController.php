@@ -36,7 +36,7 @@ class MetatagViewsTranslationController extends ControllerBase {
    * @var \Drupal\Core\Language\LanguageManagerInterface
    */
   protected $languageManager;
-  
+
   /**
    * The request stack.
    *
@@ -82,7 +82,9 @@ class MetatagViewsTranslationController extends ControllerBase {
    *   Page render array.
    */
   public function itemPage() {
+    // @todo This method doesn't exist?
     $view_id = $this->requestStack->get('view_id');
+    // @todo This method doesn't exist?
     $display_id = $this->requestStack->get('display_id');
 
     $view = $this->viewStorage->load($view_id);
@@ -123,6 +125,7 @@ class MetatagViewsTranslationController extends ControllerBase {
       }
       else {
         // Get the metatag translation for this language.
+        // @todo The getLanguageConfigOverride() method doesn't exist?
         $config_translation = $this->languageManager
           ->getLanguageConfigOverride($langcode, $config_name)
           ->get($config_path);
@@ -161,9 +164,9 @@ class MetatagViewsTranslationController extends ControllerBase {
         '#links' => $operations,
         // Even if the mapper contains multiple language codes, the source
         // configuration can still be edited.
-        // {@code}
+        // @code
         // '#access' => ($langcode == $original_langcode) || $operations_access,
-        // {@endcode}
+        // @endcode
       ];
     }
 

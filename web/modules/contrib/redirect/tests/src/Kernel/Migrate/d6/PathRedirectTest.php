@@ -16,12 +16,12 @@ class PathRedirectTest extends MigrateDrupalTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['redirect', 'link', 'path_alias'];
+  protected static $modules = ['redirect', 'link', 'path_alias'];
 
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
     $this->installEntitySchema('redirect');
     $this->loadFixture( __DIR__ . '/../../../../../tests/fixtures/drupal6.php');

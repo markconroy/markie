@@ -4,7 +4,7 @@ packages:
     chi-teck/drupal-code-generator: 1.33.1
     composer/installers: v1.12.0
     composer/semver: 3.3.2
-    consolidation/annotated-command: 4.5.5
+    consolidation/annotated-command: 4.5.6
     consolidation/config: 1.2.1
     consolidation/filter-via-dot-access-data: 1.0.0
     consolidation/log: 2.1.1
@@ -14,7 +14,7 @@ packages:
     consolidation/site-alias: 3.1.5
     consolidation/site-process: 4.2.0
     cweagans/composer-patches: 1.7.2
-    dflydev/dot-access-configuration: v1.0.3
+    dflydev/dot-access-configuration: 'dev-master:2e6eb0c8b8830b26bb23defcfc38d4276508fc49'
     dflydev/dot-access-data: v1.1.0
     dflydev/placeholder-resolver: v1.0.3
     doctrine/annotations: 1.13.3
@@ -27,38 +27,39 @@ packages:
     doctrine/lexer: 1.2.3
     doctrine/persistence: 1.3.8
     doctrine/reflection: 1.2.3
-    drupal-ckeditor-libraries-group/codesnippet: 4.19.0
+    drupal-ckeditor-libraries-group/codesnippet: 4.20.0
     drupal-composer/drupal-security-advisories: '8.x-dev:24fe3e68a77ef019b4cb789c6b58c0abd9f831b5'
-    drupal/admin_toolbar: 3.1.0
-    drupal/codesnippet: 1.7.0
+    drupal/admin_toolbar: 3.2.1
+    drupal/ckeditor: 1.0.1
+    drupal/codesnippet: 1.8.0
     drupal/components: 2.4.0
-    drupal/console: 1.9.8
-    drupal/console-core: 1.9.7
+    drupal/console: 1.9.10
+    drupal/console-core: 1.9.8
     drupal/console-en: v1.9.7
     drupal/console-extend-plugin: 0.9.5
     drupal/core: 9.4.7
     drupal/core-composer-scaffold: 9.4.7
-    drupal/core-project-message: 9.3.14
+    drupal/core-project-message: 9.4.7
     drupal/core-recommended: 9.4.7
     drupal/crop: 2.2.0
-    drupal/ctools: 3.7.0
-    drupal/devel: 4.1.5
+    drupal/ctools: 3.11.0
+    drupal/devel: 4.2.1
     drupal/disable_html5_validation: 1.1.0
-    drupal/entity: 1.3.0
+    drupal/entity: 1.4.0
     drupal/image_widget_crop: 2.3.0
-    drupal/inline_entity_form: 1.0.0-rc11
+    drupal/inline_entity_form: 1.0.0-rc14
     drupal/media_entity_generic: 1.1.0
-    drupal/media_entity_twitter: 2.7.0
+    drupal/media_entity_twitter: 2.8.0
     drupal/menu_trail_by_path: 1.3.0
-    drupal/metatag: 1.19.0
+    drupal/metatag: 1.22.0
     drupal/mgv: 2.2.0
-    drupal/pathauto: 1.10.0
-    drupal/redirect: 1.7.0
-    drupal/token: 1.10.0
-    drupal/twig_tweak: 2.9.0
+    drupal/pathauto: 1.11.0
+    drupal/redirect: 1.8.0
+    drupal/token: 1.11.0
+    drupal/twig_tweak: 2.10.0
     drupal/video_embed_field: 2.4.0
-    drupal/xmlsitemap: 1.2.0
-    drush/drush: 10.6.2
+    drupal/xmlsitemap: 1.4.0
+    drush/drush: 10.6.1
     egulias/email-validator: 3.2.1
     enlightn/security-checker: v1.10.0
     grasmash/expander: 1.0.0
@@ -67,7 +68,7 @@ packages:
     guzzlehttp/promises: 1.5.2
     guzzlehttp/psr7: 1.9.0
     j7mbo/twitter-api-php: 1.0.6
-    joachim-n/composer-manifest: 1.1.4
+    joachim-n/composer-manifest: 1.1.5
     laminas/laminas-diactoros: 2.11.3
     laminas/laminas-escaper: 2.9.0
     laminas/laminas-feed: 2.17.0
@@ -76,8 +77,8 @@ packages:
     masterminds/html5: 2.7.6
     mglaman/phpstan-drupal: 0.12.15
     nette/finder: v2.5.3
-    nette/utils: v3.2.7
-    nikic/php-parser: v4.13.2
+    nette/utils: v3.2.8
+    nikic/php-parser: v4.15.1
     pear/archive_tar: 1.4.14
     pear/console_getopt: v1.4.3
     pear/pear-core-minimal: v1.10.11
@@ -90,13 +91,15 @@ packages:
     psr/http-factory: 1.0.1
     psr/http-message: 1.0.1
     psr/log: 1.1.4
-    psy/psysh: v0.10.12
+    psy/psysh: v0.11.8
     ralouphie/getallheaders: 3.0.3
-    roave/security-advisories: 'dev-master:268c2095dd32f68b65b8cfc0af26f58d61ff320c'
+    roave/security-advisories: 'dev-master:b0d3e99ce9c8ec237338a70277dd409ffcf6cedc'
     stack/builder: v1.0.6
     stecman/symfony-console-completion: 0.11.0
     symfony-cmf/routing: 2.3.4
-    symfony/config: v4.4.41
+    symfony/cache: v5.4.13
+    symfony/cache-contracts: v2.5.2
+    symfony/config: v4.4.44
     symfony/console: v4.4.45
     symfony/css-selector: v4.4.44
     symfony/debug: v4.4.44
@@ -106,7 +109,8 @@ packages:
     symfony/error-handler: v4.4.44
     symfony/event-dispatcher: v4.4.44
     symfony/event-dispatcher-contracts: v1.1.13
-    symfony/filesystem: v4.4.39
+    symfony/expression-language: v4.4.44
+    symfony/filesystem: v4.4.42
     symfony/finder: v4.4.44
     symfony/http-client-contracts: v2.5.2
     symfony/http-foundation: v4.4.46
@@ -130,6 +134,7 @@ packages:
     symfony/translation-contracts: v2.5.2
     symfony/validator: v4.4.46
     symfony/var-dumper: v5.4.13
+    symfony/var-exporter: v5.4.10
     symfony/yaml: v4.4.45
     topfloor/composer-cleanup-vcs-dirs: 1.1.0
     twig/twig: v2.15.3

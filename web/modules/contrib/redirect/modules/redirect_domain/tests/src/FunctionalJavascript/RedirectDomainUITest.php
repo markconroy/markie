@@ -16,7 +16,7 @@ class RedirectDomainUITest extends WebDriverTestBase {
    *
    * @var array
    */
-  public static $modules = [
+  protected static $modules = [
     'redirect_domain',
   ];
 
@@ -38,9 +38,9 @@ class RedirectDomainUITest extends WebDriverTestBase {
     $this->drupalGet('/admin/config/search/redirect/domain');
 
     // Assert that there are 2 domain redirect fields.
-    $this->assertFieldByName('redirects[0][from]');
-    $this->assertFieldByName('redirects[0][sub_path]');
-    $this->assertFieldByName('redirects[0][destination]');
+    $this->assertSession()->fieldExists('redirects[0][from]');
+    $this->assertSession()->fieldExists('redirects[0][sub_path]');
+    $this->assertSession()->fieldExists('redirects[0][destination]');
 
     // Add another field for new domain redirect.
     $page = $this->getSession()->getPage();
@@ -57,13 +57,13 @@ class RedirectDomainUITest extends WebDriverTestBase {
     $page->pressButton('Save');
 
     // Check the new domain redirects.
-    $this->assertFieldByName('redirects[0][from]', 'foo.example.org');
-    $this->assertFieldByName('redirects[0][destination]', 'www.example.org/foo');
-    $this->assertFieldByName('redirects[1][from]', 'bar.example.org');
-    $this->assertFieldByName('redirects[1][destination]', 'www.example.org/bar');
+    $this->assertSession()->fieldValueEquals('redirects[0][from]', 'foo.example.org');
+    $this->assertSession()->fieldValueEquals('redirects[0][destination]', 'www.example.org/foo');
+    $this->assertSession()->fieldValueEquals('redirects[1][from]', 'bar.example.org');
+    $this->assertSession()->fieldValueEquals('redirects[1][destination]', 'www.example.org/bar');
 
     // Ensure that the sub paths are correct.
-    $this->assertFieldByName('redirects[0][sub_path]', '/sub-path');
-    $this->assertFieldByName('redirects[1][sub_path]', '/');
+    $this->assertSession()->fieldValueEquals('redirects[0][sub_path]', '/sub-path');
+    $this->assertSession()->fieldValueEquals('redirects[1][sub_path]', '/');
   }
 }

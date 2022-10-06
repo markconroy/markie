@@ -4,7 +4,6 @@ namespace Drupal\Tests\redirect\Unit;
 
 use Drupal\redirect\RedirectChecker;
 use Drupal\Tests\UnitTestCase;
-use PHPUnit_Framework_MockObject_MockObject;
 use Symfony\Cmf\Component\Routing\RouteObjectInterface;
 use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\Routing\Route;
@@ -23,19 +22,14 @@ class RedirectCheckerTest extends UnitTestCase {
 
     $config = ['redirect.settings' => ['ignore_admin_path' => FALSE, 'access_check' => TRUE]];
 
-    $state = $this->getMockBuilder('Drupal\Core\State\StateInterface')
-      ->getMock();
+    $state = $this->createMock('Drupal\Core\State\StateInterface');
     $state->expects($this->any())
       ->method('get')
       ->with('system.maintenance_mode')
       ->will($this->returnValue(FALSE));
-    $access = $this->getMockBuilder('Drupal\Core\Access\AccessManager')
-      ->disableOriginalConstructor()
-      ->getMock();
-    $account = $this->getMockBuilder('Drupal\Core\Session\AccountInterface')
-      ->getMock();
-    $route_provider = $this->getMockBuilder('Drupal\Core\Routing\RouteProviderInterface')
-      ->getMock();
+    $access = $this->createMock('Drupal\Core\Access\AccessManager');
+    $account = $this->createMock('Drupal\Core\Session\AccountInterface');
+    $route_provider = $this->createMock('Drupal\Core\Routing\RouteProviderInterface');
 
     $route = new Route('/example');
     $route_provider->expects($this->any())
@@ -77,8 +71,7 @@ class RedirectCheckerTest extends UnitTestCase {
     $this->assertFalse($checker->canRedirect($request), 'Cannot redirect');
 
     // Maintenance mode is on.
-    $state = $this->getMockBuilder('Drupal\Core\State\StateInterface')
-      ->getMock();
+    $state = $this->createMock('Drupal\Core\State\StateInterface');
     $state->expects($this->any())
       ->method('get')
       ->with('system.maintenance_mode')
@@ -90,8 +83,7 @@ class RedirectCheckerTest extends UnitTestCase {
     $this->assertFalse($checker->canRedirect($request), 'Cannot redirect if maintenance mode is on');
 
     // Maintenance mode is on, but user has access to view site in maintenance mode.
-    $accountWithMaintenanceModeAccess = $this->getMockBuilder('Drupal\Core\Session\AccountInterface')
-      ->getMock();
+    $accountWithMaintenanceModeAccess = $this->createMock('Drupal\Core\Session\AccountInterface');
     $accountWithMaintenanceModeAccess->expects($this->any())
       ->method('hasPermission')
       ->with('access site in maintenance mode')
@@ -103,8 +95,7 @@ class RedirectCheckerTest extends UnitTestCase {
     $this->assertTrue($checker->canRedirect($request), 'Redirect should have worked, user has maintenance mode access.');
 
     // We are at a admin path.
-    $state = $this->getMockBuilder('Drupal\Core\State\StateInterface')
-      ->getMock();
+    $state = $this->createMock('Drupal\Core\State\StateInterface');
     $state->expects($this->any())
       ->method('get')
       ->with('system.maintenance_mode')
@@ -145,13 +136,11 @@ class RedirectCheckerTest extends UnitTestCase {
    * @param array $query
    *   Query paramter to be passed into request->query.
    *
-   * @return PHPUnit_Framework_MockObject_MockObject
+   * @return \PHPUnit\Framework\MockObject\MockObject
    *   Mocked request object.
    */
   protected function getRequestStub($script_name, $method, array $attributes = [], array $query = []) {
-    $request = $this->getMockBuilder('Symfony\Component\HttpFoundation\Request')
-      ->disableOriginalConstructor()
-      ->getMock();
+    $request = $this->createMock('Symfony\Component\HttpFoundation\Request');
     $request->expects($this->any())
       ->method('getScriptName')
       ->will($this->returnValue($script_name));

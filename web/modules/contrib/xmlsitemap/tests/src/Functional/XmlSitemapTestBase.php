@@ -25,7 +25,7 @@ abstract class XmlSitemapTestBase extends BrowserTestBase {
    *
    * @var array
    */
-  public static $modules = ['node', 'system', 'user', 'xmlsitemap'];
+  protected static $modules = ['node', 'system', 'user', 'xmlsitemap'];
 
   /**
    * The admin user account.
@@ -96,7 +96,7 @@ abstract class XmlSitemapTestBase extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     $this->entityTypeManager = $this->container->get('entity_type.manager');
@@ -131,7 +131,7 @@ abstract class XmlSitemapTestBase extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  public function tearDown() {
+  public function tearDown(): void {
     // Capture any (remaining) watchdog errors.
     $this->assertNoWatchdogErrors();
 
@@ -159,10 +159,10 @@ abstract class XmlSitemapTestBase extends BrowserTestBase {
   }
 
   /**
-   * Retrieves an XML sitemap.
+   * Retrieves an XML Sitemap.
    *
    * @param array $context
-   *   An optional array of the XML sitemap's context.
+   *   An optional array of the XML Sitemap's context.
    * @param array $options
    *   Options to be forwarded to Url::fromUri(). These values will be merged
    *   with, but always override $sitemap->uri['options'].
@@ -189,7 +189,7 @@ abstract class XmlSitemapTestBase extends BrowserTestBase {
     $this->state->set('xmlsitemap_regenerate_needed', TRUE);
     $this->state->set('xmlsitemap_generated_last', 0);
     $this->cronRun();
-    $this->assertTrue($this->state->get('xmlsitemap_generated_last') && !$this->state->get('xmlsitemap_regenerate_needed'), t('XML sitemaps regenerated and flag cleared.'));
+    $this->assertTrue($this->state->get('xmlsitemap_generated_last') && !$this->state->get('xmlsitemap_regenerate_needed'), t('XML Sitemaps regenerated and flag cleared.'));
   }
 
   /**
@@ -371,7 +371,7 @@ abstract class XmlSitemapTestBase extends BrowserTestBase {
   protected function assertXMLSitemapProblems($problem_text = FALSE) {
     // @codingStandardsIgnoreEnd
     $this->drupalGet('admin/config/search/xmlsitemap');
-    $this->assertSession()->pageTextContains('One or more problems were detected with your XML sitemap configuration');
+    $this->assertSession()->pageTextContains('One or more problems were detected with your XML Sitemap configuration');
     if ($problem_text) {
       $this->clickLink('status report');
       $this->assertSession()->pageTextContains($problem_text);
@@ -386,7 +386,7 @@ abstract class XmlSitemapTestBase extends BrowserTestBase {
   protected function assertNoXMLSitemapProblems() {
     // @codingStandardsIgnoreEnd
     $this->drupalGet('admin/config/search/xmlsitemap');
-    $this->assertSession()->pageTextNotContains('One or more problems were detected with your XML sitemap configuration');
+    $this->assertSession()->pageTextNotContains('One or more problems were detected with your XML Sitemap configuration');
   }
 
   /**
@@ -446,7 +446,6 @@ abstract class XmlSitemapTestBase extends BrowserTestBase {
    */
   protected function assertNoWatchdogErrors() {
     $messages = $this->getWatchdogMessages();
-    $verbose = [];
 
     foreach ($messages as $message) {
       $message->text = $this->formatWatchdogMessage($message);
@@ -455,12 +454,6 @@ abstract class XmlSitemapTestBase extends BrowserTestBase {
       ])) {
         $this->fail($message->text);
       }
-      $verbose[] = $message->text;
-    }
-
-    if ($verbose) {
-      array_unshift($verbose, '<h2>Watchdog messages</h2>');
-      $this->verbose(implode('<br />', $verbose), 'Watchdog messages from test run');
     }
 
     // Clear the seen watchdog messages since we've failed on any errors.
@@ -481,7 +474,6 @@ abstract class XmlSitemapTestBase extends BrowserTestBase {
     static $levels;
 
     if (!isset($levels)) {
-      module_load_include('admin.inc', 'dblog');
       $levels = RfcLogLevel::getLevels();
     }
 
@@ -492,29 +484,6 @@ abstract class XmlSitemapTestBase extends BrowserTestBase {
         // @codingStandardsIgnoreLine
         // '@message' => theme_dblog_message(array('event' => $message, 'link' => FALSE)),.
     ]);
-  }
-
-  /**
-   * Log verbose message in a text file.
-   *
-   * This is a copy of DrupalWebTestCase->verbose() but allows a customizable
-   * summary message rather than hard-coding 'Verbose message'.
-   *
-   * @param string $verbose_message
-   *   The verbose message to be stored.
-   * @param string $message
-   *   Message to display.
-   *
-   * @see simpletest_verbose()
-   *
-   * @todo Remove when https://www.drupal.org/node/800426 is fixed.
-   */
-  protected function verbose($verbose_message, $message = 'Verbose message') {
-    if ($id = parent::verbose($verbose_message)) {
-      $url = file_create_url($this->originalFileDirectory . '/simpletest/verbose/' . get_class($this) . '-' . $id . '.html');
-      $message_url = Url::fromUri($url, ['attributes' => ['target' => '_blank']]);
-      $this->error(\Drupal::linkGenerator()->generate($message, $message_url), 'User notice');
-    }
   }
 
 }

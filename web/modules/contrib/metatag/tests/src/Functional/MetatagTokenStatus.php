@@ -10,13 +10,12 @@ use Drupal\Tests\BrowserTestBase;
  *
  * @group metatag
  */
-class MetatagTokenStatus extends BrowserTestBase
-{
+class MetatagTokenStatus extends BrowserTestBase {
 
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['metatag'];
+  protected static $modules = ['metatag'];
 
   /**
    * {@inheritdoc}
@@ -28,8 +27,7 @@ class MetatagTokenStatus extends BrowserTestBase
    *
    * @see token_get_token_problems
    */
-  function testStatusReportTypesWarning()
-  {
+  public function testStatusReportTypesWarning() {
     $this->drupalLogin($this->rootUser);
     $this->drupalGet(Url::fromRoute('system.status'));
 
@@ -41,8 +39,7 @@ class MetatagTokenStatus extends BrowserTestBase
    *
    * @see token_get_token_problems
    */
-  function testStatusReportTokensWarning()
-  {
+  public function testStatusReportTokensWarning() {
     $this->drupalLogin($this->rootUser);
     $this->drupalGet(Url::fromRoute('system.status'));
 

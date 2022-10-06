@@ -5,7 +5,7 @@ codesnippet.admin:
   dependencies:
     - core/jquery
     - core/drupal
-    - core/jquery.once
+    - core/once
     - core/drupal.vertical-tabs
     - core/drupalSettings
 
@@ -15,9 +15,7 @@ codesnippet.highlightjs:
     /libraries/codesnippet/lib/highlight/highlight.pack.js: {}
     js/codesnippet.js: {}
   dependencies:
-    - core/jquery
     - core/drupal
-    - core/jquery.once
 
 codesnippet.style.arta:
   version: VERSION

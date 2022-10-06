@@ -8,7 +8,7 @@ use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drush\Commands\DrushCommands;
 
 /**
- * Drush commands for XML sitemap.
+ * Drush commands for XML Sitemap.
  */
 class XmlSitemapCommands extends DrushCommands {
 
@@ -51,7 +51,7 @@ class XmlSitemapCommands extends DrushCommands {
   }
 
   /**
-   * Regenerate the XML sitemap files.
+   * Regenerate the XML Sitemap files.
    *
    * @validate-module-enabled xmlsitemap
    *
@@ -65,7 +65,7 @@ class XmlSitemapCommands extends DrushCommands {
   }
 
   /**
-   * Dump and re-process all possible XML sitemap data, then regenerate files.
+   * Dump and re-process all possible XML Sitemap data, then regenerate files.
    *
    * @validate-module-enabled xmlsitemap
    *
@@ -85,7 +85,7 @@ class XmlSitemapCommands extends DrushCommands {
   }
 
   /**
-   * Process un-indexed XML sitemap links.
+   * Process un-indexed XML Sitemap links.
    *
    * @param array $options
    *   An associative array of options obtained from cli, aliases, config, etc.
@@ -106,10 +106,10 @@ class XmlSitemapCommands extends DrushCommands {
     $count_after = $this->connection->select('xmlsitemap', 'x')->countQuery()->execute()->fetchField();
 
     if ($count_after == $count_before) {
-      $this->output()->writeln(dt('No new XML sitemap links to index.'));
+      $this->output()->writeln(dt('No new XML Sitemap links to index.'));
     }
     else {
-      $this->output()->writeln(dt('Indexed @count new XML sitemap links.', ['@count' => $count_after - $count_before]));
+      $this->output()->writeln(dt('Indexed @count new XML Sitemap links.', ['@count' => $count_after - $count_before]));
     }
   }
 

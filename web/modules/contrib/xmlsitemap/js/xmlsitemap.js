@@ -1,6 +1,6 @@
 /**
  * @file
- * Default JavaScript file for XML sitemap.
+ * Default JavaScript file for XML Sitemap.
  */
 
 (function ($, Drupal) {

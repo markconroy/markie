@@ -91,7 +91,7 @@ class XmlSitemapCustomListController extends ControllerBase {
       $row = [];
       $row['loc'] = Link::fromTextAndUrl($link->loc, Url::fromUri('internal:' . $link->loc));
       $row['priority'] = number_format($link->priority, 1);
-      $row['changefreq'] = $link->changefreq ? Unicode::ucfirst(xmlsitemap_get_changefreq($link->changefreq)) : $this->t('None');
+      $row['changefreq'] = $link->changefreq ? Unicode::ucfirst(xmlsitemap_get_changefreq($link->changefreq, TRUE)) : $this->t('None');
       if (isset($header['language'])) {
         $row['language'] = $language->getName();
       }

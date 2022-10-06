@@ -3,7 +3,7 @@
 /*
  * This file is part of Psy Shell.
  *
- * (c) 2012-2020 Justin Hileman
+ * (c) 2012-2022 Justin Hileman
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -169,9 +169,9 @@ HELP
      * yield Reflectors for the same-named method or property on all traits and
      * parent classes.
      *
-     * @return Generator a whole bunch of \Reflector instances
+     * @return \Generator a whole bunch of \Reflector instances
      */
-    private function getParentReflectors($reflector)
+    private function getParentReflectors($reflector): \Generator
     {
         $seenClasses = [];
 

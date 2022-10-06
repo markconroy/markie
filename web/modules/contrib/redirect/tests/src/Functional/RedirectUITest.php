@@ -37,7 +37,7 @@ class RedirectUITest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['redirect', 'node', 'path', 'dblog', 'views', 'taxonomy'];
+  protected static $modules = ['redirect', 'node', 'path', 'dblog', 'views', 'taxonomy'];
 
   /**
    * {@inheritdoc}
@@ -47,7 +47,7 @@ class RedirectUITest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     $this->drupalCreateContentType(['type' => 'article', 'name' => 'Article']);
@@ -80,8 +80,8 @@ class RedirectUITest extends BrowserTestBase {
       'path' => ['alias' => '/node_test_alias'],
     ]);
     $this->drupalGet('node/' . $node->id() . '/edit');
-    $this->assertText(t('No URL redirects available.'));
-    $this->drupalPostForm('node/' . $node->id() . '/edit', ['path[0][alias]' => '/node_test_alias_updated'], t('Save'));
+    $this->assertSession()->pageTextContains('No URL redirects available.');
+    $this->submitForm(['path[0][alias]' => '/node_test_alias_updated'], 'Save');
 
     $redirect = $this->repository->findMatchingRedirect('node_test_alias', [], Language::LANGCODE_NOT_SPECIFIED);
     $this->assertEquals(Url::fromUri('base:node_test_alias_updated')->toString(), $redirect->getRedirectUrl()->toString());
@@ -90,7 +90,8 @@ class RedirectUITest extends BrowserTestBase {
 
     // Test that changing the path back deletes the first redirect, creates
     // a new one and does not result in a loop.
-    $this->drupalPostForm('node/' . $node->id() . '/edit', ['path[0][alias]' => '/node_test_alias'], t('Save'));
+    $this->drupalGet('node/' . $node->id() . '/edit');
+    $this->submitForm(['path[0][alias]' => '/node_test_alias'], 'Save');
     $redirect = $this->repository->findMatchingRedirect('node_test_alias', [], Language::LANGCODE_NOT_SPECIFIED);
     $this->assertTrue(empty($redirect));
 
@@ -98,23 +99,25 @@ class RedirectUITest extends BrowserTestBase {
     $redirect = $this->repository->findMatchingRedirect('node_test_alias_updated', [], Language::LANGCODE_NOT_SPECIFIED);
 
     $this->drupalGet('node/' . $node->id() . '/edit');
-    $this->assertText($redirect->getSourcePathWithQuery());
-    $this->assertLinkByHref(Url::fromRoute('entity.redirect.edit_form', ['redirect' => $redirect->id()])->toString());
-    $this->assertLinkByHref(Url::fromRoute('entity.redirect.delete_form', ['redirect' => $redirect->id()])->toString());
+    $this->assertSession()->pageTextContains($redirect->getSourcePathWithQuery());
+    $this->assertSession()->linkByHrefExists(Url::fromRoute('entity.redirect.edit_form', ['redirect' => $redirect->id()])->toString());
+    $this->assertSession()->linkByHrefExists(Url::fromRoute('entity.redirect.delete_form', ['redirect' => $redirect->id()])->toString());
 
     $this->assertEquals(Url::fromUri('base:node_test_alias')->toString(), $redirect->getRedirectUrl()->toString());
     // Test if the automatically created redirect works.
     $this->assertRedirect('node_test_alias_updated', 'node_test_alias');
 
     // Test that the redirect will be deleted upon node deletion.
-    $this->drupalPostForm('node/' . $node->id() . '/delete', [], t('Delete'));
+    $this->drupalGet('node/' . $node->id() . '/delete');
+    $this->submitForm([], 'Delete');
     $redirect = $this->repository->findMatchingRedirect('node_test_alias_updated', [], Language::LANGCODE_NOT_SPECIFIED);
     $this->assertTrue(empty($redirect));
 
     // Create a term and update its path alias and check if we have a redirect
     // from the previous path alias to the new one.
     $term = $this->createTerm($this->createVocabulary());
-    $this->drupalPostForm('taxonomy/term/' . $term->id() . '/edit', ['path[0][alias]' => '/term_test_alias_updated'], t('Save'));
+    $this->drupalGet('taxonomy/term/' . $term->id() . '/edit');
+    $this->submitForm(['path[0][alias]' => '/term_test_alias_updated'], 'Save');
     $redirect = $this->repository->findMatchingRedirect('term_test_alias');
     $this->assertEquals(Url::fromUri('base:term_test_alias_updated')->toString(), $redirect->getRedirectUrl()->toString());
     // Test if the automatically created redirect works.
@@ -130,15 +133,16 @@ class RedirectUITest extends BrowserTestBase {
     }
 
     // Test the path alias update via the admin path form.
-    $this->drupalPostForm('admin/config/search/path/add', [
+    $this->drupalGet('admin/config/search/path/add');
+    $this->submitForm([
       $path_field => '/node',
       $alias_field => '/aaa_path_alias',
-    ], t('Save'));
+    ], 'Save');
     // Note that here we rely on fact that we land on the path alias list page
     // and the default sort is by the alias, which implies that the first edit
     // link leads to the edit page of the aaa_path_alias.
-    $this->clickLink(t('Edit'));
-    $this->drupalPostForm(NULL, [$alias_field => '/aaa_path_alias_updated'], t('Save'));
+    $this->clickLink('Edit');
+    $this->submitForm([$alias_field => '/aaa_path_alias_updated'], 'Save');
     $redirect = $this->repository->findMatchingRedirect('aaa_path_alias', [], 'en');
     $this->assertEquals(Url::fromUri('base:aaa_path_alias_updated')->toString(), $redirect->getRedirectUrl()->toString());
     // Test if the automatically created redirect works.
@@ -146,8 +150,8 @@ class RedirectUITest extends BrowserTestBase {
 
     // Test the automatically created redirect shows up in the form correctly.
     $this->drupalGet('admin/config/search/redirect/edit/' . $redirect->id());
-    $this->assertFieldByName('redirect_source[0][path]', 'aaa_path_alias');
-    $this->assertFieldByName('redirect_redirect[0][uri]', '/node');
+    $this->assertSession()->fieldValueEquals('redirect_source[0][path]', 'aaa_path_alias');
+    $this->assertSession()->fieldValueEquals('redirect_redirect[0][uri]', '/node');
   }
 
   /**
@@ -173,8 +177,8 @@ class RedirectUITest extends BrowserTestBase {
 
     $this->maximumRedirects = 10;
     $this->drupalGet('node');
-    $this->assertText('Service unavailable');
-    $this->assertResponse(503);
+    $this->assertSession()->pageTextContains('Service unavailable');
+    $this->assertSession()->statusCodeEquals(503);
 
     $log = \Drupal::database()->select('watchdog')->fields('watchdog')->condition('type', 'redirect')->execute()->fetchAll();
     if (count($log) == 0) {
@@ -254,7 +258,7 @@ class RedirectUITest extends BrowserTestBase {
     // Ensure that the redirect has been cleared from cache when deleted.
     $redirect1->delete();
     $this->drupalGet('test-redirect');
-    $this->assertResponse(404, 'Deleted redirect properly clears the internal page cache.');
+    $this->assertSession()->statusCodeEquals(404);
   }
 
   /**

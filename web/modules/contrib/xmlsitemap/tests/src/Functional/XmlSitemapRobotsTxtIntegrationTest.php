@@ -9,14 +9,13 @@ use Drupal\xmlsitemap\Entity\XmlSitemap;
  * Tests the robots.txt file existence.
  *
  * @group xmlsitemap
- * @dependencies robotstxt
  */
 class XmlSitemapRobotsTxtIntegrationTest extends XmlSitemapTestBase {
 
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['robotstxt'];
+  protected static $modules = ['robotstxt'];
 
   /**
    * Test if sitemap link is included in robots.txt file.

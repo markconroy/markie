@@ -10,7 +10,7 @@ use Drupal\views\Views;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Class MetatagViewsController.
+ * Controller for managing the Views integration.
  *
  * @package Drupal\metatag_views\Controller
  */
@@ -45,7 +45,7 @@ class MetatagViewsController extends ControllerBase {
     $this->metatagManager = $metatagManager;
 
     // Generate the labels for views and displays.
-    $this->labels = $this->getViewsAndDisplaysLabels();
+    $this->viewLabels = $this->getViewsAndDisplaysLabels();
   }
 
   /**
@@ -101,7 +101,7 @@ class MetatagViewsController extends ControllerBase {
     foreach ($tagged_views as $view_id => $displays) {
       $elements[$view_id] = [
         '#type' => 'details',
-        '#title' => $this->t($this->viewLabels[$view_id]['#label']),
+        '#title' => $this->t(':label', [':label' => $this->viewLabels[$view_id]['#label']]),
         'details' => $this->buildViewDetails($view_id, $displays),
       ];
     }

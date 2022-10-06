@@ -38,6 +38,13 @@ class MetatagForumTest extends BrowserTestBase {
   protected $adminUser;
 
   /**
+   * The nid of a node that is being tested.
+   *
+   * @var int
+   */
+  protected $nodeId;
+
+  /**
    * Setup basic environment.
    */
   protected function setUp(): void {
@@ -56,7 +63,10 @@ class MetatagForumTest extends BrowserTestBase {
     $this->drupalLogin($this->adminUser);
 
     // Create content type.
-    $this->drupalCreateContentType(['type' => 'page', 'display_submitted' => FALSE]);
+    $this->drupalCreateContentType([
+      'type' => 'page',
+      'display_submitted' => FALSE,
+    ]);
     $this->nodeId = $this->drupalCreateNode(
       [
         'title' => $this->randomMachineName(8),

@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Main file for the XML sitemap engines test.
+ * Main file for the XML Sitemap engines test.
  */
 
 use Drupal\Core\Url;

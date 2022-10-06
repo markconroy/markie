@@ -133,11 +133,11 @@ class Twitter extends MediaSourceBase implements MediaSourceFieldConstraintsInte
     return [
       'source_field' => '',
       'use_twitter_api' => FALSE,
-      'generate_thumbnails' => FALSE,
       'consumer_key' => '',
       'consumer_secret' => '',
       'oauth_access_token' => '',
       'oauth_access_token_secret' => '',
+      'generate_thumbnails' => FALSE,
     ];
   }
 

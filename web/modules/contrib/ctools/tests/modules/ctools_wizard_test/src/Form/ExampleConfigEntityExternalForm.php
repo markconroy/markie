@@ -48,7 +48,7 @@ class ExampleConfigEntityExternalForm extends FormBase {
    */
   public function buildForm(array $form, FormStateInterface $form_state, $machine_name = '') {
     $cached_values = $this->tempstore->get('ctools_wizard_test.config_entity')->get($machine_name);
-    /** @var $page \Drupal\ctools_wizard_test\Entity\ExampleConfigEntity */
+    /** @var \Drupal\ctools_wizard_test\Entity\ExampleConfigEntity $page */
     $config_entity = $cached_values['ctools_wizard_test_config_entity'];
 
     $form['blah'] = [

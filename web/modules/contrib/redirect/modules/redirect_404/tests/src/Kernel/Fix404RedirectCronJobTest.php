@@ -17,12 +17,12 @@ class Fix404RedirectCronJobTest extends KernelTestBase {
    *
    * @var array
    */
-  public static $modules = ['redirect_404'];
+  protected static $modules = ['redirect_404'];
 
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
     $this->installSchema('redirect_404', 'redirect_404');
 

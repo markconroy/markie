@@ -16,12 +16,12 @@ class XmlSitemapEntityFunctionalTest extends XmlSitemapTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['entity_test'];
+  protected static $modules = ['entity_test'];
 
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     $this->admin_user = $this->drupalCreateUser(['administer entity_test content', 'administer xmlsitemap']);
@@ -45,7 +45,7 @@ class XmlSitemapEntityFunctionalTest extends XmlSitemapTestBase {
       'entity_types[entity_test_mul]' => 1,
       'settings[entity_test_mul][types][entity_test_mul]' => 1,
     ];
-    $this->drupalPostForm(NULL, $edit, 'Save');
+    $this->submitForm($edit, 'Save');
     $this->assertSession()->pageTextContains('The configuration options have been saved.');
     $entity = EntityTestMul::create();
     $entity->save();
@@ -77,7 +77,7 @@ class XmlSitemapEntityFunctionalTest extends XmlSitemapTestBase {
       'xmlsitemap[priority]' => 0.3,
       'xmlsitemap[changefreq]' => XMLSITEMAP_FREQUENCY_WEEKLY,
     ];
-    $this->drupalPostForm(NULL, $edit, t('Save configuration'));
+    $this->submitForm($edit, t('Save configuration'));
     $entity = EntityTestMul::create();
     $entity->save();
     $this->assertSitemapLinkValues('entity_test_mul', $entity->id(), [
@@ -100,7 +100,8 @@ class XmlSitemapEntityFunctionalTest extends XmlSitemapTestBase {
       'xmlsitemap[priority]' => 0.6,
       'xmlsitemap[changefreq]' => XMLSITEMAP_FREQUENCY_YEARLY,
     ];
-    $this->drupalPostForm('admin/config/search/xmlsitemap/settings/entity_test_mul/entity_test_mul', $edit, t('Save configuration'));
+    $this->drupalGet('admin/config/search/xmlsitemap/settings/entity_test_mul/entity_test_mul');
+    $this->submitForm($edit, t('Save configuration'));
     $entity = EntityTestMul::create();
     $entity->save();
     $this->assertSitemapLinkValues('entity_test_mul', $entity->id(), [

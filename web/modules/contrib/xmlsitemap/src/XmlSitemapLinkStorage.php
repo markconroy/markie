@@ -5,9 +5,15 @@ namespace Drupal\xmlsitemap;
 use Drupal\Component\Utility\UrlHelper;
 use Drupal\Core\Database\Connection;
 use Drupal\Core\Database\Query\Merge;
+use Drupal\Core\Database\Query\SelectInterface;
 use Drupal\Core\Entity\EntityChangedInterface;
+use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Entity\Query\QueryInterface;
+use Drupal\Core\Entity\Query\Sql\Query;
 use Drupal\Core\Extension\ModuleHandlerInterface;
+use Drupal\Core\File\FileUrlGeneratorInterface;
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Session\AnonymousUserSession;
 use Drupal\Core\State\StateInterface;
@@ -48,6 +54,27 @@ class XmlSitemapLinkStorage implements XmlSitemapLinkStorageInterface {
   protected $connection;
 
   /**
+   * The file URL generator.
+   *
+   * @var \Drupal\Core\File\FileUrlGeneratorInterface
+   */
+  protected $fileUrlGenerator;
+
+  /**
+   * The entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected $entityTypeManager;
+
+  /**
+   * The entity field manager.
+   *
+   * @var \Drupal\Core\Entity\EntityFieldManagerInterface
+   */
+  protected $entityFieldManager;
+
+  /**
    * Constructs a XmlSitemapLinkStorage object.
    *
    * @param \Drupal\Core\State\StateInterface $state
@@ -56,12 +83,21 @@ class XmlSitemapLinkStorage implements XmlSitemapLinkStorageInterface {
    *   The module handler.
    * @param \Drupal\Core\Database\Connection $connection
    *   The database connection.
+   * @param \Drupal\Core\File\FileUrlGeneratorInterface $file_url_generator
+   *   The file URL generator.
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
+   *   The entity type manager.
+   * @param \Drupal\Core\Entity\EntityFieldManagerInterface $entity_field_manager
+   *   The entity field manager.
    */
-  public function __construct(StateInterface $state, ModuleHandlerInterface $module_handler, Connection $connection) {
+  public function __construct(StateInterface $state, ModuleHandlerInterface $module_handler, Connection $connection, FileUrlGeneratorInterface $file_url_generator, EntityTypeManagerInterface $entity_type_manager, EntityFieldManagerInterface $entity_field_manager) {
     $this->state = $state;
     $this->moduleHandler = $module_handler;
     $this->anonymousUser = new AnonymousUserSession();
     $this->connection = $connection;
+    $this->fileUrlGenerator = $file_url_generator;
+    $this->entityTypeManager = $entity_type_manager;
+    $this->entityFieldManager = $entity_field_manager;
   }
 
   /**
@@ -108,7 +144,7 @@ class XmlSitemapLinkStorage implements XmlSitemapLinkStorageInterface {
         }
         else {
           // Attempt to transform this to a relative URL.
-          $loc = file_url_transform_relative($url->toString());
+          $loc = $this->fileUrlGenerator->transformRelative($url->toString());
           // If it could not be transformed into a relative path, disregard it
           // since we cannot store external URLs in the sitemap.
           if (UrlHelper::isExternal($loc)) {
@@ -155,17 +191,17 @@ class XmlSitemapLinkStorage implements XmlSitemapLinkStorageInterface {
     // Temporary validation checks.
     // @todo Remove in final?
     if ($link['priority'] < 0 || $link['priority'] > 1) {
-      trigger_error("The XML sitemap link for {$link['type']} {$link['id']} has an invalid priority of {$link['priority']}.<br/>" . var_export($link, TRUE), E_USER_ERROR);
+      trigger_error("The XML Sitemap link for {$link['type']} {$link['id']} has an invalid priority of {$link['priority']}.<br/>" . var_export($link, TRUE), E_USER_ERROR);
     }
     if ($link['changecount'] < 0) {
-      trigger_error("The XML sitemap link for {$link['type']} {$link['id']} has a negative changecount value. Please report this to https://www.drupal.org/node/516928.<br/>" . var_export($link, TRUE), E_USER_ERROR);
+      trigger_error("The XML Sitemap link for {$link['type']} {$link['id']} has a negative changecount value. Please report this to https://www.drupal.org/node/516928.<br/>" . var_export($link, TRUE), E_USER_ERROR);
       $link['changecount'] = 0;
     }
 
     // Throw an error with the link does not start with a slash.
     // @see \Drupal\Core\Url::fromInternalUri()
     if ($link['loc'][0] !== '/') {
-      trigger_error("The XML sitemap link path {$link['loc']} for {$link['type']} {$link['id']} is invalid because it does not start with a slash.", E_USER_ERROR);
+      trigger_error("The XML Sitemap link path {$link['loc']} for {$link['type']} {$link['id']} is invalid because it does not start with a slash.", E_USER_ERROR);
     }
 
     // Check if this is a changed link and set the regenerate flag if necessary.
@@ -338,6 +374,70 @@ class XmlSitemapLinkStorage implements XmlSitemapLinkStorageInterface {
     $links = $query->execute()->fetchAll(\PDO::FETCH_ASSOC);
 
     return $links;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getEntityLinkQuery(string $entity_type_id, array $bundles = []): SelectInterface {
+    $query = $this->connection->select('xmlsitemap', 'x');
+    /** @var \Drupal\Core\Field\FieldDefinitionInterface[] $definitions */
+    $entity_type = $this->entityTypeManager->getDefinition($entity_type_id);
+    $definitions = $this->entityFieldManager->getBaseFieldDefinitions($entity_type_id);
+    $id_definition = $definitions[$entity_type->getKey('id')];
+    if ($id_definition->getType() === 'integer') {
+      $types = [
+        'mysql' => 'UNSIGNED',
+        'pgsql' => 'BIGINT',
+      ];
+      $type = $types[\Drupal::database()->databaseType()] ?? 'INTEGER';
+      $query->addExpression("CAST(x.id AS $type)", 'id');
+    }
+    else {
+      $query->addField('x', 'id');
+    }
+    $query->condition('type', $entity_type_id);
+    if (!empty($bundles)) {
+      $query->condition('subtype', $bundles, 'IN');
+    }
+    return $query;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getEntityQuery(string $entity_type_id, array $bundles = [], SelectInterface $subquery = NULL, string $subquery_operator = 'IN'): QueryInterface {
+    $storage = $this->entityTypeManager->getStorage($entity_type_id);
+    $entity_type = $storage->getEntityType();
+    $query = $storage->getQuery();
+    $id_field = $entity_type->getKey('id');
+
+    if ($bundles && $bundle_key = $entity_type->getKey('bundle')) {
+      $query->condition($bundle_key, $bundles, 'IN');
+    }
+
+    // Access for entities is checked individually for the anonymous user
+    // when each item is processed. We can skip the access check for the
+    // query.
+    $query->accessCheck(FALSE);
+
+    if (!isset($subquery)) {
+      $subquery = $this->getEntityLinkQuery($entity_type_id, $bundles);
+    }
+
+    // If the storage for this entity type is not using a SQL backend, then
+    // we need to convert our subquery into an actual array of values since we
+    // cannot perform a direct subquery with our entity query.
+    if (!($query instanceof Query)) {
+      $subquery = $subquery->execute()->fetchCol();
+    }
+    $query->condition(
+      $id_field,
+      $subquery,
+      $subquery_operator
+    );
+
+    return $query;
   }
 
 }

@@ -72,7 +72,7 @@ class XmlSitemapLinkBundleSettingsForm extends ConfigFormBase {
     $this->bundle_type = $bundle;
     $request = $this->getRequest();
 
-    $form['#title'] = $this->t('@bundle XML sitemap settings', ['@bundle' => $bundle]);
+    $form['#title'] = $this->t('@bundle XML Sitemap settings', ['@bundle' => $bundle]);
 
     xmlsitemap_add_link_bundle_settings($form, $form_state, $entity, $bundle);
     $form['xmlsitemap']['#type'] = 'markup';
@@ -118,7 +118,7 @@ class XmlSitemapLinkBundleSettingsForm extends ConfigFormBase {
 
     $entity_info = $form['xmlsitemap']['#entity_info'];
     if (!empty($form['xmlsitemap']['#show_message'])) {
-      $this->messenger()->addStatus($this->t('XML sitemap settings for the %bundle have been saved.', ['%bundle' => $entity_info['bundles'][$bundle]['label']]));
+      $this->messenger()->addStatus($this->t('XML Sitemap settings for the %bundle have been saved.', ['%bundle' => $entity_info['bundles'][$bundle]['label']]));
     }
 
     // Unset the form values since we have already saved the bundle settings and

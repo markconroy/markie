@@ -27,12 +27,12 @@ class RedirectAPITest extends KernelTestBase {
    *
    * @var array
    */
-  public static $modules = ['redirect', 'link', 'field', 'system', 'user', 'language', 'views', 'path_alias'];
+  protected static $modules = ['redirect', 'link', 'field', 'system', 'user', 'language', 'views', 'path_alias'];
 
   /**
    * {@inheritdoc}
    */
-  public function setUp() {
+  public function setUp(): void {
     parent::setUp();
 
     $this->installEntitySchema('redirect');
@@ -85,7 +85,7 @@ class RedirectAPITest extends KernelTestBase {
       $this->assertEquals($redirect->getSourceUrl(), '/another-url?key1=val1');
     }
     else {
-      $this->fail(t('Failed to find matching redirect.'));
+      $this->fail('Failed to find matching redirect.');
     }
 
     // Load the redirect based on url.
@@ -95,7 +95,7 @@ class RedirectAPITest extends KernelTestBase {
       $this->assertEquals($redirect->getSourceUrl(), '/another-url?key1=val1');
     }
     else {
-      $this->fail(t('Failed to find redirect by source path.'));
+      $this->fail('Failed to find redirect by source path.');
     }
 
     // Test passthrough_querystring.
@@ -194,7 +194,7 @@ class RedirectAPITest extends KernelTestBase {
     foreach ($test_cases as $index => $test_case) {
       $output = $test_case['input'];
       redirect_sort_recursive($output, $test_case['callback']);
-      $this->assertIdentical($output, $test_case['expected']);
+      $this->assertSame($test_case['expected'], $output);
     }
   }
 
@@ -237,7 +237,6 @@ class RedirectAPITest extends KernelTestBase {
       $this->fail('Failed to detect a redirect loop.');
     }
     catch (RedirectLoopException $e) {
-      $this->pass('Properly detected a redirect loop.');
     }
   }
 

@@ -61,7 +61,7 @@ interface XmlSitemapGeneratorInterface {
    * Generate one page (chunk) of the sitemap.
    *
    * @param XmlSitemapInterface $sitemap
-   *   An unserialized data array for an XML sitemap.
+   *   An unserialized data array for an XML Sitemap.
    * @param string $page
    *   An integer of the specific page of the sitemap to generate.
    */
@@ -71,7 +71,7 @@ interface XmlSitemapGeneratorInterface {
    * Generates one chunk of the sitemap.
    *
    * @param \Drupal\xmlsitemap\XmlSitemapInterface $sitemap
-   *   The XML sitemap config entity.
+   *   The XML Sitemap config entity.
    * @param \Drupal\xmlsitemap\XmlSitemapWriter $writer
    *   XML writer object.
    * @param int $chunk
@@ -83,7 +83,7 @@ interface XmlSitemapGeneratorInterface {
    * Generate the index sitemap.
    *
    * @param \Drupal\xmlsitemap\XmlSitemapInterface $sitemap
-   *   The XML sitemap config entity.
+   *   The XML Sitemap config entity.
    * @param int|null $pages
    *   The number of pages to write in the sitemap. Defaults to the value of
    *   $sitemap->getChunks().

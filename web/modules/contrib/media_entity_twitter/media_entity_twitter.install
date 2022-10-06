@@ -11,7 +11,9 @@ use Drupal\Core\File\FileSystemInterface;
  * Implements hook_install().
  */
 function media_entity_twitter_install() {
-  $source = drupal_get_path('module', 'media_entity_twitter') . '/images/icons';
+  /** @var \Drupal\Core\Extension\ModuleExtensionList $extension_list */
+  $extension_list = \Drupal::service("extension.list.module");
+  $source = dirname($extension_list->getPathname('media_entity_twitter')) . '/images/icons';
   $destination = \Drupal::config('media.settings')->get('icon_base_uri');
   \Drupal::service('file_system')->prepareDirectory($destination, FileSystemInterface::CREATE_DIRECTORY | FileSystemInterface::MODIFY_PERMISSIONS);
 

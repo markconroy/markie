@@ -16,7 +16,7 @@ class TweetEmbedFormatterTest extends MediaFunctionalTestBase {
    *
    * @var array
    */
-  public static $modules = [
+  protected static $modules = [
     'media_entity_twitter',
     'link',
   ];
@@ -65,14 +65,14 @@ class TweetEmbedFormatterTest extends MediaFunctionalTestBase {
       'label' => 'Embed code',
       'field_name' => 'embed_code',
     ];
-    $this->drupalPostForm(NULL, $edit_conf, t('Save and continue'));
+    $this->submitForm($edit_conf, t('Save and continue'));
     $this->assertSession()
       ->responseContains('These settings apply to the <em class="placeholder">' . $edit_conf['label'] . '</em> field everywhere it is used.');
     $edit = [
       'cardinality' => 'number',
       'cardinality_number' => '1',
     ];
-    $this->drupalPostForm(NULL, $edit, t('Save field settings'));
+    $this->submitForm($edit, t('Save field settings'));
     $this->assertSession()
       ->responseContains('Updated field <em class="placeholder">' . $edit_conf['label'] . '</em> field settings.');
 
@@ -80,7 +80,7 @@ class TweetEmbedFormatterTest extends MediaFunctionalTestBase {
     $edit = [
       'required' => TRUE,
     ];
-    $this->drupalPostForm(NULL, $edit, t('Save settings'));
+    $this->submitForm($edit, t('Save settings'));
     $this->assertSession()
       ->responseContains('Saved <em class="placeholder">' . $edit_conf['label'] . '</em> configuration.');
 
@@ -108,7 +108,7 @@ class TweetEmbedFormatterTest extends MediaFunctionalTestBase {
       'fields[field_embed_code][label]' => 'above',
       'fields[field_embed_code][type]' => 'twitter_embed',
     ];
-    $this->drupalPostForm(NULL, $edit, t('Save'));
+    $this->submitForm($edit, t('Save'));
     $this->assertSession()->responseContains('Your settings have been saved.');
 
     // Create and save the media with a twitter media code.
@@ -130,7 +130,7 @@ class TweetEmbedFormatterTest extends MediaFunctionalTestBase {
       'field_media_twitter[0][value]' => $tweet_url,
       'field_embed_code[0][value]' => $tweet,
     ];
-    $this->drupalPostForm(NULL, $edit, t('Save'));
+    $this->submitForm($edit, t('Save'));
     $this->drupalGet('media/1');
 
     // Assert that the media has been successfully saved.
@@ -139,11 +139,11 @@ class TweetEmbedFormatterTest extends MediaFunctionalTestBase {
     // Assert that the link url formatter exists on this page.
     $this->assertSession()->pageTextContains('Tweet URL');
     $this->assertSession()
-      ->responseContains('<a href="https://twitter.com/RamzyStinson/statuses/670650348319576064">', 'Link in embedded Tweet found.');
+      ->responseContains('<a href="https://twitter.com/RamzyStinson/statuses/670650348319576064">');
 
     // Assert that the string_long code formatter exists on this page.
     $this->assertSession()->pageTextContains('Embed code');
-    $this->assertSession()->responseContains('<blockquote class="twitter-tweet', 'Embedded Tweet found.');
+    $this->assertSession()->responseContains('<blockquote class="twitter-tweet');
   }
 
 }

@@ -1,4 +1,7 @@
 administer xmlsitemap:
-    title: 'Administer XML sitemap settings.'
-    description: 'Configure XML sitemap settings, select which links are included in sitemap.'
-    restrict access: true
+  title: 'Administer XML Sitemap settings.'
+  description: 'Configure XML Sitemap settings, select which links are included in sitemap.'
+  restrict access: true
+override xmlsitemap link settings:
+  title: 'Override XML sitemap link settings'
+  description: 'Override XML sitemap settings for individual links/entities.'

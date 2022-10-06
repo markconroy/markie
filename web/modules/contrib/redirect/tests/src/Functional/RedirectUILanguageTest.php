@@ -17,12 +17,12 @@ class RedirectUILanguageTest extends RedirectUITest {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['redirect', 'node', 'path', 'dblog', 'views', 'taxonomy', 'language', 'content_translation'];
+  protected static $modules = ['redirect', 'node', 'path', 'dblog', 'views', 'taxonomy', 'language', 'content_translation'];
 
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     $language = ConfigurableLanguage::createFromLangcode('de');
@@ -38,29 +38,31 @@ class RedirectUILanguageTest extends RedirectUITest {
     $this->drupalLogin($this->adminUser);
 
     $this->drupalGet('admin/config/search/redirect/add');
-    $this->assertOption('edit-language-0-value', 'en');
-    $this->assertOption('edit-language-0-value', 'de');
-    $this->assertOption('edit-language-0-value', 'es');
-    $this->assertOption('edit-language-0-value', 'und');
-    $this->assertNoOption('edit-language-0-value', 'zxx');
-    $this->assertOptionByText('edit-language-0-value', 'English');
-    $this->assertOptionByText('edit-language-0-value', 'German');
-    $this->assertOptionByText('edit-language-0-value', 'Spanish');
-    $this->assertOptionByText('edit-language-0-value', '- All languages -');
+    $this->assertSession()->optionExists('edit-language-0-value', 'en');
+    $this->assertSession()->optionExists('edit-language-0-value', 'de');
+    $this->assertSession()->optionExists('edit-language-0-value', 'es');
+    $this->assertSession()->optionExists('edit-language-0-value', 'und');
+    $this->assertSession()->optionNotExists('edit-language-0-value', 'zxx');
+    $this->assertSession()->optionExists('edit-language-0-value', 'English');
+    $this->assertSession()->optionExists('edit-language-0-value', 'German');
+    $this->assertSession()->optionExists('edit-language-0-value', 'Spanish');
+    $this->assertSession()->optionExists('edit-language-0-value', '- All languages -');
 
     // Add a redirect for english.
-    $this->drupalPostForm('admin/config/search/redirect/add', [
+    $this->drupalGet('admin/config/search/redirect/add');
+    $this->submitForm([
       'redirect_source[0][path]' => 'langpath',
       'redirect_redirect[0][uri]' => '/user',
       'language[0][value]' => 'en',
-    ], t('Save'));
+    ], 'Save');
 
     // Add a redirect for germany.
-    $this->drupalPostForm('admin/config/search/redirect/add', [
+    $this->drupalGet('admin/config/search/redirect/add');
+    $this->submitForm([
       'redirect_source[0][path]' => 'langpath',
       'redirect_redirect[0][uri]' => '<front>',
       'language[0][value]' => 'de',
-    ], t('Save'));
+    ], 'Save');
 
     // Check redirect for english.
     $this->assertRedirect('langpath', '/user', 301);
@@ -79,11 +81,12 @@ class RedirectUILanguageTest extends RedirectUITest {
     $this->drupalLogin($this->adminUser);
 
     // Add a redirect for english.
-    $this->drupalPostForm('admin/config/search/redirect/add', [
+    $this->drupalGet('admin/config/search/redirect/add');
+    $this->submitForm([
       'redirect_source[0][path]' => 'langpath',
       'redirect_redirect[0][uri]' => '/user',
       'language[0][value]' => 'und',
-    ], t('Save'));
+    ], 'Save');
 
     // Check redirect for english.
     $this->assertRedirect('langpath', '/user', 301);
@@ -99,11 +102,12 @@ class RedirectUILanguageTest extends RedirectUITest {
     $this->drupalLogin($this->adminUser);
 
     // Add a redirect for english.
-    $this->drupalPostForm('admin/config/search/redirect/add', [
+    $this->drupalGet('admin/config/search/redirect/add');
+    $this->submitForm([
       'redirect_source[0][path]' => 'langpath',
       'redirect_redirect[0][uri]' => '/user',
       'language[0][value]' => 'en',
-    ], t('Save'));
+    ], 'Save');
 
     // Check redirect for english.
     $this->assertRedirect('langpath', '/user', 301);
@@ -114,7 +118,7 @@ class RedirectUILanguageTest extends RedirectUITest {
     // Edit the redirect and change the language.
     $this->drupalGet('admin/config/search/redirect');
     $this->clickLink('Edit');
-    $this->drupalPostForm(NULL, ['language[0][value]' => 'de'], t('Save'));
+    $this->submitForm(['language[0][value]' => 'de'], 'Save');
 
     // Check redirect for english is NOT working now.
     $this->assertRedirect('langpath', NULL, 404);

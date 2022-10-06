@@ -2,7 +2,7 @@
 
 /**
  * @file
- * @defgroup xmlsitemap XML sitemap
+ * @defgroup xmlsitemap XML Sitemap
  */
 
 /**
@@ -126,7 +126,6 @@ function xmlsitemap_help($route_name, RouteMatchInterface $route_match) {
   $output = '';
 
   switch ($route_name) {
-    case 'help.page.xmlsitemap':
     case 'xmlsitemap.admin_settings':
     case 'xmlsitemap.entities_settings':
     case 'entity.xmlsitemap.edit_form':
@@ -139,8 +138,19 @@ function xmlsitemap_help($route_name, RouteMatchInterface $route_match) {
     case 'xmlsitemap.admin_search_list':
       break;
 
+    case 'help.page.xmlsitemap':
+
+      $output = '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('XML Sitemap automatically creates a sitemap that conforms to the sitemaps.org specification. This helps search engines keep their search results up to date.') . '</p>';
+      $output .= '<h3>' . t('Usage') . '</h3>';
+      $output .= '<p>' . t("You can adjust the settings for your site's sitemap at admin/config/search/xmlsitemap. Your can view your site's sitemap at http://yoursite.com/sitemap.xml.") . '</p>';
+      $output .= '<p>' . t("When is necessary you can rebuild your sitemap at admin/config/search/xmlsitemap/rebuild.") . '</p>';
+      $output .= '<p>' . t("You can configure all Custom Entities Settings at admin/config/search/xmlsitemap/entities/settings") . '</p>';
+      $output .= '<p>' . t('It is highly recommended that you have clean URLs enabled for this project.') . '</p>';
+      return $output;
+
     case 'xmlsitemap.admin_rebuild':
-      $output .= '<p>' . t("This action rebuilds your site's XML sitemap and regenerates the cached files, and may be a lengthy process. If you just installed XML sitemap, this can be helpful to import all your site's content into the sitemap. Otherwise, this should only be used in emergencies.") . '</p>';
+      $output .= '<p>' . t("This action rebuilds your site's XML Sitemap and regenerates the cached files, and may be a lengthy process. If you just installed XML Sitemap, this can be helpful to import all your site's content into the sitemap. Otherwise, this should only be used in emergencies.") . '</p>';
   }
 
   $currentUser = \Drupal::currentUser();
@@ -290,20 +300,20 @@ function xmlsitemap_var($name, $default = NULL) {
 }
 
 /**
- * @defgroup xmlsitemap_api XML sitemap API.
+ * @defgroup xmlsitemap_api XML Sitemap API.
  * @{
- * This is the XML sitemap API to be used by modules wishing to work with
- * XML sitemap and/or link data.
+ * This is the XML Sitemap API to be used by modules wishing to work with
+ * XML Sitemap and/or link data.
  */
 
 /**
- * Load an XML sitemap array from the database.
+ * Load an XML Sitemap array from the database.
  *
  * @param mixed $smid
- *   An XML sitemap ID.
+ *   An XML Sitemap ID.
  *
  * @return \Drupal\xmlsitemap\XmlSitemapInterface
- *   The XML sitemap object.
+ *   The XML Sitemap object.
  */
 function xmlsitemap_sitemap_load($smid) {
   $sitemap = xmlsitemap_sitemap_load_multiple([$smid]);
@@ -311,15 +321,15 @@ function xmlsitemap_sitemap_load($smid) {
 }
 
 /**
- * Load multiple XML sitemaps from the database.
+ * Load multiple XML Sitemaps from the database.
  *
  * @param array|bool $smids
- *   An array of XML sitemap IDs, or FALSE to load all XML sitemaps.
+ *   An array of XML Sitemap IDs, or FALSE to load all XML Sitemaps.
  * @param array $conditions
  *   An array of conditions in the form 'field' => $value.
  *
  * @return \Drupal\xmlsitemap\XmlSitemapInterface[]
- *   An array of XML sitemap objects.
+ *   An array of XML Sitemap objects.
  */
 function xmlsitemap_sitemap_load_multiple($smids = [], array $conditions = []) {
   if ($smids !== FALSE) {
@@ -340,11 +350,11 @@ function xmlsitemap_sitemap_load_multiple($smids = [], array $conditions = []) {
 }
 
 /**
- * Save changes to an XML sitemap or add a new XML sitemap.
+ * Save changes to an XML Sitemap or add a new XML Sitemap.
  *
  * @param Drupal\xmlsitemap\XmlSitemapInterface $sitemap
- *   The XML sitemap array to be saved. If $sitemap->smid is omitted, a new
- *   XML sitemap will be added.
+ *   The XML Sitemap array to be saved. If $sitemap->smid is omitted, a new
+ *   XML Sitemap will be added.
  *
  * @todo Save the sitemap's URL as a column?
  */
@@ -374,20 +384,20 @@ function xmlsitemap_sitemap_save(XmlSitemapInterface $sitemap) {
 }
 
 /**
- * Delete an XML sitemap.
+ * Delete an XML Sitemap.
  *
  * @param string $smid
- *   An XML sitemap ID.
+ *   An XML Sitemap ID.
  */
 function xmlsitemap_sitemap_delete($smid) {
   xmlsitemap_sitemap_delete_multiple([$smid]);
 }
 
 /**
- * Delete multiple XML sitemaps.
+ * Delete multiple XML Sitemaps.
  *
  * @param array $smids
- *   An array of XML sitemap IDs.
+ *   An array of XML Sitemap IDs.
  */
 function xmlsitemap_sitemap_delete_multiple(array $smids) {
   if (!empty($smids)) {
@@ -418,7 +428,7 @@ function xmlsitemap_sitemap_get_file(XmlSitemapInterface $sitemap, $chunk = 'ind
  * Find the maximum file size of all a sitemap's XML files.
  *
  * @param \Drupal\xmlsitemap\XmlSitemapInterface $sitemap
- *   The XML sitemap object.
+ *   The XML Sitemap object.
  *
  * @return int
  *   Maximum file size in the directory.
@@ -450,14 +460,14 @@ function xmlsitemap_sitemap_get_context_hash(array &$context) {
 }
 
 /**
- * Returns the uri elements of an XML sitemap.
+ * Returns the uri elements of an XML Sitemap.
  *
  * @param \Drupal\xmlsitemap\XmlSitemapInterface $sitemap
  *   The sitemap represented by and XmlSitemapInterface object.
  *
  * @return array
  *   An array containing the 'path' and 'options' keys used to build the uri of
- *   the XML sitemap, and matching the signature of url().
+ *   the XML Sitemap, and matching the signature of url().
  */
 function xmlsitemap_sitemap_uri(XmlSitemapInterface $sitemap) {
   $uri['path'] = 'sitemap.xml';
@@ -474,18 +484,18 @@ function xmlsitemap_sitemap_uri(XmlSitemapInterface $sitemap) {
 /**
  * @} End of "defgroup xmlsitemap_api"
  */
-function xmlsitemap_get_directory(XmlSitemapInterface $sitemap = NULL) {
-  $directory = &drupal_static(__FUNCTION__);
+function xmlsitemap_get_directory(XmlSitemapInterface $sitemap = NULL, $directory = NULL) {
   if (!isset($directory)) {
     $directory = \Drupal::config('xmlsitemap.settings')->get('path') ?: 'xmlsitemap';
   }
 
+  $path = \Drupal::config('system.file')->get('default_scheme') . '://' . $directory;
+
   if ($sitemap != NULL && !empty($sitemap->id)) {
-    return file_build_uri($directory . '/' . $sitemap->id);
+    $path .= '/' . $sitemap->id;
   }
-  else {
-    return file_build_uri($directory);
-  }
+
+  return $path;
 }
 
 /**
@@ -623,7 +633,7 @@ function _xmlsitemap_delete_recursive($path, $delete_root = FALSE) {
  * Implements hook_entity_type_build().
  */
 function xmlsitemap_entity_type_build(array &$entity_types) {
-  // Mark some specific core entity types as not supported by XML sitemap.
+  // Mark some specific core entity types as not supported by XML Sitemap.
   // If a site wants to undo this, they may use hook_entity_type_alter().
   $unsupported_types = [
     // Custom blocks.
@@ -648,7 +658,7 @@ function xmlsitemap_entity_type_build(array &$entity_types) {
 }
 
 /**
- * Determines if an entity type can be listed in the XML sitemap as links.
+ * Determines if an entity type can be listed in the XML Sitemap as links.
  *
  * @param \Drupal\Core\Entity\EntityTypeInterface $entity_type
  *   The entity type.
@@ -657,7 +667,7 @@ function xmlsitemap_entity_type_build(array &$entity_types) {
  *   TRUE if the entity type can be used, or FALSE otherwise.
  */
 function xmlsitemap_is_entity_type_supported(EntityTypeInterface $entity_type) {
-  // If the XML sitemap status in the entity type annotation has been set then
+  // If the XML Sitemap status in the entity type annotation has been set then
   // return that first. This will allow modules to bypass the logic below if
   // needed.
   $status = $entity_type->get('xmlsitemap');
@@ -1030,22 +1040,22 @@ function xmlsitemap_entity_bundle_delete($entity_type_id, $bundle) {
  * @param int $interval
  *   An interval value in seconds.
  *
- * @return string
+ * @return string|\Drupal\Core\StringTranslation\TranslatableMarkup
  *   A string representing the update frequency according to the sitemaps.org
  *   protocol.
  */
-function xmlsitemap_get_changefreq($interval) {
+function xmlsitemap_get_changefreq($interval, bool $translated = FALSE) {
   if ($interval <= 0 || !is_numeric($interval)) {
     return FALSE;
   }
 
   foreach (xmlsitemap_get_changefreq_options() as $value => $frequency) {
     if ($interval <= $value) {
-      return $frequency;
+      return $translated ? $frequency : $frequency->getUntranslatedString();
     }
   }
 
-  return 'never';
+  return $translated ? t('never', [], ['context' => 'At no time']) : 'never';
 }
 
 /**
@@ -1169,7 +1179,7 @@ function xmlsitemap_form_submit_flag_regenerate(array $form, FormStateInterface 
     }
     if ($stored_value != 'not_a_variable' && $stored_value != $value) {
       \Drupal::state()->set('xmlsitemap_regenerate_needed', TRUE);
-      \Drupal::messenger()->addWarning(t('XML sitemap settings have been modified and the files should be regenerated. You can <a href="@run-cron">run cron manually</a> to regenerate the cached files.', [
+      \Drupal::messenger()->addWarning(t('XML Sitemap settings have been modified and the files should be regenerated. You can <a href="@run-cron">run cron manually</a> to regenerate the cached files.', [
         '@run-cron' => Url::fromRoute('system.run_cron', [], ['query' => \Drupal::destination()->getAsArray()])->toString(),
       ]), FALSE);
       return;
@@ -1178,7 +1188,7 @@ function xmlsitemap_form_submit_flag_regenerate(array $form, FormStateInterface 
 }
 
 /**
- * Add a link's XML sitemap options to the link's form.
+ * Add a link's XML Sitemap options to the link's form.
  *
  * @param array $form
  *   Form array.
@@ -1213,11 +1223,12 @@ function xmlsitemap_add_form_link_options(array &$form, $entity_type, $bundle, $
   $form['xmlsitemap'] = [
     '#type' => 'details',
     '#tree' => TRUE,
-    '#title' => t('XML sitemap'),
+    '#title' => t('XML Sitemap'),
     '#collapsible' => TRUE,
     '#collapsed' => !$link['status_override'] && !$link['priority_override'],
-    '#access' => $currentUser->hasPermission('administer xmlsitemap') || ($admin_permission && $currentUser->hasPermission($admin_permission)),
+    '#access' => $currentUser->hasPermission('administer xmlsitemap') || $currentUser->hasPermission('override xmlsitemap link settings') || ($admin_permission && $currentUser->hasPermission($admin_permission)),
     '#group' => 'advanced',
+    '#weight' => 10,
   ];
 
   // Show a warning if the link is not accessible and will not be included in
@@ -1317,55 +1328,19 @@ function xmlsitemap_process_form_link_options(array $form, FormStateInterface $f
 }
 
 /**
- * Submit callback for link bundle settings.
- */
-function xmlsitemap_link_bundle_settings_form_submit($form, &$form_state) {
-  $entity = $form['xmlsitemap']['#entity'];
-  $bundle = $form['xmlsitemap']['#bundle'];
-
-  // Handle new bundles by fetching the proper bundle key value from the form
-  // state values.
-  if (empty($bundle)) {
-    $entity_info = $form['xmlsitemap']['#entity_info'];
-    if (isset($entity_info['bundle keys']['bundle'])) {
-      $bundle_key = $entity_info['bundle keys']['bundle'];
-      if ($form_state->hasValue($bundle_key)) {
-        $bundle = $form_state->getValue($bundle_key);
-        $form['xmlsitemap']['#bundle'] = $bundle;
-      }
-    }
-  }
-
-  xmlsitemap_link_bundle_settings_save($entity, $bundle, $form_state->getValue('xmlsitemap'));
-
-  $entity_info = $form['xmlsitemap']['#entity_info'];
-  if (!empty($form['xmlsitemap']['#show_message'])) {
-    \Drupal::messenger()->addStatus(t('XML sitemap settings for the @bundle-label %bundle have been saved.', ['@bundle-label' => mb_strtolower($entity_info['bundle label']), '%bundle' => $entity_info['bundles'][$bundle]['label']]));
-  }
-
-  // Unset the form values since we have already saved the bundle settings and
-  // we don't want these values to get saved as variables in-case this form
-  // also uses system_settings_form().
-  $form_state->unsetValue('xmlsitemap');
-}
-
-/**
  * Gets xmlsitemap frequency options.
  *
- * @return array
+ * @return \Drupal\Core\StringTranslation\TranslatableMarkup[]
  *   Frequency options.
- *
- * @todo Document this function.
- * @todo Make these translatable
  */
 function xmlsitemap_get_changefreq_options() {
   return [
-    XMLSITEMAP_FREQUENCY_ALWAYS => 'always',
-    XMLSITEMAP_FREQUENCY_HOURLY => 'hourly',
-    XMLSITEMAP_FREQUENCY_DAILY => 'daily',
-    XMLSITEMAP_FREQUENCY_WEEKLY => 'weekly',
-    XMLSITEMAP_FREQUENCY_MONTHLY => 'monthly',
-    XMLSITEMAP_FREQUENCY_YEARLY => 'yearly',
+    XMLSITEMAP_FREQUENCY_ALWAYS => t('always', [], ['context' => 'At all times']),
+    XMLSITEMAP_FREQUENCY_HOURLY => t('hourly'),
+    XMLSITEMAP_FREQUENCY_DAILY => t('daily'),
+    XMLSITEMAP_FREQUENCY_WEEKLY => t('weekly'),
+    XMLSITEMAP_FREQUENCY_MONTHLY => t('monthly'),
+    XMLSITEMAP_FREQUENCY_YEARLY => t('yearly'),
   ];
 }
 
@@ -1392,7 +1367,7 @@ function xmlsitemap_language_load($language = LanguageInterface::LANGCODE_NOT_SP
 }
 
 /**
- * @defgroup xmlsitemap_context_api XML sitemap API for sitemap contexts.
+ * @defgroup xmlsitemap_context_api XML Sitemap API for sitemap contexts.
  * @{
  */
 
@@ -1581,7 +1556,6 @@ function xmlsitemap_form_alter(array &$form, FormStateInterface $form_state, $fo
     }
     if (in_array($form_object->getOperation(), $operations, TRUE) && xmlsitemap_link_bundle_check_enabled($entity->getEntityTypeId(), $entity->bundle())) {
       xmlsitemap_add_form_link_options($form, $entity->getEntityTypeId(), $entity->bundle(), $entity->id());
-      $form['xmlsitemap']['#weight'] = 10;
     }
   }
 }
@@ -1605,30 +1579,9 @@ function xmlsitemap_xmlsitemap_index_links($limit) {
     }
 
     try {
-      $query = $entity_type_manager->getStorage($entity_type_id)->getQuery();
+      $linkStorage = \Drupal::service('xmlsitemap.link_storage');
+      $query = $linkStorage->getEntityQuery($entity_type_id, $bundles, NULL, 'NOT IN');
       $query->range(0, $limit);
-      if (!empty($info['entity keys']['bundle'])) {
-        $query->condition($info['entity keys']['bundle'], $bundles, 'IN');
-      }
-
-      // Perform a subquery against the xmlsitemap table to ensure that we are
-      // only looking for items that we have not already indexed.
-      $subquery = \Drupal::database()->select('xmlsitemap', 'x');
-      $subquery->addField('x', 'id');
-      $subquery->condition('type', $entity_type_id);
-      // If the storage for this entity type is against a SQL backend, perform
-      // a direct subquery condition to avoid needing to load all the IDs.
-      if ($query instanceof \Drupal\Core\Entity\Query\Sql\Query) {
-        $query->condition($info['entity keys']['id'], $subquery, 'NOT IN');
-      }
-      else {
-        $query->condition($info['entity keys']['id'], $subquery->execute()->fetchCol(), 'NOT IN');
-      }
-
-      // Access for entities is checked individually for the anonymous user
-      // when each item is processed. We can skip the access check for the
-      // query.
-      $query->accessCheck(FALSE);
       $query->addTag('xmlsitemap_index_links');
 
       if ($ids = $query->execute()) {
@@ -2009,7 +1962,7 @@ function xmlsitemap_xmlsitemap_sitemap_operations() {
 }
 
 /**
- * XML sitemap link type settings callback for frontpage link entity.
+ * XML Sitemap link type settings callback for frontpage link entity.
  *
  * @param array $form
  *   Form array.
@@ -2037,10 +1990,10 @@ function xmlsitemap_link_frontpage_settings(array &$form) {
 }
 
 /**
- * XML sitemap operation callback; regenerate sitemap files using the batch API.
+ * XML Sitemap operation callback; regenerate sitemap files using the batch API.
  *
  * @param array $smids
- *   An array of XML sitemap IDs.
+ *   An array of XML Sitemap IDs.
  *
  * @see xmlsitemap_regenerate_batch()
  */
@@ -2122,7 +2075,7 @@ function xmlsitemap_add_form_entity_summary(array &$form, $entity, array $entity
 }
 
 /**
- * Add the link type XML sitemap options to the link type's form.
+ * Add the link type XML Sitemap options to the link type's form.
  *
  * Caller is responsible for ensuring xmlsitemap_link_bundle_settings_save()
  * is called during submission.
@@ -2143,7 +2096,7 @@ function xmlsitemap_add_link_bundle_settings(array &$form, FormStateInterface $f
 
   $form['xmlsitemap'] = [
     '#type' => 'details',
-    '#title' => t('XML sitemap'),
+    '#title' => t('XML Sitemap'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
     '#access' => \Drupal::currentUser()->hasPermission('administer xmlsitemap'),
@@ -2352,7 +2305,7 @@ function _xmlsitemap_get_blurb($check_version = TRUE) {
         \Drupal::linkGenerator()->generate('Coupons Dealuxe', Url::fromUri('http://couponsdealuxe.com/', ['attributes' => ['target' => 'blank']])),
       ];
       // Don't extract the following string for translation.
-      $blurb = '<div class="description"><p>Thank you for helping test the XML sitemap module rewrite. Please consider helping offset developer free time by <a href="http://davereid.chipin.com/" target="blank">donating</a> or if your company is interested in sponsoring the rewrite or a specific feature, please <a href="http://davereid.net/contact" target="blank">contact the developer</a>. Thank you to the following current sponsors: ' . implode(', ', $sponsors) . ', and all the individuals that have donated. This message will not be seen in the stable versions.</p></div>';
+      $blurb = '<div class="description"><p>Thank you for helping test the XML Sitemap module rewrite. Please consider helping offset developer free time by <a href="http://davereid.chipin.com/" target="blank">donating</a> or if your company is interested in sponsoring the rewrite or a specific feature, please <a href="http://davereid.net/contact" target="blank">contact the developer</a>. Thank you to the following current sponsors: ' . implode(', ', $sponsors) . ', and all the individuals that have donated. This message will not be seen in the stable versions.</p></div>';
       // http://drupalmodules.com/module/xml-sitemap
     }
   }
@@ -2405,7 +2358,7 @@ function xmlsitemap_check_status() {
 
     $messages = [];
     foreach ($modules as $module) {
-      module_load_install($module);
+      \Drupal::moduleHandler()->loadInclude($module, 'install');
       $requirements = \Drupal::moduleHandler()->invoke($module, 'requirements', ['runtime']);
       foreach ($requirements as $requirement) {
         if (isset($requirement['severity']) && max(REQUIREMENT_OK, $requirement['severity'])) {
@@ -2419,7 +2372,7 @@ function xmlsitemap_check_status() {
         '#type' => 'item_list',
         '#items' => [$messages],
       ];
-      $message = t('One or more problems were detected with your XML sitemap configuration: @messages', ['@messages' => \Drupal::service('renderer')->render($messages)]);
+      $message = t('One or more problems were detected with your XML Sitemap configuration: @messages', ['@messages' => \Drupal::service('renderer')->render($messages)]);
       \Drupal::messenger()->addWarning($message, FALSE);
       if (\Drupal::currentUser()->hasPermission('access site reports')) {
         \Drupal::messenger()->addWarning(t('Check the <a href="@status-report">status report</a> for more information.', ['@status-report' => Url::fromRoute('system.status')->toString()]), FALSE);
@@ -2441,8 +2394,8 @@ function _xmlsitemap_regenerate_before() {
  * Batch information callback for regenerating the sitemap files.
  *
  * @param array $smids
- *   An optional array of XML sitemap IDs. If not provided, it will load all
- *   existing XML sitemaps.
+ *   An optional array of XML Sitemap IDs. If not provided, it will load all
+ *   existing XML Sitemaps.
  */
 function xmlsitemap_regenerate_batch(array $smids = []) {
   if (empty($smids)) {
@@ -2534,7 +2487,7 @@ function xmlsitemap_rebuild_batch(array $entity_type_ids, $save_custom = FALSE) 
     'operations' => [],
     'finished' => 'xmlsitemap_rebuild_batch_finished',
     'title' => t('Rebuilding Sitemap'),
-    'file' => drupal_get_path('module', 'xmlsitemap') . '/xmlsitemap.generate.inc',
+    'file' => \Drupal::service('extension.list.module')->getPath('xmlsitemap') . '/xmlsitemap.generate.inc',
   ];
 
   // Set the rebuild flag in case something fails during the rebuild.

@@ -2,10 +2,13 @@
 
 namespace Drupal\ctools\Event;
 
+use Drupal\Component\EventDispatcher\Event;
 use Drupal\Core\Block\BlockPluginInterface;
 use Drupal\ctools\Plugin\BlockVariantInterface;
-use Symfony\Component\EventDispatcher\Event;
 
+/**
+ *
+ */
 class BlockVariantEvent extends Event {
 
   /**

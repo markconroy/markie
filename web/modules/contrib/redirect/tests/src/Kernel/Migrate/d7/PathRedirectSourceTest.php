@@ -15,7 +15,7 @@ class PathRedirectSourceTest extends MigrateSqlSourceTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['redirect', 'link', 'migrate_drupal', 'path_alias'];
+  protected static $modules = ['redirect', 'link', 'migrate_drupal', 'path_alias'];
 
   /**
    * {@inheritdoc}

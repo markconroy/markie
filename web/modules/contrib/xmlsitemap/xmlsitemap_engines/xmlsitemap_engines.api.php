@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Hooks provided by the XML sitemap engines module.
+ * Hooks provided by the XML Sitemap engines module.
  */
 
 /**

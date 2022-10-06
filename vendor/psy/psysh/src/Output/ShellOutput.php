@@ -3,7 +3,7 @@
 /*
  * This file is part of Psy Shell.
  *
- * (c) 2012-2020 Justin Hileman
+ * (c) 2012-2022 Justin Hileman
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -24,6 +24,7 @@ class ShellOutput extends ConsoleOutput
     const NUMBER_LINES = 128;
 
     private $paging = 0;
+    /** @var OutputPager */
     private $pager;
 
     /**
@@ -64,7 +65,7 @@ class ShellOutput extends ConsoleOutput
      * @param string|array|\Closure $messages A string, array of strings or a callback
      * @param int                   $type     (default: 0)
      */
-    public function page($messages, $type = 0)
+    public function page($messages, int $type = 0)
     {
         if (\is_string($messages)) {
             $messages = (array) $messages;
@@ -174,9 +175,13 @@ class ShellOutput extends ConsoleOutput
     private function initFormatters()
     {
         $formatter = $this->getFormatter();
+        $errorFormatter = $this->getErrorOutput()->getFormatter();
 
         $formatter->setStyle('warning', new OutputFormatterStyle('black', 'yellow'));
+        $errorFormatter->setStyle('warning', new OutputFormatterStyle('black', 'yellow'));
         $formatter->setStyle('error', new OutputFormatterStyle('white', 'red', ['bold']));
+        $errorFormatter->setStyle('error', new OutputFormatterStyle('white', 'red', ['bold']));
+
         $formatter->setStyle('aside', new OutputFormatterStyle('blue'));
         $formatter->setStyle('strong', new OutputFormatterStyle(null, null, ['bold']));
         $formatter->setStyle('return', new OutputFormatterStyle('cyan'));

@@ -8,7 +8,6 @@ gh-pages
 mkdocs.yml
 #The Commands site output directory.
 docs/commands
-docs/generators
 #The Doctum output directories
 api
 .doctum-cache

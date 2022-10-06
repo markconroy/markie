@@ -28,7 +28,7 @@ abstract class KernelTestBase extends CoreKernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static function setUpBeforeClass() {
+  public static function setUpBeforeClass(): void {
     parent::setUpBeforeClass();
 
     // This is required to not fail the @covers for global functions.
@@ -43,6 +43,7 @@ abstract class KernelTestBase extends CoreKernelTestBase {
     parent::setUp();
 
     $this->installSchema('xmlsitemap', ['xmlsitemap']);
+    $this->installSchema('system', ['sequences']);
     $this->installConfig('xmlsitemap');
 
     // Install hooks are not run with kernel tests.

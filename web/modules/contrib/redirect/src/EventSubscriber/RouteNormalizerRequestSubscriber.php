@@ -8,8 +8,8 @@ use Drupal\Core\Routing\RequestHelper;
 use Drupal\Core\Routing\TrustedRedirectResponse;
 use Drupal\Core\Routing\UrlGeneratorInterface;
 use Drupal\redirect\RedirectChecker;
+use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
-use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
@@ -80,12 +80,12 @@ class RouteNormalizerRequestSubscriber implements EventSubscriberInterface {
    *   page.
    * - Requested path has an alias: redirect to alias.
    *
-   * @param \Symfony\Component\HttpKernel\Event\GetResponseEvent $event
+   * @param \Symfony\Component\HttpKernel\Event\RequestEvent $event
    *   The Event to process.
    */
-  public function onKernelRequestRedirect(GetResponseEvent $event) {
+  public function onKernelRequestRedirect(RequestEvent $event) {
 
-    if (!$this->config->get('route_normalizer_enabled') || !$event->isMasterRequest()) {
+    if (!$this->config->get('route_normalizer_enabled') || !$event->isMainRequest()) {
       return;
     }
 

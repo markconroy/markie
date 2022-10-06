@@ -3,7 +3,7 @@
 namespace Drupal\Tests\xmlsitemap\Functional;
 
 /**
- * Unit tests for the XML sitemap module.
+ * Unit tests for the XML Sitemap module.
  *
  * @group xmlsitemap
  */
@@ -12,7 +12,7 @@ class XmlSitemapUnitTest extends XmlSitemapTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     $this->admin_user = $this->drupalCreateUser([

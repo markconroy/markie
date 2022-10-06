@@ -25,16 +25,11 @@ class MetatagViewsCacheWrapper extends CachePluginBase {
   const RESULTS = 'results';
 
   /**
+   * {@inheritdoc}
+   *
    * @var \Drupal\views\Plugin\views\cache\CachePluginBase
    */
   protected $plugin;
-
-  /**
-   * Whether cacheSet was called with $type 'result'.
-   *
-   * @var bool
-   */
-  protected $called = FALSE;
 
   /**
    * MetatagViewsCacheWrapper constructor.
@@ -51,7 +46,18 @@ class MetatagViewsCacheWrapper extends CachePluginBase {
    */
   public function cacheSet($type) {
     if ($type === self::RESULTS) {
-      $this->called = TRUE;
+      $plugin = $this->plugin;
+      $view = $plugin->view;
+      $data = [
+        'result' => $plugin->prepareViewResult($view->result),
+        'total_rows' => $view->total_rows ?? 0,
+        'current_page' => $view->getCurrentPage(),
+        'first_row_tokens' => MetatagDisplayExtender::getFirstRowTokensFromStylePlugin($view),
+      ];
+      $cache_set_max_age = $this->cacheSetMaxAge('results');
+      $expire = ($cache_set_max_age === Cache::PERMANENT) ? Cache::PERMANENT : (int) $view->getRequest()->server->get('REQUEST_TIME') + $cache_set_max_age;
+      \Drupal::cache($plugin->resultsBin)
+        ->set($plugin->generateResultsKey(), $data, $expire, $plugin->getCacheTags());
     }
     else {
       $this->plugin->cacheSet($type);
@@ -59,55 +65,35 @@ class MetatagViewsCacheWrapper extends CachePluginBase {
   }
 
   /**
-   * Actually run cacheSet for type results.
-   *
-   * It needs to be deferred past the render phase so the row tokens in
-   * the style plugin are populated.
-   */
-  public function doDeferredCacheSet() {
-    if (!$this->called) {
-      return;
-    }
-    $plugin = $this->plugin;
-    $view = $plugin->view;
-    $data = [
-      'result' => $plugin->prepareViewResult($view->result),
-      'total_rows' => isset($view->total_rows) ? $view->total_rows : 0,
-      'current_page' => $view->getCurrentPage(),
-      'first_row_tokens' => MetatagDisplayExtender::getFirstRowTokensFromStylePlugin($view),
-    ];
-    $cache_set_max_age = $plugin->cacheSetMaxAge(self::RESULTS);
-    $expire = ($cache_set_max_age === Cache::PERMANENT) ? Cache::PERMANENT : (int) $view->getRequest()->server->get('REQUEST_TIME') + $cache_set_max_age;
-    \Drupal::cache($plugin->resultsBin)->set($plugin->generateResultsKey(), $data, $expire, $plugin->getCacheTags());
-  }
-
-  /**
    * {@inheritdoc}
    */
   public function cacheGet($type) {
-    if ($type === self::RESULTS) {
-      $cutoff = $this->plugin->cacheExpire($type);
-      // Values to set: $view->result, $view->total_rows, $view->execute_time,
-      // $view->current_page and pass row tokens to metatag display extender.
-      if ($cache = \Drupal::cache($this->plugin->resultsBin)->get($this->plugin->generateResultsKey())) {
-        if (!$cutoff || $cache->created > $cutoff) {
-          $view = $this->plugin->view;
-          $view->result = $cache->data['result'];
-          // Load entities for each result.
-          $view->query->loadEntities($view->result);
-          $view->total_rows = $cache->data['total_rows'];
-          $view->setCurrentPage($cache->data['current_page'], TRUE);
-          $view->execute_time = 0;
-          $extenders = $view->getDisplay()->getExtenders();
-          if (isset($extenders['metatag_display_extender'])) {
-            $extenders['metatag_display_extender']->setFirstRowTokens($cache->data['first_row_tokens']);
+    switch ($type) {
+      case self::RESULTS:
+        $cutoff = $this->plugin->cacheExpire($type);
+        // Values to set: $view->result, $view->total_rows, $view->execute_time,
+        // $view->current_page and pass row tokens to metatag display extender.
+        if ($cache = \Drupal::cache($this->plugin->resultsBin)->get($this->plugin->generateResultsKey())) {
+          if (!$cutoff || $cache->created > $cutoff) {
+            $view = $this->plugin->view;
+            $view->result = $cache->data['result'];
+            // Load entities for each result.
+            $view->query->loadEntities($view->result);
+            $view->total_rows = $cache->data['total_rows'];
+            $view->setCurrentPage($cache->data['current_page'], TRUE);
+            $view->execute_time = 0;
+            $extenders = $view->getDisplay()->getExtenders();
+            if (isset($extenders['metatag_display_extender'])) {
+              $extenders['metatag_display_extender']->setFirstRowTokens($cache->data['first_row_tokens']);
+            }
+            return TRUE;
           }
-          return TRUE;
         }
-      }
-      return FALSE;
+        return FALSE;
+
+      default:
+        return $this->plugin->cacheGet($type);
     }
-    return $this->plugin->cacheGet($type);
   }
 
   /**
@@ -295,8 +281,7 @@ class MetatagViewsCacheWrapper extends CachePluginBase {
   /**
    * {@inheritdoc}
    */
-  public function getAvailableGlobalTokens($prepared = FALSE, array $types = [
-  ]) {
+  public function getAvailableGlobalTokens($prepared = FALSE, array $types = []) {
     return $this->plugin->getAvailableGlobalTokens($prepared, $types);
   }
 
@@ -387,20 +372,6 @@ class MetatagViewsCacheWrapper extends CachePluginBase {
   /**
    * {@inheritdoc}
    */
-  public function __sleep() {
-    return $this->plugin->__sleep();
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function __wakeup() {
-    $this->plugin->__wakeup();
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function setMessenger(MessengerInterface $messenger) {
     $this->plugin->setMessenger($messenger);
   }
@@ -412,13 +383,18 @@ class MetatagViewsCacheWrapper extends CachePluginBase {
     $this->plugin->messenger();
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function __get($name) {
     return $this->plugin->$name;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function __set($name, $value) {
     $this->plugin->$name = $value;
   }
-
 
 }

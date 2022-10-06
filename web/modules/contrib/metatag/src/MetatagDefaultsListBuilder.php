@@ -28,7 +28,16 @@ class MetatagDefaultsListBuilder extends ConfigEntityListBuilder {
     $entity_ids = $query->execute();
 
     // Load global entity always.
-    return $entity_ids + $this->getParentIds($entity_ids);
+    $parents = $this->getParentIds($entity_ids);
+    if (!empty($parents)) {
+      if (empty($entity_ids)) {
+        $entity_ids = $parents;
+      }
+      else {
+        $entity_ids = array_merge($entity_ids, $parents);
+      }
+    }
+    return $entity_ids;
   }
 
   /**
@@ -67,6 +76,7 @@ class MetatagDefaultsListBuilder extends ConfigEntityListBuilder {
    * {@inheritdoc}
    */
   public function buildRow(EntityInterface $entity) {
+    /** @var \Drupal\metatag\Entity\MetatagDefaults $entity */
     $row['label'] = $this->getLabelAndConfig($entity);
     $row['status'] = $entity->status() ? $this->t('Active') : $this->t('Disabled');
     return $row + parent::buildRow($entity);
@@ -101,6 +111,7 @@ class MetatagDefaultsListBuilder extends ConfigEntityListBuilder {
    *   Render array for a table cell.
    */
   public function getLabelAndConfig(EntityInterface $entity) {
+    /** @var \Drupal\metatag\Entity\MetatagDefaults $entity */
     $output = '<div>';
     $prefix = '';
     $inherits = '';
@@ -125,7 +136,7 @@ class MetatagDefaultsListBuilder extends ConfigEntityListBuilder {
 <tbody>';
       foreach ($tags as $tag_id => $tag_value) {
         if (is_array($tag_value)) {
-          $tag_value = implode(', ', $tag_value);
+          $tag_value = implode(', ', array_filter($tag_value));
         }
         $output .= '<tr><td>' . $tag_id . ':</td><td>' . $tag_value . '</td></tr>';
       }

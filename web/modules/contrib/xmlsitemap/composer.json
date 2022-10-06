@@ -1,6 +1,6 @@
 {
     "name": "drupal/xmlsitemap",
-    "description": "Creates XML sitemaps for the site",
+    "description": "Creates XML Sitemaps for the site",
     "type": "drupal-module",
     "license": "GPL-2.0-or-later",
     "homepage": "https://www.drupal.org/project/xmlsitemap",
@@ -12,6 +12,7 @@
         "ext-xmlwriter": "*"
     },
     "require-dev": {
+        "drupal/config_readonly":  "^1.0",
         "drupal/metatag": "^1.0",
         "drupal/robotstxt": "^1.0"
     },
@@ -21,7 +22,7 @@
     "extra": {
         "drush": {
              "services": {
-                 "drush.services.yml": "^9 || ^10"
+                 "drush.services.yml": "^10 || ^11"
              }
         }
     }
