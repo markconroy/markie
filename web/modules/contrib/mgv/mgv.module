@@ -15,24 +15,32 @@ function mgv_help($route_name, RouteMatchInterface $route_match) {
     case 'help.page.mgv':
       /** @var \Drupal\mgv\MgvPluginManagerInterface $mgv */
       $mgv = \Drupal::service('plugin.manager.mgv');
-      /** @var \Drupal\Core\Render\RendererInterface $renderer */
-      $renderer = \Drupal::service('renderer');
       $rows = [];
-      foreach ($mgv->getDefinitions() as $definition) {
+      foreach ($mgv->getDefinitions() as $id => $definition) {
         $variable = [
           '#type' => 'html_tag',
           '#tag' => 'pre',
-          '#value' => '{{ global_variable.' . str_replace('\\', '.', $definition['id']) . ' }}',
+          '#value' => '{{ global_variable.' . str_replace('\\', '.', $id) . ' }}',
         ];
         $class = [
           '#type' => 'html_tag',
           '#tag' => 'i',
           '#value' => $definition['class'],
         ];
-        $rows[] = [
-          $definition['id'],
-          $renderer->render($variable),
-          $renderer->render($class),
+        $rows[$id] = [
+          'id' => $id,
+          'variable' => [
+            'data' => $variable,
+          ],
+          'class' => [
+            'data' => $class,
+          ],
+          'value' => [
+            'data' => [
+              '#markup' => $mgv->createInstance($id, $definition)->getValue(),
+            ],
+            'data-mgv-id' => $id,
+          ],
         ];
       }
       return [
@@ -49,7 +57,7 @@ function mgv_help($route_name, RouteMatchInterface $route_match) {
         ],
         'current' => [
           '#type' => 'details',
-          '#opened' => FALSE,
+          '#open' => TRUE,
           '#title' => t('List of available global variables'),
           'list' => [
             '#type' => 'table',
@@ -57,12 +65,13 @@ function mgv_help($route_name, RouteMatchInterface $route_match) {
               t('ID'),
               t('Variable name'),
               t('Class'),
+              t('Example Value'),
             ],
             '#rows' => $rows,
           ],
         ],
         'original_description_wrapper' => [
-          '#type'=> 'details',
+          '#type' => 'details',
           '#opened' => FALSE,
           '#title' => t('Original description'),
           'original_description' => [
@@ -91,18 +100,14 @@ function mgv_help($route_name, RouteMatchInterface $route_match) {
           ],
         ],
       ];
-
-    default:
-      return NULL;
   }
-
 }
 
 /**
  * Implements hook_template_preprocess_default_variables_alter().
  */
 function mgv_template_preprocess_default_variables_alter(&$variables) {
-  /* @var \Drupal\mgv\MgvPluginManager $variables_manager */
+  /** @var \Drupal\mgv\MgvPluginManager $variables_manager */
   $variables_manager = \Drupal::service('plugin.manager.mgv');
   $variables['global_variables'] = $variables_manager->getVariables();
 }

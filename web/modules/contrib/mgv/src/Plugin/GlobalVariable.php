@@ -2,34 +2,38 @@
 
 namespace Drupal\mgv\Plugin;
 
+use Drupal\Component\Plugin\PluginBase;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 
 /**
  * Class GlobalVariable.
  *
+ * Base class used for global variable definition.
+ *
  * @package Drupal\mgv\Plugin
  */
-abstract class GlobalVariable implements GlobalVariableInterface {
+abstract class GlobalVariable extends PluginBase implements GlobalVariableInterface {
 
   use StringTranslationTrait;
 
-  private $configurations;
-
-  private $dependency;
+  /**
+   * List of global variables which is used by variable implementation.
+   *
+   * @var array|mixed
+   *   List of dependencies.
+   */
+  protected $dependency;
 
   /**
-   * GlobalVariable constructor.
-   *
-   * @param array $configurations
-   *   Configuration that collected from createInstance() method.
+   * {@inheritdoc}
    *
    * @see \Drupal\mgv\MgvPluginManager::createInstance()
    */
-  public function __construct(array $configurations) {
-    $this->configurations = $configurations;
-    $this->dependency = empty($this->configurations['variableDependencies']) ?
-      [] :
-      $this->configurations['variableDependencies'];
+  public function __construct(array $configuration, $plugin_id, $plugin_definition) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition);
+    $this->dependency = !empty($configuration['variableDependencies']) ?
+      $configuration['variableDependencies'] :
+      [];
   }
 
   /**
@@ -41,8 +45,8 @@ abstract class GlobalVariable implements GlobalVariableInterface {
    * @return array|mixed
    *   Value of dependent global variable.
    */
-  public function getDependency($id) {
-    return empty($this->dependency[$id]) ? NULL : $this->dependency[$id];
+  public function getDependency(string $id) {
+    return !empty($this->dependency[$id]) ? $this->dependency[$id] : '';
   }
 
 }

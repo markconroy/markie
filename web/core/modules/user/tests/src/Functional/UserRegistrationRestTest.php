@@ -2,6 +2,7 @@
 
 namespace Drupal\Tests\user\Functional;
 
+use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Test\AssertMailTrait;
 use Drupal\Core\Url;
 use Drupal\Tests\rest\Functional\CookieResourceTestTrait;
@@ -41,6 +42,13 @@ class UserRegistrationRestTest extends ResourceTestBase {
    * {@inheritdoc}
    */
   protected static $modules = ['user', 'rest'];
+
+  /**
+   * Entity type ID for this storage.
+   *
+   * @var string
+   */
+  protected static $entityTypeId;
 
   const USER_EMAIL_DOMAIN = '@example.com';
 
@@ -248,11 +256,15 @@ class UserRegistrationRestTest extends ResourceTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function getExpectedUnauthorizedAccessMessage($method) {}
+  protected function getExpectedUnauthorizedAccessMessage($method) {
+    return '';
+  }
 
   /**
    * {@inheritdoc}
    */
-  protected function getExpectedUnauthorizedAccessCacheability() {}
+  protected function getExpectedUnauthorizedAccessCacheability() {
+    return new CacheableMetadata();
+  }
 
 }

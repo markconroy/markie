@@ -8,6 +8,13 @@ use Drupal\mgv\Plugin\GlobalVariable;
 /**
  * Class SocialSharingFacebook.
  *
+ * Social Sharing Global Variables
+ * To use this, you need to wrap the variable in an anchor tag, such as:
+ * ```
+ * <a href="{{ global_variables.social_sharing.facebook }}">Facebook</a>
+ * ```
+ * Share the current page on Facebook.
+ *
  * @package Drupal\mgv\Plugin\GlobalVariable
  *
  * @Mgv(
@@ -25,12 +32,6 @@ class SocialSharingFacebook extends GlobalVariable {
    * {@inheritdoc}
    */
   public function getValue() {
-    // Social Sharing Global Variables
-    //
-    // To use this, you need to wrap the variable in an anchor tag, such as:
-    // <a href="{{ global_variables.social_sharing.facebook }}">Facebook</a>
-    //
-    // Share the current page on Facebook.
     return Url::fromUri(
       'https://www.facebook.com/sharer.php',
       [

@@ -2,10 +2,11 @@
 
 namespace Drupal\mgv\Plugin\GlobalVariable;
 
-use Drupal\mgv\Plugin\GlobalVariable;
-
 /**
  * Class SiteMail.
+ *
+ * Site Information Page Global Variables.
+ * Print the Site Email.
  *
  * @package Drupal\mgv\Plugin\GlobalVariable
  *
@@ -13,16 +14,13 @@ use Drupal\mgv\Plugin\GlobalVariable;
  *   id = "site_mail",
  * );
  */
-class SiteMail extends GlobalVariable {
+class SiteMail extends SystemSiteBase {
 
   /**
    * {@inheritdoc}
    */
   public function getValue() {
-    // Site Information Page Global Variables.
-    //
-    // Print the Site Email.
-    return \Drupal::config('system.site')->get('mail');
+    return $this->config->get('mail');
   }
 
 }

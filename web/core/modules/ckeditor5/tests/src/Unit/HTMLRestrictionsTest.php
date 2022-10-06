@@ -302,6 +302,26 @@ class HTMLRestrictionsTest extends UnitTestCase {
       '<ol type="I A 1">',
       ['ol' => ['type' => ['I' => TRUE, 'A' => TRUE, 1 => TRUE]]],
     ];
+    yield 'tag with two attributes, spread across declarations' => [
+      '<a target> <a class>',
+      ['a' => ['target' => TRUE, 'class' => TRUE]],
+    ];
+    yield 'tag with conflicting attribute config, allow one attribute and forbid all attributes' => [
+      '<a target> <a>',
+      ['a' => ['target' => TRUE]],
+    ];
+    yield 'tag with conflicting attribute config, allow one attribute and allow all attributes' => [
+      '<a *> <a target>',
+      ['a' => TRUE],
+    ];
+    yield 'tag attribute configuration spread across declarations' => [
+      '<a target="_blank"> <a target="_self"> <a target="_*">',
+      ['a' => ['target' => ['_blank' => TRUE, '_self' => TRUE, '_*' => TRUE]]],
+    ];
+    yield 'tag attribute configuration spread across declarations, allow all attributes values' => [
+      '<a target> <a target="_blank"> <a target="_self"> <a target="_*">',
+      ['a' => ['target' => TRUE]],
+    ];
 
     // Multiple tag cases.
     yield 'two tags' => [
@@ -309,13 +329,27 @@ class HTMLRestrictionsTest extends UnitTestCase {
       ['a' => FALSE, 'p' => FALSE],
     ];
     yield 'two tags (reverse order)' => [
-      '<a> <p>',
-      ['a' => FALSE, 'p' => FALSE],
+      '<p> <a>',
+      ['p' => FALSE, 'a' => FALSE],
     ];
 
     // Wildcard tag, attribute and attribute value.
     yield '$text-container' => [
       '<$text-container class="text-align-left text-align-center text-align-right text-align-justify">',
+      [],
+      [
+        '$text-container' => [
+          'class' => [
+            'text-align-left' => TRUE,
+            'text-align-center' => TRUE,
+            'text-align-right' => TRUE,
+            'text-align-justify' => TRUE,
+          ],
+        ],
+      ],
+    ];
+    yield '$text-container, with attribute values spread across declarations' => [
+      '<$text-container class="text-align-left"> <$text-container class="text-align-center"> <$text-container class="text-align-right"> <$text-container class="text-align-justify">',
       [],
       [
         '$text-container' => [
@@ -963,6 +997,13 @@ class HTMLRestrictionsTest extends UnitTestCase {
       'intersection' => 'a',
       'union' => 'b',
     ];
+    yield 'attribute restrictions are the same: <ol type="1"> vs <ol type="1">' => [
+      'a' => new HTMLRestrictions(['ol' => ['type' => ['1' => TRUE]]]),
+      'b' => new HTMLRestrictions(['ol' => ['type' => ['1' => TRUE]]]),
+      'diff' => HTMLRestrictions::emptySet(),
+      'intersection' => 'a',
+      'union' => 'a',
+    ];
 
     // Complex cases.
     yield 'attribute restrictions are different: <a hreflang="en"> vs <strong>' => [
@@ -1078,6 +1119,20 @@ class HTMLRestrictionsTest extends UnitTestCase {
       'diff' => HTMLRestrictions::emptySet(),
       'intersection' => new HTMLRestrictions(['$text-container' => ['class' => TRUE], 'p' => ['class' => TRUE]]),
       'union' => 'b',
+    ];
+    yield 'wildcard + matching tag: wildcard resolves into matching tag, but matching tag already supports all attributes' => [
+      'a' => new HTMLRestrictions(['p' => TRUE]),
+      'b' => new HTMLRestrictions(['$text-container' => ['class' => ['foo' => TRUE, 'bar' => TRUE]]]),
+      'diff' => 'a',
+      'intersection' => HTMLRestrictions::emptySet(),
+      'union' => new HTMLRestrictions(['p' => TRUE, '$text-container' => ['class' => ['foo' => TRUE, 'bar' => TRUE]]]),
+    ];
+    yield 'wildcard + matching tag: wildcard resolves into matching tag, but matching tag already supports all attributes — vice versa' => [
+      'a' => new HTMLRestrictions(['$text-container' => ['class' => ['foo' => TRUE, 'bar' => TRUE]]]),
+      'b' => new HTMLRestrictions(['p' => TRUE]),
+      'diff' => 'a',
+      'intersection' => HTMLRestrictions::emptySet(),
+      'union' => new HTMLRestrictions(['p' => TRUE, '$text-container' => ['class' => ['foo' => TRUE, 'bar' => TRUE]]]),
     ];
 
     // Wildcard tag + non-matching tag cases.

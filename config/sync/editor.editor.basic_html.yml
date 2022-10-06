@@ -46,10 +46,6 @@ settings:
             - Blockquote
             - DrupalMediaLibrary
   plugins:
-    language:
-      language_list: un
-    stylescombo:
-      styles: ''
     codesnippet:
       highlight_style: monokai_sublime
       highlight_languages:

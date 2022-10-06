@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<files psalm-version="4.21.0@d8bec4c7aaee111a532daec32fb09de5687053d1">
+<files psalm-version="4.23.0@f1fe6ff483bf325c803df9f510d09a03fd796f88">
   <file src="src/CallbackStream.php">
     <ImplementedReturnTypeMismatch occurrences="1">
       <code>null|callable</code>
@@ -242,12 +242,51 @@
     </ParamNameMismatch>
   </file>
   <file src="src/ServerRequestFactory.php">
-    <MixedArgument occurrences="1">
+    <LessSpecificReturnStatement occurrences="1"/>
+    <MixedArgument occurrences="2">
       <code>$headers['cookie']</code>
+      <code>$host</code>
     </MixedArgument>
+    <MixedArgumentTypeCoercion occurrences="1">
+      <code>$headers</code>
+    </MixedArgumentTypeCoercion>
+    <MixedAssignment occurrences="3">
+      <code>$iisUrlRewritten</code>
+      <code>$requestUri</code>
+      <code>$unencodedUrl</code>
+    </MixedAssignment>
+    <MixedInferredReturnType occurrences="1">
+      <code>array{string, int|null}</code>
+    </MixedInferredReturnType>
+    <MixedReturnStatement occurrences="1">
+      <code>$defaults</code>
+    </MixedReturnStatement>
+    <MixedReturnTypeCoercion occurrences="1">
+      <code>self::marshalHostAndPortFromHeader($host)</code>
+    </MixedReturnTypeCoercion>
+    <MoreSpecificReturnType occurrences="1">
+      <code>ServerRequest</code>
+    </MoreSpecificReturnType>
     <RedundantConditionGivenDocblockType occurrences="1">
       <code>is_callable(self::$apacheRequestHeaders)</code>
     </RedundantConditionGivenDocblockType>
+  </file>
+  <file src="src/ServerRequestFilter/FilterUsingXForwardedHeaders.php">
+    <ImpureMethodCall occurrences="7">
+      <code>getHeaderLine</code>
+      <code>getServerParams</code>
+      <code>getUri</code>
+      <code>withHost</code>
+      <code>withPort</code>
+      <code>withScheme</code>
+      <code>withUri</code>
+    </ImpureMethodCall>
+    <LessSpecificReturnStatement occurrences="1">
+      <code>$proxyCIDRList</code>
+    </LessSpecificReturnStatement>
+    <MoreSpecificReturnType occurrences="1">
+      <code>list&lt;non-empty-string&gt;</code>
+    </MoreSpecificReturnType>
   </file>
   <file src="src/Stream.php">
     <InvalidArgument occurrences="1"/>
@@ -1125,54 +1164,10 @@
     </MissingReturnType>
   </file>
   <file src="test/UploadedFileTest.php">
-    <MissingParamType occurrences="6">
+    <MixedArgument occurrences="2">
       <code>$path</code>
-      <code>$status</code>
-      <code>$status</code>
-      <code>$status</code>
-      <code>$status</code>
-      <code>$streamOrFile</code>
-    </MissingParamType>
-    <MissingPropertyType occurrences="1">
-      <code>$tmpFile</code>
-    </MissingPropertyType>
-    <MissingReturnType occurrences="24">
-      <code>errorConstantsAndMessages</code>
-      <code>invalidErrorStatuses</code>
-      <code>invalidMovePaths</code>
-      <code>invalidStreams</code>
-      <code>nonOkErrorStatus</code>
-      <code>testCannotRetrieveStreamAfterMove</code>
-      <code>testConstructorDoesNotRaiseExceptionForInvalidStreamWhenErrorStatusPresent</code>
-      <code>testGetStreamRaisesExceptionWhenErrorStatusPresent</code>
-      <code>testGetStreamRaisesExceptionWithAppropriateMessageWhenUploadErrorDetected</code>
-      <code>testGetStreamReturnsOriginalStreamObject</code>
-      <code>testGetStreamReturnsStreamForFile</code>
-      <code>testGetStreamReturnsWrappedPhpStream</code>
-      <code>testMoveCannotBeCalledMoreThanOnce</code>
-      <code>testMoveRaisesExceptionForInvalidPath</code>
-      <code>testMoveToCreatesStreamIfOnlyAFilenameWasProvided</code>
-      <code>testMoveToRaisesExceptionWhenErrorStatusPresent</code>
-      <code>testMoveToRaisesExceptionWithAppropriateMessageWhenUploadErrorDetected</code>
-      <code>testMovesFileToDesignatedPath</code>
-      <code>testRaisesExceptionOnInvalidErrorStatus</code>
-      <code>testRaisesExceptionOnInvalidStreamOrFile</code>
-      <code>testValidClientFilename</code>
-      <code>testValidClientMediaType</code>
-      <code>testValidNullClientFilename</code>
-      <code>testValidSize</code>
-    </MissingReturnType>
-    <MixedArgument occurrences="6">
-      <code>$path</code>
-      <code>$status</code>
-      <code>$status</code>
-      <code>$status</code>
-      <code>$status</code>
       <code>$streamOrFile</code>
     </MixedArgument>
-    <UndefinedThisPropertyAssignment occurrences="1">
-      <code>$this-&gt;tmpfile</code>
-    </UndefinedThisPropertyAssignment>
   </file>
   <file src="test/UriTest.php">
     <InvalidScalarArgument occurrences="2">

@@ -20,6 +20,7 @@ use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Encoder\XmlEncoder;
 use Symfony\Component\Serializer\Exception\ExtraAttributesException;
 use Symfony\Component\Serializer\Exception\LogicException;
+use Symfony\Component\Serializer\Exception\MissingConstructorArgumentsException;
 use Symfony\Component\Serializer\Exception\NotNormalizableValueException;
 use Symfony\Component\Serializer\Exception\RuntimeException;
 use Symfony\Component\Serializer\Mapping\AttributeMetadataInterface;
@@ -195,7 +196,7 @@ abstract class AbstractObjectNormalizer extends AbstractNormalizer
 
             $attributeValue = $this->applyCallbacks($attributeValue, $object, $attribute, $format, $context);
 
-            if (null !== $attributeValue && !is_scalar($attributeValue)) {
+            if (null !== $attributeValue && !\is_scalar($attributeValue)) {
                 $stack[$attribute] = $attributeValue;
             }
 
@@ -370,7 +371,7 @@ abstract class AbstractObjectNormalizer extends AbstractNormalizer
             }
         }
 
-        if (!empty($extraAttributes)) {
+        if ($extraAttributes) {
             throw new ExtraAttributesException($extraAttributes);
         }
 
@@ -395,6 +396,8 @@ abstract class AbstractObjectNormalizer extends AbstractNormalizer
      * @return mixed
      *
      * @throws NotNormalizableValueException
+     * @throws ExtraAttributesException
+     * @throws MissingConstructorArgumentsException
      * @throws LogicException
      */
     private function validateAndDenormalize(string $currentClass, string $attribute, $data, ?string $format, array $context)
@@ -405,6 +408,8 @@ abstract class AbstractObjectNormalizer extends AbstractNormalizer
 
         $expectedTypes = [];
         $isUnionType = \count($types) > 1;
+        $extraAttributesException = null;
+        $missingConstructorArgumentException = null;
         foreach ($types as $type) {
             if (null === $data && $type->isNullable()) {
                 return null;
@@ -494,7 +499,31 @@ abstract class AbstractObjectNormalizer extends AbstractNormalizer
                 if (!$isUnionType) {
                     throw $e;
                 }
+            } catch (ExtraAttributesException $e) {
+                if (!$isUnionType) {
+                    throw $e;
+                }
+
+                if (!$extraAttributesException) {
+                    $extraAttributesException = $e;
+                }
+            } catch (MissingConstructorArgumentsException $e) {
+                if (!$isUnionType) {
+                    throw $e;
+                }
+
+                if (!$missingConstructorArgumentException) {
+                    $missingConstructorArgumentException = $e;
+                }
             }
+        }
+
+        if ($extraAttributesException) {
+            throw $extraAttributesException;
+        }
+
+        if ($missingConstructorArgumentException) {
+            throw $missingConstructorArgumentException;
         }
 
         if ($context[self::DISABLE_TYPE_ENFORCEMENT] ?? $this->defaultContext[self::DISABLE_TYPE_ENFORCEMENT] ?? false) {
@@ -618,7 +647,7 @@ abstract class AbstractObjectNormalizer extends AbstractNormalizer
      *
      * @internal
      */
-    protected function createChildContext(array $parentContext, $attribute/*, ?string $format */): array
+    protected function createChildContext(array $parentContext, $attribute/* , ?string $format */): array
     {
         if (\func_num_args() >= 3) {
             $format = func_get_arg(2);

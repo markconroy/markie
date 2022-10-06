@@ -2,10 +2,11 @@
 
 namespace Drupal\mgv\Plugin\GlobalVariable;
 
-use Drupal\mgv\Plugin\GlobalVariable;
-
 /**
  * Class SiteSlogan.
+ *
+ * Site Information Page Global Variables.
+ * Print the Site Slogan.
  *
  * @package Drupal\mgv\Plugin\GlobalVariable
  *
@@ -13,16 +14,13 @@ use Drupal\mgv\Plugin\GlobalVariable;
  *   id = "site_slogan",
  * );
  */
-class SiteSlogan extends GlobalVariable {
+class SiteSlogan extends SystemSiteBase {
 
   /**
    * {@inheritdoc}
    */
   public function getValue() {
-    // Site Information Page Global Variables.
-    //
-    // Print the Site Slogan.
-    return \Drupal::config('system.site')->get('slogan');
+    return $this->config->get('slogan');
   }
 
 }

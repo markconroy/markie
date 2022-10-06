@@ -2,11 +2,11 @@
 
 namespace Drupal\mgv;
 
-use Drupal\Component\Plugin\Factory\DefaultFactory;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Plugin\DefaultPluginManager;
+use Drupal\Core\Plugin\Factory\ContainerFactory;
 use Drupal\mgv\Plugin\GlobalVariableInterface;
 
 /**
@@ -45,7 +45,7 @@ class MgvPluginManager extends DefaultPluginManager implements MgvPluginManagerI
       'Drupal\mgv\Annotation\Mgv'
     );
     $this->setCacheBackend($cache_backend, 'mgv');
-    $this->factory = new DefaultFactory($this->getDiscovery());
+    $this->factory = new ContainerFactory($this->getDiscovery(), 'Drupal\mgv\Plugin\GlobalVariableInterface');
   }
 
   /**
@@ -54,19 +54,12 @@ class MgvPluginManager extends DefaultPluginManager implements MgvPluginManagerI
   public function getVariables() {
     if (empty($this->variables)) {
       $this->variables = [];
-      $all = $this->getDefinitions();
-      foreach ($all as $definition_info) {
-        /* @var \Drupal\mgv\Plugin\GlobalVariableInterface $variable */
-        $variable = $this->createInstance(
-          $definition_info['id'],
-          $definition_info
-        );
+      foreach ($this->getDefinitions() as $plugin_id => $definition) {
+        /** @var \Drupal\mgv\Plugin\GlobalVariableInterface $variable */
+        $variable = $this->createInstance($plugin_id, $definition);
         $this->variables = NestedArray::mergeDeep(
           $this->variables,
-          $this->getNamespacedValue(
-            $definition_info['id'],
-            $variable
-          )
+          $this->getNamespacedValue($plugin_id, $variable),
         );
       }
     }
@@ -92,14 +85,10 @@ class MgvPluginManager extends DefaultPluginManager implements MgvPluginManagerI
   public function createInstance($plugin_id, array $configuration = []) {
     if (!empty($configuration['variableDependencies'])) {
       foreach ($configuration['variableDependencies'] as $key => $plugin) {
-        $definition = $this->getDefinition($plugin);
-        /* @var \Drupal\mgv\Plugin\GlobalVariableInterface $instance */
-        $instance = $this->createInstance(
-          $definition['id'],
-          $definition
-        );
-        $configuration['variableDependencies'][$plugin] = $instance->getValue();
+        /** @var \Drupal\mgv\Plugin\GlobalVariableInterface $instance */
+        $instance = $this->createInstance($plugin);
         unset($configuration['variableDependencies'][$key]);
+        $configuration['variableDependencies'][$plugin] = $instance->getValue();
       }
     }
     return parent::createInstance($plugin_id, $configuration);
