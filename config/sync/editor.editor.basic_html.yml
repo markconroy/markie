@@ -1,82 +1,75 @@
-uuid: 62a0260d-4e5f-4d61-bd0a-7606184a4118
+uuid: 8f471ed8-dbc1-4055-8a52-456fc082d652
 langcode: en
 status: true
 dependencies:
   config:
     - filter.format.basic_html
   module:
-    - ckeditor
-_core:
-  default_config_hash: AqlPmO16LvJI4D0Ih6u4GFQIzqr5OnLgAUSjcUGWk2g
+    - ckeditor5
 format: basic_html
-editor: ckeditor
+editor: ckeditor5
 settings:
   toolbar:
-    rows:
-      -
-        -
-          name: Formatting
-          items:
-            - CodeSnippet
-            - Bold
-            - Italic
-            - Strike
-            - JustifyCenter
-        -
-          name: Linking
-          items:
-            - DrupalLink
-            - DrupalUnlink
-        -
-          name: Lists
-          items:
-            - BulletedList
-            - NumberedList
-        -
-          name: 'Block Formatting'
-          items:
-            - Format
-        -
-          name: Source
-          items:
-            - Source
-        -
-          name: Media
-          items:
-            - Blockquote
-            - DrupalMediaLibrary
+    items:
+      - bold
+      - italic
+      - strikethrough
+      - alignment
+      - '|'
+      - link
+      - '|'
+      - bulletedList
+      - numberedList
+      - '|'
+      - heading
+      - '|'
+      - sourceEditing
+      - '|'
+      - blockQuote
+      - drupalMedia
+      - '|'
+      - code
+      - codeBlock
   plugins:
-    codesnippet:
-      highlight_style: monokai_sublime
-      highlight_languages:
-        apache: apache
-        bash: bash
-        css: css
-        coffeescript: coffeescript
-        diff: diff
-        html: html
-        http: http
-        ini: ini
-        json: json
-        javascript: javascript
-        makefile: makefile
-        markdown: markdown
-        nginx: nginx
-        objectivec: objectivec
-        php: php
-        python: python
-        ruby: ruby
-        scss: scss
-        sql: sql
-        twig: twig
-        xhtml: xhtml
-        xml: xml
-        yml: yml
-        cs: 0
-        cpp: 0
-        java: 0
-        perl: 0
-        vbscript: 0
+    ckeditor5_heading:
+      enabled_headings:
+        - heading2
+        - heading3
+        - heading4
+        - heading5
+        - heading6
+    ckeditor5_sourceEditing:
+      allowed_tags:
+        - '<cite>'
+        - '<dl>'
+        - '<dt>'
+        - '<dd>'
+        - '<span>'
+        - '<code class>'
+        - '<blockcode type>'
+        - '<img src alt data-entity-type data-entity-uuid data-align data-caption width height>'
+        - '<pre class>'
+        - '<a hreflang>'
+        - '<blockquote cite>'
+        - '<ul type>'
+        - '<ol type>'
+        - '<h2 id>'
+        - '<h3 id>'
+        - '<h4 id>'
+        - '<h5 id>'
+        - '<h6 id>'
+        - '<drupal-media title>'
+    ckeditor5_list:
+      reversed: false
+      startIndex: true
+    ckeditor5_alignment:
+      enabled_alignments:
+        - left
+        - center
+        - right
+        - justify
+    media_media:
+      allow_view_mode_override: true
 image_upload:
   status: true
   scheme: public

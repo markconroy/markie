@@ -2,6 +2,8 @@ uuid: a3ae6503-8552-4d76-8bdb-49173775fbdc
 langcode: en
 status: true
 dependencies:
+  config:
+    - core.entity_view_mode.media.preview
   module:
     - editor
     - media
@@ -17,7 +19,7 @@ filters:
     status: true
     weight: -10
     settings:
-      allowed_html: '<a href hreflang> <em> <strong> <cite> <blockquote cite> <code class=""> <blockcode type> <ul type> <ol type start> <li> <dl> <dt> <dd> <h2 id> <h3 id> <h4 id> <h5 id> <h6 id> <p> <br> <span> <img src alt data-entity-type data-entity-uuid data-align data-caption width height> <s> <drupal-media data-entity-type data-entity-uuid data-view-mode data-align data-caption alt title> <pre class="">'
+      allowed_html: '<br> <p class="text-align-left text-align-center text-align-right text-align-justify"> <h2 id class="text-align-left text-align-center text-align-right text-align-justify"> <h3 id class="text-align-left text-align-center text-align-right text-align-justify"> <h4 id class="text-align-left text-align-center text-align-right text-align-justify"> <h5 id class="text-align-left text-align-center text-align-right text-align-justify"> <h6 id class="text-align-left text-align-center text-align-right text-align-justify"> <cite> <dl> <dt> <dd> <span> <code class> <blockcode type> <img src alt data-entity-type data-entity-uuid data-align data-caption width height> <pre class> <a hreflang href> <blockquote cite> <ul type> <ol type start> <drupal-media title data-entity-type data-entity-uuid alt data-view-mode data-caption data-align> <strong> <em> <s> <li>'
       filter_html_help: false
       filter_html_nofollow: false
   filter_align:
@@ -53,4 +55,5 @@ filters:
       default_view_mode: default
       allowed_view_modes:
         default: default
+        preview: preview
       allowed_media_types: {  }

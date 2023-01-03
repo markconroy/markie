@@ -1,86 +1,59 @@
-uuid: 9d0abeeb-67d8-4311-b576-3a4c1177a58a
+uuid: 23b60a57-d38b-4ed3-b824-e896ed033c90
 langcode: en
 status: true
 dependencies:
   config:
     - filter.format.full_html
   module:
-    - ckeditor
+    - ckeditor5
 format: full_html
-editor: ckeditor
+editor: ckeditor5
 settings:
   toolbar:
-    rows:
-      -
-        -
-          name: Formatting
-          items:
-            - CodeSnippet
-            - Bold
-            - Italic
-            - Strike
-            - JustifyCenter
-        -
-          name: Links
-          items:
-            - DrupalLink
-            - DrupalUnlink
-        -
-          name: Lists
-          items:
-            - BulletedList
-            - NumberedList
-        -
-          name: Format
-          items:
-            - Format
-        -
-          name: Media
-          items:
-            - Blockquote
-            - DrupalImage
-            - DrupalMediaLibrary
-        -
-          name: Tools
-          items:
-            - Source
+    items:
+      - bold
+      - italic
+      - strikethrough
+      - alignment
+      - '|'
+      - link
+      - '|'
+      - bulletedList
+      - numberedList
+      - '|'
+      - heading
+      - codeBlock
+      - '|'
+      - blockQuote
+      - drupalMedia
+      - '|'
+      - sourceEditing
   plugins:
-    codesnippet:
-      highlight_style: monokai_sublime
-      highlight_languages:
-        apache: apache
-        bash: bash
-        cs: cs
-        cpp: cpp
-        css: css
-        coffeescript: coffeescript
-        diff: diff
-        html: html
-        http: http
-        ini: ini
-        json: json
-        java: java
-        javascript: javascript
-        makefile: makefile
-        markdown: markdown
-        nginx: nginx
-        objectivec: objectivec
-        php: php
-        perl: perl
-        python: python
-        ruby: ruby
-        scss: scss
-        sql: sql
-        twig: twig
-        vbscript: vbscript
-        xhtml: xhtml
-        xml: xml
-        yml: yml
+    ckeditor5_heading:
+      enabled_headings:
+        - heading2
+        - heading3
+        - heading4
+        - heading5
+        - heading6
+    ckeditor5_sourceEditing:
+      allowed_tags: {  }
+    ckeditor5_list:
+      reversed: true
+      startIndex: true
+    ckeditor5_alignment:
+      enabled_alignments:
+        - left
+        - center
+        - right
+        - justify
+    media_media:
+      allow_view_mode_override: false
 image_upload:
   status: false
   scheme: public
   directory: inline-images
   max_size: ''
   max_dimensions:
-    width: null
-    height: null
+    width: 0
+    height: 0
