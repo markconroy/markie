@@ -34,7 +34,6 @@ packages:
     drupal/redirect: 1.8.0
     drupal/token: 1.11.0
     drupal/video_embed_field: 2.5.0
-    drupal/xmlsitemap: 1.4.0
     drush/drush: 10.6.1
     egulias/email-validator: 3.2.5
     enlightn/security-checker: v1.10.0
