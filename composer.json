@@ -43,7 +43,6 @@
       "drupal/pathauto": "^1.8",
       "drupal/redirect": "^1.6",
       "drupal/token": "^1.7",
-      "drupal/twig_tweak": "^2.6",
       "drupal/video_embed_field": "^2.0",
       "drush/drush": "~10.0",
       "joachim-n/composer-manifest": "^1.0",

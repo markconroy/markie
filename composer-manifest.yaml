@@ -38,7 +38,6 @@ packages:
     drupal/pathauto: 1.11.0
     drupal/redirect: 1.8.0
     drupal/token: 1.11.0
-    drupal/twig_tweak: 2.10.0
     drupal/video_embed_field: 2.5.0
     drupal/xmlsitemap: 1.4.0
     drush/drush: 10.6.1
