@@ -3,7 +3,7 @@
         'name' => 'markconroy/markie',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => '523d1d6615f79142dda0f7faf386668d6ce737c1',
+        'reference' => '687b251fecc55b5952a0a59324209092cb866b30',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -457,15 +457,6 @@
             'aliases' => array(),
             'dev_requirement' => false,
         ),
-        'drupal/menu_trail_by_path' => array(
-            'pretty_version' => '1.3.0',
-            'version' => '1.3.0.0',
-            'reference' => '8.x-1.3',
-            'type' => 'drupal-module',
-            'install_path' => __DIR__ . '/../../web/modules/contrib/menu_trail_by_path',
-            'aliases' => array(),
-            'dev_requirement' => false,
-        ),
         'drupal/metatag' => array(
             'pretty_version' => '1.22.0',
             'version' => '1.22.0.0',
@@ -667,7 +658,7 @@
         'markconroy/markie' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => '523d1d6615f79142dda0f7faf386668d6ce737c1',
+            'reference' => '687b251fecc55b5952a0a59324209092cb866b30',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
