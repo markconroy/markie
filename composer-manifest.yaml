@@ -47,16 +47,11 @@ packages:
     laminas/laminas-stdlib: 3.11.0
     league/container: 3.4.1
     masterminds/html5: 2.7.6
-    mglaman/phpstan-drupal: 0.12.15
-    nette/finder: v2.5.3
-    nette/utils: v3.2.8
     nikic/php-parser: v4.15.1
     pear/archive_tar: 1.4.14
     pear/console_getopt: v1.4.3
     pear/pear-core-minimal: v1.10.11
     pear/pear_exception: v1.0.2
-    phpstan/phpstan: 0.12.99
-    phpstan/phpstan-deprecation-rules: 0.12.6
     platformsh/config-reader: 2.4.0
     psr/cache: 1.0.1
     psr/container: 1.1.2
@@ -65,7 +60,6 @@ packages:
     psr/log: 1.1.4
     psy/psysh: v0.11.8
     ralouphie/getallheaders: 3.0.3
-    roave/security-advisories: 'dev-master:b0d3e99ce9c8ec237338a70277dd409ffcf6cedc'
     stack/builder: v1.0.6
     symfony-cmf/routing: 2.3.4
     symfony/console: v4.4.49

@@ -46,11 +46,6 @@
         "topfloor/composer-cleanup-vcs-dirs": "^1.0",
         "zaporylie/composer-drupal-optimizations": "^1.1"
     },
-    "require-dev": {
-        "mglaman/phpstan-drupal": "^0.12.5",
-        "phpstan/phpstan-deprecation-rules": "^0.12.5",
-        "roave/security-advisories": "dev-master"
-    },
     "conflict": {
         "drupal/drupal": "*"
     },
