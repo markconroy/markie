@@ -33,7 +33,6 @@
         "drupal/core-recommended": "^9",
         "drupal/crop": "^2.1",
         "drupal/ctools": "^3.4",
-        "drupal/disable_html5_validation": "^1.1",
         "drupal/entity": "^1.0.0",
         "drupal/image_widget_crop": "^2.3",
         "drupal/inline_entity_form": "^1.0",

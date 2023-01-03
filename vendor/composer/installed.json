@@ -2085,53 +2085,6 @@
             "install-path": "../../web/modules/contrib/ctools"
         },
         {
-            "name": "drupal/disable_html5_validation",
-            "version": "1.1.0",
-            "version_normalized": "1.1.0.0",
-            "source": {
-                "type": "git",
-                "url": "https://git.drupalcode.org/project/disable_html5_validation.git",
-                "reference": "8.x-1.1"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://ftp.drupal.org/files/projects/disable_html5_validation-8.x-1.1.zip",
-                "reference": "8.x-1.1",
-                "shasum": "684ff683233228d28f1a001a34503a7827f4f621"
-            },
-            "require": {
-                "drupal/core": "^8 || ^9"
-            },
-            "type": "drupal-module",
-            "extra": {
-                "drupal": {
-                    "version": "8.x-1.1",
-                    "datestamp": "1581522369",
-                    "security-coverage": {
-                        "status": "covered",
-                        "message": "Covered by Drupal's security advisory policy"
-                    }
-                }
-            },
-            "installation-source": "dist",
-            "notification-url": "https://packages.drupal.org/8/downloads",
-            "license": [
-                "GPL-2.0-or-later"
-            ],
-            "authors": [
-                {
-                    "name": "sch4lly",
-                    "homepage": "https://www.drupal.org/user/856550"
-                }
-            ],
-            "description": "Disables HTML5 validation in all forms",
-            "homepage": "https://www.drupal.org/project/disable_html5_validation",
-            "support": {
-                "source": "https://git.drupalcode.org/project/disable_html5_validation"
-            },
-            "install-path": "../../web/modules/contrib/disable_html5_validation"
-        },
-        {
             "name": "drupal/entity",
             "version": "1.4.0",
             "version_normalized": "1.4.0.0",

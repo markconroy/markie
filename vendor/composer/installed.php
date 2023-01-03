@@ -3,7 +3,7 @@
         'name' => 'markconroy/markie',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => '13a64db7127739a9180a8eaf2b4204725b0ccfb0',
+        'reference' => '68a22ab2ce7a7a7f4622497fae9f89ebd3d7be21',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -403,15 +403,6 @@
             'aliases' => array(),
             'dev_requirement' => false,
         ),
-        'drupal/disable_html5_validation' => array(
-            'pretty_version' => '1.1.0',
-            'version' => '1.1.0.0',
-            'reference' => '8.x-1.1',
-            'type' => 'drupal-module',
-            'install_path' => __DIR__ . '/../../web/modules/contrib/disable_html5_validation',
-            'aliases' => array(),
-            'dev_requirement' => false,
-        ),
         'drupal/entity' => array(
             'pretty_version' => '1.4.0',
             'version' => '1.4.0.0',
@@ -631,7 +622,7 @@
         'markconroy/markie' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => '13a64db7127739a9180a8eaf2b4204725b0ccfb0',
+            'reference' => '68a22ab2ce7a7a7f4622497fae9f89ebd3d7be21',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
