@@ -72,8 +72,6 @@ module:
   views: 10
   standard: 1000
 theme:
-  stable: 0
-  classy: 0
   claro: 0
   olivero: 0
 profile: standard
