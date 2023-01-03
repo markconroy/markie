@@ -19,7 +19,6 @@ packages:
     doctrine/reflection: 1.2.3
     drupal-composer/drupal-security-advisories: '8.x-dev:24fe3e68a77ef019b4cb789c6b58c0abd9f831b5'
     drupal/admin_toolbar: 3.3.0
-    drupal/components: 2.4.0
     drupal/core: 9.5.0
     drupal/core-composer-scaffold: 9.5.0
     drupal/core-project-message: 9.4.7

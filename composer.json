@@ -28,8 +28,8 @@
         "cweagans/composer-patches": "^1.6",
         "drupal-composer/drupal-security-advisories": "8.x-dev",
         "drupal/admin_toolbar": "^3.0",
-        "drupal/components": "^2.0",
         "drupal/core-composer-scaffold": "^9",
+        "drupal/core-project-message": "^9",
         "drupal/core-recommended": "^9",
         "drupal/crop": "^2.1",
         "drupal/ctools": "^3.4",
@@ -45,7 +45,6 @@
         "platformsh/config-reader": "^2.3",
         "topfloor/composer-cleanup-vcs-dirs": "^1.0",
         "zaporylie/composer-drupal-optimizations": "^1.1",
-        "drupal/core-project-message": "^9",
         "drupal/mgv": "^2.2"
     },
     "require-dev": {
