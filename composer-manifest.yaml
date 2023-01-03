@@ -18,14 +18,9 @@ packages:
     dflydev/dot-access-data: v1.1.0
     dflydev/placeholder-resolver: v1.0.3
     doctrine/annotations: 1.13.3
-    doctrine/cache: 1.13.0
     doctrine/collections: 1.8.0
-    doctrine/common: 2.13.3
     doctrine/deprecations: v1.0.0
-    doctrine/event-manager: 1.2.0
-    doctrine/inflector: 1.4.4
     doctrine/lexer: 1.2.3
-    doctrine/persistence: 1.3.8
     doctrine/reflection: 1.2.3
     drupal-composer/drupal-security-advisories: '8.x-dev:24fe3e68a77ef019b4cb789c6b58c0abd9f831b5'
     drupal/admin_toolbar: 3.3.0
@@ -40,7 +35,6 @@ packages:
     drupal/core-recommended: 9.5.0
     drupal/crop: 2.3.0
     drupal/ctools: 3.13.0
-    drupal/devel: 4.2.1
     drupal/disable_html5_validation: 1.1.0
     drupal/entity: 1.4.0
     drupal/image_widget_crop: 2.4.0
