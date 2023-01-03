@@ -28,7 +28,6 @@
       "drupal-composer/drupal-security-advisories": "8.x-dev",
       "drupal/admin_toolbar": "^3.0",
       "drupal/components": "^2.0",
-      "drupal/console": "^1.0.1",
       "drupal/core-composer-scaffold": "^9",
       "drupal/core-recommended": "^9",
       "drupal/crop": "^2.1",

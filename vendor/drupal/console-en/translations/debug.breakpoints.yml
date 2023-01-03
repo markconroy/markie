@@ -1,9 +1,0 @@
-description: 'Displays breakpoints available in application'
-options:
-  group-name: 'Enter Breakpoint Group Name'
-messages:
-  name: 'Extensions with breakpoints'
-examples:
-    - description: 'Displays the breakpoints available on the site'
-      execution: |
-        drupal debug:breakpoints
