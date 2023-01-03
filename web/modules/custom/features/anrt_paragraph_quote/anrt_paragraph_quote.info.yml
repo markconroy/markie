@@ -1,8 +1,0 @@
-name: 'Paragraph: Quote'
-description: 'A feature to create a Quote paragraph bundle.'
-type: module
-core: 8.x
-dependencies:
-  - field
-  - paragraphs
-  - text

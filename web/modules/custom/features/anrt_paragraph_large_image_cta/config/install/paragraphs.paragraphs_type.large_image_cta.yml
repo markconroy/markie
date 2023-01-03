@@ -1,6 +1,0 @@
-langcode: en
-status: true
-dependencies: {  }
-id: large_image_cta
-label: 'Large Image CTA'
-behavior_plugins: {  }

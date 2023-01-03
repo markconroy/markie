@@ -1,6 +1,0 @@
-langcode: en
-status: true
-dependencies: {  }
-id: tile
-label: Tile
-behavior_plugins: {  }

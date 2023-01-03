@@ -1,8 +1,0 @@
-name: 'Image Styles'
-description: 'A feature to export default image styles, based on the Image Crop feature dimensions.'
-type: module
-core: 8.x
-dependencies:
-  - crop
-  - image
-  - responsive_image
