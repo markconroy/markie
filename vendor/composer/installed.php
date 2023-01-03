@@ -3,7 +3,7 @@
         'name' => 'markconroy/markie',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => 'c4cbf57c7734fc01957a014511b9626bd2c37d70',
+        'reference' => '0cb1d08f30e8cb0381caa353a6dfcd517c863f4f',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -421,15 +421,6 @@
             'aliases' => array(),
             'dev_requirement' => false,
         ),
-        'drupal/mgv' => array(
-            'pretty_version' => '2.2.0',
-            'version' => '2.2.0.0',
-            'reference' => '2.2.0',
-            'type' => 'drupal-module',
-            'install_path' => __DIR__ . '/../../web/modules/contrib/mgv',
-            'aliases' => array(),
-            'dev_requirement' => false,
-        ),
         'drupal/pathauto' => array(
             'pretty_version' => '1.11.0',
             'version' => '1.11.0.0',
@@ -595,7 +586,7 @@
         'markconroy/markie' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => 'c4cbf57c7734fc01957a014511b9626bd2c37d70',
+            'reference' => '0cb1d08f30e8cb0381caa353a6dfcd517c863f4f',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),

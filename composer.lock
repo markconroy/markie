@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4e9c441b368cfa52386ace68579906d8",
+    "content-hash": "0df7195ffd525d2660b70f89ed33e3fb",
     "packages": [
         {
             "name": "asm89/stack-cors",
@@ -2211,54 +2211,6 @@
                 "source": "https://git.drupalcode.org/project/metatag",
                 "issues": "https://www.drupal.org/project/issues/metatag",
                 "docs": "https://www.drupal.org/docs/8/modules/metatag"
-            }
-        },
-        {
-            "name": "drupal/mgv",
-            "version": "2.2.0",
-            "source": {
-                "type": "git",
-                "url": "https://git.drupalcode.org/project/mgv.git",
-                "reference": "2.2.0"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://ftp.drupal.org/files/projects/mgv-2.2.0.zip",
-                "reference": "2.2.0",
-                "shasum": "818ef2ceff8013fdf8726297ba7e83d4762ca14b"
-            },
-            "require": {
-                "drupal/core": "^9 || ^10"
-            },
-            "type": "drupal-module",
-            "extra": {
-                "drupal": {
-                    "version": "2.2.0",
-                    "datestamp": "1660017357",
-                    "security-coverage": {
-                        "status": "covered",
-                        "message": "Covered by Drupal's security advisory policy"
-                    }
-                }
-            },
-            "notification-url": "https://packages.drupal.org/8/downloads",
-            "license": [
-                "GPL-2.0-or-later"
-            ],
-            "authors": [
-                {
-                    "name": "markconroy",
-                    "homepage": "https://www.drupal.org/user/336910"
-                },
-                {
-                    "name": "voleger",
-                    "homepage": "https://www.drupal.org/user/3260314"
-                }
-            ],
-            "description": "Some extra global variables to make your life a little easier.",
-            "homepage": "https://www.drupal.org/project/mgv",
-            "support": {
-                "source": "https://git.drupalcode.org/project/mgv"
             }
         },
         {

@@ -1,4 +1,0 @@
-services:
-  plugin.manager.mgv:
-    class: Drupal\mgv\MgvPluginManager
-    parent: default_plugin_manager

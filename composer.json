@@ -44,8 +44,7 @@
         "joachim-n/composer-manifest": "^1.0",
         "platformsh/config-reader": "^2.3",
         "topfloor/composer-cleanup-vcs-dirs": "^1.0",
-        "zaporylie/composer-drupal-optimizations": "^1.1",
-        "drupal/mgv": "^2.2"
+        "zaporylie/composer-drupal-optimizations": "^1.1"
     },
     "require-dev": {
         "mglaman/phpstan-drupal": "^0.12.5",
