@@ -162,7 +162,6 @@ class ComposerStaticInit881440a26ef8904afe463f7ceb2efdf3
             'Consolidation\\AnnotatedCommand\\' => 31,
             'Composer\\Semver\\' => 16,
             'Composer\\Installers\\' => 20,
-            'ComposerManifest\\' => 17,
         ),
         'A' => 
         array (
@@ -491,10 +490,6 @@ class ComposerStaticInit881440a26ef8904afe463f7ceb2efdf3
         'Composer\\Installers\\' => 
         array (
             0 => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers',
-        ),
-        'ComposerManifest\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/joachim-n/composer-manifest',
         ),
         'Asm89\\Stack\\' => 
         array (

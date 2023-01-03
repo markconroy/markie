@@ -3,7 +3,7 @@
         'name' => 'markconroy/markie',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => 'e4f754999f661db2ef3674fce6011a784da7df7c',
+        'reference' => 'aed66293712d03d53ef44e710005eda0fa12c4af',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -529,15 +529,6 @@
             'aliases' => array(),
             'dev_requirement' => false,
         ),
-        'joachim-n/composer-manifest' => array(
-            'pretty_version' => '1.1.5',
-            'version' => '1.1.5.0',
-            'reference' => '95da909b377c69087c63fb2a17ef7a285f6f39b2',
-            'type' => 'composer-plugin',
-            'install_path' => __DIR__ . '/../joachim-n/composer-manifest',
-            'aliases' => array(),
-            'dev_requirement' => false,
-        ),
         'laminas/laminas-diactoros' => array(
             'pretty_version' => '2.14.0',
             'version' => '2.14.0.0',
@@ -586,7 +577,7 @@
         'markconroy/markie' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => 'e4f754999f661db2ef3674fce6011a784da7df7c',
+            'reference' => 'aed66293712d03d53ef44e710005eda0fa12c4af',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
