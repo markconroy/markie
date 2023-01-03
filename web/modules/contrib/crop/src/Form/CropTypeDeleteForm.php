@@ -67,6 +67,7 @@ class CropTypeDeleteForm extends EntityConfirmFormBase {
   public function buildForm(array $form, FormStateInterface $form_state) {
     $count = $this->entityTypeManager->getStorage('crop')->getQuery()
       ->condition('type', $this->entity->id())
+      ->accessCheck(TRUE)
       ->count()
       ->execute();
     if ($count) {

@@ -158,6 +158,109 @@ display:
         - 'user.node_grants:view'
         - user.permissions
       tags: {  }
+  block_filter_auto:
+    display_plugin: block
+    id: block_filter_auto
+    display_title: 'Taxonomy autocomplete filter'
+    position: 2
+    display_options:
+      display_extenders: {  }
+      display_description: ''
+      title: 'Taxonomy filter'
+      defaults:
+        title: false
+        filters: false
+        filter_groups: false
+      filters:
+        status:
+          value: true
+          table: node_field_data
+          field: status
+          plugin_id: boolean
+          entity_type: node
+          entity_field: status
+          id: status
+          expose:
+            operator: ''
+          group: 1
+        type:
+          id: type
+          table: node_field_data
+          field: type
+          value:
+            ctools_views: ctools_views
+          entity_type: node
+          entity_field: type
+          plugin_id: bundle
+          group: 1
+        field_ctools_views_tags_target_id:
+          id: field_ctools_views_tags_target_id
+          table: node__field_ctools_views_tags
+          field: field_ctools_views_tags_target_id
+          relationship: none
+          group_type: group
+          admin_label: ''
+          operator: or
+          value: {  }
+          group: 1
+          exposed: true
+          expose:
+            operator_id: field_ctools_views_tags_target_id_op
+            label: 'Tags (field_ctools_views_tags)'
+            description: ''
+            use_operator: false
+            operator: field_ctools_views_tags_target_id_op
+            identifier: field_ctools_views_tags_target_id
+            required: false
+            remember: false
+            multiple: false
+            remember_roles:
+              authenticated: authenticated
+              anonymous: '0'
+              administrator1: '0'
+              administrator: '0'
+            reduce: false
+          is_grouped: false
+          group_info:
+            label: ''
+            description: ''
+            identifier: ''
+            optional: true
+            widget: select
+            multiple: false
+            remember: false
+            default_group: All
+            default_group_multiple: {  }
+            group_items: {  }
+          reduce_duplicates: false
+          type: textfield
+          limit: true
+          vid: tags
+          hierarchy: false
+          error_message: true
+          plugin_id: taxonomy_index_tid
+      filter_groups:
+        operator: AND
+        groups:
+          1: AND
+      allow:
+        configure_filters: configure_filters
+        items_per_page: false
+        offset: '0'
+        pager: '0'
+        hide_fields: '0'
+        sort_fields: '0'
+        disable_filters: '0'
+    cache_metadata:
+      max-age: 0
+      contexts:
+        - 'languages:language_content'
+        - 'languages:language_interface'
+        - url
+        - user
+        - 'user.node_grants:view'
+        - user.permissions
+      tags: {  }
   block_filter_date:
     display_plugin: block
     id: block_filter_date
@@ -231,11 +334,50 @@ display:
             default_group_multiple: {  }
             group_items: {  }
           plugin_id: datetime
+        field_ctools_views_date_value_greater:
+          id: field_ctools_views_date_value_greater
+          table: node__field_ctools_views_date
+          field: field_ctools_views_date_value
+          relationship: none
+          group_type: group
+          admin_label: ''
+          operator: '>'
+          group: 1
+          exposed: true
+          expose:
+            operator_id: field_ctools_views_date_value_greater_op
+            label: 'CTools Views Date (field_ctools_views_date)'
+            description: ''
+            use_operator: false
+            operator: field_ctools_views_date_value_greater_op
+            identifier: field_ctools_views_date_value_greater
+            required: false
+            remember: false
+            multiple: false
+            remember_roles:
+              authenticated: authenticated
+              anonymous: '0'
+              administrator1: '0'
+              administrator: '0'
+          is_grouped: false
+          group_info:
+            label: ''
+            description: ''
+            identifier: ''
+            optional: true
+            widget: select
+            multiple: false
+            remember: false
+            default_group: All
+            default_group_multiple: {  }
+            group_items: {  }
+          plugin_id: datetime
       filter_groups:
         operator: AND
         groups:
           1: AND
       allow:
+        configure_filters: configure_filters
         items_per_page: false
         offset: '0'
         pager: '0'
@@ -248,6 +390,125 @@ display:
         - 'languages:language_content'
         - 'languages:language_interface'
         - url
+        - 'user.node_grants:view'
+        - user.permissions
+      tags: {  }
+  block_filter_tax_grouped:
+    display_plugin: block
+    id: block_filter_tax_grouped
+    display_title: 'Taxonomy filter (grouped)'
+    position: 2
+    display_options:
+      display_extenders: {  }
+      display_description: ''
+      title: 'Taxonomy filter (grouped)'
+      defaults:
+        title: false
+        filters: false
+        filter_groups: false
+      filters:
+        status:
+          value: '1'
+          table: node_field_data
+          field: status
+          plugin_id: boolean
+          entity_type: node
+          entity_field: status
+          id: status
+          expose:
+            operator: ''
+          group: 1
+        type:
+          id: type
+          table: node_field_data
+          field: type
+          value:
+            ctools_views: ctools_views
+          entity_type: node
+          entity_field: type
+          plugin_id: bundle
+          group: 1
+        field_ctools_views_tags_target_id:
+          id: field_ctools_views_tags_target_id
+          table: node__field_ctools_views_tags
+          field: field_ctools_views_tags_target_id
+          relationship: none
+          group_type: group
+          admin_label: ''
+          operator: or
+          value: {  }
+          group: 1
+          exposed: true
+          expose:
+            operator_id: field_ctools_views_tags_target_id_op
+            label: 'Tags (field_ctools_views_tags)'
+            description: ''
+            use_operator: false
+            operator: field_ctools_views_tags_target_id_op
+            identifier: field_ctools_views_tags_target_id
+            required: false
+            remember: false
+            multiple: false
+            remember_roles:
+              authenticated: authenticated
+              anonymous: '0'
+              administrator1: '0'
+              administrator: '0'
+            reduce: false
+          is_grouped: true
+          group_info:
+            label: 'Tags (field_ctools_views_tags)'
+            description: ''
+            identifier: field_ctools_views_tags_target_id
+            optional: true
+            widget: select
+            multiple: false
+            remember: false
+            default_group: All
+            default_group_multiple: {  }
+            group_items:
+              1:
+                title: 'Tag 2 or 3'
+                operator: or
+                value:
+                  2: '2'
+                  3: '3'
+              2:
+                title: 'Not tag 3'
+                operator: not
+                value:
+                  3: '3'
+              3:
+                title: 'Tag 1'
+                operator: or
+                value:
+                  1: '1'
+          reduce_duplicates: false
+          type: select
+          limit: true
+          vid: tags
+          hierarchy: false
+          error_message: true
+          plugin_id: taxonomy_index_tid
+      filter_groups:
+        operator: AND
+        groups:
+          1: AND
+      allow:
+        configure_filters: configure_filters
+        items_per_page: false
+        offset: '0'
+        pager: '0'
+        hide_fields: '0'
+        sort_fields: '0'
+        disable_filters: '0'
+    cache_metadata:
+      max-age: 0
+      contexts:
+        - 'languages:language_content'
+        - 'languages:language_interface'
+        - url
+        - user
         - 'user.node_grants:view'
         - user.permissions
       tags: {  }
@@ -331,6 +592,7 @@ display:
         groups:
           1: AND
       allow:
+        configure_filters: configure_filters
         items_per_page: false
         offset: '0'
         pager: '0'
@@ -432,6 +694,7 @@ display:
         groups:
           1: AND
       allow:
+        configure_filters: configure_filters
         items_per_page: false
         offset: '0'
         pager: '0'
@@ -497,7 +760,7 @@ display:
             operator_id: field_ctools_views_text_value_op
             label: 'Text (field_ctools_views_text)'
             description: ''
-            use_operator: false
+            use_operator: true
             operator: field_ctools_views_text_value_op
             identifier: field_ctools_views_text_value
             required: false
@@ -526,6 +789,115 @@ display:
         groups:
           1: AND
       allow:
+        configure_filters: configure_filters
+        items_per_page: false
+        offset: '0'
+        pager: '0'
+        hide_fields: '0'
+        sort_fields: '0'
+        disable_filters: '0'
+    cache_metadata:
+      max-age: 0
+      contexts:
+        - 'languages:language_content'
+        - 'languages:language_interface'
+        - url
+        - 'user.node_grants:view'
+        - user.permissions
+      tags: {  }
+  block_filter_text_grouped:
+    display_plugin: block
+    id: block_filter_text_grouped
+    display_title: 'Textfield filter (grouped)'
+    position: 1
+    display_options:
+      display_extenders: {  }
+      display_description: ''
+      title: 'Textfield filter (grouped)'
+      defaults:
+        title: false
+        filters: false
+        filter_groups: false
+      filters:
+        status:
+          value: '1'
+          table: node_field_data
+          field: status
+          plugin_id: boolean
+          entity_type: node
+          entity_field: status
+          id: status
+          expose:
+            operator: ''
+          group: 1
+        type:
+          id: type
+          table: node_field_data
+          field: type
+          value:
+            ctools_views: ctools_views
+          entity_type: node
+          entity_field: type
+          plugin_id: bundle
+        title:
+          id: title
+          table: node_field_data
+          field: title
+          relationship: none
+          group_type: group
+          admin_label: ''
+          entity_type: node
+          entity_field: title
+          operator: '='
+          value: ''
+          group: 1
+          exposed: true
+          expose:
+            operator_id: title_op
+            label: Title
+            description: ''
+            use_operator: false
+            operator: title_op
+            identifier: title
+            required: false
+            remember: false
+            multiple: false
+            remember_roles:
+              authenticated: authenticated
+              anonymous: '0'
+              administrator1: '0'
+              administrator: '0'
+          is_grouped: true
+          group_info:
+            label: Title
+            description: ''
+            identifier: title
+            optional: true
+            widget: select
+            multiple: false
+            remember: false
+            default_group: All
+            default_group_multiple: {  }
+            group_items:
+              1:
+                title: 'Contains "entity 2"'
+                operator: contains
+                value: 'entity 2'
+              2:
+                title: 'Does not contain "entity 2"'
+                operator: not
+                value: 'entity 3'
+              3:
+                title: 'Equals "Test entity 1"'
+                operator: '='
+                value: 'Test entity 1'
+          plugin_id: string
+      filter_groups:
+        operator: AND
+        groups:
+          1: AND
+      allow:
+        configure_filters: configure_filters
         items_per_page: false
         offset: '0'
         pager: '0'

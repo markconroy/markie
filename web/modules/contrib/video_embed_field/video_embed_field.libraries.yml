@@ -4,6 +4,7 @@ colorbox:
   dependencies:
     - system/drupal.system
     - colorbox/colorbox
+    - core/once
 
 lazy-load:
   js:
@@ -11,6 +12,7 @@ lazy-load:
   dependencies:
     - system/drupal.system
     - video_embed_field/responsive-video
+    - core/once
 
 responsive-video:
   css:

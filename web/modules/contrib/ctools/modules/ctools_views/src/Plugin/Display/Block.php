@@ -2,9 +2,14 @@
 
 namespace Drupal\ctools_views\Plugin\Display;
 
+use Drupal\Component\Utility\Html;
+use Drupal\Core\Entity\Element\EntityAutocomplete;
+use Drupal\Core\Form\FormState;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Render\Element;
 use Drupal\views\Plugin\Block\ViewsBlock;
 use Drupal\views\Plugin\views\display\Block as CoreBlock;
+use Drupal\views\Plugin\views\HandlerBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -45,6 +50,15 @@ class Block extends CoreBlock {
   /**
    * {@inheritdoc}
    */
+  public function blockSettings(array $settings) {
+    $settings = parent::blockSettings($settings);
+    $settings['exposed'] = [];
+    return $settings;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function optionsSummary(&$categories, &$options) {
     parent::optionsSummary($categories, $options);
     $filtered_allow = array_filter($this->getOption('allow'));
@@ -54,6 +68,7 @@ class Block extends CoreBlock {
       'pager' => $this->t('Pager type'),
       'hide_fields' => $this->t('Hide fields'),
       'sort_fields' => $this->t('Reorder fields'),
+      'configure_filters' => $this->t('Configure filters'),
       'disable_filters' => $this->t('Disable filters'),
       'configure_sorts' => $this->t('Configure sorts'),
     ];
@@ -76,6 +91,7 @@ class Block extends CoreBlock {
     $form['allow']['#options']['pager'] = $this->t('Pager type');
     $form['allow']['#options']['hide_fields'] = $this->t('Hide fields');
     $form['allow']['#options']['sort_fields'] = $this->t('Reorder fields');
+    $form['allow']['#options']['configure_filters'] = $this->t('Configure filters');
     $form['allow']['#options']['disable_filters'] = $this->t('Disable filters');
     $form['allow']['#options']['configure_sorts'] = $this->t('Configure sorts');
 
@@ -103,6 +119,7 @@ class Block extends CoreBlock {
     if (!empty($allow_settings['items_per_page'])) {
       // Items per page.
       $form['override']['items_per_page']['#type'] = 'number';
+      $form['override']['items_per_page']['#min'] = 0;
       unset($form['override']['items_per_page']['#options']);
     }
 
@@ -211,32 +228,146 @@ class Block extends CoreBlock {
       }
     }
 
-    // Provide "Configure filters" / "Disable filters" block settings form.
-    if (!empty($allow_settings['disable_filters'])) {
-      $items = [];
-      foreach ((array) $this->getOption('filters') as $filter_name => $item) {
-        $item['value'] = $block_configuration["filter"][$filter_name]['value'] ?? '';
-        $items[$filter_name] = $item;
+    // Provide "Configure filters" form elements.
+    if (!empty($allow_settings['configure_filters'])) {
+      $view_exposed_input = $block_configuration['exposed'];
+      foreach ($block_configuration['exposed'] as $inner_input) {
+        $view_exposed_input += $inner_input;
       }
-      $this->setOption('filters', $items);
-      $filters = $this->getHandlers('filter');
+      $this->view->setExposedInput($view_exposed_input);
+      $exposed_form_state = new FormState();
+      $exposed_form_state->setValidationEnforced();
+      $exposed_form_state->set('view', $this->view);
+      $exposed_form_state->set('display', $this->view->current_display);
 
+      $exposed_form_state->setUserInput($this->view->getExposedInput());
+
+      // Let form plugins know this is for exposed widgets.
+      $exposed_form_state->set('exposed', TRUE);
+      $exposed_form = [];
+      $exposed_form['#info'] = [];
+
+      // Initialize filter and sort handlers so that the exposed form alter
+      // method works as expected.
+      $this->view->filter = $this->getHandlers('filter');
+      $this->view->sort = $this->getHandlers('sort');
+
+      $form['exposed'] = [
+        '#tree' => TRUE,
+        '#title' => $this->t('Exposed filter values'),
+        '#description' => $this->t('If a value is set for an exposed filter, it will be removed from the block display.'),
+        '#type' => 'details',
+        '#open' => TRUE,
+      ];
+
+      // Go through each handler and let it generate its exposed widget.
+      /** @var \Drupal\views\Plugin\views\ViewsHandlerInterface $handler */
+      foreach ($this->view->getDisplay()->getHandlers('filter') as $id => $handler) {
+        // If the current handler is exposed...
+        if ($handler->canExpose() && $handler->isExposed()) {
+          $filter_key = "filter-$id";
+          // Create a panel for the exposed handler.
+          $form['exposed'][$filter_key] = [
+            '#type' => 'item',
+            '#id' => Html::getUniqueId('views-exposed-pane'),
+          ];
+
+          $info = $handler->exposedInfo();
+
+          // @todo This can result in double titles for group filters.
+          if (!empty($info['label'])) {
+            $form['exposed'][$filter_key]['#title'] = $info['label'];
+          }
+
+          // If the current filter has a value saved in block configuration...
+          if (isset($block_configuration['exposed'][$filter_key])) {
+            $identifier = $handler->options['expose']['identifier'];
+            $this->mapConfigToHandler($handler, $block_configuration['exposed'][$filter_key]);
+          }
+
+          // Grouped exposed filters have their own forms. Instead of rendering
+          // the standard exposed form, a new Select or Radio form field is
+          // rendered with the available groups. When a user chooses an option
+          // the selected value is split into the operator and value that the
+          // item represents.
+          if ($handler->isAGroup()) {
+            $handler->groupForm($form['exposed'][$filter_key], $exposed_form_state);
+            $id = $handler->options['group_info']['identifier'];
+          }
+          else {
+            $handler->buildExposedForm($form['exposed'][$filter_key], $exposed_form_state);
+
+            $form_field_present = isset($form['exposed'][$filter_key][$id]);
+            $block_config_present = isset($block_configuration['exposed'][$filter_key]);
+
+            $form_field_type = $form_field_present ? $form['exposed'][$filter_key][$id]['#type'] : FALSE;
+            $filter_plugin_id = $block_config_present ? $block_configuration['exposed'][$filter_key]['plugin_id'] : FALSE;
+            if ($form_field_present && $block_config_present) {
+
+              if ($form_field_type == 'select') {
+                // Single-value select elements get their default value set to
+                // 'All' in buildExposedForm(), when that option is added, so set
+                // thir defaults manually.
+                $form['exposed'][$filter_key][$id]['#default_value'] = $block_configuration['exposed'][$filter_key]['value'];
+              }
+
+              else if ($form_field_type =='entity_autocomplete' && $filter_plugin_id == 'taxonomy_index_tid') {
+                // Entity reference autocomplete fields need their values
+                // converted back to a string for the textfield input.
+                $terms = \Drupal::entityTypeManager()->getStorage('taxonomy_term')->loadMultiple($block_configuration['exposed'][$filter_key]['value']);
+                $form['exposed'][$filter_key][$id]['#default_value'] = EntityAutocomplete::getEntityLabels($terms);
+              }
+            }
+          }
+
+          $form['exposed'][$filter_key]['exposed'] = [
+            '#type' => 'checkbox',
+            '#title' => $this->t('Expose filter value to user'),
+            '#description' => $this->t('Expose this filter value to visitors? If so, the value set here will be the default.'),
+            '#default_value' => $block_configuration['exposed'][$filter_key]['exposed'] ?? FALSE,
+          ];
+
+          $handler_use_operator = !empty($handler->options['expose']['use_operator']);
+
+          // If ''use_operator' is tru on the handler, let the admin decide to
+          // expose it to the user.
+          if ($handler_use_operator) {
+            $form['exposed'][$filter_key]['use_operator'] = [
+              '#type' => 'checkbox',
+              '#title' => $this->t('Expose filter operator to user'),
+              '#description' => $this->t("Expose this filter's operator to visitors? If so, the operator set here will be the default."),
+              '#default_value' => $block_configuration['exposed'][$filter_key]['expose']['use_operator'] ?? $handler_use_operator,
+              '#states' => [
+                // Hide the operator form element until the value is exposed.
+                'invisible' => [
+                  ':input[name="settings[exposed][' . $filter_key . '][exposed]"]' => ['checked' => FALSE],
+                ],
+              ],
+            ];
+          }
+
+          if ($info) {
+            $exposed_form['#info'][$filter_key] = $info;
+          }
+        }
+      }
+
+      // If there are no exposed filters, then we don't need the parent element.
+      if (!count(Element::children($form['exposed']))) {
+        unset($form['exposed']);
+      }
+    }
+
+    if (!empty($allow_settings['disable_filters'])) {
+      $filters = $this->getHandlers('filter');
       // Add a settings form for each exposed filter to configure or hide it.
       foreach ($filters as $filter_name => $plugin) {
         if ($plugin->isExposed() && $exposed_info = $plugin->exposedInfo()) {
-          $form['override']['filters'][$filter_name] = [
-            '#type' => 'details',
-            '#title' => $exposed_info['label'],
-          ];
-          $form['override']['filters'][$filter_name]['plugin'] = [
-            '#type' => 'value',
-            '#value' => $plugin,
-          ];
           // Render "Disable filters" settings form.
           if (!empty($allow_settings['disable_filters'])) {
             $form['override']['filters'][$filter_name]['disable'] = [
               '#type' => 'checkbox',
-              '#title' => $this->t('Disable'),
+              '#title' => $this->t('Disable filter: @handler', ['@handler' => $plugin->options['expose']['label']]),
               '#default_value' => !empty($block_configuration['filter'][$filter_name]['disable']) ? $block_configuration['filter'][$filter_name]['disable'] : 0,
             ];
           }
@@ -280,6 +411,45 @@ class Block extends CoreBlock {
   /**
    * {@inheritdoc}
    */
+  public function blockValidate(ViewsBlock $block, array $form, FormStateInterface $form_state) {
+    // Checkout validateOptionsForm on filters before saving this.
+    if ($form_state->hasValue('exposed')) {
+      $handlers = $this->view->getDisplay()->getHandlers('filter');
+      $values = $form_state->getValue('exposed');
+
+      foreach ($handlers as $key => $handler) {
+
+        if ($handler->isExposed()) {
+          $identifier = $handler->options['expose']['identifier'];
+          $handler_form_state = new FormState();
+          $handler_form_state->setValues($values);
+          $handler->validateExposed($form, $handler_form_state);
+
+          /*
+           * Select list doesn't change validated_exposed_input value
+           * when "All" is selected.
+           */
+          // @todo Determine whether this is actually necessary or not.
+          if (isset($handler->options['type']) && $handler->options['type'] === 'select') {
+            if ($values['filter-' . $key][$identifier] === 'All') {
+              $handler->validated_exposed_input = NULL;
+            }
+          }
+          foreach ($handler_form_state->getErrors() as $name => $message) {
+            $form_state->setErrorByName($name, $message);
+          }
+          // Overwrite the value with its validated counterpart, if one exists.
+          if (property_exists($handler, 'validated_exposed_input')) {
+            $form_state->setValue(['exposed', $key], [$identifier => $handler->validated_exposed_input]);
+          }
+        }
+      }
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function blockSubmit(ViewsBlock $block, $form, FormStateInterface $form_state) {
     // Set default value for items_per_page if left blank.
     if (empty($form_state->getValue(['override', 'items_per_page']))) {
@@ -299,12 +469,18 @@ class Block extends CoreBlock {
 
     // Save "Pager offset" settings to block configuration.
     if (!empty($allow_settings['offset'])) {
-      $configuration['pager_offset'] = $form_state->getValue(['override', 'pager_offset']);
+      $configuration['pager_offset'] = $form_state->getValue([
+        'override',
+        'pager_offset',
+      ]);
     }
 
     // Save "Hide fields" / "Reorder fields" settings to block configuration.
     if (!empty($allow_settings['hide_fields']) || !empty($allow_settings['sort_fields'])) {
-      if ($fields = array_filter($form_state->getValue(['override', 'order_fields']))) {
+      if ($fields = array_filter($form_state->getValue([
+        'override',
+        'order_fields',
+      ]))) {
         uasort($fields, '\Drupal\ctools_views\Plugin\Display\Block::sortFieldsByWeight');
         $configuration['fields'] = $fields;
       }
@@ -312,26 +488,55 @@ class Block extends CoreBlock {
 
     // Save "Configure filters" / "Disable filters" settings to block
     // configuration.
+    if (!empty($allow_settings['configure_filters'])) {
+      // Store the validated and raw exposed filters.
+      $handlers = $this->view->getDisplay()->getHandlers('filter');
+
+      // Map form values back to views_field type data.
+      $values = $form_state->getValue('exposed');
+      foreach ($handlers as $key => $handler) {
+        if ($handler->canExpose() && $handler->isExposed()) {
+          $identifier = $handler->options['expose']['identifier'];
+          $config_key = "filter-${key}";
+
+          if (isset($values[$config_key])) {
+            // Save values from generated form/values array, which may or may
+            // not use a wrapper.
+            $wrapper = !empty($values[$config_key][$identifier . '_wrapper']) ? $identifier . '_wrapper' : FALSE;
+            if ($wrapper) {
+              $configuration['exposed'][$config_key] = $this->extractExposedValues(
+                $handler,
+                $form['settings']['exposed'][$config_key][$wrapper],
+                $values[$config_key][$wrapper]
+              );
+            }
+            else {
+              $configuration['exposed'][$config_key] = $this->extractExposedValues(
+                $handler,
+                $form['settings']['exposed'][$config_key],
+                $values[$config_key]
+              );
+            }
+
+            $configuration['exposed'][$config_key]['plugin_id'] = $handler->getPluginId();
+            $configuration['exposed'][$config_key]['exposed'] = $values[$config_key]['exposed'];
+            if ($values[$config_key]['exposed'] && isset($values[$config_key]['use_operator'])) {
+              $configuration['exposed'][$config_key]['expose']['use_operator'] = $values[$config_key]['use_operator'];
+            }
+            else {
+              $configuration['exposed'][$config_key]['expose']['use_operator'] = FALSE;
+            }
+          }
+        }
+      }
+    }
     unset($configuration['filter']);
     if (!empty($allow_settings['disable_filters'])) {
       if ($filters = $form_state->getValue(['override', 'filters'])) {
         foreach ($filters as $filter_name => $filter) {
-          /** @var \Drupal\views\Plugin\views\filter\FilterPluginBase $plugin */
-          $plugin = $form_state->getValue([
-            'override', 'filters', $filter_name, 'plugin',
-          ]);
-          $configuration["filter"][$filter_name]['type'] = $plugin->getPluginId();
-
-          // Check if we want to disable this filter.
-          if (!empty($allow_settings['disable_filters'])) {
-            $disable = $form_state->getValue([
-              'override', 'filters', $filter_name, 'disable',
-            ]);
-            // If marked disabled, we don't really care about other stuff.
-            if ($disable) {
-              $configuration["filter"][$filter_name]['disable'] = $disable;
-              continue;
-            }
+          $disable = $filter['disable'];
+          if ($disable) {
+            $configuration['filter'][$filter_name]['disable'] = $disable;
           }
         }
       }
@@ -401,9 +606,87 @@ class Block extends CoreBlock {
         // and continue.
         if (!empty($allow_settings['disable_filters']) && !empty($config["filter"][$filter_name]['disable'])) {
           $this->view->removeHandler($display_id, 'filter', $filter_name);
-          continue;
+          // We don't want to needlessly set filter options later.
+          unset($config['exposed']['filter-' . $filter_name]);
         }
       }
+    }
+
+    // Set an exposed filter value and remove it from the display if set in the
+    // block configuration.
+    if (!empty($allow_settings['configure_filters'])) {
+      // Fetch the current view's exposed filter input from the client request.
+      $exposed = $this->view->getExposedInput();
+      $denylisted_keys = [
+        'form_id',
+      ];
+      // Filter the exposed filter input to contain only expected keys.
+      $exposed = array_filter($exposed, function ($key) use ($denylisted_keys) {
+        // Filter out certain keys not related to exposed filters that are
+        // known to cause issues.
+        return !in_array($key, $denylisted_keys, TRUE);
+      }, ARRAY_FILTER_USE_KEY);
+
+      // Loop over the exposed filter settings in the block configuration.
+      foreach ($config['exposed'] as $key => $value) {
+        // Load the handler related to the exposed filter.
+        [$handler_type, $handler_name] = explode('-', $key, 2);
+        $handler = $this->view->getDisplay()->getHandler($handler_type, $handler_name);
+
+        // Set exposed filter input directly where they were entered in the
+        // block configuration. Otherwise only set them if they haven't been set
+        // already.
+        if ($handler) {
+          if ($handler->isAGroup()) {
+            $this->mapConfigToHandler($handler, $value);
+          }
+          else {
+            // Access values with the identifier.
+            $identifier = $handler->options['expose']['identifier'];
+
+            // If the value is set from exposed form input, keep it.
+            if (!isset($exposed[$identifier])) {
+              // Entity reference autocomplete fields need their values
+              // submitted either as an array of entities or of arrays in the
+              // form ['target_id' => $id].
+              if (isset($config['exposed'][$key]['type']) && $config['exposed'][$key]['type'] == 'entity_autocomplete') {
+                $exposed[$identifier] = array_map(function ($item) {
+                  return ['target_id' => $item];
+                }, $value['value']);
+              }
+
+              // If a value with a nested 'value' key is present, un-nest it.
+              elseif (isset($value['value']['value'])) {
+                $exposed[$identifier] = $value['value']['value'];
+              }
+              else {
+                $exposed[$identifier] = $value['value'];
+              }
+            }
+
+            // If the operator is set from exposed form input, keep it.
+            if ($handler->options['expose']['use_operator']) {
+              $operator_id = $handler->options['expose']['operator_id'];
+              if (!isset($exposed[$operator_id])) {
+                $exposed[$operator_id] = $value['operator'];
+              }
+            }
+          }
+
+          // If the filter is exposed, set a variable to pass that through.
+          if ($config['exposed'][$key]['exposed']) {
+            $handler->options['value_exposed_to_user'] = TRUE;
+
+            // If the operator is exposed, set a variable to pass that through.
+            if ($config['exposed'][$key]['expose']['use_operator']) {
+              $handler->options['operator_exposed_to_user'] = TRUE;
+            }
+          }
+        }
+      }
+
+      // Set the updated exposed filter input array on the View.
+      $this->view->setExposedInput($exposed);
     }
 
     // Change sorts based on block configuration.
@@ -430,6 +713,20 @@ class Block extends CoreBlock {
   }
 
   /**
+   * {@inheritdoc}
+   */
+  public function usesExposed() {
+    $filters = $this->getHandlers('filter');
+    foreach ($filters as $filter) {
+      if ($filter->isExposed() && !empty($filter->exposedInfo())) {
+        return TRUE;
+      }
+    }
+
+    return parent::usesExposed();
+  }
+
+  /**
    * Exposed widgets.
    *
    * Exposed widgets typically only work with ajax in Drupal core, however
@@ -440,10 +737,72 @@ class Block extends CoreBlock {
   public function elementPreRender(array $element) {
     /** @var \Drupal\views\ViewExecutable $view */
     $view = $element['#view'];
+
+    // Exposed widgets typically only work with Ajax in core, but #2605218
+    // breaks the rest of the functionality in this display and in the core
+    // Block display as well. We allow non-Ajax block views to use exposed
+    // filters by manually setting the #action to the current request URI.
     if (!empty($view->exposed_widgets['#action']) && !$view->ajaxEnabled()) {
       $view->exposed_widgets['#action'] = $this->request->getRequestUri();
     }
-    return parent::elementPreRender($element);
+
+    // Allow the parent pre-render function to set the #exposed array on the
+    // element. This allows us to bypass hiding widgets if the array is emptied.
+    $element = parent::elementPreRender($element);
+
+    // Loop over the filters on the current View looking for exposed filters
+    // whose values have been derived from block configuration.
+    if (!empty($element['#exposed'])) {
+      $allow_settings = array_filter($this->getOption('allow'));
+      if (!empty($allow_settings['configure_filters'])) {
+        foreach ($view->getDisplay()->getHandlers('filter') as $id => $handler) {
+          /** @var \Drupal\views\Plugin\views\Filter\FilterPluginBase $handler */
+          // If the current handler meets the conditions, hide its exposed
+          // widget.
+          if ($handler->canExpose() && $handler->isExposed()) {
+
+            $value_exposed = $handler->options['value_exposed_to_user'] ?? FALSE;
+            $operator_exposed = $handler->options['operator_exposed_to_user'] ?? FALSE;
+
+            if ($handler->isAGroup()) {
+              $identifier = $handler->options['group_info']['identifier'];
+              $operator_id = FALSE;
+            }
+            else {
+              $identifier = $handler->options['expose']['identifier'] ?? FALSE;
+              $operator_id = $handler->options['expose']['use_operator'] ? $handler->options['expose']['operator_id'] : FALSE;
+            }
+
+            // If a wrapper is being used, store its key for later use.
+            $wrapper = !empty($element['#exposed'][$identifier . '_wrapper']) ? $identifier . '_wrapper' : FALSE;
+
+            if ($wrapper) {
+              $element['#exposed'][$wrapper][$identifier]['#access'] = $value_exposed;
+              if ($operator_id) {
+                $element['#exposed'][$wrapper][$operator_id]['#access'] = $operator_exposed;
+              }
+              if (!$value_exposed && !$operator_exposed) {
+                $element['#exposed'][$wrapper]['#access'] = FALSE;
+              }
+            }
+            else {
+              $element['#exposed'][$identifier]['#access'] = $value_exposed;
+              if ($operator_id) {
+                $element['#exposed'][$operator_id]['#access'] = $operator_exposed;
+              }
+            }
+          }
+        }
+
+        // If there are no accessible child elements in the #exposed array other
+        // than the actions, reset it to an empty array.
+        if (Element::getVisibleChildren($element['#exposed']) == ['actions']) {
+          $element['#exposed'] = [];
+        }
+      }
+    }
+
+    return $element;
   }
 
   /**
@@ -464,6 +823,146 @@ class Block extends CoreBlock {
       return 0;
     }
     return ($a_weight < $b_weight) ? -1 : 1;
+  }
+
+  /**
+   * Converts form input values to filter handler values.
+   */
+  protected function mapConfigToHandler(HandlerBase $handler, $input_value) {
+    // Convert to the form expected by $handler methods.
+    if ($handler->isAGroup()) {
+      $identifier = $handler->options['group_info']['identifier'];
+      $is_multiple = $handler->multipleExposedInput();
+      $value_key = $is_multiple ? 'default_group_multiple' : 'default_group';
+      $value = [$identifier => $input_value['group_info'][$value_key]];
+
+      $handler->group_info = $value[$identifier];
+      $handler->options['group_info'][$value_key] = $handler->group_info;
+    }
+    else {
+      $identifier = $handler->options['expose']['identifier'];
+      $use_operator = !empty($handler->options['expose']['use_operator']);
+
+      // The value passed to the handler may need defaults that are not
+      // passed with the input values, so we have to attempt to merge the
+      // expected values on the plugin before overwriting them.
+      if (is_array($input_value['value']) && is_array($handler->options['value'])) {
+        $value = [$identifier => $input_value['value'] + $handler->options['value']];
+      }
+      elseif (is_string($input_value['value']) && is_array($handler->options['value'])) {
+        $value = [$identifier => ['value' => $input_value['value']] + $handler->options['value']];
+      }
+      else {
+        $value = [$identifier => $input_value['value']];
+      }
+
+      if ($use_operator) {
+        $operator_id = $handler->options['expose']['operator_id'];
+        $value[$operator_id] = $input_value['operator'];
+      }
+
+      $handler->value = $value[$identifier];
+      $handler->options['value'] = $handler->value;
+      if ($use_operator) {
+        $handler->operator = $value[$operator_id];
+        $handler->options['operator'] = $handler->operator;
+      }
+    }
+  }
+
+  /**
+   * Extract values/operators from a given exposed form/values array element.
+   */
+  protected function extractExposedValues($handler, $form_element, $values_element) {
+    $configuration = [];
+    $identifier = $handler->options['expose']['identifier'];
+
+    // If this is an entity_autocomplete field, we need to pull out
+    // the target_id for each value in order to match our schema.
+    $element_type = $form_element[$identifier]['#type'] ?? FALSE;
+    if ($element_type == 'entity_autocomplete') {
+      $configuration['type'] = $element_type;
+      $configuration['value'] = [];
+      if (isset($values_element[$identifier]) && is_array($values_element[$identifier])) {
+        $configuration['value'] = array_map(function ($item) {
+          return $item['target_id'];
+        }, $values_element[$identifier]);
+      }
+    }
+
+    // Grouped filters store values at a different key,
+    // which we match, to match the handler's schema.
+    elseif ($handler->isAGroup()) {
+      $is_multiple = $handler->multipleExposedInput();
+      $value_key = $is_multiple ? 'default_group_multiple' : 'default_group';
+      if ($is_multiple) {
+        $configuration['group_info'][$value_key] = array_filter($values_element[$identifier]);
+      }
+      else {
+        $configuration['group_info'][$value_key] = $values_element[$identifier];
+      }
+    }
+
+    // Single value select list will provide a string value, but we
+    // should save it as an array if the view does.
+    /* elseif (is_array($handler->value)) { */
+    elseif (isset($handler->options['type'])
+      && $handler->options['type'] === 'select'
+      || $handler->options['plugin_id'] == 'list_field') {
+      if (!is_array($values_element[$identifier])) {
+        $value = $values_element[$identifier];
+        // Values of 'All' should save as an empty array, like in views.
+        if (!$handler->options['expose']['required'] && $value == 'All') {
+          $configuration['value'] = [];
+        }
+        else {
+          $configuration['value'] = [$value => $value];
+        }
+      }
+      else {
+        $configuration['value'] = $values_element[$identifier];
+      }
+    }
+    else {
+      $configuration['value'] = $values_element[$identifier];
+    }
+
+    // Save operator, if exposed and not grouped.
+    if ($handler->options['expose']['use_operator'] && !$handler->isAGroup()) {
+      $operator_id = $handler->options['expose']['operator_id'];
+      $configuration['operator'] = $values_element[$operator_id];
+    }
+
+    return $configuration;
+  }
+
+  /**
+   * Checks an exposed filter value array to see if it is non-empty and not All.
+   *
+   * @todo rename this function and document it more; it doesn't test validity.
+   */
+  protected function validValue($value) {
+    $filter = $this->valueFilter($value);
+    $not_all = $value != 'All';
+    $not_empty_or_zero = (!empty($value) || (is_numeric($value) && (int) $value === 0));
+    return ($filter && $not_all && $not_empty_or_zero);
+  }
+
+  /**
+   * Filter a potential array of values to see if any are non-0 string lengths.
+   */
+  protected function valueFilter($value) {
+    if (is_array($value)) {
+      foreach ($value as $element) {
+        // If any element returns non-0, we know all we need to.
+        if ($test = $this->valueFilter($element)) {
+          return $test;
+        }
+      }
+    }
+    else {
+      return strlen($value);
+    }
   }
 
 }

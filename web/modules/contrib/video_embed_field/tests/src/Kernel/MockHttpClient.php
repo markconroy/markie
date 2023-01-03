@@ -3,7 +3,9 @@
 namespace Drupal\Tests\video_embed_field\Kernel;
 
 use GuzzleHttp\ClientInterface;
+use GuzzleHttp\Promise\PromiseInterface;
 use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ResponseInterface;
 
 /**
  * An exceptional HTTP client mock.
@@ -18,35 +20,35 @@ class MockHttpClient implements ClientInterface {
   /**
    * {@inheritdoc}
    */
-  public function send(RequestInterface $request, array $options = []) {
+  public function send(RequestInterface $request, array $options = []): ResponseInterface {
     throw new \Exception(static::EXCEPTION_MESSAGE);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function sendAsync(RequestInterface $request, array $options = []) {
+  public function sendAsync(RequestInterface $request, array $options = []): PromiseInterface {
     throw new \Exception(static::EXCEPTION_MESSAGE);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function request($method, $uri, array $options = []) {
+  public function request($method, $uri, array $options = []): ResponseInterface {
     throw new \Exception(static::EXCEPTION_MESSAGE);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function requestAsync($method, $uri, array $options = []) {
+  public function requestAsync($method, $uri, array $options = []): PromiseInterface {
     throw new \Exception(static::EXCEPTION_MESSAGE);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getConfig($option = NULL) {
+  public function getConfig(?string $option = NULL) {
     throw new \Exception(static::EXCEPTION_MESSAGE);
   }
 

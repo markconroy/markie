@@ -123,7 +123,7 @@ class ImageWidgetCropManager implements ImageWidgetCropInterface {
         }
 
         $this->updateCropProperties($crop, $crop_properties);
-        $this->messenger()->addMessage($this->t('The crop "@cropType" were successfully updated for image "@filename".', ['@cropType' => $crop_type->label(), '@filename' => $this->fileStorage->load($field_value['file-id'])->getFilename()]));
+        $this->messenger()->addMessage($this->t('The crop "@cropType" was successfully updated for image "@filename".', ['@cropType' => $crop_type->label(), '@filename' => $this->fileStorage->load($field_value['file-id'])->getFilename()]));
       }
     }
   }

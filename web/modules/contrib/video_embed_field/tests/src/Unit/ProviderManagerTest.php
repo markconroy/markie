@@ -104,7 +104,7 @@ class ProviderManagerTest extends UnitTestCase {
     $definitions = $this->mockProviders;
     $manager = $this->getMockBuilder('Drupal\video_embed_field\ProviderManager')
       ->disableOriginalConstructor()
-      ->setMethods(['getDefinitions', 'getDefinition', 'createInstance'])
+      ->onlyMethods(['getDefinitions', 'getDefinition', 'createInstance'])
       ->getMock();
     $manager
       ->method('getDefinitions')

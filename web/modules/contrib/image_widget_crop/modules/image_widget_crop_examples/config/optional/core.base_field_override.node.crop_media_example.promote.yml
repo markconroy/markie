@@ -8,7 +8,7 @@ id: node.crop_media_example.promote
 field_name: promote
 entity_type: node
 bundle: crop_media_example
-label: 'Promu en page d''accueil'
+label: 'Promoted to homepage'
 description: ''
 required: false
 translatable: true

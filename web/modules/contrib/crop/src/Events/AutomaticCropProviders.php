@@ -2,7 +2,7 @@
 
 namespace Drupal\crop\Events;
 
-use Symfony\Component\EventDispatcher\Event;
+use Drupal\Component\EventDispatcher\Event;
 
 /**
  * Collects "Automatic crop" providers.

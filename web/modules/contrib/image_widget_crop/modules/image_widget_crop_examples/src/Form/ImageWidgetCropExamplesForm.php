@@ -25,7 +25,7 @@ class ImageWidgetCropExamplesForm extends ConfigFormBase {
   protected $settings;
 
   /**
-   * File usage interface to configurate an file object.
+   * File usage interface to configure a file object.
    *
    * @var Drupal\file\FileUsage\FileUsageInterface
    */
@@ -101,7 +101,7 @@ class ImageWidgetCropExamplesForm extends ConfigFormBase {
     $form['file'] = [
       '#title' => $this->t('Background Pictures'),
       '#type' => 'managed_file',
-      '#description' => $this->t('The uploaded image will be displayed on this page using the image style choosen below.'),
+      '#description' => $this->t('The uploaded image will be displayed on this page using the image style chosen below.'),
       '#default_value' => $this->settings->get('settings.file'),
       '#upload_location' => 'public://image_widget_crop_examples/pictures',
       '#multiple' => FALSE,
@@ -115,7 +115,7 @@ class ImageWidgetCropExamplesForm extends ConfigFormBase {
       /* @var \Drupal\file\FileInterface $file */
       $file = File::load($fid);
       // The key of element are hardcoded into buildCropToForm function,
-      // ATM that is mendatory but can change easily.
+      // ATM that is mandatory but can change easily.
       $form['image_crop'] = [
         '#type' => 'image_crop',
         '#file' => $file,
@@ -133,8 +133,8 @@ class ImageWidgetCropExamplesForm extends ConfigFormBase {
   /**
    * Helper to expose file entity element.
    *
-   * This method is mendatory to works with "buildCropToForm",
-   * for unicity with File entity compatibility.
+   * This method is mandatory to works with "buildCropToForm",
+   * for Uniqueness with File entity compatibility.
    *
    * @return \Drupal\file\Entity\File|null
    *   File saved by file_manager element.

@@ -40,7 +40,7 @@ class CToolsViewsBasicViewBlockTest extends UITestBase {
   /**
    * {@inheritdoc}
    */
-  protected $defaultTheme = 'classy';
+  protected $defaultTheme = 'starterkit_theme';
 
   /**
    * {@inheritdoc}
@@ -50,6 +50,28 @@ class CToolsViewsBasicViewBlockTest extends UITestBase {
 
     ViewTestData::createTestViews(get_class($this), ['ctools_views_test_views']);
     $this->storage = $this->container->get('entity_type.manager')->getStorage('block');
+  }
+
+  /**
+   * Test basic view with ctools_views module enabled but no options set.
+   */
+  public function testBasic() {
+    $default_theme = $this->config('system.theme')->get('default');
+
+    // Get the "Configure block" form for our Views block.
+    $this->drupalGet('admin/structure/block/add/views_block:ctools_views_test_view-block_basic/' . $default_theme);
+    // Add block to sidebar_first region with default settings.
+    $edit = [];
+    $edit['region'] = 'sidebar_first';
+    $this->drupalGet('admin/structure/block/add/views_block:ctools_views_test_view-block_basic/' . $default_theme);
+    $this->submitForm($edit, $this->t('Save block'));
+
+    // Assert items per page default settings.
+    $this->drupalGet('<front>');
+    $result = $this->xpath('//div[contains(@class, "region-sidebar-first")]/div[contains(@class, "block-views")]/h2');
+    $this->assertSession()->fieldExists('status');
+    $this->assertSession()->fieldExists('job');
+    $this->assertSession()->buttonExists('Apply');
   }
 
   /**
@@ -309,6 +331,8 @@ class CToolsViewsBasicViewBlockTest extends UITestBase {
     // Add block to sidebar_first region with default settings.
     $edit = [];
     $edit['region'] = 'sidebar_first';
+    $edit['settings[exposed][filter-status][exposed]'] = 1;
+    $edit['settings[exposed][filter-job][exposed]'] = 1;
     $this->drupalGet('admin/structure/block/add/views_block:ctools_views_test_view-block_filter/' . $default_theme);
     $this->submitForm($edit, $this->t('Save block'));
 
@@ -321,6 +345,8 @@ class CToolsViewsBasicViewBlockTest extends UITestBase {
     // Override disable_filters settings.
     $edit = [];
     $edit['region'] = 'sidebar_first';
+    $edit['settings[exposed][filter-status][exposed]'] = 1;
+    $edit['settings[exposed][filter-job][exposed]'] = 1;
     $edit['settings[override][filters][status][disable]'] = 1;
     $edit['settings[override][filters][job][disable]'] = 1;
     $this->drupalGet('admin/structure/block/manage/views_block__ctools_views_test_view_block_filter');

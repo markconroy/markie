@@ -17,7 +17,7 @@ class AutoplayPermissionTest extends BrowserTestBase {
    */
   protected $defaultTheme = 'stark';
 
-  public static $modules = [
+  protected static $modules = [
     'video_embed_field',
     'node',
   ];

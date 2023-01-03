@@ -24,7 +24,7 @@ class VideoEmbedWysiwyg extends CKEditorPluginBase implements CKEditorPluginConf
    * {@inheritdoc}
    */
   public function getFile() {
-    return drupal_get_path('module', 'video_embed_wysiwyg') . '/plugin/plugin.js';
+    return \Drupal::service('extension.list.module')->getPath('video_embed_wysiwyg') . '/plugin/plugin.js';
   }
 
   /**
@@ -34,7 +34,7 @@ class VideoEmbedWysiwyg extends CKEditorPluginBase implements CKEditorPluginConf
     return [
       'video_embed' => [
         'label' => $this->t('Video Embed'),
-        'image' => drupal_get_path('module', 'video_embed_wysiwyg') . '/plugin/icon.png',
+        'image' => \Drupal::service('extension.list.module')->getPath('video_embed_wysiwyg') . '/plugin/icon.png',
       ],
     ];
   }

@@ -22,7 +22,7 @@ function image_widget_crop_help($route_name, RouteMatchInterface $route_match) {
       $output .= '<h3>' . t('About') . '</h3>';
       $output .= '<p>' . t('Implement CROP API into the fields image');
       $output .= '<h3>' . t('Try module') . '</h3>';
-      $output .= '<p>' . t('You can Test ImageWidgetCrop in action directly with the sub-module, "ImageWidgetCrop example" to test differents usecase of this module');
+      $output .= '<p>' . t('You can Test ImageWidgetCrop in action directly with the sub-module, "ImageWidgetCrop example" to test different use case of this module');
       $output .= '</dl>';
       return $output;
   }

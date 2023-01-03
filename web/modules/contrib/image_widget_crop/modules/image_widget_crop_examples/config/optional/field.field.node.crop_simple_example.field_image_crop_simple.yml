@@ -13,7 +13,7 @@ field_name: field_image_crop_simple
 entity_type: node
 bundle: crop_simple_example
 label: 'Image Crop Simple'
-description: 'This Field is configured to display an 16:9 small image on fullContent.'
+description: 'This Field is configured to display an 16:9 small image in the Default display.'
 required: true
 translatable: false
 default_value: {  }

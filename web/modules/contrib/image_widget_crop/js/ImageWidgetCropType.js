@@ -836,32 +836,4 @@
     return summary.join('<br>');
   };
 
-    /**
-     * Override Theme function for a vertical tabs.
-     *
-     * @param {object} settings
-     *   An object with the following keys:
-     * @param {string} settings.title
-     *   The name of the tab.
-     *
-     * @return {object}
-     *   This function has to return an object with at least these keys:
-     *   - item: The root tab jQuery element
-     *   - link: The anchor tag that acts as the clickable area of the tab
-     *       (jQuery version)
-     *   - summary: The jQuery element that contains the tab summary
-     */
-  Drupal.theme.verticalTab = function (settings) {
-      var tab = {};
-      this.isRequired = settings.details.data('drupalIwcRequired');
-      tab.item = $('<li class="vertical-tabs__menu-item" tabindex="-1"></li>').append(tab.link = $('<a href="#"></a>').append(tab.title = $('<strong class="vertical-tabs__menu-item-title"></strong>').html(settings.title)).append(tab.summary = $('<span class="vertical-tabs__menu-item-summary"></span>')));
-
-      // If those Crop type is required add attributes.
-      if (this.isRequired) {
-        tab.title.addClass('js-form-required form-required');
-      }
-
-      return tab;
-  };
-
 }(jQuery, Drupal));

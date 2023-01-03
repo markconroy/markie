@@ -101,6 +101,12 @@
 
     // Trigger the initial summaryUpdate event.
     this.$wrapper.trigger('summaryUpdated');
+
+    // Disable triggering the "Reset crop" button when ENTER is pressed in the
+    // form.
+    this.$wrapper.closest('form').find('input').on('keypress', function(e) {
+      return e.which !== 13;
+    });
   };
 
   /**

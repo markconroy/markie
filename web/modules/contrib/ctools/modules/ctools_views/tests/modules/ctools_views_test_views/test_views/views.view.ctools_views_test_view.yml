@@ -406,6 +406,118 @@ display:
       contexts:
         - 'languages:language_interface'
       tags: {  }
+  block_basic:
+    display_plugin: block
+    id: block_basic
+    display_title: 'CTools Views Basic Block'
+    position: 3
+    display_options:
+      display_extenders: {  }
+      display_description: ''
+      block_category: 'CTools Views'
+      block_description: 'CTools Views Basic Block'
+      allow:
+        configure_filters: '0'
+        disable_filters: '0'
+        items_per_page: false
+        offset: '0'
+        pager: '0'
+        hide_fields: '0'
+        sort_fields: '0'
+      filters:
+        status:
+          id: status
+          table: views_test_data
+          field: status
+          relationship: none
+          group_type: group
+          admin_label: ''
+          operator: '='
+          value: true
+          group: 1
+          exposed: true
+          expose:
+            operator_id: ''
+            label: Status
+            description: ''
+            use_operator: false
+            operator: status_op
+            identifier: status
+            required: false
+            remember: false
+            multiple: false
+            remember_roles:
+              authenticated: authenticated
+              anonymous: '0'
+              administrator1: '0'
+              administrator: '0'
+          is_grouped: false
+          group_info:
+            label: ''
+            description: ''
+            identifier: ''
+            optional: true
+            widget: select
+            multiple: false
+            remember: false
+            default_group: All
+            default_group_multiple: {  }
+            group_items: {  }
+          plugin_id: boolean
+        job:
+          id: job
+          table: views_test_data
+          field: job
+          relationship: none
+          group_type: group
+          admin_label: ''
+          operator: '='
+          value: ''
+          group: 1
+          exposed: true
+          expose:
+            operator_id: job_op
+            label: Job
+            description: ''
+            use_operator: false
+            operator: job_op
+            identifier: job
+            required: false
+            remember: false
+            multiple: false
+            remember_roles:
+              authenticated: authenticated
+              anonymous: '0'
+              administrator1: '0'
+              administrator: '0'
+          is_grouped: false
+          group_info:
+            label: ''
+            description: ''
+            identifier: ''
+            optional: true
+            widget: select
+            multiple: false
+            remember: false
+            default_group: All
+            default_group_multiple: {  }
+            group_items: {  }
+          plugin_id: string
+      defaults:
+        filters: false
+        filter_groups: false
+        title: false
+      filter_groups:
+        operator: AND
+        groups:
+          1: AND
+      title: 'CTools Views Filter Block'
+    cache_metadata:
+      max-age: 0
+      contexts:
+        - 'languages:language_interface'
+        - url
+      tags: {  }
   block_fields:
     display_plugin: block
     id: block_fields
@@ -420,6 +532,7 @@ display:
         items_per_page: false
         offset: '0'
         pager: '0'
+        configure_filters: '0'
         disable_filters: '0'
       block_description: 'CTools Views Fields Block'
       display_description: ''
@@ -764,6 +877,7 @@ display:
       block_category: 'CTools Views'
       block_description: 'CTools Views Filter Block'
       allow:
+        configure_filters: configure_filters
         disable_filters: disable_filters
         items_per_page: false
         offset: '0'
@@ -879,6 +993,7 @@ display:
         pager: pager
         hide_fields: '0'
         sort_fields: '0'
+        configure_filters: '0'
         disable_filters: '0'
       display_description: ''
       header:
@@ -941,6 +1056,7 @@ display:
         pager: '0'
         hide_fields: '0'
         sort_fields: '0'
+        configure_filters: '0'
         disable_filters: '0'
     cache_metadata:
       max-age: 0

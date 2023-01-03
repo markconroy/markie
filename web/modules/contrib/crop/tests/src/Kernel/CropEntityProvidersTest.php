@@ -16,7 +16,7 @@ class CropEntityProvidersTest extends CropUnitTestBase {
    *
    * @var array
    */
-  public static $modules = ['crop', 'file', 'image', 'user', 'system'];
+  protected static $modules = ['crop', 'file', 'image', 'user', 'system'];
 
   /**
    * Tests file provider plugin.

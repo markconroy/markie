@@ -24,7 +24,7 @@ class BundleTest extends MediaFunctionalTestBase {
    *
    * @var array
    */
-  public static $modules = [
+  protected static $modules = [
     'video_embed_field',
     'video_embed_media',
   ];
@@ -63,7 +63,7 @@ class BundleTest extends MediaFunctionalTestBase {
       'field_media_video_embed_field[0][value]' => 'https://www.youtube.com/watch?v=XgYu7-DQjDQ',
     ], 'Save');
     // We should see the video thumbnail on the media page.
-    $this->assertContains('video_thumbnails/XgYu7-DQjDQ.jpg', $this->getSession()->getPage()->getHtml());
+    $this->assertStringContainsString('video_thumbnails/XgYu7-DQjDQ.jpg', $this->getSession()->getPage()->getHtml());
   }
 
 }

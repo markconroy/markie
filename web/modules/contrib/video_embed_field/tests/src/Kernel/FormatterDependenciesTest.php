@@ -35,7 +35,7 @@ class FormatterDependenciesTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     $this->style = ImageStyle::create(['name' => 'style_foo', 'label' => $this->randomString()]);

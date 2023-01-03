@@ -95,6 +95,7 @@ class CropTypeListBuilder extends ConfigEntityListBuilder {
     // Load all image styles used by the current crop type.
     $image_style_ids = $this->entityTypeManager->getStorage('image_style')->getQuery()
       ->condition('effects.*.data.crop_type', $entity->id())
+      ->accessCheck(TRUE)
       ->execute();
     $image_styles = ImageStyle::loadMultiple($image_style_ids);
 

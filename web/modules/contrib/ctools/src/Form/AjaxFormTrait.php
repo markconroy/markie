@@ -33,7 +33,7 @@ trait AjaxFormTrait {
    *   The array of attributes.
    */
   public static function getAjaxButtonAttributes() {
-    return NestedArray::mergeDeep(AjaxFormTrait::getAjaxAttributes(), [
+    return NestedArray::mergeDeep(static::getAjaxAttributes(), [
       'class' => [
         'button',
         'button--small',

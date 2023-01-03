@@ -17,7 +17,7 @@ class FilterTest extends KernelTestBase {
    *
    * @var array
    */
-  public static $modules = [
+  protected static $modules = [
     'user',
     'system',
     'field',
@@ -104,7 +104,7 @@ class FilterTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
     $this->filter = FilterFormat::create([
       'format' => 'test_format',

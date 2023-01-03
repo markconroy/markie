@@ -22,7 +22,7 @@ class FieldConfigurationTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     'field_ui',
     'node',
     'video_embed_field',

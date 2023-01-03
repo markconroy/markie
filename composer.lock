@@ -2253,20 +2253,20 @@
         },
         {
             "name": "drupal/admin_toolbar",
-            "version": "3.2.1",
+            "version": "3.3.0",
             "source": {
                 "type": "git",
                 "url": "https://git.drupalcode.org/project/admin_toolbar.git",
-                "reference": "3.2.1"
+                "reference": "3.3.0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://ftp.drupal.org/files/projects/admin_toolbar-3.2.1.zip",
-                "reference": "3.2.1",
-                "shasum": "7a4bfb716e269be4ca03b7f04e29e4439ec6cf93"
+                "url": "https://ftp.drupal.org/files/projects/admin_toolbar-3.3.0.zip",
+                "reference": "3.3.0",
+                "shasum": "8e61fba9c9d83a94a844cff96d00871878a7eb98"
             },
             "require": {
-                "drupal/core": "^8.8.0 || ^9.0"
+                "drupal/core": "^9.2 || ^10"
             },
             "require-dev": {
                 "drupal/admin_toolbar_tools": "*"
@@ -2274,8 +2274,8 @@
             "type": "drupal-module",
             "extra": {
                 "drupal": {
-                    "version": "3.2.1",
-                    "datestamp": "1665044276",
+                    "version": "3.3.0",
+                    "datestamp": "1669567837",
                     "security-coverage": {
                         "status": "covered",
                         "message": "Covered by Drupal's security advisory policy"
@@ -3164,26 +3164,26 @@
         },
         {
             "name": "drupal/crop",
-            "version": "2.2.0",
+            "version": "2.3.0",
             "source": {
                 "type": "git",
                 "url": "https://git.drupalcode.org/project/crop.git",
-                "reference": "8.x-2.2"
+                "reference": "8.x-2.3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://ftp.drupal.org/files/projects/crop-8.x-2.2.zip",
-                "reference": "8.x-2.2",
-                "shasum": "b5a84c6b85b9582e686ccf421295611d9dd52055"
+                "url": "https://ftp.drupal.org/files/projects/crop-8.x-2.3.zip",
+                "reference": "8.x-2.3",
+                "shasum": "8e109cf60077f4c605c4d1f895cb3dc28613a23a"
             },
             "require": {
-                "drupal/core": "^8.8 || ^9"
+                "drupal/core": "^9.3 || ^10"
             },
             "type": "drupal-module",
             "extra": {
                 "drupal": {
-                    "version": "8.x-2.2",
-                    "datestamp": "1645187494",
+                    "version": "8.x-2.3",
+                    "datestamp": "1665437894",
                     "security-coverage": {
                         "status": "covered",
                         "message": "Covered by Drupal's security advisory policy"
@@ -3192,7 +3192,7 @@
             },
             "notification-url": "https://packages.drupal.org/8/downloads",
             "license": [
-                "GPL-2.0+"
+                "GPL-2.0-or-later"
             ],
             "authors": [
                 {
@@ -3221,17 +3221,17 @@
         },
         {
             "name": "drupal/ctools",
-            "version": "3.11.0",
+            "version": "3.13.0",
             "source": {
                 "type": "git",
                 "url": "https://git.drupalcode.org/project/ctools.git",
-                "reference": "8.x-3.11"
+                "reference": "8.x-3.13"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://ftp.drupal.org/files/projects/ctools-8.x-3.11.zip",
-                "reference": "8.x-3.11",
-                "shasum": "67da670df43155d1e15c80c7b0e326b3049ac5a2"
+                "url": "https://ftp.drupal.org/files/projects/ctools-8.x-3.13.zip",
+                "reference": "8.x-3.13",
+                "shasum": "b84176544265d4c6aa17917d66335527c9498c5a"
             },
             "require": {
                 "drupal/core": "^9.3 || ^10"
@@ -3239,8 +3239,8 @@
             "type": "drupal-module",
             "extra": {
                 "drupal": {
-                    "version": "8.x-3.11",
-                    "datestamp": "1660167573",
+                    "version": "8.x-3.13",
+                    "datestamp": "1668631846",
                     "security-coverage": {
                         "status": "covered",
                         "message": "Covered by Drupal's security advisory policy"
@@ -3493,34 +3493,34 @@
         },
         {
             "name": "drupal/image_widget_crop",
-            "version": "2.3.0",
+            "version": "2.4.0",
             "source": {
                 "type": "git",
                 "url": "https://git.drupalcode.org/project/image_widget_crop.git",
-                "reference": "8.x-2.3"
+                "reference": "8.x-2.4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://ftp.drupal.org/files/projects/image_widget_crop-8.x-2.3.zip",
-                "reference": "8.x-2.3",
-                "shasum": "20f9e98bd6503699576ada6f4fd4c9fd06686361"
+                "url": "https://ftp.drupal.org/files/projects/image_widget_crop-8.x-2.4.zip",
+                "reference": "8.x-2.4",
+                "shasum": "6fcf4641d730bf1f5afce2a95d58f76094c72d1b"
             },
             "require": {
-                "drupal/core": "^8 || ^9",
-                "drupal/crop": "^1.0 || ^2.0"
+                "drupal/core": "^8 || ^9 || ^10",
+                "drupal/crop": "^1 || ^2"
             },
             "require-dev": {
+                "drupal/bartik": "^1",
                 "drupal/crop": "*",
-                "drupal/ctools": "3.x-dev",
-                "drupal/entity_browser": "1.x-dev",
-                "drupal/file_entity": "*",
-                "drupal/inline_entity_form": "*"
+                "drupal/ctools": "^3",
+                "drupal/entity_browser": "^2",
+                "drupal/inline_entity_form": "^1"
             },
             "type": "drupal-module",
             "extra": {
                 "drupal": {
-                    "version": "8.x-2.3",
-                    "datestamp": "1585408029",
+                    "version": "8.x-2.4",
+                    "datestamp": "1667435355",
                     "security-coverage": {
                         "status": "covered",
                         "message": "Covered by Drupal's security advisory policy"
@@ -3529,7 +3529,7 @@
             },
             "notification-url": "https://packages.drupal.org/8/downloads",
             "license": [
-                "GPL-2.0+"
+                "GPL-2.0-or-later"
             ],
             "authors": [
                 {
@@ -3538,8 +3538,8 @@
                     "role": "Maintainer"
                 },
                 {
-                    "name": "Drupal media CI",
-                    "homepage": "https://www.drupal.org/user/3057985"
+                    "name": "Drupal Media Team",
+                    "homepage": "https://www.drupal.org/user/3260690"
                 },
                 {
                     "name": "phenaproxima",
@@ -4199,31 +4199,31 @@
         },
         {
             "name": "drupal/video_embed_field",
-            "version": "2.4.0",
+            "version": "2.5.0",
             "source": {
                 "type": "git",
                 "url": "https://git.drupalcode.org/project/video_embed_field.git",
-                "reference": "8.x-2.4"
+                "reference": "8.x-2.5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://ftp.drupal.org/files/projects/video_embed_field-8.x-2.4.zip",
-                "reference": "8.x-2.4",
-                "shasum": "96b14bb93c1bb6a07b84315a4f87367870f8b574"
+                "url": "https://ftp.drupal.org/files/projects/video_embed_field-8.x-2.5.zip",
+                "reference": "8.x-2.5",
+                "shasum": "997ed67b6873e822fe628f87f65bd6da67e7350c"
             },
             "require": {
-                "drupal/core": "^8.8 || ^9"
+                "drupal/core": "^9.2 || ^10"
             },
             "require-dev": {
-                "drupal/ckeditor": "*",
-                "drupal/colorbox": "^1.0",
+                "drupal/ckeditor": "^1",
+                "drupal/colorbox": "^2",
                 "drupal/video_embed_media": "*"
             },
             "type": "drupal-module",
             "extra": {
                 "drupal": {
-                    "version": "8.x-2.4",
-                    "datestamp": "1587686337",
+                    "version": "8.x-2.5",
+                    "datestamp": "1671413311",
                     "security-coverage": {
                         "status": "covered",
                         "message": "Covered by Drupal's security advisory policy"
@@ -4232,9 +4232,13 @@
             },
             "notification-url": "https://packages.drupal.org/8/downloads",
             "license": [
-                "GPL-2.0+"
+                "GPL-2.0-or-later"
             ],
             "authors": [
+                {
+                    "name": "abhinesh",
+                    "homepage": "https://www.drupal.org/user/3645979"
+                },
                 {
                     "name": "jec006",
                     "homepage": "https://www.drupal.org/user/855980"

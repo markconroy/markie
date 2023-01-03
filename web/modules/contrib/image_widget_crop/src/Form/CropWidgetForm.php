@@ -71,7 +71,7 @@ class CropWidgetForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container) {
-    return new static (
+    return new static(
       $container->get('config.factory'),
       $container->get('image_widget_crop.manager'),
       $container->get('module_handler'),

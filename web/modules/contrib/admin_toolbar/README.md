@@ -1,16 +1,14 @@
-CONTENTS OF THIS FILE
----------------------
+# CONTENTS OF THIS FILE
 
- * Introduction
- * Requirements
- * Recommended modules
- * Installation
- * Configuration
- * Maintainers
+  - Introduction
+  - Requirements
+  - Recommended modules
+  - Installation
+  - Configuration
+  - Maintainers
 
 
-INTRODUCTION
-------------
+## INTRODUCTION
 
 Admin Toolbar intends to improve the default Drupal Toolbar to transform it into
 a drop-down menu, providing a fast and full access to all administration links.
@@ -22,14 +20,11 @@ a drop-down menu, providing a fast and full access to all administration links.
    https://www.drupal.org/project/issues/search/admin_toolbar
 
 
-REQUIREMENTS
-------------
+## REQUIREMENTS
 
 No special requirements.
 
-
-RECOMMENDED MODULES
--------------------
+## RECOMMENDED MODULES
 
  * Admin Toolbar Extra Tools (https://www.drupal.org/project/admin_toolbar):
    Provides menu links to administration pages or actions (eg. Flushing caches)
@@ -40,21 +35,17 @@ RECOMMENDED MODULES
    'Use the administration pages and help' permission see menu links they don't
    have access permission for.
 
-INSTALLATION
-------------
+## INSTALLATION
 
  * Install as you would normally install a contributed Drupal module.
    See: https://www.drupal.org/node/895232 for further information.
 
 
-CONFIGURATION
--------------
+## CONFIGURATION
 
  * Configure the admin toolbar tools at (/admin/config/user-interface/settings).
 
-
-MAINTAINERS
------------
+## MAINTAINERS
 
 Current maintainers:
  * Wilfrid Roze (eme) - https://www.drupal.org/u/eme

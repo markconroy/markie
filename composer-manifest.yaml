@@ -29,7 +29,7 @@ packages:
     doctrine/reflection: 1.2.3
     drupal-ckeditor-libraries-group/codesnippet: 4.20.0
     drupal-composer/drupal-security-advisories: '8.x-dev:24fe3e68a77ef019b4cb789c6b58c0abd9f831b5'
-    drupal/admin_toolbar: 3.2.1
+    drupal/admin_toolbar: 3.3.0
     drupal/ckeditor: 1.0.1
     drupal/codesnippet: 1.8.0
     drupal/components: 2.4.0
@@ -41,12 +41,12 @@ packages:
     drupal/core-composer-scaffold: 9.4.7
     drupal/core-project-message: 9.4.7
     drupal/core-recommended: 9.4.7
-    drupal/crop: 2.2.0
-    drupal/ctools: 3.11.0
+    drupal/crop: 2.3.0
+    drupal/ctools: 3.13.0
     drupal/devel: 4.2.1
     drupal/disable_html5_validation: 1.1.0
     drupal/entity: 1.4.0
-    drupal/image_widget_crop: 2.3.0
+    drupal/image_widget_crop: 2.4.0
     drupal/inline_entity_form: 1.0.0-rc14
     drupal/media_entity_generic: 1.1.0
     drupal/media_entity_twitter: 2.8.0
@@ -57,7 +57,7 @@ packages:
     drupal/redirect: 1.8.0
     drupal/token: 1.11.0
     drupal/twig_tweak: 2.10.0
-    drupal/video_embed_field: 2.4.0
+    drupal/video_embed_field: 2.5.0
     drupal/xmlsitemap: 1.4.0
     drush/drush: 10.6.1
     egulias/email-validator: 3.2.1

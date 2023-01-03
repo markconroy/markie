@@ -2,8 +2,10 @@
 
 namespace Drupal\Tests\image_widget_crop\FunctionalJavascript;
 
+use Drupal\crop\Entity\CropType;
+use Drupal\file\Entity\File;
 use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
-use Drupal\node\Entity\Node;
+use Drupal\Tests\image\Kernel\ImageFieldCreationTrait;
 use Drupal\Tests\TestFileCreationTrait;
 
 /**
@@ -15,84 +17,116 @@ use Drupal\Tests\TestFileCreationTrait;
  */
 class ImageWidgetCropTest extends WebDriverTestBase {
 
-  use TestFileCreationTrait {
-    getTestFiles as drupalGetTestFiles;
+  use ImageFieldCreationTrait {
+    createImageField as traitCreateImageField;
   }
+  use TestFileCreationTrait;
 
   /**
-   * User with permissions to create content.
-   *
-   * @var \Drupal\user\Entity\User
+   * {@inheritdoc}
    */
-  protected $user;
+  protected $defaultTheme = 'stark';
 
   /**
-   * Modules to enable.
-   *
-   * @var array
+   * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     'node',
-    'crop',
-    'image',
     'image_widget_crop',
   ];
 
   /**
-   * Prepares environment for the tests.
+   * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     $this->drupalCreateContentType(['name' => 'Crop test', 'type' => 'crop_test']);
 
-    $this->user = $this->createUser([
+    $user = $this->createUser([
       'access content overview',
       'administer content types',
       'edit any crop_test content',
+      'create crop_test content',
+      'administer site configuration',
     ]);
-    $this->drupalLogin($this->user);
+    $this->drupalLogin($user);
+
+    // Visit the status report to confirm that the Cropper library is available.
+    $this->drupalGet('/admin/reports/status');
+    $this->assertSession()->pageTextContains('ImageWidgetCrop libraries files are correctly configured');
+
+    // Create a crop type so that the cropping widget will actually appear.
+    CropType::create([
+      'label' => 'Widescreen',
+      'id' => 'crop_16_9',
+      'aspect_ratio' => '16:9',
+    ])->save();
+
+    $this->createImageField('field_image_crop_test', 'crop_test', [], [], [
+      'crop_list' => [
+        'crop_16_9' => 'crop_16_9',
+      ],
+      'crop_types_required' => [],
+    ]);
   }
 
   /**
-   * Test Image Widget Crop UI.
+   * {@inheritdoc}
+   */
+  protected function createImageField($name, $type_name, $storage_settings = [], $field_settings = [], $widget_settings = [], $formatter_settings = [], $description = '') {
+    $this->traitCreateImageField($name, $type_name, $storage_settings, $field_settings, $widget_settings, $formatter_settings, $description);
+
+    $this->container->get('entity_display.repository')
+      ->getFormDisplay('node', $type_name)
+      ->setComponent($name, [
+        'type' => 'image_widget_crop',
+        'settings' => $widget_settings,
+      ])
+      ->save();
+  }
+
+  /**
+   * Tests that when a crop has more than one usage we have a warning.
    */
   public function testCropUi() {
-    // Test that when a crop has more than one usage we have a warning.
-    $this->createImageField('field_image_crop_test', 'crop_test', 'image_widget_crop', [], [], ['crop_list' => ['crop_16_9' => 'crop_16_9'], 'crop_types_required' => []]);
-    $this->drupalGetTestFiles('image');
+    $images = $this->getTestFiles('image');
+    $page = $this->getSession()->getPage();
+    $assert_session = $this->assertSession();
 
     $this->drupalGet('node/add/crop_test');
-    $edit = [
-      'title[0][value]' => $this->randomMachineName(),
-    ];
-    $this->getSession()->getPage()->attachFileToField('files[field_image_crop_test_0]', $this->container->get('file_system')->realpath('public://image-test.jpg'));
-    $this->drupalPostForm(NULL, $edit, 'Save');
 
-    $node = Node::create([
+    $page->fillField('Title', $this->randomString());
+    $page->attachFileToField('files[field_image_crop_test_0]', $this->container->get('file_system')->realpath(reset($images)->uri));
+    $this->assertNotEmpty($assert_session->waitForField('Alternative text'));
+    $page->fillField('Alternative text', $this->randomString());
+    $page->pressButton('Save');
+
+    $files = File::loadMultiple();
+    $this->assertCount(1, $files);
+
+    $node = $this->drupalCreateNode([
       'title' => '2nd node using it',
       'type' => 'crop_test',
-      'field_image_crop_test' => 1,
+      'field_image_crop_test' => key($files),
       'alt' => $this->randomMachineName(),
     ]);
-    $node->save();
 
     /** @var \Drupal\file\FileUsage\FileUsageInterface $usage */
     $usage = \Drupal::service('file.usage');
-    $usage->add(\Drupal::service('entity_type.manager')->getStorage('file')->load(1), 'image_widget_crop', 'node', $node->id());
+    $usage->add(reset($files), 'image_widget_crop', 'node', $node->id());
 
     $this->drupalGet('node/1/edit');
-    $this->assertSession()->responseContains(t('This crop definition affects more usages of this image'));
-
+    $this->assertSession()->responseContains('This crop definition affects more usages of this image');
   }
 
   /**
    * Test Image Widget Crop.
    */
   public function testImageWidgetCrop() {
-    // Test that crop widget works properly.
-    $this->createImageField('field_image_crop_test', 'crop_test', 'image_widget_crop', [], [], ['crop_list' => ['crop_16_9' => 'crop_16_9'], 'crop_types_required' => []]);
-    $this->drupalGetTestFiles('image');
+    $images = $this->getTestFiles('image');
+    $image_path = $this->container->get('file_system')
+      ->realpath(reset($images)->uri);
 
     $this->drupalGet('node/add/crop_test');
 
@@ -100,26 +134,25 @@ class ImageWidgetCropTest extends WebDriverTestBase {
     // filed nor 'Remove' button yet.
     $assert_session = $this->assertSession();
     $assert_session->elementNotExists('css', 'summary:contains(Crop image)');
-    $assert_session->pageTextNotContains('Alternative text');
-    $assert_session->fieldNotExists('field_image_crop_test_0_remove_button');
+    $assert_session->fieldNotExists('Alternative text');
+    $assert_session->buttonNotExists('Remove');
 
     // Upload an image in field_image_crop_test_0.
-    $this->getSession()->getPage()->attachFileToField('files[field_image_crop_test_0]', $this->container->get('file_system')->realpath('public://image-test.jpg'));
+    $page = $this->getSession()->getPage();
+    $page->attachFileToField('files[field_image_crop_test_0]', $image_path);
 
     // Assert that now crop widget and 'Alternative text' text field appear and
     // that 'Remove' button exists.
-    $assert_session->assertWaitOnAjaxRequest();
-    $assert_session->elementExists('css', 'summary:contains(Crop image)');
-    $assert_session->pageTextContains('Alternative text');
+    $this->assertNotEmpty($assert_session->waitForElementVisible('css', 'summary:contains(Crop image)'));
+    $assert_session->fieldExists('Alternative text');
     $assert_session->buttonExists('Remove');
 
     // Set title and 'Alternative text' text field and save.
     $title = $this->randomMachineName();
-    $edit = [
-      'title[0][value]' => $title,
-      'field_image_crop_test[0][alt]' => $this->randomMachineName(),
-    ];
-    $this->drupalPostForm(NULL, $edit, 'Save');
+    $page->fillField('Title', $title);
+    $page->fillField('Alternative text', $this->randomString());
+    $page->pressButton('Save');
+
     $assert_session->pageTextContains('Crop test ' . $title . ' has been created.');
     $url = $this->getUrl();
     $nid = substr($url, -1, strrpos($url, '/'));
@@ -128,94 +161,22 @@ class ImageWidgetCropTest extends WebDriverTestBase {
     $this->drupalGet('node/' . $nid . '/edit');
 
     // Verify that the 'Remove' button works properly.
-    $assert_session->pageTextContains('Alternative text');
-    $this->getSession()->getPage()->pressButton('Remove');
-    $assert_session->assertWaitOnAjaxRequest();
-    $assert_session->pageTextNotContains('Alternative text');
+    $assert_session->fieldExists('Alternative text');
+    $page->pressButton('Remove');
+    $this->assertTrue($assert_session->waitForElementRemoved('named', ['field', 'Alternative text']));
 
-    $this->getSession()->getPage()->attachFileToField('files[field_image_crop_test_0]', $this->container->get('file_system')->realpath('public://image-test.jpg'));
+    $page->attachFileToField('files[field_image_crop_test_0]', $image_path);
+    $this->assertNotEmpty($assert_session->waitForElementVisible('css', 'summary:contains(Crop image)'));
+    // The form cannot be submitted without alt text filled in.
+    $page->fillField('Alternative text', $this->randomString());
 
     // Verify that the 'Preview' button works properly.
-    $this->drupalPostForm(NULL, $edit, 'Preview');
-    $assert_session->linkExists('Back to content editing');
-    $this->clickLink('Back to content editing');
+    $page->pressButton('Preview');
+    $page->clickLink('Back to content editing');
 
     // Verify that there is an image style preview.
-    $assert_session->hiddenFieldValueEquals('field_image_crop_test[0][width]', '40');
-    $assert_session->hiddenFieldValueEquals('field_image_crop_test[0][height]', '20');
-  }
-
-  /**
-   * Gets IEF button name.
-   *
-   * @param string $xpath
-   *   Xpath of the button.
-   *
-   * @return string
-   *   The name of the button.
-   */
-  protected function getButtonName($xpath) {
-    $retval = '';
-
-    /** @var \SimpleXMLElement[] $elements */
-    if ($elements = $this->xpath($xpath)) {
-      foreach ($elements[0]->attributes() as $name => $value) {
-        if ($name == 'name') {
-          $retval = (string) $value;
-          break;
-        }
-      }
-    }
-    return $retval;
-  }
-
-  /**
-   * Create a new image field.
-   *
-   * @param string $name
-   *   The name of the new field (all lowercase), exclude the "field_" prefix.
-   * @param string $type_name
-   *   The node type that this field will be added to.
-   * @param string $widget_name
-   *   The name of the widget.
-   * @param array $storage_settings
-   *   A list of field storage settings that will be added to the defaults.
-   * @param array $field_settings
-   *   A list of instance settings that will be added to the instance defaults.
-   * @param array $widget_settings
-   *   A list of widget settings that will be added to the widget defaults.
-   */
-  protected function createImageField($name, $type_name, $widget_name, array $storage_settings = [], array $field_settings = [], array $widget_settings = []) {
-    \Drupal::entityTypeManager()->getStorage('field_storage_config')->create([
-      'field_name' => $name,
-      'entity_type' => 'node',
-      'type' => 'image',
-      'settings' => $storage_settings,
-      'cardinality' => !empty($storage_settings['cardinality']) ? $storage_settings['cardinality'] : 1,
-    ])->save();
-
-    $field_config = \Drupal::entityTypeManager()->getStorage('field_config')->create([
-      'field_name' => $name,
-      'label' => $name,
-      'entity_type' => 'node',
-      'bundle' => $type_name,
-      'required' => !empty($field_settings['required']),
-      'settings' => $field_settings,
-    ]);
-    $field_config->save();
-
-    /** @var \Drupal\Core\Entity\Display\EntityFormDisplayInterface $form_display */
-    $form_display = \Drupal::entityTypeManager()->getStorage('entity_form_display')->load('node.' . $type_name . '.default');
-    $form_display->setComponent($name, [
-      'type' => $widget_name,
-      'settings' => $widget_settings,
-    ])->save();
-
-    /** @var \Drupal\Core\Entity\Display\EntityViewDisplayInterface $view_display */
-    $view_display = \Drupal::entityTypeManager()->getStorage('entity_view_display')->load('node.' . $type_name . '.default');
-    $view_display->setComponent($name)
-      ->save();
-
+    $assert_session->elementExists('css', 'input[name^="field_image_crop_test"][name$="[width]"]');
+    $assert_session->elementExists('css', 'input[name^="field_image_crop_test"][name$="[height]"]');
   }
 
 }

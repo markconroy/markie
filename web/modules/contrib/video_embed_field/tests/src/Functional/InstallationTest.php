@@ -21,7 +21,7 @@ class InstallationTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
     $this->drupalLogin($this->createAdminUser());
   }
@@ -58,11 +58,13 @@ class InstallationTest extends BrowserTestBase {
    * Uninstall the module using the UI.
    */
   protected function uninstallModules() {
-    $this->drupalPostForm('admin/modules/uninstall', [
+    $this->drupalGet('admin/modules/uninstall');
+    $this->submitForm([
       'uninstall[video_embed_wysiwyg]' => TRUE,
     ], 'Uninstall');
     $this->getSession()->getPage()->pressButton('Uninstall');
-    $this->drupalPostForm('admin/modules/uninstall', [
+    $this->drupalGet('admin/modules/uninstall');
+    $this->submitForm([
       'uninstall[video_embed_field]' => TRUE,
     ], 'Uninstall');
     $this->getSession()->getPage()->pressButton('Uninstall');
@@ -72,7 +74,8 @@ class InstallationTest extends BrowserTestBase {
    * Install the modules using the UI.
    */
   protected function installModules() {
-    $this->drupalPostForm('admin/modules', [
+    $this->drupalGet('admin/modules');
+    $this->submitForm([
       'modules[video_embed_field][enable]' => TRUE,
       'modules[video_embed_wysiwyg][enable]' => TRUE,
     ], 'Install');

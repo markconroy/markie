@@ -132,6 +132,7 @@ class Crop extends ContentEntityBase implements CropInterface {
    */
   public static function cropExists($uri, $type = NULL) {
     $query = \Drupal::entityQuery('crop')
+      ->accessCheck(TRUE)
       ->condition('uri', $uri);
     if ($type) {
       $query->condition('type', $type);

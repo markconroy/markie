@@ -5,7 +5,7 @@ namespace Drupal\crop\Events;
 use Drupal\Core\Image\ImageInterface;
 use Drupal\crop\CropInterface;
 use Drupal\crop\Entity\CropType;
-use Symfony\Component\EventDispatcher\Event;
+use Drupal\Component\EventDispatcher\Event;
 
 /**
  * Represents automatic crop action as event.

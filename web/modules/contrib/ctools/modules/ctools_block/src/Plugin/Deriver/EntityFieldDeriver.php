@@ -16,6 +16,10 @@ class EntityFieldDeriver extends EntityDeriverBase {
   public function getDerivativeDefinitions($base_plugin_definition) {
     $entity_type_labels = $this->entityTypeRepository->getEntityTypeLabels();
     foreach ($this->entityFieldManager->getFieldMap() as $entity_type_id => $entity_field_map) {
+      // Check if entity_type is defined.
+      if (!$this->entityTypeManager->hasDefinition($entity_type_id)) {
+        continue;
+      }
       // Some base fields have no storage.
       /** @var \Drupal\Core\Field\FieldDefinitionInterface[] $field_storage_definitions */
       $field_storage_definitions = array_merge(

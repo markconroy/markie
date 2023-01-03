@@ -99,7 +99,7 @@ function ctools_condition_info_alter(&$definitions) {
   // Replace all generic entity bundle conditions classes if they are unaltered,
   // these exist in Drupal 9.3+.
   foreach ($definitions as $id => $definition) {
-    if (strpos($id, 'entity_bundle:') === 0 && $definition['class'] == CoreEntityBundle::class) {
+    if (strpos($id, 'entity_bundle:') === 0 && ($definition['class'] == CoreEntityBundle::class || $definition['class'] == 'Drupal\ctools\Plugin\Condition\EntityBundleConstraint')) {
       $definitions[$id]['class'] = EntityBundle::class;
     }
   }

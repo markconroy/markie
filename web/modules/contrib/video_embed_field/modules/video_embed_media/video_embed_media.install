@@ -14,7 +14,7 @@ function video_embed_media_install() {
   /** @var \Drupal\Core\File\FileSystemInterface $file_system */
   $file_system = \Drupal::service('file_system');
   // Copy the video icons into the right place.
-  $icon_folder = drupal_get_path('module', 'video_embed_media') . '/images/icons';
+  $icon_folder = \Drupal::service('extension.list.module')->getPath('video_embed_media') . '/images/icons';
   $destination = \Drupal::config('media.settings')->get('icon_base_uri');
   $file_system->prepareDirectory($destination, FileSystemInterface::CREATE_DIRECTORY | FileSystemInterface::MODIFY_PERMISSIONS);
 

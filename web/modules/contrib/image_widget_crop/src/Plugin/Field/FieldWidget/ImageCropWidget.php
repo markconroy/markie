@@ -145,7 +145,7 @@ class ImageCropWidget extends ImageWidget {
    *   An array with all existent variables for render.
    *
    * @return array[]
-   *   The variables with width & height image informations.
+   *   The variables with width & height image information.
    */
   public static function getFileImageVariables(array $element, array &$variables) {
     // Determine image dimensions.

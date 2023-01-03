@@ -143,9 +143,10 @@ class ImageCrop extends FormElement {
       if ($crop_types = $crop_type_storage->loadMultiple($crop_type_list)) {
         foreach ($crop_types as $type => $crop_type) {
           $ratio = $crop_type->getAspectRatio() ?: 'NaN';
+          $title = self::isRequiredType($element, $type) ? t('@label (required)', ['@label' => $crop_type->label()]) : $crop_type->label();
           $element['crop_wrapper'][$type] = [
             '#type' => 'details',
-            '#title' => $crop_type->label(),
+            '#title' => $title,
             '#group' => $list_id,
             '#attributes' => [
               'data-drupal-iwc' => 'type',

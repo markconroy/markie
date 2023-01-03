@@ -3,10 +3,10 @@
  * The video_embed_field lazy loading videos.
  */
 
-(function($) {
+(function($, once) {
   Drupal.behaviors.video_embed_field_lazyLoad = {
     attach: function (context, settings) {
-      $('.video-embed-field-lazy', context).once().click(function(e) {
+      $(once('video-embed-field-lazy', '.video-embed-field-lazy', context)).click(function(e) {
         // Swap the lightweight image for the heavy JavaScript.
         e.preventDefault();
         var $el = $(this);
@@ -14,4 +14,4 @@
       });
     }
   };
-})(jQuery);
+})(jQuery, once);

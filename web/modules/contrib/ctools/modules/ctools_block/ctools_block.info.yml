@@ -6,7 +6,7 @@ core_version_requirement: ^9.3 || ^10
 dependencies:
   - ctools:ctools
 
-# Information added by Drupal.org packaging script on 2022-08-10
-version: '8.x-3.11'
+# Information added by Drupal.org packaging script on 2022-11-16
+version: '8.x-3.13'
 project: 'ctools'
-datestamp: 1660167576
+datestamp: 1668631849

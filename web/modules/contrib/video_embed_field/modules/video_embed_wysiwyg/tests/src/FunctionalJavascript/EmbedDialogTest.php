@@ -24,7 +24,7 @@ class EmbedDialogTest extends WebDriverTestBase {
    *
    * @var array
    */
-  public static $modules = [
+  protected static $modules = [
     'video_embed_field',
     'video_embed_wysiwyg',
     'editor',
@@ -44,7 +44,7 @@ class EmbedDialogTest extends WebDriverTestBase {
   /**
    * {@inheritdoc}
    */
-  public function setUp() {
+  public function setUp(): void {
     parent::setUp();
     $this->adminUser = $this->drupalCreateUser(array_keys($this->container->get('user.permissions')->getPermissions()));
     $this->drupalLogin($this->adminUser);
@@ -96,7 +96,7 @@ class EmbedDialogTest extends WebDriverTestBase {
     $this->find('button.form-submit')->click();
     $this->assertSession()->assertWaitOnAjaxRequest();
     $this->assertSession()->pageTextContains('Could not find a video provider to handle the given URL.');
-    $this->assertContains('http://example.com/', $this->getSession()->getPage()->getHtml());
+    $this->assertStringContainsString('http://example.com/', $this->getSession()->getPage()->getHtml());
 
     // Submit a valid URL.
     $this->find('input[name="video_url"]')->setValue('https://www.youtube.com/watch?v=iaf3Sl2r3jE&t=1553s');

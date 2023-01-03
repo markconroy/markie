@@ -2,16 +2,14 @@ name: ImageWidgetCrop
 type: module
 description: Provides an interface for using the features of the Crop API.
 core: 8.x
-core_version_requirement: ^8 || ^9
+core_version_requirement: ^8 || ^9 || ^10
 package: Media
 configure: image_widget_crop.crop_widget_settings
 dependencies:
   - crop:crop
   - drupal:image
-test_dependencies:
-  - file_entity:file_entity
 
-# Information added by Drupal.org packaging script on 2020-03-28
-version: '8.x-2.3'
+# Information added by Drupal.org packaging script on 2022-11-03
+version: '8.x-2.4'
 project: 'image_widget_crop'
-datestamp: 1585408031
+datestamp: 1667435357

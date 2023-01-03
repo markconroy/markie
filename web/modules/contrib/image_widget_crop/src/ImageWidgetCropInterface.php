@@ -151,7 +151,7 @@ interface ImageWidgetCropInterface {
    * @param \Drupal\crop\Entity\CropType $crop_type
    *   The entity CropType.
    * @param string $file_uri
-   *   Uri of uploded file.
+   *   Uri of uploaded file.
    *
    * @return array
    *   All crop used this ImageStyle.
@@ -179,7 +179,7 @@ interface ImageWidgetCropInterface {
    *   The list of existent Crop Type.
    *
    * @return arrayinteger
-   *   The list of Crop Type filtred.
+   *   The list of Crop Type filtered.
    */
   public function getAvailableCropType(array $crop_list);
 
