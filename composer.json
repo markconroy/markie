@@ -54,8 +54,7 @@
     "drupal/xmlsitemap": "^1.0",
     "drupal/core-project-message": "^9",
     "drupal/devel": "^4.1",
-    "drupal/mgv": "^2.2",
-    "drupal/classy": "^1.0"
+    "drupal/mgv": "^2.2"
   },
   "require-dev": {
       "mglaman/phpstan-drupal": "^0.12.5",
