@@ -27,11 +27,8 @@ packages:
     doctrine/lexer: 1.2.3
     doctrine/persistence: 1.3.8
     doctrine/reflection: 1.2.3
-    drupal-ckeditor-libraries-group/codesnippet: 4.20.0
     drupal-composer/drupal-security-advisories: '8.x-dev:24fe3e68a77ef019b4cb789c6b58c0abd9f831b5'
     drupal/admin_toolbar: 3.3.0
-    drupal/ckeditor: 1.0.1
-    drupal/codesnippet: 1.8.0
     drupal/components: 2.4.0
     drupal/console: 1.9.10
     drupal/console-core: 1.9.8
