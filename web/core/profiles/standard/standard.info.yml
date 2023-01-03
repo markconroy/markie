@@ -7,7 +7,7 @@ install:
   - history
   - block
   - breakpoint
-  - ckeditor
+  - ckeditor5
   - config
   - comment
   - contextual
@@ -31,7 +31,6 @@ install:
   - toolbar
   - field_ui
   - file
-  - rdf
   - views
   - views_ui
   - tour

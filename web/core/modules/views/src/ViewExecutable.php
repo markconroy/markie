@@ -24,6 +24,7 @@ use Symfony\Component\Routing\Exception\RouteNotFoundException;
  * @see https://www.drupal.org/node/2849674
  * @see https://bugs.php.net/bug.php?id=66052
  */
+#[\AllowDynamicProperties]
 class ViewExecutable {
 
   /**
@@ -340,9 +341,12 @@ class ViewExecutable {
   public $inited;
 
   /**
-   * The rendered output of the exposed form.
+   * The render array for the exposed form.
    *
-   * @var string
+   * In cases that the exposed form is rendered as a block this will be an
+   * empty array.
+   *
+   * @var array
    */
   public $exposed_widgets;
 

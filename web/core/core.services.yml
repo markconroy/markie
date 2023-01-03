@@ -27,6 +27,7 @@ parameters:
       max-age: 0
       contexts: ['session', 'user']
       tags: []
+    debug: false
   factory.keyvalue:
     default: keyvalue.database
   http.response.debug_cacheability_headers: false
@@ -726,8 +727,8 @@ services:
     tags:
       - { name: persist }
   current_route_match:
-     class: Drupal\Core\Routing\CurrentRouteMatch
-     arguments: ['@request_stack']
+    class: Drupal\Core\Routing\CurrentRouteMatch
+    arguments: ['@request_stack']
   event_dispatcher:
     class: Drupal\Component\EventDispatcher\ContainerAwareEventDispatcher
     arguments: ['@service_container']
@@ -811,10 +812,10 @@ services:
     calls:
       - [setContainer, ['@service_container']]
   http_middleware.cors:
-     class: Asm89\Stack\Cors
-     arguments: ['%cors.config%']
-     tags:
-       - { name: http_middleware, priority: 250 }
+    class: Asm89\Stack\Cors
+    arguments: ['%cors.config%']
+    tags:
+      - { name: http_middleware, priority: 250 }
   psr7.http_foundation_factory:
     class: Symfony\Bridge\PsrHttpMessage\Factory\HttpFoundationFactory
   psr17.server_request_factory:
@@ -983,12 +984,12 @@ services:
     class: Drupal\Core\Path\PathValidator
     arguments: ['@router', '@router.no_access_checks', '@current_user', '@path_processor_manager']
 
-# The argument to the hashing service defined in services.yml, to the
-# constructor of PhpassHashedPassword is the log2 number of iterations for
-# password stretching.
-# @todo increase by 1 every Drupal version in order to counteract increases in
-# the speed and power of computers available to crack the hashes. The current
-# password hashing method was introduced in Drupal 7 with a log2 count of 15.
+  # The argument to the hashing service defined in services.yml, to the
+  # constructor of PhpassHashedPassword is the log2 number of iterations for
+  # password stretching.
+  # @todo increase by 1 every Drupal version in order to counteract increases in
+  # the speed and power of computers available to crack the hashes. The current
+  # password hashing method was introduced in Drupal 7 with a log2 count of 15.
   password:
     class: Drupal\Core\Password\PhpassHashedPassword
     arguments: [16]
@@ -1337,11 +1338,7 @@ services:
     class: Drupal\Core\EventSubscriber\Fast404ExceptionHtmlSubscriber
     tags:
       - { name: event_subscriber }
-    arguments: ['@config.factory', '@http_kernel']
-  exception.test_site:
-    class: Drupal\Core\EventSubscriber\ExceptionTestSiteSubscriber
-    tags:
-      - { name: event_subscriber }
+    arguments: ['@config.factory', '@cache_tags.invalidator']
   exception.enforced_form_response:
     class: Drupal\Core\EventSubscriber\EnforcedFormResponseSubscriber
     tags:
@@ -1458,7 +1455,8 @@ services:
       - [setStandalone, ['\Laminas\Feed\Writer\StandaloneExtensionManager']]
     arguments: ['feed.writer.']
     deprecated: The "%service_id%" service is deprecated in drupal:9.4.0 and is removed from drupal:10.0.0. Use \Laminas\Feed\Writer\StandaloneExtensionManager or create your own service. See https://www.drupal.org/node/3258440
-# Laminas Feed reader plugins. Plugin instances should not be shared.
+
+  # Laminas Feed reader plugins. Plugin instances should not be shared.
   feed.reader.dublincoreentry:
     class: Laminas\Feed\Reader\Extension\DublinCore\Entry
     shared: false
@@ -1499,7 +1497,8 @@ services:
     class: Laminas\Feed\Reader\Extension\Podcast\Feed
     shared: false
     deprecated: The "%service_id%" service is deprecated in drupal:9.4.0 and is removed from drupal:10.0.0. You should use \Drupal::service('feed.bridge.reader')->get('Podcast\Feed') instead. See https://www.drupal.org/node/2979042
-# Laminas Feed writer plugins. Plugins should be set as prototype scope.
+
+  # Laminas Feed writer plugins. Plugins should be set as prototype scope.
   feed.writer.atomrendererfeed:
     class: Laminas\Feed\Writer\Extension\Atom\Renderer\Feed
     shared: false
@@ -1554,7 +1553,7 @@ services:
     arguments: ['%app.root%', '@theme_handler', '@cache.bootstrap', '@module_handler']
   theme.registry:
     class: Drupal\Core\Theme\Registry
-    arguments: ['%app.root%', '@cache.default', '@lock', '@module_handler', '@theme_handler', '@theme.initialization', null, '@cache.bootstrap', '@extension.list.module']
+    arguments: ['%app.root%', '@cache.default', '@lock', '@module_handler', '@theme_handler', '@theme.initialization', '@cache.bootstrap', '@extension.list.module']
     tags:
       - { name: needs_destruction }
     calls:
@@ -1678,12 +1677,18 @@ services:
     arguments: ['@renderer', '@url_generator', '@theme.manager', '@date.formatter', '@file_url_generator']
     tags:
       - { name: twig.extension, priority: 100 }
-  # @todo Figure out what to do about debugging functions.
-  # @see https://www.drupal.org/node/1804998
   twig.extension.debug:
     class: Twig\Extension\DebugExtension
     tags:
-      - { name: twig.extension }
+      - { name: twig.extension, priority: 50 }
+  twig.extension.varDumper:
+    class: Drupal\Core\Template\DebugExtension
+    tags:
+      # This extension is loaded after the Twig Debug Extension because for Twig
+      # Extensions, last extension loaded takes precedent. This allows this
+      # extension to override the default Twig Debug Extension conditionally
+      # when Symfony VarDumper is available.
+      - { name: twig.extension, priority: 25 }
   twig.loader:
     class: Twig\Loader\ChainLoader
     public: false

@@ -4,19 +4,16 @@
 * https://www.drupal.org/node/2815083
 * @preserve
 **/
-
 (function ($, Drupal, window, _ref) {
   var tabbable = _ref.tabbable;
   Drupal.MediaLibrary = {
     currentSelection: []
   };
-
   Drupal.AjaxCommands.prototype.updateMediaLibrarySelection = function (ajax, response, status) {
     Object.values(response.mediaIds).forEach(function (value) {
       Drupal.MediaLibrary.currentSelection.push(value);
     });
   };
-
   Drupal.behaviors.MediaLibraryTabs = {
     attach: function attach(context) {
       var $menu = $('.js-media-library-menu');
@@ -38,37 +35,17 @@
             message: Drupal.t('Please wait...')
           }
         });
-
         ajaxObject.success = function (response, status) {
-          var _this = this;
-
-          if (this.progress.element) {
-            $(this.progress.element).remove();
-          }
-
-          if (this.progress.object) {
-            this.progress.object.stopMonitoring();
-          }
-
-          $(this.element).prop('disabled', false);
-          Object.keys(response || {}).forEach(function (i) {
-            if (response[i].command && _this.commands[response[i].command]) {
-              _this.commands[response[i].command](_this, response[i], status);
+          return Promise.resolve(Drupal.Ajax.prototype.success.call(ajaxObject, response, status)).then(function () {
+            var mediaLibraryContent = document.getElementById('media-library-content');
+            if (mediaLibraryContent) {
+              var tabbableContent = tabbable(mediaLibraryContent);
+              if (tabbableContent.length) {
+                tabbableContent[0].focus();
+              }
             }
           });
-          var mediaLibraryContent = document.getElementById('media-library-content');
-
-          if (mediaLibraryContent) {
-            var tabbableContent = tabbable(mediaLibraryContent);
-
-            if (tabbableContent.length) {
-              tabbableContent[0].focus();
-            }
-          }
-
-          this.settings = null;
         };
-
         ajaxObject.execute();
         $menu.find('.active-tab').remove();
         $menu.find('a').removeClass('active');
@@ -92,7 +69,6 @@
         var loadingAnnouncement = '';
         var displayAnnouncement = '';
         var focusSelector = '';
-
         if ($link.hasClass('views-display-link-widget')) {
           loadingAnnouncement = Drupal.t('Loading grid view.');
           displayAnnouncement = Drupal.t('Changed to grid view.');
@@ -102,7 +78,6 @@
           displayAnnouncement = Drupal.t('Changed to table view.');
           focusSelector = '.views-display-link-widget_table';
         }
-
         var ajaxObject = Drupal.ajax({
           wrapper: 'media-library-view',
           url: e.currentTarget.href,
@@ -112,25 +87,19 @@
             message: loadingAnnouncement || Drupal.t('Please wait...')
           }
         });
-
         if (displayAnnouncement || focusSelector) {
           var success = ajaxObject.success;
-
           ajaxObject.success = function (response, status) {
             success.bind(this)(response, status);
-
             if (focusSelector) {
               $(focusSelector).focus();
             }
-
             if (displayAnnouncement) {
               Drupal.announce(displayAnnouncement);
             }
           };
         }
-
         ajaxObject.execute();
-
         if (loadingAnnouncement) {
           Drupal.announce(loadingAnnouncement);
         }
@@ -141,32 +110,25 @@
     attach: function attach(context, settings) {
       var $form = $('.js-media-library-views-form, .js-media-library-add-form', context);
       var currentSelection = Drupal.MediaLibrary.currentSelection;
-
       if (!$form.length) {
         return;
       }
-
       var $mediaItems = $('.js-media-library-item input[type="checkbox"]', $form);
-
       function disableItems($items) {
         $items.prop('disabled', true).closest('.js-media-library-item').addClass('media-library-item--disabled');
       }
-
       function enableItems($items) {
         $items.prop('disabled', false).closest('.js-media-library-item').removeClass('media-library-item--disabled');
       }
-
       function updateSelectionCount(remaining) {
         var selectItemsText = remaining < 0 ? Drupal.formatPlural(currentSelection.length, '1 item selected', '@count items selected') : Drupal.formatPlural(remaining, '@selected of @count item selected', '@selected of @count items selected', {
           '@selected': currentSelection.length
         });
         $('.js-media-library-selected-count').html(selectItemsText);
       }
-
       $(once('media-item-change', $mediaItems)).on('change', function (e) {
         var id = e.currentTarget.value;
         var position = currentSelection.indexOf(id);
-
         if (e.currentTarget.checked) {
           if (position === -1) {
             currentSelection.push(id);
@@ -174,21 +136,17 @@
         } else if (position !== -1) {
           currentSelection.splice(position, 1);
         }
-
         var mediaLibraryModalSelection = document.querySelector('#media-library-modal-selection');
-
         if (mediaLibraryModalSelection) {
           mediaLibraryModalSelection.value = currentSelection.join();
           $(mediaLibraryModalSelection).trigger('change');
         }
-
         document.querySelectorAll('.js-media-library-add-form-current-selection').forEach(function (item) {
           item.value = currentSelection.join();
         });
       });
       $(once('media-library-selection-change', $form.find('#media-library-modal-selection'))).on('change', function (e) {
         updateSelectionCount(settings.media_library.selection_remaining);
-
         if (currentSelection.length === settings.media_library.selection_remaining) {
           disableItems($mediaItems.not(':checked'));
           enableItems($mediaItems.filter(':checked'));
@@ -199,18 +157,14 @@
       currentSelection.forEach(function (value) {
         $form.find("input[type=\"checkbox\"][value=\"".concat(value, "\"]")).prop('checked', true).trigger('change');
       });
-
       if (!once('media-library-selection-info', 'html').length) {
         return;
       }
-
       $(window).on('dialog:aftercreate', function () {
         var $buttonPane = $('.media-library-widget-modal .ui-dialog-buttonpane');
-
         if (!$buttonPane.length) {
           return;
         }
-
         $buttonPane.append(Drupal.theme('mediaLibrarySelectionCount'));
         updateSelectionCount(settings.media_library.selection_remaining);
       });
@@ -221,13 +175,11 @@
       if (!once('media-library-clear-selection', 'html').length) {
         return;
       }
-
       $(window).on('dialog:afterclose', function () {
         Drupal.MediaLibrary.currentSelection = [];
       });
     }
   };
-
   Drupal.theme.mediaLibrarySelectionCount = function () {
     return "<div class=\"media-library-selected-count js-media-library-selected-count\" role=\"status\" aria-live=\"polite\" aria-atomic=\"true\"></div>";
   };

@@ -27,6 +27,9 @@ class ConfigImporterTest extends KernelTestBase {
    */
   protected static $modules = ['config_test', 'system', 'config_import_test'];
 
+  /**
+   * {@inheritdoc}
+   */
   protected function setUp(): void {
     parent::setUp();
 
@@ -604,7 +607,7 @@ class ConfigImporterTest extends KernelTestBase {
     $config_entity_data = $sync->read('config_test.dynamic.dotted.default');
     $config_entity_data['dependencies'] = ['module' => ['unknown', 'dblog']];
     $sync->write('config_test.dynamic.dotted.module', $config_entity_data);
-    $config_entity_data['dependencies'] = ['theme' => ['unknown', 'seven']];
+    $config_entity_data['dependencies'] = ['theme' => ['unknown', 'stark']];
     $sync->write('config_test.dynamic.dotted.theme', $config_entity_data);
     $config_entity_data['dependencies'] = ['config' => ['unknown', 'unknown2']];
     $sync->write('config_test.dynamic.dotted.config', $config_entity_data);
@@ -623,7 +626,7 @@ class ConfigImporterTest extends KernelTestBase {
         'Configuration <em class="placeholder">config_test.dynamic.dotted.config</em> depends on configuration (<em class="placeholder">unknown, unknown2</em>) that will not exist after import.',
         'Configuration <em class="placeholder">config_test.dynamic.dotted.existing</em> depends on the <em class="placeholder">config_test.dynamic.dotted.deleted</em> configuration that will not exist after import.',
         'Configuration <em class="placeholder">config_test.dynamic.dotted.module</em> depends on modules (<em class="placeholder">unknown, Database Logging</em>) that will not be installed after import.',
-        'Configuration <em class="placeholder">config_test.dynamic.dotted.theme</em> depends on themes (<em class="placeholder">unknown, Seven</em>) that will not be installed after import.',
+        'Configuration <em class="placeholder">config_test.dynamic.dotted.theme</em> depends on themes (<em class="placeholder">unknown, Stark</em>) that will not be installed after import.',
         'Configuration <em class="placeholder">unknown.config</em> depends on the <em class="placeholder">unknown</em> extension that will not be installed after import.',
       ];
       $this->assertEquals(implode(PHP_EOL, $expected), $e->getMessage());
@@ -631,7 +634,7 @@ class ConfigImporterTest extends KernelTestBase {
       $expected = [
         'Configuration <em class="placeholder">config_test.dynamic.dotted.config</em> depends on configuration (<em class="placeholder">unknown, unknown2</em>) that will not exist after import.',
         'Configuration <em class="placeholder">config_test.dynamic.dotted.module</em> depends on modules (<em class="placeholder">unknown, Database Logging</em>) that will not be installed after import.',
-        'Configuration <em class="placeholder">config_test.dynamic.dotted.theme</em> depends on themes (<em class="placeholder">unknown, Seven</em>) that will not be installed after import.',
+        'Configuration <em class="placeholder">config_test.dynamic.dotted.theme</em> depends on themes (<em class="placeholder">unknown, Stark</em>) that will not be installed after import.',
       ];
       foreach ($expected as $expected_message) {
         $this->assertContainsEquals($expected_message, $error_log, $expected_message);
@@ -819,7 +822,7 @@ class ConfigImporterTest extends KernelTestBase {
   public function testCustomStep() {
     $this->assertFalse(\Drupal::isConfigSyncing(), 'Before an import \Drupal::isConfigSyncing() returns FALSE');
     $context = [];
-    $this->configImporter()->doSyncStep([self::class, 'customStep'], $context);
+    $this->configImporter()->doSyncStep(\Closure::fromCallable([self::class, 'customStep']), $context);
     $this->assertTrue($context['is_syncing'], 'Inside a custom step \Drupal::isConfigSyncing() returns TRUE');
     $this->assertFalse(\Drupal::isConfigSyncing(), 'After an valid custom step \Drupal::isConfigSyncing() returns FALSE');
   }

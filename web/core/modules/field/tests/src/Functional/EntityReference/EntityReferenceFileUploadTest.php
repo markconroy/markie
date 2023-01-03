@@ -45,6 +45,9 @@ class EntityReferenceFileUploadTest extends BrowserTestBase {
    */
   protected $nodeId;
 
+  /**
+   * {@inheritdoc}
+   */
   protected function setUp(): void {
     parent::setUp();
 
@@ -112,7 +115,7 @@ class EntityReferenceFileUploadTest extends BrowserTestBase {
         'type' => 'entity_reference_autocomplete',
       ])
       ->setComponent($file_field_name, [
-         'type' => 'file_generic',
+        'type' => 'file_generic',
       ])
       ->save();
   }

@@ -1028,43 +1028,6 @@ class JsonApiRegressionTest extends JsonApiFunctionalTestBase {
   }
 
   /**
-   * Ensure that child comments can be retrieved via JSON:API.
-   */
-  public function testLeakedCacheMetadataViaRdfFromIssue3053827() {
-    $this->assertTrue($this->container->get('module_installer')->install(['comment', 'rdf'], TRUE), 'Installed modules.');
-    $this->addDefaultCommentField('node', 'article', 'comment', CommentItemInterface::OPEN, 'comment');
-    $this->rebuildAll();
-
-    // Create data.
-    Node::create([
-      'title' => 'Commented Node',
-      'type' => 'article',
-    ])->save();
-    $default_values = [
-      'entity_id' => 1,
-      'entity_type' => 'node',
-      'field_name' => 'comment',
-      'status' => 1,
-    ];
-    $parent = Comment::create(['subject' => 'Marlin'] + $default_values);
-    $parent->save();
-    $child = Comment::create(['subject' => 'Nemo', 'pid' => $parent->id()] + $default_values);
-    $child->save();
-
-    // Test.
-    $user = $this->drupalCreateUser(['access comments']);
-    $request_options = [
-      RequestOptions::AUTH => [
-        $user->getAccountName(),
-        $user->pass_raw,
-      ],
-    ];
-    // Requesting the comment collection should succeed.
-    $response = $this->request('GET', Url::fromUri('internal:/jsonapi/comment/comment'), $request_options);
-    $this->assertSame(200, $response->getStatusCode());
-  }
-
-  /**
    * Ensure non-translatable entities can be PATCHed with an alternate language.
    *
    * @see https://www.drupal.org/project/drupal/issues/3043168
@@ -1428,6 +1391,101 @@ class JsonApiRegressionTest extends JsonApiFunctionalTestBase {
     // Only the node authored by the filtered user should be returned.
     $this->assertCount(1, $document['data']);
     $this->assertSame('Article created by ' . $users[1]->uuid(), $document['data'][0]['attributes']['title']);
+  }
+
+  /**
+   * Ensure PATCHing a non-existing field property results in a helpful error.
+   *
+   * @see https://www.drupal.org/project/drupal/issues/3127883
+   */
+  public function testPatchInvalidFieldPropertyFromIssue3127883() {
+    $this->config('jsonapi.settings')->set('read_only', FALSE)->save(TRUE);
+
+    // Set up data model.
+    $this->drupalCreateContentType(['type' => 'page']);
+    $this->rebuildAll();
+
+    // Create data.
+    $node = Node::create([
+      'title' => 'foo',
+      'type' => 'page',
+      'body' => [
+        'format' => 'plain_text',
+        'value' => 'Hello World',
+      ],
+    ]);
+    $node->save();
+
+    // Test.
+    $user = $this->drupalCreateUser(['bypass node access']);
+    $url = Url::fromUri('internal:/jsonapi/node/page/' . $node->uuid());
+    $request_options = [
+      RequestOptions::HEADERS => [
+        'Content-Type' => 'application/vnd.api+json',
+        'Accept' => 'application/vnd.api+json',
+      ],
+      RequestOptions::AUTH => [$user->getAccountName(), $user->pass_raw],
+      RequestOptions::JSON => [
+        'data' => [
+          'type' => 'node--page',
+          'id' => $node->uuid(),
+          'attributes' => [
+            'title' => 'Updated title',
+            'body' => [
+              'value' => 'Hello World … still.',
+              // Intentional typo in the property name!
+              'form' => 'plain_text',
+              // Another intentional typo.
+              // cSpell:disable-next-line
+              'sumary' => 'Boring old "Hello World".',
+              // And finally, one that is completely absurd.
+              'foobarbaz' => '<script>alert("HI!");</script>',
+            ],
+          ],
+        ],
+      ],
+    ];
+    $response = $this->request('PATCH', $url, $request_options);
+
+    // Assert a helpful error response is present.
+    $data = Json::decode((string) $response->getBody());
+    $this->assertSame(422, $response->getStatusCode());
+    $this->assertNotNull($data);
+    // cSpell:disable-next-line
+    $this->assertSame("The properties 'form', 'sumary', 'foobarbaz' do not exist on the 'body' field of type 'text_with_summary'. Writable properties are: 'value', 'format', 'summary'.", $data['errors'][0]['detail']);
+
+    $request_options = [
+      RequestOptions::HEADERS => [
+        'Content-Type' => 'application/vnd.api+json',
+        'Accept' => 'application/vnd.api+json',
+      ],
+      RequestOptions::AUTH => [$user->getAccountName(), $user->pass_raw],
+      RequestOptions::JSON => [
+        'data' => [
+          'type' => 'node--page',
+          'id' => $node->uuid(),
+          'attributes' => [
+            'title' => 'Updated title',
+            'body' => [
+              'value' => 'Hello World … still.',
+              // Intentional typo in the property name!
+              'form' => 'plain_text',
+              // Another intentional typo.
+              // cSpell:disable-next-line
+              'sumary' => 'Boring old "Hello World".',
+            ],
+          ],
+        ],
+      ],
+    ];
+    $response = $this->request('PATCH', $url, $request_options);
+
+    // Assert a helpful error response is present.
+    $data = Json::decode((string) $response->getBody());
+    $this->assertSame(422, $response->getStatusCode());
+    $this->assertNotNull($data);
+    // cSpell:disable-next-line
+    $this->assertSame("The properties 'form', 'sumary' do not exist on the 'body' field of type 'text_with_summary'. Did you mean 'format', 'summary'?", $data['errors'][0]['detail']);
   }
 
 }

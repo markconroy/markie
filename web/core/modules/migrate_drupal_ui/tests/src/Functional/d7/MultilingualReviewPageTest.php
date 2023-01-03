@@ -28,7 +28,6 @@ class MultilingualReviewPageTest extends MultilingualReviewPageTestBase {
     'forum',
     'statistics',
     'syslog',
-    'tracker',
     'update',
     // Test migrations states.
     'migrate_state_finished_test',
@@ -41,9 +40,6 @@ class MultilingualReviewPageTest extends MultilingualReviewPageTestBase {
   protected function setUp(): void {
     parent::setUp();
     $this->loadFixture($this->getModulePath('migrate_drupal') . '/tests/fixtures/drupal7.php');
-
-    // @todo Remove this in https://www.drupal.org/node/3267515
-    \Drupal::service('module_installer')->uninstall(['rdf']);
   }
 
   /**
@@ -134,7 +130,6 @@ class MultilingualReviewPageTest extends MultilingualReviewPageTestBase {
       'Text',
       'Title',
       'Toolbar',
-      'Tracker',
       'Trigger',
       'Update manager',
       'User',
@@ -173,6 +168,8 @@ class MultilingualReviewPageTest extends MultilingualReviewPageTestBase {
       'RDF',
       'References',
       'References UUID',
+      // @todo Remove tracker in https://www.drupal.org/project/drupal/issues/3261452
+      'Tracker',
       'Translation redirect',
       'Translation sets',
       'User mail translation',

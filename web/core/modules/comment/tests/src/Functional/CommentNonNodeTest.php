@@ -120,7 +120,7 @@ class CommentNonNodeTest extends BrowserTestBase {
    * @return \Drupal\comment\CommentInterface
    *   The new comment entity.
    */
-  public function postComment(EntityInterface $entity, $comment, $subject = '', $contact = NULL) {
+  public function postComment(?EntityInterface $entity, $comment, $subject = '', $contact = NULL) {
     $edit = [];
     $edit['comment_body[0][value]'] = $comment;
 
@@ -286,8 +286,7 @@ class CommentNonNodeTest extends BrowserTestBase {
 
     // Test breadcrumb on comment add page.
     $this->drupalGet('comment/reply/entity_test/' . $this->entity->id() . '/comment');
-    $xpath = '//nav[@aria-labelledby="system-breadcrumb"]/ol/li[last()]/a';
-    $this->assertEquals($this->entity->label(), current($this->xpath($xpath))->getText(), 'Last breadcrumb item is equal to node title on comment reply page.');
+    $this->assertSession()->elementTextEquals('xpath', '//nav[@aria-labelledby="system-breadcrumb"]/ol/li[last()]/a', $this->entity->label());
 
     // Post a comment.
     /** @var \Drupal\comment\CommentInterface $comment1 */
@@ -296,18 +295,27 @@ class CommentNonNodeTest extends BrowserTestBase {
 
     // Test breadcrumb on comment reply page.
     $this->drupalGet('comment/reply/entity_test/' . $this->entity->id() . '/comment/' . $comment1->id());
-    $xpath = '//nav[@aria-labelledby="system-breadcrumb"]/ol/li[last()]/a';
-    $this->assertEquals($comment1->getSubject(), current($this->xpath($xpath))->getText(), 'Last breadcrumb item is equal to comment title on comment reply page.');
+    $this->assertSession()->elementTextEquals('xpath', '//nav[@aria-labelledby="system-breadcrumb"]/ol/li[last()]/a', $comment1->getSubject());
 
     // Test breadcrumb on comment edit page.
     $this->drupalGet('comment/' . $comment1->id() . '/edit');
-    $xpath = '//nav[@aria-labelledby="system-breadcrumb"]/ol/li[last()]/a';
-    $this->assertEquals($comment1->getSubject(), current($this->xpath($xpath))->getText(), 'Last breadcrumb item is equal to comment subject on edit page.');
+    $this->assertSession()->elementTextEquals('xpath', '//nav[@aria-labelledby="system-breadcrumb"]/ol/li[last()]/a', $comment1->getSubject());
 
     // Test breadcrumb on comment delete page.
     $this->drupalGet('comment/' . $comment1->id() . '/delete');
-    $xpath = '//nav[@aria-labelledby="system-breadcrumb"]/ol/li[last()]/a';
-    $this->assertEquals($comment1->getSubject(), current($this->xpath($xpath))->getText(), 'Last breadcrumb item is equal to comment subject on delete confirm page.');
+    $this->assertSession()->elementTextEquals('xpath', '//nav[@aria-labelledby="system-breadcrumb"]/ol/li[last()]/a', $comment1->getSubject());
+
+    // Test threading replying to comment #1 creating comment #1_2.
+    $this->drupalGet('comment/reply/entity_test/' . $this->entity->id() . '/comment/' . $comment1->id());
+    $comment1_2 = $this->postComment(NULL, $this->randomMachineName(), $this->randomMachineName());
+    $this->assertTrue($this->commentExists($comment1_2, TRUE), 'Comment #1_2. Reply found.');
+    $this->assertEquals('01.00/', $comment1_2->getThread());
+
+    // Test nested threading replying to comment #1_2 creating comment #1_2_3.
+    $this->drupalGet('comment/reply/entity_test/' . $this->entity->id() . '/comment/' . $comment1_2->id());
+    $comment1_2_3 = $this->postComment(NULL, $this->randomMachineName(), $this->randomMachineName());
+    $this->assertTrue($this->commentExists($comment1_2_3, TRUE), 'Comment #1_2_3. Reply found.');
+    $this->assertEquals('01.00.00/', $comment1_2_3->getThread());
 
     // Unpublish the comment.
     $this->performCommentOperation($comment1, 'unpublish');

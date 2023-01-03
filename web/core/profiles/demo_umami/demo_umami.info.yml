@@ -8,7 +8,7 @@ install:
   - big_pipe
   - block
   - breakpoint
-  - ckeditor
+  - ckeditor5
   - config
   - contextual
   - contact
@@ -34,7 +34,6 @@ install:
   - toolbar
   - field_ui
   - file
-  - rdf
   - views
   - views_ui
   - tour

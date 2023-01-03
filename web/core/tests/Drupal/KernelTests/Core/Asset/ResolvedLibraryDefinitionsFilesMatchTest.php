@@ -60,11 +60,9 @@ class ResolvedLibraryDefinitionsFilesMatchTest extends KernelTestBase {
    * @var string[]
    */
   protected $allThemes = [
-    'bartik',
-    'classy',
+    'claro',
     'olivero',
-    'seven',
-    'stable',
+    'stable9',
     'stark',
   ];
 

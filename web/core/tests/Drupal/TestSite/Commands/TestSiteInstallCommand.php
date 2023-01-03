@@ -14,6 +14,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Component\Filesystem\Filesystem;
 
 /**
  * Command to create a test Drupal site.
@@ -29,6 +30,35 @@ class TestSiteInstallCommand extends Command {
   use TestSetupTrait {
     changeDatabasePrefix as protected changeDatabasePrefixTrait;
   }
+
+  /**
+   * The theme to install as the default for testing.
+   *
+   * Defaults to the install profile's default theme, if it specifies any.
+   */
+  protected $defaultTheme;
+
+  /**
+   * The base URL.
+   */
+  protected $baseUrl;
+
+  /**
+   * The original array of shutdown function callbacks.
+   */
+  protected $originalShutdownCallbacks = [];
+
+  /**
+   * The translation file directory for the test environment.
+   *
+   * This is set in BrowserTestBase::prepareEnvironment().
+   */
+  protected $translationFilesDirectory;
+
+  /**
+   * The config importer that can be used in a test.
+   */
+  protected $configImporter;
 
   /**
    * The install profile to use.
@@ -90,6 +120,18 @@ class TestSiteInstallCommand extends Command {
 
     // Manage site fixture.
     $this->setup($input->getOption('install-profile'), $class_name, $input->getOption('langcode'));
+
+    // Make sure there is an entry in sites.php for the new site.
+    $fs = new Filesystem();
+    if (!$fs->exists($root . '/sites/sites.php')) {
+      $fs->copy($root . '/sites/example.sites.php', $root . '/sites/sites.php');
+    }
+    $parsed = parse_url($base_url);
+    $port = $parsed['port'] ?? 80;
+    $host = $parsed['host'] ?? 'localhost';
+    // Remove 'sites/' from the beginning of the path.
+    $site_path = substr($this->siteDirectory, 6);
+    $fs->appendToFile($root . '/sites/sites.php', "\$sites['$port.$host'] = '$site_path';");
 
     $user_agent = drupal_generate_test_ua($this->databasePrefix);
     if ($input->getOption('json')) {

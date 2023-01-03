@@ -13,6 +13,7 @@ use Drupal\KernelTests\KernelTestBase;
  * location.
  *
  * @group Theme
+ * @group legacy
  */
 class ConfirmClassyCopiesTest extends KernelTestBase {
 
@@ -179,7 +180,6 @@ class ConfirmClassyCopiesTest extends KernelTestBase {
             'file-managed-file.html.twig',
             'text-format-wrapper.html.twig',
             'filter-caption.html.twig',
-            'rdf-metadata.html.twig',
             'help-section.html.twig',
             'progress-bar.html.twig',
             'form-element-label.html.twig',
@@ -714,7 +714,7 @@ class ConfirmClassyCopiesTest extends KernelTestBase {
       ],
       'js' => [
         'media_embed_ckeditor.theme.es6.js' => 'd9fa9e008aff8d4fb0401083bab0a1ad',
-        'media_embed_ckeditor.theme.js' => 'f8e192b79f25d2b61a6ff43b9733ec72',
+        'media_embed_ckeditor.theme.js' => '8abd200fde0284ff70026eb7cc8e412c',
       ],
       'images' => [
         'application-octet-stream.png' => 'fef73511632890590b5ae0a13c99e4bf',
@@ -842,10 +842,10 @@ class ConfirmClassyCopiesTest extends KernelTestBase {
         'views-view-grid.html.twig' => '8f4ea66bf949530d31a79a44f3d87650',
         'views-view-rss.html.twig' => 'f4e49d0d8df01019245c51ff2a4259c2',
         'block--system-branding-block.html.twig' => '558d83af4c06e78f46790e0e18295588',
-        'block--search-form-block.html.twig' => '7fef4c274e4487ba887fdeaa41acb5ca',
-        'block.html.twig' => '9b68163e596c63921119ff8f20c6f157',
+        'block--search-form-block.html.twig' => '4e9d433b954dcea12b307f9edcbbe764',
+        'block.html.twig' => 'c1bce6c31368c08f6f93c687e872f055',
         'block--local-actions-block.html.twig' => '6afe8adb14d3f37ec374400fecd5b809',
-        'block--system-menu-block.html.twig' => '242f41ff8a0f71bbccece61bf8e29e2f',
+        'block--system-menu-block.html.twig' => '084931fef1422cf11a38170702677b0f',
         'block--local-tasks-block.html.twig' => 'd462897ef5c9b6935ce801de122bce30',
       ],
     ];

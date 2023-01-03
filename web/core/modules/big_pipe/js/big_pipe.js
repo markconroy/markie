@@ -4,27 +4,22 @@
 * https://www.drupal.org/node/2815083
 * @preserve
 **/
-
 (function (Drupal, drupalSettings) {
   function mapTextContentToAjaxResponse(content) {
     if (content === '') {
       return false;
     }
-
     try {
       return JSON.parse(content);
     } catch (e) {
       return false;
     }
   }
-
   function bigPipeProcessPlaceholderReplacement(placeholderReplacement) {
     var placeholderId = placeholderReplacement.getAttribute('data-big-pipe-replacement-for-placeholder-with-id');
     var content = placeholderReplacement.textContent.trim();
-
     if (typeof drupalSettings.bigPipePlaceholderIds[placeholderId] !== 'undefined') {
       var response = mapTextContentToAjaxResponse(content);
-
       if (response === false) {
         once.remove('big-pipe', placeholderReplacement);
       } else {
@@ -38,28 +33,24 @@
       }
     }
   }
-
   var interval = drupalSettings.bigPipeInterval || 50;
   var timeoutID;
-
   function bigPipeProcessDocument(context) {
     if (!context.querySelector('script[data-big-pipe-event="start"]')) {
       return false;
     }
-
+    once('big-pipe-early-behaviors', 'body', context).forEach(function (el) {
+      Drupal.attachBehaviors(el);
+    });
     once('big-pipe', 'script[data-big-pipe-replacement-for-placeholder-with-id]', context).forEach(bigPipeProcessPlaceholderReplacement);
-
     if (context.querySelector('script[data-big-pipe-event="stop"]')) {
       if (timeoutID) {
         clearTimeout(timeoutID);
       }
-
       return true;
     }
-
     return false;
   }
-
   function bigPipeProcess() {
     timeoutID = setTimeout(function () {
       if (!bigPipeProcessDocument(document)) {
@@ -67,13 +58,11 @@
       }
     }, interval);
   }
-
   bigPipeProcess();
   window.addEventListener('load', function () {
     if (timeoutID) {
       clearTimeout(timeoutID);
     }
-
     bigPipeProcessDocument(document);
   });
 })(Drupal, drupalSettings);

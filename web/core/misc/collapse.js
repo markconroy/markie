@@ -4,20 +4,16 @@
 * https://www.drupal.org/node/2815083
 * @preserve
 **/
-
 (function ($, Modernizr, Drupal) {
   function CollapsibleDetails(node) {
     this.$node = $(node);
     this.$node.data('details', this);
     var anchor = window.location.hash && window.location.hash !== '#' ? ", ".concat(window.location.hash) : '';
-
     if (this.$node.find(".error".concat(anchor)).length) {
       this.$node.attr('open', true);
     }
-
     this.setupSummaryPolyfill();
   }
-
   $.extend(CollapsibleDetails, {
     instances: []
   });
@@ -35,16 +31,13 @@
     },
     toggle: function toggle() {
       var _this = this;
-
       var isOpen = !!this.$node.attr('open');
       var $summaryPrefix = this.$node.find('> summary span.details-summary-prefix');
-
       if (isOpen) {
         $summaryPrefix.html(Drupal.t('Show'));
       } else {
         $summaryPrefix.html(Drupal.t('Hide'));
       }
-
       setTimeout(function () {
         _this.$node.attr('open', !isOpen);
       }, 0);
@@ -55,18 +48,15 @@
       if (Modernizr.details) {
         return;
       }
-
       once('collapse', 'details', context).forEach(function (detail) {
         detail.classList.add('collapse-processed');
         CollapsibleDetails.instances.push(new CollapsibleDetails(detail));
       });
     }
   };
-
   var handleFragmentLinkClickOrHashChange = function handleFragmentLinkClickOrHashChange(e, $target) {
     $target.parents('details').not('[open]').find('> summary').trigger('click');
   };
-
   $('body').on('formFragmentLinkClickOrHashChange.details', handleFragmentLinkClickOrHashChange);
   Drupal.CollapsibleDetails = CollapsibleDetails;
 })(jQuery, Modernizr, Drupal);

@@ -4,17 +4,14 @@
 * https://www.drupal.org/node/2815083
 * @preserve
 **/
-
 (function ($, Drupal) {
   Drupal.behaviors.menuUiDetailsSummaries = {
     attach: function attach(context) {
       $(context).find('.menu-link-form').drupalSetSummary(function (context) {
         var $context = $(context);
-
         if ($context.find('.js-form-item-menu-enabled input').is(':checked')) {
           return Drupal.checkPlain($context.find('.js-form-item-menu-title input')[0].value);
         }
-
         return Drupal.t('Not in menu');
       });
     }
@@ -27,15 +24,12 @@
         var $checkbox = $this.find('.js-form-item-menu-enabled input');
         var $linkTitle = $context.find('.js-form-item-menu-title input');
         var $title = $this.closest('form').find('.js-form-item-title-0-value input');
-
         if (!($checkbox.length && $linkTitle.length && $title.length)) {
           return;
         }
-
         if ($checkbox.is(':checked') && $linkTitle[0].value.length) {
           $linkTitle.data('menuLinkAutomaticTitleOverridden', true);
         }
-
         $linkTitle.on('keyup', function () {
           $linkTitle.data('menuLinkAutomaticTitleOverridden', true);
         });
@@ -48,7 +42,6 @@
             $linkTitle[0].value = '';
             $linkTitle.removeData('menuLinkAutomaticTitleOverridden');
           }
-
           $checkbox.closest('.vertical-tabs-pane').trigger('summaryUpdated');
           $checkbox.trigger('formUpdated');
         });

@@ -3,8 +3,7 @@
 namespace Drupal\Core\Password;
 
 /**
- * Secure password hashing functions based on the Portable PHP password
- * hashing framework.
+ * Secure hashing functions based on Portable PHP password hashing framework.
  *
  * @see http://www.openwall.com/phpass/
  */
@@ -32,6 +31,8 @@ class PhpassHashedPassword implements PasswordInterface {
   public static $ITOA64 = './0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
 
   /**
+   * Password stretching iteration count.
+   *
    * Specifies the number of times the hashing function will be applied when
    * generating new password hashes. The number of times is calculated by
    * raising 2 to the power of the given value.

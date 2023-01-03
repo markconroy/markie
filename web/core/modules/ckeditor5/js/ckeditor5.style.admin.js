@@ -4,7 +4,6 @@
 * https://www.drupal.org/node/2815083
 * @preserve
 **/
-
 (function ($, Drupal) {
   Drupal.behaviors.ckeditor5StyleSettingsSummary = {
     attach: function attach() {
@@ -13,11 +12,9 @@
         var styleCount = stylesElement.value.split('\n').filter(function (line) {
           return line.trim().length >= 5;
         }).length;
-
         if (styleCount === 0) {
           return Drupal.t('No styles configured');
         }
-
         return Drupal.formatPlural(styleCount, 'One style configured', '@count styles configured');
       });
     }

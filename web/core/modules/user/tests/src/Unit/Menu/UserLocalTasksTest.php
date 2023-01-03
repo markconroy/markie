@@ -12,6 +12,9 @@ use Drupal\Tests\Core\Menu\LocalTaskIntegrationTestBase;
  */
 class UserLocalTasksTest extends LocalTaskIntegrationTestBase {
 
+  /**
+   * {@inheritdoc}
+   */
   protected function setUp(): void {
     $this->directoryList = ['user' => 'core/modules/user'];
     parent::setUp();
@@ -20,7 +23,7 @@ class UserLocalTasksTest extends LocalTaskIntegrationTestBase {
     $entity_type_manager = $this->createMock(EntityTypeManagerInterface::class);
     $entity_type_manager->expects($this->any())
       ->method('getDefinitions')
-      ->will($this->returnValue([]));
+      ->willReturn([]);
     $this->container->set('entity_type.manager', $entity_type_manager);
     $this->container->set('string_translation', $this->getStringTranslationStub());
   }

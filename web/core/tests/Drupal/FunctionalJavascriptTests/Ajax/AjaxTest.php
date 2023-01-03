@@ -22,10 +22,10 @@ class AjaxTest extends WebDriverTestBase {
   protected $defaultTheme = 'stark';
 
   public function testAjaxWithAdminRoute() {
-    \Drupal::service('theme_installer')->install(['stable', 'claro']);
+    \Drupal::service('theme_installer')->install(['stable9', 'claro']);
     $theme_config = \Drupal::configFactory()->getEditable('system.theme');
     $theme_config->set('admin', 'claro');
-    $theme_config->set('default', 'stable');
+    $theme_config->set('default', 'stable9');
     $theme_config->save();
 
     $account = $this->drupalCreateUser(['view the administration theme']);
@@ -39,11 +39,11 @@ class AjaxTest extends WebDriverTestBase {
 
     // Now click the modal, which should also use the admin theme.
     $this->drupalGet('ajax-test/dialog');
-    $assert->pageTextNotContains('Current theme: stable');
+    $assert->pageTextNotContains('Current theme: stable9');
     $this->clickLink('Link 8 (ajax)');
     $assert->assertWaitOnAjaxRequest();
 
-    $assert->pageTextContains('Current theme: stable');
+    $assert->pageTextContains('Current theme: stable9');
     $assert->pageTextNotContains('Current theme: claro');
   }
 
@@ -151,6 +151,51 @@ JS;
 JS;
     $expected = '<div class="div-wrapper-forever"></div>';
     $this->assertInsert('empty', $expected, $custom_wrapper_new_content);
+  }
+
+  /**
+   * Tests that jQuery's global Ajax events are triggered at the correct time.
+   */
+  public function testGlobalEvents() {
+    $session = $this->getSession();
+    $assert = $this->assertSession();
+    $expected_event_order = implode('', ['ajaxSuccess', 'ajaxComplete', 'ajaxStop']);
+
+    $this->drupalGet('ajax-test/global-events');
+
+    // Ensure that a non-Drupal Ajax request triggers the expected events, in
+    // the correct order, a single time.
+    $session->executeScript('jQuery.get(Drupal.url("core/COPYRIGHT.txt"))');
+    $assert->assertWaitOnAjaxRequest();
+    $assert->elementTextEquals('css', '#test_global_events_log', $expected_event_order);
+    $assert->elementTextEquals('css', '#test_global_events_log2', $expected_event_order);
+
+    // Ensure that an Ajax request to a Drupal Ajax response, but that was not
+    // initiated with Drupal.Ajax(), triggers the expected events, in the
+    // correct order, a single time. We expect $expected_event_order to appear
+    // twice in each log element, because Drupal Ajax response commands (such
+    // as the one to clear the log element) are only executed for requests
+    // initiated with Drupal.Ajax(), and these elements already contain the
+    // text that was added above.
+    $session->executeScript('jQuery.get(Drupal.url("ajax-test/global-events/clear-log"))');
+    $assert->assertWaitOnAjaxRequest();
+    $assert->elementTextEquals('css', '#test_global_events_log', str_repeat($expected_event_order, 2));
+    $assert->elementTextEquals('css', '#test_global_events_log2', str_repeat($expected_event_order, 2));
+
+    // Ensure that a Drupal Ajax request triggers the expected events, in the
+    // correct order, a single time.
+    // - We expect the first log element to list the events exactly once,
+    //   because the Ajax response clears it, and we expect the events to be
+    //   triggered after the commands are executed.
+    // - We expect the second log element to list the events exactly three
+    //   times, because it already contains the two from the code that was
+    //   already executed above. This additional log element that isn't cleared
+    //   by the response's command ensures that the events weren't triggered
+    //   additional times before the response commands were executed.
+    $this->click('#test_global_events_drupal_ajax_link');
+    $assert->assertWaitOnAjaxRequest();
+    $assert->elementTextEquals('css', '#test_global_events_log', $expected_event_order);
+    $assert->elementTextEquals('css', '#test_global_events_log2', str_repeat($expected_event_order, 3));
   }
 
   /**

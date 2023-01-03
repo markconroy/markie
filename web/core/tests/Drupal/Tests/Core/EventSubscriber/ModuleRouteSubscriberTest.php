@@ -17,10 +17,13 @@ class ModuleRouteSubscriberTest extends UnitTestCase {
   /**
    * The mock module handler.
    *
-   * @var Drupal\Core\Extension\ModuleHandlerInterface|\PHPUnit\Framework\MockObject\MockObject
+   * @var \Drupal\Core\Extension\ModuleHandlerInterface|\PHPUnit\Framework\MockObject\MockObject
    */
   protected $moduleHandler;
 
+  /**
+   * {@inheritdoc}
+   */
   protected function setUp(): void {
     $this->moduleHandler = $this->createMock('Drupal\Core\Extension\ModuleHandlerInterface');
 

@@ -23,6 +23,8 @@ use PHPUnit\Framework\TestCase;
  * Relevant CVEs:
  * - CVE-2002-1806, ~CVE-2005-0682, ~CVE-2005-2106, CVE-2005-3973,
  *   CVE-2006-1226 (= rev. 1.112?), CVE-2008-0273, CVE-2008-3740.
+ *
+ * @runTestsInSeparateProcesses
  */
 class XssTest extends TestCase {
 
@@ -504,8 +506,8 @@ class XssTest extends TestCase {
   public function providerTestAttributes() {
     return [
       [
-        '<img src="http://example.com/foo.jpg" title="Example: title" alt="Example: alt">',
-        '<img src="http://example.com/foo.jpg" title="Example: title" alt="Example: alt">',
+        '<img src="http://example.com/foo.jpg" title="Example: title" alt="Example: alt" class="md:block">',
+        '<img src="http://example.com/foo.jpg" title="Example: title" alt="Example: alt" class="md:block">',
         'Image tag with alt and title attribute',
         ['img'],
       ],

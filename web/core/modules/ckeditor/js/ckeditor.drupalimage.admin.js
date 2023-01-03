@@ -4,7 +4,6 @@
 * https://www.drupal.org/node/2815083
 * @preserve
 **/
-
 (function ($, Drupal, drupalSettings) {
   Drupal.behaviors.ckeditorDrupalImageSettingsSummary = {
     attach: function attach() {
@@ -17,21 +16,17 @@
         var $scheme = $("".concat(root, "[scheme]\"]:checked"));
         var maxFileSize = maxFileSizeElement.value ? maxFileSizeElement.value : maxFileSizeElement.getAttribute('placeholder');
         var maxDimensions = maxWidth.value && maxHeight.value ? "(".concat(maxWidth.value, "x").concat(maxHeight.value, ")") : '';
-
         if (!$status.is(':checked')) {
           return Drupal.t('Uploads disabled');
         }
-
         var output = '';
         output += Drupal.t('Uploads enabled, max size: @size @dimensions', {
           '@size': maxFileSize,
           '@dimensions': maxDimensions
         });
-
         if ($scheme.length) {
           output += "<br />".concat($scheme.attr('data-label'));
         }
-
         return output;
       });
     }

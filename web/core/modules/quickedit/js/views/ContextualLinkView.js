@@ -4,7 +4,6 @@
 * https://www.drupal.org/node/2815083
 * @preserve
 **/
-
 (function ($, Backbone, Drupal) {
   Drupal.quickedit.ContextualLinkView = Backbone.View.extend({
     events: function events() {
@@ -12,7 +11,6 @@
         event.preventDefault();
         event.target.click();
       }
-
       return {
         'click a': function clickA(event) {
           event.preventDefault();

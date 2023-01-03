@@ -4,7 +4,6 @@
 * https://www.drupal.org/node/2815083
 * @preserve
 **/
-
 (function ($, Drupal, Sortable) {
   Drupal.behaviors.MediaLibraryWidgetSortable = {
     attach: function attach(context) {

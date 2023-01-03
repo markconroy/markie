@@ -172,8 +172,8 @@ simpletest_script_reporter_timer_stop();
 
 // Ensure all test locks are released once finished. If tests are run with a
 // concurrency of 1 the each test will clean up its own lock. Test locks are
-// not released if using a higher concurrency to ensure each test method has
-// unique fixtures.
+// not released if using a higher concurrency to ensure each test has unique
+// fixtures.
 TestDatabase::releaseAllTestLocks();
 
 // Display results before database is cleared.
@@ -275,9 +275,6 @@ All arguments are long options.
               (e.g., 'node')
 
   --class     Run tests identified by specific class names, instead of group names.
-              A specific test method can be added, for example,
-              'Drupal\book\Tests\BookTest::testBookExport'. This argument must
-              be last on the command line.
 
   --file      Run tests identified by specific file names, instead of group names.
               Specify the path and the extension
@@ -548,7 +545,11 @@ function simpletest_script_init() {
   if (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') {
     // Ensure that any and all environment variables are changed to https://.
     foreach ($_SERVER as $key => $value) {
-      $_SERVER[$key] = str_replace('http://', 'https://', $_SERVER[$key]);
+      // Some values are NULL. Non-NULL values which are falsy will not contain
+      // text to replace.
+      if ($value) {
+        $_SERVER[$key] = str_replace('http://', 'https://', $value);
+      }
     }
   }
 
@@ -607,7 +608,7 @@ function simpletest_script_setup_database($new = FALSE) {
     // Remove a possibly existing default connection (from settings.php).
     Database::removeConnection('default');
     try {
-      $databases['default']['default'] = Database::convertDbUrlToConnectionInfo($args['dburl'], DRUPAL_ROOT);
+      $databases['default']['default'] = Database::convertDbUrlToConnectionInfo($args['dburl'], DRUPAL_ROOT, TRUE);
     }
     catch (\InvalidArgumentException $e) {
       simpletest_script_print_error('Invalid --dburl. Reason: ' . $e->getMessage());
@@ -1135,11 +1136,12 @@ function simpletest_script_get_test_list() {
         simpletest_script_print_alternatives($first_group, $all_groups);
         exit(SIMPLETEST_SCRIPT_EXIT_FAILURE);
       }
-      // Ensure our list of tests contains only one entry for each test.
+      // Merge the tests from the groups together.
       foreach ($args['test_names'] as $group_name) {
-        $test_list = array_merge($test_list, array_flip(array_keys($groups[$group_name])));
+        $test_list = array_merge($test_list, array_keys($groups[$group_name]));
       }
-      $test_list = array_flip($test_list);
+      // Ensure our list of tests contains only one entry for each test.
+      $test_list = array_unique($test_list);
     }
   }
 

@@ -22,6 +22,9 @@ class BreakpointDiscoveryTest extends KernelTestBase {
     'breakpoint_module_test',
   ];
 
+  /**
+   * {@inheritdoc}
+   */
   protected function setUp(): void {
     parent::setUp();
     \Drupal::service('theme_installer')->install(['breakpoint_theme_test']);
@@ -185,7 +188,7 @@ class BreakpointDiscoveryTest extends KernelTestBase {
    */
   public function testBreakpointGroups() {
     $expected = [
-      'bartik' => 'Bartik',
+      'olivero' => 'Olivero',
       'breakpoint_module_test' => 'Breakpoint test module',
       'breakpoint_theme_test' => 'Breakpoint test theme',
       'breakpoint_theme_test.group2' => 'breakpoint_theme_test.group2',

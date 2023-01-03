@@ -56,9 +56,6 @@ class Upgrade7Test extends MigrateUpgradeExecuteTestBase {
     $this->nodeStorage->delete($this->nodeStorage->loadMultiple());
 
     $this->loadFixture($this->getModulePath('migrate_drupal') . '/tests/fixtures/drupal7.php');
-
-    // @todo Remove this in https://www.drupal.org/node/3267515
-    \Drupal::service('module_installer')->uninstall(['rdf']);
   }
 
   /**
@@ -216,6 +213,7 @@ class Upgrade7Test extends MigrateUpgradeExecuteTestBase {
       // These modules are in the missing path list because they are installed
       // on the source site but they are not installed on the destination site.
       'Syslog',
+      // @todo Remove tracker in https://www.drupal.org/project/drupal/issues/3261452
       'Tracker',
       'Update manager',
     ];

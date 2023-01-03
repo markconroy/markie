@@ -330,7 +330,7 @@ function node_entity_extra_field_info() {
  * @param string $new_id
  *   The new node type of the nodes.
  *
- * @return
+ * @return int
  *   The number of nodes whose node type field was modified.
  */
 function node_type_update_nodes($old_id, $new_id) {
@@ -814,9 +814,6 @@ function node_form_system_themes_admin_form_submit($form, FormStateInterface $fo
  * Note also that access to create nodes is handled by
  * hook_ENTITY_TYPE_create_access().
  *
- * To see how to write a node access module of your own, see
- * node_access_example.module.
- *
  * @see \Drupal\node\NodeAccessControlHandler
  */
 
@@ -894,7 +891,7 @@ function node_access_grants($op, AccountInterface $account) {
  *   (optional) The user object for the user whose access is being checked. If
  *   omitted, the current user is used. Defaults to NULL.
  *
- * @return
+ * @return bool
  *   TRUE if 'view' access to all nodes is granted, FALSE otherwise.
  *
  * @see hook_node_grants()

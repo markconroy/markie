@@ -50,8 +50,8 @@ use Symfony\Component\Mime\MimeTypes;
  * function example_media_source_info_alter(array &$sources) {
  *   $sources['artwork'] = [
  *     'id' => 'artwork',
- *     'label' => t('Artwork'),
- *     'description' => t('Use artwork from Flickr and DeviantArt.'),
+ *     'label' => $this->t('Artwork'),
+ *     'description' => $this->t('Use artwork from Flickr and DeviantArt.'),
  *     'allowed_field_types' => ['string'],
  *     'default_thumbnail_filename' => 'no-thumbnail.png',
  *     'providers' => ['Deviantart.com', 'Flickr'],
@@ -447,7 +447,9 @@ class OEmbed extends MediaSourceBase implements OEmbedInterface {
       }
     }
     catch (TransferException $e) {
-      $this->logger->warning($e->getMessage());
+      $this->logger->warning('Failed to download remote thumbnail file due to "%error".', [
+        '%error' => $e->getMessage(),
+      ]);
     }
     catch (FileException $e) {
       $this->logger->warning('Could not download remote thumbnail from {url}.', [

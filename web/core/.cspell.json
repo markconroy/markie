@@ -3,7 +3,7 @@
     "language": "en-US",
     "allowCompoundWords": false,
     "ignorePaths": [
-      ".*.json",
+      "**/.*.json",
       ".*ignore",
       "composer.lock",
       "assets/vendor/**",
@@ -25,6 +25,7 @@
       "modules/rdf/tests/fixtures/drupal7.php",
       "modules/search/tests/UnicodeTest.txt",
       "modules/system/tests/logo.svgz",
+      "modules/tracker/tests/fixtures/drupal7.php",
       "node_modules/*",
       "profiles/demo_umami/modules/demo_umami_content/default_content/languages/es/**/*",
       "tests/fixtures/files/*",

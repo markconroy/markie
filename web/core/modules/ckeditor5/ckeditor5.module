@@ -50,10 +50,8 @@ function ckeditor5_help($route_name, RouteMatchInterface $route_match) {
       $output .= '<dt>' . t('Generating accessible content') . '</dt>';
       $output .= '<dd>';
       $output .= '<ul>';
-      // @todo Uncomment this in https://www.drupal.org/project/ckeditor5/issues/3230230
-      // $output .= '<li>' . t('HTML tables can be created with table headers and caption/summary elements.') . '</li>';
-      // @todo Uncomment this in https://www.drupal.org/project/ckeditor5/issues/3222757
-      // $output .= '<li>' . t('Alt text is required by default on images added through CKEditor (note that this can be overridden).') . '</li>';
+      $output .= '<li>' . t('HTML tables can be created with table headers and caption/summary elements.') . '</li>';
+      $output .= '<li>' . t('Alt text is required by default on images added through CKEditor (note that this can be overridden).') . '</li>';
       $output .= '<li>' . t('Semantic HTML5 figure/figcaption are available to add captions to images.') . '</li>';
       $output .= '<li>' . t('To support multilingual page content, CKEditor 5 can be configured to include a language button in the toolbar.') . '</li>';
       $output .= '</ul>';
@@ -425,8 +423,8 @@ function _ckeditor5_get_langcode_mapping($lang = FALSE) {
  */
 function ckeditor5_library_info_alter(&$libraries, $extension) {
   if ($extension === 'filter') {
-    $libraries['drupal.filter.admin']['dependencies'][] = 'ckeditor5/ie11.filter.warnings';
-    $libraries['drupal.filter.admin']['dependencies'][] = 'ckeditor5/drupal.ckeditor5.filter.admin';
+    $libraries['drupal.filter.admin']['dependencies'][] = 'ckeditor5/internal.ie11.filter.warnings';
+    $libraries['drupal.filter.admin']['dependencies'][] = 'ckeditor5/internal.drupal.ckeditor5.filter.admin';
   }
 
   $moduleHandler = \Drupal::moduleHandler();
@@ -435,15 +433,11 @@ function ckeditor5_library_info_alter(&$libraries, $extension) {
     // Add paths to stylesheets specified by a theme's ckeditor5-stylesheets
     // config property.
     $css = _ckeditor5_theme_css();
-    $libraries['drupal.ckeditor5.stylesheets'] = [
+    $libraries['internal.drupal.ckeditor5.stylesheets'] = [
       'css' => [
         'theme' => array_fill_keys(array_values($css), []),
       ],
     ];
-
-    if ($moduleHandler->moduleExists('quickedit')) {
-      $libraries['drupal.ckeditor5']['dependencies'][] = 'ckeditor5/drupal.ckeditor5.quickedit-temporary-work-around';
-    }
   }
 
   if ($extension === 'core') {
@@ -643,7 +637,7 @@ function _ckeditor5_theme_css($theme = NULL): array {
   }
   if (isset($theme) && $theme_path = \Drupal::service('extension.list.theme')->getPath($theme)) {
     $info = \Drupal::service('extension.list.theme')->getExtensionInfo($theme);
-    if (isset($info['ckeditor5-stylesheets'])) {
+    if (isset($info['ckeditor5-stylesheets']) && $info['ckeditor5-stylesheets'] !== FALSE) {
       $css = $info['ckeditor5-stylesheets'];
       foreach ($css as $key => $url) {
         // CSS url is external or relative to Drupal root.

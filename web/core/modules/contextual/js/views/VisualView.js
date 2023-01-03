@@ -4,7 +4,6 @@
 * https://www.drupal.org/node/2815083
 * @preserve
 **/
-
 (function (Drupal, Backbone) {
   Drupal.contextual.VisualView = Backbone.View.extend({
     events: function events() {
@@ -12,7 +11,6 @@
         event.preventDefault();
         event.target.click();
       };
-
       var touchStart = false;
       return {
         touchstart: function touchstart() {
@@ -43,11 +41,9 @@
       var isOpen = this.model.get('isOpen');
       var isVisible = this.model.get('isLocked') || this.model.get('regionIsHovered') || isOpen;
       this.$el.toggleClass('open', isOpen).find('.trigger').toggleClass('visually-hidden', !isVisible);
-
       if ('isOpen' in this.model.changed) {
         this.$el.closest('.contextual-region').find('.contextual .trigger:not(:first)').toggle(!isOpen);
       }
-
       return this;
     }
   });

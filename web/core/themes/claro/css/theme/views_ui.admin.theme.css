@@ -324,7 +324,7 @@ td.group-title {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
-  padding: 0.75rem 0.75rem calc(0.75rem - 0.3125rem);
+  padding: 0.75rem 0.75rem 0.4375rem;
   border-bottom: 1px solid rgba(212, 212, 218, 0.8);
   background-color: #f3f4f9;
 }
@@ -594,29 +594,6 @@ td.group-title {
 .views-ui-dialog .views-offset-top .form-item {
   max-width: 40%;
   margin: 0 0.75rem 0.75rem 0;
-}
-
-.views-ui-dialog .views-progress-indicator {
-  position: absolute;
-  z-index: 1;
-  top: 0;
-  right: 4rem; /* LTR */
-  color: #fff;
-  font-size: 0.702rem;
-  line-height: 4rem;
-}
-
-[dir="rtl"] .views-ui-dialog .views-progress-indicator {
-  right: auto;
-  left: 4rem;
-}
-
-.views-ui-dialog .views-progress-indicator:before {
-  content: "\003C\00A0";
-}
-
-.views-ui-dialog .views-progress-indicator:after {
-  content: "\00A0\003E";
 }
 
 .views-ui-dialog .tabledrag-toggle-weight-wrapper {

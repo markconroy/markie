@@ -1,15 +1,13 @@
 <?php
 
-// phpcs:ignoreFile Portions of this file are a direct copy of
-// \Symfony\Component\DependencyInjection\Container.
-
 namespace Drupal\Core\DependencyInjection;
 
+use Drupal\Component\DependencyInjection\ContainerInterface;
+use Drupal\Component\DependencyInjection\ServiceIdHashTrait;
 use Symfony\Component\DependencyInjection\Alias;
 use Symfony\Component\DependencyInjection\ContainerBuilder as SymfonyContainerBuilder;
 use Symfony\Component\DependencyInjection\Container as SymfonyContainer;
 use Symfony\Component\DependencyInjection\Definition;
-use Symfony\Component\DependencyInjection\LazyProxy\Instantiator\RealServiceInstantiator;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 /**
@@ -19,12 +17,9 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
  *
  * @ingroup container
  */
-class ContainerBuilder extends SymfonyContainerBuilder {
+class ContainerBuilder extends SymfonyContainerBuilder implements ContainerInterface {
 
-  /**
-   * @var \Doctrine\Instantiator\InstantiatorInterface|null
-   */
-  private $proxyInstantiator;
+  use ServiceIdHashTrait;
 
   /**
    * {@inheritdoc}
@@ -32,33 +27,6 @@ class ContainerBuilder extends SymfonyContainerBuilder {
   public function __construct(ParameterBagInterface $parameterBag = NULL) {
     parent::__construct($parameterBag);
     $this->setResourceTracking(FALSE);
-  }
-
-  /**
-   * Retrieves the currently set proxy instantiator or instantiates one.
-   *
-   * @return InstantiatorInterface
-   */
-  private function getProxyInstantiator()
-  {
-    if (!$this->proxyInstantiator) {
-      $this->proxyInstantiator = new RealServiceInstantiator();
-    }
-
-    return $this->proxyInstantiator;
-  }
-
-  /**
-   * A 1to1 copy of parent::shareService.
-   *
-   * @todo https://www.drupal.org/project/drupal/issues/2937010 Since Symfony
-   *   3.4 this is not a 1to1 copy.
-   */
-  protected function shareService(Definition $definition, $service, $id, array &$inlineServices)
-  {
-    if ($definition->isShared()) {
-      $this->services[$lowerId = strtolower($id)] = $service;
-    }
   }
 
   /**
@@ -73,24 +41,13 @@ class ContainerBuilder extends SymfonyContainerBuilder {
    *   services in a frozen builder.
    */
   public function set($id, $service) {
-    if (strtolower($id) !== $id) {
-      throw new \InvalidArgumentException("Service ID names must be lowercase: $id");
-    }
     SymfonyContainer::set($id, $service);
-
-    // Ensure that the _serviceId property is set on synthetic services as well.
-    if (isset($this->services[$id]) && is_object($this->services[$id]) && !isset($this->services[$id]->_serviceId)) {
-      $this->services[$id]->_serviceId = $id;
-    }
   }
 
   /**
    * {@inheritdoc}
    */
-  public function register($id, $class = null): Definition {
-    if (strtolower($id) !== $id) {
-      throw new \InvalidArgumentException("Service ID names must be lowercase: $id");
-    }
+  public function register($id, $class = NULL): Definition {
     $definition = new Definition($class);
     // As of Symfony 5.2 all services are private by default, but in Drupal
     // services are still public by default.
@@ -133,24 +90,6 @@ class ContainerBuilder extends SymfonyContainerBuilder {
       throw new \InvalidArgumentException("Parameter names must be lowercase: $name");
     }
     parent::setParameter($name, $value);
-  }
-
-  /**
-   * A 1to1 copy of parent::callMethod.
-   *
-   * @todo https://www.drupal.org/project/drupal/issues/2937010 Since Symfony
-   *   3.4 this is not a 1to1 copy.
-   */
-  protected function callMethod($service, $call, array &$inlineServices = array()) {
-    $services = self::getServiceConditionals($call[1]);
-
-    foreach ($services as $s) {
-      if (!$this->has($s)) {
-        return;
-      }
-    }
-
-    call_user_func_array(array($service, $call[0]), $this->resolveServices($this->getParameterBag()->resolveValue($call[1])));
   }
 
   /**

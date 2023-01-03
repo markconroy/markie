@@ -11,6 +11,7 @@ use Drupal\Tests\rdf\Traits\RdfParsingTrait;
  * Tests the RDFa markup of filefields.
  *
  * @group rdf
+ * @group legacy
  */
 class FileFieldAttributesTest extends FileFieldTestBase {
 
@@ -56,6 +57,9 @@ class FileFieldAttributesTest extends FileFieldTestBase {
    */
   protected $node;
 
+  /**
+   * {@inheritdoc}
+   */
   protected function setUp(): void {
     parent::setUp();
     $node_storage = $this->container->get('entity_type.manager')->getStorage('node');

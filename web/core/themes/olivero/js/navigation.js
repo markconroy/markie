@@ -4,16 +4,13 @@
 * https://www.drupal.org/node/2815083
 * @preserve
 **/
-
 (function (Drupal, once, tabbable) {
   function isNavOpen(navWrapper) {
     return navWrapper.classList.contains('is-active');
   }
-
   function toggleNav(props, state) {
     var value = !!state;
     props.navButton.setAttribute('aria-expanded', value);
-
     if (value) {
       props.body.classList.add('is-overlay-active');
       props.body.classList.add('is-fixed');
@@ -24,7 +21,6 @@
       props.navWrapper.classList.remove('is-active');
     }
   }
-
   function init(props) {
     props.navButton.setAttribute('aria-controls', props.navWrapperId);
     props.navButton.setAttribute('aria-expanded', 'false');
@@ -52,7 +48,6 @@
         tabbableNavElements.unshift(props.navButton);
         var firstTabbableEl = tabbableNavElements[0];
         var lastTabbableEl = tabbableNavElements[tabbableNavElements.length - 1];
-
         if (e.shiftKey) {
           if (document.activeElement === firstTabbableEl && !props.olivero.isDesktopNav()) {
             lastTabbableEl.focus();
@@ -70,7 +65,6 @@
         props.body.classList.remove('is-overlay-active');
         props.body.classList.remove('is-fixed');
       }
-
       Drupal.olivero.closeAllSubNav();
     });
     props.navWrapper.addEventListener('click', function (e) {
@@ -79,13 +73,11 @@
       }
     });
   }
-
   Drupal.behaviors.oliveroNavigation = {
     attach: function attach(context) {
       var headerId = 'header';
       var header = once('navigation', "#".concat(headerId), context).shift();
       var navWrapperId = 'header-nav';
-
       if (header) {
         var navWrapper = header.querySelector("#".concat(navWrapperId));
         var olivero = Drupal.olivero;

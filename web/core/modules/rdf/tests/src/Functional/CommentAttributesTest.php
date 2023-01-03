@@ -15,6 +15,7 @@ use Drupal\comment\Entity\Comment;
  * Tests the RDFa markup of comments.
  *
  * @group rdf
+ * @group legacy
  */
 class CommentAttributesTest extends CommentTestBase {
 
@@ -52,6 +53,9 @@ class CommentAttributesTest extends CommentTestBase {
    */
   protected $nodeUri;
 
+  /**
+   * {@inheritdoc}
+   */
   protected function setUp(): void {
     parent::setUp();
 

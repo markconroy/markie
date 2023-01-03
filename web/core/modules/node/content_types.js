@@ -4,7 +4,6 @@
 * https://www.drupal.org/node/2815083
 * @preserve
 **/
-
 (function ($, Drupal) {
   Drupal.behaviors.contentTypes = {
     attach: function attach(context) {
@@ -19,11 +18,9 @@
         $(context).find('input[name^="options"]:checked').next('label').each(function () {
           vals.push(Drupal.checkPlain(this.textContent));
         });
-
         if (!$(context).find('#edit-options-status').is(':checked')) {
           vals.unshift(Drupal.t('Not published'));
         }
-
         return vals.join(', ');
       });
       $('#edit-language', context).drupalSetSummary(function (context) {
@@ -40,11 +37,9 @@
         $editContext.find('input:checked').next('label').each(function () {
           vals.push(Drupal.checkPlain(this.textContent));
         });
-
         if (!$editContext.find('#edit-display-submitted').is(':checked')) {
           vals.unshift(Drupal.t("Don't display post information"));
         }
-
         return vals.join(', ');
       });
     }

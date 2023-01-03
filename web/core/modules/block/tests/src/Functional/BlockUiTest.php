@@ -54,6 +54,9 @@ class BlockUiTest extends BrowserTestBase {
    */
   protected $adminUser;
 
+  /**
+   * {@inheritdoc}
+   */
   protected function setUp(): void {
     parent::setUp();
     // Create and log in an administrative user.
@@ -101,9 +104,23 @@ class BlockUiTest extends BrowserTestBase {
     $this->assertSession()->assertEscaped('<strong>Test theme</strong>');
 
     // Ensure that a hidden theme cannot use the block demo page.
-    \Drupal::service('theme_installer')->install(['stable']);
-    $this->drupalGet('admin/structure/block/demo/stable');
+    \Drupal::service('theme_installer')->install(['stable9']);
+    $this->drupalGet('admin/structure/block/demo/stable9');
     $this->assertSession()->statusCodeEquals(404);
+
+    // Delete all blocks and verify saving the block layout results in a
+    // validation error.
+    $block_storage = \Drupal::service('entity_type.manager')->getStorage('block');
+    $blocks = $block_storage->loadMultiple();
+    foreach ($blocks as $block) {
+      $block->delete();
+    }
+    $this->drupalGet('admin/structure/block');
+    $blocks_table = $this->xpath("//tr[@class='block-enabled']");
+    $this->assertEmpty($blocks_table, 'The blocks table is now empty.');
+    $this->submitForm([], 'Save blocks');
+    $this->assertSession()->pageTextContains('No blocks settings to update');
+
   }
 
   /**
@@ -113,14 +130,12 @@ class BlockUiTest extends BrowserTestBase {
     // Visit the blocks admin ui.
     $this->drupalGet('admin/structure/block');
     // Look for the blocks table.
-    $blocks_table = $this->xpath("//table[@id='blocks']");
-    $this->assertNotEmpty($blocks_table, 'The blocks table is being rendered.');
+    $this->assertSession()->elementExists('xpath', "//table[@id='blocks']");
     // Look for test blocks in the table.
     foreach ($this->blockValues as $delta => $values) {
       $block = $this->blocks[$delta];
       $label = $block->label();
-      $element = $this->xpath('//*[@id="blocks"]/tbody/tr[' . $values['tr'] . ']/td[1]/text()');
-      $this->assertEquals($element[0]->getText(), $label, 'The "' . $label . '" block title is set inside the ' . $values['settings']['region'] . ' region.');
+      $this->assertSession()->elementTextEquals('xpath', '//*[@id="blocks"]/tbody/tr[' . $values['tr'] . ']/td[1]/text()', $label);
       // Look for a test block region select form element.
       $this->assertSession()->fieldExists('blocks[' . $values['settings']['id'] . '][region]');
       // Move the test block to the header region.
@@ -141,8 +156,7 @@ class BlockUiTest extends BrowserTestBase {
     // Add a block with a machine name the same as a region name.
     $this->drupalPlaceBlock('system_powered_by_block', ['region' => 'header', 'id' => 'header']);
     $this->drupalGet('admin/structure/block');
-    $element = $this->xpath('//tr[contains(@class, :class)]', [':class' => 'region-title-header']);
-    $this->assertNotEmpty($element);
+    $this->assertSession()->elementExists('xpath', '//tr[contains(@class, "region-title-header")]');
 
     // Ensure hidden themes do not appear in the UI. Enable another non base
     // theme and place the local tasks block.
@@ -150,25 +164,25 @@ class BlockUiTest extends BrowserTestBase {
     $this->drupalPlaceBlock('local_tasks_block', ['region' => 'header', 'theme' => 'stark']);
     // We have to enable at least one extra theme that is not hidden so that
     // local tasks will show up. That's why we enable test_theme_theme.
-    \Drupal::service('theme_installer')->install(['stable', 'test_theme_theme']);
+    \Drupal::service('theme_installer')->install(['stable9', 'test_theme_theme']);
     $this->drupalGet('admin/structure/block');
     $theme_handler = \Drupal::service('theme_handler');
     $this->assertSession()->linkExists($theme_handler->getName('stark'));
     $this->assertSession()->linkExists($theme_handler->getName('test_theme_theme'));
-    $this->assertSession()->linkNotExists($theme_handler->getName('stable'));
+    $this->assertSession()->linkNotExists($theme_handler->getName('stable9'));
 
     // Ensure that a hidden theme cannot use the block demo page.
-    $this->drupalGet('admin/structure/block/list/stable');
+    $this->drupalGet('admin/structure/block/list/stable9');
     $this->assertSession()->statusCodeEquals(404);
 
     // Ensure that a hidden theme set as the admin theme can use the block demo
     // page.
-    \Drupal::configFactory()->getEditable('system.theme')->set('admin', 'stable')->save();
+    \Drupal::configFactory()->getEditable('system.theme')->set('admin', 'stable9')->save();
     \Drupal::service('router.builder')->rebuildIfNeeded();
-    $this->drupalPlaceBlock('local_tasks_block', ['region' => 'header', 'theme' => 'stable']);
+    $this->drupalPlaceBlock('local_tasks_block', ['region' => 'header', 'theme' => 'stable9']);
     $this->drupalGet('admin/structure/block');
-    $this->assertSession()->linkExists($theme_handler->getName('stable'));
-    $this->drupalGet('admin/structure/block/list/stable');
+    $this->assertSession()->linkExists($theme_handler->getName('stable9'));
+    $this->drupalGet('admin/structure/block/list/stable9');
     $this->assertSession()->statusCodeEquals(200);
   }
 
@@ -176,17 +190,9 @@ class BlockUiTest extends BrowserTestBase {
    * Tests the block categories on the listing page.
    */
   public function testCandidateBlockList() {
-    $arguments = [
-      ':title' => 'Display message',
-      ':category' => 'Block test',
-      ':href' => 'admin/structure/block/add/test_block_instantiation/stark',
-    ];
-    $pattern = '//tr[.//td/div[text()=:title] and .//td[text()=:category] and .//td//a[contains(@href, :href)]]';
-
     $this->drupalGet('admin/structure/block');
     $this->clickLink('Place block');
-    $elements = $this->xpath($pattern, $arguments);
-    $this->assertNotEmpty($elements, 'The test block appears in the category for its module.');
+    $this->assertSession()->elementExists('xpath', '//tr[.//td/div[text()="Display message"] and .//td[text()="Block test"] and .//td//a[contains(@href, "admin/structure/block/add/test_block_instantiation/stark")]]');
 
     // Trigger the custom category addition in block_test_block_alter().
     $this->container->get('state')->set('block_test_info_alter', TRUE);
@@ -194,9 +200,7 @@ class BlockUiTest extends BrowserTestBase {
 
     $this->drupalGet('admin/structure/block');
     $this->clickLink('Place block');
-    $arguments[':category'] = 'Custom category';
-    $elements = $this->xpath($pattern, $arguments);
-    $this->assertNotEmpty($elements, 'The test block appears in a custom category controlled by block_test_block_alter().');
+    $this->assertSession()->elementExists('xpath', '//tr[.//td/div[text()="Display message"] and .//td[text()="Custom category"] and .//td//a[contains(@href, "admin/structure/block/add/test_block_instantiation/stark")]]');
   }
 
   /**
@@ -222,17 +226,10 @@ class BlockUiTest extends BrowserTestBase {
     $this->assertSession()->responseNotContains($expected_text);
 
     $block_url = 'admin/structure/block/add/test_context_aware/stark';
-    $arguments = [
-      ':title' => 'Test context-aware block',
-      ':category' => 'Block test',
-      ':href' => $block_url,
-    ];
-    $pattern = '//tr[.//td/div[text()=:title] and .//td[text()=:category] and .//td//a[contains(@href, :href)]]';
 
     $this->drupalGet('admin/structure/block');
     $this->clickLink('Place block');
-    $elements = $this->xpath($pattern, $arguments);
-    $this->assertNotEmpty($elements, 'The context-aware test block appears.');
+    $this->assertSession()->elementExists('xpath', '//tr[.//td/div[text()="Test context-aware block"] and .//td[text()="Block test"] and .//td//a[contains(@href, "' . $block_url . '")]]');
     $definition = \Drupal::service('plugin.manager.block')->getDefinition('test_context_aware');
     $this->assertNotEmpty($definition, 'The context-aware test block exists.');
     $edit = [
@@ -363,10 +360,7 @@ class BlockUiTest extends BrowserTestBase {
     ], 'Save block');
 
     $this->assertSession()->statusMessageContains('Only digits are allowed', 'error');
-
-    $error_class_pattern = '//div[contains(@class,"form-item-settings-digits")]/input[contains(@class,"error")]';
-    $error_class = $this->xpath($error_class_pattern);
-    $this->assertNotEmpty($error_class, 'Plugin error class found in parent form.');
+    $this->assertSession()->elementExists('xpath', '//div[contains(@class,"form-item-settings-digits")]/input[contains(@class,"error")]');
   }
 
   /**

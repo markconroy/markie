@@ -454,7 +454,7 @@ abstract class KernelTestBase extends TestCase implements ServiceProviderInterfa
       throw new \Exception('There is no database connection so no tests can be run. You must provide a SIMPLETEST_DB environment variable to run PHPUnit based functional tests outside of run-tests.sh. See https://www.drupal.org/node/2116263#skipped-tests for more information.');
     }
     else {
-      $database = Database::convertDbUrlToConnectionInfo($db_url, $this->root);
+      $database = Database::convertDbUrlToConnectionInfo($db_url, $this->root, TRUE);
       Database::addConnectionInfo('default', 'default', $database);
     }
 
@@ -701,7 +701,12 @@ abstract class KernelTestBase extends TestCase implements ServiceProviderInterfa
       if (!$this->container->get('module_handler')->moduleExists($module)) {
         throw new \LogicException("$module module is not enabled.");
       }
-      $this->container->get('config.installer')->installDefaultConfig('module', $module);
+      try {
+        $this->container->get('config.installer')->installDefaultConfig('module', $module);
+      }
+      catch (\Exception $e) {
+        throw new \Exception(sprintf('Exception when installing config for module %s, message was: %s', $module, $e->getMessage()), 0, $e);
+      }
     }
   }
 
@@ -981,27 +986,6 @@ abstract class KernelTestBase extends TestCase implements ServiceProviderInterfa
     // together.
     $modules = array_values(array_reverse($modules));
     return call_user_func_array('array_merge_recursive', $modules);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  protected function prepareTemplate(\Text_Template $template) {
-    $bootstrap_globals = '';
-
-    // Fix missing bootstrap.php when $preserveGlobalState is FALSE.
-    // @see https://github.com/sebastianbergmann/phpunit/pull/797
-    $bootstrap_globals .= '$__PHPUNIT_BOOTSTRAP = ' . var_export($GLOBALS['__PHPUNIT_BOOTSTRAP'], TRUE) . ";\n";
-
-    // Avoid repetitive test namespace discoveries to improve performance.
-    // @see /core/tests/bootstrap.php
-    $bootstrap_globals .= '$namespaces = ' . var_export($GLOBALS['namespaces'], TRUE) . ";\n";
-
-    $template->setVar([
-      'constants' => '',
-      'included_files' => '',
-      'globals' => $bootstrap_globals,
-    ]);
   }
 
   /**

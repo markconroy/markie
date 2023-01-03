@@ -58,6 +58,9 @@ class UpdateScriptTest extends BrowserTestBase {
    */
   private $updateUser;
 
+  /**
+   * {@inheritdoc}
+   */
   protected function setUp(): void {
     parent::setUp();
     $this->updateUrl = Url::fromRoute('system.db_update');
@@ -590,9 +593,9 @@ class UpdateScriptTest extends BrowserTestBase {
     // Add some custom languages.
     foreach (['aa', 'bb'] as $language_code) {
       ConfigurableLanguage::create([
-          'id' => $language_code,
-          'label' => $this->randomMachineName(),
-        ])->save();
+        'id' => $language_code,
+        'label' => $this->randomMachineName(),
+      ])->save();
     }
 
     $config = \Drupal::service('config.factory')->getEditable('language.negotiation');

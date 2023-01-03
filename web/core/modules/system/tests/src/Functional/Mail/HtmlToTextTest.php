@@ -25,7 +25,7 @@ class HtmlToTextTest extends BrowserTestBase {
    * @param $text
    *   The text string to convert.
    *
-   * @return
+   * @return string
    *   An HTML representation of the text string that, when displayed in a
    *   browser, represents the PHP source code equivalent of $text.
    */
@@ -304,9 +304,9 @@ EOT;
   public function testDrupalHtmlToTextParagraphs() {
     $tests = [];
     $tests[] = [
-        'html' => "<p>line 1<br />\nline 2<br />line 3\n<br />line 4</p><p>paragraph</p>",
+      'html' => "<p>line 1<br />\nline 2<br />line 3\n<br />line 4</p><p>paragraph</p>",
         // @todo Trailing line breaks should be trimmed.
-        'text' => "line 1\nline 2\nline 3\nline 4\n\nparagraph\n\n",
+      'text' => "line 1\nline 2\nline 3\nline 4\n\nparagraph\n\n",
     ];
     $tests[] = [
       'html' => "<p>line 1<br /> line 2</p> <p>line 4<br /> line 5</p> <p>0</p>",

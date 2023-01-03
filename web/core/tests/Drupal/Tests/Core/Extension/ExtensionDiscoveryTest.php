@@ -127,6 +127,13 @@ class ExtensionDiscoveryTest extends UnitTestCase {
       'core/profiles/minimal/minimal.info.yml' => [
         'type' => 'profile',
       ],
+      'core/themes/test_theme/test_theme.info.yml' => [
+        'type' => 'theme',
+      ],
+      // Override the core instance of the 'test_theme' theme.
+      'sites/default/themes/test_theme/test_theme.info.yml' => [
+        'type' => 'theme',
+      ],
       // Override the core instance of the 'minimal' profile.
       'sites/default/profiles/minimal/minimal.info.yml' => [
         'type' => 'profile',
@@ -141,13 +148,6 @@ class ExtensionDiscoveryTest extends UnitTestCase {
       'core/modules/user/user.info.yml' => [],
       'profiles/other_profile/modules/other_profile_nested_module/other_profile_nested_module.info.yml' => [],
       'core/modules/system/system.info.yml' => [],
-      'core/themes/seven/seven.info.yml' => [
-        'type' => 'theme',
-      ],
-      // Override the core instance of the 'seven' theme.
-      'sites/default/themes/seven/seven.info.yml' => [
-        'type' => 'theme',
-      ],
       'modules/devel/devel.info.yml' => [],
       'modules/poorly_placed_theme/poorly_placed_theme.info.yml' => [
         'type' => 'theme',

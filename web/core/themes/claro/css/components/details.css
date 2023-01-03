@@ -44,6 +44,18 @@
   border-radius: 2px;
   background-color: #fff;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+  /*
+   * The following width and min-width values ensure that the <details> element
+   * does not shift widths when opening, in the event that a parent table
+   * element constrains the width. This can happen when toggling the
+   * "lazy-load" option within an image field.
+   */
+}
+
+td .claro-details {
+  width: min-content;
+  min-width: 100%;
 }
 
 .claro-details--accordion-item,
@@ -199,7 +211,7 @@
 
 /* stylelint-disable-next-line unit-allowed-list */
 
-@media not all and (min-resolution: 0.001dpcm) {
+@media not all and (-webkit-min-device-pixel-ratio: 0), not all and (min-resolution: 0.001dpcm) {
   @supports (-webkit-appearance: none) {
     .claro-details__summary::before {
       transition: none;
@@ -353,7 +365,7 @@
 
 /* stylelint-disable-next-line unit-allowed-list */
 
-@media not all and (min-resolution: 0.001dpcm) {
+@media not all and (-webkit-min-device-pixel-ratio: 0), not all and (min-resolution: 0.001dpcm) {
   @supports (-webkit-appearance: none) {
     .claro-details__summary::after {
       transition: none;

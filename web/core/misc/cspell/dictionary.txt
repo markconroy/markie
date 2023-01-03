@@ -56,7 +56,6 @@ atsign
 attrval
 attrvals
 authless
-authz
 autocompletefocus
 autocompleteresponses
 autocompletesearch
@@ -80,7 +79,6 @@ autoplace
 autoplay
 autoreply
 autorow
-autosave
 autosubmit
 autowire
 autowired
@@ -88,7 +86,6 @@ autowiring
 backlink
 backlinks
 backreferences
-backtraces
 bakeware
 bangpow
 barbar
@@ -116,7 +113,6 @@ behaviour
 bergmann
 berne
 bgblue
-bgcolor
 bggya
 bgred
 bigpipe
@@ -179,8 +175,6 @@ callout
 camelcase
 camelid
 camelids
-camelize
-camelized
 canonicalized
 canonicalizing
 canvastext
@@ -193,7 +187,6 @@ ccyymm
 ccyymmdd
 cette
 cfield
-chainable
 chainedfast
 changelist
 checkboxified
@@ -224,7 +217,6 @@ clearfix
 cleartype
 clicksorter
 clist
-cloner
 closethick
 cnenzrgre
 cnfi
@@ -257,7 +249,6 @@ corefake
 coretest
 corge
 countquery
-cpan
 cpio
 createkey
 createrole
@@ -281,8 +272,6 @@ customly
 customrequest
 cweagans
 cádiz
-dasharray
-dashoffset
 databasefilename
 databasename
 datas
@@ -298,14 +287,12 @@ dblog
 dbtng
 dburl
 ddev
+dealerdirect
 deckard
 deconstructor
-deduplicated
-deduplicates
 defaultable
 defgroup
 delayable
-deletable
 deletedline
 deletee
 deleter
@@ -332,7 +319,6 @@ desaturated
 desaturates
 desaturating
 descripcion
-deserialization
 destructable
 deutsch
 deutscher
@@ -420,7 +406,6 @@ endapply
 endautoescape
 endcode
 endembed
-endfor
 endlink
 endmacro
 endofheader
@@ -438,7 +423,6 @@ entityviewedit
 eridani
 errmode
 errrf
-eslintignore
 espagnol
 estraven
 etag
@@ -500,7 +484,6 @@ flipfit
 floatingspace
 foaf
 foat
-focusring
 fodg
 fodp
 fods
@@ -521,7 +504,6 @@ fourthcolumn
 fozzie
 fqcn
 fraîche
-freenode
 frombracket
 frontpage
 fsdf
@@ -564,8 +546,6 @@ groupwise
 guzzlehttp
 gzipped
 hande
-hardcodes
-hardcoding
 harkonnen
 hasdata
 hasher
@@ -592,7 +572,6 @@ hookname
 horizontalrule
 hosters
 hostnames
-hreflang
 hreflangs
 hrefs
 htkey
@@ -662,7 +641,6 @@ jsonlint
 jssdk
 jumplinks
 juni
-junidecode
 justifyblock
 justifycenter
 justifyleft
@@ -701,15 +679,12 @@ lcode
 leftjoin
 libc
 libellé
-libicu
 libmysqlclient
-libyaml
 licious
 lified
 lightninggreen
 linebreak
 linebreaks
-linecap
 linefeeds
 linkability
 linkback
@@ -737,7 +712,6 @@ loreming
 loremingipsum
 loremipsum
 loremipsumloremipsum
-lowercased
 lowlevel
 lowline
 lrdd
@@ -768,7 +742,6 @@ maxage
 maxdepth
 maximumred
 maxlifetime
-maxsize
 maynot
 mbytes
 mdhash
@@ -778,7 +751,6 @@ mediaimagetextalternativeui
 mediumint
 mediumtext
 membersonly
-menulist
 merhaba
 messagekey
 metainformation
@@ -789,7 +761,6 @@ metatags
 meφω
 miaus
 middlewares
-midgardmvc
 mikey
 milli
 mimetypes
@@ -801,7 +772,6 @@ minky
 minusthick
 missingkey
 missingkeys
-miterlimit
 mjuc
 mlfr
 mlid
@@ -828,7 +798,6 @@ msgctxt
 msgid
 msgstr
 msword
-mtimes
 mucho
 mulrev
 mulrevpub
@@ -874,7 +843,6 @@ negotiatiors
 nemo
 networkerror
 newcol
-newdata
 newfieldinitial
 newnode
 newstr
@@ -907,7 +875,6 @@ nonamespace
 nonconfigurable
 nonexistingfilename
 nonoptional
-nonspacing
 noquotes
 noschema
 nosniff
@@ -919,6 +886,7 @@ notnull
 notsimpletest
 nourriture
 nplurals
+nproc
 ntfs
 nyan
 nyancat
@@ -945,9 +913,7 @@ optionchecker
 orgchart
 ossp
 otsikko
-outdata
 outdent
-outdir
 outro
 overridable
 overrider
@@ -962,7 +928,6 @@ pagecache
 pagetop
 pageviews
 pagina
-pangram
 paramconverter
 parens
 parentlist
@@ -981,11 +946,13 @@ permissionless
 persistable
 phpass
 phpcbf
+phpcodesniffer
 phpcs
 phpdocumentor
 phpfile
 phpserialize
 phpspec
+phpstan
 phpunit
 phpunit's
 pianura
@@ -1022,26 +989,15 @@ poweredby
 powriter
 prebar
 precache
-precompiled
 preconfigure
 preconfigured
-preconnect
 precreated
 predelete
-prefetches
-prefill
-prefilled
-prefilling
-prefills
 prefixsqlite
 prefoo
 preinstall
-preload
 preloadable
-preloads
 preorder
-prepended
-prepending
 prepopulate
 prepopulated
 prepopulates
@@ -1093,7 +1049,6 @@ qzzz
 ragdoll
 ralouphie
 rasterizable
-rasterize
 rasterized
 rasterizes
 rawurlencoded
@@ -1101,7 +1056,6 @@ rdfa
 rdfs
 readmore
 readonlydir
-readystate
 realelement
 realise
 realpaths
@@ -1121,7 +1075,6 @@ referencers
 referer
 refinable
 regexes
-reimplement
 reindex
 reindexing
 reinject
@@ -1136,7 +1089,6 @@ replyto
 resave
 resaved
 resaving
-resizer
 restplugin
 restrictor
 restripe
@@ -1183,7 +1135,6 @@ screenreaders
 scriptable
 scrollbars
 searchdirs
-searchfield
 sebe
 secondcolumn
 seld
@@ -1216,6 +1167,7 @@ skynet
 slashentry
 slashrendererentry
 slatkin
+slevomat
 sloopal
 smacss
 smalldatetime
@@ -1249,10 +1201,10 @@ ssid
 stardivision
 starrrrr
 starterkit
+starterkit's
 starzzzz
 statuscode
 stdclass
-stdlib
 stitle
 streamwrapper
 streamwrappers
@@ -1292,7 +1244,6 @@ subrequests
 subresults
 subselect
 subsequentially
-subseven
 subshell
 substrategies
 subsubtheme
@@ -1314,12 +1265,10 @@ svgz
 svibanj
 swcf
 sxto
-symlinking
 synchronizable
 syrop
 szwr
 tabarnak
-tabbable
 tabbingmanager
 tabledrag
 tableheader
@@ -1390,13 +1339,11 @@ testwithtrailingslash
 textareas
 textboxes
 texte
-textfield
 textfields
 textfile
 textformat
 textgroup
 textwithsummary
-thaana
 themeable
 themename
 themer
@@ -1436,8 +1383,6 @@ toplevel
 topop
 torder
 totalcount
-totranslate
-touchevent
 touchevents
 tparams
 trackback
@@ -1451,7 +1396,6 @@ trid
 troopal
 truecolor
 tsid
-tspan
 turbolinks
 tuvan
 twistie
@@ -1481,7 +1425,6 @@ unbundleable
 unbustable
 uncacheable
 uncategorized
-unchecking
 unclickable
 uncollapsible
 unconfigured
@@ -1498,8 +1441,6 @@ ungroup
 ungroupable
 unhashed
 unhide
-unidecode
-unidecoder
 unindented
 unindexed
 uninstallation
@@ -1561,7 +1502,6 @@ uploaders
 uploadprogress
 uppercased
 upscaling
-upsert
 urandom
 urlalias
 urldecoding
@@ -1584,7 +1524,6 @@ veryfast
 verygreatdrupalmodule
 vfsstream
 vibber
-vids
 viewmode
 viewports
 viewsviewfiles
@@ -1599,9 +1538,7 @@ waitfor
 wcprops
 webassert
 webcal
-webdriver
 webflo
-webfonts
 webheads
 webhosting
 webmention

@@ -4,7 +4,6 @@
 * https://www.drupal.org/node/2815083
 * @preserve
 **/
-
 (function ($, Drupal, window) {
   function TableResponsive(table) {
     this.table = table;
@@ -16,7 +15,6 @@
     this.$table.before($('<div class="tableresponsive-toggle-columns"></div>').append(this.$link));
     $(window).on('resize.tableresponsive', $.proxy(this, 'eventhandlerEvaluateColumnVisibility')).trigger('resize.tableresponsive');
   }
-
   Drupal.behaviors.tableResponsive = {
     attach: function attach(context, settings) {
       once('tableresponsive', 'table.responsive-enabled', context).forEach(function (table) {
@@ -31,12 +29,10 @@
     eventhandlerEvaluateColumnVisibility: function eventhandlerEvaluateColumnVisibility(e) {
       var pegged = parseInt(this.$link.data('pegged'), 10);
       var hiddenLength = this.$headers.filter('.priority-medium:hidden, .priority-low:hidden').length;
-
       if (hiddenLength > 0) {
         this.$link.show();
         this.$link[0].textContent = this.showText;
       }
-
       if (!pegged && hiddenLength === 0) {
         this.$link.hide();
         this.$link[0].textContent = this.hideText;
@@ -47,7 +43,6 @@
       var self = this;
       var $hiddenHeaders = this.$headers.filter('.priority-medium:hidden, .priority-low:hidden');
       this.$revealedCells = this.$revealedCells || $();
-
       if ($hiddenHeaders.length > 0) {
         $hiddenHeaders.each(function (index, element) {
           var $header = $(this);
@@ -69,19 +64,15 @@
           var properties = $cell.attr('style').split(';');
           var newProps = [];
           var match = /^display\s*:\s*none$/;
-
           for (var i = 0; i < properties.length; i++) {
             var prop = properties[i];
             prop.trim();
             var isDisplayNone = match.exec(prop);
-
             if (isDisplayNone) {
               continue;
             }
-
             newProps.push(prop);
           }
-
           $cell.attr('style', newProps.join(';'));
         });
         this.$link[0].textContent = this.showText;

@@ -59,6 +59,9 @@ class EntityQueryRelationshipTest extends EntityKernelTestBase {
    */
   protected $queryResults;
 
+  /**
+   * {@inheritdoc}
+   */
   protected function setUp(): void {
     parent::setUp();
 
@@ -77,7 +80,7 @@ class EntityQueryRelationshipTest extends EntityKernelTestBase {
     $handler_settings = [
       'target_bundles' => [
         $vocabulary->id() => $vocabulary->id(),
-       ],
+      ],
       'auto_create' => TRUE,
     ];
     $this->createEntityReferenceField('entity_test', 'test_bundle', $this->fieldName, NULL, 'taxonomy_term', 'default', $handler_settings);

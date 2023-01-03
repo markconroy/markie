@@ -4,16 +4,13 @@
 * https://www.drupal.org/node/2815083
 * @preserve
 **/
-
 (function (Drupal) {
   var isDesktopNav = Drupal.olivero.isDesktopNav;
   var secondLevelNavMenus = document.querySelectorAll('[data-drupal-selector="primary-nav-menu-item-has-children"]');
-
   function toggleSubNav(topLevelMenuItem, toState) {
     var buttonSelector = '[data-drupal-selector="primary-nav-submenu-toggle-button"]';
     var button = topLevelMenuItem.querySelector(buttonSelector);
     var state = toState !== undefined ? toState : button.getAttribute('aria-expanded') !== 'true';
-
     if (state) {
       if (isDesktopNav()) {
         secondLevelNavMenus.forEach(function (el) {
@@ -22,7 +19,6 @@
           el.querySelector('[data-drupal-selector="primary-nav-menu-🥕"]').classList.remove('is-active-menu-parent');
         });
       }
-
       button.setAttribute('aria-expanded', 'true');
       topLevelMenuItem.querySelector('[data-drupal-selector="primary-nav-menu--level-2"]').classList.add('is-active-menu-parent');
       topLevelMenuItem.querySelector('[data-drupal-selector="primary-nav-menu-🥕"]').classList.add('is-active-menu-parent');
@@ -33,20 +29,16 @@
       topLevelMenuItem.querySelector('[data-drupal-selector="primary-nav-menu-🥕"]').classList.remove('is-active-menu-parent');
     }
   }
-
   Drupal.olivero.toggleSubNav = toggleSubNav;
-
   function handleBlur(e) {
     if (!Drupal.olivero.isDesktopNav()) return;
     setTimeout(function () {
       var menuParentItem = e.target.closest('[data-drupal-selector="primary-nav-menu-item-has-children"]');
-
       if (!menuParentItem.contains(document.activeElement)) {
         toggleSubNav(menuParentItem, false);
       }
     }, 200);
   }
-
   secondLevelNavMenus.forEach(function (el) {
     var button = el.querySelector('[data-drupal-selector="primary-nav-submenu-toggle-button"]');
     button.removeAttribute('aria-hidden');
@@ -77,32 +69,26 @@
     });
     el.addEventListener('blur', handleBlur, true);
   });
-
   function closeAllSubNav() {
     secondLevelNavMenus.forEach(function (el) {
       if (el.contains(document.activeElement)) {
         el.querySelector('[data-drupal-selector="primary-nav-submenu-toggle-button"]').focus();
       }
-
       toggleSubNav(el, false);
     });
   }
-
   Drupal.olivero.closeAllSubNav = closeAllSubNav;
-
   function areAnySubNavsOpen() {
     var subNavsAreOpen = false;
     secondLevelNavMenus.forEach(function (el) {
       var button = el.querySelector('[data-drupal-selector="primary-nav-submenu-toggle-button"]');
       var state = button.getAttribute('aria-expanded') === 'true';
-
       if (state) {
         subNavsAreOpen = true;
       }
     });
     return subNavsAreOpen;
   }
-
   Drupal.olivero.areAnySubNavsOpen = areAnySubNavsOpen;
   document.addEventListener('keyup', function (e) {
     if (e.key === 'Escape' || e.key === 'Esc') {

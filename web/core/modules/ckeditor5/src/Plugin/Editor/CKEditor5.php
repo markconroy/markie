@@ -116,7 +116,7 @@ class CKEditor5 extends EditorBase implements ContainerFactoryPluginInterface {
   protected $logger;
 
   /**
-   * Constructs a CKEditor5 editor plugin.
+   * Constructs a CKEditor 5 editor plugin.
    *
    * @param array $configuration
    *   A configuration array containing information about the plugin instance.
@@ -125,7 +125,7 @@ class CKEditor5 extends EditorBase implements ContainerFactoryPluginInterface {
    * @param mixed $plugin_definition
    *   The plugin implementation definition.
    * @param \Drupal\ckeditor5\Plugin\CKEditor5PluginManagerInterface $ckeditor5_plugin_manager
-   *   The CKEditor5 plugin manager.
+   *   The CKEditor 5 plugin manager.
    * @param \Drupal\Core\Language\LanguageManagerInterface $language_manager
    *   The language manager
    * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
@@ -296,7 +296,7 @@ class CKEditor5 extends EditorBase implements ContainerFactoryPluginInterface {
       // Ensure that CKEditor 5 plugins that need to interact with the Editor
       // config entity are able to access the computed Editor, which was cloned
       // from $form_state->get('editor').
-      // @see \Drupal\ckeditor5\Plugin\CKEditor5Plugin\ImageUpload::buildConfigurationForm
+      // @see \Drupal\ckeditor5\Plugin\CKEditor5Plugin\Image::buildConfigurationForm
       $form_state->set('editor', $editor);
     }
 
@@ -312,7 +312,7 @@ class CKEditor5 extends EditorBase implements ContainerFactoryPluginInterface {
           'warning' => [$css_warning],
         ],
         '#status_headings' => [
-          'warning' => t('Warning message'),
+          'warning' => $this->t('Warning message'),
         ],
       ];
     }
@@ -374,7 +374,7 @@ class CKEditor5 extends EditorBase implements ContainerFactoryPluginInterface {
 
     $editor_settings = $editor->getSettings();
     // This form field requires a JSON-style array of valid toolbar items.
-    // e.g. ["bold","italic","|","uploadImage"].
+    // e.g. ["bold","italic","|","drupalInsertImage"].
     // CKEditor 5 config for toolbar items takes an array of strings which
     // correspond to the keys under toolbar_items in a plugin yml or annotation.
     // @see https://ckeditor.com/docs/ckeditor5/latest/features/toolbar/toolbar.html
@@ -392,7 +392,7 @@ class CKEditor5 extends EditorBase implements ContainerFactoryPluginInterface {
 
     $form['plugin_settings'] = [
       '#type' => 'vertical_tabs',
-      '#title' => $this->t('CKEditor5 plugin settings'),
+      '#title' => $this->t('CKEditor 5 plugin settings'),
       '#id' => 'ckeditor5-plugin-settings',
     ];
 
@@ -633,7 +633,7 @@ class CKEditor5 extends EditorBase implements ContainerFactoryPluginInterface {
       $plugin = $this->ckeditor5PluginManager->getPlugin($plugin_id, NULL);
       // If this plugin is configurable but it has empty default configuration,
       // that means the configuration must be stored out of band.
-      // @see \Drupal\ckeditor5\Plugin\CKEditor5Plugin\ImageUpload
+      // @see \Drupal\ckeditor5\Plugin\CKEditor5Plugin\Image
       // @see editor_image_upload_settings_form()
       $default_configuration = $plugin->defaultConfiguration();
       $configuration_stored_out_of_band = empty($default_configuration);

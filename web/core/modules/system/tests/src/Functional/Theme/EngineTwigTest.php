@@ -28,6 +28,9 @@ class EngineTwigTest extends BrowserTestBase {
    */
   protected $defaultTheme = 'stark';
 
+  /**
+   * {@inheritdoc}
+   */
   protected function setUp(): void {
     parent::setUp();
     \Drupal::service('theme_installer')->install(['test_theme']);
@@ -144,7 +147,7 @@ class EngineTwigTest extends BrowserTestBase {
    */
   public function testTwigAttachLibrary() {
     $this->drupalGet('/twig-theme-test/attach-library');
-    $this->assertSession()->responseContains('ckeditor.js');
+    $this->assertSession()->responseContains('ckeditor5-dll.js');
   }
 
   /**

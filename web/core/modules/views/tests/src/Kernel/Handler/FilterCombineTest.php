@@ -104,13 +104,13 @@ class FilterCombineTest extends ViewsKernelTestBase {
 
     $fields = $view->displayHandlers->get('default')->getOption('fields');
     $view->displayHandlers->get('default')->overrideOption('fields', $fields + [
-        'job' => [
-          'id' => 'job',
-          'table' => 'views_test_data',
-          'field' => 'job',
-          'relationship' => 'none',
-        ],
-      ]);
+      'job' => [
+        'id' => 'job',
+        'table' => 'views_test_data',
+        'field' => 'job',
+        'relationship' => 'none',
+      ],
+    ]);
 
     // Change the filtering.
     $view->displayHandlers->get('default')->overrideOption('filters', [
@@ -155,13 +155,13 @@ class FilterCombineTest extends ViewsKernelTestBase {
 
     $fields = $view->displayHandlers->get('default')->getOption('fields');
     $view->displayHandlers->get('default')->overrideOption('fields', $fields + [
-        'job' => [
-          'id' => 'job',
-          'table' => 'views_test_data',
-          'field' => 'job',
-          'relationship' => 'none',
-        ],
-      ]);
+      'job' => [
+        'id' => 'job',
+        'table' => 'views_test_data',
+        'field' => 'job',
+        'relationship' => 'none',
+      ],
+    ]);
 
     // Set the filtering to allwords and simulate searching for a phrase.
     $view->displayHandlers->get('default')->overrideOption('filters', [
@@ -567,6 +567,61 @@ class FilterCombineTest extends ViewsKernelTestBase {
       ],
     ];
     $this->assertIdenticalResultset($view, $resultset, $this->columnMap);
+  }
+
+  /**
+   * Tests the combine filter when no realName is used.
+   */
+  public function testFilterCombineNoRealName() {
+    $view = Views::getView('test_view');
+    $view->setDisplay();
+
+    $fields = $view->displayHandlers->get('default')->getOption('fields');
+    $view->displayHandlers->get('default')->overrideOption('fields', $fields + [
+      'name_no_id' => [
+        'id' => 'name_no_id',
+        'table' => 'views_test_data',
+        'field' => 'name_fail',
+        'relationship' => 'none',
+      ],
+    ]);
+
+    // Change the filtering.
+    $view->displayHandlers->get('default')->overrideOption('filters', [
+      'age' => [
+        'id' => 'combine',
+        'table' => 'views',
+        'field' => 'combine',
+        'relationship' => 'none',
+        'operator' => 'contains',
+        'fields' => [
+          'name_no_id',
+          'job',
+        ],
+        'value' => 'iNg',
+      ],
+    ]);
+
+    $this->executeView($view);
+    $resultset = [
+      [
+        'name' => 'John',
+        'job' => 'Singer',
+      ],
+      [
+        'name' => 'George',
+        'job' => 'Singer',
+      ],
+      [
+        'name' => 'Ringo',
+        'job' => 'Drummer',
+      ],
+      [
+        'name' => 'Ginger',
+        'job' => NULL,
+      ],
+    ];
+    $this->assertNotIdenticalResultset($view, $resultset, $this->columnMap);
   }
 
   /**

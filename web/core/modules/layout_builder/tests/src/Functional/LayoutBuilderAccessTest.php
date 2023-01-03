@@ -18,6 +18,7 @@ class LayoutBuilderAccessTest extends BrowserTestBase {
   protected static $modules = [
     'layout_builder',
     'block_test',
+    'field_ui',
     'node',
     'user',
   ];
@@ -25,7 +26,7 @@ class LayoutBuilderAccessTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  protected $defaultTheme = 'classy';
+  protected $defaultTheme = 'starterkit_theme';
 
   /**
    * {@inheritdoc}

@@ -4,22 +4,18 @@
 * https://www.drupal.org/node/2815083
 * @preserve
 **/
-
 (function ($, Drupal) {
   Drupal.behaviors.setTimezone = {
     attach: function attach(context, settings) {
       var timezone = once('timezone', '.timezone-detect', context);
-
       if (timezone.length) {
         var tz = new Intl.DateTimeFormat().resolvedOptions().timeZone;
-
         if (tz && $(timezone).find("option[value=\"".concat(tz, "\"]")).length) {
           timezone.forEach(function (item) {
             item.value = tz;
           });
           return;
         }
-
         var dateString = Date();
         var matches = dateString.match(/\(([A-Z]{3,5})\)/);
         var abbreviation = matches ? matches[1] : 0;
@@ -30,7 +26,6 @@
         var offsetJan = dateJan.getTimezoneOffset() * -60;
         var offsetJul = dateJul.getTimezoneOffset() * -60;
         var isDaylightSavingTime;
-
         if (offsetJan === offsetJul) {
           isDaylightSavingTime = '';
         } else if (Math.max(offsetJan, offsetJul) === offsetNow) {
@@ -38,7 +33,6 @@
         } else {
           isDaylightSavingTime = 0;
         }
-
         var path = "system/timezone/".concat(abbreviation, "/").concat(offsetNow, "/").concat(isDaylightSavingTime);
         $.ajax({
           async: false,

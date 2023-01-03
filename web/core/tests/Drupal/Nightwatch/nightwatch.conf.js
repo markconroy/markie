@@ -82,7 +82,9 @@ module.exports = {
       webdriver: {
         start_process: process.env.DRUPAL_TEST_CHROMEDRIVER_AUTOSTART,
         port: process.env.DRUPAL_TEST_WEBDRIVER_PORT,
-        server_path: 'node_modules/.bin/chromedriver',
+        cli_args: process.env.DRUPAL_TEST_WEBDRIVER_CLI_ARGS
+          ? process.env.DRUPAL_TEST_WEBDRIVER_CLI_ARGS.split(' ')
+          : [],
       },
       desiredCapabilities: {
         browserName: 'chrome',

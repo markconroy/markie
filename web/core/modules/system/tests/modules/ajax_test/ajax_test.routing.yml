@@ -93,3 +93,25 @@ ajax_test.focus_first_form:
     _form: '\Drupal\ajax_test\Form\AjaxTestFocusFirstForm'
   requirements:
     _access: 'TRUE'
+
+ajax_test.promise:
+  path: '/ajax-test/promise-form'
+  defaults:
+    _title: 'Ajax Form Command Promise'
+    _form: '\Drupal\ajax_test\Form\AjaxTestFormPromise'
+  requirements:
+    _access: 'TRUE'
+
+ajax_test.global_events:
+  path: '/ajax-test/global-events'
+  defaults:
+    _controller: '\Drupal\ajax_test\Controller\AjaxTestController::globalEvents'
+  requirements:
+    _access: 'TRUE'
+
+ajax_test.global_events_clear_log:
+  path: '/ajax-test/global-events/clear-log'
+  defaults:
+    _controller: '\Drupal\ajax_test\Controller\AjaxTestController::globalEventsClearLog'
+  requirements:
+    _access: 'TRUE'

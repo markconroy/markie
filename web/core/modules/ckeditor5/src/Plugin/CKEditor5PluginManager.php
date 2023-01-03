@@ -8,17 +8,19 @@ use Drupal\ckeditor5\Annotation\CKEditor5Plugin;
 use Drupal\ckeditor5\HTMLRestrictions;
 use Drupal\Component\Annotation\Plugin\Discovery\AnnotationBridgeDecorator;
 use Drupal\Component\Assertion\Inspector;
+use Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Plugin\DefaultPluginManager;
 use Drupal\Core\Plugin\Discovery\AnnotatedClassDiscovery;
+use Drupal\Core\Plugin\Discovery\ContainerDerivativeDiscoveryDecorator;
 use Drupal\Core\Plugin\Discovery\YamlDiscoveryDecorator;
 use Drupal\editor\EditorInterface;
 use Drupal\filter\FilterPluginCollection;
 
 /**
- * Provides a CKEditor5 plugin manager.
+ * Provides a CKEditor 5 plugin manager.
  *
  * @see \Drupal\ckeditor5\Plugin\CKEditor5PluginInterface
  * @see \Drupal\ckeditor5\Plugin\CKEditor5PluginBase
@@ -61,9 +63,53 @@ class CKEditor5PluginManager extends DefaultPluginManager implements CKEditor5Pl
       // supports top-level properties.
       // @see \Drupal\ckeditor5\Plugin\CKEditor5PluginDefinition::label()
       $discovery = new AnnotationBridgeDecorator($discovery, $this->pluginDefinitionAnnotationName);
+      $discovery = new ContainerDerivativeDiscoveryDecorator($discovery);
       $this->discovery = $discovery;
     }
     return $this->discovery;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function processDefinition(&$definition, $plugin_id) {
+    if (!$definition instanceof CKEditor5PluginDefinition) {
+      throw new InvalidPluginDefinitionException($plugin_id, sprintf('The "%s" CKEditor 5 plugin definition must extend %s', $plugin_id, CKEditor5PluginDefinition::class));
+    }
+
+    // A derived plugin will still have the ID of the derivative, rather than
+    // that of the derived plugin ID (`<base plugin ID>:<derivative ID>`).
+    // Generate an updated CKEditor5PluginDefinition.
+    // @see \Drupal\Component\Plugin\Discovery\DerivativeDiscoveryDecorator::encodePluginId()
+    // @todo Remove this in https://www.drupal.org/project/drupal/issues/2458769.
+    $is_derived = $definition->id() !== $plugin_id;
+    if ($is_derived) {
+      $definition = new CKEditor5PluginDefinition(['id' => $plugin_id] + $definition->toArray());
+    }
+
+    $expected_prefix = sprintf("%s_", $definition->getProvider());
+    $id = $definition->id();
+    if (strpos($id, $expected_prefix) !== 0) {
+      throw new InvalidPluginDefinitionException($id, sprintf('The "%s" CKEditor 5 plugin definition must have a plugin ID that starts with "%s".', $id, $expected_prefix));
+    }
+
+    try {
+      $definition->validateCKEditor5Aspects($id, $definition->toArray());
+      $definition->validateDrupalAspects($id, $definition->toArray());
+    }
+    catch (InvalidPluginDefinitionException $e) {
+      // If this exception is thrown for a derived CKEditor 5 plugin definition,
+      // it means the deriver did not generate a valid plugin definition.
+      // Re-throw the exception, but tweak the language for DX: clarify it is
+      // for a derived plugin definition.
+      if ($is_derived) {
+        throw new InvalidPluginDefinitionException($e->getPluginId(), str_replace('plugin definition', 'derived plugin definition', $e->getMessage()));
+      }
+      // Otherwise, the exception was appropriate: re-throw it.
+      throw $e;
+    }
+
+    parent::processDefinition($definition, $plugin_id);
   }
 
   /**
@@ -110,7 +156,7 @@ class CKEditor5PluginManager extends DefaultPluginManager implements CKEditor5Pl
   public function getAdminLibraries(): array {
     $list = $this->mergeDefinitionValues('getAdminLibrary', $this->getDefinitions());
     // Include main admin library.
-    array_unshift($list, 'ckeditor5/admin');
+    array_unshift($list, 'ckeditor5/internal.admin');
     return $list;
   }
 
@@ -121,7 +167,7 @@ class CKEditor5PluginManager extends DefaultPluginManager implements CKEditor5Pl
     $list = $this->mergeDefinitionValues('getLibrary', $this->getEnabledDefinitions($editor));
     $list = array_unique($list);
     // Include main library.
-    array_unshift($list, 'ckeditor5/drupal.ckeditor5');
+    array_unshift($list, 'ckeditor5/internal.drupal.ckeditor5');
     sort($list);
     return $list;
   }
@@ -432,10 +478,7 @@ class CKEditor5PluginManager extends DefaultPluginManager implements CKEditor5Pl
 
         case 'imageUploadStatus':
           $image_upload_status = $editor->getImageUploadSettings()['status'] ?? FALSE;
-          if (!$image_upload_status) {
-            return TRUE;
-          }
-          break;
+          return $image_upload_status !== $required_value;
 
         case 'filter':
           $filters = $editor->getFilterFormat()->filters();

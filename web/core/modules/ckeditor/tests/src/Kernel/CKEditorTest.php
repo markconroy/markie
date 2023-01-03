@@ -11,6 +11,7 @@ use Drupal\filter\Entity\FilterFormat;
  * Tests for the 'CKEditor' text editor plugin.
  *
  * @group ckeditor
+ * @group legacy
  */
 class CKEditorTest extends KernelTestBase {
 
@@ -49,6 +50,9 @@ class CKEditorTest extends KernelTestBase {
    */
   protected $manager;
 
+  /**
+   * {@inheritdoc}
+   */
   protected function setUp(): void {
     parent::setUp();
     $this->fileUrlGenerator = $this->container->get('file_url_generator');

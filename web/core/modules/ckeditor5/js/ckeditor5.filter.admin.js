@@ -4,7 +4,6 @@
 * https://www.drupal.org/node/2815083
 * @preserve
 **/
-
 (function (Drupal, once) {
   Drupal.behaviors.allowedTagsListener = {
     attach: function attach(context) {
@@ -18,18 +17,15 @@
     }
   };
   var originalAjaxEventResponse = Drupal.Ajax.prototype.eventResponse;
-
   Drupal.Ajax.prototype.eventResponse = function ckeditor5AjaxEventResponse() {
     if (this.ckeditor5_only) {
       if (this.$form[0].querySelector('#edit-editor-editor').value !== 'ckeditor5') {
         return;
       }
     }
-
     for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
       args[_key] = arguments[_key];
     }
-
     originalAjaxEventResponse.apply(this, args);
   };
 })(Drupal, once);

@@ -19,6 +19,7 @@ use Drupal\Tests\TestFileCreationTrait;
  * in-place editors.
  *
  * @group quickedit
+ * @group legacy
  */
 class QuickEditLoadingTest extends WebDriverTestBase {
 
@@ -44,7 +45,7 @@ class QuickEditLoadingTest extends WebDriverTestBase {
   /**
    * {@inheritdoc}
    */
-  protected $defaultTheme = 'classy';
+  protected $defaultTheme = 'starterkit_theme';
 
   /**
    * A user with permissions to create and edit articles.

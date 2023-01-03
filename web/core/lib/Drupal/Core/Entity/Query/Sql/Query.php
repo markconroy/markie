@@ -41,8 +41,9 @@ class Query extends QueryBase implements QueryInterface {
   protected $sqlFields = [];
 
   /**
-   * An array of strings added as to the group by, keyed by the string to avoid
-   * duplicates.
+   * An array of strings for the SQL 'group by' operation.
+   *
+   * Array is keyed by the string to avoid duplicates.
    *
    * @var array
    */
@@ -263,7 +264,7 @@ class Query extends QueryBase implements QueryInterface {
    */
   protected function result() {
     if ($this->count) {
-      return $this->sqlQuery->countQuery()->execute()->fetchField();
+      return (int) $this->sqlQuery->countQuery()->execute()->fetchField();
     }
     // Return a keyed array of results. The key is either the revision_id or
     // the entity_id depending on whether the entity type supports revisions.

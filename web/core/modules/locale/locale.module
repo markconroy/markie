@@ -117,14 +117,16 @@ const LOCALE_TRANSLATION_STATUS_TTL = 600;
 const LOCALE_TRANSLATION_OVERWRITE_ALL = 'all';
 
 /**
- * UI option for override of existing translations. Only override non-customized
- * translations.
+ * UI option for override of existing translations.
+ *
+ * Only override non-customized translations.
  */
 const LOCALE_TRANSLATION_OVERWRITE_NON_CUSTOMIZED = 'non_customized';
 
 /**
- * UI option for override of existing translations. Don't override existing
- * translations.
+ * UI option for override of existing translations.
+ *
+ * Don't override existing translations.
  */
 const LOCALE_TRANSLATION_OVERWRITE_NONE = 'none';
 
@@ -902,7 +904,7 @@ function locale_translation_get_status($projects = NULL, $langcodes = NULL) {
 function locale_translation_status_save($project, $langcode, $type, $data) {
   // Load the translation status or build it if not already available.
   \Drupal::moduleHandler()->loadInclude('locale', 'inc', 'locale.translation');
-  $status = locale_translation_get_status();
+  $status = locale_translation_get_status([$project]);
   if (empty($status)) {
     $projects = locale_translation_get_projects([$project]);
     if (isset($projects[$project])) {
@@ -912,6 +914,7 @@ function locale_translation_status_save($project, $langcode, $type, $data) {
 
   // Merge the new status data with the existing status.
   if (isset($status[$project][$langcode])) {
+    $request_time = \Drupal::time()->getRequestTime();
     switch ($type) {
       case LOCALE_TRANSLATION_REMOTE:
       case LOCALE_TRANSLATION_LOCAL:
@@ -923,14 +926,14 @@ function locale_translation_status_save($project, $langcode, $type, $data) {
         if (isset($data->timestamp) && $data->timestamp) {
           if ($data->timestamp > $status[$project][$langcode]->timestamp) {
             $status[$project][$langcode]->timestamp = $data->timestamp;
-            $status[$project][$langcode]->last_checked = REQUEST_TIME;
+            $status[$project][$langcode]->last_checked = $request_time;
             $status[$project][$langcode]->type = $type;
           }
         }
         break;
 
       case LOCALE_TRANSLATION_CURRENT:
-        $data->last_checked = REQUEST_TIME;
+        $data->last_checked = $request_time;
         $status[$project][$langcode]->timestamp = $data->timestamp;
         $status[$project][$langcode]->last_checked = $data->last_checked;
         $status[$project][$langcode]->type = $type;
@@ -939,7 +942,7 @@ function locale_translation_status_save($project, $langcode, $type, $data) {
     }
 
     \Drupal::keyValue('locale.translation_status')->set($project, $status[$project]);
-    \Drupal::state()->set('locale.translation_last_checked', REQUEST_TIME);
+    \Drupal::state()->set('locale.translation_last_checked', $request_time);
   }
 }
 
@@ -1053,7 +1056,7 @@ function _locale_refresh_translations($langcodes, $lids = []) {
   if (!empty($langcodes)) {
     // Update javascript translations if any of the strings has a javascript
     // location, or if no string ids were provided, update all languages.
-    if (empty($lids) || ($strings = \Drupal::service('locale.storage')->getStrings(['lid' => $lids, 'type' => 'javascript']))) {
+    if (empty($lids) || !empty(\Drupal::service('locale.storage')->getStrings(['lid' => $lids, 'type' => 'javascript']))) {
       array_map('_locale_invalidate_js', $langcodes);
     }
   }

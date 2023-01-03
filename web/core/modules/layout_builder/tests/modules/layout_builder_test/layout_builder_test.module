@@ -98,6 +98,27 @@ function layout_builder_test_form_layout_builder_configure_block_alter(&$form, F
 }
 
 /**
+ * Implements hook_form_BASE_FORM_ID_alter() for layout_builder_configure_section.
+ */
+function layout_builder_test_form_layout_builder_configure_section_alter(&$form, FormStateInterface $form_state, $form_id) {
+  /** @var \Drupal\layout_builder\Form\ConfigureSectionForm $form_object */
+  $form_object = $form_state->getFormObject();
+
+  $form['layout_builder_test']['storage'] = [
+    '#type' => 'item',
+    '#title' => 'Layout Builder Storage: ' . $form_object->getSectionStorage()->getStorageId(),
+  ];
+  $form['layout_builder_test']['section'] = [
+    '#type' => 'item',
+    '#title' => 'Layout Builder Section: ' . $form_object->getCurrentSection()->getLayoutId(),
+  ];
+  $form['layout_builder_test']['layout'] = [
+    '#type' => 'item',
+    '#title' => 'Layout Builder Layout: ' . $form_object->getCurrentLayout()->getPluginId(),
+  ];
+}
+
+/**
  * Implements hook_entity_form_display_alter().
  */
 function layout_builder_entity_form_display_alter(EntityFormDisplayInterface $form_display, array $context) {
@@ -108,6 +129,30 @@ function layout_builder_entity_form_display_alter(EntityFormDisplayInterface $fo
         'display_label' => TRUE,
       ],
     ]);
+  }
+}
+
+/**
+ * Implements hook_preprocess_HOOK() for one-column layout template.
+ */
+function layout_builder_test_preprocess_layout__onecol(&$vars) {
+  if (!empty($vars['content']['#entity'])) {
+    $vars['content']['content'][\Drupal::service('uuid')->generate()] = [
+      '#type' => 'markup',
+      '#markup' => sprintf('Yes, I can access the %s', $vars['content']['#entity']->label()),
+    ];
+  }
+}
+
+/**
+ * Implements hook_preprocess_HOOK() for two-column layout template.
+ */
+function layout_builder_test_preprocess_layout__twocol_section(&$vars) {
+  if (!empty($vars['content']['#entity'])) {
+    $vars['content']['first'][\Drupal::service('uuid')->generate()] = [
+      '#type' => 'markup',
+      '#markup' => sprintf('Yes, I can access the entity %s in two column', $vars['content']['#entity']->label()),
+    ];
   }
 }
 
@@ -130,4 +175,15 @@ function layout_builder_test_module_implements_alter(&$implementations, $hook) {
       'layout_builder_test' => $group,
     ] + $implementations;
   }
+}
+
+/**
+ * Implements hook_theme().
+ */
+function layout_builder_test_theme() {
+  return [
+    'block__preview_aware_block' => [
+      'base hook' => 'block',
+    ],
+  ];
 }

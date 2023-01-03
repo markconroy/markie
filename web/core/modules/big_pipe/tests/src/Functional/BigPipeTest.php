@@ -376,13 +376,13 @@ class BigPipeTest extends BrowserTestBase {
       $placeholder_positions[$pos] = $big_pipe_placeholder_id;
       // Verify expected placeholder replacement.
       $expected_placeholder_replacement = '<script type="application/vnd.drupal-ajax" data-big-pipe-replacement-for-placeholder-with-id="' . $big_pipe_placeholder_id . '">';
-      $result = $this->xpath('//script[@data-big-pipe-replacement-for-placeholder-with-id=:id]', [':id' => Html::decodeEntities($big_pipe_placeholder_id)]);
+      $xpath = '//script[@data-big-pipe-replacement-for-placeholder-with-id="' . Html::decodeEntities($big_pipe_placeholder_id) . '"]';
       if ($expected_ajax_response === NULL) {
-        $this->assertCount(0, $result);
+        $this->assertSession()->elementNotExists('xpath', $xpath);
         $this->assertSession()->responseNotContains($expected_placeholder_replacement);
         continue;
       }
-      $this->assertEquals($expected_ajax_response, trim($result[0]->getText()));
+      $this->assertSession()->elementTextContains('xpath', $xpath, $expected_ajax_response);
       $this->assertSession()->responseContains($expected_placeholder_replacement);
       $pos = strpos($this->getSession()->getPage()->getContent(), $expected_placeholder_replacement);
       $placeholder_replacement_positions[$pos] = $big_pipe_placeholder_id;
@@ -414,9 +414,9 @@ class BigPipeTest extends BrowserTestBase {
     array_unshift($expected_stream_order, BigPipe::START_SIGNAL);
     array_push($expected_stream_order, BigPipe::STOP_SIGNAL);
     $actual_stream_order = $placeholder_replacement_positions + [
-        $start_signal_position => BigPipe::START_SIGNAL,
-        $stop_signal_position => BigPipe::STOP_SIGNAL,
-      ];
+      $start_signal_position => BigPipe::START_SIGNAL,
+      $stop_signal_position => BigPipe::STOP_SIGNAL,
+    ];
     ksort($actual_stream_order, SORT_NUMERIC);
     $this->assertEquals($expected_stream_order, array_values($actual_stream_order));
   }

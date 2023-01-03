@@ -34,6 +34,9 @@ class SessionCacheContextTest extends UnitTestCase {
    */
   protected $session;
 
+  /**
+   * {@inheritdoc}
+   */
   public function setUp(): void {
     $this->request = new Request();
 
@@ -54,7 +57,7 @@ class SessionCacheContextTest extends UnitTestCase {
     $session_id = 'aSebeZ52bbM6SvADurQP89SFnEpxY6j8';
     $this->session->expects($this->exactly(2))
       ->method('getId')
-      ->will($this->returnValue($session_id));
+      ->willReturn($session_id);
 
     $context1 = $cache_context->getContext();
     $context2 = $cache_context->getContext();

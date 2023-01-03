@@ -233,7 +233,7 @@ class WebAssert extends MinkWebAssert {
       throw new ElementNotFoundException($this->session->getDriver(), 'select', 'id|name|label|value', $select);
     }
 
-    $option_field = $select_field->find('named', ['option', $option]);
+    $option_field = $select_field->find('named_exact', ['option', $option]);
 
     if ($option_field === NULL) {
       throw new ElementNotFoundException($this->session->getDriver(), 'select', 'id|name|label|value', $option);
@@ -269,7 +269,7 @@ class WebAssert extends MinkWebAssert {
       throw new ElementNotFoundException($this->session->getDriver(), 'select', 'id|name|label|value', $select);
     }
 
-    $option_field = $select_field->find('named', ['option', $option]);
+    $option_field = $select_field->find('named_exact', ['option', $option]);
 
     $this->assert($option_field === NULL, sprintf('An option "%s" exists in select "%s", but it should not.', $option, $select));
   }
@@ -1237,9 +1237,12 @@ class WebAssert extends MinkWebAssert {
         $aria_label = 'Warning message';
     }
 
-    if ($message && $aria_label) {
-      $selector = $this->buildXPathQuery($selector . '//div[contains(@aria-label, :aria_label) and contains(., :message)]', [
+    if ($message && $aria_label && $type) {
+      $selector = $this->buildXPathQuery($selector . '//div[(contains(@aria-label, :aria_label) or contains(@aria-labelledby, :type)) and contains(., :message)]', [
+        // Value of the 'aria-label' attribute, used in Seven and Bartik
         ':aria_label' => $aria_label,
+        // Value of the 'aria-labelledby' attribute, used in Claro and Olivero.
+        ':type' => $type,
         ':message' => $message,
       ]);
     }

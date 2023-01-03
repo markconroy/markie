@@ -41,30 +41,28 @@ class Sql extends QueryPluginBase {
   public $tables = [];
 
   /**
-   * Holds an array of relationships, which are aliases of the primary
-   * table that represent different ways to join the same table in.
+   * Holds an array of relationships.
+   *
+   * These are aliases of the primary table that represent different ways to
+   * join the same table in.
    */
   public $relationships = [];
 
   /**
-   * An array of sections of the WHERE query. Each section is in itself
-   * an array of pieces and a flag as to whether or not it should be AND
-   * or OR.
+   * An array of sections of the WHERE query.
+   *
+   * Each section is in itself an array of pieces and a flag as to whether or
+   * not it should be AND or OR.
    */
+
   public $where = [];
   /**
-   * An array of sections of the HAVING query. Each section is in itself
-   * an array of pieces and a flag as to whether or not it should be AND
-   * or OR.
+   * An array of sections of the HAVING query.
+   *
+   * Each section is in itself an array of pieces and a flag as to whether or
+   * not it should be AND or OR.
    */
   public $having = [];
-  /**
-   * The default operator to use when connecting the WHERE groups. May be
-   * AND or OR.
-   *
-   * @var string
-   */
-  protected $groupOperator = 'AND';
 
   /**
    * A simple array of order by clauses.
@@ -154,6 +152,9 @@ class Sql extends QueryPluginBase {
    *   The messenger.
    */
   public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityTypeManagerInterface $entity_type_manager, DateSqlInterface $date_sql, MessengerInterface $messenger) {
+    // By default, use AND operator to connect WHERE groups.
+    $this->groupOperator = 'AND';
+
     parent::__construct($configuration, $plugin_id, $plugin_definition);
 
     $this->entityTypeManager = $entity_type_manager;
@@ -579,7 +580,7 @@ class Sql extends QueryPluginBase {
    * @param \Drupal\views\Plugin\views\join\JoinPluginBase $join
    *   A Join object (or derived object) to join the alias in.
    *
-   * @return
+   * @return string|null
    *   The alias used to refer to this specific table, or NULL if the table
    *   cannot be ensured.
    */
@@ -1351,7 +1352,7 @@ class Sql extends QueryPluginBase {
     $entity_information = $this->getEntityTableInfo();
     if ($entity_information) {
       $params = [];
-      if ($groupby) {
+      if ($this->hasAggregate) {
         // Handle grouping, by retrieving the minimum entity_id.
         $params = [
           'function' => 'min',

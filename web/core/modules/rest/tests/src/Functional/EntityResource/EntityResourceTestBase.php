@@ -85,6 +85,8 @@ abstract class EntityResourceTestBase extends ResourceTestBase {
   protected static $patchProtectedFieldNames;
 
   /**
+   * The unique field names.
+   *
    * The fields that need a different (random) value for each new entity created
    * by a POST request.
    *
@@ -93,6 +95,8 @@ abstract class EntityResourceTestBase extends ResourceTestBase {
   protected static $uniqueFieldNames = [];
 
   /**
+   * The field name for the label.
+   *
    * Optionally specify which field is the 'label' field. Some entities do not
    * specify a 'label' entity key. For example: User.
    *
@@ -519,19 +523,18 @@ abstract class EntityResourceTestBase extends ResourceTestBase {
     // @see \Drupal\rest\EventSubscriber\ResourceResponseSubscriber::flattenResponse()
     $cache_items = $this->container->get('database')
       ->select('cache_dynamic_page_cache', 'c')
-      ->fields('c', ['cid', 'data'])
+      ->fields('c', ['data'])
       ->condition('c.cid', '%[route]=rest.%', 'LIKE')
       ->execute()
-      ->fetchAllAssoc('cid');
+      ->fetchAll();
     if (!$is_cacheable_by_dynamic_page_cache) {
       $this->assertCount(0, $cache_items);
     }
     else {
-      $this->assertCount(2, $cache_items);
-      $found_cache_redirect = FALSE;
+      $this->assertLessThanOrEqual(2, count($cache_items));
       $found_cached_200_response = FALSE;
       $other_cached_responses_are_4xx = TRUE;
-      foreach ($cache_items as $cid => $cache_item) {
+      foreach ($cache_items as $cache_item) {
         $cached_data = unserialize($cache_item->data);
         if (!isset($cached_data['#cache_redirect'])) {
           $cached_response = $cached_data['#response'];
@@ -544,11 +547,7 @@ abstract class EntityResourceTestBase extends ResourceTestBase {
           $this->assertNotInstanceOf(ResourceResponseInterface::class, $cached_response);
           $this->assertInstanceOf(CacheableResponseInterface::class, $cached_response);
         }
-        else {
-          $found_cache_redirect = TRUE;
-        }
       }
-      $this->assertTrue($found_cache_redirect);
       $this->assertTrue($found_cached_200_response);
       $this->assertTrue($other_cached_responses_are_4xx);
     }
