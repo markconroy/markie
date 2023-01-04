@@ -3,7 +3,7 @@
 /*
  * This file is part of Psy Shell.
  *
- * (c) 2012-2022 Justin Hileman
+ * (c) 2012-2020 Justin Hileman
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -30,7 +30,7 @@ class ThrowUpException extends \Exception implements Exception
      *
      * @return string
      */
-    public function getRawMessage(): string
+    public function getRawMessage()
     {
         return $this->getPrevious()->getMessage();
     }
@@ -40,9 +40,9 @@ class ThrowUpException extends \Exception implements Exception
      *
      * @param \Throwable $throwable
      *
-     * @return self
+     * @return ThrowUpException
      */
-    public static function fromThrowable($throwable): self
+    public static function fromThrowable($throwable)
     {
         if ($throwable instanceof \Error) {
             $throwable = ErrorException::fromError($throwable);

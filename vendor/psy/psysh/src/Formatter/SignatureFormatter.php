@@ -3,7 +3,7 @@
 /*
  * This file is part of Psy Shell.
  *
- * (c) 2012-2022 Justin Hileman
+ * (c) 2012-2020 Justin Hileman
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -31,7 +31,7 @@ class SignatureFormatter implements ReflectorFormatter
      *
      * @return string Formatted signature
      */
-    public static function format(\Reflector $reflector): string
+    public static function format(\Reflector $reflector)
     {
         switch (true) {
             case $reflector instanceof \ReflectionFunction:
@@ -67,7 +67,7 @@ class SignatureFormatter implements ReflectorFormatter
      *
      * @return string Formatted name
      */
-    public static function formatName(\Reflector $reflector): string
+    public static function formatName(\Reflector $reflector)
     {
         return $reflector->getName();
     }
@@ -79,8 +79,16 @@ class SignatureFormatter implements ReflectorFormatter
      *
      * @return string Formatted modifiers
      */
-    private static function formatModifiers(\Reflector $reflector): string
+    private static function formatModifiers(\Reflector $reflector)
     {
+        if ($reflector instanceof \ReflectionClass && $reflector->isTrait()) {
+            // For some reason, PHP 5.x returns `abstract public` modifiers for
+            // traits. Let's just ignore that business entirely.
+            if (\version_compare(\PHP_VERSION, '7.0.0', '<')) {
+                return '';
+            }
+        }
+
         return \implode(' ', \array_map(function ($modifier) {
             return \sprintf('<keyword>%s</keyword>', $modifier);
         }, \Reflection::getModifierNames($reflector->getModifiers())));
@@ -93,7 +101,7 @@ class SignatureFormatter implements ReflectorFormatter
      *
      * @return string Formatted signature
      */
-    private static function formatClass(\ReflectionClass $reflector): string
+    private static function formatClass(\ReflectionClass $reflector)
     {
         $chunks = [];
 
@@ -134,7 +142,7 @@ class SignatureFormatter implements ReflectorFormatter
      *
      * @return string Formatted signature
      */
-    private static function formatClassConstant($reflector): string
+    private static function formatClassConstant($reflector)
     {
         $value = $reflector->getValue();
         $style = self::getTypeStyle($value);
@@ -155,7 +163,7 @@ class SignatureFormatter implements ReflectorFormatter
      *
      * @return string Formatted signature
      */
-    private static function formatConstant(ReflectionConstant_ $reflector): string
+    private static function formatConstant($reflector)
     {
         $value = $reflector->getValue();
         $style = self::getTypeStyle($value);
@@ -176,7 +184,7 @@ class SignatureFormatter implements ReflectorFormatter
      *
      * @return string
      */
-    private static function getTypeStyle($value): string
+    private static function getTypeStyle($value)
     {
         if (\is_int($value) || \is_float($value)) {
             return 'number';
@@ -196,7 +204,7 @@ class SignatureFormatter implements ReflectorFormatter
      *
      * @return string Formatted signature
      */
-    private static function formatProperty(\ReflectionProperty $reflector): string
+    private static function formatProperty(\ReflectionProperty $reflector)
     {
         return \sprintf(
             '%s <strong>$%s</strong>',
@@ -212,7 +220,7 @@ class SignatureFormatter implements ReflectorFormatter
      *
      * @return string Formatted signature
      */
-    private static function formatFunction(\ReflectionFunctionAbstract $reflector): string
+    private static function formatFunction(\ReflectionFunctionAbstract $reflector)
     {
         return \sprintf(
             '<keyword>function</keyword> %s<function>%s</function>(%s)%s',
@@ -230,7 +238,7 @@ class SignatureFormatter implements ReflectorFormatter
      *
      * @return string Formatted return type
      */
-    private static function formatFunctionReturnType(\ReflectionFunctionAbstract $reflector): string
+    private static function formatFunctionReturnType(\ReflectionFunctionAbstract $reflector)
     {
         if (!\method_exists($reflector, 'hasReturnType') || !$reflector->hasReturnType()) {
             return '';
@@ -246,7 +254,7 @@ class SignatureFormatter implements ReflectorFormatter
      *
      * @return string Formatted signature
      */
-    private static function formatMethod(\ReflectionMethod $reflector): string
+    private static function formatMethod(\ReflectionMethod $reflector)
     {
         return \sprintf(
             '%s %s',
@@ -262,7 +270,7 @@ class SignatureFormatter implements ReflectorFormatter
      *
      * @return array
      */
-    private static function formatFunctionParams(\ReflectionFunctionAbstract $reflector): array
+    private static function formatFunctionParams(\ReflectionFunctionAbstract $reflector)
     {
         $params = [];
         foreach ($reflector->getParameters() as $param) {
@@ -277,7 +285,7 @@ class SignatureFormatter implements ReflectorFormatter
                         $hint = \sprintf('<class>%s</class>', $class->getName());
                     }
                 }
-            } catch (\Throwable $e) {
+            } catch (\Exception $e) {
                 // sometimes we just don't know...
                 // bad class names, or autoloaded classes that haven't been loaded yet, or whathaveyou.
                 // come to think of it, the only time I've seen this is with the intl extension.
@@ -327,7 +335,7 @@ class SignatureFormatter implements ReflectorFormatter
      *
      * @return string
      */
-    private static function formatReflectionType(\ReflectionType $type = null): string
+    private static function formatReflectionType(\ReflectionType $type = null)
     {
         if ($type === null) {
             return '';

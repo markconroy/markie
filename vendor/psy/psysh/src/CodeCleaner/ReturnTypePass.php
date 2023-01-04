@@ -3,7 +3,7 @@
 /*
  * This file is part of Psy Shell.
  *
- * (c) 2012-2022 Justin Hileman
+ * (c) 2012-2020 Justin Hileman
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -18,7 +18,6 @@ use PhpParser\Node\Identifier;
 use PhpParser\Node\NullableType;
 use PhpParser\Node\Stmt\Function_;
 use PhpParser\Node\Stmt\Return_;
-use PhpParser\Node\UnionType;
 use Psy\Exception\FatalErrorException;
 
 /**
@@ -99,17 +98,13 @@ class ReturnTypePass extends CodeCleanerPass
         }
     }
 
-    private function isFunctionNode(Node $node): bool
+    private function isFunctionNode(Node $node)
     {
         return $node instanceof Function_ || $node instanceof Closure;
     }
 
-    private function typeName(Node $node): string
+    private function typeName(Node $node)
     {
-        if ($node instanceof UnionType) {
-            return \implode('|', \array_map([$this, 'typeName'], $node->types));
-        }
-
         if ($node instanceof NullableType) {
             return \strtolower($node->type->name);
         }

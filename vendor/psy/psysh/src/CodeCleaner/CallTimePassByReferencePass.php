@@ -3,7 +3,7 @@
 /*
  * This file is part of Psy Shell.
  *
- * (c) 2012-2022 Justin Hileman
+ * (c) 2012-2020 Justin Hileman
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -15,7 +15,6 @@ use PhpParser\Node;
 use PhpParser\Node\Expr\FuncCall;
 use PhpParser\Node\Expr\MethodCall;
 use PhpParser\Node\Expr\StaticCall;
-use PhpParser\Node\VariadicPlaceholder;
 use Psy\Exception\FatalErrorException;
 
 /**
@@ -43,10 +42,6 @@ class CallTimePassByReferencePass extends CodeCleanerPass
         }
 
         foreach ($node->args as $arg) {
-            if ($arg instanceof VariadicPlaceholder) {
-                continue;
-            }
-
             if ($arg->byRef) {
                 throw new FatalErrorException(self::EXCEPTION_MESSAGE, 0, \E_ERROR, null, $node->getLine());
             }

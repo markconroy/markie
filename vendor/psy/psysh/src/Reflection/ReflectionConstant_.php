@@ -3,7 +3,7 @@
 /*
  * This file is part of Psy Shell.
  *
- * (c) 2012-2022 Justin Hileman
+ * (c) 2012-2020 Justin Hileman
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -42,7 +42,7 @@ class ReflectionConstant_ implements \Reflector
      *
      * @param string $name
      */
-    public function __construct(string $name)
+    public function __construct($name)
     {
         $this->name = $name;
 
@@ -63,7 +63,7 @@ class ReflectionConstant_ implements \Reflector
      *
      * @return string|null
      */
-    public static function export(string $name, bool $return = false)
+    public static function export($name, $return = false)
     {
         $refl = new self($name);
         $value = $refl->getValue();
@@ -87,7 +87,7 @@ class ReflectionConstant_ implements \Reflector
      *
      * @return false
      */
-    public function getDocComment(): bool
+    public function getDocComment()
     {
         return false;
     }
@@ -97,7 +97,7 @@ class ReflectionConstant_ implements \Reflector
      *
      * @return string
      */
-    public function getName(): string
+    public function getName()
     {
         return $this->name;
     }
@@ -109,7 +109,7 @@ class ReflectionConstant_ implements \Reflector
      *
      * @return string
      */
-    public function getNamespaceName(): string
+    public function getNamespaceName()
     {
         if (!$this->inNamespace()) {
             return '';
@@ -133,7 +133,7 @@ class ReflectionConstant_ implements \Reflector
      *
      * @return bool
      */
-    public function inNamespace(): bool
+    public function inNamespace()
     {
         return \strpos($this->name, '\\') !== false;
     }
@@ -143,7 +143,7 @@ class ReflectionConstant_ implements \Reflector
      *
      * @return string
      */
-    public function __toString(): string
+    public function __toString()
     {
         return $this->getName();
     }

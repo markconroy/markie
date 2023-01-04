@@ -3,7 +3,7 @@
 /*
  * This file is part of Psy Shell.
  *
- * (c) 2012-2022 Justin Hileman
+ * (c) 2012-2020 Justin Hileman
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -115,7 +115,7 @@ class EditCommand extends Command implements ContextAware
      *
      * @return bool
      */
-    private function shouldExecuteFile(bool $execOption, bool $noExecOption, string $filePath = null): bool
+    private function shouldExecuteFile($execOption, $noExecOption, $filePath)
     {
         if ($execOption) {
             return true;
@@ -136,7 +136,7 @@ class EditCommand extends Command implements ContextAware
      *
      * @throws \InvalidArgumentException If the variable is not found in the current context
      */
-    private function extractFilePath(string $fileArgument = null)
+    private function extractFilePath($fileArgument)
     {
         // If the file argument was a variable, get it from the context
         if ($fileArgument !== null &&
@@ -156,7 +156,7 @@ class EditCommand extends Command implements ContextAware
      *
      * @throws \UnexpectedValueException if file_get_contents on $filePath returns false instead of a string
      */
-    private function editFile(string $filePath, bool $shouldRemoveFile): string
+    private function editFile($filePath, $shouldRemoveFile)
     {
         $escapedFilePath = \escapeshellarg($filePath);
         $editor = (isset($_SERVER['EDITOR']) && $_SERVER['EDITOR']) ? $_SERVER['EDITOR'] : 'nano';

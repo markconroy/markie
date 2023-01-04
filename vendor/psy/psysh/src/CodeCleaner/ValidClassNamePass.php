@@ -3,7 +3,7 @@
 /*
  * This file is part of Psy Shell.
  *
- * (c) 2012-2022 Justin Hileman
+ * (c) 2012-2020 Justin Hileman
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -13,6 +13,9 @@ namespace Psy\CodeCleaner;
 
 use PhpParser\Node;
 use PhpParser\Node\Expr;
+use PhpParser\Node\Expr\ClassConstFetch;
+use PhpParser\Node\Expr\New_;
+use PhpParser\Node\Expr\StaticCall;
 use PhpParser\Node\Expr\Ternary;
 use PhpParser\Node\Stmt;
 use PhpParser\Node\Stmt\Class_;
@@ -37,6 +40,12 @@ class ValidClassNamePass extends NamespaceAwarePass
     const TRAIT_TYPE = 'trait';
 
     private $conditionalScopes = 0;
+    private $atLeastPhp7;
+
+    public function __construct()
+    {
+        $this->atLeastPhp7 = \version_compare(\PHP_VERSION, '7.0', '>=');
+    }
 
     /**
      * Validate class, interface and trait definitions.
@@ -69,6 +78,14 @@ class ValidClassNamePass extends NamespaceAwarePass
     }
 
     /**
+     * Validate `new` expressions, class constant fetches, and static calls.
+     *
+     * @throws FatalErrorException if a class, interface or trait is referenced which does not exist
+     * @throws FatalErrorException if a class extends something that is not a class
+     * @throws FatalErrorException if a class implements something that is not an interface
+     * @throws FatalErrorException if an interface extends something that is not an interface
+     * @throws FatalErrorException if a class, interface or trait redefines an existing class, interface or trait name
+     *
      * @param Node $node
      */
     public function leaveNode(Node $node)
@@ -78,9 +95,19 @@ class ValidClassNamePass extends NamespaceAwarePass
 
             return;
         }
+
+        if (!$this->atLeastPhp7) {
+            if ($node instanceof New_) {
+                $this->validateNewExpression($node);
+            } elseif ($node instanceof ClassConstFetch) {
+                $this->validateClassConstFetchExpression($node);
+            } elseif ($node instanceof StaticCall) {
+                $this->validateStaticCallExpression($node);
+            }
+        }
     }
 
-    private static function isConditional(Node $node): bool
+    private static function isConditional(Node $node)
     {
         return $node instanceof If_ ||
             $node instanceof While_ ||
@@ -125,6 +152,50 @@ class ValidClassNamePass extends NamespaceAwarePass
     }
 
     /**
+     * Validate a `new` expression.
+     *
+     * @param New_ $stmt
+     */
+    protected function validateNewExpression(New_ $stmt)
+    {
+        // if class name is an expression or an anonymous class, give it a pass for now
+        if (!$stmt->class instanceof Expr && !$stmt->class instanceof Class_) {
+            $this->ensureClassExists($this->getFullyQualifiedName($stmt->class), $stmt);
+        }
+    }
+
+    /**
+     * Validate a class constant fetch expression's class.
+     *
+     * @param ClassConstFetch $stmt
+     */
+    protected function validateClassConstFetchExpression(ClassConstFetch $stmt)
+    {
+        // there is no need to check exists for ::class const
+        if (\strtolower($stmt->name) === 'class') {
+            return;
+        }
+
+        // if class name is an expression, give it a pass for now
+        if (!$stmt->class instanceof Expr) {
+            $this->ensureClassOrInterfaceExists($this->getFullyQualifiedName($stmt->class), $stmt);
+        }
+    }
+
+    /**
+     * Validate a class constant fetch expression's class.
+     *
+     * @param StaticCall $stmt
+     */
+    protected function validateStaticCallExpression(StaticCall $stmt)
+    {
+        // if class name is an expression, give it a pass for now
+        if (!$stmt->class instanceof Expr) {
+            $this->ensureMethodExists($this->getFullyQualifiedName($stmt->class), $stmt->name, $stmt);
+        }
+    }
+
+    /**
      * Ensure that no class, interface or trait name collides with a new definition.
      *
      * @throws FatalErrorException
@@ -132,7 +203,7 @@ class ValidClassNamePass extends NamespaceAwarePass
      * @param Stmt   $stmt
      * @param string $scopeType
      */
-    protected function ensureCanDefine(Stmt $stmt, string $scopeType = self::CLASS_TYPE)
+    protected function ensureCanDefine(Stmt $stmt, $scopeType = self::CLASS_TYPE)
     {
         // Anonymous classes don't have a name, and uniqueness shouldn't be enforced.
         if ($stmt->name === null) {
@@ -168,7 +239,7 @@ class ValidClassNamePass extends NamespaceAwarePass
      * @param string $name
      * @param Stmt   $stmt
      */
-    protected function ensureClassExists(string $name, Stmt $stmt)
+    protected function ensureClassExists($name, $stmt)
     {
         if (!$this->classExists($name)) {
             throw $this->createError(\sprintf('Class \'%s\' not found', $name), $stmt);
@@ -183,7 +254,7 @@ class ValidClassNamePass extends NamespaceAwarePass
      * @param string $name
      * @param Stmt   $stmt
      */
-    protected function ensureClassOrInterfaceExists(string $name, Stmt $stmt)
+    protected function ensureClassOrInterfaceExists($name, $stmt)
     {
         if (!$this->classExists($name) && !$this->interfaceExists($name)) {
             throw $this->createError(\sprintf('Class \'%s\' not found', $name), $stmt);
@@ -198,7 +269,7 @@ class ValidClassNamePass extends NamespaceAwarePass
      * @param string $name
      * @param Stmt   $stmt
      */
-    protected function ensureClassOrTraitExists(string $name, Stmt $stmt)
+    protected function ensureClassOrTraitExists($name, $stmt)
     {
         if (!$this->classExists($name) && !$this->traitExists($name)) {
             throw $this->createError(\sprintf('Class \'%s\' not found', $name), $stmt);
@@ -214,7 +285,7 @@ class ValidClassNamePass extends NamespaceAwarePass
      * @param string $name
      * @param Stmt   $stmt
      */
-    protected function ensureMethodExists(string $class, string $name, Stmt $stmt)
+    protected function ensureMethodExists($class, $name, $stmt)
     {
         $this->ensureClassOrTraitExists($class, $stmt);
 
@@ -246,7 +317,7 @@ class ValidClassNamePass extends NamespaceAwarePass
      * @param Interface_[] $interfaces
      * @param Stmt         $stmt
      */
-    protected function ensureInterfacesExist(array $interfaces, Stmt $stmt)
+    protected function ensureInterfacesExist($interfaces, $stmt)
     {
         foreach ($interfaces as $interface) {
             /** @var string $name */
@@ -267,7 +338,7 @@ class ValidClassNamePass extends NamespaceAwarePass
      *
      * @return string
      */
-    protected function getScopeType(Stmt $stmt): string
+    protected function getScopeType(Stmt $stmt)
     {
         if ($stmt instanceof Class_) {
             return self::CLASS_TYPE;
@@ -287,7 +358,7 @@ class ValidClassNamePass extends NamespaceAwarePass
      *
      * @return bool
      */
-    protected function classExists(string $name): bool
+    protected function classExists($name)
     {
         // Give `self`, `static` and `parent` a pass. This will actually let
         // some errors through, since we're not checking whether the keyword is
@@ -306,7 +377,7 @@ class ValidClassNamePass extends NamespaceAwarePass
      *
      * @return bool
      */
-    protected function interfaceExists(string $name): bool
+    protected function interfaceExists($name)
     {
         return \interface_exists($name) || $this->findInScope($name) === self::INTERFACE_TYPE;
     }
@@ -318,7 +389,7 @@ class ValidClassNamePass extends NamespaceAwarePass
      *
      * @return bool
      */
-    protected function traitExists(string $name): bool
+    protected function traitExists($name)
     {
         return \trait_exists($name) || $this->findInScope($name) === self::TRAIT_TYPE;
     }
@@ -330,7 +401,7 @@ class ValidClassNamePass extends NamespaceAwarePass
      *
      * @return string|null
      */
-    protected function findInScope(string $name)
+    protected function findInScope($name)
     {
         $name = \strtolower($name);
         if (isset($this->currentScope[$name])) {
@@ -346,7 +417,7 @@ class ValidClassNamePass extends NamespaceAwarePass
      *
      * @return FatalErrorException
      */
-    protected function createError(string $msg, Stmt $stmt): FatalErrorException
+    protected function createError($msg, $stmt)
     {
         return new FatalErrorException($msg, 0, \E_ERROR, null, $stmt->getLine());
     }

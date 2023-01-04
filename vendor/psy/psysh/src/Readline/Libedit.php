@@ -3,7 +3,7 @@
 /*
  * This file is part of Psy Shell.
  *
- * (c) 2012-2022 Justin Hileman
+ * (c) 2012-2020 Justin Hileman
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -32,7 +32,7 @@ class Libedit extends GNUReadline
      *
      * @return bool
      */
-    public static function isSupported(): bool
+    public static function isSupported()
     {
         return \function_exists('readline') && !\function_exists('readline_list_history');
     }
@@ -40,15 +40,7 @@ class Libedit extends GNUReadline
     /**
      * {@inheritdoc}
      */
-    public static function supportsBracketedPaste(): bool
-    {
-        return false;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function listHistory(): array
+    public function listHistory()
     {
         $history = \file_get_contents($this->historyFile);
         if (!$history) {
@@ -72,7 +64,7 @@ class Libedit extends GNUReadline
     /**
      * {@inheritdoc}
      */
-    public function writeHistory(): bool
+    public function writeHistory()
     {
         $res = parent::writeHistory();
 
@@ -101,7 +93,7 @@ class Libedit extends GNUReadline
      *
      * @return string|null
      */
-    protected function parseHistoryLine(string $line)
+    protected function parseHistoryLine($line)
     {
         // empty line, comment or timestamp
         if (!$line || $line[0] === "\0") {

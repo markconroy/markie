@@ -3,7 +3,7 @@
 /*
  * This file is part of Psy Shell.
  *
- * (c) 2012-2022 Justin Hileman
+ * (c) 2012-2020 Justin Hileman
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -19,7 +19,6 @@ use PhpParser\Node\Expr\Isset_;
 use PhpParser\Node\Expr\MethodCall;
 use PhpParser\Node\Expr\StaticCall;
 use PhpParser\Node\Stmt\Unset_;
-use PhpParser\Node\VariadicPlaceholder;
 use Psy\Exception\FatalErrorException;
 
 /**
@@ -46,10 +45,6 @@ class FunctionReturnInWriteContextPass extends CodeCleanerPass
         if ($node instanceof Array_ || $this->isCallNode($node)) {
             $items = $node instanceof Array_ ? $node->items : $node->args;
             foreach ($items as $item) {
-                if ($item instanceof VariadicPlaceholder) {
-                    continue;
-                }
-
                 if ($item && $item->byRef && $this->isCallNode($item->value)) {
                     throw new FatalErrorException(self::EXCEPTION_MESSAGE, 0, \E_ERROR, null, $node->getLine());
                 }
@@ -68,7 +63,7 @@ class FunctionReturnInWriteContextPass extends CodeCleanerPass
         }
     }
 
-    private function isCallNode(Node $node): bool
+    private function isCallNode(Node $node)
     {
         return $node instanceof FuncCall || $node instanceof MethodCall || $node instanceof StaticCall;
     }

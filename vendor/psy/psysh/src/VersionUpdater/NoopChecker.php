@@ -3,7 +3,7 @@
 /*
  * This file is part of Psy Shell.
  *
- * (c) 2012-2022 Justin Hileman
+ * (c) 2012-2020 Justin Hileman
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -21,7 +21,7 @@ class NoopChecker implements Checker
     /**
      * @return bool
      */
-    public function isLatest(): bool
+    public function isLatest()
     {
         return true;
     }
@@ -29,7 +29,7 @@ class NoopChecker implements Checker
     /**
      * @return string
      */
-    public function getLatest(): string
+    public function getLatest()
     {
         return Shell::VERSION;
     }

@@ -3,7 +3,7 @@
 /*
  * This file is part of Psy Shell.
  *
- * (c) 2012-2022 Justin Hileman
+ * (c) 2012-2020 Justin Hileman
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -33,7 +33,7 @@ class ShellInput extends StringInput
      *
      * @param string $input An array of parameters from the CLI (in the argv format)
      */
-    public function __construct(string $input)
+    public function __construct($input)
     {
         parent::__construct($input);
 
@@ -81,7 +81,7 @@ class ShellInput extends StringInput
      *
      * @throws \InvalidArgumentException When unable to parse input (should never happen)
      */
-    private function tokenize(string $input): array
+    private function tokenize($input)
     {
         $tokens = [];
         $length = \strlen($input);
@@ -150,7 +150,7 @@ class ShellInput extends StringInput
      *
      * @throws \RuntimeException When too many arguments are given
      */
-    private function parseShellArgument(string $token, string $rest)
+    private function parseShellArgument($token, $rest)
     {
         $c = \count($this->arguments);
 
@@ -200,7 +200,7 @@ class ShellInput extends StringInput
      *
      * @param string $token The current token
      */
-    private function parseShortOption(string $token)
+    private function parseShortOption($token)
     {
         $name = \substr($token, 1);
 
@@ -223,7 +223,7 @@ class ShellInput extends StringInput
      *
      * @throws \RuntimeException When option given doesn't exist
      */
-    private function parseShortOptionSet(string $name)
+    private function parseShortOptionSet($name)
     {
         $len = \strlen($name);
         for ($i = 0; $i < $len; $i++) {
@@ -247,12 +247,17 @@ class ShellInput extends StringInput
      *
      * @param string $token The current token
      */
-    private function parseLongOption(string $token)
+    private function parseLongOption($token)
     {
         $name = \substr($token, 2);
 
         if (false !== $pos = \strpos($name, '=')) {
-            if (($value = \substr($name, $pos + 1)) === '') {
+            if ('' === ($value = \substr($name, $pos + 1))) {
+                // if no value after "=" then substr() returns "" since php7 only, false before
+                // see http://php.net/manual/fr/migration70.incompatible.php#119151
+                if (\PHP_VERSION_ID < 70000 && false === $value) {
+                    $value = '';
+                }
                 \array_unshift($this->parsed, [$value, null]);
             }
             $this->addLongOption(\substr($name, 0, $pos), $value);
@@ -269,7 +274,7 @@ class ShellInput extends StringInput
      *
      * @throws \RuntimeException When option given doesn't exist
      */
-    private function addShortOption(string $shortcut, $value)
+    private function addShortOption($shortcut, $value)
     {
         if (!$this->definition->hasShortcut($shortcut)) {
             throw new \RuntimeException(\sprintf('The "-%s" option does not exist.', $shortcut));
@@ -286,7 +291,7 @@ class ShellInput extends StringInput
      *
      * @throws \RuntimeException When option given doesn't exist
      */
-    private function addLongOption(string $name, $value)
+    private function addLongOption($name, $value)
     {
         if (!$this->definition->hasOption($name)) {
             throw new \RuntimeException(\sprintf('The "--%s" option does not exist.', $name));

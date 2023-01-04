@@ -3,7 +3,7 @@
 /*
  * This file is part of Psy Shell.
  *
- * (c) 2012-2022 Justin Hileman
+ * (c) 2012-2020 Justin Hileman
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -50,7 +50,7 @@ class AutoCompleter
      *
      * @return array
      */
-    public function processCallback(string $input, int $index, array $info = []): array
+    public function processCallback($input, $index, $info = [])
     {
         // Some (Windows?) systems provide incomplete `readline_info`, so let's
         // try to work around it.
@@ -68,8 +68,6 @@ class AutoCompleter
         $tokens = \array_filter($tokens, function ($token) {
             return !AbstractMatcher::tokenIs($token, AbstractMatcher::T_WHITESPACE);
         });
-        // reset index from 0 to remove missing index number
-        $tokens = \array_values($tokens);
 
         $matches = [];
         foreach ($this->matchers as $matcher) {
@@ -93,7 +91,7 @@ class AutoCompleter
      *
      * @return array
      */
-    public function callback(string $input, int $index): array
+    public function callback($input, $index)
     {
         return $this->processCallback($input, $index, \readline_info());
     }

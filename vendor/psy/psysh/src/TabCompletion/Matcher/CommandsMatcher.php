@@ -3,7 +3,7 @@
 /*
  * This file is part of Psy Shell.
  *
- * (c) 2012-2022 Justin Hileman
+ * (c) 2012-2020 Justin Hileman
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -58,7 +58,7 @@ class CommandsMatcher extends AbstractMatcher
      *
      * @return bool
      */
-    protected function isCommand(string $name): bool
+    protected function isCommand($name)
     {
         return \in_array($name, $this->commands);
     }
@@ -70,7 +70,7 @@ class CommandsMatcher extends AbstractMatcher
      *
      * @return bool
      */
-    protected function matchCommand(string $name): bool
+    protected function matchCommand($name)
     {
         foreach ($this->commands as $cmd) {
             if ($this->startsWith($name, $cmd)) {
@@ -84,7 +84,7 @@ class CommandsMatcher extends AbstractMatcher
     /**
      * {@inheritdoc}
      */
-    public function getMatches(array $tokens, array $info = []): array
+    public function getMatches(array $tokens, array $info = [])
     {
         $input = $this->getInput($tokens);
 
@@ -96,7 +96,7 @@ class CommandsMatcher extends AbstractMatcher
     /**
      * {@inheritdoc}
      */
-    public function hasMatched(array $tokens): bool
+    public function hasMatched(array $tokens)
     {
         /* $openTag */ \array_shift($tokens);
         $command = \array_shift($tokens);

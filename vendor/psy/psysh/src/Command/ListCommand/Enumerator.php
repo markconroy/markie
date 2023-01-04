@@ -3,7 +3,7 @@
 /*
  * This file is part of Psy Shell.
  *
- * (c) 2012-2022 Justin Hileman
+ * (c) 2012-2020 Justin Hileman
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -54,7 +54,7 @@ abstract class Enumerator
      *
      * @return array
      */
-    public function enumerate(InputInterface $input, \Reflector $reflector = null, $target = null): array
+    public function enumerate(InputInterface $input, \Reflector $reflector = null, $target = null)
     {
         $this->filter->bind($input);
 
@@ -82,7 +82,7 @@ abstract class Enumerator
      *
      * @return array
      */
-    abstract protected function listItems(InputInterface $input, \Reflector $reflector = null, $target = null): array;
+    abstract protected function listItems(InputInterface $input, \Reflector $reflector = null, $target = null);
 
     protected function showItem($name)
     {

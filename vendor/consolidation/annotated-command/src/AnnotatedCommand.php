@@ -9,6 +9,8 @@ use Consolidation\AnnotatedCommand\Parser\CommandInfo;
 use Consolidation\AnnotatedCommand\State\State;
 use Consolidation\AnnotatedCommand\State\StateHelper;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Completion\CompletionInput;
+use Symfony\Component\Console\Completion\CompletionSuggestions;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputAwareInterface;
 use Symfony\Component\Console\Input\InputInterface;
@@ -33,6 +35,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 class AnnotatedCommand extends Command implements HelpDocumentAlter
 {
     protected $commandCallback;
+    protected $completionCallback;
     protected $commandProcessor;
     protected $annotationData;
     protected $examples = [];
@@ -67,6 +70,12 @@ class AnnotatedCommand extends Command implements HelpDocumentAlter
     public function setCommandCallback($commandCallback)
     {
         $this->commandCallback = $commandCallback;
+        return $this;
+    }
+
+    public function setCompletionCallback($completionCallback)
+    {
+        $this->completionCallback = $completionCallback;
         return $this;
     }
 
@@ -157,6 +166,11 @@ class AnnotatedCommand extends Command implements HelpDocumentAlter
         }
     }
 
+    public function getCompletionCallback()
+    {
+        return $this->completionCallback;
+    }
+
     public function helpAlter(\DomDocument $originalDom)
     {
         return HelpDocumentBuilder::alter($originalDom, $this);
@@ -176,7 +190,8 @@ class AnnotatedCommand extends Command implements HelpDocumentAlter
             $description = $commandInfo->arguments()->getDescription($name);
             $hasDefault = $commandInfo->arguments()->hasDefault($name);
             $parameterMode = $this->getCommandArgumentMode($hasDefault, $defaultValue);
-            $this->addArgument($name, $parameterMode, $description, $defaultValue);
+            $suggestedValues = $commandInfo->arguments()->getSuggestedValues($name);
+            $this->addArgument($name, $parameterMode, $description, $defaultValue, $suggestedValues);
         }
         return $this;
     }
@@ -206,10 +221,14 @@ class AnnotatedCommand extends Command implements HelpDocumentAlter
             $description = $inputOption->getDescription();
 
             if (empty($description) && isset($automaticOptions[$name])) {
+                // Unfortunately, Console forces us too construct a new InputOption to set a description.
                 $description = $automaticOptions[$name]->getDescription();
                 $this->addInputOption($inputOption, $description);
             } else {
-                $this->addInputOption($inputOption);
+                if ($native = $this->getNativeDefinition()) {
+                    $native->addOption($inputOption);
+                }
+                $this->getDefinition()->addOption($inputOption);
             }
         }
     }
@@ -233,12 +252,22 @@ class AnnotatedCommand extends Command implements HelpDocumentAlter
             $default = null;
         }
 
+        $suggestedValues = [];
+        // Symfony 6.1+ feature https://symfony.com/blog/new-in-symfony-6-1-improved-console-autocompletion#completion-values-in-input-definitions
+        if (property_exists($inputOption, 'suggestedValues')) {
+            // Alas, Symfony provides no accessor.
+            $class = new \ReflectionClass($inputOption);
+            $property = $class->getProperty('suggestedValues');
+            $property->setAccessible(true);
+            $suggestedValues = $property->getValue($inputOption);
+        }
         $this->addOption(
             $inputOption->getName(),
             $inputOption->getShortcut(),
             $mode,
             $description ?? $inputOption->getDescription(),
-            $default
+            $default,
+            $suggestedValues
         );
     }
 
@@ -297,6 +326,17 @@ class AnnotatedCommand extends Command implements HelpDocumentAlter
             $this->getNames(),
             $this->annotationData
         );
+    }
+
+    /**
+     * Route a completion request to the specified Callable if available.
+     */
+    public function complete(CompletionInput $input, CompletionSuggestions $suggestions): void
+    {
+        parent::complete($input, $suggestions);
+        if (is_callable($this->completionCallback)) {
+            call_user_func($this->completionCallback, $input, $suggestions);
+        }
     }
 
     public function optionsHookForHookAnnotations($commandInfoList)

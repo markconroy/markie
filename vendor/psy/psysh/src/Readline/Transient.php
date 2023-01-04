@@ -3,7 +3,7 @@
 /*
  * This file is part of Psy Shell.
  *
- * (c) 2012-2022 Justin Hileman
+ * (c) 2012-2020 Justin Hileman
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -28,17 +28,9 @@ class Transient implements Readline
      *
      * {@inheritdoc}
      */
-    public static function isSupported(): bool
+    public static function isSupported()
     {
         return true;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public static function supportsBracketedPaste(): bool
-    {
-        return false;
     }
 
     /**
@@ -55,7 +47,7 @@ class Transient implements Readline
     /**
      * {@inheritdoc}
      */
-    public function addHistory(string $line): bool
+    public function addHistory($line)
     {
         if ($this->eraseDups) {
             if (($key = \array_search($line, $this->history)) !== false) {
@@ -80,7 +72,7 @@ class Transient implements Readline
     /**
      * {@inheritdoc}
      */
-    public function clearHistory(): bool
+    public function clearHistory()
     {
         $this->history = [];
 
@@ -90,7 +82,7 @@ class Transient implements Readline
     /**
      * {@inheritdoc}
      */
-    public function listHistory(): array
+    public function listHistory()
     {
         return $this->history;
     }
@@ -98,7 +90,7 @@ class Transient implements Readline
     /**
      * {@inheritdoc}
      */
-    public function readHistory(): bool
+    public function readHistory()
     {
         return true;
     }
@@ -108,9 +100,9 @@ class Transient implements Readline
      *
      * @throws BreakException if user hits Ctrl+D
      *
-     * @return false|string
+     * @return string
      */
-    public function readline(string $prompt = null)
+    public function readline($prompt = null)
     {
         echo $prompt;
 
@@ -128,7 +120,7 @@ class Transient implements Readline
     /**
      * {@inheritdoc}
      */
-    public function writeHistory(): bool
+    public function writeHistory()
     {
         return true;
     }

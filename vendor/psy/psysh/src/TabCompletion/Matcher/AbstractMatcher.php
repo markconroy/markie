@@ -3,7 +3,7 @@
 /*
  * This file is part of Psy Shell.
  *
- * (c) 2012-2022 Justin Hileman
+ * (c) 2012-2020 Justin Hileman
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -50,7 +50,7 @@ abstract class AbstractMatcher
      *
      * @return bool
      */
-    public function hasMatched(array $tokens): bool
+    public function hasMatched(array $tokens)
     {
         return false;
     }
@@ -62,7 +62,7 @@ abstract class AbstractMatcher
      *
      * @return string
      */
-    protected function getInput(array $tokens): string
+    protected function getInput(array $tokens)
     {
         $var = '';
         $firstToken = \array_pop($tokens);
@@ -80,7 +80,7 @@ abstract class AbstractMatcher
      *
      * @return string
      */
-    protected function getNamespaceAndClass(array $tokens): string
+    protected function getNamespaceAndClass($tokens)
     {
         $class = '';
         while (self::hasToken(
@@ -105,7 +105,7 @@ abstract class AbstractMatcher
      *
      * @return array The matches resulting from the query
      */
-    abstract public function getMatches(array $tokens, array $info = []): array;
+    abstract public function getMatches(array $tokens, array $info = []);
 
     /**
      * Check whether $word starts with $prefix.
@@ -115,7 +115,7 @@ abstract class AbstractMatcher
      *
      * @return bool
      */
-    public static function startsWith(string $prefix, string $word): bool
+    public static function startsWith($prefix, $word)
     {
         return \preg_match(\sprintf('#^%s#', $prefix), $word);
     }
@@ -128,7 +128,7 @@ abstract class AbstractMatcher
      *
      * @return bool
      */
-    public static function hasSyntax($token, string $syntax = self::VAR_SYNTAX): bool
+    public static function hasSyntax($token, $syntax = self::VAR_SYNTAX)
     {
         if (!\is_array($token)) {
             return false;
@@ -147,7 +147,7 @@ abstract class AbstractMatcher
      *
      * @return bool
      */
-    public static function tokenIs($token, string $which): bool
+    public static function tokenIs($token, $which)
     {
         if (!\is_array($token)) {
             return false;
@@ -163,7 +163,7 @@ abstract class AbstractMatcher
      *
      * @return bool
      */
-    public static function isOperator($token): bool
+    public static function isOperator($token)
     {
         if (!\is_string($token)) {
             return false;
@@ -172,7 +172,7 @@ abstract class AbstractMatcher
         return \strpos(self::MISC_OPERATORS, $token) !== false;
     }
 
-    public static function needCompleteClass($token): bool
+    public static function needCompleteClass($token)
     {
         return \in_array($token[1], ['doc', 'ls', 'show']);
     }
@@ -185,7 +185,7 @@ abstract class AbstractMatcher
      *
      * @return bool
      */
-    public static function hasToken(array $coll, $token): bool
+    public static function hasToken(array $coll, $token)
     {
         if (!\is_array($token)) {
             return false;
