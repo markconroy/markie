@@ -13,8 +13,6 @@ use Drupal\Component\Utility\OpCodeCache;
 use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Database\Database;
 use Drupal\Core\DrupalKernel;
-use Drupal\Core\Entity\Sql\SqlContentEntityStorage;
-use Drupal\Core\Entity\Sql\SqlContentEntityStorageSchema;
 use Drupal\Core\Extension\ExtensionLifecycle;
 use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\Link;
@@ -28,6 +26,30 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 use GuzzleHttp\Exception\TransferException;
 use Symfony\Component\HttpFoundation\Request;
+
+// cspell:ignore quickedit
+
+/**
+ * An array of machine names of modules that were removed from Drupal core.
+ */
+const DRUPAL_CORE_REMOVED_MODULE_LIST = [
+  'aggregator' => 'Aggregator',
+  'ckeditor' => 'CKEditor',
+  'color' => 'Color',
+  'hal' => 'HAL',
+  'quickedit' => 'Quick Edit',
+  'rdf' => 'RDF',
+];
+
+/**
+ * An array of machine names of themes that were removed from Drupal core.
+ */
+const DRUPAL_CORE_REMOVED_THEME_LIST = [
+  'bartik' => 'Bartik',
+  'classy' => 'Classy',
+  'seven' => 'Seven',
+  'stable' => 'Stable',
+];
 
 /**
  * Implements hook_requirements().
@@ -318,11 +340,11 @@ function system_requirements($phase) {
     $requirements['php']['description'] = t('It is recommended to upgrade to PHP version %recommended or higher for the best ongoing support.  See <a href="http://php.net/supported-versions.php">PHP\'s version support documentation</a> and the <a href=":php_requirements">Drupal PHP requirements</a> page for more information.', ['%recommended' => \Drupal::RECOMMENDED_PHP, ':php_requirements' => 'https://www.drupal.org/docs/system-requirements/php-requirements']);
     $requirements['php']['severity'] = REQUIREMENT_INFO;
 
-    // PHP 8.1.0 to 8.1.5 has a known OPcache bug that can cause fatal errors,
-    // so warn about that if Drupal is running on one of those broken versions.
+    // PHP 8.1.0 through 8.1.5 have a known OPcache bug that can cause fatal
+    // errors, so warn about that when running Drupal on those versions.
     // @todo Remove this when \Drupal::MINIMUM_PHP is at least 8.1.6 in
     //   https://www.drupal.org/i/3305726.
-    if (version_compare($phpversion, '8.1.0', 'ge') && version_compare($phpversion, '8.1.6', 'lt')) {
+    if (version_compare(\Drupal::MINIMUM_PHP, '8.1.6') < 0) {
       $requirements['php']['description'] = t('PHP %version has <a href=":bug_url">an OPcache bug that can cause fatal errors with class autoloading</a>. This can be fixed by upgrading to PHP 8.1.6 or later. See <a href="http://php.net/supported-versions.php">PHP\'s version support documentation</a> and the <a href=":php_requirements">Drupal PHP requirements</a> page for more information.', [
         '%version' => $phpversion,
         ':bug_url' => 'https://github.com/php/php-src/issues/8164',
@@ -478,18 +500,6 @@ function system_requirements($phase) {
     }
   }
 
-  // Verify there are no database entries in settings.php with table prefix in
-  // array format.
-  if ($phase === 'runtime' || $phase === 'update') {
-    if (_system_check_array_table_prefixes() === TRUE) {
-      $requirements['database_table_prefixes'] = [
-        'title' => t('Database table prefixes'),
-        'value' => t("There is at least one database entry in the \$database array in settings.php that has a 'prefix' value in the format of an array. Per-table prefixes are no longer supported. Change your settings.php file to ensure the value of every 'prefix' entry is a single string."),
-        'severity' => REQUIREMENT_WARNING,
-      ];
-    }
-  }
-
   if ($phase == 'install' || $phase == 'update') {
     // Test for PDO (database).
     $requirements['database_extensions'] = [
@@ -560,24 +570,8 @@ function system_requirements($phase) {
     }
   }
 
-  // Test with PostgreSQL databases for the status of the pg_trgm extension.
-  if ($phase === 'runtime') {
-    if (Database::isActiveConnection() && (Database::getConnection()->driver() == 'pgsql') && !Database::getConnection()->schema()->extensionExists('pg_trgm')) {
-      $requirements['pgsql_extension_pg_trgm'] = [
-        'severity' => REQUIREMENT_WARNING,
-        'title' => t('PostgreSQL pg_trgm extension'),
-        'value' => t('Not created'),
-        'description' => t('The <a href=":pg_trgm">pg_trgm</a> PostgreSQL extension is not present. The extension will be required by Drupal 10 to improve performance when using PostgreSQL. See <a href=":requirements">Drupal database server requirements</a> for more information.', [
-          ':pg_trgm' => 'https://www.postgresql.org/docs/current/pgtrgm.html',
-          ':requirements' => 'https://www.drupal.org/docs/system-requirements/database-server-requirements',
-        ]),
-      ];
-    }
-  }
-
-  if ($phase == 'runtime') {
-    // Test JSON support. To be required from Drupal 10.0.
-    // @todo remove in https://www.drupal.org/project/drupal/issues/3203193
+  if ($phase === 'runtime' || $phase === 'update') {
+    // Test database JSON support.
     $requirements['database_support_json'] = [
       'title' => t('Database support for JSON'),
       'severity' => REQUIREMENT_OK,
@@ -587,7 +581,7 @@ function system_requirements($phase) {
 
     if (!Database::getConnection()->hasJson()) {
       $requirements['database_support_json']['value'] = t('Not available');
-      $requirements['database_support_json']['severity'] = REQUIREMENT_WARNING;
+      $requirements['database_support_json']['severity'] = REQUIREMENT_ERROR;
     }
   }
 
@@ -990,13 +984,16 @@ function system_requirements($phase) {
 
   // Display an error if a newly introduced dependency in a module is not resolved.
   if ($phase === 'update' || $phase === 'runtime') {
-    $create_extension_incompatibility_list = function ($extension_names, $description, $title) {
+    $create_extension_incompatibility_list = function (array $extension_names, PluralTranslatableMarkup $description, PluralTranslatableMarkup $title, TranslatableMarkup|string $message = '', TranslatableMarkup|string $additional_description = '') {
+      if ($message === '') {
+        $message = new TranslatableMarkup('Review the <a href=":url"> suggestions for resolving this incompatibility</a> to repair your installation, and then re-run update.php.', [':url' => 'https://www.drupal.org/docs/updating-drupal/troubleshooting-database-updates']);
+      }
       // Use an inline twig template to:
-      // - Concatenate two MarkupInterface objects and preserve safeness.
+      // - Concatenate MarkupInterface objects and preserve safeness.
       // - Use the item_list theme for the extension list.
       $template = [
         '#type' => 'inline_template',
-        '#template' => '{{ description }}{{ extensions }}',
+        '#template' => '{{ description }}{{ extensions }}{{ additional_description }}<br>',
         '#context' => [
           'extensions' => [
             '#theme' => 'item_list',
@@ -1005,15 +1002,13 @@ function system_requirements($phase) {
       ];
       $template['#context']['extensions']['#items'] = $extension_names;
       $template['#context']['description'] = $description;
+      $template['#context']['additional_description'] = $additional_description;
       return [
         'title' => $title,
         'value' => [
           'list' => $template,
           'handbook_link' => [
-            '#markup' => t(
-              'Review the <a href=":url"> suggestions for resolving this incompatibility</a> to repair your installation, and then re-run update.php.',
-              [':url' => 'https://www.drupal.org/docs/8/update/troubleshooting-database-updates']
-            ),
+            '#markup' => $message,
           ],
         ],
         'severity' => REQUIREMENT_ERROR,
@@ -1135,13 +1130,89 @@ function system_requirements($phase) {
       );
     }
 
-    // Look for invalid modules.
     $extension_config = \Drupal::configFactory()->get('core.extension');
-    $is_missing_extension = function ($extension_name) use (&$module_extension_list) {
-      return !$module_extension_list->exists($extension_name);
-    };
 
-    $invalid_modules = array_filter(array_keys($extension_config->get('module')), $is_missing_extension);
+    // Look for removed core modules.
+    $is_removed_module = function ($extension_name) use ($module_extension_list) {
+      return !$module_extension_list->exists($extension_name)
+        && array_key_exists($extension_name, DRUPAL_CORE_REMOVED_MODULE_LIST);
+    };
+    $removed_modules = array_filter(array_keys($extension_config->get('module')), $is_removed_module);
+    if (!empty($removed_modules)) {
+      $list = [];
+      foreach ($removed_modules as $removed_module) {
+        $list[] = t('<a href=":url">@module</a>', [
+          ':url' => "https://www.drupal.org/project/$removed_module",
+          '@module' => DRUPAL_CORE_REMOVED_MODULE_LIST[$removed_module],
+        ]);
+      }
+      $requirements['removed_module'] = $create_extension_incompatibility_list(
+        $list,
+        new PluralTranslatableMarkup(
+          count($removed_modules),
+          'You must add the following contributed module and reload this page.',
+          'You must add the following contributed modules and reload this page.'
+        ),
+        new PluralTranslatableMarkup(
+          count($removed_modules),
+          'Removed core module',
+          'Removed core modules'
+        ),
+        new TranslatableMarkup(
+          'For more information read the <a href=":url">documentation on deprecated modules.</a>',
+          [':url' => 'https://www.drupal.org/node/3223395#s-recommendations-for-deprecated-modules']
+        ),
+        new PluralTranslatableMarkup(
+          count($removed_modules),
+          'This module is installed on your site but is no longer provided by Core.',
+          'These modules are installed on your site but are no longer provided by Core.'
+        ),
+      );
+    }
+
+    // Look for removed core themes.
+    $is_removed_theme = function ($extension_name) use ($theme_extension_list) {
+      return !$theme_extension_list->exists($extension_name)
+        && array_key_exists($extension_name, DRUPAL_CORE_REMOVED_THEME_LIST);
+    };
+    $removed_themes = array_filter(array_keys($extension_config->get('theme')), $is_removed_theme);
+    if (!empty($removed_themes)) {
+      $list = [];
+      foreach ($removed_themes as $removed_theme) {
+        $list[] = t('<a href=":url">@theme</a>', [
+          ':url' => "https://www.drupal.org/project/$removed_theme",
+          '@theme' => DRUPAL_CORE_REMOVED_THEME_LIST[$removed_theme],
+        ]);
+      }
+      $requirements['removed_theme'] = $create_extension_incompatibility_list(
+        $list,
+        new PluralTranslatableMarkup(
+          count($removed_themes),
+          'You must add the following contributed theme and reload this page.',
+          'You must add the following contributed themes and reload this page.'
+        ),
+        new PluralTranslatableMarkup(
+          count($removed_themes),
+          'Removed core theme',
+          'Removed core themes'
+        ),
+        new TranslatableMarkup(
+          'For more information read the <a href=":url">documentation on deprecated themes.</a>',
+          [':url' => 'https://www.drupal.org/node/3223395#s-recommendations-for-deprecated-themes']
+        ),
+        new PluralTranslatableMarkup(
+          count($removed_themes),
+          'This theme is installed on your site but is no longer provided by Core.',
+          'These themes are installed on your site but are no longer provided by Core.'
+        ),
+      );
+    }
+
+    // Look for missing modules.
+    $is_missing_module = function ($extension_name) use ($module_extension_list) {
+      return !$module_extension_list->exists($extension_name) && !in_array($extension_name, array_keys(DRUPAL_CORE_REMOVED_MODULE_LIST), TRUE);
+    };
+    $invalid_modules = array_filter(array_keys($extension_config->get('module')), $is_missing_module);
 
     if (!empty($invalid_modules)) {
       $requirements['invalid_module'] = $create_extension_incompatibility_list(
@@ -1161,7 +1232,7 @@ function system_requirements($phase) {
 
     // Look for invalid themes.
     $is_missing_theme = function ($extension_name) use (&$theme_extension_list) {
-      return !$theme_extension_list->exists($extension_name);
+      return !$theme_extension_list->exists($extension_name) && !in_array($extension_name, array_keys(DRUPAL_CORE_REMOVED_THEME_LIST), TRUE);
     };
     $invalid_themes = array_filter(array_keys($extension_config->get('theme')), $is_missing_theme);
     if (!empty($invalid_themes)) {
@@ -1203,10 +1274,6 @@ function system_requirements($phase) {
   switch ($failed_check) {
     case 'mb_strlen':
       $requirements['unicode']['description'] = t('Operations on Unicode strings are emulated on a best-effort basis. Install the <a href="http://php.net/mbstring">PHP mbstring extension</a> for improved Unicode support.');
-      break;
-
-    case 'mbstring.func_overload':
-      $requirements['unicode']['description'] = t('Multibyte string function overloading in PHP is active and must be disabled. Check the php.ini <em>mbstring.func_overload</em> setting. Please refer to the <a href="http://php.net/mbstring">PHP mbstring documentation</a> for more information.');
       break;
 
     case 'mbstring.encoding_translation':
@@ -1384,18 +1451,16 @@ function system_requirements($phase) {
       }
     );
 
-    // If system or workspaces is in the list then only show a specific message
-    // for Drupal core.
-    if (isset($module_list['system']) || isset($module_list['workspaces'])) {
-      $requirements['system_update_last_removed'] = [
+    // If user module is in the list then only show a specific message for
+    // Drupal core.
+    if (isset($module_list['user'])) {
+      $requirements['user_update_last_removed'] = [
         'title' => t('The version of Drupal you are trying to update from is too old'),
-        'description' => t('Updating to Drupal @current_major is only supported from Drupal version @required_min_version or higher. If you are trying to update from an older version, first update to the latest version of Drupal @previous_major. (<a href=":url">Drupal 9 upgrade guide</a>)', [
-          '@current_major' => 9,
-          // Workspaces is special cased due to updates being removed after
-          // 8.8.0.
-          '@required_min_version' => isset($module_list['workspaces']) ? '8.8.2' : '8.8.0',
-          '@previous_major' => 8,
-          ':url' => 'https://www.drupal.org/docs/9/how-to-prepare-your-drupal-7-or-8-site-for-drupal-9/upgrading-a-drupal-8-site-to-drupal-9',
+        'description' => t('Updating to Drupal @current_major is only supported from Drupal version @required_min_version or higher. If you are trying to update from an older version, first update to the latest version of Drupal @previous_major. (<a href=":url">Drupal upgrade guide</a>)', [
+          '@current_major' => 10,
+          '@required_min_version' => '9.4.0',
+          '@previous_major' => 9,
+          ':url' => 'https://www.drupal.org/docs/upgrading-drupal/drupal-8-and-higher',
         ]),
         'severity' => REQUIREMENT_ERROR,
       ];
@@ -1540,63 +1605,7 @@ function system_schema() {
  * Implements hook_update_last_removed().
  */
 function system_update_last_removed() {
-  return 8805;
-}
-
-/**
- * Update the stored schema data for entity identifier fields.
- */
-function system_update_8901() {
-  $definition_update_manager = \Drupal::entityDefinitionUpdateManager();
-  $entity_type_manager = \Drupal::entityTypeManager();
-  $installed_storage_schema = \Drupal::keyValue('entity.storage_schema.sql');
-
-  foreach ($definition_update_manager->getEntityTypes() as $entity_type_id => $entity_type) {
-    // Ensure that we are dealing with a non-deleted entity type that uses the
-    // default SQL storage.
-    if (!$entity_type_manager->hasDefinition($entity_type_id)) {
-      continue;
-    }
-
-    $storage = $entity_type_manager->getStorage($entity_type_id);
-    if (!$storage instanceof SqlContentEntityStorage) {
-      continue;
-    }
-
-    foreach (['id', 'revision'] as $key) {
-      if (!$entity_type->hasKey($key)) {
-        continue;
-      }
-
-      $field_name = $entity_type->getKey($key);
-      $field_storage_definition = $definition_update_manager->getFieldStorageDefinition($field_name, $entity_type_id);
-      if (!$field_storage_definition) {
-        continue;
-      }
-      if ($field_storage_definition->getType() !== 'integer') {
-        continue;
-      }
-
-      // Retrieve the storage schema in order to use its own method for updating
-      // the identifier schema - ::processIdentifierSchema(). This is needed
-      // because some storage schemas might not use serial identifiers.
-      // @see \Drupal\user\UserStorageSchema::processIdentifierSchema()
-      $ref_get_storage_schema = new \ReflectionMethod($storage, 'getStorageSchema');
-      $ref_get_storage_schema->setAccessible(TRUE);
-      $storage_schema = $ref_get_storage_schema->invoke($storage);
-
-      if ($storage_schema instanceof SqlContentEntityStorageSchema) {
-        $field_schema_data = $installed_storage_schema->get($entity_type_id . '.field_schema_data.' . $field_storage_definition->getName(), []);
-        $table = $key === 'id' ? $entity_type->getBaseTable() : $entity_type->getRevisionTable();
-
-        $ref_process_identifier_schema = new \ReflectionMethod($storage_schema, 'processIdentifierSchema');
-        $ref_process_identifier_schema->setAccessible(TRUE);
-        $ref_process_identifier_schema->invokeArgs($storage_schema, [&$field_schema_data[$table], $field_name]);
-
-        $installed_storage_schema->set($entity_type_id . '.field_schema_data.' . $field_storage_definition->getName(), $field_schema_data);
-      }
-    }
-  }
+  return 8901;
 }
 
 /**
@@ -1648,18 +1657,4 @@ function _system_advisories_requirements(array &$requirements): void {
       )->toRenderable();
     }
   }
-}
-
-/**
- * Checks if there are 'prefix' entries in array format for tables.
- */
-function _system_check_array_table_prefixes() {
-  foreach (Database::getAllConnectionInfo() as $targets) {
-    foreach ($targets as $target) {
-      if (isset($target['extra_prefix']) && is_array($target['extra_prefix'])) {
-        return TRUE;
-      }
-    }
-  }
-  return FALSE;
 }

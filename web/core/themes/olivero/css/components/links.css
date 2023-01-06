@@ -10,33 +10,24 @@
  * Links component.
  */
 
-[dir="ltr"] .links.inline {
-  margin-left: 0;
-}
+/*
+ * Media query breakpoints.
+ * Processed by postcss/postcss-custom-media.
+ */
 
-[dir="rtl"] .links.inline {
-  margin-right: 0;
-}
+/* Navigation related breakpoints */
 
-[dir="ltr"] .links.inline {
-  padding-left: 0;
-}
+/* Grid related breakpoints */
 
-[dir="rtl"] .links.inline {
-  padding-right: 0;
-}
+/* Grid shifts from 6 to 14 columns. */
 
-[dir="ltr"] .links.inline {
-  padding-right: 0;
-}
-
-[dir="rtl"] .links.inline {
-  padding-left: 0;
-}
+/* Width of the entire grid maxes out. */
 
 .links.inline {
-  padding-top: 0;
-  padding-bottom: 0;
+  margin-inline-start: 0;
+  padding-block: 0;
+  padding-inline-start: 0;
+  padding-inline-end: 0;
   list-style: none;
 }
 
@@ -44,21 +35,13 @@
   display: inline;
 }
 
-[dir="ltr"] .links.inline > *:not(:last-child) {
-  padding-right: 1em;
-}
-
-[dir="rtl"] .links.inline > *:not(:last-child) {
-  padding-left: 1em;
+.links.inline > *:not(:last-child) {
+  padding-inline-end: 1em;
 }
 
 @media (min-width: 43.75rem) {
 
-  [dir="ltr"] .node--type-book .links.inline {
-    text-align: right;
-  }
-
-  [dir="rtl"] .node--type-book .links.inline {
-    text-align: left;
+  .node--type-book .links.inline {
+    text-align: end;
   }
 }

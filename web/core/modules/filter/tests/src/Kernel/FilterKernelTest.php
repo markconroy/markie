@@ -1093,7 +1093,7 @@ body {color:red}
    * Asserts that a text transformed to lowercase with HTML entities decoded does contains a given string.
    *
    * Otherwise fails the test with a given message, similar to all the
-   * SimpleTest assert* functions.
+   * PHPUnit assert* functions.
    *
    * Note that this does not remove nulls, new lines and other characters that
    * could be used to obscure a tag or an attribute name.
@@ -1104,12 +1104,10 @@ body {color:red}
    *   Lowercase, plain text to look for.
    * @param string $message
    *   (optional) Message to display if failed. Defaults to an empty string.
-   * @param string $group
-   *   (optional) The group this message belongs to. Defaults to 'Other'.
    *
    * @internal
    */
-  public function assertNormalized(string $haystack, string $needle, string $message = '', string $group = 'Other'): void {
+  public function assertNormalized(string $haystack, string $needle, string $message = ''): void {
     $this->assertStringContainsString($needle, strtolower(Html::decodeEntities($haystack)), $message);
   }
 
@@ -1117,7 +1115,7 @@ body {color:red}
    * Asserts that text transformed to lowercase with HTML entities decoded does not contain a given string.
    *
    * Otherwise fails the test with a given message, similar to all the
-   * SimpleTest assert* functions.
+   * PHPUnit assert* functions.
    *
    * Note that this does not remove nulls, new lines, and other character that
    * could be used to obscure a tag or an attribute name.
@@ -1128,12 +1126,10 @@ body {color:red}
    *   Lowercase, plain text to look for.
    * @param string $message
    *   (optional) Message to display if failed. Defaults to an empty string.
-   * @param string $group
-   *   (optional) The group this message belongs to. Defaults to 'Other'.
    *
    * @internal
    */
-  public function assertNoNormalized(string $haystack, string $needle, string $message = '', string $group = 'Other'): void {
+  public function assertNoNormalized(string $haystack, string $needle, string $message = ''): void {
     $this->assertStringNotContainsString($needle, strtolower(Html::decodeEntities($haystack)), $message);
   }
 

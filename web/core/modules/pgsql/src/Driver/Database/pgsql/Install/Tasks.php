@@ -16,9 +16,9 @@ class Tasks extends InstallTasks {
    *
    * The contrib extension pg_trgm is supposed to be installed.
    *
-   * @see https://www.postgresql.org/docs/10/pgtrgm.html
+   * @see https://www.postgresql.org/docs/12/pgtrgm.html
    */
-  const PGSQL_MINIMUM_VERSION = '10';
+  const PGSQL_MINIMUM_VERSION = '12';
 
   /**
    * {@inheritdoc}
@@ -39,6 +39,10 @@ class Tasks extends InstallTasks {
     ];
     $this->tasks[] = [
       'function' => 'checkStandardConformingStrings',
+      'arguments' => [],
+    ];
+    $this->tasks[] = [
+      'function' => 'checkExtensions',
       'arguments' => [],
     ];
     $this->tasks[] = [
@@ -236,6 +240,27 @@ class Tasks extends InstallTasks {
   protected function checkStandardConformingStringsSuccess() {
     $standard_conforming_strings = Database::getConnection()->query("SHOW standard_conforming_strings")->fetchField();
     return ($standard_conforming_strings == 'on');
+  }
+
+  /**
+   * Generic function to check postgresql extensions.
+   */
+  public function checkExtensions() {
+    $connection = Database::getConnection();
+    try {
+      if ($connection->schema()->extensionExists('pg_trgm')) {
+        $this->pass(t('PostgreSQL has the pg_trgm extension enabled.'));
+      }
+      else {
+        $this->fail(t('The <a href=":pg_trgm">pg_trgm</a> PostgreSQL extension is not present. The extension is required by Drupal 10 to improve performance when using PostgreSQL. See <a href=":requirements">Drupal database server requirements</a> for more information.', [
+          ':pg_trgm' => 'https://www.postgresql.org/docs/current/pgtrgm.html',
+          ':requirements' => 'https://www.drupal.org/docs/system-requirements/database-server-requirements',
+        ]));
+      }
+    }
+    catch (\Exception $e) {
+      $this->fail(t('Drupal could not check for the pg_trgm extension: @error.', ['@error' => $e->getMessage()]));
+    }
   }
 
   /**

@@ -48,7 +48,7 @@ class UserRegistrationRestTest extends ResourceTestBase {
    *
    * @var string
    */
-  protected static $entityTypeId;
+  protected static string $entityTypeId;
 
   const USER_EMAIL_DOMAIN = '@example.com';
 

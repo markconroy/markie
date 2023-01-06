@@ -3,8 +3,6 @@
  * Checkbox and radio input elements.
  */
 
-@import "../base/variables.pcss.css";
-
 /**
  * Form item modifiers.
  */
@@ -74,7 +72,7 @@
   appearance: none;
 }
 
-@media (-ms-high-contrast: active), (forced-colors: active) {
+@media (forced-colors: active) {
   .form-boolean {
     appearance: auto;
   }

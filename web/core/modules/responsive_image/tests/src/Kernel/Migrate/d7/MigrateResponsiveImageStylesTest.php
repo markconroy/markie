@@ -20,7 +20,7 @@ class MigrateResponsiveImageStylesTest extends MigrateDrupal7TestBase {
   /**
    * {@inheritdoc}
    */
-  public function setUp(): void {
+  protected function setUp(): void {
     parent::setUp();
     // Ensure the 'picture' module is enabled in the source.
     $this->sourceDatabase->update('system')

@@ -3,7 +3,7 @@
  * Nav Button Mobile.
  */
 
-@import "../../base/variables.pcss.css";
+@import "../../base/media-queries.pcss.css";
 
 .mobile-nav-button {
   position: relative;
@@ -24,7 +24,7 @@
   appearance: none;
 
   &:focus {
-    outline: solid 2px var(--color--blue-20);
+    outline: solid 2px var(--color--primary-40);
   }
 
   &:active {
@@ -66,7 +66,7 @@
   display: block;
   width: var(--sp2);
   height: 0;
-  border-top: solid 3px var(--color--blue-50);
+  border-top: solid 3px var(--color--primary-50);
 
   &:before {
     position: absolute;
@@ -76,7 +76,7 @@
     height: 0;
     content: "";
     transition: all 0.2s;
-    border-top: solid 3px var(--color--blue-50);
+    border-top: solid 3px var(--color--primary-50);
   }
 
   &:after {
@@ -87,7 +87,7 @@
     height: 0;
     content: "";
     transition: all 0.2s;
-    border-top: solid 3px var(--color--blue-50);
+    border-top: solid 3px var(--color--primary-50);
   }
 }
 

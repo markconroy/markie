@@ -898,19 +898,6 @@ function system_region_list($theme, $show = REGIONS_ALL) {
 }
 
 /**
- * Array sorting callback; sorts modules by their name.
- *
- * @deprecated in drupal:9.3.0 and is removed from drupal:10.0.0. Use
- *   \Drupal\Core\Extension\ExtensionList::sortByName() instead.
- *
- * @see https://www.drupal.org/node/3225999
- */
-function system_sort_modules_by_info_name($a, $b) {
-  @trigger_error('system_sort_modules_by_info_name() is deprecated in drupal:9.3.0 and is removed from drupal:10.0.0. Use \Drupal\Core\Extension\ExtensionList::sortByName() instead. See https://www.drupal.org/node/3225999', E_USER_DEPRECATED);
-  return strcasecmp($a->info['name'], $b->info['name']);
-}
-
-/**
  * Sorts themes by their names, with the default theme listed first.
  *
  * Callback for uasort() within
@@ -1400,5 +1387,15 @@ function system_file_download($uri) {
         'Cache-Control' => 'public',
       ];
     }
+  }
+}
+
+/**
+ * Implements hook_archiver_info_alter().
+ */
+function system_archiver_info_alter(&$info) {
+  if (!class_exists(\ZipArchive::class)) {
+    // PHP Zip extension is missing.
+    unset($info['Zip']);
   }
 }

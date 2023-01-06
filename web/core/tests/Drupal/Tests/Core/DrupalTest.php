@@ -434,6 +434,29 @@ class DrupalTest extends UnitTestCase {
   }
 
   /**
+   * Tests the PHP constants have consistent values.
+   */
+  public function testPhpConstants() {
+    // RECOMMENDED_PHP can be just MAJOR.MINOR so normalize it to allow using
+    // version_compare().
+    $normalizer = function (string $version): string {
+      // The regex below is from \Composer\Semver\VersionParser::normalize().
+      preg_match('{^(\d{1,5})(\.\d++)?(\.\d++)?$}i', $version, $matches);
+      return $matches[1]
+        . (!empty($matches[2]) ? $matches[2] : '.9999999')
+        . (!empty($matches[3]) ? $matches[3] : '.9999999');
+    };
+
+    $recommended_php = $normalizer(\Drupal::RECOMMENDED_PHP);
+    $this->assertTrue(version_compare($recommended_php, \Drupal::MINIMUM_PHP, '>='), "\Drupal::RECOMMENDED_PHP should be greater or equal to \Drupal::MINIMUM_PHP");
+
+    // As this test depends on the $normalizer function it is tested.
+    $this->assertSame('10.9999999.9999999', $normalizer('10'));
+    $this->assertSame('10.1.9999999', $normalizer('10.1'));
+    $this->assertSame('10.1.2', $normalizer('10.1.2'));
+  }
+
+  /**
    * Sets up a mock expectation for the container get() method.
    *
    * @param string $service_name
@@ -444,14 +467,8 @@ class DrupalTest extends UnitTestCase {
   protected function setMockContainerService($service_name, $return = NULL) {
     $expects = $this->container->expects($this->once())
       ->method('get')
-      ->with($service_name);
-
-    if (isset($return)) {
-      $expects->willReturn($return);
-    }
-    else {
-      $expects->willReturn(TRUE);
-    }
+      ->with($service_name)
+      ->willReturn($return ?? new \stdClass());
 
     \Drupal::setContainer($this->container);
   }

@@ -3,15 +3,9 @@
  * Main form and form item styles.
  */
 
-@import "../base/variables.pcss.css";
-
 ::placeholder {
   opacity: 1;
   color: var(--input-fg-color--placeholder);
-}
-/* IE 10 and 11 needs this set as important. */
-:-ms-input-placeholder {
-  color: var(--input-fg-color--placeholder) !important;
 }
 
 /**
@@ -24,7 +18,7 @@
 /**
  * When a table row or a container-inline has a single form item, prevent it
  * from adding unnecessary extra spacing.
- * If it has multiple form items, allow spacing between them, overriding Classy.
+ * If it has multiple form items, allow spacing between them, overriding core.
  */
 tr .form-item,
 .container-inline .form-item {

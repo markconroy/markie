@@ -3,6 +3,7 @@
 namespace Drupal\KernelTests\Core\Image;
 
 use Drupal\Core\File\FileSystemInterface;
+use Drupal\Core\Image\ImageFactory;
 use Drupal\Core\Image\ImageInterface;
 use Drupal\KernelTests\KernelTestBase;
 
@@ -33,14 +34,14 @@ class ToolkitGdTest extends KernelTestBase {
    *
    * @var \Drupal\Core\Image\ImageFactory
    */
-  protected $imageFactory;
+  protected ImageFactory $imageFactory;
 
   /**
    * A directory where test image files can be saved to.
    *
    * @var string
    */
-  protected $directory;
+  protected string $directory;
 
   /**
    * {@inheritdoc}
@@ -355,13 +356,7 @@ class ToolkitGdTest extends KernelTestBase {
 
     // Check that saved image reloads without raising PHP errors.
     $image_reloaded = $this->imageFactory->get($file_path);
-    if (PHP_VERSION_ID >= 80000) {
-      $this->assertInstanceOf(\GDImage::class, $image_reloaded->getToolkit()->getResource());
-    }
-    else {
-      $this->assertIsResource($image_reloaded->getToolkit()->getResource());
-      $this->assertSame(get_resource_type($image_reloaded->getToolkit()->getResource()), 'gd');
-    }
+    $this->assertInstanceOf(\GDImage::class, $image_reloaded->getToolkit()->getResource());
   }
 
   /**
@@ -458,39 +453,6 @@ class ToolkitGdTest extends KernelTestBase {
   }
 
   /**
-   * Tests that GD resources are freed from memory.
-   *
-   * @todo Remove the method for PHP 8.0+ https://www.drupal.org/node/3179058
-   */
-  public function testResourceDestruction() {
-    if (PHP_VERSION_ID >= 80000) {
-      $this->markTestSkipped('In PHP8 resources are no longer used. \GdImage objects are used instead. These will be garbage collected like the regular objects they are.');
-    }
-    // Test that an Image object going out of scope releases its GD resource.
-    $image = $this->imageFactory->get('core/tests/fixtures/files/image-test.png');
-    $res = $image->getToolkit()->getResource();
-    $this->assertIsResource($res);
-    $image = NULL;
-    // @todo In https://www.drupal.org/node/3133236 convert this to
-    //   $this->assertIsNotResource($res).
-    $this->assertFalse(is_resource($res), 'Image resource was destroyed after losing scope.');
-
-    // Test that 'create_new' operation does not leave orphaned GD resources.
-    $image = $this->imageFactory->get('core/tests/fixtures/files/image-test.png');
-    $old_res = $image->getToolkit()->getResource();
-    // Check if resource has been created successfully.
-    $this->assertIsResource($old_res);
-    $image->createNew(20, 20);
-    $new_res = $image->getToolkit()->getResource();
-    // Check if the original resource has been destroyed.
-    // @todo In https://www.drupal.org/node/3133236 convert this to
-    //   $this->assertIsNotResource($old_res).
-    $this->assertFalse(is_resource($old_res));
-    // Check if a new resource has been created successfully.
-    $this->assertIsResource($new_res);
-  }
-
-  /**
    * Tests for GIF images with transparency.
    */
   public function testGifTransparentImages(): void {
@@ -553,6 +515,21 @@ class ToolkitGdTest extends KernelTestBase {
 
     // Try perform a missing toolkit operation.
     $this->assertFalse($image->apply('missing_op', []), 'Calling a missing image toolkit operation plugin should fail, but it did not.');
+  }
+
+  /**
+   * @covers ::getRequirements
+   */
+  public function testGetRequirements(): void {
+    $this->assertEquals([
+      'version' => [
+        'title' => t('GD library'),
+        'value' => gd_info()['GD Version'],
+        'description' => t("Supported image file formats: %formats.", [
+          '%formats' => implode(', ', ['GIF', 'JPEG', 'PNG', 'WEBP']),
+        ]),
+      ],
+    ], $this->imageFactory->get()->getToolkit()->getRequirements());
   }
 
 }

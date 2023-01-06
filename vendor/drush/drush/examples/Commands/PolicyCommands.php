@@ -1,4 +1,5 @@
 <?php
+
 namespace Drush\Commands;
 
 use Consolidation\AnnotatedCommand\CommandData;
@@ -8,12 +9,11 @@ use Symfony\Component\Console\Input\InputOption;
 /**
  * Load this commandfile using the --include option - e.g. `drush --include=/path/to/drush/examples`
  *
- * See [Drush Test Traits](https://github.com/drush-ops/drush/blob/10.x/docs/contribute/unish.md#about-the-test-suites) for info on testing Drush commands.
+ * See [Drush Test Traits](https://github.com/drush-ops/drush/blob/11.x/docs/contribute/unish.md#about-the-test-suites) for info on testing Drush commands.
  */
 
 class PolicyCommands extends DrushCommands
 {
-
     /**
      * Prevent catastrophic braino. Note that this file has to be local to the
      * machine that initiates the sql:sync command.

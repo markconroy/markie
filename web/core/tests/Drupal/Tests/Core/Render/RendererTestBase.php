@@ -8,10 +8,8 @@
 namespace Drupal\Tests\Core\Render;
 
 use Drupal\Core\Cache\Cache;
-use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Cache\Context\ContextCacheKeys;
 use Drupal\Core\Cache\MemoryBackend;
-use Drupal\Core\Http\RequestStack;
 use Drupal\Core\Security\TrustedCallbackInterface;
 use Drupal\Core\Render\PlaceholderGenerator;
 use Drupal\Core\Render\PlaceholderingRenderCache;
@@ -19,6 +17,7 @@ use Drupal\Core\Render\Renderer;
 use Drupal\Tests\UnitTestCase;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
  * Base class for the actual unit tests testing \Drupal\Core\Render\Renderer.
@@ -115,7 +114,7 @@ abstract class RendererTestBase extends UnitTestCase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     $this->controllerResolver = $this->createMock('Drupal\Core\Controller\ControllerResolverInterface');
@@ -171,7 +170,7 @@ abstract class RendererTestBase extends UnitTestCase {
               $keys[] = $context_id;
           }
         }
-        return new ContextCacheKeys($keys, new CacheableMetadata());
+        return new ContextCacheKeys($keys);
       });
     $this->placeholderGenerator = new PlaceholderGenerator($this->rendererConfig);
     $this->renderCache = new PlaceholderingRenderCache($this->requestStack, $this->cacheFactory, $this->cacheContextsManager, $this->placeholderGenerator);

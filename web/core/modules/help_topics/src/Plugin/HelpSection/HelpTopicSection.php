@@ -78,10 +78,8 @@ class HelpTopicSection extends HelpSectionPluginBase implements ContainerFactory
 
   /**
    * The string translation service.
-   *
-   * @var \Drupal\Core\StringTranslation\TranslationManager
    */
-  protected $translationManager;
+  protected TranslationManager $translationManager;
 
   /**
    * Constructs a HelpTopicSection object.

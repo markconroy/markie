@@ -3,13 +3,13 @@
 namespace Drupal\mysql\Driver\Database\mysql;
 
 use Drupal\Core\Database\DatabaseAccessDeniedException;
-use Drupal\Core\Database\IntegrityConstraintViolationException;
 use Drupal\Core\Database\DatabaseExceptionWrapper;
 use Drupal\Core\Database\StatementWrapper;
 use Drupal\Core\Database\Database;
 use Drupal\Core\Database\DatabaseNotFoundException;
 use Drupal\Core\Database\DatabaseException;
 use Drupal\Core\Database\Connection as DatabaseConnection;
+use Drupal\Core\Database\SupportsTemporaryTablesInterface;
 use Drupal\Core\Database\TransactionNoActiveException;
 
 /**
@@ -20,7 +20,7 @@ use Drupal\Core\Database\TransactionNoActiveException;
 /**
  * MySQL implementation of \Drupal\Core\Database\Connection.
  */
-class Connection extends DatabaseConnection {
+class Connection extends DatabaseConnection implements SupportsTemporaryTablesInterface {
 
   /**
    * Error code for "Unknown database" error.
@@ -46,11 +46,6 @@ class Connection extends DatabaseConnection {
    * SQLSTATE error code for "Syntax error or access rule violation".
    */
   const SQLSTATE_SYNTAX_ERROR = 42000;
-
-  /**
-   * {@inheritdoc}
-   */
-  protected $statementClass = NULL;
 
   /**
    * {@inheritdoc}
@@ -115,25 +110,6 @@ class Connection extends DatabaseConnection {
       $this->identifierQuotes = ['`', '`'];
     }
     parent::__construct($connection, $connection_options);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  protected function handleQueryException(\PDOException $e, $query, array $args = [], $options = []) {
-    // In case of attempted INSERT of a record with an undefined column and no
-    // default value indicated in schema, MySql returns a 1364 error code.
-    // Throw an IntegrityConstraintViolationException here like the other
-    // drivers do, to avoid the parent class to throw a generic
-    // DatabaseExceptionWrapper instead.
-    if (!empty($e->errorInfo[1]) && $e->errorInfo[1] === 1364) {
-      @trigger_error('Connection::handleQueryException() is deprecated in drupal:9.2.0 and is removed in drupal:10.0.0. Get a handler through $this->exceptionHandler() instead, and use one of its methods. See https://www.drupal.org/node/3187222', E_USER_DEPRECATED);
-      $query_string = ($query instanceof StatementInterface) ? $query->getQueryString() : $query;
-      $message = $e->getMessage() . ": " . $query_string . "; " . print_r($args, TRUE);
-      throw new IntegrityConstraintViolationException($message, is_int($e->getCode()) ? $e->getCode() : 0, $e);
-    }
-
-    parent::handleQueryException($e, $query, $args, $options);
   }
 
   /**
@@ -251,7 +227,7 @@ class Connection extends DatabaseConnection {
    * {@inheritdoc}
    */
   public function queryTemporary($query, array $args = [], array $options = []) {
-    $tablename = $this->generateTemporaryTableName();
+    $tablename = 'db_temporary_' . uniqid();
     $this->query('CREATE TEMPORARY TABLE {' . $tablename . '} Engine=MEMORY ' . $query, $args, $options);
     return $tablename;
   }

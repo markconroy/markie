@@ -216,7 +216,7 @@ class ForumTest extends BrowserTestBase {
 
     // Topics cell contains number of topics (6), number of unread topics (also
     // 6), and the forum name.
-    $this->assertEquals('6 6 new posts in forum ' . $this->forum['name'], $cells[1]->getText(), 'Number of topics, number of unread topics, and forum name found.');
+    $this->assertEquals('6 6 new posts in forum ' . $this->forum['name'], $cells[1]->getText(), 'Number of topics found.');
 
     // Verify total number of posts in forum.
     $this->assertEquals('6', $cells[2]->getText(), 'Number of posts found.');

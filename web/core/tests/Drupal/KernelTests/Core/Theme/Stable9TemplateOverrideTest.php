@@ -29,6 +29,7 @@ class Stable9TemplateOverrideTest extends KernelTestBase {
     // Registered as a template in the views_theme() function in views.module
     // but an actual template does not exist.
     'views-form-views-form',
+    'views-view-grid-responsive',
   ];
 
   /**

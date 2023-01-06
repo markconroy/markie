@@ -2,10 +2,9 @@
 
 This project uses [dflydev/dot-access-data](https://github.com/dflydev/dot-access-data) to provide simple output filtering for applications built with [annotated-command](https://github.com/consolidation/annotated-command) / [Robo](https://github.com/consolidation/robo).
 
-[![Travis CI](https://travis-ci.org/consolidation/filter-via-dot-access-data.svg?branch=master)](https://travis-ci.org/consolidation/filter-via-dot-access-data)
-[![Windows CI](https://ci.appveyor.com/api/projects/status/o37b8kff7ai4yyer?svg=true)](https://ci.appveyor.com/project/greg-1-anderson/filter-via-dot-access-data)
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/consolidation/filter-via-dot-access-data/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/consolidation/filter-via-dot-access-data/?branch=master)
-[![Coverage Status](https://coveralls.io/repos/github/consolidation/filter-via-dot-access-data/badge.svg?branch=master)](https://coveralls.io/github/consolidation/filter-via-dot-access-data?branch=master) 
+[![ci](https://github.com/consolidation/filter-via-dot-access-data/workflows/CI/badge.svg)](https://travis-ci.org/consolidation/filter-via-dot-access-data)
+[![scrutinizer](https://scrutinizer-ci.com/g/consolidation/filter-via-dot-access-data/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/consolidation/filter-via-dot-access-data/?branch=master)
+[![codecov](https://codecov.io/gh/consolidation/filter-via-dot-access-data/branch/main/graph/badge.svg?token=CAaB7ofhxx)](https://codecov.io/gh/consolidation/filter-via-dot-access-data)
 [![License](https://img.shields.io/badge/license-MIT-408677.svg)](LICENSE)
 
 ## Overview
@@ -54,15 +53,6 @@ The filter decides whether to include or exclude each **top-level element** base
 - Simple boolean logic may be used, e.g. `color=red&&shape=round`
 
 Parenthesis are not supported.
-
-### Commandline Tool
-
-This project is bundled with a simple commandline tool, `dot-process`. It is similar to a simple version of `jq`. It is intended for demonstration purposes only.
-```
-# Write out composer.json in yaml format
-$ dot-process.phar edit composer.json --format=yaml
-```
-This demo tool will become more functional over time. It is only intended to be a demo, though, not a supported utility.
 
 ## Getting Started
 

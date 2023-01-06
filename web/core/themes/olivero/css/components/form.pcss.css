@@ -3,15 +3,10 @@
  * Main form and form item styles.
  */
 
-@import "../base/variables.pcss.css";
+@import "../base/media-queries.pcss.css";
 
 ::placeholder {
-  color: var(--color--gray-30);
-}
-
-/* IE 10 and 11 needs this set as important. */
-:-ms-input-placeholder {
-  color: var(--color--gray-30) !important;
+  color: var(--color--gray-60);
 }
 
 /**
@@ -31,7 +26,7 @@
 /**
  * When a table row or a container-inline has a single form item, prevent it
  * from adding unnecessary extra spacing.
- * If it has multiple form items, allow spacing between them, overriding Classy.
+ * If it has multiple form items, allow spacing between them, overriding core.
  */
 tr .form-item,
 .container-inline .form-item {
@@ -69,7 +64,7 @@ tr .form-item,
 /* Label states. */
 .form-item__label.is-disabled {
   cursor: default;
-  color: var(--color--gray-45);
+  color: var(--color--gray-70);
 }
 
 /* Form required star icon */

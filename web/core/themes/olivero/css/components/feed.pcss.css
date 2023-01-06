@@ -3,16 +3,16 @@
  * RSS feed.
  */
 
-@import "../base/variables.pcss.css";
+@import "../base/media-queries.pcss.css";
 
 .feed-icon {
   display: flex;
   align-items: center;
   text-decoration: none;
-  color: var(--color--gray-25);
+  color: var(--color-text-neutral-soft);
 
   &:hover {
-    color: var(--color--blue-50);
+    color: var(--color--primary-50);
   }
 }
 
@@ -32,7 +32,7 @@
   height: var(--sp1-5);
   margin-inline-start: var(--sp0-5);
   color: var(--color--white);
-  background-color: var(--color--blue-50);
+  background-color: var(--color--primary-50);
 
   & svg {
     vertical-align: top;

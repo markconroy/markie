@@ -50,7 +50,7 @@ abstract class EntityCacheTagsTestBase extends PageCacheTagsTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     // Give anonymous users permission to view test entities, so that we can
@@ -95,26 +95,6 @@ abstract class EntityCacheTagsTestBase extends PageCacheTagsTestBase {
       $this->referencingEntity,
       $this->nonReferencingEntity,
     ] = $this->createReferenceTestEntities($this->entity);
-  }
-
-  /**
-   * Generates standardized entity cache tags test info.
-   *
-   * @param string $entity_type_label
-   *   The label of the entity type whose cache tags to test.
-   * @param string $group
-   *   The test group.
-   *
-   * @return array
-   *
-   * @see \Drupal\simpletest\TestBase::getInfo()
-   */
-  protected static function generateStandardizedInfo($entity_type_label, $group) {
-    return [
-      'name' => "$entity_type_label entity cache tags",
-      'description' => "Test the $entity_type_label entity's cache tags.",
-      'group' => $group,
-    ];
   }
 
   /**
@@ -380,7 +360,7 @@ abstract class EntityCacheTagsTestBase extends PageCacheTagsTestBase {
     $empty_entity_listing_cache_tags = Cache::mergeTags($this->entity->getEntityType()->getListCacheTags(), $page_cache_tags);
 
     $nonempty_entity_listing_cache_tags = Cache::mergeTags($this->entity->getEntityType()->getListCacheTags(), $this->entity->getCacheTags());
-    $nonempty_entity_listing_cache_tags = Cache::mergeTags($nonempty_entity_listing_cache_tags, $this->getAdditionalCacheTagsForEntityListing($this->entity));
+    $nonempty_entity_listing_cache_tags = Cache::mergeTags($nonempty_entity_listing_cache_tags, $this->getAdditionalCacheTagsForEntityListing());
     $nonempty_entity_listing_cache_tags = Cache::mergeTags($nonempty_entity_listing_cache_tags, $page_cache_tags);
 
     $this->verifyPageCache($referencing_entity_url, 'MISS');

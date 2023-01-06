@@ -10,11 +10,23 @@
  * Header Search Narrow Block.
  */
 
+/*
+ * Media query breakpoints.
+ * Processed by postcss/postcss-custom-media.
+ */
+
+/* Navigation related breakpoints */
+
+/* Grid related breakpoints */
+
+/* Grid shifts from 6 to 14 columns. */
+
+/* Width of the entire grid maxes out. */
+
 .block-search-narrow {
-  margin-right: -1.125rem;
-  margin-bottom: 2.25rem;
-  margin-left: -1.125rem;
-  background: #000;
+  margin-inline: calc(-1 * var(--sp));
+  margin-block-end: var(--sp2);
+  background: var(--color--black);
 }
 
 .block-search-narrow .search-block-form {
@@ -30,37 +42,22 @@
   margin: 0;
 }
 
-[dir="ltr"] .block-search-narrow input[type="search"] {
-  padding-left: 1.125rem;
-}
-
-[dir="rtl"] .block-search-narrow input[type="search"] {
-  padding-right: 1.125rem;
-}
-
-[dir="ltr"] .block-search-narrow input[type="search"] {
-  padding-right: 1.125rem;
-}
-
-[dir="rtl"] .block-search-narrow input[type="search"] {
-  padding-left: 1.125rem;
-}
-
 .block-search-narrow input[type="search"] {
-  width: calc(100% + 2.25rem);
-  height: 3.375rem;
-  padding-top: 0;
-  padding-bottom: 0;
+  width: calc(100% + var(--sp2));
+  height: calc(3 * var(--sp));
+  padding-block: 0;
+  padding-inline-start: var(--sp);
+  padding-inline-end: var(--sp);
   transition: background-size 0.4s;
-  color: #fff;
+  color: var(--color--white);
   border: solid 1px transparent;
   background-color: transparent;
-  background-image: linear-gradient(#2494db, #2494db); /* Two values are needed for IE11 support. */
+  background-image: linear-gradient(var(--color--primary-50), var(--color--primary-50)); /* Two values are needed for IE11 support. */
   background-repeat: no-repeat;
   background-position: bottom left; /* LTR */
   background-size: 0% 0.3125rem;
   box-shadow: none;
-  font-family: Lora, georgia, serif;
+  font-family: var(--font-serif);
   font-size: 1rem;
   -webkit-appearance: none;
 }
@@ -90,70 +87,25 @@
 
 @media (min-width: 43.75rem) {
 
-  [dir="ltr"] .block-search-narrow input[type="search"] {
-    padding-left: 2.25rem;
-  }
-
-  [dir="rtl"] .block-search-narrow input[type="search"] {
-    padding-right: 2.25rem;
-  }
-
-  [dir="ltr"] .block-search-narrow input[type="search"] {
-    padding-right: 2.25rem;
-  }
-
-  [dir="rtl"] .block-search-narrow input[type="search"] {
-    padding-left: 2.25rem;
-  }
-
   .block-search-narrow input[type="search"] {
-    height: 4.5rem;
+    height: calc(4 * var(--sp));
+    padding-inline-start: var(--sp2);
+    padding-inline-end: var(--sp2);
   }
-}
-
-[dir="ltr"] .block-search-narrow .search-form__submit {
-  margin-left: 0;
-}
-
-[dir="rtl"] .block-search-narrow .search-form__submit {
-  margin-right: 0;
-}
-
-[dir="ltr"] .block-search-narrow .search-form__submit {
-  margin-right: 0;
-}
-
-[dir="rtl"] .block-search-narrow .search-form__submit {
-  margin-left: 0;
-}
-
-[dir="ltr"] .block-search-narrow .search-form__submit {
-  padding-left: 0;
-}
-
-[dir="rtl"] .block-search-narrow .search-form__submit {
-  padding-right: 0;
-}
-
-[dir="ltr"] .block-search-narrow .search-form__submit {
-  padding-right: 0;
-}
-
-[dir="rtl"] .block-search-narrow .search-form__submit {
-  padding-left: 0;
 }
 
 .block-search-narrow .search-form__submit {
   position: relative;
   overflow: hidden;
-  -ms-grid-row-align: stretch;
   align-self: stretch;
-  width: 3.375rem;
+  width: var(--sp3);
   height: auto;
-  margin-top: 0;
-  margin-bottom: 0;
-  padding-top: 0;
-  padding-bottom: 0;
+  margin-block: 0;
+  margin-inline-start: 0;
+  margin-inline-end: 0;
+  padding-block: 0;
+  padding-inline-start: 0;
+  padding-inline-end: 0;
   cursor: pointer;
   border-color: transparent;
   background-color: transparent;
@@ -164,17 +116,10 @@
     */
 }
 
-[dir="ltr"] .block-search-narrow .search-form__submit .icon--search {
-  left: 0;
-}
-
-[dir="rtl"] .block-search-narrow .search-form__submit .icon--search {
-  right: 0;
-}
-
 .block-search-narrow .search-form__submit .icon--search {
   position: absolute;
-  top: 0;
+  inset-block-start: 0;
+  inset-inline-start: 0;
   display: block;
   width: 100%; /* Width of the SVG background image. */
   height: 100%;
@@ -185,24 +130,17 @@
   background-size: auto;
 }
 
-[dir="ltr"] .block-search-narrow .search-form__submit .icon--search:after {
-  left: 0;
-}
-
-[dir="rtl"] .block-search-narrow .search-form__submit .icon--search:after {
-  right: 0;
-}
-
 .block-search-narrow .search-form__submit .icon--search:after {
   position: absolute;
-  bottom: 0;
+  inset-block-end: 0;
+  inset-inline-start: 0;
   width: 100%;
   height: 0;
   content: "";
   transition: transform 0.2s;
   transform: scaleX(0);
   transform-origin: left; /* LTR */
-  border-top: solid 0.3125rem #2494db;
+  border-block-start: solid 0.3125rem var(--color--primary-50);
 }
 
 @media (forced-colors: active) {
@@ -231,7 +169,7 @@
 @media screen and (-ms-high-contrast: active) {
 
   .block-search-narrow .search-form__submit:focus {
-    border-bottom-width: 9px;
+    border-bottom-width: var(--sp0-5);
   }
 
   .block-search-narrow .search-form__submit:focus span:after {
@@ -267,20 +205,9 @@
 
 @media (min-width: 31.25rem) {
 
-  [dir="ltr"] .block-search-narrow {
-    margin-left: 0;
-  }
-
-  [dir="rtl"] .block-search-narrow {
-    margin-right: 0;
-  }
-
-  [dir="ltr"] .block-search-narrow {
-    margin-right: 0;
-  }
-
-  [dir="rtl"] .block-search-narrow {
-    margin-left: 0;
+  .block-search-narrow {
+    margin-inline-start: 0;
+    margin-inline-end: 0;
   }
 }
 

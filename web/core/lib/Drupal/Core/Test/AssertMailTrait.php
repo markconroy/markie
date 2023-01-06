@@ -50,16 +50,11 @@ trait AssertMailTrait {
    *   messages: use \Drupal\Component\Render\FormattableMarkup to embed
    *   variables in the message text, not t(). If left blank, a default message
    *   will be displayed.
-   * @param string $group
-   *   (optional) The group this message is in, which is displayed in a column
-   *   in test output. Use 'Debug' to indicate this is debugging output. Do not
-   *   translate this string. Defaults to 'Email'; most tests do not override
-   *   this default.
    *
    * @return bool
    *   TRUE on pass.
    */
-  protected function assertMail($name, $value = '', $message = '', $group = 'Email') {
+  protected function assertMail($name, $value = '', $message = '') {
     $captured_emails = $this->container->get('state')->get('system.test_mail_collector') ?: [];
     $email = end($captured_emails);
     $this->assertIsArray($email, $message);
@@ -82,13 +77,8 @@ trait AssertMailTrait {
    *   messages: use \Drupal\Component\Render\FormattableMarkup to embed
    *   variables in the message text, not t(). If left blank, a default message
    *   will be displayed.
-   * @param string $group
-   *   (optional) The group this message is in, which is displayed in a column
-   *   in test output. Use 'Debug' to indicate this is debugging output. Do not
-   *   translate this string. Defaults to 'Other'; most tests do not override
-   *   this default.
    */
-  protected function assertMailString($field_name, $string, $email_depth, $message = '', $group = 'Other') {
+  protected function assertMailString($field_name, $string, $email_depth, $message = '') {
     $mails = $this->getMails();
     $string_found = FALSE;
     // Cast MarkupInterface objects to string.
@@ -107,7 +97,7 @@ trait AssertMailTrait {
     if (!$message) {
       $message = new FormattableMarkup('Expected text found in @field of email message: "@expected".', ['@field' => $field_name, '@expected' => $string]);
     }
-    $this->assertTrue($string_found, $message, $group);
+    $this->assertTrue($string_found, $message);
   }
 
   /**
@@ -122,40 +112,15 @@ trait AssertMailTrait {
    *   messages: use \Drupal\Component\Render\FormattableMarkup to embed
    *   variables in the message text, not t(). If left blank, a default message
    *   will be displayed.
-   * @param string $group
-   *   (optional) The group this message is in, which is displayed in a column
-   *   in test output. Use 'Debug' to indicate this is debugging output. Do not
-   *   translate this string. Defaults to 'Other'; most tests do not override
-   *   this default.
    */
-  protected function assertMailPattern($field_name, $regex, $message = '', $group = 'Other') {
+  protected function assertMailPattern($field_name, $regex, $message = '') {
     $mails = $this->getMails();
     $mail = end($mails);
     $regex_found = preg_match("/$regex/", $mail[$field_name]);
     if (!$message) {
       $message = new FormattableMarkup('Expected text found in @field of email message: "@expected".', ['@field' => $field_name, '@expected' => $regex]);
     }
-    $this->assertTrue((bool) $regex_found, $message, $group);
-  }
-
-  /**
-   * Outputs to verbose the most recent $count emails sent.
-   *
-   * @param int $count
-   *   Optional number of emails to output.
-   *
-   * @deprecated in drupal:9.2.0 and is removed from drupal:10.0.0. Use
-   *   dump() instead.
-   *
-   * @see https://www.drupal.org/node/3197514
-   */
-  protected function verboseEmail($count = 1) {
-    @trigger_error('AssertMailTrait::verboseEmail() is deprecated in drupal:9.2.0 and is removed from drupal:10.0.0. Use dump() instead. See https://www.drupal.org/node/3197514', E_USER_DEPRECATED);
-    $mails = $this->getMails();
-    for ($i = count($mails) - 1; $i >= count($mails) - $count && $i >= 0; $i--) {
-      $mail = $mails[$i];
-      $this->verbose('Email:<pre>' . print_r($mail, TRUE) . '</pre>');
-    }
+    $this->assertTrue((bool) $regex_found, $message);
   }
 
 }

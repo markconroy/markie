@@ -4,6 +4,7 @@ namespace Drupal\KernelTests\Core\Image;
 
 use Drupal\Core\Image\ImageInterface;
 use Drupal\Core\ImageToolkit\ImageToolkitInterface;
+use Drupal\image\ImageEffectManager;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\Tests\Traits\Core\Image\ToolkitTestTrait;
 
@@ -36,7 +37,7 @@ class ToolkitTest extends KernelTestBase {
    *
    * @var \Drupal\image\ImageEffectManager
    */
-  protected $imageEffectPluginManager;
+  protected ImageEffectManager $imageEffectPluginManager;
 
   /**
    * {@inheritdoc}

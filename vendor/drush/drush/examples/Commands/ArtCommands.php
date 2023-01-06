@@ -1,4 +1,5 @@
 <?php
+
 namespace Drush\Commands;
 
 use Consolidation\AnnotatedCommand\AnnotationData;
@@ -9,7 +10,6 @@ use Consolidation\OutputFormatters\StructuredData\RowsOfFields;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
-
 use Drush\Style\DrushStyle;
 use Drush\Utils\StringUtils;
 
@@ -23,7 +23,7 @@ use Drush\Utils\StringUtils;
  * This file is a good example of the first of those bullets (a commandfile) but
  * since it isn't part of a module, it does not implement drush.services.yml.
  *
- * See [Drush Test Traits](https://github.com/drush-ops/drush/blob/10.x/docs/contribute/unish.md#about-the-test-suites) for info on testing Drush commands.
+ * See [Drush Test Traits](https://github.com/drush-ops/drush/blob/11.x/docs/contribute/unish.md#about-the-test-suites) for info on testing Drush commands.
  */
 
 class ArtCommands extends DrushCommands implements CustomEventAwareInterface

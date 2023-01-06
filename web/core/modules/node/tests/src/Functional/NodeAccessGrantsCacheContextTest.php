@@ -3,6 +3,7 @@
 namespace Drupal\Tests\node\Functional;
 
 use Drupal\Core\Database\Database;
+use Drupal\user\Entity\User;
 
 /**
  * Tests the node access grants cache context service.
@@ -39,12 +40,12 @@ class NodeAccessGrantsCacheContextTest extends NodeTestBase {
    *
    * @var \Drupal\user\Entity\User
    */
-  protected $noAccessUser2;
+  protected User $noAccessUser2;
 
   /**
    * @var array
    */
-  protected $userMapping;
+  protected array $userMapping;
 
   /**
    * {@inheritdoc}

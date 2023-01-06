@@ -10,26 +10,24 @@
  * Node preview container styling.
  */
 
-[dir="ltr"] .node-preview-container {
-  padding-left: 0.5625rem;
-}
+/*
+ * Media query breakpoints.
+ * Processed by postcss/postcss-custom-media.
+ */
 
-[dir="rtl"] .node-preview-container {
-  padding-right: 0.5625rem;
-}
+/* Navigation related breakpoints */
 
-[dir="ltr"] .node-preview-container {
-  padding-right: 0.5625rem;
-}
+/* Grid related breakpoints */
 
-[dir="rtl"] .node-preview-container {
-  padding-left: 0.5625rem;
-}
+/* Grid shifts from 6 to 14 columns. */
+
+/* Width of the entire grid maxes out. */
 
 .node-preview-container {
-  padding-top: 0;
-  padding-bottom: 0;
-  background: #fff;
+  padding-block: 0;
+  padding-inline-start: var(--sp0-5);
+  padding-inline-end: var(--sp0-5);
+  background: var(--color--white);
   box-shadow: -36px 1px 36px rgba(0, 0, 0, 0.08); /* LTR */
 }
 
@@ -38,7 +36,7 @@
 }
 
 body.toolbar-vertical.toolbar-tray-open .node-preview-container {
-  max-width: calc(100vw - 15.875rem);
+  max-width: calc(100vw - var(--toolbar-tray-vertical-width) - var(--scrollbar-width));
 }
 
 .node-preview-form-select {
@@ -47,23 +45,8 @@ body.toolbar-vertical.toolbar-tray-open .node-preview-container {
   align-items: center;
 }
 
-[dir="ltr"] .node-preview-backlink {
-  margin-left: 0;
-}
-
-[dir="rtl"] .node-preview-backlink {
-  margin-right: 0;
-}
-
-[dir="ltr"] .node-preview-backlink {
-  margin-right: auto;
-}
-
-[dir="rtl"] .node-preview-backlink {
-  margin-left: auto;
-}
-
 .node-preview-backlink {
-  margin-top: 0.5625rem;
-  margin-bottom: 0.5625rem;
+  margin-block: var(--sp0-5);
+  margin-inline-start: 0;
+  margin-inline-end: auto;
 }

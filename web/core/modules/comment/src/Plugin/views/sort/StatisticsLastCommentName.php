@@ -16,12 +16,12 @@ class StatisticsLastCommentName extends SortPluginBase {
   /**
    * The users table.
    */
-  protected $user_table;
+  protected ?string $user_table;
 
   /**
    * The user name field.
    */
-  protected $user_field;
+  protected string $user_field;
 
   public function query() {
     $this->ensureMyTable();

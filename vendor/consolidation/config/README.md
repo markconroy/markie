@@ -2,10 +2,10 @@
 
 Manage configuration for a commandline tool.
 
-[![Travis CI](https://travis-ci.org/consolidation/config.svg?branch=master)](https://travis-ci.org/consolidation/config) 
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/consolidation/config/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/consolidation/config/?branch=master)
-[![Coverage Status](https://coveralls.io/repos/github/consolidation/config/badge.svg?branch=master)](https://coveralls.io/github/consolidation/config?branch=master)
-[![License](https://poser.pugx.org/consolidation/config/license)](https://packagist.org/packages/consolidation/config)
+[![ci](https://github.com/consolidation/config/workflows/CI/badge.svg)](https://travis-ci.org/consolidation/config)
+[![scrutinizer](https://scrutinizer-ci.com/g/consolidation/config/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/consolidation/config/?branch=master)
+[![codecov](https://codecov.io/gh/consolidation/config/branch/main/graph/badge.svg?token=CAaB7ofhxx)](https://codecov.io/gh/consolidation/config)
+[![license](https://poser.pugx.org/consolidation/config/license)](https://packagist.org/packages/consolidation/config)
 
 This component is designed to provide the components needed to manage configuration options from different sources, including:
 
@@ -20,7 +20,7 @@ If your goal is to be able to quickly write configurable commandline tools, you 
 
 ## Component Status
 
-In use in Robo (1.x), Terminus (1.x) and Drush (9.x).
+In use in Robo, Terminus and Drush.
 
 ## Motivation
 
@@ -39,7 +39,7 @@ command:
     options:
       color: red
 ```
-If a command name contains a `:`, then each section of the command name defines another level of heirarchy in the command option configuration. For example, to set a configuration value `George` for the option `--name` of the command `my:foo`:
+If a command name contains a `:`, then each section of the command name defines another level of hierarchy in the command option configuration. For example, to set a configuration value `George` for the option `--name` of the command `my:foo`:
 ```
 command:
   my:
@@ -47,7 +47,7 @@ command:
       options:
         name: George
 ```
-Furthermore, every level of the command name heirarchy may contain options. For example, to define a configuration value for the option `--dir` for any command that begins with `my:`:
+Furthermore, every level of the command name hierarchy may contain options. For example, to define a configuration value for the option `--dir` for any command that begins with `my:`:
 ```
 command:
   my:

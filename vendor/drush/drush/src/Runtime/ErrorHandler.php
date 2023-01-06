@@ -1,17 +1,11 @@
 <?php
+
 namespace Drush\Runtime;
 
-/**
- * @file
- * Drush's error handler
- */
-
 use Drush\Drush;
-use Drush\Log\LogLevel;
-use Webmozart\PathUtil\Path;
-
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
+use Psr\Log\LogLevel;
 
 /**
  * Log PHP errors to the Drush log. This is in effect until Drupal's error
@@ -21,7 +15,7 @@ class ErrorHandler implements LoggerAwareInterface, HandlerInterface
 {
     use LoggerAwareTrait;
 
-    public function installHandler()
+    public function installHandler(): void
     {
         set_error_handler([$this, 'errorHandler']);
     }
@@ -31,7 +25,7 @@ class ErrorHandler implements LoggerAwareInterface, HandlerInterface
         // E_DEPRECATED was added in PHP 5.3. Drupal 6 will not fix all the
         // deprecated errors, but suppresses them. So we suppress them as well.
         if (defined('E_DEPRECATED')) {
-            $errno = $errno & ~E_DEPRECATED;
+            $errno &= ~E_DEPRECATED;
         }
 
         // "error_reporting" is usually set in php.ini, but may be changed by
@@ -39,7 +33,7 @@ class ErrorHandler implements LoggerAwareInterface, HandlerInterface
         if ($errno & error_reporting()) {
             // By default we log notices.
             $type = Drush::config()->get('runtime.php.notices', LogLevel::INFO);
-            $halt_on_error = Drush::config()->get('runtime.php.halt-on-error', (drush_drupal_major_version() != 6));
+            $halt_on_error = Drush::config()->get('runtime.php.halt-on-error', true);
 
             // Bitmask value that constitutes an error needing to be logged.
             $error = E_ERROR | E_PARSE | E_CORE_ERROR | E_COMPILE_ERROR | E_USER_ERROR | E_RECOVERABLE_ERROR;

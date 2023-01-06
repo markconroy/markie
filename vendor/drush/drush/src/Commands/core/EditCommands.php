@@ -1,4 +1,5 @@
 <?php
+
 namespace Drush\Commands\core;
 
 use Consolidation\SiteProcess\Util\Escape;
@@ -20,21 +21,21 @@ class EditCommands extends DrushCommands implements SiteAliasManagerAwareInterfa
      * @bootstrap max
      * @param $filter A substring for filtering the list of files. Omit this argument to choose from loaded files.
      * @optionset_get_editor
-     * @usage drush core:config
+     * @usage drush core:edit
      *   Pick from a list of config/alias/settings files. Open selected in editor.
      * @usage drush --bg core-config
      *   Return to shell prompt as soon as the editor window opens.
-     * @usage drush core:config etc
+     * @usage drush core:edit etc
      *   Edit the global configuration file.
-     * @usage drush core:config demo.alia
+     * @usage drush core:edit demo.alia
      * Edit a particular alias file.
-     * @usage drush core:config sett
+     * @usage drush core:edit sett
      *   Edit settings.php for the current Drupal site.
-     * @usage drush core:config --choice=2
+     * @usage drush core:edit --choice=2
      *  Edit the second file in the choice list.
      * @aliases conf,config,core-edit
      */
-    public function edit($filter = null)
+    public function edit($filter = null, array $options = []): void
     {
         $all = $this->load();
 
@@ -47,7 +48,7 @@ class EditCommands extends DrushCommands implements SiteAliasManagerAwareInterfa
             }
         }
 
-        $editor = self::getEditor();
+        $editor = self::getEditor($options['editor']);
         if (count($all) == 1) {
             $filepath = current($all);
         } else {
@@ -66,7 +67,7 @@ class EditCommands extends DrushCommands implements SiteAliasManagerAwareInterfa
         $process->mustRun();
     }
 
-    public function load($headers = true)
+    public function load($headers = true): array
     {
         $php_header = $php = $rcs_header = $rcs = $aliases_header = $aliases = $drupal_header = $drupal = [];
         $php = $this->phpIniFiles();
@@ -118,13 +119,16 @@ class EditCommands extends DrushCommands implements SiteAliasManagerAwareInterfa
         return array_merge($php_header, $php, $bash_header, $bash, $rcs_header, $rcs, $aliases_header, $aliases, $drupal_header, $drupal);
     }
 
-    public static function phpIniFiles()
+    public static function phpIniFiles(): array
     {
-        $paths[] = php_ini_loaded_file();
-        return $paths;
+        $return = [];
+        if ($file = php_ini_loaded_file()) {
+            $return = [$file];
+        }
+        return $return;
     }
 
-    public function bashFiles()
+    public function bashFiles(): array
     {
         $bashFiles = [];
         $home = $this->getConfig()->home();
@@ -144,12 +148,12 @@ class EditCommands extends DrushCommands implements SiteAliasManagerAwareInterfa
      * TODO: Also exists as InitCommands::findBashrc. Decide on class-based
      * way to share code like this.
      */
-    public static function findBashrc($home)
+    public static function findBashrc($home): string
     {
         return $home . "/.bashrc";
     }
 
-    public function complete()
+    public function complete(): array
     {
         return ['values' => $this->load(false)];
     }

@@ -21,8 +21,8 @@
   --color-maximumred-active: var(--color-red-600); /* 10% darker than base. */
   --color-bgblue-hover: var(--color-blue-020); /* 2% darker than base. */
   --color-bgblue-active: var(--color-blue-050); /* 5% darker than base. */
-  --color-bgred-hover: #fdf5f5; /* 5% darker than base. */
-  --color-bgred-active: #fceded; /* 10% darker than base. */
+  --color-bgred-hover: var(--color-red-020); /* 5% darker than base. */
+  --color-bgred-active: var(--color-red-050); /* 10% darker than base. */
   /* Gray variations. */
   --color-gray: #232429;
   --color-gray-900: #393a3f;

@@ -55,7 +55,7 @@ abstract class TaxonomyTestBase extends ViewTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp($import_test_views = TRUE, $modules = []) {
+  protected function setUp($import_test_views = TRUE, $modules = []): void {
     // Important: taxonomy_test_views module must not be in the $modules to
     // avoid an issue that particular view is already exists.
     parent::setUp($import_test_views, $modules);

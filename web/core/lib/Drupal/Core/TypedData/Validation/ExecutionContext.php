@@ -6,6 +6,7 @@ use Drupal\Core\Validation\TranslatorInterface;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintViolation;
 use Symfony\Component\Validator\ConstraintViolationList;
+use Symfony\Component\Validator\ConstraintViolationListInterface;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use Symfony\Component\Validator\Mapping\MetadataInterface;
 use Symfony\Component\Validator\Util\PropertyPath;
@@ -177,28 +178,28 @@ class ExecutionContext implements ExecutionContextInterface {
   /**
    * {@inheritdoc}
    */
-  public function getViolations() {
+  public function getViolations(): ConstraintViolationListInterface {
     return $this->violations;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getValidator() {
+  public function getValidator(): ValidatorInterface {
     return $this->validator;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getRoot() {
+  public function getRoot(): mixed {
     return $this->root;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getValue() {
+  public function getValue(): mixed {
     return $this->value;
   }
 
@@ -268,7 +269,7 @@ class ExecutionContext implements ExecutionContextInterface {
   /**
    * {@inheritdoc}
    */
-  public function isConstraintValidated($cache_key, $constraint_hash) {
+  public function isConstraintValidated($cache_key, $constraint_hash): bool {
     return isset($this->validatedConstraints[$cache_key . ':' . $constraint_hash]);
   }
 
@@ -289,7 +290,7 @@ class ExecutionContext implements ExecutionContextInterface {
   /**
    * {@inheritdoc}
    */
-  public function isGroupValidated($cache_key, $group_hash) {
+  public function isGroupValidated($cache_key, $group_hash): bool {
     return isset($this->validatedObjects[$cache_key][$group_hash]);
   }
 
@@ -297,14 +298,14 @@ class ExecutionContext implements ExecutionContextInterface {
    * {@inheritdoc}
    */
   public function markObjectAsInitialized($cache_key) {
-    // Not supported, so nothing todo.
+    throw new \LogicException('\Symfony\Component\Validator\Context\ExecutionContextInterface::markObjectAsInitialized is unsupported.');
   }
 
   /**
    * {@inheritdoc}
    */
-  public function isObjectInitialized($cache_key) {
-    // Not supported, so nothing todo.
+  public function isObjectInitialized($cache_key): bool {
+    throw new \LogicException('\Symfony\Component\Validator\Context\ExecutionContextInterface::isObjectInitialized is unsupported.');
   }
 
   /**

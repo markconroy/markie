@@ -88,13 +88,6 @@ class KernelTestBaseTest extends KernelTestBase {
     ]);
     $this->assertTrue($database->schema()->tableExists('foo'));
 
-    // Ensure that the database tasks have been run during set up. Neither MySQL
-    // nor SQLite make changes that are testable.
-    if ($database->driver() == 'pgsql') {
-      $this->assertEquals('on', $database->query("SHOW standard_conforming_strings")->fetchField());
-      $this->assertEquals('escape', $database->query("SHOW bytea_output")->fetchField());
-    }
-
     $this->assertNotNull(FileCacheFactory::getPrefix());
   }
 
@@ -338,88 +331,6 @@ class KernelTestBaseTest extends KernelTestBase {
       'core/profiles/demo_umami/modules/demo_umami_content/demo_umami_content.info.yml',
       \Drupal::service('extension.list.module')->getPathname('demo_umami_content')
     );
-  }
-
-  /**
-   * Tests the deprecation of AssertLegacyTrait::assert.
-   *
-   * @group legacy
-   */
-  public function testAssert() {
-    $this->expectDeprecation('AssertLegacyTrait::assert() is deprecated in drupal:8.0.0 and is removed from drupal:10.0.0. Use $this->assertTrue() instead. See https://www.drupal.org/node/3129738');
-    $this->assert(TRUE);
-  }
-
-  /**
-   * Tests the deprecation of AssertLegacyTrait::assertIdenticalObject.
-   *
-   * @group legacy
-   */
-  public function testAssertIdenticalObject() {
-    $this->expectDeprecation('AssertLegacyTrait::assertIdenticalObject() is deprecated in drupal:8.0.0 and is removed from drupal:10.0.0. Use $this->assertEquals() instead. See https://www.drupal.org/node/3129738');
-    $this->assertIdenticalObject((object) ['foo' => 'bar'], (object) ['foo' => 'bar']);
-  }
-
-  /**
-   * Tests the deprecation of AssertLegacyTrait::assertEqual.
-   *
-   * @group legacy
-   */
-  public function testAssertEqual() {
-    $this->expectDeprecation('AssertLegacyTrait::assertEqual() is deprecated in drupal:8.0.0 and is removed from drupal:10.0.0. Use $this->assertEquals() instead. See https://www.drupal.org/node/3129738');
-    $this->assertEqual('0', 0);
-  }
-
-  /**
-   * Tests the deprecation of AssertLegacyTrait::assertNotEqual.
-   *
-   * @group legacy
-   */
-  public function testAssertNotEqual() {
-    $this->expectDeprecation('AssertLegacyTrait::assertNotEqual() is deprecated in drupal:8.0.0 and is removed from drupal:10.0.0. Use $this->assertNotEquals() instead. See https://www.drupal.org/node/3129738');
-    $this->assertNotEqual('foo', 'bar');
-  }
-
-  /**
-   * Tests the deprecation of AssertLegacyTrait::assertIdentical.
-   *
-   * @group legacy
-   */
-  public function testAssertIdentical() {
-    $this->expectDeprecation('AssertLegacyTrait::assertIdentical() is deprecated in drupal:8.0.0 and is removed from drupal:10.0.0. Use $this->assertSame() instead. See https://www.drupal.org/node/3129738');
-    $this->assertIdentical('foo', 'foo');
-  }
-
-  /**
-   * Tests the deprecation of AssertLegacyTrait::assertNotIdentical.
-   *
-   * @group legacy
-   */
-  public function testAssertNotIdentical() {
-    $this->expectDeprecation('AssertLegacyTrait::assertNotIdentical() is deprecated in drupal:8.0.0 and is removed from drupal:10.0.0. Use $this->assertNotSame() instead. See https://www.drupal.org/node/3129738');
-    $this->assertNotIdentical('foo', 'bar');
-  }
-
-  /**
-   * Tests the deprecation of AssertLegacyTrait::verbose().
-   *
-   * @group legacy
-   */
-  public function testVerbose() {
-    $this->expectDeprecation('AssertLegacyTrait::verbose() is deprecated in drupal:9.2.0 and is removed from drupal:10.0.0. Use dump() instead. See https://www.drupal.org/node/3197514');
-    $this->verbose('The show must go on');
-  }
-
-  /**
-   * Tests the deprecation of ::installSchema with the tables key_value(_expire).
-   *
-   * @group legacy
-   */
-  public function testKernelTestBaseInstallSchema() {
-    $this->expectDeprecation('Installing the tables key_value and key_value_expire with the method KernelTestBase::installSchema() is deprecated in drupal:9.1.0 and is removed from drupal:10.0.0. The tables are now lazy loaded and therefore will be installed automatically when used. See https://www.drupal.org/node/3143286');
-    $this->enableModules(['system']);
-    $this->installSchema('system', ['key_value', 'key_value_expire']);
-    $this->assertFalse(Database::getConnection()->schema()->tableExists('key_value'));
   }
 
   /**

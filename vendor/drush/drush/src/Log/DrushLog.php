@@ -16,6 +16,7 @@
 
 namespace Drush\Log;
 
+use Robo\Robo;
 use Drupal\Core\Logger\LogMessageParserInterface;
 use Drupal\Core\Logger\RfcLoggerTrait;
 use Drupal\Core\Logger\RfcLogLevel;
@@ -23,6 +24,7 @@ use Drush\Drush;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use Psr\Log\LoggerInterface;
+use Psr\Log\LogLevel;
 
 /**
  * Redirects Drupal logging messages to Drush log.
@@ -40,14 +42,14 @@ class DrushLog implements LoggerInterface, LoggerAwareInterface
     /**
      * The message's placeholders parser.
      *
-     * @var \Drupal\Core\Logger\LogMessageParserInterface
+     * @var LogMessageParserInterface
      */
     protected $parser;
 
     /**
      * Constructs a DrushLog object.
      *
-     * @param \Drupal\Core\Logger\LogMessageParserInterface $parser
+     * @param LogMessageParserInterface $parser
      *   The parser to use when extracting message variables.
      */
     public function __construct(LogMessageParserInterface $parser)
@@ -58,10 +60,10 @@ class DrushLog implements LoggerInterface, LoggerAwareInterface
     /**
      * {@inheritdoc}
      */
-    public function log($level, $message, array $context = [])
+    public function log($level, $message, array $context = []): void
     {
         // Only log during Drush requests, not web requests.
-        if (!\Robo\Robo::hasContainer()) {
+        if (!Robo::hasContainer()) {
             return;
         }
 
@@ -94,7 +96,7 @@ class DrushLog implements LoggerInterface, LoggerAwareInterface
                 $error_type = LogLevel::NOTICE;
                 break;
             // Unknown log levels that are not defined
-            // in Psr\Log\LogLevel or Drush\Log\LogLevel SHOULD NOT be used.  See
+            // in Psr\Log\LogLevel SHOULD NOT be used.  See
             // https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-3-logger-interface.md
             default:
                 $error_type = $level;

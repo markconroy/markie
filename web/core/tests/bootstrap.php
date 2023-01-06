@@ -8,7 +8,7 @@
  */
 
 use Drupal\Component\Assertion\Handle;
-use Drupal\TestTools\PhpUnitCompatibility\PhpUnit8\ClassWriter;
+use Drupal\TestTools\PhpUnitCompatibility\ClassWriter;
 
 /**
  * Finds all valid extension directories recursively within a given directory.
@@ -179,3 +179,10 @@ date_default_timezone_set('Australia/Sydney');
 // thrown if an assert fails, but this call does not turn runtime assertions on
 // if they weren't on already.
 Handle::register();
+
+// Ensure ignored deprecation patterns listed in .deprecation-ignore.txt are
+// considered in testing.
+if (getenv('SYMFONY_DEPRECATIONS_HELPER') === FALSE) {
+  $deprecation_ignore_filename = realpath(__DIR__ . "/../.deprecation-ignore.txt");
+  putenv("SYMFONY_DEPRECATIONS_HELPER=ignoreFile=$deprecation_ignore_filename");
+}

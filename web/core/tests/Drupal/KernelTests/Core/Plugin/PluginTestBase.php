@@ -32,7 +32,7 @@ abstract class PluginTestBase extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     // Real modules implementing plugin types may expose a module-specific API
@@ -45,7 +45,7 @@ abstract class PluginTestBase extends KernelTestBase {
     //   as derivatives and ReflectionFactory.
     $this->testPluginManager = new TestPluginManager();
     $this->mockBlockManager = new MockBlockManager();
-    $module_handler = new ModuleHandler($this->root, [], new MemoryBackend(), $this->container->get('event_dispatcher'));
+    $module_handler = new ModuleHandler($this->root, [], new MemoryBackend());
     $this->defaultsTestPluginManager = new DefaultsTestPluginManager($module_handler);
 
     // The expected plugin definitions within each manager. Several tests assert

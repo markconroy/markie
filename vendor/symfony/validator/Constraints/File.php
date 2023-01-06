@@ -22,6 +22,7 @@ use Symfony\Component\Validator\Exception\ConstraintDefinitionException;
  *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
+#[\Attribute(\Attribute::TARGET_PROPERTY | \Attribute::TARGET_METHOD | \Attribute::IS_REPEATABLE)]
 class File extends Constraint
 {
     // Check the Image constraint for clashes if adding new constants here
@@ -31,8 +32,9 @@ class File extends Constraint
     public const EMPTY_ERROR = '5d743385-9775-4aa5-8ff5-495fb1e60137';
     public const TOO_LARGE_ERROR = 'df8637af-d466-48c6-a59d-e7126250a654';
     public const INVALID_MIME_TYPE_ERROR = '744f00bc-4389-4c74-92de-9a43cde55534';
+    public const INVALID_EXTENSION_ERROR = 'c8c7315c-6186-4719-8b71-5659e16bdcb7';
 
-    protected static $errorNames = [
+    protected const ERROR_NAMES = [
         self::NOT_FOUND_ERROR => 'NOT_FOUND_ERROR',
         self::NOT_READABLE_ERROR => 'NOT_READABLE_ERROR',
         self::EMPTY_ERROR => 'EMPTY_ERROR',
@@ -40,12 +42,19 @@ class File extends Constraint
         self::INVALID_MIME_TYPE_ERROR => 'INVALID_MIME_TYPE_ERROR',
     ];
 
+    /**
+     * @deprecated since Symfony 6.1, use const ERROR_NAMES instead
+     */
+    protected static $errorNames = self::ERROR_NAMES;
+
     public $binaryFormat;
     public $mimeTypes = [];
+    public array|string|null $extensions = [];
     public $notFoundMessage = 'The file could not be found.';
     public $notReadableMessage = 'The file is not readable.';
     public $maxSizeMessage = 'The file is too large ({{ size }} {{ suffix }}). Allowed maximum size is {{ limit }} {{ suffix }}.';
     public $mimeTypesMessage = 'The mime type of the file is invalid ({{ type }}). Allowed mime types are {{ types }}.';
+    public string $extensionsMessage = 'The extension of the file is invalid ({{ extension }}). Allowed extensions are {{ extensions }}.';
     public $disallowEmptyMessage = 'An empty file is not allowed.';
 
     public $uploadIniSizeErrorMessage = 'The file is too large. Allowed maximum size is {{ limit }} {{ suffix }}.';
@@ -60,18 +69,60 @@ class File extends Constraint
     protected $maxSize;
 
     /**
-     * {@inheritdoc}
+     * @param array<string, string|string[]>|string[]|string $extensions
      */
-    public function __construct($options = null)
-    {
-        parent::__construct($options);
+    public function __construct(
+        array $options = null,
+        int|string $maxSize = null,
+        bool $binaryFormat = null,
+        array|string $mimeTypes = null,
+        string $notFoundMessage = null,
+        string $notReadableMessage = null,
+        string $maxSizeMessage = null,
+        string $mimeTypesMessage = null,
+        string $disallowEmptyMessage = null,
+
+        string $uploadIniSizeErrorMessage = null,
+        string $uploadFormSizeErrorMessage = null,
+        string $uploadPartialErrorMessage = null,
+        string $uploadNoFileErrorMessage = null,
+        string $uploadNoTmpDirErrorMessage = null,
+        string $uploadCantWriteErrorMessage = null,
+        string $uploadExtensionErrorMessage = null,
+        string $uploadErrorMessage = null,
+        array $groups = null,
+        mixed $payload = null,
+
+        array|string $extensions = null,
+        string $extensionsMessage = null,
+    ) {
+        parent::__construct($options, $groups, $payload);
+
+        $this->maxSize = $maxSize ?? $this->maxSize;
+        $this->binaryFormat = $binaryFormat ?? $this->binaryFormat;
+        $this->mimeTypes = $mimeTypes ?? $this->mimeTypes;
+        $this->extensions = $extensions ?? $this->extensions;
+        $this->notFoundMessage = $notFoundMessage ?? $this->notFoundMessage;
+        $this->notReadableMessage = $notReadableMessage ?? $this->notReadableMessage;
+        $this->maxSizeMessage = $maxSizeMessage ?? $this->maxSizeMessage;
+        $this->mimeTypesMessage = $mimeTypesMessage ?? $this->mimeTypesMessage;
+        $this->extensionsMessage = $extensionsMessage ?? $this->extensionsMessage;
+        $this->disallowEmptyMessage = $disallowEmptyMessage ?? $this->disallowEmptyMessage;
+        $this->uploadIniSizeErrorMessage = $uploadIniSizeErrorMessage ?? $this->uploadIniSizeErrorMessage;
+        $this->uploadFormSizeErrorMessage = $uploadFormSizeErrorMessage ?? $this->uploadFormSizeErrorMessage;
+        $this->uploadPartialErrorMessage = $uploadPartialErrorMessage ?? $this->uploadPartialErrorMessage;
+        $this->uploadNoFileErrorMessage = $uploadNoFileErrorMessage ?? $this->uploadNoFileErrorMessage;
+        $this->uploadNoTmpDirErrorMessage = $uploadNoTmpDirErrorMessage ?? $this->uploadNoTmpDirErrorMessage;
+        $this->uploadCantWriteErrorMessage = $uploadCantWriteErrorMessage ?? $this->uploadCantWriteErrorMessage;
+        $this->uploadExtensionErrorMessage = $uploadExtensionErrorMessage ?? $this->uploadExtensionErrorMessage;
+        $this->uploadErrorMessage = $uploadErrorMessage ?? $this->uploadErrorMessage;
 
         if (null !== $this->maxSize) {
             $this->normalizeBinaryFormat($this->maxSize);
         }
     }
 
-    public function __set($option, $value)
+    public function __set(string $option, mixed $value)
     {
         if ('maxSize' === $option) {
             $this->normalizeBinaryFormat($value);
@@ -82,7 +133,7 @@ class File extends Constraint
         parent::__set($option, $value);
     }
 
-    public function __get($option)
+    public function __get(string $option): mixed
     {
         if ('maxSize' === $option) {
             return $this->maxSize;
@@ -91,7 +142,7 @@ class File extends Constraint
         return parent::__get($option);
     }
 
-    public function __isset($option)
+    public function __isset(string $option): bool
     {
         if ('maxSize' === $option) {
             return true;
@@ -100,7 +151,7 @@ class File extends Constraint
         return parent::__isset($option);
     }
 
-    private function normalizeBinaryFormat($maxSize)
+    private function normalizeBinaryFormat(int|string $maxSize)
     {
         $factors = [
             'k' => 1000,
@@ -112,10 +163,10 @@ class File extends Constraint
         ];
         if (ctype_digit((string) $maxSize)) {
             $this->maxSize = (int) $maxSize;
-            $this->binaryFormat = $this->binaryFormat ?? false;
+            $this->binaryFormat ??= false;
         } elseif (preg_match('/^(\d++)('.implode('|', array_keys($factors)).')$/i', $maxSize, $matches)) {
             $this->maxSize = $matches[1] * $factors[$unit = strtolower($matches[2])];
-            $this->binaryFormat = $this->binaryFormat ?? (2 === \strlen($unit));
+            $this->binaryFormat ??= 2 === \strlen($unit);
         } else {
             throw new ConstraintDefinitionException(sprintf('"%s" is not a valid maximum size.', $maxSize));
         }

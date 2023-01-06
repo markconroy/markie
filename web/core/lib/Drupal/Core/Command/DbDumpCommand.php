@@ -29,7 +29,7 @@ class DbDumpCommand extends DbCommandBase {
   /**
    * An array of table patterns to exclude completely.
    *
-   * This excludes any lingering simpletest tables generated during test runs.
+   * This excludes any lingering tables generated during test runs.
    *
    * @var array
    */
@@ -48,7 +48,7 @@ class DbDumpCommand extends DbCommandBase {
   /**
    * {@inheritdoc}
    */
-  protected function execute(InputInterface $input, OutputInterface $output) {
+  protected function execute(InputInterface $input, OutputInterface $output): int {
     $connection = $this->getDatabaseConnection($input);
 
     // If not explicitly set, disable ANSI which will break generated php.

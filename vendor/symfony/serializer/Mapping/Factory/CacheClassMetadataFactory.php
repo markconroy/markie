@@ -12,6 +12,7 @@
 namespace Symfony\Component\Serializer\Mapping\Factory;
 
 use Psr\Cache\CacheItemPoolInterface;
+use Symfony\Component\Serializer\Mapping\ClassMetadataInterface;
 
 /**
  * Caches metadata using a PSR-6 implementation.
@@ -32,35 +33,36 @@ class CacheClassMetadataFactory implements ClassMetadataFactoryInterface
      */
     private $cacheItemPool;
 
+    private $loadedClasses = [];
+
     public function __construct(ClassMetadataFactoryInterface $decorated, CacheItemPoolInterface $cacheItemPool)
     {
         $this->decorated = $decorated;
         $this->cacheItemPool = $cacheItemPool;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getMetadataFor($value)
+    public function getMetadataFor(string|object $value): ClassMetadataInterface
     {
         $class = $this->getClass($value);
+
+        if (isset($this->loadedClasses[$class])) {
+            return $this->loadedClasses[$class];
+        }
+
         $key = rawurlencode(strtr($class, '\\', '_'));
 
         $item = $this->cacheItemPool->getItem($key);
         if ($item->isHit()) {
-            return $item->get();
+            return $this->loadedClasses[$class] = $item->get();
         }
 
         $metadata = $this->decorated->getMetadataFor($value);
         $this->cacheItemPool->save($item->set($metadata));
 
-        return $metadata;
+        return $this->loadedClasses[$class] = $metadata;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function hasMetadataFor($value)
+    public function hasMetadataFor(mixed $value): bool
     {
         return $this->decorated->hasMetadataFor($value);
     }

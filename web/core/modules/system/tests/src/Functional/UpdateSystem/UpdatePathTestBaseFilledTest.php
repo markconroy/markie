@@ -25,7 +25,7 @@ class UpdatePathTestBaseFilledTest extends UpdatePathTestBaseTest {
    */
   protected function setDatabaseDumpFiles() {
     parent::setDatabaseDumpFiles();
-    $this->databaseDumpFiles[0] = __DIR__ . '/../../../../tests/fixtures/update/drupal-9.0.0.filled.standard.php.gz';
+    $this->databaseDumpFiles[0] = __DIR__ . '/../../../../tests/fixtures/update/drupal-9.4.0.filled.standard.php.gz';
   }
 
   /**
@@ -83,9 +83,6 @@ class UpdatePathTestBaseFilledTest extends UpdatePathTestBaseTest {
         $this->assertSession()->pageTextContains('Test ' . $i);
       }
     }
-
-    // Make sure the translated slogan appears.
-    $this->assertSession()->pageTextContains('drupal Spanish');
 
     // Make sure the custom block appears.
     $this->drupalGet('<front>');
@@ -192,12 +189,6 @@ class UpdatePathTestBaseFilledTest extends UpdatePathTestBaseTest {
     $this->assertSession()->pageTextContains('Test text format');
     $this->drupalGet('admin/config/content/formats/manage/test_text_format');
     $this->assertSession()->statusCodeEquals(200);
-
-    // Make sure our feed still exists.
-    $this->drupalGet('admin/config/services/aggregator');
-    $this->assertSession()->pageTextContains('Test feed');
-    $this->drupalGet('admin/config/services/aggregator/fields');
-    $this->assertSession()->pageTextContains('field_test');
 
     // Make sure our view appears in the overview.
     $this->drupalGet('admin/structure/views');
@@ -346,15 +337,13 @@ class UpdatePathTestBaseFilledTest extends UpdatePathTestBaseTest {
     // Make sure our modules are still enabled.
     $expected_enabled_modules = [
       'action',
-      'aggregator',
       'ban',
       'basic_auth',
       'block',
       'block_content',
       'book',
       'breakpoint',
-      'ckeditor',
-      'color',
+      'ckeditor5',
       'comment',
       'config',
       'config_translation',
@@ -368,7 +357,6 @@ class UpdatePathTestBaseFilledTest extends UpdatePathTestBaseTest {
       'field_ui',
       'file',
       'filter',
-      'hal',
       'help',
       'history',
       'image',
@@ -382,8 +370,6 @@ class UpdatePathTestBaseFilledTest extends UpdatePathTestBaseTest {
       'options',
       'page_cache',
       'path',
-      'quickedit',
-      'rdf',
       'responsive_image',
       'rest',
       'search',
@@ -412,8 +398,8 @@ class UpdatePathTestBaseFilledTest extends UpdatePathTestBaseTest {
 
     // Make sure our themes are still enabled.
     $expected_enabled_themes = [
-      'bartik',
-      'seven',
+      'olivero',
+      'claro',
       'stark',
     ];
     foreach ($expected_enabled_themes as $theme) {

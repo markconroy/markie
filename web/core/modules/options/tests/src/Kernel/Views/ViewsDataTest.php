@@ -32,7 +32,7 @@ class ViewsDataTest extends OptionsTestBase {
   /**
    * @var int
    */
-  protected $field;
+  protected int $field;
 
   /**
    * {@inheritdoc}

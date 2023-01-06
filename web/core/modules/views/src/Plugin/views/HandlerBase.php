@@ -83,6 +83,11 @@ abstract class HandlerBase extends PluginBase implements ViewsHandlerInterface {
   protected $viewsData;
 
   /**
+   * Tracks whether the plugin is a handler.
+   */
+  public bool $is_handler;
+
+  /**
    * Constructs a Handler object.
    *
    * @param array $configuration

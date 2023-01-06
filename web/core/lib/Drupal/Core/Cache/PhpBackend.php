@@ -3,6 +3,7 @@
 namespace Drupal\Core\Cache;
 
 use Drupal\Component\Assertion\Inspector;
+use Drupal\Component\PhpStorage\PhpStorageInterface;
 use Drupal\Component\Utility\Crypt;
 use Drupal\Core\PhpStorage\PhpStorageFactory;
 
@@ -29,7 +30,7 @@ class PhpBackend implements CacheBackendInterface {
   /**
    * The PHP storage.
    */
-  protected $storage;
+  protected PhpStorageInterface $storage;
 
   /**
    * Array to store cache objects.

@@ -9,7 +9,6 @@ use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\node\Entity\Node;
 use Drupal\node\NodeInterface;
-use Drupal\Component\Serialization\Json;
 
 /**
  * Create a node with revisions and test viewing, saving, reverting, and
@@ -188,7 +187,7 @@ class NodeRevisionsTest extends NodeTestBase {
     $this->assertNotSame($nodes[1]->getRevisionUserId(), $reverted_node->getRevisionUserId(), 'Node revision author is not original revision author.');
 
     // Confirm that this is not the default version.
-    $node = node_revision_load($node->getRevisionId());
+    $node = $node_storage->loadRevision($node->getRevisionId());
     $this->assertFalse($node->isDefaultRevision(), 'Third node revision is not the default one.');
 
     // Confirm revisions delete properly.
@@ -359,27 +358,6 @@ class NodeRevisionsTest extends NodeTestBase {
     $node_storage->resetCache([$node->id()]);
     $node_revision = $node_storage->load($node->id());
     $this->assertEmpty($node_revision->revision_log->value, 'After a new node revision is saved with an empty log message, the log message for the node is empty.');
-  }
-
-  /**
-   * Gets server-rendered contextual links for the given contextual links IDs.
-   *
-   * @param string[] $ids
-   *   An array of contextual link IDs.
-   * @param string $current_path
-   *   The Drupal path for the page for which the contextual links are rendered.
-   *
-   * @return string
-   *   The decoded JSON response body.
-   */
-  protected function renderContextualLinks(array $ids, $current_path) {
-    $post = [];
-    for ($i = 0; $i < count($ids); $i++) {
-      $post['ids[' . $i . ']'] = $ids[$i];
-    }
-    $response = $this->drupalPost('contextual/render', 'application/json', $post, ['query' => ['destination' => $current_path]]);
-
-    return Json::decode($response);
   }
 
   /**

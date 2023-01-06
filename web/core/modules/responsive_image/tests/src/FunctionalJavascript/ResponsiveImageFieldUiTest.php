@@ -36,7 +36,7 @@ class ResponsiveImageFieldUiTest extends WebDriverTestBase {
    *
    * @var string
    */
-  protected $type;
+  protected string $type;
 
   /**
    * {@inheritdoc}

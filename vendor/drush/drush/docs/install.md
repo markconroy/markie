@@ -21,30 +21,37 @@ Drupal Compatibility
     <th rowspan="2"> Drush Version </th> 
     <th rowspan="2"> PHP Version</th>
     <th rowspan="2"> End Of Life </th>
-    <th colspan="5"> Drupal versions </th>
+    <th colspan="4"> Drupal versions </th>
   </tr>
-    <th>7</th> <th>-8.3</th> <th>8.4+</th> <th>9</th>
+    <th>7</th> <th>8</th> <th>9</th> <th>10</th>
+  </tr>
+  <tr>
+    <td> Drush 11 </td>
+    <td> 7.4+ </td>
+    <!-- TBD -->
+    <td> TBD </td>
+    <td></td> <td></td> <td><b>✅</b></td> <td><b>✅</b></td>
   </tr>
   <tr>
     <td> Drush 10 </td>
-    <td> 7.1+ </td>
+    <td> 7.1+ (not 8) </td>
     <!-- Released Oct 2019 -->
-    <td> <i>TBD</i> </td>
-    <td></td> <td></td> <td>✅</td> <td><b>✅</b></td>
+    <td> Jan 2022 </td>
+    <td></td> <td>✓</td> <td><b>✓</b></td> <td></td>
   </tr>
   <tr>
     <td> Drush 9 </td>
     <td> 5.6+ </td>
     <!-- Released Jan 2018 -->
     <td> May 2020 </td>
-    <td></td> <td></td> <td>✓</td> <td></td>
+    <td></td> <td>✓</td> <td></td> <td></td>
   </tr>
   <tr>
     <td> Drush 8 </td>
     <td> 5.4.5+ </td>
     <!-- Released Nov 2015 -->
-    <td> ❶ </td>
-    <td>✅</td> <td>✅</td> <td><b>⚠️</b></td> <td></td>
+    <td> Nov 2023 </td>
+    <td>✅</td> <td><b>⚠️</b></td> <td></td> <td></td>
   </tr>
   <tr>
     <td> Drush 7 </td>
@@ -85,4 +92,3 @@ Drupal Compatibility
     
 </table>
 
-❶: EOL date for Drush 8 tbd, but estimated to be in concert with <a href="https://www.drupal.org/psa-2019-02-25">Drupal 7 EOL</a>.</td>

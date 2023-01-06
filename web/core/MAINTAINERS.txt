@@ -59,9 +59,6 @@ maintainer. Current subsystem maintainers:
 Actions
 - ?
 
-Aggregator
-- ?
-
 Ajax
 - Alex Bronstein 'effulgentsia' https://www.drupal.org/u/effulgentsia
 - Tim Plunkett 'tim.plunkett' https://www.drupal.org/u/tim.plunkett
@@ -77,9 +74,6 @@ Automated Cron
 
 Ban
 - ?
-
-Bartik
-- Emma Maria Karayiannis 'emma.maria' https://www.drupal.org/u/emma.maria
 
 Base system
 - ?
@@ -115,11 +109,6 @@ Breakpoint
 Cache
 - Nathaniel Catchpole 'catch' https://www.drupal.org/u/catch
 
-CKEditor
-- Henrik Danielsson 'TwoD' https://www.drupal.org/u/TwoD
-- Wim Leers 'Wim Leers' https://www.drupal.org/u/wim-leers
-- Marek 'mlewand' Lewandowski https://www.drupal.org/u/mlewand
-
 CKEditor 5
 - Lauri Eskola 'lauriii' https://www.drupal.org/u/lauriii
 - Wim Leers 'Wim Leers' https://www.drupal.org/u/wim-leers
@@ -130,12 +119,6 @@ Claro
 - Sascha Eggenberger 'saschaeggi' https://www.drupal.org/u/saschaeggi
 - Lauri Eskola 'lauriii' https://www.drupal.org/u/lauriii
 - Ben Mullins 'bnjmnm' https://www.drupal.org/u/bnjmnm
-
-Classy
-- David Hernandez 'davidhernandez' https://www.drupal.org/u/davidhernandez
-
-Color
-- ?
 
 Comment
 - Lee Rowlands 'larowlan' https://www.drupal.org/u/larowlan
@@ -244,9 +227,6 @@ Form API
 History
 - Andrey Postnikov 'andypost' https://www.drupal.org/u/andypost
 
-Hypertext Application Language (HAL)
-- ?
-
 Help
 - ?
 
@@ -337,6 +317,7 @@ Olivero
 - Putra Bonaccorsi 'proeung' https://www.drupal.org/u/proeung
 - Jen Witkowski 'jwitkowski79' https://www.drupal.org/u/jwitkowski79
 - Konstantin Shupenko 'kostyashupenko' https://www.drupal.org/u/kostyashupenko
+- Andy Blum 'andy-blum' https://www.drupal.org/u/andy-blum
 
 Options
 - ?
@@ -362,9 +343,6 @@ Queue
 Quick Edit
 - Wim Leers 'Wim Leers' https://www.drupal.org/u/wim-leers
 - Théodore Biadala 'nod_' https://www.drupal.org/u/nod_
-
-RDF
-- ?
 
 Render API
 - Alex Bronstein 'effulgentsia' https://www.drupal.org/u/effulgentsia
@@ -393,15 +371,9 @@ Serialization
 Settings Tray
 - Ted Bowman 'tedbow' https://www.drupal.org/u/tedbow
 
-Seven
-- ?
-
 Shortcut
 - Tobias Zimmermann 'tstoeckler' https://www.drupal.org/u/tstoeckler
 - Jibran Ijaz 'jibran' https://www.drupal.org/u/jibran
-
-Stable
-- ?
 
 Stark
 - John Albin Wilkins 'JohnAlbin' https://www.drupal.org/u/johnalbin
@@ -420,7 +392,7 @@ Taxonomy
 - Nathaniel Catchpole 'catch' https://www.drupal.org/u/catch
 
 Telephone
-- ?
+- Stephen Mustgrave 'smustgrave' https://www.drupal.org/u/smustgrave
 
 Testing framework
 - Alex Pott 'alexpott' https://www.drupal.org/u/alexpott
@@ -429,7 +401,7 @@ Testing framework
 - Alberto M. 'mondrake' https://www.drupal.org/u/mondrake
 
 Text Field
-- ?
+- Stephen Mustgrave 'smustgrave' https://www.drupal.org/u/smustgrave
 
 Theme API
 - Alex Bronstein 'effulgentsia' https://www.drupal.org/u/effulgentsia

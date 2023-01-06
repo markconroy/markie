@@ -124,68 +124,6 @@ function drupal_theme_rebuild() {
 }
 
 /**
- * Allows themes and/or theme engines to discover overridden theme functions.
- *
- * @internal only exists to support discovery of deprecated theme functions,
- *   will be removed in Drupal 10.0.0.
- *
- * @param array $cache
- *   The existing cache of theme hooks to test against.
- * @param array $prefixes
- *   An array of prefixes to test, in reverse order of importance.
- *
- * @return array
- *   The functions found, suitable for returning from hook_theme;
- */
-function drupal_find_theme_functions($cache, $prefixes) {
-  $implementations = [];
-  $grouped_functions = \Drupal::service('theme.registry')->getPrefixGroupedUserFunctions($prefixes);
-
-  foreach ($cache as $hook => $info) {
-    foreach ($prefixes as $prefix) {
-      // Find theme functions that implement possible "suggestion" variants of
-      // registered theme hooks and add those as new registered theme hooks.
-      // The 'pattern' key defines a common prefix that all suggestions must
-      // start with. The default is the name of the hook followed by '__'. A
-      // 'base hook' key is added to each entry made for a found suggestion,
-      // so that common functionality can be implemented for all suggestions of
-      // the same base hook. To keep things simple, deep hierarchy of
-      // suggestions is not supported: each suggestion's 'base hook' key
-      // refers to a base hook, not to another suggestion, and all suggestions
-      // are found using the base hook's pattern, not a pattern from an
-      // intermediary suggestion.
-      $pattern = $info['pattern'] ?? ($hook . '__');
-      // Grep only the functions which are within the prefix group.
-      [$first_prefix] = explode('_', $prefix, 2);
-      if (!isset($info['base hook']) && !empty($pattern) && isset($grouped_functions[$first_prefix])) {
-        $matches = preg_grep('/^' . $prefix . '_' . $pattern . '/', $grouped_functions[$first_prefix]);
-        if ($matches) {
-          foreach ($matches as $match) {
-            $new_hook = substr($match, strlen($prefix) + 1);
-            $arg_name = isset($info['variables']) ? 'variables' : 'render element';
-            $implementations[$new_hook] = [
-              'function' => $match,
-              $arg_name => $info[$arg_name],
-              'base hook' => $hook,
-            ];
-          }
-        }
-      }
-      // Find theme functions that implement registered theme hooks and include
-      // that in what is returned so that the registry knows that the theme has
-      // this implementation.
-      if (function_exists($prefix . '_' . $hook)) {
-        $implementations[$hook] = [
-          'function' => $prefix . '_' . $hook,
-        ];
-      }
-    }
-  }
-
-  return $implementations;
-}
-
-/**
  * Allows themes and/or theme engines to easily discover overridden templates.
  *
  * @param $cache
@@ -260,7 +198,7 @@ function drupal_find_theme_templates($cache, $extension, $path) {
 
   // Find templates that implement possible "suggestion" variants of registered
   // theme hooks and add those as new registered theme hooks. See
-  // drupal_find_theme_functions() for more information about suggestions and
+  // hook_theme_suggestions_alter() for more information about suggestions and
   // the use of 'pattern' and 'base hook'.
   $patterns = array_keys($files);
   foreach ($cache as $hook => $info) {
@@ -1630,7 +1568,7 @@ function template_preprocess_field(&$variables, $hook) {
   while (!empty($element[$delta])) {
     $variables['items'][$delta]['content'] = $element[$delta];
 
-    // Modules (e.g., rdf.module) can add field item attributes (to
+    // Modules can add field item attributes (to
     // $item->_attributes) within hook_entity_prepare_view(). Some field
     // formatters move those attributes into some nested formatter-specific
     // element in order have them rendered on the desired HTML element (e.g., on
@@ -2085,7 +2023,6 @@ function drupal_common_theme() {
     'pager' => [
       'render element' => 'pager',
     ],
-    // From menu.inc.
     'menu' => [
       'variables' => ['menu_name' => NULL, 'items' => [], 'attributes' => []],
     ],

@@ -1,4 +1,5 @@
 <?php
+
 namespace Drush\Drupal\Commands\core;
 
 use Consolidation\OutputFormatters\StructuredData\RowsOfFields;
@@ -12,48 +13,38 @@ use Drush\Utils\StringUtils;
 
 class DrupalCommands extends DrushCommands
 {
-
     /**
-     * @var \Drupal\Core\CronInterface
+     * @var CronInterface
      */
     protected $cron;
 
     /**
-     * @var \Drupal\Core\Extension\ModuleHandlerInterface
+     * @var ModuleHandlerInterface
      */
     protected $moduleHandler;
 
     /**
-     * @var \Drupal\Core\Routing\RouteProviderInterface
+     * @var RouteProviderInterface
      */
     protected $routeProvider;
 
-    /**
-     * @return \Drupal\Core\CronInterface
-     */
-    public function getCron()
+    public function getCron(): CronInterface
     {
         return $this->cron;
     }
 
-    /**
-     * @return \Drupal\Core\Extension\ModuleHandlerInterface
-     */
-    public function getModuleHandler()
+    public function getModuleHandler(): ModuleHandlerInterface
     {
         return $this->moduleHandler;
     }
 
-    /**
-     * @return \Drupal\Core\Routing\RouteProviderInterface
-     */
-    public function getRouteProvider()
+    public function getRouteProvider(): RouteProviderInterface
     {
         return $this->routeProvider;
     }
 
     /**
-     * @param \Drupal\Core\CronInterface $cron
+     * @param CronInterface $cron
      * @param ModuleHandlerInterface $moduleHandler
      * @param RouteProviderInterface $routeProvider
      */
@@ -71,7 +62,7 @@ class DrupalCommands extends DrushCommands
      * @aliases cron,core-cron
      * @topics docs:cron
      */
-    public function cron()
+    public function cron(): void
     {
         $this->getCron()->run();
     }
@@ -96,9 +87,8 @@ class DrupalCommands extends DrushCommands
      *   value: Summary
      * @default-fields title,severity,value
      * @filter-default-field severity
-     * @return \Consolidation\OutputFormatters\StructuredData\RowsOfFields
      */
-    public function requirements($options = ['format' => 'table', 'severity' => -1, 'ignore' => ''])
+    public function requirements($options = ['format' => 'table', 'severity' => -1, 'ignore' => '']): RowsOfFields
     {
         include_once DRUSH_DRUPAL_CORE . '/includes/install.inc';
         $severities = [
@@ -111,6 +101,7 @@ class DrupalCommands extends DrushCommands
         drupal_load_updates();
 
         $requirements = $this->getModuleHandler()->invokeAll('requirements', ['runtime']);
+        $this->getModuleHandler()->alter('requirements', $requirements);
         // If a module uses "$requirements[] = " instead of
         // "$requirements['label'] = ", then build a label from
         // the title.
@@ -128,24 +119,20 @@ class DrupalCommands extends DrushCommands
         ksort($requirements);
 
         $min_severity = $options['severity'];
-        $i = 0;
         foreach ($requirements as $key => $info) {
-            $info += ['value' => '', 'description' => ''];
             $severity = array_key_exists('severity', $info) ? $info['severity'] : -1;
-            $rows[$i] = [
+            $rows[$key] = [
                 'title' => self::styleRow((string) $info['title'], $options['format'], $severity),
-                'value' => self::styleRow(DrupalUtil::drushRender($info['value']), $options['format'], $severity),
-                'description' => self::styleRow(DrupalUtil::drushRender($info['description']), $options['format'], $severity),
+                'value' => self::styleRow(DrupalUtil::drushRender($info['value'] ?? ''), $options['format'], $severity),
+                'description' => self::styleRow(DrupalUtil::drushRender($info['description'] ?? ''), $options['format'], $severity),
                 'sid' => self::styleRow($severity, $options['format'], $severity),
                 'severity' => self::styleRow(@$severities[$severity], $options['format'], $severity)
             ];
             if ($severity < $min_severity) {
-                unset($rows[$i]);
+                unset($rows[$key]);
             }
-            $i++;
         }
-        $result = new RowsOfFields($rows);
-        return $result;
+        return new RowsOfFields($rows);
     }
 
     /**
@@ -157,16 +144,24 @@ class DrupalCommands extends DrushCommands
      *   View all routes.
      * @usage drush route --name=update.status
      *   View details about the <info>update.status</info> route.
-     * @usage drush route --path=user/1
+     * @usage drush route --path=/user/1
      *   View details about the <info>entity.user.canonical</info> route.
+     * @usage drush route --url=https://example.com/node/1
+     *   View details about the <info>entity.node.canonical</info> route.
      * @option name A route name.
-     * @option path An internal path.
+     * @option path An internal path or URL.
+     * @version 10.5
      */
-    public function route($options = ['name' => self::REQ, 'path' =>self::REQ, 'format' => 'yaml'])
+    public function route($options = ['name' => self::REQ, 'path' => self::REQ, 'format' => 'yaml'])
     {
         $route = $items = null;
         $provider = $this->getRouteProvider();
         if ($path = $options['path']) {
+            if (filter_var($path, FILTER_VALIDATE_URL)) {
+                $path = parse_url($path, PHP_URL_PATH);
+                // Strip base path.
+                $path = '/' . substr_replace($path, '', 0, strlen(base_path()));
+            }
             $name = Url::fromUserInput($path)->getRouteName();
             $route = $provider->getRouteByName($name);
         } elseif ($name = $options['name']) {
@@ -195,13 +190,15 @@ class DrupalCommands extends DrushCommands
         }
         return $items;
     }
-    
+
     private static function styleRow($content, $format, $severity): ?string
     {
-        if (!in_array($format, [
+        if (
+            !in_array($format, [
             'sections',
             'table',
-        ])) {
+            ])
+        ) {
             return $content;
         }
 

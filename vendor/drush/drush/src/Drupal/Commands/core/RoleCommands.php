@@ -1,4 +1,5 @@
 <?php
+
 namespace Drush\Drupal\Commands\core;
 
 use Consolidation\OutputFormatters\Options\FormatterOptions;
@@ -20,17 +21,15 @@ class RoleCommands extends DrushCommands implements SiteAliasManagerAwareInterfa
      * @command role:create
      * @param $machine_name The symbolic machine name for the role.
      * @param $human_readable_name A descriptive name for the role.
-     * @usage drush role:create 'test role'
-     *   Create a new role 'test role'. On D8, the human-readable name will be 'Test role'.
-     * @usage drush role:create 'test role' 'Test role'
-     *   Create a new role with a machine name of 'test role', and a human-readable name of 'Test role'.
+     * @usage drush role:create 'test_role' 'Test role'
+     *   Create a new role with a machine name of 'test_role', and a human-readable name of 'Test role'.
      * @aliases rcrt,role-create
      */
     public function create($machine_name, $human_readable_name = null)
     {
         $role = Role::create([
         'id' => $machine_name,
-        'label' => $human_readable_name,
+        'label' => $human_readable_name ?: ucfirst($machine_name),
         ], 'user_role');
         $role->save();
         $this->logger()->success(dt('Created "!role"', ['!role' => $machine_name]));
@@ -43,11 +42,11 @@ class RoleCommands extends DrushCommands implements SiteAliasManagerAwareInterfa
      * @command role:delete
      * @param $machine_name The symbolic machine name for the role.
      * @validate-entity-load user_role machine_name
-     * @usage drush role:delete 'test role'
-     *   Delete the role 'test role'.
+     * @usage drush role:delete 'test_role'
+     *   Delete the role 'test_role'.
      * @aliases rdel,role-delete
      */
-    public function delete($machine_name)
+    public function delete($machine_name): void
     {
         $role = Role::load($machine_name);
         $role->delete();
@@ -70,12 +69,12 @@ class RoleCommands extends DrushCommands implements SiteAliasManagerAwareInterfa
      *   Allow anon users to post comments and access content.
      * @aliases rap,role-add-perm
      */
-    public function roleAddPerm($machine_name, $permissions)
+    public function roleAddPerm($machine_name, $permissions): void
     {
         $perms = StringUtils::csvToArray($permissions);
         user_role_grant_permissions($machine_name, $perms);
         $this->logger()->success(dt('Added "!permissions" to "!role"', ['!permissions' => $permissions, '!role' => $machine_name]));
-        $this->processManager()->drush($this->siteAliasManager()->getSelf(), 'cache-rebuild');
+        $this->processManager()->drush($this->siteAliasManager()->getSelf(), 'cache:rebuild');
     }
 
     /**
@@ -90,12 +89,12 @@ class RoleCommands extends DrushCommands implements SiteAliasManagerAwareInterfa
      *   Remove 2 permissions from anon users.
      * @aliases rmp,role-remove-perm
      */
-    public function roleRemovePerm($machine_name, $permissions)
+    public function roleRemovePerm($machine_name, $permissions): void
     {
         $perms = StringUtils::csvToArray($permissions);
         user_role_revoke_permissions($machine_name, $perms);
         $this->logger()->success(dt('Removed "!permissions" to "!role"', ['!permissions' => $permissions, '!role' => $machine_name]));
-        $this->processManager()->drush($this->siteAliasManager()->getSelf(), 'cache-rebuild');
+        $this->processManager()->drush($this->siteAliasManager()->getSelf(), 'cache:rebuild');
     }
 
     /**
@@ -115,9 +114,8 @@ class RoleCommands extends DrushCommands implements SiteAliasManagerAwareInterfa
      *   perms: Permissions
      *
      * @filter-default-field perms
-     * @return \Consolidation\OutputFormatters\StructuredData\RowsOfFields
      */
-    public function roleList($options = ['format' => 'yaml'])
+    public function roleList($options = ['format' => 'yaml']): RowsOfFields
     {
         $rows = [];
         $roles = Role::loadMultiple();

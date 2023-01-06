@@ -38,22 +38,6 @@ final class Settings {
    * @see self::handleDeprecations()
    */
   private static $deprecatedSettings = [
-    'sanitize_input_whitelist' => [
-      'replacement' => 'sanitize_input_safe_keys',
-      'message' => 'The "sanitize_input_whitelist" setting is deprecated in drupal:9.1.0 and will be removed in drupal:10.0.0. Use Drupal\Core\Security\RequestSanitizer::SANITIZE_INPUT_SAFE_KEYS instead. See https://www.drupal.org/node/3163148.',
-    ],
-    'twig_sandbox_whitelisted_classes' => [
-      'replacement' => 'twig_sandbox_allowed_classes',
-      'message' => 'The "twig_sandbox_whitelisted_classes" setting is deprecated in drupal:9.1.0 and is removed from drupal:10.0.0. Use "twig_sandbox_allowed_classes" instead. See https://www.drupal.org/node/3162897.',
-    ],
-    'twig_sandbox_whitelisted_methods' => [
-      'replacement' => 'twig_sandbox_allowed_methods',
-      'message' => 'The "twig_sandbox_whitelisted_methods" setting is deprecated in drupal:9.1.0 and is removed from drupal:10.0.0. Use "twig_sandbox_allowed_methods" instead. See https://www.drupal.org/node/3162897.',
-    ],
-    'twig_sandbox_whitelisted_prefixes' => [
-      'replacement' => 'twig_sandbox_allowed_prefixes',
-      'message' => 'The "twig_sandbox_whitelisted_prefixes" setting is deprecated in drupal:9.1.0 and is removed from drupal:10.0.0. Use "twig_sandbox_allowed_prefixes" instead. See https://www.drupal.org/node/3162897.',
-    ],
     'block_interest_cohort' => [
       'replacement' => '',
       'message' => 'The "block_interest_cohort" setting is deprecated in drupal:9.5.0. This setting should be removed from the settings file, since its usage has been removed. See https://www.drupal.org/node/3320787.',

@@ -27,13 +27,6 @@ class Connection extends CoreConnection {
   /**
    * {@inheritdoc}
    */
-  public function queryTemporary($query, array $args = [], array $options = []) {
-    return '';
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function driver() {
     return $this->driver;
   }

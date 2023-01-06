@@ -2,17 +2,20 @@
 
 namespace Drush\Boot;
 
+use Drupal\Core\DrupalKernelInterface;
 use Consolidation\AnnotatedCommand\AnnotationData;
 use Drupal\Core\Database\Database;
+use Drupal\Core\Render\HtmlResponse;
 use Drupal\Core\DrupalKernel;
+use Drupal\Core\Session\AnonymousUserSession;
+use Drush\Config\ConfigLocator;
 use Drush\Drupal\DrushLoggerServiceProvider;
 use Drush\Drupal\DrushServiceModifier;
 use Drush\Drush;
-use Drush\Log\LogLevel;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\Filesystem\Path;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Webmozart\PathUtil\Path;
-use Psr\Log\LoggerInterface;
 
 class DrupalBoot8 extends DrupalBoot implements AutoloaderAwareInterface
 {
@@ -24,35 +27,26 @@ class DrupalBoot8 extends DrupalBoot implements AutoloaderAwareInterface
     protected $drupalLoggerAdapter;
 
     /**
-     * @var \Drupal\Core\DrupalKernelInterface
+     * @var DrupalKernelInterface
      */
     protected $kernel;
 
     /**
-     * @var \Symfony\Component\HttpFoundation\Request
+     * @var Request
      */
     protected $request;
 
-    /**
-     * @return \Symfony\Component\HttpFoundation\Request
-     */
-    public function getRequest()
+    public function getRequest(): Request
     {
         return $this->request;
     }
 
-    /**
-     * @param \Symfony\Component\HttpFoundation\Request $request
-     */
-    public function setRequest($request)
+    public function setRequest(Request $request): void
     {
         $this->request = $request;
     }
 
-    /**
-     * @return \Drupal\Core\DrupalKernelInterface
-     */
-    public function getKernel()
+    public function getKernel(): DrupalKernelInterface
     {
         return $this->kernel;
     }
@@ -66,7 +60,7 @@ class DrupalBoot8 extends DrupalBoot implements AutoloaderAwareInterface
      * (i.e., after bootstrapping Drupal), then we also need to
      * update the logger reference in that adapter.
      */
-    public function setLogger(LoggerInterface $logger)
+    public function setLogger(LoggerInterface $logger): void
     {
         if ($this->drupalLoggerAdapter) {
             $this->drupalLoggerAdapter->setLogger($logger);
@@ -88,17 +82,13 @@ class DrupalBoot8 extends DrupalBoot implements AutoloaderAwareInterface
         }
     }
 
-    public function getVersion($drupal_root)
+    public function getVersion($drupal_root): string
     {
         // Are the class constants available?
         if (!$this->hasAutoloader()) {
-            throw new \Exception('Cannot access Drupal 8 class constants - Drupal autoloader not loaded yet.');
+            throw new \Exception('Cannot access Drupal class constants - Drupal autoloader not loaded yet.');
         }
-        // Drush depends on bootstrap being loaded at this point.
-        require_once $drupal_root .'/core/includes/bootstrap.inc';
-        if (defined('\Drupal::VERSION')) {
-            return \Drupal::VERSION;
-        }
+        return \Drupal::VERSION;
     }
 
     /**
@@ -122,12 +112,12 @@ class DrupalBoot8 extends DrupalBoot implements AutoloaderAwareInterface
         return $site_path;
     }
 
-    public function bootstrapDrupalCore(BootstrapManager $manager, $drupal_root)
+    public function bootstrapDrupalCore(BootstrapManager $manager, $drupal_root): string
     {
         return Path::join($drupal_root, 'core');
     }
 
-    public function bootstrapDrupalSiteValidate(BootstrapManager $manager)
+    public function bootstrapDrupalSiteValidate(BootstrapManager $manager): bool
     {
         parent::bootstrapDrupalSiteValidate($manager);
 
@@ -147,7 +137,14 @@ class DrupalBoot8 extends DrupalBoot implements AutoloaderAwareInterface
             'SCRIPT_FILENAME' => getcwd() . '/index.php',
             'SCRIPT_NAME' => isset($parsed_url['path']) ? $parsed_url['path'] . 'index.php' : '/index.php',
         ] + $_SERVER;
-        $request = Request::create($uri, 'GET', [], [], [], $server);
+        // To do: split into Drupal 9 and Drupal 10 bootstrap
+        if (method_exists(Request::class, 'create')) {
+            // Drupal 9
+            $request = Request::create($uri, 'GET', [], [], [], $server);
+        } else {
+            // Drupal 10
+            $request = Request::createFromGlobals();
+        }
         $request->overrideGlobals();
         $this->setRequest($request);
         return true;
@@ -157,13 +154,21 @@ class DrupalBoot8 extends DrupalBoot implements AutoloaderAwareInterface
      * Called by bootstrapDrupalSite to do the main work
      * of the drush drupal site bootstrap.
      */
-    public function bootstrapDoDrupalSite(BootstrapManager $manager)
+    public function bootstrapDoDrupalSite(BootstrapManager $manager): void
     {
-        // Note: this reports the'default' during site:install even if we eventually install to a different multisite.
-        $this->logger->log(LogLevel::BOOTSTRAP, dt("Initialized Drupal site !site at !site_root", ['!site' => $this->getRequest()->getHttpHost(), '!site_root' => $this->confPath()]));
+        $siteConfig = $this->confPath() . '/drush.yml';
+
+        if (ConfigLocator::addSiteSpecificConfig(Drush::config(), $siteConfig)) {
+            $this->logger->debug(dt("Loaded Drush config file at !file.", ['!file' => $siteConfig]));
+        } else {
+            $this->logger->debug(dt("Could not find a Drush config file at !file.", ['!file' => $siteConfig]));
+        }
+
+        // Note: this reports the 'default' site during site:install even if we eventually install to a different multisite.
+        $this->logger->info(dt("Initialized Drupal site !site at !site_root", ['!site' => $this->getRequest()->getHttpHost(), '!site_root' => $this->confPath()]));
     }
 
-    public function bootstrapDrupalConfigurationValidate(BootstrapManager $manager)
+    public function bootstrapDrupalConfigurationValidate(BootstrapManager $manager): bool
     {
         $conf_file = $this->confPath() . '/settings.php';
         if (!file_exists($conf_file)) {
@@ -175,12 +180,12 @@ class DrupalBoot8 extends DrupalBoot implements AutoloaderAwareInterface
         return true;
     }
 
-    public function bootstrapDrupalDatabaseValidate(BootstrapManager $manager)
+    public function bootstrapDrupalDatabaseValidate(BootstrapManager $manager): bool
     {
         // Drupal requires PDO, and Drush requires php 5.6+ which ships with PDO
         // but PHP may be compiled with --disable-pdo.
         if (!class_exists('\PDO')) {
-            $this->logger->log(LogLevel::BOOTSTRAP, dt('PDO support is required.'));
+            $this->logger->info(dt('PDO support is required.'));
             return false;
         }
 
@@ -190,23 +195,23 @@ class DrupalBoot8 extends DrupalBoot implements AutoloaderAwareInterface
             $connection_options = $connection->getConnectionOptions();
             $connection->open($connection_options);
         } catch (\Exception $e) {
-            $this->logger->log(LogLevel::BOOTSTRAP, 'Unable to connect to database with message: ' . $e->getMessage() . '. More debug information is available by running `drush status`. This may occur when Drush is trying to bootstrap a site that has not been installed or does not have a configured database. In this case you can select another site with a working database setup by specifying the URI to use with the --uri parameter on the command line. See `drush topic docs-aliases` for details.');
+            $this->logger->info('Unable to connect to database with message: ' . $e->getMessage() . '. More debug information is available by running `drush status`. This may occur when Drush is trying to bootstrap a site that has not been installed or does not have a configured database. In this case you can select another site with a working database setup by specifying the URI to use with the --uri parameter on the command line. See `drush topic docs-aliases` for details.');
             return false;
         }
         if (!$connection->schema()->tableExists('key_value')) {
-            $this->logger->log(LogLevel::BOOTSTRAP, 'key_value table not found. Database may be empty.');
+            $this->logger->info('key_value table not found. Database may be empty.');
             return false;
         }
         return true;
     }
 
-    public function bootstrapDrupalDatabase(BootstrapManager $manager)
+    public function bootstrapDrupalDatabase(BootstrapManager $manager): void
     {
         // D8 omits this bootstrap level as nothing special needs to be done.
         parent::bootstrapDrupalDatabase($manager);
     }
 
-    public function bootstrapDrupalConfiguration(BootstrapManager $manager, AnnotationData $annotationData = null)
+    public function bootstrapDrupalConfiguration(BootstrapManager $manager, AnnotationData $annotationData = null): void
     {
         // Coax \Drupal\Core\DrupalKernel::discoverServiceProviders to add our logger.
         $GLOBALS['conf']['container_service_providers'][] = DrushLoggerServiceProvider::class;
@@ -220,7 +225,7 @@ class DrupalBoot8 extends DrupalBoot implements AutoloaderAwareInterface
         $request = $this->getRequest();
         $kernel_factory = Kernels::getKernelFactory($kernel);
         $allow_dumping = $kernel !== Kernels::UPDATE;
-        /** @var \Drupal\Core\DrupalKernelInterface kernel */
+        /** @var DrupalKernelInterface kernel */
         $this->kernel = $kernel_factory($request, $classloader, 'prod', $allow_dumping, $manager->getRoot());
         // Include Drush services in the container.
         // @see Drush\Drupal\DrupalKernel::addServiceModifier()
@@ -235,7 +240,7 @@ class DrupalBoot8 extends DrupalBoot implements AutoloaderAwareInterface
         parent::bootstrapDrupalConfiguration($manager);
     }
 
-    public function bootstrapDrupalFull(BootstrapManager $manager)
+    public function bootstrapDrupalFull(BootstrapManager $manager): void
     {
         $this->logger->debug(dt('Start bootstrap of the Drupal Kernel.'));
         $this->kernel->boot();
@@ -244,9 +249,12 @@ class DrupalBoot8 extends DrupalBoot implements AutoloaderAwareInterface
 
         parent::bootstrapDrupalFull($manager);
         $this->addDrupalModuleDrushCommands($manager);
+
+        // Set a default account to make sure the correct timezone is set
+        $this->kernel->getContainer()->get('current_user')->setAccount(new AnonymousUserSession());
     }
 
-    public function addDrupalModuleDrushCommands($manager)
+    public function addDrupalModuleDrushCommands($manager): void
     {
         $application = Drush::getApplication();
         $runner = Drush::runner();
@@ -259,28 +267,28 @@ class DrupalBoot8 extends DrupalBoot implements AutoloaderAwareInterface
 
         // Set the command info alterers.
         if ($container->has(DrushServiceModifier::DRUSH_COMMAND_INFO_ALTERER_SERVICES)) {
-            $serviceCommandInfoAltererlist = $container->get(DrushServiceModifier::DRUSH_COMMAND_INFO_ALTERER_SERVICES);
+            $serviceCommandInfoAltererList = $container->get(DrushServiceModifier::DRUSH_COMMAND_INFO_ALTERER_SERVICES);
             $commandFactory = Drush::commandFactory();
-            foreach ($serviceCommandInfoAltererlist->getCommandList() as $altererHandler) {
+            foreach ($serviceCommandInfoAltererList->getCommandList() as $altererHandler) {
                 $commandFactory->addCommandInfoAlterer($altererHandler);
                 $this->logger->debug(dt('Commands are potentially altered in !class.', ['!class' => get_class($altererHandler)]));
             }
         }
 
-        $serviceCommandlist = $container->get(DrushServiceModifier::DRUSH_CONSOLE_SERVICES);
         if ($container->has(DrushServiceModifier::DRUSH_CONSOLE_SERVICES)) {
-            foreach ($serviceCommandlist->getCommandList() as $command) {
+            $serviceCommandList = $container->get(DrushServiceModifier::DRUSH_CONSOLE_SERVICES);
+            foreach ($serviceCommandList->getCommandList() as $command) {
                 $manager->inflect($command);
-                $this->logger->log(LogLevel::DEBUG_NOTIFY, dt('Add a command: !name', ['!name' => $command->getName()]));
+                $this->logger->debug(dt('Add a command: !name', ['!name' => $command->getName()]));
                 $application->add($command);
             }
         }
         // Do the same thing with the annotation commands.
         if ($container->has(DrushServiceModifier::DRUSH_COMMAND_SERVICES)) {
-            $serviceCommandlist = $container->get(DrushServiceModifier::DRUSH_COMMAND_SERVICES);
-            foreach ($serviceCommandlist->getCommandList() as $commandHandler) {
+            $serviceCommandList = $container->get(DrushServiceModifier::DRUSH_COMMAND_SERVICES);
+            foreach ($serviceCommandList->getCommandList() as $commandHandler) {
                 $manager->inflect($commandHandler);
-                $this->logger->log(LogLevel::DEBUG_NOTIFY, dt('Add a commandfile class: !name', ['!name' => get_class($commandHandler)]));
+                $this->logger->debug(dt('Add a commandfile class: !name', ['!name' => get_class($commandHandler)]));
                 $runner->registerCommandClass($application, $commandHandler);
             }
         }
@@ -289,12 +297,16 @@ class DrupalBoot8 extends DrupalBoot implements AutoloaderAwareInterface
     /**
      * {@inheritdoc}
      */
-    public function terminate()
+    public function terminate(): void
     {
         parent::terminate();
 
         if ($this->kernel) {
-            $response = Response::create('');
+            if (method_exists(Response::class, 'create')) {
+                $response = Response::create('');
+            } else {
+                $response = new HtmlResponse();
+            }
             $this->kernel->terminate($this->getRequest(), $response);
         }
     }

@@ -2,7 +2,7 @@
 
 namespace Drush\Drupal\Commands\core;
 
-use Consolidation\Log\ConsoleLogLevel;
+use Drush\Log\SuccessInterface;
 use Consolidation\OutputFormatters\StructuredData\RowsOfFields;
 use Consolidation\OutputFormatters\StructuredData\UnstructuredListData;
 use Consolidation\SiteAlias\SiteAliasManagerAwareTrait;
@@ -21,18 +21,16 @@ class DeployHookCommands extends DrushCommands implements SiteAliasManagerAwareI
 
     /**
      * Get the deploy hook update registry.
-     *
-     * @return UpdateRegistry
      */
-    public static function getRegistry()
+    public static function getRegistry(): UpdateRegistry
     {
-        $registry = new class(
-            \Drupal::service('app.root'),
-            \Drupal::service('site.path'),
+        $registry = new class (
+            \Drupal::getContainer()->getParameter('app.root'),
+            \Drupal::getContainer()->getParameter('site.path'),
             array_keys(\Drupal::service('module_handler')->getModuleList()),
             \Drupal::service('keyvalue')->get('deploy_hook')
         ) extends UpdateRegistry {
-            public function setUpdateType($type)
+            public function setUpdateType(string $type): void
             {
                 $this->updateType = $type;
             }
@@ -58,9 +56,8 @@ class DeployHookCommands extends DrushCommands implements SiteAliasManagerAwareI
      * @topics docs:deploy
      *
      * @filter-default-field hook
-     * @return \Consolidation\OutputFormatters\StructuredData\RowsOfFields
      */
-    public function status()
+    public function status(): RowsOfFields
     {
         $updates = self::getRegistry()->getPendingUpdateInformation();
         $rows = [];
@@ -87,8 +84,9 @@ class DeployHookCommands extends DrushCommands implements SiteAliasManagerAwareI
      *
      * @command deploy:hook
      * @topics docs:deploy
+     * @version 10.3
      */
-    public function run()
+    public function run(): int
     {
         $pending = self::getRegistry()->getPendingUpdateFunctions();
 
@@ -137,7 +135,7 @@ class DeployHookCommands extends DrushCommands implements SiteAliasManagerAwareI
             }
         }
 
-        $level = $success ? ConsoleLogLevel::SUCCESS : LogLevel::ERROR;
+        $level = $success ? SuccessInterface::SUCCESS : LogLevel::ERROR;
         $this->logger()->log($level, dt('Finished performing deploy hooks.'));
         return $success ? self::EXIT_SUCCESS : self::EXIT_FAILURE;
     }
@@ -149,10 +147,8 @@ class DeployHookCommands extends DrushCommands implements SiteAliasManagerAwareI
      * @param string $batch_id The batch id that will be processed.
      * @bootstrap full
      * @hidden
-     *
-     * @return \Consolidation\OutputFormatters\StructuredData\UnstructuredListData
      */
-    public function process($batch_id, $options = ['format' => 'json'])
+    public function process(string $batch_id, $options = ['format' => 'json']): UnstructuredListData
     {
         $result = drush_batch_command($batch_id);
         return new UnstructuredListData($result);
@@ -163,10 +159,9 @@ class DeployHookCommands extends DrushCommands implements SiteAliasManagerAwareI
      *
      * @param string $function
      *   The deploy-hook function to execute.
-     * @param DrushBatchContext $context
      *   The batch context object.
      */
-    public static function updateDoOneDeployHook($function, DrushBatchContext $context)
+    public static function updateDoOneDeployHook(string $function, DrushBatchContext $context): void
     {
         $ret = [];
 
@@ -176,9 +171,19 @@ class DeployHookCommands extends DrushCommands implements SiteAliasManagerAwareI
             return;
         }
 
-        list($module, $name) = explode('_deploy_', $function, 2);
-        $filename = $module . '.deploy';
-        \Drupal::moduleHandler()->loadInclude($module, 'php', $filename);
+        // Module names can include '_deploy', so deploy functions like
+        // module_deploy_deploy_name() are ambiguous. Check every occurrence.
+        $components = explode('_', $function);
+        foreach (array_keys($components, 'deploy', true) as $position) {
+            $module = implode('_', array_slice($components, 0, $position));
+            $name = implode('_', array_slice($components, $position + 1));
+            $filename = $module . '.deploy';
+            \Drupal::moduleHandler()->loadInclude($module, 'php', $filename);
+            if (function_exists($function)) {
+                break;
+            }
+        }
+
         if (function_exists($function)) {
             if (empty($context['results'][$module][$name]['type'])) {
                 Drush::logger()->notice("Deploy hook started: $function");
@@ -199,7 +204,9 @@ class DeployHookCommands extends DrushCommands implements SiteAliasManagerAwareI
                 Drush::logger()->error($e->getMessage());
 
                 $variables = Error::decodeException($e);
-                unset($variables['backtrace']);
+                $variables = array_filter($variables, function ($key) {
+                    return $key[0] == '@' || $key[0] == '%';
+                }, ARRAY_FILTER_USE_KEY);
                 // On windows there is a problem with json encoding a string with backslashes.
                 $variables['%file'] = strtr($variables['%file'], [DIRECTORY_SEPARATOR => '/']);
                 $ret['#abort'] = [
@@ -246,10 +253,8 @@ class DeployHookCommands extends DrushCommands implements SiteAliasManagerAwareI
      * Batch finished callback.
      *
      * @param boolean $success Whether the batch ended without a fatal error.
-     * @param array $results
-     * @param array $operations
      */
-    public function updateFinished($success, $results, $operations)
+    public function updateFinished(bool $success, array $results, array $operations): void
     {
         // In theory there is nothing to do here.
     }
@@ -262,8 +267,9 @@ class DeployHookCommands extends DrushCommands implements SiteAliasManagerAwareI
      *
      * @command deploy:mark-complete
      * @topics docs:deploy
+     * @version 10.6.1
      */
-    public function markComplete()
+    public function markComplete(): int
     {
         $pending = self::getRegistry()->getPendingUpdateFunctions();
         self::getRegistry()->registerInvokedUpdates($pending);

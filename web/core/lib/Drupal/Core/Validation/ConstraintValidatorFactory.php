@@ -18,7 +18,7 @@ class ConstraintValidatorFactory extends BaseConstraintValidatorFactory {
   /**
    * The class resolver.
    */
-  protected $classResolver;
+  protected ClassResolverInterface $classResolver;
 
   /**
    * Constructs a new ConstraintValidatorFactory.

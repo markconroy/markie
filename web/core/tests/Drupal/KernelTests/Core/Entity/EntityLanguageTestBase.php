@@ -44,7 +44,7 @@ abstract class EntityLanguageTestBase extends EntityKernelTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     $this->languageManager = $this->container->get('language_manager');

@@ -338,9 +338,7 @@ function install_begin_request($class_loader, &$install_state) {
   // since the error/exception handlers depend on them.
   require_once __DIR__ . '/../modules/system/system.install';
   require_once __DIR__ . '/common.inc';
-  require_once __DIR__ . '/file.inc';
   require_once __DIR__ . '/install.inc';
-  require_once __DIR__ . '/schema.inc';
   require_once __DIR__ . '/form.inc';
   require_once __DIR__ . '/batch.inc';
 
@@ -1210,8 +1208,8 @@ function install_database_errors($database, $settings_file) {
     // Run tasks associated with the database type. Any errors are caught in the
     // calling function.
     Database::addConnectionInfo('default', 'default', $database);
-
-    $errors = db_installer_object($driver, $database['namespace'] ?? NULL)->runTasks();
+    $installer_class = $database['namespace'] . "\\Install\\Tasks";
+    $errors = (new $installer_class())->runTasks();
   }
   return $errors;
 }

@@ -54,11 +54,11 @@ abstract class UpdatePathTestBase extends BrowserTestBase {
   /**
    * The file path(s) to the dumped database(s) to load into the child site.
    *
-   * The file system/tests/fixtures/update/drupal-8.8.0.bare.standard.php.gz is
+   * The file system/tests/fixtures/update/drupal-9.4.0.bare.standard.php.gz is
    * normally included first -- this sets up the base database from a bare
    * standard Drupal installation.
    *
-   * The file system/tests/fixtures/update/drupal-8.8.0.filled.standard.php.gz
+   * The file system/tests/fixtures/update/drupal-9.4.0.filled.standard.php.gz
    * can also be used in case we want to test with a database filled with
    * content, and with all core modules enabled.
    *
@@ -125,7 +125,7 @@ abstract class UpdatePathTestBase extends BrowserTestBase {
    * then needed to set various things such as the config directories and the
    * container that would normally be done via the installer.
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUpAppRoot();
     $this->zlibInstalled = function_exists('gzopen');
 
@@ -286,11 +286,9 @@ abstract class UpdatePathTestBase extends BrowserTestBase {
       ->addArgument(new Reference('language.default'));
     \Drupal::setContainer($container);
 
-    require_once __DIR__ . '/../../../../includes/install.inc';
-    $connection_info = Database::getConnectionInfo();
-    $driver = $connection_info['default']['driver'];
-    $namespace = $connection_info['default']['namespace'] ?? NULL;
-    $errors = db_installer_object($driver, $namespace)->runTasks();
+    // Run database tasks and check for errors.
+    $installer_class = Database::getConnectionInfo()['default']['namespace'] . "\\Install\\Tasks";
+    $errors = (new $installer_class())->runTasks();
     if (!empty($errors)) {
       $this->fail('Failed to run installer database tasks: ' . implode(', ', $errors));
     }

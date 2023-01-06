@@ -9,7 +9,7 @@ class FactoryTest extends TestCase
 {
     protected $factory;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->factory = LogicalOpFactory::get();
     }
@@ -20,7 +20,7 @@ class FactoryTest extends TestCase
      * Return an array of arrays, each of which contains the parameter
      * values to be used in one invocation of the testExample test function.
      */
-    public function testFactoryParsingValues()
+    public function factoryParsingTestValues()
     {
         return [
             ['a=b',],
@@ -46,6 +46,11 @@ class FactoryTest extends TestCase
             ['a=b&&c=d&&e=f',],
             ['a=b||c=d&&e=f',],
             ['a=b||c=d||e=f',],
+            ['a=b&&c=d&&e=f&&g=h',],
+            ['a=b||c=d||e=f||g=h',],
+            ['a=b&&c=d||e=f&&g=h||i=j',],
+            ['a=b&&c=d&&e=f||g=h||i=j',],
+            ['a=b||c=d||e=f||g=h&&i=j',],
 
         ];
     }
@@ -55,7 +60,7 @@ class FactoryTest extends TestCase
      * be passed data from the data provider function idendified by the
      * dataProvider annotation.
      *
-     * @dataProvider testFactoryParsingValues
+     * @dataProvider factoryParsingTestValues
      */
     public function testFactoryParsing($expr, $expected = false)
     {
@@ -73,7 +78,7 @@ class FactoryTest extends TestCase
      * Return an array of arrays, each of which contains the parameter
      * values to be used in one invocation of the testExample test function.
      */
-    public function testFactoryEvaluationValues()
+    public function factoryEvaluationTestValues()
     {
         return [
             ['a=b', ['a' => 'b'], true,],
@@ -123,7 +128,7 @@ class FactoryTest extends TestCase
      * be passed data from the data provider function idendified by the
      * dataProvider annotation.
      *
-     * @dataProvider testFactoryEvaluationValues
+     * @dataProvider factoryEvaluationTestValues
      */
     public function testFactoryEvaluation($expr, $source, $expected)
     {

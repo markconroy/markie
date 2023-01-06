@@ -3,8 +3,6 @@
  * Card.
  */
 
-@import "../base/variables.pcss.css";
-
 :root {
   --card-bg-color: var(--color-white);
   --card-border-size: 1px;
@@ -141,11 +139,6 @@
  * Card footer.
  */
 .card__footer {
-  /**
-   * Without specifying flex-shrink, IE11 will increase footer height if an
-   * interactive element inside is hovered or focused.
-   */
-  flex-shrink: 0;
   order: 100;
   margin-top: var(--space-l);
 }

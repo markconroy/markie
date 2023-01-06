@@ -39,7 +39,7 @@ class CacheContextsManager {
   /**
    * The set of valid context tokens.
    */
-  protected $validContextTokens;
+  protected array $validContextTokens;
 
   /**
    * Constructs a CacheContextsManager object.

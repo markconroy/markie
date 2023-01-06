@@ -4,10 +4,10 @@
 on:
   pull_request:
     branches:
-      - 3.x
+      - main
   push:
     branches:
-      - 3.x
+      - main
 
 name: CI
 
@@ -62,10 +62,10 @@ jobs:
           mkdir -p tools
           echo '{}' > tools/composer.json
           composer --working-dir=tools config --no-plugins allow-plugins.ocramius/package-versions true
-          composer --working-dir=tools require roave/backward-compatibility-check:^5
+          composer --working-dir=tools require roave/backward-compatibility-check:^7
 
       - name: Run roave/backward-compatibility-check
-        run: ./tools/vendor/bin/roave-backward-compatibility-check --from=3.1.0
+        run: ./tools/vendor/bin/roave-backward-compatibility-check --from=4.0.0
 
   tests:
     name: Tests
@@ -92,7 +92,7 @@ jobs:
 
         include:
           - os: ubuntu-latest
-            php-version: "7.1"
+            php-version: "7.4"
             dependencies: lowest
 
           - os: ubuntu-latest

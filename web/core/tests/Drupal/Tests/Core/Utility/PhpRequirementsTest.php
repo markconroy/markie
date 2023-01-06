@@ -21,7 +21,7 @@ class PhpRequirementsTest extends UnitTestCase {
    */
   public function testPhpEolDates(): void {
     $reflected = new \ReflectionClass(PhpRequirements::class);
-    $php_eol_dates = $reflected->getStaticProperties()['phpEolDates'];
+    $php_eol_dates = $reflected->getStaticPropertyValue('phpEolDates');
 
     foreach ($php_eol_dates as $version => $eol_date) {
       // Ensure that all of the version numbers are defined in a superset of
@@ -45,7 +45,7 @@ class PhpRequirementsTest extends UnitTestCase {
       }
       return $a_date <=> $b_date;
     });
-    $this->assertSame($php_eol_dates, $reflected->getStaticProperties()['phpEolDates']);
+    $this->assertSame($php_eol_dates, $reflected->getStaticPropertyValue('phpEolDates'));
   }
 
   /**
@@ -69,12 +69,8 @@ class PhpRequirementsTest extends UnitTestCase {
    */
   public function testMinimumSupportedPhp(string $date_string, string $drupal_minimum_php, array $php_eol_dates, string $expected_php_version): void {
     $reflected = new \ReflectionClass(PhpRequirements::class);
-    $prop = $reflected->getProperty('drupalMinimumPhp');
-    $prop->setAccessible(TRUE);
-    $prop->setValue($drupal_minimum_php);
-    $prop = $reflected->getProperty('phpEolDates');
-    $prop->setAccessible(TRUE);
-    $prop->setValue($php_eol_dates);
+    $reflected->setStaticPropertyValue('drupalMinimumPhp', $drupal_minimum_php);
+    $reflected->setStaticPropertyValue('phpEolDates', $php_eol_dates);
     $date = new \DateTime($date_string);
     $this->assertSame($expected_php_version, PhpRequirements::getMinimumSupportedPhp($date));
   }

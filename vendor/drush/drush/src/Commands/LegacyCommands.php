@@ -1,18 +1,29 @@
 <?php
+
 namespace Drush\Commands;
 
 class LegacyCommands extends DrushCommands
 {
+    /**
+     * The core:init command was removed. Please edit your .bashrc manually.
+     *
+     * @command core:init
+     * @hidden
+     * @obsolete
+     */
+    public function init(): void
+    {
+    }
 
     /**
-     * Drupal 8 does not support disabling modules. See pm:uninstall command.
+     * Drupal 8+ does not support disabling modules. See pm:uninstall command.
      *
      * @command pm:disable
      * @aliases dis,pm-disable
      * @hidden
      * @obsolete
      */
-    public function disable()
+    public function disable(): void
     {
     }
 
@@ -24,7 +35,7 @@ class LegacyCommands extends DrushCommands
      * @hidden
      * @obsolete
      */
-    public function info()
+    public function info(): void
     {
     }
 
@@ -37,7 +48,7 @@ class LegacyCommands extends DrushCommands
      * @hidden
      * @obsolete
      */
-    public function projectInfo()
+    public function projectInfo(): void
     {
     }
 
@@ -49,7 +60,7 @@ class LegacyCommands extends DrushCommands
      * @hidden
      * @obsolete
      */
-    public function refresh()
+    public function refresh(): void
     {
     }
 
@@ -63,7 +74,7 @@ class LegacyCommands extends DrushCommands
      * @hidden
      * @obsolete
      */
-    public function updatestatus()
+    public function updatestatus(): void
     {
     }
 
@@ -77,7 +88,7 @@ class LegacyCommands extends DrushCommands
      * @hidden
      * @obsolete
      */
-    public function updatecode()
+    public function updatecode(): void
     {
     }
 
@@ -89,7 +100,7 @@ class LegacyCommands extends DrushCommands
      * @hidden
      * @obsolete
      */
-    public function releaseNotes()
+    public function releaseNotes(): void
     {
     }
 
@@ -101,19 +112,7 @@ class LegacyCommands extends DrushCommands
      * @hidden
      * @obsolete
      */
-    public function releases()
-    {
-    }
-
-    /**
-     * Make has been removed, in favor of Composer. Use the make-convert command in Drush 8 to quickly upgrade your build to Composer.
-     *
-     * @command make
-     * @aliases make-convert,make-generate,make-lock,make-update
-     * @hidden
-     * @obsolete
-     */
-    public function make()
+    public function releases(): void
     {
     }
 
@@ -125,19 +124,7 @@ class LegacyCommands extends DrushCommands
      * @hidden
      * @obsolete
      */
-    public function download()
-    {
-    }
-
-    /**
-     * field-create has been removed. Please try `generate field` command.
-     *
-     * @command field:create
-     * @aliases field-create
-     * @hidden
-     * @obsolete
-     */
-    public function field()
+    public function download(): void
     {
     }
 
@@ -149,7 +136,7 @@ class LegacyCommands extends DrushCommands
      * @hidden
      * @obsolete
      */
-    public function execute()
+    public function execute(): void
     {
     }
 }

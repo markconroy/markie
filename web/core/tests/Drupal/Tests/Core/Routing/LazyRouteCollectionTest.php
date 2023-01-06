@@ -32,13 +32,13 @@ class LazyRouteCollectionTest extends UnitTestCase {
   /**
    * {@inheritdoc}
    */
-  public function setUp(): void {
+  protected function setUp(): void {
     parent::setUp();
     $this->routeProvider = $this->createMock(RouteProviderInterface::class);
-    $this->testRoutes = new \ArrayIterator([
+    $this->testRoutes = [
       'route_1' => new Route('/route-1'),
       'route_2' => new Route('/route-2'),
-    ]);
+    ];
   }
 
   /**
@@ -51,7 +51,7 @@ class LazyRouteCollectionTest extends UnitTestCase {
       ->with(NULL)
       ->willReturn($this->testRoutes);
     $lazyRouteCollection = new LazyRouteCollection($this->routeProvider);
-    $this->assertEquals($this->testRoutes, $lazyRouteCollection->getIterator());
+    $this->assertEquals($this->testRoutes, (array) $lazyRouteCollection->getIterator());
     $this->assertEquals($this->testRoutes, $lazyRouteCollection->all());
   }
 

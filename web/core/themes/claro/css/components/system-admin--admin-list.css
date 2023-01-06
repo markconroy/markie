@@ -38,7 +38,7 @@
 }
 
 .admin-item:not(:last-child) {
-  border-bottom: 0.0625em solid #d3d4d9;
+  border-bottom: calc(1em / 16) solid var(--color-gray-200);
 }
 
 .admin-item__title {
@@ -93,7 +93,7 @@
 
 .admin-item__description {
   margin: 0.5em 0 0.25em;
-  color: #55565b;
+  color: var(--color-gray-800);
 }
 
 [dir="rtl"] .admin-item__description {

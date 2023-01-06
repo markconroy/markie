@@ -42,12 +42,12 @@ class QueryFactory implements QueryFactoryInterface, EventSubscriberInterface {
   /**
    * The key value factory.
    */
-  protected $keyValueFactory;
+  protected KeyValueFactoryInterface $keyValueFactory;
 
   /**
    * The configuration manager.
    */
-  protected $configManager;
+  protected ConfigManagerInterface $configManager;
 
   /**
    * Constructs a QueryFactory object.
@@ -259,7 +259,7 @@ class QueryFactory implements QueryFactoryInterface, EventSubscriberInterface {
   /**
    * {@inheritdoc}
    */
-  public static function getSubscribedEvents() {
+  public static function getSubscribedEvents(): array {
     $events[ConfigEvents::SAVE][] = ['onConfigSave', 128];
     $events[ConfigEvents::DELETE][] = ['onConfigDelete', 128];
     return $events;

@@ -7,6 +7,7 @@ use Drupal\Core\Routing\RouteMatch;
 use Drupal\Core\Theme\AjaxBasePageNegotiator;
 use Drupal\Tests\UnitTestCase;
 use Prophecy\Argument;
+use Symfony\Component\HttpFoundation\InputBag;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 
@@ -40,7 +41,7 @@ class AjaxBasePageNegotiatorTest extends UnitTestCase {
   /**
    * {@inheritdoc}
    */
-  public function setUp(): void {
+  protected function setUp(): void {
     parent::setUp();
 
     $this->tokenGenerator = $this->prophesize(CsrfTokenGenerator::class);
@@ -55,6 +56,7 @@ class AjaxBasePageNegotiatorTest extends UnitTestCase {
    */
   public function testApplies($request_data, $expected) {
     $request = new Request([], $request_data);
+    $request->request = new InputBag($request->request->all());
     $route_match = RouteMatch::createFromRequest($request);
     $this->requestStack->push($request);
 
@@ -79,6 +81,7 @@ class AjaxBasePageNegotiatorTest extends UnitTestCase {
     $theme_token = 'valid_theme_token';
 
     $request = new Request([], ['ajax_page_state' => ['theme' => $theme, 'theme_token' => $theme_token]]);
+    $request->request = new InputBag($request->request->all());
     $this->requestStack->push($request);
     $route_match = RouteMatch::createFromRequest($request);
 
@@ -96,6 +99,7 @@ class AjaxBasePageNegotiatorTest extends UnitTestCase {
     $theme_token = 'invalid_theme_token';
 
     $request = new Request([], ['ajax_page_state' => ['theme' => $theme, 'theme_token' => $theme_token]]);
+    $request->request = new InputBag($request->request->all());
     $this->requestStack->push($request);
     $route_match = RouteMatch::createFromRequest($request);
 
@@ -115,6 +119,7 @@ class AjaxBasePageNegotiatorTest extends UnitTestCase {
     $theme_token = '';
 
     $request = new Request([], ['ajax_page_state' => ['theme' => $theme, 'theme_token' => $theme_token]]);
+    $request->request = new InputBag($request->request->all());
     $this->requestStack->push($request);
     $route_match = RouteMatch::createFromRequest($request);
 

@@ -56,7 +56,7 @@ class OptimizedPhpArrayDumper extends Dumper {
   /**
    * {@inheritdoc}
    */
-  public function dump(array $options = []) {
+  public function dump(array $options = []): string|array {
     return serialize($this->getArray());
   }
 
@@ -155,9 +155,6 @@ class OptimizedPhpArrayDumper extends Dumper {
     foreach ($parameters as $key => $value) {
       if (is_array($value)) {
         $value = $this->prepareParameters($value, $escape);
-      }
-      elseif ($value instanceof Reference) {
-        $value = $this->dumpValue($value);
       }
 
       $filtered[$key] = $value;

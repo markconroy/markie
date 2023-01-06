@@ -7,7 +7,6 @@ use Drupal\Core\Config\Entity\ConfigDependencyManager;
 use Drupal\Core\Config\Entity\ConfigEntityInterface;
 use Drupal\Core\Config\Entity\ConfigEntityTypeInterface;
 use Drupal\Core\Entity\EntityRepositoryInterface;
-use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ExtensionPathResolver;
 use Drupal\Core\Serialization\Yaml;
@@ -105,7 +104,7 @@ class ConfigManager implements ConfigManagerInterface {
    * @param \Drupal\Core\Extension\ExtensionPathResolver $extension_path_resolver
    *   The extension path resolver.
    */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager, ConfigFactoryInterface $config_factory, TypedConfigManagerInterface $typed_config_manager, TranslationInterface $string_translation, StorageInterface $active_storage, EventDispatcherInterface $event_dispatcher, EntityRepositoryInterface $entity_repository, ExtensionPathResolver $extension_path_resolver = NULL) {
+  public function __construct(EntityTypeManagerInterface $entity_type_manager, ConfigFactoryInterface $config_factory, TypedConfigManagerInterface $typed_config_manager, TranslationInterface $string_translation, StorageInterface $active_storage, EventDispatcherInterface $event_dispatcher, EntityRepositoryInterface $entity_repository, ExtensionPathResolver $extension_path_resolver) {
     $this->entityTypeManager = $entity_type_manager;
     $this->configFactory = $config_factory;
     $this->typedConfigManager = $typed_config_manager;
@@ -113,10 +112,6 @@ class ConfigManager implements ConfigManagerInterface {
     $this->activeStorage = $active_storage;
     $this->eventDispatcher = $event_dispatcher;
     $this->entityRepository = $entity_repository;
-    if (!$extension_path_resolver) {
-      @trigger_error('Calling ConfigManager::__construct without the $extension_path_resolver argument is deprecated in drupal:9.3.0 and is required in drupal:10.0.0. See https://www.drupal.org/node/2940438', E_USER_DEPRECATED);
-      $extension_path_resolver = \Drupal::service('extension.path.resolver');
-    }
     $this->extensionPathResolver = $extension_path_resolver;
   }
 
@@ -124,10 +119,13 @@ class ConfigManager implements ConfigManagerInterface {
    * {@inheritdoc}
    */
   public function getEntityTypeIdByName($name) {
-    $entities = array_filter($this->entityTypeManager->getDefinitions(), function (EntityTypeInterface $entity_type) use ($name) {
-      return ($entity_type instanceof ConfigEntityTypeInterface && $config_prefix = $entity_type->getConfigPrefix()) && strpos($name, $config_prefix . '.') === 0;
-    });
-    return key($entities);
+    foreach ($this->entityTypeManager->getDefinitions() as $entity_type_id => $entity_type) {
+      if (($entity_type instanceof ConfigEntityTypeInterface && $config_prefix = $entity_type->getConfigPrefix()) && str_starts_with($name, $config_prefix . '.')) {
+        return $entity_type_id;
+      }
+    }
+
+    return NULL;
   }
 
   /**
@@ -297,22 +295,6 @@ class ConfigManager implements ConfigManagerInterface {
       $entities_to_return = array_merge($entities_to_return, array_values($storage->loadMultiple($entities_to_load)));
     }
     return $entities_to_return;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function findConfigEntityDependents($type, array $names, ConfigDependencyManager $dependency_manager = NULL) {
-    @trigger_error('ConfigManagerInterface::findConfigEntityDependents() is deprecated in drupal:9.3.0 and is removed from drupal:10.0.0. Instead you should use ConfigManagerInterface::findConfigEntityDependencies(). See https://www.drupal.org/node/3225357', E_USER_DEPRECATED);
-    return $this->findConfigEntityDependencies($type, $names, $dependency_manager);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function findConfigEntityDependentsAsEntities($type, array $names, ConfigDependencyManager $dependency_manager = NULL) {
-    @trigger_error('ConfigManagerInterface::findConfigEntityDependentsAsEntities() is deprecated in drupal:9.3.0 and is removed from drupal:10.0.0. Instead you should use ConfigManagerInterface::findConfigEntityDependenciesAsEntities(). See https://www.drupal.org/node/3225357', E_USER_DEPRECATED);
-    return $this->findConfigEntityDependenciesAsEntities($type, $names, $dependency_manager);
   }
 
   /**

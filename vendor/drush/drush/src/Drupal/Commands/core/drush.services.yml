@@ -21,6 +21,12 @@ services:
       arguments: ['@entity_type.manager']
       tags:
         -  { name: drush.command }
+  link.hooks:
+    class: \Drush\Drupal\Commands\core\LinkHooks
+    arguments:
+      - '@module_handler'
+    tags:
+      -  { name: drush.command }
   image.commands:
     class: \Drush\Drupal\Commands\core\ImageCommands
     tags:
@@ -46,7 +52,7 @@ services:
         -  { name: drush.command }
   migrate_runner.commands:
     class: Drush\Drupal\Commands\core\MigrateRunnerCommands
-    arguments: ['@date.formatter', '@keyvalue']
+    arguments: ['@date.formatter', '@keyvalue', '@?plugin.manager.migration']
     tags:
       -  { name: drush.command }
   queue.commands:

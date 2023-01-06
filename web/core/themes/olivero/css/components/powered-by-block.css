@@ -10,10 +10,23 @@
  * Powered by block specific styles.
  */
 
+/*
+ * Media query breakpoints.
+ * Processed by postcss/postcss-custom-media.
+ */
+
+/* Navigation related breakpoints */
+
+/* Grid related breakpoints */
+
+/* Grid shifts from 6 to 14 columns. */
+
+/* Width of the entire grid maxes out. */
+
 .block-system-powered-by-block {
   letter-spacing: 0.02em;
   font-size: 0.875rem;
-  line-height: 1.125rem;
+  line-height: var(--sp);
 }
 
 .block-system-powered-by-block a {
@@ -25,17 +38,10 @@
   text-decoration: none;
 }
 
-[dir="ltr"] .block-system-powered-by-block .drupal-logo {
-  margin-left: 0.28125rem;
-}
-
-[dir="rtl"] .block-system-powered-by-block .drupal-logo {
-  margin-right: 0.28125rem;
-}
-
 .block-system-powered-by-block .drupal-logo {
   display: inline-block;
-  margin-top: -0.28125rem;
+  margin-block-start: calc(-1 * var(--sp) / 4);
+  margin-inline-start: calc(var(--sp) / 4);
 }
 
 .block-system-powered-by-block svg {
@@ -49,9 +55,9 @@
 }
 
 .site-footer .block-system-powered-by-block a {
-  color: #fff;
+  color: var(--color--white);
 }
 
 .site-footer .block-system-powered-by-block svg path {
-  fill: #fff;
+  fill: var(--color--white);
 }

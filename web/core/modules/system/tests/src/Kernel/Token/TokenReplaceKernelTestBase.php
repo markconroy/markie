@@ -33,7 +33,7 @@ abstract class TokenReplaceKernelTestBase extends EntityKernelTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
     // Install default system configuration.
     $this->installConfig(['system']);

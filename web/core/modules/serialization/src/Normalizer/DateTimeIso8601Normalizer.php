@@ -37,7 +37,7 @@ class DateTimeIso8601Normalizer extends DateTimeNormalizer {
   /**
    * {@inheritdoc}
    */
-  public function normalize($datetime, $format = NULL, array $context = []) {
+  public function normalize($datetime, $format = NULL, array $context = []): array|string|int|float|bool|\ArrayObject|NULL {
     assert($datetime instanceof DateTimeIso8601);
     $field_item = $datetime->getParent();
     // @todo Remove this in https://www.drupal.org/project/drupal/issues/2958416.
@@ -54,7 +54,7 @@ class DateTimeIso8601Normalizer extends DateTimeNormalizer {
   /**
    * {@inheritdoc}
    */
-  public function denormalize($data, $class, $format = NULL, array $context = []) {
+  public function denormalize($data, $class, $format = NULL, array $context = []): mixed {
     // @todo Move the date-only handling out of here in https://www.drupal.org/project/drupal/issues/2958416.
     if (isset($context['target_instance'])) {
       $field_definition = $context['target_instance']->getFieldDefinition();

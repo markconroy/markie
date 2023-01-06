@@ -11,6 +11,7 @@ use Drupal\jsonapi\JsonApiResource\Relationship;
 use Drupal\jsonapi\JsonApiResource\ResourceObject;
 use Drupal\jsonapi\Normalizer\RelationshipNormalizer;
 use Drupal\jsonapi\Normalizer\Value\CacheableNormalization;
+use Drupal\jsonapi\ResourceType\ResourceType;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
 use Drupal\Tests\jsonapi\Kernel\JsonapiKernelTestBase;
@@ -92,49 +93,49 @@ class RelationshipNormalizerTest extends JsonapiKernelTestBase {
    *
    * @var \Drupal\user\Entity\User
    */
-  protected $user1;
+  protected User $user1;
 
   /**
    * A user.
    *
    * @var \Drupal\user\Entity\User
    */
-  protected $user2;
+  protected User $user2;
 
   /**
    * An image.
    *
    * @var \Drupal\file\Entity\File
    */
-  protected $image1;
+  protected File $image1;
 
   /**
    * An image.
    *
    * @var \Drupal\file\Entity\File
    */
-  protected $image2;
+  protected File $image2;
 
   /**
    * A referencer node.
    *
    * @var \Drupal\node\Entity\Node
    */
-  protected $referencer;
+  protected Node $referencer;
 
   /**
    * The node type.
    *
    * @var \Drupal\jsonapi\ResourceType\ResourceType
    */
-  protected $referencingResourceType;
+  protected ResourceType $referencingResourceType;
 
   /**
    * The normalizer.
    *
    * @var \Drupal\jsonapi\Normalizer\RelationshipNormalizer
    */
-  protected $normalizer;
+  protected RelationshipNormalizer $normalizer;
 
   /**
    * {@inheritdoc}

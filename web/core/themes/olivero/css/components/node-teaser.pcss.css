@@ -3,7 +3,7 @@
  * Node Teaser specific styles.
  */
 
-@import "../base/variables.pcss.css";
+@import "../base/media-queries.pcss.css";
 
 .node--view-mode-teaser {
   position: relative; /* Anchor after pseudo-element. */
@@ -16,14 +16,14 @@
     height: 0;
     content: "";
     /* Intentionally not using CSS logical properties. */
-    border-top: solid 2px var(--color--gray-80);
+    border-top: solid 2px var(--color--gray-95);
   }
 
   & .node__meta {
     margin-block-end: var(--sp);
 
     & a {
-      color: var(--color--blue-20);
+      color: var(--color-text-primary-medium);
       font-weight: bold;
     }
   }
@@ -65,41 +65,23 @@
       border-radius: 50%;
 
       @media (--lg) {
-        width: var(--grid-col-width--lg);
-        height: var(--grid-col-width--lg);
-      }
-
-      @media (--nav) {
-        width: var(--grid-col-width--nav);
-        height: var(--grid-col-width--nav);
-      }
-
-      @media (--grid-max) {
-        width: var(--grid-col-width--max);
-        height: var(--grid-col-width--max);
+        width: var(--grid-col-width);
+        height: var(--grid-col-width);
       }
     }
 
     @media (--lg) {
       position: absolute;
       inset-block-start: 0;
-      inset-inline-start: calc(-1 * ((var(--grid-col-width--lg) + var(--grid-gap--lg))));
+      inset-inline-start: calc(-1 * ((var(--grid-col-width) + var(--grid-gap))));
       margin: 0;
-    }
-
-    @media (--nav) {
-      inset-inline-start: calc(-1 * ((var(--grid-col-width--nav) + var(--grid-gap--nav))));
-    }
-
-    @media (--grid-max) {
-      inset-inline-start: calc(-1 * ((var(--grid-col-width--max) + var(--grid-gap--max))));
     }
   }
 
   & .node__title {
     margin: 0;
     margin-block-end: var(--sp1);
-    color: var(--color--gray-0);
+    color: var(--color-text-neutral-loud);
     font-size: 24px;
     line-height: var(--line-height-base);
 

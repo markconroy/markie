@@ -10,38 +10,28 @@
  * Styles for pagination.
  */
 
-[dir="ltr"] .pager__items {
-  margin-left: 0;
-}
+/*
+ * Media query breakpoints.
+ * Processed by postcss/postcss-custom-media.
+ */
 
-[dir="rtl"] .pager__items {
-  margin-right: 0;
-}
+/* Navigation related breakpoints */
 
-[dir="ltr"] .pager__items {
-  padding-left: 0;
-}
+/* Grid related breakpoints */
 
-[dir="rtl"] .pager__items {
-  padding-right: 0;
-}
+/* Grid shifts from 6 to 14 columns. */
 
-[dir="ltr"] .pager__items {
-  padding-right: 0;
-}
-
-[dir="rtl"] .pager__items {
-  padding-left: 0;
-}
+/* Width of the entire grid maxes out. */
 
 .pager__items {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-end;
-  margin-top: 0;
-  margin-bottom: 0;
-  padding-top: 0;
-  padding-bottom: 0;
+  margin-block: 0;
+  margin-inline-start: 0;
+  padding-block: 0;
+  padding-inline-start: 0;
+  padding-inline-end: 0;
   list-style: none;
   font-weight: bold;
 }
@@ -50,18 +40,18 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 2.8125rem;
-  height: 2.8125rem;
+  width: var(--sp2-5);
+  height: var(--sp2-5);
   cursor: default;
-  color: #6e7172;
-  background-color: #fff;
+  color: var(--color-text-neutral-soft);
+  background-color: var(--color--white);
 }
 
 @media (min-width: 31.25rem) {
 
   .pager__item {
-    width: 3.375rem;
-    height: 3.375rem;
+    width: var(--sp3);
+    height: var(--sp3);
   }
 }
 
@@ -70,21 +60,11 @@
 }
 
 .pager__item--active {
-  color: #fff;
-  background-color: #0d77b5;
-}
-
-/* IE11 Specific. */
-
-@media (-ms-high-contrast: active) {
-
-  .pager__item--control path {
-    fill: currentColor;
-  }
+  color: var(--color--white);
+  background-color: var(--color--primary-40);
 }
 
 @media (forced-colors: active) {
-
   .pager__item--control path {
     fill: linktext;
   }
@@ -97,16 +77,16 @@
   width: 100%;
   height: 100%;
   text-decoration: none;
-  color: #6e7172;
+  color: var(--color-text-neutral-soft);
 }
 
 .pager__link:hover {
-  background-color: #e7edf1;
+  background-color: var(--color--gray-95);
 }
 
 .pager__link:focus {
-  color: #0d77b5;
-  outline: solid 2px #0d77b5;
+  color: var(--color-text-primary-medium);
+  outline: solid 2px currentColor;
   outline-offset: -2px;
 }
 

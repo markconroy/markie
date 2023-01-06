@@ -7,8 +7,6 @@
  * @see tabledrag.js
  */
 
-@import "../base/variables.pcss.css";
-
 :root {
   --table-row--dragging-bg-color: #fe7;
   --table-row--last-dragged-bg-color: #ffb;
@@ -110,13 +108,6 @@ body.drag {
 [dir="rtl"] .tabledrag-handle::after {
   margin-right: calc(var(--space-m) * -1);
   margin-left: 0;
-}
-
-@media screen and (-ms-high-contrast: active) {
-  .tabledrag-handle::after {
-    content: url(../../images/icons/currentColor/tabledrag-handle.svg);
-    background: none;
-  }
 }
 
 @media (forced-colors: active) {
@@ -250,7 +241,7 @@ body.drag {
 }
 
 .tabledrag-cell-content .tree {
-  min-height: 100%; /* Using simply 'height: 100%' would make IE11 rendering ugly. */
+  min-height: 100%;
 }
 
 /**

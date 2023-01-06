@@ -45,10 +45,7 @@ abstract class StableLibraryOverrideTestBase extends KernelTestBase {
    *
    * @var string[]
    */
-  protected $librariesToSkip = [
-    // This is a deprecated library that will trigger warnings.
-    'image/quickedit.inPlaceEditor.image',
-  ];
+  protected $librariesToSkip = [];
 
   /**
    * Enable all core modules that are not hidden or experimental.

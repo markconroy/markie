@@ -35,22 +35,22 @@ abstract class OptionsWidgetBase extends WidgetBase {
   /**
    * Tracks whether the field is required.
    */
-  protected $required;
+  protected bool $required;
 
   /**
    * Tracks whether the data is multi-valued.
    */
-  protected $multiple;
+  protected bool $multiple;
 
   /**
    * Tracks whether the field has a value.
    */
-  protected $has_value;
+  protected bool $has_value;
 
   /**
    * The array of options for the widget.
    */
-  protected $options;
+  protected array $options;
 
   /**
    * {@inheritdoc}

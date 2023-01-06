@@ -11,10 +11,12 @@
 
 namespace Symfony\Component\DependencyInjection\LazyProxy;
 
+trigger_deprecation('symfony/dependency-injection', '6.2', 'The "%s" class is deprecated, use "%s" instead.', ProxyHelper::class, \Symfony\Component\VarExporter\ProxyHelper::class);
+
 /**
  * @author Nicolas Grekas <p@tchwork.com>
  *
- * @internal
+ * @deprecated since Symfony 6.2, use VarExporter's ProxyHelper instead
  */
 class ProxyHelper
 {
@@ -85,6 +87,8 @@ class ProxyHelper
                 $types[] = ($parent = $r->getDeclaringClass()->getParentClass()) ? $prefix.$parent->name : null;
             }
         }
+
+        sort($types);
 
         return $types ? implode($glue, $types) : null;
     }

@@ -6,6 +6,7 @@ use Drupal\Core\Database\Database;
 use Drupal\Core\Url;
 use Drupal\Tests\BrowserTestBase;
 use Drupal\Tests\UpdatePathTestTrait;
+use Drupal\user\Entity\User;
 
 /**
  * Tests hook_removed_post_updates().
@@ -25,14 +26,14 @@ class UpdateRemovedPostUpdateTest extends BrowserTestBase {
    *
    * @var \Drupal\Core\Url
    */
-  protected $updateUrl;
+  protected Url $updateUrl;
 
   /**
    * An user that can execute updates.
    *
    * @var \Drupal\user\Entity\User
    */
-  protected $updateUser;
+  protected User $updateUser;
 
   /**
    * {@inheritdoc}

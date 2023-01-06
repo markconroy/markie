@@ -35,7 +35,7 @@ class LanguageManager implements LanguageManagerInterface {
   /**
    * Information about all defined language types.
    */
-  protected $definedLanguageTypesInfo;
+  protected array $definedLanguageTypesInfo;
 
   /**
    * Constructs the language manager.

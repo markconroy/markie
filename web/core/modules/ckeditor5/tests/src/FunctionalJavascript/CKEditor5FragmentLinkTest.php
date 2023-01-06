@@ -10,6 +10,7 @@ use Drupal\filter\Entity\FilterFormat;
 use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
 use Drupal\node\Entity\NodeType;
 use Drupal\Tests\TestFileCreationTrait;
+use Drupal\user\Entity\User;
 use Drupal\user\RoleInterface;
 
 /**
@@ -37,7 +38,7 @@ class CKEditor5FragmentLinkTest extends WebDriverTestBase {
    *
    * @var \Drupal\user\Entity\User
    */
-  protected $account;
+  protected User $account;
 
   /**
    * {@inheritdoc}

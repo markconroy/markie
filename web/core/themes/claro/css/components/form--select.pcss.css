@@ -3,8 +3,6 @@
  * Select input elements.
  */
 
-@import "../base/variables.pcss.css";
-
 .form-element--type-select {
   padding-right: calc(2rem - var(--input-border-size));
   background-image: url(../../images/icons/545560/chevron-down.svg);
@@ -12,11 +10,14 @@
   background-position: 100% 50%;
   background-size: 2.75rem 0.5625rem; /* w: 14px + (2 * 15px), h: 9px */
 }
-
 [dir="rtl"] .form-element--type-select {
   padding-right: calc(1rem - var(--input-border-size));
   padding-left: calc(2rem - var(--input-border-size));
   background-position: 0 50%;
+
+  @media (forced-colors: active) {
+    padding-left: var(--input-padding-horizontal);
+  }
 }
 
 .no-touchevents .form-element--type-select.form-element--extrasmall,
@@ -30,10 +31,6 @@
   padding-left: calc(1.5rem - var(--input-border-size));
 }
 
-.form-element--type-select::-ms-expand {
-  display: none;
-}
-
 /**
  * Select states.
  */
@@ -44,32 +41,12 @@
   background-image: url(../../images/icons/8e929c/chevron-down.svg);
 }
 
-/* Necessary to show chevron in forced colors mode in modern browsers. */
 @media (forced-colors: active) {
   .form-element--type-select,
   .form-element--type-select:focus,
   .form-element--type-select[disabled] {
     padding-right: var(--input-padding-horizontal);
     background-image: none;
-    appearance: listbox; /* Default <select> appearance value for modern browsers. */
-
-    /* Lets browser set <select> appearance to whatever the browser's default is. */
-    @supports (appearance: revert) {
-      appearance: revert;
-    }
-  }
-}
-
-/* Necessary for Internet Explorer to show chevron. */
-@media screen and (-ms-high-contrast: active) {
-  .form-element--type-select,
-  .form-element--type-select:focus,
-  .form-element--type-select[disabled] {
-    padding-right: var(--input-padding-horizontal);
-
-    /* Re-enable default chevron for Internet Explorer. */
-    &::-ms-expand {
-      display: block;
-    }
+    appearance: revert; /* Revert <select> appearance value for modern browsers. */
   }
 }

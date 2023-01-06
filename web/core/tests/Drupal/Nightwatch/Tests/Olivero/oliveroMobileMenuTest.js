@@ -42,7 +42,7 @@ module.exports = {
           'core/tests/Drupal/TestSite/TestSiteOliveroInstallTestScript.php',
         installProfile: 'minimal',
       })
-      .resizeWindow(1000, 800);
+      .setWindowSize(1000, 800);
   },
   after(browser) {
     browser.drupalUninstall();
@@ -171,5 +171,14 @@ module.exports = {
       .waitForElementVisible(headerNavSelector)
       .click('[href="#footer"]')
       .waitForElementNotVisible(headerNavSelector);
+  },
+  'Verify mobile menu works when Big Pipe when authenticated': (browser) => {
+    browser.drupalInstallModule('big_pipe').drupalLoginAsAdmin(() => {
+      browser
+        .drupalRelativeURL('/')
+        .assert.not.visible(headerNavSelector)
+        .click(mobileNavButtonSelector)
+        .waitForElementVisible(headerNavSelector);
+    });
   },
 };

@@ -8,8 +8,8 @@
 namespace Drupal\Tests\Component\DependencyInjection\Dumper {
 
   use Drupal\Component\Utility\Crypt;
-  use Drupal\Tests\PhpUnitCompatibilityTrait;
   use PHPUnit\Framework\TestCase;
+  use Prophecy\PhpUnit\ProphecyTrait;
   use Symfony\Bridge\PhpUnit\ExpectDeprecationTrait;
   use Symfony\Component\DependencyInjection\Definition;
   use Symfony\Component\DependencyInjection\Reference;
@@ -26,8 +26,8 @@ namespace Drupal\Tests\Component\DependencyInjection\Dumper {
    */
   class OptimizedPhpArrayDumperTest extends TestCase {
 
-    use PhpUnitCompatibilityTrait;
     use ExpectDeprecationTrait;
+    use ProphecyTrait;
 
     /**
      * The container builder instance.
@@ -72,7 +72,7 @@ namespace Drupal\Tests\Component\DependencyInjection\Dumper {
       $this->containerBuilder = $this->prophesize('\Symfony\Component\DependencyInjection\ContainerBuilder');
       $this->containerBuilder->getAliases()->willReturn([]);
       $this->containerBuilder->getParameterBag()->willReturn(new ParameterBag());
-      $this->containerBuilder->getDefinitions()->willReturn(NULL);
+      $this->containerBuilder->getDefinitions()->willReturn([]);
       $this->containerBuilder->isCompiled()->willReturn(TRUE);
 
       $definition = [];
@@ -154,12 +154,6 @@ namespace Drupal\Tests\Component\DependencyInjection\Dumper {
       $this->containerBuilder->getParameterBag()->willReturn($parameter_bag);
       $this->containerBuilder->isCompiled()->willReturn($is_frozen);
 
-      if (isset($parameters['reference'])) {
-        $definition = new Definition('\stdClass');
-        $definition->setPublic(TRUE);
-        $this->containerBuilder->getDefinition('referenced_service')->willReturn($definition);
-      }
-
       $this->assertEquals($this->containerDefinition, $this->dumper->getArray(), 'Expected definition matches dump.');
     }
 
@@ -194,11 +188,6 @@ namespace Drupal\Tests\Component\DependencyInjection\Dumper {
           ['foo' => '%llama%', 'llama' => 'yes'],
           ['foo' => '%llama%', 'llama' => 'yes'],
           FALSE,
-        ],
-        [
-          ['reference' => new Reference('referenced_service')],
-          ['reference' => $this->getServiceCall('referenced_service')],
-          TRUE,
         ],
       ];
     }

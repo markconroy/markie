@@ -124,13 +124,13 @@ class FormAjaxSubscriber implements EventSubscriberInterface {
   /**
    * Extracts a form AJAX exception.
    *
-   * @param \Exception $e
+   * @param \Throwable $e
    *   A generic exception that might contain a form AJAX exception.
    *
    * @return \Drupal\Core\Form\FormAjaxException|null
    *   Either the form AJAX exception, or NULL if none could be found.
    */
-  protected function getFormAjaxException(\Exception $e) {
+  protected function getFormAjaxException(\Throwable $e) {
     $exception = NULL;
     while ($e) {
       if ($e instanceof FormAjaxException) {
@@ -156,7 +156,7 @@ class FormAjaxSubscriber implements EventSubscriberInterface {
   /**
    * {@inheritdoc}
    */
-  public static function getSubscribedEvents() {
+  public static function getSubscribedEvents(): array {
     // Run before exception.logger.
     $events[KernelEvents::EXCEPTION] = ['onException', 51];
     // Run before main_content_view_subscriber.

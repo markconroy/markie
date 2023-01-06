@@ -32,13 +32,10 @@ abstract class AbstractRecursivePass implements CompilerPassInterface
     protected $container;
     protected $currentId;
 
-    private $processExpressions = false;
-    private $expressionLanguage;
-    private $inExpression = false;
+    private bool $processExpressions = false;
+    private ExpressionLanguage $expressionLanguage;
+    private bool $inExpression = false;
 
-    /**
-     * {@inheritdoc}
-     */
     public function process(ContainerBuilder $container)
     {
         $this->container = $container;
@@ -68,16 +65,16 @@ abstract class AbstractRecursivePass implements CompilerPassInterface
     /**
      * Processes a value found in a definition tree.
      *
-     * @param mixed $value
-     * @param bool  $isRoot
-     *
-     * @return mixed The processed value
+     * @return mixed
      */
-    protected function processValue($value, $isRoot = false)
+    protected function processValue(mixed $value, bool $isRoot = false)
     {
         if (\is_array($value)) {
             foreach ($value as $k => $v) {
                 if ($isRoot) {
+                    if ($v->hasTag('container.excluded')) {
+                        continue;
+                    }
                     $this->currentId = $k;
                 }
                 if ($v !== $processedValue = $this->processValue($v, $isRoot)) {
@@ -87,7 +84,7 @@ abstract class AbstractRecursivePass implements CompilerPassInterface
         } elseif ($value instanceof ArgumentInterface) {
             $value->setValues($this->processValue($value->getValues()));
         } elseif ($value instanceof Expression && $this->processExpressions) {
-            $this->getExpressionLanguage()->compile((string) $value, ['this' => 'container']);
+            $this->getExpressionLanguage()->compile((string) $value, ['this' => 'container', 'args' => 'args']);
         } elseif ($value instanceof Definition) {
             $value->setArguments($this->processValue($value->getArguments()));
             $value->setProperties($this->processValue($value->getProperties()));
@@ -95,7 +92,16 @@ abstract class AbstractRecursivePass implements CompilerPassInterface
 
             $changes = $value->getChanges();
             if (isset($changes['factory'])) {
-                $value->setFactory($this->processValue($value->getFactory()));
+                if (\is_string($factory = $value->getFactory()) && str_starts_with($factory, '@=')) {
+                    if (!class_exists(Expression::class)) {
+                        throw new LogicException('Expressions cannot be used in service factories without the ExpressionLanguage component. Try running "composer require symfony/expression-language".');
+                    }
+                    $factory = new Expression(substr($factory, 2));
+                }
+                if (($factory = $this->processValue($factory)) instanceof Expression) {
+                    $factory = '@='.$factory;
+                }
+                $value->setFactory($factory);
             }
             if (isset($changes['configurator'])) {
                 $value->setConfigurator($this->processValue($value->getConfigurator()));
@@ -106,19 +112,19 @@ abstract class AbstractRecursivePass implements CompilerPassInterface
     }
 
     /**
-     * @param bool $required
-     *
-     * @return \ReflectionFunctionAbstract|null
-     *
      * @throws RuntimeException
      */
-    protected function getConstructor(Definition $definition, $required)
+    protected function getConstructor(Definition $definition, bool $required): ?\ReflectionFunctionAbstract
     {
         if ($definition->isSynthetic()) {
             return null;
         }
 
         if (\is_string($factory = $definition->getFactory())) {
+            if (str_starts_with($factory, '@=')) {
+                return new \ReflectionFunction(static function (...$args) {});
+            }
+
             if (!\function_exists($factory)) {
                 throw new RuntimeException(sprintf('Invalid service "%s": function "%s" does not exist.', $this->currentId, $factory));
             }
@@ -144,8 +150,8 @@ abstract class AbstractRecursivePass implements CompilerPassInterface
                 }
             } elseif ($class instanceof Definition) {
                 $class = $class->getClass();
-            } elseif (null === $class) {
-                $class = $definition->getClass();
+            } else {
+                $class ??= $definition->getClass();
             }
 
             return $this->getReflectionMethod(new Definition($class), $method);
@@ -178,13 +184,9 @@ abstract class AbstractRecursivePass implements CompilerPassInterface
     }
 
     /**
-     * @param string $method
-     *
      * @throws RuntimeException
-     *
-     * @return \ReflectionFunctionAbstract
      */
-    protected function getReflectionMethod(Definition $definition, $method)
+    protected function getReflectionMethod(Definition $definition, string $method): \ReflectionFunctionAbstract
     {
         if ('__construct' === $method) {
             return $this->getConstructor($definition, true);
@@ -220,9 +222,9 @@ abstract class AbstractRecursivePass implements CompilerPassInterface
 
     private function getExpressionLanguage(): ExpressionLanguage
     {
-        if (null === $this->expressionLanguage) {
+        if (!isset($this->expressionLanguage)) {
             if (!class_exists(ExpressionLanguage::class)) {
-                throw new LogicException('Unable to use expressions as the Symfony ExpressionLanguage component is not installed.');
+                throw new LogicException('Unable to use expressions as the Symfony ExpressionLanguage component is not installed. Try running "composer require symfony/expression-language".');
             }
 
             $providers = $this->container->getExpressionLanguageProviders();
@@ -233,7 +235,7 @@ abstract class AbstractRecursivePass implements CompilerPassInterface
                     $arg = $this->processValue(new Reference($id));
                     $this->inExpression = false;
                     if (!$arg instanceof Reference) {
-                        throw new RuntimeException(sprintf('"%s::processValue()" must return a Reference when processing an expression, "%s" returned for service("%s").', static::class, \is_object($arg) ? \get_class($arg) : \gettype($arg), $id));
+                        throw new RuntimeException(sprintf('"%s::processValue()" must return a Reference when processing an expression, "%s" returned for service("%s").', static::class, get_debug_type($arg), $id));
                     }
                     $arg = sprintf('"%s"', $arg);
                 }

@@ -6,21 +6,17 @@ use Drupal\Core\Database\DatabaseExceptionWrapper;
 use Drupal\Core\Database\DatabaseNotFoundException;
 use Drupal\Core\Database\Connection as DatabaseConnection;
 use Drupal\Core\Database\StatementInterface;
+use Drupal\Core\Database\SupportsTemporaryTablesInterface;
 
 /**
  * SQLite implementation of \Drupal\Core\Database\Connection.
  */
-class Connection extends DatabaseConnection {
+class Connection extends DatabaseConnection implements SupportsTemporaryTablesInterface {
 
   /**
    * Error code for "Unable to open database file" error.
    */
   const DATABASE_NOT_FOUND = 14;
-
-  /**
-   * {@inheritdoc}
-   */
-  protected $statementClass = NULL;
 
   /**
    * {@inheritdoc}
@@ -85,21 +81,17 @@ class Connection extends DatabaseConnection {
   public function __construct(\PDO $connection, array $connection_options) {
     parent::__construct($connection, $connection_options);
 
-    // Attach one database for each registered prefix.
-    $prefixes = $this->prefixes;
-    foreach ($prefixes as &$prefix) {
-      // Empty prefix means query the main database -- no need to attach
-      // anything.
-      if ($prefix !== '') {
-        $this->attachDatabase($prefix);
-        // Add a ., so queries become prefix.table, which is proper syntax for
-        // querying an attached database.
-        $prefix .= '.';
-      }
+    // Empty prefix means query the main database -- no need to attach anything.
+    $prefix = $this->connectionOptions['prefix'] ?? '';
+    if ($prefix !== '') {
+      $this->attachDatabase($prefix);
+      // Add a ., so queries become prefix.table, which is proper syntax for
+      // querying an attached database.
+      $prefix .= '.';
     }
 
-    // Regenerate the prefixes replacement table.
-    $this->setPrefix($prefixes);
+    // Regenerate the prefix.
+    $this->setPrefix($prefix);
   }
 
   /**
@@ -358,32 +350,6 @@ class Connection extends DatabaseConnection {
     return preg_match('/^' . $pattern . '$/', $subject);
   }
 
-  /**
-   * {@inheritdoc}
-   */
-  public function prepare($statement, array $driver_options = []) {
-    @trigger_error('Connection::prepare() is deprecated in drupal:9.1.0 and is removed from drupal:10.0.0. Database drivers should instantiate \PDOStatement objects by calling \PDO::prepare in their Connection::prepareStatement method instead. \PDO::prepare should not be called outside of driver code. See https://www.drupal.org/node/3137786', E_USER_DEPRECATED);
-    return new Statement($this->connection, $this, $statement, $driver_options);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  protected function handleQueryException(\PDOException $e, $query, array $args = [], $options = []) {
-    // The database schema might be changed by another process in between the
-    // time that the statement was prepared and the time the statement was run
-    // (e.g. usually happens when running tests). In this case, we need to
-    // re-run the query.
-    // @see http://www.sqlite.org/faq.html#q15
-    // @see http://www.sqlite.org/rescode.html#schema
-    if (!empty($e->errorInfo[1]) && $e->errorInfo[1] === 17) {
-      @trigger_error('Connection::handleQueryException() is deprecated in drupal:9.2.0 and is removed in drupal:10.0.0. Get a handler through $this->exceptionHandler() instead, and use one of its methods. See https://www.drupal.org/node/3187222', E_USER_DEPRECATED);
-      return $this->query($query, $args, $options);
-    }
-
-    parent::handleQueryException($e, $query, $args, $options);
-  }
-
   public function queryRange($query, $from, $count, array $args = [], array $options = []) {
     return $this->query($query . ' LIMIT ' . (int) $from . ', ' . (int) $count, $args, $options);
   }
@@ -392,15 +358,16 @@ class Connection extends DatabaseConnection {
    * {@inheritdoc}
    */
   public function queryTemporary($query, array $args = [], array $options = []) {
-    // Generate a new temporary table name and protect it from prefixing.
-    // SQLite requires that temporary tables to be non-qualified.
-    $tablename = $this->generateTemporaryTableName();
-    $prefixes = $this->prefixes;
-    $prefixes[$tablename] = '';
-    $this->setPrefix($prefixes);
+    $tablename = 'db_temporary_' . uniqid();
 
     $this->query('CREATE TEMPORARY TABLE ' . $tablename . ' AS ' . $query, $args, $options);
-    return $tablename;
+
+    // Temporary tables always live in the temp database, which means that
+    // they cannot be fully qualified table names since they do not live
+    // in the main SQLite database. We provide the fully-qualified name
+    // ourselves to prevent Drupal from applying prefixes.
+    // @see https://www.sqlite.org/lang_createtable.html
+    return 'temp.' . $tablename;
   }
 
   public function driver() {

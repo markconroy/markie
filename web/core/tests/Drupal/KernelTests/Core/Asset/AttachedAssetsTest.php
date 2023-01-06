@@ -257,29 +257,6 @@ class AttachedAssetsTest extends KernelTestBase {
   }
 
   /**
-   * Tests adding JavaScript within conditional comments.
-   *
-   * @group legacy
-   * @see \Drupal\Core\Render\Element\HtmlTag::preRenderConditionalComments()
-   */
-  public function testBrowserConditionalComments() {
-    $this->expectDeprecation('Support for IE Conditional Comments is deprecated in drupal:9.1.0 and is removed from drupal:10.0.0. See https://www.drupal.org/node/3102997');
-    $default_query_string = $this->container->get('state')->get('system.css_js_query_string') ?: '0';
-
-    $build['#attached']['library'][] = 'common_test/browsers';
-    $assets = AttachedAssets::createFromRenderArray($build);
-
-    $js = $this->assetResolver->getJsAssets($assets, FALSE)[1];
-    $js_render_array = \Drupal::service('asset.js.collection_renderer')->render($js);
-    $rendered_js = $this->renderer->renderPlain($js_render_array);
-    $expected_1 = "<!--[if lte IE 8]>\n" . '<script src="' . $this->fileUrlGenerator->generateString('core/modules/system/tests/modules/common_test/old-ie.js') . '?' . $default_query_string . '"></script>' . "\n<![endif]-->";
-    $expected_2 = "<!--[if !IE]><!-->\n" . '<script src="' . $this->fileUrlGenerator->generateString('core/modules/system/tests/modules/common_test/no-ie.js') . '?' . $default_query_string . '"></script>' . "\n<!--<![endif]-->";
-
-    $this->assertStringContainsString($expected_1, $rendered_js, 'Rendered JavaScript within downlevel-hidden conditional comments.');
-    $this->assertStringContainsString($expected_2, $rendered_js, 'Rendered JavaScript within downlevel-revealed conditional comments.');
-  }
-
-  /**
    * Tests JavaScript versioning.
    */
   public function testVersionQueryString() {
@@ -485,16 +462,6 @@ class AttachedAssetsTest extends KernelTestBase {
     $query_string = $this->container->get('state')->get('system.css_js_query_string') ?: '0';
     $this->assertStringContainsString('<link rel="stylesheet" media="all" href="' . str_replace('&', '&amp;', $this->fileUrlGenerator->generateString('core/modules/system/tests/modules/common_test/querystring.css?arg1=value1&arg2=value2')) . '&amp;' . $query_string . '" />', $rendered_css, 'CSS file with query string gets version query string correctly appended..');
     $this->assertStringContainsString('<script src="' . str_replace('&', '&amp;', $this->fileUrlGenerator->generateString('core/modules/system/tests/modules/common_test/querystring.js?arg1=value1&arg2=value2')) . '&amp;' . $query_string . '"></script>', $rendered_js, 'JavaScript file with query string gets version query string correctly appended.');
-  }
-
-  /**
-   * Tests deprecated drupal_js_defaults() function.
-   *
-   * @group legacy
-   */
-  public function testDeprecatedDrupalJsDefaults() {
-    $this->expectDeprecation('drupal_js_defaults() is deprecated in drupal:9.4.0 and is removed from drupal:10.0.0. No direct replacement is provided. See https://www.drupal.org/node/3197679');
-    $this->assertIsArray(drupal_js_defaults());
   }
 
 }

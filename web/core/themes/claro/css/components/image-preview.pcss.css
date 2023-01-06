@@ -3,8 +3,6 @@
  * Image preview component.
  */
 
-@import "../base/variables.pcss.css";
-
 :root {
   --color-pattern: var(--color-gray-200);
   --size-pattern-square: calc(7rem / 16);
@@ -36,12 +34,6 @@
     var(--size-pattern-square) var(--size-pattern-square),
     0 0;
   background-size: calc(var(--size-pattern-square) * 2) calc(var(--size-pattern-square) * 2);
-}
-
-@media screen and (-ms-high-contrast: active) {
-  .image-preview img {
-    background: none;
-  }
 }
 
 /**

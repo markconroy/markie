@@ -23,7 +23,7 @@ class TestAccessBlock extends BlockBase implements ContainerFactoryPluginInterfa
   /**
    * The state service.
    */
-  protected $state;
+  protected StateInterface $state;
 
   /**
    * Tests the test access block.

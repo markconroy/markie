@@ -134,7 +134,7 @@ abstract class QueryBase implements QueryInterface {
   /**
    * Defines how the conditions on the query need to match.
    */
-  protected $conjunction;
+  protected string $conjunction;
 
   /**
    * Constructs this object.

@@ -32,12 +32,8 @@ class CssCollectionRenderer implements AssetCollectionRendererInterface {
    * @param \Drupal\Core\File\FileUrlGeneratorInterface $file_url_generator
    *   The file URL generator.
    */
-  public function __construct(StateInterface $state, FileUrlGeneratorInterface $file_url_generator = NULL) {
+  public function __construct(StateInterface $state, FileUrlGeneratorInterface $file_url_generator) {
     $this->state = $state;
-    if (!$file_url_generator) {
-      @trigger_error('Calling CssCollectionRenderer::__construct() without the $file_url_generator argument is deprecated in drupal:9.3.0 and will be required before drupal:10.0.0. See https://www.drupal.org/node/2549139.', E_USER_DEPRECATED);
-      $file_url_generator = \Drupal::service('file_url_generator');
-    }
     $this->fileUrlGenerator = $file_url_generator;
   }
 
@@ -65,7 +61,6 @@ class CssCollectionRenderer implements AssetCollectionRendererInterface {
     foreach ($css_assets as $css_asset) {
       $element = $link_element_defaults;
       $element['#attributes']['media'] = $css_asset['media'];
-      $element['#browsers'] = $css_asset['browsers'];
 
       switch ($css_asset['type']) {
         // For file items, output a LINK tag for file CSS assets.

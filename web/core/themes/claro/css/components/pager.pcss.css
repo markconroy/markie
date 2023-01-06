@@ -3,8 +3,6 @@
  * Styles for Claro's Pagination.
  */
 
-@import "../base/variables.pcss.css";
-
 :root {
   /**
   * Pager.
@@ -171,7 +169,7 @@
   margin-left: 0.5rem;
 }
 
-@media (-ms-high-contrast: active), (forced-colors: active) {
+@media (forced-colors: active) {
   .pager__item a:hover {
     text-decoration: underline;
   }

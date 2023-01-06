@@ -41,22 +41,27 @@ a.tabledrag-handle .handle {
   height: 14px;
   margin: -0.4em 0.5em 0;
   padding: 0.42em 0.5em;
-  background: #787878;
-  -webkit-mask: url(../../../../misc/icons/787878/move.svg) no-repeat 6px 7px;
-  mask: url(../../../../misc/icons/787878/move.svg) no-repeat 6px 7px;
+  background: url(../../../../misc/icons/787878/move.svg) no-repeat 6px 7px;
 }
 a.tabledrag-handle:hover .handle,
 a.tabledrag-handle:focus .handle {
-  background: #000;
+  background-image: url(../../../../misc/icons/000000/move.svg);
 }
 
 @media (forced-colors: active) {
   a.tabledrag-handle .handle,
   a.tabledrag-handle:hover .handle,
   a.tabledrag-handle:focus .handle {
-    background: canvastext;
+    background: linktext;
+    -webkit-mask: url(../../../../misc/icons/787878/move.svg) no-repeat 6px 7px;
+    mask: url(../../../../misc/icons/787878/move.svg) no-repeat 6px 7px;
+  }
+
+  a.tabledrag-handle:focus {
+    outline: solid 1px transparent;
   }
 }
+
 .touchevents .draggable td {
   padding: 0 10px;
 }

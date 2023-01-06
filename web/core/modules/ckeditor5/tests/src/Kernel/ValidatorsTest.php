@@ -45,6 +45,7 @@ class ValidatorsTest extends KernelTestBase {
     'ckeditor5_plugin_conditions_test',
     'editor',
     'filter',
+    'filter_test',
     'media',
     'media_library',
     'views',

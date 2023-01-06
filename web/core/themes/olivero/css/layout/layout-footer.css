@@ -10,6 +10,19 @@
  * Grid system definition for the footer top and footer bottom layouts.
  */
 
+/*
+ * Media query breakpoints.
+ * Processed by postcss/postcss-custom-media.
+ */
+
+/* Navigation related breakpoints */
+
+/* Grid related breakpoints */
+
+/* Grid shifts from 6 to 14 columns. */
+
+/* Width of the entire grid maxes out. */
+
 /**
  * Creates stacking context ensuring that child elements can never appear in
  * front of mobile navigation.
@@ -21,21 +34,19 @@
 }
 
 .site-footer__inner {
-  padding-top: 2.25rem;
-  padding-bottom: 2.25rem;
+  padding-block: var(--sp2);
 }
 
 @media (min-width: 75rem) {
 
   .site-footer__inner {
-    padding-top: 4.5rem;
-    padding-bottom: 14.625rem;
+    padding-block: var(--sp4) calc(13 * var(--sp));
   }
 }
 
 .region--footer_top__inner > *,
 .region--footer_bottom__inner > * {
-  margin-bottom: 2.25rem;
+  margin-block-end: var(--sp2);
 }
 
 @media (min-width: 43.75rem) {
@@ -43,17 +54,12 @@
   .region--footer_top__inner > *,
   .region--footer_bottom__inner > * {
     flex: 1;
-    margin-bottom: 0;
+    margin-block-end: 0;
   }
 
-  [dir="ltr"] .region--footer_top__inner > *:not(:last-child),
-  [dir="ltr"] .region--footer_bottom__inner > *:not(:last-child) {
-    margin-right: 2.25rem;
-  }
-
-  [dir="rtl"] .region--footer_top__inner > *:not(:last-child),
-  [dir="rtl"] .region--footer_bottom__inner > *:not(:last-child) {
-    margin-left: 2.25rem;
+  .region--footer_top__inner > *:not(:last-child),
+  .region--footer_bottom__inner > *:not(:last-child) {
+    margin-inline-end: var(--sp2);
   }
 }
 

@@ -3,7 +3,7 @@
 /*
  * This file is part of Psy Shell.
  *
- * (c) 2012-2020 Justin Hileman
+ * (c) 2012-2022 Justin Hileman
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -34,6 +34,8 @@ class PassableByReferencePass extends CodeCleanerPass
      * @throws FatalErrorException if non-variables are passed by reference
      *
      * @param Node $node
+     *
+     * @return int|Node|null Replacement node (or special return value)
      */
     public function enterNode(Node $node)
     {
@@ -68,7 +70,7 @@ class PassableByReferencePass extends CodeCleanerPass
         }
     }
 
-    private function isPassableByReference(Node $arg)
+    private function isPassableByReference(Node $arg): bool
     {
         // Unpacked arrays can be passed by reference
         if ($arg->value instanceof Array_) {

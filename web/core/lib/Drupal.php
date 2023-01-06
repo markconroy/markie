@@ -75,7 +75,7 @@ class Drupal {
   /**
    * The current system version.
    */
-  const VERSION = '9.5.0';
+  const VERSION = '10.0.1';
 
   /**
    * Core API compatibility.
@@ -86,16 +86,6 @@ class Drupal {
    * Core minimum schema version.
    */
   const CORE_MINIMUM_SCHEMA_VERSION = 8000;
-
-  /**
-   * Minimum supported version of PHP.
-   *
-   * @deprecated in drupal:9.4.0 and is removed from drupal:10.0.0. Use
-   *   \Drupal\Core\Utility\PhpRequirements::getMinimumSupportedPhp() instead.
-   *
-   * @see https://www.drupal.org/node/3261451
-   */
-  const MINIMUM_SUPPORTED_PHP = '7.4.0';
 
   /**
    * Minimum allowed version of PHP for Drupal to be bootstrapped.
@@ -113,7 +103,7 @@ class Drupal {
    * - Once in the error message printed to the user immediately after.
    * Remember to update both whenever this constant is updated.
    */
-  const MINIMUM_PHP = '7.3.0';
+  const MINIMUM_PHP = '8.1.0';
 
   /**
    * Minimum recommended value of PHP memory_limit.

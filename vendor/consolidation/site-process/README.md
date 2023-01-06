@@ -78,7 +78,10 @@ docker-compose --project dockerComposeProjectName --file docker-compose.yml --pr
 
 `docker.project` and `compose.options --project` do the same thing, docker.project existed before options.
 
-`docker.service` is the exact name of the service as it appears in docker-compos.yml
+`docker.service` is the exact name of the service as it appears in docker-compose.yml
+
+The default behaviour is to use `docker-compose exec` to invoke a command on a running container.
+You can change this to use `docker-compose run` for containers which by default are not running, with the property `compose.command`.
 
 Check the [docker-compose](https://docs.docker.com/compose/reference/overview/) manual for all available options.
 
@@ -112,7 +115,8 @@ We use [SemVer](http://semver.org/) for versioning. For the versions available, 
 
 | Branch       | Symfony Versions | PHP Versions
 | ------------ | ---------------- | ------------
-| main (4.x) | ^4               | 7.1+
+| main (5.x)   | ^5 | ^6          | 8.0+
+| 4.x          | ^4               | 7.1+
 | 2.x          | ^2 | ^3          | 5.6+
 
 Note that all 3.x releases of consolidation/site-process were skipped simply to align the 4.x versions with Symfony 4.x support.

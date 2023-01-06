@@ -16,6 +16,7 @@ use Drupal\Tests\ckeditor5\Traits\SynchronizeCsrfTokenSeedTrait;
 use Drupal\Tests\media\Traits\MediaTypeCreationTrait;
 use Drupal\Tests\TestFileCreationTrait;
 use Drupal\user\RoleInterface;
+use Drupal\user\Entity\User;
 use Symfony\Component\Validator\ConstraintViolation;
 
 /**
@@ -73,7 +74,7 @@ class MediaEntityMetadataApiTest extends BrowserTestBase {
    *
    * @var \Drupal\user\Entity\User
    */
-  protected $adminUser;
+  protected User $adminUser;
 
   /**
    * @var \Drupal\Component\Uuid\UuidInterface
@@ -254,7 +255,7 @@ class MediaEntityMetadataApiTest extends BrowserTestBase {
     $this->assertSession()->statusCodeEquals(404);
 
     // Ensure that invalid UUID returns 400.
-    $this->drupalGet($path, ['query' => ['uuid' => '🦙', 'token' => $token]]);
+    $this->drupalGet($path, ['query' => ['uuid' => 'ðŸ¦™', 'token' => $token]]);
     $this->assertSession()->statusCodeEquals(400);
 
     // Ensure that users that don't have access to the filter format receive

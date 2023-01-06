@@ -10,22 +10,35 @@
  * Visual styles for fields.
  */
 
+/*
+ * Media query breakpoints.
+ * Processed by postcss/postcss-custom-media.
+ */
+
+/* Navigation related breakpoints */
+
+/* Grid related breakpoints */
+
+/* Grid shifts from 6 to 14 columns. */
+
+/* Width of the entire grid maxes out. */
+
 .field:not(:last-child) {
-  margin-bottom: 2.25rem;
+  margin-block-end: var(--sp2);
 }
 
 .node--view-mode-teaser .field {
-  margin-bottom: 1.125rem;
+  margin-block-end: var(--sp);
 }
 
 .node--view-mode-teaser .field:last-child {
-  margin-bottom: 0;
+  margin-block-end: 0;
 }
 
 @media (min-width: 62.5rem) {
 
   .node--view-mode-teaser .field {
-    margin-bottom: 2.25rem;
+    margin-block-end: var(--sp2);
   }
 }
 
@@ -33,9 +46,18 @@
   font-weight: bold;
 }
 
-[dir="ltr"] .field--label-inline .field__label,
-[dir="ltr"] .field--label-inline .field__items {
-  float: left;
+.field--label-inline .field__label,
+.field--label-inline .field__items {
+  float: left; /* LTR */
+
+  /**
+   * Chromium and Webkit do not yet support flow relative logical properties,
+   * such as float: inline-end. However, PostCSS Logical does not compile this
+   * value, so we accommodate by not using these.
+   *
+   * @see https://caniuse.com/mdn-css_properties_clear_flow_relative_values
+   * @see https://github.com/csstools/postcss-plugins/issues/632
+   */
 }
 
 [dir="rtl"] .field--label-inline .field__label,
@@ -43,16 +65,10 @@
   float: right;
 }
 
-[dir="ltr"] .field--label-inline .field__label,
-[dir="ltr"] .field--label-inline > .field__item,
-[dir="ltr"] .field--label-inline .field__items {
-  padding-right: 0.5em;
-}
-
-[dir="rtl"] .field--label-inline .field__label,
-[dir="rtl"] .field--label-inline > .field__item,
-[dir="rtl"] .field--label-inline .field__items {
-  padding-left: 0.5em;
+.field--label-inline .field__label,
+.field--label-inline > .field__item,
+.field--label-inline .field__items {
+  padding-inline-end: 0.5em;
 }
 
 .field--label-inline .field__label::after {

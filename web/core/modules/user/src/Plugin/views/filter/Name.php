@@ -21,7 +21,7 @@ class Name extends InOperator {
   /**
    * The validated exposed input.
    */
-  protected $validated_exposed_input;
+  protected array $validated_exposed_input;
 
   protected function valueForm(&$form, FormStateInterface $form_state) {
     $users = $this->value ? User::loadMultiple($this->value) : [];

@@ -19,7 +19,7 @@ class FieldUiLocalAction extends DeriverBase implements ContainerDeriverInterfac
   /**
    * The route provider to load routes by name.
    */
-  protected $routeProvider;
+  protected RouteProviderInterface $routeProvider;
 
   /**
    * The entity type manager.

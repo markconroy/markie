@@ -8,6 +8,7 @@ use Drupal\Core\Database\DatabaseAccessDeniedException;
 use Drupal\Core\Database\DatabaseNotFoundException;
 use Drupal\Core\Database\StatementInterface;
 use Drupal\Core\Database\StatementWrapper;
+use Drupal\Core\Database\SupportsTemporaryTablesInterface;
 
 // cSpell:ignore ilike nextval
 
@@ -19,7 +20,7 @@ use Drupal\Core\Database\StatementWrapper;
 /**
  * PostgreSQL implementation of \Drupal\Core\Database\Connection.
  */
-class Connection extends DatabaseConnection {
+class Connection extends DatabaseConnection implements SupportsTemporaryTablesInterface {
 
   /**
    * The name by which to obtain a lock for retrieve the next insert id.
@@ -38,11 +39,6 @@ class Connection extends DatabaseConnection {
    * PDOException message. It will need to get extracted.
    */
   const CONNECTION_FAILURE = '08006';
-
-  /**
-   * {@inheritdoc}
-   */
-  protected $statementClass = NULL;
 
   /**
    * {@inheritdoc}
@@ -218,7 +214,7 @@ class Connection extends DatabaseConnection {
    * {@inheritdoc}
    */
   public function queryTemporary($query, array $args = [], array $options = []) {
-    $tablename = $this->generateTemporaryTableName();
+    $tablename = 'db_temporary_' . uniqid();
     $this->query('CREATE TEMPORARY TABLE {' . $tablename . '} AS ' . $query, $args, $options);
     return $tablename;
   }

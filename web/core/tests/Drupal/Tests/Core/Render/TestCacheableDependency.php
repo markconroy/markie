@@ -9,8 +9,8 @@ use Drupal\Core\Cache\CacheableDependencyInterface;
  */
 class TestCacheableDependency implements CacheableDependencyInterface {
 
-  protected $contexts;
-  protected $tags;
+  protected array $contexts;
+  protected array $tags;
   protected $maxAge;
 
   public function __construct(array $contexts, array $tags, $max_age) {

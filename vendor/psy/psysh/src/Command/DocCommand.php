@@ -3,7 +3,7 @@
 /*
  * This file is part of Psy Shell.
  *
- * (c) 2012-2020 Justin Hileman
+ * (c) 2012-2022 Justin Hileman
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -14,6 +14,7 @@ namespace Psy\Command;
 use Psy\Formatter\DocblockFormatter;
 use Psy\Formatter\SignatureFormatter;
 use Psy\Input\CodeArgument;
+use Psy\Output\ShellOutput;
 use Psy\Reflection\ReflectionClassConstant;
 use Psy\Reflection\ReflectionConstant_;
 use Psy\Reflection\ReflectionLanguageConstruct;
@@ -59,6 +60,8 @@ HELP
 
     /**
      * {@inheritdoc}
+     *
+     * @return int 0 if everything went fine, or an exit code
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
@@ -169,9 +172,9 @@ HELP
      * yield Reflectors for the same-named method or property on all traits and
      * parent classes.
      *
-     * @return Generator a whole bunch of \Reflector instances
+     * @return \Generator a whole bunch of \Reflector instances
      */
-    private function getParentReflectors($reflector)
+    private function getParentReflectors($reflector): \Generator
     {
         $seenClasses = [];
 
@@ -242,9 +245,10 @@ HELP
     private function getManualDocById($id)
     {
         if ($db = $this->getApplication()->getManualDb()) {
-            return $db
-                ->query(\sprintf('SELECT doc FROM php_manual WHERE id = %s', $db->quote($id)))
-                ->fetchColumn(0);
+            $result = $db->query(\sprintf('SELECT doc FROM php_manual WHERE id = %s', $db->quote($id)));
+            if ($result !== false) {
+                return $result->fetchColumn(0);
+            }
         }
     }
 }

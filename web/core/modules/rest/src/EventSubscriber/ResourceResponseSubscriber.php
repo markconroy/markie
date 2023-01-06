@@ -100,7 +100,7 @@ class ResourceResponseSubscriber implements EventSubscriberInterface {
     $acceptable_formats = $request->isMethodCacheable() ? $acceptable_response_formats : $acceptable_request_formats;
 
     $requested_format = $request->getRequestFormat();
-    $content_type_format = $request->getContentType();
+    $content_type_format = $request->getContentTypeFormat();
 
     // If an acceptable response format is requested, then use that. Otherwise,
     // including and particularly when the client forgot to specify a response
@@ -200,7 +200,7 @@ class ResourceResponseSubscriber implements EventSubscriberInterface {
   /**
    * {@inheritdoc}
    */
-  public static function getSubscribedEvents() {
+  public static function getSubscribedEvents(): array {
     // Run before \Drupal\dynamic_page_cache\EventSubscriber\DynamicPageCacheSubscriber
     // (priority 100), so that Dynamic Page Cache can cache flattened responses.
     $events[KernelEvents::RESPONSE][] = ['onResponse', 128];

@@ -28,7 +28,7 @@ class RedirectResponseSubscriber implements EventSubscriberInterface {
   /**
    * The request context.
    */
-  protected $requestContext;
+  protected RequestContext $requestContext;
 
   /**
    * Constructs a RedirectResponseSubscriber object.
@@ -139,7 +139,7 @@ class RedirectResponseSubscriber implements EventSubscriberInterface {
    * @return array
    *   An array of event listener definitions.
    */
-  public static function getSubscribedEvents() {
+  public static function getSubscribedEvents(): array {
     $events[KernelEvents::RESPONSE][] = ['checkRedirectUrl'];
     return $events;
   }
