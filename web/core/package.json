@@ -56,7 +56,7 @@
     "@drupal/once": "1.0.x",
     "backbone": "1.4.x",
     "chokidar": "^3.3.1",
-    "ckeditor5": "~35.4.0",
+    "ckeditor5": "~36.0.0",
     "cspell": "^6.0.0",
     "dotenv-safe": "^8.2.0",
     "eslint": "^8.9.0",
