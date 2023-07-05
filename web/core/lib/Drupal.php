@@ -75,10 +75,20 @@ class Drupal {
   /**
    * The current system version.
    */
-  const VERSION = '10.0.2';
+  const VERSION = '10.1.0';
 
   /**
    * Core API compatibility.
+   *
+   * This constant is set to '8.x' to provide legacy compatibility with
+   * extensions that use the '8.x-' prefix to denote Drupal core major version
+   * compatibility, for example '8.x-1.0'. These extensions can specify
+   * compatibility with multiple major versions of Drupal core by setting the
+   * version constraint in 'core_version_requirement'. Drupal does not support
+   * using this core major version number prefix with versions greater than 8.
+   * For example '9.x-' prefixed extensions are not supported.
+   *
+   * @todo Remove or rename this constant in https://www.drupal.org/i/3085662
    */
   const CORE_COMPATIBILITY = '8.x';
 
@@ -555,10 +565,10 @@ class Drupal {
   }
 
   /**
-   * Returns the url generator service.
+   * Returns the URL generator service.
    *
    * @return \Drupal\Core\Routing\UrlGeneratorInterface
-   *   The url generator service.
+   *   The URL generator service.
    */
   public static function urlGenerator() {
     return static::getContainer()->get('url_generator');

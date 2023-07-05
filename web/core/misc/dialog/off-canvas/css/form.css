@@ -59,7 +59,7 @@
   font-size: 0.75rem;
 }
 
-#drupal-off-canvas-wrapper .form-required:after {
+#drupal-off-canvas-wrapper .form-required::after {
   content: "*";
 }
 
@@ -131,7 +131,6 @@
 }
 
 @media (forced-colors: active) {
-
   #drupal-off-canvas-wrapper select {
     -webkit-appearance: revert;
     appearance: revert;

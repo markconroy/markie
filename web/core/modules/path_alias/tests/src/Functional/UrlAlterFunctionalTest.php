@@ -6,7 +6,6 @@ use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Database\Database;
 use Drupal\Core\Url;
 use Drupal\Tests\BrowserTestBase;
-use Drupal\taxonomy\Entity\Term;
 use Drupal\Tests\Traits\Core\PathAliasTestTrait;
 
 /**
@@ -23,7 +22,7 @@ class UrlAlterFunctionalTest extends BrowserTestBase {
    *
    * @var array
    */
-  protected static $modules = ['path', 'forum', 'url_alter_test'];
+  protected static $modules = ['path', 'url_alter_test'];
 
   /**
    * {@inheritdoc}
@@ -68,22 +67,6 @@ class UrlAlterFunctionalTest extends BrowserTestBase {
     // Test a non-existent user is not altered.
     $uid++;
     $this->assertUrlOutboundAlter("/user/$uid", "/user/$uid");
-
-    // Test that 'forum' is altered to 'community' correctly, both at the root
-    // level and for a specific existing forum.
-    $this->drupalGet('community');
-    $this->assertSession()->pageTextContains('General discussion');
-    $this->assertUrlOutboundAlter('/forum', '/community');
-    $forum_vid = $this->config('forum.settings')->get('vocabulary');
-    $term_name = $this->randomMachineName();
-    $term = Term::create([
-      'name' => $term_name,
-      'vid' => $forum_vid,
-    ]);
-    $term->save();
-    $this->drupalGet("community/" . $term->id());
-    $this->assertSession()->pageTextContains($term_name);
-    $this->assertUrlOutboundAlter("/forum/" . $term->id(), "/community/" . $term->id());
 
     // Test outbound query string altering.
     $url = Url::fromRoute('user.login');

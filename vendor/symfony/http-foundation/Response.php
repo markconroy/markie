@@ -212,6 +212,11 @@ class Response
     ];
 
     /**
+     * Tracks headers already sent in informational responses.
+     */
+    private array $sentHeaders;
+
+    /**
      * @param int $status The HTTP status code (200 "OK" by default)
      *
      * @throws \InvalidArgumentException When the HTTP status code is not valid
@@ -326,20 +331,53 @@ class Response
     /**
      * Sends HTTP headers.
      *
+     * @param null|positive-int $statusCode The status code to use, override the statusCode property if set and not null
+     *
      * @return $this
      */
-    public function sendHeaders(): static
+    public function sendHeaders(/* int $statusCode = null */): static
     {
         // headers have already been sent by the developer
         if (headers_sent()) {
             return $this;
         }
 
+        $statusCode = \func_num_args() > 0 ? func_get_arg(0) : null;
+        $informationalResponse = $statusCode >= 100 && $statusCode < 200;
+        if ($informationalResponse && !\function_exists('headers_send')) {
+            // skip informational responses if not supported by the SAPI
+            return $this;
+        }
+
         // headers
         foreach ($this->headers->allPreserveCaseWithoutCookies() as $name => $values) {
-            $replace = 0 === strcasecmp($name, 'Content-Type');
-            foreach ($values as $value) {
+            $newValues = $values;
+            $replace = false;
+
+            // As recommended by RFC 8297, PHP automatically copies headers from previous 103 responses, we need to deal with that if headers changed
+            if (103 === $statusCode) {
+                $previousValues = $this->sentHeaders[$name] ?? null;
+                if ($previousValues === $values) {
+                    // Header already sent in a previous response, it will be automatically copied in this response by PHP
+                    continue;
+                }
+
+                $replace = 0 === strcasecmp($name, 'Content-Type');
+
+                if (null !== $previousValues && array_diff($previousValues, $values)) {
+                    header_remove($name);
+                    $previousValues = null;
+                }
+
+                $newValues = null === $previousValues ? $values : array_diff($values, $previousValues);
+            }
+
+            foreach ($newValues  as $value) {
                 header($name.': '.$value, $replace, $this->statusCode);
+            }
+
+            if ($informationalResponse) {
+                $this->sentHeaders[$name] = $values;
             }
         }
 
@@ -348,8 +386,16 @@ class Response
             header('Set-Cookie: '.$cookie, false, $this->statusCode);
         }
 
+        if ($informationalResponse) {
+            headers_send($statusCode);
+
+            return $this;
+        }
+
+        $statusCode ??= $this->statusCode;
+
         // status
-        header(sprintf('HTTP/%s %s %s', $this->version, $this->statusCode, $this->statusText), true, $this->statusCode);
+        header(sprintf('HTTP/%s %s %s', $this->version, $statusCode, $this->statusText), true, $statusCode);
 
         return $this;
     }
@@ -758,8 +804,10 @@ class Response
             return (int) $this->headers->getCacheControlDirective('max-age');
         }
 
-        if (null !== $this->getExpires()) {
-            return (int) $this->getExpires()->format('U') - (int) $this->getDate()->format('U');
+        if (null !== $expires = $this->getExpires()) {
+            $maxAge = (int) $expires->format('U') - (int) $this->getDate()->format('U');
+
+            return max($maxAge, 0);
         }
 
         return null;
@@ -835,7 +883,7 @@ class Response
      *
      * It returns null when no freshness information is present in the response.
      *
-     * When the responses TTL is <= 0, the response may not be served from cache without first
+     * When the response's TTL is 0, the response may not be served from cache without first
      * revalidating with the origin.
      *
      * @final
@@ -844,7 +892,7 @@ class Response
     {
         $maxAge = $this->getMaxAge();
 
-        return null !== $maxAge ? $maxAge - $this->getAge() : null;
+        return null !== $maxAge ? max($maxAge - $this->getAge(), 0) : null;
     }
 
     /**

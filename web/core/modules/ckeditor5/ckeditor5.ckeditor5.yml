@@ -263,6 +263,7 @@ ckeditor5_codeBlock:
     label: Code Block
     library: ckeditor5/internal.drupal.ckeditor5.codeBlock
     admin_library: ckeditor5/internal.admin.codeBlock
+    class: Drupal\ckeditor5\Plugin\CKEditor5Plugin\CodeBlock
     toolbar_items:
       codeBlock:
         label: Code Block
@@ -440,6 +441,15 @@ ckeditor5_alignment:
     elements:
       - <$text-container class="text-align-left text-align-center text-align-right text-align-justify">
 
+ckeditor5_autoformat:
+  ckeditor5:
+    plugins:
+      - autoformat.Autoformat
+  drupal:
+    label: Autoformat
+    library: core/ckeditor5.autoformat
+    elements: false
+
 ckeditor5_removeFormat:
   ckeditor5:
     plugins: [removeFormat.RemoveFormat]
@@ -548,7 +558,7 @@ ckeditor5_imageResize:
       - image.ImageResize
     config:
       image:
-        resizeUnit: '%'
+        resizeUnit: 'px'
         resizeOptions:
           -
             name: 'resizeImage:original'
@@ -742,7 +752,6 @@ media_library_mediaLibrary:
         dialogSettings:
           height: 75%
           dialogClass: media-library-widget-modal
-          title: Add or select media
   drupal:
     label: Media Library
     elements: false

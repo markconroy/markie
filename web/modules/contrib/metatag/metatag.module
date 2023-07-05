@@ -7,6 +7,7 @@
 
 use Drupal\Component\Plugin\Exception\PluginNotFoundException;
 use Drupal\Component\Plugin\Factory\DefaultFactory;
+use Drupal\Component\Serialization\Json;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 use Drupal\Core\Entity\EntityInterface;
@@ -39,7 +40,7 @@ function metatag_help($route_name, RouteMatchInterface $route_match) {
       $output = '<h2>' . (string) new TranslatableMarkup('About') . '</h2>';
       $output .= '<p>' . (string) new TranslatableMarkup('This module allows a site to automatically provide structured metadata, aka "meta tags", about the site and individual pages.');
       $output .= '<p>' . (string) new TranslatableMarkup('In the context of search engine optimization, providing an extensive set of meta tags may help improve the site\'s and pages\' rankings, thus may aid with achieving a more prominent display of the content within search engine results. They can also be used to tailor how content is displayed when shared on social networks. For additional information, see the <a href=":online">online documentation for Metatag</a>.', [':online' => 'https://www.drupal.org/node/1774342']) . '</p>';
-      $output .= '<h3>' . (string) new TranslatableMarkup('Intended worflow') . '</h3>';
+      $output .= '<h3>' . (string) new TranslatableMarkup('Intended workflow') . '</h3>';
       $output .= '<p>' . (string) new TranslatableMarkup('The module uses <a href=":tokens">"tokens"</a> to automatically fill in values for different meta tags. Specific values may also be filled in.', [':tokens' => Url::fromRoute('help.page', ['name' => 'token'])->toString()]) . '</p>';
       $output .= '<p>' . (string) new TranslatableMarkup('The best way of using Metatag is as follows:') . '</p>';
       $output .= '<ol>';
@@ -461,10 +462,12 @@ function metatag_preprocess_html(&$variables) {
   if (!empty($metatag_attachments['#attached']['html_head'])) {
     foreach ($metatag_attachments['#attached']['html_head'] as $attachment) {
       if (!empty($attachment[1]) && $attachment[1] == 'title') {
-        // Empty head_title to avoid the site name and slogan to be appended to
-        // the meta title.
-        $variables['head_title'] = [];
-        $variables['head_title']['title'] = html_entity_decode($attachment[0]['#attributes']['content'], ENT_QUOTES);
+        if (!empty($attachment[0]['#attributes']['content'])) {
+          // Empty head_title to avoid the site name and slogan being appended
+          // to the meta title.
+          $variables['head_title'] = [];
+          $variables['head_title']['title'] = html_entity_decode($attachment[0]['#attributes']['content'], ENT_QUOTES);
+        }
 
         // No need to do anything else after this.
         break;
@@ -480,6 +483,7 @@ function metatag_preprocess_html(&$variables) {
  *   Array of meta tags or NULL.
  */
 function metatag_get_tags_from_route($entity = NULL) {
+  /** @var \Drupal\metatag\MetatagManager $metatag_manager */
   $metatag_manager = \Drupal::service('metatag.manager');
 
   // First, get defaults.
@@ -619,15 +623,69 @@ function metatag_entity_base_field_info(EntityTypeInterface $entity_type) {
 /**
  * Turn the meta tags for an entity into a human readable structure.
  *
- * @param object $entity
+ * @param object|null $entity
+ *   The entity object. May be skipped by passing NULL as the argument, which
+ *   defers to loading the current route's entity; this is an unintended
+ *   consequence of the function's poor definition.
+ *
+ * @return array
+ *   All of the meta tags in a nested structure.
+ *
+ * @deprecated in metatag:8.x-1.23 and is removed from metatag:2.0.0. Use metatag_generate_entity_all_tags() instead; note that callers should always pass the entity to metatag_generate_entity_all_tags(), which is different from the behavior of metatag_generate_entity_metatags().
+ *
+ * @see https://www.drupal.org/node/3332350
+ */
+function metatag_generate_entity_metatags($entity) {
+  // For backwards compatibility.
+  if (empty($entity)) {
+    $entity = metatag_get_route_entity();
+  }
+  // This is tecnnical a backwards compatibility break, but the "spirit" of this
+  // function was that it was always intended to be used on content entities.
+  if (!($entity instanceof ContentEntityInterface)) {
+    return [];
+  }
+  // Defer to the replacement function.
+  return metatag_generate_entity_all_tags($entity);
+}
+
+/**
+ * Turn the meta tags for an entity into a human readable structure.
+ *
+ * @param \Drupal\Core\Entity\ContentEntityInterface $entity
  *   The entity object.
  *
  * @return array
  *   All of the meta tags in a nested structure.
  */
-function metatag_generate_entity_metatags($entity) {
+function metatag_generate_entity_all_tags(ContentEntityInterface $entity): array {
   $values = [];
   $raw = metatag_get_tags_from_route($entity);
+  if (!empty($raw['#attached']['html_head'])) {
+    foreach ($raw['#attached']['html_head'] as $tag) {
+      $values[$tag[1]] = $tag[0];
+    }
+  }
+  return $values;
+}
+
+/**
+ * Turn the meta tags for an entity into a human readable structure.
+ *
+ * @param \Drupal\Core\Entity\ContentEntityInterface $entity
+ *   The entity object.
+ *
+ * @return array
+ *   The meta tags overridden on this entity in a nested structure.
+ */
+function metatag_generate_entity_overrides(ContentEntityInterface $entity): array {
+  $values = [];
+  $metatag_manager = \Drupal::service('metatag.manager');
+  $metatags = [];
+  foreach ($metatag_manager->tagsFromEntity($entity) as $tag => $data) {
+    $metatags[$tag] = $data;
+  }
+  $raw = $metatag_manager->generateElements($metatags, $entity);
   if (!empty($raw['#attached']['html_head'])) {
     foreach ($raw['#attached']['html_head'] as $tag) {
       $values[$tag[1]] = $tag[0];
@@ -964,4 +1022,54 @@ function _metatag_is_migration_plugin_supported(array $definition) {
   // If this stage is reached then this is a supported core migration and the
   // Metatag migration will be automatically handled.
   return TRUE;
+}
+
+/**
+ * Decode the different versions of encoded values supported by Metatag.
+ *
+ * Metatag v1 stored data in serialized arrays. Metatag v2 stores data in
+ * JSON-encoded strings.
+ *
+ * @param string $string
+ *   The string to decode.
+ *
+ * @return array
+ *   A Metatag values array.
+ */
+function metatag_data_decode($string): array {
+  $data = [];
+
+  // Serialized arrays from Metatag v1.
+  if (substr($string, 0, 2) === 'a:') {
+    $data = @unserialize($string, ['allowed_classes' => FALSE]);
+  }
+
+  // Encoded JSON from Metatag v2.
+  elseif (substr($string, 0, 2) === '{"') {
+    // @todo Handle non-array responses.
+    $data = Json::decode($string);
+  }
+
+  // This is expected to be an array, so if it isn't then convert it to one.
+  if (!is_array($data)) {
+    $data = [];
+  }
+
+  return $data;
+}
+
+/**
+ * Encode the data for storing in a Metatag field.
+ *
+ * By abstracting to this function each version of Metatag can use the method
+ * that is appropriate for it.
+ *
+ * @param array $data
+ *   A Metatag values array.
+ *
+ * @return string
+ *   The meta tag data encoded as a JSON string.
+ */
+function metatag_data_encode(array $data = []): string {
+  return serialize($data);
 }

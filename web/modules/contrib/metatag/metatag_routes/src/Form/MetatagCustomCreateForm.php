@@ -144,7 +144,9 @@ class MetatagCustomCreateForm extends FormBase {
       }
 
       // Validate that the route doesn't have metatags created already.
-      $ids = $this->entityTypeManager->getStorage('metatag_defaults')->getQuery()->condition('id', $route_name)->execute();
+      $ids = $this->entityTypeManager->getStorage('metatag_defaults')->getQuery()
+        ->accessCheck(FALSE)
+        ->condition('id', $route_name)->execute();
       if ($ids) {
         $form_state->setErrorByName('metatag_url',
           $this->t('There are already metatags created for this route.'));

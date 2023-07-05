@@ -232,20 +232,16 @@ class MetatagManager implements MetatagManagerInterface {
     // Pull the data from the definitions into a new array.
     $groups = [];
     foreach ($metatag_groups as $group_name => $group_info) {
-      $groups[$group_name]['id'] = $group_info['id'];
+      $groups[$group_name] = $group_info;
       $groups[$group_name]['label'] = $group_info['label']->render();
       $groups[$group_name]['description'] = $group_info['description'] ?? '';
-      $groups[$group_name]['weight'] = $group_info['weight'];
     }
 
-    // Create the 'sort by' array.
-    $sort_by = [];
-    foreach ($groups as $group) {
-      $sort_by[] = $group['weight'];
-    }
-
-    // Sort the groups by weight.
-    array_multisort($sort_by, SORT_ASC, $groups);
+    // Sort the tag groups.
+    uasort($groups, [
+      'Drupal\Component\Utility\SortArray',
+      'sortByWeightElement',
+    ]);
 
     return $groups;
   }
@@ -259,23 +255,28 @@ class MetatagManager implements MetatagManagerInterface {
     // Pull the data from the definitions into a new array.
     $tags = [];
     foreach ($metatag_tags as $tag_name => $tag_info) {
-      $tags[$tag_name]['id'] = $tag_info['id'];
-      $tags[$tag_name]['label'] = $tag_info['label']->render();
-      $tags[$tag_name]['group'] = $tag_info['group'];
-      $tags[$tag_name]['weight'] = $tag_info['weight'];
+      $tags[$tag_info['group']][$tag_name] = $tag_info;
+      $tags[$tag_info['group']][$tag_name]['label'] = $tag_info['label']->render();
     }
 
-    // Create the 'sort by' array.
-    $sort_by = [];
-    foreach ($tags as $key => $tag) {
-      $sort_by['group'][$key] = $tag['group'];
-      $sort_by['weight'][$key] = $tag['weight'];
+    // Sort the tags based on the group.
+    $sorted_tags = [];
+    foreach ($this->sortedGroups() as $group_name => $group) {
+      $tag_weight = $group['weight'] * 100;
+
+      // First, sort the tags within the group according to the original sort
+      // order provided by the tag's definition.
+      uasort($tags[$group_name], [
+        'Drupal\Component\Utility\SortArray',
+        'sortByWeightElement',
+      ]);
+      foreach ($tags[$group_name] as $tag_name => $tag_info) {
+        $tag_info['weight'] = $tag_weight++;
+        $sorted_tags[$tag_name] = $tag_info;
+      }
     }
 
-    // Sort the tags by weight.
-    array_multisort($sort_by['group'], SORT_ASC, $sort_by['weight'], SORT_ASC, $tags);
-
-    return $tags;
+    return $sorted_tags;
   }
 
   /**
@@ -411,12 +412,14 @@ class MetatagManager implements MetatagManagerInterface {
       $serialized_value = $item->get('value')->getValue();
       if (!empty($serialized_value)) {
         $new_tags = unserialize($serialized_value);
-        if (!empty($new_tags)) {
-          if (is_array($new_tags)) {
-            $tags += $new_tags;
-          }
-          else {
-            $this->logger->error("This was expected to be an array but it is not: \n%value", ['%value' => print_r($new_tags, TRUE)]);
+        if ($new_tags !== FALSE) {
+          if (!empty($new_tags)) {
+            if (is_array($new_tags)) {
+              $tags += $new_tags;
+            }
+            else {
+              $this->logger->error("This was expected to be an array but it is not: \n%value", ['%value' => print_r($new_tags, TRUE)]);
+            }
           }
         }
         else {
@@ -571,7 +574,6 @@ class MetatagManager implements MetatagManagerInterface {
     // Prepare any tokens that might exist.
     $token_replacements = [];
     if ($entity) {
-
       // @todo This needs a better way of discovering the context.
       if ($entity instanceof ViewEntityInterface) {
         // Views tokens require the ViewExecutable, not the config entity.
@@ -582,8 +584,6 @@ class MetatagManager implements MetatagManagerInterface {
         $token_replacements = [$entity->getEntityTypeId() => $entity];
       }
     }
-    $rawTags = [];
-    $metatag_tags = $this->tagPluginManager->getDefinitions();
 
     // Use the entity's language code, if one is defined.
     $langcode = NULL;
@@ -591,13 +591,11 @@ class MetatagManager implements MetatagManagerInterface {
       $langcode = $entity->language()->getId();
     }
 
-    // Order metatags based on the group and weight.
-    $group = array_column($metatag_tags, 'group');
-    $weight = array_column($metatag_tags, 'weight');
-    array_multisort($group, SORT_ASC, $weight, SORT_ASC, $metatag_tags);
+    $definitions = $this->sortedTags();
 
+    // Sort the meta tags so they are rendered in the correct order.
     $ordered_tags = [];
-    foreach ($metatag_tags as $id => $metatag) {
+    foreach ($definitions as $id => $metatag) {
       if (isset($tags[$id])) {
         $ordered_tags[$id] = $tags[$id];
       }
@@ -605,9 +603,10 @@ class MetatagManager implements MetatagManagerInterface {
 
     // Each element of the $values array is a tag with the tag plugin name as
     // the key.
+    $rawTags = [];
     foreach ($ordered_tags as $tag_name => $value) {
       // Check to ensure there is a matching plugin.
-      if (isset($metatag_tags[$tag_name])) {
+      if (isset($definitions[$tag_name])) {
         // Get an instance of the plugin.
         $tag = $this->tagPluginManager->createInstance($tag_name);
 
@@ -661,7 +660,7 @@ class MetatagManager implements MetatagManagerInterface {
     $entity_identifier = '_none';
     if ($entity) {
       $entity_identifier = $entity->getEntityTypeId() . ':' . ($entity->uuid() ?? $entity->id()) . ':' . $entity->language()
-          ->getId();
+        ->getId();
     }
 
     // Use the entity's language code, if one is defined.
@@ -671,7 +670,7 @@ class MetatagManager implements MetatagManagerInterface {
     }
 
     if (!isset($this->processedTokenCache[$entity_identifier])) {
-      $metatag_tags = $this->tagPluginManager->getDefinitions();
+      $metatag_tags = $this->sortedTags();
 
       // Each element of the $values array is a tag with the tag plugin name as
       // the key.

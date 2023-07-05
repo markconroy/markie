@@ -23,32 +23,28 @@ class AttributeMetadata implements AttributeMetadataInterface
      *           class' serialized representation. Do not access it. Use
      *           {@link getName()} instead.
      */
-    public $name;
+    public string $name;
 
     /**
      * @internal This property is public in order to reduce the size of the
      *           class' serialized representation. Do not access it. Use
      *           {@link getGroups()} instead.
      */
-    public $groups = [];
+    public array $groups = [];
 
     /**
-     * @var int|null
-     *
      * @internal This property is public in order to reduce the size of the
      *           class' serialized representation. Do not access it. Use
      *           {@link getMaxDepth()} instead.
      */
-    public $maxDepth;
+    public ?int $maxDepth = null;
 
     /**
-     * @var string|null
-     *
      * @internal This property is public in order to reduce the size of the
      *           class' serialized representation. Do not access it. Use
      *           {@link getSerializedName()} instead.
      */
-    public $serializedName;
+    public ?string $serializedName = null;
 
     /**
      * @internal This property is public in order to reduce the size of the
@@ -58,13 +54,11 @@ class AttributeMetadata implements AttributeMetadataInterface
     public ?PropertyPath $serializedPath = null;
 
     /**
-     * @var bool
-     *
      * @internal This property is public in order to reduce the size of the
      *           class' serialized representation. Do not access it. Use
      *           {@link isIgnored()} instead.
      */
-    public $ignore = false;
+    public bool $ignore = false;
 
     /**
      * @var array[] Normalization contexts per group name ("*" applies to all groups)
@@ -73,7 +67,7 @@ class AttributeMetadata implements AttributeMetadataInterface
      *           class' serialized representation. Do not access it. Use
      *           {@link getNormalizationContexts()} instead.
      */
-    public $normalizationContexts = [];
+    public array $normalizationContexts = [];
 
     /**
      * @var array[] Denormalization contexts per group name ("*" applies to all groups)
@@ -82,7 +76,7 @@ class AttributeMetadata implements AttributeMetadataInterface
      *           class' serialized representation. Do not access it. Use
      *           {@link getDenormalizationContexts()} instead.
      */
-    public $denormalizationContexts = [];
+    public array $denormalizationContexts = [];
 
     public function __construct(string $name)
     {
@@ -94,7 +88,7 @@ class AttributeMetadata implements AttributeMetadataInterface
         return $this->name;
     }
 
-    public function addGroup(string $group)
+    public function addGroup(string $group): void
     {
         if (!\in_array($group, $this->groups)) {
             $this->groups[] = $group;
@@ -106,7 +100,7 @@ class AttributeMetadata implements AttributeMetadataInterface
         return $this->groups;
     }
 
-    public function setMaxDepth(?int $maxDepth)
+    public function setMaxDepth(?int $maxDepth): void
     {
         $this->maxDepth = $maxDepth;
     }
@@ -116,7 +110,7 @@ class AttributeMetadata implements AttributeMetadataInterface
         return $this->maxDepth;
     }
 
-    public function setSerializedName(string $serializedName = null)
+    public function setSerializedName(string $serializedName = null): void
     {
         if (1 > \func_num_args()) {
             trigger_deprecation('symfony/serializer', '6.2', 'Calling "%s()" without any arguments is deprecated, pass null explicitly instead.', __METHOD__);
@@ -140,7 +134,7 @@ class AttributeMetadata implements AttributeMetadataInterface
         return $this->serializedPath;
     }
 
-    public function setIgnore(bool $ignore)
+    public function setIgnore(bool $ignore): void
     {
         $this->ignore = $ignore;
     }
@@ -202,7 +196,7 @@ class AttributeMetadata implements AttributeMetadataInterface
         }
     }
 
-    public function merge(AttributeMetadataInterface $attributeMetadata)
+    public function merge(AttributeMetadataInterface $attributeMetadata): void
     {
         foreach ($attributeMetadata->getGroups() as $group) {
             $this->addGroup($group);

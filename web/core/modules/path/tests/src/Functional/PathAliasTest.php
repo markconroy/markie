@@ -7,8 +7,7 @@ use Drupal\Core\Database\Database;
 use Drupal\Core\Url;
 
 /**
- * Add, edit, delete, and change alias and verify its consistency in the
- * database.
+ * Tests modifying path aliases from the UI.
  *
  * @group path
  */
@@ -175,14 +174,10 @@ class PathAliasTest extends PathTestBase {
     $edit['path[0][value]'] = '/node/' . $node1->id();
     $alias = '/' . $this->randomMachineName(128);
     $edit['alias[0][value]'] = $alias;
-    // The alias is shortened to 50 characters counting the ellipsis.
-    $truncated_alias = substr($alias, 0, 47);
     $this->drupalGet('admin/config/search/path/add');
     $this->submitForm($edit, 'Save');
-    // The untruncated alias should not be found.
-    $this->assertSession()->pageTextNotContains($alias);
-    // The 'truncated' alias will always be found.
-    $this->assertSession()->pageTextContains($truncated_alias);
+    // The alias will always be found.
+    $this->assertSession()->pageTextContains($alias);
 
     // Create third test node.
     $node3 = $this->drupalCreateNode();

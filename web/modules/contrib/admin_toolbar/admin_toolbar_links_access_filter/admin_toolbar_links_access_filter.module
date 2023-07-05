@@ -74,8 +74,8 @@ function admin_toolbar_links_access_filter_filter_non_accessible_links(array &$i
         // Do not filter external URL at all.
         continue;
       }
-      $route_name = $original_link->getRouteName();
-      $route_params = $original_link->getRouteParameters();
+      $route_name = $original_link->getRouteName() ?: $original_link->getUrlObject()->getRouteName();
+      $route_params = $original_link->getRouteParameters() ?: $original_link->getUrlObject()->getRouteParameters();
     }
     elseif (!empty($item['url'])) {
       /** @var \Drupal\Core\Url $url */
@@ -170,13 +170,16 @@ function admin_toolbar_links_access_filter_user_has_admin_role(AccountInterface 
   static $user_has_admin_role = [];
   $uid = $account->id();
   if (!isset($user_has_admin_role[$uid])) {
+    $user_has_admin_role[$uid] = FALSE;
     $roles = Role::loadMultiple($account->getRoles());
-    foreach ($roles as $role) {
-      if ($role->isAdmin()) {
-        $user_has_admin_role[$uid] = TRUE;
-        break;
+    // It is possible for a user account to have no roles assigned.
+    if (!empty($roles)) {
+      foreach ($roles as $role) {
+        if ($role->isAdmin()) {
+          $user_has_admin_role[$uid] = TRUE;
+          break;
+        }
       }
-      $user_has_admin_role[$uid] = FALSE;
     }
   }
   return $user_has_admin_role[$uid];

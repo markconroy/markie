@@ -44,9 +44,10 @@
             '.table-filter-text-source, .module-name, .module-description',
           );
           let sourcesConcat = '';
-          // Concatenate the textContent of the elements in the row.
+          // Concatenate the textContent of the elements in the row, with a
+          // space in between.
           sources.forEach((item) => {
-            sourcesConcat += item.textContent;
+            sourcesConcat += ` ${item.textContent}`;
           });
           const textMatch = sourcesConcat.search(re) !== -1;
           $(row).closest('tr').toggle(textMatch);
@@ -71,9 +72,11 @@
           $details.attr('open', true).each(hidePackageDetails);
 
           Drupal.announce(
-            Drupal.t('!modules modules are available in the modified list.', {
-              '!modules': $rowsAndDetails.find('tbody tr:visible').length,
-            }),
+            Drupal.formatPlural(
+              $rowsAndDetails.filter('tbody tr:visible').length,
+              '1 module is available in the modified list.',
+              '@count modules are available in the modified list.',
+            ),
           );
         } else if (searching) {
           searching = false;

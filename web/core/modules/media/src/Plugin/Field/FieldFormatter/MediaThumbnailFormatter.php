@@ -116,14 +116,11 @@ class MediaThumbnailFormatter extends ImageFormatter {
   public function settingsSummary() {
     $summary = parent::settingsSummary();
 
-    $link_types = [
-      'content' => $this->t('Linked to content'),
-      'media' => $this->t('Linked to media item'),
-    ];
-    // Display this setting only if image is linked.
-    $image_link_setting = $this->getSetting('image_link');
-    if (isset($link_types[$image_link_setting])) {
-      $summary[] = $link_types[$image_link_setting];
+    // The parent class adds summary text if the image_link setting is
+    // 'content'. Here we only have to add summary text if the setting
+    // is 'media'.
+    if ($this->getSetting('image_link') === 'media') {
+      $summary[] = $this->t('Linked to media item');
     }
 
     return $summary;
@@ -148,7 +145,9 @@ class MediaThumbnailFormatter extends ImageFormatter {
       $elements[$delta] = [
         '#theme' => 'image_formatter',
         '#item' => $media->get('thumbnail')->first(),
-        '#item_attributes' => [],
+        '#item_attributes' => [
+          'loading' => $this->getSetting('image_loading')['attribute'],
+        ],
         '#image_style' => $this->getSetting('image_style'),
         '#url' => $this->getMediaThumbnailUrl($media, $items->getEntity()),
       ];
@@ -172,6 +171,14 @@ class MediaThumbnailFormatter extends ImageFormatter {
     // This formatter is only available for entity types that reference
     // media items.
     return ($field_definition->getFieldStorageDefinition()->getSetting('target_type') == 'media');
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function checkAccess(EntityInterface $entity) {
+    return $entity->access('view', NULL, TRUE)
+      ->andIf(parent::checkAccess($entity));
   }
 
   /**

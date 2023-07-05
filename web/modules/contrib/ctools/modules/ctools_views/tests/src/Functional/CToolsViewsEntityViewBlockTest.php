@@ -191,6 +191,7 @@ class CToolsViewsEntityViewBlockTest extends UITestBase {
     // Add block to sidebar_first region with default settings.
     $this->submitForm([
       'region' => $block['region'],
+      'id' => 'views_block__ctools_views_entity_test_block_filter_text',
     ], 'Save block');
     // @todo Remove this after debugging.
     $this->assertSession()->pageTextContains('The block configuration has been saved.');
@@ -281,6 +282,7 @@ class CToolsViewsEntityViewBlockTest extends UITestBase {
     // Add block to sidebar_first region with default settings.
     $this->submitForm([
       'region' => $block['region'],
+      'id' => 'views_block__ctools_views_entity_test_block_filter_text_grouped',
     ], 'Save block');
 
     // Assert configure_filters default settings.
@@ -351,6 +353,7 @@ class CToolsViewsEntityViewBlockTest extends UITestBase {
     // Add block to sidebar_first region with default settings.
     $edit = [];
     $edit['region'] = 'sidebar_first';
+    $edit['id'] = 'views_block__ctools_views_entity_test_block_filter_tax';
     $this->drupalGet('admin/structure/block/add/views_block:ctools_views_entity_test-block_filter_tax/' . $default_theme);
     $this->submitForm($edit, 'Save block');
 
@@ -395,6 +398,7 @@ class CToolsViewsEntityViewBlockTest extends UITestBase {
     // Add block to sidebar_first region with default settings.
     $edit = [];
     $edit['region'] = 'sidebar_first';
+    $edit['id'] = 'views_block__ctools_views_entity_test_block_filter_auto';
     $this->drupalGet('admin/structure/block/add/views_block:ctools_views_entity_test-block_filter_auto/' . $default_theme);
     $this->submitForm($edit, 'Save block');
 
@@ -439,6 +443,7 @@ class CToolsViewsEntityViewBlockTest extends UITestBase {
     // Add block to sidebar_first region with default settings.
     $edit = [];
     $edit['region'] = 'sidebar_first';
+    $edit['id'] = 'views_block__ctools_views_entity_test_block_filter_list';
     $this->drupalGet('admin/structure/block/add/views_block:ctools_views_entity_test-block_filter_list/' . $default_theme);
     $this->submitForm($edit, 'Save block');
 
@@ -478,6 +483,7 @@ class CToolsViewsEntityViewBlockTest extends UITestBase {
     // Add block to sidebar_first region with default settings.
     $edit = [];
     $edit['region'] = 'sidebar_first';
+    $edit['id'] = 'views_block__ctools_views_entity_test_block_filter_date';
     $this->drupalGet('admin/structure/block/add/views_block:ctools_views_entity_test-block_filter_date/' . $default_theme);
     $this->submitForm($edit, 'Save block');
 

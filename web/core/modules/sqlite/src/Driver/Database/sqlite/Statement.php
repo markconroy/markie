@@ -2,8 +2,8 @@
 
 namespace Drupal\sqlite\Driver\Database\sqlite;
 
-use Drupal\Core\Database\StatementPrefetch;
 use Drupal\Core\Database\StatementInterface;
+use Drupal\Core\Database\StatementPrefetchIterator;
 
 /**
  * SQLite implementation of \Drupal\Core\Database\Statement.
@@ -14,7 +14,7 @@ use Drupal\Core\Database\StatementInterface;
  * user-space mock of PDOStatement that buffers all the data and doesn't
  * have those limitations.
  */
-class Statement extends StatementPrefetch implements StatementInterface {
+class Statement extends StatementPrefetchIterator implements StatementInterface {
 
   /**
    * {@inheritdoc}
@@ -26,7 +26,7 @@ class Statement extends StatementPrefetch implements StatementInterface {
    *
    * See http://bugs.php.net/bug.php?id=45259 for more details.
    */
-  protected function getStatement($query, &$args = []) {
+  protected function getStatement(string $query, ?array &$args = []): object {
     if (is_array($args) && !empty($args)) {
       // Check if $args is a simple numeric array.
       if (range(0, count($args) - 1) === array_keys($args)) {
@@ -79,7 +79,7 @@ class Statement extends StatementPrefetch implements StatementInterface {
       }
     }
 
-    return $this->pdoConnection->prepare($query);
+    return $this->clientConnection->prepare($query);
   }
 
   /**
@@ -104,45 +104,6 @@ class Statement extends StatementPrefetch implements StatementInterface {
         // Rethrow the exception.
         throw $e;
       }
-    }
-
-    // In some weird cases, SQLite will prefix some column names by the name
-    // of the table. We post-process the data, by renaming the column names
-    // using the same convention as MySQL and PostgreSQL.
-    $rename_columns = [];
-    foreach ($this->columnNames as $k => $column) {
-      // In some SQLite versions, SELECT DISTINCT(field) will return "(field)"
-      // instead of "field".
-      if (preg_match("/^\((.*)\)$/", $column, $matches)) {
-        $rename_columns[$column] = $matches[1];
-        $this->columnNames[$k] = $matches[1];
-        $column = $matches[1];
-      }
-
-      // Remove "table." prefixes.
-      if (preg_match("/^.*\.(.*)$/", $column, $matches)) {
-        $rename_columns[$column] = $matches[1];
-        $this->columnNames[$k] = $matches[1];
-      }
-    }
-    if ($rename_columns) {
-      // DatabaseStatementPrefetch already extracted the first row,
-      // put it back into the result set.
-      if (isset($this->currentRow)) {
-        $this->data[0] = &$this->currentRow;
-      }
-
-      // Then rename all the columns across the result set.
-      foreach ($this->data as $k => $row) {
-        foreach ($rename_columns as $old_column => $new_column) {
-          $this->data[$k][$new_column] = $this->data[$k][$old_column];
-          unset($this->data[$k][$old_column]);
-        }
-      }
-
-      // Finally, extract the first row again.
-      $this->currentRow = $this->data[0];
-      unset($this->data[0]);
     }
 
     return $return;

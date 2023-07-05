@@ -338,7 +338,7 @@ class NodeTranslationUITest extends ContentTranslationUITestBase {
     $display['display_options']['rendering_language'] = '***LANGUAGE_entity_translation***';
     $view->save();
 
-    // Need to check from the beginning, including the base_path, in the url
+    // Need to check from the beginning, including the base_path, in the URL
     // since the pattern for the default language might be a substring of
     // the strings for other languages.
     $base_path = base_path();
@@ -575,6 +575,28 @@ class NodeTranslationUITest extends ContentTranslationUITestBase {
     $markup = 'Image <span class="translation-entity-all-languages">(all languages)</span>';
     $this->assertSession()->assertNoEscaped($markup);
     $this->assertSession()->responseContains($markup);
+  }
+
+  /**
+   * Test that when content is language neutral, it uses interface language.
+   *
+   * When language neutral content is displayed on interface language, it should
+   * consider the interface language for creating the content link.
+   */
+  public function testUrlPrefixOnLanguageNeutralContent() {
+    $this->drupalLogin($this->administrator);
+    $neutral_langcodes = [
+      LanguageInterface::LANGCODE_NOT_APPLICABLE,
+      LanguageInterface::LANGCODE_NOT_SPECIFIED,
+    ];
+    foreach ($neutral_langcodes as $langcode) {
+      $article = $this->drupalCreateNode(['type' => 'article', 'langcode' => $langcode]);
+      $this->drupalGet("{$this->langcodes[1]}/admin/content");
+      $this->assertSession()->linkByHrefExists("{$this->langcodes[1]}/node/{$article->id()}");
+
+      $this->drupalGet("{$this->langcodes[2]}/admin/content");
+      $this->assertSession()->linkByHrefExists("{$this->langcodes[2]}/node/{$article->id()}");
+    }
   }
 
 }

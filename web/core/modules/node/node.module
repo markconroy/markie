@@ -32,6 +32,7 @@ use Drupal\node\Entity\NodeType;
 use Drupal\node\NodeInterface;
 use Drupal\node\NodeTypeInterface;
 use Drupal\user\UserInterface;
+use Drupal\node\Form\NodePreviewForm;
 
 /**
  * Implements hook_help().
@@ -40,7 +41,7 @@ function node_help($route_name, RouteMatchInterface $route_match) {
   // Remind site administrators about the {node_access} table being flagged
   // for rebuild. We don't need to issue the message on the confirm form, or
   // while the rebuild is being processed.
-  if ($route_name != 'node.configure_rebuild_confirm' && $route_name != 'system.batch_page.normal' && $route_name != 'help.page.node' && $route_name != 'help.main'
+  if ($route_name != 'node.configure_rebuild_confirm' && $route_name != 'system.batch_page.html' && $route_name != 'help.page.node' && $route_name != 'help.main'
     && \Drupal::currentUser()->hasPermission('access administration pages') && node_access_needs_rebuild()) {
     if ($route_name == 'system.status') {
       $message = t('The content access permissions need to be rebuilt.');
@@ -178,6 +179,17 @@ function node_title_list(StatementInterface $result, $title = NULL) {
 }
 
 /**
+ * Implements hook_local_tasks_alter().
+ */
+function node_local_tasks_alter(&$local_tasks): void {
+  // Removes 'Revisions' local task added by deriver. Local task
+  // 'entity.node.version_history' will be replaced by
+  // 'entity.version_history:node.version_history' after
+  // https://www.drupal.org/project/drupal/issues/3153559.
+  unset($local_tasks['entity.version_history:node.version_history']);
+}
+
+/**
  * Determines the type of marker to be displayed for a given node.
  *
  * @param int $nid
@@ -266,7 +278,10 @@ function node_add_body_field(NodeTypeInterface $type, $label = 'Body') {
       'field_storage' => $field_storage,
       'bundle' => $type->id(),
       'label' => $label,
-      'settings' => ['display_summary' => TRUE],
+      'settings' => [
+        'display_summary' => TRUE,
+        'allowed_formats' => [],
+      ],
     ]);
     $field->save();
 
@@ -332,8 +347,14 @@ function node_entity_extra_field_info() {
  *
  * @return int
  *   The number of nodes whose node type field was modified.
+ *
+ * @deprecated in drupal:10.1.0 and is removed from drupal:11.0.0. Use
+ *   \Drupal\Core\Entity\EntityStorageInterface::updateType instead.
+ *
+ * @see https://www.drupal.org/node/3323340
  */
 function node_type_update_nodes($old_id, $new_id) {
+  @trigger_error(__METHOD__ . ' is deprecated in drupal:10.1.0 and is removed from drupal:11.0.0. Use \Drupal\Core\Entity\EntityStorageInterface::updateType instead. See https://www.drupal.org/node/3294237', E_USER_DEPRECATED);
   return \Drupal::entityTypeManager()->getStorage('node')->updateType($old_id, $new_id);
 }
 
@@ -345,8 +366,14 @@ function node_type_update_nodes($old_id, $new_id) {
  *
  * @return \Drupal\node\NodeInterface|null
  *   A fully-populated node entity, or NULL if the node is not found.
+ *
+ * @deprecated in drupal:10.1.0 and is removed from drupal:11.0.0. Use
+ *   \Drupal\Core\Entity\RevisionableStorageInterface::loadRevision instead.
+ *
+ * @see https://www.drupal.org/node/3323340
  */
 function node_revision_load($vid = NULL) {
+  @trigger_error(__METHOD__ . ' is deprecated in drupal:10.1.0 and is removed from drupal:11.0.0. Use \Drupal\Core\Entity\RevisionableStorageInterface::loadRevision instead. See https://www.drupal.org/node/3294237', E_USER_DEPRECATED);
   return \Drupal::entityTypeManager()->getStorage('node')->loadRevision($vid);
 }
 
@@ -355,8 +382,14 @@ function node_revision_load($vid = NULL) {
  *
  * @param int $revision_id
  *   The revision ID to delete.
+ *
+ * @deprecated in drupal:10.1.0 and is removed from drupal:11.0.0. Use
+ *   \Drupal\Core\Entity\RevisionableStorageInterface::deleteRevision instead.
+ *
+ * @see https://www.drupal.org/node/3323340
  */
 function node_revision_delete($revision_id) {
+  @trigger_error(__METHOD__ . ' is deprecated in drupal:10.1.0 and is removed from drupal:11.0.0. Use \Drupal\Core\Entity\RevisionableStorageInterface::deleteRevision instead. See https://www.drupal.org/node/3294237', E_USER_DEPRECATED);
   \Drupal::entityTypeManager()->getStorage('node')->deleteRevision($revision_id);
 }
 
@@ -553,15 +586,15 @@ function template_preprocess_node(&$variables) {
         // 'compact' view mode on the User entity. Note that the 'compact'
         // view mode might not be configured, so remember to always check the
         // theme setting first.
-        $variables['author_picture'] = \Drupal::entityTypeManager()
-          ->getViewBuilder('user')
-          ->view($node->getOwner(), 'compact');
+        if ($node_owner = $node->getOwner()) {
+          $variables['author_picture'] = \Drupal::entityTypeManager()
+            ->getViewBuilder('user')
+            ->view($node_owner, 'compact');
+        }
       }
     }
   }
 
-  // Add article ARIA role.
-  $variables['attributes']['role'] = 'article';
 }
 
 /**
@@ -671,7 +704,7 @@ function node_user_predelete($account) {
   $storage_controller->delete($nodes);
   $revisions = $storage_controller->userRevisionIds($account);
   foreach ($revisions as $revision) {
-    node_revision_delete($revision);
+    $storage_controller->deleteRevision($revision);
   }
 }
 
@@ -694,6 +727,7 @@ function node_get_recent($number = 10) {
     // to see these in addition to published nodes. Check that they actually
     // have some unpublished nodes to view before adding the condition.
     $access_query = \Drupal::entityQuery('node')
+      ->accessCheck(TRUE)
       ->condition('uid', $account->id())
       ->condition('status', NodeInterface::NOT_PUBLISHED);
     if ($account->hasPermission('view own unpublished content') && ($own_unpublished = $access_query->execute())) {
@@ -707,6 +741,7 @@ function node_get_recent($number = 10) {
     }
   }
   $nids = $query
+    ->accessCheck(TRUE)
     ->sort('changed', 'DESC')
     ->range(0, $number)
     ->addTag('node_access')
@@ -720,19 +755,21 @@ function node_get_recent($number = 10) {
 /**
  * Implements hook_page_top().
  */
-function node_page_top(array &$page) {
+function node_page_top(array &$page_top) {
   // Add 'Back to content editing' link on preview page.
   $route_match = \Drupal::routeMatch();
   if ($route_match->getRouteName() == 'entity.node.preview') {
-    $page['page_top']['node_preview'] = [
+    $page_top['node_preview'] = [
       '#type' => 'container',
       '#attributes' => [
         'class' => ['node-preview-container', 'container-inline'],
       ],
+      'view_mode' => \Drupal::formBuilder()->getForm(
+        NodePreviewForm::class,
+        $route_match->getParameter('node_preview')
+      ),
     ];
 
-    $form = \Drupal::formBuilder()->getForm('\Drupal\node\Form\NodePreviewForm', $route_match->getParameter('node_preview'));
-    $page['page_top']['node_preview']['view_mode'] = $form;
   }
 }
 
@@ -819,11 +856,11 @@ function node_form_system_themes_admin_form_submit($form, FormStateInterface $fo
 /**
  * Implements hook_ENTITY_TYPE_access().
  */
-function node_node_access(NodeInterface $node, $op, AccountInterface $account) {
+function node_node_access(NodeInterface $node, $operation, AccountInterface $account) {
   $type = $node->bundle();
 
   // Note create access is handled by hook_ENTITY_TYPE_create_access().
-  switch ($op) {
+  switch ($operation) {
     case 'update':
       $access = AccessResult::allowedIfHasPermission($account, 'edit any ' . $type . ' content');
       if (!$access->isAllowed() && $account->hasPermission('edit own ' . $type . ' content')) {
@@ -856,7 +893,7 @@ function node_node_access(NodeInterface $node, $op, AccountInterface $account) {
  * grants array by reference. This hook allows for complex business logic to be
  * applied when integrating multiple node access modules.
  *
- * @param string $op
+ * @param string $operation
  *   The operation that the user is trying to perform.
  * @param \Drupal\Core\Session\AccountInterface $account
  *   The account object for the user performing the operation.
@@ -865,11 +902,11 @@ function node_node_access(NodeInterface $node, $op, AccountInterface $account) {
  *   An associative array in which the keys are realms, and the values are
  *   arrays of grants for those realms.
  */
-function node_access_grants($op, AccountInterface $account) {
+function node_access_grants($operation, AccountInterface $account) {
   // Fetch node access grants from other modules.
-  $grants = \Drupal::moduleHandler()->invokeAll('node_grants', [$account, $op]);
+  $grants = \Drupal::moduleHandler()->invokeAll('node_grants', [$account, $operation]);
   // Allow modules to alter the assigned grants.
-  \Drupal::moduleHandler()->alter('node_grants', $grants, $account, $op);
+  \Drupal::moduleHandler()->alter('node_grants', $grants, $account, $operation);
 
   return array_merge(['all' => [0]], $grants);
 }

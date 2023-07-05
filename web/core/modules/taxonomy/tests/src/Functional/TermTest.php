@@ -56,6 +56,7 @@ class TermTest extends TaxonomyTestBase {
 
     $this->drupalLogin($this->drupalCreateUser([
       'administer taxonomy',
+      'access taxonomy overview',
       'bypass node access',
     ]));
     $this->vocabulary = $this->createVocabulary();
@@ -405,7 +406,7 @@ class TermTest extends TaxonomyTestBase {
     $value = $this->randomMachineName();
     $term->setDescription($value);
     $term->save();
-    $this->assertEquals("<p>{$value}</p>\n", $term->description->processed);
+    $this->assertSame("<p>{$value}</p>\n", (string) $term->description->processed);
 
     // Check that the term feed page is working.
     $this->drupalGet('taxonomy/term/' . $term->id() . '/feed');
@@ -436,6 +437,15 @@ class TermTest extends TaxonomyTestBase {
     // Validate that "Save and go to list" doesn't exist when destination
     // parameter is present.
     $this->drupalGet('admin/structure/taxonomy/manage/' . $this->vocabulary->id() . '/add', ['query' => ['destination' => 'node/add']]);
+    $this->assertSession()->pageTextNotContains('Save and go to list');
+
+    // Validate that "Save and go to list" doesn't exist when missing permission
+    // 'access taxonomy overview'.
+    $this->drupalLogin($this->drupalCreateUser([
+      'administer taxonomy',
+      'bypass node access',
+    ]));
+    $this->drupalGet('admin/structure/taxonomy/manage/' . $this->vocabulary->id() . '/add');
     $this->assertSession()->pageTextNotContains('Save and go to list');
   }
 

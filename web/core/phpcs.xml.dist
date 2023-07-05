@@ -58,7 +58,6 @@
     <exclude name="Drupal.Commenting.DocComment.MissingShort"/>
     <exclude name="Drupal.Commenting.DocComment.ParamNotFirst"/>
     <exclude name="Drupal.Commenting.DocComment.ShortNotCapital"/>
-    <exclude name="Drupal.Commenting.DocComment.ShortSingleLine"/>
     <exclude name="Drupal.Commenting.DocComment.SpacingBeforeTags"/>
   </rule>
   <rule ref="Drupal.Commenting.DocCommentAlignment"/>
@@ -113,9 +112,10 @@
   </rule>
   <rule ref="Drupal.NamingConventions.ValidClassName"/>
   <rule ref="Drupal.NamingConventions.ValidGlobal"/>
-  <rule ref="Drupal.NamingConventions.ValidVariableName">
-    <!-- Sniff for: LowerStart -->
-    <exclude name="Drupal.NamingConventions.ValidVariableName.LowerCamelName"/>
+  <rule ref="Drupal.NamingConventions.ValidVariableName"/>
+  <rule ref="Drupal.NamingConventions.ValidVariableName.LowerCamelName">
+    <!-- Views plugins do not conform to this sniff. -->
+    <include-pattern>**/tests/*</include-pattern>
   </rule>
   <rule ref="Drupal.Scope.MethodScope"/>
   <rule ref="Drupal.Semantics.EmptyInstall"/>
@@ -250,6 +250,23 @@
   </rule>
   <rule ref="PSR2.Namespaces.NamespaceDeclaration"/>
   <rule ref="PSR2.Namespaces.UseDeclaration"/>
+
+  <!-- SlevomatCodingStandard sniffs -->
+  <rule ref="SlevomatCodingStandard.Commenting.ForbiddenAnnotations">
+    <properties>
+      <property name="forbiddenAnnotations" type="array">
+        <element value="@inheritDoc"/>
+        <element value="@inheritdoc"/>
+      </property>
+    </properties>
+  </rule>
+  <rule ref="SlevomatCodingStandard.Commenting.ForbiddenComments">
+    <properties>
+       <property name="forbiddenCommentPatterns" type="array">
+         <element value="/@inheritDoc/"/>
+       </property>
+    </properties>
+  </rule>
 
   <!-- Squiz sniffs -->
   <rule ref="Squiz.Arrays.ArrayBracketSpacing"/>

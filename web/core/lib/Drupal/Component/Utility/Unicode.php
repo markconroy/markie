@@ -139,7 +139,7 @@ EOD;
   }
 
   /**
-   * Decodes UTF byte-order mark (BOM) into the encoding's name.
+   * Decodes UTF byte-order mark (BOM) to the encoding name.
    *
    * @param string $data
    *   The data possibly containing a BOM. This can be the entire contents of
@@ -163,7 +163,7 @@ EOD;
     ];
 
     foreach ($bomMap as $bom => $encoding) {
-      if (strpos($data, $bom) === 0) {
+      if (str_starts_with($data, $bom)) {
         return $encoding;
       }
     }

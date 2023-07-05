@@ -2,7 +2,7 @@
     "name": "symfony/routing",
     "type": "library",
     "description": "Maps an HTTP request to a set of configuration variables",
-    "keywords": ["routing", "router", "URL", "URI"],
+    "keywords": ["routing", "router", "url", "uri"],
     "homepage": "https://symfony.com",
     "license": "MIT",
     "authors": [
@@ -32,12 +32,6 @@
         "symfony/config": "<6.2",
         "symfony/dependency-injection": "<5.4",
         "symfony/yaml": "<5.4"
-    },
-    "suggest": {
-        "symfony/http-foundation": "For using a Symfony Request object",
-        "symfony/config": "For using the all-in-one router or any loader",
-        "symfony/yaml": "For using the YAML loader",
-        "symfony/expression-language": "For using expression matching"
     },
     "autoload": {
         "psr-4": { "Symfony\\Component\\Routing\\": "" },

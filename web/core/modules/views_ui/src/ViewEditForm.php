@@ -18,6 +18,7 @@ use Drupal\views\Views;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpKernel\Exception\NotAcceptableHttpException;
+use Drupal\Core\Extension\ModuleHandlerInterface;
 
 /**
  * Form controller for the Views edit form.
@@ -62,6 +63,13 @@ class ViewEditForm extends ViewFormBase {
   protected $themeManager;
 
   /**
+   * The module handler service.
+   *
+   * @var \Drupal\Core\Extension\ModuleHandlerInterface
+   */
+  protected $moduleHandler;
+
+  /**
    * Constructs a new ViewEditForm object.
    *
    * @param \Drupal\Core\TempStore\SharedTempStoreFactory $temp_store_factory
@@ -74,13 +82,16 @@ class ViewEditForm extends ViewFormBase {
    *   The element info manager.
    * @param \Drupal\Core\Theme\ThemeManagerInterface $theme_manager
    *   The theme manager.
+   * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
+   *   The module handler service.
    */
-  public function __construct(SharedTempStoreFactory $temp_store_factory, RequestStack $requestStack, DateFormatterInterface $date_formatter, ElementInfoManagerInterface $element_info, ThemeManagerInterface $theme_manager) {
+  public function __construct(SharedTempStoreFactory $temp_store_factory, RequestStack $requestStack, DateFormatterInterface $date_formatter, ElementInfoManagerInterface $element_info, ThemeManagerInterface $theme_manager, ModuleHandlerInterface $module_handler) {
     $this->tempStore = $temp_store_factory->get('views');
     $this->requestStack = $requestStack;
     $this->dateFormatter = $date_formatter;
     $this->elementInfo = $element_info;
     $this->themeManager = $theme_manager;
+    $this->moduleHandler = $module_handler;
   }
 
   /**
@@ -92,7 +103,8 @@ class ViewEditForm extends ViewFormBase {
       $container->get('request_stack'),
       $container->get('date.formatter'),
       $container->get('element_info'),
-      $container->get('theme.manager')
+      $container->get('theme.manager'),
+      $container->get('module_handler')
     );
   }
 
@@ -312,7 +324,7 @@ class ViewEditForm extends ViewFormBase {
     $destination = $query->get('destination');
 
     if (!empty($destination)) {
-      // Find out the first display which has a changed path and redirect to this url.
+      // Find out the first display which has a changed path and redirect to this URL.
       $old_view = Views::getView($view->id());
       $old_view->initDisplay();
       foreach ($old_view->displayHandlers as $id => $display) {
@@ -374,7 +386,7 @@ class ViewEditForm extends ViewFormBase {
     // context, so hook_form_view_edit_form_alter() is insufficient.
     // @todo remove this after
     //   https://www.drupal.org/project/drupal/issues/3087455 has been resolved.
-    \Drupal::moduleHandler()->alter('views_ui_display_tab', $build, $view, $display_id);
+    $this->moduleHandler->alter('views_ui_display_tab', $build, $view, $display_id);
     // Because themes can implement hook_form_FORM_ID_alter() and because this
     // is a workaround for hook_form_view_edit_form_alter() being insufficient,
     // also invoke this on themes.
@@ -438,7 +450,7 @@ class ViewEditForm extends ViewFormBase {
         elseif ($view->status() && $view->getExecutable()->displayHandlers->get($display['id'])->hasPath()) {
           $path = $view->getExecutable()->displayHandlers->get($display['id'])->getPath();
 
-          if ($path && (strpos($path, '%') === FALSE)) {
+          if ($path && (!str_contains($path, '%'))) {
             // Wrap this in a try/catch as trying to generate links to some
             // routes may throw a NotAcceptableHttpException if they do not
             // respond to HTML, such as RESTExports.
@@ -754,7 +766,7 @@ class ViewEditForm extends ViewFormBase {
     }
 
     // Let other modules add additional links here.
-    \Drupal::moduleHandler()->alter('views_ui_display_top_links', $element['extra_actions']['#links'], $view, $display_id);
+    $this->moduleHandler->alter('views_ui_display_top_links', $element['extra_actions']['#links'], $view, $display_id);
 
     if (isset($view->type) && $view->type != $this->t('Default')) {
       if ($view->type == $this->t('Overridden')) {
@@ -804,7 +816,7 @@ class ViewEditForm extends ViewFormBase {
     // context, so hook_form_view_edit_form_alter() is insufficient.
     // @todo remove this after
     //   https://www.drupal.org/project/drupal/issues/3087455 has been resolved.
-    \Drupal::moduleHandler()->alter('views_ui_display_top', $element, $view, $display_id);
+    $this->moduleHandler->alter('views_ui_display_top', $element, $view, $display_id);
     // Because themes can implement hook_form_FORM_ID_alter() and because this
     // is a workaround for hook_form_view_edit_form_alter() being insufficient,
     // also invoke this on themes.

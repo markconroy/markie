@@ -10,32 +10,18 @@
  * Main Hero.
  */
 
-/*
- * Media query breakpoints.
- * Processed by postcss/postcss-custom-media.
- */
-
-/* Navigation related breakpoints */
-
-/* Grid related breakpoints */
-
-/* Grid shifts from 6 to 14 columns. */
-
-/* Width of the entire grid maxes out. */
-
 .hero__content {
   grid-column: 1 / 7;
 }
 
 @media (min-width: 43.75rem) {
-
-  .hero__content { /* 700px */
+  .hero__content {
+    /* 700px */
     grid-column: 3 / 13;
   }
 }
 
 @media (min-width: 62.5rem) {
-
   .hero__content {
     grid-column: 3 / 11;
   }
@@ -52,7 +38,6 @@
 }
 
 @media (min-width: 31.25rem) {
-
   .hero__img {
     margin-block-start: var(--sp3);
     margin-block-end: var(--sp3);
@@ -60,7 +45,6 @@
 }
 
 @media (min-width: 43.75rem) {
-
   .hero__img {
     grid-column: 1 / 15;
     margin-block-start: var(--sp4);
@@ -69,7 +53,6 @@
 }
 
 @media (min-width: 62.5rem) {
-
   .hero__img {
     grid-column: 2 / 14;
   }

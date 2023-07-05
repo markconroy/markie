@@ -25,7 +25,6 @@ class MigrationPluginListTest extends KernelTestBase {
   protected static $modules = [
     'migrate',
     // Test with all modules containing Drupal migrations.
-    'action',
     'ban',
     'block',
     'block_content',
@@ -37,6 +36,7 @@ class MigrationPluginListTest extends KernelTestBase {
     'field',
     'file',
     'filter',
+    // @todo Remove forum in https://www.drupal.org/project/drupal/issues/3261653
     'forum',
     'image',
     'language',

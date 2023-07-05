@@ -3,7 +3,7 @@
 /*
  * This file is part of Psy Shell.
  *
- * (c) 2012-2022 Justin Hileman
+ * (c) 2012-2023 Justin Hileman
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -73,8 +73,6 @@ class ErrorException extends \ErrorException implements Exception
 
     /**
      * Get the raw (unformatted) message for this error.
-     *
-     * @return string
      */
     public function getRawMessage(): string
     {
@@ -103,11 +101,9 @@ class ErrorException extends \ErrorException implements Exception
     /**
      * Create an ErrorException from an Error.
      *
-     * @deprecated psySH no longer wraps Errors
+     * @deprecated PsySH no longer wraps Errors
      *
      * @param \Error $e
-     *
-     * @return self
      */
     public static function fromError(\Error $e): self
     {

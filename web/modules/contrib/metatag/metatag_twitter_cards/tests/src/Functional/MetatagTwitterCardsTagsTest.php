@@ -32,16 +32,8 @@ class MetatagTwitterCardsTagsTest extends MetatagTagsTestBase {
     'twitter_cards_app_url_iphone',
     'twitter_cards_creator',
     'twitter_cards_creator_id',
-    'twitter_cards_data1',
-    'twitter_cards_data2',
     'twitter_cards_description',
-    'twitter_cards_donottrack',
     'twitter_cards_image_alt',
-    'twitter_cards_image_height',
-    'twitter_cards_image_width',
-    'twitter_cards_label1',
-    'twitter_cards_label2',
-    'twitter_cards_page_url',
     'twitter_cards_player_height',
     'twitter_cards_player_stream',
     'twitter_cards_player_stream_content_type',
@@ -51,12 +43,7 @@ class MetatagTwitterCardsTagsTest extends MetatagTagsTestBase {
     'twitter_cards_title',
     'twitter_cards_type',
     // @todo Fix test coverage for these tags.
-    // 'twitter_cards_gallery_image0',
-    // 'twitter_cards_gallery_image1',
-    // 'twitter_cards_gallery_image2',
-    // 'twitter_cards_gallery_image3',
     // 'twitter_cards_image',
-    // 'twitter_cards_player',
   ];
 
   /**

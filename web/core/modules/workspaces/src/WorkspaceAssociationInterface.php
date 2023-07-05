@@ -75,6 +75,23 @@ interface WorkspaceAssociationInterface {
   public function getAssociatedRevisions($workspace_id, $entity_type_id, $entity_ids = NULL);
 
   /**
+   * Retrieves all content revisions that were created in a given workspace.
+   *
+   * @param string $workspace_id
+   *   The ID of the workspace.
+   * @param string $entity_type_id
+   *   An entity type ID to find revisions for.
+   * @param int[]|string[] $entity_ids
+   *   (optional) An array of entity IDs to filter the results by. Defaults to
+   *   an empty array.
+   *
+   * @return array
+   *   Returns an array where the values are an array of entity IDs keyed by
+   *   revision IDs.
+   */
+  public function getAssociatedInitialRevisions(string $workspace_id, string $entity_type_id, array $entity_ids = []);
+
+  /**
    * Gets a list of workspace IDs in which an entity is tracked.
    *
    * @param \Drupal\Core\Entity\RevisionableInterface $entity
@@ -91,22 +108,33 @@ interface WorkspaceAssociationInterface {
    *
    * @param \Drupal\workspaces\WorkspaceInterface $workspace
    *   A workspace entity.
+   *
+   * @deprecated in drupal:10.1.0 and is removed from drupal:11.0.0. Use the
+   *   \Drupal\workspaces\Event\WorkspacePostPublishEvent event instead.
+   *
+   * @see https://www.drupal.org/node/3242573
    */
   public function postPublish(WorkspaceInterface $workspace);
 
   /**
    * Deletes all the workspace association records for the given workspace.
    *
-   * @param string $workspace_id
-   *   A workspace entity ID.
+   * @param string|null $workspace_id
+   *   (optional) A workspace entity ID. Defaults to NULL.
    * @param string|null $entity_type_id
    *   (optional) The target entity type of the associations to delete. Defaults
    *   to NULL.
    * @param int[]|string[]|null $entity_ids
    *   (optional) The target entity IDs of the associations to delete. Defaults
    *   to NULL.
+   * @param int[]|string[]|null $revision_ids
+   *   (optional) The target entity revision IDs of the associations to delete.
+   *   Defaults to NULL.
+   *
+   * @throws \InvalidArgumentException
+   *   If neither $workspace_id nor $entity_type_id arguments were provided.
    */
-  public function deleteAssociations($workspace_id, $entity_type_id = NULL, $entity_ids = NULL);
+  public function deleteAssociations($workspace_id = NULL, $entity_type_id = NULL, $entity_ids = NULL, $revision_ids = NULL);
 
   /**
    * Initializes a workspace with all the associations of its parent.

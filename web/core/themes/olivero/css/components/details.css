@@ -10,19 +10,6 @@
  * Collapsible details.
  */
 
-/*
- * Media query breakpoints.
- * Processed by postcss/postcss-custom-media.
- */
-
-/* Navigation related breakpoints */
-
-/* Grid related breakpoints */
-
-/* Grid shifts from 6 to 14 columns. */
-
-/* Width of the entire grid maxes out. */
-
 :root {
   --details-border-width: 1px;
   --details-summary-transition: background-color 0.12s ease-in-out;
@@ -59,7 +46,7 @@
 
 /* Arrow icon */
 
-.olivero-details__summary:before {
+.olivero-details__summary::before {
   position: absolute;
   inset-block-start: 50%;
   inset-inline-start: var(--sp0-75);
@@ -72,13 +59,13 @@
   border-right: solid 2px currentColor;
 }
 
-[dir="rtl"] .olivero-details__summary:before {
+[dir="rtl"] .olivero-details__summary::before {
   transform: translateY(-50%) rotate(-135deg);
 }
 
 /* Pseudo-selector to manage focus styles */
 
-.olivero-details__summary:after {
+.olivero-details__summary::after {
   position: absolute;
   inset: calc(var(--details-border-width) * -1);
   content: "";
@@ -109,8 +96,8 @@
 
 /* Details summary, focus and active states */
 
-.olivero-details__summary:focus:after,
-.olivero-details__summary:active:after {
+.olivero-details__summary:focus::after,
+.olivero-details__summary:active::after {
   opacity: 1;
 }
 
@@ -128,7 +115,6 @@
 }
 
 @media (min-width: 62.5rem) {
-
   .olivero-details__wrapper {
     margin-block-start: var(--sp1-5);
     margin-block-end: var(--sp1-5);

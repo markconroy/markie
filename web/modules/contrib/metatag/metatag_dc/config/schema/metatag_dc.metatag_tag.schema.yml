@@ -3,47 +3,47 @@
 # textfield.
 
 metatag.metatag_tag.dcterms_contributor:
-  type: label
+  type: text
   label: 'Dublin Core: Contributor'
 metatag.metatag_tag.dcterms_coverage:
-  type: label
+  type: text
   label: 'Dublin Core: Coverage'
 metatag.metatag_tag.dcterms_creator:
-  type: label
+  type: text
   label: 'Dublin Core: Creator'
 metatag.metatag_tag.dcterms_date:
-  type: label
+  type: text
   label: 'Dublin Core: Date'
 metatag.metatag_tag.dcterms_description:
   type: text
   label: 'Dublin Core: Description'
 metatag.metatag_tag.dcterms_format:
-  type: label
+  type: text
   label: 'Dublin Core: Format'
 metatag.metatag_tag.dcterms_identifier:
-  type: label
+  type: text
   label: 'Dublin Core: Identifier'
 metatag.metatag_tag.dcterms_language:
-  type: label
+  type: text
   label: 'Dublin Core: Language'
 metatag.metatag_tag.dcterms_publisher:
-  type: label
+  type: text
   label: 'Dublin Core: Publisher'
 metatag.metatag_tag.dcterms_relation:
-  type: label
+  type: text
   label: 'Dublin Core: Relation'
 metatag.metatag_tag.dcterms_rights:
-  type: label
+  type: text
   label: 'Dublin Core: Rights'
 metatag.metatag_tag.dcterms_source:
-  type: label
+  type: text
   label: 'Dublin Core: Source'
 metatag.metatag_tag.dcterms_subject:
-  type: label
+  type: text
   label: 'Dublin Core: Subject'
 metatag.metatag_tag.dcterms_title:
   type: text
   label: 'Dublin Core: Title'
 metatag.metatag_tag.dcterms_type:
-  type: label
+  type: text
   label: 'Dublin Core: Type'

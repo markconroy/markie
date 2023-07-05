@@ -32,13 +32,11 @@ class HandlerAllTest extends ViewTestBase {
     'field',
     'filter',
     'file',
-    'forum',
     'history',
     'language',
     'locale',
     'node',
     'search',
-    'statistics',
     'taxonomy',
     'user',
   ];

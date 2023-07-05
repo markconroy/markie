@@ -42,6 +42,13 @@ class FieldTest extends KernelTestBase {
   protected $vocabulary;
 
   /**
+   * The field used in this test class.
+   *
+   * @var \Drupal\field\Entity\FieldConfig
+   */
+  protected $field;
+
+  /**
    * {@inheritdoc}
    */
   protected static $modules = [

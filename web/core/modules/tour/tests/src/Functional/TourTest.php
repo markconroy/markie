@@ -80,7 +80,7 @@ class TourTest extends TourTestBasic {
     $href = Url::fromRoute('<front>', [], ['absolute' => TRUE])->toString();
     $elements = [];
     foreach ($tips as $tip) {
-      if ($tip['id'] == 'tour-test-1' && $tip['module'] == 'tour_test' && $tip['type'] == 'text' && strpos($tip['body'], $href) !== FALSE && strpos($tip['body'], 'Drupal') !== FALSE) {
+      if ($tip['id'] == 'tour-test-1' && $tip['module'] == 'tour_test' && $tip['type'] == 'text' && str_contains($tip['body'], $href) && str_contains($tip['body'], 'Drupal')) {
         $elements[] = $tip;
       }
     }
@@ -107,7 +107,7 @@ class TourTest extends TourTestBasic {
     // Ensure that plugins work.
     $elements = [];
     foreach ($tips as $tip) {
-      if (strpos($tip['body'], 'http://local/image.png') !== FALSE) {
+      if (str_contains($tip['body'], 'http://local/image.png')) {
         $elements[] = $tip;
       }
     }
@@ -158,7 +158,7 @@ class TourTest extends TourTestBasic {
         'tour-test-1' => [
           'id' => 'tour-code-test-1',
           'plugin' => 'text',
-          'label' => 'The rain in spain',
+          'label' => 'The rain in spain is <strong>strong</strong>',
           'body' => 'Falls mostly on the plain.',
           'weight' => '100',
           'selector' => '#tour-code-test-1',
@@ -194,7 +194,7 @@ class TourTest extends TourTestBasic {
 
     $elements = $this->findTip([
       'id' => 'tour-code-test-1',
-      'title' => 'The rain in spain',
+      'title' => 'The rain in spain is <strong>strong</strong>',
     ]);
     $this->assertCount(1, $elements, 'Found the required tip markup for tip 4');
 

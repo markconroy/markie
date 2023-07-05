@@ -230,7 +230,7 @@ class ModuleHandler implements ModuleHandlerInterface {
         }
       }
     }
-    $graph_object = new Graph($graph);
+    $graph_object = new Graph($graph ?? []);
     $graph = $graph_object->searchAndSort();
     foreach ($graph as $module_name => $data) {
       $modules[$module_name]->required_by = $data['reverse_paths'] ?? [];
@@ -499,7 +499,7 @@ class ModuleHandler implements ModuleHandlerInterface {
         foreach ($extra_types as $extra_type) {
           $extra_modules[] = array_keys($this->getImplementationInfo($extra_type . '_alter'));
         }
-        $extra_modules = array_merge([], ...$extra_modules);
+        $extra_modules = array_merge(...$extra_modules);
         // If any modules implement one of the extra hooks that do not implement
         // the primary hook, we need to add them to the $modules array in their
         // appropriate order. $this->getImplementationInfo() can only return
@@ -662,8 +662,10 @@ class ModuleHandler implements ModuleHandlerInterface {
   }
 
   /**
-   * Verifies an array of implementations loaded from the cache, by including
-   * the lazy-loaded $module.$group.inc, and checking function_exists().
+   * Verifies an array of implementations loaded from cache.
+   *
+   * Verification is done by including the lazy-loaded $module.$group.inc file,
+   * and checking function_exists().
    *
    * @param string[] $implementations
    *   Implementation "group" by module name.

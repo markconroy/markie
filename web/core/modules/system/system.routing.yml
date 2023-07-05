@@ -82,7 +82,7 @@ system.admin_config_regional:
   path: '/admin/config/regional'
   defaults:
     _controller: '\Drupal\system\Controller\SystemController::systemAdminMenuBlockPage'
-    _title: 'Regional and language'
+    _title: 'Region and language'
   requirements:
     _permission: 'access administration pages'
 
@@ -177,8 +177,16 @@ system.logging_settings:
 system.performance_settings:
   path: '/admin/config/development/performance'
   defaults:
-    _form: '\Drupal\system\Form\PerformanceForm'
+    _controller: '\Drupal\system\Controller\PerformanceController::build'
     _title: 'Performance'
+  requirements:
+    _permission: 'administer site configuration'
+
+system.development_settings:
+  path: '/admin/config/development/settings'
+  defaults:
+    _form: '\Drupal\system\Form\DevelopmentSettingsForm'
+    _title: 'Development settings'
   requirements:
     _permission: 'administer site configuration'
 
@@ -455,6 +463,9 @@ system.timezone:
     is_daylight_saving_time: NULL
   requirements:
     _access: 'TRUE'
+    abbreviation: '0|([A-Z]{3,5})'
+    offset: '\-?\d+'
+    is_daylight_saving_time: '\-1|0|1'
 
 system.admin_config:
   path: '/admin/config'
@@ -520,3 +531,15 @@ system.csrftoken:
     _controller: '\Drupal\system\Controller\CsrfTokenController::csrfToken'
   requirements:
     _access: 'TRUE'
+
+system.linkset_settings:
+  path: '/admin/config/services/linkset'
+  defaults:
+    _title: 'Menu Linkset Settings'
+    _form: 'Drupal\system\Form\MenuLinksetSettingsForm'
+  requirements:
+    _permission: 'administer site configuration'
+
+route_callbacks:
+  - '\Drupal\system\Routing\AssetRoutes::routes'
+  - '\Drupal\system\Routing\MenuLinksetRoutes::routes'

@@ -71,6 +71,7 @@
   display: block;
   margin-top: calc(var(--vertical-tabs-border-size) * -1);
   padding: var(--space-s) var(--space-s) var(--space-s) calc(var(--space-l) - var(--vertical-tabs-menu-link--active-border-size)); /* LTR */
+  -webkit-text-decoration: none;
   text-decoration: none;
   word-wrap: break-word;
   -webkit-hyphens: auto;
@@ -92,11 +93,13 @@
 
 .media-library-menu__link:focus {
   z-index: calc(var(--vertical-tabs-menu--z-index) + 3); /* Focus state should be on the highest level to make the focus effect be fully visible. This also means that it should have bigger z-index than the selected link. */
+  -webkit-text-decoration: none;
   text-decoration: none;
   box-shadow: none;
 }
 
 .media-library-menu__link:hover {
+  -webkit-text-decoration: none;
   text-decoration: none;
   color: var(--color-absolutezero);
   /* These borders are necessary to replace the dividing lines while in the hover state. */
@@ -156,7 +159,7 @@
   border-radius: var(--base-border-radius) 0 0 var(--base-border-radius); /* LTR */
 }
 
-[dir=rtl] .media-library-menu__link.active::before {
+[dir="rtl"] .media-library-menu__link.active::before {
   border-right: var(--vertical-tabs-menu-link--active-border-size) solid var(--vertical-tabs-menu-link--active-border-color);
   border-left: 0;
   border-radius: 0 var(--base-border-radius) var(--base-border-radius) 0;
@@ -451,7 +454,7 @@
   background: #fff;
 }
 
-.media-library-item--grid:before {
+.media-library-item--grid::before {
   position: absolute;
   top: 0.4375rem;
   left: 0.4375rem;
@@ -573,25 +576,25 @@
   object-position: center center;
 }
 
-.media-library-item--grid.is-hover:before,
-.media-library-item--grid.checked:before,
-.media-library-item--grid.is-focus:before {
+.media-library-item--grid.is-hover::before,
+.media-library-item--grid.checked::before,
+.media-library-item--grid.is-focus::before {
   top: 0.3125rem;
   left: 0.3125rem;
   border-width: 3px;
   border-radius: 0.1875rem;
 }
 
-.media-library-item--grid.is-hover:before,
-.media-library-item--grid.checked.is-hover:before {
+.media-library-item--grid.is-hover::before,
+.media-library-item--grid.checked.is-hover::before {
   border-color: var(--color-absolutezero-hover);
 }
 
-.media-library-item--grid.is-focus:before {
+.media-library-item--grid.is-focus::before {
   border-color: var(--color-focus);
 }
 
-.media-library-item--grid.checked:before {
+.media-library-item--grid.checked::before {
   border-color: var(--button--focus-border-color);
 }
 
@@ -717,6 +720,7 @@
   position: absolute;
   top: var(--space-s);
   right: var(--space-m); /* LTR */
+  -webkit-text-decoration: none;
   text-decoration: none;
 }
 
@@ -886,8 +890,6 @@
 .media-library-add-form__remove-button.button:disabled {
   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3e%3cpath fill='%238e929c' d='M3.51 13.925c.194.194.512.195.706.001l3.432-3.431c.194-.194.514-.194.708 0l3.432 3.431c.192.194.514.193.707-.001l1.405-1.417c.191-.195.189-.514-.002-.709l-3.397-3.4c-.192-.193-.192-.514-.002-.708l3.401-3.43c.189-.195.189-.515 0-.709l-1.407-1.418c-.195-.195-.513-.195-.707-.001l-3.43 3.431c-.195.194-.516.194-.708 0l-3.432-3.431c-.195-.195-.512-.194-.706.001l-1.407 1.417c-.194.195-.194.515 0 .71l3.403 3.429c.193.195.193.514-.001.708l-3.4 3.399c-.194.195-.195.516-.001.709l1.406 1.419z'/%3e%3c/svg%3e");
 }
-
-/* @todo Remove in https://www.drupal.org/project/drupal/issues/3064914 */
 
 .views-live-preview .media-library-view div.views-row + div.views-row {
   margin-top: 0;

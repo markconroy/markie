@@ -2,16 +2,21 @@
 
 namespace Drupal\admin_toolbar_tools;
 
+use Drupal\Core\Cache\CacheableMetadata;
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Menu\LocalTaskManager;
+use Drupal\Core\Menu\LocalTaskManagerInterface;
 use Drupal\Core\Render\Element;
 use Drupal\Core\Routing\RouteMatchInterface;
-use Drupal\Core\Security\TrustedCallbackInterface;
+use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\Core\Url;
 
 /**
  * Admin Toolbar Tools helper service.
  */
-class AdminToolbarToolsHelper implements TrustedCallbackInterface {
+class AdminToolbarToolsHelper {
+
+  use StringTranslationTrait;
 
   /**
    * The entity type manager.
@@ -23,7 +28,7 @@ class AdminToolbarToolsHelper implements TrustedCallbackInterface {
   /**
    * The local task manger.
    *
-   * @var \Drupal\Core\Menu\LocalTaskManager
+   * @var \Drupal\Core\Menu\LocalTaskManagerInterface
    *   The local task manager menu.
    */
   protected $localTaskManager;
@@ -37,56 +42,100 @@ class AdminToolbarToolsHelper implements TrustedCallbackInterface {
   protected $routeMatch;
 
   /**
+   * The configuration factory.
+   *
+   * @var \Drupal\Core\Config\ConfigFactoryInterface
+   */
+  protected $configFactory;
+
+  /**
    * Create an AdminToolbarToolsHelper object.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   The entity type manager.
-   * @param \Drupal\Core\Menu\LocalTaskManager $local_task_manager
+   * @param \Drupal\Core\Menu\LocalTaskManagerInterface $local_task_manager
    *   The local task manager.
    * @param \Drupal\Core\Routing\RouteMatchInterface $route_match
    *   The route match.
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
+   *   The configuration factory.
    */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager, LocalTaskManager $local_task_manager, RouteMatchInterface $route_match) {
+  public function __construct(EntityTypeManagerInterface $entity_type_manager, LocalTaskManagerInterface $local_task_manager, RouteMatchInterface $route_match, ConfigFactoryInterface $config_factory) {
     $this->entityTypeManager = $entity_type_manager;
     $this->localTaskManager = $local_task_manager;
     $this->routeMatch = $route_match;
+    $this->configFactory = $config_factory;
   }
 
   /**
-   * {@inheritdoc}
-   */
-  public static function trustedCallbacks() {
-    return ['localTasksTrayLazyBuilder'];
-  }
-
-  /**
-   * Lazy builder callback for the admin_toolbar_local_tasks tray items.
+   * Generate the toolbar tab and item for primary local tasks.
    *
    * @return array
-   *   A renderable array as expected by the renderer service.
+   *   The toolbar render array.
    */
-  public function localTasksTrayLazyBuilder() {
-    // Get primary local task links and inject them into new
-    // admin_toolbar_local_tasks toolbar tray.
-    $links = $this->localTaskManager->getLocalTasks($this->routeMatch->getRouteName(), 0);
-    if (!empty($links['tabs'])) {
-      $build = [
-        '#theme' => 'links',
-        '#links' => [],
-        '#attributes' => [
-          'class' => ['toolbar-menu'],
-        ],
-      ];
-      Element::children($links['tabs'], TRUE);
-      $routes = Element::getVisibleChildren($links['tabs']);
-      foreach ($routes as $route) {
-        $build['#links'][$route] = $links['tabs'][$route]['#link'];
+  public function buildLocalTasksToolbar() {
+    $build = [];
+
+    $config = $this->configFactory->get('admin_toolbar_tools.settings');
+    $cacheability = CacheableMetadata::createFromObject($config);
+
+    if ($config->get('show_local_tasks')) {
+      $local_tasks = $this->localTaskManager->getLocalTasks($this->routeMatch->getRouteName());
+      $cacheability = $cacheability->merge($local_tasks['cacheability']);
+      $cacheability = $cacheability->merge(CacheableMetadata::createFromObject($this->localTaskManager));
+
+      if (!empty($local_tasks['tabs'])) {
+        $local_task_links = [
+          '#theme' => 'links',
+          '#links' => [],
+          '#attributes' => [
+            'class' => ['toolbar-menu'],
+          ],
+        ];
+        // Sort the links by weight.
+        Element::children($local_tasks['tabs'], TRUE);
+        // Only show the accessible local tasks.
+        foreach (Element::getVisibleChildren($local_tasks['tabs']) as $task) {
+          $local_task_links['#links'][$task] = $local_tasks['tabs'][$task]['#link'];
+          if ($local_tasks['tabs'][$task]['#active']) {
+            $local_task_links['#links'][$task]['attributes']['class'][] = 'is-active';
+          }
+        }
+
+        $build = [
+          '#type' => 'toolbar_item',
+          '#wrapper_attributes' => [
+            'class' => ['local-tasks-toolbar-tab'],
+          ],
+          // Put it after contextual toolbar item so when float right is applied
+          // local tasks item will be first.
+          '#weight' => 10,
+          'tab' => [
+            // We can't use #lazy_builder here because
+            // ToolbarItem::preRenderToolbarItem will insert #attributes before
+            // lazy_builder callback and this will produce Exception.
+            // This means that for now we always render Local Tasks item even when
+            // the tray is empty.
+            '#type' => 'link',
+            '#title' => $this->t('Local Tasks'),
+            '#url' => Url::fromRoute('<none>'),
+            '#attributes' => [
+              'class' => [
+                'toolbar-icon',
+                'toolbar-icon-local-tasks',
+              ],
+            ],
+          ],
+          'tray' => [
+            'local_tasks' => $local_task_links,
+          ],
+          '#attached' => ['library' => ['admin_toolbar_tools/toolbar.icon']],
+        ];
       }
-      $links['cacheability']->applyTo($build);
-      return $build;
     }
 
-    return [];
+    $cacheability->applyTo($build);
+    return $build;
   }
 
   /**

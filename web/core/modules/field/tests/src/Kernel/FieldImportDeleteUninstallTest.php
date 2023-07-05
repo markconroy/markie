@@ -7,8 +7,7 @@ use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 
 /**
- * Delete field storages and fields during config synchronization and uninstall
- * module that provides the field type.
+ * Tests field storages and fields deletion during config synchronization.
  *
  * @group field
  * @see \Drupal\field\ConfigImporterFieldPurger
@@ -110,8 +109,7 @@ class FieldImportDeleteUninstallTest extends FieldKernelTestBase {
   }
 
   /**
-   * Tests purging already deleted field storages and fields during a config
-   * import.
+   * Tests purging previously deleted fields and storages in config import.
    */
   public function testImportAlreadyDeletedUninstall() {
     // Create a telephone field for validation.

@@ -10,7 +10,7 @@ use Drupal\metatag\Plugin\metatag\Tag\MetaNameBase;
  * @MetatagTag(
  *   id = "twitter_cards_player_width",
  *   label = @Translation("Media player width"),
- *   description = @Translation("The width of the media player iframe, in pixels. Required when using a Media player card."),
+ *   description = @Translation("The width of the media player iframe, in pixels. Required when using the Player Card type."),
  *   name = "twitter:player:width",
  *   group = "twitter_cards",
  *   weight = 401,

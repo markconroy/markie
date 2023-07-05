@@ -3,11 +3,11 @@
 # textfield.
 
 metatag.metatag_tag.fb_admins:
-  type: label
+  type: text
   label: 'Facebook Admins'
 metatag.metatag_tag.fb_app_id:
-  type: label
+  type: text
   label: 'Facebook App ID'
 metatag.metatag_tag.fb_pages:
-  type: label
+  type: text
   label: 'Facebook Pages'

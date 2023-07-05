@@ -18,6 +18,8 @@ use Symfony\Component\Serializer\Exception\LogicException;
  * A normalizer that uses an objects own JsonSerializable implementation.
  *
  * @author Fred Cox <mcfedr@gmail.com>
+ *
+ * @final since Symfony 6.3
  */
 class JsonSerializableNormalizer extends AbstractNormalizer
 {
@@ -36,6 +38,13 @@ class JsonSerializableNormalizer extends AbstractNormalizer
         }
 
         return $this->serializer->normalize($object->jsonSerialize(), $format, $context);
+    }
+
+    public function getSupportedTypes(?string $format): array
+    {
+        return [
+            \JsonSerializable::class => __CLASS__ === static::class || $this->hasCacheableSupportsMethod(),
+        ];
     }
 
     /**
@@ -59,8 +68,13 @@ class JsonSerializableNormalizer extends AbstractNormalizer
         throw new LogicException(sprintf('Cannot denormalize with "%s".', \JsonSerializable::class));
     }
 
+    /**
+     * @deprecated since Symfony 6.3, use "getSupportedTypes()" instead
+     */
     public function hasCacheableSupportsMethod(): bool
     {
+        trigger_deprecation('symfony/serializer', '6.3', 'The "%s()" method is deprecated, use "getSupportedTypes()" instead.', __METHOD__);
+
         return __CLASS__ === static::class;
     }
 }

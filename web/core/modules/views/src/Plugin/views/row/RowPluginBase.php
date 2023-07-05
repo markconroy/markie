@@ -100,7 +100,7 @@ abstract class RowPluginBase extends PluginBase {
         $data = Views::viewsData()->get($relationship['table']);
         $base = $data[$relationship['field']]['relationship']['base'];
         if ($base == $this->base_table) {
-          $relationship_handler->init($executable, $relationship);
+          $relationship_handler->init($executable, $this->displayHandler, $relationship);
           $relationship_options[$relationship['id']] = $relationship_handler->adminLabel();
         }
       }
@@ -165,8 +165,10 @@ abstract class RowPluginBase extends PluginBase {
   public function preRender($result) {}
 
   /**
-   * Render a row object. This usually passes through to a theme template
-   * of some form, but not always.
+   * Renders a row object.
+   *
+   * This usually passes through to a theme template of some form, but not
+   * always.
    *
    * @param object $row
    *   A single row of the query result, so an element of $view->result.

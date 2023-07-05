@@ -30,6 +30,10 @@ class TokenMenuTest extends TokenTestBase {
   ];
 
   function testMenuTokens() {
+
+    $admin = $this->drupalCreateUser(['administer menu', 'link to any page']);
+    $this->drupalLogin($admin);
+
     // Make sure we have a body field on the node type.
     $this->drupalCreateContentType(['type' => 'page']);
     // Add a menu.

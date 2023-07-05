@@ -879,6 +879,7 @@ class FilterKernelTest extends KernelTestBase {
    *   comments.
    * - Empty HTML tags (BR, IMG).
    * - Mix of absolute and partial URLs, and email addresses in one content.
+   * - Input that exceeds PCRE backtracking limit.
    */
   public function testUrlFilterContent() {
     // Get FilterUrl object.
@@ -894,6 +895,24 @@ class FilterKernelTest extends KernelTestBase {
     $expected = file_get_contents($path . '/filter.url-output.txt');
     $result = _filter_url($input, $filter);
     $this->assertSame($expected, $result, 'Complex HTML document was correctly processed.');
+
+    $pcre_backtrack_limit = ini_get('pcre.backtrack_limit');
+    // Setting this limit to the smallest possible value should cause PCRE
+    // errors and break the various preg_* functions used by _filter_url().
+    ini_set('pcre.backtrack_limit', 1);
+
+    // If PCRE errors occur, _filter_url() should return the exact same text.
+    // Case of a small and simple HTML document.
+    $input = $expected = '<p>www.test.com</p>';
+    $result = _filter_url($input, $filter);
+    $this->assertSame($expected, $result, 'Simple HTML document was left intact when PCRE errors occurred.');
+    // Case of a complex HTML document.
+    $input = $expected = file_get_contents($path . '/filter.url-input.txt');
+    $result = _filter_url($input, $filter);
+    $this->assertSame($expected, $result, 'Complex HTML document was left intact when PCRE errors occurred.');
+
+    // Setting limit back to default.
+    ini_set('pcre.backtrack_limit', $pcre_backtrack_limit);
   }
 
   /**
@@ -996,23 +1015,23 @@ class FilterKernelTest extends KernelTestBase {
 
     $f = Html::normalize('<script>alert("test")</script>');
     $this->assertEquals('<script>
-<!--//--><![CDATA[// ><!--
+//<![CDATA[
 alert("test")
-//--><!]]>
+//]]>
 </script>', $f, 'HTML corrector -- CDATA added to script element');
 
     $f = Html::normalize('<p><script>alert("test")</script></p>');
     $this->assertEquals('<p><script>
-<!--//--><![CDATA[// ><!--
+//<![CDATA[
 alert("test")
-//--><!]]>
+//]]>
 </script></p>', $f, 'HTML corrector -- CDATA added to a nested script element');
 
     $f = Html::normalize('<p><style> /* Styling */ body {color:red}</style></p>');
     $this->assertEquals('<p><style>
-<!--/*--><![CDATA[/* ><!--*/
+/*<![CDATA[*/
  /* Styling */ body {color:red}
-/*--><!]]>*/
+/*]]>*/
 </style></p>', $f, 'HTML corrector -- CDATA added to a style element.');
 
     $filtered_data = Html::normalize('<p><style>
@@ -1022,50 +1041,38 @@ body {color:red}
 /*]]>*/
 </style></p>');
     $this->assertEquals('<p><style>
-<!--/*--><![CDATA[/* ><!--*/
-
 /*<![CDATA[*/
 /* Styling */
 body {color:red}
-/*]]]]><![CDATA[>*/
-
-/*--><!]]>*/
+/*]]>*/
 </style></p>', $filtered_data,
       new FormattableMarkup('HTML corrector -- Existing cdata section @pattern_name properly escaped', ['@pattern_name' => '/*<![CDATA[*/'])
     );
 
     $filtered_data = Html::normalize('<p><style>
-  <!--/*--><![CDATA[/* ><!--*/
+/*<![CDATA[*/
   /* Styling */
   body {color:red}
-  /*--><!]]>*/
+/*]]>*/
 </style></p>');
     $this->assertEquals('<p><style>
-<!--/*--><![CDATA[/* ><!--*/
-
-  <!--/*--><![CDATA[/* ><!--*/
+/*<![CDATA[*/
   /* Styling */
   body {color:red}
-  /*--><!]]]]><![CDATA[>*/
-
-/*--><!]]>*/
+/*]]>*/
 </style></p>', $filtered_data,
       new FormattableMarkup('HTML corrector -- Existing cdata section @pattern_name properly escaped', ['@pattern_name' => '<!--/*--><![CDATA[/* ><!--*/'])
     );
 
     $filtered_data = Html::normalize('<p><script>
-<!--//--><![CDATA[// ><!--
+//<![CDATA[
   alert("test");
-//--><!]]>
+//]]>
 </script></p>');
     $this->assertEquals('<p><script>
-<!--//--><![CDATA[// ><!--
-
-<!--//--><![CDATA[// ><!--
+//<![CDATA[
   alert("test");
-//--><!]]]]><![CDATA[>
-
-//--><!]]>
+//]]>
 </script></p>', $filtered_data,
       new FormattableMarkup('HTML corrector -- Existing cdata section @pattern_name properly escaped', ['@pattern_name' => '<!--//--><![CDATA[// ><!--'])
     );
@@ -1073,18 +1080,43 @@ body {color:red}
     $filtered_data = Html::normalize('<p><script>
 // <![CDATA[
   alert("test");
-// ]]>
+//]]>
 </script></p>');
     $this->assertEquals('<p><script>
-<!--//--><![CDATA[// ><!--
-
 // <![CDATA[
   alert("test");
-// ]]]]><![CDATA[>
-
-//--><!]]>
+//]]>
 </script></p>', $filtered_data,
       new FormattableMarkup('HTML corrector -- Existing cdata section @pattern_name properly escaped', ['@pattern_name' => '// <![CDATA['])
+    );
+
+    $filtered_data = Html::normalize('<p><script>
+// <![CDATA[![CDATA[![CDATA[
+  alert("test");
+//]]]]]]>
+</script></p>');
+    $this->assertEquals('<p><script>
+// <![CDATA[![CDATA[![CDATA[
+  alert("test");
+//]]]]]]>
+</script></p>', $filtered_data,
+      new FormattableMarkup('HTML corrector -- Existing cdata section @pattern_name properly escaped', ['@pattern_name' => '// <![CDATA[![CDATA[![CDATA['])
+    );
+
+    // Test calling Html::normalize() twice.
+    $filtered_data = Html::normalize('<p><script>
+// <![CDATA[![CDATA[![CDATA[
+  alert("test");
+//]]]]]]>
+</script></p>');
+    $filtered_data = Html::normalize($filtered_data);
+
+    $this->assertEquals('<p><script>
+// <![CDATA[![CDATA[![CDATA[
+  alert("test");
+//]]]]]]>
+</script></p>', $filtered_data,
+      new FormattableMarkup('HTML corrector -- Existing cdata section @pattern_name properly escaped', ['@pattern_name' => '// <![CDATA[![CDATA[![CDATA['])
     );
 
   }

@@ -452,7 +452,7 @@ class Connection extends DatabaseConnection implements SupportsTemporaryTablesIn
    * {@inheritdoc}
    */
   public function getFullQualifiedTableName($table) {
-    $prefix = $this->tablePrefix($table);
+    $prefix = $this->getPrefix();
 
     // Don't include the SQLite database file name as part of the table name.
     return $prefix . $table;

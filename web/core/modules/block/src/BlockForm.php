@@ -34,7 +34,7 @@ class BlockForm extends EntityForm {
   /**
    * The block storage.
    *
-   * @var \Drupal\Core\Entity\EntityStorageInterface
+   * @var \Drupal\Core\Config\Entity\ConfigEntityStorageInterface
    */
   protected $storage;
 
@@ -387,6 +387,9 @@ class BlockForm extends EntityForm {
    */
   public function getUniqueMachineName(BlockInterface $block) {
     $suggestion = $block->getPlugin()->getMachineNameSuggestion();
+    if ($block->getTheme()) {
+      $suggestion = $block->getTheme() . '_' . $suggestion;
+    }
 
     // Get all the blocks which starts with the suggested machine name.
     $query = $this->storage->getQuery();

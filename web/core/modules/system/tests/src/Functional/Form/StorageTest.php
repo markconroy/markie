@@ -7,8 +7,7 @@ use Drupal\Core\EventSubscriber\MainContentViewSubscriber;
 use Drupal\Tests\BrowserTestBase;
 
 /**
- * Tests a multistep form using form storage and makes sure validation and
- * caching works right.
+ * Tests a multistep form using form storage.
  *
  * The tested form puts data into the storage during the initial form
  * construction. These tests verify that there are no duplicate form
@@ -147,8 +146,7 @@ class StorageTest extends BrowserTestBase {
   }
 
   /**
-   * Verifies that form build-id is regenerated when loading an immutable form
-   * from the cache.
+   * Tests form build ID regeneration when loading a cached immutable form.
    */
   public function testImmutableForm() {
     // Request the form with 'cache' query parameter to enable form caching.

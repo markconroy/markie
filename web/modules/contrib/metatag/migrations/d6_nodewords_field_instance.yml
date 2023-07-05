@@ -8,7 +8,7 @@ migration_tags:
   - Drupal 6
 source:
   plugin: d6_nodewords_field_instance
-  source_module: metatag
+  source_module: nodewords
   ignore_map: true
   constants:
     field_name: field_metatag

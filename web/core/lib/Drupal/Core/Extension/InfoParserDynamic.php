@@ -26,8 +26,7 @@ class InfoParserDynamic implements InfoParserInterface {
    */
   public function __construct(string $app_root = NULL) {
     if ($app_root === NULL) {
-      // @todo https://www.drupal.org/project/drupal/issues/3087975 Require
-      //   $app_root argument.
+      @trigger_error('Calling InfoParserDynamic::__construct() without the $app_root argument is deprecated in drupal:10.1.0 and will be required in drupal:11.0.0. See https://www.drupal.org/node/3293709', E_USER_DEPRECATED);
       $app_root = \Drupal::hasService('kernel') ? \Drupal::root() : DRUPAL_ROOT;
     }
     $this->root = $app_root;
@@ -52,7 +51,7 @@ class InfoParserDynamic implements InfoParserInterface {
         throw new InfoParserException('Missing required keys (' . implode(', ', $missing_keys) . ') in ' . $filename);
       }
       if (!isset($parsed_info['core_version_requirement'])) {
-        if (strpos($filename, 'core/') === 0 || strpos($filename, $this->root . '/core/') === 0) {
+        if (str_starts_with($filename, 'core/') || str_starts_with($filename, $this->root . '/core/')) {
           // Core extensions do not need to specify core compatibility: they are
           // by definition compatible so a sensible default is used. Core
           // modules are allowed to provide these for testing purposes.

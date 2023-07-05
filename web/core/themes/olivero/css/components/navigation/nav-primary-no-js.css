@@ -10,19 +10,6 @@
  * Styles for primary navigation when JavaScript is disabled.
  */
 
-/*
- * Media query breakpoints.
- * Processed by postcss/postcss-custom-media.
- */
-
-/* Navigation related breakpoints */
-
-/* Grid related breakpoints */
-
-/* Grid shifts from 6 to 14 columns. */
-
-/* Width of the entire grid maxes out. */
-
 :root {
   --no-js-nav-column-width: 18.75rem;
   --no-js-nav-column-gap: var(--sp2);
@@ -78,8 +65,8 @@
   html:not(.js) .primary-nav__button-toggle {
     display: none;
   }
-  html:not(.js) .primary-nav__menu-link--button.primary-nav__menu-link--has-children:before,
-  html:not(.js) .primary-nav__menu-link--button.primary-nav__menu-link--has-children:after {
+  html:not(.js) .primary-nav__menu-link--button.primary-nav__menu-link--has-children::before,
+  html:not(.js) .primary-nav__menu-link--button.primary-nav__menu-link--has-children::after {
     content: none;
   }
 }
@@ -133,8 +120,8 @@
   html:not(.js) body.is-always-mobile-nav .primary-nav__button-toggle {
     display: none;
   }
-  html:not(.js) body.is-always-mobile-nav .primary-nav__menu-link--button.primary-nav__menu-link--has-children:before,
-  html:not(.js) body.is-always-mobile-nav .primary-nav__menu-link--button.primary-nav__menu-link--has-children:after {
+  html:not(.js) body.is-always-mobile-nav .primary-nav__menu-link--button.primary-nav__menu-link--has-children::before,
+  html:not(.js) body.is-always-mobile-nav .primary-nav__menu-link--button.primary-nav__menu-link--has-children::after {
     content: none;
   }
 

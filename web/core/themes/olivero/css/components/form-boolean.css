@@ -10,19 +10,6 @@
  * Checkbox and radio input elements.
  */
 
-/*
- * Media query breakpoints.
- * Processed by postcss/postcss-custom-media.
- */
-
-/* Navigation related breakpoints */
-
-/* Grid related breakpoints */
-
-/* Grid shifts from 6 to 14 columns. */
-
-/* Width of the entire grid maxes out. */
-
 input[type="checkbox"],
 input[type="radio"] {
   display: inline-block;
@@ -47,7 +34,6 @@ input[type="radio"]:focus {
 }
 
 @supports (outline-style: double) {
-
   input[type="checkbox"]:focus,
   input[type="radio"]:focus {
     border-width: 1px;
@@ -91,13 +77,6 @@ input.error[type="checkbox"]:focus,
 input.error[type="radio"]:focus {
   outline-color: var(--color--red);
   outline-offset: -2px;
-}
-
-/* Specific pseudo-element to apply red borders for IE11 bool elements in case of error */
-
-input.error[type="checkbox"]::-ms-check,
-input.error[type="radio"]::-ms-check {
-  border: 1px solid var(--color--red);
 }
 
 input[type="checkbox"] + label,

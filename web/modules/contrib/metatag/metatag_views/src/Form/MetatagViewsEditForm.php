@@ -82,7 +82,7 @@ class MetatagViewsEditForm extends FormBase {
     // Get meta tags from the view entity.
     $metatags = [];
     if ($view_id && $display_id) {
-      $metatags = metatag_get_view_tags($view_id, $display_id);
+      $metatags = metatag_views_get_view_tags($view_id, $display_id);
     }
 
     $form['metatags'] = $this->metatagManager->form($metatags, $form, ['view']);

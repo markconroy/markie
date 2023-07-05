@@ -2,6 +2,7 @@
 
 namespace Drupal\metatag\Plugin\metatag\Tag;
 
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 
 /**
@@ -44,13 +45,8 @@ class Robots extends MetaNameBase {
    * {@inheritdoc}
    */
   public function form(array $element = []) {
-    // Prepare the default value as it is stored as a string.
-    $default_value = [];
-    if (!empty($this->value)) {
-      $default_value = explode(', ', $this->value);
-    }
-
-    $form = [
+    $form = [];
+    $form['robots'] = [
       '#type' => 'checkboxes',
       '#title' => $this->label(),
       '#description' => $this->description(),
@@ -91,10 +87,58 @@ class Robots extends MetaNameBase {
           ],
         ],
       ],
-      '#default_value' => $default_value,
       '#required' => $element['#required'] ?? FALSE,
       '#element_validate' => [[get_class($this), 'validateTag']],
     ];
+
+    $form['robots-keyed'] = [
+      '#type' => 'container',
+      '#tree' => TRUE,
+    ];
+
+    $form['robots-keyed']['max-snippet'] = [
+      '#type' => 'number',
+      '#min' => -1,
+      '#title' => $this->t('Max Snippet'),
+      '#description' => $this->t('Use a number character as a textual snippet for this search result. "0" equals "nosnippet". "-1" will let the search engine decide the most effective length.'),
+    ];
+
+    $form['robots-keyed']['max-video-preview'] = [
+      '#type' => 'number',
+      '#min' => -1,
+      '#title' => $this->t('Max Video Preview'),
+      '#description' => $this->t('Use a maximum of number seconds as a video snippet for videos on this page in search results. "0" will use a static a image. "-1" means there is no limit.'),
+    ];
+
+    $form['robots-keyed']['max-image-preview'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Max Image Preview'),
+      '#description' => $this->t('Set the maximum size of an image preview for this page in a search results.'),
+      '#options' => [
+        'none' => $this->t('None - no image preview is to be shown.'),
+        'standard' => $this->t('Standard - a default image preview may be shown.'),
+        'large' => $this->t('Large - a larger image preview, up to the width of the viewport, may be shown.'),
+      ],
+      '#empty_option' => $this->t('Select'),
+    ];
+
+    $form['robots-keyed']['unavailable_after'] = [
+      '#type' => 'date',
+      '#title' => $this->t('Unavailable after date'),
+      '#description' => $this->t('Do not show this page in search results after the specified date'),
+    ];
+
+    // Prepare the default value as it is stored as a string.
+    if (!empty($this->value)) {
+      $default_value = explode(', ', $this->value);
+      $form['robots']['#default_value'] = $default_value;
+      foreach ($default_value as $value) {
+        $key_value = explode(':', $value);
+        if (!empty($key_value[1]) && isset($form['robots-keyed'][$key_value[0]])) {
+          $form['robots-keyed'][$key_value[0]]['#default_value'] = $key_value[1];
+        }
+      }
+    }
 
     return $form;
   }
@@ -113,11 +157,27 @@ class Robots extends MetaNameBase {
       'nofollow' => $this->t('nofollow - Prevents search engines from following links on this page.'),
       'noarchive' => $this->t('noarchive - Prevents cached copies of this page from appearing in search results.'),
       'nosnippet' => $this->t('nosnippet - Prevents descriptions from appearing in search results, and prevents page caching.'),
-      'noodp' => $this->t('noodp - Blocks the <a href=":opendirectory">Open Directory Project</a> description from appearing in search results.', [':opendirectory' => 'http://www.dmoz.org/']),
-      'noydir' => $this->t('noydir - Prevents Yahoo! from listing this page in the <a href=":ydir">Yahoo! Directory</a>.', [':ydir' => 'http://dir.yahoo.com/']),
       'noimageindex' => $this->t('noimageindex - Prevent search engines from indexing images on this page.'),
       'notranslate' => $this->t('notranslate - Prevent search engines from offering to translate this page in search results.'),
     ];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function validateTag(array &$element, FormStateInterface $form_state) {
+    $robots_combined_value = $form_state->getValue($element['#parents']);
+    $robots_root_parents = array_slice($element['#parents'], 0, -1);
+    $robots_keyed = $form_state->getValue(array_merge($robots_root_parents, ['robots-keyed']));
+    if (is_array($robots_keyed)) {
+      foreach ($robots_keyed as $key => $value) {
+        if (!empty($value)) {
+          $option = "$key:$value";
+          $robots_combined_value[$option] = $option;
+        }
+      }
+      $form_state->setValue($robots_root_parents ?: $element['#parents'], $robots_combined_value);
+    }
   }
 
 }

@@ -3,17 +3,17 @@
 # textfield.
 
 metatag.metatag_tag.google_plus_name:
-  type: label
+  type: text
   label: 'Google Plus: name'
 metatag.metatag_tag.google_plus_image:
-  type: label
+  type: text
   label: 'Google Plus: image'
 metatag.metatag_tag.google_plus_description:
   type: text
   label: 'Google Plus: description'
 metatag.metatag_tag.google_plus_publisher:
-  type: label
+  type: text
   label: 'Publisher URL'
 metatag.metatag_tag.google_plus_author:
-  type: label
+  type: text
   label: 'Author'

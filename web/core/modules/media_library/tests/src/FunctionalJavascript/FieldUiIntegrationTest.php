@@ -12,7 +12,7 @@ class FieldUiIntegrationTest extends MediaLibraryTestBase {
   /**
    * {@inheritdoc}
    */
-  protected static $modules = ['field_ui'];
+  protected static $modules = ['field_ui', 'block'];
 
   /**
    * {@inheritdoc}
@@ -24,6 +24,7 @@ class FieldUiIntegrationTest extends MediaLibraryTestBase {
    */
   protected function setUp(): void {
     parent::setUp();
+    $this->drupalPlaceBlock('local_tasks_block');
 
     // Create a user who can add media fields.
     $user = $this->drupalCreateUser([
@@ -33,6 +34,7 @@ class FieldUiIntegrationTest extends MediaLibraryTestBase {
     ]);
     $this->drupalLogin($user);
     $this->drupalCreateContentType(['type' => 'article']);
+    $this->drupalCreateContentType(['type' => 'page']);
   }
 
   /**
@@ -64,6 +66,17 @@ class FieldUiIntegrationTest extends MediaLibraryTestBase {
     $this->assertElementExistsAfterWait('css', '[name="settings[handler_settings][target_bundles][type_three]"][checked="checked"]');
     $page->pressButton('Save settings');
     $assert_session->pageTextContains('Saved Shatner configuration.');
+
+    // Create a new instance of an existing field storage and assert that it
+    // automatically uses the media library.
+    $this->drupalGet('/admin/structure/types/manage/page/fields/reuse');
+    $this->assertSession()->elementExists('css', "input[value=Re-use][name=field_shatner]");
+    $this->click("input[value=Re-use][name=field_shatner]");
+    $this->waitForFieldExists('Type One')->check();
+    $this->assertElementExistsAfterWait('css', '[name="settings[handler_settings][target_bundles][type_one]"][checked="checked"]');
+    $page->pressButton('Save settings');
+    $this->drupalGet('/admin/structure/types/manage/page/form-display');
+    $assert_session->fieldValueEquals('fields[field_shatner][type]', 'media_library_widget');
   }
 
 }

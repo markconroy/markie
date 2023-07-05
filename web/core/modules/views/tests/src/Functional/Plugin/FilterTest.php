@@ -153,8 +153,7 @@ class FilterTest extends ViewTestBase {
   }
 
   /**
-   * Tests no error message is displayed when all options are selected in an
-   * exposed filter.
+   * Tests an exposed filter when all options are selected.
    */
   public function testInOperatorSelectAllOptions() {
     $row['row[type]'] = 'fields';
@@ -173,7 +172,7 @@ class FilterTest extends ViewTestBase {
     $this->drupalGet('admin/structure/views/view/test_filter_in_operator_ui/edit/default');
     $this->submitForm([], 'Save');
     $this->submitForm([], 'Update preview');
-    $this->assertSession()->pageTextNotContains('An illegal choice has been detected.');
+    $this->assertSession()->pageTextNotContains('The submitted value "page" in the Type element is not allowed.');
   }
 
   /**

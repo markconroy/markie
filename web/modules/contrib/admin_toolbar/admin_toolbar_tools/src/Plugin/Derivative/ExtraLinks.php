@@ -111,14 +111,14 @@ class ExtraLinks extends DeriverBase implements ContainerDeriverInterface {
       $content_entity_bundle = $entities['content_entity_bundle'];
       $content_entity = $entities['content_entity'];
       $content_entity_bundle_storage = $this->entityTypeManager->getStorage($content_entity_bundle);
-      $bundles_ids = $content_entity_bundle_storage->getQuery()->pager($max_bundle_number)->execute();
+      $bundles_ids = $content_entity_bundle_storage->getQuery()->sort('weight')->pager($max_bundle_number)->execute();
       $bundles = $this->entityTypeManager->getStorage($content_entity_bundle)->loadMultiple($bundles_ids);
       if (count($bundles) == $max_bundle_number && $this->routeExists('entity.' . $content_entity_bundle . '.collection')) {
         $links[$content_entity_bundle . '.collection'] = [
           'title' => $this->t('All types'),
           'route_name' => 'entity.' . $content_entity_bundle . '.collection',
           'parent' => 'entity.' . $content_entity_bundle . '.collection',
-          'weight' => -1,
+          'weight' => -999,
         ] + $base_plugin_definition;
       }
       foreach ($bundles as $machine_name => $bundle) {
@@ -138,6 +138,10 @@ class ExtraLinks extends DeriverBase implements ContainerDeriverInterface {
               'entity_id' => $bundle->id(),
             ],
           ] + $base_plugin_definition;
+          $weight = $bundles[$machine_name]->get('weight');
+          if (isset($weight) && is_numeric($weight)) {
+            $links[$content_entity_bundle_root]['weight'] = $weight;
+          }
         }
         if ($this->routeExists('entity.' . $content_entity_bundle . '.edit_form')) {
           $key = 'entity.' . $content_entity_bundle . '.edit_form.' . $machine_name;
@@ -354,7 +358,7 @@ class ExtraLinks extends DeriverBase implements ContainerDeriverInterface {
         'title' => $this->t('Add vocabulary'),
         'route_name' => 'entity.taxonomy_vocabulary.add_form',
         'parent' => 'entity.taxonomy_vocabulary.collection',
-        'weight' => -5,
+        'weight' => -998,
       ] + $base_plugin_definition;
     }
 

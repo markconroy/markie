@@ -19,9 +19,18 @@ use Symfony\Component\Serializer\Exception\NotNormalizableValueException;
  * Normalizes a {@see \DateTimeZone} object to a timezone string.
  *
  * @author Jérôme Desjardins <jewome62@gmail.com>
+ *
+ * @final since Symfony 6.3
  */
 class DateTimeZoneNormalizer implements NormalizerInterface, DenormalizerInterface, CacheableSupportsMethodInterface
 {
+    public function getSupportedTypes(?string $format): array
+    {
+        return [
+            \DateTimeZone::class => __CLASS__ === static::class || $this->hasCacheableSupportsMethod(),
+        ];
+    }
+
     /**
      * @throws InvalidArgumentException
      */
@@ -66,8 +75,13 @@ class DateTimeZoneNormalizer implements NormalizerInterface, DenormalizerInterfa
         return \DateTimeZone::class === $type;
     }
 
+    /**
+     * @deprecated since Symfony 6.3, use "getSupportedTypes()" instead
+     */
     public function hasCacheableSupportsMethod(): bool
     {
+        trigger_deprecation('symfony/serializer', '6.3', 'The "%s()" method is deprecated, use "getSupportedTypes()" instead.', __METHOD__);
+
         return __CLASS__ === static::class;
     }
 }

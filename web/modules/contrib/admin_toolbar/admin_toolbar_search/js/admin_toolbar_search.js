@@ -69,7 +69,7 @@
         }).data('ui-autocomplete')._renderItem = (function (ul, item) {
           ul.addClass('admin-toolbar-search-autocomplete-list');
           return $('<li>')
-            .append('<div>' + item.labelRaw + ' <span class="admin-toolbar-search-url">' + item.value + '</span></div>')
+            .append('<div ><a href="' + item.value + '" onclick="window.open(this.href); return false;" >' + item.labelRaw + ' <span class="admin-toolbar-search-url">' + item.value + '</span></a></div>')
             .appendTo(ul);
         });
 

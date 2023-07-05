@@ -319,8 +319,6 @@ function locale_get_plural($count, $langcode = NULL) {
  * Implements hook_modules_installed().
  */
 function locale_modules_installed($modules) {
-  locale_system_set_config_langcodes();
-
   $components['module'] = $modules;
   locale_system_update($components);
 }
@@ -337,8 +335,6 @@ function locale_module_preuninstall($module) {
  * Implements hook_themes_installed().
  */
 function locale_themes_installed($themes) {
-  locale_system_set_config_langcodes();
-
   $components['theme'] = $themes;
   locale_system_update($components);
 }
@@ -370,28 +366,7 @@ function locale_cron() {
  * Updates default configuration when new modules or themes are installed.
  */
 function locale_system_set_config_langcodes() {
-  // Need to rewrite some default configuration language codes if the default
-  // site language is not English.
-  $default_langcode = \Drupal::languageManager()->getDefaultLanguage()->getId();
-  if ($default_langcode != 'en') {
-    // Update active configuration copies of all prior shipped configuration if
-    // they are still English. It is not enough to change configuration shipped
-    // with the components just installed, because installing a component such
-    // as views or tour module may bring in default configuration from prior
-    // components.
-    $names = Locale::config()->getComponentNames();
-    foreach ($names as $name) {
-      $config = \Drupal::configFactory()->reset($name)->getEditable($name);
-      // Should only update if still exists in active configuration. If locale
-      // module is enabled later, then some configuration may not exist anymore.
-      if (!$config->isNew()) {
-        $langcode = $config->get('langcode');
-        if (empty($langcode) || $langcode == 'en') {
-          $config->set('langcode', $default_langcode)->save();
-        }
-      }
-    }
-  }
+  Locale::config()->updateDefaultConfigLangcodes();
 }
 
 /**
@@ -435,7 +410,7 @@ function locale_system_update(array $components) {
     // components. Do this even if import is not enabled because parsing new
     // configuration may expose new source strings.
     $module_handler->loadInclude('locale', 'inc', 'locale.bulk');
-    if ($batch = locale_config_batch_update_components([])) {
+    if ($batch = locale_config_batch_update_components([], [], [], TRUE)) {
       batch_set($batch);
     }
   }
@@ -492,8 +467,7 @@ function locale_cache_flush() {
 /**
  * Implements hook_js_alter().
  */
-function locale_js_alter(&$javascript, AttachedAssetsInterface $assets) {
-  // @todo Remove this in https://www.drupal.org/node/2421323.
+function locale_js_alter(&$javascript, AttachedAssetsInterface $assets, LanguageInterface $language) {
   $files = [];
   foreach ($javascript as $item) {
     if (isset($item['type']) && $item['type'] == 'file') {
@@ -508,7 +482,7 @@ function locale_js_alter(&$javascript, AttachedAssetsInterface $assets) {
   // Replace the placeholder file with the actual JS translation file.
   $placeholder_file = 'core/modules/locale/locale.translation.js';
   if (isset($javascript[$placeholder_file])) {
-    if ($translation_file = locale_js_translate($files)) {
+    if ($translation_file = locale_js_translate($files, $language)) {
       $js_translation_asset = &$javascript[$placeholder_file];
       $js_translation_asset['data'] = $translation_file;
       // @todo Remove this when https://www.drupal.org/node/1945262 lands.
@@ -532,13 +506,17 @@ function locale_js_alter(&$javascript, AttachedAssetsInterface $assets) {
  *
  * @param array $files
  *   An array of local file paths.
+ * @param \Drupal\Core\Language\LanguageInterface $language_interface
+ *   The interface language the files should be translated into.
  *
  * @return string|null
  *   The filepath to the translation file or NULL if no translation is
  *   applicable.
  */
-function locale_js_translate(array $files = []) {
-  $language_interface = \Drupal::languageManager()->getCurrentLanguage();
+function locale_js_translate(array $files = [], $language_interface = NULL) {
+  if (!isset($language_interface)) {
+    $language_interface = \Drupal::languageManager()->getCurrentLanguage();
+  }
 
   $dir = 'public://' . \Drupal::config('locale.settings')->get('javascript.directory');
   $parsed = \Drupal::state()->get('system.javascript_parsed', []);
@@ -1093,8 +1071,9 @@ function _locale_strip_quotes($string) {
 }
 
 /**
- * Parses a JavaScript file, extracts strings wrapped in Drupal.t() and
- * Drupal.formatPlural() and inserts them into the database.
+ * Parses a JavaScript file, extracts translatable strings, and saves them.
+ *
+ * Strings are extracted from both Drupal.t() and Drupal.formatPlural().
  *
  * @param string $filepath
  *   File name to parse.

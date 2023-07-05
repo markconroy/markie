@@ -17,6 +17,9 @@ metatag.settings:
     tag_trim_method:
       type: string
       label: 'Trim method for trimmable tags.'
+    use_maxlength:
+      type: boolean
+      label: 'Use Maxlength module to force these limits?'
     tag_trim_maxlength:
       type: sequence
       label: 'Tag-specific maximum length'

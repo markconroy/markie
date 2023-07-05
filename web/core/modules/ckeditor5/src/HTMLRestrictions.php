@@ -559,6 +559,7 @@ final class HTMLRestrictions {
     unset($allowed_elements['*']);
     // @see \Drupal\filter\Plugin\Filter\FilterHtml::getHTMLRestrictions()
     // @todo remove this in https://www.drupal.org/project/drupal/issues/3226368
+    // cSpell:disable-next-line
     unset($allowed_elements['__zqh6vxfbk3cg__']);
 
     // Postprocess tag wildcards: convert
@@ -1039,7 +1040,7 @@ final class HTMLRestrictions {
   private static function isWildcardAttributeName(string $attribute_name): bool {
     // @see ::validateAllowedRestrictionsPhase3()
     assert($attribute_name !== '*');
-    return strpos($attribute_name, '*') !== FALSE;
+    return str_contains($attribute_name, '*');
   }
 
   /**
@@ -1314,7 +1315,7 @@ final class HTMLRestrictions {
           // the attribute name contains a partial wildcard, more complex syntax
           // is needed.
           $to_allow['attributes'][] = [
-            'key' => strpos($name, '*') === FALSE ? $name : ['regexp' => ['pattern' => self::getRegExForWildCardAttributeName($name)]],
+            'key' => !str_contains($name, '*') ? $name : ['regexp' => ['pattern' => self::getRegExForWildCardAttributeName($name)]],
             'value' => $allowed_attribute_value,
           ];
         }

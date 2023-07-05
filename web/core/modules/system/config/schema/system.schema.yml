@@ -351,6 +351,14 @@ condition.plugin.request_path:
     pages:
       type: string
 
+system.feature_flags:
+  type: config_object
+  label: 'System Feature Flags'
+  mapping:
+    linkset_endpoint:
+      type: boolean
+      label: 'Enable the menu linkset endpoint'
+
 condition.plugin.current_theme:
   type: condition.plugin
   mapping:

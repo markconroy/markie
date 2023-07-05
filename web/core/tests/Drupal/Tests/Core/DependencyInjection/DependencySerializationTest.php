@@ -8,7 +8,6 @@
 namespace Drupal\Tests\Core\DependencyInjection;
 
 use Drupal\Component\DependencyInjection\ReverseContainer;
-use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\DependencyInjection\DependencySerializationTrait;
 use Drupal\Core\Test\TestKernel;
 use Drupal\Tests\UnitTestCase;
@@ -43,30 +42,6 @@ class DependencySerializationTest extends UnitTestCase {
     $this->assertSame($service, $dependencySerialization->service);
     $this->assertSame($container, $dependencySerialization->container);
     $this->assertEmpty($dependencySerialization->getServiceIds());
-  }
-
-  /**
-   * @covers ::__sleep
-   * @covers ::__wakeup
-   */
-  public function testSerializationWithoutReverseContainer() {
-    $container = new ContainerBuilder();
-    \Drupal::setContainer($container);
-    // Create a pseudo service and dependency injected object.
-    $service = new \stdClass();
-    $container->set('test_service', $service);
-    $this->assertSame($container, $container->get('service_container'));
-
-    $dependencySerialization = new DependencySerializationTestDummy($service);
-    $dependencySerialization->setContainer($container);
-
-    $string = serialize($dependencySerialization);
-    /** @var \Drupal\Tests\Core\DependencyInjection\DependencySerializationTestDummy $dependencySerialization */
-    $dependencySerialization = unserialize($string);
-
-    $this->assertFalse($container->has(ReverseContainer::class));
-    $this->assertSame($service, $dependencySerialization->service);
-    $this->assertSame($container, $dependencySerialization->container);
   }
 
 }
@@ -104,6 +79,9 @@ class DependencySerializationTestDummy implements ContainerAwareInterface {
 
   /**
    * {@inheritdoc}
+   *
+   * phpcs:ignore Drupal.Commenting.FunctionComment.VoidReturn
+   * @return void
    */
   public function setContainer(ContainerInterface $container = NULL) {
     $this->container = $container;

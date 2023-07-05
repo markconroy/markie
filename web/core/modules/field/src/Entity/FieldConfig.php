@@ -44,6 +44,11 @@ use Drupal\field\FieldConfigInterface;
  *     "default_value_callback",
  *     "settings",
  *     "field_type",
+ *   },
+ *   constraints = {
+ *     "RequiredConfigDependencies" = {
+ *       "field_storage_config"
+ *     }
  *   }
  * )
  */
@@ -227,16 +232,7 @@ class FieldConfig extends FieldConfigBase implements FieldConfigInterface {
    * {@inheritdoc}
    */
   public static function postDelete(EntityStorageInterface $storage, array $fields) {
-    // Clear the cache upfront, to refresh the results of getBundles().
-    \Drupal::service('entity_field.manager')->clearCachedFieldDefinitions();
-
-    // Notify the entity storage.
-    foreach ($fields as $field) {
-      if (!$field->deleted) {
-        \Drupal::service('field_definition.listener')->onFieldDefinitionDelete($field);
-      }
-    }
-
+    parent::postDelete($storage, $fields);
     // If this is part of a configuration synchronization then the following
     // configuration updates are not necessary.
     $entity = reset($fields);
@@ -374,7 +370,7 @@ class FieldConfig extends FieldConfigBase implements FieldConfigInterface {
    * @param string $field_name
    *   Name of the field.
    *
-   * @return Drupal\field\FieldConfigInterface|null
+   * @return \Drupal\field\FieldConfigInterface|null
    *   The field config entity if one exists for the provided field
    *   name, otherwise NULL.
    */

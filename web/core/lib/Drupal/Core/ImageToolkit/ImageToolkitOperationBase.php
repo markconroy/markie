@@ -86,8 +86,7 @@ abstract class ImageToolkitOperationBase extends PluginBase implements ImageTool
   abstract protected function arguments();
 
   /**
-   * Checks if required arguments are passed in and adds defaults for non passed
-   * in optional arguments.
+   * Checks for required arguments and adds optional argument defaults.
    *
    * Image toolkit operation implementers should not normally need to override
    * this method as they should place their own validation in validateArguments.
@@ -185,6 +184,9 @@ abstract class ImageToolkitOperationBase extends PluginBase implements ImageTool
    *
    * @return bool
    *   TRUE if the operation was performed successfully, FALSE otherwise.
+   *
+   * @throws \RuntimeException
+   *   If the operation can not be performed.
    */
   abstract protected function execute(array $arguments);
 

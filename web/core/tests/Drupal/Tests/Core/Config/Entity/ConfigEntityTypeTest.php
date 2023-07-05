@@ -25,6 +25,8 @@ class ConfigEntityTypeTest extends UnitTestCase {
    * {@inheritdoc}
    */
   protected function setUp(): void {
+    parent::setUp();
+
     $this->typedConfigManager = $this->createMock(TypedConfigManagerInterface::class);
     $container = new ContainerBuilder();
     $container->set('config.typed', $this->typedConfigManager);
@@ -49,6 +51,8 @@ class ConfigEntityTypeTest extends UnitTestCase {
   }
 
   /**
+   * Tests when the prefix length exceeds the maximum defined prefix length.
+   *
    * Tests that we get an exception when the length of the config prefix that is
    * returned by getConfigPrefix() exceeds the maximum defined prefix length.
    *
@@ -68,6 +72,8 @@ class ConfigEntityTypeTest extends UnitTestCase {
   }
 
   /**
+   * Tests when the prefix length is valid.
+   *
    * Tests that a valid config prefix returned by getConfigPrefix()
    * does not throw an exception and is formatted as expected.
    *

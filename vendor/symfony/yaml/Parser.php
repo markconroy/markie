@@ -43,7 +43,7 @@ class Parser
      * Parses a YAML file into a PHP value.
      *
      * @param string $filename The path to the YAML file to be parsed
-     * @param int    $flags    A bit field of PARSE_* constants to customize the YAML parser behavior
+     * @param int    $flags    A bit field of Yaml::PARSE_* constants to customize the YAML parser behavior
      *
      * @throws ParseException If the file could not be read or the YAML is not valid
      */
@@ -70,7 +70,7 @@ class Parser
      * Parses a YAML string to a PHP value.
      *
      * @param string $value A YAML string
-     * @param int    $flags A bit field of PARSE_* constants to customize the YAML parser behavior
+     * @param int    $flags A bit field of Yaml::PARSE_* constants to customize the YAML parser behavior
      *
      * @throws ParseException If the YAML is not valid
      */
@@ -99,7 +99,7 @@ class Parser
         return $data;
     }
 
-    private function doParse(string $value, int $flags)
+    private function doParse(string $value, int $flags): mixed
     {
         $this->currentLineNb = -1;
         $this->currentLine = '';
@@ -503,7 +503,7 @@ class Parser
         return empty($data) ? null : $data;
     }
 
-    private function parseBlock(int $offset, string $yaml, int $flags)
+    private function parseBlock(int $offset, string $yaml, int $flags): mixed
     {
         $skippedLineNumbers = $this->skippedLineNumbers;
 
@@ -696,7 +696,7 @@ class Parser
      * Parses a YAML value.
      *
      * @param string $value   A YAML value
-     * @param int    $flags   A bit field of PARSE_* constants to customize the YAML parser behavior
+     * @param int    $flags   A bit field of Yaml::PARSE_* constants to customize the YAML parser behavior
      * @param string $context The parser context (either sequence or mapping)
      *
      * @throws ParseException When reference does not exist
@@ -844,8 +844,8 @@ class Parser
 
             while (
                 $notEOF && (
-                    $isCurrentLineBlank ||
-                    self::preg_match($pattern, $this->currentLine, $matches)
+                    $isCurrentLineBlank
+                    || self::preg_match($pattern, $this->currentLine, $matches)
                 )
             ) {
                 if ($isCurrentLineBlank && \strlen($this->currentLine) > $indentation) {

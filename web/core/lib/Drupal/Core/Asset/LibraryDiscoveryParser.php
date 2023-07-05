@@ -99,6 +99,18 @@ class LibraryDiscoveryParser {
    *   Thrown when a library has no js/css/setting.
    * @throws \UnexpectedValueException
    *   Thrown when a js file defines a positive weight.
+   * @throws \UnknownExtensionTypeException
+   *   Thrown when the extension type is unknown.
+   * @throws \UnknownExtensionException
+   *   Thrown when the extension is unknown.
+   * @throws \InvalidLibraryFileException
+   *   Thrown when the library file is invalid.
+   * @throws \InvalidLibrariesOverrideSpecificationException
+   *   Thrown when a definition refers to a non-existent library.
+   * @throws \Drupal\Core\Asset\Exception\LibraryDefinitionMissingLicenseException
+   *   Thrown when a library definition has no license information.
+   * @throws \LogicException
+   *   Thrown when a header key in a library definition is invalid.
    */
   public function buildByExtension($extension) {
     if ($extension === 'core') {
@@ -208,7 +220,7 @@ class LibraryDiscoveryParser {
               if ($source[1] !== '/') {
                 $source = substr($source, 1);
                 // Non core provided libraries can be in multiple locations.
-                if (strpos($source, 'libraries/') === 0) {
+                if (str_starts_with($source, 'libraries/')) {
                   $path_to_source = $this->librariesDirectoryFileFinder->find(substr($source, 10));
                   if ($path_to_source) {
                     $source = $path_to_source;

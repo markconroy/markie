@@ -174,6 +174,19 @@ class Tasks extends InstallTasks {
     if (empty($form['advanced_options']['port']['#default_value'])) {
       $form['advanced_options']['port']['#default_value'] = '3306';
     }
+    $form['advanced_options']['isolation_level'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Transaction isolation level'),
+      '#options' => [
+        'READ COMMITTED' => $this->t('READ COMMITTED'),
+        'REPEATABLE READ' => $this->t('REPEATABLE READ'),
+        '' => $this->t('Use database default'),
+      ],
+      '#default_value' => $database['isolation_level'] ?? 'READ COMMITTED',
+      '#description' => $this->t('The recommended database transaction level for Drupal is "READ COMMITTED". For more information, see the <a href=":performance_doc">setting MySQL transaction isolation level</a> page.', [
+        ':performance_doc' => 'https://www.drupal.org/docs/system-requirements/setting-the-mysql-transaction-isolation-level',
+      ]),
+    ];
 
     return $form;
   }
@@ -196,7 +209,7 @@ class Tasks extends InstallTasks {
 
     // Ensure that the MySQL driver supports utf8mb4 encoding.
     $version = Database::getConnection()->clientVersion();
-    if (FALSE !== strpos($version, 'mysqlnd')) {
+    if (str_contains($version, 'mysqlnd')) {
       // The mysqlnd driver supports utf8mb4 starting at version 5.0.9.
       $version = preg_replace('/^\D+([\d.]+).*/', '$1', $version);
       if (version_compare($version, self::MYSQLND_MINIMUM_VERSION, '<')) {

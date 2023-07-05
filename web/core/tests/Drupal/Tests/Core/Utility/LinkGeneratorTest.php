@@ -28,7 +28,7 @@ class LinkGeneratorTest extends UnitTestCase {
   protected $linkGenerator;
 
   /**
-   * The mocked url generator.
+   * The mocked URL generator.
    *
    * @var \PHPUnit\Framework\MockObject\MockObject
    */
@@ -90,7 +90,7 @@ class LinkGeneratorTest extends UnitTestCase {
    */
   public function providerTestGenerateHrefs() {
     return [
-      // Test that the url returned by the URL generator is used.
+      // Test that the URL returned by the URL generator is used.
       ['test_route_1', [], FALSE, '/test-route-1'],
         // Test that $parameters is passed to the URL generator.
       ['test_route_2', ['value' => 'example'], FALSE, '/test-route-2/example'],
@@ -274,7 +274,7 @@ class LinkGeneratorTest extends UnitTestCase {
   }
 
   /**
-   * Tests the generate() method with a url containing double quotes.
+   * Tests the generate() method with a URL containing double quotes.
    *
    * @covers ::generate
    */
@@ -548,6 +548,8 @@ class LinkGeneratorTest extends UnitTestCase {
    *
    * @see \Drupal\Core\Utility\LinkGenerator::generate()
    * @see \Drupal\Core\Utility\LinkGenerator::generateFromLink()
+   *
+   * @group legacy
    */
   public function testGenerateBubbleableMetadata() {
     $options = ['query' => [], 'language' => NULL, 'set_active_class' => FALSE, 'absolute' => FALSE];
@@ -574,6 +576,7 @@ class LinkGeneratorTest extends UnitTestCase {
     $this->assertInstanceOf('\Drupal\Core\Render\BubbleableMetadata', $generated_link);
 
     // Test ::generateFromLink().
+    $this->expectDeprecation('\Drupal\Core\Utility\LinkGeneratorInterface::generateFromLink() is deprecated in drupal:10.1.0 and is removed from drupal:11.0.0. Use \Drupal\Core\Utility\LinkGeneratorInterface::generate() instead. See https://www.drupal.org/node/3342992');
     $link = new Link('Test', $url);
     $this->assertSame($expected_link_markup, (string) $this->linkGenerator->generateFromLink($link));
     $generated_link = $this->linkGenerator->generateFromLink($link);

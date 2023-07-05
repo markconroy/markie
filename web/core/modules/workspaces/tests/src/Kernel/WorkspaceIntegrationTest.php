@@ -4,6 +4,7 @@ namespace Drupal\Tests\workspaces\Kernel;
 
 use Drupal\Core\Entity\EntityStorageException;
 use Drupal\Core\Form\FormState;
+use Drupal\Core\Session\AnonymousUserSession;
 use Drupal\entity_test\Entity\EntityTestMulRevPub;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\language\Entity\ConfigurableLanguage;
@@ -15,7 +16,7 @@ use Drupal\Tests\user\Traits\UserCreationTrait;
 use Drupal\views\Tests\ViewResultAssertionTrait;
 use Drupal\views\Views;
 use Drupal\workspaces\Entity\Workspace;
-use Drupal\workspaces\WorkspaceAccessException;
+use Drupal\workspaces\WorkspacePublishException;
 
 /**
  * Tests a complete publishing scenario across different workspaces.
@@ -368,6 +369,55 @@ class WorkspaceIntegrationTest extends KernelTestBase {
   }
 
   /**
+   * Tests the workspace association data integrity for entity CRUD operations.
+   *
+   * @covers ::workspaces_entity_presave
+   * @covers ::workspaces_entity_insert
+   * @covers ::workspaces_entity_delete
+   * @covers ::workspaces_entity_revision_delete
+   */
+  public function testWorkspaceAssociationDataIntegrity() {
+    $this->initializeWorkspacesModule();
+
+    // Check the initial empty state.
+    $expected_workspace_association = ['stage' => []];
+    $this->assertWorkspaceAssociation($expected_workspace_association, 'node');
+
+    // Add a new unpublished node in 'stage' and check that new revision is
+    // tracked in the workspace association data.
+    $this->switchToWorkspace('stage');
+    $unpublished_node = $this->createNode(['title' => 'stage - 3 - r3 - unpublished', 'created' => $this->createdTimestamp++, 'status' => FALSE]);
+    $expected_workspace_association = ['stage' => [3]];
+    $this->assertWorkspaceAssociation($expected_workspace_association, 'node');
+
+    // Add a new revision for the unpublished node.
+    $unpublished_node->title = 'stage - 3 - r4 - unpublished';
+    $unpublished_node->save();
+    $expected_workspace_association = ['stage' => [4]];
+    $this->assertWorkspaceAssociation($expected_workspace_association, 'node');
+
+    // Delete the unpublished node and check that the association data has been
+    // updated.
+    $unpublished_node->delete();
+    $expected_workspace_association = ['stage' => []];
+    $this->assertWorkspaceAssociation($expected_workspace_association, 'node');
+
+    // Add a new published node in 'stage' and check that new workspace-specific
+    // revision is tracked in the workspace association data. Note that revision
+    // '5' has been created as an unpublished default revision in Live, so it is
+    // not tracked.
+    $this->createNode(['title' => 'stage - 4 - r6 - published', 'created' => $this->createdTimestamp++, 'status' => TRUE]);
+    $expected_workspace_association = ['stage' => [6]];
+    $this->assertWorkspaceAssociation($expected_workspace_association, 'node');
+
+    // Delete revision '6' and check that the workspace association does not
+    // track it anymore.
+    $this->entityTypeManager->getStorage('node')->deleteRevision(6);
+    $expected_workspace_association = ['stage' => []];
+    $this->assertWorkspaceAssociation($expected_workspace_association, 'node');
+  }
+
+  /**
    * Tests entity tracking in workspace descendants.
    */
   public function testWorkspaceHierarchy() {
@@ -477,9 +527,29 @@ class WorkspaceIntegrationTest extends KernelTestBase {
     $this->assertWorkspaceAssociation($expected_workspace_association, 'node');
 
     // Check that a workspace that is not at the top level can not be published.
-    $this->expectException(WorkspaceAccessException::class);
+    $this->expectException(WorkspacePublishException::class);
     $this->expectExceptionMessage('Only top-level workspaces can be published.');
     $this->workspaces['dev']->publish();
+  }
+
+  /**
+   * Tests workspace publishing as anonymous user, simulating a CLI request.
+   */
+  public function testCliPublishing() {
+    $this->initializeWorkspacesModule();
+    $this->switchToWorkspace('stage');
+
+    // Add a workspace-specific revision to a pre-existing node.
+    $node = $this->entityTypeManager->getStorage('node')->load(2);
+    $node->title->value = 'stage - 2 - r3 - published';
+    $node->save();
+
+    // Switch to an anonymous user account and the 'Live' workspace.
+    \Drupal::service('account_switcher')->switchTo(new AnonymousUserSession());
+    \Drupal::service('workspaces.manager')->switchToLive();
+
+    // Publish the workspace as anonymous, simulating a CLI request.
+    $this->workspaces['stage']->publish();
   }
 
   /**

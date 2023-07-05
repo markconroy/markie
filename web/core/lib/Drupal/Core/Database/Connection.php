@@ -3,6 +3,8 @@
 namespace Drupal\Core\Database;
 
 use Drupal\Component\Assertion\Inspector;
+use Drupal\Core\Database\Event\DatabaseEvent;
+use Drupal\Core\Database\Exception\EventException;
 use Drupal\Core\Database\Query\Condition;
 use Drupal\Core\Database\Query\Delete;
 use Drupal\Core\Database\Query\Insert;
@@ -114,7 +116,7 @@ abstract class Connection {
    *
    * @var string
    */
-  private string $prefix;
+  protected string $prefix;
 
   /**
    * Replacements to fully qualify {table} placeholders in SQL strings.
@@ -124,7 +126,7 @@ abstract class Connection {
    *
    * @var string[]
    */
-  private array $tablePlaceholderReplacements;
+  protected array $tablePlaceholderReplacements;
 
   /**
    * The prefixes used by this database connection.
@@ -217,6 +219,14 @@ abstract class Connection {
   protected $identifierQuotes;
 
   /**
+   * Tracks the database API events to be dispatched.
+   *
+   * For performance reasons, database API events are not yielded by default.
+   * Call ::enableEvents() to enable them.
+   */
+  private array $enabledEvents = [];
+
+  /**
    * Constructs a Connection object.
    *
    * @param object $connection
@@ -287,9 +297,11 @@ abstract class Connection {
    *     the query. This is usually only meaningful for SELECT queries, where
    *     the statement object is how one accesses the result set returned by the
    *     query.
-   *   - Database::RETURN_AFFECTED: Return the number of rows affected by an
-   *     UPDATE or DELETE query. Be aware that means the number of rows actually
-   *     changed, not the number of rows matched by the WHERE clause.
+   *   - Database::RETURN_AFFECTED: Return the number of rows found (matched) by
+   *     the WHERE clause of an UPDATE or DELETE query (not the number of rows
+   *     actually changed). Note that although named RETURN_AFFECTED for
+   *     historical reasons, the number of rows matched is returned for
+   *     consistency across database engines.
    *   - Database::RETURN_INSERT_ID: Return the sequence ID (primary key)
    *     created by an INSERT statement on a table that contains a serial
    *     column.
@@ -364,6 +376,15 @@ abstract class Connection {
   }
 
   /**
+   * Returns the prefix of the tables.
+   *
+   * @return string $prefix
+   */
+  public function getPrefix(): string {
+    return $this->prefix;
+  }
+
+  /**
    * Set the prefix used by this database connection.
    *
    * @param string $prefix
@@ -428,8 +449,14 @@ abstract class Connection {
    *
    * @param string $table
    *   (optional) The table to find the prefix for.
+   *
+   * @deprecated in drupal:10.1.0 and is removed from drupal:11.0.0.
+   * Instead, you should just use Connection::getPrefix().
+   *
+   * @see https://www.drupal.org/node/3260849
    */
   public function tablePrefix($table = 'default') {
+    @trigger_error(__METHOD__ . '() is deprecated in drupal:10.1.0 and is removed from drupal:11.0.0. Instead, you should just use Connection::getPrefix(). See https://www.drupal.org/node/3260849', E_USER_DEPRECATED);
     return $this->prefix;
   }
 
@@ -460,7 +487,7 @@ abstract class Connection {
    */
   public function getFullQualifiedTableName($table) {
     $options = $this->getConnectionOptions();
-    $prefix = $this->tablePrefix($table);
+    $prefix = $this->getPrefix();
     return $options['database'] . '.' . $prefix . $table;
   }
 
@@ -539,7 +566,7 @@ abstract class Connection {
       $trim_chars .= ';';
     }
     $query = rtrim($query, $trim_chars);
-    if (strpos($query, ';') !== FALSE && empty($options['allow_delimiter_in_query'])) {
+    if (str_contains($query, ';') && empty($options['allow_delimiter_in_query'])) {
       throw new \InvalidArgumentException('; is not supported in SQL strings. Use only one statement at a time.');
     }
 
@@ -732,8 +759,8 @@ abstract class Connection {
    *     $options['return'] is not set (due to self::defaultOptions()),
    *     returns the executed statement.
    *   - If $options['return'] === self::RETURN_AFFECTED,
-   *     returns the number of rows affected by the query
-   *     (not the number matched).
+   *     returns the number of rows matched by the query
+   *     (not the number affected).
    *   - If $options['return'] === self::RETURN_INSERT_ID,
    *     returns the generated insert ID of the last query as a string.
    *   - If $options['return'] === self::RETURN_NULL, returns NULL.
@@ -1848,6 +1875,154 @@ abstract class Connection {
     catch (\Exception $e) {
       return FALSE;
     }
+  }
+
+  /**
+   * Returns the status of a database API event toggle.
+   *
+   * @param string $eventName
+   *   The name of the event to check.
+   *
+   * @return bool
+   *   TRUE if the event is going to be fired by the database API, FALSE
+   *   otherwise.
+   */
+  public function isEventEnabled(string $eventName): bool {
+    return $this->enabledEvents[$eventName] ?? FALSE;
+  }
+
+  /**
+   * Enables database API events dispatching.
+   *
+   * @param string[] $eventNames
+   *   A list of database events to be enabled.
+   *
+   * @return static
+   */
+  public function enableEvents(array $eventNames): static {
+    foreach ($eventNames as $eventName) {
+      assert(class_exists($eventName), "Event class {$eventName} does not exist");
+      $this->enabledEvents[$eventName] = TRUE;
+    }
+    return $this;
+  }
+
+  /**
+   * Disables database API events dispatching.
+   *
+   * @param string[] $eventNames
+   *   A list of database events to be disabled.
+   *
+   * @return static
+   */
+  public function disableEvents(array $eventNames): static {
+    foreach ($eventNames as $eventName) {
+      assert(class_exists($eventName), "Event class {$eventName} does not exist");
+      $this->enabledEvents[$eventName] = FALSE;
+    }
+    return $this;
+  }
+
+  /**
+   * Dispatches a database API event via the container dispatcher.
+   *
+   * @param \Drupal\Core\Database\Event\DatabaseEvent $event
+   *   The database event.
+   * @param string|null $eventName
+   *   (Optional) the name of the event to dispatch.
+   *
+   * @return \Drupal\Core\Database\Event\DatabaseEvent
+   *   The database event.
+   *
+   * @throws \Drupal\Core\Database\Exception\EventException
+   *   If the container is not initialized.
+   */
+  public function dispatchEvent(DatabaseEvent $event, ?string $eventName = NULL): DatabaseEvent {
+    if (\Drupal::hasService('event_dispatcher')) {
+      return \Drupal::service('event_dispatcher')->dispatch($event, $eventName);
+    }
+    throw new EventException('The event dispatcher service is not available. Database API events can only be fired if the container is initialized');
+  }
+
+  /**
+   * Determine the last non-database method that called the database API.
+   *
+   * Traversing the call stack from the very first call made during the
+   * request, we define "the routine that called this query" as the last entry
+   * in the call stack that is not any method called from the namespace of the
+   * database driver, is not inside the Drupal\Core\Database namespace and does
+   * have a file (which excludes call_user_func_array(), anonymous functions
+   * and similar). That makes the climbing logic very simple, and handles the
+   * variable stack depth caused by the query builders.
+   *
+   * See the @link http://php.net/debug_backtrace debug_backtrace() @endlink
+   * function.
+   *
+   * @return array
+   *   This method returns a stack trace entry similar to that generated by
+   *   debug_backtrace(). However, it flattens the trace entry and the trace
+   *   entry before it so that we get the function and args of the function that
+   *   called into the database system, not the function and args of the
+   *   database call itself.
+   */
+  public function findCallerFromDebugBacktrace(): array {
+    $stack = $this->removeDatabaseEntriesFromDebugBacktrace($this->getDebugBacktrace(), $this->getConnectionOptions()['namespace']);
+    // Return the first function call whose stack entry has a 'file' key, that
+    // is, it is not a callback or a closure.
+    for ($i = 0; $i < count($stack); $i++) {
+      if (!empty($stack[$i]['file'])) {
+        return [
+          'file' => $stack[$i]['file'],
+          'line' => $stack[$i]['line'],
+          'function' => $stack[$i + 1]['function'],
+          'class' => $stack[$i + 1]['class'] ?? NULL,
+          'type' => $stack[$i + 1]['type'] ?? NULL,
+          'args' => $stack[$i + 1]['args'] ?? [],
+        ];
+      }
+    }
+
+    return [];
+  }
+
+  /**
+   * Removes database related calls from a backtrace array.
+   *
+   * @param array $backtrace
+   *   A standard PHP backtrace. Passed by reference.
+   * @param string $driver_namespace
+   *   The PHP namespace of the database driver.
+   *
+   * @return array
+   *   The cleaned backtrace array.
+   */
+  public static function removeDatabaseEntriesFromDebugBacktrace(array $backtrace, string $driver_namespace): array {
+    // Starting from the very first entry processed during the request, find
+    // the first function call that can be identified as a call to a
+    // method/function in the database layer.
+    for ($n = count($backtrace) - 1; $n >= 0; $n--) {
+      // If the call was made from a function, 'class' will be empty. We give
+      // it a default empty string value in that case.
+      $class = $backtrace[$n]['class'] ?? '';
+      if (str_starts_with($class, __NAMESPACE__) || str_starts_with($class, $driver_namespace)) {
+        break;
+      }
+    }
+
+    return array_values(array_slice($backtrace, $n));
+  }
+
+  /**
+   * Gets the debug backtrace.
+   *
+   * Wraps the debug_backtrace function to allow mocking results in PHPUnit
+   * tests.
+   *
+   * @return array[]
+   *   The debug backtrace.
+   */
+  protected function getDebugBacktrace(): array {
+    return debug_backtrace();
   }
 
 }

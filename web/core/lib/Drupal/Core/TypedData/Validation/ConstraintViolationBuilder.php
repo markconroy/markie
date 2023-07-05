@@ -72,7 +72,7 @@ class ConstraintViolationBuilder implements ConstraintViolationBuilderInterface 
   /**
    * The translation domain.
    *
-   * @var string|null
+   * @var string|false|null
    */
   protected $translationDomain;
 
@@ -214,6 +214,9 @@ class ConstraintViolationBuilder implements ConstraintViolationBuilderInterface 
 
     /**
      * {@inheritdoc}
+     *
+     * phpcs:ignore Drupal.Commenting.FunctionComment.VoidReturn
+     * @return void
      */
     public function addViolation()
     {
@@ -253,4 +256,15 @@ class ConstraintViolationBuilder implements ConstraintViolationBuilderInterface 
         $this->cause
       ));
     }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function disableTranslation(): static
+  {
+    $this->translationDomain = false;
+
+    return $this;
+  }
+
 }

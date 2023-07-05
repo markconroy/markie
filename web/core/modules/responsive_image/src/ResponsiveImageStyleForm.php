@@ -199,7 +199,7 @@ class ResponsiveImageStyleForm extends EntityForm {
       '#default_value' => $responsive_image_style->getFallbackImageStyle(),
       '#options' => $image_styles,
       '#required' => TRUE,
-      '#description' => $this->t('Select the smallest image style you expect to appear in this space. The fallback image style should only appear on the site if an error occurs.'),
+      '#description' => $this->t('Select the image style you wish to use as the style when a browser does not support responsive images.'),
     ];
 
     $form['#tree'] = TRUE;
@@ -225,6 +225,7 @@ class ResponsiveImageStyleForm extends EntityForm {
       if ($form_state->getValue('breakpoint_group') != $form_state->getCompleteForm()['breakpoint_group']['#default_value']) {
         // Remove the image style mappings since the breakpoint ID has changed.
         $form_state->unsetValue('keyed_styles');
+        return;
       }
 
       // Check that at least 1 image style has been selected when using sizes.

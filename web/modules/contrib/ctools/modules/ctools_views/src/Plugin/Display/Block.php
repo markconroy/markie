@@ -497,7 +497,7 @@ class Block extends CoreBlock {
       foreach ($handlers as $key => $handler) {
         if ($handler->canExpose() && $handler->isExposed()) {
           $identifier = $handler->options['expose']['identifier'];
-          $config_key = "filter-${key}";
+          $config_key = "filter-{$key}";
 
           if (isset($values[$config_key])) {
             // Save values from generated form/values array, which may or may

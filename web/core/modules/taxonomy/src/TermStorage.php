@@ -91,12 +91,16 @@ class TermStorage extends SqlContentEntityStorage implements TermStorageInterfac
   /**
    * {@inheritdoc}
    */
-  public function deleteTermHierarchy($tids) {}
+  public function deleteTermHierarchy($tids) {
+    @trigger_error(__METHOD__ . '() is deprecated in drupal:10.1.0 and is removed from drupal:11.0.0. It is a no-op since 8.6.0. Parent references are automatically cleared when deleting a taxonomy term. See https://www.drupal.org/node/2936675', E_USER_DEPRECATED);
+  }
 
   /**
    * {@inheritdoc}
    */
-  public function updateTermHierarchy(EntityInterface $term) {}
+  public function updateTermHierarchy(EntityInterface $term) {
+    @trigger_error(__METHOD__ . '() is deprecated in drupal:10.1.0 and is removed from drupal:11.0.0. It is a no-op since 8.6.0. Parent references are automatically updated when updating a taxonomy term. See https://www.drupal.org/node/2936675', E_USER_DEPRECATED);
+  }
 
   /**
    * {@inheritdoc}
@@ -339,7 +343,7 @@ class TermStorage extends SqlContentEntityStorage implements TermStorageInterfac
   /**
    * {@inheritdoc}
    */
-  public function getNodeTerms(array $nids, array $vocabs = [], $langcode = NULL) {
+  public function getNodeTerms(array $nids, array $vids = [], $langcode = NULL) {
     $query = $this->database->select($this->getDataTable(), 'td');
     $query->innerJoin('taxonomy_index', 'tn', '[td].[tid] = [tn].[tid]');
     $query->fields('td', ['tid']);
@@ -348,8 +352,8 @@ class TermStorage extends SqlContentEntityStorage implements TermStorageInterfac
     $query->orderby('td.name');
     $query->condition('tn.nid', $nids, 'IN');
     $query->addTag('taxonomy_term_access');
-    if (!empty($vocabs)) {
-      $query->condition('td.vid', $vocabs, 'IN');
+    if (!empty($vids)) {
+      $query->condition('td.vid', $vids, 'IN');
     }
     if (!empty($langcode)) {
       $query->condition('td.langcode', $langcode);

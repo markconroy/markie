@@ -10,19 +10,6 @@
  * Book module styling.
  */
 
-/*
- * Media query breakpoints.
- * Processed by postcss/postcss-custom-media.
- */
-
-/* Navigation related breakpoints */
-
-/* Grid related breakpoints */
-
-/* Grid shifts from 6 to 14 columns. */
-
-/* Width of the entire grid maxes out. */
-
 .book-pager {
   display: flex;
   flex-wrap: wrap;
@@ -41,21 +28,18 @@
 }
 
 @media (min-width: 31.25rem) {
-
   .book-pager__item {
     flex: 0 0 33.33%;
   }
 }
 
 @media (min-width: 31.25rem) {
-
   .book-pager__item--center {
     text-align: center;
   }
 }
 
 @media (min-width: 31.25rem) {
-
   .book-pager__item--next {
     margin-inline-start: auto;
     text-align: end;
@@ -65,6 +49,7 @@
 .book-pager__link {
   display: inline-flex;
   align-items: center;
+  -webkit-text-decoration: none;
   text-decoration: none;
   color: var(--color-text-primary-medium);
   font-family: var(--font-serif);
@@ -72,7 +57,7 @@
   font-weight: 600;
 }
 
-.book-pager__link--previous:before {
+.book-pager__link--previous::before {
   display: block;
   width: var(--sp0-5);
   height: var(--sp0-5);
@@ -83,7 +68,7 @@
   border-inline-start: solid 0.1875rem currentColor;
 }
 
-.book-pager__link--next:after {
+.book-pager__link--next::after {
   display: block;
   width: var(--sp0-5);
   height: var(--sp0-5);
@@ -112,10 +97,10 @@
   list-style: none;
 }
 
-[dir="rtl"] .book-pager__link--previous:before {
+[dir="rtl"] .book-pager__link--previous::before {
   transform: rotate(45deg);
 }
 
-[dir="rtl"] .book-pager__link--next:after {
+[dir="rtl"] .book-pager__link--next::after {
   transform: rotate(-135deg);
 }

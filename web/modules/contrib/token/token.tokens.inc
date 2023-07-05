@@ -177,6 +177,11 @@ function token_token_info() {
 
   // Taxonomy term and vocabulary tokens.
   if (\Drupal::moduleHandler()->moduleExists('taxonomy')) {
+    $info['tokens']['term']['source'] = [
+      'name' => t('Translation source term'),
+      'description' => t("The source term for this current term's translation set."),
+      'type' => 'term',
+    ];
     $info['tokens']['term']['edit-url'] = [
       'name' => t('Edit URL'),
       'description' => t("The URL of the taxonomy term's edit page."),
@@ -613,6 +618,11 @@ function token_tokens($type, array $tokens, array $data, array $options, Bubblea
     }
 
     // Chained token relationships.
+    if (($parent_tokens = \Drupal::token()->findWithPrefix($tokens, 'source')) && $source_term = \Drupal::service('entity.repository')->getTranslationFromContext($term, LanguageInterface::LANGCODE_DEFAULT)) {
+      $replacements += \Drupal::token()->generate('term', $parent_tokens, [
+        'term' => $source_term,
+      ], ['langcode' => $source_term->language()->getId()] + $options, $bubbleable_metadata);
+    }
     if (($url_tokens = \Drupal::token()->findWithPrefix($tokens, 'url'))) {
       $replacements += \Drupal::token()->generate('url', $url_tokens, ['url' => $term->toUrl()], $options, $bubbleable_metadata);
     }
@@ -1410,9 +1420,12 @@ function menu_ui_tokens($type, $tokens, array $data, array $options, BubbleableM
           break;
 
         case 'edit-url':
-          $result =  $link->getEditRoute()->setOptions($url_options)->toString(TRUE);
-          $bubbleable_metadata->addCacheableDependency($result);
-          $replacements[$original] = $result->getGeneratedUrl();
+          $route = $link->getEditRoute();
+          if ($route) {
+            $result = $link->getEditRoute()->setOptions($url_options)->toString(TRUE);
+            $bubbleable_metadata->addCacheableDependency($result);
+            $replacements[$original] = $result->getGeneratedUrl();
+          }
           break;
       }
     }

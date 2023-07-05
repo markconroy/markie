@@ -149,6 +149,9 @@ class MediaLibraryTest extends WebDriverTestBase {
    * Tests using drupalMedia button to embed media into CKEditor 5.
    */
   public function testButton() {
+    // Skipped due to frequent random test failures.
+    // @todo Fix this and stop skipping it at https://www.drupal.org/i/3351597.
+    $this->markTestSkipped();
     $media_preview_selector = '.ck-content .ck-widget.drupal-media .media';
     $this->drupalGet('/node/add/blog');
     $this->waitForEditor();
@@ -205,11 +208,12 @@ class MediaLibraryTest extends WebDriverTestBase {
     $expected_attributes = [
       'data-entity-type' => 'media',
       'data-entity-uuid' => $this->media->uuid(),
-      'data-align' => 'center',
     ];
     foreach ($expected_attributes as $name => $expected) {
       $this->assertSame($expected, $drupal_media->getAttribute($name));
     }
+    // Ensure that by default, data-align attribute is not set.
+    $this->assertFalse($drupal_media->hasAttribute('data-align'));
   }
 
   /**

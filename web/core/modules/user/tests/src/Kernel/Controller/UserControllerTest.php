@@ -40,7 +40,7 @@ class UserControllerTest extends KernelTestBase {
   ];
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   protected function setUp(): void {
 
@@ -69,7 +69,7 @@ class UserControllerTest extends KernelTestBase {
       ->toString();
     $this->assertEquals($edit_url, $response->getTargetUrl());
 
-    $this->assertEquals(301, $response->getStatusCode());
+    $this->assertEquals(302, $response->getStatusCode());
 
   }
 

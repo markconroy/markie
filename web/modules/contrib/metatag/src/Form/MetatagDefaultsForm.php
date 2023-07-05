@@ -271,7 +271,7 @@ class MetatagDefaultsForm extends EntityForm {
     }
 
     // Set tags within the Metatag entity.
-    $tags = $this->metatagPluginManager->getDefinitions();
+    $tags = $this->metatagManager->sortedTags();
     $tag_values = [];
     foreach ($tags as $tag_id => $tag_definition) {
       if ($form_state->hasValue($tag_id)) {

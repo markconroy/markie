@@ -66,6 +66,8 @@ class UserAuthTest extends UnitTestCase {
    * {@inheritdoc}
    */
   protected function setUp(): void {
+    parent::setUp();
+
     $this->userStorage = $this->createMock('Drupal\Core\Entity\EntityStorageInterface');
 
     /** @var \Drupal\Core\Entity\EntityTypeManagerInterface|\PHPUnit\Framework\MockObject\MockObject $entity_type_manager */
@@ -276,6 +278,56 @@ class UserAuthTest extends UnitTestCase {
       ->addCheckToUrl($event);
 
     $this->assertSame("$frontend_url?check_logged_in=1", $response->getTargetUrl());
+  }
+
+  /**
+   * Tests the auth that ends in a redirect from subdomain with a fragment to TLD.
+   */
+  public function testAddCheckToUrlForTrustedRedirectResponseWithFragment(): void {
+    $site_domain = 'site.com';
+    $frontend_url = "https://$site_domain";
+    $backend_url = "https://api.$site_domain";
+    $request = Request::create($backend_url);
+    $response = new TrustedRedirectResponse($frontend_url . '#a_fragment');
+
+    $request_context = $this->createMock(RequestContext::class);
+    $request_context
+      ->method('getCompleteBaseUrl')
+      ->willReturn($backend_url);
+
+    $container = new ContainerBuilder();
+    $container->set('router.request_context', $request_context);
+    \Drupal::setContainer($container);
+
+    $session_mock = $this->createMock(SessionInterface::class);
+    $session_mock
+      ->expects($this->once())
+      ->method('has')
+      ->with('check_logged_in')
+      ->willReturn(TRUE);
+    $session_mock
+      ->expects($this->once())
+      ->method('remove')
+      ->with('check_logged_in');
+
+    $event = new ResponseEvent(
+      $this->createMock(HttpKernelInterface::class),
+      $request,
+      HttpKernelInterface::MAIN_REQUEST,
+      $response
+    );
+
+    $request
+      ->setSession($session_mock);
+
+    $this
+      ->getMockBuilder(Cookie::class)
+      ->disableOriginalConstructor()
+      ->onlyMethods([])
+      ->getMock()
+      ->addCheckToUrl($event);
+
+    $this->assertSame("$frontend_url?check_logged_in=1#a_fragment", $response->getTargetUrl());
   }
 
 }

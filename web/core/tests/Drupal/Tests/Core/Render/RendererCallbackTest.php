@@ -42,18 +42,30 @@ class RendererCallbackTest extends RendererTestBase {
   public function providerTestCallback() {
     return [
       'Procedural function pre render' => [
+        // We specifically test an untrusted callback here. We need to let
+        // PHPStan ignore it.
+        // @phpstan-ignore-next-line
         ['#pre_render' => ['\Drupal\Tests\Core\Render\callback'], '#type' => 'container'],
         'Render #pre_render callbacks must be methods of a class that implements \Drupal\Core\Security\TrustedCallbackInterface or be an anonymous function. The callback was \Drupal\Tests\Core\Render\callback. See https://www.drupal.org/node/2966725',
       ],
       'Static object method post render' => [
+        // We specifically test an invalid callback here. We need to let PHPStan
+        // ignore it.
+        // @phpstan-ignore-next-line
         ['#post_render' => ['\Drupal\Tests\Core\Render\RendererCallbackTest::renderCallback'], '#type' => 'container'],
         'Render #post_render callbacks must be methods of a class that implements \Drupal\Core\Security\TrustedCallbackInterface or be an anonymous function. The callback was \Drupal\Tests\Core\Render\RendererCallbackTest::renderCallback. See https://www.drupal.org/node/2966725',
       ],
       'Object method access callback' => [
+        // We specifically test an invalid callback here. We need to let PHPStan
+        // ignore it.
+        // @phpstan-ignore-next-line
         ['#access_callback' => [$this, 'renderCallback'], '#type' => 'container'],
         'Render #access_callback callbacks must be methods of a class that implements \Drupal\Core\Security\TrustedCallbackInterface or be an anonymous function. The callback was Drupal\Tests\Core\Render\RendererCallbackTest::renderCallback. See https://www.drupal.org/node/2966725',
       ],
       'Procedural function lazy builder' => [
+        // We specifically test an untrusted callback here. We need to let
+        // PHPStan ignore it.
+        // @phpstan-ignore-next-line
         ['#lazy_builder' => ['\Drupal\Tests\Core\Render\callback', []]],
         'Render #lazy_builder callbacks must be methods of a class that implements \Drupal\Core\Security\TrustedCallbackInterface or be an anonymous function. The callback was \Drupal\Tests\Core\Render\callback. See https://www.drupal.org/node/2966725',
       ],

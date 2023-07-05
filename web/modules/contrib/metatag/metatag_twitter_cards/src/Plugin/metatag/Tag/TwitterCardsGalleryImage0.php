@@ -19,6 +19,10 @@ use Drupal\metatag\Plugin\metatag\Tag\MetaNameBase;
  *   multiple = FALSE,
  *   absolute_url = TRUE
  * )
+ *
+ * @deprecated in metatag:8.x-1.23 and is removed from metatag:2.0.0. No replacement is provided.
+ *
+ * @see https://www.drupal.org/node/3329072
  */
 class TwitterCardsGalleryImage0 extends MetaNameBase {
 }

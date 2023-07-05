@@ -86,6 +86,7 @@ class CToolsViewsBasicViewBlockTest extends UITestBase {
     // Add block to sidebar_first region with default settings.
     $edit = [];
     $edit['region'] = 'sidebar_first';
+    $edit['id'] = 'views_block__ctools_views_test_view_block_pager';
     $edit['settings[override][items_per_page]'] = 0;
     $this->drupalGet('admin/structure/block/add/views_block:ctools_views_test_view-block_pager/' . $default_theme);
     $this->submitForm($edit, $this->t('Save block'));
@@ -133,6 +134,7 @@ class CToolsViewsBasicViewBlockTest extends UITestBase {
     // Add block to sidebar_first region with default settings.
     $edit = [];
     $edit['region'] = 'sidebar_first';
+    $edit['id'] = 'views_block__ctools_views_test_view_block_pager';
     $edit['settings[override][items_per_page]'] = 0;
     $this->drupalGet('admin/structure/block/add/views_block:ctools_views_test_view-block_pager/' . $default_theme);
     $this->submitForm($edit, $this->t('Save block'));
@@ -181,6 +183,7 @@ class CToolsViewsBasicViewBlockTest extends UITestBase {
     // Add block to sidebar_first region with default settings.
     $edit = [];
     $edit['region'] = 'sidebar_first';
+    $edit['id'] = 'views_block__ctools_views_test_view_block_pager';
     $edit['settings[override][items_per_page]'] = 0;
     $this->drupalGet('admin/structure/block/add/views_block:ctools_views_test_view-block_pager/' . $default_theme);
     $this->submitForm($edit, $this->t('Save block'));
@@ -238,6 +241,7 @@ class CToolsViewsBasicViewBlockTest extends UITestBase {
     // Add block to sidebar_first region with default settings.
     $edit = [];
     $edit['region'] = 'sidebar_first';
+    $edit['id'] = 'views_block__ctools_views_test_view_block_fields';
     $this->drupalGet('admin/structure/block/add/views_block:ctools_views_test_view-block_fields/' . $default_theme);
     $this->submitForm($edit, $this->t('Save block'));
 
@@ -275,6 +279,7 @@ class CToolsViewsBasicViewBlockTest extends UITestBase {
     // Add block to sidebar_first region with default settings.
     $edit = [];
     $edit['region'] = 'sidebar_first';
+    $edit['id'] = 'views_block__ctools_views_test_view_block_fields';
     $this->drupalGet('admin/structure/block/add/views_block:ctools_views_test_view-block_fields/' . $default_theme);
     $this->submitForm($edit, $this->t('Save block'));
 
@@ -331,6 +336,7 @@ class CToolsViewsBasicViewBlockTest extends UITestBase {
     // Add block to sidebar_first region with default settings.
     $edit = [];
     $edit['region'] = 'sidebar_first';
+    $edit['id'] = 'views_block__ctools_views_test_view_block_filter';
     $edit['settings[exposed][filter-status][exposed]'] = 1;
     $edit['settings[exposed][filter-job][exposed]'] = 1;
     $this->drupalGet('admin/structure/block/add/views_block:ctools_views_test_view-block_filter/' . $default_theme);
@@ -376,6 +382,7 @@ class CToolsViewsBasicViewBlockTest extends UITestBase {
     // Add block to sidebar_first region with default settings.
     $edit = [];
     $edit['region'] = 'sidebar_first';
+    $edit['id'] = 'views_block__ctools_views_test_view_block_sort';
     $this->drupalGet('admin/structure/block/add/views_block:ctools_views_test_view-block_sort/' . $default_theme);
     $this->submitForm($edit, $this->t('Save block'));
 

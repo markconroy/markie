@@ -10,19 +10,6 @@
  * Styles for menu placed in sidebar region.
  */
 
-/*
- * Media query breakpoints.
- * Processed by postcss/postcss-custom-media.
- */
-
-/* Navigation related breakpoints */
-
-/* Grid related breakpoints */
-
-/* Grid shifts from 6 to 14 columns. */
-
-/* Width of the entire grid maxes out. */
-
 .menu--sidebar {
   list-style: none;
 }
@@ -47,7 +34,7 @@
   /* Bottom divider line. */
 }
 
-.menu--sidebar .menu__link:after {
+.menu--sidebar .menu__link::after {
   position: absolute;
   inset-block-end: 0;
   inset-inline-start: 0;
@@ -58,6 +45,7 @@
 }
 
 .menu--sidebar .menu__link--link {
+  -webkit-text-decoration: none;
   text-decoration: none;
   color: var(--color-text-neutral-loud);
   font-weight: 600;
@@ -69,6 +57,6 @@
 
 /* No bottom divider line for last menu item. */
 
-:is(.menu--sidebar .menu__item--level-1:last-child > .menu__link:last-child,.menu--sidebar .menu__item--level-1:last-child > .menu__item--level-2:last-child > .menu__link:last-child):after {
+:is(.menu--sidebar .menu__item--level-1:last-child > .menu__link:last-child, .menu--sidebar .menu__item--level-1:last-child > .menu__item--level-2:last-child > .menu__link:last-child)::after {
   content: none;
 }

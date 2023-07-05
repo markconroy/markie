@@ -27,7 +27,7 @@ function metatag_routes_help($route_name, RouteMatchInterface $route_match) {
  * Implements hook_metatags_alter().
  */
 function metatag_routes_metatags_alter(array &$metatags, array $context) {
-  // Ignore some system routes that are not approrpriate for meta tags.
+  // Ignore some system routes that are not appropriate for meta tags.
   if (metatag_is_current_route_supported()) {
     // Look to see if a configuration was assigned for this route.
     $current_route = \Drupal::routeMatch()->getRouteName();

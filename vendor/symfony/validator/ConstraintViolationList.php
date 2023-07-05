@@ -11,6 +11,8 @@
 
 namespace Symfony\Component\Validator;
 
+use Symfony\Component\Validator\Exception\OutOfBoundsException;
+
 /**
  * Default implementation of {@ConstraintViolationListInterface}.
  *
@@ -56,11 +58,17 @@ class ConstraintViolationList implements \IteratorAggregate, ConstraintViolation
         return $string;
     }
 
+    /**
+     * @return void
+     */
     public function add(ConstraintViolationInterface $violation)
     {
         $this->violations[] = $violation;
     }
 
+    /**
+     * @return void
+     */
     public function addAll(ConstraintViolationListInterface $otherList)
     {
         foreach ($otherList as $violation) {
@@ -71,7 +79,7 @@ class ConstraintViolationList implements \IteratorAggregate, ConstraintViolation
     public function get(int $offset): ConstraintViolationInterface
     {
         if (!isset($this->violations[$offset])) {
-            throw new \OutOfBoundsException(sprintf('The offset "%s" does not exist.', $offset));
+            throw new OutOfBoundsException(sprintf('The offset "%s" does not exist.', $offset));
         }
 
         return $this->violations[$offset];
@@ -82,11 +90,17 @@ class ConstraintViolationList implements \IteratorAggregate, ConstraintViolation
         return isset($this->violations[$offset]);
     }
 
+    /**
+     * @return void
+     */
     public function set(int $offset, ConstraintViolationInterface $violation)
     {
         $this->violations[$offset] = $violation;
     }
 
+    /**
+     * @return void
+     */
     public function remove(int $offset)
     {
         unset($this->violations[$offset]);

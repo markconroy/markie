@@ -17,11 +17,6 @@ class EntityNormalizer extends ComplexDataNormalizer implements DenormalizerInte
   use FieldableEntityNormalizerTrait;
 
   /**
-   * {@inheritdoc}
-   */
-  protected $supportedInterfaceOrClass = EntityInterface::class;
-
-  /**
    * Constructs an EntityNormalizer object.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
@@ -73,6 +68,15 @@ class EntityNormalizer extends ComplexDataNormalizer implements DenormalizerInte
     $entity->_restSubmittedFields = array_keys($data);
 
     return $entity;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getSupportedTypes(?string $format): array {
+    return [
+      EntityInterface::class => TRUE,
+    ];
   }
 
 }

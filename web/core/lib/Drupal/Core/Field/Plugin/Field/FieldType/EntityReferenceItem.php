@@ -2,10 +2,12 @@
 
 namespace Drupal\Core\Field\Plugin\Field\FieldType;
 
+use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Component\Utility\Html;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Entity\ContentEntityStorageInterface;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Component\Plugin\Exception\PluginNotFoundException;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Entity\TypedData\EntityDataDefinition;
@@ -112,6 +114,49 @@ class EntityReferenceItem extends FieldItemBase implements OptionsProviderInterf
   /**
    * {@inheritdoc}
    */
+  public static function storageSettingsSummary(FieldStorageDefinitionInterface $storage_definition): array {
+    $summary = parent::storageSettingsSummary($storage_definition);
+    $target_type = $storage_definition->getSetting('target_type');
+    $target_type_info = \Drupal::entityTypeManager()->getDefinition($target_type);
+    if (!empty($target_type_info)) {
+      $summary[] = new TranslatableMarkup('Reference type: @entity_type', [
+        '@entity_type' => $target_type_info->getLabel(),
+      ]);
+    }
+    return $summary;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function fieldSettingsSummary(FieldDefinitionInterface $field_definition): array {
+    $summary = parent::fieldSettingsSummary($field_definition);
+    $target_type = $field_definition->getFieldStorageDefinition()->getSetting('target_type');
+    $handler_settings = $field_definition->getSetting('handler_settings');
+
+    if (!isset($handler_settings['target_bundles'])) {
+      return $summary;
+    }
+
+    /** @var \Drupal\Core\Entity\EntityTypeBundleInfoInterface $entity_bundle_information */
+    $entity_bundle_information = \Drupal::service('entity_type.bundle.info');
+    $bundle_info = $entity_bundle_information->getBundleInfo($target_type);
+    $bundles = array_map(fn($bundle) => $bundle_info[$bundle]['label'], $handler_settings['target_bundles']);
+    $bundle_label = \Drupal::entityTypeManager()->getDefinition($target_type)->getBundleLabel();
+
+    if (!empty($bundles)) {
+      $summary[] = new FormattableMarkup('@bundle: @entity_type', [
+        '@bundle' => $bundle_label ?: new TranslatableMarkup('Bundle'),
+        '@entity_type' => implode(', ', $bundles),
+      ]);
+    }
+
+    return $summary;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public static function mainPropertyName() {
     return 'target_id';
   }
@@ -121,7 +166,16 @@ class EntityReferenceItem extends FieldItemBase implements OptionsProviderInterf
    */
   public static function schema(FieldStorageDefinitionInterface $field_definition) {
     $target_type = $field_definition->getSetting('target_type');
-    $target_type_info = \Drupal::entityTypeManager()->getDefinition($target_type);
+    try {
+      $target_type_info = \Drupal::entityTypeManager()->getDefinition($target_type);
+    }
+    catch (PluginNotFoundException $e) {
+      throw new FieldException(sprintf("Field '%s' on entity type '%s' references a target entity type '%s' which does not exist.",
+        $field_definition->getName(),
+        $field_definition->getTargetEntityTypeId(),
+        $target_type
+      ));
+    }
     $properties = static::propertyDefinitions($field_definition)['target_id'];
     if ($target_type_info->entityClassImplements(FieldableEntityInterface::class) && $properties->getDataType() === 'integer') {
       $columns = [
@@ -637,8 +691,6 @@ class EntityReferenceItem extends FieldItemBase implements OptionsProviderInterf
   /**
    * Render API callback: Processes the field settings form.
    *
-   * Allows access to the form state.
-   *
    * @see static::fieldSettingsForm()
    */
   public static function fieldSettingsAjaxProcess($form, FormStateInterface $form_state) {
@@ -647,8 +699,7 @@ class EntityReferenceItem extends FieldItemBase implements OptionsProviderInterf
   }
 
   /**
-   * Adds entity_reference specific properties to AJAX form elements from the
-   * field settings form.
+   * Adds the field settings to AJAX form elements.
    *
    * @see static::fieldSettingsAjaxProcess()
    */
@@ -667,9 +718,10 @@ class EntityReferenceItem extends FieldItemBase implements OptionsProviderInterf
   }
 
   /**
-   * Render API callback: Moves entity_reference specific Form API elements
-   * (i.e. 'handler_settings') up a level for easier processing by the
-   * validation and submission handlers.
+   * Render API callback that moves entity reference elements up a level.
+   *
+   * The elements (i.e. 'handler_settings') are moved for easier processing by
+   * the validation and submission handlers.
    *
    * @see _entity_reference_field_settings_process()
    */

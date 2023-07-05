@@ -5,3 +5,4 @@ services:
      - '@entity_type.manager'
      - '@plugin.manager.menu.local_task'
      - '@current_route_match'
+     - '@config.factory'

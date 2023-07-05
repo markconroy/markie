@@ -56,7 +56,7 @@ trait AssertConfigTrait {
             $found = FALSE;
             if (!empty($skipped_config[$config_name])) {
               foreach ($skipped_config[$config_name] as $line) {
-                if (strpos($closing, $line) !== FALSE) {
+                if (str_contains($closing, $line)) {
                   $found = TRUE;
                   break;
                 }
@@ -77,7 +77,7 @@ trait AssertConfigTrait {
           }
           foreach ($op->closing as $closing) {
             // The UUIDs don't exist in the default config.
-            if (strpos($closing, 'uuid: ') === 0) {
+            if (str_starts_with($closing, 'uuid: ')) {
               break;
             }
             throw new \Exception($config_name . ': ' . var_export($op, TRUE));

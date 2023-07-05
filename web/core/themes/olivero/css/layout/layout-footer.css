@@ -10,19 +10,6 @@
  * Grid system definition for the footer top and footer bottom layouts.
  */
 
-/*
- * Media query breakpoints.
- * Processed by postcss/postcss-custom-media.
- */
-
-/* Navigation related breakpoints */
-
-/* Grid related breakpoints */
-
-/* Grid shifts from 6 to 14 columns. */
-
-/* Width of the entire grid maxes out. */
-
 /**
  * Creates stacking context ensuring that child elements can never appear in
  * front of mobile navigation.
@@ -38,7 +25,6 @@
 }
 
 @media (min-width: 75rem) {
-
   .site-footer__inner {
     padding-block: var(--sp4) calc(13 * var(--sp));
   }
@@ -50,7 +36,6 @@
 }
 
 @media (min-width: 43.75rem) {
-
   .region--footer_top__inner > *,
   .region--footer_bottom__inner > * {
     flex: 1;
@@ -64,7 +49,6 @@
 }
 
 @media (min-width: 43.75rem) {
-
   .region--footer_top__inner,
   .region--footer_bottom__inner {
     display: flex;

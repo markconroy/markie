@@ -21,6 +21,8 @@ use Symfony\Component\Serializer\Exception\UnexpectedValueException;
 
 /**
  * @author Jordi Boggiano <j.boggiano@seld.be>
+ *
+ * @method getSupportedTypes(?string $format): array
  */
 interface DenormalizerInterface
 {
@@ -29,10 +31,10 @@ interface DenormalizerInterface
     /**
      * Denormalizes data back into an object of the given class.
      *
-     * @param mixed  $data    Data to restore
-     * @param string $type    The expected class to instantiate
-     * @param string $format  Format the given data was extracted from
-     * @param array  $context Options available to the denormalizer
+     * @param mixed       $data    Data to restore
+     * @param string      $type    The expected class to instantiate
+     * @param string|null $format  Format the given data was extracted from
+     * @param array       $context Options available to the denormalizer
      *
      * @return mixed
      *
@@ -49,12 +51,29 @@ interface DenormalizerInterface
     /**
      * Checks whether the given class is supported for denormalization by this normalizer.
      *
-     * @param mixed  $data    Data to denormalize from
-     * @param string $type    The class to which the data should be denormalized
-     * @param string $format  The format being deserialized from
-     * @param array  $context Options available to the denormalizer
+     * @param mixed       $data    Data to denormalize from
+     * @param string      $type    The class to which the data should be denormalized
+     * @param string|null $format  The format being deserialized from
+     * @param array       $context Options available to the denormalizer
      *
      * @return bool
      */
     public function supportsDenormalization(mixed $data, string $type, string $format = null /* , array $context = [] */);
+
+    /**
+     * Returns the types potentially supported by this denormalizer.
+     *
+     * For each supported formats (if applicable), the supported types should be
+     * returned as keys, and each type should be mapped to a boolean indicating
+     * if the result of supportsDenormalization() can be cached or not
+     * (a result cannot be cached when it depends on the context or on the data.)
+     * A null value means that the denormalizer does not support the corresponding
+     * type.
+     *
+     * Use type "object" to match any classes or interfaces,
+     * and type "*" to match any types.
+     *
+     * @return array<class-string|'*'|'object'|string, bool|null>
+     */
+    /* public function getSupportedTypes(?string $format): array; */
 }

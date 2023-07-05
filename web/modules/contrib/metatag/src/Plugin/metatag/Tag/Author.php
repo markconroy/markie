@@ -17,7 +17,6 @@ namespace Drupal\metatag\Plugin\metatag\Tag;
  *   multiple = FALSE
  * )
  */
-
 class Author extends MetaNameBase {
   // Nothing here yet. Just a placeholder class for a plugin.
 }

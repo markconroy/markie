@@ -23,12 +23,7 @@ class TermForm extends ContentEntityForm {
     $taxonomy_storage = $this->entityTypeManager->getStorage('taxonomy_term');
     $vocabulary = $vocab_storage->load($term->bundle());
 
-    $parent = [];
-    // Get the parent directly from the term as
-    // \Drupal\taxonomy\TermStorageInterface::loadParents() excludes the root.
-    foreach ($term->get('parent') as $item) {
-      $parent[] = (int) $item->target_id;
-    }
+    $parent = $this->getParentIds($term);
     $form_state->set(['taxonomy', 'parent'], $parent);
     $form_state->set(['taxonomy', 'vocabulary'], $vocabulary);
 
@@ -114,6 +109,7 @@ class TermForm extends ContentEntityForm {
         '#value' => $this->t('Save and go to list'),
         '#weight' => 20,
         '#submit' => array_merge($element['submit']['#submit'], ['::overview']),
+        '#access' => $this->currentUser()->hasPermission('access taxonomy overview'),
       ];
     }
 
@@ -217,6 +213,25 @@ class TermForm extends ContentEntityForm {
 
     $form_state->setValue('tid', $term->id());
     $form_state->set('tid', $term->id());
+  }
+
+  /**
+   * Returns term parent IDs, including the root.
+   *
+   * @param \Drupal\taxonomy\TermInterface $term
+   *   The taxonomy term entity.
+   *
+   * @return array
+   *   A list if parent term IDs.
+   */
+  protected function getParentIds(TermInterface $term): array {
+    $parent = [];
+    // Get the parent directly from the term as
+    // \Drupal\taxonomy\TermStorageInterface::loadParents() excludes the root.
+    foreach ($term->get('parent') as $item) {
+      $parent[] = (int) $item->target_id;
+    }
+    return $parent;
   }
 
 }

@@ -8,6 +8,7 @@ use Drupal\editor\Entity\Editor;
 use Drupal\filter\Entity\FilterFormat;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\language\Entity\ConfigurableLanguage;
+use Drupal\TestTools\Random;
 use Symfony\Component\Yaml\Yaml;
 
 /**
@@ -94,10 +95,10 @@ class LanguageTest extends KernelTestBase {
   /**
    * Provides a list of language code pairs.
    *
-   * @return \string[][]
+   * @return string[][]
    */
-  public function provider(): array {
-    $random_langcode = $this->randomMachineName();
+  public static function provider(): array {
+    $random_langcode = Random::machineName();
     return [
       'Language code transformed from browser mappings' => [
         'drupal_langcode' => 'pt-pt',

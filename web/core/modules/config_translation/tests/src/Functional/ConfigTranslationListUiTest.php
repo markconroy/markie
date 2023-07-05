@@ -62,6 +62,9 @@ class ConfigTranslationListUiTest extends BrowserTestBase {
     $permissions = [
       'access site-wide contact form',
       'administer blocks',
+      'administer block content',
+      'administer block types',
+      'access block library',
       'administer contact forms',
       'administer content types',
       'administer block_content fields',
@@ -190,10 +193,10 @@ class ConfigTranslationListUiTest extends BrowserTestBase {
   }
 
   /**
-   * Tests the custom block listing for the translate operation.
+   * Tests the content block listing for the translate operation.
    */
   public function doCustomContentTypeListTest() {
-    // Create a test custom block type to decouple looking for translate
+    // Create a test block type to decouple looking for translate
     // operations link so this does not test more than necessary.
     $block_content_type = BlockContentType::create([
       'id' => mb_strtolower($this->randomMachineName(16)),
@@ -202,11 +205,11 @@ class ConfigTranslationListUiTest extends BrowserTestBase {
     ]);
     $block_content_type->save();
 
-    // Get the custom block type listing.
-    $this->drupalGet('admin/structure/block/block-content/types');
+    // Get the block type listing.
+    $this->drupalGet('admin/structure/block-content');
 
-    $translate_link = 'admin/structure/block/block-content/manage/' . $block_content_type->id() . '/translate';
-    // Test if the link to translate the custom block type is on the page.
+    $translate_link = 'admin/structure/block-content/manage/' . $block_content_type->id() . '/translate';
+    // Test if the link to translate the block type is on the page.
     $this->assertSession()->linkByHrefExists($translate_link);
 
     // Test if the link to translate actually goes to the translate page.
@@ -414,7 +417,10 @@ class ConfigTranslationListUiTest extends BrowserTestBase {
       'field_storage' => FieldStorageConfig::loadByName('block_content', 'body'),
       'bundle' => $block_content_type->id(),
       'label' => 'Body',
-      'settings' => ['display_summary' => FALSE],
+      'settings' => [
+        'display_summary' => FALSE,
+        'allowed_formats' => [],
+      ],
     ]);
     $field->save();
 
@@ -425,7 +431,7 @@ class ConfigTranslationListUiTest extends BrowserTestBase {
         'field' => 'node.' . $content_type->id() . '.body',
       ],
       [
-        'list' => 'admin/structure/block/block-content/manage/basic/fields',
+        'list' => 'admin/structure/block-content/manage/basic/fields',
         'field' => 'block_content.basic.body',
       ],
     ];

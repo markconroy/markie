@@ -57,3 +57,9 @@ filters:
         default: default
         preview: preview
       allowed_media_types: {  }
+  filter_image_lazy_load:
+    id: filter_image_lazy_load
+    provider: filter
+    status: true
+    weight: 12
+    settings: {  }

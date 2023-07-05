@@ -33,7 +33,7 @@ class ConditionTest extends UnitTestCase {
 
   /**
    * @covers ::compile
-   * @dataProvider providerSimpleCondition()
+   * @dataProvider providerSimpleCondition
    */
   public function testSimpleCondition($expected, $field_name) {
     $connection = $this->prophesize(Connection::class);
@@ -54,7 +54,7 @@ class ConditionTest extends UnitTestCase {
     $query_placeholder = $query_placeholder->reveal();
 
     $condition = $connection->condition('AND');
-    $condition->condition($field_name, ['value']);
+    $condition->condition($field_name, 'value');
     $condition->compile($connection, $query_placeholder);
 
     $this->assertEquals($expected, $condition->__toString());
@@ -64,7 +64,7 @@ class ConditionTest extends UnitTestCase {
   /**
    * @covers ::compile
    *
-   * @dataProvider dataProviderTestCompileWithKnownOperators()
+   * @dataProvider dataProviderTestCompileWithKnownOperators
    *
    * @param string $expected
    *   The expected generated SQL condition.

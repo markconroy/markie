@@ -18,6 +18,7 @@ class MetatagDefaultsListBuilder extends ConfigEntityListBuilder {
    */
   protected function getEntityIds() {
     $query = $this->getStorage()->getQuery()
+      ->accessCheck(FALSE)
       ->condition('id', 'global', '<>');
 
     // Only add the pager if a limit is specified.
@@ -59,6 +60,7 @@ class MetatagDefaultsListBuilder extends ConfigEntityListBuilder {
       }
     }
     $parents_query = $this->getStorage()->getQuery()
+      ->accessCheck(FALSE)
       ->condition('id', $parents, 'IN');
     return $parents_query->execute();
   }

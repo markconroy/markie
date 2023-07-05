@@ -98,9 +98,10 @@ class PaginationAJAXTest extends WebDriverTestBase {
     $this->assertCount(5, $rows);
     $this->assertStringContainsString('Node 6 content', $rows[0]->getHtml());
     $link = $page->findLink('Go to page 3');
-    // Test that no unwanted parameters are added to the URL.
-    $this->assertEquals('?status=All&type=All&langcode=All&items_per_page=5&order=changed&sort=asc&title=&page=2', $link->getAttribute('href'));
     $this->assertNoDuplicateAssetsOnPage();
+
+    // Test that no unwanted parameters are added to the URL.
+    $this->assertEquals('?status=All&type=All&langcode=All&items_per_page=5&order=changed&sort=asc&page=2', $link->getAttribute('href'));
 
     $this->clickLink('Go to page 3');
     $session_assert->assertWaitOnAjaxRequest();

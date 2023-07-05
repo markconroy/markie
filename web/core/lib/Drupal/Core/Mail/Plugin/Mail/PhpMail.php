@@ -109,10 +109,7 @@ class PhpMail implements MailInterface {
     // line-ending format appropriate for your system. If you need to
     // override this, adjust $settings['mail_line_endings'] in settings.php.
     $mail_body = preg_replace('@\r?\n@', $line_endings, $message['body']);
-    // For headers, PHP's API suggests that we use CRLF normally,
-    // but some MTAs incorrectly replace LF with CRLF. See #234403.
-    $mail_headers = str_replace("\r\n", "\n", $headers->toString());
-    $mail_subject = str_replace("\r\n", "\n", $mail_subject);
+    $mail_headers = $headers->toString();
 
     if (!$this->request->server->has('WINDIR') && !str_contains($this->request->server->get('SERVER_SOFTWARE'), 'Win32')) {
       // On most non-Windows systems, the "-f" option to the sendmail command
@@ -121,13 +118,13 @@ class PhpMail implements MailInterface {
       // We validate the return path, unless it is equal to the site mail, which
       // we assume to be safe.
       $site_mail = $this->configFactory->get('system.site')->get('mail');
-      $additional_headers = isset($message['Return-Path']) && ($site_mail === $message['Return-Path'] || static::_isShellSafe($message['Return-Path'])) ? '-f' . $message['Return-Path'] : '';
+      $additional_params = isset($message['Return-Path']) && ($site_mail === $message['Return-Path'] || static::_isShellSafe($message['Return-Path'])) ? '-f' . $message['Return-Path'] : '';
       $mail_result = $this->doMail(
         $message['to'],
         $mail_subject,
         $mail_body,
         $mail_headers,
-        $additional_headers
+        $additional_params
       );
     }
     else {

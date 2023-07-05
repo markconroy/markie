@@ -137,7 +137,7 @@ class TermAutocompleteTest extends TaxonomyTestBase {
     $this->adminUser = $this->drupalCreateUser(['create article content']);
     $this->drupalLogin($this->adminUser);
 
-    // Retrieve the autocomplete url.
+    // Retrieve the autocomplete URL.
     $this->drupalGet('node/add/article');
     $field = $this->assertSession()->fieldExists("{$this->fieldName}[0][target_id]");
     $this->autocompleteUrl = $this->getAbsoluteUrl($field->getAttribute('data-autocomplete-path'));
@@ -149,7 +149,7 @@ class TermAutocompleteTest extends TaxonomyTestBase {
    * @param string|\Drupal\Core\Url $path
    *   Drupal path or URL to load into Mink controlled browser.
    * @param array $options
-   *   (optional) Options to be forwarded to the url generator.
+   *   (optional) Options to be forwarded to the URL generator.
    * @param string[] $headers
    *   (optional) An array containing additional HTTP request headers.
    *

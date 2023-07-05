@@ -42,10 +42,10 @@ class Xss {
    * - Makes sure no HTML tags contain URLs with a disallowed protocol (e.g.
    *   javascript:).
    *
-   * @param $string
+   * @param string $string
    *   The string with raw HTML in it. It will be stripped of everything that
    *   can cause an XSS attack.
-   * @param array $html_tags
+   * @param string[] $html_tags
    *   An array of HTML tags.
    *
    * @return string
@@ -140,7 +140,7 @@ class Xss {
    *   If the element isn't allowed, an empty string. Otherwise, the cleaned up
    *   version of the HTML element.
    */
-  protected static function split($string, $html_tags, $class) {
+  protected static function split($string, array $html_tags, $class) {
     if (substr($string, 0, 1) != '<') {
       // We matched a lone ">" character.
       return '&gt;';
@@ -238,6 +238,7 @@ class Xss {
               'rel',
               'property',
               'class',
+              'datetime',
             ]);
 
             $working = $mode = 1;
@@ -265,6 +266,10 @@ class Xss {
           break;
 
         case 2:
+          // Once we've finished processing the attribute value continue to look
+          // for attributes.
+          $mode = 0;
+          $working = 1;
           // Attribute value, a URL after href= for instance.
           if (preg_match('/^"([^"]*)"(\s+|$)/', $attributes, $match)) {
             $value = $skip_protocol_filtering ? $match[1] : UrlHelper::filterBadProtocol($match[1]);
@@ -272,8 +277,6 @@ class Xss {
             if (!$skip) {
               $attributes_array[] = "$attribute_name=\"$value\"";
             }
-            $working = 1;
-            $mode = 0;
             $attributes = preg_replace('/^"[^"]*"(\s+|$)/', '', $attributes);
             break;
           }
@@ -284,8 +287,6 @@ class Xss {
             if (!$skip) {
               $attributes_array[] = "$attribute_name='$value'";
             }
-            $working = 1;
-            $mode = 0;
             $attributes = preg_replace("/^'[^']*'(\s+|$)/", '', $attributes);
             break;
           }
@@ -296,15 +297,13 @@ class Xss {
             if (!$skip) {
               $attributes_array[] = "$attribute_name=\"$value\"";
             }
-            $working = 1;
-            $mode = 0;
             $attributes = preg_replace("%^[^\s\"']+(\s+|$)%", '', $attributes);
           }
           break;
       }
 
       if ($working == 0) {
-        // Not well formed; remove and try again.
+        // Not well-formed; remove and try again.
         $attributes = preg_replace('/
           ^
           (
@@ -330,15 +329,15 @@ class Xss {
   /**
    * Whether this element needs to be removed altogether.
    *
-   * @param $html_tags
+   * @param string[] $html_tags
    *   The list of HTML tags.
-   * @param $elem
+   * @param string $elem
    *   The name of the HTML element.
    *
    * @return bool
    *   TRUE if this element needs to be removed.
    */
-  protected static function needsRemoval($html_tags, $elem) {
+  protected static function needsRemoval(array $html_tags, $elem) {
     return !isset($html_tags[strtolower($elem)]);
   }
 

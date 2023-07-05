@@ -6,7 +6,6 @@
  */
 
 use Drupal\Core\Routing\RouteMatchInterface;
-use Drupal\metatag_views\MetatagViewsCacheWrapper;
 use Drupal\metatag_views\Plugin\views\display_extender\MetatagDisplayExtender;
 use Drupal\views\Plugin\views\cache\CachePluginBase;
 use Drupal\views\ViewEntityInterface;
@@ -25,7 +24,7 @@ use Drupal\views\Views;
  * @return array|null
  *   The meta tags if set, null otherwise.
  */
-function metatag_get_view_tags($view, $display_id = NULL, $args = []) {
+function metatag_views_get_view_tags($view, $display_id = NULL, $args = []) {
   if (empty($view)) {
     return;
   }
@@ -40,6 +39,7 @@ function metatag_get_view_tags($view, $display_id = NULL, $args = []) {
   }
   $view->setDisplay($display_id);
   $view->setArguments($args);
+  $view->preExecute();
   $view->buildTitle();
 
   // And get the list of extenders for this display.
@@ -84,7 +84,7 @@ function metatag_views_metatags_alter(array &$metatags, array &$context) {
   }
 
   // Apply view overrides.
-  if ($tags = metatag_get_view_tags($view, $display_id, $args)) {
+  if ($tags = metatag_views_get_view_tags($view, $display_id, $args)) {
     $metatags = array_merge($metatags, $tags);
   }
 }

@@ -2,7 +2,6 @@
 
 namespace Drupal\Tests\node\Kernel;
 
-use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Component\Utility\Html;
 use Drupal\Core\Render\BubbleableMetadata;
 use Drupal\node\Entity\Node;
@@ -10,8 +9,7 @@ use Drupal\node\Entity\NodeType;
 use Drupal\Tests\system\Kernel\Token\TokenReplaceKernelTestBase;
 
 /**
- * Generates text using placeholders for dummy content to check node token
- * replacement.
+ * Tests node token replacement.
  *
  * @group node
  */
@@ -104,7 +102,7 @@ class NodeTokenReplaceTest extends TokenReplaceKernelTestBase {
     foreach ($tests as $input => $expected) {
       $bubbleable_metadata = new BubbleableMetadata();
       $output = $this->tokenService->replace($input, ['node' => $node], ['langcode' => $this->interfaceLanguage->getId()], $bubbleable_metadata);
-      $this->assertEquals($expected, $output, new FormattableMarkup('Node token %token replaced.', ['%token' => $input]));
+      $this->assertSame((string) $expected, (string) $output, "Failed test case: {$input}");
       $this->assertEquals($metadata_tests[$input], $bubbleable_metadata);
     }
 
@@ -126,7 +124,7 @@ class NodeTokenReplaceTest extends TokenReplaceKernelTestBase {
 
     foreach ($tests as $input => $expected) {
       $output = $this->tokenService->replace($input, ['node' => $node], ['language' => $this->interfaceLanguage]);
-      $this->assertEquals($expected, $output, new FormattableMarkup('Node token %token replaced for node without a summary.', ['%token' => $input]));
+      $this->assertSame((string) $expected, (string) $output, "Failed test case: {$input}");
     }
   }
 

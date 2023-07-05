@@ -156,17 +156,6 @@ abstract class MetatagTagsTestBase extends BrowserTestBase {
 
       // Update the Global defaults and test them.
       $all_values = $values = [];
-      // Look for a custom method named "{$tagname}TestKey", if found use
-      // that method to get the test string for this meta tag, otherwise it
-      // defaults to the meta tag's name.
-      $method = $this->getMethodFromTagCallback($tag_name, 'TestKey');
-      if (method_exists($this, $method)) {
-        $test_key = $this->$method();
-      }
-      else {
-        $test_key = $tag_name;
-      }
-
       // Look for a custom method named "{$tagname}TestValue", if found use
       // that method to get the test string for this meta tag, otherwise it
       // defaults to just generating a random string.
@@ -192,8 +181,28 @@ abstract class MetatagTagsTestBase extends BrowserTestBase {
         $test_output = $test_value;
       }
 
-      $values[$test_key] = $test_value;
       $all_values[$tag_name] = $test_output;
+      // Look for a custom method named "{$tagname}TestFormValues", if found
+      // use that method to get the keys/values array for the edit form. This
+      // allows to test tags, that use more than one form element.
+      $method = $this->getMethodFromTagCallback($tag_name, 'TestFormValues');
+      if (method_exists($this, $method)) {
+        $values = $this->$method();
+      }
+      else {
+        // Look for a custom method named "{$tagname}TestKey", if found use
+        // that method to get the test string for this meta tag, otherwise it
+        // defaults to the meta tag's name.
+        $method = $this->getMethodFromTagCallback($tag_name, 'TestKey');
+        if (method_exists($this, $method)) {
+          $test_key = $this->$method();
+        }
+        else {
+          $test_key = $tag_name;
+        }
+
+        $values[$test_key] = $test_output;
+      }
       $this->submitForm($values, 'Save');
       // Note: if this line fails then check that the failing meta tag has a
       // definition in the relevant *.metatag_tag.schema.yml file.

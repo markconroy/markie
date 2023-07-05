@@ -318,7 +318,7 @@ function install_begin_request($class_loader, &$install_state) {
   // running tests. However, for security reasons, it is imperative that no
   // installation be permitted using such a prefix.
   $user_agent = $request->cookies->get('SIMPLETEST_USER_AGENT') ?: $request->server->get('HTTP_USER_AGENT');
-  if ($install_state['interactive'] && strpos($user_agent, 'simpletest') !== FALSE && !drupal_valid_test_ua()) {
+  if ($install_state['interactive'] && str_contains($user_agent, 'simpletest') && !drupal_valid_test_ua()) {
     header($request->server->get('SERVER_PROTOCOL') . ' 403 Forbidden');
     exit;
   }
@@ -386,7 +386,7 @@ function install_begin_request($class_loader, &$install_state) {
   $install_state['database_verified'] = install_verify_database_settings($site_path);
   // A valid settings.php has database settings and a hash_salt value. Other
   // settings will be checked by system_requirements().
-  $install_state['settings_verified'] = $install_state['database_verified'] && (bool) Settings::get('hash_salt', FALSE);
+  $install_state['settings_verified'] = $install_state['config_verified'] && $install_state['database_verified'] && (bool) Settings::get('hash_salt', FALSE);
 
   if ($install_state['settings_verified']) {
     try {
@@ -1104,14 +1104,6 @@ function install_base_system(&$install_state) {
   // system.module in order to work.
   \Drupal::service('file.htaccess_writer')->ensure();
 
-  // Prime the module list static cache with the user module's exact location.
-  // @todo Remove as part of https://www.drupal.org/node/2186491
-  \Drupal::service('extension.list.module')->setPathname('user', 'core/modules/user/user.info.yml');
-
-  // Install the User module so that installing from configuration works and to
-  // ensure the anonymous user is created with a langcode of 'en'.
-  \Drupal::service('module_installer')->install(['user'], FALSE);
-
   $install_state['base_system_verified'] = TRUE;
 }
 
@@ -1580,9 +1572,8 @@ function install_profile_modules(&$install_state) {
       $modules = array_merge($modules, array_keys($files[$module]->requires));
     }
   }
-  // The System and User modules have already been installed by
-  // install_base_system().
-  $modules = array_diff(array_unique($modules), ['system', 'user']);
+  // The System module has already been installed by install_base_system().
+  $modules = array_diff(array_unique($modules), ['system']);
   foreach ($modules as $module) {
     if (!empty($files[$module]->info['required'])) {
       $required[$module] = $files[$module]->sort;
@@ -1594,16 +1585,17 @@ function install_profile_modules(&$install_state) {
   arsort($required);
   arsort($non_required);
 
-  $operations = [];
+  $batch_builder = new BatchBuilder();
   foreach ($required + $non_required as $module => $weight) {
-    $operations[] = ['_install_module_batch', [$module, $files[$module]->info['name']]];
+    $batch_builder->addOperation(
+      '_install_module_batch',
+      [$module, $files[$module]->info['name']],
+    );
   }
-  $batch = [
-    'operations' => $operations,
-    'title' => t('Installing @drupal', ['@drupal' => drupal_install_profile_distribution_name()]),
-    'error_message' => t('The installation has encountered an error.'),
-  ];
-  return $batch;
+  $batch_builder
+    ->setTitle(t('Installing @drupal', ['@drupal' => drupal_install_profile_distribution_name()]))
+    ->setErrorMessage(t('The installation has encountered an error.'));
+  return $batch_builder->toArray();
 }
 
 /**
@@ -1727,30 +1719,40 @@ function install_import_translations(&$install_state) {
 
   // If there is more than one language or the single one is not English, we
   // should import translations.
-  $operations = install_download_additional_translations_operations($install_state);
+  $batch_builder = (new BatchBuilder())
+    ->setFile(\Drupal::service('extension.path.resolver')->getPath('module', 'locale') . '/locale.batch.inc');
+  foreach (install_download_additional_translations_operations($install_state) as $operation) {
+    $batch_builder->addOperation($operation[0], $operation[1]);
+  }
   $languages = \Drupal::languageManager()->getLanguages();
   if (count($languages) > 1 || !isset($languages['en'])) {
-    $operations[] = ['_install_prepare_import', [array_keys($languages), $install_state['server_pattern']]];
+    $batch_builder->addOperation(
+      '_install_prepare_import',
+      [array_keys($languages), $install_state['server_pattern']],
+    );
 
     // Set up a batch to import translations for drupal core. Translation import
     // for contrib modules happens in install_import_translations_remaining.
     foreach ($languages as $language) {
       if (locale_translation_use_remote_source()) {
-        $operations[] = ['locale_translation_batch_fetch_download', ['drupal', $language->getId()]];
+        $batch_builder->addOperation(
+          'locale_translation_batch_fetch_download',
+          ['drupal', $language->getId()],
+        );
       }
-      $operations[] = ['locale_translation_batch_fetch_import', ['drupal', $language->getId(), []]];
+      $batch_builder->addOperation(
+        'locale_translation_batch_fetch_import',
+        ['drupal', $language->getId(), []],
+      );
     }
 
     $module_handler->loadInclude('locale', 'inc', 'locale.fetch');
-    $batch = [
-      'operations' => $operations,
-      'title' => t('Updating translations.'),
-      'progress_message' => '',
-      'error_message' => t('Error importing translation files'),
-      'finished' => 'locale_translation_batch_fetch_finished',
-      'file' => \Drupal::service('extension.list.module')->getPath('locale') . '/locale.batch.inc',
-    ];
-    return $batch;
+    $batch_builder
+      ->setTitle(t('Updating translations.'))
+      ->setProgressMessage('')
+      ->setErrorMessage(t('Error importing translation files'))
+      ->setFinishCallback('locale_translation_batch_fetch_finished');
+    return $batch_builder->toArray();
   }
 }
 
@@ -1839,7 +1841,7 @@ function install_finish_translations(&$install_state) {
   }
 
   // Creates configuration translations.
-  $batches[] = locale_config_batch_update_components([], array_keys($languages));
+  $batches[] = locale_config_batch_update_components([], array_keys($languages), [], TRUE);
   return $batches;
 }
 
@@ -2193,7 +2195,7 @@ function install_check_requirements($install_state) {
       }
       // If the $file is not writable, throw an error.
       if (!$writable) {
-        $requirements["$file file writeable"] = [
+        $requirements["$file file writable"] = [
           'title' => $default_file_info['title'],
           'value' => t('The %file is not writable.', ['%file' => $default_file_info['title']]),
           'severity' => REQUIREMENT_ERROR,
@@ -2351,7 +2353,8 @@ function install_config_import_batch() {
     \Drupal::service('module_installer'),
     \Drupal::service('theme_handler'),
     \Drupal::service('string_translation'),
-    \Drupal::service('extension.list.module')
+    \Drupal::service('extension.list.module'),
+    \Drupal::service('extension.list.theme')
   );
 
   try {
@@ -2423,7 +2426,8 @@ function install_config_revert_install_changes() {
       \Drupal::service('module_installer'),
       \Drupal::service('theme_handler'),
       \Drupal::service('string_translation'),
-      \Drupal::service('extension.list.module')
+      \Drupal::service('extension.list.module'),
+      \Drupal::service('extension.list.theme')
     );
     try {
       $config_importer->import();

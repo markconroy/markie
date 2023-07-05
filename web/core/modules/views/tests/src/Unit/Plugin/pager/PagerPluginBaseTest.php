@@ -28,6 +28,8 @@ class PagerPluginBaseTest extends UnitTestCase {
    * {@inheritdoc}
    */
   protected function setUp(): void {
+    parent::setUp();
+
     $this->pager = $this->getMockBuilder('Drupal\views\Plugin\views\pager\PagerPluginBase')
       ->disableOriginalConstructor()
       ->getMockForAbstractClass();
@@ -278,6 +280,8 @@ class PagerPluginBaseTest extends UnitTestCase {
 }
 
 /**
+ * Creates StatementInterface for testing.
+ *
  * As StatementInterface extends \Traversable, which though always needs
  * an additional interface. The Statement class itself can't be mocked because
  * of its __wakeup function.

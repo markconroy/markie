@@ -9,6 +9,7 @@ use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\Site\Settings;
+use Drupal\Core\Site\SettingsEditor;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -66,6 +67,8 @@ class SiteSettingsForm extends FormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
+    // Make sure the install API is available.
+    include_once DRUPAL_ROOT . '/core/includes/install.inc';
     $settings_file = './' . $this->sitePath . '/settings.php';
 
     $form['#title'] = $this->t('Database configuration');
@@ -154,6 +157,9 @@ class SiteSettingsForm extends FormBase {
    * {@inheritdoc}
    */
   public function validateForm(array &$form, FormStateInterface $form_state) {
+    // Make sure the install API is available.
+    include_once DRUPAL_ROOT . '/core/includes/install.inc';
+
     $driver = $form_state->getValue('driver');
     $database = $form_state->getValue($driver);
     $drivers = drupal_get_database_types();
@@ -235,6 +241,9 @@ class SiteSettingsForm extends FormBase {
   public function submitForm(array &$form, FormStateInterface $form_state) {
     global $install_state;
 
+    // Make sure the install API is available.
+    include_once DRUPAL_ROOT . '/core/includes/install.inc';
+
     // Update global settings array and save.
     $settings = [];
     $database = $form_state->get('database');
@@ -264,7 +273,7 @@ class SiteSettingsForm extends FormBase {
       ];
     }
 
-    drupal_rewrite_settings($settings);
+    SettingsEditor::rewrite($this->sitePath . '/settings.php', $settings);
 
     // Indicate that the settings file has been verified, and check the database
     // for the last completed task, now that we have a valid connection. This

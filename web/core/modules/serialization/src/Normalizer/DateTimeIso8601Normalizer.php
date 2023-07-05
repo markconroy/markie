@@ -32,11 +32,6 @@ class DateTimeIso8601Normalizer extends DateTimeNormalizer {
   /**
    * {@inheritdoc}
    */
-  protected $supportedInterfaceOrClass = DateTimeIso8601::class;
-
-  /**
-   * {@inheritdoc}
-   */
   public function normalize($datetime, $format = NULL, array $context = []): array|string|int|float|bool|\ArrayObject|NULL {
     assert($datetime instanceof DateTimeIso8601);
     $field_item = $datetime->getParent();
@@ -85,6 +80,15 @@ class DateTimeIso8601Normalizer extends DateTimeNormalizer {
     }
     $datetime->setTimezone(new \DateTimeZone(DateTimeItemInterface::STORAGE_TIMEZONE));
     return $datetime->format(DateTimeItemInterface::DATETIME_STORAGE_FORMAT);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getSupportedTypes(?string $format): array {
+    return [
+      DateTimeIso8601::class => TRUE,
+    ];
   }
 
 }

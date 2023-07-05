@@ -15,8 +15,10 @@ use Drupal\Tests\BrowserTestBase;
 use Drupal\Tests\menu_ui\Traits\MenuUiTrait;
 
 /**
- * Add a custom menu, add menu links to the custom menu and Tools menu, check
- * their data, and delete them using the UI.
+ * Tests the menu UI.
+ *
+ * This test adds a custom menu, adds menu links to the custom menu and the
+ * Tools menu, checks their data, and deletes them using the UI.
  *
  * @group menu_ui
  */
@@ -823,7 +825,7 @@ class MenuUiTest extends BrowserTestBase {
   /**
    * Changes the parent of a menu link using the UI.
    *
-   * @param \Drupal\menu_link_content\MenuLinkContent $item
+   * @param \Drupal\menu_link_content\Entity\MenuLinkContent $item
    *   The menu link item to move.
    * @param int $parent
    *   The id of the new parent.

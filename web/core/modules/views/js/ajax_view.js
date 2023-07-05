@@ -81,7 +81,7 @@
         .slice(1)
         .replace(/q=[^&]+&?|&?render=[^&]+/, '');
       if (queryString !== '') {
-        // If there is a '?' in ajaxPath, clean url are on and & should be
+        // If there is a '?' in ajaxPath, clean URL are on and & should be
         // used to add parameters.
         queryString = (/\?/.test(ajaxPath) ? '&' : '?') + queryString;
       }
@@ -90,6 +90,7 @@
     this.element_settings = {
       url: ajaxPath + queryString,
       submit: settings,
+      httpMethod: 'GET',
       setClick: true,
       event: 'click',
       selector,
@@ -127,6 +128,7 @@
     const selfSettings = $.extend({}, this.element_settings, {
       event: 'RefreshView',
       base: this.selector,
+      httpMethod: 'GET',
       element: this.$view.get(0),
     });
     this.refreshViewAjax = Drupal.ajax(selfSettings);
@@ -170,7 +172,7 @@
   Drupal.views.ajaxView.prototype.attachPagerAjax = function () {
     this.$view
       .find(
-        'ul.js-pager__items > li > a, th.views-field a, .attachment .views-summary a',
+        '.js-pager__items a, th.views-field a, .attachment .views-summary a',
       )
       .each($.proxy(this.attachPagerLinkAjax, this));
   };
@@ -201,6 +203,7 @@
       submit: viewData,
       base: false,
       element: link,
+      httpMethod: 'GET',
     });
     this.pagerAjax = Drupal.ajax(selfSettings);
   };
@@ -214,23 +217,13 @@
    *   Ajax response.
    * @param {string} response.selector
    *   Selector to use.
+   *
+   * @deprecated in drupal:10.1.0 and is removed from drupal:11.0.0.
+   *   Use Drupal.AjaxCommands.prototype.scrollTop().
+   *
+   * @see https://www.drupal.org/node/3344141
    */
   Drupal.AjaxCommands.prototype.viewsScrollTop = function (ajax, response) {
-    // Scroll to the top of the view. This will allow users
-    // to browse newly loaded content after e.g. clicking a pager
-    // link.
-    const offset = $(response.selector).offset();
-    // We can't guarantee that the scrollable object should be
-    // the body, as the view could be embedded in something
-    // more complex such as a modal popup. Recurse up the DOM
-    // and scroll the first element that has a non-zero top.
-    let scrollTarget = response.selector;
-    while ($(scrollTarget).scrollTop() === 0 && $(scrollTarget).parent()) {
-      scrollTarget = $(scrollTarget).parent();
-    }
-    // Only scroll upward.
-    if (offset.top - 10 < $(scrollTarget).scrollTop()) {
-      $(scrollTarget).animate({ scrollTop: offset.top - 10 }, 500);
-    }
+    Drupal.AjaxCommands.prototype.scrollTop(ajax, response);
   };
 })(jQuery, Drupal, drupalSettings);

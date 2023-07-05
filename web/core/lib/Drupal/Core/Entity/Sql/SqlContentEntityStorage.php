@@ -14,16 +14,17 @@ use Drupal\Core\Entity\ContentEntityTypeInterface;
 use Drupal\Core\Entity\EntityBundleListenerInterface;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\EntityStorageException;
+use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\Query\QueryInterface;
 use Drupal\Core\Entity\Schema\DynamicallyFieldableEntityStorageSchemaInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Language\LanguageManagerInterface;
+use Drupal\Core\Utility\Error;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -560,8 +561,9 @@ class SqlContentEntityStorage extends ContentEntityStorageBase implements SqlEnt
             // returns an array keyed by property names so remove the keys
             // before array_merge() to avoid losing data with fields having the
             // same columns i.e. value.
-            $column_names = array_merge($column_names, array_values($table_mapping->getColumnNames($data_field)));
+            $column_names[] = array_values($table_mapping->getColumnNames($data_field));
           }
+          $column_names = array_merge(...$column_names);
           $query->fields('data', $column_names);
         }
 
@@ -757,7 +759,7 @@ class SqlContentEntityStorage extends ContentEntityStorageBase implements SqlEnt
       if (isset($transaction)) {
         $transaction->rollBack();
       }
-      watchdog_exception($this->entityTypeId, $e);
+      Error::logException(\Drupal::logger($this->entityTypeId), $e);
       throw new EntityStorageException($e->getMessage(), $e->getCode(), $e);
     }
   }
@@ -811,7 +813,7 @@ class SqlContentEntityStorage extends ContentEntityStorageBase implements SqlEnt
       if (isset($transaction)) {
         $transaction->rollBack();
       }
-      watchdog_exception($this->entityTypeId, $e);
+      Error::logException(\Drupal::logger($this->entityTypeId), $e);
       throw new EntityStorageException($e->getMessage(), $e->getCode(), $e);
     }
   }
@@ -860,7 +862,7 @@ class SqlContentEntityStorage extends ContentEntityStorageBase implements SqlEnt
       if (isset($transaction)) {
         $transaction->rollBack();
       }
-      watchdog_exception($this->entityTypeId, $e);
+      Error::logException(\Drupal::logger($this->entityTypeId), $e);
       throw new EntityStorageException($e->getMessage(), $e->getCode(), $e);
     }
   }
@@ -1300,6 +1302,11 @@ class SqlContentEntityStorage extends ContentEntityStorageBase implements SqlEnt
     }
 
     $original = !empty($entity->original) ? $entity->original : NULL;
+
+    // Use the loaded revision instead of default one to check for data change.
+    if ($original && !$entity->isNewRevision() && !$entity->isDefaultRevision()) {
+      $original = $this->loadRevision($entity->getLoadedRevisionId());
+    }
 
     // Determine which fields should be actually stored.
     $definitions = $this->entityFieldManager->getFieldDefinitions($entity_type, $bundle);

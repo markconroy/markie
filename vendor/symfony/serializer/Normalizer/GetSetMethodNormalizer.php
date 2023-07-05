@@ -11,6 +11,8 @@
 
 namespace Symfony\Component\Serializer\Normalizer;
 
+use Symfony\Component\Serializer\Annotation\Ignore;
+
 /**
  * Converts between objects with getter and setter methods and arrays.
  *
@@ -31,10 +33,17 @@ namespace Symfony\Component\Serializer\Normalizer;
  *
  * @author Nils Adermann <naderman@naderman.de>
  * @author Kévin Dunglas <dunglas@gmail.com>
+ *
+ * @final since Symfony 6.3
  */
 class GetSetMethodNormalizer extends AbstractObjectNormalizer
 {
     private static $setterAccessibleCache = [];
+
+    public function getSupportedTypes(?string $format): array
+    {
+        return ['object' => __CLASS__ === static::class || $this->hasCacheableSupportsMethod()];
+    }
 
     /**
      * @param array $context
@@ -52,8 +61,13 @@ class GetSetMethodNormalizer extends AbstractObjectNormalizer
         return parent::supportsDenormalization($data, $type, $format) && $this->supports($type);
     }
 
+    /**
+     * @deprecated since Symfony 6.3, use "getSupportedTypes()" instead
+     */
     public function hasCacheableSupportsMethod(): bool
     {
+        trigger_deprecation('symfony/serializer', '6.3', 'The "%s()" method is deprecated, use "getSupportedTypes()" instead.', __METHOD__);
+
         return __CLASS__ === static::class;
     }
 
@@ -78,17 +92,12 @@ class GetSetMethodNormalizer extends AbstractObjectNormalizer
      */
     private function isGetMethod(\ReflectionMethod $method): bool
     {
-        $methodLength = \strlen($method->name);
-
-        return
-            !$method->isStatic() &&
-            (
-                ((str_starts_with($method->name, 'get') && 3 < $methodLength) ||
-                (str_starts_with($method->name, 'is') && 2 < $methodLength) ||
-                (str_starts_with($method->name, 'has') && 3 < $methodLength)) &&
-                0 === $method->getNumberOfRequiredParameters()
-            )
-        ;
+        return !$method->isStatic()
+            && !$method->getAttributes(Ignore::class)
+            && !$method->getNumberOfRequiredParameters()
+            && ((2 < ($methodLength = \strlen($method->name)) && str_starts_with($method->name, 'is'))
+                || (3 < $methodLength && (str_starts_with($method->name, 'has') || str_starts_with($method->name, 'get')))
+            );
     }
 
     protected function extractAttributes(object $object, string $format = null, array $context = []): array
@@ -134,20 +143,16 @@ class GetSetMethodNormalizer extends AbstractObjectNormalizer
         return null;
     }
 
+    /**
+     * @return void
+     */
     protected function setAttributeValue(object $object, string $attribute, mixed $value, string $format = null, array $context = [])
     {
         $setter = 'set'.ucfirst($attribute);
         $key = $object::class.':'.$setter;
 
         if (!isset(self::$setterAccessibleCache[$key])) {
-            try {
-                // We have to use is_callable() here since method_exists()
-                // does not "see" protected/private methods
-                self::$setterAccessibleCache[$key] = \is_callable([$object, $setter]) && !(new \ReflectionMethod($object, $setter))->isStatic();
-            } catch (\ReflectionException $e) {
-                // Method does not exist in the class, probably a magic method
-                self::$setterAccessibleCache[$key] = false;
-            }
+            self::$setterAccessibleCache[$key] = method_exists($object, $setter) && \is_callable([$object, $setter]) && !(new \ReflectionMethod($object, $setter))->isStatic();
         }
 
         if (self::$setterAccessibleCache[$key]) {

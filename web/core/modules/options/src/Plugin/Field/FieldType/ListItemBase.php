@@ -65,6 +65,10 @@ abstract class ListItemBase extends FieldItemBase implements OptionsProviderInte
    */
   public static function generateSampleValue(FieldDefinitionInterface $field_definition) {
     $allowed_options = options_allowed_values($field_definition->getFieldStorageDefinition());
+    if (empty($allowed_options)) {
+      $values['value'] = NULL;
+      return $values;
+    }
     $values['value'] = array_rand($allowed_options);
     return $values;
   }
@@ -94,6 +98,7 @@ abstract class ListItemBase extends FieldItemBase implements OptionsProviderInte
       '#field_name' => $this->getFieldDefinition()->getName(),
       '#entity_type' => $this->getEntity()->getEntityTypeId(),
       '#allowed_values' => $allowed_values,
+      '#required' => TRUE,
     ];
 
     $element['allowed_values']['#description'] = $this->allowedValuesDescription();

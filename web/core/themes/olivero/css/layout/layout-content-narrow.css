@@ -10,19 +10,6 @@
  * Grid system definition for the content narrow layout.
  */
 
-/*
- * Media query breakpoints.
- * Processed by postcss/postcss-custom-media.
- */
-
-/* Navigation related breakpoints */
-
-/* Grid related breakpoints */
-
-/* Grid shifts from 6 to 14 columns. */
-
-/* Width of the entire grid maxes out. */
-
 .layout--content-narrow,
 .layout--pass--content-narrow > * {
   grid-column: 1 / 7;
@@ -30,7 +17,6 @@
 }
 
 @media (min-width: 43.75rem) {
-
   .layout--content-narrow,
   .layout--pass--content-narrow > * {
     grid-column: 2 / 14;
@@ -38,7 +24,6 @@
 }
 
 @media (min-width: 62.5rem) {
-
   .layout--content-narrow,
   .layout--pass--content-narrow > * {
     grid-column: 3 / 11;
@@ -55,7 +40,6 @@
 */
 
 @media (min-width: 43.75rem) {
-
   .layout--content-narrow .layout--content-narrow,
   .layout--pass--content-narrow > * .layout--content-narrow,
   .layout--content-medium .layout--content-narrow,
@@ -69,7 +53,6 @@
 }
 
 @media (min-width: 62.5rem) {
-
   .layout--content-narrow .layout--content-narrow,
   .layout--pass--content-narrow > * .layout--content-narrow,
   .layout--content-medium .layout--content-narrow,
@@ -88,21 +71,19 @@
 */
 
 @media (min-width: 43.75rem) {
-
-  .layout--content-narrow.text-content blockquote:before,
-  .layout--pass--content-narrow > *.text-content blockquote:before,
-  .layout--content-narrow .text-content blockquote:before,
-  .layout--pass--content-narrow > * .text-content blockquote:before {
+  .layout--content-narrow.text-content blockquote::before,
+  .layout--pass--content-narrow > *.text-content blockquote::before,
+  .layout--content-narrow .text-content blockquote::before,
+  .layout--pass--content-narrow > * .text-content blockquote::before {
     inset-inline-start: calc(-1 * (var(--grid-col-width) + var(--grid-gap)));
   }
 }
 
 @media (min-width: 43.75rem) {
-
-  .layout--content-narrow.text-content blockquote:after,
-  .layout--pass--content-narrow > *.text-content blockquote:after,
-  .layout--content-narrow .text-content blockquote:after,
-  .layout--pass--content-narrow > * .text-content blockquote:after {
+  .layout--content-narrow.text-content blockquote::after,
+  .layout--pass--content-narrow > *.text-content blockquote::after,
+  .layout--content-narrow .text-content blockquote::after,
+  .layout--pass--content-narrow > * .text-content blockquote::after {
     inset-inline-start: calc(-1 * (var(--grid-col-width) + var(--grid-gap)));
     width: var(--sp);
     height: calc(100% - 2.8125rem);
@@ -111,7 +92,6 @@
 }
 
 @media (min-width: 43.75rem) {
-
   .layout--content-narrow.text-content blockquote,
   .layout--pass--content-narrow > *.text-content blockquote,
   .layout--content-narrow .text-content blockquote,
@@ -123,7 +103,6 @@
 }
 
 @media (min-width: 43.75rem) {
-
   .layout--content-narrow.text-content pre,
   .layout--pass--content-narrow > *.text-content pre,
   .layout--content-narrow .text-content pre,
@@ -133,7 +112,6 @@
 }
 
 @media (min-width: 62.5rem) {
-
   .layout--content-narrow.text-content pre,
   .layout--pass--content-narrow > *.text-content pre,
   .layout--content-narrow .text-content pre,

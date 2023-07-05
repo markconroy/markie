@@ -48,11 +48,6 @@ class LinkCollectionNormalizer extends NormalizerBase {
   const LINK_CONTEXT = 'jsonapi_links_object_context';
 
   /**
-   * {@inheritdoc}
-   */
-  protected $supportedInterfaceOrClass = LinkCollection::class;
-
-  /**
    * A random string to use when hashing links.
    *
    * This string is unique per instance of a link collection, but always the
@@ -154,7 +149,18 @@ class LinkCollectionNormalizer extends NormalizerBase {
    * {@inheritdoc}
    */
   public function hasCacheableSupportsMethod(): bool {
+    @trigger_error(__METHOD__ . '() is deprecated in drupal:10.1.0 and is removed from drupal:11.0.0. Use getSupportedTypes() instead. See https://www.drupal.org/node/3359695', E_USER_DEPRECATED);
+
     return TRUE;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getSupportedTypes(?string $format): array {
+    return [
+      LinkCollection::class => TRUE,
+    ];
   }
 
 }

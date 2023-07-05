@@ -9,7 +9,7 @@ namespace Drupal\metatag\Plugin\metatag\Group;
  *   id = "advanced",
  *   label = @Translation("Advanced"),
  *   description = @Translation("Meta tags that might not be needed by many sites."),
- *   weight = 2
+ *   weight = -9
  * )
  */
 class Advanced extends GroupBase {

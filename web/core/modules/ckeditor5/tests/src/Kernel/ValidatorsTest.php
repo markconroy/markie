@@ -20,7 +20,7 @@ use Symfony\Component\Yaml\Yaml;
  * @covers \Drupal\ckeditor5\Plugin\Validation\Constraint\ToolbarItemConstraintValidator
  * @covers \Drupal\ckeditor5\Plugin\Validation\Constraint\ToolbarItemDependencyConstraintValidator
  * @covers \Drupal\ckeditor5\Plugin\Validation\Constraint\EnabledConfigurablePluginsConstraintValidator
- * @covers \Drupal\ckeditor5\Plugin\Editor\CKEditor5::validatePair()
+ * @covers \Drupal\ckeditor5\Plugin\Editor\CKEditor5::validatePair
  * @covers \Drupal\ckeditor5\Plugin\Validation\Constraint\FundamentalCompatibilityConstraintValidator
  * @covers \Drupal\ckeditor5\Plugin\Validation\Constraint\CKEditor5MediaAndFilterSettingsInSyncConstraintValidator
  * @group ckeditor5
@@ -60,9 +60,6 @@ class ValidatorsTest extends KernelTestBase {
   }
 
   /**
-   * @covers \Drupal\ckeditor5\Plugin\Validation\Constraint\ToolbarItemConstraintValidator
-   * @covers \Drupal\ckeditor5\Plugin\Validation\Constraint\ToolbarItemDependencyConstraintValidator
-   * @covers \Drupal\ckeditor5\Plugin\Validation\Constraint\EnabledConfigurablePluginsConstraintValidator
    * @covers \Drupal\ckeditor5\Plugin\Validation\Constraint\CKEditor5ElementConstraintValidator
    * @covers \Drupal\ckeditor5\Plugin\Validation\Constraint\StyleSensibleElementConstraintValidator
    * @covers \Drupal\ckeditor5\Plugin\Validation\Constraint\UniqueLabelInListConstraintValidator
@@ -549,11 +546,6 @@ class ValidatorsTest extends KernelTestBase {
   }
 
   /**
-   * @covers \Drupal\ckeditor5\Plugin\Editor\CKEditor5::validatePair()
-   * @covers \Drupal\ckeditor5\Plugin\Validation\Constraint\FundamentalCompatibilityConstraintValidator
-   * @covers \Drupal\ckeditor5\Plugin\Validation\Constraint\ToolbarItemConstraintValidator
-   * @covers \Drupal\ckeditor5\Plugin\Validation\Constraint\ToolbarItemDependencyConstraintValidator
-   * @covers \Drupal\ckeditor5\Plugin\Validation\Constraint\EnabledConfigurablePluginsConstraintValidator
    * @covers \Drupal\ckeditor5\Plugin\Validation\Constraint\SourceEditingPreventSelfXssConstraintValidator
    * @dataProvider providerPair
    *
@@ -1464,6 +1456,66 @@ class ValidatorsTest extends KernelTestBase {
       'violations' => [],
     ];
     return $data;
+  }
+
+  /**
+   * Tests that validation works with >1 enabled HTML restrictor filters.
+   *
+   * @covers \Drupal\ckeditor5\Plugin\Validation\Constraint\FundamentalCompatibilityConstraintValidator::checkHtmlRestrictionsMatch
+   */
+  public function testMultipleHtmlRestrictingFilters(): void {
+    $this->container->get('module_installer')->install(['filter_test']);
+
+    $text_format = FilterFormat::create([
+      'format' => 'very_restricted',
+      'name' => $this->randomMachineName(),
+      'filters' => [
+        // The first filter of type TYPE_HTML_RESTRICTOR.
+        'filter_html' => [
+          'id' => 'filter_html',
+          'provider' => 'filter',
+          'status' => TRUE,
+          'weight' => 0,
+          'settings' => [
+            'allowed_html' => "<p> <br>",
+            'filter_html_help' => TRUE,
+            'filter_html_nofollow' => TRUE,
+          ],
+        ],
+        // The second filter of type TYPE_HTML_RESTRICTOR. Configure this to
+        // allow exactly what the first filter allows.
+        'filter_test_restrict_tags_and_attributes' => [
+          'id' => 'filter_test_restrict_tags_and_attributes',
+          'provider' => 'filter_test',
+          'status' => TRUE,
+          'settings' => [
+            'restrictions' => [
+              'allowed' => [
+                'p' => FALSE,
+                'br' => FALSE,
+                '*' => [
+                  'dir' => ['ltr' => TRUE, 'rtl' => TRUE],
+                  'lang' => TRUE,
+                ],
+              ],
+            ],
+          ],
+        ],
+      ],
+    ]);
+    $text_editor = Editor::create([
+      'format' => 'very_restricted',
+      'editor' => 'ckeditor5',
+      'settings' => [
+        'toolbar' => [
+          'items' => [],
+        ],
+        'plugins' => [],
+      ],
+      'image_upload' => [],
+    ]);
+
+    $this->assertSame([], $this->validatePairToViolationsArray($text_editor, $text_format, TRUE));
   }
 
 }

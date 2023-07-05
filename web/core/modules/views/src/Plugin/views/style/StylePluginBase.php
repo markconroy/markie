@@ -110,6 +110,13 @@ abstract class StylePluginBase extends PluginBase {
   protected $defaultFieldLabels = FALSE;
 
   /**
+   * Keyed array by placeholder a cached per row tokens to render.
+   *
+   * @var string[]
+   */
+  public array $render_tokens = [];
+
+  /**
    * Overrides \Drupal\views\Plugin\views\PluginBase::init().
    *
    * The style options might come externally as the style can be sourced from at
@@ -191,7 +198,7 @@ abstract class StylePluginBase extends PluginBase {
   public function usesTokens() {
     if ($this->usesRowClass()) {
       $class = $this->options['row_class'];
-      if (strpos($class, '{{') !== FALSE) {
+      if (str_contains($class, '{{')) {
         return TRUE;
       }
     }
@@ -228,7 +235,7 @@ abstract class StylePluginBase extends PluginBase {
    * Take a value and apply token replacement logic to it.
    */
   public function tokenizeValue($value, $row_index) {
-    if (strpos($value, '{{') !== FALSE) {
+    if (str_contains($value, '{{')) {
       // Row tokens might be empty, for example for node row style.
       $tokens = $this->rowTokens[$row_index] ?? [];
       if (!empty($this->view->build_info['substitutions'])) {
@@ -246,8 +253,7 @@ abstract class StylePluginBase extends PluginBase {
   }
 
   /**
-   * Should the output of the style plugin be rendered even if it's an empty
-   * view.
+   * Determines if the style plugin is rendered even if the view is empty.
    */
   public function evenEmpty() {
     return !empty($this->definition['even empty']);
@@ -397,6 +403,8 @@ abstract class StylePluginBase extends PluginBase {
   }
 
   /**
+   * Determines if the style handler should interfere with sorts.
+   *
    * Called by the view builder to see if this style handler wants to
    * interfere with the sorts. If so it should build; if it returns
    * any non-TRUE value, normal sorting will NOT be added to the query.
@@ -406,6 +414,8 @@ abstract class StylePluginBase extends PluginBase {
   }
 
   /**
+   * Allows the view builder to build a second set of sorts.
+   *
    * Called by the view builder to let the style build a second set of
    * sorts that will come after any other sorts in the view.
    */

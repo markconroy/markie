@@ -124,6 +124,30 @@ class FieldTypePluginManager extends DefaultPluginManager implements FieldTypePl
   /**
    * {@inheritdoc}
    */
+  public function getStorageSettingsSummary(FieldStorageDefinitionInterface $storage_definition): array {
+    $plugin_definition = $this->getDefinition($storage_definition->getType(), FALSE);
+    if (!empty($plugin_definition['class'])) {
+      $plugin_class = DefaultFactory::getPluginClass($storage_definition->getType(), $plugin_definition);
+      return $plugin_class::storageSettingsSummary($storage_definition);
+    }
+    return [];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getFieldSettingsSummary(FieldDefinitionInterface $field_definition): array {
+    $plugin_definition = $this->getDefinition($field_definition->getType(), FALSE);
+    if (!empty($plugin_definition['class'])) {
+      $plugin_class = DefaultFactory::getPluginClass($field_definition->getType(), $plugin_definition);
+      return $plugin_class::fieldSettingsSummary($field_definition);
+    }
+    return [];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getUiDefinitions() {
     $definitions = $this->getDefinitions();
 
@@ -136,13 +160,10 @@ class FieldTypePluginManager extends DefaultPluginManager implements FieldTypePl
     foreach ($definitions as $id => $definition) {
       if (is_subclass_of($definition['class'], '\Drupal\Core\Field\PreconfiguredFieldUiOptionsInterface')) {
         foreach ($this->getPreconfiguredOptions($definition['id']) as $key => $option) {
-          $definitions['field_ui:' . $id . ':' . $key] = [
-            'label' => $option['label'],
-          ] + $definition;
-
-          if (isset($option['category'])) {
-            $definitions['field_ui:' . $id . ':' . $key]['category'] = $option['category'];
-          }
+          $definitions["field_ui:$id:$key"] = array_intersect_key(
+            $option,
+            ['label' => 0, 'category' => 1]
+          ) + $definition;
         }
       }
     }

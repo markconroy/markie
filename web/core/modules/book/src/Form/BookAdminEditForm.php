@@ -46,7 +46,7 @@ class BookAdminEditForm extends FormBase {
    * Constructs a new BookAdminEditForm.
    *
    * @param \Drupal\Core\Entity\EntityStorageInterface $node_storage
-   *   The custom block storage.
+   *   The content block storage.
    * @param \Drupal\book\BookManagerInterface $book_manager
    *   The book manager.
    * @param \Drupal\Core\Entity\EntityRepositoryInterface $entity_repository
@@ -134,7 +134,7 @@ class BookAdminEditForm extends FormBase {
             $node->book['link_title'] = $values['title'];
             $node->setNewRevision();
             $node->save();
-            $this->logger('content')->notice('book: updated %title.', ['%title' => $node->label(), 'link' => $node->toLink($this->t('View'))->toString()]);
+            $this->logger('content')->info('book: updated %title.', ['%title' => $node->label(), 'link' => $node->toLink($this->t('View'))->toString()]);
           }
         }
       }

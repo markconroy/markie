@@ -1,6 +1,6 @@
 # Metatag
 
-This module allows a site's builder to automatically provide structured
+This module suite allows a site's builder to automatically provide structured
 metadata, aka "meta tags", about the site and individual pages.
 
 In the context of search engine optimization, providing an extensive set of
@@ -9,119 +9,137 @@ achieving a more prominent display of the content within search engine results.
 They can also be used to tailor how content is displayed when shared on social
 networks.
 
-For additional information, see the [online documentation](https://www.drupal.org/docs/8/modules/metatag).
+For additional information, see the [online documentation](https://www.drupal.org/docs/contributed-modules/metatag).
 
-This version should work with all Drupal 9 releases, though it
-is always recommended to keep Drupal core installations up to date.
-
-## Requirements
-
-Metatag for Drupal 9 requires the following:
-
-* [Token](https://www.drupal.org/project/token): Provides a popup browser to
-  see the available tokens for use in meta tag fields.
 
 ## Features
 
 The primary features include:
 
-* An administration interface to manage default meta tags.
-
-* Use of standard fields for entity support, allowing for translation and
+- An administration interface to manage default meta tags.
+- Use of standard fields for entity support, allowing for translation and
   revisioning of meta tag values added for individual entities.
-
-* A large volume of meta tags available, covering commonly used tags, Open
-  Graph tags, Twitter Cards tags, Dublin Core tags, App Links tags, site
-  verification tags and more; all but the basic meta tags are kept in separate
-  submodules.
-
-* Configuration can be added for individual paths using the Metatag Custom
+- Configuration can be added for individual paths using the Metatag Custom
   Routes submodule.
-
-* The fifteen Dublin Core Basic Element Set 1.1 meta tags may be added by
-  enabling the "Metatag: Dublin Core" submodule.
-
-* Forty additional Dublin Core meta tags may be added by enabling the "Metatag:
-  Dublin Core Advanced" submodule.
-
-* The Open Graph Protocol meta tags, as used by Facebook, Pinterest, LinkedIn
-  and other sites, may be added by enabling the "Metatag: Open Graph" submodule.
-
-* The Twitter Cards meta tags may be added by enabling the "Metatag: Twitter
-  Cards" submodule.
-
-* Facebook's fb:app_id, fb:admins and fb:pages meta tags may be added by
-  enabling the "Metatag: Facebook" submodule. These are useful for sites which
-  are using Facebook widgets or are building custom integration with Facebook's
-  APIs, but they are not needed by most sites and have no bearing on the
-  Open Graph meta tags.
-
-* The Pinterest meta tags may be added by enabling the "Metatag: Pinterest"
-  submodule.
-
-* Site verification meta tags can be added, e.g. as used by the Google search
-  engine to confirm ownership of the site; see the "Metatag: Verification"
-  submodule.
-
-* The Metatag: Mobile & UI Adjustments submodule adds the MobileOptimized,
-  HandheldFriendly, viewport, cleartype, theme-color, format-detection,
-  apple-mobile-web-app-capable, apple-mobile-web-app-status-bar-style, the
-  android-app and ios-app alternative link meta tags, and the Android manifest
-  tag.
-
-* The hreflang meta tags are available via the Metatag:hreflang submodule.
-
-* The App Links meta tags may be added by enabling the Metatag: App Links
-  submodule.
-
-* Support for meta tags specific to Google Custom Search Appliance are available
-  in the "Metatag: Google Custom Search Engine (CSE)" submodule.
-
-* Meta tags specific to Facebook are included in the "Metatag: Facebook"
-  submodule.
-
-* Individual meta tags can be added to the [Search
+- Meta tags can be added to the [Search
   API](https://www.drupal.org/project/search_api) index if a Metatag field is
   added to the entity bundles; see below for further details.
-
-* A plugin interface allowing for additional meta tags to be easily added via
+- A plugin interface allowing for additional meta tags to be easily added via
   custom modules.
-
-* A report page at /admin/reports/metatag-plugins which shows all of the meta
+- A report page at /admin/reports/metatag-plugins which shows all of the meta
   tag plugins provided on the site, and indication as to which module provides
   them.
+- A large volume of meta tags are available, covering commonly used tags. All
+  but a small number of meta tags are kept in separate submodules that must be
+  installed separately:
+  - `Metatag: Dublin Core`: Provides the fifteen Dublin Core Basic Element Set
+    1.1 meta tags.
+  - `Metatag: Dublin Core Advanced`: Includes forty additional Dublin Core meta
+    tags.
+  - `Metatag: Open Graph`: Provides the Open Graph Protocol meta tags, as used
+    by Facebook, Pinterest, LinkedIn and other sites.
+  - `Metatag: Twitter Cards`: Provides the Twitter Cards meta tags.
+  - `Metatag: Facebook`: Provides Facebook's `fb:app_id`, `fb:admins` and
+    `fb:pages` meta tags. These are useful for sites which are using Facebook
+    widgets or are building custom integration with Facebook's APIs, but they
+    are not needed by most sites and have no bearing on the Open Graph meta
+    tags.
+  - `Metatag: Pinterest`: Provides meta tags for use with Pinterest.
+  - `Metatag: Verification`: Provides a range of meta tags specifically for
+    validating / verifying the site for different search engines and other
+    services, e.g. Google, Yandex, etc.
+  - `Metatag: Mobile & UI Adjustments`: Adds the MobileOptimized, cleartype,
+    HandheldFriendly, viewport, theme-color, format-detection,
+    apple-mobile-web-app-capable, apple-mobile-web-app-status-bar-style, the
+    android-app and ios-app alternative link meta tags, and the Android manifest
+    tag.
+  - `Metatag: hreflang`: Provides the hreflang meta tags, along with some
+    automation for multi-lingual sites.
+  - `Metatag: App Links`: Provides an array of App Links meta tags.
+  - `Metatag: Google Custom Search Engine (CSE)`: Provides some custom meta tags
+    specific to Google Custom Search Appliance.
 
 
-## Standard usage scenario
+## Requirements
 
-1. Install the module.
-2. Open admin/config/search/metatag.
-3. Adjust global and entity defaults. Fill in reasonable default values for any
-   of the meta tags that need to be customized. Tokens may be used to
-   automatically assign values.
-4. Additional bundle defaults may be added by clicking on "Add default meta
-   tags" and filling out the form.
-5. To adjust meta tags for a specific entity, the Metatag field must be added
-   first. Follow these steps:
+This version requires Drupal 9.4 or newer and is compatible with Drupal 10. That
+said, it is always recommended to keep Drupal core installations up to date.
 
-  * Go to the "Manage fields" of the bundle where the Metatag field is to
+This module requires the following modules:
+
+- [Token](https://www.drupal.org/project/token): Provides a popup browser to
+  see the available tokens for use in meta tag fields.
+
+
+## Recommended / related modules
+
+Some modules are available that extend Metatag with additional or complimentary
+functionality:
+
+- [Token OR](https://www.drupal.org/project/token_or):
+  Provides a means to output a second token if the first one is empty, which can
+  be very useful for complex content architectures.
+- [Schema.org Metatag](https://www.drupal.org/project/schema_metatag):
+  Extensive solution for adding schema.org / JSON-LD support to Metatag.
+- [Context Metadata](https://www.drupal.org/project/context_metadata):
+  Allow assignment of meta tags based upon different system contexts, e.g. per
+  path.
+- [Real-time SEO for Drupal](https://www.drupal.org/project/yoast_seo):
+  Uses the [YoastSEO.js library and service](https://yoast.com/) to provide
+  realtime feedback on the meta tags.
+- [Metatag Cxense](https://www.drupal.org/project/metatag_cxense):
+  Adds support for the Cxense meta tags used by their DMP and Insight services.
+- [Metatag Google Scholar](https://www.drupal.org/project/metatag_google_scholar):
+  Adds support for a number of meta tags used with the Google Scholar system.
+- [Maxlength](https://www.drupal.org/project/maxlength):
+  If this module is installed, meta tags that have a maximum length defined in
+  the settings will have that maximum length enforced; this may be disabled in
+  the settings if it proves to be problematic.
+
+
+## Installation
+
+This module suite is installed like any other contributed module. For further
+information, see [Installing Drupal
+Modules](https://drupal.org/docs/extending-drupal/installing-drupal-modules).
+
+
+## Configuration / standard usage scenario
+
+- Install the module.
+- Open `admin/config/search/metatag`.
+- Adjust global and entity defaults. Fill in reasonable default values for any
+  of the meta tags that need to be customized. Tokens may be used to
+  automatically assign values.
+  - Global meta tags are used as the base defaults that all others inherit from.
+  - Each entity type has an additional layer of defaults. These inherit from the
+    global defaults and may be customized for each entity type, e.g. content
+    / node pages can have one set of defaults while taxonomy terms have
+    different ones.
+  - Additional defaults may be added for specific entity bundles, e.g. a
+    specific content type or a specific vocabulary, by clicking on "Add default
+    meta tags", selecting the entity bundle to override, and filling out the
+    form. This will override the defaults defined for the entity type itself,
+    allowing e.g. one content type to use a specific image field for image meta
+    tags, different to the default.
+  - Special default values exist for the front page, and for both the 404 and
+    403 error pages.
+- To adjust meta tags for a specific entity, the "Metatag" field must be added
+  first. Follow these steps:
+  - Go to the "Manage fields" of the bundle where the Metatag field is to
     appear.
-
-  * Select "Meta tags" from the "Add a new field" selector.
-
-  * Fill in a label for the field, e.g. "Meta tags", and set an appropriate
+  - Select "Meta tags" from the "Add a new field" selector.
+  - Fill in a label for the field, e.g. "Meta tags", and set an appropriate
     machine name, e.g. "meta_tags".
-
-  * Click the "Save and continue" button.
-
-  * If the site supports multiple languages, and translations have been
+  - Click the "Save and continue" button.
+  - If the site supports multiple languages, and translations have been
     enabled for this entity, select "Users may translate this field" to use
     Drupal's translation system.
 
 Please note: no meta tags will be output while the site is in maintenance mode.
 
 
-## Simplify the content administration experience
+## Simplifying the content administration experience
 
 This module and its submodules gives a site's content team the ability to add
 every meta tag ever. The standard meta tag form added by the Metatag field on
@@ -131,8 +149,16 @@ need to manage a few options.
 The easiest way of simplifying this for content teams is to add new fields to
 the content type for the meta data fields that are needed and skip adding the
 Metatag field entirely, then use tokens for those fields in the defaults
-(/admin/config/search/metatag). These fields can be used in the entity's
+(`/admin/config/search/metatag`). These fields can be used in the entity's
 display, or just left hidden.
+
+
+### Alternative option to simplify the content administration experience
+
+On the settings page (`/admin/config/search/metatag/settings`) are options to
+control which meta tag groups are available for each entity bundle. This allows
+e.g. the Favicon meta tags to be available for global configurations but to hide
+them on entity forms.
 
 
 ## Indexing meta tags with Search API
@@ -140,48 +166,50 @@ display, or just left hidden.
 The Search API integration allows indexing the meta tag values from a meta tag
 field on an entity bundle.
 
+
 ### Limitations
 
-* Each meta tag must be specified individually, there isn't (currently) a way to
+- Each meta tag must be specified individually, there isn't (currently) a way to
   add all of them at once.
-* This may not work with values stored in Schema.org data structures from the
+- This may not work with values stored in Schema.org data structures from the
   Schema.org Metatag module.
-* Changing the global Metatag defaults will not trigger a reindex of the content
+- Changing the global Metatag defaults will not trigger a reindex of the content
   so this will need to be done separately.
-* By default meta tags will be added as "string" fields, which will not include
+- By default meta tags will be added as "string" fields, which will not include
   them in the keyword search index; their "Type" selection must be specifically
   set to "Fulltext" in order for the meta tags to be included in the keyword
   search index, otherwise they will only be useful for doing facets or filters.
+
 
 ### Setup
 
 To add meta tags to the Search API:
 
-* Make sure that a Metatag field is present on the entity bundle(s) that are
+- Make sure that a Metatag field is present on the entity bundle(s) that are
   being indexed.
-* In the index configuration, modify the Fields section.
-* Click the "Add fields" button.
-* In the "Add fields to index [indexname]" popup, scroll down to find the
+- In the index configuration, modify the Fields section.
+- Click the "Add fields" button.
+- In the "Add fields to index [indexname]" popup, scroll down to find the
   Metatag field; it will have the name defined in the field's settings.
-* Click the plus `(+)` button beside the field to see which meta tags are
+- Click the plus `(+)` button beside the field to see which meta tags are
   available.
-* Click the "Add" button for the meta tags that are needed.
-* Click "Done" when all of the meta tags are added.
-* Look for the meta tag fields added to the index, change their "type" selector
+- Click the "Add" button for the meta tags that are needed.
+- Click "Done" when all of the meta tags are added.
+- Look for the meta tag fields added to the index, change their "type" selector
   to "Fulltext"; adjust the "Boost" value if desired.
-* Click "Save changes" at the bottom of the Fields admin page.
-* Reindex the content with the new settings.
+- Click "Save changes" at the bottom of the Fields admin page.
+- Reindex the content with the new settings.
 
 
-## Alternative option to simplify the content administration experience
+### Note: this is deprecated!
 
-On the settings page (/admin/config/search/metatag/settings) are options to
-control which meta tag groups are available for each entity bundle. This allows
-e.g. the Favicon meta tags to be available for global configurations but to hide
-them on entity forms.
+Note that this specific Search API integration has been deprecated in release
+8.x-1.23 and a replacement will be added separately to a future release.
 
 
-## Programmatically assign meta tags to an entity
+## Advanced usage
+
+### Programmatically assign meta tags to an entity
 
 There are two ways to assign an entity's meta tags in custom module. Both
 scenarios require a "Metatag" field be added to the entity's field settings, the
@@ -189,88 +217,87 @@ field name "field_meta_tags" is used but this is completely arbitrary.
 
 Option 1:
 
-``` $entity_type = 'node';
-$values = [
-  'nid' => NULL,
-  'type' => 'article',
-  'title' => 'Testing metatag creation',
-  'uid' => 1,
-  'status' => TRUE,
-  'field_meta_tags' => serialize([
-    'title' => 'Some title',
-    'description' => 'Some description.',
-    'keywords' => 'Some,Keywords',
-  ]),
-];
-$node = \Drupal::entityTypeManager()
-  ->getStorage($entity_type)
-  ->create($values);
-$node->save();
-```
+    $entity_type = 'node';
+    $values = [
+      'nid' => NULL,
+      'type' => 'article',
+      'title' => 'Testing metatag creation',
+      'uid' => 1,
+      'status' => TRUE,
+      'field_meta_tags' => serialize([
+        'title' => 'Some title',
+        'description' => 'Some description.',
+        'keywords' => 'Some,Keywords',
+      ]),
+    ];
+    $node = \Drupal::entityTypeManager()
+      ->getStorage($entity_type)
+      ->create($values);
+    $node->save();
+
 
 Option 2:
 
-```$node = Node::create([
-  'type' => article,
-  'langcode' => 'en',
-  'status' => 1,
-  'uid' => 1,
-]);
-$node->set('title', 'Testing metatag creation');
-$node->set('field_meta_tags', serialize([
-  'title' => 'Some title',
-  'description' => 'Some description.',
-  'keywords' => 'Some,Keywords',
-]));
-$node->save();
-```
+    $node = Node::create([
+      'type' => article,
+      'langcode' => 'en',
+      'status' => 1,
+      'uid' => 1,
+    ]);
+    $node->set('title', 'Testing metatag creation');
+    $node->set('field_meta_tags', serialize([
+      'title' => 'Some title',
+      'description' => 'Some description.',
+      'keywords' => 'Some,Keywords',
+    ]));
+    $node->save();
+
 
 In both examples, the custom meta tag values will still be merged with the
 values defined via the global defaults prior to being output - it is not
 necessary to copy each value to the new record.
 
 
-## Obtain meta tags for an entity
+### Obtain meta tags for an entity
 
 For developers needing to access the rendered meta tags for a given entity, a
 function is provided to make this easy to do:
 
-`$metatags = metatag_generate_entity_metatags($entity);`
+    $metatags = metatag_generate_entity_all_tags($entity);
 
 This will return an array with the following structure:
 
-```
-  [
-    'title' => [
-      '#tag' => 'meta',
-      '#attributes' => [
-        'name' => 'title',
-        'content' => 'The What | D8.4',
+    [
+      'title' => [
+        '#tag' => 'meta',
+        '#attributes' => [
+          'name' => 'title',
+          'content' => 'The What | D8.4',
+        ],
       ],
-    ],
-    'canonical_url' => [
-      '#tag' => 'link',
-      '#attributes' => [
-        'rel' => 'canonical',
-        'href' => 'https://example.com/what',
+      'canonical_url' => [
+        '#tag' => 'link',
+        '#attributes' => [
+          'rel' => 'canonical',
+          'href' => 'https://example.com/what',
+        ],
       ],
-    ],
-    'description' => [
-      '#tag' => 'meta',
-      '#attributes' => [
-        'name' => 'description',
-        'content' => 'I can't even.',
+      'description' => [
+        '#tag' => 'meta',
+        '#attributes' => [
+          'name' => 'description',
+          'content' => 'I can't even.',
+        ],
       ],
-    ],
-    'generator' => [
-      '#tag' => 'meta',
-      '#attributes' => [
-        'name' => 'generator',
-        'content' => 'Drupal 9!',
+      'generator' => [
+        '#tag' => 'meta',
+        '#attributes' => [
+          'name' => 'generator',
+          'content' => 'Drupal 9!',
+        ],
       ],
-    ],
-  ]
-```
+    ]
+
 
 The meta tags are keyed off the meta tag plugin's ID, e.g. "generator". Each
 meta tag is then provided as arguments suitable for use in a render array with
@@ -278,104 +305,89 @@ the type "html_tag". Extracting the value of the meta tag will depend upon the
 type of meta tag, e.g. the generator meta tag uses the "content" attribute while
 the link tag uses the "href" attribute.
 
+Another function exists for viewing only the meta tags that are overridden for
+an entity, i.e. global defaults are not included.
 
-## Migration / Upgrade from Drupal 6 or 7
+    $metatags = metatag_generate_entity_overrides($entity);
+
+This returns output in the same format as the function above.
+
+
+## Migration / upgrade from Drupal 6 or 7
 
 An upgrade path from Nodewords on Drupal 6 or Metatag on Drupal 7 is provided.
 
-Two migration processes are supported:
-
-1. A guided migration using either the Migrate Drupal UI from core or the
-   [Migrate Upgrade](https://www.drupal.org/project/migrate_upgrade)
-   contributed module. This will automatically create a field named
-   "field_metatag" and import any meta tag data that existed in Nodewords on D6
-   or Metatag on D7.
-
-   This migration configuration is all prepared in
-   metatag_migration_plugins_alter(), the data is loaded onto the migrated
-   entity in metatag_migrate_prepare_row(), and then the data is remapped in
-   either \Drupal\metatag\Plugin\migrate\process\d6\NodewordsEntities or
-   \Drupal\metatag\Plugin\migrate\process\d7\MetatagEntities depending upon
-   what the source is.
-
-2. A custom migration using [Migrate
-   Plus](https://www.drupal.org/project/migrate_plus) and possibly [Migrate
-   Tools](https://www.drupal.org/project/migrate_tools).
-   This will require manually creating the meta tag fields and assigning a
-   custom process plugin as the source for its data. For example, if the name
-   of the field is "field_meta_tags" the lines from the "process" section of
-   the migration yml file would need to look line the following:
-
-   For migrating from Nodewords on D6:
-
-```process:
-...
-  field_meta_tags:
-    plugin: d6_nodewords_entities
-    source: pseudo_metatag_entities
-...
-```
-
-   For Migrating from Metatag on D7:
-
-```process:
-...
-  field_meta_tags:
-    plugin: d7_metatag_entities
-    source: pseudo_metatag_entities
-...
-```
-
-  The important items are the "plugin" and the "source" values, if these are
-  not present the migration will not work as expected.
-
-  The data will then be loaded into the migrating entity using
-  metatag_migrate_prepare_row().
-
-  See also:
-  * \Drupal\metatag\Plugin\migrate\process\d6\NodewordsEntities
-  * \Drupal\metatag\Plugin\migrate\process\d7\MetatagEntities
+Two migration processes are supported, Guided migration or Custom migration:
 
 
-## Related modules
+### Guided migration
 
-Some modules are available that extend Metatag with additional or complimentary
-functionality:
+A guided migration using either the Migrate Drupal UI from core or the
+[Migrate Upgrade](https://www.drupal.org/project/migrate_upgrade)
+contributed module. This will automatically create a field named
+"field_metatag" and import any meta tag data that existed in Nodewords on D6
+or Metatag on D7.
 
-* [Token OR](https://www.drupal.org/project/token_or):
-  Provides a means to output a second token if the first one is empty, which can
-  be very useful for complex content architectures.
-
-* [Schema.org Metatag](https://www.drupal.org/project/schema_metatag):
-  Extensive solution for adding schema.org / JSON-LD support to Metatag.
-
-* [Context Metadata](https://www.drupal.org/project/context_metadata):
-  Allow assignment of meta tags based upon different system contexts, e.g. per
-  path.
-
-* [Real-time SEO for Drupal](https://www.drupal.org/project/yoast_seo):
-  Uses the [YoastSEO.js library and service](https://yoast.com/) to provide
-  realtime feedback on the meta tags.
-
-* [Metatag Cxense](https://www.drupal.org/project/metatag_cxense):
-  Adds support for the Cxense meta tags used by their DMP and Insight services.
-
-* [Metatag Google Scholar](https://www.drupal.org/project/metatag_google_scholar):
-  Adds support for a number of meta tags used with the Google Scholar system.
+This migration configuration is all prepared in
+`metatag_migration_plugins_alter()`, the data is loaded onto the migrated
+entity in `metatag_migrate_prepare_row()`, and then the data is remapped in
+either `\Drupal\metatag\Plugin\migrate\process\d6\NodewordsEntities` or
+`\Drupal\metatag\Plugin\migrate\process\d7\MetatagEntities` depending upon
+what the source is.
 
 
-## Known issues
+### Custom migration
+
+A custom migration using [Migrate
+Plus](https://www.drupal.org/project/migrate_plus) and possibly [Migrate
+Tools](https://www.drupal.org/project/migrate_tools).
+This will require manually creating the meta tag fields and assigning a
+custom process plugin as the source for its data. For example, if the name
+of the field is "field_meta_tags" the lines from the "process" section of
+the migration yml file would need to look line the following:
+
+For migrating from Nodewords on D6:
+
+    process:
+    ...
+      field_meta_tags:
+        plugin: d6_nodewords_entities
+        source: pseudo_metatag_entities
+    ...
+
+For Migrating from Metatag on D7:
+
+    process:
+    ...
+      field_meta_tags:
+        plugin: d7_metatag_entities
+        source: pseudo_metatag_entities
+    ...
+
+The important items are the "plugin" and the "source" values, if these are
+not present the migration will not work as expected.
+
+The data will then be loaded into the migrating entity using
+`metatag_migrate_prepare_row()`.
+
+See also:
+
+- `\Drupal\metatag\Plugin\migrate\process\d6\NodewordsEntities`
+- `\Drupal\metatag\Plugin\migrate\process\d7\MetatagEntities`
+
+
+## Troubleshooting / known issues
 
 ### Uninstalling Metatag
 
 In order to uninstall the module any "Metatag" fields must first be removed
 from all entities. In order to see whether there are fields blocking the
 module from being uninstalled, load the module uninstall page
-(admin/modules/uninstall) and see if any are listed, it will look something
+(`/admin/modules/uninstall`) and see if any are listed, it will look something
 like the following:
 
-`The Meta tags field type is used in the following field:
-node.field_meta_tags`
+The Meta tags field type is used in the following field:
+`node.field_meta_tags`
 
 In order to uninstall the module, go to the appropriate field settings pages
 and remove the Metatag field listed in the message. Once this is done it will
@@ -387,11 +399,12 @@ In order for the meta tags to be displayed on the page the html.html.twig file
 must output the main `{{ page }}` element. If the meta tags are not visible on
 the page check, to see if the html.html.twig instead contains this:
 
-`{{ page.content }}`
+    {{ page.content }}
 
 To fix this, simply change that line back to `{{ page }}` and it should work.
 
-## Credits / contact
+
+## Maintainers / credits / contact
 
 Currently maintained by [Damien
 McKenna](https://www.drupal.org/u/damienmckenna). Drupal 7 module originally

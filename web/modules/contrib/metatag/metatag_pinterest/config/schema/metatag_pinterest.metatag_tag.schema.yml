@@ -6,20 +6,20 @@ metatag.metatag_tag.pinterest_description:
   type: text
   label: 'Pinterest: Description'
 metatag.metatag_tag.pinterest_id:
-  type: label
+  type: text
   label: 'Pinterest: ID'
 metatag.metatag_tag.pinterest_media:
-  type: label
+  type: text
   label: 'Pinterest: Media'
 metatag.metatag_tag.pinterest_nohover:
-  type: label
+  type: text
   label: 'Pinterest: No hover'
 metatag.metatag_tag.pinterest_nopin:
-  type: label
+  type: text
   label: 'Pinterest: No pin'
 metatag.metatag_tag.pinterest_nosearch:
-  type: label
+  type: text
   label: 'Pinterest: No search'
 metatag.metatag_tag.pinterest_url:
-  type: label
+  type: text
   label: 'Pinterest: URL'

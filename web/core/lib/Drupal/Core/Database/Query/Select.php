@@ -856,7 +856,7 @@ class Select extends Query implements SelectInterface {
       else {
         $table_string = $this->connection->escapeTable($table['table']);
         // Do not attempt prefixing cross database / schema queries.
-        if (strpos($table_string, '.') === FALSE) {
+        if (!str_contains($table_string, '.')) {
           $table_string = '{' . $table_string . '}';
         }
       }
@@ -878,7 +878,10 @@ class Select extends Query implements SelectInterface {
 
     // GROUP BY
     if ($this->group) {
-      $query .= "\nGROUP BY " . implode(', ', $this->group);
+      $group_by_fields = array_map(function (string $field): string {
+        return $this->connection->escapeField($field);
+      }, $this->group);
+      $query .= "\nGROUP BY " . implode(', ', $group_by_fields);
     }
 
     // HAVING

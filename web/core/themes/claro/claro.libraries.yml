@@ -71,12 +71,10 @@ global-styling:
     # such as inputs, action links, buttons, dropbuttons. For usability and
     # accessibility reasons, we keep target sizes big enough on touch screen
     # devices (by not making these elements smaller than their default size).
-    # Modernizr was used for recognizing whether user is using a touch device or
-    # not. This allows conditionally rendering small variation of the control
-    # elements on non-touch devices. Modernizr's touch detection has since been
-    # replaced by core/drupal.touchevents-test.
-    # In some cases, such as when rendering links, it is hard recognize when
-    # this detection should be attached, therefore it is always attached.
+    # This library allows conditionally rendering small variations of the
+    # control elements on non-touch devices. In some cases, such as when
+    # rendering links, it is hard to recognize when this detection should be
+    # attached, therefore it is always attached.
     - core/drupal.touchevents-test
 
 node-form:
@@ -117,16 +115,6 @@ drupal.nav-tabs:
     - core/drupal
     - core/once
     - core/drupal.debounce
-    - core/collapse
-
-drupal.responsive-detail:
-  version: VERSION
-  js:
-    js/responsive-details.js: {}
-  dependencies:
-    - core/jquery
-    - core/once
-    - core/collapse
 
 claro.jquery.ui:
   version: VERSION
@@ -167,7 +155,6 @@ system.admin:
       css/components/system-admin--links.css: { weight: -10 }
       css/components/system-admin--modules.css: { weight: -10 }
       css/components/system-admin--panel.css: { weight: -10 }
-      css/components/system-admin--status-report.css: { weight: -10 }
     layout:
       css/layout/system-admin--layout.css: { weight: -10 }
   dependencies:
@@ -286,6 +273,18 @@ filter:
   css:
     component:
       css/theme/filter.theme.css: {}
+
+tableselect:
+  version: VERSION
+  js:
+    js/tableselect.js: {}
+  dependencies:
+    - core/jquery
+    - core/drupal
+    - core/drupal.announce
+    - core/drupal.debounce
+    - core/tabbable
+    - core/once
 
 classy.book-navigation:
   version: VERSION

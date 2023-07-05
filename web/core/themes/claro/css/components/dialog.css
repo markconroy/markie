@@ -21,12 +21,19 @@
   box-shadow: var(--jui-dialog-box-shadow);
 }
 
+@media (forced-colors: active) {
+  .ui-dialog {
+    border: 1px solid transparent;
+  }
+}
+
 .ui-dialog:focus {
   outline: var(--jui-dialog--focus-outline);
   box-shadow: var(--jui-dialog--focus-box-shadow);
 }
 
-@media all and (max-width: 48em) { /* 768px */
+@media all and (max-width: 48em) {
+  /* 768px */
   .ui-dialog:not(.ui-dialog-off-canvas) {
     min-width: 92%;
     max-width: 92%;

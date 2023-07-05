@@ -6,6 +6,7 @@ use Drupal\Core\Render\HtmlResponse;
 use Drupal\media\Controller\OEmbedIframeController;
 use Drupal\media\OEmbed\Provider;
 use Drupal\media\OEmbed\Resource;
+use Drupal\TestTools\Random;
 use Prophecy\Argument;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -26,13 +27,13 @@ class OEmbedIframeControllerTest extends MediaKernelTestBase {
    *
    * @return array
    */
-  public function providerBadHashParameter() {
+  public static function providerBadHashParameter() {
     return [
       'no hash' => [
         '',
       ],
       'invalid hash' => [
-        $this->randomString(),
+        Random::string(),
       ],
     ];
   }
@@ -55,7 +56,7 @@ class OEmbedIframeControllerTest extends MediaKernelTestBase {
 
     $this->assertIsCallable($controller);
 
-    $this->expectException('\Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException');
+    $this->expectException('\Symfony\Component\HttpKernel\Exception\BadRequestHttpException');
     $this->expectExceptionMessage('This resource is not available');
     $request = new Request([
       'url' => 'https://example.com/path/to/resource',

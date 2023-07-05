@@ -10,19 +10,6 @@
  * Header Search Wide Block.
  */
 
-/*
- * Media query breakpoints.
- * Processed by postcss/postcss-custom-media.
- */
-
-/* Navigation related breakpoints */
-
-/* Grid related breakpoints */
-
-/* Grid shifts from 6 to 14 columns. */
-
-/* Width of the entire grid maxes out. */
-
 /* Override contextual links so we can position against .site-header. */
 
 .block-search-wide.contextual-region {
@@ -33,11 +20,11 @@
   position: absolute;
   z-index: 1; /* Ensure left border shows above social region in IE11. */
   inset-block-start: 100%;
-  inset-inline-start: 0;
+  inset-inline-start: calc(-1 * var(--content-left));
   display: none;
   visibility: hidden;
   overflow: hidden;
-  width: 100vw;
+  width: calc(100% + var(--content-left));
   max-width: var(--max-bg-color);
   height: var(--sp8);
   max-height: 0;
@@ -77,26 +64,9 @@
   -webkit-appearance: none;
 }
 
-.block-search-wide__wrapper input[type="search"]::-ms-clear {
-  width: 2.5rem;
-  opacity: 0.5;
-}
-
 .block-search-wide__wrapper input[type="search"]:focus {
   outline: solid 4px transparent;
   outline-offset: -4px;
-
-  /*
-        We normally indicate focus by animating background-image width. This isn't
-        available in IE11 when in Windows high contrast mode.
-      */
-}
-
-@media screen and (-ms-high-contrast: active) {
-
-  .block-search-wide__wrapper input[type="search"]:focus {
-    border-bottom-width: var(--sp0-5);
-  }
 }
 
 .block-search-wide__wrapper .form-item-keys {
@@ -145,7 +115,7 @@
   background-size: contain;
 }
 
-.block-search-wide__wrapper .search-form__submit .icon--search:after {
+.block-search-wide__wrapper .search-form__submit .icon--search::after {
   position: absolute;
   inset-block-end: 0;
   inset-inline-start: 0;
@@ -164,32 +134,21 @@
   box-shadow: none;
 }
 
-.block-search-wide__wrapper .search-form__submit:focus span:after {
+.block-search-wide__wrapper .search-form__submit:focus span::after {
   transform: scaleX(1);
 }
 
 @media screen and (-ms-high-contrast: active) {
-
   .block-search-wide__wrapper .search-form__submit:focus {
     border-bottom-width: var(--sp0-5);
   }
 
-  .block-search-wide__wrapper .search-form__submit:focus span:after {
+  .block-search-wide__wrapper .search-form__submit:focus span::after {
     content: none;
   }
 }
 
 @media screen and (-ms-high-contrast: active) {
-  /* IE11's high contrast show will not show the background image, so we show the text. */
-  .block-search-wide__wrapper .search-form__submit .visually-hidden {
-    position: static;
-    overflow: visible;
-    clip: auto;
-    width: auto;
-    height: auto;
-    text-align: center;
-  }
-
   /* Edge's high contrast does show the background image, so we hide it. */
   .block-search-wide__wrapper .search-form__submit .icon--search {
     display: none;
@@ -234,7 +193,7 @@
   outline: 0;
 }
 
-.block-search-wide__button:focus:after {
+.block-search-wide__button:focus::after {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -250,12 +209,12 @@
   background: var(--color--black);
 }
 
-.block-search-wide__button[aria-expanded="true"]:focus:after {
+.block-search-wide__button[aria-expanded="true"]:focus::after {
   border-color: var(--color--white);
 }
 
-.block-search-wide__button[aria-expanded="true"] .block-search-wide__button-close:before,
-.block-search-wide__button[aria-expanded="true"] .block-search-wide__button-close:after {
+.block-search-wide__button[aria-expanded="true"] .block-search-wide__button-close::before,
+.block-search-wide__button[aria-expanded="true"] .block-search-wide__button-close::after {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -265,11 +224,11 @@
   border-block-start: solid 2px var(--color--white);
 }
 
-.block-search-wide__button[aria-expanded="true"] .block-search-wide__button-close:before {
+.block-search-wide__button[aria-expanded="true"] .block-search-wide__button-close::before {
   transform: translate(-50%, -50%) rotate(-45deg);
 }
 
-.block-search-wide__button[aria-expanded="true"] .block-search-wide__button-close:after {
+.block-search-wide__button[aria-expanded="true"] .block-search-wide__button-close::after {
   transform: translate(-50%, -50%) rotate(45deg);
 }
 
@@ -283,7 +242,6 @@
 }
 
 @media (forced-colors: active) {
-
   .block-search-wide__button {
     background: ButtonFace;
   }
@@ -318,12 +276,11 @@ html:not(.js) .search-block-form:focus-within .block-search-wide__wrapper {
   background-position: bottom right;
 }
 
-[dir="rtl"] .block-search-wide__wrapper .search-form__submit .icon--search:after {
+[dir="rtl"] .block-search-wide__wrapper .search-form__submit .icon--search::after {
   transform-origin: right;
 }
 
 @media (min-width: 75rem) {
-
   body:not(.is-always-mobile-nav) .block-search-wide__wrapper,
   body:not(.is-always-mobile-nav) .block-search-wide__button {
     display: block;

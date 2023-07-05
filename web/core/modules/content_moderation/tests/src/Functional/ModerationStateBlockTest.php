@@ -36,7 +36,7 @@ class ModerationStateBlockTest extends ModerationStateTestBase {
   }
 
   /**
-   * Tests moderating custom blocks.
+   * Tests moderating content blocks.
    *
    * Blocks and any non-node-type-entities do not have a concept of
    * "published". As such, we must use the "default revision" to know what is
@@ -56,12 +56,12 @@ class ModerationStateBlockTest extends ModerationStateTestBase {
   public function testCustomBlockModeration() {
     $this->drupalLogin($this->rootUser);
 
-    // Enable moderation for custom blocks.
+    // Enable moderation for content blocks.
     $edit['bundles[basic]'] = TRUE;
     $this->drupalGet('admin/config/workflow/workflows/manage/editorial/type/block_content');
     $this->submitForm($edit, 'Save');
 
-    // Create a custom block at block/add and save it as draft.
+    // Create a content block at block/add and save it as draft.
     $body = 'Body of moderated block';
     $edit = [
       'info[0][value]' => 'Moderated block',
@@ -94,7 +94,7 @@ class ModerationStateBlockTest extends ModerationStateTestBase {
       'body[0][value]' => $updated_body,
       'moderation_state[0][state]' => 'draft',
     ];
-    $this->drupalGet('block/' . $block->id());
+    $this->drupalGet('admin/content/block/' . $block->id());
     $this->submitForm($edit, 'Save');
     $this->assertSession()->pageTextContains('basic Moderated block has been updated.');
 
@@ -105,7 +105,7 @@ class ModerationStateBlockTest extends ModerationStateTestBase {
     $this->assertSession()->pageTextContains($updated_body);
 
     // Publish the block so we can create a pending revision.
-    $this->drupalGet('block/' . $block->id());
+    $this->drupalGet('admin/content/block/' . $block->id());
     $this->submitForm(['moderation_state[0][state]' => 'published'], 'Save');
 
     // Create a pending revision.
@@ -114,7 +114,7 @@ class ModerationStateBlockTest extends ModerationStateTestBase {
       'body[0][value]' => $pending_revision_body,
       'moderation_state[0][state]' => 'draft',
     ];
-    $this->drupalGet('block/' . $block->id());
+    $this->drupalGet('admin/content/block/' . $block->id());
     $this->submitForm($edit, 'Save');
     $this->assertSession()->pageTextContains('basic Moderated block has been updated.');
 
@@ -127,7 +127,7 @@ class ModerationStateBlockTest extends ModerationStateTestBase {
     $edit = [
       'new_state' => 'published',
     ];
-    $this->drupalGet('block/' . $block->id() . '/latest');
+    $this->drupalGet('admin/content/block/' . $block->id() . '/latest');
     $this->submitForm($edit, 'Apply');
     $this->assertSession()->pageTextContains('The moderation state has been updated.');
 
@@ -138,7 +138,7 @@ class ModerationStateBlockTest extends ModerationStateTestBase {
 
     // Check that revision is checked by default when content moderation is
     // enabled.
-    $this->drupalGet('/block/' . $block->id());
+    $this->drupalGet('/admin/content/block/' . $block->id());
     $this->assertSession()->checkboxChecked('revision');
     $this->assertSession()->pageTextContains('Revisions must be required when moderation is enabled.');
     $this->assertSession()->fieldDisabled('revision');

@@ -24,6 +24,7 @@
         "phpdocumentor/reflection-docblock": "^3.2|^4.0|^5.0",
         "symfony/cache": "^5.4|^6.0",
         "symfony/config": "^5.4|^6.0",
+        "symfony/console": "^5.4|^6.0",
         "symfony/dependency-injection": "^5.4|^6.0",
         "symfony/error-handler": "^5.4|^6.0",
         "symfony/filesystem": "^5.4|^6.0",
@@ -42,21 +43,12 @@
     "conflict": {
         "doctrine/annotations": "<1.12",
         "phpdocumentor/reflection-docblock": "<3.2.2",
-        "phpdocumentor/type-resolver": "<1.4.0|>=1.7.0",
+        "phpdocumentor/type-resolver": "<1.4.0",
         "symfony/dependency-injection": "<5.4",
         "symfony/property-access": "<5.4",
         "symfony/property-info": "<5.4",
         "symfony/uid": "<5.4",
         "symfony/yaml": "<5.4"
-    },
-    "suggest": {
-        "psr/cache-implementation": "For using the metadata cache.",
-        "symfony/property-info": "To deserialize relations.",
-        "symfony/yaml": "For using the default YAML mapping loader.",
-        "symfony/config": "For using the XML mapping loader.",
-        "symfony/property-access": "For using the ObjectNormalizer.",
-        "symfony/mime": "For using a MIME type guesser within the DataUriNormalizer.",
-        "symfony/var-exporter": "For using the metadata compiler."
     },
     "autoload": {
         "psr-4": { "Symfony\\Component\\Serializer\\": "" },

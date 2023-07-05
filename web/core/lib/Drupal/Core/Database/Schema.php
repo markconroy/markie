@@ -84,7 +84,7 @@ abstract class Schema implements PlaceholderInterface {
   protected function getPrefixInfo($table = 'default', $add_prefix = TRUE) {
     $info = [
       'schema' => $this->defaultSchema,
-      'prefix' => $this->connection->tablePrefix($table),
+      'prefix' => $this->connection->getPrefix(),
     ];
     if ($add_prefix) {
       $table = $info['prefix'] . $table;
@@ -196,7 +196,7 @@ abstract class Schema implements PlaceholderInterface {
     $condition = $this->buildTableNameCondition('%', 'LIKE');
     $condition->compile($this->connection, $this);
 
-    $prefix = $this->connection->tablePrefix();
+    $prefix = $this->connection->getPrefix();
     $prefix_length = strlen($prefix);
     $tables = [];
     // Normally, we would heartily discourage the use of string
@@ -687,8 +687,7 @@ abstract class Schema implements PlaceholderInterface {
   }
 
   /**
-   * Return an escaped version of its parameter to be used as a default value
-   * on a column.
+   * Escapes a value to be used as the default value on a column.
    *
    * @param mixed $value
    *   The value to be escaped (int, float, null or string).

@@ -81,7 +81,7 @@ class ProjectInfo {
       // which is left alone by tar and correctly set to the time the .info.yml
       // file was unpacked.
       if (!isset($file->info['_info_file_ctime'])) {
-        $file->info['_info_file_ctime'] = $file->getCTime();
+        $file->info['_info_file_ctime'] = $file->getFileInfo()->getCTime();
       }
 
       if (!isset($file->info['datestamp'])) {
@@ -153,7 +153,7 @@ class ProjectInfo {
     if (isset($file->info['project'])) {
       $project_name = $file->info['project'];
     }
-    elseif (strpos($file->getPath(), 'core/modules') === 0) {
+    elseif (str_starts_with($file->getPath(), 'core/modules')) {
       $project_name = 'drupal';
     }
     return $project_name;

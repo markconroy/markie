@@ -445,9 +445,9 @@ class NodewordsEntities extends ProcessPluginBase {
       'yandex-verification' => 'yandex',
     ];
 
-    // Trigger hook_metatag_migrate_metatagd7_tags_map_alter().
+    // Trigger hook_metatag_migrate_nodewordsd6_tags_map_alter().
     // Allow modules to override tags or the entity used for token replacements.
-    \Drupal::service('module_handler')->alter('metatag_migrate_metatagd7_tags_map', $map);
+    \Drupal::service('module_handler')->alter('metatag_migrate_nodewordsd6_tags_map', $map);
 
     return $map;
   }

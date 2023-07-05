@@ -32,8 +32,9 @@
         // rather than view mode.
         // @see Drupal.contextualToolbar.VisualView.persist
         isViewing:
+          document.querySelector('body .contextual-region') === null ||
           localStorage.getItem('Drupal.contextualToolbar.isViewing') !==
-          'false',
+            'false',
       },
       {
         contextualCollection: Drupal.contextual.collection,
@@ -78,7 +79,7 @@
      *
      * @type {?Drupal.contextualToolbar.StateModel}
      *
-     * @deprecated in drupal:9.4.0 and is removed from drupal:10.0.0. There is
+     * @deprecated in drupal:9.4.0 and is removed from drupal:11.0.0. There is
      * no replacement.
      */
     model: null,

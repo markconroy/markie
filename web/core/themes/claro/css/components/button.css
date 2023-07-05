@@ -45,8 +45,9 @@
   padding: calc(var(--space-m) - 1px) calc(var(--space-l) - 1px); /* 1 */
   cursor: pointer;
   text-align: center;
+  -webkit-text-decoration: none;
   text-decoration: none;
-  color: var(--button-fg-color);  /* 2 */
+  color: var(--button-fg-color); /* 2 */
   border-radius: var(--button-border-radius-size);
   background-color: var(--button-bg-color);
   font-size: var(--font-size-base);
@@ -54,7 +55,7 @@
   line-height: 1rem;
   -webkit-appearance: none;
   appearance: none;
-  -webkit-font-smoothing: antialiased;  /* 3 */
+  -webkit-font-smoothing: antialiased; /* 3 */
 }
 
 [dir="rtl"] .button {
@@ -66,11 +67,13 @@
 }
 
 .button:hover {
+  -webkit-text-decoration: none;
   text-decoration: none;
   background-color: var(--button--hover-bg-color);
 }
 
 .button:focus {
+  -webkit-text-decoration: none;
   text-decoration: none;
 }
 
@@ -202,6 +205,7 @@ a.button--danger:active {
   display: inline;
   padding: 0;
   cursor: pointer;
+  -webkit-text-decoration: underline;
   text-decoration: underline;
   border: 0;
   background: none;

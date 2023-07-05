@@ -90,13 +90,9 @@ details.fieldset-no-legend {
   line-height: var(--input-line-height--small);
 }
 .views-ui-dialog .form-element--type-select {
-  padding-right: calc((var(--space-m) * 2) + var(--input-border-size) * 2);
-  background-position: 100% 56%;
+  padding-inline-end: calc(2rem - var(--input-border-size));
+  background-position-y: 56%;
 }
-/**
- * Elements must communicate width to table rendering.
- * @todo revisit in https://drupal.org/node/3135457
- */
 .views-ui-dialog td .form-element {
   width: auto;
 }
@@ -454,9 +450,8 @@ details.fieldset-no-legend {
 /* @group Query info table */
 
 .views-query-info table {
+  border-spacing: 1px;
   border-radius: 7px;
-  -webkit-border-horizontal-spacing: 1px;
-  -webkit-border-vertical-spacing: 1px;
 }
 
 .views-query-info table tr td:last-child {
@@ -558,7 +553,7 @@ details.fieldset-no-legend {
   position: absolute;
   z-index: 1;
   top: 3.8rem;
-  left: calc(0 - var(--space-m)); /* LTR */
+  left: calc(var(--space-m) * -1); /* LTR */
   padding: 0 0.3rem 0.3rem 0.4rem; /* LTR */
   content: ">";
   color: var(--color-gray-600);
@@ -570,7 +565,7 @@ details.fieldset-no-legend {
 }
 
 [dir="rtl"] .views-config-group-region .views-group-box--value > .form-item::after {
-  right: calc(0 - var(--space-m));
+  right: calc(var(--space-m) * -1);
   left: auto;
   padding-right: 0.4rem;
   padding-left: 0.3rem;

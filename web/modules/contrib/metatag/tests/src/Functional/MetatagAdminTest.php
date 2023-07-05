@@ -135,7 +135,7 @@ class MetatagAdminTest extends BrowserTestBase {
     // Test the Robots plugin.
     $this->drupalGet('admin/config/search/metatag/global');
     $session->statusCodeEquals(200);
-    $robots_values = ['index', 'follow', 'noydir'];
+    $robots_values = ['index', 'follow'];
     $values = [];
     foreach ($robots_values as $value) {
       $values['robots[' . $value . ']'] = TRUE;

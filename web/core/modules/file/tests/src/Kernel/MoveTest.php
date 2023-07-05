@@ -150,7 +150,7 @@ class MoveTest extends FileManagedUnitTestBase {
     // Copy the file over itself. Clone the object so we don't have to worry
     // about the function changing our reference copy.
     try {
-      $result = $this->fileRepository->move(clone $source, $source->getFileUri(), FileSystemInterface::EXISTS_ERROR);
+      $this->fileRepository->move(clone $source, $source->getFileUri(), FileSystemInterface::EXISTS_ERROR);
       $this->fail('expected FileExistsException');
     }
     catch (FileExistsException $e) {
@@ -181,7 +181,7 @@ class MoveTest extends FileManagedUnitTestBase {
     // Clone the object so we don't have to worry about the function changing
     // our reference copy.
     try {
-      $result = $this->fileRepository->move(clone $source, $target->getFileUri(), FileSystemInterface::EXISTS_ERROR);
+      $this->fileRepository->move(clone $source, $target->getFileUri(), FileSystemInterface::EXISTS_ERROR);
       $this->fail('expected FileExistsException');
     }
     // FileExistsException is a subclass of FileException.
@@ -209,6 +209,7 @@ class MoveTest extends FileManagedUnitTestBase {
    */
   public function testInvalidStreamWrapper() {
     $this->expectException(InvalidStreamWrapperException::class);
+    $this->expectExceptionMessage('Invalid stream wrapper: foo://');
     $source = $this->createFile();
     $this->fileRepository->move($source, 'foo://');
   }

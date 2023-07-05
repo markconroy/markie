@@ -32,13 +32,20 @@ final class UidNormalizer implements NormalizerInterface, DenormalizerInterface,
         self::NORMALIZATION_FORMAT_RFC4122,
     ];
 
-    private $defaultContext = [
+    private array $defaultContext = [
         self::NORMALIZATION_FORMAT_KEY => self::NORMALIZATION_FORMAT_CANONICAL,
     ];
 
     public function __construct(array $defaultContext = [])
     {
         $this->defaultContext = array_merge($this->defaultContext, $defaultContext);
+    }
+
+    public function getSupportedTypes(?string $format): array
+    {
+        return [
+            AbstractUid::class => true,
+        ];
     }
 
     /**
@@ -92,8 +99,13 @@ final class UidNormalizer implements NormalizerInterface, DenormalizerInterface,
         return is_subclass_of($type, AbstractUid::class, true);
     }
 
+    /**
+     * @deprecated since Symfony 6.3, use "getSupportedTypes()" instead
+     */
     public function hasCacheableSupportsMethod(): bool
     {
-        return __CLASS__ === static::class;
+        trigger_deprecation('symfony/serializer', '6.3', 'The "%s()" method is deprecated, use "getSupportedTypes()" instead.', __METHOD__);
+
+        return true;
     }
 }

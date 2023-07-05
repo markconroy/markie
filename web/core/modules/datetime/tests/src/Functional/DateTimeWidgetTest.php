@@ -64,6 +64,7 @@ class DateTimeWidgetTest extends DateTestBase {
 
     // Set now as default_value.
     $edit = [
+      'set_default_value' => '1',
       'default_value_input[default_date_type]' => 'now',
     ];
     $this->drupalGet('admin/structure/types/manage/dateonly_content/fields/node.dateonly_content.field_dateonly');
@@ -81,9 +82,11 @@ class DateTimeWidgetTest extends DateTestBase {
       $this->setSiteTimezone($timezone);
       $this->assertEquals($timezone, $this->config('system.date')->get('timezone.default'), 'Time zone set to ' . $timezone);
 
+      // The time of the request is determined very early on in the request so
+      // use the current time prior to making a request.
+      $request_time = $this->container->get('datetime.time')->getCurrentTime();
       $this->drupalGet('node/add/dateonly_content');
 
-      $request_time = $this->container->get('datetime.time')->getRequestTime();
       $today = $this->dateFormatter->format($request_time, 'html_date', NULL, $timezone);
       $this->assertSession()->fieldValueEquals('field_dateonly[0][value][date]', $today);
 

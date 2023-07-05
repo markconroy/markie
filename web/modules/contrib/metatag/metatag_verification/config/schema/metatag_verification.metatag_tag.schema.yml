@@ -3,38 +3,38 @@
 # textfield.
 
 metatag.metatag_tag.alexa:
-  type: label
+  type: text
   label: 'Site validation: Alexa'
 metatag.metatag_tag.baidu:
-  type: label
+  type: text
   label: 'Site validation: Baidu'
 metatag.metatag_tag.bing:
-  type: label
+  type: text
   label: 'Site validation: Bing'
 metatag.metatag_tag.facebook_domain_verification:
-  type: label
+  type: text
   label: 'Site validation: Facebook'
 metatag.metatag_tag.google_site_verification:
-  type: label
+  type: text
   label: 'Site validation: Google'
 metatag.metatag_tag.norton_safe_web:
-  type: label
+  type: text
   label: 'Site validation: Norton Safe Web'
 metatag.metatag_tag.pinterest:
-  type: label
+  type: text
   label: 'Site validation: Pinterest'
 metatag.metatag_tag.pocket:
-  type: label
+  type: text
   label: 'Site validation: Pocket'
 metatag.metatag_tag.siwecos:
-  type: label
+  type: text
   label: 'Site validation: SIWECOS'
 metatag.metatag_tag.yahoo:
-  type: label
+  type: text
   label: 'Site validation: Yahoo'
 metatag.metatag_tag.yandex:
-  type: label
+  type: text
   label: 'Site validation: Yandex'
 metatag.metatag_tag.zoom_domain_verification:
-  type: label
+  type: text
   label: 'Site validation: Zoom'

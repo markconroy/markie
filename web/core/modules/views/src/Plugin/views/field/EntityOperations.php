@@ -133,7 +133,8 @@ class EntityOperations extends FieldPluginBase {
     if (empty($entity)) {
       return '';
     }
-    $entity = $this->getEntityTranslation($entity, $values);
+
+    $entity = $this->getEntityTranslationByRelationship($entity, $values);
     $operations = $this->entityTypeManager->getListBuilder($entity->getEntityTypeId())->getOperations($entity);
     if ($this->options['destination']) {
       foreach ($operations as &$operation) {

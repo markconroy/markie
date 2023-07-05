@@ -5,7 +5,9 @@ namespace Drupal\Core\Entity;
 use Drupal\Core\Messenger\MessengerTrait;
 use Drupal\Core\Routing\RedirectDestinationTrait;
 use Drupal\Core\Url;
+use Drupal\Component\Serialization\Json;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\Core\Entity\Query\QueryInterface;
 
 /**
  * Defines a generic implementation to build a listing of entities.
@@ -94,6 +96,16 @@ class EntityListBuilder extends EntityHandlerBase implements EntityListBuilderIn
    *   An array of entity IDs.
    */
   protected function getEntityIds() {
+    return $this->getEntityListQuery()->execute();
+  }
+
+  /**
+   * Returns a query object for loading entity IDs from the storage.
+   *
+   * @return \Drupal\Core\Entity\Query\QueryInterface
+   *   A query object used to load entity IDs.
+   */
+  protected function getEntityListQuery(): QueryInterface {
     $query = $this->getStorage()->getQuery()
       ->accessCheck(TRUE)
       ->sort($this->entityType->getKey('id'));
@@ -102,7 +114,7 @@ class EntityListBuilder extends EntityHandlerBase implements EntityListBuilderIn
     if ($this->limit) {
       $query->pager($this->limit);
     }
-    return $query->execute();
+    return $query;
   }
 
   /**
@@ -140,6 +152,13 @@ class EntityListBuilder extends EntityHandlerBase implements EntityListBuilderIn
       $operations['delete'] = [
         'title' => $this->t('Delete'),
         'weight' => 100,
+        'attributes' => [
+          'class' => ['use-ajax'],
+          'data-dialog-type' => 'modal',
+          'data-dialog-options' => Json::encode([
+            'width' => 880,
+          ]),
+        ],
         'url' => $this->ensureDestination($entity->toUrl('delete-form')),
       ];
     }
@@ -191,6 +210,10 @@ class EntityListBuilder extends EntityHandlerBase implements EntityListBuilderIn
     $build = [
       '#type' => 'operations',
       '#links' => $this->getOperations($entity),
+      // Allow links to use modals.
+      '#attached' => [
+        'library' => ['core/drupal.dialog.ajax'],
+      ],
     ];
 
     return $build;

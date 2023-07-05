@@ -244,6 +244,17 @@ class BlockTest extends BlockTestBase {
     $xpath = $this->assertSession()->buildXPathQuery('//div[@id=:id]/*', [':id' => 'block-' . str_replace('_', '-', strtolower($block['id']))]);
     $this->assertSession()->elementNotExists('xpath', $xpath);
 
+    $pages = [
+      '',
+      '<front>',
+      '/valid-page',
+      'user/login',
+    ];
+    // Test error when not including forward slash.
+    $this->drupalGet('admin/structure/block/manage/' . $block['id']);
+    $this->submitForm(['visibility[request_path][pages]' => implode("\n", $pages)], 'Save block');
+    $this->assertSession()->pageTextContains('The path user/login requires a leading forward slash when used with the Pages setting.');
+
     // Test deleting the block from the edit form.
     $this->drupalGet('admin/structure/block/manage/' . $block['id']);
     $this->clickLink('Remove block');
@@ -386,7 +397,7 @@ class BlockTest extends BlockTestBase {
       'footer' => '//footer[@role = "contentinfo"]',
     ];
 
-    // Confirm that the custom block was found at the proper region.
+    // Confirm that the content block was found at the proper region.
     $xpath = $this->assertSession()->buildXPathQuery($region_xpath[$region] . '//div[@id=:block-id]/*', [
       ':block-id' => 'block-' . str_replace('_', '-', strtolower($block['id'])),
     ]);

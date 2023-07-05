@@ -14,8 +14,7 @@ use Drupal\Tests\BrowserTestBase;
 use Drupal\Tests\system\Functional\Menu\AssertBreadcrumbTrait;
 
 /**
- * Generate events and verify dblog entries; verify user access to log reports
- * based on permissions.
+ * Verifies log entries and user access based on permissions.
  *
  * @group dblog
  */
@@ -32,7 +31,6 @@ class DbLogTest extends BrowserTestBase {
     'dblog',
     'error_test',
     'node',
-    'forum',
     'help',
     'block',
   ];
@@ -200,7 +198,7 @@ class DbLogTest extends BrowserTestBase {
    * Tests individual log event page with missing log attributes.
    *
    * In some cases few log attributes are missing. For example:
-   * - Missing referer: When request is made to a specific url directly and
+   * - Missing referer: When request is made to a specific URL directly and
    *   error occurred. In this case there is no referer.
    * - Incorrect location: When location attribute is incorrect uri which can
    *   not be used to generate a valid link.
@@ -386,7 +384,6 @@ class DbLogTest extends BrowserTestBase {
     $this->drupalCreateContentType(['type' => 'page', 'name' => 'Basic page']);
     $this->doNode('article');
     $this->doNode('page');
-    $this->doNode('forum');
 
     // When a user account is canceled, any content they created remains but the
     // uid = 0. Records in the watchdog table related to that user have the uid
@@ -408,8 +405,7 @@ class DbLogTest extends BrowserTestBase {
   }
 
   /**
-   * Tests the escaping of links in the operation row of a database log detail
-   * page.
+   * Tests link escaping in the operation row of a database log detail page.
    */
   private function verifyLinkEscaping() {
     $link = Link::fromTextAndUrl('View', Url::fromRoute('entity.node.canonical', ['node' => 1]))->toString();
@@ -513,7 +509,7 @@ class DbLogTest extends BrowserTestBase {
    * Generates and then verifies some node events.
    *
    * @param string $type
-   *   A node type (e.g., 'article', 'page' or 'forum').
+   *   A node type (e.g., 'article' or 'page').
    */
   private function doNode($type) {
     // Create user.
@@ -524,7 +520,7 @@ class DbLogTest extends BrowserTestBase {
 
     // Create a node using the form in order to generate an add content event
     // (which is not triggered by drupalCreateNode).
-    $edit = $this->getContent($type);
+    $edit = $this->getContent();
     $title = $edit['title[0][value]'];
     $this->drupalGet('node/add/' . $type);
     $this->submitForm($edit, 'Save');
@@ -578,29 +574,14 @@ class DbLogTest extends BrowserTestBase {
   /**
    * Creates random content based on node content type.
    *
-   * @param string $type
-   *   Node content type (e.g., 'article').
-   *
    * @return array
    *   Random content needed by various node types.
    */
-  private function getContent($type) {
-    switch ($type) {
-      case 'forum':
-        $content = [
-          'title[0][value]' => $this->randomMachineName(8),
-          'taxonomy_forums' => 1,
-          'body[0][value]' => $this->randomMachineName(32),
-        ];
-        break;
-
-      default:
-        $content = [
-          'title[0][value]' => $this->randomMachineName(8),
-          'body[0][value]' => $this->randomMachineName(32),
-        ];
-        break;
-    }
+  private function getContent() {
+    $content = [
+      'title[0][value]' => $this->randomMachineName(8),
+      'body[0][value]' => $this->randomMachineName(32),
+    ];
     return $content;
   }
 

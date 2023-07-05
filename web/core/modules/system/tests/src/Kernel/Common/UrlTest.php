@@ -12,11 +12,10 @@ use Drupal\Core\Url;
 use Drupal\KernelTests\KernelTestBase;
 
 /**
- * Confirm that \Drupal\Core\Url,
- * \Drupal\Component\Utility\UrlHelper::filterQueryParameters(),
- * \Drupal\Component\Utility\UrlHelper::buildQuery(), and
- * \Drupal\Core\Utility\LinkGeneratorInterface::generate()
- * work correctly with various input.
+ * Tests the Url object.
+ *
+ * @covers \Drupal\Component\Utility\UrlHelper::filterQueryParameters
+ * @covers \Drupal\Core\Utility\LinkGenerator::generate
  *
  * @group Common
  */
@@ -137,7 +136,7 @@ class UrlTest extends KernelTestBase {
     $l = Link::fromTextAndUrl('foo', Url::fromUri('https://www.drupal.org'))->toString();
 
     // Test a renderable array passed to the link generator.
-    $renderer->executeInRenderContext(new RenderContext(), function () use ($renderer, $l) {
+    $renderer->executeInRenderContext(new RenderContext(), function () use ($l) {
       $renderable_text = ['#markup' => 'foo'];
       $l_renderable_text = \Drupal::service('link_generator')->generate($renderable_text, Url::fromUri('https://www.drupal.org'));
       $this->assertEquals($l, $l_renderable_text);

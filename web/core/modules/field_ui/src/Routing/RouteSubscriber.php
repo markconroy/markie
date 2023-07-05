@@ -56,7 +56,7 @@ class RouteSubscriber extends RouteSubscriberBase {
         ];
         // If the entity type has no bundles and it doesn't use {bundle} in its
         // admin path, use the entity type.
-        if (strpos($path, '{bundle}') === FALSE) {
+        if (!str_contains($path, '{bundle}')) {
           $defaults['bundle'] = !$entity_type->hasKey('bundle') ? $entity_type_id : '';
         }
 
@@ -108,6 +108,17 @@ class RouteSubscriber extends RouteSubscriberBase {
           $options
         );
         $collection->add("field_ui.field_storage_config_add_$entity_type_id", $route);
+
+        $route = new Route(
+          "$path/fields/reuse",
+          [
+            '_form' => '\Drupal\field_ui\Form\FieldStorageReuseForm',
+            '_title' => 'Re-use an existing field',
+          ] + $defaults,
+          ['_field_ui_field_reuse_access' => 'administer ' . $entity_type_id . ' fields'],
+          $options
+        );
+        $collection->add("field_ui.field_storage_config_reuse_$entity_type_id", $route);
 
         $route = new Route(
           "$path/form-display",

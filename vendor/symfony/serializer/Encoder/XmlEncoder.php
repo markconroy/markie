@@ -44,20 +44,27 @@ class XmlEncoder implements EncoderInterface, DecoderInterface, NormalizationAwa
     public const FORMAT_OUTPUT = 'xml_format_output';
 
     /**
-     * A bit field of LIBXML_* constants.
+     * A bit field of LIBXML_* constants for loading XML documents.
      */
     public const LOAD_OPTIONS = 'load_options';
+
+    /**
+     * A bit field of LIBXML_* constants for saving XML documents.
+     */
+    public const SAVE_OPTIONS = 'save_options';
+
     public const REMOVE_EMPTY_TAGS = 'remove_empty_tags';
     public const ROOT_NODE_NAME = 'xml_root_node_name';
     public const STANDALONE = 'xml_standalone';
     public const TYPE_CAST_ATTRIBUTES = 'xml_type_cast_attributes';
     public const VERSION = 'xml_version';
 
-    private $defaultContext = [
+    private array $defaultContext = [
         self::AS_COLLECTION => false,
         self::DECODER_IGNORED_NODE_TYPES => [\XML_PI_NODE, \XML_COMMENT_NODE],
         self::ENCODER_IGNORED_NODE_TYPES => [],
         self::LOAD_OPTIONS => \LIBXML_NONET | \LIBXML_NOBLANKS,
+        self::SAVE_OPTIONS => 0,
         self::REMOVE_EMPTY_TAGS => false,
         self::ROOT_NODE_NAME => 'response',
         self::TYPE_CAST_ATTRIBUTES => true,
@@ -88,7 +95,7 @@ class XmlEncoder implements EncoderInterface, DecoderInterface, NormalizationAwa
             $this->appendNode($dom, $data, $format, $context, $xmlRootNodeName);
         }
 
-        return $dom->saveXML($ignorePiNode ? $dom->documentElement : null);
+        return $dom->saveXML($ignorePiNode ? $dom->documentElement : null, $context[self::SAVE_OPTIONS] ?? $this->defaultContext[self::SAVE_OPTIONS]);
     }
 
     public function decode(string $data, string $format, array $context = []): mixed
@@ -220,9 +227,9 @@ class XmlEncoder implements EncoderInterface, DecoderInterface, NormalizationAwa
      */
     final protected function isElementNameValid(string $name): bool
     {
-        return $name &&
-            !str_contains($name, ' ') &&
-            preg_match('#^[\pL_][\pL0-9._:-]*$#ui', $name);
+        return $name
+            && !str_contains($name, ' ')
+            && preg_match('#^[\pL_][\pL0-9._:-]*$#ui', $name);
     }
 
     /**

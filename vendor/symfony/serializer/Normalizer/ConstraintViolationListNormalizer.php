@@ -21,6 +21,8 @@ use Symfony\Component\Validator\ConstraintViolationListInterface;
  *
  * @author Grégoire Pineau <lyrixx@lyrixx.info>
  * @author Kévin Dunglas <dunglas@gmail.com>
+ *
+ * @final since Symfony 6.3
  */
 class ConstraintViolationListNormalizer implements NormalizerInterface, CacheableSupportsMethodInterface
 {
@@ -30,13 +32,17 @@ class ConstraintViolationListNormalizer implements NormalizerInterface, Cacheabl
     public const TYPE = 'type';
     public const PAYLOAD_FIELDS = 'payload_fields';
 
-    private $defaultContext;
-    private $nameConverter;
+    public function __construct(
+        private readonly array $defaultContext = [],
+        private readonly ?NameConverterInterface $nameConverter = null,
+    ) {
+    }
 
-    public function __construct(array $defaultContext = [], NameConverterInterface $nameConverter = null)
+    public function getSupportedTypes(?string $format): array
     {
-        $this->defaultContext = $defaultContext;
-        $this->nameConverter = $nameConverter;
+        return [
+            ConstraintViolationListInterface::class => __CLASS__ === static::class || $this->hasCacheableSupportsMethod(),
+        ];
     }
 
     public function normalize(mixed $object, string $format = null, array $context = []): array
@@ -61,6 +67,7 @@ class ConstraintViolationListNormalizer implements NormalizerInterface, Cacheabl
             $violationEntry = [
                 'propertyPath' => $propertyPath,
                 'title' => $violation->getMessage(),
+                'template' => $violation->getMessageTemplate(),
                 'parameters' => $violation->getParameters(),
             ];
             if (null !== $code = $violation->getCode()) {
@@ -69,11 +76,11 @@ class ConstraintViolationListNormalizer implements NormalizerInterface, Cacheabl
 
             $constraint = $violation->getConstraint();
             if (
-                [] !== $payloadFieldsToSerialize &&
-                $constraint &&
-                $constraint->payload &&
+                [] !== $payloadFieldsToSerialize
+                && $constraint
+                && $constraint->payload
                 // If some or all payload fields are whitelisted, add them
-                $payloadFields = null === $payloadFieldsToSerialize || true === $payloadFieldsToSerialize ? $constraint->payload : array_intersect_key($constraint->payload, $payloadFieldsToSerialize)
+                && $payloadFields = null === $payloadFieldsToSerialize || true === $payloadFieldsToSerialize ? $constraint->payload : array_intersect_key($constraint->payload, $payloadFieldsToSerialize)
             ) {
                 $violationEntry['payload'] = $payloadFields;
             }
@@ -109,8 +116,13 @@ class ConstraintViolationListNormalizer implements NormalizerInterface, Cacheabl
         return $data instanceof ConstraintViolationListInterface;
     }
 
+    /**
+     * @deprecated since Symfony 6.3, use "getSupportedTypes()" instead
+     */
     public function hasCacheableSupportsMethod(): bool
     {
+        trigger_deprecation('symfony/serializer', '6.3', 'The "%s()" method is deprecated, use "getSupportedTypes()" instead.', __METHOD__);
+
         return __CLASS__ === static::class;
     }
 }

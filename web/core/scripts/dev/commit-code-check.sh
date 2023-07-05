@@ -72,29 +72,31 @@ if [[ "$DRUPALCI" == "1" ]]; then
   green=""
   reset=""
   DRUPAL_VERSION=$(php -r "include 'vendor/autoload.php'; print preg_replace('#\.[0-9]+-dev#', '.x', \Drupal::VERSION);")
+  GIT="sudo -u www-data git"
 else
   red=$(tput setaf 1 && tput bold)
   green=$(tput setaf 2)
   reset=$(tput sgr0)
+  GIT="git"
 fi
 
 # Gets list of files to check.
 if [[ "$BRANCH" != "" ]]; then
-  FILES=$(git diff --name-only $BRANCH HEAD);
+  FILES=$($GIT diff --name-only $BRANCH HEAD);
 elif [[ "$CACHED" == "0" ]]; then
   # For DrupalCI patch testing or when running without --cached or --branch,
   # list of all changes in the working directory.
-  FILES=$(git ls-files --other --modified --exclude-standard --exclude=vendor)
+  FILES=$($GIT ls-files --other --modified --exclude-standard --exclude=vendor)
 else
   # Check staged files only.
-  if git rev-parse --verify HEAD >/dev/null 2>&1
+  if $GIT rev-parse --verify HEAD >/dev/null 2>&1
   then
     AGAINST=HEAD
   else
     # Initial commit: diff against an empty tree object
     AGAINST=4b825dc642cb6eb9a060e54bf8d69288fbee4904
   fi
-  FILES=$(git diff --cached --name-only $AGAINST);
+  FILES=$($GIT diff --cached --name-only $AGAINST);
 fi
 
 if [[ "$FILES" == "" ]] && [[ "$DRUPALCI" == "1" ]]; then
@@ -102,10 +104,10 @@ if [[ "$FILES" == "" ]] && [[ "$DRUPALCI" == "1" ]]; then
   # need to diff against the Drupal branch or tag related to the Drupal version.
   printf "Creating list of files to check by comparing branch to %s\n" "$DRUPAL_VERSION"
   # On DrupalCI there's a merge commit so we can compare to HEAD~1.
-  FILES=$(git diff --name-only HEAD~1 HEAD);
+  FILES=$($GIT diff --name-only HEAD~1 HEAD);
 fi
 
-TOP_LEVEL=$(git rev-parse --show-toplevel)
+TOP_LEVEL=$($GIT rev-parse --show-toplevel)
 
 # This variable will be set to one when the file core/phpcs.xml.dist is changed.
 PHPCS_XML_DIST_FILE_CHANGED=0
@@ -126,6 +128,12 @@ ESLINT_CONFIG_PASSING_FILE_CHANGED=0
 #  - core/.stylelintignore
 #  - core/.stylelintrc.json
 STYLELINT_CONFIG_FILE_CHANGED=0
+
+# This variable will be set to one when JavaScript packages files are changed.
+# changed:
+#  - core/package.json
+#  - core/yarn.lock
+JAVASCRIPT_PACKAGES_CHANGED=0
 
 # This variable will be set when a Drupal-specific CKEditor 5 plugin has changed
 # it is used to make sure the compiled JS is valid.
@@ -158,6 +166,7 @@ for FILE in $FILES; do
   if [[ $FILE == "core/package.json" || $FILE == "core/yarn.lock" ]]; then
     ESLINT_CONFIG_PASSING_FILE_CHANGED=1;
     STYLELINT_CONFIG_FILE_CHANGED=1;
+    JAVASCRIPT_PACKAGES_CHANGED=1;
   fi;
 
   if [[ -f "$TOP_LEVEL/$FILE" ]] && [[ $FILE =~ \.js$ ]] && [[ $FILE =~ ^core/modules/ckeditor5/js/build || $FILE =~ ^core/modules/ckeditor5/js/ckeditor5_plugins ]]; then
@@ -200,7 +209,7 @@ if [ $DEPENDENCIES_NEED_INSTALLING -ne 0 ]; then
 fi
 
 # Check all files for spelling in one go for better performance.
-yarn run -s spellcheck --no-must-find-files -c $TOP_LEVEL/core/.cspell.json $ABS_FILES
+yarn run -s spellcheck --no-must-find-files --root $TOP_LEVEL $ABS_FILES
 if [ "$?" -ne "0" ]; then
   # If there are failures set the status to a number other than 0.
   FINAL_STATUS=1
@@ -307,6 +316,25 @@ if [[ "$DRUPALCI" == "1" ]] && [[ $CKEDITOR5_PLUGINS_CHANGED == "1" ]]; then
     printf "\nDrupal-specific CKEditor 5 plugins: ${red}failed${reset}\n"
   else
     printf "\nDrupal-specific CKEditor 5 plugins: ${green}passed${reset}\n"
+  fi
+  cd $TOP_LEVEL
+  # Add a separator line to make the output easier to read.
+  printf "\n"
+  printf -- '-%.0s' {1..100}
+  printf "\n"
+fi
+
+# When JavaScript packages change, then rerun all JavaScript style checks.
+if [[ "$JAVASCRIPT_PACKAGES_CHANGED" == "1" ]]; then
+  cd "$TOP_LEVEL/core"
+  yarn run build:css --check
+  CORRECTCSS=$?
+  if [ "$CORRECTCSS" -ne "0" ]; then
+    FINAL_STATUS=1
+    printf "\n${red}ERROR: The compiled CSS from the PCSS files"
+    printf "\n       does not match the current CSS files. Some added"
+    printf "\n       or updated JavaScript package made changes."
+    printf "\n       Recompile the CSS with: yarn run build:css${reset}\n\n"
   fi
   cd $TOP_LEVEL
   # Add a separator line to make the output easier to read.
@@ -426,9 +454,13 @@ for FILE in $FILES; do
       yarn run build:css --check --file "$TOP_LEVEL/$BASENAME.pcss.css"
       CORRECTCSS=$?
       if [ "$CORRECTCSS" -ne "0" ]; then
-        # No need to write any output the yarn run command will do this for
-        # us.
+        # If the CSS does not match the PCSS, set the status to a number other
+        # than 0.
         STATUS=1
+        printf "\n${red}ERROR: The compiled CSS from"
+        printf "\n       ${BASENAME}.pcss.css"
+        printf "\n       does not match its CSS file. Recompile the CSS with:"
+        printf "\n       yarn run build:css${reset}\n\n"
       fi
       cd $TOP_LEVEL
     fi

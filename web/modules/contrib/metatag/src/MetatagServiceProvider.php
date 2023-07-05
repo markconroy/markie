@@ -10,6 +10,10 @@ use Symfony\Component\DependencyInjection\Definition;
 
 /**
  * Service Provider for Metatag.
+ *
+ * @deprecated in metatag:8.x-1.24 and is removed from metatag:2.0.0. No replacement is provided.
+ *
+ * @see https://www.drupal.org/node/3362761
  */
 class MetatagServiceProvider extends ServiceProviderBase {
 

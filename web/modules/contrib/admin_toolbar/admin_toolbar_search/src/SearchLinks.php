@@ -120,7 +120,7 @@ class SearchLinks {
       $content_entity = $entities['content_entity'];
       // Load the remaining items that were not loaded by the toolbar.
       $content_entity_bundle_storage = $this->entityTypeManager->getStorage($content_entity_bundle);
-      $bundles_ids = $content_entity_bundle_storage->getQuery()->range($max_bundle_number)->execute();
+      $bundles_ids = $content_entity_bundle_storage->getQuery()->sort('weight')->range($max_bundle_number)->execute();
       if (!empty($bundles_ids)) {
         $bundles = $this->entityTypeManager
           ->getStorage($content_entity_bundle)

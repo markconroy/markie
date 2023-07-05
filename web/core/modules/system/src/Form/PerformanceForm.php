@@ -104,18 +104,6 @@ class PerformanceForm extends ConfigFormBase {
 
     $config = $this->config('system.performance');
 
-    $form['clear_cache'] = [
-      '#type' => 'details',
-      '#title' => $this->t('Clear cache'),
-      '#open' => TRUE,
-    ];
-
-    $form['clear_cache']['clear'] = [
-      '#type' => 'submit',
-      '#value' => $this->t('Clear all caches'),
-      '#submit' => ['::submitCacheClear'],
-    ];
-
     $form['caching'] = [
       '#type' => 'details',
       '#title' => $this->t('Caching'),
@@ -138,12 +126,12 @@ class PerformanceForm extends ConfigFormBase {
       '#access' => !$this->moduleHandler->moduleExists('page_cache'),
     ];
 
-    $directory = 'public://';
+    $directory = 'assets://';
     $is_writable = is_dir($directory) && is_writable($directory);
     $disabled = !$is_writable;
     $disabled_message = '';
     if (!$is_writable) {
-      $disabled_message = ' ' . $this->t('<strong class="error">Set up the <a href=":file-system">public files directory</a> to make these optimizations available.</strong>', [':file-system' => Url::fromRoute('system.file_system_settings')->toString()]);
+      $disabled_message = ' ' . $this->t('<strong class="error">Set up the <a href=":file-system">optimized assets file system path</a> to make these optimizations available.</strong>', [':file-system' => Url::fromRoute('system.file_system_settings')->toString()]);
     }
 
     $form['bandwidth_optimization'] = [
@@ -183,14 +171,6 @@ class PerformanceForm extends ConfigFormBase {
       ->save();
 
     parent::submitForm($form, $form_state);
-  }
-
-  /**
-   * Clears the caches.
-   */
-  public function submitCacheClear(array &$form, FormStateInterface $form_state) {
-    drupal_flush_all_caches();
-    $this->messenger()->addStatus($this->t('Caches cleared.'));
   }
 
 }

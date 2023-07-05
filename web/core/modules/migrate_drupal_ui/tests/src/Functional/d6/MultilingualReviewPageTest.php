@@ -26,11 +26,8 @@ class MultilingualReviewPageTest extends MultilingualReviewPageTestBase {
     'config_translation',
     'telephone',
     'book',
-    'forum',
     'statistics',
     'syslog',
-    // @todo Remove tracker in https://www.drupal.org/project/drupal/issues/3261452
-    'tracker',
     'update',
     // Test migrations states.
     'migrate_state_finished_test',
@@ -90,7 +87,6 @@ class MultilingualReviewPageTest extends MultilingualReviewPageTestBase {
       'FileField',
       'FileField Meta',
       'Filter',
-      'Forum',
       'Help',
       'ImageAPI',
       'ImageAPI GD2',
@@ -105,6 +101,7 @@ class MultilingualReviewPageTest extends MultilingualReviewPageTestBase {
       'Menu translation',
       'Node',
       'Node Reference',
+      'Node Reference URL Widget',
       'Nodeaccess',
       'Number',
       'OpenID',
@@ -153,6 +150,7 @@ class MultilingualReviewPageTest extends MultilingualReviewPageTestBase {
       'Devel',
       'Devel generate',
       'Devel node access',
+      'Forum',
       // Option Widgets is set not_finished in migrate_state_not_finished_test.
       'Option Widgets',
       'Views',

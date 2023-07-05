@@ -47,7 +47,7 @@ class MaintenanceModeSubscriber implements EventSubscriberInterface {
   protected $config;
 
   /**
-   * The url generator.
+   * The URL generator.
    *
    * @var \Drupal\Core\Routing\UrlGeneratorInterface
    */
@@ -84,7 +84,7 @@ class MaintenanceModeSubscriber implements EventSubscriberInterface {
    * @param \Drupal\Core\StringTranslation\TranslationInterface $translation
    *   The string translation.
    * @param \Drupal\Core\Routing\UrlGeneratorInterface $url_generator
-   *   The url generator.
+   *   The URL generator.
    * @param \Drupal\Core\Session\AccountInterface $account
    *   The current user.
    * @param \Drupal\Core\Render\BareHtmlPageRendererInterface $bare_html_page_renderer
@@ -123,15 +123,23 @@ class MaintenanceModeSubscriber implements EventSubscriberInterface {
         $this->eventDispatcher->dispatch($event, MaintenanceModeEvents::MAINTENANCE_MODE_REQUEST);
       }
       else {
-        // Display a message if the logged in user has access to the site in
-        // maintenance mode. However, suppress it on the maintenance mode
-        // settings page.
+        // Display a message if the logged-in user has access to the site in
+        // maintenance mode. Don't show maintenance message:
+        // - on AJAX requests.
+        // - on Iframe uploads.
+        // - on the maintenance mode settings page.
         if ($route_match->getRouteName() != 'system.site_maintenance_mode') {
-          if ($this->account->hasPermission('administer site configuration')) {
-            $this->messenger->addMessage($this->t('Operating in maintenance mode. <a href=":url">Go online.</a>', [':url' => $this->urlGenerator->generate('system.site_maintenance_mode')]), 'status', FALSE);
-          }
-          else {
-            $this->messenger->addMessage($this->t('Operating in maintenance mode.'), 'status', FALSE);
+          $show_message = $route_match->getRouteName() != 'system.site_maintenance_mode' &&
+            !$event->getRequest()->isXmlHttpRequest() &&
+            $event->getRequest()->get('ajax_iframe_upload', FALSE) === FALSE;
+
+          if ($show_message) {
+            if ($this->account->hasPermission('administer site configuration')) {
+              $this->messenger->addMessage($this->t('Operating in maintenance mode. <a href=":url">Go online.</a>', [':url' => $this->urlGenerator->generate('system.site_maintenance_mode')]), 'status', FALSE);
+            }
+            else {
+              $this->messenger->addMessage($this->t('Operating in maintenance mode.'), 'status', FALSE);
+            }
           }
         }
       }

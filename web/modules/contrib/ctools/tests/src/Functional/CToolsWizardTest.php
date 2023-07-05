@@ -26,7 +26,6 @@ class CToolsWizardTest extends BrowserTestBase {
   public function testWizardSteps() {
     $this->drupalGet('ctools/wizard');
     $this->assertSession()->pageTextContains('Form One');
-    $this->dumpHeaders = TRUE;
     // Check that $operations['one']['values'] worked.
     $this->assertSession()->pageTextContains('Xylophone');
     // Submit first step in the wizard.

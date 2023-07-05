@@ -3,15 +3,13 @@
 namespace Drupal\Tests\user\Functional;
 
 use Drupal\Core\Url;
-use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Render\BubbleableMetadata;
 use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\Tests\BrowserTestBase;
 use Drupal\user\Entity\User;
 
 /**
- * Generates text using placeholders for dummy content to check user token
- * replacement.
+ * Tests the replacement of user tokens.
  *
  * @group user
  */
@@ -111,7 +109,7 @@ class UserTokenReplaceTest extends BrowserTestBase {
     foreach ($tests as $input => $expected) {
       $bubbleable_metadata = new BubbleableMetadata();
       $output = $token_service->replace($input, ['user' => $account], ['langcode' => $language_interface->getId()], $bubbleable_metadata);
-      $this->assertEquals($expected, $output, new FormattableMarkup('User token %token replaced.', ['%token' => $input]));
+      $this->assertSame((string) $expected, (string) $output, "Failed test case: {$input}");
       $this->assertEquals($metadata_tests[$input], $bubbleable_metadata);
     }
 
@@ -131,7 +129,7 @@ class UserTokenReplaceTest extends BrowserTestBase {
     foreach ($tests as $input => $expected) {
       $bubbleable_metadata = new BubbleableMetadata();
       $output = $token_service->replace($input, ['user' => $anonymous_user], ['langcode' => $language_interface->getId()], $bubbleable_metadata);
-      $this->assertEquals($expected, $output, new FormattableMarkup('Sanitized user token %token replaced.', ['%token' => $input]));
+      $this->assertSame((string) $expected, (string) $output, "Failed test case: {$input}");
       $this->assertEquals($metadata_tests[$input], $bubbleable_metadata);
     }
 
@@ -171,7 +169,7 @@ class UserTokenReplaceTest extends BrowserTestBase {
     $input = '[user:display-name] [current-user:display-name]';
     $expected = "<em>{$user1->id()}</em> <em>{$user2->id()}</em>";
     $output = $token_service->replace($input, ['user' => $user1]);
-    $this->assertEquals($expected, $output, new FormattableMarkup('User token %token does not escape safe markup.', ['%token' => 'display-name']));
+    $this->assertSame($expected, (string) $output);
   }
 
 }

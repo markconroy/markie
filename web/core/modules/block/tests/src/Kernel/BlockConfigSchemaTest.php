@@ -23,9 +23,7 @@ class BlockConfigSchemaTest extends KernelTestBase {
     'book',
     'block_content',
     'comment',
-    'forum',
     'node',
-    'statistics',
     // \Drupal\block\Entity\Block->preSave() calls system_region_list().
     'system',
     'taxonomy',

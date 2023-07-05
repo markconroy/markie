@@ -36,6 +36,9 @@ abstract class ConstraintValidator implements ConstraintValidatorInterface
      */
     protected $context;
 
+    /**
+     * @return void
+     */
     public function initialize(ExecutionContextInterface $context)
     {
         $this->context = $context;
@@ -86,6 +89,10 @@ abstract class ConstraintValidator implements ConstraintValidatorInterface
             }
 
             return $value->format('Y-m-d H:i:s');
+        }
+
+        if ($value instanceof \UnitEnum) {
+            return $value->name;
         }
 
         if (\is_object($value)) {

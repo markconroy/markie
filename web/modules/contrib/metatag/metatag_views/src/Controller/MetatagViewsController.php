@@ -69,7 +69,7 @@ class MetatagViewsController extends ControllerBase {
     foreach (Views::getEnabledViews() as $view_id => $view) {
       $displays = $view->get('display');
       foreach (array_keys($displays) as $display_id) {
-        if ($tags = metatag_get_view_tags($view_id, $display_id)) {
+        if ($tags = metatag_views_get_view_tags($view_id, $display_id)) {
           $tagged_views[$view_id][$display_id] = $tags;
         }
       }

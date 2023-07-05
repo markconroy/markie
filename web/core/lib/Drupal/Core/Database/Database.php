@@ -3,6 +3,8 @@
 namespace Drupal\Core\Database;
 
 use Composer\Autoload\ClassLoader;
+use Drupal\Core\Database\Event\StatementExecutionEndEvent;
+use Drupal\Core\Database\Event\StatementExecutionStartEvent;
 use Drupal\Core\Extension\ExtensionDiscovery;
 
 /**
@@ -38,7 +40,7 @@ abstract class Database {
   const RETURN_STATEMENT = 1;
 
   /**
-   * Flag to indicate a query call should return the number of affected rows.
+   * Flag to indicate a query call should return the number of matched rows.
    *
    * @deprecated in drupal:9.4.0 and is removed from drupal:11.0.0. There is no
    *   replacement.
@@ -122,6 +124,10 @@ abstract class Database {
       // logging object associated with it.
       if (!empty(self::$connections[$key])) {
         foreach (self::$connections[$key] as $connection) {
+          $connection->enableEvents([
+            StatementExecutionStartEvent::class,
+            StatementExecutionEndEvent::class,
+          ]);
           $connection->setLogger(self::$logs[$key]);
         }
       }
@@ -240,7 +246,7 @@ abstract class Database {
     // Backwards compatibility layer for Drupal 8 style database connection
     // arrays. Those have the wrong 'namespace' key set, or not set at all
     // for core supported database drivers.
-    if (empty($info['namespace']) || (strpos($info['namespace'], 'Drupal\\Core\\Database\\Driver\\') === 0)) {
+    if (empty($info['namespace']) || str_starts_with($info['namespace'], 'Drupal\\Core\\Database\\Driver\\')) {
       switch (strtolower($info['driver'])) {
         case 'mysql':
           $info['namespace'] = 'Drupal\\mysql\\Driver\\Database\\mysql';
@@ -450,6 +456,10 @@ abstract class Database {
     // If we have any active logging objects for this connection key, we need
     // to associate them with the connection we just opened.
     if (!empty(self::$logs[$key])) {
+      $new_connection->enableEvents([
+        StatementExecutionStartEvent::class,
+        StatementExecutionEndEvent::class,
+      ]);
       $new_connection->setLogger(self::$logs[$key]);
     }
 

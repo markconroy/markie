@@ -44,8 +44,10 @@ use Drupal\Core\Render\RendererInterface;
  * $user = User::load(1);
  *
  * // [date:...] tokens use the current date automatically.
+ * $token_service = \Drupal::token();
  * $data = array('node' => $node, 'user' => $user);
- * return Token::replace($text, $data);
+ * $result = $token_service->replace($text, $data);
+ * return $result
  * @endcode
  *
  * Some tokens may be chained in the form of [$type:$pointer:$name], where $type
@@ -287,6 +289,11 @@ class Token {
    *   An associative array of discovered tokens, grouped by type.
    */
   public function scan($text) {
+    if (!is_string($text)) {
+      @trigger_error('Calling ' . __METHOD__ . '() with a $text parameter of type other than string is deprecated in drupal:10.1.0, a typehint will be added in drupal:11.0.0. See https://www.drupal.org/node/3334317', E_USER_DEPRECATED);
+      $text = (string) $text;
+    }
+
     // Matches tokens with the following pattern: [$type:$name]
     // $type and $name may not contain [ ] characters.
     // $type may not contain : or whitespace characters, but $name may.

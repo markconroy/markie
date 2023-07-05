@@ -4,6 +4,7 @@ namespace Drupal\Tests\menu_link_content\Kernel\Plugin\migrate\source;
 
 use Drupal\Component\Utility\Unicode;
 use Drupal\Tests\migrate\Kernel\MigrateSqlSourceTestBase;
+use Drupal\TestTools\Random;
 
 /**
  * Tests the menu link source plugin.
@@ -241,10 +242,41 @@ class MenuLinkTest extends MigrateSqlSourceTestBase {
         'i18n_tsid' => '1',
         'skip_translation' => FALSE,
       ],
+      [
+        // D7 shortcut set link.
+        'menu_name' => 'shortcut-set-1',
+        'mlid' => 301,
+        'plid' => 0,
+        'link_path' => 'node/add',
+        'router_path' => 'node/add',
+        'link_title' => 'Add Content',
+        'options' => [],
+        'module' => 'menu',
+        'hidden' => 0,
+        'external' => 0,
+        'has_children' => 0,
+        'expanded' => 0,
+        'weight' => 0,
+        'depth' => 1,
+        'customized' => 0,
+        'p1' => '301',
+        'p2' => '0',
+        'p3' => '0',
+        'p4' => '0',
+        'p5' => '0',
+        'p6' => '0',
+        'p7' => '0',
+        'p8' => '0',
+        'p9' => '0',
+        'updated' => '0',
+        'language' => 'und',
+        'i18n_tsid' => '0',
+        'skip_translation' => TRUE,
+      ],
     ];
 
     // Add long link title attributes to source data.
-    $title = $this->getRandomGenerator()->string('500');
+    $title = Random::getGenerator()->string('500');
     $tests[0]['source_data']['menu_links'][0]['options']['attributes']['title'] = $title;
 
     // Build the expected results.

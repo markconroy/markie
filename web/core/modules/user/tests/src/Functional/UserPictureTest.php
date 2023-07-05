@@ -2,6 +2,7 @@
 
 namespace Drupal\Tests\user\Functional;
 
+use Drupal\comment\Tests\CommentTestTrait;
 use Drupal\Core\Database\Database;
 use Drupal\Core\Entity\Entity\EntityViewDisplay;
 use Drupal\Core\StreamWrapper\StreamWrapperManager;
@@ -20,16 +21,16 @@ class UserPictureTest extends BrowserTestBase {
   use TestFileCreationTrait {
     getTestFiles as drupalGetTestFiles;
   }
+  use CommentTestTrait;
 
   /**
-   * The profile to install as a basis for testing.
-   *
-   * Using the standard profile to test user picture config provided by the
-   * standard profile.
-   *
-   * @var string
+   * {@inheritdoc}
    */
-  protected $profile = 'standard';
+  protected static $modules = [
+    'test_user_config',
+    'node',
+    'comment',
+  ];
 
   /**
    * {@inheritdoc}
@@ -108,6 +109,9 @@ class UserPictureTest extends BrowserTestBase {
   public function testPictureOnNodeComment() {
     $this->drupalLogin($this->webUser);
 
+    $this->drupalCreateContentType(['type' => 'article', 'name' => 'Article']);
+    $this->addDefaultCommentField('node', 'article');
+
     // Save a new picture.
     $image = current($this->drupalGetTestFiles('image'));
     $file = $this->saveUserPicture($image);
@@ -119,12 +123,12 @@ class UserPictureTest extends BrowserTestBase {
 
     $image_style_id = $this->config('core.entity_view_display.user.user.compact')->get('content.user_picture.settings.image_style');
     $style = ImageStyle::load($image_style_id);
-    $image_url = \Drupal::service('file_url_generator')->transformRelative($style->buildUrl($file->getfileUri()));
+    $image_url = \Drupal::service('file_url_generator')->transformRelative($style->buildUrl($file->getFileUri()));
     $alt_text = 'Profile picture for user ' . $this->webUser->getAccountName();
 
     // Verify that the image is displayed on the node page.
     $this->drupalGet('node/' . $node->id());
-    $elements = $this->cssSelect('article[role="article"] > footer img[alt="' . $alt_text . '"][src="' . $image_url . '"]');
+    $elements = $this->cssSelect('article > footer img[alt="' . $alt_text . '"][src="' . $image_url . '"]');
     $this->assertCount(1, $elements, 'User picture with alt text found on node page.');
 
     // Enable user pictures on comments, instead of nodes.

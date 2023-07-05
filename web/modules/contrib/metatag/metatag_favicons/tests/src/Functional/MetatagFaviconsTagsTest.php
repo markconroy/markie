@@ -3,7 +3,6 @@
 namespace Drupal\Tests\metatag_favicons\Functional;
 
 use Drupal\Tests\metatag\Functional\MetatagTagsTestBase;
-use Drupal\metatag\Entity\MetatagDefaults;
 
 /**
  * Tests that each of the Metatag Favicons tags work correctly.
@@ -11,8 +10,13 @@ use Drupal\metatag\Entity\MetatagDefaults;
  * @group metatag
  */
 class MetatagFaviconsTagsTest extends MetatagTagsTestBase {
-  
-  public function testTagsArePresent() {return;}
+
+  /**
+   * {@inheritdoc}
+   */
+  public function testTagsArePresent() {
+  }
+
   /**
    * Confirm that each tag can be saved and that the output is correct.
    *
@@ -24,7 +28,12 @@ class MetatagFaviconsTagsTest extends MetatagTagsTestBase {
    *
    * @dataProvider tagsInputOutputProvider
    */
-  public function testTagsInputOutput($tag_name) {return;}
+  public function testTagsInputOutput($tag_name) {
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function tagsInputOutputProvider() {
     return [];
   }
@@ -288,6 +297,7 @@ class MetatagFaviconsTagsTest extends MetatagTagsTestBase {
    */
   public function testMaskIconLegacy() {
     $this->loginUser1();
+
     // Add a metatag field to the entity type test_entity.
     $this->createContentType(['type' => 'page']);
     $this->drupalGet('admin/structure/types/manage/page/fields/add-field');

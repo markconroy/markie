@@ -10,19 +10,6 @@
  * Tags field styling.
  */
 
-/*
- * Media query breakpoints.
- * Processed by postcss/postcss-custom-media.
- */
-
-/* Navigation related breakpoints */
-
-/* Grid related breakpoints */
-
-/* Grid shifts from 6 to 14 columns. */
-
-/* Width of the entire grid maxes out. */
-
 .field--tags {
   display: flex;
   font-family: var(--font-sans);
@@ -38,12 +25,11 @@
   line-height: 1.6;
 }
 
-.field--tags__label:after {
+.field--tags__label::after {
   content: ":";
 }
 
 @media (min-width: 43.75rem) {
-
   .field--tags__label {
     line-height: 2;
   }
@@ -74,7 +60,7 @@
   margin-inline-end: calc(var(--sp0-5) / 2);
 }
 
-.field--tags__item:nth-last-child(n+2):after {
+.field--tags__item:nth-last-child(n + 2)::after {
   content: ",";
   font-size: var(--font-size-base);
   line-height: 1.5;
@@ -84,6 +70,7 @@
   position: relative;
   display: flex;
   align-items: center;
+  -webkit-text-decoration: none;
   text-decoration: none;
   letter-spacing: 0.02em;
   color: var(--color-text-primary-medium);

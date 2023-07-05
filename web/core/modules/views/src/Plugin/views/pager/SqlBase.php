@@ -227,7 +227,7 @@ abstract class SqlBase extends PagerPluginBase implements CacheableDependencyInt
     // Only accept integer values.
     $error = FALSE;
     $exposed_options = $form_state->getValue(['pager_options', 'expose', 'items_per_page_options']);
-    if (strpos($exposed_options, '.') !== FALSE) {
+    if (str_contains($exposed_options, '.')) {
       $error = TRUE;
     }
     $options = explode(',', $exposed_options);
@@ -260,7 +260,7 @@ abstract class SqlBase extends PagerPluginBase implements CacheableDependencyInt
     if ($this->itemsPerPageExposed()) {
       $query = $this->view->getRequest()->query;
       $items_per_page = $query->get('items_per_page');
-      if ($items_per_page > 0) {
+      if ((int) $items_per_page > 0) {
         $this->options['items_per_page'] = $items_per_page;
       }
       elseif ($items_per_page == 'All' && $this->options['expose']['items_per_page_options_all']) {

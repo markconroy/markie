@@ -3,7 +3,7 @@
  * Attaches the behaviors for the Field UI module.
  */
 
-(function ($, Drupal, drupalSettings) {
+(function ($, Drupal, drupalSettings, debounce) {
   /**
    * @type {Drupal~behavior}
    *
@@ -149,8 +149,14 @@
     onChange() {
       const $trigger = $(this);
       const $row = $trigger.closest('tr');
-      const rowHandler = $row.data('fieldUIRowHandler');
 
+      // Do not fire change listeners for items within forms that have their
+      // own AJAX callbacks to process a change.
+      if ($trigger.closest('.ajax-new-content').length !== 0) {
+        return;
+      }
+
+      const rowHandler = $row.data('fieldUIRowHandler');
       const refreshRows = {};
       refreshRows[rowHandler.name] = $trigger.get(0);
 
@@ -168,8 +174,27 @@
         rowHandler.region = region;
       }
 
-      // Ajax-update the rows.
-      Drupal.fieldUIOverview.AJAXRefreshRows(refreshRows);
+      // Fields inside `.tabledrag-hide` are typically hidden. They can be
+      // visible when "Show row weights" are enabled. If their value is changed
+      // while visible, the row should be marked as changed, but they should not
+      // be processed via AJAXRefreshRows as they are intended to be fields AJAX
+      // updates the value of.
+      if ($trigger.closest('.tabledrag-hide').length) {
+        const thisTableDrag = Drupal.tableDrag['field-display-overview'];
+        // eslint-disable-next-line new-cap
+        const rowObject = new thisTableDrag.row(
+          $row[0],
+          '',
+          thisTableDrag.indentEnabled,
+          thisTableDrag.maxDepth,
+          true,
+        );
+        rowObject.markChanged();
+        rowObject.addChangedWarning();
+      } else {
+        // Ajax-update the rows.
+        Drupal.fieldUIOverview.AJAXRefreshRows(refreshRows);
+      }
     },
 
     /**
@@ -262,7 +287,6 @@
         rowNames.push(rowName);
         ajaxElements.push(rows[rowName]);
       });
-
       if (rowNames.length) {
         // Add a throbber next each of the ajaxElements.
         $(ajaxElements).after(Drupal.theme.ajaxProgressThrobber());
@@ -271,6 +295,46 @@
           // Fire the Ajax update.
           $refreshRows[0].value = rowNames.join(' ');
         }
+        once(
+          'edit-refresh',
+          'input[data-drupal-selector="edit-refresh"]',
+        ).forEach((input) => {
+          // Keep track of the element that was focused prior to triggering the
+          // mousedown event on the hidden submit button.
+          let returnFocus = {
+            drupalSelector: null,
+            scrollY: null,
+          };
+          // Use jQuery on to listen as the mousedown event is propagated by
+          // jQuery trigger().
+          $(input).on('mousedown', () => {
+            returnFocus = {
+              drupalSelector: document.activeElement.hasAttribute(
+                'data-drupal-selector',
+              )
+                ? document.activeElement.getAttribute('data-drupal-selector')
+                : false,
+              scrollY: window.scrollY,
+            };
+          });
+          input.addEventListener('focus', () => {
+            if (returnFocus.drupalSelector) {
+              // Refocus the element that lost focus due to this hidden submit
+              // button being triggered by a mousedown event.
+              document
+                .querySelector(
+                  `[data-drupal-selector="${returnFocus.drupalSelector}"]`,
+                )
+                .focus();
+            }
+            // Ensure the scroll position is the same as when the input was
+            // initially changed.
+            window.scrollTo({
+              top: returnFocus.scrollY,
+            });
+            returnFocus = {};
+          });
+        });
         $('input[data-drupal-selector="edit-refresh"]').trigger('mousedown');
 
         // Disabled elements do not appear in POST ajax data, so we mark the
@@ -308,14 +372,11 @@
     this.region = data.region;
     this.tableDrag = data.tableDrag;
     this.defaultPlugin = data.defaultPlugin;
-
-    // Attach change listener to the 'plugin type' select.
     this.$pluginSelect = $(row).find('.field-plugin-type');
-    this.$pluginSelect.on('change', Drupal.fieldUIOverview.onChange);
-
-    // Attach change listener to the 'region' select.
     this.$regionSelect = $(row).find('select.field-region');
-    this.$regionSelect.on('change', Drupal.fieldUIOverview.onChange);
+
+    // Attach change listeners to select and input elements in the row.
+    $(row).find('select, input').on('change', Drupal.fieldUIOverview.onChange);
 
     return this;
   };
@@ -365,10 +426,14 @@
       // disabled previously. Pseudo-fields do not have default formatters,
       // we just return to 'visible' for those.
       if (this.region === 'hidden') {
+        const pluginSelect =
+          typeof this.$pluginSelect.find('option')[0] !== 'undefined'
+            ? this.$pluginSelect.find('option')[0].value
+            : undefined;
         const value =
           typeof this.defaultPlugin !== 'undefined'
             ? this.defaultPlugin
-            : this.$pluginSelect.find('option')[0].value;
+            : pluginSelect;
 
         if (typeof value !== 'undefined') {
           if (this.$pluginSelect.length) {
@@ -383,4 +448,64 @@
       return refreshRows;
     },
   };
-})(jQuery, Drupal, drupalSettings);
+
+  /**
+   * Filters the existing fields table by the field name or field type.
+   *
+   * @type {Drupal~behavior}
+   */
+  Drupal.behaviors.tableFilterByText = {
+    attach() {
+      const [input] = once('table-filter-text', '.js-table-filter-text');
+      if (!input) {
+        return;
+      }
+      const $table = $(input.getAttribute('data-table'));
+      let $rows;
+      let searching = false;
+
+      function filterRows(e) {
+        const query = e.target.value;
+        function showRow(index, row) {
+          const sources = row.querySelectorAll('.form-item');
+          let sourcesConcat = '';
+          // Concatenate the textContent of the elements in the row, with a
+          // space in between.
+          sources.forEach((item) => {
+            sourcesConcat += ` ${item.textContent}`;
+          });
+          // Make it case-insensitive.
+          const textMatch = sourcesConcat
+            .toLowerCase()
+            .includes(query.toLowerCase());
+          $(row).closest('tr').toggle(textMatch);
+        }
+
+        // Filter if the length of the query is at least 1 character.
+        if (query.length > 0) {
+          searching = true;
+          $rows.each(showRow);
+        } else if (searching) {
+          searching = false;
+          $rows.show();
+        }
+      }
+
+      function preventEnterKey(event) {
+        if (event.key === 'Enter') {
+          event.preventDefault();
+          event.stopPropagation();
+        }
+      }
+
+      if ($table.length) {
+        $rows = $table.find('tbody tr');
+
+        $(input).on({
+          keyup: debounce(filterRows, 200),
+          keydown: preventEnterKey,
+        });
+      }
+    },
+  };
+})(jQuery, Drupal, drupalSettings, Drupal.debounce);

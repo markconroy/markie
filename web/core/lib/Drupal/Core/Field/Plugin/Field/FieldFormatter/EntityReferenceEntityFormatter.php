@@ -16,7 +16,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * @FieldFormatter(
  *   id = "entity_reference_entity_view",
  *   label = @Translation("Rendered entity"),
- *   description = @Translation("Display the referenced entities rendered by entity_view()."),
+ *   description = @Translation("Render the referenced entity."),
  *   field_types = {
  *     "entity_reference"
  *   }
@@ -197,7 +197,7 @@ class EntityReferenceEntityFormatter extends EntityReferenceFormatterBase {
       $elements[$delta] = $view_builder->view($entity, $view_mode, $entity->language()->getId());
 
       // Add a resource attribute to set the mapping property's value to the
-      // entity's url. Since we don't know what the markup of the entity will
+      // entity's URL. Since we don't know what the markup of the entity will
       // be, we shouldn't rely on it for structured data.
       if (!empty($items[$delta]->_attributes) && !$entity->isNew() && $entity->hasLinkTemplate('canonical')) {
         $items[$delta]->_attributes += ['resource' => $entity->toUrl()->toString()];

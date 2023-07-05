@@ -393,7 +393,11 @@ class CKEditor5 extends EditorBase implements ContainerFactoryPluginInterface {
     $form['plugin_settings'] = [
       '#type' => 'vertical_tabs',
       '#title' => $this->t('CKEditor 5 plugin settings'),
-      '#id' => 'ckeditor5-plugin-settings',
+      // Add an ID to the editor settings vertical tabs wrapper so it can be
+      // easily targeted by JavaScript.
+      '#wrapper_attributes' => [
+        'id' => 'plugin-settings-wrapper',
+      ],
     ];
 
     $this->injectPluginSettingsForm($form, $form_state, $editor);
@@ -683,7 +687,7 @@ class CKEditor5 extends EditorBase implements ContainerFactoryPluginInterface {
 
       // Special case: AJAX updates that do not submit the form (that cannot
       // result in configuration being saved).
-      if ($form_state->getSubmitHandlers() === ['editor_form_filter_admin_format_editor_configure']) {
+      if (in_array('editor_form_filter_admin_format_editor_configure', $form_state->getSubmitHandlers(), TRUE)) {
         // Ensure that plugins' validation constraints do not immediately
         // trigger a validation error: the user may choose to configure other
         // CKEditor 5 aspects first.

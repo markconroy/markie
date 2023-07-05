@@ -10,32 +10,17 @@
  * Region default layout.
  */
 
-/*
- * Media query breakpoints.
- * Processed by postcss/postcss-custom-media.
- */
-
-/* Navigation related breakpoints */
-
-/* Grid related breakpoints */
-
-/* Grid shifts from 6 to 14 columns. */
-
-/* Width of the entire grid maxes out. */
-
 .region > * {
   margin-block-end: var(--sp);
 }
 
 @media (min-width: 43.75rem) {
-
   .region > * {
     margin-block-end: var(--sp2);
   }
 }
 
 @media (min-width: 62.5rem) {
-
   .region > * {
     margin-block-end: var(--sp3);
   }

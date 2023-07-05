@@ -167,6 +167,70 @@ class FormatterOptions
     }
 
     /**
+     * Get the fields based on the selections made by the user and
+     * the available annotation data. The fields are reported as the
+     * user selected them, and therefore may be either the field machine
+     * name, or its corresponding human-readable label.
+     *
+     * @param array $defaults
+     * @param mixed $default
+     * @return mixed
+     */
+    public function fields($defaults = [], $default = false)
+    {
+        $fieldShortcut = $this->get(self::FIELD, $defaults);
+        if (!empty($fieldShortcut)) {
+            return [$fieldShortcut];
+        }
+        $result = $this->get(self::FIELDS, $defaults);
+        if (!empty($result)) {
+            return $result;
+        }
+        $isHumanReadable = $this->get(self::HUMAN_READABLE, $defaults);
+        if ($isHumanReadable) {
+            $result = $this->get(self::DEFAULT_TABLE_FIELDS, $defaults);
+            if (!empty($result)) {
+                return $result;
+            }
+        }
+        return $this->get(self::DEFAULT_FIELDS, $defaults);
+    }
+
+    /**
+     * Returns 'true' iff the fields selected by the user (or the default
+     * fields, if none explicitly selected) contain the specified field name.
+     * Note that the provided field name may be either the machine name for
+     * the field, or the human-readable field label.
+     */
+    public function fieldsContain($fieldName)
+    {
+        $fields = explode(',', $this->fields());
+
+        $fieldAlias = $this->fieldAlias($fieldName);
+
+        return in_array($fieldName, $fields) || in_array($fieldAlias, $fields);
+    }
+
+    protected function fieldAlias($fieldName)
+    {
+        $availableFields = $this->get(FormatterOptions::FIELD_LABELS);
+        if (!$availableFields) {
+            return $fieldName;
+        }
+
+        if (array_key_exists($fieldName, $availableFields)) {
+            return $availableFields[$fieldName];
+        }
+
+        $availableLabels = array_flip($availableFields);
+        if (array_key_exists($fieldName, $availableLabels)) {
+            return $availableLabels[$fieldName];
+        }
+
+        return $fieldName;
+    }
+
+    /**
      * Return the XmlSchema to use with --format=xml for data types that support
      * that.  This is used when an array needs to be converted into xml.
      *

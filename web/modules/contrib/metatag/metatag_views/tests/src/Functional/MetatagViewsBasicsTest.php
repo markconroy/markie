@@ -87,7 +87,7 @@ class MetatagViewsBasicsTest extends BrowserTestBase {
     // Confirm what the page title looks like by default.
     $this->assertSession()->titleEquals('Monthly archive | Drupal');
 
-    // Load the Arcive view.
+    // Load the Archive view.
     $this->drupalGet('/admin/structure/views/view/archive');
     $this->assertSession()->statusCodeEquals(200);
 

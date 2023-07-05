@@ -10,19 +10,6 @@
  * Nav Primary (wide widths).
  */
 
-/*
- * Media query breakpoints.
- * Processed by postcss/postcss-custom-media.
- */
-
-/* Navigation related breakpoints */
-
-/* Grid related breakpoints */
-
-/* Grid shifts from 6 to 14 columns. */
-
-/* Width of the entire grid maxes out. */
-
 @media (min-width: 75rem) {
   body:not(.is-always-mobile-nav) .primary-nav__menu-item {
     flex-wrap: nowrap; /* Ensure that sub navigation toggle button doesn't wrap underneath link. */
@@ -33,7 +20,7 @@
   }
 
   /* Remove hover state if submenu exists. */
-  body:not(.is-always-mobile-nav) .primary-nav__menu-item.primary-nav__menu-item--has-children .primary-nav__menu-link--level-1 .primary-nav__menu-link-inner:after {
+  body:not(.is-always-mobile-nav) .primary-nav__menu-item.primary-nav__menu-item--has-children .primary-nav__menu-link--level-1 .primary-nav__menu-link-inner::after {
     content: none;
   }
 
@@ -48,7 +35,7 @@
     outline: 0;
   }
 
-  body:not(.is-always-mobile-nav) .primary-nav__menu-link:focus:before {
+  body:not(.is-always-mobile-nav) .primary-nav__menu-link:focus::before {
     position: absolute;
     top: 50%;
     left: 50%;
@@ -64,17 +51,17 @@
     padding-inline-end: 0.5625rem;
   }
 
-  body:not(.is-always-mobile-nav) .primary-nav__menu-link--button.primary-nav__menu-link--has-children:focus:before {
+  body:not(.is-always-mobile-nav) .primary-nav__menu-link--button.primary-nav__menu-link--has-children:focus::before {
     width: calc(100% + var(--sp1-5));
     content: "";
   }
 
-  body:not(.is-always-mobile-nav) .primary-nav__menu-link--button.primary-nav__menu-link--has-children:before {
+  body:not(.is-always-mobile-nav) .primary-nav__menu-link--button.primary-nav__menu-link--has-children::before {
     content: none;
   }
 
   /* Chevron icon for desktop navigation. */
-  body:not(.is-always-mobile-nav) .primary-nav__menu-link--button.primary-nav__menu-link--has-children:after {
+  body:not(.is-always-mobile-nav) .primary-nav__menu-link--button.primary-nav__menu-link--has-children::after {
     position: absolute;
     inset-block-start: 50%;
     inset-inline-start: calc(100% - 0.1875rem);
@@ -88,7 +75,7 @@
     border-bottom: solid 2px currentColor;
   }
 
-  body:not(.is-always-mobile-nav) .primary-nav__menu-link--button.primary-nav__menu-link--has-children[aria-expanded="true"]:after {
+  body:not(.is-always-mobile-nav) .primary-nav__menu-link--button.primary-nav__menu-link--has-children[aria-expanded="true"]::after {
     opacity: 1;
   }
 
@@ -98,7 +85,7 @@
     padding-inline-end: 0;
   }
 
-  body:not(.is-always-mobile-nav) .primary-nav__menu-link-inner:after {
+  body:not(.is-always-mobile-nav) .primary-nav__menu-link-inner::after {
     transform-origin: center;
     border-top-width: var(--sp0-5);
   }
@@ -164,7 +151,7 @@
     display: block;
   }
 
-  body:not(.is-always-mobile-nav) .primary-nav__menu-link--level-2:focus:before {
+  body:not(.is-always-mobile-nav) .primary-nav__menu-link--level-2:focus::before {
     top: 0;
     left: calc(var(--sp0-5) * -1);
     height: 100%;
@@ -177,12 +164,12 @@
     padding-inline-end: 0;
   }
 
-  body:not(.is-always-mobile-nav) .primary-nav__menu-link--level-2 .primary-nav__menu-link-inner:after {
+  body:not(.is-always-mobile-nav) .primary-nav__menu-link--level-2 .primary-nav__menu-link-inner::after {
     transform-origin: left; /* LTR */
     border-top-width: 3px;
   }
 
-  [dir="rtl"] body:not(.is-always-mobile-nav) .primary-nav__menu-link--level-2 .primary-nav__menu-link-inner:after {
+  [dir="rtl"] body:not(.is-always-mobile-nav) .primary-nav__menu-link--level-2 .primary-nav__menu-link-inner::after {
     transform-origin: right;
   }
 

@@ -52,6 +52,7 @@ function metatag_open_graph_update_8102(&$sandbox) {
           // We found a metatag field, so query for all the entities of this
           // type that have "article_tags" in the serialized array.
           $q = \Drupal::entityQuery($entity_type);
+          $q->accessCheck(FALSE);
           $q->condition($field_name, "article_tags", "CONTAINS");
           $count = $q->count()->execute();
 
@@ -81,6 +82,7 @@ function metatag_open_graph_update_8102(&$sandbox) {
 
     foreach ($fields as $field_name => $last) {
       $q = \Drupal::entityQuery($entity_type);
+      $q->accessCheck(FALSE);
       $q->condition($field_name, "article_tags", "CONTAINS");
       $q->condition($id_col, $last, ">");
       $q->sort($id_col);

@@ -2,7 +2,6 @@
 
 namespace Drupal\Tests\metatag\Functional;
 
-use Drupal\Component\Utility\Html;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Tests\BrowserTestBase;
@@ -429,6 +428,10 @@ abstract class MetatagFieldTestBase extends BrowserTestBase {
     }
 
     // @todo Confirm the values output correctly.
+    // Check the output.
+    // @todo Test this.
+    $all_tags = metatag_generate_entity_all_tags($entity);
+    $overrides = metatag_generate_entity_overrides($entity);
   }
 
   /**

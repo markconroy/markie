@@ -1,5 +1,14 @@
 # Change Log
 
+### 4.3.1, 4.3.0 - 19 May 2023
+
+- Add an accessor to get selected fields from the formatter object. (#104)
+- Add convenience function FormatterOptions::fieldsContain() (#105)
+
+### 4.2.4 - 23 Feb 2023
+
+- Minor dynamic property fix for PHP 8.2.
+
 ### 4.2.3 - 16 Oct 2022
 
 - Various PHP 8.1 compatibility fixes (warnings)

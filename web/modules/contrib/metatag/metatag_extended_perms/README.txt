@@ -7,7 +7,7 @@ allowing for very fine controlled access over meta tag customization.
 Usage
 --------------------------------------------------------------------------------
 * Enable the Metatag Extended Permissions module.
-* Assign the appropriate permissions via the admin/people/permisisons page.
+* Assign the appropriate permissions via the admin/people/permissions page.
 
 
 Known issues

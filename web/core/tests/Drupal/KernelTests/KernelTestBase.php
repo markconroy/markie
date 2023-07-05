@@ -12,6 +12,7 @@ use Drupal\Core\DependencyInjection\ServiceProviderInterface;
 use Drupal\Core\DrupalKernel;
 use Drupal\Core\Entity\Sql\SqlEntityStorageInterface;
 use Drupal\Core\Extension\ExtensionDiscovery;
+use Drupal\Core\KeyValueStore\KeyValueMemoryFactory;
 use Drupal\Core\Language\Language;
 use Drupal\Core\Site\Settings;
 use Drupal\Core\Test\TestDatabase;
@@ -23,6 +24,7 @@ use Drupal\Tests\TestRequirementsTrait;
 use Drupal\Tests\Traits\PhpUnitWarnings;
 use Drupal\TestTools\Comparator\MarkupInterfaceComparator;
 use Drupal\TestTools\Extension\SchemaInspector;
+use Drupal\TestTools\Random;
 use Drupal\TestTools\TestVarDumper;
 use PHPUnit\Framework\Exception;
 use PHPUnit\Framework\TestCase;
@@ -196,6 +198,13 @@ abstract class KernelTestBase extends TestCase implements ServiceProviderInterfa
   protected $configImporter;
 
   /**
+   * The key_value service that must persist between container rebuilds.
+   *
+   * @var \Drupal\Core\KeyValueStore\KeyValueMemoryFactory
+   */
+  protected KeyValueMemoryFactory $keyValue;
+
+  /**
    * The app root.
    *
    * @var string
@@ -251,6 +260,15 @@ abstract class KernelTestBase extends TestCase implements ServiceProviderInterfa
     $this->initFileCache();
     $this->bootEnvironment();
     $this->bootKernel();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function __get(string $name) {
+    if ($name === 'randomGenerator') {
+      return Random::getGenerator();
+    }
   }
 
   /**
@@ -350,7 +368,7 @@ abstract class KernelTestBase extends TestCase implements ServiceProviderInterfa
     $driver = $connection_info['default']['driver'];
     $namespace = $connection_info['default']['namespace'] ?? '';
     $autoload = $connection_info['default']['autoload'] ?? '';
-    if (strpos($autoload, 'src/Driver/Database/') !== FALSE) {
+    if (str_contains($autoload, 'src/Driver/Database/')) {
       [$first, $second] = explode('\\', $namespace, 3);
       if ($first === 'Drupal' && strtolower($second) === $second) {
         // Add the module that provides the database driver to the list of
@@ -544,12 +562,14 @@ abstract class KernelTestBase extends TestCase implements ServiceProviderInterfa
       ->register('lock', 'Drupal\Core\Lock\NullLockBackend');
     $container
       ->register('cache_factory', 'Drupal\Core\Cache\MemoryBackendFactory');
-    $container
-      ->register('keyvalue.memory', 'Drupal\Core\KeyValueStore\KeyValueMemoryFactory')
-      // Must persist container rebuilds, or all data would vanish otherwise.
-      ->addTag('persist');
-    $container
-      ->setAlias('keyvalue', 'keyvalue.memory');
+
+    // Use memory for key value storages to avoid database queries. Store the
+    // key value factory on the test object so that key value storages persist
+    // container rebuilds, otherwise all state data would vanish.
+    if (!isset($this->keyValue)) {
+      $this->keyValue = new KeyValueMemoryFactory();
+    }
+    $container->set('keyvalue', $this->keyValue);
 
     // Set the default language on the minimal container.
     $container->setParameter('language.default_values', Language::$defaultValues);
@@ -572,9 +592,10 @@ abstract class KernelTestBase extends TestCase implements ServiceProviderInterfa
         ->clearTag('path_processor_outbound');
     }
 
+    // Relax the password hashing cost in tests to avoid performance issues.
     if ($container->hasDefinition('password')) {
       $container->getDefinition('password')
-        ->setArguments([1]);
+        ->setArguments([PASSWORD_BCRYPT, ['cost' => 4]]);
     }
 
     // Add the on demand rebuild route provider service.

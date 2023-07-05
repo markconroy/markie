@@ -5,14 +5,14 @@ namespace Drupal\views\Plugin\views;
 use Drupal\Component\Plugin\DerivativeInspectionInterface;
 use Drupal\Component\Plugin\PluginInspectionInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\views\Plugin\views\display\DisplayPluginBase;
 use Drupal\views\ViewExecutable;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides an interface for all views plugins.
  */
-interface ViewsPluginInterface extends PluginInspectionInterface, DerivativeInspectionInterface {
+interface ViewsPluginInterface extends PluginInspectionInterface, DerivativeInspectionInterface, ContainerFactoryPluginInterface {
 
   /**
    * Returns the plugin provider.
@@ -67,11 +67,6 @@ interface ViewsPluginInterface extends PluginInspectionInterface, DerivativeInsp
    *   The form build array.
    */
   public static function preRenderAddFieldsetMarkup(array $form);
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition);
 
   /**
    * Initialize the plugin.
@@ -163,8 +158,10 @@ interface ViewsPluginInterface extends PluginInspectionInterface, DerivativeInsp
   public function query();
 
   /**
-   * Unpack options over our existing defaults, drilling down into arrays
-   * so that defaults don't get totally blown away.
+   * Unpacks options over our existing defaults.
+   *
+   * This will drill down into arrays so that defaults don't get totally blown
+   * away.
    */
   public function unpackOptions(&$storage, $options, $definition = NULL, $all = TRUE, $check = TRUE);
 

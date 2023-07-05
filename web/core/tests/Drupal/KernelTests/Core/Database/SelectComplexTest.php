@@ -82,6 +82,10 @@ class SelectComplexTest extends DatabaseTestBase {
     $task_field = $query->addField('t', 'task');
     $query->orderBy($count_field);
     $query->groupBy($task_field);
+
+    $this->assertMatchesRegularExpression("/ORDER BY .*[^\w\s]num[^\w\s]/", (string) $query);
+    $this->assertMatchesRegularExpression("/GROUP BY .*[^\w\s]task[^\w\s]/", (string) $query);
+
     $result = $query->execute();
 
     $num_records = 0;
@@ -180,10 +184,12 @@ class SelectComplexTest extends DatabaseTestBase {
   public function testDistinct() {
     $query = $this->connection->select('test_task');
     $query->addField('test_task', 'task');
+    $query->orderBy('task');
     $query->distinct();
-    $query_result = $query->countQuery()->execute()->fetchField();
+    $query_result = $query->execute()->fetchAll(\PDO::FETCH_COLUMN);
 
-    $this->assertEquals(6, $query_result, 'Returned the correct number of rows.');
+    $expected_result = ['code', 'eat', 'found new band', 'perform at superbowl', 'sing', 'sleep'];
+    $this->assertEquals($query_result, $expected_result, 'Returned the correct result.');
   }
 
   /**

@@ -3,122 +3,122 @@
 # textfield.
 
 metatag.metatag_tag.dcterms_abstract:
-  type: label
+  type: text
   label: 'Dublin Core: Abstract'
 metatag.metatag_tag.dcterms_access_rights:
-  type: label
+  type: text
   label: 'Dublin Core: Access Rights'
 metatag.metatag_tag.dcterms_accrual_method:
-  type: label
+  type: text
   label: 'Dublin Core: Accrual Method'
 metatag.metatag_tag.dcterms_accrual_periodicity:
-  type: label
+  type: text
   label: 'Dublin Core: Accrual Periodicity'
 metatag.metatag_tag.dcterms_accrual_policy:
   type: text
   label: 'Dublin Core: Accrual Policy'
 metatag.metatag_tag.dcterms_alternative:
-  type: label
+  type: text
   label: 'Dublin Core: Alternative Title'
 metatag.metatag_tag.dcterms_audience:
-  type: label
+  type: text
   label: 'Dublin Core: Audience'
 metatag.metatag_tag.dcterms_available:
-  type: label
+  type: text
   label: 'Dublin Core: Date Available'
 metatag.metatag_tag.dcterms_bibliographic_citation:
-  type: label
+  type: text
   label: 'Dublin Core: Bibliographic Citation'
 metatag.metatag_tag.dcterms_conforms_to:
-  type: label
+  type: text
   label: 'Dublin Core: Conforms To'
 metatag.metatag_tag.dcterms_created:
-  type: label
+  type: text
   label: 'Dublin Core: Date Created'
 metatag.metatag_tag.dcterms_date_accepted:
-  type: label
+  type: text
   label: 'Dublin Core: Date Accepted'
 metatag.metatag_tag.dcterms_date_copyrighted:
-  type: label
+  type: text
   label: 'Dublin Core: Date Copyrighted'
 metatag.metatag_tag.dcterms_date_submitted:
-  type: label
+  type: text
   label: 'Dublin Core: Date Submitted'
 metatag.metatag_tag.dcterms_education_level:
-  type: label
+  type: text
   label: 'Dublin Core: Audience Education Level'
 metatag.metatag_tag.dcterms_extent:
-  type: label
+  type: text
   label: 'Dublin Core: Extent'
 metatag.metatag_tag.dcterms_has_format:
-  type: label
+  type: text
   label: 'Dublin Core: Has Format'
 metatag.metatag_tag.dcterms_has_part:
-  type: label
+  type: text
   label: 'Dublin Core: Has Part'
 metatag.metatag_tag.dcterms_has_version:
-  type: label
+  type: text
   label: 'Dublin Core: Has Version'
 metatag.metatag_tag.dcterms_instructional_method:
-  type: label
+  type: text
   label: 'Dublin Core: Instructional Method'
 metatag.metatag_tag.dcterms_is_format_of:
-  type: label
+  type: text
   label: 'Dublin Core: Is Format Of'
 metatag.metatag_tag.dcterms_is_part_of:
-  type: label
+  type: text
   label: 'Dublin Core: Is Part Of'
 metatag.metatag_tag.dcterms_is_referenced_by:
-  type: label
+  type: text
   label: 'Dublin Core: Is Referenced By'
 metatag.metatag_tag.dcterms_is_replaced_by:
-  type: label
+  type: text
   label: 'Dublin Core: Is Replaced By'
 metatag.metatag_tag.dcterms_is_required_by:
-  type: label
+  type: text
   label: 'Dublin Core: Is Required By'
 metatag.metatag_tag.dcterms_issued:
-  type: label
+  type: text
   label: 'Dublin Core: Date Issued'
 metatag.metatag_tag.dcterms_is_version_of:
-  type: label
+  type: text
   label: 'Dublin Core: Is Version Of'
 metatag.metatag_tag.dcterms_license:
-  type: label
+  type: text
   label: 'Dublin Core: License'
 metatag.metatag_tag.dcterms_mediator:
-  type: label
+  type: text
   label: 'Dublin Core: Mediator'
 metatag.metatag_tag.dcterms_medium:
-  type: label
+  type: text
   label: 'Dublin Core: Medium'
 metatag.metatag_tag.dcterms_modified:
-  type: label
+  type: text
   label: 'Dublin Core: Date Modified'
 metatag.metatag_tag.dcterms_provenance:
-  type: label
+  type: text
   label: 'Dublin Core: Provenance'
 metatag.metatag_tag.dcterms_references:
-  type: label
+  type: text
   label: 'Dublin Core: References'
 metatag.metatag_tag.dcterms_replaces:
-  type: label
+  type: text
   label: 'Dublin Core: Replaces'
 metatag.metatag_tag.dcterms_requires:
-  type: label
+  type: text
   label: 'Dublin Core: Requires'
 metatag.metatag_tag.dcterms_rights_holder:
-  type: label
+  type: text
   label: 'Dublin Core: Rights Holder'
 metatag.metatag_tag.dcterms_spatial:
-  type: label
+  type: text
   label: 'Dublin Core: Spatial Coverage'
 metatag.metatag_tag.dcterms_table_of_contents:
-  type: label
+  type: text
   label: 'Dublin Core: Table Of Contents'
 metatag.metatag_tag.dcterms_temporal:
-  type: label
+  type: text
   label: 'Dublin Core: Temporal Coverage'
 metatag.metatag_tag.dcterms_valid:
-  type: label
+  type: text
   label: 'Dublin Core: Date Valid'

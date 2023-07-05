@@ -31,6 +31,52 @@ class JavascriptStatesForm extends FormBase {
       '#type' => 'textfield',
       '#title' => 'Textfield trigger',
     ];
+    $form['radios_opposite1'] = [
+      '#type' => 'radios',
+      '#title' => 'Radios opposite 1',
+      '#options' => [
+        0 => 'zero',
+        1 => 'one',
+      ],
+      '#default_value' => 0,
+      0 => [
+        '#states' => [
+          'checked' => [
+            ':input[name="radios_opposite2"]' => ['value' => 1],
+          ],
+        ],
+      ],
+      1 => [
+        '#states' => [
+          'checked' => [
+            ':input[name="radios_opposite2"]' => ['value' => 0],
+          ],
+        ],
+      ],
+    ];
+    $form['radios_opposite2'] = [
+      '#type' => 'radios',
+      '#title' => 'Radios opposite 2',
+      '#options' => [
+        0 => 'zero',
+        1 => 'one',
+      ],
+      '#default_value' => 1,
+      0 => [
+        '#states' => [
+          'checked' => [
+            ':input[name="radios_opposite1"]' => ['value' => 1],
+          ],
+        ],
+      ],
+      1 => [
+        '#states' => [
+          'checked' => [
+            ':input[name="radios_opposite1"]' => ['value' => 0],
+          ],
+        ],
+      ],
+    ];
     $form['radios_trigger'] = [
       '#type' => 'radios',
       '#title' => 'Radios trigger',
@@ -60,6 +106,10 @@ class JavascriptStatesForm extends FormBase {
       '#empty_value' => '_none',
       '#empty_option' => '- None -',
     ];
+    $form['number_trigger'] = [
+      '#type' => 'number',
+      '#title' => 'Number trigger',
+    ];
 
     // Tested fields.
     // Checkbox trigger.
@@ -77,6 +127,24 @@ class JavascriptStatesForm extends FormBase {
       '#title' => 'Textfield required when checkbox trigger checked',
       '#states' => [
         'required' => [
+          ':input[name="checkbox_trigger"]' => ['checked' => TRUE],
+        ],
+      ],
+    ];
+    $form['textfield_readonly_when_checkbox_trigger_checked'] = [
+      '#type' => 'textfield',
+      '#title' => 'Textfield readonly when checkbox trigger checked',
+      '#states' => [
+        'readonly' => [
+          ':input[name="checkbox_trigger"]' => ['checked' => TRUE],
+        ],
+      ],
+    ];
+    $form['textarea_readonly_when_checkbox_trigger_checked'] = [
+      '#type' => 'textarea',
+      '#title' => 'Textarea readonly when checkbox trigger checked',
+      '#states' => [
+        'readonly' => [
           ':input[name="checkbox_trigger"]' => ['checked' => TRUE],
         ],
       ],
@@ -127,6 +195,123 @@ class JavascriptStatesForm extends FormBase {
       '#states' => [
         'invisible' => [
           ':input[name="checkbox_trigger"]' => ['checked' => TRUE],
+        ],
+      ],
+    ];
+    $form['checkboxes_all_checked_when_checkbox_trigger_checked'] = [
+      '#type' => 'checkboxes',
+      '#title' => 'Checkboxes: all checked when checkbox trigger checked',
+      '#options' => [
+        'value1' => 'Value 1',
+        'value2' => 'Value 2',
+        'value3' => 'Value 3',
+      ],
+      '#states' => [
+        'checked' => [
+          ':input[name="checkbox_trigger"]' => ['checked' => TRUE],
+        ],
+      ],
+    ];
+    $form['checkboxes_some_checked_when_checkbox_trigger_checked'] = [
+      '#type' => 'checkboxes',
+      '#title' => 'Checkboxes: some checked when checkbox trigger checked',
+      '#options' => [
+        'value1' => 'Value 1',
+        'value2' => 'Value 2',
+        'value3' => 'Value 3',
+      ],
+      'value1' => [
+        '#states' => [
+          'checked' => [
+            ':input[name="checkbox_trigger"]' => ['checked' => TRUE],
+          ],
+        ],
+      ],
+      'value3' => [
+        '#states' => [
+          'checked' => [
+            ':input[name="checkbox_trigger"]' => ['checked' => TRUE],
+          ],
+        ],
+      ],
+    ];
+    $form['checkboxes_all_disabled_when_checkbox_trigger_checked'] = [
+      '#type' => 'checkboxes',
+      '#title' => 'Checkboxes: all disabled when checkbox trigger checked',
+      '#options' => [
+        'value1' => 'Value 1',
+        'value2' => 'Value 2',
+        'value3' => 'Value 3',
+      ],
+      '#states' => [
+        'disabled' => [
+          ':input[name="checkbox_trigger"]' => ['checked' => TRUE],
+        ],
+      ],
+    ];
+    $form['checkboxes_some_disabled_when_checkbox_trigger_checked'] = [
+      '#type' => 'checkboxes',
+      '#title' => 'Checkboxes: some disabled when checkbox trigger checked',
+      '#options' => [
+        'value1' => 'Value 1',
+        'value2' => 'Value 2',
+        'value3' => 'Value 3',
+      ],
+      'value1' => [
+        '#states' => [
+          'disabled' => [
+            ':input[name="checkbox_trigger"]' => ['checked' => TRUE],
+          ],
+        ],
+      ],
+      'value3' => [
+        '#states' => [
+          'disabled' => [
+            ':input[name="checkbox_trigger"]' => ['checked' => TRUE],
+          ],
+        ],
+      ],
+    ];
+    $form['radios_checked_when_checkbox_trigger_checked'] = [
+      '#type' => 'radios',
+      '#title' => 'Radios checked when checkbox trigger checked',
+      '#options' => [
+        'value1' => 'Value 1',
+        'value2' => 'Value 2',
+      ],
+      'value1' => [
+        '#states' => [
+          'checked' => [
+            ':input[name="checkbox_trigger"]' => ['checked' => TRUE],
+          ],
+        ],
+      ],
+    ];
+    $form['radios_all_disabled_when_checkbox_trigger_checked'] = [
+      '#type' => 'radios',
+      '#title' => 'Radios: all disabled when checkbox trigger checked',
+      '#options' => [
+        'value1' => 'Value 1',
+        'value2' => 'Value 2',
+      ],
+      '#states' => [
+        'disabled' => [
+          ':input[name="checkbox_trigger"]' => ['checked' => TRUE],
+        ],
+      ],
+    ];
+    $form['radios_some_disabled_when_checkbox_trigger_checked'] = [
+      '#type' => 'radios',
+      '#title' => 'Radios: some disabled when checkbox trigger checked',
+      '#options' => [
+        'value1' => 'Value 1',
+        'value2' => 'Value 2',
+      ],
+      'value1' => [
+        '#states' => [
+          'disabled' => [
+            ':input[name="checkbox_trigger"]' => ['checked' => TRUE],
+          ],
         ],
       ],
     ];
@@ -324,6 +509,17 @@ class JavascriptStatesForm extends FormBase {
         'visible' => [
           ':input[name="select_trigger"]' => ['value' => 'value2'],
           ':input[name="textfield_trigger"]' => ['filled' => TRUE],
+        ],
+      ],
+    ];
+
+    // Number triggers.
+    $form['item_visible_when_number_trigger_filled_by_spinner'] = [
+      '#type' => 'item',
+      '#title' => 'Item visible when number trigger filled by spinner widget',
+      '#states' => [
+        'visible' => [
+          ':input[name="number_trigger"]' => ['filled' => TRUE],
         ],
       ],
     ];

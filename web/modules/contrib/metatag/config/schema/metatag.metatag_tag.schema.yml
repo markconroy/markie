@@ -6,89 +6,89 @@ metatag.metatag_tag.abstract:
   type: text
   label: 'Abstract'
 metatag.metatag_tag.cache_control:
-  type: label
+  type: text
   label: 'Cache control'
 metatag.metatag_tag.canonical_url:
-  type: label
+  type: text
   label: 'Canonical URL'
 metatag.metatag_tag.content_language:
-  type: label
+  type: text
   label: 'Content Language'
 metatag.metatag_tag.description:
   type: text
   label: 'Description'
 metatag.metatag_tag.expires:
-  type: label
+  type: text
   label: 'Expires'
 metatag.metatag_tag.generator:
-  type: label
+  type: text
   label: 'Generator'
 metatag.metatag_tag.image_src:
-  type: label
+  type: text
   label: 'Image SRC'
 metatag.metatag_tag.keywords:
   type: text
   label: 'Keywords'
 metatag.metatag_tag.news_keywords:
-  type: label
+  type: text
   label: 'Google News Keywords'
 metatag.metatag_tag.next:
-  type: label
+  type: text
   label: 'Next page URL'
 metatag.metatag_tag.original_source:
-  type: label
+  type: text
   label: 'Original source'
 metatag.metatag_tag.pragma:
-  type: label
+  type: text
   label: 'Pragma'
 metatag.metatag_tag.prev:
-  type: label
+  type: text
   label: 'Previous page URL'
 metatag.metatag_tag.rating:
-  type: label
+  type: text
   label: 'Rating'
 metatag.metatag_tag.referrer:
-  type: label
+  type: text
   label: 'Referrer policy'
 metatag.metatag_tag.refresh:
-  type: label
+  type: text
   label: 'Refresh'
 metatag.metatag_tag.revisit_after:
-  type: label
+  type: text
   label: 'Revisit After'
 metatag.metatag_tag.rights:
-  type: label
+  type: text
   label: 'Rights'
 metatag.metatag_tag.robots:
-  type: label
+  type: text
   label: 'Robots'
 metatag.metatag_tag.shortlink:
-  type: label
+  type: text
   label: 'Shortlink'
 metatag.metatag_tag.standout:
-  type: label
+  type: text
   label: 'Standout'
 metatag.metatag_tag.title:
   type: text
   label: 'Page title'
 metatag.metatag_tag.icbm:
-  type: label
+  type: text
   label: 'ICBM'
 metatag.metatag_tag.geo_region:
-  type: label
+  type: text
   label: 'Geographical region'
 metatag.metatag_tag.geo_placename:
-  type: label
+  type: text
   label: 'Geographical place name'
 metatag.metatag_tag.geo_position:
-  type: label
+  type: text
   label: 'Geographical position'
 metatag.metatag_tag.set_cookie:
-  type: label
+  type: text
   label: 'Set Cookie'
 metatag.metatag_tag.google:
-  type: label
+  type: text
   label: 'Google'
 metatag.metatag_tag.author:
-  type: label
+  type: text
   label: 'Author'

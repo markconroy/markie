@@ -2,6 +2,8 @@
 
 namespace Drupal\Tests\views\Kernel\Plugin;
 
+use Drupal\Component\Serialization\Json;
+use Drupal\Component\Utility\Html;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
@@ -165,26 +167,26 @@ class RowRenderCacheTest extends ViewsKernelTestBase {
       $counter = $index + 1;
       $expected = "$nid: $counter (just in case: $nid)";
       $counter_output = $view->style_plugin->getField($index, 'counter');
-      $this->assertEquals($expected, $counter_output);
+      $this->assertSame($expected, (string) $counter_output);
 
       $node_url = $node->toUrl()->toString();
       $expected = "<a href=\"$node_url\"><span class=\"da-title\">{$node->label()}</span> <span class=\"counter\">$counter_output</span></a>";
       $output = $view->style_plugin->getField($index, 'title');
-      $this->assertEquals($expected, $output);
+      $this->assertSame($expected, (string) $output);
 
       $expected = $access ? "<a href=\"$node_url/edit?destination=/\" hreflang=\"en\">edit</a>" : "";
       $output = $view->style_plugin->getField($index, 'edit_node');
-      $this->assertEquals($expected, $output);
+      $this->assertSame($expected, (string) $output);
 
       $expected = $access ? "<a href=\"$node_url/delete?destination=/\" hreflang=\"en\">delete</a>" : "";
       $output = $view->style_plugin->getField($index, 'delete_node');
-      $this->assertEquals($expected, $output);
-      $expected = $access ? '  <div class="dropbutton-wrapper"><div class="dropbutton-widget"><ul class="dropbutton">' .
+      $this->assertSame($expected, (string) $output);
+      $expected = $access ? '  <div class="dropbutton-wrapper" data-drupal-ajax-container><div class="dropbutton-widget"><ul class="dropbutton">' .
         '<li><a href="' . $node_url . '/edit?destination=/" hreflang="en">Edit</a></li>' .
-        '<li><a href="' . $node_url . '/delete?destination=/" hreflang="en">Delete</a></li>' .
+        '<li><a href="' . $node_url . '/delete?destination=/" class="use-ajax" data-dialog-type="modal" data-dialog-options="' . Html::escape(Json::encode(['width' => 880])) . '" hreflang="en">Delete</a></li>' .
         '</ul></div></div>' : '';
       $output = $view->style_plugin->getField($index, 'operations');
-      $this->assertEquals($expected, $output);
+      $this->assertSame($expected, (string) $output);
 
       if ($check_cache) {
         $keys = $cache_plugin->getRowCacheKeys($view->result[$index]);

@@ -34,7 +34,7 @@ trait DependencySerializationTrait {
     $vars = get_object_vars($this);
     try {
       $container = \Drupal::getContainer();
-      $reverse_container = $container->has(ReverseContainer::class) ? $container->get(ReverseContainer::class) : new ReverseContainer($container);
+      $reverse_container = $container->get(ReverseContainer::class);
       foreach ($vars as $key => $value) {
         if (!is_object($value) || $value instanceof TranslatableMarkup) {
           // Ignore properties that cannot be services.

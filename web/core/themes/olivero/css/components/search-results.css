@@ -10,19 +10,6 @@
  * Search results specific styles.
  */
 
-/*
- * Media query breakpoints.
- * Processed by postcss/postcss-custom-media.
- */
-
-/* Navigation related breakpoints */
-
-/* Grid related breakpoints */
-
-/* Grid shifts from 6 to 14 columns. */
-
-/* Width of the entire grid maxes out. */
-
 .search-results {
   margin-block-end: var(--sp2);
   padding-block: 0;
@@ -32,7 +19,6 @@
 }
 
 @media (min-width: 43.75rem) {
-
   .search-results {
     margin-block-end: var(--sp3);
   }
@@ -50,6 +36,7 @@
 .search-result__title a {
   padding-block-end: 0.1875rem;
   transition: background-size 0.2s, color 0.2s;
+  -webkit-text-decoration: none;
   text-decoration: none;
   background-color: transparent;
   background-image: linear-gradient(var(--color--primary-50), var(--color--primary-50)); /* Two values are needed for IE11 support. */
@@ -63,7 +50,6 @@
 }
 
 @media (min-width: 62.5rem) {
-
   .search-result__title {
     margin-block-end: var(--sp1);
     font-size: 1.875rem;
@@ -80,7 +66,6 @@
 }
 
 @media (min-width: 62.5rem) {
-
   .search-result__snippet {
     padding-block-end: var(--sp3);
   }
@@ -105,7 +90,7 @@
   margin-block-end: var(--sp1-5);
 }
 
-.search-results__item:after {
+.search-results__item::after {
   position: absolute;
   inset-block-end: 0;
   width: var(--sp3);
@@ -120,7 +105,6 @@
 }
 
 @media (min-width: 62.5rem) {
-
   .search-results__item {
     margin-block-end: var(--sp3);
   }

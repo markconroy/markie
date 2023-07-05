@@ -5,6 +5,8 @@
  * Document all supported APIs.
  */
 
+use Drupal\Core\Routing\RouteMatchInterface;
+
 /**
  * Provides a ability to integrate alternative routes with metatags.
  *
@@ -17,7 +19,7 @@
  * @return \Drupal\Core\Entity\EntityInterface|null
  *   Return an entity, if the route should use metatags.
  */
-function hook_metatag_route_entity(\Drupal\Core\Routing\RouteMatchInterface $route_match) {
+function hook_metatag_route_entity(RouteMatchInterface $route_match) {
   if ($route_match->getRouteName() === 'example.test_route') {
     if ($node = $route_match->getParameter('node')) {
       return $node;
@@ -67,6 +69,19 @@ function hook_metatags_attachments_alter(array &$metatag_attachments) {
  *   An array of D7 tag names mapped against the D8 tag's IDs.
  */
 function hook_metatag_migrate_metatagd7_tags_map_alter(array $tags_map) {
+  // This tag was renamed in D8.
+  $tags_map['custom:tag'] = 'custom_tag';
+}
+
+/**
+ * Allow the list of Nodewords D6's tags to be changed.
+ *
+ * This is only used when migrating meta tags from Nodewords-D6.
+ *
+ * @param array $tags_map
+ *   An array of D6 tag names mapped against the D8 tag's IDs.
+ */
+function hook_metatag_migrate_nodewordsd6_tags_map_alter(array $tags_map) {
   // This tag was renamed in D8.
   $tags_map['custom:tag'] = 'custom_tag';
 }

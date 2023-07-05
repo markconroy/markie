@@ -15,7 +15,7 @@ class LogTest extends MigrateProcessTestCase {
   /**
    * Tests the Log plugin.
    *
-   * @dataProvider providerTestLog()
+   * @dataProvider providerTestLog
    */
   public function testLog($value, $expected_message) {
     // Test the expected log message.
@@ -32,7 +32,7 @@ class LogTest extends MigrateProcessTestCase {
   /**
    * Provides data for testLog.
    *
-   * @return \string[][]
+   * @return string[][]
    *   An array of test data arrays.
    */
   public function providerTestLog() {

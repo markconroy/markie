@@ -216,7 +216,17 @@ $connection->insert('nodewords')
     'type' => '5',
     'id' => '23',
     'name' => 'robots',
-    'content' => 'a:2:{s:5:"value";a:8:{s:8:"nofollow";s:8:"nofollow";s:9:"nosnippet";s:9:"nosnippet";s:5:"index";i:0;s:7:"noindex";i:0;s:6:"follow";i:0;s:9:"noarchive";i:0;s:5:"noodp";i:0;s:6:"noydir";i:0;}s:11:"use_default";i:0;}',
+    'content' => serialize(array(
+      'value' => array(
+        'nofollow' => 'nofollow',
+        'nosnippet' => 'nosnippet',
+        'index' => 0,
+        'noindex' => 0,
+        'follow' => 0,
+        'noarchive' => 0,
+      ),
+      'use_default' => 0,
+    )),
   ])
 
   // Values for taxonomy term tid 16.
@@ -283,7 +293,15 @@ $connection->insert('nodewords')
     'type' => '8',
     'id' => '2',
     'name' => 'robots',
-    'content' => 'a:2:{s:5:"value";a:6:{s:9:"noarchive";i:0;s:8:"nofollow";i:0;s:7:"noindex";i:0;s:5:"noodp";i:0;s:9:"nosnippet";i:0;s:6:"noydir";i:0;}s:11:"use_default";i:0;}',
+    'content' => serialize(array(
+      'value' => array(
+        'noarchive' => 0,
+        'nofollow' => 0,
+        'noindex' => 0,
+        'nosnippet' => 0,
+      ),
+      'use_default' => 0,
+    )),
   ])
   ->execute();
 

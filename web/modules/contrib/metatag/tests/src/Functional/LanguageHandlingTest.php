@@ -3,7 +3,6 @@
 namespace Drupal\Tests\metatag\Functional;
 
 use Drupal\Tests\BrowserTestBase;
-use Drupal\user\Entity\User;
 use Drupal\Tests\Traits\Core\PathAliasTestTrait;
 
 /**

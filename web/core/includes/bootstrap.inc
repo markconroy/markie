@@ -124,8 +124,14 @@ function t($string, array $args = [], array $options = []) {
  *   A link to associate with the message.
  *
  * @see \Drupal\Core\Utility\Error::decodeException()
+ *
+ * @deprecated in drupal:10.1.0 and is removed from drupal:11.0.0. Use
+ *   Use \Drupal\Core\Utility\Error::logException() instead.
+ *
+ * @see https://www.drupal.org/node/2932520
  */
 function watchdog_exception($type, Exception $exception, $message = NULL, $variables = [], $severity = RfcLogLevel::ERROR, $link = NULL) {
+  @trigger_error('watchdog_exception() is deprecated in drupal:10.1.0 and is removed from drupal:11.0.0. Use \Drupal\Core\Utility\Error::logException() instead. See https://www.drupal.org/node/2932520', E_USER_DEPRECATED);
 
   // Use a default value if $message is not set.
   if (empty($message)) {
@@ -429,36 +435,41 @@ function drupal_maintenance_theme() {
  * @see drupal_static_reset()
  */
 function &drupal_static($name, $default_value = NULL, $reset = FALSE) {
-  static $data = [], $default = [];
-  // First check if dealing with a previously defined static variable.
-  if (isset($data[$name]) || array_key_exists($name, $data)) {
-    // Non-NULL $name and both $data[$name] and $default[$name] statics exist.
-    if ($reset) {
-      // Reset pre-existing static variable to its default value.
-      $data[$name] = $default[$name];
-    }
-    return $data[$name];
-  }
-  // Neither $data[$name] nor $default[$name] static variables exist.
+  static $data = [], $defaults = [];
   if (isset($name)) {
-    if ($reset) {
-      // Reset was called before a default is set and yet a variable must be
-      // returned.
-      return $data;
+    // Check if we're dealing with a previously defined static variable.
+    if (\array_key_exists($name, $data)) {
+      // Both $data[$name] and (implicitly) $defaults[$name] statics exist.
+      if ($reset) {
+        // Reset pre-existing static variable to its default value.
+        $data[$name] = $defaults[$name];
+      }
     }
-    // First call with new non-NULL $name. Initialize a new static variable.
-    $default[$name] = $data[$name] = $default_value;
+    else {
+      // Neither $data[$name] nor $defaults[$name] static variables exist.
+      if ($reset) {
+        // Reset was called before any value for $name was set, so we should
+        // not set anything ($default_value is not reliable in this case). As
+        // the function returns a reference, we must still return a variable.
+        // (Code using $reset does not use the return value).
+        return $data;
+      }
+      // First call with new non-NULL $name. Initialize a new static variable.
+      $defaults[$name] = $data[$name] = $default_value;
+    }
+    // Return a reference to the named variable.
     return $data[$name];
   }
-  // Reset all: ($name == NULL). This needs to be done one at a time so that
-  // references returned by earlier invocations of drupal_static() also get
-  // reset.
-  foreach ($default as $name => $value) {
-    $data[$name] = $value;
+  else {
+    // Reset all: ($name == NULL). This needs to be done one at a time so that
+    // references returned by earlier invocations of drupal_static() also get
+    // reset.
+    foreach ($defaults as $name => $value) {
+      $data[$name] = $value;
+    }
+    // As the function returns a reference, we must still return a variable.
+    return $data;
   }
-  // As the function returns a reference, the return should always be a
-  // variable.
-  return $data;
 }
 
 /**

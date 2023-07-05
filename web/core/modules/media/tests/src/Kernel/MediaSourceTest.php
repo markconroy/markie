@@ -16,6 +16,11 @@ use Drupal\media\Entity\MediaType;
 class MediaSourceTest extends MediaKernelTestBase {
 
   /**
+   * {@inheritdoc}
+   */
+  protected static $modules = ['field_ui'];
+
+  /**
    * Tests that metadata is correctly mapped irrespective of how media is saved.
    */
   public function testSave() {
@@ -300,6 +305,25 @@ class MediaSourceTest extends MediaKernelTestBase {
     $this->assertEmpty($media->thumbnail->title);
     $this->assertSame('', $media->thumbnail->alt);
 
+    // Set the width and height metadata attributes and make sure they're used
+    // for the thumbnail.
+    \Drupal::state()->set('media_source_test_definition', [
+      'thumbnail_width_metadata_attribute' => 'width',
+      'thumbnail_height_metadata_attribute' => 'height',
+    ]);
+    \Drupal::state()->set('media_source_test_attributes', [
+      'width' => ['value' => 1024],
+      'height' => ['value' => 768],
+    ]);
+    $media = Media::create([
+      'bundle' => $this->testMediaType->id(),
+      'name' => 'Are you looking at me?',
+      'field_media_test' => 'some_value',
+    ]);
+    $media->save();
+    $this->assertSame(1024, $media->thumbnail->width);
+    $this->assertSame(768, $media->thumbnail->height);
+
     // Enable queued thumbnails and make sure that the entity gets the default
     // thumbnail initially.
     \Drupal::state()->set('media_source_test_definition', []);
@@ -487,6 +511,24 @@ class MediaSourceTest extends MediaKernelTestBase {
     $this->assertTrue($field->isRequired(), 'Field is not required.');
     $this->assertEquals('Test source with constraints', $field->label(), 'Incorrect label is used.');
     $this->assertSame('test_constraints_type', $field->getTargetBundle(), 'Field is not targeting correct bundle.');
+
+    // Test that new source fields respect the configured field prefix, no
+    // prefix at all if that's what's configured.
+    $this->installConfig('field_ui');
+    $this->config('field_ui.settings')
+      ->set('field_prefix', 'prefix_')
+      ->save();
+    $type = MediaType::create([
+      'id' => $this->randomMachineName(),
+      'label' => $this->randomString(),
+      'source' => 'test',
+    ]);
+    $this->assertSame('prefix_media_test', $type->getSource()->createSourceField($type)->getName());
+
+    $this->config('field_ui.settings')
+      ->set('field_prefix', '')
+      ->save();
+    $this->assertSame('media_test', $type->getSource()->createSourceField($type)->getName());
   }
 
   /**

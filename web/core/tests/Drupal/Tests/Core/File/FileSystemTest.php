@@ -31,7 +31,7 @@ class FileSystemTest extends UnitTestCase {
   /**
    * The stream wrapper manager.
    *
-   * @var \Drupal\Core\StreamWrapper\StreamWrapperInterface|\PHPUnit\Framework\MockObject\MockObject
+   * @var \Drupal\Core\StreamWrapper\StreamWrapperManagerInterface|\PHPUnit\Framework\MockObject\MockObject
    */
   protected $streamWrapperManager;
 
@@ -144,18 +144,6 @@ class FileSystemTest extends UnitTestCase {
   protected function assertFilePermissions(int $expected_mode, string $uri, string $message = ''): void {
     // Mask out all but the last three octets.
     $actual_mode = fileperms($uri) & 0777;
-
-    // PHP on Windows has limited support for file permissions. Usually each of
-    // "user", "group" and "other" use one octal digit (3 bits) to represent the
-    // read/write/execute bits. On Windows, chmod() ignores the "group" and
-    // "other" bits, and fileperms() returns the "user" bits in all three
-    // positions. $expected_mode is updated to reflect this.
-    if (substr(PHP_OS, 0, 3) == 'WIN') {
-      // Reset the "group" and "other" bits.
-      $expected_mode = $expected_mode & 0700;
-      // Shift the "user" bits to the "group" and "other" positions also.
-      $expected_mode = $expected_mode | $expected_mode >> 3 | $expected_mode >> 6;
-    }
     $this->assertSame($expected_mode, $actual_mode, $message);
   }
 
@@ -166,6 +154,7 @@ class FileSystemTest extends UnitTestCase {
    */
   public function testInvalidUTF8() {
     vfsStream::setup('dir');
+    // cspell:disable-next-line
     $filename = "a\xFFsdf\x80€" . '.txt';
     $this->expectException(FileException::class);
     $this->expectExceptionMessage("Invalid filename '$filename'");

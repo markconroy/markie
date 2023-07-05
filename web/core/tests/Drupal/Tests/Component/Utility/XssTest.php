@@ -525,6 +525,42 @@ class XssTest extends TestCase {
         'Link tag with numeric data attribute',
         ['a'],
       ],
+      [
+        '<img src= onmouseover="script(\'alert\');">',
+        '<img>',
+        'Image tag with malformed SRC',
+        ['img'],
+      ],
+      [
+        'Body"></iframe><img/src="x"/onerror="alert(document.domain)"/><"',
+        'Body"&gt;<img />&lt;"',
+        'Image tag with malformed SRC',
+        ['img'],
+      ],
+      [
+        '<img/src="x"/onerror="alert(document.domain)"/>',
+        '<img />',
+        'Image tag with malformed SRC',
+        ['img'],
+      ],
+      [
+        '<del datetime="1789-08-22T12:30:00.1-04:00">deleted text</del>',
+        '<del datetime="1789-08-22T12:30:00.1-04:00">deleted text</del>',
+        'Del with datetime attribute',
+        ['del'],
+      ],
+      [
+        '<ins datetime="1986-01-28 11:38:00.010">inserted text</ins>',
+        '<ins datetime="1986-01-28 11:38:00.010">inserted text</ins>',
+        'Ins with datetime attribute',
+        ['ins'],
+      ],
+      [
+        '<time datetime="1978-11-19T05:00:00Z">#DBD</time>',
+        '<time datetime="1978-11-19T05:00:00Z">#DBD</time>',
+        'Time with datetime attribute',
+        ['time'],
+      ],
     ];
   }
 

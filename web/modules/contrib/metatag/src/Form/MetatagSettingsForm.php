@@ -110,7 +110,6 @@ class MetatagSettingsForm extends ConfigFormBase {
 
     $trimSettingsMaxlength = $this->config('metatag.settings')->get('tag_trim_maxlength');
     $trimMethod = $this->config('metatag.settings')->get('tag_trim_method');
-    $metatags = $this->tagPluginManager->getDefinitions();
 
     $form['tag_trim'] = [
       '#title' => $this->t('Metatag Trimming Options'),
@@ -120,6 +119,18 @@ class MetatagSettingsForm extends ConfigFormBase {
       '#description' => $this->t("Many Meta-Tags can be trimmed on a specific length for search engine optimization.<br/>If the value is set to '0' or left empty, the whole Metatag will be untrimmed."),
     ];
 
+    // Optional support for the Maxlenth module.
+    $form['tag_trim']['use_maxlength'] = array(
+      '#type' => 'checkbox',
+      '#title' => $this->t('Use Maxlength module to force these limits?'),
+      '#default_value' => $this->config('metatag.settings')->get('use_maxlength') ?? TRUE,
+      '#description' => $this->t('Because of how tokens are processed in meta tags, use of the Maxlength module may not provide an accurate representation of the actual current length of each meta tag, so it may cause more problem than it is worth. '),
+    );
+    if (!\Drupal::moduleHandler()->moduleExists('maxlength')) {
+      $form['tag_trim']['use_maxlength']['#disabled'] = TRUE;
+      $form['tag_trim']['use_maxlength']['#description'] = $this->t('Install the Maxlength module to enable this option.');
+    }
+
     $form['tag_trim']['maxlength'] = [
       '#title' => $this->t('Tags'),
       '#type' => 'fieldset',
@@ -128,9 +139,8 @@ class MetatagSettingsForm extends ConfigFormBase {
 
     // Name the variable "metatag_id" to avoid confusing this with the "name"
     // value from the meta tag plugin as it's actually the plugin ID.
-    foreach ($metatags as $metatag_id => $metatag_info) {
+    foreach ($this->metatagManager->sortedTags() as $metatag_id => $metatag_info) {
       if (!empty($metatag_info['trimmable'])) {
-
         $form['tag_trim']['maxlength']['metatag_maxlength_' . $metatag_id] = [
           '#title' => $this->t('Meta Tags:') . ' ' . $metatag_id . ' ' . $this->t('length'),
           '#type' => 'number',
@@ -191,13 +201,18 @@ class MetatagSettingsForm extends ConfigFormBase {
     $settings->set('entity_type_groups', $entityTypeGroupsValues);
 
     // tag_trim handling:
+    $use_maxlength = $form_state->getValue(['tag_trim', 'use_maxlength']);
+    $settings->set('use_maxlength', $use_maxlength);
     $trimmingMethod = $form_state->getValue(['tag_trim', 'tag_trim_method']);
     $settings->set('tag_trim_method', $trimmingMethod);
     $trimmingValues = $form_state->getValue(['tag_trim', 'maxlength']);
     $settings->set('tag_trim_maxlength', $trimmingValues);
 
     // Widget settings.
-    $scrollheightvalue = $form_state->getValue(['firehose_widget', 'tag_scroll_max_height']);
+    $scrollheightvalue = $form_state->getValue([
+      'firehose_widget',
+      'tag_scroll_max_height',
+    ]);
     $settings->set('tag_scroll_max_height', $scrollheightvalue);
 
     $settings->save();

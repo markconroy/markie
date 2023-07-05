@@ -11,8 +11,8 @@ use Drupal\views\Views;
  * Tests that views hooks are registered when defined in $module.views.inc.
  *
  * @group views
- * @see views_hook_info().
- * @see field_hook_info().
+ *
+ * @see views_hook_info()
  */
 class ViewsHooksTest extends ViewsKernelTestBase {
 
@@ -53,12 +53,20 @@ class ViewsHooksTest extends ViewsKernelTestBase {
   protected $moduleHandler;
 
   /**
+   * The view storage.
+   *
+   * @var \Drupal\Core\Entity\EntityStorageInterface
+   */
+  protected $viewStorage;
+
+  /**
    * {@inheritdoc}
    */
   protected function setUp($import_test_views = TRUE): void {
     parent::setUp();
 
     $this->moduleHandler = $this->container->get('module_handler');
+    $this->viewStorage = $this->container->get('entity_type.manager')->getStorage('view');
   }
 
   /**
@@ -117,6 +125,16 @@ class ViewsHooksTest extends ViewsKernelTestBase {
     $this->setRawContent((string) $element['output']['#markup']);
     $this->assertEscaped('<em>escaped</em>');
     $this->assertRaw('<em>unescaped</em>');
+  }
+
+  /**
+   * Test that hook_views_invalidate_cache() is called when a view is deleted.
+   */
+  public function testViewsInvalidateCacheOnDelete() {
+    $this->container->get('state')->set('views_hook_test_views_invalidate_cache', FALSE);
+    $view = $this->viewStorage->load('test_view');
+    $view->delete();
+    $this->assertTrue($this->container->get('state')->get('views_hook_test_views_invalidate_cache'));
   }
 
 }

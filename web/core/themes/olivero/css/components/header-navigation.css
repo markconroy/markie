@@ -10,19 +10,6 @@
  * Navigation in header.
  */
 
-/*
- * Media query breakpoints.
- * Processed by postcss/postcss-custom-media.
- */
-
-/* Navigation related breakpoints */
-
-/* Grid related breakpoints */
-
-/* Grid shifts from 6 to 14 columns. */
-
-/* Width of the entire grid maxes out. */
-
 .header-nav {
   position: fixed;
   z-index: 501; /* Appear above overlay and contextual links in header. */
@@ -50,22 +37,20 @@
 
 .header-nav.is-active {
   visibility: visible;
-  transform: translateX(-100%); /* LTR */
+  transform: translateX(calc(-100% - var(--drupal-displace-offset-right, 0px))); /* LTR */
 }
 
 [dir="rtl"] .header-nav.is-active {
-  transform: translateX(100%);
+  transform: translateX(calc(100% + var(--drupal-displace-offset-left, 0px)));
 }
 
 @media (min-width: 31.25rem) {
-
   .header-nav {
     border-top-width: calc(var(--sp5) + var(--drupal-displace-offset-top, 0px));
   }
 }
 
 @media (min-width: 43.75rem) {
-
   .header-nav {
     padding-block-end: var(--sp3);
     padding-inline-start: var(--sp3);
@@ -74,7 +59,6 @@
 }
 
 @media (min-width: 62.5rem) {
-
   .header-nav {
     grid-column: 5 / 14;
   }
@@ -85,7 +69,6 @@
    */
 
 @media (forced-colors: active) {
-
   .header-nav {
     border-top-color: canvas;
   }
@@ -101,7 +84,6 @@ html.js .header-nav {
 }
 
 @media (min-width: 75rem) {
-
   body:not(.is-always-mobile-nav) .header-nav {
     position: static;
     display: flex;
@@ -124,7 +106,6 @@ html.js .header-nav {
 }
 
 @media (min-width: 75rem) {
-
   body.is-always-mobile-nav .header-nav {
     overflow: auto;
     max-width: calc((7 * (var(--grid-col-width) + var(--grid-gap))));
@@ -135,7 +116,6 @@ html.js .header-nav {
 }
 
 @media (min-width: 90rem) {
-
   body.is-always-mobile-nav .header-nav {
     max-width: calc(100vw - (var(--max-width) + var(--content-left)) + ((7 * (var(--grid-col-width) + var(--grid-gap)))));
     padding-inline-end: calc(100vw - (var(--max-width) + var(--content-left) - var(--sp)));
@@ -155,7 +135,6 @@ html.js .header-nav {
 }
 
 @media (forced-colors: active) {
-
   .header-nav-overlay {
     background: canvastext;
   }

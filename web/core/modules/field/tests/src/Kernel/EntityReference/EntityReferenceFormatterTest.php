@@ -54,8 +54,7 @@ class EntityReferenceFormatterTest extends EntityKernelTestBase {
   protected $referencedEntity;
 
   /**
-   * The entity that is not yet saved to its persistent storage to be referenced
-   * in this test.
+   * An entity that is not yet saved to its persistent storage.
    *
    * @var \Drupal\Core\Entity\EntityInterface
    */
@@ -213,7 +212,7 @@ class EntityReferenceFormatterTest extends EntityKernelTestBase {
           </div>
 ';
     $renderer->renderRoot($build[0]);
-    $this->assertEquals('default | ' . $this->referencedEntity->label() . $expected_rendered_name_field_1 . $expected_rendered_body_field_1, $build[0]['#markup'], sprintf('The markup returned by the %s formatter is correct for an item with a saved entity.', $formatter));
+    $this->assertSame('default | ' . $this->referencedEntity->label() . $expected_rendered_name_field_1 . $expected_rendered_body_field_1, (string) $build[0]['#markup'], sprintf('The markup returned by the %s formatter is correct for an item with a saved entity.', $formatter));
     $expected_cache_tags = Cache::mergeTags(\Drupal::entityTypeManager()->getViewBuilder($this->entityType)->getCacheTags(), $this->referencedEntity->getCacheTags());
     $expected_cache_tags = Cache::mergeTags($expected_cache_tags, FilterFormat::load('full_html')->getCacheTags());
     $this->assertEquals($expected_cache_tags, $build[0]['#cache']['tags'], new FormattableMarkup('The @formatter formatter has the expected cache tags.', ['@formatter' => $formatter]));
@@ -230,7 +229,7 @@ class EntityReferenceFormatterTest extends EntityKernelTestBase {
 ';
 
     $renderer->renderRoot($build[1]);
-    $this->assertEquals('default | ' . $this->unsavedReferencedEntity->label() . $expected_rendered_name_field_2 . $expected_rendered_body_field_2, $build[1]['#markup'], sprintf('The markup returned by the %s formatter is correct for an item with a unsaved entity.', $formatter));
+    $this->assertSame('default | ' . $this->unsavedReferencedEntity->label() . $expected_rendered_name_field_2 . $expected_rendered_body_field_2, (string) $build[1]['#markup'], sprintf('The markup returned by the %s formatter is correct for an item with a unsaved entity.', $formatter));
   }
 
   /**
@@ -377,6 +376,7 @@ class EntityReferenceFormatterTest extends EntityKernelTestBase {
     // lacking any URL info.
     $expected_item_2 = [
       '#plain_text' => $this->unsavedReferencedEntity->label(),
+      '#entity' => $this->unsavedReferencedEntity,
       '#cache' => [
         'contexts' => [
           'user.permissions',
@@ -409,7 +409,9 @@ class EntityReferenceFormatterTest extends EntityKernelTestBase {
   }
 
   /**
-   * Sets field values and returns a render array as built by
+   * Sets field values and returns a render array.
+   *
+   * The render array structure is as built by
    * \Drupal\Core\Field\FieldItemListInterface::view().
    *
    * @param \Drupal\Core\Entity\EntityInterface[] $referenced_entities

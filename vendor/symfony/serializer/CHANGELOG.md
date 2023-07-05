@@ -1,6 +1,28 @@
 CHANGELOG
 =========
 
+6.3
+---
+
+ * Add `AbstractNormalizer::REQUIRE_ALL_PROPERTIES` context flag to require all properties to be listed in the input instead of falling back to null for nullable ones
+ * Add `XmlEncoder::SAVE_OPTIONS` context option
+ * Add `BackedEnumNormalizer::ALLOW_INVALID_VALUES` context option
+ * Add `UnsupportedFormatException` which is thrown when there is no decoder for a given format
+ * Add method `getSupportedTypes(?string $format)` to `NormalizerInterface` and `DenormalizerInterface`
+ * Make `ProblemNormalizer` give details about `ValidationFailedException` and `PartialDenormalizationException`
+ * Deprecate `CacheableSupportsMethodInterface` in favor of the new `getSupportedTypes(?string $format)` methods
+ * The following Normalizer classes will become final in 7.0:
+   * `ConstraintViolationListNormalizer`
+   * `CustomNormalizer`
+   * `DataUriNormalizer`
+   * `DateIntervalNormalizer`
+   * `DateTimeNormalizer`
+   * `DateTimeZoneNormalizer`
+   * `GetSetMethodNormalizer`
+   * `JsonSerializableNormalizer`
+   * `ObjectNormalizer`
+   * `PropertyNormalizer`
+
 6.2
 ---
 

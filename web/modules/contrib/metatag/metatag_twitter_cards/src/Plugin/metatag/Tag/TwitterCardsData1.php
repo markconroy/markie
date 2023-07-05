@@ -18,6 +18,10 @@ use Drupal\metatag\Plugin\metatag\Tag\MetaNameBase;
  *   secure = FALSE,
  *   multiple = FALSE
  * )
+ *
+ * @deprecated in metatag:8.x-1.23 and is removed from metatag:2.0.0. No replacement is provided.
+ *
+ * @see https://www.drupal.org/node/3329072
  */
 class TwitterCardsData1 extends MetaNameBase {
   // Nothing here yet. Just a placeholder class for a plugin.
