@@ -1,0 +1,26 @@
+/**
+ * @file
+ * Styles for making Ck Editor a little more modern looking.
+ */
+
+.form-type-textarea .cke_top {
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.form-type-textarea .cke_toolbar {
+  margin: 0 9px;
+  padding: 7px 7px 1px;
+  border: 1px solid lightgray;
+  border-top-width: 0;
+  background: white;
+}
+
+.form-type-textarea .cke_editable {
+  line-height: 1.5;
+}
+
+.form-type-textarea .cke_toolgroup a.cke_button:last-child::after {
+  height: 0;
+}

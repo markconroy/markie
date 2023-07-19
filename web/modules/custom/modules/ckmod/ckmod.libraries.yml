@@ -1,0 +1,5 @@
+ckmod:
+  version: 1.x
+  css:
+    layout:
+      css/ckmod.css: {}
