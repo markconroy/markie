@@ -1,0 +1,4 @@
+name: Markie
+core_version_requirement: ^10
+description: "Small hooks and functions"
+type: module
