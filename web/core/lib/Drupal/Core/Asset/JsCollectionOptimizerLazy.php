@@ -133,6 +133,8 @@ class JsCollectionOptimizerLazy implements AssetCollectionGroupOptimizerInterfac
             'scope' => $js_asset['scope'] === 'header' ? 'header' : 'footer',
             'delta' => "$order",
           ] + $query_args;
+          // Add a filename prefix to mitigate ad blockers which can block
+          // any script beginning with 'ad'.
           $filename = 'js_' . $this->generateHash($js_asset) . '.js';
           $uri = 'assets://js/' . $filename;
           $js_assets[$order]['data'] = $this->fileUrlGenerator->generateString($uri) . '?' . UrlHelper::buildQuery($query);
@@ -156,18 +158,7 @@ class JsCollectionOptimizerLazy implements AssetCollectionGroupOptimizerInterfac
    */
   public function deleteAll() {
     $this->state->delete('system.js_cache_files');
-    $delete_stale = function ($uri) {
-      $threshold = $this->configFactory
-        ->get('system.performance')
-        ->get('stale_file_threshold');
-      // Default stale file threshold is 30 days.
-      if ($this->time->getRequestTime() - filemtime($uri) > $threshold) {
-        $this->fileSystem->delete($uri);
-      }
-    };
-    if (is_dir('assets://js')) {
-      $this->fileSystem->scanDirectory('assets://js', '/.*/', ['callback' => $delete_stale]);
-    }
+    $this->fileSystem->deleteRecursive('assets://js');
   }
 
   /**
