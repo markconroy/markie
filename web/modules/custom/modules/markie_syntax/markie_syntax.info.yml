@@ -1,4 +1,0 @@
-name: Markie Syntax Highlighting
-core_version_requirement: ^8 || ^9
-description: Adds new languages to syntax highlighter.
-type: module

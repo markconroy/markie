@@ -1,4 +1,0 @@
-name: CkMod
-core_version_requirement: ^8 || ^9
-description: This is a small module to make the ckeditor layout a bit more modern looking.
-type: module
