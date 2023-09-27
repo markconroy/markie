@@ -27,8 +27,7 @@ class HtmlTest extends TestCase {
     parent::setUp();
 
     $property = new \ReflectionProperty('Drupal\Component\Utility\Html', 'seenIdsInit');
-    $property->setAccessible(TRUE);
-    $property->setValue(NULL);
+    $property->setValue(NULL, NULL);
   }
 
   /**

@@ -7,6 +7,7 @@ $baseDir = dirname($vendorDir);
 
 return array(
     'Attribute' => $vendorDir . '/symfony/polyfill-php80/Resources/stubs/Attribute.php',
+    'CURLStringFile' => $vendorDir . '/symfony/polyfill-php81/Resources/stubs/CURLStringFile.php',
     'Composer\\InstalledVersions' => $vendorDir . '/composer/InstalledVersions.php',
     'Drupal' => $baseDir . '/web/core/lib/Drupal.php',
     'DrupalFinder\\DrupalFinder' => $vendorDir . '/webflo/drupal-finder/src/DrupalFinder.php',

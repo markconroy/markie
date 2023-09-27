@@ -233,13 +233,17 @@ class AutowirePass extends AbstractRecursivePass
                     unset($arguments[$j]);
                     $arguments[$namedArguments[$j]] = $value;
                 }
-                if ($namedArguments || !$value instanceof $this->defaultArgument) {
+                if (!$value instanceof $this->defaultArgument) {
                     continue;
                 }
 
                 if (\is_array($value->value) ? $value->value : \is_object($value->value)) {
                     unset($arguments[$j]);
                     $namedArguments = $value->names;
+                }
+
+                if ($namedArguments) {
+                    unset($arguments[$j]);
                 } else {
                     $arguments[$j] = $value->value;
                 }
@@ -314,10 +318,7 @@ class AutowirePass extends AbstractRecursivePass
                     }
 
                     if ($attribute instanceof AutowireCallable) {
-                        $value = (new Definition($type = \is_string($attribute->lazy) ? $attribute->lazy : ($type ?: 'Closure')))
-                            ->setFactory(['Closure', 'fromCallable'])
-                            ->setArguments([\is_array($value) ? $value + [1 => '__invoke'] : $value])
-                            ->setLazy($attribute->lazy || 'Closure' !== $type && 'callable' !== (string) $parameter->getType());
+                        $value = $attribute->buildDefinition($value, $type, $parameter);
                     } elseif ($lazy = $attribute->lazy) {
                         $definition = (new Definition($type))
                             ->setFactory('current')

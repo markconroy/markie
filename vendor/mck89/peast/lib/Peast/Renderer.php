@@ -156,7 +156,7 @@ class Renderer
                 if ($body->getType() !== "BlockStatement") {
                     $code .= $this->renderOpts->sao . $this->renderNode($body);
                 } else {
-                    $code .= $this->renderStatementBlock($body, true);
+                    $code .= $this->renderStatementBlock($node, $body, true);
                 }
             break;
             case "AwaitExpression":
@@ -203,7 +203,7 @@ class Renderer
             case "ClassBody":
             case "Program":
                 $code .= $this->renderStatementBlock(
-                    $node->getBody(), false, false, true, false
+                    $node, $node->getBody(), false, false, true, false
                 );
             break;
             case "BreakStatement":
@@ -242,7 +242,7 @@ class Renderer
                              $this->renderOpts->sirb .
                              ")";
                 }
-                $code .= $this->renderStatementBlock($node->getBody(), true);
+                $code .= $this->renderStatementBlock($node, $node->getBody(), true);
             break;
             case "ChainExpression":
             case "ExpressionStatement":
@@ -258,7 +258,7 @@ class Renderer
                     $code .= " extends " . $this->renderNode($superClass);
                 }
                 $code .= $this->renderStatementBlock(
-                    $node->getBody(), true
+                    $node, $node->getBody(), true
                 );
             break;
             case "ConditionalExpression":
@@ -278,7 +278,7 @@ class Renderer
             case "DoWhileStatement":
                 $code .= "do" .
                          $this->renderStatementBlock(
-                            $node->getBody(), null, true
+                            $node, $node->getBody(), null, true
                          ) .
                          $this->renderOpts->sao .
                          "while" .
@@ -349,7 +349,7 @@ class Renderer
                          $this->renderNode($node->getRight()) .
                          $this->renderOpts->sirb .
                          ")" .
-                         $this->renderStatementBlock($node->getBody());
+                         $this->renderStatementBlock($node, $node->getBody());
                 unset($this->renderOpts->forceSingleLine);
             break;
             case "ForStatement":
@@ -372,7 +372,7 @@ class Renderer
                 }
                 $code .= $this->renderOpts->sirb .
                          ")" .
-                         $this->renderStatementBlock($node->getBody());
+                         $this->renderStatementBlock($node, $node->getBody());
                 unset($this->renderOpts->forceSingleLine);
             break;
             case "FunctionDeclaration":
@@ -403,7 +403,7 @@ class Renderer
                          ) .
                          $this->renderOpts->sirb .
                          ")" .
-                         $this->renderStatementBlock($node->getBody(), true);
+                         $this->renderStatementBlock($node, $node->getBody(), true);
             break;
             case "ImportExpression":
                 $code .= "import(" .
@@ -424,28 +424,17 @@ class Renderer
                          $this->renderNode($node->getTest()) .
                          $this->renderOpts->sirb .
                          ")";
-                $consequent = $node->getConsequent();
-                $alternate = $node->getAlternate();
-                
-                $forceBracketsConsequent = $forceBracketsAlternate = null;
-                if (!$this->renderOpts->awb && $alternate) {
-                    $forceBracketsConsequent = $this->checkIfPartsBracketsRequirement(
-                        $consequent
-                    );
-                    $forceBracketsAlternate = $this->checkIfPartsBracketsRequirement(
-                        $alternate
-                    );
-                }
                 
                 $code .= $this->renderStatementBlock(
-                    $consequent, $forceBracketsConsequent
+                    $node, $node->getConsequent()
                 );
-                if ($alternate) {
+                if ($alternate = $node->getAlternate()) {
                     $code .= $this->renderOpts->sao .
                              "else" .
                              $this->renderStatementBlock(
+                                 $node,
                                  $alternate,
-                                 $forceBracketsAlternate,
+                                 null,
                                  true
                              );
                 }
@@ -553,7 +542,7 @@ class Renderer
                 $code .= $this->renderNode($node->getLabel()) .
                          ":";
                 if ($body->getType() === "BlockStatement") {
-                    $code .= $this->renderStatementBlock($body, true);
+                    $code .= $this->renderStatementBlock($node, $body, true);
                 } else {
                     $code .= $this->renderOpts->nl .
                              $this->getIndentation() .
@@ -738,7 +727,7 @@ class Renderer
             break;
             case "StaticBlock":
                 $code .= "static";
-                $code .= $this->renderStatementBlock($node->getBody(), true);
+                $code .= $this->renderStatementBlock($node, $node->getBody(), true);
             break;
             case "Super":
                 $code .= "super";
@@ -751,10 +740,9 @@ class Renderer
                 }
                 $code .= ":";
                 if (count($node->getConsequent())) {
-                    $code .= $this->renderOpts->nl .
-                             $this->renderStatementBlock(
-                                 $node->getConsequent(),
-                                 false
+                    $code .= $this->renderStatementBlock(
+                                 $node,
+                                 $node->getConsequent()
                              );
                 }
             break;
@@ -767,7 +755,7 @@ class Renderer
                          $this->renderOpts->sirb .
                          ")" .
                          $this->renderStatementBlock(
-                             $node->getCases(), true, false, false
+                             $node, $node->getCases(), true, false, false
                          );
             break;
             case "TaggedTemplateExpression":
@@ -796,7 +784,7 @@ class Renderer
             break;
             case "TryStatement":
                 $code .= "try" .
-                         $this->renderStatementBlock($node->getBlock(), true);
+                         $this->renderStatementBlock($node, $node->getBlock(), true);
                 if ($handler = $node->getHandler()) {
                     $code .= $this->renderOpts->sao .
                              $this->renderNode($handler);
@@ -804,7 +792,7 @@ class Renderer
                 if ($finalizer = $node->getFinalizer()) {
                     $code .= $this->renderOpts->sao .
                              "finally" .
-                             $this->renderStatementBlock($finalizer, true);
+                             $this->renderStatementBlock($node, $finalizer, true);
                 }
             break;
             case "UnaryExpression":
@@ -855,7 +843,7 @@ class Renderer
                          $this->renderNode($node->getTest()) .
                          $this->renderOpts->sirb .
                          ")" .
-                         $this->renderStatementBlock($node->getBody());
+                         $this->renderStatementBlock($node, $node->getBody());
             break;
             case "WithStatement":
                 $code .= "with" .
@@ -865,7 +853,7 @@ class Renderer
                          $this->renderNode($node->getObject()) .
                          $this->renderOpts->sirb .
                          ")" .
-                         $this->renderStatementBlock($node->getBody());
+                         $this->renderStatementBlock($node, $node->getBody());
             break;
             case "YieldExpression":
                 $code .= "yield";
@@ -888,7 +876,8 @@ class Renderer
     
     /**
      * Renders a node as a block statement
-     * 
+     *
+     * @param Syntax\Node\Node          $parent             Parent node
      * @param Syntax\Node\Node|array    $node               Node or array of 
      *                                                      nodes to render
      * @param bool                      $forceBrackets      Overrides brackets
@@ -907,11 +896,16 @@ class Renderer
      * @return string
      */
     protected function renderStatementBlock(
-        $node, $forceBrackets = null, $mandatorySeparator = false,
+        $parent, $node, $forceBrackets = null, $mandatorySeparator = false,
         $addSemicolons = true, $incIndent = true
     ) {
         $code = "";
         
+        //If node is an array with only one element, handle it as a single node
+        if (is_array($node) && count($node) === 1) {
+            $node = $node[0];
+        }
+
         //Special handling of BlockStatement and ClassBody nodes by rendering
         //their child nodes
         $origNode = null;
@@ -926,21 +920,24 @@ class Renderer
         if ($forceBrackets !== null) {
             $hasBrackets = $forceBrackets;
         } else {
-            //Insert curly brackets if required by the formatter or if the
-            //number of nodes to render is different from one
-            $hasBrackets = $this->renderOpts->awb ||
-                           (is_array($node) && count($node) !== 1);
+            //Insert curly brackets if needed
+            $hasBrackets = $this->needsBrackets($parent, $node);
         }
         $currentIndentation = $this->getIndentation();
         
-        //If $forceBrackets is not set to false then the node can be wrapped in
-        //curly braces, so a separator defined by formatter must be inserted
-        if ($forceBrackets !== false) {
+        //If the node must be wrapped in curly braces a separator defined by formatter
+        //must be inserted
+        if ($hasBrackets) {
             if ($this->renderOpts->nlbc) {
                 $code .= $this->renderOpts->nl . $currentIndentation;
             } else {
                 $code .= $this->renderOpts->sao;
             }
+        }
+        //Move the content of the SwitchCase content to a new line if brackets won't
+        //be inserted, in this way it's not rendered on the same line of the "case"
+        elseif ($parent->getType() === "SwitchCase") {
+            $code .= $this->renderOpts->nl;
         }
 
         $emptyBody = is_array($node) && !count($node);
@@ -1038,46 +1035,68 @@ class Renderer
     }
     
     /**
-     * Checks if consequent and alternate nodes of an IfStatement require the
-     * mandatory insertion of brackets around them to avoid the pattern where
-     * the "else" code is rendered as part of an inner IfStatement.
+     * Check if the node or the array of nodes need brackets to be rendered
+     *
+     * @param Syntax\Node\Node          $parent             Parent node
+     * @param Syntax\Node\Node|array    $node               Node or array of
+     *                                                      nodes to render
      * 
-     * @param Syntax\Node\Node  $node   Node
-     * 
-     * @return null|bool
+     * @return bool
      */
-    protected function checkIfPartsBracketsRequirement($node)
+    protected function needsBrackets($parent, $node)
     {
-        if ($node->getType() === "BlockStatement" && count($node->getBody()) > 1) {
-            return null;
+        $parentType = $parent->getType();
+        //The SwitchCase content needs brackets if it contains let or const declarations
+        $inSwitchCase = $parentType === "SwitchCase";
+        //Except for SwitchCase, brackets are needed if the formatter requires them or whenever
+        //there are 0 or multiple nodes to render
+        if (!$inSwitchCase && ($this->renderOpts->awb || (is_array($node) && count($node) !== 1))) {
+            return true;
         }
-        $forceBrackets = null;
+        if (!is_array($node)) {
+            $node = array($node);
+        }
+        $addBrackets = false;
         $optBracketNodes = array(
             "DoWhileStatement", "ForInStatement", "ForOfStatement",
             "ForStatement", "WhileStatement", "WithStatement"
         );
-        $checkFn = function ($n) use ($optBracketNodes, &$forceBrackets) {
+        //An IfStatement requires brackets if it contains let or const declarations and if it has the "else" part
+        //and contains another IfStatement with "else"
+        $inIfWithElse = $parentType === "IfStatement" && $parent->getAlternate();
+        $checkFn = function ($n) use ($inIfWithElse, $optBracketNodes, &$addBrackets) {
             $type = $n->getType();
-            if ($type === "IfStatement") {
+            if ($inIfWithElse && $type === "IfStatement") {
                 if (!$n->getAlternate()) {
-                    $forceBrackets = true;
+                    $addBrackets = true;
                 }
                 return Traverser::DONT_TRAVERSE_CHILD_NODES;
             } elseif ($type === "BlockStatement") {
                 if (count($n->getBody()) !== 1) {
                     return Traverser::DONT_TRAVERSE_CHILD_NODES;
                 }
-            } elseif ($type === "LabeledStatement") {
+            } elseif ($inIfWithElse && $type === "LabeledStatement") {
                 if ($n->getBody()->getType() === "BlockStatement") {
-                    $forceBrackets = true;
+                    $addBrackets = true;
+                }
+                return Traverser::DONT_TRAVERSE_CHILD_NODES;
+            } elseif ($type === "VariableDeclaration") {
+                if (in_array($n->getKind(), array($n::KIND_LET, $n::KIND_CONST))) {
+                    $addBrackets = true;
                 }
                 return Traverser::DONT_TRAVERSE_CHILD_NODES;
             } elseif (!in_array($type, $optBracketNodes)) {
                 return Traverser::DONT_TRAVERSE_CHILD_NODES;
             }
         };
-        $node->traverse($checkFn);
-        return $forceBrackets;
+        //Traverse every node but stop whenever the $addBrackets variable becomes true
+        foreach ($node as $n) {
+            $n->traverse($checkFn);
+            if ($addBrackets) {
+                break;
+            }
+        }
+        return $addBrackets;
     }
 
     /**

@@ -4,7 +4,6 @@ namespace Drupal\redirect_404\Render;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\DependencyInjection\DependencySerializationTrait;
-use Drupal\Core\Logger\LoggerChannelFactory;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;

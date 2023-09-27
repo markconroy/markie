@@ -5,7 +5,6 @@
  * Generate callbacks for the redirect module.
  */
 
-use Drupal\Component\Utility\Random;
 use Drupal\devel_generate\DevelGenerateBase;
 use Drupal\node\NodeInterface;
 use Drupal\redirect\Entity\Redirect;

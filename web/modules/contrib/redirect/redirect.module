@@ -13,7 +13,6 @@ use Drupal\Core\Url;
 use Drupal\path_alias\PathAliasInterface;
 use Drupal\redirect\Entity\Redirect;
 use Symfony\Component\Routing\Exception\RouteNotFoundException;
-use Drupal\Core\Database\Query\Condition;
 
 /**
  * Implements hook_hook_info().

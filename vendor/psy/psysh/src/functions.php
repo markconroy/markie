@@ -168,6 +168,7 @@ if (!\function_exists('Psy\\info')) {
             'OS'                  => \PHP_OS,
             'default includes'    => $config->getDefaultIncludes(),
             'require semicolons'  => $config->requireSemicolons(),
+            'strict types'        => $config->strictTypes(),
             'error logging level' => $config->errorLoggingLevel(),
             'config file'         => [
                 'default config file' => $prettyPath($config->getConfigFile()),
@@ -394,7 +395,7 @@ if (!\function_exists('Psy\\bin')) {
             }
 
             // Handle --help
-            if ($usageException !== null || $input->getOption('help')) {
+            if (!isset($config) || $usageException !== null || $input->getOption('help')) {
                 if ($usageException !== null) {
                     echo $usageException->getMessage().\PHP_EOL.\PHP_EOL;
                 }

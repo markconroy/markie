@@ -1,6 +1,12 @@
 Changelog
 ==========
 
+#### 1.15.4
+* Fixed rendering of `let` and `const` inside `switch` cases that always require brackets
+
+#### 1.15.3
+* Fixed rendering of `let` and `const` inside `if`, `for` and `while` that always require brackets
+
 #### 1.15.2
 * Fixed bug where async keyword was lost when rendering an object async method
 

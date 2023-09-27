@@ -191,6 +191,82 @@ class Fix404RedirectUITest extends Redirect404TestBase {
     $this->getSession()->getPage()->pressButton('Save configuration');
     $this->drupalGet('admin/config/search/redirect/settings');
     $this->assertSession()->fieldValueEquals('ignore_pages', "/node/*\n/term/*\n/llama_page");
+
+    // Test clearing of ignored pages.
+    $this->drupalGet('vicuna_page');
+    $this->drupalGet('vicuna_page/subpage');
+    $this->drupalGet('prefix/vicuna_page/subpage');
+    $this->drupalGet('alpaca_page');
+    $this->drupalGet('admin/config/search/redirect/404');
+    $this->assertSession()->pageTextContains('vicuna_page');
+    $this->assertSession()->pageTextContains('alpaca_page');
+    $this->drupalGet('admin/config/search/redirect/settings');
+    $edit = [
+      'ignore_pages' => '*vicuna*',
+      'clear_ignored' => TRUE,
+    ];
+    $this->submitForm($edit, 'Save configuration');
+    $this->drupalGet('admin/config/search/redirect/404');
+    $this->assertSession()->pageTextNotContains('vicuna');
+
+    $this->drupalGet('prefix/jaguar_page/subpage');
+    $this->drupalGet('prefix/tucan_page/subpage');
+    $this->drupalGet('admin/config/search/redirect/404');
+    $this->assertSession()->pageTextContains('jaguar_page');
+    $this->assertSession()->pageTextContains('tucan_page');
+    $this->drupalGet('admin/config/search/redirect/settings');
+    $edit = [
+      'ignore_pages' => '*/tucan_page/*',
+      'clear_ignored' => TRUE,
+    ];
+    $this->submitForm($edit, 'Save configuration');
+    $this->drupalGet('admin/config/search/redirect/404');
+    $this->assertSession()->pageTextContains('jaguar_page');
+    $this->assertSession()->pageTextNotContains('tucan_page');
+  }
+
+  /**
+   * Tests the redirect ignore pages for users without the 'administer redirect
+   * settings' permission.
+   */
+  public function testIgnorePagesNonAdmin() {
+    // Create a node.
+    $node = $this->drupalCreateNode(['type' => 'page']);
+    $this->container->get('config.factory')
+      ->getEditable('redirect_404.settings')
+      ->set('pages', "/brian\n/flying/circus\n/meaning/of/*\n")
+      ->save();
+
+    // Create a non admin user.
+    $user = $this->drupalCreateUser([
+      'administer redirects',
+      'ignore 404 requests',
+      'access content',
+      'bypass node access',
+      'create url aliases',
+      'administer url aliases',
+    ]);
+    $this->drupalLogin($user);
+
+    // Visit non existing pages.
+    $this->drupalGet('node/' . $node->id() . '/foobar');
+    // Go to the "fix 404" page and check there is a 404 entry.
+    $this->drupalGet('admin/config/search/redirect/404');
+    $this->assertSession()->pageTextContains('node/' . $node->id() . '/foobar');
+
+    // Add this 404 entry to the 'ignore path' list, assert it works properly.
+    $this->clickLink('Ignore');
+    $this->assertSession()->addressEquals('admin/config/search/redirect/404');
+    // Check the message.
+    $this->assertSession()->pageTextContains('Resolved the path /node/' . $node->id() . '/foobar in the database.');
+    // This removes the message.
+    $this->drupalGet('admin/config/search/redirect/404');
+    $this->assertSession()->pageTextNotContains('node/' . $node->id() . '/foobar');
+
+    $config = $this->container->get('config.factory')
+      ->get('redirect_404.settings')
+      ->get('pages');
+    $this->assertStringContainsString('node/' . $node->id() . '/foobar', $config);
   }
 
   /**

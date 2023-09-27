@@ -7,8 +7,8 @@ namespace Composer\Autoload;
 class ComposerStaticInit881440a26ef8904afe463f7ceb2efdf3
 {
     public static $files = array (
-        '0e6d7bf4a5811bfa5cf40c5ccd6fae6a' => __DIR__ . '/..' . '/symfony/polyfill-mbstring/bootstrap.php',
         '6e3fae29631ef280660b3cdad06f25a8' => __DIR__ . '/..' . '/symfony/deprecation-contracts/function.php',
+        '0e6d7bf4a5811bfa5cf40c5ccd6fae6a' => __DIR__ . '/..' . '/symfony/polyfill-mbstring/bootstrap.php',
         '320cde22f66dd4f5d3fd621d3e88b98f' => __DIR__ . '/..' . '/symfony/polyfill-ctype/bootstrap.php',
         'a4a119a56e50fbb293281d9a48007e0e' => __DIR__ . '/..' . '/symfony/polyfill-php80/bootstrap.php',
         '662a729f963d39afe703c9d9b7ab4a8c' => __DIR__ . '/..' . '/symfony/polyfill-php83/bootstrap.php',
@@ -96,7 +96,6 @@ class ComposerStaticInit881440a26ef8904afe463f7ceb2efdf3
             'Psr\\Cache\\' => 10,
             'Platformsh\\ConfigReader\\' => 24,
             'PhpParser\\' => 10,
-            'Peast\\test\\' => 11,
             'Peast\\' => 6,
         ),
         'M' => 
@@ -350,10 +349,6 @@ class ComposerStaticInit881440a26ef8904afe463f7ceb2efdf3
         array (
             0 => __DIR__ . '/..' . '/nikic/php-parser/lib/PhpParser',
         ),
-        'Peast\\test\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/mck89/peast/test/Peast',
-        ),
         'Peast\\' => 
         array (
             0 => __DIR__ . '/..' . '/mck89/peast/lib/Peast',
@@ -504,6 +499,7 @@ class ComposerStaticInit881440a26ef8904afe463f7ceb2efdf3
 
     public static $classMap = array (
         'Attribute' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/Attribute.php',
+        'CURLStringFile' => __DIR__ . '/..' . '/symfony/polyfill-php81/Resources/stubs/CURLStringFile.php',
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
         'Drupal' => __DIR__ . '/../..' . '/web/core/lib/Drupal.php',
         'DrupalFinder\\DrupalFinder' => __DIR__ . '/..' . '/webflo/drupal-finder/src/DrupalFinder.php',

@@ -18,14 +18,14 @@ interface RedirectNotFoundStorageInterface {
   public function logRequest($path, $langcode);
 
   /**
-   * Marks a 404 request log as resolved.
+   * Marks a 404 request log as resolved (supports wildcards).
    *
    * @param string $path
    *   The path of the current request.
    * @param string $langcode
-   *   The ID of the language code.
+   *   (optional) The ID of the language code.
    */
-  public function resolveLogRequest($path, $langcode);
+  public function resolveLogRequest($path, $langcode = NULL);
 
   /**
    * Returns the 404 request data.

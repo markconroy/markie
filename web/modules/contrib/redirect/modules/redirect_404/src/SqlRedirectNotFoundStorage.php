@@ -80,12 +80,17 @@ class SqlRedirectNotFoundStorage implements RedirectNotFoundStorageInterface {
   /**
    * {@inheritdoc}
    */
-  public function resolveLogRequest($path, $langcode) {
-    $this->database->update('redirect_404')
+  public function resolveLogRequest($path, $langcode = NULL) {
+    $path = str_replace('*', '%', $path);
+    $update = $this->database->update('redirect_404')
       ->fields(['resolved' => 1])
-      ->condition('path', $path)
-      ->condition('langcode', $langcode)
-      ->execute();
+      ->condition('path', $path, 'LIKE');
+
+    if ($langcode) {
+      $update->condition('langcode', $langcode);
+    }
+
+    $update->execute();
   }
 
   /**

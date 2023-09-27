@@ -8,7 +8,7 @@ dependencies:
  - redirect:redirect
  - drupal:views
 
-# Information added by Drupal.org packaging script on 2022-08-29
-version: '8.x-1.8'
+# Information added by Drupal.org packaging script on 2023-08-30
+version: '8.x-1.9'
 project: 'redirect'
-datestamp: 1661806957
+datestamp: 1693393511

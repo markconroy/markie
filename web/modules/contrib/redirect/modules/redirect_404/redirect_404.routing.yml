@@ -11,5 +11,5 @@ redirect_404.ignore_404:
   defaults:
     _controller: '\Drupal\redirect_404\Controller\Fix404IgnoreController::ignorePath'
   requirements:
-    _permission: 'administer redirect settings'
+    _permission: 'administer redirect settings+ignore 404 requests'
     _csrf_token: 'TRUE'

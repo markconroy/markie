@@ -2,7 +2,6 @@
 
 namespace Drupal\Tests\redirect\Functional;
 
-use Drupal\Core\Cache\Cache;
 use Drupal\Core\Language\Language;
 use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\taxonomy\Entity\Term;

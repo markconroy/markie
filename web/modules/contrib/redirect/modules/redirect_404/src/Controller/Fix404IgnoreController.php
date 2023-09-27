@@ -60,26 +60,41 @@ class Fix404IgnoreController extends ControllerBase {
    * @return \Symfony\Component\HttpFoundation\RedirectResponse
    */
   public function ignorePath(Request $request) {
-    $ignored_paths = $this->config('redirect_404.settings')->get('pages');
+    $editable = $this->configuration->getEditable('redirect_404.settings');
+    $existing_config_raw = $editable->get('pages');
     $path = $request->query->get('path');
     $langcode = $request->query->get('langcode');
 
-    if (empty($ignored_paths) || !strpos($path, $ignored_paths)) {
-      $this->redirectStorage->resolveLogRequest($path, $langcode);
+    if (empty($existing_config_raw) || !empty($path) || !strpos($path, $existing_config_raw)) {
+      $this->redirectStorage->resolveLogRequest($path);
 
-      $this->messenger()->addMessage($this->t('Resolved the path %path in the database. Please check the ignored list and save the settings.', [
-        '%path' => $path,
-      ]));
+      // Users without 'administer redirect settings' and 'ignore 4040 request'
+      // permission can also ignore pages.
+      if (!$this->currentUser()->hasPermission('administer redirect settings') && $this->currentUser()->hasPermission('ignore 404 requests')) {
+        $existing_config_raw .= $path . "\n";
+        $editable->set('pages', $existing_config_raw);
+        $editable->save();
+
+        $response = $this->redirect('redirect_404.fix_404');
+        $this->messenger()->addMessage($this->t('Resolved the path %path in the database.', [
+          '%path' => $path,
+        ]));
+      }
+      else {
+        $options = [
+          'query' => [
+            'ignore' => $path,
+            'destination' => Url::fromRoute('redirect_404.fix_404')->getInternalPath(),
+          ],
+        ];
+        $response = $this->redirect('redirect.settings', [], $options);
+        $this->messenger()->addMessage($this->t('Resolved the path %path in the database. Please check the ignored list and save the settings.', [
+          '%path' => $path,
+        ]));
+      }
+
+      return $response;
     }
-
-    $options = [
-      'query' => [
-        'ignore' => $path,
-        'destination' => Url::fromRoute('redirect_404.fix_404')->getInternalPath(),
-      ],
-    ];
-
-    return $this->redirect('redirect.settings', [], $options);
   }
 
 }

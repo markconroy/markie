@@ -222,3 +222,17 @@ function redirect_update_8108() {
   $config->clear('content_location_header');
   $config->save();
 }
+
+/**
+ * Enable reset button for Redirect View.
+ */
+function redirect_update_8109() {
+  $config_factory = \Drupal::configFactory();
+  $config = $config_factory->getEditable('views.view.redirect');
+  if ($config->isNew()) {
+    return;
+  }
+  // Enable the reset button.
+  $config->set('display.default.display_options.exposed_form.options.reset_button', TRUE);
+  $config->save();
+}

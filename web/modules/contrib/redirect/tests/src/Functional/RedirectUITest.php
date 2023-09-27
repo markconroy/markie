@@ -2,7 +2,6 @@
 
 namespace Drupal\Tests\redirect\Functional;
 
-use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Language\Language;
 use Drupal\Core\Logger\RfcLogLevel;
 use Drupal\Core\Url;
@@ -20,24 +19,44 @@ class RedirectUITest extends BrowserTestBase {
   use AssertRedirectTrait;
 
   /**
+   * The admin user.
+   *
    * @var \Drupal\Core\Session\AccountInterface
    */
   protected $adminUser;
 
   /**
+   * The redirect repository.
+   *
    * @var \Drupal\redirect\RedirectRepository
    */
   protected $repository;
 
   /**
+   * The Sql conntent entity storage.
+   *
    * @var \Drupal\Core\Entity\Sql\SqlContentEntityStorage
    */
-   protected $storage;
+  protected $storage;
+
+  /**
+   * The maximum redirects.
+   *
+   * @var int
+   */
+  public $maximumRedirects;
 
   /**
    * {@inheritdoc}
    */
-  protected static $modules = ['redirect', 'node', 'path', 'dblog', 'views', 'taxonomy'];
+  protected static $modules = [
+    'redirect',
+    'node',
+    'path',
+    'dblog',
+    'views',
+    'taxonomy',
+  ];
 
   /**
    * {@inheritdoc}
@@ -157,7 +176,7 @@ class RedirectUITest extends BrowserTestBase {
   /**
    * Test the redirect loop protection and logging.
    */
-  function testRedirectLoop() {
+  public function testRedirectLoop() {
     // Redirect loop redirection only works when page caching is disabled.
     \Drupal::service('module_installer')->uninstall(['page_cache']);
 
@@ -195,7 +214,7 @@ class RedirectUITest extends BrowserTestBase {
   /**
    * Returns a new vocabulary with random properties.
    */
-  function createVocabulary() {
+  public function createVocabulary() {
     // Create a vocabulary.
     $vocabulary = Vocabulary::create([
       'name' => $this->randomMachineName(),
@@ -211,7 +230,7 @@ class RedirectUITest extends BrowserTestBase {
   /**
    * Returns a new term with random properties in vocabulary $vid.
    */
-  function createTerm($vocabulary) {
+  public function createTerm($vocabulary) {
     $filter_formats = filter_formats();
     $format = array_pop($filter_formats);
     $term = Term::create([

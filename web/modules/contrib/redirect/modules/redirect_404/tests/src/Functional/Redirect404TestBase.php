@@ -2,7 +2,6 @@
 
 namespace Drupal\Tests\redirect_404\Functional;
 
-use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Tests\BrowserTestBase;
 
 /**
