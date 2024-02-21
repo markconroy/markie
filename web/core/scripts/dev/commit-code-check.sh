@@ -139,6 +139,9 @@ JAVASCRIPT_PACKAGES_CHANGED=0
 # it is used to make sure the compiled JS is valid.
 CKEDITOR5_PLUGINS_CHANGED=0
 
+# This variable will be set to when the dictionary has changed.
+CSPELL_DICTIONARY_FILE_CHANGED=0
+
 # Build up a list of absolute file names.
 ABS_FILES=
 for FILE in $FILES; do
@@ -172,6 +175,10 @@ for FILE in $FILES; do
   if [[ -f "$TOP_LEVEL/$FILE" ]] && [[ $FILE =~ \.js$ ]] && [[ $FILE =~ ^core/modules/ckeditor5/js/build || $FILE =~ ^core/modules/ckeditor5/js/ckeditor5_plugins ]]; then
     CKEDITOR5_PLUGINS_CHANGED=1;
   fi;
+
+  if [[ $FILE == "core/misc/cspell/dictionary.txt" || $FILE == "core/.cspell.json" ]]; then
+    CSPELL_DICTIONARY_FILE_CHANGED=1;
+  fi
 done
 
 # Exit early if there are no files.
@@ -209,7 +216,16 @@ if [ $DEPENDENCIES_NEED_INSTALLING -ne 0 ]; then
 fi
 
 # Check all files for spelling in one go for better performance.
-yarn run -s spellcheck --no-must-find-files --root $TOP_LEVEL $ABS_FILES
+if [[ $CSPELL_DICTIONARY_FILE_CHANGED == "1" ]] ; then
+  printf "\nRunning spellcheck on *all* files.\n"
+  yarn run -s spellcheck:core --no-must-find-files --no-progress
+else
+  # Check all files for spelling in one go for better performance. We pipe the
+  # list files in so we obey the globs set on the spellcheck:core command in
+  # core/package.json.
+  echo "${ABS_FILES}" | tr ' ' '\n' | yarn run -s spellcheck:core --no-must-find-files --file-list stdin
+fi
+
 if [ "$?" -ne "0" ]; then
   # If there are failures set the status to a number other than 0.
   FINAL_STATUS=1

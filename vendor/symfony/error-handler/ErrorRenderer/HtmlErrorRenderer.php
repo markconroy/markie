@@ -48,7 +48,7 @@ class HtmlErrorRenderer implements ErrorRendererInterface
      * @param bool|callable   $debug        The debugging mode as a boolean or a callable that should return it
      * @param string|callable $outputBuffer The output buffer as a string or a callable that should return it
      */
-    public function __construct(bool|callable $debug = false, string $charset = null, string|FileLinkFormatter $fileLinkFormat = null, string $projectDir = null, string|callable $outputBuffer = '', LoggerInterface $logger = null)
+    public function __construct(bool|callable $debug = false, ?string $charset = null, string|FileLinkFormatter|null $fileLinkFormat = null, ?string $projectDir = null, string|callable $outputBuffer = '', ?LoggerInterface $logger = null)
     {
         $this->debug = \is_bool($debug) ? $debug : $debug(...);
         $this->charset = $charset ?: (\ini_get('default_charset') ?: 'UTF-8');
@@ -171,6 +171,8 @@ class HtmlErrorRenderer implements ErrorRendererInterface
                 $formattedValue = '<em>'.strtolower(var_export($item[1], true)).'</em>';
             } elseif ('resource' === $item[0]) {
                 $formattedValue = '<em>resource</em>';
+            } elseif (preg_match('/[^\x07-\x0D\x1B\x20-\xFF]/', $item[1])) {
+                $formattedValue = '<em>binary string</em>';
             } else {
                 $formattedValue = str_replace("\n", '', $this->escape(var_export($item[1], true)));
             }
@@ -226,7 +228,7 @@ class HtmlErrorRenderer implements ErrorRendererInterface
      * @param int    $line The line number
      * @param string $text Use this text for the link rather than the file path
      */
-    private function formatFile(string $file, int $line, string $text = null): string
+    private function formatFile(string $file, int $line, ?string $text = null): string
     {
         $file = trim($file);
 
@@ -262,11 +264,21 @@ class HtmlErrorRenderer implements ErrorRendererInterface
             // highlight_file could throw warnings
             // see https://bugs.php.net/25725
             $code = @highlight_file($file, true);
-            // remove main code/span tags
-            $code = preg_replace('#^<code.*?>\s*<span.*?>(.*)</span>\s*</code>#s', '\\1', $code);
-            // split multiline spans
-            $code = preg_replace_callback('#<span ([^>]++)>((?:[^<]*+<br \/>)++[^<]*+)</span>#', fn ($m) => "<span $m[1]>".str_replace('<br />', "</span><br /><span $m[1]>", $m[2]).'</span>', $code);
-            $content = explode('<br />', $code);
+            if (\PHP_VERSION_ID >= 80300) {
+                // remove main pre/code tags
+                $code = preg_replace('#^<pre.*?>\s*<code.*?>(.*)</code>\s*</pre>#s', '\\1', $code);
+                // split multiline code tags
+                $code = preg_replace_callback('#<code ([^>]++)>((?:[^<]*+\\n)++[^<]*+)</code>#', fn ($m) => "<code $m[1]>".str_replace("\n", "</code>\n<code $m[1]>", $m[2]).'</code>', $code);
+                // Convert spaces to html entities to preserve indentation when rendered
+                $code = str_replace(' ', '&nbsp;', $code);
+                $content = explode("\n", $code);
+            } else {
+                // remove main code/span tags
+                $code = preg_replace('#^<code.*?>\s*<span.*?>(.*)</span>\s*</code>#s', '\\1', $code);
+                // split multiline spans
+                $code = preg_replace_callback('#<span ([^>]++)>((?:[^<]*+<br \/>)++[^<]*+)</span>#', fn ($m) => "<span $m[1]>".str_replace('<br />', "</span><br /><span $m[1]>", $m[2]).'</span>', $code);
+                $content = explode('<br />', $code);
+            }
 
             $lines = [];
             if (0 > $srcContext) {

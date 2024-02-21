@@ -61,16 +61,8 @@ final class DiffOpOutputBuilder implements DiffOutputBuilderInterface {
         if (count($hunkTarget) === 0) {
           $ops[] = $this->hunkOp(Differ::REMOVED, $hunkSource, $hunkTarget);
         }
-        elseif (count($hunkSource) === count($hunkTarget)) {
-          $ops[] = $this->hunkOp(self::CHANGED, $hunkSource, $hunkTarget);
-        }
-        elseif (count($hunkSource) > count($hunkTarget)) {
-          $ops[] = $this->hunkOp(self::CHANGED, array_slice($hunkSource, 0, count($hunkTarget)), $hunkTarget);
-          $ops[] = $this->hunkOp(Differ::REMOVED, array_slice($hunkSource, count($hunkTarget)), []);
-        }
         else {
-          $ops[] = $this->hunkOp(self::CHANGED, $hunkSource, array_slice($hunkTarget, 0, count($hunkSource)));
-          $ops[] = $this->hunkOp(Differ::ADDED, array_slice($hunkTarget, count($hunkSource)), []);
+          $ops[] = $this->hunkOp(self::CHANGED, $hunkSource, $hunkTarget);
         }
         $hunkMode = NULL;
         $hunkSource = [];

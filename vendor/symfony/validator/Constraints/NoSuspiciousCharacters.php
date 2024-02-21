@@ -85,15 +85,15 @@ class NoSuspiciousCharacters extends Constraint
      * @param self::RESTRICTION_LEVEL_*|null  $restrictionLevel
      */
     public function __construct(
-        array $options = null,
-        string $restrictionLevelMessage = null,
-        string $invisibleMessage = null,
-        string $mixedNumbersMessage = null,
-        string $hiddenOverlayMessage = null,
-        int $checks = null,
-        int $restrictionLevel = null,
-        array $locales = null,
-        array $groups = null,
+        ?array $options = null,
+        ?string $restrictionLevelMessage = null,
+        ?string $invisibleMessage = null,
+        ?string $mixedNumbersMessage = null,
+        ?string $hiddenOverlayMessage = null,
+        ?int $checks = null,
+        ?int $restrictionLevel = null,
+        ?array $locales = null,
+        ?array $groups = null,
         mixed $payload = null
     ) {
         if (!class_exists(\Spoofchecker::class)) {
@@ -102,12 +102,12 @@ class NoSuspiciousCharacters extends Constraint
 
         parent::__construct($options, $groups, $payload);
 
-        $this->restrictionLevelMessage ??= $restrictionLevelMessage;
-        $this->invisibleMessage ??= $invisibleMessage;
-        $this->mixedNumbersMessage ??= $mixedNumbersMessage;
-        $this->hiddenOverlayMessage ??= $hiddenOverlayMessage;
-        $this->checks ??= $checks;
-        $this->restrictionLevel ??= $restrictionLevel;
-        $this->locales ??= $locales;
+        $this->restrictionLevelMessage = $restrictionLevelMessage ?? $this->restrictionLevelMessage;
+        $this->invisibleMessage = $invisibleMessage ?? $this->invisibleMessage;
+        $this->mixedNumbersMessage = $mixedNumbersMessage ?? $this->mixedNumbersMessage;
+        $this->hiddenOverlayMessage = $hiddenOverlayMessage ?? $this->hiddenOverlayMessage;
+        $this->checks = $checks ?? $this->checks;
+        $this->restrictionLevel = $restrictionLevel ?? $this->restrictionLevel;
+        $this->locales = $locales ?? $this->locales;
     }
 }

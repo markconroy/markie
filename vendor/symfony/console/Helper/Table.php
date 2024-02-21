@@ -411,7 +411,7 @@ class Table
 
                 if ($isHeader && !$isHeaderSeparatorRendered) {
                     $this->renderRowSeparator(
-                        $isHeader ? self::SEPARATOR_TOP : self::SEPARATOR_TOP_BOTTOM,
+                        self::SEPARATOR_TOP,
                         $hasTitle ? $this->headerTitle : null,
                         $hasTitle ? $this->style->getHeaderTitleFormat() : null
                     );
@@ -421,7 +421,7 @@ class Table
 
                 if ($isFirstRow) {
                     $this->renderRowSeparator(
-                        $isHeader ? self::SEPARATOR_TOP : self::SEPARATOR_TOP_BOTTOM,
+                        $horizontal ? self::SEPARATOR_TOP : self::SEPARATOR_TOP_BOTTOM,
                         $hasTitle ? $this->headerTitle : null,
                         $hasTitle ? $this->style->getHeaderTitleFormat() : null
                     );
@@ -454,7 +454,7 @@ class Table
      *
      *     +-----+-----------+-------+
      */
-    private function renderRowSeparator(int $type = self::SEPARATOR_MID, string $title = null, string $titleFormat = null): void
+    private function renderRowSeparator(int $type = self::SEPARATOR_MID, ?string $title = null, ?string $titleFormat = null): void
     {
         if (!$count = $this->numberOfColumns) {
             return;
@@ -519,7 +519,7 @@ class Table
      *
      *     | 9971-5-0210-0 | A Tale of Two Cities  | Charles Dickens  |
      */
-    private function renderRow(array $row, string $cellFormat, string $firstCellFormat = null): void
+    private function renderRow(array $row, string $cellFormat, ?string $firstCellFormat = null): void
     {
         $rowContent = $this->renderColumnSeparator(self::BORDER_OUTSIDE);
         $columns = $this->getRowColumns($row);

@@ -1,5 +1,5 @@
 /* eslint-disable import/no-extraneous-dependencies */
-/* cspell:words insertdrupalmedia drupalmediaediting insertdrupalmediacommand drupalmediametadatarepository */
+/* cspell:ignore insertdrupalmedia drupalmediaediting insertdrupalmediacommand drupalmediametadatarepository */
 
 import { Plugin } from 'ckeditor5/src/core';
 import { toWidget, Widget } from 'ckeditor5/src/widget';
@@ -207,10 +207,7 @@ export default class DrupalMediaEditing extends Plugin {
   _defineSchema() {
     const schema = this.editor.model.schema;
     schema.register('drupalMedia', {
-      allowWhere: '$block',
-      isObject: true,
-      isContent: true,
-      isBlock: true,
+      inheritAllFrom: '$blockObject',
       allowAttributes: Object.keys(this.attrs),
     });
     // Register `<drupal-media>` as a block element in the DOM converter. This

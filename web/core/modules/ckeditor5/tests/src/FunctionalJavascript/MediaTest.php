@@ -26,6 +26,7 @@ use Symfony\Component\Validator\ConstraintViolation;
 /**
  * @coversDefaultClass \Drupal\ckeditor5\Plugin\CKEditor5Plugin\Media
  * @group ckeditor5
+ * @group #slow
  * @internal
  */
 class MediaTest extends WebDriverTestBase {
@@ -273,6 +274,64 @@ class MediaTest extends WebDriverTestBase {
     $this->waitForEditor();
     $this->assertNotEmpty($assert_session->waitForElementVisible('css', 'img[src*="image-test.png"]'));
     $assert_session->elementExists('css', '.ck-widget.drupal-media');
+  }
+
+  /**
+   * Tests adding media to a list does not split the list.
+   */
+  public function testMediaSplitList() {
+    $assert_session = $this->assertSession();
+
+    $editor = Editor::load('test_format');
+    $settings = $editor->getSettings();
+
+    // Add lists to the editor.
+    $settings['plugins']['ckeditor5_list'] = [
+      'reversed' => FALSE,
+      'startIndex' => FALSE,
+    ];
+    $settings['toolbar']['items'] = array_merge($settings['toolbar']['items'], ['bulletedList', 'numberedList']);
+    $editor->setSettings($settings);
+    $editor->save();
+
+    // Add lists to the filter.
+    $filter_format = $editor->getFilterFormat();
+    $filter_format->setFilterConfig('filter_html', [
+      'status' => TRUE,
+      'settings' => [
+        'allowed_html' => '<p> <br> <strong> <em> <a href> <drupal-media data-entity-type data-entity-uuid data-align data-caption alt data-view-mode> <ol> <ul> <li>',
+      ],
+    ]);
+    $filter_format->save();
+
+    $this->assertSame([], array_map(
+      function (ConstraintViolation $v) {
+        return (string) $v->getMessage();
+      },
+      iterator_to_array(CKEditor5::validatePair(
+        Editor::load('test_format'),
+        FilterFormat::load('test_format')
+      ))
+    ));
+
+    // Wrap the media with a list item.
+    $original_value = $this->host->body->value;
+    $this->host->body->value = '<ol><li>' . $original_value . '</li></ol>';
+    $this->host->save();
+    $this->drupalGet($this->host->toUrl('edit-form'));
+
+    $this->assertNotEmpty($upcasted_media = $assert_session->waitForElementVisible('css', '.ck-widget.drupal-media'));
+
+    // Confirm the media is wrapped by the list item on the editing view.
+    $assert_session->elementExists('css', 'li > .drupal-media');
+    // Confirm the media is not adjacent to the list on the editing view.
+    $assert_session->elementNotExists('css', 'ol + .drupal-media');
+
+    $editor_dom = new \DOMXPath($this->getEditorDataAsDom());
+    // Confirm drupal-media is wrapped by the list item.
+    $this->assertNotEmpty($editor_dom->query('//li/drupal-media'));
+    // Confirm the media is not adjacent to the list.
+    $this->assertEmpty($editor_dom->query('//ol/following-sibling::drupal-media'));
   }
 
   /**

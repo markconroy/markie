@@ -12,6 +12,7 @@ use Drupal\Tests\jsonapi\Traits\CommonCollectionFilterAccessTestPatternsTrait;
  * JSON:API integration test for the "BlockContent" content entity type.
  *
  * @group jsonapi
+ * @group #slow
  */
 class BlockContentTest extends ResourceTestBase {
 
@@ -67,6 +68,11 @@ class BlockContentTest extends ResourceTestBase {
   protected function setUpAuthorization($method) {
     switch ($method) {
       case 'GET':
+        $this->grantPermissionsToTestedRole([
+          'access block library',
+        ]);
+        break;
+
       case 'PATCH':
         $this->grantPermissionsToTestedRole([
           'access block library',
@@ -83,6 +89,14 @@ class BlockContentTest extends ResourceTestBase {
         $this->grantPermissionsToTestedRole(['access block library', 'delete any basic block content']);
         break;
     }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function setUpRevisionAuthorization($method) {
+    parent::setUpRevisionAuthorization($method);
+    $this->grantPermissionsToTestedRole(['view any basic block content history']);
   }
 
   /**

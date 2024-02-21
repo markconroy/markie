@@ -992,6 +992,9 @@ class ConfigImporter {
     else {
       $config = new Config($name, $this->storageComparer->getTargetStorage($collection), $this->eventDispatcher, $this->typedConfigManager);
     }
+    if ($old_data = $this->storageComparer->getTargetStorage($collection)->read($name)) {
+      $config->initWithData($old_data);
+    }
     if ($op == 'delete') {
       $config->delete();
     }

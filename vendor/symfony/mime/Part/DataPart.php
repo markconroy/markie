@@ -29,7 +29,7 @@ class DataPart extends TextPart
     /**
      * @param resource|string|File $body Use a File instance to defer loading the file until rendering
      */
-    public function __construct($body, string $filename = null, string $contentType = null, string $encoding = null)
+    public function __construct($body, ?string $filename = null, ?string $contentType = null, ?string $encoding = null)
     {
         unset($this->_parent);
 
@@ -49,7 +49,7 @@ class DataPart extends TextPart
         $this->setDisposition('attachment');
     }
 
-    public static function fromPath(string $path, string $name = null, string $contentType = null): self
+    public static function fromPath(string $path, ?string $name = null, ?string $contentType = null): self
     {
         return new self(new File($path), $name, $contentType);
     }
@@ -156,7 +156,7 @@ class DataPart extends TextPart
             throw new \BadMethodCallException('Cannot unserialize '.__CLASS__);
         }
         foreach (['body', 'charset', 'subtype', 'disposition', 'name', 'encoding'] as $name) {
-            if (null !== $this->_parent[$name] && !\is_string($this->_parent[$name])) {
+            if (null !== $this->_parent[$name] && !\is_string($this->_parent[$name]) && !$this->_parent[$name] instanceof File) {
                 throw new \BadMethodCallException('Cannot unserialize '.__CLASS__);
             }
             $r = new \ReflectionProperty(TextPart::class, $name);

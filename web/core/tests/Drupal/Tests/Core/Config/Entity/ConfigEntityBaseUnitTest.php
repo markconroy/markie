@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\Core\Config\Entity\ConfigEntityBaseUnitTest.
- */
-
 namespace Drupal\Tests\Core\Config\Entity;
 
 use Drupal\Component\Plugin\PluginManagerInterface;
@@ -531,26 +526,22 @@ class ConfigEntityBaseUnitTest extends UnitTestCase {
 
     // Test sorting by label.
     $list = [$entity_a, $entity_b];
-    // Suppress errors because of https://bugs.php.net/bug.php?id=50688.
-    @usort($list, '\Drupal\Core\Config\Entity\ConfigEntityBase::sort');
+    usort($list, '\Drupal\Core\Config\Entity\ConfigEntityBase::sort');
     $this->assertSame($entity_b, $list[0]);
 
     $list = [$entity_b, $entity_a];
-    // Suppress errors because of https://bugs.php.net/bug.php?id=50688.
-    @usort($list, '\Drupal\Core\Config\Entity\ConfigEntityBase::sort');
+    usort($list, '\Drupal\Core\Config\Entity\ConfigEntityBase::sort');
     $this->assertSame($entity_b, $list[0]);
 
     // Test sorting by weight.
     $entity_a->weight = 0;
     $entity_b->weight = 1;
     $list = [$entity_b, $entity_a];
-    // Suppress errors because of https://bugs.php.net/bug.php?id=50688.
-    @usort($list, '\Drupal\Core\Config\Entity\ConfigEntityBase::sort');
+    usort($list, '\Drupal\Core\Config\Entity\ConfigEntityBase::sort');
     $this->assertSame($entity_a, $list[0]);
 
     $list = [$entity_a, $entity_b];
-    // Suppress errors because of https://bugs.php.net/bug.php?id=50688.
-    @usort($list, '\Drupal\Core\Config\Entity\ConfigEntityBase::sort');
+    usort($list, '\Drupal\Core\Config\Entity\ConfigEntityBase::sort');
     $this->assertSame($entity_a, $list[0]);
   }
 

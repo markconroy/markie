@@ -43,7 +43,7 @@ class Email extends Constraint
     ];
 
     protected const ERROR_NAMES = [
-        self::INVALID_FORMAT_ERROR => 'STRICT_CHECK_FAILED_ERROR',
+        self::INVALID_FORMAT_ERROR => 'INVALID_FORMAT_ERROR',
     ];
 
     /**
@@ -56,11 +56,11 @@ class Email extends Constraint
     public $normalizer;
 
     public function __construct(
-        array $options = null,
-        string $message = null,
-        string $mode = null,
-        callable $normalizer = null,
-        array $groups = null,
+        ?array $options = null,
+        ?string $message = null,
+        ?string $mode = null,
+        ?callable $normalizer = null,
+        ?array $groups = null,
         mixed $payload = null
     ) {
         if (\is_array($options) && \array_key_exists('mode', $options) && !\in_array($options['mode'], self::VALIDATION_MODES, true)) {

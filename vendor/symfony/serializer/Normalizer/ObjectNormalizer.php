@@ -32,12 +32,9 @@ class ObjectNormalizer extends AbstractObjectNormalizer
 {
     protected $propertyAccessor;
 
-    /** @var array<string, string|null> */
-    private array $discriminatorCache = [];
-
     private readonly \Closure $objectClassResolver;
 
-    public function __construct(ClassMetadataFactoryInterface $classMetadataFactory = null, NameConverterInterface $nameConverter = null, PropertyAccessorInterface $propertyAccessor = null, PropertyTypeExtractorInterface $propertyTypeExtractor = null, ClassDiscriminatorResolverInterface $classDiscriminatorResolver = null, callable $objectClassResolver = null, array $defaultContext = [])
+    public function __construct(?ClassMetadataFactoryInterface $classMetadataFactory = null, ?NameConverterInterface $nameConverter = null, ?PropertyAccessorInterface $propertyAccessor = null, ?PropertyTypeExtractorInterface $propertyTypeExtractor = null, ?ClassDiscriminatorResolverInterface $classDiscriminatorResolver = null, ?callable $objectClassResolver = null, array $defaultContext = [])
     {
         if (!class_exists(PropertyAccess::class)) {
             throw new LogicException('The ObjectNormalizer class requires the "PropertyAccess" component. Install "symfony/property-access" to use it.');
@@ -65,7 +62,7 @@ class ObjectNormalizer extends AbstractObjectNormalizer
         return __CLASS__ === static::class;
     }
 
-    protected function extractAttributes(object $object, string $format = null, array $context = []): array
+    protected function extractAttributes(object $object, ?string $format = null, array $context = []): array
     {
         if (\stdClass::class === $object::class) {
             return array_keys((array) $object);
@@ -128,24 +125,19 @@ class ObjectNormalizer extends AbstractObjectNormalizer
         return array_keys($attributes);
     }
 
-    protected function getAttributeValue(object $object, string $attribute, string $format = null, array $context = []): mixed
+    protected function getAttributeValue(object $object, string $attribute, ?string $format = null, array $context = []): mixed
     {
-        $cacheKey = $object::class;
-        if (!\array_key_exists($cacheKey, $this->discriminatorCache)) {
-            $this->discriminatorCache[$cacheKey] = null;
-            if (null !== $this->classDiscriminatorResolver) {
-                $mapping = $this->classDiscriminatorResolver->getMappingForMappedObject($object);
-                $this->discriminatorCache[$cacheKey] = $mapping?->getTypeProperty();
-            }
-        }
+        $mapping = $this->classDiscriminatorResolver?->getMappingForMappedObject($object);
 
-        return $attribute === $this->discriminatorCache[$cacheKey] ? $this->classDiscriminatorResolver->getTypeForMappedObject($object) : $this->propertyAccessor->getValue($object, $attribute);
+        return $attribute === $mapping?->getTypeProperty()
+            ? $mapping
+            : $this->propertyAccessor->getValue($object, $attribute);
     }
 
     /**
      * @return void
      */
-    protected function setAttributeValue(object $object, string $attribute, mixed $value, string $format = null, array $context = [])
+    protected function setAttributeValue(object $object, string $attribute, mixed $value, ?string $format = null, array $context = [])
     {
         try {
             $this->propertyAccessor->setValue($object, $attribute, $value);

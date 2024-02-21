@@ -42,7 +42,7 @@ class TextPart extends AbstractPart
     /**
      * @param resource|string|File $body Use a File instance to defer loading the file until rendering
      */
-    public function __construct($body, ?string $charset = 'utf-8', string $subtype = 'plain', string $encoding = null)
+    public function __construct($body, ?string $charset = 'utf-8', string $subtype = 'plain', ?string $encoding = null)
     {
         unset($this->_headers);
 
@@ -226,7 +226,7 @@ class TextPart extends AbstractPart
     public function __sleep(): array
     {
         // convert resources to strings for serialization
-        if (null !== $this->seekable || $this->body instanceof File) {
+        if (null !== $this->seekable) {
             $this->body = $this->getBody();
             $this->seekable = null;
         }

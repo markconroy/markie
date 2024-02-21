@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\Component\DependencyInjection\Dumper\OptimizedPhpArrayDumperTest.
- */
-
 namespace Drupal\Tests\Component\DependencyInjection\Dumper {
 
   use Drupal\Component\Utility\Crypt;
@@ -527,7 +522,7 @@ namespace Drupal\Tests\Component\DependencyInjection\Dumper {
     public function testGetServiceDefinitionForDecoratedService() {
       $bar_definition = new Definition('\stdClass');
       $bar_definition->setPublic(TRUE);
-      $bar_definition->setDecoratedService(new Reference('foo'));
+      $bar_definition->setDecoratedService((string) new Reference('foo'));
       $services['bar'] = $bar_definition;
 
       $this->containerBuilder->getDefinitions()->willReturn($services);

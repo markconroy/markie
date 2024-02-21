@@ -19,7 +19,6 @@ ajaxing
 akiko
 allwords
 alphadecimal
-alterjs
 alternatif
 amet
 amphibius
@@ -120,6 +119,7 @@ blocknodebundle
 blockpromoted
 blockquotes
 blockrecipe
+blockrelated
 blocktest
 bloggy
 blub
@@ -129,8 +129,6 @@ bodyvalue
 boing
 bomofo
 bonacieux
-boskoop
-boskop
 bovigo
 breezer
 brion
@@ -214,7 +212,6 @@ cochez
 codesniffer
 colgroups
 colinodell
-collegehumor
 colonpos
 colour
 colspans
@@ -261,6 +258,7 @@ customly
 customrequest
 cweagans
 cádiz
+dailymotion
 databasefilename
 databasename
 datas
@@ -322,9 +320,11 @@ distro
 ditka
 divs
 dnumber
+dockerhub
 docroot
 docroots
 dolore
+dotenv
 downcasting
 doxygen
 dragtable
@@ -341,7 +341,6 @@ drivertext
 dropbutton
 dropbuttons
 drudbal
-drup
 drupalci
 drupaldatetime
 drupaldevdays
@@ -366,7 +365,6 @@ drush
 drépal
 détruire
 editables
-editunblock
 eerste
 egulias
 eins
@@ -436,7 +434,6 @@ fieldsets
 filelist
 filemime
 filesort
-filestorage
 filesystems
 filetransfer
 filevalidationerror
@@ -453,7 +450,6 @@ fooalert
 foobarbaz
 foobargorilla
 foofoo
-foos
 formattable
 formvalidation
 fouc
@@ -547,6 +543,7 @@ insidekeyword
 instaclick
 instantiator
 interactable
+interruptible
 introspectable
 invalidators
 invalididentifier
@@ -592,7 +589,6 @@ kontex
 kpresenter
 kristiaan
 kspread
-kthxbai
 kword
 laatste
 labely
@@ -620,7 +616,6 @@ linksby
 linkset
 linktext
 lisu
-litererally
 llamaids
 llamasarelame
 llamma
@@ -673,14 +668,12 @@ mediumtext
 membersonly
 merhaba
 messagekey
-metainformation
 metapackage
 metapackages
 metatag
 metatags
 meφω
 mglaman
-miaus
 mikey
 milli
 mimetypes
@@ -737,8 +730,6 @@ mysite
 mysqladmin
 mysqldump
 mystarterkit
-myverylongurl
-myverylongurlexample
 műveletek
 nalias
 nameofbin
@@ -755,7 +746,6 @@ negotiatiors
 newcol
 newfieldinitial
 newnode
-newstr
 newterm
 newwin
 nids
@@ -920,8 +910,6 @@ presetname
 pretransaction
 preuninstall
 processlist
-projecta
-projectb
 proname
 prophesize
 prophesized
@@ -1003,7 +991,6 @@ revlog
 revpub
 ribisi
 ritchie
-rolename
 roly
 routable
 routeable
@@ -1064,7 +1051,6 @@ somemodule
 someschema
 somethinggeneric
 sortablejs
-sourcedir
 sourceediting
 spacebar
 spagna
@@ -1167,7 +1153,6 @@ tagstack
 tagwords
 takeshita
 tappable
-targetdir
 tarz
 taskless
 tatou

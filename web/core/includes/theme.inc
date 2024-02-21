@@ -9,7 +9,6 @@
  */
 
 use Drupal\Component\Render\FormattableMarkup;
-use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 use Drupal\Component\Serialization\Json;
 use Drupal\Component\Utility\Crypt;
@@ -27,6 +26,7 @@ use Drupal\Core\Theme\ThemeSettings;
 use Drupal\Core\Render\Element;
 use Drupal\Core\Render\Markup;
 use Drupal\Core\Utility\TableSort;
+use Drupal\Core\Installer\InstallerKernel;
 
 /**
  * @defgroup content_flags Content markers
@@ -1506,13 +1506,18 @@ function template_preprocess_maintenance_page(&$variables) {
  * @see template_preprocess_maintenance_page()
  */
 function template_preprocess_install_page(&$variables) {
+  $installer_active_task = NULL;
+  if (defined('MAINTENANCE_MODE') && MAINTENANCE_MODE === 'install' && InstallerKernel::installationAttempted()) {
+    $installer_active_task = $GLOBALS['install_state']['active_task'];
+  }
+
   template_preprocess_maintenance_page($variables);
 
   // Override the site name that is displayed on the page, since Drupal is
   // still in the process of being installed.
   $distribution_name = drupal_install_profile_distribution_name();
   $variables['site_name'] = $distribution_name;
-  $variables['site_version'] = drupal_install_profile_distribution_version();
+  $variables['site_version'] = $installer_active_task ? drupal_install_profile_distribution_version() : '';
 }
 
 /**
@@ -1828,7 +1833,7 @@ function template_preprocess_pager(&$variables) {
     $items['pages'][$i]['attributes'] = new Attribute();
     if ($i == $pager_current) {
       $variables['current'] = $i;
-      $items['pages'][$i]['attributes']->setAttribute('aria-current', new TranslatableMarkup('Current page'));
+      $items['pages'][$i]['attributes']->setAttribute('aria-current', 'page');
     }
   }
   // Add an ellipsis if there are further next pages.

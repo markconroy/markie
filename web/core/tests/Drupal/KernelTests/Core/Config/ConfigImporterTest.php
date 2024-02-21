@@ -4,6 +4,7 @@ namespace Drupal\KernelTests\Core\Config;
 
 use Drupal\Component\Utility\Html;
 use Drupal\Component\Render\FormattableMarkup;
+use Drupal\Core\Config\ConfigEvents;
 use Drupal\Core\Config\ConfigImporter;
 use Drupal\Core\Config\ConfigImporterException;
 use Drupal\KernelTests\KernelTestBase;
@@ -25,7 +26,7 @@ class ConfigImporterTest extends KernelTestBase {
    *
    * @var array
    */
-  protected static $modules = ['config_test', 'system', 'config_import_test'];
+  protected static $modules = ['config_test', 'system', 'config_import_test', 'config_events_test'];
 
   /**
    * {@inheritdoc}
@@ -897,6 +898,36 @@ class ConfigImporterTest extends KernelTestBase {
     \Drupal::configFactory()->reset($cronName);
     $this->assertEquals('Foo', $this->config($systemSiteName)->get('name'));
     $this->assertEquals(0, $this->config($cronName)->get('logging'));
+  }
+
+  /**
+   * Tests config events during config import.
+   */
+  public function testConfigEvents(): void {
+    $this->installConfig(['config_events_test']);
+    $this->config('config_events_test.test')->set('key', 'bar')->save();
+    $this->copyConfig($this->container->get('config.storage'), $this->container->get('config.storage.sync'));
+    $this->config('config_events_test.test')->set('key', 'foo')->save();
+    \Drupal::state()->set('config_events_test.event', []);
+
+    // Import the configuration. This results in a save event with the value
+    // changing from foo to bar.
+    $this->configImporter()->import();
+    $event = \Drupal::state()->get('config_events_test.event', []);
+    $this->assertSame(ConfigEvents::SAVE, $event['event_name']);
+    $this->assertSame(['key' => 'bar'], $event['current_config_data']);
+    $this->assertSame(['key' => 'bar'], $event['raw_config_data']);
+    $this->assertSame(['key' => 'foo'], $event['original_config_data']);
+
+    // Import the configuration that deletes 'config_events_test.test'.
+    $this->container->get('config.storage.sync')->delete('config_events_test.test');
+    $this->configImporter()->import();
+    $this->assertFalse($this->container->get('config.storage')->exists('config_events_test.test'));
+    $event = \Drupal::state()->get('config_events_test.event', []);
+    $this->assertSame(ConfigEvents::DELETE, $event['event_name']);
+    $this->assertSame([], $event['current_config_data']);
+    $this->assertSame([], $event['raw_config_data']);
+    $this->assertSame(['key' => 'bar'], $event['original_config_data']);
   }
 
   /**

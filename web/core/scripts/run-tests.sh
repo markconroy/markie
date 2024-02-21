@@ -335,6 +335,14 @@ All arguments are long options.
               will be used. The default is that any unexpected silenced
               deprecation error will fail tests.
 
+  --ci-parallel-node-total
+
+              The total number of instances of this job running in parallel.
+
+  --ci-parallel-node-index
+
+              The index of the job in the job set.
+
   <test1>[,<test2>[,<test3> ...]]
 
               One or more tests to be run. By default, these are interpreted
@@ -404,6 +412,8 @@ function simpletest_script_parse_args() {
     'execute-test' => '',
     'xml' => '',
     'non-html' => FALSE,
+    'ci-parallel-node-index' => 1,
+    'ci-parallel-node-total' => 1,
   ];
 
   // Override with set values.
@@ -896,6 +906,7 @@ function simpletest_script_get_test_list() {
   );
   $types_processed = empty($args['types']);
   $test_list = [];
+  $slow_tests = [];
   if ($args['all'] || $args['module']) {
     try {
       $groups = $test_discovery->getTestClasses($args['module'], $args['types']);
@@ -905,11 +916,17 @@ function simpletest_script_get_test_list() {
       echo (string) $e;
       exit(SIMPLETEST_SCRIPT_EXIT_EXCEPTION);
     }
+    if ((int) $args['ci-parallel-node-total'] > 1) {
+      if (key($groups) === '#slow') {
+        $slow_tests = array_keys(array_shift($groups));
+      }
+    }
     $all_tests = [];
     foreach ($groups as $group => $tests) {
       $all_tests = array_merge($all_tests, array_keys($tests));
     }
     $test_list = array_unique($all_tests);
+    $test_list = array_diff($test_list, $slow_tests);
   }
   else {
     if ($args['class']) {
@@ -1024,6 +1041,13 @@ function simpletest_script_get_test_list() {
     simpletest_script_print_error('No valid tests were specified.');
     exit(SIMPLETEST_SCRIPT_EXIT_FAILURE);
   }
+
+  if ((int) $args['ci-parallel-node-total'] > 1) {
+    $slow_tests_per_job = ceil(count($slow_tests) / $args['ci-parallel-node-total']);
+    $tests_per_job = ceil(count($test_list) / $args['ci-parallel-node-total']);
+    $test_list = array_merge(array_slice($slow_tests, ($args['ci-parallel-node-index'] -1) * $slow_tests_per_job, $slow_tests_per_job), array_slice($test_list, ($args['ci-parallel-node-index'] - 1) * $tests_per_job, $tests_per_job));
+  }
+
   return $test_list;
 }
 

@@ -19,7 +19,7 @@ use Symfony\Component\Serializer\Exception\LogicException;
 /**
  * @author Jordi Boggiano <j.boggiano@seld.be>
  *
- * @method getSupportedTypes(?string $format): array
+ * @method array getSupportedTypes(?string $format)
  */
 interface NormalizerInterface
 {
@@ -38,7 +38,7 @@ interface NormalizerInterface
      * @throws LogicException             Occurs when the normalizer is not called in an expected context
      * @throws ExceptionInterface         Occurs for all the other cases of errors
      */
-    public function normalize(mixed $object, string $format = null, array $context = []);
+    public function normalize(mixed $object, ?string $format = null, array $context = []);
 
     /**
      * Checks whether the given class is supported for normalization by this normalizer.
@@ -49,7 +49,7 @@ interface NormalizerInterface
      *
      * @return bool
      */
-    public function supportsNormalization(mixed $data, string $format = null /* , array $context = [] */);
+    public function supportsNormalization(mixed $data, ?string $format = null /* , array $context = [] */);
 
     /**
      * Returns the types potentially supported by this normalizer.
