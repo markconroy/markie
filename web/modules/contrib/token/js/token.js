@@ -16,6 +16,16 @@
         drupalSettings.tokenFocusedField = this;
       });
 
+      if (Drupal.CKEditor5Instances) {
+        Drupal.CKEditor5Instances.forEach(function (editor) {
+          editor.editing.view.document.on('change:isFocused', (event, data, isFocused) => {
+            if (isFocused) {
+              drupalSettings.tokenFocusedCkeditor5 = editor;
+            }
+          });
+        })
+      }
+
       once('token-click-insert', '.token-click-insert .token-key', context).forEach(function (token) {
         var newThis = $('<a href="javascript:void(0);" title="' + Drupal.t('Insert this token into your form') + '">' + $(token).html() + '</a>').click(function () {
           var content = this.text;
@@ -49,6 +59,15 @@
           }
           else if (drupalSettings.tokenFocusedField) {
             insertAtCursor(drupalSettings.tokenFocusedField, content);
+          }
+          else if (drupalSettings.tokenFocusedCkeditor5) {
+            const editor = drupalSettings.tokenFocusedCkeditor5;
+            editor.model.change((writer) => {
+              writer.insertText(
+                  content,
+                  editor.model.document.selection.getFirstPosition(),
+              );
+            })
           }
           else {
             alert(Drupal.t('First click a text field to insert your tokens into.'));

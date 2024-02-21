@@ -12,7 +12,7 @@ configure: entity.pathauto_pattern.collection
 recommends:
 - redirect:redirect
 
-# Information added by Drupal.org packaging script on 2022-08-02
-version: '8.x-1.11'
+# Information added by Drupal.org packaging script on 2023-10-08
+version: '8.x-1.12'
 project: 'pathauto'
-datestamp: 1659472551
+datestamp: 1696776686

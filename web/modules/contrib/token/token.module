@@ -198,32 +198,8 @@ function token_entity_type_alter(array &$entity_types) {
 
     if ($devel_exists
       && $entity_type->hasViewBuilderClass()
-      && ($canonical = $entity_type->getLinkTemplate('canonical'))
       && !$entity_type->hasLinkTemplate('token-devel')) {
-      $entity_type->setLinkTemplate('token-devel', $canonical . '/devel/token');
-    }
-  }
-}
-
-/**
- * Implements hook_module_implements_alter().
- *
- * Adds missing token support for core modules.
- */
-function token_module_implements_alter(&$implementations, $hook) {
-  \Drupal::moduleHandler()->loadInclude('token', 'inc', 'token.tokens');
-
-  if ($hook == 'tokens' || $hook == 'token_info' || $hook == 'token_info_alter' || $hook == 'tokens_alter') {
-    foreach (_token_core_supported_modules() as $module) {
-      if (\Drupal::moduleHandler()->moduleExists($module) && function_exists($module . '_' . $hook)) {
-        $implementations[$module] = TRUE;
-      }
-    }
-    // Move token.module to get included first since it is responsible for
-    // other modules.
-    if (isset($implementations['token'])) {
-      unset($implementations['token']);
-      $implementations = array_merge(['token' => 'tokens'], $implementations);
+      $entity_type->setLinkTemplate('token-devel', "/devel/token/$entity_type_id/{{$entity_type_id}}");
     }
   }
 }
@@ -693,6 +669,13 @@ function token_node_menu_link_submit($entity_type, NodeInterface $node, &$form, 
   // Entity builders run twice, once during validation and again during
   // submission, so we only run this code after validation has been performed.
   if (!$form_state->isValueEmpty('menu') && $form_state->getTemporaryValue('entity_validated')) {
+
+    // Don't create a menu link if the node is not being saved.
+    $triggering_element = $form_state->getTriggeringElement();
+    if (!$triggering_element || !in_array('::save', $triggering_element['#submit'])) {
+      return;
+    }
+
     $values = $form_state->getValue('menu');
     if (!empty($values['enabled']) && trim($values['title'])) {
       if (!empty($values['menu_parent'])) {
@@ -717,10 +700,6 @@ function token_node_menu_link_submit($entity_type, NodeInterface $node, &$form, 
       }
       else {
         if ($node->isNew()) {
-          // Don't create a menu link if the node is being previewed.
-          if ($form_state->getTriggeringElement()['#id'] == 'edit-preview') {
-            return;
-          }
           // Create a new menu_link_content entity.
           $entity = MenuLinkContent::create([
             // Lets just reference the UUID for now, the link is not important for
@@ -738,7 +717,7 @@ function token_node_menu_link_submit($entity_type, NodeInterface $node, &$form, 
         }
       }
       $entity->title->value = trim($values['title']);
-      $entity->description->value = trim($values['description']);
+      $entity->description->value = trim($values['description'] ?? '');
       $entity->menu_name->value = $values['menu_name'];
       $entity->parent->value = $values['parent'];
       $entity->weight->value = isset($values['weight']) ? $values['weight'] : 0;

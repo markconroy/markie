@@ -4,8 +4,8 @@ namespace Drupal\pathauto\Form;
 
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\pathauto\AliasTypeManager;
 use Drupal\pathauto\AliasStorageHelperInterface;
+use Drupal\pathauto\AliasTypeManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**

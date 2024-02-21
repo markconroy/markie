@@ -65,59 +65,66 @@ function admin_toolbar_links_access_filter_filter_non_accessible_links(array &$i
 
   $access_manager = \Drupal::accessManager();
   foreach ($items as $menu_id => &$item) {
-    $route_name = NULL;
-    $route_params = [];
-    if (!empty($item['original_link'])) {
-      /** @var \Drupal\Core\Menu\MenuLinkBase $original_link */
-      $original_link = $item['original_link'];
-      if ($original_link->getUrlObject()->isExternal()) {
-        // Do not filter external URL at all.
-        continue;
+    try {
+      $route_name = NULL;
+      $route_params = [];
+      if (!empty($item['original_link'])) {
+        /** @var \Drupal\Core\Menu\MenuLinkBase $original_link */
+        $original_link = $item['original_link'];
+        if ($original_link->getUrlObject()->isExternal() || !$original_link->getUrlObject()->isRouted()) {
+          // Do not filter external URL at all.
+          continue;
+        }
+        $route_name = $original_link->getRouteName() ?: $original_link->getUrlObject()->getRouteName();
+        $route_params = $original_link->getRouteParameters() ?: $original_link->getUrlObject()->getRouteParameters();
       }
-      $route_name = $original_link->getRouteName() ?: $original_link->getUrlObject()->getRouteName();
-      $route_params = $original_link->getRouteParameters() ?: $original_link->getUrlObject()->getRouteParameters();
-    }
-    elseif (!empty($item['url'])) {
-      /** @var \Drupal\Core\Url $url */
-      $url = $item['url'];
-      if ($url->isExternal()) {
-        // Do not filter external URL at all.
-        continue;
+      elseif (!empty($item['url'])) {
+        /** @var \Drupal\Core\Url $url */
+        $url = $item['url'];
+        if ($url->isExternal() || !$original_link->getUrlObject()->isRouted()) {
+          // Do not filter external URL at all.
+          continue;
+        }
+        $route_name = $url->getRouteName();
+        $route_params = $url->getRouteParameters();
       }
-      $route_name = $url->getRouteName();
-      $route_params = $url->getRouteParameters();
-    }
 
-    // Check, if user has access rights to the route.
-    if (!$access_manager->checkNamedRoute($route_name, $route_params)) {
-      unset($items[$menu_id]);
-    }
-    else {
-      if (!empty($items[$menu_id]['below'])) {
-        // Recursively call this function for the child items.
-        admin_toolbar_links_access_filter_filter_non_accessible_links($items[$menu_id]['below']);
+      // Check, if user has access rights to the route.
+      if (!$access_manager->checkNamedRoute($route_name, $route_params)) {
+        unset($items[$menu_id]);
       }
-      if (empty($items[$menu_id]['below'])) {
+      else {
+        if (!empty($items[$menu_id]['below'])) {
+          // Recursively call this function for the child items.
+          admin_toolbar_links_access_filter_filter_non_accessible_links($items[$menu_id]['below']);
+        }
+        if (empty($items[$menu_id]['below'])) {
 
-        // Every child item has been cleared out.
-        // Now check, if the given route represents an overview page only,
-        // without having functionality on its own. In this case, we can safely
-        // unset this item, as there aren't any children left.
-        // This assumption is only valid, when the admin_toolbar module is
-        // installed because otherwise we won't have child items at all.
-        if (admin_toolbar_links_access_filter_is_overview_page($route_name)) {
-          unset($items[$menu_id]);
-        }
-        // If there are no sub-items and the parent does not have a link, then
-        // it is safe to remove it.
-        elseif ($route_name === '<nolink>') {
-          unset($items[$menu_id]);
-        }
-        else {
-          // Let's remove the expanded flag.
-          $items[$menu_id]['is_expanded'] = FALSE;
+          // Every child item has been cleared out.
+          // Now check, if the given route represents an overview page only,
+          // without having functionality on its own. In this case, we can
+          // safely unset this item, as there aren't any children left.
+          // This assumption is only valid, when the admin_toolbar module is
+          // installed because otherwise we won't have child items at all.
+          if (admin_toolbar_links_access_filter_is_overview_page($route_name)) {
+            unset($items[$menu_id]);
+          }
+          // If there are no sub-items and the parent does not have a link, then
+          // it is safe to remove it.
+          elseif ($route_name === '<nolink>') {
+            unset($items[$menu_id]);
+          }
+          else {
+            // Let's remove the expanded flag.
+            $items[$menu_id]['is_expanded'] = FALSE;
+          }
         }
       }
+    }
+    catch (\UnexpectedValueException $e) {
+      // Skip on errors like "base:block has no corresponding route":
+      \Drupal::logger('my_module')->error($e->getMessage());
+      continue;
     }
   }
 }

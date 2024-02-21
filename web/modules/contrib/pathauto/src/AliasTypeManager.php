@@ -2,10 +2,10 @@
 
 namespace Drupal\pathauto;
 
+use Drupal\Component\Plugin\FallbackPluginManagerInterface;
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Plugin\DefaultPluginManager;
-use Drupal\Component\Plugin\FallbackPluginManagerInterface;
 
 /**
  * Manages pathauto alias type plugins.

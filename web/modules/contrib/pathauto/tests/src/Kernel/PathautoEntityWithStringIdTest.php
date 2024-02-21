@@ -6,10 +6,10 @@ use Drupal\Component\Serialization\PhpSerialize;
 use Drupal\Component\Utility\Crypt;
 use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\KeyValueStore\KeyValueDatabaseFactory;
-use Drupal\pathauto\PathautoState;
-use Drupal\Tests\pathauto\Functional\PathautoTestHelperTrait;
 use Drupal\KernelTests\KernelTestBase;
+use Drupal\pathauto\PathautoState;
 use Drupal\pathauto_string_id_test\Entity\PathautoStringIdTest;
+use Drupal\Tests\pathauto\Functional\PathautoTestHelperTrait;
 
 /**
  * Tests auto-aliasing of entities that use string IDs.

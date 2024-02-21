@@ -2,12 +2,11 @@
 
 namespace Drupal\Tests\pathauto\Functional;
 
-use Drupal\pathauto\Entity\PathautoPattern;
+use Drupal\Component\Render\FormattableMarkup;
 use Drupal\node\Entity\Node;
+use Drupal\pathauto\Entity\PathautoPattern;
 use Drupal\pathauto\PathautoState;
 use Drupal\Tests\BrowserTestBase;
-use Drupal\Component\Render\FormattableMarkup;
-
 
 /**
  * Tests pathauto node UI integration.
@@ -21,7 +20,7 @@ class PathautoNodeWebTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  protected $defaultTheme = 'stable';
+  protected $defaultTheme = 'stark';
 
   /**
    * Modules to enable.

@@ -114,8 +114,8 @@ class AdminToolbarToolsHelper {
             // We can't use #lazy_builder here because
             // ToolbarItem::preRenderToolbarItem will insert #attributes before
             // lazy_builder callback and this will produce Exception.
-            // This means that for now we always render Local Tasks item even when
-            // the tray is empty.
+            // This means that for now we always render Local Tasks item even
+            // when the tray is empty.
             '#type' => 'link',
             '#title' => $this->t('Local Tasks'),
             '#url' => Url::fromRoute('<none>'),

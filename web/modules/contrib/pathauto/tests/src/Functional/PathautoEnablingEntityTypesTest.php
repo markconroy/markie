@@ -2,8 +2,8 @@
 
 namespace Drupal\Tests\pathauto\Functional;
 
-use Drupal\Tests\BrowserTestBase;
 use Drupal\comment\Tests\CommentTestTrait;
+use Drupal\Tests\BrowserTestBase;
 
 /**
  * Tests pathauto settings form.
@@ -19,7 +19,7 @@ class PathautoEnablingEntityTypesTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  protected $defaultTheme = 'stable';
+  protected $defaultTheme = 'stark';
 
   /**
    * Modules to enable.

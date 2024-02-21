@@ -44,7 +44,7 @@ class TokenUserTest extends TokenTestBase {
   }
 
   /**
-   * Tests the user releated tokens.
+   * Tests the user related tokens.
    */
   public function testUserTokens() {
     // Enable user pictures.

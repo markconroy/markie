@@ -114,14 +114,14 @@ class AliasStorageHelper implements AliasStorageHelperInterface {
       return NULL;
     }
 
+    // Don't create a new alias if it is identical to the current alias.
+    if ($existing_alias && $existing_alias->getAlias() == $alias) {
+      return NULL;
+    }
+
     // Update the existing alias if there is one and the configuration is set to
     // replace it.
     if ($existing_alias && $config->get('update_action') == PathautoGeneratorInterface::UPDATE_ACTION_DELETE) {
-      // Skip replacing the current alias with an identical alias.
-      if ($existing_alias->getAlias() == $alias) {
-        return NULL;
-      }
-
       $old_alias = $existing_alias->getAlias();
       $existing_alias->setAlias($alias)->save();
 

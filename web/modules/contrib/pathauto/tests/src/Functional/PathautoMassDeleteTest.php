@@ -2,9 +2,9 @@
 
 namespace Drupal\Tests\pathauto\Functional;
 
+use Drupal\Component\Render\FormattableMarkup;
 use Drupal\pathauto\PathautoState;
 use Drupal\Tests\BrowserTestBase;
-use Drupal\Component\Render\FormattableMarkup;
 
 /**
  * Mass delete functionality tests.
@@ -18,7 +18,7 @@ class PathautoMassDeleteTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  protected $defaultTheme = 'stable';
+  protected $defaultTheme = 'stark';
 
   /**
    * Modules to enable.

@@ -71,6 +71,13 @@ class AliasCleaner implements AliasCleanerInterface {
   protected $moduleHandler;
 
   /**
+   * An array of arrays for punctuation values.
+   *
+   * @var array
+   */
+  protected $punctuationCharacters = [];
+
+  /**
    * Creates a new AliasCleaner.
    *
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory

@@ -6,6 +6,7 @@ use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityMalformedException;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\Exception\UndefinedLinkTemplateException;
 use Drupal\Core\Entity\RevisionableInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
@@ -16,7 +17,6 @@ use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\StringTranslation\TranslationInterface;
 use Drupal\Core\Utility\Token;
 use Drupal\token\TokenEntityMapperInterface;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
 
 /**
  * Provides methods for generating path aliases.

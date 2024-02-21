@@ -2,9 +2,9 @@
 
 namespace Drupal\Tests\pathauto\Kernel;
 
+use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Render\BubbleableMetadata;
 use Drupal\KernelTests\KernelTestBase;
-use Drupal\Component\Render\FormattableMarkup;
 
 /**
  * Tests tokens provided by Pathauto.
