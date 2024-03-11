@@ -8,5 +8,6 @@ _core:
   default_config_hash: OiTQJRakSrMjR2VuevLbWaxilbzlqmmP7Ab71PthXKY
 id: media.full_width
 label: 'Full Width'
+description: ''
 targetEntityType: media
 cache: true

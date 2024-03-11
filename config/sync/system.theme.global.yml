@@ -10,5 +10,5 @@ features:
   node_user_picture: true
 logo:
   path: themes/custom/patternlab/images/logo.svg
-  url: ''
+  url: null
   use_default: false
