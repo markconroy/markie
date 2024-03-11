@@ -1,11 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\field\FunctionalJavascript\EntityReference;
 
 use Behat\Mink\Element\NodeElement;
 use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Url;
 use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
+use Drupal\Tests\field_ui\Traits\FieldUiJSTestTrait;
 use Drupal\Tests\field_ui\Traits\FieldUiTestTrait;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
@@ -18,6 +21,7 @@ use Drupal\field\Entity\FieldStorageConfig;
 class EntityReferenceAdminTest extends WebDriverTestBase {
 
   use FieldUiTestTrait;
+  use FieldUiJSTestTrait;
 
   /**
    * Modules to install.
@@ -63,12 +67,12 @@ class EntityReferenceAdminTest extends WebDriverTestBase {
     $this->drupalPlaceBlock('system_breadcrumb_block');
 
     // Create a content type, with underscores.
-    $type_name = strtolower($this->randomMachineName(8)) . '_test';
+    $type_name = $this->randomMachineName(8) . '_test';
     $type = $this->drupalCreateContentType(['name' => $type_name, 'type' => $type_name]);
     $this->type = $type->id();
 
     // Create a second content type, to be a target for entity reference fields.
-    $type_name = strtolower($this->randomMachineName(8)) . '_test';
+    $type_name = $this->randomMachineName(8) . '_test';
     $type = $this->drupalCreateContentType(['name' => $type_name, 'type' => $type_name]);
     $this->targetType = $type->id();
 
@@ -113,29 +117,25 @@ class EntityReferenceAdminTest extends WebDriverTestBase {
     $bundle_path = 'admin/structure/types/manage/' . $this->type;
 
     $page = $this->getSession()->getPage();
+    /** @var \Drupal\FunctionalJavascriptTests\JSWebAssert $assert_session */
     $assert_session = $this->assertSession();
 
     // First step: 'Add new field' on the 'Manage fields' page.
     $this->drupalGet($bundle_path . '/fields/add-field');
 
     // Check if the commonly referenced entity types appear in the list.
-    $this->assertSession()->optionExists('edit-new-storage-type', 'field_ui:entity_reference:node');
-    $this->assertSession()->optionExists('edit-new-storage-type', 'field_ui:entity_reference:user');
+    $page->find('css', "[name='new_storage_type'][value='reference']")->getParent()->click();
+    $assert_session->waitForText('Choose an option below');
+    $this->assertSession()->elementExists('css', "[name='group_field_options_wrapper'][value='field_ui:entity_reference:node']");
+    $this->assertSession()->elementExists('css', "[name='group_field_options_wrapper'][value='field_ui:entity_reference:user']");
 
-    $page->findField('new_storage_type')->setValue('entity_reference');
-    $assert_session->waitForField('label')->setValue('Test');
-    $machine_name = $assert_session->waitForElement('xpath', '//*[@id="edit-label-machine-name-suffix"]/span[contains(text(), "field_test")]');
-    $this->assertNotEmpty($machine_name);
-    $page->pressButton('Save and continue');
+    $this->fieldUIAddNewFieldJS(NULL, 'test', 'Test', 'entity_reference', FALSE);
 
     // Node should be selected by default.
-    $this->assertSession()->fieldValueEquals('settings[target_type]', 'node');
+    $this->assertSession()->fieldValueEquals('field_storage[subform][settings][target_type]', 'node');
 
     // Check that all entity types can be referenced.
-    $this->assertFieldSelectOptions('settings[target_type]', array_keys(\Drupal::entityTypeManager()->getDefinitions()));
-
-    // Second step: 'Field settings' form.
-    $this->submitForm([], 'Save field settings');
+    $this->assertFieldSelectOptions('field_storage[subform][settings][target_type]', array_keys(\Drupal::entityTypeManager()->getDefinitions()));
 
     // The base handler should be selected by default.
     $this->assertSession()->fieldValueEquals('settings[handler]', 'default:node');
@@ -228,8 +228,11 @@ class EntityReferenceAdminTest extends WebDriverTestBase {
     $assert_session->assertWaitOnAjaxRequest();
     foreach ($bundles as $bundle_name => $bundle_info) {
       $this->assertSession()->fieldExists('settings[handler_settings][target_bundles][' . $bundle_name . ']');
-      $page->findField('settings[handler_settings][target_bundles][' . $bundle_name . ']')->uncheck();
-      $assert_session->assertWaitOnAjaxRequest();
+      $checkbox = $page->findField('settings[handler_settings][target_bundles][' . $bundle_name . ']');
+      if ($checkbox->isChecked()) {
+        $checkbox->uncheck();
+        $assert_session->assertWaitOnAjaxRequest();
+      }
     }
     $this->assertFalse($sort_by->isVisible(), 'The "sort by" options are hidden.');
     $this->assertFalse($sort_direction->isVisible());
@@ -263,23 +266,19 @@ class EntityReferenceAdminTest extends WebDriverTestBase {
     // Switch the target type to 'taxonomy_term' and check that the settings
     // specific to its selection handler are displayed.
     $field_name = 'node.' . $this->type . '.field_test';
-    $edit = [
-      'settings[target_type]' => 'taxonomy_term',
-    ];
-    $this->drupalGet($bundle_path . '/fields/' . $field_name . '/storage');
-    $this->submitForm($edit, 'Save field settings');
     $this->drupalGet($bundle_path . '/fields/' . $field_name);
+    $page->findField('field_storage[subform][settings][target_type]')->setValue('taxonomy_term');
+    $this->assertSession()->assertWaitOnAjaxRequest();
     $this->assertSession()->fieldExists('settings[handler_settings][auto_create]');
+    $this->assertSession()->fieldValueEquals('settings[handler]', 'default:taxonomy_term');
 
     // Switch the target type to 'user' and check that the settings specific to
     // its selection handler are displayed.
     $field_name = 'node.' . $this->type . '.field_test';
-    $edit = [
-      'settings[target_type]' => 'user',
-    ];
-    $this->drupalGet($bundle_path . '/fields/' . $field_name . '/storage');
-    $this->submitForm($edit, 'Save field settings');
     $this->drupalGet($bundle_path . '/fields/' . $field_name);
+    $target_type_input = $assert_session->fieldExists('field_storage[subform][settings][target_type]');
+    $target_type_input->setValue('user');
+    $assert_session->assertWaitOnAjaxRequest();
     $this->assertSession()->fieldValueEquals('settings[handler_settings][filter][type]', '_none');
     $this->assertSession()->fieldValueEquals('settings[handler_settings][sort][field]', '_none');
     $assert_session->optionNotExists('settings[handler_settings][sort][field]', 'nid');
@@ -294,11 +293,8 @@ class EntityReferenceAdminTest extends WebDriverTestBase {
 
     // Switch the target type to 'node'.
     $field_name = 'node.' . $this->type . '.field_test';
-    $edit = [
-      'settings[target_type]' => 'node',
-    ];
-    $this->drupalGet($bundle_path . '/fields/' . $field_name . '/storage');
-    $this->submitForm($edit, 'Save field settings');
+    $this->drupalGet($bundle_path . '/fields/' . $field_name);
+    $page->findField('field_storage[subform][settings][target_type]')->setValue('node');
 
     // Try to select the views handler.
     $this->drupalGet($bundle_path . '/fields/' . $field_name);
@@ -327,16 +323,13 @@ class EntityReferenceAdminTest extends WebDriverTestBase {
     $assert_session->pageTextContains('Saved Test configuration.');
 
     // Switch the target type to 'entity_test'.
-    $edit = [
-      'settings[target_type]' => 'entity_test',
-    ];
-    $this->drupalGet($bundle_path . '/fields/' . $field_name . '/storage');
-    $this->submitForm($edit, 'Save field settings');
     $this->drupalGet($bundle_path . '/fields/' . $field_name);
+    $page->findField('field_storage[subform][settings][target_type]')->setValue('entity_test');
+    $assert_session->assertWaitOnAjaxRequest();
     $page->findField('settings[handler]')->setValue('views');
-    $assert_session
-      ->waitForField('settings[handler_settings][view][view_and_display]')
-      ->setValue('test_entity_reference_entity_test:entity_reference_1');
+    $page
+      ->findField('settings[handler_settings][view][view_and_display]')
+      ->selectOption('test_entity_reference_entity_test:entity_reference_1');
     $edit = [
       'required' => FALSE,
     ];

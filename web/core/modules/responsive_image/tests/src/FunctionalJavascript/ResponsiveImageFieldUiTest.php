@@ -1,9 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\responsive_image\FunctionalJavascript;
 
 use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
 use Drupal\responsive_image\Entity\ResponsiveImageStyle;
+use Drupal\Tests\field_ui\Traits\FieldUiJSTestTrait;
 
 /**
  * Tests the responsive image field UI.
@@ -11,6 +14,8 @@ use Drupal\responsive_image\Entity\ResponsiveImageStyle;
  * @group responsive_image
  */
 class ResponsiveImageFieldUiTest extends WebDriverTestBase {
+
+  use FieldUiJSTestTrait;
 
   /**
    * {@inheritdoc}
@@ -56,7 +61,7 @@ class ResponsiveImageFieldUiTest extends WebDriverTestBase {
     $this->drupalLogin($admin_user);
 
     // Create content type, with underscores.
-    $type_name = strtolower($this->randomMachineName(8)) . '_test';
+    $type_name = $this->randomMachineName(8) . '_test';
     $type = $this->drupalCreateContentType([
       'name' => $type_name,
       'type' => $type_name,
@@ -69,28 +74,11 @@ class ResponsiveImageFieldUiTest extends WebDriverTestBase {
    */
   public function testResponsiveImageFormatterUi() {
     $manage = 'admin/structure/types/manage/' . $this->type;
-    $add_field = $manage . '/fields/add-field';
     $manage_display = $manage . '/display';
+    /** @var \Drupal\FunctionalJavascriptTests\JSWebAssert $assert_session */
     $assert_session = $this->assertSession();
 
-    // Create a field, and a node with some data for the field.
-    // Create the field.
-    $this->drupalGet($add_field);
-
-    $page = $this->getSession()->getPage();
-    $storage_type = $page->findField('edit-new-storage-type');
-    $storage_type->setValue('image');
-
-    // Set the label.
-    $label = $page->findField('edit-label');
-    $label->setValue('Image');
-
-    // Wait for the machine name.
-    $assert_session->waitForElementVisible('css', '[name="label"] + * .machine-name-value');
-
-    // Save the current page.
-    $save_button = $page->findButton('Save and continue');
-    $save_button->click();
+    $this->fieldUIAddNewFieldJS('admin/structure/types/manage/' . $this->type, 'image', 'Image', 'image');
 
     // Display the "Manage display" page.
     $this->drupalGet($manage_display);

@@ -187,7 +187,7 @@ class ImageStylesPathAndUrlTest extends BrowserTestBase {
     $this->drupalGet(str_replace(IMAGE_DERIVATIVE_TOKEN . '=', IMAGE_DERIVATIVE_TOKEN . '=Zo', $generate_url));
     $this->assertSession()->statusCodeEquals(404);
     // Change the parameter name so the token is missing.
-    $this->drupalGet(str_replace(IMAGE_DERIVATIVE_TOKEN . '=', 'wrongparam=', $generate_url));
+    $this->drupalGet(str_replace(IMAGE_DERIVATIVE_TOKEN . '=', 'wrong_parameter=', $generate_url));
     $this->assertSession()->statusCodeEquals(404);
 
     // Check that the generated URL is the same when we pass in a relative path
@@ -240,13 +240,13 @@ class ImageStylesPathAndUrlTest extends BrowserTestBase {
 
       // Repeat this with a different file that we do not have access to and
       // make sure that access is denied.
-      $file_noaccess = array_shift($files);
-      $original_uri_noaccess = $file_system->copy($file_noaccess->uri, $scheme . '://', FileSystemInterface::EXISTS_RENAME);
-      $generated_uri_noaccess = $scheme . '://styles/' . $this->style->id() . '/' . $scheme . '/' . $file_system->basename($original_uri_noaccess);
-      $this->assertFileDoesNotExist($generated_uri_noaccess);
-      $generate_url_noaccess = $this->style->buildUrl($original_uri_noaccess);
+      $file_no_access = array_shift($files);
+      $original_uri_no_access = $file_system->copy($file_no_access->uri, $scheme . '://', FileSystemInterface::EXISTS_RENAME);
+      $generated_uri_no_access = $scheme . '://styles/' . $this->style->id() . '/' . $scheme . '/' . $file_system->basename($original_uri_no_access);
+      $this->assertFileDoesNotExist($generated_uri_no_access);
+      $generate_url_no_access = $this->style->buildUrl($original_uri_no_access);
 
-      $this->drupalGet($generate_url_noaccess);
+      $this->drupalGet($generate_url_no_access);
       $this->assertSession()->statusCodeEquals(403);
       // Verify that images are not appended to the response.
       // Currently this test only uses PNG images.
@@ -306,7 +306,7 @@ class ImageStylesPathAndUrlTest extends BrowserTestBase {
     $nested_url = $this->style->buildUrl($generated_uri, $clean_url);
     $matches_expected_url_format = (boolean) preg_match('/styles\/' . $this->style->id() . '\/' . $scheme . '\/styles\/' . $this->style->id() . '\/' . $scheme . '/', $nested_url);
     $this->assertTrue($matches_expected_url_format, "URL for a derivative of an image style matches expected format.");
-    $nested_url_with_wrong_token = str_replace(IMAGE_DERIVATIVE_TOKEN . '=', 'wrongparam=', $nested_url);
+    $nested_url_with_wrong_token = str_replace(IMAGE_DERIVATIVE_TOKEN . '=', 'wrong_parameter=', $nested_url);
     $this->drupalGet($nested_url_with_wrong_token);
     $this->assertSession()->statusCodeEquals(404);
     // Check that this restriction cannot be bypassed by adding extra slashes

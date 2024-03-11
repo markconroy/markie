@@ -10,9 +10,6 @@ views.settings:
       sequence:
         type: string
         label: 'Display extender'
-    skip_cache:
-      type: boolean
-      label: 'Disable views data caching'
     sql_signature:
       type: boolean
       label: 'Add Views signature to all SQL queries'
@@ -70,10 +67,15 @@ views.view.*:
   label: 'View'
   mapping:
     id:
-      type: string
+      type: machine_name
       label: 'ID'
+      constraints:
+        Length:
+          # View IDs are specifically limited to 128 characters.
+          # @see \Drupal\views_ui\ViewAddForm::form()
+          max: 128
     label:
-      type: label
+      type: required_label
       label: 'Label'
     module:
       type: string

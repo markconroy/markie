@@ -68,6 +68,23 @@
  * rendered by the Twig template; the processed variables that the Twig template
  * receives are documented in the header of the default Twig template file.
  *
+ * Theme hooks can declare a variable deprecated using the reserved
+ * 'deprecations' variable. For example:
+ * @code
+ *  search_result' => [
+ *   'variables' => [
+ *     'result' => NULL,
+ *     'new_result' => NULL,
+ *     'plugin_id' => NULL,
+ *     'deprecations' => [
+ *       'result' => "'result' is deprecated in drupal:X.0.0 and is removed from drupal:Y.0.0. Use 'new_result' instead. See https://www.example.com."
+ *     ]
+ *   ],
+ * ],
+ * @endcode
+ * Template engines should trigger a deprecation error if a deprecated
+ * variable is used in a template.
+ *
  * @section sec_overriding_theme_hooks Overriding Theme Hooks
  * Themes may register new theme hooks within a hook_theme() implementation, but
  * it is more common for themes to override default implementations provided by
@@ -670,7 +687,7 @@ function hook_theme_suggestions_HOOK(array $variables) {
  * node and taxonomy term templates based on the user being logged in.
  *
  * @code
- * function MYMODULE_theme_suggestions_alter(array &$suggestions, array $variables, $hook) {
+ * function MYMODULE_theme_suggestions_alter(array &$suggestions, array &$variables, $hook) {
  *   if (\Drupal::currentUser()->isAuthenticated() && in_array($hook, array('node', 'taxonomy_term'))) {
  *     $suggestions[] = $hook . '__' . 'logged_in';
  *   }
@@ -682,8 +699,8 @@ function hook_theme_suggestions_HOOK(array $variables) {
  *   An array of alternate, more specific names for template files, passed by
  *   reference.
  * @param array $variables
- *   An array of variables passed to the theme hook. Note that this hook is
- *   invoked before any variable preprocessing.
+ *   An array of variables passed to the theme hook, passed by reference. Note
+ *   that this hook is invoked before any variable preprocessing.
  * @param string $hook
  *   The base hook name. For example, if '#theme' => 'node__article' is called,
  *   then $hook will be 'node', not 'node__article'. The specific hook called
@@ -692,7 +709,7 @@ function hook_theme_suggestions_HOOK(array $variables) {
  *
  * @see hook_theme_suggestions_HOOK_alter()
  */
-function hook_theme_suggestions_alter(array &$suggestions, array $variables, $hook) {
+function hook_theme_suggestions_alter(array &$suggestions, array &$variables, $hook) {
   // Add an interface-language specific suggestion to all theme hooks.
   $suggestions[] = $hook . '__' . \Drupal::languageManager()->getCurrentLanguage()->getId();
 }
@@ -733,15 +750,15 @@ function hook_theme_suggestions_alter(array &$suggestions, array $variables, $ho
  * @endcode
  *
  * @param array $suggestions
- *   An array of theme suggestions.
+ *   An array of theme suggestions, passed by reference.
  * @param array $variables
- *   An array of variables passed to the theme hook. Note that this hook is
- *   invoked before any preprocessing.
+ *   An array of variables passed to the theme hook, passed by reference. Note
+ *   that this hook is invoked before any preprocessing.
  *
  * @see hook_theme_suggestions_alter()
  * @see hook_theme_suggestions_HOOK()
  */
-function hook_theme_suggestions_HOOK_alter(array &$suggestions, array $variables) {
+function hook_theme_suggestions_HOOK_alter(array &$suggestions, array &$variables) {
   if (empty($variables['header'])) {
     $suggestions[] = 'hookname__no_header';
   }
@@ -1224,13 +1241,15 @@ function hook_page_bottom(array &$page_bottom) {
  *     the standard preprocess functions to run. This can be used to give a
  *     theme FULL control over how variables are set. For example, if a theme
  *     wants total control over how certain variables in the page.html.twig are
- *     set, this can be set to true. Please keep in mind that when this is used
- *     by a theme, that theme becomes responsible for making sure necessary
- *     variables are set.
+ *     set, this can be set to true. Keep in mind that when this is used by a
+ *     theme, that theme becomes responsible for making sure necessary variables
+ *     are set.
  *   - type: (automatically derived) Where the theme hook is defined:
  *     'module', 'theme_engine', or 'theme'.
  *   - theme path: The directory path of the theme or module. If not defined,
  *     it is determined during the registry process.
+ *   - deprecated: The deprecated key marks a twig template as deprecated with
+ *     a custom message.
  *
  * @see themeable
  * @see hook_theme_registry_alter()

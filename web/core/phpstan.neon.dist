@@ -8,6 +8,9 @@ parameters:
 
   level: 1
 
+  fileExtensions:
+    - sh
+
   paths:
     - .
     - ../composer
@@ -20,12 +23,14 @@ parameters:
     - */tests/fixtures/*.php
     - */tests/fixtures/*.php.gz
     # Skip Drupal 6 & 7 code.
-    - core/scripts/generate-d6-content.sh
-    - core/scripts/generate-d7-content.sh
+    - scripts/dump-database-d?.sh
+    - scripts/generate-d?-content.sh
     # Skip data files.
     - lib/Drupal/Component/Transliteration/data/*.php
     # Below extends on purpose a non existing class for testing.
     - modules/system/tests/modules/plugin_test/src/Plugin/plugin_test/fruit/ExtendingNonInstalledClass.php
+    - modules/system/tests/modules/plugin_test/src/Plugin/plugin_test/custom_annotation/UsingNonInstalledTraitClass.php
+    - modules/system/tests/modules/plugin_test/src/Plugin/plugin_test/custom_annotation/ExtendingNonInstalledClass.php
 
   ignoreErrors:
     # new static() is a best practice in Drupal, so we cannot fix that.
@@ -34,6 +39,4 @@ parameters:
     # Ignore common errors for now.
     - "#Drupal calls should be avoided in classes, use dependency injection instead#"
     - "#^Plugin definitions cannot be altered.#"
-    - "#^Missing cache backend declaration for performance.#"
-    - "#cache tag might be unclear and does not contain the cache key in it.#"
     - "#^Class .* extends @internal class#"

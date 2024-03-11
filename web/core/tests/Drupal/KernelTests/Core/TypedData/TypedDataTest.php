@@ -10,6 +10,7 @@ use Drupal\Core\TypedData\MapDataDefinition;
 use Drupal\Core\TypedData\Type\BinaryInterface;
 use Drupal\Core\TypedData\Type\BooleanInterface;
 use Drupal\Core\TypedData\Type\DateTimeInterface;
+use Drupal\Core\TypedData\Type\DecimalInterface;
 use Drupal\Core\TypedData\Type\DurationInterface;
 use Drupal\Core\TypedData\Type\FloatInterface;
 use Drupal\Core\TypedData\Type\IntegerInterface;
@@ -115,6 +116,27 @@ class TypedDataTest extends KernelTestBase {
     $typed_data->setValue(NULL);
     $this->assertNull($typed_data->getValue(), 'Integer wrapper is null-able.');
     $this->assertEquals(0, $typed_data->validate()->count());
+    $typed_data->setValue('invalid');
+    $this->assertEquals(1, $typed_data->validate()->count(), 'Validation detected invalid value.');
+
+    // Decimal type.
+    $value = (string) (mt_rand(1, 10000) / 100);
+    $typed_data = $this->createTypedData(['type' => 'decimal'], $value);
+    $this->assertInstanceOf(DecimalInterface::class, $typed_data);
+    $this->assertSame($value, $typed_data->getValue(), 'Decimal value was fetched.');
+    $this->assertEquals(0, $typed_data->validate()->count());
+    $new_value = (string) (mt_rand(1, 10000) / 100);
+    $typed_data->setValue($new_value);
+    $this->assertSame($new_value, $typed_data->getValue(), 'Decimal value was changed.');
+    $this->assertIsString($typed_data->getString());
+    $this->assertEquals(0, $typed_data->validate()->count());
+    $typed_data->setValue(NULL);
+    $this->assertNull($typed_data->getValue(), 'Decimal wrapper is null-able.');
+    $this->assertEquals(0, $typed_data->validate()->count());
+    $typed_data->setValue(0);
+    $this->assertSame('0.0', $typed_data->getCastedValue(), '0.0 casted value was fetched.');
+    $typed_data->setValue('1337e0');
+    $this->assertEquals(1, $typed_data->validate()->count(), 'Scientific notation is not allowed in numeric type.');
     $typed_data->setValue('invalid');
     $this->assertEquals(1, $typed_data->validate()->count(), 'Validation detected invalid value.');
 
@@ -312,7 +334,7 @@ class TypedDataTest extends KernelTestBase {
     $typed_data->setValue(NULL);
     $this->assertNull($typed_data->getValue(), 'Email wrapper is null-able.');
     $this->assertEquals(0, $typed_data->validate()->count());
-    $typed_data->setValue('invalidATexample.com');
+    $typed_data->setValue('invalidAtExample.com');
     $this->assertEquals(1, $typed_data->validate()->count(), 'Validation detected invalid value.');
 
     // Binary type.
@@ -479,8 +501,8 @@ class TypedDataTest extends KernelTestBase {
     // Test working with a simple map.
     $value = [
       'one' => 'eins',
-      'two' => 'zwei',
-      'three' => 'drei',
+      'two' => 'beta',
+      'three' => 'gamma',
     ];
     $definition = MapDataDefinition::create()
       ->setPropertyDefinition('one', DataDefinition::create('string'))
@@ -506,11 +528,11 @@ class TypedDataTest extends KernelTestBase {
     // Test getting and setting properties.
     $this->assertEquals('eins', $typed_data->get('one')->getValue());
     $this->assertEquals($value, $typed_data->toArray());
-    $typed_data->set('one', 'uno');
-    $this->assertEquals('uno', $typed_data->get('one')->getValue());
+    $typed_data->set('one', 'alpha');
+    $this->assertEquals('alpha', $typed_data->get('one')->getValue());
     // Make sure the update is reflected in the value of the map also.
     $value = $typed_data->getValue();
-    $this->assertEquals(['one' => 'uno', 'two' => 'zwei', 'three' => 'drei'], $value);
+    $this->assertEquals(['one' => 'alpha', 'two' => 'beta', 'three' => 'gamma'], $value);
 
     $properties = $typed_data->getProperties();
     $this->assertEquals(array_keys($value), array_keys($properties));
@@ -523,8 +545,8 @@ class TypedDataTest extends KernelTestBase {
     $this->assertEquals(['foo', 'one', 'two', 'three'], array_keys($typed_data->getValue()));
 
     // Test getting the string representation.
-    $typed_data->setValue(['one' => 'eins', 'two' => '', 'three' => 'drei']);
-    $this->assertEquals('eins, drei', $typed_data->getString());
+    $typed_data->setValue(['one' => 'eins', 'two' => '', 'three' => 'gamma']);
+    $this->assertEquals('eins, gamma', $typed_data->getString());
 
     // Test isEmpty and cloning.
     $this->assertFalse($typed_data->isEmpty());

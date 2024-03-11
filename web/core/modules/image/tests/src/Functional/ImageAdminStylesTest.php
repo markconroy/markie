@@ -2,7 +2,6 @@
 
 namespace Drupal\Tests\image\Functional;
 
-use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Entity\Entity\EntityViewDisplay;
 use Drupal\Core\Url;
 use Drupal\file\Entity\File;
@@ -15,6 +14,7 @@ use Drupal\Tests\TestFileCreationTrait;
  * Tests creation, deletion, and editing of image styles and effects.
  *
  * @group image
+ * @group #slow
  */
 class ImageAdminStylesTest extends ImageFieldTestBase {
 
@@ -80,7 +80,7 @@ class ImageAdminStylesTest extends ImageFieldTestBase {
     $admin_path = 'admin/config/media/image-styles';
 
     // Setup a style to be created and effects to add to it.
-    $style_name = strtolower($this->randomMachineName(10));
+    $style_name = $this->randomMachineName(10);
     $style_label = $this->randomString();
     $style_path = $admin_path . '/manage/' . $style_name;
     $effect_edits = [
@@ -166,18 +166,13 @@ class ImageAdminStylesTest extends ImageFieldTestBase {
       $uuids[$effect->getPluginId()] = $uuid;
       $effect_configuration = $effect->getConfiguration();
       foreach ($effect_edits[$effect->getPluginId()] as $field => $value) {
-        $this->assertEquals($effect_configuration['data'][$field], $value, new FormattableMarkup('The %field field in the %effect effect has the correct value of %value.', ['%field' => $field, '%effect' => $effect->getPluginId(), '%value' => $value]));
+        $this->assertEquals($effect_configuration['data'][$field], $value, "The $field field in the {$effect->getPluginId()} effect has the correct value of $value.");
       }
     }
 
     // Assert that every effect was saved.
     foreach (array_keys($effect_edits) as $effect_name) {
-      $this->assertTrue(isset($uuids[$effect_name]), new FormattableMarkup(
-        'A %effect_name effect was saved with ID %uuid',
-        [
-          '%effect_name' => $effect_name,
-          '%uuid' => $uuids[$effect_name],
-        ]));
+      $this->assertTrue(isset($uuids[$effect_name]), "A $effect_name effect was saved with ID $uuids[$effect_name]");
     }
 
     // Image style overview form (ordering and renaming).
@@ -197,7 +192,7 @@ class ImageAdminStylesTest extends ImageFieldTestBase {
 
     // Test the style overview form.
     // Change the name of the style and adjust the weights of effects.
-    $style_name = strtolower($this->randomMachineName(10));
+    $style_name = $this->randomMachineName(10);
     $style_label = $this->randomMachineName();
     $weight = count($effect_edits);
     $edit = [
@@ -211,7 +206,7 @@ class ImageAdminStylesTest extends ImageFieldTestBase {
 
     // Create an image to make sure it gets flushed after saving.
     $image_path = $this->createSampleImage($style);
-    $this->assertEquals(1, $this->getImageCount($style), new FormattableMarkup('Image style %style image %file successfully generated.', ['%style' => $style->label(), '%file' => $image_path]));
+    $this->assertEquals(1, $this->getImageCount($style), "Image style {$style->label()} image $image_path successfully generated.");
 
     $this->drupalGet($style_path);
     $this->submitForm($edit, 'Save');
@@ -230,7 +225,7 @@ class ImageAdminStylesTest extends ImageFieldTestBase {
     // Check that the image was flushed after updating the style.
     // This is especially important when renaming the style. Make sure that
     // the old image directory has been deleted.
-    $this->assertEquals(0, $this->getImageCount($style), new FormattableMarkup('Image style %style was flushed after renaming the style and updating the order of effects.', ['%style' => $style->label()]));
+    $this->assertEquals(0, $this->getImageCount($style), "Image style {$style->label()} was flushed after renaming the style and updating the order of effects.");
 
     // Load the style by the new name with the new weights.
     $style = ImageStyle::load($style_name);
@@ -251,7 +246,7 @@ class ImageAdminStylesTest extends ImageFieldTestBase {
 
     // Create an image to make sure it gets flushed after deleting an effect.
     $image_path = $this->createSampleImage($style);
-    $this->assertEquals(1, $this->getImageCount($style), new FormattableMarkup('Image style %style image %file successfully generated.', ['%style' => $style->label(), '%file' => $image_path]));
+    $this->assertEquals(1, $this->getImageCount($style), "Image style {$style->label()} image $image_path successfully generated.");
 
     // Delete the 'image_crop' effect from the style.
     $this->drupalGet($style_path . '/effects/' . $uuids['image_crop'] . '/delete');
@@ -266,12 +261,7 @@ class ImageAdminStylesTest extends ImageFieldTestBase {
     // actually deleted.
     $entity_type_manager = $this->container->get('entity_type.manager');
     $style = $entity_type_manager->getStorage('image_style')->loadUnchanged($style->id());
-    $this->assertFalse($style->getEffects()->has($uuids['image_crop']), new FormattableMarkup(
-      'Effect with ID %uuid no longer found on image style %style',
-      [
-        '%uuid' => $uuids['image_crop'],
-        '%style' => $style->label(),
-      ]));
+    $this->assertFalse($style->getEffects()->has($uuids['image_crop']), "Effect with ID {$uuids['image_crop']} no longer found on image style {$style->label()}");
 
     // Additional test on Rotate effect, for transparent background.
     $edit = [
@@ -296,7 +286,7 @@ class ImageAdminStylesTest extends ImageFieldTestBase {
     $directory = 'public://styles/' . $style_name;
     $this->assertDirectoryDoesNotExist($directory);
 
-    $this->assertNull(ImageStyle::load($style_name), new FormattableMarkup('Image style %style successfully deleted.', ['%style' => $style->label()]));
+    $this->assertNull(ImageStyle::load($style_name), "Image style {$style->label()} successfully deleted.");
 
     // Test empty text when there are no image styles.
 
@@ -317,14 +307,14 @@ class ImageAdminStylesTest extends ImageFieldTestBase {
    */
   public function testStyleReplacement() {
     // Create a new style.
-    $style_name = strtolower($this->randomMachineName(10));
+    $style_name = $this->randomMachineName(10);
     $style_label = $this->randomString();
     $style = ImageStyle::create(['name' => $style_name, 'label' => $style_label]);
     $style->save();
     $style_path = 'admin/config/media/image-styles/manage/';
 
     // Create an image field that uses the new style.
-    $field_name = strtolower($this->randomMachineName(10));
+    $field_name = $this->randomMachineName(10);
     $this->createImageField($field_name, 'article');
     \Drupal::service('entity_display.repository')
       ->getViewDisplay('node', 'article')
@@ -351,7 +341,7 @@ class ImageAdminStylesTest extends ImageFieldTestBase {
     $this->assertSession()->responseContains($file_url_generator->transformRelative($style->buildUrl($original_uri)));
 
     // Rename the style and make sure the image field is updated.
-    $new_style_name = strtolower($this->randomMachineName(10));
+    $new_style_name = $this->randomMachineName(10);
     $new_style_label = $this->randomString();
     $edit = [
       'name' => $new_style_name,
@@ -441,7 +431,7 @@ class ImageAdminStylesTest extends ImageFieldTestBase {
     $admin_path = 'admin/config/media/image-styles';
 
     // Create a new style.
-    $style_name = strtolower($this->randomMachineName(10));
+    $style_name = $this->randomMachineName(10);
     $style = ImageStyle::create(['name' => $style_name, 'label' => $this->randomString()]);
     $style->save();
 
@@ -471,13 +461,13 @@ class ImageAdminStylesTest extends ImageFieldTestBase {
    */
   public function testConfigImport() {
     // Create a new style.
-    $style_name = strtolower($this->randomMachineName(10));
+    $style_name = $this->randomMachineName(10);
     $style_label = $this->randomString();
     $style = ImageStyle::create(['name' => $style_name, 'label' => $style_label]);
     $style->save();
 
     // Create an image field that uses the new style.
-    $field_name = strtolower($this->randomMachineName(10));
+    $field_name = $this->randomMachineName(10);
     $this->createImageField($field_name, 'article');
     \Drupal::service('entity_display.repository')
       ->getViewDisplay('node', 'article')
@@ -526,6 +516,40 @@ class ImageAdminStylesTest extends ImageFieldTestBase {
     $this->drupalGet('admin/config/media/image-styles');
     $this->clickLink('Edit');
     $this->assertSession()->pageTextContains("Select a new effect");
+  }
+
+  /**
+   * Tests the display of preview images using a private scheme.
+   */
+  public function testPreviewImageShowInPrivateScheme(): void {
+    $this->config('system.file')->set('default_scheme', 'private')->save();
+
+    /** @var \Drupal\Core\File\FileUrlGeneratorInterface $file_url_generator */
+    $file_url_generator = \Drupal::service('file_url_generator');
+
+    // Get the original preview image file in core config.
+    $original_path = $this->config('image.settings')->get('preview_image');
+    $style = ImageStyle::create(['name' => 'test_foo', 'label' => 'test foo']);
+    $style->save();
+
+    // Build the derivative preview image file with the Image Style.
+    // @see template_preprocess_image_style_preview()
+    $preview_file = $style->buildUri($original_path);
+    $style->createDerivative($original_path, $preview_file);
+
+    // Check if the derivative image exists.
+    $this->assertFileExists($preview_file);
+
+    // Generate itok token for the preview image.
+    $itok = $style->getPathToken('private://' . $original_path);
+
+    $url = $file_url_generator->generateAbsoluteString($preview_file);
+    $url .= '?itok=' . $itok;
+
+    // Check if the preview image with style is shown.
+    $this->drupalGet($url);
+    $this->assertSession()->statusCodeEquals(200);
+    $this->assertSession()->responseHeaderContains('Content-Type', 'image/png');
   }
 
 }

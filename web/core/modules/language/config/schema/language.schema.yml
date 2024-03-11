@@ -71,7 +71,7 @@ language.negotiation:
             type: string
             label: 'Domain'
     selected_langcode:
-      type: string
+      type: langcode
       label: 'Selected language'
 
 language.mappings:
@@ -92,7 +92,7 @@ language.entity.*:
       type: string
       label: 'ID'
     label:
-      type: label
+      type: required_label
       label: 'Label'
     direction:
       type: string
@@ -118,8 +118,12 @@ language.content_settings.*.*:
       type:  string
       label: 'Bundle'
     default_langcode:
-      type: string
+      type: langcode
       label: 'Default language'
+      constraints:
+        Choice:
+          # The "default language" has a different list of allowed values.
+          callback: '\Drupal\language\Entity\ContentLanguageSettings::getAllValidDefaultLangcodes'
     language_alterable:
       type: boolean
       label: 'Allow to alter the language'
@@ -130,12 +134,4 @@ condition.plugin.language:
     langcodes:
       type: sequence
       sequence:
-        type: string
-
-field.widget.settings.language_select:
-  type: mapping
-  label: 'Language format settings'
-  mapping:
-    include_locked:
-      type: boolean
-      label: 'Include locked languages'
+        type: langcode

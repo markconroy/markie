@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\Traits;
 
 /**
@@ -32,12 +34,13 @@ trait PhpUnitWarnings {
     'Support for using expectException() with PHPUnit\\Framework\\Error\\Error is deprecated and will be removed in PHPUnit 10. Use expectError() instead.',
     'assertDirectoryNotIsWritable() is deprecated and will be removed in PHPUnit 10. Refactor your code to use assertDirectoryIsNotWritable() instead.',
     'assertFileNotIsWritable() is deprecated and will be removed in PHPUnit 10. Refactor your code to use assertFileIsNotWritable() instead.',
+    // cspell:disable-next-line
     'The at() matcher has been deprecated. It will be removed in PHPUnit 10. Please refactor your test to not rely on the order in which methods are invoked.',
     // PHPUnit 9.6.
     'Expecting E_WARNING and E_USER_WARNING is deprecated and will no longer be possible in PHPUnit 10.',
     'Expecting E_ERROR and E_USER_ERROR is deprecated and will no longer be possible in PHPUnit 10.',
-    'assertObjectHasAttribute() is deprecated and will be removed in PHPUnit 10. Refactor your test to use assertObjectHasProperty() (PHPUnit 10.1.0+) instead.',
-    'assertObjectNotHasAttribute() is deprecated and will be removed in PHPUnit 10. Refactor your test to use assertObjectNotHasProperty() (PHPUnit 10.1.0+) instead.',
+    'assertObjectHasAttribute() is deprecated and will be removed in PHPUnit 10. Refactor your test to use assertObjectHasProperty() instead.',
+    'assertObjectNotHasAttribute() is deprecated and will be removed in PHPUnit 10. Refactor your test to use assertObjectNotHasProperty() instead.',
   ];
 
   /**

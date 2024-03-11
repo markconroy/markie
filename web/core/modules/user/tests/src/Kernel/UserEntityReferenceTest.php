@@ -4,7 +4,7 @@ namespace Drupal\Tests\user\Kernel;
 
 use Drupal\field\Entity\FieldConfig;
 use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
-use Drupal\Tests\field\Traits\EntityReferenceTestTrait;
+use Drupal\Tests\field\Traits\EntityReferenceFieldCreationTrait;
 use Drupal\user\Entity\Role;
 
 /**
@@ -14,7 +14,7 @@ use Drupal\user\Entity\Role;
  */
 class UserEntityReferenceTest extends EntityKernelTestBase {
 
-  use EntityReferenceTestTrait;
+  use EntityReferenceFieldCreationTrait;
 
   /**
    * A randomly-generated role for testing purposes.
@@ -37,13 +37,13 @@ class UserEntityReferenceTest extends EntityKernelTestBase {
     parent::setUp();
 
     $this->role1 = Role::create([
-      'id' => strtolower($this->randomMachineName(8)),
+      'id' => $this->randomMachineName(8),
       'label' => $this->randomMachineName(8),
     ]);
     $this->role1->save();
 
     $this->role2 = Role::create([
-      'id' => strtolower($this->randomMachineName(8)),
+      'id' => $this->randomMachineName(8),
       'label' => $this->randomMachineName(8),
     ]);
     $this->role2->save();

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\media\FunctionalJavascript;
 
 use Drupal\views\Views;
@@ -29,7 +31,7 @@ class MediaViewsWizardTest extends MediaJavascriptTestBase {
 
     $this->createMediaType('test');
 
-    $view_id = strtolower($this->randomMachineName(16));
+    $view_id = $this->randomMachineName(16);
     $this->drupalGet('admin/structure/views/add');
     $page->fillField('label', $view_id);
     $this->waitUntilVisible('.machine-name-value');
@@ -63,7 +65,7 @@ class MediaViewsWizardTest extends MediaJavascriptTestBase {
     $page = $session->getPage();
     $assert_session = $this->assertSession();
 
-    $view_id = strtolower($this->randomMachineName(16));
+    $view_id = $this->randomMachineName(16);
     $this->drupalGet('admin/structure/views/add');
     $page->fillField('label', $view_id);
     $this->waitUntilVisible('.machine-name-value');

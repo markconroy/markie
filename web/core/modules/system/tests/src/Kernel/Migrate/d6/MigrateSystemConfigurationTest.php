@@ -14,7 +14,7 @@ class MigrateSystemConfigurationTest extends MigrateDrupal6TestBase {
   /**
    * {@inheritdoc}
    */
-  protected static $modules = ['action', 'file', 'system'];
+  protected static $modules = ['file', 'system'];
 
   protected $expectedConfig = [
     'system.cron' => [
@@ -87,8 +87,6 @@ class MigrateSystemConfigurationTest extends MigrateDrupal6TestBase {
         // gzip is not handled by the migration.
         'gzip' => TRUE,
       ],
-      // stale_file_threshold is not handled by the migration.
-      'stale_file_threshold' => 2592000,
     ],
     'system.rss' => [
       'items' => [

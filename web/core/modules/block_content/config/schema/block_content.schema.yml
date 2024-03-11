@@ -5,10 +5,10 @@ block_content.type.*:
   label: 'Block type settings'
   mapping:
     id:
-      type: string
+      type: machine_name
       label: 'ID'
     label:
-      type: label
+      type: required_label
       label: 'Label'
     revision:
       type: integer

@@ -5,6 +5,7 @@ namespace Drupal\field_ui\Routing;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Routing\RouteSubscriberBase;
 use Drupal\Core\Routing\RoutingEvents;
+use Drupal\field_ui\Controller\FieldConfigAddController;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;
 
@@ -72,14 +73,6 @@ class RouteSubscriber extends RouteSubscriberBase {
         $collection->add("entity.field_config.{$entity_type_id}_field_edit_form", $route);
 
         $route = new Route(
-          "$path/fields/{field_config}/storage",
-          ['_entity_form' => 'field_storage_config.edit'] + $defaults,
-          ['_permission' => 'administer ' . $entity_type_id . ' fields'],
-          $options
-        );
-        $collection->add("entity.field_config.{$entity_type_id}_storage_edit_form", $route);
-
-        $route = new Route(
           "$path/fields/{field_config}/delete",
           ['_entity_form' => 'field_config.delete'] + $defaults,
           ['_entity_access' => 'field_config.delete'],
@@ -108,6 +101,17 @@ class RouteSubscriber extends RouteSubscriberBase {
           $options
         );
         $collection->add("field_ui.field_storage_config_add_$entity_type_id", $route);
+
+        $route = new Route(
+          "$path/add-field/{entity_type}/{field_name}",
+          [
+            '_controller' => FieldConfigAddController::class . '::fieldConfigAddConfigureForm',
+            '_title' => 'Add field',
+          ] + $defaults,
+          ['_permission' => 'administer ' . $entity_type_id . ' fields'],
+          $options
+        );
+        $collection->add("field_ui.field_add_$entity_type_id", $route);
 
         $route = new Route(
           "$path/fields/reuse",

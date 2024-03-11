@@ -169,7 +169,7 @@ class TaxonomyIndexTid extends ManyToOne {
     $vocabulary = $this->vocabularyStorage->load($this->options['vid']);
     if (empty($vocabulary) && $this->options['limit']) {
       $form['markup'] = [
-        '#markup' => '<div class="js-form-item form-item">' . $this->t('An invalid vocabulary is selected. Please change it in the options.') . '</div>',
+        '#markup' => '<div class="js-form-item form-item">' . $this->t('An invalid vocabulary is selected. Change it in the options.') . '</div>',
       ];
       return;
     }
@@ -398,19 +398,6 @@ class TaxonomyIndexTid extends ManyToOne {
       }
     }
     return parent::adminSummary();
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getCacheContexts() {
-    $contexts = parent::getCacheContexts();
-    // The result potentially depends on term access and so is just cacheable
-    // per user.
-    // @todo See https://www.drupal.org/node/2352175.
-    $contexts[] = 'user';
-
-    return $contexts;
   }
 
   /**

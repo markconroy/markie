@@ -6,9 +6,9 @@ use Drupal\block_content\Access\DependentAccessInterface;
 use Drupal\block_content\Event\BlockContentGetDependencyEvent;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Access\AccessResultInterface;
+use Drupal\Core\Entity\EntityAccessControlHandler;
 use Drupal\Core\Entity\EntityHandlerInterface;
 use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Entity\EntityAccessControlHandler;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Session\AccountInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -57,52 +57,26 @@ class BlockContentAccessControlHandler extends EntityAccessControlHandler implem
   protected function checkAccess(EntityInterface $entity, $operation, AccountInterface $account) {
     assert($entity instanceof BlockContentInterface);
     $bundle = $entity->bundle();
-    $forbidIfNotDefaultAndLatest = fn (): AccessResultInterface => AccessResult::forbiddenIf($entity->isDefaultRevision() && $entity->isLatestRevision());
     $forbidIfNotReusable = fn (): AccessResultInterface => AccessResult::forbiddenIf($entity->isReusable() === FALSE, sprintf('Block content must be reusable to use `%s` operation', $operation));
-    $access = match ($operation) {
-      // Allow view and update access to user with the 'edit any (type) block
-      // content' permission or the 'administer blocks' permission.
-      'view' => AccessResult::allowedIf($entity->isPublished())
-        ->orIf(AccessResult::allowedIfHasPermissions($account, [
-          'access block library',
-        ]))->orIf(AccessResult::allowedIfHasPermissions($account, [
-          'administer block content',
-        ])),
-      'update' => AccessResult::allowedIfHasPermissions($account, [
-        'access block library',
-        'edit any ' . $bundle . ' block content',
-      ])->orIf(AccessResult::allowedIfHasPermissions($account, [
-        'administer block content',
-      ])),
-      'delete' => AccessResult::allowedIfHasPermissions($account, [
-        'access block library',
-        'delete any ' . $bundle . ' block content',
-      ])->orIf(AccessResult::allowedIfHasPermissions($account, [
-        'administer block content',
-      ])),
-      // Revisions.
-      'view all revisions' => AccessResult::allowedIfHasPermissions($account, [
-        'access block library',
-        'view any ' . $bundle . ' block content history',
-      ])->orIf(AccessResult::allowedIfHasPermissions($account, [
-        'administer block content',
-      ])),
-      'revert' => AccessResult::allowedIfHasPermissions($account, [
-        'access block library',
-        'revert any ' . $bundle . ' block content revisions',
-      ])->orIf($forbidIfNotDefaultAndLatest())->orIf($forbidIfNotReusable()),
-      'delete revision' => AccessResult::allowedIfHasPermissions($account, [
-        'access block library',
-        'delete any ' . $bundle . ' block content revisions',
-      ])
-        ->orIf($forbidIfNotDefaultAndLatest())
-        ->orIf($forbidIfNotReusable())
-        ->orIf(AccessResult::allowedIfHasPermissions($account, [
-          'administer block content',
-        ])),
+    $access = AccessResult::allowedIfHasPermissions($account, ['administer block content']);
+    if (!$access->isAllowed()) {
+      $access = match ($operation) {
+        // Allow view and update access to user with the 'edit any (type) block
+        // content' permission or the 'administer block content' permission.
+        'view' => AccessResult::allowedIf($entity->isPublished())
+          ->orIf(AccessResult::allowedIfHasPermission($account, 'access block library')),
+        'update' => AccessResult::allowedIfHasPermission($account, 'edit any ' . $bundle . ' block content'),
+        'delete' => AccessResult::allowedIfHasPermission($account, 'delete any ' . $bundle . ' block content'),
+        // Revisions.
+        'view revision', 'view all revisions' => AccessResult::allowedIfHasPermission($account, 'view any ' . $bundle . ' block content history'),
+        'revert' => AccessResult::allowedIfHasPermission($account, 'revert any ' . $bundle . ' block content revisions')
+          ->orIf($forbidIfNotReusable()),
+        'delete revision' => AccessResult::allowedIfHasPermission($account, 'delete any ' . $bundle . ' block content revisions')
+          ->orIf($forbidIfNotReusable()),
 
-      default => parent::checkAccess($entity, $operation, $account),
-    };
+        default => parent::checkAccess($entity, $operation, $account),
+      };
+    }
 
     // Add the entity as a cacheable dependency because access will at least be
     // determined by whether the block is reusable.

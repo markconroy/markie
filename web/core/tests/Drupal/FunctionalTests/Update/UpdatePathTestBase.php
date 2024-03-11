@@ -3,8 +3,8 @@
 namespace Drupal\FunctionalTests\Update;
 
 use Drupal\Component\Utility\Crypt;
+use Drupal\Component\Utility\Html;
 use Drupal\Core\Site\Settings;
-use Drupal\Core\Test\TestRunnerKernel;
 use Drupal\Tests\BrowserTestBase;
 use Drupal\Core\Database\Database;
 use Drupal\Core\DependencyInjection\ContainerBuilder;
@@ -67,41 +67,6 @@ abstract class UpdatePathTestBase extends BrowserTestBase {
   protected $databaseDumpFiles = [];
 
   /**
-   * Flag that indicates whether the child site has been updated.
-   *
-   * @var bool
-   */
-  protected $upgradedSite = FALSE;
-
-  /**
-   * Array of errors triggered during the update process.
-   *
-   * @var array
-   */
-  protected $upgradeErrors = [];
-
-  /**
-   * Array of modules loaded when the test starts.
-   *
-   * @var array
-   */
-  protected $loadedModules = [];
-
-  /**
-   * Flag to indicate whether zlib is installed or not.
-   *
-   * @var bool
-   */
-  protected $zlibInstalled = TRUE;
-
-  /**
-   * Flag to indicate whether there are pending updates or not.
-   *
-   * @var bool
-   */
-  protected $pendingUpdates = TRUE;
-
-  /**
    * The update URL.
    *
    * @var string
@@ -118,26 +83,25 @@ abstract class UpdatePathTestBase extends BrowserTestBase {
   protected $strictConfigSchema = FALSE;
 
   /**
-   * Overrides BrowserTestBase::setUp() for update testing.
+   * {@inheritdoc}
+   */
+  protected function setUp(): void {
+    if (!extension_loaded('zlib')) {
+      $this->markTestSkipped('The zlib extension is not available.');
+    }
+
+    parent::setUp();
+  }
+
+  /**
+   * Overrides BrowserTestBase::installDrupal() for update testing.
    *
    * The main difference in this method is that rather than performing the
    * installation via the installer, a database is loaded. Additional work is
    * then needed to set various things such as the config directories and the
    * container that would normally be done via the installer.
    */
-  protected function setUp(): void {
-    parent::setUpAppRoot();
-    $this->zlibInstalled = function_exists('gzopen');
-
-    $request = Request::createFromGlobals();
-
-    // Boot up Drupal into a state where calling the database API is possible.
-    // This is used to initialize the database system, so we can load the dump
-    // files.
-    $autoloader = require $this->root . '/autoload.php';
-    $kernel = TestRunnerKernel::createFromRequest($request, $autoloader);
-    $kernel->loadLegacyIncludes();
-
+  public function installDrupal() {
     // Set the update URL. This must be set here rather than in
     // self::__construct() or the old URL generator will leak additional test
     // sites. Additionally, we need to prevent the path alias processor from
@@ -145,20 +109,14 @@ abstract class UpdatePathTestBase extends BrowserTestBase {
     // the updates.
     $this->updateUrl = Url::fromRoute('system.db_update', [], ['path_processing' => FALSE]);
 
-    $this->setupBaseUrl();
+    $this->initUserSession();
+    $this->prepareSettings();
+    $this->doInstall();
+    $this->initSettings();
 
-    // Install Drupal test site.
-    $this->prepareEnvironment();
-    $this->runDbTasks();
-
-    // We are going to set a missing zlib requirement property for usage
-    // during the performUpgrade() and tearDown() methods. Also set that the
-    // tests failed.
-    if (!$this->zlibInstalled) {
-      parent::setUp();
-      return;
-    }
-    $this->installDrupal();
+    $request = Request::createFromGlobals();
+    $container = $this->initKernel($request);
+    $this->initConfig($container);
 
     // Add the config directories to settings.php.
     $sync_directory = Settings::get('config_sync_directory');
@@ -175,26 +133,6 @@ abstract class UpdatePathTestBase extends BrowserTestBase {
     $this->replaceUser1();
 
     require_once $this->root . '/core/includes/update.inc';
-
-    // Setup Mink.
-    $this->initMink();
-
-    // Set up the browser test output file.
-    $this->initBrowserOutputFile();
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function installDrupal() {
-    $this->initUserSession();
-    $this->prepareSettings();
-    $this->doInstall();
-    $this->initSettings();
-
-    $request = Request::createFromGlobals();
-    $container = $this->initKernel($request);
-    $this->initConfig($container);
   }
 
   /**
@@ -245,7 +183,7 @@ abstract class UpdatePathTestBase extends BrowserTestBase {
     ];
 
     // Force every update hook to only run one entity per batch.
-    $settings['entity_update_batch_size'] = (object) [
+    $settings['settings']['entity_update_batch_size'] = (object) [
       'value' => 1,
       'required' => TRUE,
     ];
@@ -263,10 +201,6 @@ abstract class UpdatePathTestBase extends BrowserTestBase {
    * Helper function to run pending database updates.
    */
   protected function runUpdates() {
-    if (!$this->zlibInstalled) {
-      $this->fail('Missing zlib requirement for update tests.');
-      return FALSE;
-    }
     $this->doRunUpdates($this->updateUrl);
   }
 
@@ -306,6 +240,60 @@ abstract class UpdatePathTestBase extends BrowserTestBase {
     $account->setEmail($this->rootUser->getEmail());
     $account->setUsername($this->rootUser->getAccountName());
     $account->save();
+  }
+
+  /**
+   * Tests that the database was properly loaded.
+   */
+  protected function testDatabaseLoaded() {
+    // Set a value in the cache to prove caches are cleared.
+    \Drupal::service('cache.default')->set(__CLASS__, 'Test');
+
+    /** @var \Drupal\Core\Update\UpdateHookRegistry $update_registry */
+    $update_registry = \Drupal::service('update.update_hook_registry');
+    foreach (['user' => 9301, 'node' => 8700, 'system' => 8901, 'update_test_schema' => 8000] as $module => $schema) {
+      $this->assertEquals($schema, $update_registry->getInstalledVersion($module), "Module $module schema is $schema");
+    }
+
+    // Ensure that all {router} entries can be unserialized. If they cannot be
+    // unserialized a notice will be thrown by PHP.
+
+    $result = \Drupal::database()->select('router', 'r')
+      ->fields('r', ['name', 'route'])
+      ->execute()
+      ->fetchAllKeyed(0, 1);
+    // For the purpose of fetching the notices and displaying more helpful error
+    // messages, let's override the error handler temporarily.
+    set_error_handler(function ($severity, $message, $filename, $lineno) {
+      throw new \ErrorException($message, 0, $severity, $filename, $lineno);
+    });
+    foreach ($result as $route_name => $route) {
+      try {
+        unserialize($route);
+      }
+      catch (\Exception $e) {
+        $this->fail(sprintf('Error "%s" while unserializing route %s', $e->getMessage(), Html::escape($route_name)));
+      }
+    }
+    restore_error_handler();
+
+    // Before accessing the site we need to run updates first or the site might
+    // be broken.
+    $this->runUpdates();
+    $this->assertEquals('standard', \Drupal::config('core.extension')->get('profile'));
+    $this->assertEquals('Site-Install', \Drupal::config('system.site')->get('name'));
+    $this->drupalGet('<front>');
+    $this->assertSession()->pageTextContains('Site-Install');
+
+    // Ensure that the database tasks have been run during set up. Neither MySQL
+    // nor SQLite make changes that are testable.
+    $database = $this->container->get('database');
+    if ($database->driver() == 'pgsql') {
+      $this->assertEquals('on', $database->query("SHOW standard_conforming_strings")->fetchField());
+      $this->assertEquals('escape', $database->query("SHOW bytea_output")->fetchField());
+    }
+    // Ensure the test runners cache has been cleared.
+    $this->assertFalse(\Drupal::service('cache.default')->get(__CLASS__));
   }
 
 }

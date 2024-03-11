@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\Core\Form;
 
 use Drupal\Core\Form\FormInterface;
@@ -366,11 +368,11 @@ class FormStateTest extends UnitTestCase {
   public function testTemporaryValue() {
     $form_state = new FormState();
     $this->assertFalse($form_state->hasTemporaryValue('rainbow_sparkles'));
-    $form_state->setTemporaryValue('rainbow_sparkles', 'yes please');
-    $this->assertSame($form_state->getTemporaryValue('rainbow_sparkles'), 'yes please');
+    $form_state->setTemporaryValue('rainbow_sparkles', 'yes');
+    $this->assertSame($form_state->getTemporaryValue('rainbow_sparkles'), 'yes');
     $this->assertTrue($form_state->hasTemporaryValue('rainbow_sparkles'));
-    $form_state->setTemporaryValue(['rainbow_sparkles', 'magic_ponies'], 'yes please');
-    $this->assertSame($form_state->getTemporaryValue(['rainbow_sparkles', 'magic_ponies']), 'yes please');
+    $form_state->setTemporaryValue(['rainbow_sparkles', 'magic_ponies'], 'yes');
+    $this->assertSame($form_state->getTemporaryValue(['rainbow_sparkles', 'magic_ponies']), 'yes');
     $this->assertTrue($form_state->hasTemporaryValue(['rainbow_sparkles', 'magic_ponies']));
   }
 

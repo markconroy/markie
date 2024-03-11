@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\Core\Test;
 
+use Drupal\Component\Utility\Random;
 use Drupal\Tests\DrupalTestBrowser;
 use Drupal\Tests\UnitTestCase;
 use Drupal\Tests\BrowserTestBase;
@@ -52,9 +55,9 @@ class BrowserTestBaseTest extends UnitTestCase {
     $driver = new BrowserKitDriver($browserkit_client);
     $btb = $this->mockBrowserTestBaseWithDriver($driver);
 
-    $ref_gethttpclient = new \ReflectionMethod($btb, 'getHttpClient');
+    $reflected_get_http_client = new \ReflectionMethod($btb, 'getHttpClient');
 
-    $this->assertSame(get_class($expected), get_class($ref_gethttpclient->invoke($btb)));
+    $this->assertSame(get_class($expected), get_class($reflected_get_http_client->invoke($btb)));
   }
 
   /**
@@ -65,11 +68,11 @@ class BrowserTestBaseTest extends UnitTestCase {
     // RuntimeException.
     $btb = $this->mockBrowserTestBaseWithDriver(new \stdClass());
 
-    $ref_gethttpclient = new \ReflectionMethod($btb, 'getHttpClient');
+    $reflected_get_http_client = new \ReflectionMethod($btb, 'getHttpClient');
 
     $this->expectException(\RuntimeException::class);
     $this->expectExceptionMessage('The Mink client type stdClass does not support getHttpClient().');
-    $ref_gethttpclient->invoke($btb);
+    $reflected_get_http_client->invoke($btb);
   }
 
   /**
@@ -87,6 +90,19 @@ class BrowserTestBaseTest extends UnitTestCase {
     $btb->expects($this->never())->method($method);
     $ref_tearDown = new \ReflectionMethod($btb, 'tearDown');
     $ref_tearDown->invoke($btb);
+  }
+
+  /**
+   * Tests the deprecation of accessing the randomGenerator property directly.
+   *
+   * @group legacy
+   */
+  public function testGetRandomGeneratorPropertyDeprecation() {
+    $this->expectDeprecation('Accessing the randomGenerator property is deprecated in drupal:10.2.0 and is removed from drupal:11.0.0. Use getRandomGenerator() instead. See https://www.drupal.org/node/3358445');
+    // We purposely test accessing an undefined property here. We need to tell
+    // PHPStan to ignore that.
+    // @phpstan-ignore-next-line
+    $this->assertInstanceOf(Random::class, $this->randomGenerator);
   }
 
 }

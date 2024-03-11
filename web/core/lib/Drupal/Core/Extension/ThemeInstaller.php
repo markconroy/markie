@@ -159,6 +159,7 @@ class ThemeInstaller implements ThemeInstallerInterface {
         $unmet_module_dependencies = array_diff_key($module_dependencies, $installed_modules);
 
         if ($theme_data[$theme]->info[ExtensionLifecycle::LIFECYCLE_IDENTIFIER] === ExtensionLifecycle::DEPRECATED) {
+          // phpcs:ignore Drupal.Semantics.FunctionTriggerError
           @trigger_error("The theme '$theme' is deprecated. See " . $theme_data[$theme]->info['lifecycle_link'], E_USER_DEPRECATED);
         }
 
@@ -213,6 +214,12 @@ class ThemeInstaller implements ThemeInstallerInterface {
         throw new ExtensionNameLengthException("Theme name $key is over the maximum allowed length of " . DRUPAL_EXTENSION_NAME_MAX_LENGTH . ' characters.');
       }
 
+      // Throw an exception if a module with the same name is enabled.
+      $installed_modules = $extension_config->get('module') ?: [];
+      if (isset($installed_modules[$key])) {
+        throw new ExtensionNameReservedException("Theme name $key is already in use by an installed module.");
+      }
+
       // Validate default configuration of the theme. If there is existing
       // configuration then stop installing.
       $this->configInstaller->checkConfigurationToInstall('theme', $key);
@@ -259,7 +266,7 @@ class ThemeInstaller implements ThemeInstallerInterface {
     $theme_config = $this->configFactory->getEditable('system.theme');
     $list = $this->themeHandler->listInfo();
     foreach ($theme_list as $key) {
-      if (!isset($list[$key])) {
+      if ($extension_config->get("theme.$key") === NULL) {
         throw new UnknownExtensionException("Unknown theme: $key.");
       }
       if ($key === $theme_config->get('default')) {
@@ -270,7 +277,7 @@ class ThemeInstaller implements ThemeInstallerInterface {
       }
       // Base themes cannot be uninstalled if sub themes are installed, and if
       // they are not uninstalled at the same time.
-      if (!empty($list[$key]->sub_themes)) {
+      if (isset($list[$key]) && !empty($list[$key]->sub_themes)) {
         foreach ($list[$key]->sub_themes as $sub_key => $sub_label) {
           if (isset($list[$sub_key]) && !in_array($sub_key, $theme_list, TRUE)) {
             throw new \InvalidArgumentException("The base theme $key cannot be uninstalled, because theme $sub_key depends on it.");

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\block\Traits;
 
 use Drupal\block\Entity\Block;
@@ -43,7 +45,7 @@ trait BlockCreationTrait {
     $settings += [
       'plugin' => $plugin_id,
       'region' => 'content',
-      'id' => strtolower($this->randomMachineName(8)),
+      'id' => $this->randomMachineName(8),
       'theme' => $config->get('system.theme')->get('default'),
       'label' => $this->randomMachineName(8),
       'visibility' => [],

@@ -85,9 +85,9 @@ class StandardTest extends BrowserTestBase {
     $this->drupalLogin($this->adminUser);
     $this->drupalGet('node/1');
     // Verify that a line break is present.
-    $this->assertSession()->responseContains('Then she picked out two somebodies,<br />Sally and me');
+    $this->assertSession()->responseContains('Then she picked out two somebodies,<br>Sally and me');
     $this->submitForm([
-      'subject[0][value]' => 'Barfoo',
+      'subject[0][value]' => 'Bar foo',
       'comment_body[0][value]' => 'Then she picked out two somebodies, Sally and me',
     ], 'Save');
     // Fetch the feed.

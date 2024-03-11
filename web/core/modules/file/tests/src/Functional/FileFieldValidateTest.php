@@ -2,8 +2,8 @@
 
 namespace Drupal\Tests\file\Functional;
 
-use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
+use Drupal\Core\StringTranslation\ByteSizeMarkup;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\file\Entity\File;
 
@@ -28,7 +28,7 @@ class FileFieldValidateTest extends FileFieldTestBase {
   public function testRequired() {
     $node_storage = $this->container->get('entity_type.manager')->getStorage('node');
     $type_name = 'article';
-    $field_name = strtolower($this->randomMachineName());
+    $field_name = $this->randomMachineName();
     $storage = $this->createFileField($field_name, 'node', $type_name, [], ['required' => '1']);
     $field = FieldConfig::loadByName('node', $type_name, $field_name);
 
@@ -43,7 +43,7 @@ class FileFieldValidateTest extends FileFieldTestBase {
 
     // Create a new node with the uploaded file.
     $nid = $this->uploadNodeFile($test_file, $field_name, $type_name);
-    $this->assertNotFalse($nid, new FormattableMarkup('uploadNodeFile(@test_file, @field_name, @type_name) succeeded', ['@test_file' => $test_file->getFileUri(), '@field_name' => $field_name, '@type_name' => $type_name]));
+    $this->assertNotFalse($nid, "uploadNodeFile({$test_file->getFileUri()}, $field_name, $type_name) succeeded");
 
     $node_storage->resetCache([$nid]);
     $node = $node_storage->load($nid);
@@ -78,7 +78,7 @@ class FileFieldValidateTest extends FileFieldTestBase {
   public function testFileMaxSize() {
     $node_storage = $this->container->get('entity_type.manager')->getStorage('node');
     $type_name = 'article';
-    $field_name = strtolower($this->randomMachineName());
+    $field_name = $this->randomMachineName();
     $this->createFileField($field_name, 'node', $type_name, [], ['required' => '1']);
 
     // 128KB.
@@ -103,12 +103,12 @@ class FileFieldValidateTest extends FileFieldTestBase {
       $node = $node_storage->load($nid);
       $node_file = File::load($node->{$field_name}->target_id);
       $this->assertFileExists($node_file->getFileUri());
-      $this->assertFileEntryExists($node_file, new FormattableMarkup('File entry exists after uploading a file (%filesize) under the max limit (%maxsize).', ['%filesize' => format_size($small_file->getSize()), '%maxsize' => $max_filesize]));
+      $this->assertFileEntryExists($node_file, sprintf('File entry exists after uploading a file (%s) under the max limit (%s).', ByteSizeMarkup::create($small_file->getSize()), $max_filesize));
 
       // Check that uploading the large file fails (1M limit).
       $this->uploadNodeFile($large_file, $field_name, $type_name);
-      $filesize = format_size($large_file->getSize());
-      $maxsize = format_size($file_limit);
+      $filesize = ByteSizeMarkup::create($large_file->getSize());
+      $maxsize = ByteSizeMarkup::create($file_limit);
       $this->assertSession()->pageTextContains("The file is {$filesize} exceeding the maximum file size of {$maxsize}.");
     }
 
@@ -121,7 +121,7 @@ class FileFieldValidateTest extends FileFieldTestBase {
     $node = $node_storage->load($nid);
     $node_file = File::load($node->{$field_name}->target_id);
     $this->assertFileExists($node_file->getFileUri());
-    $this->assertFileEntryExists($node_file, new FormattableMarkup('File entry exists after uploading a file (%filesize) with no max limit.', ['%filesize' => format_size($large_file->getSize())]));
+    $this->assertFileEntryExists($node_file, sprintf('File entry exists after uploading a file (%s) with no max limit.', ByteSizeMarkup::create($large_file->getSize())));
   }
 
   /**
@@ -130,7 +130,7 @@ class FileFieldValidateTest extends FileFieldTestBase {
   public function testFileExtension() {
     $node_storage = $this->container->get('entity_type.manager')->getStorage('node');
     $type_name = 'article';
-    $field_name = strtolower($this->randomMachineName());
+    $field_name = $this->randomMachineName();
     $this->createFileField($field_name, 'node', $type_name);
 
     $test_file = $this->getTestFile('image');

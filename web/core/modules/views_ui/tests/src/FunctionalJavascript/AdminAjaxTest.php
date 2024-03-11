@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\views_ui\FunctionalJavascript;
 
 use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
@@ -57,6 +59,27 @@ class AdminAjaxTest extends WebDriverTestBase {
     $assert_session->waitForElementRemoved('css', '.views-ui-dialog');
     $assert_session->pageTextContains('This is text added to the display tabs at the top');
     $assert_session->pageTextContains('This is text added to the display edit form');
+  }
+
+  /**
+   * Tests body scroll.
+   */
+  public function testBodyScroll() {
+    $this->drupalGet('admin/structure/views/view/user_admin_people');
+    $page = $this->getSession()->getPage();
+    foreach (['name[views.nothing]', 'name[views.dropbutton]'] as $field) {
+      $page->find('css', '#views-add-field')->click();
+      $this->assertSession()->assertWaitOnAjaxRequest();
+      $page->checkField($field);
+      $page->find('css', '.ui-dialog-buttonset')->pressButton('Add and configure fields');
+      $this->assertSession()->assertWaitOnAjaxRequest();
+      $this->assertJsCondition('document.documentElement.style.overflow === "hidden"');
+      $page->find('css', '.ui-dialog-buttonset')->pressButton('Apply');
+      $this->assertSession()->assertWaitOnAjaxRequest();
+
+      // Check overflow.
+      $this->assertJsCondition('document.documentElement.style.overflow !== "hidden"');
+    }
   }
 
 }

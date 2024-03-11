@@ -12,7 +12,6 @@
 namespace Psy\CodeCleaner;
 
 use PhpParser\Node;
-use PhpParser\Node\Identifier;
 use PhpParser\Node\Scalar\LNumber;
 use PhpParser\Node\Stmt\Declare_;
 use PhpParser\Node\Stmt\DeclareDeclare;
@@ -61,12 +60,10 @@ class StrictTypesPass extends CodeCleanerPass
         foreach ($nodes as $node) {
             if ($node instanceof Declare_) {
                 foreach ($node->declares as $declare) {
-                    // For PHP Parser 4.x
-                    $declareKey = $declare->key instanceof Identifier ? $declare->key->toString() : $declare->key;
-                    if ($declareKey === 'strict_types') {
+                    if ($declare->key->toString() === 'strict_types') {
                         $value = $declare->value;
                         if (!$value instanceof LNumber || ($value->value !== 0 && $value->value !== 1)) {
-                            throw new FatalErrorException(self::EXCEPTION_MESSAGE, 0, \E_ERROR, null, $node->getLine());
+                            throw new FatalErrorException(self::EXCEPTION_MESSAGE, 0, \E_ERROR, null, $node->getStartLine());
                         }
 
                         $this->strictTypes = $value->value === 1;

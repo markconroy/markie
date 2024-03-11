@@ -13,6 +13,7 @@ use Drupal\Core\Database\Query\Select;
 use Drupal\Core\Database\Query\Truncate;
 use Drupal\Core\Database\Query\Update;
 use Drupal\Core\Database\Query\Upsert;
+use Drupal\Core\Database\Transaction\TransactionManagerInterface;
 use Drupal\Core\Pager\PagerManagerInterface;
 
 /**
@@ -62,6 +63,11 @@ abstract class Connection {
    * transaction.
    *
    * @var array
+   *
+   * @deprecated in drupal:10.2.0 and is removed from drupal:11.0.0. The
+   *   transaction stack is now managed by TransactionManager.
+   *
+   * @see https://www.drupal.org/node/3381002
    */
   protected $transactionLayers = [];
 
@@ -204,6 +210,11 @@ abstract class Connection {
    * Post-root (non-nested) transaction commit callbacks.
    *
    * @var callable[]
+   *
+   * @deprecated in drupal:10.2.0 and is removed from drupal:11.0.0. The
+   *   transaction end callbacks are now managed by TransactionManager.
+   *
+   * @see https://www.drupal.org/node/3381002
    */
   protected $rootTransactionEndCallbacks = [];
 
@@ -225,6 +236,11 @@ abstract class Connection {
    * Call ::enableEvents() to enable them.
    */
   private array $enabledEvents = [];
+
+  /**
+   * The transaction manager.
+   */
+  protected TransactionManagerInterface|FALSE $transactionManager;
 
   /**
    * Constructs a Connection object.
@@ -274,6 +290,45 @@ abstract class Connection {
     // using $this in the call to set the statement class can be garbage
     // collected.
     $this->connection = NULL;
+  }
+
+  /**
+   * Commits all the open transactions.
+   *
+   * @internal
+   *   This method exists only to work around a bug caused by Drupal incorrectly
+   *   relying on object destruction order to commit transactions. Xdebug 3.3.0
+   *   changes the order of object destruction when the develop mode is enabled.
+   */
+  public function commitAll() {
+    $manager = $this->transactionManager();
+    if ($manager && $manager->inTransaction() && method_exists($manager, 'commitAll')) {
+      $this->transactionManager()->commitAll();
+    }
+
+    // BC layer.
+    // @phpstan-ignore-next-line
+    if (!empty($this->transactionLayers)) {
+      // Make all transactions committable.
+      // @phpstan-ignore-next-line
+      $this->transactionLayers = array_fill_keys(array_keys($this->transactionLayers), FALSE);
+      // @phpstan-ignore-next-line
+      $this->popCommittableTransactions();
+    }
+  }
+
+  /**
+   * Returns the client-level database connection object.
+   *
+   * This method should normally be used only within database driver code. Not
+   * doing so constitutes a risk of introducing code that is not database
+   * independent.
+   *
+   * @return object
+   *   The client-level database connection, for example \PDO.
+   */
+  public function getClientConnection(): object {
+    return $this->connection;
   }
 
   /**
@@ -668,8 +723,14 @@ abstract class Connection {
    *
    * @return string
    *   A table prefix-parsed string for the sequence name.
+   *
+   * @deprecated in drupal:10.2.0 and is removed from drupal:11.0.0. There is
+   *   no replacement.
+   *
+   * @see https://www.drupal.org/node/3377046
    */
   public function makeSequenceName($table, $field) {
+    @trigger_error(__METHOD__ . "() is deprecated in drupal:10.2.0 and is removed from drupal:11.0.0. There is no replacement. See https://www.drupal.org/node/3377046", E_USER_DEPRECATED);
     $sequence_name = $this->prefixTables('{' . $table . '}_' . $field . '_seq');
     // Remove identifier quotes as we are constructing a new name from a
     // prefixed and quoted table name.
@@ -899,6 +960,21 @@ abstract class Connection {
    *   The name of the class that should be used for this driver.
    */
   public function getDriverClass($class) {
+    match($class) {
+      'Install\\Tasks',
+      'ExceptionHandler',
+      'Select',
+      'Insert',
+      'Merge',
+      'Upsert',
+      'Update',
+      'Delete',
+      'Truncate',
+      'Schema',
+      'Condition',
+      'Transaction' => @trigger_error('Calling ' . __METHOD__ . '() for \'' . $class . '\' is deprecated in drupal:10.2.0 and is removed from drupal:11.0.0. Use standard autoloading in the methods that return database operations. See https://www.drupal.org/node/3217534', E_USER_DEPRECATED),
+      default => NULL,
+    };
     if (empty($this->driverClasses[$class])) {
       $driver_class = $this->connectionOptions['namespace'] . '\\' . $class;
       if (class_exists($driver_class)) {
@@ -963,6 +1039,8 @@ abstract class Connection {
    *
    * @return \Drupal\Core\Database\ExceptionHandler
    *   The database exceptions handler.
+   *
+   * @todo in drupal:11.0.0, return a new ExceptionHandler instance directly.
    */
   public function exceptionHandler() {
     $class = $this->getDriverClass('ExceptionHandler');
@@ -987,6 +1065,8 @@ abstract class Connection {
    *   driver.
    *
    * @see \Drupal\Core\Database\Query\Select
+   *
+   * @todo in drupal:11.0.0, return a new Query\Select instance directly.
    */
   public function select($table, $alias = NULL, array $options = []) {
     assert(is_string($alias) || $alias === NULL, 'The \'$alias\' argument to ' . __METHOD__ . '() must be a string or NULL');
@@ -1009,6 +1089,8 @@ abstract class Connection {
    *
    * @see \Drupal\Core\Database\Query\Insert
    * @see \Drupal\Core\Database\Connection::defaultOptions()
+   *
+   * @todo in drupal:11.0.0, return a new Query\Insert instance directly.
    */
   public function insert($table, array $options = []) {
     $class = $this->getDriverClass('Insert');
@@ -1057,6 +1139,8 @@ abstract class Connection {
    *   A new Merge query object.
    *
    * @see \Drupal\Core\Database\Query\Merge
+   *
+   * @todo in drupal:11.0.0, return a new Query\Merge instance directly.
    */
   public function merge($table, array $options = []) {
     $class = $this->getDriverClass('Merge');
@@ -1075,6 +1159,9 @@ abstract class Connection {
    *   A new Upsert query object.
    *
    * @see \Drupal\Core\Database\Query\Upsert
+   *
+   * @todo in drupal:11.0.0, make this method abstract since Query\Upsert is
+   *   an abstract class.
    */
   public function upsert($table, array $options = []) {
     $class = $this->getDriverClass('Upsert');
@@ -1096,6 +1183,8 @@ abstract class Connection {
    *
    * @see \Drupal\Core\Database\Query\Update
    * @see \Drupal\Core\Database\Connection::defaultOptions()
+   *
+   * @todo in drupal:11.0.0, return a new Query\Update instance directly.
    */
   public function update($table, array $options = []) {
     $class = $this->getDriverClass('Update');
@@ -1117,6 +1206,8 @@ abstract class Connection {
    *
    * @see \Drupal\Core\Database\Query\Delete
    * @see \Drupal\Core\Database\Connection::defaultOptions()
+   *
+   * @todo in drupal:11.0.0, return a new Query\Delete instance directly.
    */
   public function delete($table, array $options = []) {
     $class = $this->getDriverClass('Delete');
@@ -1135,6 +1226,8 @@ abstract class Connection {
    *   A new Truncate query object.
    *
    * @see \Drupal\Core\Database\Query\Truncate
+   *
+   * @todo in drupal:11.0.0, return a new Query\Truncate instance directly.
    */
   public function truncate($table, array $options = []) {
     $class = $this->getDriverClass('Truncate');
@@ -1148,6 +1241,9 @@ abstract class Connection {
    *
    * @return \Drupal\Core\Database\Schema
    *   The database Schema object for this connection.
+   *
+   * @todo in drupal:11.0.0, make this method abstract since Schema is
+   *   an abstract class.
    */
   public function schema() {
     if (empty($this->schema)) {
@@ -1167,6 +1263,8 @@ abstract class Connection {
    *   A new Condition query object.
    *
    * @see \Drupal\Core\Database\Query\Condition
+   *
+   * @todo in drupal:11.0.0, return a new Condition instance directly.
    */
   public function condition($conjunction) {
     $class = $this->getDriverClass('Condition');
@@ -1295,13 +1393,54 @@ abstract class Connection {
   }
 
   /**
+   * Returns the transaction manager.
+   *
+   * @return \Drupal\Core\Database\Transaction\TransactionManagerInterface|false
+   *   The transaction manager, or FALSE if not available.
+   */
+  public function transactionManager(): TransactionManagerInterface|FALSE {
+    if (!isset($this->transactionManager)) {
+      try {
+        $this->transactionManager = $this->driverTransactionManager();
+      }
+      catch (\LogicException $e) {
+        $this->transactionManager = FALSE;
+      }
+    }
+    return $this->transactionManager;
+  }
+
+  /**
+   * Returns a new instance of the driver's transaction manager.
+   *
+   * Database drivers must implement their own class extending from
+   * \Drupal\Core\Database\Transaction\TransactionManagerBase, and instantiate
+   * it here.
+   *
+   * @return \Drupal\Core\Database\Transaction\TransactionManagerInterface
+   *   The transaction manager.
+   *
+   * @throws \LogicException
+   *   If the transaction manager is undefined or unavailable.
+   */
+  protected function driverTransactionManager(): TransactionManagerInterface {
+    throw new \LogicException('The database driver has no TransactionManager implementation');
+  }
+
+  /**
    * Determines if there is an active transaction open.
    *
    * @return bool
    *   TRUE if we're currently in a transaction, FALSE otherwise.
    */
   public function inTransaction() {
+    if ($this->transactionManager()) {
+      return $this->transactionManager()->inTransaction();
+    }
+    // Start of BC layer.
+    // @phpstan-ignore-next-line
     return ($this->transactionDepth() > 0);
+    // End of BC layer.
   }
 
   /**
@@ -1309,8 +1448,17 @@ abstract class Connection {
    *
    * @return int
    *   The current transaction depth.
+   *
+   * @deprecated in drupal:10.2.0 and is removed from drupal:11.0.0. Do not
+   *   access the transaction stack depth, it is an implementation detail.
+   *
+   * @see https://www.drupal.org/node/3381002
    */
   public function transactionDepth() {
+    @trigger_error(__METHOD__ . '() is deprecated in drupal:10.2.0 and is removed from drupal:11.0.0. Do not access the transaction stack depth, it is an implementation detail. See https://www.drupal.org/node/3381002', E_USER_DEPRECATED);
+    if ($this->transactionManager()) {
+      return $this->transactionManager()->stackDepth();
+    }
     return count($this->transactionLayers);
   }
 
@@ -1324,8 +1472,13 @@ abstract class Connection {
    *   A Transaction object.
    *
    * @see \Drupal\Core\Database\Transaction
+   *
+   * @todo in drupal:11.0.0, push to the TransactionManager directly.
    */
   public function startTransaction($name = '') {
+    if ($this->transactionManager()) {
+      return $this->transactionManager()->push($name);
+    }
     $class = $this->getDriverClass('Transaction');
     return new $class($this, $name);
   }
@@ -1343,8 +1496,18 @@ abstract class Connection {
    * @throws \Drupal\Core\Database\TransactionNoActiveException
    *
    * @see \Drupal\Core\Database\Transaction::rollBack()
+   *
+   * @deprecated in drupal:10.2.0 and is removed from drupal:11.0.0. Do not
+   *   rollback the connection, roll back the Transaction objects instead.
+   *
+   * @see https://www.drupal.org/node/3381002
    */
   public function rollBack($savepoint_name = 'drupal_transaction') {
+    @trigger_error(__METHOD__ . '() is deprecated in drupal:10.2.0 and is removed from drupal:11.0.0. Do not rollback the connection, roll back the Transaction objects instead. See https://www.drupal.org/node/3381002', E_USER_DEPRECATED);
+    if ($this->transactionManager()) {
+      $this->transactionManager()->rollback($savepoint_name, 'bc-force-rollback');
+      return;
+    }
     if (!$this->inTransaction()) {
       throw new TransactionNoActiveException();
     }
@@ -1402,8 +1565,14 @@ abstract class Connection {
    * @throws \Drupal\Core\Database\TransactionNameNonUniqueException
    *
    * @see \Drupal\Core\Database\Transaction
+   *
+   * @deprecated in drupal:10.2.0 and is removed from drupal:11.0.0. Use
+   *   TransactionManagerInterface methods instead.
+   *
+   * @see https://www.drupal.org/node/3381002
    */
   public function pushTransaction($name) {
+    @trigger_error(__METHOD__ . '() is deprecated in drupal:10.2.0 and is removed from drupal:11.0.0. Use TransactionManagerInterface methods instead. See https://www.drupal.org/node/3381002', E_USER_DEPRECATED);
     if (isset($this->transactionLayers[$name])) {
       throw new TransactionNameNonUniqueException($name . " is already in use.");
     }
@@ -1432,8 +1601,14 @@ abstract class Connection {
    * @throws \Drupal\Core\Database\TransactionCommitFailedException
    *
    * @see \Drupal\Core\Database\Transaction
+   *
+   * @deprecated in drupal:10.2.0 and is removed from drupal:11.0.0. Use
+   *   TransactionManagerInterface methods instead.
+   *
+   * @see https://www.drupal.org/node/3381002
    */
   public function popTransaction($name) {
+    @trigger_error(__METHOD__ . '() is deprecated in drupal:10.2.0 and is removed from drupal:11.0.0. Use TransactionManagerInterface methods instead. See https://www.drupal.org/node/3381002', E_USER_DEPRECATED);
     // The transaction has already been committed earlier. There is nothing we
     // need to do. If this transaction was part of an earlier out-of-order
     // rollback, an exception would already have been thrown by
@@ -1467,8 +1642,18 @@ abstract class Connection {
    *   The callback to invoke.
    *
    * @see \Drupal\Core\Database\Connection::doCommit()
+   *
+   * @deprecated in drupal:10.2.0 and is removed from drupal:11.0.0. Use
+   *   TransactionManagerInterface::addPostTransactionCallback() instead.
+   *
+   * @see https://www.drupal.org/node/3381002
    */
   public function addRootTransactionEndCallback(callable $callback) {
+    @trigger_error(__METHOD__ . '() is deprecated in drupal:10.2.0 and is removed from drupal:11.0.0. Use TransactionManagerInterface::addPostTransactionCallback() instead. See https://www.drupal.org/node/3381002', E_USER_DEPRECATED);
+    if ($this->transactionManager()) {
+      $this->transactionManager()->addPostTransactionCallback($callback);
+      return;
+    }
     if (!$this->transactionLayers) {
       throw new \LogicException('Root transaction end callbacks can only be added when there is an active transaction.');
     }
@@ -1479,8 +1664,14 @@ abstract class Connection {
    * Commit all the transaction layers that can commit.
    *
    * @internal
+   *
+   * @deprecated in drupal:10.2.0 and is removed from drupal:11.0.0. Use
+   *   TransactionManagerInterface methods instead.
+   *
+   * @see https://www.drupal.org/node/3381002
    */
   protected function popCommittableTransactions() {
+    @trigger_error(__METHOD__ . '() is deprecated in drupal:10.2.0 and is removed from drupal:11.0.0. Use TransactionManagerInterface methods instead. See https://www.drupal.org/node/3381002', E_USER_DEPRECATED);
     // Commit all the committable layers.
     foreach (array_reverse($this->transactionLayers) as $name => $active) {
       // Stop once we found an active transaction.
@@ -1503,8 +1694,14 @@ abstract class Connection {
    * Do the actual commit, invoke post-commit callbacks.
    *
    * @internal
+   *
+   * @deprecated in drupal:10.2.0 and is removed from drupal:11.0.0. Use
+   *   TransactionManagerInterface methods instead.
+   *
+   * @see https://www.drupal.org/node/3381002
    */
   protected function doCommit() {
+    @trigger_error(__METHOD__ . '() is deprecated in drupal:10.2.0 and is removed from drupal:11.0.0. Use TransactionManagerInterface methods instead. See https://www.drupal.org/node/3381002', E_USER_DEPRECATED);
     $success = $this->connection->commit();
     if (!empty($this->rootTransactionEndCallbacks)) {
       $callbacks = $this->rootTransactionEndCallbacks;
@@ -1642,8 +1839,14 @@ abstract class Connection {
    * @throws \Drupal\Core\Database\TransactionExplicitCommitNotAllowedException
    *
    * @see \Drupal\Core\Database\Transaction
+   *
+   * @deprecated in drupal:10.2.0 and is removed from drupal:11.0.0. Do not
+   *   commit the connection, void the Transaction objects instead.
+   *
+   * @see https://www.drupal.org/node/3381002
    */
   public function commit() {
+    @trigger_error(__METHOD__ . '() is deprecated in drupal:10.2.0 and is removed from drupal:11.0.0. Do not commit the connection, void the Transaction objects instead. See https://www.drupal.org/node/3381002', E_USER_DEPRECATED);
     throw new TransactionExplicitCommitNotAllowedException();
   }
 
@@ -1663,6 +1866,11 @@ abstract class Connection {
    * @return int|string
    *   An integer number larger than any number returned by earlier calls and
    *   also larger than the $existing_id if one was passed in.
+   *
+   * @deprecated in drupal:10.2.0 and is removed from drupal:11.0.0. Modules
+   *   should use instead the keyvalue storage for the last used id.
+   *
+   * @see https://www.drupal.org/node/3349345
    */
   abstract public function nextId($existing_id = 0);
 
@@ -2022,7 +2230,9 @@ abstract class Connection {
    *   The debug backtrace.
    */
   protected function getDebugBacktrace(): array {
-    return debug_backtrace();
+    // @todo: allow a backtrace including all arguments as an option.
+    // See https://www.drupal.org/project/drupal/issues/3401906
+    return debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
   }
 
 }

@@ -25,9 +25,10 @@ namespace Drupal\Core\Extension\Discovery;
  * @see ExtensionDiscovery::scan()
  * @see ExtensionDiscovery::scanDirectory()
  *
- * @todo Use RecursiveCallbackFilterIterator instead of the $acceptTests
- *   parameter forwarding once PHP 5.4 is available.
- *   https://www.drupal.org/node/2532228
+ * @deprecated in drupal:10.2.0 and is removed from drupal:11.0.0. Use
+ *   \Drupal\Core\Extension\Discovery\RecursiveExtensionFilterCallback instead.
+ *
+ * @see https://www.drupal.org/node/3343023
  */
 class RecursiveExtensionFilterIterator extends \RecursiveFilterIterator {
 
@@ -92,6 +93,7 @@ class RecursiveExtensionFilterIterator extends \RecursiveFilterIterator {
    *   during the iteration.
    */
   public function __construct(\RecursiveIterator $iterator, array $skipped_folders = []) {
+    @trigger_error('The ' . __NAMESPACE__ . '\RecursiveExtensionFilterIterator is deprecated in drupal:10.2.0 and is removed from drupal:11.0.0. Use \Drupal\Core\Extension\Discovery\RecursiveExtensionFilterCallback instead. See https://www.drupal.org/node/3343023', E_USER_DEPRECATED);
     parent::__construct($iterator);
     $this->skippedFolders = array_merge($this->skippedFolders, $skipped_folders);
   }

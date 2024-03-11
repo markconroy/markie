@@ -14,7 +14,6 @@ use Drupal\Core\Field\FieldItemBase;
  * @FieldType(
  *   id = "test_field",
  *   label = @Translation("Test field"),
- *   description = @Translation("Dummy field type used for tests."),
  *   default_widget = "test_field_widget",
  *   default_formatter = "field_test_default"
  * )
@@ -75,7 +74,13 @@ class TestItem extends FieldItemBase {
    * {@inheritdoc}
    */
   public function storageSettingsForm(array &$form, FormStateInterface $form_state, $has_data) {
-    $form['test_field_storage_setting'] = [
+    $form['cardinality_container'][] = [
+      '#type' => 'html_tag',
+      '#tag' => 'p',
+      '#value' => 'Greetings from ' . __METHOD__,
+    ];
+    $element = [];
+    $element['test_field_storage_setting'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Field test field storage setting'),
       '#default_value' => $this->getSetting('test_field_storage_setting'),
@@ -83,14 +88,15 @@ class TestItem extends FieldItemBase {
       '#description' => $this->t('A dummy form element to simulate field storage setting.'),
     ];
 
-    return $form;
+    return $element;
   }
 
   /**
    * {@inheritdoc}
    */
   public function fieldSettingsForm(array $form, FormStateInterface $form_state) {
-    $form['test_field_setting'] = [
+    $element = [];
+    $element['test_field_setting'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Field test field setting'),
       '#default_value' => $this->getSetting('test_field_setting'),
@@ -98,7 +104,7 @@ class TestItem extends FieldItemBase {
       '#description' => $this->t('A dummy form element to simulate field setting.'),
     ];
 
-    return $form;
+    return $element;
   }
 
   /**

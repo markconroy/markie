@@ -8,7 +8,6 @@ use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\File\FileUrlGeneratorInterface;
 use Drupal\Core\Language\LanguageManagerInterface;
-use Drupal\Core\State\StateInterface;
 use Drupal\Core\Theme\ThemeManagerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 
@@ -42,8 +41,6 @@ class CssCollectionOptimizerLazy implements AssetCollectionGroupOptimizerInterfa
    *   The time service.
    * @param \Drupal\Core\Language\LanguageManagerInterface $languageManager
    *   The language manager.
-   * @param \Drupal\Core\State\StateInterface $state
-   *   The state key/value store.
    */
   public function __construct(
     protected readonly AssetCollectionGrouperInterface $grouper,
@@ -55,8 +52,7 @@ class CssCollectionOptimizerLazy implements AssetCollectionGroupOptimizerInterfa
     protected readonly ConfigFactoryInterface $configFactory,
     protected readonly FileUrlGeneratorInterface $fileUrlGenerator,
     protected readonly TimeInterface $time,
-    protected readonly LanguageManagerInterface $languageManager,
-    protected readonly StateInterface $state
+    protected readonly LanguageManagerInterface $languageManager
   ) {}
 
   /**
@@ -135,14 +131,14 @@ class CssCollectionOptimizerLazy implements AssetCollectionGroupOptimizerInterfa
    * {@inheritdoc}
    */
   public function getAll() {
-    return $this->state->get('drupal_css_cache_files', []);
+    @trigger_error(__METHOD__ . ' is deprecated in drupal:10.2.0 and is removed from drupal:11.0.0. There is no replacement. See https://www.drupal.org/node/3301744', E_USER_DEPRECATED);
+    return [];
   }
 
   /**
    * {@inheritdoc}
    */
   public function deleteAll() {
-    $this->state->delete('drupal_css_cache_files');
     $this->fileSystem->deleteRecursive('assets://css');
   }
 

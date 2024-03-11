@@ -9,6 +9,7 @@ use Drupal\media\Entity\MediaType;
  * JSON:API integration test for the "MediaType" config entity type.
  *
  * @group jsonapi
+ * @group #slow
  */
 class MediaTypeTest extends ConfigEntityResourceTestBase {
 
@@ -52,7 +53,7 @@ class MediaTypeTest extends ConfigEntityResourceTestBase {
   protected function createEntity() {
     // Create a "Camelids" media type.
     $camelids = MediaType::create([
-      'name' => 'Camelids',
+      'label' => 'Camelids',
       'id' => 'camelids',
       'description' => 'Camelids are large, strictly herbivorous animals with slender necks and long legs.',
       'source' => 'file',
@@ -90,7 +91,7 @@ class MediaTypeTest extends ConfigEntityResourceTestBase {
           'dependencies' => [],
           'description' => 'Camelids are large, strictly herbivorous animals with slender necks and long legs.',
           'field_map' => [],
-          'label' => NULL,
+          'label' => 'Camelids',
           'langcode' => 'en',
           'new_revision' => FALSE,
           'queue_thumbnail_downloads' => FALSE,

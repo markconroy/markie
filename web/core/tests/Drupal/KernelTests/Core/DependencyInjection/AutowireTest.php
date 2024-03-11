@@ -4,10 +4,13 @@ namespace Drupal\KernelTests\Core\DependencyInjection;
 
 use Drupal\autowire_test\TestInjection;
 use Drupal\autowire_test\TestInjection2;
+use Drupal\autowire_test\TestInjection3;
 use Drupal\autowire_test\TestService;
 use Drupal\Core\Database\Connection;
 use Drupal\Core\DrupalKernelInterface;
+use Drupal\Core\Security\TrustedCallbackInterface;
 use Drupal\Core\Serialization\Yaml;
+use Drupal\KernelTests\FileSystemModuleDiscoveryDataProviderTrait;
 use Drupal\KernelTests\KernelTestBase;
 
 /**
@@ -16,6 +19,8 @@ use Drupal\KernelTests\KernelTestBase;
  * @group DependencyInjection
  */
 class AutowireTest extends KernelTestBase {
+
+  use FileSystemModuleDiscoveryDataProviderTrait;
 
   /**
    * {@inheritdoc}
@@ -30,6 +35,7 @@ class AutowireTest extends KernelTestBase {
 
     // Ensure an autowired interface works.
     $this->assertInstanceOf(TestInjection::class, $service->getTestInjection());
+    $this->assertInstanceOf(TestInjection3::class, $service->getTestInjection3());
     // Ensure an autowired class works.
     $this->assertInstanceOf(TestInjection2::class, $service->getTestInjection2());
     // Ensure an autowired core class works.
@@ -44,26 +50,32 @@ class AutowireTest extends KernelTestBase {
   public function testCoreServiceAliases(): void {
     $services = [];
     $aliases = [];
-    foreach (Yaml::decode(file_get_contents('core/core.services.yml'))['services'] as $id => $service) {
-      if (is_string($service)) {
-        $aliases[$id] = substr($service, 1);
-      }
-      elseif (isset($service['class']) && class_exists($service['class'])) {
-        // Ignore certain tagged services.
-        if (isset($service['tags'])) {
-          foreach ($service['tags'] as $tag) {
-            if (in_array($tag['name'], [
-              'access_check',
-              'cache.context',
-              'context_provider',
-              'module_install.uninstall_validator',
-            ])) {
-              continue 2;
+
+    $filenames = array_map(fn($module) => "core/modules/{$module[0]}/{$module[0]}.services.yml", $this->coreModuleListDataProvider());
+    $filenames[] = 'core/core.services.yml';
+    foreach (array_filter($filenames, 'file_exists') as $filename) {
+      foreach (Yaml::decode(file_get_contents($filename))['services'] as $id => $service) {
+        if (is_string($service)) {
+          $aliases[$id] = substr($service, 1);
+        }
+        elseif (isset($service['class']) && class_exists($service['class'])) {
+          // Ignore certain tagged services.
+          if (isset($service['tags'])) {
+            foreach ($service['tags'] as $tag) {
+              if (in_array($tag['name'], [
+                'access_check',
+                'cache.context',
+                'context_provider',
+                'event_subscriber',
+                'module_install.uninstall_validator',
+              ])) {
+                continue 2;
+              }
             }
           }
-        }
 
-        $services[$id] = $service['class'];
+          $services[$id] = $service['class'];
+        }
       }
     }
 
@@ -89,6 +101,10 @@ class AutowireTest extends KernelTestBase {
       // Expect standalone classes to be aliased.
       $implements = class_implements($class);
       if (!$implements) {
+        $expected[$class] = $id;
+      }
+      elseif (count($implements) === 1 && TrustedCallbackInterface::class === reset($implements)) {
+        // Classes implementing only TrustedCallbackInterface should be aliased.
         $expected[$class] = $id;
       }
 

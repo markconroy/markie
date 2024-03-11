@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\Core\DrupalKernel;
 
 use Drupal\Core\DrupalKernel;
@@ -133,8 +135,8 @@ EOD;
     $request->server->set('SERVER_NAME', 'www.example.org');
     $request->server->set('SERVER_PORT', '8888');
     $request->server->set('SCRIPT_NAME', '/index.php');
-    $this->assertEquals('sites/example', DrupalKernel::findSitePath($request, TRUE, $vfs_root->url('drupal_root')));
-    $this->assertEquals('sites/example', DrupalKernel::findSitePath($request, FALSE, $vfs_root->url('drupal_root')));
+    $this->assertEquals('sites/example', DrupalKernel::findSitePath($request, TRUE, $vfs_root->url()));
+    $this->assertEquals('sites/example', DrupalKernel::findSitePath($request, FALSE, $vfs_root->url()));
   }
 
   /**
@@ -168,7 +170,7 @@ class FakeAutoloader {
   }
 
   /**
-   * Unregisters this instance as an autoloader.
+   * Deregisters this instance as an autoloader.
    */
   public function unregister() {
     spl_autoload_unregister([$this, 'loadClass']);

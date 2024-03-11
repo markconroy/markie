@@ -15,6 +15,8 @@ use Drupal\Core\Cache\Cache;
 use Drupal\Core\Database\Query\AlterableInterface;
 use Drupal\Core\Datetime\TimeZoneFormHelper;
 use Drupal\Core\Entity\ContentEntityTypeInterface;
+use Drupal\Core\Entity\EntityViewModeInterface;
+use Drupal\Core\Entity\EntityFormModeInterface;
 use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 use Drupal\Core\Extension\Extension;
 use Drupal\Core\Field\Plugin\Field\FieldFormatter\TimestampFormatter;
@@ -25,7 +27,6 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\KeyValueStore\KeyValueDatabaseExpirableFactory;
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Link;
-use Drupal\Core\Menu\MenuTreeParameters;
 use Drupal\Core\PageCache\RequestPolicyInterface;
 use Drupal\Core\Queue\QueueGarbageCollectionInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
@@ -74,9 +75,9 @@ function system_help($route_name, RouteMatchInterface $route_match) {
   switch ($route_name) {
     case 'help.page.system':
       $output = '';
-      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<h2>' . t('About') . '</h2>';
       $output .= '<p>' . t('The System module is integral to the site: it provides user interfaces for many core systems and settings, as well as the basic administrative menu structure. For more information, see the <a href=":system">online documentation for the System module</a>.', [':system' => 'https://www.drupal.org/documentation/modules/system']) . '</p>';
-      $output .= '<h3>' . t('Uses') . '</h3>';
+      $output .= '<h2>' . t('Uses') . '</h2>';
       $output .= '<dl>';
       $output .= '<dt>' . t('Managing modules') . '</dt>';
       $output .= '<dd>' . t('Users with appropriate permission can install and uninstall modules from the <a href=":modules">Extend page</a>. Depending on which distribution or installation profile you choose when you install your site, several modules are installed and others are provided but not installed. Each module provides a discrete set of features; modules may be installed or uninstalled depending on the needs of the site. Many additional modules contributed by members of the Drupal community are available for download from the <a href=":drupal-modules">Drupal.org module page</a>. Note that uninstalling a module is a destructive action: when you uninstall a module, you will permanently lose all data connected to the module.', [':modules' => Url::fromRoute('system.modules_list')->toString(), ':drupal-modules' => 'https://www.drupal.org/project/modules']) . '</dd>';
@@ -671,6 +672,7 @@ function system_page_attachments(array &$page) {
   // @see \Drupal\Core\Utility\LinkGenerator::generate()
   // @see template_preprocess_links()
   // @see \Drupal\Core\EventSubscriber\ActiveLinkResponseFilter
+  $page['#cache']['contexts'][] = 'user.roles:authenticated';
   if (\Drupal::currentUser()->isAuthenticated()) {
     $page['#attached']['library'][] = 'core/drupal.active-link';
   }
@@ -970,68 +972,28 @@ function system_admin_compact_mode() {
  *
  * @param string $module
  *   Module name.
- * @param array $info
- *   The module's information, as provided by
- *   \Drupal::service('extension.list.module')->getExtensionInfo().
+ * @param string|array $module_name
+ *   The module's display name. Passing information, as provided by
+ *   \Drupal::service('extension.list.module')->getExtensionInfo() is
+ *   deprecated in drupal:10.2.0. Pass only $info["name"] instead.
  *
  * @return array
  *   An array of task links.
+ *
+ * @deprecated in drupal:10.2.0 and is removed from drupal:11.0.0. Use the
+ *   'system.module_admin_links_helper' service with the getModuleAdminLinks() method
+ *   and 'user.module_permissions_link_helper' service with the
+ *   ::getModulePermissionsLink() method instead.
+ *
+ * @see https://www.drupal.org/node/3038972
  */
-function system_get_module_admin_tasks($module, array $info) {
-  $tree = &drupal_static(__FUNCTION__);
-
-  $menu_tree = \Drupal::menuTree();
-
-  if (!isset($tree)) {
-    $parameters = new MenuTreeParameters();
-    $parameters->setRoot('system.admin')->excludeRoot()->onlyEnabledLinks();
-    $tree = $menu_tree->load('system.admin', $parameters);
-    $manipulators = [
-      ['callable' => 'menu.default_tree_manipulators:checkAccess'],
-      ['callable' => 'menu.default_tree_manipulators:generateIndexAndSort'],
-      ['callable' => 'menu.default_tree_manipulators:flatten'],
-    ];
-    $tree = $menu_tree->transform($tree, $manipulators);
+function system_get_module_admin_tasks($module, string|array $module_name) {
+  @trigger_error("system_get_module_admin_tasks() is deprecated in drupal:10.2.0 and is removed from drupal:11.0.0. Use the 'system.module_admin_links_helper' service with the getModuleAdminLinks() method and 'user.module_permissions_link_helper' service with the ::getModulePermissionsLink() method instead. See https://www.drupal.org/node/3038972", E_USER_DEPRECATED);
+  $module_admin_links = \Drupal::service('system.module_admin_links_helper')->getModuleAdminLinks($module);
+  if ($module_permissions_link = \Drupal::service('user.module_permissions_link_helper')->getModulePermissionsLink($module, $module_name)) {
+    $module_admin_links["user.admin_permissions.{$module}"] = $module_permissions_link;
   }
-
-  $admin_tasks = [];
-  foreach ($tree as $element) {
-    if (!$element->access->isAllowed()) {
-      // @todo Bubble cacheability metadata of both accessible and inaccessible
-      //   links. Currently made impossible by the way admin tasks are rendered.
-      continue;
-    }
-
-    $link = $element->link;
-    if ($link->getProvider() != $module) {
-      continue;
-    }
-    $admin_tasks[] = [
-      'title' => $link->getTitle(),
-      'description' => $link->getDescription(),
-      'url' => $link->getUrlObject(),
-    ];
-  }
-
-  // Append link for permissions.
-  /** @var \Drupal\user\PermissionHandlerInterface $permission_handler */
-  $permission_handler = \Drupal::service('user.permissions');
-
-  if ($permission_handler->moduleProvidesPermissions($module)) {
-    /** @var \Drupal\Core\Access\AccessManagerInterface $access_manager */
-    $access_manager = \Drupal::service('access_manager');
-    if ($access_manager->checkNamedRoute('user.admin_permissions.module', ['modules' => $module], \Drupal::currentUser())) {
-      /** @var \Drupal\Core\Url $url */
-      $url = new Url('user.admin_permissions.module', ['modules' => $module]);
-      $admin_tasks["user.admin_permissions.$module"] = [
-        'title' => t('Configure @module permissions', ['@module' => $info['name']]),
-        'description' => '',
-        'url' => $url,
-      ];
-    }
-  }
-
-  return $admin_tasks;
+  return $module_admin_links;
 }
 
 /**
@@ -1145,8 +1107,14 @@ function system_time_zones($blank = NULL, $grouped = FALSE) {
  *   - If it succeeds and $managed is TRUE, a \Drupal\file\FileInterface
  *     object which describes the file.
  *   - If it fails, FALSE.
+ *
+ * @deprecated in drupal:10.2.0 and is removed from drupal:11.0.0. There is no
+ *   replacement.
+ *
+ * @see https://www.drupal.org/node/3223362
  */
 function system_retrieve_file($url, $destination = NULL, $managed = FALSE, $replace = FileSystemInterface::EXISTS_RENAME) {
+  @trigger_error('system_retrieve_file is deprecated in drupal:10.2.0 and is removed from drupal:11.0.0. There is no replacement. See https://www.drupal.org/node/3223362', E_USER_DEPRECATED);
   $parsed_url = parse_url($url);
   /** @var \Drupal\Core\File\FileSystemInterface $file_system */
   $file_system = \Drupal::service('file_system');
@@ -1423,8 +1391,34 @@ function system_entity_view_display_presave(EntityViewDisplayInterface $entity_v
     }
 
     if (!isset($component['settings']['tooltip']) || !isset($component['settings']['time_diff'])) {
-      @trigger_error("The 'timestamp' formatter plugin 'tooltip' and 'time_diff' settings were added in drupal:10.1.0 and will be mandatory in Drupal 11.0.0. See https://www.drupal.org/node/2993639", E_USER_DEPRECATED);
+      @trigger_error("Using the 'timestamp' formatter plugin  without the 'tooltip' and 'time_diff' settings is deprecated in drupal:10.1.0 and is required in drupal:11.0.0. See https://www.drupal.org/node/2993639", E_USER_DEPRECATED);
       $entity_view_display->setComponent($name, $component);
     }
+  }
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_presave() for view mode entities.
+ *
+ * Sets the description property to an empty string.
+ *
+ * @todo Remove this BC layer in drupal:11.0.0.
+ */
+function system_entity_view_mode_presave(EntityViewModeInterface $entity_view_mode) {
+  if ($entity_view_mode->get('description') === NULL) {
+    $entity_view_mode->set('description', '');
+  }
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_presave() for form mode entities.
+ *
+ * Sets the description property to an empty string.
+ *
+ * @todo Remove this BC layer in drupal:11.0.0.
+ */
+function system_entity_form_mode_presave(EntityFormModeInterface $entity_form_mode) {
+  if ($entity_form_mode->get('description') === NULL) {
+    $entity_form_mode->set('description', '');
   }
 }

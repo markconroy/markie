@@ -14,6 +14,7 @@ use Drupal\Core\Url;
  * Functional class for the full integrated routing system.
  *
  * @group Routing
+ * @group #slow
  */
 class RouterTest extends BrowserTestBase {
 
@@ -34,7 +35,7 @@ class RouterTest extends BrowserTestBase {
    */
   public function testFinishResponseSubscriber() {
     $renderer_required_cache_contexts = ['languages:' . LanguageInterface::TYPE_INTERFACE, 'theme', 'user.permissions'];
-    $expected_cache_contexts = Cache::mergeContexts($renderer_required_cache_contexts, ['url.query_args:' . MainContentViewSubscriber::WRAPPER_FORMAT]);
+    $expected_cache_contexts = Cache::mergeContexts($renderer_required_cache_contexts, ['url.query_args:' . MainContentViewSubscriber::WRAPPER_FORMAT, 'user.roles:authenticated']);
     sort($expected_cache_contexts);
 
     // Confirm that the router can get to a controller.
@@ -68,7 +69,7 @@ class RouterTest extends BrowserTestBase {
     // X-Drupal-Cache-Contexts and X-Drupal-Cache-Tags headers.
     // 1. controller result: render array, globally cacheable route access.
     $this->drupalGet('router_test/test18');
-    $expected_cache_contexts = Cache::mergeContexts($renderer_required_cache_contexts, ['url']);
+    $expected_cache_contexts = Cache::mergeContexts($renderer_required_cache_contexts, ['url', 'user.roles:authenticated']);
     sort($expected_cache_contexts);
     $this->assertSession()->responseHeaderEquals('X-Drupal-Cache-Contexts', implode(' ', $expected_cache_contexts));
     $this->assertSession()->responseHeaderEquals('X-Drupal-Cache-Tags', 'config:user.role.anonymous foo http_response rendered');
@@ -171,7 +172,7 @@ class RouterTest extends BrowserTestBase {
   public function testControllerPlaceholdersDefaultValues() {
     $this->drupalGet('router_test/test4');
     $this->assertSession()->statusCodeEquals(200);
-    $this->assertSession()->pageTextContains('narf');
+    $this->assertSession()->pageTextContains('Lassie');
 
     // Confirm that the page wrapping is being added, so we're not getting a
     // raw body returned.

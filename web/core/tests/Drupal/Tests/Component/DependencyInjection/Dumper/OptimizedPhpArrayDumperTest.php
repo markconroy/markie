@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\Component\DependencyInjection\Dumper {
 
   use Drupal\Component\Utility\Crypt;
@@ -7,6 +9,7 @@ namespace Drupal\Tests\Component\DependencyInjection\Dumper {
   use Prophecy\PhpUnit\ProphecyTrait;
   use Prophecy\Prophet;
   use Symfony\Bridge\PhpUnit\ExpectDeprecationTrait;
+  use Symfony\Component\DependencyInjection\Argument\ServiceClosureArgument;
   use Symfony\Component\DependencyInjection\Definition;
   use Symfony\Component\DependencyInjection\Reference;
   use Symfony\Component\DependencyInjection\Parameter;
@@ -200,6 +203,7 @@ namespace Drupal\Tests\Component\DependencyInjection\Dumper {
      * @covers ::getPrivateServiceCall
      * @covers ::getReferenceCall
      * @covers ::getServiceCall
+     * @covers ::getServiceClosureCall
      * @covers ::getParameterCall
      *
      * @dataProvider getDefinitionsDataProvider
@@ -297,6 +301,25 @@ namespace Drupal\Tests\Component\DependencyInjection\Dumper {
         'arguments_expected' => static::getCollection([
           'foo',
           static::getPrivateServiceCall('private_definition', $private_definition, TRUE),
+        ]),
+      ] + $base_service_definition;
+
+      // Test a service closure.
+      $service_definitions[] = [
+        'arguments' => [
+          'foo',
+          [
+            'alias-1' => new ServiceClosureArgument(new Reference('bar', ContainerInterface::NULL_ON_INVALID_REFERENCE)),
+            'alias-2' => new ServiceClosureArgument(new Reference('bar', ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE)),
+          ],
+        ],
+        'arguments_count' => 2,
+        'arguments_expected' => static::getCollection([
+          'foo',
+          static::getCollection([
+            'alias-1' => static::getServiceClosureCall('bar', ContainerInterface::NULL_ON_INVALID_REFERENCE),
+            'alias-2' => static::getServiceClosureCall('bar', ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
+          ]),
         ]),
       ] + $base_service_definition;
 
@@ -448,6 +471,17 @@ namespace Drupal\Tests\Component\DependencyInjection\Dumper {
     protected static function getServiceCall($id, $invalid_behavior = ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE) {
       return (object) [
         'type' => 'service',
+        'id' => $id,
+        'invalidBehavior' => $invalid_behavior,
+      ];
+    }
+
+    /**
+     * Helper function to return a service closure definition.
+     */
+    protected static function getServiceClosureCall($id, $invalid_behavior = ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE) {
+      return (object) [
+        'type' => 'service_closure',
         'id' => $id,
         'invalidBehavior' => $invalid_behavior,
       ];

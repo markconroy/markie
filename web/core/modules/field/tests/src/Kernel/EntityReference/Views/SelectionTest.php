@@ -7,7 +7,7 @@ use Drupal\Component\Utility\Html;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\node\Entity\NodeType;
-use Drupal\Tests\field\Traits\EntityReferenceTestTrait;
+use Drupal\Tests\field\Traits\EntityReferenceFieldCreationTrait;
 use Drupal\Tests\node\Traits\NodeCreationTrait;
 use Drupal\views\Views;
 
@@ -18,7 +18,7 @@ use Drupal\views\Views;
  */
 class SelectionTest extends KernelTestBase {
 
-  use EntityReferenceTestTrait;
+  use EntityReferenceFieldCreationTrait;
   use NodeCreationTrait;
 
   /**
@@ -60,8 +60,11 @@ class SelectionTest extends KernelTestBase {
     $this->installEntitySchema('node');
 
     // Create test nodes.
-    $type = strtolower($this->randomMachineName());
-    NodeType::create(['type' => $type])->save();
+    $type = $this->randomMachineName();
+    NodeType::create([
+      'type' => $type,
+      'name' => $this->randomString(),
+    ])->save();
     $node1 = $this->createNode(['type' => $type]);
     $node2 = $this->createNode(['type' => $type]);
     $node3 = $this->createNode();
@@ -158,7 +161,7 @@ class SelectionTest extends KernelTestBase {
     foreach ($result as $node_type => $values) {
       foreach ($values as $nid => $label) {
         $this->assertSame($node_type, $this->nodes[$nid]->bundle());
-        $this->assertSame(trim(strip_tags($label)), Html::escape($this->nodes[$nid]->label()));
+        $this->assertSame(trim(strip_tags((string) $label)), Html::escape($this->nodes[$nid]->label()));
       }
     }
   }

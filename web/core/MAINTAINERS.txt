@@ -97,6 +97,7 @@ Block
 - Ben Dougherty 'benjy' https://www.drupal.org/u/benjy
 
 Block Content
+- Adam Bramley 'acbramley' https://www.drupal.org/u/acbramley
 - Lee Rowlands 'larowlan' https://www.drupal.org/u/larowlan
 - Stephen Mustgrave 'smustgrave' https://www.drupal.org/u/smustgrave
 
@@ -112,6 +113,7 @@ Breakpoint
 
 Cache
 - Nathaniel Catchpole 'catch' https://www.drupal.org/u/catch
+- Kristiaan Van den Eynde 'kristiaanvandeneynde' https://www.drupal.org/u/kristiaanvandeneynde
 
 CKEditor 5
 - Lauri Eskola 'lauriii' https://www.drupal.org/u/lauriii

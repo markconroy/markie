@@ -120,20 +120,27 @@ class MediaAccessControlHandler extends EntityAccessControlHandler implements En
         return AccessResult::neutral("The following permissions are required: 'delete any media' OR 'delete own media' OR '$type: delete any media' OR '$type: delete own media'.")->cachePerPermissions();
 
       case 'view all revisions':
-        // Perform basic permission checks first.
-        if (!$account->hasPermission('view all media revisions')) {
-          return AccessResult::neutral("The 'view all media revisions' permission is required.")->cachePerPermissions();
-        }
+      case 'view revision':
+        if ($account->hasPermission('view any ' . $type . ' media revisions') || $account->hasPermission("view all media revisions")) {
+          // Check the access to this revision and if the media passed in is not
+          // the default revision then access to that too.
+          $entity_access = $entity->access('view', $account, TRUE);
+          if (!$entity->isDefaultRevision()) {
+            $media_storage = $this->entityTypeManager->getStorage($entity->getEntityTypeId());
+            $entity_access->andIf($this->access($media_storage->load($entity->id()), 'view', $account, TRUE));
+          }
 
-        // First check the access to the default revision and finally, if the
-        // media passed in is not the default revision then access to that,
-        // too.
-        $media_storage = $this->entityTypeManager->getStorage($entity->getEntityTypeId());
-        $access = $this->access($media_storage->load($entity->id()), 'view', $account, TRUE);
-        if (!$entity->isDefaultRevision()) {
-          $access = $access->andIf($this->access($entity, 'view', $account, TRUE));
+          return AccessResult::allowed()->cachePerPermissions()->andIf($entity_access);
         }
-        return $access->cachePerPermissions()->addCacheableDependency($entity);
+        return AccessResult::neutral()->cachePerPermissions();
+
+      case 'revert':
+        return AccessResult::allowedIfHasPermission($account, 'revert any ' . $type . ' media revisions')
+          ->cachePerPermissions()->addCacheableDependency($entity);
+
+      case 'delete revision':
+        return AccessResult::allowedIfHasPermission($account, 'delete any ' . $type . ' media revisions')
+          ->cachePerPermissions()->addCacheableDependency($entity);
 
       default:
         return AccessResult::neutral()->cachePerPermissions();

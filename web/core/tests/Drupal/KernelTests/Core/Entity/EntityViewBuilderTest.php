@@ -10,7 +10,7 @@ use Drupal\Core\Entity\Entity\EntityViewMode;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\language\Entity\ConfigurableLanguage;
-use Drupal\Tests\field\Traits\EntityReferenceTestTrait;
+use Drupal\Tests\field\Traits\EntityReferenceFieldCreationTrait;
 use Drupal\user\Entity\Role;
 use Drupal\user\RoleInterface;
 
@@ -21,7 +21,7 @@ use Drupal\user\RoleInterface;
  */
 class EntityViewBuilderTest extends EntityKernelTestBase {
 
-  use EntityReferenceTestTrait;
+  use EntityReferenceFieldCreationTrait;
 
   /**
    * {@inheritdoc}
@@ -220,9 +220,9 @@ class EntityViewBuilderTest extends EntityKernelTestBase {
       'content_translation',
     ]);
     $this->installEntitySchema('entity_test_mul');
-    $en = ConfigurableLanguage::create(['id' => 'en']);
+    $en = ConfigurableLanguage::createFromLangcode('en');
     $en->save();
-    $es = ConfigurableLanguage::create(['id' => 'es']);
+    $es = ConfigurableLanguage::createFromLangcode('es');
     $es->save();
     $this->container->get('content_translation.manager')->setEnabled('entity_test_mul', 'entity_test_mul', TRUE);
 

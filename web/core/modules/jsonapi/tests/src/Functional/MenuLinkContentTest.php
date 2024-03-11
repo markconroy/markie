@@ -13,6 +13,7 @@ use GuzzleHttp\RequestOptions;
  * JSON:API integration test for the "MenuLinkContent" content entity type.
  *
  * @group jsonapi
+ * @group #slow
  */
 class MenuLinkContentTest extends ResourceTestBase {
 
@@ -129,7 +130,7 @@ class MenuLinkContentTest extends ResourceTestBase {
           'weight' => 0,
           'drupal_internal__id' => 1,
           'drupal_internal__revision_id' => 1,
-          'revision_created' => (new \DateTime())->setTimestamp($this->entity->getRevisionCreationTime())->setTimezone(new \DateTimeZone('UTC'))->format(\DateTime::RFC3339),
+          'revision_created' => (new \DateTime())->setTimestamp((int) $this->entity->getRevisionCreationTime())->setTimezone(new \DateTimeZone('UTC'))->format(\DateTime::RFC3339),
           'revision_log_message' => NULL,
           // @todo Attempt to remove this in https://www.drupal.org/project/drupal/issues/2933518.
           'revision_translation_affected' => TRUE,
@@ -159,7 +160,7 @@ class MenuLinkContentTest extends ResourceTestBase {
       'data' => [
         'type' => 'menu_link_content--menu_link_content',
         'attributes' => [
-          'title' => 'Dramallama',
+          'title' => 'Drama llama',
           'link' => [
             'uri' => 'http://www.urbandictionary.com/define.php?term=drama%20llama',
           ],

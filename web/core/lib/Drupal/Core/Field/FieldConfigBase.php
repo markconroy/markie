@@ -279,6 +279,13 @@ abstract class FieldConfigBase extends ConfigEntityBase implements FieldConfigIn
     if (empty($this->field_type)) {
       $this->field_type = $this->getFieldStorageDefinition()->getType();
     }
+
+    // Make sure all expected runtime settings are present.
+    $default_settings = \Drupal::service('plugin.manager.field.field_type')
+      ->getDefaultFieldSettings($this->getType());
+    // Filter out any unknown (unsupported) settings.
+    $supported_settings = array_intersect_key($this->getSettings(), $default_settings);
+    $this->set('settings', $supported_settings + $default_settings);
   }
 
   /**
@@ -461,10 +468,12 @@ abstract class FieldConfigBase extends ConfigEntityBase implements FieldConfigIn
    * @todo Investigate in https://www.drupal.org/node/1977206.
    */
   public function __sleep() {
+    $properties = get_object_vars($this);
+
     // Only serialize necessary properties, excluding those that can be
     // recalculated.
-    $properties = get_object_vars($this);
-    unset($properties['fieldStorage'], $properties['itemDefinition'], $properties['original']);
+    unset($properties['itemDefinition'], $properties['original']);
+
     return array_keys($properties);
   }
 

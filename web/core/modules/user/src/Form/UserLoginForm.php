@@ -109,13 +109,13 @@ class UserLoginForm extends FormBase {
       '#title' => $this->t('Username'),
       '#size' => 60,
       '#maxlength' => UserInterface::USERNAME_MAX_LENGTH,
-      '#description' => $this->t('Enter your @s username.', ['@s' => $config->get('name')]),
       '#required' => TRUE,
       '#attributes' => [
         'autocorrect' => 'none',
         'autocapitalize' => 'none',
         'spellcheck' => 'false',
         'autofocus' => 'autofocus',
+        'autocomplete' => 'username',
       ],
     ];
 
@@ -123,8 +123,10 @@ class UserLoginForm extends FormBase {
       '#type' => 'password',
       '#title' => $this->t('Password'),
       '#size' => 60,
-      '#description' => $this->t('Enter the password that accompanies your username.'),
       '#required' => TRUE,
+      '#attributes' => [
+        'autocomplete' => 'current-password',
+      ],
     ];
 
     $form['actions'] = ['#type' => 'actions'];
@@ -207,11 +209,22 @@ class UserLoginForm extends FormBase {
         }
         $form_state->set('flood_control_user_identifier', $identifier);
 
-        // Don't allow login if the limit for this user has been reached.
-        // Default is to allow 5 failed attempts every 6 hours.
-        if (!$this->userFloodControl->isAllowed('user.failed_login_user', $flood_config->get('user_limit'), $flood_config->get('user_window'), $identifier)) {
-          $form_state->set('flood_control_triggered', 'user');
-          return;
+        // If there are zero flood records for this user, then we don't need to
+        // clear any failed login attempts after a successful login, so check
+        // for this case first before checking the actual flood limit and store
+        // the result in form state.
+        if (!$this->userFloodControl->isAllowed('user.failed_login_user', 1, $flood_config->get('user_window'), $identifier)) {
+          // Now check the actual limit for the user. Default is to allow 5
+          // failed attempts every 6 hours. This means we check the flood table
+          // twice if flood control has already been triggered by a previous
+          // login attempt, but this should be the less common case.
+          if (!$this->userFloodControl->isAllowed('user.failed_login_user', $flood_config->get('user_limit'), $flood_config->get('user_window'), $identifier)) {
+            $form_state->set('flood_control_triggered', 'user');
+            return;
+          }
+        }
+        else {
+          $form_state->set('flood_control_skip_clear', 'user');
         }
       }
       // We are not limited by flood control, so try to authenticate.
@@ -249,13 +262,7 @@ class UserLoginForm extends FormBase {
         $form_state->setResponse($response);
       }
       else {
-        // Use $form_state->getUserInput() in the error message to guarantee
-        // that we send exactly what the user typed in. The value from
-        // $form_state->getValue() may have been modified by validation
-        // handlers that ran earlier than this one.
-        $user_input = $form_state->getUserInput();
-        $query = isset($user_input['name']) ? ['name' => $user_input['name']] : [];
-        $form_state->setErrorByName('name', $this->t('Unrecognized username or password. <a href=":password">Forgot your password?</a>', [':password' => Url::fromRoute('user.pass', [], ['query' => $query])->toString()]));
+        $form_state->setErrorByName('name', $this->t('Unrecognized username or password. <a href=":password">Forgot your password?</a>', [':password' => Url::fromRoute('user.pass')->toString()]));
         $accounts = $this->userStorage->loadByProperties(['name' => $form_state->getValue('name')]);
         if (!empty($accounts)) {
           $this->logger('user')->notice('Login attempt failed for %user.', ['%user' => $form_state->getValue('name')]);
@@ -267,7 +274,7 @@ class UserLoginForm extends FormBase {
         }
       }
     }
-    elseif ($flood_control_user_identifier = $form_state->get('flood_control_user_identifier')) {
+    elseif (!$form_state->get('flood_control_skip_clear') && $flood_control_user_identifier = $form_state->get('flood_control_user_identifier')) {
       // Clear past failures for this user so as not to block a user who might
       // log in and out more than once in an hour.
       $this->userFloodControl->clear('user.failed_login_user', $flood_control_user_identifier);

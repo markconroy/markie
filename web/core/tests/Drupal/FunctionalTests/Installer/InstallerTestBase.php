@@ -89,20 +89,9 @@ abstract class InstallerTestBase extends BrowserTestBase {
   }
 
   /**
-   * {@inheritdoc}
+   * We are testing the installer, so set up a minimal environment for that.
    */
-  protected function setUp(): void {
-    parent::setUpAppRoot();
-
-    $this->isInstalled = FALSE;
-
-    $this->setupBaseUrl();
-
-    $this->prepareDatabasePrefix();
-
-    // Install Drupal test site.
-    $this->prepareEnvironment();
-
+  public function installDrupal() {
     // Define information about the user 1 account.
     $this->rootUser = new UserSession([
       'uid' => 1,
@@ -157,12 +146,13 @@ abstract class InstallerTestBase extends BrowserTestBase {
     $this->container
       ->setParameter('app.root', DRUPAL_ROOT);
     \Drupal::setContainer($this->container);
+  }
 
-    // Setup Mink.
-    $this->initMink();
-
-    // Set up the browser test output file.
-    $this->initBrowserOutputFile();
+  /**
+   * {@inheritdoc}
+   */
+  protected function setUp(): void {
+    parent::setUp();
 
     $this->visitInstaller();
 
@@ -207,6 +197,14 @@ abstract class InstallerTestBase extends BrowserTestBase {
       $this->container->get('config.factory')
         ->getEditable('system.mail')
         ->set('interface.default', 'test_mail_collector')
+        ->set('mailer_dsn', [
+          'scheme' => 'null',
+          'host' => 'null',
+          'user' => NULL,
+          'password' => NULL,
+          'port' => NULL,
+          'options' => [],
+        ])
         ->save();
 
       $this->installDefaultThemeFromClassProperty($this->container);
@@ -255,7 +253,10 @@ abstract class InstallerTestBase extends BrowserTestBase {
    * Installer step: Configure settings.
    */
   protected function setUpSettings() {
-    $edit = $this->translatePostValues($this->parameters['forms']['install_settings_form']);
+    $parameters = $this->parameters['forms']['install_settings_form'];
+    $driver = $parameters['driver'];
+    unset($parameters[$driver]['dependencies']);
+    $edit = $this->translatePostValues($parameters);
     $this->submitForm($edit, $this->translations['Save and continue']);
   }
 

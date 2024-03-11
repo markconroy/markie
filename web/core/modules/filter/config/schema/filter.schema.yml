@@ -16,11 +16,16 @@ filter.format.*:
   label: 'Text formats'
   mapping:
     name:
-      type: label
+      type: required_label
       label: 'Name'
     format:
-      type: string
+      type: machine_name
       label: 'Machine name'
+      # Filter format machine names can be up to 255 characters.
+      # @see \Drupal\filter\FilterFormatFormBase::form()
+      constraints:
+        Length:
+          max: 255
     weight:
       type: integer
       label: 'Weight'
@@ -32,6 +37,7 @@ filter.format.*:
         label: 'Role'
     filters:
       type: sequence
+      orderby: key
       label: 'Enabled filters'
       sequence:
         type: filter

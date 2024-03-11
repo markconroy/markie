@@ -2,7 +2,6 @@
 
 namespace Drupal\Tests\mysql\Kernel\mysql;
 
-use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Command\DbDumpApplication;
 use Drupal\Core\Config\DatabaseStorage;
 use Drupal\Core\Database\Database;
@@ -92,7 +91,6 @@ class DbDumpTest extends DriverSpecificKernelTestBase {
     $this->installEntitySchema('file');
     $this->installEntitySchema('menu_link_content');
     $this->installEntitySchema('path_alias');
-    $this->installSchema('system', 'sequences');
 
     // Place some sample config to test for in the export.
     $this->data = [
@@ -130,7 +128,6 @@ class DbDumpTest extends DriverSpecificKernelTestBase {
       'menu_link_content_data',
       'menu_link_content_revision',
       'menu_link_content_field_revision',
-      'sequences',
       'sessions',
       'path_alias',
       'path_alias_revision',
@@ -198,9 +195,9 @@ class DbDumpTest extends DriverSpecificKernelTestBase {
     // The tables should now exist and the schemas should match the originals.
     foreach ($this->tables as $table) {
       $this->assertTrue($schema
-        ->tableExists($table), new FormattableMarkup('Table @table created by the database script.', ['@table' => $table]));
-      $this->assertSame($this->originalTableSchemas[$table], $this->getTableSchema($table), new FormattableMarkup('The schema for @table was properly restored.', ['@table' => $table]));
-      $this->assertSame($this->originalTableIndexes[$table], $this->getTableIndexes($table), new FormattableMarkup('The indexes for @table were properly restored.', ['@table' => $table]));
+        ->tableExists($table), "Table $table created by the database script.");
+      $this->assertSame($this->originalTableSchemas[$table], $this->getTableSchema($table), "The schema for $table was properly restored.");
+      $this->assertSame($this->originalTableIndexes[$table], $this->getTableIndexes($table), "The indexes for $table were properly restored.");
     }
 
     // Ensure the test config has been replaced.

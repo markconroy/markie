@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ruleset name="drupal_core">
-  <arg name="extensions" value="inc,install,module,php,profile,test,theme,yml"/>
+  <arg name="extensions" value="engine,inc,install,module,php,profile,test,theme,yml"/>
   <description>Default PHP CodeSniffer configuration for Drupal core.</description>
 
   <!--Exclude folders used by common frontend tools. These folders match the file_scan_ignore_directories setting in default.settings.php-->
@@ -123,6 +123,7 @@
   <rule ref="Drupal.Semantics.FunctionT">
     <exclude name="Drupal.Semantics.FunctionT.NotLiteralString"/>
   </rule>
+  <rule ref="Drupal.Semantics.FunctionTriggerError"/>
   <rule ref="Drupal.Semantics.FunctionWatchdog"/>
   <rule ref="Drupal.Semantics.InstallHooks"/>
   <rule ref="Drupal.Semantics.LStringTranslatable"/>
@@ -266,6 +267,20 @@
          <element value="/@inheritDoc/"/>
        </property>
     </properties>
+  </rule>
+  <rule ref="SlevomatCodingStandard.TypeHints.DeclareStrictTypes">
+    <properties>
+      <property name="spacesCountAroundEqualsSign" value="0" />
+    </properties>
+    <!-- @todo Broaden this in https://www.drupal.org/project/drupal/issues/3400434 -->
+    <!-- <include-pattern>*/tests/*</include-pattern> -->
+    <include-pattern>*/tests/src/FunctionalJavascript/*</include-pattern>
+    <include-pattern>*/tests/src/Traits/*</include-pattern>
+    <include-pattern>./tests/Drupal/BuildTests/*</include-pattern>
+    <include-pattern>./tests/Drupal/FunctionalJavascriptTests/*</include-pattern>
+    <include-pattern>./tests/Drupal/Tests/*Trait.php</include-pattern>
+    <include-pattern>./tests/Drupal/Tests/Traits/*</include-pattern>
+    <exclude-pattern>./tests/Drupal/Tests/Listeners/*</exclude-pattern>
   </rule>
 
   <!-- Squiz sniffs -->

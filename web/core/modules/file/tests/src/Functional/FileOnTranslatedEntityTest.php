@@ -3,6 +3,7 @@
 namespace Drupal\Tests\file\Functional;
 
 use Drupal\file\Entity\File;
+use Drupal\Tests\content_translation\Traits\ContentTranslationTestTrait;
 
 /**
  * Uploads files to translated nodes.
@@ -10,6 +11,8 @@ use Drupal\file\Entity\File;
  * @group file
  */
 class FileOnTranslatedEntityTest extends FileFieldTestBase {
+
+  use ContentTranslationTestTrait;
 
   /**
    * {@inheritdoc}
@@ -45,7 +48,7 @@ class FileOnTranslatedEntityTest extends FileFieldTestBase {
     $this->drupalCreateContentType(['type' => 'page', 'name' => 'Basic page', 'new_revision' => FALSE]);
 
     // Create a file field on the "Basic page" node type.
-    $this->fieldName = strtolower($this->randomMachineName());
+    $this->fieldName = $this->randomMachineName();
     $this->createFileField($this->fieldName, 'node', 'page');
 
     // Create and log in user.
@@ -64,24 +67,12 @@ class FileOnTranslatedEntityTest extends FileFieldTestBase {
     $this->drupalLogin($admin_user);
 
     // Add a second and third language.
-    $edit = [];
-    $edit['predefined_langcode'] = 'fr';
-    $this->drupalGet('admin/config/regional/language/add');
-    $this->submitForm($edit, 'Add language');
-
-    $edit = [];
-    $edit['predefined_langcode'] = 'nl';
-    $this->drupalGet('admin/config/regional/language/add');
-    $this->submitForm($edit, 'Add language');
+    static::createLanguageFromLangcode('fr');
+    static::createLanguageFromLangcode('nl');
 
     // Enable translation for "Basic page" nodes.
-    $edit = [
-      'entity_types[node]' => 1,
-      'settings[node][page][translatable]' => 1,
-      "settings[node][page][fields][$this->fieldName]" => 1,
-    ];
-    $this->drupalGet('admin/config/regional/content-language');
-    $this->submitForm($edit, 'Save configuration');
+    static::enableContentTranslation('node', 'page');
+    static::setFieldTranslatable('node', 'page', $this->fieldName, TRUE);
   }
 
   /**
@@ -213,6 +204,42 @@ class FileOnTranslatedEntityTest extends FileFieldTestBase {
 
     $file = File::load($replaced_second_fid);
     $this->assertTrue($file->isTemporary());
+  }
+
+  /**
+   * Tests if file field tracks file usages correctly on translated nodes.
+   */
+  public function testFileUsage() {
+    /** @var \Drupal\file\FileUsage\FileUsageInterface $file_usage */
+    $file_usage = \Drupal::service('file.usage');
+
+    // Enable language selector on the page edit form.
+    $edit = [
+      'language_configuration[language_alterable]' => 1,
+    ];
+    $this->drupalGet('admin/structure/types/manage/page');
+    $this->submitForm($edit, 'Save');
+
+    // Create a node and upload a file.
+    $node = $this->drupalCreateNode(['type' => 'page']);
+    $edit = [
+      'files[' . $this->fieldName . '_0]' => \Drupal::service('file_system')->realpath($this->drupalGetTestFiles('text')[0]->uri),
+    ];
+    $this->drupalGet('node/' . $node->id() . '/edit');
+    $this->submitForm($edit, 'Save');
+
+    // Check if the file usage is correct.
+    $file = File::load($this->getLastFileId());
+    $this->assertEquals($file_usage->listUsage($file), ['file' => ['node' => [$node->id() => '1']]]);
+
+    // Check if the file usage is tracked correctly when changing the original
+    // language of an entity.
+    $edit = [
+      'langcode[0][value]' => 'fr',
+    ];
+    $this->drupalGet('node/' . $node->id() . '/edit');
+    $this->submitForm($edit, 'Save');
+    $this->assertEquals($file_usage->listUsage($file), ['file' => ['node' => [$node->id() => '1']]]);
   }
 
 }

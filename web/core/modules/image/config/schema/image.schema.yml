@@ -5,9 +5,9 @@ image.style.*:
   label: 'Image style'
   mapping:
     name:
-      type: string
+      type: machine_name
     label:
-      type: label
+      type: required_label
       label: 'Label'
     effects:
       type: sequence
@@ -108,10 +108,10 @@ field.field_settings.image:
   mapping:
     max_resolution:
       type: string
-      label: 'Maximum image resolution'
+      label: 'Maximum image dimensions'
     min_resolution:
       type: string
-      label: 'Minimum image resolution'
+      label: 'Minimum image dimensions'
     alt_field:
       type: boolean
       label: 'Enable Alt field'

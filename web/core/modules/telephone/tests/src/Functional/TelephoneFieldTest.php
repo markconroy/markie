@@ -11,6 +11,7 @@ use Drupal\field\Entity\FieldStorageConfig;
  * Tests the creation of telephone fields.
  *
  * @group telephone
+ * @group #slow
  */
 class TelephoneFieldTest extends BrowserTestBase {
 
@@ -90,7 +91,7 @@ class TelephoneFieldTest extends BrowserTestBase {
   public function testTelephoneWidget() {
     $this->drupalGet('node/add/article');
     $this->assertSession()->fieldValueEquals("field_telephone[0][value]", '');
-    $this->assertSession()->elementAttributeContains('css', 'input[name="field_telephone[0][value]"]', 'maxlength', TelephoneItem::MAX_LENGTH);
+    $this->assertSession()->elementAttributeContains('css', 'input[name="field_telephone[0][value]"]', 'maxlength', (string) TelephoneItem::MAX_LENGTH);
     $this->assertSession()->responseContains('placeholder="123-456-7890"');
   }
 

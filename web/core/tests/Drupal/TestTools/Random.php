@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\TestTools;
 
 use Drupal\Component\Utility\Random as RandomUtility;
@@ -53,7 +55,7 @@ abstract class Random {
     // To prevent the introduction of random test failures, ensure that the
     // returned string contains a character that needs to be escaped in HTML by
     // injecting an ampersand into it.
-    $replacement_pos = floor($length / 2);
+    $replacement_pos = intval($length / 2);
     // Remove 2 from the length to account for the ampersand and greater than
     // characters.
     $string = static::getGenerator()->string($length - 2, TRUE, [static::class, 'stringValidate']);
@@ -89,7 +91,7 @@ abstract class Random {
   /**
    * Generates a unique random string containing letters and numbers.
    *
-   * Do not use this method when testing unvalidated user input. Instead, use
+   * Do not use this method when testing non validated user input. Instead, use
    * \Drupal\Tests\RandomGeneratorTrait::randomString().
    *
    * @param int $length
@@ -101,7 +103,7 @@ abstract class Random {
    * @see \Drupal\Component\Utility\Random::name()
    */
   public static function machineName(int $length = 8): string {
-    return static::getGenerator()->name($length, TRUE);
+    return static::getGenerator()->machineName($length, TRUE);
   }
 
   /**

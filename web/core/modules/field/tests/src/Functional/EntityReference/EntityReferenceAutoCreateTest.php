@@ -5,7 +5,7 @@ namespace Drupal\Tests\field\Functional\EntityReference;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\Tests\BrowserTestBase;
-use Drupal\Tests\field\Traits\EntityReferenceTestTrait;
+use Drupal\Tests\field\Traits\EntityReferenceFieldCreationTrait;
 use Drupal\taxonomy\Entity\Vocabulary;
 use Drupal\node\Entity\Node;
 use Drupal\field\Entity\FieldStorageConfig;
@@ -17,7 +17,7 @@ use Drupal\field\Entity\FieldStorageConfig;
  */
 class EntityReferenceAutoCreateTest extends BrowserTestBase {
 
-  use EntityReferenceTestTrait;
+  use EntityReferenceFieldCreationTrait;
 
   protected static $modules = ['node', 'taxonomy', 'entity_test'];
 
@@ -162,7 +162,7 @@ class EntityReferenceAutoCreateTest extends BrowserTestBase {
     /** @var \Drupal\taxonomy\Entity\Vocabulary[] $vocabularies */
     $vocabularies = [];
     for ($i = 0; $i < 2; $i++) {
-      $vid = mb_strtolower($this->randomMachineName());
+      $vid = $this->randomMachineName();
       $vocabularies[$i] = Vocabulary::create([
         'name' => $this->randomMachineName(),
         'vid' => $vid,
@@ -173,7 +173,7 @@ class EntityReferenceAutoCreateTest extends BrowserTestBase {
     // Create a taxonomy term entity reference field that saves the auto-created
     // taxonomy terms in the second vocabulary from the two that were configured
     // as targets.
-    $field_name = mb_strtolower($this->randomMachineName());
+    $field_name = $this->randomMachineName();
     $handler_settings = [
       'target_bundles' => [
         $vocabularies[0]->id() => $vocabularies[0]->id(),
@@ -261,7 +261,7 @@ class EntityReferenceAutoCreateTest extends BrowserTestBase {
     ]);
     $this->drupalLogin($account);
 
-    $field_name = mb_strtolower($this->randomMachineName());
+    $field_name = $this->randomMachineName();
     $handler_settings = [
       'auto_create' => TRUE,
     ];

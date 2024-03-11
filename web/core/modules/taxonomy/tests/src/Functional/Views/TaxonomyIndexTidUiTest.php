@@ -2,7 +2,7 @@
 
 namespace Drupal\Tests\taxonomy\Functional\Views;
 
-use Drupal\Tests\field\Traits\EntityReferenceTestTrait;
+use Drupal\Tests\field\Traits\EntityReferenceFieldCreationTrait;
 use Drupal\taxonomy\Entity\Term;
 use Drupal\taxonomy\Entity\Vocabulary;
 use Drupal\Tests\views_ui\Functional\UITestBase;
@@ -13,11 +13,12 @@ use Drupal\views\Entity\View;
  * Tests the taxonomy index filter handler UI.
  *
  * @group taxonomy
+ * @group #slow
  * @see \Drupal\taxonomy\Plugin\views\field\TaxonomyIndexTid
  */
 class TaxonomyIndexTidUiTest extends UITestBase {
 
-  use EntityReferenceTestTrait;
+  use EntityReferenceFieldCreationTrait;
 
   /**
    * Views used by this test.

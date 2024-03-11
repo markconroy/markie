@@ -57,7 +57,7 @@ if ($args['help'] || $count == 0) {
 simpletest_script_init();
 
 if (!class_exists(TestCase::class)) {
-  echo "\nrun-tests.sh requires the PHPUnit testing framework. Please use 'composer install' to ensure that it is present.\n\n";
+  echo "\nrun-tests.sh requires the PHPUnit testing framework. Use 'composer install' to ensure that it is present.\n\n";
   exit(SIMPLETEST_SCRIPT_EXIT_FAILURE);
 }
 
@@ -360,7 +360,7 @@ Drupal installation as the webserver user (differs per configuration), or root:
 sudo -u [wwwrun|www-data|etc] php ./core/scripts/{$args['script']}
   --url http://example.com/ --all
 sudo -u [wwwrun|www-data|etc] php ./core/scripts/{$args['script']}
-  --url http://example.com/ --class "Drupal\block\Tests\BlockTest"
+  --url http://example.com/ --class Drupal\block\Tests\BlockTest
 
 Without a preinstalled Drupal site, specify a SQLite database pathname to create
 and the default database connection info to use in tests:
@@ -1260,7 +1260,7 @@ function simpletest_script_format_result($result) {
 
   $message = trim(strip_tags($result->message));
   if ($args['non-html']) {
-    $message = Html::decodeEntities($message, ENT_QUOTES, 'UTF-8');
+    $message = Html::decodeEntities($message);
   }
   $lines = explode("\n", wordwrap($message), 76);
   foreach ($lines as $line) {

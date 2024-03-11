@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drush\Utils;
 
 class StringUtils
@@ -118,7 +120,7 @@ class StringUtils
         for ($i = 0; $i < $length; $i++) {
             // Each iteration, pick a random character from the
             // allowable string and append it to the password:
-            $pass .= $allowable_characters[mt_rand(0, $len)];
+            $pass .= $allowable_characters[random_int(0, $len)];
         }
 
         return $pass;

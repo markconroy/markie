@@ -71,7 +71,8 @@
       $trigger.addClass('visually-hidden');
 
       // Adjust nested contextual link's position.
-      $nestedContextual.css({ top: $nestedContextual.position().top + height });
+      $nestedContextual[0].style.top =
+        $nestedContextual.position().top + height;
     }
   }
 
@@ -103,7 +104,7 @@
     )}`;
     $contextual.find('.contextual-links a').each(function () {
       const url = this.getAttribute('href');
-      const glue = url.indexOf('?') === -1 ? '?' : '&';
+      const glue = url.includes('?') ? '&' : '?';
       this.setAttribute('href', url + glue + destination);
     });
 

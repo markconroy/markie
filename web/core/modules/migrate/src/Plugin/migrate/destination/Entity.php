@@ -3,14 +3,18 @@
 namespace Drupal\migrate\Plugin\migrate\destination;
 
 use Drupal\Component\Plugin\DependentPluginInterface;
+use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\DependencyTrait;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\migrate\EntityFieldDefinitionTrait;
 use Drupal\migrate\Plugin\MigrationInterface;
 use Drupal\migrate\Row;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+
+// cspell:ignore tnid
 
 /**
  * Provides a generic destination to import entities.
@@ -181,6 +185,35 @@ abstract class Entity extends DestinationBase implements ContainerFactoryPluginI
   }
 
   /**
+   * Updates an entity with the new values from row.
+   *
+   * This method should be implemented in extending classes.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $entity
+   *   The entity to update.
+   * @param \Drupal\migrate\Row $row
+   *   The row object to update from.
+   *
+   * @return \Drupal\Core\Entity\EntityInterface
+   *   An updated entity from row values.
+   *
+   * @throws \LogicException
+   *   Thrown for config entities, if the destination is for translations and
+   *   either the "property" or "translation" property does not exist.
+   */
+  abstract protected function updateEntity(EntityInterface $entity, Row $row);
+
+  /**
+   * Populates as much of the stub row as possible.
+   *
+   * This method can be implemented in extending classes when needed.
+   *
+   * @param \Drupal\migrate\Row $row
+   *   The row of data.
+   */
+  protected function processStubRow(Row $row) {}
+
+  /**
    * Gets the entity ID of the row.
    *
    * @param \Drupal\migrate\Row $row
@@ -215,6 +248,9 @@ abstract class Entity extends DestinationBase implements ContainerFactoryPluginI
     // Delete the specified entity from Drupal if it exists.
     $entity = $this->storage->load(reset($destination_identifier));
     if ($entity) {
+      if ($entity instanceof ContentEntityInterface) {
+        $entity->setSyncing(TRUE);
+      }
       $entity->delete();
     }
   }

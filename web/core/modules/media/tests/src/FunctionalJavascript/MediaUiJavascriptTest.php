@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\media\FunctionalJavascript;
 
 use Drupal\field\FieldConfigInterface;
@@ -67,11 +69,11 @@ class MediaUiJavascriptTest extends MediaJavascriptTestBase {
     $page->selectFieldOption('source', 'test');
     $this->assertJsCondition("jQuery('.form-item-source-configuration-test-config-value').length > 0");
     $page->fillField('description', $description);
-    $page->pressButton('Save');
+    $page->pressButton('Save and manage fields');
     // The wait prevents intermittent test failures.
-    $result = $assert_session->waitForLink('Add media type');
+    $result = $assert_session->waitForLink('Create a new field');
     $this->assertNotEmpty($result);
-    $assert_session->addressEquals('admin/structure/media');
+    $assert_session->addressEquals('admin/structure/media/manage/' . $machine_name . '/fields');
     $assert_session->pageTextContains('The media type ' . $name . ' has been added.');
     $this->drupalGet('admin/structure/media');
     $assert_session->pageTextContains($name);

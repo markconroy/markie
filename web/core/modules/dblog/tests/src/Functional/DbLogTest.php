@@ -66,6 +66,7 @@ class DbLogTest extends BrowserTestBase {
     $this->adminUser = $this->drupalCreateUser([
       'administer site configuration',
       'access administration pages',
+      'access help pages',
       'access site reports',
       'administer users',
     ]);
@@ -139,6 +140,36 @@ class DbLogTest extends BrowserTestBase {
 
     // Verify severity.
     $this->assertSession()->pageTextContains('Notice');
+  }
+
+  /**
+   * Tests that the details page displays the backtrace for a logged \Throwable.
+   */
+  public function testOnError(): void {
+    // Log in as the admin user.
+    $this->drupalLogin($this->adminUser);
+
+    // Load a page that throws an exception in the controller, and includes its
+    // function arguments in the exception backtrace.
+    $this->drupalGet('error-test/trigger-exception');
+
+    // Load the details page for the most recent event logged by the "php"
+    // logger.
+    $query = Database::getConnection()->select('watchdog')
+      ->condition('type', 'php');
+    $query->addExpression('MAX([wid])');
+    $wid = $query->execute()->fetchField();
+    $this->drupalGet('admin/reports/dblog/event/' . $wid);
+
+    // Verify the page displays a dblog-event table with a "Type" header.
+    $table = $this->assertSession()->elementExists('xpath', "//table[@class='dblog-event']");
+    $type = "//tr/th[contains(text(), 'Type')]/../td";
+    $this->assertSession()->elementsCount('xpath', $type, 1, $table);
+
+    // Verify that the backtrace row exists and is HTML-encoded.
+    $backtrace = "//tr//pre[contains(@class, 'backtrace')]";
+    $this->assertCount(1, $table->findAll('xpath', $backtrace));
+    $this->assertSession()->responseContains('&lt;script&gt;alert(&#039;xss&#039;)&lt;/script&gt;');
   }
 
   /**
@@ -276,7 +307,7 @@ class DbLogTest extends BrowserTestBase {
 
     // Check row limit variable.
     $current_limit = $this->config('dblog.settings')->get('row_limit');
-    $this->assertEquals($current_limit, $row_limit, new FormattableMarkup('[Cache] Row limit variable of @count equals row limit of @limit', ['@count' => $current_limit, '@limit' => $row_limit]));
+    $this->assertEquals($current_limit, $row_limit, "[Cache] Row limit variable of $current_limit equals row limit of $row_limit");
   }
 
   /**
@@ -442,7 +473,7 @@ class DbLogTest extends BrowserTestBase {
     $this->assertSession()->statusCodeEquals(200);
     // Retrieve the user object.
     $user = user_load_by_name($name);
-    $this->assertNotNull($user, new FormattableMarkup('User @name was loaded', ['@name' => $name]));
+    $this->assertNotNull($user, "User $name was loaded");
     // pass_raw property is needed by drupalLogin.
     $user->passRaw = $pass;
     // Log in user.
@@ -455,7 +486,7 @@ class DbLogTest extends BrowserTestBase {
       $ids[] = $row->wid;
     }
     $count_before = (isset($ids)) ? count($ids) : 0;
-    $this->assertGreaterThan(0, $count_before, new FormattableMarkup('DBLog contains @count records for @name', ['@count' => $count_before, '@name' => $user->getAccountName()]));
+    $this->assertGreaterThan(0, $count_before, "DBLog contains $count_before records for {$user->getAccountName()}");
 
     // Log in the admin user.
     $this->drupalLogin($this->adminUser);
@@ -530,7 +561,7 @@ class DbLogTest extends BrowserTestBase {
     $this->assertSession()->statusCodeEquals(200);
     // Retrieve the node object.
     $node = $this->drupalGetNodeByTitle($title);
-    $this->assertNotNull($node, new FormattableMarkup('Node @title was loaded', ['@title' => $title]));
+    $this->assertNotNull($node, "Node $title was loaded");
     // Edit the node.
     $edit = [
       'body[0][value]' => $this->randomMachineName(32),
@@ -602,7 +633,7 @@ class DbLogTest extends BrowserTestBase {
     // Add a watchdog entry.
     $this->container->get('logger.dblog')->log($log['severity'], $log['message'], $log);
     // Make sure the table count has actually been incremented.
-    $this->assertEquals($count + 1, (int) $connection->select('watchdog')->countQuery()->execute()->fetchField(), new FormattableMarkup('\Drupal\dblog\Logger\DbLog->log() added an entry to the dblog :count', [':count' => $count]));
+    $this->assertEquals($count + 1, (int) $connection->select('watchdog')->countQuery()->execute()->fetchField(), '\Drupal\dblog\Logger\DbLog->log() added an entry to the dblog ' . $count);
     // Log in the admin user.
     $this->drupalLogin($this->adminUser);
     // Post in order to clear the database table.
@@ -611,7 +642,7 @@ class DbLogTest extends BrowserTestBase {
     $this->submitForm([], 'Confirm');
     // Count the rows in watchdog that previously related to the deleted user.
     $count = $connection->select('watchdog')->countQuery()->execute()->fetchField();
-    $this->assertEquals(0, $count, new FormattableMarkup('DBLog contains :count records after a clear.', [':count' => $count]));
+    $this->assertEquals(0, $count, "DBLog contains $count records after a clear.");
   }
 
   /**
@@ -795,14 +826,14 @@ class DbLogTest extends BrowserTestBase {
    */
   public function testTemporaryUser() {
     // Create a temporary user.
-    $tempuser = $this->drupalCreateUser();
-    $tempuser_uid = $tempuser->id();
+    $temporary_user = $this->drupalCreateUser();
+    $temporary_user_uid = $temporary_user->id();
 
     // Log in as the admin user.
     $this->drupalLogin($this->adminUser);
 
     // Generate a single watchdog entry.
-    $this->generateLogEntries(1, ['user' => $tempuser, 'uid' => $tempuser_uid]);
+    $this->generateLogEntries(1, ['user' => $temporary_user, 'uid' => $temporary_user_uid]);
     $query = Database::getConnection()->select('watchdog');
     $query->addExpression('MAX([wid])');
     $wid = $query->execute()->fetchField();
@@ -812,8 +843,8 @@ class DbLogTest extends BrowserTestBase {
     $this->assertSession()->pageTextContains('Dblog test log message');
 
     // Delete the user.
-    $tempuser->delete();
-    $this->drupalGet('user/' . $tempuser_uid);
+    $temporary_user->delete();
+    $this->drupalGet('user/' . $temporary_user_uid);
     $this->assertSession()->statusCodeEquals(404);
 
     // Check if the full message displays on the details page.

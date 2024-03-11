@@ -1,9 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drush\Sql;
 
 use Consolidation\SiteProcess\Util\Escape;
 use Drupal\Core\Database\Database;
+use Drush\Boot\DrupalBootLevels;
 use Drush\Drush;
 use Drush\Utils\FsUtils;
 use Drush\Config\ConfigAwareTrait;
@@ -20,7 +23,7 @@ use Consolidation\Config\Util\Interpolator;
  * Contrib and custom database drivers can provide their own implementation by
  * extending from this class, and naming the class like 'SqlMydriver'. Note that
  * the camelcasing is required, as well as it is mandatory that the namespace of
- * the extending class be 'Drush\Sql'. In order to avoid autoloadier
+ * the extending class be 'Drush\Sql'. In order to avoid autoloader
  * collisions, it is recommended to place the class outside of the 'src'
  * directory of the module providing the database driver, then adding a
  * 'classmap' entry to the autoload class of the module's composer.json file.
@@ -38,30 +41,22 @@ abstract class SqlBase implements ConfigAwareInterface
     use SqlTableSelectionTrait;
     use ConfigAwareTrait;
 
-    // An Drupal style array containing specs for connecting to database.
-    public array $dbSpec;
-
     // Default code appended to sql connections.
-    public $queryExtra = '';
+    public string $queryExtra = '';
 
     // The way you pass a sql file when issueing a query.
-    public $queryFile = '<';
+    public string $queryFile = '<';
 
-    // An options array.
-    public $options;
-
-    /**
-     * @var Process
-     */
-    protected $process;
+    protected Process $process;
 
     /**
      * Typically, SqlBase instances are constructed via SqlBase::create($options).
      */
-    public function __construct($db_spec, $options)
-    {
-        $this->dbSpec = $db_spec;
-        $this->options = $options;
+    public function __construct(
+        // A Drupal style array containing specs for connecting to database.
+        public array $dbSpec,
+        public array $options
+    ) {
     }
 
     /**
@@ -126,7 +121,7 @@ abstract class SqlBase implements ConfigAwareInterface
         $driver = $db_spec['driver'];
         $class_name = 'Drush\Sql\Sql' . ucfirst($driver);
         if (class_exists($class_name)) {
-            $instance = new $class_name($db_spec, $options);
+            $instance = method_exists($class_name, 'make') ? $class_name::make($db_spec, $options) : new $class_name($db_spec, $options);
             // Inject config
             $instance->setConfig(Drush::config());
             return $instance;
@@ -161,7 +156,7 @@ abstract class SqlBase implements ConfigAwareInterface
     /**
      * A string for connecting to a database.
      *
-     * @param bool $hide_password
+     * @param $hide_password
      *  If TRUE, DBMS should try to hide password from process list.
      *  On mysql, that means using --defaults-file to supply the user+password.
      */
@@ -177,7 +172,7 @@ abstract class SqlBase implements ConfigAwareInterface
      * @return
      *   Returns path to dump file, or false on failure.
      */
-    public function dump()
+    public function dump(): string|bool|null
     {
         /** @var string|bool $file Path where dump file should be stored. If TRUE, generate a path based on usual backup directory and current date.*/
         $file = $this->getOption('result-file');
@@ -227,7 +222,7 @@ abstract class SqlBase implements ConfigAwareInterface
         if (empty($pipefail)) {
             return $cmd;
         }
-        if (strpos($pipefail, '{{cmd}}') === false) {
+        if (!str_contains($pipefail, '{{cmd}}')) {
             return $pipefail . ' ' . $cmd;
         }
         $interpolator = new Interpolator();
@@ -292,7 +287,7 @@ abstract class SqlBase implements ConfigAwareInterface
      * @param $result_file
      *   A path to save query results to. Can be drush_bit_bucket() if desired.
      *
-     * @return boolean
+     * @return bool
      *   TRUE on success, FALSE on failure
      */
     public function query(string $query, $input_file = null, $result_file = ''): ?bool
@@ -301,6 +296,7 @@ abstract class SqlBase implements ConfigAwareInterface
             return $this->alwaysQuery($query, $input_file, $result_file);
         }
         $this->logQueryInDebugMode($query, $input_file);
+        return true;
     }
 
     /**
@@ -328,7 +324,7 @@ abstract class SqlBase implements ConfigAwareInterface
             $process->run();
             $this->setProcess($process);
             if ($process->isSuccessful()) {
-                $input_file = trim($input_file, '.gz');
+                $input_file = preg_replace('/\.gz$/i', '', $input_file);
             } else {
                 Drush::logger()->error(dt('Failed to decompress input file.'));
                 return false;
@@ -393,7 +389,7 @@ abstract class SqlBase implements ConfigAwareInterface
     public function queryPrefix($query): ?string
     {
         // Inject table prefixes as needed.
-        if (Drush::bootstrapManager()->hasBootstrapped(DRUSH_BOOTSTRAP_DRUPAL_DATABASE)) {
+        if (Drush::bootstrapManager()->hasBootstrapped(DrupalBootLevels::DATABASE)) {
             // Enable prefix processing which can be dangerous so off by default. See http://drupal.org/node/1219850.
             if ($this->getOption('db-prefix')) {
                 $query = Database::getConnection()->prefixTables($query);
@@ -467,7 +463,7 @@ abstract class SqlBase implements ConfigAwareInterface
         if ($this->dbExists()) {
             return $this->drop($this->listTablesQuoted());
         } else {
-            return $this->createdb();
+            return $this->createdb(true);
         }
     }
 
@@ -588,7 +584,7 @@ abstract class SqlBase implements ConfigAwareInterface
         $db_url_default = is_array($db_url) ? $db_url['default'] : $db_url;
 
         // If it's a sqlite database, pick the database path and we're done.
-        if (strpos($db_url_default, 'sqlite://') === 0) {
+        if (str_starts_with($db_url_default, 'sqlite://')) {
             $db_spec = [
                 'driver'   => 'sqlite',
                 'database' => substr($db_url_default, strlen('sqlite://')),
@@ -605,7 +601,8 @@ abstract class SqlBase implements ConfigAwareInterface
                     'port'   => null,
                     'path'   => null,
                 ];
-                $url = (object)array_map('urldecode', $url);
+                // Suppress deprecation notice when any value in $url is null.
+                $url = (object)@array_map('urldecode', $url);
                 $db_spec = [
                     'driver'   => $url->scheme,
                     'username' => $url->user,

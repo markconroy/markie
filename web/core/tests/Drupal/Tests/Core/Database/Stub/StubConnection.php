@@ -1,10 +1,21 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\Core\Database\Stub;
 
 use Drupal\Core\Database\Connection;
+use Drupal\Core\Database\ExceptionHandler;
 use Drupal\Core\Database\Log;
+use Drupal\Core\Database\Query\Delete;
+use Drupal\Core\Database\Query\Insert;
+use Drupal\Core\Database\Query\Merge;
+use Drupal\Core\Database\Query\Select;
+use Drupal\Core\Database\Query\Truncate;
+use Drupal\Core\Database\Query\Update;
 use Drupal\Core\Database\StatementWrapper;
+use Drupal\Core\Database\Transaction;
+use Drupal\Tests\Core\Database\Stub\Driver\Schema;
 
 /**
  * A stub of the abstract Connection class for testing purposes.
@@ -85,6 +96,7 @@ class StubConnection extends Connection {
    * {@inheritdoc}
    */
   public function nextId($existing_id = 0) {
+    @trigger_error('Drupal\Core\Database\Connection::nextId() is deprecated in drupal:10.2.0 and is removed from drupal:11.0.0. Modules should use instead the keyvalue storage for the last used id. See https://www.drupal.org/node/3349345', E_USER_DEPRECATED);
     return 0;
   }
 
@@ -96,6 +108,86 @@ class StubConnection extends Connection {
    */
   public function testLogCaller() {
     return (new Log())->findCaller();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function exceptionHandler() {
+    return new ExceptionHandler();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function select($table, $alias = NULL, array $options = []) {
+    return new Select($this, $table, $alias, $options);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function insert($table, array $options = []) {
+    return new Insert($this, $table, $options);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function merge($table, array $options = []) {
+    return new Merge($this, $table, $options);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function upsert($table, array $options = []) {
+    return new StubUpsert($this, $table, $options);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function update($table, array $options = []) {
+    return new Update($this, $table, $options);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function delete($table, array $options = []) {
+    return new Delete($this, $table, $options);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function truncate($table, array $options = []) {
+    return new Truncate($this, $table, $options);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function schema() {
+    if (empty($this->schema)) {
+      $this->schema = new Schema();
+    }
+    return $this->schema;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function condition($conjunction) {
+    return new StubCondition($conjunction);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function startTransaction($name = '') {
+    return new Transaction($this, $name);
   }
 
 }

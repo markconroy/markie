@@ -58,6 +58,24 @@ function hook_field_info_alter(&$info) {
 }
 
 /**
+ * Alters the UI field definitions.
+ *
+ * This hook can be used for altering field definitions available in the UI
+ * dynamically per entity type. For example, it can be used to hide field types
+ * that are incompatible with an entity type.
+ *
+ * @param array $ui_definitions
+ *   Definition of all field types that can be added via UI.
+ * @param string $entity_type_id
+ *   The entity type id.
+ */
+function hook_field_info_entity_type_ui_definitions_alter(array &$ui_definitions, string $entity_type_id) {
+  if ($entity_type_id === 'node') {
+    unset($ui_definitions['field_type_not_compatible_with_node']);
+  }
+}
+
+/**
  * Perform alterations on preconfigured field options.
  *
  * @param array $options
@@ -408,6 +426,31 @@ function hook_field_purge_field(\Drupal\field\Entity\FieldConfig $field) {
   \Drupal::database()->delete('my_module_field_info')
     ->condition('id', $field->id())
     ->execute();
+}
+
+/**
+ * Allows modules to alter the field type category information.
+ *
+ * This hook provides a way for modules to modify or add to the existing
+ * category information. Modules can use this hook to modify the properties of
+ * existing categories. It can also be used to define custom field type
+ * categories although the use of YAML-based plugins should be preferred over
+ * the hook.
+ *
+ * @param array &$categories
+ *   An associative array of field type categories, keyed by category machine
+ *    name.
+ *
+ * @see \Drupal\Core\Field\FieldTypeCategoryManager
+ */
+function hook_field_type_category_info_alter(array &$categories) {
+  // Modify or add field type categories.
+  $categories['my_custom_category'] = [
+    'label' => 'My Custom Category',
+    'description' => 'This is a custom category for my field types.',
+  ];
+  // Modify the properties of an existing category.
+  $categories['text']['description'] = 'Modified Text';
 }
 
 /**

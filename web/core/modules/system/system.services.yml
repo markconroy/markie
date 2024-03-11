@@ -7,9 +7,15 @@ services:
     class: Drupal\system\Access\DbUpdateAccessCheck
     tags:
       - { name: access_check, applies_to: _access_system_update }
+  access_check.admin_menu_block_page:
+    class: Drupal\system\Access\SystemAdminMenuBlockAccessCheck
+    arguments: ['@access_manager', '@menu.link_tree', '@router', '@plugin.manager.menu.link']
+    tags:
+      - { name: access_check, applies_to: _access_admin_menu_block_page }
   system.manager:
     class: Drupal\system\SystemManager
     arguments: ['@module_handler', '@request_stack', '@menu.link_tree', '@menu.active_trail']
+  Drupal\system\SystemManager: '@system.manager'
   system.breadcrumb.default:
     class: Drupal\system\PathBasedBreadcrumbBuilder
     arguments: ['@router.request_context', '@access_manager', '@router', '@path_processor_manager', '@config.factory',  '@title_resolver', '@current_user', '@path.current', '@path.matcher']
@@ -40,7 +46,7 @@ services:
       - { name: event_subscriber }
   system.config_cache_tag:
     class: Drupal\system\EventSubscriber\ConfigCacheTag
-    arguments: ['@theme_handler', '@cache_tags.invalidator']
+    arguments: ['@theme_handler', '@cache_tags.invalidator', '@theme.registry']
     tags:
       - { name: event_subscriber }
   system.timezone_resolver:
@@ -59,6 +65,7 @@ services:
   system.sa_fetcher:
     class: Drupal\system\SecurityAdvisories\SecurityAdvisoriesFetcher
     arguments: ['@config.factory', '@keyvalue.expirable', '@http_client', '@extension.list.module', '@extension.list.theme', '@extension.list.profile', '@logger.channel.system', '@settings']
+  Drupal\system\SecurityAdvisories\SecurityAdvisoriesFetcher: '@system.sa_fetcher'
   system.advisories_config_subscriber:
     class: Drupal\system\EventSubscriber\AdvisoriesConfigSubscriber
     arguments: ['@system.sa_fetcher']
@@ -67,5 +74,15 @@ services:
   system.menus.route_subscriber:
     class: Drupal\system\Routing\MenuLinksetRoutes
     arguments: ['%authentication_providers%', '@config.factory', '@router.builder']
+    tags:
+      - { name: event_subscriber }
+  Drupal\system\ModuleAdminLinksHelper: '@system.module_admin_links_helper'
+  system.module_admin_links_helper:
+    class: Drupal\system\ModuleAdminLinksHelper
+    arguments: ['@menu.link_tree', '@system.module_admin_links_memory_cache']
+  system.module_admin_links_memory_cache:
+    class: Drupal\Core\Cache\MemoryCache\MemoryCache
+  system.access_route_alter_subscriber:
+    class: Drupal\system\EventSubscriber\AccessRouteAlterSubscriber
     tags:
       - { name: event_subscriber }

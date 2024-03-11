@@ -71,7 +71,7 @@ window.Drupal = { behaviors: {}, locale: {} };
    *
    * @callback Drupal~behaviorAttach
    *
-   * @param {HTMLDocument|HTMLElement} context
+   * @param {Document|HTMLElement} context
    *   An element to detach behaviors from.
    * @param {?object} settings
    *   An object containing settings for the current context. It is rarely used.
@@ -84,7 +84,7 @@ window.Drupal = { behaviors: {}, locale: {} };
    *
    * @callback Drupal~behaviorDetach
    *
-   * @param {HTMLDocument|HTMLElement} context
+   * @param {Document|HTMLElement} context
    *   An element to attach behaviors to.
    * @param {object} settings
    *   An object containing settings for the current context.
@@ -143,7 +143,7 @@ window.Drupal = { behaviors: {}, locale: {} };
    *   }
    * };
    *
-   * @param {HTMLDocument|HTMLElement} [context=document]
+   * @param {Document|HTMLElement} [context=document]
    *   An element to attach behaviors to.
    * @param {object} [settings=drupalSettings]
    *   An object containing settings for the current context. If none is given,
@@ -183,7 +183,7 @@ window.Drupal = { behaviors: {}, locale: {} };
    * implementation, i.e. `once.remove('behaviorName', selector, context)`,
    * to ensure the behavior is detached only from previously processed elements.
    *
-   * @param {HTMLDocument|HTMLElement} [context=document]
+   * @param {Document|HTMLElement} [context=document]
    *   An element to detach behaviors from.
    * @param {object} [settings=drupalSettings]
    *   An object containing settings for the current context. If none given,
@@ -486,13 +486,13 @@ window.Drupal = { behaviors: {}, locale: {} };
    * @param {number} count
    *   The item count to display.
    * @param {string} singular
-   *   The string for the singular case. Please make sure it is clear this is
-   *   singular, to ease translation (e.g. use "1 new comment" instead of "1
-   *   new"). Do not use @count in the singular string.
+   *   The string for the singular case. Make sure it is clear this is singular,
+   *   to ease translation (e.g. use "1 new comment" instead of "1 new"). Do not
+   *   use @count in the singular string.
    * @param {string} plural
-   *   The string for the plural case. Please make sure it is clear this is
-   *   plural, to ease translation. Use @count in place of the item count, as in
-   *   "@count new comments".
+   *   The string for the plural case. Make sure it is clear this is plural, to
+   *   ease translation. Use @count in place of the item count, as in "@count
+   *   new comments".
    * @param {object} [args]
    *   An object of replacements pairs to make after translation. Incidences
    *   of any key in this array are replaced with the corresponding value.
@@ -644,6 +644,36 @@ window.Drupal = { behaviors: {}, locale: {} };
    */
   Drupal.theme.placeholder = function (str) {
     return `<em class="placeholder">${Drupal.checkPlain(str)}</em>`;
+  };
+
+  /**
+   * Determine if an element is visible.
+   *
+   * @param {HTMLElement} elem
+   *   The element to check.
+   *
+   * @return {boolean}
+   *  True if the element is visible.
+   */
+  Drupal.elementIsVisible = function (elem) {
+    return !!(
+      elem.offsetWidth ||
+      elem.offsetHeight ||
+      elem.getClientRects().length
+    );
+  };
+
+  /**
+   * Determine if an element is hidden.
+   *
+   * @param {HTMLElement} elem
+   *   The element to check.
+   *
+   * @return {boolean}
+   *  True if the element is hidden.
+   */
+  Drupal.elementIsHidden = function (elem) {
+    return !Drupal.elementIsVisible(elem);
   };
 })(
   Drupal,

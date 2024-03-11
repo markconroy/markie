@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\Core\Validation\Plugin\Validation\Constraint;
 
 use Drupal\Core\TypedData\DataDefinition;
@@ -26,7 +28,7 @@ class PrimitiveTypeConstraintValidatorTest extends UnitTestCase {
    *
    * @dataProvider provideTestValidate
    */
-  public function testValidate(PrimitiveInterface $typed_data, $value, $valid) {
+  public function testValidate(PrimitiveInterface $typed_data, string|TranslatableMarkup|int|float|array|null $value, bool $valid): void {
     $context = $this->createMock(ExecutionContextInterface::class);
     $context->expects($this->any())
       ->method('getObject')
@@ -48,7 +50,7 @@ class PrimitiveTypeConstraintValidatorTest extends UnitTestCase {
     $validate->validate($value, $constraint);
   }
 
-  public function provideTestValidate() {
+  public static function provideTestValidate(): array {
     $data = [];
     $data[] = [new BooleanData(DataDefinition::create('boolean')), NULL, TRUE];
 

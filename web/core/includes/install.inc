@@ -146,8 +146,14 @@ function drupal_install_profile_distribution_version() {
  *
  * @return array
  *   An array of database types compiled into PHP.
+ *
+ * @deprecated in drupal:10.2.0 and is removed from drupal:11.0.0. Use
+ *   DatabaseDriverList::getList() instead.
+ *
+ * @see https://www.drupal.org/node/3258175
  */
 function drupal_detect_database_types() {
+  @trigger_error('drupal_detect_database_types() is deprecated in drupal:10.2.0 and is removed from drupal:11.0.0. Use DatabaseDriverList::getList() instead. See https://www.drupal.org/node/3258175', E_USER_DEPRECATED);
   $databases = drupal_get_database_types();
 
   foreach ($databases as $driver => $installer) {
@@ -162,8 +168,14 @@ function drupal_detect_database_types() {
  *
  * @return \Drupal\Core\Database\Install\Tasks[]
  *   An array of available database driver installer objects.
+ *
+ * @deprecated in drupal:10.2.0 and is removed from drupal:11.0.0. Use
+ *   DatabaseDriverList::getList() instead.
+ *
+ * @see https://www.drupal.org/node/3258175
  */
 function drupal_get_database_types() {
+  @trigger_error('drupal_get_database_types() is deprecated in drupal:10.2.0 and is removed from drupal:11.0.0. Use DatabaseDriverList::getList() instead. See https://www.drupal.org/node/3258175', E_USER_DEPRECATED);
   $databases = [];
   $drivers = [];
 
@@ -499,7 +511,7 @@ function drupal_install_system($install_state) {
   $kernel = \Drupal::service('kernel');
   $kernel->shutdown();
   // Have installer rebuild from the disk, rather then building from scratch.
-  $kernel->rebuildContainer(FALSE);
+  $kernel->rebuildContainer();
   // Reboot the kernel with new container.
   $kernel->boot();
   $kernel->preHandle($request);
@@ -562,14 +574,14 @@ function drupal_install_system($install_state) {
  *   An optional bitmask created from various FILE_* constants.
  * @param $type
  *   The type of file. Can be file (default), dir, or link.
- * @param bool $autofix
+ * @param bool $auto_fix
  *   (optional) Determines whether to attempt fixing the permissions according
  *   to the provided $mask. Defaults to TRUE.
  *
  * @return bool
  *   TRUE on success or FALSE on failure. A message is set for the latter.
  */
-function drupal_verify_install_file($file, $mask = NULL, $type = 'file', $autofix = TRUE) {
+function drupal_verify_install_file($file, $mask = NULL, $type = 'file', $auto_fix = TRUE) {
   $return = TRUE;
   // Check for files that shouldn't be there.
   if (isset($mask) && ($mask & FILE_NOT_EXIST) && file_exists($file)) {
@@ -591,7 +603,7 @@ function drupal_verify_install_file($file, $mask = NULL, $type = 'file', $autofi
         switch ($current_mask) {
           case FILE_EXIST:
             if (!file_exists($file)) {
-              if ($type == 'dir' && $autofix) {
+              if ($type == 'dir' && $auto_fix) {
                 drupal_install_mkdir($file, $mask);
               }
               if (!file_exists($file)) {
@@ -639,7 +651,7 @@ function drupal_verify_install_file($file, $mask = NULL, $type = 'file', $autofi
       }
     }
   }
-  if (!$return && $autofix) {
+  if (!$return && $auto_fix) {
     return drupal_install_fix_file($file, $mask);
   }
   return $return;

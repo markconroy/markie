@@ -114,7 +114,11 @@ class EntityDisplayTest extends KernelTestBase {
 
     // Check that createCopy() creates a new component that can be correctly
     // saved.
-    EntityViewMode::create(['id' => $display->getTargetEntityTypeId() . '.other_view_mode', 'targetEntityType' => $display->getTargetEntityTypeId()])->save();
+    EntityViewMode::create([
+      'id' => $display->getTargetEntityTypeId() . '.other_view_mode',
+      'label' => 'Other',
+      'targetEntityType' => $display->getTargetEntityTypeId(),
+    ])->save();
     $new_display = $display->createCopy('other_view_mode');
     $new_display->save();
     $new_display = EntityViewDisplay::load($new_display->id());
@@ -347,7 +351,10 @@ class EntityDisplayTest extends KernelTestBase {
    */
   public function testDeleteBundle() {
     // Create a node bundle, display and form display object.
-    $type = NodeType::create(['type' => 'article']);
+    $type = NodeType::create([
+      'type' => 'article',
+      'name' => 'Article',
+    ]);
     $type->save();
     node_add_body_field($type);
     /** @var \Drupal\Core\Entity\EntityDisplayRepositoryInterface $display_repository */
@@ -382,7 +389,11 @@ class EntityDisplayTest extends KernelTestBase {
     $field->save();
 
     // Create default and teaser entity display.
-    EntityViewMode::create(['id' => 'entity_test.teaser', 'targetEntityType' => 'entity_test'])->save();
+    EntityViewMode::create([
+      'id' => 'entity_test.teaser',
+      'label' => 'Teaser',
+      'targetEntityType' => 'entity_test',
+    ])->save();
     EntityViewDisplay::create([
       'targetEntityType' => 'entity_test',
       'bundle' => 'entity_test',
@@ -478,7 +489,10 @@ class EntityDisplayTest extends KernelTestBase {
    * Tests getDisplayModeOptions().
    */
   public function testGetDisplayModeOptions() {
-    NodeType::create(['type' => 'article'])->save();
+    NodeType::create([
+      'type' => 'article',
+      'name' => 'Article',
+    ])->save();
 
     EntityViewDisplay::create([
       'targetEntityType' => 'node',
@@ -533,14 +547,14 @@ class EntityDisplayTest extends KernelTestBase {
     // Create two arbitrary user roles.
     for ($i = 0; $i < 2; $i++) {
       $roles[$i] = Role::create([
-        'id' => mb_strtolower($this->randomMachineName()),
+        'id' => $this->randomMachineName(),
         'label' => $this->randomString(),
       ]);
       $roles[$i]->save();
     }
 
     // Create a field of type 'test_field' attached to 'entity_test'.
-    $field_name = mb_strtolower($this->randomMachineName());
+    $field_name = $this->randomMachineName();
     FieldStorageConfig::create([
       'field_name' => $field_name,
       'entity_type' => 'entity_test',

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\media_library\FunctionalJavascript;
 
 use Drupal\Core\Url;
@@ -37,7 +39,7 @@ class WidgetWithoutTypesTest extends MediaLibraryTestBase {
     ]);
     $this->drupalLogin($user);
 
-    $default_message = 'There are no allowed media types configured for this field. Please contact the site administrator.';
+    $default_message = 'There are no allowed media types configured for this field. Contact the site administrator.';
 
     $this->drupalGet('node/add/basic_page');
 
@@ -134,7 +136,7 @@ class WidgetWithoutTypesTest extends MediaLibraryTestBase {
     // Visit a node create page.
     $this->drupalGet('node/add/basic_page');
 
-    $field_ui_uninstalled_message = 'There are no allowed media types configured for this field. Please contact the site administrator.';
+    $field_ui_uninstalled_message = 'There are no allowed media types configured for this field. Contact the site administrator.';
 
     // Assert the link is now longer part of the message.
     $assert_session->elementNotExists('named', ['link', 'Edit the field settings']);

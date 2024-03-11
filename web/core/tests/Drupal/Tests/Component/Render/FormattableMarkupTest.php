@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\Component\Render;
 
 use Drupal\Component\Render\FormattableMarkup;
@@ -35,19 +37,19 @@ class FormattableMarkupTest extends TestCase {
    * @covers ::jsonSerialize
    */
   public function testToString() {
-    $string = 'Can I please have a @replacement';
+    $string = 'Can I have a @replacement';
     $formattable_string = new FormattableMarkup($string, ['@replacement' => 'kitten']);
     $text = (string) $formattable_string;
-    $this->assertEquals('Can I please have a kitten', $text);
+    $this->assertEquals('Can I have a kitten', $text);
     $text = $formattable_string->jsonSerialize();
-    $this->assertEquals('Can I please have a kitten', $text);
+    $this->assertEquals('Can I have a kitten', $text);
   }
 
   /**
    * @covers ::count
    */
   public function testCount() {
-    $string = 'Can I please have a @replacement';
+    $string = 'Can I have a @replacement';
     $formattable_string = new FormattableMarkup($string, ['@replacement' => 'kitten']);
     $this->assertEquals(strlen($string), $formattable_string->count());
   }
@@ -117,7 +119,7 @@ class FormattableMarkupTest extends TestCase {
    */
   public function providerTestUnexpectedPlaceholder() {
     return [
-      ['Non alpha, non-allowed starting character: ~placeholder', ['~placeholder' => 'replaced'], E_USER_WARNING, 'Invalid placeholder (~placeholder) with string: "Non alpha, non-allowed starting character: ~placeholder"'],
+      ['Non alpha, non-allowed starting character: ~placeholder', ['~placeholder' => 'replaced'], E_USER_WARNING, 'Placeholders must begin with one of the following "@", ":" or "%", invalid placeholder (~placeholder) with string: "Non alpha, non-allowed starting character: ~placeholder"'],
       ['Alpha starting character: placeholder', ['placeholder' => 'replaced'], NULL, ''],
       // Ensure that where the placeholder is located in the string is
       // irrelevant.

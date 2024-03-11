@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests;
 
 use Behat\Mink\Driver\BrowserKitDriver;
@@ -8,6 +10,7 @@ use Behat\Mink\Mink;
 use Behat\Mink\Selector\SelectorsHandler;
 use Behat\Mink\Session;
 use Drupal\Component\Serialization\Json;
+use Drupal\Component\Utility\UrlHelper;
 use Drupal\Core\Database\Database;
 use Drupal\Core\Test\FunctionalTestSetupTrait;
 use Drupal\Core\Test\TestSetupTrait;
@@ -19,7 +22,6 @@ use Drupal\Tests\node\Traits\NodeCreationTrait;
 use Drupal\Tests\Traits\PhpUnitWarnings;
 use Drupal\Tests\user\Traits\UserCreationTrait;
 use Drupal\TestTools\Comparator\MarkupInterfaceComparator;
-use Drupal\TestTools\Random;
 use Drupal\TestTools\TestVarDumper;
 use GuzzleHttp\Cookie\CookieJar;
 use PHPUnit\Framework\TestCase;
@@ -30,8 +32,8 @@ use Symfony\Component\VarDumper\VarDumper;
  * Provides a test case for functional Drupal tests.
  *
  * Tests extending BrowserTestBase must exist in the
- * Drupal\Tests\yourmodule\Functional namespace and live in the
- * modules/yourmodule/tests/src/Functional directory.
+ * Drupal\Tests\your_module\Functional namespace and live in the
+ * modules/your_module/tests/src/Functional directory.
  *
  * Tests extending this base class should only translate text when testing
  * translation functionality. For example, avoid wrapping test text with t()
@@ -383,7 +385,9 @@ abstract class BrowserTestBase extends TestCase {
    */
   public function __get(string $name) {
     if ($name === 'randomGenerator') {
-      return Random::getGenerator();
+      @trigger_error('Accessing the randomGenerator property is deprecated in drupal:10.2.0 and is removed from drupal:11.0.0. Use getRandomGenerator() instead. See https://www.drupal.org/node/3358445', E_USER_DEPRECATED);
+
+      return $this->getRandomGenerator();
     }
   }
 
@@ -631,7 +635,11 @@ abstract class BrowserTestBase extends TestCase {
   protected function getDrupalSettings() {
     $html = $this->getSession()->getPage()->getContent();
     if (preg_match('@<script type="application/json" data-drupal-selector="drupal-settings-json">([^<]*)</script>@', $html, $matches)) {
-      return Json::decode($matches[1]);
+      $settings = Json::decode($matches[1]);
+      if (isset($settings['ajaxPageState']['libraries'])) {
+        $settings['ajaxPageState']['libraries'] = UrlHelper::uncompressQueryParameter($settings['ajaxPageState']['libraries']);
+      }
+      return $settings;
     }
     return [];
   }

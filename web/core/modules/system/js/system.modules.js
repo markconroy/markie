@@ -62,7 +62,7 @@
 
           // Note that we first open all <details> to be able to use ':visible'.
           // Mark the <details> elements that were closed before filtering, so
-          // they can be reclosed when filtering is removed.
+          // they can be closed again when filtering is removed.
           $details
             .not('[open]')
             .attr('data-drupal-system-state', 'forced-open');
@@ -103,7 +103,7 @@
         $details = $rowsAndDetails.filter('.package-listing');
 
         $(input).on({
-          keyup: debounce(filterModuleList, 200),
+          input: debounce(filterModuleList, 200),
           keydown: preventEnterKey,
         });
       }

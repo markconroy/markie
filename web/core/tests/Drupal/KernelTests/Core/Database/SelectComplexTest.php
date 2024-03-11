@@ -2,7 +2,6 @@
 
 namespace Drupal\KernelTests\Core\Database;
 
-use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Database\Database;
 use Drupal\Core\Database\Query\PagerSelectExtender;
 use Drupal\Core\Database\RowCountException;
@@ -62,7 +61,7 @@ class SelectComplexTest extends DatabaseTestBase {
     $result = $query->execute();
 
     $num_records = 0;
-    $last_name = 0;
+    $last_name = '0';
 
     // Verify that the results are returned in the correct order.
     foreach ($result as $record) {
@@ -108,7 +107,7 @@ class SelectComplexTest extends DatabaseTestBase {
     ];
 
     foreach ($correct_results as $task => $count) {
-      $this->assertEquals($count, $records[$task], new FormattableMarkup("Correct number of '@task' records found.", ['@task' => $task]));
+      $this->assertEquals($count, $records[$task], "Correct number of '$task' records found.");
     }
 
     $this->assertEquals(6, $num_records, 'Returned the correct number of total rows.');
@@ -143,7 +142,7 @@ class SelectComplexTest extends DatabaseTestBase {
     ];
 
     foreach ($correct_results as $task => $count) {
-      $this->assertEquals($count, $records[$task], new FormattableMarkup("Correct number of '@task' records found.", ['@task' => $task]));
+      $this->assertEquals($count, $records[$task], "Correct number of '$task' records found.");
     }
 
     $this->assertEquals(1, $num_records, 'Returned the correct number of total rows.');
@@ -347,8 +346,6 @@ class SelectComplexTest extends DatabaseTestBase {
    * Tests that we can join on a query.
    */
   public function testJoinSubquery() {
-    $this->installSchema('system', 'sequences');
-
     $account = User::create([
       'name' => $this->randomMachineName(),
       'mail' => $this->randomMachineName() . '@example.com',

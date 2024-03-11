@@ -6,6 +6,9 @@ use Drupal\Core\Language\LanguageInterface;
 use Drupal\Tests\BrowserTestBase;
 use Twig\Error\SyntaxError;
 
+// cspell:ignore contaynz errrf herro kontex muun playsholdr starrrrr starzzzz
+// cspell:ignore sunz sunzzzzzzz txtzzzz
+
 /**
  * Tests Twig "trans" tags.
  *
@@ -179,7 +182,7 @@ class TwigTransTest extends BrowserTestBase {
     // Makes sure https://www.drupal.org/node/2489024 doesn't happen without
     // twig debug.
     // Ensure that running php code inside a Twig trans is not possible.
-    $this->assertSession()->pageTextNotContains(pi());
+    $this->assertSession()->pageTextNotContains((string) pi());
   }
 
   /**

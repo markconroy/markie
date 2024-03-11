@@ -201,6 +201,7 @@ class FormattableMarkup implements MarkupInterface, \Countable {
         // and in D11 this will no longer be allowed. When this trigger_error
         // is removed, also remove isset $value checks inside the switch{}
         // below.
+        // phpcs:ignore Drupal.Semantics.FunctionTriggerError
         @trigger_error(sprintf('Deprecated NULL placeholder value for key (%s) in: "%s". This will throw a PHP error in drupal:11.0.0. See https://www.drupal.org/node/3318826', (string) $key, (string) $string), E_USER_DEPRECATED);
         $value = '';
       }
@@ -243,7 +244,7 @@ class FormattableMarkup implements MarkupInterface, \Countable {
         default:
           if (!ctype_alnum($key[0])) {
             // Warn for random placeholders that won't be replaced.
-            trigger_error(sprintf('Invalid placeholder (%s) with string: "%s"', $key, $string), E_USER_WARNING);
+            trigger_error(sprintf('Placeholders must begin with one of the following "@", ":" or "%%", invalid placeholder (%s) with string: "%s"', $key, $string), E_USER_WARNING);
           }
           // No replacement possible therefore we can discard the argument.
           unset($args[$key]);

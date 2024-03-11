@@ -10,6 +10,7 @@ use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Datetime\Entity\DateFormat;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
+use Drupal\Core\Field\FieldFilteredMarkup;
 use Drupal\Core\File\Exception\FileException;
 use Drupal\Core\File\Exception\FileExistsException;
 use Drupal\Core\File\Exception\FileWriteException;
@@ -21,6 +22,7 @@ use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\Render\BubbleableMetadata;
 use Drupal\Core\Render\Element;
 use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Core\StringTranslation\ByteSizeMarkup;
 use Drupal\Core\Template\Attribute;
 use Drupal\Core\Url;
 use Drupal\file\Entity\File;
@@ -33,10 +35,7 @@ use Symfony\Component\HttpFoundation\File\Exception\IniSizeFileException;
 use Symfony\Component\HttpFoundation\File\Exception\NoFileException;
 use Symfony\Component\HttpFoundation\File\Exception\PartialFileException;
 
-// cspell:ignore abiword
-
-// Load all Field module hooks for File.
-require_once __DIR__ . '/file.field.inc';
+// cspell:ignore abiword widthx
 
 /**
  * Implements hook_help().
@@ -45,9 +44,9 @@ function file_help($route_name, RouteMatchInterface $route_match) {
   switch ($route_name) {
     case 'help.page.file':
       $output = '';
-      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<h2>' . t('About') . '</h2>';
       $output .= '<p>' . t('The File module allows you to create fields that contain files. See the <a href=":field">Field module help</a> and the <a href=":field_ui">Field UI help</a> pages for general information on fields and how to create and manage them. For more information, see the <a href=":file_documentation">online documentation for the File module</a>.', [':field' => Url::fromRoute('help.page', ['name' => 'field'])->toString(), ':field_ui' => (\Drupal::moduleHandler()->moduleExists('field_ui')) ? Url::fromRoute('help.page', ['name' => 'field_ui'])->toString() : '#', ':file_documentation' => 'https://www.drupal.org/documentation/modules/file']) . '</p>';
-      $output .= '<h3>' . t('Uses') . '</h3>';
+      $output .= '<h2>' . t('Uses') . '</h2>';
       $output .= '<dl>';
       $output .= '<dt>' . t('Managing and displaying file fields') . '</dt>';
       $output .= '<dd>' . t('The <em>settings</em> and the <em>display</em> of the file field can be configured separately. See the <a href=":field_ui">Field UI help</a> for more information on how to manage fields and their display.', [':field_ui' => (\Drupal::moduleHandler()->moduleExists('field_ui')) ? Url::fromRoute('help.page', ['name' => 'field_ui'])->toString() : '#']) . '</dd>';
@@ -94,28 +93,17 @@ function file_field_widget_info_alter(array &$info) {
  * @return array
  *   An array containing validation error messages.
  *
- * @see hook_file_validate()
+ * @deprecated in drupal:10.2.0 and is removed from drupal:11.0.0. Use the
+ *   'file.validator' service instead.
+ *
+ * @see https://www.drupal.org/node/3363700
  */
 function file_validate(FileInterface $file, $validators = []) {
-  // Call the validation functions specified by this function's caller.
+  @trigger_error(__FUNCTION__ . '() is deprecated in drupal:10.2.0 and is removed from drupal:11.0.0. Use the \'file.validator\' service instead. See https://www.drupal.org/node/3363700', E_USER_DEPRECATED);
+  $violations = \Drupal::service('file.validator')->validate($file, $validators);
   $errors = [];
-  foreach ($validators as $function => $args) {
-    if (function_exists($function)) {
-      array_unshift($args, $file);
-      $errors = array_merge($errors, call_user_func_array($function, $args));
-    }
-  }
-
-  // Let other modules perform validation on the new file.
-  $errors = array_merge($errors, \Drupal::moduleHandler()->invokeAll('file_validate', [$file]));
-
-  // Ensure the file does not contain a malicious extension. At this point
-  // \Drupal\file\Upload\FileUploadHandler::handleFileUpload() will have munged
-  // the file so it does not contain a malicious extension. Contributed and
-  // custom code that calls this method needs to take similar steps if they need
-  // to permit files with malicious extensions to be uploaded.
-  if (empty($errors) && !\Drupal::config('system.file')->get('allow_insecure_uploads') && preg_match(FileSystemInterface::INSECURE_EXTENSION_REGEX, $file->getFilename())) {
-    $errors[] = t('For security reasons, your upload has been rejected.');
+  foreach ($violations as $violation) {
+    $errors[] = $violation->getMessage();
   }
   return $errors;
 }
@@ -129,15 +117,21 @@ function file_validate(FileInterface $file, $validators = []) {
  * @return array
  *   An empty array if the file name length is smaller than the limit or an
  *   array containing an error message if it's not or is empty.
+ *
+ * @deprecated in drupal:10.2.0 and is removed from drupal:11.0.0. Use the
+ *   'file.validator' service instead.
+ *
+ * @see https://www.drupal.org/node/3363700
  */
 function file_validate_name_length(FileInterface $file) {
+  @trigger_error(__FUNCTION__ . '() is deprecated in drupal:10.2.0 and is removed from drupal:11.0.0. Use the \'file.validator\' service instead. See https://www.drupal.org/node/3363700', E_USER_DEPRECATED);
   $errors = [];
 
   if (!$file->getFilename()) {
-    $errors[] = t("The file's name is empty. Please give a name to the file.");
+    $errors[] = t("The file's name is empty. Enter a name for the file.");
   }
   if (strlen($file->getFilename()) > 240) {
-    $errors[] = t("The file's name exceeds the 240 characters limit. Please rename the file and try again.");
+    $errors[] = t("The file's name exceeds the 240 characters limit. Rename the file and try again.");
   }
   return $errors;
 }
@@ -154,9 +148,14 @@ function file_validate_name_length(FileInterface $file) {
  *   An empty array if the file extension is allowed or an array containing an
  *   error message if it's not.
  *
+ * @deprecated in drupal:10.2.0 and is removed from drupal:11.0.0. Use the
+ *   'file.validator' service instead.
+ *
+ * @see https://www.drupal.org/node/3363700
  * @see hook_file_validate()
  */
 function file_validate_extensions(FileInterface $file, $extensions) {
+  @trigger_error(__FUNCTION__ . '() is deprecated in drupal:10.2.0 and is removed from drupal:11.0.0. Use the \'file.validator\' service instead. See https://www.drupal.org/node/3363700', E_USER_DEPRECATED);
   $errors = [];
 
   $regex = '/\.(' . preg_replace('/ +/', '|', preg_quote($extensions)) . ')$/i';
@@ -189,19 +188,30 @@ function file_validate_extensions(FileInterface $file, $extensions) {
  *   An empty array if the file size is below limits or an array containing an
  *   error message if it's not.
  *
+ * @deprecated in drupal:10.2.0 and is removed from drupal:11.0.0. Use the
+ *   'file.validator' service instead.
+ *
+ * @see https://www.drupal.org/node/3363700
  * @see hook_file_validate()
  */
 function file_validate_size(FileInterface $file, $file_limit = 0, $user_limit = 0) {
+  @trigger_error(__FUNCTION__ . '() is deprecated in drupal:10.2.0 and is removed from drupal:11.0.0. Use the \'file.validator\' service instead. See https://www.drupal.org/node/3363700', E_USER_DEPRECATED);
   $user = \Drupal::currentUser();
   $errors = [];
 
   if ($file_limit && $file->getSize() > $file_limit) {
-    $errors[] = t('The file is %filesize exceeding the maximum file size of %maxsize.', ['%filesize' => format_size($file->getSize()), '%maxsize' => format_size($file_limit)]);
+    $errors[] = t('The file is %filesize exceeding the maximum file size of %maxsize.', [
+      '%filesize' => ByteSizeMarkup::create($file->getSize()),
+      '%maxsize' => ByteSizeMarkup::create($file_limit),
+    ]);
   }
 
   // Save a query by only calling spaceUsed() when a limit is provided.
   if ($user_limit && (\Drupal::entityTypeManager()->getStorage('file')->spaceUsed($user->id()) + $file->getSize()) > $user_limit) {
-    $errors[] = t('The file is %filesize which would exceed your disk quota of %quota.', ['%filesize' => format_size($file->getSize()), '%quota' => format_size($user_limit)]);
+    $errors[] = t('The file is %filesize which would exceed your disk quota of %quota.', [
+      '%filesize' => ByteSizeMarkup::create($file->getSize()),
+      '%quota' => ByteSizeMarkup::create($user_limit),
+    ]);
   }
 
   return $errors;
@@ -217,9 +227,14 @@ function file_validate_size(FileInterface $file, $file_limit = 0, $user_limit = 
  *   An empty array if the file is a valid image or an array containing an error
  *   message if it's not.
  *
+ * @deprecated in drupal:10.2.0 and is removed from drupal:11.0.0. Use the
+ *   'file.validator' service instead.
+ *
+ * @see https://www.drupal.org/node/3363700
  * @see hook_file_validate()
  */
 function file_validate_is_image(FileInterface $file) {
+  @trigger_error(__FUNCTION__ . '() is deprecated in drupal:10.2.0 and is removed from drupal:11.0.0. Use the \'file.validator\' service instead. See https://www.drupal.org/node/3363700', E_USER_DEPRECATED);
   $errors = [];
 
   $image_factory = \Drupal::service('image.factory');
@@ -256,9 +271,14 @@ function file_validate_is_image(FileInterface $file) {
  *   does not meet the requirements or an attempt to resize it fails, an array
  *   containing the error message will be returned.
  *
+ * @deprecated in drupal:10.2.0 and is removed from drupal:11.0.0. Use the
+ *   'file.validator' service instead.
+ *
+ * @see https://www.drupal.org/node/3363700
  * @see hook_file_validate()
  */
 function file_validate_image_resolution(FileInterface $file, $maximum_dimensions = 0, $minimum_dimensions = 0) {
+  @trigger_error(__FUNCTION__ . '() is deprecated in drupal:10.2.0 and is removed from drupal:11.0.0. Use the \'file.validator\' service instead. See https://www.drupal.org/node/3363700', E_USER_DEPRECATED);
   $errors = [];
 
   // Check first that the file is an image.
@@ -275,6 +295,8 @@ function file_validate_image_resolution(FileInterface $file, $maximum_dimensions
         if ($image->scale($width, $height)) {
           $scaling = TRUE;
           $image->save();
+          // Update the file size now that the image has been resized.
+          $file->setSize($image->getFileSize());
           if (!empty($width) && !empty($height)) {
             $message = t('The image was resized to fit within the maximum allowed dimensions of %dimensions pixels. The new dimensions of the resized image are %new_widthx%new_height pixels.',
               [
@@ -370,15 +392,11 @@ function file_theme() {
     'file_video' => [
       'variables' => ['files' => [], 'attributes' => NULL],
     ],
-
-    // From file.field.inc.
     'file_widget_multiple' => [
       'render element' => 'element',
-      'file' => 'file.field.inc',
     ],
     'file_upload_help' => [
       'variables' => ['description' => NULL, 'upload_validators' => NULL, 'cardinality' => NULL],
-      'file' => 'file.field.inc',
     ],
   ];
 }
@@ -664,7 +682,7 @@ function file_save_upload($form_field_name, $validators = [], $destination = FAL
     catch (IniSizeFileException | FormSizeFileException $e) {
       \Drupal::messenger()->addError(t('The file %file could not be saved because it exceeds %maxsize, the maximum allowed size for uploads.', [
         '%file' => $uploaded_file->getFilename(),
-        '%maxsize' => format_size(Environment::getUploadMaxSize()),
+        '%maxsize' => ByteSizeMarkup::create(Environment::getUploadMaxSize()),
       ]));
       $files[$i] = FALSE;
     }
@@ -781,12 +799,12 @@ function file_tokens($type, $tokens, array $data, array $options, BubbleableMeta
           break;
 
         case 'size':
-          $replacements[$original] = format_size($file->getSize());
+          $replacements[$original] = ByteSizeMarkup::create($file->getSize());
           break;
 
         case 'url':
           // Ideally, this would use return a relative URL, but because tokens
-          // are also often used in e-mails, it's better to keep absolute file
+          // are also often used in emails, it's better to keep absolute file
           // URLs. The 'url.site' cache context is associated to ensure the
           // correct absolute URL is used in case of a multisite setup.
           $replacements[$original] = $file->createFileUrl(FALSE);
@@ -1071,9 +1089,198 @@ function template_preprocess_file_link(&$variables) {
   // Set file classes to the options array.
   $variables['attributes'] = new Attribute($variables['attributes']);
   $variables['attributes']->addClass($classes);
-  $variables['file_size'] = $file->getSize() !== NULL ? format_size($file->getSize()) : '';
+  $variables['file_size'] = $file->getSize() !== NULL ? ByteSizeMarkup::create($file->getSize()) : '';
 
   $variables['link'] = Link::fromTextAndUrl($link_text, $url->mergeOptions($options))->toRenderable();
+}
+
+/**
+ * Prepares variables for multi file form widget templates.
+ *
+ * Default template: file-widget-multiple.html.twig.
+ *
+ * @param array $variables
+ *   An associative array containing:
+ *   - element: A render element representing the widgets.
+ */
+function template_preprocess_file_widget_multiple(&$variables) {
+  $element = $variables['element'];
+  // Special ID and classes for draggable tables.
+  $weight_class = $element['#id'] . '-weight';
+  $table_id = $element['#id'] . '-table';
+
+  // Build up a table of applicable fields.
+  $headers = [];
+  $headers[] = t('File information');
+  if ($element['#display_field']) {
+    $headers[] = [
+      'data' => t('Display'),
+      'class' => ['checkbox'],
+    ];
+  }
+  $headers[] = t('Weight');
+  $headers[] = t('Operations');
+
+  // Get our list of widgets in order (needed when the form comes back after
+  // preview or failed validation).
+  $widgets = [];
+  foreach (Element::children($element) as $key) {
+    $widgets[] = &$element[$key];
+  }
+  usort($widgets, '_field_multiple_value_form_sort_helper');
+
+  $rows = [];
+  foreach ($widgets as &$widget) {
+    // Save the uploading row for last.
+    if (empty($widget['#files'])) {
+      $widget['#title'] = $element['#file_upload_title'];
+      $widget['#description'] = \Drupal::service('renderer')->renderPlain($element['#file_upload_description']);
+      continue;
+    }
+
+    // Delay rendering of the buttons, so that they can be rendered later in the
+    // "operations" column.
+    $operations_elements = [];
+    foreach (Element::children($widget) as $key) {
+      if (isset($widget[$key]['#type']) && $widget[$key]['#type'] == 'submit') {
+        hide($widget[$key]);
+        $operations_elements[] = &$widget[$key];
+      }
+    }
+
+    // Delay rendering of the "Display" option and the weight selector, so that
+    // each can be rendered later in its own column.
+    if ($element['#display_field']) {
+      hide($widget['display']);
+    }
+    hide($widget['_weight']);
+    $widget['_weight']['#attributes']['class'] = [$weight_class];
+
+    // Render everything else together in a column, without the normal wrappers.
+    $row = [];
+    $widget['#theme_wrappers'] = [];
+    $row[] = \Drupal::service('renderer')->render($widget);
+
+    // Arrange the row with the rest of the rendered columns.
+    if ($element['#display_field']) {
+      unset($widget['display']['#title']);
+      $row[] = [
+        'data' => $widget['display'],
+        'class' => ['checkbox'],
+      ];
+    }
+    $row[] = [
+      'data' => $widget['_weight'],
+    ];
+
+    // Show the buttons that had previously been marked as hidden in this
+    // preprocess function. We use show() to undo the earlier hide().
+    foreach (Element::children($operations_elements) as $key) {
+      show($operations_elements[$key]);
+    }
+    $row[] = [
+      'data' => $operations_elements,
+    ];
+    $rows[] = [
+      'data' => $row,
+      'class' => isset($widget['#attributes']['class']) ? array_merge($widget['#attributes']['class'], ['draggable']) : ['draggable'],
+    ];
+  }
+
+  $variables['table'] = [
+    '#type' => 'table',
+    '#header' => $headers,
+    '#rows' => $rows,
+    '#attributes' => [
+      'id' => $table_id,
+    ],
+    '#tabledrag' => [
+      [
+        'action' => 'order',
+        'relationship' => 'sibling',
+        'group' => $weight_class,
+      ],
+    ],
+    '#access' => !empty($rows),
+  ];
+
+  $variables['element'] = $element;
+}
+
+/**
+ * Prepares variables for file upload help text templates.
+ *
+ * Default template: file-upload-help.html.twig.
+ *
+ * @param array $variables
+ *   An associative array containing:
+ *   - description: The normal description for this field, specified by the
+ *     user.
+ *   - upload_validators: An array of upload validators as used in
+ *     $element['#upload_validators'].
+ */
+function template_preprocess_file_upload_help(&$variables) {
+  $description = $variables['description'];
+  $upload_validators = $variables['upload_validators'];
+  $cardinality = $variables['cardinality'];
+
+  $descriptions = [];
+
+  if (!empty($description)) {
+    $descriptions[] = FieldFilteredMarkup::create($description);
+  }
+  if (isset($cardinality)) {
+    if ($cardinality == -1) {
+      $descriptions[] = t('Unlimited number of files can be uploaded to this field.');
+    }
+    else {
+      $descriptions[] = \Drupal::translation()->formatPlural($cardinality, 'One file only.', 'Maximum @count files.');
+    }
+  }
+  if (isset($upload_validators['file_validate_size'])) {
+    @trigger_error('\'file_validate_size\' is deprecated in drupal:10.2.0 and is removed from drupal:11.0.0. Use the \'FileSizeLimit\' constraint instead. See https://www.drupal.org/node/3363700', E_USER_DEPRECATED);
+    $descriptions[] = t('@size limit.', ['@size' => ByteSizeMarkup::create($upload_validators['file_validate_size'][0])]);
+  }
+  if (isset($upload_validators['FileSizeLimit'])) {
+    $descriptions[] = t('@size limit.', ['@size' => ByteSizeMarkup::create($upload_validators['FileSizeLimit']['fileLimit'])]);
+  }
+
+  if (isset($upload_validators['file_validate_extensions'])) {
+    @trigger_error('\'file_validate_extensions\' is deprecated in drupal:10.2.0 and is removed from drupal:11.0.0. Use the \'FileExtension\' constraint instead. See https://www.drupal.org/node/3363700', E_USER_DEPRECATED);
+    $descriptions[] = t('Allowed types: @extensions.', ['@extensions' => $upload_validators['file_validate_extensions'][0]]);
+  }
+  if (isset($upload_validators['FileExtension'])) {
+    $descriptions[] = t('Allowed types: @extensions.', ['@extensions' => $upload_validators['FileExtension']['extensions']]);
+  }
+
+  if (isset($upload_validators['file_validate_image_resolution']) || isset($upload_validators['FileImageDimensions'])) {
+    if (isset($upload_validators['file_validate_image_resolution'])) {
+      @trigger_error('\'file_validate_image_resolution\' is deprecated in drupal:10.2.0 and is removed from drupal:11.0.0. Use the \'FileImageDimensions\' constraint instead. See https://www.drupal.org/node/3363700', E_USER_DEPRECATED);
+      $max = $upload_validators['file_validate_image_resolution'][0];
+      $min = $upload_validators['file_validate_image_resolution'][1];
+    }
+    else {
+      $max = $upload_validators['FileImageDimensions']['maxDimensions'];
+      $min = $upload_validators['FileImageDimensions']['minDimensions'];
+    }
+    if ($min && $max && $min == $max) {
+      $descriptions[] = t('Images must be exactly <strong>@size</strong> pixels.', ['@size' => $max]);
+    }
+    elseif ($min && $max) {
+      $descriptions[] = t('Images must be larger than <strong>@min</strong> pixels. Images larger than <strong>@max</strong> pixels will be resized.', [
+        '@min' => $min,
+        '@max' => $max,
+      ]);
+    }
+    elseif ($min) {
+      $descriptions[] = t('Images must be larger than <strong>@min</strong> pixels.', ['@min' => $min]);
+    }
+    elseif ($max) {
+      $descriptions[] = t('Images larger than <strong>@max</strong> pixels will be resized.', ['@max' => $max]);
+    }
+  }
+
+  $variables['descriptions'] = $descriptions;
 }
 
 /**
@@ -1329,4 +1536,105 @@ function file_get_file_references(FileInterface $file, FieldDefinitionInterface 
     }
   }
   return $return;
+}
+
+/**
+ * Determine whether a field references files stored in {file_managed}.
+ *
+ * @param \Drupal\Core\Field\FieldDefinitionInterface $field
+ *   A field definition.
+ *
+ * @return bool
+ *   The field column if the field references {file_managed}.fid, typically
+ *   fid, FALSE if it does not.
+ */
+function file_field_find_file_reference_column(FieldDefinitionInterface $field) {
+  $schema = $field->getFieldStorageDefinition()->getSchema();
+  foreach ($schema['foreign keys'] as $data) {
+    if ($data['table'] == 'file_managed') {
+      foreach ($data['columns'] as $field_column => $column) {
+        if ($column == 'fid') {
+          return $field_column;
+        }
+      }
+    }
+  }
+  return FALSE;
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ *
+ * Injects the file sanitization options into /admin/config/media/file-system.
+ *
+ * These settings are enforced during upload by the FileEventSubscriber that
+ * listens to the FileUploadSanitizeNameEvent event.
+ *
+ * @see \Drupal\system\Form\FileSystemForm
+ * @see \Drupal\Core\File\Event\FileUploadSanitizeNameEvent
+ * @see \Drupal\file\EventSubscriber\FileEventSubscriber
+ */
+function file_form_system_file_system_settings_alter(array &$form, FormStateInterface $form_state) {
+  $config = \Drupal::config('file.settings');
+  $form['filename_sanitization'] = [
+    '#type' => 'details',
+    '#title' => t('Sanitize filenames'),
+    '#description' => t('These settings only apply to new files as they are uploaded. Changes here do not affect existing file names.'),
+    '#open' => TRUE,
+    '#tree' => TRUE,
+  ];
+
+  $form['filename_sanitization']['replacement_character'] = [
+    '#type' => 'select',
+    '#title' => t('Replacement character'),
+    '#default_value' => $config->get('filename_sanitization.replacement_character'),
+    '#options' => [
+      '-' => t('Dash (-)'),
+      '_' => t('Underscore (_)'),
+    ],
+    '#description' => t('Used when replacing whitespace, replacing non-alphanumeric characters or transliterating unknown characters.'),
+  ];
+
+  $form['filename_sanitization']['transliterate'] = [
+    '#type' => 'checkbox',
+    '#title' => t('Transliterate'),
+    '#default_value' => $config->get('filename_sanitization.transliterate'),
+    '#description' => t('Transliteration replaces any characters that are not alphanumeric, underscores, periods or hyphens with the replacement character. It ensures filenames only contain ASCII characters. It is recommended to keep transliteration enabled.'),
+  ];
+
+  $form['filename_sanitization']['replace_whitespace'] = [
+    '#type' => 'checkbox',
+    '#title' => t('Replace whitespace with the replacement character'),
+    '#default_value' => $config->get('filename_sanitization.replace_whitespace'),
+  ];
+
+  $form['filename_sanitization']['replace_non_alphanumeric'] = [
+    '#type' => 'checkbox',
+    '#title' => t('Replace non-alphanumeric characters with the replacement character'),
+    '#default_value' => $config->get('filename_sanitization.replace_non_alphanumeric'),
+    '#description' => t('Alphanumeric characters, dots <span aria-hidden="true">(.)</span>, underscores <span aria-hidden="true">(_)</span> and dashes <span aria-hidden="true">(-)</span> are preserved.'),
+  ];
+
+  $form['filename_sanitization']['deduplicate_separators'] = [
+    '#type' => 'checkbox',
+    '#title' => t('Replace sequences of dots, underscores and/or dashes with the replacement character'),
+    '#default_value' => $config->get('filename_sanitization.deduplicate_separators'),
+  ];
+
+  $form['filename_sanitization']['lowercase'] = [
+    '#type' => 'checkbox',
+    '#title' => t('Convert to lowercase'),
+    '#default_value' => $config->get('filename_sanitization.lowercase'),
+  ];
+
+  $form['#submit'][] = 'file_system_settings_submit';
+}
+
+/**
+ * Form submission handler for file system settings form.
+ */
+function file_system_settings_submit(array &$form, FormStateInterface $form_state) {
+  $config = \Drupal::configFactory()->getEditable('file.settings')
+    ->set('filename_sanitization', $form_state->getValue('filename_sanitization'));
+  $config->save();
 }

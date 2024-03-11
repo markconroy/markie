@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\migrate\Unit\destination;
 
 use Drupal\Core\Entity\ContentEntityInterface;
@@ -10,6 +12,7 @@ use Drupal\migrate\Plugin\MigrationInterface;
 use Drupal\migrate\Plugin\migrate\destination\EntityRevision as RealEntityRevision;
 use Drupal\migrate\Row;
 use Drupal\Tests\UnitTestCase;
+use Prophecy\Argument;
 
 /**
  * Tests entity revision destination.
@@ -25,7 +28,7 @@ class EntityRevisionTest extends UnitTestCase {
   protected $migration;
 
   /**
-   * @var \Drupal\Core\Entity\EntityStorageInterface
+   * @var \Drupal\Core\Entity\RevisionableStorageInterface
    */
   protected $storage;
 
@@ -54,7 +57,7 @@ class EntityRevisionTest extends UnitTestCase {
 
     // Setup mocks to be used when creating a revision destination.
     $this->migration = $this->prophesize(MigrationInterface::class);
-    $this->storage = $this->prophesize('\Drupal\Core\Entity\EntityStorageInterface');
+    $this->storage = $this->prophesize('\Drupal\Core\Entity\RevisionableStorageInterface');
 
     $entity_type = $this->prophesize(EntityTypeInterface::class);
     $entity_type->getSingularLabel()->willReturn('crazy');
@@ -173,6 +176,9 @@ class EntityRevisionTest extends UnitTestCase {
     $entity = $this->prophesize('\Drupal\Core\Entity\ContentEntityInterface');
     $entity->save()
       ->shouldBeCalled();
+    // Syncing should be set once.
+    $entity->setSyncing(Argument::exact(TRUE))
+      ->shouldBeCalledTimes(1);
     $entity->getRevisionId()
       ->shouldBeCalled()
       ->willReturn(1234);
@@ -233,6 +239,14 @@ class EntityRevision extends RealEntityRevision {
    * This method is from the parent and we aren't concerned with the inner
    * workings of its implementation which would trickle into mock assertions. An
    * empty implementation avoids this.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $entity
+   *   The entity to update.
+   * @param \Drupal\migrate\Row $row
+   *   The row object to update from.
+   *
+   * @return \Drupal\Core\Entity\EntityInterface
+   *   An updated entity from row values.
    */
   protected function updateEntity(EntityInterface $entity, Row $row) {
     return $entity;

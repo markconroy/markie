@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\ckeditor5\FunctionalJavascript;
 
 use Drupal\ckeditor5\Plugin\Editor\CKEditor5;
@@ -103,8 +105,8 @@ class ImageUrlTest extends ImageTestBase {
     $this->drupalGet($this->host->toUrl('edit-form'));
     $this->waitForEditor();
 
-    $this->pressEditorButton('Insert image');
-    $panel = $page->find('css', '.ck-dropdown__panel.ck-image-insert__panel');
+    $this->pressEditorButton('Insert image via URL');
+    $panel = $page->find('css', '.ck-dropdown__panel .ck-image-insert-url');
     $src_input = $panel->find('css', 'input[type=text]');
     $src_input->setValue($src);
     $panel->find('xpath', "//button[span[text()='Insert']]")->click();
@@ -113,8 +115,8 @@ class ImageUrlTest extends ImageTestBase {
     $this->click($image_selector);
     $this->assertVisibleBalloon('[aria-label="Image toolbar"]');
 
-    $this->pressEditorButton('Insert image');
-    $panel = $page->find('css', '.ck-dropdown__panel.ck-image-insert__panel');
+    $this->pressEditorButton('Update image URL');
+    $panel = $page->find('css', '.ck-dropdown__panel .ck-image-insert-url');
     $src_input = $panel->find('css', 'input[type=text]');
     $this->assertEquals($src, $src_input->getValue());
   }

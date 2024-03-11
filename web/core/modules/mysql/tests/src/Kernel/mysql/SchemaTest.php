@@ -3,6 +3,9 @@
 namespace Drupal\Tests\mysql\Kernel\mysql;
 
 use Drupal\Component\Utility\Unicode;
+use Drupal\Core\Database\DatabaseExceptionWrapper;
+use Drupal\Core\Database\Exception\SchemaTableColumnSizeTooLargeException;
+use Drupal\Core\Database\Exception\SchemaTableKeyTooLargeException;
 use Drupal\Core\Database\SchemaException;
 use Drupal\Core\Database\SchemaObjectDoesNotExistException;
 use Drupal\Core\Database\SchemaObjectExistsException;
@@ -243,6 +246,98 @@ class SchemaTest extends DriverSpecificSchemaTestBase {
     $index_schema = $introspect_index_schema->invoke($this->schema, $table_name);
 
     $this->assertEquals($table_specification, $index_schema);
+  }
+
+  /**
+   * Tests SchemaTableKeyTooLargeException.
+   */
+  public function testSchemaTableKeyTooLargeException(): void {
+    $this->expectException(SchemaTableKeyTooLargeException::class);
+    $this->schema->createTable('test_schema', [
+      'description' => 'Tests SchemaTableKeyTooLargeException.',
+      'fields' => [
+        'id'  => [
+          'type' => 'varchar',
+          'length' => 64,
+          'not null' => TRUE,
+        ],
+        'id1'  => [
+          'type' => 'varchar',
+          'length' => 255,
+          'not null' => TRUE,
+        ],
+        'id2'  => [
+          'type' => 'varchar',
+          'length' => 255,
+          'not null' => TRUE,
+        ],
+        'id3'  => [
+          'type' => 'varchar',
+          'length' => 255,
+          'not null' => TRUE,
+        ],
+        'id4'  => [
+          'type' => 'varchar',
+          'length' => 255,
+          'not null' => TRUE,
+        ],
+        'id5'  => [
+          'type' => 'varchar',
+          'length' => 255,
+          'not null' => TRUE,
+        ],
+      ],
+      'primary key' => ['id'],
+      'indexes' => [
+        'key1' => ['id1', 'id2', 'id3', 'id4', 'id5'],
+      ],
+    ]);
+  }
+
+  /**
+   * Tests SchemaTableColumnSizeTooLargeException.
+   */
+  public function testSchemaTableColumnSizeTooLargeException(): void {
+    $this->expectException(SchemaTableColumnSizeTooLargeException::class);
+    $this->expectExceptionMessage("Column length too big for column 'too_large' (max = 16383); use BLOB or TEXT instead");
+    $this->schema->createTable('test_schema', [
+      'description' => 'Tests SchemaTableColumnSizeTooLargeException.',
+      'fields' => [
+        'too_large'  => [
+          'type' => 'varchar',
+          'length' => 65536,
+          'not null' => TRUE,
+        ],
+      ],
+    ]);
+  }
+
+  /**
+   * Tests adding a primary key when sql_generate_invisible_primary_key is on.
+   */
+  public function testGeneratedInvisiblePrimaryKey(): void {
+    $is_maria = method_exists($this->connection, 'isMariaDb') && $this->connection->isMariaDb();
+    if ($this->connection->databaseType() !== 'mysql' || $is_maria || version_compare($this->connection->version(), '8.0.30', '<')) {
+      $this->markTestSkipped('This test only runs on MySQL 8.0.30 and above');
+    }
+    try {
+      $this->connection->query("SET sql_generate_invisible_primary_key = 1;")->execute();
+    }
+    catch (DatabaseExceptionWrapper $e) {
+      $this->markTestSkipped('This test requires the SESSION_VARIABLES_ADMIN privilege.');
+    }
+    $this->schema->createTable('test_primary_key', [
+      'fields' => [
+        'foo'  => [
+          'type' => 'varchar',
+          'length' => 1,
+        ],
+      ],
+    ]);
+    $this->schema->addField('test_primary_key', 'id', [
+      'type' => 'serial',
+      'not null' => TRUE,
+    ], ['primary key' => ['id']]);
   }
 
 }

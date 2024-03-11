@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\comment\Unit;
 
 use Drupal\comment\CommentLinkBuilder;
@@ -325,7 +327,7 @@ namespace Drupal\comment;
 
 if (!function_exists('history_read')) {
 
-  function history_read() {
+  function history_read($nid) {
     return 0;
   }
 

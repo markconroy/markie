@@ -10,9 +10,11 @@ use Drupal\Core\Access\AccessResultReasonInterface;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Cache\CacheableResponseInterface;
+use Drupal\Core\Cache\CacheRedirect;
 use Drupal\Core\Config\Entity\ConfigEntityInterface;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\ContentEntityNullStorage;
+use Drupal\Core\Entity\ContentEntityTypeInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityPublishedInterface;
 use Drupal\Core\Entity\FieldableEntityInterface;
@@ -28,13 +30,13 @@ use Drupal\Core\Url;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\jsonapi\CacheableResourceResponse;
+use Drupal\jsonapi\JsonApiResource\JsonApiDocumentTopLevel;
+use Drupal\jsonapi\JsonApiResource\Link;
 use Drupal\jsonapi\JsonApiResource\LinkCollection;
 use Drupal\jsonapi\JsonApiResource\NullIncludedData;
-use Drupal\jsonapi\JsonApiResource\Link;
 use Drupal\jsonapi\JsonApiResource\ResourceObject;
 use Drupal\jsonapi\JsonApiResource\ResourceObjectData;
 use Drupal\jsonapi\Normalizer\HttpExceptionNormalizer;
-use Drupal\jsonapi\JsonApiResource\JsonApiDocumentTopLevel;
 use Drupal\jsonapi\ResourceResponse;
 use Drupal\path\Plugin\Field\FieldType\PathItem;
 use Drupal\Tests\BrowserTestBase;
@@ -994,16 +996,12 @@ abstract class ResourceTestBase extends BrowserTestBase {
       ->condition('cid', '%[route]=jsonapi.%', 'LIKE')
       ->execute()
       ->fetchAll();
-    $this->assertLessThanOrEqual(4, count($cache_items));
+    $this->assertLessThanOrEqual(5, count($cache_items));
     $found_cached_200_response = FALSE;
     $other_cached_responses_are_4xx = TRUE;
     foreach ($cache_items as $cache_item) {
-      $cached_data = unserialize($cache_item->data);
-
-      // We might be finding cache redirects when querying like this, so ensure
-      // we only inspect the actual cached response to see if it got flattened.
-      if (!isset($cached_data['#cache_redirect'])) {
-        $cached_response = $cached_data['#response'];
+      $cached_response = unserialize($cache_item->data);
+      if (!$cached_response instanceof CacheRedirect) {
         if ($cached_response->getStatusCode() === 200) {
           $found_cached_200_response = TRUE;
         }
@@ -1967,7 +1965,7 @@ abstract class ResourceTestBase extends BrowserTestBase {
     }
 
     // Try with all of the following request bodies.
-    $unparseable_request_body = '!{>}<';
+    $not_parseable_request_body = '!{>}<';
     $parseable_valid_request_body = Json::encode($this->getPostDocument());
     $parseable_invalid_request_body_missing_type = Json::encode($this->removeResourceTypeFromDocument($this->getPostDocument()));
     if ($this->entity->getEntityType()->hasKey('label')) {
@@ -2016,9 +2014,9 @@ abstract class ResourceTestBase extends BrowserTestBase {
     $response = $this->request('POST', $url, $request_options);
     $this->assertResourceErrorResponse(400, 'Empty request body.', $url, $response, FALSE);
 
-    $request_options[RequestOptions::BODY] = $unparseable_request_body;
+    $request_options[RequestOptions::BODY] = $not_parseable_request_body;
 
-    // DX: 400 when unparseable request body.
+    // DX: 400 when un-parseable request body.
     $response = $this->request('POST', $url, $request_options);
     $this->assertResourceErrorResponse(400, 'Syntax error', $url, $response, FALSE);
 
@@ -2187,7 +2185,7 @@ abstract class ResourceTestBase extends BrowserTestBase {
     $this->anotherEntity = $this->createAnotherEntity('dupe');
 
     // Try with all of the following request bodies.
-    $unparseable_request_body = '!{>}<';
+    $not_parseable_request_body = '!{>}<';
     $parseable_valid_request_body = Json::encode($this->getPatchDocument());
     if ($this->entity->getEntityType()->hasKey('label')) {
       $parseable_invalid_request_body = Json::encode($this->makeNormalizationInvalid($this->getPatchDocument(), 'label'));
@@ -2202,6 +2200,10 @@ abstract class ResourceTestBase extends BrowserTestBase {
     if ($this->entity instanceof FieldableEntityInterface && $this->entity->hasField('field_jsonapi_test_entity_ref')) {
       $parseable_invalid_request_body_5 = Json::encode(NestedArray::mergeDeep(['data' => ['attributes' => ['field_jsonapi_test_entity_ref' => ['target_id' => $this->randomString()]]]], $this->getPostDocument()));
     }
+    // Invalid PATCH request with missing id key.
+    $parseable_invalid_request_body_6 = $this->getPatchDocument();
+    unset($parseable_invalid_request_body_6['data']['id']);
+    $parseable_invalid_request_body_6 = Json::encode($parseable_invalid_request_body_6);
 
     // The URL and Guzzle request options that will be used in this test. The
     // request options will be modified/expanded throughout this test:
@@ -2239,9 +2241,9 @@ abstract class ResourceTestBase extends BrowserTestBase {
     $response = $this->request('PATCH', $url, $request_options);
     $this->assertResourceErrorResponse(400, 'Empty request body.', $url, $response, FALSE);
 
-    $request_options[RequestOptions::BODY] = $unparseable_request_body;
+    $request_options[RequestOptions::BODY] = $not_parseable_request_body;
 
-    // DX: 400 when unparseable request body.
+    // DX: 400 when un-parseable request body.
     $response = $this->request('PATCH', $url, $request_options);
     $this->assertResourceErrorResponse(400, 'Syntax error', $url, $response, FALSE);
 
@@ -2305,6 +2307,12 @@ abstract class ResourceTestBase extends BrowserTestBase {
       $response = $this->request('PATCH', $url, $request_options);
       $this->assertResourceErrorResponse(422, "The following relationship fields were provided as attributes: [ field_jsonapi_test_entity_ref ]", $url, $response, FALSE);
     }
+
+    // DX: 400 when request document doesn't contain id.
+    // This also tests that no PHP warnings raised due to non-existent key.
+    $request_options[RequestOptions::BODY] = $parseable_invalid_request_body_6;
+    $response = $this->request('PATCH', $url, $request_options);
+    $this->assertResourceResponse(400, FALSE, $response);
 
     // 200 for well-formed PATCH request that sends all fields (even including
     // read-only ones, but with unchanged values).
@@ -2733,7 +2741,7 @@ abstract class ResourceTestBase extends BrowserTestBase {
       'all' => $relationship_field_names,
     ];
     if (count($relationship_field_names) > 1) {
-      $about_half_the_fields = floor(count($relationship_field_names) / 2);
+      $about_half_the_fields = (int) floor(count($relationship_field_names) / 2);
       $field_sets['some'] = array_slice($relationship_field_names, $about_half_the_fields);
 
       $nested_includes = $this->getNestedIncludePaths();
@@ -2881,7 +2889,8 @@ abstract class ResourceTestBase extends BrowserTestBase {
     // the default revision. This is always the latest revision when
     // content_moderation is not installed.
     $actual_response = $this->request('GET', $url, $request_options);
-    $expected_document = $this->getExpectedDocument();
+    $expected_document = $this->alterExpectedDocumentForRevision($this->getExpectedDocument());
+
     // The resource object should always links to the specific revision it
     // represents.
     $expected_document['data']['links']['self']['href'] = $latest_revision_id_url->setAbsolute()->toString();
@@ -2944,6 +2953,8 @@ abstract class ResourceTestBase extends BrowserTestBase {
     $workflow->getTypePlugin()->addEntityTypeAndBundle(static::$entityTypeId, $this->entity->bundle());
     $workflow->save();
 
+    $this->grantPermissionsToTestedRole(['use editorial transition publish']);
+
     // Ensure the test entity has content_moderation fields attached to it.
     /** @var \Drupal\Core\Entity\FieldableEntityInterface|\Drupal\Core\Entity\TranslatableRevisionableInterface $entity */
     $entity = $this->entityStorage->load($entity->id());
@@ -2974,6 +2985,8 @@ abstract class ResourceTestBase extends BrowserTestBase {
     // should be no links.
     unset($expected_document['data']['links']['latest-version']);
     unset($expected_document['data']['links']['working-copy']);
+    $expected_document = $this->alterExpectedDocumentForRevision($expected_document);
+    $expected_cache_tags = array_unique([...$expected_cache_tags, ...$workflow->getCacheTags()]);
     $this->assertResourceResponse(200, $expected_document, $actual_response, $expected_cache_tags, $expected_cache_contexts, FALSE, 'MISS');
     // Fetch the collection URL using the `latest-version` version argument.
     $actual_response = $this->request('GET', $rel_latest_version_collection_url, $request_options);
@@ -3098,6 +3111,7 @@ abstract class ResourceTestBase extends BrowserTestBase {
     $expected_document['data']['links']['latest-version']['href'] = $rel_latest_version_url->setAbsolute()->toString();
     $expected_cache_tags = $this->getExpectedCacheTags();
     $expected_cache_contexts = $this->getExpectedCacheContexts();
+    $expected_cache_tags = array_unique([...$expected_cache_tags, ...$workflow->getCacheTags()]);
     $this->assertResourceResponse(200, $expected_document, $actual_response, Cache::mergeTags($expected_cache_tags, $this->getExtraRevisionCacheTags()), $expected_cache_contexts, FALSE, 'MISS');
     // And the collection response should also have the latest revision.
     $actual_response = $this->request('GET', $rel_working_copy_collection_url, $request_options);
@@ -3141,9 +3155,14 @@ abstract class ResourceTestBase extends BrowserTestBase {
       [$revision_id, $relationship_url, $related_url] = $revision_case;
       // Load the revision that will be requested.
       $this->entityStorage->resetCache([$entity->id()]);
-      $revision = is_null($revision_id)
-        ? $this->entityStorage->load($entity->id())
-        : $this->entityStorage->loadRevision($revision_id);
+      if ($revision_id === NULL) {
+        $revision = $this->entityStorage->load($entity->id());
+      }
+      else {
+        /** @var \Drupal\Core\Entity\RevisionableStorageInterface $storage */
+        $storage = $this->entityStorage;
+        $revision = $storage->loadRevision($revision_id);
+      }
       // Request the relationship resource without access to the relationship
       // field.
       $actual_response = $this->request('GET', $relationship_url, $request_options);
@@ -3168,9 +3187,14 @@ abstract class ResourceTestBase extends BrowserTestBase {
       [$revision_id, $relationship_url, $related_url] = $revision_case;
       // Load the revision that will be requested.
       $this->entityStorage->resetCache([$entity->id()]);
-      $revision = is_null($revision_id)
-        ? $this->entityStorage->load($entity->id())
-        : $this->entityStorage->loadRevision($revision_id);
+      if ($revision_id === NULL) {
+        $revision = $this->entityStorage->load($entity->id());
+      }
+      else {
+        /** @var \Drupal\Core\Entity\RevisionableStorageInterface $storage */
+        $storage = $this->entityStorage;
+        $revision = $storage->loadRevision($revision_id);
+      }
       // Request the relationship resource after granting access to the
       // relationship field.
       $actual_response = $this->request('GET', $relationship_url, $request_options);
@@ -3310,7 +3334,7 @@ abstract class ResourceTestBase extends BrowserTestBase {
     $field_names = array_keys($this->entity->toArray());
     $field_sets = [
       'empty' => [],
-      'some' => array_slice($field_names, floor(count($field_names) / 2)),
+      'some' => array_slice($field_names, (int) floor(count($field_names) / 2)),
       'all' => $field_names,
     ];
     if ($this->entity instanceof EntityOwnerInterface) {
@@ -3489,6 +3513,43 @@ abstract class ResourceTestBase extends BrowserTestBase {
   protected function entityLoadUnchanged($id) {
     $this->entityStorage->resetCache();
     return $this->entityStorage->loadUnchanged($id);
+  }
+
+  /**
+   * Alters the expected JSON:API document for revisions.
+   *
+   * Default revision tests assume a non-privileged user is performing the GET
+   * request and as such the expected document may not include the revision log
+   * or other fields that require elevated permissions. This method is an
+   * extension point where child classes can modify the expected document to
+   * take into account these changes.
+   *
+   * @param array $expected_document
+   *   Expected document for the default revision.
+   *
+   * @return array[]
+   *   Modified document for a revision or user with access to edit a revision
+   *   AND/OR view revision information.
+   */
+  protected function alterExpectedDocumentForRevision(array $expected_document): array {
+    $entity_type = $this->entity->getEntityType();
+    if ($entity_type instanceof ContentEntityTypeInterface &&
+      ($field_name = $entity_type->getRevisionMetadataKey('revision_log_message'))) {
+      // The default entity access control handler assumes that permissions do not
+      // change during the lifetime of a request and caches access results.
+      // However, we're changing permissions during a test run and need fresh
+      // results, so reset the cache.
+      \Drupal::entityTypeManager()->getAccessControlHandler($this->entity->getEntityTypeId())->resetCache();
+      $revisionLogAccess = $this->entity->access('view revision', $this->account, TRUE)
+        ->orIf($this->entity->access('update', $this->account, TRUE));
+
+      if ($revisionLogAccess->isAllowed()) {
+        $expected_document['data']['attributes'][$field_name] = NULL;
+        return $expected_document;
+      }
+      unset($expected_document['data']['attributes'][$field_name]);
+    }
+    return $expected_document;
   }
 
 }

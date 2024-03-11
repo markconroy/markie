@@ -20,9 +20,8 @@
    */
   Drupal.Views.parseQueryString = function (query) {
     const args = {};
-    const pos = query.indexOf('?');
-    if (pos !== -1) {
-      query = query.substring(pos + 1);
+    if (query.includes('?')) {
+      query = query.substring(query.indexOf('?') + 1);
     }
     let pair;
     const pairs = query.split('&');
@@ -106,8 +105,8 @@
     }
     const chars = ['#', '?', '&'];
     for (let i = 0; i < chars.length; i++) {
-      if (href.indexOf(chars[i]) > -1) {
-        href = href.substr(0, href.indexOf(chars[i]));
+      if (href.includes(chars[i])) {
+        href = href.substring(0, href.indexOf(chars[i]));
       }
     }
     return href;

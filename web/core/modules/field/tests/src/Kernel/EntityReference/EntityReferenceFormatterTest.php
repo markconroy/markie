@@ -2,7 +2,6 @@
 
 namespace Drupal\Tests\field\Kernel\EntityReference;
 
-use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
@@ -14,7 +13,7 @@ use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
 use Drupal\user\Entity\Role;
 use Drupal\user\RoleInterface;
 use Drupal\entity_test\Entity\EntityTestLabel;
-use Drupal\Tests\field\Traits\EntityReferenceTestTrait;
+use Drupal\Tests\field\Traits\EntityReferenceFieldCreationTrait;
 
 /**
  * Tests the formatters functionality.
@@ -23,7 +22,7 @@ use Drupal\Tests\field\Traits\EntityReferenceTestTrait;
  */
 class EntityReferenceFormatterTest extends EntityKernelTestBase {
 
-  use EntityReferenceTestTrait;
+  use EntityReferenceFieldCreationTrait;
 
   /**
    * The entity type used in this test.
@@ -163,7 +162,7 @@ class EntityReferenceFormatterTest extends EntityKernelTestBase {
         ->view($referencing_entity, 'default');
 
       // Verify the un-accessible item still exists.
-      $this->assertEquals($this->referencedEntity->id(), $referencing_entity->{$field_name}->target_id, new FormattableMarkup('The un-accessible item still exists after @name formatter was executed.', ['@name' => $name]));
+      $this->assertEquals($this->referencedEntity->id(), $referencing_entity->{$field_name}->target_id, "The un-accessible item still exists after $name formatter was executed.");
     }
   }
 
@@ -215,7 +214,7 @@ class EntityReferenceFormatterTest extends EntityKernelTestBase {
     $this->assertSame('default | ' . $this->referencedEntity->label() . $expected_rendered_name_field_1 . $expected_rendered_body_field_1, (string) $build[0]['#markup'], sprintf('The markup returned by the %s formatter is correct for an item with a saved entity.', $formatter));
     $expected_cache_tags = Cache::mergeTags(\Drupal::entityTypeManager()->getViewBuilder($this->entityType)->getCacheTags(), $this->referencedEntity->getCacheTags());
     $expected_cache_tags = Cache::mergeTags($expected_cache_tags, FilterFormat::load('full_html')->getCacheTags());
-    $this->assertEquals($expected_cache_tags, $build[0]['#cache']['tags'], new FormattableMarkup('The @formatter formatter has the expected cache tags.', ['@formatter' => $formatter]));
+    $this->assertEquals($expected_cache_tags, $build[0]['#cache']['tags'], "The $formatter formatter has the expected cache tags.");
 
     // Test the second field item.
     $expected_rendered_name_field_2 = '
@@ -261,7 +260,7 @@ class EntityReferenceFormatterTest extends EntityKernelTestBase {
     // Check that the recursive rendering stops after it reaches the specified
     // limit.
     $build = $view_builder->view($referencing_entity_1, 'default');
-    $output = $renderer->renderRoot($build);
+    $output = (string) $renderer->renderRoot($build);
 
     // The title of entity_test entities is printed twice by default, so we have
     // to multiply the formatter's recursive rendering protection limit by 2.
@@ -280,14 +279,14 @@ class EntityReferenceFormatterTest extends EntityKernelTestBase {
     $referencing_entity_2->save();
 
     $build = $view_builder->view($referencing_entity_2, 'default');
-    $output = $renderer->renderRoot($build);
+    $output = (string) $renderer->renderRoot($build);
 
     $actual_occurrences = substr_count($output, $referencing_entity_2->label());
     $this->assertEquals($expected_occurrences, $actual_occurrences);
 
     // Now render both entities at the same time and check again.
     $build = $view_builder->viewMultiple([$referencing_entity_1, $referencing_entity_2], 'default');
-    $output = $renderer->renderRoot($build);
+    $output = (string) $renderer->renderRoot($build);
 
     $actual_occurrences = substr_count($output, $referencing_entity_1->label());
     $this->assertEquals($expected_occurrences, $actual_occurrences);

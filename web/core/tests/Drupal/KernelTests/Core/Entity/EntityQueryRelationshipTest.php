@@ -6,7 +6,7 @@ use Drupal\Component\Plugin\Exception\PluginNotFoundException;
 use Drupal\entity_test\Entity\EntityTest;
 use Drupal\taxonomy\Entity\Vocabulary;
 use Drupal\taxonomy\Entity\Term;
-use Drupal\Tests\field\Traits\EntityReferenceTestTrait;
+use Drupal\Tests\field\Traits\EntityReferenceFieldCreationTrait;
 
 /**
  * Tests the Entity Query relationship API.
@@ -15,7 +15,7 @@ use Drupal\Tests\field\Traits\EntityReferenceTestTrait;
  */
 class EntityQueryRelationshipTest extends EntityKernelTestBase {
 
-  use EntityReferenceTestTrait;
+  use EntityReferenceFieldCreationTrait;
 
   /**
    * Modules to enable.
@@ -70,13 +70,14 @@ class EntityQueryRelationshipTest extends EntityKernelTestBase {
     // We want an entity reference field. It needs a vocabulary, terms, a field
     // storage and a field. First, create the vocabulary.
     $vocabulary = Vocabulary::create([
-      'vid' => mb_strtolower($this->randomMachineName()),
+      'vid' => $this->randomMachineName(),
+      'name' => 'Tags',
     ]);
     $vocabulary->save();
 
     // Second, create the field.
     entity_test_create_bundle('test_bundle');
-    $this->fieldName = strtolower($this->randomMachineName());
+    $this->fieldName = $this->randomMachineName();
     $handler_settings = [
       'target_bundles' => [
         $vocabulary->id() => $vocabulary->id(),

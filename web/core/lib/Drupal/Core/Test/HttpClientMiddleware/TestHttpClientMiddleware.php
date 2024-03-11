@@ -31,6 +31,13 @@ class TestHttpClientMiddleware {
             if (!drupal_valid_test_ua()) {
               return $response;
             }
+            if (!empty($response->getHeader('X-Drupal-Wait-Terminate')[0])) {
+              $lock = \Drupal::lock();
+              if (!$lock->acquire('test_wait_terminate')) {
+                $lock->wait('test_wait_terminate');
+              }
+              $lock->release('test_wait_terminate');
+            }
             $headers = $response->getHeaders();
             foreach ($headers as $header_name => $header_values) {
               if (preg_match('/^X-Drupal-Assertion-[0-9]+$/', $header_name, $matches)) {
@@ -41,6 +48,7 @@ class TestHttpClientMiddleware {
                       // Fire the same deprecation message to allow it to be
                       // collected by
                       // \Symfony\Bridge\PhpUnit\DeprecationErrorHandler::collectDeprecations().
+                      // phpcs:ignore Drupal.Semantics.FunctionTriggerError
                       @trigger_error((string) $parameters[0], E_USER_DEPRECATED);
                     }
                     else {

@@ -6,7 +6,9 @@ use Drupal\Component\Utility\Html;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\node\Entity\NodeType;
 use Drupal\KernelTests\KernelTestBase;
-use Drupal\Tests\field\Traits\EntityReferenceTestTrait;
+use Drupal\Tests\field\Traits\EntityReferenceFieldCreationTrait;
+
+// cspell:ignore xyabz
 
 /**
  * Tests entity reference selection plugins.
@@ -15,7 +17,7 @@ use Drupal\Tests\field\Traits\EntityReferenceTestTrait;
  */
 class EntityReferenceSelectionReferenceableTest extends KernelTestBase {
 
-  use EntityReferenceTestTrait;
+  use EntityReferenceFieldCreationTrait;
 
   /**
    * Bundle of 'entity_test_no_label' entity.
@@ -64,24 +66,24 @@ class EntityReferenceSelectionReferenceableTest extends KernelTestBase {
 
     // Create a new node-type.
     NodeType::create([
-      'type' => $node_type = mb_strtolower($this->randomMachineName()),
+      'type' => $node_type = $this->randomMachineName(),
       'name' => $this->randomString(),
     ])->save();
 
     // Create an entity reference field targeting 'entity_test_no_label'
     // entities.
-    $field_name = mb_strtolower($this->randomMachineName());
+    $field_name = $this->randomMachineName();
     $this->createEntityReferenceField('node', $node_type, $field_name, $this->randomString(), 'entity_test_no_label');
     $field_config = FieldConfig::loadByName('node', $node_type, $field_name);
     $this->selectionHandler = $this->container->get('plugin.manager.entity_reference_selection')->getSelectionHandler($field_config);
 
     // Generate a bundle name to be used with 'entity_test_no_label'.
-    $this->bundle = mb_strtolower($this->randomMachineName());
+    $this->bundle = $this->randomMachineName();
 
     // Create 6 entities to be referenced by the field.
     foreach (static::$labels as $name) {
       $storage->create([
-        'id' => mb_strtolower($this->randomMachineName()),
+        'id' => $this->randomMachineName(),
         'name' => $name,
         'type' => $this->bundle,
       ])->save();

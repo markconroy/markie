@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\Component\Annotation;
 
 use Drupal\Component\Annotation\Reflection\MockFileFinder;
@@ -16,9 +18,9 @@ class MockFileFinderTest extends TestCase {
    * @covers ::findFile
    */
   public function testFindFile() {
-    $tmp = MockFileFinder::create('testfilename.txt');
-    $this->assertEquals('testfilename.txt', $tmp->findFile('n/a'));
-    $this->assertEquals('testfilename.txt', $tmp->findFile('SomeClass'));
+    $tmp = MockFileFinder::create('test_filename.txt');
+    $this->assertEquals('test_filename.txt', $tmp->findFile('n/a'));
+    $this->assertEquals('test_filename.txt', $tmp->findFile('SomeClass'));
   }
 
 }

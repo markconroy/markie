@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\FunctionalJavascriptTests\Core;
 
 use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
@@ -53,10 +55,30 @@ class MachineNameTest extends WebDriverTestBase {
       [
         'input' => 'Test value !0-9@',
         'message' => 'A title that should be transliterated must be equal to the php generated machine name',
-        'expected' => 'test_value_0_9_',
+        'expected' => 'test_value_0_9',
       ],
       [
         'input' => 'Test value',
+        'message' => 'A title that should not be transliterated must be equal to the php generated machine name',
+        'expected' => 'test_value',
+      ],
+      [
+        'input' => ' Test Value ',
+        'message' => 'A title that should not be transliterated must be equal to the php generated machine name',
+        'expected' => 'test_value',
+      ],
+      [
+        'input' => ', Neglect?! ',
+        'message' => 'A title that should not be transliterated must be equal to the php generated machine name',
+        'expected' => 'neglect',
+      ],
+      [
+        'input' => '0123456789!"$%&/()=?Test value?=)(/&%$"!9876543210',
+        'message' => 'A title that should not be transliterated must be equal to the php generated machine name',
+        'expected' => '0123456789_test_value_9876543210',
+      ],
+      [
+        'input' => '_Test_Value_',
         'message' => 'A title that should not be transliterated must be equal to the php generated machine name',
         'expected' => 'test_value',
       ],
@@ -83,11 +105,6 @@ class MachineNameTest extends WebDriverTestBase {
 
     // Assert that a machine name based on a default value is initialized.
     $this->assertJsCondition('jQuery("#edit-machine-name-3-label-machine-name-suffix .machine-name-value").html() == "yet_another_machine_name"');
-
-    // Field must be present for the rest of the test to work.
-    if (empty($machine_name_1_value)) {
-      $this->fail('Cannot finish test, missing machine name field');
-    }
 
     // Test each value for conversion to a machine name.
     foreach ($test_values as $test_info) {
@@ -118,7 +135,7 @@ class MachineNameTest extends WebDriverTestBase {
     $this->assertFalse($machine_name_2_wrapper->isVisible(), 'The ID field must not be visible');
 
     // Validate if the element contains the correct value.
-    $this->assertEquals($test_values[1]['expected'], $machine_name_1_field->getValue(), 'The ID field value must be equal to the php generated machine name');
+    $this->assertEquals(end($test_values)['expected'], $machine_name_1_field->getValue(), 'The ID field value must be equal to the php generated machine name');
 
     // Test that machine name generation still occurs after an HTML 5
     // validation failure.

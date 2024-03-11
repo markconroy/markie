@@ -2,7 +2,6 @@
 
 namespace Drupal\Tests\forum\Functional;
 
-use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Entity\Entity\EntityFormDisplay;
 use Drupal\Core\Entity\Entity\EntityViewDisplay;
 use Drupal\Core\Entity\EntityInterface;
@@ -18,6 +17,7 @@ use Drupal\Tests\BrowserTestBase;
  * consistency in the database.
  *
  * @group forum
+ * @group #slow
  */
 class ForumTest extends BrowserTestBase {
 
@@ -97,6 +97,7 @@ class ForumTest extends BrowserTestBase {
     // Create users.
     $this->adminUser = $this->drupalCreateUser([
       'access administration pages',
+      'access help pages',
       'administer modules',
       'administer blocks',
       'administer forums',
@@ -107,6 +108,7 @@ class ForumTest extends BrowserTestBase {
     ]);
     $this->editAnyTopicsUser = $this->drupalCreateUser([
       'access administration pages',
+      'access help pages',
       'create forum content',
       'edit any forum content',
       'delete any forum content',
@@ -228,7 +230,7 @@ class ForumTest extends BrowserTestBase {
       'post comments',
     ]));
     $this->drupalGet('admin/structure/types/manage/forum');
-    $this->submitForm(['options[promote]' => 'promote'], 'Save content type');
+    $this->submitForm(['options[promote]' => 'promote'], 'Save');
     $this->createForumTopic($this->forum, FALSE);
     $this->createForumTopic($this->forum, FALSE);
     $this->drupalGet('node');
@@ -595,7 +597,7 @@ class ForumTest extends BrowserTestBase {
 
     // Retrieve node object, ensure that the topic was created and in the proper forum.
     $node = $this->drupalGetNodeByTitle($title);
-    $this->assertNotNull($node, new FormattableMarkup('Node @title was loaded', ['@title' => $title]));
+    $this->assertNotNull($node, "Node $title was loaded");
     $this->assertEquals($tid, $node->taxonomy_forums->target_id, 'Saved forum topic was in the expected forum');
 
     // View forum topic.

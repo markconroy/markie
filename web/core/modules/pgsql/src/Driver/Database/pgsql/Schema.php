@@ -358,7 +358,7 @@ EOD;
     }
 
     if (!empty($spec['unsigned'])) {
-      $sql .= " CHECK ($name >= 0)";
+      $sql .= ' CHECK ("' . $name . '" >= 0)';
     }
 
     if (isset($spec['not null'])) {
@@ -646,9 +646,9 @@ EOD;
       $this->ensureNotNullPrimaryKey($new_keys['primary key'], [$field => $spec]);
     }
 
-    $fixnull = FALSE;
+    $fix_null = FALSE;
     if (!empty($spec['not null']) && !isset($spec['default']) && !$is_primary_key) {
-      $fixnull = TRUE;
+      $fix_null = TRUE;
       $spec['not null'] = FALSE;
     }
     $query = 'ALTER TABLE {' . $table . '} ADD COLUMN ';
@@ -672,7 +672,7 @@ EOD;
         ->fields([$field => $spec['initial']])
         ->execute();
     }
-    if ($fixnull) {
+    if ($fix_null) {
       $this->connection->query("ALTER TABLE {" . $table . "} ALTER $field SET NOT NULL");
     }
     if (isset($new_keys)) {
@@ -982,7 +982,7 @@ EOD;
       // not when altering. Because of that, the sequence needs to be created
       // and initialized by hand.
       $seq = $this->connection->makeSequenceName($table, $field_new);
-      $this->connection->query("CREATE SEQUENCE " . $seq);
+      $this->connection->query("CREATE SEQUENCE " . $seq . " OWNED BY {" . $table . "}.[" . $field_new . ']');
       // Set sequence to maximal field value to not conflict with existing
       // entries.
       $this->connection->query("SELECT setval('" . $seq . "', MAX([" . $field . "])) FROM {" . $table . "}");

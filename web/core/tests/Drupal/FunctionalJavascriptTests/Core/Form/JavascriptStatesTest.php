@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\FunctionalJavascriptTests\Core\Form;
 
 use Drupal\filter\Entity\FilterFormat;
@@ -102,6 +104,7 @@ class JavascriptStatesTest extends WebDriverTestBase {
     $this->assertNotEmpty($text_format_invisible_value);
     $text_format_invisible_format = $page->findField('text_format_invisible_when_checkbox_trigger_checked[format]');
     $this->assertNotEmpty($text_format_invisible_format);
+    $link = $page->findLink('Link states test');
 
     $checkboxes_all_checked_element_value1 = $page->findField('checkboxes_all_checked_when_checkbox_trigger_checked[value1]');
     $this->assertNotEmpty($checkboxes_all_checked_element_value1);
@@ -180,6 +183,8 @@ class JavascriptStatesTest extends WebDriverTestBase {
     $this->assertFalse($radios_all_disabled_value2->hasAttribute('disabled'));
     $this->assertFalse($radios_some_disabled_value1->hasAttribute('disabled'));
     $this->assertFalse($radios_some_disabled_value2->hasAttribute('disabled'));
+    // Check if the link is visible.
+    $this->assertTrue($link->isVisible());
 
     // Change state: check the checkbox.
     $trigger->check();
@@ -219,6 +224,8 @@ class JavascriptStatesTest extends WebDriverTestBase {
     // Only value1 should be disabled, value 2 should remain enabled.
     $this->assertTrue($radios_some_disabled_value1->hasAttribute('disabled'));
     $this->assertFalse($radios_some_disabled_value2->hasAttribute('disabled'));
+    // The link shouldn't be visible.
+    $this->assertFalse($link->isVisible());
 
     // Change state: uncheck the checkbox.
     $trigger->uncheck();
@@ -252,6 +259,8 @@ class JavascriptStatesTest extends WebDriverTestBase {
     $this->assertFalse($radios_all_disabled_value2->hasAttribute('disabled'));
     $this->assertFalse($radios_some_disabled_value1->hasAttribute('disabled'));
     $this->assertFalse($radios_some_disabled_value2->hasAttribute('disabled'));
+    // Check if the link is turned back to visible state.
+    $this->assertTrue($link->isVisible());
   }
 
   /**

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\migrate\Unit\Exception;
 
 use Drupal\migrate\Exception\RequirementsException;
@@ -11,7 +13,7 @@ use Drupal\Tests\UnitTestCase;
  */
 class RequirementsExceptionTest extends UnitTestCase {
 
-  protected const MISSING_REQUIREMENTS = ['random_jackson_pivot', '51_Eridani_b'];
+  protected const MISSING_REQUIREMENTS = ['random_jackson_pivot', 'exoplanet'];
 
   /**
    * @covers ::getRequirements
@@ -41,7 +43,7 @@ class RequirementsExceptionTest extends UnitTestCase {
         ['requirements' => static::MISSING_REQUIREMENTS[0]],
       ],
       [
-        'requirements: random_jackson_pivot. requirements: 51_Eridani_b.',
+        'requirements: random_jackson_pivot. requirements: exoplanet.',
         'Multiple Requirements',
         ['requirements' => static::MISSING_REQUIREMENTS],
       ],

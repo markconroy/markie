@@ -23,10 +23,11 @@ There are two ways that a class can receive its dependencies. One is called “c
         $this->service = $service;
     }
 ```
-A class should use one or the other of these methods. The code that is responsible for providing the dependencies a class need is usually an object called the dependency injection container.
+The code that is responsible for providing the dependencies a class needs is usually an object called the dependency injection container.
 
 create() method
 ------------------
+:octicons-tag-24: 11.6+
 
 !!! tip
 
@@ -43,28 +44,38 @@ class WootStaticFactoryCommands extends DrushCommands
         $this->configFactory = $configFactory;
     }
 
-    public static function create(ContainerInterface $container): self
+    public static function create(ContainerInterface $container, DrushContainer $drush): self
     {
         return new static($container->get('config.factory'));
     }
 ```
 See the [Drupal Documentation](https://www.drupal.org/docs/drupal-apis/services-and-dependency-injection/services-and-dependency-injection-in-drupal-8#s-injecting-dependencies-into-controllers-forms-and-blocks) for details on how to inject Drupal services into your command file. Drush's approach mimics Drupal's blocks, forms, and controllers.
 
-Services Files
-------------------
+Note that if you do not need to pull any services from the Drush container, then you may
+omit the second parameter to the `create()` method.
 
-Drush command files can request that Drupal inject services by using a drush.services.yml file. This used to be the preferred method to do dependency injection for Drush commands, but is being phased out in favor of the create() method, described above. An example services file might look something like this:
-```yaml
-services:
-  my_module.commands:
-    class: \Drupal\my_module\Commands\MyModuleiCommands
-    tags:
-      - { name: drush.command }
-```
-See the [Drupal Documentation](https://www.drupal.org/docs/8/api/services-and-dependency-injection/services-and-dependency-injection-in-drupal-8) for details on how to inject Drupal services into your command file. The process is exactly the same as using a Drupal services.yml file to inject services into your module classes.
+createEarly() method
+------------------
+:octicons-tag-24: 12.0+
+Drush commands that need to be instantiated prior to bootstrap may do so by
+utilizing the `createEarly()` static factory. This method looks and functions
+exacty like the `create()` static factory, except it is only passed the Drush
+container. The Drupal container is not available to command handlers that use
+`createEarly()`.
+
+Note also that Drush commands packaged with Drupal modules are not discovered
+until after Drupal bootstraps, and therefore cannot use `createEarly()`. This
+mechanism is only usable by PSR-4 discovered commands packaged with Composer
+projects that are *not* Drupal modules.
 
 Inflection
 -------------
+
+!!! tip
+
+    Inflection is deprecated in Drush 12; use `create()` or `createEarly()` instead.
+    Some classes are no longer available for inflection in Drush 12, and more (or potentially all)
+    may be removed in Drush 13.
 
 Drush will also inject dependencies that it provides using a technique called inflection. Inflection is a kind of dependency injection that works by way of a set of provided inflection interfaces, one for each available service. Each of these interfaces will define one or more setter methods (usually only one); these will automatically be called by Drush when the commandfile object is instantiated. The command only needs to implement this method and save the provided object in a class field. There is usually a corresponding trait that may be included via a `use` statement to fulfill this requirement.
 
@@ -85,11 +96,9 @@ class MyModuleCommands extends DrushCommands implements SiteAliasManagerAwareInt
   
   /**
    * Prints the current alias name and info.
-   *
-   * @command mymodule:myAlias
-   * @return \Consolidation\OutputFormatters\StructuredData\ListDataFromKeys
    */
-  public function myAlias() 
+  #[CLI\Command(name: 'mymodule:myAlias')]
+  public function myAlias(): ListDataFromKeys 
   {
     $selfAlias = $this->siteAliasManager()->getSelf();
     $this->logger()->success(‘The current alias is {name}’, [‘name’ => $selfAlias]);
@@ -104,9 +113,7 @@ Any additional services that are desired must be injected by implementing the ap
 
 Additional Interfaces:
 
-- AutoloaderAwareInterface: Provides access to the class loader.
 - SiteAliasManagerAwareInterface: The site alias manager [allows alias records to be obtained](site-alias-manager.md).
 - CustomEventAwareInterface: Allows command files to [define and fire custom events](hooks.md) that other command files can hook.
-- ContainerAwareInterface: Provides Drush's dependency injection container.
 
 Note that although the autoloader and Drush dependency injection container is available and may be injected into your command file if needed, this should be avoided. Favor using services that can be injected from Drupal or Drush. Some of the objects in the container are not part of the Drush public API, and may not maintain compatibility in minor and patch releases.

@@ -2,7 +2,6 @@
 
 namespace Drupal\Tests\field\Kernel;
 
-use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Database\Database;
 use Drupal\Core\Entity\Sql\SqlContentEntityStorage;
 use Drupal\entity_test\Entity\EntityTest;
@@ -63,7 +62,7 @@ class FieldDataCountTest extends FieldKernelTestBase {
       'bundle' => 'entity_test',
     ])->save();
 
-    $this->assertFalse($field_storage->hasdata(), 'There are no entities with field data.');
+    $this->assertFalse($field_storage->hasData(), 'There are no entities with field data.');
     $this->assertSame(0, $this->storage->countFieldData($field_storage), 'There are 0 entities with field data.');
 
     // Create 1 entity without the field.
@@ -71,7 +70,7 @@ class FieldDataCountTest extends FieldKernelTestBase {
     $entity->name->value = $this->randomMachineName();
     $entity->save();
 
-    $this->assertFalse($field_storage->hasdata(), 'There are no entities with field data.');
+    $this->assertFalse($field_storage->hasData(), 'There are no entities with field data.');
     $this->assertSame(0, $this->storage->countFieldData($field_storage), 'There are 0 entities with field data.');
 
     // Create 12 entities to ensure that the purging works as expected.
@@ -96,16 +95,16 @@ class FieldDataCountTest extends FieldKernelTestBase {
       $this->assertEquals(24, $result, 'The field table has 24 rows.');
     }
 
-    $this->assertTrue($field_storage->hasdata(), 'There are entities with field data.');
+    $this->assertTrue($field_storage->hasData(), 'There are entities with field data.');
     $this->assertEquals(12, $this->storage->countFieldData($field_storage), 'There are 12 entities with field data.');
 
     // Ensure the methods work on deleted fields.
     $field_storage->delete();
-    $this->assertTrue($field_storage->hasdata(), 'There are entities with deleted field data.');
+    $this->assertTrue($field_storage->hasData(), 'There are entities with deleted field data.');
     $this->assertEquals(12, $this->storage->countFieldData($field_storage), 'There are 12 entities with deleted field data.');
 
     field_purge_batch(6);
-    $this->assertTrue($field_storage->hasdata(), 'There are entities with deleted field data.');
+    $this->assertTrue($field_storage->hasData(), 'There are entities with deleted field data.');
     $this->assertEquals(6, $this->storage->countFieldData($field_storage), 'There are 6 entities with deleted field data.');
 
     $entity_type = 'entity_test_rev';
@@ -136,9 +135,10 @@ class FieldDataCountTest extends FieldKernelTestBase {
 
     $this->assertTrue($this->fieldTestData->field_storage_2->hasData(), 'There are entities with field data.');
 
+    /** @var \Drupal\Core\Entity\RevisionableStorageInterface $storage */
     $storage = $this->container->get('entity_type.manager')->getStorage($entity_type);
     $entity = $storage->loadRevision($first_revision);
-    $this->assertCount($cardinality, $entity->{$this->fieldTestData->field_name_2}, new FormattableMarkup('Revision %revision_id: expected number of values.', ['%revision_id' => $first_revision]));
+    $this->assertCount($cardinality, $entity->{$this->fieldTestData->field_name_2}, "Revision $first_revision: expected number of values.");
   }
 
   /**

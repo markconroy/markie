@@ -9,19 +9,21 @@ use Drupal\KernelTests\Core\Config\ConfigEntityValidationTestBase;
  * Tests validation of field_storage_config entities.
  *
  * @group field
+ * @group #slow
  */
 class FieldStorageConfigValidationTest extends ConfigEntityValidationTestBase {
 
   /**
    * {@inheritdoc}
    */
-  protected static $modules = ['field', 'user'];
+  protected static $modules = ['field', 'node', 'user'];
 
   /**
    * {@inheritdoc}
    */
   protected function setUp(): void {
     parent::setUp();
+    $this->installEntitySchema('user');
 
     $this->entity = FieldStorageConfig::create([
       'type' => 'boolean',

@@ -6,6 +6,8 @@ use Drupal\Core\Url;
 use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\tour\Entity\Tour;
 
+// cspell:ignore pioggia spagna
+
 /**
  * Tests the functionality of tour tips.
  *
@@ -232,6 +234,33 @@ class TourTest extends TourTestBasic {
       'title' => 'The first tip',
     ]);
     $this->assertCount(0, $elements, 'Did not find English variant of tip 1.');
+  }
+
+  /**
+   * Tests enabling and disabling the tour tip functionality.
+   */
+  public function testStatus() {
+    // Set tour tip status as enabled.
+    $tour = Tour::load('tour-test');
+    $tour->setStatus(TRUE);
+    $tour->save();
+
+    $this->drupalGet('tour-test-1');
+    $this->assertSession()->statusCodeEquals(200);
+
+    // Tour tips should be visible on the page.
+    $this->assertTourTips();
+
+    $tour->setStatus(FALSE);
+    $tour->save();
+
+    // Navigate and verify the tour_test_1 tip is not found with
+    // appropriate classes.
+    $this->drupalGet('tour-test-1');
+    $this->assertSession()->statusCodeEquals(200);
+
+    // No tips expected as tour is disabled.
+    $this->assertTourTips(expectEmpty: TRUE);
   }
 
   /**

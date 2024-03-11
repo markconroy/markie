@@ -93,6 +93,7 @@ class HtmlResponseBigPipeSubscriber implements EventSubscriberInterface {
 
     $big_pipe_response = new BigPipeResponse($response);
     $big_pipe_response->setBigPipeService($this->getBigPipeService($event));
+
     $event->setResponse($big_pipe_response);
   }
 

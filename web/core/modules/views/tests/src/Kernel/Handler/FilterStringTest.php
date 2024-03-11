@@ -416,6 +416,39 @@ class FilterStringTest extends ViewsKernelTestBase {
     $this->assertIdenticalResultset($view, $resultset, $this->columnMap);
   }
 
+  /**
+   * Tests the string filter with negated 'regular_expression' operator.
+   */
+  public function testFilterStringGroupedNotRegularExpression() {
+    $filters = $this->getGroupedExposedFilters();
+    $view = $this->getBasicPageView();
+
+    // Filter: Name, Operator: not_regular_expression, Value: ^Rin
+    $filters['name']['group_info']['default_group'] = 6;
+    $view->setDisplay('page_1');
+    $view->displayHandlers->get('page_1')->overrideOption('filters', $filters);
+    $view->save();
+    $this->container->get('router.builder')->rebuild();
+
+    $this->executeView($view);
+
+    $resultset = [
+      [
+        'name' => 'John',
+      ],
+      [
+        'name' => 'George',
+      ],
+      [
+        'name' => 'Paul',
+      ],
+      [
+        'name' => 'Meredith',
+      ],
+    ];
+    $this->assertIdenticalResultset($view, $resultset, $this->columnMap);
+  }
+
   public function testFilterStringNotStarts() {
     $view = Views::getView('test_view');
     $view->setDisplay();
@@ -770,6 +803,49 @@ class FilterStringTest extends ViewsKernelTestBase {
     $this->assertIdenticalResultset($view, $resultset, $this->columnMap);
   }
 
+  /**
+   * Tests the string filter handler with the negated 'regular_expression' operator.
+   */
+  public function testFilterStringNotRegularExpression() {
+    $view = Views::getView('test_view');
+    $view->setDisplay();
+
+    // Filtering by regular expression pattern.
+    $view->displayHandlers->get('default')->overrideOption('filters', [
+      'age' => [
+        'id' => 'name',
+        'table' => 'views_test_data',
+        'field' => 'name',
+        'relationship' => 'none',
+        'operator' => 'not_regular_expression',
+        'value' => [
+          'value' => '^Rin',
+        ],
+      ],
+    ]);
+
+    $this->executeView($view);
+    $resultset = [
+      [
+        'name' => 'John',
+        'age' => 25,
+      ],
+      [
+        'name' => 'George',
+        'age' => 27,
+      ],
+      [
+        'name' => 'Paul',
+        'age' => 26,
+      ],
+      [
+        'name' => 'Meredith',
+        'age' => 30,
+      ],
+    ];
+    $this->assertIdenticalResultset($view, $resultset, $this->columnMap);
+  }
+
   protected function getGroupedExposedFilters() {
     $filters = [
       'name' => [
@@ -814,6 +890,11 @@ class FilterStringTest extends ViewsKernelTestBase {
               'title' => 'Longer than 7 letters',
               'operator' => 'longerthan',
               'value' => 7,
+            ],
+            6 => [
+              'title' => 'Does not start with Rin',
+              'operator' => 'not_regular_expression',
+              'value' => '^Rin',
             ],
           ],
         ],

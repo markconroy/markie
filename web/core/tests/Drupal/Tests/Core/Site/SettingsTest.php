@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\Core\Site;
 
 use Composer\Autoload\ClassLoader;
@@ -146,7 +148,7 @@ class SettingsTest extends UnitTestCase {
 
     $class = new \ReflectionClass(Settings::class);
     $instance_property = $class->getProperty("instance");
-    $instance_property->setValue(NULL);
+    $instance_property->setValue(NULL, NULL);
 
     $this->expectException(\BadMethodCallException::class);
     $settings->getInstance();
@@ -201,7 +203,7 @@ class SettingsTest extends UnitTestCase {
     $instance_property = $class->getProperty('deprecatedSettings');
     $deprecated_settings = $instance_property->getValue();
     $deprecated_settings['deprecated_legacy'] = $deprecated_setting;
-    $instance_property->setValue($deprecated_settings);
+    $instance_property->setValue(NULL, $deprecated_settings);
 
     if ($expect_deprecation_message) {
       $this->expectDeprecation($deprecated_setting['message']);

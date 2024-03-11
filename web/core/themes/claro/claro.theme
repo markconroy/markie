@@ -44,7 +44,7 @@ function claro_theme_suggestions_details_alter(&$suggestions, $variables) {
  */
 function claro_page_attachments_alter(array &$attachments) {
   $theme_path = \Drupal::request()->getBasePath() . '/' . \Drupal::service('extension.list.theme')->getPath('claro');
-  $query_string = \Drupal::state()->get('system.css_js_query_string') ?: '0';
+  $query_string = \Drupal::service('asset.query_string')->get();
 
   // Attach non-JavaScript specific CSS via a noscript tag to prevent unwanted
   // layout shifts.
@@ -295,16 +295,11 @@ function claro_element_info_alter(&$type) {
   if (isset($type['status_messages'])) {
     $type['status_messages']['#pre_render'][] = [ClaroPreRender::class, 'messagePlaceholder'];
   }
-}
 
-/**
- * Implements template_preprocess_filter_guidelines().
- */
-function claro_preprocess_filter_guidelines(&$variables) {
-  // Fix filter guidelines selector issue of 'filter/drupal.filter'.
-  // @todo Remove when https://www.drupal.org/node/2881212 is fixed.
-  $variables['attributes']['class'][] = 'filter-guidelines-item';
-  $variables['attributes']['class'][] = 'filter-guidelines-' . $variables['format']->id();
+  // Add a pre-render to tables to use CSS for sticky positioning.
+  if (isset($type['table'])) {
+    $type['table']['#pre_render'][] = [ClaroPreRender::class, 'tablePositionSticky'];
+  }
 }
 
 /**
@@ -419,6 +414,10 @@ function claro_form_alter(array &$form, FormStateInterface $form_state, $form_id
     $form['actions']['delete'] = _claro_convert_link_to_action_link($form['actions']['delete'], 'trash', 'default', 'danger');
   }
 
+  if (isset($form['actions']['delete_translation']['#type']) && $form['actions']['delete_translation']['#type'] === 'link' && !empty($build_info['callback_object']) && $build_info['callback_object'] instanceof EntityForm) {
+    $form['actions']['delete_translation'] = _claro_convert_link_to_action_link($form['actions']['delete_translation'], 'trash', 'default', 'danger');
+  }
+
   if (($form_object instanceof ViewsForm || $form_object instanceof ViewsFormInterface) && isset($form['override']['#prefix'])) {
     // Replace form--inline class so positioning of override form elements don't
     // have to depend on floats.
@@ -459,7 +458,7 @@ function claro_form_alter(array &$form, FormStateInterface $form_state, $form_id
 
         // Group the bulk actions select and submit elements, and add a label
         // that makes the purpose of these elements more clear to
-        // screenreaders.
+        // screen readers.
         $form['bulk_actions_container']['#attributes']['role'] = 'group';
         $form['bulk_actions_container']['#attributes']['aria-labelledby'] = $label_id;
         $form['bulk_actions_container']['group_label'] = [
@@ -836,7 +835,7 @@ function claro_form_views_exposed_form_alter(&$form, FormStateInterface $form_st
   $view = $form_state->getStorage()['view'];
   $view_title = $view->getTitle();
 
-  // Add a label so screenreaders can identify the purpose of the exposed form
+  // Add a label so screen readers can identify the purpose of the exposed form
   // without having to scan content that appears further down the page.
   $form['#attributes']['aria-label'] = t('Filter the contents of the %view_title view', ['%view_title' => $view_title]);
 }
@@ -1773,6 +1772,19 @@ function claro_system_module_invoked_theme_registry_alter(array &$theme_registry
   foreach (['toolbar', 'menu__toolbar'] as $registry_item) {
     if (isset($theme_registry[$registry_item])) {
       $theme_registry[$registry_item]['path'] = 'core/themes/claro/templates/navigation';
+    }
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter() for the user_admin_permissions form.
+ */
+function claro_form_user_admin_permissions_alter(&$form, FormStateInterface $form_state) {
+  if (isset($form['filters'])) {
+    $form['filters']['#attributes']['class'][] = 'permissions-table-filter';
+    if (isset($form['filters']['text'])) {
+      unset($form['filters']['text']['#title_display']);
+      $form['filters']['text']['#title'] = t('Filter');
     }
   }
 }

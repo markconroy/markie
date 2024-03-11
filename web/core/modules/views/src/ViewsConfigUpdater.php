@@ -3,11 +3,13 @@
 namespace Drupal\views;
 
 use Drupal\Component\Plugin\PluginManagerInterface;
+use Drupal\Core\Cache\Cache;
 use Drupal\Core\Config\TypedConfigManagerInterface;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Field\Plugin\Field\FieldFormatter\TimestampFormatter;
+use Drupal\Core\Language\LanguageInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -145,8 +147,31 @@ class ViewsConfigUpdater implements ContainerInjectionInterface {
       if ($this->processRevisionFieldHyphenFix($view)) {
         $changed = TRUE;
       }
+      if ($this->processDefaultArgumentSkipUrlUpdate($handler, $handler_type)) {
+        $changed = TRUE;
+      }
+      if ($this->addLabelIfMissing($view)) {
+        $changed = TRUE;
+      }
       return $changed;
     });
+  }
+
+  /**
+   * Adds a label to views which don't have one.
+   *
+   * @param \Drupal\views\ViewEntityInterface $view
+   *   The view to update.
+   *
+   * @return bool
+   *   Whether the view was updated.
+   */
+  public function addLabelIfMissing(ViewEntityInterface $view): bool {
+    if (!$view->get('label')) {
+      $view->set('label', $view->id());
+      return TRUE;
+    }
+    return FALSE;
   }
 
   /**
@@ -278,7 +303,7 @@ class ViewsConfigUpdater implements ContainerInjectionInterface {
     $deprecations_triggered = &$this->triggeredDeprecations['3212351'][$view->id()];
     if ($this->deprecationsEnabled && $changed && !$deprecations_triggered) {
       $deprecations_triggered = TRUE;
-      @trigger_error(sprintf('The oEmbed loading attribute update for view "%s" is deprecated in drupal:10.1.0 and is removed from drupal:11.0.0. Profile, module and theme provided configuration should be updated to accommodate the changes described at https://www.drupal.org/node/3275103.', $view->id()), E_USER_DEPRECATED);
+      @trigger_error(sprintf('The oEmbed loading attribute update for view "%s" is deprecated in drupal:10.1.0 and is removed from drupal:11.0.0. Profile, module and theme provided configuration should be updated. See https://www.drupal.org/node/3275103', $view->id()), E_USER_DEPRECATED);
     }
 
     return $changed;
@@ -410,6 +435,95 @@ class ViewsConfigUpdater implements ContainerInjectionInterface {
     return $this->processDisplayHandlers($view, TRUE, function (&$handler, $handler_type) use ($view) {
       return $this->processRevisionFieldHyphenFix($view);
     });
+  }
+
+  /**
+   * Checks for each view if default_argument_skip_url needs to be removed.
+   *
+   * @param \Drupal\views\ViewEntityInterface $view
+   *   The view entity.
+   *
+   * @return bool
+   *   TRUE if the view has any arguments that need to have
+   *   default_argument_skip_url removed.
+   */
+  public function needsDefaultArgumentSkipUrlUpdate(ViewEntityInterface $view) {
+    return $this->processDisplayHandlers($view, TRUE, function (&$handler, $handler_type) {
+      return $this->processDefaultArgumentSkipUrlUpdate($handler, $handler_type);
+    });
+  }
+
+  /**
+   * Processes arguments and removes the default_argument_skip_url setting.
+   *
+   * @param array $handler
+   *   A display handler.
+   * @param string $handler_type
+   *   The handler type.
+   *
+   * @return bool
+   *   Whether the handler was updated.
+   */
+  public function processDefaultArgumentSkipUrlUpdate(array &$handler, string $handler_type): bool {
+    if ($handler_type === 'argument' && isset($handler['default_argument_skip_url'])) {
+      unset($handler['default_argument_skip_url']);
+      return TRUE;
+    }
+    return FALSE;
+  }
+
+  /**
+   * Removes user context from all views using term filter configurations.
+   *
+   * @param \Drupal\views\ViewEntityInterface $view
+   *   The View to update.
+   *
+   * @return bool
+   *   Whether the view was updated.
+   */
+  public function needsTaxonomyTermFilterUpdate(ViewEntityInterface $view): bool {
+    return $this->processDisplayHandlers($view, TRUE, function (&$handler, $handler_type) use ($view) {
+      return $this->processTaxonomyTermFilterHandler($handler, $handler_type, $view);
+    });
+  }
+
+  /**
+   * Processes taxonomy_index_tid type filters.
+   *
+   * @param array $handler
+   *   A display handler.
+   * @param string $handler_type
+   *   The handler type.
+   * @param \Drupal\views\ViewEntityInterface $view
+   *   The View being updated.
+   *
+   * @return bool
+   *   Whether the handler was updated.
+   */
+  protected function processTaxonomyTermFilterHandler(array &$handler, string $handler_type, ViewEntityInterface $view): bool {
+    $changed = FALSE;
+
+    // Force view resave if using taxonomy id filter.
+    $plugin_id = $handler['plugin_id'] ?? '';
+    if ($handler_type === 'filter' && $plugin_id === 'taxonomy_index_tid') {
+
+      // This cannot be done in View::preSave() due to trusted data.
+      $executable = $view->getExecutable();
+      $displays = $view->get('display');
+      foreach ($displays as $display_id => &$display) {
+        $executable->setDisplay($display_id);
+
+        $cache_metadata = $executable->getDisplay()->calculateCacheMetadata();
+        $display['cache_metadata']['contexts'] = $cache_metadata->getCacheContexts();
+        // Always include at least the 'languages:' context as there will most
+        // probably be translatable strings in the view output.
+        $display['cache_metadata']['contexts'] = Cache::mergeContexts($display['cache_metadata']['contexts'], ['languages:' . LanguageInterface::TYPE_INTERFACE]);
+        sort($display['cache_metadata']['contexts']);
+      }
+      $view->set('display', $displays);
+      $changed = TRUE;
+    }
+    return $changed;
   }
 
 }

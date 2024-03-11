@@ -94,3 +94,46 @@ function views_post_update_fix_revision_id_part(&$sandbox = NULL): void {
       return $view_config_updater->needsRevisionFieldHyphenFix($view);
     });
 }
+
+/**
+ * Add labels to views which don't have one.
+ */
+function views_post_update_add_missing_labels(&$sandbox = NULL): void {
+  /** @var \Drupal\views\ViewsConfigUpdater $view_config_updater */
+  $view_config_updater = \Drupal::classResolver(ViewsConfigUpdater::class);
+  \Drupal::classResolver(ConfigEntityUpdater::class)->update($sandbox, 'view', function (ViewEntityInterface $view) use ($view_config_updater): bool {
+    return $view_config_updater->addLabelIfMissing($view);
+  });
+}
+
+/**
+ * Remove the skip_cache settings.
+ */
+function views_post_update_remove_skip_cache_setting(): void {
+  \Drupal::configFactory()
+    ->getEditable('views.settings')
+    ->clear('skip_cache')
+    ->save(TRUE);
+}
+
+/**
+ * Remove default_argument_skip_url setting.
+ */
+function views_post_update_remove_default_argument_skip_url(array &$sandbox = NULL): void {
+  /** @var \Drupal\views\ViewsConfigUpdater $view_config_updater */
+  $view_config_updater = \Drupal::classResolver(ViewsConfigUpdater::class);
+  \Drupal::classResolver(ConfigEntityUpdater::class)->update($sandbox, 'view', function (ViewEntityInterface $view) use ($view_config_updater): bool {
+    return $view_config_updater->needsDefaultArgumentSkipUrlUpdate($view);
+  });
+}
+
+/**
+ * Removes User context from views with taxonomy filters.
+ */
+function views_post_update_taxonomy_filter_user_context(?array &$sandbox = NULL): void {
+  /** @var \Drupal\views\ViewsConfigUpdater $view_config_updater */
+  $view_config_updater = \Drupal::classResolver(ViewsConfigUpdater::class);
+  \Drupal::classResolver(ConfigEntityUpdater::class)->update($sandbox, 'view', function (ViewEntityInterface $view) use ($view_config_updater): bool {
+    return $view_config_updater->needsTaxonomyTermFilterUpdate($view);
+  });
+}

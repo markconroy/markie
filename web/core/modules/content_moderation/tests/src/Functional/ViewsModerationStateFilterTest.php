@@ -2,7 +2,6 @@
 
 namespace Drupal\Tests\content_moderation\Functional;
 
-use Drupal\node\Entity\NodeType;
 use Drupal\Tests\content_moderation\Traits\ContentModerationTestTrait;
 use Drupal\Tests\views\Functional\ViewTestBase;
 use Drupal\views\Entity\View;
@@ -15,6 +14,7 @@ use Drupal\workflows\Entity\Workflow;
  * @coversDefaultClass \Drupal\content_moderation\Plugin\views\filter\ModerationStateFilter
  *
  * @group content_moderation
+ * @group #slow
  */
 class ViewsModerationStateFilterTest extends ViewTestBase {
 
@@ -45,15 +45,15 @@ class ViewsModerationStateFilterTest extends ViewTestBase {
   protected function setUp($import_test_views = TRUE, $modules = []): void {
     parent::setUp(FALSE, $modules);
 
-    NodeType::create([
+    $this->drupalCreateContentType([
       'type' => 'example_a',
-    ])->save();
-    NodeType::create([
+    ]);
+    $this->drupalCreateContentType([
       'type' => 'example_b',
-    ])->save();
-    NodeType::create([
+    ]);
+    $this->drupalCreateContentType([
       'type' => 'example_c',
-    ])->save();
+    ]);
 
     $this->createEditorialWorkflow();
 
@@ -341,7 +341,7 @@ class ViewsModerationStateFilterTest extends ViewTestBase {
     // Check that the size of the select element does not exceed 8 options.
     if ($check_size) {
       $this->assertGreaterThan(8, count($states));
-      $assert_session->elementAttributeContains('css', '#edit-default-revision-state', 'size', 8);
+      $assert_session->elementAttributeContains('css', '#edit-default-revision-state', 'size', '8');
     }
 
     // Check that an option exists for each of the expected states.

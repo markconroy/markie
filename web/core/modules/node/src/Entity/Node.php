@@ -70,6 +70,7 @@ use Drupal\user\EntityOwnerTrait;
  *   field_ui_base_route = "entity.node_type.edit_form",
  *   common_reference_target = TRUE,
  *   permission_granularity = "bundle",
+ *   collection_permission = "access content overview",
  *   links = {
  *     "canonical" = "/node/{node}",
  *     "delete-form" = "/node/{node}/delete",
@@ -311,7 +312,7 @@ class Node extends EditorialContentEntityBase implements NodeInterface {
 
     $fields['created'] = BaseFieldDefinition::create('created')
       ->setLabel(t('Authored on'))
-      ->setDescription(t('The time that the node was created.'))
+      ->setDescription(t('The date and time that the content was created.'))
       ->setRevisionable(TRUE)
       ->setTranslatable(TRUE)
       ->setDisplayOptions('view', [

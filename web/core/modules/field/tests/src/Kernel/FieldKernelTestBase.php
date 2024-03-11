@@ -59,10 +59,9 @@ abstract class FieldKernelTestBase extends KernelTestBase {
 
     $this->installEntitySchema('entity_test');
     $this->installEntitySchema('user');
-    $this->installSchema('system', ['sequences']);
 
     // Set default storage backend and configure the theme system.
-    $this->installConfig(['field', 'system']);
+    $this->installConfig(['field', 'system', 'user']);
 
     // Create user 1.
     $storage = \Drupal::entityTypeManager()->getStorage('user');
@@ -99,7 +98,7 @@ abstract class FieldKernelTestBase extends KernelTestBase {
     $field = 'field' . $suffix;
     $field_definition = 'field_definition' . $suffix;
 
-    $this->fieldTestData->$field_name = mb_strtolower($this->randomMachineName() . '_field_name' . $suffix);
+    $this->fieldTestData->$field_name = $this->randomMachineName() . '_field_name' . $suffix;
     $this->fieldTestData->$field_storage = FieldStorageConfig::create([
       'field_name' => $this->fieldTestData->$field_name,
       'entity_type' => $entity_type,
@@ -156,7 +155,7 @@ abstract class FieldKernelTestBase extends KernelTestBase {
   protected function entityValidateAndSave(EntityInterface $entity) {
     $violations = $entity->validate();
     if ($violations->count()) {
-      $this->fail($violations);
+      $this->fail((string) $violations);
     }
     else {
       $entity->save();

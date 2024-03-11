@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\Component\DependencyInjection;
 
 use Drupal\Component\Utility\Crypt;
@@ -589,6 +591,21 @@ class ContainerTest extends TestCase {
   }
 
   /**
+   * Tests that services wrapped in a closure work correctly.
+   *
+   * @covers ::get
+   * @covers ::createService
+   * @covers ::resolveServicesAndParameters
+   */
+  public function testResolveServicesAndParametersForServiceReferencedViaServiceClosure() {
+    $service = $this->container->get('service_within_service_closure');
+    $other_service = $this->container->get('other.service');
+    $factory_function = $service->getSomeOtherService();
+    $this->assertInstanceOf(\Closure::class, $factory_function);
+    $this->assertEquals($other_service, call_user_func($factory_function));
+  }
+
+  /**
    * Tests that an invalid argument throw an Exception.
    *
    * @covers ::get
@@ -840,6 +857,14 @@ class ContainerTest extends TestCase {
 
     ];
 
+    $services['service_within_service_closure'] = [
+      'class' => '\Drupal\Tests\Component\DependencyInjection\MockService',
+      'arguments' => $this->getCollection([
+        $this->getServiceClosureCall('other.service', ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE),
+        $this->getParameterCall('some_private_config'),
+      ]),
+    ];
+
     $services['factory_service'] = [
       'class' => '\Drupal\service_container\ServiceContainer\ControllerInterface',
       'factory' => [
@@ -971,6 +996,17 @@ class ContainerTest extends TestCase {
   protected function getServiceCall($id, $invalid_behavior = ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE) {
     return (object) [
       'type' => 'service',
+      'id' => $id,
+      'invalidBehavior' => $invalid_behavior,
+    ];
+  }
+
+  /**
+   * Helper function to return a service closure definition.
+   */
+  protected function getServiceClosureCall($id, $invalid_behavior = ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE) {
+    return (object) [
+      'type' => 'service_closure',
       'id' => $id,
       'invalidBehavior' => $invalid_behavior,
     ];

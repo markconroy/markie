@@ -35,7 +35,9 @@
 
 .search-result__title a {
   padding-block-end: 0.1875rem;
-  transition: background-size 0.2s, color 0.2s;
+  transition:
+    background-size 0.2s,
+    color 0.2s;
   -webkit-text-decoration: none;
   text-decoration: none;
   background-color: transparent;
@@ -107,5 +109,23 @@
 @media (min-width: 62.5rem) {
   .search-results__item {
     margin-block-end: var(--sp3);
+  }
+}
+
+.empty-search-results-text {
+  color: var(--color-text-neutral-loud);
+  font-family: var(--font-sans);
+  font-size: 1.25rem;
+  font-weight: bold;
+  font-style: normal;
+  line-height: var(--sp1-5);
+  margin-block: var(--sp);
+}
+
+@media (min-width: 43.75rem) {
+  .empty-search-results-text {
+    margin-block: var(--sp2);
+    font-size: 1.5rem;
+    line-height: var(--sp2);
   }
 }

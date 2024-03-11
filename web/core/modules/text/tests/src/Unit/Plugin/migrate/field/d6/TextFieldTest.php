@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\text\Unit\Plugin\migrate\field\d6;
 
 use Drupal\migrate\Plugin\MigrationInterface;
@@ -103,7 +105,7 @@ class TextFieldTest extends UnitTestCase {
     $info = [
       'widget_type' => 'optionwidgets_onoff',
       'global_settings' => [
-        'allowed_values' => "foo|Foo\nbaz|Baz",
+        'allowed_values' => "foo|Foo\nBaz|Baz",
       ],
     ];
     $this->plugin->defineValueProcessPipeline($this->migration, 'field', $info);
@@ -114,7 +116,7 @@ class TextFieldTest extends UnitTestCase {
         'source' => 'value',
         'default_value' => 0,
         'map' => [
-          'baz' => 1,
+          'Baz' => 1,
         ],
       ],
     ];

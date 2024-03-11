@@ -15,7 +15,6 @@ class MigrateTaxonomyTermTest extends MigrateDrupal7TestBase {
 
   protected static $modules = [
     'comment',
-    'forum',
     'content_translation',
     'datetime',
     'datetime_range',
@@ -41,7 +40,6 @@ class MigrateTaxonomyTermTest extends MigrateDrupal7TestBase {
    */
   protected function setUp(): void {
     parent::setUp();
-    $this->installConfig('forum');
     $this->installEntitySchema('comment');
     $this->installEntitySchema('file');
 
@@ -103,16 +101,13 @@ class MigrateTaxonomyTermTest extends MigrateDrupal7TestBase {
       $this->assertTrue($entity->hasField('field_integer'));
       $this->assertEquals($expected_term_reference_tid, $entity->field_term_reference->target_id);
     }
-    if (isset($expected_container_flag)) {
-      $this->assertEquals($expected_container_flag, $entity->forum_container->value);
-    }
   }
 
   /**
    * Tests the Drupal 7 taxonomy term to Drupal 8 migration.
    */
   public function testTaxonomyTerms() {
-    $this->assertEntity(1, 'en', 'General discussion', 'forums', '', NULL, 2);
+    $this->assertEntity(1, 'en', 'General discussion', 'sujet_de_discussion', '', NULL, 2);
 
     // Tests that terms that used the Drupal 7 Title module and that have their
     // name and description replaced by real fields are correctly migrated.
@@ -120,18 +115,10 @@ class MigrateTaxonomyTermTest extends MigrateDrupal7TestBase {
 
     $this->assertEntity(3, 'en', 'Term2', 'test_vocabulary', 'The second term.', 'filtered_html');
     $this->assertEntity(4, 'en', 'Term3 in plain old English', 'test_vocabulary', 'The third term in plain old English.', 'full_html', 0, [3], 6);
-    $this->assertEntity(5, 'en', 'Custom Forum', 'forums', 'Where the cool kids are.', NULL, 3, [], NULL, NULL, 0);
-    $this->assertEntity(6, 'en', 'Games', 'forums', NULL, '', 4, [], NULL, NULL, 1);
-    $this->assertEntity(7, 'en', 'Minecraft', 'forums', '', NULL, 1, [6], NULL, NULL, 0);
-    $this->assertEntity(8, 'en', 'Half Life 3', 'forums', '', NULL, 0, [6], NULL, NULL, 0);
-
-    // Verify that we still can create forum containers after the migration.
-    $term = Term::create(['vid' => 'forums', 'name' => 'Forum Container', 'forum_container' => 1]);
-    $term->save();
-
-    // Reset the forums tree data so this new term is included in the tree.
-    unset($this->treeData['forums']);
-    $this->assertEntity(26, 'en', 'Forum Container', 'forums', '', '', 0, [], NULL, NULL, 1);
+    $this->assertEntity(5, 'en', 'Custom Forum', 'sujet_de_discussion', 'Where the cool kids are.', NULL, 3, [], NULL, NULL, 0);
+    $this->assertEntity(6, 'en', 'Games', 'sujet_de_discussion', NULL, '', 4, [], NULL, NULL, 1);
+    $this->assertEntity(7, 'en', 'Minecraft', 'sujet_de_discussion', '', NULL, 1, [6], NULL, NULL, 0);
+    $this->assertEntity(8, 'en', 'Half Life 3', 'sujet_de_discussion', '', NULL, 0, [6], NULL, NULL, 0);
 
     // Test taxonomy term language translations.
     $this->assertEntity(19, 'en', 'Jupiter Station', 'vocablocalized', 'Holographic research.', 'filtered_html', 0, [], NULL, NULL);
@@ -142,23 +129,23 @@ class MigrateTaxonomyTermTest extends MigrateDrupal7TestBase {
     $this->assertEntity(24, 'fr', 'FR - Crewman', 'vocabfixed', NULL, NULL, 0, [], NULL, NULL);
 
     // Localized.
-    $this->assertEntity(19, 'en', 'Jupiter Station', 'vocablocalized', 'Holographic research.', 'filtered_html', '0', []);
-    $this->assertEntity(20, 'en', 'DS9', 'vocablocalized', 'Terok Nor', 'filtered_html', '0', []);
-    $this->assertEntity(25, 'en', 'Emissary', 'vocablocalized2', 'Pilot episode', 'filtered_html', '0', []);
+    $this->assertEntity(19, 'en', 'Jupiter Station', 'vocablocalized', 'Holographic research.', 'filtered_html', 0, []);
+    $this->assertEntity(20, 'en', 'DS9', 'vocablocalized', 'Terok Nor', 'filtered_html', 0, []);
+    $this->assertEntity(25, 'en', 'Emissary', 'vocablocalized2', 'Pilot episode', 'filtered_html', 0, []);
 
     /** @var \Drupal\taxonomy\TermInterface $entity */
     $entity = Term::load(20);
     $this->assertSame('Bajor', $entity->field_sector->value);
 
     // Translate.
-    $this->assertEntity(21, 'en', 'High council', 'vocabtranslate', NULL, NULL, '0', []);
+    $this->assertEntity(21, 'en', 'High council', 'vocabtranslate', NULL, NULL, 0, []);
     $entity = Term::load(21);
     $this->assertSame("K'mpec", $entity->field_chancellor->value);
-    $this->assertEntity(22, 'fr', 'fr - High council', 'vocabtranslate', NULL, NULL, '0', []);
-    $this->assertEntity(23, 'is', 'is - High council', 'vocabtranslate', NULL, NULL, '0', []);
+    $this->assertEntity(22, 'fr', 'fr - High council', 'vocabtranslate', NULL, NULL, 0, []);
+    $this->assertEntity(23, 'is', 'is - High council', 'vocabtranslate', NULL, NULL, 0, []);
 
     // Fixed.
-    $this->assertEntity(24, 'fr', 'FR - Crewman', 'vocabfixed', NULL, NULL, '0', []);
+    $this->assertEntity(24, 'fr', 'FR - Crewman', 'vocabfixed', NULL, NULL, 0, []);
 
     // Tests the migration of taxonomy term entity translations.
     $manager = $this->container->get('content_translation.manager');

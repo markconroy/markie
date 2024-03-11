@@ -5,6 +5,7 @@ namespace Drupal\Tests\path\Functional;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Database\Database;
 use Drupal\Core\Url;
+use Drupal\Tests\WaitTerminateTestTrait;
 
 /**
  * Tests modifying path aliases from the UI.
@@ -12,6 +13,8 @@ use Drupal\Core\Url;
  * @group path
  */
 class PathAliasTest extends PathTestBase {
+
+  use WaitTerminateTestTrait;
 
   /**
    * Modules to enable.
@@ -40,6 +43,11 @@ class PathAliasTest extends PathTestBase {
       'access content overview',
     ]);
     $this->drupalLogin($web_user);
+
+    // The \Drupal\path_alias\AliasWhitelist service performs cache clears after
+    // Drupal has flushed the response to the client. We use
+    // WaitTerminateTestTrait to wait for Drupal to do this before continuing.
+    $this->setWaitForTerminate();
   }
 
   /**

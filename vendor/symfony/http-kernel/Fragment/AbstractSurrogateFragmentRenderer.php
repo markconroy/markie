@@ -13,9 +13,9 @@ namespace Symfony\Component\HttpKernel\Fragment;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\UriSigner;
 use Symfony\Component\HttpKernel\Controller\ControllerReference;
 use Symfony\Component\HttpKernel\HttpCache\SurrogateInterface;
-use Symfony\Component\HttpKernel\UriSigner;
 
 /**
  * Implements Surrogate rendering strategy.
@@ -59,6 +59,8 @@ abstract class AbstractSurrogateFragmentRenderer extends RoutableFragmentRendere
     public function render(string|ControllerReference $uri, Request $request, array $options = []): Response
     {
         if (!$this->surrogate || !$this->surrogate->hasSurrogateCapability($request)) {
+            $request->attributes->set('_check_controller_is_allowed', -1); // @deprecated, switch to true in Symfony 7
+
             if ($uri instanceof ControllerReference && $this->containsNonScalars($uri->attributes)) {
                 throw new \InvalidArgumentException('Passing non-scalar values as part of URI attributes to the ESI and SSI rendering strategies is not supported. Use a different rendering strategy or pass scalar values.');
             }

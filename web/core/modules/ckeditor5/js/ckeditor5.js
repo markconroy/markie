@@ -251,7 +251,7 @@
    * To ensure they have higher specificity and are not reset too aggressively.
    *
    * @param {CSSRule} rule
-   *  A single CSS rule to be analysed and changed if necessary.
+   *  A single CSS rule to be analyzed and changed if necessary.
    */
   function ckeditor5SelectorProcessing(rule) {
     // Handle nested rules in @media, @support, etc.
@@ -637,7 +637,7 @@
 
   // Redirect on hash change when the original hash has an associated CKEditor 5.
   function redirectTextareaFragmentToCKEditor5Instance() {
-    const hash = window.location.hash.substr(1);
+    const hash = window.location.hash.substring(1);
     const element = document.getElementById(hash);
     if (element) {
       const editorID = getElementId(element);

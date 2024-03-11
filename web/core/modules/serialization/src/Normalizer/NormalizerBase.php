@@ -31,6 +31,7 @@ abstract class NormalizerBase implements SerializerAwareInterface, CacheableNorm
     }
 
     if (property_exists($this, 'supportedInterfaceOrClass')) {
+      @trigger_error('Defining ' . static::class . '::supportedInterfaceOrClass property is deprecated in drupal:10.2.0 and is removed from drupal:11.0.0. Use getSupportedTypes() instead. See https://www.drupal.org/node/3359695', E_USER_DEPRECATED);
       $supported = (array) $this->supportedInterfaceOrClass;
     }
     else {
@@ -56,6 +57,7 @@ abstract class NormalizerBase implements SerializerAwareInterface, CacheableNorm
     }
 
     if (property_exists($this, 'supportedInterfaceOrClass')) {
+      @trigger_error('Defining ' . static::class . '::supportedInterfaceOrClass property is deprecated in drupal:10.2.0 and is removed from drupal:11.0.0. Use getSupportedTypes() instead. See https://www.drupal.org/node/3359695', E_USER_DEPRECATED);
       $supported = (array) $this->supportedInterfaceOrClass;
     }
     else {

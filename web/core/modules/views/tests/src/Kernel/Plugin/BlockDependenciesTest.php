@@ -27,6 +27,14 @@ class BlockDependenciesTest extends ViewsKernelTestBase {
   protected static $modules = ['node', 'block', 'user', 'field'];
 
   /**
+   * {@inheritdoc}
+   */
+  protected function setUp($import_test_views = TRUE): void {
+    parent::setUp($import_test_views);
+    $this->container->get('theme_installer')->install(['stark']);
+  }
+
+  /**
    * Tests that exposed filter blocks have the correct dependencies.
    *
    * @see \Drupal\views\Plugin\Derivative\ViewsExposedFilterBlock::getDerivativeDefinitions()
@@ -86,7 +94,7 @@ class BlockDependenciesTest extends ViewsKernelTestBase {
     $settings += [
       'plugin' => $plugin_id,
       'region' => 'sidebar_first',
-      'id' => strtolower($this->randomMachineName(8)),
+      'id' => $this->randomMachineName(8),
       'theme' => $this->config('system.theme')->get('default'),
       'label' => $this->randomMachineName(8),
       'visibility' => [],

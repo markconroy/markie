@@ -40,6 +40,22 @@ class BrowserTestBaseTest extends BrowserTestBase {
   protected $defaultTheme = 'stark';
 
   /**
+   * Tests that JavaScript Drupal settings can be read.
+   */
+  public function testDrupalSettings() {
+    // Trigger a 403 because those pages have very little else going on.
+    $this->drupalGet('admin');
+    $this->assertSame([], $this->getDrupalSettings());
+
+    // Now try the same 403 as an authenticated user and verify that Drupal
+    // settings do show up.
+    $account = $this->drupalCreateUser();
+    $this->drupalLogin($account);
+    $this->drupalGet('admin');
+    $this->assertNotSame([], $this->getDrupalSettings());
+  }
+
+  /**
    * Tests basic page test.
    */
   public function testGoTo() {
@@ -119,7 +135,7 @@ class BrowserTestBaseTest extends BrowserTestBase {
     // Check that the hidden field exists and has a specific value.
     $this->assertSession()->hiddenFieldExists('strawberry');
     $this->assertSession()->hiddenFieldExists('red');
-    $this->assertSession()->hiddenFieldExists('redstrawberryhiddenfield');
+    $this->assertSession()->hiddenFieldExists('red-strawberry-hidden-field');
     $this->assertSession()->hiddenFieldValueNotEquals('strawberry', 'brown');
     $this->assertSession()->hiddenFieldValueEquals('strawberry', 'red');
 
@@ -343,13 +359,13 @@ class BrowserTestBaseTest extends BrowserTestBase {
 
     // Part 1 - Test by name.
     // Test that checkboxes are found/not found correctly by name, when using
-    // TRUE or FALSE to match their 'checked' state.
+    // '1' or '' to match their 'checked' state.
     $this->assertSession()->fieldExists('checkbox_enabled');
     $this->assertSession()->fieldExists('checkbox_disabled');
-    $this->assertSession()->fieldValueEquals('checkbox_enabled', TRUE);
-    $this->assertSession()->fieldValueEquals('checkbox_disabled', FALSE);
-    $this->assertSession()->fieldValueNotEquals('checkbox_enabled', FALSE);
-    $this->assertSession()->fieldValueNotEquals('checkbox_disabled', TRUE);
+    $this->assertSession()->fieldValueEquals('checkbox_enabled', '1');
+    $this->assertSession()->fieldValueEquals('checkbox_disabled', '');
+    $this->assertSession()->fieldValueNotEquals('checkbox_enabled', '');
+    $this->assertSession()->fieldValueNotEquals('checkbox_disabled', '1');
 
     // Test that we have legacy support.
     $this->assertSession()->fieldValueEquals('checkbox_enabled', '1');
@@ -357,7 +373,7 @@ class BrowserTestBaseTest extends BrowserTestBase {
 
     // Test that the assertion fails correctly if given the right value.
     try {
-      $this->assertSession()->fieldValueNotEquals('checkbox_enabled', TRUE);
+      $this->assertSession()->fieldValueNotEquals('checkbox_enabled', '1');
       $this->fail('fieldValueNotEquals failed to throw an exception.');
     }
     catch (ExpectationException $e) {
@@ -366,11 +382,11 @@ class BrowserTestBaseTest extends BrowserTestBase {
 
     // Part 2 - Test by ID.
     // Test that checkboxes are found/not found correctly by ID, when using
-    // TRUE or FALSE to match their 'checked' state.
-    $this->assertSession()->fieldValueEquals('edit-checkbox-enabled', TRUE);
-    $this->assertSession()->fieldValueEquals('edit-checkbox-disabled', FALSE);
-    $this->assertSession()->fieldValueNotEquals('edit-checkbox-enabled', FALSE);
-    $this->assertSession()->fieldValueNotEquals('edit-checkbox-disabled', TRUE);
+    // '1' or '' to match their 'checked' state.
+    $this->assertSession()->fieldValueEquals('edit-checkbox-enabled', '1');
+    $this->assertSession()->fieldValueEquals('edit-checkbox-disabled', '');
+    $this->assertSession()->fieldValueNotEquals('edit-checkbox-enabled', '');
+    $this->assertSession()->fieldValueNotEquals('edit-checkbox-disabled', '1');
 
     // Test that checkboxes are found by ID, when using NULL to ignore the
     // 'checked' state.

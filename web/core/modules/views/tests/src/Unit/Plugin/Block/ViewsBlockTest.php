@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\views\Unit\Plugin\Block;
 
 use Drupal\Core\DependencyInjection\ContainerBuilder;
@@ -205,7 +207,7 @@ namespace Drupal\views\Plugin\Block;
 
 if (!function_exists('views_add_contextual_links')) {
 
-  function views_add_contextual_links() {
+  function views_add_contextual_links(&$render_element, $location, $display_id, array $view_element = NULL) {
   }
 
 }

@@ -15,8 +15,7 @@ module.exports = {
   before(browser) {
     browser
       .drupalInstall()
-      .drupalInstallModule('breakpoint')
-      .drupalInstallModule('toolbar')
+      .drupalInstallModule('toolbar', true)
       .drupalCreateUser({
         name: 'user',
         password: '123',
@@ -99,23 +98,23 @@ module.exports = {
       'is-active toolbar-tray-vertical',
     );
     browser.waitForElementPresent(
-      '#toolbar-item-administration-tray li:nth-child(4) button',
+      '#toolbar-item-administration-tray li:nth-child(2) button',
     );
     browser.assert.not.hasClass(
-      '#toolbar-item-administration-tray li:nth-child(4)',
+      '#toolbar-item-administration-tray li:nth-child(2)',
       'open',
     );
     browser.assert.not.hasClass(
-      '#toolbar-item-administration-tray li:nth-child(4) button',
+      '#toolbar-item-administration-tray li:nth-child(2) button',
       'open',
     );
-    browser.click('#toolbar-item-administration-tray li:nth-child(4) button');
+    browser.click('#toolbar-item-administration-tray li:nth-child(2) button');
     browser.assert.hasClass(
-      '#toolbar-item-administration-tray li:nth-child(4)',
+      '#toolbar-item-administration-tray li:nth-child(2)',
       'open',
     );
     browser.assert.hasClass(
-      '#toolbar-item-administration-tray li:nth-child(4) button',
+      '#toolbar-item-administration-tray li:nth-child(2) button',
       'open',
     );
     browser.expect

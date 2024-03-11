@@ -18,6 +18,7 @@ use Behat\Mink\Element\NodeElement;
  * Tests various form element validation mechanisms.
  *
  * @group Form
+ * @group #slow
  */
 class FormTest extends BrowserTestBase {
 
@@ -397,11 +398,7 @@ class FormTest extends BrowserTestBase {
       'zero_checkbox_off' => 0,
     ];
     foreach ($expected_values as $widget => $expected_value) {
-      $this->assertSame($values[$widget], $expected_value, new FormattableMarkup('Checkbox %widget returns expected value (expected: %expected, got: %value)', [
-        '%widget' => var_export($widget, TRUE),
-        '%expected' => var_export($expected_value, TRUE),
-        '%value' => var_export($values[$widget], TRUE),
-      ]));
+      $this->assertSame($values[$widget], $expected_value, sprintf('Checkbox %s returns expected value (expected: %s, got: %s)', var_export($widget, TRUE), var_export($expected_value, TRUE), var_export($values[$widget], TRUE)));
     }
   }
 
@@ -474,7 +471,7 @@ class FormTest extends BrowserTestBase {
       'multiple_no_default_required' => ['three' => 'three'],
     ];
     foreach ($expected as $key => $value) {
-      $this->assertSame($value, $values[$key], new FormattableMarkup('@name: @actual is equal to @expected.', ['@name' => $key, '@actual' => var_export($values[$key], TRUE), '@expected' => var_export($value, TRUE)]));
+      $this->assertSame($value, $values[$key], sprintf('%s: %s is equal to %s.', $key, var_export($values[$key], TRUE), var_export($value, TRUE)));
     }
   }
 
@@ -497,15 +494,15 @@ class FormTest extends BrowserTestBase {
     $this->validateSelectSorting('unsorted', [
       'uso_first_element',
       'uso_second',
-      'uso_zzgroup',
+      'uso_zz_group',
       'uso_gc',
       'uso_ga',
       'uso_gb',
-      'uso_yygroup',
+      'uso_yy_group',
       'uso_ge',
       'uso_gd',
       'uso_gf',
-      'uso_xxgroup',
+      'uso_xx_group',
       'uso_gz',
       'uso_gi',
       'uso_gh',
@@ -522,15 +519,15 @@ class FormTest extends BrowserTestBase {
       'sso_b',
       'sso_c',
       'sso_second',
-      'sso_xxgroup',
+      'sso_xx_group',
       'sso_gz',
       'sso_gh',
       'sso_gi',
-      'sso_yygroup',
+      'sso_yy_group',
       'sso_ge',
       'sso_gd',
       'sso_gf',
-      'sso_zzgroup',
+      'sso_zz_group',
       'sso_ga',
       'sso_gb',
       'sso_gc',
@@ -540,7 +537,7 @@ class FormTest extends BrowserTestBase {
       'sno_empty',
       'sno_first_element',
       'sno_second',
-      'sno_zzgroup',
+      'sno_zz_group',
       'sno_ga',
       'sno_gb',
       'sno_gc',
@@ -548,17 +545,17 @@ class FormTest extends BrowserTestBase {
       'sno_d',
       'sno_b',
       'sno_c',
-      'sno_xxgroup',
+      'sno_xx_group',
       'sno_gz',
       'sno_gi',
       'sno_gh',
-      'sno_yygroup',
+      'sno_yy_group',
       'sno_ge',
       'sno_gd',
       'sno_gf',
     ]);
 
-    $this->validateSelectSorting('sorted_none_nostart', [
+    $this->validateSelectSorting('sorted_none_no_start', [
       'snn_empty',
       'snn_a',
       'snn_d',
@@ -566,15 +563,15 @@ class FormTest extends BrowserTestBase {
       'snn_b',
       'snn_c',
       'snn_second',
-      'snn_xxgroup',
+      'snn_xx_group',
       'snn_gz',
       'snn_gi',
       'snn_gh',
-      'snn_yygroup',
+      'snn_yy_group',
       'snn_ge',
       'snn_gd',
       'snn_gf',
-      'snn_zzgroup',
+      'snn_zz_group',
       'snn_ga',
       'snn_gb',
       'snn_gc',
@@ -774,7 +771,7 @@ class FormTest extends BrowserTestBase {
     // the disabled container.
     $actual_count = count($disabled_elements);
     $expected_count = 44;
-    $this->assertEquals($expected_count, $actual_count, new FormattableMarkup('Found @actual elements with disabled property (expected @expected).', ['@actual' => count($disabled_elements), '@expected' => $expected_count]));
+    $this->assertEquals($expected_count, $actual_count, sprintf('Found %s elements with disabled property (expected %s).', count($disabled_elements), $expected_count));
 
     // Mink does not "see" hidden elements, so we need to set the value of the
     // hidden element directly.
@@ -811,7 +808,7 @@ class FormTest extends BrowserTestBase {
           // Checkboxes values are not filtered out.
           $values[$key] = array_filter($values[$key]);
         }
-        $this->assertSame($expected_value, $values[$key], new FormattableMarkup('Default value for %type: expected %expected, returned %returned.', ['%type' => $key, '%expected' => var_export($expected_value, TRUE), '%returned' => var_export($values[$key], TRUE)]));
+        $this->assertSame($expected_value, $values[$key], sprintf('Default value for %s: expected %s, returned %s.', $key, var_export($expected_value, TRUE), var_export($values[$key], TRUE)));
       }
 
       // Recurse children.

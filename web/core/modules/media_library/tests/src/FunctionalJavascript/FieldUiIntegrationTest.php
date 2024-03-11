@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\media_library\FunctionalJavascript;
 
 /**
@@ -66,12 +68,12 @@ class FieldUiIntegrationTest extends MediaLibraryTestBase {
     $this->drupalLogin($user);
 
     $this->drupalGet('/admin/structure/types/manage/article/fields/add-field');
-    $page->selectFieldOption('new_storage_type', 'field_ui:entity_reference:media');
+    $page->find('css', "[name='new_storage_type'][value='field_ui:entity_reference:media']")->getParent()->click();
     $this->assertNotNull($assert_session->waitForField('label'));
     $page->fillField('label', 'Shatner');
     $this->waitForText('field_shatner');
-    $page->pressButton('Save and continue');
-    $page->pressButton('Save field settings');
+    $page->pressButton('Continue');
+    $this->assertMatchesRegularExpression('/.*article\/add-field\/node\/field_shatner.*/', $this->getUrl());
     $assert_session->pageTextNotContains('Undefined index: target_bundles');
     $this->waitForFieldExists('Type One')->check();
     $this->assertElementExistsAfterWait('css', '[name="settings[handler_settings][target_bundles][type_one]"][checked="checked"]');
@@ -89,7 +91,7 @@ class FieldUiIntegrationTest extends MediaLibraryTestBase {
       ->pressButton('Add media');
     $this->waitForText('Add or select media');
     $this->selectMediaItem(0);
-    $this->pressInsertSelected();
+    $this->pressInsertSelected('Added one media item.');
 
     $page->pressButton('Save settings');
     $assert_session->pageTextContains('Saved Shatner configuration.');

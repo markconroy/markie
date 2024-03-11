@@ -7,6 +7,7 @@ media.settings:
       label: 'Full URI to a folder where the media icons will be installed'
     iframe_domain:
       type: uri
+      nullable: true
       label: 'Domain from which to serve oEmbed content in an iframe'
     oembed_providers_url:
       type: uri
@@ -20,10 +21,15 @@ media.type.*:
   label: 'Media type'
   mapping:
     id:
-      type: string
+      type: machine_name
       label: 'Machine name'
+      constraints:
+        Length:
+          # Media type IDs are specifically limited to 32 characters.
+          # @see \Drupal\media\MediaTypeForm::form()
+          max: 32
     label:
-      type: label
+      type: required_label
       label: 'Name'
     description:
       type: text

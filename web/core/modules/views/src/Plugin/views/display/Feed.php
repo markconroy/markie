@@ -116,7 +116,45 @@ class Feed extends PathPluginBase implements ResponseDisplayPluginInterface {
     $cache_metadata = CacheableMetadata::createFromRenderArray($build);
     $response->addCacheableDependency($cache_metadata);
 
+    // Set the HTTP headers and status code on the response if any bubbled.
+    if (!empty($build['#attached']['http_header'])) {
+      static::setHeaders($response, $build['#attached']['http_header']);
+    }
+
     return $response;
+  }
+
+  /**
+   * Sets headers on a response object.
+   *
+   * @param \Drupal\Core\Cache\CacheableResponse $response
+   *   The HTML response to update.
+   * @param array $headers
+   *   The headers to set, as an array. The items in this array should be as
+   *   follows:
+   *   - The header name.
+   *   - The header value.
+   *   - (optional) Whether to replace a current value with the new one, or add
+   *     it to the others. If the value is not replaced, it will be appended,
+   *     resulting in a header like this: 'Header: value1,value2'.
+   *
+   * @see \Drupal\Core\Render\HtmlResponseAttachmentsProcessor::setHeaders()
+   */
+  protected static function setHeaders(CacheableResponse $response, array $headers): void {
+    foreach ($headers as $values) {
+      $name = $values[0];
+      $value = $values[1];
+      $replace = !empty($values[2]);
+
+      // Drupal treats the HTTP response status code like a header, even though
+      // it really is not.
+      if (strtolower($name) === 'status') {
+        $response->setStatusCode($value);
+      }
+      else {
+        $response->headers->set($name, $value, $replace);
+      }
+    }
   }
 
   /**
@@ -325,7 +363,7 @@ class Feed extends PathPluginBase implements ResponseDisplayPluginInterface {
   /**
    * {@inheritdoc}
    */
-  public function attachTo(ViewExecutable $clone, $display_id, array &$build) {
+  public function attachTo(ViewExecutable $view, $display_id, array &$build) {
     $displays = $this->getOption('displays');
     if (empty($displays[$display_id])) {
       return;
@@ -333,19 +371,15 @@ class Feed extends PathPluginBase implements ResponseDisplayPluginInterface {
 
     // Defer to the feed style; it may put in meta information, and/or
     // attach a feed icon.
-    $clone->setArguments($this->view->args);
-    $clone->setDisplay($this->display['id']);
-    $clone->buildTitle();
-    if ($plugin = $clone->display_handler->getPlugin('style')) {
-      $plugin->attachTo($build, $display_id, $clone->getUrl(), $clone->getTitle());
-      foreach ($clone->feedIcons as $feed_icon) {
+    $view->setArguments($this->view->args);
+    $view->setDisplay($this->display['id']);
+    $view->buildTitle();
+    if ($plugin = $view->display_handler->getPlugin('style')) {
+      $plugin->attachTo($build, $display_id, $view->getUrl(), $view->getTitle());
+      foreach ($view->feedIcons as $feed_icon) {
         $this->view->feedIcons[] = $feed_icon;
       }
     }
-
-    // Clean up.
-    $clone->destroy();
-    unset($clone);
   }
 
   /**

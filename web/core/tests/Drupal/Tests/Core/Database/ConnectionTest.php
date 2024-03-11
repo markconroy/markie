@@ -1,10 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\Core\Database;
 
 use Composer\Autoload\ClassLoader;
 use Drupal\Core\Database\Database;
 use Drupal\Core\Database\StatementPrefetch;
+use Drupal\Core\Database\StatementPrefetchIterator;
 use Drupal\Tests\Core\Database\Stub\StubConnection;
 use Drupal\Tests\Core\Database\Stub\StubPDO;
 use Drupal\Tests\UnitTestCase;
@@ -135,178 +138,178 @@ class ConnectionTest extends UnitTestCase {
         NULL,
         'Select',
       ],
-      // Tests with the corefake database driver. This driver has no custom
+      // Tests with the CoreFake database driver. This driver has no custom
       // driver classes.
       [
         'Drupal\Core\Database\Query\Condition',
-        'Drupal\corefake\Driver\Database\corefake',
+        'Drupal\CoreFake\Driver\Database\CoreFake',
         'Condition',
       ],
       [
         'Drupal\Core\Database\Query\Delete',
-        'Drupal\corefake\Driver\Database\corefake',
+        'Drupal\CoreFake\Driver\Database\CoreFake',
         'Delete',
       ],
       [
         'Drupal\Core\Database\ExceptionHandler',
-        'Drupal\corefake\Driver\Database\corefake',
+        'Drupal\CoreFake\Driver\Database\CoreFake',
         'ExceptionHandler',
       ],
       [
         'Drupal\Core\Database\Query\Insert',
-        'Drupal\corefake\Driver\Database\corefake',
+        'Drupal\CoreFake\Driver\Database\CoreFake',
         'Insert',
       ],
       [
         'Drupal\Core\Database\Query\Merge',
-        'Drupal\corefake\Driver\Database\corefake',
+        'Drupal\CoreFake\Driver\Database\CoreFake',
         'Merge',
       ],
       [
         'PagerSelectExtender',
-        'Drupal\corefake\Driver\Database\corefake',
+        'Drupal\CoreFake\Driver\Database\CoreFake',
         'PagerSelectExtender',
       ],
       [
         'Drupal\Core\Database\Schema',
-        'Drupal\corefake\Driver\Database\corefake',
+        'Drupal\CoreFake\Driver\Database\CoreFake',
         'Schema',
       ],
       [
         'SearchQuery',
-        'Drupal\corefake\Driver\Database\corefake',
+        'Drupal\CoreFake\Driver\Database\CoreFake',
         'SearchQuery',
       ],
       [
         'Drupal\Core\Database\Query\Select',
-        'Drupal\corefake\Driver\Database\corefake',
+        'Drupal\CoreFake\Driver\Database\CoreFake',
         'Select',
       ],
       [
         'Drupal\Core\Database\Transaction',
-        'Drupal\corefake\Driver\Database\corefake',
+        'Drupal\CoreFake\Driver\Database\CoreFake',
         'Transaction',
       ],
       [
         'TableSortExtender',
-        'Drupal\corefake\Driver\Database\corefake',
+        'Drupal\CoreFake\Driver\Database\CoreFake',
         'TableSortExtender',
       ],
       [
         'Drupal\Core\Database\Query\Truncate',
-        'Drupal\corefake\Driver\Database\corefake',
+        'Drupal\CoreFake\Driver\Database\CoreFake',
         'Truncate',
       ],
       [
         'Drupal\Core\Database\Query\Update',
-        'Drupal\corefake\Driver\Database\corefake',
+        'Drupal\CoreFake\Driver\Database\CoreFake',
         'Update',
       ],
       [
         'Drupal\Core\Database\Query\Upsert',
-        'Drupal\corefake\Driver\Database\corefake',
+        'Drupal\CoreFake\Driver\Database\CoreFake',
         'Upsert',
       ],
-      // Tests with the corefakeWithAllCustomClasses database driver. This
+      // Tests with the CoreFakeWithAllCustomClasses database driver. This
       // driver has custom driver classes for all classes.
       [
-        'Drupal\corefake\Driver\Database\corefakeWithAllCustomClasses\Condition',
-        'Drupal\corefake\Driver\Database\corefakeWithAllCustomClasses',
+        'Drupal\core_fake\Driver\Database\CoreFakeWithAllCustomClasses\Condition',
+        'Drupal\core_fake\Driver\Database\CoreFakeWithAllCustomClasses',
         'Condition',
       ],
       [
-        'Drupal\corefake\Driver\Database\corefakeWithAllCustomClasses\Delete',
-        'Drupal\corefake\Driver\Database\corefakeWithAllCustomClasses',
+        'Drupal\core_fake\Driver\Database\CoreFakeWithAllCustomClasses\Delete',
+        'Drupal\core_fake\Driver\Database\CoreFakeWithAllCustomClasses',
         'Delete',
       ],
       [
-        'Drupal\corefake\Driver\Database\corefakeWithAllCustomClasses\ExceptionHandler',
-        'Drupal\corefake\Driver\Database\corefakeWithAllCustomClasses',
+        'Drupal\core_fake\Driver\Database\CoreFakeWithAllCustomClasses\ExceptionHandler',
+        'Drupal\core_fake\Driver\Database\CoreFakeWithAllCustomClasses',
         'ExceptionHandler',
       ],
       [
-        'Drupal\corefake\Driver\Database\corefakeWithAllCustomClasses\Insert',
-        'Drupal\corefake\Driver\Database\corefakeWithAllCustomClasses',
+        'Drupal\core_fake\Driver\Database\CoreFakeWithAllCustomClasses\Insert',
+        'Drupal\core_fake\Driver\Database\CoreFakeWithAllCustomClasses',
         'Insert',
       ],
       [
-        'Drupal\corefake\Driver\Database\corefakeWithAllCustomClasses\Merge',
-        'Drupal\corefake\Driver\Database\corefakeWithAllCustomClasses',
+        'Drupal\core_fake\Driver\Database\CoreFakeWithAllCustomClasses\Merge',
+        'Drupal\core_fake\Driver\Database\CoreFakeWithAllCustomClasses',
         'Merge',
       ],
       [
-        'Drupal\corefake\Driver\Database\corefakeWithAllCustomClasses\PagerSelectExtender',
-        'Drupal\corefake\Driver\Database\corefakeWithAllCustomClasses',
+        'Drupal\core_fake\Driver\Database\CoreFakeWithAllCustomClasses\PagerSelectExtender',
+        'Drupal\core_fake\Driver\Database\CoreFakeWithAllCustomClasses',
         'PagerSelectExtender',
       ],
       [
-        'Drupal\corefake\Driver\Database\corefakeWithAllCustomClasses\Schema',
-        'Drupal\corefake\Driver\Database\corefakeWithAllCustomClasses',
+        'Drupal\core_fake\Driver\Database\CoreFakeWithAllCustomClasses\Schema',
+        'Drupal\core_fake\Driver\Database\CoreFakeWithAllCustomClasses',
         'Schema',
       ],
       [
-        'Drupal\corefake\Driver\Database\corefakeWithAllCustomClasses\SearchQuery',
-        'Drupal\corefake\Driver\Database\corefakeWithAllCustomClasses',
+        'Drupal\core_fake\Driver\Database\CoreFakeWithAllCustomClasses\SearchQuery',
+        'Drupal\core_fake\Driver\Database\CoreFakeWithAllCustomClasses',
         'SearchQuery',
       ],
       [
-        'Drupal\corefake\Driver\Database\corefakeWithAllCustomClasses\Select',
-        'Drupal\corefake\Driver\Database\corefakeWithAllCustomClasses',
+        'Drupal\core_fake\Driver\Database\CoreFakeWithAllCustomClasses\Select',
+        'Drupal\core_fake\Driver\Database\CoreFakeWithAllCustomClasses',
         'Select',
       ],
       [
-        'Drupal\corefake\Driver\Database\corefakeWithAllCustomClasses\TableSortExtender',
-        'Drupal\corefake\Driver\Database\corefakeWithAllCustomClasses',
+        'Drupal\core_fake\Driver\Database\CoreFakeWithAllCustomClasses\TableSortExtender',
+        'Drupal\core_fake\Driver\Database\CoreFakeWithAllCustomClasses',
         'TableSortExtender',
       ],
       [
-        'Drupal\corefake\Driver\Database\corefakeWithAllCustomClasses\Transaction',
-        'Drupal\corefake\Driver\Database\corefakeWithAllCustomClasses',
+        'Drupal\core_fake\Driver\Database\CoreFakeWithAllCustomClasses\Transaction',
+        'Drupal\core_fake\Driver\Database\CoreFakeWithAllCustomClasses',
         'Transaction',
       ],
       [
-        'Drupal\corefake\Driver\Database\corefakeWithAllCustomClasses\Truncate',
-        'Drupal\corefake\Driver\Database\corefakeWithAllCustomClasses',
+        'Drupal\core_fake\Driver\Database\CoreFakeWithAllCustomClasses\Truncate',
+        'Drupal\core_fake\Driver\Database\CoreFakeWithAllCustomClasses',
         'Truncate',
       ],
       [
-        'Drupal\corefake\Driver\Database\corefakeWithAllCustomClasses\Update',
-        'Drupal\corefake\Driver\Database\corefakeWithAllCustomClasses',
+        'Drupal\core_fake\Driver\Database\CoreFakeWithAllCustomClasses\Update',
+        'Drupal\core_fake\Driver\Database\CoreFakeWithAllCustomClasses',
         'Update',
       ],
       [
-        'Drupal\corefake\Driver\Database\corefakeWithAllCustomClasses\Upsert',
-        'Drupal\corefake\Driver\Database\corefakeWithAllCustomClasses',
+        'Drupal\core_fake\Driver\Database\CoreFakeWithAllCustomClasses\Upsert',
+        'Drupal\core_fake\Driver\Database\CoreFakeWithAllCustomClasses',
         'Upsert',
       ],
       [
         'Drupal\Core\Database\Query\PagerSelectExtender',
-        'Drupal\corefake\Driver\Database\corefakeWithAllCustomClasses',
+        'Drupal\core_fake\Driver\Database\CoreFakeWithAllCustomClasses',
         'Drupal\Core\Database\Query\PagerSelectExtender',
       ],
       [
         '\Drupal\Core\Database\Query\PagerSelectExtender',
-        'Drupal\corefake\Driver\Database\corefakeWithAllCustomClasses',
+        'Drupal\core_fake\Driver\Database\CoreFakeWithAllCustomClasses',
         '\Drupal\Core\Database\Query\PagerSelectExtender',
       ],
       [
         'Drupal\Core\Database\Query\TableSortExtender',
-        'Drupal\corefake\Driver\Database\corefakeWithAllCustomClasses',
+        'Drupal\core_fake\Driver\Database\CoreFakeWithAllCustomClasses',
         'Drupal\Core\Database\Query\TableSortExtender',
       ],
       [
         '\Drupal\Core\Database\Query\TableSortExtender',
-        'Drupal\corefake\Driver\Database\corefakeWithAllCustomClasses',
+        'Drupal\core_fake\Driver\Database\CoreFakeWithAllCustomClasses',
         '\Drupal\Core\Database\Query\TableSortExtender',
       ],
       [
         'Drupal\search\SearchQuery',
-        'Drupal\corefake\Driver\Database\corefakeWithAllCustomClasses',
+        'Drupal\core_fake\Driver\Database\CoreFakeWithAllCustomClasses',
         'Drupal\search\SearchQuery',
       ],
       [
         '\Drupal\search\SearchQuery',
-        'Drupal\corefake\Driver\Database\corefakeWithAllCustomClasses',
+        'Drupal\core_fake\Driver\Database\CoreFakeWithAllCustomClasses',
         '\Drupal\search\SearchQuery',
       ],
     ];
@@ -315,15 +318,31 @@ class ConnectionTest extends UnitTestCase {
   /**
    * @covers ::getDriverClass
    * @dataProvider providerGetDriverClass
+   * @group legacy
    */
   public function testGetDriverClass($expected, $namespace, $class) {
     $additional_class_loader = new ClassLoader();
-    $additional_class_loader->addPsr4("Drupal\\corefake\\Driver\\Database\\corefake\\", __DIR__ . "/../../../../../tests/fixtures/database_drivers/module/corefake/src/Driver/Database/corefake");
-    $additional_class_loader->addPsr4("Drupal\\corefake\\Driver\\Database\\corefakeWithAllCustomClasses\\", __DIR__ . "/../../../../../tests/fixtures/database_drivers/module/corefake/src/Driver/Database/corefakeWithAllCustomClasses");
+    $additional_class_loader->addPsr4("Drupal\\core_fake\\Driver\\Database\\CoreFake\\", __DIR__ . "/../../../../../tests/fixtures/database_drivers/module/core_fake/src/Driver/Database/CoreFake");
+    $additional_class_loader->addPsr4("Drupal\\core_fake\\Driver\\Database\\CoreFakeWithAllCustomClasses\\", __DIR__ . "/../../../../../tests/fixtures/database_drivers/module/core_fake/src/Driver/Database/CoreFakeWithAllCustomClasses");
     $additional_class_loader->register(TRUE);
 
     $mock_pdo = $this->createMock('Drupal\Tests\Core\Database\Stub\StubPDO');
     $connection = new StubConnection($mock_pdo, ['namespace' => $namespace]);
+    match($class) {
+      'Install\\Tasks',
+      'ExceptionHandler',
+      'Select',
+      'Insert',
+      'Merge',
+      'Upsert',
+      'Update',
+      'Delete',
+      'Truncate',
+      'Schema',
+      'Condition',
+      'Transaction' => $this->expectDeprecation('Calling Drupal\\Core\\Database\\Connection::getDriverClass() for \'' . $class . '\' is deprecated in drupal:10.2.0 and is removed from drupal:11.0.0. Use standard autoloading in the methods that return database operations. See https://www.drupal.org/node/3217534'),
+      default => NULL,
+    };
     $this->assertEquals($expected, $connection->getDriverClass($class));
   }
 
@@ -541,7 +560,7 @@ class ConnectionTest extends UnitTestCase {
     return [
       ['/name/', 'name', ['/', '/']],
       ['`backtick`', 'backtick', ['`', '`']],
-      ['testname', 'test.name', ['', '']],
+      ['anything', 'any.thing', ['', '']],
       ['"name"', 'name'],
       ['[name]', 'name', ['[', ']']],
     ];
@@ -660,7 +679,7 @@ class ConnectionTest extends UnitTestCase {
     $result = $connection->findCallerFromDebugBacktrace();
     $this->assertSame([
       'file' => __FILE__,
-      'line' => 660,
+      'line' => __LINE__ - 3,
       'function' => 'testFindCallerFromDebugBacktrace',
       'class' => 'Drupal\Tests\Core\Database\ConnectionTest',
       'type' => '->',
@@ -730,7 +749,7 @@ class ConnectionTest extends UnitTestCase {
         ],
       ],
       [
-        'file' => '/var/www/libraries/drudbal/lib/Statement.php',
+        'file' => '/var/www/libraries/test/lib/Statement.php',
         'line' => 264,
         'function' => 'log',
         'class' => 'Drupal\\Core\\Database\\Log',
@@ -741,7 +760,7 @@ class ConnectionTest extends UnitTestCase {
         ],
       ],
       [
-        'file' => '/var/www/libraries/drudbal/lib/Connection.php',
+        'file' => '/var/www/libraries/test/lib/Connection.php',
         'line' => 213,
         'function' => 'execute',
         'class' => 'Drupal\\Driver\\Database\\dbal\\Statement',
@@ -853,7 +872,7 @@ class ConnectionTest extends UnitTestCase {
         [
           'class' => 'Drupal\\Driver\\Database\\dbal\\Statement',
           'function' => 'execute',
-          'file' => '/var/www/libraries/drudbal/lib/Statement.php',
+          'file' => '/var/www/libraries/test/lib/Statement.php',
           'line' => 264,
           'type' => '->',
           'args' => [
@@ -888,6 +907,90 @@ class ConnectionTest extends UnitTestCase {
     $mockConnection = new StubConnection($mockPdo, []);
     $statement = new StatementPrefetch($mockPdo, $mockConnection, '');
     $this->assertInstanceOf(StatementPrefetch::class, $statement);
+  }
+
+  /**
+   * Provides data for testSupportedFetchModes.
+   *
+   * @return array
+   *   An associative array of simple arrays, each having the following
+   *   elements:
+   *   - a PDO fetch mode.
+   */
+  public static function providerSupportedFetchModes(): array {
+    return [
+      'FETCH_ASSOC' => [\PDO::FETCH_ASSOC],
+      'FETCH_CLASS' => [\PDO::FETCH_CLASS],
+      'FETCH_CLASS | FETCH_PROPS_LATE' => [\PDO::FETCH_CLASS | \PDO::FETCH_PROPS_LATE],
+      'FETCH_COLUMN' => [\PDO::FETCH_COLUMN],
+      'FETCH_NUM' => [\PDO::FETCH_NUM],
+      'FETCH_OBJ' => [\PDO::FETCH_OBJ],
+    ];
+  }
+
+  /**
+   * Tests supported fetch modes.
+   *
+   * @dataProvider providerSupportedFetchModes
+   */
+  public function testSupportedFetchModes(int $mode): void {
+    $mockPdo = $this->createMock(StubPDO::class);
+    $mockConnection = new StubConnection($mockPdo, []);
+    $statement = new StatementPrefetchIterator($mockPdo, $mockConnection, '');
+    $this->assertInstanceOf(StatementPrefetchIterator::class, $statement);
+    $statement->setFetchMode($mode);
+  }
+
+  /**
+   * Provides data for testDeprecatedFetchModes.
+   *
+   * @return array
+   *   An associative array of simple arrays, each having the following
+   *   elements:
+   *   - a PDO fetch mode.
+   */
+  public static function providerDeprecatedFetchModes(): array {
+    return [
+      'FETCH_DEFAULT' => [\PDO::FETCH_DEFAULT],
+      'FETCH_LAZY' => [\PDO::FETCH_LAZY],
+      'FETCH_BOTH' => [\PDO::FETCH_BOTH],
+      'FETCH_BOUND' => [\PDO::FETCH_BOUND],
+      'FETCH_INTO' => [\PDO::FETCH_INTO],
+      'FETCH_FUNC' => [\PDO::FETCH_FUNC],
+      'FETCH_NAMED' => [\PDO::FETCH_NAMED],
+      'FETCH_KEY_PAIR' => [\PDO::FETCH_KEY_PAIR],
+      'FETCH_CLASS | FETCH_CLASSTYPE' => [\PDO::FETCH_CLASS | \PDO::FETCH_CLASSTYPE],
+    ];
+  }
+
+  /**
+   * Tests deprecated fetch modes.
+   *
+   * @todo in drupal:11.0.0, do not remove this test but convert it to expect
+   *   exceptions instead of deprecations.
+   *
+   * @dataProvider providerDeprecatedFetchModes
+   *
+   * @group legacy
+   */
+  public function testDeprecatedFetchModes(int $mode): void {
+    $this->expectDeprecation('Fetch mode %A is deprecated in drupal:10.2.0 and is removed from drupal:11.0.0. Use supported modes only. See https://www.drupal.org/node/3377999');
+    $mockPdo = $this->createMock(StubPDO::class);
+    $mockConnection = new StubConnection($mockPdo, []);
+    $statement = new StatementPrefetchIterator($mockPdo, $mockConnection, '');
+    $this->assertInstanceOf(StatementPrefetchIterator::class, $statement);
+    $statement->setFetchMode($mode);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function tearDown(): void {
+    parent::tearDown();
+
+    // Removes the default connection added by the
+    // testFindCallerFromDebugBacktrace test.
+    Database::removeConnection('default');
   }
 
 }

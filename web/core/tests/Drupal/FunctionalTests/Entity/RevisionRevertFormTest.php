@@ -5,6 +5,7 @@ namespace Drupal\FunctionalTests\Entity;
 use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Entity\RevisionLogInterface;
 use Drupal\entity_test\Entity\EntityTestRev;
+use Drupal\entity_test\Entity\EntityTestRevPub;
 use Drupal\entity_test_revlog\Entity\EntityTestWithRevisionLog;
 use Drupal\Tests\BrowserTestBase;
 
@@ -12,6 +13,7 @@ use Drupal\Tests\BrowserTestBase;
  * Tests reverting a revision with revision revert form.
  *
  * @group Entity
+ * @group #slow
  * @coversDefaultClass \Drupal\Core\Entity\Form\RevisionRevertForm
  */
 class RevisionRevertFormTest extends BrowserTestBase {
@@ -51,6 +53,7 @@ class RevisionRevertFormTest extends BrowserTestBase {
    * @dataProvider providerPageTitle
    */
   public function testPageTitle(string $entityTypeId, string $expectedQuestion): void {
+    /** @var \Drupal\Core\Entity\RevisionableStorageInterface $storage */
     $storage = \Drupal::entityTypeManager()->getStorage($entityTypeId);
 
     $entity = $storage->create([
@@ -91,11 +94,11 @@ class RevisionRevertFormTest extends BrowserTestBase {
   }
 
   /**
-   * Test cannot revert latest revision.
+   * Test cannot revert latest default revision.
    *
    * @covers \Drupal\Core\Entity\EntityAccessControlHandler::checkAccess
    */
-  public function testAccessRevertLatest(): void {
+  public function testAccessRevertLatestDefault(): void {
     /** @var \Drupal\entity_test\Entity\EntityTestRev $entity */
     $entity = EntityTestRev::create();
     $entity->setName('revert');
@@ -106,6 +109,31 @@ class RevisionRevertFormTest extends BrowserTestBase {
 
     $this->drupalGet($entity->toUrl('revision-revert-form'));
     $this->assertSession()->statusCodeEquals(403);
+    $this->assertFalse($entity->access('revert', $this->rootUser, FALSE));
+  }
+
+  /**
+   * Ensures that forward revisions can be reverted.
+   *
+   * @covers \Drupal\Core\Entity\EntityAccessControlHandler::checkAccess
+   */
+  public function testAccessRevertLatestForwardRevision(): void {
+    /** @var \Drupal\entity_test\Entity\EntityTestRev $entity */
+    $entity = EntityTestRevPub::create();
+    $entity->setName('revert');
+    $entity->isDefaultRevision(TRUE);
+    $entity->setPublished();
+    $entity->setNewRevision();
+    $entity->save();
+
+    $entity->isDefaultRevision(FALSE);
+    $entity->setUnpublished();
+    $entity->setNewRevision();
+    $entity->save();
+
+    $this->drupalGet($entity->toUrl('revision-revert-form'));
+    $this->assertSession()->statusCodeEquals(200);
+    $this->assertTrue($entity->access('revert', $this->rootUser, FALSE));
   }
 
   /**
@@ -124,10 +152,12 @@ class RevisionRevertFormTest extends BrowserTestBase {
     $entity->save();
 
     // Reload the entity.
-    $revision = \Drupal::entityTypeManager()->getStorage('entity_test_rev')
-      ->loadRevision($revisionId);
+    /** @var \Drupal\Core\Entity\RevisionableStorageInterface $storage */
+    $storage = \Drupal::entityTypeManager()->getStorage('entity_test_rev');
+    $revision = $storage->loadRevision($revisionId);
     $this->drupalGet($revision->toUrl('revision-revert-form'));
     $this->assertSession()->statusCodeEquals(200);
+    $this->assertTrue($revision->access('revert', $this->rootUser, FALSE));
   }
 
   /**
@@ -154,6 +184,7 @@ class RevisionRevertFormTest extends BrowserTestBase {
     if (count($permissions) > 0) {
       $this->drupalLogin($this->createUser($permissions));
     }
+    /** @var \Drupal\Core\Entity\RevisionableStorageInterface $storage */
     $storage = \Drupal::entityTypeManager()->getStorage($entityTypeId);
 
     $entity = $storage->create([
@@ -276,6 +307,7 @@ class RevisionRevertFormTest extends BrowserTestBase {
     $count = $this->countRevisions($entity->getEntityTypeId());
 
     // Load the revision to be copied.
+    /** @var \Drupal\Core\Entity\RevisionableStorageInterface $storage */
     $storage = \Drupal::entityTypeManager()->getStorage($entity->getEntityTypeId());
     /** @var \Drupal\entity_test_revlog\Entity\EntityTestWithRevisionLog $targetRevision */
     $targetRevision = $storage->loadRevision($targetRevertRevisionId);

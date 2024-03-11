@@ -21,7 +21,7 @@ use Drupal\migrate\Row;
 use Drupal\user\EntityOwnerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
-// cspell:ignore validatable
+// cspell:ignore huhuu maailma sivun validatable
 
 /**
  * Provides destination class for all content entities lacking a specific class.
@@ -184,7 +184,7 @@ class EntityContentBase extends Entity implements HighestIdInterface, MigrateVal
    */
   public function isEntityValidationRequired(FieldableEntityInterface $entity) {
     // Prioritize the entity method over migration config because it won't be
-    // possible to save that entity unvalidated.
+    // possible to save that entity non validated.
     /* @see \Drupal\Core\Entity\ContentEntityBase::preSave() */
     return $entity->isValidationRequired() || !empty($this->configuration['validate']);
   }
@@ -233,6 +233,7 @@ class EntityContentBase extends Entity implements HighestIdInterface, MigrateVal
    *   An array containing the entity ID.
    */
   protected function save(ContentEntityInterface $entity, array $old_destination_id_values = []) {
+    $entity->setSyncing(TRUE);
     $entity->save();
     return [$entity->id()];
   }
@@ -265,15 +266,7 @@ class EntityContentBase extends Entity implements HighestIdInterface, MigrateVal
   }
 
   /**
-   * Updates an entity with the new values from row.
-   *
-   * @param \Drupal\Core\Entity\EntityInterface $entity
-   *   The entity to update.
-   * @param \Drupal\migrate\Row $row
-   *   The row object to update from.
-   *
-   * @return \Drupal\Core\Entity\EntityInterface
-   *   An updated entity from row values.
+   * {@inheritdoc}
    */
   protected function updateEntity(EntityInterface $entity, Row $row) {
     $empty_destinations = $row->getEmptyDestinationProperties();
@@ -324,10 +317,7 @@ class EntityContentBase extends Entity implements HighestIdInterface, MigrateVal
   }
 
   /**
-   * Populates as much of the stub row as possible.
-   *
-   * @param \Drupal\migrate\Row $row
-   *   The row of data.
+   * {@inheritdoc}
    */
   protected function processStubRow(Row $row) {
     $bundle_key = $this->getKey('bundle');
@@ -380,6 +370,7 @@ class EntityContentBase extends Entity implements HighestIdInterface, MigrateVal
               $translation = $entity->getTranslation($langcode);
               if (!$translation->isDefaultTranslation()) {
                 $entity->removeTranslation($langcode);
+                $entity->setSyncing(TRUE);
                 $entity->save();
               }
             }

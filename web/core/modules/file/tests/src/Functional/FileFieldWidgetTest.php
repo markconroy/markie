@@ -2,7 +2,6 @@
 
 namespace Drupal\Tests\file\Functional;
 
-use Drupal\Component\Render\FormattableMarkup;
 use Drupal\comment\Entity\Comment;
 use Drupal\comment\Tests\CommentTestTrait;
 use Drupal\Component\Serialization\Json;
@@ -19,6 +18,7 @@ use Drupal\user\UserInterface;
  * Tests the file field widget with public and private files.
  *
  * @group file
+ * @group #slow
  */
 class FileFieldWidgetTest extends FileFieldTestBase {
 
@@ -81,7 +81,7 @@ class FileFieldWidgetTest extends FileFieldTestBase {
   public function testSingleValuedWidget() {
     $node_storage = $this->container->get('entity_type.manager')->getStorage('node');
     $type_name = 'article';
-    $field_name = strtolower($this->randomMachineName());
+    $field_name = $this->randomMachineName();
     $this->createFileField($field_name, 'node', $type_name);
 
     $test_file = $this->getTestFile('text');
@@ -167,7 +167,7 @@ class FileFieldWidgetTest extends FileFieldTestBase {
         // Ensure we have the expected number of Remove buttons, and that they
         // are numbered sequentially.
         $buttons = $this->xpath('//input[@type="submit" and @value="Remove"]');
-        $this->assertCount($num_expected_remove_buttons, $buttons, new FormattableMarkup('There are %n "Remove" buttons displayed.', ['%n' => $num_expected_remove_buttons]));
+        $this->assertCount($num_expected_remove_buttons, $buttons, "There are $num_expected_remove_buttons \"Remove\" buttons displayed.");
         foreach ($buttons as $i => $button) {
           $key = $i >= $remaining ? $i - $remaining : $i;
           $check_field_name = $field_name2;
@@ -250,7 +250,7 @@ class FileFieldWidgetTest extends FileFieldTestBase {
     user_role_grant_permissions($this->adminUser->roles[0]->target_id, ['administer node fields']);
 
     $type_name = 'article';
-    $field_name = strtolower($this->randomMachineName());
+    $field_name = $this->randomMachineName();
     $this->createFileField($field_name, 'node', $type_name);
     $field = FieldConfig::loadByName('node', $type_name, $field_name);
     $field_id = $field->id();
@@ -258,9 +258,9 @@ class FileFieldWidgetTest extends FileFieldTestBase {
     $test_file = $this->getTestFile('text');
 
     // Change the field setting to make its files private, and upload a file.
-    $edit = ['settings[uri_scheme]' => 'private'];
-    $this->drupalGet("admin/structure/types/manage/{$type_name}/fields/{$field_id}/storage");
-    $this->submitForm($edit, 'Save field settings');
+    $edit = ['field_storage[subform][settings][uri_scheme]' => 'private'];
+    $this->drupalGet("admin/structure/types/manage/{$type_name}/fields/{$field_id}");
+    $this->submitForm($edit, 'Save');
     $nid = $this->uploadNodeFile($test_file, $field_name, $type_name);
     $node = $node_storage->loadUnchanged($nid);
     $node_file = File::load($node->{$field_name}->target_id);
@@ -272,13 +272,13 @@ class FileFieldWidgetTest extends FileFieldTestBase {
 
     // Ensure we can't change 'uri_scheme' field settings while there are some
     // entities with uploaded files.
-    $this->drupalGet("admin/structure/types/manage/$type_name/fields/$field_id/storage");
-    $this->assertSession()->fieldDisabled("edit-settings-uri-scheme-public");
+    $this->drupalGet("admin/structure/types/manage/$type_name/fields/$field_id");
+    $this->assertSession()->fieldDisabled("edit-field-storage-subform-settings-uri-scheme-public");
 
     // Delete node and confirm that setting could be changed.
     $node->delete();
-    $this->drupalGet("admin/structure/types/manage/$type_name/fields/$field_id/storage");
-    $this->assertSession()->fieldEnabled("edit-settings-uri-scheme-public");
+    $this->drupalGet("admin/structure/types/manage/$type_name/fields/$field_id");
+    $this->assertSession()->fieldEnabled("edit-field-storage-subform-settings-uri-scheme-public");
   }
 
   /**
@@ -299,7 +299,7 @@ class FileFieldWidgetTest extends FileFieldTestBase {
     // Create a new field.
     $this->addDefaultCommentField('node', 'article');
 
-    $name = strtolower($this->randomMachineName());
+    $name = $this->randomMachineName();
     $label = $this->randomMachineName();
     $storage_edit = ['settings[uri_scheme]' => 'private'];
     $this->fieldUIAddNewField('admin/structure/comment/manage/comment', $name, $label, 'file', $storage_edit);
@@ -362,7 +362,7 @@ class FileFieldWidgetTest extends FileFieldTestBase {
    */
   public function testWidgetValidation() {
     $type_name = 'article';
-    $field_name = strtolower($this->randomMachineName());
+    $field_name = $this->randomMachineName();
     $this->createFileField($field_name, 'node', $type_name);
     $this->updateFileField($field_name, $type_name, ['file_extensions' => 'txt']);
 
@@ -391,7 +391,7 @@ class FileFieldWidgetTest extends FileFieldTestBase {
    * Tests file widget element.
    */
   public function testWidgetElement() {
-    $field_name = mb_strtolower($this->randomMachineName());
+    $field_name = $this->randomMachineName();
     $html_name = str_replace('_', '-', $field_name);
     $this->createFileField($field_name, 'node', 'article', ['cardinality' => FieldStorageConfig::CARDINALITY_UNLIMITED]);
     $file = $this->getTestFile('text');
@@ -477,7 +477,7 @@ class FileFieldWidgetTest extends FileFieldTestBase {
     user_role_grant_permissions($this->adminUser->roles[0]->target_id, ['administer node fields']);
 
     $type_name = 'article';
-    $field_name = strtolower($this->randomMachineName());
+    $field_name = $this->randomMachineName();
     $this->createFileField($field_name, 'node', $type_name);
     /** @var \Drupal\Field\FieldConfigInterface $field */
     $field = FieldConfig::loadByName('node', $type_name, $field_name);
@@ -504,7 +504,7 @@ class FileFieldWidgetTest extends FileFieldTestBase {
     user_role_grant_permissions($this->adminUser->roles[0]->target_id, ['administer node fields']);
 
     $type_name = 'article';
-    $field_name = strtolower($this->randomMachineName());
+    $field_name = $this->randomMachineName();
     $this->createFileField($field_name, 'node', $type_name);
     $field = FieldConfig::loadByName('node', $type_name, $field_name);
     $field_id = $field->id();

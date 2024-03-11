@@ -67,7 +67,7 @@ class FieldDisplayTest extends KernelTestBase {
 
     $this->entityType = 'entity_test_rev';
     $this->bundle = $this->entityType;
-    $this->fieldName = mb_strtolower($this->randomMachineName());
+    $this->fieldName = $this->randomMachineName();
 
     $field_storage = FieldStorageConfig::create([
       'field_name' => $this->fieldName,
@@ -115,8 +115,8 @@ class FieldDisplayTest extends KernelTestBase {
 
     $build = $this->display->build($entity);
     $renderer = \Drupal::service('renderer');
-    $content = $renderer->renderPlain($build);
-    $this->setRawContent((string) $content);
+    $content = (string) $renderer->renderPlain($build);
+    $this->setRawContent($content);
 
     $css_selector_converter = new CssSelectorConverter();
     $elements = $this->xpath($css_selector_converter->toXPath('.visually-hidden'));

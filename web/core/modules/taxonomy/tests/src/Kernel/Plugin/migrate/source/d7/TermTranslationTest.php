@@ -2,6 +2,8 @@
 
 namespace Drupal\Tests\taxonomy\Kernel\Plugin\migrate\source\d7;
 
+// cspell:ignore tsid
+
 /**
  * Tests D7 i18n term localized source plugin.
  *
@@ -29,7 +31,6 @@ class TermTranslationTest extends TermTest {
         'name' => 'fr - name 1',
         'description' => 'desc 1',
         'weight' => 0,
-        'is_container' => FALSE,
         'language' => 'fr',
         'i18n_tsid' => '1',
       ],
@@ -39,7 +40,6 @@ class TermTranslationTest extends TermTest {
         'name' => 'name 2',
         'description' => 'desc 2',
         'weight' => 0,
-        'is_container' => TRUE,
         'language' => 'en',
         'i18n_tsid' => '1',
       ],
@@ -49,7 +49,6 @@ class TermTranslationTest extends TermTest {
         'name' => 'name 3',
         'description' => 'desc 3',
         'weight' => 0,
-        'is_container' => FALSE,
         'language' => '',
         'i18n_tsid' => '',
       ],
@@ -59,7 +58,6 @@ class TermTranslationTest extends TermTest {
         'name' => 'is - name 4',
         'description' => 'desc 4',
         'weight' => 1,
-        'is_container' => FALSE,
         'language' => 'is',
         'i18n_tsid' => '1',
       ],
@@ -69,7 +67,6 @@ class TermTranslationTest extends TermTest {
         'name' => 'name 5',
         'description' => 'desc 5',
         'weight' => 1,
-        'is_container' => FALSE,
         'language' => '',
         'i18n_tsid' => '',
       ],
@@ -79,7 +76,6 @@ class TermTranslationTest extends TermTest {
         'name' => 'name 6',
         'description' => 'desc 6',
         'weight' => 0,
-        'is_container' => TRUE,
         'language' => '',
         'i18n_tsid' => '',
       ],
@@ -89,7 +85,6 @@ class TermTranslationTest extends TermTest {
         'name' => 'is - captains',
         'description' => 'desc 7',
         'weight' => 0,
-        'is_container' => TRUE,
         'language' => 'is',
         'i18n_tsid' => '',
       ],
@@ -275,7 +270,6 @@ class TermTranslationTest extends TermTest {
         'name' => 'fr - name 1',
         'description' => 'desc 1',
         'weight' => 0,
-        'is_container' => '',
         'language' => 'fr',
         'i18n_tsid' => '1',
         'machine_name' => 'tags',
@@ -289,7 +283,6 @@ class TermTranslationTest extends TermTest {
         'name' => 'name 2',
         'description' => 'desc 2',
         'weight' => 0,
-        'is_container' => '',
         'language' => 'en',
         'i18n_tsid' => '1',
         'machine_name' => 'tags',
@@ -303,7 +296,6 @@ class TermTranslationTest extends TermTest {
         'name' => 'is - name 4',
         'description' => 'desc 4',
         'weight' => 1,
-        'is_container' => '',
         'language' => 'is',
         'i18n_tsid' => '1',
         'machine_name' => 'tags',
@@ -334,7 +326,6 @@ class TermTranslationTest extends TermTest {
       'name' => 'is - captains',
       'description' => 'desc 7',
       'weight' => 0,
-      'is_container' => '',
       'language' => 'is',
       'i18n_tsid' => '',
       'machine_name' => 'categories',

@@ -7,6 +7,9 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Component\Utility\Html;
 use Drupal\filter\FilterProcessResult;
 use Drupal\filter\Plugin\FilterBase;
+use Masterminds\HTML5\Parser\DOMTreeBuilder;
+use Masterminds\HTML5\Parser\Scanner;
+use Masterminds\HTML5\Parser\Tokenizer;
 
 /**
  * Provides a filter to limit allowed HTML tags.
@@ -250,22 +253,30 @@ class FilterHtml extends FilterBase {
     // Parse the allowed HTML setting, and gradually make the list of allowed
     // tags more specific.
     $restrictions = ['allowed' => []];
+    $html = $this->settings['allowed_html'];
 
-    // Make all the tags self-closing, so they will be parsed into direct
-    // children of the body tag in the DomDocument.
-    $html = str_replace('>', ' />', $this->settings['allowed_html']);
     // Protect any trailing * characters in attribute names, since DomDocument
     // strips them as invalid.
     // cSpell:disable-next-line
     $star_protector = '__zqh6vxfbk3cg__';
     $html = str_replace('*', $star_protector, $html);
-    $body_child_nodes = Html::load($html)->getElementsByTagName('body')->item(0)->childNodes;
 
-    foreach ($body_child_nodes as $node) {
-      if ($node->nodeType !== XML_ELEMENT_NODE) {
-        // Skip the empty text nodes inside tags.
-        continue;
+    // Use HTML5 parser with a custom tokenizer to correctly parse tags that
+    // normally use text mode, such as iframe.
+    $events = new DOMTreeBuilder(FALSE, ['disable_html_ns' => TRUE]);
+    $scanner = new Scanner('<body>' . $html);
+    $parser = new class($scanner, $events) extends Tokenizer {
+
+      public function setTextMode($textMode, $untilTag = NULL) {
+        // Do nothing, we never enter text mode.
       }
+
+    };
+    $parser->parse();
+
+    $dom = $events->document();
+    $xpath = new \DOMXPath($dom);
+    foreach ($xpath->query('//body//*') as $node) {
       $tag = $node->tagName;
 
       // All attributes are already allowed on this tag, this is the most

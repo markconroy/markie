@@ -10,6 +10,7 @@ use Drupal\Tests\jsonapi\Kernel\JsonapiKernelTestBase;
 /**
  * @coversDefaultClass \Drupal\jsonapi\ResourceType\ResourceTypeRepository
  * @group jsonapi
+ * @group #slow
  *
  * @internal
  */
@@ -19,6 +20,7 @@ class ResourceTypeRepositoryTest extends JsonapiKernelTestBase {
    * {@inheritdoc}
    */
   protected static $modules = [
+    'file',
     'field',
     'node',
     'serialization',
@@ -43,17 +45,19 @@ class ResourceTypeRepositoryTest extends JsonapiKernelTestBase {
     $this->installEntitySchema('node');
     $this->installEntitySchema('user');
     // Add the additional table schemas.
-    $this->installSchema('system', ['sequences']);
     $this->installSchema('node', ['node_access']);
     $this->installSchema('user', ['users_data']);
     NodeType::create([
       'type' => 'article',
+      'name' => 'Article',
     ])->save();
     NodeType::create([
       'type' => 'page',
+      'name' => 'Page',
     ])->save();
     NodeType::create([
       'type' => '42',
+      'name' => '42',
     ])->save();
 
     $this->resourceTypeRepository = $this->container->get('jsonapi.resource_type.repository');
@@ -109,7 +113,10 @@ class ResourceTypeRepositoryTest extends JsonapiKernelTestBase {
     $this->assertEmpty($this->resourceTypeRepository->get('node', 'article')->getRelatableResourceTypesByField('field_relationship'));
     $this->createEntityReferenceField('node', 'article', 'field_relationship', 'Related entity', 'node');
     $this->assertCount(3, $this->resourceTypeRepository->get('node', 'article')->getRelatableResourceTypesByField('field_relationship'));
-    NodeType::create(['type' => 'camelids'])->save();
+    NodeType::create([
+      'type' => 'camelids',
+      'name' => 'Camelids',
+    ])->save();
     $this->assertCount(4, $this->resourceTypeRepository->get('node', 'article')->getRelatableResourceTypesByField('field_relationship'));
   }
 
@@ -126,7 +133,7 @@ class ResourceTypeRepositoryTest extends JsonapiKernelTestBase {
     $reflection_method = $reflection_class->getMethod('getFields');
 
     $this->expectException(\LogicException::class);
-    $this->expectExceptionMessage("The generated alias '{$field_name_list[1]}' for field name '{$field_name_list[0]}' conflicts with an existing field. Please report this in the JSON:API issue queue!");
+    $this->expectExceptionMessage("The generated alias '{$field_name_list[1]}' for field name '{$field_name_list[0]}' conflicts with an existing field. Report this in the JSON:API issue queue!");
     $reflection_method->invokeArgs($this->resourceTypeRepository, [$field_name_list, $entity_type, $bundle]);
   }
 

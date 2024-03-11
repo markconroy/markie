@@ -7,7 +7,8 @@ use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\StreamWrapper\PublicStream;
 use Drupal\file\Entity\File;
 use Drupal\Tests\BrowserTestBase;
-use Drupal\Component\Render\FormattableMarkup;
+
+// cspell:ignore februar januar juni marz
 
 /**
  * Base class for testing updates to string translations.
@@ -92,7 +93,7 @@ abstract class LocaleUpdateBase extends BrowserTestBase {
     $this->drupalGet('admin/config/regional/language/add');
     $this->submitForm($edit, 'Add language');
     $this->container->get('language_manager')->reset();
-    $this->assertNotEmpty(\Drupal::languageManager()->getLanguage($langcode), new FormattableMarkup('Language %langcode added.', ['%langcode' => $langcode]));
+    $this->assertNotEmpty(\Drupal::languageManager()->getLanguage($langcode), "Language $langcode added.");
   }
 
   /**
@@ -133,10 +134,11 @@ EOF;
     }
 
     \Drupal::service('file_system')->prepareDirectory($path, FileSystemInterface::CREATE_DIRECTORY);
+    $fileUri = $path . '/' . $filename;
     $file = File::create([
       'uid' => 1,
       'filename' => $filename,
-      'uri' => $path . '/' . $filename,
+      'uri' => $fileUri,
       'filemime' => 'text/x-gettext-translation',
       'timestamp' => $timestamp,
     ]);
@@ -144,6 +146,9 @@ EOF;
     file_put_contents($file->getFileUri(), $po_header . $text);
     touch(\Drupal::service('file_system')->realpath($file->getFileUri()), $timestamp);
     $file->save();
+
+    $this->assertTrue(file_exists($fileUri));
+    $this->assertEquals($timestamp, filemtime($fileUri));
   }
 
   /**
@@ -309,7 +314,7 @@ EOF;
       ->execute()
       ->fetchField();
     $db_translation = $db_translation == FALSE ? '' : $db_translation;
-    $this->assertEquals($translation, $db_translation, $message ? $message : new FormattableMarkup('Correct translation of %source (%language)', ['%source' => $source, '%language' => $langcode]));
+    $this->assertEquals($translation, $db_translation, $message ?: "Correct translation of $source ($langcode)");
   }
 
 }

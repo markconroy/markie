@@ -39,7 +39,7 @@ system.site:
       type: integer
       label: 'Weight element maximum value'
     default_langcode:
-      type: string
+      type: langcode
       label: 'Site default language code'
     mail_notification:
       type: string
@@ -183,6 +183,7 @@ system.performance:
     stale_file_threshold:
       type: integer
       label: 'Stale file threshold'
+      deprecated: 'The system.performance.stale_file_threshold config key is deprecated in drupal:10.2.0 and is removed from drupal:11.0.0. See https://www.drupal.org/node/3301744'
 
 system.rss:
   type: config_object
@@ -212,10 +213,19 @@ system.menu.*:
   label: 'Menu'
   mapping:
     id:
-      type: string
+      type: machine_name
       label: 'ID'
+      # Menu IDs are specifically limited to 32 characters, and allow dashes but not
+      # underscores.
+      # @see \Drupal\menu_ui\MenuForm::form()
+      constraints:
+        Regex:
+          pattern: '/^[a-z0-9-]+$/'
+          message: "The %value machine name is not valid."
+        Length:
+          max: 32
     label:
-      type: label
+      type: required_label
       label: 'Label'
     description:
       type: label
@@ -229,10 +239,16 @@ system.action.*:
   label: 'System action'
   mapping:
     id:
-      type: string
+      type: machine_name
       label: 'ID'
+      constraints:
+        # Action IDs also allow periods.
+        # @see user_user_role_insert()
+        Regex:
+          pattern: '/^[a-z0-9_\.]+$/'
+          message: "The %value machine name is not valid."
     label:
-      type: label
+      type: required_label
       label: 'Label'
     type:
       type: string
@@ -258,6 +274,7 @@ system.file:
       label: 'Path settings'
       mapping:
         temporary:
+          deprecated: "The 'system.file:path.temporary' config property path is deprecated in drupal:8.8.0 and is removed from drupal 11.0.0. Use settings.php instead. See https://www.drupal.org/node/3039255."
           type: string
           label: 'Temporary directory'
     temporary_maximum_age:
@@ -290,6 +307,46 @@ system.mail:
       sequence:
         type: string
         label: 'Interface'
+    mailer_dsn:
+      type: mapping
+      label: 'Symfony mailer transport DSN'
+      mapping:
+        scheme:
+          type: string
+          label: 'Scheme'
+          constraints:
+            NotBlank:
+              message: 'The mailer DSN must contain a scheme.'
+        host:
+          type: string
+          label: 'Host'
+          constraints:
+            NotBlank:
+              message: 'The mailer DSN must contain a host (use "default" by default).'
+        user:
+          type: string
+          nullable: true
+          label: 'User'
+        password:
+          type: string
+          nullable: true
+          label: 'Password'
+        port:
+          type: integer
+          nullable: true
+          label: 'Port'
+          constraints:
+            Range:
+              min: 0
+              max: 65535
+        options:
+          type: sequence
+          label: 'Options'
+          sequence:
+            type: string
+            label: Option
+            constraints:
+              NotNull: []
 
 system.theme.global:
   type: theme_settings
@@ -350,6 +407,14 @@ condition.plugin.request_path:
   mapping:
     pages:
       type: string
+
+condition.plugin.response_status:
+  type: condition.plugin
+  mapping:
+    status_codes:
+      type: sequence
+      sequence:
+        type: integer
 
 system.feature_flags:
   type: config_object

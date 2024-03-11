@@ -1,12 +1,6 @@
 <?php
 
-/**
- * @file
- * Contains \Drush\Psysh\DrushCommand.
- *
- * DrushCommand is a PsySH proxy command which accepts a Drush command config
- * array and tries to build an appropriate PsySH command for it.
- */
+declare(strict_types=1);
 
 namespace Drush\Psysh;
 
@@ -19,7 +13,8 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
- * Main Drush command.
+ * DrushCommand is a PsySH proxy command which accepts a Drush command config
+ * array and tries to build an appropriate PsySH command for it.
  */
 class DrushCommand extends BaseCommand
 {
@@ -65,14 +60,14 @@ class DrushCommand extends BaseCommand
     /**
      * {@inheritdoc}
      */
-    protected function execute(InputInterface $input, OutputInterface $output): void
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $args = $input->getArguments();
         $first = array_shift($args);
 
         // If the first argument is an alias, assign the next argument as the
         // command.
-        if (strpos($first, '@') === 0) {
+        if (str_starts_with($first, '@')) {
             $alias = $first;
             $command = array_shift($args);
         } else {
@@ -93,6 +88,8 @@ class DrushCommand extends BaseCommand
         } else {
             $output->page($process->getOutput());
         }
+
+        return $process->getExitCode();
     }
 
     /**
@@ -111,7 +108,7 @@ class DrushCommand extends BaseCommand
         if ($this->command instanceof AnnotatedCommand) {
             foreach ($this->command->getExampleUsages() as $ex => $def) {
                 // Skip empty examples and things with obvious pipes...
-                if (($ex === '') || (strpos($ex, '|') !== false)) {
+                if (($ex === '') || (str_contains($ex, '|'))) {
                     continue;
                 }
 

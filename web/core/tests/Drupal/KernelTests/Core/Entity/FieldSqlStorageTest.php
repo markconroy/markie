@@ -80,7 +80,7 @@ class FieldSqlStorageTest extends EntityKernelTestBase {
     $this->installEntitySchema('entity_test_rev');
     $entity_type = 'entity_test_rev';
 
-    $this->fieldName = strtolower($this->randomMachineName());
+    $this->fieldName = $this->randomMachineName();
     $this->fieldCardinality = 4;
     $this->fieldStorage = FieldStorageConfig::create([
       'field_name' => $this->fieldName,
@@ -107,6 +107,7 @@ class FieldSqlStorageTest extends EntityKernelTestBase {
    */
   public function testFieldLoad() {
     $entity_type = $bundle = 'entity_test_rev';
+    /** @var \Drupal\Core\Entity\RevisionableStorageInterface $storage */
     $storage = $this->container->get('entity_type.manager')->getStorage($entity_type);
 
     $columns = ['bundle', 'deleted', 'entity_id', 'revision_id', 'delta', 'langcode', $this->tableMapping->getFieldColumnName($this->fieldStorage, 'value')];
@@ -283,7 +284,7 @@ class FieldSqlStorageTest extends EntityKernelTestBase {
     $storage = $this->container->get('entity_type.manager')->getStorage($entity_type);
 
     // Create two fields and generate random values.
-    $name_base = mb_strtolower($this->randomMachineName(FieldStorageConfig::NAME_MAX_LENGTH - 1));
+    $name_base = $this->randomMachineName(FieldStorageConfig::NAME_MAX_LENGTH - 1);
     $field_names = [];
     $values = [];
     for ($i = 0; $i < 2; $i++) {
@@ -391,7 +392,7 @@ class FieldSqlStorageTest extends EntityKernelTestBase {
    */
   public function testFieldUpdateIndexesWithData() {
     // Create a decimal field.
-    $field_name = 'testfield';
+    $field_name = 'test_field';
     $entity_type = 'entity_test_rev';
     $field_storage = FieldStorageConfig::create([
       'field_name' => $field_name,
@@ -449,7 +450,7 @@ class FieldSqlStorageTest extends EntityKernelTestBase {
   public function testFieldSqlStorageForeignKeys() {
     // Create a 'shape' field, with a configurable foreign key (see
     // field_test_field_schema()).
-    $field_name = 'testfield';
+    $field_name = 'test_field';
     $foreign_key_name = 'shape';
     $field_storage = FieldStorageConfig::create([
       'field_name' => $field_name,
@@ -512,29 +513,29 @@ class FieldSqlStorageTest extends EntityKernelTestBase {
     $this->assertEquals($expected, $this->tableMapping->getDedicatedRevisionTableName($field_storage));
 
     // Long entity type, short field name
-    $entity_type = 'long_entity_type_abcdefghijklmnopqrstuvwxyz';
+    $entity_type = 'long_entity_type_all_forty_three_characters';
     $field_name = 'short_field_name';
     $field_storage = FieldStorageConfig::create([
       'entity_type' => $entity_type,
       'field_name' => $field_name,
       'type' => 'test_field',
     ]);
-    $expected = 'long_entity_type_abcdefghijklmno__' . substr(hash('sha256', $field_storage->uuid()), 0, 10);
+    $expected = 'long_entity_type_all_forty_three__' . substr(hash('sha256', $field_storage->uuid()), 0, 10);
     $this->assertEquals($expected, $this->tableMapping->getDedicatedDataTableName($field_storage));
-    $expected = 'long_entity_type_abcdefghijklmno_r__' . substr(hash('sha256', $field_storage->uuid()), 0, 10);
+    $expected = 'long_entity_type_all_forty_three_r__' . substr(hash('sha256', $field_storage->uuid()), 0, 10);
     $this->assertEquals($expected, $this->tableMapping->getDedicatedRevisionTableName($field_storage));
 
     // Long entity type and field name.
-    $entity_type = 'long_entity_type_abcdefghijklmnopqrstuvwxyz';
-    $field_name = 'long_field_name_abcdefghijklmnopqrstuvwxyz';
+    $entity_type = 'long_entity_type_all_forty_three_characters';
+    $field_name = 'long_field_name_using_forty_two_characters';
     $field_storage = FieldStorageConfig::create([
       'entity_type' => $entity_type,
       'field_name' => $field_name,
       'type' => 'test_field',
     ]);
-    $expected = 'long_entity_type_abcdefghijklmno__' . substr(hash('sha256', $field_storage->uuid()), 0, 10);
+    $expected = 'long_entity_type_all_forty_three__' . substr(hash('sha256', $field_storage->uuid()), 0, 10);
     $this->assertEquals($expected, $this->tableMapping->getDedicatedDataTableName($field_storage));
-    $expected = 'long_entity_type_abcdefghijklmno_r__' . substr(hash('sha256', $field_storage->uuid()), 0, 10);
+    $expected = 'long_entity_type_all_forty_three_r__' . substr(hash('sha256', $field_storage->uuid()), 0, 10);
     $this->assertEquals($expected, $this->tableMapping->getDedicatedRevisionTableName($field_storage));
     // Try creating a second field and check there are no clashes.
     $field_storage2 = FieldStorageConfig::create([

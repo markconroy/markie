@@ -5,6 +5,9 @@ namespace Drupal\Core\Field;
 use Drupal\Component\Utility\Html;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Component\Utility\SortArray;
+use Drupal\Core\Ajax\AjaxResponse;
+use Drupal\Core\Ajax\FocusFirstCommand;
+use Drupal\Core\Ajax\InsertCommand;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Render\Element;
@@ -68,12 +71,18 @@ abstract class WidgetBase extends PluginSettingsBase implements WidgetInterface,
     $field_name = $this->fieldDefinition->getName();
     $parents = $form['#parents'];
 
-    // Store field information in $form_state.
-    if (!static::getWidgetState($parents, $field_name, $form_state)) {
+    if (!$field_state = static::getWidgetState($parents, $field_name, $form_state)) {
       $field_state = [
         'items_count' => count($items),
         'array_parents' => [],
       ];
+      static::setWidgetState($parents, $field_name, $form_state, $field_state);
+    }
+
+    // Remove deleted items from the field item list.
+    if (isset($field_state['deleted_item']) && $items->get($field_state['deleted_item'])) {
+      $items->removeItem($field_state['deleted_item']);
+      unset($field_state['deleted_item']);
       static::setWidgetState($parents, $field_name, $form_state, $field_state);
     }
 
@@ -160,6 +169,8 @@ abstract class WidgetBase extends PluginSettingsBase implements WidgetInterface,
   protected function formMultipleElements(FieldItemListInterface $items, array &$form, FormStateInterface $form_state) {
     $field_name = $this->fieldDefinition->getName();
     $cardinality = $this->fieldDefinition->getFieldStorageDefinition()->getCardinality();
+    $is_multiple = $this->fieldDefinition->getFieldStorageDefinition()->isMultiple();
+    $is_unlimited_not_programmed = FALSE;
     $parents = $form['#parents'];
 
     // Determine the number of widgets to display.
@@ -167,17 +178,18 @@ abstract class WidgetBase extends PluginSettingsBase implements WidgetInterface,
       case FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED:
         $field_state = static::getWidgetState($parents, $field_name, $form_state);
         $max = $field_state['items_count'];
-        $is_multiple = TRUE;
+        $is_unlimited_not_programmed = !$form_state->isProgrammed();
         break;
 
       default:
         $max = $cardinality - 1;
-        $is_multiple = ($cardinality > 1);
         break;
     }
 
     $title = $this->fieldDefinition->getLabel();
     $description = $this->getFilteredDescription();
+    $id_prefix = implode('-', array_merge($parents, [$field_name]));
+    $wrapper_id = Html::getUniqueId($id_prefix . '-add-more-wrapper');
 
     $elements = [];
 
@@ -220,6 +232,29 @@ abstract class WidgetBase extends PluginSettingsBase implements WidgetInterface,
             '#default_value' => $items[$delta]->_weight ?: $delta,
             '#weight' => 100,
           ];
+
+          // Add 'remove' button, if not working with a programmed form.
+          if ($is_unlimited_not_programmed) {
+            $remove_button = [
+              '#delta' => $delta,
+              '#name' => str_replace('-', '_', $id_prefix) . "_{$delta}_remove_button",
+              '#type' => 'submit',
+              '#value' => $this->t('Remove'),
+              '#validate' => [],
+              '#submit' => [[static::class, 'deleteSubmit']],
+              '#limit_validation_errors' => [],
+              '#ajax' => [
+                'callback' => [static::class, 'deleteAjax'],
+                'wrapper' => $wrapper_id,
+                'effect' => 'fade',
+              ],
+            ];
+
+            $element['_actions'] = [
+              'delete' => $remove_button,
+              '#weight' => 101,
+            ];
+          }
         }
 
         $elements[$delta] = $element;
@@ -231,7 +266,7 @@ abstract class WidgetBase extends PluginSettingsBase implements WidgetInterface,
         '#theme' => 'field_multiple_value_form',
         '#field_name' => $field_name,
         '#cardinality' => $cardinality,
-        '#cardinality_multiple' => $this->fieldDefinition->getFieldStorageDefinition()->isMultiple(),
+        '#cardinality_multiple' => $is_multiple,
         '#required' => $this->fieldDefinition->isRequired(),
         '#title' => $title,
         '#description' => $description,
@@ -239,9 +274,7 @@ abstract class WidgetBase extends PluginSettingsBase implements WidgetInterface,
       ];
 
       // Add 'add more' button, if not working with a programmed form.
-      if ($cardinality == FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED && !$form_state->isProgrammed()) {
-        $id_prefix = implode('-', array_merge($parents, [$field_name]));
-        $wrapper_id = Html::getUniqueId($id_prefix . '-add-more-wrapper');
+      if ($is_unlimited_not_programmed) {
         $elements['#prefix'] = '<div id="' . $wrapper_id . '">';
         $elements['#suffix'] = '</div>';
 
@@ -250,7 +283,7 @@ abstract class WidgetBase extends PluginSettingsBase implements WidgetInterface,
           '#name' => strtr($id_prefix, '-', '_') . '_add_more',
           '#value' => t('Add another item'),
           '#attributes' => ['class' => ['field-add-more-submit']],
-          '#limit_validation_errors' => [array_merge($parents, [$field_name])],
+          '#limit_validation_errors' => [],
           '#submit' => [[static::class, 'addMoreSubmit']],
           '#ajax' => [
             'callback' => [static::class, 'addMoreAjax'],
@@ -319,10 +352,96 @@ abstract class WidgetBase extends PluginSettingsBase implements WidgetInterface,
 
     // Add a DIV around the delta receiving the Ajax effect.
     $delta = $element['#max_delta'];
-    $element[$delta]['#prefix'] = '<div class="ajax-new-content">' . ($element[$delta]['#prefix'] ?? '');
+    // Construct an attribute to add to div for use as selector to set the focus on.
+    $button_parent = NestedArray::getValue($form, array_slice($button['#array_parents'], 0, -1));
+    $focus_attribute = 'data-drupal-selector="field-' . $button_parent['#field_name'] . '-more-focus-target"';
+    $element[$delta]['#prefix'] = '<div class="ajax-new-content" ' . $focus_attribute . '>' . ($element[$delta]['#prefix'] ?? '');
     $element[$delta]['#suffix'] = ($element[$delta]['#suffix'] ?? '') . '</div>';
 
-    return $element;
+    // Turn render array into response with AJAX commands.
+    $response = new AjaxResponse();
+    $response->addCommand(new InsertCommand(NULL, $element));
+    // Add command to set the focus on first focusable element within the div.
+    $response->addCommand(new FocusFirstCommand("[$focus_attribute]"));
+    return $response;
+  }
+
+  /**
+   * Ajax submit callback for the "Remove" button.
+   *
+   * This re-numbers form elements and removes an item.
+   *
+   * @param array $form
+   *   The form array to remove elements from.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The current state of the form.
+   */
+  public static function deleteSubmit(&$form, FormStateInterface $form_state) {
+    $button = $form_state->getTriggeringElement();
+    $delta = (int) $button['#delta'];
+    $array_parents = array_slice($button['#array_parents'], 0, -4);
+    $parent_element = NestedArray::getValue($form, array_merge($array_parents, ['widget']));
+    $field_name = $parent_element['#field_name'];
+    $parents = $parent_element['#field_parents'];
+    $field_state = static::getWidgetState($parents, $field_name, $form_state);
+    $user_input = $form_state->getUserInput();
+    $field_input = NestedArray::getValue($user_input, $parent_element['#parents'], $exists);
+    if ($exists) {
+      $field_values = [];
+      foreach ($field_input as $key => $input) {
+        if (is_numeric($key) && $key >= $delta) {
+          if ((int) $key === $delta) {
+            --$key;
+            continue;
+          }
+        }
+        $field_values[$key] = $input;
+      }
+      NestedArray::setValue($user_input, $parent_element['#parents'], $field_values);
+      $form_state->setUserInput($user_input);
+    }
+
+    $field_state['deleted_item'] = $delta;
+
+    unset($parent_element[$delta]);
+    NestedArray::setValue($form, $array_parents, $parent_element);
+
+    if ($field_state['items_count'] > 0) {
+      $field_state['items_count']--;
+    }
+
+    $user_input = $form_state->getUserInput();
+    $input = NestedArray::getValue($user_input, $parent_element['#parents'], $exists);
+    $weight = -1 * $field_state['items_count'];
+    foreach ($input as $key => $item) {
+      if ($item) {
+        $input[$key]['_weight'] = $weight++;
+      }
+    }
+    // Reset indices.
+    $input = array_values($input);
+
+    $user_input = $form_state->getUserInput();
+    NestedArray::setValue($user_input, $parent_element['#parents'], $input);
+    $form_state->setUserInput($user_input);
+    static::setWidgetState($parents, $field_name, $form_state, $field_state);
+    $form_state->setRebuild();
+  }
+
+  /**
+   * Ajax refresh callback for the "Remove" button.
+   *
+   * This returns the new widget element content to replace
+   * the previous content made obsolete by the form submission.
+   *
+   * @param array $form
+   *   The form array to remove elements from.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The current state of the form.
+   */
+  public static function deleteAjax(array &$form, FormStateInterface $form_state) {
+    $button = $form_state->getTriggeringElement();
+    return NestedArray::getValue($form, array_slice($button['#array_parents'], 0, -3));
   }
 
   /**
@@ -393,7 +512,7 @@ abstract class WidgetBase extends PluginSettingsBase implements WidgetInterface,
       $field_state = static::getWidgetState($form['#parents'], $field_name, $form_state);
       foreach ($items as $delta => $item) {
         $field_state['original_deltas'][$delta] = $item->_original_delta ?? $delta;
-        unset($item->_original_delta, $item->_weight);
+        unset($item->_original_delta, $item->_weight, $item->_actions);
       }
       static::setWidgetState($form['#parents'], $field_name, $form_state, $field_state);
     }

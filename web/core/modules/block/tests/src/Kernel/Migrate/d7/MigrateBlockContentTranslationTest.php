@@ -18,7 +18,6 @@ class MigrateBlockContentTranslationTest extends MigrateDrupal7TestBase {
   protected static $modules = [
     'node',
     'text',
-    'book',
     'block',
     'comment',
     'filter',
@@ -41,6 +40,7 @@ class MigrateBlockContentTranslationTest extends MigrateDrupal7TestBase {
     $this->installEntitySchema('block_content');
     $this->installConfig(['block']);
     $this->installConfig(['block_content']);
+    $this->container->get('theme_installer')->install(['stark']);
 
     $this->executeMigrations([
       'language',

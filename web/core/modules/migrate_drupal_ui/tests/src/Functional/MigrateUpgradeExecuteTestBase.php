@@ -2,6 +2,7 @@
 
 namespace Drupal\Tests\migrate_drupal_ui\Functional;
 
+use Drupal\Core\Entity\ContentEntityStorageInterface;
 use Drupal\Tests\migrate_drupal\Traits\CreateTestContentEntitiesTrait;
 
 /**
@@ -40,8 +41,6 @@ abstract class MigrateUpgradeExecuteTestBase extends MigrateUpgradeTestBase {
     $this->submitForm([], 'Perform upgrade');
     $this->assertUpgrade($this->getEntityCounts());
 
-    \Drupal::service('module_installer')->install(['book']);
-
     // Test incremental migration.
     $this->createContentPostUpgrade();
 
@@ -66,7 +65,47 @@ abstract class MigrateUpgradeExecuteTestBase extends MigrateUpgradeTestBase {
       'value' => 'test_mail_collector',
       'required' => TRUE,
     ];
+    $settings['config']['system.mail']['mailer_dsn']['scheme'] = (object) [
+      'value' => 'null',
+      'required' => TRUE,
+    ];
+    $settings['config']['system.mail']['mailer_dsn']['host'] = (object) [
+      'value' => 'null',
+      'required' => TRUE,
+    ];
     $this->writeSettings($settings);
+  }
+
+  /**
+   * Checks the number of the specified entity's revisions.
+   *
+   * Revision translations are excluded.
+   *
+   * @param string $content_entity_type_id
+   *   The entity type ID of the content entity, e.g. 'node', 'media',
+   *   'block_content'.
+   * @param int $expected_revision_count
+   *   The expected number of the revisions.
+   *
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   */
+  protected function assertEntityRevisionsCount(string $content_entity_type_id, int $expected_revision_count) {
+    $entity_storage = \Drupal::entityTypeManager()->getStorage($content_entity_type_id);
+    assert($entity_storage instanceof ContentEntityStorageInterface);
+    $revision_ids = $entity_storage
+      ->getQuery()
+      ->allRevisions()
+      ->accessCheck(FALSE)
+      ->execute();
+    $this->assertCount(
+      $expected_revision_count,
+      $revision_ids,
+      sprintf(
+        "The number of %s revisions is different than expected",
+        $content_entity_type_id
+      )
+    );
   }
 
 }

@@ -10,6 +10,7 @@ use Drupal\Tests\migrate_drupal_ui\Functional\MigrateUpgradeExecuteTestBase;
  * The test method is provided by the MigrateUpgradeTestBase class.
  *
  * @group forum
+ * @group #slow
  */
 class Upgrade6Test extends MigrateUpgradeExecuteTestBase {
 
@@ -48,40 +49,39 @@ class Upgrade6Test extends MigrateUpgradeExecuteTestBase {
    */
   protected function getEntityCounts() {
     return [
-      'block' => 32,
+      'action' => 27,
+      'base_field_override' => 22,
+      'block' => 33,
       'block_content' => 1,
       'block_content_type' => 1,
       'comment' => 4,
       'comment_type' => 8,
       'contact_form' => 2,
       'contact_message' => 0,
-      'editor' => 2,
-      'field_config' => 38,
-      'field_storage_config' => 22,
-      'file' => 2,
-      'filter_format' => 7,
-      'image_style' => 6,
-      'node' => 2,
-      'node_type' => 7,
-      'search_page' => 2,
-      'shortcut' => 2,
-      'shortcut_set' => 1,
-      'action' => 27,
-      'menu' => 8,
-      'path_alias' => 4,
-      'taxonomy_term' => 3,
-      'taxonomy_vocabulary' => 2,
-      'tour' => 2,
-      'user' => 3,
-      'user_role' => 4,
-      'menu_link_content' => 1,
-      'view' => 14,
       'date_format' => 12,
+      'editor' => 2,
       'entity_form_display' => 18,
       'entity_form_mode' => 1,
-      'entity_view_display' => 31,
+      'entity_view_display' => 34,
       'entity_view_mode' => 11,
-      'base_field_override' => 22,
+      'field_config' => 41,
+      'field_storage_config' => 25,
+      'file' => 1,
+      'filter_format' => 7,
+      'image_style' => 6,
+      'menu' => 8,
+      'menu_link_content' => 1,
+      'node' => 3,
+      'node_type' => 7,
+      'path_alias' => 4,
+      'search_page' => 3,
+      'shortcut' => 2,
+      'shortcut_set' => 1,
+      'taxonomy_term' => 7,
+      'taxonomy_vocabulary' => 4,
+      'user' => 3,
+      'user_role' => 4,
+      'view' => 14,
     ];
   }
 
@@ -89,15 +89,7 @@ class Upgrade6Test extends MigrateUpgradeExecuteTestBase {
    * {@inheritdoc}
    */
   protected function getEntityCountsIncremental() {
-    $counts = $this->getEntityCounts();
-    $counts['block_content'] = 3;
-    $counts['comment'] = 9;
-    $counts['file'] = 8;
-    $counts['menu_link_content'] = 11;
-    $counts['node'] = 19;
-    $counts['taxonomy_term'] = 16;
-    $counts['user'] = 8;
-    return $counts;
+    return [];
   }
 
   /**
@@ -125,6 +117,7 @@ class Upgrade6Test extends MigrateUpgradeExecuteTestBase {
       'Search',
       'System',
       'Taxonomy',
+      'Text',
       'Upload',
       'User',
       'Variable admin',

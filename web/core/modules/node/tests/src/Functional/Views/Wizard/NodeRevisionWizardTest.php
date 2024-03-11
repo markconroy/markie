@@ -42,8 +42,8 @@ class NodeRevisionWizardTest extends WizardTestBase {
     $node->changed->value = REQUEST_TIME + 10;
     $node->save();
 
-    $this->drupalCreateContentType(['type' => 'not-article']);
-    $node = $node_storage->create(['title' => $this->randomString(), 'type' => 'not-article', 'changed' => REQUEST_TIME + 80]);
+    $this->drupalCreateContentType(['type' => 'not_article']);
+    $node = $node_storage->create(['title' => $this->randomString(), 'type' => 'not_article', 'changed' => REQUEST_TIME + 80]);
     $node->save();
 
     $type = [
@@ -54,7 +54,7 @@ class NodeRevisionWizardTest extends WizardTestBase {
 
     $view = [];
     $view['label'] = $this->randomMachineName(16);
-    $view['id'] = strtolower($this->randomMachineName(16));
+    $view['id'] = $this->randomMachineName(16);
     $view['description'] = $this->randomMachineName(16);
     $view['page[create]'] = FALSE;
     $view['show[type]'] = 'article';
@@ -85,7 +85,7 @@ class NodeRevisionWizardTest extends WizardTestBase {
     $this->submitForm($type, 'Update "Show" choice');
     $view = [];
     $view['label'] = $this->randomMachineName(16);
-    $view['id'] = strtolower($this->randomMachineName(16));
+    $view['id'] = $this->randomMachineName(16);
     $view['description'] = $this->randomMachineName(16);
     $view['page[create]'] = FALSE;
     $view['show[type]'] = 'all';

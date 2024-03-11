@@ -55,7 +55,7 @@ class TermParentsTest extends BrowserTestBase {
     $this->termStorage = $entity_type_manager->getStorage('taxonomy_term');
     $this->state = $this->container->get('state');
 
-    Vocabulary::create(['vid' => $this->vocabularyId])->save();
+    Vocabulary::create(['vid' => $this->vocabularyId, 'name' => 'Test'])->save();
     $this->drupalLogin($this->drupalCreateUser(['administer taxonomy']));
   }
 
@@ -246,6 +246,54 @@ class TermParentsTest extends BrowserTestBase {
     $terms[] = $term_5;
 
     return $terms;
+  }
+
+  /**
+   * Test the term add/edit form with parent query parameter.
+   */
+  public function testParentFromQuery() {
+    // Create three terms without any parents.
+    $term_1 = $this->createTerm('Test term 1');
+    $term_2 = $this->createTerm('Test term 2');
+    $term_3 = $this->createTerm('Test term 3');
+
+    // Add term form with one parent.
+    $this->drupalGet("/admin/structure/taxonomy/manage/{$this->vocabularyId}/add", ['query' => ['parent' => $term_1->id()]]);
+    $this->assertParentOption('Test term 1', TRUE);
+    $this->assertParentOption('Test term 2', FALSE);
+    $this->assertParentOption('Test term 3', FALSE);
+    // Add term form with two parents.
+    $this->drupalGet("/admin/structure/taxonomy/manage/{$this->vocabularyId}/add", ['query' => ['parent[0]' => $term_1->id(), 'parent[1]' => $term_2->id()]]);
+    $this->assertParentOption('Test term 1', TRUE);
+    $this->assertParentOption('Test term 2', TRUE);
+    $this->assertParentOption('Test term 3', FALSE);
+    // Add term form with no parents.
+    $this->drupalGet("/admin/structure/taxonomy/manage/{$this->vocabularyId}/add", ['query' => ['parent' => '']]);
+    $this->assertParentOption('Test term 1', FALSE);
+    $this->assertParentOption('Test term 2', FALSE);
+    $this->assertParentOption('Test term 3', FALSE);
+    // Add term form with invalid parent.
+    $this->drupalGet("/admin/structure/taxonomy/manage/{$this->vocabularyId}/add", ['query' => ['parent' => -1]]);
+    $this->assertParentOption('Test term 1', FALSE);
+    $this->assertParentOption('Test term 2', FALSE);
+    $this->assertParentOption('Test term 3', FALSE);
+
+    // Edit term form with one parent.
+    $this->drupalGet($term_1->toUrl('edit-form'), ['query' => ['parent' => $term_2->id()]]);
+    $this->assertParentOption('Test term 2', TRUE);
+    $this->assertParentOption('Test term 3', FALSE);
+    // Edit term form with two parents.
+    $this->drupalGet($term_1->toUrl('edit-form'), ['query' => ['parent[0]' => $term_2->id(), 'parent[1]' => $term_3->id()]]);
+    $this->assertParentOption('Test term 2', TRUE);
+    $this->assertParentOption('Test term 3', TRUE);
+    // Edit term form with no parents.
+    $this->drupalGet($term_1->toUrl('edit-form'), ['query' => ['parent' => '']]);
+    $this->assertParentOption('Test term 2', FALSE);
+    $this->assertParentOption('Test term 3', FALSE);
+    // Edit term form with invalid parent.
+    $this->drupalGet($term_1->toUrl('edit-form'), ['query' => ['parent' => -1]]);
+    $this->assertParentOption('Test term 2', FALSE);
+    $this->assertParentOption('Test term 3', FALSE);
   }
 
   /**

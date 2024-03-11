@@ -44,7 +44,6 @@ class ModerationStateFieldItemListTest extends KernelTestBase {
     parent::setUp();
 
     $this->installSchema('node', 'node_access');
-    $this->installSchema('system', 'sequences');
     $this->installEntitySchema('node');
     $this->installEntitySchema('user');
     $this->installEntitySchema('content_moderation_state');
@@ -52,10 +51,12 @@ class ModerationStateFieldItemListTest extends KernelTestBase {
 
     NodeType::create([
       'type' => 'unmoderated',
+      'name' => 'Unmoderated',
     ])->save();
 
     $node_type = NodeType::create([
       'type' => 'example',
+      'name' => 'Example',
     ]);
     $node_type->save();
     $workflow = $this->createEditorialWorkflow();
@@ -255,6 +256,7 @@ class ModerationStateFieldItemListTest extends KernelTestBase {
   public function testEntityWithNoWorkflow() {
     $node_type = NodeType::create([
       'type' => 'example_no_workflow',
+      'name' => 'No-Workflow example',
     ]);
     $node_type->save();
     $test_node = Node::create([

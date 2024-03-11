@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\Component\Utility;
 
 use Drupal\Component\Utility\Html;
@@ -7,9 +9,9 @@ use Drupal\Component\Utility\UrlHelper;
 use Drupal\Component\Utility\Xss;
 use PHPUnit\Framework\TestCase;
 
-// cspell:ignore ascript barbaz ckers cript CVEs dynsrc fooÿñ metacharacters
-// cspell:ignore msgbox ncript nfocus nmedi nosuchscheme nosuchtag onmediaerror
-// cspell:ignore scrscriptipt tascript vbscript
+// cspell:ignore ascript barbaz ckers cript CVEs dynsrc fooÿñ msgbox ncript
+// cspell:ignore nfocus nmedi nosuchscheme nosuchtag onmediaerror scrscriptipt
+// cspell:ignore tascript vbscript
 
 /**
  * XSS Filtering tests.
@@ -565,7 +567,7 @@ class XssTest extends TestCase {
   }
 
   /**
-   * Checks that \Drupal\Component\Utility\Xss::filterAdmin() correctly strips unallowed tags.
+   * Checks that \Drupal\Component\Utility\Xss::filterAdmin() correctly strips disallowed tags.
    */
   public function testFilterXSSAdmin() {
     $value = Xss::filterAdmin('<style /><iframe /><frame /><frameset /><meta /><link /><embed /><applet /><param /><layer />');
@@ -605,6 +607,16 @@ class XssTest extends TestCase {
       ['<object />', 'object', 'Admin HTML filter -- should not allow object tag.'],
       ['<script />', 'script', 'Admin HTML filter -- should not allow script tag.'],
     ];
+  }
+
+  /**
+   * Checks that escaped HTML embedded in an attribute is not filtered.
+   *
+   * @see \Drupal\Component\Utility\HtmlSerializerRules
+   */
+  public function testFilterNormalizedHtml5() {
+    $input = '<span data-caption="foo &lt;em&gt;bar&lt;/em&gt;"></span>';
+    $this->assertEquals($input, Xss::filter(Html::normalize($input), ['span']));
   }
 
   /**

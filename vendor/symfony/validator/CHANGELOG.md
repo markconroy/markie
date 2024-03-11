@@ -1,6 +1,22 @@
 CHANGELOG
 =========
 
+6.4
+---
+
+ * Add `is_valid` function to the `Expression` constraint, its behavior is the same as `ValidatorInterface::validate`
+ * Allow single integer for the `versions` option of the `Uuid` constraint
+ * Allow single constraint to be passed to the `constraints` option of the `When` constraint
+ * Deprecate Doctrine annotations support in favor of native attributes
+ * Deprecate `ValidatorBuilder::setDoctrineAnnotationReader()`
+ * Deprecate `ValidatorBuilder::addDefaultDoctrineAnnotationReader()`
+ * Add `number`, `finite-number` and `finite-float` types to `Type` constraint
+ * Add the `withSeconds` option to the `Time` constraint that allows to pass time without seconds
+ * Deprecate `ValidatorBuilder::enableAnnotationMapping()`, use `ValidatorBuilder::enableAttributeMapping()` instead
+ * Deprecate `ValidatorBuilder::disableAnnotationMapping()`, use `ValidatorBuilder::disableAttributeMapping()` instead
+ * Deprecate `AnnotationLoader`, use `AttributeLoader` instead
+ * Add `GroupProviderInterface` to implement validation group providers outside the underlying class
+
 6.3
 ---
 

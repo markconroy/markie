@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\field\FunctionalJavascript\Boolean;
 
 use Drupal\field\Entity\FieldConfig;
@@ -46,7 +48,7 @@ class BooleanFormatterSettingsTest extends WebDriverTestBase {
     parent::setUp();
 
     // Create a content type. Use Node because it has Field UI pages that work.
-    $type_name = mb_strtolower($this->randomMachineName(8)) . '_test';
+    $type_name = $this->randomMachineName(8) . '_test';
     $type = $this->drupalCreateContentType(['name' => $type_name, 'type' => $type_name]);
     $this->bundle = $type->id();
 
@@ -60,7 +62,7 @@ class BooleanFormatterSettingsTest extends WebDriverTestBase {
     ]);
     $this->drupalLogin($admin_user);
 
-    $this->fieldName = mb_strtolower($this->randomMachineName(8));
+    $this->fieldName = $this->randomMachineName(8);
 
     $field_storage = FieldStorageConfig::create([
       'field_name' => $this->fieldName,

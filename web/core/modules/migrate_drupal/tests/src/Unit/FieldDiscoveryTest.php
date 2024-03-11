@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\migrate_drupal\Unit;
 
 use Drupal\Core\Logger\LoggerChannelInterface;
@@ -106,14 +108,14 @@ class FieldDiscoveryTest extends UnitTestCase {
         'entity_type_id' => 'comment',
         'expected_fields' => [
           'comment_node_content_type_1' => [
-            'cfield_1' => ['field_info_key' => 'field_1_data'],
-            'cfield_2' => ['field_info_key' => 'field_2_data'],
-            'cfield_3' => ['field_info_key' => 'field_3_data'],
+            'comment_field_1' => ['field_info_key' => 'field_1_data'],
+            'comment_field_2' => ['field_info_key' => 'field_2_data'],
+            'comment_field_3' => ['field_info_key' => 'field_3_data'],
           ],
           'comment_node_content_type_2' => [
-            'cfield_1' => ['field_info_key' => 'field_1_data'],
-            'cfield_4' => ['field_info_key' => 'field_4_data'],
-            'cfield_5' => ['field_info_key' => 'field_5_data'],
+            'comment_field_1' => ['field_info_key' => 'field_1_data'],
+            'comment_field_4' => ['field_info_key' => 'field_4_data'],
+            'comment_field_5' => ['field_info_key' => 'field_5_data'],
           ],
         ],
       ],
@@ -185,18 +187,18 @@ class FieldDiscoveryTest extends UnitTestCase {
         'entity_type_id' => 'comment',
         'bundle' => 'comment_node_content_type_1',
         'expected_fields' => [
-          'cfield_1' => ['field_info_key' => 'field_1_data'],
-          'cfield_2' => ['field_info_key' => 'field_2_data'],
-          'cfield_3' => ['field_info_key' => 'field_3_data'],
+          'comment_field_1' => ['field_info_key' => 'field_1_data'],
+          'comment_field_2' => ['field_info_key' => 'field_2_data'],
+          'comment_field_3' => ['field_info_key' => 'field_3_data'],
         ],
       ],
       'Comment - Content Type 2' => [
         'entity_type_id' => 'comment',
         'bundle' => 'comment_node_content_type_2',
         'expected_fields' => [
-          'cfield_1' => ['field_info_key' => 'field_1_data'],
-          'cfield_4' => ['field_info_key' => 'field_4_data'],
-          'cfield_5' => ['field_info_key' => 'field_5_data'],
+          'comment_field_1' => ['field_info_key' => 'field_1_data'],
+          'comment_field_4' => ['field_info_key' => 'field_4_data'],
+          'comment_field_5' => ['field_info_key' => 'field_5_data'],
         ],
       ],
       'Non-existent Entity Type' => [
@@ -289,14 +291,14 @@ class FieldDiscoveryTest extends UnitTestCase {
       ],
       'comment' => [
         'comment_node_content_type_1' => [
-          'cfield_1' => ['field_info_key' => 'field_1_data'],
-          'cfield_2' => ['field_info_key' => 'field_2_data'],
-          'cfield_3' => ['field_info_key' => 'field_3_data'],
+          'comment_field_1' => ['field_info_key' => 'field_1_data'],
+          'comment_field_2' => ['field_info_key' => 'field_2_data'],
+          'comment_field_3' => ['field_info_key' => 'field_3_data'],
         ],
         'comment_node_content_type_2' => [
-          'cfield_1' => ['field_info_key' => 'field_1_data'],
-          'cfield_4' => ['field_info_key' => 'field_4_data'],
-          'cfield_5' => ['field_info_key' => 'field_5_data'],
+          'comment_field_1' => ['field_info_key' => 'field_1_data'],
+          'comment_field_4' => ['field_info_key' => 'field_4_data'],
+          'comment_field_5' => ['field_info_key' => 'field_5_data'],
         ],
       ],
     ];

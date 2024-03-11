@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\Component\Utility;
 
 use Drupal\Component\Utility\Crypt;
@@ -78,6 +80,7 @@ class CryptTest extends TestCase {
       ],
       [
         'data' => 'SHA-256 is one of the successor hash functions to SHA-1, and is one of the strongest hash functions available.',
+        // cspell:disable-next-line
         'expected_hash' => 'yuqkDDYqprL71k4xIb6K6D7n76xldO4jseRhEkEE6SI',
       ],
     ];
@@ -93,6 +96,7 @@ class CryptTest extends TestCase {
       [
         'data' => 'Calculates a base-64 encoded, URL-safe sha-256 hmac.',
         'key' => 'secret-key',
+        // cspell:disable-next-line
         'expected_hmac' => '2AaH63zwjhekWZlEpAiufyfhAHIzbQhl9Hd9oCi3_c8',
       ],
     ];

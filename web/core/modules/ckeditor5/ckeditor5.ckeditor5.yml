@@ -83,6 +83,17 @@ ckeditor5_style:
     elements:
       - <$any-html5-element class>
 
+ckeditor5_htmlComments:
+  ckeditor5:
+    plugins:
+      - htmlSupport.HtmlComment
+  drupal:
+    label: HTML Comment support
+    elements: false
+    library: core/ckeditor5.htmlSupport
+    # @see \Drupal\ckeditor5\Plugin\CKEditor5PluginManagerInterface::getEnabledDefinitions()
+    conditions: []
+
 ckeditor5_arbitraryHtmlSupport:
   ckeditor5:
     plugins: [htmlSupport.GeneralHtmlSupport]
@@ -382,8 +393,6 @@ ckeditor5_list:
     config:
       list:
         properties:
-          reversed: true
-          startIndex: true
           # @todo Make this configurable in https://www.drupal.org/project/drupal/issues/3274635
           styles: false
   drupal:
@@ -500,6 +509,45 @@ ckeditor5_table:
       - <tfoot>
       - <caption>
 
+ckeditor5_table_properties:
+  ckeditor5:
+    plugins:
+      - table.TableProperties
+    config:
+      table:
+        contentToolbar: [tableProperties]
+  drupal:
+    label: Table properties
+    library: ckeditor5/internal.drupal.ckeditor5.table
+    conditions:
+      plugins:
+        - ckeditor5_table
+        # When arbitrary HTML is already allowed, it's harmless to enable CKEditor 5's UI for table properties.
+        - ckeditor5_arbitraryHtmlSupport
+    elements:
+      - <table style>
+
+ckeditor5_table_cell_properties:
+  ckeditor5:
+    plugins:
+      - table.TableCellProperties
+    config:
+      table:
+        contentToolbar: [tableCellProperties]
+  drupal:
+    label: Table cell properties
+    library: ckeditor5/internal.drupal.ckeditor5.table
+    conditions:
+      plugins:
+        - ckeditor5_table
+        # When arbitrary HTML is already allowed, it's harmless to enable CKEditor 5's UI for table cell properties.
+        - ckeditor5_arbitraryHtmlSupport
+    elements:
+      - <td style>
+      - <td rowspan colspan style>
+      - <th style>
+      - <th rowspan colspan style>
+
 ckeditor5_image:
   ckeditor5:
     plugins:
@@ -510,6 +558,10 @@ ckeditor5_image:
     config:
       image:
         toolbar: [drupalImageAlternativeText]
+        insert:
+          # Determine image type (inline or block) by insertion context.
+          type: auto
+          integrations: []
   drupal:
     label: Image
     class: \Drupal\ckeditor5\Plugin\CKEditor5Plugin\Image
@@ -544,7 +596,7 @@ ckeditor5_imageUpload:
 ckeditor5_imageUrl:
   ckeditor5:
     plugins:
-      - image.ImageInsertUI
+      - image.ImageInsertViaUrl
   drupal:
     label: Image URL
     elements: false
@@ -649,6 +701,18 @@ ckeditor5_language:
         label: Language
     elements:
       - <span lang dir>
+
+ckeditor5_showBlocks:
+  ckeditor5:
+    plugins: [showBlocks.ShowBlocks]
+  drupal:
+    label: Show blocks
+    library: core/ckeditor5.showBlocks
+    admin_library: ckeditor5/internal.admin.showBlocks
+    toolbar_items:
+      showBlocks:
+        label: Show blocks
+    elements: false
 
 media_media:
   provider: media

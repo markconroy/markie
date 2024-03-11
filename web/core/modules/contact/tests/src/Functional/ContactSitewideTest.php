@@ -2,7 +2,6 @@
 
 namespace Drupal\Tests\contact\Functional;
 
-use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Url;
 use Drupal\contact\Entity\ContactForm;
 use Drupal\Core\Mail\MailFormatHelper;
@@ -163,16 +162,16 @@ class ContactSitewideTest extends BrowserTestBase {
     $recipients = ['simpletest&@example.com', 'simpletest2@example.com', 'simpletest3@example.com'];
     $max_length = EntityTypeInterface::BUNDLE_MAX_LENGTH;
     $max_length_exceeded = $max_length + 1;
-    $this->addContactForm($id = mb_strtolower($this->randomMachineName($max_length_exceeded)), $label = $this->randomMachineName($max_length_exceeded), implode(',', [$recipients[0]]), '', TRUE);
+    $this->addContactForm($id = $this->randomMachineName($max_length_exceeded), $label = $this->randomMachineName($max_length_exceeded), implode(',', [$recipients[0]]), '', TRUE);
     $this->assertSession()->pageTextContains('Machine-readable name cannot be longer than ' . $max_length . ' characters but is currently ' . $max_length_exceeded . ' characters long.');
-    $this->addContactForm($id = mb_strtolower($this->randomMachineName($max_length)), $label = $this->randomMachineName($max_length), implode(',', [$recipients[0]]), '', TRUE);
+    $this->addContactForm($id = $this->randomMachineName($max_length), $label = $this->randomMachineName($max_length), implode(',', [$recipients[0]]), '', TRUE);
     $this->assertSession()->pageTextContains('Contact form ' . $label . ' has been added.');
 
     // Verify that the creation message contains a link to a contact form.
     $this->assertSession()->elementExists('xpath', '//div[@data-drupal-messages]//a[contains(@href, "contact/")]');
 
     // Create first valid form.
-    $this->addContactForm($id = mb_strtolower($this->randomMachineName(16)), $label = $this->randomMachineName(16), implode(',', [$recipients[0]]), '', TRUE);
+    $this->addContactForm($id = $this->randomMachineName(16), $label = $this->randomMachineName(16), implode(',', [$recipients[0]]), '', TRUE);
     $this->assertSession()->pageTextContains('Contact form ' . $label . ' has been added.');
 
     // Verify that the creation message contains a link to a contact form.
@@ -214,10 +213,10 @@ class ContactSitewideTest extends BrowserTestBase {
     $this->drupalLogin($admin_user);
 
     // Add more forms.
-    $this->addContactForm(mb_strtolower($this->randomMachineName(16)), $label = $this->randomMachineName(16), implode(',', [$recipients[0], $recipients[1]]), '', FALSE);
+    $this->addContactForm($this->randomMachineName(16), $label = $this->randomMachineName(16), implode(',', [$recipients[0], $recipients[1]]), '', FALSE);
     $this->assertSession()->pageTextContains('Contact form ' . $label . ' has been added.');
 
-    $this->addContactForm($name = mb_strtolower($this->randomMachineName(16)), $label = $this->randomMachineName(16), implode(',', [$recipients[0], $recipients[1], $recipients[2]]), '', FALSE);
+    $this->addContactForm($name = $this->randomMachineName(16), $label = $this->randomMachineName(16), implode(',', [$recipients[0], $recipients[1], $recipients[2]]), '', FALSE);
     $this->assertSession()->pageTextContains('Contact form ' . $label . ' has been added.');
 
     // Try adding a form that already exists.
@@ -282,7 +281,7 @@ class ContactSitewideTest extends BrowserTestBase {
 
     $label = $this->randomMachineName(16);
     $recipients = implode(',', [$recipients[0], $recipients[1], $recipients[2]]);
-    $contact_form = mb_strtolower($this->randomMachineName(16));
+    $contact_form = $this->randomMachineName(16);
     $this->addContactForm($contact_form, $label, $recipients, '', FALSE);
     $this->drupalGet('admin/structure/contact');
     $this->clickLink('Edit');
@@ -314,7 +313,7 @@ class ContactSitewideTest extends BrowserTestBase {
     $this->assertSession()->statusCodeEquals(200);
 
     // Create a simple textfield.
-    $field_name = mb_strtolower($this->randomMachineName());
+    $field_name = $this->randomMachineName();
     $field_label = $this->randomMachineName();
     $this->fieldUIAddNewField(NULL, $field_name, $field_label, 'text');
     $field_name = 'field_' . $field_name;
@@ -336,7 +335,7 @@ class ContactSitewideTest extends BrowserTestBase {
     $this->submitForm($edit, 'Send message');
     $mails = $this->getMails();
     $mail = array_pop($mails);
-    $this->assertEquals(t('[@label] @subject', ['@label' => $label, '@subject' => $edit['subject[0][value]']]), $mail['subject']);
+    $this->assertEquals(sprintf('[%s] %s', $label, $edit['subject[0][value]']), $mail['subject']);
     $this->assertStringContainsString($field_label, $mail['body']);
     $this->assertStringContainsString($edit[$field_name . '[0][value]'], $mail['body']);
 
@@ -499,7 +498,7 @@ class ContactSitewideTest extends BrowserTestBase {
     $this->assertCount(0, $captured_emails);
     $this->drupalLogin($admin_user);
     $this->drupalGet('admin/reports/dblog');
-    $this->assertSession()->responseContains('Error sending auto-reply, missing sender e-mail address in foo');
+    $this->assertSession()->responseContains('Error sending auto-reply, missing sender email address in foo');
   }
 
   /**
@@ -612,7 +611,7 @@ class ContactSitewideTest extends BrowserTestBase {
         $this->drupalGet("admin/structure/contact/manage/{$id}/delete");
         $this->submitForm([], 'Delete');
         $this->assertSession()->pageTextContains("The contact form {$contact_form->label()} has been deleted.");
-        $this->assertNull(ContactForm::load($id), new FormattableMarkup('Form %contact_form not found', ['%contact_form' => $contact_form->label()]));
+        $this->assertNull(ContactForm::load($id), "Form {$contact_form->label()} not found");
       }
     }
   }

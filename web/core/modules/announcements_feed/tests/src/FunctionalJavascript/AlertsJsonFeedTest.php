@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\announcements_feed\FunctionalJavascript;
 
 use Drupal\Tests\system\FunctionalJavascript\OffCanvasTestBase;
@@ -55,6 +57,7 @@ class AlertsJsonFeedTest extends OffCanvasTestBase {
    * Check the status of the announcements when the feed is updated and removed.
    */
   public function testAnnounceFeedUpdatedAndRemoved() {
+    $this->markTestSkipped('Skipped due to major version-specific logic. See https://www.drupal.org/project/drupal/issues/3359322');
     $this->drupalLogin($this->user);
     $this->drupalGet('<front>');
     $this->clickLink('Announcements');

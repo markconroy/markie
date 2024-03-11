@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\Core\Entity;
 
 use Drupal\Core\DependencyInjection\ContainerBuilder;
@@ -105,6 +107,55 @@ class EntityUrlTest extends UnitTestCase {
     $this->expectException(EntityMalformedException::class);
     $this->expectExceptionMessage('The "' . $this->entityTypeId . '" entity cannot have a URI as it does not have an ID');
     $entity->toUrl();
+  }
+
+  /**
+   * Tests the toUrl() method without specifying the $rel parameter.
+   *
+   * It should throw an exception when neither canonical and edit-form link
+   * templates exist if no parameters are passed in.
+   *
+   * @covers ::toUrl
+   */
+  public function testToUrlDefaultException(): void {
+    $values = ['id' => $this->entityId];
+    $entity = $this->getEntity(UrlTestEntity::class, $values);
+    $this->entityType->getUriCallback()->willReturn(NULL);
+
+    $this->expectException(UndefinedLinkTemplateException::class);
+    $this->expectExceptionMessage("Cannot generate default URL because no link template 'canonical' or 'edit-form' was found for the '" . $this->entityTypeId . "' entity type");
+    $entity->toUrl();
+  }
+
+  /**
+   * Tests the toUrl() method without specifying the $rel parameter.
+   *
+   * It should return the edit-form or canonical link templates by default if
+   * they are registered.
+   *
+   * @covers ::toUrl
+   */
+  public function testToUrlDefaultFallback(): void {
+    $values = ['id' => $this->entityId, 'langcode' => $this->langcode];
+    $entity = $this->getEntity(UrlTestEntity::class, $values);
+    $this->registerLinkTemplate('edit-form');
+    /** @var \Drupal\Core\Url $url */
+    $url = $entity->toUrl();
+    $this->assertUrl('entity.test_entity.edit_form', ['test_entity' => $this->entityId], $entity, TRUE, $url);
+
+    $this->registerLinkTemplate('canonical');
+    /** @var \Drupal\Core\Url $url */
+    $url = $entity->toUrl();
+    $this->assertUrl('entity.test_entity.canonical', ['test_entity' => $this->entityId], $entity, TRUE, $url);
+
+    // Register multiple link templates with 2 that share the same path.
+    $this->entityType->getLinkTemplates()->willReturn([
+      'canonical' => "/test-entity/{test_entity}/canonical",
+      'edit-form' => "/test-entity/{test_entity}/edit-form",
+      'foobar' => "/test-entity/{test_entity}/canonical",
+    ]);
+    $url = $entity->toUrl();
+    $this->assertUrl('entity.test_entity.canonical', ['test_entity' => $this->entityId], $entity, TRUE, $url);
   }
 
   /**
@@ -358,6 +409,9 @@ class EntityUrlTest extends UnitTestCase {
 
     /** @var \Drupal\Core\Url $url */
     $url = $entity->toUrl('canonical');
+    $this->assertUrl('<none>', [], $entity, TRUE, $url);
+
+    $url = $entity->toUrl();
     $this->assertUrl('<none>', [], $entity, TRUE, $url);
   }
 

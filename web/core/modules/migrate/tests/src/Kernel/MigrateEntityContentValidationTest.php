@@ -52,7 +52,6 @@ class MigrateEntityContentValidationTest extends KernelTestBase {
     $this->installEntitySchema('user');
     $this->installEntitySchema('user_role');
     $this->installEntitySchema('entity_test');
-    $this->installSchema('system', ['sequences']);
     $this->installConfig(['field', 'filter_test', 'system', 'user']);
 
     $this->container
@@ -189,7 +188,7 @@ class MigrateEntityContentValidationTest extends KernelTestBase {
     $normal_user->save();
 
     // Add a "body" field with the text format.
-    $field_name = mb_strtolower($this->randomMachineName());
+    $field_name = $this->randomMachineName();
     $field_storage = FieldStorageConfig::create([
       'field_name' => $field_name,
       'entity_type' => 'entity_test',

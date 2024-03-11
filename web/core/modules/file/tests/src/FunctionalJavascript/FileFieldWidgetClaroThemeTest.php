@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\file\FunctionalJavascript;
 
 use Drupal\Core\Url;
@@ -13,6 +15,7 @@ use Drupal\Core\Url;
  * @see _claro_preprocess_file_and_image_widget()
  *
  * @group file
+ * @group #slow
  */
 class FileFieldWidgetClaroThemeTest extends FileFieldWidgetTest {
 

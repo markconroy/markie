@@ -477,7 +477,7 @@
       // Attach the event callback.
       this.element.on(
         event,
-        $.proxy(function (e) {
+        function (e) {
           const value = valueFn.call(this.element, e);
           // Only trigger the event if the value has actually changed.
           if (oldValue !== value) {
@@ -488,18 +488,18 @@
             });
             oldValue = value;
           }
-        }, this),
+        }.bind(this),
       );
 
       states.postponed.push(
-        $.proxy(function () {
+        function () {
           // Trigger the event once for initialization purposes.
           this.element.trigger({
             type: `state:${this.state}`,
             value: oldValue,
             oldValue: null,
           });
-        }, this),
+        }.bind(this),
       );
     },
   };
@@ -573,7 +573,7 @@
       collapsed(e) {
         return typeof e !== 'undefined' && 'value' in e
           ? e.value
-          : !this.is('[open]');
+          : !this[0].hasAttribute('open');
       },
     },
   };
@@ -724,9 +724,14 @@
 
   $document.on('state:visible', (e) => {
     if (e.trigger) {
-      $(e.target)
-        .closest('.js-form-item, .js-form-submit, .js-form-wrapper')
-        .toggle(e.value);
+      let $element = $(e.target).closest(
+        '.js-form-item, .js-form-submit, .js-form-wrapper',
+      );
+      // For links, update the state of itself instead of the wrapper.
+      if (e.target.tagName === 'A') {
+        $element = $(e.target);
+      }
+      $element.toggle(e.value);
     }
   });
 
@@ -742,7 +747,7 @@
 
   $document.on('state:collapsed', (e) => {
     if (e.trigger) {
-      if ($(e.target).is('[open]') === e.value) {
+      if (e.target.hasAttribute('open') === e.value) {
         $(e.target).find('> summary').trigger('click');
       }
     }

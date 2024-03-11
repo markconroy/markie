@@ -36,7 +36,7 @@ class FileFieldRevisionTest extends FileFieldTestBase {
       ->save();
     $node_storage = $this->container->get('entity_type.manager')->getStorage('node');
     $type_name = 'article';
-    $field_name = strtolower($this->randomMachineName());
+    $field_name = $this->randomMachineName();
     $this->createFileField($field_name, 'node', $type_name);
     // Create the same fields for users.
     $this->createFileField($field_name, 'user', 'user');
@@ -117,13 +117,6 @@ class FileFieldRevisionTest extends FileFieldTestBase {
 
     // Delete the user and check that the file is also deleted.
     $user->delete();
-    // TODO: This seems like a bug in File API. Clearing the stat cache should
-    // not be necessary here. The file really is deleted, but stream wrappers
-    // doesn't seem to think so unless we clear the PHP file stat() cache.
-    clearstatcache($node_file_r1->getFileUri());
-    clearstatcache($node_file_r2->getFileUri());
-    clearstatcache($node_file_r3->getFileUri());
-    clearstatcache($node_file_r4->getFileUri());
 
     // Call file_cron() to clean up the file. Make sure the changed timestamp
     // of the file is older than the system.file.temporary_maximum_age

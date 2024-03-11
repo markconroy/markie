@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\views\Unit\Plugin\argument_default;
 
 use Drupal\Tests\UnitTestCase;
@@ -64,9 +66,9 @@ class QueryParameterTest extends UnitTestCase {
     ];
 
     $data[] = [
-      ['query_param' => 'test', 'fallback' => 'blub'],
+      ['query_param' => 'test', 'fallback' => 'foo'],
       new Request([]),
-      'blub',
+      'foo',
     ];
 
     $data[] = [

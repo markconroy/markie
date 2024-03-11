@@ -122,8 +122,15 @@
 }
 
 .ui-dialog-buttonpane .ui-dialog-buttonset {
+  display: flex;
+  gap: var(--space-s);
   justify-content: flex-end;
-  margin: 0 var(--space-s);
+  margin-block: var(--space-m);
+  margin-inline-end: var(--space-l);
+}
+
+.ui-dialog-buttonpane .ui-dialog-buttonset > * {
+  margin: 0;
 }
 
 .ui-dialog .ui-dialog-buttonpane .ui-button-text-only .ui-button-text {
@@ -136,7 +143,8 @@
 
 /* Form action buttons are moved in dialogs. Remove empty space. */
 
-.ui-dialog .ui-dialog-content .form-actions {
+.ui-dialog .ui-dialog-content .form-actions,
+.ui-dialog .ui-dialog-content .field-actions {
   margin: 0;
   padding: 0;
 }

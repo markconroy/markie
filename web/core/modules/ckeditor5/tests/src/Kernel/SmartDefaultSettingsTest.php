@@ -541,6 +541,13 @@ class SmartDefaultSettingsTest extends KernelTestBase {
 
     // Ensure that the result of ::computeSmartDefaultSettings() always complies
     // with the config schema.
+    // TRICKY: because we're validating using `editor.editor.*` as the config
+    // name, TextEditorObjectDependentValidatorTrait will load the stored filter
+    // format. That has not yet been updated at this point, so in order for
+    // validation to pass, it must first be saved.
+    // @see \Drupal\ckeditor5\Plugin\Validation\Constraint\TextEditorObjectDependentValidatorTrait::createTextEditorObjectFromContext()
+    // @todo Remove this work-around in https://www.drupal.org/project/drupal/issues/3231354
+    $updated_text_editor->getFilterFormat()->save();
     $this->assertConfigSchema(
       $this->typedConfig,
       $updated_text_editor->getConfigDependencyName(),
@@ -684,8 +691,11 @@ class SmartDefaultSettingsTest extends KernelTestBase {
             'allow_resize' => TRUE,
           ],
           'ckeditor5_list' => [
-            'reversed' => FALSE,
-            'startIndex' => TRUE,
+            'properties' => [
+              'reversed' => FALSE,
+              'startIndex' => TRUE,
+            ],
+            'multiBlock' => TRUE,
           ],
           'ckeditor5_sourceEditing' => [
             'allowed_tags' => [
@@ -835,7 +845,13 @@ class SmartDefaultSettingsTest extends KernelTestBase {
             ],
           ],
           'ckeditor5_imageResize' => ['allow_resize' => TRUE],
-          'ckeditor5_list' => ['reversed' => FALSE, 'startIndex' => TRUE],
+          'ckeditor5_list' => [
+            'properties' => [
+              'reversed' => FALSE,
+              'startIndex' => TRUE,
+            ],
+            'multiBlock' => TRUE,
+          ],
           'ckeditor5_sourceEditing' => [
             'allowed_tags' => array_values(array_diff(
               $basic_html_test_case['expected_ckeditor5_settings']['plugins']['ckeditor5_sourceEditing']['allowed_tags'],
@@ -877,7 +893,13 @@ class SmartDefaultSettingsTest extends KernelTestBase {
             ],
           ],
           'ckeditor5_imageResize' => ['allow_resize' => TRUE],
-          'ckeditor5_list' => ['reversed' => FALSE, 'startIndex' => TRUE],
+          'ckeditor5_list' => [
+            'properties' => [
+              'reversed' => FALSE,
+              'startIndex' => TRUE,
+            ],
+            'multiBlock' => TRUE,
+          ],
           'ckeditor5_sourceEditing' => [
             'allowed_tags' => $basic_html_test_case['expected_ckeditor5_settings']['plugins']['ckeditor5_sourceEditing']['allowed_tags'],
           ],
@@ -911,7 +933,13 @@ class SmartDefaultSettingsTest extends KernelTestBase {
         ],
         'plugins' => [
           'ckeditor5_imageResize' => ['allow_resize' => TRUE],
-          'ckeditor5_list' => ['reversed' => FALSE, 'startIndex' => TRUE],
+          'ckeditor5_list' => [
+            'properties' => [
+              'reversed' => FALSE,
+              'startIndex' => TRUE,
+            ],
+            'multiBlock' => TRUE,
+          ],
           'ckeditor5_sourceEditing' => [
             'allowed_tags' => array_values(array_diff(
               $basic_html_test_case['expected_ckeditor5_settings']['plugins']['ckeditor5_sourceEditing']['allowed_tags'],
@@ -1200,8 +1228,11 @@ class SmartDefaultSettingsTest extends KernelTestBase {
             ],
           ],
           'ckeditor5_list' => [
-            'reversed' => FALSE,
-            'startIndex' => TRUE,
+            'properties' => [
+              'reversed' => FALSE,
+              'startIndex' => TRUE,
+            ],
+            'multiBlock' => TRUE,
           ],
           'ckeditor5_sourceEditing' => [
             'allowed_tags' => [
@@ -1273,6 +1304,7 @@ class SmartDefaultSettingsTest extends KernelTestBase {
             'heading',
             'codeBlock',
             '|',
+            'showBlocks',
             'sourceEditing',
           ],
         ],
@@ -1308,8 +1340,11 @@ class SmartDefaultSettingsTest extends KernelTestBase {
             'allow_resize' => TRUE,
           ],
           'ckeditor5_list' => [
-            'reversed' => TRUE,
-            'startIndex' => TRUE,
+            'properties' => [
+              'reversed' => TRUE,
+              'startIndex' => TRUE,
+            ],
+            'multiBlock' => TRUE,
           ],
           'ckeditor5_sourceEditing' => [
             'allowed_tags' => [],
@@ -1353,8 +1388,11 @@ class SmartDefaultSettingsTest extends KernelTestBase {
             ],
           ],
           'ckeditor5_list' => [
-            'reversed' => FALSE,
-            'startIndex' => TRUE,
+            'properties' => [
+              'reversed' => FALSE,
+              'startIndex' => TRUE,
+            ],
+            'multiBlock' => TRUE,
           ],
           'ckeditor5_sourceEditing' => [
             'allowed_tags' => [

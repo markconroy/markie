@@ -34,7 +34,6 @@ class UserAccountFormPasswordResetTest extends KernelTestBase {
     parent::setUp();
     // Install default configuration; required for AccountFormController.
     $this->installConfig(['user']);
-    $this->installSchema('system', ['sequences']);
     $this->installEntitySchema('user');
 
     // Create an user to login.
@@ -42,7 +41,7 @@ class UserAccountFormPasswordResetTest extends KernelTestBase {
     $this->user->save();
 
     // Set current user.
-    $this->container->set('current_user', $this->user);
+    $this->container->get('current_user')->setAccount($this->user);
     // Install the router table and then rebuild.
     \Drupal::service('router.builder')->rebuild();
   }

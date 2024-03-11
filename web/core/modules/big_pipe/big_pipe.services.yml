@@ -12,6 +12,7 @@ services:
   big_pipe:
     class: Drupal\big_pipe\Render\BigPipe
     arguments: ['@renderer', '@session', '@request_stack', '@http_kernel', '@event_dispatcher', '@config.factory']
+  Drupal\big_pipe\Render\BigPipe: '@big_pipe'
   html_response.attachments_processor.big_pipe:
     public: false
     class: \Drupal\big_pipe\Render\BigPipeResponseAttachmentsProcessor
@@ -22,3 +23,8 @@ services:
     class: Drupal\big_pipe\EventSubscriber\NoBigPipeRouteAlterSubscriber
     tags:
       - { name: event_subscriber }
+  http_middleware.big_pipe:
+    class: \Drupal\big_pipe\StackMiddleware\ContentLength
+    tags:
+      # Must run after the content_length middleware.
+      - { name: http_middleware, priority: 150 }

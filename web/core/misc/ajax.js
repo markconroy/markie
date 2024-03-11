@@ -362,7 +362,7 @@
    * @prop {string} [progress.type='throbber']
    *   Type of progress element, core provides `'bar'`, `'throbber'` and
    *   `'fullscreen'`.
-   * @prop {string} [progress.message=Drupal.t('Please wait...')]
+   * @prop {string} [progress.message=Drupal.t('Processing...')]
    *   Custom message to be used with the bar indicator.
    * @prop {object} [submit]
    *   Extra data to be sent with the Ajax request.
@@ -407,7 +407,7 @@
       method: 'replaceWith',
       progress: {
         type: 'throbber',
-        message: Drupal.t('Please wait...'),
+        message: Drupal.t('Processing...'),
       },
       submit: {
         js: true,
@@ -443,6 +443,13 @@
     this.element = element;
 
     /**
+     * The last focused element right before processing ajax response.
+     *
+     * @type {string|null}
+     */
+    this.preCommandsFocusedElementSelector = null;
+
+    /**
      * @type {Drupal.Ajax~elementSettings}
      */
     this.elementSettings = elementSettings;
@@ -459,7 +466,7 @@
     // If no Ajax callback URL was given, use the link href or form action.
     if (!this.url) {
       const $element = $(this.element);
-      if ($element.is('a')) {
+      if (this.element.tagName === 'A') {
         this.url = $element.attr('href');
       } else if (this.element && element.form) {
         this.url = this.$form.attr('action');
@@ -533,6 +540,7 @@
       },
       beforeSubmit(formValues, elementSettings, options) {
         ajax.ajaxing = true;
+        ajax.preCommandsFocusedElementSelector = null;
         return ajax.beforeSubmit(formValues, elementSettings, options);
       },
       beforeSend(xmlhttprequest, options) {
@@ -540,6 +548,9 @@
         return ajax.beforeSend(xmlhttprequest, options);
       },
       success(response, status, xmlhttprequest) {
+        ajax.preCommandsFocusedElementSelector =
+          document.activeElement.getAttribute('data-drupal-selector');
+
         // Sanity check for browser support (object expected).
         // When using iFrame uploads, responses must be returned as a string.
         if (typeof response === 'string') {
@@ -608,7 +619,7 @@
 
     // Ensure that we have a valid URL by adding ? when no query parameter is
     // yet available, otherwise append using &.
-    if (ajax.options.url.indexOf('?') === -1) {
+    if (!ajax.options.url.includes('?')) {
       ajax.options.url += '?';
     } else {
       ajax.options.url += '&';
@@ -824,6 +835,7 @@
 
     // Allow Drupal to return new JavaScript and CSS files to load without
     // returning the ones already loaded.
+    // @see \Drupal\Core\StackMiddleWare\AjaxPageState
     // @see \Drupal\Core\Theme\AjaxBasePageNegotiator
     // @see \Drupal\Core\Asset\LibraryDependencyResolverInterface::getMinimalRepresentativeSubset()
     // @see system_js_settings_alter()
@@ -1073,7 +1085,9 @@
     const focusChanged = Object.keys(response || {}).some((key) => {
       const { command, method } = response[key];
       return (
-        command === 'focusFirst' || (command === 'invoke' && method === 'focus')
+        command === 'focusFirst' ||
+        command === 'openDialog' ||
+        (command === 'invoke' && method === 'focus')
       );
     });
 
@@ -1083,19 +1097,30 @@
         // the triggering element or one of its parents if that element does not
         // exist anymore.
         .then(() => {
-          if (
-            !focusChanged &&
-            this.element &&
-            !$(this.element).data('disable-refocus')
-          ) {
+          if (!focusChanged) {
             let target = false;
-
-            for (let n = elementParents.length - 1; !target && n >= 0; n--) {
-              target = document.querySelector(
-                `[data-drupal-selector="${elementParents[n].getAttribute(
-                  'data-drupal-selector',
-                )}"]`,
-              );
+            if (this.element) {
+              if (
+                $(this.element).data('refocus-blur') &&
+                this.preCommandsFocusedElementSelector
+              ) {
+                target = document.querySelector(
+                  `[data-drupal-selector="${this.preCommandsFocusedElementSelector}"]`,
+                );
+              }
+              if (!target && !$(this.element).data('disable-refocus')) {
+                for (
+                  let n = elementParents.length - 1;
+                  !target && n >= 0;
+                  n--
+                ) {
+                  target = document.querySelector(
+                    `[data-drupal-selector="${elementParents[n].getAttribute(
+                      'data-drupal-selector',
+                    )}"]`,
+                  );
+                }
+              }
             }
             if (target) {
               $(target).trigger('focus');
@@ -1486,6 +1511,7 @@
      *   The XMLHttpRequest status.
      */
     css(ajax, response, status) {
+      // eslint-disable-next-line jquery/no-css
       $(response.selector).css(response.argument);
     },
 
@@ -1690,7 +1716,8 @@
 
       const allUniqueBundleIds = response.data.map(function (style) {
         const uniqueBundleId = style.href + ajax.instanceIndex;
-        loadjs(style.href, uniqueBundleId, {
+        // Force file to load as a CSS stylesheet using 'css!' flag.
+        loadjs(`css!${style.href}`, uniqueBundleId, {
           before(path, styleEl) {
             // This allows all attributes to be added, like media.
             Object.keys(style).forEach((attributeKey) => {

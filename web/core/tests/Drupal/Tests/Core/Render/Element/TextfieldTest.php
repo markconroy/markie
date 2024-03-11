@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\Core\Render\Element;
 
 use Drupal\Core\Form\FormStateInterface;
@@ -33,7 +35,7 @@ class TextfieldTest extends UnitTestCase {
     $data[] = ['', ['test']];
     $data[] = ['test', 'test'];
     $data[] = ['123', 123];
-    $data[] = ['testwithnewline', "test\nwith\rnewline"];
+    $data[] = ['testWithNewline', "test\nWith\rNewline"];
 
     return $data;
   }

@@ -2,11 +2,14 @@
 
 namespace Drupal\sqlite\Driver\Database\sqlite;
 
+use Drupal\Core\Database\Connection as DatabaseConnection;
 use Drupal\Core\Database\DatabaseExceptionWrapper;
 use Drupal\Core\Database\DatabaseNotFoundException;
-use Drupal\Core\Database\Connection as DatabaseConnection;
+use Drupal\Core\Database\ExceptionHandler;
+use Drupal\Core\Database\Query\Condition;
 use Drupal\Core\Database\StatementInterface;
 use Drupal\Core\Database\SupportsTemporaryTablesInterface;
+use Drupal\Core\Database\Transaction\TransactionManagerInterface;
 
 /**
  * SQLite implementation of \Drupal\Core\Database\Connection.
@@ -27,6 +30,11 @@ class Connection extends DatabaseConnection implements SupportsTemporaryTablesIn
    * Whether or not the active transaction (if any) will be rolled back.
    *
    * @var bool
+   *
+   * @deprecated in drupal:10.2.0 and is removed from drupal:11.0.0. It is
+   *   unused.
+   *
+   * @see https://www.drupal.org/node/3381002
    */
   protected $willRollback;
 
@@ -416,7 +424,11 @@ class Connection extends DatabaseConnection implements SupportsTemporaryTablesIn
     return $statement;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function nextId($existing_id = 0) {
+    @trigger_error('Drupal\Core\Database\Connection::nextId() is deprecated in drupal:10.2.0 and is removed from drupal:11.0.0. Modules should use instead the keyvalue storage for the last used id. See https://www.drupal.org/node/3349345', E_USER_DEPRECATED);
     try {
       $this->startTransaction();
     }
@@ -502,6 +514,93 @@ class Connection extends DatabaseConnection implements SupportsTemporaryTablesIn
     }
 
     return $db_url;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function exceptionHandler() {
+    return new ExceptionHandler();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function select($table, $alias = NULL, array $options = []) {
+    return new Select($this, $table, $alias, $options);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function insert($table, array $options = []) {
+    return new Insert($this, $table, $options);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function merge($table, array $options = []) {
+    return new Merge($this, $table, $options);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function upsert($table, array $options = []) {
+    return new Upsert($this, $table, $options);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function update($table, array $options = []) {
+    return new Update($this, $table, $options);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function delete($table, array $options = []) {
+    return new Delete($this, $table, $options);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function truncate($table, array $options = []) {
+    return new Truncate($this, $table, $options);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function schema() {
+    if (empty($this->schema)) {
+      $this->schema = new Schema($this);
+    }
+    return $this->schema;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function condition($conjunction) {
+    return new Condition($conjunction);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function driverTransactionManager(): TransactionManagerInterface {
+    return new TransactionManager($this);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function startTransaction($name = '') {
+    return $this->transactionManager()->push($name);
   }
 
 }

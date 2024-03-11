@@ -1,7 +1,11 @@
 module.exports = {
   '@tags': ['core', 'ckeditor5'],
   before(browser) {
-    browser.drupalInstall({ installProfile: 'minimal' });
+    browser
+      .drupalInstall({ installProfile: 'minimal' })
+      .drupalInstallModule('ckeditor5', true)
+      .drupalInstallModule('field_ui');
+
     // Set fixed (desktop-ish) size to ensure a maximum viewport.
     browser.resizeWindow(1920, 1080);
   },
@@ -11,17 +15,6 @@ module.exports = {
   'Ensure CKEditor respects field widget row value': (browser) => {
     browser.drupalLoginAsAdmin(() => {
       browser
-        // Enable required modules.
-        .drupalRelativeURL('/admin/modules')
-        .click('[name="modules[ckeditor5][enable]"]')
-        .click('[name="modules[field_ui][enable]"]')
-        .submitForm('input[type="submit"]') // Submit module form.
-        .waitForElementVisible(
-          '.system-modules-confirm-form input[value="Continue"]',
-        )
-        .submitForm('input[value="Continue"]') // Confirm installation of dependencies.
-        .waitForElementVisible('.system-modules', 10000)
-
         // Create new input format.
         .drupalRelativeURL('/admin/config/content/formats/add')
         .waitForElementVisible('[data-drupal-selector="edit-name"]')
@@ -35,7 +28,10 @@ module.exports = {
           '[data-drupal-selector="edit-editor-settings-toolbar"]',
         )
         .click('.ckeditor5-toolbar-button-sourceEditing') // Select the Source Editing button.
-        .keys(browser.Keys.DOWN) // Hit the down arrow key to move it to the toolbar.
+        // Hit the down arrow key to move it to the toolbar.
+        .perform(function () {
+          return this.actions().sendKeys(browser.Keys.ARROW_DOWN);
+        })
         // Wait for new source editing vertical tab to be present before continuing.
         .waitForElementVisible(
           '[href*=edit-editor-settings-plugins-ckeditor5-sourceediting]',

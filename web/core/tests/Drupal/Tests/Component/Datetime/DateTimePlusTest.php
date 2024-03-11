@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\Component\Datetime;
 
 use Drupal\Component\Datetime\DateTimePlus;
@@ -823,7 +825,7 @@ class DateTimePlusTest extends TestCase {
         ],
       ],
       [
-        'lorem ipsum dolor sit amet',
+        'invalid time string',
         [
           'The timezone could not be found in the database',
           'Double timezone specification',

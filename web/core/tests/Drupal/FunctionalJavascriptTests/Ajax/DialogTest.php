@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\FunctionalJavascriptTests\Ajax;
 
 use Drupal\ajax_test\Controller\AjaxTestController;
@@ -144,25 +146,35 @@ class DialogTest extends WebDriverTestBase {
     $preview = $form_dialog->findButton('Preview');
     $this->assertNotNull($preview, 'The dialog contains a "Preview" button.');
 
-    // When a form with submit inputs is in a dialog, the form's submit inputs
-    // are copied to the dialog buttonpane as buttons. The originals should have
-    // their styles set to display: none.
-    $hidden_buttons = $this->getSession()->getPage()->findAll('css', '.ajax-test-form [type="submit"]');
-    $this->assertCount(2, $hidden_buttons);
+    // Form submit inputs, link buttons, and buttons in dialog are copied to the
+    // dialog buttonpane as buttons. The originals should have their styles set
+    // to display: none.
+    $hidden_buttons = $this->getSession()->getPage()->findAll('css', '.ajax-test-form .button');
+    $this->assertCount(3, $hidden_buttons);
     $hidden_button_text = [];
     foreach ($hidden_buttons as $button) {
       $styles = $button->getAttribute('style');
       $this->assertStringContainsStringIgnoringCase('display: none;', $styles);
-      $hidden_button_text[] = $button->getAttribute('value');
+      $hidden_button_text[] = $button->hasAttribute('value') ? $button->getAttribute('value') : $button->getHtml();
     }
 
     // The copied buttons should have the same text as the submit inputs they
     // were copied from.
     $moved_to_buttonpane_buttons = $this->getSession()->getPage()->findAll('css', '.ui-dialog-buttonpane button');
-    $this->assertCount(2, $moved_to_buttonpane_buttons);
+    $this->assertCount(3, $moved_to_buttonpane_buttons);
     foreach ($moved_to_buttonpane_buttons as $key => $button) {
       $this->assertEquals($hidden_button_text[$key], $button->getText());
     }
+
+    // Press buttons in the dialog to ensure there are no AJAX errors.
+    $this->assertSession()->elementExists('css', '.ui-dialog-buttonpane')->pressButton('Hello world');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $has_focus_text = $this->getSession()->evaluateScript('document.activeElement.textContent');
+    $this->assertEquals('Do it', $has_focus_text);
+    $this->assertSession()->elementExists('css', '.ui-dialog-buttonpane')->pressButton('Preview');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $has_focus_text = $this->getSession()->evaluateScript('document.activeElement.textContent');
+    $this->assertEquals('Do it', $has_focus_text);
 
     // Reset: close the form.
     $form_dialog->findButton('Close')->press();

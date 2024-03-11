@@ -7,6 +7,7 @@
 
 use Drupal\Component\Utility\Html;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\StringTranslation\ByteSizeMarkup;
 use Drupal\search\SearchPageInterface;
 use Drupal\views\Form\ViewsForm;
 use Drupal\Core\Render\Element;
@@ -39,6 +40,10 @@ function umami_preprocess_field(&$variables, $hook) {
       $element['#field_name'] == 'field_tags' ||
       $element['#field_name'] == 'field_difficulty') {
       $variables['attributes']['class'] = 'label-items';
+
+      if ($element['#view_mode'] == 'card' && $element['#field_name'] == 'field_difficulty') {
+        $variables['attributes']['class'] = 'umami-card__label-items';
+      }
     }
   }
 }
@@ -70,7 +75,7 @@ function umami_theme_suggestions_block_alter(array &$suggestions, array $variabl
 function umami_preprocess_block__bundle__footer_promo_block(&$variables) {
   if (isset($variables['content']['field_content_link'])) {
     foreach (Element::children($variables['content']['field_content_link']) as $key) {
-      $variables['content']['field_content_link'][$key]['#attributes']['class'][] = 'footer-promo-block__link';
+      $variables['content']['field_content_link'][$key]['#attributes']['class'][] = 'footer-block__link';
     }
   }
 }
@@ -150,7 +155,7 @@ function umami_form_alter(array &$form, FormStateInterface $form_state, $form_id
 function umami_preprocess_image_widget(&$variables) {
   if (!empty($variables['element']['fids']['#value'])) {
     $file = reset($variables['element']['#files']);
-    $variables['data']["file_{$file->id()}"]['filename']['#suffix'] = ' <span class="file-size">(' . format_size($file->getSize()) . ')</span> ';
+    $variables['data']["file_{$file->id()}"]['filename']['#suffix'] = ' <span class="file-size">(' . ByteSizeMarkup::create($file->getSize()) . ')</span> ';
   }
 }
 

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\Core\Entity\Access;
 
 use Drupal\Component\Plugin\PluginManagerInterface;
@@ -182,9 +184,9 @@ class EntityFormDisplayAccessControlHandlerTest extends UnitTestCase {
 
     $this->entity = new EntityFormDisplay([
       'targetEntityType' => 'foobar',
-      'bundle' => 'bazqux',
+      'bundle' => 'new_bundle',
       'mode' => 'default',
-      'id' => 'foobar.bazqux.default',
+      'id' => 'foobar.new_bundle.default',
       'uuid' => '6f2f259a-f3c7-42ea-bdd5-111ad1f85ed1',
     ], 'entity_display');
 

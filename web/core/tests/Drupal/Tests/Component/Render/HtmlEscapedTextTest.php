@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\Component\Render;
 
 use Drupal\Component\Render\HtmlEscapedText;
@@ -59,7 +61,7 @@ class HtmlEscapedTextTest extends TestCase {
    * @covers ::count
    */
   public function testCount() {
-    $string = 'Can I please have a <em>kitten</em>';
+    $string = 'Can I have a <em>kitten</em>';
     $escapable_string = new HtmlEscapedText($string);
     $this->assertEquals(strlen($string), $escapable_string->count());
   }

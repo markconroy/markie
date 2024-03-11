@@ -111,10 +111,10 @@
    *   (due to limitations of jQuery.serialize()). That is deemed to be
    *   acceptable, because if the user forgot to attach a file, then the size of
    *   HTTP payload will most likely be small enough to be fully passed to the
-   *   server endpoint within (milli)seconds. If a user mistakenly attached a
-   *   wrong file and is technically versed enough to cancel the form submission
-   *   (and HTTP payload) in order to attach a different file, then that
-   *   edge-case is not supported here.
+   *   server endpoint within seconds, or even milliseconds. If a user
+   *   mistakenly attached a wrong file and is technically versed enough to
+   *   cancel the form submission (and HTTP payload) in order to attach a
+   *   different file, then that edge-case is not supported here.
    *
    * Lastly, all forms submitted via HTTP GET are idempotent by definition of
    * HTTP standards, so excluded in this implementation.
@@ -184,7 +184,7 @@
   Drupal.behaviors.formUpdated = {
     attach(context) {
       const $context = $(context);
-      const contextIsForm = $context.is('form');
+      const contextIsForm = context.tagName === 'FORM';
       const $forms = $(
         once('form-updated', contextIsForm ? $context : $context.find('form')),
       );
@@ -219,7 +219,7 @@
     },
     detach(context, settings, trigger) {
       const $context = $(context);
-      const contextIsForm = $context.is('form');
+      const contextIsForm = context.tagName === 'FORM';
       if (trigger === 'unload') {
         once
           .remove(
@@ -293,7 +293,7 @@
     } else {
       url = window.location;
     }
-    const hash = url.hash.substr(1);
+    const hash = url.hash.substring(1);
     if (hash) {
       const $target = $(`#${hash}`);
       $('body').trigger('formFragmentLinkClickOrHashChange', [$target]);

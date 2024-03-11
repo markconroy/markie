@@ -2,7 +2,6 @@
 
 namespace Drupal\Tests\field\Kernel;
 
-use Drupal\Component\Render\FormattableMarkup;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 
@@ -50,6 +49,7 @@ class FieldAttachStorageTest extends FieldKernelTestBase {
       $values[$current_revision] = $current_values;
     }
 
+    /** @var \Drupal\Core\Entity\RevisionableStorageInterface $storage */
     $storage = $this->container->get('entity_type.manager')->getStorage($entity_type);
     $storage->resetCache();
     $entity = $storage->load($entity_id);
@@ -58,17 +58,17 @@ class FieldAttachStorageTest extends FieldKernelTestBase {
     $this->assertCount($cardinality, $entity->{$this->fieldTestData->field_name}, 'Current revision: expected number of values');
     for ($delta = 0; $delta < $cardinality; $delta++) {
       // The field value loaded matches the one inserted or updated.
-      $this->assertEquals($values[$current_revision][$delta]['value'], $entity->{$this->fieldTestData->field_name}[$delta]->value, new FormattableMarkup('Current revision: expected value %delta was found.', ['%delta' => $delta]));
+      $this->assertEquals($values[$current_revision][$delta]['value'], $entity->{$this->fieldTestData->field_name}[$delta]->value, "Current revision: expected value $delta was found.");
     }
 
     // Confirm each revision loads the correct data.
     foreach (array_keys($values) as $revision_id) {
       $entity = $storage->loadRevision($revision_id);
       // Number of values per field loaded equals the field cardinality.
-      $this->assertCount($cardinality, $entity->{$this->fieldTestData->field_name}, new FormattableMarkup('Revision %revision_id: expected number of values.', ['%revision_id' => $revision_id]));
+      $this->assertCount($cardinality, $entity->{$this->fieldTestData->field_name}, "Revision $revision_id: expected number of values.");
       for ($delta = 0; $delta < $cardinality; $delta++) {
         // The field value loaded matches the one inserted or updated.
-        $this->assertEquals($values[$revision_id][$delta]['value'], $entity->{$this->fieldTestData->field_name}[$delta]->value, new FormattableMarkup('Revision %revision_id: expected value %delta was found.', ['%revision_id' => $revision_id, '%delta' => $delta]));
+        $this->assertEquals($values[$revision_id][$delta]['value'], $entity->{$this->fieldTestData->field_name}[$delta]->value, "Revision $revision_id: expected value $delta was found.");
       }
     }
   }
@@ -139,7 +139,7 @@ class FieldAttachStorageTest extends FieldKernelTestBase {
           continue;
         }
         // The field value loaded matches the one inserted.
-        $this->assertEquals($values[$index][$field_name], $entity->{$field_name}->value, new FormattableMarkup('Entity %index: expected value was found.', ['%index' => $index]));
+        $this->assertEquals($values[$index][$field_name], $entity->{$field_name}->value, "Entity $index: expected value was found.");
       }
     }
   }
@@ -252,6 +252,7 @@ class FieldAttachStorageTest extends FieldKernelTestBase {
     $entity->setNewRevision();
     $entity->save();
     $vids[] = $entity->getRevisionId();
+    /** @var \Drupal\Core\Entity\RevisionableStorageInterface $controller */
     $controller = $this->container->get('entity_type.manager')->getStorage($entity->getEntityTypeId());
     $controller->resetCache();
 
@@ -294,7 +295,7 @@ class FieldAttachStorageTest extends FieldKernelTestBase {
     $cardinality = $this->fieldTestData->field_storage->getCardinality();
 
     // Create a new bundle.
-    $new_bundle = 'test_bundle_' . mb_strtolower($this->randomMachineName());
+    $new_bundle = 'test_bundle_' . $this->randomMachineName();
     entity_test_create_bundle($new_bundle, NULL, $entity_type);
 
     // Add a field to that bundle.
@@ -321,7 +322,7 @@ class FieldAttachStorageTest extends FieldKernelTestBase {
     $this->createFieldWithStorage('', $entity_type);
 
     // Create a new bundle.
-    $new_bundle = 'test_bundle_' . mb_strtolower($this->randomMachineName());
+    $new_bundle = 'test_bundle_' . $this->randomMachineName();
     entity_test_create_bundle($new_bundle, NULL, $entity_type);
 
     // Add a field to that bundle.
@@ -329,7 +330,7 @@ class FieldAttachStorageTest extends FieldKernelTestBase {
     FieldConfig::create($this->fieldTestData->field_definition)->save();
 
     // Create a second field for the test bundle
-    $field_name = mb_strtolower($this->randomMachineName() . '_field_name');
+    $field_name = $this->randomMachineName() . '_field_name';
     $field_storage = [
       'field_name' => $field_name,
       'entity_type' => $entity_type,

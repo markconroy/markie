@@ -74,7 +74,7 @@ class MigrateNodeTest extends MigrateDrupal7TestBase {
   protected function getFileMigrationInfo() {
     return [
       'path' => 'public://sites/default/files/cube.jpeg',
-      'size' => '3620',
+      'size' => 3620,
       'base_path' => 'public://',
       'plugin_id' => 'd7_file',
     ];
@@ -106,7 +106,7 @@ class MigrateNodeTest extends MigrateDrupal7TestBase {
    *
    * @internal
    */
-  protected function assertEntity(string $id, string $type, string $langcode, string $title, int $uid, bool $status, int $created, int $changed, bool $promoted, bool $sticky): void {
+  protected function assertEntity(int $id, string $type, string $langcode, string $title, int $uid, bool $status, int $created, int $changed, bool $promoted, bool $sticky): void {
     /** @var \Drupal\node\NodeInterface $node */
     $node = Node::load($id);
     $this->assertInstanceOf(NodeInterface::class, $node);
@@ -158,8 +158,8 @@ class MigrateNodeTest extends MigrateDrupal7TestBase {
     $this->assertSame(9, $results['node']);
     $this->assertSame(0, $results['node_complete']);
 
-    $this->assertEntity(1, 'test_content_type', 'en', 'An English Node', '2', TRUE, '1421727515', '1441032132', TRUE, FALSE);
-    $this->assertRevision(1, 'An English Node', '1', NULL, '1441032132');
+    $this->assertEntity(1, 'test_content_type', 'en', 'An English Node', 2, TRUE, 1421727515, 1441032132, TRUE, FALSE);
+    $this->assertRevision(1, 'An English Node', 1, NULL, 1441032132);
 
     $node = Node::load(1);
     $this->assertNotEmpty($node->field_boolean->value);

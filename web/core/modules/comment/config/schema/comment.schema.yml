@@ -38,10 +38,10 @@ comment.type.*:
   label: 'Comment type settings'
   mapping:
     id:
-      type: string
+      type: machine_name
       label: 'ID'
     label:
-      type: label
+      type: required_label
       label: 'Label'
     target_entity_type_id:
       type: string

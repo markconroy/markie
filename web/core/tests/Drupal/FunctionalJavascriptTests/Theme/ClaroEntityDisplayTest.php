@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\FunctionalJavascriptTests\Theme;
 
 use Drupal\Tests\field_ui\FunctionalJavascript\EntityDisplayTest;
@@ -49,7 +51,6 @@ class ClaroEntityDisplayTest extends EntityDisplayTest {
     $this->getSession()->getPage()->pressButton('Show row weights');
     $this->assertSession()->waitForElementVisible('css', '[name="fields[field_test_text][region]"]');
     $this->getSession()->getPage()->selectFieldOption('fields[field_test_text][region]', 'hidden');
-    $this->assertSession()->assertWaitOnAjaxRequest();
     $this->assertTrue($this->assertSession()->optionExists('fields[field_test_text][region]', 'hidden')->isSelected());
 
     $this->submitForm([], 'Save');
@@ -78,7 +79,6 @@ class ClaroEntityDisplayTest extends EntityDisplayTest {
     $this->assertTrue($this->assertSession()->optionExists('fields[field_test_text][region]', 'hidden')->isSelected());
 
     $this->getSession()->getPage()->selectFieldOption('fields[field_test_text][region]', 'content');
-    $this->assertSession()->assertWaitOnAjaxRequest();
     $this->assertTrue($this->assertSession()->optionExists('fields[field_test_text][region]', 'content')->isSelected());
 
     $this->submitForm([], 'Save');

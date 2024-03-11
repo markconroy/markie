@@ -126,6 +126,7 @@ class ModuleInstaller implements ModuleInstallerInterface {
         throw new ObsoleteExtensionException("Unable to install modules: module '$module' is obsolete.");
       }
       if ($module_data[$module]->info[ExtensionLifecycle::LIFECYCLE_IDENTIFIER] === ExtensionLifecycle::DEPRECATED) {
+        // phpcs:ignore Drupal.Semantics.FunctionTriggerError
         @trigger_error("The module '$module' is deprecated. See " . $module_data[$module]->info['lifecycle_link'], E_USER_DEPRECATED);
       }
     }
@@ -188,6 +189,12 @@ class ModuleInstaller implements ModuleInstallerInterface {
         // Throw an exception if the module name is too long.
         if (strlen($module) > DRUPAL_EXTENSION_NAME_MAX_LENGTH) {
           throw new ExtensionNameLengthException("Module name '$module' is over the maximum allowed length of " . DRUPAL_EXTENSION_NAME_MAX_LENGTH . ' characters');
+        }
+
+        // Throw an exception if a theme with the same name is enabled.
+        $installed_themes = $extension_config->get('theme') ?: [];
+        if (isset($installed_themes[$module])) {
+          throw new ExtensionNameReservedException("Module name $module is already in use by an installed theme.");
         }
 
         // Load a new config object for each iteration, otherwise changes made

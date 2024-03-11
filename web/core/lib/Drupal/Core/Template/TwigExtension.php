@@ -159,6 +159,7 @@ class TwigExtension extends AbstractExtension {
     // render_var -> TwigExtension->renderVar() function.
     return [
       new TwigNodeVisitor(),
+      new TwigNodeVisitorCheckDeprecations(),
     ];
   }
 
@@ -605,15 +606,18 @@ class TwigExtension extends AbstractExtension {
   /**
    * Creates an Attribute object.
    *
-   * @param array $attributes
-   *   (optional) An associative array of key-value pairs to be converted to
-   *   HTML attributes.
+   * @param Attribute|array $attributes
+   *   (optional) An existing attribute object or an associative array of
+   *   key-value pairs to be converted to HTML attributes.
    *
    * @return \Drupal\Core\Template\Attribute
    *   An attributes object that has the given attributes.
    */
-  public function createAttribute(array $attributes = []) {
-    return new Attribute($attributes);
+  public function createAttribute(Attribute|array $attributes = []) {
+    if (\is_array($attributes)) {
+      return new Attribute($attributes);
+    }
+    return $attributes;
   }
 
   /**
@@ -707,6 +711,28 @@ class TwigExtension extends AbstractExtension {
     }
 
     return $element;
+  }
+
+  /**
+   * Triggers a deprecation error if a variable is deprecated.
+   *
+   * @param array $context
+   *   A Twig context array.
+   * @param array $used_variables
+   *   The names of the variables used in a template.
+   *
+   * @see \Drupal\Core\Template\TwigNodeCheckDeprecations
+   */
+  public function checkDeprecations(array $context, array $used_variables): void {
+    if (!isset($context['deprecations'])) {
+      return;
+    }
+
+    foreach ($used_variables as $name) {
+      if (isset($context['deprecations'][$name]) && \array_key_exists($name, $context)) {
+        @trigger_error($context['deprecations'][$name], E_USER_DEPRECATED);
+      }
+    }
   }
 
   /**

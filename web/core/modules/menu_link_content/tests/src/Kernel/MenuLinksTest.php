@@ -7,6 +7,7 @@ use Drupal\Core\Menu\MenuTreeParameters;
 use Drupal\entity_test\Entity\EntityTestExternal;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\menu_link_content\Entity\MenuLinkContent;
+use Drupal\menu_link_content\Plugin\Menu\MenuLinkContent as MenuLinkContentPlugin;
 use Drupal\system\Entity\Menu;
 use Drupal\user\Entity\User;
 
@@ -44,14 +45,13 @@ class MenuLinksTest extends KernelTestBase {
 
     $this->menuLinkManager = \Drupal::service('plugin.manager.menu.link');
 
-    $this->installSchema('system', ['sequences']);
     $this->installSchema('user', ['users_data']);
     $this->installEntitySchema('entity_test_external');
     $this->installEntitySchema('menu_link_content');
     $this->installEntitySchema('user');
 
     Menu::create([
-      'id' => 'menu_test',
+      'id' => 'menu-test',
       'label' => 'Test menu',
       'description' => 'Description text',
     ])->save();
@@ -62,7 +62,7 @@ class MenuLinksTest extends KernelTestBase {
    */
   public function createLinkHierarchy($module = 'menu_test') {
     // First remove all the menu links in the menu.
-    $this->menuLinkManager->deleteLinksInMenu('menu_test');
+    $this->menuLinkManager->deleteLinksInMenu('menu-test');
 
     // Then create a simple link hierarchy:
     // - parent
@@ -73,7 +73,7 @@ class MenuLinksTest extends KernelTestBase {
     $base_options = [
       'title' => 'Menu link test',
       'provider' => $module,
-      'menu_name' => 'menu_test',
+      'menu_name' => 'menu-test',
     ];
 
     $parent = $base_options + [
@@ -138,7 +138,7 @@ class MenuLinksTest extends KernelTestBase {
    */
   public function testCreateLink() {
     $options = [
-      'menu_name' => 'menu_test',
+      'menu_name' => 'menu-test',
       'bundle' => 'menu_link_content',
       'link' => [['uri' => 'internal:/']],
       'title' => 'Link test',
@@ -175,7 +175,7 @@ class MenuLinksTest extends KernelTestBase {
     // Create "canonical" menu link pointing to the user.
     $menu_link_content = MenuLinkContent::create([
       'title' => 'username profile',
-      'menu_name' => 'menu_test',
+      'menu_name' => 'menu-test',
       'link' => [['uri' => 'entity:user/' . $user->id()]],
       'bundle' => 'menu_test',
     ]);
@@ -184,7 +184,7 @@ class MenuLinksTest extends KernelTestBase {
     // Create "collection" menu link pointing to the user listing page.
     $menu_link_content_collection = MenuLinkContent::create([
       'title' => 'users listing',
-      'menu_name' => 'menu_test',
+      'menu_name' => 'menu-test',
       'link' => [['uri' => 'internal:/' . $user->toUrl('collection')->getInternalPath()]],
       'bundle' => 'menu_test',
     ]);
@@ -192,18 +192,18 @@ class MenuLinksTest extends KernelTestBase {
 
     // Check is menu links present in the menu.
     $menu_tree_condition = (new MenuTreeParameters())->addCondition('route_name', 'entity.user.canonical');
-    $this->assertCount(1, \Drupal::menuTree()->load('menu_test', $menu_tree_condition));
+    $this->assertCount(1, \Drupal::menuTree()->load('menu-test', $menu_tree_condition));
     $menu_tree_condition_collection = (new MenuTreeParameters())->addCondition('route_name', 'entity.user.collection');
-    $this->assertCount(1, \Drupal::menuTree()->load('menu_test', $menu_tree_condition_collection));
+    $this->assertCount(1, \Drupal::menuTree()->load('menu-test', $menu_tree_condition_collection));
 
     // Delete the user.
     $user->delete();
 
     // The "canonical" menu item has to be deleted.
-    $this->assertCount(0, \Drupal::menuTree()->load('menu_test', $menu_tree_condition));
+    $this->assertCount(0, \Drupal::menuTree()->load('menu-test', $menu_tree_condition));
 
     // The "collection" menu item should still present in the menu.
-    $this->assertCount(1, \Drupal::menuTree()->load('menu_test', $menu_tree_condition_collection));
+    $this->assertCount(1, \Drupal::menuTree()->load('menu-test', $menu_tree_condition_collection));
   }
 
   /**
@@ -327,7 +327,7 @@ class MenuLinksTest extends KernelTestBase {
   /**
    * Tests handling of pending revisions.
    *
-   * @coversDefaultClass \Drupal\menu_link_content\Plugin\Validation\Constraint\MenuTreeHierarchyConstraintValidator
+   * @covers \Drupal\menu_link_content\Plugin\Validation\Constraint\MenuTreeHierarchyConstraintValidator::validate
    */
   public function testPendingRevisions() {
     /** @var \Drupal\Core\Entity\RevisionableStorageInterface $storage */
@@ -338,14 +338,14 @@ class MenuLinksTest extends KernelTestBase {
     $root_1 = $storage->create([
       'title' => $default_root_1_title,
       'link' => [['uri' => 'internal:/#root_1']],
-      'menu_name' => 'menu_test',
+      'menu_name' => 'menu-test',
     ]);
     $root_1->save();
     $default_child1_title = $this->randomMachineName(8);
     $child1 = $storage->create([
       'title' => $default_child1_title,
       'link' => [['uri' => 'internal:/#child1']],
-      'menu_name' => 'menu_test',
+      'menu_name' => 'menu-test',
       'parent' => 'menu_link_content:' . $root_1->uuid(),
     ]);
     $child1->save();
@@ -353,7 +353,7 @@ class MenuLinksTest extends KernelTestBase {
     $child2 = $storage->create([
       'title' => $default_child2_title,
       'link' => [['uri' => 'internal:/#child2']],
-      'menu_name' => 'menu_test',
+      'menu_name' => 'menu-test',
       'parent' => 'menu_link_content:' . $child1->uuid(),
     ]);
     $child2->save();
@@ -361,7 +361,7 @@ class MenuLinksTest extends KernelTestBase {
     $root_2 = $storage->create([
       'title' => $default_root_2_title,
       'link' => [['uri' => 'internal:/#root_2']],
-      'menu_name' => 'menu_test',
+      'menu_name' => 'menu-test',
     ]);
     $root_2->save();
 
@@ -383,7 +383,7 @@ class MenuLinksTest extends KernelTestBase {
     $this->assertEquals('/#test', $child1_pending_revision->getUrlObject()->toString());
 
     // Check that saving a pending revision does not affect the menu tree.
-    $menu_tree = \Drupal::menuTree()->load('menu_test', new MenuTreeParameters());
+    $menu_tree = \Drupal::menuTree()->load('menu-test', new MenuTreeParameters());
     $parent_link = reset($menu_tree);
     $this->assertEquals($default_root_1_title, $parent_link->link->getTitle());
     $this->assertEquals('/#root_1', $parent_link->link->getUrlObject()->toString());
@@ -432,6 +432,31 @@ class MenuLinksTest extends KernelTestBase {
     $this->assertCount(1, $violations);
     $this->assertEquals('You can only change the hierarchy for the published version of this menu link.', $violations[0]->getMessage());
     $this->assertEquals('menu_parent', $violations[0]->getPropertyPath());
+  }
+
+  /**
+   * Tests that getEntity() method returns correct value.
+   */
+  public function testMenuLinkContentGetEntity(): void {
+    // Set up a custom menu link pointing to a specific path.
+    $user = User::create(['name' => 'username']);
+    $user->save();
+
+    $title = $this->randomMachineName();
+    $menu_link = MenuLinkContent::create([
+      'title' => $title,
+      'link' => [['uri' => 'internal:/' . $user->toUrl('collection')->getInternalPath()]],
+      'menu_name' => 'menu-test',
+    ]);
+    $menu_link->save();
+    $menu_tree = \Drupal::menuTree()->load('menu-test', new MenuTreeParameters());
+    $this->assertCount(1, $menu_tree);
+    /** @var \Drupal\Core\Menu\MenuLinkTreeElement $tree_element */
+    $tree_element = reset($menu_tree);
+    $this->assertInstanceOf(MenuLinkContentPlugin::class, $tree_element->link);
+    $this->assertInstanceOf(MenuLinkContent::class, $tree_element->link->getEntity());
+    $this->assertEquals($title, $tree_element->link->getEntity()->getTitle());
+    $this->assertEquals($menu_link->id(), $tree_element->link->getEntity()->id());
   }
 
 }

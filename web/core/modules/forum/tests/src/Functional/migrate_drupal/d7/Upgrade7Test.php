@@ -4,14 +4,13 @@ namespace Drupal\Tests\forum\Functional\migrate_drupal\d7;
 
 use Drupal\Tests\migrate_drupal_ui\Functional\MigrateUpgradeExecuteTestBase;
 
-// cspell:ignore Filefield Multiupload Imagefield
-
 /**
  * Tests Drupal 7 upgrade using the migrate UI.
  *
  * The test method is provided by the MigrateUpgradeTestBase class.
  *
  * @group forum
+ * @group #slow
  */
 class Upgrade7Test extends MigrateUpgradeExecuteTestBase {
 
@@ -61,40 +60,39 @@ class Upgrade7Test extends MigrateUpgradeExecuteTestBase {
    */
   protected function getEntityCounts() {
     return [
-      'block' => 25,
+      'action' => 27,
+      'base_field_override' => 3,
+      'block' => 26,
       'block_content' => 1,
       'block_content_type' => 1,
       'comment' => 0,
-      'comment_type' => 5,
+      'comment_type' => 7,
       'contact_form' => 2,
       'contact_message' => 0,
+      'date_format' => 12,
       'editor' => 2,
-      'field_config' => 20,
-      'field_storage_config' => 14,
-      'file' => 2,
+      'entity_form_display' => 16,
+      'entity_form_mode' => 1,
+      'entity_view_display' => 24,
+      'entity_view_mode' => 11,
+      'field_config' => 26,
+      'field_storage_config' => 16,
+      'file' => 1,
       'filter_format' => 7,
       'image_style' => 7,
+      'menu' => 5,
+      'menu_link_content' => 3,
       'node' => 2,
-      'node_type' => 4,
-      'search_page' => 2,
+      'node_type' => 6,
+      'path_alias' => 1,
+      'search_page' => 3,
       'shortcut' => 2,
       'shortcut_set' => 1,
-      'action' => 27,
-      'menu' => 5,
       'taxonomy_term' => 6,
       'taxonomy_vocabulary' => 2,
-      'path_alias' => 1,
-      'tour' => 2,
       'user' => 4,
       'user_role' => 4,
-      'menu_link_content' => 3,
       'view' => 14,
-      'date_format' => 12,
-      'entity_form_display' => 12,
-      'entity_form_mode' => 1,
-      'entity_view_display' => 18,
-      'entity_view_mode' => 11,
-      'base_field_override' => 3,
     ];
   }
 
@@ -102,15 +100,7 @@ class Upgrade7Test extends MigrateUpgradeExecuteTestBase {
    * {@inheritdoc}
    */
   protected function getEntityCountsIncremental() {
-    $counts = $this->getEntityCounts();
-    $counts['block_content'] = 2;
-    $counts['comment'] = 5;
-    $counts['file'] = 4;
-    $counts['menu_link_content'] = 13;
-    $counts['node'] = 8;
-    $counts['taxonomy_term'] = 26;
-    $counts['user'] = 5;
-    return $counts;
+    return [];
   }
 
   /**
@@ -149,6 +139,12 @@ class Upgrade7Test extends MigrateUpgradeExecuteTestBase {
   protected function getMissingPaths() {
     return [
       'Locale',
+      'Entity Translation',
+      'Internationalization',
+      'String translation',
+      'Taxonomy translation',
+      'Translation sets',
+      'Variable',
     ];
   }
 

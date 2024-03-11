@@ -1,10 +1,12 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace DrupalCodeGenerator\Twig;
 
 use DrupalCodeGenerator\Utils;
 use Twig\Environment;
-use Twig\Loader\LoaderInterface;
+use Twig\Loader\FilesystemLoader;
 use Twig\Source;
 use Twig\TokenStream;
 use Twig\TwigFilter;
@@ -17,7 +19,7 @@ final class TwigEnvironment extends Environment {
   /**
    * Constructs Twig environment object.
    */
-  public function __construct(LoaderInterface $loader, array $options = []) {
+  public function __construct(FilesystemLoader $loader, array $options = []) {
     parent::__construct($loader, $options);
 
     $this->addTokenParser(new TwigSortTokenParser());
@@ -37,6 +39,10 @@ final class TwigEnvironment extends Environment {
 
     $h2u = static fn (string $input): string => \str_replace('-', '_', $input);
     $this->addFilter(new TwigFilter('h2u', $h2u));
+
+    $this->addFilter(new TwigFilter('m2h', [Utils::class, 'machine2human']));
+    $this->addFilter(new TwigFilter('h2m', [Utils::class, 'human2machine']));
+    $this->addFilter(new TwigFilter('c2m', [Utils::class, 'camel2machine']));
 
     $this->addGlobal('SUT_TEST', \getenv('SUT_TEST'));
   }

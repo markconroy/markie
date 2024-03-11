@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\Core\EventSubscriber;
 
 use Drupal\Core\EventSubscriber\FinalExceptionSubscriber;
@@ -35,7 +37,7 @@ class FinalExceptionSubscriberTest extends UnitTestCase {
     $response = $event->getResponse();
 
     $this->assertInstanceOf(Response::class, $response);
-    $this->assertStringStartsWith('The website encountered an unexpected error. Please try again later.<br><br><em class="placeholder">Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException</em>: test message in ', $response->getContent());
+    $this->assertStringStartsWith('The website encountered an unexpected error. Try again later.<br><br><em class="placeholder">Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException</em>: test message in ', $response->getContent());
     $this->assertEquals(405, $response->getStatusCode());
     $this->assertEquals('POST, PUT', $response->headers->get('Allow'));
     // Also check that the text/plain content type was added.

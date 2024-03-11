@@ -6,6 +6,8 @@ use Drupal\Core\Database\Database;
 use Drupal\Core\Database\Install\Tasks as InstallTasks;
 use Drupal\Core\Database\DatabaseNotFoundException;
 
+// cspell:ignore trgm
+
 /**
  * Specifies installation tasks for PostgreSQL databases.
  */
@@ -248,6 +250,13 @@ class Tasks extends InstallTasks {
   public function checkExtensions() {
     $connection = Database::getConnection();
     try {
+      // Enable pg_trgm for PostgreSQL 13 or higher.
+      // @todo Remove this if-statement in D11 when the minimum required version
+      // for PostgreSQL becomes 13 or higher. https://www.drupal.org/i/3357409
+      if (version_compare($connection->version(), '13.0', '>=')) {
+        $connection->query('CREATE EXTENSION IF NOT EXISTS pg_trgm');
+      }
+
       if ($connection->schema()->extensionExists('pg_trgm')) {
         $this->pass(t('PostgreSQL has the pg_trgm extension enabled.'));
       }

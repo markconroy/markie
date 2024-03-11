@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\Core\Asset;
 
 use Drupal\Core\Asset\CssOptimizer;
@@ -246,11 +248,6 @@ class CssOptimizerUnitTest extends UnitTestCase {
     global $base_path;
     $original_base_path = $base_path;
     $base_path = '/';
-
-    // \Drupal\Core\Asset\CssOptimizer::loadFile() relies on the current working
-    // directory being the one that is used when index.php is the entry point.
-    // Note: PHPUnit automatically restores the original working directory.
-    chdir(realpath(__DIR__ . '/../../../../../../'));
 
     $this->assertEquals($expected, $this->optimizer->optimize($css_asset), 'Group of file CSS assets optimized correctly.');
 

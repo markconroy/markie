@@ -7,6 +7,8 @@ use Drupal\Core\Routing\RoutingEvents;
 use Drupal\Core\Test\PerformanceTestRecorder;
 use Drupal\Core\Extension\ModuleUninstallValidatorException;
 
+// cspell:ignore drupalmysqldriverdatabasemysql drupalpgsqldriverdatabasepgsql
+
 /**
  * Tests the interactive installer.
  *
@@ -23,7 +25,7 @@ class InstallerTest extends InstallerTestBase {
    * Ensures that the user page is available after installation.
    */
   public function testInstaller() {
-    $this->assertNotNull(\Drupal::state()->get('system.css_js_query_string'), 'The dummy query string should be set during install');
+    $this->assertNotEquals('0', \Drupal::service('asset.query_string')->get(), 'The dummy query string should be set during install');
     $this->assertSession()->addressEquals('user/1');
     $this->assertSession()->statusCodeEquals(200);
     // Confirm that we are logged-in after installation.
@@ -88,8 +90,8 @@ class InstallerTest extends InstallerTestBase {
 
     // Assert that we use the by core supported database drivers by default and
     // not the ones from the driver_test module.
-    $this->assertSession()->elementTextEquals('xpath', '//label[@for="edit-driver-mysql"]', 'MySQL, MariaDB, Percona Server, or equivalent');
-    $this->assertSession()->elementTextEquals('xpath', '//label[@for="edit-driver-pgsql"]', 'PostgreSQL');
+    $this->assertSession()->elementTextEquals('xpath', '//label[@for="edit-driver-drupalmysqldriverdatabasemysql"]', 'MySQL, MariaDB, Percona Server, or equivalent');
+    $this->assertSession()->elementTextEquals('xpath', '//label[@for="edit-driver-drupalpgsqldriverdatabasepgsql"]', 'PostgreSQL');
 
     parent::setUpSettings();
   }

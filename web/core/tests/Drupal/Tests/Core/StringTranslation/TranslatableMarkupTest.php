@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\Core\StringTranslation;
 
 use Drupal\Component\Render\FormattableMarkup;
@@ -54,7 +56,7 @@ class TranslatableMarkupTest extends UnitTestCase {
   public function testToString() {
     $translation = $this->createMock(TranslationInterface::class);
 
-    $string = 'May I have an exception please?';
+    $string = 'May I have an exception?';
     $text = $this->getMockBuilder(TranslatableMarkup::class)
       ->setConstructorArgs([$string, [], [], $translation])
       ->onlyMethods(['_die'])

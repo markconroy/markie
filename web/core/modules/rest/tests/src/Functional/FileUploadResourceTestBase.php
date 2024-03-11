@@ -16,6 +16,8 @@ use Drupal\user\Entity\User;
 use GuzzleHttp\RequestOptions;
 use Psr\Http\Message\ResponseInterface;
 
+// cspell:ignore èxample
+
 /**
  * Tests binary data file upload route.
  */
@@ -237,7 +239,7 @@ abstract class FileUploadResourceTestBase extends ResourceTestBase {
       ],
       'name' => [
         [
-          'value' => 'Dramallama',
+          'value' => 'Drama llama',
         ],
       ],
       'field_rest_file_test' => [

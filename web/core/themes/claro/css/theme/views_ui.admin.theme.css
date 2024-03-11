@@ -43,7 +43,9 @@
 .views-admin a.icon {
   border: 1px solid #ddd;
   border-radius: 0.25rem;
-  background: linear-gradient(-90deg, #fff 0, #e8e8e8 100%) no-repeat, repeat-y;
+  background:
+    linear-gradient(-90deg, #fff 0, #e8e8e8 100%) no-repeat,
+    repeat-y;
   box-shadow: 0 0 0 rgba(0, 0, 0, 0.3333) inset;
 }
 
@@ -96,11 +98,15 @@
 }
 
 .views-admin a.icon.delete {
-  background-position: center -52px, left top; /* LTR */
+  background-position:
+    center -52px,
+    left top; /* LTR */
 }
 
 [dir="rtl"] .views-admin a.icon.delete {
-  background-position: center -52px, right top;
+  background-position:
+    center -52px,
+    right top;
 }
 
 .views-admin .icon.rearrange {
@@ -108,11 +114,15 @@
 }
 
 .views-admin a.icon.rearrange {
-  background-position: center -111px, left top; /* LTR */
+  background-position:
+    center -111px,
+    left top; /* LTR */
 }
 
 [dir="rtl"] .views-admin a.icon.rearrange {
-  background-position: center -111px, right top;
+  background-position:
+    center -111px,
+    right top;
 }
 
 details.box-padding {
@@ -330,7 +340,8 @@ td.group-title {
   background-color: var(--color-gray-050);
 }
 
-.form-edit .form-actions {
+.form-edit .form-actions,
+.form-edit .field-actions {
   margin-top: 0;
   padding: var(--space-s) var(--space-m);
   border-right: 1px solid var(--color-gray-200-o-80);
@@ -369,8 +380,13 @@ td.group-title {
 }
 
 .view-preview-form .form-item--view-args,
-.view-preview-form .form-actions {
+.view-preview-form .form-actions,
+.view-preview-form .field-actions {
   margin-top: 0.3125rem;
+}
+
+.view-preview-form .views-bulk-actions__item {
+  margin-block-start: 0;
 }
 
 .view-preview-form .arguments-preview {
@@ -392,7 +408,8 @@ td.group-title {
 }
 
 .form-item--live-preview,
-.view-preview-form .form-actions {
+.view-preview-form .form-actions,
+.view-preview-form .field-actions {
   vertical-align: top;
 }
 
@@ -501,6 +518,14 @@ td.group-title {
 
 .views-edit-view {
   margin-bottom: 0.9375rem;
+}
+
+.views-edit-view.disabled .views-displays {
+  background-color: var(--color-red-020);
+}
+
+.views-edit-view.disabled .views-display-column {
+  background: var(--color-white);
 }
 
 /* The contents of the popup dialog on the views edit form. */

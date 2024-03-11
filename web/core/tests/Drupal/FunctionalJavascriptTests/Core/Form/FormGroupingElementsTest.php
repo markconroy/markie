@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\FunctionalJavascriptTests\Core\Form;
 
 use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
@@ -132,7 +134,6 @@ class FormGroupingElementsTest extends WebDriverTestBase {
 
     // Assert that both aria-expanded and aria-pressed are true.
     $this->assertEquals('true', $summary->getAttribute('aria-expanded'));
-    $this->assertEquals('true', $summary->getAttribute('aria-pressed'));
   }
 
   /**
