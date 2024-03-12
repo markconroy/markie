@@ -44,7 +44,8 @@
         "platformsh/config-reader": "^2.3",
         "topfloor/composer-cleanup-vcs-dirs": "^1.0",
         "zaporylie/composer-drupal-optimizations": "^1.1",
-        "drupal/devel_entity_updates": "^4.1"
+        "drupal/devel_entity_updates": "^4.1",
+        "drupal/jsonapi_extras": "^3.24"
     },
     "conflict": {
         "drupal/drupal": "*"
