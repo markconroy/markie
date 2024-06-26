@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\pgsql\Kernel\pgsql;
 
 use Drupal\KernelTests\Core\Database\DriverSpecificSchemaTestBase;
@@ -17,7 +19,7 @@ class SchemaTest extends DriverSpecificSchemaTestBase {
   /**
    * {@inheritdoc}
    */
-  public function checkSchemaComment(string $description, string $table, string $column = NULL): void {
+  public function checkSchemaComment(string $description, string $table, ?string $column = NULL): void {
     $this->assertSame($description, $this->schema->getComment($table, $column), 'The comment matches the schema description.');
   }
 
@@ -305,6 +307,62 @@ class SchemaTest extends DriverSpecificSchemaTestBase {
     $this->assertEquals($this->connection->getPrefix() . 'sequence_test', $sequence_owner->table_name);
     $this->assertEquals('uid', $sequence_owner->field_name, 'New sequence is owned by its table.');
 
+  }
+
+  /**
+   * Tests the method tableExists().
+   */
+  public function testTableExists(): void {
+    $table_name = 'test_table';
+    $table_specification = [
+      'fields' => [
+        'id'  => [
+          'type' => 'int',
+          'default' => NULL,
+        ],
+      ],
+    ];
+    $this->schema->createTable($table_name, $table_specification);
+    $prefixed_table_name = $this->connection->getPrefix($table_name) . $table_name;
+
+    // Three different calls to the method Schema::tableExists() with an
+    // unprefixed table name.
+    $this->assertTrue($this->schema->tableExists($table_name));
+    $this->assertTrue($this->schema->tableExists($table_name, TRUE));
+    $this->assertFalse($this->schema->tableExists($table_name, FALSE));
+
+    // Three different calls to the method Schema::tableExists() with a
+    // prefixed table name.
+    $this->assertFalse($this->schema->tableExists($prefixed_table_name));
+    $this->assertFalse($this->schema->tableExists($prefixed_table_name, TRUE));
+    $this->assertTrue($this->schema->tableExists($prefixed_table_name, FALSE));
+  }
+
+  /**
+   * Tests renaming a table where the new index name is equal to the table name.
+   */
+  public function testRenameTableWithNewIndexNameEqualsTableName(): void {
+    // Special table names for colliding with the PostgreSQL new index name.
+    $table_name_old = 'some_new_table_name__id__idx';
+    $table_name_new = 'some_new_table_name';
+    $table_specification = [
+      'fields' => [
+        'id'  => [
+          'type' => 'int',
+          'default' => NULL,
+        ],
+      ],
+      'indexes' => [
+        'id' => ['id'],
+      ],
+    ];
+    $this->schema->createTable($table_name_old, $table_specification);
+
+    // Renaming the table can fail for PostgreSQL, when a new index name is
+    // equal to the old table name.
+    $this->schema->renameTable($table_name_old, $table_name_new);
+
+    $this->assertTrue($this->schema->tableExists($table_name_new));
   }
 
   /**

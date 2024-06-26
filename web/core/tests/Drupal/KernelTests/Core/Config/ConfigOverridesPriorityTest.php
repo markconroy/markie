@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\KernelTests\Core\Config;
 
 use Drupal\Core\Language\Language;
@@ -30,7 +32,7 @@ class ConfigOverridesPriorityTest extends KernelTestBase {
     'language',
   ];
 
-  public function testOverridePriorities() {
+  public function testOverridePriorities(): void {
     $GLOBALS['config_test_run_module_overrides'] = FALSE;
 
     $non_overridden_mail = 'site@example.com';
@@ -51,6 +53,9 @@ class ConfigOverridesPriorityTest extends KernelTestBase {
       ->set('slogan', $non_overridden_slogan)
       ->set('mail', $non_overridden_mail)
       ->set('weight_select_max', 50)
+      // `name` and `slogan` are translatable, hence a `langcode` is required.
+      // @see \Drupal\Core\Config\Plugin\Validation\Constraint\LangcodeRequiredIfTranslatableValuesConstraint
+      ->set('langcode', 'en')
       ->save();
 
     // Ensure that no overrides are applying.

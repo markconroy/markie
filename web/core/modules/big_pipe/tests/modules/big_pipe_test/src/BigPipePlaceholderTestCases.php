@@ -4,8 +4,7 @@
  * @file
  */
 
-// cSpell:ignore Vxezb
-// cSpell:ignore divpiggydiv
+// cspell:ignore divpiggydiv timecurrent timetime
 
 namespace Drupal\big_pipe_test;
 
@@ -36,7 +35,7 @@ class BigPipePlaceholderTestCases {
    *
    * @return \Drupal\big_pipe_test\BigPipePlaceholderTestCase[]
    */
-  public static function cases(ContainerInterface $container = NULL, AccountInterface $user = NULL) {
+  public static function cases(?ContainerInterface $container = NULL, ?AccountInterface $user = NULL) {
     // Define the two types of cacheability that we expect to see. These will be
     // used in the expectations.
     $cacheability_depends_on_session_only = [
@@ -172,7 +171,7 @@ class BigPipePlaceholderTestCases {
         '#markup' => BigPipeMarkup::create('<hello'),
         '#attached' => [
           'placeholders' => [
-            '<hello' => ['#lazy_builder' => ['\Drupal\big_pipe_test\BigPipeTestController::helloOrYarhar', []]],
+            '<hello' => ['#lazy_builder' => ['\Drupal\big_pipe_test\BigPipeTestController::helloOrHi', []]],
           ],
         ],
       ],
@@ -182,7 +181,7 @@ class BigPipePlaceholderTestCases {
           // We specifically test an invalid callback here. We need to let
           // PHPStan ignore it.
           // @phpstan-ignore-next-line
-          'hello_or_yarhar',
+          'hello_or_hi',
           [],
         ],
       ]
@@ -197,7 +196,7 @@ class BigPipePlaceholderTestCases {
         ],
       ],
     ];
-    $hello->embeddedHtmlResponse = '<marquee>Yarhar llamas forever!</marquee>';
+    $hello->embeddedHtmlResponse = '<marquee>Llamas forever!</marquee>';
 
     // 5. Edge case: non-#lazy_builder placeholder that calls Fiber::suspend().
     $piggy = new BigPipePlaceholderTestCase(

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\KernelTests\Core\Entity;
 
 use Drupal\entity_test\Entity\EntityTestRev;
@@ -28,7 +30,7 @@ class EntityDuplicateTest extends EntityKernelTestBase {
   /**
    * Tests duplicating a non-default revision.
    */
-  public function testDuplicateNonDefaultRevision() {
+  public function testDuplicateNonDefaultRevision(): void {
     $entity = EntityTestRev::create([
       'name' => 'First Revision',
     ]);

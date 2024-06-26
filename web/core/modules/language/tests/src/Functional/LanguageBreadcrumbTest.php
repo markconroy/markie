@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\language\Functional;
 
 use Drupal\language\Entity\ConfigurableLanguage;
@@ -40,7 +42,7 @@ class LanguageBreadcrumbTest extends BrowserTestBase {
   /**
    * Tests breadcrumbs with URL prefixes.
    */
-  public function testBreadCrumbs() {
+  public function testBreadCrumbs(): void {
     // /user/login is the default frontpage which only works for an anonymous
     // user. Access the frontpage in different languages, ensure that no
     // breadcrumb is displayed.

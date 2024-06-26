@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\search\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
@@ -27,7 +29,7 @@ class SearchExcerptTest extends KernelTestBase {
    * contains either highlighted keywords or the original marked
    * up string if no keywords matched the string.
    */
-  public function testSearchExcerpt() {
+  public function testSearchExcerpt(): void {
     // Make some text with entities and tags.
     $text = 'The <strong>quick</strong> <a href="#">brown</a> fox &amp; jumps <h2>over</h2> the lazy dog';
     $expected = 'The quick brown fox &amp; jumps over the lazy dog';
@@ -75,7 +77,7 @@ class SearchExcerptTest extends KernelTestBase {
    * and compares them with strings that contain the original un-simplified
    * word.
    */
-  public function testSearchExcerptSimplified() {
+  public function testSearchExcerptSimplified(): void {
     $start_time = microtime(TRUE);
 
     // cSpell:disable
@@ -192,7 +194,7 @@ class SearchExcerptTest extends KernelTestBase {
    */
   protected function doSearchExcerpt($keys, $render_array, $langcode = NULL) {
     $render_array = search_excerpt($keys, $render_array, $langcode);
-    $text = (string) \Drupal::service('renderer')->renderPlain($render_array);
+    $text = (string) \Drupal::service('renderer')->renderInIsolation($render_array);
     // The search_excerpt() function adds some extra spaces -- not
     // important for HTML formatting or this test. Remove these for comparison.
     return preg_replace('| +|', ' ', $text);

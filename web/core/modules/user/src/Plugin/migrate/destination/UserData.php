@@ -2,6 +2,7 @@
 
 namespace Drupal\user\Plugin\migrate\destination;
 
+use Drupal\migrate\Attribute\MigrateDestination;
 use Drupal\migrate\Plugin\MigrationInterface;
 use Drupal\user\UserData as UserDataStorage;
 use Drupal\migrate\Row;
@@ -10,10 +11,9 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 
 /**
- * @MigrateDestination(
- *   id = "user_data"
- * )
+ * Migration destination for user data.
  */
+#[MigrateDestination('user_data')]
 class UserData extends DestinationBase implements ContainerFactoryPluginInterface {
 
   /**
@@ -43,7 +43,7 @@ class UserData extends DestinationBase implements ContainerFactoryPluginInterfac
   /**
    * {@inheritdoc}
    */
-  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition, MigrationInterface $migration = NULL) {
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition, ?MigrationInterface $migration = NULL) {
     return new static(
       $configuration,
       $plugin_id,

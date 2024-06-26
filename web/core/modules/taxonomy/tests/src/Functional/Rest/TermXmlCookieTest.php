@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\taxonomy\Functional\Rest;
 
 use Drupal\Tests\rest\Functional\CookieResourceTestTrait;
@@ -37,7 +39,7 @@ class TermXmlCookieTest extends TermResourceTestBase {
   /**
    * {@inheritdoc}
    */
-  public function testPatchPath() {
+  public function testPatchPath(): void {
     // Deserialization of the XML format is not supported.
     $this->markTestSkipped();
   }

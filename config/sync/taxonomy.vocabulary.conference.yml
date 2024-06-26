@@ -4,5 +4,6 @@ status: true
 dependencies: {  }
 name: Conference
 vid: conference
-description: ''
+description: null
 weight: 0
+new_revision: false

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\field\Kernel;
 
 use Drupal\field\Entity\FieldConfig;
@@ -7,9 +9,9 @@ use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\field\Entity\FieldStorageConfig;
 
 /**
- * Tests multilanguage fields logic.
+ * Tests multilingual fields logic.
  *
- * The following tests will check the multilanguage logic in field handling.
+ * The following tests will check the multilingual logic in field handling.
  *
  * @group field
  */
@@ -106,7 +108,7 @@ class TranslationTest extends FieldKernelTestBase {
   /**
    * Tests translatable fields storage/retrieval.
    */
-  public function testTranslatableFieldSaveLoad() {
+  public function testTranslatableFieldSaveLoad(): void {
     // Enable field translations for nodes.
     field_test_entity_info_translatable('node', TRUE);
     $entity_type = \Drupal::entityTypeManager()->getDefinition('node');
@@ -202,7 +204,7 @@ class TranslationTest extends FieldKernelTestBase {
    *
    * @see https://www.drupal.org/node/2404739
    */
-  public function testFieldAccess() {
+  public function testFieldAccess(): void {
     $access_control_handler = \Drupal::entityTypeManager()->getAccessControlHandler($this->entityType);
     $this->assertTrue($access_control_handler->fieldAccess('view', $this->field));
   }

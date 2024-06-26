@@ -160,6 +160,19 @@ class LayoutBuilderEntityViewDisplay extends BaseEntityViewDisplay implements La
   }
 
   /**
+   * {@inheritdoc}
+   */
+  public function save(): int {
+    $return = parent::save();
+    if (!\Drupal::moduleHandler()->moduleExists('layout_builder_expose_all_field_blocks')) {
+      // Invalidate the block cache in order to regenerate field block
+      // definitions.
+      \Drupal::service('plugin.manager.block')->clearCachedDefinitions();
+    }
+    return $return;
+  }
+
+  /**
    * Removes a layout section field if it is no longer needed.
    *
    * Because the field is shared across all view modes, the field will only be
@@ -318,7 +331,7 @@ class LayoutBuilderEntityViewDisplay extends BaseEntityViewDisplay implements La
         $build[$delta] = $section->toRenderArray($contexts);
       }
     }
-    // The render array is built based on decisions made by @SectionStorage
+    // The render array is built based on decisions made by SectionStorage
     // plugins and therefore it needs to depend on the accumulated
     // cacheability of those decisions.
     $cacheability->applyTo($build);

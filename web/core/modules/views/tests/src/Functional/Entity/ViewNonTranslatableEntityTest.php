@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\views\Functional\Entity;
 
 use Drupal\language\Entity\ConfigurableLanguage;
@@ -33,7 +35,7 @@ class ViewNonTranslatableEntityTest extends BrowserTestBase {
   /**
    * Tests displaying a view of non-translatable entities.
    */
-  public function testViewNoTranslatableEntity() {
+  public function testViewNoTranslatableEntity(): void {
     // Add a new language.
     ConfigurableLanguage::createFromLangcode('sr')->save();
 

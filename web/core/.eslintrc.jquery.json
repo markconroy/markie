@@ -5,11 +5,11 @@
   "rules": {
     "jquery/no-ajax": 0,
     "jquery/no-ajax-events": 2,
-    "jquery/no-animate": 0,
+    "jquery/no-animate": 2,
     "jquery/no-attr": 0,
     "jquery/no-bind": 2,
     "jquery/no-class": 0,
-    "jquery/no-clone": 0,
+    "jquery/no-clone": 2,
     "jquery/no-closest": 0,
     "jquery/no-css": 2,
     "jquery/no-data": 0,
@@ -39,7 +39,7 @@
     "jquery/no-prop": 0,
     "jquery/no-proxy": 2,
     "jquery/no-ready": 2,
-    "jquery/no-serialize": 0,
+    "jquery/no-serialize": 2,
     "jquery/no-show": 0,
     "jquery/no-size": 2,
     "jquery/no-sizzle": 0,
@@ -50,7 +50,7 @@
     "jquery/no-trigger": 0,
     "jquery/no-trim": 2,
     "jquery/no-val": 2,
-    "jquery/no-when": 0,
+    "jquery/no-when": 2,
     "jquery/no-wrap": 0
   }
 }

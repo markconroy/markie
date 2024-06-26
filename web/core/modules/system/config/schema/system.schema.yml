@@ -48,6 +48,8 @@ system.site:
 system.maintenance:
   type: config_object
   label: 'Maintenance mode'
+  constraints:
+    FullyValidatable: ~
   mapping:
     message:
       type: text
@@ -56,6 +58,8 @@ system.maintenance:
 system.cron:
   type: config_object
   label: 'Cron settings'
+  constraints:
+    FullyValidatable: ~
   mapping:
     threshold:
       type: mapping
@@ -64,27 +68,46 @@ system.cron:
         requirements_warning:
           type: integer
           label: 'Requirements warning period'
+          constraints:
+            # @see system_requirements()
+            Range:
+              min: 60
         requirements_error:
           type: integer
           label: 'Requirements error period'
+          constraints:
+            # @see system_requirements()
+            Range:
+              min: 300
     logging:
-      type: integer
+      type: boolean
       label: 'Detailed cron logging'
 
 system.date:
   type: config_object
   label: 'Date settings'
+  constraints:
+    FullyValidatable: ~
   mapping:
     first_day:
       type: integer
       label: 'First day of week'
+      constraints:
+        Range:
+          # @see \Drupal\system\Form\RegionalForm::buildForm()
+          min: 0
+          max: 6
     country:
       type: mapping
       label: 'Country'
       mapping:
         default:
+          nullable: true
           type: string
           label: 'Default country'
+          constraints:
+            # @see \Drupal\system\Form\RegionalForm::buildForm()
+            CountryCode: []
     timezone:
       type: mapping
       label: 'Time zone settings'
@@ -92,6 +115,11 @@ system.date:
         default:
           type: string
           label: 'Default time zone'
+          nullable: true
+          constraints:
+            # @see \Drupal\system\Form\RegionalForm::buildForm()
+            Choice:
+              callback: 'DateTimeZone::listIdentifiers'
         user:
           type: mapping
           label: 'User'
@@ -102,6 +130,14 @@ system.date:
             default:
               type: integer
               label: 'Time zone for new users'
+              constraints:
+                # Time zone for new users can have one of the following values:
+                # - UserInterface::TIMEZONE_DEFAULT
+                # - UserInterface::TIMEZONE_EMPTY
+                # - UserInterface::TIMEZONE_SELECT
+                # @see \Drupal\user\UserInterface::TIMEZONE_*
+                # @todo Update this to use enum in https://www.drupal.org/project/drupal/issues/3402178
+                Choice: [0, 1, 2]
             warn:
               type: boolean
               label: 'Remind users at login if their time zone is not set'
@@ -109,6 +145,8 @@ system.date:
 system.diff:
   type: config_object
   label: 'Diff settings'
+  constraints:
+    FullyValidatable: ~
   mapping:
     context:
       type: mapping
@@ -117,9 +155,17 @@ system.diff:
         lines_leading:
           type: integer
           label: 'Number of leading lines in a diff'
+          constraints:
+            # @see \Drupal\Component\Diff\DiffFormatter
+            Range:
+              min: 0
         lines_trailing:
           type: integer
           label: 'Number of trailing lines in a diff'
+          constraints:
+            # @see \Drupal\Component\Diff\DiffFormatter
+            Range:
+              min: 0
 
 system.logging:
   type: config_object
@@ -230,9 +276,16 @@ system.menu.*:
     description:
       type: label
       label: 'Menu description'
+      # @see \Drupal\menu_ui\MenuForm::form()
+      nullable: true
+      constraints:
+        Length:
+          max: 512
     locked:
       type: boolean
-      label: ''
+      label: 'Locked'
+  constraints:
+    FullyValidatable: ~
 
 system.action.*:
   type: config_entity
@@ -256,6 +309,10 @@ system.action.*:
     plugin:
       type: string
       label: 'Plugin'
+      constraints:
+        PluginExists:
+          manager: plugin.manager.action
+          interface: 'Drupal\Core\Action\ActionInterface'
     configuration:
       type: action.configuration.[%parent.plugin]
 
@@ -284,18 +341,31 @@ system.file:
 system.image:
   type: config_object
   label: 'Image settings'
+  constraints:
+    FullyValidatable: ~
   mapping:
     toolkit:
       type: string
       label: 'Toolkit'
+      constraints:
+        PluginExists:
+          manager: 'image.toolkit.manager'
+          interface: '\Drupal\Core\ImageToolkit\ImageToolkitInterface'
 
 system.image.gd:
   type: config_object
   label: 'Image settings'
+  constraints:
+    FullyValidatable: ~
   mapping:
     jpeg_quality:
       type: integer
       label: 'JPEG quality'
+      constraints:
+        # @see \Drupal\system\Plugin\ImageToolkit\GDToolkit::buildConfigurationForm()
+        Range:
+          min: 0
+          max: 100
 
 system.mail:
   type: config_object
@@ -307,6 +377,10 @@ system.mail:
       sequence:
         type: string
         label: 'Interface'
+        constraints:
+          PluginExists:
+            manager: plugin.manager.mail
+            interface: 'Drupal\Core\Mail\MailInterface'
     mailer_dsn:
       type: mapping
       label: 'Symfony mailer transport DSN'
@@ -355,6 +429,8 @@ system.theme.global:
 system.advisories:
   type: config_object
   label: 'Security advisory settings'
+  constraints:
+    FullyValidatable: ~
   mapping:
     enabled:
       type: boolean
@@ -362,10 +438,17 @@ system.advisories:
     interval_hours:
       type: integer
       label: 'How often to check for security advisories, in hours'
+      # Minimum can be set to 0 as it just means the advisories will be retrieved on every call.
+      # @see \Drupal\system\SecurityAdvisories\SecurityAdvisoriesFetcher::getSecurityAdvisories
+      constraints:
+        Range:
+          min: 0
 
 block.settings.system_branding_block:
   type: block_settings
   label: 'Branding block'
+  constraints:
+    FullyValidatable: ~
   mapping:
     use_site_logo:
       type: boolean
@@ -394,6 +477,8 @@ block.settings.system_menu_block:*:
 block.settings.local_tasks_block:
   type: block_settings
   label: 'Tabs block'
+  constraints:
+    FullyValidatable: ~
   mapping:
     primary:
       type: boolean
@@ -419,6 +504,8 @@ condition.plugin.response_status:
 system.feature_flags:
   type: config_object
   label: 'System Feature Flags'
+  constraints:
+    FullyValidatable: ~
   mapping:
     linkset_endpoint:
       type: boolean

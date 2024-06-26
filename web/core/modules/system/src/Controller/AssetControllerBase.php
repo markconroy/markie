@@ -119,9 +119,6 @@ abstract class AssetControllerBase extends FileDownloadController {
     if (file_exists($uri)) {
       return new BinaryFileResponse($uri, 200, [
         'Cache-control' => static::CACHE_CONTROL,
-        // @todo: remove the explicit setting of Content-Type once this is
-        // fixed in https://www.drupal.org/project/drupal/issues/3172550.
-        'Content-Type' => $this->contentType,
       ]);
     }
 
@@ -160,19 +157,23 @@ abstract class AssetControllerBase extends FileDownloadController {
     $this->themeManager->setActiveTheme($active_theme);
 
     $attached_assets = new AttachedAssets();
-    $include_string = UrlHelper::uncompressQueryParameter($request->query->get('include'));
+    $include_libraries = explode(',', UrlHelper::uncompressQueryParameter($request->query->get('include')));
 
-    if (!$include_string) {
-      throw new BadRequestHttpException('The libraries to include are encoded incorrectly.');
-    }
-    $attached_assets->setLibraries(explode(',', $include_string));
+    // Check that library names are in the correct format.
+    $validate = function ($libraries_to_check) {
+      foreach ($libraries_to_check as $library) {
+        if (substr_count($library, '/') === 0) {
+          throw new BadRequestHttpException(sprintf('The "%s" library name must include at least one slash.', $library));
+        }
+      }
+    };
+    $validate($include_libraries);
+    $attached_assets->setLibraries($include_libraries);
 
     if ($request->query->has('exclude')) {
-      $exclude_string = UrlHelper::uncompressQueryParameter($request->query->get('exclude'));
-      if (!$exclude_string) {
-        throw new BadRequestHttpException('The libraries to exclude are encoded incorrectly.');
-      }
-      $attached_assets->setAlreadyLoadedLibraries(explode(',', $exclude_string));
+      $exclude_libraries = explode(',', UrlHelper::uncompressQueryParameter($request->query->get('exclude')));
+      $validate($exclude_libraries);
+      $attached_assets->setAlreadyLoadedLibraries($exclude_libraries);
     }
     $groups = $this->getGroups($attached_assets, $request);
 

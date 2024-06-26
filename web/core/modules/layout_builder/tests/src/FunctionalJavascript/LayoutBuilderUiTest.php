@@ -66,7 +66,7 @@ class LayoutBuilderUiTest extends WebDriverTestBase {
   /**
    * Tests that after removing sections reloading the page does not re-add them.
    */
-  public function testReloadWithNoSections() {
+  public function testReloadWithNoSections(): void {
     $assert_session = $this->assertSession();
     $page = $this->getSession()->getPage();
 
@@ -90,14 +90,21 @@ class LayoutBuilderUiTest extends WebDriverTestBase {
   /**
    * Tests the message indicating unsaved changes.
    */
-  public function testUnsavedChangesMessage() {
+  public function testUnsavedChangesMessage(): void {
     $assert_session = $this->assertSession();
     $page = $this->getSession()->getPage();
 
-    // Make and then discard changes.
     $this->assertModifiedLayout(static::FIELD_UI_PREFIX . '/display/default/layout');
+    // Discard then cancel.
+    $page->pressButton('Discard changes');
+    $page->clickLink('Cancel');
+    $assert_session->addressEquals(static::FIELD_UI_PREFIX . '/display/default/layout');
+    $assert_session->pageTextContainsOnce('You have unsaved changes.');
+
+    // Discard then confirm.
     $page->pressButton('Discard changes');
     $page->pressButton('Confirm');
+    $assert_session->addressEquals(static::FIELD_UI_PREFIX . '/display/default');
     $assert_session->pageTextNotContains('You have unsaved changes.');
 
     // Make and then save changes.
@@ -136,7 +143,7 @@ class LayoutBuilderUiTest extends WebDriverTestBase {
   /**
    * Tests that elements that open the dialog are properly highlighted.
    */
-  public function testAddHighlights() {
+  public function testAddHighlights(): void {
     $assert_session = $this->assertSession();
     $page = $this->getSession()->getPage();
 
@@ -248,7 +255,7 @@ class LayoutBuilderUiTest extends WebDriverTestBase {
   /**
    * Tests removing newly added extra field.
    */
-  public function testNewExtraField() {
+  public function testNewExtraField(): void {
     $assert_session = $this->assertSession();
     $page = $this->getSession()->getPage();
 

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\file\Functional;
 
 use Drupal\file\Entity\File;
@@ -8,6 +10,7 @@ use Drupal\file\Entity\File;
  * Tests the 'managed_file' element type.
  *
  * @group file
+ * @group #slow
  * @todo Create a FileTestBase class and move FileFieldTestBase methods
  *   that aren't related to fields into it.
  */
@@ -21,7 +24,7 @@ class FileManagedFileElementTest extends FileFieldTestBase {
   /**
    * Tests the managed_file element type.
    */
-  public function testManagedFile() {
+  public function testManagedFile(): void {
     // Check that $element['#size'] is passed to the child upload element.
     $this->drupalGet('file/test');
     $field = $this->assertSession()->fieldExists("files[nested_file]");
@@ -146,7 +149,7 @@ class FileManagedFileElementTest extends FileFieldTestBase {
   /**
    * Ensure that warning is shown if file on the field has been removed.
    */
-  public function testManagedFileRemoved() {
+  public function testManagedFileRemoved(): void {
     $this->drupalGet('file/test/1/0/1');
     $test_file = $this->getTestFile('text');
     $file_field_name = 'files[nested_file][]';
@@ -167,7 +170,7 @@ class FileManagedFileElementTest extends FileFieldTestBase {
   /**
    * Tests file names have leading . removed.
    */
-  public function testFileNameTrim() {
+  public function testFileNameTrim(): void {
     file_put_contents('public://.leading-period.txt', $this->randomString(32));
     $last_fid_prior = $this->getLastFileId();
     $this->drupalGet('file/test/0/0/0');
@@ -181,7 +184,7 @@ class FileManagedFileElementTest extends FileFieldTestBase {
   /**
    * Ensure a file entity can be saved when the file does not exist on disk.
    */
-  public function testFileRemovedFromDisk() {
+  public function testFileRemovedFromDisk(): void {
     $this->drupalGet('file/test/1/0/1');
     $test_file = $this->getTestFile('text');
     $file_field_name = 'files[nested_file][]';
@@ -204,7 +207,7 @@ class FileManagedFileElementTest extends FileFieldTestBase {
   /**
    * Verify that unused permanent files can be used.
    */
-  public function testUnusedPermanentFileValidation() {
+  public function testUnusedPermanentFileValidation(): void {
 
     // Create a permanent file without usages.
     $file = $this->getTestFile('image');

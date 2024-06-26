@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\system\Kernel\Theme;
 
 use Drupal\KernelTests\KernelTestBase;
@@ -21,7 +23,7 @@ class TwigRawTest extends KernelTestBase {
   /**
    * Tests the raw filter inside an autoescape tag.
    */
-  public function testAutoescapeRaw() {
+  public function testAutoescapeRaw(): void {
     $test = [
       '#theme' => 'twig_raw_test',
       '#script' => '<script>alert("This alert is real because I will put it through the raw filter!");</script>',
@@ -37,7 +39,7 @@ class TwigRawTest extends KernelTestBase {
    * This is one of the most important tests in Drupal itself in terms of
    * security.
    */
-  public function testAutoescape() {
+  public function testAutoescape(): void {
     $script = '<script>alert("This alert is unreal!");</script>';
     $build = [
       '#theme' => 'twig_autoescape_test',

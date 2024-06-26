@@ -71,7 +71,7 @@ class DatabaseTest extends UnitTestCase {
    * @dataProvider providerFindDriverAutoloadDirectory
    * @group legacy
    */
-  public function testFindDriverAutoloadDirectory($expected, $namespace, $include_test_drivers) {
+  public function testFindDriverAutoloadDirectory($expected, $namespace, $include_test_drivers): void {
     $this->expectDeprecation('Drupal\Core\Database\Database::findDriverAutoloadDirectory() is deprecated in drupal:10.2.0 and is removed from drupal:11.0.0. Use DatabaseDriverList::getList() instead. See https://www.drupal.org/node/3258175');
     // The only module that provides a driver in core is a test module.
     if (!$expected) {
@@ -88,7 +88,7 @@ class DatabaseTest extends UnitTestCase {
    *
    * @return array
    */
-  public function providerFindDriverAutoloadDirectory() {
+  public static function providerFindDriverAutoloadDirectory() {
     return [
       'core mysql' => ['core/modules/mysql/src/Driver/Database/mysql/', 'Drupal\mysql\Driver\Database\mysql', FALSE],
       'D8 custom fake' => [FALSE, 'Drupal\Driver\Database\CoreFake', TRUE],
@@ -101,7 +101,7 @@ class DatabaseTest extends UnitTestCase {
    * @dataProvider providerFindDriverAutoloadDirectoryException
    * @group legacy
    */
-  public function testFindDriverAutoloadDirectoryException($expected_message, $namespace, $include_tests) {
+  public function testFindDriverAutoloadDirectoryException($expected_message, $namespace, $include_tests): void {
     $this->expectDeprecation('Drupal\Core\Database\Database::findDriverAutoloadDirectory() is deprecated in drupal:10.2.0 and is removed from drupal:11.0.0. Use DatabaseDriverList::getList() instead. See https://www.drupal.org/node/3258175');
     $this->expectException(UnknownExtensionException::class);
     $this->expectExceptionMessage($expected_message);
@@ -113,7 +113,7 @@ class DatabaseTest extends UnitTestCase {
    *
    * @return array
    */
-  public function providerFindDriverAutoloadDirectoryException() {
+  public static function providerFindDriverAutoloadDirectoryException() {
     return [
       'test module but tests not included' => [
         "The database_driver Drupal\driver_test\Driver\Database\DrivertestMysql does not exist.",

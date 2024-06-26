@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\views\Functional\Plugin;
 
 use Drupal\menu_link_content\Entity\MenuLinkContent;
@@ -64,7 +66,7 @@ class MenuLinkTest extends ViewTestBase {
   /**
    * Tests that menu links using menu_link_content as parent are visible.
    */
-  public function testHierarchicalMenuLinkVisibility() {
+  public function testHierarchicalMenuLinkVisibility(): void {
     $this->drupalLogin($this->adminUser);
 
     $node = $this->drupalCreateNode(['type' => 'page']);

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\layout_builder\Functional;
 
 use Drupal\Core\Url;
@@ -70,7 +72,7 @@ class LayoutBuilderFieldBlockEntityReferenceCacheTagsTest extends BrowserTestBas
   /**
    * Tests cache tags on field block for entity reference field.
    */
-  public function testEntityReferenceFieldBlockCaching() {
+  public function testEntityReferenceFieldBlockCaching(): void {
     $assert_session = $this->assertSession();
 
     // Create two nodes, one of the referenced content type and one of the

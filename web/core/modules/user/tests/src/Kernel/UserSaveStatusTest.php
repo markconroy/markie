@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\user\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
@@ -30,7 +32,7 @@ class UserSaveStatusTest extends KernelTestBase {
   /**
    * Tests SAVED_NEW and SAVED_UPDATED statuses for user entity type.
    */
-  public function testUserSaveStatus() {
+  public function testUserSaveStatus(): void {
     // Create a new user.
     $values = [
       'uid' => 1,

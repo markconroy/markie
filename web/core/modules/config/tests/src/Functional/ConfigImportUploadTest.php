@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\config\Functional;
 
 use Drupal\Core\Site\Settings;
@@ -47,7 +49,7 @@ class ConfigImportUploadTest extends BrowserTestBase {
   /**
    * Tests importing configuration.
    */
-  public function testImport() {
+  public function testImport(): void {
     // Verify access to the config upload form.
     $this->drupalGet('admin/config/development/configuration/full/import');
     $this->assertSession()->statusCodeEquals(200);

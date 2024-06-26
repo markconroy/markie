@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\KernelTests\Core\Theme;
 
 use Drupal\Core\Extension\ExtensionLifecycle;
@@ -89,8 +91,8 @@ class Stable9TemplateOverrideTest extends KernelTestBase {
   /**
    * Ensures that Stable 9 overrides all relevant core templates.
    */
-  public function testStable9TemplateOverrides() {
-    $registry = new Registry($this->root, \Drupal::cache(), \Drupal::lock(), \Drupal::moduleHandler(), $this->themeHandler, \Drupal::service('theme.initialization'), \Drupal::service('cache.bootstrap'), \Drupal::service('extension.list.module'), 'stable9');
+  public function testStable9TemplateOverrides(): void {
+    $registry = new Registry($this->root, \Drupal::cache(), \Drupal::lock(), \Drupal::moduleHandler(), $this->themeHandler, \Drupal::service('theme.initialization'), \Drupal::service('cache.bootstrap'), \Drupal::service('extension.list.module'), \Drupal::service('kernel'), 'stable9');
     $registry->setThemeManager(\Drupal::theme());
 
     $registry_full = $registry->get();

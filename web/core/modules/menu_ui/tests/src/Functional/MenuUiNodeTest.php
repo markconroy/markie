@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\menu_ui\Functional;
 
 use Drupal\language\Entity\ConfigurableLanguage;
@@ -75,7 +77,7 @@ class MenuUiNodeTest extends BrowserTestBase {
   /**
    * Tests creating, editing, deleting menu links via node form widget.
    */
-  public function testMenuNodeFormWidget() {
+  public function testMenuNodeFormWidget(): void {
     // Verify that cacheability metadata is bubbled from the menu link tree
     // access checking that is performed when determining the "default parent
     // item" options in menu_ui_form_node_type_form_alter(). The "log out" link
@@ -284,7 +286,7 @@ class MenuUiNodeTest extends BrowserTestBase {
   /**
    * Testing correct loading and saving of menu links via node form widget in a multilingual environment.
    */
-  public function testMultilingualMenuNodeFormWidget() {
+  public function testMultilingualMenuNodeFormWidget(): void {
     // Setup languages.
     $langcodes = ['de'];
     foreach ($langcodes as $langcode) {
@@ -374,7 +376,7 @@ class MenuUiNodeTest extends BrowserTestBase {
   /**
    * Tests creating menu links via node form widget for nodes with grants.
    */
-  public function testMenuNodeWithGrantsFormWidget() {
+  public function testMenuNodeWithGrantsFormWidget(): void {
     \Drupal::service('module_installer')->install(['node_access_test']);
     node_access_rebuild();
     $this->assertTrue(\Drupal::moduleHandler()->hasImplementations('node_grants'));
@@ -429,7 +431,10 @@ class MenuUiNodeTest extends BrowserTestBase {
    * @see menu_ui_get_menu_link_defaults()
    */
   public function testMainMenuIsPrioritized(): void {
-    $this->drupalLogin($this->rootUser);
+    $this->drupalLogin($this->drupalCreateUser([
+      'administer menu',
+      'edit any page content',
+    ]));
     $menu_name = $this->randomMachineName();
     $mainLinkTitle = $this->randomMachineName();
     $nonMainLinkTitle = $this->randomMachineName();

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\node\Functional;
 
 use Drupal\Core\Url;
@@ -28,6 +30,14 @@ class NodeAccessCacheabilityTest extends NodeTestBase {
 
   /**
    * {@inheritdoc}
+   *
+   * @todo Remove and fix test to not rely on super user.
+   * @see https://www.drupal.org/project/drupal/issues/3437620
+   */
+  protected bool $usesSuperUserAccessPolicy = TRUE;
+
+  /**
+   * {@inheritdoc}
    */
   protected $defaultTheme = 'stark';
 
@@ -51,7 +61,7 @@ class NodeAccessCacheabilityTest extends NodeTestBase {
    *
    * @see node_query_node_access_alter()
    */
-  public function testNodeAccessCacheabilitySafeguard() {
+  public function testNodeAccessCacheabilitySafeguard(): void {
     // The node grants cache context should be added automatically.
     $this->drupalGet(new Url('node_access_test_auto_bubbling'));
     $this->assertCacheContext('user.node_grants:view');
@@ -76,7 +86,7 @@ class NodeAccessCacheabilityTest extends NodeTestBase {
   /**
    * Tests that the user cache contexts are correctly set.
    */
-  public function testNodeAccessCacheContext() {
+  public function testNodeAccessCacheContext(): void {
     // Create a user, with edit/delete own content permission.
     $test_user1 = $this->drupalCreateUser([
       'access content',

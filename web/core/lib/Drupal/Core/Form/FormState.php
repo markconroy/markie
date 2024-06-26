@@ -33,6 +33,7 @@ class FormState implements FormStateInterface {
    *
    * @var array
    */
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
   protected $complete_form;
 
   /**
@@ -65,6 +66,7 @@ class FormState implements FormStateInterface {
    *
    * @var array
    */
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
   protected $build_info = [
     'args' => [],
     'files' => [],
@@ -79,6 +81,7 @@ class FormState implements FormStateInterface {
    *
    * @var array
    */
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
   protected $rebuild_info = [];
 
   /**
@@ -163,6 +166,7 @@ class FormState implements FormStateInterface {
    *
    * @var bool
    */
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
   protected $no_redirect;
 
   /**
@@ -205,7 +209,7 @@ class FormState implements FormStateInterface {
    * the $form and $form_state variables from the initial page request to the
    * one that processes the submission. 'cache' can be set to TRUE to do this.
    * A prominent example is an Ajax-enabled form, in which
-   * \Drupal\Core\Render\Element\RenderElement::processAjaxForm()
+   * \Drupal\Core\Render\Element\RenderElementBase::processAjaxForm()
    * enables form caching for all forms that include an element with the #ajax
    * property. (The Ajax handler has no way to build the form itself, so must
    * rely on the cached version.) Note that the persistence of $form and
@@ -221,6 +225,7 @@ class FormState implements FormStateInterface {
    *
    * @var bool
    */
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
   protected $no_cache;
 
   /**
@@ -229,7 +234,7 @@ class FormState implements FormStateInterface {
    * The validation functions and submit functions use this array for nearly all
    * their decision making. (Note that #tree determines whether the values are a
    * flat array or an array whose structure parallels the $form array. See
-   * \Drupal\Core\Render\Element\FormElement for more information.)
+   * \Drupal\Core\Render\Element\FormElementBase for more information.)
    *
    * This property is uncacheable.
    *
@@ -279,6 +284,7 @@ class FormState implements FormStateInterface {
    *
    * @var bool
    */
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
   protected $always_process;
 
   /**
@@ -293,6 +299,7 @@ class FormState implements FormStateInterface {
    *
    * @var bool
    */
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
   protected $must_validate;
 
   /**
@@ -316,6 +323,7 @@ class FormState implements FormStateInterface {
    *
    * @var bool
    */
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
   protected $programmed_bypass_access_check = TRUE;
 
   /**
@@ -328,6 +336,7 @@ class FormState implements FormStateInterface {
    *
    * @var bool
    */
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
   protected $process_input;
 
   /**
@@ -359,6 +368,7 @@ class FormState implements FormStateInterface {
    *
    * @var array|null
    */
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
   protected $triggering_element;
 
   /**
@@ -369,6 +379,7 @@ class FormState implements FormStateInterface {
    *
    * @var bool
    */
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
   protected $has_file_element;
 
   /**
@@ -436,6 +447,7 @@ class FormState implements FormStateInterface {
    *
    * @var bool
    */
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
   protected $validation_complete = FALSE;
 
   /**
@@ -461,6 +473,7 @@ class FormState implements FormStateInterface {
    *
    * @var array|null
    */
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
   protected $limit_validation_errors;
 
   /**
@@ -470,6 +483,7 @@ class FormState implements FormStateInterface {
    *
    * @var array
    */
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
   protected $validate_handlers = [];
 
   /**
@@ -479,6 +493,7 @@ class FormState implements FormStateInterface {
    *
    * @var array
    */
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
   protected $submit_handlers = [];
 
   /**

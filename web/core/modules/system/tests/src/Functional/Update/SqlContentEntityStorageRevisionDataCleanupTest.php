@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\system\Functional\Update;
 
 use Drupal\FunctionalTests\Update\UpdatePathTestBase;
@@ -28,7 +30,7 @@ class SqlContentEntityStorageRevisionDataCleanupTest extends UpdatePathTestBase 
    *
    * @see system_update_8404()
    */
-  public function testRevisionDataCleanup() {
+  public function testRevisionDataCleanup(): void {
     // Ensure the test data exists.
     $connection = \Drupal::database();
 

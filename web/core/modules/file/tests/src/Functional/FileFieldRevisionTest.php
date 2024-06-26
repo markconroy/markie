@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\file\Functional;
 
 use Drupal\Core\Database\Database;
@@ -28,7 +30,7 @@ class FileFieldRevisionTest extends FileFieldTestBase {
    *  - When the last revision that uses a file is deleted, the original file
    *    should be deleted also.
    */
-  public function testRevisions() {
+  public function testRevisions(): void {
     // This test expects unused managed files to be marked as a temporary file
     // and then deleted up by file_cron().
     $this->config('file.settings')
@@ -125,7 +127,7 @@ class FileFieldRevisionTest extends FileFieldTestBase {
     $connection = Database::getConnection();
     $connection->update('file_managed')
       ->fields([
-        'changed' => REQUEST_TIME - ($this->config('system.file')->get('temporary_maximum_age') + 1),
+        'changed' => \Drupal::time()->getRequestTime() - ($this->config('system.file')->get('temporary_maximum_age') + 1),
       ])
       ->condition('fid', $node_file_r3->id())
       ->execute();
@@ -143,7 +145,7 @@ class FileFieldRevisionTest extends FileFieldTestBase {
     // would set the timestamp.
     $connection->update('file_managed')
       ->fields([
-        'changed' => REQUEST_TIME - ($this->config('system.file')->get('temporary_maximum_age') + 1),
+        'changed' => \Drupal::time()->getRequestTime() - ($this->config('system.file')->get('temporary_maximum_age') + 1),
       ])
       ->condition('fid', $node_file_r1->id())
       ->execute();

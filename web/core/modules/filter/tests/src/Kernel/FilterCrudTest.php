@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\filter\Kernel;
 
 use Drupal\filter\Entity\FilterFormat;
@@ -22,7 +24,7 @@ class FilterCrudTest extends KernelTestBase {
   /**
    * Tests CRUD operations for text formats and filters.
    */
-  public function testTextFormatCrud() {
+  public function testTextFormatCrud(): void {
     // Add a text format with minimum data only.
     $format = FilterFormat::create([
       'format' => 'empty_format',
@@ -73,7 +75,7 @@ class FilterCrudTest extends KernelTestBase {
   /**
    * Tests disabling the fallback text format.
    */
-  public function testDisableFallbackFormat() {
+  public function testDisableFallbackFormat(): void {
     $this->installConfig(['filter']);
     $message = '\LogicException with message "The fallback text format \'plain_text\' cannot be disabled." was thrown.';
     try {

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\KernelTests\Core\Database;
 
 use Drupal\Core\Database\Connection;
@@ -176,7 +178,7 @@ abstract class DriverSpecificConnectionUnitTestBase extends DriverSpecificKernel
   /**
    * Tests pdo options override.
    */
-  public function testConnectionOpen() {
+  public function testConnectionOpen(): void {
     $reflection = new \ReflectionObject($this->connection);
     $connection_property = $reflection->getProperty('connection');
     $error_mode = $connection_property->getValue($this->connection)

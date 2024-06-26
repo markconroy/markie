@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\dblog\Kernel;
 
 use Drupal\Core\Database\Database;
@@ -33,7 +35,7 @@ class DbLogTest extends KernelTestBase {
   /**
    * Tests that cron correctly applies the database log row limit.
    */
-  public function testDbLogCron() {
+  public function testDbLogCron(): void {
     $row_limit = 100;
     // Generate additional log entries.
     $this->generateLogEntries($row_limit + 10);
@@ -55,7 +57,7 @@ class DbLogTest extends KernelTestBase {
     $this->assertEquals($expected_count, $cron_detailed_count, "Cron added $cron_detailed_count of $expected_count new log entries");
 
     // Test disabling of detailed cron logging.
-    $this->config('system.cron')->set('logging', 0)->save();
+    $this->config('system.cron')->set('logging', FALSE)->save();
     $cron_count = $this->runCron();
     $this->assertEquals(1, $cron_count, "Cron added $cron_count of 1 new log entries");
   }
@@ -63,7 +65,7 @@ class DbLogTest extends KernelTestBase {
   /**
    * Tests that only valid placeholders are stored in the variables column.
    */
-  public function testInvalidPlaceholders() {
+  public function testInvalidPlaceholders(): void {
     \Drupal::logger('my_module')->warning('Hello @string @array @object', ['@string' => '', '@array' => [], '@object' => new \stdClass()]);
     $variables = \Drupal::database()
       ->select('watchdog', 'w')

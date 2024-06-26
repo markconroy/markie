@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\KernelTests\Core\Controller;
 
 use Drupal\KernelTests\KernelTestBase;
@@ -25,7 +27,7 @@ class ControllerBaseTest extends KernelTestBase {
   /**
    * @covers ::create
    */
-  public function testCreate() {
+  public function testCreate(): void {
     /** @var \Drupal\system_test\Controller\SystemTestController $controller */
     $controller = $this->container->get('class_resolver')->getInstanceFromDefinition(SystemTestController::class);
 
@@ -46,7 +48,7 @@ class ControllerBaseTest extends KernelTestBase {
   /**
    * @covers ::create
    */
-  public function testCreateException() {
+  public function testCreateException(): void {
     $this->expectException(AutowiringFailedException::class);
     $this->expectExceptionMessage('Cannot autowire service "Drupal\Core\Lock\LockBackendInterface": argument "$lock" of method "Drupal\system_test\Controller\BrokenSystemTestController::_construct()", you should configure its value explicitly.');
     $this->container->get('class_resolver')->getInstanceFromDefinition(BrokenSystemTestController::class);

@@ -8,6 +8,8 @@
   <exclude-pattern>*/node_modules/*</exclude-pattern>
   <!--Exclude third party code.-->
   <exclude-pattern>./assets/vendor/*</exclude-pattern>
+  <!--Exclude the PHPStan baseline from coding standards.-->
+  <exclude-pattern>./core/.phpstan-baseline.php</exclude-pattern>
   <!-- Exclude third-party code maintained within core that does not follow our standards. -->
   <!-- @todo This rule may be removed when https://www.drupal.org/node/1848264 is resolved. -->
   <exclude-pattern>./core/lib/Drupal/Component/Diff/</exclude-pattern>
@@ -82,6 +84,7 @@
   </rule>
   <rule ref="Drupal.Commenting.InlineVariableComment"/>
   <rule ref="Drupal.Commenting.PostStatementComment"/>
+  <rule ref="Drupal.Commenting.TodoComment" />
   <rule ref="Drupal.Commenting.VariableComment">
     <!-- Sniff for: DuplicateVar, EmptyVar, InlineVariableName, WrongStyle -->
     <exclude name="Drupal.Commenting.VariableComment.IncorrectVarType"/>
@@ -101,6 +104,7 @@
   <rule ref="Drupal.Formatting.SpaceUnaryOperator"/>
   <rule ref="Drupal.Functions.DiscouragedFunctions"/>
   <rule ref="Drupal.Functions.FunctionDeclaration"/>
+  <rule ref="Drupal.Functions.MultiLineFunctionDeclaration"/>
   <rule ref="Drupal.InfoFiles.AutoAddedKeys"/>
   <rule ref="Drupal.InfoFiles.ClassFiles"/>
   <rule ref="Drupal.InfoFiles.DuplicateEntry"/>
@@ -113,10 +117,7 @@
   <rule ref="Drupal.NamingConventions.ValidClassName"/>
   <rule ref="Drupal.NamingConventions.ValidGlobal"/>
   <rule ref="Drupal.NamingConventions.ValidVariableName"/>
-  <rule ref="Drupal.NamingConventions.ValidVariableName.LowerCamelName">
-    <!-- Views plugins do not conform to this sniff. -->
-    <include-pattern>**/tests/*</include-pattern>
-  </rule>
+  <rule ref="Drupal.NamingConventions.ValidVariableName.LowerCamelName"/>
   <rule ref="Drupal.Scope.MethodScope"/>
   <rule ref="Drupal.Semantics.EmptyInstall"/>
   <rule ref="Drupal.Semantics.FunctionAlias"/>
@@ -177,11 +178,6 @@
   <rule ref="Generic.Formatting.DisallowMultipleStatements"/>
   <rule ref="Generic.Formatting.SpaceAfterCast"/>
   <rule ref="Generic.Functions.FunctionCallArgumentSpacing"/>
-  <rule ref="Generic.Functions.OpeningFunctionBraceKernighanRitchie">
-    <properties>
-      <property name="checkClosures" value="true"/>
-    </properties>
-  </rule>
   <rule ref="Generic.NamingConventions.ConstructorName"/>
   <rule ref="Generic.NamingConventions.UpperCaseConstantName"/>
   <rule ref="Generic.PHP.DeprecatedFunctions"/>
@@ -268,20 +264,23 @@
        </property>
     </properties>
   </rule>
+  <rule ref="SlevomatCodingStandard.ControlStructures.RequireNullCoalesceOperator"/>
   <rule ref="SlevomatCodingStandard.TypeHints.DeclareStrictTypes">
     <properties>
       <property name="spacesCountAroundEqualsSign" value="0" />
     </properties>
     <!-- @todo Broaden this in https://www.drupal.org/project/drupal/issues/3400434 -->
     <!-- <include-pattern>*/tests/*</include-pattern> -->
-    <include-pattern>*/tests/src/FunctionalJavascript/*</include-pattern>
-    <include-pattern>*/tests/src/Traits/*</include-pattern>
-    <include-pattern>./tests/Drupal/BuildTests/*</include-pattern>
-    <include-pattern>./tests/Drupal/FunctionalJavascriptTests/*</include-pattern>
-    <include-pattern>./tests/Drupal/Tests/*Trait.php</include-pattern>
-    <include-pattern>./tests/Drupal/Tests/Traits/*</include-pattern>
-    <exclude-pattern>./tests/Drupal/Tests/Listeners/*</exclude-pattern>
+    <include-pattern>*/tests/src/*</include-pattern>
+    <include-pattern>./tests/Drupal/*</include-pattern>
+    <include-pattern>./tests/TestSuites/*</include-pattern>
+    <include-pattern>./modules/system/src/Tests/Routing/*</include-pattern>
+    <exclude-pattern>./tests/Drupal/Tests/*/Fixture/*</exclude-pattern>
+    <exclude-pattern>./tests/Drupal/Tests/*/fixtures/*</exclude-pattern>
+    <!-- @todo remove this in https://www.drupal.org/project/drupal/issues/3402707 -->
+    <exclude-pattern>./tests/Drupal/KernelTests/AssertContentTrait.php</exclude-pattern>
   </rule>
+  <rule ref="SlevomatCodingStandard.TypeHints.NullableTypeForNullDefaultValue"/>
 
   <!-- Squiz sniffs -->
   <rule ref="Squiz.Arrays.ArrayBracketSpacing"/>
@@ -383,23 +382,6 @@
     </properties>
   </rule>
   <rule ref="Squiz.Functions.FunctionDeclarationArgumentSpacing.NoSpaceBeforeArg">
-    <severity>0</severity>
-  </rule>
-  <rule ref="Squiz.Functions.MultiLineFunctionDeclaration"/>
-  <rule ref="Squiz.Functions.MultiLineFunctionDeclaration.BraceOnSameLine">
-    <severity>0</severity>
-  </rule>
-  <rule ref="Squiz.Functions.MultiLineFunctionDeclaration.CloseBracketLine">
-    <severity>0</severity>
-  </rule>
-  <rule ref="Squiz.Functions.MultiLineFunctionDeclaration.ContentAfterBrace">
-    <severity>0</severity>
-  </rule>
-  <!-- Standard yet to be finalized on this (https://www.drupal.org/node/1539712). -->
-  <rule ref="Squiz.Functions.MultiLineFunctionDeclaration.FirstParamSpacing">
-    <severity>0</severity>
-  </rule>
-  <rule ref="Squiz.Functions.MultiLineFunctionDeclaration.Indent">
     <severity>0</severity>
   </rule>
   <rule ref="Squiz.PHP.LowercasePHPFunctions"/>

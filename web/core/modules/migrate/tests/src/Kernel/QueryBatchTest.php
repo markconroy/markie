@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\migrate\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
@@ -57,7 +59,7 @@ class QueryBatchTest extends KernelTestBase {
   /**
    * Tests a negative batch size throws an exception.
    */
-  public function testBatchSizeNegative() {
+  public function testBatchSizeNegative(): void {
     $this->expectException(MigrateException::class);
     $this->expectExceptionMessage('batch_size must be greater than or equal to zero');
     $plugin = $this->getPlugin(['batch_size' => -1]);
@@ -67,7 +69,7 @@ class QueryBatchTest extends KernelTestBase {
   /**
    * Tests a non integer batch size throws an exception.
    */
-  public function testBatchSizeNonInteger() {
+  public function testBatchSizeNonInteger(): void {
     $this->expectException(MigrateException::class);
     $this->expectExceptionMessage('batch_size must be greater than or equal to zero');
     $plugin = $this->getPlugin(['batch_size' => '1']);
@@ -149,7 +151,7 @@ class QueryBatchTest extends KernelTestBase {
    *
    * @dataProvider queryDataProvider
    */
-  public function testQueryBatch($source_data, $expected_data, $num_rows, $configuration, $expected_batch_size, $expected_batch_count) {
+  public function testQueryBatch($source_data, $expected_data, $num_rows, $configuration, $expected_batch_size, $expected_batch_count): void {
     $plugin = $this->getPlugin($configuration);
 
     // Since we don't yet inject the database connection, we need to use a
@@ -238,8 +240,7 @@ class QueryBatchTest extends KernelTestBase {
       // Use the biggest row to build the table schema.
       $counts = array_map('count', $rows);
       asort($counts);
-      end($counts);
-      $pilot = $rows[key($counts)];
+      $pilot = $rows[array_key_last($counts)];
 
       $connection->schema()
         ->createTable($table, [

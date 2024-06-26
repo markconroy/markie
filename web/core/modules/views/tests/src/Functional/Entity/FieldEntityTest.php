@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\views\Functional\Entity;
 
 use Drupal\comment\Tests\CommentTestTrait;
@@ -84,7 +86,7 @@ class FieldEntityTest extends ViewTestBase {
   /**
    * Tests the getEntity method.
    */
-  public function testGetEntity() {
+  public function testGetEntity(): void {
     // The view is a view of comments, their nodes and their authors, so there
     // are three layers of entities.
 

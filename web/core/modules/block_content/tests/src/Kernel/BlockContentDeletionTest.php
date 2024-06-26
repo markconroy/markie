@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\block_content\Kernel;
 
 use Drupal\block_content\Entity\BlockContent;
@@ -35,7 +37,7 @@ class BlockContentDeletionTest extends KernelTestBase {
   /**
    * Tests deleting a block_content updates the discovered block plugin.
    */
-  public function testDeletingBlockContentShouldClearPluginCache() {
+  public function testDeletingBlockContentShouldClearPluginCache(): void {
     // Create a block content type.
     $block_content_type = BlockContentType::create([
       'id' => 'spiffy',

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\Core\Layout;
 
+use Composer\Autoload\ClassLoader;
 use Drupal\Component\Plugin\Derivative\DeriverBase;
 use Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException;
 use Drupal\Core\Cache\CacheBackendInterface;
@@ -19,6 +20,8 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Tests\UnitTestCase;
 use org\bovigo\vfs\vfsStream;
 use Prophecy\Argument;
+
+// cspell:ignore lorem, ipsum, consectetur, adipiscing
 
 /**
  * @coversDefaultClass \Drupal\Core\Layout\LayoutPluginManager
@@ -91,6 +94,9 @@ class LayoutPluginManagerTest extends UnitTestCase {
     $this->cacheBackend = $this->prophesize(CacheBackendInterface::class);
 
     $namespaces = new \ArrayObject(['Drupal\Core' => vfsStream::url('root/core/lib/Drupal/Core')]);
+    $class_loader = new ClassLoader();
+    $class_loader->addPsr4("Drupal\\Core\\", vfsStream::url("root/core/lib/Drupal/Core"));
+    $class_loader->register(TRUE);
     $this->layoutPluginManager = new LayoutPluginManager($namespaces, $this->cacheBackend->reveal(), $this->moduleHandler->reveal(), $this->themeHandler->reveal());
   }
 
@@ -98,11 +104,12 @@ class LayoutPluginManagerTest extends UnitTestCase {
    * @covers ::getDefinitions
    * @covers ::providerExists
    */
-  public function testGetDefinitions() {
+  public function testGetDefinitions(): void {
     $expected = [
       'module_a_provided_layout',
       'theme_a_provided_layout',
       'plugin_provided_layout',
+      'plugin_provided_by_annotation_layout',
     ];
 
     $layout_definitions = $this->layoutPluginManager->getDefinitions();
@@ -114,7 +121,7 @@ class LayoutPluginManagerTest extends UnitTestCase {
    * @covers ::getDefinition
    * @covers ::processDefinition
    */
-  public function testGetDefinition() {
+  public function testGetDefinition(): void {
     $layout_definition = $this->layoutPluginManager->getDefinition('theme_a_provided_layout');
     $this->assertSame('theme_a_provided_layout', $layout_definition->id());
     $this->assertSame('2 column layout', (string) $layout_definition->getLabel());
@@ -172,6 +179,8 @@ class LayoutPluginManagerTest extends UnitTestCase {
     $this->assertEquals($expected_regions, $regions);
     $this->assertInstanceOf(TranslatableMarkup::class, $regions['top']['label']);
     $this->assertInstanceOf(TranslatableMarkup::class, $regions['bottom']['label']);
+    // Check that arbitrary property value gets set correctly.
+    $this->assertSame('ipsum', $layout_definition->get('lorem'));
 
     $core_path = '/core/lib/Drupal/Core';
     $layout_definition = $this->layoutPluginManager->getDefinition('plugin_provided_layout');
@@ -198,12 +207,43 @@ class LayoutPluginManagerTest extends UnitTestCase {
     $regions = $layout_definition->getRegions();
     $this->assertEquals($expected_regions, $regions);
     $this->assertInstanceOf(TranslatableMarkup::class, $regions['main']['label']);
+    // Check that arbitrary property value gets set correctly.
+    $this->assertSame('adipiscing', $layout_definition->get('consectetur'));
+
+    $layout_definition = $this->layoutPluginManager->getDefinition('plugin_provided_by_annotation_layout');
+    $this->assertSame('plugin_provided_by_annotation_layout', $layout_definition->id());
+    $this->assertEquals('Layout by annotation plugin', $layout_definition->getLabel());
+    $this->assertEquals('Columns: 2', $layout_definition->getCategory());
+    $this->assertEquals('Test layout provided by annotated plugin', $layout_definition->getDescription());
+    $this->assertInstanceOf(TranslatableMarkup::class, $layout_definition->getLabel());
+    $this->assertInstanceOf(TranslatableMarkup::class, $layout_definition->getCategory());
+    $this->assertInstanceOf(TranslatableMarkup::class, $layout_definition->getDescription());
+    $this->assertSame('plugin-provided-annotation-layout', $layout_definition->getTemplate());
+    $this->assertSame($core_path, $layout_definition->getPath());
+    $this->assertNull($layout_definition->getLibrary());
+    $this->assertSame('plugin_provided_annotation_layout', $layout_definition->getThemeHook());
+    $this->assertSame("$core_path/templates", $layout_definition->getTemplatePath());
+    $this->assertSame('core', $layout_definition->getProvider());
+    $this->assertSame('left', $layout_definition->getDefaultRegion());
+    $this->assertSame('Drupal\Core\Plugin\Layout\TestAnnotationLayout', $layout_definition->getClass());
+    $expected_regions = [
+      'left' => [
+        'label' => new TranslatableMarkup('Left Region', [], ['context' => 'layout_region']),
+      ],
+      'right' => [
+        'label' => new TranslatableMarkup('Right Region', [], ['context' => 'layout_region']),
+      ],
+    ];
+    $regions = $layout_definition->getRegions();
+    $this->assertEquals($expected_regions, $regions);
+    $this->assertInstanceOf(TranslatableMarkup::class, $regions['left']['label']);
+    $this->assertInstanceOf(TranslatableMarkup::class, $regions['right']['label']);
   }
 
   /**
    * @covers ::processDefinition
    */
-  public function testProcessDefinition() {
+  public function testProcessDefinition(): void {
     $this->moduleHandler->alter('layout', Argument::type('array'))->shouldNotBeCalled();
     $this->expectException(InvalidPluginDefinitionException::class);
     $this->expectExceptionMessage('The "module_a_derived_layout:array_based" layout definition must extend ' . LayoutDefinition::class);
@@ -225,7 +265,7 @@ EOS;
   /**
    * @covers ::getThemeImplementations
    */
-  public function testGetThemeImplementations() {
+  public function testGetThemeImplementations(): void {
     $core_path = '/core/lib/Drupal/Core';
     $expected = [
       'layout' => [
@@ -243,6 +283,12 @@ EOS;
         'template' => 'plugin-provided-layout',
         'path' => "$core_path/templates",
       ],
+      'plugin_provided_annotation_layout' => [
+        'render element' => 'content',
+        'base hook' => 'layout',
+        'template' => 'plugin-provided-annotation-layout',
+        'path' => "$core_path/templates",
+      ],
     ];
     $theme_implementations = $this->layoutPluginManager->getThemeImplementations();
     $this->assertEquals($expected, $theme_implementations);
@@ -251,7 +297,7 @@ EOS;
   /**
    * @covers ::getCategories
    */
-  public function testGetCategories() {
+  public function testGetCategories(): void {
     $expected = [
       'Columns: 1',
       'Columns: 2',
@@ -263,11 +309,13 @@ EOS;
   /**
    * @covers ::getSortedDefinitions
    */
-  public function testGetSortedDefinitions() {
+  public function testGetSortedDefinitions(): void {
+    // Sorted by category first, then label.
     $expected = [
       'module_a_provided_layout',
       'plugin_provided_layout',
       'theme_a_provided_layout',
+      'plugin_provided_by_annotation_layout',
     ];
 
     $layout_definitions = $this->layoutPluginManager->getSortedDefinitions();
@@ -278,7 +326,7 @@ EOS;
   /**
    * @covers ::getGroupedDefinitions
    */
-  public function testGetGroupedDefinitions() {
+  public function testGetGroupedDefinitions(): void {
     $category_expected = [
       'Columns: 1' => [
         'module_a_provided_layout',
@@ -286,6 +334,7 @@ EOS;
       ],
       'Columns: 2' => [
         'theme_a_provided_layout',
+        'plugin_provided_by_annotation_layout',
       ],
     ];
 
@@ -315,7 +364,9 @@ module_a_provided_layout:
       label: Top region
     bottom:
       label: Bottom region
+  lorem: ipsum
 module_a_derived_layout:
+  label: 'Invalid provider derived layout'
   deriver: \Drupal\Tests\Core\Layout\LayoutDeriver
   invalid_provider: true
 EOS;
@@ -338,23 +389,52 @@ EOS;
     $plugin_provided_layout = <<<'EOS'
 <?php
 namespace Drupal\Core\Plugin\Layout;
+use Drupal\Core\Layout\Attribute\Layout;
+use Drupal\Core\Layout\LayoutDefault;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+/**
+ * The TestLayout Class.
+ */
+#[Layout(
+  id: 'plugin_provided_layout',
+  label: new TranslatableMarkup('Layout plugin'),
+  category: new TranslatableMarkup('Columns: 1'),
+  description: new TranslatableMarkup('Test layout'),
+  path: "core/lib/Drupal/Core",
+  template: "templates/plugin-provided-layout",
+  regions: [
+    "main" => [
+      "label" => new TranslatableMarkup("Main Region", [], ["context" => "layout_region"]),
+    ],
+  ],
+  consectetur: 'adipiscing',
+)]
+class TestLayout extends LayoutDefault {}
+EOS;
+    $plugin_provided_by_annotation_layout = <<<'EOS'
+<?php
+namespace Drupal\Core\Plugin\Layout;
 use Drupal\Core\Layout\LayoutDefault;
 /**
  * @Layout(
- *   id = "plugin_provided_layout",
- *   label = @Translation("Layout plugin"),
- *   category = @Translation("Columns: 1"),
- *   description = @Translation("Test layout"),
+ *   id = "plugin_provided_by_annotation_layout",
+ *   label = @Translation("Layout by annotation plugin"),
+ *   category = @Translation("Columns: 2"),
+ *   description = @Translation("Test layout provided by annotated plugin"),
  *   path = "core/lib/Drupal/Core",
- *   template = "templates/plugin-provided-layout",
+ *   template = "templates/plugin-provided-annotation-layout",
+ *   default_region = "left",
  *   regions = {
- *     "main" = {
- *       "label" = @Translation("Main Region", context = "layout_region")
+ *     "left" = {
+ *       "label" = @Translation("Left Region", context = "layout_region")
+ *     },
+ *     "right" = {
+ *        "label" = @Translation("Right Region", context = "layout_region")
  *     }
  *   }
  * )
  */
-class TestLayout extends LayoutDefault {}
+class TestAnnotationLayout extends LayoutDefault {}
 EOS;
     vfsStream::setup('root');
     vfsStream::create([
@@ -379,6 +459,7 @@ EOS;
               'Plugin' => [
                 'Layout' => [
                   'TestLayout.php' => $plugin_provided_layout,
+                  'TestAnnotationLayout.php' => $plugin_provided_by_annotation_layout,
                 ],
               ],
             ],

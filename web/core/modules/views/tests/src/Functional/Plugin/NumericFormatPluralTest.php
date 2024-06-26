@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\views\Functional\Plugin;
 
 use Drupal\Component\Gettext\PoHeader;
@@ -49,7 +51,7 @@ class NumericFormatPluralTest extends ViewTestBase {
   /**
    * Tests plural formatting setting on a numeric views handler.
    */
-  public function testNumericFormatPlural() {
+  public function testNumericFormatPlural(): void {
     // Create a file.
     $file = $this->createFile();
 

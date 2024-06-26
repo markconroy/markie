@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\node\Kernel\Migrate\d6;
 
 use Drupal\node\NodeInterface;
@@ -56,7 +58,7 @@ class MigrateNodeCompleteTest extends MigrateNodeTestBase {
   /**
    * Tests the complete node migration.
    */
-  public function testNodeCompleteMigration() {
+  public function testNodeCompleteMigration(): void {
     $db = \Drupal::database();
     $this->assertEquals($this->expectedNodeFieldRevisionTable(), $db->select('node_field_revision', 'nr')
       ->fields('nr')

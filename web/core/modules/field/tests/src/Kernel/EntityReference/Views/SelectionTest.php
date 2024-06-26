@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\field\Kernel\EntityReference\Views;
 
 use Drupal\Component\Render\MarkupInterface;
@@ -73,6 +75,10 @@ class SelectionTest extends KernelTestBase {
       $this->nodes[$node->id()] = $node;
     }
 
+    // Ensure the bundle to which the field is attached actually exists, or we
+    // will get config validation errors.
+    entity_test_create_bundle('test_bundle');
+
     // Create an entity reference field.
     $handler_settings = [
       'view' => [
@@ -88,7 +94,7 @@ class SelectionTest extends KernelTestBase {
   /**
    * Tests the selection handler.
    */
-  public function testSelectionHandler() {
+  public function testSelectionHandler(): void {
     // Tests the selection handler.
     $this->assertResults($this->selectionHandler->getReferenceableEntities());
 
@@ -133,7 +139,7 @@ class SelectionTest extends KernelTestBase {
    * If we expect our output to not have the <a> tags, and this matches what's
    * produced by the tag-stripping method, we'll know that it's working.
    */
-  public function testAnchorTagStripping() {
+  public function testAnchorTagStripping(): void {
     $filtered_rendered_results_formatted = [];
     foreach ($this->selectionHandler->getReferenceableEntities() as $subresults) {
       $filtered_rendered_results_formatted += array_map(fn(MarkupInterface $markup): string => (string) $markup, $subresults);

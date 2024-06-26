@@ -2,12 +2,15 @@
 
 namespace Drupal\views\Plugin\views\display;
 
+use Drupal\Component\Utility\Unicode;
 use Drupal\Component\Utility\Xss;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Menu\MenuParentFormSelectorInterface;
 use Drupal\Core\State\StateInterface;
 use Drupal\Core\Routing\RouteProviderInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\views\Attribute\ViewsDisplay;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Routing\Route;
 
@@ -15,18 +18,17 @@ use Symfony\Component\Routing\Route;
  * The plugin that handles a full page.
  *
  * @ingroup views_display_plugins
- *
- * @ViewsDisplay(
- *   id = "page",
- *   title = @Translation("Page"),
- *   help = @Translation("Display the view as a page, with a URL and menu links."),
- *   uses_menu_links = TRUE,
- *   uses_route = TRUE,
- *   contextual_links_locations = {"page"},
- *   theme = "views_view",
- *   admin = @Translation("Page")
- * )
  */
+#[ViewsDisplay(
+  id: "page",
+  title: new TranslatableMarkup("Page"),
+  help: new TranslatableMarkup("Display the view as a page, with a URL and menu links."),
+  uses_menu_links: TRUE,
+  uses_route: TRUE,
+  contextual_links_locations: ["page"],
+  theme: "views_view",
+  admin: new TranslatableMarkup("Page"),
+)]
 class Page extends PathPluginBase {
 
   /**
@@ -122,7 +124,7 @@ class Page extends PathPluginBase {
    * @return array
    *   The page render array.
    */
-  public static function &setPageRenderArray(array &$element = NULL) {
+  public static function &setPageRenderArray(?array &$element = NULL) {
     if (isset($element)) {
       static::$pageRenderArray = &$element;
     }
@@ -174,7 +176,7 @@ class Page extends PathPluginBase {
   /**
    * {@inheritdoc}
    */
-  public static function buildBasicRenderable($view_id, $display_id, array $args = [], Route $route = NULL) {
+  public static function buildBasicRenderable($view_id, $display_id, array $args = [], ?Route $route = NULL) {
     $build = parent::buildBasicRenderable($view_id, $display_id, $args);
 
     if ($route) {
@@ -239,7 +241,7 @@ class Page extends PathPluginBase {
     $options['menu'] = [
       'category' => 'page',
       'title' => $this->t('Menu'),
-      'value' => views_ui_truncate($menu_str, 24),
+      'value' => Unicode::truncate($menu_str, 24, FALSE, TRUE),
     ];
 
     // This adds a 'Settings' link to the style_options setting if the style

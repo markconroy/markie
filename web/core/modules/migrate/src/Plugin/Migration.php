@@ -218,6 +218,7 @@ class Migration extends PluginBase implements MigrationInterface, RequirementsIn
    *
    * @var array
    */
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
   protected $migration_tags = [];
 
   /**
@@ -239,19 +240,20 @@ class Migration extends PluginBase implements MigrationInterface, RequirementsIn
    *
    * The migration_dependencies value is structured like this:
    * @code
-   * array(
-   *   'required' => array(
+   * [
+   *   'required' => [
    *     // An array of migration IDs that must be run before this migration.
-   *   ),
-   *   'optional' => array(
+   *   ],
+   *   'optional' => [
    *     // An array of migration IDs that, if they exist, must be run before
    *     // this migration.
-   *   ),
-   * );
+   *   ],
+   * ];
    * @endcode
    *
    * @var array
    */
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
   protected $migration_dependencies = [];
 
   /**
@@ -397,7 +399,7 @@ class Migration extends PluginBase implements MigrationInterface, RequirementsIn
   /**
    * {@inheritdoc}
    */
-  public function getProcessPlugins(array $process = NULL) {
+  public function getProcessPlugins(?array $process = NULL) {
     if (!isset($process)) {
       $process = $this->getProcess();
     }

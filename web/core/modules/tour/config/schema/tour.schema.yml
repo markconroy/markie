@@ -41,11 +41,15 @@ tour.tip:
     plugin:
       type: string
       label: 'Plugin'
+      constraints:
+        PluginExists:
+          manager: plugin.manager.tour.tip
+          interface: '\Drupal\tour\TipPluginInterface'
     label:
       type: required_label
       label: 'Label'
     weight:
-      type: integer
+      type: weight
       label: 'Weight'
     position:
       type: string

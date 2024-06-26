@@ -25,7 +25,7 @@ class PathProcessorFrontTest extends UnitTestCase {
    * @covers ::processInbound
    * @dataProvider providerProcessInbound
    */
-  public function testProcessInbound($frontpage_path, $path, $expected, array $expected_query = []) {
+  public function testProcessInbound($frontpage_path, $path, $expected, array $expected_query = []): void {
     $config_factory = $this->prophesize(ConfigFactoryInterface::class);
     $config = $this->prophesize(ImmutableConfig::class);
     $config_factory->get('system.site')
@@ -41,7 +41,7 @@ class PathProcessorFrontTest extends UnitTestCase {
   /**
    * Inbound paths and expected results.
    */
-  public function providerProcessInbound() {
+  public static function providerProcessInbound() {
     return [
       'accessing frontpage' => ['/node', '/', '/node'],
       'accessing non frontpage' => ['/node', '/user', '/user'],
@@ -58,7 +58,7 @@ class PathProcessorFrontTest extends UnitTestCase {
    *
    * @covers ::processInbound
    */
-  public function testProcessInboundBadConfig() {
+  public function testProcessInboundBadConfig(): void {
     $config_factory = $this->prophesize(ConfigFactoryInterface::class);
     $config = $this->prophesize(ImmutableConfig::class);
     $config_factory->get('system.site')

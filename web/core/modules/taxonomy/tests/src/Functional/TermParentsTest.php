@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\taxonomy\Functional;
 
 use Drupal\taxonomy\Entity\Vocabulary;
@@ -62,7 +64,7 @@ class TermParentsTest extends BrowserTestBase {
   /**
    * Tests specifying parents when creating terms.
    */
-  public function testAddWithParents() {
+  public function testAddWithParents(): void {
     $this->drupalGet("/admin/structure/taxonomy/manage/{$this->vocabularyId}/add");
     $page = $this->getSession()->getPage();
 
@@ -133,7 +135,7 @@ class TermParentsTest extends BrowserTestBase {
   /**
    * Tests editing the parents of existing terms.
    */
-  public function testEditingParents() {
+  public function testEditingParents(): void {
     $terms = $this->doTestEditingSingleParent();
     $term_5 = array_pop($terms);
     $term_4 = array_pop($terms);
@@ -159,7 +161,7 @@ class TermParentsTest extends BrowserTestBase {
   /**
    * Tests specifying parents when creating terms and a disabled parent form.
    */
-  public function testEditingParentsWithDisabledFormElement() {
+  public function testEditingParentsWithDisabledFormElement(): void {
     // Disable the parent form element.
     $this->state->set('taxonomy_test.disable_parent_form_element', TRUE);
     $this->drupalGet("/admin/structure/taxonomy/manage/{$this->vocabularyId}/add");
@@ -251,7 +253,7 @@ class TermParentsTest extends BrowserTestBase {
   /**
    * Test the term add/edit form with parent query parameter.
    */
-  public function testParentFromQuery() {
+  public function testParentFromQuery(): void {
     // Create three terms without any parents.
     $term_1 = $this->createTerm('Test term 1');
     $term_2 = $this->createTerm('Test term 2');

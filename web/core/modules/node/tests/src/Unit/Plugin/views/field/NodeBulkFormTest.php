@@ -7,6 +7,7 @@ namespace Drupal\Tests\node\Unit\Plugin\views\field;
 use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\Entity\EntityRepositoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Routing\ResettableStackedRouteMatchInterface;
 use Drupal\node\Plugin\views\field\NodeBulkForm;
 use Drupal\Tests\UnitTestCase;
 
@@ -28,7 +29,7 @@ class NodeBulkFormTest extends UnitTestCase {
   /**
    * Tests the constructor assignment of actions.
    */
-  public function testConstructor() {
+  public function testConstructor(): void {
     $actions = [];
 
     for ($i = 1; $i <= 2; $i++) {
@@ -62,6 +63,8 @@ class NodeBulkFormTest extends UnitTestCase {
 
     $messenger = $this->createMock('Drupal\Core\Messenger\MessengerInterface');
 
+    $route_match = $this->createMock(ResettableStackedRouteMatchInterface::class);
+
     $views_data = $this->getMockBuilder('Drupal\views\ViewsData')
       ->disableOriginalConstructor()
       ->getMock();
@@ -92,7 +95,7 @@ class NodeBulkFormTest extends UnitTestCase {
     $definition['title'] = '';
     $options = [];
 
-    $node_bulk_form = new NodeBulkForm([], 'node_bulk_form', $definition, $entity_type_manager, $language_manager, $messenger, $entity_repository);
+    $node_bulk_form = new NodeBulkForm([], 'node_bulk_form', $definition, $entity_type_manager, $language_manager, $messenger, $entity_repository, $route_match);
     $node_bulk_form->init($executable, $display, $options);
 
     $reflected_actions = (new \ReflectionObject($node_bulk_form))->getProperty('actions');

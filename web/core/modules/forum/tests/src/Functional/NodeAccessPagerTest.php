@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\forum\Functional;
 
 use Drupal\Tests\BrowserTestBase;
@@ -8,6 +10,7 @@ use Drupal\Tests\BrowserTestBase;
  * Tests access controlled node views have the right amount of comment pages.
  *
  * @group form
+ * @group legacy
  */
 class NodeAccessPagerTest extends BrowserTestBase {
 
@@ -44,7 +47,7 @@ class NodeAccessPagerTest extends BrowserTestBase {
   /**
    * Tests the forum node pager for nodes with multiple grants per realm.
    */
-  public function testForumPager() {
+  public function testForumPager(): void {
     // Look up the forums vocabulary ID.
     $vid = $this->config('forum.settings')->get('vocabulary');
     $this->assertNotEmpty($vid, 'Forum navigation vocabulary ID is set.');

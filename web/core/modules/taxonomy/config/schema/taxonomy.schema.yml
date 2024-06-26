@@ -3,6 +3,8 @@
 taxonomy.settings:
   type: config_object
   label: 'Taxonomy settings'
+  constraints:
+    FullyValidatable: ~
   mapping:
     maintain_index_table:
       type: boolean
@@ -20,6 +22,8 @@ taxonomy.settings:
 taxonomy.vocabulary.*:
   type: config_entity
   label: 'Vocabulary'
+  constraints:
+    FullyValidatable: ~
   mapping:
     name:
       type: required_label
@@ -33,11 +37,18 @@ taxonomy.vocabulary.*:
         Length:
           max: 32
     description:
-      type: label
+      type: text
       label: 'Description'
+      nullable: true
+      constraints:
+        NotBlank:
+          allowNull: true
     weight:
-      type: integer
+      type: weight
       label: 'Weight'
+    new_revision:
+      type: boolean
+      label: 'Whether a new revision should be created by default'
 
 field.formatter.settings.entity_reference_rss_category:
   type: mapping

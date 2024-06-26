@@ -11,6 +11,7 @@ use Drupal\Core\Render\Element;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Url;
 use Drupal\taxonomy\Entity\Term;
+use Drupal\taxonomy\VocabularyInterface;
 
 /**
  * Implements hook_help().
@@ -22,7 +23,7 @@ function taxonomy_help($route_name, RouteMatchInterface $route_match) {
       $output = '';
       $output .= '<h2>' . t('About') . '</h2>';
       $output .= '<p>' . t('The Taxonomy module allows users who have permission to create and edit content to categorize (tag) content of that type. Users who have the <em>Administer vocabularies and terms</em> <a href=":permissions" title="Taxonomy module permissions">permission</a> can add <em>vocabularies</em> that contain a set of related <em>terms</em>. The terms in a vocabulary can either be pre-set by an administrator or built gradually as content is added and edited. Terms may be organized hierarchically if desired.', [':permissions' => Url::fromRoute('user.admin_permissions.module', ['modules' => 'taxonomy'])->toString()]) . '</p>';
-      $output .= '<p>' . t('For more information, see the <a href=":taxonomy">online documentation for the Taxonomy module</a>.', [':taxonomy' => 'https://www.drupal.org/documentation/modules/taxonomy/']) . '</p>';
+      $output .= '<p>' . t('For more information, see the <a href=":taxonomy">online documentation for the Taxonomy module</a>.', [':taxonomy' => 'https://www.drupal.org/docs/8/core/modules/taxonomy']) . '</p>';
       $output .= '<h2>' . t('Uses') . '</h2>';
       $output .= '<dl>';
       $output .= '<dt>' . t('Managing vocabularies') . '</dt>';
@@ -70,6 +71,21 @@ function taxonomy_theme_suggestions_taxonomy_term(array $variables) {
   $suggestions[] = 'taxonomy_term__' . $term->id();
 
   return $suggestions;
+}
+
+/**
+ * Implements hook_local_tasks_alter().
+ *
+ * @todo Evaluate removing as part of https://www.drupal.org/node/2358923.
+ */
+function taxonomy_local_tasks_alter(&$local_tasks) {
+  $local_task_key = 'config_translation.local_tasks:entity.taxonomy_vocabulary.config_translation_overview';
+  if (isset($local_tasks[$local_task_key])) {
+    // The config_translation module expects the base route to be
+    // entity.taxonomy_vocabulary.edit_form like it is for other configuration
+    // entities. Taxonomy uses the overview_form as the base route.
+    $local_tasks[$local_task_key]['base_route'] = 'entity.taxonomy_vocabulary.overview_form';
+  }
 }
 
 /**
@@ -279,3 +295,15 @@ function taxonomy_taxonomy_term_delete(Term $term) {
 /**
  * @} End of "defgroup taxonomy_index".
  */
+
+/**
+ * Implements hook_ENTITY_TYPE_presave().
+ */
+function taxonomy_taxonomy_vocabulary_presave(VocabularyInterface $vocabulary) {
+  // Vocabularies' `description` field must be stored as NULL at the config
+  // level if it is empty.
+  // @see taxonomy_post_update_set_vocabulary_description_to_null()
+  if (trim($vocabulary->getDescription()) === '') {
+    $vocabulary->set('description', NULL);
+  }
+}

@@ -7,7 +7,7 @@ use Drupal\Core\DependencyInjection\DependencySerializationTrait;
 use Drupal\Core\Site\Settings;
 use Drupal\Core\Utility\Error;
 use GuzzleHttp\ClientInterface;
-use GuzzleHttp\Exception\TransferException;
+use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -104,7 +104,7 @@ class UpdateFetcher implements UpdateFetcherInterface {
         ->get($url, ['headers' => ['Accept' => 'text/xml']])
         ->getBody();
     }
-    catch (TransferException $exception) {
+    catch (ClientExceptionInterface $exception) {
       Error::logException($this->logger, $exception);
       if ($with_http_fallback && !str_contains($url, "http://")) {
         $url = str_replace('https://', 'http://', $url);
@@ -123,7 +123,8 @@ class UpdateFetcher implements UpdateFetcherInterface {
     $url .= '/' . $name . '/current';
 
     // Only append usage information if we have a site key and the project is
-    // enabled. We do not want to record usage statistics for disabled projects.
+    // installed. We do not want to record usage statistics for uninstalled
+    // projects.
     if (!empty($site_key) && !str_contains($project['project_type'], 'disabled')) {
       // Append the site key.
       $url .= str_contains($url, '?') ? '&' : '?';
@@ -136,7 +137,7 @@ class UpdateFetcher implements UpdateFetcherInterface {
         $url .= rawurlencode($project['info']['version']);
       }
 
-      // Append the list of modules or themes enabled.
+      // Append the list of modules or themes installed.
       $list = array_keys($project['includes']);
       $url .= '&list=';
       $url .= rawurlencode(implode(',', $list));

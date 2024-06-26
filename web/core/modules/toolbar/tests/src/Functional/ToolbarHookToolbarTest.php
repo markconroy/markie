@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\toolbar\Functional;
 
 use Drupal\Tests\BrowserTestBase;
@@ -44,7 +46,7 @@ class ToolbarHookToolbarTest extends BrowserTestBase {
   /**
    * Tests for a tab and tray provided by a module implementing hook_toolbar().
    */
-  public function testHookToolbar() {
+  public function testHookToolbar(): void {
     $this->drupalGet('test-page');
     $this->assertSession()->statusCodeEquals(200);
 

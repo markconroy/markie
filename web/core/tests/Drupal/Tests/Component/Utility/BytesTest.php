@@ -6,7 +6,10 @@ namespace Drupal\Tests\Component\Utility;
 
 use Drupal\Component\Utility\Bytes;
 use PHPUnit\Framework\TestCase;
+use Prophecy\Argument;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Symfony\Bridge\PhpUnit\ExpectDeprecationTrait;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 /**
  * Tests bytes size parsing helper methods.
@@ -18,6 +21,7 @@ use Symfony\Bridge\PhpUnit\ExpectDeprecationTrait;
 class BytesTest extends TestCase {
 
   use ExpectDeprecationTrait;
+  use ProphecyTrait;
 
   /**
    * Tests \Drupal\Component\Utility\Bytes::toNumber().
@@ -44,7 +48,7 @@ class BytesTest extends TestCase {
    *   \Drupal\Component\Utility\Bytes::toNumber(): size, and the expected
    *   return value with the expected type (float).
    */
-  public function providerTestToNumber(): array {
+  public static function providerTestToNumber(): array {
     return [
       ['1', 1.0],
       ['1 byte', 1.0],
@@ -85,9 +89,21 @@ class BytesTest extends TestCase {
    *
    * @dataProvider providerTestValidate
    * @covers ::validate
+   * @covers ::validateConstraint
    */
   public function testValidate($string, bool $expected_result): void {
     $this->assertSame($expected_result, Bytes::validate($string));
+
+    $execution_context = $this->prophesize(ExecutionContextInterface::class);
+    if ($expected_result) {
+      $execution_context->addViolation(Argument::cetera())
+        ->shouldNotBeCalled();
+    }
+    else {
+      $execution_context->addViolation(Argument::cetera())
+        ->shouldBeCalledTimes(1);
+    }
+    Bytes::validateConstraint($string, $execution_context->reveal());
   }
 
   /**
@@ -98,7 +114,7 @@ class BytesTest extends TestCase {
    *   \Drupal\Component\Utility\Bytes::validate(): string, and the expected
    *   return value with the expected type (bool).
    */
-  public function providerTestValidate(): array {
+  public static function providerTestValidate(): array {
     return [
       // String not starting with a number.
       ['foo', FALSE],

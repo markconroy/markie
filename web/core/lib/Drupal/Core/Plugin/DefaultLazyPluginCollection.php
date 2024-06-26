@@ -128,6 +128,11 @@ class DefaultLazyPluginCollection extends LazyPluginCollection {
    * {@inheritdoc}
    */
   public function setConfiguration($configuration) {
+    if (!is_array($configuration)) {
+      @trigger_error('Calling ' . __METHOD__ . '() with a non-array argument is deprecated in drupal:10.3.0 and will fail in drupal:11.0.0. See https://www.drupal.org/node/3406191', E_USER_DEPRECATED);
+      $configuration = [];
+    }
+
     // Track each instance ID as it is updated.
     $unprocessed_instance_ids = $this->getInstanceIds();
 
@@ -156,6 +161,17 @@ class DefaultLazyPluginCollection extends LazyPluginCollection {
    *   The plugin configuration to set.
    */
   public function setInstanceConfiguration($instance_id, array $configuration) {
+    if (
+      isset($this->pluginInstances[$instance_id]) &&
+      isset($configuration[$this->pluginKey]) &&
+      isset($this->configurations[$instance_id][$this->pluginKey]) &&
+      $configuration[$this->pluginKey] !== $this->configurations[$instance_id][$this->pluginKey]
+    ) {
+      // If the plugin has already been instantiated by the configuration was
+      // for a different plugin then we need to unset the instantiated plugin.
+      unset($this->pluginInstances[$instance_id]);
+    }
+
     $this->configurations[$instance_id] = $configuration;
     $instance = $this->get($instance_id);
     if ($instance instanceof ConfigurableInterface) {

@@ -153,7 +153,8 @@ display:
           relationship: none
           group_type: group
           admin_label: ''
-          plugin_id: numeric
+          plugin_id: entity_target_id
+          target_entity_type_id: taxonomy_term
           default_action: default
           exception:
             value: all
@@ -253,11 +254,13 @@ display:
             default_group_multiple: {  }
             group_items: {  }
       style:
-        type: default
+        type: grid_responsive
         options:
-          row_class: ''
-          default_row_class: true
           uses_fields: false
+          columns: 4
+          cell_min_width: 240
+          grid_gutter: 14
+          alignment: horizontal
       row:
         type: 'entity:node'
         options:
@@ -272,7 +275,7 @@ display:
           replica: false
           query_tags: {  }
       relationships: {  }
-      css_class: grid--4
+      css_class: ''
       header: {  }
       footer: {  }
       display_extenders: {  }

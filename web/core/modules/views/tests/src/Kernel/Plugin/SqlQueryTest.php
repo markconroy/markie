@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\views\Kernel\Plugin;
 
 use Drupal\Core\Database\Database;
@@ -35,7 +37,7 @@ class SqlQueryTest extends ViewsKernelTestBase {
   /**
    * Tests adding some metadata/tags to the views query.
    */
-  public function testExecuteMetadata() {
+  public function testExecuteMetadata(): void {
     $view = Views::getView('test_view');
     $view->setDisplay();
 
@@ -89,7 +91,7 @@ class SqlQueryTest extends ViewsKernelTestBase {
    * \Drupal\Core\Database\Database::getConnection() which is a 'final' method
    * and therefore cannot be mocked.
    */
-  public function testGetConnection() {
+  public function testGetConnection(): void {
     $view = Views::getView('test_view');
     $view->setDisplay();
 

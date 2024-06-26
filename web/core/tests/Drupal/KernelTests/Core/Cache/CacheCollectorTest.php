@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\KernelTests\Core\Cache;
 
 use Drupal\Core\DependencyInjection\ContainerBuilder;
@@ -37,7 +39,7 @@ class CacheCollectorTest extends KernelTestBase {
    *
    * @dataProvider providerTestInvalidCharacters
    */
-  public function testCacheCollector($cid, $key, $value) {
+  public function testCacheCollector($cid, $key, $value): void {
     $collector = new CacheCollectorHelper($cid, $this->container->get('cache.default'), $this->container->get('lock'));
     $this->assertNull($collector->get($key));
     $collector->set($key, $value);

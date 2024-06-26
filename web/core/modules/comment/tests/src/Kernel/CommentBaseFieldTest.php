@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\comment\Kernel;
 
 use Drupal\comment\CommentInterface;
@@ -39,7 +41,7 @@ class CommentBaseFieldTest extends KernelTestBase {
   /**
    * Tests comment as a base field.
    */
-  public function testCommentBaseField() {
+  public function testCommentBaseField(): void {
     // Verify entity creation.
     $entity = CommentTestBaseField::create([
       'name' => $this->randomMachineName(),

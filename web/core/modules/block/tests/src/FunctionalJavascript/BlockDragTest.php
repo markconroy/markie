@@ -37,11 +37,16 @@ class BlockDragTest extends WebDriverTestBase {
   /**
    * Tests drag and drop blocks.
    */
-  public function testDragAndDropBlocks() {
+  public function testDragAndDropBlocks(): void {
+    // Resize window to work around https://github.com/bitovi/syn/issues/164.
+    $this->getSession()->resizeWindow(1024, 2048);
     $this->drupalGet('admin/structure/block');
     $assertSession = $this->assertSession();
     $session = $this->getSession();
     $page = $session->getPage();
+
+    // Test if drag orientation on block layout page was applied with success.
+    $this->assertNotEmpty($assertSession->waitForElementVisible('css', '.tabledrag-handle-y'));
 
     // Dragging main-menu and status messages to header region.
     $siteBranding = $this->getDragRow($page, 'edit-blocks-olivero-site-branding');

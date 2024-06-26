@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\user\Kernel\Views;
 
 use Drupal\Tests\views\Kernel\ViewsKernelTestBase;
@@ -77,17 +79,14 @@ abstract class UserKernelTestBase extends ViewsKernelTestBase {
     // Setup a user with just the first role (so no permission beside the
     // ones from the authenticated role).
     $this->users[] = $account = $this->userStorage->create(['name' => 'first_role']);
-    $account->addRole('no_permission');
-    $account->save();
+    $account->addRole('no_permission')->save();
     // Setup a user with just the second role (so one additional permission).
     $this->users[] = $account = $this->userStorage->create(['name' => 'second_role']);
-    $account->addRole('one_permission');
-    $account->save();
+    $account->addRole('one_permission')->save();
     // Setup a user with both the second and the third role.
     $this->users[] = $account = $this->userStorage->create(['name' => 'second_third_role']);
-    $account->addRole('one_permission');
-    $account->addRole('multiple_permissions');
-    $account->save();
+    $account->addRole('one_permission')->addRole('multiple_permissions')
+      ->save();
   }
 
 }

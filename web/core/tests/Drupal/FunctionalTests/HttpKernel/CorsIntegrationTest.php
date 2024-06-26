@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\FunctionalTests\HttpKernel;
 
 use Drupal\Core\Url;
@@ -26,7 +28,7 @@ class CorsIntegrationTest extends BrowserTestBase {
    */
   protected $defaultTheme = 'stark';
 
-  public function testCrossSiteRequest() {
+  public function testCrossSiteRequest(): void {
     // Test default parameters.
     $cors_config = $this->container->getParameter('cors.config');
     $this->assertFalse($cors_config['enabled']);

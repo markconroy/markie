@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\help\Functional;
 
 // cspell:ignore hilfetestmodul testen übersetzung
@@ -33,7 +35,7 @@ class HelpTopicTranslationTest extends HelpTopicTranslatedTestBase {
   /**
    * Tests help topic translations.
    */
-  public function testHelpTopicTranslations() {
+  public function testHelpTopicTranslations(): void {
     $session = $this->assertSession();
 
     // Verify that help topic link is translated on admin/help.

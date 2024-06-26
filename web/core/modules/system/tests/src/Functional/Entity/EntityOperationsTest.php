@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\system\Functional\Entity;
 
 use Drupal\Component\Render\FormattableMarkup;
@@ -40,7 +42,7 @@ class EntityOperationsTest extends BrowserTestBase {
    *
    * @see entity_test_entity_operation_alter()
    */
-  public function testEntityOperationAlter() {
+  public function testEntityOperationAlter(): void {
     // Check that role listing contain our test_operation operation.
     $this->drupalGet('admin/people/roles');
     $roles = Role::loadMultiple();

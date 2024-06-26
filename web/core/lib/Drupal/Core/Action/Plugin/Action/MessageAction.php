@@ -89,7 +89,7 @@ class MessageAction extends ConfigurableActionBase implements ContainerFactoryPl
     ];
 
     // @todo Fix in https://www.drupal.org/node/2577827
-    $this->messenger->addStatus($this->renderer->renderPlain($build));
+    $this->messenger->addStatus($this->renderer->renderInIsolation($build));
   }
 
   /**
@@ -127,7 +127,7 @@ class MessageAction extends ConfigurableActionBase implements ContainerFactoryPl
   /**
    * {@inheritdoc}
    */
-  public function access($object, AccountInterface $account = NULL, $return_as_object = FALSE) {
+  public function access($object, ?AccountInterface $account = NULL, $return_as_object = FALSE) {
     $result = AccessResult::allowed();
     return $return_as_object ? $result : $result->isAllowed();
   }

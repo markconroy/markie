@@ -66,7 +66,7 @@ class MultipleValueWidgetTest extends WebDriverTestBase {
   /**
    * Tests the 'Add more' functionality.
    */
-  public function testFieldMultipleValueWidget() {
+  public function testFieldMultipleValueWidget(): void {
     $this->drupalGet('entity_test/add');
 
     $assert_session = $this->assertSession();
@@ -112,7 +112,7 @@ class MultipleValueWidgetTest extends WebDriverTestBase {
     $this->assertGreaterThan($field_weight_1->getValue(), $field_weight_2->getValue());
 
     // Drag the first row after the third row.
-    $dragged = $field_0->find('xpath', 'ancestor::tr[contains(@class, "draggable")]//a[@class="tabledrag-handle"]');
+    $dragged = $field_0->find('xpath', 'ancestor::tr[contains(@class, "draggable")]//a[starts-with(@class, "tabledrag-handle")]');
     $target = $field_2->find('xpath', 'ancestor::tr[contains(@class, "draggable")]');
     $dragged->dragTo($target);
 
@@ -172,7 +172,7 @@ class MultipleValueWidgetTest extends WebDriverTestBase {
   /**
    * Tests that no validation occurs on field on "Add more" click.
    */
-  public function testFieldMultipleValueWidgetAddMoreNoValidation() {
+  public function testFieldMultipleValueWidgetAddMoreNoValidation(): void {
     // Set unlimited field to be required.
     $field_name = 'field_unlimited';
     $field = FieldConfig::loadByName('entity_test', 'entity_test', $field_name);

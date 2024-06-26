@@ -9,7 +9,7 @@ use Drupal\Core\Url;
 use Drupal\Tests\BrowserTestBase;
 
 /**
- * Tests the the update_settings form.
+ * Tests the update_settings form.
  *
  * @group update
  * @group Form
@@ -29,7 +29,7 @@ class UpdateSettingsFormTest extends BrowserTestBase {
   /**
    * Tests the update_settings form.
    */
-  public function testUpdateSettingsForm() {
+  public function testUpdateSettingsForm(): void {
     $url = Url::fromRoute('update.settings');
 
     // Users without the appropriate permissions should not be able to access.

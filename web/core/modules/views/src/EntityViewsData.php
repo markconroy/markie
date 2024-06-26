@@ -509,7 +509,7 @@ class EntityViewsData implements EntityHandlerInterface, EntityViewsDataInterfac
         break;
 
       case 'language':
-        $views_field['field']['id'] = 'field';
+        $views_field['field']['id'] = 'field_language';
         $views_field['argument']['id'] = 'language';
         $views_field['filter']['id'] = 'language';
         $views_field['sort']['id'] = 'standard';
@@ -644,7 +644,10 @@ class EntityViewsData implements EntityHandlerInterface, EntityViewsDataInterfac
           'id' => 'standard',
         ];
         $views_field['field']['id'] = 'field';
-        $views_field['argument']['id'] = 'numeric';
+        // Provide an argument plugin that has a meaningful titleQuery()
+        // implementation getting the entity label.
+        $views_field['argument']['id'] = 'entity_target_id';
+        $views_field['argument']['target_entity_type_id'] = $entity_type_id;
         $views_field['filter']['id'] = 'numeric';
         $views_field['sort']['id'] = 'standard';
       }

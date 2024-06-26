@@ -60,7 +60,9 @@
         'click',
         'summary',
         (e) => {
-          $(e.currentTarget).trigger('dialogContentResize');
+          e.currentTarget?.dispatchEvent(
+            new CustomEvent('dialogContentResize', { bubbles: true }),
+          );
         },
       );
     },
@@ -81,7 +83,8 @@
    * @param {jQuery} $element
    *   The jQuery collection of the dialog element.
    */
-  $(window).on('dialog:aftercreate', (e, dialog, $element) => {
+  window.addEventListener('dialog:aftercreate', (e) => {
+    const $element = $(e.target);
     const $scroll = $element.find('.scroll');
     if ($scroll.length) {
       bodyScrollLock.unlock($element.get(0));

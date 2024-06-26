@@ -32,7 +32,7 @@ class SecurityFileUploadEventSubscriberTest extends UnitTestCase {
    *
    * @covers ::sanitizeName
    */
-  public function testSanitizeName(string $filename, string $allowed_extensions, string $expected_filename, string $expected_filename_with_insecure_uploads = NULL) {
+  public function testSanitizeName(string $filename, string $allowed_extensions, string $expected_filename, ?string $expected_filename_with_insecure_uploads = NULL): void {
     // Configure insecure uploads to be renamed.
     $config_factory = $this->getConfigFactoryStub([
       'system.file' => [
@@ -72,7 +72,7 @@ class SecurityFileUploadEventSubscriberTest extends UnitTestCase {
    *   Arrays with original name, allowed extensions, expected name and
    *   (optional) expected name 'allow_insecure_uploads' is set to TRUE.
    */
-  public function provideFilenames() {
+  public static function provideFilenames() {
     return [
       'All extensions allowed filename not munged' => ['foo.txt', '', 'foo.txt'],
       'All extensions allowed with .php file' => ['foo.php', '', 'foo.php_.txt', 'foo.php'],
@@ -106,7 +106,7 @@ class SecurityFileUploadEventSubscriberTest extends UnitTestCase {
    *
    * @covers ::sanitizeName
    */
-  public function testSanitizeNameNoMunge(string $filename, string $allowed_extensions) {
+  public function testSanitizeNameNoMunge(string $filename, string $allowed_extensions): void {
     $config_factory = $this->getConfigFactoryStub([
       'system.file' => [
         'allow_insecure_uploads' => FALSE,
@@ -142,7 +142,7 @@ class SecurityFileUploadEventSubscriberTest extends UnitTestCase {
    * @return array
    *   Arrays with original name and allowed extensions.
    */
-  public function provideFilenamesNoMunge() {
+  public static function provideFilenamesNoMunge() {
     return [
       // The following filename would be rejected by 'FileExtension' constraint
       // and therefore remains unchanged.

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\system\Functional\Theme;
 
 use Drupal\Tests\BrowserTestBase;
@@ -26,7 +28,7 @@ class HtmlAttributesTest extends BrowserTestBase {
   /**
    * Tests that attributes in the 'html' and 'body' elements can be altered.
    */
-  public function testThemeHtmlAttributes() {
+  public function testThemeHtmlAttributes(): void {
     $this->drupalGet('');
     $this->assertSession()->responseContains('<html lang="en" dir="ltr" theme_test_html_attribute="theme test html attribute value">');
     $this->assertSession()->elementsCount('xpath', '/body[@theme_test_body_attribute="theme test body attribute value"]', 1);

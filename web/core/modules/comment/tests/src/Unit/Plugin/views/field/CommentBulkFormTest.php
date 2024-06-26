@@ -8,6 +8,7 @@ use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\comment\Plugin\views\field\CommentBulkForm;
 use Drupal\Core\Entity\EntityRepositoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Routing\ResettableStackedRouteMatchInterface;
 use Drupal\Tests\UnitTestCase;
 
 /**
@@ -28,7 +29,7 @@ class CommentBulkFormTest extends UnitTestCase {
   /**
    * Tests the constructor assignment of actions.
    */
-  public function testConstructor() {
+  public function testConstructor(): void {
     $actions = [];
 
     for ($i = 1; $i <= 2; $i++) {
@@ -62,6 +63,8 @@ class CommentBulkFormTest extends UnitTestCase {
 
     $messenger = $this->createMock('Drupal\Core\Messenger\MessengerInterface');
 
+    $route_match = $this->createMock(ResettableStackedRouteMatchInterface::class);
+
     $views_data = $this->getMockBuilder('Drupal\views\ViewsData')
       ->disableOriginalConstructor()
       ->getMock();
@@ -92,7 +95,7 @@ class CommentBulkFormTest extends UnitTestCase {
     $definition['title'] = '';
     $options = [];
 
-    $comment_bulk_form = new CommentBulkForm([], 'comment_bulk_form', $definition, $entity_type_manager, $language_manager, $messenger, $entity_repository);
+    $comment_bulk_form = new CommentBulkForm([], 'comment_bulk_form', $definition, $entity_type_manager, $language_manager, $messenger, $entity_repository, $route_match);
     $comment_bulk_form->init($executable, $display, $options);
 
     $reflected_actions = (new \ReflectionObject($comment_bulk_form))->getProperty('actions');

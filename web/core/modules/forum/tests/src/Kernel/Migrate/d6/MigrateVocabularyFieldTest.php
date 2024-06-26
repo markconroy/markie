@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\forum\Kernel\Migrate\d6;
 
 use Drupal\Tests\migrate_drupal\Kernel\d6\MigrateDrupal6TestBase;
@@ -41,7 +43,7 @@ class MigrateVocabularyFieldTest extends MigrateDrupal6TestBase {
   /**
    * Tests the Drupal 6 vocabulary-node type association migration.
    */
-  public function testVocabularyField() {
+  public function testVocabularyField(): void {
     // Test that the field exists.
     $this->assertEntity('node.field_freetags', 'entity_reference', TRUE, -1);
     $this->assertEntity('node.field_trees', 'entity_reference', TRUE, 1);

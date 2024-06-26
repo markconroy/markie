@@ -44,7 +44,7 @@ class ClientFactoryTest extends UnitTestCase {
    * @param array $expected_config_keys
    *   The expected config keys.
    */
-  public function testCreateFromOptions($settings_config, $parameter_config, $expected_config_keys) {
+  public function testCreateFromOptions($settings_config, $parameter_config, $expected_config_keys): void {
     if ($settings_config) {
       new Settings(['http_client_config' => $settings_config]);
     }
@@ -64,7 +64,7 @@ class ClientFactoryTest extends UnitTestCase {
    *
    * @return array
    */
-  public function providerTestCreateFromOptions() {
+  public static function providerTestCreateFromOptions() {
     return [
       [[], [], ['verify' => TRUE, 'timeout' => 30]],
       [['timeout' => 40], [], ['verify' => TRUE, 'timeout' => 40]],

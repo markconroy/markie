@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\jsonapi\Functional;
 
 use Drupal\Component\Serialization\Json;
@@ -53,7 +55,7 @@ class JsonApiFunctionalDateFieldTest extends JsonApiFunctionalTestBase {
   /**
    * Tests the GET method.
    */
-  public function testRead() {
+  public function testRead(): void {
     /** @var \Drupal\Core\Datetime\DateFormatterInterface $date_formatter */
     $date_formatter = $this->container->get('date.formatter');
 

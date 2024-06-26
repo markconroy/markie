@@ -70,7 +70,7 @@ class LocalTaskManagerTest extends UnitTestCase {
   /**
    * The cache backend used in the test.
    *
-   * @var \PHPUnit\Framework\MockObject\MockObject
+   * @var \Drupal\Core\Cache\CacheBackendInterface|\Prophecy\Prophecy\ObjectProphecy
    */
   protected $cacheBackend;
 
@@ -106,7 +106,7 @@ class LocalTaskManagerTest extends UnitTestCase {
     $this->routeProvider = $this->createMock('Drupal\Core\Routing\RouteProviderInterface');
     $this->pluginDiscovery = $this->createMock('Drupal\Component\Plugin\Discovery\DiscoveryInterface');
     $this->factory = $this->createMock('Drupal\Component\Plugin\Factory\FactoryInterface');
-    $this->cacheBackend = $this->createMock('Drupal\Core\Cache\CacheBackendInterface');
+    $this->cacheBackend = $this->prophesize('Drupal\Core\Cache\CacheBackendInterface');
     $this->accessManager = $this->createMock('Drupal\Core\Access\AccessManagerInterface');
     $this->routeMatch = $this->createMock('Drupal\Core\Routing\RouteMatchInterface');
     $this->account = $this->createMock('Drupal\Core\Session\AccountInterface');
@@ -120,7 +120,7 @@ class LocalTaskManagerTest extends UnitTestCase {
    *
    * @see \Drupal\system\Plugin\Type\MenuLocalTaskManager::getLocalTasksForRoute()
    */
-  public function testGetLocalTasksForRouteSingleLevelTitle() {
+  public function testGetLocalTasksForRouteSingleLevelTitle(): void {
     $definitions = $this->getLocalTaskFixtures();
 
     $this->pluginDiscovery->expects($this->once())
@@ -144,7 +144,7 @@ class LocalTaskManagerTest extends UnitTestCase {
    *
    * @see \Drupal\system\Plugin\Type\MenuLocalTaskManager::getLocalTasksForRoute()
    */
-  public function testGetLocalTasksForRouteForChild() {
+  public function testGetLocalTasksForRouteForChild(): void {
     $definitions = $this->getLocalTaskFixtures();
 
     $this->pluginDiscovery->expects($this->once())
@@ -166,7 +166,7 @@ class LocalTaskManagerTest extends UnitTestCase {
   /**
    * Tests the cache of the local task manager with an empty initial cache.
    */
-  public function testGetLocalTaskForRouteWithEmptyCache() {
+  public function testGetLocalTaskForRouteWithEmptyCache(): void {
     $definitions = $this->getLocalTaskFixtures();
 
     $this->pluginDiscovery->expects($this->once())
@@ -180,18 +180,15 @@ class LocalTaskManagerTest extends UnitTestCase {
 
     $result = $this->getLocalTasksForRouteResult($mock_plugin);
 
-    $this->cacheBackend->expects($this->exactly(2))
-      ->method('get')
-      ->withConsecutive(
-        ['local_task_plugins:en:menu_local_task_test_tasks_view'],
-        ['local_task_plugins:en'],
-      );
-    $this->cacheBackend->expects($this->exactly(2))
-      ->method('set')
-      ->withConsecutive(
-        ['local_task_plugins:en', $definitions, Cache::PERMANENT],
-        ['local_task_plugins:en:menu_local_task_test_tasks_view', $this->getLocalTasksCache(), Cache::PERMANENT, ['local_task']],
-      );
+    $this->cacheBackend->get('local_task_plugins:en:menu_local_task_test_tasks_view')
+      ->shouldBeCalled();
+    $this->cacheBackend->get('local_task_plugins:en')
+      ->shouldBeCalled();
+
+    $this->cacheBackend->set('local_task_plugins:en', $definitions, Cache::PERMANENT, ["local_task"])
+      ->shouldBeCalled();
+    $this->cacheBackend->set('local_task_plugins:en:menu_local_task_test_tasks_view', $this->getLocalTasksCache(), Cache::PERMANENT, ['local_task'])
+      ->shouldBeCalled();
 
     $local_tasks = $this->manager->getLocalTasksForRoute('menu_local_task_test_tasks_view');
     $this->assertEquals($result, $local_tasks);
@@ -200,7 +197,7 @@ class LocalTaskManagerTest extends UnitTestCase {
   /**
    * Tests the cache of the local task manager with a filled initial cache.
    */
-  public function testGetLocalTaskForRouteWithFilledCache() {
+  public function testGetLocalTaskForRouteWithFilledCache(): void {
     $this->pluginDiscovery->expects($this->never())
       ->method('getDefinitions');
 
@@ -211,13 +208,11 @@ class LocalTaskManagerTest extends UnitTestCase {
 
     $result = $this->getLocalTasksCache();
 
-    $this->cacheBackend->expects($this->once())
-      ->method('get')
-      ->with('local_task_plugins:en:menu_local_task_test_tasks_view')
+    $this->cacheBackend->get('local_task_plugins:en:menu_local_task_test_tasks_view')
       ->willReturn((object) ['data' => $result]);
 
-    $this->cacheBackend->expects($this->never())
-      ->method('set');
+    $this->cacheBackend->set()
+      ->shouldNotBeCalled();
 
     $result = $this->getLocalTasksForRouteResult($mock_plugin);
     $local_tasks = $this->manager->getLocalTasksForRoute('menu_local_task_test_tasks_view');
@@ -229,7 +224,7 @@ class LocalTaskManagerTest extends UnitTestCase {
    *
    * @see \Drupal\system\Plugin\Type\MenuLocalTaskManager::getTitle()
    */
-  public function testGetTitle() {
+  public function testGetTitle(): void {
     $menu_local_task = $this->createMock('Drupal\Core\Menu\LocalTaskInterface');
     $menu_local_task->expects($this->once())
       ->method('getTitle');
@@ -257,7 +252,7 @@ class LocalTaskManagerTest extends UnitTestCase {
       ->method('getCurrentLanguage')
       ->willReturn(new Language(['id' => 'en']));
 
-    $this->manager = new LocalTaskManager($this->argumentResolver, $request_stack, $this->routeMatch, $this->routeProvider, $module_handler, $this->cacheBackend, $language_manager, $this->accessManager, $this->account);
+    $this->manager = new LocalTaskManager($this->argumentResolver, $request_stack, $this->routeMatch, $this->routeProvider, $module_handler, $this->cacheBackend->reveal(), $language_manager, $this->accessManager, $this->account);
 
     $property = new \ReflectionProperty('Drupal\Core\Menu\LocalTaskManager', 'discovery');
     $property->setValue($this->manager, $this->pluginDiscovery);
@@ -401,7 +396,7 @@ class LocalTaskManagerTest extends UnitTestCase {
   /**
    * @covers ::getTasksBuild
    */
-  public function testGetTasksBuildWithCacheabilityMetadata() {
+  public function testGetTasksBuildWithCacheabilityMetadata(): void {
     $definitions = $this->getLocalTaskFixtures();
 
     $this->pluginDiscovery->expects($this->once())

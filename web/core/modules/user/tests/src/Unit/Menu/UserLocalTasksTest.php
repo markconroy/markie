@@ -35,14 +35,14 @@ class UserLocalTasksTest extends LocalTaskIntegrationTestBase {
    *
    * @dataProvider getUserAdminRoutes
    */
-  public function testUserAdminLocalTasks($route, $expected) {
+  public function testUserAdminLocalTasks($route, $expected): void {
     $this->assertLocalTasks($route, $expected);
   }
 
   /**
    * Provides a list of routes to test.
    */
-  public function getUserAdminRoutes() {
+  public static function getUserAdminRoutes() {
     return [
       ['entity.user.collection', [['entity.user.collection', 'user.admin_permissions', 'entity.user_role.collection', 'user.role.settings']]],
       ['user.admin_permissions', [['entity.user.collection', 'user.admin_permissions', 'entity.user_role.collection', 'user.role.settings']]],
@@ -56,7 +56,7 @@ class UserLocalTasksTest extends LocalTaskIntegrationTestBase {
    *
    * @dataProvider getUserLoginRoutes
    */
-  public function testUserLoginLocalTasks($route) {
+  public function testUserLoginLocalTasks($route): void {
     $tasks = [
       0 => ['user.register', 'user.pass', 'user.login'],
     ];
@@ -66,7 +66,7 @@ class UserLocalTasksTest extends LocalTaskIntegrationTestBase {
   /**
    * Provides a list of routes to test.
    */
-  public function getUserLoginRoutes() {
+  public static function getUserLoginRoutes() {
     return [
       ['user.login'],
       ['user.register'],
@@ -79,7 +79,7 @@ class UserLocalTasksTest extends LocalTaskIntegrationTestBase {
    *
    * @dataProvider getUserPageRoutes
    */
-  public function testUserPageLocalTasks($route, $subtask = []) {
+  public function testUserPageLocalTasks($route, $subtask = []): void {
     $tasks = [
       0 => ['entity.user.canonical', 'entity.user.edit_form'],
     ];
@@ -92,7 +92,7 @@ class UserLocalTasksTest extends LocalTaskIntegrationTestBase {
   /**
    * Provides a list of routes to test.
    */
-  public function getUserPageRoutes() {
+  public static function getUserPageRoutes() {
     return [
       ['entity.user.canonical'],
       ['entity.user.edit_form'],

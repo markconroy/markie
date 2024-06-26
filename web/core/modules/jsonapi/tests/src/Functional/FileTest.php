@@ -1,8 +1,9 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\jsonapi\Functional;
 
-use Drupal\Component\Serialization\Json;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Url;
 use Drupal\file\Entity\File;
@@ -202,7 +203,7 @@ class FileTest extends ResourceTestBase {
   /**
    * {@inheritdoc}
    */
-  public function testPostIndividual() {
+  public function testPostIndividual(): void {
     // @todo https://www.drupal.org/node/1927648
     $this->markTestSkipped();
   }
@@ -222,7 +223,7 @@ class FileTest extends ResourceTestBase {
   /**
    * {@inheritdoc}
    */
-  public function testCollectionFilterAccess() {
+  public function testCollectionFilterAccess(): void {
     $label_field_name = 'filename';
     // Verify the expected behavior in the common case: when the file is public.
     $this->doTestCollectionFilterAccessBasedOnPermissions($label_field_name, 'access content');
@@ -239,7 +240,7 @@ class FileTest extends ResourceTestBase {
     $this->entity->setOwner($this->account);
     $this->entity->save();
     $response = $this->request('GET', $collection_filter_url, $request_options);
-    $doc = Json::decode((string) $response->getBody());
+    $doc = $this->getDocumentFromResponse($response);
     $this->assertCount(1, $doc['data']);
 
     // 0 results because the current user is no longer the file owner and the
@@ -247,7 +248,7 @@ class FileTest extends ResourceTestBase {
     $this->entity->setOwner(User::load(0));
     $this->entity->save();
     $response = $this->request('GET', $collection_filter_url, $request_options);
-    $doc = Json::decode((string) $response->getBody());
+    $doc = $this->getDocumentFromResponse($response);
     $this->assertCount(0, $doc['data']);
   }
 

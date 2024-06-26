@@ -21,7 +21,7 @@ class RolesRidTest extends UnitTestCase {
    *
    * @covers ::titleQuery
    */
-  public function testTitleQuery() {
+  public function testTitleQuery(): void {
     $role1 = new Role([
       'id' => 'test_rid_1',
       'label' => 'test rid 1',
@@ -32,7 +32,7 @@ class RolesRidTest extends UnitTestCase {
     ], 'user_role');
 
     // Creates a stub entity storage;
-    $role_storage = $this->getMockForAbstractClass('Drupal\Core\Entity\EntityStorageInterface');
+    $role_storage = $this->createMock('Drupal\Core\Entity\EntityStorageInterface');
     $role_storage->expects($this->any())
       ->method('loadMultiple')
       ->willReturnMap([

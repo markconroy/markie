@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\views\Functional\Update;
 
 use Drupal\FunctionalTests\Update\UpdatePathTestBase;
@@ -42,7 +44,7 @@ class ViewsRemoveDefaultArgumentSkipUrlTest extends UpdatePathTestBase {
   /**
    * Tests the upgrade path removing default_argument_skip_url.
    */
-  public function testViewsPostUpdateFixRevisionId() {
+  public function testViewsPostUpdateFixRevisionId(): void {
     $view = View::load('remove_default_argument_skip_url');
     $data = $view->toArray();
     $this->assertArrayHasKey('default_argument_skip_url', $data['display']['default']['display_options']['arguments']['tid']);

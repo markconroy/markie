@@ -14,9 +14,9 @@ class ComposerValidateTest extends BuildTestBase {
 
   use ComposerIntegrationTrait;
 
-  public function provideComposerJson() {
+  public static function provideComposerJson() {
     $data = [];
-    $composer_json_finder = $this->getComposerJsonFinder($this->getDrupalRoot());
+    $composer_json_finder = self::getComposerJsonFinder(self::getDrupalRootStatic());
     foreach ($composer_json_finder->getIterator() as $composer_json) {
       $data[] = [$composer_json->getPathname()];
     }
@@ -26,7 +26,7 @@ class ComposerValidateTest extends BuildTestBase {
   /**
    * @dataProvider provideComposerJson
    */
-  public function testValidateComposer($path) {
+  public function testValidateComposer($path): void {
     $this->executeCommand('composer validate --strict --no-check-all ' . $path);
     $this->assertCommandSuccessful();
   }

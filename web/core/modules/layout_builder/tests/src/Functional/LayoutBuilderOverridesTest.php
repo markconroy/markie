@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\layout_builder\Functional;
 
 use Drupal\layout_builder\Entity\LayoutBuilderEntityViewDisplay;
@@ -16,7 +18,7 @@ class LayoutBuilderOverridesTest extends LayoutBuilderTestBase {
   /**
    * Tests deleting a field in-use by an overridden layout.
    */
-  public function testDeleteField() {
+  public function testDeleteField(): void {
     $assert_session = $this->assertSession();
     $page = $this->getSession()->getPage();
 
@@ -49,7 +51,7 @@ class LayoutBuilderOverridesTest extends LayoutBuilderTestBase {
   /**
    * Tests Layout Builder overrides without access to edit the default layout.
    */
-  public function testOverridesWithoutDefaultsAccess() {
+  public function testOverridesWithoutDefaultsAccess(): void {
     $assert_session = $this->assertSession();
     $page = $this->getSession()->getPage();
 
@@ -69,15 +71,15 @@ class LayoutBuilderOverridesTest extends LayoutBuilderTestBase {
   /**
    * Tests Layout Builder overrides without Field UI installed.
    */
-  public function testOverridesWithoutFieldUi() {
+  public function testOverridesWithoutFieldUi(): void {
     $this->container->get('module_installer')->uninstall(['field_ui']);
 
     $assert_session = $this->assertSession();
     $page = $this->getSession()->getPage();
 
-    // @todo In https://www.drupal.org/node/540008 switch this to logging in as
-    //   a user with the 'configure any layout' permission.
-    $this->drupalLogin($this->rootUser);
+    $this->drupalLogin($this->drupalCreateUser([
+      'configure any layout',
+    ]));
 
     LayoutBuilderEntityViewDisplay::load('node.bundle_with_section_field.default')
       ->enableLayoutBuilder()
@@ -93,7 +95,7 @@ class LayoutBuilderOverridesTest extends LayoutBuilderTestBase {
   /**
    * Tests functionality of Layout Builder for overrides.
    */
-  public function testOverrides() {
+  public function testOverrides(): void {
     $assert_session = $this->assertSession();
     $page = $this->getSession()->getPage();
 
@@ -127,8 +129,7 @@ class LayoutBuilderOverridesTest extends LayoutBuilderTestBase {
 
     // Get the UUID of the component.
     $components = Node::load(1)->get('layout_builder__layout')->getSection(0)->getComponents();
-    end($components);
-    $uuid = key($components);
+    $uuid = array_key_last($components);
 
     $this->drupalGet('layout_builder/update/block/overrides/node.1/0/content/' . $uuid);
     $page->uncheckField('settings[label_display]');
@@ -141,7 +142,7 @@ class LayoutBuilderOverridesTest extends LayoutBuilderTestBase {
   /**
    * Tests a custom alter of the overrides form.
    */
-  public function testOverridesFormAlter() {
+  public function testOverridesFormAlter(): void {
     $assert_session = $this->assertSession();
     $page = $this->getSession()->getPage();
 
@@ -176,7 +177,7 @@ class LayoutBuilderOverridesTest extends LayoutBuilderTestBase {
   /**
    * Tests removing all sections from overrides and defaults.
    */
-  public function testRemovingAllSections() {
+  public function testRemovingAllSections(): void {
     $assert_session = $this->assertSession();
     $page = $this->getSession()->getPage();
 

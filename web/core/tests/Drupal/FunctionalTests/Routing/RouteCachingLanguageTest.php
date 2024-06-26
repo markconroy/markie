@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\FunctionalTests\Routing;
 
 use Drupal\field\Entity\FieldConfig;
@@ -127,7 +129,7 @@ class RouteCachingLanguageTest extends BrowserTestBase {
    *
    * @dataProvider providerLanguage
    */
-  public function testLinkTranslationWithAlias($source_langcode) {
+  public function testLinkTranslationWithAlias($source_langcode): void {
     $source_url_options = [
       'language' => ConfigurableLanguage::load($source_langcode),
     ];
@@ -190,7 +192,7 @@ class RouteCachingLanguageTest extends BrowserTestBase {
   /**
    * Data provider for testFromUri().
    */
-  public function providerLanguage() {
+  public static function providerLanguage() {
     return [
       ['en'],
       ['fr'],

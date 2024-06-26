@@ -3,6 +3,7 @@
 namespace Drupal\Core\Render\Element;
 
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Render\Attribute\FormElement;
 use Drupal\Core\Render\Element;
 
 /**
@@ -23,10 +24,9 @@ use Drupal\Core\Render\Element;
  * @endcode
  *
  * @see \Drupal\Core\Render\Element\Textfield
- *
- * @FormElement("email")
  */
-class Email extends FormElement {
+#[FormElement('email')]
+class Email extends FormElementBase {
 
   /**
    * Defines the max length for an email address.

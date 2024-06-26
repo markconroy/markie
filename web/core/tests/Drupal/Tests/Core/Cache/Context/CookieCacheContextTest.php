@@ -20,7 +20,7 @@ class CookieCacheContextTest extends UnitTestCase {
    *
    * @dataProvider providerTestGetContext
    */
-  public function testGetContext($cookies, $cookie_name, $context) {
+  public function testGetContext($cookies, $cookie_name, $context): void {
     $request_stack = new RequestStack();
     $request = Request::create('/', 'GET');
     foreach ($cookies as $cookie => $value) {
@@ -34,7 +34,7 @@ class CookieCacheContextTest extends UnitTestCase {
   /**
    * Provides a list of cookies and expected cache contexts.
    */
-  public function providerTestGetContext() {
+  public static function providerTestGetContext() {
     return [
       [['foo' => 1, 'bar' => 2, 'baz' => 3], 'foo', 1],
       // Context is ordered by cookie name.

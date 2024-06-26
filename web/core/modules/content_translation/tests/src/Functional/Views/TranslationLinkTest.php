@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\content_translation\Functional\Views;
 
 use Drupal\Tests\content_translation\Functional\ContentTranslationTestBase;
@@ -69,7 +71,7 @@ class TranslationLinkTest extends ContentTranslationTestBase {
   /**
    * Tests the content translation overview link field handler.
    */
-  public function testTranslationLink() {
+  public function testTranslationLink(): void {
     $this->drupalGet('test-entity-translations-link');
     $this->assertSession()->linkByHrefExists('user/1/translations');
     $this->assertSession()->linkByHrefNotExists('user/2/translations', 'The translations link is not present when content_translation_translate_access() is FALSE.');

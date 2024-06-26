@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\field\Kernel\KernelString;
 
 use Drupal\entity_test\Entity\EntityTest;
@@ -33,7 +35,7 @@ class UuidFormatterTest extends KernelTestBase {
   /**
    * Tests string formatter output.
    */
-  public function testUuidStringFormatter() {
+  public function testUuidStringFormatter(): void {
     $entity = EntityTest::create([]);
     $entity->save();
 

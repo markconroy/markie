@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\config_translation\Functional;
 
 use Drupal\language\Entity\ConfigurableLanguage;
@@ -65,7 +67,7 @@ class ConfigTranslationUiThemeTest extends BrowserTestBase {
   /**
    * Tests that theme provided *.config_translation.yml files are found.
    */
-  public function testThemeDiscovery() {
+  public function testThemeDiscovery(): void {
     // Install the test theme and rebuild routes.
     $theme = 'config_translation_test_theme';
 

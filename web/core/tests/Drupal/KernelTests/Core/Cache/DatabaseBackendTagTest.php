@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\KernelTests\Core\Cache;
 
 use Drupal\Core\Cache\Cache;
@@ -34,7 +36,7 @@ class DatabaseBackendTagTest extends KernelTestBase {
       ->addMethodCall('setContainer', [new Reference('service_container')]);
   }
 
-  public function testTagInvalidations() {
+  public function testTagInvalidations(): void {
     // Create cache entry in multiple bins.
     $tags = ['test_tag:1', 'test_tag:2', 'test_tag:3'];
     $bins = ['data', 'bootstrap', 'render'];

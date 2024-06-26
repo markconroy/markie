@@ -2,25 +2,27 @@
 
 namespace Drupal\comment\Plugin\views\sort;
 
+use Drupal\views\Attribute\ViewsSort;
 use Drupal\views\Plugin\views\sort\Date;
 
 /**
  * Sort handler for the newer of last comment / entity updated.
  *
  * @ingroup views_sort_handlers
- *
- * @ViewsSort("comment_ces_last_updated")
  */
+#[ViewsSort("comment_ces_last_updated")]
 class StatisticsLastUpdated extends Date {
 
   /**
    * The node table.
    */
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
   protected ?string $node_table;
 
   /**
    * The field alias.
    */
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
   protected string $field_alias;
 
   public function query() {

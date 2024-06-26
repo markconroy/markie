@@ -2,6 +2,8 @@
 
 namespace Drupal\Core\Password;
 
+// cspell:ignore ITOA64
+
 /**
  * Legacy password hashing framework.
  *
@@ -31,6 +33,7 @@ abstract class PhpassHashedPasswordBase implements PasswordInterface {
    *
    * @var string
    */
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
   public static $ITOA64 = './0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
 
   /**
@@ -41,6 +44,11 @@ abstract class PhpassHashedPasswordBase implements PasswordInterface {
    * raising 2 to the power of the given value.
    *
    * @var int
+   *
+   * @deprecated in drupal:10.3.0 and is removed from drupal:11.0.0.
+   *   No replacement.
+   *
+   * @see https://www.drupal.org/node/3443277
    */
   protected $countLog2;
 
@@ -60,6 +68,7 @@ abstract class PhpassHashedPasswordBase implements PasswordInterface {
       // Note: If $corePassword is set, $countLog2 isn't used anywhere in the
       // code path of this class. Still, set it to the default value for BC
       // reasons.
+      // @phpstan-ignore-next-line
       $this->countLog2 = 16;
       $this->corePassword = $corePassword;
     }
@@ -67,6 +76,7 @@ abstract class PhpassHashedPasswordBase implements PasswordInterface {
       $countLog2 = $corePassword;
       @trigger_error('Calling ' . __METHOD__ . '() with numeric $countLog2 as the first parameter is deprecated in drupal:10.1.0 and is removed from drupal:11.0.0. Use PhpassHashedPasswordInterface::__construct() with $corePassword parameter set to an instance of Drupal\Core\Password\PhpPassword instead. See https://www.drupal.org/node/3322420', E_USER_DEPRECATED);
       // Ensure that $countLog2 is within set bounds.
+      // @phpstan-ignore-next-line
       $this->countLog2 = $this->enforceLog2Boundaries($countLog2);
       $this->corePassword = NULL;
     }
@@ -120,8 +130,15 @@ abstract class PhpassHashedPasswordBase implements PasswordInterface {
    *
    * @return string
    *   A 12 character string containing the iteration count and a random salt.
+   *
+   * @deprecated in drupal:10.3.0 and is removed from drupal:11.0.0.
+   *   No replacement.
+   *
+   * @see https://www.drupal.org/node/3443277
    */
   protected function generateSalt() {
+    @trigger_error(__METHOD__ . '() is deprecated in drupal:10.3.0 and is removed from drupal:11.0.0. No replacement. See https://www.drupal.org/node/3443277', E_USER_DEPRECATED);
+
     $output = '$S$';
     // We encode the final log2 iteration count in base 64.
     $output .= static::$ITOA64[$this->countLog2];
@@ -235,6 +252,7 @@ abstract class PhpassHashedPasswordBase implements PasswordInterface {
       return $this->corePassword->hash($password);
     }
 
+    // @phpstan-ignore-next-line
     return $this->crypt('sha512', $password, $this->generateSalt());
   }
 
@@ -297,6 +315,7 @@ abstract class PhpassHashedPasswordBase implements PasswordInterface {
       return TRUE;
     }
     // Ensure that $count_log2 is within set bounds.
+    // @phpstan-ignore-next-line
     $count_log2 = $this->enforceLog2Boundaries($this->countLog2);
     // Check whether the iteration count used differs from the standard number.
     return ($this->getCountLog2($hash) !== $count_log2);

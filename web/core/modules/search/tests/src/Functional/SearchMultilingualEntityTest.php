@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\search\Functional;
 
 use Drupal\Core\Database\Database;
@@ -138,7 +140,7 @@ class SearchMultilingualEntityTest extends BrowserTestBase {
   /**
    * Tests the indexing throttle and search results with multilingual nodes.
    */
-  public function testMultilingualSearch() {
+  public function testMultilingualSearch(): void {
     // Index only 2 nodes per cron run. We cannot do this setting in the UI,
     // because it doesn't go this low.
     $this->config('search.settings')->set('index.cron_limit', 2)->save();
@@ -228,7 +230,7 @@ class SearchMultilingualEntityTest extends BrowserTestBase {
     // The request time is always the same throughout test runs. Update the
     // request time to a previous time, to simulate it having been marked
     // previously.
-    $current = REQUEST_TIME;
+    $current = \Drupal::time()->getRequestTime();
     $old = $current - 10;
     $connection = Database::getConnection();
     $connection->update('search_dataset')

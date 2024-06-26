@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\search\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
@@ -20,6 +22,14 @@ class SearchTokenizerTest extends KernelTestBase {
   protected static $modules = ['search'];
 
   /**
+   * {@inheritdoc}
+   */
+  protected function setUp(): void {
+    parent::setUp();
+    $this->installConfig(['search']);
+  }
+
+  /**
    * Verifies that strings of CJK characters are tokenized.
    *
    * The text analysis function does special things with numbers, symbols
@@ -27,7 +37,7 @@ class SearchTokenizerTest extends KernelTestBase {
    * character classes are tokenized properly. See PREG_CLASS_CKJ for more
    * information.
    */
-  public function testTokenizer() {
+  public function testTokenizer(): void {
     // Set the minimum word size to 1 (to split all CJK characters) and make
     // sure CJK tokenizing is turned on.
     $this->config('search.settings')
@@ -112,7 +122,7 @@ class SearchTokenizerTest extends KernelTestBase {
    * This is just a sanity check - it verifies that strings of letters are
    * not tokenized.
    */
-  public function testNoTokenizer() {
+  public function testNoTokenizer(): void {
     // Set the minimum word size to 1 (to split all CJK characters) and make
     // sure CJK tokenizing is turned on.
     $this->config('search.settings')

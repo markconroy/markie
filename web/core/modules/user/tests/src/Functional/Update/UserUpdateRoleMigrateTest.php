@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\user\Functional\Update;
 
 use Drupal\FunctionalTests\Update\UpdatePathTestBase;
@@ -25,7 +27,7 @@ class UserUpdateRoleMigrateTest extends UpdatePathTestBase {
   /**
    * Tests that roles have only existing permissions.
    */
-  public function testRolePermissions() {
+  public function testRolePermissions(): void {
     /** @var \Drupal\Core\Database\Connection $connection */
     $connection = \Drupal::service('database');
 

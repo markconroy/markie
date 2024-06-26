@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\workspaces\Kernel;
 
 use Drupal\Core\Entity\EntityTypeManagerInterface;
@@ -22,7 +24,7 @@ class WorkspacePublishFormTest extends KernelTestBase {
   /**
    * @covers ::submitForm
    */
-  public function testSubmitFormWithException() {
+  public function testSubmitFormWithException(): void {
     /** @var \Drupal\Core\Messenger\MessengerInterface $messenger */
     $messenger = \Drupal::service('messenger');
 

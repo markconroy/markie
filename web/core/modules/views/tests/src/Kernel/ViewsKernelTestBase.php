@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\views\Kernel;
 
 use Drupal\Core\Database\Database;
@@ -28,7 +30,6 @@ abstract class ViewsKernelTestBase extends KernelTestBase {
    * {@inheritdoc}
    */
   protected static $modules = [
-    'path_alias',
     'system',
     'views',
     'views_test_config',

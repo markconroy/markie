@@ -10,6 +10,7 @@ use Drupal\Tests\Core\Menu\LocalTaskIntegrationTestBase;
  * Tests action local tasks.
  *
  * @group action
+ * @group legacy
  */
 class ActionLocalTasksTest extends LocalTaskIntegrationTestBase {
 
@@ -24,7 +25,7 @@ class ActionLocalTasksTest extends LocalTaskIntegrationTestBase {
   /**
    * Tests local task existence.
    */
-  public function testActionLocalTasks() {
+  public function testActionLocalTasks(): void {
     $this->assertLocalTasks('entity.action.collection', [['action.admin']]);
   }
 

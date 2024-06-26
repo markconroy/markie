@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\mysql\Functional;
 
 use Drupal\Core\Database\Database;
@@ -38,7 +40,7 @@ class RequirementsTest extends BrowserTestBase {
   /**
    * Test the isolation level warning message on status page.
    */
-  public function testIsolationLevelWarningNotDisplaying() {
+  public function testIsolationLevelWarningNotDisplaying(): void {
     $admin_user = $this->drupalCreateUser([
       'administer site configuration',
       'access site reports',

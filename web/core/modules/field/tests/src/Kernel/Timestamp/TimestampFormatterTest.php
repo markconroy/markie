@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\field\Kernel\Timestamp;
 
 use Drupal\Component\Render\FormattableMarkup;
@@ -105,7 +107,7 @@ class TimestampFormatterTest extends KernelTestBase {
   /**
    * Tests TimestampFormatter.
    */
-  public function testTimestampFormatter() {
+  public function testTimestampFormatter(): void {
     $data = [];
 
     // Test standard formats.
@@ -124,7 +126,7 @@ class TimestampFormatterTest extends KernelTestBase {
         $timezone = NULL;
       }
 
-      $value = REQUEST_TIME - 87654321;
+      $value = \Drupal::time()->getRequestTime() - 87654321;
       $expected = \Drupal::service('date.formatter')->format($value, $date_format, $custom_date_format, $timezone);
 
       $component = $this->display->getComponent($this->fieldName);
@@ -143,10 +145,10 @@ class TimestampFormatterTest extends KernelTestBase {
   /**
    * Tests TimestampAgoFormatter.
    */
-  public function testTimestampAgoFormatter() {
+  public function testTimestampAgoFormatter(): void {
     $data = [];
 
-    foreach ([1, 2, 3, 4, 5, 6] as $granularity) {
+    foreach ([1, 2, 3, 4, 5, 6, 7] as $granularity) {
       $data[] = [
         'future_format' => '@interval hence',
         'past_format' => '@interval ago',

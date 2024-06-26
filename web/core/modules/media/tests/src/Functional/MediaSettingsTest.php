@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\media\Functional;
 
 use Drupal\Core\Url;
@@ -30,7 +32,7 @@ class MediaSettingsTest extends MediaFunctionalTestBase {
   /**
    * Tests that media warning appears if oEmbed media types exists.
    */
-  public function testStatusPage() {
+  public function testStatusPage(): void {
     $assert_session = $this->assertSession();
 
     $this->drupalGet('admin/reports/status');

@@ -6,34 +6,52 @@ use Drupal\Component\Render\PlainTextOutput;
 use Drupal\Component\Utility\Bytes;
 use Drupal\Component\Utility\Environment;
 use Drupal\Component\Utility\Random;
+use Drupal\Core\Field\Attribute\FieldType;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Field\Plugin\Field\FieldType\EntityReferenceItem;
+use Drupal\Core\File\FileExists;
 use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StreamWrapper\StreamWrapperInterface;
 use Drupal\Core\StringTranslation\ByteSizeMarkup;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\TypedData\DataDefinition;
+use Drupal\file\Validation\FileValidatorSettingsTrait;
 
 /**
  * Plugin implementation of the 'file' field type.
- *
- * @FieldType(
- *   id = "file",
- *   label = @Translation("File"),
- *   description = {
- *     @Translation("For uploading files"),
- *     @Translation("Can be configured with options such as allowed file extensions and maximum upload size"),
- *   },
- *   category = "file_upload",
- *   default_widget = "file_generic",
- *   default_formatter = "file_default",
- *   list_class = "\Drupal\file\Plugin\Field\FieldType\FileFieldItemList",
- *   constraints = {"ReferenceAccess" = {}, "FileValidation" = {}}
- * )
  */
+#[FieldType(
+  id: "file",
+  label: new TranslatableMarkup("File"),
+  description: [
+    new TranslatableMarkup("For uploading files"),
+    new TranslatableMarkup("Can be configured with options such as allowed file extensions and maximum upload size"),
+  ],
+  category: "file_upload",
+  default_widget: "file_generic",
+  default_formatter: "file_default",
+  list_class: FileFieldItemList::class,
+  constraints: ["ReferenceAccess" => [], "FileValidation" => []],
+  column_groups: [
+    'target_id' => [
+      'label' => new TranslatableMarkup('File'),
+      'translatable' => TRUE,
+    ],
+    'display' => [
+      'label' => new TranslatableMarkup('Display'),
+      'translatable' => TRUE,
+    ],
+    'description' => [
+      'label' => new TranslatableMarkup('Description'),
+      'translatable' => TRUE,
+    ],
+  ],
+)]
 class FileItem extends EntityReferenceItem {
+
+  use FileValidatorSettingsTrait;
 
   /**
    * {@inheritdoc}
@@ -327,24 +345,7 @@ class FileItem extends EntityReferenceItem {
    *   element's '#upload_validators' property.
    */
   public function getUploadValidators() {
-    $validators = [];
-    $settings = $this->getSettings();
-
-    // Cap the upload size according to the PHP limit.
-    $max_filesize = Bytes::toNumber(Environment::getUploadMaxSize());
-    if (!empty($settings['max_filesize'])) {
-      $max_filesize = min($max_filesize, Bytes::toNumber($settings['max_filesize']));
-    }
-
-    // There is always a file size limit due to the PHP server limit.
-    $validators['FileSizeLimit'] = ['fileLimit' => $max_filesize];
-
-    // Add the extension check if necessary.
-    if (!empty($settings['file_extensions'])) {
-      $validators['FileExtension'] = ['extensions' => $settings['file_extensions']];
-    }
-
-    return $validators;
+    return $this->getFileUploadValidators($this->getSettings());
   }
 
   /**
@@ -363,7 +364,7 @@ class FileItem extends EntityReferenceItem {
     $data = $random->paragraphs(3);
     /** @var \Drupal\file\FileRepositoryInterface $file_repository */
     $file_repository = \Drupal::service('file.repository');
-    $file = $file_repository->writeData($data, $destination, FileSystemInterface::EXISTS_ERROR);
+    $file = $file_repository->writeData($data, $destination, FileExists::Error);
     $values = [
       'target_id' => $file->id(),
       'display' => (int) $settings['display_default'],

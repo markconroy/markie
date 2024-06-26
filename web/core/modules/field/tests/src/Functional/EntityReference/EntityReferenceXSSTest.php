@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\field\Functional\EntityReference;
 
 use Drupal\Core\Entity\Entity\EntityFormDisplay;
@@ -25,13 +27,21 @@ class EntityReferenceXSSTest extends BrowserTestBase {
 
   /**
    * {@inheritdoc}
+   *
+   * @todo Remove and fix test to not rely on super user.
+   * @see https://www.drupal.org/project/drupal/issues/3437620
+   */
+  protected bool $usesSuperUserAccessPolicy = TRUE;
+
+  /**
+   * {@inheritdoc}
    */
   protected $defaultTheme = 'stark';
 
   /**
    * Tests markup is escaped in the entity reference select and label formatter.
    */
-  public function testEntityReferenceXSS() {
+  public function testEntityReferenceXSS(): void {
     $this->drupalCreateContentType(['type' => 'article']);
 
     // Create a node with markup in the title.

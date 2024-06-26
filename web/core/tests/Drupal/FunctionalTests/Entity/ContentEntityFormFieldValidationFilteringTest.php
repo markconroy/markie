@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\FunctionalTests\Entity;
 
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
@@ -128,7 +130,7 @@ class ContentEntityFormFieldValidationFilteringTest extends BrowserTestBase {
   /**
    * Tests field widgets with #limit_validation_errors.
    */
-  public function testFieldWidgetsWithLimitedValidationErrors() {
+  public function testFieldWidgetsWithLimitedValidationErrors(): void {
     $assert_session = $this->assertSession();
     $this->drupalGet($this->entityTypeId . '/add');
 

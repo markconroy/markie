@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\layout_builder\Kernel;
 
 use Drupal\Core\Field\FieldItemListInterface;
@@ -54,7 +56,7 @@ class LayoutSectionItemListTest extends SectionListTestBase {
   /**
    * @covers ::equals
    */
-  public function testEquals() {
+  public function testEquals(): void {
     $this->sectionList->getSection(0)->setLayoutSettings(['foo' => 1]);
 
     $second_section_storage = clone $this->sectionList;
@@ -67,7 +69,7 @@ class LayoutSectionItemListTest extends SectionListTestBase {
   /**
    * @covers ::equals
    */
-  public function testEqualsNonSection() {
+  public function testEqualsNonSection(): void {
     $list = $this->prophesize(FieldItemListInterface::class);
     $this->assertFalse($this->sectionList->equals($list->reveal()));
   }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\language\Functional;
 
 use Drupal\Core\Url;
@@ -29,7 +31,7 @@ class LanguageCustomLanguageConfigurationTest extends BrowserTestBase {
   /**
    * Functional tests for adding, editing and deleting languages.
    */
-  public function testLanguageConfiguration() {
+  public function testLanguageConfiguration(): void {
 
     // Create user with permissions to add and remove languages.
     $admin_user = $this->drupalCreateUser([

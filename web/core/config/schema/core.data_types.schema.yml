@@ -51,7 +51,8 @@ mapping:
   definition_class: '\Drupal\Core\TypedData\MapDataDefinition'
   mapping: {}
   constraints:
-    # By default, only allow the explicitly listed mapping keys.
+    # By default, allow the explicitly listed mapping keys, and require their
+    # presence unless `requiredKey: false` is specified.
     ValidKeys: '<infer>'
 sequence:
   label: Sequence
@@ -125,6 +126,18 @@ date_format:
 color_hex:
   type: string
   label: 'Color'
+  constraints:
+    # TRICKY: this cannot reuse the Color::validateHex() logic because:
+    # 1. Color::validateHex() would not allow NULL, but this constraint does.
+    #    (Anything in config can be marked optional, so NULL must never trigger
+    #    a validation error) Color::validateHex() does not allow this.
+    # 2. The Regex constraint is something that an external tool (no matter
+    #    whether that's something generating/validating Drupal config or a
+    #    JSON:API/REST/GraphQL/… client) to also correctly validate this.
+    Regex:
+      # Regex copied from Color::validateHex()
+      pattern: '/^[#]?([0-9a-fA-F]{3}){1,2}$/'
+      message: "%value is not a valid hexadecimal color."
 
 # Machine-readable identifier that can only contain certain characters.
 machine_name:
@@ -146,6 +159,25 @@ langcode:
     NotNull: []
     Choice:
       callback: 'Drupal\Core\TypedData\Plugin\DataType\LanguageReference::getAllValidLangcodes'
+
+# A number of bytes; either a plain number or with a size indication such as "MB".
+# @see \Drupal\Component\Utility\Bytes
+bytes:
+  type: string
+  label: 'Bytes'
+  constraints:
+    Callback: ['\Drupal\Component\Utility\Bytes', 'validateConstraint']
+
+weight:
+  type: integer
+  label: 'Weight'
+  constraints:
+    Range:
+      # @see PHP_INT_MIN (32-bit)
+      min: -2147483648
+      # @see PHP_INT_MAX (32-bit)
+      max: 2147483647
+    FullyValidatable: ~
 
 # Complex extended data types:
 
@@ -171,9 +203,19 @@ config_object:
   type: mapping
   mapping:
     _core:
+      # This only exists for merging configuration; it's not required.
+      requiredKey: false
       type: _core_config_info
     langcode:
+      requiredKey: false
       type: langcode
+  constraints:
+    # The `langcode` key:
+    # - MUST be specified when there are translatable values
+    # - MUST NOT be specified when there are no translatable values.
+    # Translatable values are specified for this config schema type (a subtype of `type: config_object`) if the
+    # `translatable` flag is present and set to `true` for *any* element in that config schema type.
+    LangcodeRequiredIfTranslatableValues: ~
 
 # Mail text with subject and body parts.
 mail:
@@ -195,6 +237,10 @@ filter:
     id:
       type: string
       label: 'ID'
+      constraints:
+        PluginExists:
+          manager: plugin.manager.filter
+          interface: 'Drupal\filter\Plugin\FilterInterface'
     provider:
       type: string
       label: 'Provider'
@@ -202,7 +248,7 @@ filter:
       type: boolean
       label: 'Status'
     weight:
-      type: integer
+      type: weight
       label: 'Weight'
     settings:
       type: filter_settings.[%parent.id]
@@ -273,6 +319,9 @@ theme_settings:
           type: boolean
           label: 'Use default'
     third_party_settings:
+      # Third party settings are always optional: they're an optional extension
+      # point.
+      requiredKey: false
       type: sequence
       label: 'Third party settings'
       sequence:
@@ -298,6 +347,8 @@ config_dependencies_base:
   type: mapping
   mapping:
     config:
+      # All dependency keys are optional: this might not depend on any other config.
+      requiredKey: false
       type: sequence
       label: 'Configuration entity dependencies'
       sequence:
@@ -306,11 +357,15 @@ config_dependencies_base:
           NotBlank: []
           ConfigExists: []
     content:
+      # All dependency keys are optional: this might not depend on any content entities.
+      requiredKey: false
       type: sequence
       label: 'Content entity dependencies'
       sequence:
         type: string
     module:
+      # All dependency keys are optional: this might not depend on any modules.
+      requiredKey: false
       type: sequence
       label: 'Module dependencies'
       sequence:
@@ -320,6 +375,8 @@ config_dependencies_base:
           ExtensionName: []
           ExtensionExists: module
     theme:
+      # All dependency keys are optional: this might not depend on any themes.
+      requiredKey: false
       type: sequence
       label: 'Theme dependencies'
       sequence:
@@ -336,6 +393,8 @@ config_dependencies:
   label: 'Configuration dependencies'
   mapping:
     enforced:
+      # All dependency keys are optional: this may have no dependencies at all.
+      requiredKey: false
       type: config_dependencies_base
       label: 'Enforced configuration dependencies'
   constraints:
@@ -356,11 +415,16 @@ config_entity:
       type: config_dependencies
       label: 'Dependencies'
     third_party_settings:
+      # Third party settings are always optional: they're an optional extension
+      # point.
+      requiredKey: false
       type: sequence
       label: 'Third party settings'
       sequence:
         type: '[%parent.%parent.%type].third_party.[%key]'
     _core:
+      # This only exists for merging configuration; it's not required.
+      requiredKey: false
       type: _core_config_info
 
 block.settings.*:
@@ -404,6 +468,10 @@ condition.plugin:
     id:
       type: string
       label: 'ID'
+      constraints:
+        PluginExists:
+          manager: plugin.manager.condition
+          interface: 'Drupal\Core\Condition\ConditionInterface'
     negate:
       type: boolean
       label: 'Negate'
@@ -434,7 +502,7 @@ display_variant.plugin:
       type: required_label
       label: 'Label'
     weight:
-      type: integer
+      type: weight
       label: 'Weight'
     uuid:
       type: uuid
@@ -452,6 +520,7 @@ layout_plugin.settings:
       sequence:
         type: string
 
+# Specify defaults.
 layout_plugin.settings.*:
   type: layout_plugin.settings
 
@@ -477,6 +546,8 @@ field_config_base:
     bundle:
       type: string
       label: 'Bundle'
+      constraints:
+        EntityBundleExists: '%parent.entity_type'
     label:
       type: required_label
       label: 'Label'
@@ -503,6 +574,10 @@ field_config_base:
     field_type:
       type: string
       label: 'Field type'
+      constraints:
+        PluginExists:
+          manager: plugin.manager.field.field_type
+          interface: '\Drupal\Core\Field\FieldItemInterface'
 
 core.base_field_override.*.*.*:
   type: field_config_base
@@ -513,7 +588,7 @@ core.date_format.*:
   label: 'Date format'
   mapping:
     id:
-      type: string
+      type: machine_name
       label: 'ID'
     label:
       type: required_label
@@ -524,6 +599,15 @@ core.date_format.*:
     pattern:
       type: core_date_format_pattern.[%parent.locked]
       label: 'PHP date format'
+      constraints:
+        NotBlank: []
+        # A valid date format character must appear somewhere in the value.
+        # See https://www.php.net/manual/en/datetime.format.php
+        Regex:
+          pattern: '/[aABcdDeFgGhHiIjlLmMnNoOpPrsStTuUvwWxXyYzZ]/'
+          message: 'This is not a valid date format.'
+  constraints:
+    FullyValidatable: ~
 
 # Unlocked date formats should use the translatable type.
 core_date_format_pattern.0:
@@ -540,17 +624,34 @@ core_date_format_pattern.1:
 field.storage_settings.*:
   type: mapping
   label: 'Settings'
+  # By default, a field type has no settings, so this can safely be considered
+  # fully validatable. A `FOO` field type that has one or more settings is
+  # required to create a `field.storage_settings.FOO` config schema type, and
+  # cannot possibly forget to do that, because validation errors would be
+  # triggered if it ever tried to save a setting, since this mapping allows no
+  # key-value pairs at all.
+  constraints:
+    FullyValidatable: ~
 
 field.field_settings.*:
   type: mapping
   label: 'Settings'
+  # By default, a field type has no settings, so this can safely be considered
+  # fully validatable. A `FOO` field type that has one or more settings is
+  # required to create a `field.field_settings.FOO` config schema type, and
+  # cannot possibly forget to do that, because validation errors would be
+  # triggered if it ever tried to save a setting, since this mapping allows no
+  # key-value pairs at all.
+  constraints:
+    FullyValidatable: ~
 
 field.value.*:
   type: mapping
   label: 'Default value'
 
 # Schema for the configuration of the String field type.
-
+# This field type has no field instance settings, so no specific config schema type.
+# @see `type: field.field_settings.*`
 field.storage_settings.string:
   type: mapping
   label: 'String settings'
@@ -564,10 +665,6 @@ field.storage_settings.string:
     is_ascii:
       type: boolean
       label: 'Contains US ASCII characters only'
-
-field.field_settings.string:
-  type: mapping
-  label: 'String settings'
 
 field.value.string:
   type: mapping
@@ -587,10 +684,6 @@ field.storage_settings.string_long:
       type: boolean
       label: 'Case sensitive'
 
-field.field_settings.string_long:
-  type: mapping
-  label: 'String (long) settings'
-
 field.value.string_long:
   type: mapping
   label: 'Default value'
@@ -600,17 +693,15 @@ field.value.string_long:
       label: 'Value'
 
 # Schema for the configuration of the Password field type.
-
+# This field type has no field instance settings, so no specific config schema type.
+# @see `type: field.field_settings.*`
 field.storage_settings.password:
   type: field.storage_settings.string
   label: 'Password settings'
 
-field.field_settings.password:
-  type: mapping
-  label: 'Password settings'
-
 # Schema for the configuration of the URI field type.
-
+# This field type has no field instance settings, so no specific config schema type.
+# @see `type: field.field_settings.*`
 field.storage_settings.uri:
   type: field.storage_settings.string
   label: 'URI settings'
@@ -622,10 +713,6 @@ field.storage_settings.uri:
       type: boolean
       label: 'Case sensitive'
 
-field.field_settings.uri:
-  type: mapping
-  label: 'URI settings'
-
 field.value.uri:
   type: mapping
   label: 'Default value'
@@ -635,15 +722,10 @@ field.value.uri:
       label: 'Value'
 
 # Schema for the configuration of the Created field type.
-
-field.storage_settings.created:
-  type: mapping
-  label: 'Created timestamp settings'
-
-field.field_settings.created:
-  type: mapping
-  label: 'Created timestamp settings'
-
+# This field type has no field storage settings, so no specific config schema type.
+# @see `type: field.storage_settings.*`
+# This field type has no field instance settings, so no specific config schema type.
+# @see `type: field.field_settings.*`
 field.value.created:
   type: mapping
   label: 'Default value'
@@ -653,15 +735,10 @@ field.value.created:
       label: 'Value'
 
 # Schema for the configuration of the Changed field type.
-
-field.storage_settings.changed:
-  type: mapping
-  label: 'Changed timestamp settings'
-
-field.field_settings.changed:
-  type: mapping
-  label: 'Changed timestamp settings'
-
+# This field type has no field storage settings, so no specific config schema type.
+# @see `type: field.storage_settings.*`
+# This field type has no field instance settings, so no specific config schema type.
+# @see `type: field.field_settings.*`
 field.value.changed:
   type: mapping
   label: 'Default value'
@@ -687,6 +764,13 @@ field.field_settings.entity_reference:
     handler:
       type: string
       label: 'Reference method'
+      constraints:
+        PluginExists:
+          manager: plugin.manager.entity_reference_selection
+          interface: 'Drupal\Core\Entity\EntityReferenceSelection\SelectionInterface'
+          # @todo Remove this line and explicitly require valid entity reference
+          # selection plugin IDs in https://drupal.org/i/3420198.
+          allowFallback: true
     handler_settings:
       type: entity_reference_selection.[%parent.handler]
       label: 'Entity reference selection plugin settings'
@@ -722,11 +806,8 @@ field.value.boolean:
       label: 'Value'
 
 # Schema for the configuration of the Email field type.
-
-field.storage_settings.email:
-  type: mapping
-  label: 'Email settings'
-
+# This field type has no field storage settings, so no specific config schema type.
+# @see `type: field.storage_settings.*`
 field.field_settings.email:
   type: mapping
   label: 'Email settings'

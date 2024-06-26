@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\field\Kernel\KernelString;
 
 use Drupal\Component\Utility\Html;
@@ -107,7 +109,7 @@ class RawStringFormatterTest extends KernelTestBase {
   /**
    * Tests string formatter output.
    */
-  public function testStringFormatter() {
+  public function testStringFormatter(): void {
     $value = $this->randomString();
     $value .= "\n\n<strong>" . $this->randomString() . '</strong>';
     $value .= "\n\n" . $this->randomString();

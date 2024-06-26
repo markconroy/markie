@@ -22,7 +22,7 @@ class ReflectionTest extends TestCase {
    * @covers ::getParameterClassName
    * @dataProvider providerGetParameterClassName
    */
-  public function testGetParameterClassName(?string $expected, \ReflectionParameter $parameter) {
+  public function testGetParameterClassName(?string $expected, \ReflectionParameter $parameter): void {
     $this->assertEquals($expected, Reflection::getParameterClassName($parameter));
   }
 
@@ -31,7 +31,7 @@ class ReflectionTest extends TestCase {
    *
    * @return array[]
    */
-  public function providerGetParameterClassName() {
+  public static function providerGetParameterClassName() {
     $reflection_method = new \ReflectionMethod(static::class, 'existsForTesting');
     $parameters = $reflection_method->getParameters();
     return [

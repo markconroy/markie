@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\image\Functional;
 
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
@@ -26,12 +28,12 @@ class ImageFieldValidateTest extends ImageFieldTestBase {
   /**
    * Tests image validity.
    */
-  public function testValid() {
+  public function testValid(): void {
     $file_system = $this->container->get('file_system');
     $image_files = $this->drupalGetTestFiles('image');
 
     $field_name = $this->randomMachineName();
-    $this->createImageField($field_name, 'article', [], ['file_directory' => 'test-upload']);
+    $this->createImageField($field_name, 'node', 'article', [], ['file_directory' => 'test-upload']);
     $expected_path = 'public://test-upload';
 
     // Create alt text for the image.
@@ -88,7 +90,7 @@ class ImageFieldValidateTest extends ImageFieldTestBase {
   /**
    * Tests min/max dimensions settings.
    */
-  public function testResolution() {
+  public function testResolution(): void {
     $field_names = [
       0 => $this->randomMachineName(),
       1 => $this->randomMachineName(),
@@ -123,9 +125,9 @@ class ImageFieldValidateTest extends ImageFieldTestBase {
       1 => $this->getFieldSettings($no_height_min_resolution, $no_height_max_resolution),
       2 => $this->getFieldSettings($no_width_min_resolution, $no_width_max_resolution),
     ];
-    $this->createImageField($field_names[0], 'article', [], $field_settings[0]);
-    $this->createImageField($field_names[1], 'article', [], $field_settings[1]);
-    $this->createImageField($field_names[2], 'article', [], $field_settings[2]);
+    $this->createImageField($field_names[0], 'node', 'article', [], $field_settings[0]);
+    $this->createImageField($field_names[1], 'node', 'article', [], $field_settings[1]);
+    $this->createImageField($field_names[2], 'node', 'article', [], $field_settings[2]);
 
     // We want a test image that is too small, and a test image that is too
     // big, so cycle through test image files until we have what we need.
@@ -163,7 +165,7 @@ class ImageFieldValidateTest extends ImageFieldTestBase {
   /**
    * Tests that required alt/title fields gets validated right.
    */
-  public function testRequiredAttributes() {
+  public function testRequiredAttributes(): void {
     $field_name = $this->randomMachineName();
     $field_settings = [
       'alt_field' => 1,
@@ -172,7 +174,7 @@ class ImageFieldValidateTest extends ImageFieldTestBase {
       'title_field_required' => 1,
       'required' => 1,
     ];
-    $instance = $this->createImageField($field_name, 'article', [], $field_settings);
+    $instance = $this->createImageField($field_name, 'node', 'article', [], $field_settings);
     $images = $this->drupalGetTestFiles('image');
     // Let's just use the first image.
     $image = $images[0];
@@ -220,8 +222,8 @@ class ImageFieldValidateTest extends ImageFieldTestBase {
    *
    * @dataProvider providerTestEmpty
    */
-  public function testEmpty($field_name, $required, $cardinality, $form_element_name, $expected_page_text_when_edit_access_allowed, $expected_page_text_when_edit_access_forbidden) {
-    $this->createImageField($field_name, 'article', ['cardinality' => $cardinality], ['required' => $required]);
+  public function testEmpty($field_name, $required, $cardinality, $form_element_name, $expected_page_text_when_edit_access_allowed, $expected_page_text_when_edit_access_forbidden): void {
+    $this->createImageField($field_name, 'node', 'article', ['cardinality' => $cardinality], ['required' => $required]);
 
     // Test with field edit access allowed.
     $this->drupalGet('node/add/article');
@@ -249,7 +251,7 @@ class ImageFieldValidateTest extends ImageFieldTestBase {
    * @return array
    *   Test cases.
    */
-  public function providerTestEmpty() {
+  public static function providerTestEmpty() {
     return [
       'optional-single' => ['field_image', FALSE, 1, 'files[field_image_0]', 'Article Article with edit-access-allowed image field has been created.', 'Article Article with edit-access-forbidden image field has been created.'],
       'optional-unlimited' => ['field_image', FALSE, FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED, 'files[field_image_0][]', 'Article Article with edit-access-allowed image field has been created.', 'Article Article with edit-access-forbidden image field has been created.'],

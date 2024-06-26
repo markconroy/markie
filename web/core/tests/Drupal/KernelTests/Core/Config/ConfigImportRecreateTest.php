@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\KernelTests\Core\Config;
 
 use Drupal\Core\Config\ConfigImporter;
@@ -59,7 +61,7 @@ class ConfigImportRecreateTest extends KernelTestBase {
     );
   }
 
-  public function testRecreateEntity() {
+  public function testRecreateEntity(): void {
     $type_name = $this->randomMachineName(16);
     $content_type = NodeType::create([
       'type' => $type_name,

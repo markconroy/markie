@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\user\Kernel\Migrate\d7;
 
 use Drupal\Core\Database\Database;
@@ -141,7 +143,7 @@ class MigrateUserTest extends MigrateDrupal7TestBase {
   /**
    * Tests the Drupal 7 user to Drupal 8 migration.
    */
-  public function testUser() {
+  public function testUser(): void {
     $users = Database::getConnection('default', 'migrate')
       ->select('users', 'u')
       ->fields('u')

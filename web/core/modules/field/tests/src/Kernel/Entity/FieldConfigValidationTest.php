@@ -1,9 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\field\Kernel\Entity;
 
+use Drupal\entity_test\Entity\EntityTestBundle;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\KernelTests\Core\Config\ConfigEntityValidationTestBase;
+use Drupal\Tests\node\Traits\ContentTypeCreationTrait;
 
 /**
  * Tests validation of field_config entities.
@@ -11,7 +16,14 @@ use Drupal\field\Entity\FieldStorageConfig;
  * @group field
  * @group #slow
  */
-class FieldConfigValidationTest extends FieldStorageConfigValidationTest {
+class FieldConfigValidationTest extends ConfigEntityValidationTestBase {
+
+  use ContentTypeCreationTrait;
+
+  /**
+   * {@inheritdoc}
+   */
+  protected static $modules = ['field', 'node', 'entity_test', 'text', 'user'];
 
   /**
    * {@inheritdoc}
@@ -19,14 +31,14 @@ class FieldConfigValidationTest extends FieldStorageConfigValidationTest {
   protected function setUp(): void {
     parent::setUp();
 
-    // The field storage was created in the parent method.
-    $field_storage = $this->entity;
+    $this->installConfig('node');
+    $this->createContentType(['type' => 'one']);
+    $this->createContentType(['type' => 'another']);
 
-    $this->entity = FieldConfig::create([
-      'field_storage' => $field_storage,
-      'bundle' => 'user',
-    ]);
-    $this->entity->save();
+    EntityTestBundle::create(['id' => 'one'])->save();
+    EntityTestBundle::create(['id' => 'another'])->save();
+
+    $this->entity = FieldConfig::loadByName('node', 'one', 'body');
   }
 
   /**
@@ -88,6 +100,17 @@ class FieldConfigValidationTest extends FieldStorageConfigValidationTest {
   }
 
   /**
+   * Tests that the target bundle of the field is checked.
+   */
+  public function testTargetBundleMustExist(): void {
+    $this->entity->set('bundle', 'nope');
+    $this->assertValidationErrors([
+      '' => "The 'bundle' property cannot be changed.",
+      'bundle' => "The 'nope' bundle does not exist on the 'node' entity type.",
+    ]);
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function testImmutableProperties(array $valid_values = []): void {
@@ -96,7 +119,73 @@ class FieldConfigValidationTest extends FieldStorageConfigValidationTest {
     // settings from the *old* field_type won't match the config schema for the
     // settings of the *new* field_type.
     $this->entity->set('settings', []);
-    parent::testImmutableProperties($valid_values);
+    parent::testImmutableProperties([
+      'entity_type' => 'entity_test_with_bundle',
+      'bundle' => 'another',
+      'field_type' => 'string',
+    ]);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function testRequiredPropertyKeysMissing(?array $additional_expected_validation_errors_when_missing = NULL): void {
+    parent::testRequiredPropertyKeysMissing([
+      'dependencies' => [
+        // @see ::testInvalidDependencies()
+        // @see \Drupal\Core\Config\Plugin\Validation\Constraint\RequiredConfigDependenciesConstraintValidator
+        '' => 'This field requires a field storage.',
+      ],
+    ]);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function testRequiredPropertyValuesMissing(?array $additional_expected_validation_errors_when_missing = NULL): void {
+    parent::testRequiredPropertyValuesMissing([
+      'dependencies' => [
+        // @see ::testInvalidDependencies()
+        // @see \Drupal\Core\Config\Plugin\Validation\Constraint\RequiredConfigDependenciesConstraintValidator
+        '' => 'This field requires a field storage.',
+      ],
+    ]);
+  }
+
+  /**
+   * Tests that the field type plugin's existence is validated.
+   */
+  public function testFieldTypePluginIsValidated(): void {
+    // The `field_type` property is immutable, so we need to clone the entity in
+    // order to cleanly change its immutable properties.
+    $this->entity = $this->entity->createDuplicate()
+      // We need to clear the current settings, or we will get validation errors
+      // because the old settings are not supported by the new field type.
+      ->set('settings', [])
+      ->set('field_type', 'invalid');
+
+    $this->assertValidationErrors([
+      'field_type' => "The 'invalid' plugin does not exist.",
+    ]);
+  }
+
+  /**
+   * Tests that entity reference selection handler plugin IDs are validated.
+   */
+  public function testEntityReferenceSelectionHandlerIsValidated(): void {
+    $this->container->get('state')
+      ->set('field_test_disable_broken_entity_reference_handler', TRUE);
+    $this->enableModules(['field_test']);
+
+    // The `field_type` property is immutable, so we need to clone the entity in
+    // order to cleanly change its immutable properties.
+    $this->entity = $this->entity->createDuplicate()
+      ->set('field_type', 'entity_reference')
+      ->set('settings', ['handler' => 'non_existent']);
+
+    $this->assertValidationErrors([
+      'settings.handler' => "The 'non_existent' plugin does not exist.",
+    ]);
   }
 
 }

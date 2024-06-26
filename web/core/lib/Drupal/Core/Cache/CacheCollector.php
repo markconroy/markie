@@ -157,7 +157,11 @@ abstract class CacheCollector implements CacheCollectorInterface, DestructableIn
    * value will only apply while the object is in scope and will not be written
    * back to the persistent cache. This follows a similar pattern to static vs.
    * persistent caching in procedural code. Extending classes may wish to alter
-   * this behavior, for example by adding a call to persist().
+   * this behavior, for example by adding a call to persist(). If you are
+   * writing data to somewhere in addition to the cache item in ::set(), you
+   * should call static::updateCache() at the end of your ::set implementation.
+   * This avoids a race condition if another request starts with an empty cache
+   * before your ::set() call. For example: Drupal\Core\State\State.
    */
   public function set($key, $value) {
     $this->lazyLoadCache();
@@ -165,7 +169,6 @@ abstract class CacheCollector implements CacheCollectorInterface, DestructableIn
     // The key might have been marked for deletion.
     unset($this->keysToRemove[$key]);
     $this->invalidateCache();
-
   }
 
   /**
@@ -229,7 +232,7 @@ abstract class CacheCollector implements CacheCollectorInterface, DestructableIn
 
     // Lock cache writes to help avoid stampedes.
     $cid = $this->getCid();
-    $lock_name = $this->normalizeLockName($cid . ':' . __CLASS__);
+    $lock_name = $cid . ':' . __CLASS__;
     if (!$lock || $this->lock->acquire($lock_name)) {
       // Set and delete operations invalidate the cache item. Try to also load
       // an eventually invalidated cache entry, only update an invalidated cache
@@ -243,6 +246,13 @@ abstract class CacheCollector implements CacheCollectorInterface, DestructableIn
           // later requests.
           $this->cache->delete($cid);
           $this->lock->release($lock_name);
+          return;
+        }
+        // If there wasn't a cache item at the beginning of the request, but
+        // there is now, then there has been a cache write in the interim.
+        // Discard our data if so since the cache may have been written by
+        // a request that was also setting data.
+        if (!$this->cacheCreated) {
           return;
         }
         $data = array_merge($cache->data, $data);
@@ -283,6 +293,8 @@ abstract class CacheCollector implements CacheCollectorInterface, DestructableIn
    *   An ASCII-encoded cache ID that is at most 255 characters long.
    */
   protected function normalizeLockName($cid) {
+    @trigger_error(sprintf('%s is deprecated in drupal:10.3.0 and is removed from drupal:11.0.0. The lock service is responsible for normalizing the lock name. See https://www.drupal.org/node/3436961', __METHOD__), E_USER_DEPRECATED);
+
     // Nothing to do if the ID is a US ASCII string of 255 characters or less.
     $cid_is_ascii = mb_check_encoding($cid, 'ASCII');
     if (strlen($cid) <= 255 && $cid_is_ascii) {

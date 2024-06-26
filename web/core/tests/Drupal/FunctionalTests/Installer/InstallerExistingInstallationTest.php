@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\FunctionalTests\Installer;
 
 /**
@@ -17,7 +19,7 @@ class InstallerExistingInstallationTest extends InstallerTestBase {
   /**
    * Tests that Drupal fails to install when there is an existing installation.
    */
-  public function testInstaller() {
+  public function testInstaller(): void {
     // Verify that Drupal can't be immediately reinstalled.
     $this->visitInstaller();
     $this->assertSession()->pageTextContains('Drupal already installed');

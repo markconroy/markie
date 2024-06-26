@@ -2,6 +2,7 @@
 
 namespace Drupal\views\Plugin\views\field;
 
+use Drupal\views\Attribute\ViewsField;
 use Drupal\views\Plugin\views\display\DisplayPluginBase;
 use Drupal\views\ResultRow;
 use Drupal\views\ViewExecutable;
@@ -15,9 +16,8 @@ use Drupal\views\ViewExecutable;
  *           which goes with the 'body' field.
  *
  * @ingroup views_field_handlers
- *
- * @ViewsField("markup")
  */
+#[ViewsField("markup")]
 class Markup extends FieldPluginBase {
 
   /**
@@ -28,7 +28,7 @@ class Markup extends FieldPluginBase {
   /**
    * {@inheritdoc}
    */
-  public function init(ViewExecutable $view, DisplayPluginBase $display, array &$options = NULL) {
+  public function init(ViewExecutable $view, DisplayPluginBase $display, ?array &$options = NULL) {
     parent::init($view, $display, $options);
 
     $this->format = $this->definition['format'];

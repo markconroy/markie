@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\big_pipe\Functional;
 
 use Behat\Mink\Element\NodeElement;
@@ -76,7 +78,7 @@ class BigPipeTest extends BrowserTestBase {
    * - big_pipe_page_attachments()
    * - \Drupal\big_pipe\Controller\BigPipeController
    */
-  public function testNoJsDetection() {
+  public function testNoJsDetection(): void {
     $no_js_to_js_markup = '<script>document.cookie = "' . BigPipeStrategy::NOJS_COOKIE . '=1; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT"</script>';
 
     // 1. No session (anonymous).
@@ -140,7 +142,7 @@ class BigPipeTest extends BrowserTestBase {
    *
    * @see \Drupal\big_pipe_test\BigPipePlaceholderTestCases
    */
-  public function testBigPipe() {
+  public function testBigPipe(): void {
     // Simulate production.
     $this->config('system.logging')->set('error_level', ERROR_REPORTING_HIDE)->save();
 
@@ -175,14 +177,12 @@ class BigPipeTest extends BrowserTestBase {
       $cases['exception__lazy_builder']->bigPipePlaceholderId          => NULL,
       $cases['exception__embedded_response']->bigPipePlaceholderId     => NULL,
     ], [
-      0 => $cases['edge_case__html_non_lazy_builder']->bigPipePlaceholderId,
+      0 => $cases['html']->bigPipePlaceholderId,
+      1 => $cases['edge_case__html_non_lazy_builder']->bigPipePlaceholderId,
       // The suspended placeholder is replaced after the non-suspended
       // placeholder even though it appears first in the page.
       // @see Drupal\big_pipe\Render\BigPipe\Render::sendPlaceholders()
-      1 => $cases['edge_case__html_non_lazy_builder_suspend']->bigPipePlaceholderId,
-       // The 'html' case contains the 'status messages' placeholder, which is
-      // always rendered last.
-      2 => $cases['html']->bigPipePlaceholderId,
+      2 => $cases['edge_case__html_non_lazy_builder_suspend']->bigPipePlaceholderId,
     ]);
 
     $this->assertSession()->responseContains('</body>');
@@ -231,7 +231,7 @@ class BigPipeTest extends BrowserTestBase {
    *
    * @see \Drupal\big_pipe_test\BigPipePlaceholderTestCases
    */
-  public function testBigPipeNoJs() {
+  public function testBigPipeNoJs(): void {
     // Simulate production.
     $this->config('system.logging')->set('error_level', ERROR_REPORTING_HIDE)->save();
 
@@ -294,7 +294,7 @@ class BigPipeTest extends BrowserTestBase {
   /**
    * Tests BigPipe with a multi-occurrence placeholder.
    */
-  public function testBigPipeMultiOccurrencePlaceholders() {
+  public function testBigPipeMultiOccurrencePlaceholders(): void {
     $this->drupalLogin($this->rootUser);
     $this->assertSessionCookieExists('1');
     $this->assertBigPipeNoJsCookieExists('0');
@@ -431,8 +431,23 @@ class BigPipeTest extends BrowserTestBase {
    * Ensures CSRF tokens can be generated for the current user's session.
    */
   protected function setCsrfTokenSeedInTestEnvironment() {
+    // Retrieve the CSRF token from the child site from its serialized session
+    // record in the database.
     $session_data = $this->container->get('session_handler.write_safe')->read($this->getSession()->getCookie($this->getSessionName()));
     $csrf_token_seed = unserialize(explode('_sf2_meta|', $session_data)[1])['s'];
+
+    // Ensure that the session is started before accessing a session bag.
+    // Otherwise the value stored in the bag is lost when subsequent session
+    // access triggers a session start automatically.
+
+    /** @var \Symfony\Component\HttpFoundation\RequestStack $request_stack */
+    $request_stack = $this->container->get('request_stack');
+    $session = $request_stack->getSession();
+    if (!$session->isStarted()) {
+      $session->start();
+    }
+
+    // Store the CSRF token in the test runners session metadata bag.
     $this->container->get('session_manager.metadata_bag')->setCsrfTokenSeed($csrf_token_seed);
   }
 

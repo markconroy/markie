@@ -7,7 +7,7 @@ use Drupal\Component\Utility\UrlHelper;
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use GuzzleHttp\ClientInterface;
-use GuzzleHttp\Exception\TransferException;
+use Psr\Http\Client\ClientExceptionInterface;
 
 // cspell:ignore omitscript
 
@@ -96,7 +96,7 @@ class UrlResolver implements UrlResolverInterface {
     try {
       $response = $this->httpClient->get($url);
     }
-    catch (TransferException $e) {
+    catch (ClientExceptionInterface) {
       return FALSE;
     }
 
@@ -176,7 +176,7 @@ class UrlResolver implements UrlResolverInterface {
     // provide extra parameters in the query string. For example, Instagram also
     // supports the 'omitscript' parameter.
     $this->moduleHandler->alter('oembed_resource_url', $parsed_url, $provider);
-    $resource_url = $parsed_url['path'] . '?' . rawurldecode(UrlHelper::buildQuery($parsed_url['query']));
+    $resource_url = $parsed_url['path'] . '?' . UrlHelper::buildQuery($parsed_url['query']);
 
     $this->urlCache[$url] = $resource_url;
     $this->cacheBackend->set($cache_id, $resource_url);

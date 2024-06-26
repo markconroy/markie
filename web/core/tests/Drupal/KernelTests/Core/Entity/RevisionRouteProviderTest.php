@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\KernelTests\Core\Entity;
 
 use Drupal\entity_test\Entity\EntityTestRev;
@@ -104,7 +106,7 @@ class RevisionRouteProviderTest extends KernelTestBase {
    * @return array
    *   Data for testing.
    */
-  public function providerOperationAccessRevisionRoutes(): array {
+  public static function providerOperationAccessRevisionRoutes(): array {
     $data = [];
 
     $data['view revision'] = [

@@ -5,26 +5,28 @@ namespace Drupal\system\Plugin\ImageToolkit;
 use Drupal\Component\Utility\Color;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\File\Exception\FileException;
+use Drupal\Core\File\FileExists;
 use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\ImageToolkit\Attribute\ImageToolkit;
 use Drupal\Core\ImageToolkit\ImageToolkitBase;
 use Drupal\Core\ImageToolkit\ImageToolkitOperationManagerInterface;
 use Drupal\Core\StreamWrapper\StreamWrapperInterface;
 use Drupal\Core\StreamWrapper\StreamWrapperManager;
 use Drupal\Core\StreamWrapper\StreamWrapperManagerInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
-// cspell:ignore rrggbb
+// cspell:ignore imagecreatefrom rrggbb
 
 /**
  * Defines the GD2 toolkit for image manipulation within Drupal.
- *
- * @ImageToolkit(
- *   id = "gd",
- *   title = @Translation("GD2 image manipulation toolkit")
- * )
  */
+#[ImageToolkit(
+  id: "gd",
+  title: new TranslatableMarkup("GD2 image manipulation toolkit"),
+)]
 class GDToolkit extends ImageToolkitBase {
 
   /**
@@ -367,7 +369,7 @@ class GDToolkit extends ImageToolkitBase {
     // Move temporary local file to remote destination.
     if (isset($permanent_destination) && $success) {
       try {
-        $this->fileSystem->move($destination, $permanent_destination, FileSystemInterface::EXISTS_REPLACE);
+        $this->fileSystem->move($destination, $permanent_destination, FileExists::Replace);
         return TRUE;
       }
       catch (FileException $e) {

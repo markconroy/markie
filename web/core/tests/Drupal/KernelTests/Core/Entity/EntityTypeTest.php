@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\KernelTests\Core\Entity;
 
 use Drupal\Core\Entity\EntityType;
@@ -31,7 +33,7 @@ class EntityTypeTest extends KernelTestBase {
   /**
    * Tests that the EntityType object can be serialized.
    */
-  public function testIsSerializable() {
+  public function testIsSerializable(): void {
     $entity_type = $this->setUpEntityType([]);
 
     $translation_service = new class () extends TranslationManager {

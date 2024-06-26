@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\content_translation\Functional;
 
 use Drupal\Tests\content_translation\Traits\ContentTranslationTestTrait;
@@ -70,13 +72,13 @@ class ContentTranslationLanguageChangeTest extends NodeTestBase {
 
     $this->rebuildContainer();
 
-    $this->createImageField('field_image_field', 'article');
+    $this->createImageField('field_image_field', 'node', 'article');
   }
 
   /**
    * Tests that the source language is properly set when changing.
    */
-  public function testLanguageChange() {
+  public function testLanguageChange(): void {
     // Create a node in English.
     $this->drupalGet('node/add/article');
     $edit = [
@@ -111,7 +113,7 @@ class ContentTranslationLanguageChangeTest extends NodeTestBase {
   /**
    * Tests that title does not change on ajax call with new language value.
    */
-  public function testTitleDoesNotChangesOnChangingLanguageWidgetAndTriggeringAjaxCall() {
+  public function testTitleDoesNotChangesOnChangingLanguageWidgetAndTriggeringAjaxCall(): void {
     // Create a node in English.
     $this->drupalGet('node/add/article', ['query' => ['test_field_only_en_fr' => 1]]);
     $edit = [

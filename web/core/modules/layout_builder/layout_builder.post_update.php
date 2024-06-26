@@ -39,7 +39,7 @@ function layout_builder_removed_post_updates() {
 /**
  * Update timestamp formatter settings for Layout Builder fields.
  */
-function layout_builder_post_update_timestamp_formatter(array &$sandbox = NULL): void {
+function layout_builder_post_update_timestamp_formatter(?array &$sandbox = NULL): void {
   /** @var \Drupal\Core\Field\FormatterPluginManager $field_formatter_manager */
   $field_formatter_manager = \Drupal::service('plugin.manager.field.formatter');
 
@@ -68,4 +68,11 @@ function layout_builder_post_update_timestamp_formatter(array &$sandbox = NULL):
     }
     return $update;
   });
+}
+
+/**
+ * Enable the expose all fields feature flag module.
+ */
+function layout_builder_post_update_enable_expose_field_block_feature_flag(): void {
+  \Drupal::service('module_installer')->install(['layout_builder_expose_all_field_blocks']);
 }

@@ -2,6 +2,7 @@
 
 namespace Drupal\Core\Render\Element;
 
+use Drupal\Core\Render\Attribute\FormElement;
 use Drupal\Core\Render\Element;
 
 /**
@@ -18,10 +19,9 @@ use Drupal\Core\Render\Element;
  *   '#default_value' => '2020-02-05',
  * ];
  * @endcode
- *
- * @FormElement("date")
  */
-class Date extends FormElement {
+#[FormElement('date')]
+class Date extends FormElementBase {
 
   /**
    * {@inheritdoc}

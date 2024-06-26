@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\KernelTests\Core\Entity;
 
 use Drupal\entity_test\Entity\EntityTestMulChanged;
@@ -62,7 +64,7 @@ class ContentEntityChangedTest extends EntityKernelTestBase {
   /**
    * Tests basic EntityChangedInterface functionality.
    */
-  public function testChanged() {
+  public function testChanged(): void {
     $user1 = $this->createUser();
     $user2 = $this->createUser();
 
@@ -75,10 +77,8 @@ class ContentEntityChangedTest extends EntityKernelTestBase {
     ]);
     $entity->save();
 
-    $this->assertTrue(
-      $entity->getChangedTime() >= REQUEST_TIME,
-      'Changed time of original language is valid.'
-    );
+    $requestTime = \Drupal::time()->getRequestTime();
+    $this->assertGreaterThanOrEqual($requestTime, $entity->getChangedTime(), 'Changed time of original language is valid.');
 
     // We can't assert equality here because the created time is set to the
     // request time, while instances of ChangedTestItem use the current
@@ -86,7 +86,7 @@ class ContentEntityChangedTest extends EntityKernelTestBase {
     // between the created time and now.
     $this->assertTrue(
       ($entity->getChangedTime() >= $entity->get('created')->value) &&
-      (($entity->getChangedTime() - $entity->get('created')->value) <= time() - REQUEST_TIME),
+      (($entity->getChangedTime() - $entity->get('created')->value) <= time() - $requestTime),
       'Changed and created time of original language can be assumed to be identical.'
     );
 
@@ -241,7 +241,7 @@ class ContentEntityChangedTest extends EntityKernelTestBase {
   /**
    * Tests revisionable EntityChangedInterface functionality.
    */
-  public function testRevisionChanged() {
+  public function testRevisionChanged(): void {
     $user1 = $this->createUser();
     $user2 = $this->createUser();
 
@@ -254,7 +254,7 @@ class ContentEntityChangedTest extends EntityKernelTestBase {
     $entity->save();
 
     $this->assertTrue(
-      $entity->getChangedTime() >= REQUEST_TIME,
+      $entity->getChangedTime() >= \Drupal::time()->getRequestTime(),
       'Changed time of original language is valid.'
     );
 
@@ -263,7 +263,7 @@ class ContentEntityChangedTest extends EntityKernelTestBase {
     // timestamp every time.
     $this->assertTrue(
       ($entity->getChangedTime() >= $entity->get('created')->value) &&
-      (($entity->getChangedTime() - $entity->get('created')->value) <= time() - REQUEST_TIME),
+      (($entity->getChangedTime() - $entity->get('created')->value) <= time() - \Drupal::time()->getRequestTime()),
       'Changed and created time of original language can be assumed to be identical.'
     );
 

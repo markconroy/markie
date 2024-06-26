@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\KernelTests\Config;
 
 use Drupal\Core\Config\Schema\Sequence;
@@ -10,7 +12,6 @@ use Drupal\Core\TypedData\ComplexDataInterface;
 use Drupal\Core\TypedData\Type\IntegerInterface;
 use Drupal\Core\TypedData\Type\StringInterface;
 use Drupal\KernelTests\KernelTestBase;
-use PHPUnit\Framework\Error\Error;
 use Symfony\Component\Validator\ConstraintViolationListInterface;
 
 /**
@@ -42,7 +43,7 @@ class TypedConfigTest extends KernelTestBase {
   /**
    * Verifies that the Typed Data API is implemented correctly.
    */
-  public function testTypedDataAPI() {
+  public function testTypedDataAPI(): void {
     /** @var \Drupal\Core\Config\TypedConfigManagerInterface $typed_config_manager */
     $typed_config_manager = \Drupal::service('config.typed');
 
@@ -51,7 +52,7 @@ class TypedConfigTest extends KernelTestBase {
       $typed_config_manager->get('config_test.non_existent');
       $this->fail('Expected error when trying to get non-existent typed config.');
     }
-    catch (Error $e) {
+    catch (\InvalidArgumentException $e) {
       $this->assertEquals('Missing required data for typed configuration: config_test.non_existent', $e->getMessage());
     }
 
@@ -95,7 +96,7 @@ class TypedConfigTest extends KernelTestBase {
     $typed_config_manager = \Drupal::service('config.typed');
     $typed_config = $typed_config_manager->createFromNameAndData('config_test.validation', \Drupal::configFactory()->get('config_test.validation')->get());
     $this->assertInstanceOf(TypedConfigInterface::class, $typed_config);
-    $this->assertEquals(['_core', 'llama', 'cat', 'giraffe', 'uuid', 'langcode'], array_keys($typed_config->getElements()));
+    $this->assertEquals(['_core', 'llama', 'cat', 'giraffe', 'uuid', 'string__not_blank'], array_keys($typed_config->getElements()));
     $this->assertSame('config_test.validation', $typed_config->getName());
     $this->assertSame('config_test.validation', $typed_config->getPropertyPath());
     $this->assertSame('config_test.validation.llama', $typed_config->get('llama')->getPropertyPath());
@@ -113,9 +114,37 @@ class TypedConfigTest extends KernelTestBase {
   }
 
   /**
+   * Tests the behavior of `NotBlank` on required data.
+   *
+   * @testWith ["", false, "This value should not be blank."]
+   *           ["", true, "This value should not be blank."]
+   *           [null, false, "This value should not be blank."]
+   *           [null, true, "This value should not be null."]
+   *
+   * @see \Drupal\Core\TypedData\DataDefinition::getConstraints()
+   * @see \Drupal\Core\TypedData\DataDefinitionInterface::isRequired()
+   * @see \Drupal\Core\Validation\Plugin\Validation\Constraint\NotNullConstraint
+   * @see \Symfony\Component\Validator\Constraints\NotBlank::$allowNull
+   */
+  public function testNotBlankInteractionWithNotNull(?string $value, bool $is_required, string $expected_message): void {
+    \Drupal::configFactory()->getEditable('config_test.validation')
+      ->set('string__not_blank', $value)
+      ->save();
+
+    $typed_config = \Drupal::service('config.typed')->get('config_test.validation');
+    $typed_config->get('string__not_blank')->getDataDefinition()->setRequired($is_required);
+    $result = $typed_config->validate();
+
+    // Expect 1 validation error message: the one from `NotBlank` or `NotNull`.
+    $this->assertCount(1, $result);
+    $this->assertSame('string__not_blank', $result->get(0)->getPropertyPath());
+    $this->assertEquals($expected_message, $result->get(0)->getMessage());
+  }
+
+  /**
    * Tests config validation via the Typed Data API.
    */
-  public function testSimpleConfigValidation() {
+  public function testSimpleConfigValidation(): void {
     $config = \Drupal::configFactory()->getEditable('config_test.validation');
     /** @var \Drupal\Core\Config\TypedConfigManagerInterface $typed_config_manager */
     $typed_config_manager = \Drupal::service('config.typed');

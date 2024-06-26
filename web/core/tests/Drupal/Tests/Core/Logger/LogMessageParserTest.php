@@ -29,7 +29,7 @@ class LogMessageParserTest extends UnitTestCase {
    * @dataProvider providerTestParseMessagePlaceholders
    * @covers ::parseMessagePlaceholders
    */
-  public function testParseMessagePlaceholders(array $value, array $expected) {
+  public function testParseMessagePlaceholders(array $value, array $expected): void {
     $parser = new LogMessageParser();
     $message_placeholders = $parser->parseMessagePlaceholders($value['message'], $value['context']);
     $this->assertEquals($expected['message'], $value['message']);
@@ -39,7 +39,7 @@ class LogMessageParserTest extends UnitTestCase {
   /**
    * Data provider for testParseMessagePlaceholders().
    */
-  public function providerTestParseMessagePlaceholders() {
+  public static function providerTestParseMessagePlaceholders() {
     return [
       'PSR3-style placeholder' => [
         ['message' => 'User {username} created', 'context' => ['username' => 'Dries']],

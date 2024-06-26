@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\field\Kernel\EntityReference;
 
 use Drupal\Core\DependencyInjection\ContainerBuilder;
@@ -88,7 +90,7 @@ class EntityReferenceSettingsTest extends KernelTestBase {
   /**
    * Tests that config bundle deletions are mirrored in field config settings.
    */
-  public function testConfigTargetBundleDeletion() {
+  public function testConfigTargetBundleDeletion(): void {
     // Create two vocabularies.
     /** @var \Drupal\taxonomy\Entity\Vocabulary[] $vocabularies */
     $vocabularies = [];
@@ -148,7 +150,7 @@ class EntityReferenceSettingsTest extends KernelTestBase {
   /**
    * Tests that deletions of custom bundles are mirrored in field settings.
    */
-  public function testCustomTargetBundleDeletion() {
+  public function testCustomTargetBundleDeletion(): void {
     // Attach an entity reference field to $this->nodeType.
     $name = $this->randomMachineName();
     $label = $this->randomString();

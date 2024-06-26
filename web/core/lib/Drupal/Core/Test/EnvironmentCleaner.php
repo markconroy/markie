@@ -32,7 +32,7 @@ class EnvironmentCleaner implements EnvironmentCleanerInterface {
     protected Connection $testDatabase,
     protected TestRunResultsStorageInterface $testRunResultsStorage,
     protected OutputInterface $output,
-    protected FileSystemInterface $fileSystem
+    protected FileSystemInterface $fileSystem,
   ) {
   }
 
@@ -131,7 +131,7 @@ class EnvironmentCleaner implements EnvironmentCleanerInterface {
   /**
    * {@inheritdoc}
    */
-  public function cleanResults(TestRun $test_run = NULL): int {
+  public function cleanResults(?TestRun $test_run = NULL): int {
     return $test_run ? $test_run->removeResults() : $this->testRunResultsStorage->cleanUp();
   }
 

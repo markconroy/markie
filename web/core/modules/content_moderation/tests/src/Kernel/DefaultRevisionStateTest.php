@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\content_moderation\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
@@ -60,7 +62,7 @@ class DefaultRevisionStateTest extends KernelTestBase {
   /**
    * Tests a translatable Node.
    */
-  public function testMultilingual() {
+  public function testMultilingual(): void {
     // Enable French.
     ConfigurableLanguage::createFromLangcode('fr')->save();
     $node_type = NodeType::create([

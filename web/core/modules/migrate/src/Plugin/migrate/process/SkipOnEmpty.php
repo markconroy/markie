@@ -2,7 +2,7 @@
 
 namespace Drupal\migrate\Plugin\migrate\process;
 
-use Drupal\migrate\MigrateSkipProcessException;
+use Drupal\migrate\Attribute\MigrateProcess;
 use Drupal\migrate\ProcessPluginBase;
 use Drupal\migrate\MigrateExecutableInterface;
 use Drupal\migrate\Row;
@@ -74,11 +74,8 @@ use Drupal\migrate\MigrateSkipRowException;
  * source.
  *
  * @see \Drupal\migrate\Plugin\MigrateProcessInterface
- *
- * @MigrateProcessPlugin(
- *   id = "skip_on_empty"
- * )
  */
+#[MigrateProcess('skip_on_empty')]
 class SkipOnEmpty extends ProcessPluginBase {
 
   /**
@@ -124,14 +121,11 @@ class SkipOnEmpty extends ProcessPluginBase {
    *
    * @return mixed
    *   The input value, $value, if it is not empty.
-   *
-   * @throws \Drupal\migrate\MigrateSkipProcessException
-   *   Thrown if the source property is not set and rest of the process should
-   *   be skipped.
    */
   public function process($value, MigrateExecutableInterface $migrate_executable, Row $row, $destination_property) {
     if (!$value) {
-      throw new MigrateSkipProcessException();
+      $this->stopPipeline();
+      return NULL;
     }
     return $value;
   }

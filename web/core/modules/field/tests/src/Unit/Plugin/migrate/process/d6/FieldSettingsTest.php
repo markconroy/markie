@@ -21,7 +21,7 @@ class FieldSettingsTest extends UnitTestCase {
    *
    * @dataProvider getSettingsProvider
    */
-  public function testGetSettings($field_type, $field_settings, $allowed_values) {
+  public function testGetSettings($field_type, $field_settings, $allowed_values): void {
     $migration = $this->createMock(MigrationInterface::class);
     $plugin = new FieldSettings([], 'd6_field_settings', []);
 
@@ -37,7 +37,7 @@ class FieldSettingsTest extends UnitTestCase {
   /**
    * Provides field settings for testGetSettings().
    */
-  public function getSettingsProvider() {
+  public static function getSettingsProvider() {
     return [
       [
         'list_integer',

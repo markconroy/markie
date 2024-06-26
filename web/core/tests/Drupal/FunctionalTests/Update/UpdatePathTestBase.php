@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\FunctionalTests\Update;
 
 use Drupal\Component\Utility\Crypt;
@@ -145,7 +147,7 @@ abstract class UpdatePathTestBase extends BrowserTestBase {
 
     // Load the database(s).
     foreach ($this->databaseDumpFiles as $file) {
-      if (substr($file, -3) == '.gz') {
+      if (str_ends_with($file, '.gz')) {
         $file = "compress.zlib://$file";
       }
       require $file;

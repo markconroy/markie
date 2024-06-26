@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\views\Functional\Plugin;
 
 use Drupal\Tests\views\Functional\ViewTestBase;
@@ -63,13 +65,13 @@ class ContextualFiltersStringTest extends ViewTestBase {
     $this->createUser([], 'user4', FALSE, ['roles' => [$this->role2]]);
     $this->createUser([], 'user5', FALSE, ['roles' => [$this->role1, $this->role2]]);
 
-    $this->drupalLogin($this->rootUser);
+    $this->drupalLogin($this->createUser(['administer views']));
   }
 
   /**
    * Tests contextual filter for the user roles.
    */
-  public function testUserRoleContextualFilter() {
+  public function testUserRoleContextualFilter(): void {
     $this->drupalGet('admin/structure/views/view/test_user_role_contextual_filter');
     $edit = [
       'view_args' => $this->role1,

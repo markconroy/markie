@@ -8,7 +8,9 @@ use Drupal\Tests\UnitTestCase;
 
 /**
  * @coversDefaultClass \Drupal\tour\Entity\Tour
+ *
  * @group tour
+ * @group legacy
  */
 class TourTest extends UnitTestCase {
 
@@ -28,7 +30,7 @@ class TourTest extends UnitTestCase {
    *
    * @dataProvider routeProvider
    */
-  public function testHasMatchingRoute($routes, $route_name, $route_params, $result) {
+  public function testHasMatchingRoute($routes, $route_name, $route_params, $result): void {
     $tour = $this->getMockBuilder('\Drupal\tour\Entity\Tour')
       ->disableOriginalConstructor()
       ->onlyMethods(['getRoutes'])
@@ -46,7 +48,7 @@ class TourTest extends UnitTestCase {
   /**
    * Provides sample routes for testing.
    */
-  public function routeProvider() {
+  public static function routeProvider() {
     return [
       // Simple match.
       [

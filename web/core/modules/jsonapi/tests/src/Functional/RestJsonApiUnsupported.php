@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\jsonapi\Functional;
 
 use Drupal\Core\Cache\CacheableMetadata;
@@ -86,7 +88,7 @@ class RestJsonApiUnsupported extends ResourceTestBase {
    *
    * @see \Drupal\jsonapi\EventSubscriber\JsonApiRequestValidator::validateQueryParams()
    */
-  public function testApiJsonNotSupportedInRest() {
+  public function testApiJsonNotSupportedInRest(): void {
     $this->assertSame(['json', 'xml'], $this->container->getParameter('serializer.formats'));
 
     $this->provisionResource(['api_json'], []);

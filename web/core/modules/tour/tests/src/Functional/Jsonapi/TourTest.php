@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\tour\Functional\Jsonapi;
 
 use Drupal\Core\Url;
@@ -10,6 +12,7 @@ use Drupal\tour\Entity\Tour;
  * JSON:API integration test for the "Tour" config entity type.
  *
  * @group tour
+ * @group legacy
  */
 class TourTest extends ConfigEntityResourceTestBase {
 

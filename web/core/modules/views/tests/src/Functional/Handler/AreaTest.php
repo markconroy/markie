@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\views\Functional\Handler;
 
 use Drupal\Tests\views\Functional\ViewTestBase;
@@ -58,7 +60,7 @@ class AreaTest extends ViewTestBase {
   /**
    * Tests the generic UI of an area handler.
    */
-  public function testUI() {
+  public function testUI(): void {
     $admin_user = $this->drupalCreateUser([
       'administer views',
       'administer site configuration',
@@ -94,7 +96,7 @@ class AreaTest extends ViewTestBase {
   /**
    * Tests global tokens.
    */
-  public function testRenderAreaToken() {
+  public function testRenderAreaToken(): void {
     $admin_user = $this->drupalCreateUser([
       'administer views',
       'administer site configuration',
@@ -136,7 +138,7 @@ class AreaTest extends ViewTestBase {
   /**
    * Tests overriding the view title using the area title handler.
    */
-  public function testTitleArea() {
+  public function testTitleArea(): void {
     $view = Views::getView('frontpage');
     $view->initDisplay('page_1');
 

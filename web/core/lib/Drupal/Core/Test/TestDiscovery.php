@@ -81,12 +81,15 @@ class TestDiscovery {
 
     $existing = $this->classLoader->getPrefixesPsr4();
 
-    // Add PHPUnit test namespaces of Drupal core.
-    $this->testNamespaces['Drupal\\Tests\\'] = [$this->root . '/core/tests/Drupal/Tests'];
-    $this->testNamespaces['Drupal\\BuildTests\\'] = [$this->root . '/core/tests/Drupal/BuildTests'];
-    $this->testNamespaces['Drupal\\KernelTests\\'] = [$this->root . '/core/tests/Drupal/KernelTests'];
-    $this->testNamespaces['Drupal\\FunctionalTests\\'] = [$this->root . '/core/tests/Drupal/FunctionalTests'];
+    // Add PHPUnit test namespaces of Drupal core. Order the namespaces by the
+    // test types that tend to be slowest first, to optimize overall test times
+    // when multiple different test types are run concurrently by the same test
+    // runner.
     $this->testNamespaces['Drupal\\FunctionalJavascriptTests\\'] = [$this->root . '/core/tests/Drupal/FunctionalJavascriptTests'];
+    $this->testNamespaces['Drupal\\FunctionalTests\\'] = [$this->root . '/core/tests/Drupal/FunctionalTests'];
+    $this->testNamespaces['Drupal\\BuildTests\\'] = [$this->root . '/core/tests/Drupal/BuildTests'];
+    $this->testNamespaces['Drupal\\Tests\\'] = [$this->root . '/core/tests/Drupal/Tests'];
+    $this->testNamespaces['Drupal\\KernelTests\\'] = [$this->root . '/core/tests/Drupal/KernelTests'];
     $this->testNamespaces['Drupal\\TestTools\\'] = [$this->root . '/core/tests/Drupal/TestTools'];
 
     $this->availableExtensions = [];
@@ -101,15 +104,7 @@ class TestDiscovery {
       }
 
       // Add PHPUnit test namespaces.
-      $this->testNamespaces["Drupal\\Tests\\$name\\Unit\\"][] = "$base_path/tests/src/Unit";
-      $this->testNamespaces["Drupal\\Tests\\$name\\Kernel\\"][] = "$base_path/tests/src/Kernel";
-      $this->testNamespaces["Drupal\\Tests\\$name\\Functional\\"][] = "$base_path/tests/src/Functional";
-      $this->testNamespaces["Drupal\\Tests\\$name\\Build\\"][] = "$base_path/tests/src/Build";
-      $this->testNamespaces["Drupal\\Tests\\$name\\FunctionalJavascript\\"][] = "$base_path/tests/src/FunctionalJavascript";
-
-      // Add discovery for traits which are shared between different test
-      // suites.
-      $this->testNamespaces["Drupal\\Tests\\$name\\Traits\\"][] = "$base_path/tests/src/Traits";
+      $this->testNamespaces["Drupal\\Tests\\$name\\"][] = "$base_path/tests/src";
     }
 
     foreach ($this->testNamespaces as $prefix => $paths) {
@@ -129,7 +124,9 @@ class TestDiscovery {
    * @param string $extension
    *   (optional) The name of an extension to limit discovery to; e.g., 'node'.
    * @param string[] $types
-   *   An array of included test types.
+   *   (optional) An array of included test types.
+   * @param string|null $directory
+   *   (optional) Limit discovered tests to a specific directory.
    *
    * @return array
    *   An array of tests keyed by the group name. If a test is annotated to
@@ -137,20 +134,20 @@ class TestDiscovery {
    *   to.
    *
    * @code
-   *     $groups['block'] => array(
-   *       'Drupal\Tests\block\Functional\BlockTest' => array(
+   *     $groups['block'] => [
+   *       'Drupal\Tests\block\Functional\BlockTest' => [
    *         'name' => 'Drupal\Tests\block\Functional\BlockTest',
    *         'description' => 'Tests block UI CRUD functionality.',
    *         'group' => 'block',
    *         'groups' => ['block', 'group2', 'group3'],
-   *       ),
-   *     );
+   *       ],
+   *     ];
    * @endcode
    *
    * @todo Remove singular grouping; retain list of groups in 'group' key.
    * @see https://www.drupal.org/node/2296615
    */
-  public function getTestClasses($extension = NULL, array $types = []) {
+  public function getTestClasses($extension = NULL, array $types = [], ?string $directory = NULL) {
     if (!isset($extension) && empty($types)) {
       if (!empty($this->testClasses)) {
         return $this->testClasses;
@@ -158,12 +155,12 @@ class TestDiscovery {
     }
     $list = [];
 
-    $classmap = $this->findAllClassFiles($extension);
+    $classmap = $this->findAllClassFiles($extension, $directory);
 
     // Prevent expensive class loader lookups for each reflected test class by
     // registering the complete classmap of test classes to the class loader.
     // This also ensures that test classes are loaded from the discovered
-    // pathnames; a namespace/classname mismatch will throw an exception.
+    // path names; a namespace/classname mismatch will throw an exception.
     $this->classLoader->addClassMap($classmap);
 
     foreach ($classmap as $classname => $pathname) {
@@ -174,7 +171,7 @@ class TestDiscovery {
       }
       catch (MissingGroupException $e) {
         // If the class name ends in Test and is not a migrate table dump.
-        if (preg_match('/Test$/', $classname) && !str_contains($classname, 'migrate_drupal\Tests\Table')) {
+        if (str_ends_with($classname, 'Test') && !str_contains($classname, 'migrate_drupal\Tests\Table')) {
           throw $e;
         }
         // If the class is @group annotation just skip it. Most likely it is an
@@ -210,12 +207,14 @@ class TestDiscovery {
    *
    * @param string $extension
    *   (optional) The name of an extension to limit discovery to; e.g., 'node'.
+   * @param string|null $directory
+   *   (optional) Limit discovered tests to a specific directory.
    *
    * @return array
    *   A classmap containing all discovered class files; i.e., a map of
-   *   fully-qualified classnames to pathnames.
+   *   fully-qualified classnames to path names.
    */
-  public function findAllClassFiles($extension = NULL) {
+  public function findAllClassFiles($extension = NULL, ?string $directory = NULL) {
     $classmap = [];
     $namespaces = $this->registerTestNamespaces();
     if (isset($extension)) {
@@ -225,7 +224,7 @@ class TestDiscovery {
     }
     foreach ($namespaces as $namespace => $paths) {
       foreach ($paths as $path) {
-        if (!is_dir($path)) {
+        if (!is_dir($path) || (!is_null($directory) && !str_contains($path, $directory))) {
           continue;
         }
         $classmap += static::scanDirectory($namespace, $path);
@@ -247,7 +246,7 @@ class TestDiscovery {
    *
    * @return array
    *   An associative array whose keys are fully-qualified class names and whose
-   *   values are corresponding filesystem pathnames.
+   *   values are corresponding filesystem path names.
    *
    * @throws \InvalidArgumentException
    *   If $namespace_prefix does not end in a namespace separator (backslash).
@@ -256,7 +255,7 @@ class TestDiscovery {
    * @see https://www.drupal.org/node/2296635
    */
   public static function scanDirectory($namespace_prefix, $path) {
-    if (substr($namespace_prefix, -1) !== '\\') {
+    if (!str_ends_with($namespace_prefix, '\\')) {
       throw new \InvalidArgumentException("Namespace prefix for $path must contain a trailing namespace separator.");
     }
     $flags = \FilesystemIterator::UNIX_PATHS;
@@ -273,10 +272,10 @@ class TestDiscovery {
       // We don't want to discover abstract TestBase classes, traits or
       // interfaces. They can be deprecated and will call @trigger_error()
       // during discovery.
-      return substr($file_name, -4) === '.php' &&
-        substr($file_name, -12) !== 'TestBase.php' &&
-        substr($file_name, -9) !== 'Trait.php' &&
-        substr($file_name, -13) !== 'Interface.php';
+      return str_ends_with($file_name, '.php') &&
+        !str_ends_with($file_name, 'TestBase.php') &&
+        !str_ends_with($file_name, 'Trait.php') &&
+        !str_ends_with($file_name, 'Interface.php');
     });
     $files = new \RecursiveIteratorIterator($filter);
     $classes = [];

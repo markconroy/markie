@@ -1,11 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\statistics\Functional;
 
 /**
  * Tests statistics token replacement.
  *
  * @group statistics
+ * @group legacy
  */
 class StatisticsTokenReplaceTest extends StatisticsTestBase {
 
@@ -17,7 +20,7 @@ class StatisticsTokenReplaceTest extends StatisticsTestBase {
   /**
    * Creates a node, then tests the statistics tokens generated from it.
    */
-  public function testStatisticsTokenReplacement() {
+  public function testStatisticsTokenReplacement(): void {
     $language_interface = \Drupal::languageManager()->getCurrentLanguage();
 
     // Create user and node.

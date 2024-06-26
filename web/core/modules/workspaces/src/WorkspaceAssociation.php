@@ -3,6 +3,7 @@
 namespace Drupal\workspaces;
 
 use Drupal\Core\Database\Connection;
+use Drupal\Core\Database\Query\PagerSelectExtender;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\RevisionableInterface;
 use Drupal\Core\Entity\Sql\SqlContentEntityStorage;
@@ -42,6 +43,26 @@ class WorkspaceAssociation implements WorkspaceAssociationInterface, EventSubscr
    * @var \Drupal\workspaces\WorkspaceRepositoryInterface
    */
   protected $workspaceRepository;
+
+  /**
+   * A multidimensional array of entity IDs that are associated to a workspace.
+   *
+   * The first level keys are workspace IDs, the second level keys are entity
+   * type IDs, and the third level array are entity IDs, keyed by revision IDs.
+   *
+   * @var array
+   */
+  protected array $associatedRevisions = [];
+
+  /**
+   * A multidimensional array of entity IDs that were created in a workspace.
+   *
+   * The first level keys are workspace IDs, the second level keys are entity
+   * type IDs, and the third level array are entity IDs, keyed by revision IDs.
+   *
+   * @var array
+   */
+  protected array $associatedInitialRevisions = [];
 
   /**
    * Constructs a WorkspaceAssociation object.
@@ -127,6 +148,8 @@ class WorkspaceAssociation implements WorkspaceAssociationInterface, EventSubscr
       Error::logException($this->logger, $e);
       throw $e;
     }
+
+    $this->associatedRevisions = $this->associatedInitialRevisions = [];
   }
 
   /**
@@ -169,7 +192,41 @@ class WorkspaceAssociation implements WorkspaceAssociationInterface, EventSubscr
   /**
    * {@inheritdoc}
    */
+  public function getTrackedEntitiesForListing($workspace_id, ?int $pager_id = NULL, int|false $limit = 50): array {
+    $query = $this->database->select(static::TABLE)
+      ->extend(PagerSelectExtender::class)
+      ->limit($limit);
+    if ($pager_id) {
+      $query->element($pager_id);
+    }
+
+    $query
+      ->fields(static::TABLE, ['target_entity_type_id', 'target_entity_id', 'target_entity_revision_id'])
+      ->orderBy('target_entity_type_id', 'ASC')
+      ->orderBy('target_entity_revision_id', 'DESC')
+      ->condition('workspace', $workspace_id);
+
+    $tracked_revisions = [];
+    foreach ($query->execute() as $record) {
+      $tracked_revisions[$record->target_entity_type_id][$record->target_entity_revision_id] = $record->target_entity_id;
+    }
+
+    return $tracked_revisions;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getAssociatedRevisions($workspace_id, $entity_type_id, $entity_ids = NULL) {
+    if (isset($this->associatedRevisions[$workspace_id][$entity_type_id])) {
+      if ($entity_ids) {
+        return array_intersect($this->associatedRevisions[$workspace_id][$entity_type_id], $entity_ids);
+      }
+      else {
+        return $this->associatedRevisions[$workspace_id][$entity_type_id];
+      }
+    }
+
     /** @var \Drupal\Core\Entity\EntityStorageInterface $storage */
     $storage = $this->entityTypeManager->getStorage($entity_type_id);
 
@@ -208,13 +265,29 @@ class WorkspaceAssociation implements WorkspaceAssociationInterface, EventSubscr
       $query->condition("revision.$id_field", $entity_ids, 'IN');
     }
 
-    return $query->execute()->fetchAllKeyed();
+    $result = $query->execute()->fetchAllKeyed();
+
+    // Cache the list of associated entity IDs if the full list was requested.
+    if (!$entity_ids) {
+      $this->associatedRevisions[$workspace_id][$entity_type_id] = $result;
+    }
+
+    return $result;
   }
 
   /**
    * {@inheritdoc}
    */
   public function getAssociatedInitialRevisions(string $workspace_id, string $entity_type_id, array $entity_ids = []) {
+    if (isset($this->associatedInitialRevisions[$workspace_id][$entity_type_id])) {
+      if ($entity_ids) {
+        return array_intersect($this->associatedInitialRevisions[$workspace_id][$entity_type_id], $entity_ids);
+      }
+      else {
+        return $this->associatedInitialRevisions[$workspace_id][$entity_type_id];
+      }
+    }
+
     /** @var \Drupal\Core\Entity\EntityStorageInterface $storage */
     $storage = $this->entityTypeManager->getStorage($entity_type_id);
 
@@ -244,19 +317,46 @@ class WorkspaceAssociation implements WorkspaceAssociationInterface, EventSubscr
       $query->condition("base.$id_field", $entity_ids, 'IN');
     }
 
-    return $query->execute()->fetchAllKeyed();
+    $result = $query->execute()->fetchAllKeyed();
+
+    // Cache the list of associated entity IDs if the full list was requested.
+    if (!$entity_ids) {
+      $this->associatedInitialRevisions[$workspace_id][$entity_type_id] = $result;
+    }
+
+    return $result;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getEntityTrackingWorkspaceIds(RevisionableInterface $entity) {
-    $query = $this->database->select(static::TABLE)
-      ->fields(static::TABLE, ['workspace'])
-      ->condition('target_entity_type_id', $entity->getEntityTypeId())
-      ->condition('target_entity_id', $entity->id());
+  public function getEntityTrackingWorkspaceIds(RevisionableInterface $entity, bool $latest_revision = FALSE) {
+    $query = $this->database->select(static::TABLE, 'wa')
+      ->fields('wa', ['workspace'])
+      ->condition('[wa].[target_entity_type_id]', $entity->getEntityTypeId())
+      ->condition('[wa].[target_entity_id]', $entity->id());
 
-    return $query->execute()->fetchCol();
+    // Use a self-join to get only the workspaces in which the latest revision
+    // of the entity is tracked.
+    if ($latest_revision) {
+      $inner_select = $this->database->select(static::TABLE, 'wai')
+        ->condition('[wai].[target_entity_type_id]', $entity->getEntityTypeId())
+        ->condition('[wai].[target_entity_id]', $entity->id());
+      $inner_select->addExpression('MAX([wai].[target_entity_revision_id])', 'max_revision_id');
+
+      $query->join($inner_select, 'waj', '[wa].[target_entity_revision_id] = [waj].[max_revision_id]');
+    }
+
+    $result = $query->execute()->fetchCol();
+
+    // Return early if the entity is not tracked in any workspace.
+    if (empty($result)) {
+      return [];
+    }
+
+    // Return workspace IDs sorted in tree order.
+    $tree = $this->workspaceRepository->loadTree();
+    return array_keys(array_intersect_key($tree, array_flip($result)));
   }
 
   /**
@@ -298,6 +398,8 @@ class WorkspaceAssociation implements WorkspaceAssociationInterface, EventSubscr
     }
 
     $query->execute();
+
+    $this->associatedRevisions = $this->associatedInitialRevisions = [];
   }
 
   /**
@@ -317,6 +419,8 @@ class WorkspaceAssociation implements WorkspaceAssociationInterface, EventSubscr
       $indexed_rows->condition('workspace', $parent_id);
       $this->database->insert(static::TABLE)->from($indexed_rows)->execute();
     }
+
+    $this->associatedRevisions = $this->associatedInitialRevisions = [];
   }
 
   /**

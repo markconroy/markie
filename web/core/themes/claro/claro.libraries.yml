@@ -56,7 +56,6 @@ global-styling:
       css/components/system-status-counter.css: {}
       css/components/tableselect.css: {}
       css/components/tabs.css: {}
-      css/components/views-ui.css: {}
     theme:
       css/theme/colors.css: {}
     layout:
@@ -77,13 +76,11 @@ global-styling:
     # attached, therefore it is always attached.
     - core/drupal.touchevents-test
 
-node-form:
+form-two-columns:
   version: VERSION
   css:
     layout:
-      css/layout/node-add.css: {}
-  dependencies:
-    - node/form
+      css/layout/form-two-columns.css: {}
 
 maintenance-page:
   version: VERSION
@@ -134,6 +131,12 @@ claro.tabledrag:
   version: VERSION
   js:
     js/tabledrag.js: {}
+
+drupal.node.preview:
+  version: VERSION
+  css:
+    theme:
+      css/components/node-preview.css: {}
 
 tour-styling:
   version: VERSION
@@ -226,6 +229,20 @@ views:
   css:
     component:
       css/components/views-exposed-form.css: {}
+
+views_ui:
+  css:
+    component:
+      css/components/views-ui.css: {}
+  moved_files:
+    claro/global-styling:
+      deprecation_version: 10.3.0
+      removed_version: 11.0.0
+      deprecation_link: https://www.drupal.org/node/3432346
+      css:
+        component:
+          css/components/views-ui.css:
+            component: css/components/views-ui.css
 
 messages:
   js:

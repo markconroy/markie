@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\announcements_feed\Kernel;
 
 use GuzzleHttp\Psr7\Response;
@@ -68,7 +70,7 @@ class AnnounceFetcherTest extends AnnounceTestBase {
   /**
    * Data provider for testShowAnnouncements().
    */
-  public function providerShowAnnouncements(): array {
+  public static function providerShowAnnouncements(): array {
     return [
       '1' => [
         'feed_item' => [

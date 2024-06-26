@@ -1,11 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\jsonapi\Functional;
 
 use Drupal\comment\Entity\Comment;
 use Drupal\comment\Plugin\Field\FieldType\CommentItemInterface;
 use Drupal\comment\Tests\CommentTestTrait;
-use Drupal\Component\Serialization\Json;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Url;
 use Drupal\node\Entity\Node;
@@ -44,7 +45,7 @@ class JsonApiFilterRegressionTest extends JsonApiFunctionalTestBase {
    *
    * @see https://www.drupal.org/project/drupal/issues/2953207
    */
-  public function testBundleSpecificTargetEntityTypeFromIssue2953207() {
+  public function testBundleSpecificTargetEntityTypeFromIssue2953207(): void {
     // Set up data model.
     $this->assertTrue($this->container->get('module_installer')->install(['comment'], TRUE), 'Installed modules.');
     $this->addDefaultCommentField('taxonomy_term', 'tags', 'comment', CommentItemInterface::OPEN, 'tcomment');
@@ -80,7 +81,7 @@ class JsonApiFilterRegressionTest extends JsonApiFunctionalTestBase {
    *
    * @see https://www.drupal.org/project/drupal/issues/3015759
    */
-  public function testFilterByIdFromIssue3015759() {
+  public function testFilterByIdFromIssue3015759(): void {
     // Set up data model.
     $this->assertTrue($this->container->get('module_installer')->install(['shortcut'], TRUE), 'Installed modules.');
     $this->rebuildAll();
@@ -107,8 +108,8 @@ class JsonApiFilterRegressionTest extends JsonApiFunctionalTestBase {
         $user->pass_raw,
       ],
     ]);
+    $doc = $this->getDocumentFromResponse($response);
     $this->assertSame(200, $response->getStatusCode());
-    $doc = Json::decode((string) $response->getBody());
     $this->assertNotEmpty($doc['data']);
     $this->assertSame($doc['data'][0]['id'], $shortcut->uuid());
     $this->assertSame($doc['data'][0]['attributes']['drupal_internal__id'], (int) $shortcut->id());
@@ -120,7 +121,7 @@ class JsonApiFilterRegressionTest extends JsonApiFunctionalTestBase {
    *
    * @see https://www.drupal.org/project/jsonapi/issues/3025372
    */
-  public function testEmptyRelationshipFilteringFromIssue3025372() {
+  public function testEmptyRelationshipFilteringFromIssue3025372(): void {
     // Set up data model.
     $this->drupalCreateContentType(['type' => 'folder']);
     $this->createEntityReferenceField(
@@ -155,20 +156,24 @@ class JsonApiFilterRegressionTest extends JsonApiFunctionalTestBase {
       RequestOptions::AUTH => [$user->getAccountName(), $user->pass_raw],
     ];
     $response = $this->request('GET', $url, $request_options);
+    $document = $this->getDocumentFromResponse($response);
     $this->assertSame(200, $response->getStatusCode(), (string) $response->getBody());
-    $this->assertSame($node->uuid(), Json::decode((string) $response->getBody())['data'][0]['id']);
+    $this->assertSame($node->uuid(), $document['data'][0]['id']);
     $response = $this->request('GET', $url->setOption('query', [
       'filter[test][condition][path]' => 'field_parent_folder',
       'filter[test][condition][operator]' => 'IS NULL',
     ]), $request_options);
+    $document = $this->getDocumentFromResponse($response);
+
     $this->assertSame(200, $response->getStatusCode(), (string) $response->getBody());
-    $this->assertSame($node->uuid(), Json::decode((string) $response->getBody())['data'][0]['id']);
+    $this->assertSame($node->uuid(), $document['data'][0]['id']);
     $response = $this->request('GET', $url->setOption('query', [
       'filter[test][condition][path]' => 'field_parent_folder',
       'filter[test][condition][operator]' => 'IS NOT NULL',
     ]), $request_options);
+    $document = $this->getDocumentFromResponse($response);
     $this->assertSame(200, $response->getStatusCode(), (string) $response->getBody());
-    $this->assertEmpty(Json::decode((string) $response->getBody())['data']);
+    $this->assertEmpty($document['data']);
   }
 
   /**
@@ -176,7 +181,7 @@ class JsonApiFilterRegressionTest extends JsonApiFunctionalTestBase {
    *
    * @see https://www.drupal.org/project/drupal/issues/3036593
    */
-  public function testFilteringEntitiesByEntityReferenceTargetId() {
+  public function testFilteringEntitiesByEntityReferenceTargetId(): void {
     // Create two config entities to be the config targets of an entity
     // reference. In this case, the `roles` field.
     $role_llamalovers = $this->drupalCreateRole([], 'llamalovers', 'Llama Lovers');
@@ -186,8 +191,8 @@ class JsonApiFilterRegressionTest extends JsonApiFunctionalTestBase {
     for ($i = 0; $i < 3; $i++) {
       // Create 3 users, one with the first role and two with the second role.
       $users[$i] = $this->drupalCreateUser();
-      $users[$i]->addRole($i === 0 ? $role_llamalovers : $role_catcuddlers);
-      $users[$i]->save();
+      $users[$i]->addRole($i === 0 ? $role_llamalovers : $role_catcuddlers)
+        ->save();
       // For each user, create a node that is owned by that user. The node's
       // `uid` field will be used to test filtering by a content entity ID.
       Node::create([
@@ -211,13 +216,13 @@ class JsonApiFilterRegressionTest extends JsonApiFunctionalTestBase {
 
     // Ensure that an entity can be filtered by a target machine name.
     $response = $this->request('GET', Url::fromUri('internal:/jsonapi/user/user?filter[roles.meta.drupal_internal__target_id]=llamalovers'), $request_options);
-    $document = Json::decode((string) $response->getBody());
+    $document = $this->getDocumentFromResponse($response);
     $this->assertSame(200, $response->getStatusCode(), var_export($document, TRUE));
     // Only one user should have the first role.
     $this->assertCount(1, $document['data']);
     $this->assertSame($users[0]->uuid(), $document['data'][0]['id']);
     $response = $this->request('GET', Url::fromUri('internal:/jsonapi/user/user?sort=drupal_internal__uid&filter[roles.meta.drupal_internal__target_id]=catcuddlers'), $request_options);
-    $document = Json::decode((string) $response->getBody());
+    $document = $this->getDocumentFromResponse($response);
     $this->assertSame(200, $response->getStatusCode(), var_export($document, TRUE));
     // Two users should have the second role. A sort is used on this request to
     // ensure a consistent ordering with different databases.
@@ -227,7 +232,7 @@ class JsonApiFilterRegressionTest extends JsonApiFunctionalTestBase {
 
     // Ensure that an entity can be filtered by an target entity integer ID.
     $response = $this->request('GET', Url::fromUri('internal:/jsonapi/node/article?filter[uid.meta.drupal_internal__target_id]=' . $users[1]->id()), $request_options);
-    $document = Json::decode((string) $response->getBody());
+    $document = $this->getDocumentFromResponse($response);
     $this->assertSame(200, $response->getStatusCode(), var_export($document, TRUE));
     // Only the node authored by the filtered user should be returned.
     $this->assertCount(1, $document['data']);

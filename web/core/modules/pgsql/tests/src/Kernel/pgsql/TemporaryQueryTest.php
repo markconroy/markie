@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\pgsql\Kernel\pgsql;
 
 use Drupal\KernelTests\Core\Database\TemporaryQueryTestBase;
@@ -14,7 +16,7 @@ class TemporaryQueryTest extends TemporaryQueryTestBase {
   /**
    * Confirms that temporary tables work.
    */
-  public function testTemporaryQuery() {
+  public function testTemporaryQuery(): void {
     parent::testTemporaryQuery();
 
     $connection = $this->getConnection();

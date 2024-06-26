@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\FunctionalTests\Installer;
 
 use Drupal\Core\Database\Database;
@@ -71,7 +73,7 @@ class InstallerExistingBrokenDatabaseSettingsTest extends InstallerTestBase {
   /**
    * Tests the expected requirements problem.
    */
-  public function testRequirementsProblem() {
+  public function testRequirementsProblem(): void {
     $this->assertSession()->titleEquals('Requirements problem | Drupal');
     $this->assertSession()->pageTextContains('Database settings');
     $this->assertSession()->pageTextContains('Resolve all issues below to continue the installation. For help configuring your database server,');

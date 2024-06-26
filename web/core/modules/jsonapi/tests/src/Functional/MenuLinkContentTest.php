@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\jsonapi\Functional;
 
 use Drupal\Component\Serialization\Json;
@@ -185,7 +187,7 @@ class MenuLinkContentTest extends ResourceTestBase {
   /**
    * {@inheritdoc}
    */
-  public function testCollectionFilterAccess() {
+  public function testCollectionFilterAccess(): void {
     $this->doTestCollectionFilterAccessBasedOnPermissions('title', 'administer menu');
   }
 
@@ -194,7 +196,7 @@ class MenuLinkContentTest extends ResourceTestBase {
    *
    * @see https://security.drupal.org/node/161923
    */
-  public function testLinkOptionsSerialization() {
+  public function testLinkOptionsSerialization(): void {
     $this->config('jsonapi.settings')->set('read_only', FALSE)->save(TRUE);
 
     $document = $this->getPostDocument();
@@ -221,7 +223,7 @@ class MenuLinkContentTest extends ResourceTestBase {
     unset($document['data']['attributes']['link']['options']);
     $request_options[RequestOptions::BODY] = Json::encode($document);
     $response = $this->request('POST', $url, $request_options);
-    $document = Json::decode((string) $response->getBody());
+    $document = $this->getDocumentFromResponse($response);
     $internal_id = $document['data']['attributes']['drupal_internal__id'];
 
     // Load the created menu item and add link options to it.

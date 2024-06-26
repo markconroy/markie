@@ -3,6 +3,7 @@
 namespace Drupal\file\Plugin\Field\FieldWidget;
 
 use Drupal\Component\Utility\NestedArray;
+use Drupal\Core\Field\Attribute\FieldWidget;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
@@ -18,15 +19,12 @@ use Symfony\Component\Validator\ConstraintViolationListInterface;
 
 /**
  * Plugin implementation of the 'file_generic' widget.
- *
- * @FieldWidget(
- *   id = "file_generic",
- *   label = @Translation("File"),
- *   field_types = {
- *     "file"
- *   }
- * )
  */
+#[FieldWidget(
+  id: 'file_generic',
+  label: new TranslatableMarkup('File'),
+  field_types: ['file'],
+)]
 class FileWidget extends WidgetBase {
 
   /**
@@ -72,7 +70,7 @@ class FileWidget extends WidgetBase {
       '#default_value' => $this->getSetting('progress_indicator'),
       '#description' => $this->t('The throbber display does not show the status of uploads but takes up less space. The progress bar is helpful for monitoring progress on large uploads.'),
       '#weight' => 16,
-      '#access' => file_progress_implementation(),
+      '#access' => extension_loaded('uploadprogress'),
     ];
     return $element;
   }
@@ -266,7 +264,7 @@ class FileWidget extends WidgetBase {
         '#upload_validators' => $element['#upload_validators'],
         '#cardinality' => $cardinality,
       ];
-      $element['#description'] = \Drupal::service('renderer')->renderPlain($file_upload_help);
+      $element['#description'] = \Drupal::service('renderer')->renderInIsolation($file_upload_help);
       $element['#multiple'] = $cardinality != 1 ? TRUE : FALSE;
       if ($cardinality != 1 && $cardinality != -1) {
         $element['#element_validate'] = [[static::class, 'validateMultipleCount']];

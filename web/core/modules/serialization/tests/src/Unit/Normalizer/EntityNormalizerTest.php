@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\serialization\Unit\Normalizer;
 
-use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\EntityTypeRepositoryInterface;
 use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\serialization\Normalizer\EntityNormalizer;
+use Drupal\Tests\Core\Entity\ContentEntityBaseMockableClass;
 use Drupal\Tests\UnitTestCase;
 use Symfony\Component\Serializer\Exception\UnexpectedValueException;
 
@@ -77,7 +77,7 @@ class EntityNormalizerTest extends UnitTestCase {
    *
    * @covers ::normalize
    */
-  public function testNormalize() {
+  public function testNormalize(): void {
     $list_item_1 = $this->createMock('Drupal\Core\TypedData\TypedDataInterface');
     $list_item_2 = $this->createMock('Drupal\Core\TypedData\TypedDataInterface');
 
@@ -86,10 +86,10 @@ class EntityNormalizerTest extends UnitTestCase {
       'field_2' => $list_item_2,
     ];
 
-    $content_entity = $this->getMockBuilder('Drupal\Core\Entity\ContentEntityBase')
+    $content_entity = $this->getMockBuilder(ContentEntityBaseMockableClass::class)
       ->disableOriginalConstructor()
       ->onlyMethods(['getFields'])
-      ->getMockForAbstractClass();
+      ->getMock();
     $content_entity->expects($this->once())
       ->method('getFields')
       ->willReturn($definitions);
@@ -108,9 +108,9 @@ class EntityNormalizerTest extends UnitTestCase {
    *
    * @covers ::denormalize
    */
-  public function testDenormalizeWithNoEntityType() {
+  public function testDenormalizeWithNoEntityType(): void {
     $this->expectException(UnexpectedValueException::class);
-    $this->entityNormalizer->denormalize([], 'Drupal\Core\Entity\ContentEntityBase');
+    $this->entityNormalizer->denormalize([], ContentEntityBaseMockableClass::class);
   }
 
   /**
@@ -118,7 +118,7 @@ class EntityNormalizerTest extends UnitTestCase {
    *
    * @covers ::denormalize
    */
-  public function testDenormalizeWithValidBundle() {
+  public function testDenormalizeWithValidBundle(): void {
     $test_data = [
       'key_1' => 'value_1',
       'key_2' => 'value_2',
@@ -189,7 +189,7 @@ class EntityNormalizerTest extends UnitTestCase {
     $key_1 = $this->createMock(FieldItemListInterface::class);
     $key_2 = $this->createMock(FieldItemListInterface::class);
 
-    $entity = $this->createMock(ContentEntityBase::class);
+    $entity = $this->createMock(ContentEntityBaseMockableClass::class);
     $entity->expects($this->exactly(2))
       ->method('get')
       ->willReturnMap([
@@ -227,7 +227,7 @@ class EntityNormalizerTest extends UnitTestCase {
 
     $this->entityNormalizer->setSerializer($serializer->reveal());
 
-    $this->assertNotNull($this->entityNormalizer->denormalize($test_data, 'Drupal\Core\Entity\ContentEntityBase', NULL, ['entity_type' => 'test']));
+    $this->assertNotNull($this->entityNormalizer->denormalize($test_data, ContentEntityBaseMockableClass::class, NULL, ['entity_type' => 'test']));
   }
 
   /**
@@ -235,7 +235,7 @@ class EntityNormalizerTest extends UnitTestCase {
    *
    * @covers ::denormalize
    */
-  public function testDenormalizeWithInvalidBundle() {
+  public function testDenormalizeWithInvalidBundle(): void {
     $test_data = [
       'key_1' => 'value_1',
       'key_2' => 'value_2',
@@ -309,7 +309,7 @@ class EntityNormalizerTest extends UnitTestCase {
       ->willReturn($entity_type_storage);
 
     $this->expectException(UnexpectedValueException::class);
-    $this->entityNormalizer->denormalize($test_data, 'Drupal\Core\Entity\ContentEntityBase', NULL, ['entity_type' => 'test']);
+    $this->entityNormalizer->denormalize($test_data, ContentEntityBaseMockableClass::class, NULL, ['entity_type' => 'test']);
   }
 
   /**
@@ -317,7 +317,7 @@ class EntityNormalizerTest extends UnitTestCase {
    *
    * @covers ::denormalize
    */
-  public function testDenormalizeWithNoBundle() {
+  public function testDenormalizeWithNoBundle(): void {
     $test_data = [
       'key_1' => 'value_1',
       'key_2' => 'value_2',
@@ -343,7 +343,7 @@ class EntityNormalizerTest extends UnitTestCase {
     $key_1 = $this->createMock(FieldItemListInterface::class);
     $key_2 = $this->createMock(FieldItemListInterface::class);
 
-    $entity = $this->createMock(ContentEntityBase::class);
+    $entity = $this->createMock(ContentEntityBaseMockableClass::class);
     $entity->expects($this->exactly(2))
       ->method('get')
       ->willReturnMap([
@@ -377,7 +377,7 @@ class EntityNormalizerTest extends UnitTestCase {
 
     $this->entityNormalizer->setSerializer($serializer->reveal());
 
-    $this->assertNotNull($this->entityNormalizer->denormalize($test_data, 'Drupal\Core\Entity\ContentEntityBase', NULL, ['entity_type' => 'test']));
+    $this->assertNotNull($this->entityNormalizer->denormalize($test_data, ContentEntityBaseMockableClass::class, NULL, ['entity_type' => 'test']));
   }
 
   /**
@@ -385,7 +385,7 @@ class EntityNormalizerTest extends UnitTestCase {
    *
    * @covers ::denormalize
    */
-  public function testDenormalizeWithNoFieldableEntityType() {
+  public function testDenormalizeWithNoFieldableEntityType(): void {
     $test_data = [
       'key_1' => 'value_1',
       'key_2' => 'value_2',
@@ -409,7 +409,7 @@ class EntityNormalizerTest extends UnitTestCase {
     $storage->expects($this->once())
       ->method('create')
       ->with($test_data)
-      ->willReturn($this->createMock(ContentEntityBase::class));
+      ->willReturn($this->createMock(ContentEntityBaseMockableClass::class));
 
     $this->entityTypeManager->expects($this->once())
       ->method('getStorage')
@@ -419,7 +419,7 @@ class EntityNormalizerTest extends UnitTestCase {
     $this->entityFieldManager->expects($this->never())
       ->method('getBaseFieldDefinitions');
 
-    $this->assertNotNull($this->entityNormalizer->denormalize($test_data, 'Drupal\Core\Entity\ContentEntityBase', NULL, ['entity_type' => 'test']));
+    $this->assertNotNull($this->entityNormalizer->denormalize($test_data, ContentEntityBaseMockableClass::class, NULL, ['entity_type' => 'test']));
   }
 
 }

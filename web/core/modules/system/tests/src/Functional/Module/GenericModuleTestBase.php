@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\system\Functional\Module;
 
 use Drupal\Core\Database\Database;
@@ -42,7 +44,7 @@ abstract class GenericModuleTestBase extends BrowserTestBase {
     if (!empty($info['required']) && !empty($info['hidden'])) {
       $this->markTestSkipped('Nothing to assert for hidden, required modules.');
     }
-    $this->drupalLogin($this->rootUser);
+    $this->drupalLogin($this->createUser(['access help pages']));
     $this->assertHookHelp($module);
 
     if (empty($info['required'])) {

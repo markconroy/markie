@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\forum\Functional\migrate_drupal\d6;
 
 use Drupal\Tests\migrate_drupal_ui\Functional\MigrateUpgradeExecuteTestBase;
@@ -11,6 +13,7 @@ use Drupal\Tests\migrate_drupal_ui\Functional\MigrateUpgradeExecuteTestBase;
  *
  * @group forum
  * @group #slow
+ * @group legacy
  */
 class Upgrade6Test extends MigrateUpgradeExecuteTestBase {
 
@@ -49,7 +52,7 @@ class Upgrade6Test extends MigrateUpgradeExecuteTestBase {
    */
   protected function getEntityCounts() {
     return [
-      'action' => 27,
+      'action' => 24,
       'base_field_override' => 22,
       'block' => 33,
       'block_content' => 1,
@@ -134,7 +137,7 @@ class Upgrade6Test extends MigrateUpgradeExecuteTestBase {
   /**
    * Executes all steps of migrations upgrade.
    */
-  public function testUpgrade() {
+  public function testUpgrade(): void {
     // Start the upgrade process.
     $this->submitCredentialForm();
     $session = $this->assertSession();

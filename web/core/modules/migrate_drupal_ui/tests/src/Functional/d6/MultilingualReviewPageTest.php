@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\migrate_drupal_ui\Functional\d6;
 
 use Drupal\Tests\migrate_drupal_ui\Functional\MultilingualReviewPageTestBase;
@@ -25,7 +27,6 @@ class MultilingualReviewPageTest extends MultilingualReviewPageTestBase {
     'content_translation',
     'config_translation',
     'telephone',
-    'statistics',
     'syslog',
     'update',
     // Test migrations states.
@@ -112,7 +113,6 @@ class MultilingualReviewPageTest extends MultilingualReviewPageTestBase {
       'Profile',
       'Profile translation',
       'Search',
-      'Statistics',
       'String translation',
       'Synchronize translations',
       'Syslog',
@@ -150,6 +150,7 @@ class MultilingualReviewPageTest extends MultilingualReviewPageTestBase {
       'Devel generate',
       'Devel node access',
       'Forum',
+      'Statistics',
       // Option Widgets is set not_finished in migrate_state_not_finished_test.
       'Option Widgets',
       'Views',

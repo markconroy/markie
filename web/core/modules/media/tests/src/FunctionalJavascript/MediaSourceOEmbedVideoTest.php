@@ -5,12 +5,16 @@ declare(strict_types=1);
 namespace Drupal\Tests\media\FunctionalJavascript;
 
 use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\Database\Database;
+use Drupal\dblog\Controller\DbLogController;
 use Drupal\media\Entity\Media;
 use Drupal\media\Entity\MediaType;
 use Drupal\media_test_oembed\Controller\ResourceController;
 use Drupal\Tests\media\Traits\OEmbedTestTrait;
 use Drupal\user\Entity\Role;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+
+// cspell:ignore dailymotion Schipulcon
 
 /**
  * Tests the oembed:video media source.
@@ -22,7 +26,7 @@ class MediaSourceOEmbedVideoTest extends MediaSourceTestBase {
   /**
    * {@inheritdoc}
    */
-  protected static $modules = ['media_test_oembed'];
+  protected static $modules = ['media_test_oembed', 'dblog'];
 
   /**
    * {@inheritdoc}
@@ -54,7 +58,7 @@ class MediaSourceOEmbedVideoTest extends MediaSourceTestBase {
   /**
    * Tests the oembed media source.
    */
-  public function testMediaOEmbedVideoSource() {
+  public function testMediaOEmbedVideoSource(): void {
     $media_type_id = 'test_media_oembed_type';
     $provided_fields = [
       'type',
@@ -141,7 +145,7 @@ class MediaSourceOEmbedVideoTest extends MediaSourceTestBase {
     $this->assertSame($video_url, $query['url']);
     $this->assertNotEmpty($query['hash']);
     // Ensure that the outer iframe's width respects the formatter settings.
-    $this->assertSame('240', $iframe->getAttribute('width'));
+    $this->assertSame('480', $iframe->getAttribute('width'));
     // Check the inner iframe to make sure that CSS has been applied to scale it
     // correctly, regardless of whatever its width attribute may be (the fixture
     // hard-codes it to 480).
@@ -190,6 +194,24 @@ class MediaSourceOEmbedVideoTest extends MediaSourceTestBase {
     // should have deduced the correct one.
     $this->assertStringEndsWith('.png', $thumbnail);
 
+    // Test ResourceException logging.
+    $video_url = 'https://vimeo.com/1111';
+    ResourceController::setResourceUrl($video_url, $this->getFixturesDirectory() . '/video_vimeo.json');
+    $this->drupalGet("media/add/$media_type_id");
+    $assert_session->fieldExists('Remote video URL')->setValue($video_url);
+    $assert_session->buttonExists('Save')->press();
+    $assert_session->addressEquals('admin/content/media');
+    ResourceController::setResource404($video_url);
+    $this->drupalGet($this->assertLinkToCreatedMedia());
+    $row = Database::getConnection()->select('watchdog')
+      ->fields('watchdog', ['message', 'variables'])
+      ->orderBy('wid', 'DESC')
+      ->range(0, 1)
+      ->execute()
+      ->fetchObject();
+    $message = (string) DbLogController::create($this->container)->formatMessage($row);
+    $this->assertStringContainsString('resulted in a `404 Not Found` response', $message);
+
     // Test anonymous access to media via iframe.
     $this->drupalLogout();
 
@@ -216,7 +238,7 @@ class MediaSourceOEmbedVideoTest extends MediaSourceTestBase {
   /**
    * Tests that a security warning appears if iFrame domain is not set.
    */
-  public function testOEmbedSecurityWarning() {
+  public function testOEmbedSecurityWarning(): void {
     $media_type_id = 'test_media_oembed_type';
     $source_id = 'oembed:video';
 

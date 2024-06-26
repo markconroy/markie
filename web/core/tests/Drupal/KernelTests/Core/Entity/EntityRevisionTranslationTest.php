@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\KernelTests\Core\Entity;
 
 use Drupal\entity_test\Entity\EntityTestMul;
@@ -35,7 +37,7 @@ class EntityRevisionTranslationTest extends EntityKernelTestBase {
   /**
    * Tests if the translation object has the right revision id after new revision.
    */
-  public function testNewRevisionAfterTranslation() {
+  public function testNewRevisionAfterTranslation(): void {
     $user = $this->createUser();
 
     // Create a test entity.
@@ -61,7 +63,7 @@ class EntityRevisionTranslationTest extends EntityKernelTestBase {
   /**
    * Tests if the translation object has the right revision id after new revision.
    */
-  public function testRevertRevisionAfterTranslation() {
+  public function testRevertRevisionAfterTranslation(): void {
     $user = $this->createUser();
     /** @var \Drupal\Core\Entity\RevisionableStorageInterface $storage */
     $storage = $this->entityTypeManager->getStorage('entity_test_mulrev');
@@ -97,7 +99,7 @@ class EntityRevisionTranslationTest extends EntityKernelTestBase {
   /**
    * Tests the translation values when saving a pending revision.
    */
-  public function testTranslationValuesWhenSavingPendingRevisions() {
+  public function testTranslationValuesWhenSavingPendingRevisions(): void {
     $user = $this->createUser();
     /** @var \Drupal\Core\Entity\RevisionableStorageInterface $storage */
     $storage = $this->entityTypeManager->getStorage('entity_test_mulrev');
@@ -143,7 +145,7 @@ class EntityRevisionTranslationTest extends EntityKernelTestBase {
   /**
    * Tests changing the default revision flag is propagated to all translations.
    */
-  public function testDefaultRevision() {
+  public function testDefaultRevision(): void {
     // Create a test entity with a translation, which will internally trigger
     // entity cloning for the new translation and create references for some of
     // the entity properties.
@@ -168,7 +170,7 @@ class EntityRevisionTranslationTest extends EntityKernelTestBase {
   /**
    * @covers \Drupal\Core\Entity\ContentEntityBase::setNewRevision
    */
-  public function testSetNewRevision() {
+  public function testSetNewRevision(): void {
     $user = $this->createUser();
 
     // All revisionable entity variations have to have the same results.
@@ -200,7 +202,7 @@ class EntityRevisionTranslationTest extends EntityKernelTestBase {
    *
    * @covers \Drupal\Core\Entity\ContentEntityStorageBase::isAnyStoredRevisionTranslated
    */
-  public function testIsAnyStoredRevisionTranslated() {
+  public function testIsAnyStoredRevisionTranslated(): void {
     /** @var \Drupal\Core\Entity\ContentEntityStorageInterface $storage */
     $storage = $this->entityTypeManager->getStorage('entity_test_mul');
     $method = new \ReflectionMethod(get_class($storage), 'isAnyStoredRevisionTranslated');

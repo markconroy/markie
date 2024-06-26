@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\system\Functional\Theme;
 
 use Drupal\Tests\BrowserTestBase;
@@ -42,7 +44,7 @@ class FastTest extends BrowserTestBase {
   /**
    * Tests access to user autocompletion and verify the correct results.
    */
-  public function testUserAutocomplete() {
+  public function testUserAutocomplete(): void {
     $this->drupalLogin($this->account);
     $this->drupalGet('user/autocomplete', ['query' => ['q' => $this->account->getAccountName()]]);
     $this->assertSession()->responseContains($this->account->getAccountName());

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\update\Functional;
 
 /**
@@ -8,13 +10,6 @@ namespace Drupal\Tests\update\Functional;
  * @group update
  */
 class FileTransferAuthorizeFormTest extends UpdateUploaderTestBase {
-
-  /**
-   * Modules to enable.
-   *
-   * @var array
-   */
-  protected static $modules = ['update', 'update_test'];
 
   /**
    * {@inheritdoc}
@@ -48,7 +43,7 @@ class FileTransferAuthorizeFormTest extends UpdateUploaderTestBase {
    *
    * @dataProvider archiveFileUrlProvider
    */
-  public function testViaAuthorize($url) {
+  public function testViaAuthorize($url): void {
     // Ensure the that we can select which file transfer backend to use.
     \Drupal::state()->set('test_uploaders_via_prompt', TRUE);
 
@@ -78,7 +73,7 @@ class FileTransferAuthorizeFormTest extends UpdateUploaderTestBase {
    *
    * Each of these release URLs has been cached in the setUp() method.
    */
-  public function archiveFileUrlProvider() {
+  public static function archiveFileUrlProvider() {
     return [
       'tar.gz' => [
         'url' => 'https://ftp.drupal.org/files/projects/update_test_new_module.tar.gz',

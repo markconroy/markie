@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\FunctionalTests\Entity;
 
 use Drupal\entity_test\Entity\EntityTestBundle;
@@ -55,7 +57,7 @@ class DeleteMultipleFormTest extends BrowserTestBase {
   /**
    * Tests the delete form for translatable entities.
    */
-  public function testTranslatableEntities() {
+  public function testTranslatableEntities(): void {
     ConfigurableLanguage::createFromLangcode('es')->save();
     ConfigurableLanguage::createFromLangcode('fr')->save();
 
@@ -115,7 +117,7 @@ class DeleteMultipleFormTest extends BrowserTestBase {
   /**
    * Tests the delete form for untranslatable entities.
    */
-  public function testUntranslatableEntities() {
+  public function testUntranslatableEntities(): void {
     $selection = [];
 
     $entity1 = EntityTestRev::create(['type' => 'default', 'name' => 'entity1']);

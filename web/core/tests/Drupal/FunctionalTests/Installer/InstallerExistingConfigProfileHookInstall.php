@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\FunctionalTests\Installer;
 
 /**
@@ -62,7 +64,7 @@ EOF;
   /**
    * Confirms the installation has failed and the expected error is displayed.
    */
-  public function testConfigSync() {
+  public function testConfigSync(): void {
     $this->assertSession()->titleEquals('Requirements problem | Drupal');
     $this->assertSession()->pageTextContains($this->profile);
     $this->assertSession()->pageTextContains('The selected profile has a hook_install() implementation and therefore can not be installed from configuration.');

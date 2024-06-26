@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\comment\Kernel;
 
 use Drupal\comment\Entity\Comment;
@@ -38,7 +40,7 @@ class CommentItemTest extends FieldKernelTestBase {
   /**
    * Tests using entity fields of the comment field type.
    */
-  public function testCommentItem() {
+  public function testCommentItem(): void {
     $this->addDefaultCommentField('entity_test', 'entity_test', 'comment');
 
     // Verify entity creation.
@@ -72,7 +74,7 @@ class CommentItemTest extends FieldKernelTestBase {
   /**
    * Tests comment author name.
    */
-  public function testCommentAuthorName() {
+  public function testCommentAuthorName(): void {
     $this->installEntitySchema('comment');
     $this->addDefaultCommentField('entity_test', 'entity_test', 'comment');
 

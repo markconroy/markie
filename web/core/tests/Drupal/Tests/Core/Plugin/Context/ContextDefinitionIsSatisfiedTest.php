@@ -74,7 +74,7 @@ class ContextDefinitionIsSatisfiedTest extends UnitTestCase {
    *
    * @dataProvider providerTestIsSatisfiedBy
    */
-  public function testIsSatisfiedBy($expected, ContextDefinition $requirement, ContextDefinition $definition, $value = NULL) {
+  public function testIsSatisfiedBy($expected, ContextDefinition $requirement, ContextDefinition $definition, $value = NULL): void {
     $context = new Context($definition, $value);
     $this->assertSame($expected, $requirement->isSatisfiedBy($context));
   }
@@ -82,7 +82,7 @@ class ContextDefinitionIsSatisfiedTest extends UnitTestCase {
   /**
    * Provides test data for ::testIsSatisfiedBy().
    */
-  public function providerTestIsSatisfiedBy() {
+  public static function providerTestIsSatisfiedBy() {
     $data = [];
 
     // Simple data types.

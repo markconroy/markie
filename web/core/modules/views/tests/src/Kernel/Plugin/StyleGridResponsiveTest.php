@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\views\Kernel\Plugin;
 
 use Drupal\views\Views;
@@ -68,10 +70,10 @@ class StyleGridResponsiveTest extends PluginKernelTestBase {
    * @return array
    *   Array containing options for the style plugin and expected values.
    */
-  public function providerTestResponsiveGrid() {
+  public static function providerTestResponsiveGrid() {
     return [
       'horizontal' => [
-        'settings' => [
+        'options' => [
           'columns' => 7,
           'cell_min_width' => 123,
           'grid_gutter' => 13,
@@ -85,7 +87,7 @@ class StyleGridResponsiveTest extends PluginKernelTestBase {
         ],
       ],
       'vertical' => [
-        'settings' => [
+        'options' => [
           'columns' => 8,
           'cell_min_width' => 50,
           'grid_gutter' => 44,
@@ -99,7 +101,7 @@ class StyleGridResponsiveTest extends PluginKernelTestBase {
         ],
       ],
       'default options' => [
-        'settings' => [],
+        'options' => [],
         'expected' => [
           'columns' => 4,
           'cell_min_width' => 100,

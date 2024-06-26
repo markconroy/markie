@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\views\Kernel;
 
 use Drupal\Component\Render\MarkupInterface;
@@ -49,7 +51,7 @@ class FieldApiDataTest extends ViewsKernelTestBase {
    *
    * We check data structure for both node and node revision tables.
    */
-  public function testViewsData() {
+  public function testViewsData(): void {
     $field_storage_string = FieldStorageConfig::create([
       'field_name' => 'field_string',
       'entity_type' => 'node',
@@ -209,7 +211,7 @@ class FieldApiDataTest extends ViewsKernelTestBase {
   /**
    * Tests filtering entries with different translatability.
    */
-  public function testEntityFieldFilter() {
+  public function testEntityFieldFilter(): void {
     NodeType::create([
       'type' => 'bundle1',
       'name' => 'Bundle One',

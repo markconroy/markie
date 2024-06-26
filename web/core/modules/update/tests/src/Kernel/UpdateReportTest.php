@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\update\Kernel;
 
 use Drupal\Core\Link;
@@ -28,7 +30,7 @@ class UpdateReportTest extends KernelTestBase {
   /**
    * @dataProvider providerTemplatePreprocessUpdateReport
    */
-  public function testTemplatePreprocessUpdateReport($variables) {
+  public function testTemplatePreprocessUpdateReport($variables): void {
     \Drupal::moduleHandler()->loadInclude('update', 'inc', 'update.report');
 
     // The function should run without an exception being thrown when the value
@@ -45,7 +47,7 @@ class UpdateReportTest extends KernelTestBase {
    * @return array
    *   Array of $variables for template_preprocess_update_report().
    */
-  public function providerTemplatePreprocessUpdateReport() {
+  public static function providerTemplatePreprocessUpdateReport() {
     return [
       '$variables with data not set' => [
         [],
@@ -60,11 +62,11 @@ class UpdateReportTest extends KernelTestBase {
   }
 
   /**
-   * Tests the error message when failing to fetch data without dblog enabled.
+   * Tests the error message when failing to fetch data without dblog installed.
    *
    * @see template_preprocess_update_fetch_error_message()
    */
-  public function testTemplatePreprocessUpdateFetchErrorMessageNoDblog() {
+  public function testTemplatePreprocessUpdateFetchErrorMessageNoDblog(): void {
     $build = [
       '#theme' => 'update_fetch_error_message',
     ];
@@ -82,11 +84,11 @@ class UpdateReportTest extends KernelTestBase {
   }
 
   /**
-   * Tests the error message when failing to fetch data with dblog enabled.
+   * Tests the error message when failing to fetch data with dblog installed.
    *
    * @see template_preprocess_update_fetch_error_message()
    */
-  public function testTemplatePreprocessUpdateFetchErrorMessageWithDblog() {
+  public function testTemplatePreprocessUpdateFetchErrorMessageWithDblog(): void {
     \Drupal::moduleHandler()->loadInclude('update', 'inc', 'update.report');
 
     $this->enableModules(['dblog', 'user']);

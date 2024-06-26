@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\FunctionalTests\Installer;
 
 use Drupal\Core\Serialization\Yaml;
@@ -70,7 +72,7 @@ class DistributionProfileTest extends InstallerTestBase {
   /**
    * Confirms that the installation succeeded.
    */
-  public function testInstalled() {
+  public function testInstalled(): void {
     $this->assertSession()->addressEquals('root-user');
     $this->assertSession()->statusCodeEquals(200);
     // Confirm that we are logged-in after installation.

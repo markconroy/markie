@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\field_ui\Functional;
 
 use Drupal\Core\Entity\Entity\EntityFormDisplay;
@@ -21,7 +23,7 @@ class ManageFieldsMultipleTypesTest extends ManageFieldsFunctionalTestBase {
    *
    * @dataProvider entityTypesProvider
    */
-  public function testReuseField($entity_type, $bundle1, $bundle2) {
+  public function testReuseField($entity_type, $bundle1, $bundle2): void {
     $field_name = 'test_reuse';
     $label = $this->randomMachineName();
 
@@ -50,7 +52,7 @@ class ManageFieldsMultipleTypesTest extends ManageFieldsFunctionalTestBase {
    *
    * @dataProvider entityTypesProvider
    */
-  public function testReuseFieldMultipleDisplay($entity_type, $bundle1, $bundle2) {
+  public function testReuseFieldMultipleDisplay($entity_type, $bundle1, $bundle2): void {
     // Create additional form mode and enable it on both bundles.
     EntityFormMode::create([
       'id' => "{$entity_type}.little",
@@ -138,26 +140,26 @@ class ManageFieldsMultipleTypesTest extends ManageFieldsFunctionalTestBase {
    * @return array
    *   Test cases.
    */
-  public function entityTypesProvider() {
+  public static function entityTypesProvider() {
     return [
       'node' => [
         'entity_type' => 'node',
-        'article' => [
+        'bundle1' => [
           'id' => 'article',
           'path' => 'admin/structure/types/manage/article',
         ],
-        'page' => [
+        'bundle2' => [
           'id' => 'page',
           'path' => 'admin/structure/types/manage/page',
         ],
       ],
       'taxonomy' => [
         'entity_type' => 'taxonomy_term',
-        'tags' => [
+        'bundle1' => [
           'id' => 'tags',
           'path' => 'admin/structure/taxonomy/manage/tags/overview',
         ],
-        'kittens' => [
+        'bundle2' => [
           'id' => 'kittens',
           'path' => 'admin/structure/taxonomy/manage/kittens/overview',
         ],

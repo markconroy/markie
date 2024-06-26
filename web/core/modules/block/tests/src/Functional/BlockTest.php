@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\block\Functional;
 
 use Drupal\Component\Utility\Html;
@@ -24,7 +26,7 @@ class BlockTest extends BlockTestBase {
   /**
    * Tests block visibility.
    */
-  public function testBlockVisibility() {
+  public function testBlockVisibility(): void {
     $block_name = 'system_powered_by_block';
     // Create a random title for the block.
     $title = $this->randomMachineName(8);
@@ -84,7 +86,7 @@ class BlockTest extends BlockTestBase {
   /**
    * Tests that visibility can be properly toggled.
    */
-  public function testBlockToggleVisibility() {
+  public function testBlockToggleVisibility(): void {
     $block_name = 'system_powered_by_block';
     // Create a random title for the block.
     $title = $this->randomMachineName(8);
@@ -121,7 +123,7 @@ class BlockTest extends BlockTestBase {
   /**
    * Tests block visibility when leaving "pages" textarea empty.
    */
-  public function testBlockVisibilityListedEmpty() {
+  public function testBlockVisibilityListedEmpty(): void {
     $block_name = 'system_powered_by_block';
     // Create a random title for the block.
     $title = $this->randomMachineName(8);
@@ -158,7 +160,7 @@ class BlockTest extends BlockTestBase {
   /**
    * Tests adding a block from the library page with a weight query string.
    */
-  public function testAddBlockFromLibraryWithWeight() {
+  public function testAddBlockFromLibraryWithWeight(): void {
     $default_theme = $this->config('system.theme')->get('default');
     // Test one positive, zero, and one negative weight.
     foreach (['7', '0', '-9'] as $weight) {
@@ -207,7 +209,7 @@ class BlockTest extends BlockTestBase {
   /**
    * Tests configuring and moving a module-define block to specific regions.
    */
-  public function testBlock() {
+  public function testBlock(): void {
     // Place page title block to test error messages.
     $this->drupalPlaceBlock('page_title_block');
 
@@ -291,7 +293,7 @@ class BlockTest extends BlockTestBase {
   /**
    * Tests that the block form has a theme selector when not passed via the URL.
    */
-  public function testBlockThemeSelector() {
+  public function testBlockThemeSelector(): void {
     // Install all themes.
     $themes = [
       'olivero',
@@ -324,7 +326,7 @@ class BlockTest extends BlockTestBase {
   /**
    * Tests block display of theme titles.
    */
-  public function testThemeName() {
+  public function testThemeName(): void {
     // Enable the help block.
     $this->drupalPlaceBlock('help_block', ['region' => 'help']);
     $this->drupalPlaceBlock('local_tasks_block');
@@ -340,7 +342,7 @@ class BlockTest extends BlockTestBase {
   /**
    * Tests block title display settings.
    */
-  public function testHideBlockTitle() {
+  public function testHideBlockTitle(): void {
     $block_name = 'system_powered_by_block';
     // Create a random title for the block.
     $title = $this->randomMachineName(8);
@@ -424,7 +426,7 @@ class BlockTest extends BlockTestBase {
    * - "block:<block ID>"
    * - "block_plugin:<block plugin ID>"
    */
-  public function testBlockCacheTags() {
+  public function testBlockCacheTags(): void {
     // The page cache only works for anonymous users.
     $this->drupalLogout();
 
@@ -533,7 +535,7 @@ class BlockTest extends BlockTestBase {
   /**
    * Tests that a link exists to block layout from the appearance form.
    */
-  public function testThemeAdminLink() {
+  public function testThemeAdminLink(): void {
     $this->drupalPlaceBlock('help_block', ['region' => 'help']);
     $theme_admin = $this->drupalCreateUser([
       'administer blocks',
@@ -549,7 +551,7 @@ class BlockTest extends BlockTestBase {
   /**
    * Tests that uninstalling a theme removes its block configuration.
    */
-  public function testUninstallTheme() {
+  public function testUninstallTheme(): void {
     /** @var \Drupal\Core\Extension\ThemeInstallerInterface $theme_installer */
     $theme_installer = \Drupal::service('theme_installer');
 
@@ -569,7 +571,7 @@ class BlockTest extends BlockTestBase {
   /**
    * Tests the block access.
    */
-  public function testBlockAccess() {
+  public function testBlockAccess(): void {
     $this->drupalPlaceBlock('test_access', ['region' => 'help']);
 
     $this->drupalGet('<front>');
@@ -583,7 +585,7 @@ class BlockTest extends BlockTestBase {
   /**
    * Tests block_user_role_delete.
    */
-  public function testBlockUserRoleDelete() {
+  public function testBlockUserRoleDelete(): void {
     $role1 = Role::create(['id' => 'test_role1', 'label' => 'Test role 1']);
     $role1->save();
 
@@ -616,7 +618,7 @@ class BlockTest extends BlockTestBase {
   /**
    * Tests block title.
    */
-  public function testBlockTitle() {
+  public function testBlockTitle(): void {
     // Create a custom title for the block.
     $title = "This block's <b>great!</b>";
     // Enable a standard block.

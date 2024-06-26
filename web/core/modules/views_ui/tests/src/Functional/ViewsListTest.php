@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\views_ui\Functional;
 
 use Drupal\views\Entity\View;
@@ -46,7 +48,7 @@ class ViewsListTest extends UITestBase {
   /**
    * Tests that the views list does not use a pager.
    */
-  public function testViewsListLimit() {
+  public function testViewsListLimit(): void {
     // Check if we can access the main views admin page.
     $this->drupalGet('admin/structure/views');
     $this->assertSession()->statusCodeEquals(200);

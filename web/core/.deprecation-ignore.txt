@@ -30,6 +30,8 @@
 # Drupal 11.
 %Drupal\\Core\\Form\\FormBuilder::getForm\(\).* will require a new "mixed \.\.\. \$args" argument in the next major version of its interface%
 %Drupal\\Core\\Form\\FormBuilder::submitForm\(\).* will require a new "mixed \.\.\. \$args" argument in the next major version of its interface%
+%The core/tabbable.jquery.shim asset library is deprecated in Drupal 10.3.0 and will be removed in Drupal 11.0.0. See https://www.drupal.org/node/3441616%
+%The core/internal.shepherd asset library is deprecated in Drupal 10.3.0 and will be removed in Drupal 11.0.0. See https://www.drupal.org/node/3442299%
 
 # PHPUnit 9.
 %"PHPUnit\\Framework\\TestListener".*is deprecated%
@@ -52,6 +54,11 @@
 
 # Temporarily for testing Symfony 6.4.
 %Since symfony/dependency-injection 6.4: "Symfony\\Component\\DependencyInjection\\ContainerAwareTrait" is deprecated, use dependency injection instead.%
-%The ".*" class uses "Symfony\\Component\\DependencyInjection\\ContainerAwareTrait" that is deprecated since Symfony 6.4, use dependency injection instead.%
-%The ".*" class implements "Symfony\\Component\\DependencyInjection\\ContainerAwareInterface" that is deprecated since Symfony 6.4, use dependency injection instead.%
-%The ".*" interface extends "Symfony\\Component\\DependencyInjection\\ContainerAwareInterface" that is deprecated since Symfony 6.4, use dependency injection instead.%
+%The "Drupal\\Core\\DrupalKernelInterface" interface extends "Symfony\\Component\\DependencyInjection\\ContainerAwareInterface" that is deprecated since Symfony 6.4, use dependency injection instead.%
+%The "Drupal\\Core\\Logger\\LoggerChannelFactory" class implements "Symfony\\Component\\DependencyInjection\\ContainerAwareInterface" that is deprecated since Symfony 6.4, use dependency injection instead.%
+%The "Drupal\\Core\\Logger\\LoggerChannelFactory" class uses "Symfony\\Component\\DependencyInjection\\ContainerAwareTrait" that is deprecated since Symfony 6.4, use dependency injection instead.%
+%The "Drupal\\Core\\Queue\\QueueFactory" class implements "Symfony\\Component\\DependencyInjection\\ContainerAwareInterface" that is deprecated since Symfony 6.4, use dependency injection instead.%
+%The "Drupal\\Core\\Queue\\QueueFactory" class uses "Symfony\\Component\\DependencyInjection\\ContainerAwareTrait" that is deprecated since Symfony 6.4, use dependency injection instead.%
+%The "Drupal\\Tests\\Core\\Controller\\MockContainerAware" class implements "Symfony\\Component\\DependencyInjection\\ContainerAwareInterface" that is deprecated since Symfony 6.4, use dependency injection instead.%
+%The "Drupal\\Tests\\Core\\DependencyInjection\\DependencySerializationTestDummy" class implements "Symfony\\Component\\DependencyInjection\\ContainerAwareInterface" that is deprecated since Symfony 6.4, use dependency injection instead.%
+%The "Drupal\\Tests\\Core\\Utility\\MockContainerAware" class implements "Symfony\\Component\\DependencyInjection\\ContainerAwareInterface" that is deprecated since Symfony 6.4, use dependency injection instead.%

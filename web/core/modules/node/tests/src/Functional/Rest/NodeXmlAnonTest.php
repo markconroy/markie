@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\node\Functional\Rest;
 
 use Drupal\Tests\rest\Functional\AnonResourceTestTrait;
@@ -31,7 +33,7 @@ class NodeXmlAnonTest extends NodeResourceTestBase {
   /**
    * {@inheritdoc}
    */
-  public function testPatchPath() {
+  public function testPatchPath(): void {
     // Deserialization of the XML format is not supported.
     $this->markTestSkipped();
   }

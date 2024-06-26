@@ -1,9 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\syslog\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
 
 /**
  * Test syslog logger functionality.
@@ -26,10 +30,11 @@ class SyslogTest extends KernelTestBase {
   /**
    * @covers ::log
    */
-  public function testSyslogWriting() {
+  public function testSyslogWriting(): void {
 
     $request = Request::create('/page-not-found', 'GET', [], [], [], ['REMOTE_ADDR' => '1.2.3.4']);
     $request->headers->set('Referer', 'other-site');
+    $request->setSession(new Session(new MockArraySessionStorage()));
     \Drupal::requestStack()->push($request);
 
     $user = $this->getMockBuilder('Drupal\Core\Session\AccountInterface')->getMock();
@@ -67,7 +72,7 @@ class SyslogTest extends KernelTestBase {
    *
    * @covers ::openConnection
    */
-  public function testSyslogMissingFacility() {
+  public function testSyslogMissingFacility(): void {
     $config = $this->container->get('config.factory')->getEditable('syslog.settings');
     $config->clear('facility');
     $config->save();
@@ -81,7 +86,7 @@ class SyslogTest extends KernelTestBase {
    *
    * @covers ::log
    */
-  public function testSyslogSeverity() {
+  public function testSyslogSeverity(): void {
     /** @var \Drupal\Core\Config\Config $config */
     $config = $this->container->get('config.factory')->getEditable('syslog.settings');
     $config->set('format', '!type|!message|!severity');

@@ -18,7 +18,7 @@ class ValidateHostnameTest extends UnitTestCase {
    * @covers ::validateHostname
    * @dataProvider providerTestValidateHostname
    */
-  public function testValidateHostname($hostname, $message, $expected = FALSE) {
+  public function testValidateHostname($hostname, $message, $expected = FALSE): void {
     $server = ['HTTP_HOST' => $hostname];
     $request = new Request([], [], [], [], [], $server);
     $validated_hostname = DrupalKernel::validateHostname($request);
@@ -28,7 +28,7 @@ class ValidateHostnameTest extends UnitTestCase {
   /**
    * Provides test data for testValidateHostname().
    */
-  public function providerTestValidateHostname() {
+  public static function providerTestValidateHostname() {
     $data = [];
 
     // Verifies that DrupalKernel::validateHostname() prevents invalid
@@ -39,7 +39,7 @@ class ValidateHostnameTest extends UnitTestCase {
     $data[] = ['security<.drupal.org:80', 'HTTP_HOST with &lt; is invalid'];
     $data[] = ['security..drupal.org:80', 'HTTP_HOST with .. is invalid'];
 
-    // Verifies hostnames that are too long, or have too many parts are
+    // Verifies host names that are too long, or have too many parts are
     // invalid.
     $data[] = [str_repeat('x', 1000) . '.security.drupal.org:80', 'HTTP_HOST with more than 1000 characters is invalid.'];
     $data[] = [str_repeat('x.', 100) . 'security.drupal.org:80', 'HTTP_HOST with more than 100 subdomains is invalid.'];

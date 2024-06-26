@@ -98,7 +98,7 @@ class LocaleLookupTest extends UnitTestCase {
    *
    * @covers ::resolveCacheMiss
    */
-  public function testResolveCacheMissWithoutFallback() {
+  public function testResolveCacheMissWithoutFallback(): void {
     $args = [
       'language' => 'en',
       'source' => 'test',
@@ -136,7 +136,7 @@ class LocaleLookupTest extends UnitTestCase {
    *
    * @dataProvider resolveCacheMissWithFallbackProvider
    */
-  public function testResolveCacheMissWithFallback($langcode, $string, $context, $expected) {
+  public function testResolveCacheMissWithFallback($langcode, $string, $context, $expected): void {
     // These are fake words!
     // cSpell:disable
     $translations = [
@@ -195,7 +195,7 @@ class LocaleLookupTest extends UnitTestCase {
   /**
    * Provides test data for testResolveCacheMissWithFallback().
    */
-  public function resolveCacheMissWithFallbackProvider() {
+  public static function resolveCacheMissWithFallbackProvider() {
     // cSpell:disable
     return [
       ['cs', 'test', 'irrelevant', 'test v české'],
@@ -219,7 +219,7 @@ class LocaleLookupTest extends UnitTestCase {
    *
    * @covers ::resolveCacheMiss
    */
-  public function testResolveCacheMissWithPersist() {
+  public function testResolveCacheMissWithPersist(): void {
     $args = [
       'language' => 'en',
       'source' => 'test',
@@ -251,11 +251,11 @@ class LocaleLookupTest extends UnitTestCase {
    *
    * @covers ::resolveCacheMiss
    */
-  public function testResolveCacheMissNoTranslation() {
+  public function testResolveCacheMissNoTranslation(): void {
     $string = $this->createMock('Drupal\locale\StringInterface');
     $string->expects($this->once())
       ->method('addLocation')
-      ->will($this->returnSelf());
+      ->willReturnSelf();
     $this->storage->expects($this->once())
       ->method('findTranslation')
       ->willReturn(NULL);
@@ -291,7 +291,7 @@ class LocaleLookupTest extends UnitTestCase {
    * @covers ::resolveCacheMiss
    * @dataProvider providerFixOldPluralTranslationProvider
    */
-  public function testFixOldPluralStyleTranslations($translations, $langcode, $string, $is_fix) {
+  public function testFixOldPluralStyleTranslations($translations, $langcode, $string, $is_fix): void {
     $this->storage->expects($this->any())
       ->method('findTranslation')
       ->willReturnCallback(function ($argument) use ($translations) {
@@ -325,7 +325,7 @@ class LocaleLookupTest extends UnitTestCase {
   /**
    * Provides test data for testResolveCacheMissWithFallback().
    */
-  public function providerFixOldPluralTranslationProvider() {
+  public static function providerFixOldPluralTranslationProvider() {
     $translations = [
       'by' => [
         'word1' => '@count[2] word-by',
@@ -349,7 +349,7 @@ class LocaleLookupTest extends UnitTestCase {
    *
    * @dataProvider getCidProvider
    */
-  public function testGetCid(array $roles, $expected) {
+  public function testGetCid(array $roles, $expected): void {
     $this->user = $this->createMock('Drupal\Core\Session\AccountInterface');
     $this->user->expects($this->any())
       ->method('getRoles')
@@ -373,7 +373,7 @@ class LocaleLookupTest extends UnitTestCase {
   /**
    * Provides test data for testGetCid().
    */
-  public function getCidProvider() {
+  public static function getCidProvider() {
     return [
       [
         ['a'], 'locale:en:irrelevant:a',

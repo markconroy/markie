@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\filter\Kernel;
 
 use Drupal\Core\Form\FormInterface;
@@ -71,8 +73,7 @@ class TextFormatElementFormTest extends KernelTestBase implements FormInterface 
       'name' => 'foobar',
       'mail' => 'foobar@example.com',
     ]);
-    $this->testUser->addRole($role->id());
-    $this->testUser->save();
+    $this->testUser->addRole($role->id())->save();
     \Drupal::service('current_user')->setAccount($this->testUser);
   }
 
@@ -87,8 +88,8 @@ class TextFormatElementFormTest extends KernelTestBase implements FormInterface 
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
-    // A textformat field.
-    $form['textformat'] = [
+    // A text_format field.
+    $form['text_format'] = [
       '#type' => 'text_format',
       '#required' => TRUE,
       '#title' => 'Text',
@@ -118,13 +119,13 @@ class TextFormatElementFormTest extends KernelTestBase implements FormInterface 
   /**
    * Tests that values are returned.
    */
-  public function testTextFormatElement() {
+  public function testTextFormatElement(): void {
     /** @var \Drupal\Core\Form\FormBuilder $form_builder */
     $form_builder = $this->container->get('form_builder');
     $form = $form_builder->getForm($this);
     $output = $this->render($form);
     $this->setRawContent($output);
-    $this->assertFieldByName('textformat[value]');
+    $this->assertFieldByName('text_format[value]');
     $this->assertRaw('<h4>Full HTML</h4>');
     $this->assertRaw('<h4>Filtered HTML</h4>');
     $this->assertRaw('<h4>Test format</h4>');

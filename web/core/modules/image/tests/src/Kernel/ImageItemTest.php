@@ -1,8 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\image\Kernel;
 
-use Drupal\Core\Entity\EntityStorageException;
+use Drupal\Core\Database\Database;
 use Drupal\Core\Field\FieldItemInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
@@ -12,7 +14,6 @@ use Drupal\Tests\field\Kernel\FieldKernelTestBase;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\file\Entity\File;
 use Drupal\user\Entity\Role;
-use PHPUnit\Framework\Error\Warning;
 
 /**
  * Tests using entity fields of the image field type.
@@ -98,7 +99,7 @@ class ImageItemTest extends FieldKernelTestBase {
   /**
    * Tests using entity fields of the image field type.
    */
-  public function testImageItem() {
+  public function testImageItem(): void {
     // Create a test entity with the image field set.
     $entity = EntityTest::create();
     $entity->image_test->target_id = $this->image->id();
@@ -157,7 +158,7 @@ class ImageItemTest extends FieldKernelTestBase {
   /**
    * Tests generateSampleItems() method under different dimensions.
    */
-  public function testImageItemSampleValueGeneration() {
+  public function testImageItemSampleValueGeneration(): void {
 
     // Default behavior. No dimensions configuration.
     $entity = EntityTest::create();
@@ -176,23 +177,27 @@ class ImageItemTest extends FieldKernelTestBase {
   /**
    * Tests a malformed image.
    */
-  public function testImageItemMalformed() {
+  public function testImageItemMalformed(): void {
+    \Drupal::service('module_installer')->install(['dblog']);
+
     // Validate entity is an image and don't gather dimensions if it is not.
     $entity = EntityTest::create();
     $entity->image_test = NULL;
     $entity->image_test->target_id = 9999;
-    // PHPUnit re-throws E_USER_WARNING as an exception.
-    try {
-      $entity->save();
-      $this->fail('Exception did not fail');
-    }
-    catch (EntityStorageException $exception) {
-      $this->assertInstanceOf(Warning::class, $exception->getPrevious());
-      $this->assertEquals('Missing file with ID 9999.', $exception->getMessage());
-      $this->assertEmpty($entity->image_test->width);
-      $this->assertEmpty($entity->image_test->height);
-    }
-
+    $entity->save();
+    // Check that the proper warning has been logged.
+    $arguments = [
+      '%id' => 9999,
+    ];
+    $logged = Database::getConnection()->select('watchdog')
+      ->fields('watchdog', ['variables'])
+      ->condition('type', 'image')
+      ->condition('message', "Missing file with ID %id.")
+      ->execute()
+      ->fetchField();
+    $this->assertEquals(serialize($arguments), $logged);
+    $this->assertEmpty($entity->image_test->width);
+    $this->assertEmpty($entity->image_test->height);
   }
 
 }

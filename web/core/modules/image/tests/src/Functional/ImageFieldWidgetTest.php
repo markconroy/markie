@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\image\Functional;
 
 use Drupal\field\Entity\FieldConfig;
@@ -19,7 +21,7 @@ class ImageFieldWidgetTest extends ImageFieldTestBase {
   /**
    * Tests file widget element.
    */
-  public function testWidgetElement() {
+  public function testWidgetElement(): void {
     // Check for image widget in add/node/article page
     $field_name = $this->randomMachineName();
     $min_resolution = 50;
@@ -29,7 +31,7 @@ class ImageFieldWidgetTest extends ImageFieldTestBase {
       'min_resolution' => $min_resolution . 'x' . $min_resolution,
       'alt_field' => 0,
     ];
-    $this->createImageField($field_name, 'article', [], $field_settings, [], [], 'Image test on [site:name]');
+    $this->createImageField($field_name, 'node', 'article', [], $field_settings, [], [], 'Image test on [site:name]');
     $this->drupalGet('node/add/article');
     // Verify that the image field widget is found on add/node page.
     $this->assertSession()->elementExists('xpath', '//div[contains(@class, "field--widget-image-image")]');

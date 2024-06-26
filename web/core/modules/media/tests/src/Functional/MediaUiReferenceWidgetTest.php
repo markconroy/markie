@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\media\Functional;
 
 use Behat\Mink\Element\NodeElement;
@@ -50,7 +52,7 @@ class MediaUiReferenceWidgetTest extends MediaFunctionalTestBase {
    * @return array[]
    *   Test data. See testMediaReferenceWidget() for the child array structure.
    */
-  public function providerTestMediaReferenceWidget() {
+  public static function providerTestMediaReferenceWidget() {
     return [
       // Single-value fields with a single media type and the default widget:
       // - The user can create and list the media.
@@ -113,7 +115,7 @@ class MediaUiReferenceWidgetTest extends MediaFunctionalTestBase {
    *
    * @dataProvider providerTestMediaReferenceWidget
    */
-  public function testMediaReferenceWidget($cardinality, array $media_type_create_access, $list_access, $widget_id = 'entity_reference_autocomplete') {
+  public function testMediaReferenceWidget($cardinality, array $media_type_create_access, $list_access, $widget_id = 'entity_reference_autocomplete'): void {
     $assert_session = $this->assertSession();
 
     // Create two content types.

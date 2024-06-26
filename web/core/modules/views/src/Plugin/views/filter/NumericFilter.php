@@ -3,15 +3,15 @@
 namespace Drupal\views\Plugin\views\filter;
 
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\views\Attribute\ViewsFilter;
 
 /**
  * Simple filter to handle greater than/less than filters.
  *
  * @ingroup views_filter_handlers
- *
- * @ViewsFilter("numeric")
  */
-class NumericFilter extends FilterPluginBase {
+#[ViewsFilter("numeric")]
+class NumericFilter extends FilterPluginBase implements FilterOperatorsInterface {
 
   protected $alwaysMultiple = TRUE;
 
@@ -89,6 +89,9 @@ class NumericFilter extends FilterPluginBase {
     }
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function operators() {
     $operators = [
       '<' => [
@@ -420,15 +423,18 @@ class NumericFilter extends FilterPluginBase {
       return TRUE;
     }
 
-    // rewrite the input value so that it's in the correct format so that
+    // Rewrite the input value so that it's in the correct format so that
     // the parent gets the right data.
-    if (!empty($this->options['expose']['identifier'])) {
-      $value = &$input[$this->options['expose']['identifier']];
-      if (!is_array($value)) {
-        $value = [
-          'value' => $value,
-        ];
-      }
+    $key = $this->isAGroup() ? 'group_info' : 'expose';
+    if (empty($this->options[$key]['identifier'])) {
+      // Invalid identifier configuration. Value can't be resolved.
+      return FALSE;
+    }
+    $value = &$input[$this->options[$key]['identifier']];
+    if (!is_array($value)) {
+      $value = [
+        'value' => $value,
+      ];
     }
 
     $rc = parent::acceptExposedInput($input);

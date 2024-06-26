@@ -54,6 +54,8 @@ core.entity_view_display.*.*.*:
     bundle:
       type: string
       label: 'Bundle'
+      constraints:
+        EntityBundleExists: '%parent.targetEntityType'
     mode:
       type: string
       label: 'View or form mode machine name'
@@ -76,6 +78,10 @@ field_formatter:
     type:
       type: string
       label: 'Format type machine name'
+      constraints:
+        PluginExists:
+          manager: plugin.manager.field.formatter
+          interface: 'Drupal\Core\Field\FormatterInterface'
     label:
       type: string
       label: 'Label setting machine name'
@@ -83,6 +89,9 @@ field_formatter:
       type: field.formatter.settings.[%parent.type]
       label: 'Settings'
     third_party_settings:
+      # Third party settings are always optional: they're an optional extension
+      # point.
+      requiredKey: false
       type: sequence
       label: 'Third party settings'
       sequence:
@@ -92,7 +101,7 @@ field_formatter.entity_view_display:
   type: field_formatter
   mapping:
     weight:
-      type: integer
+      type: weight
       label: 'Weight'
     region:
       type: string
@@ -112,6 +121,8 @@ core.entity_form_display.*.*.*:
     bundle:
       type: string
       label: 'Bundle'
+      constraints:
+        EntityBundleExists: '%parent.targetEntityType'
     mode:
       type: string
       label: 'View or form mode machine name'
@@ -128,8 +139,12 @@ core.entity_form_display.*.*.*:
           type:
             type: string
             label: 'Widget type machine name'
+            constraints:
+              PluginExists:
+                manager: plugin.manager.field.widget
+                interface: '\Drupal\Core\Field\WidgetInterface'
           weight:
-            type: integer
+            type: weight
             label: 'Weight'
           region:
             type: string
@@ -138,6 +153,9 @@ core.entity_form_display.*.*.*:
             type: field.widget.settings.[%parent.type]
             label: 'Settings'
           third_party_settings:
+            # Third party settings are always optional: they're an optional extension
+            # point.
+            requiredKey: false
             type: sequence
             label: 'Third party settings'
             sequence:

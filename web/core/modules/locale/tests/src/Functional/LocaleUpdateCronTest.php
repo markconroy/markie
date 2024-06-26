@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\locale\Functional;
 
 use Drupal\Core\Database\Database;
@@ -40,7 +42,7 @@ class LocaleUpdateCronTest extends LocaleUpdateBase {
   /**
    * Tests interface translation update using cron.
    */
-  public function testUpdateCron() {
+  public function testUpdateCron(): void {
     // Set a flag to let the locale_test module replace the project data with a
     // set of test projects.
     \Drupal::state()->set('locale.test_projects_alter', TRUE);
@@ -60,7 +62,7 @@ class LocaleUpdateCronTest extends LocaleUpdateBase {
     // Prepare for test: Simulate new translations being available.
     // Change the last updated timestamp of a translation file.
     $contrib_module_two_uri = 'public://local/contrib_module_two-8.x-2.0-beta4.de._po';
-    touch(\Drupal::service('file_system')->realpath($contrib_module_two_uri), REQUEST_TIME);
+    touch(\Drupal::service('file_system')->realpath($contrib_module_two_uri), \Drupal::time()->getRequestTime());
 
     // Prepare for test: Simulate that the file has not been checked for a long
     // time. Set the last_check timestamp to zero.

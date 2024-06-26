@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\content_moderation\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
@@ -44,7 +46,7 @@ class ContentModerationWorkflowTypeApiTest extends KernelTestBase {
    * @covers ::addEntityTypeAndBundle
    * @covers ::removeEntityTypeAndBundle
    */
-  public function testGetBundlesForEntityType() {
+  public function testGetBundlesForEntityType(): void {
     /** @var \Drupal\content_moderation\Plugin\WorkflowType\ContentModeration $workflow_plugin */
     $workflow_plugin = $this->workflow->getTypePlugin();
     // The content moderation plugin does not validate the existence of the
@@ -62,7 +64,7 @@ class ContentModerationWorkflowTypeApiTest extends KernelTestBase {
    * @covers ::addEntityTypeAndBundle
    * @covers ::removeEntityTypeAndBundle
    */
-  public function testAppliesToEntityTypeAndBundle() {
+  public function testAppliesToEntityTypeAndBundle(): void {
     /** @var \Drupal\content_moderation\Plugin\WorkflowType\ContentModeration $workflow_plugin */
     $workflow_plugin = $this->workflow->getTypePlugin();
     // The content moderation plugin does not validate the existence of the
@@ -78,7 +80,7 @@ class ContentModerationWorkflowTypeApiTest extends KernelTestBase {
   /**
    * @covers ::addEntityTypeAndBundle
    */
-  public function testAddEntityTypeAndBundle() {
+  public function testAddEntityTypeAndBundle(): void {
     /** @var \Drupal\content_moderation\Plugin\WorkflowType\ContentModeration $workflow_plugin */
     $workflow_plugin = $this->workflow->getTypePlugin();
 
@@ -102,7 +104,7 @@ class ContentModerationWorkflowTypeApiTest extends KernelTestBase {
    * @covers ::addEntityTypeAndBundle
    * @covers ::removeEntityTypeAndBundle
    */
-  public function testRemoveEntityTypeAndBundle() {
+  public function testRemoveEntityTypeAndBundle(): void {
     /** @var \Drupal\content_moderation\Plugin\WorkflowType\ContentModeration $workflow_plugin */
     $workflow_plugin = $this->workflow->getTypePlugin();
 

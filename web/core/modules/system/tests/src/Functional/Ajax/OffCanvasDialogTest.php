@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\system\Functional\Ajax;
 
 use Drupal\ajax_test\Controller\AjaxTestController;
@@ -31,13 +33,14 @@ class OffCanvasDialogTest extends BrowserTestBase {
    *
    * @dataProvider dialogPosition
    */
-  public function testDialog($position) {
+  public function testDialog($position): void {
     // Ensure the elements render without notices or exceptions.
     $this->drupalGet('ajax-test/dialog');
 
     // Set up variables for this test.
     $dialog_renderable = AjaxTestController::dialogContents();
     $dialog_contents = \Drupal::service('renderer')->renderRoot($dialog_renderable);
+    $dialog_class = 'ui-dialog-off-canvas ui-dialog-position-' . ($position ?: 'side');
     $off_canvas_expected_response = [
       'command' => 'openDialog',
       'selector' => '#drupal-off-canvas',
@@ -45,6 +48,7 @@ class OffCanvasDialogTest extends BrowserTestBase {
       'data' => (string) $dialog_contents,
       'dialogOptions' =>
         [
+          'classes' => ['ui-dialog' => $dialog_class, 'ui-dialog-content' => 'drupal-off-canvas-reset'],
           'title' => 'AJAX Dialog & contents',
           'modal' => FALSE,
           'autoResize' => FALSE,
@@ -52,8 +56,6 @@ class OffCanvasDialogTest extends BrowserTestBase {
           'draggable' => FALSE,
           'drupalAutoButtons' => FALSE,
           'drupalOffCanvasPosition' => $position ?: 'side',
-          'dialogClass' => 'ui-dialog-off-canvas ui-dialog-position-' . ($position ?: 'side'),
-          'classes' => ['ui-dialog-content' => 'drupal-off-canvas-reset'],
           'width' => 300,
         ],
       'effect' => 'fade',

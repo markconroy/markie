@@ -8,8 +8,10 @@ druplicon
 drush
 langcode
 langcodes
+lullabot
 olivero
 olivero's
 simpletest
 tempstore
 umami
+validatable

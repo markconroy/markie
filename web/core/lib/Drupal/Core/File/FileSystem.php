@@ -4,6 +4,7 @@ namespace Drupal\Core\File;
 
 use Drupal\Component\FileSystem\FileSystem as FileSystemComponent;
 use Drupal\Component\Utility\Unicode;
+use Drupal\Core\DependencyInjection\DeprecatedServicePropertyTrait;
 use Drupal\Core\File\Exception\DirectoryNotReadyException;
 use Drupal\Core\File\Exception\FileException;
 use Drupal\Core\File\Exception\FileExistsException;
@@ -15,12 +16,20 @@ use Drupal\Core\Site\Settings;
 use Drupal\Core\StreamWrapper\PublicStream;
 use Drupal\Core\StreamWrapper\StreamWrapperManager;
 use Drupal\Core\StreamWrapper\StreamWrapperManagerInterface;
-use Psr\Log\LoggerInterface;
 
 /**
  * Provides helpers to operate on files and stream wrappers.
  */
 class FileSystem implements FileSystemInterface {
+
+  use DeprecatedServicePropertyTrait;
+
+  /**
+   * {@inheritdoc}
+   */
+  protected array $deprecatedProperties = [
+    'logger' => 'logger.channel.file',
+  ];
 
   /**
    * Default mode for new directories. See self::chmod().
@@ -40,13 +49,6 @@ class FileSystem implements FileSystemInterface {
   protected $settings;
 
   /**
-   * The file logger channel.
-   *
-   * @var \Psr\Log\LoggerInterface
-   */
-  protected $logger;
-
-  /**
    * The stream wrapper manager.
    *
    * @var \Drupal\Core\StreamWrapper\StreamWrapperManagerInterface
@@ -60,13 +62,10 @@ class FileSystem implements FileSystemInterface {
    *   The stream wrapper manager.
    * @param \Drupal\Core\Site\Settings $settings
    *   The site settings.
-   * @param \Psr\Log\LoggerInterface $logger
-   *   The file logger channel.
    */
-  public function __construct(StreamWrapperManagerInterface $stream_wrapper_manager, Settings $settings, LoggerInterface $logger) {
+  public function __construct(StreamWrapperManagerInterface $stream_wrapper_manager, Settings $settings) {
     $this->streamWrapperManager = $stream_wrapper_manager;
     $this->settings = $settings;
-    $this->logger = $logger;
   }
 
   /**
@@ -102,12 +101,7 @@ class FileSystem implements FileSystemInterface {
       }
     }
 
-    if (@chmod($uri, $mode)) {
-      return TRUE;
-    }
-
-    $this->logger->error('The file permissions could not be set on %uri.', ['%uri' => $uri]);
-    return FALSE;
+    return @chmod($uri, $mode);
   }
 
   /**
@@ -293,8 +287,12 @@ class FileSystem implements FileSystemInterface {
   /**
    * {@inheritdoc}
    */
-  public function copy($source, $destination, $replace = self::EXISTS_RENAME) {
-    $this->prepareDestination($source, $destination, $replace);
+  public function copy($source, $destination, /* FileExists */$fileExists = FileExists::Rename) {
+    if (!$fileExists instanceof FileExists) {
+      // @phpstan-ignore-next-line
+      $fileExists = FileExists::fromLegacyInt($fileExists, __METHOD__);
+    }
+    $this->prepareDestination($source, $destination, $fileExists);
 
     if (!@copy($source, $destination)) {
       // If the copy failed and realpaths exist, retry the operation using them
@@ -302,10 +300,6 @@ class FileSystem implements FileSystemInterface {
       $real_source = $this->realpath($source) ?: $source;
       $real_destination = $this->realpath($destination) ?: $destination;
       if ($real_source === FALSE || $real_destination === FALSE || !@copy($real_source, $real_destination)) {
-        $this->logger->error("The specified file '%source' could not be copied to '%destination'.", [
-          '%source' => $source,
-          '%destination' => $destination,
-        ]);
         throw new FileWriteException("The specified file '$source' could not be copied to '$destination'.");
       }
     }
@@ -322,34 +316,30 @@ class FileSystem implements FileSystemInterface {
   public function delete($path) {
     if (is_file($path)) {
       if (!$this->unlink($path)) {
-        $this->logger->error("Failed to unlink file '%path'.", ['%path' => $path]);
         throw new FileException("Failed to unlink file '$path'.");
       }
       return TRUE;
     }
 
     if (is_dir($path)) {
-      $this->logger->error("Cannot delete '%path' because it is a directory. Use deleteRecursive() instead.", ['%path' => $path]);
       throw new NotRegularFileException("Cannot delete '$path' because it is a directory. Use deleteRecursive() instead.");
     }
 
-    // Return TRUE for non-existent file, but log that nothing was actually
-    // deleted, as the current state is the intended result.
+    // Return TRUE for non-existent file as the current state is the intended
+    // result.
     if (!file_exists($path)) {
-      $this->logger->notice('The file %path was not deleted because it does not exist.', ['%path' => $path]);
       return TRUE;
     }
 
     // We cannot handle anything other than files and directories.
     // Throw an exception for everything else (sockets, symbolic links, etc).
-    $this->logger->error("The file '%path' is not of a recognized type so it was not deleted.", ['%path' => $path]);
     throw new NotRegularFileException("The file '$path' is not of a recognized type so it was not deleted.");
   }
 
   /**
    * {@inheritdoc}
    */
-  public function deleteRecursive($path, callable $callback = NULL) {
+  public function deleteRecursive($path, ?callable $callback = NULL) {
     if ($callback) {
       call_user_func($callback, $path);
     }
@@ -378,8 +368,12 @@ class FileSystem implements FileSystemInterface {
   /**
    * {@inheritdoc}
    */
-  public function move($source, $destination, $replace = self::EXISTS_RENAME) {
-    $this->prepareDestination($source, $destination, $replace);
+  public function move($source, $destination, /* FileExists */$fileExists = FileExists::Rename) {
+    if (!$fileExists instanceof FileExists) {
+      // @phpstan-ignore-next-line
+      $fileExists = FileExists::fromLegacyInt($fileExists, __METHOD__);
+    }
+    $this->prepareDestination($source, $destination, $fileExists);
 
     // Ensure compatibility with Windows.
     // @see \Drupal\Core\File\FileSystemInterface::unlink().
@@ -398,17 +392,9 @@ class FileSystem implements FileSystemInterface {
       // been implemented. It's not necessary to use FileSystem::unlink() as the
       // Windows issue has already been resolved above.
       if (!@copy($real_source, $real_destination)) {
-        $this->logger->error("The specified file '%source' could not be moved to '%destination'.", [
-          '%source' => $source,
-          '%destination' => $destination,
-        ]);
         throw new FileWriteException("The specified file '$source' could not be moved to '$destination'.");
       }
       if (!@unlink($real_source)) {
-        $this->logger->error("The source file '%source' could not be unlinked after copying to '%destination'.", [
-          '%source' => $source,
-          '%destination' => $destination,
-        ]);
         throw new FileException("The source file '$source' could not be unlinked after copying to '$destination'.");
       }
     }
@@ -434,31 +420,27 @@ class FileSystem implements FileSystemInterface {
    *   A URI containing the destination that $source should be moved/copied to.
    *   The URI may be a bare filepath (without a scheme) and in that case the
    *   default scheme (file://) will be used.
-   * @param int $replace
-   *   Replace behavior when the destination file already exists:
-   *   - FileSystemInterface::EXISTS_REPLACE - Replace the existing file.
-   *   - FileSystemInterface::EXISTS_RENAME - Append _{incrementing number}
-   *     until the filename is unique.
-   *   - FileSystemInterface::EXISTS_ERROR - Do nothing and return FALSE.
+   * @param \Drupal\Core\File\FileExists|int $fileExists
+   *   Replace behavior when the destination file already exists.
+   *
+   * @throws \TypeError
+   *   Thrown when the $fileExists parameter is not an enum or legacy int.
    *
    * @see \Drupal\Core\File\FileSystemInterface::copy()
    * @see \Drupal\Core\File\FileSystemInterface::move()
    */
-  protected function prepareDestination($source, &$destination, $replace) {
+  protected function prepareDestination($source, &$destination, /* FileExists */$fileExists) {
+    if (!$fileExists instanceof FileExists) {
+      // @phpstan-ignore-next-line
+      $fileExists = FileExists::fromLegacyInt($fileExists, __METHOD__);
+    }
     $original_source = $source;
 
     if (!file_exists($source)) {
       if (($realpath = $this->realpath($original_source)) !== FALSE) {
-        $this->logger->error("File '%original_source' ('%realpath') could not be copied because it does not exist.", [
-          '%original_source' => $original_source,
-          '%realpath' => $realpath,
-        ]);
         throw new FileNotExistsException("File '$original_source' ('$realpath') could not be copied because it does not exist.");
       }
       else {
-        $this->logger->error("File '%original_source' could not be copied because it does not exist.", [
-          '%original_source' => $original_source,
-        ]);
         throw new FileNotExistsException("File '$original_source' could not be copied because it does not exist.");
       }
     }
@@ -472,21 +454,13 @@ class FileSystem implements FileSystemInterface {
       // Perhaps $destination is a dir/file?
       $dirname = $this->dirname($destination);
       if (!$this->prepareDirectory($dirname)) {
-        $this->logger->error("The specified file '%original_source' could not be copied because the destination directory '%destination_directory' is not properly configured. This may be caused by a problem with file or directory permissions.", [
-          '%original_source' => $original_source,
-          '%destination_directory' => $dirname,
-        ]);
         throw new DirectoryNotReadyException("The specified file '$original_source' could not be copied because the destination directory '$dirname' is not properly configured. This may be caused by a problem with file or directory permissions.");
       }
     }
 
     // Determine whether we can perform this operation based on overwrite rules.
-    $destination = $this->getDestinationFilename($destination, $replace);
+    $destination = $this->getDestinationFilename($destination, $fileExists);
     if ($destination === FALSE) {
-      $this->logger->error("File '%original_source' could not be copied because a file by that name already exists in the destination directory ('%destination').", [
-        '%original_source' => $original_source,
-        '%destination' => $destination,
-      ]);
       throw new FileExistsException("File '$original_source' could not be copied because a file by that name already exists in the destination directory ('$destination').");
     }
 
@@ -494,9 +468,6 @@ class FileSystem implements FileSystemInterface {
     $real_source = $this->realpath($source);
     $real_destination = $this->realpath($destination);
     if ($source == $destination || ($real_source !== FALSE) && ($real_source == $real_destination)) {
-      $this->logger->error("File '%source' could not be copied because it would overwrite itself.", [
-        '%source' => $source,
-      ]);
       throw new FileException("File '$source' could not be copied because it would overwrite itself.");
     }
   }
@@ -504,16 +475,19 @@ class FileSystem implements FileSystemInterface {
   /**
    * {@inheritdoc}
    */
-  public function saveData($data, $destination, $replace = self::EXISTS_RENAME) {
+  public function saveData($data, $destination, /* FileExists */$fileExists = FileExists::Rename) {
+    if (!$fileExists instanceof FileExists) {
+      // @phpstan-ignore-next-line
+      $fileExists = FileExists::fromLegacyInt($fileExists, __METHOD__);
+    }
     // Write the data to a temporary file.
     $temp_name = $this->tempnam('temporary://', 'file');
     if (file_put_contents($temp_name, $data) === FALSE) {
-      $this->logger->error("Temporary file '%temp_name' could not be created.", ['%temp_name' => $temp_name]);
       throw new FileWriteException("Temporary file '$temp_name' could not be created.");
     }
 
     // Move the file to its final destination.
-    return $this->move($temp_name, $destination, $replace);
+    return $this->move($temp_name, $destination, $fileExists);
   }
 
   /**
@@ -555,23 +529,27 @@ class FileSystem implements FileSystemInterface {
   /**
    * {@inheritdoc}
    */
-  public function getDestinationFilename($destination, $replace) {
+  public function getDestinationFilename($destination, /* FileExists */$fileExists) {
+    if (!$fileExists instanceof FileExists) {
+      // @phpstan-ignore-next-line
+      $fileExists = FileExists::fromLegacyInt($fileExists, __METHOD__);
+    }
     $basename = $this->basename($destination);
     if (!Unicode::validateUtf8($basename)) {
       throw new FileException(sprintf("Invalid filename '%s'", $basename));
     }
     if (file_exists($destination)) {
-      switch ($replace) {
-        case FileSystemInterface::EXISTS_REPLACE:
+      switch ($fileExists) {
+        case FileExists::Replace:
           // Do nothing here, we want to overwrite the existing file.
           break;
 
-        case FileSystemInterface::EXISTS_RENAME:
+        case FileExists::Rename:
           $directory = $this->dirname($destination);
           $destination = $this->createFilename($basename, $directory);
           break;
 
-        case FileSystemInterface::EXISTS_ERROR:
+        case FileExists::Error:
           // Error reporting handled by calling function.
           return FALSE;
       }
@@ -596,7 +574,7 @@ class FileSystem implements FileSystemInterface {
     }
 
     // A URI or path may already have a trailing slash or look like "public://".
-    if (substr($directory, -1) == '/') {
+    if (str_ends_with($directory, '/')) {
       $separator = '';
     }
     else {
@@ -711,7 +689,7 @@ class FileSystem implements FileSystemInterface {
       while (FALSE !== ($filename = readdir($handle))) {
         // Skip this file if it matches the nomask or starts with a dot.
         if ($filename[0] != '.' && !(preg_match($options['nomask'], $filename))) {
-          if (substr($dir, -1) == '/') {
+          if (str_ends_with($dir, '/')) {
             $uri = "$dir$filename";
           }
           else {
@@ -736,9 +714,6 @@ class FileSystem implements FileSystemInterface {
         }
       }
       closedir($handle);
-    }
-    else {
-      $this->logger->error('@dir can not be opened', ['@dir' => $dir]);
     }
 
     // Give priority to files in this folder by merging them after

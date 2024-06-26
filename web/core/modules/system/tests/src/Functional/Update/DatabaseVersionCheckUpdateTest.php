@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\system\Functional\Update;
 
 use Drupal\Core\Database\Database;
@@ -31,7 +33,7 @@ class DatabaseVersionCheckUpdateTest extends BrowserTestBase {
   /**
    * Tests that updates fail if the database does not meet the minimum version.
    */
-  public function testUpdate() {
+  public function testUpdate(): void {
     if (Database::getConnection()->driver() !== 'mysql') {
       $this->markTestSkipped('This test only works with the mysql driver');
     }

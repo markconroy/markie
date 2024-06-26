@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\views\Functional\Plugin;
 
 use Drupal\Tests\views\Functional\ViewTestBase;
@@ -54,7 +56,7 @@ class DisabledDisplayTest extends ViewTestBase {
    * the .enabled property disappear from the schema both the load and save
    * calls will start failing.
    */
-  public function testDisabledDisplays() {
+  public function testDisabledDisplays(): void {
     // The displays defined in this view.
     $display_ids = ['attachment_1', 'block_1', 'embed_1', 'feed_1', 'page_2'];
 

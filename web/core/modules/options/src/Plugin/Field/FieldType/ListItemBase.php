@@ -34,7 +34,7 @@ abstract class ListItemBase extends FieldItemBase implements OptionsProviderInte
   /**
    * {@inheritdoc}
    */
-  public function getPossibleValues(AccountInterface $account = NULL) {
+  public function getPossibleValues(?AccountInterface $account = NULL) {
     // Flatten options firstly, because Possible Options may contain group
     // arrays.
     $flatten_options = OptGroup::flattenOptions($this->getPossibleOptions($account));
@@ -44,14 +44,14 @@ abstract class ListItemBase extends FieldItemBase implements OptionsProviderInte
   /**
    * {@inheritdoc}
    */
-  public function getPossibleOptions(AccountInterface $account = NULL) {
+  public function getPossibleOptions(?AccountInterface $account = NULL) {
     return $this->getSettableOptions($account);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getSettableValues(AccountInterface $account = NULL) {
+  public function getSettableValues(?AccountInterface $account = NULL) {
     // Flatten options firstly, because Settable Options may contain group
     // arrays.
     $flatten_options = OptGroup::flattenOptions($this->getSettableOptions($account));
@@ -61,7 +61,7 @@ abstract class ListItemBase extends FieldItemBase implements OptionsProviderInte
   /**
    * {@inheritdoc}
    */
-  public function getSettableOptions(AccountInterface $account = NULL) {
+  public function getSettableOptions(?AccountInterface $account = NULL) {
     $allowed_options = options_allowed_values($this->getFieldDefinition()->getFieldStorageDefinition(), $this->getEntity());
     return $allowed_options;
   }
@@ -342,7 +342,7 @@ abstract class ListItemBase extends FieldItemBase implements OptionsProviderInte
    * @param $form_state
    *   The current state of the form for the form this element belongs to.
    *
-   * @see \Drupal\Core\Render\Element\FormElement::processPattern()
+   * @see \Drupal\Core\Render\Element\FormElementBase::processPattern()
    */
   public static function validateAllowedValues($element, FormStateInterface $form_state) {
     $items = array_filter(array_map(function ($item) use ($element) {

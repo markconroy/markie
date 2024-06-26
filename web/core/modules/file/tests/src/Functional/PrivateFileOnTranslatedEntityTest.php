@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\file\Functional;
 
 use Drupal\file\Entity\File;
@@ -70,7 +72,7 @@ class PrivateFileOnTranslatedEntityTest extends FileFieldTestBase {
   /**
    * Tests private file fields on translated nodes.
    */
-  public function testPrivateLanguageFile() {
+  public function testPrivateLanguageFile(): void {
     // Verify that the file field on the "Basic page" node type is translatable.
     $definitions = \Drupal::service('entity_field.manager')->getFieldDefinitions('node', 'page');
     $this->assertTrue($definitions[$this->fieldName]->isTranslatable(), 'Node file field is translatable.');

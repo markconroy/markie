@@ -24,7 +24,7 @@ final class ContentLengthTest extends UnitTestCase {
    * @covers ::handle
    * @dataProvider providerTestSetContentLengthHeader
    */
-  public function testHandle(false|int $expected_header, Response $response) {
+  public function testHandle(false|int $expected_header, Response $response): void {
     $kernel = $this->prophesize(HttpKernelInterface::class);
     $request = Request::create('/');
     $kernel->handle($request, HttpKernelInterface::MAIN_REQUEST, TRUE)->willReturn($response);
@@ -37,7 +37,7 @@ final class ContentLengthTest extends UnitTestCase {
     $this->assertSame((string) $expected_header, $response->headers->get('Content-Length'));
   }
 
-  public function providerTestSetContentLengthHeader() {
+  public static function providerTestSetContentLengthHeader() {
     $response = new Response('Test content', 200);
     $response->headers->set('Content-Length', (string) strlen('Test content'));
     return [

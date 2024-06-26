@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\field\Kernel\Plugin\migrate\source\d6;
 
 use Drupal\Tests\migrate\Kernel\MigrateSqlSourceTestBase;
@@ -26,7 +28,7 @@ class FieldInstanceLabelDescriptionTranslationTest extends MigrateSqlSourceTestB
   /**
    * {@inheritdoc}
    */
-  public function providerSource() {
+  public static function providerSource() {
     $test = [];
 
     // The source data.
@@ -65,7 +67,7 @@ class FieldInstanceLabelDescriptionTranslationTest extends MigrateSqlSourceTestB
       ],
     ];
 
-    $test[0]['expected_results'] = [
+    $test[0]['expected_data'] = [
       [
         'property' => 'widget_label',
         'translation' => "fr - Integer Field",

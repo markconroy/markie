@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\field\Functional;
 
 use Drupal\field\Entity\FieldConfig;
@@ -19,6 +21,14 @@ class FieldDefaultValueCallbackTest extends BrowserTestBase {
    * @var array
    */
   protected static $modules = ['node', 'field_test', 'field_ui'];
+
+  /**
+   * {@inheritdoc}
+   *
+   * @todo Remove and fix test to not rely on super user.
+   * @see https://www.drupal.org/project/drupal/issues/3437620
+   */
+  protected bool $usesSuperUserAccessPolicy = TRUE;
 
   /**
    * {@inheritdoc}
@@ -50,7 +60,7 @@ class FieldDefaultValueCallbackTest extends BrowserTestBase {
 
   }
 
-  public function testDefaultValueCallbackForm() {
+  public function testDefaultValueCallbackForm(): void {
     // Create a field and storage for checking.
     /** @var \Drupal\field\Entity\FieldStorageConfig $field_storage */
     FieldStorageConfig::create([

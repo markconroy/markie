@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\block\Functional;
 
 use Drupal\Tests\BrowserTestBase;
@@ -35,7 +37,7 @@ class NonDefaultBlockAdminTest extends BrowserTestBase {
   /**
    * Tests non-default theme admin.
    */
-  public function testNonDefaultBlockAdmin() {
+  public function testNonDefaultBlockAdmin(): void {
     $admin_user = $this->drupalCreateUser([
       'administer blocks',
       'administer themes',
@@ -45,7 +47,7 @@ class NonDefaultBlockAdminTest extends BrowserTestBase {
     \Drupal::service('theme_installer')->install([$new_theme]);
     // Ensure that the Olivero tab is shown.
     $this->drupalGet('admin/structure/block/list/' . $new_theme);
-    $this->assertSession()->pageTextContains('Olivero(active tab)');
+    $this->assertSession()->pageTextContains('Olivero');
   }
 
 }

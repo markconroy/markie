@@ -11,6 +11,8 @@ use Drupal\Core\Test\TestDatabase;
 use Drupal\Core\Utility\Error;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 
+// cspell:ignore htkey
+
 /**
  * Error reporting level: display no errors.
  */
@@ -371,7 +373,7 @@ function drupal_maintenance_theme() {
  *
  * Example:
  * @code
- * function mymodule_log_stream_handle($new_handle = NULL) {
+ * function my_module_log_stream_handle($new_handle = NULL) {
  *   static $handle;
  *   if (isset($new_handle)) {
  *     $handle = $new_handle;
@@ -484,6 +486,8 @@ function drupal_static_reset($name = NULL) {
   switch ($name) {
     case 'system_get_module_admin_tasks':
       @trigger_error("Calling " . __FUNCTION__ . "() with 'system_get_module_admin_tasks' as an argument is deprecated in drupal:10.2.0 and is removed from drupal:11.0.0. There is no replacement for this usage. See https://www.drupal.org/node/3038972", E_USER_DEPRECATED);
+    case 'shortcut_current_displayed_set':
+      @trigger_error("Calling " . __FUNCTION__ . "() with 'shortcut_current_displayed_set' as an argument is deprecated in drupal:10.3.0 and is removed from drupal:11.0.0. There is no replacement for this usage. See https://www.drupal.org/node/3427050", E_USER_DEPRECATED);
       break;
   }
   drupal_static($name, NULL, TRUE);

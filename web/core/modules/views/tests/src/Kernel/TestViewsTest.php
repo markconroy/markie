@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\views\Kernel;
 
 use Drupal\Core\Entity\Entity\EntityViewMode;
@@ -29,11 +31,8 @@ class TestViewsTest extends KernelTestBase {
    * @var array
    */
   protected static $modules = [
-    // `node.type.book` config entity is a config dependency.
-    // @see core/modules/book/tests/modules/book_test_views/test_views/views.view.test_book_view.yml
-    'book',
+    'views',
     // For NodeType config entities to exist, its module must be installed.
-    // @see book_entity_type_build()
     'node',
     // The `DRUPAL_OPTIONAL` constant is used by the NodeType config entity type
     // and only available if the system module is installed.
@@ -120,6 +119,9 @@ class TestViewsTest extends KernelTestBase {
     // `history` is a module dependency.
     // @see core/modules/views/tests/modules/views_test_config/test_views/views.view.test_history.yml
     'history',
+    // The `image` module is required by at least one of the Node module's
+    // views.
+    'image',
   ];
 
   /**
@@ -127,9 +129,6 @@ class TestViewsTest extends KernelTestBase {
    */
   protected function setUp(): void {
     parent::setUp();
-    // `node.type.book` config entity is a config dependency.
-    // @see core/modules/book/tests/modules/book_test_views/test_views/views.view.test_book_view.yml
-    $this->installConfig('book');
     // `field.storage.node.body` config entity is a config dependency. It is one
     // of the default config of the Node module.
     // @see core/modules/node/tests/modules/node_test_views/test_views/views.view.test_node_tokens.yml
@@ -201,7 +200,7 @@ class TestViewsTest extends KernelTestBase {
   /**
    * Tests default configuration data type.
    */
-  public function testDefaultConfig() {
+  public function testDefaultConfig(): void {
     // Create a typed config manager with access to configuration schema in
     // every module, profile and theme.
     $typed_config = new TypedConfigManager(

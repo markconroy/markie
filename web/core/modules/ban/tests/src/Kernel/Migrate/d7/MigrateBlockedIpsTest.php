@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\ban\Kernel\Migrate\d7;
 
 use Drupal\Tests\SchemaCheckTestTrait;
@@ -32,7 +34,7 @@ class MigrateBlockedIpsTest extends MigrateDrupal7TestBase {
   /**
    * Tests migration of blocked IPs.
    */
-  public function testBlockedIps() {
+  public function testBlockedIps(): void {
     $this->startCollectingMessages();
     $this->executeMigration('d7_blocked_ips');
     $this->assertEmpty($this->migrateMessages);

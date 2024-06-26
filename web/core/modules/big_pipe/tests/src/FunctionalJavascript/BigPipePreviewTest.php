@@ -31,7 +31,7 @@ class BigPipePreviewTest extends WebDriverTestBase {
   /**
    * Test preview functionality within placeholders.
    */
-  public function testLazyLoaderPreview() {
+  public function testLazyLoaderPreview(): void {
     $user = $this->drupalCreateUser([]);
     $display_name = $user->getDisplayName();
     $this->drupalLogin($user);
@@ -48,7 +48,7 @@ class BigPipePreviewTest extends WebDriverTestBase {
 
     $this->assertSession()->pageTextContains('There is a lamb and there is a puppy');
     $this->assertSession()->elementTextEquals('css', '#placeholder-render-array-container [data-big-pipe-placeholder-id] > #render-array-preview', 'There is a lamb and there is a puppy');
-    $this->assertSession()->elementTextNotContains('css', '#placeholder-render-array-container', 'Yarhar llamas forever!');
+    $this->assertSession()->elementTextNotContains('css', '#placeholder-render-array-container', 'Llamas forever!');
 
     // Uninstall big_pipe_bypass_js.
     \Drupal::service('module_installer')->uninstall(['big_pipe_bypass_js']);
@@ -58,7 +58,7 @@ class BigPipePreviewTest extends WebDriverTestBase {
     $this->assertSession()->elementTextContains('css', '#placeholder-preview-twig-container', $display_name);
     $this->assertSession()->pageTextNotContains('LOOK AT ME I AM CONSUMING SPACE FOR LATER');
 
-    $this->assertSession()->elementTextContains('css', '#placeholder-render-array-container marquee', 'Yarhar llamas forever!');
+    $this->assertSession()->elementTextContains('css', '#placeholder-render-array-container marquee', 'Llamas forever!');
     $this->assertSession()->pageTextNotContains('There is a lamb and there is a puppy');
   }
 

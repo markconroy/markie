@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\system\Functional\Entity;
 
 use Drupal\Core\Language\LanguageInterface;
@@ -52,7 +54,7 @@ class EntityTranslationFormTest extends BrowserTestBase {
   /**
    * Tests entity form language.
    */
-  public function testEntityFormLanguage() {
+  public function testEntityFormLanguage(): void {
     $this->drupalCreateContentType(['type' => 'page', 'name' => 'Basic page']);
 
     $web_user = $this->drupalCreateUser([

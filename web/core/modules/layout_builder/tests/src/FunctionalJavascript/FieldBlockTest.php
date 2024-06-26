@@ -14,6 +14,7 @@ use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
  * @coversDefaultClass \Drupal\layout_builder\Plugin\Block\FieldBlock
  *
  * @group field
+ * @group legacy
  */
 class FieldBlockTest extends WebDriverTestBase {
 
@@ -27,6 +28,7 @@ class FieldBlockTest extends WebDriverTestBase {
     'user',
     // See \Drupal\layout_builder_fieldblock_test\Plugin\Block\FieldBlock.
     'layout_builder_fieldblock_test',
+    'layout_builder_expose_all_field_blocks',
   ];
 
   /**
@@ -65,7 +67,7 @@ class FieldBlockTest extends WebDriverTestBase {
   /**
    * Tests configuring a field block for a user field.
    */
-  public function testUserFieldBlock() {
+  public function testUserFieldBlock(): void {
     $page = $this->getSession()->getPage();
     $assert_session = $this->assertSession();
 
@@ -141,7 +143,7 @@ class FieldBlockTest extends WebDriverTestBase {
   /**
    * Tests configuring a field block that uses #states.
    */
-  public function testStatesFieldBlock() {
+  public function testStatesFieldBlock(): void {
     $page = $this->getSession()->getPage();
 
     $timestamp_field_storage = FieldStorageConfig::create([

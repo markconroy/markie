@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\KernelTests\Core\Entity;
 
 use Drupal\Component\Plugin\Exception\PluginNotFoundException;
@@ -113,7 +115,7 @@ class EntityQueryRelationshipTest extends EntityKernelTestBase {
   /**
    * Tests querying.
    */
-  public function testQuery() {
+  public function testQuery(): void {
     $storage = $this->container->get('entity_type.manager')->getStorage('entity_test');
     // This returns the 0th entity as that's the only one pointing to the 0th
     // account.
@@ -212,7 +214,7 @@ class EntityQueryRelationshipTest extends EntityKernelTestBase {
   /**
    * Tests the invalid specifier in the query relationship.
    */
-  public function testInvalidSpecifier() {
+  public function testInvalidSpecifier(): void {
     $this->expectException(PluginNotFoundException::class);
     $this->container
       ->get('entity_type.manager')

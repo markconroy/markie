@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\block\Functional;
 
 use Drupal\Tests\BrowserTestBase;
@@ -41,7 +43,7 @@ class BlockInvalidRegionTest extends BrowserTestBase {
   /**
    * Tests that blocks assigned to invalid regions work correctly.
    */
-  public function testBlockInInvalidRegion() {
+  public function testBlockInInvalidRegion(): void {
     // Enable a test block and place it in an invalid region.
     $block = $this->drupalPlaceBlock('test_html');
     \Drupal::configFactory()->getEditable('block.block.' . $block->id())->set('region', 'invalid_region')->save();

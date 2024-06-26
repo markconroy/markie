@@ -1,8 +1,9 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\KernelTests\Core\Routing;
 
-use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\Tests\Traits\Core\PathAliasTestTrait;
 use Symfony\Component\HttpFoundation\Request;
@@ -32,23 +33,9 @@ class ContentNegotiationRoutingTest extends KernelTestBase {
   }
 
   /**
-   * {@inheritdoc}
-   */
-  public function register(ContainerBuilder $container) {
-    parent::register($container);
-
-    // \Drupal\KernelTests\KernelTestBase::register() removes the alias path
-    // processor.
-    if ($container->hasDefinition('path_alias.path_processor')) {
-      $definition = $container->getDefinition('path_alias.path_processor');
-      $definition->addTag('path_processor_inbound', ['priority' => 100])->addTag('path_processor_outbound', ['priority' => 300]);
-    }
-  }
-
-  /**
    * Tests the content negotiation aspect of routing.
    */
-  public function testContentRouting() {
+  public function testContentRouting(): void {
     // Alias with extension pointing to no extension/constant content-type.
     $this->createPathAlias('/content_negotiation/html', '/alias.html');
 
@@ -112,7 +99,7 @@ class ContentNegotiationRoutingTest extends KernelTestBase {
   /**
    * Full negotiation by header only.
    */
-  public function testFullNegotiation() {
+  public function testFullNegotiation(): void {
     $this->enableModules(['accept_header_routing_test']);
     $tests = [
       // ['path', 'accept', 'content-type'],

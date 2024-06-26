@@ -3,6 +3,8 @@
 namespace Drupal\help\Plugin\HelpSection;
 
 use Drupal\Core\Cache\CacheableMetadata;
+use Drupal\help\Attribute\HelpSection;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\help\SearchableHelpInterface;
 use Drupal\help\HelpTopicPluginInterface;
 use Drupal\help\HelpTopicPluginManagerInterface;
@@ -18,17 +20,15 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * Provides the help topics list section for the help page.
  *
- * @HelpSection(
- *   id = "help_topics",
- *   title = @Translation("Topics"),
- *   weight = -10,
- *   description = @Translation("Topics can be provided by modules or themes. Top-level help topics on your site:"),
- *   permission = "access help pages"
- * )
- *
  * @internal
  *   Plugin classes are internal.
  */
+#[HelpSection(
+  id: 'help_topics',
+  title: new TranslatableMarkup('Topics'),
+  description: new TranslatableMarkup('Topics can be provided by modules or themes. Top-level help topics on your site:'),
+  weight: -10
+)]
 class HelpTopicSection extends HelpSectionPluginBase implements ContainerFactoryPluginInterface, SearchableHelpInterface {
 
   /**
@@ -189,7 +189,7 @@ class HelpTopicSection extends HelpSectionPluginBase implements ContainerFactory
           '#markup' => $plugin->getLabel(),
         ],
       ];
-      $topic['title'] = $this->renderer->renderPlain($title_build);
+      $topic['title'] = $this->renderer->renderInIsolation($title_build);
       $cacheable_metadata = CacheableMetadata::createFromRenderArray($title_build);
 
       // Render the body in this language. For this, we need to set up a render
@@ -199,7 +199,7 @@ class HelpTopicSection extends HelpSectionPluginBase implements ContainerFactory
       $build = [
         'body' => $this->renderer->executeInRenderContext($context, [$plugin, 'getBody']),
       ];
-      $topic['text'] = $this->renderer->renderPlain($build);
+      $topic['text'] = $this->renderer->renderInIsolation($build);
       $cacheable_metadata->addCacheableDependency(CacheableMetadata::createFromRenderArray($build));
       $cacheable_metadata->addCacheableDependency($plugin);
       if (!$context->isEmpty()) {

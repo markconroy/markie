@@ -11,7 +11,9 @@ use Drupal\Core\Plugin\Context\ContextDefinition;
 use Drupal\Core\Plugin\ContextAwarePluginTrait;
 use Drupal\Core\Plugin\PluginBase;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
+use Drupal\layout_builder\Attribute\SectionStorage;
 use Drupal\layout_builder\Plugin\SectionStorage\SectionStorageLocalTaskProviderInterface;
 use Drupal\layout_builder\Routing\LayoutBuilderRoutesTrait;
 use Drupal\layout_builder\Section;
@@ -22,14 +24,13 @@ use Symfony\Component\Routing\RouteCollection;
 
 /**
  * Provides section storage utilizing simple config.
- *
- * @SectionStorage(
- *   id = "test_simple_config",
- *   context_definitions = {
- *     "config_id" = @ContextDefinition("string"),
- *   }
- * )
  */
+#[SectionStorage(id: "test_simple_config", context_definitions: [
+  "config_id" => new ContextDefinition(
+    data_type: "string",
+    label: new TranslatableMarkup("Configuration ID"),
+  ),
+])]
 class SimpleConfigSectionStorage extends PluginBase implements SectionStorageInterface, SectionStorageLocalTaskProviderInterface, ContainerFactoryPluginInterface {
 
   use ContextAwarePluginTrait;
@@ -188,7 +189,7 @@ class SimpleConfigSectionStorage extends PluginBase implements SectionStorageInt
   /**
    * {@inheritdoc}
    */
-  public function access($operation, AccountInterface $account = NULL, $return_as_object = FALSE) {
+  public function access($operation, ?AccountInterface $account = NULL, $return_as_object = FALSE) {
     $result = AccessResult::allowed();
     return $return_as_object ? $result : $result->isAllowed();
   }

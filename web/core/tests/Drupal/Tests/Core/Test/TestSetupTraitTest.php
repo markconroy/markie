@@ -26,7 +26,7 @@ class TestSetupTraitTest extends UnitTestCase {
    *
    * @covers ::changeDatabasePrefix
    */
-  public function testChangeDatabasePrefix() {
+  public function testChangeDatabasePrefix(): void {
     $root = dirname(__FILE__, 7);
     putenv('SIMPLETEST_DB=pgsql://user:pass@127.0.0.1/db');
     $connection_info = Database::convertDbUrlToConnectionInfo('mysql://user:pass@localhost/db', $root);
@@ -36,7 +36,11 @@ class TestSetupTraitTest extends UnitTestCase {
 
     // Create a mock for testing the trait and set a few properties that are
     // used to avoid unnecessary set up.
-    $test_setup = $this->getMockForTrait(TestSetupTrait::class);
+    $test_setup = new class() {
+
+      use TestSetupTrait;
+
+    };
 
     $reflection = new \ReflectionClass($test_setup);
     $reflection->getProperty('databasePrefix')->setValue($test_setup, 'testDbPrefix');

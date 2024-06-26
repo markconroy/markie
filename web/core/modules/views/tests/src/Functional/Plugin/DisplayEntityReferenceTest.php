@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\views\Functional\Plugin;
 
 use Drupal\entity_test\Entity\EntityTest;
@@ -129,7 +131,7 @@ class DisplayEntityReferenceTest extends ViewTestBase {
   /**
    * Tests the entity reference display plugin.
    */
-  public function testEntityReferenceDisplay() {
+  public function testEntityReferenceDisplay(): void {
     // Test that the 'title' settings are not shown.
     $this->drupalGet('admin/structure/views/view/test_display_entity_reference/edit/entity_reference_1');
     $this->assertSession()->linkByHrefNotExists('admin/structure/views/nojs/display/test_display_entity_reference/entity_reference_1/title');

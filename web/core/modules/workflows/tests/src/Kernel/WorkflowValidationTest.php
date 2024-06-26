@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\workflows\Kernel;
 
 use Drupal\KernelTests\Core\Config\ConfigEntityValidationTestBase;
@@ -30,6 +32,16 @@ class WorkflowValidationTest extends ConfigEntityValidationTestBase {
       'type' => 'workflow_type_test',
     ]);
     $this->entity->save();
+  }
+
+  /**
+   * Tests that the workflow type plugin is validated.
+   */
+  public function testTypePluginIsValidated(): void {
+    $this->entity->set('type', 'non_existent');
+    $this->assertValidationErrors([
+      'type' => "The 'non_existent' plugin does not exist.",
+    ]);
   }
 
 }

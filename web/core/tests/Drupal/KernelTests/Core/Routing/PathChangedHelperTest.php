@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\KernelTests\Core\Routing;
 
 use Drupal\Core\Routing\PathChangedHelper;
@@ -32,7 +34,7 @@ class PathChangedHelperTest extends KernelTestBase {
    * @covers ::newPath
    * @covers ::redirect
    */
-  public function testPathChangedHelper() {
+  public function testPathChangedHelper(): void {
     $route = \Drupal::service('router.route_provider')->getRouteByName('path.changed.bc');
     $raw_parameters = [
       'block_type' => 'test_block_type',

@@ -26,7 +26,7 @@ class MigrateLookupTest extends MigrateTestCase {
    *
    * @covers ::lookup
    */
-  public function testLookup() {
+  public function testLookup(): void {
     $source_ids = ['id' => '1'];
 
     $destination_ids = [[2]];
@@ -54,7 +54,7 @@ class MigrateLookupTest extends MigrateTestCase {
    *
    * @dataProvider providerExceptionOnMigrationNotFound
    */
-  public function testExceptionOnMigrationNotFound($migrations, $message) {
+  public function testExceptionOnMigrationNotFound($migrations, $message): void {
     $migration_plugin_manager = $this->prophesize(MigrationPluginManagerInterface::class);
     $migration_plugin_manager->createInstances($migrations)->willReturn([]);
     $this->expectException(PluginNotFoundException::class);
@@ -66,7 +66,7 @@ class MigrateLookupTest extends MigrateTestCase {
   /**
    * Provides data for testExceptionOnMigrationNotFound.
    */
-  public function providerExceptionOnMigrationNotFound() {
+  public static function providerExceptionOnMigrationNotFound() {
     return [
       'string' => [
         'bad_plugin',
@@ -84,7 +84,7 @@ class MigrateLookupTest extends MigrateTestCase {
    *
    * @dataProvider providerExceptionOnMultipleMigrationsNotFound
    */
-  public function testExceptionOnMultipleMigrationsNotFound($migrations, $message) {
+  public function testExceptionOnMultipleMigrationsNotFound($migrations, $message): void {
     $migration_plugin_manager = $this->prophesize(MigrationPluginManagerInterface::class);
     $migration_plugin_manager->createInstances($migrations)->willReturn([]);
     $this->expectException(PluginException::class);
@@ -96,7 +96,7 @@ class MigrateLookupTest extends MigrateTestCase {
   /**
    * Provides data for testExceptionOnMultipleMigrationsNotFound.
    */
-  public function providerExceptionOnMultipleMigrationsNotFound() {
+  public static function providerExceptionOnMultipleMigrationsNotFound() {
     return [
       'array two items' => [
         ['foo', 'bar'],

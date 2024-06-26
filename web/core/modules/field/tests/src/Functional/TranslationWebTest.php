@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\field\Functional;
 
 use Drupal\field\Entity\FieldStorageConfig;
@@ -7,7 +9,7 @@ use Drupal\field\Entity\FieldConfig;
 use Drupal\language\Entity\ConfigurableLanguage;
 
 /**
- * Tests multilanguage fields logic that require a full environment.
+ * Tests multilingual fields logic that require a full environment.
  *
  * @group field
  */
@@ -93,7 +95,7 @@ class TranslationWebTest extends FieldTestBase {
   /**
    * Tests field translations when creating a new revision.
    */
-  public function testFieldFormTranslationRevisions() {
+  public function testFieldFormTranslationRevisions(): void {
     $web_user = $this->drupalCreateUser([
       'view test entity',
       'administer entity_test content',

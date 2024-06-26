@@ -5,6 +5,7 @@ namespace Drupal\layout_builder\Form;
 use Drupal\Core\Ajax\AjaxFormHelperTrait;
 use Drupal\Core\Form\ConfirmFormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Form\WorkspaceDynamicSafeFormInterface;
 use Drupal\layout_builder\Controller\LayoutRebuildTrait;
 use Drupal\layout_builder\LayoutBuilderHighlightTrait;
 use Drupal\layout_builder\LayoutTempstoreRepositoryInterface;
@@ -17,11 +18,12 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * @internal
  *   Form classes are internal.
  */
-abstract class LayoutRebuildConfirmFormBase extends ConfirmFormBase {
+abstract class LayoutRebuildConfirmFormBase extends ConfirmFormBase implements WorkspaceDynamicSafeFormInterface {
 
   use AjaxFormHelperTrait;
   use LayoutBuilderHighlightTrait;
   use LayoutRebuildTrait;
+  use WorkspaceSafeFormTrait;
 
   /**
    * The layout tempstore repository.
@@ -73,7 +75,7 @@ abstract class LayoutRebuildConfirmFormBase extends ConfirmFormBase {
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state, SectionStorageInterface $section_storage = NULL, $delta = NULL) {
+  public function buildForm(array $form, FormStateInterface $form_state, ?SectionStorageInterface $section_storage = NULL, $delta = NULL) {
     $this->sectionStorage = $section_storage;
     $this->delta = $delta;
 

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\KernelTests\Core\Validation;
 
 use Drupal\Component\Render\FormattableMarkup;
@@ -31,7 +33,7 @@ class UniqueFieldConstraintTest extends KernelTestBase {
    *
    * @covers ::validate
    */
-  public function testEntityWithStringId() {
+  public function testEntityWithStringId(): void {
     $this->installEntitySchema('entity_test_string_id');
 
     EntityTestStringId::create([
@@ -67,7 +69,7 @@ class UniqueFieldConstraintTest extends KernelTestBase {
    *
    * @dataProvider providerTestEntityWithStringIdWithViolation
    */
-  public function testEntityWithStringIdWithViolation($id) {
+  public function testEntityWithStringIdWithViolation($id): void {
     $this->installEntitySchema('entity_test_string_id');
 
     $value = $this->randomString();
@@ -122,7 +124,7 @@ class UniqueFieldConstraintTest extends KernelTestBase {
    *
    * @covers ::validate
    */
-  public function testViolationDespiteNoAccess() {
+  public function testViolationDespiteNoAccess(): void {
     $this->installEntitySchema('entity_test');
 
     // Create and save an entity with a given field value in the field that has

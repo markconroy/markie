@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\tour\Functional\Locale;
 
 use Drupal\Tests\tour\Functional\TourTestBase;
@@ -8,6 +10,7 @@ use Drupal\Tests\tour\Functional\TourTestBase;
  * Tests the Translate Interface tour.
  *
  * @group tour
+ * @group legacy
  */
 class LocaleTranslateStringTourTest extends TourTestBase {
 
@@ -46,7 +49,7 @@ class LocaleTranslateStringTourTest extends TourTestBase {
   /**
    * Tests locale tour tip availability.
    */
-  public function testTranslateStringTourTips() {
+  public function testTranslateStringTourTips(): void {
     // Add another language so there are no missing form items.
     $edit = [];
     $edit['predefined_langcode'] = 'es';

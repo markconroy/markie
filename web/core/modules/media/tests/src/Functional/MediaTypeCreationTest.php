@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\media\Functional;
 
 use Drupal\media\Entity\MediaType;
+use Drupal\TestTools\Random;
 
 /**
  * Ensures that media UI works correctly without JavaScript.
@@ -28,7 +31,7 @@ class MediaTypeCreationTest extends MediaFunctionalTestBase {
    *
    * @dataProvider providerMediaTypeCreationForm
    */
-  public function testMediaTypeCreationForm($button_label, $address, $machine_name) {
+  public function testMediaTypeCreationForm($button_label, $address, $machine_name): void {
     $this->drupalGet('/admin/structure/media/add');
     $this->assertSession()->statusCodeEquals(200);
     $this->assertSession()->fieldExists('label')->setValue($this->randomString());
@@ -47,8 +50,8 @@ class MediaTypeCreationTest extends MediaFunctionalTestBase {
   /**
    * Data provider for testMediaTypeCreationForm().
    */
-  public function providerMediaTypeCreationForm() {
-    $machine_name = $this->randomMachineName();
+  public static function providerMediaTypeCreationForm() {
+    $machine_name = Random::machineName();
     return [
       [
         'Save',

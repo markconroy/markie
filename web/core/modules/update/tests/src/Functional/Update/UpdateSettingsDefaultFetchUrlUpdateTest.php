@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\update\Functional\Update;
 
 use Drupal\Core\Database\Database;
@@ -97,7 +99,7 @@ class UpdateSettingsDefaultFetchUrlUpdateTest extends UpdatePathTestBase {
   /**
    * Tests update of update.settings:fetch.url.
    */
-  public function testUpdate() {
+  public function testUpdate(): void {
     $fetch_url_before = $this->config('update.settings')->get('fetch.url');
     $this->assertSame('', $fetch_url_before);
 

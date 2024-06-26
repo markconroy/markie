@@ -54,7 +54,7 @@ class SystemLocalTasksTest extends LocalTaskIntegrationTestBase {
       ->expects($this->once())
       ->method('hasLinkTemplate')
       ->with('version-history')
-      ->will($this->returnValue(TRUE));
+      ->willReturn(TRUE);
     $entityTypeManager = $this->createMock(EntityTypeManagerInterface::class);
     $entityTypeManager->expects($this->any())
       ->method('getDefinitions')
@@ -69,14 +69,14 @@ class SystemLocalTasksTest extends LocalTaskIntegrationTestBase {
    *
    * @dataProvider getSystemAdminRoutes
    */
-  public function testSystemAdminLocalTasks($route, $expected) {
+  public function testSystemAdminLocalTasks($route, $expected): void {
     $this->assertLocalTasks($route, $expected);
   }
 
   /**
    * Provides a list of routes to test.
    */
-  public function getSystemAdminRoutes() {
+  public static function getSystemAdminRoutes() {
     return [
       ['system.admin_content', [['system.admin_content']]],
       [

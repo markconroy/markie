@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\mysql\Kernel\mysql;
 
 use Drupal\Core\Database\Database;
@@ -21,7 +23,7 @@ class PrefixInfoTest extends DriverSpecificKernelTestBase {
    * The other two by Drupal core supported databases do not have this variable
    * set in the return array.
    */
-  public function testGetPrefixInfo() {
+  public function testGetPrefixInfo(): void {
     $connection_info = Database::getConnectionInfo('default');
 
     // Copy the default connection info to the 'extra' key.

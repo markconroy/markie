@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\ban\Functional;
 
 use Drupal\Tests\BrowserTestBase;
@@ -28,7 +30,7 @@ class IpAddressBlockingTest extends BrowserTestBase {
   /**
    * Tests various user input to confirm correct validation and saving of data.
    */
-  public function testIPAddressValidation() {
+  public function testIPAddressValidation(): void {
     // Create user.
     $admin_user = $this->drupalCreateUser(['ban IP addresses']);
     $this->drupalLogin($admin_user);
@@ -82,7 +84,7 @@ class IpAddressBlockingTest extends BrowserTestBase {
 
     // Submit your own IP address. This fails, although it works when testing
     // manually.
-    // TODO: On some systems this test fails due to a bug/inconsistency in cURL.
+    // @todo On some systems this test fails due to a bug/inconsistency in cURL.
     // $edit = array();
     // $edit['ip'] = \Drupal::request()->getClientIP();
     // $this->drupalGet('admin/config/people/ban');

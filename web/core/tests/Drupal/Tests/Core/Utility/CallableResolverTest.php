@@ -10,7 +10,6 @@ use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Utility\CallableResolver;
 use Drupal\Tests\UnitTestCase;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
-use Symfony\Component\DependencyInjection\ContainerAwareTrait;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -35,26 +34,17 @@ class CallableResolverTest extends UnitTestCase {
     $container = new ContainerBuilder();
     $container->set('test_service', $this);
 
-    $class_resolver = new ClassResolver();
-    $class_resolver->setContainer($container);
+    $class_resolver = new ClassResolver($container);
 
     $this->resolver = new CallableResolver($class_resolver);
   }
 
   /**
-   * @dataProvider callableResolverTestCases
    * @covers ::getCallableFromDefinition
+   * @group legacy
    */
-  public function testCallbackResolver($definition, $result) {
-    $argument = 'bar';
-    $this->assertEquals($result . '+' . $argument, $this->resolver->getCallableFromDefinition($definition)($argument));
-  }
-
-  /**
-   * Test cases for ::testCallbackResolver.
-   */
-  public function callableResolverTestCases() {
-    return [
+  public function testCallbackResolver(): void {
+    $cases = [
       'Inline function' => [
         function ($suffix) {
           return __METHOD__ . '+' . $suffix;
@@ -100,6 +90,7 @@ class CallableResolverTest extends UnitTestCase {
       'Non-static function, instantiated by class resolver, container aware' => [
         '\Drupal\Tests\Core\Utility\MockContainerAware::getResult',
         'Drupal\Tests\Core\Utility\MockContainerAware::getResult',
+        'Implementing \Symfony\Component\DependencyInjection\ContainerAwareInterface is deprecated in drupal:10.3.0 and it will be removed in drupal:11.0.0. Implement \Drupal\Core\DependencyInjection\ContainerInjectionInterface and use dependency injection instead. See https://www.drupal.org/node/3428661',
       ],
       'Service notation' => [
         'test_service:method',
@@ -114,13 +105,22 @@ class CallableResolverTest extends UnitTestCase {
         __CLASS__ . '::__invoke',
       ],
     ];
+
+    $argument = 'bar';
+    foreach ($cases as $label => [$definition, $result]) {
+      if (isset($cases[$label][2])) {
+        $this->expectDeprecation($cases[$label][2]);
+      }
+
+      $this->assertEquals($result . '+' . $argument, $this->resolver->getCallableFromDefinition($definition)($argument), $label);
+    }
   }
 
   /**
    * @dataProvider callableResolverExceptionHandlingTestCases
    * @covers ::getCallableFromDefinition
    */
-  public function testCallbackResolverExceptionHandling($definition, $exception_class, $exception_message) {
+  public function testCallbackResolverExceptionHandling($definition, $exception_class, $exception_message): void {
     $this->expectException($exception_class);
     $this->expectExceptionMessage($exception_message);
     $this->resolver->getCallableFromDefinition($definition);
@@ -129,7 +129,7 @@ class CallableResolverTest extends UnitTestCase {
   /**
    * Test cases for ::testCallbackResolverExceptionHandling.
    */
-  public function callableResolverExceptionHandlingTestCases() {
+  public static function callableResolverExceptionHandlingTestCases() {
     return [
       'String function' => [
         'not_a_callable',
@@ -253,7 +253,17 @@ class NoMethodCallable {
 
 class MockContainerAware implements ContainerAwareInterface {
 
-  use ContainerAwareTrait;
+  /**
+   * The service container.
+   */
+  protected ContainerInterface $container;
+
+  /**
+   * Sets the service container.
+   */
+  public function setContainer(?ContainerInterface $container): void {
+    $this->container = $container;
+  }
 
   public function getResult($suffix) {
     if (empty($this->container)) {

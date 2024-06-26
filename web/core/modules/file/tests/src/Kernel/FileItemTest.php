@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\file\Kernel;
 
 use Drupal\Core\Field\FieldItemInterface;
@@ -80,7 +82,7 @@ class FileItemTest extends FieldKernelTestBase {
   /**
    * Tests using entity fields of the file field type.
    */
-  public function testFileItem() {
+  public function testFileItem(): void {
     // Check that the selection handler was automatically assigned to
     // 'default:file'.
     $field_definition = FieldConfig::load('entity_test.entity_test.file_test');

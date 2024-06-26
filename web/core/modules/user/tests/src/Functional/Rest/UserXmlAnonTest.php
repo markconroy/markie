@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\user\Functional\Rest;
 
 use Drupal\Tests\rest\Functional\AnonResourceTestTrait;
@@ -7,6 +9,7 @@ use Drupal\Tests\rest\Functional\EntityResource\XmlEntityNormalizationQuirksTrai
 
 /**
  * @group rest
+ * @group #slow
  */
 class UserXmlAnonTest extends UserResourceTestBase {
 
@@ -31,7 +34,7 @@ class UserXmlAnonTest extends UserResourceTestBase {
   /**
    * {@inheritdoc}
    */
-  public function testPatchDxForSecuritySensitiveBaseFields() {
+  public function testPatchDxForSecuritySensitiveBaseFields(): void {
     // Deserialization of the XML format is not supported.
     $this->markTestSkipped();
   }

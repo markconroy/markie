@@ -29,14 +29,8 @@ function twig_extension() {
 function twig_render_template($template_file, array $variables) {
   /** @var \Twig\Environment $twig_service */
   $twig_service = \Drupal::service('twig');
-  $output = [
-    'debug_prefix' => '',
-    'debug_info' => '',
-    'rendered_markup' => '',
-    'debug_suffix' => '',
-  ];
   try {
-    $output['rendered_markup'] = $twig_service->load($template_file)->render($variables);
+    $rendered_markup = $twig_service->load($template_file)->render($variables);
   }
   catch (RuntimeError $e) {
     // In case there is a previous exception, re-throw the previous exception,
@@ -49,6 +43,13 @@ function twig_render_template($template_file, array $variables) {
     throw $e;
   }
   if ($twig_service->isDebug()) {
+    $output = [
+      'debug_prefix' => '',
+      'debug_info' => '',
+      'rendered_markup' => $rendered_markup,
+      'debug_suffix' => '',
+    ];
+
     $output['debug_prefix'] .= "\n\n<!-- THEME DEBUG -->";
     $output['debug_prefix'] .= "\n<!-- THEME HOOK: '" . Html::escape($variables['theme_hook_original']) . "' -->";
     // If there are theme suggestions, reverse the array so more specific
@@ -89,7 +90,7 @@ function twig_render_template($template_file, array $variables) {
           continue;
         }
         $template = strtr($suggestion, '_', '-') . $extension;
-        $prefix = ($template == $current_template) ? 'x' : '*';
+        $prefix = ($template == $current_template) ? '✅' : '▪️';
         $suggestion = $prefix . ' ' . $template;
       }
       $output['debug_info'] .= "\n<!-- FILE NAME SUGGESTIONS:\n   " . Html::escape(implode("\n   ", $suggestions)) . "\n-->";
@@ -101,9 +102,17 @@ function twig_render_template($template_file, array $variables) {
         $output['debug_info'] .= "\n-->";
       }
     }
-    $output['debug_info']   .= "\n<!-- BEGIN OUTPUT from '" . Html::escape($template_file) . "' -->\n";
-    $output['debug_suffix'] .= "\n<!-- END OUTPUT from '" . Html::escape($template_file) . "' -->\n\n";
+    // Check if the template_file belongs to a custom theme
+    $template_override_status_output = "BEGIN OUTPUT";
+    $template_override_suffix_output = "END OUTPUT";
+    if (str_starts_with($template_file, $variables['directory'])) {
+      $template_override_status_output = "💡 BEGIN CUSTOM TEMPLATE OUTPUT";
+      $template_override_suffix_output = "END CUSTOM TEMPLATE OUTPUT";
+    }
+    $output['debug_info']   .= "\n<!-- " . $template_override_status_output . " from '" . Html::escape($template_file) . "' -->\n";
+    $output['debug_suffix'] .= "\n<!-- " . $template_override_suffix_output . " from '" . Html::escape($template_file) . "' -->\n\n";
+    // This output has already been rendered and is therefore considered safe.
+    return Markup::create(implode('', $output));
   }
-  // This output has already been rendered and is therefore considered safe.
-  return Markup::create(implode('', $output));
+  return Markup::create($rendered_markup);
 }

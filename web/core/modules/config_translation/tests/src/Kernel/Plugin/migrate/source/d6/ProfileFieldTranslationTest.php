@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\config_translation\Kernel\Plugin\migrate\source\d6;
 
 use Drupal\Tests\migrate\Kernel\MigrateSqlSourceTestBase;
@@ -22,7 +24,7 @@ class ProfileFieldTranslationTest extends MigrateSqlSourceTestBase {
   /**
    * {@inheritdoc}
    */
-  public function providerSource() {
+  public static function providerSource() {
     $test = [];
     $test[0]['source_data'] = [
       'profile_fields' => [
@@ -70,7 +72,7 @@ class ProfileFieldTranslationTest extends MigrateSqlSourceTestBase {
         ],
       ],
     ];
-    $test[0]['expected_results'] = [
+    $test[0]['expected_data'] = [
       [
         'property' => 'title',
         'translation' => "fr - I love migration.",

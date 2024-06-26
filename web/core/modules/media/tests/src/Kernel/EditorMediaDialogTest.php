@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\media\Kernel;
 
 use Drupal\Core\Form\FormState;
@@ -50,7 +52,7 @@ class EditorMediaDialogTest extends KernelTestBase {
    *
    * @covers ::buildForm
    */
-  public function testBuildForm() {
+  public function testBuildForm(): void {
     $format = FilterFormat::create([
       'filters' => [
         'media_embed' => ['status' => TRUE],

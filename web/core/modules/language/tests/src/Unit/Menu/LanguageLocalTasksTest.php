@@ -28,14 +28,14 @@ class LanguageLocalTasksTest extends LocalTaskIntegrationTestBase {
    *
    * @dataProvider getLanguageAdminOverviewRoutes
    */
-  public function testLanguageAdminLocalTasks($route, $expected) {
+  public function testLanguageAdminLocalTasks($route, $expected): void {
     $this->assertLocalTasks($route, $expected);
   }
 
   /**
    * Provides a list of routes to test.
    */
-  public function getLanguageAdminOverviewRoutes() {
+  public static function getLanguageAdminOverviewRoutes() {
     return [
       ['entity.configurable_language.collection', [['entity.configurable_language.collection', 'language.negotiation']]],
       ['language.negotiation', [['entity.configurable_language.collection', 'language.negotiation']]],
@@ -45,7 +45,7 @@ class LanguageLocalTasksTest extends LocalTaskIntegrationTestBase {
   /**
    * Tests language edit local tasks existence.
    */
-  public function testLanguageEditLocalTasks() {
+  public function testLanguageEditLocalTasks(): void {
     $this->assertLocalTasks('entity.configurable_language.edit_form', [
       0 => ['entity.configurable_language.edit_form'],
     ]);

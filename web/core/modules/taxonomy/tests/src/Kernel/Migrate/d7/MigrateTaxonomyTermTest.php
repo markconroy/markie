@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\taxonomy\Kernel\Migrate\d7;
 
 use Drupal\taxonomy\Entity\Term;
@@ -81,7 +83,7 @@ class MigrateTaxonomyTermTest extends MigrateDrupal7TestBase {
    *
    * @internal
    */
-  protected function assertEntity(int $id, string $expected_language, string $expected_label, string $expected_vid, ?string $expected_description = '', ?string $expected_format = NULL, int $expected_weight = 0, array $expected_parents = [], int $expected_field_integer_value = NULL, int $expected_term_reference_tid = NULL, int|NULL $expected_container_flag = NULL): void {
+  protected function assertEntity(int $id, string $expected_language, string $expected_label, string $expected_vid, ?string $expected_description = '', ?string $expected_format = NULL, int $expected_weight = 0, array $expected_parents = [], ?int $expected_field_integer_value = NULL, ?int $expected_term_reference_tid = NULL, int|NULL $expected_container_flag = NULL): void {
     /** @var \Drupal\taxonomy\TermInterface $entity */
     $entity = Term::load($id);
     $this->assertInstanceOf(TermInterface::class, $entity);
@@ -106,7 +108,7 @@ class MigrateTaxonomyTermTest extends MigrateDrupal7TestBase {
   /**
    * Tests the Drupal 7 taxonomy term to Drupal 8 migration.
    */
-  public function testTaxonomyTerms() {
+  public function testTaxonomyTerms(): void {
     $this->assertEntity(1, 'en', 'General discussion', 'sujet_de_discussion', '', NULL, 2);
 
     // Tests that terms that used the Drupal 7 Title module and that have their

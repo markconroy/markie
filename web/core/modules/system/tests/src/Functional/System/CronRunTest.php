@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\system\Functional\System;
 
 use Drupal\Tests\BrowserTestBase;
@@ -35,7 +37,7 @@ class CronRunTest extends BrowserTestBase {
   /**
    * Tests cron runs.
    */
-  public function testCronRun() {
+  public function testCronRun(): void {
     // Run cron anonymously without any cron key.
     $this->drupalGet('cron');
     $this->assertSession()->statusCodeEquals(404);
@@ -54,10 +56,10 @@ class CronRunTest extends BrowserTestBase {
   /**
    * Ensure that the automated cron run module is working.
    *
-   * In these tests we do not use REQUEST_TIME to track start time, because we
+   * In these tests we do not use \Drupal::time()->getRequestTime() to track start time, because we
    * need the exact time when cron is triggered.
    */
-  public function testAutomatedCron() {
+  public function testAutomatedCron(): void {
     // To prevent race conditions between the admin_user login triggering cron
     // and updating its state, and this test doing the same thing, we use
     // \Drupal\Tests\WaitTerminateTestTrait::setWaitForTerminate.
@@ -104,7 +106,7 @@ class CronRunTest extends BrowserTestBase {
   /**
    * Make sure exceptions thrown on hook_cron() don't affect other modules.
    */
-  public function testCronExceptions() {
+  public function testCronExceptions(): void {
     \Drupal::state()->delete('common_test.cron');
     // The common_test module throws an exception. If it isn't caught, the tests
     // won't finish successfully.
@@ -117,7 +119,7 @@ class CronRunTest extends BrowserTestBase {
   /**
    * Make sure the cron UI reads from the state storage.
    */
-  public function testCronUI() {
+  public function testCronUI(): void {
     $admin_user = $this->drupalCreateUser(['administer site configuration']);
     $this->drupalLogin($admin_user);
     $this->drupalGet('admin/config/system/cron');
@@ -145,7 +147,7 @@ class CronRunTest extends BrowserTestBase {
   /**
    * Ensure that the manual cron run is working.
    */
-  public function testManualCron() {
+  public function testManualCron(): void {
     $admin_user = $this->drupalCreateUser(['administer site configuration']);
     $this->drupalLogin($admin_user);
 

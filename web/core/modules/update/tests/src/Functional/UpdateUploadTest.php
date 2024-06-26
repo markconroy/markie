@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\update\Functional;
 
 use Drupal\Core\Extension\InfoParserDynamic;
@@ -23,7 +25,7 @@ class UpdateUploadTest extends UpdateUploaderTestBase {
    *
    * @var array
    */
-  protected static $modules = ['update', 'update_test', 'file'];
+  protected static $modules = ['file'];
 
   /**
    * {@inheritdoc}
@@ -46,7 +48,7 @@ class UpdateUploadTest extends UpdateUploaderTestBase {
   /**
    * Tests upload, extraction, and update of a module.
    */
-  public function testUploadModule() {
+  public function testUploadModule(): void {
     // Ensure that the update information is correct before testing.
     update_get_available(TRUE);
 
@@ -100,7 +102,7 @@ class UpdateUploadTest extends UpdateUploaderTestBase {
     // core/authorize.php.
     $this->assertSession()->linkExists('Add another module');
     $this->assertSession()->linkByHrefExists(Url::fromRoute('update.module_install')->toString());
-    $this->assertSession()->linkExists('Enable newly added modules');
+    $this->assertSession()->linkExists('Install newly added modules');
     $this->assertSession()->linkByHrefExists(Url::fromRoute('system.modules_list')->toString());
     $this->assertSession()->linkExists('Administration pages');
     $this->assertSession()->linkByHrefExists(Url::fromRoute('system.admin')->toString());
@@ -118,7 +120,7 @@ class UpdateUploadTest extends UpdateUploaderTestBase {
     $info = $info_parser->parse($installedInfoFilePath);
     $this->assertEquals('8.x-1.0', $info['version']);
 
-    // Enable the module.
+    // Install the module.
     $this->drupalGet('admin/modules');
     $this->submitForm(['modules[update_test_new_module][enable]' => TRUE], 'Install');
 
@@ -150,7 +152,7 @@ class UpdateUploadTest extends UpdateUploaderTestBase {
   /**
    * Ensures that archiver extensions are properly merged in the UI.
    */
-  public function testFileNameExtensionMerging() {
+  public function testFileNameExtensionMerging(): void {
     $this->drupalGet('admin/modules/install');
     // Make sure the bogus extension supported by update_test.module is there.
     $this->assertSession()->responseMatches('/file extensions are supported:.*update-test-extension/');
@@ -161,7 +163,7 @@ class UpdateUploadTest extends UpdateUploaderTestBase {
   /**
    * Checks the messages on update manager pages when missing a security update.
    */
-  public function testUpdateManagerCoreSecurityUpdateMessages() {
+  public function testUpdateManagerCoreSecurityUpdateMessages(): void {
     $this->mockDefaultExtensionsInfo(['version' => '8.0.0']);
     $this->mockReleaseHistory(['drupal' => '0.2-sec']);
     $this->config('update.settings')
@@ -198,7 +200,7 @@ class UpdateUploadTest extends UpdateUploaderTestBase {
   /**
    * Tests only an *.info.yml file are detected without supporting files.
    */
-  public function testUpdateDirectory() {
+  public function testUpdateDirectory(): void {
     $type = Updater::getUpdaterFromDirectory($this->root . '/core/modules/update/tests/modules/aaa_update_test');
     $this->assertEquals('Drupal\\Core\\Updater\\Module', $type, 'Detected a Module');
 

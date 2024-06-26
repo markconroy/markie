@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\text\Functional;
 
 use Drupal\Component\Utility\Html;
@@ -57,7 +59,7 @@ class TextFieldTest extends StringFieldTest {
   /**
    * Tests text field validation.
    */
-  public function testTextFieldValidation() {
+  public function testTextFieldValidation(): void {
     // Create a field with settings to validate.
     $max_length = 3;
     $field_name = $this->randomMachineName();
@@ -92,7 +94,7 @@ class TextFieldTest extends StringFieldTest {
   /**
    * Tests required long text with file upload.
    */
-  public function testRequiredLongTextWithFileUpload() {
+  public function testRequiredLongTextWithFileUpload(): void {
     // Create a text field.
     $text_field_name = 'text_long';
     $field_storage = FieldStorageConfig::create([
@@ -154,7 +156,7 @@ class TextFieldTest extends StringFieldTest {
   /**
    * Tests widgets.
    */
-  public function testTextfieldWidgets() {
+  public function testTextfieldWidgets(): void {
     $this->_testTextfieldWidgets('text', 'text_textfield');
     $this->_testTextfieldWidgets('text_long', 'text_textarea');
   }
@@ -162,7 +164,7 @@ class TextFieldTest extends StringFieldTest {
   /**
    * Tests widgets + 'formatted_text' setting.
    */
-  public function testTextfieldWidgetsFormatted() {
+  public function testTextfieldWidgetsFormatted(): void {
     $this->_testTextfieldWidgetsFormatted('text', 'text_textfield');
     $this->_testTextfieldWidgetsFormatted('text_long', 'text_textarea');
   }
@@ -170,7 +172,7 @@ class TextFieldTest extends StringFieldTest {
   /**
    * Test widgets for fields with selected allowed formats.
    */
-  public function testTextfieldWidgetsAllowedFormats() {
+  public function testTextfieldWidgetsAllowedFormats(): void {
     // Create one text format.
     $this->drupalLogin($this->adminUser);
     $format1 = FilterFormat::create([

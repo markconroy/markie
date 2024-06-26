@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\workflows\Kernel;
 
 use Drupal\Core\Access\AccessResult;
@@ -70,7 +72,7 @@ class WorkflowAccessControlHandlerTest extends KernelTestBase {
   /**
    * @covers ::checkCreateAccess
    */
-  public function testCheckCreateAccess() {
+  public function testCheckCreateAccess(): void {
     // A user must have the correct permission to create a workflow.
     $this->assertEquals(
       AccessResult::neutral()
@@ -99,7 +101,7 @@ class WorkflowAccessControlHandlerTest extends KernelTestBase {
    * @covers ::checkAccess
    * @dataProvider checkAccessProvider
    */
-  public function testCheckAccess($user, $operation, $result, $states_to_create = []) {
+  public function testCheckAccess($user, $operation, $result, $states_to_create = []): void {
     $workflow = Workflow::create([
       'type' => 'workflow_type_test',
       'id' => 'test_workflow',
@@ -119,7 +121,7 @@ class WorkflowAccessControlHandlerTest extends KernelTestBase {
    *
    * @return array
    */
-  public function checkAccessProvider() {
+  public static function checkAccessProvider() {
     $container = new ContainerBuilder();
     $cache_contexts_manager = (new Prophet())->prophesize(CacheContextsManager::class);
     $cache_contexts_manager->assertValidTokens()->willReturn(TRUE);

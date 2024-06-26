@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\media\Kernel;
 
 use Drupal\media\Entity\Media;
@@ -19,7 +21,7 @@ class MediaCreationTest extends MediaKernelTestBase {
   /**
    * Tests creating a media type programmatically.
    */
-  public function testMediaTypeCreation() {
+  public function testMediaTypeCreation(): void {
     $media_type_storage = $this->container->get('entity_type.manager')->getStorage('media_type');
 
     $this->assertInstanceOf(MediaTypeInterface::class, MediaType::load($this->testMediaType->id()));
@@ -61,7 +63,7 @@ class MediaCreationTest extends MediaKernelTestBase {
   /**
    * Tests creating a media item programmatically.
    */
-  public function testMediaEntityCreation() {
+  public function testMediaEntityCreation(): void {
     $media = Media::create([
       'bundle' => $this->testMediaType->id(),
       'name' => 'Unnamed',

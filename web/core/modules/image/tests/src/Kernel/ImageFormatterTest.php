@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\image\Kernel;
 
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
@@ -87,7 +89,7 @@ class ImageFormatterTest extends FieldKernelTestBase {
   /**
    * Tests the cache tags from image formatters.
    */
-  public function testImageFormatterCacheTags() {
+  public function testImageFormatterCacheTags(): void {
     // Create a test entity with the image field set.
     $entity = EntityTest::create([
       'name' => $this->randomMachineName(),
@@ -107,7 +109,7 @@ class ImageFormatterTest extends FieldKernelTestBase {
    *
    * @requires extension gd
    */
-  public function testImageFormatterSvg() {
+  public function testImageFormatterSvg(): void {
     // Install the default image styles.
     $this->installConfig(['image']);
 
@@ -177,7 +179,7 @@ class ImageFormatterTest extends FieldKernelTestBase {
   /**
    * Tests Image Formatter URL options handling.
    */
-  public function testImageFormatterUrlOptions() {
+  public function testImageFormatterUrlOptions(): void {
     $this->display->setComponent($this->fieldName, ['settings' => ['image_link' => 'content']]);
 
     // Create a test entity with the image field set.

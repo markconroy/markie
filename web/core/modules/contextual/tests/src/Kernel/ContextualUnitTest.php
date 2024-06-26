@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\contextual\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
@@ -26,7 +28,7 @@ class ContextualUnitTest extends KernelTestBase {
    * @return array[]
    *   Test cases.
    */
-  public function contextualLinksDataProvider(): array {
+  public static function contextualLinksDataProvider(): array {
     $tests['one group, one dynamic path argument, no metadata'] = [
       [
         'node' => [
@@ -108,7 +110,7 @@ class ContextualUnitTest extends KernelTestBase {
    *
    * @dataProvider contextualLinksDataProvider
    */
-  public function testContextualLinksToId(array $links, string $id) {
+  public function testContextualLinksToId(array $links, string $id): void {
     $this->assertSame($id, _contextual_links_to_id($links));
   }
 
@@ -124,7 +126,7 @@ class ContextualUnitTest extends KernelTestBase {
    *
    * @dataProvider contextualLinksDataProvider
    */
-  public function testContextualIdToLinks(array $links, string $id) {
+  public function testContextualIdToLinks(array $links, string $id): void {
     $this->assertSame($links, _contextual_id_to_links($id));
   }
 

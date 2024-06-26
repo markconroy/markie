@@ -9,6 +9,7 @@ use Drupal\Core\Form\FormBuilderInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 use Drupal\media_library\MediaLibraryState;
+use Drupal\views\Attribute\ViewsField;
 use Drupal\views\Plugin\views\field\FieldPluginBase;
 use Drupal\views\Render\ViewsRenderPipelineMarkup;
 use Drupal\views\ResultRow;
@@ -17,18 +18,44 @@ use Symfony\Component\HttpFoundation\Request;
 /**
  * Defines a field that outputs a checkbox and form for selecting media.
  *
- * @ViewsField("media_library_select_form")
- *
  * @internal
  *   Plugin classes are internal.
  */
+#[ViewsField("media_library_select_form")]
 class MediaLibrarySelectForm extends FieldPluginBase {
 
   /**
    * {@inheritdoc}
    */
   public function getValue(ResultRow $row, $field = NULL) {
-    return '<!--form-item-' . $this->options['id'] . '--' . $row->index . '-->';
+    return '<!--form-item-' . $this->options['id'] . '--' . $row->mid . '-->';
+  }
+
+  /**
+   * Return the name of a form field.
+   *
+   * @see \Drupal\views\Form\ViewsFormMainForm
+   *
+   * @return string
+   *   The form field name.
+   */
+  public function form_element_name(): string {
+    return $this->field;
+  }
+
+  /**
+   * Return a media entity ID from a views result row.
+   *
+   * @see \Drupal\views\Form\ViewsFormMainForm
+   *
+   * @param int $row_id
+   *   The index of a views result row.
+   *
+   * @return string
+   *   The ID of a media entity.
+   */
+  public function form_element_row_id(int $row_id): string {
+    return $this->view->result[$row_id]->mid;
   }
 
   /**
@@ -70,7 +97,7 @@ class MediaLibrarySelectForm extends FieldPluginBase {
         $form[$this->options['id']][$row_index] = [];
         continue;
       }
-      $form[$this->options['id']][$row_index] = [
+      $form[$this->options['id']][$row->mid] = [
         '#type' => 'checkbox',
         '#title' => $this->t('Select @label', [
           '@label' => $entity->label(),

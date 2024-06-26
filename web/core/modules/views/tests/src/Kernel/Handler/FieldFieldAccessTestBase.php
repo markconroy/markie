@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\views\Kernel\Handler;
 
 use Drupal\user\Entity\Role;
@@ -30,7 +32,7 @@ abstract class FieldFieldAccessTestBase extends ViewsKernelTestBase {
   /**
    * {@inheritdoc}
    */
-  protected static $modules = ['user'];
+  protected static $modules = ['user', 'language'];
 
   /**
    * {@inheritdoc}
