@@ -30,6 +30,7 @@ class EntityResourceTest extends KernelTestBase {
    * {@inheritdoc}
    */
   protected static $modules = [
+    'file',
     'node',
     'jsonapi',
     'serialization',

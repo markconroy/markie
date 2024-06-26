@@ -48,6 +48,9 @@ include:
 ################
 variables:
   SKIP_ESLINT: '1'
+  # Ignore logo.psd file from cspell check.
+  _CSPELL_IGNORE_PATHS: "\"logo.psd\""
+
 
 
 ###################################################################################

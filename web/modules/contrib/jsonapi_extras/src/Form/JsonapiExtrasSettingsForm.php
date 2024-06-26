@@ -121,6 +121,13 @@ class JsonapiExtrasSettingsForm extends ConfigFormBase {
       '#default_value' => $config->get('default_disabled'),
     ];
 
+    $form['validate_configuration_integrity'] = [
+      '#title' => $this->t('Validate config integrity'),
+      '#type' => 'checkbox',
+      '#description' => $this->t("Enable a configuration validation step for the fields in your resources. This will ensure that new (and updated) fields also contain configuration for the corresponding resources.<br /><strong>IMPORTANT:</strong> disable this <em>temporarily</em> to allow importing incomplete configuration, so you can fix it locally and export complete configuration. Remember to re-enable this after the configuration has been fixed."),
+      '#default_value' => $config->get('validate_configuration_integrity'),
+    ];
+
     return parent::buildForm($form, $form_state);
   }
 
@@ -137,6 +144,7 @@ class JsonapiExtrasSettingsForm extends ConfigFormBase {
     $this->config('jsonapi_extras.settings')
       ->set('include_count', $form_state->getValue('include_count'))
       ->set('default_disabled', $form_state->getValue('default_disabled'))
+      ->set('validate_configuration_integrity', $form_state->getValue('validate_configuration_integrity'))
       ->save();
 
     // Rebuild the router.

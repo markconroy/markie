@@ -203,17 +203,18 @@ class JsonapiResourceConfigForm extends EntityForm {
   public function save(array $form, FormStateInterface $form_state) {
     $resource_config = $this->entity;
     $status = $resource_config->save();
+    $type = $resource_config->get('resourceType') ?? '';
 
     switch ($status) {
       case SAVED_NEW:
-        $this->messenger()->addStatus($this->t('Created the %label JSON:API Resource overwrites.', [
-          '%label' => $resource_config->id(),
+        $this->messenger()->addStatus($this->t('Created the %type JSON:API Resource overwrites.', [
+          '%type' => $type,
         ]));
         break;
 
       default:
-        $this->messenger()->addStatus($this->t('Saved the %label JSON:API Resource overwrites.', [
-          '%label' => $resource_config->id(),
+        $this->messenger()->addStatus($this->t('Saved the %type JSON:API Resource overwrites.', [
+          '%type' => $type,
         ]));
     }
     $form_state->setRedirectUrl($resource_config->toUrl('collection'));

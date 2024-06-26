@@ -2,6 +2,7 @@
 
 namespace Drupal\jsonapi_extras\Plugin\jsonapi\FieldEnhancer;
 
+use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
@@ -54,7 +55,7 @@ class UrlLinkEnhancer extends ResourceFieldEnhancerBase implements ContainerFact
     $plugin_id,
     array $plugin_definition,
     LanguageManagerInterface $language_manager,
-    LoggerChannelFactoryInterface $logger_factory
+    LoggerChannelFactoryInterface $logger_factory,
   ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->languageManager = $language_manager;
@@ -106,7 +107,7 @@ class UrlLinkEnhancer extends ResourceFieldEnhancerBase implements ContainerFact
   protected function doUndoTransform($data, Context $context) {
     if (isset($data['uri'])) {
       try {
-        $url = Url::fromUri($data['uri'], ['language' => $this->languageManager->getCurrentLanguage()]);
+        $url = Url::fromUri($data['uri'], ['language' => $this->languageManager->getCurrentLanguage(LanguageInterface::TYPE_CONTENT)]);
 
         // Use absolute urls if configured.
         $configuration = $this->getConfiguration();

@@ -54,6 +54,9 @@ class ResourceIdentifierNormalizer extends JsonApiNormalizerDecoratorBase {
     // Find the name of the field being normalized. This is unreasonably more
     // contrived than one could expect for ResourceIdentifiers.
     $resource_type = $resource_object->getResourceType();
+    if (!($resource_type instanceof ConfigurableResourceType)) {
+      return $normalized_output;
+    }
     $field_name = $this->guessFieldName($field->getId(), $resource_object);
     if (!$field_name) {
       return $normalized_output;

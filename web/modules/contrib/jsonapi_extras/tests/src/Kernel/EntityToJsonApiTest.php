@@ -284,7 +284,7 @@ class EntityToJsonApiTest extends JsonapiKernelTestBase {
   protected function assertEntity(
     EntityInterface $entity,
     array $include_fields = [],
-    array $expected_includes = []
+    array $expected_includes = [],
   ) {
     $output = $this->sut->serialize($entity, $include_fields);
 
