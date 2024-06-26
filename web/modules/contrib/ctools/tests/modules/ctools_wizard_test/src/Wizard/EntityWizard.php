@@ -8,7 +8,7 @@ use Drupal\ctools\Wizard\FormWizardBase;
 /**
  *
  */
-class WizardTest extends FormWizardBase {
+class EntityWizard extends FormWizardBase {
 
   /**
    * {@inheritdoc}
