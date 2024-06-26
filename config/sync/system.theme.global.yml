@@ -9,6 +9,6 @@ features:
   favicon: true
   node_user_picture: true
 logo:
-  path: themes/custom/patternlab/images/logo.svg
+  path: ''
   url: null
-  use_default: false
+  use_default: true
