@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\node\Kernel\Views;
 
 use Drupal\node\Entity\NodeType;
@@ -86,7 +88,7 @@ class PathPluginTest extends ViewsKernelTestBase {
 
     // Test with view_mode full.
     $output = $view->preview();
-    $output = $renderer->renderRoot($output);
+    $output = (string) $renderer->renderRoot($output);
     foreach ($this->nodes as $node) {
       $this->assertStringContainsString('This is <strong>not escaped</strong> and this is ' . $node->toLink('the link')->toString(), $output, 'Make sure path field rewriting is not escaped.');
     }

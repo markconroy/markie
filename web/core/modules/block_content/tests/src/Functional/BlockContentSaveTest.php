@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\block_content\Functional;
 
 use Drupal\block_content\Entity\BlockContent;
@@ -35,7 +37,7 @@ class BlockContentSaveTest extends BlockContentTestBase {
   /**
    * Checks whether content block IDs are saved properly during an import.
    */
-  public function testImport() {
+  public function testImport(): void {
     // Content block ID must be a number that is not in the database.
     $max_id = (int) \Drupal::entityQueryAggregate('block_content')
       ->accessCheck(FALSE)
@@ -67,10 +69,12 @@ class BlockContentSaveTest extends BlockContentTestBase {
    *
    * Verifies the static block load cache is cleared upon save.
    */
-  public function testDeterminingChanges() {
+  public function testDeterminingChanges(): void {
     // Initial creation.
     $block = $this->createBlockContent('test_changes');
-    $this->assertEquals(REQUEST_TIME, $block->getChangedTime(), 'Creating a block sets default "changed" timestamp.');
+    // Creating a block should set the changed date to the current time
+    // which is always greater than the time set by hooks we're testing.
+    $this->assertGreaterThan(979534800, $block->getChangedTime(), 'Creating a block sets default "changed" timestamp.');
 
     // Update the block without applying changes.
     $block->save();
@@ -100,7 +104,7 @@ class BlockContentSaveTest extends BlockContentTestBase {
    *
    * @see block_test_block_insert()
    */
-  public function testBlockContentSaveOnInsert() {
+  public function testBlockContentSaveOnInsert(): void {
     // block_content_test_block_content_insert() triggers a save on insert if the
     // title equals 'new'.
     $block = $this->createBlockContent('new');

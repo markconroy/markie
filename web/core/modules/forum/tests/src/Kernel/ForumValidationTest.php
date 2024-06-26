@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\forum\Kernel;
 
 use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
@@ -10,6 +12,7 @@ use Drupal\taxonomy\Entity\Term;
  * Tests forum validation constraints.
  *
  * @group forum
+ * @group legacy
  */
 class ForumValidationTest extends EntityKernelTestBase {
 
@@ -29,7 +32,7 @@ class ForumValidationTest extends EntityKernelTestBase {
   /**
    * Tests the forum validation constraints.
    */
-  public function testValidation() {
+  public function testValidation(): void {
     $this->installConfig('forum');
 
     // Add a forum.

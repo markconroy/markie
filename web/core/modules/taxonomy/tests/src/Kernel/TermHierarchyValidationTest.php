@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\taxonomy\Kernel;
 
 use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
@@ -31,7 +33,7 @@ class TermHierarchyValidationTest extends EntityKernelTestBase {
   /**
    * Tests the term hierarchy validation with re-parenting in pending revisions.
    */
-  public function testTermHierarchyValidation() {
+  public function testTermHierarchyValidation(): void {
     $vocabulary_id = $this->randomMachineName();
     $vocabulary = Vocabulary::create([
       'name' => $vocabulary_id,

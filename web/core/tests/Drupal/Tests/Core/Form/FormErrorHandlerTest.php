@@ -49,16 +49,23 @@ class FormErrorHandlerTest extends UnitTestCase {
    * @covers ::handleFormErrors
    * @covers ::displayErrorMessages
    */
-  public function testDisplayErrorMessages() {
-    $this->messenger->expects($this->exactly(6))
+  public function testDisplayErrorMessages(): void {
+    $messages = [
+      'invalid',
+      'invalid',
+      'invalid',
+      'no title given',
+      'element is invisible',
+      'this missing element is invalid',
+    ];
+
+    $this->messenger->expects($this->exactly(count($messages)))
       ->method('addMessage')
-      ->withConsecutive(
-        ['invalid', 'error'],
-        ['invalid', 'error'],
-        ['invalid', 'error'],
-        ['no title given', 'error'],
-        ['element is invisible', 'error'],
-        ['this missing element is invalid', 'error'],
+      ->with(
+        $this->callback(function (string $message) use (&$messages): bool {
+          return array_shift($messages) === $message;
+        }),
+        'error',
       );
 
     $form = [
@@ -118,7 +125,7 @@ class FormErrorHandlerTest extends UnitTestCase {
    * @covers ::handleFormErrors
    * @covers ::setElementErrorsFromFormState
    */
-  public function testSetElementErrorsFromFormState() {
+  public function testSetElementErrorsFromFormState(): void {
     $form = [
       '#parents' => [],
       '#array_parents' => [],

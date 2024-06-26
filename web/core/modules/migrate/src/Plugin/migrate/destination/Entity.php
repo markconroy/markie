@@ -9,7 +9,9 @@ use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Drupal\migrate\Attribute\MigrateDestination;
 use Drupal\migrate\EntityFieldDefinitionTrait;
+use Drupal\migrate\Plugin\Derivative\MigrateEntity;
 use Drupal\migrate\Plugin\MigrationInterface;
 use Drupal\migrate\Row;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -57,12 +59,11 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * @endcode
  *
  * This will save the processed, migrated row as a node of type 'custom'.
- *
- * @MigrateDestination(
- *   id = "entity",
- *   deriver = "Drupal\migrate\Plugin\Derivative\MigrateEntity"
- * )
  */
+#[MigrateDestination(
+  id: 'entity',
+  deriver: MigrateEntity::class
+)]
 abstract class Entity extends DestinationBase implements ContainerFactoryPluginInterface, DependentPluginInterface {
 
   use DependencyTrait;
@@ -117,7 +118,7 @@ abstract class Entity extends DestinationBase implements ContainerFactoryPluginI
   /**
    * {@inheritdoc}
    */
-  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition, MigrationInterface $migration = NULL) {
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition, ?MigrationInterface $migration = NULL) {
     $entity_type_id = static::getEntityTypeId($plugin_id);
     return new static(
       $configuration,
@@ -148,7 +149,7 @@ abstract class Entity extends DestinationBase implements ContainerFactoryPluginI
    * {@inheritdoc}
    */
   public function fields() {
-    // TODO: Implement fields() method.
+    // @todo Implement fields() method.
   }
 
   /**

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\field_ui\Functional;
 
 use Behat\Mink\Exception\ElementNotFoundException;
@@ -18,7 +20,7 @@ class ManageFieldsFunctionalTest extends ManageFieldsFunctionalTestBase {
   /**
    * Tests that default value is correctly validated and saved.
    */
-  public function testDefaultValue() {
+  public function testDefaultValue(): void {
     // Create a test field storage and field.
     $field_name = 'test';
     FieldStorageConfig::create([
@@ -110,35 +112,39 @@ class ManageFieldsFunctionalTest extends ManageFieldsFunctionalTestBase {
   /**
    * Tests that Field UI respects disallowed field names.
    */
-  public function testDisallowedFieldNames() {
+  public function testDisallowedFieldNames(): void {
     // Reset the field prefix so we can test properly.
     $this->config('field_ui.settings')->set('field_prefix', '')->save();
 
     $label = 'Disallowed field';
-    $edit = [
-      'label' => $label,
+    $edit1 = [
       'new_storage_type' => 'test_field',
+    ];
+    $edit2 = [
+      'label' => $label,
     ];
 
     // Try with an entity key.
-    $edit['field_name'] = 'title';
+    $edit2['field_name'] = 'title';
     $bundle_path = 'admin/structure/types/manage/' . $this->contentType;
     $this->drupalGet("{$bundle_path}/fields/add-field");
-    $this->submitForm($edit, 'Continue');
+    $this->submitForm($edit1, 'Continue');
+    $this->submitForm($edit2, 'Continue');
     $this->assertSession()->pageTextContains('The machine-readable name is already in use. It must be unique.');
 
     // Try with a base field.
-    $edit['field_name'] = 'sticky';
+    $edit2['field_name'] = 'sticky';
     $bundle_path = 'admin/structure/types/manage/' . $this->contentType;
     $this->drupalGet("{$bundle_path}/fields/add-field");
-    $this->submitForm($edit, 'Continue');
+    $this->submitForm($edit1, 'Continue');
+    $this->submitForm($edit2, 'Continue');
     $this->assertSession()->pageTextContains('The machine-readable name is already in use. It must be unique.');
   }
 
   /**
    * Tests that Field UI respects locked fields.
    */
-  public function testLockedField() {
+  public function testLockedField(): void {
     // Create a locked field and attach it to a bundle. We need to do this
     // programmatically as there's no way to create a locked field through UI.
     $field_name = $this->randomMachineName(8);
@@ -172,7 +178,7 @@ class ManageFieldsFunctionalTest extends ManageFieldsFunctionalTestBase {
   /**
    * Tests that Field UI respects the 'no_ui' flag in the field type definition.
    */
-  public function testHiddenFields() {
+  public function testHiddenFields(): void {
     // Check that the field type is not available in the 'add new field' row.
     $this->drupalGet('admin/structure/types/manage/' . $this->contentType . '/fields/add-field');
     $this->assertSession()->elementNotExists('css', "[name='new_storage_type'][value='hidden_test_field']");
@@ -219,9 +225,13 @@ class ManageFieldsFunctionalTest extends ManageFieldsFunctionalTestBase {
             ->elementExists('css', "[name='new_storage_type'][value='$field_type']");
         }
         catch (ElementNotFoundException) {
-          if ($this->getFieldFromGroup($field_type)) {
+          if ($group = $this->getFieldFromGroup($field_type)) {
+            $this->assertSession()
+              ->elementExists('css', "[name='new_storage_type'][value='$group']");
+            $this->submitForm(['new_storage_type' => $group], 'Continue');
             $this->assertSession()
               ->elementExists('css', "[name='group_field_options_wrapper'][value='$field_type']");
+            $this->submitForm([], 'Back');
           }
         }
       }
@@ -234,15 +244,18 @@ class ManageFieldsFunctionalTest extends ManageFieldsFunctionalTestBase {
   /**
    * Tests that a duplicate field name is caught by validation.
    */
-  public function testDuplicateFieldName() {
+  public function testDuplicateFieldName(): void {
     // field_tags already exists, so we're expecting an error when trying to
     // create a new field with the same name.
     $url = 'admin/structure/types/manage/' . $this->contentType . '/fields/add-field';
     $this->drupalGet($url);
     $edit = [
+      'new_storage_type' => 'boolean',
+    ];
+    $this->submitForm($edit, 'Continue');
+    $edit = [
       'label' => $this->randomMachineName(),
       'field_name' => 'tags',
-      'new_storage_type' => 'boolean',
     ];
     $this->submitForm($edit, 'Continue');
 
@@ -253,7 +266,7 @@ class ManageFieldsFunctionalTest extends ManageFieldsFunctionalTestBase {
   /**
    * Tests that external URLs in the 'destinations' query parameter are blocked.
    */
-  public function testExternalDestinations() {
+  public function testExternalDestinations(): void {
     $options = [
       'query' => ['destinations' => ['http://example.com']],
     ];
@@ -268,7 +281,7 @@ class ManageFieldsFunctionalTest extends ManageFieldsFunctionalTestBase {
   /**
    * Tests that deletion removes field storages and fields as expected for a term.
    */
-  public function testDeleteTaxonomyField() {
+  public function testDeleteTaxonomyField(): void {
     // Create a new field.
     $bundle_path = 'admin/structure/taxonomy/manage/tags/overview';
 
@@ -286,7 +299,7 @@ class ManageFieldsFunctionalTest extends ManageFieldsFunctionalTestBase {
   /**
    * Tests that help descriptions render valid HTML.
    */
-  public function testHelpDescriptions() {
+  public function testHelpDescriptions(): void {
     // Create an image field.
     FieldStorageConfig::create([
       'field_name' => 'field_image',
@@ -333,7 +346,7 @@ class ManageFieldsFunctionalTest extends ManageFieldsFunctionalTestBase {
    *
    * @see \Drupal\Core\Field\PreconfiguredFieldUiOptionsInterface
    */
-  public function testPreconfiguredFields() {
+  public function testPreconfiguredFields(): void {
     $this->drupalGet('admin/structure/types/manage/article/fields/add-field');
 
     // Check that the preconfigured field option exist alongside the regular
@@ -364,7 +377,7 @@ class ManageFieldsFunctionalTest extends ManageFieldsFunctionalTestBase {
   /**
    * Tests the access to non-existent field URLs.
    */
-  public function testNonExistentFieldUrls() {
+  public function testNonExistentFieldUrls(): void {
     $field_id = 'node.foo.bar';
 
     $this->drupalGet('admin/structure/types/manage/' . $this->contentType . '/fields/' . $field_id);
@@ -374,7 +387,7 @@ class ManageFieldsFunctionalTest extends ManageFieldsFunctionalTestBase {
   /**
    * Tests that the 'field_prefix' setting works on Field UI.
    */
-  public function testFieldPrefix() {
+  public function testFieldPrefix(): void {
     // Change default field prefix.
     $field_prefix = $this->randomMachineName(10);
     $this->config('field_ui.settings')->set('field_prefix', $field_prefix)->save();
@@ -384,12 +397,16 @@ class ManageFieldsFunctionalTest extends ManageFieldsFunctionalTestBase {
     $field_exceed_max_length_input = $this->randomMachineName(23);
 
     // Try to create the field.
-    $edit = [
+    $edit1 = [
+      'new_storage_type' => 'test_field',
+    ];
+    $edit2 = [
       'label' => $field_exceed_max_length_label,
       'field_name' => $field_exceed_max_length_input,
     ];
     $this->drupalGet('admin/structure/types/manage/' . $this->contentType . '/fields/add-field');
-    $this->submitForm($edit, 'Continue');
+    $this->submitForm($edit1, 'Continue');
+    $this->submitForm($edit2, 'Continue');
     $this->assertSession()->pageTextContains('Machine-readable name cannot be longer than 22 characters but is currently 23 characters long.');
 
     // Create a valid field.
@@ -401,7 +418,7 @@ class ManageFieldsFunctionalTest extends ManageFieldsFunctionalTestBase {
   /**
    * Test translation defaults.
    */
-  public function testTranslationDefaults() {
+  public function testTranslationDefaults(): void {
     $this->fieldUIAddNewField('admin/structure/types/manage/' . $this->contentType, $this->fieldNameInput, $this->fieldLabel);
     $field_storage = FieldStorageConfig::loadByName('node', 'field_' . $this->fieldNameInput);
     $this->assertTrue($field_storage->isTranslatable(), 'Field storage translatable.');

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\config_translation\Functional;
 
 use Drupal\FunctionalTests\Installer\InstallerTestBase;
@@ -62,7 +64,7 @@ msgstr "Language $langcode"
 PO;
   }
 
-  public function testConfigTranslation() {
+  public function testConfigTranslation(): void {
     \Drupal::service('module_installer')->install(['node', 'field_ui']);
     $this->createContentType(['type' => 'article']);
 

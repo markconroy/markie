@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\taxonomy\Kernel\Migrate\d7;
 
 use Drupal\taxonomy\Entity\Vocabulary;
@@ -52,7 +54,7 @@ class MigrateTaxonomyVocabularyTest extends MigrateDrupal7TestBase {
   /**
    * Tests the Drupal 7 taxonomy vocabularies to Drupal 8 migration.
    */
-  public function testTaxonomyVocabulary() {
+  public function testTaxonomyVocabulary(): void {
     $this->assertEntity('tags', 'Tags', 'Use tags to group articles on similar topics into categories.', 0);
     $this->assertEntity('sujet_de_discussion', 'Sujet de discussion', 'Forum navigation vocabulary', -10);
     $this->assertEntity('test_vocabulary', 'Test Vocabulary', 'This is the vocabulary description', 0);

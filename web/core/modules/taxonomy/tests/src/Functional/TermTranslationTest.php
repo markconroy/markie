@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\taxonomy\Functional;
 
 use Drupal\Core\Url;
@@ -58,7 +60,7 @@ class TermTranslationTest extends TaxonomyTestBase {
   /**
    * Tests translated breadcrumbs.
    */
-  public function testTranslatedBreadcrumbs() {
+  public function testTranslatedBreadcrumbs(): void {
     // Ensure non-translated breadcrumb is correct.
     $breadcrumb = [Url::fromRoute('<front>')->toString() => 'Home'];
     foreach ($this->terms as $term) {
@@ -92,7 +94,7 @@ class TermTranslationTest extends TaxonomyTestBase {
   /**
    * Tests translation of terms are showed in the node.
    */
-  public function testTermsTranslation() {
+  public function testTermsTranslation(): void {
 
     // Set the display of the term reference field on the article content type
     // to "Check boxes/radio buttons".

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\menu_link_content\Functional;
 
 use Drupal\menu_link_content\Entity\MenuLinkContent;
@@ -58,7 +60,7 @@ class MenuLinkContentFormTest extends BrowserTestBase {
   /**
    * Tests the 'link to any page' permission for a restricted page.
    */
-  public function testMenuLinkContentFormLinkToAnyPage() {
+  public function testMenuLinkContentFormLinkToAnyPage(): void {
     $menu_link = MenuLinkContent::create([
       'title' => 'Menu link test',
       'provider' => 'menu_link_content',
@@ -84,7 +86,7 @@ class MenuLinkContentFormTest extends BrowserTestBase {
   /**
    * Tests the MenuLinkContentForm class.
    */
-  public function testMenuLinkContentForm() {
+  public function testMenuLinkContentForm(): void {
     $this->drupalGet('admin/structure/menu/manage/admin/add');
     // Test that other menus are not available when creating a new menu link.
     $this->assertSession()->optionNotExists('edit-menu-parent', 'main:');
@@ -103,7 +105,7 @@ class MenuLinkContentFormTest extends BrowserTestBase {
   /**
    * Tests validation for the MenuLinkContentForm class.
    */
-  public function testMenuLinkContentFormValidation() {
+  public function testMenuLinkContentFormValidation(): void {
     $this->drupalGet('admin/structure/menu/manage/admin/add');
     $this->submitForm([
       'title[0][value]' => 'Test page',
@@ -115,7 +117,7 @@ class MenuLinkContentFormTest extends BrowserTestBase {
   /**
    * Tests the operations links alter related functional for menu_link_content.
    */
-  public function testMenuLinkContentOperationsLink() {
+  public function testMenuLinkContentOperationsLink(): void {
     \Drupal::service('module_installer')->install(['menu_operations_link_test']);
     $menu_link = MenuLinkContent::create([
       'title' => 'Menu link test',

@@ -37,7 +37,7 @@ class AllowToolbarPathTest extends UnitTestCase {
    * @dataProvider providerTestAllowToolbarPath
    * @covers ::check
    */
-  public function testAllowToolbarPath($expected_result, $path) {
+  public function testAllowToolbarPath($expected_result, $path): void {
     $request = Request::create($path);
     $result = $this->policy->check($request);
     $this->assertSame($expected_result, $result);
@@ -49,7 +49,7 @@ class AllowToolbarPathTest extends UnitTestCase {
    * @return array
    *   Data and expected results.
    */
-  public function providerTestAllowToolbarPath() {
+  public static function providerTestAllowToolbarPath() {
     return [
       [NULL, '/'],
       [NULL, '/other-path?q=/toolbar/subtrees/'],

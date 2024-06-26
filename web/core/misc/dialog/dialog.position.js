@@ -84,7 +84,7 @@
         // jQuery UI does not support percentages on heights, convert to pixels.
         if (
           typeof optionValue === 'string' &&
-          /%$/.test(optionValue) &&
+          optionValue.endsWith('%') &&
           /height/i.test(option)
         ) {
           // Take offsets in account.
@@ -108,33 +108,39 @@
     if (!event.data.settings.modal) {
       adjustedOptions = resetPosition(adjustedOptions);
     }
+    event.data.$element.dialog('option', adjustedOptions);
+
     event.data.$element
-      .dialog('option', adjustedOptions)
-      .trigger('dialogContentResize');
+      ?.get(0)
+      ?.dispatchEvent(
+        new CustomEvent('dialogContentResize', { bubbles: true }),
+      );
   }
 
-  $(window).on({
-    'dialog:aftercreate': function (event, dialog, $element, settings) {
-      const autoResize = debounce(resetSize, 20);
-      const eventData = { settings, $element };
-      if (settings.autoResize === true || settings.autoResize === 'true') {
-        const uiDialog = $element
-          .dialog('option', { resizable: false, draggable: false })
-          .dialog('widget');
-        uiDialog[0].style.position = 'fixed';
-        $(window)
-          .on('resize.dialogResize scroll.dialogResize', eventData, autoResize)
-          .trigger('resize.dialogResize');
-        $(document).on(
-          'drupalViewportOffsetChange.dialogResize',
-          eventData,
-          autoResize,
-        );
-      }
-    },
-    'dialog:beforeclose': function (event, dialog, $element) {
-      $(window).off('.dialogResize');
-      $(document).off('.dialogResize');
-    },
+  window.addEventListener('dialog:aftercreate', (e) => {
+    const autoResize = debounce(resetSize, 20);
+    const $element = $(e.target);
+    const { settings } = e;
+    const eventData = { settings, $element };
+
+    if (settings.autoResize === true || settings.autoResize === 'true') {
+      const uiDialog = $element
+        .dialog('option', { resizable: false, draggable: false })
+        .dialog('widget');
+      uiDialog[0].style.position = 'fixed';
+      $(window)
+        .on('resize.dialogResize scroll.dialogResize', eventData, autoResize)
+        .trigger('resize.dialogResize');
+      $(document).on(
+        'drupalViewportOffsetChange.dialogResize',
+        eventData,
+        autoResize,
+      );
+    }
+  });
+
+  window.addEventListener('dialog:beforeclose', () => {
+    $(window).off('.dialogResize');
+    $(document).off('.dialogResize');
   });
 })(jQuery, Drupal, drupalSettings, Drupal.debounce, Drupal.displace);

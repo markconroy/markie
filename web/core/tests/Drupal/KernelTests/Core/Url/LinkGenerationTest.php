@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\KernelTests\Core\Url;
 
 use Drupal\Component\Render\MarkupInterface;
@@ -19,7 +21,7 @@ class LinkGenerationTest extends KernelTestBase {
   /**
    * Tests how hook_link_alter() can affect escaping of the link text.
    */
-  public function testHookLinkAlter() {
+  public function testHookLinkAlter(): void {
     $url = Url::fromUri('http://example.com');
     $renderer = \Drupal::service('renderer');
 

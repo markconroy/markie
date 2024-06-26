@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\FunctionalTests\Installer;
 
 use Drupal\Core\Logger\RfcLogLevel;
@@ -26,7 +28,7 @@ class InstallerExistingConfigMultilingualTest extends InstallerExistingConfigTes
   /**
    * {@inheritdoc}
    */
-  public function testConfigSync() {
+  public function testConfigSync(): void {
     parent::testConfigSync();
 
     // Ensure no warning, error, critical, alert or emergency messages have been

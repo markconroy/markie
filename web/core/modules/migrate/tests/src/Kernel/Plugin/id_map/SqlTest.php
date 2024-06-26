@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\migrate\Kernel\Plugin\id_map;
 
 use Drupal\Core\Database\Database;
@@ -8,8 +10,6 @@ use Drupal\Tests\migrate\Kernel\MigrateTestBase;
 use Drupal\Tests\migrate\Unit\TestSqlIdMap;
 use Drupal\migrate\MigrateException;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
-
-// cspell:ignore sourceid
 
 /**
  * Tests that the migrate map table is created.
@@ -83,7 +83,7 @@ class SqlTest extends MigrateTestBase {
    *
    * @dataProvider providerTestEnsureTables
    */
-  public function testEnsureTables($ids) {
+  public function testEnsureTables($ids): void {
     $this->migrationDefinition['source']['ids'] = $ids;
     $migration = $this->migrationPluginManager->createStubMigration($this->migrationDefinition);
 
@@ -98,7 +98,7 @@ class SqlTest extends MigrateTestBase {
   /**
    * Provides data for testEnsureTables.
    */
-  public function providerTestEnsureTables() {
+  public static function providerTestEnsureTables() {
     return [
       'no ids' => [
         [],
@@ -137,7 +137,7 @@ class SqlTest extends MigrateTestBase {
    *
    * @dataProvider providerTestFailEnsureTables
    */
-  public function testFailEnsureTables($ids) {
+  public function testFailEnsureTables($ids): void {
     // This just tests mysql, as other PDO integrations allow longer indexes.
     if (Database::getConnection()->databaseType() !== 'mysql') {
       $this->markTestSkipped("This test only runs for MySQL");
@@ -158,7 +158,7 @@ class SqlTest extends MigrateTestBase {
   /**
    * Provides data for testFailEnsureTables.
    */
-  public function providerTestFailEnsureTables() {
+  public static function providerTestFailEnsureTables() {
     return [
       'one id' => [
         [

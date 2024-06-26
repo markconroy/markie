@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\field_ui\Functional;
 
 use Drupal\field\Entity\FieldConfig;
@@ -47,7 +49,9 @@ class EntityDisplayFormBaseTest extends BrowserTestBase {
 
       \Drupal::service('entity_display.repository')
         ->getFormDisplay($entity_type, $entity_type)
-        ->setComponent('field_test_no_plugin', [])
+        ->setComponent('field_test_no_plugin', [
+          'type' => 'test_field_widget',
+        ])
         ->save();
     }
 

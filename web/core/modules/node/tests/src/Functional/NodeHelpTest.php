@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\node\Functional;
 
 use Drupal\Tests\BrowserTestBase;
@@ -66,7 +68,7 @@ class NodeHelpTest extends BrowserTestBase {
   /**
    * Verifies that help text appears on node add/edit forms.
    */
-  public function testNodeShowHelpText() {
+  public function testNodeShowHelpText(): void {
     // Check the node add form.
     $this->drupalGet('node/add/' . $this->testType);
     $this->assertSession()->statusCodeEquals(200);

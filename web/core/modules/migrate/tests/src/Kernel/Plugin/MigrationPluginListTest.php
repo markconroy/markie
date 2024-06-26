@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\migrate\Kernel\Plugin;
 
 use Drupal\Core\Database\Database;
@@ -49,6 +51,7 @@ class MigrationPluginListTest extends KernelTestBase {
     'path',
     'search',
     'shortcut',
+    // @todo Remove statistics in https://www.drupal.org/project/drupal/issues/3341092
     'statistics',
     'syslog',
     'system',
@@ -72,7 +75,7 @@ class MigrationPluginListTest extends KernelTestBase {
   /**
    * @covers ::getDefinitions
    */
-  public function testGetDefinitions() {
+  public function testGetDefinitions(): void {
     // Create an entity reference field to make sure that migrations derived by
     // EntityReferenceTranslationDeriver do not get discovered without
     // migrate_drupal enabled.

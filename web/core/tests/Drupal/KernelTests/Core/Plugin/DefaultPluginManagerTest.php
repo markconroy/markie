@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\KernelTests\Core\Plugin;
 
 use Drupal\Core\Plugin\DefaultPluginManager;
@@ -23,7 +25,7 @@ class DefaultPluginManagerTest extends KernelTestBase {
   /**
    * Tests annotations and attributes on the default plugin manager.
    */
-  public function testDefaultPluginManager() {
+  public function testDefaultPluginManager(): void {
     $subdir = 'Plugin/plugin_test/custom_annotation';
     $base_directory = $this->root . '/core/modules/system/tests/modules/plugin_test/src';
     $namespaces = new \ArrayObject(['Drupal\plugin_test' => $base_directory]);

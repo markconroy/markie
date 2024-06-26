@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\system\Kernel\Installer;
 
 use Drupal\Core\StringTranslation\Translator\FileTranslation;
@@ -40,7 +42,7 @@ class InstallTranslationFilePatternTest extends KernelTestBase {
   /**
    * @dataProvider providerValidTranslationFiles
    */
-  public function testFilesPatternValid($langcode, $filename) {
+  public function testFilesPatternValid($langcode, $filename): void {
     $pattern = $this->filePatternMethod->invoke($this->fileTranslation, $langcode);
     $this->assertNotEmpty(preg_match($pattern, $filename));
   }
@@ -48,7 +50,7 @@ class InstallTranslationFilePatternTest extends KernelTestBase {
   /**
    * @return array
    */
-  public function providerValidTranslationFiles() {
+  public static function providerValidTranslationFiles() {
     return [
       ['hu', 'drupal-8.0.0-alpha1.hu.po'],
       ['ta', 'drupal-8.10.10-beta12.ta.po'],
@@ -59,7 +61,7 @@ class InstallTranslationFilePatternTest extends KernelTestBase {
   /**
    * @dataProvider providerInvalidTranslationFiles
    */
-  public function testFilesPatternInvalid($langcode, $filename) {
+  public function testFilesPatternInvalid($langcode, $filename): void {
     $pattern = $this->filePatternMethod->invoke($this->fileTranslation, $langcode);
     $this->assertEmpty(preg_match($pattern, $filename));
   }
@@ -67,7 +69,7 @@ class InstallTranslationFilePatternTest extends KernelTestBase {
   /**
    * @return array
    */
-  public function providerInvalidTranslationFiles() {
+  public static function providerInvalidTranslationFiles() {
     return [
       ['hu', 'drupal-alpha1-*-hu.po'],
       ['ta', 'drupal-beta12.ta'],

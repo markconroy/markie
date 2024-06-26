@@ -321,10 +321,10 @@ class UrlGenerator implements UrlGeneratorInterface {
       // otherwise we would generate a URI that, when followed by a user agent
       // (e.g. browser), does not match this route
       $path = strtr($path, ['/../' => '/%2E%2E/', '/./' => '/%2E/']);
-      if ('/..' === substr($path, -3)) {
+      if (str_ends_with($path, '/..')) {
         $path = substr($path, 0, -2) . '%2E%2E';
       }
-      elseif ('/.' === substr($path, -2)) {
+      elseif (str_ends_with($path, '/.')) {
         $path = substr($path, 0, -1) . '%2E';
       }
     }
@@ -398,7 +398,7 @@ class UrlGenerator implements UrlGeneratorInterface {
   /**
    * Passes the path to a processor manager to allow alterations.
    */
-  protected function processPath($path, &$options = [], BubbleableMetadata $bubbleable_metadata = NULL) {
+  protected function processPath($path, &$options = [], ?BubbleableMetadata $bubbleable_metadata = NULL) {
     $actual_path = $path === '/' ? $path : rtrim($path, '/');
     return $this->pathProcessor->processOutbound($actual_path, $options, $this->requestStack->getCurrentRequest(), $bubbleable_metadata);
   }
@@ -415,7 +415,7 @@ class UrlGenerator implements UrlGeneratorInterface {
    * @param \Drupal\Core\Render\BubbleableMetadata $bubbleable_metadata
    *   (optional) Object to collect route processors' bubbleable metadata.
    */
-  protected function processRoute($name, SymfonyRoute $route, array &$parameters, BubbleableMetadata $bubbleable_metadata = NULL) {
+  protected function processRoute($name, SymfonyRoute $route, array &$parameters, ?BubbleableMetadata $bubbleable_metadata = NULL) {
     $this->routeProcessor->processOutbound($name, $route, $parameters, $bubbleable_metadata);
   }
 

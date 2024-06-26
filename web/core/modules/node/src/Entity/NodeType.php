@@ -78,16 +78,16 @@ class NodeType extends ConfigEntityBundleBase implements NodeTypeInterface {
   /**
    * A brief description of this node type.
    *
-   * @var string
+   * @var string|null
    */
-  protected $description;
+  protected $description = NULL;
 
   /**
    * Help information shown to the user when creating a Node of this type.
    *
-   * @var string
+   * @var string|null
    */
-  protected $help;
+  protected $help = NULL;
 
   /**
    * Default value of the 'Create new revision' checkbox of this node type.
@@ -122,7 +122,7 @@ class NodeType extends ConfigEntityBundleBase implements NodeTypeInterface {
    */
   public function isLocked() {
     $locked = \Drupal::state()->get('node.type.locked');
-    return isset($locked[$this->id()]) ? $locked[$this->id()] : FALSE;
+    return $locked[$this->id()] ?? FALSE;
   }
 
   /**
@@ -164,14 +164,14 @@ class NodeType extends ConfigEntityBundleBase implements NodeTypeInterface {
    * {@inheritdoc}
    */
   public function getHelp() {
-    return $this->help;
+    return $this->help ?? '';
   }
 
   /**
    * {@inheritdoc}
    */
   public function getDescription() {
-    return $this->description;
+    return $this->description ?? '';
   }
 
   /**

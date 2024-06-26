@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\taxonomy\Kernel\Views;
 
 use Drupal\Core\Link;
@@ -59,7 +61,7 @@ class TaxonomyFieldTidTest extends ViewsKernelTestBase {
   /**
    * Tests the taxonomy field handler.
    */
-  public function testViewsHandlerTidField() {
+  public function testViewsHandlerTidField(): void {
     /** @var \Drupal\Core\Render\RendererInterface $renderer */
     $renderer = \Drupal::service('renderer');
 

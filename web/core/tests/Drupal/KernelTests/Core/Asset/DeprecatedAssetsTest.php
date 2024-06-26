@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\KernelTests\Core\Asset;
 
 use Drupal\KernelTests\KernelTestBase;
@@ -57,7 +59,7 @@ class DeprecatedAssetsTest extends KernelTestBase {
    * @return array
    *   See description above.
    */
-  public function deprecatedLibrariesProvider(): array {
+  public static function deprecatedLibrariesProvider(): array {
     return [
       'Tests deprecation of library core/js-cookie' => [
         'core',

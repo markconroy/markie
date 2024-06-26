@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\config\Functional;
 
 use Drupal\Tests\BrowserTestBase;
@@ -44,7 +46,7 @@ class CacheabilityMetadataConfigOverrideIntegrationTest extends BrowserTestBase 
   /**
    * Tests if config overrides correctly set cacheability metadata.
    */
-  public function testConfigOverride() {
+  public function testConfigOverride(): void {
     // Check the default (disabled) state of the cache context. The block label
     // should not be overridden.
     $this->drupalGet('<front>');

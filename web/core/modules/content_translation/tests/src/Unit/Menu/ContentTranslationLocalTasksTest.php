@@ -48,14 +48,14 @@ class ContentTranslationLocalTasksTest extends LocalTaskIntegrationTestBase {
    *
    * @dataProvider providerTestBlockAdminDisplay
    */
-  public function testBlockAdminDisplay($route, $expected) {
+  public function testBlockAdminDisplay($route, $expected): void {
     $this->assertLocalTasks($route, $expected);
   }
 
   /**
    * Provides a list of routes to test.
    */
-  public function providerTestBlockAdminDisplay() {
+  public static function providerTestBlockAdminDisplay() {
     return [
       [
         'entity.node.canonical',

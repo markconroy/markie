@@ -8,7 +8,6 @@
  * customized by user themes.
  */
 
-use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Url;
 use Drupal\Component\Serialization\Json;
 use Drupal\Component\Utility\Crypt;
@@ -864,16 +863,16 @@ function template_preprocess_image(&$variables) {
  *     - Any HTML attributes, such as "colspan", to apply to the table cell.
  *     Here's an example for $rows:
  *     @code
- *     $rows = array(
+ *     $rows = [
  *       // Simple row
- *       array(
+ *       [
  *         'Cell 1', 'Cell 2', 'Cell 3'
- *       ),
+ *       ],
  *       // Row with attributes on the row and some of its cells.
- *       array(
- *         'data' => array('Cell 1', array('data' => 'Cell 2', 'colspan' => 2)), 'class' => array('funky')
- *       ),
- *     );
+ *       [
+ *         'data' => ['Cell 1', ['data' => 'Cell 2', 'colspan' => 2]], 'class' => ['funky']
+ *       ],
+ *     ];
  *     @endcode
  *   - footer: An array of table rows which will be printed within a <tfoot>
  *     tag, in the same format as the rows element (see above).
@@ -889,23 +888,23 @@ function template_preprocess_image(&$variables) {
  *       associative array of HTML attributes.
  *     Here's an example for $colgroup:
  *     @code
- *     $colgroup = array(
+ *     $colgroup = [
  *       // <colgroup> with one <col> element.
- *       array(
- *         array(
- *           'class' => array('funky'), // Attribute for the <col> element.
- *         ),
- *       ),
+ *       [
+ *         [
+ *           'class' => ['funky'], // Attribute for the <col> element.
+ *         ],
+ *       ],
  *       // <colgroup> with attributes and inner <col> elements.
- *       array(
- *         'data' => array(
- *           array(
- *             'class' => array('funky'), // Attribute for the <col> element.
- *           ),
- *         ),
- *         'class' => array('jazzy'), // Attribute for the <colgroup> element.
- *       ),
- *     );
+ *       [
+ *         'data' => [
+ *           [
+ *             'class' => ['funky'], // Attribute for the <col> element.
+ *           ],
+ *         ],
+ *         'class' => ['jazzy'], // Attribute for the <colgroup> element.
+ *       ],
+ *     ];
  *     @endcode
  *     These optional tags are used to group and set properties on columns
  *     within a table. For example, one may easily group three columns and
@@ -1749,6 +1748,7 @@ function template_preprocess_breadcrumb(&$variables) {
  *     - #tags: An array of labels for the controls in the pager.
  *     - #element: An optional integer to distinguish between multiple pagers on
  *       one page.
+ *     - #pagination_heading_level: An optional heading level for the pager.
  *     - #parameters: An associative array of query string parameters to append
  *       to the pager links.
  *     - #route_parameters: An associative array of the route parameters.
@@ -1875,6 +1875,10 @@ function template_preprocess_pager(&$variables) {
 
   $variables['items'] = $items;
   $variables['heading_id'] = Html::getUniqueId('pagination-heading');
+  $variables['pagination_heading_level'] = $variables['pager']['#pagination_heading_level'] ?? 'h4';
+  if (!preg_match('/^h[1-6]$/', $variables['pagination_heading_level'])) {
+    $variables['pagination_heading_level'] = 'h4';
+  }
 
   // The rendered link needs to play well with any other query parameter used
   // on the page, like exposed filters, so for the cacheability all query
@@ -1903,10 +1907,6 @@ function template_preprocess_menu_local_task(&$variables) {
 
   if (!empty($variables['element']['#active'])) {
     $variables['is_active'] = TRUE;
-
-    // Add text to indicate active tab for non-visual users.
-    $active = new FormattableMarkup('<span class="visually-hidden">@label</span>', ['@label' => t('(active tab)')]);
-    $link_text = t('@local-task-title@active', ['@local-task-title' => $link_text, '@active' => $active]);
   }
 
   $link['localized_options']['set_active_class'] = TRUE;
@@ -2026,7 +2026,7 @@ function drupal_common_theme() {
       'variables' => ['items' => [], 'title' => '', 'list_type' => 'ul', 'wrapper_attributes' => [], 'attributes' => [], 'empty' => NULL, 'context' => []],
     ],
     'feed_icon' => [
-      'variables' => ['url' => NULL, 'title' => NULL],
+      'variables' => ['url' => NULL, 'title' => NULL, 'attributes' => []],
     ],
     'progress_bar' => [
       'variables' => ['label' => NULL, 'percent' => NULL, 'message' => NULL],

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\system\Functional\System;
 
 use Drupal\Tests\BrowserTestBase;
@@ -37,7 +39,7 @@ class ShutdownFunctionsTest extends BrowserTestBase {
   /**
    * Tests shutdown functions.
    */
-  public function testShutdownFunctions() {
+  public function testShutdownFunctions(): void {
     $arg1 = $this->randomMachineName();
     $arg2 = $this->randomMachineName();
     $this->drupalGet('system-test/shutdown-functions/' . $arg1 . '/' . $arg2);

@@ -103,7 +103,7 @@ class ExtensionDiscovery {
    * @param string $site_path
    *   The path to the site.
    */
-  public function __construct(string $root, $use_file_cache = TRUE, array $profile_directories = NULL, string $site_path = NULL) {
+  public function __construct(string $root, $use_file_cache = TRUE, ?array $profile_directories = NULL, ?string $site_path = NULL) {
     $this->root = $root;
     $this->fileCache = $use_file_cache ? FileCacheFactory::get('extension_discovery') : NULL;
     $this->profileDirectories = $profile_directories;
@@ -234,7 +234,18 @@ class ExtensionDiscovery {
     if (!\Drupal::hasContainer() || !\Drupal::getContainer()->hasParameter('install_profile')) {
       return $this;
     }
-    if ($profile = \Drupal::installProfile()) {
+
+    $profile = \Drupal::installProfile();
+    // If $profile is FALSE then we need to add a fake directory as a profile
+    // directory in order to filter out profile provided modules. This ensures
+    // that, after uninstalling a profile, a site cannot install modules
+    // contained in an install profile. During installation $profile will be
+    // NULL, so we need to discover all modules and profiles.
+    if ($profile === FALSE) {
+      // cspell:ignore CNKDSIUSYFUISEFCB
+      $this->profileDirectories[] = '_does_not_exist_profile_CNKDSIUSYFUISEFCB';
+    }
+    elseif ($profile) {
       $this->profileDirectories[] = \Drupal::service('extension.list.profile')->getPath($profile);
     }
     return $this;
@@ -260,7 +271,7 @@ class ExtensionDiscovery {
    *
    * @return $this
    */
-  public function setProfileDirectories(array $paths = NULL) {
+  public function setProfileDirectories(?array $paths = NULL) {
     $this->profileDirectories = $paths;
     return $this;
   }

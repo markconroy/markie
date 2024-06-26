@@ -37,7 +37,7 @@ class OffCanvasTest extends OffCanvasTestBase {
    *
    * @dataProvider themeDataProvider
    */
-  public function testOffCanvasLinks($theme) {
+  public function testOffCanvasLinks($theme): void {
     $this->enableTheme($theme);
     $this->drupalGet('/off-canvas-test-links');
 
@@ -117,7 +117,7 @@ class OffCanvasTest extends OffCanvasTestBase {
   /**
    * Tests the body displacement behaves differently at a narrow width.
    */
-  public function testNarrowWidth() {
+  public function testNarrowWidth(): void {
     $narrow_width_breakpoint = 768;
     $offset = 20;
     $height = 800;
@@ -125,7 +125,7 @@ class OffCanvasTest extends OffCanvasTestBase {
     $web_assert = $this->assertSession();
 
     // Test the same functionality on multiple themes.
-    foreach ($this->getTestThemes() as $theme) {
+    foreach (static::getTestThemes() as $theme) {
       $this->enableTheme($theme);
       // Testing at the wider width.
       $this->getSession()->resizeWindow($narrow_width_breakpoint + $offset, $height);

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\options\Functional;
 
 use Drupal\field\Entity\FieldConfig;
@@ -55,7 +57,7 @@ class OptionsFloatFieldImportTest extends FieldTestBase {
   /**
    * Tests that importing list_float fields works.
    */
-  public function testImport() {
+  public function testImport(): void {
     $field_name = 'field_options_float';
     $type = 'options_install_test';
 

@@ -16,6 +16,8 @@ use Symfony\Component\Routing\Exception\RouteNotFoundException;
 use Symfony\Component\Routing\RouteCollection;
 use Drupal\Core\Database\Connection;
 
+// cspell:ignore filesort
+
 /**
  * A Route Provider front-end for all Drupal-stored routes.
  */
@@ -123,7 +125,7 @@ class RouteProvider implements CacheableRouteProviderInterface, PreloadableRoute
    * @param \Drupal\Core\Language\LanguageManagerInterface $language_manager
    *   (Optional) The language manager.
    */
-  public function __construct(Connection $connection, StateInterface $state, CurrentPathStack $current_path, CacheBackendInterface $cache_backend, InboundPathProcessorInterface $path_processor, CacheTagsInvalidatorInterface $cache_tag_invalidator, $table = 'router', LanguageManagerInterface $language_manager = NULL) {
+  public function __construct(Connection $connection, StateInterface $state, CurrentPathStack $current_path, CacheBackendInterface $cache_backend, InboundPathProcessorInterface $path_processor, CacheTagsInvalidatorInterface $cache_tag_invalidator, $table = 'router', ?LanguageManagerInterface $language_manager = NULL) {
     $this->connection = $connection;
     $this->state = $state;
     $this->currentPath = $current_path;
@@ -451,6 +453,8 @@ class RouteProvider implements CacheableRouteProviderInterface, PreloadableRoute
     // based on the domain.
     $this->addExtraCacheKeyPart('language', $this->getCurrentLanguageCacheIdPart());
 
+    $this->addExtraCacheKeyPart('query_parameters', $this->getQueryParametersCacheIdPart($request));
+
     // Sort the cache key parts by their provider in order to have predictable
     // cache keys.
     ksort($this->extraCacheKeyParts);
@@ -459,7 +463,52 @@ class RouteProvider implements CacheableRouteProviderInterface, PreloadableRoute
       $key_parts[] = '[' . $provider . ']=' . $key_part;
     }
 
-    return 'route:' . implode(':', $key_parts) . ':' . $request->getPathInfo() . ':' . $request->getQueryString();
+    return 'route:' . implode(':', $key_parts) . ':' . $request->getPathInfo();
+  }
+
+  /**
+   * Returns the query parameters identifier for the route collection cache.
+   *
+   * The query parameters on the request may be altered programmatically, e.g.
+   * while serving private files or in subrequests. As such, we must vary on
+   * both the query string from the client and the parameter bag after incoming
+   * route processors have modified the request object.
+   *
+   * @param \Symfony\Component\HttpFoundation\Request $request
+   *   Request.
+   *
+   * @return string
+   */
+  protected function getQueryParametersCacheIdPart(Request $request) {
+    // @todo Use \Symfony\Component\HttpFoundation\Request::normalizeQueryString
+    //   for recursive key ordering if support is added in the future.
+    $recursive_sort = function (&$array) use (&$recursive_sort) {
+      foreach ($array as &$v) {
+        if (is_array($v)) {
+          $recursive_sort($v);
+        }
+      }
+      ksort($array);
+    };
+    // Recursively normalize the query parameters to ensure maximal cache hits.
+    // If we did not normalize the order, functionally identical query string
+    // sets could be sent in differing order creating a potential DoS vector
+    // and decreasing cache hit rates.
+    $sorted_resolved_parameters = $request->query->all();
+    $recursive_sort($sorted_resolved_parameters);
+    $sorted_original_parameters = Request::create('/?' . $request->getQueryString())->query->all();
+    $recursive_sort($sorted_original_parameters);
+    // Hash this portion to help shorten the total key length.
+    $resolved_hash = $sorted_resolved_parameters
+      ? sha1(http_build_query($sorted_resolved_parameters))
+      : NULL;
+    return implode(
+      ',',
+      array_filter([
+        http_build_query($sorted_original_parameters),
+        $resolved_hash,
+      ])
+    );
   }
 
   /**

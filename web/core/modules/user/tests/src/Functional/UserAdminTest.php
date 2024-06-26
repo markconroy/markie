@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\user\Functional;
 
 use Drupal\Core\Test\AssertMailTrait;
@@ -46,7 +48,7 @@ class UserAdminTest extends BrowserTestBase {
   /**
    * Registers a user and deletes it.
    */
-  public function testUserAdmin() {
+  public function testUserAdmin(): void {
     $config = $this->config('user.settings');
     $user_a = $this->drupalCreateUser();
     $user_a->name = 'User A';
@@ -75,7 +77,10 @@ class UserAdminTest extends BrowserTestBase {
     $this->assertSession()->pageTextContains($admin_user->getAccountName());
 
     // Test for existence of edit link in table.
-    $link = $user_a->toLink('Edit', 'edit-form', ['query' => ['destination' => $user_a->toUrl('collection')->toString()]])->toString();
+    $link = $user_a->toLink('Edit', 'edit-form', [
+      'query' => ['destination' => $user_a->toUrl('collection')->toString()],
+      'attributes' => ['aria-label' => 'Edit ' . $user_a->label()],
+    ])->toString();
     $this->assertSession()->responseContains($link);
 
     // Test exposed filter elements.
@@ -177,7 +182,7 @@ class UserAdminTest extends BrowserTestBase {
   /**
    * Tests the alternate notification email address for user mails.
    */
-  public function testNotificationEmailAddress() {
+  public function testNotificationEmailAddress(): void {
     // Test that the Notification Email address field is on the config page.
     $admin_user = $this->drupalCreateUser([
       'administer users',

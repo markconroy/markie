@@ -4,6 +4,7 @@ namespace Drupal\Core\Config\Entity;
 
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Cache\Cache;
+use Drupal\Core\Config\Action\Attribute\ActionMethod;
 use Drupal\Core\Config\Schema\SchemaIncompleteException;
 use Drupal\Core\Entity\EntityBase;
 use Drupal\Core\Config\ConfigDuplicateUUIDException;
@@ -12,6 +13,7 @@ use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\EntityWithPluginCollectionInterface;
 use Drupal\Core\Entity\SynchronizableEntityTrait;
 use Drupal\Core\Plugin\PluginDependencyTrait;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 
 /**
  * Defines a base configuration entity class.
@@ -81,6 +83,7 @@ abstract class ConfigEntityBase extends EntityBase implements ConfigEntityInterf
    *
    * @var array
    */
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
   protected $third_party_settings = [];
 
   /**
@@ -92,7 +95,7 @@ abstract class ConfigEntityBase extends EntityBase implements ConfigEntityInterf
    *
    * @var array
    */
-  // phpcs:ignore Drupal.Classes.PropertyDeclaration
+  // phpcs:ignore Drupal.Classes.PropertyDeclaration, Drupal.NamingConventions.ValidVariableName.LowerCamelName
   protected $_core = [];
 
   /**
@@ -158,7 +161,7 @@ abstract class ConfigEntityBase extends EntityBase implements ConfigEntityInterf
    * {@inheritdoc}
    */
   public function set($property_name, $value) {
-    if ($this instanceof EntityWithPluginCollectionInterface) {
+    if ($this instanceof EntityWithPluginCollectionInterface && !$this->isSyncing()) {
       $plugin_collections = $this->getPluginCollections();
       if (isset($plugin_collections[$property_name])) {
         // If external code updates the settings, pass it along to the plugin.
@@ -288,7 +291,7 @@ abstract class ConfigEntityBase extends EntityBase implements ConfigEntityInterf
     /** @var \Drupal\Core\Config\Entity\ConfigEntityStorageInterface $storage */
     parent::preSave($storage);
 
-    if ($this instanceof EntityWithPluginCollectionInterface) {
+    if ($this instanceof EntityWithPluginCollectionInterface && !$this->isSyncing()) {
       // Any changes to the plugin configuration must be saved to the entity's
       // copy as well.
       foreach ($this->getPluginCollections() as $plugin_config_key => $plugin_collection) {
@@ -502,6 +505,7 @@ abstract class ConfigEntityBase extends EntityBase implements ConfigEntityInterf
   /**
    * {@inheritdoc}
    */
+  #[ActionMethod(adminLabel: new TranslatableMarkup('Set third-party setting'))]
   public function setThirdPartySetting($module, $key, $value) {
     $this->third_party_settings[$module][$key] = $value;
     return $this;

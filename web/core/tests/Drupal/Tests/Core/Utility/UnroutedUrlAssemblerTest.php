@@ -59,7 +59,7 @@ class UnroutedUrlAssemblerTest extends UnitTestCase {
   /**
    * @covers ::assemble
    */
-  public function testAssembleWithNeitherExternalNorDomainLocalUri() {
+  public function testAssembleWithNeitherExternalNorDomainLocalUri(): void {
     $this->expectException(\InvalidArgumentException::class);
     $this->unroutedUrlAssembler->assemble('wrong-url');
   }
@@ -67,7 +67,7 @@ class UnroutedUrlAssemblerTest extends UnitTestCase {
   /**
    * @covers ::assemble
    */
-  public function testAssembleWithLeadingSlash() {
+  public function testAssembleWithLeadingSlash(): void {
     $this->expectException(\InvalidArgumentException::class);
     $this->unroutedUrlAssembler->assemble('/drupal.org');
   }
@@ -78,7 +78,7 @@ class UnroutedUrlAssemblerTest extends UnitTestCase {
    *
    * @dataProvider providerTestAssembleWithExternalUrl
    */
-  public function testAssembleWithExternalUrl($uri, array $options, $expected) {
+  public function testAssembleWithExternalUrl($uri, array $options, $expected): void {
     $this->setupRequestStack(FALSE);
     $this->assertEquals($expected, $this->unroutedUrlAssembler->assemble($uri, $options));
     $generated_url = $this->unroutedUrlAssembler->assemble($uri, $options, TRUE);
@@ -89,7 +89,7 @@ class UnroutedUrlAssemblerTest extends UnitTestCase {
   /**
    * Provides test data for testAssembleWithExternalUrl.
    */
-  public function providerTestAssembleWithExternalUrl() {
+  public static function providerTestAssembleWithExternalUrl() {
     return [
       ['http://example.com/test', [], 'http://example.com/test'],
       ['http://example.com/test', ['fragment' => 'example'], 'http://example.com/test#example'],
@@ -113,7 +113,7 @@ class UnroutedUrlAssemblerTest extends UnitTestCase {
    *
    * @dataProvider providerTestAssembleWithLocalUri
    */
-  public function testAssembleWithLocalUri($uri, array $options, $subdir, $expected) {
+  public function testAssembleWithLocalUri($uri, array $options, $subdir, $expected): void {
     $this->setupRequestStack($subdir);
 
     $this->assertEquals($expected, $this->unroutedUrlAssembler->assemble($uri, $options));
@@ -122,7 +122,7 @@ class UnroutedUrlAssemblerTest extends UnitTestCase {
   /**
    * @return array
    */
-  public function providerTestAssembleWithLocalUri() {
+  public static function providerTestAssembleWithLocalUri() {
     return [
       ['base:example', [], FALSE, '/example'],
       ['base:example', ['query' => ['foo' => 'bar']], FALSE, '/example?foo=bar'],
@@ -139,7 +139,7 @@ class UnroutedUrlAssemblerTest extends UnitTestCase {
   /**
    * @covers ::assemble
    */
-  public function testAssembleWithNotEnabledProcessing() {
+  public function testAssembleWithNotEnabledProcessing(): void {
     $this->setupRequestStack(FALSE);
     $this->pathProcessor->expects($this->never())
       ->method('processOutbound');
@@ -150,11 +150,11 @@ class UnroutedUrlAssemblerTest extends UnitTestCase {
   /**
    * @covers ::assemble
    */
-  public function testAssembleWithEnabledProcessing() {
+  public function testAssembleWithEnabledProcessing(): void {
     $this->setupRequestStack(FALSE);
     $this->pathProcessor->expects($this->exactly(2))
       ->method('processOutbound')
-      ->willReturnCallback(function ($path, &$options = [], Request $request = NULL, BubbleableMetadata $bubbleable_metadata = NULL) {
+      ->willReturnCallback(function ($path, &$options = [], ?Request $request = NULL, ?BubbleableMetadata $bubbleable_metadata = NULL) {
         if ($bubbleable_metadata) {
           $bubbleable_metadata->setCacheContexts(['some-cache-context']);
         }
@@ -174,12 +174,12 @@ class UnroutedUrlAssemblerTest extends UnitTestCase {
   /**
    * @covers ::assemble
    */
-  public function testAssembleWithStartingSlashEnabledProcessing() {
+  public function testAssembleWithStartingSlashEnabledProcessing(): void {
     $this->setupRequestStack(FALSE);
     $this->pathProcessor->expects($this->exactly(2))
       ->method('processOutbound')
       ->with('/test-uri', $this->anything(), $this->anything(), $this->anything())
-      ->willReturnCallback(function ($path, &$options = [], Request $request = NULL, BubbleableMetadata $bubbleable_metadata = NULL) {
+      ->willReturnCallback(function ($path, &$options = [], ?Request $request = NULL, ?BubbleableMetadata $bubbleable_metadata = NULL) {
         $bubbleable_metadata?->setCacheContexts(['some-cache-context']);
         return '/test-other-uri';
       });

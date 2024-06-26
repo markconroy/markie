@@ -18,7 +18,7 @@ class RectangleTest extends TestCase {
    *
    * @covers ::rotate
    */
-  public function testWrongWidth() {
+  public function testWrongWidth(): void {
     $this->expectException(\InvalidArgumentException::class);
     $rect = new Rectangle(-40, 20);
   }
@@ -28,7 +28,7 @@ class RectangleTest extends TestCase {
    *
    * @covers ::rotate
    */
-  public function testWrongHeight() {
+  public function testWrongHeight(): void {
     $this->expectException(\InvalidArgumentException::class);
     $rect = new Rectangle(40, 0);
   }
@@ -53,7 +53,7 @@ class RectangleTest extends TestCase {
    *
    * @dataProvider providerPhp55RotateDimensions
    */
-  public function testRotateDimensions($width, $height, $angle, $exp_width, $exp_height) {
+  public function testRotateDimensions($width, $height, $angle, $exp_width, $exp_height): void {
     $rect = new Rectangle($width, $height);
     $rect->rotate($angle);
     $this->assertEquals($exp_width, $rect->getBoundingWidth());
@@ -96,7 +96,7 @@ class RectangleTest extends TestCase {
    *
    * @see testRotateDimensions()
    */
-  public function providerPhp55RotateDimensions() {
+  public static function providerPhp55RotateDimensions() {
     // The dataset is stored in a .json file because it is very large and causes
     // problems for PHPCS.
     return json_decode(file_get_contents(__DIR__ . '/fixtures/RectangleTest.json'));

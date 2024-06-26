@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\locale\Kernel;
 
 use Drupal\locale\LocaleTranslation;
@@ -21,7 +23,7 @@ class LocaleTranslationTest extends KernelTestBase {
   /**
    * Tests that \Drupal\locale\LocaleTranslation is serializable.
    */
-  public function testSerializable() {
+  public function testSerializable(): void {
     $translation = $this->container->get('string_translator.locale.lookup');
     $this->assertInstanceOf(LocaleTranslation::class, $translation);
 

@@ -15,30 +15,30 @@ use Drupal\Component\Graph\Graph;
  *
  * The configuration dependency value is structured like this:
  * @code
- * array(
- *   'config' => array(
+ * [
+ *   'config' => [
  *     // An array of configuration entity object names. Recalculated on save.
- *   ),
- *   'content' => array(
+ *   ],
+ *   'content' => [
  *     // An array of content entity configuration dependency names. The default
  *     // format is "ENTITY_TYPE_ID:BUNDLE:UUID". Recalculated on save.
- *   ),
- *   'module' => array(
+ *   ],
+ *   'module' => [
  *     // An array of module names. Recalculated on save.
- *   ),
- *   'theme' => array(
+ *   ],
+ *   'theme' => [
  *     // An array of theme names. Recalculated on save.
- *   ),
- *   'enforced' => array(
+ *   ],
+ *   'enforced' => [
  *     // An array of configuration dependencies that the config entity is
  *     // ensured to have regardless of the details of the configuration. These
  *     // dependencies are not recalculated on save.
- *     'config' => array(),
- *     'content' => array(),
- *     'module' => array(),
- *     'theme' => array(),
+ *     'config' => [],
+ *     'content' => [],
+ *     'module' => [],
+ *     'theme' => [],
  *   ),
- * );
+ * ];
  * @endcode
  *
  * Configuration entity dependencies are recalculated on save based on the
@@ -68,11 +68,11 @@ use Drupal\Component\Graph\Graph;
  *
  * If an extension author wants a configuration entity to depend on something
  * that is not calculable then they can add these dependencies to the enforced
- * dependencies key. For example, the Forum module provides the forum node type
- * and in order for it to be deleted when the forum module is uninstalled it has
- * an enforced dependency on the module. The dependency on the Forum module can
- * not be calculated since there is nothing inherent in the state of the node
- * type configuration entity that depends on functionality provided by the Forum
+ * dependencies key. For example, a custom module that provides a node type can
+ * have that type deleted when the module is uninstalled, if it has an enforced
+ * dependency on the module. The dependency on the custom module can not be
+ * calculated since there is nothing inherent in the state of the node type
+ * configuration entity that depends on functionality provided by the custom
  * module.
  *
  * Once declared properly, dependencies are saved to the configuration entity's
@@ -305,21 +305,21 @@ class ConfigDependencyManager {
    * @param array $dependencies
    *   The configuration dependencies. The array is structured like this:
    *   @code
-   *   array(
-   *     'config' => array(
+   *   [
+   *     'config' => [
    *       // An array of configuration entity object names.
-   *     ),
-   *     'content' => array(
+   *     ],
+   *     'content' => [
    *       // An array of content entity configuration dependency names. The default
    *       // format is "ENTITY_TYPE_ID:BUNDLE:UUID".
-   *     ),
-   *     'module' => array(
+   *     ],
+   *     'module' => [
    *       // An array of module names.
-   *     ),
-   *     'theme' => array(
+   *     ],
+   *     'theme' => [
    *       // An array of theme names.
-   *     ),
-   *   );
+   *     ],
+   *   ];
    *   @endcode
    *
    * @return $this

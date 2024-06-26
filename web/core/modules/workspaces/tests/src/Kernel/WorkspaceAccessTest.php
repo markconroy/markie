@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\workspaces\Kernel;
 
 use Drupal\Core\Access\AccessResult;
@@ -25,7 +27,6 @@ class WorkspaceAccessTest extends KernelTestBase {
     'system',
     'workspaces',
     'workspace_access_test',
-    'path_alias',
   ];
 
   /**
@@ -49,7 +50,7 @@ class WorkspaceAccessTest extends KernelTestBase {
    * @return array
    *   An array of operations and permissions to test with.
    */
-  public function operationCases() {
+  public static function operationCases() {
     return [
       ['create', 'administer workspaces'],
       ['create', 'create workspace'],
@@ -75,7 +76,7 @@ class WorkspaceAccessTest extends KernelTestBase {
    *
    * @dataProvider operationCases
    */
-  public function testWorkspaceAccess($operation, $permission) {
+  public function testWorkspaceAccess($operation, $permission): void {
     $user = $this->createUser();
     $this->setCurrentUser($user);
     $workspace = Workspace::create(['id' => 'oak']);
@@ -92,7 +93,7 @@ class WorkspaceAccessTest extends KernelTestBase {
   /**
    * Tests workspace publishing access.
    */
-  public function testPublishWorkspaceAccess() {
+  public function testPublishWorkspaceAccess(): void {
     $user = $this->createUser([
       'view own workspace',
       'edit own workspace',
@@ -115,7 +116,7 @@ class WorkspaceAccessTest extends KernelTestBase {
   /**
    * @covers \Drupal\workspaces\Plugin\EntityReferenceSelection\WorkspaceSelection::getReferenceableEntities
    */
-  public function testWorkspaceSelection() {
+  public function testWorkspaceSelection(): void {
     $own_permission_user = $this->createUser(['view own workspace']);
     $any_permission_user = $this->createUser(['view any workspace']);
     $admin_permission_user = $this->createUser(['administer workspaces']);
@@ -221,6 +222,28 @@ class WorkspaceAccessTest extends KernelTestBase {
     $this->assertEquals($expected_all, array_keys($selection_handler->getReferenceableEntities()['workspace']));
     $this->assertEquals($expected_3, array_keys($selection_handler->getReferenceableEntities(NULL, 'CONTAINS', 3)['workspace']));
     $this->assertEquals($expected_top, array_keys($selection_handler->getReferenceableEntities('top')['workspace']));
+  }
+
+  /**
+   * @covers \Drupal\workspaces\Plugin\Block\WorkspaceSwitcherBlock::blockAccess
+   */
+  public function testWorkspaceSwitcherBlock(): void {
+    $own_permission_user = $this->createUser(['view own workspace']);
+    $any_permission_user = $this->createUser(['view any workspace']);
+    $admin_permission_user = $this->createUser(['administer workspaces']);
+    $access_content_user = $this->createUser(['access content']);
+    $no_permission_user = $this->createUser();
+
+    /** @var \Drupal\Core\Block\BlockManagerInterface $block_manager */
+    $block_manager = \Drupal::service('plugin.manager.block');
+    /** @var \Drupal\Core\Block\BlockPluginInterface $switcher_block */
+    $switcher_block = $block_manager->createInstance('workspace_switcher');
+
+    $this->assertTrue($switcher_block->access($own_permission_user));
+    $this->assertTrue($switcher_block->access($any_permission_user));
+    $this->assertTrue($switcher_block->access($admin_permission_user));
+    $this->assertFalse($switcher_block->access($access_content_user));
+    $this->assertFalse($switcher_block->access($no_permission_user));
   }
 
 }

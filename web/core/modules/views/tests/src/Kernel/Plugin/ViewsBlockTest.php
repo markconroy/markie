@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\views\Kernel\Plugin;
 
 use Drupal\views\Plugin\Block\ViewsBlock;
@@ -42,7 +44,7 @@ class ViewsBlockTest extends ViewsKernelTestBase {
    *
    * @see \Drupal\views\Plugin\Block::getMachineNameSuggestion()
    */
-  public function testMachineNameSuggestion() {
+  public function testMachineNameSuggestion(): void {
     $plugin_definition = [
       'provider' => 'views',
     ];
@@ -57,7 +59,7 @@ class ViewsBlockTest extends ViewsKernelTestBase {
    *
    * @see \Drupal\views\Plugin\Block::build()
    */
-  public function testBuildWithTitleToken() {
+  public function testBuildWithTitleToken(): void {
     $view = Views::getView('test_view_block');
     $view->setDisplay();
 
@@ -91,7 +93,7 @@ class ViewsBlockTest extends ViewsKernelTestBase {
    *
    * @see \Drupal\views\Plugin\Block::build()
    */
-  public function testBuildWithTitleOverride() {
+  public function testBuildWithTitleOverride(): void {
     $view = Views::getView('test_view_block');
     $view->setDisplay();
 
@@ -132,7 +134,7 @@ class ViewsBlockTest extends ViewsKernelTestBase {
    *
    * @see \Drupal\views\Plugin\Block\ViewsBlockBase::getPreviewFallbackString()
    */
-  public function testGetPreviewFallbackString() {
+  public function testGetPreviewFallbackString(): void {
     $plugin_definition = [
       'provider' => 'views',
     ];

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\taxonomy\Kernel;
 
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
@@ -95,7 +97,7 @@ class TokenReplaceTest extends KernelTestBase {
   /**
    * Creates some terms and a node, then tests the tokens generated from them.
    */
-  public function testTaxonomyTokenReplacement() {
+  public function testTaxonomyTokenReplacement(): void {
     $token_service = \Drupal::token();
     $language_interface = \Drupal::languageManager()->getCurrentLanguage();
 
@@ -120,6 +122,9 @@ class TokenReplaceTest extends KernelTestBase {
     $tests['[term:url]'] = $term1->toUrl('canonical', ['absolute' => TRUE])->toString();
     $tests['[term:node-count]'] = 0;
     $tests['[term:parent:name]'] = '[term:parent:name]';
+    /** @var \Drupal\Core\Datetime\DateFormatterInterface $date_formatter */
+    $date_formatter = $this->container->get('date.formatter');
+    $tests['[term:changed:since]'] = $date_formatter->formatTimeDiffSince($term1->getChangedTime(), ['langcode' => $language_interface->getId()]);
     $tests['[term:vocabulary:name]'] = $this->vocabulary->label();
     $tests['[term:vocabulary]'] = $this->vocabulary->label();
 
@@ -135,6 +140,8 @@ class TokenReplaceTest extends KernelTestBase {
     $bubbleable_metadata = clone $base_bubbleable_metadata;
     $metadata_tests['[term:vocabulary:name]'] = $bubbleable_metadata->addCacheTags($this->vocabulary->getCacheTags());
     $metadata_tests['[term:vocabulary]'] = $bubbleable_metadata->addCacheTags($this->vocabulary->getCacheTags());
+    $bubbleable_metadata = clone $base_bubbleable_metadata;
+    $metadata_tests['[term:changed:since]'] = $bubbleable_metadata->setCacheMaxAge(0);
 
     foreach ($tests as $input => $expected) {
       $bubbleable_metadata = new BubbleableMetadata();
@@ -153,6 +160,7 @@ class TokenReplaceTest extends KernelTestBase {
     $tests['[term:parent:name]'] = $term1->getName();
     $tests['[term:parent:url]'] = $term1->toUrl('canonical', ['absolute' => TRUE])->toString();
     $tests['[term:parent:parent:name]'] = '[term:parent:parent:name]';
+    $tests['[term:changed:since]'] = $date_formatter->formatTimeDiffSince($term2->getChangedTime(), ['langcode' => $language_interface->getId()]);
     $tests['[term:vocabulary:name]'] = $this->vocabulary->label();
 
     // Test to make sure that we generated something for each token.

@@ -38,7 +38,7 @@ class JsOptimizerUnitTest extends UnitTestCase {
    * @return array
    *   An array of test data.
    */
-  public function providerTestClean() {
+  public static function providerTestClean() {
     $path = dirname(__FILE__) . '/js_test_files/';
     return [
       // File. Tests:
@@ -73,7 +73,7 @@ class JsOptimizerUnitTest extends UnitTestCase {
    *
    * @dataProvider providerTestClean
    */
-  public function testClean($js_asset, $expected) {
+  public function testClean($js_asset, $expected): void {
     $this->assertEquals($expected, $this->optimizer->clean($js_asset));
   }
 
@@ -85,7 +85,7 @@ class JsOptimizerUnitTest extends UnitTestCase {
    * @return array
    *   An array of test data.
    */
-  public function providerTestOptimize() {
+  public static function providerTestOptimize() {
     $path = dirname(__FILE__) . '/js_test_files/';
     return [
       0 => [
@@ -139,7 +139,7 @@ class JsOptimizerUnitTest extends UnitTestCase {
    *
    * @dataProvider providerTestOptimize
    */
-  public function testOptimize($js_asset, $expected) {
+  public function testOptimize($js_asset, $expected): void {
     $this->assertEquals($expected, $this->optimizer->optimize($js_asset));
   }
 

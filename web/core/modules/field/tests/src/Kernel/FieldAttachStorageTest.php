@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\field\Kernel;
 
 use Drupal\field\Entity\FieldConfig;
@@ -27,12 +29,12 @@ class FieldAttachStorageTest extends FieldKernelTestBase {
    * Works independently of the underlying field storage backend. Inserts or
    * updates random field data and then loads and verifies the data.
    */
-  public function testFieldAttachSaveLoad() {
+  public function testFieldAttachSaveLoad(): void {
     $entity_type = 'entity_test_rev';
     $this->createFieldWithStorage('', $entity_type);
     $cardinality = $this->fieldTestData->field_storage->getCardinality();
 
-    // TODO : test empty values filtering and "compression" (store consecutive deltas).
+    // @todo Test empty values filtering and "compression" (store consecutive deltas).
     // Preparation: create three revisions and store them in $revision array.
     $values = [];
     $entity = $this->container->get('entity_type.manager')
@@ -76,7 +78,7 @@ class FieldAttachStorageTest extends FieldKernelTestBase {
   /**
    * Tests the 'multiple' load feature.
    */
-  public function testFieldAttachLoadMultiple() {
+  public function testFieldAttachLoadMultiple(): void {
     $entity_type = 'entity_test_rev';
 
     // Define 2 bundles.
@@ -84,8 +86,8 @@ class FieldAttachStorageTest extends FieldKernelTestBase {
       1 => 'test_bundle_1',
       2 => 'test_bundle_2',
     ];
-    entity_test_create_bundle($bundles[1]);
-    entity_test_create_bundle($bundles[2]);
+    entity_test_create_bundle($bundles[1], entity_type: $entity_type);
+    entity_test_create_bundle($bundles[2], entity_type: $entity_type);
     // Define 3 fields:
     // - field_1 is in bundle_1 and bundle_2,
     // - field_2 is in bundle_1,
@@ -147,7 +149,7 @@ class FieldAttachStorageTest extends FieldKernelTestBase {
   /**
    * Tests insert and update with empty or NULL fields.
    */
-  public function testFieldAttachSaveEmptyData() {
+  public function testFieldAttachSaveEmptyData(): void {
     $entity_type = 'entity_test';
     $this->createFieldWithStorage('', $entity_type);
 
@@ -195,7 +197,7 @@ class FieldAttachStorageTest extends FieldKernelTestBase {
   /**
    * Tests insert with empty or NULL fields, with default value.
    */
-  public function testFieldAttachSaveEmptyDataDefaultValue() {
+  public function testFieldAttachSaveEmptyDataDefaultValue(): void {
     $entity_type = 'entity_test_rev';
     $this->createFieldWithStorage('', $entity_type);
 
@@ -228,7 +230,7 @@ class FieldAttachStorageTest extends FieldKernelTestBase {
   /**
    * Tests entity deletion.
    */
-  public function testFieldAttachDelete() {
+  public function testFieldAttachDelete(): void {
     $entity_type = 'entity_test_rev';
     $this->createFieldWithStorage('', $entity_type);
     $cardinality = $this->fieldTestData->field_storage->getCardinality();
@@ -289,7 +291,7 @@ class FieldAttachStorageTest extends FieldKernelTestBase {
   /**
    * Tests entity_bundle_create().
    */
-  public function testEntityCreateBundle() {
+  public function testEntityCreateBundle(): void {
     $entity_type = 'entity_test_rev';
     $this->createFieldWithStorage('', $entity_type);
     $cardinality = $this->fieldTestData->field_storage->getCardinality();
@@ -317,7 +319,7 @@ class FieldAttachStorageTest extends FieldKernelTestBase {
   /**
    * Tests entity_bundle_delete().
    */
-  public function testEntityDeleteBundle() {
+  public function testEntityDeleteBundle(): void {
     $entity_type = 'entity_test_rev';
     $this->createFieldWithStorage('', $entity_type);
 
@@ -361,7 +363,12 @@ class FieldAttachStorageTest extends FieldKernelTestBase {
     $this->assertCount(4, $entity->{$this->fieldTestData->field_name}, 'First field got loaded');
     $this->assertCount(1, $entity->{$field_name}, 'Second field got loaded');
 
-    // Delete the bundle.
+    // Delete the bundle. The form display has to be deleted first to prevent
+    // schema errors when fields attached to the deleted bundle are themselves
+    // deleted, which triggers an update of the form display.
+    $this->container->get('entity_display.repository')
+      ->getFormDisplay($entity_type, $this->fieldTestData->field->getTargetBundle())
+      ->delete();
     entity_test_delete_bundle($this->fieldTestData->field->getTargetBundle(), $entity_type);
 
     // Verify no data gets loaded

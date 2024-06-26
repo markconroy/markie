@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\KernelTests\Core\Entity\Element;
 
 use Drupal\Core\Entity\Element\EntityAutocomplete;
@@ -211,7 +213,7 @@ class EntityAutocompleteElementFormTest extends EntityKernelTestBase implements 
   /**
    * Tests valid entries in the EntityAutocomplete Form API element.
    */
-  public function testValidEntityAutocompleteElement() {
+  public function testValidEntityAutocompleteElement(): void {
     $form_state = (new FormState())
       ->setValues([
         'single' => $this->getAutocompleteInput($this->referencedEntities[0]),
@@ -291,7 +293,7 @@ class EntityAutocompleteElementFormTest extends EntityKernelTestBase implements 
   /**
    * Tests invalid entries in the EntityAutocomplete Form API element.
    */
-  public function testInvalidEntityAutocompleteElement() {
+  public function testInvalidEntityAutocompleteElement(): void {
     $form_builder = $this->container->get('form_builder');
 
     // Test 'single' with an entity label that doesn't exist
@@ -341,7 +343,7 @@ class EntityAutocompleteElementFormTest extends EntityKernelTestBase implements 
   /**
    * Tests that access is properly checked by the EntityAutocomplete element.
    */
-  public function testEntityAutocompleteAccess() {
+  public function testEntityAutocompleteAccess(): void {
     $form_builder = $this->container->get('form_builder');
     $form = $form_builder->getForm($this);
 
@@ -370,7 +372,7 @@ class EntityAutocompleteElementFormTest extends EntityKernelTestBase implements 
    *
    * E.g. This can happen with GET form parameters.
    */
-  public function testEntityAutocompleteIdInput() {
+  public function testEntityAutocompleteIdInput(): void {
     /** @var \Drupal\Core\Form\FormBuilderInterface $form_builder */
     $form_builder = $this->container->get('form_builder');
     // $form = $form_builder->getForm($this);

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\media\Functional;
 
 use Drupal\media\OEmbed\ProviderException;
@@ -30,7 +32,7 @@ class ProviderRepositoryTest extends MediaFunctionalTestBase {
    *
    * @dataProvider providerEmptyProviderList
    */
-  public function testEmptyProviderList($content) {
+  public function testEmptyProviderList($content): void {
     $response = $this->prophesize('\GuzzleHttp\Psr7\Response');
     $response->getBody()->willReturn(Utils::streamFor($content));
 
@@ -50,7 +52,7 @@ class ProviderRepositoryTest extends MediaFunctionalTestBase {
    *
    * @return array
    */
-  public function providerEmptyProviderList() {
+  public static function providerEmptyProviderList() {
     return [
       'empty array' => ['[]'],
       'empty string' => [''],
@@ -67,7 +69,7 @@ class ProviderRepositoryTest extends MediaFunctionalTestBase {
    *
    * @dataProvider providerNonExistingProviderDatabase
    */
-  public function testNonExistingProviderDatabase($providers_url, $exception_message) {
+  public function testNonExistingProviderDatabase($providers_url, $exception_message): void {
     $this->config('media.settings')
       ->set('oembed_providers_url', $providers_url)
       ->save();
@@ -84,7 +86,7 @@ class ProviderRepositoryTest extends MediaFunctionalTestBase {
    *
    * @return array
    */
-  public function providerNonExistingProviderDatabase() {
+  public static function providerNonExistingProviderDatabase() {
     return [
       [
         'http://oembed1.com/providers.json',

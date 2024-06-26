@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\serialization\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
@@ -37,7 +39,7 @@ class SerializationTest extends KernelTestBase {
   /**
    * Confirms that modules can register normalizers and encoders.
    */
-  public function testSerializerComponentRegistration() {
+  public function testSerializerComponentRegistration(): void {
     $object = new \stdClass();
     $format = 'serialization_test';
     $expected = 'Normalized by SerializationTestNormalizer, Encoded by SerializationTestEncoder';

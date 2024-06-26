@@ -15,7 +15,7 @@ use Drupal\views\Views;
  *
  * Relationship handlers extend
  * \Drupal\views\Plugin\views\relationship\RelationshipPluginBase. They must
- * be annotated with \Drupal\views\Annotation\ViewsRelationship annotation,
+ * be attributed with \Drupal\views\Attribute\ViewsRelationship attribute,
  * and they must be in namespace directory Plugin\views\relationship.
  *
  * @ingroup views_plugins
@@ -63,7 +63,7 @@ abstract class RelationshipPluginBase extends HandlerBase {
    * Init handler to let relationships live on tables other than
    * the table they operate on.
    */
-  public function init(ViewExecutable $view, DisplayPluginBase $display, array &$options = NULL) {
+  public function init(ViewExecutable $view, DisplayPluginBase $display, ?array &$options = NULL) {
     parent::init($view, $display, $options);
 
     if (isset($this->definition['relationship table'])) {

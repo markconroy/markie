@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\KernelTests\Core\Entity;
 
 use Drupal\language\Entity\ConfigurableLanguage;
@@ -43,7 +45,7 @@ class ContentEntityFieldMethodInvocationOrderTest extends EntityKernelTestBase {
   /**
    * Tests correct field method invocation order.
    */
-  public function testFieldMethodInvocationOrder() {
+  public function testFieldMethodInvocationOrder(): void {
 
     // Create a test entity.
     $entity = $this->entityTestFieldMethodsStorage->create([

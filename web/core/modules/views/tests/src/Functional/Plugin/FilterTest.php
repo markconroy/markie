@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\views\Functional\Plugin;
 
 use Drupal\Tests\views\Functional\ViewTestBase;
@@ -59,7 +61,7 @@ class FilterTest extends ViewTestBase {
   /**
    * Tests query of the row plugin.
    */
-  public function testFilterQuery() {
+  public function testFilterQuery(): void {
     // Check that we can find the test filter plugin.
     $plugin = $this->container->get('plugin.manager.views.filter')->createInstance('test_filter');
     $this->assertInstanceOf(FilterPlugin::class, $plugin);
@@ -154,7 +156,7 @@ class FilterTest extends ViewTestBase {
   /**
    * Tests an exposed filter when all options are selected.
    */
-  public function testInOperatorSelectAllOptions() {
+  public function testInOperatorSelectAllOptions(): void {
     $row['row[type]'] = 'fields';
     $this->drupalGet('admin/structure/views/nojs/display/test_filter_in_operator_ui/default/row');
     $this->submitForm($row, 'Apply');
@@ -177,7 +179,7 @@ class FilterTest extends ViewTestBase {
   /**
    * Tests the limit of the expose operator functionality.
    */
-  public function testLimitExposedOperators() {
+  public function testLimitExposedOperators(): void {
 
     $this->drupalGet('test_filter_in_operator_ui');
     $this->assertSession()->statusCodeEquals(200);

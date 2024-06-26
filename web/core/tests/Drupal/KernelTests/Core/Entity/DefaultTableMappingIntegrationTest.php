@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\KernelTests\Core\Entity;
 
 use Drupal\Core\Entity\EntityFieldManagerInterface;
@@ -76,7 +78,7 @@ class DefaultTableMappingIntegrationTest extends EntityKernelTestBase {
    *
    * @covers ::getFieldTableName
    */
-  public function testGetFieldTableName() {
+  public function testGetFieldTableName(): void {
     // Test the field table name for a single-valued base field, which is stored
     // in the entity's base table.
     $expected = 'entity_test_mulrev';
@@ -96,7 +98,7 @@ class DefaultTableMappingIntegrationTest extends EntityKernelTestBase {
   /**
    * @covers ::getAllFieldTableNames
    */
-  public function testGetAllFieldTableNames() {
+  public function testGetAllFieldTableNames(): void {
     // Check a field that is stored in all the shared tables.
     $expected = [
       'entity_test_mulrev',
@@ -135,7 +137,7 @@ class DefaultTableMappingIntegrationTest extends EntityKernelTestBase {
    *
    * @covers ::getTableNames
    */
-  public function testGetTableNames() {
+  public function testGetTableNames(): void {
     $storage_definitions = \Drupal::service('entity_field.manager')->getFieldStorageDefinitions('entity_test_mulrev');
     $dedicated_data_table = $this->tableMapping->getDedicatedDataTableName($storage_definitions['multivalued_base_field']);
     $dedicated_revision_table = $this->tableMapping->getDedicatedRevisionTableName($storage_definitions['multivalued_base_field']);

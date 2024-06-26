@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\media_library\Kernel;
 
 use Drupal\Core\Field\BaseFieldDefinition;
@@ -29,6 +31,7 @@ class MediaLibraryWidgetTest extends KernelTestBase {
     'media',
     'media_library',
     'field',
+    'filter',
     'image',
     'system',
     'views',
@@ -95,7 +98,7 @@ class MediaLibraryWidgetTest extends KernelTestBase {
   /**
    * Test the media library widget access.
    */
-  public function testWidgetAccess() {
+  public function testWidgetAccess(): void {
     $entity = EntityTest::create([
       'name' => 'sample entity',
     ]);
@@ -107,7 +110,7 @@ class MediaLibraryWidgetTest extends KernelTestBase {
   /**
    * Test the media library widget access with a revisionable entity type.
    */
-  public function testRevisionableWidgetAccess() {
+  public function testRevisionableWidgetAccess(): void {
     $allowed_revision = EntityTestRev::create([
       'name' => 'allowed_access',
     ]);

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\block\Kernel;
 
 use Drupal\block\Entity\Block;
@@ -61,7 +63,7 @@ class BlockConfigSchemaTest extends KernelTestBase {
   /**
    * Tests the block config schema for block plugins.
    */
-  public function testBlockConfigSchema() {
+  public function testBlockConfigSchema(): void {
     foreach ($this->blockManager->getDefinitions() as $block_id => $definition) {
       $id = $this->randomMachineName();
       $block = Block::create([

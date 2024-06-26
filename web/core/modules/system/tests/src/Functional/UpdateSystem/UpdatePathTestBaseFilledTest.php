@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\system\Functional\UpdateSystem;
 
 use Drupal\FunctionalTests\Update\UpdatePathTestBase;
@@ -34,7 +36,7 @@ class UpdatePathTestBaseFilledTest extends UpdatePathTestBase {
   /**
    * Tests that the content and configuration were properly updated.
    */
-  public function testUpdatedSite() {
+  public function testUpdatedSite(): void {
     $assert_session = $this->assertSession();
 
     $this->runUpdates();
@@ -382,7 +384,6 @@ class UpdatePathTestBaseFilledTest extends UpdatePathTestBase {
       'telephone',
       'text',
       'toolbar',
-      'tour',
       'tracker',
       'update',
       'user',
@@ -422,7 +423,7 @@ class UpdatePathTestBaseFilledTest extends UpdatePathTestBase {
   /**
    * Tests that the database was properly loaded.
    */
-  public function testDatabaseProperlyLoaded() {
+  public function testDatabaseProperlyLoaded(): void {
     $this->testDatabaseLoaded();
   }
 

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\system\Functional\Common;
 
 use Drupal\Component\Serialization\Json;
@@ -31,7 +33,7 @@ class RenderWebTest extends BrowserTestBase {
   /**
    * Asserts the cache context for the wrapper format is always present.
    */
-  public function testWrapperFormatCacheContext() {
+  public function testWrapperFormatCacheContext(): void {
     $this->drupalGet('common-test/type-link-active-class');
     $this->assertStringStartsWith("<!DOCTYPE html>\n<html", $this->getSession()->getPage()->getContent());
     $this->assertSession()->responseHeaderEquals('Content-Type', 'text/html; charset=UTF-8');

@@ -1,9 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\editor\Kernel;
 
 use Drupal\Core\Cache\Cache;
-use Drupal\Core\File\FileSystemInterface;
+use Drupal\Core\File\FileExists;
 use Drupal\file\Entity\File;
 use Drupal\filter\FilterPluginCollection;
 use Drupal\KernelTests\KernelTestBase;
@@ -54,7 +56,7 @@ class EditorFileReferenceFilterTest extends KernelTestBase {
   /**
    * Tests the editor file reference filter.
    */
-  public function testEditorFileReferenceFilter() {
+  public function testEditorFileReferenceFilter(): void {
     $filter = $this->filters['editor_file_reference'];
 
     $test = function ($input) use ($filter) {
@@ -134,7 +136,7 @@ class EditorFileReferenceFilterTest extends KernelTestBase {
     /** @var array stdClass */
     $files = $this->getTestFiles('image');
     $image = reset($files);
-    \Drupal::service('file_system')->copy($image->uri, 'public://llama.jpg', FileSystemInterface::EXISTS_REPLACE);
+    \Drupal::service('file_system')->copy($image->uri, 'public://llama.jpg', FileExists::Replace);
     [$width, $height] = getimagesize('public://llama.jpg');
     $dimensions = 'width="' . $width . '" height="' . $height . '"';
 

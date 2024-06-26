@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\views\Kernel;
 
 use Drupal\Core\Entity\ContentEntityTypeInterface;
@@ -47,7 +49,7 @@ class ViewsConfigDependenciesIntegrationTest extends ViewsKernelTestBase {
   /**
    * Tests integration with image module.
    */
-  public function testImage() {
+  public function testImage(): void {
     /** @var \Drupal\image\ImageStyleInterface $style */
     $style = ImageStyle::create(['name' => 'foo', 'label' => 'Foo']);
     $style->save();
@@ -109,7 +111,7 @@ class ViewsConfigDependenciesIntegrationTest extends ViewsKernelTestBase {
   /**
    * Tests removing a config dependency that deletes the View.
    */
-  public function testConfigRemovalRole() {
+  public function testConfigRemovalRole(): void {
     // Create a role we can add to the View and delete.
     $role = Role::create([
       'id' => 'dummy',
@@ -149,7 +151,7 @@ class ViewsConfigDependenciesIntegrationTest extends ViewsKernelTestBase {
   /**
    * Tests uninstalling a module that provides a base table for a View.
    */
-  public function testConfigRemovalBaseTable() {
+  public function testConfigRemovalBaseTable(): void {
     // Find all the entity types provided by the entity_test module and install
     // the schema for them so we can uninstall them.
     $entities = \Drupal::entityTypeManager()->getDefinitions();

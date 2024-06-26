@@ -1,9 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\KernelTests\Core\File;
 
 use Drupal\KernelTests\KernelTestBase;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
 
 /**
  * Tests URL transform to relative.
@@ -19,7 +23,7 @@ class UrlTransformRelativeTest extends KernelTestBase {
    *
    * @dataProvider providerFileUrlTransformRelative
    */
-  public function testFileUrlTransformRelative($host, $port, $https, $base_path, $root_relative, $url, $expected) {
+  public function testFileUrlTransformRelative($host, $port, $https, $base_path, $root_relative, $url, $expected): void {
 
     $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
     $_SERVER['SERVER_ADDR'] = '127.0.0.1';
@@ -35,12 +39,13 @@ class UrlTransformRelativeTest extends KernelTestBase {
     $_SERVER['HTTPS'] = $https;
 
     $request = Request::createFromGlobals();
+    $request->setSession(new Session(new MockArraySessionStorage()));
     \Drupal::requestStack()->push($request);
 
     $this->assertSame($expected, \Drupal::service('file_url_generator')->transformRelative($url, $root_relative));
   }
 
-  public function providerFileUrlTransformRelative() {
+  public static function providerFileUrlTransformRelative() {
     $data = [
       'http' => [
         'example.com',

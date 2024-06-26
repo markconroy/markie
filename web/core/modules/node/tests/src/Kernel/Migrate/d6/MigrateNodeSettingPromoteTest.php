@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\node\Kernel\Migrate\d6;
 
 use Drupal\Core\Field\Entity\BaseFieldOverride;
@@ -25,7 +27,7 @@ class MigrateNodeSettingPromoteTest extends MigrateDrupal6TestBase {
   /**
    * Tests migration of the promote checkbox's settings.
    */
-  public function testMigration() {
+  public function testMigration(): void {
     $this->assertSame('Promoted to front page', BaseFieldOverride::load('node.article.promote')->label());
   }
 

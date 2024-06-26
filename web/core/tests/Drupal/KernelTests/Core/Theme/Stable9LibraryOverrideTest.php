@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\KernelTests\Core\Theme;
 
 /**
@@ -26,12 +28,16 @@ class Stable9LibraryOverrideTest extends StableLibraryOverrideTestBase {
     'media/drupal.media-icon',
     'options/drupal.options-icon',
     'telephone/drupal.telephone-icon',
+    // This library will be changed in https://www.drupal.org/i/3096017.
+    'workspaces/drupal.workspaces.toolbar',
+    // This library will be removed in https://www.drupal.org/i/3207233.
+    'workspaces/drupal.workspaces.overview',
   ];
 
   /**
    * {@inheritdoc}
    */
-  protected static $modules = ['system', 'user', 'path_alias'];
+  protected static $modules = ['system', 'user'];
 
   /**
    * {@inheritdoc}
@@ -52,7 +58,7 @@ class Stable9LibraryOverrideTest extends StableLibraryOverrideTestBase {
   /**
    * Ensures that Stable 9 overrides all relevant core library assets.
    */
-  public function testStable9LibraryOverrides() {
+  public function testStable9LibraryOverrides(): void {
     // First get the clean library definitions with no active theme.
     $libraries_before = $this->getAllLibraries();
     $libraries_before = $this->removeVendorAssets($libraries_before);

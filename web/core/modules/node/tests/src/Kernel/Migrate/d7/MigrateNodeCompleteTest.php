@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\node\Kernel\Migrate\d7;
 
 use Drupal\migrate\MigrateExecutable;
@@ -97,7 +99,7 @@ class MigrateNodeCompleteTest extends MigrateDrupal7TestBase {
   /**
    * Tests the complete node migration.
    */
-  public function testNodeCompleteMigration() {
+  public function testNodeCompleteMigration(): void {
     // Confirm there are only complete node migration map tables. This shows
     // that only the complete migration ran.
     $results = $this->nodeMigrateMapTableCount('7');
@@ -159,7 +161,7 @@ class MigrateNodeCompleteTest extends MigrateDrupal7TestBase {
   /**
    * Tests rollback of the complete node migration.
    */
-  public function testRollbackNodeComplete() {
+  public function testRollbackNodeComplete(): void {
     $db = \Drupal::database();
     $node_types = [
       'article',

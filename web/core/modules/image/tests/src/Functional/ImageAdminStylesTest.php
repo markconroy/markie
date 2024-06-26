@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\image\Functional;
 
 use Drupal\Core\Entity\Entity\EntityViewDisplay;
@@ -59,7 +61,7 @@ class ImageAdminStylesTest extends ImageFieldTestBase {
   /**
    * Tests creating an image style with a numeric name.
    */
-  public function testNumericStyleName() {
+  public function testNumericStyleName(): void {
     $style_name = rand();
     $style_label = $this->randomString();
     $edit = [
@@ -76,7 +78,7 @@ class ImageAdminStylesTest extends ImageFieldTestBase {
   /**
    * General test to add a style, add/remove/edit effects to it, then delete it.
    */
-  public function testStyle() {
+  public function testStyle(): void {
     $admin_path = 'admin/config/media/image-styles';
 
     // Setup a style to be created and effects to add to it.
@@ -305,7 +307,7 @@ class ImageAdminStylesTest extends ImageFieldTestBase {
   /**
    * Tests deleting a style and choosing a replacement style.
    */
-  public function testStyleReplacement() {
+  public function testStyleReplacement(): void {
     // Create a new style.
     $style_name = $this->randomMachineName(10);
     $style_label = $this->randomString();
@@ -315,7 +317,7 @@ class ImageAdminStylesTest extends ImageFieldTestBase {
 
     // Create an image field that uses the new style.
     $field_name = $this->randomMachineName(10);
-    $this->createImageField($field_name, 'article');
+    $this->createImageField($field_name, 'node', 'article');
     \Drupal::service('entity_display.repository')
       ->getViewDisplay('node', 'article')
       ->setComponent($field_name, [
@@ -372,7 +374,7 @@ class ImageAdminStylesTest extends ImageFieldTestBase {
   /**
    * Verifies that editing an image effect does not cause it to be duplicated.
    */
-  public function testEditEffect() {
+  public function testEditEffect(): void {
     // Add a scale effect.
     $style_name = 'test_style_effect_edit';
     $this->drupalGet('admin/config/media/image-styles/add');
@@ -427,7 +429,7 @@ class ImageAdminStylesTest extends ImageFieldTestBase {
   /**
    * Tests flush user interface.
    */
-  public function testFlushUserInterface() {
+  public function testFlushUserInterface(): void {
     $admin_path = 'admin/config/media/image-styles';
 
     // Create a new style.
@@ -459,7 +461,7 @@ class ImageAdminStylesTest extends ImageFieldTestBase {
   /**
    * Tests image style configuration import that does a delete.
    */
-  public function testConfigImport() {
+  public function testConfigImport(): void {
     // Create a new style.
     $style_name = $this->randomMachineName(10);
     $style_label = $this->randomString();
@@ -468,7 +470,7 @@ class ImageAdminStylesTest extends ImageFieldTestBase {
 
     // Create an image field that uses the new style.
     $field_name = $this->randomMachineName(10);
-    $this->createImageField($field_name, 'article');
+    $this->createImageField($field_name, 'node', 'article');
     \Drupal::service('entity_display.repository')
       ->getViewDisplay('node', 'article')
       ->setComponent($field_name, [
@@ -509,7 +511,7 @@ class ImageAdminStylesTest extends ImageFieldTestBase {
   /**
    * Tests access for the image style listing.
    */
-  public function testImageStyleAccess() {
+  public function testImageStyleAccess(): void {
     $style = ImageStyle::create(['name' => 'style_foo', 'label' => $this->randomString()]);
     $style->save();
 

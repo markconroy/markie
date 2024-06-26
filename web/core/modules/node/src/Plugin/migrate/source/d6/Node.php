@@ -88,7 +88,7 @@ class Node extends DrupalSqlBase {
   /**
    * {@inheritdoc}
    */
-  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition, MigrationInterface $migration = NULL) {
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition, ?MigrationInterface $migration = NULL) {
     return new static(
       $configuration,
       $plugin_id,
@@ -249,7 +249,7 @@ class Node extends DrupalSqlBase {
       foreach ($this->fieldInfo as $type => $fields) {
         foreach ($fields as $field => $info) {
           foreach ($info as $property => $value) {
-            if ($property == 'db_columns' || preg_match('/_settings$/', $property)) {
+            if ($property == 'db_columns' || str_ends_with($property, '_settings')) {
               $this->fieldInfo[$type][$field][$property] = unserialize($value);
             }
           }

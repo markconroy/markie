@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\migrate_drupal\Kernel\Plugin\migrate\source;
 
 use Drupal\Component\Plugin\PluginBase;
@@ -213,7 +215,7 @@ class ContentEntityTest extends KernelTestBase {
    *
    * @dataProvider migrationConfigurationProvider
    */
-  public function testUserSource(array $configuration) {
+  public function testUserSource(array $configuration): void {
     $migration = $this->migrationPluginManager
       ->createStubMigration($this->migrationDefinition('content_entity:user', $configuration));
     $user_source = $migration->getSourcePlugin();
@@ -244,7 +246,7 @@ class ContentEntityTest extends KernelTestBase {
    *
    * @dataProvider migrationConfigurationProvider
    */
-  public function testFileSource(array $configuration) {
+  public function testFileSource(array $configuration): void {
     $file = File::create([
       'filename' => 'foo.txt',
       'uid' => $this->user->id(),
@@ -279,7 +281,7 @@ class ContentEntityTest extends KernelTestBase {
    *
    * @dataProvider migrationConfigurationProvider
    */
-  public function testNodeSource(array $configuration) {
+  public function testNodeSource(array $configuration): void {
     $configuration += ['bundle' => $this->bundle];
     $migration = $this->migrationPluginManager
       ->createStubMigration($this->migrationDefinition('content_entity:node', $configuration));
@@ -331,7 +333,7 @@ class ContentEntityTest extends KernelTestBase {
    *
    * @dataProvider migrationConfigurationProvider
    */
-  public function testMediaSource(array $configuration) {
+  public function testMediaSource(array $configuration): void {
     $values = [
       'id' => 'image',
       'label' => 'Image',
@@ -383,7 +385,7 @@ class ContentEntityTest extends KernelTestBase {
    *
    * @dataProvider migrationConfigurationProvider
    */
-  public function testTermSource(array $configuration) {
+  public function testTermSource(array $configuration): void {
     $term2 = Term::create([
       'vid' => $this->vocabulary,
       'name' => 'Granny Smith',
@@ -431,7 +433,7 @@ class ContentEntityTest extends KernelTestBase {
    * @see \Drupal\Tests\migrate_drupal\Kernel\Plugin\migrate\source\ContentEntityTest::testMediaSource
    * @see \Drupal\Tests\migrate_drupal\Kernel\Plugin\migrate\source\ContentEntityTest::testTermSource
    */
-  public function migrationConfigurationProvider() {
+  public static function migrationConfigurationProvider() {
     $data = [];
     foreach ([FALSE, TRUE] as $include_translations) {
       foreach ([FALSE, TRUE] as $add_revision_id) {

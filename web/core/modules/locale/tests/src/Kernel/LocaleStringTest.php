@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\locale\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
@@ -50,7 +52,7 @@ class LocaleStringTest extends KernelTestBase {
   /**
    * Tests CRUD API.
    */
-  public function testStringCrudApi() {
+  public function testStringCrudApi(): void {
     // Create source string.
     $source = $this->buildSourceString()->save();
     $this->assertNotEmpty($source->lid);
@@ -121,7 +123,7 @@ class LocaleStringTest extends KernelTestBase {
   /**
    * Tests Search API loading multiple objects.
    */
-  public function testStringSearchApi() {
+  public function testStringSearchApi(): void {
     $language_count = 3;
     // Strings 1 and 2 will have some common prefix.
     // Source 1 will have all translations, not customized.

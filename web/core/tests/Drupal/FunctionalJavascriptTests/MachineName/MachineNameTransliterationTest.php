@@ -51,7 +51,7 @@ class MachineNameTransliterationTest extends WebDriverTestBase {
    *
    * @dataProvider machineNameInputOutput
    */
-  public function testMachineNameTransliterations($langcode, $input, $output) {
+  public function testMachineNameTransliterations($langcode, $input, $output): void {
     $page = $this->getSession()->getPage();
     if ($langcode !== 'en') {
       ConfigurableLanguage::createFromLangcode($langcode)->save();
@@ -70,7 +70,7 @@ class MachineNameTransliterationTest extends WebDriverTestBase {
    *
    * @return array
    */
-  public function machineNameInputOutput(): array {
+  public static function machineNameInputOutput(): array {
     return [
       // cSpell:disable
       ['en', 'Bob', 'bob'],

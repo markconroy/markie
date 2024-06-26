@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\views\Kernel\Plugin;
 
 use Drupal\views\Views;
@@ -24,7 +26,7 @@ class StyleTableUnitTest extends PluginKernelTestBase {
   /**
    * Tests the table style.
    */
-  public function testTable() {
+  public function testTable(): void {
     $view = Views::getView('test_table');
 
     $view->setDisplay('default');

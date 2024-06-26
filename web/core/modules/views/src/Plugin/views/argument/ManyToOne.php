@@ -3,6 +3,7 @@
 namespace Drupal\views\Plugin\views\argument;
 
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\views\Attribute\ViewsArgument;
 use Drupal\views\ViewExecutable;
 use Drupal\views\Plugin\views\display\DisplayPluginBase;
 use Drupal\views\ManyToOneHelper;
@@ -21,9 +22,10 @@ use Drupal\views\ManyToOneHelper;
  *   a default argument can be provided or a summary can be shown.
  *
  * @ingroup views_argument_handlers
- *
- * @ViewsArgument("many_to_one")
  */
+#[ViewsArgument(
+  id: 'many_to_one',
+)]
 class ManyToOne extends ArgumentPluginBase {
 
   /**
@@ -34,7 +36,7 @@ class ManyToOne extends ArgumentPluginBase {
   /**
    * {@inheritdoc}
    */
-  public function init(ViewExecutable $view, DisplayPluginBase $display, array &$options = NULL) {
+  public function init(ViewExecutable $view, DisplayPluginBase $display, ?array &$options = NULL) {
     parent::init($view, $display, $options);
 
     $this->helper = new ManyToOneHelper($this);
@@ -144,7 +146,7 @@ class ManyToOne extends ArgumentPluginBase {
       $this->operator = 'or';
     }
 
-    // @todo -- both of these should check definition for alternate keywords.
+    // @todo Both of these should check definition for alternate keywords.
 
     if (empty($this->value)) {
       return !empty($this->definition['empty field name']) ? $this->definition['empty field name'] : $this->t('Uncategorized');

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\views\Kernel\Plugin;
 
 use Drupal\Tests\views\Kernel\ViewsKernelTestBase;
@@ -39,7 +41,7 @@ class BlockDependenciesTest extends ViewsKernelTestBase {
    *
    * @see \Drupal\views\Plugin\Derivative\ViewsExposedFilterBlock::getDerivativeDefinitions()
    */
-  public function testExposedBlock() {
+  public function testExposedBlock(): void {
     $block = $this->createBlock('views_exposed_filter_block:test_exposed_block-page_1');
     $dependencies = $block->calculateDependencies()->getDependencies();
     $expected = [
@@ -55,7 +57,7 @@ class BlockDependenciesTest extends ViewsKernelTestBase {
    *
    * @see \Drupal\views\Plugin\Derivative\ViewsBlock::getDerivativeDefinitions()
    */
-  public function testViewsBlock() {
+  public function testViewsBlock(): void {
     $block = $this->createBlock('views_block:content_recent-block_1');
     $dependencies = $block->calculateDependencies()->getDependencies();
     $expected = [
@@ -76,9 +78,9 @@ class BlockDependenciesTest extends ViewsKernelTestBase {
    *   Override the defaults by specifying the key and value in the array, for
    *   example:
    *   @code
-   *     $this->createBlock('system_powered_by_block', array(
+   *     $this->createBlock('system_powered_by_block', [
    *       'label' => 'Hello, world!',
-   *     ));
+   *     ]);
    *   @endcode
    *   The following defaults are provided:
    *   - label: Random string.

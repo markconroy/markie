@@ -7,6 +7,8 @@ namespace Drupal\Tests\jsonapi\Unit;
 use Drupal\jsonapi\JsonApiSpec;
 use Drupal\Tests\UnitTestCase;
 
+// cspell:ignore kitt
+
 /**
  * @coversDefaultClass \Drupal\jsonapi\JsonApiSpec
  * @group jsonapi
@@ -21,7 +23,7 @@ class JsonApiSpecTest extends UnitTestCase {
    * @dataProvider providerTestIsValidMemberName
    * @covers ::isValidMemberName
    */
-  public function testIsValidMemberName($member_name, $expected) {
+  public function testIsValidMemberName($member_name, $expected): void {
     $this->assertSame($expected, JsonApiSpec::isValidMemberName($member_name));
   }
 
@@ -38,9 +40,9 @@ class JsonApiSpecTest extends UnitTestCase {
     $data['hyphen-start'] = ['-kittens', FALSE];
     $data['hyphen-middle'] = ['kitt-ens', TRUE];
     $data['hyphen-end'] = ['kittens-', FALSE];
-    $data['lowline-start'] = ['_kittens', FALSE];
-    $data['lowline-middle'] = ['kitt_ens', TRUE];
-    $data['lowline-end'] = ['kittens_', FALSE];
+    $data['low-line-start'] = ['_kittens', FALSE];
+    $data['low-line-middle'] = ['kitt_ens', TRUE];
+    $data['low-line-end'] = ['kittens_', FALSE];
     $data['space-start'] = [' kittens', FALSE];
     $data['space-middle'] = ['kitt ens', TRUE];
     $data['space-end'] = ['kittens ', FALSE];
@@ -102,7 +104,7 @@ class JsonApiSpecTest extends UnitTestCase {
    * @covers ::isValidCustomQueryParameter
    * @covers ::isValidMemberName
    */
-  public function testIsValidCustomQueryParameter($custom_query_parameter, $expected) {
+  public function testIsValidCustomQueryParameter($custom_query_parameter, $expected): void {
     $this->assertSame($expected, JsonApiSpec::isValidCustomQueryParameter($custom_query_parameter));
   }
 

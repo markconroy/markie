@@ -112,7 +112,7 @@ abstract class ExtensionList {
   /**
    * The install profile used by the site.
    *
-   * @var string
+   * @var string|false|null
    */
   protected $installProfile;
 
@@ -170,14 +170,13 @@ abstract class ExtensionList {
     $this->pathNames = NULL;
 
     try {
-      $this->state->delete($this->getPathnamesCacheId());
+      $this->state->delete($this->getPathNamesCacheId());
     }
     catch (DatabaseExceptionWrapper $e) {
       // Ignore exceptions caused by a non existing {key_value} table in the
       // early installer.
     }
 
-    $this->cache->delete($this->getPathnamesCacheId());
     // @todo In the long run it would be great to add the reset, but the early
     //   installer fails due to that. https://www.drupal.org/node/2719315 could
     //   help to resolve with that.
@@ -210,7 +209,7 @@ abstract class ExtensionList {
    * @return string
    *   The filename cache ID.
    */
-  protected function getPathnamesCacheId() {
+  protected function getPathNamesCacheId() {
     return "system.{$this->type}.files";
   }
 
@@ -413,21 +412,17 @@ abstract class ExtensionList {
    *
    * @return string[]
    */
-  public function getPathnames() {
+  public function getPathNames() {
     if ($this->pathNames === NULL) {
-      $cache_id = $this->getPathnamesCacheId();
-      if ($cache = $this->cache->get($cache_id)) {
-        $path_names = $cache->data;
-      }
-      // We use $file_names below.
-      elseif (!$path_names = $this->state->get($cache_id)) {
-        $path_names = $this->recalculatePathnames();
+      $cache_id = $this->getPathNamesCacheId();
+      $this->pathNames = $this->state->get($cache_id);
+
+      if ($this->pathNames === NULL) {
+        $this->pathNames = $this->recalculatePathNames();
         // Store filenames to allow static::getPathname() to retrieve them
         // without having to rebuild or scan the filesystem.
-        $this->state->set($cache_id, $path_names);
-        $this->cache->set($cache_id, $path_names);
+        $this->state->set($cache_id, $this->pathNames);
       }
-      $this->pathNames = $path_names;
     }
     return $this->pathNames;
   }
@@ -438,7 +433,7 @@ abstract class ExtensionList {
    * @return string[]
    *   An array of .info.yml file locations keyed by the extension machine name.
    */
-  protected function recalculatePathnames() {
+  protected function recalculatePathNames() {
     $extensions = $this->getList();
     ksort($extensions);
 
@@ -518,7 +513,7 @@ abstract class ExtensionList {
     elseif (isset($this->pathNames[$extension_name])) {
       return $this->pathNames[$extension_name];
     }
-    elseif (($path_names = $this->getPathnames()) && isset($path_names[$extension_name])) {
+    elseif (($path_names = $this->getPathNames()) && isset($path_names[$extension_name])) {
       return $path_names[$extension_name];
     }
     throw new UnknownExtensionException("The {$this->type} $extension_name does not exist.");

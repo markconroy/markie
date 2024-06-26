@@ -2,10 +2,12 @@
 
 namespace Drupal\Core\Session;
 
+use Drupal\Component\Datetime\TimeInterface;
 use Drupal\Core\Database\Connection;
 use Drupal\Core\DependencyInjection\DependencySerializationTrait;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Session\Storage\NativeSessionStorage;
+use Symfony\Component\HttpFoundation\Session\Storage\Proxy\AbstractProxy;
 
 /**
  * Manages user sessions.
@@ -16,8 +18,7 @@ use Symfony\Component\HttpFoundation\Session\Storage\NativeSessionStorage;
  * storing and retrieving session data has been extracted from it in Symfony 2.1
  * but the class name was not changed.
  *
- * @todo
- *   In fact the NativeSessionStorage class already implements all of the
+ * @todo In fact the NativeSessionStorage class already implements all of the
  *   functionality required by a typical Symfony application. Normally it is not
  *   necessary to subclass it at all. In order to reach the point where Drupal
  *   can use the Symfony session management unmodified, the code implemented
@@ -59,7 +60,7 @@ class SessionManager extends NativeSessionStorage implements SessionManagerInter
   /**
    * The write safe session handler.
    *
-   * @todo: This reference should be removed once all database queries
+   * @todo This reference should be removed once all database queries
    *   are removed from the session manager class.
    *
    * @var \Drupal\Core\Session\WriteSafeSessionHandlerInterface
@@ -77,15 +78,32 @@ class SessionManager extends NativeSessionStorage implements SessionManagerInter
    *   The session metadata bag.
    * @param \Drupal\Core\Session\SessionConfigurationInterface $session_configuration
    *   The session configuration interface.
+   * @param \Drupal\Component\Datetime\TimeInterface|null|\Symfony\Component\HttpFoundation\Session\Storage\Proxy\AbstractProxy|\SessionHandlerInterface $time
+   *   The time service.
    * @param \Symfony\Component\HttpFoundation\Session\Storage\Proxy\AbstractProxy|\SessionHandlerInterface|null $handler
    *   The object to register as a PHP session handler.
-   *   @see \Symfony\Component\HttpFoundation\Session\Storage\NativeSessionStorage::setSaveHandler()
+   *
+   * @see \Symfony\Component\HttpFoundation\Session\Storage\NativeSessionStorage::setSaveHandler()
    */
-  public function __construct(RequestStack $request_stack, Connection $connection, MetadataBag $metadata_bag, SessionConfigurationInterface $session_configuration, $handler = NULL) {
+  public function __construct(
+    RequestStack $request_stack,
+    Connection $connection,
+    MetadataBag $metadata_bag,
+    SessionConfigurationInterface $session_configuration,
+    protected TimeInterface|AbstractProxy|\SessionHandlerInterface|null $time = NULL,
+    $handler = NULL,
+  ) {
     $options = [];
     $this->sessionConfiguration = $session_configuration;
     $this->requestStack = $request_stack;
     $this->connection = $connection;
+    if (!$time || $time instanceof AbstractProxy || $time instanceof \SessionHandlerInterface) {
+      @trigger_error('Calling ' . __METHOD__ . '() without the $time argument is deprecated in drupal:10.3.0 and it will be the 5th argument in drupal:11.0.0. See https://www.drupal.org/node/3387233', E_USER_DEPRECATED);
+      if ($time instanceof AbstractProxy || $time instanceof \SessionHandlerInterface) {
+        $handler = $time;
+      }
+      $this->time = \Drupal::service(TimeInterface::class);
+    }
 
     parent::__construct($options, $handler, $metadata_bag);
   }
@@ -215,9 +233,14 @@ class SessionManager extends NativeSessionStorage implements SessionManagerInter
     if (!$this->writeSafeHandler->isSessionWritable() || $this->isCli()) {
       return;
     }
-    $this->connection->delete('sessions')
-      ->condition('uid', $uid)
-      ->execute();
+    // The sessions table may not have been created yet.
+    try {
+      $this->connection->delete('sessions')
+        ->condition('uid', $uid)
+        ->execute();
+    }
+    catch (\Exception) {
+    }
   }
 
   /**
@@ -242,7 +265,7 @@ class SessionManager extends NativeSessionStorage implements SessionManagerInter
     // setcookie() can only be called when headers are not yet sent.
     if ($cookies->has($session_name) && !headers_sent()) {
       $params = session_get_cookie_params();
-      setcookie($session_name, '', REQUEST_TIME - 3600, $params['path'], $params['domain'], $params['secure'], $params['httponly']);
+      setcookie($session_name, '', $this->time->getRequestTime() - 3600, $params['path'], $params['domain'], $params['secure'], $params['httponly']);
       $cookies->remove($session_name);
     }
   }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\path\Functional;
 
 use Drupal\Tests\BrowserTestBase;
@@ -53,7 +55,30 @@ class PathContentModerationTest extends BrowserTestBase {
     $workflow->getTypePlugin()->addEntityTypeAndBundle('node', 'moderated');
     $workflow->save();
 
-    $this->drupalLogin($this->rootUser);
+    $this->drupalLogin($this->drupalCreateUser([
+      'administer workflows',
+      'access administration pages',
+      'administer content types',
+      'administer content translation',
+      'administer nodes',
+      'view latest version',
+      'view any unpublished content',
+      'access content overview',
+      'use editorial transition create_new_draft',
+      'use editorial transition publish',
+      'use editorial transition archive',
+      'use editorial transition archived_draft',
+      'use editorial transition archived_published',
+      'administer languages',
+      'administer site configuration',
+      'administer url aliases',
+      'create url aliases',
+      'view the administration theme',
+      'translate any entity',
+      'create content translations',
+      'create moderated content',
+      'edit own moderated content',
+    ]));
 
     // Enable URL language detection and selection.
     $edit = ['language_interface[enabled][language-url]' => 1];
@@ -67,7 +92,7 @@ class PathContentModerationTest extends BrowserTestBase {
   /**
    * Tests node path aliases on a moderated content type.
    */
-  public function testNodePathAlias() {
+  public function testNodePathAlias(): void {
     // Create some moderated content with a path alias.
     $this->drupalGet('node/add/moderated');
     $this->assertSession()->fieldValueEquals('path[0][alias]', '');
@@ -132,7 +157,7 @@ class PathContentModerationTest extends BrowserTestBase {
   /**
    * Tests that translated and moderated node can get new draft revision.
    */
-  public function testTranslatedModeratedNodeAlias() {
+  public function testTranslatedModeratedNodeAlias(): void {
     // Create one node with a random alias.
     $default_node = $this->drupalCreateNode([
       'type' => 'moderated',

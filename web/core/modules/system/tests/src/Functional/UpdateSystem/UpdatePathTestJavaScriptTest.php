@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\system\Functional\UpdateSystem;
 
 use Drupal\Tests\BrowserTestBase;
@@ -31,7 +33,7 @@ class UpdatePathTestJavaScriptTest extends BrowserTestBase {
    *
    * @see ::doPreUpdateTests
    */
-  public function testJavaScriptLoading() {
+  public function testJavaScriptLoading(): void {
     $this->runUpdates();
   }
 

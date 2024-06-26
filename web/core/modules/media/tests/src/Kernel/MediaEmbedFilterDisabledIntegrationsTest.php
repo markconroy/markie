@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\media\Kernel;
 
 /**
@@ -36,7 +38,7 @@ class MediaEmbedFilterDisabledIntegrationsTest extends MediaEmbedFilterTestBase 
    * @covers ::renderMedia
    * @covers ::disableContextualLinks
    */
-  public function testDisabledIntegrations() {
+  public function testDisabledIntegrations(): void {
     $text = $this->createEmbedCode([
       'data-entity-type' => 'media',
       'data-entity-uuid' => static::EMBEDDED_ENTITY_UUID,

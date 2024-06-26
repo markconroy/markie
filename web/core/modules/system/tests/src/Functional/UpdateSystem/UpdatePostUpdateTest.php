@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\system\Functional\UpdateSystem;
 
 use Drupal\Core\Database\Database;
@@ -72,7 +74,7 @@ class UpdatePostUpdateTest extends BrowserTestBase {
   /**
    * Tests hook_post_update_NAME().
    */
-  public function testPostUpdate() {
+  public function testPostUpdate(): void {
     $this->runUpdates();
 
     $this->assertSession()->responseContains('<h3>Update first</h3>');

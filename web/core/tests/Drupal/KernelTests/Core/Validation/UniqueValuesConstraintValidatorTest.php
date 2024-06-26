@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\KernelTests\Core\Validation;
 
 use Drupal\KernelTests\KernelTestBase;
@@ -45,7 +47,7 @@ class UniqueValuesConstraintValidatorTest extends KernelTestBase {
    *
    * @covers ::validate
    */
-  public function testValidation() {
+  public function testValidation(): void {
     // Create entity with two values for the testing field.
     $definition = [
       'id' => (int) rand(0, getrandmax()),
@@ -112,7 +114,7 @@ class UniqueValuesConstraintValidatorTest extends KernelTestBase {
    *
    * @covers ::validate
    */
-  public function testValidationReference() {
+  public function testValidationReference(): void {
 
     $users = [];
     for ($i = 0; $i <= 5; $i++) {
@@ -188,7 +190,7 @@ class UniqueValuesConstraintValidatorTest extends KernelTestBase {
    *
    * @covers ::validate
    */
-  public function testValidationOwn() {
+  public function testValidationOwn(): void {
     // Create new entity with two identical values for the testing field.
     $definition = [
       'user_id' => 0,
@@ -236,7 +238,7 @@ class UniqueValuesConstraintValidatorTest extends KernelTestBase {
    *
    * @covers ::validate
    */
-  public function testValidationMultiple() {
+  public function testValidationMultiple(): void {
     // Create entity with two different values for the testing field.
     $definition = [
       'user_id' => 0,
@@ -286,6 +288,44 @@ class UniqueValuesConstraintValidatorTest extends KernelTestBase {
     $this->assertEquals('field_test_text.2', $violations[1]->getPropertyPath());
     $this->assertEquals(sprintf('A unique field entity with unique_field_test %s already exists.', $definition['field_test_text'][2]), $violations[1]->getMessage());
 
+  }
+
+  /**
+   * Tests the UniqueField validation constraint validator with regards to case-insensitivity.
+   *
+   * Case 5. Try to create another entity with existing value for unique field with different capitalization.
+   *
+   * @throws \Drupal\Core\Entity\EntityStorageException
+   *
+   * @covers ::validate
+   */
+  public function testValidationCaseInsensitive(): void {
+    // Create entity with two values for the testing field.
+    $definition = [
+      'id' => (int) rand(0, getrandmax()),
+      'user_id' => 0,
+      'field_test_text' => [
+        'text1',
+        'text2',
+      ],
+    ];
+    $entity = EntityTestUniqueConstraint::create($definition);
+    $entity->save();
+
+    // Create another entity with two values for the testing field, one identical
+    // to other value, but with different capitalization which should still trigger a validation error.
+    $definition = [
+      'id' => (int) rand(0, getrandmax()),
+      'user_id' => 0,
+      'field_test_text' => [
+        'Text1',
+        'text3',
+      ],
+    ];
+    $entity = EntityTestUniqueConstraint::create($definition);
+    $violations = $entity->validate();
+    $this->assertCount(1, $violations);
+    $this->assertEquals('field_test_text.0', $violations[0]->getPropertyPath());
   }
 
 }

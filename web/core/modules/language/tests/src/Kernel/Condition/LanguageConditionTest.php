@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\language\Kernel\Condition;
 
 use Drupal\language\Entity\ConfigurableLanguage;
@@ -49,7 +51,7 @@ class LanguageConditionTest extends KernelTestBase {
   /**
    * Tests the language condition.
    */
-  public function testConditions() {
+  public function testConditions(): void {
     // Grab the language condition and configure it to check the content
     // language.
     $language = \Drupal::languageManager()->getLanguage('en');

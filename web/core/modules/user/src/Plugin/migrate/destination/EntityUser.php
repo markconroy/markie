@@ -9,6 +9,7 @@ use Drupal\Core\Field\FieldTypePluginManagerInterface;
 use Drupal\Core\Field\Plugin\Field\FieldType\EmailItem;
 use Drupal\Core\Password\PasswordInterface;
 use Drupal\Core\Session\AccountSwitcherInterface;
+use Drupal\migrate\Attribute\MigrateDestination;
 use Drupal\migrate\Plugin\MigrationInterface;
 use Drupal\migrate\Plugin\migrate\destination\EntityContentBase;
 use Drupal\migrate\Row;
@@ -61,11 +62,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * on different password hash types and a list of other user properties, refer
  * to the handbook documentation:
  * @see https://www.drupal.org/docs/8/api/migrate-api/migrate-destination-plugins-examples/migrating-users
- *
- * @MigrateDestination(
- *   id = "entity:user"
- * )
  */
+#[MigrateDestination('entity:user')]
 class EntityUser extends EntityContentBase {
 
   /**
@@ -99,7 +97,7 @@ class EntityUser extends EntityContentBase {
    * @param \Drupal\Core\Session\AccountSwitcherInterface|null $account_switcher
    *   The account switcher service.
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, MigrationInterface $migration, EntityStorageInterface $storage, array $bundles, EntityFieldManagerInterface $entity_field_manager, FieldTypePluginManagerInterface $field_type_manager, PasswordInterface $password, AccountSwitcherInterface $account_switcher = NULL) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, MigrationInterface $migration, EntityStorageInterface $storage, array $bundles, EntityFieldManagerInterface $entity_field_manager, FieldTypePluginManagerInterface $field_type_manager, PasswordInterface $password, ?AccountSwitcherInterface $account_switcher = NULL) {
     parent::__construct($configuration, $plugin_id, $plugin_definition, $migration, $storage, $bundles, $entity_field_manager, $field_type_manager, $account_switcher);
     $this->password = $password;
   }
@@ -107,7 +105,7 @@ class EntityUser extends EntityContentBase {
   /**
    * {@inheritdoc}
    */
-  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition, MigrationInterface $migration = NULL) {
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition, ?MigrationInterface $migration = NULL) {
     $entity_type = static::getEntityTypeId($plugin_id);
     return new static(
       $configuration,

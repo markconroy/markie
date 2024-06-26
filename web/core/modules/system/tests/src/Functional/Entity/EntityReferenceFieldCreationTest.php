@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\system\Functional\Entity;
 
 use Drupal\Tests\BrowserTestBase;
@@ -29,9 +31,13 @@ class EntityReferenceFieldCreationTest extends BrowserTestBase {
   /**
    * Tests that entity reference fields cannot target entity types without IDs.
    */
-  public function testAddReferenceFieldTargetingEntityTypeWithoutId() {
-    $this->drupalLogin($this->rootUser);
+  public function testAddReferenceFieldTargetingEntityTypeWithoutId(): void {
+
     $node_type = $this->drupalCreateContentType()->id();
+    $this->drupalLogin($this->drupalCreateUser([
+      'administer content types',
+      'administer node fields',
+    ]));
 
     // Entity types without an ID key should not be presented as options when
     // creating an entity reference field in the UI.

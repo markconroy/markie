@@ -63,14 +63,16 @@ class JavascriptStatesTest extends WebDriverTestBase {
    * this is a single public test method that invokes a series of protected
    * methods to do assertions on specific kinds of triggering elements.
    */
-  public function testJavascriptStates() {
+  public function testJavascriptStates(): void {
     $this->doCheckboxTriggerTests();
     $this->doCheckboxesTriggerTests();
     $this->doTextfieldTriggerTests();
     $this->doRadiosTriggerTests();
     $this->doSelectTriggerTests();
+    $this->doMultipleSelectTriggerTests();
     $this->doMultipleTriggerTests();
     $this->doNestedTriggerTests();
+    $this->doElementsDisabledStateTests();
   }
 
   /**
@@ -444,6 +446,63 @@ class JavascriptStatesTest extends WebDriverTestBase {
   }
 
   /**
+   * Tests states of elements triggered by a multiple select element.
+   */
+  protected function doMultipleSelectTriggerTests() {
+    $this->drupalGet('form-test/javascript-states-form');
+    $page = $this->getSession()->getPage();
+    // Find trigger and target elements.
+    $trigger = $page->findField('multiple_select_trigger[]');
+    $this->assertNotEmpty($trigger);
+    $item_visible_value2 = $this->assertSession()->elementExists('css', '#edit-item-visible-when-multiple-select-trigger-has-value2');
+    $item_visible_no_value = $this->assertSession()->elementExists('css', '#edit-item-visible-when-multiple-select-trigger-has-no-value');
+    $textfield_visible_value3 = $page->findField('textfield_visible_when_multiple_select_trigger_has_value3');
+    $this->assertNotEmpty($textfield_visible_value3);
+    $textfield_visible_value2_or_value3 = $page->findField('textfield_visible_when_multiple_select_trigger_has_value2_or_value3');
+    $this->assertNotEmpty($textfield_visible_value2_or_value3);
+    $textfield_visible_value2_and_value3 = $page->findField('textfield_visible_when_multiple_select_trigger_has_value2_and_value3');
+    $this->assertNotEmpty($textfield_visible_value2_and_value3);
+
+    // Verify initial state.
+    $this->assertFalse($item_visible_value2->isVisible());
+    $this->assertTrue($item_visible_no_value->isVisible());
+    $this->assertFalse($textfield_visible_value3->isVisible());
+    $this->assertFalse($textfield_visible_value2_or_value3->isVisible());
+    $this->assertFalse($textfield_visible_value2_and_value3->isVisible());
+    // Change state: select the 'Value 2' option.
+    $trigger->setValue('value2');
+    $this->assertTrue($item_visible_value2->isVisible());
+    $this->assertFalse($item_visible_no_value->isVisible());
+    $this->assertFalse($textfield_visible_value3->isVisible());
+    $this->assertTrue($textfield_visible_value2_or_value3->isVisible());
+    $this->assertFalse($textfield_visible_value2_and_value3->isVisible());
+    // Change state: select the 'Value 3' option.
+    $trigger->setValue('value3');
+    $this->assertFalse($item_visible_value2->isVisible());
+    $this->assertFalse($item_visible_no_value->isVisible());
+    $this->assertTrue($textfield_visible_value3->isVisible());
+    $this->assertTrue($textfield_visible_value2_or_value3->isVisible());
+    $this->assertFalse($textfield_visible_value2_and_value3->isVisible());
+    // Change state: select 'Value2' and 'Value 3' options.
+    $trigger->setValue(['value2', 'value3']);
+    $this->assertFalse($item_visible_value2->isVisible());
+    $this->assertFalse($item_visible_no_value->isVisible());
+    $this->assertFalse($textfield_visible_value3->isVisible());
+    $this->assertFalse($textfield_visible_value2_or_value3->isVisible());
+    $this->assertTrue($textfield_visible_value2_and_value3->isVisible());
+    // Restore initial trigger state (clear the values).
+    $trigger->setValue([]);
+    // Make sure the initial element states are restored.
+    $this->assertFalse($item_visible_value2->isVisible());
+    $this->assertFalse($textfield_visible_value3->isVisible());
+    $this->assertFalse($textfield_visible_value2_or_value3->isVisible());
+    // @todo These last two look to be correct, but the assertion is failing.
+    // @see https://www.drupal.org/project/drupal/issues/3367310
+    // $this->assertTrue($item_visible_no_value->isVisible());
+    // $this->assertFalse($textfield_visible_value2_and_value3->isVisible());
+  }
+
+  /**
    * Tests states of elements triggered by multiple elements.
    */
   protected function doMultipleTriggerTests() {
@@ -491,6 +550,49 @@ class JavascriptStatesTest extends WebDriverTestBase {
     // Set $radios_opposite1 value to 1, $radios_opposite2 value should be 0.
     $radios_opposite1->setValue('0');
     $this->assertEquals('1', $radios_opposite2->getValue());
+  }
+
+  /**
+   * Tests the submit button, select and textarea disabled states.
+   *
+   * The element should be disabled when visit the form
+   * then they should enable when trigger by a checkbox.
+   */
+  public function doElementsDisabledStateTests(): void {
+    $this->drupalGet('form-test/javascript-states-form');
+    $session = $this->assertSession();
+
+    // The submit button should be disabled when visit the form.
+    $button = $session->elementExists('css', 'input[value="Submit button disabled when checkbox not checked"]');
+    $this->assertTrue($button->hasAttribute('disabled'));
+
+    // The submit button should be enabled when the checkbox is checked.
+    $session->elementExists('css', 'input[name="checkbox_enable_submit_button"]')->check();
+    $this->assertFalse($button->hasAttribute('disabled'));
+
+    // The text field should be disabled when visit the form.
+    $textfield = $session->elementExists('css', 'input[name="input_textfield"]');
+    $this->assertTrue($textfield->hasAttribute('disabled'));
+
+    // The text field should be enabled when the checkbox is checked.
+    $session->elementExists('css', 'input[name="checkbox_enable_input_textfield"]')->check();
+    $this->assertFalse($textfield->hasAttribute('disabled'));
+
+    // The select should be disabled when visit the form.
+    $select = $session->elementExists('css', 'select[name="test_select_disabled"]');
+    $this->assertTrue($select->hasAttribute('disabled'));
+
+    // The select should be enabled when the checkbox is checked.
+    $session->elementExists('css', 'input[name="checkbox_enable_select"]')->check();
+    $this->assertFalse($select->hasAttribute('disabled'));
+
+    // The textarea should be disabled when visit the form.
+    $textarea = $session->elementExists('css', 'textarea[name="test_textarea_disabled"]');
+    $this->assertTrue($textarea->hasAttribute('disabled'));
+
+    // The textarea should be enabled when the checkbox is checked.
+    $session->elementExists('css', 'input[name="checkbox_enable_textarea"]')->check();
+    $this->assertFalse($textarea->hasAttribute('disabled'));
   }
 
 }

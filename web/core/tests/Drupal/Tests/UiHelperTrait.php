@@ -84,14 +84,16 @@ trait UiHelperTrait {
     foreach ($edit as $name => $value) {
       $field = $assert_session->fieldExists($name, $form);
 
-      // Provide support for the values '1' and '0' for checkboxes instead of
-      // TRUE and FALSE.
-      // @todo Get rid of supporting 1/0 by converting all tests cases using
-      // this to boolean values.
-      $field_type = $field->getAttribute('type');
-      if ($field_type === 'checkbox') {
-        $value = (bool) $value;
-      }
+      $value = match ($field->getAttribute('type')) {
+        // Provide support for the values '1' and '0' for checkboxes instead of
+        // TRUE and FALSE.
+        // @todo Get rid of supporting 1/0 by converting all tests cases using
+        // this to boolean values.
+        'checkbox' => (bool) $value,
+        // Mink only allows strings for text, number and radio button values.
+        'text', 'number', 'radio' => (string) $value,
+        default => $value,
+      };
 
       $field->setValue($value);
     }
@@ -136,7 +138,7 @@ trait UiHelperTrait {
    * For example:
    * @code
    *   // Create a user.
-   *   $account = $this->drupalCreateUser(array());
+   *   $account = $this->drupalCreateUser([]);
    *   $this->drupalLogin($account);
    *   // Load real user object.
    *   $pass_raw = $account->passRaw;
@@ -179,10 +181,20 @@ trait UiHelperTrait {
     // screen.
     $assert_session = $this->assertSession();
     $destination = Url::fromRoute('user.page')->toString();
-    $this->drupalGet(Url::fromRoute('user.logout', [], ['query' => ['destination' => $destination]]));
+    $this->drupalGet(Url::fromRoute('user.logout.confirm', options: ['query' => ['destination' => $destination]]));
+    // Target the submit button using the name rather than the value to work
+    // regardless of the user interface language.
+    $this->submitForm([], 'op', 'user-logout-confirm');
     $assert_session->fieldExists('name');
     $assert_session->fieldExists('pass');
 
+    $this->drupalResetSession();
+  }
+
+  /**
+   * Resets the current active session back to Anonymous session.
+   */
+  protected function drupalResetSession(): void {
     // @see BrowserTestBase::drupalUserIsLoggedIn()
     unset($this->loggedInUser->sessionId);
     $this->loggedInUser = FALSE;
@@ -232,6 +244,16 @@ trait UiHelperTrait {
 
     $this->prepareRequest();
     foreach ($headers as $header_name => $header_value) {
+      if (is_int($header_name)) {
+        // @todo Trigger deprecation in
+        //   https://www.drupal.org/project/drupal/issues/3421105.
+        [$header_name, $header_value] = explode(':', $header_value);
+      }
+      if (is_null($header_value)) {
+        // @todo Trigger deprecation in
+        //   https://www.drupal.org/project/drupal/issues/3421105.
+        $header_value = '';
+      }
       $session->setRequestHeader($header_name, $header_value);
     }
 
@@ -288,6 +310,10 @@ trait UiHelperTrait {
       $length = strlen($base_path);
       if (substr($path, 0, $length) === $base_path) {
         $path = substr($path, $length);
+      }
+      // Additionally strip any forward slashes.
+      if (strlen($path) > 1) {
+        $path = ltrim($path, '/');
       }
 
       $force_internal = isset($options['external']) && $options['external'] == FALSE;

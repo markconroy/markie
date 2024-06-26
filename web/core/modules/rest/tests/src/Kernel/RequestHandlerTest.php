@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\rest\Kernel;
 
 use Drupal\Component\Serialization\Json;
@@ -52,9 +54,9 @@ class RequestHandlerTest extends KernelTestBase {
   /**
    * @covers ::handle
    */
-  public function testHandle() {
+  public function testHandle(): void {
     $request = new Request([], [], [], [], [], ['CONTENT_TYPE' => 'application/json'], Json::encode(['this is an array']));
-    $route_match = new RouteMatch('test', (new Route('/rest/test', ['_rest_resource_config' => 'restplugin', 'example' => ''], ['_format' => 'json']))->setMethods(['GET']));
+    $route_match = new RouteMatch('test', (new Route('/rest/test', ['_rest_resource_config' => 'rest_plugin', 'example' => ''], ['_format' => 'json']))->setMethods(['GET']));
 
     $resource = $this->prophesize(StubRequestHandlerResourcePlugin::class);
     $resource->get('', $request)
@@ -83,7 +85,7 @@ class RequestHandlerTest extends KernelTestBase {
     $this->assertEquals($response, $handler_response);
 
     // We will call the patch method this time.
-    $route_match = new RouteMatch('test', (new Route('/rest/test', ['_rest_resource_config' => 'restplugin', 'example_original' => ''], ['_content_type_format' => 'json']))->setMethods(['PATCH']));
+    $route_match = new RouteMatch('test', (new Route('/rest/test', ['_rest_resource_config' => 'rest_plugin', 'example_original' => ''], ['_content_type_format' => 'json']))->setMethods(['PATCH']));
     $request->setMethod('PATCH');
     $response = new ResourceResponse([]);
     $resource->patch(['this is an array'], $request)
@@ -100,7 +102,7 @@ class RequestHandlerTest extends KernelTestBase {
  */
 class StubRequestHandlerResourcePlugin extends ResourceBase {
 
-  public function get($example = NULL, Request $request = NULL) {}
+  public function get($example = NULL, ?Request $request = NULL) {}
 
   public function post() {}
 

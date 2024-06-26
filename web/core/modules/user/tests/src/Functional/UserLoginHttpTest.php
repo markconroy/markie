@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\user\Functional;
 
 use Drupal\Core\Flood\DatabaseBackend;
@@ -101,7 +103,7 @@ class UserLoginHttpTest extends BrowserTestBase {
   /**
    * Tests user session life cycle.
    */
-  public function testLogin() {
+  public function testLogin(): void {
     // Without the serialization module only JSON is supported.
     $this->doTestLogin('json');
 
@@ -130,7 +132,7 @@ class UserLoginHttpTest extends BrowserTestBase {
 
     $login_status_url = $this->getLoginStatusUrlString($format);
     $response = $client->get($login_status_url);
-    $this->assertHttpResponse($response, 200, (string) UserAuthenticationController::LOGGED_OUT);
+    $this->assertHttpResponse($response, 200, UserAuthenticationController::LOGGED_OUT);
 
     // Flooded.
     $this->config('user.flood')
@@ -195,13 +197,13 @@ class UserLoginHttpTest extends BrowserTestBase {
     $this->assertSame(['message' => 'This route can only be accessed by anonymous users.'], $this->serializer->decode((string) $response->getBody(), $format));
 
     $response = $client->get($login_status_url, ['cookies' => $this->cookies]);
-    $this->assertHttpResponse($response, 200, (string) UserAuthenticationController::LOGGED_IN);
+    $this->assertHttpResponse($response, 200, UserAuthenticationController::LOGGED_IN);
 
     $response = $this->logoutRequest($format, $logout_token);
     $this->assertEquals(204, $response->getStatusCode());
 
     $response = $client->get($login_status_url, ['cookies' => $this->cookies]);
-    $this->assertHttpResponse($response, 200, (string) UserAuthenticationController::LOGGED_OUT);
+    $this->assertHttpResponse($response, 200, UserAuthenticationController::LOGGED_OUT);
 
     $this->resetFlood();
   }
@@ -237,7 +239,7 @@ class UserLoginHttpTest extends BrowserTestBase {
   /**
    * Tests user password reset.
    */
-  public function testPasswordReset() {
+  public function testPasswordReset(): void {
     // Create a user account.
     $account = $this->drupalCreateUser();
 
@@ -487,7 +489,7 @@ class UserLoginHttpTest extends BrowserTestBase {
 
     // Ensure still logged in.
     $response = $client->get($login_status_url, ['cookies' => $this->cookies]);
-    $this->assertHttpResponse($response, 200, (string) UserAuthenticationController::LOGGED_IN);
+    $this->assertHttpResponse($response, 200, UserAuthenticationController::LOGGED_IN);
 
     // Try with an incorrect token.
     $response = $this->logoutRequest($format, 'not-the-correct-token');
@@ -495,7 +497,7 @@ class UserLoginHttpTest extends BrowserTestBase {
 
     // Ensure still logged in.
     $response = $client->get($login_status_url, ['cookies' => $this->cookies]);
-    $this->assertHttpResponse($response, 200, (string) UserAuthenticationController::LOGGED_IN);
+    $this->assertHttpResponse($response, 200, UserAuthenticationController::LOGGED_IN);
 
     // Try a logout request with correct token.
     $response = $this->logoutRequest($format, $logout_token);
@@ -503,7 +505,7 @@ class UserLoginHttpTest extends BrowserTestBase {
 
     // Ensure actually logged out.
     $response = $client->get($login_status_url, ['cookies' => $this->cookies]);
-    $this->assertHttpResponse($response, 200, (string) UserAuthenticationController::LOGGED_OUT);
+    $this->assertHttpResponse($response, 200, UserAuthenticationController::LOGGED_OUT);
   }
 
   /**

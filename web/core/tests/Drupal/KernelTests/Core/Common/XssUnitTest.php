@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\KernelTests\Core\Common;
 
 use Drupal\Component\Utility\UrlHelper;
@@ -34,7 +36,7 @@ class XssUnitTest extends KernelTestBase {
   /**
    * Tests t() functionality.
    */
-  public function testT() {
+  public function testT(): void {
     $text = t('Simple text');
     $this->assertSame('Simple text', (string) $text, 't leaves simple text alone.');
     $text = t('Escaped text: @value', ['@value' => '<script>']);
@@ -46,7 +48,7 @@ class XssUnitTest extends KernelTestBase {
   /**
    * Checks that harmful protocols are stripped.
    */
-  public function testBadProtocolStripping() {
+  public function testBadProtocolStripping(): void {
     // Ensure that check_url() strips out harmful protocols, and encodes for
     // HTML.
     // Ensure \Drupal\Component\Utility\UrlHelper::stripDangerousProtocols() can

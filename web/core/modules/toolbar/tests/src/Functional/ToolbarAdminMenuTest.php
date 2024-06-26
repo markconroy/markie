@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\toolbar\Functional;
 
 use Drupal\Core\EventSubscriber\MainContentViewSubscriber;
@@ -122,7 +124,7 @@ class ToolbarAdminMenuTest extends BrowserTestBase {
    * @see toolbar_modules_installed()
    * @see toolbar_modules_uninstalled()
    */
-  public function testModuleStatusChangeSubtreesHashCacheClear() {
+  public function testModuleStatusChangeSubtreesHashCacheClear(): void {
     // Use an admin role to ensure the user has all available permissions. This
     // results in the admin menu links changing as the taxonomy module is
     // installed and uninstalled because the role will always have the
@@ -130,8 +132,7 @@ class ToolbarAdminMenuTest extends BrowserTestBase {
     $role = Role::load($this->createRole([]));
     $role->setIsAdmin(TRUE);
     $role->save();
-    $this->adminUser->addRole($role->id());
-    $this->adminUser->save();
+    $this->adminUser->addRole($role->id())->save();
 
     // Uninstall a module.
     $edit = [];
@@ -161,7 +162,7 @@ class ToolbarAdminMenuTest extends BrowserTestBase {
   /**
    * Tests toolbar cache tags implementation.
    */
-  public function testMenuLinkUpdateSubtreesHashCacheClear() {
+  public function testMenuLinkUpdateSubtreesHashCacheClear(): void {
     // The ID of (any) admin menu link.
     $admin_menu_link_id = 'system.admin_config_development';
 
@@ -184,7 +185,7 @@ class ToolbarAdminMenuTest extends BrowserTestBase {
    * @see toolbar_user_role_update()
    * @see toolbar_user_update()
    */
-  public function testUserRoleUpdateSubtreesHashCacheClear() {
+  public function testUserRoleUpdateSubtreesHashCacheClear(): void {
     // Find the new role ID.
     $all_rids = $this->adminUser->getRoles();
     unset($all_rids[array_search(RoleInterface::AUTHENTICATED_ID, $all_rids)]);
@@ -249,7 +250,7 @@ class ToolbarAdminMenuTest extends BrowserTestBase {
   /**
    * Tests cache invalidation when one user modifies another user.
    */
-  public function testNonCurrentUserAccountUpdates() {
+  public function testNonCurrentUserAccountUpdates(): void {
     $admin_user_id = $this->adminUser->id();
     $this->hash = $this->getSubtreesHash();
 
@@ -285,7 +286,7 @@ class ToolbarAdminMenuTest extends BrowserTestBase {
   /**
    * Tests that toolbar cache is cleared when string translations are made.
    */
-  public function testLocaleTranslationSubtreesHashCacheClear() {
+  public function testLocaleTranslationSubtreesHashCacheClear(): void {
     $admin_user = $this->adminUser;
     // User to translate and delete string.
     $translate_user = $this->drupalCreateUser([
@@ -378,7 +379,7 @@ class ToolbarAdminMenuTest extends BrowserTestBase {
   /**
    * Tests that the 'toolbar/subtrees/{hash}' is reachable and correct.
    */
-  public function testSubtreesJsonRequest() {
+  public function testSubtreesJsonRequest(): void {
     $admin_user = $this->adminUser;
     $this->drupalLogin($admin_user);
     // Request a new page to refresh the drupalSettings object.
@@ -393,7 +394,7 @@ class ToolbarAdminMenuTest extends BrowserTestBase {
   /**
    * Tests that subtrees hashes vary by the language of the page.
    */
-  public function testLanguageSwitching() {
+  public function testLanguageSwitching(): void {
     // Create a new language with the langcode 'xx'.
     $langcode = 'xx';
     $language = ConfigurableLanguage::createFromLangcode($langcode);
@@ -417,7 +418,7 @@ class ToolbarAdminMenuTest extends BrowserTestBase {
   /**
    * Tests that back to site link exists on admin pages, not on content pages.
    */
-  public function testBackToSiteLink() {
+  public function testBackToSiteLink(): void {
     // Back to site link should exist in the markup.
     $this->drupalGet('test-page');
     $back_link = $this->cssSelect('.home-toolbar-tab');
@@ -427,7 +428,7 @@ class ToolbarAdminMenuTest extends BrowserTestBase {
   /**
    * Tests that external links added to the menu appear in the toolbar.
    */
-  public function testExternalLink() {
+  public function testExternalLink(): void {
     $edit = [
       'title[0][value]' => 'External URL',
       'link[0][uri]' => 'http://example.org',

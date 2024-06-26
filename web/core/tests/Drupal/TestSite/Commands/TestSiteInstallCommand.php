@@ -88,6 +88,17 @@ class TestSiteInstallCommand extends Command {
 
   /**
    * {@inheritdoc}
+   *
+   * @todo Remove and fix test to not rely on super user.
+   * @see https://www.drupal.org/project/drupal/issues/3437620
+   */
+  public function __construct(?string $name = NULL) {
+    parent::__construct($name);
+    $this->usesSuperUserAccessPolicy = TRUE;
+  }
+
+  /**
+   * {@inheritdoc}
    */
   protected function configure() {
     $this->setName('install')
@@ -101,7 +112,7 @@ class TestSiteInstallCommand extends Command {
       ->addOption('json', NULL, InputOption::VALUE_NONE, 'Output test site connection details in JSON.')
       ->addUsage('--setup-file core/tests/Drupal/TestSite/TestSiteMultilingualInstallTestScript.php --json')
       ->addUsage('--install-profile demo_umami --langcode fr')
-      ->addUsage('--base-url "http://example.com" --db-url "mysql://username:password@localhost/databasename#table_prefix"');
+      ->addUsage('--base-url "http://example.com" --db-url "mysql://username:password@localhost/database_name#table_prefix"');
   }
 
   /**

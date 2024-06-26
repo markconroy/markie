@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\node\Functional;
 
 use Drupal\field\Entity\FieldConfig;
@@ -27,7 +29,7 @@ class MultiStepNodeFormBasicOptionsTest extends NodeTestBase {
   /**
    * Tests changing the default values of basic options to ensure they persist.
    */
-  public function testMultiStepNodeFormBasicOptions() {
+  public function testMultiStepNodeFormBasicOptions(): void {
     // Prepare a user to create the node.
     $web_user = $this->drupalCreateUser([
       'administer nodes',

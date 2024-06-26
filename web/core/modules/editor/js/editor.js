@@ -137,7 +137,9 @@
       );
       const confirmationDialog = Drupal.dialog(`<div>${message}</div>`, {
         title: Drupal.t('Change text format?'),
-        dialogClass: 'editor-change-text-format-modal',
+        classes: {
+          'ui-dialog': 'editor-change-text-format-modal',
+        },
         resizable: false,
         buttons: [
           {
@@ -239,7 +241,7 @@
           $this.on('change.editorAttach', { field }, onTextFormatChange);
         }
         // Detach any editor when the containing form is submitted.
-        $this.parents('form').on('submit', (event) => {
+        $(field.form).on('submit', (event) => {
           // Do not detach if the event was canceled.
           if (event.isDefaultPrevented()) {
             return;

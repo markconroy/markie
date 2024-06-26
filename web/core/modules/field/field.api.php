@@ -20,8 +20,8 @@
  * and so on. The data type(s) accepted by a field are defined in the class
  * implementing \Drupal\Core\Field\FieldItemInterface::schema() method.
  *
- * Field types are plugins annotated with class
- * \Drupal\Core\Field\Annotation\FieldType, and implement plugin interface
+ * Field types are plugins with \Drupal\Core\Field\Attribute\FieldType
+ * attributes and implement plugin interface
  * \Drupal\Core\Field\FieldItemInterface. Field Type plugins are managed by the
  * \Drupal\Core\Field\FieldTypePluginManager class. Field type classes usually
  * extend base class \Drupal\Core\Field\FieldItemBase. Field-type plugins need
@@ -53,7 +53,7 @@
 function hook_field_info_alter(&$info) {
   // Change the default widget for fields of type 'foo'.
   if (isset($info['foo'])) {
-    $info['foo']['default_widget'] = 'mymodule_widget';
+    $info['foo']['default_widget'] = 'my_module_widget';
   }
 }
 
@@ -68,6 +68,8 @@ function hook_field_info_alter(&$info) {
  *   Definition of all field types that can be added via UI.
  * @param string $entity_type_id
  *   The entity type id.
+ *
+ * @see \Drupal\Core\Field\FieldTypePluginManagerInterface::getEntityTypeUiDefinitions
  */
 function hook_field_info_entity_type_ui_definitions_alter(array &$ui_definitions, string $entity_type_id) {
   if ($entity_type_id === 'node') {
@@ -149,11 +151,11 @@ function hook_field_storage_config_update_forbid(\Drupal\field\FieldStorageConfi
  * which widget to use.
  *
  * Widgets are Plugins managed by the
- * \Drupal\Core\Field\WidgetPluginManager class. A widget is a plugin annotated
- * with class \Drupal\Core\Field\Annotation\FieldWidget that implements
- * \Drupal\Core\Field\WidgetInterface (in most cases, by
- * subclassing \Drupal\Core\Field\WidgetBase). Widget plugins need to be in the
- * namespace \Drupal\{your_module}\Plugin\Field\FieldWidget.
+ * \Drupal\Core\Field\WidgetPluginManager class. A widget is a plugin
+ * attributed with class \Drupal\Core\Field\Attribute\FieldWidget that
+ * implements \Drupal\Core\Field\WidgetInterface (in most cases, by subclassing
+ * \Drupal\Core\Field\WidgetBase). Widget plugins need to be in the namespace
+ * \Drupal\{your_module}\Plugin\Field\FieldWidget.
  *
  * Widgets are @link form_api Form API @endlink elements with additional
  * processing capabilities. The methods of the WidgetInterface object are
@@ -171,7 +173,7 @@ function hook_field_storage_config_update_forbid(\Drupal\field\FieldStorageConfi
  *
  * @param array $info
  *   An array of information on existing widget types, as collected by the
- *   annotation discovery mechanism.
+ *   plugin discovery mechanism.
  */
 function hook_field_widget_info_alter(array &$info) {
   // Let a new field type re-use an existing widget.
@@ -247,9 +249,9 @@ function hook_field_widget_single_element_form_alter(array &$element, \Drupal\Co
  */
 function hook_field_widget_single_element_WIDGET_TYPE_form_alter(array &$element, \Drupal\Core\Form\FormStateInterface $form_state, array $context) {
   // Code here will only act on widgets of type WIDGET_TYPE.  For example,
-  // hook_field_widget_single_element_mymodule_autocomplete_form_alter() will
-  // only act on widgets of type 'mymodule_autocomplete'.
-  $element['#autocomplete_route_name'] = 'mymodule.autocomplete_route';
+  // hook_field_widget_single_element_my_module_autocomplete_form_alter() will
+  // only act on widgets of type 'my_module_autocomplete'.
+  $element['#autocomplete_route_name'] = 'my_module.autocomplete_route';
 }
 
 /**
@@ -330,7 +332,7 @@ function hook_field_widget_complete_WIDGET_TYPE_form_alter(&$field_widget_comple
  *
  * Formatters are Plugins managed by the
  * \Drupal\Core\Field\FormatterPluginManager class. A formatter is a plugin
- * annotated with class \Drupal\Core\Field\Annotation\FieldFormatter that
+ * attributed with class \Drupal\Core\Field\Attribute\FieldFormatter that
  * implements \Drupal\Core\Field\FormatterInterface (in most cases, by
  * subclassing \Drupal\Core\Field\FormatterBase). Formatter plugins need to be
  * in the namespace \Drupal\{your_module}\Plugin\Field\FieldFormatter.
@@ -346,7 +348,7 @@ function hook_field_widget_complete_WIDGET_TYPE_form_alter(&$field_widget_comple
  *
  * @param array $info
  *   An array of information on existing formatter types, as collected by the
- *   annotation discovery mechanism.
+ *   plugin discovery mechanism.
  */
 function hook_field_formatter_info_alter(array &$info) {
   // Let a new field type re-use an existing formatter.

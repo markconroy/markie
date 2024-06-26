@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\node\Functional;
 
 use Drupal\user\RoleInterface;
@@ -51,7 +53,7 @@ class NodeAccessMenuLinkTest extends NodeTestBase {
   /**
    * SA-CORE-2015-003: Tests menu links to nodes when node access is restricted.
    */
-  public function testNodeAccessMenuLink() {
+  public function testNodeAccessMenuLink(): void {
 
     $menu_link_title = $this->randomString();
 

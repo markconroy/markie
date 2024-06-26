@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\comment\Kernel\Views;
 
 use Drupal\comment\CommentManagerInterface;
@@ -41,7 +43,7 @@ class CommentDepthTest extends CommentViewsKernelTestBase {
   /**
    * Test the comment depth.
    */
-  public function testCommentDepth() {
+  public function testCommentDepth(): void {
     $this->enableModules(['field']);
     $this->installConfig(['field']);
 

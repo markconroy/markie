@@ -45,9 +45,16 @@ class WebAssert extends MinkWebAssert {
   }
 
   /**
-   * {@inheritdoc}
+   * Trims the base URL from the URL.
+   *
+   * @param string|\Drupal\Core\Url $url
+   *   A url string, or object.
+   * @param bool $include_query
+   *   Whether to include the query string in the return value.
+   *
+   * @return string
    */
-  protected function cleanUrl($url, $include_query = FALSE) {
+  protected function cleanUrl(string|Url $url, bool $include_query = FALSE) {
     if ($url instanceof Url) {
       $url = $url->setAbsolute()->toString();
     }
@@ -138,7 +145,12 @@ class WebAssert extends MinkWebAssert {
    * @throws \Behat\Mink\Exception\ElementNotFoundException
    *   When the element doesn't exist.
    */
-  public function buttonExists($button, TraversableElement $container = NULL) {
+  public function buttonExists($button, ?TraversableElement $container = NULL) {
+    if (!is_string($button)) {
+      // @todo Trigger deprecation in
+      //   https://www.drupal.org/project/drupal/issues/3421105.
+      $button = (string) $button;
+    }
     $container = $container ?: $this->session->getPage();
     $node = $container->findButton($button);
 
@@ -160,7 +172,7 @@ class WebAssert extends MinkWebAssert {
    * @throws \Behat\Mink\Exception\ExpectationException
    *   When the button exists.
    */
-  public function buttonNotExists($button, TraversableElement $container = NULL) {
+  public function buttonNotExists($button, ?TraversableElement $container = NULL) {
     $container = $container ?: $this->session->getPage();
     $node = $container->findButton($button);
 
@@ -181,7 +193,7 @@ class WebAssert extends MinkWebAssert {
    * @throws \Behat\Mink\Exception\ElementNotFoundException
    *   When the element doesn't exist.
    */
-  public function selectExists($select, TraversableElement $container = NULL) {
+  public function selectExists($select, ?TraversableElement $container = NULL) {
     $container = $container ?: $this->session->getPage();
     $node = $container->find('named', [
       'select',
@@ -211,7 +223,7 @@ class WebAssert extends MinkWebAssert {
    * @throws \Behat\Mink\Exception\ElementNotFoundException
    *   When the element doesn't exist.
    */
-  public function optionExists($select, $option, TraversableElement $container = NULL) {
+  public function optionExists($select, $option, ?TraversableElement $container = NULL) {
     $container = $container ?: $this->session->getPage();
     $select_field = $container->find('named', [
       'select',
@@ -244,7 +256,7 @@ class WebAssert extends MinkWebAssert {
    * @throws \Behat\Mink\Exception\ElementNotFoundException
    *   When the select element doesn't exist.
    */
-  public function optionNotExists($select, $option, TraversableElement $container = NULL) {
+  public function optionNotExists($select, $option, ?TraversableElement $container = NULL) {
     $container = $container ?: $this->session->getPage();
     $select_field = $container->find('named', [
       'select',
@@ -589,7 +601,7 @@ class WebAssert extends MinkWebAssert {
    * @throws \Behat\Mink\Exception\ElementNotFoundException
    * @throws \Behat\Mink\Exception\ExpectationException
    */
-  public function fieldDisabled($field, TraversableElement $container = NULL) {
+  public function fieldDisabled($field, ?TraversableElement $container = NULL) {
     $container = $container ?: $this->session->getPage();
     $node = $container->findField($field);
 
@@ -618,7 +630,7 @@ class WebAssert extends MinkWebAssert {
    * @throws \Behat\Mink\Exception\ElementNotFoundException
    * @throws \Behat\Mink\Exception\ExpectationException
    */
-  public function fieldEnabled($field, TraversableElement $container = NULL) {
+  public function fieldEnabled($field, ?TraversableElement $container = NULL) {
     $container = $container ?: $this->session->getPage();
     $node = $container->findField($field);
 
@@ -646,7 +658,7 @@ class WebAssert extends MinkWebAssert {
    *
    * @throws \Behat\Mink\Exception\ElementNotFoundException
    */
-  public function hiddenFieldExists($field, TraversableElement $container = NULL) {
+  public function hiddenFieldExists($field, ?TraversableElement $container = NULL) {
     $container = $container ?: $this->session->getPage();
     if ($node = $container->find('hidden_field_selector', ['hidden_field', $field])) {
       return $node;
@@ -664,7 +676,7 @@ class WebAssert extends MinkWebAssert {
    *
    * @throws \Behat\Mink\Exception\ExpectationException
    */
-  public function hiddenFieldNotExists($field, TraversableElement $container = NULL) {
+  public function hiddenFieldNotExists($field, ?TraversableElement $container = NULL) {
     $container = $container ?: $this->session->getPage();
     $node = $container->find('hidden_field_selector', ['hidden_field', $field]);
     $this->assert($node === NULL, "A hidden field '$field' exists on this page, but it should not.");
@@ -683,7 +695,7 @@ class WebAssert extends MinkWebAssert {
    * @throws \Behat\Mink\Exception\ElementNotFoundException
    * @throws \Behat\Mink\Exception\ExpectationException
    */
-  public function hiddenFieldValueEquals($field, $value, TraversableElement $container = NULL) {
+  public function hiddenFieldValueEquals($field, $value, ?TraversableElement $container = NULL) {
     $node = $this->hiddenFieldExists($field, $container);
     $actual = $node->getValue();
     $regex = '/^' . preg_quote($value, '/') . '$/ui';
@@ -704,7 +716,7 @@ class WebAssert extends MinkWebAssert {
    * @throws \Behat\Mink\Exception\ElementNotFoundException
    * @throws \Behat\Mink\Exception\ExpectationException
    */
-  public function hiddenFieldValueNotEquals($field, $value, TraversableElement $container = NULL) {
+  public function hiddenFieldValueNotEquals($field, $value, ?TraversableElement $container = NULL) {
     $node = $this->hiddenFieldExists($field, $container);
     $actual = $node->getValue();
     $regex = '/^' . preg_quote($value, '/') . '$/ui';
@@ -747,9 +759,16 @@ class WebAssert extends MinkWebAssert {
   }
 
   /**
-   * {@inheritdoc}
+   * Checks that current session address is equals to provided one.
+   *
+   * @param string|\Drupal\Core\Url $page
+   *   A url string, or object.
+   *
+   * @return void
+   *
+   * @throws \Behat\Mink\Exception\ExpectationException
    */
-  public function addressEquals($page) {
+  public function addressEquals(string|Url $page) {
     $expected = $this->cleanUrl($page, TRUE);
     $actual = $this->cleanUrl($this->session->getCurrentUrl(), str_contains($expected, '?'));
 
@@ -757,9 +776,14 @@ class WebAssert extends MinkWebAssert {
   }
 
   /**
-   * {@inheritdoc}
+   * Checks that current session address is not equals to provided one.
+   *
+   * @param string|\Drupal\Core\Url $page
+   *   A url string, or object.
+   *
+   * @throws \Behat\Mink\Exception\ExpectationException
    */
-  public function addressNotEquals($page) {
+  public function addressNotEquals(string|Url $page) {
     $expected = $this->cleanUrl($page, TRUE);
     $actual = $this->cleanUrl($this->session->getCurrentUrl(), str_contains($expected, '?'));
 
@@ -789,7 +813,7 @@ class WebAssert extends MinkWebAssert {
    * @param string|null $type
    *   The optional message type: status, error, or warning.
    */
-  public function statusMessageExists(string $type = NULL): void {
+  public function statusMessageExists(?string $type = NULL): void {
     $selector = $this->buildStatusMessageSelector(NULL, $type);
     try {
       $this->elementExists('xpath', $selector);
@@ -805,7 +829,7 @@ class WebAssert extends MinkWebAssert {
    * @param string|null $type
    *   The optional message type: status, error, or warning.
    */
-  public function statusMessageNotExists(string $type = NULL): void {
+  public function statusMessageNotExists(?string $type = NULL): void {
     $selector = $this->buildStatusMessageSelector(NULL, $type);
     try {
       $this->elementNotExists('xpath', $selector);
@@ -823,7 +847,7 @@ class WebAssert extends MinkWebAssert {
    * @param string|null $type
    *   The optional message type: status, error, or warning.
    */
-  public function statusMessageContains(string $message, string $type = NULL): void {
+  public function statusMessageContains(string $message, ?string $type = NULL): void {
     $selector = $this->buildStatusMessageSelector($message, $type);
     try {
       $this->elementExists('xpath', $selector);
@@ -841,7 +865,7 @@ class WebAssert extends MinkWebAssert {
    * @param string|null $type
    *   The optional message type: status, error, or warning.
    */
-  public function statusMessageNotContains(string $message, string $type = NULL): void {
+  public function statusMessageNotContains(string $message, ?string $type = NULL): void {
     $selector = $this->buildStatusMessageSelector($message, $type);
     try {
       $this->elementNotExists('xpath', $selector);
@@ -870,7 +894,7 @@ class WebAssert extends MinkWebAssert {
    * @throws \InvalidArgumentException
    *   Thrown when $type is not an allowed type.
    */
-  protected function buildStatusMessageSelector(string $message = NULL, string $type = NULL): string {
+  protected function buildStatusMessageSelector(?string $message = NULL, ?string $type = NULL): string {
     $allowed_types = [
       'status',
       'error',
@@ -916,6 +940,51 @@ class WebAssert extends MinkWebAssert {
     }
 
     return $selector;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function responseHeaderEquals($name, $value) {
+    if (!is_string($name)) {
+      // @todo Trigger deprecation in
+      //   https://www.drupal.org/project/drupal/issues/3421105.
+      $name = (string) $name;
+    }
+    if ($value === NULL) {
+      // @todo Trigger deprecation in
+      //   https://www.drupal.org/project/drupal/issues/3421105.
+      $this->responseHeaderDoesNotExist($name);
+      return;
+    }
+    if (!is_string($value)) {
+      $value = (string) $value;
+    }
+    parent::responseHeaderEquals($name, $value);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function pageTextContains($text) {
+    if (!is_string($text)) {
+      // @todo Trigger deprecation in
+      //   https://www.drupal.org/project/drupal/issues/3421105.
+      $text = (string) $text;
+    }
+    parent::pageTextContains($text);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function fieldValueEquals(string $field, $value, ?TraversableElement $container = NULL) {
+    if (!is_string($value)) {
+      // @todo Trigger deprecation in
+      //   https://www.drupal.org/project/drupal/issues/3421105.
+      $value = (string) $value;
+    }
+    parent::fieldValueEquals($field, $value, $container);
   }
 
 }

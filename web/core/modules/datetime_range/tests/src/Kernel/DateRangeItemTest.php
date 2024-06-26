@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\datetime_range\Kernel;
 
 use Drupal\Core\Entity\Entity\EntityViewDisplay;
@@ -80,7 +82,7 @@ class DateRangeItemTest extends FieldKernelTestBase {
   /**
    * Tests the field configured for date-only.
    */
-  public function testDateOnly() {
+  public function testDateOnly(): void {
     $this->fieldStorage->setSetting('datetime_type', DateRangeItem::DATETIME_TYPE_DATE);
     $field_name = $this->fieldStorage->getName();
     // Create an entity.

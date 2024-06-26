@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\comment\Kernel\Migrate;
 
 use Drupal\comment\Entity\CommentType;
@@ -54,7 +56,7 @@ class MigrateCommentStubTest extends MigrateDrupalTestBase {
   /**
    * Tests creation of comment stubs.
    */
-  public function testStub() {
+  public function testStub(): void {
     $this->performStubTest('comment');
   }
 

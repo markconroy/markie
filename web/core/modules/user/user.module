@@ -14,7 +14,6 @@ use Drupal\Core\Asset\AttachedAssetsInterface;
 use Drupal\Core\Batch\BatchBuilder;
 use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Element;
 use Drupal\Core\Routing\RouteMatchInterface;
@@ -206,13 +205,15 @@ function user_load_by_name($name) {
  * @return string|null
  *   A translated violation message if the name is invalid or NULL if the name
  *   is valid.
+ *
+ * @deprecated in drupal:10.3.0 and is removed from drupal:12.0.0. Use
+ *   \Drupal\user\UserValidator::validateName() instead.
+ *
+ * @see https://www.drupal.org/node/3431205
  */
 function user_validate_name($name) {
-  $definition = BaseFieldDefinition::create('string')
-    ->addConstraint('UserName', []);
-  $data = \Drupal::typedDataManager()->create($definition);
-  $data->setValue($name);
-  $violations = $data->validate();
+  @trigger_error(__METHOD__ . '() is deprecated in drupal:10.3.0 and is removed from drupal:12.0.0. Use \Drupal\user\UserValidator::validateName() instead. See https://www.drupal.org/node/3431205', E_USER_DEPRECATED);
+  $violations = \Drupal::service('user.name_validator')->validateName($name);
   if (count($violations) > 0) {
     return $violations[0]->getMessage();
   }
@@ -283,8 +284,13 @@ function _user_role_permissions_update($roles) {
  *
  * @return bool
  *   TRUE if the user is blocked, FALSE otherwise.
+ *
+ * @deprecated in drupal:11.0.0 and is removed from drupal:12.0.0. Use
+ * Drupal\user\UserInterface::isBlocked() instead.
+ * @see https://www.drupal.org/node/3411040
  */
 function user_is_blocked($name) {
+  @trigger_error('user_is_blocked() is deprecated in drupal:11.0.0 and is removed from drupal:12.0.0. Use \Drupal\user\UserInterface::isBlocked() instead. See https://www.drupal.org/node/3411040', E_USER_DEPRECATED);
   return (bool) \Drupal::entityQuery('user')
     ->accessCheck(FALSE)
     ->condition('name', $name)
@@ -958,13 +964,13 @@ function user_roles($members_only = FALSE, $permission = NULL) {
  *   Any value that evaluates to FALSE will cause the permission to be
  *   revoked.
  *   @code
- *     array(
+ *     [
  *       'administer nodes' => 0,                // Revoke 'administer nodes'
  *       'administer blocks' => FALSE,           // Revoke 'administer blocks'
  *       'access user profiles' => 1,            // Grant 'access user profiles'
  *       'access content' => TRUE,               // Grant 'access content'
  *       'access comments' => 'access comments', // Grant 'access comments'
- *     )
+ *     ]
  *   @endcode
  *   Existing permissions are not changed, unless specified in $permissions.
  *

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\config\Functional;
 
 use Drupal\Core\Archiver\ArchiveTar;
@@ -39,7 +41,6 @@ class ConfigExportImportUITest extends BrowserTestBase {
    */
   protected $newSlogan;
 
-
   /**
    * Holds a content type.
    *
@@ -78,17 +79,24 @@ class ConfigExportImportUITest extends BrowserTestBase {
    */
   protected function setUp(): void {
     parent::setUp();
-    // The initial import must be done with uid 1 because if separately named
-    // roles are created then the role is lost after import. If the roles
-    // created have the same name then the sync will fail because they will
-    // have different UUIDs.
-    $this->drupalLogin($this->rootUser);
+    // Create a content type.
+    $this->contentType = $this->drupalCreateContentType(['type' => 'test']);
+
+    $this->drupalLogin($this->drupalCreateUser([
+      'export configuration',
+      'import configuration',
+      'synchronize configuration',
+      'access administration pages',
+      'administer site configuration',
+      'create test content',
+      'view the administration theme',
+    ]));
   }
 
   /**
    * Tests a simple site export import case.
    */
-  public function testExportImport() {
+  public function testExportImport(): void {
     // After installation there is no snapshot and nothing to import.
     $this->drupalGet('admin/config/development/configuration');
     $this->assertSession()->pageTextNotContains('Warning message');
@@ -101,9 +109,6 @@ class ConfigExportImportUITest extends BrowserTestBase {
       ->set('slogan', $this->newSlogan)
       ->save();
     $this->assertEquals($this->newSlogan, $this->config('system.site')->get('slogan'));
-
-    // Create a content type.
-    $this->contentType = $this->drupalCreateContentType();
 
     // Create a field.
     $this->fieldName = $this->randomMachineName();
@@ -219,7 +224,7 @@ class ConfigExportImportUITest extends BrowserTestBase {
   /**
    * Tests an export and import of collections.
    */
-  public function testExportImportCollections() {
+  public function testExportImportCollections(): void {
 
     /** @var \Drupal\Core\Config\StorageInterface $active_storage */
     $active_storage = \Drupal::service('config.storage');

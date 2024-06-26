@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\help\Functional;
 
 use Drupal\Tests\BrowserTestBase;
@@ -48,7 +50,7 @@ class ExperimentalHelpTest extends BrowserTestBase {
   /**
    * Verifies that a warning message is displayed for experimental modules.
    */
-  public function testExperimentalHelp() {
+  public function testExperimentalHelp(): void {
     $this->drupalLogin($this->adminUser);
     $this->drupalGet('admin/help/experimental_module_test');
     $this->assertSession()->statusMessageContains('This module is experimental.', 'warning');

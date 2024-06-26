@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\KernelTests\Core\Element;
 
 use Drupal\Core\Form\FormInterface;
@@ -49,8 +51,7 @@ class PathElementFormTest extends KernelTestBase implements FormInterface {
       'name' => 'foobar',
       'mail' => 'foobar@example.com',
     ]);
-    $this->testUser->addRole($role->id());
-    $this->testUser->save();
+    $this->testUser->addRole($role->id())->save();
     \Drupal::service('current_user')->setAccount($this->testUser);
   }
 
@@ -139,7 +140,7 @@ class PathElementFormTest extends KernelTestBase implements FormInterface {
   /**
    * Tests that default handlers are added even if custom are specified.
    */
-  public function testPathElement() {
+  public function testPathElement(): void {
     $form_state = (new FormState())
       ->setValues([
         'required_validate' => 'user/' . $this->testUser->id(),

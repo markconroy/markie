@@ -160,15 +160,15 @@
        * set active editable ID.
        */
       .forEach((instance) => {
+        const closestSettingsTray = instance.element.closest(
+          '.settings-tray-editable',
+        );
         // Check to make sure existing dialogOptions aren't overridden.
         if (!instance.options.data.hasOwnProperty('dialogOptions')) {
           instance.options.data.dialogOptions = {};
         }
-        instance.options.data.dialogOptions.settingsTrayActiveEditableId = $(
-          instance.element,
-        )
-          .parents('.settings-tray-editable')
-          .attr('id');
+        instance.options.data.dialogOptions.settingsTrayActiveEditableId =
+          closestSettingsTray.id;
         instance.progress = { type: 'fullscreen' };
       });
   }
@@ -237,24 +237,22 @@
   };
 
   // Manage Active editable class on opening and closing of the dialog.
-  $(window).on({
-    'dialog:beforecreate': (event, dialog, $element, settings) => {
-      if ($element[0].id === 'drupal-off-canvas') {
-        $('body .settings-tray-active-editable').removeClass(
-          'settings-tray-active-editable',
-        );
-        const $activeElement = $(`#${settings.settingsTrayActiveEditableId}`);
-        if ($activeElement.length) {
-          $activeElement.addClass('settings-tray-active-editable');
-        }
+  window.addEventListener('dialog:beforecreate', (e) => {
+    if (e.target.id === 'drupal-off-canvas') {
+      $('body .settings-tray-active-editable').removeClass(
+        'settings-tray-active-editable',
+      );
+      const $activeElement = $(`#${e.settings.settingsTrayActiveEditableId}`);
+      if ($activeElement.length) {
+        $activeElement.addClass('settings-tray-active-editable');
       }
-    },
-    'dialog:beforeclose': (event, dialog, $element) => {
-      if ($element[0].id === 'drupal-off-canvas') {
-        $('body .settings-tray-active-editable').removeClass(
-          'settings-tray-active-editable',
-        );
-      }
-    },
+    }
+  });
+  window.addEventListener('dialog:beforeclose', (e) => {
+    if (e.target.id === 'drupal-off-canvas') {
+      $('body .settings-tray-active-editable').removeClass(
+        'settings-tray-active-editable',
+      );
+    }
   });
 })(jQuery, Drupal);

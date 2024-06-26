@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\language\Functional;
 
 use Drupal\language\Entity\ConfigurableLanguage;
@@ -60,7 +62,7 @@ class LanguageSwitchingTest extends BrowserTestBase {
   /**
    * Functional tests for the language switcher block.
    */
-  public function testLanguageBlock() {
+  public function testLanguageBlock(): void {
     // Add language.
     $edit = [
       'predefined_langcode' => 'fr',
@@ -311,7 +313,7 @@ class LanguageSwitchingTest extends BrowserTestBase {
   /**
    * Tests language switcher links for domain based negotiation.
    */
-  public function testLanguageBlockWithDomain() {
+  public function testLanguageBlockWithDomain(): void {
     // Add the Italian language.
     ConfigurableLanguage::createFromLangcode('it')->save();
 
@@ -368,7 +370,7 @@ class LanguageSwitchingTest extends BrowserTestBase {
   /**
    * Tests active class on links when switching languages.
    */
-  public function testLanguageLinkActiveClass() {
+  public function testLanguageLinkActiveClass(): void {
     // Add language.
     $edit = [
       'predefined_langcode' => 'fr',
@@ -388,7 +390,7 @@ class LanguageSwitchingTest extends BrowserTestBase {
   /**
    * Check the path-admin class, as same as on default language.
    */
-  public function testLanguageBodyClass() {
+  public function testLanguageBodyClass(): void {
     // Add language.
     $edit = [
       'predefined_langcode' => 'fr',
@@ -515,7 +517,7 @@ class LanguageSwitchingTest extends BrowserTestBase {
   /**
    * Tests language switcher links for session based negotiation.
    */
-  public function testLanguageSessionSwitchLinks() {
+  public function testLanguageSessionSwitchLinks(): void {
     // Add language.
     $edit = [
       'predefined_langcode' => 'fr',

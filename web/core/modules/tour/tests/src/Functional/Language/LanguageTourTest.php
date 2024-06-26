@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\tour\Functional\Language;
 
 use Drupal\Tests\tour\Functional\TourTestBase;
@@ -8,6 +10,7 @@ use Drupal\Tests\tour\Functional\TourTestBase;
  * Tests tour functionality.
  *
  * @group tour
+ * @group legacy
  */
 class LanguageTourTest extends TourTestBase {
 
@@ -46,7 +49,7 @@ class LanguageTourTest extends TourTestBase {
   /**
    * Tests language tour tip availability.
    */
-  public function testLanguageTour() {
+  public function testLanguageTour(): void {
     $this->drupalGet('admin/config/regional/language');
     $this->assertTourTips();
   }
@@ -54,7 +57,7 @@ class LanguageTourTest extends TourTestBase {
   /**
    * Go to add language page and check the tour tooltips.
    */
-  public function testLanguageAddTour() {
+  public function testLanguageAddTour(): void {
     $this->drupalGet('admin/config/regional/language/add');
     $this->assertTourTips();
   }
@@ -62,7 +65,7 @@ class LanguageTourTest extends TourTestBase {
   /**
    * Go to edit language page and check the tour tooltips.
    */
-  public function testLanguageEditTour() {
+  public function testLanguageEditTour(): void {
     $this->drupalGet('admin/config/regional/language/edit/en');
     $this->assertTourTips();
   }

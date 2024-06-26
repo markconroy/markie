@@ -3,13 +3,16 @@
 namespace Drupal\Core\Installer\Form;
 
 use Drupal\Core\Datetime\TimeZoneFormHelper;
+use Drupal\Core\DependencyInjection\DeprecatedServicePropertyTrait;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleInstallerInterface;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Locale\CountryManagerInterface;
 use Drupal\Core\Site\Settings;
-use Drupal\user\UserStorageInterface;
 use Drupal\user\UserInterface;
+use Drupal\user\UserStorageInterface;
+use Drupal\user\UserNameValidator;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -18,6 +21,17 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * @internal
  */
 class SiteConfigureForm extends ConfigFormBase {
+
+  use DeprecatedServicePropertyTrait;
+
+  /**
+   * Defines deprecated injected properties.
+   *
+   * @var array
+   */
+  protected array $deprecatedProperties = [
+    'countryManager' => 'country_manager',
+  ];
 
   /**
    * The site path.
@@ -41,13 +55,6 @@ class SiteConfigureForm extends ConfigFormBase {
   protected $moduleInstaller;
 
   /**
-   * The country manager.
-   *
-   * @var \Drupal\Core\Locale\CountryManagerInterface
-   */
-  protected $countryManager;
-
-  /**
    * The app root.
    *
    * @var string
@@ -61,19 +68,39 @@ class SiteConfigureForm extends ConfigFormBase {
    *   The app root.
    * @param string $site_path
    *   The site path.
-   * @param \Drupal\user\UserStorageInterface $user_storage
-   *   The user storage.
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface|\Drupal\user\UserStorageInterface $entityTypeManager
+   *   The entity type manager.
    * @param \Drupal\Core\Extension\ModuleInstallerInterface $module_installer
    *   The module installer.
-   * @param \Drupal\Core\Locale\CountryManagerInterface $country_manager
-   *   The country manager.
+   * @param \Drupal\Core\Locale\CountryManagerInterface|\Drupal\user\UserNameValidator $userNameValidator
+   *   The user validator.
+   * @param bool|null $superUserAccessPolicy
+   *   The value of the 'security.enable_super_user' container parameter.
    */
-  public function __construct($root, $site_path, UserStorageInterface $user_storage, ModuleInstallerInterface $module_installer, CountryManagerInterface $country_manager) {
+  public function __construct(
+    $root,
+    $site_path,
+    protected EntityTypeManagerInterface|UserStorageInterface $entityTypeManager,
+    ModuleInstallerInterface $module_installer,
+    protected CountryManagerInterface|UserNameValidator $userNameValidator,
+    protected ?bool $superUserAccessPolicy = NULL,
+  ) {
     $this->root = $root;
     $this->sitePath = $site_path;
-    $this->userStorage = $user_storage;
+    if ($this->entityTypeManager instanceof UserStorageInterface) {
+      @trigger_error('Calling ' . __METHOD__ . '() with the $entityTypeManager argument as UserStorageInterface is deprecated in drupal:10.3.0 and must be EntityTypeManagerInterface in drupal:11.0.0. See https://www.drupal.org/node/3443172', E_USER_DEPRECATED);
+      $this->entityTypeManager = \Drupal::entityTypeManager();
+    }
+    $this->userStorage = $this->entityTypeManager->getStorage('user');
     $this->moduleInstaller = $module_installer;
-    $this->countryManager = $country_manager;
+    if ($userNameValidator instanceof CountryManagerInterface) {
+      @trigger_error('Calling ' . __METHOD__ . '() with the $userNameValidator argument as CountryManagerInterface is deprecated in drupal:10.3.0 and must be UserNameValidator in drupal:11.0.0. See https://www.drupal.org/node/3431205', E_USER_DEPRECATED);
+      $this->userNameValidator = \Drupal::service('user.name_validator');
+    }
+    if ($this->superUserAccessPolicy === NULL) {
+      @trigger_error('Calling ' . __METHOD__ . '() without the $superUserAccessPolicy argument is deprecated in drupal:10.3.0 and must be passed in drupal:11.0.0. See https://www.drupal.org/node/3443172', E_USER_DEPRECATED);
+      $this->superUserAccessPolicy = \Drupal::getContainer()->getParameter('security.enable_super_user') ?? TRUE;
+    }
   }
 
   /**
@@ -83,9 +110,13 @@ class SiteConfigureForm extends ConfigFormBase {
     return new static(
       $container->getParameter('app.root'),
       $container->getParameter('site.path'),
-      $container->get('entity_type.manager')->getStorage('user'),
+      $container->get('entity_type.manager'),
       $container->get('module_installer'),
-      $container->get('country_manager')
+      $container->get('user.name_validator'),
+      // In order to disable the super user policy this must be set to FALSE. If
+      // the container parameter is missing then the policy is enabled. See
+      // \Drupal\Core\DependencyInjection\Compiler\SuperUserAccessPolicyPass.
+      $container->getParameter('security.enable_super_user') ?? TRUE,
     );
   }
 
@@ -161,9 +192,16 @@ class SiteConfigureForm extends ConfigFormBase {
       '#access' => empty($install_state['config_install_path']),
     ];
 
+    if (count($this->getAdminRoles()) === 0 && $this->superUserAccessPolicy === FALSE) {
+      $account_label = $this->t('Site account');
+    }
+    else {
+      $account_label = $this->t('Site maintenance account');
+    }
+
     $form['admin_account'] = [
       '#type' => 'fieldgroup',
-      '#title' => $this->t('Site maintenance account'),
+      '#title' => $account_label,
     ];
     $form['admin_account']['account']['name'] = [
       '#type' => 'textfield',
@@ -190,16 +228,6 @@ class SiteConfigureForm extends ConfigFormBase {
       '#title' => $this->t('Regional settings'),
       '#access' => empty($install_state['config_install_path']),
     ];
-    $countries = $this->countryManager->getList();
-    $form['regional_settings']['site_default_country'] = [
-      '#type' => 'select',
-      '#title' => $this->t('Default country'),
-      '#empty_value' => '',
-      '#default_value' => $this->config('system.date')->get('country.default'),
-      '#options' => $countries,
-      '#weight' => 0,
-      '#access' => empty($install_state['config_install_path']),
-    ];
     // Use the default site timezone if one is already configured, or fall back
     // to the system timezone if set (and avoid throwing a warning in
     // PHP >=5.4).
@@ -217,7 +245,7 @@ class SiteConfigureForm extends ConfigFormBase {
     $form['update_notifications'] = [
       '#type' => 'fieldgroup',
       '#title' => $this->t('Update notifications'),
-      '#description' => $this->t('When checking for updates, anonymous information about your site is sent to <a href="@drupal">Drupal.org</a>.', ['@drupal' => 'https://drupal.org']),
+      '#description' => $this->t('When checking for updates, your site automatically sends anonymous information to Drupal.org. See the <a href="@update-module-docs" target="_blank">Update module documentation</a> for details.', ['@update-module-docs' => 'https://www.drupal.org/node/178772']),
       '#access' => empty($install_state['config_install_path']),
     ];
     $form['update_notifications']['enable_update_status_module'] = [
@@ -253,8 +281,9 @@ class SiteConfigureForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function validateForm(array &$form, FormStateInterface $form_state) {
-    if ($error = user_validate_name($form_state->getValue(['account', 'name']))) {
-      $form_state->setErrorByName('account][name', $error);
+    $violations = $this->userNameValidator->validateName($form_state->getValue(['account', 'name']));
+    if ($violations->count() > 0) {
+      $form_state->setErrorByName('account][name', $violations[0]->getMessage());
     }
   }
 
@@ -272,7 +301,6 @@ class SiteConfigureForm extends ConfigFormBase {
 
       $this->config('system.date')
         ->set('timezone.default', (string) $form_state->getValue('date_default_timezone'))
-        ->set('country.default', (string) $form_state->getValue('site_default_country'))
         ->save(TRUE);
     }
 
@@ -294,6 +322,7 @@ class SiteConfigureForm extends ConfigFormBase {
     }
 
     // We created user 1 with placeholder values. Let's save the real values.
+    /** @var \Drupal\user\UserInterface $account */
     $account = $this->userStorage->load(1);
     $account->init = $account->mail = $account_values['mail'];
     $account->roles = $account->getRoles();
@@ -301,7 +330,38 @@ class SiteConfigureForm extends ConfigFormBase {
     $account->timezone = $form_state->getValue('date_default_timezone');
     $account->pass = $account_values['pass'];
     $account->name = $account_values['name'];
+
+    // Ensure user 1 has an administrator role if one exists.
+    /** @var \Drupal\user\RoleInterface[] $admin_roles */
+    $admin_roles = $this->getAdminRoles();
+    if (count(array_intersect($account->getRoles(), array_keys($admin_roles))) === 0) {
+      if (count($admin_roles) > 0) {
+        foreach ($admin_roles as $role) {
+          $account->addRole($role->id());
+        }
+      }
+      elseif ($this->superUserAccessPolicy === FALSE) {
+        $this->messenger()->addWarning($this->t(
+          'The user %username does not have administrator access. For more information, see the documentation on <a href="@secure-user-1-docs">securing the admin super user</a>.',
+          [
+            '%username' => $account->getDisplayName(),
+            '@secure-user-1-docs' => 'https://www.drupal.org/docs/administering-a-drupal-site/security-in-drupal/securing-the-admin-super-user-1#s-disable-the-super-user-access-policy',
+          ]
+        ));
+      }
+    }
+
     $account->save();
+  }
+
+  /**
+   * Returns the list of admin roles.
+   *
+   * @return \Drupal\user\RoleInterface[]
+   *   The list of admin roles.
+   */
+  protected function getAdminRoles(): array {
+    return $this->entityTypeManager->getStorage('user_role')->loadByProperties(['is_admin' => TRUE]);
   }
 
 }

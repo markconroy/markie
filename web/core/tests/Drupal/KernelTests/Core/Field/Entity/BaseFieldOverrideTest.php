@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\KernelTests\Core\Field\Entity;
 
 use Drupal\Core\Field\BaseFieldDefinition;
@@ -38,7 +40,7 @@ class BaseFieldOverrideTest extends KernelTestBase {
    *
    * @dataProvider getClassTestCases
    */
-  public function testGetClass($field_type, $base_field_class, $expected_override_class) {
+  public function testGetClass($field_type, $base_field_class, $expected_override_class): void {
     $base_field = BaseFieldDefinition::create($field_type)
       ->setName('Test Field')
       ->setTargetEntityTypeId('entity_test');
@@ -52,7 +54,7 @@ class BaseFieldOverrideTest extends KernelTestBase {
   /**
    * Test cases for ::testGetClass.
    */
-  public function getClassTestCases() {
+  public static function getClassTestCases() {
     return [
       'String (default class)' => [
         'string',
@@ -70,7 +72,7 @@ class BaseFieldOverrideTest extends KernelTestBase {
   /**
    * Tests the default value callback.
    */
-  public function testDefaultValueCallback() {
+  public function testDefaultValueCallback(): void {
     $base_field = BaseFieldDefinition::create('entity_reference')
       ->setName('Test Field')
       ->setTargetEntityTypeId('entity_test')
@@ -90,7 +92,7 @@ class BaseFieldOverrideTest extends KernelTestBase {
    * @covers ::isInternal
    * @covers ::getUniqueIdentifier
    */
-  public function testInheritedProperties() {
+  public function testInheritedProperties(): void {
     $base_field = BaseFieldDefinition::create('string')
       ->setName('Test Field')
       ->setTargetEntityTypeId('entity_test')

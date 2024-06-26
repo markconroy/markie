@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\system\Functional\Form;
 
 use Drupal\Tests\BrowserTestBase;
@@ -38,7 +40,7 @@ class StateValuesCleanAdvancedTest extends BrowserTestBase {
   /**
    * Tests \Drupal\Core\Form\FormState::cleanValues().
    */
-  public function testFormStateValuesCleanAdvanced() {
+  public function testFormStateValuesCleanAdvanced(): void {
 
     // Get an image for uploading.
     $image_files = $this->drupalGetTestFiles('image');

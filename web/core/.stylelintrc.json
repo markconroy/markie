@@ -1,5 +1,8 @@
 {
-  "extends": "stylelint-config-standard",
+  "extends": [
+    "stylelint-config-standard",
+    "stylelint-prettier/recommended"
+  ],
   "plugins": [
     "stylelint-order"
   ],
@@ -377,7 +380,7 @@
     "selector-id-pattern": "^[a-z][-_a-z0-9]*$",
     "selector-no-vendor-prefix": null,
     "shorthand-property-no-redundant-values": null,
-    "unit-allowed-list": ["ch", "deg", "dpcm", "em", "ex", "fr", "ms", "rem", "%", "s", "px", "vw", "vh"],
+    "unit-allowed-list": ["ch", "deg", "dpcm", "em", "ex", "fr", "ms", "rem", "%", "s", "px", "vw", "vh", "cqw", "cqh", "cqi", "cqb", "cqmin", "cqmax"],
     "value-keyword-case": ["lower", {
       "camelCaseSvgKeywords": true,
       "ignoreProperties": [

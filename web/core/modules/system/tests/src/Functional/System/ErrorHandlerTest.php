@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\system\Functional\System;
 
 use Drupal\Component\Render\FormattableMarkup;
@@ -27,7 +29,7 @@ class ErrorHandlerTest extends BrowserTestBase {
   /**
    * Tests the error handler.
    */
-  public function testErrorHandler() {
+  public function testErrorHandler(): void {
     $config = $this->config('system.logging');
     $error_notice = [
       '%type' => 'Notice',
@@ -95,7 +97,7 @@ class ErrorHandlerTest extends BrowserTestBase {
   /**
    * Tests a custom error handler set in settings.php.
    */
-  public function testCustomErrorHandler() {
+  public function testCustomErrorHandler(): void {
     $settings_filename = $this->siteDirectory . '/settings.php';
     chmod($settings_filename, 0777);
     $settings_php = file_get_contents($settings_filename);
@@ -119,7 +121,7 @@ class ErrorHandlerTest extends BrowserTestBase {
   /**
    * Tests the exception handler.
    */
-  public function testExceptionHandler() {
+  public function testExceptionHandler(): void {
     $error_exception = [
       '%type' => 'Exception',
       '@message' => 'Drupal & awesome',

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\KernelTests\Core\Entity;
 
 use Drupal\comment\Entity\CommentType;
@@ -22,6 +24,7 @@ class EntityDisplayBaseTest extends KernelTestBase {
     'entity_test',
     'entity_test_third_party',
     'field',
+    'field_test',
     'system',
     'comment',
     'user',
@@ -40,16 +43,16 @@ class EntityDisplayBaseTest extends KernelTestBase {
   /**
    * @covers ::preSave
    */
-  public function testPreSave() {
+  public function testPreSave(): void {
     $entity_display = EntityViewDisplay::create([
       'targetEntityType' => 'entity_test',
       'bundle' => 'entity_test',
       'mode' => 'default',
       'status' => TRUE,
       'content' => [
-        'foo' => ['type' => 'visible'],
+        'foo' => ['type' => 'field_no_settings'],
         'bar' => ['region' => 'hidden'],
-        'name' => ['type' => 'hidden', 'region' => 'content'],
+        'name' => ['type' => 'field_no_settings', 'region' => 'content'],
       ],
     ]);
 
@@ -77,7 +80,7 @@ class EntityDisplayBaseTest extends KernelTestBase {
   /**
    * @covers ::onDependencyRemoval
    */
-  public function testOnDependencyRemoval() {
+  public function testOnDependencyRemoval(): void {
     // Create a comment field for entity_test.
     $comment_bundle = CommentType::create([
       'id' => 'entity_test',

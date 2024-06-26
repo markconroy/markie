@@ -5,7 +5,7 @@ namespace Drupal\Core\Session;
 /**
  * An implementation of the user account interface for the global user.
  *
- * @todo: Change all properties to protected.
+ * @todo Change all properties to protected.
  */
 #[\AllowDynamicProperties]
 class UserSession implements AccountInterface {
@@ -45,6 +45,7 @@ class UserSession implements AccountInterface {
    *
    * @var string
    */
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
   protected $preferred_langcode;
 
   /**
@@ -52,6 +53,7 @@ class UserSession implements AccountInterface {
    *
    * @var string
    */
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
   protected $preferred_admin_langcode;
 
   /**
@@ -119,7 +121,11 @@ class UserSession implements AccountInterface {
   /**
    * {@inheritdoc}
    */
-  public function hasPermission($permission) {
+  public function hasPermission(/* string */$permission) {
+    if (!is_string($permission)) {
+      @trigger_error('Calling ' . __METHOD__ . '() with a $permission parameter of type other than string is deprecated in drupal:10.3.0 and will cause an error in drupal:11.0.0. See https://www.drupal.org/node/3411485', E_USER_DEPRECATED);
+      return FALSE;
+    }
     return \Drupal::service('permission_checker')->hasPermission($permission, $this);
   }
 

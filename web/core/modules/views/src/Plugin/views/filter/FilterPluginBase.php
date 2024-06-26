@@ -21,8 +21,8 @@ use Drupal\views\ViewExecutable;
  * Plugins that handle views filtering.
  *
  * Filter handler plugins extend
- * \Drupal\views\Plugin\views\filter\FilterPluginBase. They must be annotated
- * with \Drupal\views\Annotation\ViewsFilter annotation, and they must be in
+ * \Drupal\views\Plugin\views\filter\FilterPluginBase. They must be attributed
+ * with \Drupal\views\Attribute\ViewsFilter attribute, and they must be in
  * namespace directory Plugin\views\filter.
  *
  * The following items can go into a hook_views_data() implementation in a
@@ -81,6 +81,7 @@ abstract class FilterPluginBase extends HandlerBase implements CacheableDependen
   /**
    * Contains the information of the selected item in a grouped filter.
    */
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
   public $group_info = NULL;
 
   /**
@@ -93,12 +94,14 @@ abstract class FilterPluginBase extends HandlerBase implements CacheableDependen
    * @var bool
    * Disable the possibility to use operators.
    */
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
   public $no_operator = FALSE;
 
   /**
    * @var bool
    * Disable the possibility to allow an exposed input to be optional.
    */
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
   public $always_required = FALSE;
 
   /**
@@ -116,7 +119,7 @@ abstract class FilterPluginBase extends HandlerBase implements CacheableDependen
    * This likely has to be overridden by filters which are more complex
    * than simple operator/value.
    */
-  public function init(ViewExecutable $view, DisplayPluginBase $display, array &$options = NULL) {
+  public function init(ViewExecutable $view, DisplayPluginBase $display, ?array &$options = NULL) {
     parent::init($view, $display, $options);
 
     $this->operator = $this->options['operator'];
@@ -717,6 +720,9 @@ abstract class FilterPluginBase extends HandlerBase implements CacheableDependen
    * @return bool
    */
   protected function hasValidGroupedValue(array $group) {
+    if (!method_exists($this, 'operators')) {
+      throw new \LogicException(get_class($this) . '::operators() not implemented');
+    }
     $operators = $this->operators();
     if ($operators[$group['operator']]['values'] == 0) {
       // Some filters, such as "is empty," do not require a value to be
@@ -753,6 +759,12 @@ abstract class FilterPluginBase extends HandlerBase implements CacheableDependen
         if (empty($group['remove'])) {
           $has_valid_value = $this->hasValidGroupedValue($group);
           if ($has_valid_value && $group['title'] == '') {
+            if (!method_exists($this, 'operators')) {
+              throw new \LogicException(get_class($this) . '::operators() not implemented');
+            }
+            if (!$this instanceof FilterOperatorsInterface) {
+              @trigger_error('Implementing operators() in class ' . get_class($this) . ' without it implementing \Drupal\views\Plugin\views\filter\FilterOperatorsInterface is deprecated in drupal:10.3.0 and will throw a LogicException in drupal:12.0.0. See https://www.drupal.org/node/3412013', E_USER_DEPRECATED);
+            }
             $operators = $this->operators();
             if ($operators[$group['operator']]['values'] == 0) {
               $form_state->setError($form['group_info']['group_items'][$id]['title'], $this->t('A label is required for the specified operator.'));
@@ -784,7 +796,7 @@ abstract class FilterPluginBase extends HandlerBase implements CacheableDependen
    *
    * @return string
    */
-  protected function validateIdentifier($identifier, FormStateInterface $form_state = NULL, &$form_group = []) {
+  protected function validateIdentifier($identifier, ?FormStateInterface $form_state = NULL, &$form_group = []) {
     $error = '';
     if (empty($identifier)) {
       $error = $this->t('The identifier is required if the filter is exposed.');

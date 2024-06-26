@@ -109,8 +109,7 @@ function drupal_install_profile_distribution_name() {
     }
   }
   // At all other times, we load the profile via standard methods.
-  else {
-    $profile = \Drupal::installProfile();
+  elseif ($profile = \Drupal::installProfile()) {
     $info = \Drupal::service('extension.list.profile')->getExtensionInfo($profile);
   }
   return $info['distribution']['name'] ?? 'Drupal';
@@ -256,10 +255,10 @@ function drupal_get_database_types() {
  *   are dumped up to a stdClass object. The object can have value, required
  *   and comment properties.
  *   @code
- *   $settings['settings']['config_sync_directory'] = (object) array(
+ *   $settings['settings']['config_sync_directory'] = (object) [
  *     'value' => 'config_hash/sync',
  *     'required' => TRUE,
- *   );
+ *   ];
  *   @endcode
  *   gets dumped as:
  *   @code
@@ -446,9 +445,15 @@ function _drupal_rewrite_settings_dump_one(\stdClass $variable, $prefix = '', $s
  *
  * @return array
  *   The list of modules to install.
+ *
+ * @todo https://www.drupal.org/i/3005959 Rework this method as it is not only
+ *   about profiles.
  */
 function drupal_verify_profile($install_state) {
   $profile = $install_state['parameters']['profile'];
+  if ($profile === FALSE) {
+    return [];
+  }
   $info = $install_state['profile_info'];
 
   // Get the list of available modules for the selected installation profile.
@@ -477,7 +482,7 @@ function drupal_verify_profile($install_state) {
       $build['#items'][] = ['#markup' => '<span class="admin-missing">' . Unicode::ucfirst($module) . '</span>'];
     }
 
-    $modules_list = \Drupal::service('renderer')->renderPlain($build);
+    $modules_list = \Drupal::service('renderer')->renderInIsolation($build);
     $requirements['required_modules'] = [
       'title' => t('Required modules'),
       'value' => t('Required modules not found.'),
@@ -532,9 +537,14 @@ function drupal_install_system($install_state) {
 
   // Store the installation profile in configuration to populate the
   // 'install_profile' container parameter.
-  \Drupal::configFactory()->getEditable('core.extension')
-    ->set('profile', $install_state['parameters']['profile'])
-    ->save();
+  $config = \Drupal::configFactory()->getEditable('core.extension');
+  if ($install_state['parameters']['profile'] === FALSE) {
+    $config->clear('profile');
+  }
+  else {
+    $config->set('profile', $install_state['parameters']['profile']);
+  }
+  $config->save();
 
   $connection = Database::getConnection();
   $provider = $connection->getProvider();

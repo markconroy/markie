@@ -18,7 +18,7 @@ class RegexDirectoryIteratorTest extends TestCase {
    * @covers ::accept
    * @dataProvider providerTestRegexDirectoryIterator
    */
-  public function testRegexDirectoryIterator(array $directory, $regex, array $expected) {
+  public function testRegexDirectoryIterator(array $directory, $regex, array $expected): void {
     vfsStream::setup('root', NULL, $directory);
     $iterator = new RegexDirectoryIterator(vfsStream::url('root'), $regex);
 
@@ -33,7 +33,7 @@ class RegexDirectoryIteratorTest extends TestCase {
   /**
    * Provider for self::testRegexDirectoryIterator().
    */
-  public function providerTestRegexDirectoryIterator() {
+  public static function providerTestRegexDirectoryIterator() {
     return [
       [
         [

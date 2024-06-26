@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\node\Kernel;
 
 use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
@@ -43,7 +45,7 @@ class NodeFieldAccessTest extends EntityKernelTestBase {
   /**
    * Tests permissions on nodes status field.
    */
-  public function testAccessToAdministrativeFields() {
+  public function testAccessToAdministrativeFields(): void {
 
     // Create the page node type with revisions disabled.
     $page = NodeType::create([

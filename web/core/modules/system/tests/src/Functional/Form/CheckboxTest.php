@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\system\Functional\Form;
 
 use Drupal\Tests\BrowserTestBase;
@@ -25,7 +27,7 @@ class CheckboxTest extends BrowserTestBase {
    */
   protected $defaultTheme = 'stark';
 
-  public function testFormCheckbox() {
+  public function testFormCheckbox(): void {
     // Ensure that the checked state is determined and rendered correctly for
     // tricky combinations of default and return values.
     foreach ([FALSE, NULL, TRUE, 0, '0', '', 1, '1', 'foobar', '1foobar'] as $default_value) {

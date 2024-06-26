@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\comment\Functional\Rest;
 
 use Drupal\Tests\rest\Functional\BasicAuthResourceTestTrait;
@@ -7,6 +9,7 @@ use Drupal\Tests\rest\Functional\EntityResource\XmlEntityNormalizationQuirksTrai
 
 /**
  * @group rest
+ * @group #slow
  */
 class CommentXmlBasicAuthTest extends CommentResourceTestBase {
 
@@ -41,7 +44,7 @@ class CommentXmlBasicAuthTest extends CommentResourceTestBase {
   /**
    * {@inheritdoc}
    */
-  public function testPostDxWithoutCriticalBaseFields() {
+  public function testPostDxWithoutCriticalBaseFields(): void {
     // Deserialization of the XML format is not supported.
     $this->markTestSkipped();
   }
@@ -49,7 +52,7 @@ class CommentXmlBasicAuthTest extends CommentResourceTestBase {
   /**
    * {@inheritdoc}
    */
-  public function testPostSkipCommentApproval() {
+  public function testPostSkipCommentApproval(): void {
     // Deserialization of the XML format is not supported.
     $this->markTestSkipped();
   }

@@ -3,6 +3,7 @@
 namespace Drupal\Component\DependencyInjection\Dumper;
 
 use Drupal\Component\Utility\Crypt;
+use Symfony\Component\DependencyInjection\Argument\IteratorArgument;
 use Symfony\Component\DependencyInjection\Argument\ServiceClosureArgument;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Definition;
@@ -328,7 +329,6 @@ class OptimizedPhpArrayDumper extends Dumper {
     return (object) [
       'type' => 'collection',
       'value' => $code,
-      'resolve' => $resolve,
     ];
   }
 
@@ -435,6 +435,9 @@ class OptimizedPhpArrayDumper extends Dumper {
 
       return $this->getServiceClosureCall((string) $reference, $reference->getInvalidBehavior());
     }
+    elseif ($value instanceof IteratorArgument) {
+      return $this->getIterator($value);
+    }
     elseif (is_object($value)) {
       // Drupal specific: Instantiated objects have a _serviceId parameter.
       if (isset($value->_serviceId)) {
@@ -466,7 +469,7 @@ class OptimizedPhpArrayDumper extends Dumper {
    * @return string|object
    *   A suitable representation of the service reference.
    */
-  protected function getReferenceCall($id, Reference $reference = NULL) {
+  protected function getReferenceCall($id, ?Reference $reference = NULL) {
     $invalid_behavior = ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE;
 
     if ($reference !== NULL) {
@@ -549,6 +552,22 @@ class OptimizedPhpArrayDumper extends Dumper {
       'type' => 'service_closure',
       'id' => $id,
       'invalidBehavior' => $invalid_behavior,
+    ];
+  }
+
+  /**
+   * Gets a service iterator in a suitable PHP array format.
+   *
+   * @param \Symfony\Component\DependencyInjection\Argument\IteratorArgument $iterator
+   *   The iterator.
+   *
+   * @return object
+   *   The PHP array representation of the iterator.
+   */
+  protected function getIterator(IteratorArgument $iterator) {
+    return (object) [
+      'type' => 'iterator',
+      'value' => array_map($this->dumpValue(...), $iterator->getValues()),
     ];
   }
 

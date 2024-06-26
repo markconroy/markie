@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\content_translation\Functional;
 
 use Drupal\Tests\BrowserTestBase;
@@ -20,13 +22,21 @@ class ContentTranslationEnableTest extends BrowserTestBase {
 
   /**
    * {@inheritdoc}
+   *
+   * @todo Remove and fix test to not rely on super user.
+   * @see https://www.drupal.org/project/drupal/issues/3437620
+   */
+  protected bool $usesSuperUserAccessPolicy = TRUE;
+
+  /**
+   * {@inheritdoc}
    */
   protected $defaultTheme = 'stark';
 
   /**
    * Tests that entity schemas are up-to-date after enabling translation.
    */
-  public function testEnable() {
+  public function testEnable(): void {
     $this->drupalLogin($this->rootUser);
     // Enable modules and make sure the related config entity type definitions
     // are installed.

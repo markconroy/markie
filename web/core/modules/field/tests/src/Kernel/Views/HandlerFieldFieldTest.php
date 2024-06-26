@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\field\Kernel\Views;
 
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
@@ -64,7 +66,7 @@ class HandlerFieldFieldTest extends KernelTestBase {
   /**
    * Tests fields rendering in views.
    */
-  public function testFieldRender() {
+  public function testFieldRender(): void {
     $this->installConfig(['filter']);
     $this->installEntitySchema('user');
     $this->installEntitySchema('node');

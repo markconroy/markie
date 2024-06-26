@@ -2,6 +2,7 @@
 
 namespace Drupal\link\Plugin\Field\FieldWidget;
 
+use Drupal\Core\Field\Attribute\FieldWidget;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 use Drupal\Core\Entity\Element\EntityAutocomplete;
@@ -14,15 +15,12 @@ use Symfony\Component\Validator\ConstraintViolationListInterface;
 
 /**
  * Plugin implementation of the 'link' widget.
- *
- * @FieldWidget(
- *   id = "link_default",
- *   label = @Translation("Link"),
- *   field_types = {
- *     "link"
- *   }
- * )
  */
+#[FieldWidget(
+  id: 'link_default',
+  label: new TranslatableMarkup('Link'),
+  field_types: ['link'],
+)]
 class LinkWidget extends WidgetBase {
 
   /**
@@ -236,12 +234,12 @@ class LinkWidget extends WidgetBase {
     // If the field is configured to allow both internal and external links,
     // show a useful description.
     elseif ($this->supportsExternalLinks() && $this->supportsInternalLinks()) {
-      $element['uri']['#description'] = $this->t('Start typing the title of a piece of content to select it. You can also enter an internal path such as %add-node or an external URL such as %url. Enter %front to link to the front page. Enter %nolink to display link text only. Enter %button to display keyboard-accessible link text only.', ['%front' => '<front>', '%add-node' => '/node/add', '%url' => 'http://example.com', '%nolink' => '<nolink>', '%button' => '<button>']);
+      $element['uri']['#description'] = $this->t('Start typing the title of a piece of content to select it. You can also enter an internal path such as %add-node or an external URL such as %url. Enter %front to link to the front page. Enter %nolink to display link text only. Enter %button to display keyboard-accessible link text only.', ['%front' => '<front>', '%add-node' => '/node/add', '%url' => 'https://example.com', '%nolink' => '<nolink>', '%button' => '<button>']);
     }
     // If the field is configured to allow only external links, show a useful
     // description.
     elseif ($this->supportsExternalLinks() && !$this->supportsInternalLinks()) {
-      $element['uri']['#description'] = $this->t('This must be an external URL such as %url.', ['%url' => 'http://example.com']);
+      $element['uri']['#description'] = $this->t('This must be an external URL such as %url.', ['%url' => 'https://example.com']);
     }
 
     // Make uri required on the front-end when title filled-in.

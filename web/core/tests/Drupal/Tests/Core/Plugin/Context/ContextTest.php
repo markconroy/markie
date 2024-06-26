@@ -50,7 +50,7 @@ class ContextTest extends UnitTestCase {
   /**
    * @covers ::getContextValue
    */
-  public function testDefaultValue() {
+  public function testDefaultValue(): void {
     $this->setUpDefaultValue('test');
 
     $context = new Context($this->contextDefinition);
@@ -61,7 +61,7 @@ class ContextTest extends UnitTestCase {
   /**
    * @covers ::getContextData
    */
-  public function testDefaultDataValue() {
+  public function testDefaultDataValue(): void {
     $this->setUpDefaultValue('test');
 
     $context = new Context($this->contextDefinition);
@@ -72,7 +72,7 @@ class ContextTest extends UnitTestCase {
   /**
    * @covers ::getContextData
    */
-  public function testNullDataValue() {
+  public function testNullDataValue(): void {
     $this->setUpDefaultValue(NULL);
 
     $context = new Context($this->contextDefinition);
@@ -83,11 +83,9 @@ class ContextTest extends UnitTestCase {
   /**
    * @covers ::setContextValue
    */
-  public function testSetContextValueTypedData() {
+  public function testSetContextValueTypedData(): void {
 
-    $this->contextDefinition = $this->getMockBuilder('Drupal\Core\Plugin\Context\ContextDefinitionInterface')
-      ->onlyMethods(['getDefaultValue', 'getDataDefinition'])
-      ->getMockForAbstractClass();
+    $this->contextDefinition = $this->createMock('Drupal\Core\Plugin\Context\ContextDefinitionInterface');
 
     $typed_data = $this->createMock('Drupal\Core\TypedData\TypedDataInterface');
     $context = new Context($this->contextDefinition, $typed_data);
@@ -97,7 +95,7 @@ class ContextTest extends UnitTestCase {
   /**
    * @covers ::setContextValue
    */
-  public function testSetContextValueCacheableDependency() {
+  public function testSetContextValueCacheableDependency(): void {
     $container = new Container();
     $cache_context_manager = $this->getMockBuilder('Drupal\Core\Cache\Context\CacheContextsManager')
       ->disableOriginalConstructor()
@@ -141,9 +139,7 @@ class ContextTest extends UnitTestCase {
   protected function setUpDefaultValue($default_value = NULL) {
     $mock_data_definition = $this->createMock('Drupal\Core\TypedData\DataDefinitionInterface');
 
-    $this->contextDefinition = $this->getMockBuilder('Drupal\Core\Plugin\Context\ContextDefinitionInterface')
-      ->onlyMethods(['getDefaultValue', 'getDataDefinition'])
-      ->getMockForAbstractClass();
+    $this->contextDefinition = $this->createMock('Drupal\Core\Plugin\Context\ContextDefinitionInterface');
 
     $this->contextDefinition->expects($this->once())
       ->method('getDefaultValue')

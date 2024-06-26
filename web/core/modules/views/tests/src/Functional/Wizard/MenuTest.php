@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\views\Functional\Wizard;
 
 use Drupal\Core\Url;
@@ -19,7 +21,7 @@ class MenuTest extends WizardTestBase {
   /**
    * Tests the menu functionality.
    */
-  public function testMenus() {
+  public function testMenus(): void {
     $this->drupalPlaceBlock('system_menu_block:main');
 
     // Create a view with a page display and a menu link in the Main Menu.

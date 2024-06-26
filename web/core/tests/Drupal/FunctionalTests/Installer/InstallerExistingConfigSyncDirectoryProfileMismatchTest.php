@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\FunctionalTests\Installer;
 
 /**
@@ -47,7 +49,7 @@ class InstallerExistingConfigSyncDirectoryProfileMismatchTest extends InstallerE
   /**
    * Tests that profile mismatch fails to install.
    */
-  public function testConfigSync() {
+  public function testConfigSync(): void {
     $this->htmlOutput(NULL);
     $this->assertSession()->titleEquals('Configuration validation | Drupal');
     $this->assertSession()->pageTextContains('The configuration synchronization failed validation.');

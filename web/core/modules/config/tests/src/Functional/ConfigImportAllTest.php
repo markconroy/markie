@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\config\Functional;
 
 use Drupal\Core\Config\StorageComparer;
@@ -58,7 +60,7 @@ class ConfigImportAllTest extends ModuleTestBase {
   /**
    * Tests that a fixed set of modules can be installed and uninstalled.
    */
-  public function testInstallUninstall() {
+  public function testInstallUninstall(): void {
 
     // Get a list of modules to enable.
     $all_modules = $this->container->get('extension.list.module')->getList();
@@ -108,7 +110,7 @@ class ConfigImportAllTest extends ModuleTestBase {
 
     $all_modules = \Drupal::service('extension.list.module')->getList();
     $database_module = \Drupal::service('database')->getProvider();
-    $expected_modules = ['path_alias', 'system', 'user', 'testing', $database_module];
+    $expected_modules = ['path_alias', 'system', 'user', $database_module];
 
     // Ensure that only core required modules and the install profile can not be uninstalled.
     $validation_reasons = \Drupal::service('module_installer')->validateUninstall(array_keys($all_modules));
@@ -116,8 +118,8 @@ class ConfigImportAllTest extends ModuleTestBase {
     $this->assertEqualsCanonicalizing($expected_modules, $validation_modules);
 
     $modules_to_uninstall = array_filter($all_modules, function ($module) {
-      // Filter required and not enabled modules.
-      if (!empty($module->info['required']) || $module->status == FALSE) {
+      // Filter profiles, and required and not enabled modules.
+      if (!empty($module->info['required']) || $module->status == FALSE || $module->getType() === 'profile') {
         return FALSE;
       }
       return TRUE;

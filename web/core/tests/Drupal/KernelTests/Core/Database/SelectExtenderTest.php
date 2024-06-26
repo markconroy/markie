@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\KernelTests\Core\Database;
 
 use Composer\Autoload\ClassLoader;
@@ -25,7 +27,7 @@ class SelectExtenderTest extends KernelTestBase {
    *   - The database driver namespace.
    *   - The namespaced class name for which to extend.
    */
-  public function providerExtend(): array {
+  public static function providerExtend(): array {
     return [
       [
         'Drupal\Core\Database\Query\PagerSelectExtender',

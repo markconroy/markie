@@ -85,7 +85,7 @@ class OptionsFieldUITest extends WebDriverTestBase {
    *
    * @dataProvider providerTestOptionsAllowedValues
    */
-  public function testOptionsAllowedValues($option_type, $options, $is_string_option, string $add_row_method) {
+  public function testOptionsAllowedValues($option_type, $options, $is_string_option, string $add_row_method): void {
     $assert = $this->assertSession();
     $this->fieldName = 'field_options_text';
     $this->createOptionsField($option_type);
@@ -213,7 +213,7 @@ class OptionsFieldUITest extends WebDriverTestBase {
   /**
    * Tests that the allowed options are available to the default value widget.
    */
-  public function testDefaultValueOptions() {
+  public function testDefaultValueOptions(): void {
     $page = $this->getSession()->getPage();
     $assert_session = $this->assertSession();
     $bundle_path = 'admin/structure/types/manage/' . $this->type;
@@ -340,7 +340,7 @@ JS;
    *   - The method which should be used to add another row to the table. The
    *     possible values are 'Press button', 'Enter button' or 'Enter element'.
    */
-  public function providerTestOptionsAllowedValues() {
+  public static function providerTestOptionsAllowedValues() {
     $type_cases = [
       'List integer' => [
         'list_integer',
@@ -378,7 +378,7 @@ JS;
   /**
    * Tests `list_string` machine name with special characters.
    */
-  public function testMachineNameSpecialCharacters() {
+  public function testMachineNameSpecialCharacters(): void {
     $this->fieldName = 'field_options_text';
     $this->createOptionsField('list_string');
     $this->drupalGet($this->adminPath);

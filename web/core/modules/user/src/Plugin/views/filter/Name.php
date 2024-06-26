@@ -5,15 +5,15 @@ namespace Drupal\user\Plugin\views\filter;
 use Drupal\Core\Entity\Element\EntityAutocomplete;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\user\Entity\User;
+use Drupal\views\Attribute\ViewsFilter;
 use Drupal\views\Plugin\views\filter\InOperator;
 
 /**
  * Filter handler for usernames.
  *
  * @ingroup views_filter_handlers
- *
- * @ViewsFilter("user_name")
  */
+#[ViewsFilter("user_name")]
 class Name extends InOperator {
 
   protected $alwaysMultiple = TRUE;
@@ -21,6 +21,7 @@ class Name extends InOperator {
   /**
    * The validated exposed input.
    */
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
   protected array $validated_exposed_input;
 
   protected function valueForm(&$form, FormStateInterface $form_state) {

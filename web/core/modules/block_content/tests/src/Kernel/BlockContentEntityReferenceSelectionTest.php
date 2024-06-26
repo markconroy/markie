@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\block_content\Kernel;
 
 use Drupal\block_content\Entity\BlockContent;
@@ -118,7 +120,7 @@ class BlockContentEntityReferenceSelectionTest extends KernelTestBase {
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
-  public function testQueriesNotAltered() {
+  public function testQueriesNotAltered(): void {
     // Ensure that queries without all the tags are not altered.
     $query = $this->entityTypeManager->getStorage('block_content')
       ->getQuery()
@@ -143,7 +145,7 @@ class BlockContentEntityReferenceSelectionTest extends KernelTestBase {
    *
    * @throws \Drupal\Core\Entity\EntityStorageException
    */
-  public function testNoConditions() {
+  public function testNoConditions(): void {
     $this->assertEquals(
       $this->expectations['block_reusable'],
       $this->selectionHandler->getReferenceableEntities()
@@ -166,7 +168,7 @@ class BlockContentEntityReferenceSelectionTest extends KernelTestBase {
    *
    * @throws \Exception
    */
-  public function testFieldConditions($condition_type, $is_reusable) {
+  public function testFieldConditions($condition_type, $is_reusable): void {
     $this->selectionHandler->setTestMode($condition_type, $is_reusable);
     $this->assertEquals(
       $is_reusable ? $this->expectations['block_reusable'] : $this->expectations['block_non_reusable'],
@@ -177,7 +179,7 @@ class BlockContentEntityReferenceSelectionTest extends KernelTestBase {
   /**
    * Provides possible fields and condition types.
    */
-  public function fieldConditionProvider() {
+  public static function fieldConditionProvider() {
     $cases = [];
     foreach (['base', 'group', 'nested_group'] as $condition_type) {
       foreach ([TRUE, FALSE] as $reusable) {

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\views\Kernel\Handler;
 
 use Drupal\node\Entity\Node;
@@ -29,7 +31,7 @@ class ArgumentStringTest extends ViewsKernelTestBase {
   /**
    * Tests the glossary feature.
    */
-  public function testGlossary() {
+  public function testGlossary(): void {
     $this->installEntitySchema('user');
     $this->installEntitySchema('node');
     NodeType::create([

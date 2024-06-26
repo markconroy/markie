@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\field\Kernel\Plugin\migrate\source\d7;
 
 use Drupal\Tests\migrate\Kernel\MigrateSqlSourceTestBase;
 
-// cspell:ignore objectid objectindex
+// cspell:ignore objectid objectindex plid textgroup
 
 /**
  * Tests the field option translation source plugin.
@@ -22,7 +24,7 @@ class FieldOptionTranslationTest extends MigrateSqlSourceTestBase {
   /**
    * {@inheritdoc}
    */
-  public function providerSource() {
+  public static function providerSource() {
     $test = [];
 
     // The source data.
@@ -173,7 +175,7 @@ class FieldOptionTranslationTest extends MigrateSqlSourceTestBase {
         'i18n_status' => '0',
       ],
     ];
-    $test[0]['expected_results'] = [
+    $test[0]['expected_data'] = [
       [
         'i18n_lid' => '1',
         'textgroup' => 'field',

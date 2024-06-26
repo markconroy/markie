@@ -74,11 +74,11 @@ class ElementInfoManagerTest extends UnitTestCase {
    *
    * @dataProvider providerTestGetInfoElementPlugin
    */
-  public function testGetInfoElementPlugin($plugin_class, $expected_info) {
+  public function testGetInfoElementPlugin($plugin_class, $expected_info): void {
     $this->moduleHandler->expects($this->once())
       ->method('alter')
       ->with('element_info', $this->anything())
-      ->will($this->returnArgument(0));
+      ->willReturnArgument(0);
 
     $plugin = $this->createMock($plugin_class);
     $plugin->expects($this->once())
@@ -114,7 +114,7 @@ class ElementInfoManagerTest extends UnitTestCase {
    *
    * @return array
    */
-  public function providerTestGetInfoElementPlugin() {
+  public static function providerTestGetInfoElementPlugin() {
     $data = [];
     $data[] = [
       'Drupal\Core\Render\Element\ElementInterface',
@@ -141,7 +141,7 @@ class ElementInfoManagerTest extends UnitTestCase {
   /**
    * @covers ::getInfoProperty
    */
-  public function testGetInfoProperty() {
+  public function testGetInfoProperty(): void {
     $this->themeManager
       ->method('getActiveTheme')
       ->willReturn(new ActiveTheme(['name' => 'test']));

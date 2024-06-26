@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\image\Functional;
 
+use Drupal\Core\File\FileExists;
 use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\StreamWrapper\StreamWrapperManager;
 use Drupal\image\Entity\ImageStyle;
@@ -59,7 +62,7 @@ class ImageStylesPathAndUrlTest extends BrowserTestBase {
   /**
    * Tests \Drupal\image\ImageStyleInterface::buildUri().
    */
-  public function testImageStylePath() {
+  public function testImageStylePath(): void {
     $scheme = 'public';
     $actual = $this->style->buildUri("$scheme://foo/bar.gif");
     $expected = "$scheme://styles/" . $this->style->id() . "/$scheme/foo/bar.gif";
@@ -73,56 +76,72 @@ class ImageStylesPathAndUrlTest extends BrowserTestBase {
   /**
    * Tests an image style URL using the "public://" scheme.
    */
-  public function testImageStyleUrlAndPathPublic() {
+  public function testImageStyleUrlAndPathPublic(): void {
     $this->doImageStyleUrlAndPathTests('public');
   }
 
   /**
    * Tests an image style URL using the "private://" scheme.
    */
-  public function testImageStyleUrlAndPathPrivate() {
+  public function testImageStyleUrlAndPathPrivate(): void {
     $this->doImageStyleUrlAndPathTests('private');
   }
 
   /**
    * Tests an image style URL with the "public://" scheme and unclean URLs.
    */
-  public function testImageStyleUrlAndPathPublicUnclean() {
+  public function testImageStyleUrlAndPathPublicUnclean(): void {
     $this->doImageStyleUrlAndPathTests('public', FALSE);
   }
 
   /**
    * Tests an image style URL with the "private://" schema and unclean URLs.
    */
-  public function testImageStyleUrlAndPathPrivateUnclean() {
+  public function testImageStyleUrlAndPathPrivateUnclean(): void {
     $this->doImageStyleUrlAndPathTests('private', FALSE);
   }
 
   /**
    * Tests an image style URL with the "public://" schema and language prefix.
    */
-  public function testImageStyleUrlAndPathPublicLanguage() {
+  public function testImageStyleUrlAndPathPublicLanguage(): void {
     $this->doImageStyleUrlAndPathTests('public', TRUE, TRUE, 'fr');
   }
 
   /**
    * Tests an image style URL with the "private://" schema and language prefix.
    */
-  public function testImageStyleUrlAndPathPrivateLanguage() {
+  public function testImageStyleUrlAndPathPrivateLanguage(): void {
     $this->doImageStyleUrlAndPathTests('private', TRUE, TRUE, 'fr');
   }
 
   /**
    * Tests an image style URL with a file URL that has an extra slash in it.
    */
-  public function testImageStyleUrlExtraSlash() {
+  public function testImageStyleUrlExtraSlash(): void {
     $this->doImageStyleUrlAndPathTests('public', TRUE, TRUE);
+  }
+
+  /**
+   * Test an image style URL with a private file that also gets converted.
+   */
+  public function testImageStylePrivateWithConversion(): void {
+    // Add the "convert" image style effect to our style.
+    $this->style->addImageEffect([
+      'uuid' => '',
+      'id' => 'image_convert',
+      'weight' => 1,
+      'data' => [
+        'extension' => 'jpeg',
+      ],
+    ]);
+    $this->doImageStyleUrlAndPathTests('private');
   }
 
   /**
    * Tests that an invalid source image returns a 404.
    */
-  public function testImageStyleUrlForMissingSourceImage() {
+  public function testImageStyleUrlForMissingSourceImage(): void {
     $non_existent_uri = 'public://foo.png';
     $generated_url = $this->style->buildUrl($non_existent_uri);
     $this->drupalGet($generated_url);
@@ -156,7 +175,7 @@ class ImageStylesPathAndUrlTest extends BrowserTestBase {
     $file = array_shift($files);
     /** @var \Drupal\Core\File\FileSystemInterface $file_system */
     $file_system = \Drupal::service('file_system');
-    $original_uri = $file_system->copy($file->uri, $scheme . '://', FileSystemInterface::EXISTS_RENAME);
+    $original_uri = $file_system->copy($file->uri, $scheme . '://', FileExists::Rename);
     // Let the image_module_test module know about this file, so it can claim
     // ownership in hook_file_download().
     \Drupal::state()->set('image.test_file_download', $original_uri);
@@ -241,7 +260,7 @@ class ImageStylesPathAndUrlTest extends BrowserTestBase {
       // Repeat this with a different file that we do not have access to and
       // make sure that access is denied.
       $file_no_access = array_shift($files);
-      $original_uri_no_access = $file_system->copy($file_no_access->uri, $scheme . '://', FileSystemInterface::EXISTS_RENAME);
+      $original_uri_no_access = $file_system->copy($file_no_access->uri, $scheme . '://', FileExists::Rename);
       $generated_uri_no_access = $scheme . '://styles/' . $this->style->id() . '/' . $scheme . '/' . $file_system->basename($original_uri_no_access);
       $this->assertFileDoesNotExist($generated_uri_no_access);
       $generate_url_no_access = $this->style->buildUrl($original_uri_no_access);
@@ -281,7 +300,7 @@ class ImageStylesPathAndUrlTest extends BrowserTestBase {
     // Create another working copy of the file.
     $files = $this->drupalGetTestFiles('image');
     $file = array_shift($files);
-    $original_uri = $file_system->copy($file->uri, $scheme . '://', FileSystemInterface::EXISTS_RENAME);
+    $original_uri = $file_system->copy($file->uri, $scheme . '://', FileExists::Rename);
     // Let the image_module_test module know about this file, so it can claim
     // ownership in hook_file_download().
     \Drupal::state()->set('image.test_file_download', $original_uri);

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\jsonapi\Functional;
 
 use Drupal\Component\Render\PlainTextOutput;
@@ -16,7 +18,7 @@ use Drupal\user\Entity\User;
 use GuzzleHttp\RequestOptions;
 use Psr\Http\Message\ResponseInterface;
 
-// cspell:ignore èxample
+// cspell:ignore èxample msword
 
 /**
  * Tests binary data file upload route.
@@ -147,45 +149,45 @@ class FileUploadTest extends ResourceTestBase {
 
   /**
    * {@inheritdoc}
-   *
-   * @requires module irrelevant_for_this_test
    */
-  public function testGetIndividual() {}
+  public function testGetIndividual(): void {
+    $this->markTestSkipped('Irrelevant for this test');
+  }
 
   /**
    * {@inheritdoc}
-   *
-   * @requires module irrelevant_for_this_test
    */
-  public function testPostIndividual() {}
+  public function testPostIndividual(): void {
+    $this->markTestSkipped('Irrelevant for this test');
+  }
 
   /**
    * {@inheritdoc}
-   *
-   * @requires module irrelevant_for_this_test
    */
-  public function testPatchIndividual() {}
+  public function testPatchIndividual(): void {
+    $this->markTestSkipped('Irrelevant for this test');
+  }
 
   /**
    * {@inheritdoc}
-   *
-   * @requires module irrelevant_for_this_test
    */
-  public function testDeleteIndividual() {}
+  public function testDeleteIndividual(): void {
+    $this->markTestSkipped('Irrelevant for this test');
+  }
 
   /**
    * {@inheritdoc}
-   *
-   * @requires module irrelevant_for_this_test
    */
-  public function testCollection() {}
+  public function testCollection(): void {
+    $this->markTestSkipped('Irrelevant for this test');
+  }
 
   /**
    * {@inheritdoc}
-   *
-   * @requires module irrelevant_for_this_test
    */
-  public function testRelationships() {}
+  public function testRelationships(): void {
+    $this->markTestSkipped('Irrelevant for this test');
+  }
 
   /**
    * {@inheritdoc}
@@ -205,7 +207,7 @@ class FileUploadTest extends ResourceTestBase {
   /**
    * {@inheritdoc}
    */
-  public function testRelated() {
+  public function testRelated(): void {
     \Drupal::service('router.builder')->rebuild();
     parent::testRelated();
   }
@@ -213,7 +215,7 @@ class FileUploadTest extends ResourceTestBase {
   /**
    * Tests using the file upload POST route; needs second request to "use" file.
    */
-  public function testPostFileUpload() {
+  public function testPostFileUpload(): void {
     \Drupal::service('router.builder')->rebuild();
     $uri = Url::fromUri('base:' . static::$postUri);
 
@@ -249,7 +251,7 @@ class FileUploadTest extends ResourceTestBase {
     // header with no 'file' prefix.
     $response = $this->fileRequest($uri, $this->testFileData, ['Content-Disposition' => 'filename="example.txt"']);
     $this->assertSame(201, $response->getStatusCode());
-    $expected = $this->getExpectedDocument(2, 'example_0.txt');
+    $expected = $this->getExpectedDocument(2, 'example_0.txt', TRUE);
     $this->assertResponseData($expected, $response);
 
     // Check the actual file data.
@@ -278,7 +280,7 @@ class FileUploadTest extends ResourceTestBase {
   /**
    * Tests using the 'file upload and "use" file in single request" POST route.
    */
-  public function testPostFileUploadAndUseInSingleRequest() {
+  public function testPostFileUploadAndUseInSingleRequest(): void {
     \Drupal::service('router.builder')->rebuild();
     // Update the test entity so it already has a file. This allows verifying
     // that this route appends files, and does not replace them.
@@ -340,7 +342,7 @@ class FileUploadTest extends ResourceTestBase {
       'data' => [
         0 => $this->getExpectedDocument(1, 'existing.txt', TRUE, TRUE)['data'],
         1 => $this->getExpectedDocument(2, 'example.txt', TRUE, TRUE)['data'],
-        2 => $this->getExpectedDocument(3, 'example_0.txt', FALSE, TRUE)['data'],
+        2 => $this->getExpectedDocument(3, 'example_0.txt', TRUE, TRUE)['data'],
       ],
     ];
     $this->assertResponseData($expected, $response);
@@ -429,7 +431,7 @@ class FileUploadTest extends ResourceTestBase {
    *
    * A new file should be created with a suffixed name.
    */
-  public function testPostFileUploadDuplicateFile() {
+  public function testPostFileUploadDuplicateFile(): void {
     \Drupal::service('router.builder')->rebuild();
     $this->setUpAuthorization('POST');
     $this->config('jsonapi.settings')->set('read_only', FALSE)->save(TRUE);
@@ -448,7 +450,7 @@ class FileUploadTest extends ResourceTestBase {
     $this->assertSame(201, $response->getStatusCode());
 
     // Loading expected normalized data for file 2, the duplicate file.
-    $expected = $this->getExpectedDocument(2, 'example_0.txt');
+    $expected = $this->getExpectedDocument(2, 'example_0.txt', TRUE);
     $this->assertResponseData($expected, $response);
 
     // Check the actual file data.
@@ -470,7 +472,7 @@ class FileUploadTest extends ResourceTestBase {
    *
    * @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Disposition#Directives
    */
-  public function testFileUploadStrippedFilePath() {
+  public function testFileUploadStrippedFilePath(): void {
     \Drupal::service('router.builder')->rebuild();
     $this->setUpAuthorization('POST');
     $this->config('jsonapi.settings')->set('read_only', FALSE)->save(TRUE);
@@ -517,7 +519,7 @@ class FileUploadTest extends ResourceTestBase {
   /**
    * Tests invalid file uploads.
    */
-  public function testInvalidFileUploads() {
+  public function testInvalidFileUploads(): void {
     \Drupal::service('router.builder')->rebuild();
     $this->setUpAuthorization('POST');
     $this->config('jsonapi.settings')->set('read_only', FALSE)->save(TRUE);
@@ -530,7 +532,7 @@ class FileUploadTest extends ResourceTestBase {
   /**
    * Tests using the file upload route with a unicode file name.
    */
-  public function testFileUploadUnicodeFilename() {
+  public function testFileUploadUnicodeFilename(): void {
     \Drupal::service('router.builder')->rebuild();
     $this->setUpAuthorization('POST');
     $this->config('jsonapi.settings')->set('read_only', FALSE)->save(TRUE);
@@ -549,7 +551,7 @@ class FileUploadTest extends ResourceTestBase {
   /**
    * Tests using the file upload route with a zero byte file.
    */
-  public function testFileUploadZeroByteFile() {
+  public function testFileUploadZeroByteFile(): void {
     \Drupal::service('router.builder')->rebuild();
     $this->setUpAuthorization('POST');
     $this->config('jsonapi.settings')->set('read_only', FALSE)->save(TRUE);
@@ -721,7 +723,7 @@ class FileUploadTest extends ResourceTestBase {
   /**
    * Tests using the file upload POST route no configuration.
    */
-  public function testFileUploadNoConfiguration() {
+  public function testFileUploadNoConfiguration(): void {
     $this->setUpAuthorization('POST');
     $this->config('jsonapi.settings')->set('read_only', FALSE)->save(TRUE);
 
@@ -783,6 +785,7 @@ class FileUploadTest extends ResourceTestBase {
   protected function getExpectedDocument($fid = 1, $expected_filename = 'example.txt', $expected_as_filename = FALSE, $expected_status = FALSE) {
     $author = User::load($this->account->id());
     $file = File::load($fid);
+    $this->assertInstanceOf(File::class, $file);
     $self_url = Url::fromUri('base:/jsonapi/file/file/' . $file->uuid())->setAbsolute()->toString(TRUE)->getGeneratedUrl();
 
     return [
@@ -903,7 +906,7 @@ class FileUploadTest extends ResourceTestBase {
    */
   protected function assertResponseData(array $expected, ResponseInterface $response): void {
     static::recursiveKSort($expected);
-    $actual = Json::decode((string) $response->getBody());
+    $actual = $this->getDocumentFromResponse($response);
     static::recursiveKSort($actual);
 
     $this->assertSame($expected, $actual);

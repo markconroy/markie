@@ -8,6 +8,8 @@
  * used for navigation.
  */
 
+use Drupal\block\BlockInterface;
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Url;
 use Drupal\Core\Breadcrumb\Breadcrumb;
 use Drupal\Core\Cache\CacheableMetadata;
@@ -30,7 +32,7 @@ function menu_ui_help($route_name, RouteMatchInterface $route_match) {
     case 'help.page.menu_ui':
       $output = '';
       $output .= '<h2>' . t('About') . '</h2>';
-      $output .= '<p>' . t('The Menu UI module provides an interface for managing menus. A menu is a hierarchical collection of links, which can be within or external to the site, generally used for navigation. For more information, see the <a href=":menu">online documentation for the Menu UI module</a>.', [':menu' => 'https://www.drupal.org/documentation/modules/menu/']) . '</p>';
+      $output .= '<p>' . t('The Menu UI module provides an interface for managing menus. A menu is a hierarchical collection of links, which can be within or external to the site, generally used for navigation. For more information, see the <a href=":menu">online documentation for the Menu UI module</a>.', [':menu' => 'https://www.drupal.org/docs/core-modules-and-themes/core-modules/menu-ui-module']) . '</p>';
       $output .= '<h2>' . t('Uses') . '</h2>';
       $output .= '<dl>';
       $output .= '<dt>' . t('Managing menus') . '</dt>';
@@ -454,4 +456,37 @@ function menu_ui_system_breadcrumb_alter(Breadcrumb $breadcrumb, RouteMatchInter
       $breadcrumb->addLink(Link::createFromRoute($menu->label(), 'entity.menu.edit_form', ['menu' => $menu->id()]));
     }
   }
+}
+
+/**
+ * Implements hook_theme().
+ */
+function menu_ui_theme(): array {
+  return [
+    'menu_link_form' => [
+      'render element' => 'form',
+    ],
+  ];
+}
+
+/**
+ * Implements hook_entity_operation().
+ */
+function menu_ui_entity_operation(EntityInterface $entity): array {
+  $operations = [];
+  if ($entity instanceof BlockInterface) {
+    $plugin = $entity->getPlugin();
+    if ($plugin->getBaseId() === 'system_menu_block') {
+      $menu = Menu::load($plugin->getDerivativeId());
+      if ($menu && $menu->access('edit')) {
+        $operations['menu-edit'] = [
+          'title' => t('Edit menu'),
+          'url' => $menu->toUrl('edit-form'),
+          'weight' => 50,
+        ];
+      }
+    }
+  }
+
+  return $operations;
 }

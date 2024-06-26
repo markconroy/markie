@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\mysql\Functional;
 
 use Drupal\Core\Database\Database;
@@ -33,7 +35,7 @@ class InstallerIsolationLevelNoDatabaseSettingsTest extends InstallerTestBase {
   /**
    * Verifies that the isolation_level was added to the database settings.
    */
-  public function testInstaller() {
+  public function testInstaller(): void {
     $contents = file_get_contents($this->container->getParameter('app.root') . '/' . $this->siteDirectory . '/settings.php');
 
     // Test that isolation_level was set to "READ COMMITTED".

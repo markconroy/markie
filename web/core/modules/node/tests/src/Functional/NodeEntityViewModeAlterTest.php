@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\node\Functional;
 
 use Drupal\Core\Cache\Cache;
@@ -27,7 +29,7 @@ class NodeEntityViewModeAlterTest extends NodeTestBase {
   /**
    * Create a "Basic page" node and verify its consistency in the database.
    */
-  public function testNodeViewModeChange() {
+  public function testNodeViewModeChange(): void {
     $web_user = $this->drupalCreateUser([
       'create page content',
       'edit own page content',

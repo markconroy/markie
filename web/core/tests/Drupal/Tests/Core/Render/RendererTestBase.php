@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\Core\Render;
 
+use Drupal\Component\Datetime\Time;
+use Drupal\Component\Datetime\TimeInterface;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Cache\Context\ContextCacheKeys;
@@ -23,6 +25,13 @@ use Symfony\Component\HttpFoundation\RequestStack;
  * Base class for the actual unit tests testing \Drupal\Core\Render\Renderer.
  */
 abstract class RendererTestBase extends UnitTestCase {
+
+  /**
+   * System time service.
+   *
+   * @var \Drupal\Component\Datetime\TimeInterface
+   */
+  protected TimeInterface $datetimeTime;
 
   /**
    * The tested renderer.
@@ -183,11 +192,13 @@ abstract class RendererTestBase extends UnitTestCase {
     $this->placeholderGenerator = new PlaceholderGenerator($this->cacheContextsManager, $this->rendererConfig);
     $this->renderCache = new PlaceholderingRenderCache($this->requestStack, $this->cacheFactory, $this->cacheContextsManager, $this->placeholderGenerator);
     $this->renderer = new Renderer($this->callableResolver, $this->themeManager, $this->elementInfo, $this->placeholderGenerator, $this->renderCache, $this->requestStack, $this->rendererConfig);
+    $this->datetimeTime = new Time($this->requestStack);
 
     $container = new ContainerBuilder();
     $container->set('cache_contexts_manager', $this->cacheContextsManager);
     $container->set('render_cache', $this->renderCache);
     $container->set('renderer', $this->renderer);
+    $container->set('datetime.time', $this->datetimeTime);
     \Drupal::setContainer($container);
   }
 
@@ -205,7 +216,7 @@ abstract class RendererTestBase extends UnitTestCase {
    * @see PlaceholdersTest::callback()
    * @see https://www.drupal.org/node/2151609
    */
-  protected function randomContextValue() {
+  protected static function randomContextValue(): string {
     $tokens = ['llama', 'alpaca', 'camel', 'moose', 'elk'];
     return $tokens[mt_rand(0, 4)];
   }
@@ -221,8 +232,8 @@ abstract class RendererTestBase extends UnitTestCase {
   /**
    * Sets up a memory-based render cache back-end.
    */
-  protected function setupMemoryCache() {
-    $this->memoryCache = $this->memoryCache ?: new VariationCache($this->requestStack, new MemoryBackend(), $this->cacheContextsManager);
+  protected function setUpMemoryCache() {
+    $this->memoryCache = $this->memoryCache ?: new VariationCache($this->requestStack, new MemoryBackend(new Time($this->requestStack)), $this->cacheContextsManager);
 
     $this->cacheFactory->expects($this->atLeastOnce())
       ->method('get')

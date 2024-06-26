@@ -54,7 +54,7 @@ class SessionCacheContextTest extends UnitTestCase {
   /**
    * @covers ::getContext
    */
-  public function testSameContextForSameSession() {
+  public function testSameContextForSameSession(): void {
     $this->request->setSession($this->session);
     $cache_context = new SessionCacheContext($this->requestStack);
 
@@ -73,7 +73,7 @@ class SessionCacheContextTest extends UnitTestCase {
   /**
    * @covers ::getContext
    */
-  public function testDifferentContextForDifferentSession() {
+  public function testDifferentContextForDifferentSession(): void {
     $this->request->setSession($this->session);
     $cache_context = new SessionCacheContext($this->requestStack);
 
@@ -91,15 +91,6 @@ class SessionCacheContextTest extends UnitTestCase {
 
     $this->assertStringNotContainsString($session1_id, $context1, 'Session ID not contained in cache context');
     $this->assertStringNotContainsString($session2_id, $context2, 'Session ID not contained in cache context');
-  }
-
-  /**
-   * @covers ::getContext
-   */
-  public function testContextWithoutSessionInRequest() {
-    $cache_context = new SessionCacheContext($this->requestStack);
-
-    $this->assertSame('none', $cache_context->getContext());
   }
 
 }

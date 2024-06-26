@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\system\Kernel\System;
 
 use Drupal\Core\Database\Database;
@@ -57,7 +59,7 @@ class CronQueueTest extends KernelTestBase {
   /**
    * A logger for testing.
    *
-   * @var \PHPUnit\Framework\MockObject\MockObject|\Psr\Log\LoggerInterface
+   * @var \Prophecy\Prophecy\ObjectProphecy|\Psr\Log\LoggerInterface
    */
   protected $logger;
 
@@ -66,7 +68,7 @@ class CronQueueTest extends KernelTestBase {
    */
   protected function setUp(): void {
     // Setup logger before register() is called.
-    $this->logger = $this->createMock(LoggerInterface::class);
+    $this->logger = $this->prophesize(LoggerInterface::class);
     parent::setUp();
 
     $this->connection = Database::getConnection();
@@ -96,7 +98,7 @@ class CronQueueTest extends KernelTestBase {
   /**
    * Tests that DelayedRequeueException behaves as expected when running cron.
    */
-  public function testDelayException() {
+  public function testDelayException(): void {
     $database = $this->container->get('queue')->get('cron_queue_test_database_delay_exception');
     $memory = $this->container->get('queue')->get('cron_queue_test_memory_delay_exception');
 
@@ -140,7 +142,7 @@ class CronQueueTest extends KernelTestBase {
   /**
    * Tests that leases are expiring correctly, also within the same request.
    */
-  public function testLeaseTime() {
+  public function testLeaseTime(): void {
     $queue = $this->container->get('queue')->get('cron_queue_test_lease_time');
     $queue->createItem([$this->randomMachineName() => $this->randomMachineName()]);
     // Run initial queue job and ensure lease time variable is initialized.
@@ -172,24 +174,21 @@ class CronQueueTest extends KernelTestBase {
    *
    * @see \Drupal\cron_queue_test\Plugin\QueueWorker\CronQueueTestException
    */
-  public function testUncaughtExceptions() {
-    $this->logger->expects($this->atLeast(2))
-      ->method('log')
-      ->withConsecutive(
-        [
-          $this->equalTo(RfcLogLevel::ERROR),
-          $this->equalTo('%type: @message in %function (line %line of %file).'),
-          $this->callback(function ($args) {
-            return $args['@message'] === 'That is not supposed to happen.' &&
-              $args['exception'] instanceof \Exception;
-          }),
-        ],
-        [
-          $this->equalTo(RfcLogLevel::INFO),
-          $this->equalTo('Cron run completed.'),
-          $this->anything(),
-        ],
-      );
+  public function testUncaughtExceptions(): void {
+    $this->logger->log(
+      RfcLogLevel::ERROR,
+      '%type: @message in %function (line %line of %file).',
+      Argument::that(function ($args) {
+        return $args['@message'] === 'That is not supposed to happen.'
+          && $args['exception'] instanceof \Exception;
+      })
+    )->shouldBeCalled();
+
+    $this->logger->log(
+      RfcLogLevel::INFO,
+      'Cron run completed.',
+      Argument::cetera()
+    )->shouldBeCalled();
 
     // Get the queue to test the normal Exception.
     $queue = $this->container->get('queue')->get(CronQueueTestException::PLUGIN_ID);
@@ -205,9 +204,10 @@ class CronQueueTest extends KernelTestBase {
     // The item should be left in the queue.
     $this->assertEquals(1, $queue->numberOfItems(), 'Failing item still in the queue after throwing an exception.');
 
-    // Expire the queue item manually. system_cron() relies in REQUEST_TIME to
-    // find queue items whose expire field needs to be reset to 0. This is a
-    // Kernel test, so REQUEST_TIME won't change when cron runs.
+    // Expire the queue item manually. system_cron() relies in
+    // \Drupal::time()->getRequestTime() to find queue items whose expire field needs to be
+    // reset to 0. This is a Kernel test, so \Drupal::time()->getRequestTime() won't change
+    // when cron runs.
     // @see system_cron()
     // @see \Drupal\Core\Cron::processQueues()
     $this->connection->update('queue')
@@ -226,22 +226,19 @@ class CronQueueTest extends KernelTestBase {
    * @covers \Drupal\Core\Queue\SuspendQueueException
    */
   public function testSuspendQueueException(): void {
-    $this->logger->expects($this->atLeast(2))
-      ->method('log')
-      ->withConsecutive(
-        [
-          $this->equalTo(RfcLogLevel::DEBUG),
-          $this->equalTo('A worker for @queue queue suspended further processing of the queue.'),
-          $this->callback(function ($args) {
-            return $args['@queue'] === CronQueueTestSuspendQueue::PLUGIN_ID;
-          }),
-        ],
-        [
-          $this->equalTo(RfcLogLevel::INFO),
-          $this->equalTo('Cron run completed.'),
-          $this->anything(),
-        ],
-      );
+    $this->logger->log(
+      RfcLogLevel::DEBUG,
+      'A worker for @queue queue suspended further processing of the queue.',
+      Argument::that(function ($args) {
+        return $args['@queue'] === CronQueueTestSuspendQueue::PLUGIN_ID;
+      })
+    )->shouldBeCalled();
+
+    $this->logger->log(
+      RfcLogLevel::INFO,
+      'Cron run completed.',
+      Argument::cetera()
+    )->shouldBeCalled();
 
     // Get the queue to test the specific SuspendQueueException.
     $queue = \Drupal::queue(CronQueueTestSuspendQueue::PLUGIN_ID);
@@ -348,9 +345,9 @@ class CronQueueTest extends KernelTestBase {
    */
   public function register(ContainerBuilder $container) {
     parent::register($container);
-    $container->register('test_logger', get_class($this->logger))
+    $container->register('test_logger', get_class($this->logger->reveal()))
       ->addTag('logger');
-    $container->set('test_logger', $this->logger);
+    $container->set('test_logger', $this->logger->reveal());
   }
 
 }

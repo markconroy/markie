@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\views_ui\Functional;
 
 use Drupal\Core\Database\Database;
@@ -34,7 +36,7 @@ class SettingsTest extends UITestBase {
   /**
    * Tests the settings for the edit ui.
    */
-  public function testEditUI() {
+  public function testEditUI(): void {
     $this->drupalLogin($this->adminUser);
 
     // Test the settings tab exists.

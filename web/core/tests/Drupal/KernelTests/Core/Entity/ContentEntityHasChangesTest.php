@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\KernelTests\Core\Entity;
 
 use Drupal\KernelTests\KernelTestBase;
@@ -37,7 +39,7 @@ class ContentEntityHasChangesTest extends KernelTestBase {
   /**
    * Tests the correct functionality of the hasTranslationChanges() function.
    */
-  public function testHasTranslationChanges() {
+  public function testHasTranslationChanges(): void {
     $user1 = User::create([
       'name' => 'username1',
       'status' => 1,

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\file\Functional;
 
 use Drupal\Component\Utility\Html;
@@ -22,7 +24,7 @@ class FileTokenReplaceTest extends FileFieldTestBase {
   /**
    * Creates a file, then tests the tokens generated from it.
    */
-  public function testFileTokenReplacement() {
+  public function testFileTokenReplacement(): void {
     $node_storage = $this->container->get('entity_type.manager')->getStorage('node');
     $token_service = \Drupal::token();
     $language_interface = \Drupal::languageManager()->getCurrentLanguage();

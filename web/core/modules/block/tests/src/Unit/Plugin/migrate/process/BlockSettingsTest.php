@@ -27,7 +27,7 @@ class BlockSettingsTest extends UnitTestCase {
    *
    * @dataProvider providerTestTransform
    */
-  public function testTransform($value, $expected) {
+  public function testTransform($value, $expected): void {
     $executable = $this->prophesize(MigrateExecutableInterface::class)
       ->reveal();
     $row = $this->prophesize(Row::class)->reveal();
@@ -40,7 +40,7 @@ class BlockSettingsTest extends UnitTestCase {
   /**
    * Provides data for testTransform.
    */
-  public function providerTestTransform() {
+  public static function providerTestTransform() {
     return [
       'title set' => [
         [

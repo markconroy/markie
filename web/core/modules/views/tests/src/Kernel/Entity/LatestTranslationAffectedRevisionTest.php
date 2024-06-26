@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\views\Kernel\Entity;
 
 use Drupal\language\Entity\ConfigurableLanguage;
@@ -33,7 +35,7 @@ class LatestTranslationAffectedRevisionTest extends ViewsKernelTestBase {
   /**
    * Tests the 'Latest revision' filter.
    */
-  public function testLatestRevisionFilter() {
+  public function testLatestRevisionFilter(): void {
     $this->installEntitySchema('user');
     $this->installEntitySchema('node');
     $this->installSchema('node', ['node_access']);

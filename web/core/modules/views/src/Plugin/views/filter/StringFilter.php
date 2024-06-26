@@ -4,6 +4,7 @@ namespace Drupal\views\Plugin\views\filter;
 
 use Drupal\Core\Database\Connection;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\views\Attribute\ViewsFilter;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -12,10 +13,9 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * Including equality, like, not like, etc.
  *
  * @ingroup views_filter_handlers
- *
- * @ViewsFilter("string")
  */
-class StringFilter extends FilterPluginBase {
+#[ViewsFilter("string")]
+class StringFilter extends FilterPluginBase implements FilterOperatorsInterface {
 
   /**
    * All words separated by spaces or sentences encapsulated by double quotes.
@@ -97,11 +97,7 @@ class StringFilter extends FilterPluginBase {
   }
 
   /**
-   * Get the operators.
-   *
-   * This kind of construct makes it relatively easy for a child class
-   * to add or remove functionality by overriding this function and
-   * adding/removing items from this array.
+   * {@inheritdoc}
    */
   public function operators() {
     $operators = [

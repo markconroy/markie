@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\KernelTests\Core\Config\Storage;
 
 use Drupal\Core\Config\DatabaseStorage;
@@ -43,7 +45,7 @@ class DatabaseStorageTest extends ConfigStorageTestBase {
   /**
    * Tests that operations throw exceptions if the query fails.
    */
-  public function testExceptionIsThrownIfQueryFails() {
+  public function testExceptionIsThrownIfQueryFails(): void {
     $connection = Database::getConnection();
     if ($connection->databaseType() === 'sqlite') {
       // See: https://www.drupal.org/project/drupal/issues/3349286

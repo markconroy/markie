@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\views\Functional\Plugin;
 
 use Drupal\Core\Plugin\Context\ContextDefinitionInterface;
@@ -85,7 +87,7 @@ class ContextualFiltersBlockContextTest extends ViewTestBase {
   /**
    * Tests exposed context.
    */
-  public function testBlockContext() {
+  public function testBlockContext(): void {
     $this->drupalLogin($this->drupalCreateUser([
       'administer views',
       'administer blocks',

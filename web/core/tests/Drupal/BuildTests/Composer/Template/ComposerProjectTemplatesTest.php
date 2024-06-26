@@ -67,7 +67,7 @@ class ComposerProjectTemplatesTest extends ComposerBuildTestBase {
     return $data;
   }
 
-  public function provideTemplateCreateProject() {
+  public static function provideTemplateCreateProject() {
     return [
       'recommended-project' => [
         'drupal/recommended-project',
@@ -85,7 +85,7 @@ class ComposerProjectTemplatesTest extends ComposerBuildTestBase {
   /**
    * Make sure that static::MINIMUM_STABILITY is sufficiently strict.
    */
-  public function testMinimumStabilityStrictness() {
+  public function testMinimumStabilityStrictness(): void {
     // Ensure that static::MINIMUM_STABILITY is not less stable than the
     // current core stability. For example, if we've already released a beta on
     // the branch, ensure that we no longer allow alpha dependencies.
@@ -121,7 +121,12 @@ class ComposerProjectTemplatesTest extends ComposerBuildTestBase {
         continue;
       }
 
-      $project_stability = VersionParser::parseStability($project['version']);
+      // VersionParser::parseStability doesn't play nice with (mostly dev-)
+      // versions ending with the first seven characters of the commit ID as
+      // returned by "composer info". Let's strip those suffixes here.
+      $version = preg_replace('/ [0-9a-f]{7}$/i', '', $project['version']);
+
+      $project_stability = VersionParser::parseStability($version);
       $project_stability_order_index = $stability_order_indexes[$project_stability];
 
       $project_stabilities[$project['name']] = $project_stability;
@@ -141,7 +146,7 @@ class ComposerProjectTemplatesTest extends ComposerBuildTestBase {
   /**
    * Make sure we've accounted for all the templates.
    */
-  public function testVerifyTemplateTestProviderIsAccurate() {
+  public function testVerifyTemplateTestProviderIsAccurate(): void {
     $root = $this->getDrupalRoot();
     $data = $this->provideTemplateCreateProject();
 
@@ -169,7 +174,7 @@ class ComposerProjectTemplatesTest extends ComposerBuildTestBase {
   /**
    * @dataProvider provideTemplateCreateProject
    */
-  public function testTemplateCreateProject($project, $package_dir, $docroot_dir) {
+  public function testTemplateCreateProject($project, $package_dir, $docroot_dir): void {
     // Make a working COMPOSER_HOME directory for setting global composer config
     $composer_home = $this->getWorkspaceDirectory() . '/composer-home';
     mkdir($composer_home);
@@ -420,7 +425,7 @@ JSON;
       // Strip off "-dev";
       $version_towards = substr($version, 0, -4);
 
-      if (substr($version_towards, -2) !== '.0') {
+      if (!str_ends_with($version_towards, '.0')) {
         // If the current version is developing towards an x.y.z release where
         // z is not 0, it means that the x.y.0 has already been released, and
         // only stable changes are permitted on the branch.

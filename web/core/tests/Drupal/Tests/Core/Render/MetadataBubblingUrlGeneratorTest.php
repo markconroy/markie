@@ -52,7 +52,7 @@ class MetadataBubblingUrlGeneratorTest extends UrlGeneratorTest {
    *
    * @dataProvider providerUrlBubbleableMetadataBubbling
    */
-  public function testUrlBubbleableMetadataBubbling($collect_bubbleable_metadata, $invocations, array $options) {
+  public function testUrlBubbleableMetadataBubbling($collect_bubbleable_metadata, $invocations, array $options): void {
     $self = $this;
 
     $this->renderer->expects($this->exactly($invocations))
@@ -69,7 +69,7 @@ class MetadataBubblingUrlGeneratorTest extends UrlGeneratorTest {
   /**
    * Data provider for ::testUrlBubbleableMetadataBubbling().
    */
-  public function providerUrlBubbleableMetadataBubbling() {
+  public static function providerUrlBubbleableMetadataBubbling() {
     return [
       // No bubbling when bubbleable metadata is collected.
       [TRUE, 0, []],

@@ -1,8 +1,9 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\menu_link_content\Kernel;
 
-use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Menu\MenuTreeParameters;
 use Drupal\entity_test\Entity\EntityTestExternal;
 use Drupal\KernelTests\KernelTestBase;
@@ -129,14 +130,15 @@ class MenuLinksTest extends KernelTestBase {
       $menu_link_plugin = $this->menuLinkManager->createInstance($links[$id]);
       $expected_parent = $links[$parent] ?? '';
 
-      $this->assertEquals($expected_parent, $menu_link_plugin->getParent(), new FormattableMarkup('Menu link %id has parent of %parent, expected %expected_parent.', ['%id' => $id, '%parent' => $menu_link_plugin->getParent(), '%expected_parent' => $expected_parent]));
+      $link_parent = $menu_link_plugin->getParent();
+      $this->assertEquals($expected_parent, $link_parent, "Menu link $id has parent of $link_parent, expected $expected_parent.");
     }
   }
 
   /**
    * Assert that a link entity's created timestamp is set.
    */
-  public function testCreateLink() {
+  public function testCreateLink(): void {
     $options = [
       'menu_name' => 'menu-test',
       'bundle' => 'menu_link_content',
@@ -146,7 +148,7 @@ class MenuLinksTest extends KernelTestBase {
     $link = MenuLinkContent::create($options);
     $link->save();
     // Make sure the changed timestamp is set.
-    $this->assertEquals(REQUEST_TIME, $link->getChangedTime(), 'Creating a menu link sets the "changed" timestamp.');
+    $this->assertGreaterThanOrEqual(\Drupal::time()->getRequestTime(), $link->getChangedTime(), 'Creating a menu link sets the "changed" timestamp.');
     $options = [
       'title' => 'Test Link',
     ];
@@ -154,13 +156,13 @@ class MenuLinksTest extends KernelTestBase {
     $link->changed->value = 0;
     $link->save();
     // Make sure the changed timestamp is updated.
-    $this->assertEquals(REQUEST_TIME, $link->getChangedTime(), 'Changing a menu link sets "changed" timestamp.');
+    $this->assertGreaterThanOrEqual(\Drupal::time()->getRequestTime(), $link->getChangedTime(), 'Changing a menu link sets "changed" timestamp.');
   }
 
   /**
    * Tests that menu link pointing to entities get removed on entity remove.
    */
-  public function testMenuLinkOnEntityDelete() {
+  public function testMenuLinkOnEntityDelete(): void {
 
     // Create user.
     $user = User::create(['name' => 'username']);
@@ -209,7 +211,7 @@ class MenuLinksTest extends KernelTestBase {
   /**
    * Tests automatic reparenting of menu links.
    */
-  public function testMenuLinkReparenting($module = 'menu_test') {
+  public function testMenuLinkReparenting($module = 'menu_test'): void {
     // Check the initial hierarchy.
     $links = $this->createLinkHierarchy($module);
 
@@ -275,7 +277,7 @@ class MenuLinksTest extends KernelTestBase {
   /**
    * Tests the MenuLinkContent::preDelete function.
    */
-  public function testMenuLinkContentReparenting() {
+  public function testMenuLinkContentReparenting(): void {
     // Add new menu items in a hierarchy.
     $parent = MenuLinkContent::create([
       'title' => $this->randomMachineName(8),
@@ -309,7 +311,7 @@ class MenuLinksTest extends KernelTestBase {
   /**
    * Tests uninstalling a module providing default links.
    */
-  public function testModuleUninstalledMenuLinks() {
+  public function testModuleUninstalledMenuLinks(): void {
     \Drupal::service('module_installer')->install(['menu_test']);
     \Drupal::service('plugin.manager.menu.link')->rebuild();
     $menu_links = $this->menuLinkManager->loadLinksByRoute('menu_test.menu_test');
@@ -329,7 +331,7 @@ class MenuLinksTest extends KernelTestBase {
    *
    * @covers \Drupal\menu_link_content\Plugin\Validation\Constraint\MenuTreeHierarchyConstraintValidator::validate
    */
-  public function testPendingRevisions() {
+  public function testPendingRevisions(): void {
     /** @var \Drupal\Core\Entity\RevisionableStorageInterface $storage */
     $storage = \Drupal::entityTypeManager()->getStorage('menu_link_content');
 
@@ -457,6 +459,22 @@ class MenuLinksTest extends KernelTestBase {
     $this->assertInstanceOf(MenuLinkContent::class, $tree_element->link->getEntity());
     $this->assertEquals($title, $tree_element->link->getEntity()->getTitle());
     $this->assertEquals($menu_link->id(), $tree_element->link->getEntity()->id());
+  }
+
+  /**
+   * Tests that the form doesn't break for links with arbitrary menu names.
+   */
+  public function testMenuLinkContentFormInvalidParentMenu(): void {
+    $menu_link = MenuLinkContent::create([
+      'title' => 'Menu link test',
+      'provider' => 'menu_link_content',
+      'menu_name' => 'non-existent',
+      'link' => ['uri' => 'internal:/user/login'],
+    ]);
+    // Get the form for a new link, assert that building it doesn't break if
+    // the links menu name doesn't exist.
+    $build = \Drupal::service('entity.form_builder')->getForm($menu_link);
+    static::assertIsArray($build);
   }
 
 }

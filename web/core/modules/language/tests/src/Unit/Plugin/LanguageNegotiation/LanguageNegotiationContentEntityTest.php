@@ -12,7 +12,7 @@ use Drupal\Core\Render\BubbleableMetadata;
 use Drupal\Core\Url;
 use Drupal\language\ConfigurableLanguageManagerInterface;
 use Drupal\language\Plugin\LanguageNegotiation\LanguageNegotiationContentEntity;
-use Symfony\Component\HttpFoundation\ParameterBag;
+use Symfony\Component\HttpFoundation\InputBag;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\ServerBag;
 use Symfony\Component\Routing\Route;
@@ -57,17 +57,17 @@ class LanguageNegotiationContentEntityTest extends LanguageNegotiationTestBase {
     $language_de = $this->createMock(LanguageInterface::class);
     $language_de->expects($this->any())
       ->method('getId')
-      ->will($this->returnValue('de'));
+      ->willReturn('de');
     $language_de->expects($this->any())
       ->method('getName')
-      ->will($this->returnValue('German'));
+      ->willReturn('German');
     $language_en = $this->createMock(LanguageInterface::class);
     $language_en->expects($this->any())
       ->method('getId')
-      ->will($this->returnValue('en'));
+      ->willReturn('en');
     $language_en->expects($this->any())
       ->method('getName')
-      ->will($this->returnValue('English'));
+      ->willReturn('English');
     $this->languages = [
       'de' => $language_de,
       'en' => $language_en,
@@ -76,10 +76,10 @@ class LanguageNegotiationContentEntityTest extends LanguageNegotiationTestBase {
     $language_manager = $this->createMock(ConfigurableLanguageManagerInterface::class);
     $language_manager->expects($this->any())
       ->method('getLanguages')
-      ->will($this->returnValue($this->languages));
+      ->willReturn($this->languages);
     $language_manager->expects($this->any())
       ->method('getNativeLanguages')
-      ->will($this->returnValue($this->languages));
+      ->willReturn($this->languages);
     $this->languageManager = $language_manager;
 
     $container = new ContainerBuilder();
@@ -97,7 +97,7 @@ class LanguageNegotiationContentEntityTest extends LanguageNegotiationTestBase {
   /**
    * @covers ::getLangcode
    */
-  public function testGetLangcode() {
+  public function testGetLangcode(): void {
     $languageNegotiationContentEntity = $this->createLanguageNegotiationPlugin();
 
     // Case 1: Empty request.
@@ -106,7 +106,7 @@ class LanguageNegotiationContentEntityTest extends LanguageNegotiationTestBase {
     // Case 2: A request is available, but the languageManager is not set and
     // the static::QUERY_PARAMETER is not provided as a named parameter.
     $request = Request::create('/de/foo', 'GET');
-    $request->query = new ParameterBag();
+    $request->query = new InputBag();
     $this->assertEquals(NULL, $languageNegotiationContentEntity->getLangcode($request));
 
     // Case 3: A request is available, the languageManager is set, but the
@@ -131,7 +131,7 @@ class LanguageNegotiationContentEntityTest extends LanguageNegotiationTestBase {
   /**
    * @covers ::processOutbound
    */
-  public function testProcessOutbound() {
+  public function testProcessOutbound(): void {
 
     // Case 1: Not all processing conditions are met.
     $languageNegotiationContentEntityMock = $this->createPartialMock($this->getPluginClass(),
@@ -167,10 +167,10 @@ class LanguageNegotiationContentEntityTest extends LanguageNegotiationTestBase {
       ['hasLowerLanguageNegotiationWeight', 'meetsContentEntityRoutesCondition', 'getLangcode']);
     $languageNegotiationContentEntityMock->expects($this->any())
       ->method('hasLowerLanguageNegotiationWeight')
-      ->will($this->returnValue(TRUE));
+      ->willReturn(TRUE);
     $languageNegotiationContentEntityMock->expects($this->any())
       ->method('meetsContentEntityRoutesCondition')
-      ->will($this->returnValue(TRUE));
+      ->willReturn(TRUE);
     $languageNegotiationContentEntityMock->expects($this->exactly(2))
       ->method('getLangcode')
       ->willReturnOnConsecutiveCalls(
@@ -208,7 +208,7 @@ class LanguageNegotiationContentEntityTest extends LanguageNegotiationTestBase {
   /**
    * @covers ::getLanguageSwitchLinks
    */
-  public function testGetLanguageSwitchLinks() {
+  public function testGetLanguageSwitchLinks(): void {
     $languageNegotiationContentEntity = $this->createLanguageNegotiationPlugin();
     $languageNegotiationContentEntity->setLanguageManager($this->languageManager);
 

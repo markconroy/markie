@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\mysql\Functional;
 
 use Drupal\Core\Database\Database;
@@ -53,7 +55,7 @@ class Mysql8RequirePrimaryKeyUpdateTest extends UpdatePathTestBase {
   /**
    * Tests updates.
    */
-  public function testDatabaseLoaded() {
+  public function testDatabaseLoaded(): void {
     $this->runUpdates();
 
     // Ensure that after updating a user can be created and do a basic test that

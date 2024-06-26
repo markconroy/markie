@@ -102,8 +102,8 @@ abstract class EntityDisplayFormBase extends EntityForm {
    * @return array
    *   Example usage:
    *   @code
-   *     return array(
-   *       'content' => array(
+   *     return [
+   *       'content' => [
    *         // label for the region.
    *         'title' => $this->t('Content'),
    *         // Indicates if the region is visible in the UI.
@@ -111,8 +111,8 @@ abstract class EntityDisplayFormBase extends EntityForm {
    *         // A message to indicate that there is nothing to be displayed in
    *         // the region.
    *         'message' => $this->t('No field is displayed.'),
-   *       ),
-   *     );
+   *       ],
+   *     ];
    *   @endcode
    */
   public function getRegions() {
@@ -579,7 +579,12 @@ abstract class EntityDisplayFormBase extends EntityForm {
       $this->saveDisplayStatuses($statuses);
     }
 
-    $this->messenger()->addStatus($this->t('Your settings have been saved.'));
+    // The saved message may not be needed in some cases. An example of
+    // this is in LayoutBuilderEntityViewDisplayForm which can redirect
+    // the user to a confirmation form before the settings are saved.
+    if (!$form_state->getRedirect()) {
+      $this->messenger()->addStatus($this->t('Your settings have been saved.'));
+    }
   }
 
   /**
@@ -688,23 +693,16 @@ abstract class EntityDisplayFormBase extends EntityForm {
     $op = $trigger['#op'];
 
     // Pick the elements that need to receive the ajax-new-content effect.
-    switch ($op) {
-      case 'edit':
-        $updated_rows = [$trigger['#field_name']];
-        $updated_columns = ['plugin'];
-        break;
-
-      case 'update':
-      case 'cancel':
-        $updated_rows = [$trigger['#field_name']];
-        $updated_columns = ['plugin', 'settings_summary', 'settings_edit'];
-        break;
-
-      case 'refresh_table':
-        $updated_rows = array_values(explode(' ', $form_state->getValue('refresh_rows')));
-        $updated_columns = ['settings_summary', 'settings_edit'];
-        break;
-    }
+    $updated_rows = match ($op) {
+      'edit' => [$trigger['#field_name']],
+      'update', 'cancel' => [$trigger['#field_name']],
+      'refresh_table' => array_values(explode(' ', $form_state->getValue('refresh_rows')))
+    };
+    $updated_columns = match ($op) {
+      'edit' => ['plugin'],
+      'update', 'cancel' => ['plugin', 'settings_summary', 'settings_edit'],
+      'refresh_table' => ['settings_summary', 'settings_edit'],
+    };
 
     foreach ($updated_rows as $name) {
       foreach ($updated_columns as $key) {

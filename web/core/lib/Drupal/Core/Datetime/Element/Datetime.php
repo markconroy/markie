@@ -7,14 +7,14 @@ use Drupal\Component\Utility\Variable;
 use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Datetime\Entity\DateFormat;
+use Drupal\Core\Render\Attribute\FormElement;
 use Drupal\Core\Security\DoTrustedCallbackTrait;
 use Drupal\Core\Security\StaticTrustedCallbackHelper;
 
 /**
  * Provides a datetime element.
- *
- * @FormElement("datetime")
  */
+#[FormElement('datetime')]
 class Datetime extends DateElementBase {
 
   use DoTrustedCallbackTrait;
@@ -201,14 +201,14 @@ class Datetime extends DateElementBase {
    *
    * Example usage:
    * @code
-   *   $form = array(
+   *   $form = [
    *     '#type' => 'datetime',
    *     '#default_value' => new DrupalDateTime('2000-01-01 00:00:00'),
    *     '#date_date_element' => 'date',
    *     '#date_time_element' => 'none',
    *     '#date_year_range' => '2010:+3',
    *     '#date_timezone' => 'Asia/Kolkata',
-   *   );
+   *   ];
    * @endcode
    *
    * @param array $element

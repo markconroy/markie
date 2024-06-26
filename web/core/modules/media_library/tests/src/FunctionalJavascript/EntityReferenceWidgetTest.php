@@ -74,7 +74,7 @@ class EntityReferenceWidgetTest extends MediaLibraryTestBase {
   /**
    * Tests that disabled media items don't capture focus on page load.
    */
-  public function testFocusNotAppliedWithoutSelectionChange() {
+  public function testFocusNotAppliedWithoutSelectionChange(): void {
     // Create a node with the maximum number of values for the field_twin_media
     // field.
     $node = $this->drupalCreateNode([
@@ -99,7 +99,7 @@ class EntityReferenceWidgetTest extends MediaLibraryTestBase {
   /**
    * Tests that the Media library's widget works as expected.
    */
-  public function testWidget() {
+  public function testWidget(): void {
     $assert_session = $this->assertSession();
     $page = $this->getSession()->getPage();
 
@@ -192,10 +192,10 @@ class EntityReferenceWidgetTest extends MediaLibraryTestBase {
 
     $assert_session->buttonExists('field_twin_media_settings_edit')->press();
     $this->assertElementExistsAfterWait('css', '#field-twin-media .tabledrag-toggle-weight')->press();
-    $assert_session->fieldExists('fields[field_twin_media][settings_edit_form][settings][media_types][type_one][weight]')->selectOption(0);
-    $assert_session->fieldExists('fields[field_twin_media][settings_edit_form][settings][media_types][type_three][weight]')->selectOption(1);
-    $assert_session->fieldExists('fields[field_twin_media][settings_edit_form][settings][media_types][type_four][weight]')->selectOption(2);
-    $assert_session->fieldExists('fields[field_twin_media][settings_edit_form][settings][media_types][type_two][weight]')->selectOption(3);
+    $assert_session->fieldExists('fields[field_twin_media][settings_edit_form][settings][media_types][type_one][weight]')->selectOption('0');
+    $assert_session->fieldExists('fields[field_twin_media][settings_edit_form][settings][media_types][type_three][weight]')->selectOption('1');
+    $assert_session->fieldExists('fields[field_twin_media][settings_edit_form][settings][media_types][type_four][weight]')->selectOption('2');
+    $assert_session->fieldExists('fields[field_twin_media][settings_edit_form][settings][media_types][type_two][weight]')->selectOption('3');
     $assert_session->buttonExists('Save')->press();
 
     $this->drupalGet('node/add/basic_page');
@@ -212,7 +212,7 @@ class EntityReferenceWidgetTest extends MediaLibraryTestBase {
     $this->assertAnnounceContains('Showing Type Three media.');
     $this->switchToMediaType('One');
     $this->assertAnnounceContains('Showing Type One media.');
-    // Assert the links can be triggered by via the spacebar.
+    // Assert the links can be triggered by via the space bar.
     $assert_session->elementExists('named', ['link', 'Type Three'])->keyPress(32);
     $this->assertAnnounceContains('Showing Type Three media.');
     $assert_session->elementExists('css', '.ui-dialog-titlebar-close')->click();
@@ -474,7 +474,7 @@ class EntityReferenceWidgetTest extends MediaLibraryTestBase {
   /**
    * Tests saving a required media library field.
    */
-  public function testRequiredMediaField() {
+  public function testRequiredMediaField(): void {
     $assert_session = $this->assertSession();
     $page = $this->getSession()->getPage();
 
@@ -599,7 +599,7 @@ JS;
   /**
    * Tests the preview displayed by the field widget.
    */
-  public function testWidgetPreview() {
+  public function testWidgetPreview(): void {
     $assert_session = $this->assertSession();
     $page = $this->getSession()->getPage();
 

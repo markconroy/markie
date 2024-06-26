@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\syslog\Functional;
 
 use Drupal\Tests\BrowserTestBase;
@@ -26,7 +28,7 @@ class SyslogTest extends BrowserTestBase {
   /**
    * Tests the syslog settings page.
    */
-  public function testSettings() {
+  public function testSettings(): void {
     $admin_user = $this->drupalCreateUser(['administer site configuration']);
     $this->drupalLogin($admin_user);
 

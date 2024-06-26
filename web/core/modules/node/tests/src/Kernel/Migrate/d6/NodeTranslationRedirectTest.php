@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\node\Kernel\Migrate\d6;
 
 use Drupal\Tests\migrate_drupal\Kernel\d6\MigrateDrupal6TestBase;
@@ -52,7 +54,7 @@ class NodeTranslationRedirectTest extends MigrateDrupal6TestBase {
   /**
    * Tests that not found node translations are redirected.
    */
-  public function testNodeTranslationRedirect() {
+  public function testNodeTranslationRedirect(): void {
     $kernel = $this->container->get('http_kernel');
     $request = Request::create('/node/11');
     $response = $kernel->handle($request);

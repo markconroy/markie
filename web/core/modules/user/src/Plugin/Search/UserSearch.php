@@ -9,17 +9,18 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Access\AccessibleInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\search\Attribute\Search;
 use Drupal\search\Plugin\SearchPluginBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Executes a keyword search for users against the {users} database table.
- *
- * @SearchPlugin(
- *   id = "user_search",
- *   title = @Translation("Users")
- * )
  */
+#[Search(
+  id: 'user_search',
+  title: new TranslatableMarkup('Users'),
+)]
 class UserSearch extends SearchPluginBase implements AccessibleInterface {
 
   /**
@@ -96,7 +97,7 @@ class UserSearch extends SearchPluginBase implements AccessibleInterface {
   /**
    * {@inheritdoc}
    */
-  public function access($operation = 'view', AccountInterface $account = NULL, $return_as_object = FALSE) {
+  public function access($operation = 'view', ?AccountInterface $account = NULL, $return_as_object = FALSE) {
     $result = AccessResult::allowedIf(!empty($account) && $account->hasPermission('access user profiles'))->cachePerPermissions();
     return $return_as_object ? $result : $result->isAllowed();
   }

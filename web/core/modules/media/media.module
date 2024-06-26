@@ -12,7 +12,7 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Field\FieldTypeCategoryManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Element;
-use Drupal\Core\Render\Element\RenderElement;
+use Drupal\Core\Render\Element\RenderElementBase;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Template\Attribute;
@@ -208,7 +208,7 @@ function media_form_field_ui_field_storage_add_form_alter(&$form, FormStateInter
     'file_upload',
     'field_ui:entity_reference:media',
   ];
-  if (in_array($form_state->getValue('selected_field_type'), $field_types)) {
+  if (in_array($form_state->getValue('new_storage_type'), $field_types)) {
     $form['group_field_options_wrapper']['description_wrapper'] = [
       '#type' => 'item',
       '#markup' => $description_text,
@@ -310,7 +310,7 @@ function media_preprocess_media_reference_help(&$variables) {
   // incorporate parity for both.
   $element = $variables['element'];
   Element::setAttributes($element, ['id']);
-  RenderElement::setAttributes($element);
+  RenderElementBase::setAttributes($element);
   $variables['attributes'] = $element['#attributes'] ?? [];
   $variables['legend_attributes'] = new Attribute();
   $variables['header_attributes'] = new Attribute();

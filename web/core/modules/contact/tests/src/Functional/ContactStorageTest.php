@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\contact\Functional;
 
 use Drupal\contact\Entity\Message;
@@ -39,7 +41,7 @@ class ContactStorageTest extends ContactSitewideTest {
   /**
    * Tests configuration options and the site-wide contact form.
    */
-  public function testContactStorage() {
+  public function testContactStorage(): void {
     // Create and log in administrative user.
     $admin_user = $this->drupalCreateUser([
       'access site-wide contact form',

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\comment\Functional;
 
 use Drupal\comment\Entity\Comment;
@@ -104,7 +106,7 @@ class CommentLanguageTest extends BrowserTestBase {
   /**
    * Tests that comment language is properly set.
    */
-  public function testCommentLanguage() {
+  public function testCommentLanguage(): void {
 
     // Create two nodes, one for english and one for french, and comment each
     // node using both english and french as content language by changing URL

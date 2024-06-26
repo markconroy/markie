@@ -29,7 +29,7 @@ use Drupal\Core\Database\Query\SelectInterface;
  * mysqli or oci8.
  *
  * For more detailed information on the database abstraction layer, see
- * https://www.drupal.org/docs/8/api/database-api/database-api-overview.
+ * https://www.drupal.org/docs/drupal-apis/database-api/database-api-overview.
  *
  * @section sec_entity Querying entities
  * Any query on Drupal entities or fields should use the Entity Query API. See
@@ -77,7 +77,7 @@ use Drupal\Core\Database\Query\SelectInterface;
  *   FROM {example} e
  *   WHERE e.uid = :uid
  *   ORDER BY e.created DESC',
- *   0, 10, array(':uid' => $uid));
+ *   0, 10, [':uid' => $uid)];
  * foreach ($result as $record) {
  *   // Perform operations on $record->title, etc. here.
  * }
@@ -90,7 +90,7 @@ use Drupal\Core\Database\Query\SelectInterface;
  * when you convert it to placeholders, omit the quotes:
  * @code
  * WHERE e.my_field = :my_field
- * ... array(':my_field' => 'foo') ...
+ * ... [':my_field' => 'foo'] ...
  * @endcode
  *
  * @section sec_dynamic Dynamic SELECT queries
@@ -110,7 +110,7 @@ use Drupal\Core\Database\Query\SelectInterface;
  * would be:
  * @code
  * $result = \Drupal::database()->select('example', 'e')
- *   ->fields('e', array('id', 'title', 'created'))
+ *   ->fields('e', ['id', 'title', 'created'])
  *   ->condition('e.uid', $uid)
  *   ->orderBy('e.created', 'DESC')
  *   ->range(0, 10)
@@ -119,7 +119,7 @@ use Drupal\Core\Database\Query\SelectInterface;
  *
  * There are also methods to join to other tables, add fields with aliases,
  * isNull() to query for NULL values, etc. See
- * https://www.drupal.org/developing/api/database for many more details.
+ * https://www.drupal.org/docs/drupal-apis/database-api for many more details.
  *
  * One note on chaining: It is common in the dynamic database API to chain
  * method calls (as illustrated here), because most of the query methods modify
@@ -152,7 +152,7 @@ use Drupal\Core\Database\Query\SelectInterface;
  * @endcode
  * You can execute it via:
  * @code
- * $fields = array('id' => 1, 'uid' => 2, 'path' => 'path', 'name' => 'Name');
+ * $fields = ['id' => 1, 'uid' => 2, 'path' => 'path', 'name' => 'Name'];
  * \Drupal::database()->insert('example')
  *   ->fields($fields)
  *   ->execute();
@@ -182,10 +182,10 @@ use Drupal\Core\Database\Query\SelectInterface;
  *     $transaction = $connection->startTransaction();
  *
  *     $id = $connection->insert('example')
- *       ->fields(array(
+ *       ->fields([
  *         'field1' => 'string',
  *         'field2' => 5,
- *       ))
+ *       ])
  *       ->execute();
  *
  *     my_other_function($id);
@@ -216,7 +216,7 @@ use Drupal\Core\Database\Query\SelectInterface;
  *   if ($id % 2 == 0) {
  *     $connection->update('example')
  *       ->condition('id', $id)
- *       ->fields(array('field2' => 10))
+ *       ->fields(['field2' => 10])
  *       ->execute();
  *   }
  * }
@@ -240,7 +240,7 @@ use Drupal\Core\Database\Query\SelectInterface;
  * if you had a connection object variable $connection available to use. See
  * also the @link container Services and Dependency Injection topic. @endlink
  *
- * @see https://www.drupal.org/developing/api/database
+ * @see https://www.drupal.org/docs/drupal-apis/database-api
  * @see entity_api
  * @see schemaapi
  *

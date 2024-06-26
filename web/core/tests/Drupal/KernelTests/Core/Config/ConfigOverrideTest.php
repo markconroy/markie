@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\KernelTests\Core\Config;
 
 use Drupal\KernelTests\KernelTestBase;
@@ -30,7 +32,7 @@ class ConfigOverrideTest extends KernelTestBase {
   /**
    * Tests configuration override.
    */
-  public function testConfOverride() {
+  public function testConfOverride(): void {
     $expected_original_data = [
       'foo' => 'bar',
       'baz' => NULL,

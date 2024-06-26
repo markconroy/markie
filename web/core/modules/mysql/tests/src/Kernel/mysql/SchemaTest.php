@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\mysql\Kernel\mysql;
 
 use Drupal\Component\Utility\Unicode;
@@ -21,7 +23,7 @@ class SchemaTest extends DriverSpecificSchemaTestBase {
   /**
    * {@inheritdoc}
    */
-  public function checkSchemaComment(string $description, string $table, string $column = NULL): void {
+  public function checkSchemaComment(string $description, string $table, ?string $column = NULL): void {
     $comment = $this->schema->getComment($table, $column);
     $max_length = $column ? 255 : 60;
     $description = Unicode::truncate($description, $max_length, TRUE, TRUE);

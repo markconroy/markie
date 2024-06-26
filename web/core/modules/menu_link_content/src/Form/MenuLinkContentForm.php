@@ -11,6 +11,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Menu\MenuParentFormSelectorInterface;
 use Drupal\Core\Path\PathValidatorInterface;
+use Drupal\system\MenuInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -58,7 +59,7 @@ class MenuLinkContentForm extends ContentEntityForm {
    * @param \Drupal\Component\Datetime\TimeInterface|\Drupal\Core\Entity\EntityTypeBundleInfoInterface $time
    *   The time service.
    */
-  public function __construct(EntityRepositoryInterface $entity_repository, MenuParentFormSelectorInterface $menu_parent_selector, PathValidatorInterface|LanguageManagerInterface $path_validator, EntityTypeBundleInfoInterface|PathValidatorInterface $entity_type_bundle_info = NULL, TimeInterface|EntityTypeBundleInfoInterface $time = NULL) {
+  public function __construct(EntityRepositoryInterface $entity_repository, MenuParentFormSelectorInterface $menu_parent_selector, PathValidatorInterface|LanguageManagerInterface $path_validator, EntityTypeBundleInfoInterface|PathValidatorInterface|null $entity_type_bundle_info = NULL, TimeInterface|EntityTypeBundleInfoInterface|null $time = NULL) {
     if ($path_validator instanceof LanguageManagerInterface) {
       $path_validator = func_get_arg(3);
       $entity_type_bundle_info = func_get_arg(4);
@@ -92,9 +93,9 @@ class MenuLinkContentForm extends ContentEntityForm {
     $parent_id = $this->entity->getParentId() ?: $this->getRequest()->query->get('parent');
     $default = $this->entity->getMenuName() . ':' . $parent_id;
     $id = $this->entity->isNew() ? '' : $this->entity->getPluginId();
-    if ($this->entity->isNew()) {
-      $menu_id = $this->entity->getMenuName();
-      $menu = $this->entityTypeManager->getStorage('menu')->load($menu_id);
+    $menu_id = $this->entity->getMenuName();
+    $menu = $this->entityTypeManager->getStorage('menu')->load($menu_id);
+    if ($menu instanceof MenuInterface && $this->entity->isNew()) {
       $form['menu_parent'] = $this->menuParentSelector->parentSelectElement($default, $id, [
         $menu_id => $menu->label(),
       ]);

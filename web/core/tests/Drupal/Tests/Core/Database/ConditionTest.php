@@ -27,7 +27,7 @@ class ConditionTest extends UnitTestCase {
    *   - Expected result for the string version of the condition.
    *   - The field name to input in the condition.
    */
-  public function providerSimpleCondition() {
+  public static function providerSimpleCondition() {
     return [
       ['name = :db_condition_placeholder_0', 'name'],
       ['name123 = :db_condition_placeholder_0', 'name-123'],
@@ -38,7 +38,7 @@ class ConditionTest extends UnitTestCase {
    * @covers ::compile
    * @dataProvider providerSimpleCondition
    */
-  public function testSimpleCondition($expected, $field_name) {
+  public function testSimpleCondition($expected, $field_name): void {
     $connection = $this->prophesize(Connection::class);
     $connection->escapeField($field_name)->will(function ($args) {
       return preg_replace('/[^A-Za-z0-9_.]+/', '', $args[0]);
@@ -80,7 +80,7 @@ class ConditionTest extends UnitTestCase {
    * @param mixed $expected_arguments
    *   (optional) The expected set arguments.
    */
-  public function testCompileWithKnownOperators($expected, $field, $value, $operator, $expected_arguments = NULL) {
+  public function testCompileWithKnownOperators($expected, $field, $value, $operator, $expected_arguments = NULL): void {
     $connection = $this->prophesize(Connection::class);
     $connection->escapeField(Argument::any())->will(function ($args) {
       return preg_replace('/[^A-Za-z0-9_.]+/', '', $args[0]);
@@ -113,7 +113,7 @@ class ConditionTest extends UnitTestCase {
    *
    * @return array
    */
-  public function dataProviderTestCompileWithKnownOperators() {
+  public static function dataProviderTestCompileWithKnownOperators() {
     // Below are a list of commented out test cases, which should work but
     // aren't directly supported by core, but instead need manual handling with
     // prefix/suffix at the moment.
@@ -149,7 +149,7 @@ class ConditionTest extends UnitTestCase {
    *
    * @dataProvider providerTestCompileWithSqlInjectionForOperator
    */
-  public function testCompileWithSqlInjectionForOperator($operator) {
+  public function testCompileWithSqlInjectionForOperator($operator): void {
     $connection = $this->prophesize(Connection::class);
     $connection->escapeField(Argument::any())->will(function ($args) {
       return preg_replace('/[^A-Za-z0-9_.]+/', '', $args[0]);
@@ -173,7 +173,7 @@ class ConditionTest extends UnitTestCase {
     $condition->compile($connection, $query_placeholder);
   }
 
-  public function providerTestCompileWithSqlInjectionForOperator() {
+  public static function providerTestCompileWithSqlInjectionForOperator() {
     $data = [];
     $data[] = ["IS NOT NULL) ;INSERT INTO {test} (name) VALUES ('test12345678'); -- "];
     $data[] = ["IS NOT NULL) UNION ALL SELECT name, pass FROM {users_field_data} -- "];
@@ -186,7 +186,7 @@ class ConditionTest extends UnitTestCase {
   /**
    * Tests that the core Condition can be overridden.
    */
-  public function testContribCondition() {
+  public function testContribCondition(): void {
     $connection = new StubConnection($this->createMock(StubPDO::class), [
       'namespace' => 'Drupal\mock\Driver\Database\mock',
       'prefix' => '',

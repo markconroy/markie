@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\forum\Functional;
 
 use Drupal\comment\CommentInterface;
@@ -14,6 +16,7 @@ use Drupal\Tests\BrowserTestBase;
  * Tests forum module uninstallation.
  *
  * @group forum
+ * @group legacy
  * @group #slow
  */
 class ForumUninstallTest extends BrowserTestBase {
@@ -33,7 +36,7 @@ class ForumUninstallTest extends BrowserTestBase {
   /**
    * Tests if forum module uninstallation properly deletes the field.
    */
-  public function testForumUninstallWithField() {
+  public function testForumUninstallWithField(): void {
     $this->drupalLogin($this->drupalCreateUser([
       'administer taxonomy',
       'administer nodes',
@@ -133,13 +136,14 @@ class ForumUninstallTest extends BrowserTestBase {
     // Double check everything by reinstalling the forum module again.
     $this->drupalGet('admin/modules');
     $this->submitForm(['modules[forum][enable]' => 1], 'Install');
-    $this->assertSession()->pageTextContains('Module Forum has been enabled.');
+    $this->submitForm([], 'Continue');
+    $this->assertSession()->pageTextContains('Module Forum has been installed.');
   }
 
   /**
    * Tests uninstallation if the field storage has been deleted beforehand.
    */
-  public function testForumUninstallWithoutFieldStorage() {
+  public function testForumUninstallWithoutFieldStorage(): void {
     // Manually delete the taxonomy_forums field before module uninstallation.
     $field_storage = FieldStorageConfig::loadByName('node', 'taxonomy_forums');
     $this->assertNotNull($field_storage, 'The taxonomy_forums field storage exists.');
@@ -164,8 +168,10 @@ class ForumUninstallTest extends BrowserTestBase {
   /**
    * Tests uninstallation of forum module when vocabulary is deleted.
    */
-  public function testForumUninstallWithoutForumVocabulary() {
-    $this->drupalLogin($this->rootUser);
+  public function testForumUninstallWithoutForumVocabulary(): void {
+    $this->drupalLogin($this->drupalCreateUser([
+      'administer modules',
+    ]));
     Vocabulary::load('forums')->delete();
 
     // Now attempt to uninstall forum.

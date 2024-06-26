@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\menu_link_content\Kernel\Plugin\migrate\source;
 
 use Drupal\Component\Utility\Unicode;
 use Drupal\Tests\migrate\Kernel\MigrateSqlSourceTestBase;
 use Drupal\TestTools\Random;
 
-// cspell:ignore tsid
+// cspell:ignore mlid plid tsid
 
 /**
  * Tests the menu link source plugin.
@@ -25,7 +27,7 @@ class MenuLinkTest extends MigrateSqlSourceTestBase {
   /**
    * {@inheritdoc}
    */
-  public function providerSource() {
+  public static function providerSource() {
     $tests = [];
 
     // The source data.

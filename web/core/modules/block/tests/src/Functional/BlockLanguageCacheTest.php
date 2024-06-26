@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\block\Functional;
 
 use Drupal\language\Entity\ConfigurableLanguage;
@@ -52,7 +54,7 @@ class BlockLanguageCacheTest extends BrowserTestBase {
   /**
    * Creates a block in a language, check blocks page in all languages.
    */
-  public function testBlockLinks() {
+  public function testBlockLinks(): void {
     // Create admin user to be able to access block admin.
     $admin_user = $this->drupalCreateUser([
       'administer blocks',

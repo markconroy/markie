@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\system\Functional\System;
 
 use Drupal\Tests\BrowserTestBase;
@@ -29,7 +31,7 @@ class DateFormatsMachineNameTest extends BrowserTestBase {
   /**
    * Tests that date formats cannot be created with invalid machine names.
    */
-  public function testDateFormatsMachineNameAllowedValues() {
+  public function testDateFormatsMachineNameAllowedValues(): void {
     // Try to create a date format with a not allowed character to test the date
     // format specific machine name replace pattern.
     $edit = [

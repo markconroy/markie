@@ -27,7 +27,7 @@ class CryptTest extends TestCase {
    * @param string $expected_hash
    *   Expected result from hashing $data.
    */
-  public function testHashBase64($data, $expected_hash) {
+  public function testHashBase64($data, $expected_hash): void {
     $hash = Crypt::hashBase64($data);
     $this->assertEquals($expected_hash, $hash, 'The correct hash was not calculated.');
   }
@@ -45,7 +45,7 @@ class CryptTest extends TestCase {
    * @param string $expected_hmac
    *   Expected result from hashing $data using $key.
    */
-  public function testHmacBase64($data, $key, $expected_hmac) {
+  public function testHmacBase64($data, $key, $expected_hmac): void {
     $hmac = Crypt::hmacBase64($data, $key);
     $this->assertEquals($expected_hmac, $hmac, 'The correct hmac was not calculated.');
   }
@@ -61,7 +61,7 @@ class CryptTest extends TestCase {
    * @param string $key
    *   Key to use in hashing process.
    */
-  public function testHmacBase64Invalid($data, $key) {
+  public function testHmacBase64Invalid($data, $key): void {
     $this->expectException('InvalidArgumentException');
     Crypt::hmacBase64($data, $key);
   }
@@ -71,12 +71,12 @@ class CryptTest extends TestCase {
    *
    * @return array Test data.
    */
-  public function providerTestHashBase64() {
+  public static function providerTestHashBase64() {
     return [
       [
         'data' => 'The SHA (Secure Hash Algorithm) is one of a number of cryptographic hash functions. A cryptographic hash is like a signature for a text or a data file. SHA-256 algorithm generates an almost-unique, fixed size 256-bit (32-byte) hash. Hash is a one way function – it cannot be decrypted back. This makes it suitable for password validation, challenge hash authentication, anti-tamper, digital signatures.',
         // cspell:disable-next-line
-        'expectedHash' => '034rT6smZAVRxpq8O98cFFNLIVx_Ph1EwLZQKcmRR_s',
+        'expected_hash' => '034rT6smZAVRxpq8O98cFFNLIVx_Ph1EwLZQKcmRR_s',
       ],
       [
         'data' => 'SHA-256 is one of the successor hash functions to SHA-1, and is one of the strongest hash functions available.',
@@ -91,7 +91,7 @@ class CryptTest extends TestCase {
    *
    * @return array Test data.
    */
-  public function providerTestHmacBase64() {
+  public static function providerTestHmacBase64() {
     return [
       [
         'data' => 'Calculates a base-64 encoded, URL-safe sha-256 hmac.',
@@ -107,7 +107,7 @@ class CryptTest extends TestCase {
    *
    * @return array Test data.
    */
-  public function providerTestHmacBase64Invalid() {
+  public static function providerTestHmacBase64Invalid() {
     return [
       [new \stdClass(), new \stdClass()],
       [new \stdClass(), 'string'],

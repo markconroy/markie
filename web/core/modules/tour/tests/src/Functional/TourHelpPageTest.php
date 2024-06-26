@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\tour\Functional;
 
 use Drupal\Tests\BrowserTestBase;
@@ -8,6 +10,7 @@ use Drupal\Tests\BrowserTestBase;
  * Verifies help page display of tours.
  *
  * @group help
+ * @group legacy
  */
 class TourHelpPageTest extends BrowserTestBase {
 
@@ -59,7 +62,7 @@ class TourHelpPageTest extends BrowserTestBase {
   /**
    * Logs in users, tests help pages.
    */
-  public function testHelp() {
+  public function testHelp(): void {
     $this->drupalLogin($this->tourUser);
     $this->verifyHelp();
 

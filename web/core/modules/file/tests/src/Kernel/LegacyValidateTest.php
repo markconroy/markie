@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\file\Kernel;
 
 /**
@@ -13,7 +15,7 @@ class LegacyValidateTest extends FileManagedUnitTestBase {
   /**
    * Tests that the validators passed into are checked.
    */
-  public function testCallerValidation() {
+  public function testCallerValidation(): void {
     $file = $this->createFile();
 
     // Empty validators.
@@ -39,7 +41,7 @@ class LegacyValidateTest extends FileManagedUnitTestBase {
   /**
    * Tests hard-coded security check in file_validate().
    */
-  public function testInsecureExtensions() {
+  public function testInsecureExtensions(): void {
     $file = $this->createFile('test.php', 'Invalid PHP');
 
     // Test that file_validate() will check for insecure extensions by default.

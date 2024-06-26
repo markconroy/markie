@@ -31,14 +31,14 @@ class SortTest extends TestCase {
   /**
    * Tests that the phpcs.xml.dist file exists.
    */
-  public function testFileExists() {
+  public function testFileExists(): void {
     $this->assertFileExists($this->filePath);
   }
 
   /**
    * Tests that the phpcs.xml.dist file is properly sorted.
    */
-  public function testSorted() {
+  public function testSorted(): void {
     $content = file_get_contents($this->filePath);
     $xml_encoder = new XmlEncoder();
     $xml_encoded = $xml_encoder->decode($content, 'xml');
@@ -81,7 +81,7 @@ class SortTest extends TestCase {
    * @param null|string $column
    *   The column of the value or NULL.
    */
-  private function assertSorted(array $input, string $column = NULL) {
+  private function assertSorted(array $input, ?string $column = NULL) {
     $input_sorted = $input;
 
     if ($column === NULL) {

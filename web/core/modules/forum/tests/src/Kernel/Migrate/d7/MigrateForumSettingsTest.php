@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\forum\Kernel\Migrate\d7;
 
 use Drupal\Tests\migrate_drupal\Kernel\d7\MigrateDrupal7TestBase;
@@ -8,6 +10,7 @@ use Drupal\Tests\migrate_drupal\Kernel\d7\MigrateDrupal7TestBase;
  * Tests migration of Forum's variables to configuration.
  *
  * @group forum
+ * @group legacy
  */
 class MigrateForumSettingsTest extends MigrateDrupal7TestBase {
 
@@ -47,7 +50,7 @@ class MigrateForumSettingsTest extends MigrateDrupal7TestBase {
   /**
    * Tests the migration of Forum's settings to configuration.
    */
-  public function testForumSettingsMigration() {
+  public function testForumSettingsMigration(): void {
     $config = $this->config('forum.settings');
     $this->assertSame(9, $config->get('block.active.limit'));
     $this->assertSame(4, $config->get('block.new.limit'));

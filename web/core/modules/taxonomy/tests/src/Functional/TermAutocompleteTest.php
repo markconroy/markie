@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\taxonomy\Functional;
 
 use Drupal\Component\Serialization\Json;
@@ -166,7 +168,7 @@ class TermAutocompleteTest extends TaxonomyTestBase {
    *
    * @see \Drupal\taxonomy\Controller\TermAutocompleteController::autocomplete()
    */
-  public function testAutocompleteCountResults() {
+  public function testAutocompleteCountResults(): void {
     // Test that no matching term found.
     $data = $this->drupalGetJson(
       $this->autocompleteUrl,
@@ -202,7 +204,7 @@ class TermAutocompleteTest extends TaxonomyTestBase {
    *
    * @see \Drupal\taxonomy\Controller\TermAutocompleteController::autocomplete()
    */
-  public function testAutocompleteOrderedResults() {
+  public function testAutocompleteOrderedResults(): void {
     $expectedResults = [
       'aaa 10 bbb',
       'aaa 11 bbb',

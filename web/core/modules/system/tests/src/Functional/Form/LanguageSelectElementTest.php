@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\system\Functional\Form;
 
 use Drupal\Component\Serialization\Json;
@@ -29,7 +31,7 @@ class LanguageSelectElementTest extends BrowserTestBase {
   /**
    * Tests that the options printed by the language select element are correct.
    */
-  public function testLanguageSelectElementOptions() {
+  public function testLanguageSelectElementOptions(): void {
     // Add some languages.
     ConfigurableLanguage::create([
       'id' => 'aaa',
@@ -72,7 +74,7 @@ class LanguageSelectElementTest extends BrowserTestBase {
    *
    * This happens when the language module is disabled.
    */
-  public function testHiddenLanguageSelectElement() {
+  public function testHiddenLanguageSelectElement(): void {
     // Disable the language module, so that the language select field will not
     // be rendered.
     $this->container->get('module_installer')->uninstall(['language']);

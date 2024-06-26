@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\KernelTests\Core\Asset;
 
 use Drupal\Core\Asset\Exception\InvalidLibrariesExtendSpecificationException;
@@ -38,7 +40,7 @@ class LibraryDiscoveryIntegrationTest extends KernelTestBase {
   /**
    * Tests that hook_library_info is invoked and the cache is cleared.
    */
-  public function testHookLibraryInfoByTheme() {
+  public function testHookLibraryInfoByTheme(): void {
     // Activate test_theme and verify that the library 'kitten' is added using
     // hook_library_info_alter().
     $this->activateTheme('test_theme');
@@ -53,7 +55,7 @@ class LibraryDiscoveryIntegrationTest extends KernelTestBase {
   /**
    * Tests that libraries-override are applied to library definitions.
    */
-  public function testLibrariesOverride() {
+  public function testLibrariesOverride(): void {
     // Assert some starterkit_theme libraries that will be overridden or
     // removed.
     $this->activateTheme('starterkit_theme');
@@ -94,7 +96,7 @@ class LibraryDiscoveryIntegrationTest extends KernelTestBase {
   /**
    * Tests libraries-override on drupalSettings.
    */
-  public function testLibrariesOverrideDrupalSettings() {
+  public function testLibrariesOverrideDrupalSettings(): void {
     // Activate test theme that attempts to override drupalSettings.
     $this->activateTheme('test_theme_libraries_override_with_drupal_settings');
 
@@ -112,7 +114,7 @@ class LibraryDiscoveryIntegrationTest extends KernelTestBase {
   /**
    * Tests libraries-override on malformed assets.
    */
-  public function testLibrariesOverrideMalformedAsset() {
+  public function testLibrariesOverrideMalformedAsset(): void {
     // Activate test theme that overrides with a malformed asset.
     $this->activateTheme('test_theme_libraries_override_with_invalid_asset');
 
@@ -128,9 +130,32 @@ class LibraryDiscoveryIntegrationTest extends KernelTestBase {
   }
 
   /**
+   * Tests libraries overrides with multiple parent themes.
+   */
+  public function testLibrariesOverridesMultiple(): void {
+    /** @var \Drupal\Core\Extension\ThemeInstallerInterface $theme_installer */
+    $theme_installer = $this->container->get('theme_installer');
+    $theme_installer->install(['test_basetheme']);
+    $theme_installer->install(['test_subtheme']);
+    $theme_installer->install(['test_subsubtheme']);
+
+    /** @var \Drupal\Core\Theme\ThemeInitializationInterface $theme_initializer */
+    $theme_initializer = $this->container->get('theme.initialization');
+    $active_theme = $theme_initializer->initTheme('test_subsubtheme');
+
+    $libraries_override = $active_theme->getLibrariesOverride();
+    $expected_order = [
+      'core/modules/system/tests/themes/test_basetheme',
+      'core/modules/system/tests/themes/test_subtheme',
+      'core/modules/system/tests/themes/test_subsubtheme',
+    ];
+    $this->assertEquals($expected_order, array_keys($libraries_override));
+  }
+
+  /**
    * Tests library assets with other ways for specifying paths.
    */
-  public function testLibrariesOverrideOtherAssetLibraryNames() {
+  public function testLibrariesOverrideOtherAssetLibraryNames(): void {
     // Activate a test theme that defines libraries overrides on other types of
     // assets.
     $this->activateTheme('test_theme');
@@ -151,7 +176,7 @@ class LibraryDiscoveryIntegrationTest extends KernelTestBase {
   /**
    * Tests that base theme libraries-override still apply in sub themes.
    */
-  public function testBaseThemeLibrariesOverrideInSubTheme() {
+  public function testBaseThemeLibrariesOverrideInSubTheme(): void {
     // Activate a test theme that has subthemes.
     $this->activateTheme('test_subtheme');
 
@@ -164,15 +189,15 @@ class LibraryDiscoveryIntegrationTest extends KernelTestBase {
   /**
    * Tests libraries-extend.
    */
-  public function testLibrariesExtend() {
-    // Simulate starterkit_theme defining the book-navigation library.
+  public function testLibrariesExtend(): void {
+    // Simulate starterkit_theme defining the test-navigation library.
     // @see theme_test_library_info_alter()
     $this->container->get('state')
       ->set('theme_test_library_info_alter starterkit_theme', [
-        'book-navigation' => [
+        'test-navigation' => [
           'css' => [
             'component' => [
-              'css/components/book-navigation.css' => [],
+              'css/components/test-navigation.css' => [],
             ],
           ],
         ],
@@ -180,16 +205,16 @@ class LibraryDiscoveryIntegrationTest extends KernelTestBase {
 
     // Activate starterkit_theme and verify the libraries are not extended.
     $this->activateTheme('starterkit_theme');
-    $this->assertNoAssetInLibrary('core/modules/system/tests/themes/test_theme_libraries_extend/css/extend_1.css', 'starterkit_theme', 'book-navigation', 'css');
-    $this->assertNoAssetInLibrary('core/modules/system/tests/themes/test_theme_libraries_extend/js/extend_1.js', 'starterkit_theme', 'book-navigation', 'js');
-    $this->assertNoAssetInLibrary('core/modules/system/tests/themes/test_theme_libraries_extend/css/extend_2.css', 'starterkit_theme', 'book-navigation', 'css');
+    $this->assertNoAssetInLibrary('core/modules/system/tests/themes/test_theme_libraries_extend/css/extend_1.css', 'starterkit_theme', 'test-navigation', 'css');
+    $this->assertNoAssetInLibrary('core/modules/system/tests/themes/test_theme_libraries_extend/js/extend_1.js', 'starterkit_theme', 'test-navigation', 'js');
+    $this->assertNoAssetInLibrary('core/modules/system/tests/themes/test_theme_libraries_extend/css/extend_2.css', 'starterkit_theme', 'test-navigation', 'css');
 
-    // Activate the theme that extends the book-navigation library in
+    // Activate the theme that extends the test-navigation library in
     // starterkit_theme.
     $this->activateTheme('test_theme_libraries_extend');
-    $this->assertAssetInLibrary('core/modules/system/tests/themes/test_theme_libraries_extend/css/extend_1.css', 'starterkit_theme', 'book-navigation', 'css');
-    $this->assertAssetInLibrary('core/modules/system/tests/themes/test_theme_libraries_extend/js/extend_1.js', 'starterkit_theme', 'book-navigation', 'js');
-    $this->assertAssetInLibrary('core/modules/system/tests/themes/test_theme_libraries_extend/css/extend_2.css', 'starterkit_theme', 'book-navigation', 'css');
+    $this->assertAssetInLibrary('core/modules/system/tests/themes/test_theme_libraries_extend/css/extend_1.css', 'starterkit_theme', 'test-navigation', 'css');
+    $this->assertAssetInLibrary('core/modules/system/tests/themes/test_theme_libraries_extend/js/extend_1.js', 'starterkit_theme', 'test-navigation', 'js');
+    $this->assertAssetInLibrary('core/modules/system/tests/themes/test_theme_libraries_extend/css/extend_2.css', 'starterkit_theme', 'test-navigation', 'css');
 
     // Activate a sub theme and confirm that it inherits the library assets
     // extended in the base theme as well as its own.
@@ -224,16 +249,19 @@ class LibraryDiscoveryIntegrationTest extends KernelTestBase {
   }
 
   /**
-   * Test deprecated libraries.
+   * Test library deprecation support.
    *
    * @group legacy
    */
-  public function testDeprecatedLibrary() {
+  public function testDeprecatedLibrary(): void {
+    $this->expectDeprecation('Targeting theme_test/moved_from css/foo.css from test_theme_with_deprecated_libraries library_overrides is deprecated in drupal:X.0.0 and will be removed in drupal:Y.0.0. Target theme_test/moved_to css/base-remove.css instead. See https://example.com');
+    $this->expectDeprecation('Targeting theme_test/moved_from js/bar.js from test_theme_with_deprecated_libraries library_overrides is deprecated in drupal:X.0.0 and will be removed in drupal:Y.0.0. Target theme_test/moved_to js/foo.js instead. See https://example.com');
     $this->expectDeprecation('Theme "theme_test" is overriding a deprecated library. The "theme_test/deprecated_library" asset library is deprecated in drupal:X.0.0 and is removed from drupal:Y.0.0. Use another library instead. See https://www.example.com');
     $this->expectDeprecation('Theme "theme_test" is extending a deprecated library. The "theme_test/another_deprecated_library" asset library is deprecated in drupal:X.0.0 and is removed from drupal:Y.0.0. Use another library instead. See https://www.example.com');
     $this->expectDeprecation('The "theme_test/deprecated_library" asset library is deprecated in drupal:X.0.0 and is removed from drupal:Y.0.0. Use another library instead. See https://www.example.com');
     $this->expectDeprecation('The "theme_test/another_deprecated_library" asset library is deprecated in drupal:X.0.0 and is removed from drupal:Y.0.0. Use another library instead. See https://www.example.com');
     $this->activateTheme('test_theme_with_deprecated_libraries');
+    $this->libraryDiscovery->getLibraryByName('theme_test', 'moved_to');
     $this->libraryDiscovery->getLibraryByName('theme_test', 'deprecated_library');
     $this->libraryDiscovery->getLibraryByName('theme_test', 'another_deprecated_library');
   }
@@ -278,7 +306,7 @@ class LibraryDiscoveryIntegrationTest extends KernelTestBase {
    *
    * @internal
    */
-  protected function assertAssetInLibrary(string $asset, string $extension, string $library_name, string $sub_key, string $message = NULL): void {
+  protected function assertAssetInLibrary(string $asset, string $extension, string $library_name, string $sub_key, ?string $message = NULL): void {
     if (!isset($message)) {
       $message = sprintf('Asset %s found in library "%s/%s"', $asset, $extension, $library_name);
     }
@@ -307,7 +335,7 @@ class LibraryDiscoveryIntegrationTest extends KernelTestBase {
    *
    * @internal
    */
-  protected function assertNoAssetInLibrary(string $asset, string $extension, string $library_name, string $sub_key, string $message = NULL): void {
+  protected function assertNoAssetInLibrary(string $asset, string $extension, string $library_name, string $sub_key, ?string $message = NULL): void {
     if (!isset($message)) {
       $message = sprintf('Asset %s not found in library "%s/%s"', $asset, $extension, $library_name);
     }

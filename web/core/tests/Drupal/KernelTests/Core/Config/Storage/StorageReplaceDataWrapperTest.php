@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\KernelTests\Core\Config\Storage;
 
 use Drupal\config\StorageReplaceDataWrapper;
@@ -51,7 +53,7 @@ class StorageReplaceDataWrapperTest extends ConfigStorageTestBase {
   /**
    * {@inheritdoc}
    */
-  public function testInvalidStorage() {
+  public function testInvalidStorage(): void {
     $this->markTestSkipped('No-op as this test does not make sense');
   }
 
@@ -63,7 +65,7 @@ class StorageReplaceDataWrapperTest extends ConfigStorageTestBase {
    *
    * @dataProvider providerCollections
    */
-  public function testCreateCollection($collection) {
+  public function testCreateCollection($collection): void {
     $initial_collection_name = $this->storage->getCollectionName();
 
     // Create new storage with given collection and check it is set correctly.
@@ -80,7 +82,7 @@ class StorageReplaceDataWrapperTest extends ConfigStorageTestBase {
    * @return array
    *   Returns an array of collection names.
    */
-  public function providerCollections() {
+  public static function providerCollections() {
     return [
       [StorageInterface::DEFAULT_COLLECTION],
       ['foo.bar'],

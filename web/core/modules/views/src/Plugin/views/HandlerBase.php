@@ -85,6 +85,7 @@ abstract class HandlerBase extends PluginBase implements ViewsHandlerInterface {
   /**
    * Tracks whether the plugin is a handler.
    */
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
   public bool $is_handler;
 
   /**
@@ -105,7 +106,7 @@ abstract class HandlerBase extends PluginBase implements ViewsHandlerInterface {
   /**
    * {@inheritdoc}
    */
-  public function init(ViewExecutable $view, DisplayPluginBase $display, array &$options = NULL) {
+  public function init(ViewExecutable $view, DisplayPluginBase $display, ?array &$options = NULL) {
     parent::init($view, $display, $options);
 
     // Check to see if this handler type is defaulted. Note that

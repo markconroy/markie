@@ -75,7 +75,7 @@ class Drupal {
   /**
    * The current system version.
    */
-  const VERSION = '10.2.4';
+  const VERSION = '10.3.0';
 
   /**
    * Core API compatibility.
@@ -131,7 +131,7 @@ class Drupal {
    * message, but Drupal can still be installed. Used for (e.g.) PHP versions
    * that have reached their EOL or will in the near future.
    */
-  const RECOMMENDED_PHP = '8.2.0';
+  const RECOMMENDED_PHP = '8.3.0';
 
   /**
    * The currently active container object, or NULL if not initialized yet.
@@ -223,8 +223,10 @@ class Drupal {
   /**
    * Gets the active install profile.
    *
-   * @return string|null
-   *   The name of the active install profile.
+   * @return string|false|null
+   *   The name of the active install profile. FALSE indicates that the site is
+   *   not using an install profile. NULL indicates that the site has not yet
+   *   been installed.
    */
   public static function installProfile() {
     return static::getContainer()->getParameter('install_profile');
@@ -346,7 +348,7 @@ class Drupal {
    * an object of a class that implements
    * \Drupal\Core\DependencyInjection\ContainerInjectionInterface.
    *
-   * One common usecase is to provide a class which contains the actual code
+   * One common use case is to provide a class which contains the actual code
    * of a hook implementation, without having to create a service.
    *
    * @param string $class
@@ -394,14 +396,15 @@ class Drupal {
    * Retrieves a configuration object.
    *
    * This is the main entry point to the configuration API. Calling
-   * @code \Drupal::config('book.admin') @endcode will return a configuration
-   * object the Book module can use to read its administrative settings.
+   * @code \Drupal::config('my_module.admin') @endcode will return a
+   * configuration object the my_module module can use to read its
+   * administrative settings.
    *
    * @param string $name
    *   The name of the configuration object to retrieve, which typically
    *   corresponds to a configuration file. For
-   *   @code \Drupal::config('book.admin') @endcode, the configuration
-   *   object returned will contain the content of the book.admin
+   *   @code \Drupal::config('my_module.admin') @endcode, the configuration
+   *   object returned will contain the content of the my_module.admin
    *   configuration file.
    *
    * @return \Drupal\Core\Config\ImmutableConfig

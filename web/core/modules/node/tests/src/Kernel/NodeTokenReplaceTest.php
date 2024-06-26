@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\node\Kernel;
 
 use Drupal\Component\Utility\Html;
@@ -37,7 +39,7 @@ class NodeTokenReplaceTest extends TokenReplaceKernelTestBase {
   /**
    * Creates a node, then tests the tokens generated from it.
    */
-  public function testNodeTokenReplacement() {
+  public function testNodeTokenReplacement(): void {
     $url_options = [
       'absolute' => TRUE,
       'language' => $this->interfaceLanguage,

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\workspaces\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
@@ -14,7 +16,7 @@ class WorkspaceAssociationDeprecationTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  protected static $modules = ['path_alias', 'user', 'workspaces'];
+  protected static $modules = ['user', 'workspaces'];
 
   /**
    * {@inheritdoc}

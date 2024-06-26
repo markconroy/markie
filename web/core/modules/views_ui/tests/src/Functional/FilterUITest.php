@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\views_ui\Functional;
 
 /**
@@ -40,7 +42,7 @@ class FilterUITest extends UITestBase {
   /**
    * Tests that an option for a filter is saved as expected from the UI.
    */
-  public function testFilterInOperatorUi() {
+  public function testFilterInOperatorUi(): void {
     $admin_user = $this->drupalCreateUser([
       'administer views',
       'administer site configuration',
@@ -67,7 +69,7 @@ class FilterUITest extends UITestBase {
   /**
    * Tests the filters from the UI.
    */
-  public function testFiltersUI() {
+  public function testFiltersUI(): void {
     $admin_user = $this->drupalCreateUser([
       'administer views',
       'administer site configuration',
@@ -102,7 +104,7 @@ class FilterUITest extends UITestBase {
   /**
    * Tests the identifier settings and restrictions.
    */
-  public function testFilterIdentifier() {
+  public function testFilterIdentifier(): void {
     $admin_user = $this->drupalCreateUser([
       'administer views',
       'administer site configuration',

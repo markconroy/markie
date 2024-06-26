@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\content_translation\Kernel;
 
 use Drupal\entity_test\Entity\EntityTestMulBundle;
@@ -38,7 +40,7 @@ class ContentTranslationPermissionsTest extends KernelTestBase {
   /**
    * Tests that enabling translation via the API triggers schema updates.
    */
-  public function testPermissions() {
+  public function testPermissions(): void {
     $this->container->get('content_translation.manager')->setEnabled('entity_test_mul', 'entity_test_mul', TRUE);
     $this->container->get('content_translation.manager')->setEnabled('entity_test_mul_with_bundle', 'test', TRUE);
     $permissions = $this->container->get('user.permissions')->getPermissions();

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\content_moderation\Functional;
 
 use Drupal\Tests\content_moderation\Traits\ContentModerationTestTrait;
@@ -83,7 +85,7 @@ class ViewsModerationStateFilterTest extends ViewTestBase {
    * @covers ::calculateDependencies
    * @covers ::onDependencyRemoval
    */
-  public function testModerationStateFilterDependencyHandling() {
+  public function testModerationStateFilterDependencyHandling(): void {
     // First, check that the view doesn't have any config dependency when there
     // are no states configured in the filter.
     $view_id = 'test_content_moderation_state_filter_base_table';
@@ -168,7 +170,7 @@ class ViewsModerationStateFilterTest extends ViewTestBase {
    *
    * @dataProvider providerTestWorkflowChanges
    */
-  public function testWorkflowChanges($view_id) {
+  public function testWorkflowChanges($view_id): void {
     // First, apply the Editorial workflow to both of our content types.
     $this->drupalGet('admin/config/workflow/workflows/manage/editorial/type/node');
     $this->submitForm([
@@ -261,7 +263,7 @@ class ViewsModerationStateFilterTest extends ViewTestBase {
    * @return string[]
    *   An array of view IDs.
    */
-  public function providerTestWorkflowChanges() {
+  public static function providerTestWorkflowChanges() {
     return [
       'view on base table, filter on base table' => [
         'test_content_moderation_state_filter_base_table',
@@ -275,7 +277,7 @@ class ViewsModerationStateFilterTest extends ViewTestBase {
   /**
    * Tests the content moderation state filter caching is correct.
    */
-  public function testFilterRenderCache() {
+  public function testFilterRenderCache(): void {
     // Initially all states of the workflow are displayed.
     $this->drupalGet('admin/config/workflow/workflows/manage/editorial/type/node');
     $this->submitForm(['bundles[example_a]' => TRUE], 'Save');

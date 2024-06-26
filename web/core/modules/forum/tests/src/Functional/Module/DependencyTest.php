@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\forum\Functional\Module;
 
 use Drupal\Tests\system\Functional\Module\ModuleTestBase;
@@ -8,6 +10,7 @@ use Drupal\Tests\system\Functional\Module\ModuleTestBase;
  * Enable module without dependency enabled.
  *
  * @group form
+ * @group legacy
  */
 class DependencyTest extends ModuleTestBase {
 
@@ -19,7 +22,7 @@ class DependencyTest extends ModuleTestBase {
   /**
    * Tests attempting to uninstall a module that has installed dependents.
    */
-  public function testUninstallDependents() {
+  public function testUninstallDependents(): void {
     // Enable the forum module.
     $edit = ['modules[forum][enable]' => 'forum'];
     $this->drupalGet('admin/modules');

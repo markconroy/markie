@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\link\Functional\Views;
 
 use Drupal\field\Entity\FieldConfig;
@@ -67,7 +69,7 @@ class LinkViewsTokensTest extends ViewTestBase {
 
   }
 
-  public function testLinkViewsTokens() {
+  public function testLinkViewsTokens(): void {
     // Array of URI's to test.
     $uris = [
       'http://www.example.com' => 'example.com',

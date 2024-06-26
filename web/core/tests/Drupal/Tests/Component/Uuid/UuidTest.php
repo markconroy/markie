@@ -23,7 +23,7 @@ class UuidTest extends TestCase {
    *
    * @dataProvider providerUuidInstances
    */
-  public function testGenerateUuid(UuidInterface $instance) {
+  public function testGenerateUuid(UuidInterface $instance): void {
     $this->assertTrue(Uuid::isValid($instance->generate()), sprintf('UUID generation for %s works.', get_class($instance)));
   }
 
@@ -32,7 +32,7 @@ class UuidTest extends TestCase {
    *
    * @dataProvider providerUuidInstances
    */
-  public function testUuidIsUnique(UuidInterface $instance) {
+  public function testUuidIsUnique(UuidInterface $instance): void {
     $this->assertNotEquals($instance->generate(), $instance->generate(), sprintf('Same UUID was not generated twice with %s.', get_class($instance)));
   }
 
@@ -41,7 +41,7 @@ class UuidTest extends TestCase {
    *
    * @return array
    */
-  public function providerUuidInstances() {
+  public static function providerUuidInstances() {
 
     $instances = [];
     $instances[][] = new Php();
@@ -71,7 +71,7 @@ class UuidTest extends TestCase {
    *
    * @dataProvider providerTestValidation
    */
-  public function testValidation($uuid, $is_valid, $message) {
+  public function testValidation($uuid, $is_valid, $message): void {
     $this->assertSame($is_valid, Uuid::isValid($uuid), $message);
   }
 
@@ -84,7 +84,7 @@ class UuidTest extends TestCase {
    *   - (bool) Whether or not the Uuid is valid.
    *   - Failure message.
    */
-  public function providerTestValidation() {
+  public static function providerTestValidation() {
     return [
       // These valid UUIDs.
       ['6ba7b810-9dad-11d1-80b4-00c04fd430c8', TRUE, 'Basic FQDN UUID did not validate'],

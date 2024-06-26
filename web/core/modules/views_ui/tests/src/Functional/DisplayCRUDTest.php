@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\views_ui\Functional;
 
 use Drupal\views\Views;
@@ -33,7 +35,7 @@ class DisplayCRUDTest extends UITestBase {
   /**
    * Tests adding a display.
    */
-  public function testAddDisplay() {
+  public function testAddDisplay(): void {
     // Show the default display.
     $this->config('views.settings')->set('ui.show.default_display', TRUE)->save();
 
@@ -58,7 +60,7 @@ class DisplayCRUDTest extends UITestBase {
   /**
    * Tests removing a display.
    */
-  public function testRemoveDisplay() {
+  public function testRemoveDisplay(): void {
     $view = $this->randomView();
     $path_prefix = 'admin/structure/views/view/' . $view['id'] . '/edit';
 
@@ -104,7 +106,7 @@ class DisplayCRUDTest extends UITestBase {
   /**
    * Tests that the correct display is loaded by default.
    */
-  public function testDefaultDisplay() {
+  public function testDefaultDisplay(): void {
     $this->drupalGet('admin/structure/views/view/test_display');
     $this->assertSession()->elementsCount('xpath', '//*[@id="views-page-1-display-title"]', 1);
   }
@@ -112,7 +114,7 @@ class DisplayCRUDTest extends UITestBase {
   /**
    * Tests the duplicating of a display.
    */
-  public function testDuplicateDisplay() {
+  public function testDuplicateDisplay(): void {
     $view = $this->randomView();
     $path_prefix = 'admin/structure/views/view/' . $view['id'] . '/edit';
     $path = $view['page[path]'];

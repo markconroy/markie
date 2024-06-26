@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\block\Functional;
 
 use Drupal\Tests\BrowserTestBase;
@@ -29,7 +31,10 @@ class BlockHtmlTest extends BrowserTestBase {
   protected function setUp(): void {
     parent::setUp();
 
-    $this->drupalLogin($this->rootUser);
+    $this->drupalLogin($this->drupalCreateUser([
+      'administer blocks',
+      'access administration pages',
+    ]));
 
     // Enable the test_html block, to test HTML ID and attributes.
     \Drupal::state()->set('block_test.attributes', ['data-custom-attribute' => 'foo']);
@@ -43,7 +48,7 @@ class BlockHtmlTest extends BrowserTestBase {
   /**
    * Tests for valid HTML for a block.
    */
-  public function testHtml() {
+  public function testHtml(): void {
     $this->drupalGet('');
 
     // Ensure that a block's ID is converted to an HTML valid ID, and that

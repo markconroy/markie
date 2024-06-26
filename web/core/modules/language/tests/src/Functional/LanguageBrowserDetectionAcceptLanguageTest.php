@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\language\Functional;
 
 use Drupal\Tests\BrowserTestBase;
@@ -74,7 +76,7 @@ class LanguageBrowserDetectionAcceptLanguageTest extends BrowserTestBase {
   /**
    * Tests with browsers with and without Accept-Language header.
    */
-  public function testAcceptLanguageEmptyDefault() {
+  public function testAcceptLanguageEmptyDefault(): void {
 
     // Check correct headers.
     $this->drupalGet('/en/system-test/echo/language test', [], ['Accept-Language' => 'en']);

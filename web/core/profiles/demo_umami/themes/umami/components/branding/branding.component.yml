@@ -1,5 +1,5 @@
 # This is so your IDE knows about the syntax for fixes and autocomplete.
-$schema: https://git.drupalcode.org/project/drupal/-/raw/10.1.x/core/modules/sdc/src/metadata.schema.json
+$schema: https://git.drupalcode.org/project/drupal/-/raw/HEAD/core/assets/schemas/v1/metadata.schema.json
 
 # The human readable name.
 name: Branding
@@ -18,9 +18,20 @@ props:
   type: object
 
   properties:
+    attributes:
+      type: Drupal\Core\Template\Attribute
+      title: Attributes
+      description: Wrapper attributes.
     site_logo:
       type: string
-    site_name:
+      format: iri-reference
+    url:
       type: string
-    site_slogan:
-      type: string
+      title: Branding url
+      format: iri-reference
+
+slots:
+  site_name:
+    type: string
+  site_slogan:
+    type: string

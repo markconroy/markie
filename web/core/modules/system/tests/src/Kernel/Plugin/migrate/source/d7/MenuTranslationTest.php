@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\system\Kernel\Plugin\migrate\source\d7;
 
 use Drupal\Tests\migrate\Kernel\MigrateSqlSourceTestBase;
 
-// cspell:ignore objectid objectindex
+// cspell:ignore objectid objectindex plid textgroup
 
 /**
  * Tests the menu translation source plugin.
@@ -22,7 +24,7 @@ class MenuTranslationTest extends MigrateSqlSourceTestBase {
   /**
    * {@inheritdoc}
    */
-  public function providerSource() {
+  public static function providerSource() {
     $tests = [];
     $tests[0]['source_data']['menu_custom'] = [
       [
@@ -80,7 +82,7 @@ class MenuTranslationTest extends MigrateSqlSourceTestBase {
         'i18n_status' => 0,
       ],
     ];
-    $tests[0]['expected_results'] = [
+    $tests[0]['expected_data'] = [
       [
         'menu_name' => 'navigation',
         'type' => 'menu',

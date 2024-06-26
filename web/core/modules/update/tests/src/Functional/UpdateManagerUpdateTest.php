@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\update\Functional;
 
 /**
@@ -18,8 +20,6 @@ class UpdateManagerUpdateTest extends UpdateTestBase {
    * @var array
    */
   protected static $modules = [
-    'update',
-    'update_test',
     'aaa_update_test',
     'bbb_update_test',
   ];
@@ -82,21 +82,13 @@ class UpdateManagerUpdateTest extends UpdateTestBase {
    *     <core_compatibility> at all).
    *   - 8.x-1.2 is available and requires Drupal 8.1.0 and above.
    *
-   * @todo In https://www.drupal.org/project/drupal/issues/3112962:
-   *   Change the 'core_fixture' values here to use:
-   *   - '1.1' instead of '1.1-core_compatibility'.
-   *   - '1.1-alpha1' instead of '1.1-alpha1-core_compatibility'.
-   *   Delete the files:
-   *   - core/modules/update/tests/modules/update_test/drupal.1.1-alpha1-core_compatibility.xml
-   *   - core/modules/update/tests/modules/update_test/drupal.1.1-core_compatibility.xml
-   *
    * @return array[]
    *   Test data.
    */
-  public function incompatibleUpdatesTableProvider() {
+  public static function incompatibleUpdatesTableProvider() {
     return [
       'only one compatible' => [
-        'core_fixture' => '1.1-core_compatibility',
+        'core_fixture' => '8.1.1',
         // aaa_update_test.8.x-1.2.xml has core compatibility set and will test
         // the case where $recommended_release['core_compatible'] === TRUE in
         // \Drupal\update\Form\UpdateManagerUpdate.
@@ -109,7 +101,7 @@ class UpdateManagerUpdateTest extends UpdateTestBase {
         'incompatible' => [],
       ],
       'only one incompatible' => [
-        'core_fixture' => '1.1-core_compatibility',
+        'core_fixture' => '8.1.1',
         'a_fixture' => 'core_compatibility.8.x-1.2_8.x-2.2',
         // Use a fixture with only a 8.x-1.0 release so BBB is up to date.
         'b_fixture' => '1_0',
@@ -122,7 +114,7 @@ class UpdateManagerUpdateTest extends UpdateTestBase {
         ],
       ],
       'two compatible, no incompatible' => [
-        'core_fixture' => '1.1-core_compatibility',
+        'core_fixture' => '8.1.1',
         'a_fixture' => '8.x-1.2',
         // bbb_update_test.1_1.xml does not have core compatibility set and will
         // test the case where $recommended_release['core_compatible'] === NULL
@@ -135,7 +127,7 @@ class UpdateManagerUpdateTest extends UpdateTestBase {
         'incompatible' => [],
       ],
       'two incompatible, no compatible' => [
-        'core_fixture' => '1.1-core_compatibility',
+        'core_fixture' => '8.1.1',
         'a_fixture' => 'core_compatibility.8.x-1.2_8.x-2.2',
         // bbb_update_test.1_2.xml has core compatibility set and will test the
         // case where $recommended_release['core_compatible'] === FALSE in
@@ -154,7 +146,7 @@ class UpdateManagerUpdateTest extends UpdateTestBase {
         ],
       ],
       'one compatible, one incompatible' => [
-        'core_fixture' => '1.1-core_compatibility',
+        'core_fixture' => '8.1.1',
         'a_fixture' => 'core_compatibility.8.x-1.2_8.x-2.2',
         'b_fixture' => '1_1',
         'compatible' => [
@@ -190,7 +182,7 @@ class UpdateManagerUpdateTest extends UpdateTestBase {
    *   - 'recommended': The recommended version.
    *   - 'range': The versions of Drupal core required for that version.
    */
-  public function testIncompatibleUpdatesTable($core_fixture, $a_fixture, $b_fixture, array $compatible, array $incompatible) {
+  public function testIncompatibleUpdatesTable($core_fixture, $a_fixture, $b_fixture, array $compatible, array $incompatible): void {
 
     $assert_session = $this->assertSession();
     $compatible_table_locator = '[data-drupal-selector="edit-projects"]';
@@ -239,15 +231,13 @@ class UpdateManagerUpdateTest extends UpdateTestBase {
   /**
    * Tests the Update form with an uninstalled module in the system.
    */
-  public function testUninstalledUpdatesTable() {
+  public function testUninstalledUpdatesTable(): void {
     $assert_session = $this->assertSession();
     $compatible_table_locator = '[data-drupal-selector="edit-projects"]';
-    // @todo In https://www.drupal.org/project/drupal/issues/3121870 change this
-    //   selector when the implementation details catch up with the UI strings.
-    $uninstalled_table_locator = '[data-drupal-selector="edit-disabled-projects"]';
+    $uninstalled_table_locator = '[data-drupal-selector="edit-uninstalled-projects"]';
 
     $fixtures = [
-      'drupal' => '1.1-core_compatibility',
+      'drupal' => '8.1.1',
       'aaa_update_test' => '8.x-1.2',
       // Use a fixture with only a 8.x-1.0 release so BBB is up to date.
       'bbb_update_test' => '1_0',
@@ -331,7 +321,7 @@ class UpdateManagerUpdateTest extends UpdateTestBase {
    *
    * @group legacy
    */
-  public function testDeprecationWarning() {
+  public function testDeprecationWarning(): void {
     $this->drupalGet('admin/theme/update');
     $this->expectDeprecation('The path /admin/theme/update is deprecated in drupal:10.2.0 and is removed from drupal:11.0.0. Use /admin/appearance/update. See https://www.drupal.org/node/3382805');
     $this->assertSession()->statusMessageContains("You have been redirected from admin/theme/update. Update links, shortcuts, and bookmarks to use admin/appearance/update.", 'warning');

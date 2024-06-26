@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\tour\Functional;
 
 use Drupal\Core\Url;
@@ -12,6 +14,7 @@ use Drupal\tour\Entity\Tour;
  * Tests the functionality of tour tips.
  *
  * @group tour
+ * @group legacy
  */
 class TourTest extends TourTestBasic {
 
@@ -66,7 +69,7 @@ class TourTest extends TourTestBasic {
   /**
    * Tests tour functionality.
    */
-  public function testTourFunctionality() {
+  public function testTourFunctionality(): void {
     // Navigate to tour-test-1 and verify the tour_test_1 tip is found with appropriate classes.
     $this->drupalGet('tour-test-1');
 
@@ -239,7 +242,7 @@ class TourTest extends TourTestBasic {
   /**
    * Tests enabling and disabling the tour tip functionality.
    */
-  public function testStatus() {
+  public function testStatus(): void {
     // Set tour tip status as enabled.
     $tour = Tour::load('tour-test');
     $tour->setStatus(TRUE);

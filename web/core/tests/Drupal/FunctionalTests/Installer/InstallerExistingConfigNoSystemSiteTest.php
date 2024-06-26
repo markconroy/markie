@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\FunctionalTests\Installer;
 
 /**
@@ -28,7 +30,7 @@ class InstallerExistingConfigNoSystemSiteTest extends InstallerExistingConfigTes
   /**
    * Tests that profiles with no system.site do not work.
    */
-  public function testConfigSync() {
+  public function testConfigSync(): void {
     $this->htmlOutput(NULL);
     $this->assertSession()->titleEquals('Configuration validation | Drupal');
     $this->assertSession()->pageTextContains('The configuration synchronization failed validation.');

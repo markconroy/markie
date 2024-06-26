@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\search\Functional;
 
 use Drupal\comment\Plugin\Field\FieldType\CommentItemInterface;
@@ -59,7 +61,7 @@ class SearchRankingTest extends BrowserTestBase {
     ]));
   }
 
-  public function testRankings() {
+  public function testRankings(): void {
     // Add a comment field.
     $this->addDefaultCommentField('node', 'page');
 
@@ -77,7 +79,7 @@ class SearchRankingTest extends BrowserTestBase {
         'title' => 'Drupal rocks',
         'body' => [['value' => "Drupal's search rocks"]],
         // Node is one day old.
-        'created' => REQUEST_TIME - 24 * 3600,
+        'created' => \Drupal::time()->getRequestTime() - 24 * 3600,
         'sticky' => 0,
         'promote' => 0,
       ];
@@ -95,7 +97,7 @@ class SearchRankingTest extends BrowserTestBase {
 
             case 'recent':
               // Node is 1 hour hold.
-              $settings['created'] = REQUEST_TIME - 3600;
+              $settings['created'] = \Drupal::time()->getRequestTime() - 3600;
               break;
 
             case 'comments':
@@ -209,7 +211,7 @@ class SearchRankingTest extends BrowserTestBase {
   /**
    * Tests rankings of HTML tags.
    */
-  public function testHTMLRankings() {
+  public function testHTMLRankings(): void {
     $full_html_format = FilterFormat::create([
       'format' => 'full_html',
       'name' => 'Full HTML',
