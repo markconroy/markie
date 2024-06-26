@@ -26,7 +26,12 @@ class HelpPageTest extends TokenTestBase {
   public function setUp(): void {
     parent::setUp();
 
-    $this->account = $this->drupalCreateUser(['access administration pages']);
+    // On Drupal 10.2 there is new permission to access help pages.
+    $permissions = ['access help pages'];
+    if (version_compare(\Drupal::VERSION, '10.2', '<')) {
+      $permissions = ['access administration pages'];
+    }
+    $this->account = $this->drupalCreateUser($permissions);
     $this->drupalLogin($this->account);
   }
 

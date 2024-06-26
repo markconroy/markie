@@ -10,3 +10,8 @@ services:
     arguments: ['@entity_type.manager', '@module_handler']
     tags:
       - { name: event_subscriber }
+  token.module_provider:
+    class: Drupal\token\TokenModuleProvider
+    arguments: ['@cache.default', '@lock', '@token']
+    tags:
+      - { name: needs_destruction }

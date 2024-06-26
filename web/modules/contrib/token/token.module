@@ -215,10 +215,12 @@ function token_entity_type_alter(array &$entity_types) {
  * @return mixed
  *   The value of $info['tokens'][$type][$name]['module'] from token info, or
  *   NULL if the value does not exist.
+ *
+ * @deprecated in token:8.x-1.x and is removed from token:2.0.0. Use the
+ *   token.module_provider service instead.
  */
 function _token_module($type, $name) {
-  $token_info = \Drupal::token()->getTokenInfo($type, $name);
-  return isset($token_info['module']) ? $token_info['module'] : NULL;
+  return \Drupal::service('token.module_provider')->getTokenModule($type, $name);
 }
 
 /**
@@ -672,14 +674,14 @@ function token_node_menu_link_submit($entity_type, NodeInterface $node, &$form, 
 
     // Don't create a menu link if the node is not being saved.
     $triggering_element = $form_state->getTriggeringElement();
-    if (!$triggering_element || !in_array('::save', $triggering_element['#submit'])) {
+    if (!$triggering_element || !isset($triggering_element['#submit']) || !in_array('::save', $triggering_element['#submit'])) {
       return;
     }
 
     $values = $form_state->getValue('menu');
     if (!empty($values['enabled']) && trim($values['title'])) {
       if (!empty($values['menu_parent'])) {
-        list($menu_name, $parent) = explode(':', $values['menu_parent'], 2);
+        [$menu_name, $parent] = explode(':', $values['menu_parent'], 2);
         $values['menu_name'] = $menu_name;
         $values['parent'] = $parent;
       }

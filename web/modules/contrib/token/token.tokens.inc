@@ -141,7 +141,7 @@ function token_token_info() {
     $info += _book_token_info();
   }
   if (\Drupal::moduleHandler()->moduleExists('menu_ui')) {
-    $info += _menu_ui_token_info();
+    $info = array_merge_recursive($info, _menu_ui_token_info());
   }
 
   // Node tokens.
@@ -520,7 +520,7 @@ function token_tokens($type, array $tokens, array $data, array $options, Bubblea
     // @todo Remove when http://drupal.org/node/1173706 is fixed.
     $date_format_types = \Drupal::entityTypeManager()->getStorage('date_format')->loadMultiple();
     foreach ($tokens as $name => $original) {
-      if (isset($date_format_types[$name]) && _token_module('date', $name) == 'token') {
+      if (isset($date_format_types[$name]) && \Drupal::service('token.module_provider')->getTokenModule('date', $name) == 'token') {
         $replacements[$original] = \Drupal::service('date.formatter')->format($date, $name, '', NULL, $langcode);
       }
     }
@@ -1042,7 +1042,10 @@ function token_tokens($type, array $tokens, array $data, array $options, Bubblea
       $url->setOption('alias', TRUE);
       $replacements += \Drupal::token()->generate('url', $unaliased_tokens, ['url' => $url], $options, $bubbleable_metadata);
     }
+
   }
+  /** @var \Drupal\token\TokenModuleProvider $token_module_provider */
+  $token_module_provider = \Drupal::service('token.module_provider');
 
   // Entity tokens.
   if (!empty($data[$type]) && $entity_type = \Drupal::service('token.entity_mapper')->getEntityTypeForTokenType($type)) {
@@ -1052,7 +1055,7 @@ function token_tokens($type, array $tokens, array $data, array $options, Bubblea
     foreach ($tokens as $name => $original) {
       switch ($name) {
         case 'url':
-          if (_token_module($type, 'url') === 'token' && !$entity->isNew() && $entity->hasLinkTemplate('canonical')) {
+          if ($token_module_provider->getTokenModule($type, 'url') === 'token' && !$entity->isNew() && $entity->hasLinkTemplate('canonical')) {
             $result = $entity->toUrl('canonical')->toString(TRUE);
             $bubbleable_metadata->addCacheableDependency($result);
             $replacements[$original] = $result->getGeneratedUrl();
@@ -1060,7 +1063,7 @@ function token_tokens($type, array $tokens, array $data, array $options, Bubblea
           break;
 
         case 'original':
-          if (_token_module($type, 'original') == 'token' && !empty($entity->original)) {
+          if ($token_module_provider->getTokenModule($type, 'original') == 'token' && !empty($entity->original)) {
             $label = $entity->original->label();
             $replacements[$original] = $label;
           }
@@ -1069,17 +1072,17 @@ function token_tokens($type, array $tokens, array $data, array $options, Bubblea
     }
 
     // [entity:url:*] chained tokens.
-    if (($url_tokens = \Drupal::token()->findWithPrefix($tokens, 'url')) && _token_module($type, 'url') == 'token') {
+    if (($url_tokens = \Drupal::token()->findWithPrefix($tokens, 'url')) && $token_module_provider->getTokenModule($type, 'url') == 'token') {
       $replacements += \Drupal::token()->generate('url', $url_tokens, ['url' => $entity->toUrl()], $options, $bubbleable_metadata);
     }
 
     // [entity:original:*] chained tokens.
-    if (($original_tokens = \Drupal::token()->findWithPrefix($tokens, 'original')) && _token_module($type, 'original') == 'token' && !empty($entity->original)) {
+    if (($original_tokens = \Drupal::token()->findWithPrefix($tokens, 'original')) && $token_module_provider->getTokenModule($type, 'original') == 'token' && !empty($entity->original)) {
       $replacements += \Drupal::token()->generate($type, $original_tokens, [$type => $entity->original], $options, $bubbleable_metadata);
     }
 
     // [entity:language:*] chained tokens.
-    if (($language_tokens = \Drupal::token()->findWithPrefix($tokens, 'language')) && _token_module($type, 'language') == 'token') {
+    if (($language_tokens = \Drupal::token()->findWithPrefix($tokens, 'language')) && $token_module_provider->getTokenModule($type, 'language') == 'token') {
       $language_options = array_merge($options, ['langcode' => $entity->get('langcode')->value]);
       $replacements += \Drupal::token()->generate('language', $language_tokens, [], $language_options, $bubbleable_metadata);
     }
@@ -1748,7 +1751,7 @@ function _field_tokens($type, $tokens, array $data, array $options, BubbleableMe
       }
       // Ensure the entity has the requested field and that the token for it is
       // defined by token.module.
-      if (!$entity->hasField($field_name) || _token_module($data['token_type'], $token_name) != 'token') {
+      if (!$entity->hasField($field_name) || \Drupal::service('token.module_provider')->getTokenModule($data['token_type'], $token_name) != 'token') {
         continue;
       }
 
@@ -1768,6 +1771,9 @@ function _field_tokens($type, $tokens, array $data, array $options, BubbleableMe
           /** @var \Drupal\Core\Field\FieldTypePluginManager $field_type_manager */
           $field_type_manager = \Drupal::service('plugin.manager.field.field_type');
           $field_type_definition = $field_type_manager->getDefinition($entity->getFieldDefinition($field_name)->getType());
+          if (empty($field_type_definition['default_token_formatter']) && empty($field_type_definition['default_formatter'])) {
+            continue;
+          }
           $display_options = [
             'type' => !empty($field_type_definition['default_token_formatter']) ? $field_type_definition['default_token_formatter'] : $field_type_definition['default_formatter'],
             'label' => 'hidden',

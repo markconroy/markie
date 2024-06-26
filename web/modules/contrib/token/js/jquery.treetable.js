@@ -623,7 +623,7 @@
   };
 
   // Expose classes to world
-  this.TreeTable || (this.TreeTable = {});
-  this.TreeTable.Node = Node;
-  this.TreeTable.Tree = Tree;
+  window.TreeTable || (window.TreeTable = {});
+  window.TreeTable.Node = Node;
+  window.TreeTable.Tree = Tree;
 })(jQuery);

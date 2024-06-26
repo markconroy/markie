@@ -156,7 +156,7 @@ class TokenMenuTest extends TokenTestBase {
       'menu_parent' => 'main-menu:',
     ];
     $this->drupalGet('admin/structure/types/manage/page');
-    $this->submitForm($edit, 'Save content type');
+    $this->submitForm($edit, 'Save');
 
     // Use a menu-link token in the body.
     $this->drupalGet('node/add/page');
