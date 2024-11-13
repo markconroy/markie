@@ -3,11 +3,8 @@
 namespace Drupal\jsonapi_extras\Form;
 
 use Drupal\Core\Cache\Cache;
-use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\ProxyClass\Routing\RouteBuilder;
-use Drupal\jsonapi\ResourceType\ResourceTypeRepositoryInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -35,38 +32,16 @@ class JsonapiExtrasSettingsForm extends ConfigFormBase {
   protected $container;
 
   /**
-   * Constructs a \Drupal\system\ConfigFormBase object.
-   *
-   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
-   *   The factory for configuration objects.
-   * @param \Drupal\Core\ProxyClass\Routing\RouteBuilder $router_builder
-   *   The router builder to rebuild menus after saving config entity.
-   * @param \Drupal\jsonapi\ResourceType\ResourceTypeRepositoryInterface $jsonApiResourceRepository
-   *   Resource type repository.
-   * @param \Drupal\Component\DependencyInjection\ContainerInterface|null $container
-   *   The dependency injection container.
-   */
-  public function __construct(ConfigFactoryInterface $config_factory, RouteBuilder $router_builder, ResourceTypeRepositoryInterface $jsonApiResourceRepository, ContainerInterface $container = NULL) {
-    parent::__construct($config_factory);
-    $this->routerBuilder = $router_builder;
-    $this->jsonApiResourceRepository = $jsonApiResourceRepository;
-    if ($container === NULL) {
-      $container = \Drupal::getContainer();
-      @trigger_error('Calling ' . __METHOD__ . ' without the $container argument is deprecated in jsonapi_extras:8.x-3.24 and will be required in jsonapi_extras:8.x-4.0. See https://www.drupal.org/node/3384627', E_USER_DEPRECATED);
-    }
-    $this->container = $container;
-  }
-
-  /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container) {
-    return new static(
-      $container->get('config.factory'),
-      $container->get('router.builder'),
-      $container->get('jsonapi.resource_type.repository'),
-      $container
-    );
+    $instance = parent::create($container);
+
+    $instance->routerBuilder = $container->get('router.builder');
+    $instance->jsonApiResourceRepository = $container->get('jsonapi.resource_type.repository');
+    $instance->container = $container;
+
+    return $instance;
   }
 
   /**

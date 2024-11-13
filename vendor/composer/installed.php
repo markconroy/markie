@@ -452,9 +452,9 @@
             'dev_requirement' => false,
         ),
         'drupal/jsonapi_extras' => array(
-            'pretty_version' => '3.25.0',
-            'version' => '3.25.0.0',
-            'reference' => '8.x-3.25',
+            'pretty_version' => '3.26.0',
+            'version' => '3.26.0.0',
+            'reference' => '8.x-3.26',
             'type' => 'drupal-module',
             'install_path' => __DIR__ . '/../../web/modules/contrib/jsonapi_extras',
             'aliases' => array(),

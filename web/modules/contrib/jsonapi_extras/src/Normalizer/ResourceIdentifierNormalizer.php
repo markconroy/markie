@@ -43,7 +43,7 @@ class ResourceIdentifierNormalizer extends JsonApiNormalizerDecoratorBase {
   /**
    * {@inheritdoc}
    */
-  public function normalize($field, $format = NULL, array $context = []) {
+  public function normalize($field, $format = NULL, array $context = []): array|bool|string|int|float|null|\ArrayObject {
     assert($field instanceof ResourceIdentifier);
     $normalized_output = parent::normalize($field, $format, $context);
     assert($normalized_output instanceof CacheableNormalization);

@@ -145,7 +145,13 @@ class EntityToJsonApiTest extends JsonapiKernelTestBase {
       FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED
     );
 
-    $this->createImageField('field_image', 'article');
+    // @todo Remove this once we drop support for Drupal 9.
+    if (version_compare(\Drupal::VERSION, '10.3.0', '>=')) {
+      $this->createImageField('field_image', 'node', 'article');
+    }
+    else {
+      $this->createImageField('field_image', 'article');
+    }
 
     $this->user = User::create([
       'name' => 'user1',
@@ -269,6 +275,8 @@ class EntityToJsonApiTest extends JsonapiKernelTestBase {
     $this->sut->serialize($this->node);
     $request = $request_stack->pop();
     $this->assertNotEquals($request->getPathInfo(), '/jsonapi/node/' . $this->nodeType->id() . '/' . $this->node->uuid(), 'The request from jsonapi_extras.entity.to_jsonapi should not linger in the request stack.');
+    // The session is gone, set the container to null so teardown doesn't fail.
+    $this->container = NULL;
   }
 
   /**
@@ -281,11 +289,7 @@ class EntityToJsonApiTest extends JsonapiKernelTestBase {
    * @param array[] $expected_includes
    *   The list of partial structures of the "included" key.
    */
-  protected function assertEntity(
-    EntityInterface $entity,
-    array $include_fields = [],
-    array $expected_includes = [],
-  ) {
+  protected function assertEntity(EntityInterface $entity, array $include_fields = [], array $expected_includes = []) {
     $output = $this->sut->serialize($entity, $include_fields);
 
     $this->assertTrue(is_string($output));
