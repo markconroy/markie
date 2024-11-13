@@ -1,7 +1,0 @@
-attributes:
-  Attribute():
-    class:
-
-content:
-  field_p_cta_title: '<div class="field--name-field-p-cta-title">Call to Action Title</div>'
-  field_p_cta_link: '<div class="field--name-field-p-cta-link"><a href="http://www.example.com">Act Now!</a></div>'

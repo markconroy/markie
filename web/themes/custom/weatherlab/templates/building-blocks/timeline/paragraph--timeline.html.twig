@@ -1,9 +1,0 @@
-{% if paragraph.field_p_timeline_title.value %}
-  {% set timeline_title = paragraph.field_p_timeline_title.value %}
-{% endif %}
-
-{% embed "@building-blocks/timeline/timeline.twig" %}
-  {% block timeline_items %}
-    {{ content.field_p_timeline_items }}
-  {% endblock %}
-{% endembed %}

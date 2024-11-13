@@ -1,9 +1,0 @@
-image_src_sets:
-  join():
-    - '../../../../components/images/sample/responsive-images/annertech-team/annertech-team-1x1.jpg 639w, '
-    - '../../../../components/images/sample/responsive-images/annertech-team/annertech-team-4x3.jpg 1023w, '
-    - '../../../../components/images/sample/responsive-images/annertech-team/annertech-team-16x9.jpg 1440w'
-
-image_sizes: '(max-width: 600px) 100vw, (max-width: 960px) 100vw'
-
-image_src: '../../../../components/images/sample/responsive-images/annertech-team/annertech-team-4x3.jpg'

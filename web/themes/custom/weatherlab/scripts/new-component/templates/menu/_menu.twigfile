@@ -1,1 +1,0 @@
-{% extends "@site-components/menus/_menu-block.twig" %}

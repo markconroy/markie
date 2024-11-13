@@ -1,6 +1,0 @@
-<picture>
-  {% for source in picture_sources %}
-    <source {% if source.media %} media="{{ source.media }}" {% endif %} srcset="{{ source.srcset }}">
-  {% endfor %}
-  <img src="{{ picture_img_src }}" alt="{{ image_alt }}">
-</picture>

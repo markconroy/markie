@@ -1,4 +1,0 @@
-files:
-  - join():
-    - include():
-        pattern: building-blocks-file-upload-file

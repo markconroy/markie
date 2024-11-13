@@ -1,9 +1,0 @@
-{% if node.field_intro.value %}
-  {% set introduction = content.field_intro %}
-{% endif %}
-
-{% if node.body.value %}
-  {% set basic_page_body = content.body %}
-{% endif %}
-
-{% include "@content/basic-page/basic-page.twig" %}

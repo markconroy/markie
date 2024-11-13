@@ -1,4 +1,0 @@
-housekeeping_menu:
-  join():
-  - include():
-      pattern: 'site-components-menu-block-housekeeping'

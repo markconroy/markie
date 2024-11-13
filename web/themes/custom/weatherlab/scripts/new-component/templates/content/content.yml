@@ -1,6 +1,0 @@
-node:
-  isPublished: true
-
-label: 'Hello <%- cleanName %>'
-
-<%- snakeName %>_content: '<%- cleanName %> Content Goes Here'

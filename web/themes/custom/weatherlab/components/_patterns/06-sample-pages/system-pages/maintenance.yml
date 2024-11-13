@@ -1,7 +1,0 @@
-page_content:
-  include():
-    pattern: 'sample-pages-site-layout'
-    with:
-      page_content:
-        include():
-          pattern: 'content-maintenance'

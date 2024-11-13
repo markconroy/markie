@@ -1,7 +1,0 @@
-tile_image: 
-  include():
-    pattern: basic-elements-image
-    with:
-      image_source: '../../../../components/images/sample/responsive-images/annertech-team/annertech-team-4x3.jpg'
-tile_title: 'Business and Employment Support'
-tile_text: 'Find out what our service can do for your business'

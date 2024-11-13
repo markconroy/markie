@@ -1,9 +1,0 @@
-{% if paragraph.field_p_ai_title.value %}
-  {% set accordion_item_title = paragraph.field_p_ai_title.value %}
-{% endif %}
-
-{% if paragraph.field_p_ai_response.value %}
-  {% set accordion_item_response = content.field_p_ai_details %}
-{% endif %}
-
-{% include "@building-blocks/accordion/_accordion-item.twig" %}

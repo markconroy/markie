@@ -1,4 +1,0 @@
-text_content:
-  join():
-    - '<p>Integer posuere erat a ante <a href="#">this is an inline link</a> venenatis dapibus posuere velit aliquet. Etiam <a href="#">this is an inline link</a>. Maecenas sed diam eget risus varius blandit sit amet non magna. Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum. Donec sed odio dui.</p>'
-    - '<p>Etiam porta sem malesuada magna mollis euismod. Integer posuere erat a ante venenatis dapibus posuere velit aliquet. Maecenas sed diam eget risus varius blandit sit amet non magna. Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum. Donec sed odio dui.</p>'

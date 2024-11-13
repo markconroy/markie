@@ -1,7 +1,0 @@
-pl_class: true
-timeline_item_image:
-  join():
-    - include():
-        pattern: 'building-blocks-single-image-traditional-television'
-timeline_item_title: 'December'
-timeline_item_text: '<p>Donec ullamcorper nulla non metus auctor fringilla. Cras mattis consectetur purus sit amet fermentum. Maecenas faucibus mollis interdum. Donec sed odio dui.</p>'

@@ -1,6 +1,0 @@
-block_type: 'page-title-block'
-block_content:
-  include():
-    pattern: 'site-components-page-title-content'
-    with:
-      page_title: 'This is the Page Title'

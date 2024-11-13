@@ -1,1 +1,0 @@
-<%- snakeName %>_content: '<%- cleanName %> Content Goes Here'

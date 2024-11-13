@@ -1,7 +1,0 @@
-breadcrumb:
-  -
-    text: 'Home'
-    url: link.sample-pages-basic-page
-  -
-    text: 'About Us'
-    url: link.sample-pages-basic-page-with-related-content

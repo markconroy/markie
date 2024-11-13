@@ -1,4 +1,0 @@
-footer_pre_content:
-  join():
-    - site-components-search
-    - site-components-menu-block-main-navigation

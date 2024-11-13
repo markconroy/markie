@@ -1,5 +1,0 @@
-single_image:
-  include():
-    pattern: basic-elements-image
-    with:
-    image_source: '../../../../components/images/sample/responsive-images/annertech-team/annertech-team-16x9.jpg'
