@@ -3,7 +3,6 @@ langcode: en
 status: true
 dependencies:
   module:
-    - ctools
     - taxonomy
 id: t
 label: 'Taxonomy: Tags'
