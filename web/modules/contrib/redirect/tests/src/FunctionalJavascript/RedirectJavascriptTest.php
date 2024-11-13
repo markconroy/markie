@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\redirect\FunctionalJavascript;
 
 use Drupal\Core\Url;
@@ -104,7 +106,6 @@ class RedirectJavascriptTest extends WebDriverTestBase {
     $this->assertSession()->addressEquals('admin/config/search/redirect');
     $this->assertSession()->pageTextContains('non-existing');
     $this->assertSession()->linkExists(Url::fromUri('base:node')->toString());
-    $this->assertSession()->pageTextContains('Not specified');
 
     // Test the edit form and update action.
     $this->clickLink('Edit');
@@ -256,9 +257,9 @@ class RedirectJavascriptTest extends WebDriverTestBase {
     $this->getSession()->getPage()->selectFieldOption("action", "redirect_delete_action", TRUE);
     $this->submitForm($edit, 'Apply to selected items');
     $this->assertSession()->pageTextContains('Are you sure you want to delete these redirects?');
-    $this->clickLink('Cancel');
 
     // Test the delete action.
+    $this->drupalGet('admin/config/search/redirect');
     $page->find('css', '.dropbutton-toggle button')->press();
     $this->clickLink('Delete');
     $this->assertSession()->responseContains(

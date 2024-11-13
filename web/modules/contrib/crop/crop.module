@@ -9,13 +9,12 @@
 
 use Drupal\Component\Utility\UrlHelper;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\crop\Entity\Crop;
-use Drupal\image\Entity\ImageStyle;
-use Drupal\media\MediaSourceInterface;
-use Drupal\media\MediaTypeInterface;
-use Drupal\file\FileInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\StreamWrapper\StreamWrapperManager;
+use Drupal\crop\Entity\Crop;
+use Drupal\file\FileInterface;
+use Drupal\media\MediaSourceInterface;
+use Drupal\media\MediaTypeInterface;
 
 /**
  * Implements hook_theme().

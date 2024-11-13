@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\redirect_404\Unit;
 
 use Drupal\Core\Database\Connection;

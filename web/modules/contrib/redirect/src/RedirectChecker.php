@@ -51,7 +51,7 @@ class RedirectChecker {
   /**
    * Determines if redirect may be performed.
    *
-   * @param Request $request
+   * @param \Symfony\Component\HttpFoundation\Request $request
    *   The current request object.
    * @param string $route_name
    *   The current route name.

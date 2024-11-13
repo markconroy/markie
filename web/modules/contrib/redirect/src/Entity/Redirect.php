@@ -60,6 +60,8 @@ class Redirect extends ContentEntityBase {
    *   Base 64 hash.
    */
   public static function generateHash($source_path, array $source_query, $language) {
+    // Remove leading and trailing slashes, and convert to lowercase.
+    $source_path = trim(mb_strtolower($source_path), '/');
     $hash = [
       'source' => mb_strtolower($source_path),
       'language' => $language,
@@ -249,7 +251,7 @@ class Redirect extends ContentEntityBase {
    */
   public function getRedirectOption($key, $default = NULL) {
     $options = $this->getRedirectOptions();
-    return isset($options[$key]) ? $options[$key] : $default;
+    return $options[$key] ?? $default;
   }
 
   /**
@@ -310,7 +312,7 @@ class Redirect extends ContentEntityBase {
       ->setTranslatable(FALSE)
       ->setSettings([
         'link_type' => LinkItemInterface::LINK_GENERIC,
-        'title' => DRUPAL_DISABLED
+        'title' => DRUPAL_DISABLED,
       ])
       ->setDisplayOptions('form', [
         'type' => 'link',

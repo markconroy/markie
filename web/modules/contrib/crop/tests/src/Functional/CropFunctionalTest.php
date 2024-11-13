@@ -6,8 +6,8 @@ use Drupal\Core\StreamWrapper\PublicStream;
 use Drupal\crop\Entity\Crop;
 use Drupal\crop\Entity\CropType;
 use Drupal\file\Entity\File;
-use Drupal\Tests\BrowserTestBase;
 use Drupal\file\FileInterface;
+use Drupal\Tests\BrowserTestBase;
 
 /**
  * Functional tests for crop API.
@@ -77,7 +77,6 @@ class CropFunctionalTest extends BrowserTestBase {
     $this->drupalGet('admin/config/media/crop/add');
     $this->assertSession()->statusCodeEquals(403);
 
-
     // Can access pages if logged in and no crop types exist.
     $this->drupalLogin($this->adminUser);
     $this->drupalGet('admin/config/media/crop');
@@ -90,13 +89,12 @@ class CropFunctionalTest extends BrowserTestBase {
     $this->assertSession()->statusCodeEquals(200);
     $this->assertSession()->addressEquals('admin/config/media/crop/add');
 
-
     // Create crop type.
     $crop_type_id = strtolower($this->randomMachineName());
     $edit = [
       'id' => $crop_type_id,
       'label' => $this->randomMachineName(),
-      'description' => $this->randomGenerator->sentences(10),
+      'description' => $this->getRandomGenerator()->word(10),
     ];
     $this->drupalGet('admin/config/media/crop/add');
     $this->submitForm($edit, 'Save crop type');
@@ -107,7 +105,6 @@ class CropFunctionalTest extends BrowserTestBase {
     self::assertTrue(strpos($label[0]->getText(), $edit['label']) !== FALSE, 'Crop type label found on listing page.');
     $this->assertSession()->pageTextContains($edit['description']);
 
-
     // Check edit form.
     $this->clickLink(t('Edit'));
     $this->assertSession()->pageTextContains(t('Edit @name crop type', ['@name' => $edit['label']]));
@@ -115,7 +112,6 @@ class CropFunctionalTest extends BrowserTestBase {
     $this->assertSession()->responseContains($edit['id']);
     $this->assertSession()->fieldExists('edit-label');
     $this->assertSession()->responseContains($edit['description']);
-
 
     // See if crop type appears on image effect configuration form.
     $this->drupalGet('admin/config/media/image-styles/manage/' . $this->testStyle->id() . '/add/crop_crop');
@@ -144,7 +140,6 @@ class CropFunctionalTest extends BrowserTestBase {
     $this->drupalGet('admin/config/media/crop/add');
     $this->submitForm($edit, 'Save crop type');
     $this->assertSession()->pageTextContains(t('The machine-readable name is already in use. It must be unique.'));
-
 
     // Delete crop type.
     $this->drupalGet('admin/config/media/crop');

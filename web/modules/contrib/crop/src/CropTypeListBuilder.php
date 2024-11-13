@@ -2,15 +2,15 @@
 
 namespace Drupal\crop;
 
-use Drupal\Core\Config\Entity\ConfigEntityListBuilder;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Entity\EntityTypeInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
-use Drupal\Core\Entity\EntityStorageInterface;
-use Drupal\Core\Routing\UrlGeneratorInterface;
-use Drupal\Core\Entity\EntityInterface;
 use Drupal\Component\Utility\Xss;
+use Drupal\Core\Config\Entity\ConfigEntityListBuilder;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityStorageInterface;
+use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Routing\UrlGeneratorInterface;
 use Drupal\image\Entity\ImageStyle;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Defines a class to build a listing of crop type entities.
@@ -89,7 +89,7 @@ class CropTypeListBuilder extends ConfigEntityListBuilder {
       'data' => $entity->label(),
       'class' => ['menu-label'],
     ];
-    $row['description'] = Xss::filterAdmin($entity->description);
+    $row['description'] = Xss::filterAdmin($entity->description ?? '');
     $row['aspect_ratio'] = $entity->getAspectRatio();
 
     // Load all image styles used by the current crop type.

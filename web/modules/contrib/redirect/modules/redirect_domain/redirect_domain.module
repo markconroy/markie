@@ -1,11 +1,16 @@
 <?php
 
+/**
+ * @file
+ * The redirect domain module.
+ */
+
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Url;
 
 /**
-* Implements hook_help().
-*/
+ * Implements hook_help().
+ */
 function redirect_domain_help($route_name, RouteMatchInterface $route_match) {
   $output = '';
   switch ($route_name) {
@@ -16,6 +21,7 @@ function redirect_domain_help($route_name, RouteMatchInterface $route_match) {
       $output .= '<dt>' . t('Manage domain redirects') . '</dt>';
       $output .= '<dd>' . t('The domain redirect is accessed through <a href=":domainlist">Domain Redirects</a>. The user can add the domain redirects through the domain redirect table which consists of the domain from which it needs to be redirected, the sub path and the complete url destination to which it needs to be redirected. The module also supports the usage of a wildcard redirecting, thus many requests can be handled with one instance of domain redirect.', [':domainlist' => Url::fromRoute('redirect_domain.domain_list')->toString()]) . '</dd>';
       return $output;
+
     case 'redirect_domain.domain_list':
       $output = '<p>' . t('The domain redirect table consists of the domain from which it needs to be redirected, the sub path and the complete url destination to which it needs to be redirected.') . '</p>';
       $output .= '<h5>' . t('Example Configuration') . '</h5>';

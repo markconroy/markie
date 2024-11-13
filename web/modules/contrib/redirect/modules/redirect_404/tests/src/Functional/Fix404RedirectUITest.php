@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\redirect_404\Functional;
 
 use Drupal\Component\Utility\UrlHelper;
@@ -177,7 +179,7 @@ class Fix404RedirectUITest extends Redirect404TestBase {
     $this->drupalGet('admin/config/search/redirect/settings');
     $xpath = $this->xpath('//*[@id="edit-ignore-pages"]')[0]->getHtml();
     // Check that the new page to ignore has been saved with leading slash.
-    $this->assertSession()->elementContains('css', '#edit-ignore-pages', '/'. $nodes_to_ignore);
+    $this->assertSession()->elementContains('css', '#edit-ignore-pages', '/' . $nodes_to_ignore);
     $this->assertSession()->elementContains('css', '#edit-ignore-pages', $terms_to_ignore);
     $this->assertSession()->elementNotContains('css', '#edit-ignore-pages', $node_to_ignore);
     $this->assertSession()->elementNotContains('css', '#edit-ignore-pages', $path_to_ignore);
@@ -226,8 +228,7 @@ class Fix404RedirectUITest extends Redirect404TestBase {
   }
 
   /**
-   * Tests the redirect ignore pages for users without the 'administer redirect
-   * settings' permission.
+   * Tests the redirect ignore pages for users without the 'administer redirect settings' permission.
    */
   public function testIgnorePagesNonAdmin() {
     // Create a node.

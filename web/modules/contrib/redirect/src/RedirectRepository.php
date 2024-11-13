@@ -40,6 +40,8 @@ class RedirectRepository {
    *   The entity type manager.
    * @param \Drupal\Core\Database\Connection $connection
    *   The database connection.
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
+   *   The config factory.
    */
   public function __construct(EntityTypeManagerInterface $manager, Connection $connection, ConfigFactoryInterface $config_factory) {
     $this->manager = $manager;
@@ -107,7 +109,7 @@ class RedirectRepository {
   /**
    * Helper function to find recursive redirects.
    *
-   * @param \Drupal\redirect\Entity\Redirect
+   * @param \Drupal\redirect\Entity\Redirect $redirect
    *   The redirect object.
    * @param string $language
    *   The language to use.
@@ -178,7 +180,8 @@ class RedirectRepository {
    * @return \Drupal\redirect\Entity\Redirect[]
    *   List of redirect entities.
    */
-  public function loadMultiple(array $redirect_ids = NULL) {
+  public function loadMultiple(?array $redirect_ids = NULL) {
     return $this->manager->getStorage('redirect')->loadMultiple($redirect_ids);
   }
+
 }

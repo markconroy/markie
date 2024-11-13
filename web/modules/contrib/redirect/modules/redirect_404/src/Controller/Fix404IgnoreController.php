@@ -63,7 +63,6 @@ class Fix404IgnoreController extends ControllerBase {
     $editable = $this->configuration->getEditable('redirect_404.settings');
     $existing_config_raw = $editable->get('pages');
     $path = $request->query->get('path');
-    $langcode = $request->query->get('langcode');
 
     if (empty($existing_config_raw) || !empty($path) || !strpos($path, $existing_config_raw)) {
       $this->redirectStorage->resolveLogRequest($path);
