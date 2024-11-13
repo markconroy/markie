@@ -2,11 +2,9 @@
 
 namespace Drupal\admin_toolbar_tools\Plugin\Menu;
 
-use Drupal\Core\Entity\EntityDescriptionInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Menu\MenuLinkDefault;
 use Drupal\Core\Menu\StaticMenuLinkOverridesInterface;
-use Drupal\node\NodeTypeInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -67,11 +65,10 @@ class MenuLinkEntity extends MenuLinkDefault {
    * {@inheritdoc}
    */
   public function getDescription() {
-    // @todo Remove node_type special handling.
-    if ($this->entity instanceof EntityDescriptionInterface || $this->entity instanceof NodeTypeInterface) {
-      return $this->entity->getDescription();
+    if ($this->entity && method_exists($this->entity, 'getDescription')) {
+      $description = $this->entity->getDescription();
     }
-    return parent::getDescription();
+    return $description ?? parent::getDescription();
   }
 
   /**

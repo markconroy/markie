@@ -5,10 +5,10 @@
  * This is the module to create a drop-down menu for the core toolbar.
  */
 
-use Drupal\admin_toolbar\Render\Element\AdminToolbar;
+use Drupal\Component\Utility\Html;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Url;
-use Drupal\Component\Utility\Html;
+use Drupal\admin_toolbar\Render\Element\AdminToolbar;
 
 /**
  * Implements hook_toolbar_alter().
@@ -57,6 +57,7 @@ function admin_toolbar_help($route_name, RouteMatchInterface $route_match) {
  * @return \Drupal\Core\Menu\MenuLinkTreeElement[]
  *   The manipulated menu link tree.
  */
+// phpcs:ignore Drupal.NamingConventions.ValidFunctionName.InvalidPrefix, Drupal.Commenting.FunctionComment.Missing
 function toolbar_tools_menu_navigation_links(array $tree) {
   foreach ($tree as $element) {
     if ($element->subtree) {

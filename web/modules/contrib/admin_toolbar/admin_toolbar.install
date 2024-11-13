@@ -28,3 +28,16 @@ function admin_toolbar_update_8002() {
     $config->save(TRUE);
   }
 }
+
+/**
+ * Uninstall Admin Toolbar Links Access Filter for Drupal 10.3+.
+ *
+ * @see https://www.drupal.org/project/admin_toolbar/issues/3463291
+ */
+function admin_toolbar_update_8003() {
+  if (version_compare(\Drupal::VERSION, '10.3.0', '>=')) {
+    /** @var \Drupal\Core\Extension\ModuleInstallerInterface $module_installer */
+    $module_installer = \Drupal::service('module_installer');
+    $module_installer->uninstall(['admin_toolbar_links_access_filter']);
+  }
+}

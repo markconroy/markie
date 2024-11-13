@@ -77,7 +77,7 @@ class SearchLinks {
    * @param \Drupal\Core\Cache\CacheBackendInterface $toolbar_cache
    *   Cache backend instance to use.
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
-   *   Config factory mservice.
+   *   Config factory service.
    */
   public function __construct(EntityTypeManagerInterface $entity_type_manager, ModuleHandlerInterface $module_handler, RouteProviderInterface $route_provider, CacheContextsManager $cache_context_manager, CacheBackendInterface $toolbar_cache, ConfigFactoryInterface $config_factory) {
     $this->entityTypeManager = $entity_type_manager;
@@ -120,18 +120,23 @@ class SearchLinks {
       $content_entity = $entities['content_entity'];
       // Load the remaining items that were not loaded by the toolbar.
       $content_entity_bundle_storage = $this->entityTypeManager->getStorage($content_entity_bundle);
-      $bundles_ids = $content_entity_bundle_storage->getQuery()->sort('weight')->range($max_bundle_number)->execute();
+      $bundles_ids = $content_entity_bundle_storage->getQuery()
+        ->accessCheck()
+        ->sort('weight')
+        ->sort($this->entityTypeManager->getDefinition($content_entity_bundle)->getKey('label'))
+        ->range($max_bundle_number)
+        ->execute();
       if (!empty($bundles_ids)) {
         $bundles = $this->entityTypeManager
           ->getStorage($content_entity_bundle)
           ->loadMultiple($bundles_ids);
         foreach ($bundles as $machine_name => $bundle) {
           $cache_tags = Cache::mergeTags($cache_tags, $bundle->getEntityType()->getListCacheTags());
-          $tparams = [
+          $label_params = [
             '@entity_type' => $bundle->getEntityType()->getLabel(),
             '@bundle' => $bundle->label(),
           ];
-          $label_base = $this->t('@entity_type > @bundle', $tparams);
+          $label_base = $this->t('@entity_type > @bundle', $label_params);
           $params = [$content_entity_bundle => $machine_name];
           if ($this->routeExists('entity.' . $content_entity_bundle . '.overview_form')) {
             // Some bundles have an overview/list form that make a better root

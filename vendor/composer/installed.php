@@ -209,9 +209,9 @@
             'dev_requirement' => false,
         ),
         'drupal/admin_toolbar' => array(
-            'pretty_version' => '3.4.2',
-            'version' => '3.4.2.0',
-            'reference' => '3.4.2',
+            'pretty_version' => '3.5.1',
+            'version' => '3.5.1.0',
+            'reference' => '3.5.1',
             'type' => 'drupal-module',
             'install_path' => __DIR__ . '/../../web/modules/contrib/admin_toolbar',
             'aliases' => array(),

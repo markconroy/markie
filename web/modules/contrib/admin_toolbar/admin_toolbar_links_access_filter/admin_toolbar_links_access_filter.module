@@ -5,10 +5,10 @@
  * This module don't show menu links that you don't have access permission for.
  */
 
+use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\user\Entity\Role;
 use Symfony\Component\Routing\Exception\RouteNotFoundException;
-use Drupal\Core\Routing\RouteMatchInterface;
 
 /**
  * Implements hook_help().
@@ -90,7 +90,7 @@ function admin_toolbar_links_access_filter_filter_non_accessible_links(array &$i
       }
 
       // Check, if user has access rights to the route.
-      if (!$access_manager->checkNamedRoute($route_name, $route_params)) {
+      if ($route_name === NULL || !$access_manager->checkNamedRoute($route_name, $route_params)) {
         unset($items[$menu_id]);
       }
       else {
@@ -123,7 +123,7 @@ function admin_toolbar_links_access_filter_filter_non_accessible_links(array &$i
     }
     catch (\UnexpectedValueException $e) {
       // Skip on errors like "base:block has no corresponding route":
-      \Drupal::logger('my_module')->error($e->getMessage());
+      \Drupal::logger('admin_toolbar')->error($e->getMessage());
       continue;
     }
   }

@@ -2,19 +2,19 @@
   padding-left: 1em;
 }
 
-#admin-toolbar-search-tab .toolbar-item:before {
+#admin-toolbar-search-tab .toolbar-item::before {
   background-image: url(../misc/icons/bebebe/loupe.svg);
 }
 
-#admin-toolbar-search-tab .toolbar-item:active:before,
-#admin-toolbar-search-tab .toolbar-item.is-active:before {
+#admin-toolbar-search-tab .toolbar-item:active::before,
+#admin-toolbar-search-tab .toolbar-item.is-active::before {
   background-image: url(../misc/icons/ffffff/loupe.svg);
 }
 
 #toolbar-item-administration-search-tray label {
   display: inline-block;
+  margin-right: 0.5em;
   color: #000;
-  margin-right: .5em;
   font-weight: bold;
 }
 

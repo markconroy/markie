@@ -26,7 +26,7 @@ class AdminToolbarSearchTest extends AdminToolbarSearchTestBase {
     $assert_session->waitForElementVisible('css', $search_toolbar_item);
     $assert_session->waitForElementVisible('css', $search_tray);
 
-    $this->assertSuggestionContains('perfor', 'admin/config/development/performance');
+    $this->assertSuggestionContains('perform', 'admin/config/development/performance');
     $this->assertSuggestionContains('develop', 'admin/config/development/maintenance');
     $this->assertSuggestionContains('types', 'admin/structure/types');
   }

@@ -2,8 +2,8 @@
 
 namespace Drupal\Tests\admin_toolbar_search\FunctionalJavascript;
 
-use Drupal\media\Entity\MediaType;
 use Drupal\Tests\media\Traits\MediaTypeCreationTrait;
+use Drupal\media\Entity\MediaType;
 
 /**
  * Test the functionality of admin toolbar search.
