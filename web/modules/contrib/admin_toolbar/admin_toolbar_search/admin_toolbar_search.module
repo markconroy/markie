@@ -5,8 +5,8 @@
  * Functionality for search of Admin Toolbar.
  */
 
-use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 
 /**
@@ -67,6 +67,7 @@ function admin_toolbar_search_toolbar_alter(&$items) {
           '#size' => 30,
           '#attributes' => [
             'placeholder' => new TranslatableMarkup('Admin Toolbar quick search'),
+            'accesskey' => ('a'),
           ],
           '#id' => 'admin-toolbar-search-input',
         ],

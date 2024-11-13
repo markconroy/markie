@@ -6,16 +6,19 @@
   background: #abeae4;
 }
 
-.toolbar-tray-horizontal .toolbar-menu:not(:first-child) li.menu-item--expanded > a:focus {
-  background-position: center right;
+.toolbar-tray-horizontal
+  .toolbar-menu:not(:first-child)
+  li.menu-item--expanded
+  > a:focus {
   background-image: url(../misc/icons/0074bd/chevron-right.svg);
   background-repeat: no-repeat;
+  background-position: center right;
 }
 
 .toolbar-tray-horizontal .menu-item--expanded .menu {
-  background: #fff;
   width: auto;
   height: auto;
+  background: #fff;
 }
 
 .toolbar-tray-horizontal .menu-item--expanded {
@@ -30,8 +33,8 @@
 }
 
 .toolbar .toolbar-tray-horizontal .menu-item:last-child {
-  border-left: 1px solid #ddd;
   border-right: 1px solid #ddd;
+  border-left: 1px solid #ddd;
 }
 
 .toolbar .toolbar-tray-horizontal ul ul li.menu-item:first-child {
@@ -42,8 +45,8 @@
 .toolbar-tray-horizontal li.menu-item--expanded.hover-intent ul ul ul,
 .toolbar-tray-horizontal li.menu-item--expanded.hover-intent ul ul ul ul,
 .toolbar-tray-horizontal li.menu-item--expanded.hover-intent ul ul ul ul ul {
-  display: none;
   left: -999em; /* LTR */
+  display: none;
 }
 
 /* Lists nested under hovered list items */
@@ -52,8 +55,8 @@
 .toolbar-tray-horizontal li li li.menu-item--expanded.hover-intent ul,
 .toolbar-tray-horizontal li li li li.menu-item--expanded.hover-intent ul,
 .toolbar-tray-horizontal li li li li li.menu-item--expanded.hover-intent ul {
-  display: block;
   left: auto; /* LTR */
+  display: block;
 }
 
 .toolbar-tray-horizontal .menu ul li a,
@@ -62,11 +65,11 @@
 }
 
 .toolbar-tray-horizontal ul li.menu-item--expanded.hover-intent ul {
-  display: block;
   position: absolute;
+  z-index: 1;
+  display: block;
   width: 200px;
   box-shadow: 2px 2px 3px hsla(0, 0%, 0%, 0.4);
-  z-index: 1;
 }
 
 .toolbar-tray-horizontal ul li.menu-item--expanded .menu-item > ul {
@@ -74,9 +77,9 @@
 }
 
 .toolbar-tray-horizontal ul li.menu-item--expanded ul li.menu-item--expanded {
-  background-position: center right;
   background-image: url(../misc/icons/0074bd/chevron-right.svg);
   background-repeat: no-repeat;
+  background-position: center right;
 }
 
 .toolbar-tray-horizontal ul li.menu-item--expanded .menu-item.hover-intent ul {
@@ -94,29 +97,49 @@
 
 .toolbar-tray-horizontal .toolbar .level-2 > ul {
   position: absolute;
-  padding-top: 0;
   top: 0;
   left: 200px;
   width: 200px;
+  padding-top: 0;
 }
 
 .toolbar .toolbar-tray-vertical li.open > ul.toolbar-menu.clearfix {
   display: block;
 }
 
-.toolbar-menu  .menu-item > span {
-  padding: 1em 1.3333em;
+.toolbar-menu .menu-item > span {
   display: block;
-  color: #434343;
+  padding: 1em 1.3333em;
   cursor: pointer;
+  color: #434343;
 }
 
-[dir="rtl"] .toolbar-tray-horizontal ul li.menu-item--expanded ul li.menu-item--expanded {
-  background-position: center left;
+[dir="rtl"]
+  .toolbar-tray-horizontal
+  ul
+  li.menu-item--expanded
+  ul
+  li.menu-item--expanded {
   background-image: url(../misc/icons/0074bd/chevron-left.svg);
+  background-position: center left;
 }
 
-[dir="rtl"] .toolbar-tray-horizontal ul li.menu-item--expanded .menu-item.hover-intent ul {
+[dir="rtl"]
+  .toolbar-tray-horizontal
+  .toolbar-menu:not(:first-child)
+  li.menu-item--expanded
+  > a:focus {
+  background-image: url(../misc/icons/0074bd/chevron-left.svg);
+  background-repeat: no-repeat;
+  background-position: center left;
+}
+
+[dir="rtl"]
+  .toolbar-tray-horizontal
+  ul
+  li.menu-item--expanded
+  .menu-item.hover-intent
+  ul {
   margin: -40px 197px 0 0;
 }
 

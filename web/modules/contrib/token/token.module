@@ -2,19 +2,18 @@
 
 /**
  * @file
- * Enhances the token API in core: adds a browseable UI, missing tokens, etc.
+ * Enhances the token API in core: adds a browsable UI, missing tokens, etc.
  */
 
 use Drupal\Component\Render\PlainTextOutput;
 use Drupal\Core\Block\BlockPluginInterface;
+use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Menu\MenuLinkInterface;
 use Drupal\Core\Render\BubbleableMetadata;
 use Drupal\Core\Render\Element;
 use Drupal\Core\Routing\RouteMatchInterface;
-use Drupal\Core\Entity\EntityTypeInterface;
-use Drupal\Core\Field\BaseFieldDefinition;
-use Drupal\Core\TypedData\TranslatableInterface;
 use Drupal\menu_link_content\Entity\MenuLinkContent;
 use Drupal\menu_link_content\MenuLinkContentInterface;
 use Drupal\node\Entity\Node;
@@ -335,7 +334,7 @@ function token_form_action_form_alter(&$form, $form_state) {
 /**
  * Implements hook_form_FORM_ID_alter().
  *
- * Alters the user e-mail fields to add token context validation and
+ * Alters the user email fields to add token context validation and
  * adds the token tree for a better token UI and selection.
  */
 function token_form_user_admin_settings_alter(&$form, FormStateInterface $form_state) {
@@ -361,7 +360,7 @@ function token_form_user_admin_settings_alter(&$form, FormStateInterface $form_s
       case 'email_activated':
       case 'email_blocked':
       case 'email_canceled':
-        // These fieldsets have their e-mail elements inside a 'settings'
+        // These fieldsets have their email elements inside a 'settings'
         // sub-element, so switch to that element instead.
         $element = &$form[$key]['settings'];
         break;
@@ -447,7 +446,7 @@ function token_render_array_value($value, array $options = []) {
 }
 
 /**
- * Coyp of drupal_render_cache_set() that does not care about request method.
+ * Copy of drupal_render_cache_set() that does not care about request method.
  */
 function token_render_cache_set(&$markup, $elements) {
   // This should only run of drupal_render_cache_set() did not.
@@ -462,7 +461,7 @@ function token_render_cache_set(&$markup, $elements) {
 }
 
 /**
- * Loads menu link titles for all purents of a menu link plugin ID.
+ * Loads menu link titles for all parents of a menu link plugin ID.
  *
  * @param string $plugin_id
  *   The menu link plugin ID.

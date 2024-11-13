@@ -97,7 +97,7 @@ class AdminToolbarToolsHelper {
         // Only show the accessible local tasks.
         foreach (Element::getVisibleChildren($local_tasks['tabs']) as $task) {
           $local_task_links['#links'][$task] = $local_tasks['tabs'][$task]['#link'];
-          if ($local_tasks['tabs'][$task]['#active']) {
+          if (isset($local_tasks['tabs'][$task]['#active']) && $local_tasks['tabs'][$task]['#active']) {
             $local_task_links['#links'][$task]['attributes']['class'][] = 'is-active';
           }
         }

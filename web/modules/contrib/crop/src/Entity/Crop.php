@@ -151,6 +151,7 @@ class Crop extends ContentEntityBase implements CropInterface {
    * {@inheritdoc}
    */
   public static function getCropFromImageStyle($uri, ImageStyleInterface $image_style) {
+    //phpcs:ignore Drupal.Semantics.FunctionTriggerError.TriggerErrorTextLayoutRelaxed
     @trigger_error('Crop::getCropFromImageStyle() is deprecated, use Crop::getCropFromImageStyleId() instead.', E_USER_DEPRECATED);
     return static::getCropFromImageStyleId($uri, $image_style->id());
   }
@@ -321,8 +322,8 @@ class Crop extends ContentEntityBase implements CropInterface {
 
     // Denormalized information, which is calculated in storage plugin for a
     // given entity type. Saved here for performance reasons in image effects.
-    // ---
-    // TODO - we are not enforcing uniqueness on this as we want to support more
+    // ---.
+    // @todo we are not enforcing uniqueness on this as we want to support more
     // crops per same image/image_style combination. However, image effect
     // operates with image URI only, which means we have no mechanism to
     // distinguish between multiple crops in there. If we really want to

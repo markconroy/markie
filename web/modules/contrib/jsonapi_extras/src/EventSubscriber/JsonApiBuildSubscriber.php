@@ -50,7 +50,7 @@ class JsonApiBuildSubscriber implements EventSubscriberInterface {
   /**
    * What events to subscribe to.
    */
-  public static function getSubscribedEvents() {
+  public static function getSubscribedEvents(): array {
     $events[ResourceTypeBuildEvents::BUILD][] = ['applyResourceConfig'];
     return $events;
   }

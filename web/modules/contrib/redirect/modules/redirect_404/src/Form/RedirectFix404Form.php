@@ -167,7 +167,7 @@ class RedirectFix404Form extends FormBase {
       $rows[] = $row;
     }
 
-    $form['redirect_404_table']  = [
+    $form['redirect_404_table'] = [
       '#theme' => 'table',
       '#header' => $header,
       '#rows' => $rows,

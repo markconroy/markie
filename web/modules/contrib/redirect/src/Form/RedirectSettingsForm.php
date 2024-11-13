@@ -13,6 +13,7 @@ class RedirectSettingsForm extends ConfigFormBase {
   public function getFormId() {
     return 'redirect_settings_form';
   }
+
   /**
    * {@inheritdoc}
    */
@@ -69,7 +70,7 @@ class RedirectSettingsForm extends ConfigFormBase {
     $form['globals']['redirect_access_check'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Check access to the redirected page'),
-      '#description' => $this->t('This helps to stop redirection on protected pages and avoids giving away <em>secret</em> URL\'s. <strong>By default this feature is disabled to avoid any unexpected behavior</strong>'),
+      '#description' => $this->t("This helps to stop redirection on protected pages and avoids giving away <em>secret</em> URL's. <strong>By default this feature is disabled to avoid any unexpected behavior</strong>"),
       '#default_value' => $config->get('access_check'),
     ];
 

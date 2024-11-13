@@ -53,11 +53,7 @@ class FieldConfigIntegrityValidation extends ConfigImportValidateEventSubscriber
    * @param \Drupal\jsonapi_extras\ResourceType\ConfigurableResourceTypeRepository $resource_type_repository
    *   The resource type repository.
    */
-  public function __construct(
-    ConfigManagerInterface $config_manager,
-    EntityTypeManagerInterface $entity_type_manager,
-    ConfigurableResourceTypeRepository $resource_type_repository,
-  ) {
+  public function __construct(ConfigManagerInterface $config_manager, EntityTypeManagerInterface $entity_type_manager, ConfigurableResourceTypeRepository $resource_type_repository) {
     $this->configManager = $config_manager;
     $this->entityTypeManager = $entity_type_manager;
     $this->resourceTypeRepository = $resource_type_repository;

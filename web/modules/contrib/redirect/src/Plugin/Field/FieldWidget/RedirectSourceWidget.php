@@ -3,6 +3,7 @@
 namespace Drupal\redirect\Plugin\Field\FieldWidget;
 
 use Drupal\Component\Utility\UrlHelper;
+use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\WidgetBase;
 use Drupal\Core\Url;
@@ -63,12 +64,18 @@ class RedirectSourceWidget extends WidgetBase {
         $source_path = trim($source_path);
 
         // Warning about creating a redirect from a valid path.
-        // @todo - Hmm... exception driven logic. Find a better way how to
+        // @todo Hmm... exception driven logic. Find a better way how to
         //   determine if we have a valid path.
         try {
           \Drupal::service('router')->match('/' . $form_state->getValue(['redirect_source', 0, 'path']));
-          $element['status_box'][]['#markup'] = '<div class="messages messages--warning">' . $this->t('The source path %path is likely a valid path. It is preferred to <a href="@url-alias">create URL aliases</a> for existing paths rather than redirects.',
-              ['%path' => $source_path, '@url-alias' => Url::fromRoute('entity.path_alias.add_form')->toString()]) . '</div>';
+
+          $url = Url::fromRoute('entity.path_alias.add_form');
+          if ($url->access()) {
+            $element['status_box'][]['#markup'] = '<div class="messages messages--warning">' . $this->t('The source path %path is likely a valid path. It is preferred to <a href="@url-alias">create URL aliases</a> for existing paths rather than redirects.', [
+              '%path' => $source_path,
+              '@url-alias' => $url->toString(),
+            ]) . '</div>';
+          }
         }
         catch (ResourceNotFoundException $e) {
           // Do nothing, expected behaviour.
@@ -79,7 +86,7 @@ class RedirectSourceWidget extends WidgetBase {
 
         // Warning about the path being already redirected.
         $parsed_url = UrlHelper::parse($source_path);
-        $path = isset($parsed_url['path']) ? $parsed_url['path'] : NULL;
+        $path = $parsed_url['path'] ?? NULL;
         if (!empty($path)) {
           /** @var \Drupal\redirect\RedirectRepository $repository */
           $repository = \Drupal::service('redirect.repository');
@@ -120,4 +127,13 @@ class RedirectSourceWidget extends WidgetBase {
     }
     return $values;
   }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function isApplicable(FieldDefinitionInterface $field_definition): bool {
+    $entity_type = $field_definition->getTargetEntityTypeId();
+    return $entity_type === 'redirect';
+  }
+
 }

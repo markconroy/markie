@@ -106,7 +106,7 @@ class RouteNormalizerRequestSubscriber implements EventSubscriberInterface {
 
       // Strip off query parameters added by the route such as a CSRF token.
       if (strpos($redirect_uri, '?') !== FALSE) {
-        $redirect_uri  = strtok($redirect_uri, '?');
+        $redirect_uri = strtok($redirect_uri, '?');
       }
 
       // Append back the request query string from $_SERVER.
@@ -134,7 +134,7 @@ class RouteNormalizerRequestSubscriber implements EventSubscriberInterface {
   /**
    * {@inheritdoc}
    */
-  static function getSubscribedEvents() {
+  public static function getSubscribedEvents(): array {
     $events[KernelEvents::REQUEST][] = ['onKernelRequestRedirect', 30];
     return $events;
   }

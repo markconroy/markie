@@ -172,7 +172,7 @@ class EntityResourceTest extends KernelTestBase {
    * @return array
    *   The input data for the test function.
    */
-  public function patchIndividualConfigProvider() {
+  public static function patchIndividualConfigProvider(): array {
     return [
       [['description' => 'PATCHED', 'status' => FALSE]],
       [[]],
@@ -195,7 +195,7 @@ class EntityResourceTest extends KernelTestBase {
    * @return array
    *   The input data for the test function.
    */
-  public function patchIndividualConfigFailedProvider() {
+  public static function patchIndividualConfigFailedProvider(): array {
     return [
       [
         ['type' => 'article', 'status' => FALSE],

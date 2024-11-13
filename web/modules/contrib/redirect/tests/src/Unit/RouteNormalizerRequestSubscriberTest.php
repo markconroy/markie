@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\redirect\Unit;
 
 use Drupal\Tests\UnitTestCase;
@@ -69,7 +71,7 @@ class RouteNormalizerRequestSubscriberTest extends UnitTestCase {
     $request_uri = 'https://example.com/route-to-normalize';
     $request_query = [];
 
-    $event = $this->getGetResponseEventStub($request_uri, http_build_query($request_query), HttpKernelInterface::MASTER_REQUEST, TRUE);
+    $event = $this->getGetResponseEventStub($request_uri, http_build_query($request_query), HttpKernelInterface::MAIN_REQUEST, TRUE);
     // We set '_disable_route_normalizer' as a request attribute and expect to leave onKernelRequestRedirect at the beginning,
     // i.e. $this->redirectChecker->canRedirect($request) should never be called.
     $subscriber = $this->getSubscriber($request_uri, TRUE, FALSE);
@@ -207,7 +209,7 @@ class RouteNormalizerRequestSubscriberTest extends UnitTestCase {
    *
    * @return \Symfony\Component\HttpKernel\Event\RequestEvent
    */
-  protected function getGetResponseEventStub($path_info, $query_string, $request_type = HttpKernelInterface::MASTER_REQUEST, $set_request_attribute = FALSE) {
+  protected function getGetResponseEventStub($path_info, $query_string, $request_type = HttpKernelInterface::MAIN_REQUEST, $set_request_attribute = FALSE) {
     $request = Request::create($path_info . '?' . $query_string, 'GET', [], [], [], ['SCRIPT_NAME' => 'index.php', 'SCRIPT_FILENAME' => 'index.php']);
 
     if ($set_request_attribute === TRUE) {

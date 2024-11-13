@@ -26,7 +26,7 @@ class CropCRUDTest extends CropUnitTestBase {
     $values = [
       'id' => $this->randomMachineName(),
       'label' => $this->randomString(),
-      'description' => $this->randomGenerator->sentences(8),
+      'description' => $this->getRandomGenerator()->word(8),
     ];
     $crop_type = $this->cropTypeStorage->create($values);
 

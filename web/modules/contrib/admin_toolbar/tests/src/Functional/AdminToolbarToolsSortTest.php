@@ -2,9 +2,9 @@
 
 namespace Drupal\Tests\admin_toolbar\Functional;
 
+use Drupal\Tests\BrowserTestBase;
 use Drupal\media\Entity\MediaType;
 use Drupal\system\Entity\Menu;
-use Drupal\Tests\BrowserTestBase;
 
 /**
  * Tests Admin Toolbar tools functionality.

@@ -67,7 +67,7 @@ class RedirectForm extends ContentEntityForm {
     $redirect = $this->entity;
 
     // Only add the configured languages and a single key for all languages.
-    if (isset($form['language']['widget'][0]['value']))  {
+    if (isset($form['language']['widget'][0]['value'])) {
       foreach (\Drupal::languageManager()->getLanguages(LanguageInterface::STATE_CONFIGURABLE) as $langcode => $language) {
         $form['language']['widget'][0]['value']['#options'][$langcode] = $language->getName();
       }
@@ -125,8 +125,8 @@ class RedirectForm extends ContentEntityForm {
     }
 
     $parsed_url = UrlHelper::parse(trim($source['path']));
-    $path = isset($parsed_url['path']) ? $parsed_url['path'] : NULL;
-    $query = isset($parsed_url['query']) ? $parsed_url['query'] : NULL;
+    $path = $parsed_url['path'] ?? NULL;
+    $query = $parsed_url['query'] ?? NULL;
     $hash = Redirect::generateHash($path, $query, $form_state->getValue('language')[0]['value']);
 
     // Search for duplicate.
@@ -140,7 +140,9 @@ class RedirectForm extends ContentEntityForm {
         $form_state->setErrorByName('redirect_source', $this->t('The source path %source is already being redirected. Do you want to <a href="@edit-page">edit the existing redirect</a>?',
           [
             '%source' => $source['path'],
-            '@edit-page' => $redirect->toUrl('edit-form')->toString()]));
+            '@edit-page' => $redirect->toUrl('edit-form')->toString(),
+          ]
+        ));
       }
     }
   }
@@ -153,4 +155,5 @@ class RedirectForm extends ContentEntityForm {
     $this->messenger()->addMessage($this->t('The redirect has been saved.'));
     $form_state->setRedirect('redirect.list');
   }
+
 }

@@ -304,7 +304,7 @@ class JsonApiExtrasFunctionalTest extends JsonApiFunctionalTestBase {
     $this->assertSession()->statusCodeEquals(404);
     $output = Json::decode($this->drupalGet('/api/taxonomy_term/tags/' . $this->tags[0]->uuid() . '/relationships/vid'));
     $this->assertSession()->statusCodeEquals(200);
-    $this->assertSame(NULL, $output['data']);
+    $this->assertNull($output['data']);
 
     // 14. Test a disabled related resource of multiple cardinality.
     $this->tags[1]->vocabs->set(0, 'tags');

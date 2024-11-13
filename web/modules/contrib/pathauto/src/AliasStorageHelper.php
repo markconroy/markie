@@ -242,7 +242,10 @@ class AliasStorageHelper implements AliasStorageHelperInterface {
    * {@inheritdoc}
    */
   public function deleteMultiple($pids) {
-    $this->entityTypeManager->getStorage('path_alias')->delete($this->entityTypeManager->getStorage('path_alias')->loadMultiple($pids));
+    // Avoid hitting memory limit by deleting a chunk at a time.
+    foreach (array_chunk($pids, 100) as $chunk) {
+      $this->entityTypeManager->getStorage('path_alias')->delete($this->entityTypeManager->getStorage('path_alias')->loadMultiple($chunk));
+    }
   }
 
 }

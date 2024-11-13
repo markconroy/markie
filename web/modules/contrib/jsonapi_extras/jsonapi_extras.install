@@ -10,7 +10,7 @@ declare(strict_types=1);
 use Drupal\Core\Config\ConfigFactoryInterface;
 
 /**
- * Implements hook_update_N().
+ * Set config validation setting to false for existing install.
  */
 function jsonapi_extras_update_9001() {
   $config_factory = \Drupal::service('config.factory');
