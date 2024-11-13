@@ -2,7 +2,7 @@ name: WeatherLab
 type: theme
 description: 'An Annertech starter-theme. It is changeable, like the weather.'
 base theme: classy
-core_version_requirement: ^8 || ^9
+core_version_requirement: ^10 || ^11
 
 ckeditor_stylesheets:
   - dist/wysiwyg.css
