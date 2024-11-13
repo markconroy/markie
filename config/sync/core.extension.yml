@@ -55,7 +55,6 @@ module:
   text: 0
   token: 0
   toolbar: 0
-  tour: 0
   update: 0
   upgrade_status: 0
   user: 0
