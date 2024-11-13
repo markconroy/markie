@@ -389,9 +389,9 @@
             'dev_requirement' => false,
         ),
         'drupal/ctools' => array(
-            'pretty_version' => '3.15.0',
-            'version' => '3.15.0.0',
-            'reference' => '8.x-3.15',
+            'pretty_version' => '4.1.0',
+            'version' => '4.1.0.0',
+            'reference' => '4.1.0',
             'type' => 'drupal-module',
             'install_path' => __DIR__ . '/../../web/modules/contrib/ctools',
             'aliases' => array(),
