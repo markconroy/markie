@@ -32,7 +32,7 @@ class TwigNodeTrans extends Node {
   /**
    * {@inheritdoc}
    */
-  public function __construct(Node $body, ?Node $plural = NULL, ?AbstractExpression $count = NULL, ?AbstractExpression $options = NULL, $lineno = 0, $tag = NULL) {
+  public function __construct(Node $body, ?Node $plural = NULL, ?AbstractExpression $count = NULL, ?AbstractExpression $options = NULL, $lineno = 0) {
     $nodes['body'] = $body;
     if ($count !== NULL) {
       $nodes['count'] = $count;
@@ -43,7 +43,7 @@ class TwigNodeTrans extends Node {
     if ($options !== NULL) {
       $nodes['options'] = $options;
     }
-    parent::__construct($nodes, [], $lineno, $tag);
+    parent::__construct($nodes, [], $lineno);
   }
 
   /**
@@ -145,7 +145,7 @@ class TwigNodeTrans extends Node {
           // @see TwigExtension::getFilters()
           $argPrefix = '@';
           while ($args instanceof FilterExpression) {
-            switch ($args->getNode('filter')->getAttribute('value')) {
+            switch ($args->getAttribute('twig_callable')->getName()) {
               case 'placeholder':
                 $argPrefix = '%';
                 break;

@@ -20,9 +20,6 @@ arrowstop
 arrowthick
 arrowthickstop
 assertable
-autocompletefocus
-autocompleteselect
-autocompleting
 autoconfiguration
 autoconfigure
 autoconfigured
@@ -48,6 +45,9 @@ autowired
 autowiring
 backlink
 backlinks
+backported
+backporting
+backports
 bakeware
 barbar
 barchart
@@ -77,7 +77,6 @@ blockpromoted
 blockquotes
 blockrecipe
 blockrelated
-blocktest
 bodyless
 boing
 bovigo
@@ -254,11 +253,9 @@ fdiv
 fieldable
 fieldapi
 fieldblock
-fieldbody
 fieldgroup
 fieldgroups
 fieldlayout
-fieldlinks
 fieldnames
 fieldsets
 filemime
@@ -703,17 +700,10 @@ tappable
 taskless
 tcomment
 templating
-testajax
-testblock
-testbody
 testbot
 testbots
 testcase
-testcontent
-testcontextawareblock
-testdialog
 testgroups
-testkey
 testlogger
 testsuite
 testsuites
@@ -754,7 +744,6 @@ twistie
 twocol
 tzid
 uids
-ulwa
 unban
 uncacheable
 uncategorized

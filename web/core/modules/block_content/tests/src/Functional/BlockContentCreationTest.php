@@ -8,6 +8,8 @@ use Drupal\block_content\BlockContentInterface;
 use Drupal\block_content\Entity\BlockContent;
 use Drupal\Core\Database\Database;
 
+// cspell:ignore testblock
+
 /**
  * Create a block and test saving it.
  *
@@ -16,7 +18,7 @@ use Drupal\Core\Database\Database;
 class BlockContentCreationTest extends BlockContentTestBase {
 
   /**
-   * Modules to enable.
+   * Modules to install.
    *
    * Enable dummy module that implements hook_block_insert() for exceptions and
    * field_ui to edit display settings.

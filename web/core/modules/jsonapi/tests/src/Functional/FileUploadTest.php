@@ -109,9 +109,20 @@ class FileUploadTest extends ResourceTestBase {
   protected $fileStorage;
 
   /**
+   * A list of test methods to skip.
+   *
+   * @var array
+   */
+  const SKIP_METHODS = ['testGetIndividual', 'testIndividual', 'testCollection', 'testRelationships'];
+
+  /**
    * {@inheritdoc}
    */
   protected function setUp(): void {
+    if (in_array($this->name(), static::SKIP_METHODS, TRUE)) {
+      $this->markTestSkipped('Irrelevant for this test');
+    }
+
     parent::setUp();
 
     $this->fileStorage = $this->container->get('entity_type.manager')
@@ -145,48 +156,6 @@ class FileUploadTest extends ResourceTestBase {
 
     // Reload entity so that it has the new field.
     $this->entity = $this->entityStorage->loadUnchanged($this->entity->id());
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function testGetIndividual(): void {
-    $this->markTestSkipped('Irrelevant for this test');
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function testPostIndividual(): void {
-    $this->markTestSkipped('Irrelevant for this test');
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function testPatchIndividual(): void {
-    $this->markTestSkipped('Irrelevant for this test');
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function testDeleteIndividual(): void {
-    $this->markTestSkipped('Irrelevant for this test');
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function testCollection(): void {
-    $this->markTestSkipped('Irrelevant for this test');
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function testRelationships(): void {
-    $this->markTestSkipped('Irrelevant for this test');
   }
 
   /**
@@ -319,7 +288,7 @@ class FileUploadTest extends ResourceTestBase {
     // This request fails despite the upload succeeding, because we're not
     // allowed to view the entity we're uploading to.
     $response = $this->fileRequest($uri, $this->testFileData);
-    $this->assertResourceErrorResponse(403, $this->getExpectedUnauthorizedAccessMessage('GET'), $uri, $response, FALSE, ['4xx-response', 'http_response'], ['url.site', 'user.permissions']);
+    $this->assertResourceErrorResponse(403, $this->getExpectedUnauthorizedAccessMessage('GET'), $uri, $response, FALSE, ['4xx-response', 'http_response'], ['url.query_args', 'url.site', 'user.permissions']);
 
     $this->setUpAuthorization('GET');
 

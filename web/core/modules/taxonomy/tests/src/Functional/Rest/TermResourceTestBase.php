@@ -15,7 +15,7 @@ abstract class TermResourceTestBase extends EntityResourceTestBase {
   /**
    * {@inheritdoc}
    */
-  protected static $modules = ['taxonomy', 'path'];
+  protected static $modules = ['content_translation', 'path', 'taxonomy'];
 
   /**
    * {@inheritdoc}
@@ -33,6 +33,17 @@ abstract class TermResourceTestBase extends EntityResourceTestBase {
    * @var \Drupal\taxonomy\TermInterface
    */
   protected $entity;
+
+  /**
+   * Marks some tests as skipped because XML cannot be deserialized.
+   *
+   * @before
+   */
+  public function termResourceTestBaseSkipTests(): void {
+    if (static::$format === 'xml' && $this->name() === 'testPatchPath') {
+      $this->markTestSkipped('Deserialization of the XML format is not supported.');
+    }
+  }
 
   /**
    * {@inheritdoc}

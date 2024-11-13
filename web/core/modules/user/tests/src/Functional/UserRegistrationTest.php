@@ -15,13 +15,12 @@ use Drupal\user\UserInterface;
  * Tests registration of user under different configurations.
  *
  * @group user
+ * @group #slow
  */
 class UserRegistrationTest extends BrowserTestBase {
 
   /**
-   * Modules to enable.
-   *
-   * @var array
+   * {@inheritdoc}
    */
   protected static $modules = ['field_test'];
 

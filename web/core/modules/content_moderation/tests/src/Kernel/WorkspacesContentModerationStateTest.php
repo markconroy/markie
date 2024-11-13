@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\Tests\content_moderation\Kernel;
 
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\entity_test\Entity\EntityTestMulRevPub;
 use Drupal\node\Entity\Node;
 use Drupal\Tests\content_moderation\Traits\ContentModerationTestTrait;
 use Drupal\Tests\node\Traits\ContentTypeCreationTrait;
@@ -40,10 +41,30 @@ class WorkspacesContentModerationStateTest extends ContentModerationStateTest {
    */
   protected $revEntityTypeId = 'entity_test_revpub';
 
+  const SKIP_METHODS = [
+    // This test creates published default revisions in Live, which can not be
+    // deleted in a workspace. A test scenario for the case when Content
+    // Moderation and Workspaces are used together is covered in
+    // parent::testContentModerationStateRevisionDataRemoval().
+    'testContentModerationStateDataRemoval',
+    // This test does not assert anything that can be workspace-specific.
+    'testModerationWithFieldConfigOverride',
+    // This test does not assert anything that can be workspace-specific.
+    'testWorkflowDependencies',
+    // This test does not assert anything that can be workspace-specific.
+    'testWorkflowNonConfigBundleDependencies',
+    // This test does not assert anything that can be workspace-specific.
+    'testGetCurrentUserId',
+  ];
+
   /**
    * {@inheritdoc}
    */
   protected function setUp(): void {
+    if (in_array($this->name(), static::SKIP_METHODS, TRUE)) {
+      $this->markTestSkipped('Irrelevant for this test');
+    }
+
     parent::setUp();
 
     $this->initializeWorkspacesModule();
@@ -64,8 +85,6 @@ class WorkspacesContentModerationStateTest extends ContentModerationStateTest {
 
   /**
    * Tests the integration between Content Moderation and Workspaces.
-   *
-   * @see content_moderation_workspace_access()
    */
   public function testContentModerationIntegrationWithWorkspaces(): void {
     $editorial = $this->createEditorialWorkflow();
@@ -155,6 +174,86 @@ class WorkspacesContentModerationStateTest extends ContentModerationStateTest {
   }
 
   /**
+   * Publish a workspace with workflows including no tracked default revisions.
+   */
+  public function testContentModerationWithoutDefaultRevisionsInWorkspaces(): void {
+    $access_handler = $this->container->get('entity_type.manager')->getAccessControlHandler('workspace');
+    // Create a workflow which has the same states as the 'editorial' one,
+    // but it doesn't create any default revisions. This covers the case when a
+    // workspace is published containing no tracked types. This has to be the
+    // only workflow.
+    $editorial = $this->createEditorialWorkflow();
+    $type_settings = $editorial->get('type_settings');
+    $type_settings['states']['draft']['default_revision'] = FALSE;
+    $type_settings['states']['archived']['default_revision'] = FALSE;
+    $this->workspaceManager->executeOutsideWorkspace(function () use ($editorial) {
+      $editorial->save();
+    });
+    // Create an node bundle 'note' that uses non-default workflow.
+    $this->createContentType(['type' => 'note']);
+
+    // Create content in all states none with default revisions.
+    $note_archived = Node::create(['type' => 'note', 'title' => 'Test note - archived', 'moderation_state' => 'archived']);
+    $note_archived->save();
+    $note_draft = Node::create(['type' => 'note', 'title' => 'Test note - draft', 'moderation_state' => 'draft']);
+    $note_draft->save();
+    $note_published = Node::create(['type' => 'note', 'title' => 'Test note - published', 'moderation_state' => 'published']);
+    $note_published->save();
+
+    // Check workspace can be published.
+    $access_handler->resetCache();
+    $this->workspaces['stage']->publish();
+  }
+
+  /**
+   * Publish a workspace with multiple entities from different entity types.
+   */
+  public function testContentModerationMultipleEntityTypesWithWorkspaces(): void {
+    $editorial = $this->createEditorialWorkflow();
+    $this->createContentType(['type' => 'page']);
+    $this->addEntityTypeAndBundleToWorkflow($editorial, 'node', 'page');
+    $this->addEntityTypeAndBundleToWorkflow($editorial, 'entity_test_mulrevpub', 'entity_test_mulrevpub');
+
+    // Create an entity with a previous revision that is tracked in unpublished
+    // state.
+    $entity_with_revision = EntityTestMulRevPub::create([
+      'title' => 'Test entity mulrevpub',
+      'type' => 'entity_test_mulrevpub',
+      'moderation_state' => 'draft',
+    ]);
+    $entity_with_revision->save();
+    $entity_with_revision->save();
+    $entity_with_revision = $this->reloadEntity($entity_with_revision);
+    // Confirm unpublished earlier revision.
+    $this->assertEquals('draft', $entity_with_revision->moderation_state->value);
+    $earlier_revision_id = $entity_with_revision->getRevisionId();
+    // Publish.
+    $entity_with_revision->moderation_state->value = 'published';
+    $entity_with_revision->save();
+    $entity_with_revision = $this->reloadEntity($entity_with_revision);
+    // Confirm publish revision.
+    $this->assertEquals('published', $entity_with_revision->moderation_state->value);
+    $published_revision_id = $entity_with_revision->getRevisionId();
+    $this->assertNotEquals($earlier_revision_id, $published_revision_id);
+
+    // Create an entity that has a default revision id the same as the previous
+    // entity's old revision.
+    $entity_without_revision = Node::create([
+      'title' => 'Test node page',
+      'type' => 'page',
+      'moderation_state' => 'published',
+    ]);
+    $entity_without_revision->save();
+    $entity_without_revision = $this->reloadEntity($entity_without_revision);
+    $this->assertEquals('published', $entity_without_revision->moderation_state->value);
+
+    // Current published revisions of second entity has the same revision as
+    // earlier unpublished revision of first entity.
+    $this->assertEquals($entity_without_revision->getRevisionId(), $earlier_revision_id);
+    $this->workspaces['stage']->publish();
+  }
+
+  /**
    * Test cases for basic moderation test.
    */
   public static function basicModerationTestCases() {
@@ -181,43 +280,45 @@ class WorkspacesContentModerationStateTest extends ContentModerationStateTest {
    * {@inheritdoc}
    */
   public function testContentModerationStateDataRemoval($entity_type_id = NULL): void {
-    // This test creates published default revisions in Live, which can not be
-    // deleted in a workspace. A test scenario for the case when Content
-    // Moderation and Workspaces are used together is covered in
-    // parent::testContentModerationStateRevisionDataRemoval().
-    $this->markTestSkipped();
+    // Deliberately empty body. This test will be skipped in the setUp() of this
+    // class. However, for it to be picked up there, in PHPUnit 9, it still
+    // needs to be defined in this class.
   }
 
   /**
    * {@inheritdoc}
    */
   public function testModerationWithFieldConfigOverride(): void {
-    // This test does not assert anything that can be workspace-specific.
-    $this->markTestSkipped();
+    // Deliberately empty body. This test will be skipped in the setUp() of this
+    // class. However, for it to be picked up there, in PHPUnit 9, it still
+    // needs to be defined in this class.
   }
 
   /**
    * {@inheritdoc}
    */
   public function testWorkflowDependencies(): void {
-    // This test does not assert anything that can be workspace-specific.
-    $this->markTestSkipped();
+    // Deliberately empty body. This test will be skipped in the setUp() of this
+    // class. However, for it to be picked up there, in PHPUnit 9, it still
+    // needs to be defined in this class.
   }
 
   /**
    * {@inheritdoc}
    */
   public function testWorkflowNonConfigBundleDependencies(): void {
-    // This test does not assert anything that can be workspace-specific.
-    $this->markTestSkipped();
+    // Deliberately empty body. This test will be skipped in the setUp() of this
+    // class. However, for it to be picked up there, in PHPUnit 9, it still
+    // needs to be defined in this class.
   }
 
   /**
    * {@inheritdoc}
    */
   public function testGetCurrentUserId(): void {
-    // This test does not assert anything that can be workspace-specific.
-    $this->markTestSkipped();
+    // Deliberately empty body. This test will be skipped in the setUp() of this
+    // class. However, for it to be picked up there, in PHPUnit 9, it still
+    // needs to be defined in this class.
   }
 
   /**

@@ -9,7 +9,6 @@ use Drupal\Tests\rest\Functional\EntityResource\XmlEntityNormalizationQuirksTrai
 
 /**
  * @group rest
- * @group #slow
  */
 class UserXmlCookieTest extends UserResourceTestBase {
 
@@ -35,21 +34,5 @@ class UserXmlCookieTest extends UserResourceTestBase {
    * {@inheritdoc}
    */
   protected $defaultTheme = 'stark';
-
-  /**
-   * {@inheritdoc}
-   */
-  public function testPatchDxForSecuritySensitiveBaseFields(): void {
-    // Deserialization of the XML format is not supported.
-    $this->markTestSkipped();
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function testPatchSecurityOtherUser(): void {
-    // Deserialization of the XML format is not supported.
-    $this->markTestSkipped();
-  }
 
 }

@@ -15,9 +15,7 @@ use Drupal\Tests\BrowserTestBase;
 class ElementsLabelsTest extends BrowserTestBase {
 
   /**
-   * Modules to enable.
-   *
-   * @var array
+   * {@inheritdoc}
    */
   protected static $modules = ['form_test'];
 
@@ -25,6 +23,16 @@ class ElementsLabelsTest extends BrowserTestBase {
    * {@inheritdoc}
    */
   protected $defaultTheme = 'stark';
+
+  /**
+   * Tests form elements.
+   */
+  public function testFormElements(): void {
+    $this->testFormLabels();
+    $this->testTitleEscaping();
+    $this->testFormDescriptions();
+    $this->testFormsInThemeLessEnvironments();
+  }
 
   /**
    * Tests form element rendering.
@@ -35,7 +43,7 @@ class ElementsLabelsTest extends BrowserTestBase {
    * - Prefix and suffix render element placement.
    * - Form element title attributes.
    */
-  public function testFormLabels(): void {
+  protected function testFormLabels(): void {
     $this->drupalGet('form_test/form-labels');
 
     // Check that the checkbox/radio processing is not interfering with
@@ -104,7 +112,7 @@ class ElementsLabelsTest extends BrowserTestBase {
   /**
    * Tests XSS-protection of element labels.
    */
-  public function testTitleEscaping(): void {
+  protected function testTitleEscaping(): void {
     $this->drupalGet('form_test/form-labels');
     foreach (FormTestLabelForm::$typesWithTitle as $type) {
       $this->assertSession()->responseContains("$type alert('XSS') is XSS filtered!");
@@ -115,7 +123,7 @@ class ElementsLabelsTest extends BrowserTestBase {
   /**
    * Tests different display options for form element descriptions.
    */
-  public function testFormDescriptions(): void {
+  protected function testFormDescriptions(): void {
     $this->drupalGet('form_test/form-descriptions');
 
     // Check #description placement with #description_display='after'.
@@ -142,7 +150,7 @@ class ElementsLabelsTest extends BrowserTestBase {
   /**
    * Tests forms in theme-less environments.
    */
-  public function testFormsInThemeLessEnvironments(): void {
+  protected function testFormsInThemeLessEnvironments(): void {
     $form = $this->getFormWithLimitedProperties();
     $render_service = $this->container->get('renderer');
     // This should not throw any notices.

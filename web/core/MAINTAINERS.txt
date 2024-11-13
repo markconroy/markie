@@ -305,10 +305,16 @@ Menu UI
 
 Migrate
 - Benji Fisher 'benjifisher' https://www.drupal.org/u/benjifisher
-- Adam Globus-Hoenich 'phenaproxima' https://www.drupal.org/u/phenaproxima
 - Lucas Hedding 'heddn' https://www.drupal.org/u/heddn
 - Michael Lutz 'mikelutz' https://www.drupal.org/u/mikelutz
 - Victoria Spagnolo 'quietone' https://www.drupal.org/u/quietone
+
+Navigation
+- Cristina Chumillas 'ckrina' https://www.drupal.org/u/ckrina
+- Ivan Berdinsky 'finnsky' https://www.drupal.org/u/finnsky
+- Matthew Oliveira 'm4olivei' https://www.drupal.org/u/m4olivei
+- Théodore Biadala 'nod_' https://www.drupal.org/u/nod_
+- Pablo López 'plopesc' https://www.drupal.org/u/plopesc
 
 Node
 - ?
@@ -512,13 +518,6 @@ The Drupal core initiative coordinators oversee approved projects that
 re-architect or otherwise improve large areas of Drupal core. See
 https://www.drupal.org/contribute/core/maintainers for more information on
 their responsibilities. The initiative coordinators are:
-
-Decoupled Menus Initiative
-- Théodore Biadala 'nod_' https://www.drupal.org/u/nod_
-- Brian Perry 'brianperry' https://www.drupal.org/u/brianperry
-
-Media Initiative
-- Janez Urevc 'slashrsm' https://www.drupal.org/u/slashrsm
 
 Project Browser Initiative
 - Leslie Glynn 'leslieg' https://www.drupal.org/u/leslieg

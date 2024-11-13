@@ -15,6 +15,9 @@ use Drupal\views\Views;
  */
 class AreaTextTest extends ViewsKernelTestBase {
 
+  /**
+   * {@inheritdoc}
+   */
   protected static $modules = ['system', 'user', 'filter'];
 
   /**
@@ -40,7 +43,7 @@ class AreaTextTest extends ViewsKernelTestBase {
     $view = Views::getView('test_view');
     $view->setDisplay();
 
-    // add a text header
+    // Add a text header
     $string = $this->randomMachineName();
     $view->displayHandlers->get('default')->overrideOption('header', [
       'area' => [

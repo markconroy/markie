@@ -15,9 +15,7 @@ use Drupal\language\Entity\ConfigurableLanguage;
 class LanguageBrowserDetectionAcceptLanguageTest extends BrowserTestBase {
 
   /**
-   * Modules to enable.
-   *
-   * @var array
+   * {@inheritdoc}
    */
   protected static $modules = [
     'language',
@@ -102,7 +100,7 @@ class LanguageBrowserDetectionAcceptLanguageTest extends BrowserTestBase {
     $this->assertSession()->responseHeaderDoesNotExist('X-Drupal-Cache');
 
     // Check with browser without language settings - should return fallback language.
-    $this->drupalGet('/system-test/echo/language test', [], ['Accept-Language' => NULL]);
+    $this->drupalGet('/system-test/echo/language test', [], ['Accept-Language' => '']);
     $this->assertSession()->responseHeaderEquals('Content-Language', 'en');
     $this->assertSession()->responseHeaderDoesNotExist('X-Drupal-Cache');
 

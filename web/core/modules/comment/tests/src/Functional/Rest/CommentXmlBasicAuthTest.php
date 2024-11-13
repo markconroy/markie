@@ -9,7 +9,6 @@ use Drupal\Tests\rest\Functional\EntityResource\XmlEntityNormalizationQuirksTrai
 
 /**
  * @group rest
- * @group #slow
  */
 class CommentXmlBasicAuthTest extends CommentResourceTestBase {
 
@@ -40,21 +39,5 @@ class CommentXmlBasicAuthTest extends CommentResourceTestBase {
    * {@inheritdoc}
    */
   protected static $auth = 'basic_auth';
-
-  /**
-   * {@inheritdoc}
-   */
-  public function testPostDxWithoutCriticalBaseFields(): void {
-    // Deserialization of the XML format is not supported.
-    $this->markTestSkipped();
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function testPostSkipCommentApproval(): void {
-    // Deserialization of the XML format is not supported.
-    $this->markTestSkipped();
-  }
 
 }

@@ -187,6 +187,8 @@ class JavascriptStatesTest extends WebDriverTestBase {
     $this->assertFalse($radios_some_disabled_value2->hasAttribute('disabled'));
     // Check if the link is visible.
     $this->assertTrue($link->isVisible());
+    // Check enter password is visible.
+    $this->assertSession()->pageTextContains('Enter password');
 
     // Change state: check the checkbox.
     $trigger->check();
@@ -228,6 +230,8 @@ class JavascriptStatesTest extends WebDriverTestBase {
     $this->assertFalse($radios_some_disabled_value2->hasAttribute('disabled'));
     // The link shouldn't be visible.
     $this->assertFalse($link->isVisible());
+    // Check enter password is not visible.
+    $this->assertSession()->pageTextNotContains('Enter password');
 
     // Change state: uncheck the checkbox.
     $trigger->uncheck();
@@ -263,6 +267,8 @@ class JavascriptStatesTest extends WebDriverTestBase {
     $this->assertFalse($radios_some_disabled_value2->hasAttribute('disabled'));
     // Check if the link is turned back to visible state.
     $this->assertTrue($link->isVisible());
+    // Check enter password is visible.
+    $this->assertSession()->pageTextContains('Enter password');
   }
 
   /**
@@ -443,6 +449,15 @@ class JavascriptStatesTest extends WebDriverTestBase {
     $this->assertFalse($item_visible_value2->isVisible());
     $this->assertTrue($textfield_visible_value3->isVisible());
     $this->assertTrue($textfield_visible_value2_or_value3->isVisible());
+
+    $this->container->get('module_installer')->install(['big_pipe']);
+    $this->drupalGet('form-test/javascript-states-form');
+    $select_visible_2 = $this->assertSession()->elementExists('css', 'select[name="select_visible_2"]');
+    $select_visible_3 = $this->assertSession()->elementExists('css', 'select[name="select_visible_3"]');
+    $this->assertFalse($select_visible_3->isVisible());
+
+    $select_visible_2->setValue('1');
+    $this->assertTrue($select_visible_3->isVisible());
   }
 
   /**

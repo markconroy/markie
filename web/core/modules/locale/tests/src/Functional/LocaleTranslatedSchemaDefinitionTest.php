@@ -19,9 +19,7 @@ class LocaleTranslatedSchemaDefinitionTest extends BrowserTestBase {
   use RequirementsPageTrait;
 
   /**
-   * Modules to enable.
-   *
-   * @var array
+   * {@inheritdoc}
    */
   protected static $modules = ['language', 'locale', 'node'];
 
@@ -29,6 +27,11 @@ class LocaleTranslatedSchemaDefinitionTest extends BrowserTestBase {
    * {@inheritdoc}
    */
   protected $defaultTheme = 'stark';
+
+  /**
+   * {@inheritdoc}
+   */
+  protected bool $useOneTimeLoginLinks = FALSE;
 
   /**
    * {@inheritdoc}

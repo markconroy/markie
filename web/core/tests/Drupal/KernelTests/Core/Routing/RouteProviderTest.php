@@ -29,13 +29,14 @@ use Symfony\Component\Routing\RouteCollection;
  * Confirm that the default route provider is working correctly.
  *
  * @group Routing
+ * @group #slow
  */
 class RouteProviderTest extends KernelTestBase {
 
   use PathAliasTestTrait;
 
   /**
-   * Modules to enable.
+   * {@inheritdoc}
    */
   protected static $modules = [
     'url_alter_test',
