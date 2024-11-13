@@ -19,19 +19,9 @@ class EntityReferenceXSSTest extends BrowserTestBase {
   use EntityReferenceFieldCreationTrait;
 
   /**
-   * Modules to enable.
-   *
-   * @var array
+   * {@inheritdoc}
    */
   protected static $modules = ['node'];
-
-  /**
-   * {@inheritdoc}
-   *
-   * @todo Remove and fix test to not rely on super user.
-   * @see https://www.drupal.org/project/drupal/issues/3437620
-   */
-  protected bool $usesSuperUserAccessPolicy = TRUE;
 
   /**
    * {@inheritdoc}
@@ -68,7 +58,9 @@ class EntityReferenceXSSTest extends BrowserTestBase {
       ->save();
 
     // Create a node and reference the node with markup in the title.
-    $this->drupalLogin($this->rootUser);
+    $this->drupalLogin($this->drupalCreateUser([
+      'create article content',
+    ]));
     $this->drupalGet('node/add/article');
     $this->assertSession()->assertEscaped($referenced_node->getTitle());
     $this->assertSession()->assertEscaped($node_type_two->label());

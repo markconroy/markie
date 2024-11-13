@@ -9,7 +9,6 @@ use Drupal\Tests\rest\Functional\EntityResource\XmlEntityNormalizationQuirksTrai
 
 /**
  * @group rest
- * @group #slow
  */
 class CommentXmlCookieTest extends CommentResourceTestBase {
 
@@ -35,21 +34,5 @@ class CommentXmlCookieTest extends CommentResourceTestBase {
    * {@inheritdoc}
    */
   protected $defaultTheme = 'stark';
-
-  /**
-   * {@inheritdoc}
-   */
-  public function testPostDxWithoutCriticalBaseFields(): void {
-    // Deserialization of the XML format is not supported.
-    $this->markTestSkipped();
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function testPostSkipCommentApproval(): void {
-    // Deserialization of the XML format is not supported.
-    $this->markTestSkipped();
-  }
 
 }

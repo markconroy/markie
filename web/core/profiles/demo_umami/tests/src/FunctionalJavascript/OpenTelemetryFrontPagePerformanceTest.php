@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\demo_umami\FunctionalJavascript;
 
+use Drupal\Core\Cache\Cache;
 use Drupal\FunctionalJavascriptTests\PerformanceTestBase;
 
 /**
@@ -21,9 +22,18 @@ class OpenTelemetryFrontPagePerformanceTest extends PerformanceTestBase {
   protected $profile = 'demo_umami';
 
   /**
+   * Tests performance of the Umami demo front page.
+   */
+  public function testFrontPagePerformance(): void {
+    $this->testFrontPageColdCache();
+    $this->testFrontPageCoolCache();
+    $this->testFrontPageHotCache();
+  }
+
+  /**
    * Logs front page tracing data with a cold cache.
    */
-  public function testFrontPageColdCache(): void {
+  protected function testFrontPageColdCache(): void {
     // @todo Chromedriver doesn't collect tracing performance logs for the very
     //   first request in a test, so warm it up.
     //   https://www.drupal.org/project/drupal/issues/3379750
@@ -40,7 +50,7 @@ class OpenTelemetryFrontPagePerformanceTest extends PerformanceTestBase {
    *
    * Hot here means that all possible caches are warmed.
    */
-  public function testFrontPageHotCache(): void {
+  protected function testFrontPageHotCache(): void {
     // Request the page twice so that asset aggregates and image derivatives are
     // definitely cached in the browser cache. The first response builds the
     // file and serves from PHP with private, no-store headers. The second
@@ -65,9 +75,9 @@ class OpenTelemetryFrontPagePerformanceTest extends PerformanceTestBase {
     $this->assertSame(1, $performance_data->getCacheTagIsValidCount());
     $this->assertSame(0, $performance_data->getCacheTagInvalidationCount());
     $this->assertSame(1, $performance_data->getScriptCount());
-    $this->assertLessThan(7500, $performance_data->getScriptBytes());
+    $this->assertLessThan(12000, $performance_data->getScriptBytes());
     $this->assertSame(2, $performance_data->getStylesheetCount());
-    $this->assertLessThan(40400, $performance_data->getStylesheetBytes());
+    $this->assertLessThan(42000, $performance_data->getStylesheetBytes());
   }
 
   /**
@@ -76,15 +86,24 @@ class OpenTelemetryFrontPagePerformanceTest extends PerformanceTestBase {
    * Cool here means that 'global' site caches are warm but anything
    * specific to the front page is cold.
    */
-  public function testFrontPageCoolCache(): void {
+  protected function testFrontPageCoolCache(): void {
     // First of all visit the front page to ensure the image style exists.
     $this->drupalGet('<front>');
-    $this->rebuildAll();
+    $this->clearCaches();
     // Now visit a different page to warm non-route-specific caches.
     $this->drupalGet('user/login');
     $this->collectPerformanceData(function () {
       $this->drupalGet('<front>');
     }, 'umamiFrontPageCoolCache');
+  }
+
+  /**
+   * Clear caches.
+   */
+  protected function clearCaches(): void {
+    foreach (Cache::getBins() as $bin) {
+      $bin->deleteAll();
+    }
   }
 
 }

@@ -3,6 +3,7 @@
 namespace Drupal\Core\Template;
 
 use Twig\Environment;
+use Twig\TwigFunction;
 use Twig\Node\Expression\FilterExpression;
 use Twig\Node\Expression\FunctionExpression;
 use Twig\Node\Node;
@@ -47,16 +48,20 @@ class TwigNodeVisitor implements NodeVisitorInterface {
       $class = get_class($node);
       $line = $node->getTemplateLine();
       return new $class(
-        new FunctionExpression('render_var', new Node([$node->getNode('expr')]), $line),
+        new FunctionExpression(
+          new TwigFunction('render_var', [$env->getExtension(TwigExtension::class), 'renderVar']),
+          new Node([$node->getNode('expr')]),
+          $line
+        ),
         $line
       );
     }
     // Change the 'escape' filter to our own 'drupal_escape' filter.
     elseif ($node instanceof FilterExpression) {
-      $name = $node->getNode('filter')->getAttribute('value');
+      $name = $node->getAttribute('twig_callable')->getName();
       if ('escape' == $name || 'e' == $name) {
         // Use our own escape filter that is MarkupInterface aware.
-        $node->getNode('filter')->setAttribute('value', 'drupal_escape');
+        $node->setAttribute('twig_callable', $env->getFilter('drupal_escape'));
 
         // Store that we have a filter active already that knows
         // how to deal with render arrays.

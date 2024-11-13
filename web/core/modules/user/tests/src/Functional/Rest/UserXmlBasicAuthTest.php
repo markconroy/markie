@@ -9,7 +9,6 @@ use Drupal\Tests\rest\Functional\EntityResource\XmlEntityNormalizationQuirksTrai
 
 /**
  * @group rest
- * @group #slow
  */
 class UserXmlBasicAuthTest extends UserResourceTestBase {
 
@@ -40,21 +39,5 @@ class UserXmlBasicAuthTest extends UserResourceTestBase {
    * {@inheritdoc}
    */
   protected static $auth = 'basic_auth';
-
-  /**
-   * {@inheritdoc}
-   */
-  public function testPatchDxForSecuritySensitiveBaseFields(): void {
-    // Deserialization of the XML format is not supported.
-    $this->markTestSkipped();
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function testPatchSecurityOtherUser(): void {
-    // Deserialization of the XML format is not supported.
-    $this->markTestSkipped();
-  }
 
 }

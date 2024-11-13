@@ -19,7 +19,6 @@ html {
 
 body {
   word-wrap: break-word;
-  -webkit-hyphens: auto;
   hyphens: auto;
   color: var(--color-fg);
   background: var(--color-bg);
@@ -203,16 +202,6 @@ ol {
   margin-block: 0.25em;
   margin-inline: 2em 0;
   padding: 0;
-}
-
-/**
- * Fix duplicate border caused by normalize.css adding border-bottom without
- * removing the text-decoration.
- */
-
-abbr[title] {
-  -webkit-text-decoration: none;
-  text-decoration: none;
 }
 
 code {

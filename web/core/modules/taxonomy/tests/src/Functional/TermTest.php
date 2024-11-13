@@ -36,9 +36,7 @@ class TermTest extends TaxonomyTestBase {
   protected $field;
 
   /**
-   * Modules to enable.
-   *
-   * @var string[]
+   * {@inheritdoc}
    */
   protected static $modules = ['block'];
 
@@ -87,15 +85,6 @@ class TermTest extends TaxonomyTestBase {
         'type' => 'entity_reference_label',
       ])
       ->save();
-  }
-
-  /**
-   * The "parent" field must restrict references to the same vocabulary.
-   */
-  public function testParentHandlerSettings(): void {
-    $vocabulary_fields = \Drupal::service('entity_field.manager')->getFieldDefinitions('taxonomy_term', $this->vocabulary->id());
-    $parent_target_bundles = $vocabulary_fields['parent']->getSetting('handler_settings')['target_bundles'];
-    $this->assertSame([$this->vocabulary->id() => $this->vocabulary->id()], $parent_target_bundles);
   }
 
   /**

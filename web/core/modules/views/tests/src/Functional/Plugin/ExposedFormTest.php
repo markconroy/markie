@@ -31,9 +31,7 @@ class ExposedFormTest extends ViewTestBase {
   public static $testViews = ['test_exposed_form_buttons', 'test_exposed_block', 'test_exposed_form_sort_items_per_page', 'test_exposed_form_pager', 'test_remember_selected'];
 
   /**
-   * Modules to enable.
-   *
-   * @var array
+   * {@inheritdoc}
    */
   protected static $modules = ['node', 'views_ui', 'block', 'entity_test'];
 
@@ -334,7 +332,17 @@ class ExposedFormTest extends ViewTestBase {
   /**
    * Tests the input required exposed form type.
    */
-  public function testInputRequired(): void {
+  public function testExposedForm(): void {
+    $this->testFormErrorWithExposedForm();
+    $this->testInputRequired();
+    $this->testTextInputRequired();
+    $this->testRememberSelected();
+  }
+
+  /**
+   * Tests the input required exposed form type.
+   */
+  protected function testInputRequired(): void {
     $view = View::load('test_exposed_form_buttons');
     $display = &$view->getDisplay('default');
     $display['display_options']['exposed_form']['type'] = 'input_required';
@@ -357,7 +365,7 @@ class ExposedFormTest extends ViewTestBase {
   /**
    * Tests the "on demand text" for the input required exposed form type.
    */
-  public function testTextInputRequired(): void {
+  protected function testTextInputRequired(): void {
     $view = Views::getView('test_exposed_form_buttons');
     $display = &$view->storage->getDisplay('default');
     $display['display_options']['exposed_form']['type'] = 'input_required';
@@ -480,7 +488,7 @@ class ExposedFormTest extends ViewTestBase {
   /**
    * Tests a view which is rendered after a form with a validation error.
    */
-  public function testFormErrorWithExposedForm(): void {
+  protected function testFormErrorWithExposedForm(): void {
     $this->drupalGet('views_test_data_error_form_page');
     $this->assertSession()->statusCodeEquals(200);
     $form = $this->cssSelect('form.views-exposed-form');
@@ -548,7 +556,7 @@ class ExposedFormTest extends ViewTestBase {
   /**
    * Tests the "Remember the last selection" functionality.
    */
-  public function testRememberSelected(): void {
+  protected function testRememberSelected(): void {
     $this->drupalGet('test_remember_selected');
     $this->getSession()->getPage()->fillField('type', 'page');
     $this->getSession()->getPage()->pressButton('Apply');

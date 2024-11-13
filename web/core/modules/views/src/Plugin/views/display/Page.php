@@ -65,7 +65,7 @@ class Page extends PathPluginBase {
    * @param array $configuration
    *   A configuration array containing information about the plugin instance.
    * @param string $plugin_id
-   *   The plugin_id for the plugin instance.
+   *   The plugin ID for the plugin instance.
    * @param mixed $plugin_definition
    *   The plugin implementation definition.
    * @param \Drupal\Core\Routing\RouteProviderInterface $route_provider
@@ -526,7 +526,7 @@ class Page extends PathPluginBase {
         $menu = $form_state->getValue('menu');
         [$menu['menu_name'], $menu['parent']] = explode(':', $menu['parent'], 2);
         $this->setOption('menu', $menu);
-        // send ajax form to options page if we use it.
+        // Send ajax form to options page if we use it.
         if ($form_state->getValue(['menu', 'type']) == 'default tab') {
           $form_state->get('view')->addFormToStack('display', $this->display['id'], 'tab_options');
         }

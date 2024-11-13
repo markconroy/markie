@@ -93,7 +93,7 @@ function template_preprocess_views_view(&$variables) {
  *     - element_default_classes: If the default classes are to be added.
  *     - separator: A string to be placed between inline fields to keep them
  *       visually distinct.
- *    - row: An array containing information about the current row.
+ *   - row: An array containing information about the current row.
  */
 function template_preprocess_views_view_fields(&$variables) {
   $view = $variables['view'];
@@ -105,7 +105,7 @@ function template_preprocess_views_view_fields(&$variables) {
   /** @var \Drupal\views\ResultRow $row */
   $row = $variables['row'];
   foreach ($view->field as $id => $field) {
-    // render this even if set to exclude so it can be used elsewhere.
+    // Render this even if set to exclude so it can be used elsewhere.
     $field_output = $view->style_plugin->getField($row->index, $id);
     $empty = $field->isValueEmpty($field_output, $field->options['empty_zero']);
     if (empty($field->options['exclude']) && (!$empty || (empty($field->options['hide_empty']) && empty($variables['options']['hide_empty'])))) {

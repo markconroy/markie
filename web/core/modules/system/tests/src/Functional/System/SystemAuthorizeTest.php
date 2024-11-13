@@ -14,9 +14,7 @@ use Drupal\Tests\BrowserTestBase;
 class SystemAuthorizeTest extends BrowserTestBase {
 
   /**
-   * Modules to enable.
-   *
-   * @var array
+   * {@inheritdoc}
    */
   protected static $modules = ['system_test'];
 
@@ -68,6 +66,23 @@ class SystemAuthorizeTest extends BrowserTestBase {
     // Test that \Drupal\Core\Render\BareHtmlPageRenderer adds assets as
     // expected to the first page of the authorize.php script.
     $this->assertSession()->responseContains('core/misc/states.js');
+  }
+
+  /**
+   * Tests error handling in authorize.php.
+   */
+  public function testError(): void {
+    $settings_filename = $this->siteDirectory . '/settings.php';
+    chmod($settings_filename, 0777);
+    $settings_php = file_get_contents($settings_filename);
+    $settings_php .= "\ndefine('SIMPLETEST_COLLECT_ERRORS', FALSE);\n";
+    $settings_php .= "\ntrigger_error('Test warning', E_USER_WARNING);\n";
+    file_put_contents($settings_filename, $settings_php);
+
+    $this->drupalGetAuthorizePHP();
+
+    $this->assertSession()->pageTextContains('User warning: Test warning');
+    $this->assertSession()->pageTextMatches('@line \d+ of sites/simpletest@');
   }
 
 }

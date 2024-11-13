@@ -15,7 +15,7 @@ abstract class NodeResourceTestBase extends EntityResourceTestBase {
   /**
    * {@inheritdoc}
    */
-  protected static $modules = ['node', 'path'];
+  protected static $modules = ['content_translation', 'node', 'path'];
 
   /**
    * {@inheritdoc}
@@ -39,6 +39,17 @@ abstract class NodeResourceTestBase extends EntityResourceTestBase {
    * @var \Drupal\node\NodeInterface
    */
   protected $entity;
+
+  /**
+   * Marks some tests as skipped because XML cannot be deserialized.
+   *
+   * @before
+   */
+  public function nodeResourceTestBaseSkipTests(): void {
+    if (static::$format === 'xml' && $this->name() === 'testPatchPath') {
+      $this->markTestSkipped('Deserialization of the XML format is not supported.');
+    }
+  }
 
   /**
    * {@inheritdoc}
@@ -220,6 +231,17 @@ abstract class NodeResourceTestBase extends EntityResourceTestBase {
       return "The 'access content' permission is required.";
     }
     return parent::getExpectedUnauthorizedAccessMessage($method);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function getExpectedCacheContexts() {
+    return [
+      'languages:language_interface',
+      'url.site',
+      'user.permissions',
+    ];
   }
 
   /**

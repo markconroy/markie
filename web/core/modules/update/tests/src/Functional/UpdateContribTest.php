@@ -27,9 +27,7 @@ class UpdateContribTest extends UpdateTestBase {
   protected $updateProject = 'aaa_update_test';
 
   /**
-   * Modules to enable.
-   *
-   * @var array
+   * {@inheritdoc}
    */
   protected static $modules = [
     'aaa_update_test',
@@ -587,6 +585,15 @@ class UpdateContribTest extends UpdateTestBase {
 
   /**
    * Tests update status of security releases.
+   */
+  public function testSecurityUpdateAvailability(): void {
+    foreach (static::securityUpdateAvailabilityProvider() as $case) {
+      $this->doTestSecurityUpdateAvailability($case['module_version'], $case['expected_security_releases'], $case['expected_update_message_type'], $case['fixture']);
+    }
+  }
+
+  /**
+   * Tests update status of security releases.
    *
    * @param string $module_version
    *   The module version the site is using.
@@ -596,10 +603,8 @@ class UpdateContribTest extends UpdateTestBase {
    *   The type of update message expected.
    * @param string $fixture
    *   The fixture file to use.
-   *
-   * @dataProvider securityUpdateAvailabilityProvider
    */
-  public function testSecurityUpdateAvailability($module_version, array $expected_security_releases, $expected_update_message_type, $fixture): void {
+  protected function doTestSecurityUpdateAvailability($module_version, array $expected_security_releases, $expected_update_message_type, $fixture): void {
     $this->mockInstalledExtensionsInfo([
       'aaa_update_test' => [
         'project' => 'aaa_update_test',

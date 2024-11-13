@@ -8,6 +8,8 @@ use Drupal\ajax_test\Controller\AjaxTestController;
 use Drupal\Core\Ajax\OpenModalDialogWithUrl;
 use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
 
+// cspell:ignore testdialog
+
 /**
  * Performs tests on opening and manipulating dialogs via AJAX commands.
  *
@@ -214,6 +216,13 @@ class DialogTest extends WebDriverTestBase {
 
     $form_title = $dialog_add->find('css', "span.ui-dialog-title:contains('Add contact form')");
     $this->assertNotNull($form_title, 'The add form title is as expected.');
+
+    // Test: dialog link opener with title callback.
+    $page = $this->getSession()->getPage();
+    $assert_session = $this->assertSession();
+    $this->drupalGet("/ajax-test/link-page-dialog");
+    $page->clickLink('Modal link');
+    $this->assertEquals('Dialog link page title', $assert_session->waitForElement('css', '.ui-dialog-title')->getText());
   }
 
   /**

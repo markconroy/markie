@@ -64,7 +64,7 @@ class Image extends File {
    * @param array $configuration
    *   A configuration array containing information about the plugin instance.
    * @param string $plugin_id
-   *   The plugin_id for the plugin instance.
+   *   The plugin ID for the plugin instance.
    * @param mixed $plugin_definition
    *   The plugin implementation definition.
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
@@ -144,7 +144,7 @@ class Image extends File {
         return $uri;
 
       case 'thumbnail_alt_value':
-        return $media->get($this->configuration['source_field'])->alt ?: parent::getMetadata($media, $name);
+        return $media->get($this->configuration['source_field'])->alt ?? parent::getMetadata($media, $name);
     }
 
     return parent::getMetadata($media, $name);

@@ -22,9 +22,7 @@ class ImageDimensionsTest extends BrowserTestBase {
   }
 
   /**
-   * Modules to enable.
-   *
-   * @var array
+   * {@inheritdoc}
    */
   protected static $modules = ['image', 'image_module_test'];
 
@@ -33,6 +31,9 @@ class ImageDimensionsTest extends BrowserTestBase {
    */
   protected $defaultTheme = 'stark';
 
+  /**
+   * {@inheritdoc}
+   */
   protected $profile = 'testing';
 
   /**

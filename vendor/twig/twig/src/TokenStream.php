@@ -21,13 +21,12 @@ use Twig\Error\SyntaxError;
  */
 final class TokenStream
 {
-    private $tokens;
     private $current = 0;
-    private $source;
 
-    public function __construct(array $tokens, ?Source $source = null)
-    {
-        $this->tokens = $tokens;
+    public function __construct(
+        private array $tokens,
+        private ?Source $source = null,
+    ) {
         $this->source = $source ?: new Source('', '');
     }
 
@@ -71,11 +70,11 @@ final class TokenStream
         $token = $this->tokens[$this->current];
         if (!$token->test($type, $value)) {
             $line = $token->getLine();
-            throw new SyntaxError(sprintf('%sUnexpected token "%s"%s ("%s" expected%s).',
+            throw new SyntaxError(\sprintf('%sUnexpected token "%s"%s ("%s" expected%s).',
                 $message ? $message.'. ' : '',
                 Token::typeToEnglish($token->getType()),
-                $token->getValue() ? sprintf(' of value "%s"', $token->getValue()) : '',
-                Token::typeToEnglish($type), $value ? sprintf(' with value "%s"', $value) : ''),
+                $token->getValue() ? \sprintf(' of value "%s"', $token->getValue()) : '',
+                Token::typeToEnglish($type), $value ? \sprintf(' with value "%s"', $value) : ''),
                 $line,
                 $this->source
             );
@@ -110,7 +109,7 @@ final class TokenStream
      */
     public function isEOF(): bool
     {
-        return /* Token::EOF_TYPE */ -1 === $this->tokens[$this->current]->getType();
+        return Token::EOF_TYPE === $this->tokens[$this->current]->getType();
     }
 
     public function getCurrent(): Token

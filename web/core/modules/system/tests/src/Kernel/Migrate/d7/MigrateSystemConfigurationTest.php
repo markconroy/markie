@@ -13,13 +13,16 @@ use Drupal\Tests\migrate_drupal\Kernel\d7\MigrateDrupal7TestBase;
  */
 class MigrateSystemConfigurationTest extends MigrateDrupal7TestBase {
 
+  /**
+   * {@inheritdoc}
+   */
   protected static $modules = ['file', 'system'];
 
   protected $expectedConfig = [
     'system.authorize' => [],
     'system.cron' => [
       'threshold' => [
-        // autorun is not handled by the migration.
+        // Auto-run is not handled by the migration.
         // 'autorun' => 0,
         'requirements_warning' => 172800,
         'requirements_error' => 1209600,
@@ -71,7 +74,7 @@ class MigrateSystemConfigurationTest extends MigrateDrupal7TestBase {
       ],
     ],
     'system.maintenance' => [
-      // langcode is not handled by the migration.
+      // Langcode is not handled by the migration.
       'langcode' => 'en',
       'message' => 'This is a custom maintenance mode message.',
     ],
@@ -83,7 +86,7 @@ class MigrateSystemConfigurationTest extends MigrateDrupal7TestBase {
       ],
       'css' => [
         'preprocess' => TRUE,
-        // gzip is not handled by the migration.
+        // Gzip is not handled by the migration.
         'gzip' => TRUE,
       ],
       // fast_404 is not handled by the migration.
@@ -95,7 +98,7 @@ class MigrateSystemConfigurationTest extends MigrateDrupal7TestBase {
       ],
       'js' => [
         'preprocess' => FALSE,
-        // gzip is not handled by the migration.
+        // Gzip is not handled by the migration.
         'gzip' => TRUE,
       ],
     ],
@@ -105,9 +108,9 @@ class MigrateSystemConfigurationTest extends MigrateDrupal7TestBase {
       ],
     ],
     'system.site' => [
-      // langcode and default_langcode are not handled by the migration.
+      // Neither langcode nor default_langcode are not handled by the migration.
       'langcode' => 'en',
-      // uuid is not handled by the migration.
+      // UUID is not handled by the migration.
       'uuid' => '',
       'name' => 'The Site Name',
       'mail' => 'joseph@flattandsons.com',

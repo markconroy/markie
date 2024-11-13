@@ -730,6 +730,39 @@ class JavascriptStatesForm extends FormBase {
       '#title' => 'Enable textarea',
     ];
 
+    $form['password_confirm'] = [
+      '#title' => $this->t('Enter password'),
+      '#type' => 'password_confirm',
+      '#states' => [
+        'visible' => [
+          ':input[name="checkbox_trigger"]' => ['checked' => FALSE],
+        ],
+      ],
+    ];
+    $form['test_select_visible_dependence']['select_visible_1'] = [
+      '#type' => 'select',
+      '#title' => 'Select visible 1',
+      '#options' => [0 => 0, 1 => 1],
+      '#default_value' => 0,
+    ];
+    $form['test_select_visible_dependence']['select_visible_2'] = [
+      '#type' => 'select',
+      '#title' => 'Select visible 2',
+      '#options' => [0 => 0, 1 => 1],
+      '#default_value' => 0,
+    ];
+    $form['test_select_visible_dependence']['select_visible_3'] = [
+      '#type' => 'select',
+      '#title' => 'Select should show when 0 and 1 are selected',
+      '#options' => [0 => 0, 1 => 1],
+      '#states' => [
+        'visible' => [
+          ':input[name="select_visible_1"]' => ['value' => 0],
+          ':input[name="select_visible_2"]' => ['value' => 1],
+        ],
+      ],
+    ];
+
     return $form;
   }
 
