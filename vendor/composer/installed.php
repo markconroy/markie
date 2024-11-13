@@ -136,6 +136,15 @@
             'aliases' => array(),
             'dev_requirement' => false,
         ),
+        'dekor/php-array-table' => array(
+            'pretty_version' => '2.0',
+            'version' => '2.0.0.0',
+            'reference' => 'ca40b21ba84eee6a9658a33fc5f897d76baaf8e5',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../dekor/php-array-table',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
         'dflydev/dot-access-data' => array(
             'pretty_version' => 'v3.0.2',
             'version' => '3.0.2.0',
@@ -496,6 +505,15 @@
             'aliases' => array(),
             'dev_requirement' => false,
         ),
+        'drupal/upgrade_status' => array(
+            'pretty_version' => '4.3.6',
+            'version' => '4.3.6.0',
+            'reference' => '4.3.6',
+            'type' => 'drupal-module',
+            'install_path' => __DIR__ . '/../../web/modules/contrib/upgrade_status',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
         'drupal/video_embed_field' => array(
             'pretty_version' => '2.5.0',
             'version' => '2.5.0.0',
@@ -622,6 +640,15 @@
             'aliases' => array(),
             'dev_requirement' => false,
         ),
+        'mglaman/phpstan-drupal' => array(
+            'pretty_version' => '1.2.12',
+            'version' => '1.2.12.0',
+            'reference' => '346bdddda169a56b6ebb7dc17893f0ac8f33a4f1',
+            'type' => 'phpstan-extension',
+            'install_path' => __DIR__ . '/../mglaman/phpstan-drupal',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
         'nikic/php-parser' => array(
             'pretty_version' => 'v5.0.2',
             'version' => '5.0.2.0',
@@ -700,6 +727,24 @@
             'aliases' => array(),
             'dev_requirement' => false,
         ),
+        'phpstan/phpstan' => array(
+            'pretty_version' => '1.12.10',
+            'version' => '1.12.10.0',
+            'reference' => 'fc463b5d0fe906dcf19689be692c65c50406a071',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../phpstan/phpstan',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+        'phpstan/phpstan-deprecation-rules' => array(
+            'pretty_version' => '1.2.1',
+            'version' => '1.2.1.0',
+            'reference' => 'f94d246cc143ec5a23da868f8f7e1393b50eaa82',
+            'type' => 'phpstan-extension',
+            'install_path' => __DIR__ . '/../phpstan/phpstan-deprecation-rules',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
         'platformsh/config-reader' => array(
             'pretty_version' => '2.4.1',
             'version' => '2.4.1.0',
@@ -730,8 +775,8 @@
         'psr/container-implementation' => array(
             'dev_requirement' => false,
             'provided' => array(
-                0 => '1.1|2.0',
-                1 => '^1.0',
+                0 => '^1.0',
+                1 => '1.1|2.0',
             ),
         ),
         'psr/event-dispatcher' => array(
