@@ -2,6 +2,7 @@
 
 namespace Drupal\Tests\metatag\Functional;
 
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\Tests\BrowserTestBase;
 
 /**
@@ -67,7 +68,7 @@ class DisabledDefaultTags extends BrowserTestBase {
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
-  protected function loadMetatagDefault($id) {
+  protected function loadMetatagDefault($id): EntityInterface|NULL {
     /** @var \Drupal\Core\Entity\EntityStorageInterface $global_metatag_manager */
     $global_metatag_manager = \Drupal::entityTypeManager()
       ->getStorage('metatag_defaults');

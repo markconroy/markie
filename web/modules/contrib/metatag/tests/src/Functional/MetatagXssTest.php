@@ -2,8 +2,9 @@
 
 namespace Drupal\Tests\metatag\Functional;
 
-use Drupal\Tests\BrowserTestBase;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\Tests\BrowserTestBase;
+use Drupal\Tests\field_ui\Traits\FieldUiTestTrait;
 
 /**
  * Ensures that meta tags do not allow xss vulnerabilities.
@@ -12,6 +13,7 @@ use Drupal\Core\StringTranslation\StringTranslationTrait;
  */
 class MetatagXssTest extends BrowserTestBase {
 
+  use FieldUiTestTrait;
   use StringTranslationTrait;
 
   /**
@@ -107,15 +109,7 @@ class MetatagXssTest extends BrowserTestBase {
     ]);
 
     // Add a metatag field to the content type.
-    $this->drupalGet('admin/structure/types/manage/metatag_node/fields/add-field');
-    $this->assertSession()->statusCodeEquals(200);
-    $edit = [
-      'label' => 'Metatag',
-      'field_name' => 'metatag_field',
-      'new_storage_type' => 'metatag',
-    ];
-    $this->submitForm($edit, $this->t('Save and continue'));
-    $this->submitForm([], $this->t('Save field settings'));
+    $this->fieldUIAddNewField('admin/structure/types/manage/metatag_node', 'metatag_field', 'Metatag', 'metatag');
   }
 
   /**

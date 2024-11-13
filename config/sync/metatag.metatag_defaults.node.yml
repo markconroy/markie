@@ -21,7 +21,6 @@ tags:
   twitter_cards_creator_id: '16218176'
   twitter_cards_title: '[current-page:title] by @markconroy'
   twitter_cards_image: '[node:field_main_image:entity:field_m_image_image:default:url]'
-  twitter_cards_page_url: '[node:url]'
   twitter_cards_creator: '@markconroy'
   twitter_cards_site_id: '16218176'
   schema_article_description: '[node:field_intro]'

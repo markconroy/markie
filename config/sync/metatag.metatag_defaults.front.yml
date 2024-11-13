@@ -8,7 +8,6 @@ id: front
 label: 'Front page'
 tags:
   shortlink: '[site:url]'
-  content_language: en
   description: 'Welcome to Mark.ie. The web-home of Lead Frontend Drupal Developer, Drupal Core Developer, and public speaker (DrupalCon, Frontend United, et al) Mark Conroy.'
   title: '[site:name] | Lead Frontend Drupal Developer Ireland'
   canonical_url: '[site:url]'

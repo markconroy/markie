@@ -5,6 +5,7 @@
  * Contains metatag.module.
  */
 
+use Drupal\commerce_migrate_commerce\Plugin\migrate\source\commerce1\ProductDisplay;
 use Drupal\Component\Plugin\Exception\PluginNotFoundException;
 use Drupal\Component\Plugin\Factory\DefaultFactory;
 use Drupal\Component\Serialization\Json;
@@ -13,8 +14,10 @@ use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 use Drupal\migrate\Plugin\migrate\destination\EntityContentBase;
 use Drupal\migrate\Plugin\MigrateSourceInterface;
@@ -27,8 +30,6 @@ use Drupal\taxonomy\Plugin\migrate\source\d7\Term as Term7;
 use Drupal\taxonomy\TermInterface;
 use Drupal\user\Plugin\migrate\source\d6\User as User6;
 use Drupal\user\Plugin\migrate\source\d7\User as User7;
-use Drupal\Core\StringTranslation\TranslatableMarkup;
-use Drupal\commerce_migrate_commerce\Plugin\migrate\source\commerce1\ProductDisplay;
 
 /**
  * Implements hook_help().
@@ -94,6 +95,10 @@ function metatag_form_field_config_edit_form_alter(&$form, FormStateInterface $f
     $form['default_value']['#access'] = FALSE;
     $form['default_value']['#disabled'] = TRUE;
 
+    // Hide the cardinality field.
+    $form['cardinality_container']['#access'] = FALSE;
+    $form['cardinality_container']['#disabled'] = TRUE;
+
     // Step through the default value structure and erase any '#default_value'
     // items that are found.
     foreach ($form['default_value']['widget'][0] as &$outer) {
@@ -146,6 +151,9 @@ function metatag_page_attachments(array &$attachments) {
       $attachments['#attached']['html_head'] = [];
     }
 
+    // Work out what separator should be used in the string processing.
+    $separator = \Drupal::service('metatag.manager')->getSeparator();
+
     foreach ($metatag_attachments['#attached']['html_head'] as $item) {
       // Do not attach a title meta tag as this unnecessarily duplicates the
       // title tag.
@@ -154,6 +162,11 @@ function metatag_page_attachments(array &$attachments) {
         continue;
       }
 
+      // Replace multiple value delimiter with commas if the delimiter hasn't
+      // already been replaced by some other module.
+      if (isset($item['#attributes']['content']) && is_string($item['#attributes']['content'])) {
+        $item['#attributes']['content'] = str_replace($separator, ', ', $item['#attributes']['content']);
+      }
       $attachments['#attached']['html_head'][] = $item;
     }
   }
@@ -206,17 +219,6 @@ function metatag_entity_view_alter(array &$build, EntityInterface $entity, Entit
     return;
   }
 
-  // Panelized entities still use the original entity's controller, but with
-  // custom built entities. In those cases hook_entity_view_alter might be
-  // called too early, where meta links are not yet set.
-  // @see \Drupal\node\Controller\NodeController::view
-  if ($display->getThirdPartySetting('panelizer', 'enable', FALSE)) {
-    $build['#pre_render'][] = function (array $element) {
-      return _metatag_panelizer_pre_render($element);
-    };
-    return;
-  }
-
   _metatag_remove_duplicate_entity_tags($build);
 }
 
@@ -241,24 +243,6 @@ function _metatag_is_entity_route_entity(EntityInterface $entity): bool {
     }
   }
   return ($cached_entity_uuid === $entity->uuid());
-}
-
-/**
- * Pre render callback for entities processed by Panelizer.
- *
- * @param array $element
- *   The render array being processed.
- *
- * @return array
- *   The filtered render array.
- *
- * @deprecated in metatag:8.x-1.22 and is removed from metatag:2.0.0. No replacement is provided.
- *
- * @see https://www.drupal.org/project/metatag/issues/3305580
- */
-function _metatag_panelizer_pre_render(array $element) {
-  _metatag_remove_duplicate_entity_tags($element);
-  return $element;
 }
 
 /**
@@ -608,45 +592,17 @@ function metatag_entity_base_field_info(EntityTypeInterface $entity_type) {
   // If the entity type doesn't have a base table, has no link template then
   // there's no point in supporting it.
   if (!empty($base_table) && $canonical_template_exists && !in_array($original_class, $classes_to_skip)) {
-    $fields['metatag'] = BaseFieldDefinition::create('map')
+    $fields['metatag'] = BaseFieldDefinition::create('metatag_computed')
       ->setLabel(t('Metatags (Hidden field for JSON support)'))
-      ->setDescription(t('The meta tags for the entity.'))
-      ->setClass('\Drupal\metatag\Plugin\Field\MetatagEntityFieldItemList')
+      ->setDescription(t('The computed meta tags for the entity.'))
       ->setComputed(TRUE)
       ->setTranslatable(TRUE)
-      ->setTargetEntityTypeId($entity_type->id());
+      ->setReadOnly(TRUE)
+      ->setTargetEntityTypeId($entity_type->id())
+      ->setCardinality(FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED);
   }
 
   return $fields;
-}
-
-/**
- * Turn the meta tags for an entity into a human readable structure.
- *
- * @param object|null $entity
- *   The entity object. May be skipped by passing NULL as the argument, which
- *   defers to loading the current route's entity; this is an unintended
- *   consequence of the function's poor definition.
- *
- * @return array
- *   All of the meta tags in a nested structure.
- *
- * @deprecated in metatag:8.x-1.23 and is removed from metatag:2.0.0. Use metatag_generate_entity_all_tags() instead; note that callers should always pass the entity to metatag_generate_entity_all_tags(), which is different from the behavior of metatag_generate_entity_metatags().
- *
- * @see https://www.drupal.org/node/3332350
- */
-function metatag_generate_entity_metatags($entity) {
-  // For backwards compatibility.
-  if (empty($entity)) {
-    $entity = metatag_get_route_entity();
-  }
-  // This is tecnnical a backwards compatibility break, but the "spirit" of this
-  // function was that it was always intended to be used on content entities.
-  if (!($entity instanceof ContentEntityInterface)) {
-    return [];
-  }
-  // Defer to the replacement function.
-  return metatag_generate_entity_all_tags($entity);
 }
 
 /**
@@ -978,7 +934,6 @@ function _metatag_is_migration_plugin_supported(array $definition) {
       'entity:block',
       'entity:block_content',
       'entity:block_content_type',
-      'entity:comment',
       'entity:comment_type',
       'entity:contact_form',
       'entity:date_format',
@@ -998,6 +953,20 @@ function _metatag_is_migration_plugin_supported(array $definition) {
       'shortcut_set_users',
       'url_alias',
       'user_data',
+      // Various contrib modules.
+      'entity:commerce_order',
+      'entity:commerce_payment',
+      'entity:commerce_payment_method',
+      'entity:commerce_promotion',
+      'entity:commerce_promotion_coupon',
+      'entity:commerce_shipment',
+      'entity:commerce_shipping_method',
+      'entity:commerce_stock_location',
+      'entity:linkcheckerlink',
+      'entity:path_alias',
+      'entity:redirect',
+      'entity:salesforce_mapped_object',
+      'entity:webform_submission',
     ];
     if (in_array($definition['destination']['plugin'], $destinations_to_ignore)) {
       return FALSE;
@@ -1071,5 +1040,5 @@ function metatag_data_decode($string): array {
  *   The meta tag data encoded as a JSON string.
  */
 function metatag_data_encode(array $data = []): string {
-  return serialize($data);
+  return Json::encode($data);
 }

@@ -2,10 +2,10 @@
 
 namespace Drupal\Tests\metatag\Kernel\Plugin\migrate\source\d6;
 
-use Drupal\Tests\migrate\Kernel\MigrateSqlSourceTestBase;
 use Drupal\node\Entity\NodeType;
 use Drupal\taxonomy\Entity\Term;
 use Drupal\taxonomy\Entity\Vocabulary;
+use Drupal\Tests\migrate\Kernel\MigrateSqlSourceTestBase;
 
 /**
  * Tests Metatag-D6 field instance source plugin.

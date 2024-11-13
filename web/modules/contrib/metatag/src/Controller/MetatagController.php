@@ -4,8 +4,8 @@ namespace Drupal\metatag\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
-use Drupal\metatag\MetatagTagPluginManager;
 use Drupal\metatag\MetatagGroupPluginManager;
+use Drupal\metatag\MetatagTagPluginManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -58,7 +58,7 @@ class MetatagController extends ControllerBase {
    * @return array
    *   The Metatag plugins report page.
    */
-  public function reportPlugins() {
+  public function reportPlugins(): array {
     // Get tags.
     $tag_definitions = $this->tagManager->getDefinitions();
     uasort($tag_definitions, [
