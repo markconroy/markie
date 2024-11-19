@@ -1,0 +1,7 @@
+ai_chatbot.message_skeleton:
+  path: '/ajax/chatbot/message-skeleton'
+  defaults:
+    _controller: '\Drupal\ai_chatbot\Controller\GetSkeleton::messageSkeleton'
+    _format: json
+  requirements:
+    _permission: 'access content'

@@ -1,0 +1,20 @@
+services:
+  ai_assistant_api.runner:
+    class: Drupal\ai_assistant_api\AiAssistantApiRunner
+    arguments:
+      - '@entity_type.manager'
+      - '@ai.provider'
+      - '@renderer'
+      - '@tempstore.private'
+      - '@ai_assistant_api.action_plugin.manager'
+      - '@event_dispatcher'
+      - '@current_user'
+      - '@request_stack'
+      - '@title_resolver'
+      - '@language_manager'
+      - '@config.factory'
+      - '@logger.factory'
+      - '@ai.prompt_json_decode'
+  ai_assistant_api.action_plugin.manager:
+    class: Drupal\ai_assistant_api\AiAssistantActionPluginManager
+    parent: default_plugin_manager

@@ -1,0 +1,3 @@
+services:
+  ai_api_explorer.helper:
+    class: '\Drupal\ai_api_explorer\ExplorerHelper'

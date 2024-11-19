@@ -1,0 +1,15 @@
+name: Ollama Provider
+description: This enables the use of Ollama for the AI module.
+package: AI Providers
+type: module
+core_version_requirement: ^10.2 || ^11
+lifecycle: deprecated
+lifecycle_link: "https://www.drupal.org/project/ai/issues/3483356"
+
+dependencies:
+  - ai:ai
+
+# Information added by Drupal.org packaging script on 2024-10-29
+version: '1.0.0-beta1'
+project: 'ai'
+datestamp: 1730196283

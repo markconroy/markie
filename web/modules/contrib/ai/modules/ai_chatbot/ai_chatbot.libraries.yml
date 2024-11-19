@@ -1,0 +1,12 @@
+chat:
+  css:
+    theme:
+      css/chat.css: {}
+form-stream:
+  js:
+    js/showdown.min.js: {}
+    js/form-stream.js: {}
+  dependencies:
+    - core/jquery
+    - core/drupal
+    - core/once

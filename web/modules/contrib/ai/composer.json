@@ -1,0 +1,17 @@
+{
+    "name": "drupal/ai",
+    "description": "AI module for Drupal",
+    "type": "drupal-module",
+    "require": {
+        "drupal/key": "^1.18",
+        "league/commonmark": "^2.5",
+        "league/html-to-markdown": "^5.1",
+        "yethee/tiktoken": "^0.5.1"
+    },
+    "require-dev": {
+        "drupal/eca": "^2.0",
+        "drupal/search_api": "^1.35",
+        "drupal/search_api_solr": "^4.0",
+        "drupal/token": "^1.14"
+    }
+}

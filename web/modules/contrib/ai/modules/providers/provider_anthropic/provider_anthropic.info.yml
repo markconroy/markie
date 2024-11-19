@@ -1,0 +1,16 @@
+name: Anthropic Provider
+description: This enables the use of Anthropic for the AI module.
+package: AI Providers
+type: module
+core_version_requirement: ^10.3 || ^11
+lifecycle: deprecated
+lifecycle_link: "https://www.drupal.org/project/ai/issues/3483356"
+
+dependencies:
+  - ai:ai
+  - key:key
+
+# Information added by Drupal.org packaging script on 2024-10-29
+version: '1.0.0-beta1'
+project: 'ai'
+datestamp: 1730196283

@@ -1,0 +1,6 @@
+ai_content.admin_settings_page:
+  title: 'AI Content Settings'
+  description: 'Configure the AI Content Settings.'
+  parent: ai.admin_settings
+  route_name: ai_content.settings_form
+  weight: 1

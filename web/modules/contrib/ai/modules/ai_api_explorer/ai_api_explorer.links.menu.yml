@@ -1,0 +1,77 @@
+ai_api_explorer.main:
+  title: AI API Explorer
+  description: Development mode to test out different API's.
+  parent: ai.admin_settings
+  route_name: ai_api_explorer.list_page
+ai_api_explorer.image_generation_form:
+  title: Text-To-Image Generation Explorer
+  description: Contains a form where you can experiment and test the AI image generator with prompts.
+  parent: ai_api_explorer.main
+  route_name: ai_api_explorer.image_generation_form
+  weight: 1
+ai_api_explorer.text_to_speech_form:
+  title: Text-To-Speech Generation Explorer
+  description: Contains a form where you can experiment and test the AI text-to-speech generator with prompts.
+  parent: ai_api_explorer.main
+  route_name: ai_api_explorer.text_to_speech_form
+  weight: 2
+ai_api_explorer.speech_to_text_form:
+  title: Speech-To-Text Generation Explorer
+  description: Contains a form where you can experiment and test the AI speech-to-text generator with prompts.
+  parent: ai_api_explorer.main
+  route_name: ai_api_explorer.speech_to_text_form
+  weight: 3
+ai_api_explorer.chat_generation_form:
+  title: Chat Generation Explorer
+  description: Contains a form where you can experiment and test the AI chat generator with prompts.
+  parent: ai_api_explorer.main
+  route_name: ai_api_explorer.chat_generation_form
+  weight: -1
+ai_api_explorer.embeddings_form:
+  title: Embeddings Generation Explorer
+  description: Contains a form where you can experiment and test the AI embeddings generator with prompts.
+  parent: ai_api_explorer.main
+  route_name: ai_api_explorer.embeddings_form
+  weight: 4
+ai_api_explorer.moderation_form:
+  title: Moderation Explorer
+  description: Contains a form where you can experiment and test the AI moderation tool with prompts.
+  parent: ai_api_explorer.main
+  route_name: ai_api_explorer.moderation_form
+  weight: 5
+ai_api_explorer.audio_to_audio_form:
+  title: Audio-To-Audio Explorer
+  description: Contains a form where you can experiment and test the AI audio to audio tool with prompts.
+  parent: ai_api_explorer.main
+  route_name: ai_api_explorer.audio_to_audio_form
+  weight: 6
+ai_api_explorer.speech_to_speech_form:
+  title: Speech-To-Speech Explorer
+  description: Contains a form where you can experiment and test the AI speech to speech tool with prompts.
+  parent: ai_api_explorer.main
+  route_name: ai_api_explorer.speech_to_speech_form
+  weight: 7
+ai_api_explorer.image_and_audio_to_video_form:
+  title: Image-and-Audio-to-Video Explorer
+  description: Contains a form where you can experiment and test the AI image and audio to video tool with prompts.
+  parent: ai_api_explorer.main
+  route_name: ai_api_explorer.image_and_audio_to_video_form
+  weight: 8
+ai_api_explorer.image_classification:
+  title: Image Classification Explorer
+  description: Contains a form where you can experiment and test the AI image classification.
+  parent: ai_api_explorer.main
+  route_name: ai_api_explorer.image_classification
+  weight: 9
+ai_api_explorer.translate_text:
+  title: Translate Text Explorer
+  description: Contains a form where you can test text translations.
+  parent: ai_api_explorer.main
+  route_name: ai_api_explorer.translate_text
+  weight: 10
+ai_api_explorer.vector_db_form:
+  title: Vector DB Explorer
+  description: Contains a form where you can try out the results you get back from the vector databases.
+  parent: ai_api_explorer.main
+  route_name: ai_api_explorer.vector_db_query
+  weight: 20

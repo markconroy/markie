@@ -1,0 +1,28 @@
+ai_search.index.*:
+  type: config_object
+  label : 'Search index indexing options'
+  mapping:
+    index_id:
+      type: string
+      label: 'Search API Index ID'
+    control_field_max_length:
+      type: boolean
+      label: 'Control whether to set a maximum length per field'
+    exclude_chunk_from_metadata:
+      type: boolean
+      label: 'Exclude the content chunk from the metadata'
+    mapping:
+      indexing_options:
+        type: mapping
+        label: 'Indexing Options'
+        mapping:
+          values:
+            type: mapping
+            label: 'Field Indexing Configuration'
+            mapping:
+              indexing_option:
+                type: string
+                label: 'Indexing Option'
+              max:
+                type: integer
+                label: 'Maximum length'

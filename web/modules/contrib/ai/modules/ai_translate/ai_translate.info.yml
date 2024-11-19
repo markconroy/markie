@@ -1,0 +1,14 @@
+name: AI Translate
+description: This module provides simple -one click- AI powered translations
+package: AI
+type: module
+core_version_requirement: ^10.2 || ^11
+
+dependencies:
+  - ai:ai
+  - drupal:content_translation
+
+# Information added by Drupal.org packaging script on 2024-10-29
+version: '1.0.0-beta1'
+project: 'ai'
+datestamp: 1730196283
