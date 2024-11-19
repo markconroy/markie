@@ -11,6 +11,7 @@ editor: ckeditor5
 settings:
   toolbar:
     items:
+      - aickeditor
       - bold
       - italic
       - strikethrough
@@ -31,47 +32,42 @@ settings:
       - code
       - codeBlock
   plugins:
+    ai_ckeditor_ai:
+      dialog:
+        autoresize: 'min-width: 600px'
+        height: '750'
+        width: '900'
+        dialog_class: ai-ckeditor-modal
+      plugins:
+        ai_ckeditor_completion:
+          provider: ''
+          enabled: true
+        ai_ckeditor_help:
+          enabled: false
+        ai_ckeditor_reformat_html:
+          provider: ''
+          enabled: true
+        ai_ckeditor_summarize:
+          provider: ''
+          enabled: false
+        ai_ckeditor_tone:
+          autocreate: false
+          provider: ''
+          tone_vocabulary: conference
+          use_description: 0
+          enabled: false
+        ai_ckeditor_translate:
+          autocreate: false
+          provider: ''
+          translate_vocabulary: conference
+          use_description: false
+          enabled: false
     ckeditor5_alignment:
       enabled_alignments:
-        - left
         - center
-        - right
         - justify
-    ckeditor5_heading:
-      enabled_headings:
-        - heading2
-        - heading3
-        - heading4
-        - heading5
-        - heading6
-    ckeditor5_list:
-      properties:
-        reversed: false
-        startIndex: true
-      multiBlock: true
-    ckeditor5_sourceEditing:
-      allowed_tags:
-        - '<cite>'
-        - '<dl>'
-        - '<dt>'
-        - '<dd>'
-        - '<span>'
-        - '<code class>'
-        - '<blockcode type>'
-        - '<img src alt data-entity-type data-entity-uuid data-align data-caption width height>'
-        - '<pre class>'
-        - '<a hreflang>'
-        - '<blockquote cite>'
-        - '<ul type>'
-        - '<ol type>'
-        - '<h2 id>'
-        - '<h3 id>'
-        - '<h4 id>'
-        - '<h5 id>'
-        - '<h6 id>'
-        - '<drupal-media title>'
-    media_media:
-      allow_view_mode_override: true
+        - left
+        - right
     ckeditor5_codeBlock:
       languages:
         -
@@ -116,6 +112,41 @@ settings:
         -
           label: XML
           language: xml
+    ckeditor5_heading:
+      enabled_headings:
+        - heading2
+        - heading3
+        - heading4
+        - heading5
+        - heading6
+    ckeditor5_list:
+      properties:
+        reversed: false
+        startIndex: true
+      multiBlock: true
+    ckeditor5_sourceEditing:
+      allowed_tags:
+        - '<cite>'
+        - '<dl>'
+        - '<dt>'
+        - '<dd>'
+        - '<span>'
+        - '<code class>'
+        - '<blockcode type>'
+        - '<img src alt data-entity-type data-entity-uuid data-align data-caption width height>'
+        - '<pre class>'
+        - '<a hreflang>'
+        - '<blockquote cite>'
+        - '<ul type>'
+        - '<ol type>'
+        - '<h2 id>'
+        - '<h3 id>'
+        - '<h4 id>'
+        - '<h5 id>'
+        - '<h6 id>'
+        - '<drupal-media title>'
+    media_media:
+      allow_view_mode_override: true
 image_upload:
   status: true
   scheme: public
