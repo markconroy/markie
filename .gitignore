@@ -21,3 +21,5 @@ web/sites/default/services.yml
 # databases
 *.sql
 *.sql.gz
+
+.env

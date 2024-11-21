@@ -47,13 +47,17 @@
         "drupal/jsonapi_extras": "^3.24",
         "drupal/upgrade_status": "^4.3",
         "drupal/ai": "^1.0@beta",
-        "drupal/ai_provider_openai": "^1.0@beta"
+        "drupal/ai_provider_openai": "^1.0@beta",
+        "vlucas/phpdotenv": "^5.6"
     },
     "conflict": {
         "drupal/drupal": "*"
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
+    "autoload": {
+        "files": ["load.environment.php"]
+    },
     "extra": {
         "composer-exit-on-patch-failure": true,
         "patchLevel": {
