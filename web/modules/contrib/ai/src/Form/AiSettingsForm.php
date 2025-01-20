@@ -6,7 +6,7 @@ use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\ai\AiProviderPluginManager;
 use Drupal\ai\Enum\AiModelCapability;
-use Drupal\ai\Exception\AiSetupFailureException;
+use Drupal\Core\Url;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -91,7 +91,10 @@ class AiSettingsForm extends ConfigFormBase {
       '#title' => $this->t('Default Providers'),
       '#open' => TRUE,
       '#weight' => 10,
-      '#description' => $this->t('These are default providers for each operation type that external modules can use or show on their configurations pages.'),
+      '#description' => $this->t('These are default providers for each operation type that external modules can use or show on their configurations pages. Choose a provider from the <a href="@ai">AI module homepage</a>, add it to your project, then install and <a href="@configure">configure</a> it first.', [
+        '@ai' => 'https://www.drupal.org/project/ai',
+        '@configure' => Url::fromRoute('ai.admin_providers')->toString(),
+      ]),
     ];
 
     $operation_types = $this->providerManager->getOperationTypes();
@@ -157,9 +160,16 @@ class AiSettingsForm extends ConfigFormBase {
             ]));
           }
         }
-        catch (AiSetupFailureException $e) {
+        catch (\Exception $e) {
           // Don't crash if the provider is not fully configured.
           $this->messenger()->addError($e->getMessage());
+          // In case the exception is related to authentication.
+          if ($e->getCode() == 401 || method_exists($e, 'getStatusCode') && $e->getStatusCode() == 401) {
+            $api_key = $providers[$default_provider]->getConfig()->get('api_key');
+            if (!empty($api_key)) {
+              $this->messenger()->addError($this->t('You can update or add the API Key <a href="@url" target="_blank">here</a>', ['@url' => Url::fromRoute('entity.key.edit_form', ['key' => $api_key])->toString()]));
+            }
+          }
         }
         $form['default_providers'][$operation_type['id']]['model']['model__' . $operation_type['id']] = [
           '#type' => 'select',
@@ -183,11 +193,22 @@ class AiSettingsForm extends ConfigFormBase {
     $values = $form_state->getValues();
     foreach ($this->providerManager->getOperationTypes() as $operation_type) {
 
-      // If a provider is selected, a model must also be selected.
-      if (
-        !empty($values['operation__' . $operation_type['id']])
-        && empty($values['model__' . $operation_type['id']])
-      ) {
+      // We only want to ensure a model is selected for each operation that
+      // has a default.
+      if (empty($values['operation__' . $operation_type['id']])) {
+        continue;
+      }
+
+      if (!isset($values['model__' . $operation_type['id']])) {
+
+        // In this scenario, the user has not yet been given the chance to
+        // select a model. This is typically because JavaScript is disabled.
+        $form_state->setRebuild();
+      }
+      elseif (empty($values['model__' . $operation_type['id']])) {
+
+        // The user has the option to select a model but has not, show a
+        // validation error.
         $message = $this->t('You have selected a provider for @operation but have not selected a model.', [
           '@operation' => $operation_type['label'],
         ]);

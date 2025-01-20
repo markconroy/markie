@@ -14,6 +14,7 @@ use Drupal\ai_assistant_api\Data\UserMessage;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\Yaml\Yaml;
 
 /**
  * Provides a chat bot.
@@ -27,14 +28,14 @@ class ChatForm extends FormBase {
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
    *   The entity type manager.
-   * @param \Drupal\ai_assistant_api\AiAssistantApiRunner $aiAssistantClient
+   * @param \Drupal\ai_assistant_api\AiAssistantApiRunner $aiAssistantRunner
    *   The AI Assistant API client.
    * @param \Drupal\Core\Routing\RouteMatchInterface $routeMatcher
    *   The route match.
    */
   public function __construct(
     private readonly EntityTypeManagerInterface $entityTypeManager,
-    private readonly AiAssistantApiRunner $aiAssistantClient,
+    private readonly AiAssistantApiRunner $aiAssistantRunner,
     private readonly RouteMatchInterface $routeMatcher,
   ) {
   }
@@ -67,11 +68,12 @@ class ChatForm extends FormBase {
       $context[$key] = $this->routeMatcher->getParameter($key);
     }
     // Setup the assistant.
-    $this->aiAssistantClient->setContext($context);
+    $this->aiAssistantRunner->setContext($context);
 
     if (!$this->getRequest()->isXmlHttpRequest()) {
       // Set the assistant id if its the page load.
-      $form['#attached']['drupalSettings']['ai_chatbot']['assistant_id'] = $this->aiAssistantClient->getThreadsKey();
+      $form['#attached']['drupalSettings']['ai_chatbot']['assistant_id'] = $this->aiAssistantRunner->getAssistant()->id();
+      $form['#attached']['drupalSettings']['ai_chatbot']['thread_id'] = $this->aiAssistantRunner->getThreadsKey();
     }
 
     $response_id = Html::getId($form_state->getBuildInfo()['block_id'] . '-response');
@@ -87,11 +89,22 @@ class ChatForm extends FormBase {
       '#rows' => 1,
     ];
 
-    $form['assistant_id'] = [
+    // Make it possible to clear history.
+    if ($this->aiAssistantRunner->getAssistant()->get('allow_history') == 'session_one_thread') {
+      $form['clear_history'] = [
+        '#type' => 'submit',
+        '#value' => $this->t('Clear History'),
+        '#attributes' => [
+          'class' => ['chat-form-clear-history'],
+        ],
+      ];
+    }
+
+    $form['thread_id'] = [
       '#type' => 'hidden',
       '#default_value' => '',
       '#attributes' => [
-        'class' => ['chat-form-assistant-id'],
+        'class' => ['chat-form-thread-id'],
       ],
     ];
 
@@ -113,49 +126,65 @@ class ChatForm extends FormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    // Set the assistant id.
-    $this->aiAssistantClient->setThreadsKey($form_state->getValue('assistant_id'));
+    $this->aiAssistantRunner->setThreadsKey($form_state->getValue('thread_id'));
     // Set the user message.
-    $this->aiAssistantClient->setUserMessage(new UserMessage($form_state->getValue('query')));
+    $this->aiAssistantRunner->setUserMessage(new UserMessage($form_state->getValue('query')));
 
     // Send the query to OpenAI.
     if ($this->getRequest()->isXmlHttpRequest()) {
       try {
         $http_response = new StreamedResponse();
         // Process.
-        $response = $this->aiAssistantClient->process();
+        $response = $this->aiAssistantRunner->process();
         // If its a failure, the variable is a string, just output;.
         if ($response->getNormalized() instanceof ChatMessage) {
-          $http_response = new Response($response->getNormalized()->getText());
-          $this->aiAssistantClient->setAssistantMessage($response->getNormalized()->getText());
+          $output = $response->getNormalized()->getText();
+          // Show structured results if wanted.
+          if ($this->getChatConfig($form_state)['show_structured_results']) {
+            $structured = $this->aiAssistantRunner->getStructuredResults();
+            if ($structured) {
+              $output .= "\n\n<details>\n\n```\n" . Yaml::dump($structured, 10) . "\n```\n\n</details>";
+            }
+          }
+          $http_response = new Response($output);
+          $this->aiAssistantRunner->setAssistantMessage($output);
           $form_state->setResponse($http_response);
         }
         else {
-          $http_response->setCallback(function () use ($response) {
+          $http_response->setCallback(function () use ($response, $form_state) {
             $full_response = "";
+            $this->aiAssistantRunner->startSession();
             foreach ($response->getNormalized() as $message) {
               echo $message->getText();
               $full_response .= $message->getText();
               ob_flush();
               flush();
             }
-
-            $this->aiAssistantClient->setAssistantMessage($full_response);
+            // Show structured results if wanted.
+            if ($this->getChatConfig($form_state)['show_structured_results']) {
+              $structured = $this->aiAssistantRunner->getStructuredResults();
+              if ($structured) {
+                echo "\n\n<details>\n\n```\n" . Yaml::dump($structured, 10) . "\n```\n\n</details>";
+                $full_response .= "\n\n<details>\n\n```\n" . Yaml::dump($structured, 10) . "\n```\n\n</details>";
+                ob_flush();
+                flush();
+              }
+            }
+            $this->aiAssistantRunner->setAssistantMessage($full_response);
           });
           $form_state->setResponse($http_response);
         }
       }
       catch (\Exception $exception) {
-        $this->messenger()
-          ->addError("Chat exception: {$exception->getMessage()}");
-        return;
+        $http_response = new Response('Error: ' . $exception->getMessage());
+        $form_state->setResponse($http_response);
       }
     }
     else {
-      $response = $this->aiAssistantClient->process();
+      $response = $this->aiAssistantRunner->process();
       $form_state->setRebuild();
       $form_state->set('response', $response->getNormalized()->getText());
-      $this->aiAssistantClient->setAssistantMessage($response->getNormalized()->getText());
+      $this->aiAssistantRunner->setAssistantMessage($response->getNormalized()->getText());
     }
   }
 

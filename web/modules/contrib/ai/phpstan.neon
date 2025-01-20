@@ -13,10 +13,6 @@ parameters:
   paths:
     - .
 
-  # AI Validations, will not work with phpstan next until D11.
-  excludePaths:
-    - modules/ai_validations
-
   fileExtensions:
     - php
     - module

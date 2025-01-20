@@ -23,6 +23,19 @@ function ai_chatbot_theme() {
         'username' => 'Chatbot',
         'timestamp' => '',
         'bot_image' => '',
+        'user' => '',
+        'assistant_id' => NULL,
+        'thread_id' => NULL,
+      ],
+    ],
+    'ai_deepchat' => [
+      'variables' => [
+        'settings' => [
+          'width' => '400px',
+          'height' => '500px',
+        ],
+        'deepchat_settings' => [],
+        'current_theme' => '',
       ],
     ],
   ];

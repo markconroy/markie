@@ -192,7 +192,7 @@ class RagAction extends AiAssistantActionBase {
     $databases[''] = $this->t('-- Select --');
     foreach ($this->entityTypeManager->getStorage('search_api_index')->loadMultiple() as $index) {
       $databases[$index->id()] = $index->label() . ' (' . $index->id() . ')';
-    };
+    }
     return $databases;
   }
 

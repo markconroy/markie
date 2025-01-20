@@ -97,7 +97,7 @@ class OpenAiProvider extends AiProviderClientBase implements
    */
   public function isUsable(?string $operation_type = NULL, array $capabilities = []): bool {
     // If its not configured, it is not usable.
-    if (!$this->getConfig()->get('api_key')) {
+    if (!$this->apiKey && !$this->getConfig()->get('api_key')) {
       return FALSE;
     }
     // If its one of the bundles that OpenAI supports its usable.
@@ -270,10 +270,19 @@ class OpenAiProvider extends AiProviderClientBase implements
       $chat_input = [];
       // Add a system role if wanted.
       if ($this->chatSystemRole) {
-        $chat_input[] = [
-          'role' => 'system',
-          'content' => $this->chatSystemRole,
-        ];
+        // If its o1 or o3 in it, we add it as a user message.
+        if (preg_match('/(o1|o3)/i', $model_id)) {
+          $chat_input[] = [
+            'role' => 'user',
+            'content' => $this->chatSystemRole,
+          ];
+        }
+        else {
+          $chat_input[] = [
+            'role' => 'system',
+            'content' => $this->chatSystemRole,
+          ];
+        }
       }
       /** @var \Drupal\ai\OperationType\Chat\ChatMessage $message */
       foreach ($input->getMessages() as $message) {
@@ -342,7 +351,7 @@ class OpenAiProvider extends AiProviderClientBase implements
       $input = $input->getPrompt();
     }
     $payload = [
-      'model' => $model_id ?? 'text-moderation-latest',
+      'model' => $model_id ?? 'omni-moderation-latest',
       'input' => $input,
     ] + $this->configuration;
     $response = $this->client->moderations()->create($payload)->toArray();
@@ -511,6 +520,25 @@ class OpenAiProvider extends AiProviderClientBase implements
   /**
    * {@inheritdoc}
    */
+  public function getSetupData(): array {
+    return [
+      'key_config_name' => 'api_key',
+      'default_models' => [
+        'chat' => 'gpt-4o',
+        'chat_with_image_vision' => 'gpt-4o',
+        'chat_with_complex_json' => 'gpt-4o',
+        'text_to_image' => 'dall-e-3',
+        'embeddings' => 'text-embedding-3-small',
+        'moderation' => 'omni-moderation-latest',
+        'text_to_speech' => 'tts-1-hd',
+        'speech_to_text' => 'whisper-1',
+      ],
+    ];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function embeddingsVectorSize(string $model_id): int {
     return match($model_id) {
       'text-embedding-ada-002', 'text-embedding-3-small' => 1536,
@@ -531,7 +559,7 @@ class OpenAiProvider extends AiProviderClientBase implements
       return;
     }
     $payload = [
-      'model' => 'text-moderation-latest',
+      'model' => 'omni-moderation-latest',
       'input' => $prompt,
     ] + $this->configuration;
     try {
@@ -615,7 +643,7 @@ class OpenAiProvider extends AiProviderClientBase implements
           break;
 
         case 'moderation':
-          if (!preg_match('/^(text-moderation)/i', $model['id'])) {
+          if (!preg_match('/^(text-moderation|omni-moderation)/i', $model['id'])) {
             continue 2;
           }
           break;
@@ -666,6 +694,7 @@ class OpenAiProvider extends AiProviderClientBase implements
 
     if ($operation_type == 'moderation') {
       $models['text-moderation-latest'] = 'text-moderation-latest';
+      $models['omni-moderation-latest'] = 'omni-moderation-latest';
     }
 
     if (!empty($models)) {

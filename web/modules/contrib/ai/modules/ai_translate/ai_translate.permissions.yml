@@ -1,4 +1,6 @@
 create ai content translation:
   title: 'Create AI translation'
   description: 'Create AI translations for any content type'
-  restrict access: true
+manage ai translation prompts:
+  title: 'Manage AI translation prompts'
+  description: 'Manage the ai translation prompts'

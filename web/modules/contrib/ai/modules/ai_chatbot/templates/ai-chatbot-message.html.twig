@@ -1,4 +1,12 @@
-<div class="chat-message clearfix">
+{%
+  set classes = [
+  'chat-message',
+  'clearfix',
+  message ? 'chat-message--complete',
+  ]
+%}
+
+<div class={{ classes|join(' ') }}>
 
 	<img src="{{ bot_image }}" alt="" width="32" height="32">
 

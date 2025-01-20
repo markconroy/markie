@@ -143,8 +143,8 @@ class TextToMediaImage extends RuleBase implements ContainerFactoryPluginInterfa
   public function validateConfigValues($form, FormStateInterface $formState) {
     parent::validateConfigValues($form, $formState);
     $values = $formState->getValues();
-    if (empty($values['llm_media_type'])) {
-      $formState->setErrorByName('llm_media_type', 'Media Type is required.');
+    if (empty($values['automator_llm_media_type'])) {
+      $formState->setErrorByName('automator_llm_media_type', 'Media Type is required.');
     }
   }
 

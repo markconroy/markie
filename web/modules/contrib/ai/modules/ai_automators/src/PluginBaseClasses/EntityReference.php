@@ -20,39 +20,6 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 abstract class EntityReference extends RuleBase {
 
   /**
-   * The entity type manager.
-   *
-   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
-   */
-  protected $entityTypeManager;
-
-  /**
-   * The current user.
-   *
-   * @var \Drupal\Core\Session\AccountProxyInterface
-   */
-  protected $currentUser;
-
-  /**
-   * The entity type bundle.
-   *
-   * @var \Drupal\Core\Entity\EntityTypeBundleInfo
-   */
-  protected $entityTypeBundleInfo;
-
-  /**
-   * The entity field manager.
-   *
-   * @var \Drupal\Core\Entity\EntityFieldManagerInterface
-   */
-  protected $entityFieldManager;
-
-  /**
-   * The prompt JSON decoder.
-   */
-  protected PromptJsonDecoderInterface $promptJsonDecoder;
-
-  /**
    * Constructs a new AiClientBase abstract class.
    *
    * @param \Drupal\ai\AiProviderPluginManager $pluginManager
@@ -74,16 +41,12 @@ abstract class EntityReference extends RuleBase {
     AiProviderPluginManager $pluginManager,
     AiProviderFormHelper $formHelper,
     PromptJsonDecoderInterface $promptJsonDecoder,
-    EntityTypeManagerInterface $entityTypeManager,
-    AccountProxyInterface $currentUser,
-    EntityTypeBundleInfo $entityTypeBundleInfo,
-    EntityFieldManagerInterface $entityFieldManager,
+    protected EntityTypeManagerInterface $entityTypeManager,
+    protected AccountProxyInterface $currentUser,
+    protected EntityTypeBundleInfo $entityTypeBundleInfo,
+    protected EntityFieldManagerInterface $entityFieldManager,
   ) {
     parent::__construct($pluginManager, $formHelper, $promptJsonDecoder);
-    $this->entityTypeManager = $entityTypeManager;
-    $this->currentUser = $currentUser;
-    $this->entityTypeBundleInfo = $entityTypeBundleInfo;
-    $this->entityFieldManager = $entityFieldManager;
   }
 
   /**
@@ -106,7 +69,7 @@ abstract class EntityReference extends RuleBase {
    *
    * @var array
    */
-  public $allowedTypes = [
+  public array $allowedTypes = [
     'string',
     'string_long',
     'text',
@@ -125,28 +88,36 @@ abstract class EntityReference extends RuleBase {
   /**
    * {@inheritDoc}
    */
-  public function helpText() {
+  public function helpText(): string {
     return "This can take a field on the parent node and seed entity reference nodes.";
   }
 
   /**
    * {@inheritDoc}
    */
-  public function placeholderText() {
+  public function placeholderText(): string {
     return "Based on the context text I want a title and a description.\n\nContext:\n{{ context }}";
   }
 
   /**
    * {@inheritDoc}
    */
-  public function ruleIsAllowed(ContentEntityInterface $entity, FieldDefinitionInterface $fieldDefinition) {
-    return $fieldDefinition->getFieldStorageDefinition()->getSettings()['target_type'] ? TRUE : FALSE;
+  public function ruleIsAllowed(ContentEntityInterface $entity, FieldDefinitionInterface $fieldDefinition): bool {
+    if ($storage = $fieldDefinition->getFieldStorageDefinition()) {
+      if (isset($storage->getSettings()['target_type'])) {
+        if ($storage->getSettings()['target_type'] !== 'media') {
+          return TRUE;
+        }
+      }
+    }
+
+    return FALSE;
   }
 
   /**
    * {@inheritDoc}
    */
-  public function extraFormFields(ContentEntityInterface $entity, FieldDefinitionInterface $fieldDefinition, FormStateInterface $formState, array $defaultValues = []) {
+  public function extraFormFields(ContentEntityInterface $entity, FieldDefinitionInterface $fieldDefinition, FormStateInterface $formState, array $defaultValues = []): array {
     // Load the target type.
     $targetType = $fieldDefinition->getFieldStorageDefinition()->getSettings()['target_type'];
     // Check if the target type has bundles.
@@ -172,17 +143,13 @@ abstract class EntityReference extends RuleBase {
 
     // If bundle is chosen or if there are no bundles, show the fields.
     if ($chosenBundle || !$bundles) {
-      $fields = $this->entityFieldManager->getFieldDefinitions($targetType, $chosenBundle);
-      $options = [
-        '' => $this->t('Select a field'),
-      ];
       $form['ai_automator_fields'] = [
         '#type' => 'details',
         '#title' => $this->t('Fields to generate'),
         '#weight' => 20,
         '#open' => TRUE,
       ];
-      foreach ($fields as $field => $info) {
+      foreach ($this->entityFieldManager->getFieldDefinitions($targetType, $chosenBundle) as $field => $info) {
         // Only string, string_long, text, text_long and text_with_summary.
         if (in_array($info->getType(), $this->allowedTypes)) {
           $form['ai_automator_fields']['automator_entity_field_enable_' . $field] = [
@@ -206,7 +173,6 @@ abstract class EntityReference extends RuleBase {
             ],
           ];
         }
-
       }
     }
     return $form;
@@ -215,12 +181,12 @@ abstract class EntityReference extends RuleBase {
   /**
    * {@inheritDoc}
    */
-  public function validateConfigValues($form, FormStateInterface $formState) {
+  public function validateConfigValues($form, FormStateInterface $formState): void {
     // If the bundle is set, but no fields, please notify the user.
     $foundField = FALSE;
     $isEnabled = FALSE;
     foreach ($formState->getValues() as $key => $value) {
-      if (strpos($key, 'automator_entity_field_enable_') !== FALSE) {
+      if (str_contains($key, 'automator_entity_field_enable_')) {
         $foundField = TRUE;
         if ($value) {
           $isEnabled = TRUE;
@@ -235,14 +201,14 @@ abstract class EntityReference extends RuleBase {
   /**
    * {@inheritDoc}
    */
-  public function generate(ContentEntityInterface $entity, FieldDefinitionInterface $fieldDefinition, array $automatorConfig) {
+  public function generate(ContentEntityInterface $entity, FieldDefinitionInterface $fieldDefinition, array $automatorConfig): array {
     // Generate the real prompt if needed.
     $prompts = parent::generate($entity, $fieldDefinition, $automatorConfig);
 
     // Build up the prompt.
     $configs = [];
     foreach ($automatorConfig as $key => $value) {
-      if (strpos($key, 'entity_field_enable_') !== FALSE && $value) {
+      if (str_contains($key, 'entity_field_enable_') && $value) {
         $field = str_replace('entity_field_enable_', '', $key);
         $promptPart = $automatorConfig['entity_field_generate_' . $field];
         $configs[] = '"' . $field . '": "' . $promptPart . '"';
@@ -272,7 +238,7 @@ abstract class EntityReference extends RuleBase {
   /**
    * {@inheritDoc}
    */
-  public function verifyValue(ContentEntityInterface $entity, $value, FieldDefinitionInterface $fieldDefinition, array $automatorConfig) {
+  public function verifyValue(ContentEntityInterface $entity, $value, FieldDefinitionInterface $fieldDefinition, array $automatorConfig): bool {
     if (!is_array($value)) {
       return FALSE;
     }
@@ -282,11 +248,11 @@ abstract class EntityReference extends RuleBase {
   /**
    * {@inheritDoc}
    */
-  public function storeValues(ContentEntityInterface $entity, array $values, FieldDefinitionInterface $fieldDefinition, array $automatorConfig) {
+  public function storeValues(ContentEntityInterface $entity, array $values, FieldDefinitionInterface $fieldDefinition, array $automatorConfig): void {
     $target = $automatorConfig['entity_reference_bundle'] ?? '';
     $baseFields = $this->getBaseFields($entity->getEntityTypeId());
     $storage = $this->entityTypeManager->getStorage($entity->getEntityTypeId());
-    $textFormat = $this->getGeneralHelper()->getTextFormat($fieldDefinition);
+    $textFormat = $this->getGeneralHelper()->calculateTextFormat($fieldDefinition);
 
     $targets = [];
     foreach ($values as $parts) {
@@ -325,7 +291,7 @@ abstract class EntityReference extends RuleBase {
    * @return bool
    *   If the field is formatted.
    */
-  public function isFormattedField($fieldName, ContentEntityInterface $entity) {
+  public function isFormattedField($fieldName, ContentEntityInterface $entity): bool {
     $fieldDefinition = $entity->getFieldDefinition($fieldName);
     return in_array($fieldDefinition->getType(), ['text', 'text_long', 'text_with_summary']);
   }
@@ -335,8 +301,10 @@ abstract class EntityReference extends RuleBase {
    *
    * @return array
    *   The base fields.
+   *
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
-  public function getBaseFields($entityType) {
+  public function getBaseFields($entityType): array {
     $entityTypeDef = $this->entityTypeManager->getDefinition($entityType);
 
     // Get the entity keys.

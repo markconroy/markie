@@ -84,6 +84,29 @@ class ModerationConfigurations extends ConfigFormBase {
   /**
    * {@inheritdoc}
    */
+  public function validateForm(array &$form, FormStateInterface $form_state) {
+    // Get the moderation.
+    $moderations = $form_state->getValue('moderations');
+    foreach ($moderations as $moderation) {
+      $provider = $moderation['provider'];
+      // Get models.
+      $models = $moderation['models'];
+      foreach ($models as $model) {
+        $parts = explode('__', $model);
+        if ($provider == $parts[0]) {
+          $form_state->setErrorByName('moderations', $this->t('Model %model cannot be from the same provider as the provider %provider. This tool is only to set an external moderation layer on another provider.', [
+            '%model' => $model,
+            '%provider' => $provider,
+          ]));
+        }
+      }
+    }
+    parent::validateForm($form, $form_state);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     // Load config.
     $config = $this->config(static::CONFIG_NAME);

@@ -27,7 +27,7 @@ use Drupal\Core\Config\Entity\ConfigEntityBundleBase;
  *     },
  *     "list_builder" = "Drupal\ai_automators\AutomatorChainTypeListBuilder",
  *     "route_provider" = {
- *       "html" = "Drupal\Core\Entity\Routing\AdminHtmlRouteProvider",
+ *       "html" = "Drupal\ai_automators\Routing\AutomatorChainTypeHtmlRouteProvider",
  *     },
  *   },
  *   admin_permission = "administer automator_chain types",
@@ -39,10 +39,10 @@ use Drupal\Core\Config\Entity\ConfigEntityBundleBase;
  *     "uuid" = "uuid",
  *   },
  *   links = {
- *     "add-form" = "/admin/structure/automator_chain_types/add",
- *     "edit-form" = "/admin/structure/automator_chain_types/manage/{automator_chain_type}",
- *     "delete-form" = "/admin/structure/automator_chain_types/manage/{automator_chain_type}/delete",
- *     "collection" = "/admin/structure/automator_chain_types",
+ *     "add-form" = "/admin/config/ai/automator_chain_types/add",
+ *     "edit-form" = "/admin/config/ai/automator_chain_types/manage/{automator_chain_type}",
+ *     "delete-form" = "/admin/config/ai/automator_chain_types/manage/{automator_chain_type}/delete",
+ *     "collection" = "/admin/config/ai/automator_chain_types",
  *   },
  *   config_export = {
  *     "id",

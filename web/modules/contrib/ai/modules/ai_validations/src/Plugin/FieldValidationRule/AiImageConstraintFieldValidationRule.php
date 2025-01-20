@@ -83,7 +83,7 @@ class AiImageConstraintFieldValidationRule extends ConstraintFieldValidationRule
 
     if ($this->configuration['prompt'] == '') {
       $this->configuration['prompt'] = 'You can only answer with XTRUE or XFALSE.
-Take the following image and check if Queen Elisabeth is on the image.
+Take the following image and check if the Drupal logo is in the image.
 If it is answer XTRUE, if its not answer XFALSE. ';
     }
 

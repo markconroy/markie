@@ -38,6 +38,24 @@ class PromptCodeBlockExtractor implements PromptCodeBlockExtractorInterface {
         ],
       ],
     ],
+    'twig' => [
+      'label' => 'Twig',
+      'rules' => [
+        [
+          'type' => 'regex',
+          'rule' => '/```twig\n(.*)```/s',
+        ],
+        [
+          'type' => 'regex',
+          'rule' => '/<html>(.*)<\/html>/s',
+        ],
+        [
+          // Find on the first and the last tag blocks of any type.
+          'type' => 'regex',
+          'rule' => '/<.*?>(.*)<\/.*?>/s',
+        ],
+      ],
+    ],
     'yaml' => [
       'label' => 'YAML',
       'rules' => [

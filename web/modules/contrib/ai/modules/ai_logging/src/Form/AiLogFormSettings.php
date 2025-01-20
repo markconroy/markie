@@ -56,12 +56,17 @@ class AiLogFormSettings extends ConfigFormBase {
       '#title' => $this->t('Log response'),
       '#description' => $this->t('Also log the output of the AI requests.'),
       '#default_value' => $config->get('prompt_logging_output'),
+      '#states' => [
+        'visible' => [
+          ':input[name="prompt_logging"]' => ['checked' => TRUE],
+        ],
+      ],
     ];
 
     $form['prompt_logging_tags'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Request Tags'),
-      '#description' => $this->t('Log prompts and responses with these tags in the database. Separate tags with commas. Empty means all.'),
+      '#description' => $this->t('All requests are tagged with the operation type (call, moderate, etc): to log only specific operations, enter them here. Leave empty to log all types.'),
       '#default_value' => $config->get('prompt_logging_tags'),
       '#states' => [
         'visible' => [
@@ -75,6 +80,11 @@ class AiLogFormSettings extends ConfigFormBase {
       '#title' => $this->t('Maximum number messages to log'),
       '#description' => $this->t('The maximum number of messages to log in the database. Empty or 0 means unlimited. Beyond this number, older logs will be automatically deleted.'),
       '#default_value' => $config->get('prompt_logging_max_messages'),
+      '#states' => [
+        'visible' => [
+          ':input[name="prompt_logging"]' => ['checked' => TRUE],
+        ],
+      ],
     ];
 
     $form['prompt_logging_max_age'] = [
@@ -82,6 +92,11 @@ class AiLogFormSettings extends ConfigFormBase {
       '#title' => $this->t('Maximum age of messages to log'),
       '#description' => $this->t('The maximum age of messages to log in the database in days. Empty or 0 means unlimited. Beyond this age, older logs will be automatically deleted.'),
       '#default_value' => $config->get('prompt_logging_max_age'),
+      '#states' => [
+        'visible' => [
+          ':input[name="prompt_logging"]' => ['checked' => TRUE],
+        ],
+      ],
     ];
 
     return parent::buildForm($form, $form_state);

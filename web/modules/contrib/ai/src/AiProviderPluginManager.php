@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\ai;
 
+use Drupal\Component\Uuid\UuidInterface;
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Messenger\MessengerInterface;
@@ -11,6 +12,7 @@ use Drupal\Core\Plugin\DefaultPluginManager;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\ai\Attribute\AiProvider;
 use Drupal\ai\Attribute\OperationType;
+use Drupal\ai\Event\ProviderDisabledEvent;
 use Drupal\ai\OperationType\OperationTypeInterface;
 use Drupal\ai\Plugin\ProviderProxy;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -65,6 +67,13 @@ final class AiProviderPluginManager extends DefaultPluginManager {
   protected $messenger;
 
   /**
+   * The UUID service.
+   *
+   * @var \Drupal\Component\Uuid\UuidInterface
+   */
+  protected $uuid;
+
+  /**
    * Constructs the object.
    */
   public function __construct(
@@ -73,6 +82,7 @@ final class AiProviderPluginManager extends DefaultPluginManager {
     ModuleHandlerInterface $module_handler,
     ContainerInterface $container,
     MessengerInterface $messenger,
+    UuidInterface $uuid,
   ) {
     parent::__construct('Plugin/AiProvider', $namespaces, $module_handler, AiProviderInterface::class, AiProvider::class);
     $this->alterInfo('ai_provider_info');
@@ -83,6 +93,7 @@ final class AiProviderPluginManager extends DefaultPluginManager {
     $this->moduleHandler = $module_handler;
     $this->configFactory = $container->get('config.factory');
     $this->messenger = $messenger;
+    $this->uuid = $uuid;
   }
 
   /**
@@ -101,7 +112,7 @@ final class AiProviderPluginManager extends DefaultPluginManager {
    */
   public function createInstance($plugin_id, array $configuration = []): ProviderProxy {
     $plugin = parent::createInstance($plugin_id, $configuration);
-    return new ProviderProxy($plugin, $this->eventDispatcher, $this->loggerFactory);
+    return new ProviderProxy($plugin, $this->eventDispatcher, $this->loggerFactory, $this->uuid, $this->cacheBackend);
   }
 
   /**
@@ -301,7 +312,7 @@ final class AiProviderPluginManager extends DefaultPluginManager {
    * @return array|null
    *   The id and label or nothing.
    */
-  public function getOperationType(string $operation_type, bool $check_has_default = FALSE): array {
+  public function getOperationType(string $operation_type, bool $check_has_default = FALSE): array|null {
     $operation_types = $this->getOperationTypes();
     foreach ($operation_types as $operation) {
       if ($operation['id'] === $operation_type) {
@@ -353,11 +364,7 @@ final class AiProviderPluginManager extends DefaultPluginManager {
       'model_id' => $model_id,
     ];
     // Set a message to the user.
-    $this->messenger->addMessage($this->t('Default provider %provider_id with model %model set for operation type %operation_type.', [
-      '%operation_type' => $operation_type,
-      '%provider_id' => $provider_id,
-      '%model' => $model_id,
-    ]));
+    $this->loggerFactory->get('ai')->notice("Default provider $provider_id with model $model_id set for operation type $operation_type.");
     $config->set('default_providers', $default_providers)->save();
     return TRUE;
   }
@@ -412,6 +419,32 @@ final class AiProviderPluginManager extends DefaultPluginManager {
     }
 
     return FALSE;
+  }
+
+  /**
+   * Gives notice that a provider is disabled.
+   *
+   * @param string $provider_id
+   *   The provider ID.
+   */
+  public function providerDisabled(string $provider_id) {
+    // Get AI settings as editable.
+    $defaults = $this->configFactory->getEditable('ai.settings')->get('default_providers');
+    $changed = FALSE;
+    foreach ($defaults as $key => $value) {
+      if ($value['provider_id'] == $provider_id) {
+        // Remove the provider from the default providers.
+        unset($defaults[$key]);
+        // Set that we need to change the config.
+        $changed = TRUE;
+      }
+    }
+    if ($changed) {
+      // Save the updated default providers, if needed.
+      $this->configFactory->getEditable('ai.settings')->set('default_providers', $defaults)->save();
+    }
+    // Notify other modules that a provider was disabled.
+    $this->eventDispatcher->dispatch(new ProviderDisabledEvent($provider_id), ProviderDisabledEvent::EVENT_NAME);
   }
 
 }

@@ -45,3 +45,11 @@ ai.edit_model_settings_form:
     _title_callback: '\Drupal\ai\Form\AiModelSettingsForm::createTitle'
   requirements:
     _permission: 'administer ai providers'
+
+ai.ai_setup:
+  path: '/admin/config/ai/setup'
+  defaults:
+    _title: 'AI Set-Up Wizard'
+    _form: 'Drupal\ai\Form\AiSetupForm'
+  requirements:
+    _permission: 'administer ai'

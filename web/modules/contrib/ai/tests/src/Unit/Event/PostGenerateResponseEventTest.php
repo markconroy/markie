@@ -115,13 +115,21 @@ class PostGenerateResponseEventTest extends TestCase {
   }
 
   /**
+   * Test get event id.
+   */
+  public function testEventId(): void {
+    $event = $this->getEvent();
+    $this->assertEquals('unique_id', $event->getRequestThreadId());
+  }
+
+  /**
    * Helper function to get the events.
    *
    * @return \Drupal\ai\Event\PostGenerateResponseEvent|\PHPUnit\Framework\MockObject\MockObject
    *   The event.
    */
   public function getEvent(): PostGenerateResponseEvent {
-    return new PostGenerateResponseEvent('test', 'chat', [
+    return new PostGenerateResponseEvent('unique_id', 'test', 'chat', [
       'test' => 'testing',
     ],
       'This is a test',

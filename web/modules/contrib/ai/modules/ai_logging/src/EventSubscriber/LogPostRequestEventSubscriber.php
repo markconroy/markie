@@ -8,6 +8,7 @@ use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Link;
 use Drupal\Core\Url;
 use Drupal\ai\Event\PostGenerateResponseEvent;
+use Drupal\ai\Event\PostStreamingResponseEvent;
 use Drupal\ai\OperationType\InputInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
@@ -40,6 +41,13 @@ class LogPostRequestEventSubscriber implements EventSubscriberInterface {
   protected $moduleHandler;
 
   /**
+   * UUID to log for streaming.
+   *
+   * @var array
+   */
+  protected $streamingUuids = [];
+
+  /**
    * Constructor.
    */
   public function __construct(EntityTypeManagerInterface $entityTypeManager, ConfigFactoryInterface $configFactory, ModuleHandlerInterface $moduleHandler) {
@@ -57,6 +65,7 @@ class LogPostRequestEventSubscriber implements EventSubscriberInterface {
   public static function getSubscribedEvents(): array {
     return [
       PostGenerateResponseEvent::EVENT_NAME => 'logPostRequest',
+      PostStreamingResponseEvent::EVENT_NAME => 'logPostStream',
     ];
   }
 
@@ -85,6 +94,33 @@ class LogPostRequestEventSubscriber implements EventSubscriberInterface {
         $log->set('output_text', json_encode($event->getOutput()->getRawOutput()));
       }
       $log->save();
+      // We store the connection for logging the streamed response.
+      if ($this->aiSettings->get('prompt_logging_output')) {
+        if ($event->getOutput()->getNormalized() instanceof \IteratorAggregate) {
+          $this->streamingUuids[$event->getRequestThreadId()] = $log->id();
+        }
+      }
+    }
+  }
+
+  /**
+   * If the log was a streaming object, we need to update with the response.
+   *
+   * @param \Drupal\ai\Event\PostStreamingResponseEvent $event
+   *   The event to log.
+   */
+  public function logPostStream(PostStreamingResponseEvent $event) {
+    // If response logging is enabled, add the streamed response.
+    if ($this->aiSettings->get('prompt_logging_output') && isset($this->streamingUuids[$event->getRequestThreadId()])) {
+      // Load to update.
+      $storage = $this->entityTypeManager->getStorage('ai_log');
+      /** @var \Drupal\ai_logging\Entity\AiLog $log */
+      $log = $storage->load($this->streamingUuids[$event->getRequestThreadId()]);
+
+      if ($log) {
+        $log->set('output_text', json_encode($event->getOutput()));
+        $log->save();
+      }
     }
   }
 

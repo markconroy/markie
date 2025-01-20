@@ -23,7 +23,7 @@ $binaries = $audio->getAsBinary();
 // Examples Possibility #2 - get as base 64 encoded string from the audio.
 $base64 = $audio->getAsBase64EncodedString();
 // Examples Possibility #3 - get as generated media from the audio.
-$media = $audio->getAsMediaEntity("audio", "public://", "audio.mp3");
+$media = $audio->getAsMediaEntity("audio", "", "audio.mp3");
 // Examples Possibility #4 - get as file entity from the audio.
 $file = $audio->getAsFileEntity("public://", "audio.mp3");
 ```

@@ -9,12 +9,21 @@ services:
       - '@ai_assistant_api.action_plugin.manager'
       - '@event_dispatcher'
       - '@current_user'
-      - '@request_stack'
-      - '@title_resolver'
-      - '@language_manager'
-      - '@config.factory'
       - '@logger.factory'
       - '@ai.prompt_json_decode'
+      - '@ai_assistant_api.assistant_message_builder'
+      - '@session_manager'
   ai_assistant_api.action_plugin.manager:
     class: Drupal\ai_assistant_api\AiAssistantActionPluginManager
     parent: default_plugin_manager
+  ai_assistant_api.assistant_message_builder:
+    class: Drupal\ai_assistant_api\Service\AssistantMessageBuilder
+    arguments:
+      - '@entity_type.manager'
+      - '@ai_assistant_api.action_plugin.manager'
+      - '@event_dispatcher'
+      - '@current_user'
+      - '@title_resolver'
+      - '@request_stack'
+      - '@language_manager'
+      - '@config.factory'

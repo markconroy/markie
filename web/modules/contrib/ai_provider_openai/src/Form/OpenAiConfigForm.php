@@ -98,6 +98,10 @@ class OpenAiConfigForm extends ConfigFormBase {
   public function validateForm(array &$form, FormStateInterface $form_state) {
     // Validate the api key against model listing.
     $key = $form_state->getValue('api_key');
+    if (empty($key)) {
+      $form_state->setErrorByName('api_key', $this->t('The API Key is required.'));
+      return;
+    }
     $api_key = $this->keyRepository->getKey($key)->getKeyValue();
     if (!$api_key) {
       $form_state->setErrorByName('api_key', $this->t('The API Key is invalid.'));
@@ -129,6 +133,7 @@ class OpenAiConfigForm extends ConfigFormBase {
     $this->aiProviderManager->defaultIfNone('embeddings', 'openai', 'text-embedding-3-small');
     $this->aiProviderManager->defaultIfNone('text_to_speech', 'openai', 'tts-1-hd');
     $this->aiProviderManager->defaultIfNone('speech_to_text', 'openai', 'whisper-1');
+    $this->aiProviderManager->defaultIfNone('moderation', 'openai', 'omni-moderation-latest');
 
     parent::submitForm($form, $form_state);
   }

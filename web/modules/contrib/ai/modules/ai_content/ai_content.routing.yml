@@ -1,7 +1,0 @@
-ai_content.settings_form:
-  path: '/admin/config/ai/ai_content'
-  defaults:
-    _form: '\Drupal\ai_content\Form\AiContentSettingsForm'
-    _title: 'AI Content Settings'
-  requirements:
-    _permission: 'administer ai'

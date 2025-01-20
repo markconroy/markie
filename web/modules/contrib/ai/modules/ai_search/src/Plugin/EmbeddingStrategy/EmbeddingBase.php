@@ -146,8 +146,8 @@ class EmbeddingBase extends EmbeddingStrategyPluginBase implements EmbeddingStra
     $index_config = $this->configFactory->get('ai_search.index.' . $index->id())->getRawData();
     $indexing_options = $index_config['indexing_options'] ?? [];
     $allowed_options = [
-      EmbeddingStrategyIndexingOptions::MAIN_CONTENT->getKey(),
-      EmbeddingStrategyIndexingOptions::CONTEXTUAL_CONTENT->getKey(),
+      EmbeddingStrategyIndexingOptions::MainContent->getKey(),
+      EmbeddingStrategyIndexingOptions::ContextualContent->getKey(),
     ];
     foreach ($fields as $field) {
 
@@ -323,7 +323,7 @@ class EmbeddingBase extends EmbeddingStrategyPluginBase implements EmbeddingStra
       if (
         !$field instanceof FieldInterface
         || !isset($indexing_options[$field->getFieldIdentifier()]['indexing_option'])
-        || $indexing_options[$field->getFieldIdentifier()]['indexing_option'] !== EmbeddingStrategyIndexingOptions::ATTRIBUTES->getKey()
+        || $indexing_options[$field->getFieldIdentifier()]['indexing_option'] !== EmbeddingStrategyIndexingOptions::Attributes->getKey()
       ) {
         continue;
       }

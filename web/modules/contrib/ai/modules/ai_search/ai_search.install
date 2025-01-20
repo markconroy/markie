@@ -98,7 +98,7 @@ function ai_search_update_10002() {
         }
         $setting['type'] = 'string';
         $config_object->set('field_settings.' . $key, $setting);
-        $indexing_options[$key]['indexing_option'] = EmbeddingStrategyIndexingOptions::MAIN_CONTENT->getKey();
+        $indexing_options[$key]['indexing_option'] = EmbeddingStrategyIndexingOptions::MainContent->getKey();
       }
     }
 

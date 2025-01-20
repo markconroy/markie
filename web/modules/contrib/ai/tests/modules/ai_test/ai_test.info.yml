@@ -4,7 +4,7 @@ description: Adds integrations for testing.
 package: Testing
 core_version_requirement: ^10.3 || ^11
 
-# Information added by Drupal.org packaging script on 2024-10-29
-version: '1.0.0-beta1'
+# Information added by Drupal.org packaging script on 2025-01-14
+version: '1.0.2'
 project: 'ai'
-datestamp: 1730196283
+datestamp: 1736878583

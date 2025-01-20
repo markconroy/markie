@@ -148,3 +148,33 @@ function ai_update_10301() {
   }
   return t('AI module moving to contributed modules has been completed.');
 }
+
+/**
+ * Disable deprecated sub modules.
+ */
+function ai_update_10302() {
+  /** @var \Drupal\Core\Extension\ModuleHandlerInterface $handler */
+  $handler = \Drupal::service('module_handler');
+  /** @var \Drupal\Core\Extension\ModuleInstallerInterface $installer */
+  $installer = \Drupal::service('module_installer');
+
+  $messages = [];
+
+  // Disable old sub modules if they exist.
+  foreach (array_keys(_ai_providers_mapping()) as $submodule) {
+    if ($handler->moduleExists($submodule)) {
+      try {
+        $installer->uninstall([$submodule]);
+        $messages[] = t('Successfully disabled @module', ['@module' => $submodule]);
+      }
+      catch (\Exception $e) {
+        $messages[] = t('Failed to disable @module: @error', [
+          '@module' => $submodule,
+          '@error' => $e->getMessage(),
+        ]);
+      }
+    }
+  }
+
+  return empty($messages) ? t('No deprecated modules needed to be disabled.') : implode(' ', $messages);
+}

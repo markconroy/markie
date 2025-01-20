@@ -1,4 +1,6 @@
-The following are some helper files for DDEV that might make local development easier to setup.
+The following are some helper files for DDEV that might make local development easier to set up.
+
+To set up DDEV on your machine, follow the instructions provided [here](https://ddev.readthedocs.io/en/stable/users/install/). For further details on setting up and running Drupal contrib projects with DDEV, refer to the documentation [here](https://github.com/ddev/ddev-drupal-contrib).
 
 ## Streaming
 

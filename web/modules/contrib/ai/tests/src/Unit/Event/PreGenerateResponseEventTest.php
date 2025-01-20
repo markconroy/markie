@@ -98,6 +98,14 @@ class PreGenerateResponseEventTest extends TestCase {
   }
 
   /**
+   * Test get event id.
+   */
+  public function testEventId(): void {
+    $event = $this->getEvent();
+    $this->assertEquals('unique_id', $event->getRequestThreadId());
+  }
+
+  /**
    * Helper function to get the events.
    *
    * @return \Drupal\ai\Event\PreGenerateResponseEvent|\PHPUnit\Framework\MockObject\MockObject
@@ -105,6 +113,7 @@ class PreGenerateResponseEventTest extends TestCase {
    */
   public function getEvent(): PreGenerateResponseEvent {
     return new PreGenerateResponseEvent(
+      'unique_id',
       'test',
       'chat',
       [

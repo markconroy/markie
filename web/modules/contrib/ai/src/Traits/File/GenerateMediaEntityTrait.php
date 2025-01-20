@@ -53,7 +53,7 @@ trait GenerateMediaEntityTrait {
     }
     // Generate the path.
     if (!$file_path) {
-      $file_path = $this->getMediaFilePath($base_field, $filename);
+      $file_path = $this->getMediaFilePath($base_field);
     }
 
     // Create the file, depending on type.
@@ -70,6 +70,7 @@ trait GenerateMediaEntityTrait {
       ],
     ]);
     $media->save();
+
     return $media;
   }
 
@@ -79,15 +80,14 @@ trait GenerateMediaEntityTrait {
    * @param \Drupal\field\Entity\FieldConfig $field_definition
    *   The field definition.
    * @param string $file_name
-   *   The file name.
+   *   The file name. No longer required.
    *
    * @return string
    *   The path.
    */
-  private function getMediaFilePath(FieldConfigInterface $field_definition, string $file_name): string {
+  private function getMediaFilePath(FieldConfigInterface $field_definition, string $file_name = ''): string {
     $config = $field_definition->getSettings();
-    $file_path = \Drupal::token()->replace($config['uri_scheme'] . '://' . rtrim($config['file_directory'], '/'));
-    return $file_path . '/' . $file_name;
+    return \Drupal::token()->replace($config['uri_scheme'] . '://' . rtrim($config['file_directory'], '/'));
   }
 
   /**

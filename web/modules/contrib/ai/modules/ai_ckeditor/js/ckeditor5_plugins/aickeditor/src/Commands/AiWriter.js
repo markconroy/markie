@@ -26,6 +26,14 @@ export default class AiWriter extends Command {
     sourceEditing.set("isSourceEditingMode", true);
     sourceEditing.isEnabled = false;
 
+    // Locate the target field (sourceEditingTextarea or a custom field)
+    const sourceEditingTextarea = editor.editing.view.getDomRoot()?.nextSibling?.firstChild;
+
+    // Clear the field before writing new content
+    if (sourceEditingTextarea) {
+      sourceEditingTextarea.value = ''; // Clear the field
+    }
+
     editor.model.change(async writer => {
       const response = await fetch(drupalSettings.path.baseUrl + 'api/ai-ckeditor/request/' + request_parameters.editor_id + '/' + request_parameters.plugin_id, {
         method: 'POST',
@@ -48,7 +56,6 @@ export default class AiWriter extends Command {
       });
 
       const reader = response.body.getReader();
-      const sourceEditingTextarea = editor.editing.view.getDomRoot()?.nextSibling?.firstChild;
 
       while (true) {
         const {value, done} = await reader.read();

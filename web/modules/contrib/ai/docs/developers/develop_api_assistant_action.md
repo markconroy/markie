@@ -50,3 +50,8 @@ and their workings**.
 ### Examples
 For working examples, please see the code of the [AI search](../modules/ai_search/index.md)
 sub-module or the [AI Agents](https://www.drupal.org/project/ai_agents) module.
+
+For an example of how to provide a user-facing interface for an AI Assistant,
+please see the AI Chatbot module's code: this provides a user-facing block
+plugin that uses a configured AI Assistant to allow users to interact with an
+AI Assistant and see responses from the LLM.

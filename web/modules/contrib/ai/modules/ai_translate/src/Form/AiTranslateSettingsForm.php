@@ -175,6 +175,18 @@ class AiTranslateSettingsForm extends ConfigFormBase {
       '#description' => $this->t('This setting can be overriden in entity reference field settings.'),
       '#default_value' => $config->get('reference_defaults'),
     ];
+    $form['reference_defaults']['entity_reference_depth'] = [
+      '#type' => 'select',
+      '#options' => [
+        1 => '1',
+        2 => '2',
+        5 => '5',
+        10 => '10',
+        0 => 'Unlimited',
+      ],
+      '#default_value' => $config->get('entity_reference_depth'),
+      '#title' => $this->t('Maximum Reference Depth'),
+    ];
 
     return parent::buildForm($form, $form_state);
   }
@@ -208,6 +220,7 @@ class AiTranslateSettingsForm extends ConfigFormBase {
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $config = $this->config(static::CONFIG_NAME);
     $config->set('prompt', $form_state->getValue('prompt'));
+    $config->set('entity_reference_depth', $form_state->getValue('entity_reference_depth'));
     $config->set('reference_defaults', array_keys(array_filter($form_state->getValue('reference_defaults'))));
     $languages = $this->languageManager->getLanguages();
     foreach ($languages as $langcode => $language) {

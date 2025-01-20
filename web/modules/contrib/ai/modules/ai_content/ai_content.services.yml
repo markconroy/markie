@@ -1,4 +1,0 @@
-services:
-  ai_content.form_alter:
-    class: Drupal\ai_content\AiContentForm
-    arguments: ['@current_user', '@config.factory', '@ai.provider', '@renderer', '@entity_type.manager', '@entity_field.manager', '@messenger']

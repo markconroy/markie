@@ -62,6 +62,10 @@ final class AiImageConstraintValidator extends ConstraintValidator implements Co
       $this->context->addViolation('No AI provider specified to do validation', []);
       return;
     }
+    if (empty($data)) {
+      // If no actual image is set, it should pass since it wasn't required.
+      return;
+    }
     $storage = $this->entityTypeManager->getStorage('file');
     $file = $storage->load($data);
     if (empty($file)) {

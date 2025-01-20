@@ -16,6 +16,7 @@ prompt: >1
   The context text ``` {{ input_text }} ```
 reference_defaults:
   block_content: true
+  entity_reference_depth: 1
   node: false
   paragraph: true
   taxonomy_term: true

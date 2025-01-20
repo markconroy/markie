@@ -98,12 +98,16 @@ class TextChunkerTest extends KernelTestBase {
     return [
       ['gpt-3.5', 'sample-1', 18, 64, 5],
       ['gpt-4o', 'sample-1', 18, 64, 5],
+      ['gpt-4o', 'sample-1', 16, 64, 0],
       ['gpt-3.5', 'sample-1', 9, 128, 12],
       ['gpt-4o', 'sample-1', 9, 128, 12],
       ['gpt-3.5', 'sample-1', 10, 128, 24],
       ['gpt-4o', 'sample-1', 10, 128, 24],
       ['gpt-3.5', 'sample-2', 18, 64, 5],
       ['gpt-4o', 'sample-2', 18, 64, 5],
+      ['gpt-3.5', 'sample-3', 5, 64, 5],
+      ['gpt-4o', 'sample-3', 3, 64, 5],
+      ['gpt-4o', 'sample-3', 2, 128, 24],
     ];
   }
 

@@ -55,7 +55,7 @@ class AiAutomatorRule extends ActionBase implements ConfigurableInterface, Plugi
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition): static {
     $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
-    $instance->setAiAutomatorTypeManager($container->get('plugin.manager.ai_automator_type'));
+    $instance->setAiAutomatorTypeManager($container->get('plugin.manager.ai_automator'));
     $instance->setAiAutomatorRuleRunner($container->get('ai_automator.rule_runner'));
     $instance->setFieldManager($container->get('entity_field.manager'));
     return $instance;

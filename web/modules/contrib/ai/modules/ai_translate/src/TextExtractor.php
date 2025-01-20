@@ -130,7 +130,9 @@ class TextExtractor implements TextExtractorInterface {
     // @todo better way to find fields that should be translatable?
     static $supportedFieldNames = [
       'body',
+      'info',
       '^field_',
+      '^layout_builder_',
     ];
     foreach ($supportedFieldNames as $pattern) {
       if (preg_match("/$pattern/", $fieldName)) {

@@ -23,7 +23,7 @@ $binaries = $image->getAsBinary();
 // Examples Possibility #2 - get as base 64 encoded string from the image.
 $base64 = $image->getAsBase64EncodedString();
 // Examples Possibility #3 - get as generated media from the image.
-$media = $image->getAsMediaEntity("image", "public://", "image.png");
+$media = $image->getAsMediaEntity("image", "", "image.png");
 // Examples Possibility #4 - get as image file entity from the first image.
 $file = $image->getAsFileEntity("public://", "image.png");
 ```

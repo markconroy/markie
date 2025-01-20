@@ -17,17 +17,15 @@ variables:
   OPT_IN_TEST_MAX_PHP: 1
   _PHPUNIT_CONCURRENT: 1
   SKIP_ESLINT: 1
+  # Until fixed in gitlab templates.
+  SKIP_STYLELINT: 1
   # showdown.js is full of emoji words.
-  _CSPELL_IGNORE_PATHS: "'modules/ai_chatbot/js', '.cspell-project-words.txt'"
+  _CSPELL_IGNORE_PATHS: "'modules/ai_chatbot/js', 'modules/ai_chatbot/deepchat', 'modules/ai_chatbot/css', '.cspell-project-words.txt'"
 
 pages:
   stage: .post
-  before_script:
-    - python docs/build-docs.py
 
 cspell:
-  allow_failure: false
-stylelint:
   allow_failure: false
 phpcs:
   allow_failure: false
@@ -35,4 +33,3 @@ phpstan:
   allow_failure: false
   before_script:
     - composer require --dev drush/drush
-

@@ -37,6 +37,13 @@ final class AutomatorChainTypeListBuilder extends ConfigEntityListBuilder {
   public function render(): array {
     $build = parent::render();
 
+    $build['message'] = [
+      '#type' => 'html_tag',
+      '#tag' => 'p',
+      '#value' => $this->t('This is where you can add or edit Automator Chain Types, which are collections of AI Automators that can be run on your content using the AI CK Editor Integration module or with your own custom code.'),
+      '#weight' => -50,
+    ];
+
     $build['table']['#empty'] = $this->t(
       'No automator chain types available. <a href=":link">Add Automator Chain type</a>.',
       [':link' => Url::fromRoute('entity.automator_chain_type.add_form')->toString()],

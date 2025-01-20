@@ -5,7 +5,6 @@ namespace Drupal\ai_automators\FormAlter;
 use Drupal\Core\DependencyInjection\DependencySerializationTrait;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Field\Entity\BaseFieldOverride;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
@@ -23,36 +22,6 @@ class AiAutomatorFieldConfig {
   use StringTranslationTrait;
 
   /**
-   * The field manager.
-   */
-  protected EntityFieldManagerInterface $fieldManager;
-
-  /**
-   * The field rule manager.
-   */
-  protected AiFieldRules $fieldRules;
-
-  /**
-   * The route match.
-   */
-  protected RouteMatchInterface $routeMatch;
-
-  /**
-   * The module handler.
-   */
-  protected ModuleHandlerInterface $moduleHandler;
-
-  /**
-   * The processes available.
-   */
-  protected AiAutomatorFieldProcessManager $processes;
-
-  /**
-   * The entity type manager.
-   */
-  protected EntityTypeManagerInterface $entityTypeManager;
-
-  /**
    * Constructs a field config modifier.
    *
    * @param \Drupal\Core\Entity\EntityFieldManagerInterface $fieldManager
@@ -61,20 +30,18 @@ class AiAutomatorFieldConfig {
    *   The field rule manager.
    * @param \Drupal\Core\Routing\RouteMatchInterface $routeMatch
    *   The route match interface.
-   * @param \Drupal\Core\Extension\ModuleHandler $moduleHandler
-   *   The module handler.
    * @param \Drupal\ai_automators\PluginManager\AiAutomatorFieldProcessManager $processes
    *   The process manager.
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
    *   The entity type manager.
    */
-  public function __construct(EntityFieldManagerInterface $fieldManager, AiFieldRules $fieldRules, RouteMatchInterface $routeMatch, ModuleHandlerInterface $moduleHandler, AiAutomatorFieldProcessManager $processes, EntityTypeManagerInterface $entityTypeManager) {
-    $this->fieldManager = $fieldManager;
-    $this->fieldRules = $fieldRules;
-    $this->routeMatch = $routeMatch;
-    $this->moduleHandler = $moduleHandler;
-    $this->processes = $processes;
-    $this->entityTypeManager = $entityTypeManager;
+  public function __construct(
+    protected EntityFieldManagerInterface $fieldManager,
+    protected AiFieldRules $fieldRules,
+    protected RouteMatchInterface $routeMatch,
+    protected AiAutomatorFieldProcessManager $processes,
+    protected EntityTypeManagerInterface $entityTypeManager,
+  ) {
   }
 
   /**
@@ -84,8 +51,12 @@ class AiAutomatorFieldConfig {
    *   The form passed by reference.
    * @param \Drupal\Core\Form\FormStateInterface $formState
    *   The form state interface.
+   *
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
-  public function alterForm(array &$form, FormStateInterface $formState) {
+  public function alterForm(array &$form, FormStateInterface $formState): void {
     // Get the entity and the field name.
     $entity = $form['#entity'];
 
@@ -110,12 +81,12 @@ class AiAutomatorFieldConfig {
     // Get the field config.
     $fields = $this->fieldManager->getFieldDefinitions($entity->getEntityTypeId(), $entity->bundle());
 
-    /** @var \Drupal\field\Entity\FieldConfig */
+    /** @var \Drupal\field\Entity\FieldConfig $fieldInfo */
     $fieldInfo = $fields[$fieldName] ?? NULL;
 
     // Try to get it from the form session if not existing.
     if (!$fieldInfo) {
-      /** @var \Drupal\Core\Entity\ConfigEntityForm $formObject */
+      /** @var \Drupal\Core\Entity\EntityFormInterface $formObject */
       $formObject = $formState->getFormObject();
       $fieldInfo = $formObject->getEntity();
     }
@@ -232,26 +203,19 @@ class AiAutomatorFieldConfig {
       $modeOptions['token'] = $this->t('Advanced Mode (Token)');
     }
 
-    if ($this->moduleHandler->moduleExists('token')) {
-      $description = $rule->advancedMode() ? $this->t('The Advanced Mode (Token) is available for this Automator Type to use multiple fields as input, you may also choose Base Mode to choose one base field.') :
-        $this->t('For this Automator Type, only the Base Mode is available. It uses the base field to generate the content.');
-      $form['automator_container']['automator_mode'] = [
-        '#type' => 'select',
-        '#title' => $this->t('Automator Input Mode'),
-        '#description' => $description,
-        '#options' => $modeOptions,
-        '#default_value' => !is_null($aiConfig) ? $aiConfig->get('input_mode') : 'base',
-        '#weight' => 5,
-        '#attributes' => [
-          'name' => 'automator_mode',
-        ],
-      ];
-    }
-    else {
-      $form['automator_container']['automator_mode'] = [
-        '#value' => 'base',
-      ];
-    }
+    $description = $rule->advancedMode() ? $this->t('The Advanced Mode (Token) is available for this Automator Type to use multiple fields as input, you may also choose Base Mode to choose one base field.') :
+      $this->t('For this Automator Type, only the Base Mode is available. It uses the base field to generate the content.');
+    $form['automator_container']['automator_mode'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Automator Input Mode'),
+      '#description' => $description,
+      '#options' => $modeOptions,
+      '#default_value' => !is_null($aiConfig) ? $aiConfig->get('input_mode') : 'base',
+      '#weight' => 5,
+      '#attributes' => [
+        'name' => 'automator_mode',
+      ],
+    ];
 
     // Prompt with token.
     $form['automator_container']['normal_prompt'] = [
@@ -312,13 +276,11 @@ class AiAutomatorFieldConfig {
       ];
     }
     else {
-      // Just save empty.
       $form['automator_prompt'] = [
         '#value' => '',
       ];
     }
     if ($rule->advancedMode()) {
-      // Prompt with token.
       $form['automator_container']['token_prompt'] = [
         '#type' => 'fieldset',
         '#open' => TRUE,
@@ -332,23 +294,19 @@ class AiAutomatorFieldConfig {
         ],
       ];
 
-      // Tokens help - static service call since module might not exist.
-      if ($this->moduleHandler->moduleExists('token')) {
-        $form['automator_container']['token_prompt']['automator_token'] = [
-          '#type' => 'textarea',
-          '#title' => $this->t('Automator Prompt (Token)'),
-          '#description' => $this->t('The prompt to use to fill this field.'),
-          '#default_value' => !is_null($aiConfig) ? $aiConfig->get('token') : NULL,
-        ];
+      $form['automator_container']['token_prompt']['automator_token'] = [
+        '#type' => 'textarea',
+        '#title' => $this->t('Automator Prompt (Token)'),
+        '#description' => $this->t('The prompt to use to fill this field.'),
+        '#default_value' => !is_null($aiConfig) ? $aiConfig->get('token') : NULL,
+      ];
 
-        // Because we have to invoke this only if the module is installed, no
-        // dependency injection.
-        // @codingStandardsIgnoreLine @phpstan-ignore-next-line
-        $form['automator_container']['token_prompt']['token_help'] = \Drupal::service('token.tree_builder')->buildRenderable([
+      $form['automator_container']['token_prompt']['token_help'] = [
+        '#theme' => 'token_tree_link',
+        '#token_types' => [
           $this->getEntityTokenType($entity->getEntityTypeId()),
-          'current-user',
-        ]);
-      }
+        ],
+      ];
     }
 
     $form['automator_container']['automator_edit_mode'] = [
@@ -407,10 +365,7 @@ class AiAutomatorFieldConfig {
 
     $subForm = $rule->extraAdvancedFormFields($entity, $fieldInfo, $formState, $defaultValues);
     $form['automator_container']['automator_advanced'] = array_merge($form['automator_container']['automator_advanced'], $subForm);
-
-    // Validate.
     $form['#validate'][] = [$this, 'validateConfigValues'];
-    // Save.
     $form['#entity_builders'][] = [$this, 'addConfigValues'];
   }
 
@@ -421,8 +376,11 @@ class AiAutomatorFieldConfig {
    *   The form passed by reference.
    * @param \Drupal\Core\Form\FormStateInterface $formState
    *   The form state interface.
+   *
+   * @return array
+   *   The automator container section of the form.
    */
-  public function updateRule(array &$form, FormStateInterface $formState) {
+  public function updateRule(array &$form, FormStateInterface $formState): array {
     return $form['automator_container'];
   }
 
@@ -434,11 +392,11 @@ class AiAutomatorFieldConfig {
    * @param \Drupal\Core\Form\FormStateInterface $formState
    *   The form state interface.
    */
-  public function validateConfigValues(&$form, FormStateInterface $formState) {
+  public function validateConfigValues(&$form, FormStateInterface $formState): bool {
     if ($formState->getValue('automator_enabled')) {
       $values = $formState->getValues();
       foreach ($values as $key => $val) {
-        if (strpos($key, 'automator_') === 0) {
+        if (str_starts_with($key, 'automator_')) {
           // Find the rule. If not found don't do anything.
           $rule = $this->fieldRules->findRule($formState->getValue('automator_rule'));
 
@@ -471,10 +429,15 @@ class AiAutomatorFieldConfig {
    *   The form passed by reference.
    * @param \Drupal\Core\Form\FormStateInterface $formState
    *   The form state interface.
+   *
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   * @throws \Drupal\Core\Entity\EntityStorageException
    */
-  public function addConfigValues($entity_type, FieldConfig|BaseFieldOverride $fieldConfig, &$form, FormStateInterface $formState) {
+  public function addConfigValues(string $entity_type, FieldConfig|BaseFieldOverride $fieldConfig, array &$form, FormStateInterface $formState): bool {
     // Get the default config if it exists.
     $id = $form['#entity']->getEntityTypeId() . '.' . $form['#entity']->bundle() . '.' . $fieldConfig->getName() . '.default';
+
     /** @var \Drupal\ai_automators\Entity\AiAutomator $aiConfig */
     $aiConfig = $this->entityTypeManager->getStorage('ai_automator')->load($id);
 
@@ -502,7 +465,7 @@ class AiAutomatorFieldConfig {
 
       $pluginConfig = [];
       foreach ($formState->getValues() as $key => $val) {
-        if (substr($key, 0, 10) == 'automator_') {
+        if (str_starts_with($key, 'automator_')) {
           $pluginConfig[$key] = $val;
         }
       }
@@ -525,12 +488,8 @@ class AiAutomatorFieldConfig {
    * @return string
    *   The corrected type.
    */
-  public function getEntityTokenType($entityTypeId) {
-    switch ($entityTypeId) {
-      case 'taxonomy_term':
-        return 'term';
-    }
-    return $entityTypeId;
+  public function getEntityTokenType(string $entityTypeId): string {
+    return ($entityTypeId == 'taxonomy_term') ? 'term' : $entityTypeId;
   }
 
 }

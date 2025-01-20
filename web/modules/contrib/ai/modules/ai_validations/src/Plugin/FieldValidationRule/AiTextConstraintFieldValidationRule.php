@@ -85,7 +85,7 @@ class AiTextConstraintFieldValidationRule extends ConstraintFieldValidationRuleB
 
     if ($this->configuration['prompt'] == '') {
       $this->configuration['prompt'] = 'You can only answer with XTRUE or XFALSE.
-Take the following input and check if it mentions Queen Elisabeth.
+Take the following input and check if it mentions Drupal.
 If it is answer XTRUE, if its not answer XFALSE. ';
     }
 

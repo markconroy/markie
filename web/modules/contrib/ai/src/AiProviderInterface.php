@@ -186,7 +186,7 @@ interface AiProviderInterface extends PluginInspectionInterface {
    * @return array
    *   The form array.
    */
-  public function loadModelsForm(array $form, $form_state, string $operation_type, string|NULL $model_id = NULL): array;
+  public function loadModelsForm(array $form, $form_state, string $operation_type, string|null $model_id = NULL): array;
 
   /**
    * Validate the models form for the provider.
@@ -207,5 +207,19 @@ interface AiProviderInterface extends PluginInspectionInterface {
    *   True if the provider has predefined models.
    */
   public function hasPredefinedModels(): bool;
+
+  /**
+   * Returns an array of setup data for the provider.
+   *
+   * The data should be an array of arrays with the following keys:
+   * - key_config_name: The key for setting an api key via key module. Can be
+   *   empty. If empty, its not setup.
+   * - default_models: An assoc array of operation type and model id, for
+   *   setting the default models.
+   *
+   * @return array
+   *   The setup data.
+   */
+  public function getSetupData(): array;
 
 }

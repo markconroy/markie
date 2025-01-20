@@ -138,13 +138,12 @@ class AiRequest implements ContainerInjectionInterface {
           $allowed_tags .= $tag . " ";
         }
 
-        $data->prompt .= "Format the answer using ONLY the following HTML tags: " . $allowed_tags;
+        $data->prompt = "Format the answer using ONLY the following HTML tags: " . $allowed_tags . $data->prompt;
       }
       else {
-        $data->prompt .= "Format the answer using basic HTML formatting tags.";
+        $data->prompt = "Format the answer using basic HTML formatting tags." . $data->prompt;
       }
-
-      $data->prompt .= ". Do not try to use any image, video, or audio tags. Do not use backticks or ```html indicator.";
+      $data->prompt = "Do not try to use any image, video, or audio tags. Do not use backticks or ```html indicator." . $data->prompt;
 
       $messages = new ChatInput([
         new ChatMessage('user', $data->prompt),

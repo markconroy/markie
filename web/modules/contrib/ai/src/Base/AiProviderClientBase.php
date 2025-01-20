@@ -96,13 +96,6 @@ abstract class AiProviderClientBase implements AiProviderInterface, ContainerFac
   protected FileSystemInterface $fileSystem;
 
   /**
-   * The API definition.
-   *
-   * @var array
-   */
-  protected array $apiDefinition = [];
-
-  /**
    * The configuration to add to the call.
    *
    * @var array
@@ -204,7 +197,6 @@ abstract class AiProviderClientBase implements AiProviderInterface, ContainerFac
     $this->loggerFactory = $logger_factory;
     $this->moduleHandler = $module_handler;
     $this->config = $this->getConfig();
-    $this->apiDefinition = $this->getApiDefinition();
     $this->cacheBackend = $cache_backend;
     $this->keyRepository = $key_repository;
     $this->eventDispatcher = $event_dispatcher;
@@ -215,10 +207,14 @@ abstract class AiProviderClientBase implements AiProviderInterface, ContainerFac
    * Load from dependency injection container.
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
+    $client_options = $configuration['http_client_options'] ?? [];
+
     return new static(
       $plugin_id,
       $plugin_definition,
-      $container->get('http_client'),
+      $container->get('http_client_factory')->fromOptions($client_options + [
+        'timeout' => 60,
+      ]),
       $container->get('config.factory'),
       $container->get('logger.factory'),
       $container->get('cache.default'),
@@ -412,7 +408,21 @@ abstract class AiProviderClientBase implements AiProviderInterface, ContainerFac
   /**
    * {@inheritdoc}
    */
-  public function loadModelsForm(array $form, $form_state, string $operation_type, string|NULL $model_id = NULL): array {
+  public function getSetupData(): array {
+    return [];
+  }
+
+  /**
+   * Reset the tags.
+   */
+  public function resetTags(): void {
+    $this->tags = [];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function loadModelsForm(array $form, $form_state, string $operation_type, string|null $model_id = NULL): array {
     $config = $this->loadModelConfig($operation_type, $model_id);
     switch ($operation_type) {
       case 'chat':

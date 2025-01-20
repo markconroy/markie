@@ -67,8 +67,6 @@ return array(
     'Masterminds\\' => array($vendorDir . '/masterminds/html5/src'),
     'League\\HTMLToMarkdown\\' => array($vendorDir . '/league/html-to-markdown/src'),
     'League\\Container\\' => array($vendorDir . '/league/container/src'),
-    'League\\Config\\' => array($vendorDir . '/league/config/src'),
-    'League\\CommonMark\\' => array($vendorDir . '/league/commonmark/src'),
     'JsonSchema\\' => array($vendorDir . '/justinrainbow/json-schema/src/JsonSchema'),
     'Http\\Message\\MultipartStream\\' => array($vendorDir . '/php-http/multipart-stream-builder/src'),
     'Http\\Discovery\\' => array($vendorDir . '/php-http/discovery/src'),

@@ -2,7 +2,6 @@
 
 namespace Drupal\ai\Traits\File;
 
-use Drupal\Core\File\FileExists;
 use Drupal\Core\File\FileSystemInterface;
 use Drupal\file\Entity\File;
 
@@ -17,14 +16,14 @@ trait GenerateFileEntityTrait {
    * Get as file entity.
    *
    * @param string $file_path
-   *   The file path.
+   *   A path to store the file at: for example public:://images/.
    * @param string $filename
    *   The filename.
    *
    * @return \Drupal\file\Entity\File
    *   The file entity.
    */
-  public function getAsFileEntity($file_path = "", $filename = ""): File {
+  public function getAsFileEntity(string $file_path = '', string $filename = ''): File {
     // Set defaults.
     if (!$file_path) {
       $file_path = 'public://';
@@ -37,17 +36,22 @@ trait GenerateFileEntityTrait {
         $filename = uniqid();
       }
     }
-    // Get the directory from the file path.
-    $directory = dirname($file_path);
+
     // Get the file system.
+    /** @var \Drupal\Core\File\FileSystemInterface $file_system */
     $file_system = \Drupal::service('file_system');
+
     // Prepare the directory.
-    $file_system->prepareDirectory($directory, FileSystemInterface::CREATE_DIRECTORY);
+    $file_system->prepareDirectory($file_path, FileSystemInterface::CREATE_DIRECTORY);
 
     $file_storage = \Drupal::service('entity_type.manager')->getStorage('file');
+
+    // The file url is the $file_path + the $filename, with correct dividers
+    // between.
+    $file_url = (str_ends_with($file_path, '//')) ? $file_path . $filename : rtrim($file_path, '/') . '/' . $filename;
+
     // Generate a file from string and rename if it already exists.
-    $file_url = substr($file_path, -2) == '//' ? $file_path . $filename : rtrim($file_path, '/') . '/' . $filename;
-    $file_path = $file_system->saveData($this->getBinary(), $file_url, FileExists::Rename);
+    $file_path = $file_system->saveData($this->getBinary(), $file_url);
 
     // Generate a file entity.
     $file = $file_storage->create([
@@ -57,6 +61,7 @@ trait GenerateFileEntityTrait {
       'filename' => basename($file_path),
     ]);
     $file->save();
+
     return $file;
   }
 

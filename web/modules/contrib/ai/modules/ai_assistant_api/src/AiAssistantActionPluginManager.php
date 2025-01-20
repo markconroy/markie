@@ -44,6 +44,26 @@ final class AiAssistantActionPluginManager extends DefaultPluginManager {
   }
 
   /**
+   * Get a list of all instructions.
+   *
+   * @param array $configs
+   *   The configurations.
+   *
+   * @return array
+   *   An array of all instructions.
+   */
+  public function listAllUsageInstructions($configs = []): array {
+    $instructions = [];
+    foreach ($this->getDefinitions() as $definition) {
+      $instance = $this->createInstance($definition['id'], $configs[$definition['id']] ?? []);
+      foreach ($instance->listUsageInstructions() as $instruction) {
+        $instructions[] = $instruction;
+      }
+    }
+    return $instructions;
+  }
+
+  /**
    * Get the list of all actions.
    *
    * @param array $configs

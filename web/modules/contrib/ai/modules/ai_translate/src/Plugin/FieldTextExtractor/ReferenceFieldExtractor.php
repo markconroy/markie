@@ -74,15 +74,30 @@ class ReferenceFieldExtractor implements ConfigurableFieldTextExtractorInterface
    * {@inheritdoc}
    */
   public function extract(ContentEntityInterface $entity, string $fieldName): array {
+    // Static variable to track recursion depth.
+    static $depth = 0;
+    $maxDepth = (int) $this->config->get('entity_reference_depth') ?? 1;
+
+    // Return empty if the maximum depth is reached.
+    if ($maxDepth && $depth > $maxDepth) {
+      return [];
+    }
+
     if ($entity->get($fieldName)->isEmpty()) {
       return [];
     }
+
+    // Increment depth at the start of processing.
+    $depth++;
     $textMeta = [];
     foreach ($entity->get($fieldName)->referencedEntities() as $delta => $subEntity) {
       foreach ($this->textExtractor->extractTextMetadata($subEntity) as $subMeta) {
         $textMeta[] = ['delta' => $delta] + $subMeta;
       }
     }
+    // Decrement depth after processing.
+    $depth--;
+
     return $textMeta;
   }
 

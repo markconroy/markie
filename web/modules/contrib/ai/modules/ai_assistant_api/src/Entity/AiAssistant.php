@@ -46,15 +46,16 @@ use Drupal\ai_assistant_api\AiAssistantInterface;
  *     "label",
  *     "description",
  *     "allow_history",
+ *     "history_context_length",
  *     "pre_action_prompt",
- *     "preprompt_instructions",
- *     "system_role",
+ *     "system_prompt",
+ *     "instructions",
  *     "actions_enabled",
- *     "assistant_message",
  *     "error_message",
  *     "llm_provider",
  *     "llm_model",
  *     "llm_configuration",
+ *     "roles",
  *   },
  * )
  */
@@ -81,6 +82,11 @@ final class AiAssistant extends ConfigEntityBase implements AiAssistantInterface
   protected string $allow_history;
 
   /**
+   * History context length.
+   */
+  protected string $history_context_length = "2";
+
+  /**
    * The system role.
    */
   protected string $system_role;
@@ -89,6 +95,18 @@ final class AiAssistant extends ConfigEntityBase implements AiAssistantInterface
    * The pre action prompt.
    */
   protected string $pre_action_prompt;
+
+  /**
+   * The system prompt.
+   *
+   * @var string
+   */
+  protected ?string $system_prompt;
+
+  /**
+   * The instructions for the LLM.
+   */
+  protected ?string $instructions;
 
   /**
    * The instructions for the pre action prompt.
@@ -124,5 +142,10 @@ final class AiAssistant extends ConfigEntityBase implements AiAssistantInterface
    * The LLM configuration.
    */
   protected array $llm_configuration;
+
+  /**
+   * The roles that can run this assistant.
+   */
+  protected array $roles = [];
 
 }

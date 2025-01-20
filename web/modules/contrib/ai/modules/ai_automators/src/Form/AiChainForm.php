@@ -4,11 +4,14 @@ namespace Drupal\ai_automators\Form;
 
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\ai_automators\Entity\AiAutomator;
 use Drupal\ai_automators\PluginManager\AiAutomatorTypeManager;
 use Drupal\ai_automators\Traits\AutomatorInstructionTrait;
+use Drupal\Core\Url;
 use Drupal\token\TokenEntityMapperInterface;
 use Drupal\token\TreeBuilder;
 use Http\Discovery\Exception\NotFoundException;
@@ -22,91 +25,47 @@ class AiChainForm extends FormBase {
   use AutomatorInstructionTrait;
 
   /**
-   * Entity type manager.
-   *
-   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
-   */
-  protected $entityTypeManager;
-
-  /**
-   * Entity field manager.
-   *
-   * @var \Drupal\Core\Entity\EntityFieldManagerInterface
-   */
-  protected $entityFieldManager;
-
-  /**
-   * The automator type manager.
-   *
-   * @var \Drupal\ai_automators\PluginManager\AiAutomatorTypeManager
-   */
-  protected $automatorTypeManager;
-
-  /**
-   * The token entity mapper service.
-   *
-   * @var \Drupal\token\TokenEntityMapperInterface
-   */
-  protected $tokenEntityMapper;
-
-  /**
-   * Token tree builder.
-   *
-   * @var \Drupal\token\TreeBuilder
-   */
-  protected $tokenTreeBuilder;
-
-  /**
-   * The route match.
-   *
-   * @var \Drupal\Core\Routing\RouteMatchInterface
-   */
-  protected $routeMatch;
-
-  /**
    * The entity type.
    *
    * @var string
    */
-  protected $entityType;
+  protected string $entityType;
 
   /**
    * The bundle.
    *
    * @var string
    */
-  protected $bundle;
+  protected string $bundle;
 
   /**
    * AiChainForm constructor.
    *
-   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
    *   The entity type manager.
-   * @param \Drupal\Core\Entity\EntityFieldManagerInterface $entity_field_manager
+   * @param \Drupal\Core\Entity\EntityFieldManagerInterface $entityFieldManager
    *   The entity field manager.
-   * @param \Drupal\ai_automators\PluginManager\AiAutomatorTypeManager $automator_type_manager
+   * @param \Drupal\ai_automators\PluginManager\AiAutomatorTypeManager $automatorTypeManager
    *   The automator type manager.
-   * @param \Drupal\token\TokenEntityMapperInterface $token_entity_mapper
+   * @param \Drupal\token\TokenEntityMapperInterface $tokenEntityMapper
    *   The token entity mapper.
-   * @param \Drupal\token\TreeBuilder $token_tree_builder
+   * @param \Drupal\token\TreeBuilder $tokenTreeBuilder
    *   The token tree builder.
-   * @param \Drupal\Core\Routing\RouteMatchInterface $route_match
+   * @param \Drupal\Core\Routing\RouteMatchInterface $routeMatch
    *   The route match.
+   * @param \Drupal\Core\Extension\ModuleHandlerInterface $moduleHandler
+   *   The module handler.
    */
   public function __construct(
-    EntityTypeManagerInterface $entity_type_manager,
-    EntityFieldManagerInterface $entity_field_manager,
-    AiAutomatorTypeManager $automator_type_manager,
-    TokenEntityMapperInterface $token_entity_mapper,
-    TreeBuilder $token_tree_builder,
-    RouteMatchInterface $route_match,
+    protected EntityTypeManagerInterface $entityTypeManager,
+    protected EntityFieldManagerInterface $entityFieldManager,
+    protected AiAutomatorTypeManager $automatorTypeManager,
+    protected TokenEntityMapperInterface $tokenEntityMapper,
+    protected TreeBuilder $tokenTreeBuilder,
+    RouteMatchInterface $routeMatch,
+    protected ModuleHandlerInterface $moduleHandler,
   ) {
-    $this->entityTypeManager = $entity_type_manager;
-    $this->entityFieldManager = $entity_field_manager;
-    $this->automatorTypeManager = $automator_type_manager;
-    $this->tokenEntityMapper = $token_entity_mapper;
-    $this->tokenTreeBuilder = $token_tree_builder;
-    $this->routeMatch = $route_match;
+    $this->routeMatch = $routeMatch;
   }
 
   /**
@@ -119,21 +78,22 @@ class AiChainForm extends FormBase {
       $container->get('plugin.manager.ai_automator'),
       $container->get('token.entity_mapper'),
       $container->get('token.tree_builder'),
-      $container->get('current_route_match')
+      $container->get('current_route_match'),
+      $container->get('module_handler'),
     );
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getFormId() {
+  public function getFormId(): string {
     return 'ai_chain_form';
   }
 
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state) {
+  public function buildForm(array $form, FormStateInterface $form_state): array {
     // Get entity type from the route.
     [, , $entity_type] = explode(".", $this->routeMatch->getRouteName());
     if (empty($entity_type)) {
@@ -161,6 +121,22 @@ class AiChainForm extends FormBase {
     }
     catch (\Exception $e) {
       throw new NotFoundException('Entity type and bundle are required.');
+    }
+
+    $form['introduction'] = [
+      '#type' => 'html_tag',
+      '#tag' => 'p',
+      '#value' => $this->t('This form shows you all the AI Automators currently set up on this :entity_type and allows you to alter the order in which they run.', [
+        ':entity_type' => ucwords($entity_type),
+      ]),
+    ];
+
+    if (!$this->moduleHandler->moduleExists('field_ui')) {
+      $form['warning'] = [
+        '#type' => 'html_tag',
+        '#tag' => 'p',
+        '#value' => $this->t('You do not currently have the Field UI module enabled. <strong>AI Automators are configured through the settings of the field they are attached to</strong> so to add or edit them you will need Field UI enabled. This can then be disabled again once you have finished altering them.'),
+      ];
     }
 
     // Resort definitions on weight.
@@ -228,24 +204,42 @@ class AiChainForm extends FormBase {
         '#attributes' => ['class' => ['item-order-weight']],
       ];
 
+      $links = [];
+
+      if ($this->moduleHandler->moduleExists('field_ui')) {
+        $field_config = [
+          'entity_type' => $entity_type,
+          'bundle' => $bundle,
+          'field' => $definition->get('field_name'),
+        ];
+
+        $route_params = $parameters;
+        $route_params['field_config'] = implode('.', $field_config);
+
+        $links['edit'] = [
+          'title' => $this->t('Edit'),
+          'url' => Url::fromRoute('entity.field_config.' . $entity_type . '_field_edit_form', $route_params, [
+            'query' => [
+              'destination' => Url::fromRoute('<current>')->toString(),
+            ],
+          ]),
+        ];
+      }
+
+      $links['delete'] = [
+        'title' => $this->t('Delete'),
+        'url' => $definition->toUrl('delete-form'),
+      ];
+
       $form['items'][$definition->id()]['operations'] = [
         '#type' => 'operations',
-        '#links' => [
-          'edit' => [
-            'title' => $this->t('Edit'),
-            'url' => $definition->toUrl('edit-form'),
-          ],
-          'delete' => [
-            'title' => $this->t('Delete'),
-            'url' => $definition->toUrl('delete-form'),
-          ],
-        ],
+        '#links' => $links,
       ];
     }
 
     $form['submit'] = [
       '#type' => 'submit',
-      '#value' => $this->t('Resort'),
+      '#value' => $this->t('Re-sort'),
     ];
 
     return $form;
@@ -254,7 +248,7 @@ class AiChainForm extends FormBase {
   /**
    * {@inheritdoc}
    */
-  public function submitForm(array &$form, FormStateInterface $form_state) {
+  public function submitForm(array &$form, FormStateInterface $form_state): void {
     // First get the lowest values.
     $weight = NULL;
     foreach ($form_state->getValues()['items'] as $instruction => $new_weight) {
@@ -265,7 +259,8 @@ class AiChainForm extends FormBase {
 
     // Now loop through the instructions and update the weight.
     foreach ($form_state->getValues()['items'] as $instruction => $new_weight) {
-      /** @var \Drupal\ai_automators\Entity\AiAutomator */
+
+      /** @var \Drupal\ai_automators\Entity\AiAutomator $definition */
       $definition = $this->entityTypeManager->getStorage('ai_automator')->load($instruction);
       $definition->set('weight', (int) $weight);
       $definition->save();
@@ -285,7 +280,7 @@ class AiChainForm extends FormBase {
    * @return string
    *   The input.
    */
-  protected function calculateInput($definition) {
+  protected function calculateInput(AiAutomator $definition): string {
     $input = $definition->get('input_mode');
     if ($input == 'base') {
       return $this->fieldNameToLabel($definition->get('base_field'));
@@ -317,7 +312,7 @@ class AiChainForm extends FormBase {
    * @return string
    *   The field label.
    */
-  protected function fieldNameToLabel($field_name) {
+  protected function fieldNameToLabel(string $field_name): string {
     // Load the field name from the entity type.
     $field_data = $this->entityFieldManager->getFieldDefinitions($this->entityType, $this->bundle);
     return isset($field_data[$field_name]) ? $field_data[$field_name]->getLabel() : 'Unknown Field';
@@ -332,7 +327,7 @@ class AiChainForm extends FormBase {
    * @return string
    *   The token label.
    */
-  protected function tokenToLabel($token) {
+  protected function tokenToLabel(string $token): string {
     [$entity_type, $info] = explode(':', $token);
     // Current user.
     $info = $this->tokenTreeBuilder->buildTree('current-user');

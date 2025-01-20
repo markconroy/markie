@@ -1,8 +1,5 @@
-uuid: 3f9bee63-8809-4968-914d-5ac2ffb78a54
 langcode: en
 status: true
-dependencies:
-  module:
-    - ai_logging
+dependencies: {  }
 id: generic
 label: Generic

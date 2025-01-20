@@ -59,6 +59,17 @@ interface AiAssistantActionInterface extends PluginFormInterface, ConfigurableIn
   public function listContexts(): array;
 
   /**
+   * List of usage instructions to give back.
+   *
+   * This is used to give back a list of usage instructions to the assistant
+   * so that it can be provided in the system prompt for best usages.
+   *
+   * @return array
+   *   List of usage instructions.
+   */
+  public function listUsageInstructions(): array;
+
+  /**
    * Triggers some action.
    *
    * @param string $action_id
@@ -79,5 +90,13 @@ interface AiAssistantActionInterface extends PluginFormInterface, ConfigurableIn
    *   An array of examples.
    */
   public function provideFewShotLearningExample(): array;
+
+  /**
+   * Triggers a rollback.
+   *
+   * This is used to trigger a rollback of the action, for actions that actually
+   * change the state of the system.
+   */
+  public function triggerRollback(): void;
 
 }

@@ -6,6 +6,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Link;
 use Drupal\Core\Path\CurrentPathStack;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 use Drupal\ai\AiProviderInterface;
 use Drupal\ai\AiProviderPluginManager;
@@ -78,9 +79,9 @@ class AiProviderFormHelper {
    *   The weight of the form element.
    * @param string $provider_id
    *   If you already have the provider id and only want to show the models.
-   * @param string $title
+   * @param string|\Drupal\Core\StringTranslation\TranslatableMarkup $title
    *   The title of the form element.
-   * @param string $description
+   * @param string|\Drupal\Core\StringTranslation\TranslatableMarkup $description
    *   The description of the form element.
    * @param bool $default_provider
    *   If a default provider should be selectable.
@@ -91,12 +92,12 @@ class AiProviderFormHelper {
     string $operation_type,
     string $prefix = '',
     int $config_level = AiProviderFormHelper::FORM_CONFIGURATION_NONE,
-    $weight = 0,
+    int $weight = 0,
     string $provider_id = '',
-    $title = '',
-    $description = '',
-    $default_provider = FALSE,
-  ) {
+    string|TranslatableMarkup $title = '',
+    string|TranslatableMarkup $description = '',
+    bool $default_provider = FALSE,
+  ): array {
     $providers = $this->getAiProvidersOptions($operation_type);
 
     // Make sure the prefix is properly formatted.
@@ -117,12 +118,12 @@ class AiProviderFormHelper {
 
       $form[$prefix . 'ai_provider'] = [
         '#type' => 'select',
-        '#title' => $title ? $title : $this->t('LLM Provider'),
+        '#title' => $title,
         '#options' => $providers,
         '#default_value' => $provider,
         '#description' => $description,
         '#required' => TRUE,
-        '#empty_option' => $this->t('Select a provider'),
+        '#empty_option' => ($provider) ? NULL : $this->t('Select a provider'),
         '#ajax' => [
           'callback' => '\Drupal\ai\Service\AiProviderFormHelper::loadModelsAjaxCallback',
           'wrapper' => $prefix . 'ajax_wrapper',
@@ -143,7 +144,7 @@ class AiProviderFormHelper {
       ],
       '#states' => [
         'visible' => [
-          ':input[name="' . $prefix . 'ai_provider"]' => ['!value' => ''],
+          ':input[name="' . $prefix . 'ai_provider"]' => ['!value' => $provider ? '__default__' : ''],
         ],
       ],
     ];
@@ -161,7 +162,6 @@ class AiProviderFormHelper {
         $form[$prefix . 'ajax_prefix'][$prefix . 'ai_model'] = [
           '#type' => 'select',
           '#title' => $this->t('Model'),
-          // Only get chat models.
           '#options' => $llmInstance->getConfiguredModels($operation_type),
           '#default_value' => $model,
           '#required' => TRUE,
@@ -183,6 +183,7 @@ class AiProviderFormHelper {
       }
 
     }
+
     return $form;
   }
 
@@ -198,7 +199,7 @@ class AiProviderFormHelper {
    * @param string $prefix
    *   If you want to add a prefix to the form parts generated.
    */
-  public function validateAiProvidersConfig(array &$form, FormStateInterface $form_state, string $operation_type, string $prefix) {
+  public function validateAiProvidersConfig(array &$form, FormStateInterface $form_state, string $operation_type, string $prefix): void {
     $prefix = $prefix ? rtrim($prefix, '_') . '_' : '';
     $provider = $form_state->getValue($prefix . 'ai_provider');
     $model = $form_state->getValue($prefix . 'ai_model');
@@ -316,7 +317,7 @@ class AiProviderFormHelper {
   public static function loadModelsAjaxCallback(array &$form, FormStateInterface $form_state) {
     $prefix = $form_state->getTriggeringElement()['#ajax']['data-prefix'];
     $form_state->setRebuild();
-    return $form[$prefix . 'ajax_prefix'];
+    return $form[$prefix . 'ajax_prefix'] ?? $form['left'][$prefix . 'ajax_prefix'] ?? $form['right'][$prefix . 'ajax_prefix'];
   }
 
   /**
@@ -465,11 +466,11 @@ class AiProviderFormHelper {
               'provider' => $provider->getPluginId(),
               'model_id' => $id,
             ],
-            [
-              'query' => [
-                'destination' => $this->currentPath->getPath(),
-              ],
-            ])),
+              [
+                'query' => [
+                  'destination' => $this->currentPath->getPath(),
+                ],
+              ])),
           ];
         }
         if (isset($form['models']['actions'])) {
@@ -482,11 +483,11 @@ class AiProviderFormHelper {
               'operation_type' => $operation_type['id'],
               'provider' => $provider->getPluginId(),
             ],
-            [
-              'query' => [
-                'destination' => $this->currentPath->getPath(),
-              ],
-            ]),
+              [
+                'query' => [
+                  'destination' => $this->currentPath->getPath(),
+                ],
+              ]),
             '#attributes' => [
               'class' => 'button',
             ],

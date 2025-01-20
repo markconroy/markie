@@ -10,7 +10,6 @@ use Drupal\ai\Enum\EmbeddingStrategyIndexingOptions;
 use Drupal\search_api\Datasource\DatasourceInterface;
 use Drupal\search_api\Form\IndexFieldsForm;
 use Drupal\search_api\Item\ItemInterface;
-use League\CommonMark\CommonMarkConverter;
 
 /**
  * Override the Search API Index Fields Form.
@@ -150,7 +149,7 @@ class AiSearchIndexFieldsForm extends IndexFieldsForm {
               if (
                 isset($row['type']['#default_value'])
                 && $row['type']['#default_value'] === 'string'
-                && $row['indexing_option']['#default_value'] === EmbeddingStrategyIndexingOptions::ATTRIBUTES->getKey()
+                && $row['indexing_option']['#default_value'] === EmbeddingStrategyIndexingOptions::Attributes->getKey()
               ) {
                 $row['max'] = [
                   '#type' => 'number',
@@ -361,10 +360,18 @@ class AiSearchIndexFieldsForm extends IndexFieldsForm {
       'property' => $this->t('Dimensions'),
       'content' => count($embedding['values']),
     ];
-    $converter = new CommonMarkConverter([
-      'html_input' => 'strip',
-      'allow_unsafe_links' => FALSE,
-    ]);
+
+    // The conversion from markdown to html is an optional dependency.
+    $converter = FALSE;
+    if (class_exists('League\CommonMark\CommonMarkConverter')) {
+      // Ignore the non-use statement loading since this dependency may not
+      // exist.
+      // @codingStandardsIgnoreLine
+      $converter = new \League\CommonMark\CommonMarkConverter([
+        'html_input' => 'strip',
+        'allow_unsafe_links' => FALSE,
+      ]);
+    }
     foreach ($embedding['metadata'] as $key => $item) {
       if (is_array($item)) {
         $form['checker']['embeddings_' . $number]['#rows'][] = [
@@ -373,8 +380,24 @@ class AiSearchIndexFieldsForm extends IndexFieldsForm {
         ];
       }
       else {
+
+        // Convert the main content from markdown to HTML if the optional
+        // dependency on Commonmark exists.
         if ($key === 'content') {
-          $item = $converter->convert($item);
+          if ($converter) {
+            $item = $converter->convert($item);
+          }
+          else {
+            $notice = [
+              '#theme' => 'status_messages',
+              '#message_list' => [
+                'status' => [
+                  $this->t('In order to make the chunk more readable, please install the Commonmark optional dependency from PHP League by running <code>composer require league/commonmark</code>.'),
+                ],
+              ],
+            ];
+            $item = $this->renderer->render($notice) . $item;
+          }
         }
 
         $form['checker']['embeddings_' . $number]['#rows'][] = [
@@ -441,7 +464,7 @@ class AiSearchIndexFieldsForm extends IndexFieldsForm {
           }
 
           // If there is more than one, set a validation error.
-          if ($field['indexing_option'] === EmbeddingStrategyIndexingOptions::MAIN_CONTENT->getKey()) {
+          if ($field['indexing_option'] === EmbeddingStrategyIndexingOptions::MainContent->getKey()) {
             $count_main_contents++;
           }
           if ($count_main_contents > 1) {

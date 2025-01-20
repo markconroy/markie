@@ -7,7 +7,7 @@ services:
     parent: default_plugin_manager
   ai_automator.field_config:
     class: Drupal\ai_automators\FormAlter\AiAutomatorFieldConfig
-    arguments: ['@entity_field.manager', '@ai_automator.field_rules', '@current_route_match', '@module_handler', '@plugin.manager.ai_processor', '@entity_type.manager']
+    arguments: ['@entity_field.manager', '@ai_automator.field_rules', '@current_route_match', '@plugin.manager.ai_processor', '@entity_type.manager']
   ai_automator.field_rules:
     class: Drupal\ai_automators\AiFieldRules
     arguments: ['@plugin.manager.ai_automator', '@event_dispatcher']
@@ -32,3 +32,8 @@ services:
   ai_automator.automate:
     class: Drupal\ai_automators\Service\Automate
     arguments: ['@entity_type.manager', '@entity_field.manager']
+  access_check.ai_automators.automator_advanced:
+    class: Drupal\ai_automators\Access\AutomatorAdvancedAccessChecker
+    arguments: ['@module_handler']
+    tags:
+      - { name: access_check, applies_to: _automator_advanced }

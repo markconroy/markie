@@ -17,7 +17,7 @@ class AutomatorRouteSubscriber implements ContainerInjectionInterface {
    *
    * @var \Drupal\Core\Entity\EntityTypeManagerInterface
    */
-  protected $entityTypeManager;
+  protected EntityTypeManagerInterface $entityTypeManager;
 
   /**
    * Constructs a new AutomatorRouteSubscriber object.
@@ -41,7 +41,7 @@ class AutomatorRouteSubscriber implements ContainerInjectionInterface {
   /**
    * Provides dynamic routes.
    */
-  public function routes() {
+  public function routes(): array {
     $routes = [];
     foreach ($this->entityTypeManager->getDefinitions() as $entity_type_id => $entity_type) {
       if (!$entity_type->entityClassImplements('Drupal\Core\Config\Entity\ConfigEntityInterface')) {
@@ -54,7 +54,7 @@ class AutomatorRouteSubscriber implements ContainerInjectionInterface {
         '/admin/structure/types/manage/automator_chain/' . $entity_type->getBundleOf() . '/{' . $entity_type_id . '}',
         [
           '_form' => '\Drupal\ai_automators\Form\AiChainForm',
-          '_title' => 'AI Automator Chain Configuration',
+          '_title' => 'AI Automator Run Order',
         ],
         [
           '_permission'  => 'administer ai_automator',

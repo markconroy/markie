@@ -89,7 +89,7 @@ class FileHelper {
   public function createFilePathFromFieldConfig($fileName, FieldDefinitionInterface $fieldDefinition, ContentEntityInterface $entity) {
     $config = $fieldDefinition->getConfig($entity->bundle())->getSettings();
     $path = $this->token->replace($config['uri_scheme'] . '://' . rtrim($config['file_directory'], '/'));
-    $this->fileSystem->prepareDirectory($path);
+    $this->fileSystem->prepareDirectory($path, FileSystemInterface::CREATE_DIRECTORY);
     return $path . '/' . $fileName;
   }
 
@@ -100,11 +100,15 @@ class FileHelper {
    *   The binary string.
    * @param string $dest
    *   The destination.
+   * @param string $alt_text
+   *   The alt text.
+   * @param string $title
+   *   The title.
    *
    * @return array
    *   The image entity with meta data.
    */
-  public function generateImageMetaDataFromBinary(string $binary, string $dest) {
+  public function generateImageMetaDataFromBinary(string $binary, string $dest, string $alt_text = '', string $title = '') {
     $file = $this->generateFileFromBinary($binary, $dest);
     if ($file instanceof FileInterface) {
       // Get resolution.
@@ -114,6 +118,8 @@ class FileHelper {
         'target_id' => $file->id(),
         'width' => $resolution[0],
         'height' => $resolution[1],
+        'alt' => $alt_text,
+        'title' => $title,
       ];
     }
     return NULL;

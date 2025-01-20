@@ -22,6 +22,7 @@ class PromptJsonDecoder implements PromptJsonDecoderInterface {
     '{\"',
     '[{',
     '```',
+    "{\n",
   ];
 
   /**

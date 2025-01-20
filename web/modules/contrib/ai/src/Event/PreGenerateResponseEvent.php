@@ -13,6 +13,13 @@ class PreGenerateResponseEvent extends Event {
   const EVENT_NAME = 'ai.pre_generate_response';
 
   /**
+   * The request thread id.
+   *
+   * @var string
+   */
+  protected $requestThreadId;
+
+  /**
    * The provider to process.
    *
    * @var string
@@ -76,8 +83,17 @@ class PreGenerateResponseEvent extends Event {
   protected $debugData;
 
   /**
+   * The metadata to store for the request.
+   *
+   * @var array
+   */
+  protected array $metadata;
+
+  /**
    * Constructs the object.
    *
+   * @param string $request_thread_id
+   *   The unique request thread id.
    * @param string $provider_id
    *   The provider to process.
    * @param string $operation_type
@@ -92,8 +108,11 @@ class PreGenerateResponseEvent extends Event {
    *   The tags for the request.
    * @param array $debug_data
    *   The debug data for the request.
+   * @param array $metadata
+   *   The metadata to store for the request.
    */
-  public function __construct(string $provider_id, string $operation_type, array $configuration, mixed $input, string $model_id, array $tags = [], array $debug_data = []) {
+  public function __construct(string $request_thread_id, string $provider_id, string $operation_type, array $configuration, mixed $input, string $model_id, array $tags = [], array $debug_data = [], array $metadata = []) {
+    $this->requestThreadId = $request_thread_id;
     $this->providerId = $provider_id;
     $this->configuration = $configuration;
     $this->operationType = $operation_type;
@@ -101,6 +120,17 @@ class PreGenerateResponseEvent extends Event {
     $this->input = $input;
     $this->tags = $tags;
     $this->debugData = $debug_data;
+    $this->metadata = $metadata;
+  }
+
+  /**
+   * Gets the request thread id.
+   *
+   * @return string
+   *   The request thread id.
+   */
+  public function getRequestThreadId() {
+    return $this->requestThreadId;
   }
 
   /**
@@ -226,6 +256,51 @@ class PreGenerateResponseEvent extends Event {
    */
   public function getAuthentication() {
     return $this->authentication;
+  }
+
+  /**
+   * Get all the metadata.
+   *
+   * @return array
+   *   All the metadata.
+   */
+  public function getAllMetadata(): array {
+    return $this->metadata;
+  }
+
+  /**
+   * Set all metadata replacing existing contents.
+   *
+   * @param array $metadata
+   *   All the metadata.
+   */
+  public function setAllMetadata(array $metadata): void {
+    $this->metadata = $metadata;
+  }
+
+  /**
+   * Get specific metadata by key.
+   *
+   * @param string $metadata_key
+   *   The key of the metadata to return.
+   *
+   * @return mixed
+   *   The metadata for the provided key.
+   */
+  public function getMetadata(string $metadata_key): mixed {
+    return $this->metadata[$metadata_key];
+  }
+
+  /**
+   * Add to the metadata by key.
+   *
+   * @param string $key
+   *   The key.
+   * @param mixed $value
+   *   The value.
+   */
+  public function setMetadata(string $key, mixed $value): void {
+    $this->metadata[$key] = $value;
   }
 
 }

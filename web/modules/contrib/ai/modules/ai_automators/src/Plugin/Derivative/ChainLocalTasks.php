@@ -20,10 +20,10 @@ class ChainLocalTasks extends DeriverBase implements ContainerDeriverInterface {
    *
    * @var \Drupal\Core\Entity\EntityTypeManagerInterface
    */
-  protected $entityTypeManager;
+  protected EntityTypeManagerInterface $entityTypeManager;
 
   /**
-   * Creates a Automator Chain derivite object.
+   * Creates a Automator Chain derivative object.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   The entity type manager.
@@ -44,7 +44,7 @@ class ChainLocalTasks extends DeriverBase implements ContainerDeriverInterface {
   /**
    * {@inheritdoc}
    */
-  public function getDerivativeDefinitions($base_plugin_definition) {
+  public function getDerivativeDefinitions($base_plugin_definition): array {
 
     $entity_definitions = $this->entityTypeManager->getDefinitions();
     foreach ($entity_definitions as $entity_type_id => $entity_type) {
@@ -55,7 +55,7 @@ class ChainLocalTasks extends DeriverBase implements ContainerDeriverInterface {
         continue;
       }
       $this->derivatives["entity.$entity_type_id.automator_chain"] = $base_plugin_definition;
-      $this->derivatives["entity.$entity_type_id.automator_chain"]['title'] = $this->t("Automator chain");
+      $this->derivatives["entity.$entity_type_id.automator_chain"]['title'] = $this->t('AI Automator Run Order');
       $this->derivatives["entity.$entity_type_id.automator_chain"]['route_name'] = 'ai_automator.config_chain.' . $entity_type->getBundleOf();
       $this->derivatives["entity.$entity_type_id.automator_chain"]['base_route'] = "entity.$entity_type_id.edit_form";
       $this->derivatives["entity.$entity_type_id.automator_chain"]['weight'] = 100;

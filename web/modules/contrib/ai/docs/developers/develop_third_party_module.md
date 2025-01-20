@@ -117,6 +117,10 @@ public submitForm($form, $form_state) {
 
 ```
 
+## Listening for provider changes.
+Sometimes when you have your own provider picker, you might need to listen for events where this provider is disabled/uninstalled. This can be done
+via the [Provider Disabled event](events.md)
+
 ### Setting Chat system messages.
 There is an abstracted way to set system messages for the providers that allows for it, the method is called `setChatSystemRole` and just takes the system role you want to set. Note that different providers weights these instructions more or less, so in certain cases it might make more sense to use two user messages instead.
 

@@ -1,0 +1,19 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall function for AI assistant.
+ */
+
+/**
+ * Implements hook_update_N().
+ */
+function ai_assistant_api_update_10200() {
+  // Get all assistants.
+  $assistants = \Drupal::entityTypeManager()->getStorage('ai_assistant')->loadMultiple();
+  // Update all of them and set empty on the roles.
+  foreach ($assistants as $assistant) {
+    $assistant->set('roles', []);
+    $assistant->save();
+  }
+}

@@ -7,6 +7,7 @@ use Drupal\Core\Config\ImmutableConfig;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\DependencyInjection\DependencySerializationTrait;
 use Drupal\Core\Entity\ContentEntityInterface;
+use Drupal\Core\Entity\EntityPublishedInterface;
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Template\TwigEnvironment;
 use Drupal\Core\Url;
@@ -289,6 +290,11 @@ class AiTranslateController extends ControllerBase {
     array &$context,
   ) {
     $translation = $entity->addTranslation($lang_to);
+    // Keep published status when translating.
+    if ($entity instanceof EntityPublishedInterface) {
+      $entity->isPublished() ? $translation->setPublished()
+        : $translation->setUnpublished();
+    }
     $this->textExtractor->insertTextMetadata($translation,
       $context['results']['processedTranslations']);
     try {

@@ -7,7 +7,7 @@ entity.ai_automator.collection:
     _permission: 'administer ai_automator'
 
 entity.ai_automator.add_form:
-  path: '/admin/config/ai/ai_automator/add'
+  path: '/admin/config/ai/ai-automator/add'
   defaults:
     _entity_form: 'ai_automator.add'
     _title: 'Add an ai automator'

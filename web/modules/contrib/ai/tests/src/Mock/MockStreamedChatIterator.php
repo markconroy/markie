@@ -3,26 +3,13 @@
 namespace Drupal\Tests\ai\Mock;
 
 use Drupal\ai\OperationType\Chat\StreamedChatMessage;
+use Drupal\ai\OperationType\Chat\StreamedChatMessageIterator;
 use Drupal\ai\OperationType\Chat\StreamedChatMessageIteratorInterface;
 
 /**
  * Mock chat iterator for testing.
  */
-class MockStreamedChatIterator implements StreamedChatMessageIteratorInterface {
-
-  /**
-   * The iterator.
-   *
-   * @var \IteratorAggregate
-   */
-  private $iterator;
-
-  /**
-   * {@inheritdoc}
-   */
-  public function __construct(\IteratorAggregate $iterator) {
-    $this->iterator = $iterator;
-  }
+class MockStreamedChatIterator extends StreamedChatMessageIterator implements StreamedChatMessageIteratorInterface {
 
   /**
    * Get the iterator.

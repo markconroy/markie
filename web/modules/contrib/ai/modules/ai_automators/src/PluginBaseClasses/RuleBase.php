@@ -16,6 +16,7 @@ use Drupal\ai\Service\AiProviderFormHelper;
 use Drupal\ai\Service\PromptJsonDecoder\PromptJsonDecoderInterface;
 use Drupal\ai\Utility\CastUtility;
 use Drupal\ai_automators\Exceptions\AiAutomatorResponseErrorException;
+use Drupal\ai_automators\Exceptions\AiAutomatorTypeNotRunnable;
 use Drupal\ai_automators\PluginInterfaces\AiAutomatorTypeInterface;
 use Drupal\ai_automators\Traits\GeneralHelperTrait;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -276,9 +277,9 @@ abstract class RuleBase implements AiAutomatorTypeInterface, ContainerFactoryPlu
     }
 
     // Add vision if it is available or default vision.
-    if (($llmInstance && in_array($model, $llmInstance->getConfiguredModels('chat', [AiModelCapability::ChatWithImageVision]))) || $provider == 'default_vision') {
+    if (($llmInstance && in_array($model, array_keys($llmInstance->getConfiguredModels('chat', [AiModelCapability::ChatWithImageVision])))) || $provider == 'default_vision') {
       // Add the image field to use.
-      $form['automator_configuration_image_field'] = [
+      $form['ajax_prefix']['automator_configuration_image_field'] = [
         '#type' => 'select',
         '#title' => $this->t('Image Field'),
         '#options' => $this->getGeneralHelper()->getFieldsOfType($entity, 'image'),
@@ -288,7 +289,7 @@ abstract class RuleBase implements AiAutomatorTypeInterface, ContainerFactoryPlu
       ];
 
       // Also add the possibility to add an image style.
-      $form['automator_configuration_image_style'] = [
+      $form['ajax_prefix']['automator_configuration_image_style'] = [
         '#type' => 'select',
         '#title' => $this->t('Image Style'),
         '#description' => $this->t('Use an optional image style to lower costs and increase speed.'),
@@ -499,7 +500,7 @@ abstract class RuleBase implements AiAutomatorTypeInterface, ContainerFactoryPlu
    * @return \Drupal\ai\Plugin\ProviderProxy
    *   The LLM instance.
    */
-  public function prepareLlmInstance($operationType, array $automatorConfig) {
+  public function prepareLlmInstance($operationType, array &$automatorConfig) {
     $provider = $this->getProvider($automatorConfig);
     $model = $this->getModel($automatorConfig);
     $instance = $this->aiPluginManager->createInstance($provider);
@@ -595,7 +596,10 @@ abstract class RuleBase implements AiAutomatorTypeInterface, ContainerFactoryPlu
    * @return string
    *   The provider.
    */
-  protected function getProvider(array $automatorConfig) {
+  protected function getProvider(array $automatorConfig): string {
+    if (empty($automatorConfig['ai_provider'])) {
+      throw new AiAutomatorTypeNotRunnable('No provider set for the LLM type ' . $this->llmType);
+    }
     if ($automatorConfig['ai_provider'] == 'default_json') {
       $automatorConfig['ai_provider'] = $this->aiPluginManager->getDefaultProviderForOperationType('chat_with_complex_json')['provider_id'];
     }
@@ -617,7 +621,7 @@ abstract class RuleBase implements AiAutomatorTypeInterface, ContainerFactoryPlu
    * @return string
    *   The model.
    */
-  protected function getModel(array $automatorConfig) {
+  protected function getModel(array &$automatorConfig): string {
     if ($automatorConfig['ai_provider'] == 'default_json') {
       $automatorConfig['ai_model'] = $this->aiPluginManager->getDefaultProviderForOperationType('chat_with_complex_json')['model_id'];
     }
