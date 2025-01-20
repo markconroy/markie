@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\redirect\Unit;
 
+use Drupal\Core\Path\CurrentPathStack;
+use Drupal\path_alias\AliasManager;
 use Drupal\Tests\UnitTestCase;
 use Drupal\redirect\EventSubscriber\RouteNormalizerRequestSubscriber;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
@@ -118,6 +120,17 @@ class RouteNormalizerRequestSubscriberTest extends UnitTestCase {
    * @return \Drupal\redirect\EventSubscriber\RouteNormalizerRequestSubscriber
    */
   protected function getSubscriber($request_uri, $enabled = TRUE, $call_expected = TRUE) {
+
+    $alias_manager = $this->createMock(AliasManager::class);
+    $alias_manager->expects($this->any())
+      ->method('setCacheKey')
+      ->with('/current-path');
+
+    $current_path = $this->createMock(CurrentPathStack::class);
+    $current_path->expects($this->any())
+      ->method('getPath')
+      ->willReturn('/current-path');
+
     return new RouteNormalizerRequestSubscriber(
       $this->getUrlGeneratorStub($request_uri, $call_expected),
       $this->getPathMatcherStub($call_expected),
@@ -127,7 +140,9 @@ class RouteNormalizerRequestSubscriberTest extends UnitTestCase {
           'default_status_code' => 301,
         ],
       ]),
-      $this->getRedirectCheckerStub($call_expected)
+      $this->getRedirectCheckerStub($call_expected),
+      $alias_manager,
+      $current_path
     );
   }
 

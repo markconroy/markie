@@ -262,10 +262,18 @@ class RedirectJavascriptTest extends WebDriverTestBase {
     $this->drupalGet('admin/config/search/redirect');
     $page->find('css', '.dropbutton-toggle button')->press();
     $this->clickLink('Delete');
+    if (version_compare(\Drupal::VERSION, '11.1', '>=')) {
+      $this->assertSession()->assertWaitOnAjaxRequest();
+    }
     $this->assertSession()->responseContains(
       'Are you sure you want to delete the URL redirect from ' . Url::fromUri('base:non-existing', ['query' => ['key' => 'value']])->toString() . ' to ' . Url::fromUri('base:node')->toString() . '?'
     );
-    $this->submitForm([], 'Delete');
+    if (version_compare(\Drupal::VERSION, '11.1', '>=')) {
+      $this->assertSession()->elementExists('css', '.ui-dialog-buttonset')->findButton('Delete')->press();
+    }
+    else {
+      $this->getSession()->getPage()->findButton('Delete')->press();
+    }
     $this->assertSession()->addressEquals('admin/config/search/redirect');
 
     // Test the bulk delete action.

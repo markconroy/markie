@@ -23,7 +23,7 @@ services:
       - { name: event_subscriber }
   redirect.route_normalizer_request_subscriber:
     class: Drupal\redirect\EventSubscriber\RouteNormalizerRequestSubscriber
-    arguments: ['@url_generator', '@path.matcher', '@config.factory', '@redirect.checker']
+    arguments: ['@url_generator', '@path.matcher', '@config.factory', '@redirect.checker', '@path_alias.manager', '@path.current']
     tags:
       - { name: event_subscriber }
   redirect.route_subscriber:

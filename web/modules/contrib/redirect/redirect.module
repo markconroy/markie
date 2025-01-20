@@ -120,36 +120,6 @@ function redirect_path_alias_insert(PathAliasInterface $path_alias) {
 }
 
 /**
- * Implements hook_page_build().
- *
- * Adds an action on 404 pages to create a redirect.
- *
- * @todo hook_page_build() can no longer be used for this. Find a different way.
- */
-function redirect_page_build(&$page) {
-  if (redirect_is_current_page_404() && \Drupal::currentUser()->hasPermission('administer redirects')) {
-    if (!isset($page['content']['system_main']['actions'])) {
-      $page['content']['system_main']['actions'] = [
-        '#theme' => 'links',
-        '#links' => [],
-        '#attributes' => ['class' => ['action-links']],
-        '#weight' => -100,
-      ];
-    }
-    // We cannot simply use current_path() because if a 404 path is set, then
-    // that value overrides whatever is in $_GET['q']. The
-    // drupal_deliver_html_page() function thankfully puts the original current
-    // path into $_GET['destination'].
-    $destination = \Drupal::destination()->getAsArray();
-    $page['content']['system_main']['actions']['#links']['add_redirect'] = [
-      'title' => t('Add URL redirect from this page to another location'),
-      'href' => 'admin/config/search/redirect/add',
-      'query' => ['source' => $destination['destination']] + \Drupal::destination()->getAsArray(),
-    ];
-  }
-}
-
-/**
  * Gets the redirect repository service.
  *
  * @return \Drupal\redirect\RedirectRepository
@@ -235,18 +205,6 @@ function redirect_status_code_options($code = NULL) {
     307 => t('307 Temporary Redirect'),
   ];
   return $codes[$code] ?? $codes;
-}
-
-/**
- * Returns if the current page request is a page not found (404 status error).
- *
- * Why the fuck do we have to do this? Why is there not an easier way???
- *
- * @return bool
- *   TRUE if the current page is a 404, or FALSE otherwise.
- */
-function redirect_is_current_page_404() {
-  return drupal_get_http_header('Status') == '404 Not Found';
 }
 
 /**
