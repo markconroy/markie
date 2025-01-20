@@ -21,6 +21,7 @@ use Drupal\Tests\Traits\Core\PathAliasTestTrait;
  * Tests link field widgets and formatters.
  *
  * @group link
+ * @group #slow
  */
 class LinkFieldTest extends BrowserTestBase {
 
@@ -1054,7 +1055,7 @@ class LinkFieldTest extends BrowserTestBase {
    * @return string
    *   The rendered HTML output.
    */
-  protected function renderTestEntity($id, $view_mode = 'full', $reset = TRUE) {
+  protected function renderTestEntity($id, $view_mode = 'full', $reset = TRUE): string {
     if ($reset) {
       $this->container->get('entity_type.manager')->getStorage('entity_test')->resetCache([$id]);
     }

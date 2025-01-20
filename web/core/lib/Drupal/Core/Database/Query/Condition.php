@@ -12,6 +12,8 @@ class Condition implements ConditionInterface, \Countable {
 
   /**
    * Provides a map of condition operators to condition operator options.
+   *
+   * @var string[][]
    */
   protected static $conditionOperatorMap = [
     'BETWEEN' => ['delimiter' => ' AND '],
@@ -263,7 +265,7 @@ class Condition implements ConditionInterface, \Countable {
             // your site is broken.
             // On top of that the database API relies on __toString() which
             // does not allow to throw exceptions.
-            trigger_error('Invalid characters in query operator: ' . $condition['operator'], E_USER_ERROR);
+            trigger_error('Invalid characters in query operator: ' . $condition['operator'], E_USER_WARNING);
             return;
           }
 

@@ -63,6 +63,7 @@
     <exclude name="Drupal.Commenting.DocComment.SpacingBeforeTags"/>
   </rule>
   <rule ref="Drupal.Commenting.DocCommentAlignment"/>
+  <rule ref="Drupal.Commenting.DocCommentLongArraySyntax"/>
   <rule ref="Drupal.Commenting.DocCommentStar"/>
   <rule ref="Drupal.Commenting.FileComment"/>
   <rule ref="Drupal.Commenting.FunctionComment">
@@ -168,6 +169,7 @@
   <rule ref="DrupalPractice.InfoFiles.NamespacedDependency"/>
   <rule ref="DrupalPractice.Objects.GlobalFunction">
     <include-pattern>*/Plugin/*</include-pattern>
+    <include-pattern>*/ListBuilder/*</include-pattern>
   </rule>
 
   <!-- Generic sniffs -->
@@ -277,8 +279,6 @@
     <include-pattern>./modules/system/src/Tests/Routing/*</include-pattern>
     <exclude-pattern>./tests/Drupal/Tests/*/Fixture/*</exclude-pattern>
     <exclude-pattern>./tests/Drupal/Tests/*/fixtures/*</exclude-pattern>
-    <!-- @todo remove this in https://www.drupal.org/project/drupal/issues/3402707 -->
-    <exclude-pattern>./tests/Drupal/KernelTests/AssertContentTrait.php</exclude-pattern>
   </rule>
   <rule ref="SlevomatCodingStandard.TypeHints.NullableTypeForNullDefaultValue"/>
 

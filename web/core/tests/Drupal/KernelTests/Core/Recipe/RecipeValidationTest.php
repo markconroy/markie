@@ -6,10 +6,12 @@ namespace Drupal\KernelTests\Core\Recipe;
 
 use Drupal\Core\Recipe\Recipe;
 use Drupal\Core\Recipe\RecipeFileException;
+use Drupal\Core\TypedData\PrimitiveInterface;
 use Drupal\KernelTests\KernelTestBase;
 
 /**
  * @group Recipe
+ * @group #slow
  */
 class RecipeValidationTest extends KernelTestBase {
 
@@ -256,6 +258,58 @@ YAML,
         '[config][import][0]' => ['This value should satisfy at least one of the following constraints: [1] This value should be identical to string "*". [2] Each element of this collection should satisfy its own set of constraints.'],
       ],
     ];
+    yield 'config strict is not a boolean or array' => [
+      <<<YAML
+name: Invalid strict flag
+config:
+  strict: 40
+YAML,
+      [
+        '[config][strict]' => ['This value must be a boolean, or a list of config names.'],
+      ],
+    ];
+    yield 'config strict is an array of not-strings' => [
+      <<<YAML
+name: Invalid item in strict list
+config:
+  strict:
+    - 40
+YAML,
+      [
+        '[config][strict]' => ['This value must be a boolean, or a list of config names.'],
+      ],
+    ];
+    yield 'config strict list contains blank strings' => [
+      <<<YAML
+name: Invalid item in strict list
+config:
+  strict:
+    - ''
+YAML,
+      [
+        '[config][strict]' => ['This value must be a boolean, or a list of config names.'],
+      ],
+    ];
+    yield 'config strict list item does not have a period' => [
+      <<<YAML
+name: Invalid item in strict list
+config:
+  strict:
+    - 'something'
+YAML,
+      [
+        '[config][strict]' => ['This value must be a boolean, or a list of config names.'],
+      ],
+    ];
+    yield 'valid strict list' => [
+      <<<YAML
+name: Valid strict list
+config:
+  strict:
+    - system.menu.foo
+YAML,
+      NULL,
+    ];
     yield 'config actions list is valid' => [
       <<<YAML
 name: 'Correct config actions list'
@@ -293,6 +347,293 @@ YAML,
           'Config actions cannot be applied to 0 because the 0 extension is not installed, and is not installed by this recipe or any of the recipes it depends on.',
         ],
       ],
+    ];
+    yield 'input definitions are an indexed array' => [
+      <<<YAML
+name: Bad input definitions
+input: false
+YAML,
+      [
+        '[input]' => [
+          'This value should be of type array.',
+          'This value should be of type iterable.',
+        ],
+      ],
+    ];
+    yield 'input data type is missing' => [
+      <<<YAML
+name: Bad input definitions
+input:
+  foo:
+    description: What's my data type?
+    default:
+      source: value
+      value: Here be dragons
+YAML,
+      [
+        '[input][foo][data_type]' => ['This field is missing.'],
+      ],
+    ];
+    yield 'input description is not a string' => [
+      <<<YAML
+name: Bad input definitions
+input:
+  foo:
+    data_type: string
+    description: 3.141
+    default:
+      source: value
+      value: Here be dragons
+YAML,
+      [
+        '[input][foo][description]' => ['This value should be of type string.'],
+      ],
+    ];
+    yield 'input description is blank' => [
+      <<<YAML
+name: Bad input definitions
+input:
+  foo:
+    data_type: string
+    description: ''
+    default:
+      source: value
+      value: Here be dragons
+YAML,
+      [
+        '[input][foo][description]' => ['This value should not be blank.'],
+      ],
+    ];
+    yield 'input constraints are an indexed array' => [
+      <<<YAML
+name: Bad input definitions
+input:
+  foo:
+    data_type: string
+    description: 'Constraints need to be associative'
+    constraints: false
+    default:
+      source: value
+      value: Here be dragons
+YAML,
+      [
+        '[input][foo][constraints]' => ['This value should be of type array.'],
+      ],
+    ];
+    yield 'input data type is unknown' => [
+      <<<YAML
+name: Bad input definitions
+input:
+  foo:
+    data_type: power_tool
+    description: 'Bad data type'
+    prompt:
+      method: ask
+    default:
+      source: value
+      value: Here be dragons
+YAML,
+      [
+        '[input][foo][data_type]' => ["The 'power_tool' plugin does not exist."],
+      ],
+    ];
+    yield 'data type is not a primitive' => [
+      <<<YAML
+name: Bad input definitions
+input:
+  foo:
+    data_type: list
+    description: 'Non-primitive data type'
+    default:
+      source: value
+      value: [Yeah, No]
+YAML,
+      [
+        '[input][foo][data_type]' => [
+          "The 'list' plugin must implement or extend " . PrimitiveInterface::class . '.',
+        ],
+      ],
+    ];
+    yield 'prompt definition is not an array' => [
+      <<<YAML
+name: Bad input definitions
+input:
+  foo:
+    data_type: string
+    description: 'Prompt info must be an array'
+    prompt: ask
+    default:
+      source: value
+      value: Here be dragons
+YAML,
+      [
+        '[input][foo][prompt]' => ['This value should be of type array|(Traversable&ArrayAccess).'],
+      ],
+    ];
+    yield 'invalid prompt method' => [
+      <<<YAML
+name: Bad input definitions
+input:
+  foo:
+    data_type: string
+    description: 'Bad prompt type'
+    prompt:
+      method: whoops
+    default:
+      source: value
+      value: Here be dragons
+YAML,
+      [
+        '[input][foo][prompt][method]' => ['The value you selected is not a valid choice.'],
+      ],
+    ];
+    yield 'prompt arguments are an indexed array' => [
+      <<<YAML
+name: Bad input definitions
+input:
+  foo:
+    data_type: string
+    description: 'Prompt arguments must be associative'
+    prompt:
+      method: ask
+      arguments: false
+    default:
+      source: value
+      value: Here be dragons
+YAML,
+      [
+        '[input][foo][prompt][arguments]' => ['This value should be of type array.'],
+      ],
+    ];
+    yield 'input definition without default value' => [
+      <<<YAML
+name: Bad input definitions
+input:
+  foo:
+    data_type: string
+    description: 'No default'
+    prompt:
+      method: ask
+YAML,
+      [
+        '[input][foo][default]' => ['This field is missing.'],
+      ],
+    ];
+    yield 'default value from config is not defined' => [
+      <<<YAML
+name: Bad input definitions
+input:
+  foo:
+    data_type: string
+    description: 'Bad default definition'
+    prompt:
+      method: ask
+    default:
+      source: config
+YAML,
+      [
+        '[input][foo][default]' => ["The 'config' key is required."],
+      ],
+    ];
+    yield 'default value from config is not an array' => [
+      <<<YAML
+name: Bad input definitions
+input:
+  foo:
+    data_type: email
+    description: 'Bad default definition'
+    prompt:
+      method: ask
+    default:
+      source: config
+      config: 'system.site:mail'
+YAML,
+      [
+        '[input][foo][default][config]' => ['This value should be of type array.'],
+      ],
+    ];
+    yield 'default value from config has too few values' => [
+      <<<YAML
+name: Bad input definitions
+input:
+  foo:
+    data_type: email
+    description: 'Bad default definition'
+    prompt:
+      method: ask
+    default:
+      source: config
+      config: ['system.site:mail']
+YAML,
+      [
+        '[input][foo][default][config]' => ['This collection should contain exactly 2 elements.'],
+      ],
+    ];
+    yield 'default value from config is an associative array' => [
+      <<<YAML
+name: Bad input definitions
+input:
+  foo:
+    data_type: email
+    description: 'Bad default definition'
+    prompt:
+      method: ask
+    default:
+      source: config
+      config: false
+YAML,
+      [
+        '[input][foo][default][config]' => ['This value should be of type array.'],
+      ],
+    ];
+    yield 'default value from config has non-string values' => [
+      <<<YAML
+name: Bad input definitions
+input:
+  foo:
+    data_type: string
+    description: 'Bad default definition'
+    prompt:
+      method: ask
+    default:
+      source: config
+      config: ['system.site', 39]
+YAML,
+      [
+        '[input][foo][default][config][1]' => ['This value should be of type string.'],
+      ],
+    ];
+    yield 'default value from config has empty strings' => [
+      <<<YAML
+name: Bad input definitions
+input:
+  foo:
+    data_type: email
+    description: 'Bad default definition'
+    prompt:
+      method: ask
+    default:
+      source: config
+      config: ['', 'mail']
+YAML,
+      [
+        '[input][foo][default][config][0]' => ['This value should not be blank.'],
+      ],
+    ];
+    yield 'valid default value from config' => [
+      <<<YAML
+name: Good input definitions
+input:
+  foo:
+    data_type: email
+    description: 'Good default definition'
+    prompt:
+      method: ask
+    default:
+      source: config
+      config: ['system.site', 'mail']
+YAML,
+      NULL,
     ];
   }
 

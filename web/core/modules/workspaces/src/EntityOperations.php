@@ -4,6 +4,7 @@ namespace Drupal\workspaces;
 
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityPublishedInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\RevisionableInterface;
 use Drupal\Core\Form\FormStateInterface;
@@ -129,7 +130,7 @@ class EntityOperations implements ContainerInjectionInterface {
     // Disallow any change to an unsupported entity when we are not in the
     // default workspace.
     if (!$this->workspaceInfo->isEntitySupported($entity)) {
-      throw new \RuntimeException('This entity can only be saved in the default workspace.');
+      throw new \RuntimeException(sprintf('The "%s" entity type can only be saved in the default workspace.', $entity->getEntityTypeId()));
     }
 
     /** @var \Drupal\Core\Entity\ContentEntityInterface|\Drupal\Core\Entity\EntityPublishedInterface $entity */
@@ -189,6 +190,7 @@ class EntityOperations implements ContainerInjectionInterface {
       return;
     }
 
+    assert($entity instanceof RevisionableInterface && $entity instanceof EntityPublishedInterface);
     $this->workspaceAssociation->trackEntity($entity, $this->workspaceManager->getActiveWorkspace());
 
     // When a published entity is created in a workspace, it should remain
@@ -200,6 +202,12 @@ class EntityOperations implements ContainerInjectionInterface {
     // entities where there is already a valid default revision for the live
     // workspace.
     if (isset($entity->_initialPublished)) {
+      // Ensure that the default revision of an entity saved in a workspace is
+      // unpublished.
+      if ($entity->isPublished()) {
+        throw new \RuntimeException('The default revision of an entity created in a workspace cannot be published.');
+      }
+
       $entity->setPublished();
       $entity->isDefaultRevision(FALSE);
       $entity->save();

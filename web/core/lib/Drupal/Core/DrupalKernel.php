@@ -1055,8 +1055,7 @@ class DrupalKernel implements DrupalKernelInterface, TerminableInterface {
       $app_root = static::guessApplicationRoot();
     }
 
-    // Enforce E_STRICT, but allow users to set levels not part of E_STRICT.
-    error_reporting(E_STRICT | E_ALL);
+    error_reporting(E_ALL);
 
     // Override PHP settings required for Drupal to work properly.
     // sites/default/default.settings.php contains more runtime settings.
@@ -1066,8 +1065,10 @@ class DrupalKernel implements DrupalKernelInterface, TerminableInterface {
       // Use session cookies, not transparent sessions that puts the session id
       // in the query string.
       ini_set('session.use_cookies', '1');
-      ini_set('session.use_only_cookies', '1');
-      ini_set('session.use_trans_sid', '0');
+      if (\PHP_VERSION_ID < 80400) {
+        ini_set('session.use_only_cookies', '1');
+        ini_set('session.use_trans_sid', '0');
+      }
       // Don't send HTTP headers using PHP's session handler.
       // Send an empty string to disable the cache limiter.
       ini_set('session.cache_limiter', '');

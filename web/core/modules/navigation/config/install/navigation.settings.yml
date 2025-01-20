@@ -1,3 +1,7 @@
-logo_provider: default
-logo_managed: {}
-logo_max_filesize: 1048576
+logo:
+  provider: default
+  path: ''
+  max:
+    filesize: 1048576
+    height: 40
+    width: 40

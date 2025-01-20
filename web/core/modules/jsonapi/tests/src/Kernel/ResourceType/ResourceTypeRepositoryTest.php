@@ -12,7 +12,6 @@ use Drupal\Tests\jsonapi\Kernel\JsonapiKernelTestBase;
 /**
  * @coversDefaultClass \Drupal\jsonapi\ResourceType\ResourceTypeRepository
  * @group jsonapi
- * @group #slow
  *
  * @internal
  */
@@ -212,6 +211,40 @@ class ResourceTypeRepositoryTest extends JsonapiKernelTestBase {
     Cache::invalidateTags(['jsonapi_resource_types']);
     $this->assertFalse($this->resourceTypeRepository->getByTypeName('node--article')->isFieldEnabled('uid'));
     $this->assertTrue($this->resourceTypeRepository->getByTypeName('node--page')->isFieldEnabled('uid'));
+  }
+
+  /**
+   * Tests that resource type fields can be re-enabled per resource type.
+   */
+  public function testResourceTypeFieldEnabling(): void {
+    $this->assertTrue($this->resourceTypeRepository->getByTypeName('node--article')->isFieldEnabled('uid'));
+    $this->assertTrue($this->resourceTypeRepository->getByTypeName('node--page')->isFieldEnabled('uid'));
+    $disabled_resource_type_fields = [
+      'node--article' => [
+        'uid' => TRUE,
+      ],
+      'node--page' => [
+        'uid' => TRUE,
+      ],
+    ];
+    \Drupal::state()->set('jsonapi_test_resource_type_builder.disabled_resource_type_fields', $disabled_resource_type_fields);
+    Cache::invalidateTags(['jsonapi_resource_types']);
+    $this->assertFalse($this->resourceTypeRepository->getByTypeName('node--article')->isFieldEnabled('uid'));
+    $this->assertFalse($this->resourceTypeRepository->getByTypeName('node--page')->isFieldEnabled('uid'));
+
+    $enabled_resource_type_fields = [
+      'node--article' => [
+        'uid' => TRUE,
+      ],
+      'node--page' => [
+        'uid' => TRUE,
+      ],
+    ];
+    \Drupal::state()->set('jsonapi_test_resource_type_builder.enabled_resource_type_fields', $enabled_resource_type_fields);
+    Cache::invalidateTags(['jsonapi_resource_types']);
+    $this->assertTrue($this->resourceTypeRepository->getByTypeName('node--article')->isFieldEnabled('uid'));
+    $this->assertTrue($this->resourceTypeRepository->getByTypeName('node--page')->isFieldEnabled('uid'));
+
   }
 
   /**

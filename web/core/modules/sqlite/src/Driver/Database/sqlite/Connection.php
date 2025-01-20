@@ -2,6 +2,7 @@
 
 namespace Drupal\sqlite\Driver\Database\sqlite;
 
+use Drupal\Component\Utility\FilterArray;
 use Drupal\Core\Database\Connection as DatabaseConnection;
 use Drupal\Core\Database\DatabaseExceptionWrapper;
 use Drupal\Core\Database\DatabaseNotFoundException;
@@ -42,6 +43,8 @@ class Connection extends DatabaseConnection implements SupportsTemporaryTablesIn
    * A map of condition operators to SQLite operators.
    *
    * We don't want to override any of the defaults.
+   *
+   * @var string[][]
    */
   protected static $sqliteConditionOperatorMap = [
     'LIKE' => ['postfix' => " ESCAPE '\\'"],
@@ -58,7 +61,7 @@ class Connection extends DatabaseConnection implements SupportsTemporaryTablesIn
    *
    * @var array
    */
-  protected $attachedDatabases = [];
+  protected array $attachedDatabases = [];
 
   /**
    * Whether or not a table has been dropped this request.
@@ -258,7 +261,7 @@ class Connection extends DatabaseConnection implements SupportsTemporaryTablesIn
    */
   public static function sqlFunctionLeast() {
     // Remove all NULL, FALSE and empty strings values but leaves 0 (zero) values.
-    $values = array_filter(func_get_args(), 'strlen');
+    $values = FilterArray::removeEmptyStrings(func_get_args());
 
     return count($values) < 1 ? NULL : min($values);
   }

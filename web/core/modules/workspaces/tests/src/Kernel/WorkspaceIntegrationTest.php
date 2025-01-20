@@ -8,9 +8,9 @@ use Drupal\Core\Entity\EntityStorageException;
 use Drupal\Core\Form\FormState;
 use Drupal\Core\Session\AnonymousUserSession;
 use Drupal\entity_test\Entity\EntityTestMulRevPub;
+use Drupal\form_test\Form\FormTestAlterForm;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\language\Entity\ConfigurableLanguage;
-use Drupal\system\Form\SiteInformationForm;
 use Drupal\Tests\field\Traits\EntityReferenceFieldCreationTrait;
 use Drupal\Tests\node\Traits\ContentTypeCreationTrait;
 use Drupal\Tests\node\Traits\NodeCreationTrait;
@@ -23,7 +23,6 @@ use Drupal\workspaces\WorkspacePublishException;
 /**
  * Tests a complete publishing scenario across different workspaces.
  *
- * @group #slow
  * @group workspaces
  */
 class WorkspaceIntegrationTest extends KernelTestBase {
@@ -71,6 +70,7 @@ class WorkspaceIntegrationTest extends KernelTestBase {
     'language',
     'content_translation',
     'path_alias',
+    'form_test',
   ];
 
   /**
@@ -690,7 +690,7 @@ class WorkspaceIntegrationTest extends KernelTestBase {
 
     if (!$allowed) {
       $this->expectException(EntityStorageException::class);
-      $this->expectExceptionMessage('This entity can only be saved in the default workspace.');
+      $this->expectExceptionMessage("The \"$entity_type_id\" entity type can only be saved in the default workspace.");
     }
     $entity->save();
   }
@@ -721,7 +721,7 @@ class WorkspaceIntegrationTest extends KernelTestBase {
 
     if (!$allowed) {
       $this->expectException(EntityStorageException::class);
-      $this->expectExceptionMessage('This entity can only be saved in the default workspace.');
+      $this->expectExceptionMessage("The \"$entity_type_id\" entity type can only be saved in the default workspace.");
     }
     $entity->save();
   }
@@ -1073,7 +1073,7 @@ class WorkspaceIntegrationTest extends KernelTestBase {
     $form_builder = $this->container->get('form_builder');
 
     $form_state = new FormState();
-    $built_form = $form_builder->getForm(SiteInformationForm::class, $form_state);
+    $built_form = $form_builder->getForm(FormTestAlterForm::class, $form_state);
     $form_builder->setCache($built_form['#build_id'], $built_form, $form_state);
   }
 

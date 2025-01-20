@@ -52,17 +52,24 @@ trait RecipeTestTrait {
    * @param int $expected_exit_code
    *   The expected exit code of the `drupal recipe` process. Defaults to 0,
    *   which indicates that no error occurred.
+   * @param string[] $options
+   *   (optional) Additional options to pass to the `drupal recipe` command.
+   * @param string $command
+   *   (optional) The name of the command to run. Defaults to `recipe`.
    *
    * @return \Symfony\Component\Process\Process
    *   The `drupal recipe` command process, after having run.
    */
-  protected function applyRecipe(string $path, int $expected_exit_code = 0): Process {
+  protected function applyRecipe(string $path, int $expected_exit_code = 0, array $options = [], string $command = 'recipe'): Process {
     assert($this instanceof BrowserTestBase);
 
     $arguments = [
       (new PhpExecutableFinder())->find(),
       'core/scripts/drupal',
-      'recipe',
+      $command,
+      // Never apply recipes interactively.
+      '--no-interaction',
+      ...$options,
       $path,
     ];
     $process = (new Process($arguments))
@@ -88,6 +95,24 @@ trait RecipeTestTrait {
     // @see \Drupal\Core\Config\Checkpoint\LinearHistory::__construct()
     $this->rebuildAll();
     return $process;
+  }
+
+  /**
+   * Alters an existing recipe.
+   *
+   * @param string $path
+   *   The recipe directory path.
+   * @param callable $alter
+   *   A function that will receive the decoded contents of recipe.yml as an
+   *   array. This should returned a modified array to be written to recipe.yml.
+   */
+  protected function alterRecipe(string $path, callable $alter): void {
+    $file = $path . '/recipe.yml';
+    $this->assertFileExists($file);
+    $contents = file_get_contents($file);
+    $contents = Yaml::decode($contents);
+    $contents = $alter($contents);
+    file_put_contents($file, Yaml::encode($contents));
   }
 
 }

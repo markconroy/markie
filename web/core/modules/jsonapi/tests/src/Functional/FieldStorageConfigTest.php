@@ -11,7 +11,6 @@ use Drupal\field\Entity\FieldStorageConfig;
  * JSON:API integration test for the "FieldStorageConfig" config entity type.
  *
  * @group jsonapi
- * @group #slow
  */
 class FieldStorageConfigTest extends ConfigEntityResourceTestBase {
 
@@ -121,7 +120,7 @@ class FieldStorageConfigTest extends ConfigEntityResourceTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function getExpectedUnauthorizedAccessMessage($method) {
+  protected function getExpectedUnauthorizedAccessMessage($method): string {
     return "The 'administer node fields' permission is required.";
   }
 

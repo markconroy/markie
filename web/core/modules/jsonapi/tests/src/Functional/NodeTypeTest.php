@@ -11,7 +11,6 @@ use Drupal\node\Entity\NodeType;
  * JSON:API integration test for the "NodeType" config entity type.
  *
  * @group jsonapi
- * @group #slow
  */
 class NodeTypeTest extends ConfigEntityResourceTestBase {
 
@@ -115,7 +114,7 @@ class NodeTypeTest extends ConfigEntityResourceTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function getExpectedUnauthorizedAccessMessage($method) {
+  protected function getExpectedUnauthorizedAccessMessage($method): string {
     return "The 'access content' permission is required.";
   }
 
