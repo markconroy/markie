@@ -14,8 +14,10 @@ namespace Twig;
 use Twig\Error\RuntimeError;
 use Twig\Extension\ExtensionInterface;
 use Twig\Extension\GlobalsInterface;
+use Twig\Extension\LastModifiedExtensionInterface;
 use Twig\Extension\StagingExtension;
-use Twig\Node\Expression\AbstractExpression;
+use Twig\Node\Expression\Binary\AbstractBinary;
+use Twig\Node\Expression\Unary\AbstractUnary;
 use Twig\NodeVisitor\NodeVisitorInterface;
 use Twig\TokenParser\TokenParserInterface;
 
@@ -44,9 +46,9 @@ final class ExtensionSet
     private $functions;
     /** @var array<string, TwigFunction> */
     private $dynamicFunctions;
-    /** @var array<string, array{precedence: int, class: class-string<AbstractExpression>}> */
+    /** @var array<string, array{precedence: int, precedence_change?: OperatorPrecedenceChange, class: class-string<AbstractUnary>}> */
     private $unaryOperators;
-    /** @var array<string, array{precedence: int, class?: class-string<AbstractExpression>, associativity: ExpressionParser::OPERATOR_*}> */
+    /** @var array<string, array{precedence: int, precedence_change?: OperatorPrecedenceChange, class?: class-string<AbstractBinary>, associativity: ExpressionParser::OPERATOR_*}> */
     private $binaryOperators;
     /** @var array<string, mixed>|null */
     private $globals;
@@ -60,6 +62,9 @@ final class ExtensionSet
         $this->staging = new StagingExtension();
     }
 
+    /**
+     * @return void
+     */
     public function initRuntime()
     {
         $this->runtimeInitialized = true;
@@ -115,14 +120,19 @@ final class ExtensionSet
             return $this->lastModified;
         }
 
+        $lastModified = 0;
         foreach ($this->extensions as $extension) {
-            $r = new \ReflectionObject($extension);
-            if (is_file($r->getFileName()) && ($extensionTime = filemtime($r->getFileName())) > $this->lastModified) {
-                $this->lastModified = $extensionTime;
+            if ($extension instanceof LastModifiedExtensionInterface) {
+                $lastModified = max($extension->getLastModified(), $lastModified);
+            } else {
+                $r = new \ReflectionObject($extension);
+                if (is_file($r->getFileName())) {
+                    $lastModified = max(filemtime($r->getFileName()), $lastModified);
+                }
             }
         }
 
-        return $this->lastModified;
+        return $this->lastModified = $lastModified;
     }
 
     public function addExtension(ExtensionInterface $extension): void
@@ -385,7 +395,7 @@ final class ExtensionSet
     }
 
     /**
-     * @return array<string, array{precedence: int, class: class-string<AbstractExpression>}>
+     * @return array<string, array{precedence: int, precedence_change?: OperatorPrecedenceChange, class: class-string<AbstractUnary>}>
      */
     public function getUnaryOperators(): array
     {
@@ -397,7 +407,7 @@ final class ExtensionSet
     }
 
     /**
-     * @return array<string, array{precedence: int, class?: class-string<AbstractExpression>, associativity: ExpressionParser::OPERATOR_*}>
+     * @return array<string, array{precedence: int, precedence_change?: OperatorPrecedenceChange, class?: class-string<AbstractBinary>, associativity: ExpressionParser::OPERATOR_*}>
      */
     public function getBinaryOperators(): array
     {
