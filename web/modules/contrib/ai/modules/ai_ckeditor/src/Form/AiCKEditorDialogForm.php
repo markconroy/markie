@@ -70,31 +70,35 @@ class AiCKEditorDialogForm extends FormBase {
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
     $request = $this->getRequest();
-    $query_parameters = $request->query->all();
-    // Since we can't load the editor instance, we can't load the config in the
-    // way the CKEditor5PluginManager does. We have to rely on the query string
-    // and load the config from the configuration.
-    if (!isset($query_parameters['editor_id'])) {
+    $payload = $request->getPayload();
+
+    // Ensure 'editor_id' is provided.
+    $editor_id = $payload->get('editor_id');
+
+    if (!$editor_id) {
       throw new \InvalidArgumentException('We cannot determine that this is a CKEditor field.');
     }
 
-    // Check that the settings exists.
-    $editor_config = $this->configFactory()->get('editor.editor.' . $query_parameters['editor_id']);
+    // Check that settings exist for this editor ID.
+    $editor_config = $this->configFactory()->get('editor.editor.' . $editor_id);
+
     if (empty($editor_config->get('settings'))) {
       throw new \InvalidArgumentException('The editor configuration is empty.');
     }
 
-    // Since this is custom form outside the CKEditor5 context, we have to
-    // check that the user has permissions to this specific text format.
+    // Verify user permissions for the specific text format.
     if (!$this->currentUser()->hasPermission('use text format ' . $editor_config->get('format'))) {
       throw new \InvalidArgumentException('The user does not have permission to use this text format.');
     }
 
-    // This parameter is passed when clicking on a drop down in CKEditor.
-    if (!isset($query_parameters['plugin_id'])) {
+    // Ensure 'plugin_id' is provided, either from payload or form state.
+    $plugin_id = $payload->get('plugin_id') ?? $form_state->getValue('plugin_id');
+
+    if (!$plugin_id) {
       throw new \InvalidArgumentException('No action was selected.');
     }
 
+    // Load plugin instance configuration.
     $instance_config = $editor_config->get('settings')['plugins']['ai_ckeditor_ai'] ?? [];
 
     if (empty($instance_config['plugins'])) {
@@ -102,38 +106,58 @@ class AiCKEditorDialogForm extends FormBase {
         '#type' => 'markup',
         '#markup' => $this->t('No AI CKEditor plugins were detected.'),
       ];
+
       return $form;
     }
 
-    if (!empty($query_parameters['plugin_id'])) {
-      /** @var \Drupal\ai_ckeditor\PluginInterfaces\AiCKEditorPluginInterface $instance */
+    if ($plugin_id) {
       try {
-        $plugin_id = $query_parameters['plugin_id'];
-        $config_id = $query_parameters['plugin_id'];
+        // Check for multi-instance plugin format (e.g., "plugin__config").
+        $config_id = $plugin_id;
 
-        // Check if its a multi instance plugin.
-        if (strpos($query_parameters['plugin_id'], '__') !== FALSE) {
-          $parts = explode('__', $query_parameters['plugin_id']);
-          $plugin_id = $parts[0];
-          $config_id = $parts[1];
+        if (strpos($plugin_id, '__') !== FALSE) {
+          [$plugin_id, $config_id] = explode('__', $plugin_id);
         }
-        $instance = $this->aiCKEditorPluginManager->createInstance($plugin_id, $instance_config['plugins'][$config_id] ?? []);
+
+        // Instantiate the plugin using the manager.
+        /** @var \Drupal\ai_ckeditor\PluginInterfaces\AiCKEditorPluginInterface $instance */
+        $instance = $this->aiCKEditorPluginManager->createInstance(
+          $plugin_id,
+          $instance_config['plugins'][$config_id] ?? []
+        );
+
+        // Initialize subform and SubformState.
         $subform = $form['plugin_config'] ?? [];
         $subform_state = SubformState::createForSubform($subform, $form, $form_state);
 
-        if (isset($query_parameters['selected_text'])) {
-          $subform_state->setStorage(['selected_text' => $query_parameters['selected_text']]);
+        // Set selected text in storage if provided in the payload.
+        $selected_text = $payload->get('selected_text');
+
+        if ($selected_text) {
+          $subform_state->setStorage(['selected_text' => $selected_text]);
         }
 
+        // Build and render the plugin configuration form.
         $form['plugin_config'] = $instance->buildCkEditorModalForm([], $subform_state, [
           'config_id' => $config_id,
-          'editor_id' => $query_parameters['editor_id'],
+          'editor_id' => $editor_id,
           'plugin_id' => $plugin_id,
+          'selected_text' => $selected_text,
         ]);
         $form['plugin_config']['#tree'] = TRUE;
+
+        // Hidden fields for editor ID, plugin ID, and selected text.
         $form['editor_id'] = [
           '#type' => 'hidden',
-          '#value' => $query_parameters['editor_id'],
+          '#value' => $editor_id,
+        ];
+        $form['plugin_id'] = [
+          '#type' => 'hidden',
+          '#value' => $plugin_id,
+        ];
+        $form['selected_text'] = [
+          '#type' => 'hidden',
+          '#value' => $selected_text,
         ];
       }
       catch (\Exception $exception) {
@@ -149,8 +173,6 @@ class AiCKEditorDialogForm extends FormBase {
   /**
    * {@inheritdoc}
    */
-  public function submitForm(array &$form, FormStateInterface $form_state) {
-
-  }
+  public function submitForm(array &$form, FormStateInterface $form_state) {}
 
 }

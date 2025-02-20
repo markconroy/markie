@@ -52,7 +52,7 @@ class IpCheckSubscriber implements EventSubscriberInterface {
         'my_secret_word',
         'do_not_send_this',
       ];
-      $messages = $event->getInput()->getMessages()
+      $messages = $event->getInput()->getMessages();
       foreach ($messages as $key => &$message) {
         // Remove all ips.
         $messages[$key]->setText(str_replace($ip, 'censored', $message->getText()));

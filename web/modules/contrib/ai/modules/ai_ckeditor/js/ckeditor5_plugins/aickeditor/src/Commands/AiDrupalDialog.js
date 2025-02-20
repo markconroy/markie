@@ -16,18 +16,11 @@ export default class AiDrupalDialog extends Command {
     }
 
     const selected = this.editor.editing.model.getSelectedContent(this.editor.model.document.selection);
-    const selectedText = this.editor.data.stringify(selected);
+    const selectedText = this.editor.data.stringify(selected) ?? 'No text selected';
 
     dialogSettings.title = dialogSettings.title + ' - ' + plugin_label;
 
     const url = new URL(dialogURL, document.baseURI);
-    if (selectedText.length > 0) {
-      url.searchParams.append('selected_text', selectedText);
-    }
-    // Since we can't attach an editor instance to the dialog, we need to
-    // pass the key for the configuration in the query.
-    url.searchParams.append('editor_id', this.editor.sourceElement.dataset.editorActiveTextFormat);
-    url.searchParams.append('plugin_id', plugin_id);
 
     openDialog(
       url.toString(),
@@ -44,15 +37,12 @@ export default class AiDrupalDialog extends Command {
           }
 
           if (typeof attributes.returnsHtml != 'undefined' && attributes.returnsHtml) {
-
             // Covert the value to html and insert it.
             const viewFragment = this.editor.data.processor.toView(attributes.value);
             const modelFragment = this.editor.data.toModel(viewFragment);
             this.editor.model.insertContent(modelFragment);
             //writer.insert(modelFragment, insertPosition);
-          }
-          else {
-
+          } else {
             // Insert the value as plain text.
             // const textNode = writer.createText(attributes.value);
             // writer.insert(insertPosition, textNode);
@@ -63,6 +53,11 @@ export default class AiDrupalDialog extends Command {
         });
       },
       dialogSettings,
+      {
+        selected_text: selectedText,
+        editor_id: this.editor.sourceElement.dataset.editorActiveTextFormat,
+        plugin_id,
+      }
     );
   }
 
@@ -75,5 +70,4 @@ export default class AiDrupalDialog extends Command {
     this.isOn = this.isEnabled;
     this.isReadOnly = this.isEnabled;
   }
-
 }

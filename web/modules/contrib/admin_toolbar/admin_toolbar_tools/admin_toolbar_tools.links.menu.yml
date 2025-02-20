@@ -90,3 +90,10 @@ admin_toolbar_tools.settings:
   description: 'Configure the Admin Toolbar Tools module.'
   route_name: admin_toolbar_tools.settings
   parent: system.admin_config_ui
+
+system.run_reindex_site:
+  title: 'Re-index Site'
+  route_name: admin_toolbar.run.reindex.site
+  menu_name: admin
+  parent: admin_toolbar_tools.help
+  weight: -9

@@ -137,12 +137,12 @@
           });
         }
 
-        // Function to add retry button on error
-        const addRetryButton = (event) => {
+        // Function to handle errors appropriately.
+        const handleError = (event) => {
           // Add a new assistant message.
           deepchatElement.addMessage({
             role: 'assistant',
-            html: `<p>` + Drupal.t('Something went wrong, please retry.') + `</p>
+            html: `<p>` + Drupal.t('You can retry your last message with this button:') + `</p>
             <div class="deep-chat-temporary-message">
         <button class="deep-chat-button deep-chat-suggestion-button" style="margin-top: 5px">` + Drupal.t("Retry last instruction") + `</button>
       </div>`,
@@ -187,7 +187,7 @@
         }
 
         // Add retry on error
-        deepchatElement.addEventListener('error', addRetryButton);
+        deepchatElement.addEventListener('error', handleError);
 
         deepchatElement.addEventListener('render', () => {
           pendingRenders--;

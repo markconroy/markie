@@ -4,9 +4,9 @@ namespace Drupal\ai\Form;
 
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Url;
 use Drupal\ai\AiProviderPluginManager;
 use Drupal\ai\Enum\AiModelCapability;
-use Drupal\Core\Url;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -104,6 +104,9 @@ class AiSettingsForm extends ConfigFormBase {
     $providers = [];
     foreach ($this->providerManager->getDefinitions() as $id => $definition) {
       $providers[$id] = $this->providerManager->createInstance($id);
+    }
+    if (count($providers) === 0) {
+      $this->messenger()->addWarning($this->t('Choose at least one AI provider module from those listed on the AI module homepage, add to your project, install and configure it. Then update the AI Settings on this page.'));
     }
 
     // Add the hardcoded selections of filtered types.

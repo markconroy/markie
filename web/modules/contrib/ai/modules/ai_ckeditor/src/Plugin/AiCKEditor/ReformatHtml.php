@@ -44,6 +44,16 @@ final class ReformatHtml extends AiCKEditorPluginBase {
       '#description' => $this->t('Select which provider to use for this plugin. See the <a href=":link">Provider overview</a> for details about each provider.', [':link' => '/admin/config/ai/providers']),
     ];
 
+    $prompts_config = $this->getConfigFactory()->get('ai_ckeditor.settings');
+    $prompt_reformat = $prompts_config->get('prompts.reformat');
+    $form['prompt'] = [
+      '#type' => 'textarea',
+      '#title' => $this->t('Reformat prompt'),
+      '#required' => TRUE,
+      '#default_value' => $prompt_reformat,
+      '#description' => $this->t('This prompt will be used to reformat the html.'),
+    ];
+
     return $form;
   }
 
@@ -59,6 +69,9 @@ final class ReformatHtml extends AiCKEditorPluginBase {
    */
   public function submitConfigurationForm(array &$form, FormStateInterface $form_state) {
     $this->configuration['provider'] = $form_state->getValue('provider');
+    $newPrompt = $form_state->getValue('prompt');
+    $prompts_config = $this->getConfigFactory()->getEditable('ai_ckeditor.settings');
+    $prompts_config->set('prompts.reformat', $newPrompt)->save();
   }
 
   /**
@@ -114,7 +127,9 @@ final class ReformatHtml extends AiCKEditorPluginBase {
     $values = $form_state->getValues();
 
     try {
-      $prompt = 'Please fix this text to be marked up with semantic HTML using only lists, headers, or paragraph tags:\r\n"' . $values["plugin_config"]["selected_text"];
+      $prompts_config = $this->getConfigFactory()->get('ai_ckeditor.settings');
+      $prompt = $prompts_config->get('prompts.reformat');
+      $prompt = $prompt . '\r\n"' . $values["plugin_config"]["selected_text"];
       $response = new AjaxResponse();
       $values = $form_state->getValues();
       $response->addCommand(new AiRequestCommand($prompt, $values["editor_id"], $this->pluginDefinition['id'], 'ai-ckeditor-response'));

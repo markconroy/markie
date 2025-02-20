@@ -43,7 +43,15 @@ final class Summarize extends AiCKEditorPluginBase {
       '#default_value' => $this->configuration['provider'] ?? $this->aiProviderManager->getSimpleDefaultProviderOptions('chat'),
       '#description' => $this->t('Select which provider to use for this plugin. See the <a href=":link">Provider overview</a> for details about each provider.', [':link' => '/admin/config/ai/providers']),
     ];
-
+    $prompts_config = $this->getConfigFactory()->get('ai_ckeditor.settings');
+    $prompt_summarise = $prompts_config->get('prompts.summarise');
+    $form['prompt'] = [
+      '#type' => 'textarea',
+      '#title' => $this->t('Summarise prompt'),
+      '#required' => TRUE,
+      '#default_value' => $prompt_summarise,
+      '#description' => $this->t('This prompt will be used to summarise the text.'),
+    ];
     return $form;
   }
 
@@ -59,6 +67,9 @@ final class Summarize extends AiCKEditorPluginBase {
    */
   public function submitConfigurationForm(array &$form, FormStateInterface $form_state) {
     $this->configuration['provider'] = $form_state->getValue('provider');
+    $newPrompt = $form_state->getValue('prompt');
+    $prompts_config = $this->getConfigFactory()->getEditable('ai_ckeditor.settings');
+    $prompts_config->set('prompts.summarise', $newPrompt)->save();
   }
 
   /**
@@ -112,11 +123,9 @@ final class Summarize extends AiCKEditorPluginBase {
    */
   public function ajaxGenerate(array &$form, FormStateInterface $form_state) {
     $values = $form_state->getValues();
-
+    $prompts_config = $this->getConfigFactory()->get('ai_ckeditor.settings');
+    $prompt = $prompts_config->get('prompts.summarise');
     try {
-      $prompt = 'Summarize the following text in the same language, ';
-      $prompt .= 'do not return the original text or restate it word-for-word.' . "\r\n\r\n";
-      $prompt .= 'Here is the original text:' . "\r\n";
       $prompt .= '"' . $values["plugin_config"]["selected_text"] . '"';
       $response = new AjaxResponse();
       $values = $form_state->getValues();

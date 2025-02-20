@@ -182,7 +182,7 @@ class AiSearchIndexFieldsForm extends IndexFieldsForm {
         '#type' => 'details',
         '#title' => $this->t('Preview content to be vectorized'),
         '#description' => $this->t('After saving your configuration, without needing to index, this form can be used to check what will get vectorized from a specific item (i.e., the "Main Content" and "Contextual Content" output will be shown), as well as what metadata will be available from "Filterable Attributes".'),
-        '#open' => FALSE,
+        '#open' => (bool) $form_state->get(['checker', 'entity']),
         '#attributes' => ['id' => 'checker-wrapper'],
       ];
 
@@ -480,6 +480,11 @@ class AiSearchIndexFieldsForm extends IndexFieldsForm {
           $form_state->setErrorByName('fields[' . $id . '][indexing_option', $message);
         }
       }
+    }
+
+    if ($form_state->getValue(['checker', 'entity'])) {
+      $this->messenger()->addWarning('Remove the "Preview content to be vectorized" in order to save the form.');
+      $form_state->setRebuild();
     }
   }
 

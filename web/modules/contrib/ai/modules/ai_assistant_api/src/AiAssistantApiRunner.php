@@ -5,10 +5,12 @@ namespace Drupal\ai_assistant_api;
 use Drupal\Component\Utility\Crypt;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\Render\Renderer;
 use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\Session\SessionManagerInterface;
+use Drupal\Core\Site\Settings;
 use Drupal\Core\TempStore\PrivateTempStoreFactory;
 use Drupal\ai\AiProviderPluginManager;
 use Drupal\ai\OperationType\Chat\ChatInput;
@@ -121,6 +123,10 @@ class AiAssistantApiRunner {
    *   The assistant message builder.
    * @param \Drupal\Core\Session\SessionManagerInterface $sessionManager
    *   The session manager.
+   * @param \Drupal\Core\Site\Settings $settings
+   *   The settings service.
+   * @param \Drupal\Core\Extension\ModuleHandlerInterface $moduleHandler
+   *   The module handler.
    */
   public function __construct(
     protected EntityTypeManagerInterface $entityTypeManager,
@@ -134,6 +140,8 @@ class AiAssistantApiRunner {
     protected PromptJsonDecoderInterface $promptJsonDecoder,
     protected AssistantMessageBuilder $assistantMessageBuilder,
     protected SessionManagerInterface $sessionManager,
+    protected Settings $settings,
+    protected ModuleHandlerInterface $moduleHandler,
   ) {
   }
 
@@ -302,11 +310,17 @@ class AiAssistantApiRunner {
     $this->resetOutputContexts();
     $instance = NULL;
     try {
-      $pre_prompt = $this->assistant->get('system_prompt');
-      if ($pre_prompt) {
+      $system_prompt = $this->assistant->get('system_prompt');
+      // If the site isn't configured to use custom prompts, override with the
+      // latest version of the prompt from the module.
+      if (!$this->settings->get('ai_assistant_custom_prompts', FALSE)) {
+        $path = $this->moduleHandler->getModule('ai_assistant_api')->getPath() . '/resources/';
+        $system_prompt = file_get_contents($path . 'system_prompt.txt');
+      }
+      if ($system_prompt) {
         $return = $this->assistantMessage(TRUE);
 
-        // If its a normal response, we just return it.
+        // If it's a normal response, we just return it.
         if ($return instanceof ChatOutput) {
           return $return;
         }
@@ -335,7 +349,8 @@ class AiAssistantApiRunner {
         $instance->triggerRollback();
       }
       if ($this->throwException) {
-        throw new \Exception($error_message);
+        // Throw the existing exception to maintain the type.
+        throw $e;
       }
       // Return the error message.
       return new ChatOutput(
@@ -386,7 +401,7 @@ class AiAssistantApiRunner {
     }
     // Check if they have values.
     if (count($chosen_roles)) {
-      if ($this->currentUser->isAnonymous() && $roles['anonymous']) {
+      if ($this->currentUser->isAnonymous() && isset($chosen_roles['anonymous'])) {
         return TRUE;
       }
       else {
@@ -420,6 +435,22 @@ class AiAssistantApiRunner {
     $event = new AiAssistantSystemRoleEvent($assistant_message);
     $this->eventDispatcher->dispatch($event, AiAssistantSystemRoleEvent::EVENT_NAME);
     $assistant_message = $event->getSystemPrompt();
+
+    // Set context messages from the actions.
+    if (!empty($this->getOutputContexts())) {
+      $message = '';
+      foreach ($this->getOutputContexts() as $key => $data) {
+        $message .= "The following are the results the different actions from the $key action: \n";
+        foreach ($data as $item) {
+          $message .= $item . "\n";
+        }
+        $message .= "\n";
+      }
+    }
+    else {
+      $message = "No actions have been run, this means that you have done nothing since the last instruction.";
+    }
+    $assistant_message = $assistant_message . $message;
     $provider->setChatSystemRole($assistant_message);
 
     $messages = [];
@@ -438,18 +469,6 @@ class AiAssistantApiRunner {
     $history = $this->getMessageHistory();
     foreach ($history as $key => $message) {
       $messages[] = new ChatMessage($message['role'], $message['message']);
-    }
-    // Set context messages from the actions.
-    if (!empty($this->getOutputContexts())) {
-      $message = '';
-      foreach ($this->getOutputContexts() as $key => $data) {
-        $message .= "The following are the results the different actions from the $key action: \n";
-        foreach ($data as $item) {
-          $message .= $item . "\n";
-        }
-        $message .= "\n";
-      }
-      $messages[] = new ChatMessage('assistant', $message);
     }
     $input = new ChatInput($messages);
 

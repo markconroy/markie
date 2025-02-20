@@ -106,3 +106,30 @@ function ai_logging_update_10304() {
   }
 
 }
+
+/**
+ * Update the AI logs view access settings.
+ */
+function ai_logging_update_10305() {
+  $config_factory = \Drupal::configFactory();
+  if ($config_factory->get('views.view.ai_logging')) {
+    /** @var \Drupal\Core\Config\Config $view */
+    $view = \Drupal::service('config.factory')->getEditable('views.view.ai_logs');
+    $display = $view->get('display');
+    if (
+      isset($display['default']['display_options']['access'])
+      && $display['default']['display_options']['access']['type'] === 'none'
+    ) {
+
+      // Change permission to the 'view ai log' permission.
+      $display['default']['display_options']['access'] = [
+        'type' => 'perm',
+        'options' => [
+          'perm' => 'view ai log',
+        ],
+      ];
+      $view->set('display', $display);
+      $view->save();
+    }
+  }
+}

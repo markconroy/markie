@@ -75,3 +75,37 @@ via a VDB Provider (Vector Database Provider).
 3. Load your VDB Provider, e.g. into `$vdb`.
 4. Get relevant results `$results = $vdb->vectorSearch($collection_name, $vector_input, []);`.
 5. Do something with it like `$answer = $llm->chat("Here is a question, answer it using this content: " . $content_from_results);`
+
+## Automated tests
+
+The automated tests uses:
+- test_ai_provider_mysql test module to generate embeddings as a Provider.
+- test_ai_vdb_provider_mysql test module to store and search the vector database as a VDB Provider.
+
+This requires FFI PHP extension to run. In DDEV this can be enabled as follows:
+```bash
+mkdir -p .ddev/php
+touch .ddev/php/ai-search-test-mysql-php.ini
+echo "ffi.enable=true" > .ddev/php/ai-search-test-mysql-php.ini
+ddev restart
+```
+
+AI Search related tests can then be run as follows:
+```bash
+ddev ssh
+phpunit -c core/phpunit.xml modules/contrib/ai/modules/ai_search/tests/
+phpunit -c core/phpunit.xml modules/contrib/ai/tests/src/Kernel/Utility/TextChunkerTest.php
+```
+Which runs all tests in the AI Search submodule + the Text Chunker which is
+heavily used by the submodule.
+
+### Updated the FFI extension for AI Search
+
+When the current major version of PHP run by Gitlab CI e.g. becomes 8.4 up
+from 8.3, the .gitlab-ci.yml file in the AI module project root should have the
+PHP source file changed from 8.3 to 8.4 in order for it to continue to
+recompile correctly with the FFI extension.
+
+Similarly, the skip test against PHP version set in
+`modules/ai_search/tests/src/Functional/AiSearchSetupMySqlTest.php` should be
+updated.

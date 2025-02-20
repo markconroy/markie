@@ -468,6 +468,13 @@ abstract class AiProviderClientBase implements AiProviderInterface, ContainerFac
   }
 
   /**
+   * Post setup. Currently used in Drupal CMS.
+   */
+  public function postSetup(): void {
+    // Do nothing by default.
+  }
+
+  /**
    * Load config for provider, operation type and model.
    *
    * @param string $operation_type

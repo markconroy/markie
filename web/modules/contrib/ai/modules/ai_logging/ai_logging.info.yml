@@ -4,12 +4,14 @@ package: AI
 type: module
 core_version_requirement: ^10.2 || ^11
 configure: ai_logging.settings_form
+tags:
+  - developer
 
 dependencies:
   - ai:ai
   - drupal:views
 
-# Information added by Drupal.org packaging script on 2025-01-14
-version: '1.0.2'
+# Information added by Drupal.org packaging script on 2025-02-05
+version: '1.0.4'
 project: 'ai'
-datestamp: 1736878583
+datestamp: 1738761524

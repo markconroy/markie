@@ -5,6 +5,7 @@ namespace Drupal\ai_provider_openai\Form;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\ai\AiProviderPluginManager;
+use Drupal\ai_provider_openai\OpenAiHelper;
 use Drupal\key\KeyRepositoryInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -19,25 +20,13 @@ class OpenAiConfigForm extends ConfigFormBase {
   const CONFIG_NAME = 'ai_provider_openai.settings';
 
   /**
-   * The AI Provider service.
-   *
-   * @var \Drupal\ai\AiProviderPluginManager
-   */
-  protected $aiProviderManager;
-
-  /**
-   * The key factory.
-   *
-   * @var \Drupal\key\KeyRepositoryInterface
-   */
-  protected $keyRepository;
-
-  /**
    * Constructs a new OpenAIConfigForm object.
    */
-  final public function __construct(AiProviderPluginManager $ai_provider_manager, KeyRepositoryInterface $key_repository) {
-    $this->aiProviderManager = $ai_provider_manager;
-    $this->keyRepository = $key_repository;
+  final public function __construct(
+    private readonly AiProviderPluginManager $aiProviderManager,
+    private readonly KeyRepositoryInterface $keyRepository,
+    private readonly OpenAiHelper $openAiHelper,
+  ) {
   }
 
   /**
@@ -47,6 +36,7 @@ class OpenAiConfigForm extends ConfigFormBase {
     return new static(
       $container->get('ai.provider'),
       $container->get('key.repository'),
+      $container->get('ai_provider_openai.helper'),
     );
   }
 
@@ -114,12 +104,16 @@ class OpenAiConfigForm extends ConfigFormBase {
     catch (\Exception $e) {
       $form_state->setErrorByName('api_key', $this->t('The API Key is not working.'));
     }
+
   }
 
   /**
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
+    $api_key = $this->keyRepository->getKey($form_state->getValue('api_key'))->getKeyValue();
+    // If it all passed through, we do one last check of rate limits via chat.
+    $this->openAiHelper->testRateLimit($api_key);
     // Retrieve the configuration.
     $this->config(static::CONFIG_NAME)
       ->set('api_key', $form_state->getValue('api_key'))

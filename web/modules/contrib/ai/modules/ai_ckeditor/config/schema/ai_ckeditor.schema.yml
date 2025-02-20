@@ -24,3 +24,29 @@ ckeditor5.plugin.ai_ckeditor_ai:
       orderby: key
       sequence:
         type: ckeditor5.plugin.ai_ckeditor_ai.[%key]
+ai_ckeditor.settings:
+  type: mapping
+  label: 'AI Ckeditor Settings'
+  mapping:
+    prompts:
+      type: mapping
+      label: 'Prompts settings'
+      mapping:
+        complete:
+          type: string
+          label: 'Completion prompt'
+        reformat:
+          type: text
+          label: 'Reformat prompt'
+        spellfix:
+          type: text
+          label: 'Spellfix prompt'
+        summarise:
+          type: text
+          label: 'Summarize prompt'
+        tone:
+          type: text
+          label: 'Tone adjustment prompt'
+        translate:
+          type: text
+          label: 'Translate prompt'

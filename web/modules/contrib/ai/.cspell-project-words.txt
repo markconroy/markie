@@ -108,6 +108,7 @@ libx
 livechat
 logprobs
 Longstockings
+mgmt
 midword
 milvusdb
 minidisc
@@ -193,6 +194,8 @@ fulltext
 defintion
 analysed
 Asymetric
+bundlable
+utilises
 Automator
 automator
 fireworksai
@@ -209,3 +212,9 @@ myconfig
 ai_ckeditor_spellfix
 interpunction
 Spellfix
+embedder
+Embedder
+UNHEX
+Rerank
+COSIM
+subprompt

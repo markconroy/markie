@@ -3,13 +3,16 @@
 namespace Drupal\ai_assistant_api\Service;
 
 use Drupal\ai_assistant_api\AiAssistantActionPluginManager;
+use Drupal\ai_assistant_api\AiAssistantApiCacheTrait;
 use Drupal\ai_assistant_api\Entity\AiAssistant;
 use Drupal\ai_assistant_api\Event\PrepromptSystemRoleEvent;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Controller\TitleResolverInterface;
 use Drupal\Core\Entity\EntityTypeManager;
+use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Session\AccountProxyInterface;
+use Drupal\Core\Site\Settings;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 
@@ -17,6 +20,8 @@ use Symfony\Component\HttpFoundation\RequestStack;
  * For building the assistant message.
  */
 class AssistantMessageBuilder {
+
+  use AiAssistantApiCacheTrait;
 
   /**
    * The AI assistant entity.
@@ -51,6 +56,10 @@ class AssistantMessageBuilder {
    *   The language manager.
    * @param \Drupal\Core\Config\ConfigFactoryInterface $configFactory
    *   The config factory.
+   * @param \Drupal\Core\Site\Settings $settings
+   *   The settings service.
+   * @param \Drupal\Core\Extension\ModuleHandlerInterface $moduleHandler
+   *   The module handler.
    */
   public function __construct(
     protected EntityTypeManager $entityTypeManager,
@@ -61,6 +70,8 @@ class AssistantMessageBuilder {
     protected RequestStack $requestStack,
     protected LanguageManagerInterface $languageManager,
     protected ConfigFactoryInterface $configFactory,
+    protected Settings $settings,
+    protected ModuleHandlerInterface $moduleHandler,
   ) {
   }
 
@@ -82,6 +93,19 @@ class AssistantMessageBuilder {
     $this->threadId = $thread_id;
     // Get the system prompt.
     $assistant_message = $ai_assistant->get('system_prompt');
+    // If the site isn't configured to use custom prompts, override with the
+    // latest version of the prompt from the module.
+    if (!$this->settings->get('ai_assistant_custom_prompts', FALSE)) {
+      if ($assistant_message = $this->cacheGet('system_prompt')) {
+        $assistant_message = $assistant_message->data;
+      }
+      else {
+        $path = $this->moduleHandler->getModule('ai_assistant_api')->getPath() . '/resources/';
+        $assistant_message = file_get_contents($path . 'system_prompt.txt');
+        $this->cacheSet('system_prompt', $assistant_message);
+      }
+    }
+
     // First replace the instructions.
     $assistant_message = str_replace('[instructions]', $ai_assistant->get('instructions'), $assistant_message);
     // If the pre-prompt message should be included, replace it.
@@ -98,6 +122,18 @@ class AssistantMessageBuilder {
    */
   protected function prePrompt() {
     $preprompt = $this->assistant->get('pre_action_prompt');
+    // If configured to use the updated prompts from the module, override.
+    if (!$this->settings->get('ai_assistant_custom_prompts', FALSE)) {
+      if ($preprompt = $this->cacheGet('pre_action_prompt')) {
+        $preprompt = $preprompt->data;
+      }
+      else {
+        $path = $this->moduleHandler->getModule('ai_assistant_api')->getPath() . '/resources/';
+        $preprompt = file_get_contents($path . 'pre_action_prompt.txt');
+        $this->cacheSet('pre_action_prompt', $preprompt);
+      }
+    }
+
     $actions = $this->getPreparedActions();
     $usage_instructions = $this->getUsageInstructions();
     $pre_prompt = str_replace([

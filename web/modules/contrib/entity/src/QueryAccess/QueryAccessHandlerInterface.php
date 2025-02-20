@@ -30,13 +30,13 @@ interface QueryAccessHandlerInterface {
    * @param string $operation
    *   The access operation. Usually one of "view", "update", "duplicate",
    *   or "delete".
-   * @param \Drupal\Core\Session\AccountInterface $account
+   * @param \Drupal\Core\Session\AccountInterface|null $account
    *   The user for which to restrict access, or NULL
    *   to assume the current user. Defaults to NULL.
    *
    * @return \Drupal\entity\QueryAccess\ConditionGroup
    *   The conditions.
    */
-  public function getConditions($operation, AccountInterface $account = NULL);
+  public function getConditions($operation, ?AccountInterface $account = NULL);
 
 }

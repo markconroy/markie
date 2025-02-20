@@ -83,6 +83,15 @@ final class Translate extends AiCKEditorPluginBase {
       '#default_value' => $this->configuration['provider'] ?? $this->aiProviderManager->getSimpleDefaultProviderOptions('chat'),
       '#description' => $this->t('Select which provider to use for this plugin. See the <a href=":link">Provider overview</a> for details about each provider.', [':link' => '/admin/config/ai/providers']),
     ];
+    $prompts_config = $this->getConfigFactory()->get('ai_ckeditor.settings');
+    $prompt_translate = $prompts_config->get('prompts.translate');
+    $form['prompt'] = [
+      '#type' => 'textarea',
+      '#title' => $this->t('Change translation prompt'),
+      '#required' => TRUE,
+      '#default_value' => $prompt_translate,
+      '#description' => $this->t('This prompt will be used to translate the text. {{ tone }} is the target tone of voice that is chosen.'),
+    ];
 
     return $form;
   }
@@ -95,6 +104,9 @@ final class Translate extends AiCKEditorPluginBase {
     $this->configuration['autocreate'] = (bool) $form_state->getValue('autocreate');
     $this->configuration['translate_vocabulary'] = $form_state->getValue('translate_vocabulary');
     $this->configuration['use_description'] = (bool) $form_state->getValue('use_description');
+    $newPrompt = $form_state->getValue('prompt');
+    $prompts_config = $this->getConfigFactory()->getEditable('ai_ckeditor.settings');
+    $prompts_config->set('prompts.translate', $newPrompt)->save();
   }
 
   /**
@@ -189,8 +201,9 @@ final class Translate extends AiCKEditorPluginBase {
       if ($term->isNew() && $this->configuration['autocreate'] && $this->account->hasPermission('create terms in ' . $this->configuration['translate_vocabulary'])) {
         $term->save();
       }
-
-      $prompt = 'Translate the selected text into ' . $term->label() . '."';
+      $prompts_config = $this->getConfigFactory()->get('ai_ckeditor.settings');
+      $prompt = $prompts_config->get('prompts.translate');
+      $prompt = str_replace('{{ lang }}', $term->label(), $prompt);
       if ($this->configuration['use_description'] && !empty($term->description->value)) {
         $prompt .= 'Think about the following when translating it into ' . $term->label() . ': ' . strip_tags($term->description->value);
       }

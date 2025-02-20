@@ -15,6 +15,7 @@ use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\ai\AiProviderPluginManager;
 use Drupal\ai_ckeditor\PluginInterfaces\AiCKEditorPluginInterface;
+use Drupal\ai_ckeditor\Traits\AiCKEditorConfigTrait;
 use Drupal\editor\Ajax\EditorDialogSave;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -25,6 +26,7 @@ use Symfony\Component\HttpFoundation\RequestStack;
 abstract class AiCKEditorPluginBase extends PluginBase implements AiCKEditorPluginInterface, ContainerFactoryPluginInterface {
 
   use StringTranslationTrait;
+  use AiCKEditorConfigTrait;
 
   /**
    * The provider plugin manager.

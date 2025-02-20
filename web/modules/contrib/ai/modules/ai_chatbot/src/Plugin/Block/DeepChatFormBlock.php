@@ -159,6 +159,15 @@ class DeepChatFormBlock extends BlockBase implements ContainerFactoryPluginInter
       $assistants[$id] = $ai_assistant->label();
     }
 
+    $form['notice'] = [
+      '#theme' => 'status_messages',
+      '#message_list' => [
+        'warning' => [
+          $this->t('Important and recommended to select the appropriate user role for this block to ensure it aligns with the AI assistance functionality and prevents anonymous users from accessing restricted features.'),
+        ],
+      ],
+    ];
+
     $form['ai_assistant'] = [
       '#type' => 'select',
       '#title' => $this->t('AI Assistant'),
@@ -439,6 +448,12 @@ class DeepChatFormBlock extends BlockBase implements ContainerFactoryPluginInter
     $deepchat['htmlClassUtilities']['chat-button']['styles']['default']['height'] = '25px';
     $deepchat['htmlClassUtilities']['chat-button']['styles']['default']['display'] = 'inline';
     $deepchat['htmlClassUtilities']['chat-button']['styles']['default']['float'] = 'none';
+
+    // Enable displayServiceErrorMessages by default so that we can display
+    // specific error messages.
+    $deepchat['errorMessages'] = [
+      'displayServiceErrorMessages' => TRUE,
+    ];
 
     // Let people run hooks to change this.
     $this->moduleHandler->invokeAll('deepchat_settings', [&$deepchat]);

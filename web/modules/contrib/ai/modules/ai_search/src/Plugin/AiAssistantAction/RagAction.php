@@ -359,7 +359,7 @@ class RagAction extends AiAssistantActionBase {
       }
 
       // Render the entity in selected view mode.
-      $view_mode = $rag_database['aggregated_llm'] ?? 'full';
+      $view_mode = $rag_database['rendered_view_mode'] ?? 'full';
       $pre_render_entity = $this->entityTypeManager->getViewBuilder($entity_type)->view($entity, $view_mode);
       $rendered = $this->renderer->render($pre_render_entity);
       $rendered_entities[] = $this->converter->convert((string) $rendered);
@@ -482,7 +482,7 @@ class RagAction extends AiAssistantActionBase {
       '#title' => $this->t('RAG rendered view mode'),
       '#description' => $this->t('Select a preferred view mode. If not found, the default view mode will be used for the given entity type.'),
       '#options' => $options,
-      '#default_value' => 'full',
+      '#default_value' => $this->configuration['rag_' . $i]['rendered_view_mode'] ?? 'full',
       '#states' => [
         'visible' => [
           ':input[name="action_plugin_rag_action[configuration][rag_' . $i . '][output_mode]"]' => ['value' => 'rendered'],

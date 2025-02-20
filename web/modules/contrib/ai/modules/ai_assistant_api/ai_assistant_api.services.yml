@@ -13,6 +13,8 @@ services:
       - '@ai.prompt_json_decode'
       - '@ai_assistant_api.assistant_message_builder'
       - '@session_manager'
+      - '@settings'
+      - '@module_handler'
   ai_assistant_api.action_plugin.manager:
     class: Drupal\ai_assistant_api\AiAssistantActionPluginManager
     parent: default_plugin_manager
@@ -27,3 +29,11 @@ services:
       - '@request_stack'
       - '@language_manager'
       - '@config.factory'
+      - '@settings'
+      - '@module_handler'
+  cache.ai_assistant_api:
+    class: Drupal\Core\Cache\CacheBackendInterface
+    arguments: ['ai_assistant_api']
+    factory: cache_factory:get
+    tags:
+      - { name: cache.bin }

@@ -40,7 +40,9 @@ use Drupal\ai\OperationType\TextToSpeech\TextToSpeechInterface;
 use Drupal\ai\OperationType\TextToSpeech\TextToSpeechOutput;
 use Drupal\ai\Traits\OperationType\ChatTrait;
 use Drupal\ai_provider_openai\OpenAiChatMessageIterator;
+use Drupal\ai_provider_openai\OpenAiHelper;
 use OpenAI\Client;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Yaml\Yaml;
 
 /**
@@ -69,6 +71,13 @@ class OpenAiProvider extends AiProviderClientBase implements
   protected $client;
 
   /**
+   * The helper to use.
+   *
+   * @var \Drupal\ai_provider_openai\OpenAiHelper
+   */
+  protected OpenAiHelper $openAiHelper;
+
+  /**
    * API Key.
    *
    * @var string
@@ -81,6 +90,15 @@ class OpenAiProvider extends AiProviderClientBase implements
    * @var bool|null
    */
   protected bool|null $moderation = NULL;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
+    $parent_instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
+    $parent_instance->openAiHelper = $container->get('ai_provider_openai.helper');
+    return $parent_instance;
+  }
 
   /**
    * {@inheritdoc}
@@ -329,6 +347,9 @@ class OpenAiProvider extends AiProviderClientBase implements
       if (strpos($e->getMessage(), 'Request too large') !== FALSE) {
         throw new AiRateLimitException($e->getMessage());
       }
+      if (strpos($e->getMessage(), 'Too Many Requests') !== FALSE) {
+        throw new AiRateLimitException($e->getMessage());
+      }
       // Try to figure out quota issues.
       if (strpos($e->getMessage(), 'You exceeded your current quota') !== FALSE) {
         throw new AiQuotaException($e->getMessage());
@@ -383,6 +404,9 @@ class OpenAiProvider extends AiProviderClientBase implements
       if (strpos($e->getMessage(), 'Request too large') !== FALSE) {
         throw new AiRateLimitException($e->getMessage());
       }
+      if (strpos($e->getMessage(), 'Too Many Requests') !== FALSE) {
+        throw new AiRateLimitException($e->getMessage());
+      }
       // Try to figure out quota issues.
       if (strpos($e->getMessage(), 'You exceeded your current quota') !== FALSE) {
         throw new AiQuotaException($e->getMessage());
@@ -397,11 +421,11 @@ class OpenAiProvider extends AiProviderClientBase implements
       throw new AiResponseErrorException('No image data found in the response.');
     }
     foreach ($response['data'] as $data) {
-      if (isset($this->configuration['response_format']) && $this->configuration['response_format'] === 'url') {
-        $images[] = new ImageFile(file_get_contents($data['url']), 'image/png', 'dalle.png');
+      if (isset($this->configuration['response_format']) && $this->configuration['response_format'] === 'b64_json') {
+        $images[] = new ImageFile(base64_decode($data['b64_json']), 'image/png', 'dalle.png');
       }
       else {
-        $images[] = new ImageFile(base64_decode($data['b64_json']), 'image/png', 'dalle.png');
+        $images[] = new ImageFile(file_get_contents($data['url']), 'image/png', 'dalle.png');
       }
     }
     return new TextToImageOutput($images, $response, []);
@@ -429,6 +453,9 @@ class OpenAiProvider extends AiProviderClientBase implements
     catch (\Exception $e) {
       // Try to figure out rate limit issues.
       if (strpos($e->getMessage(), 'Request too large') !== FALSE) {
+        throw new AiRateLimitException($e->getMessage());
+      }
+      if (strpos($e->getMessage(), 'Too Many Requests') !== FALSE) {
         throw new AiRateLimitException($e->getMessage());
       }
       // Try to figure out quota issues.
@@ -469,6 +496,9 @@ class OpenAiProvider extends AiProviderClientBase implements
       if (strpos($e->getMessage(), 'Request too large') !== FALSE) {
         throw new AiRateLimitException($e->getMessage());
       }
+      if (strpos($e->getMessage(), 'Too Many Requests') !== FALSE) {
+        throw new AiRateLimitException($e->getMessage());
+      }
       // Try to figure out quota issues.
       if (strpos($e->getMessage(), 'You exceeded your current quota') !== FALSE) {
         throw new AiQuotaException($e->getMessage());
@@ -505,6 +535,9 @@ class OpenAiProvider extends AiProviderClientBase implements
       if (strpos($e->getMessage(), 'Request too large') !== FALSE) {
         throw new AiRateLimitException($e->getMessage());
       }
+      if (strpos($e->getMessage(), 'Too Many Requests') !== FALSE) {
+        throw new AiRateLimitException($e->getMessage());
+      }
       // Try to figure out quota issues.
       if (strpos($e->getMessage(), 'You exceeded your current quota') !== FALSE) {
         throw new AiQuotaException($e->getMessage());
@@ -534,6 +567,14 @@ class OpenAiProvider extends AiProviderClientBase implements
         'speech_to_text' => 'whisper-1',
       ],
     ];
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public function postSetup(): void {
+    // Throw an error on installation with rate limit.
+    $this->openAiHelper->testRateLimit($this->loadApiKey());
   }
 
   /**
@@ -568,6 +609,9 @@ class OpenAiProvider extends AiProviderClientBase implements
     catch (\Exception $e) {
       // Try to figure out rate limit issues.
       if (strpos($e->getMessage(), 'Request too large') !== FALSE) {
+        throw new AiRateLimitException($e->getMessage());
+      }
+      if (strpos($e->getMessage(), 'Too Many Requests') !== FALSE) {
         throw new AiRateLimitException($e->getMessage());
       }
       // Try to figure out quota issues.

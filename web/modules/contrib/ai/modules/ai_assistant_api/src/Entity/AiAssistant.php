@@ -8,7 +8,7 @@ use Drupal\Core\Config\Entity\ConfigEntityBase;
 use Drupal\ai_assistant_api\AiAssistantInterface;
 
 /**
- * Defines the ai assistant entity type.
+ * Defines the AI assistant entity type.
  *
  * @ConfigEntityType(
  *   id = "ai_assistant",
@@ -52,6 +52,7 @@ use Drupal\ai_assistant_api\AiAssistantInterface;
  *     "instructions",
  *     "actions_enabled",
  *     "error_message",
+ *     "specific_error_messages",
  *     "llm_provider",
  *     "llm_model",
  *     "llm_configuration",
@@ -124,9 +125,14 @@ final class AiAssistant extends ConfigEntityBase implements AiAssistantInterface
   protected string $assistant_message;
 
   /**
-   * The error message.
+   * The generic error message.
    */
   protected string $error_message;
+
+  /**
+   * The specific error message overrides.
+   */
+  protected ?array $specific_error_messages;
 
   /**
    * The LLM provider.

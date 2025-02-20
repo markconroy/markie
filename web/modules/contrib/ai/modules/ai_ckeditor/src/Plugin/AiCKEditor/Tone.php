@@ -83,6 +83,15 @@ final class Tone extends AiCKEditorPluginBase {
       '#default_value' => $this->configuration['provider'] ?? $this->aiProviderManager->getSimpleDefaultProviderOptions('chat'),
       '#description' => $this->t('Select which provider to use for this plugin. See the <a href=":link">Provider overview</a> for details about each provider.', [':link' => '/admin/config/ai/providers']),
     ];
+    $prompts_config = $this->getConfigFactory()->get('ai_ckeditor.settings');
+    $prompt_tone = $prompts_config->get('prompts.tone');
+    $form['prompt'] = [
+      '#type' => 'textarea',
+      '#title' => $this->t('Change tone prompt'),
+      '#required' => TRUE,
+      '#default_value' => $prompt_tone,
+      '#description' => $this->t('This prompt will be used to change the tone of voice. {{ tone }} is the target tone of voice that is chosen.'),
+    ];
 
     return $form;
   }
@@ -102,6 +111,9 @@ final class Tone extends AiCKEditorPluginBase {
     $this->configuration['autocreate'] = (bool) $form_state->getValue('autocreate');
     $this->configuration['tone_vocabulary'] = $form_state->getValue('tone_vocabulary');
     $this->configuration['use_description'] = $form_state->getValue('use_description');
+    $newPrompt = $form_state->getValue('prompt');
+    $prompts_config = $this->getConfigFactory()->getEditable('ai_ckeditor.settings');
+    $prompts_config->set('prompts.tone', $newPrompt)->save();
   }
 
   /**
@@ -196,8 +208,9 @@ final class Tone extends AiCKEditorPluginBase {
       if ($term->isNew() && $this->configuration['autocreate'] && $this->account->hasPermission('create terms in ' . $this->configuration['tone_vocabulary'])) {
         $term->save();
       }
-
-      $prompt = 'Change the tone of the following text to be ' . $term->label() . ' using the same language as the following text.';
+      $prompts_config = $this->getConfigFactory()->get('ai_ckeditor.settings');
+      $prompt = $prompts_config->get('prompts.tone');
+      $prompt = str_replace('{{ tone }}', $term->label(), $prompt);
       if ($this->configuration['use_description'] && !empty($term->description->value)) {
         $prompt .= 'That tone can described as: ' . strip_tags($term->description->value);
       }

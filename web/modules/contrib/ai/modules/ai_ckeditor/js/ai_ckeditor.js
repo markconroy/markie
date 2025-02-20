@@ -17,7 +17,7 @@
     const editor_id = $('#ai-ckeditor-response textarea').attr('data-ckeditor5-id');
     const editor = Drupal.CKEditor5Instances.get(editor_id);
     editor.execute('AiWriter', parameters);
-  }
+  };
 
   /**
    * Public API for AI CKEditor integration.
@@ -25,7 +25,6 @@
    * @namespace
    */
   Drupal.aickeditor = {
-
     /**
      * Open a dialog for a Drupal-based plugin.
      *
@@ -38,8 +37,10 @@
      *   A function to be called upon saving the dialog.
      * @param {object} dialogSettings
      *   An object containing settings to be passed to the jQuery UI.
+     * @param {object} additionalData
+     *   An object containing form data to be passed to the plugin.
      */
-    openDialog(url, saveCallback, dialogSettings) {
+    openDialog(url, saveCallback, dialogSettings, additionalData) {
       // Add a consistent dialog class.
       const classes = dialogSettings.dialogClass
         ? dialogSettings.dialogClass.split(' ')
@@ -53,13 +54,13 @@
         }
       }
 
-      dialogSettings.height = dialogSettings.height ?
-        dialogSettings.height :
-        dialogSettings.height = 'auto';
+      dialogSettings.height = dialogSettings.height
+        ? dialogSettings.height
+        : (dialogSettings.height = 'auto');
 
-      dialogSettings.width = dialogSettings.width ?
-        dialogSettings.width :
-        dialogSettings.width = 'auto';
+      dialogSettings.width = dialogSettings.width
+        ? dialogSettings.width
+        : (dialogSettings.width = 'auto');
 
       const ckeditorAjaxDialog = Drupal.ajax({
         dialog: dialogSettings,
@@ -69,6 +70,7 @@
         progress: {type: 'fullscreen'},
         submit: {
           editor_object: {},
+          ...additionalData,
         },
       });
       ckeditorAjaxDialog.execute();
@@ -77,5 +79,4 @@
       Drupal.ckeditor5.saveCallback = saveCallback;
     },
   };
-
 })(Drupal, Drupal.debounce, CKEditor5, jQuery, once);

@@ -36,8 +36,10 @@ nav:
     - AI Ckeditor: modules/ai_ckeditor/index.md
     - AI Content Suggestions: modules/ai_content_suggestions/index.md
     - AI ECA: modules/ai_eca/index.md
+    - AI Logging: modules/ai_logging/index.md
     - AI Search: modules/ai_search/index.md
     - AI Translate: modules/ai_translate/index.md
+    - AI Validations: modules/ai_validations/index.md
     - Providers:
       - Ollama: modules/providers/provider_ollama/index.md
     - VDB Providers:

@@ -48,7 +48,9 @@ class LlmTextLong extends ComplexTextChat implements AiAutomatorTypeInterface {
    */
   public function storeValues(ContentEntityInterface $entity, array $values, FieldDefinitionInterface $fieldDefinition, array $automatorConfig) {
     // Get text format.
-    $textFormat = $automatorConfig['use_text_format'] ?? $this->getGeneralHelper()->calculateTextFormat($fieldDefinition);
+    $textFormat = !empty($automatorConfig['use_text_format'])
+      ? $automatorConfig['use_text_format']
+      : $this->getGeneralHelper()->calculateTextFormat($fieldDefinition);
 
     // Then set the value.
     $cleanedValues = [];

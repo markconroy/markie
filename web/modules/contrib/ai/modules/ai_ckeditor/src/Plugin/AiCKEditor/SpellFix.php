@@ -43,6 +43,15 @@ final class SpellFix extends AiCKEditorPluginBase {
       '#default_value' => $this->configuration['provider'] ?? $this->aiProviderManager->getSimpleDefaultProviderOptions('chat'),
       '#description' => $this->t('Select which provider to use for this plugin. See the <a href=":link">Provider overview</a> for details about each provider.', [':link' => '/admin/config/ai/providers']),
     ];
+    $prompts_config = $this->getConfigFactory()->get('ai_ckeditor.settings');
+    $prompt_fix_spelling = $prompts_config->get('prompts.spellfix');
+    $form['prompt'] = [
+      '#type' => 'textarea',
+      '#title' => $this->t('Spelling fix prompt'),
+      '#required' => TRUE,
+      '#default_value' => $prompt_fix_spelling,
+      '#description' => $this->t('This prompt will be used to fix the spelling.'),
+    ];
 
     return $form;
   }
@@ -59,6 +68,9 @@ final class SpellFix extends AiCKEditorPluginBase {
    */
   public function submitConfigurationForm(array &$form, FormStateInterface $form_state) {
     $this->configuration['provider'] = $form_state->getValue('provider');
+    $newPrompt = $form_state->getValue('prompt');
+    $prompts_config = $this->getConfigFactory()->getEditable('ai_ckeditor.settings');
+    $prompts_config->set('prompts.spellfix', $newPrompt)->save();
   }
 
   /**
@@ -112,13 +124,10 @@ final class SpellFix extends AiCKEditorPluginBase {
    */
   public function ajaxGenerate(array &$form, FormStateInterface $form_state) {
     $values = $form_state->getValues();
+    $prompts_config = $this->getConfigFactory()->get('ai_ckeditor.settings');
+    $prompt = $prompts_config->get('prompts.spellfix');
     try {
-      $prompt = 'Assess technical grammar only, no style suggestions,
-      I am unplugging you if you exceed the bounds of this scope.
-      Fix the spelling and interpunction in the following text.
-      Do not explain what you fixed or why you fixed it.
-      Only return the corrected text (in the same language as the source text):
-      "' . $values["plugin_config"]["selected_text"];
+      $prompt .= '"' . $values["plugin_config"]["selected_text"] . '"';
       $response = new AjaxResponse();
       $values = $form_state->getValues();
       $response->addCommand(new AiRequestCommand($prompt, $values["editor_id"], $this->pluginDefinition['id'], 'ai-ckeditor-response'));

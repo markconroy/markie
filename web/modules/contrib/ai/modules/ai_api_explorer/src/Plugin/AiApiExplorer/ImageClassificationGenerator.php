@@ -95,7 +95,7 @@ final class ImageClassificationGenerator extends AiApiExplorerPluginBase {
 
     $form = $this->getFormTemplate($form, 'image-classify-response');
 
-    $form['left']['file'] = [
+    $form['left']['image'] = [
       '#type' => 'file',
       '#accept' => '.jpg, .jpeg, .png',
       '#title' => $this->t('Upload your image here. When submitted, your provider will generate a classification. Please note that each query counts against your API usage if your provider is a paid provider.'),
@@ -177,7 +177,7 @@ final class ImageClassificationGenerator extends AiApiExplorerPluginBase {
               ':label' => $row->getLabel(),
             ]),
             $this->t('<em>:score</em>', [
-              ':label' => $row->getConfidenceScore(),
+              ':score' => $row->getConfidenceScore(),
             ]),
           ];
         }

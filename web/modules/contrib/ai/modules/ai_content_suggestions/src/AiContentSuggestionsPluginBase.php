@@ -132,10 +132,11 @@ abstract class AiContentSuggestionsPluginBase extends PluginBase implements AiCo
       '#title' => $this->label(),
       '#group' => 'advanced',
       '#tree' => TRUE,
-      'target_field' => [
+      'target_fields' => [
         '#type' => 'select',
-        '#description' => $this->t('Select the field you wish to send to the LLM'),
+        '#description' => $this->t('Select the field(s) you wish to send to the LLM'),
         '#options' => $fields,
+        '#multiple' => TRUE,
         '#weight' => 0,
       ],
       'response' => [
@@ -255,22 +256,22 @@ abstract class AiContentSuggestionsPluginBase extends PluginBase implements AiCo
    * {@inheritdoc}
    */
   public function getTargetFieldValue(FormStateInterface $form_state): mixed {
-    $value = $field = NULL;
-
-    if ($target_field = $this->getFormFieldValue('target_field', $form_state)) {
+    $values = [];
+    $target_fields = $this->getFormFieldValue('target_fields', $form_state);
+    foreach ($target_fields as $target_field) {
       if (!$field = $form_state->getValue($target_field)) {
         $tree = explode(':', $target_field);
-
         $field = $form_state->getValue($tree);
       }
-    }
 
-    if ($field) {
-      if (isset($field[0]['value'])) {
-        $value = $field[0]['value'];
+      if ($field) {
+        if (isset($field[0]['value'])) {
+          $values[] = $field[0]['value'];
+        }
       }
     }
 
+    $value = implode(PHP_EOL . PHP_EOL, $values);
     return $value;
   }
 
@@ -310,7 +311,9 @@ abstract class AiContentSuggestionsPluginBase extends PluginBase implements AiCo
       $ai_provider->setChatSystemRole('You are helpful assistant.');
 
       /** @var \Drupal\ai\OperationType\Chat\ChatMessage $response */
-      $response = $ai_provider->chat($messages, $provider_config['model_id'], ['ai_content_suggestions'])->getNormalized();
+      $response = $ai_provider->chat($messages, $provider_config['model_id'], [
+        'ai_content_suggestions',
+      ])->getNormalized();
       $message = trim($response->getText()) ?? $this->t('No result could be generated.');
     }
     catch (\Exception $e) {

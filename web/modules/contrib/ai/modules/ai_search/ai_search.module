@@ -52,6 +52,10 @@ function ai_search_preprocess_search_api_index(array &$variables) {
     $backend === 'search_api_ai_search'
     && !empty($variables['table']['#rows'])
   ) {
+
+    // Add warning explaining how Vector Database count of rows check does
+    // not follow the same pattern as database or SOLR based searches (for
+    // example).
     foreach ($variables['table']['#rows'] as $key => $row) {
       if (
         !isset($row['data'][0]['data'])
@@ -62,5 +66,29 @@ function ai_search_preprocess_search_api_index(array &$variables) {
 
       $variables['table']['#rows'][$key]['data'][1] = t('This statistic normally counts the rows of data in your actual index by querying your database with no filters. Vector databases require a vector to compare against so that approach does not work here. Please see the Search API Server "View" page to check on the status of your connection in general.');
     }
+
+    // Add a row to check if Indexing Options have been set up in the Search
+    // API Field configuration.
+    /** @var \Drupal\Core\Config\ConfigFactoryInterface $config_factory */
+    $config_factory = \Drupal::configFactory();
+    $index_config = $config_factory->get('ai_search.index.' . $index->id())->getRawData();
+    $new_row = [
+      'data' => [
+        [
+          'header' => TRUE,
+          'data' => t('Indexing options configured'),
+        ],
+      ],
+      'class' => [],
+    ];
+    if (empty($index_config['indexing_options'])) {
+      $new_row['class'][] = 'warning';
+      $new_row['class'][] = 'color-warning';
+      $new_row['data'][1] = t('Indexing options must be configured in the Fields tab first for indexing to work correctly.');
+    }
+    else {
+      $new_row['data'][1] = t('Indexing options have been configured.');
+    }
+    $variables['table']['#rows'][] = $new_row;
   }
 }

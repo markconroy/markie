@@ -9,7 +9,7 @@ dependencies:
   - drupal:file
   - eca:eca
 
-# Information added by Drupal.org packaging script on 2025-01-14
-version: '1.0.2'
+# Information added by Drupal.org packaging script on 2025-02-05
+version: '1.0.4'
 project: 'ai'
-datestamp: 1736878583
+datestamp: 1738761524

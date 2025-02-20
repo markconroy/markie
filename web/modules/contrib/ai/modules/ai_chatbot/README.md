@@ -9,4 +9,4 @@ the AI Assistant API, and renders LLM responses as user-readable text.
 In the backend it uses Deepchat by OvidijusParsiunas.
 
 ## Using the module
-For more information, please see the [AI Assistant API module documentation](https://project.pages.drupalcode.org/ai/modules/ai_assistant_api/index.md).
+For more information, please see the [AI Assistant API module documentation](https://project.pages.drupalcode.org/ai/modules/ai_assistant_api/).

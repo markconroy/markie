@@ -49,6 +49,11 @@ final class AiTextConstraintValidator extends ConstraintValidator implements Con
       $this->context->addViolation('No AI provider specified to do validation', []);
       return;
     }
+
+    if (is_null($data)) {
+      $data = '';
+    }
+
     $provider = $this->aiPluginManager->loadProviderFromSimpleOption($constraint->provider);
 
     $prompt = $constraint->prompt . PHP_EOL . $constraint->message;

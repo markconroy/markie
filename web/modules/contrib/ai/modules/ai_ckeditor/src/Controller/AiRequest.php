@@ -13,6 +13,7 @@ use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\ai\AiProviderPluginManager;
 use Drupal\ai\OperationType\Chat\ChatInput;
 use Drupal\ai\OperationType\Chat\ChatMessage;
+use Drupal\ai\OperationType\Chat\StreamedChatMessageIteratorInterface;
 use Drupal\ai_ckeditor\PluginInterfaces\AiCKEditorPluginInterface;
 use Drupal\ai_ckeditor\PluginManager\AiCKEditorPluginManager;
 use Drupal\editor\EditorInterface;
@@ -29,34 +30,6 @@ class AiRequest implements ContainerInjectionInterface {
   use StringTranslationTrait;
 
   /**
-   * The AI CKEditor plugin manager.
-   *
-   * @var \Drupal\ai_ckeditor\PluginManager\AiCKEditorPluginManager
-   */
-  protected $pluginManager;
-
-  /**
-   * The provider plugin manager.
-   *
-   * @var \Drupal\ai\AiProviderPluginManager
-   */
-  protected AiProviderPluginManager $aiProviderManager;
-
-  /**
-   * The entity type manager.
-   *
-   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
-   */
-  protected EntityTypeManagerInterface $entityTypeManager;
-
-  /**
-   * The current user.
-   *
-   * @var \Drupal\Core\Session\AccountProxyInterface
-   */
-  protected $account;
-
-  /**
    * The logger service.
    *
    * @var \Drupal\Core\Logger\LoggerChannelInterface
@@ -64,22 +37,30 @@ class AiRequest implements ContainerInjectionInterface {
   protected LoggerChannelInterface $logger;
 
   /**
-   * The messenger service.
+   * Constructs the controller.
    *
-   * @var \Drupal\Core\Messenger\MessengerInterface
+   * @param \Drupal\ai_ckeditor\PluginManager\AiCKEditorPluginManager $pluginManager
+   *   AI CKEditor Plugin manager.
+   * @param \Drupal\ai\AiProviderPluginManager $aiProviderManager
+   *   AI Provider manager.
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
+   *   Entity type manager.
+   * @param \Drupal\Core\Session\AccountProxyInterface $account
+   *   Account proxy.
+   * @param \Drupal\Core\Logger\LoggerChannelFactoryInterface $logger_factory
+   *   Logger factory.
+   * @param \Drupal\Core\Messenger\MessengerInterface $messenger
+   *   Messenger service.
    */
-  protected $messenger;
-
-  /**
-   * {@inheritdoc}
-   */
-  public function __construct(AiCKEditorPluginManager $plugin_manager, AiProviderPluginManager $ai_provider_manager, EntityTypeManagerInterface $entity_type_manager, AccountProxyInterface $account, LoggerChannelFactoryInterface $logger_factory, MessengerInterface $messenger) {
-    $this->pluginManager = $plugin_manager;
-    $this->aiProviderManager = $ai_provider_manager;
-    $this->entityTypeManager = $entity_type_manager;
-    $this->account = $account;
+  public function __construct(
+    protected readonly AiCKEditorPluginManager $pluginManager,
+    protected readonly AiProviderPluginManager $aiProviderManager,
+    protected readonly EntityTypeManagerInterface $entityTypeManager,
+    protected readonly AccountProxyInterface $account,
+    LoggerChannelFactoryInterface $logger_factory,
+    protected readonly MessengerInterface $messenger,
+  ) {
     $this->logger = $logger_factory->get('ai_ckeditor');
-    $this->messenger = $messenger;
   }
 
   /**
@@ -98,8 +79,18 @@ class AiRequest implements ContainerInjectionInterface {
 
   /**
    * Performs a request to AI for streamed output.
+   *
+   * @param \Symfony\Component\HttpFoundation\Request $request
+   *   The request.
+   * @param \Drupal\editor\EditorInterface $editor
+   *   The editor.
+   * @param \Drupal\ai_ckeditor\PluginInterfaces\AiCKEditorPluginInterface $ai_ckeditor_plugin
+   *   The CK Editor plugin.
+   *
+   * @return \Symfony\Component\HttpFoundation\StreamedResponse|\Symfony\Component\HttpFoundation\Response
+   *   The AI response.
    */
-  public function doRequest(Request $request, EditorInterface $editor, AiCKEditorPluginInterface $ai_ckeditor_plugin) {
+  public function doRequest(Request $request, EditorInterface $editor, AiCKEditorPluginInterface $ai_ckeditor_plugin): StreamedResponse|Response {
     $data = json_decode($request->getContent());
 
     try {
@@ -117,7 +108,8 @@ class AiRequest implements ContainerInjectionInterface {
         if (empty($default_provider['provider_id'])) {
           // If we got nothing return NULL.
           $this->messenger->addError($this->t('No AI provider is set for chat. Please configure one in the "Text format and editors settings" or setup a default Chat model in the %ai_settings_link.', [
-            '%ai_settings_link' => Link::createFromRoute($this->t('AI settings'), 'ai.settings_form')->toString(),
+            '%ai_settings_link' => Link::createFromRoute($this->t('AI settings'), 'ai.settings_form')
+              ->toString(),
           ]));
           throw new \exception('No AI provider is set for chat. Please configure one in the AI default settings or in the ai_content settings form.');
         }
@@ -151,25 +143,27 @@ class AiRequest implements ContainerInjectionInterface {
 
       // Add the system message.
       $ai_provider->setChatSystemRole('You are helpful website assistant for content writing and editing. Do not give responses in the first, second or third person form. Do not add any commentary to the answer.');
-
-      // @todo Not all providers stream.
-      // @see: https://www.drupal.org/project/ai/issues/3466906
       $ai_provider->streamedOutput();
 
       /** @var \Drupal\ai\OperationType\Chat\StreamedChatMessageIteratorInterface $response */
-      $response = $ai_provider->chat($messages, $ai_model)->getNormalized();
+      $response = $ai_provider->chat($messages, $ai_model, ['ai_ckeditor'])->getNormalized();
 
-      return new StreamedResponse(function () use ($response) {
-        foreach ($response as $message) {
-          echo $message->getText();
-          ob_flush();
-          flush();
-        }
-      }, 200, [
-        'Cache-Control' => 'no-cache, must-revalidate',
-        'Content-Type' => 'text/event-stream',
-        'X-Accel-Buffering' => 'no',
-      ]);
+      if ($response instanceof StreamedChatMessageIteratorInterface) {
+        return new StreamedResponse(function () use ($response) {
+          foreach ($response as $message) {
+            echo $message->getText();
+            ob_flush();
+            flush();
+          }
+        }, 200, [
+          'Cache-Control' => 'no-cache, must-revalidate',
+          'Content-Type' => 'text/event-stream',
+          'X-Accel-Buffering' => 'no',
+        ]);
+      }
+      else {
+        return new Response($response->getText());
+      }
     }
     catch (\Exception $e) {
       $this->logger->error($e->getMessage());

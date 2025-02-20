@@ -99,6 +99,11 @@ $form['response_text'] = [
 ];
 ```
 
+The Completion plugin requires the sourceEditing plugin to be enabled in order
+for it to work: this is done automatically in an element pre-render hook. If you
+also require the plugin, you can add ```'#ai_ckeditor_response' => TRUE,``` to
+your text_format field definition and the pre-render plugin will add it for you.
+
 This is to make sure that the value can be transferred back to the main CKEditor window and that it follows the same editor rules (which will be validated)
 
 The form also has a storage section where you can get selected text from the main CKEditor window. So if the user clicks and holds and marks some text.

@@ -6,7 +6,7 @@ to allow it to make suggests about content, from translations to tone
 suggestions to text completion. 
 
 ## Dependencies
-The AI Content Editing Tools requires the AI Core module to be installed and
+The AI CKEditor integration requires the AI Core module to be installed and
 configured, and a valid AI Provider module to be enabled and configured.
 
 ## Installation & configuration

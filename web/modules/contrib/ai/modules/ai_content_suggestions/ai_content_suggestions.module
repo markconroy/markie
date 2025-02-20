@@ -30,8 +30,12 @@ function ai_content_suggestions_form_taxonomy_term_tags_form_alter(&$form, FormS
  *   The form state.
  */
 function ai_content_suggestions_alter_form(array &$form, FormStateInterface $form_state): void {
-  \Drupal::service('ai_content_suggestions.form_alter')->alter($form, $form_state);
-  $form['#cache']['contexts'][] = 'user.permissions';
-  $form['#cache']['contexts'][] = 'ai_content_suggestions_plugins';
-  $form['#cache']['contexts'][] = 'ai_providers';
+  $user = \Drupal::currentUser();
+  $hasPermission = $user->hasPermission('access ai content suggestion tools');
+  if ($hasPermission) {
+    \Drupal::service('ai_content_suggestions.form_alter')->alter($form, $form_state);
+    $form['#cache']['contexts'][] = 'user.permissions';
+    $form['#cache']['contexts'][] = 'ai_content_suggestions_plugins';
+    $form['#cache']['contexts'][] = 'ai_providers';
+  }
 }

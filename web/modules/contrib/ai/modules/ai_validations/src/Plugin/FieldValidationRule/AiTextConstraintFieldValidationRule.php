@@ -10,7 +10,7 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Provides functionality for EmailFieldValidationRule.
+ * Provides functionality for AiTextFieldValidationRule.
  *
  * @FieldValidationRule(
  *   id = "ai_text_prompt_constraint_rule",

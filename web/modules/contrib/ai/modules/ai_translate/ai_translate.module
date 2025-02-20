@@ -98,8 +98,8 @@ function ai_translate_plugin_help($route_name, RouteMatchInterface $route_match)
  * Check if default provider is chosen and model is selected.
  */
 function _ai_translate_check_default_provider_and_model() {
-  $sets = \Drupal::service('ai.provider')->getDefaultProviderForOperationType('chat');
+  $sets = \Drupal::service('ai.provider')->getDefaultProviderForOperationType('translate_text');
   if (empty($sets['provider_id'])) {
-    \Drupal::messenger()->addMessage(t('Please set a default chat provider & model in the <a href=":url">AI module settings</a>.', [':url' => Url::fromRoute('ai.settings_form')->toString()]), 'error', FALSE);
+    \Drupal::messenger()->addMessage(t('Please set a default provider & model for the text translation the <a href=":url">AI module settings</a>.', [':url' => Url::fromRoute('ai.settings_form')->toString()]), 'error', FALSE);
   }
 }

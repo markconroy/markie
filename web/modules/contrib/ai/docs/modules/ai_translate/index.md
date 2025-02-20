@@ -4,7 +4,7 @@ The AI Translate module integrates with Drupal's content translation system to
 allow passing content to an LLM to generate a translation.
 
 ## Dependencies
-The AI Content Editing Tools requires the AI Core module to be installed and
+The AI Translate module requires the AI Core module to be installed and
 configured, and a valid AI Provider module to be enabled and configured.
 
 The module also requires Drupal's Content Translation module to be enabled and

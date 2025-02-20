@@ -244,7 +244,7 @@ final class Taxonomy extends AiContentSuggestionsPluginBase {
     $relevant_vocabularies = [];
 
     foreach ($term_reference_fields as $field) {
-      $target_bundles = $field->getSetting('handler_settings')['target_bundles'];
+      $target_bundles = $field->getSetting('handler_settings')['target_bundles'] ?? [];
       $relevant_vocabularies = array_merge($relevant_vocabularies, $target_bundles);
     }
 

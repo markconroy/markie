@@ -8,7 +8,7 @@
 /**
  * Implements hook_theme().
  */
-function ai_chatbot_theme() {
+function ai_chatbot_theme(): array {
   return [
     'ai_chatbot' => [
       'variables' => [

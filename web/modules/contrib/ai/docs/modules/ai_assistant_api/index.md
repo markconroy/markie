@@ -12,14 +12,14 @@ to talk to a chosen LLM and ask it to perform tasks on the site.
 2. At least one Provider module must be enabled and configured.
 
 The default configuration for this module assumes that one or more modules
-providing AI Assistant Actions have also been enabled, such as the [AI search](../ai_search/index.md)
+providing AI Assistant Actions have also been enabled, such as the [AI search](../ai_search/)
 sub-module or the [AI Agents](https://www.drupal.org/project/ai_agents) module.
 Without any available actions, the AI Assistant will be limited to what the
 chosen LLM can do, and will have no information about the site the module is
 installed on.
 
 If no modules providing AI Assistant Actions are available, the Pre Action
-Prompt section of the AI Assistant form MUST be altered from it's default value,
+Prompt section of the AI Assistant form MUST be altered from its default value,
 in order to instruct the LLM about how to respond to user input. To do this, you
 will need to add
 
@@ -37,14 +37,26 @@ Please note, **editing this section requires experience of writing LLM prompts
 and may produce unexpected results**.
 
 ## How to configure the AI Assistant API module
+### Standard configuration
 1. Enable the module as normal.
 2. Visit /admin/config/ai/ai-assistant to view existing assistants or add your own.
 3. When adding an assistant, you will be able to set prompts for the assistant:
     1. **Pre Action Prompt**: this section is not editable by default (see [Dependencies](#dependencies)) and is the main prompt sent to the LLM prior to any configured actions being run.
-    2. **Pre-prompt System role**: this section explains to the LLM what role it should adopt when responding to the user's messages. It is sent as part of the Pre Action Prompt.
+    2. **System Prompt**: this section explains to the LLM what role it should adopt when responding to the user's messages. It is sent as part of the Pre Action Prompt.
     3. **Pre-prompt Instructions**: additional instructions for the LLM about how to respond to messages. It is sent as part of the Pre Action Prompt.
 4. If there are available API Assistant Actions, you will be able to select which actions are available to the LLM. The selected Actions will be run in the order listed in the form. This section will not appear if there are no available Actions.
 5. When you have completed the form as you require, click save to create the AI Assistant.
+
+### Advanced configuration
+By default, the AI Assistant API module will use the Pre Action Prompt and System Prompt provided within the /resources
+directory of the module. This ensures that the module will run the latest version of these prompts. However, if you wish
+to use custom values for these then you should add the following to your settings.php file:
+
+`$settings['ai_assistant_custom_prompts'] = TRUE;`
+
+This also allows different AI Assistants to use different Pre Action Prompts and System Prompts to each other. You may
+also wish to enable the `ai_assistant_advanced_mode_enabled` setting described in the [Dependencies](#dependencies)
+section so that these fields can be edited through the UI.
 
 ## AI Chatbot module
 ### What is the AI Chatbot module?

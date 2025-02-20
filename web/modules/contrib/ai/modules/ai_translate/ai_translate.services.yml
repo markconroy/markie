@@ -9,6 +9,15 @@ services:
       - '@entity_type.manager'
       - '@entity_field.manager'
       - '@plugin.manager.text_extractor'
+  ai_translate.text_translator:
+    class: Drupal\ai_translate\TextTranslator
+    arguments:
+      - '@entity_type.manager'
+      - '@language_manager'
+      - '@config.factory'
+      - '@ai.provider'
+      - '@twig'
+      - '@module_handler'
   plugin.manager.text_extractor:
     class: Drupal\ai_translate\FieldTextExtractorPluginManager
     parent: default_plugin_manager

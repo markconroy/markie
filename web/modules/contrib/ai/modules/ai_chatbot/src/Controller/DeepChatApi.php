@@ -6,6 +6,11 @@ namespace Drupal\ai_chatbot\Controller;
 
 use Drupal\Component\Serialization\Json;
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\ai\Exception\AiBadRequestException;
+use Drupal\ai\Exception\AiQuotaException;
+use Drupal\ai\Exception\AiRateLimitException;
+use Drupal\ai\Exception\AiRequestErrorException;
+use Drupal\ai\Exception\AiSetupFailureException;
 use Drupal\ai\OperationType\Chat\ChatMessage;
 use Drupal\ai\OperationType\Chat\StreamedChatMessageIterator;
 use Drupal\ai_assistant_api\AiAssistantApiRunner;
@@ -157,11 +162,33 @@ final class DeepChatApi extends ControllerBase {
         }
         else {
           return $this->createStreamedResponse($normalizedResponse);
-
         }
       }
       catch (\Exception $e) {
-        return new JsonResponse(['error' => $e->getMessage()], 500);
+        $error_message = $assistant->get('error_message');
+
+        // Try to find a specific error message to use.
+        if ($e instanceof AiBadRequestException) {
+          $error_message = $assistant->get('specific_error_messages')['AiBadRequestException'] ?? $error_message;
+        }
+        elseif ($e instanceof AiRateLimitException) {
+          $error_message = $assistant->get('specific_error_messages')['AiRateLimitException'] ?? $error_message;
+        }
+        elseif ($e instanceof AiQuotaException) {
+          $error_message = $assistant->get('specific_error_messages')['AiQuotaException'] ?? $error_message;
+        }
+        elseif ($e instanceof AiSetupFailureException) {
+          $error_message = $assistant->get('specific_error_messages')['AiSetupFailureException'] ?? $error_message;
+        }
+        elseif ($e instanceof AiRequestErrorException) {
+          $error_message = $assistant->get('specific_error_messages')['AiRequestErrorException'] ?? $error_message;
+        }
+
+        // Otherwise use the default error message.
+        return new JsonResponse([
+          'error' => $error_message,
+        ], 500);
+
       }
     }
     else {

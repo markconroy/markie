@@ -1393,17 +1393,17 @@
         },
         {
             "name": "drupal/admin_toolbar",
-            "version": "3.5.1",
+            "version": "3.5.2",
             "source": {
                 "type": "git",
                 "url": "https://git.drupalcode.org/project/admin_toolbar.git",
-                "reference": "3.5.1"
+                "reference": "3.5.2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://ftp.drupal.org/files/projects/admin_toolbar-3.5.1.zip",
-                "reference": "3.5.1",
-                "shasum": "b5215109836f7fade374fef531231e36c1c9b945"
+                "url": "https://ftp.drupal.org/files/projects/admin_toolbar-3.5.2.zip",
+                "reference": "3.5.2",
+                "shasum": "d5c42971050bf6656644f15a7602ae4e0502674e"
             },
             "require": {
                 "drupal/core": "^9.5 || ^10 || ^11"
@@ -1414,8 +1414,8 @@
             "type": "drupal-module",
             "extra": {
                 "drupal": {
-                    "version": "3.5.1",
-                    "datestamp": "1730409973",
+                    "version": "3.5.2",
+                    "datestamp": "1739914592",
                     "security-coverage": {
                         "status": "covered",
                         "message": "Covered by Drupal's security advisory policy"
@@ -1449,6 +1449,10 @@
                     "role": "Maintainer"
                 },
                 {
+                    "name": "fethi.krout",
+                    "homepage": "https://www.drupal.org/user/3206765"
+                },
+                {
                     "name": "japerry",
                     "homepage": "https://www.drupal.org/user/45640"
                 },
@@ -1478,17 +1482,17 @@
         },
         {
             "name": "drupal/ai",
-            "version": "1.0.2",
+            "version": "1.0.4",
             "source": {
                 "type": "git",
                 "url": "https://git.drupalcode.org/project/ai.git",
-                "reference": "1.0.2"
+                "reference": "1.0.4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://ftp.drupal.org/files/projects/ai-1.0.2.zip",
-                "reference": "1.0.2",
-                "shasum": "cbf7922dd41456951a6f7a1589a8f8376edba177"
+                "url": "https://ftp.drupal.org/files/projects/ai-1.0.4.zip",
+                "reference": "1.0.4",
+                "shasum": "4db641b126cc8fab5baa97778265c778c14c682c"
             },
             "require": {
                 "drupal/core": "^10.2 || ^11",
@@ -1497,23 +1501,24 @@
                 "yethee/tiktoken": "^0.5.1"
             },
             "require-dev": {
+                "allanpichardo/mysql-vector": "^2.0",
                 "drupal/ai_assistant_api": "*",
                 "drupal/ai_search-ai_search": "*",
                 "drupal/eca": "^2.0",
                 "drupal/field_validation": "^3.0@beta",
                 "drupal/key": "*",
-                "drupal/search_api": "^1.35",
+                "drupal/search_api": "^1.x-dev",
                 "drupal/search_api_solr": "^4.0",
                 "drupal/token": "^1.14"
             },
             "suggest": {
-                "league/commonmark": "Allows previewing of chunked content when configuring the fields to be indexed in AI Search."
+                "league/commonmark": "Allows previewing of chunked content when configuring the fields to be indexed in AI Search, and formats messages in the AI Chatbot module."
             },
             "type": "drupal-module",
             "extra": {
                 "drupal": {
-                    "version": "1.0.2",
-                    "datestamp": "1736957364",
+                    "version": "1.0.4",
+                    "datestamp": "1738761521",
                     "security-coverage": {
                         "status": "covered",
                         "message": "Covered by Drupal's security advisory policy"
@@ -1558,20 +1563,20 @@
         },
         {
             "name": "drupal/ai_provider_openai",
-            "version": "1.0.1",
+            "version": "1.0.2",
             "source": {
                 "type": "git",
                 "url": "https://git.drupalcode.org/project/ai_provider_openai.git",
-                "reference": "1.0.1"
+                "reference": "1.0.2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://ftp.drupal.org/files/projects/ai_provider_openai-1.0.1.zip",
-                "reference": "1.0.1",
-                "shasum": "a29de1c00963d018430320a3b8202f100f9b7c81"
+                "url": "https://ftp.drupal.org/files/projects/ai_provider_openai-1.0.2.zip",
+                "reference": "1.0.2",
+                "shasum": "1942f27fd2cac935e5a5cc34c466a7e9bb51b632"
             },
             "require": {
-                "drupal/ai": "^1.0.0",
+                "drupal/ai": "^1.0.4",
                 "drupal/core": "^10.3 || ^11",
                 "drupal/key": "^1.18",
                 "openai-php/client": ">=v0.10.1"
@@ -1579,8 +1584,8 @@
             "type": "drupal-module",
             "extra": {
                 "drupal": {
-                    "version": "1.0.1",
-                    "datestamp": "1736872381",
+                    "version": "1.0.2",
+                    "datestamp": "1738761667",
                     "security-coverage": {
                         "status": "covered",
                         "message": "Covered by Drupal's security advisory policy"
@@ -2115,17 +2120,17 @@
         },
         {
             "name": "drupal/entity",
-            "version": "1.5.0",
+            "version": "1.6.0",
             "source": {
                 "type": "git",
                 "url": "https://git.drupalcode.org/project/entity.git",
-                "reference": "8.x-1.5"
+                "reference": "8.x-1.6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://ftp.drupal.org/files/projects/entity-8.x-1.5.zip",
-                "reference": "8.x-1.5",
-                "shasum": "86c0b75c173144aaedde3e3258dc0d3ce11d1a22"
+                "url": "https://ftp.drupal.org/files/projects/entity-8.x-1.6.zip",
+                "reference": "8.x-1.6",
+                "shasum": "dfb214fd45bd6ad79604d23a39a96b3d4c38f8e1"
             },
             "require": {
                 "drupal/core": "^10.1 || ^11"
@@ -2133,8 +2138,8 @@
             "type": "drupal-module",
             "extra": {
                 "drupal": {
-                    "version": "8.x-1.5",
-                    "datestamp": "1723380062",
+                    "version": "8.x-1.6",
+                    "datestamp": "1740006812",
                     "security-coverage": {
                         "status": "covered",
                         "message": "Covered by Drupal's security advisory policy"
@@ -2171,7 +2176,7 @@
                     "homepage": "https://www.drupal.org/user/2416470"
                 },
                 {
-                    "name": "TR",
+                    "name": "tr",
                     "homepage": "https://www.drupal.org/user/202830"
                 }
             ],

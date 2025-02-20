@@ -132,6 +132,7 @@ class TextToMediaImage extends RuleBase implements ContainerFactoryPluginInterfa
       '#description' => $this->t('Media Type to create'),
       '#options' => $options,
       '#default_value' => $defaultValues['automator_llm_media_type'] ?? '',
+      '#empty_option' => $this->t('- Please select -'),
     ];
 
     return $form;

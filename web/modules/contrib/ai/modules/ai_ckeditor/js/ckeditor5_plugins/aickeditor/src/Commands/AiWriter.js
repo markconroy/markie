@@ -22,7 +22,7 @@ export default class AiWriter extends Command {
 
     const editor = this.editor;
     const sourceEditing = editor.plugins.get('SourceEditing');
-    editor.enableReadOnlyMode( 'ai_ckeditor');
+    editor.enableReadOnlyMode('ai_ckeditor');
     sourceEditing.set("isSourceEditingMode", true);
     sourceEditing.isEnabled = false;
 
@@ -34,12 +34,19 @@ export default class AiWriter extends Command {
       sourceEditingTextarea.value = ''; // Clear the field
     }
 
-    editor.model.change(async writer => {
-      const response = await fetch(drupalSettings.path.baseUrl + 'api/ai-ckeditor/request/' + request_parameters.editor_id + '/' + request_parameters.plugin_id, {
-        method: 'POST',
-        credentials: 'same-origin',
-        body: JSON.stringify(request_parameters),
-      });
+    editor.model.change(async (writer) => {
+      const response = await fetch(
+        drupalSettings.path.baseUrl +
+          "api/ai-ckeditor/request/" +
+          request_parameters.editor_id +
+          "/" +
+          request_parameters.plugin_id,
+        {
+          method: "POST",
+          credentials: "same-origin",
+          body: JSON.stringify(request_parameters),
+        }
+      );
 
       if (!response.ok) {
         status.fire('ai_status', {
@@ -85,8 +92,7 @@ export default class AiWriter extends Command {
 
       sourceEditing.set("isSourceEditingMode", false);
       sourceEditing.isEnabled = true;
-      editor.disableReadOnlyMode( 'ai_ckeditor');
+      editor.disableReadOnlyMode('ai_ckeditor');
     });
   }
-
 }

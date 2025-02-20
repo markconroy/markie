@@ -9,12 +9,12 @@ use Drupal\search_api\Query\QueryInterface;
 use Solarium\Core\Query\QueryInterface as SolariumQueryInterface;
 
 /**
- * Prepend AI Search results into the database search..
+ * Prepend and combine AI Search results into the database search.
  *
  * @SearchApiProcessor(
  *   id = "solr_boost_by_ai_search",
  *   label = @Translation("Boost SOLR by AI Search"),
- *   description = @Translation("Prepend results from the AI Search into the SOLR results ready for subsequent filtering (if any) to improve relevance."),
+ *   description = @Translation("This combines results from the AI Search (Vector Database) with the SOLR index, both finding results that would otherwise not be found due to lack of keyword match, as well as vastly improving the relevance of the top results. It prepends the results from the AI Search into the database results ready for and respecting any filtering applied to this index (such as filters, exposed filters, or facets)."),
  *   stages = {
  *     "preprocess_query" = 0,
  *   }

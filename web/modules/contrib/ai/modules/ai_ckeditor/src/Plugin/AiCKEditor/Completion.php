@@ -22,7 +22,7 @@ final class Completion extends AiCKEditorPluginBase {
   /**
    * {@inheritdoc}
    */
-  public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
+  public function buildConfigurationForm(array $form, FormStateInterface $form_state): array {
     $options = $this->aiProviderManager->getSimpleProviderModelOptions('chat');
     array_shift($options);
     array_splice($options, 0, 1);
@@ -33,6 +33,15 @@ final class Completion extends AiCKEditorPluginBase {
       "#empty_option" => $this->t('-- Default from AI module (chat) --'),
       '#default_value' => $this->configuration['provider'] ?? $this->aiProviderManager->getSimpleDefaultProviderOptions('chat'),
       '#description' => $this->t('Select which provider to use for this plugin. See the <a href=":link">Provider overview</a> for details about each provider.', [':link' => '/admin/config/ai/providers']),
+    ];
+
+    $prompts_config = $this->getConfigFactory()->get('ai_ckeditor.settings');
+    $prompt_complete = $prompts_config->get('prompts.complete');
+    $form['prompt'] = [
+      '#type' => 'textarea',
+      '#title' => $this->t('Completion pre prompt'),
+      '#default_value' => $prompt_complete ?? '',
+      '#description' => $this->t('This prompt will be prepended before the user prompt. This field may be left empty too.'),
     ];
 
     return $form;
@@ -48,14 +57,17 @@ final class Completion extends AiCKEditorPluginBase {
   /**
    * {@inheritdoc}
    */
-  public function submitConfigurationForm(array &$form, FormStateInterface $form_state) {
+  public function submitConfigurationForm(array &$form, FormStateInterface $form_state): void {
     $this->configuration['provider'] = $form_state->getValue('provider');
+    $newPrompt = $form_state->getValue('prompt');
+    $prompts_config = $this->getConfigFactory()->getEditable('ai_ckeditor.settings');
+    $prompts_config->set('prompts.complete', $newPrompt)->save();
   }
 
   /**
    * {@inheritdoc}
    */
-  public function buildCkEditorModalForm(array $form, FormStateInterface $form_state, array $settings = []) {
+  public function buildCkEditorModalForm(array $form, FormStateInterface $form_state, array $settings = []): array {
     $form = parent::buildCkEditorModalForm($form, $form_state);
 
     $editor_id = $this->requestStack->getParentRequest()->get('editor_id');
@@ -76,6 +88,7 @@ final class Completion extends AiCKEditorPluginBase {
       '#default_value' => '',
       '#allowed_formats' => [$editor_id],
       '#format' => $editor_id,
+      '#ai_ckeditor_response' => TRUE,
     ];
 
     return $form;
@@ -87,7 +100,16 @@ final class Completion extends AiCKEditorPluginBase {
   public function ajaxGenerate(array $form, FormStateInterface $form_state) {
     $response = new AjaxResponse();
     $values = $form_state->getValues();
-    $response->addCommand(new AiRequestCommand($values["plugin_config"]["text_to_submit"], $values["editor_id"], $this->pluginDefinition['id'], 'ai-ckeditor-response'));
+    $prompts_config = $this->getConfigFactory()->get('ai_ckeditor.settings');
+    $prompt_complete = $prompts_config->get('prompts.complete');
+    if (!empty($prompt_complete)) {
+      $prompt = $prompt_complete . PHP_EOL . $values["plugin_config"]["text_to_submit"];
+    }
+    else {
+      $prompt = $values["plugin_config"]["text_to_submit"];
+    }
+    $response->addCommand(new AiRequestCommand($prompt, $values["editor_id"], $this->pluginDefinition['id'], 'ai-ckeditor-response'));
+
     return $response;
   }
 

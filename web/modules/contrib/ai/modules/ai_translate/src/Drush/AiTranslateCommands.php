@@ -7,8 +7,9 @@ use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Logger\LoggerChannelTrait;
 use Drupal\Core\Messenger\MessengerTrait;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
-use Drupal\ai_translate\Controller\AiTranslateController;
 use Drupal\ai_translate\TextExtractorInterface;
+use Drupal\ai_translate\TextTranslatorInterface;
+use Drupal\ai_translate\TranslationException;
 use Drush\Attributes\Argument;
 use Drush\Attributes\Command;
 use Drush\Commands\DrushCommands;
@@ -45,11 +46,11 @@ class AiTranslateCommands extends DrushCommands {
   protected TextExtractorInterface $textExtractor;
 
   /**
-   * Translate controller.
+   * Text translation service.
    *
-   * @var \Drupal\ai_translate\Controller\AiTranslateController
+   * @var \Drupal\ai_translate\TextTranslatorInterface
    */
-  protected AiTranslateController $translateController;
+  protected TextTranslatorInterface $textTranslator;
 
   /**
    * {@inheritdoc}
@@ -59,8 +60,7 @@ class AiTranslateCommands extends DrushCommands {
     $instance->languageManager = $container->get('language_manager');
     $instance->entityTypeManager = $container->get('entity_type.manager');
     $instance->textExtractor = $container->get('ai_translate.text_extractor');
-    $instance->translateController = \Drupal::classResolver(AiTranslateController::class
-    );
+    $instance->textTranslator = $container->get('ai_translate.text_translator');
     return $instance;
   }
 
@@ -68,13 +68,13 @@ class AiTranslateCommands extends DrushCommands {
    * Create AI-powered translation of an entity.
    */
   #[Command(
-    name: 'ai:translate'
+    name: 'ai:translate-entity'
   )]
   #[Argument(name: 'entityType', description: 'Entity type (i.e. node)')]
   #[Argument(name: 'entityId', description: 'Entity ID (i.e. 16)')]
   #[Argument(name: 'langFrom', description: 'Source language code (i.e. fr)')]
   #[Argument(name: 'langTo', description: 'Target language code (i.e. en)')]
-  public function translate(
+  public function translateEntity(
     string $entityType,
     string $entityId,
     string $langFrom,
@@ -84,8 +84,6 @@ class AiTranslateCommands extends DrushCommands {
     if (empty($langNames)) {
       $langNames = $this->languageManager->getNativeLanguages();
     }
-    $langFromName = $langNames[$langFrom]->getName();
-    $langToName = $langNames[$langTo]->getName();
     $entity = $this->entityTypeManager->getStorage($entityType)
       ->load($entityId);
     if ($entity->language()->getId() !== $langFrom
@@ -99,8 +97,15 @@ class AiTranslateCommands extends DrushCommands {
     }
     $textMetadata = $this->textExtractor->extractTextMetadata($entity);
     foreach ($textMetadata as &$singleText) {
-      $singleText['translated'] = $this->translateController
-        ->translateContent($singleText['value'], $langFromName, $langToName);
+      try {
+        $singleText['translated'] = $this->textTranslator->translateContent(
+          $singleText['value'], $langNames[$langTo], $langNames[$langFrom] ?? NULL);
+      }
+      catch (TranslationException) {
+        // Error already logged by text_translate service.
+        $this->messenger()->addError('Error translating content.');
+        return;
+      }
     }
     $translation = $entity->addTranslation($langTo);
     $this->textExtractor->insertTextMetadata($translation,
@@ -114,6 +119,35 @@ class AiTranslateCommands extends DrushCommands {
       $this->messenger()->addError($this->t('There was some issue with content translation.'));
     }
 
+  }
+
+  /**
+   * Create AI-powered translation of a text.
+   */
+  #[Command(
+    name: 'ai:translate-text'
+  )]
+  #[Argument(name: 'text', description: 'Text to translate')]
+  #[Argument(name: 'langTo', description: 'Target language code (i.e. en)')]
+  #[Argument(name: 'langFrom', description: 'Source language code (i.e. fr)')]
+  public function translate(
+    string $text,
+    string $langFrom,
+    string $langTo,
+  ) {
+    static $langNames;
+    if (empty($langNames)) {
+      $langNames = $this->languageManager->getNativeLanguages();
+    }
+    try {
+      return $this->textTranslator->translateContent($text,
+        $langNames[$langTo], $langNames[$langFrom] ?? NULL);
+    }
+    catch (TranslationException) {
+      // Error already logged by text_translate service.
+      $this->messenger()->addError('Error translating content.');
+      return;
+    }
   }
 
 }

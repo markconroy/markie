@@ -201,6 +201,12 @@ abstract class AiVdbProviderClientBase implements AiVdbProviderInterface, AiVdbP
         '@url' => Url::fromRoute('ai.admin_vdb_providers')->toString(),
       ]));
     }
+
+    // Ensure that the user has been offered to configure the metrics, needed
+    // if JS is disabled.
+    if (!isset($database_settings['metric'])) {
+      $form_state->setRebuild();
+    }
   }
 
   /**

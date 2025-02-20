@@ -11,4 +11,4 @@ have configured. Other modules may provide additional forms provided as they
 require: please see the developers section for more details.
 
 ## How to use the module
-For more information, please see the [AI API Explorer module documentation](https://project.pages.drupalcode.org/ai/modules/ai_api_explorer/index.md).
+For more information, please see the [AI API Explorer module documentation](https://project.pages.drupalcode.org/ai/modules/ai_api_explorer/).

@@ -2,6 +2,7 @@
 
 namespace Drupal\ai_translate\Form;
 
+use Drupal\Core\Config\FileStorage;
 use Drupal\Core\Entity\ContentEntityTypeInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
@@ -107,6 +108,12 @@ class AiTranslateSettingsForm extends ConfigFormBase {
     $example_prompt = $config->get('prompt');
 
     $languages = $this->languageManager->getLanguages();
+    $form['prompt'] = [
+      '#title' => $this->t('Default translation prompt'),
+      '#type' => 'textarea',
+      '#required' => TRUE,
+      '#default_value' => $example_prompt ?? '',
+    ];
     foreach ($languages as $langcode => $language) {
       $form[$langcode] = [
         '#type' => 'fieldset',
@@ -124,16 +131,22 @@ class AiTranslateSettingsForm extends ConfigFormBase {
       ];
       $form[$langcode]['prompt'] = [
         '#title' => $this->t('Translation prompt for translating to @lang', ['@lang' => $language->getName()]),
+        '#description' => $this->t('Leave empty to use the default translation prompt.'),
         '#type' => 'textarea',
-        '#required' => TRUE,
+        '#required' => FALSE,
         '#default_value' => $config->get($langcode . '_prompt') ?? $example_prompt,
       ];
     }
 
-    $example_prompt = '<h3>Example prompt</h3><pre> ' . $example_prompt . ' </pre>';
-    $form['example_prompt'] = [
-      '#type' => 'markup',
-      '#markup' => $example_prompt,
+    $moduleInfo = $this->moduleHandler->getModule('ai_translate');
+    $config_path = $moduleInfo->getPath() . '/config/install';
+    $source = new FileStorage($config_path);
+    $source->read('ai_translate.settings');
+    $form['default_prompt'] = [
+      '#type' => 'inline_template',
+      '#template' => '<h3>Prompt suggested by module maintainers:</h3>
+<pre>{{ settings.prompt }}</pre>',
+      '#context' => ['settings' => $source->read('ai_translate.settings')],
     ];
 
     $helpText = $this->moduleHandler->moduleExists('help')
@@ -195,15 +208,30 @@ class AiTranslateSettingsForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function validateForm(array &$form, FormStateInterface $form_state) {
-    $languages = $this->languageManager->getLanguages();
-    foreach ($languages as $langcode => $language) {
+    try {
+      if (strlen($this->twig->renderInline($form_state->getValue('prompt'), [
+        'source_lang_name' => 'Test 1',
+        'dest_lang_name' => 'Test 2',
+        'input_text' => 'Text to translate',
+      ])) < self::MINIMAL_PROMPT_LENGTH) {
+        $form_state->setErrorByName('prompt',
+          $this->t('Prompt cannot be shorter than @num characters',
+            ['@num' => self::MINIMAL_PROMPT_LENGTH]));
+      }
+    }
+    catch (\Exception $e) {
+      $form_state->setErrorByName('prompt', $e->getMessage());
+    }
+    foreach ($this->languageManager->getLanguages() as $langcode => $language) {
       try {
-        if (strlen($this->twig->renderInline($form_state->getValue($langcode)['prompt'], [
+        // Language-specific prompts are optional.
+        $langPrompt = $form_state->getValue([$langcode, 'prompt']);
+        if ($langPrompt && strlen($this->twig->renderInline($langPrompt, [
           'source_lang_name' => 'Test 1',
           'dest_lang_name' => 'Test 2',
           'input_text' => 'Text to translate',
         ])) < self::MINIMAL_PROMPT_LENGTH) {
-          $form_state->setErrorByName('prompt',
+          $form_state->setError($form[$langcode]['prompt'],
             $this->t('Prompt cannot be shorter than @num characters',
               ['@num' => self::MINIMAL_PROMPT_LENGTH]));
         }
@@ -224,8 +252,8 @@ class AiTranslateSettingsForm extends ConfigFormBase {
     $config->set('reference_defaults', array_keys(array_filter($form_state->getValue('reference_defaults'))));
     $languages = $this->languageManager->getLanguages();
     foreach ($languages as $langcode => $language) {
-      $config->set($langcode . '_model', $form_state->getValue($langcode)['model']);
-      $config->set($langcode . '_prompt', $form_state->getValue($langcode)['prompt']);
+      $config->set($langcode . '_model', $form_state->getValue([$langcode, 'model']));
+      $config->set($langcode . '_prompt', $form_state->getValue([$langcode, 'prompt']));
     }
     $config->save();
     parent::submitForm($form, $form_state);

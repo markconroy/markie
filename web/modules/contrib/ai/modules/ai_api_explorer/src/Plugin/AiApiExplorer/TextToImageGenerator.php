@@ -225,7 +225,7 @@ final class TextToImageGenerator extends AiApiExplorerPluginBase {
     $code['code']['#value'] .= "// Examples Possibility #3 - get as generated media from the first image.<br>";
     $code['code']['#value'] .= '$media = $normalized[0]->getAsMediaEntity("image", "", "image.png");<br>';
     $code['code']['#value'] .= "// Examples Possibility #4 - get as image file entity from the first image.<br>";
-    $code['code']['#value'] .= '$file = $normalized[0]->getAsImageEntity("public://", "image.png");<br><br>';
+    $code['code']['#value'] .= '$file = $normalized[0]->getAsFileEntity("public://", "image.png");<br><br>';
     $code['code']['#value'] .= "// Another possibility is to get the raw response from the provider.<br>";
     $code['code']['#value'] .= '$raw = $response->getRaw();<br>';
 

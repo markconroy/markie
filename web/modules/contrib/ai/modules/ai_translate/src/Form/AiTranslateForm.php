@@ -128,26 +128,33 @@ class AiTranslateForm extends FormBase {
           }
         }
       }
-
+      $ai_model = FALSE;
+      $additional = '';
       if ($lang_from !== $langcode && !$entity->hasTranslation($langcode)) {
         $model = $config->get($langcode . '_model') ?? '';
         $parts = explode('__', $model);
-        if (empty($parts[0])) {
-          $default_model = $this->providerManager->getSimpleDefaultProviderOptions('chat');
-          $parts1 = explode('__', $default_model);
-          $ai_model = $parts1[1];
+        if ($model == "" || empty($parts[0])) {
+          $default_model = $this->providerManager->getSimpleDefaultProviderOptions('translate_text');
+          if ($default_model == "") {
+          }
+          else {
+            $parts1 = explode('__', $default_model);
+            $ai_model = $parts1[1];
+          }
         }
         else {
           $ai_model = $parts[1];
         }
-        $additional = Link::createFromRoute($this->t('Translate using @ai', ['@ai' => $ai_model]),
-          'ai_translate.translate_content', [
-            'entity_type' => $entity_type_id,
-            'entity_id' => $entity_id,
-            'lang_from' => $lang_from,
-            'lang_to' => $langcode,
-          ]
-        )->toString();
+        if ($ai_model) {
+          $additional = Link::createFromRoute($this->t('Translate using @ai', ['@ai' => $ai_model]),
+            'ai_translate.translate_content', [
+              'entity_type' => $entity_type_id,
+              'entity_id' => $entity_id,
+              'lang_from' => $lang_from,
+              'lang_to' => $langcode,
+            ]
+          )->toString();
+        }
       }
       else {
         $additional = $this->t('NA');
@@ -190,7 +197,7 @@ class AiTranslateForm extends FormBase {
    * Function to call the translate API and get the result.
    */
   public function aiTranslateResult(array &$form, FormStateInterface $form_state) {
-
+    return [];
   }
 
 }

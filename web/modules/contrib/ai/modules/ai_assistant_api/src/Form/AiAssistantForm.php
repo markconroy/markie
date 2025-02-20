@@ -245,7 +245,7 @@ final class AiAssistantForm extends EntityForm {
 
     $form['advanced']['error_message'] = [
       '#type' => 'textarea',
-      '#title' => $this->t('Error message'),
+      '#title' => $this->t('Generic error message'),
       '#description' => $this->t('This is the answer if we run into any error on the way. You may use the token [error_message] to get the error message from the backend in your message, but it might be a security concern to show this to none escalated users.'),
       '#default_value' => $entity->get('error_message') ?? $this->t('I am sorry, something went terribly wrong. Please try to ask me again.'),
       '#attributes' => [
@@ -253,6 +253,27 @@ final class AiAssistantForm extends EntityForm {
         'rows' => 2,
       ],
     ];
+
+    $form['advanced']['specific_error_messages'] = [
+      '#type' => 'details',
+      '#title' => $this->t('Specific error messages'),
+      '#description' => $this->t("These custom error messages will be used where applicable. If there isn't a specific error message for an error, the generic error above will be used."),
+      '#open' => FALSE,
+      '#tree' => TRUE,
+    ];
+
+    foreach ($this->getExceptions() as $name => $exception) {
+      $form['advanced']['specific_error_messages'][$name] = [
+        '#type' => 'textarea',
+        '#title' => $this->t('@type error message', ['@type' => $exception['label']]),
+        '#description' => $this->t('The response if we run into an error of this type. You may use the token [error_message] to get the error message from the backend in your message, but it might be a security concern to show this to none escalated users.'),
+        '#default_value' => $entity->get('specific_error_messages')[$name] ?? NULL,
+        '#attributes' => [
+          'placeholder' => $exception['placeholder'] ?? NULL,
+          'rows' => 2,
+        ],
+      ];
+    }
 
     $form['advanced']['pre_action_prompt'] = [
       '#type' => 'textarea',
@@ -361,6 +382,40 @@ final class AiAssistantForm extends EntityForm {
     );
     $form_state->setRedirectUrl($this->entity->toUrl('collection'));
     return $result;
+  }
+
+  /**
+   * Defines the exception types that will have custom error messages.
+   *
+   * @return <string, <\Drupal\Core\StringTranslation\TranslatableMarkup>[]>[]
+   *   The array of exception with custom error messages. Key is the class name.
+   *   Value is the human-readable label.
+   */
+  protected function getExceptions(): array {
+    $exceptions = [];
+
+    $exceptions['AiBadRequestException'] = [
+      'label' => $this->t('Bad Request'),
+      'placeholder' => $this->t('I am sorry, there was an issue with your request. If the problem persists, please contact an administrator.'),
+    ];
+    $exceptions['AiRateLimitException'] = [
+      'label' => $this->t('Rate Limit'),
+      'placeholder' => $this->t('I am sorry, the request has been rejected due to rate limits. Often AI provider accounts can be upgraded to increase the rate limit. You may also find trying later works.'),
+    ];
+    $exceptions['AiQuotaException'] = [
+      'label' => $this->t('Quota'),
+      'placeholder' => $this->t('I am sorry, something went wrong. This could be due to the attached account requiring more credits.'),
+    ];
+    $exceptions['AiSetupFailureException'] = [
+      'label' => $this->t('Setup Failure'),
+      'placeholder' => $this->t('I am sorry, there is an issue with the AI integration on your site. Please contact an administrator to resolve.'),
+    ];
+    $exceptions['AiRequestErrorException'] = [
+      'label' => $this->t('Request Error'),
+      'placeholder' => $this->t('I am sorry, there was an error communicating with the AI. If the problem persists, please contact an administrator.'),
+    ];
+
+    return $exceptions;
   }
 
 }

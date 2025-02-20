@@ -22,3 +22,6 @@ parameters:
   ignoreErrors:
     # new static() is a best practice in Drupal, so we cannot fix that.
     - "#^Unsafe usage of new static#"
+
+  excludePaths:
+    - modules/ai_search/tests/modules/test_ai_vdb_provider_mysql/src/TestVectorTable.php

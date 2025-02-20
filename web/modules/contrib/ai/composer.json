@@ -10,11 +10,12 @@
     "require-dev": {
         "drupal/eca": "^2.0",
         "drupal/field_validation": "^3.0@beta",
-        "drupal/search_api": "^1.35",
+        "drupal/search_api": "^1.x-dev",
         "drupal/search_api_solr": "^4.0",
-        "drupal/token": "^1.14"
+        "drupal/token": "^1.14",
+        "allanpichardo/mysql-vector": "^2.0"
     },
     "suggest": {
-        "league/commonmark": "Allows previewing of chunked content when configuring the fields to be indexed in AI Search."
+        "league/commonmark": "Allows previewing of chunked content when configuring the fields to be indexed in AI Search, and formats messages in the AI Chatbot module."
     }
 }

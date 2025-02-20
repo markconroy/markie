@@ -2,13 +2,29 @@
 
 ## Translate Text
 
-Translate text calls are calls for translating text from one language to another. One known provider using this is DeepL.
+Translate text calls are calls for translating text from one language to another.
+[DeepL](https://www.drupal.org/project/ai_provider_deepl) is the one provider that
+implements this call natively.
+
+AI translate module, when enabled, allows using any provider that supports
+[chat](call_chat.md) calls, for translation.
 
 ### Example normalized text translation call
 
-The following is an example of sending text to DeepL and getting the translated text back.
+Using default provider:
 
-For the example to work, you need to have the contributed module DeepL Provider (`provider_deepl`) installed.
+```php
+      $providerConfig = $this->aiProviderManager->getDefaultProviderForOperationType('translate_text');
+      $provider = $this->aiProviderManager->createInstance($providerConfig['provider_id'], $providerConfig);
+      $translation = $provider->translateText(
+        new TranslateTextInput($input_text, $langFrom?->getId(), $langTo->getId()),
+        $providerConfig['model_id']
+      );
+```
+
+Using non-default provider (for this example to work, you need to install Deepl provider module)
+
+For the following example to work, you need to install [DeepL](https://www.drupal.org/project/ai_provider_deepl) module.
 
 ```php
 $translator = \Drupal::service('ai.provider')->createInstance('deepl');

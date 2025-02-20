@@ -199,7 +199,10 @@ final class ChatGenerator extends AiApiExplorerPluginBase {
       if ($form_state->getValue('streamed')) {
         $provider->streamedOutput();
       }
-      $response = $provider->chat($input, $form_state->getValue('chat_ai_model'), ['chat_generation'])->getNormalized();
+      $response = $provider->chat($input, $form_state->getValue('chat_ai_model'), [
+        'chat_generation',
+        'ai_api_explorer',
+      ])->getNormalized();
     }
     catch (\Exception $e) {
       $message = $this->explorerHelper->renderException($e);

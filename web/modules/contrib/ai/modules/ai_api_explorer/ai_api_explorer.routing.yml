@@ -4,4 +4,4 @@ ai_api_explorer.list_page:
     _controller: '\Drupal\ai\Controller\ProviderSetupList::list'
     _title: 'AI API Explorers'
   requirements:
-    _permission: 'administer ai'
+    _permission: 'access ai prompt'
