@@ -100,6 +100,7 @@ class AiCKEditorDialogForm extends FormBase {
 
     // Load plugin instance configuration.
     $instance_config = $editor_config->get('settings')['plugins']['ai_ckeditor_ai'] ?? [];
+    $full_payload = $request->request->all();
 
     if (empty($instance_config['plugins'])) {
       $form['warning'] = [
@@ -117,6 +118,10 @@ class AiCKEditorDialogForm extends FormBase {
 
         if (strpos($plugin_id, '__') !== FALSE) {
           [$plugin_id, $config_id] = explode('__', $plugin_id);
+        }
+        // The config id can also be in the payload of the plugin config.
+        elseif (!empty($full_payload['plugin_config']['config_id'])) {
+          $config_id = $full_payload['plugin_config']['config_id'];
         }
 
         // Instantiate the plugin using the manager.

@@ -181,6 +181,13 @@ class ProviderProxy {
       $this->plugin->setAuthentication($pre_generate_event->getAuthentication());
     }
 
+    // Handle any changes to the tags made in the event.
+    $this->plugin->resetTags();
+
+    foreach ($pre_generate_event->getTags() as $tag) {
+      $this->plugin->setTag($tag);
+    }
+
     // Trigger the provider and try to catch where it went wrong.
     try {
       $response = $method->invokeArgs($this->plugin, $arguments);
@@ -190,7 +197,7 @@ class ProviderProxy {
       $this->loggerFactory->get('ai')->error('Error invoking client: @error', ['@error' => $e->getMessage()]);
       throw new AiBadRequestException('Error invoking client: ' . $e->getMessage());
     }
-    // If the provider does an responser error.
+    // If the provider does a responder error.
     catch (AiResponseErrorException $e) {
       $this->loggerFactory->get('ai')->error('Error invoking model response: @error', ['@error' => $e->getMessage()]);
       throw $e;

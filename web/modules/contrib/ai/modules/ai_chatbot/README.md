@@ -6,7 +6,8 @@ assistant, consisting of a block with a text-input that pushes user messages to
 the AI Assistant API, and renders LLM responses as user-readable text.
 
 ## Deepchat
-In the backend it uses Deepchat by OvidijusParsiunas.
+In the backend it uses Deepchat by OvidijusParsiunas. To have the Chatbot
+responses display correctly you **MUST** install the league/commonmark library.
 
 ## Using the module
 For more information, please see the [AI Assistant API module documentation](https://project.pages.drupalcode.org/ai/modules/ai_assistant_api/).

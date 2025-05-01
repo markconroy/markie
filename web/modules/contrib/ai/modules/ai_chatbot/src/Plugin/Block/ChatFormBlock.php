@@ -105,7 +105,7 @@ class ChatFormBlock extends BlockBase implements ContainerFactoryPluginInterface
       '#theme' => 'status_messages',
       '#message_list' => [
         'warning' => [
-          $this->t('This code type will be replace with the AI Deepchat Chatbot, we recommend to use that instead.'),
+          $this->t('This block type will be replace with the AI Deepchat Chatbot, we recommend to use that instead.'),
         ],
       ],
     ];

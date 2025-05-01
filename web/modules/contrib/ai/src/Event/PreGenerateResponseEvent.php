@@ -184,6 +184,16 @@ class PreGenerateResponseEvent extends Event {
   }
 
   /**
+   * Helper to set tags on the event.
+   *
+   * @param array $tags
+   *   An array of tags to set. Will completely replace those in $this->tags.
+   */
+  public function setTags(array $tags): void {
+    $this->tags = $tags;
+  }
+
+  /**
    * Gets the tags.
    *
    * @return array

@@ -3,5 +3,5 @@ ai_external_moderation.settings:
   label: 'AI Moderation Settings'
   mapping:
     moderations:
-      type: object
+      type: ignore
       label: 'The mappings of what should be moderated'

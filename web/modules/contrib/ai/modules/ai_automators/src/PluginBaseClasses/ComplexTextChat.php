@@ -16,7 +16,7 @@ class ComplexTextChat extends RuleBase {
    */
   public function extraAdvancedFormFields(ContentEntityInterface $entity, FieldDefinitionInterface $fieldDefinition, FormStateInterface $formState, array $defaultValues = []) {
     $form = parent::extraAdvancedFormFields($entity, $fieldDefinition, $formState, $defaultValues);
-    $this->getGeneralHelper()->addJoinerConfigurationFormField('automator', $form, $entity, $fieldDefinition);
+    $this->getGeneralHelper()->addJoinerConfigurationFormField('automator', $form, $entity, $fieldDefinition, $defaultValues);
     return $form;
   }
 

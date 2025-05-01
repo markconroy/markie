@@ -12,19 +12,32 @@
 # To test a Drupal 7 project, change the first include filename from .main.yml to .main-d7.yml
 include:
   - project: $_GITLAB_TEMPLATES_REPO
-    # Keep reference on 1.5.10 to support testing against actual current versions of Drupal.
-    ref: "1.5.10"
+    ref: $_GITLAB_TEMPLATES_REF
     file:
-      - "/includes/include.drupalci.main.yml"
-      - "/includes/include.drupalci.variables.yml"
-      - "/includes/include.drupalci.workflows.yml"
+      - '/includes/include.drupalci.main.yml'
+      - '/includes/include.drupalci.variables.yml'
+      - '/includes/include.drupalci.workflows.yml'
 
 ################
 # Pipeline configuration variables are defined with default values and descriptions in the file
 # https://git.drupalcode.org/project/gitlab_templates/-/blob/main/includes/include.drupalci.variables.yml
 # Uncomment the lines below if you want to override any of the variables. The following is just an example.
 ################
+# variables:
+#   SKIP_ESLINT: '1'
+#   OPT_IN_TEST_NEXT_MAJOR: '1'
+#   _CURL_TEMPLATES_REF: 'main'
+
+################
+# Admin Toolbar: Pipeline configuration variables and custom jobs, mostly:
+#  - Broaden test coverage to all supported core versions and max PHP.
+#  - Require jobs to pass: PHPCS and Stylelint.
+################
+
 variables:
+  ################
+  # Opt in variables: Broaden test coverage.
+  ################
   OPT_IN_TEST_PREVIOUS_MAJOR: 1
   OPT_IN_TEST_PREVIOUS_MINOR: 1
   OPT_IN_TEST_NEXT_MINOR: 1

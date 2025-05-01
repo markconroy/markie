@@ -54,10 +54,13 @@ class ChainLocalTasks extends DeriverBase implements ContainerDeriverInterface {
       if (!$entity_type->getBundleOf()) {
         continue;
       }
+
+      // Handle the different menu structure of taxonomy terms.
+      $base_route = $entity_type->hasLinkTemplate('overview-form') ? "entity.$entity_type_id.overview_form" : "entity.$entity_type_id.edit_form";
       $this->derivatives["entity.$entity_type_id.automator_chain"] = $base_plugin_definition;
       $this->derivatives["entity.$entity_type_id.automator_chain"]['title'] = $this->t('AI Automator Run Order');
       $this->derivatives["entity.$entity_type_id.automator_chain"]['route_name'] = 'ai_automator.config_chain.' . $entity_type->getBundleOf();
-      $this->derivatives["entity.$entity_type_id.automator_chain"]['base_route'] = "entity.$entity_type_id.edit_form";
+      $this->derivatives["entity.$entity_type_id.automator_chain"]['base_route'] = $base_route;
       $this->derivatives["entity.$entity_type_id.automator_chain"]['weight'] = 100;
     }
     return $this->derivatives;

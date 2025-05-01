@@ -9,6 +9,7 @@ use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Link;
+use Drupal\Core\Render\Element;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -26,21 +27,21 @@ class AiTranslateForm extends FormBase {
    *
    * @var \Drupal\Core\Entity\EntityTypeManagerInterface
    */
-  protected $entityTypeManager;
+  protected EntityTypeManagerInterface $entityTypeManager;
 
   /**
    * The language manager.
    *
    * @var \Drupal\Core\Language\LanguageManagerInterface
    */
-  protected $languageManager;
+  protected LanguageManagerInterface $languageManager;
 
   /**
    * The AI Provider service.
    *
    * @var \Drupal\ai\AiProviderPluginManager
    */
-  protected $providerManager;
+  protected AiProviderPluginManager $providerManager;
 
   /**
    * Constructor for the class.
@@ -72,107 +73,119 @@ class AiTranslateForm extends FormBase {
   /**
    * {@inheritdoc}
    */
-  public function getFormId() {
+  public function getFormId(): string {
     return 'ai_translate_form';
   }
 
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state, ?array $build = NULL) {
+  public function buildForm(array $form, FormStateInterface $form_state, ?array $build = NULL): ?array {
     _ai_translate_check_default_provider_and_model();
     $form_state->set('entity', $build['#entity']);
 
-    $overview = $build['content_translation_overview'];
+    $overview = NULL;
 
-    $form['#title'] = $this->t('Translations of @title', ['@title' => $build['#entity']->label()]);
+    // If our build has a table in it, we'll assume it is the section of the
+    // page we want to update.
+    foreach (Element::children($build) as $child) {
+      if (isset($build[$child]['#theme']) && $build[$child]['#theme'] == 'table') {
+        $overview = $build[$child];
+      }
+    }
 
-    // Inject our additional column into the header.
-    array_splice($overview['#header'], -1, 0, [$this->t('AI Translations')]);
+    if ($overview) {
 
-    // Make this a tableselect form.
-    $form['languages'] = [
-      '#type' => 'tableselect',
-      '#header' => $overview['#header'],
-      '#options' => [],
-    ];
-    $languages = $this->languageManager->getLanguages();
+      $form['#title'] = $this->t('Translations of @title', ['@title' => $build['#entity']->label()]);
 
-    $entity = $build['#entity'];
-    $entity_id = $entity->id();
-    $entity_type_id = $entity->getEntityTypeId();
-    $storage = $this->entityTypeManager->getStorage($entity_type_id);
-    $default_revision = $storage->load($entity_id);
-    $entity_type = $entity->getEntityType();
+      // Inject our additional column into the header.
+      array_splice($overview['#header'], -1, 0, [$this->t('AI Translations')]);
 
-    $use_latest_revisions = $entity_type->isRevisionable() && ContentTranslationManager::isPendingRevisionSupportEnabled($entity_type_id, $entity->bundle());
-    $lang_from = $entity->getUntranslated()->language()->getId();
+      // Make this a tableselect form.
+      $form['languages'] = [
+        '#type' => 'tableselect',
+        '#header' => $overview['#header'],
+        '#options' => [],
+      ];
+      $languages = $this->languageManager->getLanguages();
 
-    $config = $this->config(static::CONFIG_NAME);
+      $entity = $build['#entity'];
+      $entity_id = $entity->id();
+      $entity_type_id = $entity->getEntityTypeId();
+      $storage = $this->entityTypeManager->getStorage($entity_type_id);
+      $default_revision = $storage->load($entity_id);
+      $entity_type = $entity->getEntityType();
 
-    foreach ($languages as $langcode => $language) {
-      $option = array_shift($overview['#rows']);
+      $use_latest_revisions = $entity_type->isRevisionable() && ContentTranslationManager::isPendingRevisionSupportEnabled($entity_type_id, $entity->bundle());
+      $lang_from = $entity->getUntranslated()->language()->getId();
 
-      // Get the latest revision.
-      // This logic comes from web/core/modules/content_translation/src/Controller/ContentTranslationController.php.
-      if ($use_latest_revisions) {
-        $entity = $default_revision;
-        $latest_revision_id = $storage->getLatestTranslationAffectedRevisionId($entity->id(), $langcode);
-        if ($latest_revision_id) {
-          /** @var \Drupal\Core\Entity\ContentEntityInterface $latest_revision */
-          $latest_revision = $storage->loadRevision($latest_revision_id);
-          // Make sure we do not list removed translations, i.e. translations
-          // that have been part of a default revision but no longer are.
-          if (!$latest_revision->wasDefaultRevision() || $default_revision->hasTranslation($langcode)) {
-            $entity = $latest_revision;
+      $config = $this->config(static::CONFIG_NAME);
+
+      foreach ($languages as $langcode => $language) {
+        $option = array_shift($overview['#rows']);
+
+        // Get the latest revision.
+        // This logic comes from web/core/modules/content_translation/src/Controller/ContentTranslationController.php.
+        if ($use_latest_revisions) {
+          $entity = $default_revision;
+          $latest_revision_id = $storage->getLatestTranslationAffectedRevisionId($entity->id(), $langcode);
+          if ($latest_revision_id) {
+            /** @var \Drupal\Core\Entity\ContentEntityInterface $latest_revision */
+            $latest_revision = $storage->loadRevision($latest_revision_id);
+            // Make sure we do not list removed translations, i.e. translations
+            // that have been part of a default revision but no longer are.
+            if (!$latest_revision->wasDefaultRevision() || $default_revision->hasTranslation($langcode)) {
+              $entity = $latest_revision;
+            }
           }
         }
-      }
-      $ai_model = FALSE;
-      $additional = '';
-      if ($lang_from !== $langcode && !$entity->hasTranslation($langcode)) {
-        $model = $config->get($langcode . '_model') ?? '';
-        $parts = explode('__', $model);
-        if ($model == "" || empty($parts[0])) {
-          $default_model = $this->providerManager->getSimpleDefaultProviderOptions('translate_text');
-          if ($default_model == "") {
+
+        $ai_model = FALSE;
+        $additional = '';
+        if ($lang_from !== $langcode && !$entity->hasTranslation($langcode)) {
+          $model = $config->get($langcode . '_model') ?? '';
+          $parts = explode('__', $model);
+          if ($model == "" || empty($parts[0])) {
+            $default_model = $this->providerManager->getSimpleDefaultProviderOptions('chat');
+            if ($default_model == "") {
+            }
+            else {
+              $parts1 = explode('__', $default_model);
+              $ai_model = $parts1[1];
+            }
           }
           else {
-            $parts1 = explode('__', $default_model);
-            $ai_model = $parts1[1];
+            $ai_model = $parts[1];
           }
-        }
-        else {
-          $ai_model = $parts[1];
-        }
-        if ($ai_model) {
-          $additional = Link::createFromRoute($this->t('Translate using @ai', ['@ai' => $ai_model]),
+          if ($ai_model) {
+            $additional = Link::createFromRoute($this->t('Translate using @ai', ['@ai' => $ai_model]),
             'ai_translate.translate_content', [
               'entity_type' => $entity_type_id,
               'entity_id' => $entity_id,
               'lang_from' => $lang_from,
               'lang_to' => $langcode,
             ]
-          )->toString();
+            )->toString();
+          }
         }
-      }
-      else {
-        $additional = $this->t('NA');
-      }
+        else {
+          $additional = $this->t('NA');
+        }
 
-      // Inject the additional column into the array.
-      // The generated form structure has changed, support both an additional
-      // 'data' key (that is not supported by tableselect) and the old version
-      // without.
-      if (isset($option['data'])) {
-        array_splice($option['data'], -1, 0, [$additional]);
-        // Append the current option array to the form.
-        $form['languages']['#options'][$langcode] = $option['data'];
-      }
-      else {
-        array_splice($option, -1, 0, [$additional]);
-        // Append the current option array to the form.
-        $form['languages']['#options'][$langcode] = $option;
+        // Inject the additional column into the array.
+        // The generated form structure has changed, support both an additional
+        // 'data' key (that is not supported by tableselect) and the old version
+        // without.
+        if (isset($option['data'])) {
+          array_splice($option['data'], -1, 0, [$additional]);
+          // Append the current option array to the form.
+          $form['languages']['#options'][$langcode] = $option['data'];
+        }
+        else {
+          array_splice($option, -1, 0, [$additional]);
+          // Append the current option array to the form.
+          $form['languages']['#options'][$langcode] = $option;
+        }
       }
     }
 

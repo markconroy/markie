@@ -63,8 +63,11 @@ final class SetupAiProvider implements ConfigActionPluginInterface, ContainerFac
     if ($provider->getSetupData()) {
       $setupData = $provider->getSetupData();
     }
+    // If the value is empty, we can still try to get it from environment vars.
+    if ((empty($value['key_value']) || str_starts_with($value['key_value'], "\${")) && isset($value['env_var'])) {
+      $value['key_value'] = getenv($value['env_var']);
+    }
     if (isset($value['provider']) && !empty($value['key_value']) && !empty($setupData['key_config_name'])) {
-
       // Create a key.
       $key = $this->createKeyFromApiKey($value['key_name'], $value['key_label'], $value['key_value']);
 

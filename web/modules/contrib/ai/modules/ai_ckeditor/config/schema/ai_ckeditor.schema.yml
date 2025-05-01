@@ -28,6 +28,13 @@ ai_ckeditor.settings:
   type: mapping
   label: 'AI Ckeditor Settings'
   mapping:
+    _core:
+      type: mapping
+      label: 'Core settings'
+      mapping:
+        default_config_hash:
+          type: string
+          label: 'The default configuration hash to use for the editor.'
     prompts:
       type: mapping
       label: 'Prompts settings'

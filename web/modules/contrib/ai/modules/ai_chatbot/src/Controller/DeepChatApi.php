@@ -26,7 +26,7 @@ use Symfony\Component\Yaml\Yaml;
 /**
  * Returns responses for AI Deepchat routes.
  */
-final class DeepChatApi extends ControllerBase {
+class DeepChatApi extends ControllerBase {
 
   /**
    * All buttons available for the assistant.

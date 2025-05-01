@@ -4,6 +4,7 @@ namespace Drupal\ai_automators\Plugin\AiAutomatorType;
 
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
+use Drupal\Core\File\FileExists;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\ai\OperationType\Chat\ChatInput;
@@ -135,7 +136,7 @@ class LlmVideoToImage extends VideoToText implements AiAutomatorTypeInterface {
           if (!isset($values[0][0]['timestamp'])) {
             throw new AiAutomatorResponseErrorException('Could not find any timestamp..');
           }
-          $this->createVideoRasterImages($automatorConfig, $entityWrapper->entity, $values[0]['value'][0]['timestamp']);
+          $this->createVideoRasterImages($automatorConfig, $entityWrapper->entity, $values[0][0]['timestamp']);
           $input = new ChatInput([
             new ChatMessage('user', $prompt, $this->images),
           ]);
@@ -154,7 +155,7 @@ class LlmVideoToImage extends VideoToText implements AiAutomatorTypeInterface {
    */
   public function verifyValue(ContentEntityInterface $entity, $value, FieldDefinitionInterface $fieldDefinition, array $automatorConfig) {
     // Should have start and end time.
-    if (!isset($value['timestamp'])) {
+    if (!isset($value[0]['timestamp'])) {
       return FALSE;
     }
     // Otherwise it is ok.
@@ -175,7 +176,7 @@ class LlmVideoToImage extends VideoToText implements AiAutomatorTypeInterface {
 
     // Get the actual file name and replace it with _cut.
     $fileName = pathinfo($realPath, PATHINFO_FILENAME);
-    $newFile = str_replace($fileName, $fileName . '_cut', $entity->{$baseField}->entity->getFileUri());
+    $newFile = str_replace($fileName, $fileName . '_cut', $entity->{$baseField}->entity->getFileUri()) . '.jpg';
 
     $tmpName = "";
     foreach ($values as $keys) {
@@ -186,16 +187,20 @@ class LlmVideoToImage extends VideoToText implements AiAutomatorTypeInterface {
         $tmpNames[] = $tmpName;
 
         $inputVideo = $this->video ?? $realPath;
-        $command = 'ffmpeg -y -nostdin -i "' . $inputVideo . '" -ss "' . $key['timestamp'] . '" -frames:v 1 ' . $tmpName;
 
-        exec($command, $status);
-        if ($status) {
-          throw new AiAutomatorResponseErrorException('Could not generate new videos.');
-        }
+        // Clean the values.
+        $timeStamp = $this->cleanTimestamp($key['timestamp']);
+        $tokens = [
+          'inputFile' => $inputVideo,
+          'timeStamp' => $timeStamp,
+          'outputFile' => $tmpName,
+        ];
+        $command = '-y -nostdin -i {inputFile} -ss {timeStamp} -frames:v 1 {outputFile}';
+        $this->runFfmpegCommand($command, $tokens, 'Could not generate new images.');
       }
 
       // Move the file to the correct place.
-      $fixedFile = $this->fileSystem->move($tmpName, $newFile);
+      $fixedFile = $this->fileSystem->copy($tmpName, $newFile, FileExists::Rename);
 
       // Generate the new file entity.
       $file = File::create([

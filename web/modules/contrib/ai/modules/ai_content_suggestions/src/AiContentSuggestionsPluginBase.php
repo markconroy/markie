@@ -134,10 +134,15 @@ abstract class AiContentSuggestionsPluginBase extends PluginBase implements AiCo
       '#tree' => TRUE,
       'target_fields' => [
         '#type' => 'select',
-        '#description' => $this->t('Select the field(s) you wish to send to the LLM'),
+        '#description' => $this->t('<a href="javascript://" class="toggle_content_suggestion_fields">Select the field(s) you wish to send to the LLM</a>'),
         '#options' => $fields,
+        '#default_value' => array_keys($fields),
         '#multiple' => TRUE,
         '#weight' => 0,
+        '#attributes' => ['class' => ['toggle_content_suggestion_select']],
+        '#attached'  => [
+          'library' => ['ai_content_suggestions/ai_content_suggestions_js'],
+        ],
       ],
       'response' => [
         '#type' => 'container',

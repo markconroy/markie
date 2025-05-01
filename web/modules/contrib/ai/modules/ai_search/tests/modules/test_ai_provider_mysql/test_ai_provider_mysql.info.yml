@@ -7,7 +7,7 @@ dependencies:
   - ai:ai
   - ai:ai_search
 
-# Information added by Drupal.org packaging script on 2025-02-05
-version: '1.0.4'
+# Information added by Drupal.org packaging script on 2025-03-05
+version: '1.0.5'
 project: 'ai'
-datestamp: 1738761524
+datestamp: 1741174945

@@ -9,7 +9,6 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\ai\OperationType\Chat\ChatInput;
 use Drupal\ai\OperationType\Chat\ChatMessage;
 use Drupal\ai_automators\Attribute\AiAutomatorType;
-use Drupal\ai_automators\Exceptions\AiAutomatorResponseErrorException;
 use Drupal\ai_automators\PluginBaseClasses\VideoToText;
 use Drupal\ai_automators\PluginInterfaces\AiAutomatorTypeInterface;
 use Drupal\file\Entity\File;
@@ -172,11 +171,14 @@ class LlmVideoToVideo extends VideoToText implements AiAutomatorTypeInterface {
         $tmpName = $this->fileSystem->tempnam($this->tmpDir, 'video') . '.mp4';
         $tmpNames[] = $tmpName;
 
-        $command = "ffmpeg -y -nostdin -i \"$realPath\" -ss {$key['start_time']} -to {$key['end_time']} -c:v libx264 -c:a aac -strict -2 $tmpName";
-        exec($command, $status);
-        if ($status) {
-          throw new AiAutomatorResponseErrorException('Could not generate new videos.');
-        }
+        $tokens = [
+          'startTime' => $this->cleanTimestamp($key['start_time']),
+          'endTime' => $this->cleanTimestamp($key['end_time']),
+          'realPath' => $realPath,
+          'tmpName' => $tmpName,
+        ];
+        $command = "-y -nostdin -i {realPath} -ss {startTime} -to {endTime} -c:v libx264 -c:a aac -strict -2 {tmpName}";
+        $this->runFfmpegCommand($command, $tokens, 'Could not cut out the video.');
       }
 
       // If we only have one video, we can just rename it.
@@ -189,14 +191,15 @@ class LlmVideoToVideo extends VideoToText implements AiAutomatorTypeInterface {
         // Generate list file.
         $text = '';
         foreach ($tmpNames as $tmpName) {
-          $text .= "file '$tmpName'\n";
+          $text .= "file $tmpName\n";
         }
         file_put_contents($this->tmpDir . 'list.txt', $text);
-        $command = "ffmpeg -y -nostdin -f concat -safe 0 -i {$this->tmpDir}list.txt -c:v libx264 -c:a aac -strict -2 $endFile";
-        exec($command, $status);
-        if ($status) {
-          throw new AiAutomatorResponseErrorException('Could not generate new videos.');
-        }
+        $tokens = [
+          'listFile' => $this->tmpDir . 'list.txt',
+          'endFile' => $endFile,
+        ];
+        $command = "-y -nostdin -f concat -safe 0 -i {listFile} -c:v libx264 -c:a aac -strict -2 {endFile}";
+        $this->runFfmpegCommand($command, $tokens, 'Could not mix the videos together.');
       }
       // Move the file to the correct place.
       $fixedFile = $this->fileSystem->move($endFile, $newFile);

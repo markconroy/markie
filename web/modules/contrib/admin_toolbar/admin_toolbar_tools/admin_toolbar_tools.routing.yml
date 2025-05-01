@@ -95,12 +95,3 @@ admin_toolbar_tools.settings:
     _title: 'Admin Toolbar Tools settings'
   requirements:
     _permission: 'administer site configuration'
-
-admin_toolbar.run.reindex.site:
-  path: '/reindex-site'
-  defaults:
-    _controller: '\Drupal\admin_toolbar_tools\Controller\ToolbarController::runReindexSite'
-    _title: 'Re-index Site'
-  requirements:
-    _permission: 'administer site configuration'
-    _csrf_token: 'TRUE'

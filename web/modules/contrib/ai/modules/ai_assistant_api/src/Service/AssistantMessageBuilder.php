@@ -107,9 +107,14 @@ class AssistantMessageBuilder {
     }
 
     // First replace the instructions.
-    $assistant_message = str_replace('[instructions]', $ai_assistant->get('instructions'), $assistant_message);
-    // If the pre-prompt message should be included, replace it.
-    $assistant_message = str_replace('[pre_action_prompt]', $include_pre_prompt ? $this->prePrompt() : '', $assistant_message);
+    $instructions = ($ai_assistant->get('instructions')) ?? '';
+    $assistant_message = str_replace('[instructions]', $instructions, $assistant_message);
+
+    // If the pre-prompt message should be included and it exists, replace it.
+    $pre_prompt_content = $this->prePrompt();
+    $pre_prompt = ($include_pre_prompt && $pre_prompt_content) ? $pre_prompt_content : '';
+    $assistant_message = str_replace('[pre_action_prompt]', $pre_prompt, $assistant_message);
+
     foreach ($this->getPrePromptDrupalContext() as $key => $replace) {
       $assistant_message = str_replace('[' . $key . ']', is_null($replace) ? '' : $replace, $assistant_message);
     }

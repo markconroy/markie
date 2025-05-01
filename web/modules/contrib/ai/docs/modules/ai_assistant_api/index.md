@@ -71,6 +71,10 @@ user-readable text.
 The AI Chatbot module requires that the AI Assistant API module has been
 installed and configured (see [How to configure the AI Assistant API module](#how_to_configure_the_ai_assistant_api_module)).
 
+The AI Deepchat Chatbot requires the [league/commonmark](https://github.com/thephpleague/commonmark)
+library. This must be downloaded and made available to the codebase: it is
+recommended to use composer to achieve this.
+
 ### How to configure the AI Chatbot module
 1. Enable and configure the AI Assistant API module (see [How to configure the AI Assistant API module](#how_to_configure_the_ai_assistant_api_module)).
 2. Enable the AI Deepchat Chatbot module.
@@ -90,7 +94,6 @@ messages via the AI Assistant API and see the responses.
 
 The message history can be retained inside the block until the page is reloaded
 or the user navigates away, depending on settings in the AI Assistant.
-
 
 ### Customize the Chatbot.
 The Chatbot is based on [Deepchat](https://deepchat.dev/) by OvidijusParsiunas

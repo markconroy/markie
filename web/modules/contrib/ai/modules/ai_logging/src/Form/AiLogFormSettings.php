@@ -46,14 +46,14 @@ class AiLogFormSettings extends ConfigFormBase {
 
     $form['prompt_logging'] = [
       '#type' => 'checkbox',
-      '#title' => $this->t('Log requests'),
-      '#description' => $this->t('Log all or selective prompts and responses in the database.'),
+      '#title' => $this->t('Automatically log requests'),
+      '#description' => $this->t('Log all or selective prompts and responses in the database automatically.'),
       '#default_value' => $config->get('prompt_logging'),
     ];
 
     $form['prompt_logging_output'] = [
       '#type' => 'checkbox',
-      '#title' => $this->t('Log response'),
+      '#title' => $this->t('Automatically log responses'),
       '#description' => $this->t('Also log the output of the AI requests.'),
       '#default_value' => $config->get('prompt_logging_output'),
       '#states' => [
@@ -65,8 +65,8 @@ class AiLogFormSettings extends ConfigFormBase {
 
     $form['prompt_logging_tags'] = [
       '#type' => 'textfield',
-      '#title' => $this->t('Request Tags'),
-      '#description' => $this->t('All requests are tagged with the operation type (call, moderate, etc): to log only specific operations, enter them here. Leave empty to log all types.'),
+      '#title' => $this->t('Restrict automated logging by request tags'),
+      '#description' => $this->t('All requests are tagged with the operation type (call, moderate, etc): to automatically log only specific operations, enter them here. Leave empty to automatically log all operation types.'),
       '#default_value' => $config->get('prompt_logging_tags'),
       '#states' => [
         'visible' => [
@@ -77,26 +77,16 @@ class AiLogFormSettings extends ConfigFormBase {
 
     $form['prompt_logging_max_messages'] = [
       '#type' => 'number',
-      '#title' => $this->t('Maximum number messages to log'),
+      '#title' => $this->t('Maximum number messages to keep stored in the log'),
       '#description' => $this->t('The maximum number of messages to log in the database. Empty or 0 means unlimited. Beyond this number, older logs will be automatically deleted.'),
       '#default_value' => $config->get('prompt_logging_max_messages'),
-      '#states' => [
-        'visible' => [
-          ':input[name="prompt_logging"]' => ['checked' => TRUE],
-        ],
-      ],
     ];
 
     $form['prompt_logging_max_age'] = [
       '#type' => 'number',
-      '#title' => $this->t('Maximum age of messages to log'),
+      '#title' => $this->t('Maximum age of messages to keep stored in the log'),
       '#description' => $this->t('The maximum age of messages to log in the database in days. Empty or 0 means unlimited. Beyond this age, older logs will be automatically deleted.'),
       '#default_value' => $config->get('prompt_logging_max_age'),
-      '#states' => [
-        'visible' => [
-          ':input[name="prompt_logging"]' => ['checked' => TRUE],
-        ],
-      ],
     ];
 
     return parent::buildForm($form, $form_state);

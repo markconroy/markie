@@ -282,7 +282,7 @@ abstract class RuleBase implements AiAutomatorTypeInterface, ContainerFactoryPlu
       $form['ajax_prefix']['automator_configuration_image_field'] = [
         '#type' => 'select',
         '#title' => $this->t('Image Field'),
-        '#options' => $this->getGeneralHelper()->getFieldsOfType($entity, 'image'),
+        '#options' => $this->getGeneralHelper()->getImageMediaFields($entity),
         '#description' => $this->t('Since this is a vision model you can choose to add an image field to the prompt.'),
         '#empty_option' => $this->t('No images'),
         '#default_value' => $defaultValues['automator_configuration_image_field'] ?? NULL,
@@ -563,19 +563,35 @@ abstract class RuleBase implements AiAutomatorTypeInterface, ContainerFactoryPlu
    */
   public function runRawChatMessage(string $prompt, array $automatorConfig, $instance, ?ContentEntityInterface $entity = NULL) {
     $images = [];
-    // Check for images.
+    // Check for images or media.
+    $possibleImages = [];
     if (!empty($automatorConfig['configuration_image_field'])) {
-      foreach ($entity->{$automatorConfig['configuration_image_field']} as $imageEntityWrapper) {
+      $parts[0] = $automatorConfig['configuration_image_field'];
+      if (strpos($automatorConfig['configuration_image_field'], '--') !== FALSE) {
+        $parts = explode('--', $automatorConfig['configuration_image_field']);
+      }
+      foreach ($entity->{$parts[0]} as $imageEntityWrapper) {
         $imageEntity = $imageEntityWrapper->entity;
-        // If an image style is set, use it.
-        if (!empty($automatorConfig['configuration_image_style'])) {
-          $imageEntity = $this->getGeneralHelper()->preprocessImageStyle($imageEntity, $automatorConfig['configuration_image_style']);
+        if (isset($parts[1])) {
+          foreach ($imageEntity->{$parts[1]} as $image) {
+            $possibleImages[] = $image->entity;
+          }
         }
-        $image = new ImageFile();
-        $image->setFileFromFile($imageEntity);
-        $images[] = $image;
+        else {
+          $possibleImages[] = $imageEntity;
+        }
       }
     }
+    foreach ($possibleImages as $possibleImage) {
+      // If an image style is set, use it.
+      if (!empty($automatorConfig['configuration_image_style'])) {
+        $possibleImage = $this->getGeneralHelper()->preprocessImageStyle($possibleImage, $automatorConfig['configuration_image_style']);
+      }
+      $image = new ImageFile();
+      $image->setFileFromFile($possibleImage);
+      $images[] = $image;
+    }
+
     // Create new messages.
     $input = new ChatInput([
       new ChatMessage("user", $prompt, $images),
@@ -658,7 +674,7 @@ abstract class RuleBase implements AiAutomatorTypeInterface, ContainerFactoryPlu
     elseif (isset($json[0])) {
       $values = [];
       foreach ($json as $val) {
-        if (isset($val[key($val)])) {
+        if (is_array($val) && isset($val[key($val)])) {
           $values[] = $val[key($val)];
         }
         return $values;

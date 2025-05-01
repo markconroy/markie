@@ -17,6 +17,7 @@ use Drupal\ai\AiProviderPluginManager;
 use Drupal\ai\OperationType\Chat\ChatInput;
 use Drupal\ai\OperationType\Chat\ChatMessage;
 use Drupal\ai\OperationType\GenericType\AudioFile;
+use Drupal\ai\OperationType\GenericType\ImageFile;
 use Drupal\ai\OperationType\SpeechToText\SpeechToTextInput;
 use Drupal\ai\Service\AiProviderFormHelper;
 use Drupal\ai\Service\PromptJsonDecoder\PromptJsonDecoderInterface;
@@ -165,7 +166,7 @@ class VideoToText extends RuleBase implements ContainerFactoryPluginInterface {
    */
   public function __destruct() {
     if (!empty($this->tmpDir) && file_exists($this->tmpDir)) {
-      exec('rm -rf ' . $this->tmpDir);
+      $this->deleteFilesFromTmpDir('', TRUE);
     }
   }
 
@@ -264,21 +265,24 @@ class VideoToText extends RuleBase implements ContainerFactoryPluginInterface {
    */
   public function screenshotFromTimestamp(File $video, $timeStamp, array $cropData = []) {
     $path = $video->getFileUri();
-    $realPath = $this->fileSystem->realpath($path);
-    $command = "ffmpeg -y -nostdin -ss $timeStamp -i \"$realPath\" -vframes 1 {$this->tmpDir}/screenshot.jpeg";
+    // Clean values before using them.
+    $command = "-y -nostdin -ss {timeStamp} -i {realPath} -vframes 1 {screenshotFile}";
+    $tokens = [
+      'screenshotFile' => $this->tmpDir . "screenshot.jpeg",
+      'timeStamp' => $this->cleanTimestamp($timeStamp),
+      'realPath' => $this->fileSystem->realpath($path),
+    ];
     // If we need to crop also.
     if (count($cropData)) {
       $realCropData = $this->normalizeCropData($video, $cropData);
-      $command = "ffmpeg -y -nostdin  -ss $timeStamp -i \"$realPath\" -vf \"crop={$realCropData[2]}:{$realCropData[3]}:{$realCropData[0]}:{$realCropData[1]}\" -vframes 1 {$this->tmpDir}/screenshot.jpeg";
+      $tokens['crop'] = 'crop=' . $realCropData[2] . ':' . $realCropData[3] . ':' . $realCropData[0] . ':' . $realCropData[1];
+      $command = "-y -nostdin  -ss {timeStamp} -i {realPath} -vf {crop} -vframes 1 {screenshotFile}";
     }
-
-    exec($command, $status);
-    if ($status) {
-      throw new AiAutomatorRequestErrorException('Could not create video screenshot.');
-    }
-    $newFile = str_replace($video->getFilename(), $video->getFilename() . '_cut', $path);
+    // Run the command.
+    $this->runFfmpegCommand($command, $tokens, 'Could not generate screenshot from video.');
+    $newFile = str_replace($video->getFilename(), $video->getFilename() . '_cut', $path) . '.jpg';
     $newFile = preg_replace('/\.(avi|mp4|mov|wmv|flv|mkv)$/', '.jpg', $newFile);
-    $fixedFile = $this->fileSystem->move("{$this->tmpDir}/screenshot.jpeg", $newFile);
+    $fixedFile = $this->fileSystem->move("{$this->tmpDir}screenshot.jpeg", $newFile);
     $file = File::create([
       'uri' => $fixedFile,
       'status' => 1,
@@ -301,14 +305,18 @@ class VideoToText extends RuleBase implements ContainerFactoryPluginInterface {
   public function normalizeCropData(File $video, $cropData) {
     $originalWidth = 640;
     // Get the width and height of the video with FFmpeg.
-    $realPath = $this->fileSystem->realpath($video->getFileUri());
-    $command = "ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=s=x:p=0 \"$realPath\"";
+    $realPathEscaped = escapeshellarg($this->fileSystem->realpath($video->getFileUri()));
+    $command = "ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=s=x:p=0 $realPathEscaped";
     $result = shell_exec($command);
     [$width] = explode('x', $result);
     $ratio = $width / $originalWidth;
     $newCropData = [];
     foreach ($cropData as $key => $value) {
       $newCropData[$key] = round($value * $ratio);
+    }
+    // There should only be 4 numeric values.
+    if (count($newCropData) != 4) {
+      throw new AiAutomatorRequestErrorException('The crop data is not in the correct format.');
     }
     return $newCropData;
   }
@@ -355,11 +363,12 @@ class VideoToText extends RuleBase implements ContainerFactoryPluginInterface {
     // Get the actual file path on the server.
     $realPath = $this->fileSystem->realpath($video);
     // Let FFMPEG do its magic.
-    $command = "ffmpeg -y -nostdin  -i \"$realPath\" -c:a mp3 -b:a 64k {$this->tmpDir}/audio.mp3";
-    exec($command, $status);
-    if ($status) {
-      throw new AiAutomatorResponseErrorException('Could not generate audio from video.');
-    }
+    $command = "-y -nostdin  -i {realPath} -c:a mp3 -b:a 64k {file}";
+    $tokens = [
+      'file' => $this->tmpDir . "audio.mp3",
+      'realPath' => $realPath,
+    ];
+    $this->runFfmpegCommand($command, $tokens, 'Could not generate audio from video.');
     return '';
   }
 
@@ -370,51 +379,52 @@ class VideoToText extends RuleBase implements ContainerFactoryPluginInterface {
     // Use Whisper to transcribe and then get the segments.
     $input = [
       'model' => 'whisper-1',
-      'file' => fopen($this->tmpDir . '/audio.mp3', 'r'),
+      'file' => fopen($this->tmpDir . 'audio.mp3', 'r'),
       'response_format' => 'json',
     ];
     $instance = $this->aiPluginManager->createInstance($automatorConfig['ai_provider_audio']);
 
-    $input = new SpeechToTextInput(new AudioFile(file_get_contents($this->tmpDir . '/audio.mp3'), 'audio/mpeg', 'audio.mp3'));
+    $input = new SpeechToTextInput(new AudioFile(file_get_contents($this->tmpDir . 'audio.mp3'), 'audio/mpeg', 'audio.mp3'));
     $this->transcription = $instance->speechToText($input, $automatorConfig['ai_model_audio'])->getNormalized();
   }
 
   /**
    * Helper function to get the image raster images from the video.
    */
-  protected function createVideoRasterImages($automatorConfig, File $file, $timestamp = NULL) {
+  protected function createVideoRasterImages($automatorConfig, File $file, $timeStamp = NULL) {
     $this->images = [];
-    exec('rm ' . $this->tmpDir . '/*.jpeg');
+    // Remove all the images.
+    $this->deleteFilesFromTmpDir('jpeg');
     // Get the video file.
     $video = $file->getFileUri();
-    // Get the actual file path on the server.
-    $realPath = $this->fileSystem->realpath($video);
     // Let FFMPEG do its magic.
-    $command = "ffmpeg -y -nostdin  -i \"$realPath\" -vf \"select='gt(scene,0.1)',scale=640:-1,drawtext=fontsize=45:fontcolor=yellow:box=1:boxcolor=black:x=(W-tw)/2:y=H-th-10:text='%{pts\:hms}'\" -vsync vfr {$this->tmpDir}output_frame_%04d.jpeg";
+    $tokens = [
+      'tmpDir' => $this->tmpDir,
+      'realPath' => $this->fileSystem->realpath($video),
+      'thumbFile' => $this->tmpDir . 'output_frame_%04d.jpeg',
+      'rasterFile' => $this->tmpDir . 'raster-%04d.jpeg',
+      'videoFile' => $this->tmpDir . 'tmpVideo.mp4',
+    ];
+    $command = "-y -nostdin  -i {realPath} -vf \"select='gt(scene,0.1)',scale=640:-1,drawtext=fontsize=45:fontcolor=yellow:box=1:boxcolor=black:x=(W-tw)/2:y=H-th-10:text='%{pts\:hms}'\" -vsync vfr {thumbFile}";
     // If its timestamp, just get 0.5 seconds before and after.
-    if ($timestamp) {
-      $command = "ffmpeg -y -nostdin -ss " . $timestamp . " -i \"$realPath\" -t 3 -vf \"scale=640:-1,drawtext=fontsize=45:fontcolor=yellow:box=1:boxcolor=black:x=(W-tw)/2:y=H-th-10:text='%{pts\:hms}'\" -vsync vfr {$this->tmpDir}output_frame_%04d.jpeg";
+    $tokens['timeStamp'] = $this->cleanTimestamp($timeStamp);
+    if ($tokens['timeStamp']) {
+      $command = "-y -nostdin -ss {timeStamp} -i {realPath} -t 3 -vf \"scale=640:-1,drawtext=fontsize=45:fontcolor=yellow:box=1:boxcolor=black:x=(W-tw)/2:y=H-th-10:text='%{pts\:hms}'\" -vsync vfr {thumbFile}";
     }
+    $this->runFfmpegCommand($command, $tokens, 'Could not generate images from video.');
 
-    exec($command, $status);
-    // If it failed, give up.
-    if ($status) {
-      throw new AiAutomatorResponseErrorException('Could not create video thumbs.');
-    }
-    $rasterCommand = "ffmpeg -i {$this->tmpDir}/output_frame_%04d.jpeg -filter_complex \"scale=640:-1,tile=3x3:margin=10:padding=4:color=white\" {$this->tmpDir}/raster-%04d.jpeg";
-    exec($rasterCommand, $status);
-    // If it failed, give up.
-    if ($status) {
-      throw new AiAutomatorResponseErrorException('Could not create video raster.');
-    }
+    $rasterCommand = "-i {thumbFile} -filter_complex \"scale=640:-1,tile=3x3:margin=10:padding=4:color=white\" {rasterFile}";
+    $this->runFfmpegCommand($rasterCommand, $tokens, 'Could not create video raster.');
     $images = glob($this->tmpDir . 'raster-*.jpeg');
     foreach ($images as $uri) {
-      $this->images[] = 'data:image/jpeg;base64,' . base64_encode(file_get_contents($uri));
+      $image = new ImageFile();
+      $image->setFileFromUri($uri);
+      $this->images[] = $image;
     }
     // If timestamp also generate a temp video.
-    if ($timestamp) {
-      $command = "ffmpeg -y -nostdin -ss " . $timestamp . " -i \"$realPath\" -t 3 -c:v libx264 -qscale 0 {$this->tmpDir}tmpVideo.mp4";
-      exec($command, $status);
+    if ($tokens['timeStamp']) {
+      $command = "-y -nostdin -ss {timeStamp} -i {realPath} -t 3 -c:v libx264 -qscale 0 {videoFile}";
+      $this->runFfmpegCommand($command, $tokens, 'Could not generate video from video.');
       $this->video = "{$this->tmpDir}tmpVideo.mp4";
     }
   }
@@ -423,9 +433,9 @@ class VideoToText extends RuleBase implements ContainerFactoryPluginInterface {
    * Helper function to generate a temp directory.
    */
   protected function createTempDirectory() {
-    $this->tmpDir = $this->fileSystem->getTempDirectory() . '/' . mt_rand(10000, 99999) . '/';
+    $this->tmpDir = $this->fileSystem->getTempDirectory() . '/ai_automator/' . mt_rand(10000, 99999) . '/';
     if (!file_exists($this->tmpDir)) {
-      $this->fileSystem->mkdir($this->tmpDir);
+      $this->fileSystem->mkdir($this->tmpDir, NULL, TRUE);
     }
   }
 
@@ -476,6 +486,96 @@ class VideoToText extends RuleBase implements ContainerFactoryPluginInterface {
     $date->sub($interval);
 
     return substr($date->format('H:i:s.u'), 0, -3);
+  }
+
+  /**
+   * Clean up timestamp.
+   *
+   * @param string|null $timeStamp
+   *   The timestamp.
+   *
+   * @return string
+   *   The cleaned up timestamp.
+   */
+  public function cleanTimestamp(?string $timeStamp = NULL) {
+    // If its null, just return it.
+    if (!$timeStamp) {
+      return NULL;
+    }
+    // Make sure it follows the h:i:s.ms, since we can't escape this.
+    if (!preg_match('/^(\d{1,2}:\d{2}:\d{2}\.\d{2,3})$/', $timeStamp)) {
+      throw new AiAutomatorRequestErrorException('The timestamp is not in the correct format.');
+    }
+    return $timeStamp;
+  }
+
+  /**
+   * Run FFMPEG command.
+   *
+   * @param string $command
+   *   The command to run.
+   * @param array $tokens
+   *   The tokens to replace.
+   * @param string $error_message
+   *   Error message to throw if it fails.
+   */
+  public function runFfmpegCommand($command, array $tokens, $error_message) {
+    $command = $this->prepareFfmpegCommand($command, $tokens);
+    exec($command, $status);
+    if ($status) {
+      throw new AiAutomatorResponseErrorException($error_message);
+    }
+  }
+
+  /**
+   * Prepare the FFMPEG command.
+   *
+   * @param string $command
+   *   The command to run.
+   * @param array $tokens
+   *   The tokens to replace.
+   *
+   * @return string
+   *   The prepared command.
+   */
+  public function prepareFfmpegCommand($command, array $tokens) {
+    foreach ($tokens as $token => $value) {
+      // Only escape if it is not empty.
+      if (empty($value)) {
+        continue;
+      }
+      $escaped_value = escapeshellarg($value);
+      $command = str_replace("{{$token}}", $escaped_value, $command);
+    }
+    // @todo Add full path to ffmpeg.
+    return "ffmpeg $command";
+  }
+
+  /**
+   * Delete files from the tmp dir.
+   *
+   * @param string $ext
+   *   The extension to delete.
+   * @param bool $remove_directory
+   *   If the directory should be removed.
+   */
+  public function deleteFilesFromTmpDir($ext = '', $remove_directory = FALSE) {
+    // Get the actual tmp directory, to make sure nothing was injected.
+    $tmpDir = $this->fileSystem->getTempDirectory() . '/ai_automator';
+
+    foreach (scandir($tmpDir) as $file) {
+      if ($file == '.' || $file == '..') {
+        continue;
+      }
+      if ($ext && pathinfo($file, PATHINFO_EXTENSION) != $ext) {
+        continue;
+      }
+      unlink($tmpDir . $file);
+    }
+
+    if ($remove_directory) {
+      rmdir($tmpDir);
+    }
   }
 
 }

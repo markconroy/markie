@@ -8,7 +8,6 @@ use Drupal\Core\DependencyInjection\DependencySerializationTrait;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityPublishedInterface;
 use Drupal\Core\Language\LanguageInterface;
-use Drupal\Core\Url;
 use Drupal\ai_translate\TextExtractorInterface;
 use Drupal\ai_translate\TextTranslatorInterface;
 use Drupal\ai_translate\TranslationException;
@@ -79,10 +78,8 @@ class AiTranslateController extends ControllerBase {
       $entity = $entity->getTranslation($lang_from);
     }
 
-    $redirectUrl = Url::fromRoute("entity.$entity_type.content_translation_overview",
-      ['entity_type_id' => $entity_type, $entity_type => $entity_id]);
-    $response = new RedirectResponse($redirectUrl
-      ->setAbsolute(TRUE)->toString());
+    $redirectUrl = $entity->toUrl('drupal:content-translation-overview');
+    $response = new RedirectResponse($redirectUrl->setAbsolute()->toString());
 
     // @todo support updating existing translations.
     if ($entity->hasTranslation($lang_to)) {

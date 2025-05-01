@@ -280,27 +280,25 @@ final class AiAutomatorsCKEditor extends AiCKEditorPluginBase {
 
     // Metadata.
     $form['automator_chain'] = [
-      '#type' => 'value',
+      '#type' => 'hidden',
+      '#value' => $settings['config_id'],
+    ];
+    $form['config_id'] = [
+      '#type' => 'hidden',
       '#value' => $settings['config_id'],
     ];
     $form['automator_output'] = [
-      '#type' => 'value',
+      '#type' => 'hidden',
       '#value' => $plugin_config['output'],
     ];
     $form['automator_storage'] = [
-      '#type' => 'value',
+      '#type' => 'hidden',
       '#value' => $storage['selected_text'],
     ];
     $form['automator_write_mode'] = [
-      '#type' => 'value',
+      '#type' => 'hidden',
       '#value' => $plugin_config['write_mode'],
     ];
-
-    // Generate the entity form.
-    $entity = $this->entityTypeManager->getStorage('automator_chain')->create([
-      'bundle' => $settings['config_id'],
-    ]);
-    $entity_form = $this->entityFormBuilder->getForm($entity, 'add');
 
     // Get the inputs.
     foreach ($plugin_config['inputs'] as $input) {
@@ -373,7 +371,6 @@ final class AiAutomatorsCKEditor extends AiCKEditorPluginBase {
    */
   public function ajaxGenerate(array $form, FormStateInterface $form_state) {
     $response = new AjaxResponse();
-    $form_state->setValue('response_text', '<p>test</p>');
     // Generate the response.
     $values = $form_state->getValue('plugin_config');
 
@@ -393,8 +390,9 @@ final class AiAutomatorsCKEditor extends AiCKEditorPluginBase {
         'automator_output',
         'automator_storage',
         'automator_write_mode',
+        'config_id',
       ])) {
-        if (in_array($fields[$key]->getType(), [
+        if (isset($fields[$key]) && in_array($fields[$key]->getType(), [
           'image',
           'file',
         ])) {

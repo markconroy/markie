@@ -146,6 +146,11 @@ interface AiProviderInterface extends PluginInspectionInterface {
   public function getTags(): array;
 
   /**
+   * Helper to clear all tags prior to rebuilding them.
+   */
+  public function resetTags(): void;
+
+  /**
    * Set debug data for the AI Provider.
    *
    * @param string $key
