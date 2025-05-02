@@ -3,10 +3,12 @@ langcode: en
 status: true
 dependencies:
   config:
+    - field.field.media.video.field_corresponding_remote_video
     - field.field.media.video.field_media_tags
     - field.field.media.video.field_media_video_embed_field
     - media.type.video
   module:
+    - media_library
     - video_embed_field
 _core:
   default_config_hash: 0Jz8m5oAn_dHxKFLX-CtqDG3E2dcQP4AcZ9STHTj208
@@ -15,9 +17,16 @@ targetEntityType: media
 bundle: video
 mode: default
 content:
+  field_corresponding_remote_video:
+    type: media_library_widget
+    weight: 3
+    region: content
+    settings:
+      media_types: {  }
+    third_party_settings: {  }
   field_media_tags:
     type: entity_reference_autocomplete_tags
-    weight: 3
+    weight: 2
     region: content
     settings:
       match_operator: CONTAINS
@@ -41,7 +50,7 @@ content:
     third_party_settings: {  }
   status:
     type: boolean_checkbox
-    weight: 100
+    weight: 4
     region: content
     settings:
       display_label: true

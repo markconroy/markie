@@ -4,6 +4,7 @@ status: true
 dependencies:
   config:
     - core.entity_form_mode.media.media_library
+    - field.field.media.video.field_corresponding_remote_video
     - field.field.media.video.field_media_tags
     - field.field.media.video.field_media_video_embed_field
     - media.type.video
@@ -47,5 +48,6 @@ content:
     third_party_settings: {  }
 hidden:
   created: true
+  field_corresponding_remote_video: true
   path: true
   uid: true

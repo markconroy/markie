@@ -4,6 +4,7 @@ status: true
 dependencies:
   config:
     - core.entity_view_mode.media.preview
+    - field.field.media.video.field_corresponding_remote_video
     - field.field.media.video.field_media_tags
     - field.field.media.video.field_media_video_embed_field
     - media.type.video
@@ -27,6 +28,7 @@ content:
     region: content
 hidden:
   created: true
+  field_corresponding_remote_video: true
   field_media_tags: true
   name: true
   thumbnail: true
