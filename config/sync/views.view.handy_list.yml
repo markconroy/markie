@@ -413,7 +413,7 @@ display:
           exposed: true
           expose:
             operator_id: ''
-            label: 'Video checked? (field_video_checked)'
+            label: 'Video checked?'
             description: ''
             use_operator: false
             operator: field_video_checked_value_op

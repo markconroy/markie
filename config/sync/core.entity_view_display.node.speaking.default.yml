@@ -10,6 +10,7 @@ dependencies:
     - field.field.node.speaking.field_speaking_date
     - field.field.node.speaking.field_speaking_where
     - field.field.node.speaking.field_tags
+    - field.field.node.speaking.field_video_checked
     - node.type.speaking
   module:
     - datetime
@@ -75,6 +76,16 @@ content:
       link: true
     third_party_settings: {  }
     weight: 103
+    region: content
+  field_video_checked:
+    type: boolean
+    label: above
+    settings:
+      format: default
+      format_custom_false: ''
+      format_custom_true: ''
+    third_party_settings: {  }
+    weight: 1
     region: content
   links:
     settings: {  }

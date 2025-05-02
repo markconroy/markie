@@ -6,6 +6,7 @@ dependencies:
     - core.entity_view_mode.node.teaser
     - field.field.node.page.body
     - field.field.node.page.field_intro
+    - field.field.node.page.field_video_checked
     - node.type.page
   module:
     - user
@@ -19,4 +20,5 @@ content: {  }
 hidden:
   body: true
   field_intro: true
+  field_video_checked: true
   links: true
