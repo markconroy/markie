@@ -20,7 +20,6 @@ module:
   dynamic_page_cache: 0
   editor: 0
   entity: 0
-  entity_usage: 0
   field: 0
   field_ui: 0
   file: 0
