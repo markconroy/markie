@@ -1,0 +1,25 @@
+<?php
+
+use \Drupal\node\Entity\Node;
+
+/**
+ * Implements hook_update_N().
+ */
+function markie_update_10001() {
+  // Get an array of all 'article' node IDs.
+  $nids = \Drupal::entityQuery('node')
+    ->accessCheck(FALSE)
+    ->execute();
+
+  // Load all the nodes.
+  $nodes = Node::loadMultiple($nids);
+  foreach ($nodes as $node) {
+    // Set the field_video_checked boolean to TRUE
+    $node->set('field_video_checked', TRUE);
+    $node->save();
+    $node->set('field_video_checked', FALSE);
+    $node->save();
+  }
+
+  return t('@count nodes updated with field_video_checked set to TRUE.', ['@count' => count($nodes)]);
+}
