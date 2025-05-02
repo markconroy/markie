@@ -9,6 +9,7 @@ dependencies:
     - field.field.node.article.field_intro
     - field.field.node.article.field_main_image
     - field.field.node.article.field_tags
+    - field.field.node.article.field_video_checked
     - node.type.article
   module:
     - text
@@ -37,3 +38,4 @@ hidden:
   comment: true
   field_main_image: true
   field_tags: true
+  field_video_checked: true

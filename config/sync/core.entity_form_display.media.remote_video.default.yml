@@ -15,7 +15,7 @@ mode: default
 content:
   field_media_oembed_video:
     type: oembed_textfield
-    weight: 0
+    weight: 1
     region: content
     settings:
       size: 60
@@ -23,7 +23,7 @@ content:
     third_party_settings: {  }
   field_media_tags:
     type: entity_reference_autocomplete_tags
-    weight: 1
+    weight: 2
     region: content
     settings:
       match_operator: CONTAINS
@@ -31,15 +31,22 @@ content:
       size: 60
       placeholder: ''
     third_party_settings: {  }
+  name:
+    type: string_textfield
+    weight: 0
+    region: content
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
   status:
     type: boolean_checkbox
-    weight: 2
+    weight: 3
     region: content
     settings:
       display_label: true
     third_party_settings: {  }
 hidden:
   created: true
-  name: true
   path: true
   uid: true

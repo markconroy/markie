@@ -8,6 +8,7 @@ dependencies:
     - field.field.node.article.field_intro
     - field.field.node.article.field_main_image
     - field.field.node.article.field_tags
+    - field.field.node.article.field_video_checked
     - node.type.article
   module:
     - user
@@ -17,7 +18,17 @@ id: node.article.default
 targetEntityType: node
 bundle: article
 mode: default
-content: {  }
+content:
+  field_video_checked:
+    type: boolean
+    label: above
+    settings:
+      format: default
+      format_custom_false: ''
+      format_custom_true: ''
+    third_party_settings: {  }
+    weight: 1
+    region: content
 hidden:
   body: true
   comment: true
