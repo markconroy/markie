@@ -1,0 +1,13 @@
+langcode: en
+status: true
+dependencies: {  }
+id: eu_test_image
+label: eu_test_image
+description: ''
+source: image
+queue_thumbnail_downloads: false
+new_revision: false
+source_configuration:
+  source_field: field_media_image_1
+field_map:
+  name: name

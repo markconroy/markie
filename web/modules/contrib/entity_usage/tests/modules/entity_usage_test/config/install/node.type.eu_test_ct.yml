@@ -1,0 +1,12 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+name: 'Entity Usage test content'
+type: eu_test_ct
+description: 'Entity Usage test content type'
+help: ''
+new_revision: false
+preview_mode: 1
+display_submitted: true

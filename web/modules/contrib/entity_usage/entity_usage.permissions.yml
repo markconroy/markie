@@ -1,0 +1,11 @@
+access entity usage statistics:
+  title: 'Access entity usage statistics'
+  description: 'Users with this permission will be able to see statistics of entity usage.'
+perform batch updates entity usage:
+  title: 'Access the form to launch batch updates on existing entities'
+  description: 'Users with this permission will be able to reset/relaunch the statistics counts on all existing entities in the system.'
+  restrict access: TRUE
+administer entity usage:
+  title: 'Administer Entity Usage'
+  description: 'Users with this permission will be able to administer the Entity usage module settings.'
+  restrict access: TRUE

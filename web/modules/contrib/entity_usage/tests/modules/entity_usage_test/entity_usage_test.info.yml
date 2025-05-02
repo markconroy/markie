@@ -1,0 +1,16 @@
+name: 'Entity usage test'
+type: module
+description: 'Support module for the Entity Usage module tests.'
+package: Testing
+dependencies:
+  - entity_usage:entity_usage
+  - entity_embed:entity_embed
+  - drupal:text
+  - drupal:node
+  - drupal:media
+  - drupal:ckeditor5
+
+# Information added by Drupal.org packaging script on 2025-04-04
+version: '8.x-2.0-beta24'
+project: 'entity_usage'
+datestamp: 1743745776

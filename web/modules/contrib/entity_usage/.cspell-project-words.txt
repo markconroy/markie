@@ -1,0 +1,6 @@
+# List of words excluded from cspell validation for the project Entity Usage.
+basefield
+basefields
+linkit
+webform
+webforms

@@ -3,7 +3,7 @@
         'name' => 'markconroy/markie',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => '0fe9618c6cf94182ff4f4cc6ad49a143fcc79d03',
+        'reference' => 'ce8ae07921b208cdd01422468c246dd034e70d9a',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -424,6 +424,15 @@
             'aliases' => array(),
             'dev_requirement' => false,
         ),
+        'drupal/entity_usage' => array(
+            'pretty_version' => '2.0.0-beta24',
+            'version' => '2.0.0.0-beta24',
+            'reference' => '8.x-2.0-beta24',
+            'type' => 'drupal-module',
+            'install_path' => __DIR__ . '/../../web/modules/contrib/entity_usage',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
         'drupal/image_widget_crop' => array(
             'pretty_version' => '2.4.0',
             'version' => '2.4.0.0',
@@ -616,7 +625,7 @@
         'markconroy/markie' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => '0fe9618c6cf94182ff4f4cc6ad49a143fcc79d03',
+            'reference' => 'ce8ae07921b208cdd01422468c246dd034e70d9a',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),

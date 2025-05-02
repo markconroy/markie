@@ -1,0 +1,48 @@
+include:
+  - project: $_GITLAB_TEMPLATES_REPO
+    ref: $_GITLAB_TEMPLATES_REF
+    file:
+      - '/includes/include.drupalci.main.yml'
+      - '/includes/include.drupalci.variables.yml'
+      - '/includes/include.drupalci.workflows.yml'
+
+variables:
+  _PHPUNIT_CONCURRENT: '1'
+  OPT_IN_TEST_PREVIOUS_MAJOR: 1
+  RUN_JOB_UPGRADE_STATUS: '1'
+phpcs:
+  allow_failure: false
+# By default, Gitlab CI runs on the default system mysql database, change
+# this as it won't work for the schema required by entity_usage.
+# Remove when https://www.drupal.org/project/gitlab_templates/issues/3463044 is
+# fixed.
+.test-variables:
+  variables:
+    MYSQL_DATABASE: drupal
+    MYSQL_ROOT_PASSWORD: drupal
+
+phpunit:
+  before_script:
+    - 'sed -i "s/core_version_requirement.*/core_version_requirement: \^10||\^11/" web/modules/contrib/**/*.info.yml'
+  variables:
+    SYMFONY_DEPRECATIONS_HELPER: "disabled"
+  parallel:
+    matrix:
+      - _TARGET_DB_TYPE: 'mysql'
+        _TARGET_DB_VERSION: $CORE_MYSQL_TEST_DEFAULT
+      - _TARGET_DB_TYPE: 'pgsql'
+        _TARGET_DB_VERSION: $CORE_PGSQL_MIN
+      - _TARGET_DB_TYPE: 'sqlite'
+        _TARGET_DB_VERSION: $CORE_SQLITE_MIN
+
+#
+# Linting jobs are passing so any issue that breaks them should fix them.
+#
+phpcs:
+  allow_failure: false
+phpstan:
+  allow_failure: false
+cspell:
+  allow_failure: false
+eslint:
+  allow_failure: false

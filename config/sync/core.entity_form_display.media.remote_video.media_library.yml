@@ -1,0 +1,31 @@
+uuid: f4377cfa-7d24-4fed-af0e-3a4f55c1dfda
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_form_mode.media.media_library
+    - field.field.media.remote_video.field_media_oembed_video
+    - field.field.media.remote_video.field_media_tags
+    - media.type.remote_video
+id: media.remote_video.media_library
+targetEntityType: media
+bundle: remote_video
+mode: media_library
+content:
+  field_media_tags:
+    type: entity_reference_autocomplete_tags
+    weight: 2
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+hidden:
+  created: true
+  field_media_oembed_video: true
+  name: true
+  path: true
+  status: true
+  uid: true

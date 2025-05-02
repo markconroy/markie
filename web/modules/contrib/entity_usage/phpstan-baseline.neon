@@ -1,0 +1,91 @@
+parameters:
+	ignoreErrors:
+		-
+			message: "#^Method Drupal\\\\entity_usage\\\\EntityUsageTrackManager\\:\\:processDefinition\\(\\) has parameter \\$definition with no type specified\\.$#"
+			count: 1
+			path: src/EntityUsageTrackManager.php
+
+		-
+			message: "#^Method Drupal\\\\entity_usage\\\\EntityUsageTrackManager\\:\\:processDefinition\\(\\) has parameter \\$plugin_id with no type specified\\.$#"
+			count: 1
+			path: src/EntityUsageTrackManager.php
+
+		-
+			message: "#^PHPDoc tag @param for parameter \\$namespaces with type array is incompatible with native type Traversable\\.$#"
+			count: 1
+			path: src/EntityUsageTrackManager.php
+
+		-
+			message: "#^Method Drupal\\\\entity_usage\\\\EntityUsageTrackMultipleLoadInterface\\:\\:getTargetEntitiesFromField\\(\\) has parameter \\$field with generic interface Drupal\\\\Core\\\\Field\\\\FieldItemListInterface but does not specify its types\\: T$#"
+			count: 1
+			path: src/EntityUsageTrackMultipleLoadInterface.php
+
+		-
+			message: "#^Method Drupal\\\\entity_usage\\\\Form\\\\EntityUsageSettingsForm\\:\\:submitForm\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: src/Form/EntityUsageSettingsForm.php
+
+		-
+			message: "#^Method Drupal\\\\entity_usage\\\\Plugin\\\\EntityUsage\\\\Track\\\\DynamicEntityReference\\:\\:doGetTargetEntities\\(\\) has parameter \\$field with generic interface Drupal\\\\Core\\\\Field\\\\FieldItemListInterface but does not specify its types\\: T$#"
+			count: 1
+			path: src/Plugin/EntityUsage/Track/DynamicEntityReference.php
+
+		-
+			message: "#^Method Drupal\\\\entity_usage\\\\Plugin\\\\EntityUsage\\\\Track\\\\DynamicEntityReference\\:\\:getTargetEntitiesFromField\\(\\) has parameter \\$field with generic interface Drupal\\\\Core\\\\Field\\\\FieldItemListInterface but does not specify its types\\: T$#"
+			count: 1
+			path: src/Plugin/EntityUsage/Track/DynamicEntityReference.php
+
+		-
+			message: "#^PHPDoc tag @var for variable \\$item contains generic class Drupal\\\\Core\\\\Field\\\\Plugin\\\\Field\\\\FieldType\\\\EntityReferenceItem but does not specify its types\\: T$#"
+			count: 1
+			path: src/Plugin/EntityUsage/Track/DynamicEntityReference.php
+
+		-
+			message: "#^Parameter \\#1 \\$field of method Drupal\\\\entity_usage\\\\Plugin\\\\EntityUsage\\\\Track\\\\DynamicEntityReference\\:\\:doGetTargetEntities\\(\\) expects Drupal\\\\Core\\\\Field\\\\FieldItemListInterface, Drupal\\\\Core\\\\TypedData\\\\TraversableTypedDataInterface\\|null given\\.$#"
+			count: 1
+			path: src/Plugin/EntityUsage/Track/DynamicEntityReference.php
+
+		-
+			message: "#^Method Drupal\\\\entity_usage\\\\Plugin\\\\EntityUsage\\\\Track\\\\EntityReference\\:\\:doGetTargetEntities\\(\\) has parameter \\$field with generic interface Drupal\\\\Core\\\\Field\\\\FieldItemListInterface but does not specify its types\\: T$#"
+			count: 1
+			path: src/Plugin/EntityUsage/Track/EntityReference.php
+
+		-
+			message: "#^Method Drupal\\\\entity_usage\\\\Plugin\\\\EntityUsage\\\\Track\\\\EntityReference\\:\\:getTargetEntitiesFromField\\(\\) has parameter \\$field with generic interface Drupal\\\\Core\\\\Field\\\\FieldItemListInterface but does not specify its types\\: T$#"
+			count: 1
+			path: src/Plugin/EntityUsage/Track/EntityReference.php
+
+		-
+			message: "#^PHPDoc tag @var for variable \\$item contains generic class Drupal\\\\Core\\\\Field\\\\Plugin\\\\Field\\\\FieldType\\\\EntityReferenceItem but does not specify its types\\: T$#"
+			count: 1
+			path: src/Plugin/EntityUsage/Track/EntityReference.php
+
+		-
+			message: "#^Parameter \\#1 \\$field of method Drupal\\\\entity_usage\\\\Plugin\\\\EntityUsage\\\\Track\\\\EntityReference\\:\\:doGetTargetEntities\\(\\) expects Drupal\\\\Core\\\\Field\\\\FieldItemListInterface, Drupal\\\\Core\\\\TypedData\\\\TraversableTypedDataInterface\\|null given\\.$#"
+			count: 1
+			path: src/Plugin/EntityUsage/Track/EntityReference.php
+
+		-
+			message: "#^Access to an undefined property Drupal\\\\filter\\\\FilterPluginCollection\\|Drupal\\\\filter\\\\Plugin\\\\FilterInterface\\:\\:\\$status\\.$#"
+			count: 1
+			path: src/Plugin/EntityUsage/Track/HtmlLink.php
+
+		-
+			message: "#^Access to an undefined property Drupal\\\\Core\\\\Field\\\\FieldItemInterface\\:\\:\\$summary\\.$#"
+			count: 1
+			path: src/Plugin/EntityUsage/Track/TextFieldEmbedBase.php
+
+		-
+			message: "#^Access to an undefined property Drupal\\\\Core\\\\Field\\\\FieldItemInterface\\:\\:\\$value\\.$#"
+			count: 1
+			path: src/Plugin/EntityUsage/Track/TextFieldEmbedBase.php
+
+		-
+			message: "#^Function entity_usage_test_entity_usage_block_tracking\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/modules/entity_usage_test/entity_usage_test.module
+
+		-
+			message: "#^PHPDoc tag @var with type array\\<Drupal\\\\entity_usage\\\\Events\\\\EntityUsageEvent\\> is not subtype of native type 0\\|0\\.0\\|''\\|'0'\\|array\\{\\}\\|Countable\\|EmptyIterator\\|false\\|null\\.$#"
+			count: 1
+			path: tests/src/FunctionalJavascript/BatchUpdateTest.php

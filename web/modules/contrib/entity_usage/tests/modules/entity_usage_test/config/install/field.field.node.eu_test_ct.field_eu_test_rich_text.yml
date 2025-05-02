@@ -1,0 +1,20 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_eu_test_rich_text
+    - node.type.eu_test_ct
+  module:
+    - text
+id: node.eu_test_ct.field_eu_test_rich_text
+field_name: field_eu_test_rich_text
+entity_type: node
+bundle: eu_test_ct
+label: Text
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: text_long

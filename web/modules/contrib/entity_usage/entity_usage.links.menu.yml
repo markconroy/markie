@@ -1,0 +1,5 @@
+entity_usage.configuration_form:
+  title: 'Entity Usage Settings'
+  parent: system.admin_config_content
+  description: 'Configure Entity Usage settings'
+  route_name: entity_usage.settings.form

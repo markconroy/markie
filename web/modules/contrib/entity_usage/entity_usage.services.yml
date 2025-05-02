@@ -1,0 +1,59 @@
+parameters:
+  entity_usage:
+    always_track_base_fields:
+      # Redirect base fields are always since if you've enabled redirect as a
+      # source entity the only use case is to track entities in the
+      # redirect_redirect link field.
+      - redirect
+  # Number of entity usage records to update on kernel terminate when an
+  # entity's URL changes. Above this limit, remaining records will be
+  # deferred to be processed in a background queue.
+  entity_usage.url_updater_records_to_process: 15
+
+services:
+  _defaults:
+    autowire: true
+    autoconfigure: true
+
+  plugin.manager.entity_usage.track:
+    class: Drupal\entity_usage\EntityUsageTrackManager
+    parent: default_plugin_manager
+  Drupal\entity_usage\EntityUsageTrackManager: '@plugin.manager.entity_usage.track'
+
+  entity_usage.usage:
+    class: Drupal\entity_usage\EntityUsage
+    arguments:
+      # The table to store the entity usage info.
+      $tableName: 'entity_usage'
+  Drupal\entity_usage\EntityUsageInterface: '@entity_usage.usage'
+
+  entity_usage.entity_update_manager:
+    class: Drupal\entity_usage\EntityUpdateManager
+  Drupal\entity_usage\EntityUpdateManagerInterface: '@entity_usage.entity_update_manager'
+
+  Drupal\entity_usage\EntityUsageBatchManager: ~
+  entity_usage.batch_manager: '@Drupal\entity_usage\EntityUsageBatchManager'
+
+  Drupal\entity_usage\Routing\RouteSubscriber: ~
+
+  logger.channel.entity_usage:
+    parent: logger.channel_base
+    arguments:
+      $channel: 'entity_usage'
+
+  Drupal\entity_usage\OptimizedRouteEnhancer:
+    tags:
+      - { name: route_enhancer, priority: 6000 }
+
+  Drupal\entity_usage\UrlToEntity: ~
+  Drupal\entity_usage\UrlToEntityInterface: '@Drupal\entity_usage\UrlToEntity'
+
+  Drupal\entity_usage\PreSaveUrlRecorder: ~
+  Drupal\entity_usage\RecreateTrackingDataForFieldQueuer: ~
+
+  # By default we enable Entity and Language subscribers to the
+  # \Drupal\entity_usage\Events\Events::URL_TO_ENTITY event. If the file and/or
+  # redirect modules are enabled, two more subscribers will be enabled. See
+  # \Drupal\entity_usage\EntityUsageServiceProvider::register().
+  Drupal\entity_usage\UrlToEntityIntegrations\EntityRouting: ~
+  Drupal\entity_usage\UrlToEntityIntegrations\LanguageIntegration: ~

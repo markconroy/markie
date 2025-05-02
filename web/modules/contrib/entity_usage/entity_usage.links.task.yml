@@ -1,0 +1,12 @@
+entity_usage.entities:
+  class: \Drupal\Core\Menu\LocalTaskDefault
+  deriver: \Drupal\entity_usage\Plugin\Derivative\EntityUsageLocalTask
+entity_usage.settings.form:
+  route_name: entity_usage.settings.form
+  base_route: entity_usage.settings.form
+  title: Settings
+entity_usage.batch_update:
+  route_name: entity_usage.batch_update
+  base_route: entity_usage.settings.form
+  title: Batch Update
+  weight: 10
