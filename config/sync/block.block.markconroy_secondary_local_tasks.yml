@@ -1,0 +1,22 @@
+uuid: 50ba8585-d171-4e87-8216-194f0afaa338
+langcode: en
+status: true
+dependencies:
+  theme:
+    - markconroy
+_core:
+  default_config_hash: ydSxdq7R66I8UMC460rOzlfzvlUL4VRbdwc6z9DWaUI
+id: markconroy_secondary_local_tasks
+theme: markconroy
+region: content
+weight: -6
+provider: null
+plugin: local_tasks_block
+settings:
+  id: local_tasks_block
+  label: 'Secondary tabs'
+  label_display: '0'
+  provider: core
+  primary: false
+  secondary: true
+visibility: {  }

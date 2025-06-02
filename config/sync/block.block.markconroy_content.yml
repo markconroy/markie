@@ -1,0 +1,22 @@
+uuid: 2cae6e52-0fc2-48b0-8101-9aed89bdb411
+langcode: en
+status: true
+dependencies:
+  module:
+    - system
+  theme:
+    - markconroy
+_core:
+  default_config_hash: erQSEZF2XUjNmgTl0uNRBzmg18ZGXwUcw2FhApoeuHk
+id: markconroy_content
+theme: markconroy
+region: content
+weight: -4
+provider: null
+plugin: system_main_block
+settings:
+  id: system_main_block
+  label: 'Main page content'
+  label_display: '0'
+  provider: system
+visibility: {  }

@@ -1,0 +1,10 @@
+.header {
+  background-color: var(--color-secondary);
+  color: var(--color-white);
+  padding: var(--spacing);
+}
+
+.header a {
+  color: var(--color-white);
+  text-decoration: none;
+}

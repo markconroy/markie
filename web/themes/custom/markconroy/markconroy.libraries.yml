@@ -1,0 +1,13 @@
+base:
+  css:
+    component:
+      css/base/fonts.css: {}
+      css/base/variables.css: {}
+      css/base/base.css: {}
+      css/layout/container.css: {}
+      css/components/header.css: {}
+
+teaser:
+  css:
+    component:
+      css/components/teaser.css: {}

@@ -28,14 +28,10 @@ content:
     third_party_settings: {  }
     weight: 0
     region: content
-  links:
-    settings: {  }
-    third_party_settings: {  }
-    weight: 1
-    region: content
 hidden:
   body: true
   comment: true
   field_main_image: true
   field_tags: true
   field_video_checked: true
+  links: true

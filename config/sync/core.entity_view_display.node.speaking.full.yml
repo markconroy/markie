@@ -30,10 +30,11 @@ content:
     weight: 105
     region: content
   field_main_image:
-    type: entity_reference_label
+    type: entity_reference_entity_view
     label: hidden
     settings:
-      link: true
+      view_mode: full
+      link: false
     third_party_settings: {  }
     weight: 102
     region: content

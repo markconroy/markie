@@ -1,0 +1,92 @@
+:root {
+  /* Colours */
+  --color-primary: #123456;
+  --color-secondary: #eb0032;
+
+  /* Grey Scale */
+  --color-white: #fff;
+  --color-grey-100: hsl(0, 0%, 95%);
+  --color-grey-200: hsl(0, 0%, 90%);
+  --color-grey-300: hsl(0, 0%, 80%);
+  --color-grey-400: hsl(0, 0%, 70%);
+  --color-grey-500: hsl(0, 0%, 60%);
+  --color-grey-600: hsl(0, 0%, 50%);
+  --color-grey-700: hsl(0, 0%, 40%);
+  --color-grey-800: hsl(0, 0%, 30%);
+  --color-grey-900: hsl(0, 0%, 20%);
+  --color-black: #000;
+
+  /* Fonts */
+  --font-primary: "Cormorant", serif;
+  --font-secondary: "Cabin", sans-serif;
+
+  /* Font Sizes */
+  /* Static Font Sizes */
+  --base-font-size: 16px;
+  --font-size-smallest: calc(var(--base-font-size) * 0.5);
+  --font-size-smaller: calc(var(--base-font-size) * 0.66);
+  --font-size-small: calc(var(--base-font-size) * 0.75);
+  --font-size-medium: calc(var(--base-font-size) * 1);
+  --font-size-large: calc(var(--base-font-size) * 1.5);
+  --font-size-larger: calc(var(--base-font-size) * 2);
+  --font-size-largest: calc(var(--base-font-size) * 2.5);
+  --font-size-mega: calc(var(--base-font-size) * 4);
+
+  /* Responsive Font Sizes */
+  /* These sizes use the variables from the static sizes */
+  --font-size-responsive-heading: clamp(
+    var(--font-size-medium),
+    0.78rem + 0.976vw,
+    var(--font-size-large)
+  );
+  --font-size-responsive-heading-large: clamp(
+    var(--font-size-large),
+    1.28rem + 0.976vw,
+    var(--font-size-largest)
+  );
+  --font-size-responsive-heading-larger: clamp(
+    var(--font-size-larger),
+    1.78rem + 0.976vw,
+    var(--font-size-largest)
+  );
+  --font-size-responsive-heading-largest: clamp(
+    var(--font-size-largest),
+    1.841rem + 2.927vw,
+    var(--font-size-mega)
+  );
+
+  /* Line Heights */
+  --scale-factor: 1.5;
+  --line-height: 1.5;
+  --line-height-small: 0.9;
+
+  /* Spacing Items */
+  --spacing: 1rem;
+  --spacing-smallest: calc(var(--spacing) * 0.25);
+  --spacing-smaller: calc(var(--spacing) * 0.5);
+  --spacing-small: calc(var(--spacing) * 0.75);
+  --spacing-medium: var(--spacing);
+  --spacing-large: calc(var(--spacing) * 1.5);
+  --spacing-larger: calc(var(--spacing) * 2);
+  --spacing-largest: calc(var(--spacing) * 2.5);
+  --spacing-mega: calc(var(--spacing) * 4);
+
+  /* Widths */
+  --width-small: 48em; /* 768px */
+  --width-medium: 60em; /* 960px */
+  --width-large: 73.75em; /* 1180px */
+  --width-xl: 90em; /* 1440px */
+  --width-100: 100%;
+  --width-content-area: var(--width-large);
+
+  /* Borders */
+  --border-style: solid;
+  --border-width: 2px;
+  --border-color: var(--color-grey-dark);
+  --border-radius: 5px;
+  --border: var(--border-width) var(--border-style) var(--border-color);
+  --text-decoration-thickness: var(--border-width);
+
+  /* Animation */
+  --transition-time: 0.3s;
+}

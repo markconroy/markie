@@ -1,0 +1,20 @@
+name: markconroy
+type: theme
+'base theme': stable9
+version: 1.0.0
+description: 'Theme for Mark Conroy'
+core_version_requirement: ^10 || ^11
+generator: 'starterkit_theme:10.4.6'
+
+libraries:
+  - markconroy/base
+  - core/normalize
+
+regions:
+  tabs: 'Tabs'
+  header: 'Header'
+  breadcrumb: 'Breadcrumb'
+  highlighted: 'Highlighted'
+  content: 'Content'
+  footer: 'Footer'
+  disabled: 'Disabled'

@@ -1,0 +1,10 @@
+.teaser > h2 > a {
+  text-decoration: none;
+}
+
+.list--teasers .views-row + .views-row {
+  margin-block-start: var(--spacing-large);
+  padding-block-start: var(--spacing-large);
+  padding-block-end: var(--spacing-largest);
+  border-block-end: 2px solid var(--color-white);
+}

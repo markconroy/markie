@@ -1,0 +1,23 @@
+uuid: 2f7253b2-568c-4424-b58a-07cfbab80f3f
+langcode: en
+status: false
+dependencies:
+  module:
+    - search
+  theme:
+    - markconroy
+_core:
+  default_config_hash: imMyHD6LYci0gtXq56qr9ZKGHzbEG9uFydrN5EhKtSU
+id: markconroy_search_form_wide
+theme: markconroy
+region: disabled
+weight: -7
+provider: null
+plugin: search_form_block
+settings:
+  id: search_form_block
+  label: 'Search form (wide)'
+  label_display: '0'
+  provider: search
+  page_id: ''
+visibility: {  }

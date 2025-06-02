@@ -72,4 +72,6 @@ module:
 theme:
   claro: 0
   olivero: 0
+  stable9: 0
+  markconroy: 0
 profile: standard
