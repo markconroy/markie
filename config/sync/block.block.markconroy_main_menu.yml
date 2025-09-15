@@ -12,7 +12,7 @@ _core:
   default_config_hash: KWAiziL39uEzmOJEql_wbUP2RtqGceL3WM2CfxhMelE
 id: markconroy_main_menu
 theme: markconroy
-region: ''
+region: tabs
 weight: -6
 provider: null
 plugin: 'system_menu_block:main'

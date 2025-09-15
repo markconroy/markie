@@ -10,7 +10,7 @@ _core:
   default_config_hash: eYL19CLDyinGTWYQfBD1DswWzglEotE_kHnHx3AxTXM
 id: markconroy_powered
 theme: markconroy
-region: ''
+region: tabs
 weight: -7
 provider: null
 plugin: system_powered_by_block

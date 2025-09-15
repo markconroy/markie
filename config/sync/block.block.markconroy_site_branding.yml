@@ -10,7 +10,7 @@ _core:
   default_config_hash: n_nlgjggHVfQt2H__zvLOKB2YtjPDbQ5tHijF9LE1aM
 id: markconroy_site_branding
 theme: markconroy
-region: ''
+region: tabs
 weight: -7
 provider: null
 plugin: system_branding_block

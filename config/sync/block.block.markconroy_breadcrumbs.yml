@@ -10,7 +10,7 @@ _core:
   default_config_hash: VhBzWb7lMRtIOg9G7VSw_0uopi-7zXeHq4vXqqV1HFE
 id: markconroy_breadcrumbs
 theme: markconroy
-region: ''
+region: tabs
 weight: -7
 provider: null
 plugin: system_breadcrumb_block

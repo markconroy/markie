@@ -10,7 +10,7 @@ _core:
   default_config_hash: VfPFqqxfkomud5CO8DUijw85QIl9GIxh_nIxLOYESxg
 id: markconroy_help
 theme: markconroy
-region: ''
+region: tabs
 weight: -6
 provider: null
 plugin: help_block

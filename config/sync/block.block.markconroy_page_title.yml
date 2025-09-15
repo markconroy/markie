@@ -8,7 +8,7 @@ _core:
   default_config_hash: 6aOgWsNTXjqrDm98TXSAjP6qd2nCijD1xw45MrnbK-Y
 id: markconroy_page_title
 theme: markconroy
-region: ''
+region: tabs
 weight: -5
 provider: null
 plugin: page_title_block
