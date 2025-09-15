@@ -14,6 +14,7 @@ use Drupal\Tests\field_ui\Traits\FieldUiTestTrait;
 class MetatagXssTest extends BrowserTestBase {
 
   use FieldUiTestTrait;
+  use MetatagHelperTrait;
   use StringTranslationTrait;
 
   /**
@@ -151,12 +152,11 @@ class MetatagXssTest extends BrowserTestBase {
    * Verify XSS injected in the entity metatag override field is not rendered.
    */
   public function testXssEntityOverride() {
-
     $this->drupalGet('node/add/metatag_node');
     $session = $this->assertSession();
     $session->statusCodeEquals(200);
     $edit = [
-      'title[0][value]' => $this->randomString(32),
+      'title[0][value]' => $this->randomTitle(),
       'field_metatag_field[0][basic][title]' => $this->xssTitleString,
       'field_metatag_field[0][basic][abstract]' => $this->xssString,
       'field_metatag_field[0][advanced][image_src]' => $this->xssImageString,
@@ -181,7 +181,6 @@ class MetatagXssTest extends BrowserTestBase {
    * Verify XSS injected in the entity titles are not rendered.
    */
   public function testXssEntityTitle() {
-
     $this->drupalGet('node/add/metatag_node');
     $session = $this->assertSession();
     $session->statusCodeEquals(200);
@@ -201,12 +200,11 @@ class MetatagXssTest extends BrowserTestBase {
    * Verify XSS injected in the entity fields are not rendered.
    */
   public function testXssEntityBody() {
-
     $this->drupalGet('node/add/metatag_node');
     $session = $this->assertSession();
     $session->statusCodeEquals(200);
     $edit = [
-      'title[0][value]' => $this->randomString(),
+      'title[0][value]' => $this->randomTitle(),
       'body[0][value]' => $this->xssTitleString,
     ];
     $this->submitForm($edit, 'Save');

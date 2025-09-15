@@ -128,7 +128,7 @@ class RedirectRequestSubscriber implements EventSubscriberInterface {
     // Get URL info and process it to be used for hash generation.
     $request_query = $request->query->all();
 
-    if (strpos($request->getPathInfo(), '/system/files/') === 0 && !$request->query->has('file')) {
+    if (str_starts_with($request->getPathInfo(), '/system/files/') && !$request->query->has('file')) {
       // Private files paths are split by the inbound path processor and the
       // relative file path is moved to the 'file' query string parameter. This
       // is because the route system does not allow an arbitrary amount of
@@ -145,8 +145,10 @@ class RedirectRequestSubscriber implements EventSubscriberInterface {
 
     $this->context->fromRequest($request);
 
+    $cacheable_metadata = new CacheableMetadata();
+
     try {
-      $redirect = $this->redirectRepository->findMatchingRedirect($path, $request_query, $this->languageManager->getCurrentLanguage()->getId());
+      $redirect = $this->redirectRepository->findMatchingRedirect($path, $request_query, $this->languageManager->getCurrentLanguage()->getId(), $cacheable_metadata);
     }
     catch (RedirectLoopException $e) {
       \Drupal::logger('redirect')->warning('Redirect loop identified at %path for redirect %rid', ['%path' => $e->getPath(), '%rid' => $e->getRedirectId()]);
@@ -168,7 +170,7 @@ class RedirectRequestSubscriber implements EventSubscriberInterface {
         'X-Redirect-ID' => $redirect->id(),
       ];
       $response = new TrustedRedirectResponse($url->setAbsolute()->toString(), $redirect->getStatusCode(), $headers);
-      $response->addCacheableDependency($redirect);
+      $response->addCacheableDependency($cacheable_metadata);
 
       // Invoke hook_redirect_response_alter().
       $this->moduleHandler->alter('redirect_response', $response, $redirect);

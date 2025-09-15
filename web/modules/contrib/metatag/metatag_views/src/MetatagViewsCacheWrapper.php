@@ -195,7 +195,7 @@ class MetatagViewsCacheWrapper extends CachePluginBase {
   /**
    * {@inheritdoc}
    */
-  public function init(ViewExecutable $view, DisplayPluginBase $display, array &$options = NULL) {
+  public function init(ViewExecutable $view, DisplayPluginBase $display, ?array &$options = NULL) {
     $this->plugin->init($view, $display, $options);
   }
 

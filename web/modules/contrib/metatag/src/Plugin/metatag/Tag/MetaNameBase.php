@@ -494,7 +494,7 @@ abstract class MetaNameBase extends PluginBase {
     }
 
     $value = str_replace(["\r\n", "\n", "\r", "\t"], ' ', $value);
-    $value = preg_replace('/\s+/', ' ', $value);
+    $value = preg_replace('/\s+/u', ' ', $value);
     return trim($value);
   }
 

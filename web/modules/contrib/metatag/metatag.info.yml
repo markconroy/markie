@@ -9,7 +9,7 @@ dependencies:
   - drupal:field
   - token:token
 
-# Information added by Drupal.org packaging script on 2024-11-07
-version: '2.1.0'
+# Information added by Drupal.org packaging script on 2025-09-04
+version: '2.1.2'
 project: 'metatag'
-datestamp: 1731004045
+datestamp: 1757006646

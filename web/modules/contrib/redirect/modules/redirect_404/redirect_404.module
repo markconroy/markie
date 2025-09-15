@@ -109,7 +109,7 @@ function redirect_404_logging_settings_submit($form, FormStateInterface $form_st
     ->save();
 
   // Remove the filtered out items.
-  /** @var \Drupal\redirect_404\RedirectNotFoundStorageInterface; $redirect_storage */
+  /** @var \Drupal\redirect_404\RedirectNotFoundStorageInterface $redirect_storage */
   $redirect_storage = \Drupal::service('redirect.not_found_storage');
   foreach ($ignore_pages as $ignore_page) {
     $redirect_storage->resolveLogRequest(trim($ignore_page));
@@ -132,7 +132,7 @@ function redirect_404_redirect_presave(Redirect $redirect) {
 }
 
 /**
- * Submit Handler for Reseting all the 404 logs from Database.
+ * Submit Handler for resetting all the 404 logs from Database.
  */
 function redirect_404_reset_submit() {
   \Drupal::database()->truncate('redirect_404')->execute();

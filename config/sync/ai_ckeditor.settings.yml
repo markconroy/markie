@@ -1,0 +1,6 @@
+prompts:
+  modify_prompt: |-
+    Use the following instructions to process this text. Return only the processed text without explanations.
+    Instructions: {{ modify_prompt }}
+
+    Text to process:

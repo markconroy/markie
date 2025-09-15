@@ -53,7 +53,21 @@ variables:
   OPT_IN_TEST_PREVIOUS_MAJOR: 1
   _PHPUNIT_CONCURRENT: 1
 
-# This module wants to strictly comply with Drupal core's coding standards.
+
+cspell:
+  allow_failure: false
+eslint:
+  allow_failure: false
 phpcs:
+  # This module wants to strictly comply with Drupal core's coding standards.
   before_script:
-  - cp $_WEB_ROOT/core/phpcs.xml.dist ./phpcs.xml.dist
+    - cp $_WEB_ROOT/core/phpcs.xml.dist ./phpcs.xml.dist
+  allow_failure: false
+phpstan:
+  allow_failure: false
+phpstan (previous major):
+  rules:
+    # We are only interested in PHPStan on the current version.
+    - when: never
+stylelint:
+  allow_failure: false

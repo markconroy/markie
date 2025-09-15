@@ -54,7 +54,7 @@ class MetatagDefaultsTest extends MigrateDrupal7TestBase {
           'description' => 'Mango heaven!',
           'robots' => 'nofollow, noindex',
           'title' => 'I\'m in heaven!',
-        ]
+        ],
       ],
       'node' => [
         'langcode' => 'en',
@@ -70,7 +70,7 @@ class MetatagDefaultsTest extends MigrateDrupal7TestBase {
         'langcode' => 'en',
         'label' => 'Node: Article',
         'tags' => [
-          'keywords' =>'Alphonso, Angie, Julie',
+          'keywords' => 'Alphonso, Angie, Julie',
           'robots' => 'nofollow, noindex',
         ],
       ],
@@ -107,7 +107,7 @@ class MetatagDefaultsTest extends MigrateDrupal7TestBase {
         'label' => '404 page not found',
       ],
       '404' => [
-        'langcode' => 'en', 
+        'langcode' => 'en',
         'label' => '404 page not found',
       ],
     ];

@@ -669,9 +669,11 @@ final class DeprecationAnalyzer {
       $category = 'ignore';
     }
 
-    // Ignore twig 3.12 false positives (until core fixes them).
-    if (strpos($error, 'Since twig/twig 3.12') !== FALSE && ProjectCollector::getDrupalCoreMajorVersion() < 11) {
-      $category = 'ignore';
+    // Ignore twig 3.12 and 3.15 false positives (until core fixes them).
+    foreach ([3.12, 3.15] as $version) {
+      if (strpos($error, 'Since twig/twig ' . $version) !== FALSE && ProjectCollector::getDrupalCoreMajorVersion() < 11) {
+        $category = 'ignore';
+      }
     }
 
     return [$error, $category];

@@ -6,8 +6,12 @@ use Drupal\Component\Utility\UrlHelper;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\WidgetBase;
+use Drupal\Core\Routing\AccessAwareRouterInterface;
 use Drupal\Core\Url;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\redirect\RedirectRepository;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;
 
@@ -32,12 +36,40 @@ use Symfony\Component\Routing\Exception\ResourceNotFoundException;
 class RedirectSourceWidget extends WidgetBase {
 
   /**
+   * The request stack.
+   */
+  protected RequestStack $requestStack;
+
+  /**
+   * The access aware router.
+   */
+  protected AccessAwareRouterInterface $router;
+
+  /**
+   * The redirect repository.
+   */
+  protected RedirectRepository $redirectRepository;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
+    $widget = parent::create($container, $configuration, $plugin_id, $plugin_definition);
+    $widget->requestStack = $container->get('request_stack');
+    $widget->router = $container->get('router');
+    $widget->redirectRepository = $container->get('redirect.repository');
+    return $widget;
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function formElement(FieldItemListInterface $items, $delta, array $element, array &$form, FormStateInterface $form_state) {
-    $default_url_value = $items[$delta]->path;
-    if ($items[$delta]->query) {
-      $default_url_value .= '?' . http_build_query($items[$delta]->query);
+    /** @var \Drupal\redirect\Plugin\Field\FieldType\RedirectSourceItem $redirect_source */
+    $redirect_source = $items[$delta];
+    $default_url_value = $redirect_source->path;
+    if ($redirect_source->query) {
+      $default_url_value .= '?' . http_build_query($redirect_source->query);
     }
     $element['path'] = [
       '#type' => 'textfield',
@@ -48,7 +80,7 @@ class RedirectSourceWidget extends WidgetBase {
       '#required' => $element['#required'],
       // Add a trailing slash to make it more clear that a redirect should not
       // start with a leading slash.
-      '#field_prefix' => \Drupal::request()->getSchemeAndHttpHost() . '/',
+      '#field_prefix' => $this->requestStack->getCurrentRequest()->getSchemeAndHttpHost() . '/',
       '#attributes' => ['data-disable-refocus' => 'true'],
     ];
 
@@ -67,7 +99,7 @@ class RedirectSourceWidget extends WidgetBase {
         // @todo Hmm... exception driven logic. Find a better way how to
         //   determine if we have a valid path.
         try {
-          \Drupal::service('router')->match('/' . $form_state->getValue(['redirect_source', 0, 'path']));
+          $this->router->match('/' . $form_state->getValue(['redirect_source', 0, 'path']));
 
           $url = Url::fromRoute('entity.path_alias.add_form');
           if ($url->access()) {
@@ -77,10 +109,10 @@ class RedirectSourceWidget extends WidgetBase {
             ]) . '</div>';
           }
         }
-        catch (ResourceNotFoundException $e) {
-          // Do nothing, expected behaviour.
+        catch (ResourceNotFoundException) {
+          // Do nothing, expected behavior.
         }
-        catch (AccessDeniedHttpException $e) {
+        catch (AccessDeniedHttpException) {
           // @todo Source lookup results in an access denied, deny access?
         }
 
@@ -88,9 +120,7 @@ class RedirectSourceWidget extends WidgetBase {
         $parsed_url = UrlHelper::parse($source_path);
         $path = $parsed_url['path'] ?? NULL;
         if (!empty($path)) {
-          /** @var \Drupal\redirect\RedirectRepository $repository */
-          $repository = \Drupal::service('redirect.repository');
-          $redirects = $repository->findBySourcePath($path);
+          $redirects = $this->redirectRepository->findBySourcePath($path);
           if (!empty($redirects)) {
             $redirect = array_shift($redirects);
             $element['status_box'][]['#markup'] = '<div class="messages messages--warning">' . $this->t('The base source path %source is already being redirected. Do you want to <a href="@edit-page">edit the existing redirect</a>?', ['%source' => $source_path, '@edit-page' => $redirect->toUrl('edit-form')->toString()]) . '</div>';
@@ -118,7 +148,7 @@ class RedirectSourceWidget extends WidgetBase {
     foreach ($values as &$value) {
       if (!empty($value['path'])) {
         // In case we have query process the url.
-        if (strpos($value['path'], '?') !== FALSE) {
+        if (str_contains($value['path'], '?')) {
           $url = UrlHelper::parse($value['path']);
           $value['path'] = $url['path'];
           $value['query'] = $url['query'];

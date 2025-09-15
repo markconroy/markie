@@ -86,9 +86,9 @@ interface MetatagManagerInterface {
    *   Existing element.
    * @param array $token_types
    *   Token types to return in the tree.
-   * @param array $included_groups
+   * @param array|null $included_groups
    *   Available group plugins.
-   * @param array $included_tags
+   * @param array|null $included_tags
    *   Available tag plugins.
    * @param bool $verbose_help
    *   Whether to include extra help text at the top of the form or keep it
@@ -97,7 +97,7 @@ interface MetatagManagerInterface {
    * @return array
    *   Render array for metatag form.
    */
-  public function form(array $values, array $element, array $token_types = [], array $included_groups = NULL, array $included_tags = NULL, $verbose_help = FALSE): array;
+  public function form(array $values, array $element, array $token_types = [], ?array $included_groups = NULL, ?array $included_tags = NULL, $verbose_help = FALSE): array;
 
   /**
    * Generate the elements that go in the hook_page_attachments attached array.
@@ -125,6 +125,6 @@ interface MetatagManagerInterface {
    * @return array
    *   Render array with tag elements.
    */
-  public function generateRawElements(array $tags, $entity = NULL, BubbleableMetadata $cache = NULL): array;
+  public function generateRawElements(array $tags, $entity = NULL, ?BubbleableMetadata $cache = NULL): array;
 
 }

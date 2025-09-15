@@ -3,7 +3,6 @@
 namespace Drupal\metatag\Plugin\migrate\source\d7;
 
 use Drupal\metatag\Plugin\migrate\MigrateMetatagD7Trait;
-use Drupal\migrate\Row;
 use Drupal\migrate_drupal\Plugin\migrate\source\DrupalSqlBase;
 
 /**

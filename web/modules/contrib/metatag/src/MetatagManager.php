@@ -279,15 +279,23 @@ class MetatagManager implements MetatagManagerInterface {
     foreach ($this->sortedGroups() as $group_name => $group) {
       $tag_weight = $group['weight'] * 100;
 
-      // First, sort the tags within the group according to the original sort
-      // order provided by the tag's definition.
-      uasort($tags[$group_name], [
-        'Drupal\Component\Utility\SortArray',
-        'sortByWeightElement',
-      ]);
-      foreach ($tags[$group_name] as $tag_name => $tag_info) {
-        $tag_info['weight'] = $tag_weight++;
-        $sorted_tags[$tag_name] = $tag_info;
+      // Make sure the tag group is in the correct structure.
+      if (isset($tags[$group_name]) && is_array($tags[$group_name])) {
+        // First, sort the tags within the group according to the original sort
+        // order provided by the tag's definition.
+        uasort($tags[$group_name], [
+          'Drupal\Component\Utility\SortArray',
+          'sortByWeightElement',
+        ]);
+        foreach ($tags[$group_name] as $tag_name => $tag_info) {
+          $tag_info['weight'] = $tag_weight++;
+          $sorted_tags[$tag_name] = $tag_info;
+        }
+      }
+
+      // Log an error message because this shouldn't happen.
+      else {
+        $this->logger->error('Expected an array but got null or other type for group: @group_name', ['@group_name' => $group_name]);
       }
     }
 
@@ -324,7 +332,7 @@ class MetatagManager implements MetatagManagerInterface {
   /**
    * {@inheritdoc}
    */
-  public function form(array $values, array $element, array $token_types = [], array $included_groups = NULL, array $included_tags = NULL, $verbose_help = FALSE): array {
+  public function form(array $values, array $element, array $token_types = [], ?array $included_groups = NULL, ?array $included_tags = NULL, $verbose_help = FALSE): array {
     // Add the outer fieldset.
     $element += [
       '#type' => 'details',
@@ -449,13 +457,13 @@ class MetatagManager implements MetatagManagerInterface {
   /**
    * Returns default meta tags for an entity.
    *
-   * @param \Drupal\Core\Entity\ContentEntityInterface $entity
+   * @param \Drupal\Core\Entity\ContentEntityInterface|null $entity
    *   The entity to work on.
    *
    * @return array
    *   The default meta tags appropriate for this entity.
    */
-  public function getDefaultMetatags(ContentEntityInterface $entity = NULL): array {
+  public function getDefaultMetatags(?ContentEntityInterface $entity = NULL): array {
     // Get general global metatags.
     $metatags = $this->getGlobalMetatags();
     // If that is empty something went wrong.
@@ -579,7 +587,7 @@ class MetatagManager implements MetatagManagerInterface {
   /**
    * {@inheritdoc}
    */
-  public function generateRawElements(array $tags, $entity = NULL, BubbleableMetadata $cache = NULL): array {
+  public function generateRawElements(array $tags, $entity = NULL, ?BubbleableMetadata $cache = NULL): array {
     // Ignore the update.php path.
     $request = $this->requestStack->getCurrentRequest();
     if ($request->getBaseUrl() == '/update.php') {

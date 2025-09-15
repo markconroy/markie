@@ -2,8 +2,8 @@
 
 namespace Drupal\Tests\metatag\Kernel;
 
-use Drupal\metatag\MetatagSeparator;
 use Drupal\KernelTests\KernelTestBase;
+use Drupal\metatag\MetatagSeparator;
 
 /**
  * Test the Metatag Manager class.

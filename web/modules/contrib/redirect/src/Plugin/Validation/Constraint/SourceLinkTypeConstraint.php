@@ -22,6 +22,11 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
  */
 class SourceLinkTypeConstraint extends Constraint implements ConstraintValidatorInterface {
 
+  /**
+   * The violation message when the URL is not valid.
+   *
+   * @var string
+   */
   public $message = 'The URL %url is not valid.';
 
   /**
@@ -71,15 +76,15 @@ class SourceLinkTypeConstraint extends Constraint implements ConstraintValidator
             }
           }
         }
-        catch (NotFoundHttpException $e) {
+        catch (NotFoundHttpException) {
           $url_is_valid = FALSE;
         }
-        catch (ResourceNotFoundException $e) {
+        catch (ResourceNotFoundException) {
           // User is creating a redirect from non existing path. This is not an
           // error state.
           $url_is_valid = TRUE;
         }
-        catch (ParamNotConvertedException $e) {
+        catch (ParamNotConvertedException) {
           $url_is_valid = FALSE;
         }
       }

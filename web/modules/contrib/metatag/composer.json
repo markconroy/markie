@@ -26,7 +26,7 @@
     "drupal/token": "^1.0"
   },
   "require-dev": {
-    "drupal/forum": "*",
+    "drupal/forum": "1.x-dev",
     "drupal/hal": "^1 || ^2 || ^9",
     "drupal/page_manager": "^4.0",
     "drupal/redirect": "^1.0",

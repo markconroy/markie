@@ -241,7 +241,10 @@ class UpgradeStatusForm extends FormBase {
       ];
     }
 
-    if ($this->nextMajor == 11) {
+    if ($this->nextMajor == 12) {
+      $environment = $this->buildEnvironmentChecksFor12();
+    }
+    elseif ($this->nextMajor == 11) {
       $environment = $this->buildEnvironmentChecksFor11();
     }
     else {
@@ -966,6 +969,22 @@ MARKUP
     $build['status'] = $status;
 
     return $build;
+  }
+
+  /**
+   * Builds a list of environment checks for Drupal 12 compatibility.
+   *
+   * @return array
+   *   Build array. The overall environment status (TRUE, FALSE or NULL) is
+   *   indicated in the 'status' key, while a 'description' key explains the
+   *   environment requirements on a high level.
+   */
+  protected function buildEnvironmentChecksFor12() {
+    return [
+      'description' => $this->t('<a href=":platform">Drupal 12 environment requirements are still to be defined</a>.', [':platform' => 'https://www.drupal.org/project/drupal/issues/3449806']),
+      // Checks neither passed, nor failed.
+      'status' => NULL,
+    ];
   }
 
   /**

@@ -4,7 +4,6 @@ namespace Drupal\metatag\Plugin\migrate\process\d7;
 
 use Drupal\Component\Serialization\Json;
 use Drupal\metatag\Plugin\migrate\MigrateMetatagD7Trait;
-use Drupal\migrate\MigrateException;
 use Drupal\migrate\MigrateExecutableInterface;
 use Drupal\migrate\ProcessPluginBase;
 use Drupal\migrate\Row;

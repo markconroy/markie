@@ -3,24 +3,54 @@
 namespace Drupal\metatag_custom_tags\Form;
 
 use Drupal\Core\Entity\EntityForm;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\metatag\MetatagTagPluginManager;
 use Drupal\metatag_custom_tags\MetaTagCustomTagInterface;
 
 /**
  * Form handler for the MetaTag Custom Tag entity type.
- *
- * @package Drupal\metatag_custom_tags\Form
  */
 class MetaTagCustomTagForm extends EntityForm {
+
+  /**
+   * The metatag tag plugin manager.
+   *
+   * @var \Drupal\metatag\MetatagTagPluginManager
+   */
+  protected MetatagTagPluginManager $metatagTagPluginManager;
+
+  /**
+   * Constructs a new MetaTagCustomTagForm.
+   */
+  public function __construct(
+    MetatagTagPluginManager $metatagTagPluginManager,
+    MessengerInterface $messenger,
+    EntityTypeManagerInterface $entityTypeManager,
+  ) {
+    $this->metatagTagPluginManager = $metatagTagPluginManager;
+    $this->messenger = $messenger;
+    $this->entityTypeManager = $entityTypeManager;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create($container) {
+    return new static(
+      $container->get('plugin.manager.metatag.tag'),
+      $container->get('messenger'),
+      $container->get('entity_type.manager')
+    );
+  }
 
   /**
    * {@inheritdoc}
    */
   public function form(array $form, FormStateInterface $form_state): array {
-
     $form = parent::form($form, $form_state);
-
     $entity = $this->entity;
 
     $form['label'] = [
@@ -98,13 +128,16 @@ class MetaTagCustomTagForm extends EntityForm {
   public function save(array $form, FormStateInterface $form_state): int {
     $result = parent::save($form, $form_state);
     $message_args = ['%label' => $this->entity->label()];
-    $this->messenger()->addStatus(
-      match($result) {
+    $this->messenger->addStatus(
+      match ($result) {
         \SAVED_NEW => $this->t('Created %label Custom tag.', $message_args),
         \SAVED_UPDATED => $this->t('Updated %label Custom tag.', $message_args),
       }
     );
-    \Drupal::service('plugin.manager.metatag.tag')->clearCachedDefinitions();
+
+    // Clear cached definitions using injected service.
+    $this->metatagTagPluginManager->clearCachedDefinitions();
+
     $form_state->setRedirectUrl($this->entity->toUrl('collection'));
     return $result;
   }
@@ -112,8 +145,9 @@ class MetaTagCustomTagForm extends EntityForm {
   /**
    * Helper function to check whether the configuration entity exists.
    */
-  public function exist($id) {
+  public function exist($id): bool {
     $entity = $this->entityTypeManager->getStorage('metatag_custom_tag')->getQuery()
+      ->accessCheck(FALSE)
       ->condition('id', $id)
       ->execute();
     return (bool) $entity;

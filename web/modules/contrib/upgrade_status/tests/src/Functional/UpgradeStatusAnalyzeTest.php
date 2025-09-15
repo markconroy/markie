@@ -154,10 +154,15 @@ class UpgradeStatusAnalyzeTest extends UpgradeStatusTestBase {
 
     $report = $key_value->get('upgrade_status_test_twig');
     $this->assertNotEmpty($report);
-    $this->assertEquals($this->getDrupalCoreMajorVersion() < 11 ? 4 : 5, $report['data']['totals']['file_errors']);
-    $this->assertCount($this->getDrupalCoreMajorVersion() < 11 ? 2 : 3, $report['data']['files']);
+    $this->assertEquals($this->getDrupalCoreMajorVersion() < 11 ? 5 : 6, $report['data']['totals']['file_errors']);
+    $this->assertCount($this->getDrupalCoreMajorVersion() < 11 ? 3 : 4, $report['data']['files']);
 
     $file = array_shift($report['data']['files']);
+    if ($this->getDrupalCoreMajorVersion() > 9) {
+      // In Drupal 10, Twig 3.15 introduced some stuff.
+      $this->assertEquals('Since twig/twig 3.15: Using the "deprecated", "deprecating_package", and "alternative" options is deprecated, pass a "deprecation_info" one instead.', $file['messages'][0]['message']);
+      $file = array_shift($report['data']['files']);
+    }
     $upgrade_status_test_twig_directory = $this->container->get('module_handler')->getModule('upgrade_status_test_twig')->getPath();
     if ($this->getDrupalCoreMajorVersion() < 10) {
       $this->assertEquals(sprintf('The spaceless tag in "%s/templates/spaceless.html.twig" at line 2 is deprecated since Twig 2.7, use the "spaceless" filter with the "apply" tag instead. See https://drupal.org/node/3071078.', $upgrade_status_test_twig_directory), $file['messages'][0]['message']);
@@ -166,7 +171,7 @@ class UpgradeStatusAnalyzeTest extends UpgradeStatusTestBase {
       $this->assertEquals(sprintf('Twig template %s/templates/spaceless.html.twig contains a syntax error and cannot be parsed.', $upgrade_status_test_twig_directory), $file['messages'][0]['message']);
     }
     $file = array_shift($report['data']['files']);
-    $this->assertEquals('Twig Filter "deprecatedfilter" is deprecated. See https://drupal.org/node/3071078.', $file['messages'][0]['message']);
+    $this->assertEquals('Since 1: Twig Filter "deprecatedfilter" is deprecated. See https://drupal.org/node/3071078.', $file['messages'][0]['message']);
     $this->assertEquals(10, $file['messages'][0]['line']);
     $this->assertEquals('Template is attaching a deprecated library. The "upgrade_status_test_library/deprecated_library" asset library is deprecated for testing.', $file['messages'][1]['message']);
     $this->assertEquals(1, $file['messages'][1]['line']);
@@ -182,12 +187,17 @@ class UpgradeStatusAnalyzeTest extends UpgradeStatusTestBase {
     $report = $key_value->get('upgrade_status_test_theme');
     $this->assertNotEmpty($report);
     // The info file error only happens on post-10, theme function only on pre-10.
-    $this->assertEquals($this->getDrupalCoreMajorVersion() == 10 ? 4 : 5, $report['data']['totals']['file_errors']);
-    $this->assertCount($this->getDrupalCoreMajorVersion() == 10 ? 2 : 3, $report['data']['files']);
+    $this->assertEquals($this->getDrupalCoreMajorVersion() == 10 ? 5 : 6, $report['data']['totals']['file_errors']);
+    $this->assertCount($this->getDrupalCoreMajorVersion() == 10 ? 3 : 4, $report['data']['files']);
     $file = reset($report['data']['files']);
+    if ($this->getDrupalCoreMajorVersion() > 9) {
+      // In Drupal 10, Twig 3.15 introduced some stuff.
+      $this->assertEquals('Since twig/twig 3.15: Using the "deprecated", "deprecating_package", and "alternative" options is deprecated, pass a "deprecation_info" one instead.', $file['messages'][0]['message']);
+      $file = next($report['data']['files']);
+    }
     foreach ([0 => 2, 1 => 4] as $index => $line) {
       $message = $file['messages'][$index];
-      $this->assertEquals('Twig Filter "deprecatedfilter" is deprecated. See https://drupal.org/node/3071078.', $message['message']);
+      $this->assertEquals('Since 1: Twig Filter "deprecatedfilter" is deprecated. See https://drupal.org/node/3071078.', $message['message']);
       $this->assertEquals($line, $message['line']);
     }
     $file = next($report['data']['files']);
@@ -201,7 +211,7 @@ class UpgradeStatusAnalyzeTest extends UpgradeStatusTestBase {
       $this->assertEquals(6, $file['messages'][0]['line']);
     }
     elseif ($this->getDrupalCoreMajorVersion() > 10) {
-      // In Drupal 11, this theme is not yet forward compatible.
+      // In Drupal 11 and 12, this theme is not yet forward compatible.
       $file = next($report['data']['files']);
       $this->assertEquals("Value of core_version_requirement: ^9 || ^10 || ^11 is not compatible with the next major version of Drupal core. See https://drupal.org/node/3070687.", $file['messages'][0]['message']);
       $this->assertEquals(5, $file['messages'][0]['line']);

@@ -4,6 +4,6 @@
  */
 
 .metatags {
-  overflow-y: overlay;
+  overflow-y: auto;
   max-height: 500px;
 }
