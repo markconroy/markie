@@ -131,7 +131,7 @@ class RedirectDomainForm extends ConfigFormBase {
     parent::validateForm($form, $form_state);
     if ($redirects = $form_state->getValue('redirects')) {
       foreach ($redirects as $redirect) {
-        if (strpos($redirect['from'], '://') !== FALSE) {
+        if (str_contains($redirect['from'], '://')) {
           $form_state->setErrorByName('redirects', $this->t('No protocol should be included in the redirect domain.'));
         }
       }

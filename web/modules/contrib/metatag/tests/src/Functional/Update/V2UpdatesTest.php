@@ -39,6 +39,11 @@ class V2UpdatesTest extends UpdatePathTestBase {
   /**
    * {@inheritdoc}
    */
+  protected $defaultTheme = 'stark';
+
+  /**
+   * {@inheritdoc}
+   */
   protected function setDatabaseDumpFiles() {
     // Drupal 10 uses the D9 core fixture, D11 uses the D10 fixture.
     $core9 = static::getDrupalRoot() . '/core/modules/system/tests/fixtures/update/drupal-9.4.0.bare.standard.php.gz';
@@ -61,7 +66,7 @@ class V2UpdatesTest extends UpdatePathTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function doSelectionTest() {
+  protected function doSelectionTest(): void {
     parent::doSelectionTest();
 
     // Verify that the v2 post post-update script is present.

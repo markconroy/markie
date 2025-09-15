@@ -57,7 +57,7 @@ class MetatagToken {
    * @return string
    *   The processed string.
    */
-  public function replace($string, array $data = [], array $options = [], BubbleableMetadata $bubbleable_metadata = NULL): string {
+  public function replace($string, array $data = [], array $options = [], ?BubbleableMetadata $bubbleable_metadata = NULL): string {
     // Set default requirements for metatag unless options specify otherwise.
     $options = $options + [
       'clear' => TRUE,

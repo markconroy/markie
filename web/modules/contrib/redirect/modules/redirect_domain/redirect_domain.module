@@ -37,14 +37,14 @@ function redirect_domain_help($route_name, RouteMatchInterface $route_match) {
       $output .= '<h5>' . t('Precedence') . '</h5>';
       $output .= t('Top-down precedence is used. This means the first matching redirect that is found will be taken. For example, assume these redirect rules:') . '</p>';
       $output .= '<ul>';
-      $output .= '<li>' . t('foo.com/some/path => somedomain.com/path') . '</li>';
-      $output .= '<li>' . t('foo.com/* => wildcardredirect.com') . '</li>';
-      $output .= '<li>' . t('foo.com/other/path => otherdomain.com/path') . '</li>';
+      $output .= '<li>' . t('foo.com/some/path => some-domain.com/path') . '</li>';
+      $output .= '<li>' . t('foo.com/* => wildcard-redirect.com') . '</li>';
+      $output .= '<li>' . t('foo.com/other/path => other-domain.com/path') . '</li>';
       $output .= '</ul>';
       $output .= '<p>' . t('The following redirects would actually occur:') . '</p>';
       $output .= '<ul>';
-      $output .= '<li>' . t('foo.com/some/path => somedomain.com/path') . '</li>';
-      $output .= '<li>' . t('foo.com/other/path => wildcardredirect.com') . '</li>';
+      $output .= '<li>' . t('foo.com/some/path => some-domain.com/path') . '</li>';
+      $output .= '<li>' . t('foo.com/other/path => wildcard-redirect.com') . '</li>';
       $output .= '</ul>';
 
       return $output;

@@ -2,8 +2,6 @@
 
 namespace Drupal\metatag;
 
-use Drupal\Core\Config\ConfigFactoryInterface;
-
 /**
  * Separator logic used elsewhere.
  */

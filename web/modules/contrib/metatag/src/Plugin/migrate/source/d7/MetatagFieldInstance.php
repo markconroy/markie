@@ -27,7 +27,7 @@ class MetatagFieldInstance extends DrupalSqlBase {
   /**
    * {@inheritdoc}
    */
-  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition, MigrationInterface $migration = NULL) {
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition, ?MigrationInterface $migration = NULL) {
     /** @var static $source */
     $source = parent::create($container, $configuration, $plugin_id, $plugin_definition, $migration);
     $source->setEntityTypeBundleInfo($container->get('entity_type.bundle.info'));

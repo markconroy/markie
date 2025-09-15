@@ -21,9 +21,7 @@ use Symfony\Component\Routing\Exception\RouteNotFoundException;
 function redirect_hook_info() {
   $hooks = [
     'redirect_load',
-    'redirect_load_by_source_alter',
     'redirect_access',
-    'redirect_prepare',
     'redirect_validate',
     'redirect_presave',
     'redirect_insert',
@@ -77,7 +75,7 @@ function redirect_entity_delete(EntityInterface $entity) {
       redirect_delete_by_path('entity:' . $entity->getEntityTypeId() . '/' . $entity->id());
     }
   }
-  catch (RouteNotFoundException | MissingMandatoryParametersException $e) {
+  catch (RouteNotFoundException | MissingMandatoryParametersException) {
     // This can happen if a module incorrectly defines a link template, ignore
     // such errors.
   }
@@ -174,11 +172,11 @@ function redirect_delete_by_path($path, $langcode = NULL, $match_subpaths_and_re
 }
 
 /**
- * Sort an array recusively.
+ * Sort an array recursively.
  *
- * @param $array
+ * @param array $array
  *   The array to sort, by reference.
- * @param $callback
+ * @param callable $callback
  *   The sorting callback to use (e.g. 'sort', 'ksort', 'asort').
  *
  * @return bool
@@ -256,8 +254,10 @@ function redirect_entity_extra_field_info() {
  * Implements hook_form_node_form_alter().
  */
 function redirect_form_node_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  /** @var \Drupal\Core\Entity\EntityFormInterface $form_object */
+  $form_object = $form_state->getFormObject();
   /** @var \Drupal\node\NodeInterface $node */
-  $node = $form_state->getFormObject()->getEntity();
+  $node = $form_object->getEntity();
   if (!$node->isNew() && \Drupal::currentUser()->hasPermission('administer redirects')) {
 
     $nid = $node->id();

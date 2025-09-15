@@ -3,7 +3,10 @@
 namespace Drupal\metatag_routes\Helper;
 
 /**
- * Interface MetatagRoutesHelperInterface.
+ * Provides an interface for handling Metatag route identification.
+ *
+ * Defines methods to generate unique Metatag route IDs based on
+ * route names and parameters.
  *
  * @package Drupal\metatag_routes\Helper
  */

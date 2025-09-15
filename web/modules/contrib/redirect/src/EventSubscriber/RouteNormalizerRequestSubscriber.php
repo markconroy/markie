@@ -117,7 +117,7 @@ class RouteNormalizerRequestSubscriber implements EventSubscriberInterface {
       $redirect_uri = $this->urlGenerator->generateFromRoute($route_name, [], $options);
 
       // Strip off query parameters added by the route such as a CSRF token.
-      if (strpos($redirect_uri, '?') !== FALSE) {
+      if (str_contains($redirect_uri, '?')) {
         $redirect_uri = strtok($redirect_uri, '?');
       }
 

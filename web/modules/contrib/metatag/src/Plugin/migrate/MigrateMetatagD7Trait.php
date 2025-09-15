@@ -2,7 +2,6 @@
 
 namespace Drupal\metatag\Plugin\migrate;
 
-use Drupal\Component\Serialization\Json;
 use Drupal\Component\Utility\Unicode;
 use Drupal\migrate\MigrateException;
 

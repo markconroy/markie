@@ -35,8 +35,8 @@ class DomainRedirectRequestSubscriberTest extends UnitTestCase {
         'domain_redirects' => [
           'foo:com' => [
             [
-              'sub_path' => '/fixedredirect',
-              'destination' => 'bar.com/fixedredirect',
+              'sub_path' => '/fixed-redirect',
+              'destination' => 'bar.com/fixed-redirect',
             ],
             [
               'sub_path' => '/*',
@@ -49,24 +49,24 @@ class DomainRedirectRequestSubscriberTest extends UnitTestCase {
               'destination' => 'example.com/bar/foo',
             ],
           ],
-          'simpleexample:com' => [
+          'simple-example:com' => [
             [
               'sub_path' => '/redirect',
               'destination' => 'redirected.com/redirect',
             ],
           ],
-          'wildcardtest:com' => [
+          'wildcard-test:com' => [
             [
               'sub_path' => '/some/path',
-              'destination' => 'somedomain.com/path',
+              'destination' => 'some-domain.com/path',
             ],
             [
               'sub_path' => '/*',
-              'destination' => 'wildcardredirect.com',
+              'destination' => 'wildcard-redirect.com',
             ],
             [
               'sub_path' => '/other/path',
-              'destination' => 'otherdomain.com/path',
+              'destination' => 'other-domain.com/path',
             ],
           ],
         ],
@@ -83,7 +83,7 @@ class DomainRedirectRequestSubscriberTest extends UnitTestCase {
     $checker = $this->createMock(RedirectChecker::class);
     $checker->expects($this->any())
       ->method('canRedirect')
-      ->will($this->returnValue(TRUE));
+      ->willReturn(TRUE);
 
     // Set up the configuration for the requested domain.
     $config_factory = $this->getConfigFactoryStub($data);
@@ -123,9 +123,9 @@ class DomainRedirectRequestSubscriberTest extends UnitTestCase {
   /**
    * Gets response event object.
    *
-   * @param $path_info
+   * @param string $path_info
    *   The path info.
-   * @param $query_string
+   * @param string $query_string
    *   The query string in the url.
    *
    * @return \Symfony\Component\HttpKernel\Event\RequestEvent
@@ -144,17 +144,17 @@ class DomainRedirectRequestSubscriberTest extends UnitTestCase {
    * @return array
    *   An array of requests and expected responses for the redirect domains.
    */
-  public function providerDomains() {
+  public static function providerDomains() {
     $datasets = [];
     $datasets[] = ['http://foo.com/example', 'http://bar.com/example'];
     $datasets[] = ['http://example.com/foo/test/bar', 'http://example.com/bar/foo'];
-    $datasets[] = ['http://simpleexample.com/redirect', 'http://redirected.com/redirect'];
+    $datasets[] = ['http://simple-example.com/redirect', 'http://redirected.com/redirect'];
     $datasets[] = ['http://nonexisting.com', NULL];
-    $datasets[] = ['http://simpleexample.com/wrongpath', NULL];
-    $datasets[] = ['http://foo.com/fixedredirect', 'http://bar.com/fixedredirect'];
-    $datasets[] = ['http://wildcardtest.com/some/path', 'http://somedomain.com/path'];
-    $datasets[] = ['http://wildcardtest.com/other/path', 'http://wildcardredirect.com'];
-    $datasets[] = ['http://wildcardtest.com/does-not-exist', 'http://wildcardredirect.com'];
+    $datasets[] = ['http://simple-example.com/wrongpath', NULL];
+    $datasets[] = ['http://foo.com/fixed-redirect', 'http://bar.com/fixed-redirect'];
+    $datasets[] = ['http://wildcard-test.com/some/path', 'http://some-domain.com/path'];
+    $datasets[] = ['http://wildcard-test.com/other/path', 'http://wildcard-redirect.com'];
+    $datasets[] = ['http://wildcard-test.com/does-not-exist', 'http://wildcard-redirect.com'];
     return $datasets;
   }
 

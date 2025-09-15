@@ -29,7 +29,7 @@ class RedirectJavascriptTest extends WebDriverTestBase {
   protected $repository;
 
   /**
-   * The Sql conntent entity storage.
+   * The Sql content entity storage.
    *
    * @var \Drupal\Core\Entity\Sql\SqlContentEntityStorage
    */

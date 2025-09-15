@@ -27,7 +27,7 @@ class RedirectCheckerTest extends UnitTestCase {
     $state->expects($this->any())
       ->method('get')
       ->with('system.maintenance_mode')
-      ->will($this->returnValue(FALSE));
+      ->willReturn(FALSE);
     $access = $this->createMock('Drupal\Core\Access\AccessManager');
     $account = $this->createMock('Drupal\Core\Session\AccountInterface');
     $route_provider = $this->createMock('Drupal\Core\Routing\RouteProviderInterface');
@@ -75,7 +75,7 @@ class RedirectCheckerTest extends UnitTestCase {
     $state->expects($this->any())
       ->method('get')
       ->with('system.maintenance_mode')
-      ->will($this->returnValue(TRUE));
+      ->willReturn(TRUE);
 
     $checker = new RedirectChecker($this->getConfigFactoryStub($config), $state, $access, $account, $route_provider);
 
@@ -87,7 +87,7 @@ class RedirectCheckerTest extends UnitTestCase {
     $accountWithMaintenanceModeAccess->expects($this->any())
       ->method('hasPermission')
       ->with('access site in maintenance mode')
-      ->will($this->returnValue(TRUE));
+      ->willReturn(TRUE);
 
     $checker = new RedirectChecker($this->getConfigFactoryStub($config), $state, $access, $accountWithMaintenanceModeAccess, $route_provider);
 
@@ -99,7 +99,7 @@ class RedirectCheckerTest extends UnitTestCase {
     $state->expects($this->any())
       ->method('get')
       ->with('system.maintenance_mode')
-      ->will($this->returnValue(FALSE));
+      ->willReturn(FALSE);
 
     // $checker = new RedirectChecker($this->getConfigFactoryStub($config), $state);
     //
@@ -131,7 +131,7 @@ class RedirectCheckerTest extends UnitTestCase {
    * @param array $attributes
    *   Attributes to be passed into request->attributes.
    * @param array $query
-   *   Query paramter to be passed into request->query.
+   *   Query parameter to be passed into request->query.
    *
    * @return \PHPUnit\Framework\MockObject\MockObject
    *   Mocked request object.
@@ -140,11 +140,11 @@ class RedirectCheckerTest extends UnitTestCase {
     $request = $this->createMock('Symfony\Component\HttpFoundation\Request');
     $request->expects($this->any())
       ->method('getScriptName')
-      ->will($this->returnValue($script_name));
+      ->willReturn($script_name);
     $request->expects($this->any())
       ->method('isMethod')
       ->with($this->anything())
-      ->will($this->returnValue($method == 'GET'));
+      ->willReturn($method == 'GET');
     $request->query = new InputBag($query);
     $request->attributes = new InputBag($attributes);
 

@@ -17,7 +17,7 @@ trait AssertRedirectTrait {
    *
    * @param string $path
    *   The request path.
-   * @param $expected_ending_url
+   * @param string|null $expected_ending_url
    *   The path where we expect it to redirect. If NULL value provided, no
    *   redirect is expected.
    * @param int $expected_ending_status
@@ -30,7 +30,6 @@ trait AssertRedirectTrait {
    */
   public function assertRedirect($path, $expected_ending_url, $expected_ending_status = 301, $method = 'GET') {
     $client = $this->getHttpClient();
-    /** @var \Psr\Http\Message\ResponseInterface $response */
     $url = $this->getAbsoluteUrl($path);
     try {
       $response = $client->request($method, $url, ['allow_redirects' => FALSE]);

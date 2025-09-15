@@ -102,6 +102,8 @@ class MetatagViewsTranslationForm extends FormBase {
   protected $baseData = [];
 
   /**
+   * Handles interactions with enabled modules.
+   *
    * @var \Drupal\Core\Extension\ModuleHandlerInterface
    */
   protected ModuleHandlerInterface $moduleHandler;

@@ -159,7 +159,7 @@ class GlobalRedirectTest extends BrowserTestBase {
     $this->assertRedirect('index.php/node/' . $this->node->id(), 'test-node');
     $this->assertRedirect('index.php/test-node', 'test-node');
 
-    // Test deslashing.
+    // Test deslash capability.
     $this->assertRedirect('test-node/', 'test-node');
 
     // Test front page redirects.

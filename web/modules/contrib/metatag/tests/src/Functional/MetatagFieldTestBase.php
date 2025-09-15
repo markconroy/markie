@@ -2,6 +2,7 @@
 
 namespace Drupal\Tests\metatag\Functional;
 
+use Drupal\Component\Utility\DeprecationHelper;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Tests\BrowserTestBase;
@@ -261,7 +262,14 @@ abstract class MetatagFieldTestBase extends BrowserTestBase {
     $this->drupalGet($this->entityFieldAdminPath . '/fields/add-field');
     $session = $this->assertSession();
     $session->statusCodeEquals(200);
-    $session->elementExists('css', 'label:contains("Meta tags")');
+
+    // Check both the title and the description, both of which should be links.
+    $result = DeprecationHelper::backwardsCompatibleCall(
+      currentVersion: \Drupal::VERSION,
+      deprecatedVersion: '11.2',
+      currentCallable: fn() => $session->linkExists('Meta tags'),
+      deprecatedCallable: fn() => $session->elementExists('css', 'label:contains("Meta tags")'),
+    );
   }
 
   /**

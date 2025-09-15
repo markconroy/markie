@@ -3,7 +3,7 @@ parameters:
 services:
   redirect.repository:
     class: Drupal\redirect\RedirectRepository
-    arguments: ['@entity_type.manager', '@database', '@config.factory']
+    arguments: ['@entity_type.manager', '@database', '@config.factory', '@request_stack']
     tags:
       - { name: backend_overridable }
   Drupal\redirect\RedirectRepository: '@redirect.repository'
