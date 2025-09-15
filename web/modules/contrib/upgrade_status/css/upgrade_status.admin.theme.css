@@ -29,20 +29,20 @@
 
 /* Upgrade Status next step table layout */
 .upgrade-status-next-step th {
-  width: 8%;
+  width: 10%;
 }
 .upgrade-status-next-step th.project-label {
   width: 20%;
 }
-
-/* Based on --gin-border-m and --gin-border-color-table-header */
-.upgrade-status-of-environment .gin-layer-wrapper thead tr,
-.upgrade-status-next-step .gin-layer-wrapper thead tr {
-  border-left: 0.5rem solid rgba(0, 0, 0, 0.2);
+.upgrade-status-next-step th.select-all {
+  width: 1px;
 }
-html.gin--dark-mode .upgrade-status-of-environment .gin-layer-wrapper thead tr,
-html.gin--dark-mode .upgrade-status-next-step .gin-layer-wrapper thead tr {
-  border-left: 0.5rem solid rgba(255, 255, 255, 0.12);
+
+/* Remove Gin borders on these tables. TH and TR don't line up. */
+.upgrade-status-of-environment .gin-layer-wrapper tr,
+.upgrade-status-next-step .gin-layer-wrapper tr,
+.upgrade-status-project-result-group .gin-layer-wrapper tr {
+  border-left: 0;
 }
 
 /* Project specific results layout */

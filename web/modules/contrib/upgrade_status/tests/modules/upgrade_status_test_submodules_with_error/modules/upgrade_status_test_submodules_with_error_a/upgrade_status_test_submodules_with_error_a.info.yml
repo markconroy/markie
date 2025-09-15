@@ -5,7 +5,7 @@ package: Testing
 dependencies:
   - upgrade_status:upgrade_status_test_submodules_with_error
 
-# Information added by Drupal.org packaging script on 2024-10-17
-version: '4.3.6'
+# Information added by Drupal.org packaging script on 2025-07-02
+version: '4.3.8'
 project: 'upgrade_status'
-datestamp: 1729173429
+datestamp: 1751485117
