@@ -4,7 +4,7 @@
   color: var(--color-primary);
 }
 
-.path-frontpage a {
+.path-frontpage .dialog-off-canvas-main-canvas a {
   color: var(--color-secondary);
 }
 
