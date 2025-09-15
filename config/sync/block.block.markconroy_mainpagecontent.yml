@@ -1,17 +1,15 @@
-uuid: 2cae6e52-0fc2-48b0-8101-9aed89bdb411
+uuid: aa18f31b-9f4d-4c70-80d9-f76316318032
 langcode: en
-status: false
+status: true
 dependencies:
   module:
     - system
   theme:
     - markconroy
-_core:
-  default_config_hash: erQSEZF2XUjNmgTl0uNRBzmg18ZGXwUcw2FhApoeuHk
-id: markconroy_content
+id: markconroy_mainpagecontent
 theme: markconroy
-region: ''
-weight: -4
+region: content
+weight: -2
 provider: null
 plugin: system_main_block
 settings:

@@ -1,6 +1,6 @@
 uuid: 41e1771e-bcac-4510-b916-4a8241d2ed08
 langcode: en
-status: true
+status: false
 dependencies:
   module:
     - system
@@ -10,7 +10,7 @@ _core:
   default_config_hash: eYL19CLDyinGTWYQfBD1DswWzglEotE_kHnHx3AxTXM
 id: markconroy_powered
 theme: markconroy
-region: footer
+region: ''
 weight: -7
 provider: null
 plugin: system_powered_by_block

@@ -1,6 +1,6 @@
 uuid: f68d4ad1-3026-42ca-abd5-631e733bccd3
 langcode: en
-status: true
+status: false
 dependencies:
   theme:
     - markconroy
@@ -8,7 +8,7 @@ _core:
   default_config_hash: Q9_2whdOj1YIomfvsIfopROW4FT_X5pY0DjdOiOaQ5U
 id: markconroy_primary_admin_actions
 theme: markconroy
-region: content
+region: ''
 weight: -7
 provider: null
 plugin: local_actions_block

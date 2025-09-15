@@ -1,17 +1,15 @@
-uuid: 433aa456-44ca-496b-89fd-b2030dbfeb95
+uuid: 2e9bdffb-7eb4-4951-a212-3da9fe30b868
 langcode: en
-status: false
+status: true
 dependencies:
   module:
     - system
   theme:
     - markconroy
-_core:
-  default_config_hash: n_nlgjggHVfQt2H__zvLOKB2YtjPDbQ5tHijF9LE1aM
-id: markconroy_site_branding
+id: markconroy_sitebranding
 theme: markconroy
-region: ''
-weight: -7
+region: header
+weight: -4
 provider: null
 plugin: system_branding_block
 settings:
@@ -21,5 +19,5 @@ settings:
   provider: system
   use_site_logo: true
   use_site_name: true
-  use_site_slogan: false
+  use_site_slogan: true
 visibility: {  }

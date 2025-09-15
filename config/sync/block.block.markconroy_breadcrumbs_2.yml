@@ -1,17 +1,15 @@
-uuid: fb0f127b-9d8f-4ce1-93ee-0e989d642eba
+uuid: badddc65-ded0-4a06-baf5-8da435ff4a21
 langcode: en
-status: false
+status: true
 dependencies:
   module:
     - system
   theme:
     - markconroy
-_core:
-  default_config_hash: VhBzWb7lMRtIOg9G7VSw_0uopi-7zXeHq4vXqqV1HFE
-id: markconroy_breadcrumbs
+id: markconroy_breadcrumbs_2
 theme: markconroy
-region: ''
-weight: -7
+region: breadcrumb
+weight: 0
 provider: null
 plugin: system_breadcrumb_block
 settings:

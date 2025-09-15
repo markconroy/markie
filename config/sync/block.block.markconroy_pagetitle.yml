@@ -1,15 +1,13 @@
-uuid: 49133427-24b2-45a9-ad8e-b650e6d1b35f
+uuid: 02c0bce4-abd7-48a5-bc53-afd61f16c921
 langcode: en
-status: false
+status: true
 dependencies:
   theme:
     - markconroy
-_core:
-  default_config_hash: 6aOgWsNTXjqrDm98TXSAjP6qd2nCijD1xw45MrnbK-Y
-id: markconroy_page_title
+id: markconroy_pagetitle
 theme: markconroy
-region: ''
-weight: -5
+region: content
+weight: -3
 provider: null
 plugin: page_title_block
 settings:

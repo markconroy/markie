@@ -1,6 +1,6 @@
-uuid: 41614eae-020f-4537-ac1c-86e34d2a1f66
+uuid: 56860c92-7d08-4ecd-adbd-0a55bcd05cf6
 langcode: en
-status: false
+status: true
 dependencies:
   config:
     - system.menu.main
@@ -8,12 +8,10 @@ dependencies:
     - system
   theme:
     - markconroy
-_core:
-  default_config_hash: KWAiziL39uEzmOJEql_wbUP2RtqGceL3WM2CfxhMelE
-id: markconroy_main_menu
+id: markconroy_mainnavigation
 theme: markconroy
-region: ''
-weight: -6
+region: header
+weight: -3
 provider: null
 plugin: 'system_menu_block:main'
 settings:
@@ -22,6 +20,6 @@ settings:
   label_display: '0'
   provider: system
   level: 1
-  depth: 2
-  expand_all_items: true
+  depth: 0
+  expand_all_items: false
 visibility: {  }
