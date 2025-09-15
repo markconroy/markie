@@ -62,6 +62,9 @@ settings:
           translate_vocabulary: conference
           use_description: false
           enabled: false
+        ai_ckeditor_modify_prompt:
+          enabled: false
+          provider: null
     ckeditor5_alignment:
       enabled_alignments:
         - center
