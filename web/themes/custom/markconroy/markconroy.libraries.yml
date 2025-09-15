@@ -11,3 +11,8 @@ teaser:
   css:
     component:
       css/components/teaser.css: {}
+
+homepage:
+  css:
+    component:
+      css/components/homepage.css: {}

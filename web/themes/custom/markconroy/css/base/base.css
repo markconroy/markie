@@ -16,7 +16,7 @@ body {
   margin: 0;
   font-size: var(--base-font-size);
   line-height: var(--line-height);
-  font-family: var(--font-secondary);
+  font-family: var(--font-primary);
   color: var(--color-primary);
   background-color: var(--color-primary);
   color: var(--color-white);
@@ -38,7 +38,7 @@ h6,
   line-height: var(--line-height-small);
   font-size: calc(var(--base-font-size) * var(--scale-factor-calculated));
   font-weight: bold;
-  font-family: var(--font-primary);
+  font-family: var(--font-secondary);
 }
 
 h1 {
@@ -76,6 +76,7 @@ p:last-of-type {
 
 a {
   text-underline-offset: 6px;
+  text-decoration-thickness: 2px;
   color: var(--color-white);
 }
 

@@ -4,7 +4,7 @@
   font-family: "Cormorant";
   font-style: normal;
   font-weight: 400;
-  src: url("../fonts/cormorant-v21-latin/cormorant-v21-latin-regular.woff2")
+  src: url("../../fonts/cormorant-v21-latin/cormorant-v21-latin-regular.woff2")
     format("woff2"); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
 }
 
@@ -14,7 +14,7 @@
   font-family: "Cormorant";
   font-style: normal;
   font-weight: 600;
-  src: url("../fonts/cormorant-v21-latin/cormorant-v21-latin-600.woff2")
+  src: url("../../fonts/cormorant-v21-latin/cormorant-v21-latin-600.woff2")
     format("woff2"); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
 }
 
@@ -24,7 +24,7 @@
   font-family: "Cabin";
   font-style: normal;
   font-weight: 400;
-  src: url("../fonts/cabin-v27-latin/cabin-v27-latin-regular.woff2")
+  src: url("../../fonts/cabin-v27-latin/cabin-v27-latin-regular.woff2")
     format("woff2"); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
 }
 
@@ -34,5 +34,5 @@
   font-family: "Cabin";
   font-style: normal;
   font-weight: 600;
-  src: url("../fonts/cabin-v27-latin/cabin-v27-latin-600.woff2") format("woff2"); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+  src: url("../../fonts/cabin-v27-latin/cabin-v27-latin-600.woff2") format("woff2"); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
 }
