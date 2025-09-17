@@ -3,7 +3,7 @@
         'name' => 'markconroy/markie',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => 'c304d5e808ddb6190eb700be6fd4f819aed3a08c',
+        'reference' => '853cfc32c38813623c20a758de51c81056fd2f52',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -487,6 +487,15 @@
             'aliases' => array(),
             'dev_requirement' => false,
         ),
+        'drupal/twig_tweak' => array(
+            'pretty_version' => '3.4.1',
+            'version' => '3.4.1.0',
+            'reference' => '3.4.1',
+            'type' => 'drupal-module',
+            'install_path' => __DIR__ . '/../../web/modules/contrib/twig_tweak',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
         'drupal/upgrade_status' => array(
             'pretty_version' => '4.3.8',
             'version' => '4.3.8.0',
@@ -616,7 +625,7 @@
         'markconroy/markie' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => 'c304d5e808ddb6190eb700be6fd4f819aed3a08c',
+            'reference' => '853cfc32c38813623c20a758de51c81056fd2f52',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
