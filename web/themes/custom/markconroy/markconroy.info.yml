@@ -9,6 +9,7 @@ generator: 'starterkit_theme:10.4.6'
 libraries:
   - markconroy/base
   - core/normalize
+  - starterkit_theme/messages
 
 regions:
   tabs: 'Tabs'

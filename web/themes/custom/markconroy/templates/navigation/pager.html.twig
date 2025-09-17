@@ -32,6 +32,9 @@
  */
 #}
 {% if items %}
+
+{{ attach_library('markconroy/pager') }}
+
   <nav class="pager" role="navigation" aria-labelledby="{{ heading_id }}">
     <{{ pagination_heading_level }} id="{{ heading_id }}" class="visually-hidden">{{ 'Pagination'|t }}</{{ pagination_heading_level }}>
     <ul class="pager__items js-pager__items">

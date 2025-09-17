@@ -1,0 +1,4 @@
+.pager__item.is-active a {
+  color: var(--color-primary);
+  text-decoration: none;
+}

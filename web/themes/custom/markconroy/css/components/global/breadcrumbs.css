@@ -1,0 +1,27 @@
+.region-breadcrumb {
+  margin-block-end: var(--spacing-largest);
+}
+.region-breadcrumb__inner {
+  padding: var(--spacing);
+  background-color: var(--color-grey-100);
+}
+
+.breadcrumb ol {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-smaller);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.breadcrumb li + li::before {
+  content: "»";
+  padding-right: var(--spacing-smaller);
+  /* color: var(--color-secondary); */
+}
+
+.breadcrumb a {
+  color: var(--color-primary);
+  font-weight: normal;
+}

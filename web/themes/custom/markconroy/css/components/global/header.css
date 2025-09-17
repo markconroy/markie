@@ -1,0 +1,9 @@
+.header {
+  padding: var(--spacing-largest);
+  border-block-start: var(--spacing) solid var(--color-secondary);
+}
+
+.header a {
+  color: var(--color-secondary);
+  text-decoration-color: var(--color-secondary);
+}

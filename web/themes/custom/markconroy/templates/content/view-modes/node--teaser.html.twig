@@ -61,21 +61,33 @@
  *
  */
 #}
+
+{% set content_type = node.bundle %}
+
 {%
   set classes = [
     'teaser',
-    'node',
-    'node--type-' ~ node.bundle|clean_class,
-    node.isPromoted() ? 'node--promoted',
-    node.isSticky() ? 'node--sticky',
+    'teaser--' ~ content_type|clean_class,
     not node.isPublished() ? 'node--unpublished',
-    view_mode ? 'node--view-mode-' ~ view_mode|clean_class,
   ]
 %}
 
 {{ attach_library('markconroy/teaser') }}
 
 <article{{ attributes.addClass(classes) }}>
+
+  {% if content_type == 'article' %}
+    {% set author_id = elements['#node'].uid.target_id %}
+    {% set author = drupal_entity('user', author_id, 'name') %}
+    <footer class="teaser__metadata">
+      <span class="teaser__metadata-item">
+        {{ author }}
+      </span>
+      <span class="teaser__metadata-item">
+        {{ date }}
+      </span>
+    </footer>
+  {% endif %}
 
   {{ title_prefix }}
   {% if label and not page %}
@@ -88,5 +100,6 @@
   <div{{ content_attributes.addClass('node__content') }}>
     {{ content }}
   </div>
+
 
 </article>

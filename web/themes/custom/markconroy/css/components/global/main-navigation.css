@@ -1,0 +1,41 @@
+.header .navigation,
+.footer .navigation {
+  background-color: var(--color-secondary);
+}
+
+.header .menu,
+.footer .menu {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-largest);
+  justify-content: center;
+  align-items: center;
+}
+
+.header .menu a,
+.footer .menu a {
+  display: inline-block;
+  color: var(--color-white);
+  font-weight: bold;
+  padding: var(--spacing-small) var(--spacing-medium);
+}
+
+.header .menu a:hover,
+.footer .menu a:hover,
+.header .menu a:focus,
+.footer .menu a:focus {
+  background-color: var(--color-primary);
+  text-decoration-color: var(--color-white);
+}
+
+.header .block-system-branding-block,
+.footer .block-system-branding-block {
+  display: grid;
+  place-content: center;
+  text-align: center;
+  margin-block-end: var(--spacing-largest);
+  font-size: var(--font-size-large);
+}

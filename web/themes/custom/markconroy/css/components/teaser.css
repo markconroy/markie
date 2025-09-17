@@ -1,10 +1,34 @@
-.teaser > h2 > a {
-  text-decoration: none;
+.teaser > * {
+  margin: 0;
 }
 
-.list--teasers .views-row + .views-row {
+.teaser > * + * {
   margin-block-start: var(--spacing-large);
-  padding-block-start: var(--spacing-large);
+}
+
+.teaser:not(:has(.teaser__metadata)) h2 {
+  padding-block-start: var(--spacing);
+  margin-block-start: var(--spacing-largest);
+}
+
+.teaser > h2 > a {
+  text-decoration: none;
+  color: var(--color-primary);
+}
+
+.teaser__metadata {
+  display: inline-flex;
+  width: auto;
+  margin-block-end: var(--spacing-large);
+  gap: var(--spacing);
+  padding: var(--spacing-small) var(--spacing);
+  color: var(--color-white);
+  background-color: var(--color-secondary);
+}
+
+.list--teasers .views-row {
+  margin-block-start: var(--spacing-large);
   padding-block-end: var(--spacing-largest);
-  border-block-end: 2px solid var(--color-white);
+  padding-inline: var(--spacing-largest);
+  border-block-start: 2px solid var(--color-secondary);
 }

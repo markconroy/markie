@@ -2,6 +2,7 @@
 *::before,
 *::after {
   box-sizing: border-box;
+  transition: var(--transition-time);
 }
 
 *:not(dialog) {
@@ -17,9 +18,9 @@ body {
   font-size: var(--base-font-size);
   line-height: var(--line-height);
   font-family: var(--font-primary);
-  color: var(--color-primary);
+  /* color: var(--color-primary);
   background-color: var(--color-primary);
-  color: var(--color-white);
+  color: var(--color-white); */
 }
 
 h1,
@@ -75,9 +76,10 @@ p:last-of-type {
 }
 
 .dialog-off-canvas-main-canvas a {
-  text-underline-offset: 6px;
-  text-decoration-thickness: 2px;
-  color: var(--color-white);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-thickness: var(--text-decoration-thickness);
+  color: var(--color-secondary);
 }
 
 a:focus-visible {
@@ -86,5 +88,9 @@ a:focus-visible {
 }
 
 a:hover {
-  text-decoration-thickness: var(--text-decoration-thickness);
+  text-underline-offset: 2px;
+}
+
+.messages__wrapper {
+  margin-block-end: var(--spacing-largest);
 }

@@ -5,7 +5,11 @@ base:
       css/base/variables.css: {}
       css/base/base.css: {}
       css/layout/container.css: {}
-      css/components/header.css: {}
+      css/components/global/header.css: {}
+      css/components/global/footer.css: {}
+      css/components/global/main-navigation.css: {}
+      css/components/global/breadcrumbs.css: {}
+      css/components/global/page-title.css: {}
 
 teaser:
   css:
@@ -16,3 +20,8 @@ homepage:
   css:
     component:
       css/components/homepage.css: {}
+
+pager:
+  css:
+    component:
+      ../../../../core/themes/starterkit_theme/css/components/pager.css: {}

@@ -1,0 +1,9 @@
+.footer {
+  padding: var(--spacing-largest);
+  border-block-end: var(--spacing) solid var(--color-secondary);
+}
+/*
+.footer a {
+  color: var(--color-secondary);
+  text-decoration-color: var(--color-secondary);
+} */
