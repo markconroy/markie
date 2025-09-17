@@ -63,8 +63,6 @@ module:
   update: 0
   upgrade_status: 0
   user: 0
-  video_embed_field: 0
-  video_embed_media: 0
   views_ui: 0
   menu_link_content: 1
   pathauto: 1
