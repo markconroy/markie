@@ -15,10 +15,16 @@
   align-items: center;
 }
 
+.header .menu-item,
+.footer .menu-item {
+  background-color: var(--color-primary);
+}
+
 .header .menu a,
 .footer .menu a {
   display: inline-block;
   color: var(--color-white);
+  background-color: var(--color-secondary);
   font-weight: bold;
   padding: var(--spacing-small) var(--spacing-medium);
 }
@@ -29,6 +35,7 @@
 .footer .menu a:focus {
   background-color: var(--color-primary);
   text-decoration-color: var(--color-white);
+  transform: translateY(-3px);
 }
 
 .header .block-system-branding-block,
