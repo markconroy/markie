@@ -6,21 +6,30 @@ namespace Drush\Commands\config;
 
 use Consolidation\AnnotatedCommand\CommandData;
 use Consolidation\AnnotatedCommand\Hooks\HookManager;
+use Consolidation\OutputFormatters\StructuredData\PropertyList;
+use Consolidation\SiteAlias\HostPath;
+use Consolidation\SiteAlias\SiteAliasManagerInterface;
+use Consolidation\SiteProcess\SiteProcess;
 use Drush\Attributes as CLI;
+use Drush\Boot\DrupalBootLevels;
+use Drush\Commands\AutowireTrait;
 use Drush\Commands\core\DocsCommands;
 use Drush\Commands\core\RsyncCommands;
 use Drush\Commands\DrushCommands;
 use Drush\Drush;
-use Consolidation\SiteAlias\HostPath;
-use Consolidation\SiteAlias\SiteAliasManagerAwareInterface;
-use Consolidation\SiteAlias\SiteAliasManagerAwareTrait;
-use Consolidation\OutputFormatters\StructuredData\PropertyList;
 
-final class ConfigPullCommands extends DrushCommands implements SiteAliasManagerAwareInterface
+#[CLI\Bootstrap(DrupalBootLevels::NONE)]
+final class ConfigPullCommands extends DrushCommands
 {
-    use SiteAliasManagerAwareTrait;
+    use AutowireTrait;
 
     const PULL = 'config:pull';
+
+    public function __construct(
+        private readonly SiteAliasManagerInterface $siteAliasManager
+    ) {
+        parent::__construct();
+    }
 
     /**
      * Export and transfer config from one environment to another.
@@ -37,7 +46,7 @@ final class ConfigPullCommands extends DrushCommands implements SiteAliasManager
     public function pull(string $source, string $destination, array $options = ['safe' => false, 'runner' => null, 'format' => 'null']): PropertyList
     {
         $global_options = Drush::redispatchOptions()  + ['strict' => 0];
-        $sourceRecord = $this->siteAliasManager()->get($source);
+        $sourceRecord = $this->siteAliasManager->get($source);
 
         $export_options = [
             // Use the standard backup directory on Destination.
@@ -45,7 +54,7 @@ final class ConfigPullCommands extends DrushCommands implements SiteAliasManager
             'yes' => null,
             'format' => 'string',
         ];
-        $this->logger()->notice(dt('Starting to export configuration on :destination.', [':destination' => $destination]));
+        $this->logger()->notice(dt('Starting to export configuration on :source.', [':source' => $source]));
         $process = $this->processManager()->drush($sourceRecord, ConfigExportCommands::EXPORT, [], $export_options + $global_options);
         $process->mustRun();
 
@@ -61,11 +70,11 @@ final class ConfigPullCommands extends DrushCommands implements SiteAliasManager
         if (!str_contains($destination, ':')) {
             $destination .= ':%config-sync';
         }
-        $destinationHostPath = HostPath::create($this->siteAliasManager(), $destination);
+        $destinationHostPath = HostPath::create($this->siteAliasManager, $destination);
 
         if (!$runner = $options['runner']) {
             $destinationRecord = $destinationHostPath->getSiteAlias();
-            $runner = $sourceRecord->isRemote() && $destinationRecord->isRemote() ? $destinationRecord : $this->siteAliasManager()->getSelf();
+            $runner = $sourceRecord->isRemote() && $destinationRecord->isRemote() ? $destinationRecord : $this->siteAliasManager->getSelf();
         }
         $this->logger()
           ->notice(dt('Starting to rsync configuration files from !source to !dest.', [
@@ -87,7 +96,8 @@ final class ConfigPullCommands extends DrushCommands implements SiteAliasManager
     public function validateConfigPull(CommandData $commandData): void
     {
         if ($commandData->input()->getOption('safe')) {
-            $destinationRecord = $this->siteAliasManager()->get($commandData->input()->getArgument('destination'));
+            $destinationRecord = $this->siteAliasManager->get($commandData->input()->getArgument('destination'));
+            /** @var SiteProcess $process */
             $process = $this->processManager()->siteProcess($destinationRecord, ['git', 'diff', '--quiet']);
             $process->chdirToSiteRoot();
             $process->run();

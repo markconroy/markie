@@ -4,24 +4,25 @@ declare(strict_types=1);
 
 namespace Drush\Commands\core;
 
-use Drush\Commands\DrushCommands;
 use Consolidation\SiteAlias\HostPath;
-use Consolidation\SiteAlias\SiteAliasManagerAwareInterface;
-use Consolidation\SiteAlias\SiteAliasManagerAwareTrait;
+use Consolidation\SiteAlias\SiteAliasManagerInterface;
 use Drush\Attributes as CLI;
 use Drush\Backend\BackendPathEvaluator;
+use Drush\Commands\AutowireTrait;
+use Drush\Commands\DrushCommands;
 
-final class DrupalDirectoryCommands extends DrushCommands implements SiteAliasManagerAwareInterface
+final class DrupalDirectoryCommands extends DrushCommands
 {
-    use SiteAliasManagerAwareTrait;
+    use AutowireTrait;
 
     const DIRECTORY = 'drupal:directory';
 
-    /** @var BackendPathEvaluator */
-    protected $pathEvaluator;
+    protected BackendPathEvaluator $pathEvaluator;
 
-    public function __construct()
-    {
+    public function __construct(
+        private readonly SiteAliasManagerInterface $siteAliasManager
+    ) {
+        parent::__construct();
         $this->pathEvaluator = new BackendPathEvaluator();
     }
 
@@ -69,7 +70,7 @@ final class DrupalDirectoryCommands extends DrushCommands implements SiteAliasMa
             $target = "%$target";
         }
         // Set up the evaluated path; fail if --local-only and the site alias is remote
-        $evaluatedPath = HostPath::create($this->siteAliasManager(), $target);
+        $evaluatedPath = HostPath::create($this->siteAliasManager, $target);
         if ($local_only && $evaluatedPath->isRemote()) {
             throw new \Exception(dt('{target} was remote, and --local-only was specified', ['target' => $target]));
         }

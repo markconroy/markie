@@ -4,41 +4,34 @@ declare(strict_types=1);
 
 namespace Drush\Commands\field;
 
-use Drupal\Core\Entity\EntityTypeBundleInfo;
+use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\FieldConfigInterface;
+use Drupal\field\FieldStorageConfigInterface;
 use Drush\Attributes as CLI;
+use Drush\Commands\AutowireTrait;
 use Drush\Commands\DrushCommands;
 use Symfony\Component\Console\Completion\CompletionInput;
 use Symfony\Component\Console\Completion\CompletionSuggestions;
 use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 use function count;
 use function dt;
 use function field_purge_batch;
-use function t;
 
-class FieldDeleteCommands extends DrushCommands
+final class FieldDeleteCommands extends DrushCommands
 {
+    use AutowireTrait;
     use EntityTypeBundleAskTrait;
     use EntityTypeBundleValidationTrait;
 
+    const DELETE = 'field:delete';
+
     public function __construct(
         protected EntityTypeManagerInterface $entityTypeManager,
-        protected EntityTypeBundleInfo $entityTypeBundleInfo
+        protected EntityTypeBundleInfoInterface $entityTypeBundleInfo
     ) {
-    }
-
-    public static function create(ContainerInterface $container): self
-    {
-        $commandHandler = new static(
-            $container->get('entity_type.manager'),
-            $container->get('entity_type.bundle.info')
-        );
-
-        return $commandHandler;
     }
 
     /**
@@ -46,7 +39,7 @@ class FieldDeleteCommands extends DrushCommands
      *
      * @see \Drupal\field_ui\Form\FieldConfigDeleteForm
      */
-    #[CLI\Command(name: 'field:delete', aliases: ['field-delete', 'fd'])]
+    #[CLI\Command(name: self::DELETE, aliases: ['field-delete', 'fd'])]
     #[CLI\Argument(name: 'entityType', description: 'The machine name of the entity type.')]
     #[CLI\Argument(name: 'bundle', description: 'The machine name of the bundle.')]
     #[CLI\Option(name: 'field-name', description: 'The machine name of the field.')]
@@ -259,6 +252,8 @@ class FieldDeleteCommands extends DrushCommands
     protected function deleteFieldConfig(FieldConfigInterface $fieldConfig): void
     {
         $fieldStorage = $fieldConfig->getFieldStorageDefinition();
+        assert($fieldStorage instanceof FieldStorageConfigInterface);
+
         $bundles = $this->entityTypeBundleInfo->getBundleInfo($fieldConfig->getTargetEntityTypeId());
         $bundleLabel = $bundles[$fieldConfig->getTargetBundle()]['label'];
 

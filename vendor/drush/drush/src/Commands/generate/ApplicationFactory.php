@@ -8,21 +8,22 @@ use DrupalCodeGenerator\Application;
 use DrupalCodeGenerator\Event\GeneratorInfoAlter;
 use Drush\Commands\generate\Generators\Drush\DrushAliasFile;
 use Drush\Commands\generate\Generators\Drush\DrushCommandFile;
+use Drush\Commands\generate\Generators\Drush\DrushGeneratorFile;
 use Drush\Runtime\ServiceManager;
 use Psr\Container\ContainerInterface as DrushContainer;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class ApplicationFactory
 {
-    private ServiceManager $serviceManager;
+    private readonly ServiceManager $serviceManager;
+    private readonly \Symfony\Component\DependencyInjection\ContainerInterface $container;
 
     public function __construct(
-        private ContainerInterface $container,
-        private DrushContainer $drush_container,
-        private LoggerInterface $logger
+        private readonly DrushContainer $drush_container,
+        private readonly LoggerInterface $logger
     ) {
         $this->serviceManager = $this->drush_container->get('service.manager');
+        $this->container = $this->drush_container->get('service_container');
     }
 
     /**
@@ -57,25 +58,21 @@ class ApplicationFactory
         $module_generators = $this->serviceManager->instantiateServices($module_generator_classes, $this->drush_container, $this->container);
 
         $global_generator_classes = $this->serviceManager->discoverPsr4Generators();
-        $global_generator_classes = $this->filterCLassExists($global_generator_classes);
+        $global_generator_classes = $this->filterClassExists($global_generator_classes);
         $global_generators = $this->serviceManager->instantiateServices($global_generator_classes, $this->drush_container, $this->container);
-
-        $generators = [
+        return [
             new DrushCommandFile(),
             new DrushAliasFile(),
+            new DrushGeneratorFile(),
             ...$global_generators,
             ...$module_generators,
         ];
-        return $generators;
     }
 
     /**
      * Check each class for existence.
-     *
-     * @param array $classes
-     * @return array
      */
-    public function filterCLassExists(array $classes): array
+    public function filterClassExists(array $classes): array
     {
         $exists = [];
         foreach ($classes as $class) {

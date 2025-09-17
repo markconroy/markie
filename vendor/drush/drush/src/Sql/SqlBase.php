@@ -4,17 +4,17 @@ declare(strict_types=1);
 
 namespace Drush\Sql;
 
+use Consolidation\Config\Util\Interpolator;
 use Consolidation\SiteProcess\Util\Escape;
 use Drupal\Core\Database\Database;
 use Drush\Boot\DrupalBootLevels;
+use Drush\Config\ConfigAwareTrait;
 use Drush\Drush;
 use Drush\Utils\FsUtils;
-use Drush\Config\ConfigAwareTrait;
 use Robo\Contract\ConfigAwareInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Filesystem\Path;
 use Symfony\Component\Process\Process;
-use Consolidation\Config\Util\Interpolator;
 
 /**
  * The base implementation for Drush database connections.
@@ -312,7 +312,7 @@ abstract class SqlBase implements ConfigAwareInterface
      * @param $result_file
      *   A path to save query results to. Can be drush_bit_bucket() if desired.
      *
-     * @return
+     * @return bool
      *   TRUE on success, FALSE on failure.
      */
     public function alwaysQuery(string $query, $input_file = null, ?string $result_file = ''): bool
@@ -424,13 +424,13 @@ abstract class SqlBase implements ConfigAwareInterface
     /**
      * Build a SQL string for dropping and creating a database.
      *
-     * @param string dbname
+     * @param $dbname
      *   The database name.
-     * @param boolean $quoted
+     * @param $quoted
      *   Quote the database name. Mysql uses backticks to quote which can cause problems
      *   in a Windows shell. Set TRUE if the CREATE is not running on the bash command line.
      */
-    public function createdbSql($dbname, bool $quoted = false): string
+    public function createdbSql(string $dbname, bool $quoted = false): string
     {
         return '';
     }
@@ -506,7 +506,7 @@ abstract class SqlBase implements ConfigAwareInterface
     /**
      * Extract the name of all existing tables in the given database.
      *
-     * @return
+     * @return array
      *   An array of table names which exist in the current database,
      *   appropriately quoted for the RDMS.
      */
@@ -572,57 +572,21 @@ abstract class SqlBase implements ConfigAwareInterface
     /**
      * Convert from an old-style database URL to an array of database settings.
      *
-     * @param db_url
+     * @param $db_url
      *   A Drupal 6 db url string to convert, or an array with a 'default' element.
      *   An array of database values containing only the 'default' element of
      *   the db url. If the parse fails the array is empty.
      */
     public static function dbSpecFromDbUrl($db_url): array
     {
-        $db_spec = [];
-
         $db_url_default = is_array($db_url) ? $db_url['default'] : $db_url;
-
-        // If it's a sqlite database, pick the database path and we're done.
-        if (str_starts_with($db_url_default, 'sqlite://')) {
-            $db_spec = [
-                'driver'   => 'sqlite',
-                'database' => substr($db_url_default, strlen('sqlite://')),
-            ];
-        } else {
-            $url = parse_url($db_url_default);
-            if ($url) {
-                // Fill in defaults to prevent notices.
-                $url += [
-                    'scheme' => null,
-                    'user'   => null,
-                    'pass'   => null,
-                    'host'   => null,
-                    'port'   => null,
-                    'path'   => null,
-                ];
-                // Suppress deprecation notice when any value in $url is null.
-                $url = (object)@array_map('urldecode', $url);
-                $db_spec = [
-                    'driver'   => $url->scheme,
-                    'username' => $url->user,
-                    'password' => $url->pass,
-                    'host' => $url->host,
-                    'port' => $url->port,
-                    'database' => ltrim($url->path, '/'),
-                ];
-            }
-        }
-
-        return $db_spec;
+        return Database::convertDbUrlToConnectionInfo($db_url_default, DRUSH_DRUPAL_CORE);
     }
 
     /**
      * Start building the command to run a query.
      *
      * @param $input_file
-     *
-     * @return array
      */
     public function alwaysQueryCommand($input_file): array
     {

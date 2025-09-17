@@ -6,40 +6,34 @@ namespace Drush\Commands\core;
 
 use Consolidation\OutputFormatters\StructuredData\RowsOfFields;
 use Drupal\Core\DrupalKernelInterface;
-use Drupal\Core\Extension\ExtensionList;
+use Drupal\Core\Extension\ModuleExtensionList;
+use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\PhpStorage\PhpStorageFactory;
 use Drupal\Core\State\StateInterface;
 use Drupal\Core\Template\TwigEnvironment;
 use Drush\Attributes as CLI;
+use Drush\Commands\AutowireTrait;
 use Drush\Commands\DrushCommands;
-use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drush\Drush;
 use Drush\Utils\StringUtils;
 use Symfony\Component\Filesystem\Path;
 use Symfony\Component\Finder\Finder;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 final class TwigCommands extends DrushCommands
 {
+    use AutowireTrait;
+
     const UNUSED = 'twig:unused';
     const COMPILE = 'twig:compile';
     const DEBUG = 'twig:debug';
 
-    public function __construct(protected TwigEnvironment $twig, protected ModuleHandlerInterface $moduleHandler, private ExtensionList $extensionList, private StateInterface $state, private DrupalKernelInterface $kernel)
-    {
-    }
-
-    public static function create(ContainerInterface $container): self
-    {
-        $commandHandler = new static(
-            $container->get('twig'),
-            $container->get('module_handler'),
-            $container->get('extension.list.module'),
-            $container->get('state'),
-            $container->get('kernel'),
-        );
-
-        return $commandHandler;
+    public function __construct(
+        protected TwigEnvironment $twig,
+        protected ModuleHandlerInterface $moduleHandler,
+        private readonly ModuleExtensionList $extensionList,
+        private readonly StateInterface $state,
+        private readonly DrupalKernelInterface $kernel
+    ) {
     }
 
     public function getTwig(): TwigEnvironment
@@ -98,6 +92,7 @@ final class TwigCommands extends DrushCommands
     #[CLI\Command(name: self::COMPILE, aliases: ['twigc', 'twig-compile'])]
     public function twigCompile(): void
     {
+        $searchpaths = [];
         require_once DRUSH_DRUPAL_CORE . "/themes/engines/twig/twig.engine";
         // Scan all enabled modules and themes.
         $modules = array_keys($this->getModuleHandler()->getModuleList());

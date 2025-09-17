@@ -4,29 +4,36 @@ declare(strict_types=1);
 
 namespace Drush\Commands\core;
 
-use Consolidation\AnnotatedCommand\Hooks\HookManager;
-use Drupal\Core\Cache\CacheTagsInvalidatorInterface;
+use Composer\Autoload\ClassLoader;
 use Consolidation\AnnotatedCommand\CommandData;
 use Consolidation\AnnotatedCommand\Events\CustomEventAwareInterface;
 use Consolidation\AnnotatedCommand\Events\CustomEventAwareTrait;
+use Consolidation\AnnotatedCommand\Hooks\HookManager;
+use Consolidation\AnnotatedCommand\Input\StdinAwareInterface;
+use Consolidation\AnnotatedCommand\Input\StdinAwareTrait;
 use Consolidation\OutputFormatters\StructuredData\PropertyList;
+use Drupal\Core\Asset\AssetQueryStringInterface;
+use Drupal\Core\Asset\JsCollectionOptimizerLazy;
+use Drupal\Core\Cache\Cache;
+use Drupal\Core\Cache\CacheTagsInvalidatorInterface;
+use Drupal\Core\Plugin\CachedDiscoveryClearerInterface;
+use Drupal\Core\Routing\RouteBuilderInterface;
+use Drupal\Core\Theme\Registry;
 use Drush\Attributes as CLI;
 use Drush\Boot\BootstrapManager;
 use Drush\Boot\DrupalBootLevels;
+use Drush\Commands\AutowireTrait;
 use Drush\Commands\DrushCommands;
-use Drupal\Core\Cache\Cache;
 use Drush\Utils\StringUtils;
-use Consolidation\AnnotatedCommand\Input\StdinAwareInterface;
-use Consolidation\AnnotatedCommand\Input\StdinAwareTrait;
-use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Filesystem\Exception\IOException;
-use Composer\Autoload\ClassLoader;
 
 /*
  * Interact with Drupal's Cache API.
  */
 final class CacheCommands extends DrushCommands implements CustomEventAwareInterface, StdinAwareInterface
 {
+    use AutowireTrait;
     use CustomEventAwareTrait;
     use StdinAwareTrait;
 
@@ -34,37 +41,23 @@ final class CacheCommands extends DrushCommands implements CustomEventAwareInter
     const TAGS = 'cache:tags';
     const CLEAR = 'cache:clear';
     const SET = 'cache:set';
-    // @deprecated. Use CacheRebuildCommands::REBUILD
-    const REBUILD = 'cache:rebuild';
     const EVENT_CLEAR = 'cache-clear';
 
     public function __construct(
         private CacheTagsInvalidatorInterface $invalidator,
-        private $themeRegistry,
-        private $routerBuilder,
-        private $jsOptimizer,
+        private Registry $themeRegistry,
+        private RouteBuilderInterface $routerBuilder,
+        // @todo Type hints not sufficient for unknown reason.
+        #[Autowire(service: 'asset.js.collection_optimizer')]
+        private JsCollectionOptimizerLazy $jsOptimizer,
+        #[Autowire(service: 'asset.css.collection_optimizer')]
         private $cssOptimizer,
-        private $pluginCacheClearer,
+        private CachedDiscoveryClearerInterface $pluginCacheClearer,
         private BootstrapManager $bootstrapManager,
-        private ClassLoader $autoloader
+        private ClassLoader $autoloader,
+        private AssetQueryStringInterface $assetQueryString
     ) {
         parent::__construct();
-    }
-
-    public static function create(ContainerInterface $container, $drush_container): self
-    {
-        $commandHandler = new static(
-            $container->get('cache_tags.invalidator'),
-            $container->get('theme.registry'),
-            $container->get('router.builder'),
-            $container->get('asset.js.collection_optimizer'),
-            $container->get('asset.css.collection_optimizer'),
-            $container->get('plugin.cache_clearer'),
-            $drush_container->get('bootstrap.manager'),
-            $drush_container->get('loader')
-        );
-
-        return $commandHandler;
     }
 
     /**
@@ -140,14 +133,14 @@ final class CacheCommands extends DrushCommands implements CustomEventAwareInter
         if (empty($input->getArgument('type'))) {
             $types = $this->getTypes($this->bootstrapManager->hasBootstrapped(DrupalBootLevels::FULL));
             $choices = array_combine(array_keys($types), array_keys($types));
-            $type = $this->io()->choice(dt("Choose a cache to clear"), $choices, 'render');
+            $type = $this->io()->select(dt("Choose a cache to clear"), $choices, 'render', scroll: 20);
             $input->setArgument('type', $type);
         }
 
         if ($input->getArgument('type') == 'bin' && empty($input->getArgument('args'))) {
             $bins = Cache::getBins();
             $choices = array_combine(array_keys($bins), array_keys($bins));
-            $chosen = $this->io()->choice(dt("Choose a cache to clear"), $choices, 'default');
+            $chosen = $this->io()->select(dt("Choose a cache to clear"), $choices, 'default', scroll: 20);
             $input->setArgument('args', [$chosen]);
         }
     }
@@ -184,14 +177,11 @@ final class CacheCommands extends DrushCommands implements CustomEventAwareInter
             $data = $this->stdin()->contents();
         }
 
-        // Now, we parse the object.
-        switch ($options['input-format']) {
-            case 'json':
-                $data = json_decode($data, true);
-                if ($data === false) {
-                    throw new \Exception('Unable to parse JSON.');
-                }
-                break;
+        if ($options['input-format'] === 'json') {
+            $data = json_decode($data, true);
+            if ($data === false) {
+                throw new \Exception('Unable to parse JSON.');
+            }
         }
 
         if ($options['cache-get']) {
@@ -299,7 +289,7 @@ final class CacheCommands extends DrushCommands implements CustomEventAwareInter
 
     public function clearCssJs(): void
     {
-        _drupal_flush_css_js();
+        $this->assetQueryString->reset();
         $this->cssOptimizer->deleteAll();
         $this->jsOptimizer->deleteAll();
     }

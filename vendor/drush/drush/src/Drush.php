@@ -5,28 +5,30 @@ declare(strict_types=1);
 namespace Drush;
 
 use Composer\InstalledVersions;
-use Robo\Runner;
-use Robo\Robo;
-use Drush\Config\DrushConfig;
-use Drush\Boot\BootstrapManager;
-use Drush\Boot\Boot;
 use Consolidation\AnnotatedCommand\AnnotatedCommandFactory;
 use Consolidation\SiteAlias\SiteAliasInterface;
 use Consolidation\SiteAlias\SiteAliasManager;
 use Consolidation\SiteProcess\ProcessBase;
 use Consolidation\SiteProcess\SiteProcess;
+use Drush\Boot\BootstrapManager;
+use Drush\Boot\DrupalBoot8;
+use Drush\Config\DrushConfig;
+use Drush\Preflight\PreflightArgs;
+use Drush\Runtime\DependencyInjection;
 use Drush\SiteAlias\ProcessManager;
+use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
+use Robo\Robo;
+use Robo\Runner;
 use RuntimeException;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Exception\InvalidArgumentException;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+
 // TODO: Not sure if we should have a reference to PreflightArgs here.
 // Maybe these constants should be in config, and PreflightArgs can
 // reference them from there as well.
-use Drush\Preflight\PreflightArgs;
-use Symfony\Component\Process\Process;
 
 /**
  * Static Service Container wrapper.
@@ -139,7 +141,7 @@ class Drush
      *
      * @throws RuntimeException
      */
-    public static function getContainer(): \Psr\Container\ContainerInterface
+    public static function getContainer(): ContainerInterface
     {
         if (!Robo::hasContainer()) {
             throw new RuntimeException('Drush::$container is not initialized yet. \Drush::setContainer() must be called with a real container.');
@@ -231,7 +233,7 @@ class Drush
      */
     public static function aliasManager(): SiteAliasManager
     {
-        return self::service('site.alias.manager');
+        return self::service(DependencyInjection::SITE_ALIAS_MANAGER);
     }
 
     /**
@@ -341,9 +343,6 @@ class Drush
      * @param array|null     $env         The environment variables or null to use the same environment as the current PHP process
      * @param mixed|null     $input       The input as stream resource, scalar or \Traversable, or null for no input
      * @param int|float|null $timeout     The timeout in seconds or null to disable
-     *
-     * @return
-     *   A wrapper around Symfony Process.
      */
     public static function process($commandline, $cwd = null, $env = null, $input = null, $timeout = 60): ProcessBase
     {
@@ -361,10 +360,10 @@ class Drush
      * @param mixed|null $input   The input as stream resource, scalar or \Traversable, or null for no input
      * @param int|float|null $timeout The timeout in seconds or null to disable
      *
-     * @return
+     * @return ProcessBase
      *   A wrapper around Symfony Process.
      */
-    public static function shell(string $command, $cwd = null, array $env = null, $input = null, $timeout = 60): ProcessBase
+    public static function shell(string $command, ?string $cwd = null, ?array $env = null, mixed $input = null, int|float|null $timeout = 60): ProcessBase
     {
         return self::processManager()->shell($command, $cwd, $env, $input, $timeout);
     }
@@ -434,7 +433,7 @@ class Drush
     /**
      * Return the Bootstrap object.
      */
-    public static function bootstrap(): Boot
+    public static function bootstrap(): DrupalBoot8
     {
         return self::bootstrapManager()->bootstrap();
     }
@@ -447,12 +446,18 @@ class Drush
         // $input->getOptions() returns an associative array of option => value
         $options = $input->getOptions();
 
-        // The 'runtime.options' config contains a list of option names on th cli
+        // The 'runtime.options' config contains a list of option names on the CLI
         $optionNamesFromCommandline = self::config()->get('runtime.options');
 
         // Attempt to normalize option names.
         foreach ($optionNamesFromCommandline as $key => $name) {
             try {
+                // Don't incorrectly remap these to --verbose, or discard them.
+                if ($name == 'vv' || $name == 'vvv') {
+                    // Special handling is in \Consolidation\SiteProcess\Util\ArgumentProcessor::convertOptions
+                    $options[$name] = true;
+                    continue;
+                }
                 $optionNamesFromCommandline[$key] = Drush::getApplication()->get($command_name)->getDefinition()->shortcutToName($name);
             } catch (InvalidArgumentException $e) {
                 // Do nothing. It's expected.

@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace Drush\Commands\help;
 
-use Drush\Boot\DrupalBootLevels;
-use Symfony\Component\Console\Application;
 use Consolidation\AnnotatedCommand\Help\HelpDocument;
 use Consolidation\OutputFormatters\FormatterManager;
 use Consolidation\OutputFormatters\Options\FormatterOptions;
 use Consolidation\OutputFormatters\StructuredData\RowsOfFields;
 use Drush\Attributes as CLI;
+use Drush\Boot\DrupalBootLevels;
 use Drush\Commands\DrushCommands;
 use Drush\Drush;
+use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Descriptor\JsonDescriptor;
 use Symfony\Component\Console\Descriptor\XmlDescriptor;
@@ -66,15 +66,18 @@ class ListCommands extends DrushCommands
             }
             return null;
         } elseif ($options['format'] == 'xml') {
-            $descriptor  = new XmlDescriptor($this->output(), []);
-            return $descriptor->describe($this->output, $application, []);
+            $descriptor = new XmlDescriptor();
+            $descriptor->describe($this->output, $application, []);
+            return null;
         } elseif ($options['format'] == 'json') {
-            $descriptor  = new JsonDescriptor($this->output(), []);
-            return $descriptor->describe($this->output, $application, []);
+            $descriptor = new JsonDescriptor();
+            $descriptor->describe($this->output, $application, []);
+            return null;
         } else {
             // No longer used. Works for XML, but gives error for JSON.
             // $dom = $this->buildDom($namespaced, $application);
             // return $dom;
+            return null;
         }
     }
 

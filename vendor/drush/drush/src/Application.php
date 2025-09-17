@@ -12,13 +12,14 @@ use Drush\Boot\DrupalBootLevels;
 use Drush\Command\RemoteCommandProxy;
 use Drush\Config\ConfigAwareTrait;
 use Drush\Runtime\RedispatchHook;
-use Drush\Runtime\TildeExpansionHook;
 use Drush\Runtime\ServiceManager;
+use Drush\Runtime\TildeExpansionHook;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use Robo\Contract\ConfigAwareInterface;
 use Robo\Robo;
 use Symfony\Component\Console\Application as SymfonyApplication;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Exception\CommandNotFoundException;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -183,11 +184,8 @@ class Application extends SymfonyApplication implements LoggerAwareInterface, Co
     /**
      * @inheritdoc
      */
-    public function find($name)
+    public function find($name): Command
     {
-        if (empty($name)) {
-            return;
-        }
         $command = $this->bootstrapAndFind($name);
         // Avoid exception when help is being built by https://github.com/bamarni/symfony-console-autocomplete.
         // @todo Find a cleaner solution.
@@ -277,7 +275,7 @@ class Application extends SymfonyApplication implements LoggerAwareInterface, Co
      * second call. At the moment, the work done here is trivial, so we let
      * it happen twice.
      */
-    protected function configureIO(InputInterface $input, OutputInterface $output)
+    protected function configureIO(InputInterface $input, OutputInterface $output): void
     {
         // Do default Symfony confguration.
         parent::configureIO($input, $output);
@@ -333,16 +331,6 @@ class Application extends SymfonyApplication implements LoggerAwareInterface, Co
         // Note that Robo::register can accept either Annotated Command
         // command handlers or Symfony Console Command objects.
         Robo::register($this, $commandInstances);
-    }
-
-    /**
-     * Renders a caught exception. Omits the command docs at end.
-     */
-    public function renderException(\Exception $e, OutputInterface $output)
-    {
-        $output->writeln('', OutputInterface::VERBOSITY_QUIET);
-
-        $this->doRenderException($e, $output);
     }
 
     /**

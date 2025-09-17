@@ -4,18 +4,26 @@ declare(strict_types=1);
 
 namespace Drush\Commands\core;
 
+use Consolidation\SiteAlias\SiteAliasManagerInterface;
 use Consolidation\SiteProcess\Util\Shell;
 use Consolidation\SiteProcess\Util\Tty;
 use Drush\Attributes as CLI;
+use Drush\Boot\DrupalBootLevels;
+use Drush\Commands\AutowireTrait;
 use Drush\Commands\DrushCommands;
-use Consolidation\SiteAlias\SiteAliasManagerAwareInterface;
-use Consolidation\SiteAlias\SiteAliasManagerAwareTrait;
 
-final class SshCommands extends DrushCommands implements SiteAliasManagerAwareInterface
+#[CLI\Bootstrap(DrupalBootLevels::NONE)]
+final class SshCommands extends DrushCommands
 {
-    use SiteAliasManagerAwareTrait;
+    use AutowireTrait;
 
     const SSH = 'site:ssh';
+
+    public function __construct(
+        private readonly SiteAliasManagerInterface $siteAliasManager
+    ) {
+        parent::__construct();
+    }
 
     /**
      * Connect to a webserver via SSH, and optionally run a shell command.
@@ -32,9 +40,9 @@ final class SshCommands extends DrushCommands implements SiteAliasManagerAwareIn
     #[CLI\Topics(topics: [DocsCommands::ALIASES])]
     public function ssh(array $code, $options = ['cd' => self::REQ]): void
     {
-        $alias = $this->siteAliasManager()->getSelf();
+        $alias = $this->siteAliasManager->getSelf();
 
-        if (empty($code)) {
+        if ($code === []) {
             $code[] = 'bash';
             $code[] = '-l';
 

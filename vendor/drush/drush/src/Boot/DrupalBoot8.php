@@ -4,28 +4,28 @@ declare(strict_types=1);
 
 namespace Drush\Boot;
 
-use Drupal\Core\DrupalKernelInterface;
 use Consolidation\AnnotatedCommand\AnnotationData;
 use Drupal\Core\Database\Database;
-use Drupal\Core\Render\HtmlResponse;
 use Drupal\Core\DrupalKernel;
+use Drupal\Core\DrupalKernelInterface;
+use Drupal\Core\Render\HtmlResponse;
 use Drupal\Core\Session\AnonymousUserSession;
 use Drush\Config\ConfigLocator;
 use Drush\Drupal\DrushLoggerServiceProvider;
 use Drush\Drush;
+use Drush\Runtime\LegacyServiceFinder;
+use Drush\Runtime\LegacyServiceInstantiator;
 use Drush\Runtime\ServiceManager;
+use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\Filesystem\Path;
+use Robo\Robo;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Consolidation\AnnotatedCommand\CommandFileDiscovery;
-use Robo\Robo;
-use Drush\Runtime\LegacyServiceInstantiator;
-use Drush\Runtime\LegacyServiceFinder;
+use Symfony\Component\HttpKernel\TerminableInterface;
 
 class DrupalBoot8 extends DrupalBoot
 {
-    protected ?LoggrInterface $drupalLoggerAdapter = null;
+    protected ?LoggerInterface $drupalLoggerAdapter = null;
     protected ?DrupalKernelInterface $kernel = null;
     protected Request $request;
 
@@ -60,7 +60,7 @@ class DrupalBoot8 extends DrupalBoot
      */
     public function setLogger(LoggerInterface $logger): void
     {
-        if ($this->drupalLoggerAdapter) {
+        if ($this->drupalLoggerAdapter && $this->drupalLoggerAdapter instanceof LoggerAwareInterface) {
             $this->drupalLoggerAdapter->setLogger($logger);
         }
         parent::setLogger($logger);
@@ -81,7 +81,7 @@ class DrupalBoot8 extends DrupalBoot
         return false;
     }
 
-    public function getVersion($drupal_root): string
+    public function getVersion($root): string
     {
         return \Drupal::VERSION;
     }
@@ -197,7 +197,7 @@ class DrupalBoot8 extends DrupalBoot
         parent::bootstrapDrupalDatabase($manager);
     }
 
-    public function bootstrapDrupalConfiguration(BootstrapManager $manager, AnnotationData $annotationData = null): void
+    public function bootstrapDrupalConfiguration(BootstrapManager $manager, ?AnnotationData $annotationData = null): void
     {
         // Coax \Drupal\Core\DrupalKernel::discoverServiceProviders to add our logger.
         $GLOBALS['conf']['container_service_providers'][] = DrushLoggerServiceProvider::class;
@@ -210,7 +210,6 @@ class DrupalBoot8 extends DrupalBoot
         $request = $this->getRequest();
         $kernel_factory = Kernels::getKernelFactory($kernel);
         $allow_dumping = $kernel !== Kernels::UPDATE;
-        /** @var DrupalKernelInterface kernel */
         $this->kernel = $kernel_factory($request, $this->autoloader, 'prod', $allow_dumping, $manager->getRoot());
 
         // Unset drupal error handler and restore Drush's one.
@@ -323,7 +322,19 @@ class DrupalBoot8 extends DrupalBoot
             } else {
                 $response = new HtmlResponse();
             }
+            assert($this->kernel instanceof TerminableInterface);
             $this->kernel->terminate($this->getRequest(), $response);
         }
+    }
+
+    /**
+     * Initialize a site on the Drupal root.
+     *
+     * We now set various contexts that we determined and confirmed to be valid.
+     * Additionally we load an optional drush.yml file in the site directory.
+     */
+    public function bootstrapDrupalSite(BootstrapManager $manager)
+    {
+        $this->bootstrapDoDrupalSite($manager);
     }
 }

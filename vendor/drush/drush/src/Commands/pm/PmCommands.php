@@ -14,15 +14,16 @@ use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Extension\ModuleInstallerInterface;
 use Drupal\Core\Extension\ThemeHandlerInterface;
 use Drush\Attributes as CLI;
-use Drush\Boot\DrupalBootLevels;
+use Drush\Commands\AutowireTrait;
 use Drush\Commands\DrushCommands;
 use Drush\Drush;
 use Drush\Exceptions\UserAbortException;
 use Drush\Utils\StringUtils;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 final class PmCommands extends DrushCommands
 {
+    use AutowireTrait;
+
     const INSTALL = 'pm:install';
     const UNINSTALL = 'pm:uninstall';
     const LIST = 'pm:list';
@@ -35,19 +36,6 @@ final class PmCommands extends DrushCommands
         protected ModuleExtensionList $extensionListModule
     ) {
         parent::__construct();
-    }
-
-    public static function create(ContainerInterface $container): self
-    {
-        $commandHandler = new static(
-            $container->get('config.factory'),
-            $container->get('module_installer'),
-            $container->get('module_handler'),
-            $container->get('theme_handler'),
-            $container->get('extension.list.module')
-        );
-
-        return $commandHandler;
     }
 
     public function getConfigFactory(): ConfigFactoryInterface
@@ -86,7 +74,7 @@ final class PmCommands extends DrushCommands
         $modules = StringUtils::csvToArray($modules);
         $todo = $this->addInstallDependencies($modules);
         $todo_str = ['!list' => implode(', ', $todo)];
-        if (empty($todo)) {
+        if ($todo === []) {
             $this->logger()->notice(dt('Already enabled: !list', ['!list' => implode(', ', $modules)]));
             return;
         } elseif (Drush::simulate()) {
@@ -118,7 +106,7 @@ final class PmCommands extends DrushCommands
         $modules = $commandData->input()->getArgument('modules');
         $modules = StringUtils::csvToArray($modules);
         $modules = $this->addInstallDependencies($modules);
-        if (empty($modules)) {
+        if ($modules === []) {
             return;
         }
 
@@ -128,8 +116,7 @@ final class PmCommands extends DrushCommands
             // Note: we can't just call the API ($moduleHandler->loadInclude($module, 'install')),
             // because the API ignores modules that haven't been installed yet. We have
             // to do it the same way the `function drupal_check_module($module)` does.
-            $module_list = \Drupal::service('extension.list.module');
-            $file = DRUPAL_ROOT . '/' . $module_list->getPath($module) . "/$module.install";
+            $file = DRUPAL_ROOT . '/' . $this->extensionListModule->getPath($module) . "/$module.install";
             if (is_file($file)) {
                 require_once $file;
             }
@@ -203,10 +190,8 @@ final class PmCommands extends DrushCommands
         if ($modules = $commandData->input()->getArgument('modules')) {
             $modules = StringUtils::csvToArray($modules);
             if ($validation_reasons = $this->getModuleInstaller()->validateUninstall($modules)) {
-                foreach ($validation_reasons as $module => $list) {
-                    foreach ($list as $markup) {
-                        $reasons[$module] = "$module: " . (string) $markup;
-                    }
+                foreach ($validation_reasons as $module => $reason) {
+                    $reasons[$module] = "$module: " . $reason;
                 }
                 throw new \Exception(implode("/n", $reasons));
             }
@@ -282,7 +267,7 @@ final class PmCommands extends DrushCommands
             }
 
             // Filter by package.
-            if (!empty($package_filter)) {
+            if ($package_filter !== []) {
                 if (!in_array(strtolower($extension->info['package']), $package_filter)) {
                     unset($modules[$key]);
                     continue;
@@ -312,8 +297,8 @@ final class PmCommands extends DrushCommands
      * @param $extension
      *   Object of a single extension info.
      *
-     * @return
-     *   String describing extension status. Values: enabled|disabled.
+     * @return string
+     *   Status. Values: enabled|disabled.
      */
     public function extensionStatus($extension): string
     {

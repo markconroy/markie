@@ -5,20 +5,17 @@ declare(strict_types=1);
 namespace Drush\Commands\core;
 
 use Consolidation\SiteProcess\Util\Tty;
-use Drush\Boot\DrupalBootLevels;
-use Drush\Config\ConfigAwareTrait;
-use Drush\Drush;
 use Drupal\Core\Url;
 use Drush\Attributes as CLI;
+use Drush\Boot\DrupalBootLevels;
 use Drush\Commands\DrushCommands;
+use Drush\Drush;
 use Drush\Exec\ExecTrait;
-use Robo\Contract\ConfigAwareInterface;
 use Symfony\Component\Filesystem\Path;
 
-final class RunserverCommands extends DrushCommands implements ConfigAwareInterface
+final class RunserverCommands extends DrushCommands
 {
     use ExecTrait;
-    use ConfigAwareTrait;
 
     const RUNSERVER = 'runserver';
     protected $uri;
@@ -43,12 +40,11 @@ final class RunserverCommands extends DrushCommands implements ConfigAwareInterf
     #[CLI\Usage(name: 'drush rs :9000/admin', description: 'Start runserver on 127.0.0.1, port 9000, and open /admin in browser. Note that you need a colon when you specify port and path, but no IP.')]
     #[CLI\Usage(name: 'drush --quiet rs', description: 'Silence logging the printing of web requests to the console.')]
     #[CLI\Bootstrap(level: DrupalBootLevels::FULL)]
-    public function runserver($uri = null, $options = ['default-server' => self::REQ, 'browser' => true, 'dns' => false])
+    public function runserver($uri = null, $options = ['default-server' => self::REQ, 'browser' => true, 'dns' => false]): void
     {
-        // Determine active configuration.
         $uri = $this->uri($uri, $options);
         if (!$uri) {
-            return false;
+            throw new \RuntimeException('Unable to determine URI');
         }
 
         // Remove any leading slashes from the path, since that is what url() expects.
@@ -71,7 +67,7 @@ final class RunserverCommands extends DrushCommands implements ConfigAwareInterf
             $this->startBrowser($link, 2);
         }
         // Start the server using 'php -S'.
-        $router = Path::join($this->config->get('drush.base-dir'), '/misc/d8-rs-router.php');
+        $router = Path::join($this->getConfig()->get('drush.base-dir'), '/misc/d8-rs-router.php');
         $php = $this->getConfig()->get('php', 'php');
         $process = $this->processManager()->process([$php, '-S', $addr . ':' . $uri['port'], $router]);
         $process->setTimeout(null);
@@ -96,21 +92,20 @@ final class RunserverCommands extends DrushCommands implements ConfigAwareInterf
         $user_default = $this->parseUri($options['default-server']);
         $site_default = $this->parseUri($uri);
         $uri = $this->parseUri($uri);
-        if (is_array($uri)) {
-            // Populate defaults.
-            $uri = $uri + $user_default + $site_default + $drush_default;
-            if (ltrim($uri['path'], '/') == '-') {
-                // Allow a path of a single hyphen to clear a default path.
-                $uri['path'] = '';
-            }
-            // Determine and set the new URI.
-            $uri['addr'] = $uri['host'];
-            if ($options['dns']) {
-                if (ip2long($uri['host'])) {
-                    $uri['host'] = gethostbyaddr($uri['host']);
-                } else {
-                    $uri['addr'] = gethostbyname($uri['host']);
-                }
+
+        // Populate defaults.
+        $uri = $uri + $user_default + $site_default + $drush_default;
+        if (ltrim($uri['path'], '/') === '-') {
+            // Allow a path of a single hyphen to clear a default path.
+            $uri['path'] = '';
+        }
+        // Determine and set the new URI.
+        $uri['addr'] = $uri['host'];
+        if ($options['dns']) {
+            if (ip2long($uri['host'])) {
+                $uri['host'] = gethostbyaddr($uri['host']);
+            } else {
+                $uri['addr'] = gethostbyname($uri['host']);
             }
         }
         return $uri;
@@ -129,7 +124,7 @@ final class RunserverCommands extends DrushCommands implements ConfigAwareInterf
         if (empty($uri)) {
             return [];
         }
-        if ($uri[0] == ':') {
+        if ($uri[0] === ':') {
             // ':port/path' shorthand, insert a placeholder hostname to allow parsing.
             $uri = 'placeholder-hostname' . $uri;
         }
@@ -152,7 +147,7 @@ final class RunserverCommands extends DrushCommands implements ConfigAwareInterf
                 unset($uri['path']);
             }
         }
-        if (isset($uri['host']) && $uri['host'] == 'placeholder-hostname') {
+        if (isset($uri['host']) && $uri['host'] === 'placeholder-hostname') {
             unset($uri['host']);
         }
         return $uri;

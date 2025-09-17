@@ -9,16 +9,20 @@ use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drush\Attributes as CLI;
+use Drush\Commands\AutowireTrait;
 use Drush\Commands\DrushCommands;
 use Symfony\Component\Console\Completion\CompletionInput;
 use Symfony\Component\Console\Completion\CompletionSuggestions;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
-class FieldBaseInfoCommands extends DrushCommands
+final class FieldBaseInfoCommands extends DrushCommands
 {
+    use AutowireTrait;
+
     use EntityTypeBundleAskTrait;
     use EntityTypeBundleValidationTrait;
     use FieldDefinitionRowsOfFieldsTrait;
+
+    const BASE_INFO = 'field:base-info';
 
     public function __construct(
         protected EntityTypeManagerInterface $entityTypeManager,
@@ -27,21 +31,10 @@ class FieldBaseInfoCommands extends DrushCommands
     ) {
     }
 
-    public static function create(ContainerInterface $container): self
-    {
-        $commandHandler = new static(
-            $container->get('entity_type.manager'),
-            $container->get('entity_type.bundle.info'),
-            $container->get('entity_field.manager')
-        );
-
-        return $commandHandler;
-    }
-
     /**
      * List all base fields of an entity type
      */
-    #[CLI\Command(name: 'field:base-info', aliases: ['field-base-info', 'fbi'])]
+    #[CLI\Command(name: self::BASE_INFO, aliases: ['field-base-info', 'fbi'])]
     #[CLI\Argument(name: 'entityType', description: 'The machine name of the entity type.')]
     #[CLI\Option(name: 'show-machine-names', description: 'Show machine names instead of labels in option lists.')]
     #[CLI\DefaultTableFields(fields: [
@@ -67,7 +60,7 @@ class FieldBaseInfoCommands extends DrushCommands
     ])]
     #[CLI\FilterDefaultField(field: 'field_name')]
     #[CLI\Usage(name: 'field:base-info taxonomy_term', description: 'List all base fields.')]
-    #[CLI\Usage(name: 'field:base-info', description: 'List all base fields and fill in the remaining information through prompts.')]
+    #[CLI\Usage(name: self::BASE_INFO, description: 'List all base fields and fill in the remaining information through prompts.')]
     #[CLI\Complete(method_name_or_callable: 'complete')]
     #[CLI\Version(version: '11.0')]
     public function info(?string $entityType = null, array $options = [

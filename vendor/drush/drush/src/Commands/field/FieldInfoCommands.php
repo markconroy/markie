@@ -8,16 +8,19 @@ use Consolidation\OutputFormatters\StructuredData\RowsOfFields;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drush\Attributes as CLI;
+use Drush\Commands\AutowireTrait;
 use Drush\Commands\DrushCommands;
 use Symfony\Component\Console\Completion\CompletionInput;
 use Symfony\Component\Console\Completion\CompletionSuggestions;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
-class FieldInfoCommands extends DrushCommands
+final class FieldInfoCommands extends DrushCommands
 {
+    use AutowireTrait;
     use EntityTypeBundleAskTrait;
     use EntityTypeBundleValidationTrait;
     use FieldDefinitionRowsOfFieldsTrait;
+
+    const INFO = 'field:info';
 
     public function __construct(
         protected EntityTypeManagerInterface $entityTypeManager,
@@ -25,20 +28,10 @@ class FieldInfoCommands extends DrushCommands
     ) {
     }
 
-    public static function create(ContainerInterface $container): self
-    {
-        $commandHandler = new static(
-            $container->get('entity_type.manager'),
-            $container->get('entity_type.bundle.info')
-        );
-
-        return $commandHandler;
-    }
-
     /**
      * List all configurable fields of an entity bundle
      */
-    #[CLI\Command(name: 'field:info', aliases: ['field-info', 'fi'])]
+    #[CLI\Command(name: self::INFO, aliases: ['field-info', 'fi'])]
     #[CLI\Argument(name: 'entityType', description: 'The machine name of the entity type.')]
     #[CLI\Argument(name: 'bundle', description: 'The machine name of the bundle.')]
     #[CLI\Option(name: 'show-machine-names', description: 'Show machine names instead of labels in option lists.')]
@@ -65,7 +58,7 @@ class FieldInfoCommands extends DrushCommands
     ])]
     #[CLI\FilterDefaultField(field: 'field_name')]
     #[CLI\Usage(name: 'field:info taxonomy_term tag', description: 'List all fields.')]
-    #[CLI\Usage(name: 'field:info', description: 'List all fields and fill in the remaining information through prompts.')]
+    #[CLI\Usage(name: self::INFO, description: 'List all fields and fill in the remaining information through prompts.')]
     #[CLI\Complete(method_name_or_callable: 'complete')]
     #[CLI\Version(version: '11.0')]
     public function info(?string $entityType = null, ?string $bundle = null, array $options = [

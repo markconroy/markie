@@ -4,49 +4,65 @@ declare(strict_types=1);
 
 namespace Drush\Commands\core;
 
-use Drush\Attributes as CLI;
-use Drush\Boot\DrupalBootLevels;
-use Drush\Commands\core\DocsCommands;
-use Drush\Log\SuccessInterface;
 use Consolidation\OutputFormatters\StructuredData\RowsOfFields;
 use Consolidation\OutputFormatters\StructuredData\UnstructuredListData;
-use Consolidation\SiteAlias\SiteAliasManagerAwareTrait;
-use Consolidation\SiteAlias\SiteAliasManagerAwareInterface;
+use Consolidation\SiteAlias\SiteAliasManagerInterface;
+use Drupal\Core\Extension\ThemeHandlerInterface;
+use Drupal\Core\KeyValueStore\KeyValueFactoryInterface;
 use Drupal\Core\Update\UpdateRegistry;
 use Drupal\Core\Utility\Error;
+use Drush\Attributes as CLI;
+use Drush\Boot\DrupalBootLevels;
+use Drush\Commands\AutowireTrait;
 use Drush\Commands\DrushCommands;
 use Drush\Drush;
 use Drush\Exceptions\UserAbortException;
+use Drush\Log\SuccessInterface;
 use Psr\Log\LogLevel;
 
-final class DeployHookCommands extends DrushCommands implements SiteAliasManagerAwareInterface
+final class DeployHookCommands extends DrushCommands
 {
-    use SiteAliasManagerAwareTrait;
+    use AutowireTrait;
 
     const HOOK_STATUS = 'deploy:hook-status';
     const HOOK = 'deploy:hook';
     const BATCH_PROCESS = 'deploy:batch-process';
     const MARK_COMPLETE = 'deploy:mark-complete';
 
+    public function __construct(
+        private readonly SiteAliasManagerInterface $siteAliasManager
+    ) {
+        parent::__construct();
+    }
+
     /**
      * Get the deploy hook update registry.
      */
     public static function getRegistry(): UpdateRegistry
     {
-        $registry = new class (
+        return new class (
             \Drupal::getContainer()->getParameter('app.root'),
             \Drupal::getContainer()->getParameter('site.path'),
-            array_keys(\Drupal::service('module_handler')->getModuleList()),
-            \Drupal::service('keyvalue')->get('deploy_hook')
+            \Drupal::service('module_handler')->getModuleList(),
+            \Drupal::service('keyvalue'),
+            \Drupal::service('theme_handler'),
         ) extends UpdateRegistry {
-            public function setUpdateType(string $type): void
-            {
-                $this->updateType = $type;
+            public function __construct(
+                $root,
+                $site_path,
+                $module_list,
+                KeyValueFactoryInterface $key_value_factory,
+                ThemeHandlerInterface $theme_handler,
+            ) {
+                // Do not call the parent constructor, we set the properties directly.
+                // We need a different key value store and set the update type.
+                $this->root = $root;
+                $this->sitePath = $site_path;
+                $this->enabledExtensions = array_merge(array_keys($module_list), array_keys($theme_handler->listInfo()));
+                $this->keyValue = $key_value_factory->get('post_update');
+                $this->updateType = 'deploy';
             }
         };
-        $registry->setUpdateType('deploy');
-
-        return $registry;
     }
 
     /**
@@ -95,7 +111,7 @@ final class DeployHookCommands extends DrushCommands implements SiteAliasManager
             return self::EXIT_SUCCESS;
         }
 
-        $process = $this->processManager()->drush($this->siteAliasManager()->getSelf(), self::HOOK_STATUS);
+        $process = $this->processManager()->drush($this->siteAliasManager->getSelf(), self::HOOK_STATUS);
         $process->mustRun();
         $this->output()->writeln($process->getOutput());
 
@@ -178,6 +194,7 @@ final class DeployHookCommands extends DrushCommands implements SiteAliasManager
                 break;
             }
         }
+        assert(isset($module) && isset($name) && isset($filename));
 
         if (function_exists($function)) {
             if (empty($context['results'][$module][$name]['type'])) {
@@ -200,7 +217,7 @@ final class DeployHookCommands extends DrushCommands implements SiteAliasManager
 
                 $variables = Error::decodeException($e);
                 $variables = array_filter($variables, function ($key) {
-                    return $key[0] == '@' || $key[0] == '%';
+                    return $key[0] === '@' || $key[0] === '%';
                 }, ARRAY_FILTER_USE_KEY);
                 // On windows there is a problem with json encoding a string with backslashes.
                 $variables['%file'] = strtr($variables['%file'], [DIRECTORY_SEPARATOR => '/']);

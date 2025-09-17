@@ -5,26 +5,32 @@ declare(strict_types=1);
 namespace Drush\Commands\core;
 
 use Consolidation\OutputFormatters\Options\FormatterOptions;
-use Consolidation\SiteAlias\SiteAliasManagerAwareTrait;
+use Consolidation\OutputFormatters\StructuredData\RowsOfFields;
+use Consolidation\SiteAlias\SiteAliasManagerInterface;
 use Drupal\user\Entity\Role;
 use Drush\Attributes as CLI;
+use Drush\Boot\DrupalBootLevels;
+use Drush\Commands\AutowireTrait;
 use Drush\Commands\DrushCommands;
-use Consolidation\OutputFormatters\StructuredData\RowsOfFields;
-use Drush\SiteAlias\SiteAliasManagerAwareInterface;
 use Drush\Utils\StringUtils;
 use Symfony\Component\Console\Completion\CompletionInput;
 use Symfony\Component\Console\Completion\CompletionSuggestions;
-use Drush\Boot\DrupalBootLevels;
 
-final class RoleCommands extends DrushCommands implements SiteAliasManagerAwareInterface
+final class RoleCommands extends DrushCommands
 {
-    use SiteAliasManagerAwareTrait;
+    use AutowireTrait;
 
     const CREATE = 'role:create';
     const DELETE = 'role:delete';
     const PERM_ADD = 'role:perm:add';
     const PERM_REMOVE = 'role:perm:remove';
     const LIST = 'role:list';
+
+    public function __construct(
+        private readonly SiteAliasManagerInterface $siteAliasManager
+    ) {
+        parent::__construct();
+    }
 
     /**
      * Create a new role.
@@ -34,12 +40,12 @@ final class RoleCommands extends DrushCommands implements SiteAliasManagerAwareI
     #[CLI\Argument(name: 'human_readable_name', description: 'A descriptive name for the role.')]
     #[CLI\Usage(name: "drush role:create 'test_role' 'Test role'", description: "Create a new role with a machine name of 'test_role', and a human-readable name of 'Test role'.")]
     #[CLI\Bootstrap(level: DrupalBootLevels::FULL)]
-    public function create($machine_name, $human_readable_name = null)
+    public function createRole($machine_name, $human_readable_name = null)
     {
         $role = Role::create([
             'id' => $machine_name,
             'label' => $human_readable_name ?: ucfirst($machine_name),
-        ], 'user_role');
+        ]);
         $role->save();
         $this->logger()->success(dt('Created "!role"', ['!role' => $machine_name]));
         return $role;
@@ -78,7 +84,7 @@ final class RoleCommands extends DrushCommands implements SiteAliasManagerAwareI
         $perms = StringUtils::csvToArray($permissions);
         user_role_grant_permissions($machine_name, $perms);
         $this->logger()->success(dt('Added "!permissions" to "!role"', ['!permissions' => $permissions, '!role' => $machine_name]));
-        $this->processManager()->drush($this->siteAliasManager()->getSelf(), CacheRebuildCommands::REBUILD);
+        $this->processManager()->drush($this->siteAliasManager->getSelf(), CacheRebuildCommands::REBUILD);
     }
 
     /**
@@ -97,7 +103,7 @@ final class RoleCommands extends DrushCommands implements SiteAliasManagerAwareI
         $perms = StringUtils::csvToArray($permissions);
         user_role_revoke_permissions($machine_name, $perms);
         $this->logger()->success(dt('Removed "!permissions" to "!role"', ['!permissions' => $permissions, '!role' => $machine_name]));
-        $this->processManager()->drush($this->siteAliasManager()->getSelf(), CacheRebuildCommands::REBUILD);
+        $this->processManager()->drush($this->siteAliasManager->getSelf(), CacheRebuildCommands::REBUILD);
     }
 
     /**

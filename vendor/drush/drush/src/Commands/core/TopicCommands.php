@@ -60,7 +60,7 @@ final class TopicCommands extends DrushCommands
                 $choices[$key] = $topic->getDescription() . " ($key)";
             }
             natcasesort($choices);
-            $topic_name = $this->io()->choice(dt('Choose a topic'), $choices);
+            $topic_name = $this->io()->select(dt('Choose a topic'), $choices, scroll: 30);
             $input->setArgument('topic_name', $topic_name);
         }
     }
@@ -69,7 +69,7 @@ final class TopicCommands extends DrushCommands
     public function validate(CommandData $commandData): void
     {
         $topic_name = $commandData->input()->getArgument('topic_name');
-        if (!in_array($topic_name, array_keys(self::getAllTopics()))) {
+        if (!array_key_exists($topic_name, self::getAllTopics())) {
             throw new \Exception(dt("!topic topic not found.", ['!topic' => $topic_name]));
         }
     }

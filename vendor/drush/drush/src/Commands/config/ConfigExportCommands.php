@@ -6,16 +6,16 @@ namespace Drush\Commands\config;
 
 use Consolidation\AnnotatedCommand\Hooks\HookManager;
 use Drupal\Core\Config\ConfigManagerInterface;
-use Drupal\Core\Config\StorageComparer;
 use Drupal\Core\Config\FileStorage;
+use Drupal\Core\Config\StorageComparer;
 use Drupal\Core\Config\StorageInterface;
 use Drupal\Core\Site\Settings;
 use Drush\Attributes as CLI;
 use Drush\Commands\DrushCommands;
 use Drush\Exceptions\UserAbortException;
+use Psr\Container\ContainerInterface;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Filesystem\Path;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 final class ConfigExportCommands extends DrushCommands
 {
@@ -65,7 +65,7 @@ final class ConfigExportCommands extends DrushCommands
 
     public static function create(ContainerInterface $container): self
     {
-        $commandHandler = new static(
+        $commandHandler = new self(
             $container->get('config.manager'),
             $container->get('config.storage')
         );
@@ -118,7 +118,7 @@ final class ConfigExportCommands extends DrushCommands
 
         if (count(glob($destination_dir . '/*')) > 0) {
             // Retrieve a list of differences between the active and target configuration (if any).
-            $config_comparer = new StorageComparer($this->getConfigStorageExport(), $target_storage, $this->getConfigManager());
+            $config_comparer = new StorageComparer($this->getConfigStorageExport(), $target_storage);
             if (!$config_comparer->createChangelist()->hasChanges()) {
                 $this->logger()->notice(dt('The active configuration is identical to the configuration in the export directory (!target).', ['!target' => $destination_dir]));
                 return;

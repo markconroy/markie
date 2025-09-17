@@ -6,12 +6,13 @@ namespace Drush\Commands\core;
 
 use Consolidation\OutputFormatters\StructuredData\RowsOfFields;
 use Consolidation\OutputFormatters\StructuredData\UnstructuredListData;
-use Consolidation\SiteAlias\SiteAliasManagerAwareInterface;
-use Consolidation\SiteAlias\SiteAliasManagerAwareTrait;
+use Consolidation\SiteAlias\SiteAliasManagerInterface;
 use Drupal\Core\Database\Database;
+use Drupal\Core\Update\UpdateRegistry;
 use Drupal\Core\Utility\Error;
 use Drush\Attributes as CLI;
 use Drush\Boot\DrupalBootLevels;
+use Drush\Commands\AutowireTrait;
 use Drush\Commands\DrushCommands;
 use Drush\Drupal\DrupalUtil;
 use Drush\Drush;
@@ -19,13 +20,20 @@ use Drush\Exceptions\UserAbortException;
 use Drush\Log\SuccessInterface;
 use Psr\Log\LogLevel;
 
-final class UpdateDBCommands extends DrushCommands implements SiteAliasManagerAwareInterface
+#[CLI\Bootstrap(DrupalBootLevels::NONE)]
+final class UpdateDBCommands extends DrushCommands
 {
-    use SiteAliasManagerAwareTrait;
+    use AutowireTrait;
 
     const UPDATEDB = 'updatedb';
     const STATUS = 'updatedb:status';
     const BATCH_PROCESS = 'updatedb:batch-process';
+
+    public function __construct(
+        private readonly SiteAliasManagerInterface $siteAliasManager
+    ) {
+        parent::__construct();
+    }
 
     /**
      * Note - can't inject @database since a method below is static.
@@ -59,7 +67,7 @@ final class UpdateDBCommands extends DrushCommands implements SiteAliasManagerAw
         $status_options = ['strict' => 0];
         $status_options = array_merge(Drush::redispatchOptions(), $status_options);
 
-        $process = $this->processManager()->drush($this->siteAliasManager()->getSelf(), self::STATUS, [], $status_options);
+        $process = $this->processManager()->drush($this->siteAliasManager->getSelf(), self::STATUS, [], $status_options);
         $process->mustRun();
         if ($output = $process->getOutput()) {
             // We have pending updates - let's run em.
@@ -263,14 +271,7 @@ final class UpdateDBCommands extends DrushCommands implements SiteAliasManagerAw
         }
 
         list($extension, $name) = explode('_post_update_', $function, 2);
-        $update_registry = \Drupal::service('update.post_update_registry');
-        // https://www.drupal.org/project/drupal/issues/3259188 Support theme's
-        // having post update functions when it is supported in Drupal core.
-        if (method_exists($update_registry, 'getUpdateFunctions')) {
-            \Drupal::service('update.post_update_registry')->getUpdateFunctions($extension);
-        } else {
-            \Drupal::service('update.post_update_registry')->getModuleUpdateFunctions($extension);
-        }
+        \Drupal::service('update.post_update_registry')->getUpdateFunctions($extension);
 
         if (function_exists($function)) {
             if (empty($context['results'][$extension][$name]['type'])) {
@@ -300,9 +301,8 @@ final class UpdateDBCommands extends DrushCommands implements SiteAliasManagerAw
             }
         } else {
             $ret['#abort'] = ['success' => false];
-            Drush::logger()->warning(dt('Post update function @function not found in file @filename', [
-                '@function' => $function,
-                '@filename' => "$filename.php",
+            Drush::logger()->warning(dt('Post update function @function not found.', [
+                '@function' => $function
             ]));
         }
 
@@ -355,7 +355,7 @@ final class UpdateDBCommands extends DrushCommands implements SiteAliasManagerAw
         // potentially very large.)
         $dependency_map = [];
         foreach ($updates as $function => $update) {
-            $dependency_map[$function] = !empty($update['reverse_paths']) ? array_keys($update['reverse_paths']) : [];
+            $dependency_map[$function] = empty($update['reverse_paths']) ? [] : array_keys($update['reverse_paths']);
         }
 
         $operations = [];
@@ -510,7 +510,7 @@ final class UpdateDBCommands extends DrushCommands implements SiteAliasManagerAw
         }
 
         // Pending hook_post_update_X() implementations.
-        /** @var \Drupal\Core\Update\UpdateRegistry $post_update_registry */
+        /** @var UpdateRegistry $post_update_registry */
         $post_update_registry = \Drupal::service('update.post_update_registry');
         $post_updates = $post_update_registry->getPendingUpdateInformation();
         foreach ($post_updates as $module => $post_update) {

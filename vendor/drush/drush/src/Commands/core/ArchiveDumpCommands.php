@@ -68,6 +68,7 @@ final class ArchiveDumpCommands extends DrushCommands
     #[CLI\Option(name: 'overwrite', description: 'Overwrite destination file if exists.')]
     #[CLI\Option(name: 'code', description: 'Archive codebase.')]
     #[CLI\Option(name: 'exclude-code-paths', description: 'Comma-separated list of paths (or regular expressions matching paths) to exclude from the code archive.')]
+    #[CLI\Option(name: 'extra-dump', description: 'Add custom arguments/options to the dumping of the database (e.g. <info>mysqldump</info> command).')]
     #[CLI\Option(name: 'files', description: 'Archive Drupal files.')]
     #[CLI\Option(name: 'db', description: 'Archive database SQL dump.')]
     #[CLI\Option(name: 'description', description: 'Describe the archive contents.')]
@@ -79,6 +80,7 @@ final class ArchiveDumpCommands extends DrushCommands
     #[CLI\Usage(name: 'drush archive:dump --destination=/path/to/archive.tar.gz --overwrite', description: 'Create (or overwrite if exists) /path/to/archive.tar.gz file containing code, database and Drupal files.')]
     #[CLI\Usage(name: 'drush archive:dump --code --destination=/path/to/archive.tar.gz', description: 'Create /path/to/archive.tar.gz file containing the code only.')]
     #[CLI\Usage(name: 'drush archive:dump --exclude-code-paths=foo_bar.txt,web/sites/.+/settings.php --destination=/path/to/archive.tar.gz', description: 'Create /path/to/archive.tar.gz file containing code, database and Drupal files but excluding foo_bar.txt file and settings.php files if found in web/sites/* subdirectories.')]
+    #[CLI\Usage(name: 'drush archive:dump --extra-dump=--no-data --destination=/path/to/archive.tar.gz', description: 'Create /path/to/archive.tar.gz file and pass extra option to <info>mysqldump</info> command.')]
     #[CLI\Usage(name: 'drush archive:dump --files --destination=/path/to/archive.tar.gz', description: 'Create /path/to/archive.tar.gz file containing the Drupal files only.')]
     #[CLI\Usage(name: 'drush archive:dump --database --destination=/path/to/archive.tar.gz', description: 'Create /path/to/archive.tar.gz archive file containing the database dump only.')]
     #[CLI\OptionsetTableSelection]
@@ -95,6 +97,7 @@ final class ArchiveDumpCommands extends DrushCommands
         'generator' => InputOption::VALUE_REQUIRED,
         'generatorversion' => InputOption::VALUE_REQUIRED,
         'exclude-code-paths' => InputOption::VALUE_REQUIRED,
+        'extra-dump' => self::REQ,
     ]): string
     {
         $this->prepareArchiveDir();
@@ -237,7 +240,6 @@ final class ArchiveDumpCommands extends DrushCommands
     /**
      * Returns TRUE if the site is a "web" docroot site.
      *
-     * @return bool
      *
      * @throws \Exception
      */
@@ -249,7 +251,6 @@ final class ArchiveDumpCommands extends DrushCommands
     /**
      * Returns site's docroot name.
      *
-     * @return string
      *
      * @throws \Exception
      */
@@ -267,7 +268,6 @@ final class ArchiveDumpCommands extends DrushCommands
     /**
      * Returns site's docroot path.
      *
-     * @return string
      *
      * @throws \Exception
      */
@@ -390,7 +390,6 @@ final class ArchiveDumpCommands extends DrushCommands
     /**
      * Returns the path to Drupal files directory.
      *
-     * @return string
      *
      * @throws \Exception
      */
@@ -419,8 +418,6 @@ final class ArchiveDumpCommands extends DrushCommands
      *   Directory.
      * @param array $excludes
      *   The list of file exclude rules (regular expressions).
-     *
-     * @return \Traversable
      */
     private function getFileIterator(string $path, array $excludes): Traversable
     {
@@ -487,8 +484,6 @@ final class ArchiveDumpCommands extends DrushCommands
      *
      * @param array $paths
      *   The list of paths to match.
-     *
-     * @return array
      */
     private function getRegexpsForPaths(array $paths): array
     {
@@ -501,7 +496,6 @@ final class ArchiveDumpCommands extends DrushCommands
     /**
      * Returns docroot directory name with trailing escaped slash for a "web" docroot site for use in regular expressions, otherwise - empty string.
      *
-     * @return string
      *
      * @throws \Exception
      */
@@ -513,7 +507,6 @@ final class ArchiveDumpCommands extends DrushCommands
     /**
      * Returns the list of regular expressions to match Drupal files paths and sites/@/settings.@.php files.
      *
-     * @return array
      *
      * @throws \Exception
      */

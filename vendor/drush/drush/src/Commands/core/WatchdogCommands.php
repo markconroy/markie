@@ -7,24 +7,26 @@ namespace Drush\Commands\core;
 use Consolidation\AnnotatedCommand\Hooks\HookManager;
 use Consolidation\OutputFormatters\StructuredData\PropertyList;
 use Consolidation\OutputFormatters\StructuredData\RowsOfFields;
+use Drupal\Component\Utility\Html;
+use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Database\Connection;
 use Drupal\Core\Logger\RfcLogLevel;
 use Drupal\Core\Session\AnonymousUserSession;
 use Drupal\user\Entity\User;
 use Drush\Attributes as CLI;
+use Drush\Boot\DrupalBootLevels;
+use Drush\Commands\AutowireTrait;
 use Drush\Commands\DrushCommands;
-use Drupal\Component\Utility\Unicode;
-use Drupal\Component\Utility\Html;
 use Drush\Drupal\DrupalUtil;
 use Drush\Exceptions\UserAbortException;
 use Symfony\Component\Console\Completion\CompletionInput;
 use Symfony\Component\Console\Completion\CompletionSuggestions;
 use Symfony\Component\Console\Output\OutputInterface;
-use Drush\Boot\DrupalBootLevels;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 final class WatchdogCommands extends DrushCommands
 {
+    use AutowireTrait;
+
     const SHOW = 'watchdog:show';
     const LIST = 'watchdog:list';
     const TAIL = 'watchdog:tail';
@@ -33,15 +35,6 @@ final class WatchdogCommands extends DrushCommands
 
     public function __construct(protected Connection $connection)
     {
-    }
-
-    public static function create(ContainerInterface $container): self
-    {
-        $commandHandler = new static(
-            $container->get('database')
-        );
-
-        return $commandHandler;
     }
 
     /**
@@ -199,7 +192,7 @@ final class WatchdogCommands extends DrushCommands
         foreach ($severities as $key => $value) {
             $choices[$key] = $value;
         }
-        $option = $this->io()->choice(dt('Select a message type or severity level'), $choices);
+        $option = $this->io()->select(dt('Select a message type or severity level'), $choices);
         if (isset($types[$option])) {
             $input->setOption('type', $types[$option]);
         } else {
@@ -295,10 +288,9 @@ final class WatchdogCommands extends DrushCommands
      * @param $severity_min
      *   Int or String for the minimum severity to return.
      */
-    protected function where(?string $type = null, $severity = null, ?string $filter = null, string $criteria = 'AND', int|string $severity_min = null): array
+    protected function where(?string $type = null, $severity = null, ?string $filter = null, string $criteria = 'AND', int|string|null $severity_min = null): array
     {
-        $args = [];
-        $conditions = [];
+        $args = $levels = $conditions = [];
         if ($type) {
             $types = $this->messageTypes();
             if (!in_array($type, $types)) {
@@ -353,13 +345,13 @@ final class WatchdogCommands extends DrushCommands
      * Format a watchdog database row.
      *
      * @param $result
-     *   Array. A database result object.
+     *   A database result object.
      * @param $extended
-     *   Boolean. Return extended message details.
-     * @return
-     *   Array. The result object with some attributes themed.
+     *   Return extended message details.
+     * @return \stdClass
+     *   The result object with some attributes themed.
      */
-    protected function formatResult($result, bool $extended = false)
+    protected function formatResult(\stdClass $result, bool $extended = false): \stdClass
     {
         // Severity.
         $severities = RfcLogLevel::getLevels();

@@ -4,21 +4,37 @@ declare(strict_types=1);
 
 namespace Drush\Commands\core;
 
+use Consolidation\SiteAlias\SiteAliasManagerInterface;
 use Consolidation\SiteProcess\Util\Escape;
 use Drush\Attributes as CLI;
 use Drush\Boot\DrupalBootLevels;
 use Drush\Commands\DrushCommands;
 use Drush\Drush;
-use Consolidation\SiteAlias\SiteAliasManagerAwareInterface;
-use Consolidation\SiteAlias\SiteAliasManagerAwareTrait;
 use Drush\Exec\ExecTrait;
+use League\Container\Container as DrushContainer;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
-final class EditCommands extends DrushCommands implements SiteAliasManagerAwareInterface
+final class EditCommands extends DrushCommands
 {
-    use SiteAliasManagerAwareTrait;
     use ExecTrait;
 
     const EDIT = 'core:edit';
+
+    public function __construct(
+        private readonly SiteAliasManagerInterface $siteAliasManager
+    ) {
+        parent::__construct();
+    }
+
+    /**
+     * Not using Autowire in order to implicitly test backward compat.
+     */
+    public static function create(ContainerInterface $container, DrushContainer $drush_container): self
+    {
+        return new self(
+            $drush_container->get('site.alias.manager'),
+        );
+    }
 
     /**
      * Edit drush.yml, site alias, and Drupal settings.php files.
@@ -67,16 +83,16 @@ final class EditCommands extends DrushCommands implements SiteAliasManagerAwareI
 
     public function load($headers = true): array
     {
-        $php_header = $rcs_header = $aliases_header = $drupal_header = $drupal = [];
+        $php_header = $rcs_header = $aliases_header = $drupal_header = $bash_header = $drupal = [];
         $php = $this->phpIniFiles();
-        if (!empty($php)) {
+        if ($php !== []) {
             if ($headers) {
                 $php_header = ['phpini' => '-- PHP ini files --'];
             }
         }
 
         $bash = $this->bashFiles();
-        if (!empty($bash)) {
+        if ($bash !== []) {
             if ($headers) {
                 $bash_header = ['bash' => '-- Bash files --'];
             }
@@ -90,7 +106,7 @@ final class EditCommands extends DrushCommands implements SiteAliasManagerAwareI
             }
         }
 
-        if ($aliases = $this->siteAliasManager()->listAllFilePaths()) {
+        if ($aliases = $this->siteAliasManager->listAllFilePaths()) {
             sort($aliases);
             $aliases = array_combine($aliases, $aliases);
             if ($headers) {

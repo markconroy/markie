@@ -8,11 +8,11 @@ use Consolidation\AnnotatedCommand\AnnotationData;
 use Consolidation\AnnotatedCommand\Hooks\InitializeHookInterface;
 use Consolidation\SiteAlias\SiteAliasManagerAwareInterface;
 use Consolidation\SiteAlias\SiteAliasManagerAwareTrait;
-use Consolidation\SiteProcess\ProcessManager;
 use Consolidation\SiteProcess\Util\Tty;
 use Drush\Attributes\HandleRemoteCommands;
 use Drush\Config\ConfigAwareTrait;
 use Drush\Drush;
+use Drush\SiteAlias\ProcessManager;
 use Robo\Contract\ConfigAwareInterface;
 use Symfony\Component\Console\Input\InputInterface;
 
@@ -74,7 +74,7 @@ class RedispatchHook implements InitializeHookInterface, ConfigAwareInterface, S
     {
         // Get the command arguments, and shift off the Drush command.
         $redispatchArgs = $this->getConfig()->get('runtime.argv');
-        $drush_path = array_shift($redispatchArgs);
+        array_shift($redispatchArgs);
         $command_name = $this->getConfig()->get('runtime.command');
 
         Drush::logger()->debug('Redispatch hook {command}', ['command' => $command_name]);

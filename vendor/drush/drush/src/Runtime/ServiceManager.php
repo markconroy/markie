@@ -13,6 +13,8 @@ use Consolidation\SiteAlias\SiteAliasManagerAwareInterface;
 use Consolidation\SiteProcess\ProcessManagerAwareInterface;
 use Drupal\Component\DependencyInjection\ContainerInterface as DrupalContainer;
 use DrupalCodeGenerator\Command\BaseGenerator;
+use Drush\Attributes\Bootstrap;
+use Drush\Boot\DrupalBootLevels;
 use Drush\Commands\DrushCommands;
 use Drush\Config\DrushConfig;
 use Grasmash\YamlCli\Command\GetValueCommand;
@@ -20,12 +22,13 @@ use Grasmash\YamlCli\Command\LintCommand;
 use Grasmash\YamlCli\Command\UnsetKeyCommand;
 use Grasmash\YamlCli\Command\UpdateKeyCommand;
 use Grasmash\YamlCli\Command\UpdateValueCommand;
-use Psr\Container\ContainerInterface as DrushContainer;
+use League\Container\Container as DrushContainer;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
 use Robo\ClassDiscovery\RelativeNamespaceDiscovery;
 use Robo\Contract\ConfigAwareInterface;
 use Robo\Contract\OutputAwareInterface;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputAwareInterface;
 
 /**
@@ -61,7 +64,7 @@ class ServiceManager
      * Ensure that any discovered class that is not part of the autoloader
      * is, in fact, included.
      *
-     * @param array Associative array mapping path => class.
+     * @param array $commandClasses Associative array mapping path => class.
      */
     protected function loadCommandClasses(array $commandClasses): void
     {
@@ -105,9 +108,9 @@ class ServiceManager
             [FilterHooks::class]
         ));
 
-        // If a command class has a static `create` method, then we will
+        // If a command class has a Bootstrap Attribute or static `create` method, we
         // postpone instantiating it until after we bootstrap Drupal.
-        $this->bootstrapCommandClasses = array_filter($commandClasses, [$this, 'hasStaticCreateFactory']);
+        $this->bootstrapCommandClasses = array_filter($commandClasses, [$this, 'requiresBootstrap']);
 
         // Remove the command classes that we put into the bootstrap command classes.
         $commandClasses = array_diff($commandClasses, $this->bootstrapCommandClasses);
@@ -288,14 +291,12 @@ class ServiceManager
     }
 
     /**
-     * Instantiate objects given a lsit of classes. For each class, if it has
+     * Instantiate objects given a list of classes. For each class, if it has
      * a static `create` factory, use that to instantiate it, passing both the
      * Drupal and Drush DI containers. If there is no static factory, then
      * instantiate it via 'new $class'
      *
      * @param string[] $bootstrapCommandClasses Classes to instantiate.
-     * @param Drupal\Component\DependencyInjection\ContainerInterface $container
-     * @param Psr\Container\ContainerInterface $drushContainer
      *
      * @return object[]
      *   List of instantiated service objects
@@ -313,11 +314,19 @@ class ServiceManager
             return !$reflection->isAbstract();
         });
 
+        // Prevent duplicate calls to delegate() by checking for state.
+        if ($container && !$drushContainer->has('state')) {
+            // Combine the two containers.
+            $drushContainer->delegate($container);
+        }
         foreach ($bootstrapCommandClasses as $class) {
             $commandHandler = null;
 
             try {
-                if ($container && $this->hasStaticCreateFactory($class)) {
+                if ($this->hasStaticCreateFactory($class) && $this->supportsCompoundContainer($class, $drushContainer)) {
+                    // Hurray, this class is compatible with the container with delegate.
+                    $commandHandler = $class::create($drushContainer);
+                } elseif ($container && $this->hasStaticCreateFactory($class)) {
                     $commandHandler = $class::create($container, $drushContainer);
                 } elseif (!$container && $this->hasStaticCreateEarlyFactory($class)) {
                     $commandHandler = $class::createEarly($drushContainer);
@@ -338,16 +347,63 @@ class ServiceManager
     }
 
     /**
+     * Determine if the first parameter of the create method supports our container with delegate.
+     */
+    protected function supportsCompoundContainer($class, $drush_container): bool
+    {
+        $reflection = new \ReflectionMethod($class, 'create');
+        $hint = (string)$reflection->getParameters()[0]->getType();
+        return is_a($drush_container, $hint);
+    }
+
+    /**
      * Check to see if the provided class has a static `create` method.
-     *
-     * @param string $class The name of the class to check
-     *
-     * @return bool
-     *   True if class has a static `create` method.
      */
     protected function hasStaticCreateFactory(string $class): bool
     {
         return static::hasStaticMethod($class, 'create');
+    }
+
+    /**
+     * Does the provided class have a Bootstrap Attribute, indicating early loading.
+     */
+    protected function bootStrapAttributeValue(string $class): ?int
+    {
+        try {
+            $reflection = new \ReflectionClass($class);
+            if ($attributes = $reflection->getAttributes(Bootstrap::class)) {
+                $bootstrap = $attributes[0]->newInstance();
+                return $bootstrap->level;
+            }
+        } catch (\ReflectionException $e) {
+        }
+        return null;
+    }
+
+    /**
+     * Check whether a command class requires Drupal bootstrap.
+     */
+    protected function requiresBootstrap(string $class): bool
+    {
+        if ($this->bootStrapAttributeValue($class) === DrupalBootLevels::FULL) {
+            return true;
+        } elseif ($this->bootStrapAttributeValue($class) === DrupalBootLevels::NONE) {
+            return false;
+        }
+        return $this->hasStaticCreateFactory($class);
+    }
+
+    /**
+     * Check to see if the provided class has the specified static method.
+     */
+    protected function hasStaticMethod(string $class, string $methodName): bool
+    {
+        if (!method_exists($class, $methodName)) {
+            return false;
+        }
+
+        $reflectionMethod = new \ReflectionMethod($class, $methodName);
+        return $reflectionMethod->isStatic();
     }
 
     /**
@@ -361,25 +417,6 @@ class ServiceManager
     protected function hasStaticCreateEarlyFactory(string $class): bool
     {
         return static::hasStaticMethod($class, 'createEarly');
-    }
-
-    /**
-     * Check to see if the provided class has the specified static method.
-     *
-     * @param string $class The name of the class to check
-     * @param string $methodName The name of the method the class should have
-     *
-     * @return bool
-     *   True if class has a static method with the specified name.
-     */
-    protected function hasStaticMethod(string $class, string $methodName): bool
-    {
-        if (!method_exists($class, $methodName)) {
-            return false;
-        }
-
-        $reflectionMethod = new \ReflectionMethod($class, $methodName);
-        return $reflectionMethod->isStatic();
     }
 
     /**
@@ -414,7 +451,7 @@ class ServiceManager
         if ($object instanceof ConfigAwareInterface) {
             $object->setConfig($container->get('config'));
         }
-        if ($object instanceof LoggerAwareInterface) {
+        if ($object instanceof LoggerAwareInterface && (!method_exists($object, 'logger') || empty($object->logger()))) {
             $object->setLogger($container->get('logger'));
         }
         // Made available by DrushCommands (must preserve for basic bc)
@@ -432,7 +469,7 @@ class ServiceManager
         }
         // These may be removed in future versions of Drush
         if ($object instanceof SiteAliasManagerAwareInterface) {
-            $object->setSiteAliasManager($container->get('site.alias.manager'));
+            $object->setSiteAliasManager($container->get(DependencyInjection::SITE_ALIAS_MANAGER));
         }
         if ($object instanceof StdinAwareInterface) {
             $object->setStdinHandler($container->get('stdinHandler'));

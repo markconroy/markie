@@ -4,8 +4,18 @@ declare(strict_types=1);
 
 namespace Drush\Commands\core;
 
+use Drupal\Core\Entity\ContentEntityInterface;
+use Drush\Psysh\Caster;
+use Drupal\Core\Field\FieldItemListInterface;
+use Drupal\Core\Field\FieldItemInterface;
+use Drupal\Core\Config\Entity\ConfigEntityInterface;
+use Drupal\Core\Config\ConfigBase;
+use Drupal\Component\DependencyInjection\Container;
+use Drupal\Component\Render\MarkupInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drush\Attributes as CLI;
+use Drush\Boot\DrupalBootLevels;
+use Drush\Commands\AutowireTrait;
 use Drush\Commands\DrushCommands;
 use Drush\Drush;
 use Drush\Psysh\DrushCommand;
@@ -15,11 +25,11 @@ use Drush\Runtime\Runtime;
 use Drush\Utils\FsUtils;
 use Psy\Configuration;
 use Psy\VersionUpdater\Checker;
-use Drush\Boot\DrupalBootLevels;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 final class CliCommands extends DrushCommands
 {
+    use AutowireTrait;
+
     const DOCS_REPL = 'docs:repl';
     const PHP = 'php:cli';
 
@@ -27,15 +37,6 @@ final class CliCommands extends DrushCommands
         protected EntityTypeManagerInterface $entityTypeManager
     ) {
         parent::__construct();
-    }
-
-    public static function create(ContainerInterface $container): self
-    {
-        $commandHandler = new static(
-            $container->get('entity_type.manager')
-        );
-
-        return $commandHandler;
     }
 
     /**
@@ -53,7 +54,7 @@ final class CliCommands extends DrushCommands
     /**
      * Open an interactive shell on a Drupal site.
      */
-    #[CLI\Command(name: self::PHP, aliases: ['php,core:cli', 'core-cli'])]
+    #[CLI\Command(name: self::PHP, aliases: ['php', 'core:cli', 'core-cli'])]
     #[CLI\Option(name: 'version-history', description: 'Use command history based on Drupal version. Default is per site.')]
     #[CLI\Option(name: 'cwd', description: 'A directory to change to before launching the shell. Default is the project root directory')]
     #[CLI\Topics(topics: [self::DOCS_REPL])]
@@ -176,13 +177,13 @@ final class CliCommands extends DrushCommands
     protected function getCasters(): array
     {
         return [
-            \Drupal\Core\Entity\ContentEntityInterface::class => \Drush\Psysh\Caster::castContentEntity(...),
-            \Drupal\Core\Field\FieldItemListInterface::class => \Drush\Psysh\Caster::castFieldItemList(...),
-            \Drupal\Core\Field\FieldItemInterface::class => \Drush\Psysh\Caster::castFieldItem(...),
-            \Drupal\Core\Config\Entity\ConfigEntityInterface::class => \Drush\Psysh\Caster::castConfigEntity(...),
-            \Drupal\Core\Config\ConfigBase::class => \Drush\Psysh\Caster::castConfig(...),
-            \Drupal\Component\DependencyInjection\Container::class => \Drush\Psysh\Caster::castContainer(...),
-            \Drupal\Component\Render\MarkupInterface::class => \Drush\Psysh\Caster::castMarkup(...),
+            ContentEntityInterface::class => Caster::castContentEntity(...),
+            FieldItemListInterface::class => Caster::castFieldItemList(...),
+            FieldItemInterface::class => Caster::castFieldItem(...),
+            ConfigEntityInterface::class => Caster::castConfigEntity(...),
+            ConfigBase::class => Caster::castConfig(...),
+            Container::class => Caster::castContainer(...),
+            MarkupInterface::class => Caster::castMarkup(...),
         ];
     }
 
@@ -191,7 +192,6 @@ final class CliCommands extends DrushCommands
      *
      * This can either be site specific (default) or Drupal version specific.
      *
-     * @param array $options
      *
      * @return string.
      */
@@ -313,8 +313,9 @@ final class CliCommands extends DrushCommands
             $reflectionClass = new \ReflectionClass($class);
             $parts = explode('\\', $class);
             $end = end($parts);
-            // https://github.com/drush-ops/drush/pull/5729 and https://github.com/drush-ops/drush/issues/5730.
-            if ($reflectionClass->isAbstract() || $reflectionClass->isFinal() || class_exists($end)) {
+            // https://github.com/drush-ops/drush/pull/5729, https://github.com/drush-ops/drush/issues/5730
+            // and https://github.com/drush-ops/drush/issues/5899.
+            if ($reflectionClass->isFinal() || $reflectionClass->isAbstract() || class_exists($end)) {
                 continue;
             }
             // Make it possible to easily load revisions.

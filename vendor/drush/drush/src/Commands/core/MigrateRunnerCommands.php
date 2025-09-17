@@ -19,53 +19,38 @@ use Drupal\migrate\Plugin\MigrationInterface;
 use Drupal\migrate\Plugin\MigrationPluginManagerInterface;
 use Drupal\migrate\Plugin\RequirementsInterface;
 use Drush\Attributes as CLI;
-use Drush\Commands\core\DocsCommands;
+use Drush\Commands\AutowireTrait;
 use Drush\Commands\DrushCommands;
-use Drush\Config\ConfigAwareTrait;
-use Drush\Drupal\Migrate;
 use Drush\Drupal\Migrate\MigrateExecutable;
 use Drush\Drupal\Migrate\MigrateMessage;
 use Drush\Drupal\Migrate\MigrateUtils;
+use Drush\Drupal\Migrate\ValidateMigrationId;
+use Drush\Drush;
 use Drush\Utils\StringUtils;
-use Robo\Contract\ConfigAwareInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Filesystem\Path;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
-/**
- * Migrate runner commands.
- */
-class MigrateRunnerCommands extends DrushCommands implements ConfigAwareInterface
+class MigrateRunnerCommands extends DrushCommands
 {
-    use ConfigAwareTrait;
+    use AutowireTrait;
 
-    /**
-     * The key-value store service.
-     */
-    protected KeyValueStoreInterface $keyValue;
     protected ?MigrationPluginManagerInterface $migrationPluginManager = null;
+    protected KeyValueStoreInterface $keyValue;
+    private MigrateMessage $migrateMessage;
 
     public function __construct(
         protected DateFormatterInterface $dateFormatter,
-        KeyValueFactoryInterface $keyValueFactory
+        // @todo Can we avoid the autowire attribute here?
+        #[Autowire(service: 'keyvalue')]
+        protected KeyValueFactoryInterface $keyValueFactory
     ) {
         parent::__construct();
         $this->keyValue = $keyValueFactory->get('migrate_last_imported');
-    }
 
-    public static function create(ContainerInterface $container): self
-    {
-        $migrationPluginManager = null;
-
-        $commandHandler = new static(
-            $container->get('date.formatter'),
-            $container->get('keyvalue')
-        );
-
+        $container = Drush::getContainer();
         if ($container->has('plugin.manager.migration')) {
-            $commandHandler->setMigrationPluginManager($container->get('plugin.manager.migration'));
+            $this->setMigrationPluginManager($container->get('plugin.manager.migration'));
         }
-
-        return $commandHandler;
     }
 
     /**
@@ -114,6 +99,7 @@ class MigrateRunnerCommands extends DrushCommands implements ConfigAwareInterfac
       'format' => 'table'
     ]): RowsOfFields
     {
+        $fields = [];
         if ($options['field']) {
             $fields = [$options['field']];
         } elseif ($options['fields']) {
@@ -215,7 +201,7 @@ class MigrateRunnerCommands extends DrushCommands implements ConfigAwareInterfac
      * @param MigrationInterface $migration
      *   The migration plugin instance.
      *
-     * @return int|null
+     * @return int
      *   The number of items that needs update.
      */
     protected function getMigrationNeedingUpdateCount(MigrationInterface $migration): int
@@ -362,7 +348,7 @@ class MigrateRunnerCommands extends DrushCommands implements ConfigAwareInterfac
         ];
 
         // Include the file providing a migrate_prepare_row hook implementation.
-        require_once Path::join($this->config->get('drush.base-dir'), 'src/Drupal/Migrate/migrate_runner.inc');
+        require_once Path::join($this->getConfig()->get('drush.base-dir'), 'src/Drupal/Migrate/migrate_runner.inc');
         // If the 'migrate_prepare_row' hook implementations are already cached,
         // make sure that system_migrate_prepare_row() is picked-up.
         \Drupal::moduleHandler()->resetImplementations();
@@ -486,7 +472,7 @@ class MigrateRunnerCommands extends DrushCommands implements ConfigAwareInterfac
     #[CLI\Argument(name: 'migrationId', description: 'The ID of migration to stop.')]
     #[CLI\Topics(topics: [DocsCommands::MIGRATE])]
     #[CLI\ValidateModulesEnabled(modules: ['migrate'])]
-    #[Migrate\ValidateMigrationId()]
+    #[ValidateMigrationId()]
     #[CLI\Version(version: '10.4')]
     public function stop(string $migrationId): void
     {
@@ -518,7 +504,7 @@ class MigrateRunnerCommands extends DrushCommands implements ConfigAwareInterfac
     #[CLI\Argument(name: 'migrationId', description: 'The ID of migration to reset.')]
     #[CLI\Topics(topics: [DocsCommands::MIGRATE])]
     #[CLI\ValidateModulesEnabled(modules: ['migrate'])]
-    #[Migrate\ValidateMigrationId()]
+    #[ValidateMigrationId()]
     #[CLI\Version(version: '10.4')]
     public function resetStatus(string $migrationId): void
     {
@@ -546,7 +532,7 @@ class MigrateRunnerCommands extends DrushCommands implements ConfigAwareInterfac
     #[CLI\Usage(name: 'migrate:messages custom_node_revision --idlist=1:"r:1",2:"r:3"', description: 'Show messages related to node revision records with source IDs [1,"r:1"], and [2,"r:3"].')]
     #[CLI\Topics(topics: [DocsCommands::MIGRATE])]
     #[CLI\ValidateModulesEnabled(modules: ['migrate'])]
-    #[Migrate\ValidateMigrationId()]
+    #[ValidateMigrationId()]
     #[CLI\FieldLabels(labels: [
         'level' => 'Level',
         'source_ids' => 'Source ID(s)',
@@ -569,7 +555,7 @@ class MigrateRunnerCommands extends DrushCommands implements ConfigAwareInterfac
         $idMap = $migration->getIdMap();
         $sourceIdKeys = $this->getSourceIdKeys($idMap);
         $table = [];
-        if (empty($sourceIdKeys)) {
+        if ($sourceIdKeys === []) {
             // Cannot find one item to extract keys from, no need to process
             // messages on an empty ID map.
             return new RowsOfFields($table);
@@ -645,7 +631,7 @@ class MigrateRunnerCommands extends DrushCommands implements ConfigAwareInterfac
     #[CLI\Usage(name: 'migrate:fields-source article', description: 'List fields for the source in the article migration.')]
     #[CLI\Topics(topics: ['docs:migrate'])]
     #[CLI\ValidateModulesEnabled(modules: ['migrate'])]
-    #[Migrate\ValidateMigrationId()]
+    #[ValidateMigrationId()]
     #[CLI\FieldLabels(labels: [
         'machine_name' => 'Field name',
         'description' => 'Description',

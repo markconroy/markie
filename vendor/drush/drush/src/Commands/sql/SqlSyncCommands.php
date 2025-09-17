@@ -6,24 +6,31 @@ namespace Drush\Commands\sql;
 
 use Consolidation\AnnotatedCommand\CommandData;
 use Consolidation\AnnotatedCommand\Hooks\HookManager;
+use Consolidation\SiteAlias\SiteAlias;
+use Consolidation\SiteAlias\SiteAliasManagerInterface;
 use Drush\Attributes as CLI;
-use Drush\Commands\core\CoreCommands;
+use Drush\Boot\DrupalBootLevels;
+use Drush\Commands\AutowireTrait;
 use Drush\Commands\core\DocsCommands;
 use Drush\Commands\core\RsyncCommands;
 use Drush\Commands\core\StatusCommands;
 use Drush\Commands\DrushCommands;
 use Drush\Drush;
 use Drush\Exceptions\UserAbortException;
-use Consolidation\SiteAlias\SiteAlias;
-use Consolidation\SiteAlias\SiteAliasManagerAwareInterface;
-use Consolidation\SiteAlias\SiteAliasManagerAwareTrait;
 use Symfony\Component\Filesystem\Path;
 
-final class SqlSyncCommands extends DrushCommands implements SiteAliasManagerAwareInterface
+#[CLI\Bootstrap(DrupalBootLevels::NONE)]
+final class SqlSyncCommands extends DrushCommands
 {
-    use SiteAliasManagerAwareTrait;
+    use AutowireTrait;
 
     const SYNC = 'sql:sync';
+
+    public function __construct(
+        private readonly SiteAliasManagerInterface $siteAliasManager
+    ) {
+        parent::__construct();
+    }
 
     /**
      * Copy DB data from a source site to a target site. Transfers data via rsync.
@@ -47,9 +54,8 @@ final class SqlSyncCommands extends DrushCommands implements SiteAliasManagerAwa
     #[CLI\Topics(topics: [DocsCommands::ALIASES, DocsCommands::POLICY, DocsCommands::CONFIGURATION, DocsCommands::EXAMPLE_SYNC_VIA_HTTP])]
     public function sqlsync($source, $target, $options = ['no-dump' => false, 'no-sync' => false, 'runner' => self::REQ, 'create-db' => false, 'db-su' => self::REQ, 'db-su-pw' => self::REQ, 'target-dump' => self::REQ, 'source-dump' => self::OPT, 'extra-dump' => self::REQ]): void
     {
-        $manager = $this->siteAliasManager();
-        $sourceRecord = $manager->get($source);
-        $targetRecord = $manager->get($target);
+        $sourceRecord = $this->siteAliasManager->get($source);
+        $targetRecord = $this->siteAliasManager->get($target);
 
         // Append --strict in case we are calling older versions of Drush.
         $global_options = Drush::redispatchOptions()  + ['strict' => 0];
@@ -74,11 +80,10 @@ final class SqlSyncCommands extends DrushCommands implements SiteAliasManagerAwa
         $source = $commandData->input()->getArgument('source');
         $target = $commandData->input()->getArgument('target');
         // Get target info for confirmation prompt.
-        $manager = $this->siteAliasManager();
-        if (!$sourceRecord = $manager->get($source)) {
+        if (!$sourceRecord = $this->siteAliasManager->get($source)) {
             throw new \Exception(dt('Error: no alias record could be found for source !source', ['!source' => $source]));
         }
-        if (!$targetRecord = $manager->get($target)) {
+        if (!$targetRecord = $this->siteAliasManager->get($target)) {
             throw new \Exception(dt('Error: no alias record could be found for target !target', ['!target' => $target]));
         }
         if (!$commandData->input()->getOption('no-dump') && !$source_db_name = $this->databaseName($sourceRecord)) {
@@ -156,7 +161,6 @@ final class SqlSyncCommands extends DrushCommands implements SiteAliasManagerAwa
     }
 
     /**
-     * @param array $options
      * @param $source_dump_path
      *   Path to the target file.
      * @throws \Exception
@@ -190,7 +194,7 @@ final class SqlSyncCommands extends DrushCommands implements SiteAliasManagerAwa
                 $double_dash_options['remove-source-files'] = true;
             }
             if (!$runner = $options['runner']) {
-                $runner = $sourceRecord->isRemote() && $targetRecord->isRemote() ? $targetRecord : $this->siteAliasManager()->getSelf();
+                $runner = $sourceRecord->isRemote() && $targetRecord->isRemote() ? $targetRecord : $this->siteAliasManager->getSelf();
             }
             if ($runner == 'source') {
                 $runner = $sourceRecord;

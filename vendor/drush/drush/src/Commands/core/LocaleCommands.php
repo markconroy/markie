@@ -15,13 +15,15 @@ use Drupal\Core\State\StateInterface;
 use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\locale\PoDatabaseReader;
 use Drush\Attributes as CLI;
+use Drush\Commands\AutowireTrait;
 use Drush\Commands\DrushCommands;
 use Drush\Exceptions\CommandFailedException;
 use Drush\Utils\StringUtils;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 final class LocaleCommands extends DrushCommands
 {
+    use AutowireTrait;
+
     const CHECK = 'locale:check';
     const CLEAR = 'locale:clear-status';
     const UPDATE = 'locale:update';
@@ -39,30 +41,18 @@ final class LocaleCommands extends DrushCommands
         return $this->configFactory;
     }
 
-    public function getModuleHandler(): ModuleHandlerInterface
-    {
-        return $this->moduleHandler;
-    }
-
     public function getState(): StateInterface
     {
         return $this->state;
     }
 
-    public function __construct(protected LanguageManagerInterface $languageManager, protected ConfigFactoryInterface $configFactory, protected ModuleHandlerInterface $moduleHandler, protected StateInterface $state)
-    {
-    }
-
-    public static function create(ContainerInterface $container): self
-    {
-        $commandHandler = new static(
-            $container->get('language_manager'),
-            $container->get('config.factory'),
-            $container->get('module_handler'),
-            $container->get('state')
-        );
-
-        return $commandHandler;
+    public function __construct(
+        protected LanguageManagerInterface $languageManager,
+        protected ConfigFactoryInterface $configFactory,
+        protected ModuleHandlerInterface $moduleHandler,
+        protected StateInterface $state
+    ) {
+        parent::__construct();
     }
 
     /**
@@ -72,7 +62,7 @@ final class LocaleCommands extends DrushCommands
     #[CLI\ValidateModulesEnabled(modules: ['locale'])]
     public function check(): void
     {
-        $this->getModuleHandler()->loadInclude('locale', 'inc', 'locale.compare');
+        $this->moduleHandler->loadInclude('locale', 'inc', 'locale.compare');
 
         // Check translation status of all translatable project in all languages.
         // First we clear the cached list of projects. Although not strictly
@@ -113,7 +103,7 @@ final class LocaleCommands extends DrushCommands
     #[CLI\ValidateModulesEnabled(modules: ['locale'])]
     public function update($options = ['langcodes' => self::REQ]): void
     {
-        $module_handler = $this->getModuleHandler();
+        $module_handler = $this->moduleHandler;
         $module_handler->loadInclude('locale', 'fetch.inc');
         $module_handler->loadInclude('locale', 'bulk.inc');
 
@@ -234,8 +224,8 @@ final class LocaleCommands extends DrushCommands
             throw new \Exception('Translation files not found in the defined directory.');
         }
 
-        $this->getModuleHandler()->loadInclude('locale', 'translation.inc');
-        $this->getModuleHandler()->loadInclude('locale', 'bulk.inc');
+        $this->moduleHandler->loadInclude('locale', 'translation.inc');
+        $this->moduleHandler->loadInclude('locale', 'bulk.inc');
 
         $translationOptions = _locale_translation_default_update_options();
         $translationOptions['customized'] = $this->convertCustomizedType($options['type']);
@@ -317,8 +307,8 @@ final class LocaleCommands extends DrushCommands
 
         $language = $this->getTranslatableLanguage($langcode, $options['autocreate-language']);
 
-        $this->getModuleHandler()->loadInclude('locale', 'translation.inc');
-        $this->getModuleHandler()->loadInclude('locale', 'bulk.inc');
+        $this->moduleHandler->loadInclude('locale', 'translation.inc');
+        $this->moduleHandler->loadInclude('locale', 'bulk.inc');
 
         $translationOptions = _locale_translation_default_update_options();
         $translationOptions['langcode'] = $language->getId();
@@ -428,8 +418,6 @@ final class LocaleCommands extends DrushCommands
 
     /**
      * Check if language is translatable.
-     *
-     * @param LanguageInterface $language
      */
     private function isTranslatable(LanguageInterface $language): bool
     {
@@ -462,7 +450,7 @@ final class LocaleCommands extends DrushCommands
             'not_translated' => 'not-translated',
         ];
 
-        if (empty($types)) {
+        if ($types === []) {
             return array_fill_keys(array_keys($valid_convertions), true);
         }
 
@@ -487,7 +475,7 @@ final class LocaleCommands extends DrushCommands
      * @param array $options The export options for PoDatabaseReader.
      * @return bool True if successful.
      */
-    private function writePoFile(string $file_uri, LanguageInterface $language = null, array $options = []): bool
+    private function writePoFile(string $file_uri, ?LanguageInterface $language = null, array $options = []): bool
     {
         $reader = new PoDatabaseReader();
 

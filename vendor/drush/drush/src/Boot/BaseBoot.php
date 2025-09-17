@@ -46,10 +46,12 @@ abstract class BaseBoot implements Boot, LoggerAwareInterface
 
     public function validRoot(?string $path): bool
     {
+        return false;
     }
 
-    public function getVersion($root)
+    public function getVersion(string $root)
     {
+        return null;
     }
 
     public function commandDefaults()

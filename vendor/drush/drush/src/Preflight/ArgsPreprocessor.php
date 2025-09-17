@@ -126,12 +126,13 @@ class ArgsPreprocessor
      * @param $optionsTable Table of option names and the name of the
      *   method that should be called to process that option.
      * @param $opt The option string to check
-     * @return [$methodName, $optionValue, $acceptsValueFromNextArg]
+     * @return array
+     *   [$methodName, $optionValue, $acceptsValueFromNextArg]
      */
     protected function findMethodForOptionWithValues(array $optionsTable, string $opt): array
     {
         // Skip $opt if it is empty, or if it is not an option.
-        if (empty($opt) || ($opt[0] != '-')) {
+        if (empty($opt) || ($opt[0] !== '-')) {
             return [false, false, false];
         }
 
@@ -156,15 +157,16 @@ class ArgsPreprocessor
      *   '--'.  If $key ends with '=', then the option must have a value.
      *   Otherwise, it cannot be supplied with a value, and always defaults
      *   to 'true'.
-     * @return [$methodName, $optionValue, $acceptsValueFromNextArg]
+     * @return array
+     *   [$methodName, $optionValue, $acceptsValueFromNextArg]
      */
     protected function checkMatchingOption(string $opt, string $keyParam, string $methodName): array
     {
         // Test to see if $key ends in '='; remove the character if present.
         // If the char is removed, it means the option accepts a value.
         $key = rtrim($keyParam, '=~');
-        $acceptsValue = $key != $keyParam;
-        $acceptsValueFromNextArg = $keyParam[strlen($keyParam) - 1] != '~';
+        $acceptsValue = $key !== $keyParam;
+        $acceptsValueFromNextArg = $keyParam[strlen($keyParam) - 1] !== '~';
 
         // If $opt does not begin with $key, then it cannot be a match.
         if (!str_starts_with($opt, $key)) {
@@ -183,7 +185,7 @@ class ArgsPreprocessor
         // If the option is not an exact match for the key, then the next
         // character in the option after the key name must be an '='. Otherwise,
         // we might confuse `--locale` for `--local`, etc.
-        if ($opt[strlen($key)] != '=') {
+        if ($opt[strlen($key)] !== '=') {
             return [false, false, false];
         }
 
@@ -198,7 +200,7 @@ class ArgsPreprocessor
 
         // If $opt is a double-dash option, and it contains an '=', then
         // the option value is everything after the '='.
-        if ((strlen($key) < strlen($opt)) && ($opt[1] == '-') && ($opt[strlen($key)] == '=')) {
+        if ((strlen($key) < strlen($opt)) && ($opt[1] === '-') && ($opt[strlen($key)] === '=')) {
             $value = substr($opt, strlen($key) + 1);
             return [$methodName, $value, false];
         }

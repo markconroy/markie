@@ -2,17 +2,17 @@
 
 !!! tip
 
-      1. Drush 12 expects commandfiles to use a [create() method](dependency-injection.md#create-method) to inject Drupal and Drush dependencies. Prior versions used a [drush.services.yml file](https://www.drush.org/11.x/dependency-injection/#services-files) which is now deprecated and will be removed in Drush 13.
+      1. Drush 13 expects commandfiles to use [Autowire](https://github.com/drush-ops/drush/blob/13.x/src/Commands/AutowireTrait.php) to inject Drupal and Drush dependencies. Prior versions used a [drush.services.yml file](https://www.drush.org/11.x/dependency-injection/#services-files) which is now deprecated and will be removed in Drush 13.
       1. Drush 12 expects all commandfiles in the `<module-name>/src/Drush/<Commands|Generators>` directory. The `Drush` subdirectory is a new requirement.
 
 Creating a new Drush command is easy. Follow the steps below.
 
 1. Run `drush generate drush:command-file`.
-2. Drush will prompt for the machine name of the module that should "own" the file. The module selected must already exist and be enabled. Use `drush generate module` to create a new module.
+2. Drush will prompt for the machine name of the module that should _own_ the file. The module selected must already exist and be enabled. Use `drush generate module` to create a new module.
 3. Drush will then report that it created a commandfile. Edit as needed.
-4. Use the classes for the core Drush commands at [/src/Commands](https://github.com/drush-ops/drush/tree/12.x/src/Commands) as inspiration and documentation.
-5. See the [dependency injection docs](dependency-injection.md) for interfaces you can implement to gain access to Drush config, Drupal site aliases, etc. Also note the [create() method](dependency-injection.md#create-method) for injecting Drupal or Drush dependencies.
-6. Write PHPUnit tests based on [Drush Test Traits](https://github.com/drush-ops/drush/blob/12.x/docs/contribute/unish.md#drush-test-traits).
+4. Use the classes for the core Drush commands at [/src/Commands](https://github.com/drush-ops/drush/tree/13.x/src/Commands) as inspiration and documentation.
+5. You may [inject dependencies](dependency-injection.md) into a command instance.
+6. Write PHPUnit tests based on [Drush Test Traits](https://github.com/drush-ops/drush/blob/13.x/docs/contribute/unish.md#drush-test-traits).
 
 ## Attributes or Annotations
 The following are both valid ways to declare a command:
@@ -56,23 +56,25 @@ The following are both valid ways to declare a command:
     ```
 
 - A commandfile that will only be used on PHP8+ should [use PHP Attributes](https://github.com/drush-ops/drush/pull/4821) instead of Annotations.
-- [See Attributes provided by Drush core](https://www.drush.org/api/Drush/Attributes.html). Custom code can add additional attributes.
+- [See Attributes provided by Drush core](https://www.drush.org/api/Drush/Attributes.html). Custom code can supply additional Attribute classes, which may then be used by any command.
 
 ## Altering Command Info
 Drush command info (annotations/attributes) can be altered from other modules. This is done by creating and registering _command info alterers_. Alterers are classes that are able to intercept and manipulate an existing command annotation.
 
 In the module that wants to alter a command info, add a class that:
 
-1. The generator class namespace, relative to base namespace, should be `Drupal\<module-name>\Drush\CommandInfoAlterers` and the class file should be located under the `src/Drush/CommandInfoAlterers` directory.
+1. The class namespace, relative to base namespace, should be `Drupal\<module-name>\Drush\CommandInfoAlterers` and the class file should be located under the `src/Drush/CommandInfoAlterers` directory.
 1. The filename must have a name like FooCommandInfoAlterer.php. The prefix `Foo` can be whatever string you want. The file must end in `CommandInfoAlterer.php`.
 1. The class must implement the `\Consolidation\AnnotatedCommand\CommandInfoAltererInterface`.
 1. Implement the alteration logic in the `alterCommandInfo()` method.
 1. Along with the alter code, it's strongly recommended to log a debug message explaining what exactly was altered. This makes things easier on others who may need to debug the interaction of the alter code with other modules. Also it's a good practice to inject the the logger in the class constructor.
 
-For an example, see [WootCommandInfoAlterer](https://github.com/drush-ops/drush/blob/12.x/sut/modules/unish/woot/src/Drush/CommandInfoAlterers/WootCommandInfoAlterer.php) provided by the testing 'woot' module.
+For an example, see [WootCommandInfoAlterer](https://github.com/drush-ops/drush/blob/13.x/sut/modules/unish/woot/src/Drush/CommandInfoAlterers/WootCommandInfoAlterer.php) provided by the testing 'woot' module.
 
 ## Symfony Console Commands
-Drush lists and runs Symfony Console commands, in addition to more typical annotated commands. See [this test](https://github.com/drush-ops/drush/blob/eed106ae4510d5a2df89f8e7fd54b41ffb0aa5fa/tests/integration/AnnotatedCommandCase.php#L178-L180) and this [commandfile](https://github.com/drush-ops/drush/blob/12.x/sut/modules/unish/woot/src/Commands/GreetCommand.php).
+
+Drush lists and runs Symfony Console commands, in addition to more typical annotated commands.
+See [GreetCommands](https://github.com/drush-ops/drush/blob/13.x/sut/modules/unish/woot/src/Drush/Commands/GreetCommands.php) as an example. Note that these commands must conform to the usual class name and class namespace requirements. You might need to extend the Console class if you can't rename and move it.
 
 ## Auto-discovered commands (PSR4)
 
@@ -100,10 +102,10 @@ Using `require` in place of `conflict` is not recommended.
 
 !!! warning "Symlinked packages"
 
-    While it is good practice to make your custom commands into a Composer package, please beware that symlinked packages (by using the composer repository type [Path](https://getcomposer.org/doc/05-repositories.md#path)) will **not** be discovered by Drush. When in development, it is recommended to [specify your package's](https://github.com/drush-ops/drush/blob/12.x/examples/example.drush.yml#L52-L67) path in your `drush.yml` to have quick access to your commands.
+    While it is good practice to make your custom commands into a Composer package, please beware that symlinked packages (by using the composer repository type [Path](https://getcomposer.org/doc/05-repositories.md#path)) will **not** be discovered by Drush. When in development, it is recommended to [specify your package's](https://github.com/drush-ops/drush/blob/13.x/examples/example.drush.yml#L52-L67) path in your `drush.yml` to have quick access to your commands.
 
 ## Site-wide Commands
-Commandfiles that are installed in a Drupal site and are not bundled inside a Drupal module are called _site-wide_ commandfiles. Site-wide commands may either be added directly to the Drupal site's repository (e.g. for site-specific policy files), or via `composer require`. See the [examples/Commands](https://github.com/drush-ops/drush/tree/12.x/examples/Commands) folder for examples. In general, it's preferable to use modules to carry your Drush commands.
+Commandfiles that are installed in a Drupal site and are not bundled inside a Drupal module are called _site-wide_ commandfiles. Site-wide commands may either be added directly to the Drupal site's repository (e.g. for site-specific policy files), or via `composer require`. See the [examples/Commands](https://github.com/drush-ops/drush/tree/13.x/examples/Commands) folder for examples. In general, it's preferable to use modules to carry your Drush commands.
 
 Here are some examples of valid commandfile names and namespaces:
 

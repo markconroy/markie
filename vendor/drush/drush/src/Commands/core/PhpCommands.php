@@ -11,6 +11,7 @@ use Drush\Boot\DrupalBootLevels;
 use Drush\Commands\DrushCommands;
 use Symfony\Component\Finder\Finder;
 
+#[CLI\Bootstrap(DrupalBootLevels::NONE)]
 final class PhpCommands extends DrushCommands implements StdinAwareInterface
 {
     use StdinAwareTrait;
@@ -52,11 +53,12 @@ final class PhpCommands extends DrushCommands implements StdinAwareInterface
     public function script(array $extra, $options = ['format' => 'var_export', 'script-path' => self::REQ])
     {
         $found = false;
+        $all = [];
         $script = array_shift($extra);
 
         if ($script == '-') {
             return eval($this->stdin()->contents());
-        } elseif (file_exists($script)) {
+        } elseif ($script && file_exists($script)) {
             $found = $script;
         } else {
             // Array of paths to search for scripts

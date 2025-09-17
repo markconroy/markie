@@ -15,7 +15,6 @@ use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
-use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Field\FieldTypePluginManagerInterface;
 use Drupal\Core\Field\WidgetPluginManager;
@@ -24,14 +23,12 @@ use Drupal\field\FieldConfigInterface;
 use Drupal\field\FieldStorageConfigInterface;
 use Drush\Attributes as CLI;
 use Drush\Commands\DrushCommands;
+use Psr\Container\ContainerInterface;
 use Symfony\Component\Console\Completion\CompletionInput;
 use Symfony\Component\Console\Completion\CompletionSuggestions;
 use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Question\ChoiceQuestion;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 use function dt;
-use function t;
 
 class FieldCreateCommands extends DrushCommands implements CustomEventAwareInterface
 {
@@ -52,11 +49,12 @@ class FieldCreateCommands extends DrushCommands implements CustomEventAwareInter
         protected ModuleHandlerInterface $moduleHandler,
         protected EntityFieldManagerInterface $entityFieldManager
     ) {
+        parent::__construct();
     }
 
     public static function create(ContainerInterface $container): self
     {
-        $commandHandler = new static(
+        $commandHandler = new self(
             $container->get('plugin.manager.field.field_type'),
             $container->get('plugin.manager.field.widget'),
             $container->get('plugin.manager.entity_reference_selection'),
@@ -73,7 +71,7 @@ class FieldCreateCommands extends DrushCommands implements CustomEventAwareInter
         return $commandHandler;
     }
 
-    public function setContentTranslationManager(ContentTranslationManagerInterface $manager = null): void
+    public function setContentTranslationManager(?ContentTranslationManagerInterface $manager = null): void
     {
         if ($manager) {
             $this->contentTranslationManager = $manager;
@@ -103,8 +101,8 @@ class FieldCreateCommands extends DrushCommands implements CustomEventAwareInter
     #[CLI\Option(name: 'existing-field-name', description: 'The name of an existing field you want to re-use. Only used in non-interactive context.')]
     #[CLI\Option(name: 'show-machine-names', description: 'Show machine names instead of labels in option lists.')]
     #[CLI\Usage(name: self::CREATE, description: 'Create a field by answering the prompts.')]
-    #[CLI\Usage(name: 'field-create taxonomy_term tag', description: 'Create a field and fill in the remaining information through prompts.')]
-    #[CLI\Usage(name: 'field-create taxonomy_term tag --field-name=field_tag_label --field-label=Label --field-type=string --field-widget=string_textfield --is-required=1 --cardinality=2', description: 'Create a field in a completely non-interactive way.')]
+    #[CLI\Usage(name: 'field:create taxonomy_term tag', description: 'Create a field and fill in the remaining information through prompts.')]
+    #[CLI\Usage(name: 'field:create taxonomy_term tag --field-name=field_tag_label --field-label=Label --field-type=string --field-widget=string_textfield --is-required=1 --cardinality=2', description: 'Create a field in a completely non-interactive way.')]
     #[CLI\Complete(method_name_or_callable: 'complete')]
     #[CLI\Version(version: '11.0')]
     public function fieldCreate(?string $entityType = null, ?string $bundle = null, array $options = [
@@ -262,11 +260,11 @@ class FieldCreateCommands extends DrushCommands implements CustomEventAwareInter
         $showMachineNames = (bool) $this->input->getOption('show-machine-names');
         $choices = $this->getExistingFieldStorageOptions($entityType, $bundle, $showMachineNames);
 
-        if (empty($choices)) {
+        if ($choices === []) {
             return null;
         }
 
-        return $this->io()->choice('Choose an existing field', $choices);
+        return $this->io()->select('Choose an existing field', $choices);
     }
 
     protected function askFieldName(): string
@@ -282,22 +280,19 @@ class FieldCreateCommands extends DrushCommands implements CustomEventAwareInter
         }
 
         while (!$fieldName) {
-            $answer = $this->io()->ask('Field name', $machineName);
+            $answer = $this->io()->ask('Field name', default: $machineName, required: true, validate: function ($answer) use ($entityType) {
+                if (!preg_match('/^[_a-z]+[_a-z0-9]*$/', $answer)) {
+                    return'Only lowercase alphanumeric chars/underscores allowed; only letters/underscore allowed as first character.';
+                }
 
-            if (!preg_match('/^[_a-z]+[_a-z0-9]*$/', $answer)) {
-                $this->logger()->error('Only lowercase alphanumeric characters and underscores are allowed, and only lowercase letters and underscore are allowed as the first character.');
-                continue;
-            }
+                if (strlen($answer) > 32) {
+                    return 'Field name must not be longer than 32 characters.';
+                }
 
-            if (strlen($answer) > 32) {
-                $this->logger()->error('Field name must not be longer than 32 characters.');
-                continue;
-            }
-
-            if ($this->fieldStorageExists($answer, $entityType)) {
-                $this->logger()->error('A field with this name already exists.');
-                continue;
-            }
+                if ($this->fieldStorageExists($answer, $entityType)) {
+                    return 'A field with this name already exists.';
+                }
+            });
 
             $fieldName = $answer;
         }
@@ -307,7 +302,7 @@ class FieldCreateCommands extends DrushCommands implements CustomEventAwareInter
 
     protected function askFieldLabel(): string
     {
-        return $this->io()->askRequired('Field label');
+        return $this->io()->ask('Field label', required: true);
     }
 
     protected function askFieldDescription(): ?string
@@ -329,7 +324,7 @@ class FieldCreateCommands extends DrushCommands implements CustomEventAwareInter
             $choices[$definition['id']] = $label;
         }
 
-        return $this->io()->choice('Field type', $choices);
+        return $this->io()->select('Field type', $choices, scroll: 25);
     }
 
     protected function askFieldWidget(): ?string
@@ -360,7 +355,7 @@ class FieldCreateCommands extends DrushCommands implements CustomEventAwareInter
 
         $default = $this->input->getOption('show-machine-names') ? key($choices) : current($choices);
 
-        return $this->io()->choice('Field widget', $choices, $default);
+        return $this->io()->select('Field widget', $choices, $default);
     }
 
     protected function askRequired(): bool
@@ -388,7 +383,7 @@ class FieldCreateCommands extends DrushCommands implements CustomEventAwareInter
         }
 
         $choices = ['Limited', 'Unlimited'];
-        $cardinality = $this->io()->choice(
+        $cardinality = $this->io()->select(
             'Allowed number of values',
             array_combine($choices, $choices),
             0
@@ -396,7 +391,7 @@ class FieldCreateCommands extends DrushCommands implements CustomEventAwareInter
 
         $limit = FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED;
         while ($cardinality === 'Limited' && $limit < 1) {
-            $limit = (int) $this->io()->ask('Allowed number of values', '1');
+            $limit = (int)$this->io()->ask('Allowed number of values', default: '1');
         }
 
         return $limit;
@@ -494,6 +489,7 @@ class FieldCreateCommands extends DrushCommands implements CustomEventAwareInter
             $storage->save();
         }
 
+        assert($storage instanceof EntityDisplayInterface);
         $storage->setComponent($fieldName, $values)->save();
     }
 

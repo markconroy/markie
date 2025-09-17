@@ -10,20 +10,21 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Field\Entity\BaseFieldOverride;
 use Drush\Attributes as CLI;
+use Drush\Commands\AutowireTrait;
 use Drush\Commands\DrushCommands;
 use Symfony\Component\Console\Completion\CompletionInput;
 use Symfony\Component\Console\Completion\CompletionSuggestions;
 use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Question\ConfirmationQuestion;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 use function dt;
-use function t;
 
-class FieldBaseOverrideCreateCommands extends DrushCommands
+final class FieldBaseOverrideCreateCommands extends DrushCommands
 {
+    use AutowireTrait;
     use EntityTypeBundleAskTrait;
     use EntityTypeBundleValidationTrait;
+
+    const BASE_OVERRIDE_CREATE = 'field:base-override-create';
 
     public function __construct(
         protected EntityTypeManagerInterface $entityTypeManager,
@@ -32,24 +33,13 @@ class FieldBaseOverrideCreateCommands extends DrushCommands
     ) {
     }
 
-    public static function create(ContainerInterface $container): self
-    {
-        $commandHandler = new static(
-            $container->get('entity_type.manager'),
-            $container->get('entity_type.bundle.info'),
-            $container->get('entity_field.manager')
-        );
-
-        return $commandHandler;
-    }
-
     /**
      * Create a new base field override
      *
      * @see \Drupal\field_ui\Form\FieldConfigEditForm
      * @see \Drupal\field_ui\Form\FieldStorageConfigEditForm
      */
-    #[CLI\Command(name: 'field:base-override-create', aliases: ['bfoc'])]
+    #[CLI\Command(name: self::BASE_OVERRIDE_CREATE, aliases: ['bfoc'])]
     #[CLI\Argument(name: 'entityType', description: 'The machine name of the entity type.')]
     #[CLI\Argument(name: 'bundle', description: 'The machine name of the bundle.')]
     #[CLI\Option(name: 'field-name', description: 'A unique machine-readable name containing letters, numbers, and underscores.')]
@@ -156,22 +146,22 @@ class FieldBaseOverrideCreateCommands extends DrushCommands
             $choices[$definition->getName()] = $label;
         }
 
-        return $this->io()->choice('Field name', $choices);
+        return $this->io()->select('Field name', $choices);
     }
 
     protected function askFieldLabel(string $default): string
     {
-        return $this->io()->ask('Field label', $default);
+        return $this->io()->ask('Field label', default: $default);
     }
 
     protected function askFieldDescription(?string $default): ?string
     {
-        return $this->io()->ask('Field description', $default);
+        return $this->io()->ask('Field description', default: $default);
     }
 
     protected function askRequired(bool $default): bool
     {
-        return $this->io()->askQuestion(new ConfirmationQuestion('Required', $default));
+        return $this->io()->confirm('Required', default: $default);
     }
 
     protected function createBaseFieldOverride(string $entityType, string $bundle, string $fieldName, $fieldLabel, $fieldDescription, bool $isRequired): BaseFieldOverride
