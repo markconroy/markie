@@ -11,7 +11,6 @@ dependencies:
     - field.field.node.speaking.field_speaking_date
     - field.field.node.speaking.field_speaking_where
     - field.field.node.speaking.field_tags
-    - field.field.node.speaking.field_video_checked
     - node.type.speaking
   module:
     - text
@@ -35,5 +34,4 @@ hidden:
   field_speaking_date: true
   field_speaking_where: true
   field_tags: true
-  field_video_checked: true
   links: true

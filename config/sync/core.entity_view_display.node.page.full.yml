@@ -6,7 +6,6 @@ dependencies:
     - core.entity_view_mode.node.full
     - field.field.node.page.body
     - field.field.node.page.field_intro
-    - field.field.node.page.field_video_checked
     - node.type.page
   module:
     - text
@@ -33,5 +32,4 @@ content:
     weight: 0
     region: content
 hidden:
-  field_video_checked: true
   links: true

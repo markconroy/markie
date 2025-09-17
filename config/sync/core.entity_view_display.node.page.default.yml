@@ -5,7 +5,6 @@ dependencies:
   config:
     - field.field.node.page.body
     - field.field.node.page.field_intro
-    - field.field.node.page.field_video_checked
     - node.type.page
   module:
     - user
@@ -15,17 +14,7 @@ id: node.page.default
 targetEntityType: node
 bundle: page
 mode: default
-content:
-  field_video_checked:
-    type: boolean
-    label: above
-    settings:
-      format: default
-      format_custom_false: ''
-      format_custom_true: ''
-    third_party_settings: {  }
-    weight: 1
-    region: content
+content: {  }
 hidden:
   body: true
   field_intro: true

@@ -10,7 +10,6 @@ dependencies:
     - field.field.node.speaking.field_speaking_date
     - field.field.node.speaking.field_speaking_where
     - field.field.node.speaking.field_tags
-    - field.field.node.speaking.field_video_checked
     - node.type.speaking
   module:
     - datetime
@@ -83,13 +82,6 @@ content:
       match_limit: 10
       size: 60
       placeholder: ''
-    third_party_settings: {  }
-  field_video_checked:
-    type: boolean_checkbox
-    weight: 1
-    region: content
-    settings:
-      display_label: true
     third_party_settings: {  }
   path:
     type: path
