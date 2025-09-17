@@ -4,6 +4,7 @@ status: true
 dependencies:
   config:
     - field.field.node.article.body
+    - field.field.node.article.comment
     - field.field.node.article.field_intro
     - field.field.node.article.field_main_image
     - field.field.node.article.field_tags
@@ -30,6 +31,7 @@ content:
     region: content
 hidden:
   body: true
+  comment: true
   field_intro: true
   field_main_image: true
   field_tags: true

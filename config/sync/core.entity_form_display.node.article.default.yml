@@ -4,12 +4,14 @@ status: true
 dependencies:
   config:
     - field.field.node.article.body
+    - field.field.node.article.comment
     - field.field.node.article.field_intro
     - field.field.node.article.field_main_image
     - field.field.node.article.field_tags
     - field.field.node.article.field_video_checked
     - node.type.article
   module:
+    - comment
     - media_library
     - path
     - text
@@ -29,6 +31,12 @@ content:
       summary_rows: 3
       placeholder: ''
       show_summary: false
+    third_party_settings: {  }
+  comment:
+    type: comment_default
+    weight: 7
+    region: content
+    settings: {  }
     third_party_settings: {  }
   created:
     type: datetime_timestamp

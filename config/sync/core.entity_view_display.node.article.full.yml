@@ -3,14 +3,17 @@ langcode: en
 status: true
 dependencies:
   config:
+    - core.entity_view_display.comment.comment.default
     - core.entity_view_mode.node.full
     - field.field.node.article.body
+    - field.field.node.article.comment
     - field.field.node.article.field_intro
     - field.field.node.article.field_main_image
     - field.field.node.article.field_tags
     - field.field.node.article.field_video_checked
     - node.type.article
   module:
+    - comment
     - text
     - user
 _core:
@@ -26,6 +29,15 @@ content:
     settings: {  }
     third_party_settings: {  }
     weight: 2
+    region: content
+  comment:
+    type: comment_default
+    label: hidden
+    settings:
+      view_mode: default
+      pager_id: 0
+    third_party_settings: {  }
+    weight: 6
     region: content
   field_intro:
     type: text_default
