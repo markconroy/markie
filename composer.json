@@ -34,7 +34,7 @@
         "drupal/crop": "^2.1",
         "drupal/ctools": "^4.0",
         "drupal/entity": "^1.0.0",
-        "drupal/image_widget_crop": "^2.3",
+        "drupal/image_widget_crop": "^3.0",
         "drupal/metatag": "^2.0",
         "drupal/pathauto": "^1.8",
         "drupal/redirect": "^1.6",
