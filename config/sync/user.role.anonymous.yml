@@ -5,7 +5,6 @@ dependencies:
   config:
     - filter.format.restricted_html
   module:
-    - comment
     - filter
     - media
     - search
@@ -17,10 +16,8 @@ label: 'Anonymous user'
 weight: 0
 is_admin: false
 permissions:
-  - 'access comments'
   - 'access content'
-  - 'post comments'
+  - 'access user profiles'
   - 'search content'
-  - 'skip comment approval'
   - 'use text format restricted_html'
   - 'view media'
