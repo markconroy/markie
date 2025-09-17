@@ -79,13 +79,14 @@ interface ConditionInterface {
    * data structure directly and manipulate it before it gets compiled.
    *
    * @return array
+   *   An array of all conditions in this conditional clause.
    */
   public function &conditions();
 
   /**
    * Compiles this conditional clause.
    *
-   * @param $query
+   * @param \Drupal\Core\Entity\Query\QueryInterface $query
    *   The query object this conditional clause belongs to.
    */
   public function compile($query);

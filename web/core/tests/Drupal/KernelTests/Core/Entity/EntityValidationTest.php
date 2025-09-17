@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Drupal\KernelTests\Core\Entity;
 
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\Plugin\Validation\Constraint\CompositeConstraintBase;
+use Drupal\entity_test\EntityTestHelper;
 use Drupal\language\Entity\ConfigurableLanguage;
 
 /**
@@ -73,7 +75,7 @@ class EntityValidationTest extends EntityKernelTestBase {
    * @return \Drupal\Core\Entity\EntityInterface
    *   The created test entity.
    */
-  protected function createTestEntity($entity_type) {
+  protected function createTestEntity($entity_type): EntityInterface {
     $this->entityName = $this->randomMachineName();
     $this->entityUser = $this->createUser();
 
@@ -102,11 +104,7 @@ class EntityValidationTest extends EntityKernelTestBase {
 
     // Use the protected property on the cache_clearer first to check whether
     // the constraint manager is added there.
-
-    // Ensure that the proxy class is initialized, which has the necessary
-    // method calls attached.
-    \Drupal::service('plugin.cache_clearer');
-    $plugin_cache_clearer = \Drupal::service('drupal.proxy_original_service.plugin.cache_clearer');
+    $plugin_cache_clearer = \Drupal::service('plugin.cache_clearer');
     $get_cached_discoveries = function () {
       return $this->cachedDiscoveries;
     };
@@ -119,7 +117,7 @@ class EntityValidationTest extends EntityKernelTestBase {
     $this->assertContains('Drupal\Core\Validation\ConstraintManager', $cached_discovery_classes);
 
     // All entity variations have to have the same results.
-    foreach (entity_test_entity_types() as $entity_type) {
+    foreach (EntityTestHelper::getEntityTypes() as $entity_type) {
       $this->checkValidation($entity_type);
     }
   }
@@ -130,7 +128,7 @@ class EntityValidationTest extends EntityKernelTestBase {
    * @param string $entity_type
    *   The entity type to run the tests with.
    */
-  protected function checkValidation($entity_type) {
+  protected function checkValidation($entity_type): void {
     $entity = $this->createTestEntity($entity_type);
     $violations = $entity->validate();
     $this->assertEquals(0, $violations->count(), 'Validation passes.');

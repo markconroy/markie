@@ -41,9 +41,9 @@ class CKEditor5AllowedTagsTest extends CKEditor5TestBase {
   /**
    * The default allowed elements for filter_html's "allowed_html" setting.
    *
-   * @see \Drupal\filter\Plugin\Filter\FilterHtml
-   *
    * @var string
+   *
+   * @see \Drupal\filter\Plugin\Filter\FilterHtml
    */
   protected $defaultElementsWhenUpdatingNotCkeditor5 = "<a href hreflang> <em> <strong> <cite> <blockquote cite> <code> <ul type> <ol start type='1 A I'> <li> <dl> <dt> <dd> <h2 id='jump-*'> <h3 id> <h4 id> <h5 id> <h6 id>";
 
@@ -52,7 +52,7 @@ class CKEditor5AllowedTagsTest extends CKEditor5TestBase {
    *
    * @var string
    */
-  protected $defaultElementsAfterUpdatingToCkeditor5 = '<br> <p> <h2 id="jump-*"> <h3 id> <h4 id> <h5 id> <h6 id> <cite> <dl> <dt> <dd> <a hreflang href> <blockquote cite> <ul type> <ol type="1 A I" start> <strong> <em> <code> <li>';
+  protected $defaultElementsAfterUpdatingToCkeditor5 = '<br> <p> <h2 id="jump-*"> <h3 id> <h4 id> <h5 id> <h6 id> <cite> <dl> <dt> <dd> <a hreflang href> <blockquote cite> <ul type> <ol type="1 A I" reversed start> <strong> <em> <code> <li>';
 
   /**
    * Test enabling CKEditor 5 in a way that triggers validation.
@@ -96,10 +96,10 @@ class CKEditor5AllowedTagsTest extends CKEditor5TestBase {
         'status' => TRUE,
         'scheme' => 'public',
         'directory' => 'inline-images',
-        'max_size' => '',
+        'max_size' => NULL,
         'max_dimensions' => [
-          'width' => 0,
-          'height' => 0,
+          'width' => NULL,
+          'height' => NULL,
         ],
       ],
     ])->save();

@@ -263,8 +263,8 @@ class CacheTest extends ViewsKernelTestBase {
    */
   public function testHeaderStorage(): void {
     // Create a view with output caching enabled.
-    // Some hook_views_pre_render in views_test_data.module adds the test css/js file.
-    // so they should be added to the css/js storage.
+    // Some hook_views_pre_render in views_test_data.module adds the test css/js
+    // file. so they should be added to the css/js storage.
     $view = Views::getView('test_view');
     $view->setDisplay();
     $view->storage->set('id', 'test_cache_header_storage');
@@ -295,7 +295,17 @@ class CacheTest extends ViewsKernelTestBase {
     $this->assertEquals(['foo' => 'bar'], $output['#attached']['drupalSettings'], 'Make sure drupalSettings are added for cached views.');
     // Note: views_test_data_views_pre_render() adds some cache tags.
     $this->assertEquals(['config:views.view.test_cache_header_storage', 'views_test_data:1'], $output['#cache']['tags']);
-    $this->assertEquals(['non-existing-placeholder-just-for-testing-purposes' => ['#lazy_builder' => ['Drupal\views_test_data\Controller\ViewsTestDataController::placeholderLazyBuilder', ['bar']]]], $output['#attached']['placeholders']);
+    $this->assertEquals(
+      [
+        'non-existing-placeholder-just-for-testing-purposes' => [
+          '#lazy_builder' => [
+            'Drupal\views_test_data\Controller\ViewsTestDataController::placeholderLazyBuilder',
+            ['bar'],
+          ],
+        ],
+      ],
+      $output['#attached']['placeholders']
+    );
     $this->assertArrayNotHasKey('pre_render_called', $view->build_info, 'Make sure hook_views_pre_render is not called for the cached view.');
   }
 

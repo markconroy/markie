@@ -12,6 +12,7 @@ use Drupal\migrate\Plugin\MigrateIdMapInterface;
 use Drupal\migrate\MigrateException;
 use Drupal\migrate\Row;
 use Prophecy\Argument;
+use Prophecy\Prophecy\ObjectProphecy;
 
 /**
  * @coversDefaultClass \Drupal\migrate\MigrateExecutable
@@ -109,10 +110,6 @@ class MigrateExecutableTest extends MigrateTestCase {
   public function testImportWithValidRow(): void {
     $source = $this->getMockSource();
 
-    $row = $this->getMockBuilder('Drupal\migrate\Row')
-      ->disableOriginalConstructor()
-      ->getMock();
-
     $this->executable->setSource($source);
 
     $this->migration->expects($this->once())
@@ -133,10 +130,6 @@ class MigrateExecutableTest extends MigrateTestCase {
    */
   public function testImportWithValidRowWithoutDestinationId(): void {
     $source = $this->getMockSource();
-
-    $row = $this->getMockBuilder('Drupal\migrate\Row')
-      ->disableOriginalConstructor()
-      ->getMock();
 
     $this->executable->setSource($source);
 
@@ -162,10 +155,6 @@ class MigrateExecutableTest extends MigrateTestCase {
   public function testImportWithValidRowNoDestinationValues(): void {
     $source = $this->getMockSource();
 
-    $row = $this->getMockBuilder('Drupal\migrate\Row')
-      ->disableOriginalConstructor()
-      ->getMock();
-
     $this->executable->setSource($source);
 
     $this->migration->expects($this->once())
@@ -187,12 +176,7 @@ class MigrateExecutableTest extends MigrateTestCase {
    * The MigrationException in this case is being thrown from the destination.
    */
   public function testImportWithValidRowWithDestinationMigrateException(): void {
-    $exception_message = $this->getRandomGenerator()->string();
     $source = $this->getMockSource();
-
-    $row = $this->getMockBuilder('Drupal\migrate\Row')
-      ->disableOriginalConstructor()
-      ->getMock();
 
     $this->executable->setSource($source);
 
@@ -261,12 +245,7 @@ class MigrateExecutableTest extends MigrateTestCase {
    * Tests the import method with a regular Exception being thrown.
    */
   public function testImportWithValidRowWithException(): void {
-    $exception_message = $this->getRandomGenerator()->string();
     $source = $this->getMockSource();
-
-    $row = $this->getMockBuilder('Drupal\migrate\Row')
-      ->disableOriginalConstructor()
-      ->getMock();
 
     $this->executable->setSource($source);
 
@@ -440,19 +419,9 @@ class MigrateExecutableTest extends MigrateTestCase {
    *   The mocked migration source.
    */
   protected function getMockSource() {
-    $this->createMock('\Iterator');
-
-    $class = 'Drupal\migrate\Plugin\migrate\source\SourcePluginBase';
-    $source = $this->getMockBuilder($class)
-      ->disableOriginalConstructor()
-      ->onlyMethods(get_class_methods($class))
-      ->getMockForAbstractClass();
+    $source = $this->createMock(StubSourcePlugin::class);
     $source->expects($this->once())
-      ->method('rewind')
-      ->willReturn(TRUE);
-    $source->expects($this->any())
-      ->method('initializeIterator')
-      ->willReturn([]);
+      ->method('rewind');
     $source->expects($this->any())
       ->method('valid')
       ->willReturn(TRUE, FALSE);
@@ -589,10 +558,10 @@ class MigrateExecutableTest extends MigrateTestCase {
   /**
    * Returns an ID map object prophecy used in ::testRollback.
    *
-   * @return \Prophecy\Prophecy\ObjectProphecy
+   * @return \Prophecy\Prophecy\ObjectProphecy<\Drupal\migrate\Plugin\MigrateIdMapInterface>
    *   An ID map object prophecy.
    */
-  public function getTestRollbackIdMap(array $items, array $source_id_keys, array $destination_id_keys) {
+  public function getTestRollbackIdMap(array $items, array $source_id_keys, array $destination_id_keys): ObjectProphecy {
     static::$idMapRecords = array_map(function (array $item) {
       return $item + [
         'source_row_status' => '0',

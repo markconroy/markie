@@ -16,6 +16,11 @@ use Drupal\Tests\UnitTestCase;
  */
 class TagsTest extends UnitTestCase {
 
+  /**
+   * A list of valid tags.
+   *
+   * @var string[][]
+   */
   protected $validTags = [
     'Drupal' => 'Drupal',
     'Drupal with some spaces' => 'Drupal with some spaces',

@@ -12,6 +12,7 @@ use Drupal\migrate_drupal\Plugin\migrate\source\ContentEntity;
 /**
  * Tests the constructor of the entity content source plugin.
  *
+ * @group legacy
  * @group migrate_drupal
  */
 class ContentEntityConstructorTest extends KernelTestBase {

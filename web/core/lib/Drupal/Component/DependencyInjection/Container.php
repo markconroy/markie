@@ -46,8 +46,6 @@ use Symfony\Contracts\Service\ResetInterface;
  */
 class Container implements ContainerInterface, ResetInterface {
 
-  use ServiceIdHashTrait;
-
   /**
    * The parameters of the container.
    *
@@ -202,7 +200,7 @@ class Container implements ContainerInterface, ResetInterface {
    * ref-counting. A subsequent call to ContainerInterface::get() will recreate
    * a new instance of the shared service.
    */
-  public function reset() {
+  public function reset(): void {
     $this->services = [];
   }
 
@@ -306,11 +304,8 @@ class Container implements ContainerInterface, ResetInterface {
 
   /**
    * {@inheritdoc}
-   *
-   * phpcs:ignore Drupal.Commenting.FunctionComment.VoidReturn
-   * @return void
    */
-  public function set($id, $service) {
+  public function set($id, $service): void {
     $this->services[$id] = $service;
   }
 
@@ -345,11 +340,8 @@ class Container implements ContainerInterface, ResetInterface {
 
   /**
    * {@inheritdoc}
-   *
-   * phpcs:ignore Drupal.Commenting.FunctionComment.VoidReturn
-   * @return void
    */
-  public function setParameter($name, $value) {
+  public function setParameter($name, $value): void {
     if ($this->frozen) {
       throw new LogicException('Impossible to call set() on a frozen ParameterBag.');
     }

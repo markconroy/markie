@@ -2,7 +2,6 @@
 
 /**
  * @file
- * The content translation administration forms.
  */
 
 use Drupal\content_translation\BundleTranslationSettingsInterface;
@@ -28,7 +27,7 @@ use Drupal\Core\Render\Element;
  * @return array
  *   A form element to configure field synchronization.
  */
-function content_translation_field_sync_widget(FieldDefinitionInterface $field, $element_name = 'third_party_settings[content_translation][translation_sync]') {
+function content_translation_field_sync_widget(FieldDefinitionInterface $field, $element_name = 'third_party_settings[content_translation][translation_sync]'): array {
   // No way to store field sync information on this field.
   if (!($field instanceof ThirdPartySettingsInterface)) {
     return [];
@@ -76,9 +75,9 @@ function content_translation_field_sync_widget(FieldDefinitionInterface $field, 
 }
 
 /**
- * (proxied) Implements hook_form_FORM_ID_alter().
+ * Injects translation settings into the content language settings form.
  */
-function _content_translation_form_language_content_settings_form_alter(array &$form, FormStateInterface $form_state) {
+function _content_translation_form_language_content_settings_form_alter(array &$form, FormStateInterface $form_state): void {
   // Inject into the content language settings the translation settings if the
   // user has the required permission.
   if (!\Drupal::currentUser()->hasPermission('administer content translation')) {
@@ -190,9 +189,9 @@ function _content_translation_is_field_translatability_configurable(EntityTypeIn
 }
 
 /**
- * (proxied) Implements hook_preprocess_HOOK().
+ * Injects translation settings into the language content settings table.
  */
-function _content_translation_preprocess_language_content_settings_table(&$variables) {
+function _content_translation_preprocess_language_content_settings_table(&$variables): void {
   // Alter the 'build' variable injecting the translation settings if the user
   // has the required permission.
   if (!\Drupal::currentUser()->hasPermission('administer content translation')) {
@@ -312,7 +311,7 @@ function _content_translation_preprocess_language_content_settings_table(&$varia
  *
  * @see content_translation_admin_settings_form_submit()
  */
-function content_translation_form_language_content_settings_validate(array $form, FormStateInterface $form_state) {
+function content_translation_form_language_content_settings_validate(array $form, FormStateInterface $form_state): void {
   $settings = &$form_state->getValue('settings');
   foreach ($settings as $entity_type => $entity_settings) {
     foreach ($entity_settings as $bundle => $bundle_settings) {
@@ -342,7 +341,7 @@ function content_translation_form_language_content_settings_validate(array $form
  *
  * @see content_translation_admin_settings_form_validate()
  */
-function content_translation_form_language_content_settings_submit(array $form, FormStateInterface $form_state) {
+function content_translation_form_language_content_settings_submit(array $form, FormStateInterface $form_state): void {
   /** @var \Drupal\content_translation\ContentTranslationManagerInterface $content_translation_manager */
   $content_translation_manager = \Drupal::service('content_translation.manager');
   $entity_types = $form_state->getValue('entity_types');

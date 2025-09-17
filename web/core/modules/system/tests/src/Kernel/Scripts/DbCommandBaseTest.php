@@ -111,7 +111,7 @@ class DbCommandBaseTester extends DbCommandBase {
   /**
    * {@inheritdoc}
    */
-  public function configure() {
+  public function configure(): void {
     parent::configure();
     $this->setName('test');
   }

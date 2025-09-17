@@ -38,13 +38,9 @@ final class Settings {
    * @see self::handleDeprecations()
    */
   private static $deprecatedSettings = [
-    'block_interest_cohort' => [
+    'state_cache' => [
       'replacement' => '',
-      'message' => 'The "block_interest_cohort" setting is deprecated in drupal:9.5.0. This setting should be removed from the settings file, since its usage has been removed. See https://www.drupal.org/node/3320787.',
-    ],
-    'yaml_parser_class' => [
-      'replacement' => '',
-      'message' => 'The "yaml_parser_class" setting is deprecated in drupal:10.3.0. This setting should be removed from the settings file, since its usage has been removed. See https://www.drupal.org/node/3415489.',
+      'message' => 'The "state_cache" setting is deprecated in drupal:11.0.0. This setting should be removed from the settings file, since its usage has been removed. See https://www.drupal.org/node/3177901.',
     ],
   ];
 
@@ -65,7 +61,7 @@ final class Settings {
    * A singleton is used because this class is used before the container is
    * available.
    *
-   * @return \Drupal\Core\Site\Settings
+   * @return $this
    *
    * @throws \BadMethodCallException
    *   Thrown when the settings instance has not been initialized yet.
@@ -86,7 +82,7 @@ final class Settings {
   /**
    * Prevents settings from being serialized.
    */
-  public function __sleep() {
+  public function __sleep(): array {
     throw new \LogicException('Settings can not be serialized. This probably means you are serializing an object that has an indirect reference to the Settings object. Adjust your code so that is not necessary.');
   }
 

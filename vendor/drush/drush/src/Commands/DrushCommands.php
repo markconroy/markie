@@ -59,10 +59,12 @@ abstract class DrushCommands implements IOAwareInterface, LoggerAwareInterface, 
      */
     protected function io(): DrushStyle
     {
+        // @phpstan-ignore booleanNot.alwaysFalse
         if (!$this->io) {
             // Specify our own Style class when needed.
             $this->io = new DrushStyle($this->input(), $this->output());
         }
+        assert($this->io instanceof DrushStyle);
         return $this->io;
     }
 
@@ -71,6 +73,7 @@ abstract class DrushCommands implements IOAwareInterface, LoggerAwareInterface, 
      */
     public function logger(): ?DrushLoggerManager
     {
+        assert(is_null($this->logger) || $this->logger instanceof DrushLoggerManager, 'Instead of using replacing Drush\'s logger, use $this->add() on DrushLoggerManager to add a custom logger. See https://github.com/drush-ops/drush/pull/5022');
         return $this->logger;
     }
 
@@ -109,7 +112,7 @@ abstract class DrushCommands implements IOAwareInterface, LoggerAwareInterface, 
     }
 
     /**
-     * Persist commandData for use in primary command callback. Used by 'topic' commands.
+     * Configure Laravel prompts package.
      */
     #[CLI\Hook(type: HookManager::INITIALIZE, target: '*')]
     public function initHook($input, AnnotationData $annotationData)

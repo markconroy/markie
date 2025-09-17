@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\layout_builder\Unit;
 
-use Drupal\block_content\Access\RefinableDependentAccessInterface;
 use Drupal\Component\Plugin\Context\ContextInterface;
 use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Access\RefinableDependentAccessInterface;
 use Drupal\Core\Block\BlockManagerInterface;
 use Drupal\Core\Block\BlockPluginInterface;
 use Drupal\Core\Cache\Cache;
@@ -497,6 +497,29 @@ class BlockComponentRenderArrayTest extends UnitTestCase {
     $this->assertEquals($expected_build, $result);
     $event->getCacheableMetadata()->applyTo($result);
     $this->assertEqualsCanonicalizing($expected_cache, $result);
+  }
+
+  /**
+   * @covers ::onBuildRender
+   */
+  public function testOnBuildRenderNullBuild(): void {
+    $block = $this->prophesize(BlockPluginInterface::class);
+
+    $access_result = AccessResult::allowed();
+    $block->access($this->account->reveal(), TRUE)->willReturn($access_result)->shouldBeCalled();
+    $block->getCacheContexts()->willReturn([]);
+    $block->getCacheTags()->willReturn(['test']);
+    $block->getCacheMaxAge()->willReturn(Cache::PERMANENT);
+
+    $block->build()->willReturn(NULL);
+    $this->expectException(\UnexpectedValueException::class);
+    $this->expectExceptionMessage(sprintf('The block "%s" did not return an array', get_class($block->reveal())));
+    $this->blockManager->createInstance('some_block_id', ['id' => 'some_block_id'])->willReturn($block->reveal());
+
+    $component = new SectionComponent('some-uuid', 'some-region', ['id' => 'some_block_id']);
+    $event = new SectionComponentBuildRenderArrayEvent($component, [], FALSE);
+    $subscriber = new BlockComponentRenderArray($this->account->reveal());
+    $subscriber->onBuildRender($event);
   }
 
   /**

@@ -54,6 +54,9 @@ class EditorFileUsageTest extends EntityKernelTestBase {
     $editor = Editor::create([
       'format' => 'filtered_html',
       'editor' => 'unicorn',
+      'image_upload' => [
+        'status' => FALSE,
+      ],
     ]);
     $editor->save();
 

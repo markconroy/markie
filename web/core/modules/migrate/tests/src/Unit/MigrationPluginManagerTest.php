@@ -228,7 +228,7 @@ class TestMigrationMock extends Migration {
   /**
    * {@inheritdoc}
    */
-  public function getMigrationDependencies(bool $expand = FALSE) {
+  public function getMigrationDependencies() {
     // For the purpose of testing, do not expand dependencies.
     return $this->migration_dependencies;
   }
@@ -236,7 +236,7 @@ class TestMigrationMock extends Migration {
   /**
    * {@inheritdoc}
    */
-  public function set($prop, $value) {
+  public function set($prop, $value): void {
     $this->set[] = func_get_args();
   }
 

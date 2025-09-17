@@ -239,6 +239,7 @@ interface EntityInterface extends AccessibleInterface, CacheableDependencyInterf
    * over all translations if needed. This is different from its counterpart in
    * the Field API, FieldItemListInterface::preSave(), which is fired on all
    * field translations automatically.
+   *
    * @todo Adjust existing implementations and the documentation according to
    *   https://www.drupal.org/node/2577609 to have a consistent API.
    *
@@ -443,5 +444,31 @@ interface EntityInterface extends AccessibleInterface, CacheableDependencyInterf
    *   The configuration target identifier.
    */
   public function getConfigTarget();
+
+  /**
+   * Returns the original unchanged entity.
+   *
+   * If the entity being saved was not the default revision then the original
+   * entity is that specific revision to allow for reliable comparisons.
+   *
+   * This is only available while an entity is being saved.
+   *
+   * @return static|null
+   *   The original entity.
+   */
+  public function getOriginal(): ?static;
+
+  /**
+   * Sets the original unchanged entity.
+   *
+   * This method may be used as a performance optimization when unchanged entity
+   * is already available.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface|null $original
+   *   The unchanged entity.
+   *
+   * @return $this
+   */
+  public function setOriginal(?EntityInterface $original): static;
 
 }

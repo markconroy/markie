@@ -17,11 +17,15 @@ use Drupal\views\Plugin\ViewsHandlerManager;
 class ViewsHandlerManagerTest extends UnitTestCase {
 
   /**
+   * The views handler manager.
+   *
    * @var \Drupal\views\Plugin\ViewsHandlerManager
    */
   protected $handlerManager;
 
   /**
+   * The module handler service.
+   *
    * @var \Drupal\Core\Extension\ModuleHandlerInterface|\PHPUnit\Framework\MockObject\MockObject
    */
   protected $moduleHandler;
@@ -56,7 +60,7 @@ class ViewsHandlerManagerTest extends UnitTestCase {
   /**
    * Setups of the plugin factory.
    */
-  protected function setupMockedFactory() {
+  protected function setupMockedFactory(): void {
     $this->factory = $this->createMock('Drupal\Component\Plugin\Factory\FactoryInterface');
 
     $reflection = new \ReflectionClass($this->handlerManager);

@@ -8,6 +8,8 @@ use Drupal\Core\Database\Database;
 use Drupal\Core\Entity\Entity\EntityViewDisplay;
 use Drupal\filter\Entity\FilterFormat;
 
+// cspell:ignore drupalmediaediting
+
 /**
  * @coversDefaultClass \Drupal\ckeditor5\Plugin\CKEditor5Plugin\Media
  * @group ckeditor5
@@ -88,11 +90,6 @@ class MediaPreviewTest extends MediaTestBase {
    * The CKEditor Widget must load a preview generated using the default theme.
    */
   public function testPreviewUsesDefaultThemeAndIsClientCacheable(): void {
-    // Make the node edit form use the admin theme, like on most Drupal sites.
-    $this->config('node.settings')
-      ->set('use_admin_theme', TRUE)
-      ->save();
-
     // Allow the test user to view the admin theme.
     $this->adminUser
       ->addRole($this->drupalCreateRole(['view the administration theme']))

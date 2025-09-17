@@ -3,7 +3,7 @@
  */
 
 import {Plugin} from 'ckeditor5/src/core';
-import {ButtonView} from 'ckeditor5/src/ui';
+import {ButtonView, ViewModel} from 'ckeditor5/src/ui';
 import {DropdownButtonView, addListToDropdown, createDropdown} from 'ckeditor5/src/ui';
 import icon from '../../../../icons/sparkles.svg';
 import {Collection} from 'ckeditor5/src/utils';

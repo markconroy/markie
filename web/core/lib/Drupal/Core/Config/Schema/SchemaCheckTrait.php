@@ -41,7 +41,7 @@ trait SchemaCheckTrait {
    * path segment can use a wildcard (`*`) to indicate any value for that
    * segment should be accepted for this property path to be ignored.
    *
-   * @var \string[][]
+   * @var array<string, array<string, array<int, string>>>
    */
   protected static array $ignoredPropertyPaths = [
     'search.page.*' => [
@@ -132,6 +132,8 @@ trait SchemaCheckTrait {
    *   A validation constraint violation for a Config object.
    *
    * @return bool
+   *   TRUE when the violation is for an ignored configuration property path,
+   *   FALSE otherwise.
    */
   protected static function isViolationForIgnoredPropertyPath(ConstraintViolation $v): bool {
     // When the validated object is a config entity wrapped in a

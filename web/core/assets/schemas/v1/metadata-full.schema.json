@@ -2,8 +2,27 @@
   "$id": "https://git.drupalcode.org/project/drupal/-/raw/HEAD/core/assets/schemas/v1/metadata-full.schema.json",
   "$schema": "http://json-schema.org/draft-04/schema#",
   "$defs": {
+    "propDefinition": {
+      "$ref": "http://json-schema.org/draft-04/schema#",
+      "meta:enum": {
+        "type": "object",
+        "minItems": 1,
+        "uniqueItems": true,
+        "patternProperties": {
+          "additionalProperties": false,
+          "^[a-zA-Z0-9_-]*$": {
+            "type": "string"
+          }
+        }
+      },
+      "x-translation-context": {
+        "type": "string",
+        "title": "Translation Context"
+      }
+    },
     "slotDefinition": {
       "type": "object",
+      "additionalProperties": false,
       "patternProperties": {
         "^[a-zA-Z0-9_-]+$": {
           "type": "object",
@@ -21,6 +40,26 @@
               "items": {
                 "type": "string"
               }
+            }
+          }
+        }
+      }
+    },
+    "variantDefinition": {
+      "type": "object",
+      "additionalProperties": false,
+      "patternProperties": {
+        "^[a-zA-Z0-9_-]+$": {
+          "type": "object",
+          "required": ["title"],
+          "properties": {
+            "title": {
+              "type": "string",
+              "title": "Title"
+            },
+            "description": {
+              "type": "string",
+              "title": "Description"
             }
           }
         }
@@ -139,10 +178,13 @@
       ]
     },
     "props": {
-      "$ref": "http://json-schema.org/draft-04/schema#"
+      "$ref": "#/$defs/propDefinition"
     },
     "slots": {
       "$ref": "metadata.schema.json#/$defs/slotDefinition"
+    },
+    "variants": {
+      "$ref": "metadata.schema.json#/$defs/variantDefinition"
     },
     "template": {
       "type": "string",

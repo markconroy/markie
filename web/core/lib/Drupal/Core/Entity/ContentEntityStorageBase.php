@@ -2,7 +2,6 @@
 
 namespace Drupal\Core\Entity;
 
-use Drupal\Core\Cache\Cache;
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Cache\MemoryCache\MemoryCacheInterface;
 use Drupal\Core\Entity\Exception\AmbiguousBundleClassException;
@@ -431,7 +430,7 @@ abstract class ContentEntityStorageBase extends EntityStorageBase implements Con
       // defined, the stored version is loaded explicitly. Since the merged
       // revision generated here is not stored anywhere, we need to populate the
       // "original" property manually, so that changes can be properly detected.
-      $new_revision->original = clone $new_revision;
+      $new_revision->setOriginal(clone $new_revision);
     }
 
     // Eventually mark the new revision as such.
@@ -513,6 +512,8 @@ abstract class ContentEntityStorageBase extends EntityStorageBase implements Con
         ->range(0, 1)
         ->sort($this->entityType->getKey('revision'), 'DESC')
         ->accessCheck(FALSE)
+        ->addMetaData('entity_id', $entity_id)
+        ->addTag('latest_translated_affected_revision')
         ->execute();
 
       $this->latestRevisionIds[$entity_id][$langcode] = key($result);
@@ -571,7 +572,7 @@ abstract class ContentEntityStorageBase extends EntityStorageBase implements Con
    *
    * @param \Drupal\Core\Field\FieldDefinitionInterface $field_definition
    *   The field definition.
-   * @param $batch_size
+   * @param int $batch_size
    *   The maximum number of field data records to purge before returning.
    *
    * @return \Drupal\Core\Field\FieldItemListInterface[]
@@ -750,12 +751,26 @@ abstract class ContentEntityStorageBase extends EntityStorageBase implements Con
       $entity->updateLoadedRevisionId();
     }
 
+    // Use the loaded revision instead of default one to check for data change.
+    if (!$entity->isNew() && !$entity->getOriginal() && !$entity->wasDefaultRevision()) {
+      $original = $this->loadRevision($entity->getLoadedRevisionId());
+      $entity->setOriginal($original);
+    }
+
     $id = parent::doPreSave($entity);
+
+    $previously_default_revision = $entity->wasDefaultRevision();
+    $no_longer_default = !$entity->isDefaultRevision();
+    $original_same_as_current = $entity->getOriginal()?->getRevisionId() == $entity->getLoadedRevisionId();
+    $not_new_revision = !$entity->isNewRevision();
+    if ($previously_default_revision && $no_longer_default && $original_same_as_current && $not_new_revision) {
+      throw new EntityStorageException("An existing default revision of the '{$this->entityTypeId}' entity type can not be changed to a non-default revision.");
+    }
 
     if (!$entity->isNew()) {
       // If the ID changed then original can't be loaded, throw an exception
       // in that case.
-      if (empty($entity->original) || $entity->id() != $entity->original->id()) {
+      if (!$entity->getOriginal() || $entity->id() != $entity->getOriginal()->id()) {
         throw new EntityStorageException("Update existing '{$this->entityTypeId}' entity while changing the ID is not supported.");
       }
       // Do not allow changing the revision ID when resaving the current
@@ -838,7 +853,7 @@ abstract class ContentEntityStorageBase extends EntityStorageBase implements Con
    */
   protected function invokeTranslationHooks(ContentEntityInterface $entity) {
     $translations = $entity->getTranslationLanguages(FALSE);
-    $original_translations = $entity->original->getTranslationLanguages(FALSE);
+    $original_translations = $entity->getOriginal()->getTranslationLanguages(FALSE);
     $all_translations = array_keys($translations + $original_translations);
 
     // Notify modules of translation insertion/deletion.
@@ -847,7 +862,7 @@ abstract class ContentEntityStorageBase extends EntityStorageBase implements Con
         $this->invokeHook('translation_insert', $entity->getTranslation($langcode));
       }
       elseif (!isset($translations[$langcode]) && isset($original_translations[$langcode])) {
-        $this->invokeHook('translation_delete', $entity->original->getTranslation($langcode));
+        $this->invokeHook('translation_delete', $entity->getOriginal()->getTranslation($langcode));
       }
     }
   }
@@ -941,22 +956,17 @@ abstract class ContentEntityStorageBase extends EntityStorageBase implements Con
 
     // We need to call the delete method for field items of removed
     // translations.
-    if ($method == 'postSave' && !empty($entity->original)) {
-      $original_langcodes = array_keys($entity->original->getTranslationLanguages());
+    if ($method == 'postSave' && $entity->getOriginal()) {
+      $original_langcodes = array_keys($entity->getOriginal()->getTranslationLanguages());
       foreach (array_diff($original_langcodes, $langcodes) as $removed_langcode) {
         /** @var \Drupal\Core\Entity\ContentEntityInterface $translation */
-        $translation = $entity->original->getTranslation($removed_langcode);
+        $translation = $entity->getOriginal()->getTranslation($removed_langcode);
 
         // Fields may rely on the isDefaultTranslation() method to determine
         // what is going to be deleted - the whole entity or a particular
         // translation.
         if ($translation->isDefaultTranslation()) {
-          if (method_exists($translation, 'setDefaultTranslationEnforced')) {
-            $translation->setDefaultTranslationEnforced(FALSE);
-          }
-          else {
-            @trigger_error('Not providing a setDefaultTranslationEnforced() method when implementing \Drupal\Core\TypedData\TranslatableInterface is deprecated in drupal:10.2.0 and is required from drupal:11.0.0. See https://www.drupal.org/node/3376146', E_USER_DEPRECATED);
-          }
+          $translation->setDefaultTranslationEnforced(FALSE);
         }
 
         $fields = $translation->getTranslatableFields();
@@ -1120,15 +1130,11 @@ abstract class ContentEntityStorageBase extends EntityStorageBase implements Con
       return;
     }
 
-    $cache_tags = [
-      $this->entityTypeId . '_values',
-      'entity_field_info',
-    ];
     $items = [];
     foreach ($entities as $id => $entity) {
       $items[$this->buildCacheId($id)] = [
         'data' => $entity,
-        'tags' => $cache_tags,
+        'tags' => ['entity_field_info'],
       ];
     }
     $this->cacheBackend->setMultiple($items);
@@ -1207,7 +1213,7 @@ abstract class ContentEntityStorageBase extends EntityStorageBase implements Con
     else {
       parent::resetCache();
       if ($this->entityType->isPersistentlyCacheable()) {
-        Cache::invalidateTags([$this->entityTypeId . '_values']);
+        $this->cacheBackend->deleteAll();
       }
       $this->latestRevisionIds = [];
     }

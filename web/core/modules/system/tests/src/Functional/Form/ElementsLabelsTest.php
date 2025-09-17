@@ -61,8 +61,8 @@ class ElementsLabelsTest extends BrowserTestBase {
     // appropriate override and correct behavior.
     $this->assertSession()->elementExists('xpath', '//input[@id="edit-form-checkbox-test"]/following-sibling::label[@for="edit-form-checkbox-test" and @class="option"]');
 
-    // Exercise various defaults for textboxes and modifications to ensure
-    // appropriate override and correct behavior.
+    // Exercise various textbox defaults and modifications to ensure appropriate
+    // override and correct behavior.
 
     // Verify that label precedes textfield, with required marker inside label.
     $this->assertSession()->elementExists('xpath', '//label[@for="edit-form-textfield-test-title-and-required" and @class="js-form-required form-required"]/following-sibling::input[@id="edit-form-textfield-test-title-and-required"]');
@@ -160,7 +160,7 @@ class ElementsLabelsTest extends BrowserTestBase {
   /**
    * Return a form with element with not all properties defined.
    */
-  protected function getFormWithLimitedProperties() {
+  protected function getFormWithLimitedProperties(): array {
     $form = [];
 
     $form['fieldset'] = [

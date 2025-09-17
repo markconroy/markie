@@ -59,15 +59,11 @@ class UserLoginBlock extends BlockBase implements ContainerFactoryPluginInterfac
     $plugin_id,
     $plugin_definition,
     RouteMatchInterface $route_match,
-    protected ?FormBuilderInterface $formBuilder = NULL,
+    protected FormBuilderInterface $formBuilder,
   ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
 
     $this->routeMatch = $route_match;
-    if (!$formBuilder) {
-      @trigger_error('Calling ' . __METHOD__ . ' without the $formBuilder argument is deprecated in drupal:10.3.0 and it will be required in drupal:11.0.0. See https://www.drupal.org/node/3159776', E_USER_DEPRECATED);
-      $this->formBuilder = \Drupal::service('form_builder');
-    }
   }
 
   /**
@@ -156,7 +152,9 @@ class UserLoginBlock extends BlockBase implements ContainerFactoryPluginInterfac
   }
 
   /**
-   * #lazy_builder callback; renders a form action URL including destination.
+   * Render API callback: Renders a form action URL including destination.
+   *
+   * This function is assigned as a #lazy_builder callback.
    *
    * @return array
    *   A renderable array representing the form action.

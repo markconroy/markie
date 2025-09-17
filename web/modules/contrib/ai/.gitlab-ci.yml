@@ -11,7 +11,7 @@ variables:
   # Give more verbose PHPUnit output.
   _PHPUNIT_EXTRA: --verbose
   # Opt into the relevant versions.
-  OPT_IN_TEST_PREVIOUS_MAJOR: 0 # Opted out due to issues debian archives.
+  OPT_IN_TEST_PREVIOUS_MAJOR: 1
   OPT_IN_TEST_PREVIOUS_MINOR: 1
   OPT_IN_TEST_NEXT_MINOR: 1
   OPT_IN_TEST_NEXT_MAJOR: 1
@@ -22,8 +22,32 @@ variables:
   SKIP_ESLINT: 1
   SKIP_STYLELINT: 1   # Until fixed in gitlab templates.
   # showdown.js is full of emoji words.
-  _CSPELL_IGNORE_PATHS: "'modules/ai_api_explorer/css', 'modules/ai_api_explorer/js', 'modules/ai_chatbot/js', 'modules/ai_chatbot/deepchat', 'modules/ai_chatbot/css', '.cspell-project-words.txt', 'grumphp.yml"
+  _CSPELL_IGNORE_PATHS: "'assets/js/chat_history_element.js', 'modules/*/tests/resources/ai_test/requests/*/*.yml', 'modules/ai_api_explorer/css', 'modules/ai_api_explorer/js', 'modules/ai_chatbot/js', 'modules/ai_chatbot/deepchat', 'modules/ai_chatbot/css', 'modules/ai_automators/tests/config', '.cspell-project-words.txt', 'grumphp.yml"
   COMPOSER_IGNORE_PLATFORM_REQS: 'ext-ffi'
+
+phpunit (previous major):
+  before_script:
+    # We need to build 8.1 with the FFI extension enabled.
+    # Install dependencies.
+    - apt-get update
+    - apt-get install -y --no-install-recommends $PHPIZE_DEPS libffi-dev
+    # Download and extract PHP source.
+    - curl -LS -o /usr/src/php.tar.xz "https://php.net/distributions/php-$(php -r 'echo PHP_VERSION;').tar.xz"
+    - docker-php-source extract
+    # Compile the FFI module.
+    - |-
+      (
+        cd /usr/src/php/ext/ffi
+        phpize
+        ./configure
+        make
+        make install
+      )
+    # Enable the FFI module.
+    - echo "extension=ffi.so" > /usr/local/etc/php/conf.d/docker-php-ext-ffi.ini
+    - echo "ffi.enable=true" >> /usr/local/etc/php/conf.d/docker-php-ext-ffi.ini
+    # Show the configuration for debugging purposes.
+    - php -i | grep ffi
 
 # Build JS artifacts as this can sometimes be forgotten.
 js_build:
@@ -136,23 +160,9 @@ phpstan:
 
 .phpunit-base:
   before_script:
-    # Install dependencies.
-    - apt-get update
-    - apt-get install -y --no-install-recommends $PHPIZE_DEPS libffi-dev
-    # Download and extract PHP source.
-    - curl -LS -o /usr/src/php.tar.xz "https://php.net/distributions/php-$(php -r 'echo PHP_VERSION;').tar.xz"
-    - docker-php-source extract
-    # Compile the FFI module.
-    - |-
-      (
-        cd /usr/src/php/ext/ffi
-        phpize
-        ./configure
-        make
-        make install
-      )
     # Enable the FFI module.
-    - echo "extension=ffi.so" > /usr/local/etc/php/conf.d/docker-php-ext-ffi.ini
+    - echo "extension=ffi" > /usr/local/etc/php/conf.d/docker-php-ext-ffi.ini
     - echo "ffi.enable=true" >> /usr/local/etc/php/conf.d/docker-php-ext-ffi.ini
     # Show the configuration for debugging purposes.
-    - php -i | grep ffi
+    - php --ri ffi
+

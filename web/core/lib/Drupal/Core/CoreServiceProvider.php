@@ -6,9 +6,11 @@ use Drupal\Core\Cache\Context\CacheContextsPass;
 use Drupal\Core\Cache\ListCacheBinsPass;
 use Drupal\Core\DependencyInjection\Compiler\AuthenticationProviderPass;
 use Drupal\Core\DependencyInjection\Compiler\BackendCompilerPass;
+use Drupal\Core\DependencyInjection\Compiler\BackwardsCompatibilityClassLoaderPass;
 use Drupal\Core\DependencyInjection\Compiler\CorsCompilerPass;
 use Drupal\Core\DependencyInjection\Compiler\DeprecatedServicePass;
 use Drupal\Core\DependencyInjection\Compiler\DevelopmentSettingsPass;
+use Drupal\Core\Hook\HookCollectorPass;
 use Drupal\Core\DependencyInjection\Compiler\LoggerAwarePass;
 use Drupal\Core\DependencyInjection\Compiler\ModifyServiceDefinitionsPass;
 use Drupal\Core\DependencyInjection\Compiler\ProxyServicesPass;
@@ -24,12 +26,15 @@ use Drupal\Core\DependencyInjection\Compiler\TwigExtensionPass;
 use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\DependencyInjection\ServiceModifierInterface;
 use Drupal\Core\DependencyInjection\ServiceProviderInterface;
+use Drupal\Core\Extension\ModuleUninstallValidatorInterface;
 use Drupal\Core\Plugin\PluginManagerPass;
+use Drupal\Core\PreWarm\PreWarmableInterface;
+use Drupal\Core\Queue\QueueFactoryInterface;
 use Drupal\Core\Render\MainContent\MainContentRenderersPass;
 use Drupal\Core\Site\Settings;
 use Psr\Log\LoggerAwareInterface;
 use Symfony\Component\DependencyInjection\Compiler\PassConfig;
-use Symfony\Component\DependencyInjection\Reference;
+use Symfony\Component\EventDispatcher\DependencyInjection\RegisterListenersPass;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
@@ -50,17 +55,18 @@ class CoreServiceProvider implements ServiceProviderInterface, ServiceModifierIn
    * {@inheritdoc}
    */
   public function register(ContainerBuilder $container) {
-    $this->registerTest($container);
-
-    // Only register the private file stream wrapper if a file path has been set.
+    // Only register the private file stream wrapper if a file path has been
+    // set.
     if (Settings::get('file_private_path')) {
       $container->register('stream_wrapper.private', 'Drupal\Core\StreamWrapper\PrivateStream')
         ->addTag('stream_wrapper', ['scheme' => 'private']);
     }
 
+    $container->addCompilerPass(new HookCollectorPass());
     // Add the compiler pass that lets service providers modify existing
-    // service definitions. This pass must come first so that later
-    // list-building passes are operating on the post-alter services list.
+    // service definitions. This pass must come before all passes operating on
+    // services so that later list-building passes are operating on the
+    // post-alter services list.
     $container->addCompilerPass(new ModifyServiceDefinitionsPass());
 
     $container->addCompilerPass(new DevelopmentSettingsPass());
@@ -85,7 +91,7 @@ class CoreServiceProvider implements ServiceProviderInterface, ServiceModifierIn
     $container->addCompilerPass(new TwigExtensionPass());
 
     // Add a compiler pass for registering event subscribers.
-    $container->addCompilerPass(new RegisterEventSubscribersPass(), PassConfig::TYPE_AFTER_REMOVING);
+    $container->addCompilerPass(new RegisterEventSubscribersPass(new RegisterListenersPass()), PassConfig::TYPE_AFTER_REMOVING);
     $container->addCompilerPass(new LoggerAwarePass(), PassConfig::TYPE_AFTER_REMOVING);
 
     $container->addCompilerPass(new RegisterAccessChecksPass());
@@ -103,12 +109,34 @@ class CoreServiceProvider implements ServiceProviderInterface, ServiceModifierIn
 
     $container->addCompilerPass(new DeprecatedServicePass());
 
+    // Collect moved classes for the backwards compatibility class loader.
+    $container->addCompilerPass(new BackwardsCompatibilityClassLoaderPass());
+
     $container->registerForAutoconfiguration(EventSubscriberInterface::class)
       ->addTag('event_subscriber');
 
     $container->registerForAutoconfiguration(LoggerAwareInterface::class)
       ->addTag('logger_aware');
 
+    $container->registerForAutoconfiguration(QueueFactoryInterface::class)
+      ->addTag('queue_factory');
+
+    $container->registerForAutoconfiguration(PreWarmableInterface::class)
+      ->addTag('cache_prewarmable');
+
+    $container->registerForAutoconfiguration(ModuleUninstallValidatorInterface::class)
+      ->addTag('module_install.uninstall_validator');
+
+    // Deprecated parameters.
+    if ($container->hasParameter('session.storage.options')) {
+      $session_storage_options = $container->getParameter('session.storage.options');
+      if (array_key_exists('sid_length', $session_storage_options)) {
+        @trigger_error('The "sid_length" parameter is deprecated in drupal:11.1.0 and will be removed in drupal:12.0.0. This setting should be removed from the settings file, since its usage has been removed. See https://www.drupal.org/node/3469305', E_USER_DEPRECATED);
+      }
+      if (array_key_exists('sid_bits_per_character', $session_storage_options)) {
+        @trigger_error('The "sid_bits_per_character" parameter is deprecated in drupal:11.1.0 and will be removed in drupal:12.0.0. This setting should be removed from the settings file, since its usage has been removed. See https://www.drupal.org/node/3469305', E_USER_DEPRECATED);
+      }
+    }
   }
 
   /**
@@ -129,34 +157,6 @@ class CoreServiceProvider implements ServiceProviderInterface, ServiceModifierIn
     elseif (function_exists('com_create_guid')) {
       $uuid_service->setClass('Drupal\Component\Uuid\Com');
     }
-  }
-
-  /**
-   * Registers services and event subscribers for a site under test.
-   *
-   * @param \Drupal\Core\DependencyInjection\ContainerBuilder $container
-   *   The container builder.
-   */
-  protected function registerTest(ContainerBuilder $container) {
-    // Do nothing if we are not in a test environment.
-    if (!drupal_valid_test_ua()) {
-      return;
-    }
-    // The test middleware is not required for kernel tests as there is no child
-    // site. DRUPAL_TEST_IN_CHILD_SITE is not defined in this case.
-    if (!defined('DRUPAL_TEST_IN_CHILD_SITE')) {
-      return;
-    }
-    // Add the HTTP request middleware to Guzzle.
-    $container
-      ->register('test.http_client.middleware', 'Drupal\Core\Test\HttpClientMiddleware\TestHttpClientMiddleware')
-      ->addTag('http_client_middleware');
-    // Add the wait terminate middleware which acquires a lock to signal request
-    // termination to the test runner.
-    $container
-      ->register('test.http_middleware.wait_terminate_middleware', 'Drupal\Core\Test\StackMiddleware\TestWaitTerminateMiddleware')
-      ->setArguments([new Reference('state'), new Reference('lock')])
-      ->addTag('http_middleware', ['priority' => -1024]);
   }
 
 }

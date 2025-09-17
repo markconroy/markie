@@ -54,10 +54,7 @@ class MappingTest extends KernelTestBase {
             'use_site_name' => TRUE,
             'use_site_slogan' => TRUE,
             'label_display' => FALSE,
-            // TRICKY: these 4 are inherited from `type: block_settings`.
-            'status' => TRUE,
-            'info' => '',
-            'view_mode' => 'full',
+            // This is inherited from `type: block_settings`.
             'context_mapping' => [],
           ],
         ])->save();
@@ -76,10 +73,7 @@ class MappingTest extends KernelTestBase {
           'settings' => [
             'primary' => TRUE,
             'secondary' => FALSE,
-            // TRICKY: these 4 are inherited from `type: block_settings`.
-            'status' => TRUE,
-            'info' => '',
-            'view_mode' => 'full',
+            // This is inherited from `type: block_settings`.
             'context_mapping' => [],
           ],
         ])->save();
@@ -100,10 +94,7 @@ class MappingTest extends KernelTestBase {
           'status' => TRUE,
           'settings' => [
             'label_display' => FALSE,
-            // TRICKY: these 4 are inherited from `type: block_settings`.
-            'status' => TRUE,
-            'info' => '',
-            'view_mode' => 'full',
+            // This is inherited from `type: block_settings`.
             'context_mapping' => [],
           ],
           // Avoid showing "Powered by Drupal" on 404 responses.
@@ -143,10 +134,12 @@ class MappingTest extends KernelTestBase {
         break;
 
       case 'field.field.node.config_mapping_test.comment_config_mapping_test':
-        $this->enableModules(['field', 'node', 'comment', 'taxonomy', 'config_mapping_test']);
+        $this->enableModules(['user', 'field', 'node', 'comment', 'taxonomy', 'config_mapping_test']);
+        $this->installEntitySchema('user');
+        $this->installEntitySchema('node');
         $this->assertNull(FieldConfig::load('node.config_mapping_test.comment_config_mapping_test'));
-        // TRICKY: \Drupal\node\Entity\NodeType::$preview_mode uses
-        // DRUPAL_OPTIONAL, which is defined in system.module.
+        // \Drupal\node\Entity\NodeType::$preview_mode uses DRUPAL_OPTIONAL,
+        // which is defined in system.module.
         require_once 'core/modules/system/system.module';
         $this->installConfig(['config_mapping_test']);
         $this->assertNotNull(FieldConfig::load('node.config_mapping_test.comment_config_mapping_test'));
@@ -174,6 +167,7 @@ class MappingTest extends KernelTestBase {
    * @see https://www.drupal.org/files/ConfigSchemaCheatSheet2.0.pdf
    *
    * @return \Generator
+   *   The test cases.
    */
   public static function providerMappingInterpretation(): \Generator {
     $available_block_settings_types = [
@@ -234,7 +228,8 @@ class MappingTest extends KernelTestBase {
         // @see core/config/schema/core.data_types.schema.yml
         '_core',
         'langcode',
-        // Keys defined locally, in `type: config_schema_deprecated_test.settings`.
+        // Keys defined locally, in `type:
+        // config_schema_deprecated_test.settings`.
         // @see core/modules/config/tests/config_schema_deprecated_test/config/schema/config_schema_deprecated_test.schema.yml
         'complex_structure_deprecated',
       ],
@@ -245,7 +240,8 @@ class MappingTest extends KernelTestBase {
       'config_schema_deprecated_test.settings',
       'complex_structure_deprecated',
       [
-        // Keys defined locally, in `type: config_schema_deprecated_test.settings`.
+        // Keys defined locally, in `type:
+        // config_schema_deprecated_test.settings`.
         // @see core/modules/config/tests/config_schema_deprecated_test/config/schema/config_schema_deprecated_test.schema.yml
         'type',
         'products',
@@ -322,15 +318,15 @@ class MappingTest extends KernelTestBase {
         'label',
         'label_display',
         'provider',
-        'status',
-        'info',
-        'view_mode',
         'context_mapping',
-        // Keys defined locally, in `type: block.settings.system_branding_block`.
+        // Keys defined locally, in `type:
+        // block.settings.system_branding_block`.
         // @see core/modules/block/config/schema/block.schema.yml
         ...$available_block_settings_types['block.settings.system_branding_block'],
       ],
-      [],
+      // This key is optional, see `type: block_settings`.
+      // @see core.data_types.schema.yml
+      ['context_mapping'],
       $available_block_settings_types,
     ];
     yield 'Dynamic type with [%parent]: block.block.local_tasks:settings' => [
@@ -344,15 +340,14 @@ class MappingTest extends KernelTestBase {
         'label',
         'label_display',
         'provider',
-        'status',
-        'info',
-        'view_mode',
         'context_mapping',
         // Keys defined locally, in `type: block.settings.local_tasks_block`.
         // @see core/modules/system/config/schema/system.schema.yml
         ...$available_block_settings_types['block.settings.local_tasks_block'],
       ],
-      [],
+      // This key is optional, see `type: block_settings`.
+      // @see core.data_types.schema.yml
+      ['context_mapping'],
       $available_block_settings_types,
     ];
     yield 'Dynamic type with [%parent.%parent]: field.field.node.config_mapping_test.comment_config_mapping_test:default_value.0' => [
@@ -382,6 +377,7 @@ class MappingTest extends KernelTestBase {
         'field.value.decimal' => ['value'],
         'field.value.float' => ['value'],
         'field.value.timestamp' => ['value'],
+        'field.value.language' => ['value'],
         'field.value.comment' => [
           'status',
           'cid',

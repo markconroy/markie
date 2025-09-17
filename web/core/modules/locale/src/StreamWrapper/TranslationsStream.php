@@ -4,6 +4,7 @@ namespace Drupal\locale\StreamWrapper;
 
 use Drupal\Core\StreamWrapper\LocalStream;
 use Drupal\Core\StreamWrapper\StreamWrapperInterface;
+use Drupal\Core\StringTranslation\StringTranslationTrait;
 
 /**
  * Defines a Drupal translations (translations://) stream wrapper class.
@@ -11,6 +12,8 @@ use Drupal\Core\StreamWrapper\StreamWrapperInterface;
  * Provides support for storing translation files.
  */
 class TranslationsStream extends LocalStream {
+
+  use StringTranslationTrait;
 
   /**
    * {@inheritdoc}
@@ -23,14 +26,14 @@ class TranslationsStream extends LocalStream {
    * {@inheritdoc}
    */
   public function getName() {
-    return t('Translation files');
+    return $this->t('Translation files');
   }
 
   /**
    * {@inheritdoc}
    */
   public function getDescription() {
-    return t('Translation files');
+    return $this->t('Translation files');
   }
 
   /**
@@ -41,7 +44,9 @@ class TranslationsStream extends LocalStream {
   }
 
   /**
+   * phpcs:ignore Drupal.Files.LineLength
    * Implements Drupal\Core\StreamWrapper\StreamWrapperInterface::getExternalUrl().
+   *
    * @throws \LogicException
    *   PO files URL should not be public.
    */

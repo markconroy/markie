@@ -9,11 +9,12 @@ use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
- * @coversDefaultClass \Drupal\Component\Datetime\Time
- * @group Datetime
+ * Tests the Time class.
  *
  * Isolate the tests to prevent side effects from altering system time.
  *
+ * @coversDefaultClass \Drupal\Component\Datetime\Time
+ * @group Datetime
  * @runTestsInSeparateProcesses
  * @preserveGlobalState disabled
  */
@@ -133,6 +134,7 @@ namespace Drupal\Component\Datetime;
  * Shadow time() system call.
  *
  * @return int
+ *   The fixed integer timestamp used for testing purposes.
  */
 function time() {
   return 12345678;
@@ -142,6 +144,7 @@ function time() {
  * Shadow microtime system call.
  *
  * @return float
+ *   The fixed float timestamp used for testing purposes.
  */
 function microtime(bool $as_float = FALSE) {
   return 1234567.89;

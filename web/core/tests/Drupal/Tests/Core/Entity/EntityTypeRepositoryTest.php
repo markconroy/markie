@@ -61,11 +61,11 @@ class EntityTypeRepositoryTest extends UnitTestCase {
    * @param \Drupal\Core\Entity\EntityTypeInterface[]|\Prophecy\Prophecy\ProphecyInterface[] $definitions
    *   (optional) An array of entity type definitions.
    */
-  protected function setUpEntityTypeDefinitions($definitions = []) {
+  protected function setUpEntityTypeDefinitions($definitions = []): void {
     foreach ($definitions as $key => $entity_type) {
       // \Drupal\Core\Entity\EntityTypeInterface::getLinkTemplates() is called
-      // by \Drupal\Core\Entity\EntityTypeManager::processDefinition() so it must
-      // always be mocked.
+      // by \Drupal\Core\Entity\EntityTypeManager::processDefinition() so it
+      // must always be mocked.
       $entity_type->getLinkTemplates()->willReturn([]);
 
       // Give the entity type a legitimate class to return.
@@ -219,14 +219,26 @@ class EntityTypeRepositoryTest extends UnitTestCase {
 
 }
 
+/**
+ * A simple entity for testing.
+ */
 class Fruit extends EntityBase {
 }
 
+/**
+ * A Fruit class for testing.
+ */
 class Apple extends Fruit {
 }
 
+/**
+ * An Apple class for testing.
+ */
 class RoyalGala extends Apple {
 }
 
+/**
+ * A Fruit class for testing.
+ */
 class Blackcurrant extends Fruit {
 }

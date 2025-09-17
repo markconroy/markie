@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Drupal\KernelTests\Core\Entity;
 
 use Drupal\Component\Plugin\Exception\PluginNotFoundException;
+use Drupal\Core\Entity\Query\QueryException;
 use Drupal\entity_test\Entity\EntityTest;
+use Drupal\entity_test\EntityTestHelper;
 use Drupal\taxonomy\Entity\Vocabulary;
 use Drupal\taxonomy\Entity\Term;
 use Drupal\Tests\field\Traits\EntityReferenceFieldCreationTrait;
@@ -39,7 +41,7 @@ class EntityQueryRelationshipTest extends EntityKernelTestBase {
   public $accounts;
 
   /**
-   * entity_test entities.
+   * The entity_test entities.
    *
    * @var array
    */
@@ -76,7 +78,7 @@ class EntityQueryRelationshipTest extends EntityKernelTestBase {
     $vocabulary->save();
 
     // Second, create the field.
-    entity_test_create_bundle('test_bundle');
+    EntityTestHelper::createBundle('test_bundle');
     $this->fieldName = $this->randomMachineName();
     $handler_settings = [
       'target_bundles' => [
@@ -84,7 +86,7 @@ class EntityQueryRelationshipTest extends EntityKernelTestBase {
       ],
       'auto_create' => TRUE,
     ];
-    $this->createEntityReferenceField('entity_test', 'test_bundle', $this->fieldName, NULL, 'taxonomy_term', 'default', $handler_settings);
+    $this->createEntityReferenceField('entity_test', 'test_bundle', $this->fieldName, '', 'taxonomy_term', 'default', $handler_settings);
 
     // Create two terms and also two accounts.
     for ($i = 0; $i <= 1; $i++) {
@@ -221,6 +223,35 @@ class EntityQueryRelationshipTest extends EntityKernelTestBase {
       ->accessCheck(FALSE)
       ->condition('langcode.language.foo', 'bar')
       ->execute();
+  }
+
+  /**
+   * Tests a non-existent field name in a complex query relationship.
+   *
+   * @dataProvider providerTestInvalidFieldName
+   */
+  public function testInvalidFieldName(string $field_name): void {
+    $this->expectException(QueryException::class);
+    $this->expectExceptionMessage("'non_existent_field_name' not found");
+
+    // Check that non-existent field names in a complex relationship query
+    // throws a meaningful exception.
+    $this->container->get('entity_type.manager')
+      ->getStorage('entity_test')
+      ->getQuery()
+      ->accessCheck()
+      ->condition($field_name, $this->randomString(), '=')
+      ->execute();
+  }
+
+  /**
+   * Data provider for testInvalidFieldName().
+   */
+  public static function providerTestInvalidFieldName(): array {
+    return [
+      ['non_existent_field_name.entity:user.name.value'],
+      ['user_id.entity:user.non_existent_field_name.value'],
+    ];
   }
 
   /**

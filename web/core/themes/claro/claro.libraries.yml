@@ -17,7 +17,6 @@ global-styling:
       css/classy/components/links.css: {}
       css/classy/components/menu.css: {}
       css/classy/components/more-link.css: {}
-      css/classy/components/tablesort.css: {}
       css/classy/components/textarea.css: {}
       css/classy/components/ui-dialog.css: {}
       css/components/accordion.css: {}
@@ -50,11 +49,6 @@ global-styling:
       css/components/tables.css: {}
       css/components/table--file-multiple-widget.css: {}
       css/components/search-admin-settings.css: {}
-      css/components/tablesort-indicator.css: {}
-      css/components/system-status-report-general-info.css: {}
-      css/components/system-status-report.css: {}
-      css/components/system-status-report-counters.css: {}
-      css/components/system-status-counter.css: {}
       css/components/tableselect.css: {}
       css/components/tabs.css: {}
     theme:
@@ -139,11 +133,12 @@ drupal.node.preview:
     theme:
       css/components/node-preview.css: {}
 
-tour-styling:
+drupal.tablesort:
   version: VERSION
   css:
-    theme:
-      css/theme/tour.theme.css: {}
+    component:
+      css/classy/components/tablesort.css: {}
+      css/components/tablesort-indicator.css: {}
 
 media-form:
   version: VERSION
@@ -226,6 +221,31 @@ form.password-confirm:
     - core/drupal
     - claro/global-styling
 
+
+status.report:
+  version: VERSION
+  css:
+    component:
+      css/components/system-status-report-general-info.css: {}
+      css/components/system-status-report.css: {}
+      css/components/system-status-report-counters.css: {}
+      css/components/system-status-counter.css: {}
+  moved_files:
+    claro/global-styling:
+      deprecation_version: 11.2.0
+      removed_version: 12.0.0
+      deprecation_link: https://www.drupal.org/node/3432346
+      css:
+        component:
+          css/components/system-status-report.css:
+            base: css/components/system-status-report.css
+          css/components/system-status-counter.css:
+            base: css/components/system-status-counter.css
+          css/components/system-status-report-counters.css:
+            base: css/components/system-status-report-counters.css
+          css/components/system-status-report-general-info.css:
+            base: css/components/system-status-report-general-info.css
+
 views:
   css:
     component:
@@ -235,15 +255,6 @@ views_ui:
   css:
     component:
       css/components/views-ui.css: {}
-  moved_files:
-    claro/global-styling:
-      deprecation_version: 10.3.0
-      removed_version: 11.0.0
-      deprecation_link: https://www.drupal.org/node/3432346
-      css:
-        component:
-          css/components/views-ui.css:
-            component: css/components/views-ui.css
 
 messages:
   js:
@@ -318,23 +329,11 @@ tableselect:
     - core/tabbable
     - core/once
 
-classy.book-navigation:
-  version: VERSION
-  css:
-    component:
-      css/classy/components/book-navigation.css: {}
-
 classy.file:
   version: VERSION
   css:
     component:
       css/classy/components/file.css: { weight: -10 }
-
-classy.forum:
-  version: VERSION
-  css:
-    component:
-      css/classy/components/forum.css: { weight: -10 }
 
 classy.indented:
   version: VERSION

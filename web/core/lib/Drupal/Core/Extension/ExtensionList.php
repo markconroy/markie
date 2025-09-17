@@ -148,6 +148,7 @@ abstract class ExtensionList {
    * Returns the extension discovery.
    *
    * @return \Drupal\Core\Extension\ExtensionDiscovery
+   *   The extension discovery.
    */
   protected function getExtensionDiscovery() {
     return new ExtensionDiscovery($this->root);
@@ -172,7 +173,7 @@ abstract class ExtensionList {
     try {
       $this->state->delete($this->getPathNamesCacheId());
     }
-    catch (DatabaseExceptionWrapper $e) {
+    catch (DatabaseExceptionWrapper) {
       // Ignore exceptions caused by a non existing {key_value} table in the
       // early installer.
     }
@@ -411,6 +412,8 @@ abstract class ExtensionList {
    * Returns a list of extension file paths keyed by machine name.
    *
    * @return string[]
+   *   An associative array of extension file paths, keyed by the extension
+   *   machine name.
    */
   public function getPathNames() {
     if ($this->pathNames === NULL) {

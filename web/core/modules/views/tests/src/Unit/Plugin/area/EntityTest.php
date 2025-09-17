@@ -127,7 +127,7 @@ class EntityTest extends UnitTestCase {
   /**
    * Ensures that the entity type manager returns an entity storage.
    */
-  protected function setupEntityTypeManager() {
+  protected function setupEntityTypeManager(): void {
     $this->entityTypeManager->expects($this->any())
       ->method('getStorage')
       ->with('entity_test')
@@ -142,6 +142,7 @@ class EntityTest extends UnitTestCase {
    * Data provider for testing different types of tokens.
    *
    * @return array
+   *   An array of test data.
    */
   public static function providerTestTokens() {
     return [

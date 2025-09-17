@@ -119,24 +119,6 @@ class ConfigEntityStorage extends EntityStorageBase implements ConfigEntityStora
   }
 
   /**
-   * {@inheritdoc}
-   */
-  public function loadRevision($revision_id) {
-    @trigger_error(__METHOD__ . '() is deprecated in drupal:10.1.0 and is removed from drupal:11.0.0. Use \Drupal\Core\Entity\RevisionableStorageInterface::loadRevision instead. See https://www.drupal.org/node/3294237', E_USER_DEPRECATED);
-
-    return NULL;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function deleteRevision($revision_id) {
-    @trigger_error(__METHOD__ . '() is deprecated in drupal:10.1.0 and is removed from drupal:11.0.0. Use \Drupal\Core\Entity\RevisionableStorageInterface::deleteRevision instead. See https://www.drupal.org/node/3294237', E_USER_DEPRECATED);
-
-    return NULL;
-  }
-
-  /**
    * Returns the prefix used to create the configuration name.
    *
    * The prefix consists of the config prefix from the entity type plus a dot
@@ -329,11 +311,22 @@ class ConfigEntityStorage extends EntityStorageBase implements ConfigEntityStora
   }
 
   /**
+   * {@inheritdoc}
+   */
+  public function resetCache(?array $ids = NULL) {
+    if ($this->entityType->isStaticallyCacheable()) {
+      // Always invalidate through the cache tag, since config entities may
+      // be cached under different cache keys depending on the override flag.
+      $this->memoryCache->invalidateTags([$this->memoryCacheTag]);
+    }
+  }
+
+  /**
    * Invokes a hook on behalf of the entity.
    *
-   * @param $hook
+   * @param string $hook
    *   One of 'presave', 'insert', 'update', 'predelete', or 'delete'.
-   * @param $entity
+   * @param \Drupal\Core\Entity\EntityInterface $entity
    *   The entity object.
    */
   protected function invokeHook($hook, EntityInterface $entity) {
@@ -424,7 +417,7 @@ class ConfigEntityStorage extends EntityStorageBase implements ConfigEntityStora
     $data = $this->mapFromStorageRecords([$values]);
     /** @var \Drupal\Core\Config\Entity\ConfigEntityInterface $entity */
     $entity = current($data);
-    $entity->original = clone $entity;
+    $entity->setOriginal(clone $entity);
     $entity->setSyncing($is_syncing);
     $entity->enforceIsNew();
     $entity->postCreate($this);
@@ -440,7 +433,7 @@ class ConfigEntityStorage extends EntityStorageBase implements ConfigEntityStora
    * {@inheritdoc}
    */
   public function updateFromStorageRecord(ConfigEntityInterface $entity, array $values) {
-    $entity->original = clone $entity;
+    $entity->setOriginal(clone $entity);
 
     $data = $this->mapFromStorageRecords([$values]);
     $updated_entity = current($data);

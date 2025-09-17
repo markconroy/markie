@@ -50,13 +50,20 @@ class NodeTokenReplaceTest extends TokenReplaceKernelTestBase {
       'type' => 'article',
       'uid' => $account->id(),
       'title' => '<blink>Blinking Text</blink>',
-      'body' => [['value' => 'Regular NODE body for the test.', 'summary' => 'Fancy NODE summary.', 'format' => 'plain_text']],
+      'body' => [
+        [
+          'value' => 'Regular NODE body for the test.',
+          'summary' => 'Fancy NODE summary.',
+          'format' => 'plain_text',
+        ],
+      ],
     ]);
     $node->save();
 
     // Generate and test tokens.
     $tests = [];
     $tests['[node:nid]'] = $node->id();
+    $tests['[node:uuid]'] = $node->uuid();
     $tests['[node:vid]'] = $node->getRevisionId();
     $tests['[node:type]'] = 'article';
     $tests['[node:type-name]'] = 'Article';
@@ -79,6 +86,7 @@ class NodeTokenReplaceTest extends TokenReplaceKernelTestBase {
 
     $metadata_tests = [];
     $metadata_tests['[node:nid]'] = $base_bubbleable_metadata;
+    $metadata_tests['[node:uuid]'] = $base_bubbleable_metadata;
     $metadata_tests['[node:vid]'] = $base_bubbleable_metadata;
     $metadata_tests['[node:type]'] = $base_bubbleable_metadata;
     $metadata_tests['[node:type-name]'] = $base_bubbleable_metadata;

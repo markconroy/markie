@@ -5,6 +5,8 @@
  * Test module.
  */
 
+declare(strict_types=1);
+
 use Drupal\Core\Extension\Extension;
 
 /**
@@ -12,7 +14,7 @@ use Drupal\Core\Extension\Extension;
  *
  * Manipulate module dependencies to test dependency chains.
  */
-function module_test_system_info_alter(&$info, Extension $file, $type) {
+function module_test_system_info_alter(&$info, Extension $file, $type): void {
   if (\Drupal::state()->get('module_test.dependency') == 'missing dependency') {
     if ($file->getName() == 'dblog') {
       // Make dblog module depend on config.
@@ -59,7 +61,7 @@ function module_test_system_info_alter(&$info, Extension $file, $type) {
 /**
  * Implements hook_hook_info().
  */
-function module_test_hook_info() {
+function module_test_hook_info(): array {
   $hooks['test_hook'] = [
     'group' => 'file',
   ];
@@ -79,7 +81,7 @@ function module_test_load($param) {
 /**
  * Implements hook_modules_installed().
  */
-function module_test_modules_installed($modules) {
+function module_test_modules_installed($modules): void {
   // Record the ordered list of modules that were passed in to this hook so we
   // can check that the modules were enabled in the correct sequence.
   \Drupal::state()->set('module_test.install_order', $modules);
@@ -88,28 +90,8 @@ function module_test_modules_installed($modules) {
 /**
  * Implements hook_modules_uninstalled().
  */
-function module_test_modules_uninstalled($modules) {
+function module_test_modules_uninstalled($modules): void {
   // Record the ordered list of modules that were passed in to this hook so we
   // can check that the modules were uninstalled in the correct sequence.
   \Drupal::state()->set('module_test.uninstall_order', $modules);
-}
-
-/**
- * Implements hook_module_implements_alter().
- *
- * @see module_test_altered_test_hook()
- * @see \Drupal\system\Tests\Module\ModuleImplementsAlterTest::testModuleImplementsAlter()
- */
-function module_test_module_implements_alter(&$implementations, $hook) {
-  if ($hook === 'altered_test_hook') {
-    // Add a hook implementation, that will be found in
-    // module_test.implementation.inc.
-    $implementations['module_test'] = 'implementations';
-  }
-  if ($hook === 'unimplemented_test_hook') {
-    // Add the non-existing function module_test_unimplemented_test_hook(). This
-    // should cause an exception to be thrown in
-    // \Drupal\Core\Extension\ModuleHandler::buildImplementationInfo('unimplemented_test_hook').
-    $implementations['module_test'] = FALSE;
-  }
 }

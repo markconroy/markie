@@ -40,7 +40,7 @@ class UpdatePathTestJavaScriptTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function doSelectionTest() {
+  protected function doSelectionTest(): void {
     // Ensure that at least one JS script has drupalSettings in there.
     $scripts = $this->xpath('//script');
     $found = FALSE;
@@ -50,7 +50,7 @@ class UpdatePathTestJavaScriptTest extends BrowserTestBase {
       }
       // Source is a root-relative URL. Transform it to an absolute URL to allow
       // file_get_contents() to access the file.
-      $src = preg_replace('#^' . $GLOBALS['base_path'] . '(.*)#i', $GLOBALS['base_url'] . '/' . '${1}', $script->getAttribute('src'));
+      $src = preg_replace('#^' . $GLOBALS['base_path'] . '(.*)#i', $GLOBALS['base_url'] . '/${1}', $script->getAttribute('src'));
       $file_content = file_get_contents($src);
 
       if (str_contains($file_content, 'window.drupalSettings =')) {

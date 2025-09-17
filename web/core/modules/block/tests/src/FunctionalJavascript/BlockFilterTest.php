@@ -89,8 +89,9 @@ class BlockFilterTest extends WebDriverTestBase {
    *   An array of node elements.
    *
    * @return \Behat\Mink\Element\NodeElement[]
+   *   An array of visible elements.
    */
-  protected function filterVisibleElements(array $elements) {
+  protected function filterVisibleElements(array $elements): array {
     $elements = array_filter($elements, function (NodeElement $element) {
       return $element->isVisible();
     });

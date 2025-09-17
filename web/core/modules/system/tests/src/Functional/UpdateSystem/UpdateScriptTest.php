@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\Tests\system\Functional\UpdateSystem;
 
 use Drupal\Component\Serialization\Yaml;
+use Drupal\Core\Extension\Requirement\RequirementSeverity;
 use Drupal\Core\Url;
 use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\Tests\BrowserTestBase;
@@ -64,6 +65,9 @@ class UpdateScriptTest extends BrowserTestBase {
    * {@inheritdoc}
    */
   protected function setUp(): void {
+    if ($this->name() === 'testMissingExtension') {
+      $this->markTestSkipped('Skipped due to major version-specific logic. See https://www.drupal.org/project/drupal/issues/3359322');
+    }
     parent::setUp();
     $this->updateUrl = Url::fromRoute('system.db_update');
     $this->statusReportUrl = Url::fromRoute('system.status');
@@ -146,7 +150,7 @@ class UpdateScriptTest extends BrowserTestBase {
     // First, run this test with pending updates to make sure they can be run
     // successfully.
     $this->drupalLogin($this->updateUser);
-    $update_script_test_config->set('requirement_type', REQUIREMENT_WARNING)->save();
+    $update_script_test_config->set('requirement_type', RequirementSeverity::Warning->value)->save();
     /** @var \Drupal\Core\Update\UpdateHookRegistry $update_registry */
     $update_registry = \Drupal::service('update.update_hook_registry');
     $update_registry->setInstalledVersion('update_script_test', $update_registry->getInstalledVersion('update_script_test') - 1);
@@ -174,7 +178,7 @@ class UpdateScriptTest extends BrowserTestBase {
     // If there is a requirements error, it should be displayed even after
     // clicking the link to proceed (since the problem that triggered the error
     // has not been fixed).
-    $update_script_test_config->set('requirement_type', REQUIREMENT_ERROR)->save();
+    $update_script_test_config->set('requirement_type', RequirementSeverity::Error->value)->save();
     $this->drupalGet($this->updateUrl, ['external' => TRUE]);
     $this->assertSession()->pageTextContains('This is a requirements error provided by the update_script_test module.');
     $this->clickLink('try again');
@@ -182,7 +186,7 @@ class UpdateScriptTest extends BrowserTestBase {
 
     // Ensure that changes to a module's requirements that would cause errors
     // are displayed correctly.
-    $update_script_test_config->set('requirement_type', REQUIREMENT_OK)->save();
+    $update_script_test_config->set('requirement_type', RequirementSeverity::OK->value)->save();
     \Drupal::state()->set('update_script_test.system_info_alter', ['dependencies' => ['a_module_that_does_not_exist']]);
     $this->drupalGet($this->updateUrl, ['external' => TRUE]);
     $this->assertSession()->responseContains('a_module_that_does_not_exist (Missing)');
@@ -350,7 +354,6 @@ class UpdateScriptTest extends BrowserTestBase {
    * @dataProvider providerMissingExtension
    */
   public function testMissingExtension(array $core, array $contrib): void {
-    $this->markTestSkipped('Skipped due to major version-specific logic. See https://www.drupal.org/project/drupal/issues/3359322');
     $this->drupalLogin(
       $this->drupalCreateUser(
         [
@@ -536,7 +539,8 @@ class UpdateScriptTest extends BrowserTestBase {
     // But verify that we warn the admin about this situation.
     $this->assertSession()->elementTextEquals('xpath', '//div[@aria-label="Warning message"]', 'Warning message Module update_test_0 has an entry in the system.schema key/value storage, but is not installed. More information about this error.');
 
-    // Finally, try with both kinds of orphans and make sure we get both warnings.
+    // Finally, try with both kinds of orphans and make sure we get both
+    // warnings.
     \Drupal::service('update.update_hook_registry')->setInstalledVersion('my_already_removed_module', 8000);
     $this->drupalGet($this->updateUrl, ['external' => TRUE]);
     $this->updateRequirementsProblem();
@@ -793,7 +797,8 @@ class UpdateScriptTest extends BrowserTestBase {
     ]);
     $this->drupalLogin($admin_user);
 
-    // Visit status report page and ensure, that link to update.php has no path prefix set.
+    // Visit status report page and ensure, that link to update.php has no path
+    // prefix set.
     $this->drupalGet('en/admin/reports/status', ['external' => TRUE]);
     $this->assertSession()->statusCodeEquals(200);
     $this->assertSession()->linkByHrefExists('/update.php');
@@ -809,8 +814,9 @@ class UpdateScriptTest extends BrowserTestBase {
     $this->assertSession()->pageTextContains('Updates were attempted.');
     $this->assertSession()->linkExists('logged');
     $this->assertSession()->linkExists('Administration pages');
+    $this->assertSession()->linkExists('Status report');
     $this->assertSession()->elementNotExists('xpath', '//main//a[contains(@href, "update.php")]');
-    $this->clickLink('Administration pages');
+    $this->clickLink('Status report');
     $this->assertSession()->statusCodeEquals(200);
   }
 
@@ -845,7 +851,7 @@ class UpdateScriptTest extends BrowserTestBase {
   /**
    * Helper function to run updates via the browser.
    */
-  protected function runUpdates($maintenance_mode) {
+  protected function runUpdates($maintenance_mode): void {
     /** @var \Drupal\Core\Update\UpdateHookRegistry $update_registry */
     $update_registry = \Drupal::service('update.update_hook_registry');
     $schema_version = $update_registry->getInstalledVersion('update_script_test');

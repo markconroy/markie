@@ -98,7 +98,7 @@ class TaggedWithTest extends WizardTestBase {
       ],
       'auto_create' => TRUE,
     ];
-    $this->createEntityReferenceField('node', $this->nodeTypeWithTags->id(), $this->tagFieldName, NULL, 'taxonomy_term', 'default', $handler_settings, FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED);
+    $this->createEntityReferenceField('node', $this->nodeTypeWithTags->id(), $this->tagFieldName, '', 'taxonomy_term', 'default', $handler_settings, FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED);
 
     /** @var \Drupal\Core\Entity\EntityDisplayRepositoryInterface $display_repository */
     $display_repository = \Drupal::service('entity_display.repository');
@@ -194,7 +194,9 @@ class TaggedWithTest extends WizardTestBase {
   }
 
   /**
-   * Tests that the "tagged with" form element only shows for node types that support it.
+   * Tests the "tagged with" form element.
+   *
+   * Confirm that the element only shows for node types that support it.
    */
   public function testTaggedWithByNodeType(): void {
     // The tagging field is associated with one of our node types only. So the

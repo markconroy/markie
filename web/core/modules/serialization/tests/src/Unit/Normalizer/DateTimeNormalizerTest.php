@@ -11,6 +11,7 @@ use Drupal\Core\TypedData\Plugin\DataType\DateTimeIso8601;
 use Drupal\Core\TypedData\Plugin\DataType\IntegerData;
 use Drupal\Core\TypedData\Type\DateTimeInterface;
 use Drupal\serialization\Normalizer\DateTimeNormalizer;
+use Drupal\Tests\serialization\Traits\JsonSchemaTestTrait;
 use Drupal\Tests\UnitTestCase;
 use Symfony\Component\Serializer\Exception\UnexpectedValueException;
 
@@ -22,6 +23,8 @@ use Symfony\Component\Serializer\Exception\UnexpectedValueException;
  * @see \Drupal\Core\TypedData\Type\DateTimeInterface
  */
 class DateTimeNormalizerTest extends UnitTestCase {
+
+  use JsonSchemaTestTrait;
 
   /**
    * The tested data type's normalizer.
@@ -120,6 +123,7 @@ class DateTimeNormalizerTest extends UnitTestCase {
    * Data provider for testDenormalizeValidFormats.
    *
    * @return array
+   *   An array of test data.
    */
   public static function providerTestDenormalizeValidFormats() {
     $data = [];
@@ -151,13 +155,26 @@ class DateTimeNormalizerTest extends UnitTestCase {
    * Data provider for testDenormalizeUserFormats.
    *
    * @return array
+   *   An array of test data.
    */
   public static function providerTestDenormalizeUserFormats() {
     $data = [];
 
-    $data['Y/m/d H:i:s P'] = ['2016/11/06 09:02:00 +00:00', 'Y/m/d H:i:s P', new \DateTimeImmutable('2016-11-06T09:02:00+00:00')];
-    $data['H:i:s Y/m/d P'] = ['09:02:00 2016/11/06  +01:00', 'H:i:s Y/m/d P', new \DateTimeImmutable('2016-11-06T09:02:00+01:00')];
-    $data['Y/m/d H:i:s'] = ['09:02:00 2016/11/06', 'H:i:s Y/m/d', new \DateTimeImmutable('2016-11-06T09:02:00+11:00')];
+    $data['Y/m/d H:i:s P'] = [
+      '2016/11/06 09:02:00 +00:00',
+      'Y/m/d H:i:s P',
+      new \DateTimeImmutable('2016-11-06T09:02:00+00:00'),
+    ];
+    $data['H:i:s Y/m/d P'] = [
+      '09:02:00 2016/11/06  +01:00',
+      'H:i:s Y/m/d P',
+      new \DateTimeImmutable('2016-11-06T09:02:00+01:00'),
+    ];
+    $data['Y/m/d H:i:s'] = [
+      '09:02:00 2016/11/06',
+      'H:i:s Y/m/d',
+      new \DateTimeImmutable('2016-11-06T09:02:00+11:00'),
+    ];
 
     return $data;
   }
@@ -176,6 +193,30 @@ class DateTimeNormalizerTest extends UnitTestCase {
     $this->normalizer->denormalize($normalized, DateTimeInterface::class, NULL, []);
   }
 
+  /**
+   * Generate test data for date data providers.
+   *
+   * @return array
+   *   Test data for time formats supported by DateTimeNormalizer.
+   */
+  public static function jsonSchemaDataProvider(): array {
+    $case = function (UnitTestCase $test) {
+      $drupal_date_time = $test->prophesize(DateTimeNormalizerTestDrupalDateTime::class);
+      $drupal_date_time->setTimezone(new \DateTimeZone('Australia/Sydney'))
+        ->willReturn($drupal_date_time->reveal());
+      $drupal_date_time->format(\DateTime::RFC3339)
+        ->willReturn('1983-07-12T05:00:00-05:00');
+
+      $data = $test->prophesize(DateTimeInterface::class);
+      $data->getDateTime()
+        ->willReturn($drupal_date_time->reveal());
+      return $data->reveal();
+    };
+    return [
+      'RFC 3339' => [fn (UnitTestCase $test) => $case($test)],
+    ];
+  }
+
 }
 
 
@@ -184,12 +225,16 @@ class DateTimeNormalizerTest extends UnitTestCase {
  *
  * Note: Prophecy does not support magic methods. By subclassing and specifying
  * an explicit method, Prophecy works.
+ *
  * @see https://github.com/phpspec/prophecy/issues/338
  * @see https://github.com/phpspec/prophecy/issues/34
  * @see https://github.com/phpspec/prophecy/issues/80
  */
 class DateTimeNormalizerTestDrupalDateTime extends DrupalDateTime {
 
+  /**
+   * Sets the timezone.
+   */
   public function setTimezone(\DateTimeZone $timezone) {
     parent::setTimezone($timezone);
   }

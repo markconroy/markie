@@ -46,6 +46,7 @@ class LinkWidget extends WidgetBase {
    *   The URI to get the displayable string for.
    *
    * @return string
+   *   The displayable string for the URI.
    *
    * @see static::getUserEnteredStringAsUri()
    */
@@ -158,8 +159,8 @@ class LinkWidget extends WidgetBase {
    */
   public static function validateTitleElement(&$element, FormStateInterface $form_state, $form) {
     if ($element['uri']['#value'] !== '' && $element['title']['#value'] === '') {
-      // We expect the field name placeholder value to be wrapped in $this->t() here,
-      // so it won't be escaped again as it's already marked safe.
+      // We expect the field name placeholder value to be wrapped in $this->t()
+      // here, so it won't be escaped again as it's already marked safe.
       $form_state->setError($element['title'], new TranslatableMarkup('@title field is required if there is @uri input.', ['@title' => $element['title']['#title'], '@uri' => $element['uri']['#title']]));
     }
   }
@@ -192,7 +193,7 @@ class LinkWidget extends WidgetBase {
           $display_uri = static::getUriAsDisplayableString($item->uri);
         }
       }
-      catch (\InvalidArgumentException $e) {
+      catch (\InvalidArgumentException) {
         // If $item->uri is invalid, show value as is, so the user can see what
         // to edit.
         // @todo Add logging here in https://www.drupal.org/project/drupal/issues/3348020
@@ -218,7 +219,7 @@ class LinkWidget extends WidgetBase {
       //   in https://www.drupal.org/node/2423093.
       $element['uri']['#target_type'] = 'node';
       // Disable autocompletion when the first character is '/', '#' or '?'.
-      $element['uri']['#attributes']['data-autocomplete-first-character-blacklist'] = '/#?';
+      $element['uri']['#attributes']['data-autocomplete-first-character-denylist'] = '/#?';
 
       // The link widget is doing its own processing in
       // static::getUriAsDisplayableString().
@@ -297,8 +298,8 @@ class LinkWidget extends WidgetBase {
       $element['#element_validate'][] = [static::class, 'validateTitleNoLink'];
     }
 
-    // Exposing the attributes array in the widget is left for alternate and more
-    // advanced field widgets.
+    // Exposing the attributes array in the widget is left for alternate and
+    // more advanced field widgets.
     $element['attributes'] = [
       '#type' => 'value',
       '#tree' => TRUE,
@@ -445,6 +446,7 @@ class LinkWidget extends WidgetBase {
       if (isset($parameters['@uri'])) {
         $parameters['@uri'] = static::getUriAsDisplayableString($parameters['@uri']);
         $violations->set($offset, new ConstraintViolation(
+          // phpcs:ignore Drupal.Semantics.FunctionT.NotLiteralString
           $this->t($violation->getMessageTemplate(), $parameters),
           $violation->getMessageTemplate(),
           $parameters,

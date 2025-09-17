@@ -18,13 +18,13 @@ class ConfigEntityType extends EntityType implements ConfigEntityTypeInterface {
    *
    * @see \Drupal\Core\Config\Entity\ConfigEntityTypeInterface::getConfigPrefix()
    */
-  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName, Drupal.Commenting.VariableComment.Missing
   protected $config_prefix;
 
   /**
    * {@inheritdoc}
    */
-  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName, Drupal.Commenting.VariableComment.Missing
   protected $static_cache = FALSE;
 
   /**
@@ -32,7 +32,7 @@ class ConfigEntityType extends EntityType implements ConfigEntityTypeInterface {
    *
    * @var array
    */
-  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName, Drupal.Commenting.VariableComment.Missing
   protected $lookup_keys = [];
 
   /**
@@ -40,7 +40,7 @@ class ConfigEntityType extends EntityType implements ConfigEntityTypeInterface {
    *
    * @var array
    */
-  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName, Drupal.Commenting.VariableComment.Missing
   protected $config_export = [];
 
   /**
@@ -62,8 +62,8 @@ class ConfigEntityType extends EntityType implements ConfigEntityTypeInterface {
   public function __construct($definition) {
     // Ensure a default list cache tag is set; do this before calling the parent
     // constructor, because we want "Configuration System style" cache tags.
-    if (empty($this->list_cache_tags)) {
-      $this->list_cache_tags = ['config:' . $definition['id'] . '_list'];
+    if (empty($definition['list_cache_tags'])) {
+      $definition['list_cache_tags'] = ['config:' . $definition['id'] . '_list'];
     }
 
     parent::__construct($definition);
@@ -195,8 +195,8 @@ class ConfigEntityType extends EntityType implements ConfigEntityTypeInterface {
 
     // If there is an ID key for this config entity type, make it immutable by
     // default. Individual config entities can override this with an
-    // `ImmutableProperties` constraint in their definition that is either empty,
-    // or with an alternative set of immutable properties.
+    // `ImmutableProperties` constraint in their definition that is either
+    // empty, or with an alternative set of immutable properties.
     $id_key = $this->getKey('id');
     if ($id_key) {
       $constraints += [

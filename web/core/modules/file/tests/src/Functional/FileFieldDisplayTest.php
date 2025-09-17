@@ -77,7 +77,6 @@ class FileFieldDisplayTest extends FileFieldTestBase {
 
     // Check that the default formatter is displaying with the file name.
     $node_storage = $this->container->get('entity_type.manager')->getStorage('node');
-    $node_storage->resetCache([$nid]);
     $node = $node_storage->load($nid);
     $node_file = File::load($node->{$field_name}->target_id);
     $file_link = [
@@ -87,7 +86,8 @@ class FileFieldDisplayTest extends FileFieldTestBase {
     $default_output = \Drupal::service('renderer')->renderRoot($file_link);
     $this->assertSession()->responseContains($default_output);
 
-    // Turn the "display" option off and check that the file is no longer displayed.
+    // Turn the "display" option off and check that the file is no longer
+    // displayed.
     $edit = [$field_name . '[0][display]' => FALSE];
     $this->drupalGet('node/' . $nid . '/edit');
     $this->submitForm($edit, 'Save');

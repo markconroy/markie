@@ -121,6 +121,7 @@ class UnroutedUrlAssemblerTest extends UnitTestCase {
 
   /**
    * @return array
+   *   An array of test data for testAssembleWithLocalUri.
    */
   public static function providerTestAssembleWithLocalUri() {
     return [
@@ -200,7 +201,7 @@ class UnroutedUrlAssemblerTest extends UnitTestCase {
    * @param bool $subdir
    *   TRUE to use a subdir.
    */
-  protected function setupRequestStack($subdir) {
+  protected function setupRequestStack($subdir): void {
     $server = [];
     if ($subdir) {
       // Setup a fake request which looks like a Drupal installed under the

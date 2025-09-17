@@ -95,6 +95,7 @@ class Views {
    *   The plugin type, for example filter.
    *
    * @return \Drupal\views\Plugin\ViewsPluginManager
+   *   The Views plugin manager service.
    */
   public static function pluginManager($type) {
     return \Drupal::service('plugin.manager.views.' . $type);
@@ -104,6 +105,7 @@ class Views {
    * Returns the plugin manager for a certain views handler type.
    *
    * @return \Drupal\views\Plugin\ViewsHandlerManager
+   *   The Views plugin manager service.
    */
   public static function handlerManager($type) {
     return \Drupal::service('plugin.manager.views.' . $type);
@@ -127,7 +129,7 @@ class Views {
   }
 
   /**
-   * Fetches a list of all base tables available.
+   * Fetches a list of plugin names for a given type.
    *
    * @param string $type
    *   Either 'display', 'style' or 'row'.
@@ -138,7 +140,8 @@ class Views {
    *   An array of possible base tables.
    *
    * @return array
-   *   A keyed array of in the form of 'base_table' => 'Description'.
+   *   A sorted associative array of in the form 'plugin_id' => 'Plugin title'.
+   *   If no plugins are found, an empty array is returned.
    */
   public static function fetchPluginNames($type, $key = NULL, array $base = []) {
     $definitions = static::pluginManager($type)->getDefinitions();
@@ -156,8 +159,9 @@ class Views {
     }
 
     if (!empty($plugins)) {
-      asort($plugins);
-      return $plugins;
+      uasort($plugins, static function ($a, $b) {
+        return strcmp((string) $a, (string) $b);
+      });
     }
 
     return $plugins;
@@ -286,16 +290,16 @@ class Views {
    *   If TRUE, only return views, not displays.
    * @param string $filter
    *   Filters the views on status. Can either be 'all' (default), 'enabled' or
-   *   'disabled'
+   *   'disabled'.
    * @param \Drupal\views\ViewExecutable|string $exclude_view
    *   View or current display to exclude.
    *   Either a:
-   *   - Views executable object
-   *   - views name, for example 'my_view'
-   *   - views name and display ID separated by ':', for example 'my_view:page'
+   *   - Views executable object.
+   *   - views name, for example 'my_view'.
+   *   - views name and display ID separated by ':', for example 'my_view:page'.
    * @param bool $optgroup
-   *   If TRUE, returns an array with optgroups for each view (will be ignored for
-   *   $views_only = TRUE). Can be used by select
+   *   If TRUE, returns an array with optgroups for each view (will be ignored
+   *   for $views_only = TRUE). Can be used by select.
    * @param bool $sort
    *   If TRUE, the list of views is sorted ascending.
    *
@@ -328,8 +332,8 @@ class Views {
       $exclude_view_display = $exclude_view->current_display;
     }
     else {
-      // Append a ':' to the $exclude_view string so we always have more than one
-      // item to explode.
+      // Append a ':' to the $exclude_view string so we always have more than
+      // one item to explode.
       [$exclude_view_name, $exclude_view_display] = explode(':', "$exclude_view:");
     }
 

@@ -88,17 +88,6 @@ class DoTrustedCallbackTraitTest extends UnitTestCase {
   }
 
   /**
-   * @dataProvider errorTypeProvider
-   * @group legacy
-   */
-  public function testWarning($callback): void {
-    $this->expectDeprecation('Passing E_USER_WARNING for $error_type in Drupal\Core\Security\DoTrustedCallbackTrait::doTrustedCallback() is deprecated in drupal:10.3.0 and will be removed from drupal:11.0.0. Use TrustedCallbackInterface::THROW_EXCEPTION or TrustedCallbackInterface::TRIGGER_SILENCED_DEPRECATION instead. See https://www.drupal.org/node/3427367');
-    $this->expectWarning();
-    $this->expectWarningMessage('Drupal\Tests\Core\Security\UntrustedObject::callback is not trusted');
-    $this->doTrustedCallback($callback, [], '%s is not trusted', TrustedCallbackInterface::TRIGGER_WARNING);
-  }
-
-  /**
    * Data provider for tests of ::doTrustedCallback $error_type argument.
    */
   public static function errorTypeProvider() {
@@ -110,9 +99,15 @@ class DoTrustedCallbackTraitTest extends UnitTestCase {
 
 }
 
+/**
+ * Interface representing classes with trusted callbacks.
+ */
 interface TrustedInterface {
 }
 
+/**
+ * Class with a trusted interface implementation with callback.
+ */
 class TrustedObject implements TrustedInterface {
 
   public static function callback() {
@@ -121,6 +116,9 @@ class TrustedObject implements TrustedInterface {
 
 }
 
+/**
+ * Class representing untrusted callback.
+ */
 class UntrustedObject {
 
   public static function callback() {
@@ -129,6 +127,9 @@ class UntrustedObject {
 
 }
 
+/**
+ * Invokable untrusted test class.
+ */
 class InvokableUntrustedObject {
 
   public function __invoke() {
@@ -137,6 +138,9 @@ class InvokableUntrustedObject {
 
 }
 
+/**
+ * Test class with implemented trusted callbacks.
+ */
 class TrustedMethods implements TrustedCallbackInterface {
 
   public static function trustedCallbacks() {

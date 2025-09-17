@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\field\Functional\FunctionalString;
 
-use Drupal\Component\Render\FormattableMarkup;
 use Drupal\entity_test\Entity\EntityTest;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
@@ -61,7 +60,7 @@ class StringFieldTest extends BrowserTestBase {
   /**
    * Helper function for testTextfieldWidgets().
    */
-  public function _testTextfieldWidgets($field_type, $widget_type) {
+  public function _testTextfieldWidgets($field_type, $widget_type): void {
     // Create a field.
     $field_name = $this->randomMachineName();
     $field_storage = FieldStorageConfig::create([
@@ -95,7 +94,7 @@ class StringFieldTest extends BrowserTestBase {
     $this->drupalGet('entity_test/add');
     $this->assertSession()->fieldValueEquals("{$field_name}[0][value]", '');
     $this->assertSession()->fieldNotExists("{$field_name}[0][format]");
-    $this->assertSession()->responseContains(new FormattableMarkup('placeholder="A placeholder on @widget_type"', ['@widget_type' => $widget_type]));
+    $this->assertSession()->responseContains('placeholder="A placeholder on ' . $widget_type . '"');
 
     // Submit with some value.
     $value = $this->randomMachineName();

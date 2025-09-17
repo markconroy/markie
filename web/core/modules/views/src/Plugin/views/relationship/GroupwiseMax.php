@@ -64,7 +64,7 @@ class GroupwiseMax extends RelationshipPluginBase {
   /**
    * The namespace of the subquery.
    */
-  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName, Drupal.Commenting.VariableComment.Missing
   public string $subquery_namespace;
 
   /**
@@ -179,7 +179,7 @@ class GroupwiseMax extends RelationshipPluginBase {
    * generate the subquery when the options are saved, rather than when the view
    * is run. This saves considerable time.
    *
-   * @param $options
+   * @param array $options
    *   An array of options:
    *    - subquery_sort: the id of a views sort.
    *    - subquery_order: either ASC or DESC.

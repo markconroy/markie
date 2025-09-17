@@ -107,7 +107,7 @@ class PageCache implements HttpKernelInterface {
    *   The type of the request (one of HttpKernelInterface::MAIN_REQUEST or
    *   HttpKernelInterface::SUB_REQUEST)
    * @param bool $catch
-   *   Whether to catch exceptions or not
+   *   Whether to catch exceptions or not.
    *
    * @return \Symfony\Component\HttpFoundation\Response
    *   A response object.
@@ -125,7 +125,7 @@ class PageCache implements HttpKernelInterface {
    *   The type of the request (one of HttpKernelInterface::MAIN_REQUEST or
    *   HttpKernelInterface::SUB_REQUEST)
    * @param bool $catch
-   *   Whether to catch exceptions or not
+   *   Whether to catch exceptions or not.
    *
    * @return \Symfony\Component\HttpFoundation\Response
    *   A response object.
@@ -183,18 +183,18 @@ class PageCache implements HttpKernelInterface {
   /**
    * Fetches a response from the backend and stores it in the cache.
    *
-   * @see drupal_page_header()
-   *
    * @param \Symfony\Component\HttpFoundation\Request $request
    *   A request object.
    * @param int $type
    *   The type of the request (one of HttpKernelInterface::MAIN_REQUEST or
    *   HttpKernelInterface::SUB_REQUEST)
    * @param bool $catch
-   *   Whether to catch exceptions or not
+   *   Whether to catch exceptions or not.
    *
    * @return \Symfony\Component\HttpFoundation\Response
    *   A response object.
+   *
+   * @see drupal_page_header()
    */
   protected function fetch(Request $request, $type = self::MAIN_REQUEST, $catch = TRUE) {
     /** @var \Symfony\Component\HttpFoundation\Response $response */
@@ -342,7 +342,7 @@ class PageCache implements HttpKernelInterface {
    *   identify objects used to build the cache item, which should trigger
    *   cache invalidation when updated. For example if a cached item represents
    *   a node, both the node ID and the author's user ID might be passed in as
-   *   tags. For example array('node' => array(123), 'user' => array(92)).
+   *   tags. For example, ['node' => [123], 'user' => [92]].
    */
   protected function set(Request $request, Response $response, $expire, array $tags) {
     $cid = $this->getCacheId($request);

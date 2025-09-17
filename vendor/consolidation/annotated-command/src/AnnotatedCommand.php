@@ -380,7 +380,7 @@ class AnnotatedCommand extends Command implements HelpDocumentAlter
     /**
      * {@inheritdoc}
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $state = $this->injectIntoCommandfileInstance($input, $output);
         // Validate, run, process, alter, handle results.

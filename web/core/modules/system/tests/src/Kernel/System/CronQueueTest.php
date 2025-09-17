@@ -70,7 +70,6 @@ class CronQueueTest extends KernelTestBase {
     parent::setUp();
 
     $this->connection = Database::getConnection();
-    $this->cron = \Drupal::service('cron');
 
     $time = $this->prophesize('Drupal\Component\Datetime\TimeInterface');
     $time->getCurrentTime()->willReturn($this->currentTime);
@@ -91,6 +90,8 @@ class CronQueueTest extends KernelTestBase {
     });
 
     $this->container->set('queue', $queue_factory->reveal());
+    // Instantiate the `cron` service after the mock queue factory is set.
+    $this->cron = \Drupal::service('cron');
   }
 
   /**
@@ -203,9 +204,9 @@ class CronQueueTest extends KernelTestBase {
     $this->assertEquals(1, $queue->numberOfItems(), 'Failing item still in the queue after throwing an exception.');
 
     // Expire the queue item manually. system_cron() relies in
-    // \Drupal::time()->getRequestTime() to find queue items whose expire field needs to be
-    // reset to 0. This is a Kernel test, so \Drupal::time()->getRequestTime() won't change
-    // when cron runs.
+    // \Drupal::time()->getRequestTime() to find queue items whose expire field
+    // needs to be reset to 0. This is a Kernel test, so
+    // \Drupal::time()->getRequestTime() won't change when cron runs.
     // @see system_cron()
     // @see \Drupal\Core\Cron::processQueues()
     $this->connection->update('queue')
@@ -341,7 +342,7 @@ class CronQueueTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public function register(ContainerBuilder $container) {
+  public function register(ContainerBuilder $container): void {
     parent::register($container);
     $container->register('test_logger', get_class($this->logger->reveal()))
       ->addTag('logger');

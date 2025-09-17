@@ -45,7 +45,7 @@ class UserSession implements AccountInterface {
    *
    * @var string
    */
-  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName, Drupal.Commenting.VariableComment.Missing
   protected $preferred_langcode;
 
   /**
@@ -53,7 +53,7 @@ class UserSession implements AccountInterface {
    *
    * @var string
    */
-  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName, Drupal.Commenting.VariableComment.Missing
   protected $preferred_admin_langcode;
 
   /**
@@ -121,11 +121,7 @@ class UserSession implements AccountInterface {
   /**
    * {@inheritdoc}
    */
-  public function hasPermission(/* string */$permission) {
-    if (!is_string($permission)) {
-      @trigger_error('Calling ' . __METHOD__ . '() with a $permission parameter of type other than string is deprecated in drupal:10.3.0 and will cause an error in drupal:11.0.0. See https://www.drupal.org/node/3411485', E_USER_DEPRECATED);
-      return FALSE;
-    }
+  public function hasPermission(string $permission) {
     return \Drupal::service('permission_checker')->hasPermission($permission, $this);
   }
 

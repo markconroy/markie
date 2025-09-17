@@ -23,7 +23,18 @@ class MainContentFallbackTest extends BrowserTestBase {
    */
   protected $defaultTheme = 'stark';
 
+  /**
+   * The administrator user for the test.
+   *
+   * @var \Drupal\Core\Session\AccountInterface
+   */
   protected $adminUser;
+
+  /**
+   * The web user for the test.
+   *
+   * @var \Drupal\Core\Session\AccountInterface
+   */
   protected $webUser;
 
   /**

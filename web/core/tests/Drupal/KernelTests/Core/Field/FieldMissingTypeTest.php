@@ -20,9 +20,9 @@ class FieldMissingTypeTest extends EntityKernelTestBase {
   /**
    * Set to FALSE because we are hacking a field storage to use a fake type.
    *
-   * @see \Drupal\Core\Config\Development\ConfigSchemaChecker
-   *
    * @var bool
+   *
+   * @see \Drupal\Core\Config\Development\ConfigSchemaChecker
    */
   protected $strictConfigSchema = FALSE;
 
@@ -41,7 +41,6 @@ class FieldMissingTypeTest extends EntityKernelTestBase {
     $this->installEntitySchema($entity_type_id);
     $this->fieldName = $this->randomMachineName();
 
-    /** @var \Drupal\field\Entity\FieldStorageConfig $field_storage */
     FieldStorageConfig::create([
       'field_name' => $this->fieldName,
       'type' => 'text',

@@ -96,7 +96,7 @@ class ComponentRenderTest extends ComponentKernelTestBase {
     $build = [
       '#type' => 'inline_template',
       '#context' => ['content' => $content],
-      '#template' => "{% embed 'sdc_theme_test:my-card' with { header: 'Card header', content: content } only %}{% block card_body %}This is a card with a CTA {{ include('sdc_test:my-cta', { text: content.heading, href: 'https://www.example.org', target: '_blank' }, with_context = false) }}{% endblock %}{% endembed %}",
+      '#template' => "{% embed 'sdc_theme_test:my-card' with { variant: 'horizontal', header: 'Card header', content: content } only %}{% block card_body %}This is a card with a CTA {{ include('sdc_test:my-cta', { text: content.heading, href: 'https://www.example.org', target: '_blank' }, with_context = false) }}{% endblock %}{% endembed %}",
     ];
     $crawler = $this->renderComponentRenderArray($build);
     $this->assertNotEmpty($crawler->filter('#sdc-wrapper [data-component-id="sdc_theme_test:my-card"] h2.component--my-card__header:contains("Card header")'));
@@ -109,8 +109,8 @@ class ComponentRenderTest extends ComponentKernelTestBase {
       '#type' => 'component',
       '#component' => 'sdc_test:my-banner',
       '#props' => [
-        'heading' => $this->t('I am a banner'),
-        'ctaText' => $this->t('Click me'),
+        'heading' => 'I am a banner',
+        'ctaText' => 'Click me',
         'ctaHref' => 'https://www.example.org',
         'ctaTarget' => '',
       ],
@@ -118,7 +118,7 @@ class ComponentRenderTest extends ComponentKernelTestBase {
         'banner_body' => [
           '#type' => 'html_tag',
           '#tag' => 'p',
-          '#value' => $this->t('This is the contents of the banner body.'),
+          '#value' => 'This is the contents of the banner body.',
         ],
       ],
     ];
@@ -155,7 +155,7 @@ class ComponentRenderTest extends ComponentKernelTestBase {
       $this->renderComponentRenderArray($build);
       $this->fail('Invalid prop did not cause an exception');
     }
-    catch (\Throwable $e) {
+    catch (\Throwable) {
       $this->addToAssertionCount(1);
     }
 
@@ -169,7 +169,7 @@ class ComponentRenderTest extends ComponentKernelTestBase {
       $this->renderComponentRenderArray($build);
       $this->fail('Invalid prop did not cause an exception');
     }
-    catch (\Throwable $e) {
+    catch (\Throwable) {
       $this->addToAssertionCount(1);
     }
   }
@@ -188,7 +188,7 @@ class ComponentRenderTest extends ComponentKernelTestBase {
       $this->renderComponentRenderArray($build);
       $this->addToAssertionCount(1);
     }
-    catch (\Throwable $e) {
+    catch (\Throwable) {
       $this->fail('Empty array was not converted to object');
     }
   }
@@ -206,7 +206,7 @@ class ComponentRenderTest extends ComponentKernelTestBase {
       $this->renderComponentRenderArray($build);
       $this->fail('Invalid prop did not cause an exception');
     }
-    catch (\Throwable $e) {
+    catch (\Throwable) {
       $this->addToAssertionCount(1);
     }
   }
@@ -261,19 +261,19 @@ class ComponentRenderTest extends ComponentKernelTestBase {
       '#type' => 'component',
       '#component' => 'sdc_test:my-banner',
       '#props' => [
-        'heading' => $this->t('I am a banner'),
-        'ctaText' => $this->t('Click me'),
+        'heading' => 'I am a banner',
+        'ctaText' => 'Click me',
         'ctaHref' => 'https://www.example.org',
         'ctaTarget' => '',
       ],
       '#propsAlter' => [
-        fn ($props) => [...$props, 'heading' => $this->t('I am another banner')],
+        fn ($props) => [...$props, 'heading' => 'I am another banner'],
       ],
       '#slots' => [
         'banner_body' => [
           '#type' => 'html_tag',
           '#tag' => 'p',
-          '#value' => $this->t('This is the contents of the banner body.'),
+          '#value' => 'This is the contents of the banner body.',
         ],
       ],
       '#slotsAlter' => [
@@ -300,8 +300,8 @@ class ComponentRenderTest extends ComponentKernelTestBase {
         '#type' => 'component',
         '#component' => 'sdc_test:my-banner',
         '#props' => [
-          'heading' => $this->t('I am a banner'),
-          'ctaText' => $this->t('Click me'),
+          'heading' => 'I am a banner',
+          'ctaText' => 'Click me',
           'ctaHref' => 'https://www.example.org',
           'ctaTarget' => '',
         ],
@@ -322,8 +322,8 @@ class ComponentRenderTest extends ComponentKernelTestBase {
       '#type' => 'component',
       '#component' => 'sdc_test:my-banner',
       '#props' => [
-        'heading' => $this->t('I am a banner'),
-        'ctaText' => $this->t('Click me'),
+        'heading' => 'I am a banner',
+        'ctaText' => 'Click me',
         'ctaHref' => 'https://www.example.org',
         'ctaTarget' => '',
       ],
@@ -350,6 +350,36 @@ class ComponentRenderTest extends ComponentKernelTestBase {
       $crawler->filter('#sdc-wrapper')->innerText(),
       'This is a test string.'
     );
+  }
+
+  /**
+   * Ensure that components variants render.
+   */
+  public function testVariants(): void {
+    $build = [
+      '#type' => 'component',
+      '#component' => 'sdc_test:my-cta',
+      '#variant' => 'primary',
+      '#props' => [
+        'text' => 'Test link',
+      ],
+    ];
+    $crawler = $this->renderComponentRenderArray($build);
+    $this->assertNotEmpty($crawler->filter('#sdc-wrapper a[data-component-id="sdc_test:my-cta"][data-component-variant="primary"][class*="my-cta-primary"]'));
+
+    // If there were an existing prop named variant, we don't override that for BC reasons.
+    $build = [
+      '#type' => 'component',
+      '#component' => 'sdc_test:my-cta-with-variant-prop',
+      '#variant' => 'tertiary',
+      '#props' => [
+        'text' => 'Test link',
+        'variant' => 'secondary',
+      ],
+    ];
+    $crawler = $this->renderComponentRenderArray($build);
+    $this->assertEmpty($crawler->filter('#sdc-wrapper a[data-component-id="sdc_test:my-cta-with-variant-prop"][data-component-variant="tertiary"]'));
+    $this->assertNotEmpty($crawler->filter('#sdc-wrapper a[data-component-id="sdc_test:my-cta-with-variant-prop"][data-component-variant="secondary"]'));
   }
 
   /**

@@ -97,7 +97,6 @@ class ValidatorsTest extends KernelTestBase {
     );
     $violations = $typed_config->validate();
 
-    $actual_violations = self::violationsToArray($violations);
     $this->assertSame($expected_violations, self::violationsToArray($violations));
 
     if (empty($expected_violations)) {
@@ -966,7 +965,7 @@ class ValidatorsTest extends KernelTestBase {
           'status' => TRUE,
           'weight' => 0,
           'settings' => [
-            'allowed_html' => "<a href hreflang> <em> <strong> <cite> <blockquote cite> <code> <ul type> <ol start type='1 A I'> <li> <dl> <dt> <dd> <h2 id='jump-*'> <h3 id> <h4 id> <h5 id> <h6 id>" . "<p> <br>",
+            'allowed_html' => "<a href hreflang> <em> <strong> <cite> <blockquote cite> <code> <ul type> <ol start type='1 A I'> <li> <dl> <dt> <dd> <h2 id='jump-*'> <h3 id> <h4 id> <h5 id> <h6 id> <p> <br>",
             'filter_html_help' => TRUE,
             'filter_html_nofollow' => TRUE,
           ],
@@ -1627,6 +1626,9 @@ class ValidatorsTest extends KernelTestBase {
     $text_editor = Editor::create([
       'format' => 'very_restricted',
       'editor' => 'ckeditor5',
+      'image_upload' => [
+        'status' => FALSE,
+      ],
       'settings' => [
         'toolbar' => [
           'items' => [],

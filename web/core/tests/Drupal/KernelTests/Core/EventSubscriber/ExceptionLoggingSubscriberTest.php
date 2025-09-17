@@ -61,6 +61,9 @@ class ExceptionLoggingSubscriberTest extends KernelTestBase {
     }
   }
 
+  /**
+   * Returns data for testing exception logging.
+   */
   public static function exceptionDataProvider(): array {
     return [
       [400, 'client error', RfcLogLevel::WARNING],
@@ -81,7 +84,7 @@ class ExceptionLoggingSubscriberTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public function register(ContainerBuilder $container) {
+  public function register(ContainerBuilder $container): void {
     parent::register($container);
     $container
       ->register($this->testLogServiceName, BufferingLogger::class)

@@ -67,7 +67,11 @@ class BlockViewBuilder extends EntityViewBuilder implements TrustedCallbackInter
       if ($plugin instanceof MainContentBlockPluginInterface || $plugin instanceof TitleBlockPluginInterface) {
         // Immediately build a #pre_render-able block, since this block cannot
         // be built lazily.
-        $build[$entity_id] += static::buildPreRenderableBlock($entity, $this->moduleHandler());
+        $cacheableMetadata = CacheableMetadata::createFromRenderArray($build[$entity_id]);
+        $preRenderableBlock = static::buildPreRenderableBlock($entity, $this->moduleHandler());
+        $cacheableMetadata->addCacheableDependency(CacheableMetadata::createFromRenderArray($preRenderableBlock));
+        $build[$entity_id] += $preRenderableBlock;
+        $cacheableMetadata->applyTo($build[$entity_id]);
       }
       else {
         // Assign a #lazy_builder callback, which will generate a #pre_render-
@@ -75,6 +79,13 @@ class BlockViewBuilder extends EntityViewBuilder implements TrustedCallbackInter
         $build[$entity_id] += [
           '#lazy_builder' => [static::class . '::lazyBuilder', [$entity_id, $view_mode, $langcode]],
         ];
+        // Only add create_placeholder if it's explicitly set to TRUE, so it can
+        // be set to TRUE by automatic placeholdering conditions if it's absent.
+        if ($plugin->createPlaceholder()) {
+          $build[$entity_id] += [
+            '#create_placeholder' => TRUE,
+          ];
+        }
       }
     }
 
@@ -144,11 +155,13 @@ class BlockViewBuilder extends EntityViewBuilder implements TrustedCallbackInter
   }
 
   /**
-   * #lazy_builder callback; builds a #pre_render-able block.
+   * Render API callback: Builds a block that can be pre-rendered.
    *
-   * @param $entity_id
+   * This function is assigned as a #lazy_builder callback.
+   *
+   * @param string $entity_id
    *   A block config entity ID.
-   * @param $view_mode
+   * @param string $view_mode
    *   The view mode the block is being viewed in.
    *
    * @return array
@@ -159,7 +172,9 @@ class BlockViewBuilder extends EntityViewBuilder implements TrustedCallbackInter
   }
 
   /**
-   * #pre_render callback for building a block.
+   * Render API callback: Builds a block.
+   *
+   * This function is assigned as a #pre_render callback.
    *
    * Renders the content using the provided block plugin, and then:
    * - if there is no content, aborts rendering, and makes sure the block won't

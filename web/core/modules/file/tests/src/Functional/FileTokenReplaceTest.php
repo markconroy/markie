@@ -46,13 +46,13 @@ class FileTokenReplaceTest extends FileFieldTestBase {
     $nid = $this->uploadNodeFile($test_file, $field_name, $type_name);
 
     // Load the node and the file.
-    $node_storage->resetCache([$nid]);
     $node = $node_storage->load($nid);
     $file = File::load($node->{$field_name}->target_id);
 
     // Generate and test sanitized tokens.
     $tests = [];
     $tests['[file:fid]'] = $file->id();
+    $tests['[file:uuid]'] = $file->uuid();
     $tests['[file:name]'] = Html::escape($file->getFilename());
     $tests['[file:path]'] = Html::escape($file->getFileUri());
     $tests['[file:mime]'] = Html::escape($file->getMimeType());
@@ -68,6 +68,7 @@ class FileTokenReplaceTest extends FileFieldTestBase {
     $base_bubbleable_metadata = BubbleableMetadata::createFromObject($file);
     $metadata_tests = [];
     $metadata_tests['[file:fid]'] = $base_bubbleable_metadata;
+    $metadata_tests['[file:uuid]'] = $base_bubbleable_metadata;
     $metadata_tests['[file:name]'] = $base_bubbleable_metadata;
     $metadata_tests['[file:path]'] = $base_bubbleable_metadata;
     $metadata_tests['[file:mime]'] = $base_bubbleable_metadata;

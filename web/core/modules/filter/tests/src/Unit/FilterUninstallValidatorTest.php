@@ -15,6 +15,8 @@ use Drupal\Tests\UnitTestCase;
 class FilterUninstallValidatorTest extends UnitTestCase {
 
   /**
+   * The filter uninstall validator.
+   *
    * @var \Drupal\filter\FilterUninstallValidator|\PHPUnit\Framework\MockObject\MockObject
    */
   protected $filterUninstallValidator;
@@ -171,6 +173,9 @@ class FilterUninstallValidatorTest extends UnitTestCase {
  */
 class FilterBaseTestableClass extends FilterBase {
 
+  /**
+   * {@inheritdoc}
+   */
   public function process($text, $langcode) {
     return new FilterProcessResult();
   }

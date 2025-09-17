@@ -52,6 +52,8 @@ class DrupalComponentTest extends TestCase {
    * Data provider.
    *
    * @return array
+   *   An associative array where the keys are component names and the values
+   *   are arrays containing the corresponding component path.
    */
   public static function getComponents(): array {
     $root_component_path = dirname(substr(__DIR__, 0, -strlen(__NAMESPACE__))) . '/lib/Drupal/Component';
@@ -73,7 +75,7 @@ class DrupalComponentTest extends TestCase {
    * @return array
    *   An array of class paths.
    */
-  protected function findPhpClasses($dir) {
+  protected function findPhpClasses($dir): array {
     $classes = [];
     foreach (new \DirectoryIterator($dir) as $file) {
       if ($file->isDir() && !$file->isDot()) {
@@ -150,7 +152,7 @@ class DrupalComponentTest extends TestCase {
       $pass = TRUE;
       $this->assertNoCoreUsage($file_uri);
     }
-    catch (AssertionFailedError $e) {
+    catch (AssertionFailedError) {
       $pass = FALSE;
     }
     $this->assertEquals($expected_pass, $pass, $expected_pass ?

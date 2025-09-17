@@ -53,6 +53,9 @@ class ResourceResponseSubscriberTest extends UnitTestCase {
     $this->assertEquals($expected_response !== FALSE ? $expected_response : Json::encode($data), $event->getResponse()->getContent());
   }
 
+  /**
+   * Provides data to testSerialization().
+   */
   public static function providerTestSerialization() {
     return [
       // The default data for \Drupal\rest\ResourceResponse.
@@ -70,12 +73,13 @@ class ResourceResponseSubscriberTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::getResponseFormat
+   * Tests the response format.
    *
    * Note this does *not* need to test formats being requested that are not
    * accepted by the server, because the routing system would have already
    * prevented those from reaching the controller.
    *
+   * @covers ::getResponseFormat
    * @dataProvider providerTestResponseFormat
    */
   public function testResponseFormat($methods, array $supported_response_formats, array $supported_request_formats, $request_format, array $request_headers, $request_body, $expected_response_format, $expected_response_content_type, $expected_response_content): void {
@@ -208,6 +212,8 @@ class ResourceResponseSubscriberTest extends UnitTestCase {
   }
 
   /**
+   * Provides data for testing the response format.
+   *
    * @return array
    *   0. methods to test
    *   1. supported formats for route requirements
@@ -338,7 +344,7 @@ class ResourceResponseSubscriberTest extends UnitTestCase {
       ],
     ];
 
-    $unsafe_method_bodyless_test_cases = [
+    $unsafe_method_no_body_test_cases = [
       'unsafe methods without request bodies (DELETE): client requested no format, response should have the first acceptable format' => [
         ['DELETE'],
         ['xml', 'json'],
@@ -374,11 +380,14 @@ class ResourceResponseSubscriberTest extends UnitTestCase {
       ],
     ];
 
-    return $safe_method_test_cases + $unsafe_method_bodied_test_cases + $unsafe_method_bodyless_test_cases;
+    return $safe_method_test_cases + $unsafe_method_bodied_test_cases + $unsafe_method_no_body_test_cases;
   }
 
   /**
+   * Gets the resource response subscriber.
+   *
    * @return \Drupal\rest\EventSubscriber\ResourceResponseSubscriber
+   *   A functioning ResourceResponseSubscriber.
    */
   protected function getFunctioningResourceResponseSubscriber(RouteMatchInterface $route_match) {
     // Create a dummy of the renderer service.
@@ -410,7 +419,7 @@ class ResourceResponseSubscriberTest extends UnitTestCase {
    * @return array
    *   An array of route requirements.
    */
-  protected function generateRouteRequirements(array $supported_response_formats, array $supported_request_formats) {
+  protected function generateRouteRequirements(array $supported_response_formats, array $supported_request_formats): array {
     $route_requirements = [
       '_format' => implode('|', $supported_response_formats),
     ];

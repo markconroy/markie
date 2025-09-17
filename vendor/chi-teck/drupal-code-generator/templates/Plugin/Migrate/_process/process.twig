@@ -5,7 +5,8 @@ declare(strict_types=1);
 
 namespace Drupal\{{ machine_name }}\Plugin\migrate\process;
 
-{% sort %}
+{% apply sort_namespaces %}
+use Drupal\migrate\Attribute\MigrateProcess;
 use Drupal\migrate\MigrateExecutableInterface;
 use Drupal\migrate\ProcessPluginBase;
 use Drupal\migrate\Row;
@@ -14,7 +15,7 @@ use Drupal\migrate\Row;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
   {% endif %}
-{% endsort %}
+{% endapply %}
 
 /**
  * Provides {{ plugin_id|article }} plugin.
@@ -27,9 +28,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *     plugin: {{ plugin_id }}
  *     source: foo
  * @endcode
- *
- * @MigrateProcessPlugin(id = "{{ plugin_id }}")
  */
+#[MigrateProcess('{{ plugin_id }}')]
 final class {{ class }} extends ProcessPluginBase {% if services %}implements ContainerFactoryPluginInterface {% endif %}{
 
 {% if services %}

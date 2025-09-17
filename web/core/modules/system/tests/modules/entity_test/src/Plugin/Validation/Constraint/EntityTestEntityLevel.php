@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\entity_test\Plugin\Validation\Constraint;
 
 use Drupal\Core\StringTranslation\TranslatableMarkup;
@@ -16,6 +18,11 @@ use Symfony\Component\Validator\Constraint as SymfonyConstraint;
 )]
 class EntityTestEntityLevel extends SymfonyConstraint {
 
+  /**
+   * The error message.
+   *
+   * @var string
+   */
   public $message = 'Entity level validation';
 
 }

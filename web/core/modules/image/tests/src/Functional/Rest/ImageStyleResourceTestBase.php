@@ -6,6 +6,7 @@ namespace Drupal\Tests\image\Functional\Rest;
 
 use Drupal\image\Entity\ImageStyle;
 use Drupal\Tests\rest\Functional\EntityResource\ConfigEntityResourceTestBase;
+use PHPUnit\Framework\Attributes\Before;
 
 /**
  * ResourceTestBase for ImageStyle entity.
@@ -38,9 +39,8 @@ abstract class ImageStyleResourceTestBase extends ConfigEntityResourceTestBase {
 
   /**
    * Marks some tests as skipped because XML cannot be deserialized.
-   *
-   * @before
    */
+  #[Before]
   public function imageStyleResourceTestBaseSkipTests(): void {
     if ($this->name() === 'testGet' && static::$format === 'xml') {
       // @todo Remove this method override in https://www.drupal.org/node/2905655

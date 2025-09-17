@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\rest_test\Plugin\Validation\Constraint;
 
 use Drupal\Core\StringTranslation\TranslatableMarkup;
@@ -17,6 +19,9 @@ use Symfony\Component\Validator\Constraint as SymfonyConstraint;
 )]
 class RestTestConstraint extends SymfonyConstraint {
 
-  public $message = 'REST test validation failed';
+  /**
+   * The default violation message.
+   */
+  public string $message = 'REST test validation failed';
 
 }

@@ -3,15 +3,12 @@
 namespace Drupal\Core\Installer\Form;
 
 use Drupal\Core\Datetime\TimeZoneFormHelper;
-use Drupal\Core\DependencyInjection\DeprecatedServicePropertyTrait;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleInstallerInterface;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Locale\CountryManagerInterface;
 use Drupal\Core\Site\Settings;
 use Drupal\user\UserInterface;
-use Drupal\user\UserStorageInterface;
 use Drupal\user\UserNameValidator;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -22,86 +19,30 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  */
 class SiteConfigureForm extends ConfigFormBase {
 
-  use DeprecatedServicePropertyTrait;
-
-  /**
-   * Defines deprecated injected properties.
-   *
-   * @var array
-   */
-  protected array $deprecatedProperties = [
-    'countryManager' => 'country_manager',
-  ];
-
-  /**
-   * The site path.
-   *
-   * @var string
-   */
-  protected $sitePath;
-
-  /**
-   * The user storage.
-   *
-   * @var \Drupal\user\UserStorageInterface
-   */
-  protected $userStorage;
-
-  /**
-   * The module installer.
-   *
-   * @var \Drupal\Core\Extension\ModuleInstallerInterface
-   */
-  protected $moduleInstaller;
-
-  /**
-   * The app root.
-   *
-   * @var string
-   */
-  protected $root;
-
   /**
    * Constructs a new SiteConfigureForm.
    *
    * @param string $root
    *   The app root.
-   * @param string $site_path
+   * @param string $sitePath
    *   The site path.
-   * @param \Drupal\Core\Entity\EntityTypeManagerInterface|\Drupal\user\UserStorageInterface $entityTypeManager
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
    *   The entity type manager.
-   * @param \Drupal\Core\Extension\ModuleInstallerInterface $module_installer
+   * @param \Drupal\Core\Extension\ModuleInstallerInterface $moduleInstaller
    *   The module installer.
-   * @param \Drupal\Core\Locale\CountryManagerInterface|\Drupal\user\UserNameValidator $userNameValidator
+   * @param \Drupal\user\UserNameValidator $userNameValidator
    *   The user validator.
-   * @param bool|null $superUserAccessPolicy
+   * @param bool $superUserAccessPolicy
    *   The value of the 'security.enable_super_user' container parameter.
    */
   public function __construct(
-    $root,
-    $site_path,
-    protected EntityTypeManagerInterface|UserStorageInterface $entityTypeManager,
-    ModuleInstallerInterface $module_installer,
-    protected CountryManagerInterface|UserNameValidator $userNameValidator,
-    protected ?bool $superUserAccessPolicy = NULL,
-  ) {
-    $this->root = $root;
-    $this->sitePath = $site_path;
-    if ($this->entityTypeManager instanceof UserStorageInterface) {
-      @trigger_error('Calling ' . __METHOD__ . '() with the $entityTypeManager argument as UserStorageInterface is deprecated in drupal:10.3.0 and must be EntityTypeManagerInterface in drupal:11.0.0. See https://www.drupal.org/node/3443172', E_USER_DEPRECATED);
-      $this->entityTypeManager = \Drupal::entityTypeManager();
-    }
-    $this->userStorage = $this->entityTypeManager->getStorage('user');
-    $this->moduleInstaller = $module_installer;
-    if ($userNameValidator instanceof CountryManagerInterface) {
-      @trigger_error('Calling ' . __METHOD__ . '() with the $userNameValidator argument as CountryManagerInterface is deprecated in drupal:10.3.0 and must be UserNameValidator in drupal:11.0.0. See https://www.drupal.org/node/3431205', E_USER_DEPRECATED);
-      $this->userNameValidator = \Drupal::service('user.name_validator');
-    }
-    if ($this->superUserAccessPolicy === NULL) {
-      @trigger_error('Calling ' . __METHOD__ . '() without the $superUserAccessPolicy argument is deprecated in drupal:10.3.0 and must be passed in drupal:11.0.0. See https://www.drupal.org/node/3443172', E_USER_DEPRECATED);
-      $this->superUserAccessPolicy = \Drupal::getContainer()->getParameter('security.enable_super_user') ?? TRUE;
-    }
-  }
+    protected $root,
+    protected $sitePath,
+    protected EntityTypeManagerInterface $entityTypeManager,
+    protected ModuleInstallerInterface $moduleInstaller,
+    protected UserNameValidator $userNameValidator,
+    protected bool $superUserAccessPolicy,
+  ) {}
 
   /**
    * {@inheritdoc}
@@ -157,9 +98,15 @@ class SiteConfigureForm extends ConfigFormBase {
     // successfully.)
     $post_params = $this->getRequest()->request->all();
     if (empty($post_params) && (Settings::get('skip_permissions_hardening') || !drupal_verify_install_file($this->root . '/' . $settings_file, FILE_EXIST | FILE_READABLE | FILE_NOT_WRITABLE) || !drupal_verify_install_file($this->root . '/' . $settings_dir, FILE_NOT_WRITABLE, 'dir'))) {
-      $this->messenger()->addWarning($this->t('All necessary changes to %dir and %file have been made, so you should remove write permissions to them now in order to avoid security risks. If you are unsure how to do so, consult the <a href=":handbook_url">online handbook</a>.', ['%dir' => $settings_dir, '%file' => $settings_file, ':handbook_url' => 'https://www.drupal.org/server-permissions']));
+      $this->messenger()
+        ->addWarning($this->t('All necessary changes to %dir and %file have been made, so you should remove write permissions to them now in order to avoid security risks. If you are unsure how to do so, consult the <a href=":handbook_url">online handbook</a>.', [
+          '%dir' => $settings_dir,
+          '%file' => $settings_file,
+          ':handbook_url' => 'https://www.drupal.org/server-permissions',
+        ]));
     }
 
+    $form['#attached']['library'][] = 'core/drupal.fieldgroup';
     $form['#attached']['library'][] = 'system/drupal.system';
     // Add JavaScript time zone detection.
     $form['#attached']['library'][] = 'core/drupal.timezone';
@@ -168,7 +115,8 @@ class SiteConfigureForm extends ConfigFormBase {
     $form['#attached']['drupalSettings']['copyFieldValue']['edit-site-mail'] = ['edit-account-mail'];
 
     $form['site_information'] = [
-      '#type' => 'fieldgroup',
+      '#type' => 'fieldset',
+      '#attributes' => ['class' => ['fieldgroup']],
       '#title' => $this->t('Site information'),
       '#access' => empty($install_state['config_install_path']),
     ];
@@ -200,7 +148,8 @@ class SiteConfigureForm extends ConfigFormBase {
     }
 
     $form['admin_account'] = [
-      '#type' => 'fieldgroup',
+      '#type' => 'fieldset',
+      '#attributes' => ['class' => ['fieldgroup']],
       '#title' => $account_label,
     ];
     $form['admin_account']['account']['name'] = [
@@ -224,7 +173,8 @@ class SiteConfigureForm extends ConfigFormBase {
     ];
 
     $form['regional_settings'] = [
-      '#type' => 'fieldgroup',
+      '#type' => 'fieldset',
+      '#attributes' => ['class' => ['fieldgroup']],
       '#title' => $this->t('Regional settings'),
       '#access' => empty($install_state['config_install_path']),
     ];
@@ -243,9 +193,10 @@ class SiteConfigureForm extends ConfigFormBase {
     ];
 
     $form['update_notifications'] = [
-      '#type' => 'fieldgroup',
+      '#type' => 'fieldset',
+      '#attributes' => ['class' => ['fieldgroup']],
       '#title' => $this->t('Update notifications'),
-      '#description' => $this->t('When checking for updates, your site automatically sends anonymous information to Drupal.org. See the <a href="@update-module-docs" target="_blank">Update module documentation</a> for details.', ['@update-module-docs' => 'https://www.drupal.org/node/178772']),
+      '#description' => $this->t('When checking for updates, your site automatically sends anonymous information to Drupal.org. See the <a href="@update-status-module-docs" target="_blank">Update Status module documentation</a> for details.', ['@update-status-module-docs' => 'https://www.drupal.org/node/178772']),
       '#access' => empty($install_state['config_install_path']),
     ];
     $form['update_notifications']['enable_update_status_module'] = [
@@ -323,7 +274,7 @@ class SiteConfigureForm extends ConfigFormBase {
 
     // We created user 1 with placeholder values. Let's save the real values.
     /** @var \Drupal\user\UserInterface $account */
-    $account = $this->userStorage->load(1);
+    $account = $this->entityTypeManager->getStorage('user')->load(1);
     $account->init = $account->mail = $account_values['mail'];
     $account->roles = $account->getRoles();
     $account->activate();

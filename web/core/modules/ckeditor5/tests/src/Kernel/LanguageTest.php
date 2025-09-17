@@ -52,6 +52,9 @@ class LanguageTest extends KernelTestBase {
     Editor::create([
       'format' => 'basic_html',
       'editor' => 'ckeditor5',
+      'image_upload' => [
+        'status' => FALSE,
+      ],
     ])->save();
 
     $this->installConfig(['language']);
@@ -96,6 +99,7 @@ class LanguageTest extends KernelTestBase {
    * Provides a list of language code pairs.
    *
    * @return string[][]
+   *   An array of language code pairs.
    */
   public static function provider(): array {
     $random_langcode = Random::machineName();

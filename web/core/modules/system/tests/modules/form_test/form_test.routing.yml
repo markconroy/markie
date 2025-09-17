@@ -180,6 +180,14 @@ form_test.vertical_tabs:
   requirements:
     _access: 'TRUE'
 
+form_test.vertical_tabs_with_summary:
+  path: '/form_test/vertical-tabs-with-summary'
+  defaults:
+    _form: '\Drupal\form_test\Form\FormTestVerticalTabsWithSummaryForm'
+    _title: 'Vertical tabs with Summary tests'
+  requirements:
+    _access: 'TRUE'
+
 form_test.storage:
   path: '/form_test/form-storage'
   defaults:
@@ -571,5 +579,28 @@ form_test.incorrect_config_target:
     _form: '\Drupal\form_test\Form\IncorrectConfigTargetForm'
   options:
     _admin_route: TRUE
+  requirements:
+    _access: 'TRUE'
+
+form_test.textarea:
+  path: '/form-test/textarea'
+  defaults:
+    _form: '\Drupal\form_test\Form\FormTestTextareaForm'
+  options:
+    _admin_route: TRUE
+  requirements:
+    _access: 'TRUE'
+
+form_test.recipe_input:
+  path: '/form-test/recipe-input'
+  defaults:
+    _form: '\Drupal\form_test\Form\FormTestRecipeInputForm'
+  requirements:
+    _access: 'TRUE'
+
+form_test.button_attribute:
+  path: '/form-test/button-form-attribute'
+  defaults:
+    _controller: '\Drupal\form_test\Controller\FormTestController::buttonWithFormAttribute'
   requirements:
     _access: 'TRUE'

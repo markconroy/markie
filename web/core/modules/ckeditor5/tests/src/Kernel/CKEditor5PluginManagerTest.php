@@ -18,6 +18,7 @@ use Drupal\filter\Entity\FilterFormat;
 use Drupal\Tests\SchemaCheckTestTrait;
 use Drupal\TestTools\Random;
 use org\bovigo\vfs\vfsStream;
+use PHPUnit\Framework\Attributes\IgnoreDeprecations;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\FrozenParameterBag;
 use Symfony\Component\Yaml\Yaml;
@@ -72,6 +73,9 @@ class CKEditor5PluginManagerTest extends KernelTestBase {
     Editor::create([
       'format' => 'basic_html',
       'editor' => 'ckeditor5',
+      'image_upload' => [
+        'status' => FALSE,
+      ],
     ])->save();
     FilterFormat::create(
       Yaml::parseFile('core/profiles/standard/config/install/filter.format.full_html.yml')
@@ -79,6 +83,9 @@ class CKEditor5PluginManagerTest extends KernelTestBase {
     Editor::create([
       'format' => 'full_html',
       'editor' => 'ckeditor5',
+      'image_upload' => [
+        'status' => FALSE,
+      ],
     ])->save();
     $this->manager = $this->container->get('plugin.manager.ckeditor5.plugin');
     $this->typedConfig = $this->container->get('config.typed');
@@ -87,7 +94,7 @@ class CKEditor5PluginManagerTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function enableModules(array $modules) {
+  protected function enableModules(array $modules): void {
     parent::enableModules($modules);
     // Ensure the CKEditor 5 plugin manager instance on the test reflects the
     // status after the module is installed.
@@ -167,10 +174,10 @@ YAML,
     // static file cache in \Drupal\Core\Extension\ExtensionDiscovery. There is
     // no work-around that allows using both the files on disk and some in vfs.
     // To make matters worse, decorating a service within the test only is not
-    // an option either, because \Drupal\ckeditor5\Plugin\CKEditor5PluginDefinition
-    // is a pure value object, so it uses the global container. Therefore the
-    // only work-around possible is to manipulate the config schema definition
-    // cache.
+    // an option either, because
+    // \Drupal\ckeditor5\Plugin\CKEditor5PluginDefinition is a pure value
+    // object, so it uses the global container. Therefore the only work-around
+    // possible is to manipulate the config schema definition cache.
     // @todo Remove this in https://www.drupal.org/project/drupal/issues/2961541.
     if (isset($additional_files['config']['schema']["$module_name.schema.yml"])) {
       $cache = \Drupal::service('cache.discovery')
@@ -1058,6 +1065,9 @@ PHP,
     $text_editor = Editor::create([
       'format' => 'dummy',
       'editor' => 'ckeditor5',
+      'image_upload' => [
+        'status' => FALSE,
+      ],
       'settings' => [
         'plugins' => [
           $sneaky_plugin_id => ['configured_subset' => $configured_subset],
@@ -1207,7 +1217,10 @@ PHP,
     $settings['toolbar']['items'][] = 'insertTable';
     $editor->setSettings($settings);
     $plugin_ids = array_keys($this->manager->getEnabledDefinitions($editor));
-    $expected_plugins = array_merge($expected_plugins, ['ckeditor5_table', 'ckeditor5_plugin_conditions_test_plugins_condition']);
+    $expected_plugins = array_merge($expected_plugins, [
+      'ckeditor5_table',
+      'ckeditor5_plugin_conditions_test_plugins_condition',
+    ]);
     sort($expected_plugins);
     $this->assertSame(array_values($expected_plugins), $plugin_ids);
     $expected_libraries = array_merge($default_libraries, [
@@ -1609,14 +1622,19 @@ PHP,
   /**
    * @covers \Drupal\ckeditor5\Plugin\CKEditor5PluginManager::getDiscovery
    * @dataProvider providerTestDerivedPluginDefinitions
+   * @group legacy
    */
-  public function testDerivedPluginDefinitions(string $yaml, ?string $expected_exception = NULL, ?string $expected_message = NULL, array $additional_files = [], ?array $expected_derived_plugin_definitions = NULL): void {
+  public function testDerivedPluginDefinitions(string $yaml, ?string $expected_exception = NULL, ?string $expected_message = NULL, array $additional_files = [], ?array $expected_derived_plugin_definitions = NULL, ?string $expected_deprecation_message = NULL): void {
     if ($expected_exception) {
       $this->expectException($expected_exception);
     }
     if ($expected_message) {
       $this->expectExceptionMessage($expected_message);
     }
+    if ($expected_deprecation_message) {
+      $this->expectDeprecation($expected_deprecation_message);
+    }
+
     $container = $this->mockModuleInVfs('ckeditor5_derived_plugin', $yaml, $additional_files);
 
     $actual_definitions = $container->get('plugin.manager.ckeditor5.plugin')->getDefinitions();
@@ -1894,6 +1912,7 @@ PHP,
           ] + $drupal_aspects_defaults,
         ]),
       ],
+      'Using @CKEditor5Plugin annotation for plugin with ID ckeditor5_derived_plugin_foo is deprecated and is removed from drupal:13.0.0. Use a Drupal\ckeditor5\Attribute\CKEditor5Plugin attribute instead. See https://www.drupal.org/node/3395575',
     ];
 
     yield 'VALID: minimal base plugin definition, maximal deriver' => [
@@ -2036,9 +2055,15 @@ PHP,
   }
 
   /**
-   * Tests backwards compatibility of icon names.
+   * Tests deprecation and backwards compatibility of icon names.
    */
-  public function testIconsBackwardsCompatibility(): void {
+  #[IgnoreDeprecations]
+  public function testDeprecatedIcons(): void {
+    $this->expectDeprecation('The icon configuration value "objectBlockLeft" in drupalElementStyles group align for CKEditor5 plugin ckeditor5_icon_deprecation_test_plugin is deprecated in drupal:11.2.0 and will be removed in drupal:12.0.0. Try using "IconObjectLeft" instead. See https://www.drupal.org/node/3528806');
+    $this->expectDeprecation('The icon configuration value "objectBlockRight" in drupalElementStyles group align for CKEditor5 plugin ckeditor5_icon_deprecation_test_plugin is deprecated in drupal:11.2.0 and will be removed in drupal:12.0.0. Try using "IconObjectRight" instead. See https://www.drupal.org/node/3528806');
+    $this->expectDeprecation('The icon configuration value "objectLeft" in drupalElementStyles group align for CKEditor5 plugin ckeditor5_icon_deprecation_test_plugin is deprecated in drupal:11.2.0 and will be removed in drupal:12.0.0. Try using "IconObjectInlineLeft" instead. See https://www.drupal.org/node/3528806');
+    $this->expectDeprecation('The icon configuration value "objectRight" in drupalElementStyles group align for CKEditor5 plugin ckeditor5_icon_deprecation_test_plugin is deprecated in drupal:11.2.0 and will be removed in drupal:12.0.0. Try using "IconObjectInlineRight" instead. See https://www.drupal.org/node/3528806');
+    $this->expectDeprecation('The icon configuration value "threeVerticalDots" in drupalElementStyles group threeVerticalDots for CKEditor5 plugin ckeditor5_icon_deprecation_test_plugin is deprecated in drupal:11.2.0 and will be removed in drupal:12.0.0. Try using "IconThreeVerticalDots" instead. See https://www.drupal.org/node/3528806');
     \Drupal::service('module_installer')->install(['ckeditor5_icon_deprecation_test']);
     $definitions = \Drupal::service('plugin.manager.ckeditor5.plugin')->getDefinitions();
     $config = $definitions['ckeditor5_icon_deprecation_test_plugin']->toArray()['ckeditor5']['config']['drupalElementStyles'];

@@ -191,7 +191,9 @@ class MenuUiNodeTest extends BrowserTestBase {
     $this->drupalGet('test-page');
     $this->assertSession()->linkNotExists($node_title, 'Found no menu link with the node unpublished');
     // Assert that the link exists if published.
-    $edit['status[value]'] = TRUE;
+    $edit = [
+      'status[value]' => TRUE,
+    ];
     $this->drupalGet('node/' . $node->id() . '/edit');
     $this->submitForm($edit, 'Save');
     $this->drupalGet('test-page');
@@ -274,7 +276,8 @@ class MenuUiNodeTest extends BrowserTestBase {
     $child_item->save();
     // Edit the first node.
     $this->drupalGet('node/' . $node->id() . '/edit');
-    // Assert that it is not possible to set the parent of the first node to itself or the second node.
+    // Assert that it is not possible to set the parent of the first node to
+    // itself or the second node.
     $this->assertSession()->optionNotExists('edit-menu-menu-parent', 'tools:' . $item->getPluginId());
     $this->assertSession()->optionNotExists('edit-menu-menu-parent', 'tools:' . $child_item->getPluginId());
     // Assert that disallowed Administration menu is not available in options.
@@ -357,14 +360,16 @@ class MenuUiNodeTest extends BrowserTestBase {
     $this->drupalGet('node/' . $node->id(), ['language' => $languages[$langcodes[1]]]);
     $this->assertSession()->linkExists($translated_node_title);
 
-    // Revisit the edit page in original language, check the loaded menu item title and save.
+    // Revisit the edit page in original language, check the loaded menu item
+    // title and save.
     $options = ['language' => $languages[$langcodes[0]]];
     $url = $node->toUrl('edit-form', $options);
     $this->drupalGet($url);
     $this->assertSession()->fieldValueEquals('edit-menu-title', $node_title);
     $this->submitForm([], 'Save (this translation)');
 
-    // Revisit the edit page of the translation and check the loaded menu item title.
+    // Revisit the edit page of the translation and check the loaded menu item
+    // title.
     $options = ['language' => $languages[$langcodes[1]]];
     $url = $node->toUrl('edit-form', $options);
     $this->drupalGet($url);

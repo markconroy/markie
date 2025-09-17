@@ -34,7 +34,10 @@ class OpenOffCanvasDialogCommandTest extends UnitTestCase {
         'resizable' => 'w',
         'draggable' => FALSE,
         'drupalAutoButtons' => FALSE,
-        'classes' => ['ui-dialog' => 'ui-dialog-off-canvas ui-dialog-position-' . $position, 'ui-dialog-content' => 'drupal-off-canvas-reset'],
+        'classes' => [
+          'ui-dialog' => 'ui-dialog-off-canvas ui-dialog-position-' . $position,
+          'ui-dialog-content' => 'drupal-off-canvas-reset',
+        ],
         'width' => 300,
         'drupalOffCanvasPosition' => $position,
       ],
@@ -48,6 +51,7 @@ class OpenOffCanvasDialogCommandTest extends UnitTestCase {
    * The data provider for potential dialog positions.
    *
    * @return array
+   *   An array of dialog positions.
    */
   public static function dialogPosition() {
     return [

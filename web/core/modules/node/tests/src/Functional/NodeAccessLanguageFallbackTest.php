@@ -120,10 +120,10 @@ class NodeAccessLanguageFallbackTest extends NodeTestBase {
    * @param int $count
    *   The number of rows expected by the query (equal to the translation
    *   count).
-   * @param $langcode
+   * @param string $langcode
    *   The expected language code set as the fallback property.
    */
-  public function checkRecords($count, $langcode = 'hu') {
+  public function checkRecords($count, $langcode = 'hu'): void {
     $select = \Drupal::database()
       ->select('node_access', 'na')
       ->fields('na', ['nid', 'fallback', 'langcode', 'grant_view'])

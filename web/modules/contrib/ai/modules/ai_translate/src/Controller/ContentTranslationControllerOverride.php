@@ -117,6 +117,8 @@ class ContentTranslationControllerOverride extends ContentTranslationController 
 
       $entity = $route_match->getParameter($entity_type_id);
       $entity_id = $entity->id();
+
+      /** @var \Drupal\Core\Entity\RevisionableStorageInterface $storage */
       $storage = $this->entityTypeManager()->getStorage($entity_type_id);
       $default_revision = $storage->load($entity_id);
       $entity_type = $entity->getEntityType();

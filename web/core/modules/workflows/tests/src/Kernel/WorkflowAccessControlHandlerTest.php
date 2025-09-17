@@ -88,7 +88,8 @@ class WorkflowAccessControlHandlerTest extends KernelTestBase {
 
     // Remove all plugin types and ensure not even the admin user is allowed to
     // create a workflow.
-    workflow_type_test_set_definitions([]);
+    $this->container->get('state')->set('workflow_type_test.plugin_definitions', []);
+    $this->container->get('plugin.manager.workflows.type')->clearCachedDefinitions();
     $this->accessControlHandler->resetCache();
     $this->assertEquals(
       AccessResult::neutral()
@@ -120,8 +121,11 @@ class WorkflowAccessControlHandlerTest extends KernelTestBase {
    * Data provider for ::testCheckAccess.
    *
    * @return array
+   *   An array of test data.
    */
   public static function checkAccessProvider() {
+    $originalContainer = \Drupal::hasContainer() ? \Drupal::getContainer() : NULL;
+
     $container = new ContainerBuilder();
     $cache_contexts_manager = (new Prophet())->prophesize(CacheContextsManager::class);
     $cache_contexts_manager->assertValidTokens()->willReturn(TRUE);
@@ -129,7 +133,7 @@ class WorkflowAccessControlHandlerTest extends KernelTestBase {
     $container->set('cache_contexts_manager', $cache_contexts_manager);
     \Drupal::setContainer($container);
 
-    return [
+    $data = [
       'Admin view' => [
         'adminUser',
         'view',
@@ -273,6 +277,13 @@ class WorkflowAccessControlHandlerTest extends KernelTestBase {
         AccessResult::allowed()->addCacheContexts(['user.permissions']),
       ],
     ];
+
+    // Restore the original container if needed.
+    if ($originalContainer) {
+      \Drupal::setContainer($originalContainer);
+    }
+
+    return $data;
   }
 
 }

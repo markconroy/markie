@@ -250,11 +250,13 @@ class AiCKEditor extends CKEditor5PluginDefault implements ContainerFactoryPlugi
 
     }
 
-    foreach ($static_plugin_config['ai_ckeditor_ai']['plugins'] as $plugin_id => $plugin) {
-      if ($plugin_id == 'ai_ckeditor_help') {
-        unset($static_plugin_config['ai_ckeditor_ai']['plugins'][$plugin_id]);
-        $static_plugin_config['ai_ckeditor_ai']['plugins'][$plugin_id] = $plugin;
-        break;
+    if (isset($static_plugin_config['ai_ckeditor_ai']['plugins'])) {
+      foreach ($static_plugin_config['ai_ckeditor_ai']['plugins'] as $plugin_id => $plugin) {
+        if ($plugin_id == 'ai_ckeditor_help') {
+          unset($static_plugin_config['ai_ckeditor_ai']['plugins'][$plugin_id]);
+          $static_plugin_config['ai_ckeditor_ai']['plugins'][$plugin_id] = $plugin;
+          break;
+        }
       }
     }
 

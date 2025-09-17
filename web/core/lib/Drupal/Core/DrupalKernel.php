@@ -8,6 +8,7 @@ use Drupal\Component\FileCache\FileCacheFactory;
 use Drupal\Component\Serialization\PhpSerialize;
 use Drupal\Component\Utility\UrlHelper;
 use Drupal\Core\Cache\DatabaseBackend;
+use Drupal\Core\ClassLoader\BackwardsCompatibilityClassLoader;
 use Drupal\Core\Config\BootstrapConfigStorageFactory;
 use Drupal\Core\Config\NullStorage;
 use Drupal\Core\DependencyInjection\ContainerBuilder;
@@ -227,9 +228,9 @@ class DrupalKernel implements DrupalKernelInterface, TerminableInterface {
   /**
    * List of instantiated service provider classes.
    *
-   * @see \Drupal\Core\DrupalKernel::$serviceProviderClasses
-   *
    * @var array
+   *
+   * @see \Drupal\Core\DrupalKernel::$serviceProviderClasses
    */
   protected $serviceProviders;
 
@@ -264,21 +265,11 @@ class DrupalKernel implements DrupalKernelInterface, TerminableInterface {
   protected $root;
 
   /**
-   * A mapping from service classes to service IDs.
-   *
-   * @deprecated in drupal:9.5.1 and is removed from drupal:11.0.0. Use the
-   *   'Drupal\Component\DependencyInjection\ReverseContainer' service instead.
-   *
-   * @see https://www.drupal.org/node/3327942
-   */
-  protected $serviceIdMapping = [];
-
-  /**
    * Create a DrupalKernel object from a request.
    *
    * @param \Symfony\Component\HttpFoundation\Request $request
    *   The request.
-   * @param $class_loader
+   * @param \Composer\Autoload\ClassLoader $class_loader
    *   The class loader. Normally Composer's ClassLoader, as included by the
    *   front controller, but may also be decorated.
    * @param string $environment
@@ -307,7 +298,7 @@ class DrupalKernel implements DrupalKernelInterface, TerminableInterface {
    *
    * @param string $environment
    *   String indicating the environment, e.g. 'prod' or 'dev'.
-   * @param $class_loader
+   * @param \Composer\Autoload\ClassLoader $class_loader
    *   The class loader. Normally \Composer\Autoload\ClassLoader, as included by
    *   the front controller, but may also be decorated.
    * @param bool $allow_dumping
@@ -414,7 +405,7 @@ class DrupalKernel implements DrupalKernelInterface, TerminableInterface {
 
     // Determine whether multi-site functionality is enabled. If not, return
     // the default directory.
-    if (!file_exists($app_root . '/sites/sites.php')) {
+    if (!is_file($app_root . '/sites/sites.php')) {
       return 'sites/default';
     }
 
@@ -445,10 +436,10 @@ class DrupalKernel implements DrupalKernelInterface, TerminableInterface {
         // If the identifier is a key in $sites, check for a directory matching
         // the corresponding value. Otherwise, check for a directory matching
         // the identifier.
-        if (isset($sites[$site_id]) && file_exists($app_root . '/sites/' . $sites[$site_id])) {
+        if (isset($sites[$site_id]) && is_dir($app_root . '/sites/' . $sites[$site_id])) {
           $site_id = $sites[$site_id];
         }
-        if (file_exists($app_root . '/sites/' . $site_id . '/settings.php') || (!$require_settings && file_exists($app_root . '/sites/' . $site_id))) {
+        if (is_file($app_root . '/sites/' . $site_id . '/settings.php') || (!$require_settings && is_file($app_root . '/sites/' . $site_id))) {
           return "sites/$site_id";
         }
       }
@@ -523,6 +514,11 @@ class DrupalKernel implements DrupalKernelInterface, TerminableInterface {
       $this->classLoader->setApcuPrefix($prefix);
     }
 
+    if ($this->container->hasParameter('moved_classes')) {
+      $bc_class_loader = new BackwardsCompatibilityClassLoader($this->container->getParameter('moved_classes'));
+      spl_autoload_register([$bc_class_loader, 'loadClass']);
+    }
+
     $this->booted = TRUE;
 
     return $this;
@@ -548,25 +544,6 @@ class DrupalKernel implements DrupalKernelInterface, TerminableInterface {
    */
   public function getContainer() {
     return $this->container;
-  }
-
-  /**
-   * {@inheritdoc}
-   *
-   * phpcs:ignore Drupal.Commenting.FunctionComment.VoidReturn
-   * phpcs:ignore Drupal.Commenting.FunctionComment.InvalidReturnVoid
-   * @return void
-   */
-  public function setContainer(?ContainerInterface $container = NULL) {
-    if (isset($this->container)) {
-      throw new \Exception('The container should not override an existing container.');
-    }
-    if ($this->booted) {
-      throw new \Exception('The container cannot be set after a booted kernel.');
-    }
-
-    $this->container = $container;
-    return $this;
   }
 
   /**
@@ -649,7 +626,7 @@ class DrupalKernel implements DrupalKernelInterface, TerminableInterface {
 
     // Retrieve enabled modules and register their namespaces.
     if (!isset($this->moduleList)) {
-      $extensions = $this->getConfigStorage()->read('core.extension');
+      $extensions = $this->getExtensions();
       // If core.extension configuration does not exist and we're not in the
       // installer itself, then we need to put the kernel into a pre-installer
       // mode. The container should not be dumped because Drupal is yet to be
@@ -678,7 +655,7 @@ class DrupalKernel implements DrupalKernelInterface, TerminableInterface {
         $this->serviceProviderClasses['app'][$module] = $class;
       }
       $filename = dirname($filename) . "/$module.services.yml";
-      if (file_exists($filename)) {
+      if (is_file($filename)) {
         $this->serviceYamls['app'][$module] = $filename;
       }
     }
@@ -703,11 +680,8 @@ class DrupalKernel implements DrupalKernelInterface, TerminableInterface {
 
   /**
    * {@inheritdoc}
-   *
-   * phpcs:ignore Drupal.Commenting.FunctionComment.VoidReturn
-   * @return void
    */
-  public function terminate(Request $request, Response $response) {
+  public function terminate(Request $request, Response $response): void {
     if ($this->booted && $this->getHttpKernel() instanceof TerminableInterface) {
       // Only run terminate() when essential services have been set up properly
       // by preHandle() before.
@@ -758,9 +732,9 @@ class DrupalKernel implements DrupalKernelInterface, TerminableInterface {
    * Converts an exception into a response.
    *
    * @param \Exception $e
-   *   An exception
+   *   An exception.
    * @param \Symfony\Component\HttpFoundation\Request $request
-   *   A Request instance
+   *   A Request instance.
    * @param int $type
    *   The type of the request (one of HttpKernelInterface::MAIN_REQUEST or
    *   HttpKernelInterface::SUB_REQUEST)
@@ -789,7 +763,7 @@ class DrupalKernel implements DrupalKernelInterface, TerminableInterface {
   /**
    * Returns module data on the filesystem.
    *
-   * @param $module
+   * @param string $module
    *   The name of the module.
    *
    * @return \Drupal\Core\Extension\Extension|bool
@@ -856,39 +830,6 @@ class DrupalKernel implements DrupalKernelInterface, TerminableInterface {
   }
 
   /**
-   * Generate a unique hash for a service object.
-   *
-   * @param object $object
-   *   A service object.
-   *
-   * @return string
-   *   A unique hash value.
-   *
-   * @deprecated in drupal:9.5.1 and is removed from drupal:11.0.0. Use the
-   *   'Drupal\Component\DependencyInjection\ReverseContainer' service instead.
-   *
-   * @see https://www.drupal.org/node/3327942
-   */
-  public static function generateServiceIdHash($object) {
-    @trigger_error(__METHOD__ . "() is deprecated in drupal:9.5.1 and is removed from drupal:11.0.0. Use the 'Drupal\Component\DependencyInjection\ReverseContainer' service instead. See https://www.drupal.org/node/3327942", E_USER_DEPRECATED);
-    // Include class name as an additional namespace for the hash since
-    // spl_object_hash's return can be recycled. This still is not a 100%
-    // guarantee to be unique but makes collisions incredibly difficult and even
-    // then the interface would be preserved.
-    // @see https://php.net/spl_object_hash#refsect1-function.spl-object-hash-notes
-    return hash('sha256', get_class($object) . spl_object_hash($object));
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getServiceIdMapping() {
-    @trigger_error(__METHOD__ . "() is deprecated in drupal:9.5.1 and is removed from drupal:11.0.0. Use the 'Drupal\Component\DependencyInjection\ReverseContainer' service instead. See https://www.drupal.org/node/3327942", E_USER_DEPRECATED);
-    $this->collectServiceIdMapping();
-    return $this->serviceIdMapping;
-  }
-
-  /**
    * Returns the container cache key based on the environment.
    *
    * The 'environment' consists of:
@@ -904,14 +845,22 @@ class DrupalKernel implements DrupalKernelInterface, TerminableInterface {
    *   The cache key used for the service container.
    */
   protected function getContainerCacheKey() {
-    $parts = ['service_container', $this->environment, \Drupal::VERSION, Settings::get('deployment_identifier'), PHP_OS, serialize(Settings::get('container_yamls'))];
+    $parts = [
+      'service_container',
+      $this->environment,
+      \Drupal::VERSION,
+      Settings::get('deployment_identifier'),
+      PHP_OS,
+      serialize(Settings::get('container_yamls')),
+    ];
     return implode(':', $parts);
   }
 
   /**
    * Returns the kernel parameters.
    *
-   * @return array An array of kernel parameters
+   * @return array
+   *   An associative array of kernel parameters
    */
   protected function getKernelParameters() {
     return [
@@ -923,6 +872,7 @@ class DrupalKernel implements DrupalKernelInterface, TerminableInterface {
    * Initializes the service container.
    *
    * @return \Symfony\Component\DependencyInjection\ContainerInterface
+   *   An initialized container object.
    */
   protected function initializeContainer() {
     $this->containerNeedsDumping = FALSE;
@@ -953,22 +903,15 @@ class DrupalKernel implements DrupalKernelInterface, TerminableInterface {
       $all_messages = $this->container->get('messenger')->all();
     }
 
-    // If we haven't booted yet but there is a container, then we're asked to
-    // boot the container injected via setContainer().
-    // @see \Drupal\KernelTests\KernelTestBase::setUp()
-    if (isset($this->container) && !$this->booted) {
-      $container = $this->container;
-    }
-
     // If the module list hasn't already been set in updateModules and we are
     // not forcing a rebuild, then try and load the container from the cache.
     if (empty($this->moduleList) && !$this->containerNeedsRebuild) {
       $container_definition = $this->getCachedContainerDefinition();
     }
 
-    // If there is no container and no cached container definition, build a new
-    // one from scratch.
-    if (!isset($container) && !isset($container_definition)) {
+    // If there is no cached container definition, build a new container from
+    // scratch.
+    if (!isset($container_definition)) {
       $container = $this->compileContainer();
 
       // Only dump the container if dumping is allowed. This is useful for
@@ -1066,6 +1009,7 @@ class DrupalKernel implements DrupalKernelInterface, TerminableInterface {
       // Use session cookies, not transparent sessions that puts the session id
       // in the query string.
       ini_set('session.use_cookies', '1');
+      ini_set('session.use_strict_mode', '1');
       if (\PHP_VERSION_ID < 80400) {
         ini_set('session.use_only_cookies', '1');
         ini_set('session.use_trans_sid', '0');
@@ -1090,16 +1034,16 @@ class DrupalKernel implements DrupalKernelInterface, TerminableInterface {
       if ($test_prefix = drupal_valid_test_ua()) {
         $test_db = new TestDatabase($test_prefix);
         // Only code that interfaces directly with tests should rely on this
-        // constant; e.g., the error/exception handler conditionally adds further
-        // error information into HTTP response headers that are consumed by
-        // the internal browser.
+        // constant; e.g., the error/exception handler conditionally adds
+        // further error information into HTTP response headers that are
+        // consumed by the internal browser.
         define('DRUPAL_TEST_IN_CHILD_SITE', TRUE);
 
         // Log fatal errors to the test site directory.
         ini_set('log_errors', 1);
         ini_set('error_log', $app_root . '/' . $test_db->getTestSitePath() . '/error.log');
 
-        // Ensure that a rewritten settings.php is used if opcache is on.
+        // Ensure that a rewritten settings.php is used if OPcache is on.
         ini_set('opcache.validate_timestamps', 'on');
         ini_set('opcache.revalidate_freq', 0);
       }
@@ -1215,7 +1159,11 @@ class DrupalKernel implements DrupalKernelInterface, TerminableInterface {
     $this->moduleList = NULL;
     $this->moduleData = [];
     $this->containerNeedsRebuild = TRUE;
-    return $this->initializeContainer();
+    $container = $this->initializeContainer();
+    // ThemeManager::render() fails without this. Normally ::preHandle() has
+    // a ->loadAll() call.
+    $container->get('module_handler')->loadAll();
+    return $container;
   }
 
   /**
@@ -1322,9 +1270,10 @@ class DrupalKernel implements DrupalKernelInterface, TerminableInterface {
    * Attach synthetic values on to kernel.
    *
    * @param \Symfony\Component\DependencyInjection\ContainerInterface $container
-   *   Container object
+   *   Container object.
    *
    * @return \Symfony\Component\DependencyInjection\ContainerInterface
+   *   The container object with the kernel and the class loader added.
    */
   protected function attachSynthetic(ContainerInterface $container) {
     $persist = [];
@@ -1347,7 +1296,8 @@ class DrupalKernel implements DrupalKernelInterface, TerminableInterface {
   /**
    * Compiles a new service container.
    *
-   * @return \Drupal\Core\DependencyInjection\ContainerBuilder The compiled service container
+   * @return \Drupal\Core\DependencyInjection\ContainerBuilder
+   *   The compiled service container
    */
   protected function compileContainer() {
     // We are forcing a container build so it is reasonable to assume that the
@@ -1477,6 +1427,7 @@ class DrupalKernel implements DrupalKernelInterface, TerminableInterface {
    * Gets a new ContainerBuilder instance used to build the service container.
    *
    * @return \Drupal\Core\DependencyInjection\ContainerBuilder
+   *   The Drupal dependency injection container builder.
    */
   protected function getContainerBuilder() {
     return new ContainerBuilder(new ParameterBag($this->getKernelParameters()));
@@ -1496,7 +1447,7 @@ class DrupalKernel implements DrupalKernelInterface, TerminableInterface {
     try {
       $this->bootstrapContainer->get('cache.container')->set($this->getContainerCacheKey(), $container_definition);
     }
-    catch (\Exception $e) {
+    catch (\Exception) {
       // There is no way to get from the Cache API if the cache set was
       // successful or not, hence an Exception is caught and the caller informed
       // about the error condition.
@@ -1510,15 +1461,17 @@ class DrupalKernel implements DrupalKernelInterface, TerminableInterface {
    * Gets a http kernel from the container.
    *
    * @return \Symfony\Component\HttpKernel\HttpKernelInterface
+   *   The Symfony HTTP kernel service.
    */
   protected function getHttpKernel() {
     return $this->container->get('http_kernel');
   }
 
   /**
-   * Returns the active configuration storage to use during building the container.
+   * Gets the active configuration storage to use during building the container.
    *
    * @return \Drupal\Core\Config\StorageInterface
+   *   The configuration storage.
    */
   protected function getConfigStorage() {
     if (!isset($this->configStorage)) {
@@ -1527,7 +1480,7 @@ class DrupalKernel implements DrupalKernelInterface, TerminableInterface {
       try {
         $this->configStorage = BootstrapConfigStorageFactory::get($this->classLoader);
       }
-      catch (\Exception $e) {
+      catch (\Exception) {
         $this->configStorage = new NullStorage();
       }
     }
@@ -1538,6 +1491,8 @@ class DrupalKernel implements DrupalKernelInterface, TerminableInterface {
    * Returns an array of Extension class parameters for all enabled modules.
    *
    * @return array
+   *   An associated array of module class parameters, keyed by module name, for
+   *   all enabled modules.
    */
   protected function getModulesParameter() {
     $extensions = [];
@@ -1640,7 +1595,7 @@ class DrupalKernel implements DrupalKernelInterface, TerminableInterface {
    * Validates the hostname supplied from the HTTP request.
    *
    * @param \Symfony\Component\HttpFoundation\Request $request
-   *   The request object
+   *   The request object.
    *
    * @return bool
    *   TRUE if the hostname is valid, or FALSE otherwise.
@@ -1651,7 +1606,7 @@ class DrupalKernel implements DrupalKernelInterface, TerminableInterface {
     try {
       $http_host = $request->getHost();
     }
-    catch (\UnexpectedValueException $e) {
+    catch (\UnexpectedValueException) {
       return FALSE;
     }
 
@@ -1706,10 +1661,10 @@ class DrupalKernel implements DrupalKernelInterface, TerminableInterface {
       // TrustedHostsRequestFactory makes sure to pass in the server variables
       // from the main request.
       $request_factory = new TrustedHostsRequestFactory($host);
-      Request::setFactory([$request_factory, 'createRequest']);
+      Request::setFactory([$request_factory, 'createRequest'](...));
 
     }
-    catch (\UnexpectedValueException $e) {
+    catch (\UnexpectedValueException) {
       return FALSE;
     }
 
@@ -1723,24 +1678,7 @@ class DrupalKernel implements DrupalKernelInterface, TerminableInterface {
    *   A list of service files.
    */
   protected function addServiceFiles(array $service_yamls) {
-    $this->serviceYamls['site'] = array_filter($service_yamls, 'file_exists');
-  }
-
-  /**
-   * Collect a mapping between service to ids.
-   *
-   * @deprecated in drupal:9.5.1 and is removed from drupal:11.0.0. Use the
-   *   'Drupal\Component\DependencyInjection\ReverseContainer' service instead.
-   *
-   * @see https://www.drupal.org/node/3327942
-   */
-  protected function collectServiceIdMapping() {
-    @trigger_error(__METHOD__ . "() is deprecated in drupal:9.5.1 and is removed from drupal:11.0.0. Use the 'Drupal\Component\DependencyInjection\ReverseContainer' service instead. See https://www.drupal.org/node/3327942", E_USER_DEPRECATED);
-    if (isset($this->container)) {
-      foreach ($this->container->getServiceIdMappings() as $hash => $service_id) {
-        $this->serviceIdMapping[$hash] = $service_id;
-      }
-    }
+    $this->serviceYamls['site'] = array_filter($service_yamls, 'is_file');
   }
 
   /**
@@ -1751,7 +1689,7 @@ class DrupalKernel implements DrupalKernelInterface, TerminableInterface {
    *   no install profile or NULL if Drupal is being installed.
    */
   protected function getInstallProfile() {
-    $config = $this->getConfigStorage()->read('core.extension');
+    $config = $this->getExtensions();
     if (is_array($config) && !array_key_exists('profile', $config)) {
       return FALSE;
     }
@@ -1775,6 +1713,16 @@ class DrupalKernel implements DrupalKernelInterface, TerminableInterface {
     $session = new Session(new MockArraySessionStorage());
     $session->start();
     $request->setSession($session);
+  }
+
+  /**
+   * Get the core.extension config object.
+   *
+   * @return array|false
+   *   The core.extension config object if it exists or FALSE.
+   */
+  protected function getExtensions(): array|false {
+    return $this->getConfigStorage()->read('core.extension');
   }
 
 }

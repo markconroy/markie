@@ -2,7 +2,6 @@
 
 /**
  * @file
- * Provides the Views' administrative interface.
  */
 
 use Drupal\Component\Utility\NestedArray;
@@ -25,22 +24,22 @@ use Drupal\Core\Url;
  * mean that the non-JavaScript fallback button does not appear in the correct
  * place in the form.
  *
- * @param $wrapping_element
+ * @param array $wrapping_element
  *   The element whose child will server as the AJAX trigger. For example, if
  *   $form['some_wrapper']['triggering_element'] represents the element which
  *   will trigger the AJAX behavior, you would pass $form['some_wrapper'] for
  *   this parameter.
- * @param $trigger_key
+ * @param string $trigger_key
  *   The key within the wrapping element that identifies which of its children
  *   serves as the AJAX trigger. In the above example, you would pass
  *   'triggering_element' for this parameter.
- * @param $refresh_parents
+ * @param array $refresh_parents
  *   An array of parent keys that point to the part of the form that will be
  *   refreshed by AJAX. For example, if triggering the AJAX behavior should
  *   cause $form['dynamic_content']['section'] to be refreshed, you would pass
- *   array('dynamic_content', 'section') for this parameter.
+ *   ['dynamic_content', 'section'] for this parameter.
  */
-function views_ui_add_ajax_trigger(&$wrapping_element, $trigger_key, $refresh_parents) {
+function views_ui_add_ajax_trigger(&$wrapping_element, $trigger_key, $refresh_parents): void {
   $seen_ids = &drupal_static(__FUNCTION__ . ':seen_ids', []);
   $seen_buttons = &drupal_static(__FUNCTION__ . ':seen_buttons', []);
 
@@ -117,7 +116,7 @@ function views_ui_add_ajax_trigger(&$wrapping_element, $trigger_key, $refresh_pa
 }
 
 /**
- * Processes a non-JavaScript fallback submit button to limit its validation errors.
+ * Limits validation errors for a non-JavaScript fallback submit button.
  */
 function views_ui_add_limited_validation($element, FormStateInterface $form_state) {
   // Retrieve the AJAX triggering element so we can determine its parents. (We
@@ -149,7 +148,7 @@ function views_ui_add_limited_validation($element, FormStateInterface $form_stat
 }
 
 /**
- * After-build function that adds a wrapper to a form region (for AJAX refreshes).
+ * Adds a wrapper to a form region (for AJAX refreshes) after the build.
  *
  * This function inserts a wrapper around the region of the form that needs to
  * be refreshed by AJAX, based on information stored in the corresponding
@@ -195,14 +194,14 @@ function views_ui_ajax_update_form($form, FormStateInterface $form_state) {
 /**
  * Non-JavaScript fallback for updating the add view form.
  */
-function views_ui_nojs_submit($form, FormStateInterface $form_state) {
+function views_ui_nojs_submit($form, FormStateInterface $form_state): void {
   $form_state->setRebuild();
 }
 
 /**
  * Adds an element to select either the default display or the current display.
  */
-function views_ui_standard_display_dropdown(&$form, FormStateInterface $form_state, $section) {
+function views_ui_standard_display_dropdown(&$form, FormStateInterface $form_state, $section): void {
   $view = $form_state->get('view');
   $display_id = $form_state->get('display_id');
   $executable = $view->getExecutable();
@@ -296,7 +295,9 @@ function views_ui_build_form_url(FormStateInterface $form_state) {
 }
 
 /**
- * #process callback for a button; determines if a button is the form's triggering element.
+ * The #process callback for a button.
+ *
+ * Determines if a button is the form's triggering element.
  *
  * The Form API has logic to determine the form's triggering element based on
  * the data in POST. However, it only checks buttons based on a single #value

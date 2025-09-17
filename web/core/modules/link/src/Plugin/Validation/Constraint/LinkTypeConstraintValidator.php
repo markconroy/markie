@@ -14,7 +14,7 @@ class LinkTypeConstraintValidator extends ConstraintValidator {
   /**
    * {@inheritdoc}
    */
-  public function validate($value, Constraint $constraint) {
+  public function validate($value, Constraint $constraint): void {
     if (isset($value)) {
       $uri_is_valid = TRUE;
 
@@ -26,7 +26,7 @@ class LinkTypeConstraintValidator extends ConstraintValidator {
       try {
         $url = $link_item->getUrl();
       }
-      catch (\InvalidArgumentException $e) {
+      catch (\InvalidArgumentException) {
         $uri_is_valid = FALSE;
       }
 

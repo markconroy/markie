@@ -469,7 +469,7 @@ class ContentTranslationFieldSyncRevisionTest extends EntityKernelTestBase {
    * @param bool $display
    *   Whether untranslatable field widgets should be displayed.
    */
-  protected function setUntranslatableFieldWidgetsDisplay($display) {
+  protected function setUntranslatableFieldWidgetsDisplay($display): void {
     $entity_type_id = $this->storage->getEntityTypeId();
     $settings = ['untranslatable_fields_hide' => !$display];
     $this->contentTranslationManager->setBundleTranslationSettings($entity_type_id, $entity_type_id, $settings);
@@ -480,6 +480,7 @@ class ContentTranslationFieldSyncRevisionTest extends EntityKernelTestBase {
 
   /**
    * @return \Drupal\Core\Entity\ContentEntityInterface
+   *   The saved entity.
    */
   protected function saveNewEntity() {
     /** @var \Drupal\Core\Entity\ContentEntityInterface $entity */
@@ -551,7 +552,7 @@ class ContentTranslationFieldSyncRevisionTest extends EntityKernelTestBase {
   /**
    * Asserts that the latest revision has the expected field values.
    *
-   * @param $entity_id
+   * @param string $entity_id
    *   The entity ID.
    * @param array $expected_values
    *   An array of expected values in the following order:

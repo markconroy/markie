@@ -8,7 +8,7 @@ use Consolidation\OutputFormatters\StructuredData\Xml\XmlSchema;
 use Consolidation\OutputFormatters\StructuredData\Xml\XmlSchemaInterface;
 
 /**
- * FormetterOptions holds information that affects the way a formatter
+ * FormatterOptions holds information that affects the way a formatter
  * renders its output.
  *
  * There are three places where a formatter might get options from:
@@ -38,6 +38,7 @@ class FormatterOptions
     const FORMAT = 'format';
     const DEFAULT_FORMAT = 'default-format';
     const TABLE_STYLE = 'table-style';
+    const TABLE_EMPTY_MESSAGE = 'table-empty-message';
     const LIST_ORIENTATION = 'list-orientation';
     const FIELDS = 'fields';
     const FIELD = 'field';
@@ -135,6 +136,16 @@ class FormatterOptions
     public function setFieldLabels($fieldLabels)
     {
         return $this->setConfigurationValue(self::FIELD_LABELS, $fieldLabels);
+    }
+
+    public function setTableEmptyMessage($emptyMessage)
+    {
+        return $this->setConfigurationValue(FormatterOptions::TABLE_EMPTY_MESSAGE, $emptyMessage);
+    }
+
+    public function setTableDefaultFields($defaultTableFields)
+    {
+        return $this->setConfigurationValue(FormatterOptions::DEFAULT_TABLE_FIELDS, $defaultTableFields);
     }
 
     public function setDefaultStringField($defaultStringField)
@@ -363,7 +374,7 @@ class FormatterOptions
      *
      * @param string $key
      * @param mixed $value
-     * @return FormetterOptions
+     * @return FormatterOptions
      */
     protected function setConfigurationValue($key, $value)
     {
@@ -377,7 +388,7 @@ class FormatterOptions
      *
      * @param string $key
      * @param mixed $value
-     * @return FormetterOptions
+     * @return FormatterOptions
      */
     public function setConfigurationDefault($key, $value)
     {
@@ -437,11 +448,12 @@ class FormatterOptions
      * options for this request.
      *
      * @param InputInterface $input
-     * @return type
+     * @return self
      */
     public function setInput(InputInterface $input)
     {
         $this->input = $input;
+        return $this;
     }
 
     /**

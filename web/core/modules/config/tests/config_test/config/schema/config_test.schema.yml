@@ -303,3 +303,8 @@ config_test.validation:
       type: string
       constraints:
         NotBlank: {}
+
+    host:
+      type: string
+      constraints:
+        UriHost: ~

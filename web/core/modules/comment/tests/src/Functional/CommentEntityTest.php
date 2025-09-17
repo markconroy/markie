@@ -38,7 +38,18 @@ class CommentEntityTest extends CommentTestBase {
    */
   protected $defaultTheme = 'stark';
 
+  /**
+   * A vocabulary used for testing.
+   *
+   * @var \Drupal\taxonomy\VocabularyInterface
+   */
   protected $vocab;
+
+  /**
+   * The comment type used for testing.
+   *
+   * @var \Drupal\comment\CommentTypeInterface
+   */
   protected $commentType;
 
   /**

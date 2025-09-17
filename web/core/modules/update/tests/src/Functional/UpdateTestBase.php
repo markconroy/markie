@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\update\Functional;
 
+use Behat\Mink\Element\NodeElement;
 use Drupal\Core\Url;
 use Drupal\Tests\BrowserTestBase;
 
@@ -64,17 +65,17 @@ abstract class UpdateTestBase extends BrowserTestBase {
   /**
    * Refreshes the update status based on the desired available update scenario.
    *
-   * @param $xml_map
+   * @param array $xml_map
    *   Array that maps project names to availability scenarios to fetch. The key
    *   '#all' is used if a project-specific mapping is not defined.
-   * @param $url
+   * @param string $url
    *   (optional) A string containing the URL to fetch update data from.
    *   Defaults to 'update-test'.
    *
    * @see \Drupal\update_test\Controller\UpdateTestController::updateTest()
    */
   protected function refreshUpdateStatus($xml_map, $url = 'update-test') {
-    // Tell the Update Manager module to fetch from the URL provided by
+    // Tell the Update Status module to fetch from the URL provided by
     // update_test module.
     $this->config('update.settings')->set('fetch.url', Url::fromUri('base:' . $url, ['absolute' => TRUE])->toString())->save();
     // Save the map for UpdateTestController::updateTest() to use.
@@ -294,7 +295,7 @@ abstract class UpdateTestBase extends BrowserTestBase {
    * @return \Behat\Mink\Element\NodeElement
    *   The update element.
    */
-  protected function findUpdateElementByLabel($label, int $index = 0) {
+  protected function findUpdateElementByLabel($label, int $index = 0): NodeElement {
     $update_elements = $this->getSession()->getPage()
       ->findAll('css', $this->updateTableLocator . " .project-update__version:contains(\"$label\")");
     $this->assertGreaterThanOrEqual($index, count($update_elements));

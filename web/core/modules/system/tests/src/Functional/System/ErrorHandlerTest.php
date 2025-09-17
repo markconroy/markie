@@ -143,7 +143,7 @@ class ErrorHandlerTest extends BrowserTestBase {
       '%type' => 'Exception',
       '@message' => 'This is an exception that occurs during rendering',
       '%function' => PHP_VERSION_ID >= 80400 ?
-      'Drupal\error_test\Controller\ErrorTestController->{closure:Drupal\error_test\Controller\ErrorTestController::triggerRendererException():102}()' :
+      'Drupal\error_test\Controller\ErrorTestController->{closure:Drupal\error_test\Controller\ErrorTestController::triggerRendererException():104}()' :
       'Drupal\error_test\Controller\ErrorTestController->Drupal\error_test\Controller\{closure}()',
       '%line' => 82,
       '%file' => $this->getModulePath('error_test') . '/error_test.module',

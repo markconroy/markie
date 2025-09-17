@@ -225,7 +225,10 @@ class ConfigSchemaTest extends KernelTestBase {
     $expected['mapping']['_core']['type'] = '_core_config_info';
     $expected['mapping']['_core']['requiredKey'] = FALSE;
     $expected['type'] = 'image.style.*';
-    $expected['constraints'] = ['ValidKeys' => '<infer>'];
+    $expected['constraints'] = [
+      'ValidKeys' => '<infer>',
+      'FullyValidatable' => NULL,
+    ];
 
     $this->assertEquals($expected, $definition);
 
@@ -239,24 +242,33 @@ class ConfigSchemaTest extends KernelTestBase {
     $expected['unwrap_for_canonical_representation'] = TRUE;
     $expected['mapping']['width']['type'] = 'integer';
     $expected['mapping']['width']['label'] = 'Width';
+    $expected['mapping']['width']['nullable'] = TRUE;
+    $expected['mapping']['width']['constraints'] = ['NotBlank' => ['allowNull' => TRUE]];
     $expected['mapping']['height']['type'] = 'integer';
     $expected['mapping']['height']['label'] = 'Height';
+    $expected['mapping']['height']['nullable'] = TRUE;
+    $expected['mapping']['height']['constraints'] = ['NotBlank' => ['allowNull' => TRUE]];
     $expected['mapping']['upscale']['type'] = 'boolean';
     $expected['mapping']['upscale']['label'] = 'Upscale';
     $expected['type'] = 'image.effect.image_scale';
-    $expected['constraints'] = ['ValidKeys' => '<infer>'];
+    $expected['constraints'] = [
+      'ValidKeys' => '<infer>',
+      'FullyValidatable' => NULL,
+    ];
 
     $this->assertEquals($expected, $definition, 'Retrieved the right metadata for image.effect.image_scale');
 
     // Most complex case, get metadata for actual configuration element.
     $effects = \Drupal::service('config.typed')->get('image.style.medium')->get('effects');
     $definition = $effects->get('bddf0d06-42f9-4c75-a700-a33cafa25ea0')->get('data')->getDataDefinition()->toArray();
-    // This should be the schema for image.effect.image_scale, reuse previous one.
+    // This should be the schema for image.effect.image_scale, reuse previous
+    // one.
     $expected['type'] = 'image.effect.image_scale';
     $expected['mapping']['width']['requiredKey'] = TRUE;
     $expected['mapping']['height']['requiredKey'] = TRUE;
     $expected['mapping']['upscale']['requiredKey'] = TRUE;
     $expected['requiredKey'] = TRUE;
+    $expected['required'] = TRUE;
 
     $this->assertEquals($expected, $definition, 'Retrieved the right metadata for the first effect of image.style.medium');
 
@@ -277,7 +289,8 @@ class ConfigSchemaTest extends KernelTestBase {
 
     // More complex, several level deep test.
     $definition = \Drupal::service('config.typed')->getDefinition('config_schema_test.some_schema.some_module.section_one.subsection');
-    // This should be the schema of config_schema_test.some_schema.some_module.*.*.
+    // This should be the schema of
+    // config_schema_test.some_schema.some_module.*.*.
     $expected = [];
     $expected['label'] = 'Schema multiple filesystem marker test';
     $expected['class'] = Mapping::class;
@@ -400,8 +413,6 @@ class ConfigSchemaTest extends KernelTestBase {
 
   /**
    * Tests configuration value data type enforcement using schemas.
-   *
-   * @group legacy
    */
   public function testConfigSaveWithSchema(): void {
     $untyped_values = [
@@ -422,11 +433,10 @@ class ConfigSchemaTest extends KernelTestBase {
         'string' => 1,
       ],
       'sequence' => [1, 0, 1],
-      'sequence_bc' => [1, 0, 1],
-      'sequence_bc_root' => [['id' => 'foo', 'value' => 0], ['id' => 'bar', 'value' => 1]],
       // Not in schema and therefore should be left untouched.
       'not_present_in_schema' => TRUE,
     ];
+
     $untyped_to_typed = $untyped_values;
 
     $typed_values = [
@@ -445,13 +455,10 @@ class ConfigSchemaTest extends KernelTestBase {
         'string' => '1',
       ],
       'sequence' => [TRUE, FALSE, TRUE],
-      'sequence_bc' => [TRUE, FALSE, TRUE],
-      'sequence_bc_root' => [['id' => 'foo', 'value' => FALSE], ['id' => 'bar', 'value' => TRUE]],
       'not_present_in_schema' => TRUE,
     ];
 
     // Save config which has a schema that enforces types.
-    $this->expectDeprecation("The definition for the 'config_schema_test.schema_data_types.sequence_bc' sequence declares the type of its items in a way that is deprecated in drupal:8.0.0 and is removed from drupal:11.0.0. See https://www.drupal.org/node/2442603");
     $config_object = $this->config('config_schema_test.schema_data_types');
     $config_object
       ->setData($untyped_to_typed)
@@ -857,20 +864,17 @@ class ConfigSchemaTest extends KernelTestBase {
   }
 
   /**
-   * @group legacy
+   * Tests exception is thrown for the root object.
    */
   public function testLangcodeRequiredIfTranslatableValuesConstraintError(): void {
     $config = \Drupal::configFactory()->getEditable('config_test.foo');
 
+    $this->expectException(\LogicException::class);
+    $this->expectExceptionMessage('The LangcodeRequiredIfTranslatableValues constraint is applied to \'config_test.foo::broken_langcode_required\'. This constraint can only operate on the root object being validated.');
+
     $config
       ->set('broken_langcode_required.foo', 'bar')
       ->save();
-
-    $this->expectDeprecation('The LangcodeRequiredIfTranslatableValues constraint can only be applied to the root object being validated, using the \'config_object\' schema type on \'config_test.foo::broken_langcode_required\' is deprecated in drupal:10.3.0 and will trigger a \LogicException in drupal:11.0.0. See https://www.drupal.org/node/3459863');
-    $violations = \Drupal::service('config.typed')->createFromNameAndData($config->getName(), $config->get())
-      ->validate();
-
-    $this->assertCount(0, $violations);
   }
 
 }

@@ -86,7 +86,7 @@ abstract class HandlerBase extends PluginBase implements ViewsHandlerInterface {
   /**
    * Tracks whether the plugin is a handler.
    */
-  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName, Drupal.Commenting.VariableComment.Missing
   public bool $is_handler;
 
   /**
@@ -144,6 +144,9 @@ abstract class HandlerBase extends PluginBase implements ViewsHandlerInterface {
     $this->query = &$view->query;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   protected function defineOptions() {
     $options = parent::defineOptions();
 
@@ -181,7 +184,8 @@ abstract class HandlerBase extends PluginBase implements ViewsHandlerInterface {
       }
     }
 
-    // If grouping, check to see if the aggregation method needs to modify the field.
+    // If grouping, check to see if the aggregation method needs to modify the
+    // field.
     if ($this->view->display_handler->useGroupBy()) {
       $this->view->initQuery();
       if ($this->query) {
@@ -228,9 +232,9 @@ abstract class HandlerBase extends PluginBase implements ViewsHandlerInterface {
   /**
    * Transform a string by a certain method.
    *
-   * @param $string
+   * @param string $string
    *   The input you want to transform.
-   * @param $option
+   * @param string $option
    *   How do you want to transform it, possible values:
    *   - upper: Uppercase the string.
    *   - lower: lowercase the string.
@@ -262,10 +266,10 @@ abstract class HandlerBase extends PluginBase implements ViewsHandlerInterface {
    * {@inheritdoc}
    */
   public function buildOptionsForm(&$form, FormStateInterface $form_state) {
-    // Some form elements belong in a fieldset for presentation, but can't
-    // be moved into one because of the $form_state->getValues() hierarchy. Those
-    // elements can add a #fieldset => 'fieldset_name' property, and they'll
-    // be moved to their fieldset during pre_render.
+    // Some form elements belong in a fieldset for presentation, but can't be
+    // moved into one because of the $form_state->getValues() hierarchy. Those
+    // elements can add a #fieldset => 'fieldset_name' property, and they'll be
+    // moved to their fieldset during pre_render.
     $form['#pre_render'][] = [static::class, 'preRenderAddFieldsetMarkup'];
 
     parent::buildOptionsForm($form, $form_state);
@@ -306,6 +310,7 @@ abstract class HandlerBase extends PluginBase implements ViewsHandlerInterface {
    * Gets the module handler.
    *
    * @return \Drupal\Core\Extension\ModuleHandlerInterface
+   *   The module handler service.
    */
   protected function getModuleHandler() {
     if (!$this->moduleHandler) {
@@ -326,7 +331,7 @@ abstract class HandlerBase extends PluginBase implements ViewsHandlerInterface {
   }
 
   /**
-   * Provides the handler some groupby.
+   * Provides the handler some group by.
    */
   public function usesGroupBy() {
     return TRUE;
@@ -390,8 +395,19 @@ abstract class HandlerBase extends PluginBase implements ViewsHandlerInterface {
 
   /**
    * Provide defaults for the handler.
+   *
+   * @param array $option
+   *   An array of options.
+   *
+   * @deprecated in drupal:11.2.0 and is removed from drupal:12.0.0.
+   *   This method is no longer used by Drupal core. There is no
+   *   replacement.
+   *
+   * @see https://www.drupal.org/node/3486781
    */
-  public function defineExtraOptions(&$option) {}
+  public function defineExtraOptions(&$option) {
+    @trigger_error('defineExtraOptions() is deprecated in drupal:11.2.0 and is removed from drupal:12.0.0. This method is no longer in use and should not be called. See https://www.drupal.org/node/3486781', E_USER_DEPRECATED);
+  }
 
   /**
    * Provide a form for setting options.
@@ -640,6 +656,7 @@ abstract class HandlerBase extends PluginBase implements ViewsHandlerInterface {
    * Exposed means it provides form elements to let users modify the view.
    *
    * @return bool
+   *   TRUE if the item is exposed, FALSE otherwise.
    */
   public function isExposed() {
     return !empty($this->options['exposed']);
@@ -671,6 +688,11 @@ abstract class HandlerBase extends PluginBase implements ViewsHandlerInterface {
 
   /**
    * If set to remember exposed input in the session, store it there.
+   *
+   * @param array $input
+   *   Associative array containing the exposed data for this view.
+   * @param bool $status
+   *   Whether to store the exposed input in the session.
    */
   public function storeExposedInput($input, $status) {
     return TRUE;
@@ -736,6 +758,7 @@ abstract class HandlerBase extends PluginBase implements ViewsHandlerInterface {
    * Gets views data service.
    *
    * @return \Drupal\views\ViewsData
+   *   The views data service.
    */
   protected function getViewsData() {
     if (!$this->viewsData) {
@@ -746,7 +769,10 @@ abstract class HandlerBase extends PluginBase implements ViewsHandlerInterface {
   }
 
   /**
-   * {@inheritdoc}
+   * Sets the views data service.
+   *
+   * @param \Drupal\views\ViewsData $views_data
+   *   The view to save.
    */
   public function setViewsData(ViewsData $views_data) {
     $this->viewsData = $views_data;
@@ -926,8 +952,8 @@ abstract class HandlerBase extends PluginBase implements ViewsHandlerInterface {
     // @todo Decide if \Drupal\views_ui\Form\Ajax\ViewsFormBase::getForm() is
     //   perhaps the better place to fix the issue.
     // \Drupal\views_ui\Form\Ajax\ViewsFormBase::getForm() drops the current
-    // form from the stack, even if it's an #ajax. So add the item back to the top
-    // of the stack.
+    // form from the stack, even if it's an #ajax. So add the item back to the
+    // top of the stack.
     $view->addFormToStack($form_state->get('form_key'), $form_state->get('display_id'), $type, $item['id'], TRUE);
 
     $form_state->get('rerender', TRUE);
@@ -940,7 +966,7 @@ abstract class HandlerBase extends PluginBase implements ViewsHandlerInterface {
    * Calculates options stored on the handler.
    *
    * @param array $options
-   *   The options stored in the handler
+   *   The options stored in the handler.
    * @param array $form_state_options
    *   The newly submitted form state options.
    *

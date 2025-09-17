@@ -2,6 +2,12 @@
 
 namespace Drupal\block\Entity;
 
+use Drupal\block\BlockAccessControlHandler;
+use Drupal\block\BlockForm;
+use Drupal\block\BlockListBuilder;
+use Drupal\block\BlockViewBuilder;
+use Drupal\block\Form\BlockDeleteForm;
+use Drupal\Core\Entity\Attribute\ConfigEntityType;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Condition\ConditionPluginCollection;
 use Drupal\Core\Config\Action\Attribute\ActionMethod;
@@ -11,56 +17,56 @@ use Drupal\block\BlockInterface;
 use Drupal\Core\Config\Entity\ConfigEntityInterface;
 use Drupal\Core\Entity\EntityWithPluginCollectionInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 
 /**
  * Defines a Block configuration entity class.
- *
- * @ConfigEntityType(
- *   id = "block",
- *   label = @Translation("Block"),
- *   label_collection = @Translation("Blocks"),
- *   label_singular = @Translation("block"),
- *   label_plural = @Translation("blocks"),
- *   label_count = @PluralTranslation(
- *     singular = "@count block",
- *     plural = "@count blocks",
- *   ),
- *   handlers = {
- *     "access" = "Drupal\block\BlockAccessControlHandler",
- *     "view_builder" = "Drupal\block\BlockViewBuilder",
- *     "list_builder" = "Drupal\block\BlockListBuilder",
- *     "form" = {
- *       "default" = "Drupal\block\BlockForm",
- *       "delete" = "Drupal\block\Form\BlockDeleteForm"
- *     }
- *   },
- *   admin_permission = "administer blocks",
- *   entity_keys = {
- *     "id" = "id",
- *     "status" = "status"
- *   },
- *   links = {
- *     "delete-form" = "/admin/structure/block/manage/{block}/delete",
- *     "edit-form" = "/admin/structure/block/manage/{block}",
- *     "enable" = "/admin/structure/block/manage/{block}/enable",
- *     "disable" = "/admin/structure/block/manage/{block}/disable",
- *   },
- *   config_export = {
- *     "id",
- *     "theme",
- *     "region",
- *     "weight",
- *     "provider",
- *     "plugin",
- *     "settings",
- *     "visibility",
- *   },
- *   lookup_keys = {
- *     "theme"
- *   }
- * )
  */
+#[ConfigEntityType(
+  id: 'block',
+  label: new TranslatableMarkup('Block'),
+  label_collection: new TranslatableMarkup('Blocks'),
+  label_singular: new TranslatableMarkup('block'),
+  label_plural: new TranslatableMarkup('blocks'),
+  entity_keys: [
+    'id' => 'id',
+    'status' => 'status',
+  ],
+  handlers: [
+    'access' => BlockAccessControlHandler::class,
+    'view_builder' => BlockViewBuilder::class,
+    'list_builder' => BlockListBuilder::class,
+    'form' => [
+      'default' => BlockForm::class,
+      'delete' => BlockDeleteForm::class,
+    ],
+  ],
+  links: [
+    'delete-form' => '/admin/structure/block/manage/{block}/delete',
+    'edit-form' => '/admin/structure/block/manage/{block}',
+    'enable' => '/admin/structure/block/manage/{block}/enable',
+    'disable' => '/admin/structure/block/manage/{block}/disable',
+  ],
+  admin_permission: 'administer blocks',
+  label_count: [
+    'singular' => '@count block',
+    'plural' => '@count blocks',
+  ],
+  lookup_keys: [
+    'theme',
+  ],
+  config_export: [
+    'id',
+    'theme',
+    'region',
+    'weight',
+    'provider',
+    'plugin',
+    'settings',
+    'visibility',
+  ],
+)]
 class Block extends ConfigEntityBase implements BlockInterface, EntityWithPluginCollectionInterface {
 
   /**
@@ -89,7 +95,7 @@ class Block extends ConfigEntityBase implements BlockInterface, EntityWithPlugin
    *
    * @var int
    */
-  protected $weight;
+  protected $weight = 0;
 
   /**
    * The plugin instance ID.
@@ -247,8 +253,8 @@ class Block extends ConfigEntityBase implements BlockInterface, EntityWithPlugin
   public function postSave(EntityStorageInterface $storage, $update = TRUE) {
     parent::postSave($storage, $update);
 
-    // Entity::postSave() calls Entity::invalidateTagsOnSave(), which only
-    // handles the regular cases. The Block entity has one special case: a
+    // EntityBase::postSave() calls EntityBase::invalidateTagsOnSave(), which
+    // only handles the regular cases. The Block entity has one special case: a
     // newly created block may *also* appear on any page in the current theme,
     // so we must invalidate the associated block's cache tag (which includes
     // the theme cache tag).
@@ -323,7 +329,7 @@ class Block extends ConfigEntityBase implements BlockInterface, EntityWithPlugin
    */
   #[ActionMethod(adminLabel: new TranslatableMarkup('Set block weight'), pluralize: FALSE)]
   public function setWeight($weight) {
-    $this->weight = $weight;
+    $this->weight = (int) $weight;
     return $this;
   }
 
@@ -347,6 +353,11 @@ class Block extends ConfigEntityBase implements BlockInterface, EntityWithPlugin
   public function preSave(EntityStorageInterface $storage) {
     parent::preSave($storage);
 
+    if (!is_int($this->weight)) {
+      @trigger_error('Saving a block with a non-integer weight is deprecated in drupal:11.1.0 and removed in drupal:12.0.0. See https://www.drupal.org/node/3462474', E_USER_DEPRECATED);
+      $this->setWeight((int) $this->weight);
+    }
+
     // Ensure the region is valid to mirror the behavior of block_rebuild().
     // This is done primarily for backwards compatibility support of
     // \Drupal\block\BlockInterface::BLOCK_REGION_NONE.
@@ -355,6 +366,25 @@ class Block extends ConfigEntityBase implements BlockInterface, EntityWithPlugin
       $this
         ->setRegion(system_default_region($this->theme))
         ->disable();
+    }
+  }
+
+  /**
+   * Validates that a region exists in the active theme.
+   *
+   * @param null|string $region
+   *   The region to validate.
+   * @param \Symfony\Component\Validator\Context\ExecutionContextInterface $context
+   *   The validation context.
+   */
+  public static function validateRegion(?string $region, ExecutionContextInterface $context): void {
+    if ($theme = $context->getRoot()->get('theme')->getValue()) {
+      if (!array_key_exists($region, system_region_list($theme))) {
+        $context->addViolation('This is not a valid region of the %theme theme.', ['%theme' => $theme]);
+      }
+    }
+    else {
+      $context->addViolation('This block does not say which theme it appears in.');
     }
   }
 

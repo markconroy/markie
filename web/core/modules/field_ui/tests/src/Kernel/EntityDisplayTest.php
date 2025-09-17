@@ -11,6 +11,7 @@ use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 use Drupal\Core\Entity\Entity\EntityFormDisplay;
 use Drupal\Core\Entity\Entity\EntityViewDisplay;
 use Drupal\Core\Entity\Entity\EntityViewMode;
+use Drupal\entity_test\EntityTestHelper;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\node\Entity\NodeType;
@@ -72,7 +73,11 @@ class EntityDisplayTest extends KernelTestBase {
     $this->assertEquals($expected['component_2'], $display->getComponent('component_2'));
 
     // Check that arbitrary options are correctly stored.
-    $expected['component_3'] = ['weight' => 10, 'third_party_settings' => ['field_test' => ['foo' => 'bar']], 'settings' => []];
+    $expected['component_3'] = [
+      'weight' => 10,
+      'third_party_settings' => ['field_test' => ['foo' => 'bar']],
+      'settings' => [],
+    ];
     $display->setComponent('component_3', $expected['component_3']);
     $this->assertEquals($expected['component_3'], $display->getComponent('component_3'));
 
@@ -174,7 +179,7 @@ class EntityDisplayTest extends KernelTestBase {
    * Tests the behavior of a field component within an entity display object.
    */
   public function testExtraFieldComponent(): void {
-    entity_test_create_bundle('bundle_with_extra_fields');
+    EntityTestHelper::createBundle('bundle_with_extra_fields');
     $display = EntityViewDisplay::create([
       'targetEntityType' => 'entity_test',
       'bundle' => 'bundle_with_extra_fields',
@@ -197,7 +202,7 @@ class EntityDisplayTest extends KernelTestBase {
    * Tests the behavior of an extra field component with initial invalid values.
    */
   public function testExtraFieldComponentInitialInvalidConfig(): void {
-    entity_test_create_bundle('bundle_with_extra_fields');
+    EntityTestHelper::createBundle('bundle_with_extra_fields');
     $display = EntityViewDisplay::create([
       'targetEntityType' => 'entity_test',
       'bundle' => 'bundle_with_extra_fields',
@@ -260,7 +265,8 @@ class EntityDisplayTest extends KernelTestBase {
     ];
     $this->assertEquals($expected, $display->getComponent($field_name));
 
-    // Check that the getFormatter() method returns the correct formatter plugin.
+    // Check that the getFormatter() method returns the correct formatter
+    // plugin.
     $formatter = $display->getRenderer($field_name);
     $this->assertEquals($default_formatter, $formatter->getPluginId());
     $this->assertEquals($formatter_settings, $formatter->getSettings());
@@ -279,7 +285,13 @@ class EntityDisplayTest extends KernelTestBase {
     // Check that the display has dependencies on the field and the module that
     // provides the formatter.
     $dependencies = $display->calculateDependencies()->getDependencies();
-    $this->assertEquals(['config' => ['field.field.entity_test.entity_test.test_field'], 'module' => ['entity_test', 'field_test']], $dependencies);
+    $this->assertEquals(
+      [
+        'config' => ['field.field.entity_test.entity_test.test_field'],
+        'module' => ['entity_test', 'field_test'],
+      ],
+      $dependencies
+    );
   }
 
   /**

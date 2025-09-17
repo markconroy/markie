@@ -24,7 +24,7 @@ class ViewsTemplateTest extends ViewsKernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public function register(ContainerBuilder $container) {
+  public function register(ContainerBuilder $container): void {
     parent::register($container);
     // Enable Twig debugging.
     $parameters = $container->getParameter('twig.config');
@@ -45,7 +45,7 @@ class ViewsTemplateTest extends ViewsKernelTestBase {
   }
 
   /**
-   * @covers views_theme_suggestions_container_alter
+   * @covers \Drupal\views\Hook\ViewsHooks::themeSuggestionsContainerAlter
    * @throws \Exception
    */
   public function testThemeSuggestionsContainerAlter(): void {

@@ -12,6 +12,7 @@ use Consolidation\Filter\Hooks\FilterHooks;
 use Consolidation\SiteAlias\SiteAliasManagerAwareInterface;
 use Consolidation\SiteProcess\ProcessManagerAwareInterface;
 use Drupal\Component\DependencyInjection\ContainerInterface as DrupalContainer;
+use Drupal\Core\Recipe\RecipeCommand;
 use DrupalCodeGenerator\Command\BaseGenerator;
 use Drush\Attributes\Bootstrap;
 use Drush\Boot\DrupalBootLevels;
@@ -178,7 +179,7 @@ class ServiceManager
     {
         $classes = (new RelativeNamespaceDiscovery($this->autoloader))
             ->setRelativeNamespace('Drush\Commands')
-            ->setSearchPattern('/.*DrushCommands\.php$/')
+            ->setSearchPattern('/.*Commands\.php$/')
             ->getClasses();
 
         return array_filter($classes, function (string $class): bool {
@@ -291,6 +292,27 @@ class ServiceManager
     }
 
     /**
+     * Instantiate commands from Drupal Core that we want to expose
+     * as Drush commands.
+     *
+     * These require a bootstrapped Drupal.
+     *
+     * @return Command[]
+     *   List of Symfony Command objects
+     */
+    public function instantiateDrupalCoreBootstrappedCommands(): array
+    {
+        $instances = [];
+        if (class_exists(RecipeCommand::class)) {
+            $instance = new RecipeCommand($this->autoloader);
+            $instance->setHelp('See https://drupal.org/project/issues/drupal for bug reports and feature requests for this command.');
+            $instances[] = $instance;
+        }
+
+        return $instances;
+    }
+
+    /**
      * Instantiate objects given a list of classes. For each class, if it has
      * a static `create` factory, use that to instantiate it, passing both the
      * Drupal and Drush DI containers. If there is no static factory, then
@@ -310,7 +332,11 @@ class ServiceManager
         // n.b. we cannot simply use 'isInstantiable' here because
         // the constructor is typically protected when using a static create method
         $bootstrapCommandClasses = array_filter($bootstrapCommandClasses, function ($class) {
-            $reflection = new \ReflectionClass($class);
+            try {
+                $reflection = new \ReflectionClass($class);
+            } catch (\Throwable $e) {
+                return false;
+            }
             return !$reflection->isAbstract();
         });
 

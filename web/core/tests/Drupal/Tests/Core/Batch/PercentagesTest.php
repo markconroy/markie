@@ -8,14 +8,14 @@ use Drupal\Core\Batch\Percentage;
 use Drupal\Tests\UnitTestCase;
 
 /**
+ * Tests the Batch helper object.
+ *
+ * Make sure that the rounding works properly in all cases.
+ *
  * @coversDefaultClass \Drupal\Core\Batch\Percentage
  * @group Batch
- *
- * Tests the Batch helper object to make sure that the rounding works properly
- * in all cases.
  */
 class PercentagesTest extends UnitTestCase {
-  protected $testCases = [];
 
   /**
    * @dataProvider providerTestPercentages
@@ -30,12 +30,12 @@ class PercentagesTest extends UnitTestCase {
    * Provide data for batch unit tests.
    *
    * @return array
-   *   An array of data used by the test.
+   *   An array of data used by the test. The array values, in order, are the
+   *   total count, the current count, and the expected percentage.
    */
   public static function providerTestPercentages() {
     // Set up an array of test cases.
     return [
-      // array(total, current, expected).
       // 1/2 is 50%.
       [2, 1, '50'],
       // Though we should never encounter a case where the current set is set
@@ -75,11 +75,11 @@ class PercentagesTest extends UnitTestCase {
       // but for the last pass through, when 500 out of 501 items have been
       // processed, we do not want to round up to 100%, since that would
       // erroneously indicate that the processing is complete.
-      ['total' => 1, 'current' => 100 / 501, '20'],
-      ['total' => 1, 'current' => 200 / 501, '40'],
-      ['total' => 1, 'current' => 300 / 501, '60'],
-      ['total' => 1, 'current' => 400 / 501, '80'],
-      ['total' => 1, 'current' => 500 / 501, '99.8'],
+      ['total' => 1, 'current' => 100 / 501, 'expected_result' => '20'],
+      ['total' => 1, 'current' => 200 / 501, 'expected_result' => '40'],
+      ['total' => 1, 'current' => 300 / 501, 'expected_result' => '60'],
+      ['total' => 1, 'current' => 400 / 501, 'expected_result' => '80'],
+      ['total' => 1, 'current' => 500 / 501, 'expected_result' => '99.8'],
     ];
   }
 

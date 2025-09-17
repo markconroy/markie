@@ -219,6 +219,7 @@ class DateTimePlus {
    *   to use things like negative years, which php's parser fails on, or
    *   any other specialized input with a known format. If provided the
    *   date will be created using the createFromFormat() method.
+   *   phpcs:ignore Drupal.Commenting.FunctionComment.ParamCommentFullStop
    *   @see http://php.net/manual/datetime.createfromformat.php
    * @param string $time
    *   String representing the time.
@@ -262,11 +263,11 @@ class DateTimePlus {
       $datetime_plus->setTimestamp($date->getTimestamp());
       $datetime_plus->setTimezone($date->getTimezone());
 
-      // Functions that parse date is forgiving, it might create a date that
-      // is not exactly a match for the provided value, so test for that by
-      // re-creating the date/time formatted string and comparing it to the input. For
-      // instance, an input value of '11' using a format of Y (4 digits) gets
-      // created as '0011' instead of '2011'.
+      // Functions that parse date is forgiving, it might create a date that is
+      // not exactly a match for the provided value, so test for that by
+      // re-creating the date/time formatted string and comparing it to the
+      // input. For instance, an input value of '11' using a format of Y (4
+      // digits) gets created as '0011' instead of '2011'.
       if ($settings['validate_format'] && $date->format($format) != $time) {
         throw new \UnexpectedValueException('The created date does not match the input value.');
       }
@@ -285,6 +286,7 @@ class DateTimePlus {
    *   parameter and the current timezone are ignored when the $time parameter
    *   either is a UNIX timestamp (e.g. @946684800) or specifies a timezone
    *   (e.g. 2010-01-28T15:00:00+02:00).
+   *   phpcs:ignore Drupal.Commenting.FunctionComment.ParamCommentFullStop
    *   @see http://php.net/manual/datetime.construct.php
    * @param array $settings
    *   (optional) Keyed array of settings. Defaults to empty array.
@@ -327,6 +329,7 @@ class DateTimePlus {
    * Renders the timezone name.
    *
    * @return string
+   *   The formatted value of the date including the name of the timezone.
    */
   public function render() {
     return $this->format(static::FORMAT) . ' ' . $this->getTimeZone()->getName();

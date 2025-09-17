@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\system\Functional\Session;
 
+use Drupal\Component\Utility\Crypt;
 use Drupal\Core\Database\Database;
 use Drupal\Tests\BrowserTestBase;
 
@@ -179,6 +180,75 @@ class SessionTest extends BrowserTestBase {
   }
 
   /**
+   * Tests that an invalid session ID in the cookie is rejected.
+   *
+   * @covers \Drupal\Core\Session\SessionManager::start
+   */
+  public function testAnonymousSessionFixation(): void {
+
+    $mink = $this->getSession();
+    $connection = Database::getConnection();
+
+    // Initialize a session for anonymous user.
+    $this->drupalGet('session-test/set/foo');
+
+    // Switch browser cookie to arbitrary session_id.
+    $session_cookie_name = $this->getSessionName();
+    $initial_session_cookie_value = $mink->getCookie($session_cookie_name);
+
+    $mink->restart();
+    $this->initFrontPage();
+    // Session restart always resets all the cookies by design, so we
+    // set an arbitrary session_id in the cookie for the next request.
+    $invalid_session_cookie_value = bin2hex($this->randomMachineName(13));
+    $mink->setCookie($session_cookie_name, $invalid_session_cookie_value);
+
+    // Make another request.
+    sleep(1);
+    $this->drupalGet('session-test/set/bar');
+
+    // Check returned cookie value.
+    $returned_session_cookie_value = $mink->getCookie($session_cookie_name);
+
+    // The backend should reject $invalid_session_cookie_value and return a
+    // new session_id that's different from both the first and the invalid
+    // SIDs.
+    $this->assertNotEquals(
+      $initial_session_cookie_value,
+      $returned_session_cookie_value,
+      'Returned session ID is not equal to initial session ID'
+    );
+
+    $this->assertNotEquals(
+      $invalid_session_cookie_value,
+      $returned_session_cookie_value,
+      'Returned session ID is not equal to invalid session ID'
+    );
+
+    // Check that invalid SID does not exist in database.
+    $this->assertEmpty(
+      $connection
+        ->select('sessions', 's')
+        ->fields('s', ['timestamp'])
+        ->condition('sid', Crypt::hashBase64($invalid_session_cookie_value))
+        ->execute()
+        ->fetchField(),
+        'Invalid session ID is not in database'
+    );
+
+    // Check that returned SID does exist in database.
+    $this->assertNotEmpty(
+      $connection
+        ->select('sessions', 's')
+        ->fields('s', ['timestamp'])
+        ->condition('sid', Crypt::hashBase64($returned_session_cookie_value))
+        ->execute()
+        ->fetchField(),
+        'Returned session ID is in database'
+    );
+  }
+
+  /**
    * Tests that empty anonymous sessions are destroyed.
    */
   public function testEmptyAnonymousSession(): void {
@@ -230,7 +300,8 @@ class SessionTest extends BrowserTestBase {
     $this->assertSession()->responseHeaderEquals('X-Drupal-Cache', 'HIT');
     $this->assertSession()->responseHeaderDoesNotExist('Set-Cookie');
 
-    // Verify that no session is created if drupal_save_session(FALSE) is called.
+    // Verify that no session is created if drupal_save_session(FALSE) is
+    // called.
     $this->drupalGet('session-test/set-message-but-do-not-save');
     $this->assertSessionCookie(FALSE);
     $this->assertSessionEmpty(TRUE);
@@ -375,7 +446,7 @@ class SessionTest extends BrowserTestBase {
   /**
    * Reset the cookie file so that it refers to the specified user.
    */
-  public function sessionReset() {
+  public function sessionReset(): void {
     // Close the internal browser.
     $this->mink->resetSessions();
     $this->loggedInUser = FALSE;

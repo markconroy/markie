@@ -112,7 +112,8 @@ class LocalTaskManager extends DefaultPluginManager implements LocalTaskManagerI
    * @param \Symfony\Component\HttpKernel\Controller\ArgumentResolverInterface $argument_resolver
    *   An object to use in resolving route arguments.
    * @param \Symfony\Component\HttpFoundation\RequestStack $request_stack
-   *   The request object to use for building titles and paths for plugin instances.
+   *   The request object to use for building titles and paths for plugin
+   *   instances.
    * @param \Drupal\Core\Routing\RouteMatchInterface $route_match
    *   The current route match.
    * @param \Drupal\Core\Routing\RouteProviderInterface $route_provider
@@ -359,6 +360,17 @@ class LocalTaskManager extends DefaultPluginManager implements LocalTaskManagerI
         foreach ($local_tasks as $tab_level => $items) {
           $data[$tab_level] = empty($data[$tab_level]) ? $items : array_merge($data[$tab_level], $items);
         }
+
+        // Sort by weight and alphabetically if weights are the same.
+        foreach ($data as $key => $values) {
+          $weights = array_column($values, '#weight');
+          array_multisort(
+            $weights, SORT_ASC, SORT_NUMERIC,
+            array_keys($values), SORT_ASC, SORT_NATURAL,
+            $data[$key],
+          );
+        }
+
         $this->taskData[$route_name]['tabs'] = $data;
         // Allow modules to alter local tasks.
         $this->moduleHandler->alter('menu_local_tasks', $this->taskData[$route_name], $route_name, $cacheability);

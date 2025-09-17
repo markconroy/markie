@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\pager_test\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
@@ -86,7 +88,7 @@ class PagerTestController extends ControllerBase implements TrustedCallbackInter
 
     // Counter of calls to the current pager.
     $query_params = $this->pagerParams->getQueryParameters();
-    $pager_calls = isset($query_params['pager_calls']) ? ($query_params['pager_calls'] ? $query_params['pager_calls'] : 0) : 0;
+    $pager_calls = isset($query_params['pager_calls']) ? ($query_params['pager_calls'] ?: 0) : 0;
     $build['l_pager_pager_0'] = ['#markup' => $this->t('Pager calls: @pager_calls', ['@pager_calls' => $pager_calls])];
 
     // Pager.
@@ -144,7 +146,9 @@ class PagerTestController extends ControllerBase implements TrustedCallbackInter
   }
 
   /**
-   * #pre_render callback for #type => pager that shows the pager cache context.
+   * Render API callback: Shows the pager cache context for type pager.
+   *
+   * This function is assigned as a #pre_render callback.
    */
   public static function showPagerCacheContext(array $pager) {
     \Drupal::messenger()->addStatus(\Drupal::service('cache_contexts_manager')->convertTokensToKeys(['url.query_args.pagers:' . $pager['#element']])->getKeys()[0]);

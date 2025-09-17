@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Drupal\Tests\workspaces\Functional;
 
 use Drupal\Tests\BrowserTestBase;
-use Drupal\workspaces\Entity\Workspace;
 
 /**
  * Tests workspace integration for custom menu links.
@@ -33,6 +32,7 @@ class WorkspaceMenuLinkContentIntegrationTest extends BrowserTestBase {
     'menu_ui',
     'node',
     'workspaces',
+    'workspaces_ui',
   ];
 
   /**
@@ -60,7 +60,7 @@ class WorkspaceMenuLinkContentIntegrationTest extends BrowserTestBase {
    * Tests custom menu links in non-default workspaces.
    */
   public function testWorkspacesWithCustomMenuLinks(): void {
-    $stage = Workspace::load('stage');
+    $stage = $this->createWorkspaceThroughUi('Stage', 'stage');
 
     $this->setupWorkspaceSwitcherBlock();
 

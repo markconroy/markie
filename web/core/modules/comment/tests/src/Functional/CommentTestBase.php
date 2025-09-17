@@ -64,7 +64,7 @@ abstract class CommentTestBase extends BrowserTestBase {
     // child classes may specify the standard profile.
     $types = NodeType::loadMultiple();
     if (empty($types['article'])) {
-      $this->drupalCreateContentType(['type' => 'article', 'name' => t('Article')]);
+      $this->drupalCreateContentType(['type' => 'article', 'name' => 'Article']);
     }
 
     // Create two test users.
@@ -108,7 +108,7 @@ abstract class CommentTestBase extends BrowserTestBase {
    *   Comment body.
    * @param string $subject
    *   Comment subject.
-   * @param string $contact
+   * @param null|true|array $contact
    *   Set to NULL for no contact info, TRUE to ignore success checking, and
    *   array of values to set contact info.
    * @param string $field_name
@@ -183,7 +183,6 @@ abstract class CommentTestBase extends BrowserTestBase {
     }
 
     if (isset($match[1])) {
-      \Drupal::entityTypeManager()->getStorage('comment')->resetCache([$match[1]]);
       return Comment::load($match[1]);
     }
   }
@@ -199,7 +198,7 @@ abstract class CommentTestBase extends BrowserTestBase {
    * @return bool
    *   Boolean indicating whether the comment was found.
    */
-  protected function commentExists(?CommentInterface $comment = NULL, $reply = FALSE) {
+  protected function commentExists(?CommentInterface $comment = NULL, $reply = FALSE): bool {
     if ($comment) {
       $comment_element = $this->cssSelect(($reply ? '.indented ' : '') . 'article#comment-' . $comment->id());
       if (empty($comment_element)) {
@@ -327,9 +326,9 @@ abstract class CommentTestBase extends BrowserTestBase {
    *
    * @param string $name
    *   Name of variable.
-   * @param string $value
+   * @param string|int $value
    *   Value of variable.
-   * @param string $message
+   * @param string|\Stringable $message
    *   Status message to display.
    * @param string $field_name
    *   (optional) Field name through which the comment should be posted.
@@ -347,7 +346,7 @@ abstract class CommentTestBase extends BrowserTestBase {
    * @return bool
    *   Contact info is available.
    */
-  protected function commentContactInfoAvailable() {
+  protected function commentContactInfoAvailable(): bool {
     return (bool) preg_match('/(input).*?(name="name").*?(input).*?(name="mail").*?(input).*?(name="homepage")/s', $this->getSession()->getPage()->getContent());
   }
 

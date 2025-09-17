@@ -33,7 +33,8 @@ class SecuredRedirectResponseTest extends TestCase {
     $secureRedirect = SecuredRedirectStub::createFromRedirectResponse($redirect);
     $this->assertEquals('/magic_redirect_url', $secureRedirect->getTargetUrl());
     $this->assertEquals(301, $secureRedirect->getStatusCode());
-    // We pull the headers from the original redirect because there are default headers applied.
+    // We pull the headers from the original redirect because there are default
+    // headers applied.
     $headers1 = $redirect->headers->all();
     $headers2 = $secureRedirect->headers->all();
     $this->assertEquals($headers1, $headers2);
@@ -44,12 +45,15 @@ class SecuredRedirectResponseTest extends TestCase {
 
 }
 
+/**
+ * Test class for safe redirects.
+ */
 class SecuredRedirectStub extends SecuredRedirectResponse {
 
   /**
    * {@inheritdoc}
    */
-  protected function isSafe($url) {
+  protected function isSafe($url): bool {
     // Empty implementation for testing.
     return TRUE;
   }

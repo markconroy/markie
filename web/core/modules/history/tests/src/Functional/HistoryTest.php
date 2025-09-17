@@ -8,6 +8,7 @@ use Drupal\Component\Serialization\Json;
 use Drupal\Core\Url;
 use Drupal\Tests\BrowserTestBase;
 use Drupal\Tests\system\Functional\Cache\AssertPageCacheContextsAndTagsTrait;
+use Psr\Http\Message\ResponseInterface;
 
 /**
  * Tests the History endpoints.
@@ -68,7 +69,7 @@ class HistoryTest extends BrowserTestBase {
    * @return \Psr\Http\Message\ResponseInterface
    *   The response object.
    */
-  protected function getNodeReadTimestamps(array $node_ids) {
+  protected function getNodeReadTimestamps(array $node_ids): ResponseInterface {
     // Perform HTTP request.
     $http_client = $this->getHttpClient();
     $url = Url::fromRoute('history.get_last_node_view')
@@ -91,7 +92,7 @@ class HistoryTest extends BrowserTestBase {
    * @return \Psr\Http\Message\ResponseInterface
    *   The response body.
    */
-  protected function markNodeAsRead($node_id) {
+  protected function markNodeAsRead($node_id): ResponseInterface {
     $http_client = $this->getHttpClient();
     $url = Url::fromRoute('history.read_node', ['node' => $node_id], ['absolute' => TRUE])->toString();
 
@@ -158,7 +159,10 @@ class HistoryTest extends BrowserTestBase {
     $this->assertEquals(403, $response->getStatusCode());
 
     // Additional check to ensure that we did not forget to verify anything.
-    $rows = \Drupal::database()->query('SELECT * FROM {history}')->fetchAll();
+    $rows = \Drupal::database()->select('history')
+      ->fields('history', ['nid', 'uid', 'timestamp'])
+      ->execute()
+      ->fetchAll();
     $this->assertCount(1, $rows);
     $this->assertSame($this->user->id(), $rows[0]->uid);
     $this->assertSame($this->testNode->id(), $rows[0]->nid);

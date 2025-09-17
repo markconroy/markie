@@ -5,7 +5,8 @@ declare(strict_types=1);
 
 namespace Drupal\{{ machine_name }}\Plugin\migrate\destination;
 
-{% sort %}
+{% apply sort_namespaces %}
+use Drupal\migrate\Attribute\MigrateDestination;
 use Drupal\migrate\Plugin\migrate\destination\DestinationBase;
 use Drupal\migrate\Plugin\MigrationInterface;
 use Drupal\migrate\Row;
@@ -14,13 +15,12 @@ use Drupal\migrate\Row;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
   {% endif %}
-{% endsort %}
+{% endapply %}
 
 /**
  * The '{{ plugin_id }}' destination plugin.
- *
- * @MigrateDestination(id = "{{ plugin_id }}")
  */
+#[MigrateDestination('{{ plugin_id }}')]
 final class {{ class }} extends DestinationBase {% if services %}implements ContainerFactoryPluginInterface {% endif %}{
 
 {% if services %}
@@ -72,7 +72,7 @@ final class {{ class }} extends DestinationBase {% if services %}implements Cont
   /**
    * {@inheritdoc}
    */
-  public function fields(MigrationInterface $migration = NULL): array {
+  public function fields(?MigrationInterface $migration = NULL): array {
     return [
       'id' => $this->t('The row ID.'),
       // @todo Describe row fields here.

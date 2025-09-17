@@ -74,27 +74,6 @@ final class PharAutoloader
 			}
 
 			if (
-				PHP_VERSION_ID < 70300
-				&& empty($GLOBALS['__composer_autoload_files']['0d59ee240a4cd96ddbb4ff164fccea4d'])
-				&& !class_exists(\Symfony\Polyfill\Php73\Php73::class, false)
-			) {
-				$GLOBALS['__composer_autoload_files']['0d59ee240a4cd96ddbb4ff164fccea4d'] = true;
-				// already loaded by bootstrap inside the hrtime condition
-				// require_once 'phar://' . __DIR__ . '/phpstan.phar/vendor/symfony/polyfill-php73/Php73.php';
-				require_once 'phar://' . __DIR__ . '/phpstan.phar/vendor/symfony/polyfill-php73/bootstrap.php';
-			}
-
-			if (
-				PHP_VERSION_ID < 70400
-				&& empty($GLOBALS['__composer_autoload_files']['b686b8e46447868025a15ce5d0cb2634'])
-				&& !class_exists(\Symfony\Polyfill\Php74\Php74::class, false)
-			) {
-				$GLOBALS['__composer_autoload_files']['b686b8e46447868025a15ce5d0cb2634'] = true;
-				require_once 'phar://' . __DIR__ . '/phpstan.phar/vendor/symfony/polyfill-php74/Php74.php';
-				require_once 'phar://' . __DIR__ . '/phpstan.phar/vendor/symfony/polyfill-php74/bootstrap.php';
-			}
-
-			if (
 				!extension_loaded('intl')
 				&& empty($GLOBALS['__composer_autoload_files']['8825ede83f2f289127722d4e842cf7e8'])
 				&& !class_exists(\Symfony\Polyfill\Intl\Grapheme\Grapheme::class, false)
@@ -113,6 +92,16 @@ final class PharAutoloader
 				require_once 'phar://' . __DIR__ . '/phpstan.phar/vendor/symfony/polyfill-php81/Php81.php';
 				require_once 'phar://' . __DIR__ . '/phpstan.phar/vendor/symfony/polyfill-php81/bootstrap.php';
 			}
+
+            if (
+                PHP_VERSION_ID < 80300
+                && empty ($GLOBALS['__composer_autoload_files']['662a729f963d39afe703c9d9b7ab4a8c'])
+                && !class_exists(\Symfony\Polyfill\Php83\Php83::class, false)
+            ) {
+                $GLOBALS['__composer_autoload_files']['662a729f963d39afe703c9d9b7ab4a8c'] = true;
+                require_once 'phar://' . __DIR__ . '/phpstan.phar/vendor/symfony/polyfill-php83/Php83.php';
+                require_once 'phar://' . __DIR__ . '/phpstan.phar/vendor/symfony/polyfill-php83/bootstrap.php';
+            }
 		}
 
 		$filename = str_replace('\\', DIRECTORY_SEPARATOR, $class);

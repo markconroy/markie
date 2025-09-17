@@ -25,13 +25,13 @@ class Rss extends RssPluginBase {
    *
    * @var string
    */
-  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName, Drupal.Commenting.VariableComment.Missing
   public $base_table = 'node_field_data';
 
   /**
    * The base field for this row plugin.
    */
-  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName, Drupal.Commenting.VariableComment.Missing
   public string $base_field = 'nid';
 
   /**
@@ -56,11 +56,17 @@ class Rss extends RssPluginBase {
     return $options;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function summaryTitle() {
     $options = $this->buildOptionsForm_summary_options();
     return $options[$this->options['view_mode']];
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function preRender($values) {
     $nids = [];
     foreach ($values as $row) {
@@ -71,6 +77,9 @@ class Rss extends RssPluginBase {
     }
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function render($row) {
     global $base_url;
 

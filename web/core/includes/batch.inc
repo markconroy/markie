@@ -146,7 +146,7 @@ function _batch_do() {
  *
  * @see _batch_process()
  */
-function _batch_progress_page() {
+function _batch_progress_page(): array {
   $batch = &batch_get();
 
   $current_set = _batch_current_set();
@@ -223,7 +223,8 @@ function _batch_progress_page() {
           'batch_progress_meta_refresh',
         ],
       ],
-      // Adds JavaScript code and settings for clients where JavaScript is enabled.
+      // Adds JavaScript code and settings for clients where JavaScript is
+      // enabled.
       'drupalSettings' => [
         'batch' => [
           'errorMessage' => $current_set['error_message'] . '<br />' . $batch['error_message'],
@@ -556,7 +557,7 @@ function _batch_finished() {
  * @see _batch_page()
  * @see drupal_register_shutdown_function()
  */
-function _batch_shutdown() {
+function _batch_shutdown(): void {
   if (($batch = batch_get()) && _batch_needs_update()) {
     \Drupal::service('batch.storage')->update($batch);
   }

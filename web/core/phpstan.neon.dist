@@ -1,12 +1,15 @@
 # Configuration file for PHPStan static code checking, see https://phpstan.org .
-# PHPStan is triggered on Drupal CI in commit-code-check.sh.
+# The PHPStan check is executed as a job in the CI pipeline.
 includes:
   - .phpstan-baseline.php
-  - phar://phpstan.phar/conf/bleedingEdge.neon
 
 parameters:
 
+  tmpDir: phpstan-tmp
+
   level: 1
+
+  checkInternalClassCaseSensitivity: true
 
   fileExtensions:
     - sh
@@ -26,6 +29,10 @@ parameters:
     - ../*/node_modules/*
     - */tests/fixtures/*.php
     - */tests/fixtures/*.php.gz
+    # Skip the phpstan tmpDir
+    - phpstan-tmp/*
+    # Skip Drupal's own PHPStan rules test fixtures.
+    - tests/PHPStan/fixtures/*
     # Skip Drupal 6 & 7 code.
     - scripts/dump-database-d?.sh
     - scripts/generate-d?-content.sh
@@ -43,3 +50,9 @@ parameters:
     # Ignore common errors for now.
     - "#Drupal calls should be avoided in classes, use dependency injection instead#"
     - "#^Class .* extends @internal class#"
+    - identifier: missingType.iterableValue
+
+rules:
+  - Drupal\PHPStan\Rules\ComponentTestDoesNotExtendCoreTest
+  - PHPStan\Rules\Functions\MissingFunctionReturnTypehintRule
+  - PHPStan\Rules\Methods\MissingMethodReturnTypehintRule

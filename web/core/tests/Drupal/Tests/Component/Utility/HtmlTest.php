@@ -9,7 +9,6 @@ use Drupal\Component\Render\MarkupTrait;
 use Drupal\Component\Utility\Html;
 use Drupal\Component\Utility\Random;
 use PHPUnit\Framework\TestCase;
-use Symfony\Bridge\PhpUnit\ExpectDeprecationTrait;
 
 // cspell:ignore répét répété
 
@@ -21,8 +20,6 @@ use Symfony\Bridge\PhpUnit\ExpectDeprecationTrait;
  * @coversDefaultClass \Drupal\Component\Utility\Html
  */
 class HtmlTest extends TestCase {
-
-  use ExpectDeprecationTrait;
 
   /**
    * {@inheritdoc}
@@ -68,13 +65,17 @@ class HtmlTest extends TestCase {
     $id1 = 'abcdefghijklmnopqrstuvwxyz_ABCDEFGHIJKLMNOPQRSTUVWXYZ-0123456789';
     $id2 = '¡¢£¤¥';
     $id3 = 'css__identifier__with__double__underscores';
+    $id4 = "\x80\x81";
     return [
       // Verify that no valid ASCII characters are stripped from the identifier.
       [$id1, $id1, []],
-      // Verify that valid UTF-8 characters are not stripped from the identifier.
+      // Verify that valid UTF-8 characters are not stripped from the
+      // identifier.
       [$id2, $id2, []],
       // Verify that double underscores are not stripped from the identifier.
       [$id3, $id3],
+      // Confirm that NULL identifier does not trigger PHP 8.1 deprecation message.
+      ['', $id4],
       // Verify that invalid characters (including non-breaking space) are
       // stripped from the identifier.
       ['invalid_identifier', 'invalid_ !"#$%&\'()*+,./:;<=>?@[\\]^`{|}~ identifier', []],
@@ -330,8 +331,9 @@ class HtmlTest extends TestCase {
   /**
    * Tests Html::serialize().
    *
-   * Resolves an issue by where an empty DOMDocument object sent to serialization would
-   * cause errors in getElementsByTagName() in the serialization function.
+   * Resolves an issue by where an empty DOMDocument object sent to
+   * serialization would cause errors in getElementsByTagName() in the
+   * serialization function.
    *
    * @covers ::serialize
    */
@@ -416,19 +418,6 @@ class HtmlTest extends TestCase {
       'host and path' => ['example.com/llama'],
       'scheme, host and path' => ['http://example.com/llama'],
     ];
-  }
-
-  /**
-   * Test deprecations.
-   *
-   * @group legacy
-   */
-  public function testDeprecations(): void {
-    $this->expectDeprecation('Passing NULL to Drupal\Component\Utility\Html::decodeEntities is deprecated in drupal:9.5.0 and will trigger a PHP error from drupal:11.0.0. Pass a string instead. See https://www.drupal.org/node/3318826');
-    $this->assertSame('', Html::decodeEntities(NULL));
-
-    $this->expectDeprecation('Passing NULL to Drupal\Component\Utility\Html::escape is deprecated in drupal:9.5.0 and will trigger a PHP error from drupal:11.0.0. Pass a string instead. See https://www.drupal.org/node/3318826');
-    $this->assertSame('', Html::escape(NULL));
   }
 
 }

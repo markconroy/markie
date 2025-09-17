@@ -19,11 +19,11 @@
 #}
 {% set control_bar_attributes = create_attribute() %}
 
-<div {{ control_bar_attributes.addClass('admin-toolbar-control-bar').setAttribute('data-drupal-admin-styles', '').setAttribute('data-offset-top', '') }}>
+<div {{ control_bar_attributes.addClass('admin-toolbar-control-bar').setAttribute('data-drupal-admin-styles', '') }}>
   <div class="admin-toolbar-control-bar__content">
     {% include 'navigation:toolbar-button' with {
       attributes: create_attribute({'aria-expanded': 'false', 'aria-controls': 'admin-toolbar', 'type': 'button'}),
-      icon: 'burger',
+      icon: { icon_id: 'burger' },
       text: 'Expand sidebar'|t,
       modifiers: ['small-offset'],
       extra_classes: [
@@ -60,14 +60,14 @@
         {% include 'navigation:toolbar-button' with {
           attributes: create_attribute({ 'data-toolbar-back-control': true, 'tabindex': '-1' }),
           extra_classes: ['admin-toolbar__back-button'],
-          icon: 'back',
+          icon: { icon_id: 'arrow-left' },
           text: 'Back'|t,
         } only %}
         {% include 'navigation:toolbar-button' with {
           action: 'Collapse sidebar'|t,
           attributes: create_attribute({ 'aria-controls': 'admin-toolbar', 'tabindex': '-1', 'type': 'button' }),
           extra_classes: ['admin-toolbar__close-button'],
-          icon: 'cross',
+          icon: { icon_id: 'cross' },
         } only %}
       </div>
 
@@ -80,6 +80,7 @@
       <h3 id="{{ title_menu_footer }}" class="visually-hidden">{{ 'Administrative toolbar footer'|t }}</h3>
       {{ content.footer }}
       <button aria-controls="admin-toolbar" class="admin-toolbar__expand-button" type="button">
+        {{ icon('navigation', 'chevron', { class: 'admin-toolbar__expand-button-chevron', size: 16 }) }}
         <span class="visually-hidden" data-toolbar-text>{{ 'Collapse sidebar'|t }}</span>
       </button>
     </nav>

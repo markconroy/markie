@@ -18,6 +18,7 @@ use Drupal\field_discovery_test\FieldDiscoveryTestClass;
  * Test FieldDiscovery Service against Drupal 7.
  *
  * @group migrate_drupal
+ * @group #slow
  * @coversDefaultClass \Drupal\migrate_drupal\FieldDiscovery
  */
 class FieldDiscoveryTest extends MigrateDrupal7TestBase {
@@ -334,7 +335,7 @@ class FieldDiscoveryTest extends MigrateDrupal7TestBase {
     $this->assertCount(23, $actual_fields['node']['test_content_type']);
     foreach ($actual_fields as $entity_type_id => $bundles) {
       foreach ($bundles as $bundle => $fields) {
-        foreach ($fields as $field_name => $field_info) {
+        foreach ($fields as $field_info) {
           $this->assertArrayHasKey('field_definition', $field_info);
           $this->assertEquals($entity_type_id, $field_info['entity_type']);
           $this->assertEquals($bundle, $field_info['bundle']);

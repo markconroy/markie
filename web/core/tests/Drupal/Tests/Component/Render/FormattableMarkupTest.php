@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Drupal\Tests\Component\Render;
 
 use Drupal\Component\Render\FormattableMarkup;
+use Drupal\TestTools\Extension\DeprecationBridge\ExpectDeprecationTrait;
 use PHPUnit\Framework\TestCase;
-use Symfony\Bridge\PhpUnit\ExpectDeprecationTrait;
 
 /**
  * Tests the TranslatableMarkup class.
@@ -55,29 +55,6 @@ class FormattableMarkupTest extends TestCase {
   }
 
   /**
-   * @covers ::__toString
-   * @dataProvider providerTestNullPlaceholder
-   * @group legacy
-   */
-  public function testNullPlaceholder(string $expected, string $string, array $arguments, string $expected_deprecation): void {
-    $this->expectDeprecation($expected_deprecation);
-    $this->assertEquals($expected, (string) new FormattableMarkup($string, $arguments));
-  }
-
-  /**
-   * Data provider for FormattableMarkupTest::testNullPlaceholder().
-   *
-   * @return array
-   */
-  public static function providerTestNullPlaceholder() {
-    return [
-      ['', '@empty', ['@empty' => NULL], 'Deprecated NULL placeholder value for key (@empty) in: "@empty". This will throw a PHP error in drupal:11.0.0. See https://www.drupal.org/node/3318826'],
-      ['', ':empty', [':empty' => NULL], 'Deprecated NULL placeholder value for key (:empty) in: ":empty". This will throw a PHP error in drupal:11.0.0. See https://www.drupal.org/node/3318826'],
-      ['<em class="placeholder"></em>', '%empty', ['%empty' => NULL], 'Deprecated NULL placeholder value for key (%%empty) in: "%%empty". This will throw a PHP error in drupal:11.0.0. See https://www.drupal.org/node/3318826'],
-    ];
-  }
-
-  /**
    * Custom error handler that saves the last error.
    *
    * We need this custom error handler because we cannot rely on the error to
@@ -89,7 +66,7 @@ class FormattableMarkupTest extends TestCase {
    * @param string $error_message
    *   The error message.
    */
-  public function errorHandler($error_number, $error_message) {
+  public function errorHandler($error_number, $error_message): void {
     $this->lastErrorNumber = $error_number;
     $this->lastErrorMessage = $error_message;
   }
@@ -99,7 +76,8 @@ class FormattableMarkupTest extends TestCase {
    * @dataProvider providerTestUnexpectedPlaceholder
    */
   public function testUnexpectedPlaceholder($string, $arguments, $error_number, $error_message): void {
-    // We set a custom error handler because of https://github.com/sebastianbergmann/phpunit/issues/487
+    // We set a custom error handler because of
+    // https://github.com/sebastianbergmann/phpunit/issues/487
     set_error_handler([$this, 'errorHandler']);
     // We want this to trigger an error.
     $markup = new FormattableMarkup($string, $arguments);
@@ -116,6 +94,7 @@ class FormattableMarkupTest extends TestCase {
    * Data provider for FormattableMarkupTest::testUnexpectedPlaceholder().
    *
    * @return array
+   *   An array of test cases.
    */
   public static function providerTestUnexpectedPlaceholder() {
     return [

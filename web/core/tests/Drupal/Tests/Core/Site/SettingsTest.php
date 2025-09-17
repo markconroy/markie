@@ -100,6 +100,7 @@ class SettingsTest extends UnitTestCase {
    * Data provider for testGetHashSaltEmpty.
    *
    * @return array
+   *   An array of settings arrays with no hash salt value.
    */
   public static function providerTestGetHashSaltEmpty() {
     return [
@@ -161,9 +162,6 @@ class SettingsTest extends UnitTestCase {
    * or provider. This test is only for the general deprecated settings API
    * itself.
    *
-   * @see self::testRealDeprecatedSettings()
-   * @see self::providerTestRealDeprecatedSettings()
-   *
    * @param string[] $settings_config
    *   Array of settings to put in the settings.php file for testing.
    * @param string $setting_name
@@ -179,6 +177,9 @@ class SettingsTest extends UnitTestCase {
    * @covers ::initialize
    *
    * @group legacy
+   *
+   * @see self::testRealDeprecatedSettings()
+   * @see self::providerTestRealDeprecatedSettings()
    */
   public function testFakeDeprecatedSettings(array $settings_config, string $setting_name, string $expected_value, bool $expect_deprecation_message = TRUE): void {
 
@@ -309,8 +310,8 @@ class SettingsTest extends UnitTestCase {
   public static function providerTestRealDeprecatedSettings(): array {
     return [
       [
-        'block_interest_cohort',
-        'The "block_interest_cohort" setting is deprecated in drupal:9.5.0. This setting should be removed from the settings file, since its usage has been removed. See https://www.drupal.org/node/3320787.',
+        'state_cache',
+        'The "state_cache" setting is deprecated in drupal:11.0.0. This setting should be removed from the settings file, since its usage has been removed. See https://www.drupal.org/node/3177901.',
       ],
     ];
   }

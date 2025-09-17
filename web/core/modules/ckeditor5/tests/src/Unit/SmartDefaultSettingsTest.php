@@ -7,10 +7,15 @@ namespace Drupal\Tests\ckeditor5\Unit;
 use Drupal\ckeditor5\Annotation\CKEditor5Plugin;
 use Drupal\ckeditor5\HTMLRestrictions;
 use Drupal\ckeditor5\Plugin\CKEditor5PluginDefinition;
+use Drupal\ckeditor5\Plugin\CKEditor5PluginManagerInterface;
 use Drupal\ckeditor5\SmartDefaultSettings;
 use Drupal\Component\Utility\NestedArray;
+use Drupal\Core\Extension\ModuleHandlerInterface;
+use Drupal\Core\Session\AccountInterface;
+use Drupal\editor\EditorInterface;
 use Drupal\Tests\ckeditor5\Traits\PrivateMethodUnitTestTrait;
 use Drupal\Tests\UnitTestCase;
+use Psr\Log\LoggerInterface;
 
 /**
  * @coversDefaultClass \Drupal\ckeditor5\SmartDefaultSettings
@@ -33,6 +38,7 @@ class SmartDefaultSettingsTest extends UnitTestCase {
    * Data provider for testing computeSurplusScore().
    *
    * @return \Generator
+   *   Yields the data for testSurplusScore().
    */
   public static function providerSurplusScore(): \Generator {
     $needed = new HTMLRestrictions(['code' => FALSE]);
@@ -82,7 +88,14 @@ class SmartDefaultSettingsTest extends UnitTestCase {
    */
   public function testCandidates(HTMLRestrictions $provided, HTMLRestrictions $still_needed, array $disabled_plugin_definitions, array $expected_candidates, array $expected_selection = []): void {
     $get_candidates = self::getMethod(SmartDefaultSettings::class, 'getCandidates');
-    $this->assertSame($expected_candidates, $get_candidates->invoke(NULL, $provided, $still_needed, $disabled_plugin_definitions));
+    $smart_default_settings = new SmartDefaultSettings(
+      $this->prophesize(CKEditor5PluginManagerInterface::class)->reveal(),
+      $this->prophesize(LoggerInterface::class)->reveal(),
+      $this->prophesize(ModuleHandlerInterface::class)->reveal(),
+      $this->prophesize(AccountInterface::class)->reveal(),
+    );
+    $editor = $this->prophesize(EditorInterface::class);
+    $this->assertSame($expected_candidates, $get_candidates->invoke($smart_default_settings, $provided, $still_needed, $disabled_plugin_definitions, $editor->reveal()));
     $select_candidate = self::getMethod(SmartDefaultSettings::class, 'selectCandidate');
     $this->assertSame($expected_selection, $select_candidate->invoke(NULL, $expected_candidates, $still_needed, array_keys($provided->getAllowedElements())));
   }
@@ -91,6 +104,7 @@ class SmartDefaultSettingsTest extends UnitTestCase {
    * Data provider for testing getCandidates() and ::selectCandidate().
    *
    * @return \Generator
+   *   Yields the data for testCandidates().
    */
   public static function providerCandidates(): \Generator {
     $generate_definition = function (string $label_and_id, array $overrides): CKEditor5PluginDefinition {

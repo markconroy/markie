@@ -36,6 +36,11 @@ class RecipeTest extends KernelTestBase {
     $this->assertSame($expected_description, $recipe->description);
   }
 
+  /**
+   * Tests creating a recipe from an empty directory.
+   *
+   * @covers ::createFromDirectory
+   */
   public function testCreateFromDirectoryNoRecipe(): void {
     $dir = uniqid('public://');
     mkdir($dir);
@@ -45,10 +50,15 @@ class RecipeTest extends KernelTestBase {
     Recipe::createFromDirectory($dir);
   }
 
+  /**
+   * Tests creating a pre-existing configuration with a different configuration.
+   *
+   * @covers ::createFromDirectory
+   */
   public function testPreExistingDifferentConfiguration(): void {
     // Install the node module, its dependencies and configuration.
     $this->container->get('module_installer')->install(['node']);
-    $this->assertFalse($this->config('node.settings')->get('use_admin_theme'), 'The node.settings:use_admin_theme is set to FALSE');
+    $this->assertTrue($this->config('node.settings')->get('use_admin_theme'), 'The node.settings:use_admin_theme is set to TRUE');
 
     try {
       Recipe::createFromDirectory('core/tests/fixtures/recipes/install_node_with_config');
@@ -60,17 +70,25 @@ class RecipeTest extends KernelTestBase {
     }
   }
 
+  /**
+   * Tests creating an existing configuration with the same configuration.
+   *
+   * @covers ::createFromDirectory
+   */
   public function testPreExistingMatchingConfiguration(): void {
     // Install the node module, its dependencies and configuration.
     $this->container->get('module_installer')->install(['node']);
     // Change the config to match the recipe's config to prevent the exception
     // being thrown.
-    $this->config('node.settings')->set('use_admin_theme', TRUE)->save();
+    $this->config('node.settings')->set('use_admin_theme', FALSE)->save();
 
     $recipe = Recipe::createFromDirectory('core/tests/fixtures/recipes/install_node_with_config');
     $this->assertSame('core/tests/fixtures/recipes/install_node_with_config/config', $recipe->config->recipeConfigDirectory);
   }
 
+  /**
+   * Tests processing a recipe.
+   */
   public function testExampleRecipe(): void {
     // The example recipe imports all the configurations from the node module
     // including optional configurations associated with the search and view
@@ -83,6 +101,9 @@ class RecipeTest extends KernelTestBase {
     $this->assertSame($this->config('text.settings')->get('default_summary_length'), 700);
   }
 
+  /**
+   * Tests creating a recipe with a missing implicitly required module.
+   */
   public function testImplicitlyRequiredModule(): void {
     $this->disableModules(['user']);
     $recipe = $this->createRecipe([
@@ -96,6 +117,21 @@ class RecipeTest extends KernelTestBase {
       ],
     ]);
     $this->assertIsObject($recipe);
+  }
+
+  /**
+   * Tests getting extra extension-specific info from a recipe.
+   *
+   * @covers ::getExtra
+   */
+  public function testExtra(): void {
+    $recipe = $this->createRecipe([
+      'name' => 'Getting extra info',
+      'extra' => [
+        'special_sauce' => 'Wasabi',
+      ],
+    ]);
+    $this->assertSame('Wasabi', $recipe->getExtra('special_sauce'));
   }
 
 }

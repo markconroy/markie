@@ -2,6 +2,8 @@
 
 namespace Drupal\user\Entity;
 
+use Drupal\Core\Entity\Attribute\ContentEntityType;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityChangedTrait;
 use Drupal\Core\Entity\EntityStorageInterface;
@@ -9,62 +11,70 @@ use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Flood\PrefixFloodInterface;
 use Drupal\Core\Language\LanguageInterface;
+use Drupal\user\Form\UserCancelForm;
+use Drupal\user\ProfileForm;
+use Drupal\user\ProfileTranslationHandler;
+use Drupal\user\RegisterForm;
 use Drupal\user\RoleInterface;
 use Drupal\user\StatusItem;
 use Drupal\user\TimeZoneItem;
+use Drupal\user\UserAccessControlHandler;
 use Drupal\user\UserInterface;
+use Drupal\user\UserListBuilder;
+use Drupal\user\UserStorage;
+use Drupal\user\UserStorageSchema;
+use Drupal\user\UserViewsData;
 
 /**
  * Defines the user entity class.
  *
  * The base table name here is plural, despite Drupal table naming standards,
  * because "user" is a reserved word in many databases.
- *
- * @ContentEntityType(
- *   id = "user",
- *   label = @Translation("User"),
- *   label_collection = @Translation("Users"),
- *   label_singular = @Translation("user"),
- *   label_plural = @Translation("users"),
- *   label_count = @PluralTranslation(
- *     singular = "@count user",
- *     plural = "@count users",
- *   ),
- *   handlers = {
- *     "storage" = "Drupal\user\UserStorage",
- *     "storage_schema" = "Drupal\user\UserStorageSchema",
- *     "access" = "Drupal\user\UserAccessControlHandler",
- *     "list_builder" = "Drupal\user\UserListBuilder",
- *     "views_data" = "Drupal\user\UserViewsData",
- *     "route_provider" = {
- *       "html" = "Drupal\user\Entity\UserRouteProvider",
- *     },
- *     "form" = {
- *       "default" = "Drupal\user\ProfileForm",
- *       "cancel" = "Drupal\user\Form\UserCancelForm",
- *       "register" = "Drupal\user\RegisterForm"
- *     },
- *     "translation" = "Drupal\user\ProfileTranslationHandler"
- *   },
- *   admin_permission = "administer users",
- *   base_table = "users",
- *   data_table = "users_field_data",
- *   translatable = TRUE,
- *   entity_keys = {
- *     "id" = "uid",
- *     "langcode" = "langcode",
- *     "uuid" = "uuid"
- *   },
- *   links = {
- *     "canonical" = "/user/{user}",
- *     "edit-form" = "/user/{user}/edit",
- *     "cancel-form" = "/user/{user}/cancel",
- *     "collection" = "/admin/people",
- *   },
- *   field_ui_base_route = "entity.user.admin_form",
- *   common_reference_target = TRUE
- * )
  */
+#[ContentEntityType(
+  id: 'user',
+  label: new TranslatableMarkup('User'),
+  label_collection: new TranslatableMarkup('Users'),
+  label_singular: new TranslatableMarkup('user'),
+  label_plural: new TranslatableMarkup('users'),
+  entity_keys: [
+    'id' => 'uid',
+    'langcode' => 'langcode',
+    'uuid' => 'uuid',
+  ],
+  handlers: [
+    'storage' => UserStorage::class,
+    'storage_schema' => UserStorageSchema::class,
+    'access' => UserAccessControlHandler::class,
+    'list_builder' => UserListBuilder::class,
+    'views_data' => UserViewsData::class,
+    'route_provider' => [
+      'html' => UserRouteProvider::class,
+    ],
+    'form' => [
+      'default' => ProfileForm::class,
+      'cancel' => UserCancelForm::class,
+      'register' => RegisterForm::class,
+    ],
+    'translation' => ProfileTranslationHandler::class,
+  ],
+  links: [
+    'canonical' => '/user/{user}',
+    'edit-form' => '/user/{user}/edit',
+    'cancel-form' => '/user/{user}/cancel',
+    'collection' => '/admin/people',
+  ],
+  admin_permission: 'administer users',
+  base_table: 'users',
+  data_table: 'users_field_data',
+  translatable: TRUE,
+  label_count: [
+    'singular' => '@count user',
+    'plural' => '@count users',
+  ],
+  field_ui_base_route: 'entity.user.admin_form',
+  common_reference_target: TRUE,
+)]
 class User extends ContentEntityBase implements UserInterface {
 
   use EntityChangedTrait;
@@ -121,7 +131,7 @@ class User extends ContentEntityBase implements UserInterface {
       $session_manager = \Drupal::service('session_manager');
       // If the password has been changed, delete all open sessions for the
       // user and recreate the current one.
-      if ($this->pass->value != $this->original->pass->value) {
+      if ($this->pass->value != $this->getOriginal()->pass->value) {
         $session_manager->delete($this->id());
         if ($this->id() == \Drupal::currentUser()->id()) {
           \Drupal::service('session')->migrate();
@@ -141,12 +151,12 @@ class User extends ContentEntityBase implements UserInterface {
       }
 
       // If the user was blocked, delete the user's sessions to force a logout.
-      if ($this->original->status->value != $this->status->value && $this->status->value == 0) {
+      if ($this->getOriginal()->status->value != $this->status->value && $this->status->value == 0) {
         $session_manager->delete($this->id());
       }
 
       // Send emails after we have the new user object.
-      if ($this->status->value != $this->original->status->value) {
+      if ($this->status->value != $this->getOriginal()->status->value) {
         // The user's status is changing; conditionally send notification email.
         $op = $this->status->value == 1 ? 'status_activated' : 'status_blocked';
         _user_mail_notify($op, $this);
@@ -224,11 +234,7 @@ class User extends ContentEntityBase implements UserInterface {
   /**
    * {@inheritdoc}
    */
-  public function hasPermission(/* string */$permission) {
-    if (!is_string($permission)) {
-      @trigger_error('Calling ' . __METHOD__ . '() with a $permission parameter of type other than string is deprecated in drupal:10.3.0 and will cause an error in drupal:11.0.0. See https://www.drupal.org/node/3411485', E_USER_DEPRECATED);
-      return FALSE;
-    }
+  public function hasPermission(string $permission) {
     return \Drupal::service('permission_checker')->hasPermission($permission, $this);
   }
 

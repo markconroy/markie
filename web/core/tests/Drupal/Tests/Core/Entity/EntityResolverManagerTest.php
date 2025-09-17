@@ -439,7 +439,7 @@ class EntityResolverManagerTest extends UnitTestCase {
   /**
    * Creates the entity type manager mock returning entity type objects.
    */
-  protected function setupEntityTypes() {
+  protected function setupEntityTypes(): void {
     $definition = $this->createMock('Drupal\Core\Entity\EntityTypeInterface');
     $definition->expects($this->any())
       ->method('getClass')
@@ -559,6 +559,9 @@ class BasicFormNoUpcasting extends FormBase {
 
 }
 
+/**
+ * A basic form without a container injection interface implemented.
+ */
 class BasicFormNoContainerInjectionInterface implements FormInterface {
 
   /**

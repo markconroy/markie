@@ -1,4 +1,6 @@
 services:
+  _defaults:
+    autoconfigure: true
   stream_wrapper.dummy_readonly:
     class: Drupal\file_test\StreamWrapper\DummyReadOnlyStreamWrapper
     tags:
@@ -20,3 +22,5 @@ services:
     tags:
       - { name: stream_wrapper, scheme: dummy1 }
       - { name: stream_wrapper, scheme: dummy2 }
+  Drupal\file_test\EventSubscriber\DummyMimeTypeMapLoadedSubscriber:
+    autowire: true

@@ -38,7 +38,6 @@ class OffCanvasDialogTest extends BrowserTestBase {
     // Set up variables for this test.
     $dialog_renderable = AjaxTestController::dialogContents();
     $dialog_contents = \Drupal::service('renderer')->renderRoot($dialog_renderable);
-    $dialog_class = 'ui-dialog-off-canvas ui-dialog-position-' . ($position ?: 'side');
     $off_canvas_expected_response = [
       'command' => 'openDialog',
       'selector' => '#drupal-off-canvas',
@@ -46,7 +45,10 @@ class OffCanvasDialogTest extends BrowserTestBase {
       'data' => (string) $dialog_contents,
       'dialogOptions' =>
         [
-          'classes' => ['ui-dialog' => $dialog_class, 'ui-dialog-content' => 'drupal-off-canvas-reset'],
+          'classes' => [
+            'ui-dialog' => 'ui-dialog-off-canvas ui-dialog-position-' . ($position ?: 'side'),
+            'ui-dialog-content' => 'drupal-off-canvas-reset',
+          ],
           'title' => 'AJAX Dialog & contents',
           'modal' => FALSE,
           'autoResize' => FALSE,
@@ -72,6 +74,7 @@ class OffCanvasDialogTest extends BrowserTestBase {
    * The data provider for potential dialog positions.
    *
    * @return array
+   *   An array of dialog positions.
    */
   public static function dialogPosition() {
     return [

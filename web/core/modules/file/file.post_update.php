@@ -6,40 +6,36 @@
  */
 
 use Drupal\Core\Config\Entity\ConfigEntityUpdater;
-use Drupal\user\RoleInterface;
+use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 
 /**
  * Implements hook_removed_post_updates().
  */
-function file_removed_post_updates() {
+function file_removed_post_updates(): array {
   return [
     'file_post_update_add_txt_if_allows_insecure_extensions' => '10.0.0',
+    'file_post_update_add_permissions_to_roles' => '11.0.0',
+    'file_post_update_add_default_filename_sanitization_configuration' => '11.0.0',
   ];
 }
 
 /**
- * Grant all non-anonymous roles the 'delete own files' permission.
+ * Adds a value for the 'playsinline' setting of the 'file_video' formatter.
  */
-function file_post_update_add_permissions_to_roles(?array &$sandbox = NULL): void {
-  \Drupal::classResolver(ConfigEntityUpdater::class)->update($sandbox, 'user_role', function (RoleInterface $role): bool {
-    if ($role->id() === RoleInterface::ANONYMOUS_ID || $role->isAdmin()) {
-      return FALSE;
+function file_post_update_add_playsinline(array &$sandbox = []): ?TranslatableMarkup {
+  /** @var \Drupal\Core\Config\Entity\ConfigEntityUpdater $config_entity_updater */
+  $config_entity_updater = \Drupal::classResolver(ConfigEntityUpdater::class);
+  return $config_entity_updater->update($sandbox, 'entity_view_display', function (EntityViewDisplayInterface $display) {
+    $needs_update = FALSE;
+    $components = $display->getComponents();
+    foreach ($components as $name => $component) {
+      if (isset($component['type']) && $component['type'] === 'file_video') {
+        $needs_update = TRUE;
+        $component['settings']['playsinline'] = FALSE;
+        $display->setComponent($name, $component);
+      }
     }
-    $role->grantPermission('delete own files');
-    return TRUE;
+    return $needs_update;
   });
-}
-
-/**
- * Add default filename sanitization configuration.
- */
-function file_post_update_add_default_filename_sanitization_configuration() {
-  $config = \Drupal::configFactory()->getEditable('file.settings');
-  $config->set('filename_sanitization.transliterate', FALSE);
-  $config->set('filename_sanitization.replace_whitespace', FALSE);
-  $config->set('filename_sanitization.replace_non_alphanumeric', FALSE);
-  $config->set('filename_sanitization.deduplicate_separators', FALSE);
-  $config->set('filename_sanitization.lowercase', FALSE);
-  $config->set('filename_sanitization.replacement_character', '-');
-  $config->save();
 }

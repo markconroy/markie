@@ -3,6 +3,7 @@
 namespace Drupal\Core\Installer;
 
 use Drupal\Core\DrupalKernel;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Extend DrupalKernel to handle force some kernel behaviors.
@@ -81,6 +82,33 @@ class InstallerKernel extends DrupalKernel {
     // subsequently executed code does not involve the installer at all.
     // @see install_drupal()
     return isset($GLOBALS['install_state']) && empty($GLOBALS['install_state']['installation_finished']);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function attachSynthetic(ContainerInterface $container): void {
+    parent::attachSynthetic($container);
+
+    // Reset any existing container in order to avoid holding on to old object
+    // references, otherwise memory usage grows exponentially with each rebuild
+    // when multiple modules are being installed.
+    // @todo Move this to the parent class after https://www.drupal.org/i/2066993
+    $this->container?->reset();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function getExtensions(): array {
+    $extensions = parent::getExtensions() ?: [];
+    // Ensure that the System module is always available to the installer.
+    $extensions['module']['system'] ??= 0;
+    if (empty($extensions['profile']) && !empty($GLOBALS['install_state']) && ($profile = _install_select_profile($GLOBALS['install_state']))) {
+      $extensions['profile'] = $profile;
+      $extensions['module'][$profile] = 1000;
+    }
+    return $extensions;
   }
 
 }

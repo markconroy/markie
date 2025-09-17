@@ -63,9 +63,9 @@ trait FunctionalTestSetupTrait {
   /**
    * Set to TRUE to make user 1 a super user.
    *
-   * @see \Drupal\Core\Session\SuperUserAccessPolicy
-   *
    * @var bool
+   *
+   * @see \Drupal\Core\Session\SuperUserAccessPolicy
    */
   protected bool $usesSuperUserAccessPolicy;
 
@@ -167,6 +167,17 @@ trait FunctionalTestSetupTrait {
         'tags' => [['name' => 'event_subscriber']],
       ];
     }
+    // Register test middleware.
+    $services['services']['testing.http_client.middleware'] = [
+      'class' => 'Drupal\Core\Test\HttpClientMiddleware\TestHttpClientMiddleware',
+      'tags' => [['name' => 'http_client_middleware']],
+    ];
+    $services['services']['testing.http_middleware.wait_terminate_middleware'] = [
+      'class' => 'Drupal\Core\Test\StackMiddleware\TestWaitTerminateMiddleware',
+      'arguments' => ['@lock', '%drupal.test_wait_terminate%'],
+      'tags' => [['name' => 'http_middleware', 'priority' => -1024]],
+    ];
+    $services['parameters']['drupal.test_wait_terminate'] = FALSE;
     file_put_contents($directory . '/services.yml', $yaml->dump($services));
     // Since Drupal is bootstrapped already, install_begin_request() will not
     // bootstrap again. Hence, we have to reload the newly written custom
@@ -588,7 +599,7 @@ trait FunctionalTestSetupTrait {
     ];
 
     // If we only have one db driver available, we cannot set the driver.
-    if (count($this->getDatabaseTypes()) == 1) {
+    if (count(Database::getDriverList()->getInstallableList()) == 1) {
       unset($parameters['forms']['install_settings_form']['driver']);
     }
     return $parameters;
@@ -598,7 +609,8 @@ trait FunctionalTestSetupTrait {
    * Sets up the base URL based upon the environment variable.
    *
    * @throws \Exception
-   *   Thrown when no SIMPLETEST_BASE_URL environment variable is provided or uses an invalid scheme.
+   *   Thrown when no SIMPLETEST_BASE_URL environment variable is provided or
+   *   uses an invalid scheme.
    */
   protected function setupBaseUrl() {
     global $base_url;
@@ -716,29 +728,6 @@ trait FunctionalTestSetupTrait {
     $callbacks = &drupal_register_shutdown_function();
     $this->originalShutdownCallbacks = $callbacks;
     $callbacks = [];
-  }
-
-  /**
-   * Returns all supported database driver installer objects.
-   *
-   * This wraps DatabaseDriverList::getInstallableList() for use without a
-   * current container.
-   *
-   * @return \Drupal\Core\Database\Install\Tasks[]
-   *   An array of available database driver installer objects.
-   */
-  protected function getDatabaseTypes() {
-    if (isset($this->originalContainer) && $this->originalContainer) {
-      \Drupal::setContainer($this->originalContainer);
-    }
-    $database_types = [];
-    foreach (Database::getDriverList()->getInstallableList() as $name => $driver) {
-      $database_types[$name] = $driver->getInstallTasks();
-    }
-    if (isset($this->originalContainer) && $this->originalContainer) {
-      \Drupal::unsetContainer();
-    }
-    return $database_types;
   }
 
 }

@@ -1,0 +1,2 @@
+parameters:
+  link.skip_procedural_hook_scan: false

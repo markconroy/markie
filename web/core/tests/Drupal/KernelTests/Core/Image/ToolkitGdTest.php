@@ -9,7 +9,7 @@ use Drupal\Core\Image\ImageFactory;
 use Drupal\Core\Image\ImageInterface;
 use Drupal\KernelTests\KernelTestBase;
 
-// cspell:ignore imagecreatefrom
+// cspell:ignore iccp, imagecreatefrom
 
 /**
  * Tests for the GD image toolkit.
@@ -192,6 +192,13 @@ class ToolkitGdTest extends KernelTestBase {
         'arguments' => ['extension' => 'webp'],
         'corners' => $default_corners,
       ],
+      'convert_avif' => [
+        'operation' => 'convert',
+        'width' => 40,
+        'height' => 20,
+        'arguments' => ['extension' => 'avif'],
+        'corners' => $default_corners,
+      ],
     ];
 
     // Systems using non-bundled GD2 may miss imagerotate(). Test if available.
@@ -242,9 +249,9 @@ class ToolkitGdTest extends KernelTestBase {
           'arguments' => [],
           'height' => 20,
           'width' => 40,
-          // Grayscale corners are a bit funky. Each of the corners are a shade of
-          // gray. The values of these were determined simply by looking at the
-          // final image to see what desaturated colors end up being.
+          // Grayscale corners are a bit funky. Each of the corners are a shade
+          // of gray. The values of these were determined simply by looking at
+          // the final image to see what desaturated colors end up being.
           'corners' => [
             array_fill(0, 3, 76) + [3 => 0],
             array_fill(0, 3, 149) + [3 => 0],
@@ -262,6 +269,7 @@ class ToolkitGdTest extends KernelTestBase {
       'image-test-no-transparency.gif',
       'image-test.jpg',
       'img-test.webp',
+      'img-test.avif',
     ] as $file_name) {
       foreach ($test_cases as $test_case => $values) {
         $operation = $values['operation'];
@@ -340,15 +348,18 @@ class ToolkitGdTest extends KernelTestBase {
         continue;
       }
 
-      // JPEG has small differences in color after processing.
-      $tolerance = $image_original_type === IMAGETYPE_JPEG ? 3 : 0;
+      // JPEG and AVIF have small differences in color after processing.
+      $tolerance = match($image_original_type) {
+        IMAGETYPE_JPEG, IMAGETYPE_AVIF => 3,
+        default => 0,
+      };
 
       $this->assertColorsAreEqual($expected_color, $actual_color, $tolerance, "Image '$file_name' object after '$test_case' action has the correct color placement at corner '$key'");
     }
 
     // Check that saved image reloads without raising PHP errors.
     $image_reloaded = $this->imageFactory->get($file_path);
-    $this->assertInstanceOf(\GDImage::class, $image_reloaded->getToolkit()->getImage());
+    $this->assertInstanceOf(\GdImage::class, $image_reloaded->getToolkit()->getImage());
   }
 
   /**
@@ -357,7 +368,7 @@ class ToolkitGdTest extends KernelTestBase {
    */
   public function testSupportedExtensions(): void {
     // Test the list of supported extensions.
-    $expected_extensions = ['png', 'gif', 'jpeg', 'jpg', 'jpe', 'webp'];
+    $expected_extensions = ['png', 'gif', 'jpeg', 'jpg', 'jpe', 'webp', 'avif'];
     $this->assertEqualsCanonicalizing($expected_extensions, $this->imageFactory->getSupportedExtensions());
 
     // Test that the supported extensions map to correct internal GD image
@@ -369,6 +380,7 @@ class ToolkitGdTest extends KernelTestBase {
       'jpg' => IMAGETYPE_JPEG,
       'jpe' => IMAGETYPE_JPEG,
       'webp' => IMAGETYPE_WEBP,
+      'avif' => IMAGETYPE_AVIF,
     ];
     $image = $this->imageFactory->get();
     foreach ($expected_image_types as $extension => $expected_image_type) {
@@ -385,6 +397,7 @@ class ToolkitGdTest extends KernelTestBase {
       [IMAGETYPE_GIF],
       [IMAGETYPE_JPEG],
       [IMAGETYPE_WEBP],
+      [IMAGETYPE_AVIF],
     ];
   }
 
@@ -515,38 +528,56 @@ class ToolkitGdTest extends KernelTestBase {
   public function testGetRequirements(): void {
     $this->assertEquals([
       'version' => [
-        'title' => t('GD library'),
+        'title' => 'GD library',
         'value' => gd_info()['GD Version'],
-        'description' => t("Supported image file formats: %formats.", [
-          '%formats' => implode(', ', ['GIF', 'JPEG', 'PNG', 'WEBP']),
-        ]),
+        'description' => sprintf("Supported image file formats: %s.", implode(', ', ['GIF', 'JPEG', 'PNG', 'WEBP', 'AVIF'])),
       ],
     ], $this->imageFactory->get()->getToolkit()->getRequirements());
   }
 
   /**
-   * Tests deprecated setResource() and getResource().
+   * Tests that GD doesn't trigger warnings for iCCP sRGB profiles.
    *
-   * @group legacy
+   * If image is saved with 'sRGB IEC61966-2.1' sRGB profile, GD will trigger
+   * a warning about an incorrect sRGB profile'.
+   *
+   * @dataProvider pngImageProvider
    */
-  public function testResourceDeprecation(): void {
-    $toolkit = $this->imageFactory->get()->getToolkit();
-    $image = imagecreate(10, 10);
-    $this->expectDeprecation('Drupal\system\Plugin\ImageToolkit\GDToolkit::setResource() is deprecated in drupal:10.2.0 and is removed from drupal:11.0.0. Use \Drupal\system\Plugin\ImageToolkit\GDToolkit::setImage() instead. See https://www.drupal.org/node/3265963');
-    $toolkit->setResource($image);
-    $this->expectDeprecation('Checking the \Drupal\system\Plugin\ImageToolkit\GDToolkit::resource property is deprecated in drupal:10.2.0 and is removed from drupal:11.0.0. Use \Drupal\system\Plugin\ImageToolkit\GDToolkit::image instead. See https://www.drupal.org/node/3265963');
-    $this->assertTrue(isset($toolkit->resource));
-    $this->expectDeprecation('Drupal\system\Plugin\ImageToolkit\GDToolkit::getResource() is deprecated in drupal:10.2.0 and is removed from drupal:11.0.0. Use \Drupal\system\Plugin\ImageToolkit\GDToolkit::getImage() instead. See https://www.drupal.org/node/3265963');
-    $this->assertSame($image, $toolkit->getResource());
-    $this->expectDeprecation('Accessing the \Drupal\system\Plugin\ImageToolkit\GDToolkit::resource property is deprecated in drupal:10.2.0 and is removed from drupal:11.0.0. Use \Drupal\system\Plugin\ImageToolkit\GDToolkit::image instead. See https://www.drupal.org/node/3265963');
-    $this->assertSame($image, $toolkit->resource);
-    $this->expectDeprecation('Setting the \Drupal\system\Plugin\ImageToolkit\GDToolkit::resource property is deprecated in drupal:10.2.0 and is removed from drupal:11.0.0. Use \Drupal\system\Plugin\ImageToolkit\GDToolkit::image instead. See https://www.drupal.org/node/3265963');
-    $toolkit->resource = NULL;
-    $this->assertNull($toolkit->getImage());
-    $this->expectDeprecation('Unsetting the \Drupal\system\Plugin\ImageToolkit\GDToolkit::resource property is deprecated in drupal:10.2.0 and is removed from drupal:11.0.0. Use \Drupal\system\Plugin\ImageToolkit\GDToolkit::image instead. See https://www.drupal.org/node/3265963');
-    $toolkit->setImage($image);
-    unset($toolkit->resource);
-    $this->assertNull($toolkit->getImage());
+  public function testIncorrectIccpSrgbProfile(string $image_uri): void {
+    $warning_detected = FALSE;
+    // @see https://github.com/sebastianbergmann/phpunit/issues/5062
+    $error_handler = static function () use (&$warning_detected): void {
+      $warning_detected = TRUE;
+    };
+    // $error_level is intentionally set to 0. It's required for PHP '@'
+    // suppression not to trigger Drupal error handler. In that case native
+    // PHP handler will be called and Drupal's will serve like a notification.
+    set_error_handler($error_handler, 0);
+
+    $image_factory = $this->container->get('image.factory');
+    \assert($image_factory instanceof ImageFactory);
+
+    $image = $image_factory->get($image_uri, 'gd');
+    // We need to do any image manipulation to trigger GD profile loading.
+    $image->resize('100', '100');
+
+    self::assertFalse($warning_detected);
+
+    restore_error_handler();
+  }
+
+  /**
+   * Provides a list of PNG image URIs for testing.
+   *
+   * @return \Generator
+   *   The test data.
+   */
+  public static function pngImageProvider(): \Generator {
+    yield 'valid image 1' => ['core/tests/fixtures/files/image-1.png'];
+    yield 'valid image 2' => ['core/tests/fixtures/files/image-test.png'];
+    yield 'PNG with iCCP profile' => [
+      'core/tests/fixtures/files/image-test-iccp-profile.png',
+    ];
   }
 
 }

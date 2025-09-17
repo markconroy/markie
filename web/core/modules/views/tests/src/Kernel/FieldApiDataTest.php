@@ -159,8 +159,9 @@ class FieldApiDataTest extends ViewsKernelTestBase {
     $this->assertInstanceOf(MarkupInterface::class, $data[$current_table][$field_storage_string->getName() . '_value']['help']);
     $this->assertEquals('Appears in: page, article. Also known as: Content: GiraffeA&quot; label (field_string)', $data[$current_table][$field_storage_string->getName() . '_value']['help']);
 
-    // Since each label is only used once, views_entity_field_label() will
-    // return a label using alphabetical sorting.
+    // Since each label is only used once,
+    // EntityFieldManagerInterface::getFieldLabels() will return a label using
+    // alphabetical sorting.
     $this->assertEquals('GiraffeA&quot; label (field_string)', $data[$current_table][$field_storage_string->getName() . '_value']['title']);
 
     // Attach the same field to a different bundle with a different label.
@@ -178,7 +179,7 @@ class FieldApiDataTest extends ViewsKernelTestBase {
     $data = $this->getViewsData();
 
     // Now the 'GiraffeB&quot; label' is used twice and therefore will be
-    // selected by views_entity_field_label().
+    // selected by EntityFieldManagerInterface::getFieldLabels().
     $this->assertEquals('GiraffeB&quot; label (field_string)', $data[$current_table][$field_storage_string->getName() . '_value']['title']);
     $this->assertInstanceOf(MarkupInterface::class, $data[$current_table][$field_storage_string->getName()]['help']);
     $this->assertEquals('Appears in: page, article, news. Also known as: Content: GiraffeA&quot; label', $data[$current_table][$field_storage_string->getName()]['help']);
@@ -193,7 +194,7 @@ class FieldApiDataTest extends ViewsKernelTestBase {
    * @return array
    *   Views data.
    */
-  protected function getViewsData($field_storage_key = 'field_string') {
+  protected function getViewsData($field_storage_key = 'field_string'): array {
     $views_data = $this->container->get('views.views_data');
     $data = [];
 
@@ -267,7 +268,6 @@ class FieldApiDataTest extends ViewsKernelTestBase {
       'field_name_3' => 'field name 3: es',
     ]);
     $node1->save();
-    /** @var \Drupal\node\NodeInterface $translation */
     $node1->addTranslation('fr', [
       'title' => $node1->title->value,
       'field_name_1' => 'field name 1: fr',

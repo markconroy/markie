@@ -166,7 +166,7 @@ class MigrateSqlIdMapEnsureTablesTest extends MigrateTestCase {
    *   ensureTables() which in turn calls this object and the expectations on
    *   it are the actual test and there are no additional asserts added.
    */
-  protected function runEnsureTablesTest($schema) {
+  protected function runEnsureTablesTest($schema): void {
     $database = $this->getMockBuilder('Drupal\Core\Database\Connection')
       ->disableOriginalConstructor()
       ->getMock();
@@ -174,7 +174,7 @@ class MigrateSqlIdMapEnsureTablesTest extends MigrateTestCase {
       ->method('schema')
       ->willReturn($schema);
     $database->expects($this->any())
-      ->method('tablePrefix')
+      ->method('getPrefix')
       ->willReturn('');
     $migration = $this->getMigration();
     $plugin = $this->createMock('Drupal\migrate\Plugin\MigrateSourceInterface');

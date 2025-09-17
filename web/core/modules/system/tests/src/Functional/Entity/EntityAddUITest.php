@@ -7,6 +7,7 @@ namespace Drupal\Tests\system\Functional\Entity;
 use Drupal\entity_test\Entity\EntityTestBundle;
 use Drupal\entity_test\Entity\EntityTestMul;
 use Drupal\entity_test\Entity\EntityTestWithBundle;
+use Drupal\entity_test\EntityTestHelper;
 use Drupal\Tests\BrowserTestBase;
 
 /**
@@ -61,20 +62,23 @@ class EntityAddUITest extends BrowserTestBase {
     $this->drupalGet('/entity_test_with_bundle/add');
     $this->assertSession()->addressEquals('/entity_test_with_bundle/add/test');
 
-    // Two bundles exist, confirm both are shown.
+    // Two bundles exist. Confirm both are shown and that they are ordered
+    // alphabetically by their labels, not by their IDs.
     EntityTestBundle::create([
       'id' => 'test2',
-      'label' => 'Test2 label',
+      'label' => 'Aaa Test2 label',
       'description' => 'My test2 description',
     ])->save();
     $this->drupalGet('/entity_test_with_bundle/add');
 
     $this->assertSession()->linkExists('Test label');
-    $this->assertSession()->linkExists('Test2 label');
+    $this->assertSession()->linkExists('Aaa Test2 label');
     $this->assertSession()->pageTextContains('My test description');
     $this->assertSession()->pageTextContains('My test2 description');
 
-    $this->clickLink('Test2 label');
+    $this->assertSession()->pageTextMatches('/Aaa Test2 label(.*)Test label/');
+
+    $this->clickLink('Aaa Test2 label');
     $this->drupalGet('/entity_test_with_bundle/add/test2');
 
     $this->submitForm(['name[0][value]' => 'test name'], 'Save');
@@ -105,7 +109,7 @@ class EntityAddUITest extends BrowserTestBase {
     $this->drupalGet('/entity_test_with_bundle/add');
     $this->assertSession()->statusCodeEquals(200);
     $this->assertSession()->linkExists('Test label');
-    $this->assertSession()->linkExists('Test2 label');
+    $this->assertSession()->linkExists('Aaa Test2 label');
     $this->assertSession()->linkNotExists('Forbidden to create bundle');
     $this->assertSession()->linkNotExists('Test3 label');
     $this->clickLink('Test label');
@@ -128,7 +132,7 @@ class EntityAddUITest extends BrowserTestBase {
     $this->drupalGet('/entity_test_with_bundle/add');
     $this->assertSession()->linkNotExists('Forbidden to create bundle');
     $this->assertSession()->linkNotExists('Test label');
-    $this->assertSession()->linkNotExists('Test2 label');
+    $this->assertSession()->linkNotExists('Aaa Test2 label');
     $this->assertSession()->linkNotExists('Test3 label');
     $this->assertSession()->linkExists('Add a new test entity bundle.');
   }
@@ -142,7 +146,7 @@ class EntityAddUITest extends BrowserTestBase {
     ]);
     $this->drupalLogin($admin_user);
 
-    entity_test_create_bundle('test', 'Test label', 'entity_test_mul');
+    EntityTestHelper::createBundle('test', 'Test label', 'entity_test_mul');
     // Delete the default bundle, so that we can rely on our own. The form
     // display has to be deleted first to prevent schema errors when fields
     // attached to the deleted bundle are themselves deleted, which triggers
@@ -150,14 +154,14 @@ class EntityAddUITest extends BrowserTestBase {
     $this->container->get('entity_display.repository')
       ->getFormDisplay('entity_test_mul', 'entity_test_mul')
       ->delete();
-    entity_test_delete_bundle('entity_test_mul', 'entity_test_mul');
+    EntityTestHelper::deleteBundle('entity_test_mul', 'entity_test_mul');
 
     // One bundle exists, confirm redirection to the add-form.
     $this->drupalGet('/entity_test_mul/add');
     $this->assertSession()->addressEquals('/entity_test_mul/add/test');
 
     // Two bundles exist, confirm both are shown.
-    entity_test_create_bundle('test2', 'Test2 label', 'entity_test_mul');
+    EntityTestHelper::createBundle('test2', 'Test2 label', 'entity_test_mul');
     $this->drupalGet('/entity_test_mul/add');
 
     $this->assertSession()->linkExists('Test label');

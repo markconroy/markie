@@ -34,13 +34,14 @@ class PagerTest extends BrowserTestBase {
    */
   protected $adminUser;
 
-  protected $profile = 'testing';
-
   /**
    * {@inheritdoc}
    */
   protected function setUp(): void {
     parent::setUp();
+
+    // Start from a clean log.
+    \Drupal::database()->delete('watchdog')->execute();
 
     // Insert 300 log messages.
     $logger = $this->container->get('logger.factory')->get('pager_test');

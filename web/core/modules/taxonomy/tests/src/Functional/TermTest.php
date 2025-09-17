@@ -6,6 +6,7 @@ namespace Drupal\Tests\taxonomy\Functional;
 
 use Drupal\Component\Utility\Tags;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
+use Drupal\Core\Url;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\taxonomy\Entity\Term;
 use Drupal\taxonomy\TermInterface;
@@ -37,7 +38,7 @@ class TermTest extends TaxonomyTestBase {
   /**
    * {@inheritdoc}
    */
-  protected static $modules = ['block'];
+  protected static $modules = ['block', 'taxonomy_test'];
 
   /**
    * {@inheritdoc}
@@ -69,7 +70,7 @@ class TermTest extends TaxonomyTestBase {
       ],
       'auto_create' => TRUE,
     ];
-    $this->createEntityReferenceField('node', 'article', $field_name, NULL, 'taxonomy_term', 'default', $handler_settings, FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED);
+    $this->createEntityReferenceField('node', 'article', $field_name, '', 'taxonomy_term', 'default', $handler_settings, FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED);
     $this->field = FieldConfig::loadByName('node', 'article', $field_name);
 
     /** @var \Drupal\Core\Entity\EntityDisplayRepositoryInterface $display_repository */
@@ -137,8 +138,6 @@ class TermTest extends TaxonomyTestBase {
     $term1 = $this->createTerm($this->vocabulary);
     $terms_array = [];
 
-    $taxonomy_storage = $this->container->get('entity_type.manager')->getStorage('taxonomy_term');
-
     // Create 40 terms. Terms 1-12 get parent of $term1. All others are
     // individual terms.
     for ($x = 1; $x <= 40; $x++) {
@@ -151,8 +150,6 @@ class TermTest extends TaxonomyTestBase {
         $edit['parent'] = $term1->id();
       }
       $term = $this->createTerm($this->vocabulary, $edit);
-      $children = $taxonomy_storage->loadChildren($term1->id());
-      $parents = $taxonomy_storage->loadParents($term->id());
       $terms_array[$x] = Term::load($term->id());
     }
 
@@ -569,6 +566,43 @@ class TermTest extends TaxonomyTestBase {
   }
 
   /**
+   * Tests destination after saving terms.
+   */
+  public function testRedirects(): void {
+    // Save a new term.
+    $addUrl = Url::fromRoute('entity.taxonomy_term.add_form', ['taxonomy_vocabulary' => $this->vocabulary->id()]);
+    $this->drupalGet($addUrl);
+    $this->submitForm([
+      'name[0][value]' => $this->randomMachineName(),
+    ], 'Save');
+
+    // Adding a term reloads the form.
+    $this->assertSession()->addressEquals($addUrl->toString());
+    $this->assertSession()->pageTextContains('Created new term');
+
+    // Update a term.
+    $term = Term::create(['vid' => $this->vocabulary->id(), 'name' => $this->randomMachineName()]);
+    $term->save();
+    $this->drupalGet($term->toUrl('edit-form'));
+    $this->submitForm(edit: [], submit: 'Save');
+
+    // Updating a term sends user to view the term.
+    $this->assertSession()->addressEquals($term->toUrl()->setAbsolute());
+    $this->assertSession()->pageTextContains('Updated term');
+
+    // Unless the term is not accessible to the user.
+    // Label triggers forbidden in taxonomy_test_entity_access().
+    $term = Term::create(['vid' => $this->vocabulary->id(), 'name' => 'Inaccessible view']);
+    $term->save();
+    $this->drupalGet($term->toUrl('edit-form'));
+    $this->submitForm(edit: [], submit: 'Save');
+
+    // In which case, the edit form is reloaded.
+    $this->assertSession()->addressEquals($term->toUrl('edit-form')->setAbsolute());
+    $this->assertSession()->pageTextContains('Updated term');
+  }
+
+  /**
    * Reloads a term by name.
    *
    * @param string $name
@@ -593,7 +627,7 @@ class TermTest extends TaxonomyTestBase {
    * @return array
    *   A sorted array of tids and 0 if the root is a parent.
    */
-  private function getParentTids($term) {
+  private function getParentTids($term): array {
     $parent_tids = [];
     foreach ($term->get('parent') as $item) {
       $parent_tids[] = (int) $item->target_id;

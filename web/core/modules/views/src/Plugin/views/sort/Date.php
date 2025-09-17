@@ -14,6 +14,9 @@ use Drupal\views\Attribute\ViewsSort;
 #[ViewsSort("date")]
 class Date extends SortPluginBase {
 
+  /**
+   * {@inheritdoc}
+   */
   protected function defineOptions() {
     $options = parent::defineOptions();
 
@@ -22,6 +25,9 @@ class Date extends SortPluginBase {
     return $options;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function buildOptionsForm(&$form, FormStateInterface $form_state) {
     parent::buildOptionsForm($form, $form_state);
 
@@ -33,6 +39,7 @@ class Date extends SortPluginBase {
         'minute' => $this->t('Minute'),
         'hour'   => $this->t('Hour'),
         'day'    => $this->t('Day'),
+        'week'   => $this->t('Week'),
         'month'  => $this->t('Month'),
         'year'   => $this->t('Year'),
       ],
@@ -62,6 +69,10 @@ class Date extends SortPluginBase {
 
       case 'day':
         $formula = $this->getDateFormat('Ymd');
+        break;
+
+      case 'week':
+        $formula = $this->getDateFormat('W');
         break;
 
       case 'month':

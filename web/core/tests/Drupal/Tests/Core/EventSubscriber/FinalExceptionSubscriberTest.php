@@ -46,9 +46,12 @@ class FinalExceptionSubscriberTest extends UnitTestCase {
 
 }
 
+/**
+ * Test class for testing the final exception subscriber.
+ */
 class TestDefaultExceptionSubscriber extends FinalExceptionSubscriber {
 
-  protected function isErrorDisplayable($error) {
+  protected function isErrorDisplayable($error): bool {
     return TRUE;
   }
 
@@ -56,7 +59,7 @@ class TestDefaultExceptionSubscriber extends FinalExceptionSubscriber {
     return $error;
   }
 
-  protected function isErrorLevelVerbose() {
+  protected function isErrorLevelVerbose(): bool {
     return TRUE;
   }
 

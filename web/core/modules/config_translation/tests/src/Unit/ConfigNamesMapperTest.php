@@ -30,9 +30,9 @@ class ConfigNamesMapperTest extends UnitTestCase {
   /**
    * The configuration names mapper to test.
    *
-   * @see \Drupal\config_translation\ConfigNamesMapper
-   *
    * @var \Drupal\Tests\config_translation\Unit\TestConfigNamesMapper
+   *
+   * @see \Drupal\config_translation\ConfigNamesMapper
    */
   protected $configNamesMapper;
 
@@ -453,7 +453,7 @@ class ConfigNamesMapperTest extends UnitTestCase {
       $this->configNamesMapper->getLangcode();
       $this->fail();
     }
-    catch (\RuntimeException $e) {
+    catch (\RuntimeException) {
     }
   }
 
@@ -679,7 +679,7 @@ class TestConfigNamesMapper extends ConfigNamesMapper {
    * @param array $config_names
    *   The configuration names.
    */
-  public function setConfigNames(array $config_names) {
+  public function setConfigNames(array $config_names): void {
     $this->pluginDefinition['names'] = $config_names;
   }
 
@@ -689,7 +689,7 @@ class TestConfigNamesMapper extends ConfigNamesMapper {
    * @var \Drupal\Core\Config\ConfigFactoryInterface $config_factory
    *   The config factory to set.
    */
-  public function setConfigFactory(ConfigFactoryInterface $config_factory) {
+  public function setConfigFactory(ConfigFactoryInterface $config_factory): void {
     $this->configFactory = $config_factory;
   }
 

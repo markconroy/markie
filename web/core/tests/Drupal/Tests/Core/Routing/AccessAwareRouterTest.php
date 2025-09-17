@@ -42,7 +42,7 @@ class AccessAwareRouterTest extends UnitTestCase {
   protected $accessManager;
 
   /**
-   * @var \Drupal\Core\Session\AccountInterface||\PHPUnit\Framework\MockObject\MockObject
+   * @var \Drupal\Core\Session\AccountInterface|\PHPUnit\Framework\MockObject\MockObject
    */
   protected $currentUser;
 
@@ -64,7 +64,7 @@ class AccessAwareRouterTest extends UnitTestCase {
   /**
    * Sets up a chain router with matchRequest.
    */
-  protected function setupRouter() {
+  protected function setupRouter(): void {
     $this->router = $this->getMockBuilder('Drupal\Core\Routing\Router')
       ->disableOriginalConstructor()
       ->getMock();

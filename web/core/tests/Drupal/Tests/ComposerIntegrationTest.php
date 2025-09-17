@@ -77,6 +77,7 @@ class ComposerIntegrationTest extends UnitTestCase {
    * Data provider for all the composer.json provided by Drupal core.
    *
    * @return array
+   *   An array of composer.json file paths.
    */
   public static function providerTestComposerJson(): array {
     $data = [];
@@ -134,6 +135,7 @@ class ComposerIntegrationTest extends UnitTestCase {
    * Data provider for the scaffold files test for Drupal core.
    *
    * @return array
+   *   An array of scaffold file mappings.
    */
   public static function providerTestExpectedScaffoldFiles() {
     return [
@@ -150,7 +152,6 @@ class ComposerIntegrationTest extends UnitTestCase {
       ['README.md', 'assets/scaffold/files/drupal.README.md'],
       ['robots.txt', 'assets/scaffold/files/robots.txt'],
       ['update.php', 'assets/scaffold/files/update.php'],
-      ['web.config', 'assets/scaffold/files/web.config'],
       ['sites/README.txt', 'assets/scaffold/files/sites.README.txt'],
       ['sites/development.services.yml', 'assets/scaffold/files/development.services.yml'],
       ['sites/example.settings.local.php', 'assets/scaffold/files/example.settings.local.php'],
@@ -178,11 +179,11 @@ class ComposerIntegrationTest extends UnitTestCase {
    * See https://www.drupal.org/project/drupal/issues/3075954
    *
    * @param string $destRelPath
-   *   Path to scaffold file destination location
+   *   Path to scaffold file destination location.
    * @param string $sourceRelPath
-   *   Path to scaffold file source location
+   *   Path to scaffold file source location.
    * @param string $expectedDestination
-   *   Named location to the destination path of the scaffold file
+   *   Named location to the destination path of the scaffold file.
    *
    * @dataProvider providerTestExpectedScaffoldFiles
    */
@@ -222,7 +223,7 @@ class ComposerIntegrationTest extends UnitTestCase {
   {
     $content = json_decode($composerFileContents, true);
 
-    $relevantKeys = array(
+    $relevantKeys = [
       'name',
       'version',
       'require',
@@ -234,9 +235,9 @@ class ComposerIntegrationTest extends UnitTestCase {
       'prefer-stable',
       'repositories',
       'extra',
-    );
+    ];
 
-    $relevantContent = array();
+    $relevantContent = [];
 
     foreach (array_intersect($relevantKeys, array_keys($content)) as $key) {
       $relevantContent[$key] = $content[$key];

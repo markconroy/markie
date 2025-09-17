@@ -6,6 +6,7 @@ namespace Drupal\Tests\block\Kernel\Migrate\d6;
 
 use Drupal\block\Entity\Block;
 use Drupal\Tests\migrate_drupal\Kernel\d6\MigrateDrupal6TestBase;
+use Drupal\block\Hook\BlockHooks;
 
 /**
  * Tests migration of blocks to configuration entities.
@@ -50,11 +51,13 @@ class MigrateBlockTest extends MigrateDrupal6TestBase {
       'd6_filter_format',
       'block_content_type',
       'block_content_body_field',
+      'd6_menu',
       'd6_custom_block',
       'd6_user_role',
       'd6_block',
     ]);
-    block_rebuild();
+    $blockRebuild = new BlockHooks();
+    $blockRebuild->rebuild();
   }
 
   /**
@@ -97,7 +100,7 @@ class MigrateBlockTest extends MigrateDrupal6TestBase {
    */
   public function testBlockMigration(): void {
     $blocks = Block::loadMultiple();
-    $this->assertCount(25, $blocks);
+    $this->assertCount(24, $blocks);
 
     // Check user blocks.
     $visibility = [
@@ -187,10 +190,13 @@ class MigrateBlockTest extends MigrateDrupal6TestBase {
 
     // Check menu blocks.
     $settings = [
-      'id' => 'broken',
+      'id' => 'system_menu_block',
       'label' => '',
-      'provider' => 'core',
+      'provider' => 'system',
       'label_display' => '0',
+      'level' => 1,
+      'depth' => NULL,
+      'expand_all_items' => FALSE,
     ];
     $this->assertEntity('menu', [], 'header', 'olivero', -5, $settings);
 
@@ -303,7 +309,7 @@ class MigrateBlockTest extends MigrateDrupal6TestBase {
     // Check migrate messages.
     $messages = iterator_to_array($this->getMigration('d6_block')->getIdMap()->getMessages());
     $this->assertCount(7, $messages);
-    $this->assertSame($messages[0]->message, 'Schema errors for block.block.block_1 with the following errors: 0 [dependencies.theme.0] Theme &#039;bluemarine&#039; is not installed.');
+    $this->assertSame($messages[0]->message, 'Schema errors for block.block.block_1 with the following errors: 0 [dependencies.theme.0] Theme &#039;bluemarine&#039; is not installed., 1 [theme] Theme &#039;bluemarine&#039; is not installed., 2 [region] This value should not be blank., 3 [region] This is not a valid region of the &lt;em class=&quot;placeholder&quot;&gt;bluemarine&lt;/em&gt; theme.');
     $this->assertSame($messages[1]->message, "d6_block:visibility: The block with bid '13' from module 'block' will have no PHP or request_path visibility configuration.");
     $this->assertSame($messages[2]->message, 'Schema errors for block.block.aggregator with the following errors: block.block.aggregator:settings.block_count missing schema, block.block.aggregator:settings.feed missing schema, 0 [settings.feed] &#039;feed&#039; is not a supported key., 1 [settings] &#039;block_count&#039; is an unknown key because plugin is aggregator_feed_block (see config schema type block.settings.*).');
     $this->assertSame($messages[3]->message, 'Schema errors for block.block.book with the following errors: block.block.book:settings.block_mode missing schema, 0 [settings.block_mode] &#039;block_mode&#039; is not a supported key.');

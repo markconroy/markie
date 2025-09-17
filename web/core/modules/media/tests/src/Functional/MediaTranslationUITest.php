@@ -57,7 +57,7 @@ class MediaTranslationUITest extends ContentTranslationUITestBase {
   /**
    * {@inheritdoc}
    */
-  public function setupBundle() {
+  public function setupBundle(): void {
     $this->createMediaType('test', [
       'id' => $this->bundle,
       'queue_thumbnail_downloads' => FALSE,
@@ -67,7 +67,7 @@ class MediaTranslationUITest extends ContentTranslationUITestBase {
   /**
    * {@inheritdoc}
    */
-  protected function getTranslatorPermissions() {
+  protected function getTranslatorPermissions(): array {
     return array_merge(parent::getTranslatorPermissions(), [
       'administer media',
       'edit any test media',
@@ -77,14 +77,14 @@ class MediaTranslationUITest extends ContentTranslationUITestBase {
   /**
    * {@inheritdoc}
    */
-  protected function getEditorPermissions() {
+  protected function getEditorPermissions(): array {
     return ['administer media', 'create test media'];
   }
 
   /**
    * {@inheritdoc}
    */
-  protected function getAdministratorPermissions() {
+  protected function getAdministratorPermissions(): array {
     return array_merge(parent::getAdministratorPermissions(), [
       'access administration pages',
       'administer media types',

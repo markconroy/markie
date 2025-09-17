@@ -159,19 +159,16 @@
   behaviors.layoutBuilderBlockDrag = {
     attach(context) {
       const regionSelector = '.js-layout-builder-region';
-      Array.prototype.forEach.call(
-        context.querySelectorAll(regionSelector),
-        (region) => {
-          Sortable.create(region, {
-            draggable: '.js-layout-builder-block',
-            ghostClass: 'ui-state-drop',
-            group: 'builder-region',
-            filter: '.contextual',
-            onEnd: (event) =>
-              Drupal.layoutBuilderBlockUpdate(event.item, event.from, event.to),
-          });
-        },
-      );
+      context.querySelectorAll(regionSelector).forEach((region) => {
+        Sortable.create(region, {
+          draggable: '.js-layout-builder-block',
+          ghostClass: 'ui-state-drop',
+          group: 'builder-region',
+          filter: '.contextual',
+          onEnd: (event) =>
+            Drupal.layoutBuilderBlockUpdate(event.item, event.from, event.to),
+        });
+      });
     },
   };
 
@@ -294,17 +291,11 @@
           const viewportMiddle = (viewportBottom + viewportTop) / 2;
           const scrollAmount = targetTop - viewportMiddle;
 
-          // Check whether the browser supports scrollBy(options). If it does
-          // not, use scrollBy(x-coord, y-coord) instead.
-          if ('scrollBehavior' in document.documentElement.style) {
-            window.scrollBy({
-              top: scrollAmount,
-              left: 0,
-              behavior: 'smooth',
-            });
-          } else {
-            window.scrollBy(0, scrollAmount);
-          }
+          window.scrollBy({
+            top: scrollAmount,
+            left: 0,
+            behavior: 'smooth',
+          });
         }
       }
     });

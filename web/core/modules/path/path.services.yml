@@ -1,0 +1,2 @@
+parameters:
+  path.skip_procedural_hook_scan: true

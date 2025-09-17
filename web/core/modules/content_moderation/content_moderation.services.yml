@@ -1,3 +1,6 @@
+parameters:
+  content_moderation.skip_procedural_hook_scan: false
+
 services:
   _defaults:
     autoconfigure: true

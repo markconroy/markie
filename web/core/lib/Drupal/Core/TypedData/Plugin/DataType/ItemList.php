@@ -171,8 +171,7 @@ class ItemList extends TypedData implements \IteratorAggregate, ListInterface {
   /**
    * {@inheritdoc}
    */
-  #[\ReturnTypeWillChange]
-  public function offsetExists($offset) {
+  public function offsetExists($offset): bool {
     // We do not want to throw exceptions here, so we do not use get().
     return isset($this->list[$offset]);
   }
@@ -180,24 +179,21 @@ class ItemList extends TypedData implements \IteratorAggregate, ListInterface {
   /**
    * {@inheritdoc}
    */
-  #[\ReturnTypeWillChange]
-  public function offsetUnset($offset) {
+  public function offsetUnset($offset): void {
     $this->removeItem($offset);
   }
 
   /**
    * {@inheritdoc}
    */
-  #[\ReturnTypeWillChange]
-  public function offsetGet($offset) {
+  public function offsetGet($offset): mixed {
     return $this->get($offset);
   }
 
   /**
    * {@inheritdoc}
    */
-  #[\ReturnTypeWillChange]
-  public function offsetSet($offset, $value) {
+  public function offsetSet($offset, $value): void {
     if (!isset($offset)) {
       // The [] operator has been used.
       $this->appendItem($value);
@@ -221,6 +217,7 @@ class ItemList extends TypedData implements \IteratorAggregate, ListInterface {
    * Helper for creating a list item object.
    *
    * @return \Drupal\Core\TypedData\TypedDataInterface
+   *   The new property instance.
    */
   protected function createItem($offset = 0, $value = NULL) {
     return $this->getTypedDataManager()->getPropertyInstance($this, $offset, $value);
@@ -236,16 +233,14 @@ class ItemList extends TypedData implements \IteratorAggregate, ListInterface {
   /**
    * {@inheritdoc}
    */
-  #[\ReturnTypeWillChange]
-  public function getIterator() {
+  public function getIterator(): \ArrayIterator {
     return new \ArrayIterator($this->list);
   }
 
   /**
    * {@inheritdoc}
    */
-  #[\ReturnTypeWillChange]
-  public function count() {
+  public function count(): int {
     return count($this->list);
   }
 
@@ -307,6 +302,13 @@ class ItemList extends TypedData implements \IteratorAggregate, ListInterface {
       $this->list[$delta] = clone $item;
       $this->list[$delta]->setContext($delta, $this);
     }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function last(): ?TypedDataInterface {
+    return $this->get($this->count() - 1);
   }
 
 }

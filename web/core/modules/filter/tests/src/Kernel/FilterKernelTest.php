@@ -13,6 +13,9 @@ use Drupal\filter\FilterPluginCollection;
 use Drupal\filter\Plugin\FilterInterface;
 use Drupal\KernelTests\KernelTestBase;
 
+// cspell:ignore outro
+// cspell:ignore toolongdomainexampledomainexampledomainexampledomainexampledomain
+
 /**
  * Tests Filter module filters individually.
  *
@@ -730,15 +733,15 @@ class FilterKernelTest extends KernelTestBase {
         '<a href="mailto:' . $email_with_plus_sign . '">' . $email_with_plus_sign . '</a>' => TRUE,
       ],
       // URI parts and special characters.
-      'http://trailingslash.com/ or www.trailingslash.com/
+      'http://trailing-slash.com/ or www.trailing-slash.com/
       http://host.com/some/path?query=foo&bar[baz]=beer#fragment or www.host.com/some/path?query=foo&bar[baz]=beer#fragment
       http://twitter.com/#!/example/status/22376963142324226
       http://example.com/@user/
       ftp://user:pass@ftp.example.com/~home/dir1
       sftp://user@nonstandardport:222/dir
       ssh://192.168.0.100/srv/git/drupal.git' => [
-        '<a href="http://trailingslash.com/">http://trailingslash.com/</a>' => TRUE,
-        '<a href="http://www.trailingslash.com/">www.trailingslash.com/</a>' => TRUE,
+        '<a href="http://trailing-slash.com/">http://trailing-slash.com/</a>' => TRUE,
+        '<a href="http://www.trailing-slash.com/">www.trailing-slash.com/</a>' => TRUE,
         '<a href="http://host.com/some/path?query=foo&amp;bar[baz]=beer#fragment">http://host.com/some/path?query=foo&amp;bar[baz]=beer#fragment</a>' => TRUE,
         '<a href="http://www.host.com/some/path?query=foo&amp;bar[baz]=beer#fragment">www.host.com/some/path?query=foo&amp;bar[baz]=beer#fragment</a>' => TRUE,
         '<a href="http://twitter.com/#!/example/status/22376963142324226">http://twitter.com/#!/example/status/22376963142324226</a>' => TRUE,
@@ -900,11 +903,11 @@ class FilterKernelTest extends KernelTestBase {
       '<script>
       <!--
         // @see www.example.com
-        var exampleurl = "http://example.net";
+        var example_url = "http://example.net";
       -->
       <!--//--><![CDATA[//><!--
         // @see www.example.com
-        var exampleurl = "http://example.net";
+        var example_url = "http://example.net";
       //--><!]]>
       </script>' => [
         'href="http://www.example.com"' => FALSE,

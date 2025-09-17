@@ -30,10 +30,17 @@ class ViewsLocalTaskTest extends UnitTestCase {
   protected $state;
 
   /**
+   * The views storage.
+   *
    * @var \Drupal\Core\Entity\EntityStorageInterface|\PHPUnit\Framework\MockObject\MockObject
    */
   protected $viewStorage;
 
+  /**
+   * The base definition for the test plugin.
+   *
+   * @var array
+   */
   protected $baseDefinition = [
     'class' => '\Drupal\views\Plugin\Menu\LocalTask\ViewsLocalTask',
     'deriver' => '\Drupal\views\Plugin\Derivative\ViewsLocalTask',
@@ -82,7 +89,7 @@ class ViewsLocalTaskTest extends UnitTestCase {
     $display_plugin = $this->getMockBuilder('Drupal\views\Plugin\views\display\PathPluginBase')
       ->onlyMethods(['getOption'])
       ->disableOriginalConstructor()
-      ->getMockForAbstractClass();
+      ->getMock();
     $display_plugin->expects($this->once())
       ->method('getOption')
       ->with('menu')
@@ -137,7 +144,7 @@ class ViewsLocalTaskTest extends UnitTestCase {
     $display_plugin = $this->getMockBuilder('Drupal\views\Plugin\views\display\PathPluginBase')
       ->onlyMethods(['getOption'])
       ->disableOriginalConstructor()
-      ->getMockForAbstractClass();
+      ->getMock();
     $display_plugin->expects($this->once())
       ->method('getOption')
       ->with('menu')
@@ -194,7 +201,7 @@ class ViewsLocalTaskTest extends UnitTestCase {
     $display_plugin = $this->getMockBuilder('Drupal\views\Plugin\views\display\PathPluginBase')
       ->onlyMethods(['getOption'])
       ->disableOriginalConstructor()
-      ->getMockForAbstractClass();
+      ->getMock();
     $display_plugin->expects($this->once())
       ->method('getOption')
       ->with('menu')
@@ -243,7 +250,7 @@ class ViewsLocalTaskTest extends UnitTestCase {
     $display_plugin = $this->getMockBuilder('Drupal\views\Plugin\views\display\PathPluginBase')
       ->onlyMethods(['getOption'])
       ->disableOriginalConstructor()
-      ->getMockForAbstractClass();
+      ->getMock();
     $display_plugin->expects($this->exactly(2))
       ->method('getOption')
       ->with('menu')
@@ -316,7 +323,7 @@ class ViewsLocalTaskTest extends UnitTestCase {
     $display_plugin = $this->getMockBuilder('Drupal\views\Plugin\views\display\PathPluginBase')
       ->onlyMethods(['getOption', 'getPath'])
       ->disableOriginalConstructor()
-      ->getMockForAbstractClass();
+      ->getMock();
     $display_plugin->expects($this->exactly(2))
       ->method('getOption')
       ->with('menu')
@@ -383,12 +390,17 @@ class ViewsLocalTaskTest extends UnitTestCase {
  */
 class TestViewsLocalTask extends ViewsLocalTask {
 
+  /**
+   * The view result.
+   *
+   * @var array
+   */
   protected $result;
 
   /**
    * Sets applicable views result.
    */
-  public function setApplicableMenuViews($result) {
+  public function setApplicableMenuViews($result): void {
     $this->result = $result;
   }
 

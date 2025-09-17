@@ -13,6 +13,7 @@ class CacheCollectorHelper extends CacheCollector {
 
   /**
    * Contains data to return on a cache miss.
+   *
    * @var array
    */
   protected $cacheMissData = [];
@@ -64,13 +65,6 @@ class CacheCollectorHelper extends CacheCollector {
    */
   public function getCacheMisses() {
     return $this->cacheMisses;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function normalizeLockName($cid) {
-    return parent::normalizeLockName($cid);
   }
 
   /**

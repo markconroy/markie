@@ -80,7 +80,9 @@ class RouteSubscriberTest extends UnitTestCase {
 
     $this->state->expects($this->once())
       ->method('set')
-      ->with('views.view_route_names', ['test_id.page_1' => 'views.test_id.page_1', 'test_id.page_2' => 'views.test_id.page_2']);
+      ->with(
+        'views.view_route_names',
+        ['test_id.page_1' => 'views.test_id.page_1', 'test_id.page_2' => 'views.test_id.page_2']);
     $this->routeSubscriber->routeRebuildFinished();
   }
 
@@ -145,7 +147,7 @@ class RouteSubscriberTest extends UnitTestCase {
    * @return \Drupal\views\Plugin\views\display\DisplayRouterInterface[]|\PHPUnit\Framework\MockObject\MockObject[]
    *   An array of two mocked view displays.
    */
-  protected function setupMocks() {
+  protected function setupMocks(): array {
     $executable = $this->getMockBuilder('Drupal\views\ViewExecutable')
       ->disableOriginalConstructor()
       ->getMock();

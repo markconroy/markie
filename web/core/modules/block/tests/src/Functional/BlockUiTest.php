@@ -34,8 +34,6 @@ class BlockUiTest extends BrowserTestBase {
    */
   protected $defaultTheme = 'stark';
 
-  protected $regions;
-
   /**
    * The submitted block values used by this test.
    *
@@ -52,6 +50,8 @@ class BlockUiTest extends BrowserTestBase {
 
   /**
    * An administrative user to configure the test environment.
+   *
+   * @var \Drupal\user\Entity\User|false
    */
   protected $adminUser;
 
@@ -246,9 +246,9 @@ class BlockUiTest extends BrowserTestBase {
     $this->assertSession()->responseContains($expected_text);
 
     // Test context mapping form element is not visible if there are no valid
-    // context options for the block (the test_context_aware_no_valid_context_options
-    // block has one context defined which is not available for it on the
-    // Block Layout interface).
+    // context options for the block (the
+    // test_context_aware_no_valid_context_options block has one context defined
+    // which is not available for it on the Block Layout interface).
     $this->drupalGet('admin/structure/block/add/test_context_aware_no_valid_context_options/stark');
     $this->assertSession()->fieldNotExists('edit-settings-context-mapping-email');
 
@@ -335,19 +335,17 @@ class BlockUiTest extends BrowserTestBase {
     // block placement indicator. Click the first 'Place block' link to bring up
     // the list of blocks to place in the first available region.
     $this->clickLink('Place block');
-    // Select the first available block, which is the 'test_xss_title' plugin,
-    // with a default machine name 'scriptalertxsssubjectscript' that is used
+    // Select the first available block, which is the 'test_block_instantiation'
+    // plugin, with a default machine name 'stark-displaymessage' that is used
     // for the 'block-placement' querystring parameter.
     $this->clickLink('Place block');
     $this->submitForm([], 'Save block');
-    $this->assertSession()->addressEquals('admin/structure/block/list/stark?block-placement=stark-scriptalertxsssubjectscript');
+    $this->assertSession()->addressEquals('admin/structure/block/list/stark?block-placement=stark-displaymessage');
 
     // Removing a block will remove the block placement indicator.
     $this->clickLink('Remove');
     $this->submitForm([], 'Remove');
-    // @todo https://www.drupal.org/project/drupal/issues/2980527 this should be
-    //   'admin/structure/block/list/stark' but there is a bug.
-    $this->assertSession()->addressEquals('admin/structure/block');
+    $this->assertSession()->addressEquals('admin/structure/block/list/stark');
   }
 
   /**

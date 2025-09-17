@@ -57,7 +57,7 @@ class DemoUmamiProfileTest extends BrowserTestBase {
   /**
    * Tests demo_umami profile warnings shown on Status Page.
    */
-  protected function testWarningsOnStatusPage() {
+  protected function testWarningsOnStatusPage(): void {
     $account = $this->drupalCreateUser(['administer site configuration']);
     $this->drupalLogin($account);
 
@@ -145,7 +145,7 @@ class DemoUmamiProfileTest extends BrowserTestBase {
   /**
    * Tests that the users can log in with the admin password entered at install.
    */
-  protected function testUser() {
+  protected function testUser(): void {
     $password = $this->rootUser->pass_raw;
     $ids = \Drupal::entityQuery('user')
       ->accessCheck(FALSE)
@@ -170,7 +170,7 @@ class DemoUmamiProfileTest extends BrowserTestBase {
     ];
     $account = $this->drupalCreateUser($permissions);
     $this->drupalLogin($account);
-    $webassert = $this->assertSession();
+    $assert_session = $this->assertSession();
 
     // Check that admin is able to edit the node.
     $nodes = $this->container->get('entity_type.manager')
@@ -178,33 +178,33 @@ class DemoUmamiProfileTest extends BrowserTestBase {
       ->loadByProperties(['title' => 'Deep mediterranean quiche']);
     $node = reset($nodes);
     $this->drupalGet($node->toUrl('edit-form'));
-    $webassert->statusCodeEquals(200);
+    $assert_session->statusCodeEquals(200);
 
     $this->submitForm([], 'Preview');
-    $webassert->statusCodeEquals(200);
+    $assert_session->statusCodeEquals(200);
     $this->assertSession()->elementsCount('css', 'h1', 1);
     $this->clickLink('Back to content editing');
 
     $this->submitForm([], "Save");
-    $webassert->pageTextContains('Recipe Deep mediterranean quiche has been updated.');
+    $assert_session->pageTextContains('Recipe Deep mediterranean quiche has been updated.');
   }
 
   /**
    * Tests that the Umami theme is available on the Appearance page.
    */
-  protected function testAppearance() {
+  protected function testAppearance(): void {
     $account = $this->drupalCreateUser(['administer themes']);
     $this->drupalLogin($account);
-    $webassert = $this->assertSession();
+    $assert_session = $this->assertSession();
 
     $this->drupalGet('admin/appearance');
-    $webassert->pageTextContains('Umami');
+    $assert_session->pageTextContains('Umami');
   }
 
   /**
    * Tests that the toolbar warning only appears on the admin pages.
    */
-  protected function testDemonstrationWarningMessage() {
+  protected function testDemonstrationWarningMessage(): void {
     $permissions = [
       'access content overview',
       'access toolbar',
@@ -213,6 +213,80 @@ class DemoUmamiProfileTest extends BrowserTestBase {
       'create recipe content',
       'use editorial transition create_new_draft',
     ];
+    $this->assertDemonstrationWarningMessage($permissions);
+  }
+
+  /**
+   * Tests that the navigation warning only appears on the admin pages.
+   */
+  protected function testNavigationDemonstrationWarningMessage(): void {
+    \Drupal::service('module_installer')->install(['navigation']);
+    $permissions = [
+      'access content overview',
+      'access navigation',
+      'administer nodes',
+      'edit any recipe content',
+      'create recipe content',
+      'use editorial transition create_new_draft',
+    ];
+    $this->assertDemonstrationWarningMessage($permissions);
+  }
+
+  /**
+   * Logs in a user using the Mink controlled browser using a password.
+   *
+   * If a user is already logged in, then the current user is logged out before
+   * logging in the specified user.
+   *
+   * Note that neither the current user nor the passed-in user object is
+   * populated with data of the logged in user. If you need full access to the
+   * user object after logging in, it must be updated manually. If you also need
+   * access to the plain-text password of the user (set by drupalCreateUser()),
+   * e.g. to log in the same user again, then it must be re-assigned manually.
+   * For example:
+   * @code
+   *   // Create a user.
+   *   $account = $this->drupalCreateUser([]);
+   *   $this->drupalLogin($account);
+   *   // Load real user object.
+   *   $pass_raw = $account->passRaw;
+   *   $account = User::load($account->id());
+   *   $account->passRaw = $pass_raw;
+   * @endcode
+   *
+   * @param \Drupal\Core\Session\AccountInterface $account
+   *   User object representing the user to log in.
+   * @param string $password
+   *   The password to authenticate the user with.
+   *
+   * @see drupalCreateUser()
+   */
+  protected function drupalLoginWithPassword(AccountInterface $account, $password): void {
+    if ($this->loggedInUser) {
+      $this->drupalLogout();
+    }
+
+    $this->drupalGet('user/login');
+    $this->submitForm([
+      'name' => $account->getAccountName(),
+      'pass' => $password,
+    ], 'Log in');
+
+    // @see ::drupalUserIsLoggedIn()
+    $account->sessionId = $this->getSession()->getCookie(\Drupal::service('session_configuration')->getOptions(\Drupal::request())['name']);
+    $this->assertTrue($this->drupalUserIsLoggedIn($account), "User {$account->getAccountName()} successfully logged in.");
+
+    $this->loggedInUser = $account;
+    $this->container->get('current_user')->setAccount($account);
+  }
+
+  /**
+   * Asserts if the demonstration warning message is displayed properly.
+   *
+   * @param array $permissions
+   *   The user permissions needed to make the assertions.
+   */
+  protected function assertDemonstrationWarningMessage(array $permissions): void {
     $account = $this->drupalCreateUser($permissions);
     $this->drupalLogin($account);
     $web_assert = $this->assertSession();
@@ -247,54 +321,6 @@ class DemoUmamiProfileTest extends BrowserTestBase {
     $this->drupalGet('<front>');
     $web_assert->statusCodeEquals(200);
     $web_assert->pageTextNotContains('This site is intended for demonstration purposes.');
-  }
-
-  /**
-   * Logs in a user using the Mink controlled browser using a password.
-   *
-   * If a user is already logged in, then the current user is logged out before
-   * logging in the specified user.
-   *
-   * Note that neither the current user nor the passed-in user object is
-   * populated with data of the logged in user. If you need full access to the
-   * user object after logging in, it must be updated manually. If you also need
-   * access to the plain-text password of the user (set by drupalCreateUser()),
-   * e.g. to log in the same user again, then it must be re-assigned manually.
-   * For example:
-   * @code
-   *   // Create a user.
-   *   $account = $this->drupalCreateUser([]);
-   *   $this->drupalLogin($account);
-   *   // Load real user object.
-   *   $pass_raw = $account->passRaw;
-   *   $account = User::load($account->id());
-   *   $account->passRaw = $pass_raw;
-   * @endcode
-   *
-   * @param \Drupal\Core\Session\AccountInterface $account
-   *   User object representing the user to log in.
-   * @param string $password
-   *   The password to authenticate the user with.
-   *
-   * @see drupalCreateUser()
-   */
-  protected function drupalLoginWithPassword(AccountInterface $account, $password) {
-    if ($this->loggedInUser) {
-      $this->drupalLogout();
-    }
-
-    $this->drupalGet('user/login');
-    $this->submitForm([
-      'name' => $account->getAccountName(),
-      'pass' => $password,
-    ], 'Log in');
-
-    // @see ::drupalUserIsLoggedIn()
-    $account->sessionId = $this->getSession()->getCookie(\Drupal::service('session_configuration')->getOptions(\Drupal::request())['name']);
-    $this->assertTrue($this->drupalUserIsLoggedIn($account), "User {$account->getAccountName()} successfully logged in.");
-
-    $this->loggedInUser = $account;
-    $this->container->get('current_user')->setAccount($account);
   }
 
 }

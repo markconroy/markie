@@ -226,7 +226,8 @@ class ContactSitewideTest extends BrowserTestBase {
 
     $this->drupalLogout();
 
-    // Check to see that anonymous user cannot see contact page without permission.
+    // Check to see that anonymous user cannot see contact page without
+    // permission.
     user_role_revoke_permissions(RoleInterface::ANONYMOUS_ID, ['access site-wide contact form']);
     $this->drupalGet('contact');
     $this->assertSession()->statusCodeEquals(403);
@@ -465,7 +466,8 @@ class ContactSitewideTest extends BrowserTestBase {
     $subject = $this->randomMachineName(64);
     $this->submitContact($this->randomMachineName(16), $email, $subject, 'foo', $this->randomString(128));
 
-    // We are testing the auto-reply, so there should be one email going to the sender.
+    // We are testing the auto-reply, so there should be one email going to the
+    // sender.
     $captured_emails = $this->getMails(['id' => 'contact_page_autoreply', 'to' => $email]);
     $this->assertCount(1, $captured_emails);
     $this->assertEquals(trim(MailFormatHelper::htmlToText($foo_autoreply)), trim($captured_emails[0]['body']));
@@ -474,12 +476,14 @@ class ContactSitewideTest extends BrowserTestBase {
     $email = $this->randomMachineName(32) . '@example.com';
     $this->submitContact($this->randomMachineName(16), $email, $this->randomString(64), 'bar', $this->randomString(128));
 
-    // Auto-reply for form 'bar' should result in one auto-reply email to the sender.
+    // Auto-reply for form 'bar' should result in one auto-reply email to the
+    // sender.
     $captured_emails = $this->getMails(['id' => 'contact_page_autoreply', 'to' => $email]);
     $this->assertCount(1, $captured_emails);
     $this->assertEquals(trim(MailFormatHelper::htmlToText($bar_autoreply)), trim($captured_emails[0]['body']));
 
-    // Verify that no auto-reply is sent when the auto-reply field is left blank.
+    // Verify that no auto-reply is sent when the auto-reply field is left
+    // blank.
     $email = $this->randomMachineName(32) . '@example.com';
     $this->submitContact($this->randomMachineName(16), $email, $this->randomString(64), 'no_autoreply', $this->randomString(128));
     $captured_emails = $this->getMails(['id' => 'contact_page_autoreply', 'to' => $email]);
@@ -521,7 +525,7 @@ class ContactSitewideTest extends BrowserTestBase {
    * @param array $third_party_settings
    *   Array of third party settings to be added to the posted form data.
    */
-  public function addContactForm($id, $label, $recipients, $reply, $selected, $message = 'Your message has been sent.', $third_party_settings = []) {
+  public function addContactForm($id, $label, $recipients, $reply, $selected, $message = 'Your message has been sent.', $third_party_settings = []): void {
     $edit = [];
     $edit['label'] = $label;
     $edit['id'] = $id;
@@ -558,7 +562,7 @@ class ContactSitewideTest extends BrowserTestBase {
    * @param string $redirect
    *   The path where user will be redirect after this form has been submitted..
    */
-  public function updateContactForm($id, $label, $recipients, $reply, $selected, $message = 'Your message has been sent.', $redirect = '/') {
+  public function updateContactForm($id, $label, $recipients, $reply, $selected, $message = 'Your message has been sent.', $redirect = '/'): void {
     $edit = [];
     $edit['label'] = $label;
     $edit['recipients'] = $recipients;
@@ -584,7 +588,7 @@ class ContactSitewideTest extends BrowserTestBase {
    * @param string $message
    *   The message body.
    */
-  public function submitContact($name, $mail, $subject, $id, $message) {
+  public function submitContact($name, $mail, $subject, $id, $message): void {
     $edit = [];
     $edit['name'] = $name;
     $edit['mail'] = $mail;
@@ -603,7 +607,7 @@ class ContactSitewideTest extends BrowserTestBase {
   /**
    * Deletes all forms.
    */
-  public function deleteContactForms() {
+  public function deleteContactForms(): void {
     $contact_forms = ContactForm::loadMultiple();
     foreach ($contact_forms as $id => $contact_form) {
       if ($id == 'personal') {

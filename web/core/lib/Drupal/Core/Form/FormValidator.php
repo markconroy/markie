@@ -142,8 +142,9 @@ class FormValidator implements FormValidatorInterface {
    *   The unique string identifying the form.
    */
   protected function handleErrorsWithLimitedValidation(&$form, FormStateInterface &$form_state, $form_id) {
-    // If validation errors are limited then remove any non validated form values,
-    // so that only values that passed validation are left for submit callbacks.
+    // If validation errors are limited then remove any non validated form
+    // values, so that only values that passed validation are left for submit
+    // callbacks.
     $triggering_element = $form_state->getTriggeringElement();
     if (isset($triggering_element['#limit_validation_errors']) && $triggering_element['#limit_validation_errors'] !== FALSE) {
       $values = [];
@@ -209,7 +210,7 @@ class FormValidator implements FormValidatorInterface {
    * and selected options were in the list of options given to the user. Then
    * calls user-defined validators.
    *
-   * @param $elements
+   * @param array $elements
    *   An associative array containing the structure of the form.
    * @param \Drupal\Core\Form\FormStateInterface $form_state
    *   The current state of the form. The current user-submitted data is stored
@@ -221,7 +222,7 @@ class FormValidator implements FormValidatorInterface {
    *   This technique is useful when validation requires file parsing,
    *   web service requests, or other expensive requests that should
    *   not be repeated in the submission step.
-   * @param $form_id
+   * @param string $form_id
    *   A unique string identifying the form for validation, submission,
    *   theming, and hook_form_alter functions. Is only present on the initial
    *   call to the method, which receives the entire form array as the $element,
@@ -330,7 +331,11 @@ class FormValidator implements FormValidatorInterface {
   protected function performRequiredValidation(&$elements, FormStateInterface &$form_state) {
     // Verify that the value is not longer than #maxlength.
     if (isset($elements['#maxlength']) && mb_strlen($elements['#value']) > $elements['#maxlength']) {
-      $form_state->setError($elements, $this->t('@name cannot be longer than %max characters but is currently %length characters long.', ['@name' => empty($elements['#title']) ? $elements['#parents'][0] : $elements['#title'], '%max' => $elements['#maxlength'], '%length' => mb_strlen($elements['#value'])]));
+      $form_state->setError($elements, $this->t('@name cannot be longer than %max characters but is currently %length characters long.', [
+        '@name' => empty($elements['#title']) ? $elements['#parents'][0] : $elements['#title'],
+        '%max' => $elements['#maxlength'],
+        '%length' => mb_strlen($elements['#value']),
+      ]));
     }
 
     if (isset($elements['#options']) && isset($elements['#value'])) {
@@ -386,6 +391,8 @@ class FormValidator implements FormValidatorInterface {
    *   The current state of the form.
    *
    * @return array|null
+   *   An array of validation errors for the triggering element. Defaults to
+   *   NULL, which turns off error suppression.
    */
   protected function determineLimitValidationErrors(FormStateInterface &$form_state) {
     // While this element is being validated, it may be desired that some

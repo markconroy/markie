@@ -45,16 +45,12 @@ class Time extends CachePluginBase {
    *   The plugin implementation definition.
    * @param \Drupal\Core\Datetime\DateFormatterInterface $date_formatter
    *   The date formatter service.
-   * @param \Drupal\Component\Datetime\TimeInterface|null $time
+   * @param \Drupal\Component\Datetime\TimeInterface $time
    *   The time service.
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, DateFormatterInterface $date_formatter, protected ?TimeInterface $time = NULL) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, DateFormatterInterface $date_formatter, protected TimeInterface $time) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->dateFormatter = $date_formatter;
-    if (!$time) {
-      @trigger_error('Calling ' . __METHOD__ . ' without the $time argument is deprecated in drupal:10.3.0 and it will be required in drupal:11.0.0. See https://www.drupal.org/node/3395991', E_USER_DEPRECATED);
-      $this->time = \Drupal::service('datetime.time');
-    }
   }
 
   /**
@@ -70,6 +66,9 @@ class Time extends CachePluginBase {
     );
   }
 
+  /**
+   * {@inheritdoc}
+   */
   protected function defineOptions() {
     $options = parent::defineOptions();
     $options['results_lifespan'] = ['default' => 3600];
@@ -80,6 +79,9 @@ class Time extends CachePluginBase {
     return $options;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function buildOptionsForm(&$form, FormStateInterface $form_state) {
     parent::buildOptionsForm($form, $form_state);
     $options = [60, 300, 1800, 3600, 21600, 518400];
@@ -128,6 +130,9 @@ class Time extends CachePluginBase {
     ];
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function validateOptionsForm(&$form, FormStateInterface $form_state) {
     $custom_fields = ['output_lifespan', 'results_lifespan'];
     foreach ($custom_fields as $field) {
@@ -138,17 +143,26 @@ class Time extends CachePluginBase {
     }
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function summaryTitle() {
     $results_lifespan = $this->getLifespan('results');
     $output_lifespan = $this->getLifespan('output');
     return $this->dateFormatter->formatInterval($results_lifespan, 1) . '/' . $this->dateFormatter->formatInterval($output_lifespan, 1);
   }
 
+  /**
+   * Gets the value for the lifespan of the given type.
+   */
   protected function getLifespan($type) {
     $lifespan = $this->options[$type . '_lifespan'] == 'custom' ? $this->options[$type . '_lifespan_custom'] : $this->options[$type . '_lifespan'];
     return $lifespan;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   protected function cacheExpire($type) {
     $lifespan = $this->getLifespan($type);
     if ($lifespan) {

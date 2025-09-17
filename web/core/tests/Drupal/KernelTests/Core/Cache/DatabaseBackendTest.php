@@ -112,7 +112,7 @@ class DatabaseBackendTest extends GenericCacheBackendUnitTestBase {
    * @return int
    *   The number of rows in the test cache bin database table.
    */
-  protected function getNumRows() {
+  protected function getNumRows(): int {
     $table = 'cache_' . $this->testBin;
     $connection = $this->container->get('database');
     $query = $connection->select($table);
@@ -121,7 +121,7 @@ class DatabaseBackendTest extends GenericCacheBackendUnitTestBase {
   }
 
   /**
-   * Test that the service "cache_tags.invalidator.checksum" is backend overridable.
+   * Tests that "cache_tags.invalidator.checksum" is backend overridable.
    */
   public function testCacheTagsInvalidatorChecksumIsBackendOverridable(): void {
     $definition = $this->container->getDefinition('cache_tags.invalidator.checksum');

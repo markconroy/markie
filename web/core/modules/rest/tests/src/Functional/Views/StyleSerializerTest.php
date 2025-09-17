@@ -53,7 +53,7 @@ class StyleSerializerTest extends ViewTestBase {
   public static $testViews = ['test_serializer_display_field', 'test_serializer_display_entity', 'test_serializer_display_entity_translated', 'test_serializer_node_display_field', 'test_serializer_node_exposed_filter', 'test_serializer_shared_path'];
 
   /**
-   * A user with administrative privileges to look at test entity and configure views.
+   * A user with permissions to look at test entity and configure views.
    *
    * @var \Drupal\user\Entity\User|false
    */
@@ -111,7 +111,7 @@ class StyleSerializerTest extends ViewTestBase {
     // Ensure that any changes to variables in the other thread are picked up.
     $this->refreshVariables();
 
-    $this->assertSession()->statusCodeEquals(200);
+    $this->assertEquals(200, $response->getStatusCode());
   }
 
   /**
@@ -158,7 +158,7 @@ class StyleSerializerTest extends ViewTestBase {
    * @param string $format
    *   The new request format.
    */
-  protected function addRequestWithFormat($format) {
+  protected function addRequestWithFormat($format): void {
     $request = \Drupal::request();
     $request = clone $request;
     $request->setRequestFormat($format);

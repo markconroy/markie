@@ -523,10 +523,6 @@ class AccessResultTest extends UnitTestCase {
     $verify($a, $tags);
     $b = AccessResult::neutral()->addCacheableDependency($node);
     $verify($b, $tags, ['user'], 600);
-
-    $non_cacheable_dependency = new \stdClass();
-    $non_cacheable = AccessResult::neutral()->addCacheableDependency($non_cacheable_dependency);
-    $verify($non_cacheable, [], [], 0);
   }
 
   /**
@@ -541,7 +537,8 @@ class AccessResultTest extends UnitTestCase {
     $this->assertSame(['node:20011988'], $access->getCacheTags());
     $this->assertSame(1500, $access->getCacheMaxAge());
 
-    // andIf(); 1st has custom tags, max-age, 2nd has custom contexts and max-age.
+    // andIf(); 1st has custom tags, max-age, 2nd has custom contexts and
+    // max-age.
     $access = AccessResult::allowed()->cachePerUser()->setCacheMaxAge(43200);
     $other = AccessResult::forbidden()->addCacheTags(['node:14031991'])->setCacheMaxAge(86400);
     $this->assertInstanceOf(AccessResult::class, $access->inheritCacheability($other));
@@ -874,13 +871,15 @@ class AccessResultTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::orIf
+   * Tests orIf().
    *
    * Tests the special case of ORing non-forbidden access results that are both
    * cacheable but have different cacheability metadata.
    * This is only the case for non-forbidden access results; we still abort the
    * ORing process as soon as a forbidden access result is encountered. This is
    * tested in ::testOrIf().
+   *
+   * @covers ::orIf
    */
   public function testOrIfCacheabilityMerging(): void {
     $merge_both_directions = function (AccessResult $a, AccessResult $b) {
@@ -907,16 +906,15 @@ class AccessResultTest extends UnitTestCase {
   /**
    * Tests allowedIfHasPermissions().
    *
-   * @covers ::allowedIfHasPermissions
-   *
-   * @dataProvider providerTestAllowedIfHasPermissions
-   *
    * @param string[] $permissions
    *   The permissions to check for.
    * @param string $conjunction
    *   The conjunction to use when checking for permission. 'AND' or 'OR'.
    * @param \Drupal\Core\Access\AccessResult $expected_access
    *   The expected access check result.
+   *
+   * @covers ::allowedIfHasPermissions
+   * @dataProvider providerTestAllowedIfHasPermissions
    */
   public function testAllowedIfHasPermissions($permissions, $conjunction, AccessResult $expected_access): void {
     $account = $this->createMock('\Drupal\Core\Session\AccountInterface');
@@ -939,6 +937,7 @@ class AccessResultTest extends UnitTestCase {
    * Provides data for the testAllowedIfHasPermissions() method.
    *
    * @return array
+   *   An array of test scenarios with permissions, logic, and expected result.
    */
   public static function providerTestAllowedIfHasPermissions() {
     $access_result = AccessResult::allowedIf(FALSE);
@@ -970,6 +969,9 @@ class AccessResultTest extends UnitTestCase {
 
 }
 
+/**
+ * Stub class for testing AccessResult.
+ */
 class UncacheableTestAccessResult implements AccessResultInterface {
 
   /**

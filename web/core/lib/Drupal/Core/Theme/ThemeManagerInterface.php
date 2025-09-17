@@ -36,6 +36,7 @@ interface ThemeManagerInterface {
    *   The route match.
    *
    * @return \Drupal\Core\Theme\ActiveTheme
+   *   The active theme object.
    */
   public function getActiveTheme(?RouteMatchInterface $route_match = NULL);
 
@@ -43,6 +44,7 @@ interface ThemeManagerInterface {
    * Determines whether there is an active theme.
    *
    * @return bool
+   *   TRUE if there is an active theme, FALSE otherwise.
    */
   public function hasActiveTheme();
 
@@ -137,7 +139,7 @@ interface ThemeManagerInterface {
    * @param string|array $type
    *   A string describing the type of the alterable $data.
    * @param mixed $data
-   *   The variable that will be passed to $theme_TYPE_alter() implementations
+   *   The variable that will be passed to $theme_TYPE_alter() implementations.
    * @param mixed $context1
    *   (optional) An additional variable that is passed by reference.
    * @param mixed $context2

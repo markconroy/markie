@@ -323,6 +323,10 @@ abstract class EntityDisplayFormBase extends EntityForm {
       'human_name' => [
         '#plain_text' => $label,
       ],
+      'machine_name' => [
+        '#markup' => $field_name,
+        '#attributes' => ['class' => ['machine-name']],
+      ],
       'weight' => [
         '#type' => 'textfield',
         '#title' => $this->t('Weight for @title', ['@title' => $label]),
@@ -495,6 +499,10 @@ abstract class EntityDisplayFormBase extends EntityForm {
       '#js_settings' => ['rowHandler' => 'field'],
       'human_name' => [
         '#markup' => $extra_field['label'],
+      ],
+      'machine_name' => [
+        '#markup' => $field_id,
+        '#attributes' => ['class' => ['machine-name']],
       ],
       'weight' => [
         '#type' => 'textfield',

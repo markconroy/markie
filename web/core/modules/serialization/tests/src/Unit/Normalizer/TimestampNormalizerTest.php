@@ -10,6 +10,7 @@ use Drupal\Core\TypedData\Plugin\DataType\IntegerData;
 use Drupal\Core\TypedData\Plugin\DataType\Timestamp;
 use Drupal\Core\TypedData\Type\DateTimeInterface;
 use Drupal\serialization\Normalizer\TimestampNormalizer;
+use Drupal\Tests\serialization\Traits\JsonSchemaTestTrait;
 use Drupal\Tests\UnitTestCase;
 use Symfony\Component\Serializer\Exception\UnexpectedValueException;
 
@@ -21,6 +22,8 @@ use Symfony\Component\Serializer\Exception\UnexpectedValueException;
  * @see \Drupal\Core\TypedData\Plugin\DataType\Timestamp
  */
 class TimestampNormalizerTest extends UnitTestCase {
+
+  use JsonSchemaTestTrait;
 
   /**
    * The tested data type's normalizer.
@@ -100,6 +103,7 @@ class TimestampNormalizerTest extends UnitTestCase {
    * Data provider for testDenormalizeValidFormats.
    *
    * @return array
+   *   An array of test data.
    */
   public static function providerTestDenormalizeValidFormats() {
     $expected_stamp = 1478422920;
@@ -132,6 +136,28 @@ class TimestampNormalizerTest extends UnitTestCase {
     $this->normalizer->denormalize($normalized, Timestamp::class, NULL, []);
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public static function jsonSchemaDataProvider(): array {
+    $case = function (UnitTestCase $test) {
+      assert(in_array(JsonSchemaTestTrait::class, class_uses($test)));
+      $drupal_date_time = $test->doProphesize(TimestampNormalizerTestDrupalDateTime::class);
+      $drupal_date_time->setTimezone(new \DateTimeZone('UTC'))
+        ->willReturn($drupal_date_time->reveal());
+      $drupal_date_time->format(\DateTime::RFC3339)
+        ->willReturn('1983-07-12T09:05:00-05:00');
+
+      $data = $test->doProphesize(Timestamp::class);
+      $data->getDateTime()
+        ->willReturn($drupal_date_time->reveal());
+      return $data->reveal();
+    };
+    return [
+      'RFC 3339' => [fn (UnitTestCase $test) => $case($test)],
+    ];
+  }
+
 }
 
 /**
@@ -139,12 +165,16 @@ class TimestampNormalizerTest extends UnitTestCase {
  *
  * Note: Prophecy does not support magic methods. By subclassing and specifying
  * an explicit method, Prophecy works.
+ *
  * @see https://github.com/phpspec/prophecy/issues/338
  * @see https://github.com/phpspec/prophecy/issues/34
  * @see https://github.com/phpspec/prophecy/issues/80
  */
 class TimestampNormalizerTestDrupalDateTime extends DrupalDateTime {
 
+  /**
+   * Sets the timezone.
+   */
   public function setTimezone(\DateTimeZone $timezone) {
     parent::setTimezone($timezone);
   }

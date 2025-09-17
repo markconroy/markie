@@ -38,15 +38,21 @@ class OpenOffCanvasDialogCommand extends OpenDialogCommand {
    *   (optional) The position to render the off-canvas dialog.
    */
   public function __construct(string|\Stringable|null $title, $content, array $dialog_options = [], $settings = NULL, $position = 'side') {
-    $dialog_class = '';
-    if (isset($dialog_options['dialogClass'])) {
-      @trigger_error('Passing $dialog_options[\'dialogClass\'] to OpenOffCanvasDialogCommand::__construct() is deprecated in drupal:10.3.0 and will be removed in drupal:12.0.0. Use $dialog_options[\'classes\'] instead. See https://www.drupal.org/node/3440844', E_USER_DEPRECATED);
-      $dialog_class = $dialog_options['dialogClass'];
-    }
+    $dialog_class = FALSE;
     if (isset($dialog_options['classes']['ui-dialog'])) {
       $dialog_class = $dialog_options['classes']['ui-dialog'];
     }
-    $dialog_options['classes']['ui-dialog'] = trim("$dialog_class ui-dialog-off-canvas ui-dialog-position-$position");
+    elseif (isset($dialog_options['dialogClass'])) {
+      @trigger_error('Passing $dialog_options[\'dialogClass\'] to OpenOffCanvasDialogCommand::__construct() is deprecated in drupal:10.3.0 and will be removed in drupal:12.0.0. Use $dialog_options[\'classes\'] instead. See https://www.drupal.org/node/3440844', E_USER_DEPRECATED);
+      $dialog_class = $dialog_options['dialogClass'];
+      unset($dialog_options['dialogClass']);
+    }
+    if ($dialog_class) {
+      $dialog_options['classes']['ui-dialog'] = $dialog_class . ' ' . "ui-dialog-off-canvas ui-dialog-position-$position";
+    }
+    else {
+      $dialog_options['classes']['ui-dialog'] = "ui-dialog-off-canvas ui-dialog-position-$position";
+    }
     parent::__construct('#drupal-off-canvas', $title, $content, $dialog_options, $settings);
     $this->dialogOptions['modal'] = FALSE;
     $this->dialogOptions['autoResize'] = FALSE;

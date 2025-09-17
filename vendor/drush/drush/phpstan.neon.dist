@@ -1,12 +1,10 @@
 parameters:
-    level: 2
+    level: 4
     editorUrl: 'phpstorm://open?file=%%file%%&line=%%line%%'
     bootstrapFiles:
         - phpstan-bootstrap.php
     paths:
         - src
-    drupal:
-        drupal_root: %currentWorkingDirectory%/sut
     universalObjectCratesClasses:
         # Useful until we have https://www.drupal.org/project/drupal/issues/2024043
         - Drupal\Core\Extension\Extension
@@ -17,6 +15,8 @@ parameters:
         # Remove once https://github.com/mglaman/phpstan-drupal/issues/741 is resolved
         - src/Commands/core/LocaleCommands.php
         - src/Commands/core/LanguageCommands.php
+        # Remove once we only support Drupal 11.2
+        - src/Commands/core/CacheWarmCommands.php
     ignoreErrors:
         # XHprof
         - '#tideways_xhprof_enable#'

@@ -5,14 +5,14 @@ declare(strict_types=1);
 
 namespace Drupal\{{ machine_name }}\Logger;
 
-{% sort %}
+{% apply sort_namespaces %}
 use Drupal\Core\Logger\LogMessageParserInterface;
 use Drupal\Core\Logger\RfcLoggerTrait;
 use Psr\Log\LoggerInterface;
   {% if services %}
 {{ di.use(services) }}
   {% endif %}
-{% endsort %}
+{% endapply %}
 
 /**
  * @todo Add a description for the logger.
@@ -34,6 +34,7 @@ final class {{ class }} implements LoggerInterface {
    * {@inheritdoc}
    */
   public function log($level, string|\Stringable $message, array $context = []): void {
+    $message = (string) $message;
     // Convert PSR3-style messages to \Drupal\Component\Render\FormattableMarkup
     // style, so they can be translated too.
     $placeholders = $this->parser->parseMessagePlaceholders($message, $context);

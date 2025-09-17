@@ -62,7 +62,8 @@ class TrustedRedirectResponseTest extends UnitTestCase {
   public function testCreateFromRedirectResponse($redirect_response): void {
     $trusted_redirect_response = TrustedRedirectResponse::createFromRedirectResponse($redirect_response);
 
-    // The trusted redirect response is always a CacheableResponseInterface instance.
+    // The trusted redirect response is always a CacheableResponseInterface
+    // instance.
     $this->assertInstanceOf(CacheableResponseInterface::class, $trusted_redirect_response);
 
     // But it is only actually cacheable (non-zero max-age) if the redirect
@@ -74,6 +75,7 @@ class TrustedRedirectResponseTest extends UnitTestCase {
 
   /**
    * @return array
+   *   An array of test cases, each containing a redirect response instance.
    */
   public static function providerCreateFromRedirectResponse() {
     return [

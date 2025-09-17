@@ -199,7 +199,8 @@ class CommentManager implements CommentManagerInterface {
     // @todo Replace module handler with optional history service injection
     //   after https://www.drupal.org/node/2081585.
     if ($this->currentUser->isAuthenticated() && $this->moduleHandler->moduleExists('history')) {
-      // Retrieve the timestamp at which the current user last viewed this entity.
+      // Retrieve the timestamp at which the current user last viewed this
+      // entity.
       if (!$timestamp) {
         if ($entity->getEntityTypeId() == 'node') {
           $timestamp = history_read($entity->id());
@@ -212,7 +213,7 @@ class CommentManager implements CommentManagerInterface {
           else {
             // Default to 30 days ago.
             // @todo Remove this else branch when we have a generic
-            //   HistoryRepository service in https://www.drupal.org/node/3267011.
+            //   HistoryRepository service in https://www.drupal.org/i/3267011.
             $timestamp = COMMENT_NEW_LIMIT;
           }
         }

@@ -20,6 +20,8 @@ use Drupal\Core\TypedData\Plugin\DataType\StringData;
 use Drupal\Core\TypedData\TypedDataManagerInterface;
 use Drupal\KernelTests\KernelTestBase;
 
+// cspell:ignore sisko
+
 /**
  * @coversDefaultClass \Drupal\Core\Plugin\ContextAwarePluginTrait
  *
@@ -95,12 +97,18 @@ class ContextAwarePluginTraitTest extends KernelTestBase {
 
 }
 
+/**
+ * A plugin definition test class.
+ */
 class TestContextAwarePluginDefinition extends PluginDefinition implements ContextAwarePluginDefinitionInterface {
 
   use ContextAwarePluginDefinitionTrait;
 
 }
 
+/**
+ * Context aware plugin test class.
+ */
 class TestContextAwarePlugin extends PluginBase implements ContextAwarePluginInterface {
 
   use ContextAwarePluginTrait {
@@ -117,13 +125,16 @@ class TestContextAwarePlugin extends PluginBase implements ContextAwarePluginInt
   /**
    * {@inheritdoc}
    */
-  public function setContext($name, ComponentContextInterface $context) {
+  public function setContext($name, ComponentContextInterface $context): void {
     $this->setContextTrait($name, $context);
     $this->setContextCalled = TRUE;
   }
 
 }
 
+/**
+ * Configurable context aware plugin test class.
+ */
 class TestConfigurableContextAwarePlugin extends PluginBase implements ConfigurableInterface, ContextAwarePluginInterface {
 
   use ContextAwarePluginTrait;

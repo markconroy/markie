@@ -5,15 +5,12 @@ declare(strict_types=1);
 namespace Drupal\KernelTests;
 
 use Drupal\Component\FileCache\FileCacheFactory;
-use Drupal\Component\Utility\Random;
 use Drupal\Core\Database\Database;
-use Drupal\Tests\StreamCapturer;
-use Drupal\user\Entity\Role;
+use Drupal\TestTools\Extension\Dump\DebugDump;
 use org\bovigo\vfs\vfsStream;
 use org\bovigo\vfs\visitor\vfsStreamStructureVisitor;
-use PHPUnit\Framework\SkippedTestError;
+use PHPUnit\Framework\Attributes\DoesNotPerformAssertions;
 use Psr\Http\Client\ClientExceptionInterface;
-use Symfony\Component\HttpFoundation\Request;
 
 /**
  * @coversDefaultClass \Drupal\KernelTests\KernelTestBase
@@ -77,9 +74,6 @@ class KernelTestBaseTest extends KernelTestBase {
 
     $this->assertEquals($this, $GLOBALS['conf']['container_service_providers']['test']);
 
-    $GLOBALS['destroy-me'] = TRUE;
-    $this->assertArrayHasKey('destroy-me', $GLOBALS);
-
     $database = $this->container->get('database');
     $database->schema()->createTable('foo', [
       'fields' => [
@@ -100,8 +94,6 @@ class KernelTestBaseTest extends KernelTestBase {
    * @depends testSetUp
    */
   public function testSetUpDoesNotLeak(): void {
-    $this->assertArrayNotHasKey('destroy-me', $GLOBALS);
-
     // Ensure that we have a different database prefix.
     $schema = $this->container->get('database')->schema();
     $this->assertFalse($schema->tableExists('foo'));
@@ -255,18 +247,6 @@ class KernelTestBaseTest extends KernelTestBase {
   }
 
   /**
-   * Tests deprecation of modified request stack lacking a session.
-   *
-   * @covers ::tearDown
-   *
-   * @group legacy
-   */
-  public function testDeprecatedSessionMissing(): void {
-    $this->expectDeprecation('Pushing requests without a session onto the request_stack is deprecated in drupal:10.3.0 and an error will be thrown from drupal:11.0.0. See https://www.drupal.org/node/3337193');
-    $this->container->get('request_stack')->push(Request::create('/'));
-  }
-
-  /**
    * Tests the assumption that local time is in 'Australia/Sydney'.
    */
   public function testLocalTimeZone(): void {
@@ -275,67 +255,10 @@ class KernelTestBaseTest extends KernelTestBase {
   }
 
   /**
-   * Tests that a test method is skipped when it requires a module not present.
-   *
-   * In order to catch checkRequirements() regressions, we have to make a new
-   * test object and run checkRequirements() here.
-   *
-   * @covers ::checkRequirements
-   * @covers ::checkModuleRequirements
-   *
-   * @group legacy
+   * Tests that ::tearDown() does not perform assertions.
    */
-  public function testMethodRequiresModule(): void {
-    $this->expectDeprecation('Drupal\Tests\TestRequirementsTrait::checkModuleRequirements() is deprecated in drupal:10.3.0 and is removed from drupal:11.0.0. There is no replacement. See https://www.drupal.org/node/3418480');
-
-    require __DIR__ . '/../../fixtures/KernelMissingDependentModuleMethodTest.php';
-
-    // @phpstan-ignore-next-line
-    $stub_test = new KernelMissingDependentModuleMethodTest();
-    // We have to setName() to the method name we're concerned with.
-    $stub_test->setName('testRequiresModule');
-
-    // We cannot use $this->setExpectedException() because PHPUnit would skip
-    // the test before comparing the exception type.
-    try {
-      $stub_test->publicCheckRequirements();
-      $this->fail('Missing required module throws skipped test exception.');
-    }
-    catch (SkippedTestError $e) {
-      $this->assertEquals('Required modules: module_does_not_exist', $e->getMessage());
-    }
-  }
-
-  /**
-   * Tests that a test case is skipped when it requires a module not present.
-   *
-   * In order to catch checkRequirements() regressions, we have to make a new
-   * test object and run checkRequirements() here.
-   *
-   * @covers ::checkRequirements
-   * @covers ::checkModuleRequirements
-   *
-   * @group legacy
-   */
-  public function testRequiresModule(): void {
-    $this->expectDeprecation('Drupal\Tests\TestRequirementsTrait::checkModuleRequirements() is deprecated in drupal:10.3.0 and is removed from drupal:11.0.0. There is no replacement. See https://www.drupal.org/node/3418480');
-
-    require __DIR__ . '/../../fixtures/KernelMissingDependentModuleTest.php';
-
-    // @phpstan-ignore-next-line
-    $stub_test = new KernelMissingDependentModuleTest();
-    // We have to setName() to the method name we're concerned with.
-    $stub_test->setName('testRequiresModule');
-
-    // We cannot use $this->setExpectedException() because PHPUnit would skip
-    // the test before comparing the exception type.
-    try {
-      $stub_test->publicCheckRequirements();
-      $this->fail('Missing required module throws skipped test exception.');
-    }
-    catch (SkippedTestError $e) {
-      $this->assertEquals('Required modules: module_does_not_exist', $e->getMessage());
-    }
+  #[DoesNotPerformAssertions]
+  public function testTearDown(): void {
   }
 
   /**
@@ -349,18 +272,20 @@ class KernelTestBaseTest extends KernelTestBase {
     // the tables.
     $connection = Database::getConnection();
     if ($connection->databaseType() === 'sqlite') {
-      $result = $connection->query("SELECT name FROM " . $this->databasePrefix .
+      $tables = $connection->query("SELECT name FROM " . $this->databasePrefix .
         ".sqlite_master WHERE type = :type AND name LIKE :table_name AND name NOT LIKE :pattern", [
           ':type' => 'table',
           ':table_name' => '%',
           ':pattern' => 'sqlite_%',
         ]
       )->fetchAllKeyed(0, 0);
-      $this->assertEmpty($result, 'All test tables have been removed.');
     }
     else {
       $tables = $connection->schema()->findTables($this->databasePrefix . '%');
-      $this->assertEmpty($tables, 'All test tables have been removed.');
+    }
+
+    if (!empty($tables)) {
+      throw new \RuntimeException("Not all test tables were removed");
     }
   }
 
@@ -379,20 +304,19 @@ class KernelTestBaseTest extends KernelTestBase {
    * Tests the dump() function provided by the var-dumper Symfony component.
    */
   public function testVarDump(): void {
-    // Append the stream capturer to the STDERR stream, so that we can test the
-    // dump() output and also prevent it from actually outputting in this
-    // particular test.
-    stream_filter_register("capture", StreamCapturer::class);
-    stream_filter_append(STDERR, "capture");
-
     // Dump some variables.
-    $this->enableModules(['system', 'user']);
-    $role = Role::create(['id' => 'test_role', 'label' => 'Test role']);
-    dump($role);
-    dump($role->id());
+    $object = (object) [
+      'Aldebaran' => 'Betelgeuse',
+    ];
+    dump($object);
+    dump('Alpheratz');
 
-    $this->assertStringContainsString('Drupal\user\Entity\Role', StreamCapturer::$cache);
-    $this->assertStringContainsString('test_role', StreamCapturer::$cache);
+    $dumpString = json_encode(DebugDump::getDumps());
+
+    $this->assertStringContainsString('KernelTestBaseTest::testVarDump', $dumpString);
+    $this->assertStringContainsString('Aldebaran', $dumpString);
+    $this->assertStringContainsString('Betelgeuse', $dumpString);
+    $this->assertStringContainsString('Alpheratz', $dumpString);
   }
 
   /**
@@ -403,19 +327,6 @@ class KernelTestBaseTest extends KernelTestBase {
 
     // Test that the module that is providing the database driver is enabled.
     $this->assertSame(1, \Drupal::service('extension.list.module')->get($module)->status);
-  }
-
-  /**
-   * Tests the deprecation of accessing the randomGenerator property directly.
-   *
-   * @group legacy
-   */
-  public function testGetRandomGeneratorPropertyDeprecation(): void {
-    $this->expectDeprecation('Accessing the randomGenerator property is deprecated in drupal:10.2.0 and is removed from drupal:11.0.0. Use getRandomGenerator() instead. See https://www.drupal.org/node/3358445');
-    // We purposely test accessing an undefined property here. We need to tell
-    // PHPStan to ignore that.
-    // @phpstan-ignore-next-line
-    $this->assertInstanceOf(Random::class, $this->randomGenerator);
   }
 
 }

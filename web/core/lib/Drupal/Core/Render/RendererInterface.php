@@ -323,7 +323,7 @@ interface RendererInterface {
    *   (Internal use only.) Whether this is a recursive call or not. See
    *   ::renderRoot().
    *
-   * @return \Drupal\Component\Render\MarkupInterface
+   * @return \Drupal\Component\Render\MarkupInterface|string
    *   The rendered HTML.
    *
    * @throws \LogicException
@@ -340,7 +340,7 @@ interface RendererInterface {
    * @see \Drupal\Core\Render\AttachmentsResponseProcessorInterface::processAttachments()
    * @see \Drupal\Core\Render\RendererInterface::renderRoot()
    */
-  public function render(&$elements, $is_root_call = FALSE);
+  public function render(/* array */&$elements, $is_root_call = FALSE);
 
   /**
    * Checks whether a render context is active.

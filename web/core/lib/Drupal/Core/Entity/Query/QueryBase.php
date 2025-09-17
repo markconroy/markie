@@ -473,7 +473,7 @@ abstract class QueryBase implements QueryInterface {
    * is useful for locating classes in a hierarchy of namespaces, such as when
    * searching for the appropriate query class for an entity type.
    *
-   * @param $object
+   * @param object $object
    *   An object within a namespace.
    *
    * @return array
@@ -498,7 +498,7 @@ abstract class QueryBase implements QueryInterface {
    * @param string $short_class_name
    *   A class name without namespace.
    *
-   * @return string
+   * @return string|null
    *   The fully qualified name of the class.
    */
   public static function getClass(array $namespaces, $short_class_name) {
@@ -508,6 +508,7 @@ abstract class QueryBase implements QueryInterface {
         return $class;
       }
     }
+    return NULL;
   }
 
   /**

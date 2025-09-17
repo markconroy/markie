@@ -27,6 +27,7 @@ use Symfony\Component\Process\Process;
  * @see \Drupal\TestSite\Commands\TestSiteTearDownCommand
  *
  * @group Setup
+ * @group #slow
  * @preserveGlobalState disabled
  */
 class TestSiteApplicationTest extends KernelTestBase {
@@ -88,8 +89,6 @@ class TestSiteApplicationTest extends KernelTestBase {
    * @coversNothing
    */
   public function testInstallScript(): void {
-    $simpletest_path = $this->root . DIRECTORY_SEPARATOR . 'sites' . DIRECTORY_SEPARATOR . 'simpletest';
-
     // Install a site using the JSON output.
     $command_line = $this->php . ' core/scripts/test-site.php install --json --setup-file core/tests/Drupal/TestSite/TestSiteInstallTestScript.php --db-url "' . getenv('SIMPLETEST_DB') . '"';
     $process = Process::fromShellCommandline($command_line, $this->root);
@@ -185,8 +184,6 @@ class TestSiteApplicationTest extends KernelTestBase {
    * @coversNothing
    */
   public function testInstallInDifferentLanguage(): void {
-    $simpletest_path = $this->root . DIRECTORY_SEPARATOR . 'sites' . DIRECTORY_SEPARATOR . 'simpletest';
-
     $command_line = $this->php . ' core/scripts/test-site.php install --json --langcode fr --setup-file core/tests/Drupal/TestSite/TestSiteMultilingualInstallTestScript.php --db-url "' . getenv('SIMPLETEST_DB') . '"';
     $process = Process::fromShellCommandline($command_line, $this->root);
     $process->setTimeout(500);
@@ -232,7 +229,6 @@ class TestSiteApplicationTest extends KernelTestBase {
    */
   public function testUserLogin(): void {
     $this->markTestIncomplete('Fix this test in https://www.drupal.org/project/drupal/issues/2962157.');
-    $simpletest_path = $this->root . DIRECTORY_SEPARATOR . 'sites' . DIRECTORY_SEPARATOR . 'simpletest';
 
     // Install a site using the JSON output.
     $command_line = $this->php . ' core/scripts/test-site.php install --json --setup-file core/tests/Drupal/TestSite/TestSiteInstallTestScript.php --db-url "' . getenv('SIMPLETEST_DB') . '"';

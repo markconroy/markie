@@ -47,20 +47,41 @@ class PerComponentEntityFormDisplayTest extends MigrateTestCase {
 
 }
 
+/**
+ * Test class for testing per component entity form display.
+ */
 class TestPerComponentEntityFormDisplay extends PerComponentEntityFormDisplay {
   const MODE_NAME = 'form_mode';
+
+  /**
+   * The test values.
+   *
+   * @var string[]
+   */
   protected $testValues;
+
+  /**
+   * The test entity.
+   *
+   * @var \PHPUnit\Framework\MockObject\MockObject
+   */
   protected $entity;
 
   public function __construct($entity) {
     $this->entity = $entity;
   }
 
+  /**
+   * Gets the test entity.
+   */
   protected function getEntity($entity_type, $bundle, $form_mode) {
     $this->testValues = func_get_args();
     return $this->entity;
   }
 
+  /**
+   * Gets the test values.
+   */
   public function getTestValues() {
     return $this->testValues;
   }

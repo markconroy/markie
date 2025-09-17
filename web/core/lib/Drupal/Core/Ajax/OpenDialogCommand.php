@@ -41,9 +41,9 @@ class OpenDialogCommand implements CommandInterface, CommandWithAttachedAssetsIn
    *
    * Any jQuery UI option can be used.
    *
-   * @see http://api.jqueryui.com/dialog.
-   *
    * @var array
+   *
+   * @see http://api.jqueryui.com/dialog.
    */
   protected $dialogOptions;
 
@@ -78,12 +78,8 @@ class OpenDialogCommand implements CommandInterface, CommandWithAttachedAssetsIn
     $dialog_options += ['title' => $title];
     if (isset($dialog_options['dialogClass'])) {
       @trigger_error('Passing $dialog_options[\'dialogClass\'] to OpenDialogCommand::__construct() is deprecated in drupal:10.3.0 and will be removed in drupal:12.0.0. Use $dialog_options[\'classes\'] instead. See https://www.drupal.org/node/3440844', E_USER_DEPRECATED);
-      if (isset($dialog_options['classes']['ui-dialog'])) {
-        $dialog_options['classes']['ui-dialog'] = $dialog_options['classes']['ui-dialog'] . ' ' . $dialog_options['dialogClass'];
-      }
-      else {
-        $dialog_options['classes']['ui-dialog'] = $dialog_options['dialogClass'];
-      }
+      $dialog_options['classes']['ui-dialog'] = $dialog_options['dialogClass'];
+      unset($dialog_options['dialogClass']);
     }
 
     $this->selector = $selector;
@@ -96,6 +92,8 @@ class OpenDialogCommand implements CommandInterface, CommandWithAttachedAssetsIn
    * Returns the dialog options.
    *
    * @return array
+   *   An array of the dialog-specific options passed directly to jQuery UI
+   *   dialogs.
    */
   public function getDialogOptions() {
     return $this->dialogOptions;

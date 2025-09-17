@@ -27,6 +27,9 @@ class LocaleJavascriptTranslationTest extends BrowserTestBase {
    */
   protected $defaultTheme = 'stark';
 
+  /**
+   * @covers ::\_locale_parse_js_file
+   */
   public function testFileParsing(): void {
 
     // This test is for ensuring that the regular expression in
@@ -35,7 +38,7 @@ class LocaleJavascriptTranslationTest extends BrowserTestBase {
     // respect to optional whitespace, line breaks, etc.
     // - We test locale_test.js, because that is the one that contains a
     //   variety of whitespace styles.
-    $files[] = __DIR__ . '/../../locale_test.js';
+    $files[] = __DIR__ . '/../../js/locale_test.js';
 
     foreach ($files as $filename) {
       // Parse the file to look for source strings.
@@ -149,7 +152,7 @@ class LocaleJavascriptTranslationTest extends BrowserTestBase {
       ->getStrings([
         'source' => 'Show description',
         'type' => 'javascript',
-        'name' => 'core/modules/locale/locale.admin.js',
+        'name' => 'core/modules/locale/js/locale.admin.js',
       ]);
     $string = $strings[0];
 

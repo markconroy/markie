@@ -95,6 +95,7 @@ class LayoutDefault extends PluginBase implements LayoutInterface, PluginFormInt
    * {@inheritdoc}
    *
    * @return \Drupal\Core\Layout\LayoutDefinition
+   *   The layout plugin definition for this plugin.
    */
   public function getPluginDefinition() {
     return parent::getPluginDefinition();

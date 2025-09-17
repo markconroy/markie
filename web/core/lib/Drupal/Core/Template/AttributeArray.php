@@ -35,16 +35,14 @@ class AttributeArray extends AttributeValueBase implements \ArrayAccess, \Iterat
   /**
    * {@inheritdoc}
    */
-  #[\ReturnTypeWillChange]
-  public function offsetGet($offset) {
+  public function offsetGet($offset): mixed {
     return $this->value[$offset];
   }
 
   /**
    * {@inheritdoc}
    */
-  #[\ReturnTypeWillChange]
-  public function offsetSet($offset, $value) {
+  public function offsetSet($offset, $value): void {
     if (isset($offset)) {
       $this->value[$offset] = $value;
     }
@@ -56,16 +54,14 @@ class AttributeArray extends AttributeValueBase implements \ArrayAccess, \Iterat
   /**
    * {@inheritdoc}
    */
-  #[\ReturnTypeWillChange]
-  public function offsetUnset($offset) {
+  public function offsetUnset($offset): void {
     unset($this->value[$offset]);
   }
 
   /**
    * {@inheritdoc}
    */
-  #[\ReturnTypeWillChange]
-  public function offsetExists($offset) {
+  public function offsetExists($offset): bool {
     return isset($this->value[$offset]);
   }
 
@@ -81,21 +77,20 @@ class AttributeArray extends AttributeValueBase implements \ArrayAccess, \Iterat
   /**
    * {@inheritdoc}
    */
-  #[\ReturnTypeWillChange]
-  public function getIterator() {
+  public function getIterator(): \ArrayIterator {
     return new \ArrayIterator($this->value);
   }
 
   /**
    * Exchange the array for another one.
    *
-   * @see ArrayObject::exchangeArray
-   *
    * @param array $input
    *   The array input to replace the internal value.
    *
    * @return array
    *   The old array value.
+   *
+   * @see ArrayObject::exchangeArray
    */
   public function exchangeArray($input) {
     $old = $this->value;

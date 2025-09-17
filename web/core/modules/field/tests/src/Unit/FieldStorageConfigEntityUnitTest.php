@@ -169,11 +169,11 @@ class FieldStorageConfigEntityUnitTest extends UnitTestCase {
   /**
    * Tests invalid enforced cardinality.
    *
+   * @param mixed $enforced_cardinality
+   *   Enforced cardinality.
+   *
    * @covers ::getCardinality
    * @dataProvider providerInvalidEnforcedCardinality
-   *
-   * @param mixed $enforced_cardinality
-   *   Enforced cardinality
    */
   public function testInvalidEnforcedCardinality($enforced_cardinality): void {
     $this->fieldTypeManager->expects($this->any())

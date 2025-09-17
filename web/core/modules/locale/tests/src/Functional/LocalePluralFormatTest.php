@@ -9,7 +9,7 @@ use Drupal\Core\Database\Database;
 use Drupal\Core\StringTranslation\PluralTranslatableMarkup;
 use Drupal\Tests\BrowserTestBase;
 
-// cspell:ignore heure heures jours lundi ponedjeljak
+// cspell:ignore nmsgid nmsgstr heure heures jours lundi ponedjeljak
 
 /**
  * Tests plural handling for various languages.
@@ -385,7 +385,7 @@ class LocalePluralFormatTest extends BrowserTestBase {
    * @param array $options
    *   Additional options to pass to the translation import form.
    */
-  public function importPoFile($contents, array $options = []) {
+  public function importPoFile($contents, array $options = []): void {
     $file_system = \Drupal::service('file_system');
     $name = $file_system->tempnam('temporary://', "po_") . '.po';
     file_put_contents($name, $contents);

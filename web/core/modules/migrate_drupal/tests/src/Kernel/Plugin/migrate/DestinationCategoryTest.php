@@ -11,7 +11,6 @@ use Drupal\migrate\Plugin\migrate\destination\Config;
 use Drupal\migrate\Plugin\migrate\destination\EntityConfigBase;
 use Drupal\migrate\Plugin\migrate\destination\EntityContentBase;
 use Drupal\shortcut\Plugin\migrate\destination\ShortcutSetUsers;
-use Drupal\statistics\Plugin\migrate\destination\NodeCounter;
 use Drupal\system\Plugin\migrate\destination\d7\ThemeSettings;
 use Drupal\Tests\migrate_drupal\Kernel\MigrateDrupalTestBase;
 use Drupal\Tests\migrate_drupal\Traits\CreateMigrationsTrait;
@@ -99,7 +98,7 @@ class DestinationCategoryTest extends MigrateDrupalTestBase {
    * @return array
    *   The configuration class names.
    */
-  protected function getConfigurationClasses() {
+  protected function getConfigurationClasses(): array {
     return [
       Config::class,
       EntityConfigBase::class,
@@ -118,11 +117,11 @@ class DestinationCategoryTest extends MigrateDrupalTestBase {
    * @return array
    *   The content class names.
    */
-  protected function getContentClasses() {
+  protected function getContentClasses(): array {
     return [
       EntityContentBase::class,
+      // @todo Remove BlockedIp in https://www.drupal.org/project/drupal/issues/3488827
       BlockedIp::class,
-      NodeCounter::class,
       UserData::class,
     ];
   }

@@ -67,12 +67,12 @@ class Schema extends DatabaseSchema {
   }
 
   /**
-   * Build a condition to match a table name against a standard information_schema.
+   * Builds a condition to match a table name with the information schema.
    *
-   * MySQL uses databases like schemas rather than catalogs so when we build
-   * a condition to query the information_schema.tables, we set the default
-   * database as the schema unless specified otherwise, and exclude table_catalog
-   * from the condition criteria.
+   * MySQL uses databases like schemas rather than catalogs so when we build a
+   * condition to query the information_schema.tables, we set the default
+   * database as the schema unless specified otherwise, and exclude
+   * table_catalog from the condition criteria.
    */
   protected function buildTableNameCondition($table_name, $operator = '=', $add_prefix = TRUE) {
     $table_info = $this->getPrefixInfo($table_name, $add_prefix);
@@ -133,7 +133,7 @@ class Schema extends DatabaseSchema {
   }
 
   /**
-   * Create an SQL string for a field to be used in table creation or alteration.
+   * Creates an SQL string for a field used in table creation or alteration.
    *
    * @param string $name
    *   Name of the field.
@@ -199,7 +199,7 @@ class Schema extends DatabaseSchema {
   /**
    * Set database-engine specific properties for a field.
    *
-   * @param $field
+   * @param array $field
    *   A field description array, as specified in the schema documentation.
    */
   protected function processField($field) {
@@ -271,6 +271,9 @@ class Schema extends DatabaseSchema {
     return $map;
   }
 
+  /**
+   * Creates the keys for an SQL table.
+   */
   protected function createKeysSql($spec) {
     $keys = [];
 
@@ -355,6 +358,9 @@ class Schema extends DatabaseSchema {
     }
   }
 
+  /**
+   * Creates an SQL key for the given fields.
+   */
   protected function createKeySql($fields) {
     $return = [];
     foreach ($fields as $field) {
@@ -380,7 +386,7 @@ class Schema extends DatabaseSchema {
     }
 
     $info = $this->getPrefixInfo($new_name);
-    $this->connection->query('ALTER TABLE {' . $table . '} RENAME TO [' . $info['table'] . ']');
+    $this->executeDdlStatement('ALTER TABLE {' . $table . '} RENAME TO [' . $info['table'] . ']');
   }
 
   /**
@@ -391,7 +397,7 @@ class Schema extends DatabaseSchema {
       return FALSE;
     }
 
-    $this->connection->query('DROP TABLE {' . $table . '}');
+    $this->executeDdlStatement('DROP TABLE {' . $table . '}');
     return TRUE;
   }
 
@@ -430,14 +436,14 @@ class Schema extends DatabaseSchema {
       $query .= ', ADD ' . implode(', ADD ', $keys_sql);
     }
     try {
-      $this->connection->query($query);
+      $this->executeDdlStatement($query);
     }
     catch (DatabaseExceptionWrapper $e) {
       // MySQL error number 4111 (ER_DROP_PK_COLUMN_TO_DROP_GIPK) indicates that
       // when dropping and adding a primary key, the generated invisible primary
       // key (GIPK) column must also be dropped.
       if (isset($e->getPrevious()->errorInfo[1]) && $e->getPrevious()->errorInfo[1] === 4111 && isset($keys_new['primary key']) && $this->indexExists($table, 'PRIMARY') && $this->findPrimaryKeyColumns($table) === ['my_row_id']) {
-        $this->connection->query($query . ', DROP COLUMN [my_row_id]');
+        $this->executeDdlStatement($query . ', DROP COLUMN [my_row_id]');
       }
       else {
         throw $e;
@@ -488,7 +494,7 @@ class Schema extends DatabaseSchema {
       $this->dropPrimaryKey($table);
     }
 
-    $this->connection->query('ALTER TABLE {' . $table . '} DROP [' . $field . ']');
+    $this->executeDdlStatement('ALTER TABLE {' . $table . '} DROP [' . $field . ']');
     return TRUE;
   }
 
@@ -513,7 +519,7 @@ class Schema extends DatabaseSchema {
       throw new SchemaObjectExistsException("Cannot add primary key to table '$table': primary key already exists.");
     }
 
-    $this->connection->query('ALTER TABLE {' . $table . '} ADD PRIMARY KEY (' . $this->createKeySql($fields) . ')');
+    $this->executeDdlStatement('ALTER TABLE {' . $table . '} ADD PRIMARY KEY (' . $this->createKeySql($fields) . ')');
   }
 
   /**
@@ -524,7 +530,7 @@ class Schema extends DatabaseSchema {
       return FALSE;
     }
 
-    $this->connection->query('ALTER TABLE {' . $table . '} DROP PRIMARY KEY');
+    $this->executeDdlStatement('ALTER TABLE {' . $table . '} DROP PRIMARY KEY');
     return TRUE;
   }
 
@@ -550,7 +556,7 @@ class Schema extends DatabaseSchema {
       throw new SchemaObjectExistsException("Cannot add unique key '$name' to table '$table': unique key already exists.");
     }
 
-    $this->connection->query('ALTER TABLE {' . $table . '} ADD UNIQUE KEY [' . $name . '] (' . $this->createKeySql($fields) . ')');
+    $this->executeDdlStatement('ALTER TABLE {' . $table . '} ADD UNIQUE KEY [' . $name . '] (' . $this->createKeySql($fields) . ')');
   }
 
   /**
@@ -561,7 +567,7 @@ class Schema extends DatabaseSchema {
       return FALSE;
     }
 
-    $this->connection->query('ALTER TABLE {' . $table . '} DROP KEY [' . $name . ']');
+    $this->executeDdlStatement('ALTER TABLE {' . $table . '} DROP KEY [' . $name . ']');
     return TRUE;
   }
 
@@ -579,7 +585,7 @@ class Schema extends DatabaseSchema {
     $spec['indexes'][$name] = $fields;
     $indexes = $this->getNormalizedIndexes($spec);
 
-    $this->connection->query('ALTER TABLE {' . $table . '} ADD INDEX [' . $name . '] (' . $this->createKeySql($indexes[$name]) . ')');
+    $this->executeDdlStatement('ALTER TABLE {' . $table . '} ADD INDEX [' . $name . '] (' . $this->createKeySql($indexes[$name]) . ')');
   }
 
   /**
@@ -590,7 +596,7 @@ class Schema extends DatabaseSchema {
       return FALSE;
     }
 
-    $this->connection->query('ALTER TABLE {' . $table . '} DROP INDEX [' . $name . ']');
+    $this->executeDdlStatement('ALTER TABLE {' . $table . '} DROP INDEX [' . $name . ']');
     return TRUE;
   }
 
@@ -642,11 +648,11 @@ class Schema extends DatabaseSchema {
     if ($keys_sql = $this->createKeysSql($keys_new)) {
       $sql .= ', ADD ' . implode(', ADD ', $keys_sql);
     }
-    $this->connection->query($sql);
+    $this->executeDdlStatement($sql);
 
     if ($spec['type'] === 'serial') {
       $max = $this->connection->query('SELECT MAX(`' . $field_new . '`) FROM {' . $table . '}')->fetchField();
-      $this->connection->query("ALTER TABLE {" . $table . "} AUTO_INCREMENT = " . ($max + 1));
+      $this->executeDdlStatement("ALTER TABLE {" . $table . "} AUTO_INCREMENT = " . ($max + 1));
     }
   }
 

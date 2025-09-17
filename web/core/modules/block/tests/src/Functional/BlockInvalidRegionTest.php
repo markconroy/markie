@@ -22,6 +22,16 @@ class BlockInvalidRegionTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
+  protected static $configSchemaCheckerExclusions = [
+    // This block is intentionally put in an invalid region, so it will violate
+    // config schema.
+    // @see ::testBlockInvalidRegion()
+    'block.block.invalid_region',
+  ];
+
+  /**
+   * {@inheritdoc}
+   */
   protected $defaultTheme = 'stark';
 
   /**
@@ -43,13 +53,14 @@ class BlockInvalidRegionTest extends BrowserTestBase {
    */
   public function testBlockInInvalidRegion(): void {
     // Enable a test block and place it in an invalid region.
-    $block = $this->drupalPlaceBlock('test_html');
+    $block = $this->drupalPlaceBlock('test_html', ['id' => 'invalid_region']);
     \Drupal::configFactory()->getEditable('block.block.' . $block->id())->set('region', 'invalid_region')->save();
     $block = Block::load($block->id());
 
     $warning_message = 'The block ' . $block->id() . ' was assigned to the invalid region invalid_region and has been disabled.';
 
-    // Clearing the cache should disable the test block placed in the invalid region.
+    // Clearing the cache should disable the test block placed in the invalid
+    // region.
     $this->drupalGet('admin/config/development/performance');
     $this->submitForm([], 'Clear all caches');
     $this->assertSession()->statusMessageContains($warning_message, 'warning');

@@ -21,14 +21,12 @@ use Drupal\Core\Installer\Form\SelectProfileForm;
 abstract class InstallerExistingConfigTestBase extends InstallerTestBase {
 
   /**
-   * This is set by the profile in the core.extension extracted.
-   *
-   * If set to FALSE, then the install will proceed without an install profile.
+   * {@inheritdoc}
    */
   protected $profile = NULL;
 
   /**
-   * @todo Fill out docblock.
+   * @var bool
    */
   protected $existingSyncDirectory = FALSE;
 
@@ -53,8 +51,9 @@ abstract class InstallerExistingConfigTestBase extends InstallerTestBase {
     }
 
     if ($this->profile !== FALSE) {
-      // Create a profile for testing. We set core_version_requirement to '*' for
-      // the test so that it does not need to be updated between major versions.
+      // Create a profile for testing. We set core_version_requirement to '*'
+      // for the test so that it does not need to be updated between major
+      // versions.
       $info = [
         'type' => 'profile',
         'core_version_requirement' => '*',

@@ -26,8 +26,12 @@ class PageTitleTest extends BrowserTestBase {
    */
   protected $defaultTheme = 'starterkit_theme';
 
+  /**
+   * The test user.
+   *
+   * @var \Drupal\Core\Session\AccountInterface
+   */
   protected $contentUser;
-  protected $savedTitle;
 
   /**
    * Implement setUp().

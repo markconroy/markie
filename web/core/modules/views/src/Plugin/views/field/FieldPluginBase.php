@@ -72,10 +72,18 @@ abstract class FieldPluginBase extends HandlerBase implements FieldHandlerInterf
   const RENDER_TEXT_PHASE_EMPTY = 2;
 
   /**
+   * The alias for the field plugin.
+   *
    * @var string
    */
-  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName, Drupal.Commenting.VariableComment.Missing
   public $field_alias = 'unknown';
+
+  /**
+   * An array of aliases.
+   *
+   * @var string[]
+   */
   public $aliases = [];
 
   /**
@@ -83,7 +91,7 @@ abstract class FieldPluginBase extends HandlerBase implements FieldHandlerInterf
    *
    * @var mixed
    */
-  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName, Drupal.Commenting.VariableComment.Missing
   public $original_value = NULL;
 
   /**
@@ -93,7 +101,7 @@ abstract class FieldPluginBase extends HandlerBase implements FieldHandlerInterf
    *
    * @var array
    */
-  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName, Drupal.Commenting.VariableComment.Missing
   public $additional_fields = [];
 
   /**
@@ -113,19 +121,19 @@ abstract class FieldPluginBase extends HandlerBase implements FieldHandlerInterf
   /**
    * The last rendered value.
    */
-  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName, Drupal.Commenting.VariableComment.Missing
   public string|MarkupInterface|NULL $last_render;
 
   /**
    * The last rendered text.
    */
-  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName, Drupal.Commenting.VariableComment.Missing
   public string|MarkupInterface|NULL $last_render_text;
 
   /**
    * The last rendered tokens.
    */
-  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName, Drupal.Commenting.VariableComment.Missing
   public array $last_tokens;
 
   /**
@@ -176,7 +184,7 @@ abstract class FieldPluginBase extends HandlerBase implements FieldHandlerInterf
   /**
    * Add 'additional' fields to the query.
    *
-   * @param $fields
+   * @param array $fields
    *   An array of fields. The key is an identifier used to later find the
    *   field alias used. The value is either a string in which case it's
    *   assumed to be a field on this handler's table; or it's an array in the
@@ -474,6 +482,9 @@ abstract class FieldPluginBase extends HandlerBase implements FieldHandlerInterf
     return TRUE;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   protected function defineOptions() {
     $options = parent::defineOptions();
 
@@ -520,7 +531,7 @@ abstract class FieldPluginBase extends HandlerBase implements FieldHandlerInterf
 
     $options['element_label_type'] = ['default' => ''];
     $options['element_label_class'] = ['default' => ''];
-    $options['element_label_colon'] = ['default' => TRUE];
+    $options['element_label_colon'] = ['default' => FALSE];
 
     $options['element_wrapper_type'] = ['default' => ''];
     $options['element_wrapper_class'] = ['default' => ''];
@@ -1308,9 +1319,10 @@ abstract class FieldPluginBase extends HandlerBase implements FieldHandlerInterf
     // Check if there should be no further rewrite for empty values.
     $no_rewrite_for_empty = $this->options['hide_alter_empty'] && $this->isValueEmpty($this->original_value, $this->options['empty_zero']);
 
-    // Check whether the value is empty and return nothing, so the field isn't rendered.
-    // First check whether the field should be hidden if the value(hide_alter_empty = TRUE) /the rewrite is empty (hide_alter_empty = FALSE).
-    // For numeric values you can specify whether "0"/0 should be empty.
+    // Check whether the value is empty and return nothing, so the field isn't
+    // rendered. First check whether the field should be hidden if the
+    // value(hide_alter_empty = TRUE) /the rewrite is empty (hide_alter_empty =
+    // FALSE). For numeric values you can specify whether "0"/0 should be empty.
     if ((($this->options['hide_empty'] && empty($value))
         || ($alter['phase'] != static::RENDER_TEXT_PHASE_EMPTY && $no_rewrite_for_empty))
       && $this->isValueEmpty($value, $this->options['empty_zero'], FALSE)) {
@@ -1333,7 +1345,7 @@ abstract class FieldPluginBase extends HandlerBase implements FieldHandlerInterf
       $value = $this->renderTrimText($alter, $value);
       if ($this->options['alter']['more_link'] && strlen($value) < $length) {
         $tokens = $this->getRenderTokens($alter);
-        $more_link_text = $this->options['alter']['more_link_text'] ? $this->options['alter']['more_link_text'] : $this->t('more');
+        $more_link_text = $this->options['alter']['more_link_text'] ?: $this->t('more');
         $more_link_text = strtr(Xss::filterAdmin($more_link_text), $tokens);
         $more_link_path = $this->options['alter']['more_link_path'];
         $more_link_path = strip_tags(Html::decodeEntities($this->viewsTokenReplace($more_link_path, $tokens)));
@@ -1515,7 +1527,8 @@ abstract class FieldPluginBase extends HandlerBase implements FieldHandlerInterf
 
     // If the path is empty do not build a link around the given text and return
     // it as is.
-    // http://www.example.com URLs will not have a $url['path'], so check host as well.
+    // http://www.example.com URLs will not have a $url['path'], so check host
+    // as well.
     if (empty($url['path']) && empty($url['host']) && empty($url['fragment']) && empty($url['url'])) {
       return $text;
     }
@@ -1571,8 +1584,9 @@ abstract class FieldPluginBase extends HandlerBase implements FieldHandlerInterf
       $options['attributes']['target'] = $target;
     }
 
-    // Allow the addition of arbitrary attributes to links. Additional attributes
-    // currently can only be altered in preprocessors and not within the UI.
+    // Allow the addition of arbitrary attributes to links. Additional
+    // attributes currently can only be altered in preprocessors and not within
+    // the UI.
     if (isset($alter['link_attributes']) && is_array($alter['link_attributes'])) {
       foreach ($alter['link_attributes'] as $key => $attribute) {
         if (!isset($options['attributes'][$key])) {
@@ -1725,13 +1739,14 @@ abstract class FieldPluginBase extends HandlerBase implements FieldHandlerInterf
    *     '{{ arguments.bar.b.c }}' => 'value',
    *   ];
    *
-   * @param $array
+   * @param array $array
    *   An array of values.
-   * @param $parent_keys
+   * @param array $parent_keys
    *   An array of parent keys. This will represent the array depth.
    *
    * @return array
-   *   An array of available tokens, with nested keys representative of the array structure.
+   *   An array of available tokens, with nested keys representative of the
+   *   array structure.
    */
   protected function getTokenValuesRecursive(array $array, array $parent_keys = []) {
     $tokens = [];
@@ -1803,6 +1818,9 @@ abstract class FieldPluginBase extends HandlerBase implements FieldHandlerInterf
     return $output;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function themeFunctions() {
     $themes = [];
     $hook = 'views_view_field';
@@ -1829,6 +1847,9 @@ abstract class FieldPluginBase extends HandlerBase implements FieldHandlerInterf
     return $themes;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function adminLabel($short = FALSE) {
     return $this->getField(parent::adminLabel($short));
   }
@@ -1882,6 +1903,7 @@ abstract class FieldPluginBase extends HandlerBase implements FieldHandlerInterf
    * Gets the link generator.
    *
    * @return \Drupal\Core\Utility\LinkGeneratorInterface
+   *   The link generator service.
    */
   protected function linkGenerator() {
     if (!isset($this->linkGenerator)) {
@@ -1894,6 +1916,7 @@ abstract class FieldPluginBase extends HandlerBase implements FieldHandlerInterf
    * Returns the render API renderer.
    *
    * @return \Drupal\Core\Render\RendererInterface
+   *   The render API renderer service.
    */
   protected function getRenderer() {
     if (!isset($this->renderer)) {

@@ -70,7 +70,8 @@ class TextSummaryTest extends KernelTestBase {
                 'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. ' .
                 'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.';
     // cSpell:enable
-    // First three sentences add up to: 336, so add one for space and then 3 to get half-way into next word.
+    // First three sentences add up to: 336, so add one for space and then 3 to
+    // get half-way into next word.
     $this->assertTextSummary($text, $expected, NULL, 340);
   }
 
@@ -256,6 +257,7 @@ class TextSummaryTest extends KernelTestBase {
    * Tests required summary.
    */
   public function testRequiredSummary(): void {
+    $this->installEntitySchema('user');
     $this->installEntitySchema('entity_test');
     $this->setUpCurrentUser();
     $field_definition = FieldStorageConfig::create([

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\Core\DependencyInjection\Fixture;
 
 use Symfony\Component\HttpFoundation\Request;
@@ -21,10 +23,7 @@ final class FinalTestHttpMiddlewareClass implements HttpKernelInterface, Termina
 
   /**
    * {@inheritdoc}
-   *
-   * phpcs:ignore Drupal.Commenting.FunctionComment.VoidReturn
-   * @return void
    */
-  public function terminate(Request $request, Response $response) {}
+  public function terminate(Request $request, Response $response): void {}
 
 }

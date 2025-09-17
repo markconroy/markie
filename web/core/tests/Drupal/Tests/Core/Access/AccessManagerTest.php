@@ -113,12 +113,6 @@ class AccessManagerTest extends UnitTestCase {
       ->method('getRouteByName')
       ->willReturnMap($map);
 
-    $map = [];
-    $map[] = ['test_route_1', [], '/test-route-1'];
-    $map[] = ['test_route_2', [], '/test-route-2'];
-    $map[] = ['test_route_3', [], '/test-route-3'];
-    $map[] = ['test_route_4', ['value' => 'example'], '/test-route-4/example'];
-
     $this->paramConverter = $this->createMock('Drupal\Core\ParamConverter\ParamConverterManagerInterface');
 
     $this->account = $this->createMock('Drupal\Core\Session\AccountInterface');
@@ -506,6 +500,7 @@ class AccessManagerTest extends UnitTestCase {
    * Data provider for testCheckException.
    *
    * @return array
+   *   An array of data for check exceptions.
    */
   public static function providerCheckException() {
     return [
@@ -519,7 +514,7 @@ class AccessManagerTest extends UnitTestCase {
   /**
    * Adds a default access check service to the container and the access manager.
    */
-  protected function setupAccessChecker() {
+  protected function setupAccessChecker(): void {
     $this->container->register('test_access_default', DefaultAccessCheck::class);
     $this->checkProvider->addCheckService('test_access_default', 'access', ['_access']);
   }

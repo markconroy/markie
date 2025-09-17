@@ -537,8 +537,8 @@ class ToolsPropertyInput implements ToolsPropertyInputInterface {
       }
     }
     if (!empty($this->properties)) {
-      foreach ($this->properties as $property) {
-        $property['properties'][$property->getName()] = $property->renderPropertyArray();
+      foreach ($this->properties as $child_property) {
+        $property['properties'][$child_property->getName()] = $child_property->renderPropertyArray();
       }
     }
     if (!empty($this->default)) {

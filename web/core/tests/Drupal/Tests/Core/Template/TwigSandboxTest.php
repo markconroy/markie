@@ -57,6 +57,7 @@ class TwigSandboxTest extends UnitTestCase {
    * Data provider for ::testEntityDangerousMethods.
    *
    * @return array
+   *   An array of dangerous methods.
    */
   public static function getTwigEntityDangerousMethods() {
     return [
@@ -105,8 +106,8 @@ class TwigSandboxTest extends UnitTestCase {
   /**
    * Tests that valid methods can be called from within Twig templates.
    *
-   * Currently the following methods are whitelisted: id, label, bundle, and
-   * get.
+   * Currently the following methods are in the allowed list: id, label, bundle,
+   * and get.
    */
   public function testEntitySafeMethods(): void {
     $entity = $this->getMockBuilder(ContentEntityBaseMockableClass::class)
@@ -157,4 +158,7 @@ class TwigSandboxTest extends UnitTestCase {
 
 }
 
+/**
+ * Test class for HTML attributes collector, sanitizer, and renderer.
+ */
 class TestAttribute extends Attribute {}

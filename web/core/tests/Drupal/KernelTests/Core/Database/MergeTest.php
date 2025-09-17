@@ -225,18 +225,12 @@ class MergeTest extends DatabaseTestBase {
   }
 
   /**
-   * Tests deprecation of Merge::key() with array $field argument.
-   *
-   * @group legacy
+   * @covers \Drupal\Core\Database\Query\Merge::__toString
    */
-  public function testDeprecatedKeyArrayArgument(): void {
-    $this->expectDeprecation('Passing an array to the $field argument of Drupal\Core\Database\Query\Merge::key() is deprecated in drupal:10.2.0 and is removed from drupal:11.0.0. See https://www.drupal.org/node/2205327');
-    $this->connection->merge('select')
-      ->key(['id' => 2])
-      ->execute();
-    $person = $this->connection->query('SELECT * FROM {select} WHERE [id] = :id', [':id' => 2])->fetch();
-    $this->assertEquals('', $person->update);
-    $this->assertEquals('2', $person->id);
+  public function testMergeToString(): void {
+    $this->expectException(\BadMethodCallException::class);
+    $this->expectExceptionMessage('The merge query can not be converted to a string');
+    (string) $this->connection->merge('test_people');
   }
 
 }

@@ -5,8 +5,9 @@ declare(strict_types=1);
 
 namespace Drupal\{{ machine_name }}\Plugin\views\field;
 
-{% sort %}
+{% apply sort_namespaces %}
 use Drupal\Component\Render\MarkupInterface;
+use Drupal\views\Attribute\ViewsField;
 use Drupal\views\Plugin\views\field\FieldPluginBase;
 use Drupal\views\ResultRow;
   {% if configurable %}
@@ -16,12 +17,10 @@ use Drupal\Core\Form\FormStateInterface;
 {{ di.use(services) }}
 use Symfony\Component\DependencyInjection\ContainerInterface;
   {% endif %}
-{% endsort %}
+{% endapply %}
 
 /**
  * Provides {{ plugin_label }} field handler.
- *
- * @ViewsField("{{ plugin_id }}")
  *
  * @DCG
  * The plugin needs to be assigned to a specific table column through
@@ -37,6 +36,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * }
  * @endcode
  */
+#[ViewsField('{{ plugin_id }}')]
 final class {{ class }} extends FieldPluginBase {
 
 {% if services %}

@@ -12,12 +12,11 @@ use Drupal\Core\Render\HtmlResponse;
 use Drupal\Core\Session\AnonymousUserSession;
 use Drush\Config\ConfigLocator;
 use Drush\Drupal\DrushLoggerServiceProvider;
+use Drush\Drupal\Migrate\MigrateRunnerServiceProvider;
 use Drush\Drush;
 use Drush\Runtime\LegacyServiceFinder;
 use Drush\Runtime\LegacyServiceInstantiator;
 use Drush\Runtime\ServiceManager;
-use Psr\Log\LoggerAwareInterface;
-use Psr\Log\LoggerInterface;
 use Robo\Robo;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -25,7 +24,6 @@ use Symfony\Component\HttpKernel\TerminableInterface;
 
 class DrupalBoot8 extends DrupalBoot
 {
-    protected ?LoggerInterface $drupalLoggerAdapter = null;
     protected ?DrupalKernelInterface $kernel = null;
     protected Request $request;
 
@@ -47,23 +45,6 @@ class DrupalBoot8 extends DrupalBoot
     public function getKernel(): DrupalKernelInterface
     {
         return $this->kernel;
-    }
-
-    /**
-     * Sometimes (e.g. in the integration tests), the DrupalBoot
-     * object will be cached, and re-injected into a fresh set
-     * of preflight / bootstrap objects. When this happens, the
-     * new Drush logger will be injected into the boot object. If
-     * this happens after we have created the Drupal logger adapter
-     * (i.e., after bootstrapping Drupal), then we also need to
-     * update the logger reference in that adapter.
-     */
-    public function setLogger(LoggerInterface $logger): void
-    {
-        if ($this->drupalLoggerAdapter && $this->drupalLoggerAdapter instanceof LoggerAwareInterface) {
-            $this->drupalLoggerAdapter->setLogger($logger);
-        }
-        parent::setLogger($logger);
     }
 
     public function validRoot(?string $path): bool
@@ -201,6 +182,9 @@ class DrupalBoot8 extends DrupalBoot
     {
         // Coax \Drupal\Core\DrupalKernel::discoverServiceProviders to add our logger.
         $GLOBALS['conf']['container_service_providers'][] = DrushLoggerServiceProvider::class;
+        // Implement a hook in behalf of 'system' module until #2952291 lands.
+        // @see https://www.drupal.org/project/drupal/issues/2952291
+        $GLOBALS['conf']['container_service_providers'][] = MigrateRunnerServiceProvider::class;
 
         // Default to the standard kernel.
         $kernel = Kernels::DRUPAL;
@@ -229,6 +213,10 @@ class DrupalBoot8 extends DrupalBoot
         $this->logger->debug(dt('Finished bootstrap of the Drupal Kernel.'));
 
         parent::bootstrapDrupalFull($manager);
+
+        // Directly add the Drupal core bootstrapped commands.
+        Drush::getApplication()->addCommands($this->serviceManager->instantiateDrupalCoreBootstrappedCommands());
+
         $this->addDrupalModuleDrushCommands($manager);
 
         // Set a default account to make sure the correct timezone is set

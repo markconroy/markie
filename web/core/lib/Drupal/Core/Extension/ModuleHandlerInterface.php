@@ -2,8 +2,6 @@
 
 namespace Drupal\Core\Extension;
 
-use Drupal\Core\DestructableInterface;
-
 /**
  * Interface for classes that manage a set of enabled modules.
  *
@@ -11,7 +9,7 @@ use Drupal\Core\DestructableInterface;
  * responsible for loading module files and maintaining information about module
  * dependencies and hook implementations.
  */
-interface ModuleHandlerInterface extends DestructableInterface {
+interface ModuleHandlerInterface {
 
   /**
    * Includes a module's .module file.
@@ -84,6 +82,10 @@ interface ModuleHandlerInterface extends DestructableInterface {
    *   The module name; e.g., 'node'.
    * @param string $path
    *   The module path; e.g., 'core/modules/node'.
+   *
+   * @deprecated in drupal:11.2.0 and is removed from drupal:12.0.0.
+   * There is no direct replacement.
+   * @see https://www.drupal.org/node/3491200
    */
   public function addModule($name, $path);
 
@@ -94,6 +96,10 @@ interface ModuleHandlerInterface extends DestructableInterface {
    *   The profile name; e.g., 'standard'.
    * @param string $path
    *   The profile path; e.g., 'core/profiles/standard'.
+   *
+   * @deprecated in drupal:11.2.0 and is removed from drupal:12.0.0.
+   * There is no direct replacement.
+   * @see https://www.drupal.org/node/3491200
    */
   public function addProfile($name, $path);
 
@@ -109,8 +115,8 @@ interface ModuleHandlerInterface extends DestructableInterface {
    *   The same array with the new keys for each module:
    *   - requires: An array with the keys being the modules that this module
    *     requires.
-   *   - required_by: An array with the keys being the modules that will not work
-   *     without this module.
+   *   - required_by: An array with the keys being the modules that will not
+   *     work without this module.
    *
    * @see \Drupal\Core\Extension\ExtensionDiscovery
    */
@@ -170,12 +176,22 @@ interface ModuleHandlerInterface extends DestructableInterface {
    *   associative array containing a group name. The structure of the array
    *   is the same as the return value of hook_hook_info().
    *
+   * @deprecated in drupal:11.1.0 and is removed from drupal:12.0.0. Not
+   * needed any more.
+   *
+   * @see https://www.drupal.org/node/3442349
+   *
    * @see hook_hook_info()
    */
   public function getHookInfo();
 
   /**
-   * Write the hook implementation info to the cache.
+   * Does not do anything.
+   *
+   * @deprecated in drupal:11.1.0 and is removed from drupal:12.0.0. Not
+   * needed any more.
+   *
+   * @see https://www.drupal.org/node/3442349
    */
   public function writeCache();
 
@@ -209,7 +225,7 @@ interface ModuleHandlerInterface extends DestructableInterface {
    *
    * @param string $hook
    *   The name of the hook to invoke.
-   * @param callable $callback
+   * @param callable(callable, string): mixed $callback
    *   A callable that invokes a hook implementation. Such that
    *   $callback is callable(callable, string): mixed.
    *   Arguments:
@@ -309,9 +325,9 @@ interface ModuleHandlerInterface extends DestructableInterface {
    * hook_TYPE_alter() implementations in modules. It ensures a consistent
    * interface for all altering operations.
    *
-   * A maximum of 2 alterable arguments is supported. In case more arguments need
-   * to be passed and alterable, modules provide additional variables assigned by
-   * reference in the last $context argument:
+   * A maximum of 2 alterable arguments is supported. In case more arguments
+   * need to be passed and alterable, modules provide additional variables
+   * assigned by reference in the last $context argument:
    * @code
    *   $context = [
    *     'alterable' => &$alterable,
@@ -340,8 +356,8 @@ interface ModuleHandlerInterface extends DestructableInterface {
    *   execute both hook_form_alter() and hook_form_FORM_ID_alter()
    *   implementations, it passes ['form', 'form_' . $form_id] for $type.
    * @param mixed $data
-   *   The variable that will be passed to hook_TYPE_alter() implementations to be
-   *   altered. The type of this variable depends on the value of the $type
+   *   The variable that will be passed to hook_TYPE_alter() implementations to
+   *   be altered. The type of this variable depends on the value of the $type
    *   argument. For example, when altering a 'form', $data will be a structured
    *   array. When altering a 'profile', $data will be an object.
    * @param mixed $context1
@@ -373,8 +389,8 @@ interface ModuleHandlerInterface extends DestructableInterface {
    *   execute both hook_form_alter() and hook_form_FORM_ID_alter()
    *   implementations, it passes ['form', 'form_' . $form_id] for $type.
    * @param mixed $data
-   *   The variable that will be passed to hook_TYPE_alter() implementations to be
-   *   altered. The type of this variable depends on the value of the $type
+   *   The variable that will be passed to hook_TYPE_alter() implementations to
+   *   be altered. The type of this variable depends on the value of the $type
    *   argument. For example, when altering a 'form', $data will be a structured
    *   array. When altering a 'profile', $data will be an object.
    * @param mixed $context1
@@ -396,6 +412,8 @@ interface ModuleHandlerInterface extends DestructableInterface {
    * directories.
    *
    * @return array
+   *   An associative array of the directories for all enabled modules, keyed by
+   *   the extension machine name.
    */
   public function getModuleDirectories();
 

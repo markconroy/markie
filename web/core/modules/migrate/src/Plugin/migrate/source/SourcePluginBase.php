@@ -30,7 +30,7 @@ use Drupal\migrate\Row;
  *     \Drupal\migrate\Plugin\MigrateIdMapInterface::STATUS_NEEDS_UPDATE.
  * - The row needs an update.
  *   - Rows can be marked by custom or contrib modules using the
- *     \Drupal\migrate\Plugin\MigrateIdMapInterface::prepareUpdate() os
+ *     \Drupal\migrate\Plugin\MigrateIdMapInterface::prepareUpdate() or
  *     \Drupal\migrate\Plugin\MigrateIdMapInterface::setUpdate()
  *     methods.
  * - The row is above the high-water mark.
@@ -97,15 +97,15 @@ use Drupal\migrate\Row;
  * source:
  *   plugin: some_source_plugin_name
  *   constants:
- *     - foo: bar
+ *     foo: bar
  * process:
- *   baz: constants/bar
+ *   baz: constants/foo
  * @endcode
  *
  * In this example, the constant 'foo' is defined with a value of 'bar'. It is
  * later used in the process pipeline to set the value of the field baz.
  *
- * @see \Drupal\migrate\Annotation\MigrateSource
+ * @see \Drupal\migrate\Attribute\MigrateSource
  * @see \Drupal\migrate\Plugin\MigrateIdMapInterface
  * @see \Drupal\migrate\Plugin\MigratePluginManager
  * @see \Drupal\migrate\Plugin\MigrateSourceInterface
@@ -343,8 +343,7 @@ abstract class SourcePluginBase extends PluginBase implements MigrateSourceInter
   /**
    * {@inheritdoc}
    */
-  #[\ReturnTypeWillChange]
-  public function current() {
+  public function current(): mixed {
     return $this->currentRow;
   }
 
@@ -356,8 +355,7 @@ abstract class SourcePluginBase extends PluginBase implements MigrateSourceInter
    * serialize to fulfill the requirement, but using getCurrentIds() is
    * preferable.
    */
-  #[\ReturnTypeWillChange]
-  public function key() {
+  public function key(): mixed {
     return serialize($this->currentSourceIds);
   }
 
@@ -367,8 +365,7 @@ abstract class SourcePluginBase extends PluginBase implements MigrateSourceInter
    * Implementation of \Iterator::valid() - called at the top of the loop,
    * returning TRUE to process the loop and FALSE to terminate it.
    */
-  #[\ReturnTypeWillChange]
-  public function valid() {
+  public function valid(): bool {
     return isset($this->currentRow);
   }
 
@@ -379,8 +376,7 @@ abstract class SourcePluginBase extends PluginBase implements MigrateSourceInter
    * should implement initializeIterator() to do any class-specific setup for
    * iterating source records.
    */
-  #[\ReturnTypeWillChange]
-  public function rewind() {
+  public function rewind(): void {
     $this->getIterator()->rewind();
     $this->next();
   }
@@ -388,8 +384,7 @@ abstract class SourcePluginBase extends PluginBase implements MigrateSourceInter
   /**
    * {@inheritdoc}
    */
-  #[\ReturnTypeWillChange]
-  public function next() {
+  public function next(): void {
     $this->currentSourceIds = NULL;
     $this->currentRow = NULL;
 
@@ -492,8 +487,7 @@ abstract class SourcePluginBase extends PluginBase implements MigrateSourceInter
    * @return int
    *   The count.
    */
-  #[\ReturnTypeWillChange]
-  public function count($refresh = FALSE) {
+  public function count($refresh = FALSE): int {
     if ($this->skipCount) {
       return MigrateSourceInterface::NOT_COUNTABLE;
     }
@@ -533,6 +527,7 @@ abstract class SourcePluginBase extends PluginBase implements MigrateSourceInter
    * Checks if the source is countable or using the iterator_count function.
    *
    * @return int
+   *   The count of available source records.
    */
   protected function doCount() {
     $iterator = $this->getIterator();
@@ -555,8 +550,8 @@ abstract class SourcePluginBase extends PluginBase implements MigrateSourceInter
   /**
    * The current value of the high water mark.
    *
-   * The high water mark defines a timestamp stating the time the import was last
-   * run. If the mark is set, only content with a higher timestamp will be
+   * The high water mark defines a timestamp stating the time the import was
+   * last run. If the mark is set, only content with a higher timestamp will be
    * imported.
    *
    * @return int|null
@@ -614,15 +609,15 @@ abstract class SourcePluginBase extends PluginBase implements MigrateSourceInter
    * {@inheritdoc}
    */
   public function preRollback(MigrateRollbackEvent $event) {
-    // Nothing to do in this implementation.
+    // Reset the high-water mark.
+    $this->saveHighWater(NULL);
   }
 
   /**
    * {@inheritdoc}
    */
   public function postRollback(MigrateRollbackEvent $event) {
-    // Reset the high-water mark.
-    $this->saveHighWater(NULL);
+    // Nothing to do in this implementation.
   }
 
   /**
@@ -631,9 +626,6 @@ abstract class SourcePluginBase extends PluginBase implements MigrateSourceInter
   public function getSourceModule() {
     if (!empty($this->configuration['source_module'])) {
       return $this->configuration['source_module'];
-    }
-    elseif (!empty($this->pluginDefinition['source_module'])) {
-      return $this->pluginDefinition['source_module'];
     }
     return NULL;
   }

@@ -168,7 +168,6 @@ class SearchCommentTest extends BrowserTestBase {
     ];
     $this->drupalGet('search/node');
     $this->submitForm($edit, 'Search');
-    $node_storage->resetCache([$node->id()]);
     $node2 = $node_storage->load($node->id());
     $this->assertSession()->pageTextContains($node2->label());
     $this->assertSession()->pageTextContains($edit_comment['subject[0][value]']);
@@ -302,7 +301,7 @@ class SearchCommentTest extends BrowserTestBase {
   /**
    * Set permissions for role.
    */
-  public function setRolePermissions($rid, $access_comments = FALSE, $search_content = TRUE) {
+  public function setRolePermissions($rid, $access_comments = FALSE, $search_content = TRUE): void {
     $permissions = [
       'access comments' => $access_comments,
       'search content' => $search_content,
@@ -336,7 +335,7 @@ class SearchCommentTest extends BrowserTestBase {
         $this->assertSession()->pageTextContains('Your search yielded no results.');
       }
     }
-    catch (ResponseTextException $exception) {
+    catch (ResponseTextException) {
       $this->fail($message);
     }
   }

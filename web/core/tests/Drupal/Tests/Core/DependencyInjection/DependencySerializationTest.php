@@ -8,7 +8,6 @@ use Drupal\Component\DependencyInjection\ReverseContainer;
 use Drupal\Core\DependencyInjection\DependencySerializationTrait;
 use Drupal\Core\Test\TestKernel;
 use Drupal\Tests\UnitTestCase;
-use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -46,7 +45,7 @@ class DependencySerializationTest extends UnitTestCase {
 /**
  * Defines a test class which has a single service as dependency.
  */
-class DependencySerializationTestDummy implements ContainerAwareInterface {
+class DependencySerializationTestDummy {
 
   use DependencySerializationTrait;
 
@@ -76,11 +75,8 @@ class DependencySerializationTestDummy implements ContainerAwareInterface {
 
   /**
    * {@inheritdoc}
-   *
-   * phpcs:ignore Drupal.Commenting.FunctionComment.VoidReturn
-   * @return void
    */
-  public function setContainer(?ContainerInterface $container = NULL) {
+  public function setContainer(?ContainerInterface $container): void {
     $this->container = $container;
   }
 

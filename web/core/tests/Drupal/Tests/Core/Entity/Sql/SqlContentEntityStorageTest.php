@@ -9,7 +9,6 @@ use Drupal\Core\Cache\MemoryCache\MemoryCache;
 use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\Entity\EntityFieldManager;
 use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManager;
 use Drupal\Core\Entity\Query\QueryFactoryInterface;
@@ -17,6 +16,7 @@ use Drupal\Core\Entity\Sql\DefaultTableMapping;
 use Drupal\Core\Entity\Sql\SqlContentEntityStorage;
 use Drupal\Core\Language\Language;
 use Drupal\Tests\Core\Entity\ContentEntityBaseMockableClass;
+use Drupal\Tests\Core\Entity\StubEntityBase;
 use Drupal\Tests\UnitTestCase;
 use Prophecy\Argument;
 
@@ -1105,12 +1105,7 @@ class SqlContentEntityStorageTest extends UnitTestCase {
     $this->setUpEntityStorage();
 
     $entity = $this->entityStorage->create();
-    $entity->expects($this->atLeastOnce())
-      ->method('id')
-      ->willReturn('foo');
-
-    $this->assertInstanceOf('Drupal\Core\Entity\EntityInterface', $entity);
-    $this->assertSame('foo', $entity->id());
+    $this->assertInstanceOf(EntityInterface::class, $entity);
     $this->assertTrue($entity->isNew());
   }
 
@@ -1126,7 +1121,7 @@ class SqlContentEntityStorageTest extends UnitTestCase {
    * @return \Drupal\Tests\Core\Field\TestBaseFieldDefinitionInterface[]|\PHPUnit\Framework\MockObject\MockObject[]
    *   An array of mock base field definitions.
    */
-  protected function mockFieldDefinitions(array $field_names, $methods = []) {
+  protected function mockFieldDefinitions(array $field_names, $methods = []): array {
     $field_definitions = [];
     $definition = $this->createMock('Drupal\Tests\Core\Field\TestBaseFieldDefinitionInterface');
 
@@ -1156,7 +1151,7 @@ class SqlContentEntityStorageTest extends UnitTestCase {
   /**
    * Sets up the content entity database storage.
    */
-  protected function setUpEntityStorage() {
+  protected function setUpEntityStorage(): void {
     $this->connection = $this->getMockBuilder('Drupal\Core\Database\Connection')
       ->disableOriginalConstructor()
       ->getMock();
@@ -1191,8 +1186,10 @@ class SqlContentEntityStorageTest extends UnitTestCase {
 
     $key = 'values:' . $this->entityTypeId . ':1';
     $id = 1;
-    $entity = $this->getMockBuilder('\Drupal\Tests\Core\Entity\Sql\SqlContentEntityStorageTestEntityInterface')
-      ->getMockForAbstractClass();
+    $entity = $this->getMockBuilder(StubEntityBase::class)
+      ->disableOriginalConstructor()
+      ->onlyMethods(['id'])
+      ->getMock();
     $entity->expects($this->any())
       ->method('id')
       ->willReturn($id);
@@ -1226,8 +1223,10 @@ class SqlContentEntityStorageTest extends UnitTestCase {
     $this->setUpModuleHandlerNoImplementations();
 
     $id = 1;
-    $entity = $this->getMockBuilder('\Drupal\Tests\Core\Entity\Sql\SqlContentEntityStorageTestEntityInterface')
-      ->getMockForAbstractClass();
+    $entity = $this->getMockBuilder(StubEntityBase::class)
+      ->disableOriginalConstructor()
+      ->onlyMethods(['id'])
+      ->getMock();
     $entity->expects($this->any())
       ->method('id')
       ->willReturn($id);
@@ -1277,8 +1276,10 @@ class SqlContentEntityStorageTest extends UnitTestCase {
     $this->setUpModuleHandlerNoImplementations();
 
     $id = 1;
-    $entity = $this->getMockBuilder('\Drupal\Tests\Core\Entity\Sql\SqlContentEntityStorageTestEntityInterface')
-      ->getMockForAbstractClass();
+    $entity = $this->getMockBuilder(StubEntityBase::class)
+      ->disableOriginalConstructor()
+      ->onlyMethods(['id'])
+      ->getMock();
     $entity->expects($this->any())
       ->method('id')
       ->willReturn($id);
@@ -1302,7 +1303,7 @@ class SqlContentEntityStorageTest extends UnitTestCase {
       ->with([
         $key => [
           'data' => $entity,
-          'tags' => [$this->entityTypeId . '_values', 'entity_field_info'],
+          'tags' => ['entity_field_info'],
         ],
       ]);
 
@@ -1448,7 +1449,7 @@ class SqlContentEntityStorageTest extends UnitTestCase {
   /**
    * Sets up the module handler with no implementations.
    */
-  protected function setUpModuleHandlerNoImplementations() {
+  protected function setUpModuleHandlerNoImplementations(): void {
     $this->moduleHandler->expects($this->any())
       ->method('invokeAllWith')
       ->willReturnMap([
@@ -1457,19 +1458,6 @@ class SqlContentEntityStorageTest extends UnitTestCase {
       ]);
 
     $this->container->set('module_handler', $this->moduleHandler);
-  }
-
-}
-
-/**
- * Provides an entity with dummy implementations of static methods.
- */
-abstract class SqlContentEntityStorageTestEntityInterface implements EntityInterface {
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function postLoad(EntityStorageInterface $storage, array &$entities) {
   }
 
 }

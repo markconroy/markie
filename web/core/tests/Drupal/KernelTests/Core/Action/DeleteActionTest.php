@@ -15,6 +15,11 @@ use Drupal\user\Entity\User;
  */
 class DeleteActionTest extends KernelTestBase {
 
+  /**
+   * The test user.
+   *
+   * @var \Drupal\Core\Session\AccountInterface
+   */
   protected $testUser;
 
   /**

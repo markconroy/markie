@@ -1,3 +1,16 @@
+parameters:
+  node.moved_classes:
+    'Drupal\node\NodeForm':
+      class: 'Drupal\node\Form\NodeForm'
+      deprecation_version: drupal:11.2.0
+      removed_version: drupal:12.0.0
+      change_record: https://www.drupal.org/node/3517871
+    'Drupal\node\NodeTypeForm':
+      class: 'Drupal\node\Form\NodeTypeForm'
+      deprecation_version: drupal:11.2.0
+      removed_version: drupal:12.0.0
+      change_record: https://www.drupal.org/node/3517871
+
 services:
   _defaults:
     autoconfigure: true
@@ -23,13 +36,6 @@ services:
     tags:
       - { name: paramconverter }
     lazy: true
-  node.page_cache_response_policy.deny_node_preview:
-    class: Drupal\node\PageCache\DenyNodePreview
-    arguments: ['@current_route_match']
-    public: false
-    tags:
-      - { name: page_cache_response_policy }
-      - { name: dynamic_page_cache_response_policy }
   cache_context.user.node_grants:
     class: Drupal\node\Cache\NodeAccessGrantsCacheContext
     arguments: ['@current_user']

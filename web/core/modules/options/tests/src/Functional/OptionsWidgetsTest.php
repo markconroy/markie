@@ -344,7 +344,7 @@ class OptionsWidgetsTest extends FieldTestBase {
     // Test optgroups.
 
     $this->card1->setSetting('allowed_values', []);
-    $this->card1->setSetting('allowed_values_function', 'options_test_allowed_values_callback');
+    $this->card1->setSetting('allowed_values_function', '\Drupal\options_test\OptionsAllowedValues::simpleValues');
     $this->card1->save();
 
     // Display form: with no field data, nothing is selected
@@ -409,7 +409,7 @@ class OptionsWidgetsTest extends FieldTestBase {
     // Submit form: select invalid 'none' option.
     $edit = ['card_1' => '_none'];
     $this->submitForm($edit, 'Save');
-    $this->assertSession()->responseContains(t('This is custom message for required field.'));
+    $this->assertSession()->responseContains('This is custom message for required field.');
   }
 
   /**
@@ -505,7 +505,7 @@ class OptionsWidgetsTest extends FieldTestBase {
 
     // Use a callback function defining optgroups.
     $this->card2->setSetting('allowed_values', []);
-    $this->card2->setSetting('allowed_values_function', 'options_test_allowed_values_callback');
+    $this->card2->setSetting('allowed_values_function', '\Drupal\options_test\OptionsAllowedValues::simpleValues');
     $this->card2->save();
     $field->setRequired(FALSE);
     $field->save();

@@ -1,16 +1,21 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\big_pipe_regression_test;
 
 use Drupal\big_pipe\Render\BigPipeMarkup;
 use Drupal\Component\Utility\Random;
 use Drupal\Core\Security\TrustedCallbackInterface;
 
+/**
+ * Controller for BigPipe regression tests.
+ */
 class BigPipeRegressionTestController implements TrustedCallbackInterface {
 
   const MARKER_2678662 = '<script>var hitsTheFloor = "</body>";</script>';
 
-  const PLACEHOLDER_COUNT = 3000;
+  const PLACEHOLDER_COUNT = 2000;
 
   /**
    * @see \Drupal\Tests\big_pipe\FunctionalJavascript\BigPipeRegressionTest::testMultipleBodies_2678662()
@@ -79,9 +84,12 @@ class BigPipeRegressionTestController implements TrustedCallbackInterface {
   }
 
   /**
-   * #lazy_builder callback; builds <time> markup with current time.
+   * Render API callback: Builds <time> markup with current time.
+   *
+   * This function is assigned as a #lazy_builder callback.
    *
    * @return array
+   *   Render array with a <time> markup with current time and cache settings.
    */
   public static function currentTime() {
     return [

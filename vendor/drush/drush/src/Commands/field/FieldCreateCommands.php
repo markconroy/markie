@@ -498,9 +498,11 @@ class FieldCreateCommands extends DrushCommands implements CustomEventAwareInter
         $entityType = $this->input->getArgument('entityType');
         $bundle = $this->input->getArgument('bundle');
 
-        return $this->entityTypeManager
+        $return = $this->entityTypeManager
             ->getStorage(sprintf('entity_%s_display', $context))
             ->load(sprintf('%s.%s.default', $entityType, $bundle));
+        assert($return instanceof EntityDisplayInterface || $return === null);
+        return $return;
     }
 
     protected function logResult(FieldConfigInterface $field): void
@@ -525,11 +527,9 @@ class FieldCreateCommands extends DrushCommands implements CustomEventAwareInter
 
         if ($this->moduleHandler->moduleExists('field_ui')) {
             $this->logger()->success(
-                'Further customisation can be done at the following url:'
-                . PHP_EOL
-                . Url::fromRoute($routeName, $routeParams)
-                    ->setAbsolute(true)
-                    ->toString()
+                dt('Further customisation can be done through the <href=%editForm>edit form</>.', [
+                    '%editForm' => Url::fromRoute($routeName, $routeParams)->setAbsolute(true)->toString(),
+                ]),
             );
         }
     }

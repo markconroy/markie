@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\Tests\Core\Database;
 
 use Drupal\Core\Database\Connection;
+use Drupal\Core\Database\InvalidQueryException;
 use Drupal\Core\Database\Query\Condition;
 use Drupal\Core\Database\Query\PlaceholderInterface;
 use Drupal\Tests\Core\Database\Stub\StubCondition;
@@ -112,6 +113,7 @@ class ConditionTest extends UnitTestCase {
    * Provides a list of known operations and the expected output.
    *
    * @return array
+   *   An array of known operations and the expected output.
    */
   public static function dataProviderTestCompileWithKnownOperators() {
     // Below are a list of commented out test cases, which should work but
@@ -169,10 +171,14 @@ class ConditionTest extends UnitTestCase {
 
     $condition = $connection->condition('AND');
     $condition->condition('name', 'value', $operator);
-    $this->expectError();
+    $this->expectException(InvalidQueryException::class);
+    $this->expectExceptionMessage('Invalid characters in query operator:');
     $condition->compile($connection, $query_placeholder);
   }
 
+  /**
+   * Provides data for testing SQL injection.
+   */
   public static function providerTestCompileWithSqlInjectionForOperator() {
     $data = [];
     $data[] = ["IS NOT NULL) ;INSERT INTO {test} (name) VALUES ('test12345678'); -- "];

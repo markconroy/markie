@@ -15,6 +15,7 @@ use Drupal\Tests\field_ui\Traits\FieldUiTestTrait;
  * Tests link field UI functionality.
  *
  * @group link
+ * @group #slow
  */
 class LinkFieldUITest extends BrowserTestBase {
 
@@ -149,7 +150,7 @@ class LinkFieldUITest extends BrowserTestBase {
    * @param string $default_uri
    *   The default URI value.
    */
-  public function runFieldUIItem($cardinality, $link_type, $title, $label, $field_name, $default_uri) {
+  public function runFieldUIItem($cardinality, $link_type, $title, $label, $field_name, $default_uri): void {
     $this->drupalLogin($this->adminUser);
     $type_path = 'admin/structure/types/manage/' . $this->contentType->id();
 
@@ -243,7 +244,7 @@ class LinkFieldUITest extends BrowserTestBase {
   /**
    * Returns the raw HTML for the given field.
    *
-   * @param $field_name
+   * @param string $field_name
    *   The name of the field for which to return the HTML.
    *
    * @return string

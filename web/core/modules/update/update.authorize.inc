@@ -2,15 +2,10 @@
 
 /**
  * @file
- * Callbacks and related functions invoked by authorize.php to update projects.
- *
- * We use the Batch API to actually update each individual project on the site.
- * All of the code in this file is run at a low bootstrap level (modules are not
- * loaded), so these functions cannot assume access to the rest of the code of
- * the Update Manager module.
  */
 
 use Drupal\Core\Batch\BatchBuilder;
+use Drupal\Core\Hook\Attribute\ProceduralHookScanStop;
 use Drupal\Core\Updater\UpdaterException;
 use Drupal\Core\Url;
 
@@ -20,10 +15,10 @@ use Drupal\Core\Url;
  * Callback for system_authorized_init() in
  * update_manager_update_ready_form_submit().
  *
- * @param $filetransfer
+ * @param \Drupal\Core\FileTransfer\FileTransfer $filetransfer
  *   The FileTransfer object created by authorize.php for use during this
  *   operation.
- * @param $projects
+ * @param array $projects
  *   A nested array of projects to install into the live webroot, keyed by
  *   project name. Each subarray contains the following keys:
  *   - project: The canonical project short name.
@@ -36,7 +31,10 @@ use Drupal\Core\Url;
  *   an instance of \Symfony\Component\HttpFoundation\Response the calling code
  *   should use that response for the current page request.
  */
+#[ProceduralHookScanStop]
 function update_authorize_run_update($filetransfer, $projects) {
+  @trigger_error(__FUNCTION__ . '() is deprecated in drupal:11.2.0 and is removed from drupal:12.0.0. There is no replacement. Use composer to manage the code for your site. See https://www.drupal.org/node/3512364', E_USER_DEPRECATED);
+
   $batch_builder = (new BatchBuilder())
     ->setFile(\Drupal::service('extension.list.module')->getPath('update') . '/update.authorize.inc')
     ->setInitMessage(t('Preparing to update your site'))
@@ -63,56 +61,6 @@ function update_authorize_run_update($filetransfer, $projects) {
 }
 
 /**
- * Installs a new project when invoked by authorize.php.
- *
- * Callback for system_authorized_init() in
- * update_manager_install_form_submit().
- *
- * @param \Drupal\Core\FileTransfer\FileTransfer $filetransfer
- *   The FileTransfer object created by authorize.php for use during this
- *   operation.
- * @param string $project
- *   The canonical project short name; i.e., the name of the module, theme, or
- *   profile.
- * @param string $updater_name
- *   The name of the Drupal\Core\Updater\Updater class to use for installing
- *   this project.
- * @param string $local_url
- *   The URL to the locally installed temp directory where the project has
- *   already been downloaded and extracted into.
- *
- * @return \Symfony\Component\HttpFoundation\Response|null
- *   The result of processing the batch that installs the project. If this is
- *   an instance of \Symfony\Component\HttpFoundation\Response the calling code
- *   should use that response for the current page request.
- */
-function update_authorize_run_install($filetransfer, $project, $updater_name, $local_url) {
-  @trigger_error(__METHOD__ . '() is deprecated in drupal:10.4.0 and is removed from drupal:11.1.0. There is no replacement. See https://www.drupal.org/node/3461934');
-
-  // @todo Instantiate our Updater to set the human-readable title?
-  $batch_builder = (new BatchBuilder())
-    ->setFile(\Drupal::service('extension.list.module')->getPath('update') . '/update.authorize.inc')
-    ->setInitMessage(t('Preparing to install'))
-    ->addOperation('update_authorize_batch_copy_project', [
-      $project,
-      $updater_name,
-      $local_url,
-      $filetransfer,
-    ])
-    // @todo Use a different finished callback for different messages?
-    ->setFinishCallback('update_authorize_install_batch_finished');
-  batch_set($batch_builder->toArray());
-
-  // Since authorize.php has its own method for setting the page title, set it
-  // manually here rather than passing it in to batch_set() as would normally
-  // be done.
-  \Drupal::request()->getSession()->set('authorize_page_title', t('Adding %project', ['%project' => $project]));
-
-  // Invoke the batch via authorize.php.
-  return system_authorized_batch_process();
-}
-
-/**
  * Implements callback_batch_operation().
  *
  * Copies project to its proper place when authorized to do so.
@@ -130,7 +78,8 @@ function update_authorize_run_install($filetransfer, $project, $updater_name, $l
  * @param array $context
  *   Reference to an array used for Batch API storage.
  */
-function update_authorize_batch_copy_project($project, $updater_name, $local_url, $filetransfer, &$context) {
+function update_authorize_batch_copy_project($project, $updater_name, $local_url, $filetransfer, &$context): void {
+  @trigger_error(__FUNCTION__ . '() is deprecated in drupal:11.2.0 and is removed from drupal:12.0.0. There is no replacement. Use composer to manage the code for your site. See https://www.drupal.org/node/3512364', E_USER_DEPRECATED);
 
   // Initialize some variables in the Batch API $context array.
   if (!isset($context['results']['log'])) {
@@ -151,6 +100,7 @@ function update_authorize_batch_copy_project($project, $updater_name, $local_url
   // though the connection itself is now gone. So, although it's ugly, we have
   // to unset the connection variable at this point so that the FileTransfer
   // object will re-initiate the actual connection.
+  // @phpstan-ignore property.deprecatedClass
   unset($filetransfer->connection);
 
   if (!empty($context['results']['log'][$project]['#abort'])) {
@@ -158,6 +108,7 @@ function update_authorize_batch_copy_project($project, $updater_name, $local_url
     return;
   }
 
+  // @phpstan-ignore getDeprecatedService.deprecated
   $updater = new $updater_name($local_url, \Drupal::getContainer()->get('update.root'));
 
   try {
@@ -194,12 +145,14 @@ function update_authorize_batch_copy_project($project, $updater_name, $local_url
  * authorize.php will render a report. Also responsible for putting the site
  * back online and clearing the update status storage after a successful update.
  *
- * @param $success
+ * @param bool $success
  *   TRUE if the batch operation was successful; FALSE if there were errors.
- * @param $results
+ * @param array $results
  *   An associative array of results from the batch operation.
  */
-function update_authorize_update_batch_finished($success, $results) {
+function update_authorize_update_batch_finished($success, $results): void {
+  @trigger_error(__FUNCTION__ . '() is deprecated in drupal:11.2.0 and is removed from drupal:12.0.0. There is no replacement. Use composer to manage the code for your site. See https://www.drupal.org/node/3512364', E_USER_DEPRECATED);
+
   foreach ($results['log'] as $messages) {
     if (!empty($messages['#abort'])) {
       $success = FALSE;
@@ -271,69 +224,6 @@ function update_authorize_update_batch_finished($success, $results) {
 }
 
 /**
- * Implements callback_batch_finished().
- *
- * Performs actions when the authorized install batch is done.
- *
- * This processes the results and stashes them into SESSION such that
- * authorize.php will render a report. Also responsible for putting the site
- * back online after a successful install if necessary.
- *
- * @param $success
- *   TRUE if the batch operation was a success; FALSE if there were errors.
- * @param $results
- *   An associative array of results from the batch operation.
- */
-function update_authorize_install_batch_finished($success, $results) {
-  foreach ($results['log'] as $messages) {
-    if (!empty($messages['#abort'])) {
-      $success = FALSE;
-    }
-  }
-  $offline = \Drupal::state()->get('system.maintenance_mode');
-  $session = \Drupal::request()->getSession();
-  // Unset the variable since it is no longer needed.
-  $maintenance_mode = $session->remove('maintenance_mode');
-  if ($success) {
-    // Take the site out of maintenance mode if it was previously that way.
-    if ($offline && $maintenance_mode === FALSE) {
-      \Drupal::state()->set('system.maintenance_mode', FALSE);
-      $page_message = [
-        'message' => t('Files were added successfully. Your site has been taken out of maintenance mode.'),
-        'type' => 'status',
-      ];
-    }
-    else {
-      $page_message = [
-        'message' => t('Files were added successfully.'),
-        'type' => 'status',
-      ];
-    }
-  }
-  elseif (!$success && !$offline) {
-    $page_message = [
-      'message' => t('File add failed! See the log below for more information.'),
-      'type' => 'error',
-    ];
-  }
-  else {
-    $page_message = [
-      'message' => t('File add failed! See the log below for more information. Your site is still in maintenance mode.'),
-      'type' => 'error',
-    ];
-  }
-
-  // Set all these values into the SESSION so authorize.php can display them.
-  $session->set('authorize_results', [
-    'success' => $success,
-    'page_message' => $page_message,
-    'messages' => $results['log'],
-    'tasks' => $results['tasks'],
-  ]);
-  $session->set('authorize_page_title', t('Update manager'));
-}
-
-/**
  * Creates a structure of log messages.
  *
  * @param array $project_results
@@ -344,7 +234,9 @@ function update_authorize_install_batch_finished($success, $results) {
  *   (optional) TRUE if the operation the message is about was a success, FALSE
  *   if there were errors. Defaults to TRUE.
  */
-function _update_batch_create_message(&$project_results, $message, $success = TRUE) {
+function _update_batch_create_message(&$project_results, $message, $success = TRUE): void {
+  @trigger_error(__FUNCTION__ . '() is deprecated in drupal:11.2.0 and is removed from drupal:12.0.0. There is no replacement. Use composer to manage the code for your site. See https://www.drupal.org/node/3512364', E_USER_DEPRECATED);
+
   $project_results[] = ['message' => $message, 'success' => $success];
 }
 
@@ -361,7 +253,9 @@ function _update_batch_create_message(&$project_results, $message, $success = TR
  * @see update_authorize_update_batch_finished()
  * @see update_storage_clear()
  */
-function _update_authorize_clear_update_status() {
+function _update_authorize_clear_update_status(): void {
+  @trigger_error(__FUNCTION__ . '() is deprecated in drupal:11.2.0 and is removed from drupal:12.0.0. There is no replacement. Use composer to manage the code for your site. See https://www.drupal.org/node/3512364', E_USER_DEPRECATED);
+
   \Drupal::keyValueExpirable('update')->deleteAll();
   \Drupal::keyValueExpirable('update_available_release')->deleteAll();
 }

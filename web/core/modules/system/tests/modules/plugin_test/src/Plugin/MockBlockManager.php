@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\plugin_test\Plugin;
 
 use Drupal\Component\Plugin\PluginManagerBase;
@@ -138,6 +140,7 @@ class MockBlockManager extends PluginManagerBase {
    *   Whether the context definition is required.
    *
    * @return \Drupal\Core\Plugin\Context\ContextDefinition
+   *   The context definition object.
    */
   protected function createContextDefinition($data_type, $label, $required = TRUE) {
     // We cast the label to string for testing purposes only, as it may be

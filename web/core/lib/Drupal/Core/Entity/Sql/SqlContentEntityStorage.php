@@ -5,9 +5,9 @@ namespace Drupal\Core\Entity\Sql;
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Cache\MemoryCache\MemoryCacheInterface;
 use Drupal\Core\Database\Connection;
-use Drupal\Core\Database\Database;
 use Drupal\Core\Database\DatabaseExceptionWrapper;
 use Drupal\Core\Database\SchemaException;
+use Drupal\Core\Database\Statement\FetchAs;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\ContentEntityStorageBase;
 use Drupal\Core\Entity\ContentEntityTypeInterface;
@@ -531,7 +531,7 @@ class SqlContentEntityStorage extends ContentEntityStorageBase implements SqlEnt
       // latest revision. Otherwise we fall back to the data table.
       $table = $this->revisionDataTable ?: $this->dataTable;
       $alias = $this->revisionDataTable ? 'revision' : 'data';
-      $query = $this->database->select($table, $alias, ['fetch' => \PDO::FETCH_ASSOC])
+      $query = $this->database->select($table, $alias, ['fetch' => FetchAs::Associative])
         ->fields($alias)
         ->condition($alias . '.' . $record_key, array_keys($values), 'IN')
         ->orderBy($alias . '.' . $record_key);
@@ -792,9 +792,7 @@ class SqlContentEntityStorage extends ContentEntityStorageBase implements SqlEnt
         ->execute();
     }
 
-    foreach ($entities as $entity) {
-      $this->deleteFromDedicatedTables($entity);
-    }
+    $this->deleteFromDedicatedTables($ids);
   }
 
   /**
@@ -940,15 +938,14 @@ class SqlContentEntityStorage extends ContentEntityStorageBase implements SqlEnt
         }
       }
       else {
-        // @todo Remove the 'return' option in Drupal 11.
-        // @see https://www.drupal.org/project/drupal/issues/3256524
         $insert_id = $this->database
-          ->insert($this->baseTable, ['return' => Database::RETURN_INSERT_ID])
+          ->insert($this->baseTable)
           ->fields((array) $record)
           ->execute();
         // Even if this is a new entity the ID key might have been set, in which
-        // case we should not override the provided ID. An ID key that is not set
-        // to any value is interpreted as NULL (or DEFAULT) and thus overridden.
+        // case we should not override the provided ID. An ID key that is not
+        // set to any value is interpreted as NULL (or DEFAULT) and thus
+        // overridden.
         if (!isset($record->{$this->idKey})) {
           $record->{$this->idKey} = $insert_id;
         }
@@ -1087,9 +1084,9 @@ class SqlContentEntityStorage extends ContentEntityStorageBase implements SqlEnt
   /**
    * Checks whether a field column should be treated as serial.
    *
-   * @param $table_name
+   * @param string $table_name
    *   The name of the table the field column belongs to.
-   * @param $schema_name
+   * @param string $schema_name
    *   The schema name of the field column.
    *
    * @return bool
@@ -1145,10 +1142,8 @@ class SqlContentEntityStorage extends ContentEntityStorageBase implements SqlEnt
     $entity->preSaveRevision($this, $record);
 
     if ($entity->isNewRevision()) {
-      // @todo Remove the 'return' option in Drupal 11.
-      // @see https://www.drupal.org/project/drupal/issues/3256524
       $insert_id = $this->database
-        ->insert($this->revisionTable, ['return' => Database::RETURN_INSERT_ID])
+        ->insert($this->revisionTable)
         ->fields((array) $record)
         ->execute();
       // Even if this is a new revision, the revision ID key might have been
@@ -1301,12 +1296,7 @@ class SqlContentEntityStorage extends ContentEntityStorageBase implements SqlEnt
       $vid = $id;
     }
 
-    $original = !empty($entity->original) ? $entity->original : NULL;
-
-    // Use the loaded revision instead of default one to check for data change.
-    if ($original && !$entity->isNewRevision() && !$entity->isDefaultRevision()) {
-      $original = $this->loadRevision($entity->getLoadedRevisionId());
-    }
+    $original = $entity->getOriginal();
 
     // Determine which fields should be actually stored.
     $definitions = $this->entityFieldManager->getFieldDefinitions($entity_type, $bundle);
@@ -1409,10 +1399,10 @@ class SqlContentEntityStorage extends ContentEntityStorageBase implements SqlEnt
   /**
    * Deletes values of fields in dedicated tables for all revisions.
    *
-   * @param \Drupal\Core\Entity\ContentEntityInterface $entity
-   *   The entity.
+   * @param array $ids
+   *   An array of entity IDs.
    */
-  protected function deleteFromDedicatedTables(ContentEntityInterface $entity) {
+  protected function deleteFromDedicatedTables(array $ids) {
     $table_mapping = $this->getTableMapping();
     foreach ($this->fieldStorageDefinitions as $storage_definition) {
       if (!$table_mapping->requiresDedicatedTableStorage($storage_definition)) {
@@ -1421,11 +1411,11 @@ class SqlContentEntityStorage extends ContentEntityStorageBase implements SqlEnt
       $table_name = $table_mapping->getDedicatedDataTableName($storage_definition);
       $revision_name = $table_mapping->getDedicatedRevisionTableName($storage_definition);
       $this->database->delete($table_name)
-        ->condition('entity_id', $entity->id())
+        ->condition('entity_id', $ids, 'IN')
         ->execute();
       if ($this->entityType->isRevisionable()) {
         $this->database->delete($revision_name)
-          ->condition('entity_id', $entity->id())
+          ->condition('entity_id', $ids, 'IN')
           ->execute();
       }
     }
@@ -1650,7 +1640,7 @@ class SqlContentEntityStorage extends ContentEntityStorageBase implements SqlEnt
     $table_name = $table_mapping->getDedicatedDataTableName($storage_definition, $storage_definition->isDeleted());
 
     // Get the entities which we want to purge first.
-    $entity_query = $this->database->select($table_name, 't', ['fetch' => \PDO::FETCH_ASSOC]);
+    $entity_query = $this->database->select($table_name, 't', ['fetch' => FetchAs::Associative]);
     $or = $entity_query->orConditionGroup();
     foreach ($storage_definition->getColumns() as $column_name => $data) {
       $or->isNotNull($table_mapping->getFieldColumnName($storage_definition, $column_name));
@@ -1670,7 +1660,7 @@ class SqlContentEntityStorage extends ContentEntityStorageBase implements SqlEnt
     $entities = [];
     $items_by_entity = [];
     foreach ($entity_query->execute() as $row) {
-      $item_query = $this->database->select($table_name, 't', ['fetch' => \PDO::FETCH_ASSOC])
+      $item_query = $this->database->select($table_name, 't', ['fetch' => FetchAs::Associative])
         ->fields('t')
         ->condition('entity_id', $row['entity_id'])
         ->condition('deleted', 1)

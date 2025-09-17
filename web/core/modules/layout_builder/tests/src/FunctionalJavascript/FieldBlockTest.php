@@ -26,8 +26,8 @@ class FieldBlockTest extends WebDriverTestBase {
     'datetime',
     'layout_builder',
     'user',
-    // See \Drupal\layout_builder_fieldblock_test\Plugin\Block\FieldBlock.
-    'layout_builder_fieldblock_test',
+    // See \Drupal\layout_builder_field_block_test\Plugin\Block\FieldBlock.
+    'layout_builder_field_block_test',
     'layout_builder_expose_all_field_blocks',
   ];
 
@@ -137,7 +137,7 @@ class FieldBlockTest extends WebDriverTestBase {
 
     // Assert that the block is displaying the user field.
     $this->drupalGet('admin');
-    $assert_session->pageTextContains('Sunday, November 19, 1978 - 16:00');
+    $assert_session->pageTextContains('Sunday, 19 November 1978 - 16:00');
   }
 
   /**

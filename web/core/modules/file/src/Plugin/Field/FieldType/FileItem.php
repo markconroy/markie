@@ -233,8 +233,8 @@ class FileItem extends EntityReferenceItem {
    * Form API callback.
    *
    * Removes slashes from the beginning and end of the destination value and
-   * ensures that the file directory path is not included at the beginning of the
-   * value.
+   * ensures that the file directory path is not included at the beginning of
+   * the value.
    *
    * This function is assigned as an #element_validate callback in
    * fieldSettingsForm().
@@ -253,7 +253,8 @@ class FileItem extends EntityReferenceItem {
    *
    * This doubles as a convenience clean-up function and a validation routine.
    * Commas are allowed by the end-user, but ultimately the value will be stored
-   * as a space-separated list for compatibility with file_validate_extensions().
+   * as a space-separated list for compatibility with the 'FileExtension'
+   * constraint.
    */
   public static function validateExtensions($element, FormStateInterface $form_state) {
     if (!empty($element['#value'])) {

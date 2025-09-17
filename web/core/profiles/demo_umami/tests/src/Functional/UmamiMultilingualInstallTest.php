@@ -30,13 +30,13 @@ class UmamiMultilingualInstallTest extends InstallerTestBase {
   public function testUmami(): void {
     $this->drupalGet('');
     // cSpell:disable-next-line
-    $this->assertSession()->pageTextContains('Quiche mediterráneo profundo');
+    $this->assertSession()->pageTextContains('Crema catalana');
   }
 
   /**
    * {@inheritdoc}
    */
-  protected function setUpLanguage() {
+  protected function setUpLanguage(): void {
     // Place custom local translations in the translations directory to avoid
     // getting translations from localize.drupal.org.
     mkdir(DRUPAL_ROOT . '/' . $this->siteDirectory . '/files/translations', 0777, TRUE);

@@ -52,9 +52,9 @@ use Psr\Http\Message\ResponseInterface;
  *    (permissions or perhaps custom access control handling, such as node
  *    grants), plus
  * 2. a concrete subclass extending the abstract entity type-specific subclass
- *    that specifies the exact @code $format @endcode, @code $mimeType @endcode
- *    and @code $auth @endcode for this concrete test. Usually that's all that's
- *    necessary: most concrete subclasses will be very thin.
+ *    that specifies the exact "$format", "$mimeType" and "$auth" for this
+ *    concrete test. Usually that's all that's necessary: most concrete
+ *    subclasses will be very thin.
  *
  * For every of these concrete subclasses, a comprehensive test scenario will
  * run per HTTP method:
@@ -103,9 +103,9 @@ abstract class EntityResourceTestBase extends ResourceTestBase {
    *
    * Some entities do not specify a 'label' entity key. For example: User.
    *
-   * @see ::getInvalidNormalizedEntityToCreate
-   *
    * @var string|null
+   *
+   * @see ::getInvalidNormalizedEntityToCreate
    */
   protected static $labelFieldName = NULL;
 
@@ -114,9 +114,9 @@ abstract class EntityResourceTestBase extends ResourceTestBase {
    *
    * The default value of 2 should work for most content entities.
    *
-   * @see ::testPost()
-   *
    * @var string|int
+   *
+   * @see ::testPost()
    */
   protected static $firstCreatedEntityId = 2;
 
@@ -125,9 +125,9 @@ abstract class EntityResourceTestBase extends ResourceTestBase {
    *
    * The default value of 3 should work for most content entities.
    *
-   * @see ::testPost()
-   *
    * @var string|int
+   *
+   * @see ::testPost()
    */
   protected static $secondCreatedEntityId = 3;
 
@@ -272,6 +272,7 @@ abstract class EntityResourceTestBase extends ResourceTestBase {
    * @see ::createEntity()
    *
    * @return array
+   *   An array structure as returned by ::getExpectedNormalizedEntity().
    */
   abstract protected function getExpectedNormalizedEntity();
 
@@ -281,6 +282,7 @@ abstract class EntityResourceTestBase extends ResourceTestBase {
    * @see ::testPost
    *
    * @return array
+   *   An array structure as returned by ::getNormalizedPostEntity().
    */
   abstract protected function getNormalizedPostEntity();
 
@@ -293,6 +295,7 @@ abstract class EntityResourceTestBase extends ResourceTestBase {
    * @see ::testPatch
    *
    * @return array
+   *   An array structure as returned by ::getNormalizedPostEntity().
    */
   protected function getNormalizedPatchEntity() {
     return $this->getNormalizedPostEntity();
@@ -377,6 +380,7 @@ abstract class EntityResourceTestBase extends ResourceTestBase {
    * @see ::testGet
    *
    * @return string[]
+   *   The expected cache tags.
    */
   protected function getExpectedCacheTags() {
     $expected_cache_tags = [
@@ -395,6 +399,7 @@ abstract class EntityResourceTestBase extends ResourceTestBase {
    * @see ::testGet
    *
    * @return string[]
+   *   The expected cache contexts.
    */
   protected function getExpectedCacheContexts() {
     return [
@@ -475,7 +480,8 @@ abstract class EntityResourceTestBase extends ResourceTestBase {
     $this->provisionEntityResource(TRUE);
     $expected_403_cacheability = $this->getExpectedUnauthorizedAccessCacheability()
       ->addCacheableDependency($this->getExpectedUnauthorizedEntityAccessCacheability(static::$auth !== FALSE));
-    // DX: 403 because unauthorized single-format route, ?_format is omittable.
+    // DX: 403 because unauthorized single-format route, ?_format can be
+    // omitted.
     $url->setOption('query', []);
     $response = $this->request('GET', $url, $request_options);
     if ($has_canonical_url) {
@@ -496,7 +502,7 @@ abstract class EntityResourceTestBase extends ResourceTestBase {
 
     // Then, what we'll use for the remainder of the test: multiple formats.
     $this->provisionEntityResource();
-    // DX: 406 because despite unauthorized, ?_format is not omittable.
+    // DX: 406 because despite unauthorized, ?_format can not be omitted.
     $url->setOption('query', []);
     $response = $this->request('GET', $url, $request_options);
     if ($has_canonical_url) {
@@ -1233,7 +1239,8 @@ abstract class EntityResourceTestBase extends ResourceTestBase {
     $has_canonical_url = $this->entity->hasLinkTemplate('canonical');
     // Note that the 'canonical' link relation type must be specified explicitly
     // in the call to ::toUrl(). 'canonical' is the default for
-    // \Drupal\Core\Entity\Entity::toUrl(), but ConfigEntityBase overrides this.
+    // \Drupal\Core\Entity\EntityBase::toUrl(), but ConfigEntityBase overrides
+    // this.
     return $has_canonical_url ? $this->entity->toUrl('canonical') : Url::fromUri('base:entity/' . static::$entityTypeId . '/' . $this->entity->id());
   }
 
@@ -1444,9 +1451,9 @@ abstract class EntityResourceTestBase extends ResourceTestBase {
    * A response may include more properties, we only need to ensure that all
    * items in the request exist in the response.
    *
-   * @param $expected
+   * @param array $expected
    *   An array of expected values, may contain further nested arrays.
-   * @param $actual
+   * @param array $actual
    *   The object to test.
    */
   protected function assertEntityArraySubset($expected, $actual) {

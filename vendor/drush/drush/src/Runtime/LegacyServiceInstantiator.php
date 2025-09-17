@@ -119,6 +119,10 @@ class LegacyServiceInstantiator
                 $info['arguments'] ?? [],
                 $info['calls'] ?? []
             );
+            if (empty($service)) {
+                $this->logger->debug("Could not instantiate {class} for '{service_name}' service", ['class' => $info['class'], 'service_name' => $serviceName]);
+                continue;
+            }
 
             $this->instantiatedDrushServices[$serviceName] = $service;
 
@@ -155,12 +159,15 @@ class LegacyServiceInstantiator
      * @param string[] $arguments Parameters to class constructor
      * @param array $calls Method names and arguments to call after object is instantiated
      *
-     * @return object
-     *   Instantiated command handler from the service file
+     * @return object|null
+     *   Instantiated command handler from the service file or empty result
      */
     public function create(string $class, array $arguments, array $calls)
     {
         $instance = $this->instantiateObject($class, $arguments);
+        if (empty($instance)) {
+            return null;
+        }
         foreach ($calls as $callInfo) {
             $this->call($instance, $callInfo[0], $callInfo[1]);
         }
@@ -178,7 +185,11 @@ class LegacyServiceInstantiator
      */
     public function instantiateObject($class, array $arguments)
     {
-        $refl = new \ReflectionClass($class);
+        try {
+            $refl = new \ReflectionClass($class);
+        } catch (\Throwable $e) {
+            return;
+        }
         return $refl->newInstanceArgs($this->resolveArguments($arguments));
     }
 
@@ -216,12 +227,12 @@ class LegacyServiceInstantiator
      * Look up one argument in the appropriate container, or
      * return it as-is.
      *
-     * @param array $arg Argument to resolve
+     * @param $arg Argument to resolve
      *
-     * @return object
+     * @return mixed
      *   Argument after it has been resolved by DI container
      */
-    protected function resolveArgument($arg)
+    protected function resolveArgument($arg): mixed
     {
         if (!is_string($arg)) {
             return $arg;
@@ -259,7 +270,7 @@ class LegacyServiceInstantiator
      * @param Container $container Drupal DI container
      * @param string $arg Argument to resolve
      *
-     * @return object
+     * @return ?object
      *   Resolved object from DI container
      */
     protected function resolveFromContainer($container, string $arg)
@@ -283,12 +294,12 @@ class LegacyServiceInstantiator
      * those that do not are required.
      *
      *
-     * @return bool, string
+     * @return array{bool, string}
      *   Boolean indicating whether the object is required to be in the container,
      *   and a string with the name of the object to look up (passed input with
      *   any leading ? removed).
      */
-    protected function isRequired(string $arg)
+    protected function isRequired(string $arg): array
     {
         if ($arg[0] === '?') {
             return [false, substr($arg, 1)];

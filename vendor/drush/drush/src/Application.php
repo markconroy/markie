@@ -38,20 +38,11 @@ class Application extends SymfonyApplication implements LoggerAwareInterface, Co
     use LoggerAwareTrait;
     use ConfigAwareTrait;
 
-    /** @var BootstrapManager */
-    protected $bootstrapManager;
-
-    /** @var SiteAliasManager */
-    protected $aliasManager;
-
-    /** @var RedispatchHook */
-    protected $redispatchHook;
-
-    /** @var TildeExpansionHook */
-    protected $tildeExpansionHook;
-
-    /** @var ServiceManager */
-    protected $serviceManager;
+    protected ?BootstrapManager $bootstrapManager;
+    protected ?SiteAliasManager $aliasManager;
+    protected ?RedispatchHook $redispatchHook;
+    protected ?TildeExpansionHook $tildeExpansionHook;
+    protected ?ServiceManager $serviceManager;
 
     /**
      * Add global options to the Application and their default values to Config.
@@ -79,7 +70,7 @@ class Application extends SymfonyApplication implements LoggerAwareInterface, Co
 
         $this->getDefinition()
             ->addOption(
-                new InputOption('--root', '-r', InputOption::VALUE_REQUIRED, 'The Drupal root for this site.')
+                new InputOption('--root', '-r', InputOption::VALUE_REQUIRED, 'The Drupal root for this site. Note: this option is deprecated and will be removed. ')
             );
 
 
@@ -96,6 +87,11 @@ class Application extends SymfonyApplication implements LoggerAwareInterface, Co
         $this->getDefinition()
             ->addOption(
                 new InputOption('--define', '-D', InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'Define a configuration item value.', [])
+            );
+
+        $this->getDefinition()
+            ->addOption(
+                new InputOption('--xdebug', null, InputOption::VALUE_NONE, 'Drush turns off Xdebug to achieve better performance. Pass this option to keep Xdebug enabled.')
             );
     }
 
@@ -225,7 +221,7 @@ class Application extends SymfonyApplication implements LoggerAwareInterface, Co
 
             if (!$this->bootstrapManager()->hasBootstrapped(DrupalBootLevels::ROOT)) {
                 // Unable to progress in the bootstrap. Give friendly error message.
-                throw new CommandNotFoundException(dt('Command !command was not found. Pass --root or a @siteAlias in order to run Drupal-specific commands.', ['!command' => $name]));
+                throw new CommandNotFoundException(dt('Command !command was not found. Make sure that the `drush` you are calling is a dependency of a your site\'s composer.json', ['!command' => $name]));
             }
 
             // Try to find it again, now that we bootstrapped as far as possible.

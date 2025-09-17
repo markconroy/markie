@@ -7,9 +7,11 @@ use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Cache\UseCacheBackendTrait;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\Core\Field\FieldConfigInterface;
 use Drupal\Core\Field\FieldDefinition;
 use Drupal\Core\KeyValueStore\KeyValueFactoryInterface;
 use Drupal\Core\Language\LanguageManagerInterface;
+use Drupal\Core\PreWarm\PreWarmableInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\TypedData\TypedDataManagerInterface;
 
@@ -19,7 +21,7 @@ use Drupal\Core\TypedData\TypedDataManagerInterface;
  * This includes field definitions, base field definitions, and field storage
  * definitions.
  */
-class EntityFieldManager implements EntityFieldManagerInterface {
+class EntityFieldManager implements EntityFieldManagerInterface, PreWarmableInterface {
 
   use UseCacheBackendTrait;
   use StringTranslationTrait;
@@ -193,7 +195,10 @@ class EntityFieldManager implements EntityFieldManagerInterface {
       else {
         // Rebuild the definitions and put it into the cache.
         $this->baseFieldDefinitions[$entity_type_id] = $this->buildBaseFieldDefinitions($entity_type_id);
-        $this->cacheSet($cid, $this->baseFieldDefinitions[$entity_type_id], Cache::PERMANENT, ['entity_types', 'entity_field_info']);
+        $this->cacheSet($cid, $this->baseFieldDefinitions[$entity_type_id], Cache::PERMANENT, [
+          'entity_types',
+          'entity_field_info',
+        ]);
       }
     }
     return $this->baseFieldDefinitions[$entity_type_id];
@@ -576,7 +581,7 @@ class EntityFieldManager implements EntityFieldManagerInterface {
    *
    * @param string $entity_type_id
    *   The entity type ID. Only entity types that implement
-   *   \Drupal\Core\Entity\FieldableEntityInterface are supported
+   *   \Drupal\Core\Entity\FieldableEntityInterface are supported.
    *
    * @return \Drupal\Core\Field\FieldStorageDefinitionInterface[]
    *   An array of field storage definitions, keyed by field name.
@@ -691,6 +696,48 @@ class EntityFieldManager implements EntityFieldManagerInterface {
     ]);
 
     return $extra;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function preWarm(): void {
+    $this->getFieldMap();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getFieldLabels(string $entity_type, string $field_name): array {
+    $label_counter = [];
+    $all_labels = [];
+    // Count the number of fields per label per field storage.
+    foreach (array_keys($this->entityTypeBundleInfo->getBundleInfo($entity_type)) as $bundle) {
+      $bundle_fields = array_filter($this->getFieldDefinitions($entity_type, $bundle), function ($field_definition) {
+        return $field_definition instanceof FieldConfigInterface;
+      });
+      if (isset($bundle_fields[$field_name])) {
+        $field = $bundle_fields[$field_name];
+        $label = $field->getLabel();
+        $label_counter[$label] = isset($label_counter[$label]) ? ++$label_counter[$label] : 1;
+        $all_labels[$label] = TRUE;
+      }
+    }
+    if (empty($label_counter)) {
+      return [$field_name, $all_labels];
+    }
+    // Sort the field labels by the most used label and return the most used
+    // one. If the counts are equal, sort by the label to ensure the result is
+    // deterministic.
+    uksort($label_counter, function ($a, $b) use ($label_counter) {
+      if ($label_counter[$a] === $label_counter[$b]) {
+        return strcmp($a, $b);
+      }
+      return $label_counter[$b] <=> $label_counter[$a];
+    });
+    $label_counter = array_keys($label_counter);
+
+    return [$label_counter[0], $all_labels];
   }
 
 }

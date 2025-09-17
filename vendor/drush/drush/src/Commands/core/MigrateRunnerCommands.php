@@ -30,7 +30,7 @@ use Drush\Utils\StringUtils;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Filesystem\Path;
 
-class MigrateRunnerCommands extends DrushCommands
+final class MigrateRunnerCommands extends DrushCommands
 {
     use AutowireTrait;
 
@@ -347,11 +347,13 @@ class MigrateRunnerCommands extends DrushCommands
             'execute_dependencies' => $options['execute-dependencies'],
         ];
 
-        // Include the file providing a migrate_prepare_row hook implementation.
-        require_once Path::join($this->getConfig()->get('drush.base-dir'), 'src/Drupal/Migrate/migrate_runner.inc');
-        // If the 'migrate_prepare_row' hook implementations are already cached,
-        // make sure that system_migrate_prepare_row() is picked-up.
-        \Drupal::moduleHandler()->resetImplementations();
+        if (version_compare(\Drupal::VERSION, '11.1.0', '<')) {
+            // Include the migrate_prepare_row hook implementation.
+            require_once Path::join($this->getConfig()->get('drush.base-dir'), 'src/Drupal/Migrate/migrate_runner.inc');
+            // If the 'migrate_prepare_row' hook implementations are already
+            // cached, make sure that system_migrate_prepare_row() is picked-up.
+            \Drupal::moduleHandler()->resetImplementations();
+        }
 
         foreach ($list as $migrations) {
             array_walk($migrations, [static::class, 'executeMigration'], $userData);
@@ -388,6 +390,10 @@ class MigrateRunnerCommands extends DrushCommands
             }
         }
         if (!empty($userData['options']['force'])) {
+            // @todo Use the new MigrationInterface::setRequirements() method,
+            //   instead of Migration::set() and remove the PHPStan exception
+            //   from phpstan-baseline.neon when #2796755 lands in Drupal core.
+            // @see https://www.drupal.org/i/2796755
             $migration->set('requirements', []);
         }
         if (!empty($userData['options']['update'])) {
@@ -647,7 +653,7 @@ class MigrateRunnerCommands extends DrushCommands
         foreach ($source->fields() as $machineName => $description) {
             $table[] = [
                 'machine_name' => $machineName,
-                'description' => strip_tags($description),
+                'description' => strip_tags((string) $description),
             ];
         }
         return new RowsOfFields($table);

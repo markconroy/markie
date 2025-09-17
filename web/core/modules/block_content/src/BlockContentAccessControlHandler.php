@@ -2,10 +2,10 @@
 
 namespace Drupal\block_content;
 
-use Drupal\block_content\Access\DependentAccessInterface;
 use Drupal\block_content\Event\BlockContentGetDependencyEvent;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Access\AccessResultInterface;
+use Drupal\Core\Access\DependentAccessInterface;
 use Drupal\Core\Entity\EntityAccessControlHandler;
 use Drupal\Core\Entity\EntityHandlerInterface;
 use Drupal\Core\Entity\EntityInterface;
@@ -107,10 +107,8 @@ class BlockContentAccessControlHandler extends EntityAccessControlHandler implem
   protected function checkCreateAccess(AccountInterface $account, array $context, $entity_bundle = NULL) {
     return AccessResult::allowedIfHasPermissions($account, [
       'create ' . $entity_bundle . ' block content',
-      'access block library',
-    ])->orIf(AccessResult::allowedIfHasPermissions($account, [
       'administer block content',
-    ]));
+    ], 'OR');
   }
 
 }

@@ -1,9 +1,14 @@
+parameters:
+  editor.skip_procedural_hook_scan: true
+
 services:
   _defaults:
     autoconfigure: true
   plugin.manager.editor:
     class: Drupal\editor\Plugin\EditorManager
     parent: default_plugin_manager
+    arguments:
+      $entityTypeManager: '@entity_type.manager'
   element.editor:
     class: Drupal\editor\Element
     arguments: ['@plugin.manager.editor']

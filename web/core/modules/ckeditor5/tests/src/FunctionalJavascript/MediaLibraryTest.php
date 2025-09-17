@@ -13,7 +13,7 @@ use Drupal\media\Entity\Media;
 use Drupal\Tests\ckeditor5\Traits\CKEditor5TestTrait;
 use Drupal\Tests\media\Traits\MediaTypeCreationTrait;
 use Drupal\Tests\TestFileCreationTrait;
-use Symfony\Component\Validator\ConstraintViolation;
+use Symfony\Component\Validator\ConstraintViolationInterface;
 
 // cspell:ignore arrakis complote détruire harkonnen
 
@@ -74,6 +74,9 @@ class MediaLibraryTest extends WebDriverTestBase {
     Editor::create([
       'editor' => 'ckeditor5',
       'format' => 'test_format',
+      'image_upload' => [
+        'status' => FALSE,
+      ],
       'settings' => [
         'toolbar' => [
           'items' => [
@@ -94,7 +97,7 @@ class MediaLibraryTest extends WebDriverTestBase {
       ],
     ])->save();
     $this->assertSame([], array_map(
-      function (ConstraintViolation $v) {
+      function (ConstraintViolationInterface $v) {
         return (string) $v->getMessage();
       },
       iterator_to_array(CKEditor5::validatePair(
@@ -153,9 +156,6 @@ class MediaLibraryTest extends WebDriverTestBase {
    * Tests using drupalMedia button to embed media into CKEditor 5.
    */
   public function testButton(): void {
-    // Skipped due to frequent random test failures.
-    // @todo Fix this and stop skipping it at https://www.drupal.org/i/3351597.
-    $this->markTestSkipped();
     $media_preview_selector = '.ck-content .ck-widget.drupal-media .media';
     $this->drupalGet('/node/add/blog');
     $this->waitForEditor();

@@ -22,14 +22,14 @@ class FileCopyTest extends MigrateProcessTestCase {
   /**
    * Tests that the plugin constructor correctly sets the configuration.
    *
-   * @dataProvider providerFileProcessBaseConstructor
-   *
    * @param array $configuration
    *   The plugin configuration.
-   * @param $expected
+   * @param \Drupal\Core\File\FileExists $expected
    *   The expected value of the plugin configuration.
+   *
+   * @dataProvider providerFileProcessBaseConstructor
    */
-  public function testFileProcessBaseConstructor($configuration, $expected): void {
+  public function testFileProcessBaseConstructor(array $configuration, FileExists $expected): void {
     $this->assertPlugin($configuration, $expected);
   }
 

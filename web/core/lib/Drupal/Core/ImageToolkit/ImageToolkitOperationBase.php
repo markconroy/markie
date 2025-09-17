@@ -59,6 +59,7 @@ abstract class ImageToolkitOperationBase extends PluginBase implements ImageTool
    * image toolkit operation developers.
    *
    * @return \Drupal\Core\ImageToolkit\ImageToolkitInterface
+   *   The image toolkit in use.
    */
   protected function getToolkit() {
     return $this->toolkit;
@@ -97,8 +98,8 @@ abstract class ImageToolkitOperationBase extends PluginBase implements ImageTool
    * @return array
    *   The prepared arguments array.
    *
-   * @throws \InvalidArgumentException.
-   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException.
+   * @throws \InvalidArgumentException
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    */
   protected function prepareArguments(array $arguments) {
     foreach ($this->arguments() as $id => $argument) {

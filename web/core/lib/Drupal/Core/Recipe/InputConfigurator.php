@@ -25,11 +25,11 @@ final class InputConfigurator {
   private array $data = [];
 
   /**
-   * The collected input values, or NULL if none have been collected yet.
+   * The collected input values.
    *
-   * @var mixed[]|null
+   * @var mixed[]
    */
-  private ?array $values = NULL;
+  private array $values = [];
 
   /**
    * @param array<string, array<string, mixed>> $definitions
@@ -72,7 +72,7 @@ final class InputConfigurator {
         $definition['constraints'],
       );
       $data_definition->setSettings($definition);
-      $this->data[$name] = $typedDataManager->create($data_definition);
+      $this->data[$name] = $typedDataManager->create($data_definition, name: "$prefix.$name");
     }
   }
 
@@ -96,7 +96,7 @@ final class InputConfigurator {
    *   The collected input values, keyed by name.
    */
   public function getValues(): array {
-    return $this->values ?? [];
+    return $this->values;
   }
 
   /**
@@ -112,9 +112,9 @@ final class InputConfigurator {
     foreach ($this->dependencies->recipes as $dependency) {
       $descriptions = array_merge($descriptions, $dependency->input->describeAll());
     }
-    foreach ($this->getDataDefinitions() as $key => $definition) {
-      $name = $this->prefix . '.' . $key;
-      $descriptions[$name] = $definition->getDescription();
+    foreach ($this->data as $data) {
+      $name = $data->getName();
+      $descriptions[$name] = $data->getDataDefinition()->getDescription();
     }
     return $descriptions;
   }
@@ -131,29 +131,28 @@ final class InputConfigurator {
    * @throws \Symfony\Component\Validator\Exception\ValidationFailedException
    *   Thrown if any of the collected values violate their validation
    *   constraints.
+   * @throws \LogicException
+   *   Thrown if input values have already been collected for this recipe.
    */
   public function collectAll(InputCollectorInterface $collector, array &$processed = []): void {
     // Don't bother collecting values for a recipe we've already seen.
     if (in_array($this->prefix, $processed, TRUE)) {
       return;
     }
-
-    if (is_array($this->values)) {
+    if ($this->values) {
       throw new \LogicException('Input values cannot be changed once they have been set.');
     }
-
     // First, collect values for the recipe's dependencies.
     /** @var \Drupal\Core\Recipe\Recipe $dependency */
     foreach ($this->dependencies->recipes as $dependency) {
       $dependency->input->collectAll($collector, $processed);
     }
 
-    $this->values = [];
     foreach ($this->data as $key => $data) {
       $definition = $data->getDataDefinition();
 
       $value = $collector->collectValue(
-        $this->prefix . '.' . $key,
+        $data->getName(),
         $definition,
         $this->getDefaultValue($definition),
       );
@@ -161,7 +160,7 @@ final class InputConfigurator {
 
       $violations = $data->validate();
       if (count($violations) > 0) {
-        throw new ValidationFailedException($value, $violations);
+        throw new ValidationFailedException($data, $violations);
       }
       $this->values[$key] = $data->getCastedValue();
     }

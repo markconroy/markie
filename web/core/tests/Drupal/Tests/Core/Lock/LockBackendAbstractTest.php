@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\Core\Lock;
 
+use Drupal\Core\Lock\LockBackendAbstract;
 use Drupal\Tests\UnitTestCase;
+use PHPUnit\Framework\MockObject\MockObject;
 
 /**
  * @coversDefaultClass \Drupal\Tests\Core\Lock\LockBackendAbstractTest
@@ -14,10 +16,8 @@ class LockBackendAbstractTest extends UnitTestCase {
 
   /**
    * The Mocked LockBackendAbstract object.
-   *
-   * @var \Drupal\Core\Lock\LockBackendAbstract|\PHPUnit\Framework\MockObject\MockObject
    */
-  protected $lock;
+  protected LockBackendAbstract&MockObject $lock;
 
   /**
    * {@inheritdoc}
@@ -25,7 +25,9 @@ class LockBackendAbstractTest extends UnitTestCase {
   protected function setUp(): void {
     parent::setUp();
 
-    $this->lock = $this->getMockForAbstractClass('Drupal\Core\Lock\LockBackendAbstract');
+    $this->lock = $this->getMockBuilder(StubLockBackendAbstract::class)
+      ->onlyMethods(['lockMayBeAvailable'])
+      ->getMock();
   }
 
   /**
@@ -44,6 +46,7 @@ class LockBackendAbstractTest extends UnitTestCase {
    * Tests the wait() method when lockMayBeAvailable() returns FALSE.
    *
    * Waiting could take 1 second so we need to extend the possible runtime.
+   *
    * @medium
    */
   public function testWaitTrue(): void {

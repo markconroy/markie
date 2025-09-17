@@ -195,7 +195,7 @@ class TermParentsTest extends BrowserTestBase {
    * @return \Drupal\taxonomy\TermInterface[]
    *   A list of terms created for testing.
    */
-  protected function doTestEditingSingleParent() {
+  protected function doTestEditingSingleParent(): array {
     $terms = [];
 
     // Create two terms without any parents.
@@ -302,7 +302,7 @@ class TermParentsTest extends BrowserTestBase {
    * Creates a term, saves it and returns it.
    *
    * @param string $name
-   *   The name of the term to create
+   *   The name of the term to create.
    * @param int[] $parent_ids
    *   (optional) A list of parent term IDs.
    *

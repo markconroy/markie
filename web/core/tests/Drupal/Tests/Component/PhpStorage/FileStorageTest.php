@@ -6,9 +6,8 @@ namespace Drupal\Tests\Component\PhpStorage;
 
 use Drupal\Component\PhpStorage\FileStorage;
 use Drupal\Component\Utility\Random;
-use Drupal\Tests\Traits\PhpUnitWarnings;
+use Drupal\TestTools\Extension\DeprecationBridge\ExpectDeprecationTrait;
 use org\bovigo\vfs\vfsStreamDirectory;
-use Symfony\Bridge\PhpUnit\ExpectDeprecationTrait;
 
 /**
  * @coversDefaultClass \Drupal\Component\PhpStorage\FileStorage
@@ -17,7 +16,7 @@ use Symfony\Bridge\PhpUnit\ExpectDeprecationTrait;
  */
 class FileStorageTest extends PhpStorageTestBase {
 
-  use PhpUnitWarnings, ExpectDeprecationTrait;
+  use ExpectDeprecationTrait;
 
   /**
    * Standard test settings to pass to storage instances.
@@ -49,16 +48,6 @@ class FileStorageTest extends PhpStorageTestBase {
   public function testCRUD(): void {
     $php = new FileStorage($this->standardSettings);
     $this->assertCRUD($php);
-  }
-
-  /**
-   * @covers ::writeable
-   * @group legacy
-   */
-  public function testWritable(): void {
-    $this->expectDeprecation('Drupal\Component\PhpStorage\FileStorage::writeable() is deprecated in drupal:10.1.0 and will be removed from drupal:11.0.0. There is no replacement. See https://www.drupal.org/node/3155413');
-    $php = new FileStorage($this->standardSettings);
-    $this->assertTrue($php->writeable());
   }
 
   /**

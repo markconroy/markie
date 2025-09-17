@@ -1,7 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\basic_auth_test;
 
+/**
+ * Provides routes for HTTP Basic Authentication testing.
+ */
 class BasicAuthTestController {
 
   /**

@@ -265,8 +265,8 @@ class ConfigInstallTest extends KernelTestBase {
    * Tests installing configuration where the filename and ID do not match.
    */
   public function testIdMisMatch(): void {
-    $this->expectWarning();
-    $this->expectWarningMessage('The configuration name "config_test.dynamic.no_id_match" does not match the ID "does_not_match"');
+    $this->expectException(\LogicException::class);
+    $this->expectExceptionMessage('The configuration name "config_test.dynamic.no_id_match" does not match the ID "does_not_match"');
     $this->installModules(['config_test_id_mismatch']);
   }
 
@@ -276,7 +276,7 @@ class ConfigInstallTest extends KernelTestBase {
    * @param array $modules
    *   The module names.
    */
-  protected function installModules(array $modules) {
+  protected function installModules(array $modules): void {
     $this->container->get('module_installer')->install($modules);
     $this->container = \Drupal::getContainer();
   }

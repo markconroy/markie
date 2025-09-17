@@ -16,9 +16,11 @@ use Symfony\Component\Config\Builder\ConfigBuilderGeneratorInterface;
 use Symfony\Component\Config\Builder\ConfigBuilderInterface;
 use Symfony\Component\Config\FileLocatorInterface;
 use Symfony\Component\DependencyInjection\Attribute\When;
+use Symfony\Component\DependencyInjection\Attribute\WhenNot;
 use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Exception\InvalidArgumentException;
+use Symfony\Component\DependencyInjection\Exception\LogicException;
 use Symfony\Component\DependencyInjection\Extension\ConfigurationExtensionInterface;
 use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
@@ -33,13 +35,16 @@ use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigura
  */
 class PhpFileLoader extends FileLoader
 {
-    protected $autoRegisterAliasesForSinglyImplementedInterfaces = false;
-    private ?ConfigBuilderGeneratorInterface $generator;
+    protected bool $autoRegisterAliasesForSinglyImplementedInterfaces = false;
 
-    public function __construct(ContainerBuilder $container, FileLocatorInterface $locator, ?string $env = null, ?ConfigBuilderGeneratorInterface $generator = null)
-    {
-        parent::__construct($container, $locator, $env);
-        $this->generator = $generator;
+    public function __construct(
+        ContainerBuilder $container,
+        FileLocatorInterface $locator,
+        ?string $env = null,
+        private ?ConfigBuilderGeneratorInterface $generator = null,
+        bool $prepend = false,
+    ) {
+        parent::__construct($container, $locator, $env, $prepend);
     }
 
     public function load(mixed $resource, ?string $type = null): mixed
@@ -94,14 +99,32 @@ class PhpFileLoader extends FileLoader
         $configBuilders = [];
         $r = new \ReflectionFunction($callback);
 
-        $attribute = null;
-        foreach ($r->getAttributes(When::class, \ReflectionAttribute::IS_INSTANCEOF) as $attribute) {
+        $excluded = true;
+        $whenAttributes = $r->getAttributes(When::class, \ReflectionAttribute::IS_INSTANCEOF);
+        $notWhenAttributes = $r->getAttributes(WhenNot::class, \ReflectionAttribute::IS_INSTANCEOF);
+
+        if ($whenAttributes && $notWhenAttributes) {
+            throw new LogicException('Using both #[When] and #[WhenNot] attributes on the same target is not allowed.');
+        }
+
+        if (!$whenAttributes && !$notWhenAttributes) {
+            $excluded = false;
+        }
+
+        foreach ($whenAttributes as $attribute) {
             if ($this->env === $attribute->newInstance()->env) {
-                $attribute = null;
+                $excluded = false;
                 break;
             }
         }
-        if (null !== $attribute) {
+
+        foreach ($notWhenAttributes as $attribute) {
+            if ($excluded = $this->env === $attribute->newInstance()->env) {
+                break;
+            }
+        }
+
+        if ($excluded) {
             return;
         }
 
@@ -143,12 +166,18 @@ class PhpFileLoader extends FileLoader
         // Force load ContainerConfigurator to make env(), param() etc available.
         class_exists(ContainerConfigurator::class);
 
-        $callback(...$arguments);
-
-        /** @var ConfigBuilderInterface $configBuilder */
-        foreach ($configBuilders as $configBuilder) {
-            $containerConfigurator->extension($configBuilder->getExtensionAlias(), $configBuilder->toArray());
+        ++$this->importing;
+        try {
+            $callback(...$arguments);
+        } finally {
+            --$this->importing;
         }
+
+        foreach ($configBuilders as $configBuilder) {
+            $this->loadExtensionConfig($configBuilder->getExtensionAlias(), ContainerConfigurator::processValue($configBuilder->toArray()));
+        }
+
+        $this->loadExtensionConfigs();
     }
 
     /**
@@ -183,7 +212,7 @@ class PhpFileLoader extends FileLoader
 
         if (!$this->container->hasExtension($alias)) {
             $extensions = array_filter(array_map(fn (ExtensionInterface $ext) => $ext->getAlias(), $this->container->getExtensions()));
-            throw new InvalidArgumentException(\sprintf('There is no extension able to load the configuration for "%s". Looked for namespace "%s", found "%s".', $namespace, $alias, $extensions ? implode('", "', $extensions) : 'none'));
+            throw new InvalidArgumentException(UndefinedExtensionHandler::getErrorMessage($namespace, null, $alias, $extensions));
         }
 
         $extension = $this->container->getExtension($alias);

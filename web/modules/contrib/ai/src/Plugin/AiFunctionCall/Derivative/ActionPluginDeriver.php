@@ -159,8 +159,17 @@ class ActionPluginDeriver extends DeriverBase implements ContainerDeriverInterfa
         // @todo Handle missing schema.
         foreach ($config_schema_definition['mapping'] as $key => $info) {
           $constraints = $info['constraints'] ?? [];
-          $info['type'] = $this->resolveRootDataType($info['type']);
-          $context_definitions[$key] = new ContextDefinition($info['type'], $info['label'], $info['required'] ?? FALSE, FALSE, $info['label'], $info['default_value'] ?? NULL, $constraints);
+          // If the type is a sequence, extract its inner type, so one works.
+          if ($info['type'] === 'sequence' && isset($info['sequence']['type'])) {
+            $type = $this->resolveRootDataType($info['sequence']['type']);
+          }
+          // @todo Handle mapping type.
+          else {
+            $type = $this->resolveRootDataType($info['type']);
+          }
+          if (!empty($type)) {
+            $context_definitions[$key] = new ContextDefinition($type, $info['label'], $info['required'] ?? FALSE, FALSE, $info['label'], $info['default_value'] ?? NULL, $constraints);
+          }
         }
       }
     }
@@ -174,13 +183,20 @@ class ActionPluginDeriver extends DeriverBase implements ContainerDeriverInterfa
    *   The type to resolve.
    *
    * @return string
-   *   The resolved root data type.
+   *   The resolved root data type. An empty string on failure.
    */
   protected function resolveRootDataType(string $type): string {
     $definition = $this->typedConfigManager->getDefinition($type);
     $reflection_class = new \ReflectionClass($definition['class']);
     $attributes = $reflection_class->getAttributes(DataType::class);
-    return $attributes[0]->newInstance()->id;
+
+    // Make sure there are available attributes.
+    if (!empty($attributes)) {
+      return $attributes[0]->newInstance()->id;
+    }
+
+    // Since there aren't any attributes, return an empty string.
+    return '';
   }
 
 }

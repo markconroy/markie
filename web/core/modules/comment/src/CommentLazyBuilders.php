@@ -11,12 +11,15 @@ use Drupal\Core\Render\Element\Link;
 use Drupal\Core\Security\TrustedCallbackInterface;
 use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\Url;
 
 /**
  * Defines a service for comment #lazy_builder callbacks.
  */
 class CommentLazyBuilders implements TrustedCallbackInterface {
+
+  use StringTranslationTrait;
 
   /**
    * The entity type manager service.
@@ -86,7 +89,9 @@ class CommentLazyBuilders implements TrustedCallbackInterface {
   }
 
   /**
-   * #lazy_builder callback; builds the comment form.
+   * Render API callback: Builds the comment form.
+   *
+   * This function is assigned as a #lazy_builder callback.
    *
    * @param string $commented_entity_type_id
    *   The commented entity type ID.
@@ -113,7 +118,9 @@ class CommentLazyBuilders implements TrustedCallbackInterface {
   }
 
   /**
-   * #lazy_builder callback; builds a comment's links.
+   * Render API callback: Builds a comment's links.
+   *
+   * This function is assigned as a #lazy_builder callback.
    *
    * @param string $comment_entity_id
    *   The comment entity ID.
@@ -172,14 +179,14 @@ class CommentLazyBuilders implements TrustedCallbackInterface {
     if ($status == CommentItemInterface::OPEN) {
       if ($entity->access('delete')) {
         $links['comment-delete'] = [
-          'title' => t('Delete'),
+          'title' => $this->t('Delete'),
           'url' => $entity->toUrl('delete-form'),
         ];
       }
 
       if ($entity->access('update')) {
         $links['comment-edit'] = [
-          'title' => t('Edit'),
+          'title' => $this->t('Edit'),
           'url' => $entity->toUrl('edit-form'),
         ];
       }
@@ -188,7 +195,7 @@ class CommentLazyBuilders implements TrustedCallbackInterface {
         && $entity->access('create')
         && $field_definition->getSetting('default_mode') === CommentManagerInterface::COMMENT_MODE_THREADED) {
         $links['comment-reply'] = [
-          'title' => t('Reply'),
+          'title' => $this->t('Reply'),
           'url' => Url::fromRoute('comment.reply', [
             'entity_type' => $entity->getCommentedEntityTypeId(),
             'entity' => $entity->getCommentedEntityId(),
@@ -199,7 +206,7 @@ class CommentLazyBuilders implements TrustedCallbackInterface {
       }
       if (!$entity->isPublished() && $entity->access('approve')) {
         $links['comment-approve'] = [
-          'title' => t('Approve'),
+          'title' => $this->t('Approve'),
           'url' => Url::fromRoute('comment.approve', ['comment' => $entity->id()]),
         ];
       }
@@ -211,7 +218,7 @@ class CommentLazyBuilders implements TrustedCallbackInterface {
     // Add translations link for translation-enabled comment bundles.
     if ($this->moduleHandler->moduleExists('content_translation') && $this->access($entity)->isAllowed()) {
       $links['comment-translations'] = [
-        'title' => t('Translate'),
+        'title' => $this->t('Translate'),
         'url' => $entity->toUrl('drupal:content-translation-overview'),
       ];
     }

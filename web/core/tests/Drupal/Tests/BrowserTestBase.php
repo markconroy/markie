@@ -6,6 +6,7 @@ namespace Drupal\Tests;
 
 use Behat\Mink\Driver\BrowserKitDriver;
 use Behat\Mink\Element\Element;
+use Behat\Mink\Exception\Exception as MinkException;
 use Behat\Mink\Mink;
 use Behat\Mink\Selector\SelectorsHandler;
 use Behat\Mink\Session;
@@ -18,22 +19,25 @@ use Drupal\Core\Utility\Error;
 use Drupal\Tests\block\Traits\BlockCreationTrait;
 use Drupal\Tests\node\Traits\ContentTypeCreationTrait;
 use Drupal\Tests\node\Traits\NodeCreationTrait;
-use Drupal\Tests\Traits\PhpUnitWarnings;
 use Drupal\Tests\user\Traits\UserCreationTrait;
 use Drupal\TestTools\Comparator\MarkupInterfaceComparator;
-use Drupal\TestTools\TestVarDumper;
+use Drupal\TestTools\Extension\DeprecationBridge\ExpectDeprecationTrait;
+use Drupal\TestTools\Extension\Dump\DebugDump;
 use GuzzleHttp\Cookie\CookieJar;
+use PHPUnit\Framework\Attributes\BeforeClass;
 use PHPUnit\Framework\TestCase;
-use Symfony\Bridge\PhpUnit\ExpectDeprecationTrait;
-use Symfony\Component\HttpFoundation\Exception\SessionNotFoundException;
 use Symfony\Component\VarDumper\VarDumper;
 
 /**
  * Provides a test case for functional Drupal tests.
  *
- * Tests extending BrowserTestBase must exist in the
+ * Module tests extending BrowserTestBase must exist in the
  * Drupal\Tests\your_module\Functional namespace and live in the
  * modules/your_module/tests/src/Functional directory.
+ *
+ * Tests for core/lib/Drupal classes extending BrowserTestBase must exist in the
+ * \Drupal\FunctionalTests\Core namespace and live in the
+ * core/tests/Drupal/FunctionalTests directory.
  *
  * Tests extending this base class should only translate text when testing
  * translation functionality. For example, avoid wrapping test text with t()
@@ -71,7 +75,6 @@ abstract class BrowserTestBase extends TestCase {
     createUser as drupalCreateUser;
   }
   use XdebugRequestTrait;
-  use PhpUnitWarnings;
   use PhpUnitCompatibilityTrait;
   use ExpectDeprecationTrait;
   use ExtensionListTestTrait;
@@ -121,15 +124,6 @@ abstract class BrowserTestBase extends TestCase {
   protected $defaultTheme;
 
   /**
-   * An array of custom translations suitable for SettingsEditor::rewrite().
-   *
-   * @var array
-   *
-   * @see \Drupal\Core\Site\SettingsEditor::rewrite()
-   */
-  protected $customTranslations;
-
-  /**
    * Mink class for the default driver to use.
    *
    * Should be a fully-qualified class name that implements
@@ -165,19 +159,6 @@ abstract class BrowserTestBase extends TestCase {
   protected $mink;
 
   /**
-   * {@inheritdoc}
-   *
-   * Browser tests are run in separate processes to prevent collisions between
-   * code that may be loaded by tests.
-   */
-  protected $runTestInSeparateProcess = TRUE;
-
-  /**
-   * {@inheritdoc}
-   */
-  protected $preserveGlobalState = FALSE;
-
-  /**
    * The base URL.
    *
    * @var string
@@ -192,21 +173,21 @@ abstract class BrowserTestBase extends TestCase {
   protected $originalShutdownCallbacks = [];
 
   /**
-   * The original container.
-   *
-   * Move this to \Drupal\Core\Test\FunctionalTestSetupTrait once TestBase no
-   * longer provides the same value.
-   *
-   * @var \Symfony\Component\DependencyInjection\ContainerInterface
-   */
-  protected $originalContainer;
-
-  /**
    * {@inheritdoc}
    */
-  public static function setUpBeforeClass(): void {
-    parent::setUpBeforeClass();
-    VarDumper::setHandler(TestVarDumper::class . '::cliHandler');
+  public function __construct(string $name) {
+    parent::__construct($name);
+    $this->setRunTestInSeparateProcess(TRUE);
+  }
+
+  /**
+   * Registers the dumper CLI handler when the DebugDump extension is enabled.
+   */
+  #[BeforeClass]
+  public static function setDebugDumpHandler(): void {
+    if (DebugDump::isEnabled()) {
+      VarDumper::setHandler(DebugDump::class . '::cliHandler');
+    }
   }
 
   /**
@@ -350,6 +331,7 @@ abstract class BrowserTestBase extends TestCase {
     parent::setUp();
 
     $this->setUpAppRoot();
+    chdir($this->root);
 
     // Allow tests to compare MarkupInterface objects via assertEquals().
     $this->registerComparator(new MarkupInterfaceComparator());
@@ -360,27 +342,14 @@ abstract class BrowserTestBase extends TestCase {
     $this->prepareEnvironment();
     $this->installDrupal();
 
-    // Setup Mink.
+    // Setup Mink. Register Mink exceptions to cause test failures instead of
+    // errors.
+    $this->registerFailureType(MinkException::class);
     $this->initMink();
 
     // Set up the browser test output file.
     $this->initBrowserOutputFile();
 
-    // Ensure that the test is not marked as risky because of no assertions. In
-    // PHPUnit 6 tests that only make assertions using $this->assertSession()
-    // can be marked as risky.
-    $this->addToAssertionCount(1);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function __get(string $name) {
-    if ($name === 'randomGenerator') {
-      @trigger_error('Accessing the randomGenerator property is deprecated in drupal:10.2.0 and is removed from drupal:11.0.0. Use getRandomGenerator() instead. See https://www.drupal.org/node/3358445', E_USER_DEPRECATED);
-
-      return $this->getRandomGenerator();
-    }
   }
 
   /**
@@ -438,19 +407,19 @@ abstract class BrowserTestBase extends TestCase {
    * {@inheritdoc}
    */
   protected function tearDown(): void {
+    // Close any mink sessions as early as possible to free a new browser
+    // session up for the next test method or test.
+    if ($this->mink) {
+      $this->mink->stopSessions();
+    }
     parent::tearDown();
 
     if ($this->container) {
       // Cleanup mock session started in DrupalKernel::preHandle().
-      try {
-        /** @var \Symfony\Component\HttpFoundation\Session\Session $session */
-        $session = $this->container->get('request_stack')->getSession();
-        $session->clear();
-        $session->save();
-      }
-      catch (SessionNotFoundException) {
-        @trigger_error('Pushing requests without a session onto the request_stack is deprecated in drupal:10.3.0 and an error will be thrown from drupal:11.0.0. See https://www.drupal.org/node/3337193', E_USER_DEPRECATED);
-      }
+      /** @var \Symfony\Component\HttpFoundation\Session\Session $session */
+      $session = $this->container->get('request_stack')->getSession();
+      $session->clear();
+      $session->save();
     }
 
     // Destroy the testing kernel.
@@ -461,10 +430,6 @@ abstract class BrowserTestBase extends TestCase {
 
     // Ensure that internal logged in variable is reset.
     $this->loggedInUser = FALSE;
-
-    if ($this->mink) {
-      $this->mink->stopSessions();
-    }
 
     // Restore original shutdown callbacks.
     if (function_exists('drupal_register_shutdown_function')) {
@@ -537,8 +502,14 @@ abstract class BrowserTestBase extends TestCase {
    *
    * @return array
    *   Associative array of option keys and values.
+   *
+   * @deprecated in drupal:11.2.0 and is removed from drupal:12.0.0. There is
+   *   no direct replacement.
+   *
+   * @see https://www.drupal.org/node/3523039
    */
   protected function getOptions($select, ?Element $container = NULL) {
+    @trigger_error(__METHOD__ . 'is deprecated in drupal:11.2.0 and is removed from drupal:12.0.0. There is no direct replacement. See https://www.drupal.org/node/3523039', E_DEPRECATED);
     if (is_string($select)) {
       $select = $this->assertSession()->selectExists($select, $container);
     }
@@ -590,7 +561,7 @@ abstract class BrowserTestBase extends TestCase {
    *
    * @see vendor/phpunit/phpunit/src/Util/PHP/Template/TestCaseMethod.tpl.dist
    */
-  public function __sleep() {
+  public function __sleep(): array {
     return [];
   }
 
@@ -634,9 +605,8 @@ abstract class BrowserTestBase extends TestCase {
    *   The JSON decoded drupalSettings value from the current page.
    */
   protected function getDrupalSettings() {
-    $html = $this->getSession()->getPage()->getContent();
-    if (preg_match('@<script type="application/json" data-drupal-selector="drupal-settings-json">([^<]*)</script>@', $html, $matches)) {
-      $settings = Json::decode($matches[1]);
+    if ($elements = $this->xpath('//script[@type="application/json" and @data-drupal-selector="drupal-settings-json"]')) {
+      $settings = Json::decode($elements[0]->getText());
       if (isset($settings['ajaxPageState']['libraries'])) {
         $settings['ajaxPageState']['libraries'] = UrlHelper::uncompressQueryParameter($settings['ajaxPageState']['libraries']);
       }

@@ -80,7 +80,7 @@ class MailManager extends DefaultPluginManager implements MailManagerInterface {
    *   The renderer.
    */
   public function __construct(\Traversable $namespaces, CacheBackendInterface $cache_backend, ModuleHandlerInterface $module_handler, ConfigFactoryInterface $config_factory, LoggerChannelFactoryInterface $logger_factory, TranslationInterface $string_translation, RendererInterface $renderer) {
-    parent::__construct('Plugin/Mail', $namespaces, $module_handler, 'Drupal\Core\Mail\MailInterface', Mail::class, 'Drupal\Core\Annotation\Mail');
+    parent::__construct('Plugin/Mail', $namespaces, $module_handler, MailInterface::class, Mail::class, 'Drupal\Core\Annotation\Mail');
     $this->alterInfo('mail_backend_info');
     $this->setCacheBackend($cache_backend, 'mail_backend_plugins');
     $this->configFactory = $config_factory;
@@ -197,10 +197,10 @@ class MailManager extends DefaultPluginManager implements MailManagerInterface {
    *   formatting of this string will be validated with the
    *   @link http://php.net/manual/filter.filters.validate.php PHP email validation filter. @endlink
    *   Some examples are:
-   *   - user@example.com
-   *   - user@example.com, anotheruser@example.com
-   *   - User <user@example.com>
-   *   - User <user@example.com>, Another User <anotheruser@example.com>
+   *   - "user@example.com".
+   *   - "user@example.com, anotheruser@example.com"
+   *   - "User <user@example.com>".
+   *   - "User <user@example.com>, Another User <anotheruser@example.com>".
    * @param string $langcode
    *   Language code to use to compose the email.
    * @param array $params
@@ -312,7 +312,7 @@ class MailManager extends DefaultPluginManager implements MailManagerInterface {
             ->error('Error sending email (from %from to %to with reply-to %reply).', [
               '%from' => $message['from'],
               '%to' => $message['to'],
-              '%reply' => $message['reply-to'] ? $message['reply-to'] : $this->t('not set'),
+              '%reply' => $message['reply-to'] ?: $this->t('not set'),
             ]);
           $error_message = $params['_error_message'] ?? $this->t('Unable to send email. Contact the site administrator if the problem persists.');
           if ($error_message) {

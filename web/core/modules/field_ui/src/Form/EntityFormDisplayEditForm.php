@@ -96,6 +96,10 @@ class EntityFormDisplayEditForm extends EntityDisplayFormBase {
   protected function getTableHeader() {
     return [
       $this->t('Field'),
+      [
+        'data' => $this->t('Machine name'),
+        'class' => [RESPONSIVE_PRIORITY_MEDIUM, 'machine-name'],
+      ],
       $this->t('Weight'),
       $this->t('Parent'),
       $this->t('Region'),
@@ -123,13 +127,13 @@ class EntityFormDisplayEditForm extends EntityDisplayFormBase {
     $this->moduleHandler->invokeAllWith(
       'field_widget_third_party_settings_form',
       function (callable $hook, string $module) use (&$settings_form, $plugin, $field_definition, &$form, $form_state) {
-        $settings_form[$module] = $hook(
+        $settings_form[$module] = ($settings_form[$module] ?? []) + ($hook(
           $plugin,
           $field_definition,
           $this->entity->getMode(),
           $form,
           $form_state
-        );
+        ) ?? []);
       }
     );
     return $settings_form;

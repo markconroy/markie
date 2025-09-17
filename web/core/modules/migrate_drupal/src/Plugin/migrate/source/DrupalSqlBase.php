@@ -77,7 +77,7 @@ abstract class DrupalSqlBase extends SqlBase implements DependentPluginInterface
           $this->systemData[$result['type']][$result['name']] = $result;
         }
       }
-      catch (\Exception $e) {
+      catch (\Exception) {
         // The table might not exist for example in tests.
       }
     }
@@ -153,12 +153,13 @@ abstract class DrupalSqlBase extends SqlBase implements DependentPluginInterface
   /**
    * Reads a variable from a source Drupal database.
    *
-   * @param $name
+   * @param string $name
    *   Name of the variable.
-   * @param $default
+   * @param mixed $default
    *   The default value.
    *
    * @return mixed
+   *   The variable value.
    */
   protected function variableGet($name, $default) {
     try {
@@ -169,7 +170,7 @@ abstract class DrupalSqlBase extends SqlBase implements DependentPluginInterface
         ->fetchField();
     }
     // The table might not exist.
-    catch (\Exception $e) {
+    catch (\Exception) {
       $result = FALSE;
     }
     return $result !== FALSE ? unserialize($result) : $default;
@@ -187,6 +188,13 @@ abstract class DrupalSqlBase extends SqlBase implements DependentPluginInterface
       $this->addDependency('module', $this->configuration['constants']['module']);
     }
     return $this->dependencies;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getSourceModule(): ?string {
+    return parent::getSourceModule() ?? $this->pluginDefinition['source_module'] ?? NULL;
   }
 
 }

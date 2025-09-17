@@ -16,6 +16,9 @@ use Drupal\user\Entity\User;
 use Drupal\user\RoleInterface;
 use GuzzleHttp\RequestOptions;
 
+/**
+ * Resource test base for the media entity.
+ */
 abstract class MediaResourceTestBase extends EntityResourceTestBase {
 
   /**
@@ -292,7 +295,7 @@ abstract class MediaResourceTestBase extends EntityResourceTestBase {
    */
   protected function getExpectedUnauthorizedAccessMessage($method) {
     switch ($method) {
-      case 'GET';
+      case 'GET':
         return "The 'view media' permission is required when the media item is published.";
 
       case 'POST':

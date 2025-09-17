@@ -34,24 +34,11 @@ class ChainedPlaceholderStrategyTest extends UnitTestCase {
    * Provides a list of render strategies, placeholders and results.
    *
    * @return array
+   *   An array of render strategies, placeholders and results.
    */
   public static function providerProcessPlaceholders() {
     $prophet = new Prophet();
     $data = [];
-
-    // Empty placeholders.
-    $data['empty placeholders'] = [[], [], []];
-
-    // Placeholder removing strategy.
-    $placeholders = [
-      'remove-me' => ['#markup' => 'I-am-a-llama-that-will-be-removed-sad-face.'],
-    ];
-
-    $prophecy = $prophet->prophesize('\Drupal\Core\Render\Placeholder\PlaceholderStrategyInterface');
-    $prophecy->processPlaceholders($placeholders)->willReturn([]);
-    $dev_null_strategy = $prophecy->reveal();
-
-    $data['placeholder removing strategy'] = [[$dev_null_strategy], $placeholders, []];
 
     // Fake Single Flush strategy.
     $placeholders = [

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\form_test\Form;
 
 use Drupal\Core\Form\FormBase;
@@ -24,8 +26,8 @@ class FormTestCheckboxesRadiosForm extends FormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state, $customize = FALSE) {
-    // Expand #type checkboxes, setting custom element properties for some but not
-    // all options.
+    // Expand #type checkboxes, setting custom element properties for some but
+    // not all options.
     $form['checkboxes'] = [
       '#type' => 'checkboxes',
       '#title' => 'Checkboxes',

@@ -6,15 +6,20 @@ namespace Drupal\KernelTests\Core\Recipe;
 
 use Drupal\Component\Uuid\UuidInterface;
 use Drupal\contact\Entity\ContactForm;
+use Drupal\Core\Config\Action\ConfigActionException;
 use Drupal\Core\Recipe\ConsoleInputCollector;
 use Drupal\Core\Recipe\InputCollectorInterface;
 use Drupal\Core\Recipe\Recipe;
 use Drupal\Core\Recipe\RecipeRunner;
 use Drupal\Core\TypedData\DataDefinitionInterface;
+use Drupal\Core\TypedData\TypedDataInterface;
 use Drupal\FunctionalTests\Core\Recipe\RecipeTestTrait;
 use Drupal\KernelTests\KernelTestBase;
+use Drupal\node\Entity\NodeType;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\StyleInterface;
+use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Validator\Exception\ValidationFailedException;
 
 /**
@@ -30,6 +35,9 @@ class InputTest extends KernelTestBase {
    */
   protected static $modules = ['system', 'user'];
 
+  /**
+   * The recipe.
+   */
   private readonly Recipe $recipe;
 
   /**
@@ -52,6 +60,9 @@ class InputTest extends KernelTestBase {
     $this->recipe = Recipe::createFromDirectory($this->getDrupalRoot() . '/core/recipes/feedback_contact_form');
   }
 
+  /**
+   * Tests getting the default value from configuration.
+   */
   public function testDefaultValueFromConfig(): void {
     // Collect the input values before processing the recipe, using a mocked
     // collector that will always return the default value.
@@ -67,6 +78,9 @@ class InputTest extends KernelTestBase {
     $this->assertSame(['ben@deep.space'], ContactForm::load('feedback')?->getRecipients());
   }
 
+  /**
+   * Tests input validation.
+   */
   public function testInputIsValidated(): void {
     $collector = $this->createMock(InputCollectorInterface::class);
     $collector->expects($this->atLeastOnce())
@@ -79,7 +93,9 @@ class InputTest extends KernelTestBase {
       $this->fail('Expected an exception due to validation failure, but none was thrown.');
     }
     catch (ValidationFailedException $e) {
-      $this->assertSame('not-an-email-address', $e->getValue());
+      $value = $e->getValue();
+      $this->assertInstanceOf(TypedDataInterface::class, $value);
+      $this->assertSame('not-an-email-address', $value->getValue());
       $this->assertSame('This value is not a valid email address.', (string) $e->getViolations()->get(0)->getMessage());
     }
   }
@@ -146,6 +162,11 @@ YAML
     $recipe->input->collectAll($collector);
   }
 
+  /**
+   * Tests getting the default value from non-existing configuration.
+   *
+   * @covers \Drupal\Core\Recipe\InputConfigurator::getDefaultValue
+   */
   public function testDefaultValueFromNonExistentConfig(): void {
     $recipe = $this->createRecipe(<<<YAML
 name: 'Default value from non-existent config'
@@ -163,6 +184,9 @@ YAML
     $recipe->input->collectAll($this->createMock(InputCollectorInterface::class));
   }
 
+  /**
+   * Tests input with literals.
+   */
   public function testLiterals(): void {
     $recipe = $this->createRecipe(<<<YAML
 name: Literals as input
@@ -224,6 +248,75 @@ YAML
     $config = $this->config('system.site');
     $this->assertSame("Boston rocks!", $config->get('name'));
     $this->assertSame('int is 1234, bool is  and float is 3.141', $config->get('slogan'));
+  }
+
+  /**
+   * Tests using input values in entity IDs for config actions.
+   */
+  public function testInputInConfigEntityIds(): void {
+    $this->assertFalse(\Drupal::moduleHandler()->moduleExists('node'));
+
+    $collector = new class () implements InputCollectorInterface {
+
+      /**
+       * {@inheritdoc}
+       */
+      public function collectValue(string $name, DataDefinitionInterface $definition, mixed $default_value): mixed {
+        return $default_value;
+      }
+
+    };
+    $recipe = Recipe::createFromDirectory('core/tests/fixtures/recipes/input_test');
+    $recipe->input->collectAll($collector);
+    RecipeRunner::processRecipe($recipe);
+    $this->assertInstanceOf(NodeType::class, NodeType::load('test'));
+
+    // Using an input placeholder in a non-identifying part of the config entity
+    // ID should cause an exception.
+    $recipe = $this->createRecipe([
+      'name' => 'Invalid use of an input in config entity ID',
+      'config' => [
+        'actions' => [
+          'node.${anything}.test' => [
+            'createIfNotExists' => [
+              'id' => 'test',
+            ],
+          ],
+        ],
+      ],
+    ]);
+    $recipe->input->collectAll($collector);
+    $this->expectException(ConfigActionException::class);
+    $this->expectExceptionMessage("The entity type for the config name 'node.\${anything}.test' could not be identified.");
+    RecipeRunner::processRecipe($recipe);
+  }
+
+  /**
+   * Tests that the askHidden prompt forwards arguments correctly.
+   */
+  public function testAskHiddenPromptArgumentsForwarded(): void {
+    $input = $this->createMock(InputInterface::class);
+    $output = $this->createMock(OutputInterface::class);
+    $io = new SymfonyStyle($input, $output);
+
+    $recipe = $this->createRecipe(<<<YAML
+name: 'Prompt askHidden Test'
+input:
+  foo:
+    data_type: string
+    description: Foo
+    prompt:
+      method: askHidden
+    default:
+      source: value
+      value: bar
+YAML
+    );
+    $collector = new ConsoleInputCollector($input, $io);
+    // askHidden prompt should have an ArgumentCountError rather than a general
+    // error.
+    $this->expectException(\ArgumentCountError::class);
+    $recipe->input->collectAll($collector);
   }
 
 }

@@ -87,6 +87,8 @@ abstract class TransactionManagerBase implements TransactionManagerInterface {
    * A list of post-transaction callbacks.
    *
    * @var callable[]
+   *
+   * @see \Drupal\Core\Database\Transaction\TransactionManagerInterface::addPostTransactionCallback()
    */
   private array $postTransactionCallbacks = [];
 
@@ -139,7 +141,6 @@ abstract class TransactionManagerBase implements TransactionManagerInterface {
    * Drivers should not override this method unless they also override the
    * $stack property.
    *
-   * phpcs:ignore Drupal.Commenting.FunctionComment.InvalidReturn
    * @return array<string,StackItem>
    *   The elements of the transaction stack.
    */
@@ -349,20 +350,13 @@ abstract class TransactionManagerBase implements TransactionManagerInterface {
    * {@inheritdoc}
    */
   public function rollback(string $name, string $id): void {
-    // @todo remove in drupal:11.0.0.
-    // Start of BC layer.
-    if ($id === 'bc-force-rollback') {
-      foreach ($this->stack() as $stackId => $item) {
-        if ($item->name === $name) {
-          $id = $stackId;
-          break;
-        }
-      }
-      if ($id === 'bc-force-rollback') {
-        throw new TransactionOutOfOrderException();
-      }
+    // If the transaction was voided, we cannot rollback. Fail silently but
+    // trigger a user warning.
+    if ($this->getConnectionTransactionState() === ClientConnectionTransactionState::Voided) {
+      $this->connectionTransactionState = ClientConnectionTransactionState::RollbackFailed;
+      trigger_error('Transaction::rollBack() failed because of a prior execution of a DDL statement.', E_USER_WARNING);
+      return;
     }
-    // End of BC layer.
 
     // Rolled back item should match the last one in stack.
     if ($id != array_key_last($this->stack()) || $name !== $this->stack()[$id]->name) {
@@ -385,8 +379,8 @@ abstract class TransactionManagerBase implements TransactionManagerInterface {
         // transaction. The transaction is closed.
         $this->processRootRollback();
         if ($this->getConnectionTransactionState() === ClientConnectionTransactionState::RolledBack) {
-          // The Transaction object remains open, and when it will get destructed
-          // no commit should happen. Void the stack item.
+          // The Transaction object remains open, and when it will get
+          // destructed no commit should happen. Void the stack item.
           $this->voidStackItem($id);
         }
       }

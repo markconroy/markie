@@ -413,13 +413,16 @@ class PathBasedBreadcrumbBuilderTest extends UnitTestCase {
   /**
    * Setup the access manager to always allow access to routes.
    */
-  public function setupAccessManagerToAllow() {
+  public function setupAccessManagerToAllow(): void {
     $this->accessManager->expects($this->any())
       ->method('check')
       ->willReturn((new AccessResultAllowed())->cachePerPermissions());
   }
 
-  protected function setupStubPathProcessor() {
+  /**
+   * Prepares the mock processInbound() method.
+   */
+  protected function setupStubPathProcessor(): void {
     $this->pathProcessor->expects($this->any())
       ->method('processInbound')
       ->willReturnArgument(0);
@@ -432,14 +435,23 @@ class PathBasedBreadcrumbBuilderTest extends UnitTestCase {
  */
 class TestPathBasedBreadcrumbBuilder extends PathBasedBreadcrumbBuilder {
 
+  /**
+   * The test link generator.
+   */
   protected LinkGeneratorInterface $linkGenerator;
 
+  /**
+   * {@inheritdoc}
+   */
   public function setStringTranslation(TranslationInterface $string_translation) {
     $this->stringTranslation = $string_translation;
     return $this;
   }
 
-  public function setLinkGenerator(LinkGeneratorInterface $link_generator) {
+  /**
+   * Sets the link generator.
+   */
+  public function setLinkGenerator(LinkGeneratorInterface $link_generator): void {
     $this->linkGenerator = $link_generator;
   }
 

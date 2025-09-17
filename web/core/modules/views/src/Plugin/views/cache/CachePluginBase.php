@@ -75,21 +75,24 @@ abstract class CachePluginBase extends PluginBase {
    *
    * Plugins must override this to implement expiration.
    *
-   * @param $type
+   * @param string $type
    *   The cache type, either 'query', 'result'.
    */
   protected function cacheExpire($type) {
   }
 
   /**
-   * Determine cache expiration time.
+   * Determines cache expiration time based on its type.
    *
-   * Plugins must override this to implement expiration in the cache table. The
-   * default is CACHE_PERMANENT, indicating that the item will not be removed
-   * automatically from cache.
+   * Plugins must override this to implement expiration in the cache table.
    *
    * @param string $type
    *   The cache type.
+   *
+   * @return int
+   *   Either an offset from the request time to indicate when the cache
+   *   expires, or \Drupal\Core\Cache\Cache::PERMANENT to indicate that the
+   *   cache does not expire. Defaults to \Drupal\Core\Cache\Cache::PERMANENT.
    */
   protected function cacheSetMaxAge($type) {
     return Cache::PERMANENT;
@@ -100,7 +103,7 @@ abstract class CachePluginBase extends PluginBase {
    *
    * A plugin should override this to provide specialized caching behavior.
    *
-   * @param $type
+   * @param string $type
    *   The cache type, either 'query', 'result'.
    */
   public function cacheSet($type) {
@@ -126,7 +129,7 @@ abstract class CachePluginBase extends PluginBase {
    *
    * A plugin should override this to provide specialized caching behavior.
    *
-   * @param $type
+   * @param string $type
    *   The cache type, either 'query', 'result'.
    *
    * @return bool
@@ -258,6 +261,7 @@ abstract class CachePluginBase extends PluginBase {
    * Gets the max age for the current view.
    *
    * @return int
+   *   The maximum age for the current view's cache.
    */
   public function getCacheMaxAge() {
     $max_age = $this->getDefaultCacheMaxAge();

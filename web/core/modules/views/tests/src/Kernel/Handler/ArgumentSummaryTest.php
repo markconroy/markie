@@ -102,7 +102,8 @@ class ArgumentSummaryTest extends ViewsKernelTestBase {
   /**
    * Creates a term in the tag vocabulary.
    *
-   * @return \Drupal\taxonomy\TermInterface $term
+   * @return \Drupal\taxonomy\TermInterface
+   *   The created term.
    */
   protected function createTag(): TermInterface {
     $tag = Term::create([
@@ -147,6 +148,40 @@ class ArgumentSummaryTest extends ViewsKernelTestBase {
     // Output should show first tag on 4 nodes, the second tag on only 2.
     $this->assertStringContainsString($tags[0]->label() . ' (4)', $output);
     $this->assertStringContainsString($tags[1]->label() . ' (2)', $output);
+  }
+
+  /**
+   * Tests that the active link is set correctly.
+   */
+  public function testActiveLink(): void {
+    require_once $this->root . '/core/modules/views/views.theme.inc';
+
+    // We need at least one node.
+    Node::create([
+      'type' => $this->nodeType->id(),
+      'title' => $this->randomMachineName(),
+    ])->save();
+
+    $view = Views::getView('test_argument_summary');
+    $view->execute();
+    $view->build();
+    $variables = [
+      'view' => $view,
+      'rows' => $view->result,
+    ];
+
+    template_preprocess_views_view_summary_unformatted($variables);
+    $this->assertFalse($variables['rows'][0]->active);
+
+    template_preprocess_views_view_summary($variables);
+    $this->assertFalse($variables['rows'][0]->active);
+
+    // Checks that the row with the current path is active.
+    \Drupal::service('path.current')->setPath('/test-argument-summary');
+    template_preprocess_views_view_summary_unformatted($variables);
+    $this->assertTrue($variables['rows'][0]->active);
+    template_preprocess_views_view_summary($variables);
+    $this->assertTrue($variables['rows'][0]->active);
   }
 
 }

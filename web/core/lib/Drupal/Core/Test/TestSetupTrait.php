@@ -42,9 +42,9 @@ trait TestSetupTrait {
   /**
    * The public file directory for the test environment.
    *
-   * @see \Drupal\Tests\BrowserTestBase::prepareEnvironment()
-   *
    * @var string
+   *
+   * @see \Drupal\Tests\BrowserTestBase::prepareEnvironment()
    */
   protected $publicFilesDirectory;
 
@@ -58,18 +58,18 @@ trait TestSetupTrait {
   /**
    * The private file directory for the test environment.
    *
-   * @see \Drupal\Tests\BrowserTestBase::prepareEnvironment()
-   *
    * @var string
+   *
+   * @see \Drupal\Tests\BrowserTestBase::prepareEnvironment()
    */
   protected $privateFilesDirectory;
 
   /**
    * Set to TRUE to strict check all configuration saved.
    *
-   * @see \Drupal\Core\Config\Testing\ConfigSchemaChecker
-   *
    * @var bool
+   *
+   * @see \Drupal\Core\Config\Testing\ConfigSchemaChecker
    */
   protected $strictConfigSchema = TRUE;
 
@@ -100,10 +100,10 @@ trait TestSetupTrait {
    * This value has to match the temporary directory created in
    * install_base_system() for test installs.
    *
+   * @var string
+   *
    * @see \Drupal\Tests\BrowserTestBase::prepareEnvironment()
    * @see install_base_system()
-   *
-   * @var string
    */
   protected $tempFilesDirectory;
 
@@ -113,22 +113,6 @@ trait TestSetupTrait {
    * @var string
    */
   protected $testId;
-
-  /**
-   * Returns the database connection to the site under test.
-   *
-   * @return \Drupal\Core\Database\Connection
-   *   The database connection to use for inserting assertions.
-   *
-   * @deprecated in drupal:10.1.0 and is removed from drupal:11.0.0. There is no
-   *   replacement.
-   *
-   * @see https://www.drupal.org/node/3176816
-   */
-  public static function getDatabaseConnection() {
-    @trigger_error(__METHOD__ . ' is deprecated in drupal:10.1.0 and is removed from drupal:11.0.0. There is no replacement. See https://www.drupal.org/node/3176816', E_USER_DEPRECATED);
-    return SimpletestTestRunResultsStorage::getConnection();
-  }
 
   /**
    * Generates a database prefix for running tests.
@@ -186,6 +170,7 @@ trait TestSetupTrait {
         // prefixes of the test runner leak into the test.
         $connection_info[$target]['prefix'] = $value['prefix'] . $this->databasePrefix;
       }
+      Database::removeConnection('default');
       Database::addConnectionInfo('default', 'default', $connection_info['default']);
     }
   }

@@ -5,10 +5,12 @@
  * Hook implementations for this module.
  */
 
+declare(strict_types=1);
+
 /**
  * Implements hook_preprocess_HOOK().
  */
-function pager_test_preprocess_pager(&$variables) {
+function pager_test_preprocess_pager(&$variables): void {
   // Nothing to do if there is only one page.
   $element = $variables['pager']['#element'];
   /** @var \Drupal\Core\Pager\PagerManagerInterface $pager_manager */
@@ -25,7 +27,7 @@ function pager_test_preprocess_pager(&$variables) {
     return;
   }
 
-  foreach ($variables['items']['pages'] as $index => &$pager_item) {
+  foreach ($variables['items']['pages'] as &$pager_item) {
     $pager_item['attributes']['pager-test'] = 'yes';
     $pager_item['attributes']->addClass('lizards');
   }

@@ -86,7 +86,7 @@ class DefaultConfigTest extends KernelTestBase {
         $file_name = DRUPAL_ROOT . '/core/modules/system/tests/modules/' . $name . '/' . $name . '.info.yml';
         break;
 
-      default;
+      default:
         $file_name = DRUPAL_ROOT . '/core/' . $type . 's/' . $name . '/' . $name . '.info.yml';
     }
 
@@ -192,7 +192,7 @@ class DefaultConfigTest extends KernelTestBase {
    * @param string $type
    *   The extension type to test.
    */
-  protected function doTestsOnConfigStorage(StorageInterface $default_config_storage, $extension, string $type = 'module') {
+  protected function doTestsOnConfigStorage(StorageInterface $default_config_storage, $extension, string $type = 'module'): void {
     /** @var \Drupal\Core\Config\ConfigManagerInterface $config_manager */
     $config_manager = $this->container->get('config.manager');
 

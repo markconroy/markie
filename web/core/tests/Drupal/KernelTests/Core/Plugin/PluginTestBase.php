@@ -4,14 +4,13 @@ declare(strict_types=1);
 
 namespace Drupal\KernelTests\Core\Plugin;
 
-use Drupal\Component\Datetime\TimeInterface;
 use Drupal\Core\Plugin\Context\EntityContextDefinition;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\plugin_test\Plugin\TestPluginManager;
 use Drupal\plugin_test\Plugin\MockBlockManager;
 use Drupal\plugin_test\Plugin\DefaultsTestPluginManager;
-use Drupal\Core\Cache\MemoryBackend;
 use Drupal\Core\Extension\ModuleHandler;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
  * Base class for Plugin API unit tests.
@@ -23,11 +22,46 @@ abstract class PluginTestBase extends KernelTestBase {
    */
   protected static $modules = ['plugin_test'];
 
+  /**
+   * The test plugin manager used by Plugin API unit tests.
+   *
+   * @var \Drupal\plugin_test\Plugin\TestPluginManager
+   */
   protected $testPluginManager;
+
+  /**
+   * The expected plugin definitions for the test plugin.
+   *
+   * @var array
+   */
   protected $testPluginExpectedDefinitions;
+
+  /**
+   * The mock plugin manager used by Plugin API derivative unit tests.
+   *
+   * @var \Drupal\plugin_test\Plugin\MockBlockManager
+   */
   protected $mockBlockManager;
+
+  /**
+   * The expected plugin definitions for the mock block plugin.
+   *
+   * @var array
+   */
   protected $mockBlockExpectedDefinitions;
+
+  /**
+   * The default plugin manager used by Plugin API unit tests.
+   *
+   * @var \Drupal\plugin_test\Plugin\DefaultsTestPluginManager
+   */
   protected $defaultsTestPluginManager;
+
+  /**
+   * The expected plugin definitions for the defaults plugin.
+   *
+   * @var array
+   */
   protected $defaultsTestPluginExpectedDefinitions;
 
   /**
@@ -46,7 +80,7 @@ abstract class PluginTestBase extends KernelTestBase {
     //   as derivatives and ReflectionFactory.
     $this->testPluginManager = new TestPluginManager();
     $this->mockBlockManager = new MockBlockManager();
-    $module_handler = new ModuleHandler($this->root, [], new MemoryBackend(\Drupal::service(TimeInterface::class)));
+    $module_handler = new ModuleHandler($this->root, [], $this->createMock(EventDispatcherInterface::class), []);
     $this->defaultsTestPluginManager = new DefaultsTestPluginManager($module_handler);
 
     // The expected plugin definitions within each manager. Several tests assert

@@ -52,20 +52,26 @@ class Table extends StylePluginBase implements CacheableDependencyInterface {
 
   /**
    * Contains the current active sort column.
+   *
    * @var string
    */
   public $active;
 
   /**
    * Contains the current active sort order, either desc or asc.
+   *
    * @var string
    */
   public $order;
 
+  /**
+   * {@inheritdoc}
+   */
   protected function defineOptions() {
     $options = parent::defineOptions();
 
     $options['columns'] = ['default' => []];
+    $options['class'] = ['default' => ''];
     $options['default'] = ['default' => ''];
     $options['info'] = ['default' => []];
     $options['override'] = ['default' => TRUE];
@@ -154,10 +160,10 @@ class Table extends StylePluginBase implements CacheableDependencyInterface {
    * - Any fields not currently represented must be added.
    * - Columns must be re-ordered to match the fields.
    *
-   * @param $columns
+   * @param string[][] $columns
    *   An array of all fields; the key is the id of the field and the
    *   value is the id of the column the field should be in.
-   * @param $fields
+   * @param string[] $fields
    *   The fields to use for the columns. If not provided, they will
    *   be requested from the current display. The running render should
    *   send the fields through, as they may be different than what the
@@ -209,6 +215,13 @@ class Table extends StylePluginBase implements CacheableDependencyInterface {
       ];
       return;
     }
+
+    $form['class'] = [
+      '#title' => $this->t('Table CSS classes'),
+      '#type' => 'textfield',
+      '#description' => $this->t('Classes to provide on the table. Separate multiple classes with a space. Example: classA classB'),
+      '#default_value' => $this->options['class'],
+    ];
 
     $form['override'] = [
       '#type' => 'checkbox',
@@ -411,10 +424,16 @@ class Table extends StylePluginBase implements CacheableDependencyInterface {
     ];
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function evenEmpty() {
     return parent::evenEmpty() || !empty($this->options['empty_table']);
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function wizardSubmit(&$form, FormStateInterface $form_state, WizardInterface $wizard, &$display_options, $display_type) {
     // If any of the displays use the table style, make sure that the fields
     // always have a labels by unsetting the override.

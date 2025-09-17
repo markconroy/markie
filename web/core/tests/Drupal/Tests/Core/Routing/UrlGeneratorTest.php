@@ -186,6 +186,7 @@ class UrlGeneratorTest extends UnitTestCase {
    * to return an actual alias.
    *
    * @return string
+   *   The alias for the given path, or the path itself if no alias is defined.
    */
   public function aliasManagerCallback() {
     $args = func_get_args();
@@ -290,20 +291,6 @@ class UrlGeneratorTest extends UnitTestCase {
 
     $url = $generator->generateFromRoute('test_1', [], ['path_processing' => TRUE]);
     $this->assertEquals('/hello/world', $url);
-  }
-
-  /**
-   * Tests URL generation deprecations.
-   *
-   * @group legacy
-   */
-  public function testRouteObjectDeprecation(): void {
-    $this->expectDeprecation('Passing a route object to Drupal\Core\Routing\UrlGenerator::getPathFromRoute() is deprecated in drupal:10.1.0 and will not be supported in drupal:11.0.0. Pass the route name instead. See https://www.drupal.org/node/3172280');
-    $path = $this->generator->getPathFromRoute(new Route('/test/one'));
-    $this->assertSame($this->generator->getPathFromRoute('test_1'), $path);
-    $this->expectDeprecation('Passing a route object to Drupal\Core\Routing\UrlGenerator::generateFromRoute() is deprecated in drupal:10.1.0 and will not be supported in drupal:11.0.0. Pass the route name instead. See https://www.drupal.org/node/3172280');
-    $url = $this->generator->generateFromRoute(new Route('/test/one'));
-    $this->assertSame($this->generator->generateFromRoute('test_1'), $url);
   }
 
   /**
@@ -469,18 +456,6 @@ class UrlGeneratorTest extends UnitTestCase {
   }
 
   /**
-   * Tests deprecated methods.
-   *
-   * @group legacy
-   */
-  public function testDeprecatedMethods(): void {
-    $this->expectDeprecation('Drupal\Core\Routing\UrlGenerator::getRouteDebugMessage() is deprecated in drupal:10.1.0 and is removed from drupal:11.0.0. Use the route name instead. See https://www.drupal.org/node/3172303');
-    $this->assertSame('test', $this->generator->getRouteDebugMessage('test'));
-    $this->expectDeprecation('Drupal\Core\Routing\UrlGenerator::supports() is deprecated in drupal:10.1.0 and is removed from drupal:11.0.0. Only string route names are supported. See https://www.drupal.org/node/3172303');
-    $this->assertTrue($this->generator->supports('test'));
-  }
-
-  /**
    * Tests the 'scheme' route requirement during URL generation.
    */
   public function testUrlGenerationWithHttpsRequirement(): void {
@@ -536,9 +511,6 @@ class UrlGeneratorTest extends UnitTestCase {
 
   /**
    * @covers \Drupal\Core\Routing\UrlGenerator::generateFromRoute
-   *
-   * Note: We use absolute covers to let
-   * \Drupal\Tests\Core\Render\MetadataBubblingUrlGeneratorTest work.
    */
   public function testGenerateWithPathProcessorChangingOptions(): void {
     $path_processor = $this->createMock(OutboundPathProcessorInterface::CLASS);

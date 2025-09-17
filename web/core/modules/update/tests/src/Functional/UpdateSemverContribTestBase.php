@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace Drupal\Tests\update\Functional;
 
 /**
- * Base class for Update manager semantic versioning tests of contrib projects.
+ * Base class for Update Status semantic versioning tests of contrib projects.
  *
  * This wires up the protected data from UpdateSemverTestBase for a contrib
  * module with semantic version releases.
  */
-class UpdateSemverContribTestBase extends UpdateSemverTestBase {
+abstract class UpdateSemverContribTestBase extends UpdateSemverTestBase {
 
   /**
    * {@inheritdoc}

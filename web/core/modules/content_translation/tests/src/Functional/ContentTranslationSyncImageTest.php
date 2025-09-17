@@ -64,7 +64,7 @@ class ContentTranslationSyncImageTest extends ContentTranslationTestBase {
   /**
    * Creates the test image field.
    */
-  protected function setupTestFields() {
+  protected function setupTestFields(): void {
     $this->fieldName = 'field_test_et_ui_image';
     $this->cardinality = 3;
 
@@ -95,7 +95,7 @@ class ContentTranslationSyncImageTest extends ContentTranslationTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function getEditorPermissions() {
+  protected function getEditorPermissions(): array {
     // Every entity-type-specific test needs to define these.
     return ['administer entity_test_mul fields', 'administer languages', 'administer content translation'];
   }
@@ -262,7 +262,7 @@ class ContentTranslationSyncImageTest extends ContentTranslationTestBase {
    * @return \Drupal\Core\Entity\EntityInterface
    *   The saved entity.
    */
-  protected function saveEntity(EntityInterface $entity) {
+  protected function saveEntity(EntityInterface $entity): EntityInterface {
     $entity->save();
     $entity = \Drupal::entityTypeManager()->getStorage('entity_test_mul')->loadUnchanged($entity->id());
     return $entity;

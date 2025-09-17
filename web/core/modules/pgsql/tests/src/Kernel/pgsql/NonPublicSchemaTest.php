@@ -128,10 +128,25 @@ class NonPublicSchemaTest extends DriverSpecificKernelTestBase {
    * @covers ::changeField
    */
   public function testField(): void {
-    $this->testingFakeConnection->schema()->addField('faking_table', 'added_field', ['type' => 'int', 'not null' => FALSE]);
+    $this->testingFakeConnection->schema()
+      ->addField(
+        'faking_table',
+        'added_field',
+        [
+          'type' => 'int',
+          'not null' => FALSE,
+        ]);
     $this->assertTrue($this->testingFakeConnection->schema()->fieldExists('faking_table', 'added_field'));
 
-    $this->testingFakeConnection->schema()->changeField('faking_table', 'added_field', 'changed_field', ['type' => 'int', 'not null' => FALSE]);
+    $this->testingFakeConnection->schema()
+      ->changeField(
+        'faking_table',
+        'added_field',
+        'changed_field',
+        [
+          'type' => 'int',
+          'not null' => FALSE,
+        ]);
     $this->assertFalse($this->testingFakeConnection->schema()->fieldExists('faking_table', 'added_field'));
     $this->assertTrue($this->testingFakeConnection->schema()->fieldExists('faking_table', 'changed_field'));
 
@@ -293,8 +308,11 @@ class NonPublicSchemaTest extends DriverSpecificKernelTestBase {
   public function testUniqueKey(): void {
     $this->testingFakeConnection->schema()->addUniqueKey('faking_table', 'test_field', ['test_field']);
 
-    // This should work, but currently indexExist() only searches for keys that end with idx.
-    // @todo remove comments when: https://www.drupal.org/project/drupal/issues/3325358 is committed.
+    // This should work, but currently indexExist() only searches for keys that
+    // end with idx.
+    // @todo remove comments when:
+    //   https://www.drupal.org/project/drupal/issues/3325358 is committed.
+    // phpcs:ignore
     // $this->assertTrue($this->testingFakeConnection->schema()->indexExists('faking_table', 'test_field'));
 
     $results = $this->testingFakeConnection->query("SELECT * FROM pg_indexes WHERE indexname = :indexname", [':indexname' => $this->testingFakeConnection->getPrefix() . 'faking_table__test_field__key'])->fetchAll();
@@ -307,8 +325,11 @@ class NonPublicSchemaTest extends DriverSpecificKernelTestBase {
 
     $this->testingFakeConnection->schema()->dropUniqueKey('faking_table', 'test_field');
 
-    // This function will not work due to a the fact that indexExist() does not search for keys without idx tag.
-    // @todo remove comments when: https://www.drupal.org/project/drupal/issues/3325358 is committed.
+    // This function will not work due to a the fact that indexExist() does not
+    // search for keys without idx tag.
+    // @todo remove comments when:
+    //   https://www.drupal.org/project/drupal/issues/3325358 is committed.
+    // phpcs:ignore
     // $this->assertFalse($this->testingFakeConnection->schema()->indexExists('faking_table', 'test_field'));
   }
 

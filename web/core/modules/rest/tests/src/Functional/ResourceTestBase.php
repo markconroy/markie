@@ -4,13 +4,12 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\rest\Functional;
 
-use Behat\Mink\Driver\BrowserKitDriver;
 use Drupal\Core\Url;
 use Drupal\rest\RestResourceConfigInterface;
+use Drupal\Tests\ApiRequestTrait;
 use Drupal\Tests\BrowserTestBase;
 use Drupal\user\Entity\Role;
 use Drupal\user\RoleInterface;
-use GuzzleHttp\RequestOptions;
 use Psr\Http\Message\ResponseInterface;
 
 /**
@@ -26,17 +25,21 @@ use Psr\Http\Message\ResponseInterface;
  */
 abstract class ResourceTestBase extends BrowserTestBase {
 
+  use ApiRequestTrait {
+    makeApiRequest as request;
+  }
+
   /**
    * The format to use in this test.
    *
    * A format is the combination of a certain normalizer and a certain
    * serializer.
    *
-   * @see https://www.drupal.org/developing/api/8/serialization
-   *
    * (The default is 'json' because that doesn't depend on any module.)
    *
    * @var string
+   *
+   * @see https://www.drupal.org/developing/api/8/serialization
    */
   protected static $format = 'json';
 
@@ -228,14 +231,14 @@ abstract class ResourceTestBase extends BrowserTestBase {
    *
    * (Should be called before sending a well-formed request.)
    *
-   * @see \GuzzleHttp\ClientInterface::request()
-   *
    * @param string $method
    *   HTTP method.
    * @param \Drupal\Core\Url $url
    *   URL to request.
    * @param array $request_options
    *   Request options to apply.
+   *
+   * @see \GuzzleHttp\ClientInterface::request()
    */
   abstract protected function assertNormalizationEdgeCases($method, Url $url, array $request_options);
 
@@ -244,14 +247,14 @@ abstract class ResourceTestBase extends BrowserTestBase {
    *
    * (Should be called before sending a well-formed request.)
    *
-   * @see \GuzzleHttp\ClientInterface::request()
-   *
    * @param string $method
    *   HTTP method.
    * @param \Drupal\Core\Url $url
    *   URL to request.
    * @param array $request_options
    *   Request options to apply.
+   *
+   * @see \GuzzleHttp\ClientInterface::request()
    */
   abstract protected function assertAuthenticationEdgeCases($method, Url $url, array $request_options);
 
@@ -321,36 +324,6 @@ abstract class ResourceTestBase extends BrowserTestBase {
     else {
       $this->grantPermissionsToAnonymousRole($permissions);
     }
-  }
-
-  /**
-   * Performs a HTTP request. Wraps the Guzzle HTTP client.
-   *
-   * Why wrap the Guzzle HTTP client? Because we want to keep the actual test
-   * code as simple as possible, and hence not require them to specify the
-   * 'http_errors = FALSE' request option, nor do we want them to have to
-   * convert Drupal Url objects to strings.
-   *
-   * We also don't want to follow redirects automatically, to ensure these tests
-   * are able to detect when redirects are added or removed.
-   *
-   * @see \GuzzleHttp\ClientInterface::request()
-   *
-   * @param string $method
-   *   HTTP method.
-   * @param \Drupal\Core\Url $url
-   *   URL to request.
-   * @param array $request_options
-   *   Request options to apply.
-   *
-   * @return \Psr\Http\Message\ResponseInterface
-   */
-  protected function request($method, Url $url, array $request_options) {
-    $request_options[RequestOptions::HTTP_ERRORS] = FALSE;
-    $request_options[RequestOptions::ALLOW_REDIRECTS] = FALSE;
-    $request_options = $this->decorateWithXdebugCookie($request_options);
-    $client = $this->getHttpClient();
-    return $client->request($method, $url->setAbsolute(TRUE)->toString(), $request_options);
   }
 
   /**
@@ -458,32 +431,6 @@ abstract class ResourceTestBase extends BrowserTestBase {
   }
 
   /**
-   * Adds the Xdebug cookie to the request options.
-   *
-   * @param array $request_options
-   *   The request options.
-   *
-   * @return array
-   *   Request options updated with the Xdebug cookie if present.
-   */
-  protected function decorateWithXdebugCookie(array $request_options) {
-    $session = $this->getSession();
-    $driver = $session->getDriver();
-    if ($driver instanceof BrowserKitDriver) {
-      $client = $driver->getClient();
-      foreach ($client->getCookieJar()->all() as $cookie) {
-        if (isset($request_options[RequestOptions::HEADERS]['Cookie'])) {
-          $request_options[RequestOptions::HEADERS]['Cookie'] .= '; ' . $cookie->getName() . '=' . $cookie->getValue();
-        }
-        else {
-          $request_options[RequestOptions::HEADERS]['Cookie'] = $cookie->getName() . '=' . $cookie->getValue();
-        }
-      }
-    }
-    return $request_options;
-  }
-
-  /**
    * Recursively sorts an array by key.
    *
    * @param array $array
@@ -494,7 +441,7 @@ abstract class ResourceTestBase extends BrowserTestBase {
     ksort($array);
 
     // Then check for child arrays.
-    foreach ($array as $key => &$value) {
+    foreach ($array as &$value) {
       if (is_array($value)) {
         static::recursiveKSort($value);
       }

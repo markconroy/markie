@@ -2,7 +2,6 @@
 
 /**
  * @file
- * Administration functions for editor.module.
  */
 
 use Drupal\Component\Utility\Environment;
@@ -14,17 +13,14 @@ use Drupal\editor\Entity\Editor;
  * Subform constructor to configure the text editor's image upload settings.
  *
  * Each text editor plugin that is configured to offer the ability to insert
- * images and uses EditorImageDialog for that, should use this form to update
- * the text editor's configuration so that EditorImageDialog knows whether it
- * should allow the user to upload images.
+ * images, should use this form to update the text editor's configuration so
+ * that it knows whether it should allow the user to upload images.
  *
  * @param \Drupal\editor\Entity\Editor $editor
  *   The text editor entity that is being edited.
  *
  * @return array
  *   The image upload settings form.
- *
- * @see \Drupal\editor\Form\EditorImageDialog
  */
 function editor_image_upload_settings_form(Editor $editor) {
   // Defaults.

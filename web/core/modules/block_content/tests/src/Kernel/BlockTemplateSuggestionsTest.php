@@ -8,6 +8,7 @@ use Drupal\block\Entity\Block;
 use Drupal\block_content\Entity\BlockContent;
 use Drupal\block_content\Entity\BlockContentType;
 use Drupal\KernelTests\KernelTestBase;
+use Drupal\block_content\Hook\BlockContentHooks;
 
 /**
  * Tests the block_content_theme_suggestions_block() function.
@@ -68,12 +69,12 @@ class BlockTemplateSuggestionsTest extends KernelTestBase {
     ]);
 
     $variables['elements']['#id'] = $block->id();
-    $variables['elements']['#configuration']['provider'] = 'block_content';
-    $variables['elements']['#configuration']['view_mode'] = 'full';
     $variables['elements']['content']['#block_content'] = $this->blockContent;
-    $suggestions_empty = [];
-    $suggestions_empty[] = 'block__block_content__' . $block->uuid();
-    $suggestions = block_content_theme_suggestions_block_alter($suggestions_empty, $variables);
+    $variables['elements']['content']['#view_mode'] = 'full';
+    $suggestions = [];
+    $suggestions[] = 'block__block_content__' . $block->uuid();
+    $blockTemplateSuggestionsAlter = new BlockContentHooks();
+    $blockTemplateSuggestionsAlter->themeSuggestionsBlockAlter($suggestions, $variables);
 
     $this->assertSame([
       'block__block_content__' . $block->uuid(),

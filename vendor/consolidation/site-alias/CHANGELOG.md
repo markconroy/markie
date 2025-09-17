@@ -1,5 +1,13 @@
 # Changelog
 
+### 4.1.1 2024-12-13 
+
+* PHP 8.4 support
+
+### 4.1.0 2024-04-05
+
+* Symfony 7 support
+
 ### 4.0.1 2023-04-29
 
 * Automatically create new release from tags (#63)

@@ -85,16 +85,25 @@ final class SingleDirectoryComponent extends BaseGenerator implements ContainerI
     } while ($library !== NULL);
 
     $vars['component_libraries'] = \array_filter($vars['component_libraries']);
-    $vars['component_has_css'] = $ir->confirm('Needs CSS?');
-    $vars['component_has_js'] = $ir->confirm('Needs JS?');
-    if ($ir->confirm('Needs component props?')) {
+    $vars['component_has_css'] = $ir->confirm('Need CSS?');
+    $vars['component_has_js'] = $ir->confirm('Need JS?');
+    if ($ir->confirm('Need component props?')) {
       $vars['component_props'] = [];
       do {
-        $prop = $this->askProp($ir);
+        $prop = $this->askProp($vars, $ir);
         $vars['component_props'][] = $prop;
       } while ($ir->confirm('Add another prop?'));
     }
     $vars['component_props'] = \array_filter($vars['component_props'] ?? []);
+
+    if ($ir->confirm('Need slots?')) {
+      $vars['component_slots'] = [];
+      do {
+        $slot = $this->askSlot($vars, $ir);
+        $vars['component_slots'][] = $slot;
+      } while ($ir->confirm('Add another slot?'));
+    }
+    $vars['component_slots'] = \array_filter($vars['component_slots'] ?? []);
   }
 
   /**
@@ -116,8 +125,8 @@ final class SingleDirectoryComponent extends BaseGenerator implements ContainerI
     $assets->addFile($component_path . '{component_machine_name}.component.yml', 'component.twig');
     $assets->addFile($component_path . 'README.md', 'readme.twig');
 
-    $contents = \file_get_contents($this->getTemplatePath() . \DIRECTORY_SEPARATOR . 'thumbnail.jpg');
-    $thumbnail = new File($component_path . 'thumbnail.jpg');
+    $contents = \file_get_contents($this->getTemplatePath() . \DIRECTORY_SEPARATOR . 'thumbnail.png');
+    $thumbnail = new File($component_path . 'thumbnail.png');
     $thumbnail->content($contents);
     $assets[] = $thumbnail;
   }
@@ -161,10 +170,13 @@ final class SingleDirectoryComponent extends BaseGenerator implements ContainerI
   /**
    * Asks for multiple questions to define a prop and its schema.
    *
+   * @psalm-param array{component_machine_name: mixed, ...<array-key, mixed>} $vars
+   *   The answers to the CLI questions.
+   *
    * @return array
    *   The prop data, if any.
    */
-  protected function askProp(Interviewer $ir): array {
+  protected function askProp(array $vars, Interviewer $ir): array {
     $prop = [];
     $prop['title'] = $ir->ask('Prop title', '', new Required());
     $default = Utils::human2machine($prop['title']);
@@ -180,9 +192,30 @@ final class SingleDirectoryComponent extends BaseGenerator implements ContainerI
     ];
     $prop['type'] = $ir->choice('Prop type', $choices, 'String');
     if (!\in_array($prop['type'], ['string', 'number', 'boolean'])) {
-      $this->io()->warning('Unable to generate full schema for ' . $prop['type'] . '. Please edit metadata.json after generation.');
+      /** @psalm-var string $type */
+      $type = $prop['type'];
+      $component_schema_name = $vars['component_machine_name'] . '.component.yml';
+      $this->io()->warning(\sprintf('Unable to generate full schema for %s. Please edit %s after generation.', $type, $component_schema_name));
     }
     return $prop;
+  }
+
+  /**
+   * Asks for multiple questions to define a slot.
+   *
+   * @psalm-param array{component_machine_name: mixed, ...<array-key, mixed>} $vars
+   *   The answers to the CLI questions.
+   *
+   * @return array
+   *   The slot data, if any.
+   */
+  protected function askSlot(array $vars, Interviewer $ir): array {
+    $slot = [];
+    $slot['title'] = $ir->ask('Slot title', '', new Required());
+    $default = Utils::human2machine($slot['title']);
+    $slot['name'] = $ir->ask('Slot machine name', $default, new RequiredMachineName());
+    $slot['description'] = $ir->ask('Slot description (optional)');
+    return $slot;
   }
 
 }

@@ -145,9 +145,9 @@ abstract class FilterFormatFormBase extends EntityForm {
         '#parents' => ['filters', $name, 'provider'],
       ];
 
-      // Retrieve the settings form of the filter plugin. The plugin should not be
-      // aware of the text format. Therefore, it only receives a set of minimal
-      // base properties to allow advanced implementations to work.
+      // Retrieve the settings form of the filter plugin. The plugin should not
+      // be aware of the text format. Therefore, it only receives a set of
+      // minimal base properties to allow advanced implementations to work.
       $settings_form = [
         '#parents' => ['filters', $name, 'settings'],
         '#tree' => TRUE,
@@ -172,7 +172,7 @@ abstract class FilterFormatFormBase extends EntityForm {
    * Determines if the format already exists.
    *
    * @param string $format_id
-   *   The format ID
+   *   The format ID.
    *
    * @return bool
    *   TRUE if the format exists, FALSE otherwise.

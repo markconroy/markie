@@ -6,7 +6,6 @@ namespace Drupal\Tests\system\Functional\Form;
 
 use Drupal\Component\Serialization\Json;
 use Drupal\Component\Utility\Html;
-use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Form\FormState;
 use Drupal\Core\Render\Element;
 use Drupal\Core\Url;
@@ -156,7 +155,8 @@ class FormTest extends BrowserTestBase {
         }
       }
     }
-    // Clear the expected form error messages so they don't appear as exceptions.
+    // Clear the expected form error messages so they don't appear as
+    // exceptions.
     \Drupal::messenger()->deleteAll();
   }
 
@@ -198,7 +198,7 @@ class FormTest extends BrowserTestBase {
       $expected_key = array_search($error->getText(), $expected);
       // If the error message is not one of the expected messages, fail.
       if ($expected_key === FALSE) {
-        $this->fail(new FormattableMarkup("Unexpected error message: @error", ['@error' => $error[0]]));
+        $this->fail("Unexpected error message: " . $error[0]);
       }
       // Remove the expected message from the list once it is found.
       else {
@@ -208,7 +208,7 @@ class FormTest extends BrowserTestBase {
 
     // Fail if any expected messages were not found.
     foreach ($expected as $not_found) {
-      $this->fail(new FormattableMarkup("Found error message: @error", ['@error' => $not_found]));
+      $this->fail("Found error message: " . $not_found);
     }
 
     // Verify that input elements are still empty.
@@ -589,7 +589,7 @@ class FormTest extends BrowserTestBase {
    * @param string[] $order
    *   Expected order of its options.
    */
-  protected function validateSelectSorting($select, array $order) {
+  protected function validateSelectSorting($select, array $order): void {
     $option_map_function = function (NodeElement $node) {
       return ($node->getTagName() === 'optgroup') ?
         $node->getAttribute('label') : $node->getValue();
@@ -608,14 +608,6 @@ class FormTest extends BrowserTestBase {
    */
   public function testNumber(): void {
     $form = \Drupal::formBuilder()->getForm('\Drupal\form_test\Form\FormTestNumberForm');
-
-    // Array with all the error messages to be checked.
-    $error_messages = [
-      'no_number' => '%name must be a number.',
-      'too_low' => '%name must be higher than or equal to %min.',
-      'too_high' => '%name must be lower than or equal to %max.',
-      'step_mismatch' => '%name is not a valid number.',
-    ];
 
     // The expected errors.
     $expected = [
@@ -647,21 +639,26 @@ class FormTest extends BrowserTestBase {
       $this->submitForm([], 'Submit');
 
       foreach ($expected as $element => $error) {
-        // Create placeholder array.
-        $placeholders = [
-          '%name' => $form[$element]['#title'],
-          '%min' => $form[$element]['#min'] ?? '0',
-          '%max' => $form[$element]['#max'] ?? '0',
+        // Array with all the error messages to be checked.
+        $name = $form[$element]['#title'];
+        $min = $form[$element]['#min'] ?? '0';
+        $max = $form[$element]['#max'] ?? '0';
+
+        $error_messages = [
+          'no_number' => "<em class=\"placeholder\">$name</em> must be a number.",
+          'too_low' => "<em class=\"placeholder\">$name</em> must be higher than or equal to <em class=\"placeholder\">$min</em>.",
+          'too_high' => "<em class=\"placeholder\">$name</em> must be lower than or equal to <em class=\"placeholder\">$max</em>.",
+          'step_mismatch' => "<em class=\"placeholder\">$name</em> is not a valid number.",
         ];
 
         foreach ($error_messages as $id => $message) {
           // Check if the error exists on the page, if the current message ID is
           // expected. Otherwise ensure that the error message is not present.
           if ($id === $error) {
-            $this->assertSession()->responseContains(new FormattableMarkup($message, $placeholders));
+            $this->assertSession()->responseContains($message);
           }
           else {
-            $this->assertSession()->responseNotContains(new FormattableMarkup($message, $placeholders));
+            $this->assertSession()->responseNotContains($message);
           }
         }
       }
@@ -752,7 +749,8 @@ class FormTest extends BrowserTestBase {
     }
 
     // Submit the form with no input, as the browser does for disabled elements,
-    // and fetch the $form_state->getValues() that is passed to the submit handler.
+    // and fetch the $form_state->getValues() that is passed to the submit
+    // handler.
     $this->drupalGet('form-test/disabled-elements');
     $this->submitForm([], 'Submit');
     $returned_values['normal'] = Json::decode($this->getSession()->getPage()->getContent());

@@ -22,7 +22,7 @@ use Symfony\Component\HttpFoundation\RequestStack;
 class VariationCacheTest extends UnitTestCase {
 
   /**
-   * The prophesized request stack.
+   * The mock request stack.
    *
    * @var \Symfony\Component\HttpFoundation\RequestStack|\Prophecy\Prophecy\ProphecyInterface
    */
@@ -36,7 +36,7 @@ class VariationCacheTest extends UnitTestCase {
   protected $memoryBackend;
 
   /**
-   * The prophesized cache contexts manager.
+   * The mock cache contexts manager.
    *
    * @var \Drupal\Core\Cache\Context\CacheContextsManager|\Prophecy\Prophecy\ProphecyInterface
    */
@@ -635,7 +635,7 @@ class VariationCacheTest extends UnitTestCase {
    * @param \Drupal\Core\Cache\CacheableMetadata $initial_cacheability
    *   The initial cacheability that should be used.
    */
-  protected function setVariationCacheItem($data, CacheableMetadata $cacheability, CacheableMetadata $initial_cacheability) {
+  protected function setVariationCacheItem($data, CacheableMetadata $cacheability, CacheableMetadata $initial_cacheability): void {
     $this->variationCache->set($this->cacheKeys, $data, $cacheability, $initial_cacheability);
   }
 
@@ -649,7 +649,7 @@ class VariationCacheTest extends UnitTestCase {
    * @param \Drupal\Core\Cache\CacheableMetadata $initial_cacheability
    *   The initial cacheability that should be used.
    */
-  protected function assertVariationCacheItem($data, CacheableMetadata $cacheability, CacheableMetadata $initial_cacheability) {
+  protected function assertVariationCacheItem($data, CacheableMetadata $cacheability, CacheableMetadata $initial_cacheability): void {
     $cache_item = $this->variationCache->get($this->cacheKeys, $initial_cacheability);
     $this->assertNotFalse($cache_item, 'Variable data was stored and retrieved successfully.');
     $this->assertEquals($data, $cache_item->data, 'Variable cache item contains the right data.');
@@ -662,7 +662,7 @@ class VariationCacheTest extends UnitTestCase {
    * @param \Drupal\Core\Cache\CacheableMetadata $initial_cacheability
    *   The initial cacheability that should be used.
    */
-  protected function assertVariationCacheMiss(CacheableMetadata $initial_cacheability) {
+  protected function assertVariationCacheMiss(CacheableMetadata $initial_cacheability): void {
     $this->assertFalse($this->variationCache->get($this->cacheKeys, $initial_cacheability), 'Nothing could be retrieved for the active cache contexts.');
   }
 
@@ -677,7 +677,7 @@ class VariationCacheTest extends UnitTestCase {
    *   (optional) The cacheability that should have been used. Does not apply
    *   when checking for cache redirects.
    */
-  protected function assertCacheBackendItem(string $cid, $data, ?CacheableMetadata $cacheability = NULL) {
+  protected function assertCacheBackendItem(string $cid, $data, ?CacheableMetadata $cacheability = NULL): void {
     $cache_backend_item = $this->memoryBackend->get($cid);
     $this->assertNotFalse($cache_backend_item, 'The data was stored and retrieved successfully.');
     $this->assertEquals($data, $cache_backend_item->data, 'Cache item contains the right data.');

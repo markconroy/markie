@@ -21,7 +21,7 @@ class PropertyEnumerator extends Enumerator
     /**
      * {@inheritdoc}
      */
-    protected function listItems(InputInterface $input, \Reflector $reflector = null, $target = null): array
+    protected function listItems(InputInterface $input, ?\Reflector $reflector = null, $target = null): array
     {
         // only list properties when a Reflector is present.
 
@@ -168,7 +168,9 @@ class PropertyEnumerator extends Enumerator
             return '';
         }
 
-        $property->setAccessible(true);
+        if (\PHP_VERSION_ID < 80100) {
+            $property->setAccessible(true);
+        }
         $value = $property->getValue($target);
 
         return $this->presentRef($value);

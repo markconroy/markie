@@ -68,14 +68,14 @@ class LibraryDiscoveryParserTest extends UnitTestCase {
   /**
    * The mocked stream wrapper manager.
    *
-   * @var \Drupal\Core\StreamWrapper\StreamWrapperManagerInterface||\PHPUnit\Framework\MockObject\MockObject
+   * @var \Drupal\Core\StreamWrapper\StreamWrapperManagerInterface|\PHPUnit\Framework\MockObject\MockObject
    */
   protected $streamWrapperManager;
 
   /**
    * The mocked libraries directory file finder.
    *
-   * @var \Drupal\Core\Asset\LibrariesDirectoryFileFinder||\PHPUnit\Framework\MockObject\MockObject
+   * @var \Drupal\Core\Asset\LibrariesDirectoryFileFinder|\PHPUnit\Framework\MockObject\MockObject
    */
   protected $librariesDirectoryFileFinder;
 
@@ -294,9 +294,9 @@ class LibraryDiscoveryParserTest extends UnitTestCase {
 
     $libraries = $this->libraryDiscoveryParser->buildByExtension('versions');
 
-    $this->assertArrayNotHasKey('version', $libraries['versionless']);
-    $this->assertEquals(-1, $libraries['versionless']['css'][0]['version']);
-    $this->assertEquals(-1, $libraries['versionless']['js'][0]['version']);
+    $this->assertArrayNotHasKey('version', $libraries['no_version']);
+    $this->assertEquals(-1, $libraries['no_version']['css'][0]['version']);
+    $this->assertEquals(-1, $libraries['no_version']['js'][0]['version']);
 
     $this->assertEquals('9.8.7.6', $libraries['versioned']['version']);
     $this->assertEquals('9.8.7.6', $libraries['versioned']['css'][0]['version']);
@@ -869,13 +869,18 @@ class LibraryDiscoveryParserTest extends UnitTestCase {
  */
 class TestLibraryDiscoveryParser extends LibraryDiscoveryParser {
 
+  /**
+   * The valid URIs.
+   *
+   * @var array
+   */
   protected $validUris;
 
   protected function fileValidUri($source) {
     return $this->validUris[$source] ?? FALSE;
   }
 
-  public function setFileValidUri($source, $valid) {
+  public function setFileValidUri($source, $valid): void {
     $this->validUris[$source] = $valid;
   }
 

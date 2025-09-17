@@ -83,6 +83,11 @@ class LibraryDiscoveryCollectorTest extends UnitTestCase {
     ],
   ];
 
+  /**
+   * The active theme.
+   *
+   * @var \Drupal\Core\Theme\ActiveTheme|\PHPUnit\Framework\MockObject\MockObject
+   */
   protected $activeTheme;
 
   /**

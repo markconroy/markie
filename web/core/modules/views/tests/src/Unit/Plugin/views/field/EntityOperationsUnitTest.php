@@ -77,7 +77,7 @@ class EntityOperationsUnitTest extends UnitTestCase {
       ->getMock();
     $display = $this->getMockBuilder('\Drupal\views\Plugin\views\display\DisplayPluginBase')
       ->disableOriginalConstructor()
-      ->getMockForAbstractClass();
+      ->getMock();
     $view->display_handler = $display;
     $this->plugin->init($view, $display);
   }
@@ -134,6 +134,9 @@ class EntityOperationsUnitTest extends UnitTestCase {
     $expected_build = [
       '#type' => 'operations',
       '#links' => $operations,
+      '#attached' => [
+        'library' => ['core/drupal.dialog.ajax'],
+      ],
     ];
     $expected_build['#links']['foo']['query'] = ['destination' => 'foobar'];
     $build = $this->plugin->render($result);
@@ -176,6 +179,9 @@ class EntityOperationsUnitTest extends UnitTestCase {
     $expected_build = [
       '#type' => 'operations',
       '#links' => $operations,
+      '#attached' => [
+        'library' => ['core/drupal.dialog.ajax'],
+      ],
     ];
     $build = $this->plugin->render($result);
     $this->assertSame($expected_build, $build);

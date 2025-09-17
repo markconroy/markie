@@ -15,6 +15,7 @@ use Drupal\Core\TypedData\Plugin\DataType\IntegerData;
 use Drupal\Core\TypedData\Type\DateTimeInterface;
 use Drupal\datetime\Plugin\Field\FieldType\DateTimeItem;
 use Drupal\serialization\Normalizer\DateTimeIso8601Normalizer;
+use Drupal\Tests\serialization\Traits\JsonSchemaTestTrait;
 use Drupal\Tests\UnitTestCase;
 use Prophecy\Argument;
 use Symfony\Component\Serializer\Exception\InvalidArgumentException;
@@ -29,6 +30,8 @@ use Symfony\Component\Serializer\Exception\UnexpectedValueException;
  * @see \Drupal\datetime\Plugin\Field\FieldType\DateTimeItem::DATETIME_TYPE_DATE
  */
 class DateTimeIso8601NormalizerTest extends UnitTestCase {
+
+  use JsonSchemaTestTrait;
 
   /**
    * The tested data type's normalizer.
@@ -152,6 +155,7 @@ class DateTimeIso8601NormalizerTest extends UnitTestCase {
    * Data provider for testNormalize.
    *
    * @return array
+   *   The data provider array.
    */
   public static function providerTestNormalize() {
     return [
@@ -196,6 +200,7 @@ class DateTimeIso8601NormalizerTest extends UnitTestCase {
    * Data provider for testDenormalizeValidFormats.
    *
    * @return array
+   *   An array of test cases.
    */
   public static function providerTestDenormalizeValidFormats() {
     $data = [];
@@ -255,6 +260,39 @@ class DateTimeIso8601NormalizerTest extends UnitTestCase {
     $this->normalizer->denormalize('', DateTimeIso8601::class, NULL, []);
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public static function jsonSchemaDataProvider(): array {
+    $case = function (UnitTestCase $test) {
+      assert(in_array(JsonSchemaTestTrait::class, class_uses($test)));
+      $field_item = $test->doProphesize(DateTimeItem::class);
+      $data = $test->doProphesize(DateTimeIso8601::class);
+
+      $field_storage_definition = $test->doProphesize(FieldStorageDefinitionInterface::class);
+      $field_storage_definition->getSetting('datetime_type')
+        ->willReturn(DateTimeItem::DATETIME_TYPE_DATE);
+      $field_definition = $test->doProphesize(FieldDefinitionInterface::class);
+      $field_definition->getFieldStorageDefinition()
+        ->willReturn($field_storage_definition);
+      $field_item->getFieldDefinition()
+        ->willReturn($field_definition);
+      $data->getParent()
+        ->willReturn($field_item);
+      $drupal_date_time = $test->doProphesize(DateTimeIso8601NormalizerTestDrupalDateTime::class);
+      $drupal_date_time->setTimezone(new \DateTimeZone('Australia/Sydney'))
+        ->willReturn($drupal_date_time->reveal());
+      $drupal_date_time->format('Y-m-d')
+        ->willReturn('1991-09-19');
+      $data->getDateTime()
+        ->willReturn($drupal_date_time->reveal());
+      return $data->reveal();
+    };
+    return [
+      'ISO 8601 date-only' => [fn (UnitTestCase $test) => $case($test)],
+    ];
+  }
+
 }
 
 /**
@@ -262,12 +300,16 @@ class DateTimeIso8601NormalizerTest extends UnitTestCase {
  *
  * Note: Prophecy does not support magic methods. By subclassing and specifying
  * an explicit method, Prophecy works.
+ *
  * @see https://github.com/phpspec/prophecy/issues/338
  * @see https://github.com/phpspec/prophecy/issues/34
  * @see https://github.com/phpspec/prophecy/issues/80
  */
 class DateTimeIso8601NormalizerTestDrupalDateTime extends DrupalDateTime {
 
+  /**
+   * Sets the timezone.
+   */
   public function setTimezone(\DateTimeZone $timezone) {
     parent::setTimezone($timezone);
   }

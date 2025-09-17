@@ -28,17 +28,16 @@ class ManagedFile extends FormElementBase {
    * {@inheritdoc}
    */
   public function getInfo() {
-    $class = static::class;
     return [
       '#input' => TRUE,
       '#process' => [
-        [$class, 'processManagedFile'],
+        [static::class, 'processManagedFile'],
       ],
       '#element_validate' => [
-        [$class, 'validateManagedFile'],
+        [static::class, 'validateManagedFile'],
       ],
       '#pre_render' => [
-        [$class, 'preRenderManagedFile'],
+        [static::class, 'preRenderManagedFile'],
       ],
       '#theme' => 'file_managed_file',
       '#theme_wrappers' => ['form_element'],
@@ -160,7 +159,7 @@ class ManagedFile extends FormElementBase {
   }
 
   /**
-   * #ajax callback for managed_file upload forms.
+   * The #ajax callback for managed_file upload forms.
    *
    * This ajax callback takes care of the following things:
    *   - Ensures that broken requests due to too big files are caught.
@@ -326,7 +325,7 @@ class ManagedFile extends FormElementBase {
     }
 
     if (!empty($element['#accept'])) {
-      $element['upload']['#attributes'] = ['accept' => $element['#accept']];
+      $element['upload']['#attributes']['accept'] = $element['#accept'];
     }
 
     // Indicate that $element['#title'] should be used as the HTML label for the
@@ -363,14 +362,8 @@ class ManagedFile extends FormElementBase {
     }
 
     // Add the extension list to the page as JavaScript settings.
-    if (isset($element['#upload_validators']['file_validate_extensions'][0]) || isset($element['#upload_validators']['FileExtension']['extensions'])) {
-      if (isset($element['#upload_validators']['file_validate_extensions'][0])) {
-        @trigger_error('\'file_validate_extensions\' is deprecated in drupal:10.2.0 and is removed from drupal:11.0.0. Use the \'FileExtension\' constraint instead. See https://www.drupal.org/node/3363700', E_USER_DEPRECATED);
-        $allowed_extensions = $element['#upload_validators']['file_validate_extensions'][0];
-      }
-      else {
-        $allowed_extensions = $element['#upload_validators']['FileExtension']['extensions'];
-      }
+    if (isset($element['#upload_validators']['FileExtension']['extensions'])) {
+      $allowed_extensions = $element['#upload_validators']['FileExtension']['extensions'];
       $extension_list = implode(',', array_filter(explode(' ', $allowed_extensions)));
       $element['upload']['#attached']['drupalSettings']['file']['elements']['#' . $id] = $extension_list;
     }
@@ -472,6 +465,7 @@ class ManagedFile extends FormElementBase {
    * Wraps the file usage service.
    *
    * @return \Drupal\file\FileUsage\FileUsageInterface
+   *   The file usage service.
    */
   protected static function fileUsage() {
     return \Drupal::service('file.usage');

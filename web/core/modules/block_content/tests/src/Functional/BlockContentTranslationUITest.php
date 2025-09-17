@@ -59,7 +59,7 @@ class BlockContentTranslationUITest extends ContentTranslationUITestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setupBundle() {
+  protected function setupBundle(): void {
     // Create the basic bundle since it is provided by standard.
     $bundle = BlockContentType::create([
       'id' => $this->bundle,
@@ -109,7 +109,7 @@ class BlockContentTranslationUITest extends ContentTranslationUITestBase {
   /**
    * {@inheritdoc}
    */
-  protected function doTestBasicTranslation() {
+  protected function doTestBasicTranslation(): void {
     parent::doTestBasicTranslation();
 
     // Ensure that a block translation can be created using the same description
@@ -125,7 +125,7 @@ class BlockContentTranslationUITest extends ContentTranslationUITestBase {
     try {
       $entity->save();
     }
-    catch (\Exception $e) {
+    catch (\Exception) {
       $this->fail('Blocks can have translations with the same "info" value.');
     }
 
@@ -137,10 +137,9 @@ class BlockContentTranslationUITest extends ContentTranslationUITestBase {
   /**
    * {@inheritdoc}
    */
-  protected function doTestTranslationEdit() {
+  protected function doTestTranslationEdit(): void {
     $storage = $this->container->get('entity_type.manager')
       ->getStorage($this->entityTypeId);
-    $storage->resetCache([$this->entityId]);
     $entity = $storage->load($this->entityId);
     $languages = $this->container->get('language_manager')->getLanguages();
 

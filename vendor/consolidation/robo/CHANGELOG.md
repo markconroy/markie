@@ -1,5 +1,16 @@
 # Changelog
 
+### 5.1.0 10/22/2024
+
+* PHP 8.4 compatibility by Andy Postnikov (#1165)
+* Don't require exact event-dispatcher version (typo fix) by Pierre Rudloff (#1169)
+
+### 5.0.0 4/17/2024
+
+* Support Symfony 7
+* Minimum version of PHP supported is now 8.2
+* BREAKING: Remove consolidation/self-update as a required dependency
+
 ### 4.0.4, 4.0.5, 4.0.6 4/30/2023
 
 * Move register command out of runner and into Robo class. (#1143)

@@ -84,8 +84,8 @@ class ToolbarCacheContextsTest extends BrowserTestBase {
     // Test with default combination and permission to see toolbar.
     $this->assertToolbarCacheContexts(['user', 'session'], 'Expected cache contexts found for default combination and permission to see toolbar.');
 
-    // Test without user toolbar tab. User module is a required module so we have to
-    // manually remove the user toolbar tab.
+    // Test without user toolbar tab. User module is a required module so we
+    // have to manually remove the user toolbar tab.
     $this->installExtraModules(['toolbar_disable_user_toolbar']);
     $this->assertToolbarCacheContexts(['user.permissions'], 'Expected cache contexts found without user toolbar tab.');
 
@@ -139,7 +139,7 @@ class ToolbarCacheContextsTest extends BrowserTestBase {
    * @param string[] $module_list
    *   An array of module names.
    */
-  protected function installExtraModules(array $module_list) {
+  protected function installExtraModules(array $module_list): void {
     \Drupal::service('module_installer')->install($module_list);
 
     // Installing modules updates the container and needs a router rebuild.

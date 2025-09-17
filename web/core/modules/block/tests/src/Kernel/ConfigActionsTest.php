@@ -27,6 +27,9 @@ class ConfigActionsTest extends KernelTestBase {
    */
   protected static $modules = ['block', 'system', 'user'];
 
+  /**
+   * The configuration action manager.
+   */
   private readonly ConfigActionManager $configActionManager;
 
   /**
@@ -46,6 +49,9 @@ class ConfigActionsTest extends KernelTestBase {
     $this->configActionManager = $this->container->get('plugin.manager.config_action');
   }
 
+  /**
+   * Tests the application of entity method actions on a block.
+   */
   public function testEntityMethodActions(): void {
     $block = $this->placeBlock('system_messages_block', ['theme' => 'olivero']);
     $this->assertSame('content', $block->getRegion());
@@ -77,6 +83,9 @@ class ConfigActionsTest extends KernelTestBase {
     $this->configActionManager->applyAction($action, 'user.role.anonymous', []);
   }
 
+  /**
+   * Verifies placeBlockInDefaultTheme action doesn't alter an existing block.
+   */
   public function testPlaceBlockActionDoesNotChangeExistingBlock(): void {
     $extant_region = Block::load('olivero_powered')->getRegion();
     $this->assertNotSame('content', $extant_region);
@@ -95,7 +104,7 @@ class ConfigActionsTest extends KernelTestBase {
    * @testWith ["placeBlockInDefaultTheme", "olivero", "header"]
    *           ["placeBlockInAdminTheme", "claro", "page_bottom"]
    */
-  public function testPlaceBlockInTheme(string $action, string $expected_theme, string $expected_region): void {
+  public function testPlaceBlockInDynamicRegion(string $action, string $expected_theme, string $expected_region): void {
     $this->configActionManager->applyAction($action, 'block.block.test_block', [
       'plugin' => 'system_powered_by_block',
       'region' => [
@@ -119,11 +128,34 @@ class ConfigActionsTest extends KernelTestBase {
     ]);
   }
 
-  public function testPlaceBlockInDefaultRegion(): void {
-    $this->config('system.theme')->set('default', 'umami')->save();
-    $this->testPlaceBlockInTheme('placeBlockInDefaultTheme', 'umami', 'content');
+  /**
+   * @testWith ["placeBlockInDefaultTheme", "olivero"]
+   *           ["placeBlockInAdminTheme", "claro"]
+   */
+  public function testPlaceBlockInStaticRegion(string $action, string $expected_theme): void {
+    $this->configActionManager->applyAction($action, 'block.block.test_block', [
+      'plugin' => 'system_powered_by_block',
+      'region' => 'content',
+    ]);
+
+    $block = Block::load('test_block');
+    $this->assertInstanceOf(Block::class, $block);
+    $this->assertSame('system_powered_by_block', $block->getPluginId());
+    $this->assertSame($expected_theme, $block->getTheme());
+    $this->assertSame('content', $block->getRegion());
   }
 
+  /**
+   * Tests placing a block in the default theme's region.
+   */
+  public function testPlaceBlockInDefaultRegion(): void {
+    $this->config('system.theme')->set('default', 'umami')->save();
+    $this->testPlaceBlockInDynamicRegion('placeBlockInDefaultTheme', 'umami', 'content');
+  }
+
+  /**
+   * Tests placing a block at the first and last position in a region.
+   */
   public function testPlaceBlockAtPosition(): void {
     // Ensure there's at least one block already in the region.
     $block = Block::create([

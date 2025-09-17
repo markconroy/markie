@@ -160,7 +160,8 @@ class EntityRevisionsTest extends EntityKernelTestBase {
    * Tests re-saving the entity in entity_test_entity_insert().
    */
   public function testSaveInHookEntityInsert(): void {
-    // Create an entity which will be saved again in entity_test_entity_insert().
+    // Create an entity which will be saved again in
+    // entity_test_entity_insert().
     $entity = EntityTestMulRev::create(['name' => 'EntityLoadedRevisionTest']);
     $entity->save();
     $loadedRevisionId = \Drupal::state()->get('entity_test.loadedRevisionId');
@@ -251,9 +252,6 @@ class EntityRevisionsTest extends EntityKernelTestBase {
     $it_revision->setName($this->randomString());
     $it_revision->setNewRevision(TRUE);
     $it_revision->isDefaultRevision(FALSE);
-    // @todo Remove this once the "original" property works with revisions. See
-    //   https://www.drupal.org/project/drupal/issues/2859042.
-    $it_revision->original = $storage->loadRevision($it_revision->getLoadedRevisionId());
     $it_revision->save();
     $this->assertTrue($it_revision->isLatestRevision());
     $this->assertTrue($it_revision->isLatestTranslationAffectedRevision());

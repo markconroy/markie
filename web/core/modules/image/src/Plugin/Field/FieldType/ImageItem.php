@@ -327,16 +327,16 @@ class ImageItem extends FileItem {
   public function preSave() {
     parent::preSave();
 
-    $width = $this->width;
-    $height = $this->height;
+    $width = $this->get('width')->getValue();
+    $height = $this->get('height')->getValue();
 
     // Determine the dimensions if necessary.
     if ($this->entity && $this->entity instanceof EntityInterface) {
-      if (empty($width) || empty($height)) {
+      if ($width === NULL || $height === NULL) {
         $image = \Drupal::service('image.factory')->get($this->entity->getFileUri());
         if ($image->isValid()) {
-          $this->width = $image->getWidth();
-          $this->height = $image->getHeight();
+          $this->set('width', $image->getWidth());
+          $this->set('height', $image->getHeight());
         }
       }
     }
@@ -377,7 +377,7 @@ class ImageItem extends FileItem {
       try {
         $file_system->move($tmp_file, $destination);
       }
-      catch (FileException $e) {
+      catch (FileException) {
         // Ignore failed move.
       }
       if ($path = $random->image($file_system->realpath($destination), $min_resolution, $max_resolution)) {
@@ -423,8 +423,9 @@ class ImageItem extends FileItem {
     if (!empty($element['x']['#value']) || !empty($element['y']['#value'])) {
       foreach (['x', 'y'] as $dimension) {
         if (!$element[$dimension]['#value']) {
-          // We expect the field name placeholder value to be wrapped in $this->t()
-          // here, so it won't be escaped again as it's already marked safe.
+          // We expect the field name placeholder value to be wrapped in
+          // $this->t() here, so it won't be escaped again as it's already
+          // marked safe.
           $form_state->setError($element[$dimension], new TranslatableMarkup('Both a height and width value must be specified in the @name field.', ['@name' => $element['#title']]));
           return;
         }

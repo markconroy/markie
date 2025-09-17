@@ -133,7 +133,7 @@ class EntityReferenceAdminTest extends BrowserTestBase {
       'required' => FALSE,
       'settings[handler_settings][view][view_and_display]' => 'node_test_view:entity_reference_1',
     ];
-    $this->submitForm($edit, 'Save settings');
+    $this->submitForm($edit, 'Save');
     $this->assertSession()->statusMessageContains("Saved Test Entity Reference Field configuration.", MessengerInterface::TYPE_STATUS);
     $this->assertFieldExistsOnOverview('Test Entity Reference Field');
 
@@ -192,7 +192,7 @@ class EntityReferenceAdminTest extends BrowserTestBase {
     $this->assertSession()->pageTextContains('Multiple content items match this reference;');
     $this->assertSession()->pageTextContains($node1->getTitle() . ' (' . $node1->id() . ')');
     $this->assertSession()->pageTextContains($node2->getTitle() . ' (' . $node2->id() . ')');
-    $this->assertSession()->pageTextContains('Specify the one you want by appending the id in parentheses, like "' . $node2->getTitle() . ' (' . $node2->id() . ')' . '".');
+    $this->assertSession()->pageTextContains('Specify the one you want by appending the id in parentheses, like "' . $node2->getTitle() . ' (' . $node2->id() . ')".');
 
     $edit = [
       'title[0][value]' => 'Test',
@@ -384,7 +384,7 @@ class EntityReferenceAdminTest extends BrowserTestBase {
    * Creates a new Entity Reference fields with a given target type.
    *
    * @param string $target_type
-   *   The name of the target type
+   *   The name of the target type.
    * @param string[] $bundles
    *   A list of bundle IDs. Defaults to [].
    *

@@ -6,7 +6,6 @@ namespace Drupal\Tests\Composer\Plugin\VendorHardening;
 
 use Composer\Package\RootPackageInterface;
 use Drupal\Composer\Plugin\VendorHardening\Config;
-use Drupal\Tests\Traits\PhpUnitWarnings;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -14,8 +13,6 @@ use PHPUnit\Framework\TestCase;
  * @group VendorHardening
  */
 class ConfigTest extends TestCase {
-
-  use PhpUnitWarnings;
 
   /**
    * @covers ::getPathsForPackage
@@ -102,8 +99,8 @@ class ConfigTest extends TestCase {
     // Put some mixed-case in the defaults.
     $ref_default = new \ReflectionProperty($config, 'defaultConfig');
     $ref_default->setValue($config, [
-      'BeHatted/Mank' => ['tests'],
-      'SymFunic/HTTPFoundational' => ['src'],
+      'BeHatted/Monk' => ['tests'],
+      'SymPhony/HTTPFoundational' => ['src'],
     ]);
 
     $plugin_config = $ref_plugin_config->invoke($config);
@@ -111,6 +108,23 @@ class ConfigTest extends TestCase {
     foreach (array_keys($plugin_config) as $package_name) {
       $this->assertDoesNotMatchRegularExpression('/[A-Z]/', $package_name);
     }
+  }
+
+  /**
+   * @covers ::getAllCleanupPaths
+   */
+  public function testSkipClean(): void {
+    $root = $this->createMock(RootPackageInterface::class);
+    $root->expects($this->once())
+      ->method('getExtra')
+      ->willReturn([
+        'drupal-core-vendor-hardening' => [
+          'composer/composer' => FALSE,
+        ],
+      ]);
+
+    $plugin_config = (new Config($root))->getAllCleanupPaths();
+    $this->assertArrayNotHasKey('composer/composer', $plugin_config);
   }
 
 }

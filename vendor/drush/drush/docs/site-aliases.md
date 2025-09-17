@@ -102,7 +102,7 @@ See [Additional Site Alias Options](#additional-site-alias-options) for more inf
 
 ### Altering aliases:
 
-See [examples/Commands/SiteAliasAlterCommands.php](https://www.drush.org/latest/examples/SiteAliasAlterCommands.php/)) for an example.
+See [examples/Commands/SiteAliasAlterCommands.php](https://www.drush.org/latest/examples/SiteAliasAlterCommands.php/) for an example.
 
 ### Site specifications:
 
@@ -284,12 +284,17 @@ Drush provides transport for running drush commands on your Kubernetes cluster v
  ```
 
 #### Key options
+
   * **namespace:** The namespace where your Drupal deployment resides.
   * **resource:**  Kubernetes resource type (usually 'pods').
   * **container:** The specific container within the pod where Drupal runs.
   * **kubeconfig:** The kubeconfig file to use for authentication.
   * **entrypoint:** The command to use as the container entrypoint.
 
+Drush will attempt to use the status of the connection to determine if it is tty/interactive, but in some complex cases that status may not be available. These options can be used to force those flags:
+
+  * **tty:** Set to `true` to force a tty connection using the `kubectl --tty` flag.
+  * **interactive:** Set to `true` to force an interactive connection using the `kubectl --stdin` flag.
 
 ### Example of rsync with exclude-paths
 

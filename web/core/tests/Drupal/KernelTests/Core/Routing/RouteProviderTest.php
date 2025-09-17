@@ -383,7 +383,7 @@ class RouteProviderTest extends KernelTestBase {
       $this->assertCount(1, $routes, 'The correct number of routes was found.');
       $this->assertNotNull($routes->get('foo'), 'The first matching route was found.');
     }
-    catch (ResourceNotFoundException $e) {
+    catch (ResourceNotFoundException) {
       $this->fail('No matching route found with default argument value.');
     }
   }
@@ -422,7 +422,7 @@ class RouteProviderTest extends KernelTestBase {
       $this->assertCount(1, $routes, 'The correct number of routes was found.');
       $this->assertNotNull($routes->get('foo'), 'The first matching route was found.');
     }
-    catch (ResourceNotFoundException $e) {
+    catch (ResourceNotFoundException) {
       $this->fail('No matching route found with default argument value.');
     }
   }
@@ -461,7 +461,7 @@ class RouteProviderTest extends KernelTestBase {
       $this->assertNotNull($routes->get('foo'), 'The second matching route was found.');
       $this->assertNull($routes->get('eep'), 'Non-matching route was not found.');
     }
-    catch (ResourceNotFoundException $e) {
+    catch (ResourceNotFoundException) {
       $this->fail('No matching route found with default argument value.');
     }
   }
@@ -500,7 +500,7 @@ class RouteProviderTest extends KernelTestBase {
       $this->assertNotNull($routes->get('foo2'), 'The second matching route was found.');
       $this->assertNull($routes->get('eep'), 'Non-matching route was not found.');
     }
-    catch (ResourceNotFoundException $e) {
+    catch (ResourceNotFoundException) {
       $this->fail('No matching route found with default argument value.');
     }
   }
@@ -535,8 +535,8 @@ class RouteProviderTest extends KernelTestBase {
 
       $this->assertCount(1, $routes, 'The correct number of routes was found.');
     }
-    catch (ResourceNotFoundException $e) {
-      $this->fail('No matchout route found with 0 as argument value');
+    catch (ResourceNotFoundException) {
+      $this->fail('No matching route found with 0 as argument value');
     }
   }
 
@@ -680,7 +680,7 @@ class RouteProviderTest extends KernelTestBase {
     try {
       $provider->getRouteByName('invalid_name');
     }
-    catch (RouteNotFoundException $e) {
+    catch (RouteNotFoundException) {
       $exception_thrown = TRUE;
     }
     $this->assertTrue($exception_thrown, 'Random route was not found.');
@@ -749,10 +749,41 @@ class RouteProviderTest extends KernelTestBase {
     $this->assertCount(7, $candidates);
   }
 
+  /**
+   * @covers \Drupal\Core\Routing\RouteProvider::getRouteAliases
+   */
+  public function testRouteAliases(): void {
+    $connection = Database::getConnection();
+    $provider = new RouteProvider($connection, $this->state, $this->currentPath, $this->cache, $this->pathProcessor, $this->cacheTagsInvalidator, 'test_routes');
+
+    $this->fixtures->createTables($connection);
+
+    $dumper = new MatcherDumper($connection, $this->state, $this->logger, 'test_routes');
+    $dumper->addRoutes($this->fixtures->aliasedRouteCollection());
+    $dumper->dump();
+
+    $aliases = $provider->getRouteAliases('route_a');
+    $this->assertCount(2, $aliases);
+    $this->assertEquals('route_a', $aliases['route_b']->getId());
+    $this->assertEquals('route_a', $aliases['route_c']->getId());
+    $this->assertTrue($aliases['route_c']->isDeprecated());
+
+    $deprecation = $aliases['route_c']->getDeprecation('route_c');
+    $this->assertEquals('drupal/core', $deprecation['package']);
+    $this->assertEquals('11.2.0', $deprecation['version']);
+    $this->assertEquals('route_c is deprecated!', $deprecation['message']);
+  }
+
 }
 
+/**
+ * Stub class for testing RouteProvider.
+ */
 class TestRouteProvider extends RouteProvider {
 
+  /**
+   * {@inheritdoc}
+   */
   public function getCandidateOutlines(array $parts) {
     return parent::getCandidateOutlines($parts);
   }

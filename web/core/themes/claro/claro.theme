@@ -24,7 +24,7 @@ use Drupal\views_ui\Form\Ajax\ViewsFormInterface;
 /**
  * Implements hook_theme_suggestions_HOOK_alter() for form_element.
  */
-function claro_theme_suggestions_form_element_alter(&$suggestions, $variables) {
+function claro_theme_suggestions_form_element_alter(&$suggestions, $variables): void {
   if (!empty($variables['element']['#type'])) {
     $suggestions[] = 'form_element__' . $variables['element']['#type'];
   }
@@ -33,7 +33,7 @@ function claro_theme_suggestions_form_element_alter(&$suggestions, $variables) {
 /**
  * Implements hook_theme_suggestions_HOOK_alter() for details.
  */
-function claro_theme_suggestions_details_alter(&$suggestions, $variables) {
+function claro_theme_suggestions_details_alter(&$suggestions, $variables): void {
   if (!empty($variables['element']['#vertical_tab_item'])) {
     $suggestions[] = 'details__vertical_tabs';
   }
@@ -42,7 +42,7 @@ function claro_theme_suggestions_details_alter(&$suggestions, $variables) {
 /**
  * Implements hook_page_attachments_alter().
  */
-function claro_page_attachments_alter(array &$attachments) {
+function claro_page_attachments_alter(array &$attachments): void {
   $theme_path = \Drupal::request()->getBasePath() . '/' . \Drupal::service('extension.list.theme')->getPath('claro');
   $query_string = \Drupal::service('asset.query_string')->get();
 
@@ -59,6 +59,18 @@ function claro_page_attachments_alter(array &$attachments) {
     ],
     'dropbutton_noscript',
   ];
+
+  $attachments['#attached']['html_head'][] = [
+    [
+      '#tag' => 'link',
+      '#noscript' => TRUE,
+      '#attributes' => [
+        'rel' => 'stylesheet',
+        'href' => $theme_path . '/css/components/views-ui-noscript.css?' . $query_string,
+      ],
+    ],
+    'views_ui_noscript',
+  ];
 }
 
 /**
@@ -67,7 +79,7 @@ function claro_page_attachments_alter(array &$attachments) {
  * Use preprocess hook to set #attached to child elements because they will be
  * processed by Twig and \Drupal::service('renderer')->render() will be invoked.
  */
-function claro_preprocess_menu_local_tasks(&$variables) {
+function claro_preprocess_menu_local_tasks(&$variables): void {
   if (!empty($variables['primary'])) {
     $variables['primary']['#attached'] = [
       'library' => [
@@ -94,7 +106,7 @@ function claro_preprocess_menu_local_tasks(&$variables) {
 /**
  * Implements hook_preprocess_HOOK() for menu-local-task templates.
  */
-function claro_preprocess_menu_local_task(&$variables) {
+function claro_preprocess_menu_local_task(&$variables): void {
   $variables['link']['#options']['attributes']['class'][] = 'tabs__link';
   $variables['link']['#options']['attributes']['class'][] = 'js-tabs-link';
 
@@ -113,7 +125,7 @@ function claro_preprocess_menu_local_task(&$variables) {
 /**
  * Implements hook_preprocess_HOOK() for menu-local-task Views UI templates.
  */
-function claro_preprocess_menu_local_task__views_ui(&$variables) {
+function claro_preprocess_menu_local_task__views_ui(&$variables): void {
   // Remove 'tabs__link' without adding a new class because it couldn't be used
   // reliably.
   // @see https://www.drupal.org/node/3051605
@@ -128,7 +140,7 @@ function claro_preprocess_menu_local_task__views_ui(&$variables) {
  *
  * Makes node_add_list variables compatible with entity_add_list.
  */
-function claro_preprocess_node_add_list(&$variables) {
+function claro_preprocess_node_add_list(&$variables): void {
   if (!empty($variables['content'])) {
     /** @var \Drupal\node\NodeTypeInterface $type */
     foreach ($variables['content'] as $type) {
@@ -156,7 +168,7 @@ function claro_preprocess_node_add_list(&$variables) {
  *
  * Makes block_content_add_list variables compatible with entity_add_list.
  */
-function claro_preprocess_block_content_add_list(&$variables) {
+function claro_preprocess_block_content_add_list(&$variables): void {
   if (!empty($variables['content'])) {
     $query = \Drupal::request()->query->all();
     /** @var \Drupal\block_content\BlockContentTypeInterface $type */
@@ -187,7 +199,7 @@ function claro_preprocess_block_content_add_list(&$variables) {
 /**
  * Implements template_preprocess_HOOK() for entity_add_list.
  */
-function claro_preprocess_entity_add_list(&$variables) {
+function claro_preprocess_entity_add_list(&$variables): void {
   // Remove description if empty.
   foreach ($variables['bundles'] as $type_id => $values) {
     if (isset($values['description']['#markup']) && empty($values['description']['#markup'])) {
@@ -201,7 +213,7 @@ function claro_preprocess_entity_add_list(&$variables) {
  *
  * Disables contextual links for all blocks except for layout builder blocks.
  */
-function claro_preprocess_block(&$variables) {
+function claro_preprocess_block(&$variables): void {
   if (isset($variables['title_suffix']['contextual_links']) && !isset($variables['elements']['#contextual_links']['layout_builder_block'])) {
     unset($variables['title_suffix']['contextual_links']);
     unset($variables['elements']['#contextual_links']);
@@ -213,7 +225,7 @@ function claro_preprocess_block(&$variables) {
 /**
  * Implements template_preprocess_HOOK() for admin_block.
  */
-function claro_preprocess_admin_block(&$variables) {
+function claro_preprocess_admin_block(&$variables): void {
   if (!empty($variables['block']['content'])) {
     $variables['block']['content']['#attributes']['class'][] = 'admin-list--panel';
   }
@@ -222,7 +234,7 @@ function claro_preprocess_admin_block(&$variables) {
 /**
  * Implements template_preprocess_HOOK() for admin_block.
  */
-function claro_preprocess_admin_block_content(&$variables) {
+function claro_preprocess_admin_block_content(&$variables): void {
   foreach ($variables['content'] as &$item) {
     $link_attributes = $item['url']->getOption('attributes') ?: [];
     $link_attributes['class'][] = 'admin-item__link';
@@ -238,7 +250,7 @@ function claro_preprocess_admin_block_content(&$variables) {
 /**
  * Implements hook_preprocess_HOOK() for menu-local-action templates.
  */
-function claro_preprocess_menu_local_action(array &$variables) {
+function claro_preprocess_menu_local_action(array &$variables): void {
   $variables['link']['#options']['attributes']['class'][] = 'button--primary';
   $variables['attributes']['class'][] = 'local-actions__item';
   $legacy_class_key = array_search('button-action', $variables['link']['#options']['attributes']['class']);
@@ -251,7 +263,7 @@ function claro_preprocess_menu_local_action(array &$variables) {
 /**
  * Implements hook_element_info_alter().
  */
-function claro_element_info_alter(&$type) {
+function claro_element_info_alter(&$type): void {
   // Add a pre-render function that handles the sidebar of the node form.
   // @todo Refactor when https://www.drupal.org/node/3056089 is in.
   if (isset($type['container'])) {
@@ -302,7 +314,7 @@ function claro_element_info_alter(&$type) {
  *
  * @todo Remove when https://www.drupal.org/node/3016343 is fixed.
  */
-function claro_preprocess_text_format_wrapper(&$variables) {
+function claro_preprocess_text_format_wrapper(&$variables): void {
   $description_attributes = [];
   if (!empty($variables['attributes']['id'])) {
     $description_attributes['id'] = $variables['attributes']['aria-describedby'] = $variables['attributes']['id'];
@@ -314,7 +326,7 @@ function claro_preprocess_text_format_wrapper(&$variables) {
 /**
  * Implements hook_theme_registry_alter().
  */
-function claro_theme_registry_alter(&$theme_registry) {
+function claro_theme_registry_alter(&$theme_registry): void {
   if (!empty($theme_registry['admin_block_content'])) {
     $theme_registry['admin_block_content']['variables']['attributes'] = [];
   }
@@ -328,7 +340,7 @@ function claro_theme_registry_alter(&$theme_registry) {
 /**
  * Implements hook_preprocess_install_page().
  */
-function claro_preprocess_install_page(&$variables) {
+function claro_preprocess_install_page(&$variables): void {
   // Claro has custom styling for the install page.
   $variables['#attached']['library'][] = 'claro/install-page';
 }
@@ -336,7 +348,7 @@ function claro_preprocess_install_page(&$variables) {
 /**
  * Implements hook_preprocess_maintenance_page().
  */
-function claro_preprocess_maintenance_page(&$variables) {
+function claro_preprocess_maintenance_page(&$variables): void {
   // Claro has custom styling for the maintenance page.
   $variables['#attached']['library'][] = 'claro/maintenance-page';
 }
@@ -344,11 +356,11 @@ function claro_preprocess_maintenance_page(&$variables) {
 /**
  * Implements hook_theme_suggestions_maintenance_page_alter().
  */
-function claro_theme_suggestions_maintenance_page_alter(&$suggestions) {
+function claro_theme_suggestions_maintenance_page_alter(&$suggestions): void {
   try {
     $is_front = \Drupal::service('path.matcher')->isFrontPage();
   }
-  catch (Exception $e) {
+  catch (Exception) {
     // An exception could mean that the database is offline. This scenario
     // should also be rendered using the frontpage template.
     $is_front = TRUE;
@@ -367,7 +379,7 @@ function claro_theme_suggestions_maintenance_page_alter(&$suggestions) {
  *
  * @todo Revisit when https://www.drupal.org/node/3056089 is in.
  */
-function claro_preprocess_details(&$variables) {
+function claro_preprocess_details(&$variables): void {
   $element = $variables['element'];
 
   if (!empty($element['#accordion_item'])) {
@@ -400,7 +412,7 @@ function claro_preprocess_details(&$variables) {
 /**
  * Implements hook_form_alter().
  */
-function claro_form_alter(array &$form, FormStateInterface $form_state, $form_id) {
+function claro_form_alter(array &$form, FormStateInterface $form_state, $form_id): void {
   $build_info = $form_state->getBuildInfo();
   $form_object = $form_state->getFormObject();
 
@@ -513,7 +525,7 @@ function claro_form_alter(array &$form, FormStateInterface $form_state, $form_id
 /**
  * Implements hook_preprocess_HOOK() for links.
  */
-function claro_preprocess_links(&$variables) {
+function claro_preprocess_links(&$variables): void {
   foreach ($variables['links'] as $links_item) {
     if (!empty($links_item['link']) && !empty($links_item['link']['#url']) && $links_item['link']['#url'] instanceof Url) {
       if ($links_item['link']['#url']->isRouted()) {
@@ -584,7 +596,7 @@ function claro_preprocess_links(&$variables) {
  * @return array
  *   The link renderable converted to action link.
  */
-function _claro_convert_link_to_action_link(array $link, $icon_name = NULL, $size = 'default', $variant = 'default') {
+function _claro_convert_link_to_action_link(array $link, $icon_name = NULL, $size = 'default', $variant = 'default'): array {
   // Early opt-out if we cannot do anything.
   if (empty($link['#type']) || $link['#type'] !== 'link' || empty($link['#url'])) {
     return $link;
@@ -653,11 +665,11 @@ function _claro_convert_link_to_action_link(array $link, $icon_name = NULL, $siz
 }
 
 /**
- * Implements hook_form_BASE_FORM_ID_alter() for \Drupal\node\NodeForm.
+ * Implements hook_form_BASE_FORM_ID_alter() for \Drupal\node\Form\NodeForm.
  *
  * Changes vertical tabs to container.
  */
-function claro_form_node_form_alter(&$form, FormStateInterface $form_state) {
+function claro_form_node_form_alter(&$form, FormStateInterface $form_state): void {
   $form['#theme'] = ['node_edit_form'];
   $form['#attached']['library'][] = 'claro/form-two-columns';
 
@@ -677,7 +689,7 @@ function claro_form_node_form_alter(&$form, FormStateInterface $form_state) {
  * Alters the menu_link_content_form by organizing form elements into different
  * 'details' sections.
  */
-function claro_form_menu_link_content_form_alter(&$form, FormStateInterface $form_state) {
+function claro_form_menu_link_content_form_alter(&$form, FormStateInterface $form_state): void {
   $form['#theme'] = ['menu_link_form'];
   $form['#attached']['library'][] = 'claro/form-two-columns';
   $form['advanced'] = [
@@ -727,14 +739,14 @@ function claro_form_menu_link_content_form_alter(&$form, FormStateInterface $for
  * Alters the menu_link_edit form by organizing form elements into different
  * 'details' sections.
  */
-function claro_form_menu_link_edit_alter(&$form, FormStateInterface $form_state) {
+function claro_form_menu_link_edit_alter(&$form, FormStateInterface $form_state): void {
   claro_form_menu_link_content_form_alter($form, $form_state);
 }
 
 /**
  * Implements hook_form_BASE_FORM_ID_alter() for \Drupal\media\MediaForm.
  */
-function claro_form_media_form_alter(&$form, FormStateInterface $form_state) {
+function claro_form_media_form_alter(&$form, FormStateInterface $form_state): void {
   // Only attach CSS from core if this form comes from Media core, and not from
   // the contrib Media Entity 1.x branch.
   if (\Drupal::moduleHandler()->moduleExists('media') && $form_state->getFormObject() instanceof MediaForm) {
@@ -749,7 +761,7 @@ function claro_form_media_form_alter(&$form, FormStateInterface $form_state) {
 /**
  * Implements hook_views_ui_display_top_alter().
  */
-function claro_views_ui_display_top_alter(&$element) {
+function claro_views_ui_display_top_alter(&$element): void {
   // @todo Remove this after https://www.drupal.org/node/3051605 has been
   //   solved.
   $element['tabs']['#prefix'] = preg_replace('/(class="(.+\s)?)tabs(\s.+"|")/', '$1views-tabs$3', $element['tabs']['#prefix']);
@@ -794,7 +806,7 @@ function claro_views_ui_display_top_alter(&$element) {
 /**
  * Implements hook_views_ui_display_tab_alter().
  */
-function claro_views_ui_display_tab_alter(&$element) {
+function claro_views_ui_display_tab_alter(&$element): void {
   // We process the dropbutton-like element on views edit form's
   // display settings top section.
   //
@@ -852,7 +864,7 @@ function claro_views_ui_display_tab_alter(&$element) {
 /**
  * Implements hook_preprocess_HOOK() for views_exposed_form.
  */
-function claro_preprocess_views_exposed_form(&$variables) {
+function claro_preprocess_views_exposed_form(&$variables): void {
   $form = &$variables['form'];
 
   // Add BEM classes for items in the form.
@@ -886,7 +898,7 @@ function claro_preprocess_views_exposed_form(&$variables) {
 /**
  * Implements hook_form_FORM_ID_alter() for views_exposed_form.
  */
-function claro_form_views_exposed_form_alter(&$form, FormStateInterface $form_state) {
+function claro_form_views_exposed_form_alter(&$form, FormStateInterface $form_state): void {
   $view = $form_state->getStorage()['view'];
   $view_title = $view->getTitle();
 
@@ -898,7 +910,7 @@ function claro_form_views_exposed_form_alter(&$form, FormStateInterface $form_st
 /**
  * Implements hook_form_FORM_ID_alter() for the system_modules form.
  */
-function claro_form_system_modules_alter(&$form, FormStateInterface $form_state) {
+function claro_form_system_modules_alter(&$form, FormStateInterface $form_state): void {
   if (isset($form['filters'])) {
     $form['filters']['#attributes']['class'][] = 'modules-table-filter';
     if (isset($form['filters']['text'])) {
@@ -935,7 +947,7 @@ function claro_form_system_modules_alter(&$form, FormStateInterface $form_state)
 /**
  * Implements hook_preprocess_form_element().
  */
-function claro_preprocess_form_element(&$variables) {
+function claro_preprocess_form_element(&$variables): void {
   if (!empty($variables['element']['#errors'])) {
     $variables['label']['#attributes']['class'][] = 'has-error';
   }
@@ -952,7 +964,7 @@ function claro_preprocess_form_element(&$variables) {
 /**
  * Implements template_preprocess_HOOK() for input.
  */
-function claro_preprocess_input(&$variables) {
+function claro_preprocess_input(&$variables): void {
   if (
     !empty($variables['element']['#title_display']) &&
     $variables['element']['#title_display'] === 'attribute' &&
@@ -999,7 +1011,7 @@ function claro_preprocess_input(&$variables) {
 /**
  * Implements template_preprocess_HOOK() for select.
  */
-function claro_preprocess_select(&$variables) {
+function claro_preprocess_select(&$variables): void {
   if (!empty($variables['element']['#title_display']) && $variables['element']['#title_display'] === 'attribute' && !empty((string) $variables['element']['#title'])) {
     $variables['attributes']['title'] = (string) $variables['element']['#title'];
   }
@@ -1017,7 +1029,7 @@ function claro_preprocess_select(&$variables) {
 /**
  * Implements template_preprocess_HOOK() for datetime_wrapper.
  */
-function claro_preprocess_datetime_wrapper(&$variables) {
+function claro_preprocess_datetime_wrapper(&$variables): void {
   if (!empty($variables['element']['#errors'])) {
     $variables['title_attributes']['class'][] = 'has-error';
   }
@@ -1034,7 +1046,7 @@ function claro_preprocess_datetime_wrapper(&$variables) {
 /**
  * Implements template_preprocess_HOOK() for fieldset.
  */
-function claro_preprocess_fieldset(&$variables) {
+function claro_preprocess_fieldset(&$variables): void {
   $element = $variables['element'];
   $composite_types = ['checkboxes', 'radios'];
 
@@ -1067,7 +1079,7 @@ function claro_preprocess_fieldset(&$variables) {
 /**
  * Implements hook_preprocess_HOOK() for field_multiple_value_form.
  */
-function claro_preprocess_field_multiple_value_form(&$variables) {
+function claro_preprocess_field_multiple_value_form(&$variables): void {
   // Make disabled available for the template.
   $variables['disabled'] = !empty($variables['element']['#disabled']);
 
@@ -1101,18 +1113,13 @@ function claro_preprocess_field_multiple_value_form(&$variables) {
         }
       }
     }
-
-    // Make add-more button smaller.
-    if (!empty($variables['button'])) {
-      $variables['button']['#attributes']['class'][] = 'button--small';
-    }
   }
 }
 
 /**
  * Implements hook_preprocess_HOOK() for form_element__password_confirm.
  */
-function claro_preprocess_form_element__password_confirm(&$variables) {
+function claro_preprocess_form_element__password_confirm(&$variables): void {
   // Add CSS classes needed for theming the password confirm widget.
   $variables['attributes']['class'][] = 'password-confirm';
   $variables['attributes']['class'][] = 'is-initial';
@@ -1123,7 +1130,7 @@ function claro_preprocess_form_element__password_confirm(&$variables) {
 /**
  * Implements hook_preprocess_HOOK() for form_element__password.
  */
-function claro_preprocess_form_element__password(&$variables) {
+function claro_preprocess_form_element__password(&$variables): void {
   if (!empty($variables['element']['#array_parents']) && in_array('pass1', $variables['element']['#array_parents'], TRUE)) {
     // This is the main password form element.
     $variables['attributes']['class'][] = 'password-confirm__password';
@@ -1138,14 +1145,14 @@ function claro_preprocess_form_element__password(&$variables) {
 /**
  * Implements template_preprocess_HOOK() for filter_tips.
  */
-function claro_preprocess_filter_tips(&$variables) {
+function claro_preprocess_filter_tips(&$variables): void {
   $variables['#attached']['library'][] = 'filter/drupal.filter';
 }
 
 /**
  * Implements template_preprocess_HOOK() for table.
  */
-function claro_preprocess_table(&$variables) {
+function claro_preprocess_table(&$variables): void {
   // Adding table sort indicator CSS class for inactive sort link.
   // @todo Revisit after https://www.drupal.org/node/3025726 or
   //   https://www.drupal.org/node/1973418 is in.
@@ -1189,7 +1196,7 @@ function claro_preprocess_table(&$variables) {
 /**
  * Implements template_preprocess_HOOK() for field_ui_table.
  */
-function claro_preprocess_field_ui_table(&$variables) {
+function claro_preprocess_field_ui_table(&$variables): void {
   claro_preprocess_table($variables);
 }
 
@@ -1199,7 +1206,7 @@ function claro_preprocess_field_ui_table(&$variables) {
  * @todo Revisit after https://www.drupal.org/node/3025726 or
  *   https://www.drupal.org/node/1973418 is in.
  */
-function claro_preprocess_views_view_table(&$variables) {
+function claro_preprocess_views_view_table(&$variables): void {
   if (!empty($variables['header'])) {
     foreach ($variables['header'] as &$header_cell) {
       if (!empty($header_cell['url'])) {
@@ -1217,7 +1224,7 @@ function claro_preprocess_views_view_table(&$variables) {
 /**
  * Implements hook_preprocess_HOOK() for links__dropbutton.
  */
-function claro_preprocess_links__dropbutton(&$variables) {
+function claro_preprocess_links__dropbutton(&$variables): void {
   // Add the right CSS class for the dropbutton list that helps reducing FOUC.
   if (!empty($variables['links'])) {
     $variables['attributes']['class'][] = count($variables['links']) > 1
@@ -1233,7 +1240,7 @@ function claro_preprocess_links__dropbutton(&$variables) {
 /**
  * Implements hook_preprocess_HOOK() for views_ui_display_tab_bucket.
  */
-function claro_preprocess_views_ui_display_tab_bucket(&$variables) {
+function claro_preprocess_views_ui_display_tab_bucket(&$variables): void {
   // Instead of re-styling Views UI dropbuttons with module-specific CSS styles,
   // change dropbutton variants to the extra small version.
   // @todo Revisit after https://www.drupal.org/node/3057581 is added.
@@ -1245,7 +1252,7 @@ function claro_preprocess_views_ui_display_tab_bucket(&$variables) {
 /**
  * Implements hook_preprocess_HOOK() for status_messages.
  */
-function claro_preprocess_status_messages(&$variables) {
+function claro_preprocess_status_messages(&$variables): void {
   $variables['title_ids'] = [];
   foreach ($variables['message_list'] as $message_type => $messages) {
     $variables['title_ids'][$message_type] = Html::getUniqueId("message-$message_type-title");
@@ -1255,16 +1262,14 @@ function claro_preprocess_status_messages(&$variables) {
 /**
  * Implements hook_preprocess_HOOK() for system_themes_page.
  */
-function claro_preprocess_system_themes_page(&$variables) {
+function claro_preprocess_system_themes_page(&$variables): void {
   if (!empty($variables['theme_groups'])) {
     foreach ($variables['theme_groups'] as &$theme_group) {
       if (!empty($theme_group['themes'])) {
         foreach ($theme_group['themes'] as &$theme_card) {
-          /**
-           * @todo Remove dependency on attributes after
-           *   https://www.drupal.org/project/drupal/issues/2511548 has been
-           *   resolved.
-           */
+          // @todo Remove dependency on attributes after
+          //   https://www.drupal.org/project/drupal/issues/2511548 has been
+          //   resolved.
           if (isset($theme_card['screenshot']['#attributes']) && $theme_card['screenshot']['#attributes'] instanceof Attribute && $theme_card['screenshot']['#attributes']->hasClass('no-screenshot')) {
             unset($theme_card['screenshot']);
           }
@@ -1289,7 +1294,7 @@ function claro_preprocess_system_themes_page(&$variables) {
 /**
  * Implements hook_preprocess_HOOK() for links__action_links.
  */
-function claro_preprocess_links__action_links(&$variables) {
+function claro_preprocess_links__action_links(&$variables): void {
   $variables['attributes']['class'][] = 'action-links';
   foreach ($variables['links'] as $delta => $link_item) {
     $variables['links'][$delta]['attributes']->addClass('action-links__item');
@@ -1299,7 +1304,7 @@ function claro_preprocess_links__action_links(&$variables) {
 /**
  * Implements hook_preprocess_HOOK() for file_managed_file.
  */
-function claro_preprocess_file_managed_file(&$variables) {
+function claro_preprocess_file_managed_file(&$variables): void {
   // Produce the same renderable element structure as image widget has.
   $child_keys = Element::children($variables['element']);
   foreach ($child_keys as $child_key) {
@@ -1312,7 +1317,7 @@ function claro_preprocess_file_managed_file(&$variables) {
 /**
  * Implements hook_preprocess_HOOK() for file_widget_multiple.
  */
-function claro_preprocess_file_widget_multiple(&$variables) {
+function claro_preprocess_file_widget_multiple(&$variables): void {
   $has_upload = FALSE;
 
   if (isset($variables['table']['#type']) && $variables['table']['#type'] === 'table') {
@@ -1384,7 +1389,7 @@ function claro_preprocess_file_widget_multiple(&$variables) {
 /**
  * Implements hook_preprocess_HOOK() for image_widget.
  */
-function claro_preprocess_image_widget(&$variables) {
+function claro_preprocess_image_widget(&$variables): void {
   // This prevents image widget templates from rendering preview container HTML
   // to users that do not have permission to access these previews.
   // @todo Revisit in https://drupal.org/node/953034
@@ -1403,7 +1408,7 @@ function claro_preprocess_image_widget(&$variables) {
  *   The renderable array of image and file widgets, with 'element' and 'data'
  *   keys.
  */
-function _claro_preprocess_file_and_image_widget(array &$variables) {
+function _claro_preprocess_file_and_image_widget(array &$variables): void {
   $element = $variables['element'];
   $main_item_keys = [
     'upload',
@@ -1466,7 +1471,7 @@ function _claro_preprocess_file_and_image_widget(array &$variables) {
  * This targets each rendered media item in the grid display of the media
  * library's modal dialog.
  */
-function claro_preprocess_views_view_fields__media_library(array &$variables) {
+function claro_preprocess_views_view_fields__media_library(array &$variables): void {
   // Add classes to media rendered entity field so it can be targeted for
   // styling. Adding this class in a template is very difficult to do.
   if (isset($variables['fields']['rendered_entity']->wrapper_attributes)) {
@@ -1477,7 +1482,7 @@ function claro_preprocess_views_view_fields__media_library(array &$variables) {
 /**
  * Implements hook_form_BASE_FORM_ID_alter().
  */
-function claro_form_media_library_add_form_alter(array &$form, FormStateInterface $form_state) {
+function claro_form_media_library_add_form_alter(array &$form, FormStateInterface $form_state): void {
   $form['#attributes']['class'][] = 'media-library-add-form';
   $form['#attached']['library'][] = 'claro/media_library.theme';
 
@@ -1498,7 +1503,7 @@ function claro_form_media_library_add_form_alter(array &$form, FormStateInterfac
 /**
  * Implements hook_form_FORM_ID_alter().
  */
-function claro_form_media_library_add_form_upload_alter(array &$form, FormStateInterface $form_state) {
+function claro_form_media_library_add_form_upload_alter(array &$form, FormStateInterface $form_state): void {
   $form['#attributes']['class'][] = 'media-library-add-form--upload';
   if (isset($form['container']['upload'])) {
     // Set this flag so we can prevent the details element from being added
@@ -1513,7 +1518,7 @@ function claro_form_media_library_add_form_upload_alter(array &$form, FormStateI
 /**
  * Implements hook_form_FORM_ID_alter().
  */
-function claro_form_media_library_add_form_oembed_alter(array &$form, FormStateInterface $form_state) {
+function claro_form_media_library_add_form_oembed_alter(array &$form, FormStateInterface $form_state): void {
   $form['#attributes']['class'][] = 'media-library-add-form--oembed';
 
   // If no media items have been added yet, add a couple of styling classes
@@ -1531,7 +1536,7 @@ function claro_form_media_library_add_form_oembed_alter(array &$form, FormStateI
  * This targets each new, unsaved media item added to the media library, before
  * they are saved.
  */
-function claro_preprocess_item_list__media_library_add_form_media_list(array &$variables) {
+function claro_preprocess_item_list__media_library_add_form_media_list(array &$variables): void {
   foreach ($variables['items'] as &$item) {
     $item['value']['preview']['#attributes']['class'][] = 'media-library-add-form__preview';
     $item['value']['fields']['#attributes']['class'][] = 'media-library-add-form__fields';
@@ -1557,7 +1562,7 @@ function claro_preprocess_item_list__media_library_add_form_media_list(array &$v
  *
  * This targets each media item selected in an entity reference field.
  */
-function claro_preprocess_media_library_item__widget(array &$variables) {
+function claro_preprocess_media_library_item__widget(array &$variables): void {
   $variables['content']['remove_button']['#attributes']['class'][] = 'media-library-item__remove';
   $variables['content']['remove_button']['#attributes']['class'][] = 'icon-link';
 }
@@ -1568,7 +1573,7 @@ function claro_preprocess_media_library_item__widget(array &$variables) {
  * This targets each pre-selected media item selected when adding new media in
  * the modal media library dialog.
  */
-function claro_preprocess_media_library_item__small(array &$variables) {
+function claro_preprocess_media_library_item__small(array &$variables): void {
   $variables['content']['select']['#attributes']['class'][] = 'media-library-item__click-to-select-checkbox';
 }
 
@@ -1578,7 +1583,7 @@ function claro_preprocess_media_library_item__small(array &$variables) {
  *
  * @see \Drupal\media_library\Plugin\Field\FieldWidget\MediaLibraryWidget::formElement()
  */
-function claro_preprocess_fieldset__media_library_widget(array &$variables) {
+function claro_preprocess_fieldset__media_library_widget(array &$variables): void {
   if (isset($variables['prefix']['weight_toggle'])) {
     $variables['prefix']['weight_toggle']['#attributes']['class'][] = 'action-link';
     $variables['prefix']['weight_toggle']['#attributes']['class'][] = 'action-link--extrasmall';
@@ -1593,7 +1598,7 @@ function claro_preprocess_fieldset__media_library_widget(array &$variables) {
 /**
  * Implements hook_views_pre_render().
  */
-function claro_views_pre_render(ViewExecutable $view) {
+function claro_views_pre_render(ViewExecutable $view): void {
   $add_classes = function (&$option, array $classes_to_add) {
     $classes = preg_split('/\s+/', $option);
     $classes = array_filter($classes);
@@ -1652,7 +1657,7 @@ function claro_views_pre_render(ViewExecutable $view) {
  * @todo Do this in the relevant template once
  *   https://www.drupal.org/project/drupal/issues/3088856 is resolved.
  */
-function claro_preprocess_links__media_library_menu(array &$variables) {
+function claro_preprocess_links__media_library_menu(array &$variables): void {
   foreach ($variables['links'] as &$link) {
     // Add a class to the Media Library menu items.
     $link['attributes']->addClass('media-library-menu__item');
@@ -1663,7 +1668,7 @@ function claro_preprocess_links__media_library_menu(array &$variables) {
 /**
  * Implements hook_form_FORM_ID_alter() for the Views UI rearrange filter form.
  */
-function claro_preprocess_views_ui_rearrange_filter_form(array &$variables) {
+function claro_preprocess_views_ui_rearrange_filter_form(array &$variables): void {
   foreach ($variables['table']['#rows'] as &$row) {
     // Remove the container-inline class from the operator table cell.
     if (isset($row['data'][0]['class'])) {
@@ -1675,7 +1680,7 @@ function claro_preprocess_views_ui_rearrange_filter_form(array &$variables) {
 /**
  * Implements hook_form_FORM_ID_alter() for the Views UI config form.
  */
-function claro_form_views_ui_config_item_form_alter(array &$form, FormStateInterface $form_state) {
+function claro_form_views_ui_config_item_form_alter(array &$form, FormStateInterface $form_state): void {
   $type = $form_state->get('type');
 
   if ($type === 'filter') {
@@ -1745,7 +1750,7 @@ function claro_form_views_ui_config_item_form_alter(array &$form, FormStateInter
 /**
  * Implements hook_form_FORM_ID_alter() for Views UI add handler form.
  */
-function claro_form_views_ui_add_handler_form_alter(array &$form, FormStateInterface $form_state) {
+function claro_form_views_ui_add_handler_form_alter(array &$form, FormStateInterface $form_state): void {
   // Remove container-inline class to allow more control over styling.
   if (isset($form['selected']['#attributes']['class'])) {
     $form['selected']['#attributes']['class'] = array_diff($form['selected']['#attributes']['class'], ['container-inline']);
@@ -1778,7 +1783,7 @@ function claro_form_views_ui_add_handler_form_alter(array &$form, FormStateInter
  *
  * @see system_preprocess_toolbar()
  */
-function claro_preprocess_toolbar(&$variables, $hook, $info) {
+function claro_preprocess_toolbar(&$variables, $hook, $info): void {
   $variables['attributes']['data-drupal-claro-processed-toolbar'] = TRUE;
 }
 
@@ -1790,7 +1795,7 @@ function claro_preprocess_toolbar(&$variables, $hook, $info) {
  *
  * @see system_library_info_alter()
  */
-function claro_system_module_invoked_library_info_alter(&$libraries, $extension) {
+function claro_system_module_invoked_library_info_alter(&$libraries, $extension): void {
   if ($extension === 'toolbar') {
     $claro_info = \Drupal::service('theme_handler')->listInfo()['claro']->info;
     $path_prefix = '/core/themes/claro/';
@@ -1821,7 +1826,7 @@ function claro_system_module_invoked_library_info_alter(&$libraries, $extension)
  *
  * @see system_theme_registry_alter()
  */
-function claro_system_module_invoked_theme_registry_alter(array &$theme_registry) {
+function claro_system_module_invoked_theme_registry_alter(array &$theme_registry): void {
   foreach (['toolbar', 'menu__toolbar'] as $registry_item) {
     if (isset($theme_registry[$registry_item])) {
       $theme_registry[$registry_item]['path'] = 'core/themes/claro/templates/navigation';
@@ -1832,7 +1837,7 @@ function claro_system_module_invoked_theme_registry_alter(array &$theme_registry
 /**
  * Implements hook_form_FORM_ID_alter() for the user_admin_permissions form.
  */
-function claro_form_user_admin_permissions_alter(&$form, FormStateInterface $form_state) {
+function claro_form_user_admin_permissions_alter(&$form, FormStateInterface $form_state): void {
   if (isset($form['filters'])) {
     $form['filters']['#attributes']['class'][] = 'permissions-table-filter';
     if (isset($form['filters']['text'])) {
@@ -1845,7 +1850,7 @@ function claro_form_user_admin_permissions_alter(&$form, FormStateInterface $for
 /**
  * Implements hook_form_FORM_ID_alter().
  */
-function claro_form_node_preview_form_select_alter(array &$form, FormStateInterface $form_state) {
+function claro_form_node_preview_form_select_alter(array &$form, FormStateInterface $form_state): void {
   if (isset($form['backlink'])) {
     $form['backlink']['#options']['attributes']['class'][] = 'action-link';
     $form['backlink']['#options']['attributes']['class'][] = 'action-link--icon-chevron-left';

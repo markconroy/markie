@@ -23,11 +23,9 @@ interface ElementInfoManagerInterface extends DiscoveryInterface {
    *   The machine name of an element type plugin.
    *
    * @return array
-   *   An associative array describing the element types being defined. The
-   *   array contains a sub-array for each element type, with the
-   *   machine-readable type name as the key. Each sub-array has a number of
-   *   possible attributes:
-   *   - #input: boolean indicating whether or not this element carries a value
+   *   An associative array describing the element type being defined. The
+   *   array has a number of possible attributes:
+   *   - #input: boolean indicating whether this element carries a value
    *     (even if it's hidden).
    *   - #process: array of callback functions taking $element, $form_state,
    *     and $complete_form.
@@ -53,7 +51,7 @@ interface ElementInfoManagerInterface extends DiscoveryInterface {
    *   An element type as defined by an element plugin.
    * @param string $property_name
    *   The property within the element type that should be returned.
-   * @param $default
+   * @param mixed|null $default
    *   (Optional) The value to return if the element type does not specify a
    *   value for the property. Defaults to NULL.
    *

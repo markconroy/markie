@@ -4,9 +4,12 @@ namespace Drupal\Core\Test;
 
 use Drupal\Core\Database\Database;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
+use Drupal\TestTools\Extension\DeprecationBridge\DeprecationHandler;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Process\PhpExecutableFinder;
 use Symfony\Component\Process\Process;
+
+// cspell:ignore testdox
 
 /**
  * Run PHPUnit-based tests.
@@ -18,7 +21,7 @@ use Symfony\Component\Process\Process;
  *
  * @code
  * $runner = PhpUnitTestRunner::create(\Drupal::getContainer());
- * $results = $runner->execute($test_run, $test_list['phpunit']);
+ * $results = $runner->execute($test_run, $test_class_name);
  * @endcode
  *
  * @internal
@@ -95,66 +98,89 @@ class PhpUnitTestRunner implements ContainerInjectionInterface {
   /**
    * Executes the PHPUnit command.
    *
-   * @param string[] $unescaped_test_classnames
-   *   An array of test class names, including full namespaces, to be passed as
-   *   a regular expression to PHPUnit's --filter option.
-   * @param string $phpunit_file
+   * @param string $test_class_name
+   *   A fully qualified test class name.
+   * @param string $log_junit_file_path
    *   A filepath to use for PHPUnit's --log-junit option.
-   * @param int $status
+   * @param int|null $status
    *   (optional) The exit status code of the PHPUnit process will be assigned
    *   to this variable.
-   * @param string[] $output
+   * @param string[]|null $output
    *   (optional) The output by running the phpunit command. If provided, this
    *   array will contain the lines output by the command.
+   * @param string[]|null $error
+   *   (optional) The error returned by running the phpunit command. If
+   *   provided, this array will contain the error lines output by the
+   *   command.
+   * @param bool $colors
+   *   (optional) Whether to use colors in output. Defaults to FALSE.
    *
    * @internal
    */
-  public function runCommand(array $unescaped_test_classnames, string $phpunit_file, ?int &$status = NULL, ?array &$output = NULL): void {
+  protected function runCommand(
+    string $test_class_name,
+    string $log_junit_file_path,
+    ?int &$status = NULL,
+    ?array &$output = NULL,
+    ?array &$error = NULL,
+    bool $colors = FALSE,
+  ): void {
     global $base_url;
-    // Setup an environment variable containing the database connection so that
-    // functional tests can connect to the database.
-    $process_environment_variables = [
-      'SIMPLETEST_DB' => Database::getConnectionInfoAsUrl(),
-    ];
+    $process_environment_variables = [];
 
-    // Setup an environment variable containing the base URL, if it is available.
-    // This allows functional tests to browse the site under test. When running
-    // tests via CLI, core/phpunit.xml.dist or core/scripts/run-tests.sh can set
-    // this variable.
+    // Setup an environment variable containing the database connection if
+    // available, so that non-unit tests can connect to the database.
+    try {
+      $process_environment_variables['SIMPLETEST_DB'] = Database::getConnectionInfoAsUrl();
+    }
+    catch (\RuntimeException) {
+      // Just continue with no variable set.
+    }
+
+    // Setup an environment variable containing the base URL, if it is
+    // available. This allows functional tests to browse the site under test.
+    // When running tests via CLI, core/phpunit.xml.dist or
+    // core/scripts/run-tests.sh can set this variable.
     if ($base_url) {
       $process_environment_variables['SIMPLETEST_BASE_URL'] = $base_url;
       $process_environment_variables['BROWSERTEST_OUTPUT_DIRECTORY'] = $this->workingDirectory;
     }
     $phpunit_bin = $this->phpUnitCommand();
 
+    // Build the command line for the PHPUnit CLI invocation.
     $command = [
       $phpunit_bin,
+      '--testdox',
       '--log-junit',
-      $phpunit_file,
+      $log_junit_file_path,
     ];
-
-    // Optimized for running a single test.
-    if (count($unescaped_test_classnames) == 1) {
-      $class = new \ReflectionClass($unescaped_test_classnames[0]);
-      $command[] = $class->getFileName();
-    }
-    else {
-      // Double escape namespaces so they'll work in a regexp.
-      $escaped_test_classnames = array_map(function ($class) {
-        return addslashes($class);
-      }, $unescaped_test_classnames);
-
-      $filter_string = implode("|", $escaped_test_classnames);
-      $command = array_merge($command, [
-        '--filter',
-        $filter_string,
-      ]);
+    if ($colors) {
+      $command[] = '--colors=always';
     }
 
+    // If the deprecation handler bridge is active, we need to fail when there
+    // are deprecations that get reported (i.e. not ignored or expected).
+    $deprecationConfiguration = DeprecationHandler::getConfiguration();
+    if ($deprecationConfiguration !== FALSE) {
+      $command[] = '--fail-on-deprecation';
+      if ($deprecationConfiguration['failOnPhpunitDeprecation']) {
+        $command[] = '--fail-on-phpunit-deprecation';
+      }
+    }
+
+    // Add to the command the file containing the test class to be run.
+    $reflectedClass = new \ReflectionClass($test_class_name);
+    $command[] = $reflectedClass->getFileName();
+
+    // Invoke PHPUnit CLI with the built command line.
     $process = new Process($command, \Drupal::root() . "/core", $process_environment_variables);
     $process->setTimeout(NULL);
     $process->run();
     $output = explode("\n", $process->getOutput());
+    $errorOutput = $process->getErrorOutput();
+    if (!empty($errorOutput)) {
+      $error = explode("\n", $process->getErrorOutput());
+    }
     $status = $process->getExitCode();
   }
 
@@ -163,12 +189,13 @@ class PhpUnitTestRunner implements ContainerInjectionInterface {
    *
    * @param \Drupal\Core\Test\TestRun $test_run
    *   The test run object.
-   * @param string[] $unescaped_test_classnames
-   *   An array of test class names, including full namespaces, to be passed as
-   *   a regular expression to PHPUnit's --filter option.
-   * @param int $status
+   * @param string $test_class_name
+   *   A fully qualified test class name.
+   * @param int|null $status
    *   (optional) The exit status code of the PHPUnit process will be assigned
    *   to this variable.
+   * @param bool $colors
+   *   (optional) Whether to use colors in output. Defaults to FALSE.
    *
    * @return array
    *   The parsed results of PHPUnit's JUnit XML output, in the format of
@@ -176,27 +203,49 @@ class PhpUnitTestRunner implements ContainerInjectionInterface {
    *
    * @internal
    */
-  public function execute(TestRun $test_run, array $unescaped_test_classnames, ?int &$status = NULL): array {
-    $phpunit_file = $this->xmlLogFilePath($test_run->id());
+  public function execute(
+    TestRun $test_run,
+    string $test_class_name,
+    ?int &$status = NULL,
+    bool $colors = FALSE,
+  ): array {
+    $log_junit_file_path = $this->xmlLogFilePath($test_run->id());
     // Store output from our test run.
     $output = [];
-    $this->runCommand($unescaped_test_classnames, $phpunit_file, $status, $output);
+    $error = [];
+    $start = microtime(TRUE);
+    $this->runCommand($test_class_name, $log_junit_file_path, $status, $output, $error, $colors);
+    $time = microtime(TRUE) - $start;
 
-    if ($status == TestStatus::PASS) {
-      return JUnitConverter::xmlToRows($test_run->id(), $phpunit_file);
+    if (file_exists($log_junit_file_path)) {
+      $results = JUnitConverter::xmlToRows($test_run->id(), $log_junit_file_path);
     }
-    return [
-      [
+    else {
+      $results = [];
+    }
+
+    // If not passed, add full PHPUnit run output since individual test cases
+    // messages may not give full clarity (deprecations, warnings, etc.).
+    if ($status > TestStatus::PASS) {
+      $message = implode("\n", $output);
+      if (!empty($error)) {
+        $message .= "\nERROR:\n";
+        $message .= implode("\n", $error);
+      }
+      $results[] = [
         'test_id' => $test_run->id(),
-        'test_class' => implode(",", $unescaped_test_classnames),
-        'status' => TestStatus::label($status),
-        'message' => 'PHPUnit Test failed to complete; Error: ' . implode("\n", $output),
+        'test_class' => $test_class_name,
+        'status' => $status < TestStatus::SYSTEM ? 'debug' : 'exception',
+        'message' => $message,
         'message_group' => 'Other',
-        'function' => implode(",", $unescaped_test_classnames),
+        'function' => '*** Process execution output ***',
         'line' => '0',
-        'file' => $phpunit_file,
-      ],
-    ];
+        'file' => $log_junit_file_path,
+        'time' => $time,
+      ];
+    }
+
+    return $results;
   }
 
   /**
@@ -234,10 +283,15 @@ class PhpUnitTestRunner implements ContainerInjectionInterface {
         $summaries[$result['test_class']] = [
           '#pass' => 0,
           '#fail' => 0,
+          '#error' => 0,
+          '#skipped' => 0,
           '#exception' => 0,
           '#debug' => 0,
+          '#time' => 0,
         ];
       }
+
+      $summaries[$result['test_class']]['#time'] += $result['time'];
 
       switch ($result['status']) {
         case 'pass':
@@ -248,6 +302,14 @@ class PhpUnitTestRunner implements ContainerInjectionInterface {
           $summaries[$result['test_class']]['#fail']++;
           break;
 
+        case 'error':
+          $summaries[$result['test_class']]['#error']++;
+          break;
+
+        case 'skipped':
+          $summaries[$result['test_class']]['#skipped']++;
+          break;
+
         case 'exception':
           $summaries[$result['test_class']]['#exception']++;
           break;
@@ -255,6 +317,7 @@ class PhpUnitTestRunner implements ContainerInjectionInterface {
         case 'debug':
           $summaries[$result['test_class']]['#debug']++;
           break;
+
       }
     }
     return $summaries;

@@ -4,19 +4,97 @@ namespace DrupalFinder\Tests;
 
 use DrupalFinder\DrupalFinder;
 use Exception;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\SkippedTestError;
+use PHPUnit\Framework\TestCase;
 
-abstract class DrupalFinderTestBase extends PHPUnit_Framework_TestCase
+/**
+ * @deprecated in drupal-finder:1.3.0 and is removed from drupal-finder:2.0.0.
+ */
+abstract class DrupalFinderTestBase extends TestCase
 {
     /**
-     * @var \DrupalFinder\DrupalFinder
+     * @var string
      */
-    protected $finder;
+    protected $envNameDrupal;
 
-    protected function setUp()
+    /**
+     * @var string
+     */
+    protected $envNameComposer;
+
+    /**
+     * @var string
+     */
+    protected $envNameVendor;
+
+    protected function setUp(): void
     {
         parent::setUp();
-        $this->finder = new DrupalFinder();
+        $this->envNameDrupal = DrupalFinder::ENV_DRUPAL_ROOT;
+        $this->envNameComposer = DrupalFinder::ENV_COMPOSER_ROOT;
+        $this->envNameVendor = DrupalFinder::ENV_VENDOR_DIR;
+    }
+
+    protected function tearDown(): void
+    {
+        parent::tearDown();
+        // Unset variables to ensure their values don't carry over into other
+        // tests that are going to run.
+        putenv('DRUPAL_FINDER_DRUPAL_ROOT');
+        putenv('DRUPAL_FINDER_COMPOSER_ROOT');
+        putenv('DRUPAL_FINDER_VENDOR_DIR');
+    }
+
+    public function testOnlyDrupalEnvironmentVariable() {
+        $finder = new DrupalFinder();
+        $fileStructure = [
+            'web' => [],
+        ];
+
+        $root = $this->tempdir(sys_get_temp_dir());
+        $this->dumpToFileSystem($fileStructure, $root);
+
+        $drupal_root = $root . '/web';
+
+        putenv("{$this->envNameDrupal}=$drupal_root");
+
+        // DrupalFinder::locateRoot should be true if the Drupal root is known.
+        $this->assertTrue($finder->locateRoot($root));
+        $this->assertSame($finder->getDrupalRoot(), $drupal_root);
+    }
+
+    public function testOnlyVendorEnvironmentVariable() {
+        $finder = new DrupalFinder();
+        $fileStructure = [
+            'vendor' => [],
+        ];
+
+        $root = $this->tempdir(sys_get_temp_dir());
+        $this->dumpToFileSystem($fileStructure, $root);
+
+        $vendor_dir = $root . '/vendor';
+
+        putenv("{$this->envNameVendor}=$vendor_dir");
+
+        // DrupalFinder::locateRoot should be false since Drupal root is unknown.
+        $this->assertFalse($finder->locateRoot($root));
+        $this->assertSame($finder->getVendorDir(), $vendor_dir);
+    }
+
+    public function testOnlyComposerEnvironmentVariable() {
+        $finder = new DrupalFinder();
+        $fileStructure = [];
+
+        $root = $this->tempdir(sys_get_temp_dir());
+        $this->dumpToFileSystem($fileStructure, $root);
+
+        $composer_dir = $root;
+
+        putenv("{$this->envNameComposer}=$composer_dir");
+
+        // DrupalFinder::locateRoot should be false since Drupal root is unknown.
+        $this->assertFalse($finder->locateRoot($root));
+        $this->assertSame($finder->getComposerRoot(), $composer_dir);
     }
 
     protected function dumpToFileSystem($fileStructure, $root)
@@ -53,7 +131,7 @@ abstract class DrupalFinderTestBase extends PHPUnit_Framework_TestCase
             $path = $dir . $prefix . mt_rand(0, 9999999);
         } while (!mkdir($path, $mode));
         register_shutdown_function(
-            [get_called_class(), 'tempdir_remove'],
+            [static::class, 'tempdir_remove'],
             $path
         );
 
@@ -86,7 +164,7 @@ abstract class DrupalFinderTestBase extends PHPUnit_Framework_TestCase
      * @param $target
      * @param $link
      *
-     * @throws \PHPUnit_Framework_SkippedTestError
+     * @throws SkippedTestError
      */
     protected function symlink($target, $link)
     {

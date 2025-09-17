@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\config_import_test;
 
 use Drupal\Core\Config\ConfigCrudEvent;
@@ -101,7 +103,7 @@ class EventSubscriber implements EventSubscriberInterface {
       $data = $config->get('module');
       $install = array_diff_key($data, $original);
       if (!empty($install)) {
-        $installed[] = key($install);
+        $installed = array_merge($installed, $install);
       }
       $uninstall = array_diff_key($original, $data);
       if (!empty($uninstall)) {

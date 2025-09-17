@@ -34,9 +34,58 @@ class MigrateImageStylesTest extends MigrateDrupal7TestBase {
    * Tests the image styles migration.
    */
   public function testImageStylesMigration(): void {
-    $this->assertEntity('custom_image_style_1', "Custom image style 1", ['image_scale_and_crop', 'image_desaturate'], [['width' => 55, 'height' => 55, 'anchor' => 'center-center'], []]);
-    $this->assertEntity('custom_image_style_2', "Custom image style 2", ['image_resize', 'image_rotate'], [['width' => 55, 'height' => 100], ['degrees' => 45, 'bgcolor' => '#FFFFFF', 'random' => FALSE]]);
-    $this->assertEntity('custom_image_style_3', "Custom image style 3", ['image_scale', 'image_crop'], [['width' => 150, 'height' => NULL, 'upscale' => FALSE], ['width' => 50, 'height' => 50, 'anchor' => 'left-top']]);
+    $this->assertEntity(
+     'custom_image_style_1',
+     "Custom image style 1",
+      [
+        'image_scale_and_crop',
+        'image_desaturate',
+      ],
+      [
+        [
+          'width' => 55,
+          'height' => 55,
+          'anchor' => 'center-center',
+        ],
+        [],
+      ]);
+    $this->assertEntity(
+     'custom_image_style_2',
+     "Custom image style 2",
+      [
+        'image_resize',
+        'image_rotate',
+      ],
+      [
+        [
+          'width' => 55,
+          'height' => 100,
+        ],
+        [
+          'degrees' => 45,
+          'bgcolor' => '#FFFFFF',
+          'random' => FALSE,
+        ],
+      ]);
+    $this->assertEntity(
+     'custom_image_style_3',
+     "Custom image style 3",
+      [
+        'image_scale',
+        'image_crop',
+      ],
+      [
+        [
+          'width' => 150,
+          'height' => NULL,
+          'upscale' => FALSE,
+        ],
+        [
+          'width' => 50,
+          'height' => 50,
+          'anchor' => 'left-top',
+        ],
+      ]);
   }
 
   /**
@@ -47,9 +96,9 @@ class MigrateImageStylesTest extends MigrateDrupal7TestBase {
    * @param string $label
    *   The expected image style label.
    * @param array $expected_effect_plugins
-   *   An array of expected plugins attached to the image style entity
+   *   An array of expected plugins attached to the image style entity.
    * @param array $expected_effect_config
-   *   An array of expected configuration for each effect in the image style
+   *   An array of expected configuration for each effect in the image style.
    */
   protected function assertEntity(string $id, string $label, array $expected_effect_plugins, array $expected_effect_config): void {
     $style = ImageStyle::load($id);

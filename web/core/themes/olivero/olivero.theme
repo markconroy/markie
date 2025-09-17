@@ -17,7 +17,7 @@ use Drupal\user\UserInterface;
  *
  * Adds body classes if certain regions have content.
  */
-function olivero_preprocess_html(&$variables) {
+function olivero_preprocess_html(&$variables): void {
   if (theme_get_setting('mobile_menu_all_widths') === 1) {
     $variables['attributes']['class'][] = 'is-always-mobile-nav';
   }
@@ -28,7 +28,8 @@ function olivero_preprocess_html(&$variables) {
 
   $variables['html_attributes']->setAttribute('style', "--color--primary-hue:$h;--color--primary-saturation:$s%;--color--primary-lightness:$l");
 
-  // So fonts can be preloaded from base theme in the event Olivero is used as a subtheme.
+  // So fonts can be preloaded from base theme in the event Olivero is used as a
+  // subtheme.
   $variables['olivero_path'] = \Drupal::request()->getBasePath() . '/' . \Drupal::service('extension.list.theme')->getPath('olivero');
 
   $query_string = \Drupal::service('asset.query_string')->get();
@@ -49,7 +50,7 @@ function olivero_preprocess_html(&$variables) {
 /**
  * Implements hook_preprocess_HOOK() for page title templates.
  */
-function olivero_preprocess_page_title(&$variables) {
+function olivero_preprocess_page_title(&$variables): void {
   // Since the title and the shortcut link are both block level elements,
   // positioning them next to each other is much simpler with a wrapper div.
   if (!empty($variables['title_suffix']['add_or_remove_shortcut']) && $variables['title']) {
@@ -78,7 +79,7 @@ function olivero_preprocess_page_title(&$variables) {
 /**
  * Implements hook_preprocess_HOOK() for maintenance-page.html.twig.
  */
-function olivero_preprocess_maintenance_page(&$variables) {
+function olivero_preprocess_maintenance_page(&$variables): void {
   // By default, site_name is set to Drupal if no db connection is available
   // or during site installation. Setting site_name to an empty string makes
   // the site and update pages look cleaner.
@@ -94,10 +95,10 @@ function olivero_preprocess_maintenance_page(&$variables) {
 /**
  * Implements hook_preprocess_HOOK() for node.html.twig.
  */
-function olivero_preprocess_node(&$variables) {
+function olivero_preprocess_node(&$variables): void {
   // Remove the "Add new comment" link on teasers or when the comment form is
   // displayed on the page.
-  if ($variables['teaser'] || !empty($variables['content']['comments']['comment_form'])) {
+  if ($variables['view_mode'] === 'teaser' || !empty($variables['content']['comments']['comment_form'])) {
     unset($variables['content']['links']['comment']['#links']['comment-add']);
   }
 
@@ -117,7 +118,7 @@ function olivero_preprocess_node(&$variables) {
 /**
  * Implements hook_preprocess_HOOK() for block.html.twig.
  */
-function olivero_preprocess_block(&$variables) {
+function olivero_preprocess_block(&$variables): void {
   if (!empty($variables['elements']['#id'])) {
     /** @var \Drupal\block\BlockInterface $block */
     $block = \Drupal::entityTypeManager()
@@ -162,7 +163,7 @@ function olivero_preprocess_block(&$variables) {
 /**
  * Implements hook_theme_suggestions_HOOK_alter() for menu.
  */
-function olivero_theme_suggestions_menu_alter(&$suggestions, array $variables) {
+function olivero_theme_suggestions_menu_alter(&$suggestions, array $variables): void {
   if (isset($variables['attributes']['region'])) {
     $suggestions[] = 'menu__' . $variables['attributes']['region'];
   }
@@ -171,7 +172,7 @@ function olivero_theme_suggestions_menu_alter(&$suggestions, array $variables) {
 /**
  * Implements hook_preprocess_HOOK().
  */
-function olivero_preprocess_menu(&$variables) {
+function olivero_preprocess_menu(&$variables): void {
   if (isset($variables['attributes']['region'])) {
     if ($variables['attributes']['region'] === 'sidebar') {
       $variables['attributes']['class'][] = 'menu--sidebar';
@@ -183,7 +184,7 @@ function olivero_preprocess_menu(&$variables) {
 /**
  * Implements hook_theme_suggestions_HOOK_alter() for form templates.
  */
-function olivero_theme_suggestions_form_alter(array &$suggestions, array $variables) {
+function olivero_theme_suggestions_form_alter(array &$suggestions, array $variables): void {
   if ($variables['element']['#form_id'] === 'search_block_form') {
     $suggestions[] = 'form__search_block_form';
   }
@@ -192,7 +193,7 @@ function olivero_theme_suggestions_form_alter(array &$suggestions, array $variab
 /**
  * Implements hook_form_alter() for adding classes and placeholder text to the search forms.
  */
-function olivero_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+function olivero_form_alter(&$form, FormStateInterface $form_state, $form_id): void {
   if (isset($form['actions']['submit']) && (count($form['actions'])) <= 2) {
     $form['actions']['submit']['#attributes']['class'][] = 'button--primary';
   }
@@ -217,7 +218,7 @@ function olivero_form_alter(&$form, FormStateInterface $form_state, $form_id) {
 /**
  * Implements hook_theme_suggestions_HOOK_alter() for block().
  */
-function olivero_theme_suggestions_block_alter(&$suggestions, array $variables) {
+function olivero_theme_suggestions_block_alter(&$suggestions, array $variables): void {
   if (!empty($variables['elements']['#id'])) {
 
     /** @var \Drupal\block\BlockInterface $block */
@@ -231,8 +232,8 @@ function olivero_theme_suggestions_block_alter(&$suggestions, array $variables) 
         ->getRegion();
 
       $suggestions[] = 'block__' . $region;
-      $suggestions[] = 'block__' . $region . '__' . 'plugin_id' . '__' . $variables['elements']['#plugin_id'];
-      $suggestions[] = 'block__' . $region . '__' . 'id' . '__' . $variables['elements']['#id'];
+      $suggestions[] = 'block__' . $region . '__plugin_id__' . $variables['elements']['#plugin_id'];
+      $suggestions[] = 'block__' . $region . '__id__' . $variables['elements']['#id'];
     }
   }
 }
@@ -240,7 +241,7 @@ function olivero_theme_suggestions_block_alter(&$suggestions, array $variables) 
 /**
  * Implements hook_preprocess_HOOK() for menu-local-tasks templates.
  */
-function olivero_preprocess_menu_local_tasks(&$variables) {
+function olivero_preprocess_menu_local_tasks(&$variables): void {
   foreach (Element::children($variables['primary']) as $key) {
     $variables['primary'][$key]['#level'] = 'primary';
   }
@@ -252,7 +253,7 @@ function olivero_preprocess_menu_local_tasks(&$variables) {
 /**
  * Implements hook_preprocess_form_element().
  */
-function olivero_preprocess_form_element(&$variables) {
+function olivero_preprocess_form_element(&$variables): void {
   if (in_array($variables['element']['#type'] ?? FALSE, ['checkbox', 'radio'], TRUE)) {
     $variables['attributes']['class'][] = 'form-type-boolean';
   }
@@ -269,14 +270,14 @@ function olivero_preprocess_form_element(&$variables) {
 /**
  * Implements hook_preprocess_HOOK().
  */
-function olivero_preprocess_form_element_label(&$variables) {
+function olivero_preprocess_form_element_label(&$variables): void {
   $variables['attributes']['class'][] = 'form-item__label';
 }
 
 /**
  * Implements hook_preprocess_HOOK().
  */
-function olivero_preprocess_input(&$variables) {
+function olivero_preprocess_input(&$variables): void {
   if (
     !empty($variables['element']['#title_display']) &&
     $variables['element']['#title_display'] === 'attribute' &&
@@ -309,8 +310,9 @@ function olivero_preprocess_input(&$variables) {
     $variables['attributes']['class'][] = Html::getClass('form-element--type-' . $type_html);
     $variables['attributes']['class'][] = Html::getClass('form-element--api-' . $type_api);
 
-    // This logic is functioning as expected, but there is nothing in the theme that renders the result.
-    // As a result it can't currently be covered by a functional test.
+    // This logic is functioning as expected, but there is nothing in the theme
+    // that renders the result. As a result it can't currently be covered by a
+    // functional test.
     if (!empty($variables['element']['#autocomplete_route_name'])) {
       $variables['autocomplete_message'] = t('Loading…');
     }
@@ -325,7 +327,7 @@ function olivero_preprocess_input(&$variables) {
 /**
  * Implements hook_preprocess_HOOK().
  */
-function olivero_preprocess_textarea(&$variables) {
+function olivero_preprocess_textarea(&$variables): void {
   $variables['attributes']['class'][] = 'form-element';
   $variables['attributes']['class'][] = 'form-element--type-textarea';
   $variables['attributes']['class'][] = 'form-element--api-textarea';
@@ -334,7 +336,7 @@ function olivero_preprocess_textarea(&$variables) {
 /**
  * Implements hook_preprocess_HOOK().
  */
-function olivero_preprocess_select(&$variables) {
+function olivero_preprocess_select(&$variables): void {
   $variables['attributes']['class'][] = 'form-element';
   $variables['attributes']['class'][] = $variables['element']['#multiple'] ?
     'form-element--type-select-multiple' :
@@ -344,21 +346,21 @@ function olivero_preprocess_select(&$variables) {
 /**
  * Implements hook_preprocess_HOOK().
  */
-function olivero_preprocess_checkboxes(&$variables) {
+function olivero_preprocess_checkboxes(&$variables): void {
   $variables['attributes']['class'][] = 'form-boolean-group';
 }
 
 /**
  * Implements hook_preprocess_HOOK().
  */
-function olivero_preprocess_radios(&$variables) {
+function olivero_preprocess_radios(&$variables): void {
   $variables['attributes']['class'][] = 'form-boolean-group';
 }
 
 /**
  * Implements hook_preprocess_HOOK().
  */
-function olivero_preprocess_field(&$variables) {
+function olivero_preprocess_field(&$variables): void {
   $rich_field_types = ['text_with_summary', 'text', 'text_long'];
 
   if (in_array($variables['field_type'], $rich_field_types, TRUE)) {
@@ -373,7 +375,7 @@ function olivero_preprocess_field(&$variables) {
 /**
  * Implements hook_preprocess_HOOK().
  */
-function olivero_preprocess_field_multiple_value_form(&$variables) {
+function olivero_preprocess_field_multiple_value_form(&$variables): void {
   // Make disabled available for the template.
   $variables['disabled'] = !empty($variables['element']['#disabled']);
 
@@ -428,7 +430,7 @@ function olivero_preprocess_field_multiple_value_form(&$variables) {
 /**
  * Implements hook_preprocess_HOOK() for menu-local-task templates.
  */
-function olivero_preprocess_menu_local_task(&$variables) {
+function olivero_preprocess_menu_local_task(&$variables): void {
   $variables['link']['#options']['attributes']['class'][] = 'tabs__link';
   $variables['link']['#options']['attributes']['class'][] = 'js-tabs-link';
 
@@ -447,7 +449,7 @@ function olivero_preprocess_menu_local_task(&$variables) {
 /**
  * Implements template_preprocess_HOOK() for fieldset.
  */
-function olivero_preprocess_fieldset(&$variables) {
+function olivero_preprocess_fieldset(&$variables): void {
   $element = $variables['element'];
   $composite_types = ['checkboxes', 'radios'];
 
@@ -480,14 +482,14 @@ function olivero_preprocess_fieldset(&$variables) {
 /**
  * Implements hook_theme_suggestions_HOOK_alter().
  */
-function olivero_theme_suggestions_user_alter(&$suggestions, $variables) {
+function olivero_theme_suggestions_user_alter(&$suggestions, $variables): void {
   $suggestions[] = 'user__' . $variables['elements']['#view_mode'];
 }
 
 /**
  * Implements hook_preprocess_HOOK().
  */
-function olivero_preprocess_field__node__created(&$variables) {
+function olivero_preprocess_field__node__created(&$variables): void {
   foreach (Element::children($variables['items']) as $item) {
     unset($variables['items'][$item]['content']['#prefix']);
   }
@@ -496,14 +498,14 @@ function olivero_preprocess_field__node__created(&$variables) {
 /**
  * Implements hook_preprocess_HOOK() for setting classes.
  */
-function olivero_preprocess_filter_caption(&$variables) {
+function olivero_preprocess_filter_caption(&$variables): void {
   $variables['classes'] = isset($variables['classes']) && !empty($variables['classes']) ? $variables['classes'] . ' caption' : 'caption';
 }
 
 /**
  * Implements hook_form_FORM_ID_alter().
  */
-function olivero_form_node_preview_form_select_alter(&$form, FormStateInterface $form_state, $form_id) {
+function olivero_form_node_preview_form_select_alter(&$form, FormStateInterface $form_state, $form_id): void {
   $form['backlink']['#options']['attributes']['class'][] = 'button';
   $form['backlink']['#options']['attributes']['class'][] = 'button--small';
   $form['backlink']['#options']['attributes']['class'][] = 'button--icon-back';
@@ -514,7 +516,7 @@ function olivero_form_node_preview_form_select_alter(&$form, FormStateInterface 
 /**
  * Implements hook_preprocess_HOOK() for comment.html.twig.
  */
-function olivero_preprocess_comment(&$variables) {
+function olivero_preprocess_comment(&$variables): void {
   // Getting the node creation time stamp from the comment object.
   $date = $variables['comment']->getCreatedTime();
   // Formatting "created" as "X days ago".
@@ -524,7 +526,7 @@ function olivero_preprocess_comment(&$variables) {
 /**
  * Implements hook_preprocess_HOOK() for field--comment.html.twig.
  */
-function olivero_preprocess_field__comment(&$variables) {
+function olivero_preprocess_field__comment(&$variables): void {
   // Add a comment_count.
   $variables['comment_count'] = count(array_filter($variables['comments'], 'is_numeric', ARRAY_FILTER_USE_KEY));
 
@@ -545,7 +547,7 @@ function olivero_preprocess_field__comment(&$variables) {
 /**
  * Implements hook_element_info_alter().
  */
-function olivero_element_info_alter(&$info) {
+function olivero_element_info_alter(&$info): void {
   if (array_key_exists('text_format', $info)) {
     $info['text_format']['#pre_render'][] = [OliveroPreRender::class, 'textFormat'];
   }
@@ -560,7 +562,7 @@ function olivero_element_info_alter(&$info) {
  *
  * @todo Remove when https://www.drupal.org/node/3016343 is fixed.
  */
-function olivero_preprocess_text_format_wrapper(&$variables) {
+function olivero_preprocess_text_format_wrapper(&$variables): void {
   $description_attributes = [];
   if (!empty($variables['attributes']['id'])) {
     $description_attributes['id'] = $variables['attributes']['aria-describedby'] = $variables['attributes']['id'];
@@ -572,7 +574,7 @@ function olivero_preprocess_text_format_wrapper(&$variables) {
 /**
  * Implements hook_preprocess_search_result().
  */
-function olivero_preprocess_search_result(&$variables) {
+function olivero_preprocess_search_result(&$variables): void {
   // Apply custom date formatter to "date" field.
   if (!empty($variables['result']['date'])) {
     $variables['info_date'] = \Drupal::service('date.formatter')->format($variables['result']['node']->getCreatedTime(), 'olivero_medium');
@@ -582,7 +584,7 @@ function olivero_preprocess_search_result(&$variables) {
 /**
  * Implements hook_preprocess_item_list__search_results().
  */
-function olivero_preprocess_item_list__search_results(&$variables) {
+function olivero_preprocess_item_list__search_results(&$variables): void {
   if (isset($variables['empty'])) {
     $variables['empty']['#attributes']['class'][] = 'empty-search-results-text';
     $variables['empty']['#attached']['library'][] = 'olivero/search-results';
@@ -592,7 +594,7 @@ function olivero_preprocess_item_list__search_results(&$variables) {
 /**
  * Implements hook_preprocess_links__comment().
  */
-function olivero_preprocess_links__comment(&$variables) {
+function olivero_preprocess_links__comment(&$variables): void {
   foreach ($variables['links'] as &$link) {
     $link['link']['#options']['attributes']['class'][] = 'comment__links-link';
   }
@@ -601,7 +603,7 @@ function olivero_preprocess_links__comment(&$variables) {
 /**
  * Implements hook_preprocess_table().
  */
-function olivero_preprocess_table(&$variables) {
+function olivero_preprocess_table(&$variables): void {
   // Mark the whole table and the first cells if rows are draggable.
   if (!empty($variables['rows'])) {
     $draggable_row_found = FALSE;
@@ -620,7 +622,7 @@ function olivero_preprocess_table(&$variables) {
 /**
  * Implements hook_form_views_exposed_form_alter().
  */
-function olivero_form_views_exposed_form_alter(&$form) {
+function olivero_form_views_exposed_form_alter(&$form): void {
   $form['#attributes']['class'][] = 'form--inline';
 }
 
@@ -628,13 +630,15 @@ function olivero_form_views_exposed_form_alter(&$form) {
  * Converts hex color strings to array of HSL values.
  *
  * @param string $hex_string
- *   The 6-character hexadecimal color code, optionally with a leading hash
+ *   The 6-character hexadecimal color code, optionally with a leading hash.
  *
  * @return array
  *   Array containing hue, saturation, and lightness values.
  *   $hue: integer of value 0-360 indicating the hue on a color wheel.
- *   $saturation: string of saturation as a percentage (0% all gray, 100% full color).
- *   $lightness: string of lightness as a percentage (0% darkened to black, 50% full color, 100% lightened to white).
+ *   $saturation: string of saturation as a percentage (0% all gray, 100% full
+ *   color).
+ *   $lightness: string of lightness as a percentage (0% darkened to black, 50%
+ *   full color, 100% lightened to white).
  *
  * @see https://css-tricks.com/converting-color-spaces-in-javascript
  *   Code based on JS version.

@@ -170,6 +170,9 @@ class PluginDependencyTraitTest extends UnitTestCase {
 
 }
 
+/**
+ * Stub class for testing PluginDependencyTrait.
+ */
 class TestPluginDependency {
 
   use PluginDependencyTrait {
@@ -177,15 +180,25 @@ class TestPluginDependency {
     getPluginDependencies as public;
   }
 
+  /**
+   * The module handler.
+   *
+   * @var Drupal\Core\Extension\ModuleHandlerInterface
+   */
   protected $moduleHandler;
 
+  /**
+   * The theme handler.
+   *
+   * @var Drupal\Core\Extension\ThemeHandlerInterface
+   */
   protected $themeHandler;
 
-  public function setModuleHandler(ModuleHandlerInterface $module_handler) {
+  public function setModuleHandler(ModuleHandlerInterface $module_handler): void {
     $this->moduleHandler = $module_handler;
   }
 
-  public function setThemeHandler(ThemeHandlerInterface $theme_handler) {
+  public function setThemeHandler(ThemeHandlerInterface $theme_handler): void {
     $this->themeHandler = $theme_handler;
   }
 
@@ -199,6 +212,7 @@ class TestPluginDependency {
 
   /**
    * @return array[]
+   *   The dependencies.
    */
   public function getDependencies() {
     return $this->dependencies;

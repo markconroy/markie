@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\jsonapi\Functional;
 
+use Drupal\jsonapi\JsonApiSpec;
 use Drupal\Component\Serialization\Json;
 use Drupal\Component\Utility\Crypt;
 use Drupal\Core\Access\AccessResultInterface;
@@ -79,10 +80,10 @@ trait ResourceResponseTestTrait {
     $merged_document['jsonapi'] = [
       'meta' => [
         'links' => [
-          'self' => ['href' => 'http://jsonapi.org/format/1.0/'],
+          'self' => ['href' => JsonApiSpec::SUPPORTED_SPECIFICATION_PERMALINK],
         ],
       ],
-      'version' => '1.0',
+      'version' => JsonApiSpec::SUPPORTED_SPECIFICATION_VERSION,
     ];
     // Until we can reasonably know what caused an error, we shouldn't include
     // 'self' links in error documents. For example, a 404 shouldn't have a
@@ -218,7 +219,7 @@ trait ResourceResponseTestTrait {
    * @return \Drupal\jsonapi\ResourceResponse[]
    *   The ResourceResponses.
    */
-  protected static function toResourceResponses(array $responses) {
+  protected static function toResourceResponses(array $responses): array {
     return array_map([self::class, 'toResourceResponse'], $responses);
   }
 
@@ -260,7 +261,7 @@ trait ResourceResponseTestTrait {
    * @return array
    *   A resource identifier for the given entity.
    */
-  protected static function toResourceIdentifier(EntityInterface $entity) {
+  protected static function toResourceIdentifier(EntityInterface $entity): array {
     return [
       'type' => $entity->getEntityTypeId() . '--' . $entity->bundle(),
       'id' => $entity->uuid(),
@@ -276,7 +277,7 @@ trait ResourceResponseTestTrait {
    * @return bool
    *   TRUE if the array has a type and ID, FALSE otherwise.
    */
-  protected static function isResourceIdentifier(array $data) {
+  protected static function isResourceIdentifier(array $data): bool {
     return array_key_exists('type', $data) && array_key_exists('id', $data);
   }
 
@@ -306,7 +307,7 @@ trait ResourceResponseTestTrait {
    * @return bool
    *   TRUE if the needle exists is present in the haystack, FALSE otherwise.
    */
-  protected static function collectionHasResourceIdentifier(array $needle, array $haystack) {
+  protected static function collectionHasResourceIdentifier(array $needle, array $haystack): bool {
     foreach ($haystack as $resource) {
       if ($resource['type'] == $needle['type'] && $resource['id'] == $needle['id']) {
         return TRUE;
@@ -346,7 +347,7 @@ trait ResourceResponseTestTrait {
    * @return array
    *   The extracted links, keyed by the original associated key name.
    */
-  protected static function extractLinks(array $link_paths, array $document) {
+  protected static function extractLinks(array $link_paths, array $document): array {
     return array_map(function ($link_path) use ($document) {
       $link = array_reduce(
         explode('.', $link_path),
@@ -366,7 +367,7 @@ trait ResourceResponseTestTrait {
    * @return string[]
    *   The resource links.
    */
-  protected static function getResourceLinks(array $resource_identifiers) {
+  protected static function getResourceLinks(array $resource_identifiers): array {
     return array_map([static::class, 'getResourceLink'], $resource_identifiers);
   }
 
@@ -585,7 +586,7 @@ trait ResourceResponseTestTrait {
    * @return array
    *   A new omitted object.
    */
-  protected static function errorsToOmittedObject(array $errors) {
+  protected static function errorsToOmittedObject(array $errors): array {
     $omitted = [
       'detail' => 'Some resources have been omitted because of insufficient authorization.',
       'links' => [

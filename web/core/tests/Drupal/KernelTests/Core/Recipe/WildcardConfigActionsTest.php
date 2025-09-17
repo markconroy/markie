@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Drupal\KernelTests\Core\Recipe;
 
-use Drupal\block_content\Entity\BlockContentType;
 use Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException;
 use Drupal\Component\Plugin\Exception\PluginNotFoundException;
 use Drupal\Core\Config\Action\ConfigActionException;
@@ -15,6 +14,7 @@ use Drupal\entity_test\Entity\EntityTestBundle;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\FunctionalTests\Core\Recipe\RecipeTestTrait;
+use Drupal\image\Entity\ImageStyle;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\language\Entity\ContentLanguageSettings;
 use Drupal\Tests\node\Traits\ContentTypeCreationTrait;
@@ -49,11 +49,13 @@ class WildcardConfigActionsTest extends KernelTestBase {
    */
   protected function setUp(): void {
     parent::setUp();
+    $this->installEntitySchema('node');
     $this->installConfig('node');
 
     $this->createContentType(['type' => 'one', 'name' => 'Type A']);
     $this->createContentType(['type' => 'two', 'name' => 'Type B']);
 
+    $this->installEntitySchema('entity_test_with_bundle');
     EntityTestBundle::create(['id' => 'one'])->save();
     EntityTestBundle::create(['id' => 'two'])->save();
 
@@ -144,7 +146,7 @@ YAML;
    * Tests that the createForEach action works as expected in normal conditions.
    */
   public function testCreateForEach(): void {
-    $this->enableModules(['language']);
+    $this->enableModules(['image', 'language']);
 
     /** @var \Drupal\Core\Config\Action\ConfigActionManager $manager */
     $manager = $this->container->get('plugin.manager.config_action');
@@ -162,7 +164,7 @@ YAML;
    * Tests that the createForEach action validates the config it creates.
    */
   public function testCreateForEachValidatesCreatedEntities(): void {
-    $this->enableModules(['block_content']);
+    $this->enableModules(['image']);
 
     // To prove that the validation runs, we need to disable strict schema
     // checking in this test. We need to explicitly unsubscribe it from events
@@ -175,12 +177,12 @@ YAML;
     try {
       $this->container->get('plugin.manager.config_action')
         ->applyAction('createForEach', 'node.type.*', [
-          'block_content.type.%bundle_block' => [],
+          'image.style.node__%bundle' => [],
         ]);
       $this->fail('Expected an exception to be thrown but it was not.');
     }
     catch (InvalidConfigException $e) {
-      $this->assertSame('block_content.type.one_block', $e->data->getName());
+      $this->assertSame('image.style.node__one', $e->data->getName());
       $this->assertCount(1, $e->violations);
       $this->assertSame('label', $e->violations[0]->getPropertyPath());
       $this->assertSame(NotNull::IS_NULL_ERROR, $e->violations[0]->getCode());
@@ -191,17 +193,17 @@ YAML;
    * Tests using the `%label` placeholder with the createForEach action.
    */
   public function testCreateForEachWithLabel(): void {
-    $this->enableModules(['block_content']);
+    $this->enableModules(['image']);
 
     // We should be able to use the `%label` placeholder.
     $this->container->get('plugin.manager.config_action')
       ->applyAction('createForEach', 'node.type.*', [
-        'block_content.type.%bundle_block' => [
-          'label' => 'Block on %label content',
+        'image.style.node_%bundle_big' => [
+          'label' => 'Big image for %label content',
         ],
       ]);
-    $this->assertSame('Block on Type A content', BlockContentType::load('one_block')?->label());
-    $this->assertSame('Block on Type B content', BlockContentType::load('two_block')?->label());
+    $this->assertSame('Big image for Type A content', ImageStyle::load('node_one_big')?->label());
+    $this->assertSame('Big image for Type B content', ImageStyle::load('node_two_big')?->label());
   }
 
   /**

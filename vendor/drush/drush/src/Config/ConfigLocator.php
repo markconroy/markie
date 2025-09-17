@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Drush\Config;
 
-use Consolidation\Config\ConfigInterface;
 use Consolidation\Config\Loader\ConfigLoader;
 use Consolidation\Config\Loader\ConfigProcessor;
 use Consolidation\Config\Util\EnvConfig;
@@ -178,7 +177,7 @@ class ConfigLocator
      * Return the configuration object. Create it and load it with
      * all identified configuration if necessary.
      */
-    public function config(): ConfigInterface
+    public function config(): DrushConfig
     {
         return $this->config;
     }
@@ -264,7 +263,13 @@ class ConfigLocator
         // Remember that we've seen this location.
         $this->siteRoots[] = $siteRoot;
 
-        $this->addConfigPaths(self::DRUPAL_CONTEXT, [ dirname($siteRoot) . '/drush', "$siteRoot/drush", "$siteRoot/sites/all/drush" ]);
+        $paths = [
+            dirname($siteRoot) . '/drush',
+            "$siteRoot/drush",
+            "$siteRoot/sites/all/drush",
+        ];
+        $paths = array_filter($paths, is_dir(...));
+        $this->addConfigPaths(self::DRUPAL_CONTEXT, $paths);
         return $this;
     }
 

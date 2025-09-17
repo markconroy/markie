@@ -20,12 +20,12 @@ abstract class EntityStorageBase extends EntityHandlerBase implements EntityStor
   /**
    * Information about the entity type.
    *
+   * @var \Drupal\Core\Entity\EntityTypeInterface
+   *
    * The following code returns the same object:
    * @code
    * \Drupal::entityTypeManager()->getDefinition($this->entityTypeId)
    * @endcode
-   *
-   * @var \Drupal\Core\Entity\EntityTypeInterface
    */
   protected $entityType;
 
@@ -248,6 +248,7 @@ abstract class EntityStorageBase extends EntityHandlerBase implements EntityStor
    *   An array of values to set, keyed by property name.
    *
    * @return \Drupal\Core\Entity\EntityInterface
+   *   The created entity.
    */
   protected function doCreate(array $values) {
     $entity_class = $this->getEntityClass();
@@ -520,8 +521,8 @@ abstract class EntityStorageBase extends EntityHandlerBase implements EntityStor
     }
 
     // Load the original entity, if any.
-    if ($id_exists && !isset($entity->original)) {
-      $entity->original = $this->loadUnchanged($id);
+    if ($id_exists && !$entity->getOriginal()) {
+      $entity->setOriginal($this->loadUnchanged($id));
     }
 
     // Allow code to run before saving.
@@ -568,7 +569,7 @@ abstract class EntityStorageBase extends EntityHandlerBase implements EntityStor
     // correctly identify the original entity.
     $entity->setOriginalId($entity->id());
 
-    unset($entity->original);
+    $entity->setOriginal(NULL);
   }
 
   /**

@@ -339,11 +339,6 @@ ckeditor5.autoformat:
   dependencies:
     - core/ckeditor5
 
-css.escape:
-  version: VERSION
-  drupalSettings: {}
-  deprecated: The %library_id% asset library is deprecated in Drupal 10.0.0 and will be removed in Drupal 11.0.0. See https://www.drupal.org/node/3280410
-
 drupal:
   version: VERSION
   js:
@@ -386,15 +381,6 @@ drupal.ajax:
   css:
     component:
       misc/components/ajax-progress.module.css: { weight: -10 }
-  moved_files:
-    system/base:
-      deprecation_version: 10.3.0
-      removed_version: 11.0.0
-      deprecation_link: https://www.drupal.org/node/3432346
-      css:
-        component:
-          css/components/ajax-progress.module.css:
-            component: misc/components/ajax-progress.module.css
 
   drupalSettings:
     # These placeholder values will be set by system_js_settings_alter().
@@ -473,33 +459,15 @@ drupal.autocomplete:
       assets/vendor/jquery.ui/themes/base/autocomplete.css: { weight: -11.7 }
       assets/vendor/jquery.ui/themes/base/menu.css: { weight: -11.7 }
       misc/components/autocomplete-loading.module.css: { weight: -10 }
-  moved_files:
-    system/base:
-      deprecation_version: 10.3.0
-      removed_version: 11.0.0
-      deprecation_link: https://www.drupal.org/node/3432346
-      css:
-        component:
-          css/components/autocomplete-loading.module.css:
-            component: misc/components/autocomplete-loading.module.css
+
   dependencies:
     - core/jquery
     - core/internal.jquery_ui
     - core/drupal
     - core/drupalSettings
     - core/drupal.ajax
-    - core/tabbable.jquery.shim
     - core/drupal.jquery.position
-
-drupal.array.find:
-  version: VERSION
-  drupalSettings: {}
-  deprecated: The %library_id% asset library is deprecated in Drupal 10.0.0 and will be removed in Drupal 11.0.0. See https://www.drupal.org/node/3280410
-
-drupal.array.includes:
-  version: VERSION
-  drupalSettings: {}
-  deprecated: The %library_id% asset library is deprecated in Drupal 10.0.0 and will be removed in Drupal 11.0.0. See https://www.drupal.org/node/3280410
+    - core/tabbable
 
 drupal.batch:
   version: VERSION
@@ -531,11 +499,6 @@ drupal.collapse:
     - core/drupal
     - core/drupal.form
     - core/once
-
-drupal.customevent:
-  version: VERSION
-  drupalSettings: {}
-  deprecated: The %library_id% asset library is deprecated in Drupal 10.0.0 and will be removed in Drupal 11.0.0. See https://www.drupal.org/node/3280410
 
 drupal.debounce:
   version: VERSION
@@ -581,9 +544,9 @@ drupal.dialog:
     - core/drupalSettings
     - core/drupal.debounce
     - core/drupal.displace
-    - core/tabbable.jquery.shim
     - core/once
     - core/drupal.jquery.position
+    - core/tabbable
 
 drupal.dialog.ajax:
   version: VERSION
@@ -619,22 +582,27 @@ drupal.dropbutton:
     - core/drupalSettings
     - core/once
 
-drupal.element.closest:
-  version: VERSION
-  drupalSettings: {}
-  deprecated: The %library_id% asset library is deprecated in Drupal 10.0.0 and will be removed in Drupal 11.0.0. See https://www.drupal.org/node/3280410
-
-drupal.element.matches:
-  version: VERSION
-  drupalSettings: {}
-  deprecated: The %library_id% asset library is deprecated in Drupal 10.0.0 and will be removed in Drupal 11.0.0. See https://www.drupal.org/node/3280410
-
 drupal.entity-form:
   version: VERSION
   js:
     misc/entity-form.js: {}
   dependencies:
     - core/drupal.form
+
+drupal.fieldgroup:
+  version: VERSION
+  css:
+    component:
+      misc/components/fieldgroup.module.css: { weight: -10 }
+  moved_files:
+    system/base:
+      deprecation_version: 11.2.0
+      removed_version: 12.0.0
+      deprecation_link: https://www.drupal.org/node/3432346
+      css:
+        component:
+          css/components/fieldgroup.module.css:
+            base: core/misc/components/fieldgroup.module.css
 
 drupal.form:
   version: VERSION
@@ -645,6 +613,24 @@ drupal.form:
     - core/drupal
     - core/drupal.debounce
     - core/once
+
+drupal.htmx:
+  version: VERSION
+  js:
+    misc/htmx/htmx-assets.js: {}
+    misc/htmx/htmx-behaviors.js: {}
+  dependencies:
+    - core/htmx
+    - core/drupal
+    - core/drupalSettings
+    - core/loadjs
+  drupalSettings:
+    # These placeholder values will be set by system_js_settings_alter().
+    ajaxPageState:
+      libraries: null
+      theme: null
+      theme_token: null
+    ajaxTrustedUrl: {}
 
 drupal.machine-name:
   version: VERSION
@@ -666,16 +652,6 @@ drupal.message:
     - core/drupal
     - core/drupal.announce
 
-drupal.nodelist.foreach:
-  version: VERSION
-  drupalSettings: {}
-  deprecated: The %library_id% asset library is deprecated in Drupal 10.0.0 and will be removed in Drupal 11.0.0. See https://www.drupal.org/node/3280410
-
-drupal.object.assign:
-  version: VERSION
-  drupalSettings: {}
-  deprecated: The %library_id% asset library is deprecated in Drupal 10.0.0 and will be removed in Drupal 11.0.0. See https://www.drupal.org/node/3280410
-
 drupal.progress:
   version: VERSION
   js:
@@ -683,19 +659,26 @@ drupal.progress:
   css:
     component:
       misc/components/progress.module.css: { weight: -10 }
-  moved_files:
-    system/base:
-      deprecation_version: 10.3.0
-      removed_version: 11.0.0
-      deprecation_link: https://www.drupal.org/node/3432346
-      css:
-        component:
-          css/components/progress.module.css:
-            component: misc/components/progress.module.css
+
   dependencies:
     - core/drupal
     - core/jquery
     - core/drupalSettings
+
+drupal.textarea-resize:
+  version: VERSION
+  css:
+    component:
+      misc/components/resize.module.css: { weight: -10 }
+  moved_files:
+    system/base:
+      deprecation_version: 11.2.0
+      removed_version: 12.0.0
+      deprecation_link: https://www.drupal.org/node/3432346
+      css:
+        component:
+          css/components/resize.module.css:
+            component: misc/components/resize.module.css
 
 drupal.states:
   version: VERSION
@@ -706,11 +689,6 @@ drupal.states:
     - core/drupal
     - core/drupalSettings
     - core/once
-
-drupal.string.includes:
-  version: VERSION
-  drupalSettings: {}
-  deprecated: The %library_id% asset library is deprecated in Drupal 10.0.0 and will be removed in Drupal 11.0.0. See https://www.drupal.org/node/3280410
 
 drupal.tabbingmanager:
   version: VERSION
@@ -729,17 +707,7 @@ drupal.tabledrag:
     component:
       misc/components/tabledrag.module.css: { weight: -10 }
       misc/components/tree-child.module.css: { weight: -10 }
-  moved_files:
-    system/base:
-      deprecation_version: 10.3.0
-      removed_version: 11.0.0
-      deprecation_link: https://www.drupal.org/node/3432346
-      css:
-        component:
-          css/components/tabledrag.module.css:
-            component: misc/components/tabledrag.module.css
-          css/components/tree-child.module.css:
-            component: misc/components/tree-child.module.css
+
   dependencies:
     - core/jquery
     - core/drupal
@@ -760,17 +728,6 @@ drupal.tableheader:
   css:
     component:
       misc/components/sticky-header.module.css: { weight: -10 }
-  moved_files:
-    system/base:
-      deprecation_version: 10.3.0
-      removed_version: 11.0.0
-      deprecation_link: https://www.drupal.org/node/3440477
-      css:
-        component:
-          css/components/sticky-header.module.css:
-            component: misc/components/sticky-header.module.css
-      js:
-        misc/tableheader.js: false
 
 drupal.tableresponsive:
   version: VERSION
@@ -790,6 +747,21 @@ drupal.tableselect:
     - core/drupal.checkbox
     - core/jquery
     - core/once
+
+drupal.tablesort:
+  version: VERSION
+  css:
+    component:
+      misc/components/tablesort.module.css: { weight: -10 }
+  moved_files:
+    system/base:
+      deprecation_version: 11.2.0
+      removed_version: 12.0.0
+      deprecation_link: https://www.drupal.org/node/3432346
+      css:
+        component:
+          css/components/tablesort.module.css:
+            base: misc/components/tablesort.module.css
 
 drupal.time-diff:
   version: VERSION
@@ -812,8 +784,6 @@ drupal.touchevents-test:
   header: true
   version: VERSION
   js:
-    # Set weight to -21 so it loads alongside Modernizr, the library previously
-    # responsible for this detection.
     misc/touchevents-test.js: { weight: -21 }
 
 drupal.vertical-tabs:
@@ -829,18 +799,22 @@ drupal.vertical-tabs:
     - core/drupal
     - core/drupalSettings
     - core/drupal.form
-
-es6-promise:
-  version: VERSION
-  drupalSettings: {}
-  deprecated: The %library_id% asset library is deprecated in Drupal 10.0.0 and will be removed in Drupal 11.0.0. See https://www.drupal.org/node/3280410
+htmx:
+  remote: https://github.com/bigskysoftware/htmx
+  version: "2.0.4"
+  license:
+    name: Zero-Clause BSD
+    url:  https://raw.githubusercontent.com/bigskysoftware/htmx/refs/tags/v2.0.4/LICENSE
+    gpl-compatible: true
+  js:
+    assets/vendor/htmx/htmx.min.js: { minified: true }
 
 internal.floating-ui:
   remote: https://github.com/floating-ui/floating-ui
-  version: "1.1.1"
+  version: "1.7.0"
   license:
     name: MIT
-    url: https://github.com/floating-ui/floating-ui/blob/master/LICENSE
+    url: https://github.com/floating-ui/floating-ui/blob/@floating-ui/dom@1.7.0/LICENSE
     gpl-compatible: true
   js:
     assets/vendor/floating-ui/floating-ui.core.umd.min.js: { minified: true }
@@ -848,13 +822,18 @@ internal.floating-ui:
 
 jquery:
   remote: https://github.com/jquery/jquery
-  version: "3.7.1"
+  version: "4.0.0-rc.1"
   license:
     name: MIT
-    url: https://raw.githubusercontent.com/jquery/jquery/3.7.1/LICENSE.txt
+    url: https://raw.githubusercontent.com/jquery/jquery/4.0.0-rc.1/LICENSE.txt
     gpl-compatible: true
   js:
-    assets/vendor/jquery/jquery.min.js: { minified: true, weight: -20 }
+    # jquery.min.js is explicitly set to preprocess: false to prevent its
+    # inclusion in JavaScript aggregates. This prevents it being duplicated
+    # across different aggregates which can include different combinations of
+    # libraries that depend on jQuery, so that it is only downloaded once per
+    # browser instead of potentially multiple times from different pages.
+    assets/vendor/jquery/jquery.min.js: { preprocess: false, minified: true, weight: -20 }
 
 internal.jquery.form:
   # Internal library. Do not depend on it outside core nor add new core usage.
@@ -868,17 +847,6 @@ internal.jquery.form:
   dependencies:
     - core/jquery
 
-internal.shepherd:
-  remote: https://github.com/shipshapecode/shepherd
-  version: "10.0.1"
-  license:
-    name: MIT
-    url: https://raw.githubusercontent.com/shipshapecode/shepherd/v10.0.1/LICENSE
-    gpl-compatible: true
-  js:
-    assets/vendor/shepherd/shepherd.min.js: { minified: true }
-  deprecated: The %library_id% asset library is deprecated in Drupal 10.3.0 and will be removed in Drupal 11.0.0. See https://www.drupal.org/node/3442299
-
 drupal.jquery.position:
   # This is a modified version of jQuery UI position for that does not require
   # any jQuery UI assets, only jQuery. It is provided by core for use with
@@ -888,19 +856,6 @@ drupal.jquery.position:
     misc/position.js: {}
   dependencies:
     - core/jquery
-
-modernizr:
-  # Block the page from being loaded until Modernizr is initialized.
-  header: true
-  remote: https://github.com/Modernizr/Modernizr
-  license:
-    name: MIT
-    url: https://modernizr.com/license/
-    gpl-compatible: true
-  version: "3.11.7"
-  js:
-    assets/vendor/modernizr/modernizr.min.js: { preprocess: 0, weight: -21, minified: true }
-  deprecated: The %library_id% asset library is deprecated in Drupal 10.1.0 and will be removed in Drupal 11.0.0. See https://www.drupal.org/node/3333253
 
 normalize:
   remote: https://github.com/necolas/normalize.css
@@ -922,11 +877,6 @@ once:
     gpl-compatible: true
   js:
     assets/vendor/once/once.min.js: { weight: -19, minified: true }
-
-picturefill:
-  version: VERSION
-  drupalSettings: {}
-  deprecated: The %library_id% asset library is deprecated in Drupal 10.0.0 and will be removed in Drupal 11.0.0. See https://www.drupal.org/node/3280410
 
 sortable:
   remote: https://github.com/SortableJS/Sortable
@@ -957,16 +907,6 @@ transliteration:
     gpl-compatible: true
   js:
     assets/vendor/transliteration/bundle.umd.min.js: { minified: true }
-
-tabbable.jquery.shim:
-  version: VERSION
-  js:
-    misc/jquery.tabbable.shim.js: {}
-  dependencies:
-    - core/drupal
-    - core/tabbable
-    - core/jquery
-  deprecated: The %library_id% asset library is deprecated in Drupal 10.3.0 and will be removed in Drupal 11.0.0. See https://www.drupal.org/node/3441616
 
 internal.underscore:
   # Internal library. Do not depend on it outside core nor add new core usage.

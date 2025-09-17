@@ -310,6 +310,9 @@ class SearchPageRepositoryTest extends UnitTestCase {
 
 }
 
+/**
+ * Mock for the configured search page entity.
+ */
 class TestSearchPage extends SearchPage {
 
   public function __construct(array $values) {
@@ -318,6 +321,9 @@ class TestSearchPage extends SearchPage {
     }
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function label($langcode = NULL) {
     return $this->label;
   }
