@@ -1,15 +1,13 @@
-uuid: f68d4ad1-3026-42ca-abd5-631e733bccd3
+uuid: 98a8ce54-fb55-45e6-8c95-5a789ff2b89a
 langcode: en
-status: false
+status: true
 dependencies:
   theme:
     - markconroy
-_core:
-  default_config_hash: Q9_2whdOj1YIomfvsIfopROW4FT_X5pY0DjdOiOaQ5U
-id: markconroy_primary_admin_actions
+id: markconroy_primaryadminactions
 theme: markconroy
 region: tabs
-weight: -7
+weight: 0
 provider: null
 plugin: local_actions_block
 settings:

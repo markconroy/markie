@@ -1,18 +1,19 @@
-uuid: a2e21edf-3cf8-4c55-ac3d-a897eb233a52
+uuid: 53fa3bd1-856b-41e5-907e-0a438189d77e
 langcode: en
 status: true
 dependencies:
   config:
+    - core.entity_view_mode.user.name
     - field.field.user.user.field_name
     - field.field.user.user.user_picture
   module:
     - user
 _core:
   default_config_hash: V51QPCKkgNREKtSmB9Iu2wmAMEpktVpnzklWaZV8UYo
-id: user.user.default
+id: user.user.name
 targetEntityType: user
 bundle: user
-mode: default
+mode: name
 content:
   field_name:
     type: string

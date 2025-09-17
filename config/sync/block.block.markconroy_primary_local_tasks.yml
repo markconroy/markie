@@ -1,6 +1,6 @@
 uuid: 53e968c8-db56-4075-9cc0-175d8479b19d
 langcode: en
-status: false
+status: true
 dependencies:
   theme:
     - markconroy
@@ -9,7 +9,7 @@ _core:
 id: markconroy_primary_local_tasks
 theme: markconroy
 region: tabs
-weight: -4
+weight: -3
 provider: null
 plugin: local_tasks_block
 settings:
