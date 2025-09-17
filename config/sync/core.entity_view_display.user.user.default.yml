@@ -13,15 +13,8 @@ id: user.user.default
 targetEntityType: user
 bundle: user
 mode: default
-content:
-  field_name:
-    type: string
-    label: hidden
-    settings:
-      link_to_entity: false
-    third_party_settings: {  }
-    weight: 0
-    region: content
+content: {  }
 hidden:
+  field_name: true
   member_for: true
   user_picture: true
