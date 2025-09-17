@@ -39,7 +39,6 @@
         "drupal/pathauto": "^1.8",
         "drupal/redirect": "^1.6",
         "drupal/token": "^1.7",
-        "drupal/video_embed_field": "^2.0",
         "drush/drush": "^12",
         "platformsh/config-reader": "^2.3",
         "topfloor/composer-cleanup-vcs-dirs": "^1.0",

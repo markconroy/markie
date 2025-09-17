@@ -3,7 +3,7 @@
         'name' => 'markconroy/markie',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => 'e8c45123550562b2cc2c3b844d27d285c7df20ce',
+        'reference' => 'b96f3eb7808fb1568ebba60034fb0b372366625d',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -514,15 +514,6 @@
             'aliases' => array(),
             'dev_requirement' => false,
         ),
-        'drupal/video_embed_field' => array(
-            'pretty_version' => '2.5.0',
-            'version' => '2.5.0.0',
-            'reference' => '8.x-2.5',
-            'type' => 'drupal-module',
-            'install_path' => __DIR__ . '/../../web/modules/contrib/video_embed_field',
-            'aliases' => array(),
-            'dev_requirement' => false,
-        ),
         'drush/drush' => array(
             'pretty_version' => '12.4.4',
             'version' => '12.4.4.0',
@@ -634,7 +625,7 @@
         'markconroy/markie' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => 'e8c45123550562b2cc2c3b844d27d285c7df20ce',
+            'reference' => 'b96f3eb7808fb1568ebba60034fb0b372366625d',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
