@@ -14,3 +14,19 @@ function markie_preprocess_media(&$variables) {
   $variables['attributes']['data-media-id'] = $media_id;
   $variables['attributes']['data-media-source-file-id'] = $media_source;
 }
+
+/**
+ * Implements hook_preprocess_HOOK().
+ */
+function markie_preprocess_user(&$variables) {
+  // Just in case we ever add a sensitive field to user profiles, block
+  // anonymous users from viewing user profiles in the default view mode, where
+  // all fields are shown by default.
+
+  // 1. Check if we are on the user profile page.
+  // 2. Check if the current user is an anonymous user.
+  // 3. If so, return 403.
+  if (\Drupal::routeMatch()->getRouteName() === 'entity.user.canonical' && \Drupal::currentUser()->isAnonymous()) {
+    throw new \Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException();
+  }
+}
