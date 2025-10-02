@@ -9,7 +9,7 @@ dependencies:
 id: markconroy_mainpagecontent
 theme: markconroy
 region: content
-weight: -2
+weight: -4
 provider: null
 plugin: system_main_block
 settings:

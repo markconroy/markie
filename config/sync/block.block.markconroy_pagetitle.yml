@@ -6,8 +6,8 @@ dependencies:
     - markconroy
 id: markconroy_pagetitle
 theme: markconroy
-region: content
-weight: -3
+region: page_title
+weight: -4
 provider: null
 plugin: page_title_block
 settings:

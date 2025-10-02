@@ -1,6 +1,8 @@
 prompts:
-  modify_prompt: |-
-    Use the following instructions to process this text. Return only the processed text without explanations.
-    Instructions: {{ modify_prompt }}
-
-    Text to process:
+  complete: ''
+  modify_prompt: "Use the following instructions to process this text. Return only the processed text without explanations.\r\nInstructions: {{ modify_prompt }}\r\n\r\nText to process:"
+  reformat: ''
+  spellfix: ''
+  summarise: ''
+  tone: ''
+  translate: ''
