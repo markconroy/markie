@@ -58,7 +58,7 @@
   /* Line Heights */
   --scale-factor: 1.5;
   --line-height: 1.5;
-  --line-height-small: 0.9;
+  --line-height-small: 1.1;
 
   /* Spacing Items */
   --spacing: 1rem;
@@ -72,10 +72,10 @@
   --spacing-mega: calc(var(--spacing) * 4);
 
   /* Widths */
-  --width-small: 48em; /* 768px */
-  --width-medium: 60em; /* 960px */
-  --width-large: 73.75em; /* 1180px */
-  --width-xl: 90em; /* 1440px */
+  --width-small: 48rem; /* 768px */
+  --width-medium: 60rem; /* 960px */
+  --width-large: 73.75rem; /* 1180px */
+  --width-xl: 90rem; /* 1440px */
   --width-100: 100%;
   --width-content-area: var(--width-large);
 

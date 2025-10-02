@@ -16,6 +16,7 @@ regions:
   header: 'Header'
   breadcrumb: 'Breadcrumb'
   highlighted: 'Highlighted'
+  page_title: 'Page Title'
   content: 'Content'
   footer: 'Footer'
   disabled: 'Disabled'

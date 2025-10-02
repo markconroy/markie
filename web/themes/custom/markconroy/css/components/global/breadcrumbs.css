@@ -18,7 +18,6 @@
 .breadcrumb li + li::before {
   content: "»";
   padding-right: var(--spacing-smaller);
-  /* color: var(--color-secondary); */
 }
 
 .breadcrumb a {

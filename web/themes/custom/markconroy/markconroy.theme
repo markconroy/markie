@@ -19,3 +19,21 @@ function markconroy_preprocess_image_widget(array &$variables) {
     unset($data['preview']);
   }
 }
+
+/**
+ * Implements hook_preprocess_page().
+ */
+function markconroy_preprocess_node(array &$variables) {
+  if ($variables['view_mode'] === 'full') {
+    $variables['#attached']['library'][] = 'markconroy/full-page';
+  }
+}
+
+/**
+ * Implements hook_theme_suggestions_HOOK_alter() for user templates.
+ */
+function markconroy_theme_suggestions_user_alter(array &$suggestions, array $variables) {
+  if (isset($variables['elements']['#view_mode'])) {
+    $suggestions[] = 'user__' . $variables['elements']['#view_mode'];
+  }
+}

@@ -63,6 +63,9 @@
     <a id="main-content" tabindex="-1"></a>{# link is in html.html.twig #}
 
     <div class="layout-content">
+      {% if not node %}
+        {{ page.page_title }}
+      {% endif %}
       {{ page.content }}
     </div>{# /.layout-content #}
 

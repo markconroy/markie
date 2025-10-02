@@ -4,12 +4,17 @@ base:
       css/base/fonts.css: {}
       css/base/variables.css: {}
       css/base/base.css: {}
-      css/layout/container.css: {}
+      css/utilities/container.css: {}
       css/components/global/header.css: {}
       css/components/global/footer.css: {}
       css/components/global/main-navigation.css: {}
       css/components/global/breadcrumbs.css: {}
       css/components/global/page-title.css: {}
+
+full-page:
+  css:
+    component:
+      css/components/full-page.css: {}
 
 teaser:
   css:

@@ -1,3 +1,7 @@
-.page-title {
-  padding-inline: var(--spacing-largest);
+.page-title,
+.full-page__title h1 {
+  max-width: var(--width-small);
+  margin-inline: auto;
+  text-wrap: balance;
+  text-align: center;
 }
