@@ -82,6 +82,17 @@
     </div>
     {{ title_suffix }}
 
+    </div>
+
+
+  {% if node.field_main_image.value %}
+    <div class="full-page__media">
+      {{ content.field_main_image }}
+    </div>
+  {% endif %}
+
+  <div class="container container--narrow">
+
     {% if display_submitted %}
       <footer class="node__meta">
         <div{{ author_attributes.addClass('node__submitted', 'full-page__submitted') }}>
@@ -101,12 +112,6 @@
     {% endif %}
 
   </div>
-
-  {% if node.field_main_image.value %}
-    <div class="full-page__media">
-      {{ content.field_main_image }}
-    </div>
-  {% endif %}
 
   <div{{ content_attributes.addClass('node__content', 'full-page__content', 'container', 'container--narrow') }}>
     {{ content|without('field_main_image') }}
