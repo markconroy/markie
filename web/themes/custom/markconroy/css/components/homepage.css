@@ -1,5 +1,4 @@
 .path-frontpage {
-  padding: var(--spacing-mega);
   background-color: var(--color-white);
   color: var(--color-primary);
 }
@@ -14,6 +13,7 @@
   max-width: 48rem;
   min-height: 100vh;
   margin-inline: auto;
+  padding: var(--spacing-mega);
   font-size: var(--font-size-large);
 }
 
@@ -31,7 +31,4 @@
   align-items: center;
   flex-wrap: wrap;
 
-}
-.homepage__nav a {
-  /* color: var(--color-primary); */
 }

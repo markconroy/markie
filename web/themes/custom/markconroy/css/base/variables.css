@@ -5,6 +5,7 @@
 
   /* Grey Scale */
   --color-white: #fff;
+  --color-grey-50: hsl(0, 0%, 98%);
   --color-grey-100: hsl(0, 0%, 95%);
   --color-grey-200: hsl(0, 0%, 90%);
   --color-grey-300: hsl(0, 0%, 80%);

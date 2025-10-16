@@ -30,3 +30,14 @@ pager:
   css:
     component:
       ../../../../core/themes/starterkit_theme/css/components/pager.css: {}
+
+course-signup-popup-form:
+  js:
+    https://eomail5.com/form/2acee644-8334-11f0-b9ec-595e60d01c50.js: { type=external, data-form="2acee644-8334-11f0-b9ec-595e60d01c50", async: true }
+
+course-signup-inline-form:
+  css:
+    component:
+      css/components/course-form.css: {}
+  js:
+    https://eomail5.com/form/02e55ac2-7205-11f0-afe3-6f416b030533.js: { type=external, data-form="02e55ac2-7205-11f0-afe3-6f416b030533", async: true }

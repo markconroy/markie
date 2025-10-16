@@ -1,0 +1,23 @@
+.course-form {
+  background-color: var(--color-grey-50);
+  border: 1px solid var(--color-grey-200);
+  padding: var(--spacing-large);
+  margin-top: var(--spacing-largest);
+  text-align: center;
+}
+
+.course-form form {
+  max-width: 30rem;
+}
+
+.course-form form input.btn[type="submit"] {
+  width: auto;
+  flex-grow: 0;
+  margin-inline-end: auto;
+}
+.course-form form input.btn[type="submit"]:focus,
+.course-form form input.btn[type="submit"]:hover {
+  background-color: var(--color-secondary);
+  border-color: var(--color-secondary);
+  text-decoration: underline;
+}

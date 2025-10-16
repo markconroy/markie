@@ -61,6 +61,9 @@
  *
  */
 #}
+
+{% set content_type = node.bundle %}
+
 {%
   set classes = [
     'full-page',
@@ -114,7 +117,22 @@
   </div>
 
   <div{{ content_attributes.addClass('node__content', 'full-page__content', 'container', 'container--narrow') }}>
-    {{ content|without('field_main_image') }}
+    {{ content|without('field_main_image', 'field_tags') }}
+
+    {% if content_type == 'article' %}
+      <div class="course-form container container--narrow">
+        <h2>Course: Build a LocalGov Drupal Website</h2>
+        <p>
+          Subscribe to get updates about the course (and perhaps a discount code
+          before it is launched).
+        </p>
+        <script async src="https://eomail5.com/form/02e55ac2-7205-11f0-afe3-6f416b030533.js" data-form="02e55ac2-7205-11f0-afe3-6f416b030533"></script>
+      </div>
+    {% endif %}
+
+    {% if node.field_tags.value %}
+      {{ content.field_tags }}
+    {% endif %}
   </div>
 
 </article>
