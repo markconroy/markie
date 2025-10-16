@@ -42,3 +42,9 @@
   max-width: 530px;
   margin-inline: auto;
 }
+
+.full-page .field--name-body .media--type-remote-video {
+  display: flex;
+  justify-content: center;
+  margin-block: var(--spacing-largest);
+}

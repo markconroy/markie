@@ -27,8 +27,9 @@
 }
 
 .list--teasers .views-row {
-  margin-block-start: var(--spacing-large);
+  margin-block-start: var(--spacing-largest);
   padding-block-end: var(--spacing-largest);
   padding-inline: var(--spacing-largest);
-  border-block-start: 2px solid var(--color-secondary);
+  border: 2px solid var(--color-secondary);
+  background-color: var(--color-grey-100);
 }
