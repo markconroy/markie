@@ -17,8 +17,8 @@ content:
     type: oembed
     label: hidden
     settings:
-      max_width: 0
-      max_height: 0
+      max_width: 560
+      max_height: 315
       loading:
         attribute: eager
     third_party_settings: {  }
