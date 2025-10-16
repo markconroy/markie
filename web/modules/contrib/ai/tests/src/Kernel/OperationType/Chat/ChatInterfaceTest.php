@@ -48,6 +48,8 @@ class ChatInterfaceTest extends KernelTestBase {
     $this->installSchema('file', [
       'file_usage',
     ]);
+    $this->installConfig(['ai', 'ai_test']);
+    $this->installEntitySchema('ai_mock_provider_result');
   }
 
   /**
@@ -82,7 +84,7 @@ class ChatInterfaceTest extends KernelTestBase {
       new ChatMessage('user', $text),
     ]);
     // Set to streaming.
-    $provider->streamedOutput(TRUE);
+    $input->setStreamedOutput(TRUE);
     $chat_response = $provider->chat($input, 'test');
     // Should be a ChatOutput object.
     $this->assertInstanceOf(ChatOutput::class, $chat_response);

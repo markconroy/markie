@@ -78,14 +78,18 @@ final class ModifyPrompt extends AiCKEditorPluginBase {
   public function buildCkEditorModalForm(array $form, FormStateInterface $form_state, array $settings = []): array {
     $form = parent::buildCkEditorModalForm($form, $form_state);
 
-    $form['modify_prompt'] = [
-      '#type' => 'textarea',
-      '#title' => $this->t('Your instructions'),
-      '#description' => $this->t('Describe how you want the AI to modify the selected text.'),
-      '#required' => TRUE,
-      '#rows' => 4,
-      '#weight' => 5,
-    ];
+    // Only add 'Your instructions' if selected text is available.
+    $storage = $form_state->getStorage();
+    if (!empty($storage['selected_text'])) {
+      $form['modify_prompt'] = [
+        '#type' => 'textarea',
+        '#title' => $this->t('Your instructions'),
+        '#description' => $this->t('Describe how you want the AI to modify the selected text.'),
+        '#required' => TRUE,
+        '#rows' => 4,
+        '#weight' => 5,
+      ];
+    }
 
     return $form;
   }
@@ -126,7 +130,7 @@ final class ModifyPrompt extends AiCKEditorPluginBase {
       return $response;
     }
     catch (\Exception $e) {
-      $this->logger->error('There was an error in the Modify with a prompt AI plugin for CKEditor: @error', ['@error' => $e->getMessage()]);
+      $this->loggerFactory->get('ai_ckeditor')->error("There was an error in the 'Modify with a prompt' AI plugin for CKEditor: @error", ['@error' => $e->getMessage()]);
       return $form['plugin_config']['response_text']['#value'] = 'There was an error processing your request. Please try again.';
     }
   }

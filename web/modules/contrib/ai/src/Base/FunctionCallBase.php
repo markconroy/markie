@@ -3,28 +3,37 @@
 namespace Drupal\ai\Base;
 
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
-use Drupal\Core\Plugin\ContextAwarePluginInterface;
 use Drupal\Core\Plugin\ContextAwarePluginTrait;
 use Drupal\Core\Plugin\PluginBase;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\ai\OperationType\Chat\Tools\ToolsFunctionInput;
 use Drupal\ai\OperationType\Chat\Tools\ToolsFunctionOutput;
+use Drupal\ai\PluginManager\AiDataTypeConverterPluginManager;
 use Drupal\ai\Service\FunctionCalling\FunctionCallInterface;
+use Drupal\ai\Traits\PluginManager\AiDataTypeConverterPluginManagerTrait;
 use Drupal\ai\Utility\ContextDefinitionNormalizer;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Function call base class.
  */
-abstract class FunctionCallBase extends PluginBase implements FunctionCallInterface, ContainerFactoryPluginInterface, ContextAwarePluginInterface {
+abstract class FunctionCallBase extends PluginBase implements FunctionCallInterface, ContainerFactoryPluginInterface {
 
+  use AiDataTypeConverterPluginManagerTrait;
   use StringTranslationTrait;
-  use ContextAwarePluginTrait;
+  use ContextAwarePluginTrait {
+    setContextValue as protected traitSetContextValue;
+  }
 
   /**
    * The context definition normalizer service.
    */
   protected ContextDefinitionNormalizer $contextDefinitionNormalizer;
+
+  /**
+   * The ai context converter plugin manager.
+   */
+  protected AiDataTypeConverterPluginManager $dataTypeConverterManager;
 
   /**
    * The tools id.
@@ -41,6 +50,13 @@ abstract class FunctionCallBase extends PluginBase implements FunctionCallInterf
   protected string $stringOutput = "";
 
   /**
+   * The structured output.
+   *
+   * @var array
+   */
+  protected array $structuredOutput = [];
+
+  /**
    * Constructs a FunctionCall plugin.
    *
    * @param array $configuration
@@ -51,15 +67,26 @@ abstract class FunctionCallBase extends PluginBase implements FunctionCallInterf
    *   The plugin implementation definition.
    * @param \Drupal\ai\Utility\ContextDefinitionNormalizer $context_definition_normalizer
    *   The context definition normalizer service.
+   * @param \Drupal\ai\PluginManager\AiDataTypeConverterPluginManager $data_type_converter_manager
+   *   The ai data type converter plugin manager.
    */
   public function __construct(
     array $configuration,
     $plugin_id,
     $plugin_definition,
     protected ContextDefinitionNormalizer $context_definition_normalizer,
+    protected ?AiDataTypeConverterPluginManager $data_type_converter_manager = NULL,
   ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->contextDefinitionNormalizer = $context_definition_normalizer;
+
+    if (!$data_type_converter_manager instanceof AiDataTypeConverterPluginManager) {
+      @trigger_error('FunctionCallBase::__construct() without the AiDataTypeConverterPluginManager argument is deprecated in ai:1.2.0 and will be required in ai:2.0.0. See https://www.drupal.org/project/ai/issues/3512100', E_USER_DEPRECATED);
+    }
+    else {
+      $this->dataTypeConverterManager = $data_type_converter_manager;
+    }
+
   }
 
   /**
@@ -70,7 +97,8 @@ abstract class FunctionCallBase extends PluginBase implements FunctionCallInterf
       $configuration,
       $plugin_id,
       $plugin_definition,
-      $container->get('ai.context_definition_normalizer')
+      $container->get('ai.context_definition_normalizer'),
+      $container->get('plugin.manager.ai_data_type_converter')
     );
   }
 
@@ -103,8 +131,10 @@ abstract class FunctionCallBase extends PluginBase implements FunctionCallInterf
       $property_name = $argument->getName();
       // Tmp fix?.
       $property_name = str_replace('__colon__', ':', $property_name);
-      // @todo What happens if this fails to pass constraints?
-      $this->setContextValue($property_name, $argument->getValue());
+      // Only set context value if the context exists.
+      if (array_key_exists($property_name, $this->getContextDefinitions())) {
+        $this->setContextValue($property_name, $argument->getValue());
+      }
     }
   }
 
@@ -125,12 +155,31 @@ abstract class FunctionCallBase extends PluginBase implements FunctionCallInterf
   /**
    * {@inheritdoc}
    */
+  public function setContextValue($name, $value) {
+    // If multiple, convert the value based on list, then convert each item.
+    if ($this->getContextDefinition($name)->isMultiple()) {
+      $value = $this->dataTypeConverterManager()->convert('list', $value);
+      foreach ($value as $delta => $item) {
+        $value[$delta] = $this->dataTypeConverterManager()->convert($this->getContextDefinition($name)->getDataType(), $item);
+      }
+    }
+    else {
+      $value = $this->dataTypeConverterManager()->convert($this->getContextDefinition($name)->getDataType(), $value);
+    }
+    return $this->traitSetContextValue($name, $value);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function populateChildValue(FunctionCallInterface $child, array $values): array {
     $items = [];
     foreach ($values as $props) {
       $item = clone $child;
       foreach ($props as $prop => $value) {
         if (property_exists($child, $prop)) {
+          // Ensure the value is converted to the correct type, we ignore the
+          // type conversion here, as the child should handle it.
           $item->$prop = $value;
         }
       }
@@ -155,6 +204,36 @@ abstract class FunctionCallBase extends PluginBase implements FunctionCallInterf
       }
     }
     return $function;
+  }
+
+  /**
+   * Add the get structured output method to the abstract as fallback.
+   *
+   * @return array
+   *   The structured output.
+   */
+  public function getStructuredOutput(): array {
+    return $this->structuredOutput ?? [];
+  }
+
+  /**
+   * Set the structured output.
+   *
+   * @param array $output
+   *   The structured output to set.
+   */
+  public function setStructuredOutput(array $output): void {
+    $this->structuredOutput = $output;
+  }
+
+  /**
+   * Get the data type converter manager.
+   *
+   * @return \Drupal\ai\PluginManager\AiDataTypeConverterPluginManager
+   *   The data type converter plugin manager.
+   */
+  protected function dataTypeConverterManager(): AiDataTypeConverterPluginManager {
+    return $this->dataTypeConverterManager ?? $this->getAiDataTypeConverterPluginManager();
   }
 
 }

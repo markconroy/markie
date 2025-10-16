@@ -5,11 +5,7 @@
  * Primary module hooks for AI Content Suggestions module.
  */
 
-use Drupal\ai_content_suggestions\Hook\AiContentSuggestions;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Field\FieldDefinitionInterface;
-use Drupal\Core\Field\WidgetInterface;
-use Drupal\Core\Hook\Attribute\LegacyHook;
 
 /**
  * Implements hook_form_FORM_ID_alter().
@@ -49,28 +45,4 @@ function ai_content_suggestions_alter_form(array &$form, FormStateInterface $for
     $form['#cache']['contexts'][] = 'ai_content_suggestions_plugins';
     $form['#cache']['contexts'][] = 'ai_providers';
   }
-}
-
-/**
- * Implements hook_field_widget_third_party_settings_form().
- */
-#[LegacyHook]
-function ai_content_suggestions_field_widget_third_party_settings_form(WidgetInterface $plugin, FieldDefinitionInterface $field_definition, $form_mode, array $form, FormStateInterface $form_state) {
-  return \Drupal::service(AiContentSuggestions::class)->fieldWidgetThirdPartySettingsForm($plugin, $field_definition, $form_mode, $form, $form_state);
-}
-
-/**
- * Implements hook_field_widget_complete_form_alter().
- */
-#[LegacyHook]
-function ai_content_suggestions_field_widget_complete_form_alter(array &$field_widget_complete_form, FormStateInterface $form_state, array $context) {
-  \Drupal::service(AiContentSuggestions::class)->fieldWidgetCompleteFormAlter($field_widget_complete_form, $form_state, $context);
-}
-
-/**
- * Implements hook_field_widget_single_element_form_alter().
- */
-#[LegacyHook]
-function ai_content_suggestions_field_widget_single_element_form_alter(array &$element, FormStateInterface $form_state, array $context) {
-  \Drupal::service(AiContentSuggestions::class)->fieldWidgetSingleElementFormAlter($element, $form_state, $context);
 }

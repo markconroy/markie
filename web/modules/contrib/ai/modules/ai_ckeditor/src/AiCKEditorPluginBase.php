@@ -9,7 +9,6 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
-use Drupal\Core\Logger\LoggerChannelInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Plugin\PluginBase;
 use Drupal\Core\Session\AccountProxyInterface;
@@ -58,11 +57,11 @@ abstract class AiCKEditorPluginBase extends PluginBase implements AiCKEditorPlug
   protected $requestStack;
 
   /**
-   * The logger service.
+   * The logger factory.
    *
-   * @var \Drupal\Core\Logger\LoggerChannelInterface
+   * @var \Drupal\Core\Logger\LoggerChannelFactoryInterface
    */
-  protected LoggerChannelInterface $logger;
+  protected LoggerChannelFactoryInterface $loggerFactory;
 
   /**
    * The language manager.
@@ -81,7 +80,7 @@ abstract class AiCKEditorPluginBase extends PluginBase implements AiCKEditorPlug
     $this->entityTypeManager = $entity_type_manager;
     $this->account = $account;
     $this->requestStack = $requestStack;
-    $this->logger = $logger_factory->get('ai_ckeditor');
+    $this->loggerFactory = $logger_factory;
     $this->languageManager = $language_manager;
   }
 

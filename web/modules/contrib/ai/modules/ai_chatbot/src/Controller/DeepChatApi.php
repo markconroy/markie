@@ -279,7 +279,7 @@ class DeepChatApi extends ControllerBase {
     $response = new StreamedResponse();
 
     // Set headers for streaming.
-    $response->headers->set('Content-Type', 'text/event-stream');
+    $response->headers->set('Content-Type', 'text/plain');
     $response->headers->set('Cache-Control', 'no-cache');
     $response->headers->set('Connection', 'keep-alive');
 
@@ -319,6 +319,7 @@ class DeepChatApi extends ControllerBase {
       }
       // Send the structured results.
       $this->createSseMessage($this->renderStructuredResults());
+
       // Send the buttons.
       $this->createSseMessage($this->messagesButtons->getRenderedButtons($this->buttons, $this->aiAssistantClient->getAssistant()->id(), $this->aiAssistantClient->getThreadsKey()));
       // Check if the output buffer is empty.

@@ -17,9 +17,6 @@ form-stream:
     - core/drupal
     - core/once
 deepchat:
-  css:
-    theme:
-      css/deepchat.css: { }
   js:
     deepchat/deepchat.bundle.js: {  attributes: { type: module } }
     js/deepchat-init.js : {}
@@ -34,3 +31,22 @@ ai_chatbot:
   css:
     theme:
       css/ai_chatbot.css: {}
+sticky-chatbot:
+  css:
+    theme:
+      css/sticky-chatbot.css: {}
+  js:
+    js/sticky-chatbot.js: {}
+  dependencies:
+    - core/drupal
+    - core/once
+toolbar-chatbot:
+  css:
+    theme:
+      css/toolbar-chatbot.css: {}
+      css/toolbar-button.css: {}
+  js:
+    js/toolbar-chatbot.js: {}
+  dependencies:
+    - core/drupal
+    - core/once

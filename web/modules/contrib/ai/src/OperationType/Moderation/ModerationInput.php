@@ -64,4 +64,13 @@ class ModerationInput extends InputBase implements InputInterface {
     return $this->toString();
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function toArray(): array {
+    return [
+      'prompt' => $this->prompt,
+    ];
+  }
+
 }

@@ -6,7 +6,7 @@ use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\ai_automators\Attribute\AiAutomatorType;
-use Drupal\ai_automators\PluginBaseClasses\Numeric;
+use Drupal\ai_automators\PluginBaseClasses\NumericRule;
 use Drupal\ai_automators\PluginInterfaces\AiAutomatorTypeInterface;
 
 /**
@@ -18,7 +18,7 @@ use Drupal\ai_automators\PluginInterfaces\AiAutomatorTypeInterface;
   field_rule: 'integer',
   target: '',
 )]
-class LlmInteger extends Numeric implements AiAutomatorTypeInterface {
+class LlmInteger extends NumericRule implements AiAutomatorTypeInterface {
 
   /**
    * {@inheritDoc}

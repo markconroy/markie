@@ -96,4 +96,14 @@ class ImageAndAudioToVideoInput extends InputBase implements InputInterface {
     return $this->toString();
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function toArray(): array {
+    return [
+      'image_file' => $this->file->toArray(),
+      'audio_file' => $this->audioFile->toArray(),
+    ];
+  }
+
 }

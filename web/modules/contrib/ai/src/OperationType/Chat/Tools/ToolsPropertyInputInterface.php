@@ -197,6 +197,50 @@ interface ToolsPropertyInputInterface {
   public function setMaximum($maximum);
 
   /**
+   * Gets the minimum length of the array.
+   *
+   * Minimum items can be set to give the AI a constraint on the length of the
+   * array. This is not supported by all providers.
+   *
+   * @return int
+   *   The minimum length of the array.
+   */
+  public function getMinItems(): ?int;
+
+  /**
+   * Sets the minimum length of the array.
+   *
+   * Minimum items can be set to give the AI a constraint on the length of the
+   * array. This is not supported by all providers.
+   *
+   * @param int $minItems
+   *   The minimum length of the array.
+   */
+  public function setMinItems(int $minItems);
+
+  /**
+   * Gets the maximum length of the array.
+   *
+   * Maximum items can be set to give the AI a constraint on the length of the
+   * array. This is not supported by all providers.
+   *
+   * @return int
+   *   The maximum length of the array.
+   */
+  public function getMaxItems(): ?int;
+
+  /**
+   * Sets the maximum length of the array.
+   *
+   * Maximum items can be set to give the AI a constraint on the length of the
+   * array. This is not supported by all providers.
+   *
+   * @param int $maxItems
+   *   The maximum length of the array.
+   */
+  public function setMaxItems(int $maxItems);
+
+  /**
    * Gets the minimum length of the property.
    *
    * Minimum lengths can be set to give the AI a constraint on the length of the

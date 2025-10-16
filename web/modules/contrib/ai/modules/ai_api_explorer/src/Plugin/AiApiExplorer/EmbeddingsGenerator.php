@@ -13,6 +13,7 @@ use Drupal\ai\Plugin\ProviderProxy;
 use Drupal\ai\Service\AiProviderFormHelper;
 use Drupal\ai_api_explorer\AiApiExplorerPluginBase;
 use Drupal\ai_api_explorer\Attribute\AiApiExplorer;
+use Drupal\Core\DependencyInjection\DependencySerializationTrait;
 
 /**
  * Plugin implementation of the ai_api_explorer.
@@ -29,6 +30,9 @@ use Drupal\ai_api_explorer\Attribute\AiApiExplorer;
   description: new TranslatableMarkup('Contains a form where you can experiment and test the AI embeddings generator with prompts.'),
 )]
 final class EmbeddingsGenerator extends AiApiExplorerPluginBase {
+
+  // Trait to serialize dependencies.
+  use DependencySerializationTrait;
 
   /**
    * {@inheritDoc}
@@ -105,49 +109,91 @@ final class EmbeddingsGenerator extends AiApiExplorerPluginBase {
    * {@inheritdoc}
    */
   public function getResponse(array &$form, FormStateInterface $form_state): array {
-    $provider = $this->aiProviderHelper->generateAiProviderFromFormSubmit($form, $form_state, 'embeddings', 'embed');
-    $prompt = $form_state->getValue('prompt');
-    $image = $form_state->getValue('image');
+    try {
+      $provider = $this->aiProviderHelper->generateAiProviderFromFormSubmit($form, $form_state, 'embeddings', 'embed');
+      $prompt = $form_state->getValue('prompt');
+      $image = $form_state->getValue('image');
 
-    // Check if a prompt or image has value.
-    if (!empty($prompt) || (!empty($image))) {
-      // Normalize the input.
-      $input = new EmbeddingsInput();
-      if ($file = $this->generateFile('image')) {
-        $file_name = $file->getFilename();
+      // Check if a prompt or image has value.
+      if (!empty($prompt) || !empty($image)) {
+        // Normalize the input.
+        $input = new EmbeddingsInput();
+        if ($file = $this->generateFile('image')) {
+          $file_name = $file->getFilename();
 
-        // Because its octect/stream sometimes.
-        $file->resetMimeTypeFromFileName();
-        $input->setImage($file);
-      }
-      else {
-        $input->setPrompt($form_state->getValue('prompt'));
-        $file_name = NULL;
-      }
-      try {
+          // Because it’s octet/stream sometimes.
+          $file->resetMimeTypeFromFileName();
+          $input->setImage($file);
+        }
+        else {
+          $input->setPrompt($prompt);
+          $file_name = NULL;
+        }
+
         $embeddings = $provider->embeddings($input, $form_state->getValue('embed_ai_model'), ['ai_api_explorer']);
         $response = implode(', ', $embeddings->getNormalized());
-      }
-      catch (\Exception $e) {
+
         $form['right']['response']['#context']['ai_response']['response'] = [
-          '#type' => 'inline_template',
-          '#template' => '{{ error|raw }}',
-          '#context' => [
-            'error' => $this->explorerHelper->renderException($e),
+          '#type' => 'html_tag',
+          '#tag' => 'p',
+          '#value' => $response,
+        ];
+        $form['right']['response']['#context']['ai_response']['code'] = $this->normalizeCodeExample($provider, $form_state, $prompt, $file_name);
+      }
+      else {
+        $form['right']['response']['#context']['ai_response'] = [
+          'heading' => [
+            '#type' => 'html_tag',
+            '#tag' => 'h3',
+            '#value' => $this->t('No Input Provided'),
+          ],
+          'message' => [
+            '#type' => 'html_tag',
+            '#tag' => 'div',
+            '#value' => $this->t('Please enter a prompt or upload an image to generate embeddings.'),
+            '#attributes' => [
+              'class' => ['ai-text-response', 'ai-error-message'],
+            ],
           ],
         ];
-
-        // Early return if we've hit an error.
-        return $form['right'];
       }
-      $form['right']['response']['#context']['ai_response']['response'] = [
-        '#type' => 'html_tag',
-        '#tag' => 'p',
-        '#value' => $response,
+    }
+    catch (\TypeError $e) {
+      $form['right']['response']['#context']['ai_response'] = [
+        'heading' => [
+          '#type' => 'html_tag',
+          '#tag' => 'h3',
+          '#value' => $this->t('Configuration Error'),
+        ],
+        'message' => [
+          '#type' => 'html_tag',
+          '#tag' => 'div',
+          '#value' => $this->t('The AI provider could not be used. Please make sure a model is selected and the provider is properly configured.'),
+          '#attributes' => [
+            'class' => ['ai-text-response', 'ai-error-message'],
+          ],
+        ],
       ];
-      $form['right']['response']['#context']['ai_response']['code'] = $this->normalizeCodeExample($provider, $form_state, $form_state->getValue('prompt'), $file_name);
+    }
+    catch (\Exception $e) {
+      $form['right']['response']['#context']['ai_response'] = [
+        'heading' => [
+          '#type' => 'html_tag',
+          '#tag' => 'h3',
+          '#value' => $this->t('Error'),
+        ],
+        'message' => [
+          '#type' => 'html_tag',
+          '#tag' => 'div',
+          '#value' => $this->explorerHelper->renderException($e),
+          '#attributes' => [
+            'class' => ['ai-text-response', 'ai-error-message'],
+          ],
+        ],
+      ];
     }
 
+    $form_state->setRebuild();
     return $form['right'];
   }
 

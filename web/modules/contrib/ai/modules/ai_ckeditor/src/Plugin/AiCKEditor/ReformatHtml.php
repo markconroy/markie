@@ -124,7 +124,7 @@ final class ReformatHtml extends AiCKEditorPluginBase {
       return $response;
     }
     catch (\Exception $e) {
-      $this->logger->error("There was an error in the Reformat HTML plugin for CKEditor.");
+      $this->loggerFactory->get('ai_ckeditor')->error("There was an error in the Reformat HTML plugin for CKEditor.");
       return $form['plugin_config']['response_wrapper']['response_text']['#value'] = 'There was an error in the Reformat HTML plugin for CKEditor.';
     }
   }

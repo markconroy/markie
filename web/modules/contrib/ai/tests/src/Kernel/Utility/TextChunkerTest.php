@@ -6,6 +6,7 @@ namespace Drupal\Tests\ai\Kernel\Utility;
 
 use Drupal\Component\Serialization\Json;
 use Drupal\KernelTests\KernelTestBase;
+use Drupal\Tests\ai\Kernel\TiktokenCacheIsolationTrait;
 
 /**
  * The text chunker utility test class.
@@ -16,12 +17,38 @@ use Drupal\KernelTests\KernelTestBase;
  */
 class TextChunkerTest extends KernelTestBase {
 
+  use TiktokenCacheIsolationTrait;
+
   /**
    * Modules to enable.
    *
    * @var array
    */
   protected static $modules = ['ai'];
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function setUp(): void {
+    parent::setUp();
+
+    // Extract models from our test data and isolate
+    // the tiktoken cache to avoid race conditions
+    // in the temp directory.
+    $test_data = static::modelToChunkProvider();
+    $models = $this->extractModelsFromTestData($test_data);
+    $this->isolateTiktokenCache($models);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function tearDown(): void {
+    // Clean up isolated cache directory.
+    $this->cleanupTiktokenCache();
+
+    parent::tearDown();
+  }
 
   /**
    * Tests token chunk counts.
@@ -109,6 +136,25 @@ class TextChunkerTest extends KernelTestBase {
       ['gpt-4o', 'sample-3', 3, 64, 5],
       ['gpt-4o', 'sample-3', 2, 128, 24],
     ];
+  }
+
+  /**
+   * Extract unique models from test data provider.
+   *
+   * @param array $test_data
+   *   Test data array where first element of each case is the model name.
+   *
+   * @return array
+   *   Array of unique model names.
+   */
+  protected function extractModelsFromTestData(array $test_data): array {
+    $models = [];
+    foreach ($test_data as $test_case) {
+      if (isset($test_case[0]) && is_string($test_case[0])) {
+        $models[] = $test_case[0];
+      }
+    }
+    return array_unique($models);
   }
 
 }

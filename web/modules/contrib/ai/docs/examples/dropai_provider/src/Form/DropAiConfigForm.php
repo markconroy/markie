@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\dropai_provider\Form;
 
 use Drupal\ai\AiProviderPluginManager;
+use Drupal\ai\Service\AiProviderFormHelper;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
@@ -28,6 +29,13 @@ final class DropAiConfigForm extends ConfigFormBase {
   protected $aiProviderManager;
 
   /**
+   * The form helper.
+   *
+   * @var \Drupal\ai\Service\AiProviderFormHelper
+   */
+  protected $formHelper;
+
+  /**
    * Module Handler.
    *
    * @var \Drupal\Core\Extension\ModuleHandlerInterface
@@ -37,8 +45,9 @@ final class DropAiConfigForm extends ConfigFormBase {
   /**
    * Constructs a new AnthropicConfigForm object.
    */
-  final public function __construct(AiProviderPluginManager $ai_provider_manager, ModuleHandlerInterface $module_handler) {
+  final public function __construct(AiProviderPluginManager $ai_provider_manager, AiProviderFormHelper $form_helper, ModuleHandlerInterface $module_handler) {
     $this->aiProviderManager = $ai_provider_manager;
+    $this->formHelper = $form_helper;
     $this->moduleHandler = $module_handler;
   }
 
@@ -48,6 +57,7 @@ final class DropAiConfigForm extends ConfigFormBase {
   final public static function create(ContainerInterface $container) {
     return new static(
       $container->get('ai.provider'),
+      $container->get('ai.form_helper'),
       $container->get('module_handler')
     );
   }
@@ -78,6 +88,15 @@ final class DropAiConfigForm extends ConfigFormBase {
       '#description' => $this->t('The DropAI API Key.'),
       '#default_value' => $config->get('api_key'),
     ];
+
+    // Enable this and add loadModelsForm() to your plugin to enable
+    // configuration per model.
+    /*
+    $provider = $this->aiProviderManager->createInstance('dropai');
+    $form['models'] = $this->formHelper->getModelsTable(
+    $form, $form_state, $provider
+    );
+     */
 
     return parent::buildForm($form, $form_state);
   }

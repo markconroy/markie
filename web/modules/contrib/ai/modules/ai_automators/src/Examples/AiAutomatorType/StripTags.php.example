@@ -99,7 +99,7 @@ class StripTags extends AiAutomatorType implements AiAutomatorTypeInterface, Con
   public function generate(string $prompt, ContentEntityInterface $entity, FieldDefinitionInterface $fieldDefinition, array $automatorConfig) {
     // Strip the tags.
     $values = [];
-    foreach ($entity->{$automatorConfig['base_field']} as $target) {
+    foreach ($entity->get($automatorConfig['base_field']) as $target) {
       if ($target->value) {
         $values[] = strip_tags($target->value);
       }

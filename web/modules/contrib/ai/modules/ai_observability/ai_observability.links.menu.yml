@@ -1,0 +1,5 @@
+ai_observability.settings:
+  title: "AI Observability Settings"
+  description: "Configure AI observability settings."
+  parent: ai.admin_settings
+  route_name: ai_observability.settings

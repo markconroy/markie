@@ -14,6 +14,13 @@ trait EmbeddingsTrait {
   /**
    * {@inheritdoc}
    */
+  public function maxEmbeddingsInput(string $model_id = ''): int {
+    return 1024;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function embeddingsVectorSize(string $model_id): int {
     $cache = \Drupal::cache('ai');
     $cid = 'embeddings_size:' . $this->getPluginId() . ':' . $model_id;

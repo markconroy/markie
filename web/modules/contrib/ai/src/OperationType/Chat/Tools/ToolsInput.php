@@ -77,4 +77,30 @@ class ToolsInput implements ToolsInputInterface {
     return $tools;
   }
 
+  /**
+   * {@inheritDoc}
+   */
+  public function toArray(): array {
+    return $this->renderToolsArray();
+  }
+
+  /**
+   * Create the tools input from an array.
+   *
+   * @param array $array
+   *   The array to create the tools input from.
+   *
+   * @return \Drupal\ai\OperationType\Chat\Tools\ToolsInputInterface
+   *   The tools input.
+   */
+  public static function fromArray(array $array): ToolsInputInterface {
+    $functions = [];
+    if (isset($array['functions']) && is_array($array['functions'])) {
+      foreach ($array['functions'] as $function) {
+        $functions[] = ToolsFunctionInput::fromArray($function);
+      }
+    }
+    return new static($functions);
+  }
+
 }

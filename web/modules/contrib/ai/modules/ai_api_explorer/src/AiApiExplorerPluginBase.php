@@ -239,6 +239,23 @@ abstract class AiApiExplorerPluginBase extends PluginBase implements AiApiExplor
         $raw_file = file_get_contents($file->getPathname());
         $file_name = $file->getClientOriginalName();
 
+        // If mimetype is application/octet-stream, we need to guess the type.
+        if ($mime_type == 'application/octet-stream') {
+          // Get the file extension from the filename.
+          $extension = pathinfo($file_name, PATHINFO_EXTENSION);
+          // Guess the mime type based on the extension.
+          $mime_type = match ($extension) {
+            'mp3' => 'audio/mpeg',
+            'wav' => 'audio/wav',
+            'ogg' => 'audio/ogg',
+            'jpg', 'jpeg' => 'image/jpeg',
+            'png' => 'image/png',
+            'gif' => 'image/gif',
+            'webp' => 'image/webp',
+            default => 'application/octet-stream',
+          };
+        }
+
         if ($type == 'audio') {
           $return = new AudioFile($raw_file, $mime_type, $file_name);
         }

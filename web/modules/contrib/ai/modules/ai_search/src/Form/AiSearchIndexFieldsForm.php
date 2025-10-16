@@ -216,7 +216,7 @@ class AiSearchIndexFieldsForm extends IndexFieldsForm {
           // keep this compatible with Search API as changes are expected here.
           // @phpstan-ignore-next-line
           $all_bundles = array_keys(\Drupal::service('entity_type.bundle.info')->getBundleInfo($current_type));
-          if ($configuration['bundles']['default']) {
+          if (!empty($configuration['bundles']['default'])) {
 
             // All selections are exclusions.
             $current_bundles = $all_bundles;
@@ -236,15 +236,15 @@ class AiSearchIndexFieldsForm extends IndexFieldsForm {
         $form['checker']['data_source']['#options'][$key] = $data_source->label();
       }
 
-      if ($current_type && $current_bundles) {
+      if ($current_type) {
         $form['checker']['entity'] = [
           '#type' => 'entity_autocomplete',
           '#title' => $this->t('Search for an item by title'),
           '#target_type' => $current_type,
           '#selection_handler' => 'default',
-          '#selection_settings' => [
+          '#selection_settings' => $current_bundles ? [
             'target_bundles' => $current_bundles,
-          ],
+          ] : [],
           '#ajax' => [
             'callback' => [$this, 'updateChecker'],
             'event' => 'autocompleteclose',

@@ -65,4 +65,13 @@ class SpeechToSpeechInput extends InputBase implements InputInterface {
     return $this->toString();
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function toArray(): array {
+    return [
+      'audio_file' => $this->file->toArray(),
+    ];
+  }
+
 }

@@ -211,7 +211,7 @@ final class Tone extends AiCKEditorPluginBase {
       return $response;
     }
     catch (\Exception $e) {
-      $this->logger->error("There was an error in the Tone AI plugin for CKEditor.");
+      $this->loggerFactory->get('ai_ckeditor')->error("There was an error in the Tone AI plugin for CKEditor.");
       return $form['plugin_config']['response_wrapper']['response_text']['#value'] = 'There was an error in the Tone AI plugin for CKEditor.';
     }
   }

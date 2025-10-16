@@ -11,36 +11,6 @@ use Drupal\Core\Field\FieldDefinitionInterface;
 class Link extends RuleBase {
 
   /**
-   * The JSON Schema.
-   *
-   * @var array
-   */
-  public array $jsonSchema = [
-    'name' => 'Link',
-    'schema' => [
-      'type' => 'object',
-      'properties' => [
-        'values' => [
-          'type' => 'array',
-          'items' => [
-            'type' => 'object',
-            'properties' => [
-              'uri' => [
-                'type' => 'string',
-                'format' => 'uri',
-              ],
-              'title' => [
-                'type' => 'string',
-              ],
-            ],
-            'required' => ['uri'],
-          ],
-        ],
-      ],
-    ],
-  ];
-
-  /**
    * {@inheritDoc}
    */
   public function helpText() {

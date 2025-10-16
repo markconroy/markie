@@ -10,6 +10,7 @@ use Drupal\Tests\ai\Mock\MockStreamedChatIterator;
 use Drupal\ai\OperationType\Chat\ChatMessage;
 use Drupal\ai\OperationType\Chat\StreamedChatMessageIteratorInterface;
 use Drupal\ai\Service\PromptJsonDecoder\PromptJsonDecoder;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Yaml\Yaml;
 
 /**
@@ -35,6 +36,12 @@ class PromptJsonDecoderTest extends UnitTestCase {
    */
   public function testJsonMessage(string $message, int $placements, bool $json_exist): void {
     $prompt_json_decoder = new PromptJsonDecoder();
+    // Set the event dispatcher.
+    $mock_event_dispatcher = $this->createMock(EventDispatcherInterface::class);
+
+    // Optionally define behavior or expectations:
+    $mock_event_dispatcher
+      ->method('dispatch');
     // First test as a normal message.
     $chat_message = new ChatMessage('assistant', $message, []);
     $decoded = $prompt_json_decoder->decode($chat_message);
@@ -48,6 +55,8 @@ class PromptJsonDecoderTest extends UnitTestCase {
     // Now test as a streaming message.
     $iterator = new MockIterator(explode("\n", $message));
     $chat_message = new MockStreamedChatIterator($iterator);
+
+    $chat_message->setEventDispatcher($mock_event_dispatcher);
     $decoded = $prompt_json_decoder->decode($chat_message, $placements);
 
     if ($json_exist) {

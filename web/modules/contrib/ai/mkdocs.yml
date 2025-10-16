@@ -39,17 +39,21 @@ nav:
     - AI Ckeditor: modules/ai_ckeditor/index.md
     - AI Content Suggestions: modules/ai_content_suggestions/index.md
     - AI ECA: modules/ai_eca/index.md
-    - AI External Moderation: modules/ai_external_moderation/index.md
     - AI Logging: modules/ai_logging/index.md
     - AI Search: modules/ai_search/index.md
     - AI Translate: modules/ai_translate/index.md
     - AI Validations: modules/ai_validations/index.md
+    - Field Widget Actions:
+      - Overview: modules/field_widget_actions/index.md
+      - With AI Automators: modules/field_widget_actions/automators.md
   - Develop:
     - Getting Started: developers/developer_information.md
     - Why base on the AI module?: developers/why_ai.md
     - Making AI Calls:
       - The Idea: developers/base_calls.md
-      - Chat Call: developers/call_chat.md
+      - Chat Call:
+        - Basic Chat Call: developers/call_chat.md
+        - Streaming Chat Call: developers/call_chat_streaming.md
       - Text-To-Image Call: developers/call_text_to_image.md
       - Text-To-Speech Call: developers/call_text_to_speech.md
       - Speech-To-Text Call: developers/call_speech_to_text.md
@@ -59,11 +63,17 @@ nav:
       - Speech-To-Speech Call: developers/call_speech_to_speech.md
       - Image Classification Call: developers/call_image_classification.md
       - Translate Text Call: developers/call_translate_text.md
-    - Plugins:
+      - Image-To-Image Call: developers/call_image_to_image.md
+    - Plugins/Managers:
       - Function Call Schema: developers/function_call_schema.md
+      - Short-Term Memory: developers/short_term_memory.md
+    - Helper Services:
+      - Chat History Form Element: developers/chat_history_element.md
     - Develop a third-party module: developers/develop_third_party_module.md
     - Events: developers/events.md
     - DDEV: developers/ddev.md
+    - Prompt Management: developers/ai_prompt_management.md
+    - Mock a Provider: developers/virtual_provider.md
     - Develop for submodules:
         - AI Assistant API Action: developers/develop_api_assistant_action.md
         - Develop an AI API Explorer plugin: developers/ai_api_explorer.md
@@ -75,7 +85,9 @@ nav:
     - Issue Guidelines: contribute/issue_guidelines.md
     - Contribute Documentation: contribute/documentation.md
     - Contribute Bug Reports: contribute/bug_finding.md
-    - Contribute Testings: contribute/testing.md
+    - Contribute Testings:
+      - Getting Started: contribute/testing.md
+      - Mock Provider Calls: contribute/testing/spoof_provider.md
     - Contribute Features: contribute/features.md
     - Developer Information: contribute/developer_information.md
   - Providers: providers/matris.md
@@ -86,6 +98,9 @@ nav:
     - Building an Agent: agents/build_agent.md
     - Agent Form Parts: agents/agent_form_parts.md
     - Security Considerations: agents/security.md
+    - Running Agents:
+      - Getting Started: agents/running/index.md
+      - Poll/Progress Service: agents/running/polling.md
     - Testing Agents:
       - Agent Explorer: agents/testing/agent_explorer.md
       - AI Agent Test:
@@ -105,7 +120,7 @@ plugins:
   - mike:
       alias_type: redirect
       # This is for SEO reasons, not redirects.
-      canonical_version: 1.1.0
+      canonical_version: 1.2.0
       version_selector: true
       deploy_prefix: "mkdocs"
 extra:

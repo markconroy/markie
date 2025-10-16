@@ -19,7 +19,7 @@ interface FieldTextExtractorPluginManagerInterface extends PluginManagerInterfac
    * @param string $fieldType
    *   Field type ID.
    *
-   * @return \Drupal\ai_translate\Attribute\FieldTextExtractorPlugin|null
+   * @return \Drupal\ai_translate\Attribute\FieldTextExtractor|null
    *   Extractor plugin.
    */
   public function getExtractor(string $fieldType): ?FieldTextExtractorInterface;

@@ -140,4 +140,40 @@ final class FunctionCallPluginManager extends DefaultPluginManager {
     throw new \Exception('Function with class ' . $class . ' not found.');
   }
 
+  /**
+   * Get executable function call definitions.
+   *
+   * @return array
+   *   An array of function call definitions.
+   */
+  public function getExecutableDefinitions(): array {
+    $definitions = $this->getDefinitions();
+    $executable_definitions = [];
+    foreach ($definitions as $definition) {
+      $implements = class_implements($definition['class']);
+      if (in_array(ExecutableFunctionCallInterface::class, $implements)) {
+        $executable_definitions[$definition['id']] = $definition;
+      }
+    }
+    return $executable_definitions;
+  }
+
+  /**
+   * Get structured executable function call definitions.
+   *
+   * @return array
+   *   An array of structured executable function call definitions.
+   */
+  public function getStructuredExecutableDefinitions(): array {
+    $definitions = $this->getDefinitions();
+    $structured_executable_definitions = [];
+    foreach ($definitions as $definition) {
+      $implements = class_implements($definition['class']);
+      if (in_array(StructuredExecutableFunctionCallInterface::class, $implements)) {
+        $structured_executable_definitions[$definition['id']] = $definition;
+      }
+    }
+    return $structured_executable_definitions;
+  }
+
 }

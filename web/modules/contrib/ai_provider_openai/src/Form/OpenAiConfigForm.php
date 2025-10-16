@@ -70,8 +70,9 @@ class OpenAiConfigForm extends ConfigFormBase {
     $form['api_key'] = [
       '#type' => 'key_select',
       '#title' => $this->t('OpenAI API Key'),
-      '#description' => $this->t('The API Key. Can be found on <a href="https://platform.openai.com/">https://platform.openai.com/</a>.'),
+      '#description' => $this->t('A valid API key is required to use OpenAI services. Your API key can be found on <a href=":url" target="_blank">https://platform.openai.com/</a>.', [':url' => 'https://platform.openai.com/']),
       '#default_value' => $config->get('api_key'),
+      '#required' => TRUE,
     ];
 
     $form['advanced'] = [
@@ -94,20 +95,30 @@ class OpenAiConfigForm extends ConfigFormBase {
     // Validate the api key against model listing.
     $key = $form_state->getValue('api_key');
     if (empty($key)) {
-      $form_state->setErrorByName('api_key', $this->t('The API Key is required.'));
+      $form_state->setErrorByName('api_key', $this->t('The API key is required. Please select a valid key from the list.'));
       return;
     }
     $api_key = $this->keyRepository->getKey($key)->getKeyValue();
     if (!$api_key) {
-      $form_state->setErrorByName('api_key', $this->t('The API Key is invalid.'));
+      $form_state->setErrorByName('api_key', $this->t('The API key is invalid. Please double-check that the selected key has a value. If you are using a file-based Key, ensure the file is present in the environment and contains a value.'));
       return;
     }
-    $client = \OpenAI::client($api_key);
-    try {
-      $client->models()->list();
+    /** @var \Drupal\ai_provider_openai\Plugin\AiProvider\OpenAiProvider $provider */
+    $provider = $this->aiProviderManager->createInstance('openai');
+
+    // Temporarily set the API key and host for validation.
+    $provider->setAuthentication($api_key);
+    $host = $this->config(static::CONFIG_NAME)->get('host');
+    if (!empty($host)) {
+      $provider->setConfiguration(['host' => $host]);
     }
-    catch (\Exception $e) {
-      $form_state->setErrorByName('api_key', $this->t('The API Key is not working.'));
+
+    try {
+      // Test connectivity by attempting to get configured models.
+      $provider->getConfiguredModels();
+    }
+    catch (\Exception) {
+      $form_state->setErrorByName('api_key', $this->t('The selected API key is not working. Please double-check the correct API key was entered and that it has credit(s) available.'));
     }
 
   }

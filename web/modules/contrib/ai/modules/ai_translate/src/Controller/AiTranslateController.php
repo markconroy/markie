@@ -77,7 +77,10 @@ class AiTranslateController extends ControllerBase {
       $entity = $entity->getTranslation($lang_from);
     }
 
-    $redirectUrl = $entity->toUrl('drupal:content-translation-overview');
+    $redirectUrl = ('edit' === $this->config('ai_translate.settings')
+      ->get('redirect_after_create'))
+      ? $entity->toUrl('edit-form', ['language' => $langNames[$lang_to]])
+      : $entity->toUrl('drupal:content-translation-overview');
     $response = new RedirectResponse($redirectUrl->setAbsolute()->toString());
 
     // @todo support updating existing translations.
@@ -177,11 +180,24 @@ class AiTranslateController extends ControllerBase {
     array &$context,
   ) {
     $translation = $entity->addTranslation($lang_to, $entity->toArray());
-    // Keep published status when translating.
+
+    // Handle published status based on configuration setting.
     if ($entity instanceof EntityPublishedInterface) {
-      $entity->isPublished() ? $translation->setPublished()
-        : $translation->setUnpublished();
+      $config = $this->config('ai_translate.settings');
+      $translation_status = $config->get('translation_status') ?? 'keep_original';
+      if ('create_draft' === $translation_status) {
+        if ($entity->getEntityType()->isRevisionable()) {
+          $translation->setRevisionTranslationAffected(NULL);
+        }
+        // Is there a better way to detect moderation state?
+        if ($entity->hasField('moderation_state')) {
+          $translation->set('moderation_state', 'draft');
+        }
+        // Content moderation module sets draft states to unpublish.
+        $translation->setUnpublished();
+      }
     }
+
     $this->textExtractor->insertTextMetadata($translation,
       $context['results']['processedTranslations'] ?? []);
     try {

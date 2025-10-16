@@ -1,0 +1,159 @@
+name: Toolbar
+parameters:
+  auxiliaryStyle: "
+      .chat-header {
+      display: flex;
+      color: var(--gin-color-primary);
+      font-weight: 700;
+      font-size: 18px;
+    }
+
+    .chat-header span {
+      font-weight: 700;
+      color: black;
+      font-size: 14px;
+    }
+
+    .input-button-container.outer-button-container {
+        position: absolute;
+    bottom: 0;
+    left: 0.75rem;
+    }
+    "
+  introPanelStyle:
+    top: "0"
+    marginTop: "0"
+    justifyContent: "flex-start"
+  names:
+    ai:
+      style:
+        font-weight: "bold"
+        font-size: "12px"
+        color: "#0550e6"
+    user:
+      style:
+        display: "none"
+  textInput:
+    styles:
+      container:
+        width: "100%"
+        marginBottom: "0.25rem"
+        borderRadius: "6px"
+        boxShadow: "none"
+        height: "6rem"
+      text:
+        padding: "16px 60px 16px 18px"
+        fontSize: "15px"
+        lineHeight: "1.25rem"
+    placeholder:
+      text: "Build me a..."
+  messageStyles:
+    default:
+      shared:
+        bubble:
+          maxWidth: "100%"
+          backgroundColor: "unset"
+          marginTop: "10px"
+          marginBottom: "10px"
+          fontSize: "1rem"
+          lineHeight: "1.5em"
+          marginLeft: "0"
+          paddingLeft: "0"
+        innerContainer:
+          marginLeft: "16px"
+      user:
+        outerContainer:
+          backgroundColor: "rgba(5, 80, 230, 0.1)"
+          borderRadius: "10px"
+          position: "relative"
+          marginLeft: "auto"
+          width: "90%"
+          marginBottom: "1rem"
+          marginRight: "0.5rem"
+        bubble:
+          marginLeft: "0px"
+          color: "#2b353b"
+          fontSize: "14px"
+          fontWeight: "400"
+      ai:
+        outerContainer:
+          position: "relative"
+          marginRight: "auto"
+          width: "95%"
+          marginBottom: "1rem"
+        innerContainer:
+          flexWrap: "wrap"
+          width: "auto"
+          marginLeft: "0"
+        bubble:
+          fontSize: "14px"
+          fontWeight: "400"
+          flexBasis: "100%"
+          marginTop: "0"
+    loading:
+      message:
+        styles:
+          outerContainer:
+            marginLeft: "0"
+          innerContainer:
+            flexWrap: "wrap"
+            marginLeft: "8px"
+          bubble:
+            flexBasis: "100%"
+            marginLeft: "10px"
+  avatars:
+    default:
+      styles:
+        position: "left"
+
+    user:
+      styles:
+        container:
+          display: "none"
+    ai:
+      styles:
+        container:
+          display: "none"
+  
+  submitButtonStyles:
+    disabled:
+      svg:
+        styles:
+          default:
+            filter: "opacity(0)"
+    submit:
+      container:
+        default:
+          bottom: "10px"
+          right: "12px"
+          height: "38px"
+          width: "38px"
+      svg:
+        content: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 44" fill="none"><rect width="44" height="44" rx="10" fill="#217bfe"/><path d="M21.2931 14.4644L22.0001 13.7574L22.707 14.4644L27.5356 19.2929C27.9261 19.6834 27.9261 20.3166 27.5356 20.7071C27.1451 21.0977 26.5119 21.0977 26.1214 20.7071L23.0001 17.5858L23.0001 29.2427C23.0001 29.795 22.5523 30.2427 22.0001 30.2427C21.4478 30.2427 21.0001 29.795 21.0001 29.2427V17.5858L17.8787 20.7071C17.4882 21.0977 16.855 21.0977 16.4645 20.7071C16.074 20.3166 16.074 19.6834 16.4645 19.2929L21.2931 14.4644Z" fill="white"/></svg>'
+    loading:
+      container:
+        default:
+          backgroundColor: ""
+          bottom: "4px"
+          width: "36px"
+      svg:
+        styles:
+          default:
+            filter: "brightness(0) saturate(100%) invert(72%) sepia(0%) saturate(3044%) hue-rotate(322deg) brightness(100%) contrast(96%)"
+    stop:
+      container:
+        default:
+          backgroundColor: ""
+        hover:
+          backgroundColor: "#dadada52"
+      svg:
+        content: |
+          <?xml version="1.0" encoding="utf-8"?>
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <rect width="24" height="24" rx="4" ry="4" />
+          </svg>
+        styles:
+          default:
+            width: "0.95em"
+            marginTop: "0.32em"
+            filter: "brightness(0) saturate(100%) invert(72%) sepia(0%) saturate(3044%) hue-rotate(322deg) brightness(100%) contrast(96%)"

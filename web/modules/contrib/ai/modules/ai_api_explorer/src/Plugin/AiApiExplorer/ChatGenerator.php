@@ -96,6 +96,13 @@ final class ChatGenerator extends AiApiExplorerPluginBase {
   }
 
   /**
+   * {@inheritDoc}
+   */
+  public function isActive(): bool {
+    return $this->providerManager->hasProvidersForOperationType('chat');
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state): array {
@@ -107,7 +114,7 @@ final class ChatGenerator extends AiApiExplorerPluginBase {
       '#type' => 'details',
       '#title' => $this->t('Chat Messages'),
       '#open' => TRUE,
-      '#description' => $this->t('<strong>Please note: This is not a chat, its an explorer of the chat endpoint to build chat logic!</strong> <br />Enter your chat messages here, each message has to have a role and a message. Role will no always be used by all providers/models.'),
+      '#description' => $this->t('<strong>Please note: This is not a chat, it is an explorer of the chat endpoint to build chat logic!</strong> <br />Enter your chat messages here, each message has to have a role and a message. The role may not be used by all providers or models.'),
     ];
 
     $form['left']['prompts']['system_prompt'] = [
@@ -146,9 +153,8 @@ final class ChatGenerator extends AiApiExplorerPluginBase {
     $form['left']['prompts']['image_1'] = [
       '#type' => 'file',
       // Only jpg, png files are allowed, since that covers most models.
-      '#accept' => '.jpg, .png, .jpeg',
-      '#title' => $this->t('Image'),
-      '#description' => $this->t('Attach an image to the call. Note that not all models support images and will throw an error.'),
+      '#title' => $this->t('File'),
+      '#description' => $this->t('Attach a file to the call. Note that not all models support images or other files and will throw an error.'),
     ];
 
     $form['left']['streamed'] = [
@@ -255,32 +261,34 @@ final class ChatGenerator extends AiApiExplorerPluginBase {
    */
   public function getResponse(array &$form, FormStateInterface $form_state): array {
     // This runs on streamed.
-    $provider = $this->aiProviderHelper->generateAiProviderFromFormSubmit($form, $form_state, 'chat', 'chat');
-    $values = $form_state->getValues();
-    $prompt_message = $values['message_1'];
+    try {
+      $provider = $this->aiProviderHelper->generateAiProviderFromFormSubmit($form, $form_state, 'chat', 'chat');
+      $values = $form_state->getValues();
+      $prompt_message = $values['message_1'];
 
-    // Get the messages.
-    $messages = [];
-    // Get potential files.
-    $files = $this->getRequest()->files->all();
-    if (!empty($prompt_message)) {
-      foreach ($values as $key => $value) {
-        if (str_starts_with($key, 'role_')) {
-          $index = substr($key, 5);
-          $role = $value;
-          $message = $values['message_' . $index];
-          // Load the file.
-          $image = "";
-          if (isset($files['files']['image_' . $index])) {
-            $raw_file = file_get_contents($files['files']['image_' . $index]->getPathname());
-            $image = new ImageFile($raw_file, $files['files']['image_' . $index]->getClientMimeType(), $files['files']['image_' . $index]->getClientOriginalName());
-          }
-          if ($role && $message) {
-            $images = [];
-            if ($image) {
-              $images[] = $image;
+      // Get the messages.
+      $messages = [];
+      // Get potential files.
+      $files = $this->getRequest()->files->all();
+      if (!empty($prompt_message)) {
+        foreach ($values as $key => $value) {
+          if (str_starts_with($key, 'role_')) {
+            $index = substr($key, 5);
+            $role = $value;
+            $message = $values['message_' . $index];
+            // Load the file.
+            $image = "";
+            if (isset($files['files']['image_' . $index])) {
+              $raw_file = file_get_contents($files['files']['image_' . $index]->getPathname());
+              $image = new ImageFile($raw_file, $files['files']['image_' . $index]->getClientMimeType(), $files['files']['image_' . $index]->getClientOriginalName());
             }
-            $messages[] = new ChatMessage($role, $message, $images);
+            if ($role && $message) {
+              $images = [];
+              if ($image) {
+                $images[] = $image;
+              }
+              $messages[] = new ChatMessage($role, $message, $images);
+            }
           }
         }
       }
@@ -301,7 +309,7 @@ final class ChatGenerator extends AiApiExplorerPluginBase {
 
       // Check for system message.
       if ($form_state->getValue('system_message')) {
-        $provider->setChatSystemRole($form_state->getValue('system_message'));
+        $input->setSystemPrompt($form_state->getValue('system_message'));
       }
 
       if ($form_state->getValue('json_schema')) {
@@ -313,12 +321,15 @@ final class ChatGenerator extends AiApiExplorerPluginBase {
       try {
         // If we should stream.
         if ($form_state->getValue('streamed')) {
-          $provider->streamedOutput();
+          $input->setStreamedOutput(TRUE);
         }
         $response = $provider->chat($input, $form_state->getValue('chat_ai_model'), [
           'chat_generation',
           'ai_api_explorer',
         ])->getNormalized();
+      }
+      catch (\TypeError $e) {
+        $message = $this->t('The AI provider could not be used. Please make sure a model is selected and the provider is properly configured.');
       }
       catch (\Exception $e) {
         $message = $this->explorerHelper->renderException($e);
@@ -386,20 +397,79 @@ final class ChatGenerator extends AiApiExplorerPluginBase {
         $form_state->setResponse($http_response);
       }
       else {
-        $form['middle']['response']['#context']['ai_response']['#markup'] = $message;
+        $form['middle']['response']['#context']['ai_response'] = [
+          'heading' => [
+            '#type' => 'html_tag',
+            '#tag' => 'h3',
+            '#value' => $message ? $this->t('Error') : $this->t('Response will appear here.'),
+          ],
+        ];
+
+        if ($message) {
+          $form['middle']['response']['#context']['ai_response']['message'] = [
+            '#type' => 'html_tag',
+            '#tag' => 'div',
+            '#value' => $message,
+            '#attributes' => [
+              'class' => ['ai-text-response', 'ai-error-message'],
+            ],
+          ];
+        }
+
         $form_state->setRebuild();
         return $form['middle'];
       }
+    }
+    catch (\TypeError $e) {
+      $form['middle']['response']['#context']['ai_response'] = [
+        'heading' => [
+          '#type' => 'html_tag',
+          '#tag' => 'h3',
+          '#value' => $this->t('Configuration Error'),
+        ],
+        'message' => [
+          '#type' => 'html_tag',
+          '#tag' => 'div',
+          '#value' => $this->t('The AI provider could not be used. Please make sure a model is selected and the provider is properly configured.'),
+          '#attributes' => [
+            'class' => ['ai-text-response', 'ai-error-message'],
+          ],
+        ],
+      ];
+      $form_state->setRebuild();
+      return $form['middle'];
+    }
+    catch (\Exception $e) {
+      $form['middle']['response']['#context']['ai_response'] = [
+        'heading' => [
+          '#type' => 'html_tag',
+          '#tag' => 'h3',
+          '#value' => $this->t('Error'),
+        ],
+        'message' => [
+          '#type' => 'html_tag',
+          '#tag' => 'div',
+          '#value' => $this->explorerHelper->renderException($e),
+          '#attributes' => [
+            'class' => ['ai-text-response', 'ai-error-message'],
+          ],
+        ],
+      ];
+      $form_state->setRebuild();
+      return $form['middle'];
     }
 
     return $form['middle'] ?? [];
   }
 
   /**
-   * {@inheritdoc}
+   * {@inheritDoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state): void {
-    $this->getResponse($form, $form_state);
+    // If its streamed, we trigger the function.
+    if ($form_state->getValue('streamed')) {
+      $this->getResponse($form, $form_state);
+    }
   }
 
   /**
@@ -500,14 +570,14 @@ final class ChatGenerator extends AiApiExplorerPluginBase {
       $code['code']['#value'] .= "\$ai_provider->setConfiguration(\$config);<br>";
     }
     if ($form_state->getValue('json_schema')) {
-      $code['code']['#value'] .= '$ai_provider->setChatStructuredJsonSchema(' . $form_state->getValue('json_schema') . ');<br>';
+      $code['code']['#value'] .= '$input->setChatStructuredJsonSchema(' . $form_state->getValue('json_schema') . ');<br>';
     }
     if ($form_state->getValue('system_message')) {
-      $code['code']['#value'] .= '$ai_provider->setChatSystemRole("' . Json::decode($form_state->getValue('system_message')) . '");<br>';
+      $code['code']['#value'] .= '$input->setSystemPrompt("' . Json::decode($form_state->getValue('system_message')) . '");<br>';
     }
     if ($form_state->getValue('streamed')) {
       $code['code']['#value'] .= "// If you want to stream the response normalized you have to make sure<br>";
-      $code['code']['#value'] .= "\$ai_provider->streamedOutput();<br>";
+      $code['code']['#value'] .= "\$input->setStreamedOutput(TRUE);<br>";
     }
     $code['code']['#value'] .= "// Normalized \$response will be a ChatMessage object.<br>";
     $code['code']['#value'] .= "\$response = \$ai_provider->chat(\$input, '" . $form_state->getValue('chat_ai_model') . '\', ["your_module_name"])->getNormalized();<br>';
@@ -572,9 +642,6 @@ final class ChatGenerator extends AiApiExplorerPluginBase {
     $code['code']['#value'] .= '// Another way if you know you always will use ' . $provider->getPluginDefinition()['label'] . ' and want its way of doing stuff. Not recommended. <br>';
     $code['code']['#value'] .= $this->addProviderCodeExample($provider);
     $code['code']['#value'] .= "\$ai_provider = \Drupal::service('ai.provider')->createInstance('" . $form_state->getValue('chat_ai_provider') . '\');<br>';
-    if ($form_state->getValue('system_message')) {
-      $code['code']['#value'] .= '$ai_provider->setChatSystemRole("' . $form_state->getValue('system_message') . '");<br>';
-    }
     $code['code']['#value'] .= "\$ai_provider->setConfiguration(\$config);<br>";
     if (!empty($form_state->getValue('function_calls'))) {
       $code['code']['#value'] .= '// Some custom code for function calling per model.<br>';

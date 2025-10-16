@@ -27,9 +27,9 @@ class ToolsFunctionOutput implements ToolsFunctionOutputInterface {
   /**
    * The input function.
    *
-   * @var \Drupal\ai\OperationType\Chat\Tools\ToolsFunctionInputInterface
+   * @var \Drupal\ai\OperationType\Chat\Tools\ToolsFunctionInputInterface|null
    */
-  private ToolsFunctionInputInterface $inputFunction;
+  private ?ToolsFunctionInputInterface $inputFunction = NULL;
 
   /**
    * The property arguments.
@@ -42,10 +42,12 @@ class ToolsFunctionOutput implements ToolsFunctionOutputInterface {
   /**
    * {@inheritDoc}
    */
-  public function __construct(ToolsFunctionInputInterface $input, string $tool_id, array $arguments = []) {
+  public function __construct(?ToolsFunctionInputInterface $input = NULL, string $tool_id = '', array $arguments = []) {
     $this->setToolId($tool_id);
     $this->setInputFunction($input);
-    $this->setName($input->getName());
+    if ($input !== NULL) {
+      $this->setName($input->getName());
+    }
     $this->addArguments($arguments);
   }
 
@@ -66,14 +68,14 @@ class ToolsFunctionOutput implements ToolsFunctionOutputInterface {
   /**
    * {@inheritDoc}
    */
-  public function getInputFunction(): ToolsFunctionInputInterface {
+  public function getInputFunction(): ToolsFunctionInputInterface|null {
     return $this->inputFunction;
   }
 
   /**
    * {@inheritDoc}
    */
-  public function setInputFunction(ToolsFunctionInputInterface $input) {
+  public function setInputFunction(?ToolsFunctionInputInterface $input) {
     $this->inputFunction = $input;
   }
 
@@ -91,6 +93,7 @@ class ToolsFunctionOutput implements ToolsFunctionOutputInterface {
     foreach ($arguments as $name => $value) {
       $property = $this->getInputPropertyByName($name);
       $argument = new ToolsPropertyResult($property, $value);
+      $argument->setName($name);
       $this->addArgument($argument);
     }
   }
@@ -120,7 +123,7 @@ class ToolsFunctionOutput implements ToolsFunctionOutputInterface {
    * {@inheritDoc}
    */
   public function getInputPropertyByName(string $name): ?ToolsPropertyInputInterface {
-    return $this->inputFunction->getPropertyByName($name);
+    return $this->inputFunction ? $this->inputFunction->getPropertyByName($name) : NULL;
   }
 
   /**
@@ -129,9 +132,9 @@ class ToolsFunctionOutput implements ToolsFunctionOutputInterface {
   public function getOutputRenderArray(): array {
     $output['id'] = $this->getToolId();
     $output['type'] = 'function';
-    $args = [];
+    $args = new \stdClass();
     foreach ($this->arguments as $argument) {
-      $args[$argument->getName()] = $argument->getValue();
+      $args->{$argument->getName()} = $argument->getValue();
     }
     $output['function'] = [
       'name' => $this->getName(),
@@ -147,6 +150,10 @@ class ToolsFunctionOutput implements ToolsFunctionOutputInterface {
     // Validate all arguments.
     foreach ($this->arguments as $argument) {
       $argument->validate();
+    }
+    // If not input function was given, we do not need to validate further.
+    if (!$this->inputFunction) {
+      return;
     }
     // Validate that the required arguments are present.
     $required = $this->inputFunction->getRequiredProperties();

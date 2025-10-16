@@ -1,0 +1,17 @@
+ai_prompt_type.add_form:
+  title: 'Add AI Prompt Type'
+  route_name: entity.ai_prompt_type.add_form
+  appears_on:
+    - entity.ai_prompt_type.collection
+
+ai_prompt_type.manage_types:
+  title: 'Manage AI Prompt Types'
+  route_name: entity.ai_prompt_type.collection
+  appears_on:
+    - entity.ai_prompt.collection
+
+ai_prompt.add_page:
+  title: 'Add Prompt'
+  route_name: entity.ai_prompt.add_form
+  appears_on:
+    - entity.ai_prompt.collection

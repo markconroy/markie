@@ -8,6 +8,7 @@ use Drupal\Core\Entity\TranslatableInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Form\SubformStateInterface;
 use Drupal\Core\Link;
+use Drupal\Core\Plugin\PluginDependencyTrait;
 use Drupal\Core\Plugin\PluginFormInterface;
 use Drupal\ai\AiProviderPluginManager;
 use Drupal\ai\AiVdbProviderPluginManager;
@@ -15,6 +16,7 @@ use Drupal\ai\OperationType\Embeddings\EmbeddingsInput;
 use Drupal\ai\Utility\TokenizerInterface;
 use Drupal\ai_search\Backend\AiSearchBackendPluginBase;
 use Drupal\ai_search\EmbeddingStrategyPluginManager;
+use Drupal\search_api\Backend\BackendSpecificInterface;
 use Drupal\search_api\IndexInterface;
 use Drupal\search_api\Item\ItemInterface;
 use Drupal\search_api\Query\QueryInterface;
@@ -29,7 +31,9 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *   description = @Translation("Index items on Vector DB.")
  * )
  */
-class SearchApiAiSearchBackend extends AiSearchBackendPluginBase implements PluginFormInterface {
+class SearchApiAiSearchBackend extends AiSearchBackendPluginBase implements PluginFormInterface, BackendSpecificInterface {
+
+  use PluginDependencyTrait;
 
   /**
    * The AI VDB Provider.
@@ -149,6 +153,8 @@ class SearchApiAiSearchBackend extends AiSearchBackendPluginBase implements Plug
     if (!isset($config['embedding_strategy'])) {
       $config['embedding_strategy'] = NULL;
     }
+    // Add default for including raw embedding vector.
+    $config['include_raw_embedding_vector'] = FALSE;
     return $config;
   }
 
@@ -199,6 +205,14 @@ class SearchApiAiSearchBackend extends AiSearchBackendPluginBase implements Plug
       '#default_value' => $this->configuration['chat_model'] ?? $default_model,
       '#options' => $this->tokenizer->getSupportedModels(),
       '#weight' => 2,
+    ];
+
+    $form['include_raw_embedding_vector'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Include raw embedding vector in results'),
+      '#description' => $this->t("If checked, the raw embedding vector will be fetched from the VDB and added to the search result item's extra data. This is useful for features like re-ranking but may have a minor performance impact."),
+      '#default_value' => $this->configuration['include_raw_embedding_vector'] ?? FALSE,
+      '#weight' => 2.5,
     ];
 
     $chosen_database = $this->configuration['database'] ?? NULL;
@@ -262,6 +276,15 @@ class SearchApiAiSearchBackend extends AiSearchBackendPluginBase implements Plug
    */
   public function validateConfigurationForm(array &$form, FormStateInterface $form_state) {
     $values = $form_state->getValues();
+
+    // Check whether Vector DB providers are available.
+    if (empty($this->vdbProviderManager->getSearchApiProviders(TRUE))) {
+      $form_state->setError($form, $this->t('No Vector DB providers are installed or setup for search in vectors, please %install and %configure one first.', [
+        '%install' => Link::createFromRoute($this->t('install'), 'system.modules_list')->toString(),
+        '%configure' => Link::createFromRoute($this->t('configure'), 'ai.admin_vdb_providers')->toString(),
+      ]));
+    }
+
     if (
       !empty($values['embeddings_engine'])
       && isset($values['embeddings_engine_configuration']['dimensions'])
@@ -298,6 +321,35 @@ class SearchApiAiSearchBackend extends AiSearchBackendPluginBase implements Plug
   /**
    * {@inheritdoc}
    */
+  public function isAvailable() {
+    $is_configured = FALSE;
+    $client_available = FALSE;
+    try {
+      $client = $this->getClient();
+      $is_configured = $client->isSetup();
+      $client_available = $client->ping();
+
+      return $is_configured && $client_available;
+    }
+    catch (\Exception $exception) {
+      $this->logException($exception);
+      // If any exception was thrown we consider the server to be unavailable.
+      return FALSE;
+    }
+    finally {
+      if ($is_configured && !$client_available) {
+        $this->messenger
+          ->addWarning($this->t('Server %server is configured, but the configured collection %core is not available.', [
+            '%server' => $this->getServer()->label(),
+            '%core' => $this->configuration['database_settings']['collection'] ?? 'n/a',
+          ]));
+      }
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function supportsDataType($type) {
     if ($type === 'embeddings') {
       return TRUE;
@@ -328,6 +380,17 @@ class SearchApiAiSearchBackend extends AiSearchBackendPluginBase implements Plug
     $this->setConfiguration($form_state->getValues());
     /*$vdb_client = $this->vdbProviderManager->createInstance($this->configuration['database']);
     $vdb_client->submitSettingsForm($form, $form_state);*/
+    if (!$this->ensureCollectionExists()) {
+      $this->messenger()->addError($this->t('Could not create the collection.'));
+    }
+  }
+
+  /**
+   * Ensure that the backend collection has been created.
+   */
+  protected function ensureCollectionExists() {
+    $client = $this->getClient();
+    return $this->vdbProviderManager->ensureCollectionExists($client, $this->configuration);
   }
 
   /**
@@ -346,6 +409,7 @@ class SearchApiAiSearchBackend extends AiSearchBackendPluginBase implements Plug
    * @throws \Drupal\Component\Plugin\Exception\PluginException
    */
   public function deleteItems(IndexInterface $index, array $item_ids): void {
+    /** @var \Drupal\ai\AiVdbProviderInterface $vdb_client */
     $vdb_client = $this->vdbProviderManager->createInstance($this->configuration['database']);
     $vdb_client->deleteIndexItems($this->configuration, $index, $item_ids);
   }
@@ -410,6 +474,18 @@ class SearchApiAiSearchBackend extends AiSearchBackendPluginBase implements Plug
       'offset' => (int) $query->getOption('offset', 0),
     ];
 
+    // Check if we need to include the raw embedding vector.
+    if (!empty($this->configuration['include_raw_embedding_vector'])) {
+      /** @var \Drupal\ai\AiVdbProviderInterface $vdb_client */
+      $vdb_client = $this->getClient();
+      $raw_embedding_field_name = $vdb_client->getRawEmbeddingFieldName();
+      if (!empty($raw_embedding_field_name)) {
+        $params['output_fields'][] = $raw_embedding_field_name;
+        // Store for extractMetadata to use, without changing its signature.
+        $query->setOption('search_api_ai_retrieved_embedding_field_name', $raw_embedding_field_name);
+      }
+    }
+
     if ($filters = $this->getClient()->prepareFilters($query)) {
       $params['filters'] = $filters;
     }
@@ -429,7 +505,7 @@ class SearchApiAiSearchBackend extends AiSearchBackendPluginBase implements Plug
       $id = $get_chunked ? $match['drupal_entity_id'] . ':' . $match['id'] : $match['drupal_entity_id'];
       $item = $this->getFieldsHelper()->createItem($index, $id);
       $item->setScore($match['distance'] ?? 1);
-      $this->extractMetadata($match, $item);
+      $this->extractMetadata($match, $item, $query);
 
       // Adding result items always overwrites, see the Result Set class in
       // Search API. Ensure that the items with the desired highest or lowest
@@ -507,7 +583,7 @@ class SearchApiAiSearchBackend extends AiSearchBackendPluginBase implements Plug
           $search_words = implode(' ', $search_words);
         }
         $input = new EmbeddingsInput($search_words);
-        $params['vector_input'] = $embedding_llm->embeddings($input, $model_id)->getNormalized();
+        $params['vector_input'] = $embedding_llm->embeddings($input, $model_id, ['ai_search'])->getNormalized();
       }
       $params['query'] = $query;
       $response = $this->getClient()->vectorSearch(...$params);
@@ -567,13 +643,24 @@ class SearchApiAiSearchBackend extends AiSearchBackendPluginBase implements Plug
    *   The result row.
    * @param \Drupal\search_api\Item\ItemInterface $item
    *   The item.
+   * @param \Drupal\search_api\Query\QueryInterface|null $query
+   *   The search query, or NULL if not available.
    */
-  public function extractMetadata(array $result_row, ItemInterface $item): void {
+  public function extractMetadata(array $result_row, ItemInterface $item, ?QueryInterface $query = NULL): void {
+    $raw_embedding_field_name = $query ? $query->getOption('search_api_ai_retrieved_embedding_field_name') : NULL;
+
     foreach ($result_row as $key => $value) {
-      if ($key === 'vector' || $key === 'id' || $key === 'distance') {
+      // Skip default fields and the dynamically retrieved raw embedding field.
+      if ($key === 'vector' || $key === 'id' || $key === 'distance' || ($raw_embedding_field_name && $key === $raw_embedding_field_name)) {
         continue;
       }
       $item->setExtraData($key, $value);
+    }
+
+    // If a raw embedding field name was configured and,
+    // its data exists in the result, add it.
+    if ($raw_embedding_field_name && isset($result_row[$raw_embedding_field_name])) {
+      $item->setExtraData('raw_vector', $result_row[$raw_embedding_field_name]);
     }
   }
 
@@ -627,7 +714,88 @@ class SearchApiAiSearchBackend extends AiSearchBackendPluginBase implements Plug
    * {@inheritdoc}
    */
   public function viewSettings(): array {
-    return $this->getClient()->viewIndexSettings($this->configuration['database_settings']);
+    $info = [];
+
+    $database_settings = $this->configuration['database_settings'];
+    $vdb_provider_status = NULL;
+    if ($this->vdbProviderManager->hasDefinition($this->configuration['database'])) {
+      $vdb_provider = $this->vdbProviderManager->createInstance($this->configuration['database']);
+      $vdb_provider_label = $vdb_provider->getPluginDefinition()['label'];
+      if ($vdb_provider->isSetup()) {
+        $vdb_info = $vdb_provider_label;
+      }
+      else {
+        $vdb_info = $this->t('The %provider vector database provider has not been fully setup.', [
+          '%provider' => $vdb_provider_label,
+        ]);
+        $vdb_provider_status = 'warning';
+      }
+    }
+    else {
+      $vdb_info = $this->t('The %provider vector database provider is not currently available.', [
+        '%provider' => $this->configuration['database'],
+      ]);
+      $vdb_provider_status = 'error';
+    }
+    $info[] = [
+      'label' => $this->t('Vector Database'),
+      'info' => $vdb_info,
+      'status' => $vdb_provider_status,
+    ];
+
+    $client = $this->getClient();
+    $info[] = [
+      'label' => $this->t('Database name'),
+      'info' => $database_settings['database_name'],
+    ];
+    $info[] = [
+      'label' => $this->t('Collection name'),
+      'info' => $database_settings['collection'],
+    ];
+    $collections = $this->ensureCollectionExists();
+    $collection_status = [
+      'label' => $this->t('Collection status'),
+    ];
+    if ($collections) {
+      $collection_status['info'] = $this->t('Successfully connected');
+    }
+    else {
+      $collection_status['info'] = $this->t('The collection %collection could not be connected to or created.', [
+        '%collection' => $database_settings['collection'],
+      ]);
+      $collection_status['status'] = 'error';
+      $this->messenger()->addWarning($collection_status['info']);
+    }
+    $info[] = $collection_status;
+    $supported_models = $this->tokenizer->getSupportedModels();
+    $info[] = [
+      'label' => $this->t('Chat model'),
+      'info' => $supported_models[$this->configuration['chat_model']] ?? $this->t('Could not resolve the %chat_model chat model.', [
+        '%chat_model' => $this->configuration['chat_model'],
+      ]),
+      'status' => !isset($supported_models[$this->configuration['chat_model']]) ? 'error' : NULL,
+    ];
+    $embedding_options = $this->getEmbeddingEnginesOptions();
+    $info[] = [
+      'label' => $this->t('Embeddings engine'),
+      'info' => $embedding_options[$this->configuration['embeddings_engine']] ?? $this->t('Could not resolve the %embeddings_engine embeddings engine.', [
+        '%embeddings_engine' => $this->configuration['embeddings_engine'],
+      ]),
+      'status' => !isset($embedding_options[$this->configuration['embeddings_engine']]) ? 'error' : NULL,
+    ];
+
+    return array_merge($info, $client->viewIndexSettings($this->configuration['database_settings']));
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function calculateDependencies() {
+    $client = $this->getClient();
+    // @todo This ignore next line can be removed after Search API 2.0.x is
+    // released.
+    // @phpstan-ignore-next-line
+    return $this->getPluginDependencies($client);
   }
 
 }

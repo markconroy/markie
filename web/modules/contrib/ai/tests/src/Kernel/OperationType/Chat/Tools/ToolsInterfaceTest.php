@@ -49,6 +49,7 @@ class ToolsInterfaceTest extends KernelTestBase {
     $this->installSchema('file', [
       'file_usage',
     ]);
+    $this->installEntitySchema('ai_mock_provider_result');
   }
 
   /**

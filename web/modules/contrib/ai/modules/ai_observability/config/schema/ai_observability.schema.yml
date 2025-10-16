@@ -1,0 +1,23 @@
+ai_observability.settings:
+  type: config_object
+  label: 'AI Observability Settings'
+  mapping:
+    log_event_types:
+      type: sequence
+      label: 'Log event types'
+      sequence:
+        type: string
+    log_input:
+      type: boolean
+      label: Log input
+    log_output:
+      type: boolean
+      label: Log output
+    log_tags:
+      type: sequence
+      label: 'Log tags'
+      sequence:
+        type: string
+    fallback_log_message_mode:
+      type: boolean
+      label: 'Fallback mode for the log message placeholders'

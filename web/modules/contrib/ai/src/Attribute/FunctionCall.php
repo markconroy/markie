@@ -21,13 +21,13 @@ final class FunctionCall extends Plugin {
    *   identical to group or prefixed with the group. E.g. if the group is "foo"
    *   the ID must be either "foo" or "foo:bar".
    *   Try to keep module name as a prefix and camelcase to underscore.
-   * @param string|string $function_name
+   * @param string $function_name
    *   The function name, only alphanumeric characters and underscores.
    * @param string $name
    *   The human-readable name of the function.
-   * @param string $description
+   * @param string|null $description
    *   The (optional) description of the function.
-   * @param string $group
+   * @param string|null $group
    *   The (optional) group of the function.
    * @param array $module_dependencies
    *   The (optional) array of module dependencies.
@@ -42,7 +42,7 @@ final class FunctionCall extends Plugin {
     public readonly string $function_name,
     public readonly string $name,
     public readonly ?string $description,
-    public readonly ?string $group = "",
+    public readonly ?string $group = "other_fallback",
     public readonly array $module_dependencies = [],
     public readonly array $context_definitions = [],
     public readonly ?string $deriver = NULL,

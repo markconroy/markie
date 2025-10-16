@@ -41,4 +41,12 @@ interface InputInterface {
    */
   public function setDebugDataValue(string $key, $value): void;
 
+  /**
+   * Returns the input as an array.
+   *
+   * @return array
+   *   The input as an array.
+   */
+  public function toArray(): array;
+
 }

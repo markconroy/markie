@@ -6,11 +6,7 @@ use Drupal\Core\Plugin\Context\ContextDefinition;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\ai\Attribute\FunctionCall;
 use Drupal\ai\Base\FunctionCallBase;
-use Drupal\ai\Service\FunctionCalling\ExecutableFunctionCallInterface;
-use Drupal\ai\Service\FunctionCalling\FunctionCallInterface;
-use Drupal\ai\Utility\ContextDefinitionNormalizer;
-use GuzzleHttp\ClientInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\ai\Service\FunctionCalling\StructuredExecutableFunctionCallInterface;
 
 /**
  * Plugin implementation of a weather function - just for tests.
@@ -50,53 +46,49 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
     ),
   ]
 )]
-class Weather extends FunctionCallBase implements ExecutableFunctionCallInterface {
-
-  /**
-   * The temperature.
-   *
-   * @var string
-   */
-  protected string $temperature;
-
-  /**
-   * The HTTP client.
-   *
-   * @var \GuzzleHttp\ClientInterface
-   */
-  protected ClientInterface $httpClient;
-
-  /**
-   * Load from dependency injection container.
-   */
-  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition): FunctionCallInterface|static {
-    $instance = new static(
-      $configuration,
-      $plugin_id,
-      $plugin_definition,
-      new ContextDefinitionNormalizer(),
-    );
-    $instance->httpClient = $container->get('http_client');
-    return $instance;
-  }
+class Weather extends FunctionCallBase implements StructuredExecutableFunctionCallInterface {
 
   /**
    * {@inheritdoc}
    */
   public function execute() {
-    $cities = json_decode($this->httpClient->get('https://geocoding-api.open-meteo.com/v1/search?name=' . $this->getContextValue('city') . '%2C+' . $this->getContextValue('country') . '&count=10&language=en&format=json')->getBody()->getContents(), TRUE);
-    $this->temperature = 'No data found';
-    if (isset($cities['results'][0])) {
-      $data = json_decode($this->httpClient->get('https://api.open-meteo.com/v1/forecast?latitude=' . $cities['results'][0]['latitude'] . '&longitude=' . $cities['results'][0]['longitude'] . '&hourly=temperature_2m&forecast_days=1&temperature_unit=' . $this->getContextValue('unit'))->getBody()->getContents(), TRUE);
-      $this->temperature = $data['hourly']['temperature_2m'][0] . ' °' . $data['hourly_units']['temperature_2m'];
+    // Since this is for testing we will just simulate a weather response.
+    $city = $this->getContextValue('city');
+    $country = $this->getContextValue('country');
+    $unit = $this->getContextValue('unit');
+
+    // Simulate a temperature based on the city and country.
+    if ($city === 'London' && $country === 'UK') {
+      $this->stringOutput = $unit === 'celsius' ? '15°C' : '59°F';
+    }
+    elseif ($city === 'Los Angeles' && $country === 'USA') {
+      $this->stringOutput = $unit === 'celsius' ? '25°C' : '77°F';
+    }
+    else {
+      $this->stringOutput = $unit === 'celsius' ? '20°C' : '68°F';
     }
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getReadableOutput(): string {
-    return (string) $this->temperature;
+  public function getStructuredOutput(): array {
+    return [
+      'city' => $this->getContextValue('city'),
+      'country' => $this->getContextValue('country'),
+      'unit' => $this->getContextValue('unit'),
+      'temperature' => $this->stringOutput,
+    ];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setStructuredOutput(array $output): void {
+    $this->stringOutput = $output['temperature'] ?? '';
+    $this->setContextValue('city', $output['city'] ?? '');
+    $this->setContextValue('country', $output['country'] ?? '');
+    $this->setContextValue('unit', $output['unit'] ?? 'celsius');
   }
 
 }

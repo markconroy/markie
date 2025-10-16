@@ -9,6 +9,7 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\ai_automators\Event\AutomatorConfigEvent;
 use Drupal\ai_automators\Event\ProcessFieldEvent;
+use Drupal\ai_automators\PluginInterfaces\AiAutomatorDirectProcessInterface;
 use Drupal\ai_automators\PluginInterfaces\AiAutomatorFieldProcessInterface;
 use Drupal\ai_automators\PluginManager\AiAutomatorFieldProcessManager;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -72,19 +73,23 @@ class AiAutomatorEntityModifier {
    *   The entity to check for modifications.
    * @param bool $isInsert
    *   Is it an insert.
+   * @param string|null $specificField
+   *   If a specific field should be processed, this is the field name.
+   * @param bool $isAutomated
+   *   If this is an automated process or not.
    *
-   * @return bool
-   *   If the entity is saved or marked for saving.
+   * @return \Drupal\Core\Entity\ContentEntityInterface|null
+   *   The entity or NULL if no automator fields are found.
    */
-  public function saveEntity(EntityInterface $entity, $isInsert = FALSE) {
+  public function saveEntity(EntityInterface $entity, $isInsert = FALSE, $specificField = NULL, $isAutomated = TRUE) {
     // Only run on Content Interfaces.
     if (!($entity instanceof ContentEntityInterface)) {
-      return FALSE;
+      return NULL;
     }
     // Get and check so field configs exists.
     $configs = $this->entityHasConfig($entity);
     if (!count($configs)) {
-      return FALSE;
+      return NULL;
     }
 
     // Resort on weight to create in the right order.
@@ -97,6 +102,17 @@ class AiAutomatorEntityModifier {
       }
       return 0;
     });
+
+    // If a specific field is set, only process that one.
+    if ($specificField) {
+      $configs = array_filter($configs, function ($config) use ($specificField) {
+        return $config['fieldDefinition']->getName() === $specificField;
+      });
+      // If no configs are found, return NULL.
+      if (!count($configs)) {
+        return NULL;
+      }
+    }
 
     // Get possible processes.
     $workerOptions = [];
@@ -122,6 +138,10 @@ class AiAutomatorEntityModifier {
       }
       // Load the processor or load direct.
       $processor = $processes[$config['automatorConfig']['worker_type']] ?? $processes['direct'];
+      // If the processor is a dynamic process and its automatic, we skip it.
+      if ($isAutomated && $processor instanceof AiAutomatorDirectProcessInterface) {
+        continue;
+      }
       if (method_exists($processor, 'isImport') && $isInsert) {
         $this->markFieldForProcessing($entity, $config['fieldDefinition'], $config['automatorConfig'], $processor);
       }
@@ -134,7 +154,7 @@ class AiAutomatorEntityModifier {
     foreach ($processes as $process) {
       $process->postProcessing($entity);
     }
-    return TRUE;
+    return $entity;
   }
 
   /**
@@ -215,6 +235,12 @@ class AiAutomatorEntityModifier {
       return FALSE;
     }
     elseif (in_array(ProcessFieldEvent::FIELD_FORCE_PROCESS, $event->actions)) {
+      return $processor->modify($entity, $fieldDefinition, $automatorConfig);
+    }
+
+    // If the type is of AiAutomatorDirectProcessInterface, it checks first.
+    if ($processor instanceof AiAutomatorDirectProcessInterface && $processor->shouldProcessDirectly($entity, $fieldDefinition, $automatorConfig)) {
+      // If the processor wants to process directly, we do that.
       return $processor->modify($entity, $fieldDefinition, $automatorConfig);
     }
 

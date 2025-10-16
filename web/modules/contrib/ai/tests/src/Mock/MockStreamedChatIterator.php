@@ -2,7 +2,6 @@
 
 namespace Drupal\Tests\ai\Mock;
 
-use Drupal\ai\OperationType\Chat\StreamedChatMessage;
 use Drupal\ai\OperationType\Chat\StreamedChatMessageIterator;
 use Drupal\ai\OperationType\Chat\StreamedChatMessageIteratorInterface;
 
@@ -14,15 +13,15 @@ class MockStreamedChatIterator extends StreamedChatMessageIterator implements St
   /**
    * Get the iterator.
    *
-   * @return \Traversable
+   * @return \Generator
    *   The iterator.
    */
-  public function getIterator(): \Traversable {
+  public function doIterate(): \Generator {
     foreach ($this->iterator as $data) {
-      yield new StreamedChatMessage(
+      yield $this->createStreamedChatMessage(
         'assistant',
-        $data . "\n",
-        []
+        $data,
+        [],
       );
     }
   }

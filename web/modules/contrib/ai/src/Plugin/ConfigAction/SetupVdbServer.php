@@ -6,6 +6,7 @@ namespace Drupal\ai\Plugin\ConfigAction;
 
 use Drupal\Core\Config\Action\Attribute\ConfigAction;
 use Drupal\Core\Config\Action\ConfigActionPluginInterface;
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
@@ -31,6 +32,7 @@ final class SetupVdbServer implements ConfigActionPluginInterface, ContainerFact
     private readonly EntityTypeManagerInterface $entityTypeManager,
     private readonly AiProviderPluginManager $aiProviderPluginManager,
     private readonly AiVdbProviderPluginManager $aiVdbProviderPluginManager,
+    private readonly ConfigFactoryInterface $configFactory,
   ) {
   }
 
@@ -43,6 +45,7 @@ final class SetupVdbServer implements ConfigActionPluginInterface, ContainerFact
       $container->get(EntityTypeManagerInterface::class),
       $container->get('ai.provider'),
       $container->get('ai.vdb_provider'),
+      $container->get('config.factory'),
     );
   }
 
@@ -50,13 +53,35 @@ final class SetupVdbServer implements ConfigActionPluginInterface, ContainerFact
    * {@inheritdoc}
    */
   public function apply(string $configName, mixed $value): void {
-    // Basic validation that its a vdb server.
+    // Basic validation that it's a vdb server.
     assert(isset($value['id']));
     assert(isset($value['name']));
-    assert(isset($value['backend_config']['database']));
-    assert(isset($value['backend_config']['database_settings']));
     assert(isset($value['backend_config']['embedding_strategy']));
     assert(isset($value['backend_config']['embedding_strategy_configuration']));
+
+    // Handle default database setting if not provided.
+    if (!isset($value['backend_config']['database'])) {
+      $config = $this->configFactory->get('ai.settings');
+      $default_vdb_provider = $config->get('default_vdb_provider');
+      if (empty($default_vdb_provider)) {
+        throw new \Exception('No default VDB provider is set and database backend is not specified.');
+      }
+      $value['backend_config']['database'] = $default_vdb_provider;
+    }
+
+    // Handle default database_name setting if not provided.
+    if (!isset($value['backend_config']['database_settings'])) {
+      $value['backend_config']['database_settings'] = [];
+    }
+    if (!isset($value['backend_config']['database_settings']['database_name'])) {
+      try {
+        $vdb_provider = $this->aiVdbProviderPluginManager->createInstance($value['backend_config']['database']);
+        $value['backend_config']['database_settings']['database_name'] = $vdb_provider->getDefaultDatabase();
+      }
+      catch (\Exception $e) {
+        throw new \Exception('Could not get default database name from VDB provider: ' . $e->getMessage());
+      }
+    }
     // Make sure a default embeddings model is set and can be loaded.
     $defaults = $this->aiProviderPluginManager->getDefaultProviderForOperationType('embeddings');
     if (empty($defaults)) {

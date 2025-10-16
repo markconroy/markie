@@ -349,7 +349,6 @@ abstract class RuleBase implements AiAutomatorTypeInterface, ContainerFactoryPlu
       $prompts[] = \Drupal::service('ai_automator.prompt_helper')->renderTokenPrompt($automatorConfig['token'], $entity); /* @phpstan-ignore-line */
     }
     elseif ($this->needsPrompt()) {
-      // Run rule.
       foreach ($entity->get($automatorConfig['base_field'])->getValue() as $i => $item) {
         // Get tokens.
         $tokens = $this->generateTokens($entity, $fieldDefinition, $automatorConfig, $i);
@@ -597,10 +596,20 @@ abstract class RuleBase implements AiAutomatorTypeInterface, ContainerFactoryPlu
       if (strpos($automatorConfig['configuration_image_field'], '--') !== FALSE) {
         $parts = explode('--', $automatorConfig['configuration_image_field']);
       }
-      foreach ($entity->{$parts[0]} as $imageEntityWrapper) {
+      foreach ($entity->get($parts[0]) as $imageEntityWrapper) {
         $imageEntity = $imageEntityWrapper->entity;
+        // If the image entity is not available, it might be partially formed.
+        if (!$imageEntity) {
+          $values = $imageEntityWrapper->getValue();
+          // Try to load via the file ID.
+          // @phpstan-ignore-next-line
+          if (isset($values['target_id']) && $file = \Drupal::entityTypeManager()->getStorage('file')->load($values['target_id'])) {
+            $imageEntity = $file;
+          }
+        }
+
         if (isset($parts[1])) {
-          foreach ($imageEntity->{$parts[1]} as $image) {
+          foreach ($imageEntity->get($parts[1]) as $image) {
             $possibleImages[] = $image->entity;
           }
         }
@@ -647,19 +656,26 @@ abstract class RuleBase implements AiAutomatorTypeInterface, ContainerFactoryPlu
     if (empty($automatorConfig['ai_provider'])) {
       throw new AiAutomatorTypeNotRunnable('No provider set for the LLM type ' . $this->llmType);
     }
-    if ($automatorConfig['ai_provider'] == 'default_json') {
-      $automatorConfig['ai_provider'] = $this->aiPluginManager->getDefaultProviderForOperationType('chat_with_complex_json')['provider_id'];
+    $provider = $automatorConfig['ai_provider'];
+
+    if ($provider === 'default_json') {
+      $defaultProvider = $this->aiPluginManager->getDefaultProviderForOperationType('chat_with_complex_json');
+      $provider = $defaultProvider['provider_id'] ?? NULL;
     }
-    elseif ($automatorConfig['ai_provider'] == 'default_structured_response') {
-      $automatorConfig['ai_provider'] = $this->aiPluginManager->getDefaultProviderForOperationType('chat_with_complex_json')['provider_id'];
+    elseif ($provider === 'default_vision') {
+      $defaultProvider = $this->aiPluginManager->getDefaultProviderForOperationType('chat_with_image_vision');
+      $provider = $defaultProvider['provider_id'] ?? NULL;
     }
-    elseif ($automatorConfig['ai_provider'] == 'default_vision') {
-      $automatorConfig['ai_provider'] = $this->aiPluginManager->getDefaultProviderForOperationType('chat_with_image_vision')['provider_id'];
+    elseif ($provider === 'default') {
+      $defaultProvider = $this->aiPluginManager->getDefaultProviderForOperationType($this->llmType);
+      $provider = $defaultProvider['provider_id'] ?? NULL;
     }
-    elseif ($automatorConfig['ai_provider'] == 'default') {
-      $automatorConfig['ai_provider'] = $this->aiPluginManager->getDefaultProviderForOperationType($this->llmType)['provider_id'];
+
+    // Ensure provider is always a valid string.
+    if (empty($provider) || !is_string($provider)) {
+      throw new AiAutomatorTypeNotRunnable('Invalid or missing AI provider for LLM type: ' . $this->llmType);
     }
-    return $automatorConfig['ai_provider'];
+    return $provider;
   }
 
   /**

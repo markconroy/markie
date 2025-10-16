@@ -5,6 +5,9 @@
  * Hooks and custom functions for the AI API Explorer module.
  */
 
+use Drupal\ai_api_explorer\Hook\AiApiExplorer;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Hook\Attribute\LegacyHook;
 use Drupal\Core\StreamWrapper\StreamWrapperManager;
 
 /**
@@ -57,4 +60,12 @@ function ai_api_explorer_file_download(string $uri): ?array {
   }
 
   return NULL;
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+#[LegacyHook]
+function ai_api_explorer_form_ai_tools_library_select_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  \Drupal::service(AiApiExplorer::class)->aiToolsLibrarySelectFormAlter($form, $form_state, $form_id);
 }

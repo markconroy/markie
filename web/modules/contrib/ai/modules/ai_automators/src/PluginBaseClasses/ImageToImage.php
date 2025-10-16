@@ -58,7 +58,7 @@ class ImageToImage extends RuleBase {
 
     // Generate the images.
     $images = [];
-    foreach ($entity->{$automatorConfig['base_field']} as $target) {
+    foreach ($entity->get($automatorConfig['base_field']) as $target) {
       // The image binary.
       for ($i = 0; $i < $amount; $i++) {
         $image = $this->generateFileResponse($target->entity, $automatorConfig, $entity, $fieldDefinition);

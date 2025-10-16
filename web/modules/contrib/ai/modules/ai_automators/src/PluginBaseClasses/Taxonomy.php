@@ -142,7 +142,7 @@ class Taxonomy extends RuleBase implements ContainerFactoryPluginInterface {
       $form['automator_search_similar_tags'] = [
         '#type' => 'checkbox',
         '#title' => 'Find similar tags',
-        '#description' => $this->t('This will use GPT-4 to find similar tags. Meaning if the tag "Jesus Christ" exists and the system wants to store "Jesus" it will store it as "Jesus Christ". This uses extra calls and is slower and more costly.'),
+        '#description' => $this->t('This will use your LLM to find similar tags. Meaning if the tag "Whirlpool" exists and the system wants to store "Whirlpool Bath" it will store it as "Whirlpool". This uses extra calls and is slower and more costly.'),
         '#default_value' => $defaultValues["automator_search_similar_tags"] ?? FALSE,
         '#weight' => 23,
       ];
@@ -167,6 +167,7 @@ class Taxonomy extends RuleBase implements ContainerFactoryPluginInterface {
     $instance = $this->prepareLlmInstance('chat', $automatorConfig);
     foreach ($prompts as $prompt) {
       $values = $this->runChatMessage($prompt, $automatorConfig, $instance, $entity);
+
       if (!empty($values)) {
         // Clean value.
         if ($automatorConfig['clean_up']) {
@@ -187,6 +188,7 @@ class Taxonomy extends RuleBase implements ContainerFactoryPluginInterface {
    */
   public function verifyValue(ContentEntityInterface $entity, $value, FieldDefinitionInterface $fieldDefinition, array $automatorConfig) {
     $settings = $fieldDefinition->getConfig($entity->bundle())->getSettings();
+
     // If it's auto create and its a text field, create.
     if ($settings['handler_settings']['auto_create'] && is_string($value)) {
       return TRUE;
@@ -234,7 +236,7 @@ class Taxonomy extends RuleBase implements ContainerFactoryPluginInterface {
   }
 
   /**
-   * Looks for similar tags using GPT-3.5.
+   * Looks for similar tags using any model.
    *
    * @param array $values
    *   The values to search for.

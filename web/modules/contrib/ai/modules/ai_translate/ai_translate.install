@@ -93,3 +93,28 @@ function ai_translate_update_10003(&$sandbox) {
     ->set('use_ai_translate', TRUE)
     ->save();
 }
+
+/**
+ * Update language prompts and models.
+ *
+ * Moves specific langcode model and prompt config,
+ * into a single config object.
+ */
+function ai_translate_update_10004(&$sandbox) {
+  /** @var \Drupal\Core\Config\ConfigFactory $configFactory */
+  $configFactory = \Drupal::service('config.factory');
+  $config = $configFactory->getEditable('ai_translate.settings');
+  $languages = \Drupal::languageManager()->getLanguages();
+  $installed_config = $config->getRawData();
+  $language_settings = [];
+  foreach (array_keys($languages) as $langcode) {
+    $language_settings[$langcode]['model'] = $config->get($langcode . '_model');
+    $language_settings[$langcode]['prompt'] = $config->get($langcode . '_prompt');
+    unset($installed_config[$langcode . '_model']);
+    unset($installed_config[$langcode . '_prompt']);
+  }
+  $config->delete();
+  $config->setData($installed_config);
+  $config->set('language_settings', $language_settings);
+  $config->save();
+}

@@ -7,7 +7,7 @@ ai_automators.list:
     _permission: 'administer ai_automator'
 
 entity.ai_automator.collection:
-  path: '/admin/config/ai/ai-automator'
+  path: '/admin/config/ai/ai-automators/ai-automator'
   defaults:
     _entity_list: 'ai_automator'
     _title: 'AI Automator configuration'
@@ -15,7 +15,7 @@ entity.ai_automator.collection:
     _permission: 'administer ai_automator'
 
 entity.ai_automator.add_form:
-  path: '/admin/config/ai/ai-automator/add'
+  path: '/admin/config/ai/ai-automators/ai-automator/add'
   defaults:
     _entity_form: 'ai_automator.add'
     _title: 'Add an ai automator'
@@ -23,7 +23,7 @@ entity.ai_automator.add_form:
     _permission: 'administer ai_automator'
 
 entity.ai_automator.edit_form:
-  path: '/admin/config/ai/ai-automator/{ai_automator}'
+  path: '/admin/config/ai/ai-automators/ai-automator/{ai_automator}'
   defaults:
     _entity_form: 'ai_automator.edit'
     _title: 'Edit an ai automator'
@@ -31,7 +31,7 @@ entity.ai_automator.edit_form:
     _permission: 'administer ai_automator'
 
 entity.ai_automator.delete_form:
-  path: '/admin/config/ai/ai-automator/{ai_automator}/delete'
+  path: '/admin/config/ai/ai-automators/ai-automator/{ai_automator}/delete'
   defaults:
     _entity_form: 'ai_automator.delete'
     _title: 'Delete an ai automator'

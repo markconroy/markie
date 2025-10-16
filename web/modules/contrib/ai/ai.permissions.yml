@@ -6,3 +6,15 @@ administer ai providers:
   title: 'Administer LLM Providers'
   description: 'Administer the individual AI providers'
   restrict access: true
+access ai tools overview:
+  title: 'Access Overview of AI Tools'
+  description: 'With this permission the user will be able to access overview of all available AI Tools.'
+  restrict access: true
+administer ai prompt types:
+  title: 'Administer AI Prompt Types'
+  description: 'Administer the AI Prompt Types'
+  restrict access: true
+manage ai prompts:
+  title: 'Create, Edit, and Delete AI Prompts'
+  description: 'Create, Edit, and Delete individual AI prompts'
+  restrict access: true

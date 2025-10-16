@@ -37,3 +37,6 @@ services:
     arguments: ['@module_handler']
     tags:
       - { name: access_check, applies_to: _automator_advanced }
+  ai_automators.cleanup:
+    class: Drupal\ai_automators\AiAutomatorCleanupService
+    arguments: ['@entity_type.manager', '@logger.factory']

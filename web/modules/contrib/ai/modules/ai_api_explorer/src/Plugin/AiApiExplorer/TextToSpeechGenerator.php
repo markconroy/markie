@@ -149,24 +149,44 @@ final class TextToSpeechGenerator extends AiApiExplorerPluginBase {
    * {@inheritdoc}
    */
   public function getResponse(array &$form, FormStateInterface $form_state): array {
-    $prompt = $form_state->getValue('prompt');
-    if (!empty($prompt)) {
+    try {
       $provider = $this->aiProviderHelper->generateAiProviderFromFormSubmit($form, $form_state, 'text_to_speech', 'tts_');
+      $prompt = $form_state->getValue('prompt');
 
-      try {
-        $audio = $provider->textToSpeech($form_state->getValue('prompt'), $form_state->getValue('tts_ai_model'), ['ai_api_explorer'])->getNormalized();
+      if (empty($prompt)) {
+        $form['right']['response']['#context']['ai_response'] = [
+          'heading' => [
+            '#type' => 'html_tag',
+            '#tag' => 'h3',
+            '#value' => $this->t('No Prompt Provided'),
+          ],
+          'message' => [
+            '#type' => 'html_tag',
+            '#tag' => 'div',
+            '#value' => $this->t('Please enter a prompt to generate an audio response.'),
+            '#attributes' => [
+              'class' => ['ai-text-response', 'ai-error-message'],
+            ],
+          ],
+        ];
+        $form_state->setRebuild();
+        return $form['right'];
+      }
+
+      $audio = $provider->textToSpeech($prompt, $form_state->getValue('tts_ai_model'), ['ai_api_explorer'])->getNormalized();
+
+      if (!empty($audio) && is_array($audio) && isset($audio[0]) && method_exists($audio[0], 'getBinary')) {
         if ($form_state->getValue('save_as_media')) {
           if ($media = $audio[0]->getAsMediaEntity($form_state->getValue('save_as_media'), '', 'text-to-speech.mp3')) {
             $media->save();
           }
         }
-        $audio_normalized = $audio[0]->getAsBinary();
 
         // Save the binary data to a file.
         $destination = 'temporary://ai-explorers/';
         $this->fileSystem->prepareDirectory($destination, FileSystemInterface::CREATE_DIRECTORY);
         $random = (string) rand();
-        $file_url = $this->fileSystem->saveData($audio_normalized, $destination . '/' . md5($random) . '.mp3');
+        $file_url = $this->fileSystem->saveData($audio[0]->getBinary(), $destination . '/' . md5($random) . '.mp3');
         $file_name = basename($file_url);
         $url = Url::fromRoute('system.temporary', [], ['query' => ['file' => 'ai-explorers/' . $file_name]]);
         $form['right']['response']['#context']['ai_response']['response'] = [
@@ -177,19 +197,62 @@ final class TextToSpeechGenerator extends AiApiExplorerPluginBase {
           ],
         ];
 
-        $form['right']['response']['#context']['ai_response']['code'] = $this->normalizeCodeExample($provider, $form_state, $form_state->getValue('prompt'));
+        $form['right']['response']['#context']['ai_response']['code'] = $this->normalizeCodeExample($provider, $form_state, $prompt);
       }
-      catch (\Exception $e) {
-        $form['right']['response']['#context']['ai_response']['response'] = [
-          '#type' => 'inline_template',
-          '#template' => '{{ error|raw }}',
-          '#context' => [
-            'error' => $this->explorerHelper->renderException($e),
+      else {
+        $form['right']['response']['#context']['ai_response'] = [
+          'heading' => [
+            '#type' => 'html_tag',
+            '#tag' => 'h3',
+            '#value' => $this->t('No Audio Generated'),
+          ],
+          'message' => [
+            '#type' => 'html_tag',
+            '#tag' => 'div',
+            '#value' => $this->t('The provider did not generate a valid audio response. Please check your prompt and try again.'),
+            '#attributes' => [
+              'class' => ['ai-text-response', 'ai-error-message'],
+            ],
           ],
         ];
       }
     }
+    catch (\TypeError $e) {
+      $form['right']['response']['#context']['ai_response'] = [
+        'heading' => [
+          '#type' => 'html_tag',
+          '#tag' => 'h3',
+          '#value' => $this->t('Configuration Error'),
+        ],
+        'message' => [
+          '#type' => 'html_tag',
+          '#tag' => 'div',
+          '#value' => $this->t('The AI provider could not be used. Please make sure a model is selected and the provider is properly configured.'),
+          '#attributes' => [
+            'class' => ['ai-text-response', 'ai-error-message'],
+          ],
+        ],
+      ];
+    }
+    catch (\Exception $e) {
+      $form['right']['response']['#context']['ai_response'] = [
+        'heading' => [
+          '#type' => 'html_tag',
+          '#tag' => 'h3',
+          '#value' => $this->t('Error'),
+        ],
+        'message' => [
+          '#type' => 'html_tag',
+          '#tag' => 'div',
+          '#value' => $this->explorerHelper->renderException($e),
+          '#attributes' => [
+            'class' => ['ai-text-response', 'ai-error-message'],
+          ],
+        ],
+      ];
+    }
 
+    $form_state->setRebuild();
     return $form['right'];
   }
 

@@ -7,6 +7,7 @@ use Drupal\search_api\Entity\Server;
 use Drupal\search_api\IndexInterface;
 use Drupal\search_api\Query\QueryInterface;
 use Solarium\Core\Query\QueryInterface as SolariumQueryInterface;
+use Solarium\Component\QueryInterface as SolariumComponentQueryInterface;
 
 /**
  * Prepend and combine AI Search results into the database search.
@@ -94,13 +95,22 @@ class SolrBoostByAiSearch extends BoostByAiSearchBase {
     $hash = $index->getServerInstance()->getBackend()->getTargetedSiteHash($index);
     $prefix = $hash . '-' . $index->id() . '-';
 
-    // Build the parameter string and set to elevate these IDs.
-    // The elevate IDs option respects the order provided, so the results
-    // will therefore respect the order provided by the AI Search relevance.
+    // Build the item ids array.
     $param_parts = [];
     foreach (array_keys($ai_search_ids) as $ai_search_id) {
       $param_parts[] = $prefix . $ai_search_id;
     }
+
+    // Change the query to display both SOLR query and AI-boosted results.
+    if ($solarium_query instanceof SolariumComponentQueryInterface) {
+      if ($query = $solarium_query->getQuery()) {
+        $query = $query . ' OR id:("' . implode('" "', $param_parts) . '")';
+        $solarium_query->setQuery($query);
+      }
+    }
+
+    // The elevate IDs option respects the order provided, so the results
+    // will therefore respect the order provided by the AI Search relevance.
     $solarium_query->addParam('elevateIds', implode(',', $param_parts));
   }
 

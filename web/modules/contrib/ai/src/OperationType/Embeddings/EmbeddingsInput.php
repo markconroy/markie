@@ -95,4 +95,17 @@ class EmbeddingsInput extends InputBase implements InputInterface {
     return $this->toString();
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function toArray(): array {
+    $data = [
+      'prompt' => $this->prompt,
+    ];
+    if ($this->image) {
+      $data['image'] = $this->image->toArray();
+    }
+    return $data;
+  }
+
 }

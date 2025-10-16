@@ -131,32 +131,36 @@ final class ImageAndAudioToVideoGenerator extends AiApiExplorerPluginBase {
    * {@inheritdoc}
    */
   public function getResponse(array &$form, FormStateInterface $form_state): array {
-    $provider = $this->aiProviderHelper->generateAiProviderFromFormSubmit($form, $form_state, 'image_and_audio_to_video', 'ata');
+    try {
+      $provider = $this->aiProviderHelper->generateAiProviderFromFormSubmit($form, $form_state, 'image_and_audio_to_video', 'ata');
 
-    $audio_file = $this->generateFile();
-    $image_file = $this->generateFile('image');
+      $audio_file = $this->generateFile();
+      $image_file = $this->generateFile('image');
 
-    if ($audio_file && $image_file) {
-      $input = new ImageAndAudioToVideoInput($image_file, $audio_file);
-
-      try {
-        $video_normalized = $provider->ImageAndAudioToVideo($input, $form_state->getValue('ata_ai_model'), ['ai_api_explorer'])->getNormalized();
-      }
-      catch (\Exception $e) {
-        $form['right']['response']['#context']['ai_response']['response'] = [
-          '#type' => 'inline_template',
-          '#template' => '{{ error|raw }}',
-          '#context' => [
-            'error' => $this->explorerHelper->renderException($e),
+      if (!$audio_file || !$image_file) {
+        $form['right']['response']['#context']['ai_response'] = [
+          'heading' => [
+            '#type' => 'html_tag',
+            '#tag' => 'h3',
+            '#value' => $this->t('No Files Provided'),
+          ],
+          'message' => [
+            '#type' => 'html_tag',
+            '#tag' => 'div',
+            '#value' => $this->t('Please upload both an audio file (MP3) and an image file (JPG, JPEG, or PNG) to generate a video.'),
+            '#attributes' => [
+              'class' => ['ai-text-response', 'ai-error-message'],
+            ],
           ],
         ];
-
-        // Early return if we've hit an error.
+        $form_state->setRebuild();
         return $form['right'];
       }
 
-      if ($video_normalized) {
+      $input = new ImageAndAudioToVideoInput($image_file, $audio_file);
+      $video_normalized = $provider->ImageAndAudioToVideo($input, $form_state->getValue('image_and_audio_to_video_ai_model'), ['ai_api_explorer'])->getNormalized();
 
+      if ($video_normalized) {
         // Save the binary data to a file.
         $destination = 'temporary://ai-explorers/';
         $this->fileSystem->prepareDirectory($destination, FileSystemInterface::CREATE_DIRECTORY);
@@ -168,12 +172,64 @@ final class ImageAndAudioToVideoGenerator extends AiApiExplorerPluginBase {
           '#type' => 'inline_template',
           '#template' => '{{ player|raw }}',
           '#context' => [
-            'player' => '<video controls><source src="' . $url->toString() . '" type="audio/mpeg"></video>',
+            'player' => '<video controls><source src="' . $url->toString() . '" type="video/mp4"></video>',
+          ],
+        ];
+      }
+      else {
+        $form['right']['response']['#context']['ai_response'] = [
+          'heading' => [
+            '#type' => 'html_tag',
+            '#tag' => 'h3',
+            '#value' => $this->t('No Video Generated'),
+          ],
+          'message' => [
+            '#type' => 'html_tag',
+            '#tag' => 'div',
+            '#value' => $this->t('The provider did not generate a video. Please check your input files and try again.'),
+            '#attributes' => [
+              'class' => ['ai-text-response', 'ai-error-message'],
+            ],
           ],
         ];
       }
     }
+    catch (\TypeError $e) {
+      $form['right']['response']['#context']['ai_response'] = [
+        'heading' => [
+          '#type' => 'html_tag',
+          '#tag' => 'h3',
+          '#value' => $this->t('Configuration Error'),
+        ],
+        'message' => [
+          '#type' => 'html_tag',
+          '#tag' => 'div',
+          '#value' => $this->t('The AI provider could not be used. Please make sure a model is selected and the provider is properly configured.'),
+          '#attributes' => [
+            'class' => ['ai-text-response', 'ai-error-message'],
+          ],
+        ],
+      ];
+    }
+    catch (\Exception $e) {
+      $form['right']['response']['#context']['ai_response'] = [
+        'heading' => [
+          '#type' => 'html_tag',
+          '#tag' => 'h3',
+          '#value' => $this->t('Error'),
+        ],
+        'message' => [
+          '#type' => 'html_tag',
+          '#tag' => 'div',
+          '#value' => $this->explorerHelper->renderException($e),
+          '#attributes' => [
+            'class' => ['ai-text-response', 'ai-error-message'],
+          ],
+        ],
+      ];
+    }
 
+    $form_state->setRebuild();
     return $form['right'];
   }
 

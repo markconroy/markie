@@ -145,21 +145,21 @@ class DeepChatFormBlock extends BlockBase implements ContainerFactoryPluginInter
   public function defaultConfiguration() {
     return [
       'ai_assistant' => NULL,
-      'bot_name' => 'Generic Chatbot',
-      'bot_image' => '/core/misc/druplicon.png',
-      'use_username' => TRUE,
-      'default_username' => 'User',
-      'use_avatar' => TRUE,
-      'default_avatar' => '/core/misc/favicon.ico',
-      'first_message' => 'Hello! How can I help you today?',
+      'bot_name' => 'Assistant',
+      'bot_image' => '/modules/contrib/ai/modules/ai_chatbot/assets/ai-star-avatar.svg',
+      'use_username' => FALSE,
+      'default_username' => '',
+      'use_avatar' => FALSE,
+      'default_avatar' => '',
+      'first_message' => '',
       'stream' => FALSE,
       'toggle_state' => 'remember',
-      'width' => '400px',
-      'height' => '500px',
-      'placement' => 'bottom-right',
+      'width' => 'auto',
+      'height' => '100%',
+      'placement' => 'toolbar',
       'show_structured_results' => FALSE,
       'collapse_minimal' => FALSE,
-      'style_file' => 'bard.yml',
+      'style_file' => 'toolbar.yml',
       'show_copy_icon' => TRUE,
       'verbose_mode' => TRUE,
     ];
@@ -321,6 +321,7 @@ class DeepChatFormBlock extends BlockBase implements ContainerFactoryPluginInter
       '#description' => $this->t('The placement of the chat window.'),
       '#required' => TRUE,
       '#options' => [
+        'toolbar' => $this->t('Toolbar'),
         'bottom-right' => $this->t('Bottom right'),
         'bottom-left' => $this->t('Bottom left'),
       ],
@@ -459,6 +460,7 @@ class DeepChatFormBlock extends BlockBase implements ContainerFactoryPluginInter
   public function build() {
     /** @var \Drupal\ai_assistant_api\Entity\AiAssistant $assistant */
     $assistant = $this->entityTypeManager->getStorage('ai_assistant')->load($this->configuration['ai_assistant']);
+    $active_theme = $this->themeManager->getActiveTheme()->getName();
 
     $this->aiAssistantRunner->setAssistant($assistant);
     $this->aiAssistantRunner->streamedOutput($this->isStreamingSupported());
@@ -473,7 +475,7 @@ class DeepChatFormBlock extends BlockBase implements ContainerFactoryPluginInter
     $this->configuration['default_avatar'] = $user_data['avatar'];
     $block['#settings'] = $this->configuration;
     $block['#deepchat_settings'] = $this->getDeepChatParameters($this->configuration['style_file']);
-    $block['#current_theme'] = 'chatbot-' . $this->themeManager->getActiveTheme()->getName();
+    $block['#current_theme'] = 'chatbot-' . $active_theme;
     $block['#attached']['drupalSettings']['ai_deepchat']['assistant_id'] = $this->aiAssistantRunner->getAssistant()->id();
     $block['#attached']['drupalSettings']['ai_deepchat']['thread_id'] = $this->aiAssistantRunner->getThreadsKey();
     $block['#attached']['drupalSettings']['ai_deepchat']['bot_name'] = $this->configuration['bot_name'];
@@ -553,6 +555,10 @@ class DeepChatFormBlock extends BlockBase implements ContainerFactoryPluginInter
 
     $deepchat['class'] = 'deepchat-element';
     $deepchat['intromessage']['text'] = $this->configuration['first_message'];
+    // @todo remove this in 2.0.0, its just for BC.
+    if ($this->configuration['placement'] == 'toolbar') {
+      $deepchat['names']['ai']['text'] = $this->configuration['bot_name'];
+    }
 
     $deepchat['htmlClassUtilities']['chat-button']['styles']['default']['width'] = '25px';
     $deepchat['htmlClassUtilities']['chat-button']['styles']['default']['height'] = '25px';

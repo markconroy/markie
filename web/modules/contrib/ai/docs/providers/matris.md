@@ -2,8 +2,8 @@
 
 The full list of providers available.
 
-| Provider Name | [Chat](../developers/call_chat.md) | [Vector Database](../modules/ai_search/index.md) | [Embeddings](../developers/call_embeddings.md) | [Moderation](../developers/call_moderation.md) | [TextToImage](../developers/call_text_to_image.md) | [TextToSpeech](../developers/call_text_to_speech.md) | [SpeechToText](../developers/call_speech_to_text.md) | [SpeechToSpeech](../developers/call_speech_to_speech.md) | [AudioToAudio](../developers/call_audio_to_audio.md) | [TranslateText](../developers/call_translate_text.md) | [ImageClassification](../developers/call_image_classification.md) |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Provider Name | [Chat](../developers/call_chat.md) | [Vector Database](../modules/ai_search/index.md) | [Embeddings](../developers/call_embeddings.md) | [Moderation](../developers/call_moderation.md) | [TextToImage](../developers/call_text_to_image.md) | [TextToSpeech](../developers/call_text_to_speech.md) | [SpeechToText](../developers/call_speech_to_text.md) | [SpeechToSpeech](../developers/call_speech_to_speech.md) | [AudioToAudio](../developers/call_audio_to_audio.md) | [TranslateText](../developers/call_translate_text.md) | [ImageClassification](../developers/call_image_classification.md) | [ImageToImage](..developers/call_image_to_image.md) |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | [amazee.ai](https://www.drupal.org/project/ai_provider_amazeeio) | ☑ | ☑ | ☑ | |
 | [Anthropic](https://www.drupal.org/project/ai_provider_anthropic) | ☑ | | | | | | | | | | |
 | [Auphonic](https://www.drupal.org/project/auphonic) | | | | | | | | | ☑ | | |
@@ -11,6 +11,7 @@ The full list of providers available.
 | [Azure](https://www.drupal.org/project/ai_provider_azure) | ☑ | | ☑ | ☑ | ☑ | ☑ | ☑ | | | | | |
 | [Deepgram](https://www.drupal.org/project/deepgram) | | | | | | ☑ | ☑ |
 | [DeepL](https://www.drupal.org/project/ai_provider_deepl) | | | | | | | | | | ☑ |  |
+| [DreamStudio](https://www.drupal.org/project/ai_provider_dreamstudio) | | | | | ☑| | | | | | | ☑  |
 | [ElevenLabs](https://www.drupal.org/project/elevenlabs)  | | | | | | ☑ | | ☑ |
 | [Fireworks AI](https://www.drupal.org/project/fireworksai) | ☑ | | ☑ | | ☑ | | |
 | [Gemini](https://www.drupal.org/project/gemini_provider) | ☑ | | | |
@@ -21,7 +22,7 @@ The full list of providers available.
 | [Milvus](https://www.drupal.org/project/ai_vdb_provider_milvus) | | ☑ |
 | [Mistral](https://www.drupal.org/project/ai_provider_mistral) | ☑ |
 | [Ollama](https://www.drupal.org/project/ai_provider_ollama) | ☑ | | ☑ |
-| [OpenAI](https://www.drupal.org/project/ai_provider_openai) | ☑ | | ☑ | ☑ | ☑ | ☑ | ☑ |
+| [OpenAI](https://www.drupal.org/project/ai_provider_openai) | ☑ | | ☑ | ☑ | ☑ | ☑ | ☑ | | | | | ☑ |
 | [Pinecone](https://www.drupal.org/project/ai_vdb_provider_pinecone) | | ☑ |
 | [Postgres](https://www.drupal.org/project/ai_vdb_provider_postgres) | | ☑ |
 | [SQLite](https://www.drupal.org/project/ai_vdb_provider_sqlite) | | ☑ |

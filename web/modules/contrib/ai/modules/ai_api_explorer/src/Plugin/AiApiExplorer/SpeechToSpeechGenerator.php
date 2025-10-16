@@ -126,47 +126,106 @@ final class SpeechToSpeechGenerator extends AiApiExplorerPluginBase {
    * {@inheritdoc}
    */
   public function getResponse(array &$form, FormStateInterface $form_state): array {
-    $provider = $this->aiProviderHelper->generateAiProviderFromFormSubmit($form, $form_state, 'speech_to_speech', 'sts');
+    try {
+      $provider = $this->aiProviderHelper->generateAiProviderFromFormSubmit($form, $form_state, 'speech_to_speech', 'speech_to_speech');
+      $audio_file = $this->generateFile();
 
-    // Normalize the input.
-    if ($audio_file = $this->generateFile()) {
-      $input = new SpeechToSpeechInput($audio_file);
-
-      try {
-        $audio_normalized = $provider->speechToSpeech($input, $form_state->getValue('sts_ai_model'), ['ai_api_explorer'])->getNormalized();
-      }
-      catch (\Exception $e) {
-        $form['right']['response']['#context']['ai_response']['response'] = [
-          '#type' => 'inline_template',
-          '#template' => '{{ error|raw }}',
-          '#context' => [
-            'error' => $this->explorerHelper->renderException($e),
+      if (!$audio_file) {
+        $form['right']['response']['#context']['ai_response'] = [
+          'heading' => [
+            '#type' => 'html_tag',
+            '#tag' => 'h3',
+            '#value' => $this->t('No Audio File Provided'),
+          ],
+          'message' => [
+            '#type' => 'html_tag',
+            '#tag' => 'div',
+            '#value' => $this->t('Please upload an audio file (MP3) to process.'),
+            '#attributes' => [
+              'class' => ['ai-text-response', 'ai-error-message'],
+            ],
           ],
         ];
-
-        // Early return if we've hit an error.
+        $form_state->setRebuild();
         return $form['right'];
       }
 
-      // Save the binary data to a file.
-      $destination = 'temporary://ai-explorers/';
-      $this->fileSystem->prepareDirectory($destination, FileSystemInterface::CREATE_DIRECTORY);
-      $random = (string) rand();
-      $binary_data = $audio_normalized[0]->getBinary();
-      $file_url = $this->fileSystem->saveData($binary_data, $destination . '/' . md5($random) . '.mp3');
-      $file_name = basename($file_url);
-      $url = Url::fromRoute('system.temporary', [], ['query' => ['file' => 'ai-explorers/' . $file_name]]);
-      $form['right']['response']['#context']['ai_response']['response'] = [
-        '#type' => 'inline_template',
-        '#template' => '{{ player|raw }}',
-        '#context' => [
-          'player' => '<audio controls><source src="' . $url->toString() . '" type="audio/mpeg"></audio>',
+      $input = new SpeechToSpeechInput($audio_file);
+      $audio_normalized = $provider->speechToSpeech($input, $form_state->getValue('speech_to_speech_ai_model'), ['ai_api_explorer'])->getNormalized();
+
+      if (!empty($audio_normalized) && is_array($audio_normalized) && isset($audio_normalized[0]) && method_exists($audio_normalized[0], 'getBinary')) {
+        // Save the binary data to a file.
+        $destination = 'temporary://ai-explorers/';
+        $this->fileSystem->prepareDirectory($destination, FileSystemInterface::CREATE_DIRECTORY);
+        $random = (string) rand();
+        $binary_data = $audio_normalized[0]->getBinary();
+        $file_url = $this->fileSystem->saveData($binary_data, $destination . '/' . md5($random) . '.mp3');
+        $file_name = basename($file_url);
+        $url = Url::fromRoute('system.temporary', [], ['query' => ['file' => 'ai-explorers/' . $file_name]]);
+        $form['right']['response']['#context']['ai_response']['response'] = [
+          '#type' => 'inline_template',
+          '#template' => '{{ player|raw }}',
+          '#context' => [
+            'player' => '<audio controls><source src="' . $url->toString() . '" type="audio/mpeg"></audio>',
+          ],
+        ];
+
+        $form['right']['response']['#context']['ai_response']['code'] = $this->normalizeCodeExample($provider, $form_state, $audio_file->getFilename());
+      }
+      else {
+        $form['right']['response']['#context']['ai_response'] = [
+          'heading' => [
+            '#type' => 'html_tag',
+            '#tag' => 'h3',
+            '#value' => $this->t('No Audio Generated'),
+          ],
+          'message' => [
+            '#type' => 'html_tag',
+            '#tag' => 'div',
+            '#value' => $this->t('The provider did not generate an audio response. Please check your input file and try again.'),
+            '#attributes' => [
+              'class' => ['ai-text-response', 'ai-error-message'],
+            ],
+          ],
+        ];
+      }
+    }
+    catch (\TypeError $e) {
+      $form['right']['response']['#context']['ai_response'] = [
+        'heading' => [
+          '#type' => 'html_tag',
+          '#tag' => 'h3',
+          '#value' => $this->t('Configuration Error'),
+        ],
+        'message' => [
+          '#type' => 'html_tag',
+          '#tag' => 'div',
+          '#value' => $this->t('The AI provider could not be used. Please make sure a model is selected and the provider is properly configured.'),
+          '#attributes' => [
+            'class' => ['ai-text-response', 'ai-error-message'],
+          ],
         ],
       ];
-
-      $form['right']['response']['#context']['ai_response']['code'] = $this->normalizeCodeExample($provider, $form_state, $audio_file->getFilename());
+    }
+    catch (\Exception $e) {
+      $form['right']['response']['#context']['ai_response'] = [
+        'heading' => [
+          '#type' => 'html_tag',
+          '#tag' => 'h3',
+          '#value' => $this->t('Error'),
+        ],
+        'message' => [
+          '#type' => 'html_tag',
+          '#tag' => 'div',
+          '#value' => $this->explorerHelper->renderException($e),
+          '#attributes' => [
+            'class' => ['ai-text-response', 'ai-error-message'],
+          ],
+        ],
+      ];
     }
 
+    $form_state->setRebuild();
     return $form['right'];
   }
 

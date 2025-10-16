@@ -2,13 +2,13 @@ name: AI Core
 description: This module provides an abstraction layer for AI services.
 package: AI
 type: module
-core_version_requirement: ^10.2 || ^11
+core_version_requirement: ^10.4 || ^11
 configure: ai.settings_form
 
 dependencies:
   - key:key
 
-# Information added by Drupal.org packaging script on 2025-09-17
-version: '1.1.4'
+# Information added by Drupal.org packaging script on 2025-10-15
+version: '1.2.1'
 project: 'ai'
-datestamp: 1758116446
+datestamp: 1760514354

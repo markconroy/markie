@@ -2,6 +2,7 @@
 
 namespace Drupal\ai_translate\Plugin\FieldTextExtractor;
 
+use Drupal\ai_translate\FieldTextExtractorPluginManagerInterface;
 use Drupal\Core\Config\ImmutableConfig;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
@@ -28,7 +29,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
     'entity_reference_revisions',
   ]
 )]
-class ReferenceFieldExtractor implements ConfigurableFieldTextExtractorInterface, ContainerFactoryPluginInterface {
+class ReferenceFieldExtractor extends FieldExtractorBase implements ConfigurableFieldTextExtractorInterface, ContainerFactoryPluginInterface {
 
   use StringTranslationTrait;
 
@@ -70,15 +71,24 @@ class ReferenceFieldExtractor implements ConfigurableFieldTextExtractorInterface
   protected LoggerChannelInterface $logger;
 
   /**
+   * The field text extractor plugin manager.
+   *
+   * @var \Drupal\ai_translate\FieldTextExtractorPluginManagerInterface
+   */
+  protected FieldTextExtractorPluginManagerInterface $extractorManager;
+
+  /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
-    $instance = new static();
+    $instance = new static($configuration, $plugin_id, $plugin_definition);
     $instance->config = $container->get('config.factory')
       ->get('ai_translate.settings');
     $instance->entityTypeManager = $container->get('entity_type.manager');
     $instance->textExtractor = $container->get('ai_translate.text_extractor');
     $instance->logger = $container->get('logger.factory')->get('ai_translate');
+    $instance->extractorManager = $container->get('plugin.manager.text_extractor');
+
     return $instance;
   }
 
@@ -102,8 +112,7 @@ class ReferenceFieldExtractor implements ConfigurableFieldTextExtractorInterface
     // Increment depth at the start of processing.
     $depth++;
     $textMeta = [];
-    foreach ($entity->get($fieldName)
-      ->referencedEntities() as $delta => $subEntity) {
+    foreach ($entity->get($fieldName)->referencedEntities() as $delta => $subEntity) {
       if ($subEntity instanceof ContentEntityInterface) {
         foreach ($this->textExtractor->extractTextMetadata($subEntity) as $subMeta) {
           $textMeta[] = ['delta' => $delta] + $subMeta;
@@ -119,12 +128,7 @@ class ReferenceFieldExtractor implements ConfigurableFieldTextExtractorInterface
   /**
    * {@inheritdoc}
    */
-  public function setValue(
-    ContentEntityInterface $entity,
-    string $fieldName,
-    array $textMeta,
-  ): void {
-
+  public function setValue(ContentEntityInterface $entity, string $fieldName, array $textMeta): void {
     // Get the entity in the source language.
     $entity_in_source_language = $entity->getUntranslated();
 
@@ -146,23 +150,25 @@ class ReferenceFieldExtractor implements ConfigurableFieldTextExtractorInterface
 
       $referencedEntity = $referencedEntities[$delta];
 
-      // Translate text fields while preserving non-translatable fields.
-      $this->translateAndPreserveFields($referencedEntity, $singleValue, $translationLanguage);
+      // Translate referenced entity.
+      if ($referencedEntity->isTranslatable()) {
+        $this->translateReferencedEntity($referencedEntity, $singleValue, $translationLanguage);
 
-      try {
-        // Save the updated referenced entity.
-        $referencedEntity->save();
-      }
-      catch (\Throwable $e) {
-        $this->logger->error('Unexpected error while saving referenced entity @delta. Type: @type, Message: @message, File: @file, Line: @line', [
-          '@delta' => $referencedEntity->id(),
-          '@type' => get_class($e),
-          '@message' => $e->getMessage(),
-          '@file' => $e->getFile(),
-          '@line' => $e->getLine(),
-        ]);
+        try {
+          // Save the updated referenced entity.
+          $referencedEntity->save();
+        }
+        catch (\Throwable $e) {
+          $this->logger->error('Unexpected error while saving referenced entity @delta. Type: @type, Message: @message, File: @file, Line: @line', [
+            '@delta' => $referencedEntity->id(),
+            '@type' => get_class($e),
+            '@message' => $e->getMessage(),
+            '@file' => $e->getFile(),
+            '@line' => $e->getLine(),
+          ]);
 
-        continue;
+          continue;
+        }
       }
       $newValue[$delta] = ['entity' => $referencedEntity];
     }
@@ -172,74 +178,41 @@ class ReferenceFieldExtractor implements ConfigurableFieldTextExtractorInterface
   }
 
   /**
-   * Translate text fields while keeping non-translatable fields in paragraphs.
+   * Translate the referenced entity.
    */
-  protected function translateAndPreserveFields(
-    ContentEntityInterface $entity,
-    array $fieldsMeta,
-    string $language,
-  ): void {
-
-    $stringTypes = [
-      'title',
-      'text',
-      'text_with_summary',
-      'text_long',
-      'string',
-      'string_long',
-    ];
+  protected function translateReferencedEntity(ContentEntityInterface $entity, array $fieldsMeta, string $language): void {
 
     // Check if the entity has the translation, create it if not.
     if (!$entity->hasTranslation($language)) {
-      $translatedEntity = $entity->addTranslation($language);
+      $translatedEntity = $entity->addTranslation($language, $entity->toArray());
     }
     else {
       $translatedEntity = $entity->getTranslation($language);
     }
 
+    // If entity_reference_depth limits have not yet been reached, the fields
+    // on this referenced entity will have been extracted as well by their
+    // appropriate FieldTextExtractor plugin. Set the translated values on the
+    // translated referenced entity now.
+    // Fields on the referenced entity that are not translatable, will not be
+    // in the extracted data, and remain as-is on the translation.
     foreach ($fieldsMeta as $subFieldName => $subFieldValue) {
-      // Get the field definition to check the type.
+      // Get the field definition to check the subfield type.
       $fieldDefinition = $entity->get($subFieldName)->getFieldDefinition();
-
-      // If it's a text field, translate it.
-      if (in_array($fieldDefinition->getType(), $stringTypes)) {
-        foreach ($subFieldValue as &$singleSubValue) {
-          unset($singleSubValue['field_name']);
-          unset($singleSubValue['field_type']);
-
-          // Set the translated value.
-          if (isset($singleSubValue['value'])) {
-            $translatedEntity->set($subFieldName, $singleSubValue);
-          }
-        }
+      // Get the FieldTextExtractor plugin that is relevant for this field type.
+      // Pass along the translated referenced entity, so the relevant extractor
+      // can set translated values on it.
+      $translatedEntity->set($subFieldName, $entity->get($subFieldName)->getValue());
+      $extractor = $this->extractorManager->getExtractor(
+        $fieldDefinition->getType()
+      );
+      // This shouldn't happen.
+      if (!$extractor) {
+        continue;
       }
-      // Handle entity reference fields.
-      // E.g., media, content references, or nested paragraphs.
-      elseif (in_array($fieldDefinition->getType(), ['entity_reference', 'entity_reference_revisions'])) {
-        $referencedSubEntities = $entity->get($subFieldName)->referencedEntities();
-
-        foreach ($subFieldValue as $subDelta => $subSubFieldValue) {
-          if (!isset($referencedSubEntities[$subDelta])) {
-            continue;
-          }
-
-          $nestedEntity = $referencedSubEntities[$subDelta];
-
-          // Recursively translate the fields of the nested entity.
-          $this->translateAndPreserveFields($nestedEntity, $subSubFieldValue, $language);
-
-          // Save the updated nested entity.
-          $nestedEntity->save();
-        }
-
-        // Set the original referenced entities to the translated
-        // entity if they aren't translated.
-        $translatedEntity->set($subFieldName, $entity->get($subFieldName)->getValue());
-      }
-      // If translatable, preserve the original value in the translated entity.
-      else {
-        $translatedEntity->set($subFieldName, $entity->get($subFieldName)->getValue());
-      }
+      // Set the AI translated value on this specific field on the referenced
+      // entity.
+      $extractor->setValue($translatedEntity, $subFieldName, $subFieldValue);
     }
   }
 
@@ -249,7 +222,7 @@ class ReferenceFieldExtractor implements ConfigurableFieldTextExtractorInterface
   public function shouldExtract(ContentEntityInterface $entity, FieldConfigInterface $fieldDefinition): bool {
     $targetType = $fieldDefinition->getFieldStorageDefinition()->getSetting('target_type');
     // Extract only fields of content entities.
-    if (!in_array(ContentEntityInterface::class, class_implements(
+    if (!\in_array(ContentEntityInterface::class, class_implements(
       $this->entityTypeManager->getDefinition($targetType)->getClass()))) {
       return FALSE;
     }
@@ -265,7 +238,7 @@ class ReferenceFieldExtractor implements ConfigurableFieldTextExtractorInterface
   /**
    * {@inheritdoc}
    */
-  public function fieldSettingsForm(FieldConfigInterface $entity, FormStateInterface $form_state, array &$completeForm = []) {
+  public function fieldSettingsForm(FieldConfigInterface $entity, FormStateInterface $form_state, array &$completeForm = []): array {
     $subform = [];
     $subform['translate_references'] = [
       '#type' => 'radios',
@@ -278,8 +251,7 @@ class ReferenceFieldExtractor implements ConfigurableFieldTextExtractorInterface
       '#default_value' => $entity->getThirdPartySetting('ai_translate',
           'translate_references') ?? self::TRANSLATE_REFERENCE_DEFAULT,
     ];
-    $targetType = $entity->getFieldStorageDefinition()
-      ->getSetting('target_type');
+    $targetType = $entity->getFieldStorageDefinition()->getSetting('target_type');
     $default = $this->entityTypeTranslatedDefault($targetType);
     $subform['translate_references']['#description'] =
       $this->t('Current default for @entity_type is @default', [
@@ -297,7 +269,7 @@ class ReferenceFieldExtractor implements ConfigurableFieldTextExtractorInterface
   /**
    * {@inheritdoc}
    */
-  public function submitFieldSettingForm(FieldConfigInterface $entity, FormStateInterface $form_state, array &$completeForm = []) {
+  public function submitFieldSettingForm(FieldConfigInterface $entity, FormStateInterface $form_state, array &$completeForm = []): void {
     $pluginValues = $form_state->getValue([
       'third_party_settings',
       'ai_translate',
@@ -319,8 +291,8 @@ class ReferenceFieldExtractor implements ConfigurableFieldTextExtractorInterface
   protected function entityTypeTranslatedDefault(string $entityTypeId): bool {
     $defaults = $this->config->get('reference_defaults') ?? [];
 
-    // Default is to not translate entities of unknown type.
-    return (array_search($entityTypeId, $defaults) !== FALSE);
+    // Default is to not translate entities of an unknown type.
+    return \in_array($entityTypeId, $defaults);
   }
 
 }

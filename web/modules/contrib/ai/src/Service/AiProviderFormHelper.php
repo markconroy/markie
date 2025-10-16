@@ -283,6 +283,14 @@ class AiProviderFormHelper {
       return [];
     }
     $model = $form_state->getValue($prefix . 'ai_model');
+
+    // Early return with an empty configuration if model is not selected.
+    if (empty($model)) {
+      // Set a more user-friendly message as a form error.
+      $form_state->setErrorByName($prefix . 'ai_model', $this->t('Please select a model to continue. The AI provider may not be properly configured.'));
+      return [];
+    }
+
     $llmInstance = $this->aiProviderPluginManager->createInstance($provider);
     $schema = $llmInstance->getAvailableConfiguration($operation_type, $model);
     $prefix = $prefix ? rtrim($prefix, '_') . '_' : '';

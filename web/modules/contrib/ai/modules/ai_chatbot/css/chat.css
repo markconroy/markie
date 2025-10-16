@@ -85,6 +85,7 @@
   width: 400px;
   box-shadow: rgba(100, 100, 111, 0.2) 0 7px 29px 0;
   font-size: 12px;
+  transition: bottom 0.3s ease, height 0.3s ease;
 }
 
 /* Specific change for Gin Admin theme */

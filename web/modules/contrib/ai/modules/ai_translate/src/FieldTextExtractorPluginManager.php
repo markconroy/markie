@@ -47,7 +47,9 @@ final class FieldTextExtractorPluginManager extends DefaultPluginManager impleme
     if (empty($this->definitionsByFieldType[$fieldType])) {
       return NULL;
     }
-    return $this->createInstance($this->definitionsByFieldType[$fieldType]['id'], ['field_type' => $fieldType]);
+    return $this->createInstance($this->definitionsByFieldType[$fieldType]['id'], [
+      'field_type' => $fieldType,
+    ]);
   }
 
 }

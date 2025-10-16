@@ -11,7 +11,6 @@ use Drupal\ai\Base\FunctionCallBase;
 use Drupal\ai\Plugin\AiFunctionCall\Derivative\ActionPluginDeriver;
 use Drupal\ai\Service\FunctionCalling\ExecutableFunctionCallInterface;
 use Drupal\ai\Service\FunctionCalling\FunctionCallInterface;
-use Drupal\ai\Utility\ContextDefinitionNormalizer;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -55,41 +54,17 @@ class ActionPluginBase extends FunctionCallBase implements ExecutableFunctionCal
   protected $errorMessage;
 
   /**
-   * Constructs a FunctionCall plugin.
-   *
-   * @param array $configuration
-   *   A configuration array containing information about the plugin instance.
-   * @param string $plugin_id
-   *   The plugin_id for the plugin instance.
-   * @param mixed $plugin_definition
-   *   The plugin implementation definition.
-   * @param \Drupal\ai\Utility\ContextDefinitionNormalizer $context_definition_normalizer
-   *   The context definition normalizer service.
-   * @param \Drupal\Core\Action\ActionManager $action_manager
-   *   The action manager service.
-   */
-  public function __construct(
-    array $configuration,
-    $plugin_id,
-    $plugin_definition,
-    protected ContextDefinitionNormalizer $context_definition_normalizer,
-    protected ActionManager $action_manager,
-  ) {
-    parent::__construct($configuration, $plugin_id, $plugin_definition, $context_definition_normalizer);
-    $this->actionManager = $action_manager;
-  }
-
-  /**
    * Load from dependency injection container.
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition): FunctionCallInterface|static {
-    return new static(
+    $instance = parent::create(
+      $container,
       $configuration,
       $plugin_id,
       $plugin_definition,
-      $container->get('ai.context_definition_normalizer'),
-      $container->get('plugin.manager.action')
     );
+    $instance->actionManager = $container->get('plugin.manager.action');
+    return $instance;
   }
 
   /**
@@ -130,7 +105,6 @@ class ActionPluginBase extends FunctionCallBase implements ExecutableFunctionCal
       // Set the execution status to failed and store the error message.
       $this->executionStatus = 'failed';
       $this->errorMessage = $e->getMessage();
-
     }
   }
 

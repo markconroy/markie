@@ -500,6 +500,13 @@ final class AiAssistantForm extends EntityForm {
     parent::validateForm($form, $form_state);
     $this->formHelper->validateAiProvidersConfig($form, $form_state, 'chat', 'llm');
 
+    // Even if the model is required, it can be empty.
+    // Trigger an error if the provider is not set to default and the model is
+    // empty.
+    if ($form_state->getValue('llm_ai_provider') !== '__default__' && empty($form_state->getValue('llm_ai_model'))) {
+      $form_state->setErrorByName('llm_ai_model', $this->t('You need to select a model for the AI provider.'));
+    }
+
     // If the rag is enabled, we need to check if the database is selected.
     if ($form_state->getValue('enable_rag') && !$form_state->getValue('rag_database')) {
       $form_state->setErrorByName('rag_database', $this->t('You need to select a RAG database.'));

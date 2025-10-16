@@ -8,9 +8,8 @@ use Drupal\Core\Plugin\Context\ContextDefinition;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\ai\Attribute\FunctionCall;
 use Drupal\ai\Base\FunctionCallBase;
-use Drupal\ai\Service\FunctionCalling\ExecutableFunctionCallInterface;
 use Drupal\ai\Service\FunctionCalling\FunctionCallInterface;
-use Drupal\ai\Utility\ContextDefinitionNormalizer;
+use Drupal\ai\Service\FunctionCalling\StructuredExecutableFunctionCallInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -51,7 +50,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
     ),
   ],
 )]
-class RagTool extends FunctionCallBase implements ExecutableFunctionCallInterface {
+class RagTool extends FunctionCallBase implements StructuredExecutableFunctionCallInterface {
 
 
   /**
@@ -69,6 +68,13 @@ class RagTool extends FunctionCallBase implements ExecutableFunctionCallInterfac
   protected EntityFieldManagerInterface $entityFieldManager;
 
   /**
+   * The results.
+   *
+   * @var array
+   */
+  protected array $results = [];
+
+  /**
    * Load from dependency injection container.
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition): FunctionCallInterface|static {
@@ -76,7 +82,7 @@ class RagTool extends FunctionCallBase implements ExecutableFunctionCallInterfac
       $configuration,
       $plugin_id,
       $plugin_definition,
-      new ContextDefinitionNormalizer(),
+      $container->get('ai.context_definition_normalizer'),
     );
     $instance->entityTypeManager = $container->get('entity_type.manager');
     $instance->entityFieldManager = $container->get('entity_field.manager');
@@ -140,13 +146,33 @@ class RagTool extends FunctionCallBase implements ExecutableFunctionCallInterfac
       return;
     }
     if (count($end_results)) {
-      $output = "Results from searching in the rag index $this->index for the following prompt: $this->searchString.\n";
+      $output = "Results from searching in the rag index " . $this->index . " for the following prompt: " . $this->searchString . ".\n";
       $output .= implode("\n", $end_results);
       $this->setOutput($output);
     }
     else {
-      $this->setOutput("No results were found when searching in the rag index for the following prompt: $this->searchString.\n");
+      $this->setOutput("No results were found when searching in the rag index " . $this->index . " for the following prompt: " . $this->searchString . ".\n");
     }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getStructuredOutput(): array {
+    return [
+      'results' => $this->results,
+      'index' => $this->index,
+      'search_string' => $this->searchString,
+    ];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setStructuredOutput(array $output): void {
+    $this->results = $output['results'];
+    $this->index = $output['index'] ?? '';
+    $this->searchString = $output['search_string'] ?? '';
   }
 
 }

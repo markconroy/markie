@@ -152,4 +152,19 @@ class ToolsFunctionInput implements ToolsFunctionInputInterface {
     return $function;
   }
 
+  /**
+   * From array.
+   *
+   * @param array $data
+   *   The data to create the function from.
+   *
+   * @return \Drupal\ai\OperationType\Chat\Tools\ToolsFunctionInputInterface
+   *   The function input.
+   */
+  public static function fromArray(array $data): ToolsFunctionInputInterface {
+    $function = new static($data['name'] ?? '', $data);
+    $function->setFromArray($data['name'] ?? '', $data);
+    return $function;
+  }
+
 }

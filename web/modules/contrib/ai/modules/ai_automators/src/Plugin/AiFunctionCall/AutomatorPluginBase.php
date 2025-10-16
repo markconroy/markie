@@ -6,9 +6,8 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\ai\Attribute\FunctionCall;
 use Drupal\ai\Base\FunctionCallBase;
-use Drupal\ai\Service\FunctionCalling\ExecutableFunctionCallInterface;
 use Drupal\ai\Service\FunctionCalling\FunctionCallInterface;
-use Drupal\ai\Utility\ContextDefinitionNormalizer;
+use Drupal\ai\Service\FunctionCalling\StructuredExecutableFunctionCallInterface;
 use Drupal\ai_automators\Plugin\AiFunctionCall\Derivative\AutomatorPluginDeriver;
 use Drupal\ai_automators\Service\Automate;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -24,7 +23,7 @@ use Symfony\Component\Yaml\Yaml;
   description: '',
   deriver: AutomatorPluginDeriver::class
 )]
-class AutomatorPluginBase extends FunctionCallBase implements ExecutableFunctionCallInterface {
+class AutomatorPluginBase extends FunctionCallBase implements StructuredExecutableFunctionCallInterface {
 
   /**
    * The automator tool config.
@@ -62,7 +61,7 @@ class AutomatorPluginBase extends FunctionCallBase implements ExecutableFunction
       $configuration,
       $plugin_id,
       $plugin_definition,
-      new ContextDefinitionNormalizer(),
+      $container->get('ai.context_definition_normalizer'),
     );
     $instance->entityTypeManager = $container->get('entity_type.manager');
     $instance->automate = $container->get('ai_automator.automate');
@@ -107,6 +106,20 @@ class AutomatorPluginBase extends FunctionCallBase implements ExecutableFunction
    */
   public function getReadableOutput(): string {
     return Yaml::dump($this->output, 10, 2);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getStructuredOutput(): array {
+    return $this->output;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setStructuredOutput(array $output): void {
+    $this->output = $output;
   }
 
 }

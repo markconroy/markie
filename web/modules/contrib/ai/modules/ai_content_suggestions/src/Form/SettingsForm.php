@@ -8,6 +8,7 @@ use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Config\TypedConfigManagerInterface;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Url;
 use Drupal\ai_content_suggestions\AiContentSuggestionsPluginManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -70,18 +71,40 @@ final class SettingsForm extends ConfigFormBase {
       '#tree' => TRUE,
       '#open' => TRUE,
     ];
-    $form['plugins']['introduction'] = [
-      '#type' => 'html_tag',
-      '#tag' => 'p',
-      '#value' => $this->t('Below is a list of the available plugins you can use to analyze your content.'),
-    ];
 
+    // Collect available plugins.
+    $available_plugins = [];
     foreach ($this->pluginManager->getDefinitions() as $id => $config) {
       /** @var \Drupal\ai_content_suggestions\AiContentSuggestionsInterface $plugin */
       if ($plugin = $this->pluginManager->createInstance($id, $config)) {
         if ($plugin->isAvailable()) {
-          $plugin->buildSettingsForm($form['plugins']);
+          $available_plugins[$id] = $plugin;
         }
+      }
+    }
+
+    // Show warning if no plugins are available.
+    if (empty($available_plugins)) {
+      $form['plugins']['no_providers'] = [
+        '#type' => 'html_tag',
+        '#tag' => 'p',
+        '#value' => $this->t('No AI content suggestion plugins are currently available. Please <a href="@url">configure and enable an AI provider</a> first to see the list of available plugins.', [
+          '@url' => Url::fromRoute('ai.admin_providers')->toString(),
+        ]),
+        '#attributes' => [
+          'class' => ['messages', 'messages--warning'],
+        ],
+      ];
+    }
+    else {
+      $form['plugins']['introduction'] = [
+        '#type' => 'html_tag',
+        '#tag' => 'p',
+        '#value' => $this->t('Below is a list of the available plugins you can use to analyze your content.'),
+      ];
+
+      foreach ($available_plugins as $plugin) {
+        $plugin->buildSettingsForm($form['plugins']);
       }
     }
 

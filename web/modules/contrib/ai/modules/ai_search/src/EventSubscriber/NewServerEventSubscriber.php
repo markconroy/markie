@@ -5,7 +5,6 @@ namespace Drupal\ai_search\EventSubscriber;
 use Drupal\Core\Config\ConfigCrudEvent;
 use Drupal\Core\Config\ConfigEvents;
 use Drupal\ai\AiVdbProviderPluginManager;
-use Drupal\ai\Enum\VdbSimilarityMetrics;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
@@ -38,21 +37,10 @@ class NewServerEventSubscriber implements EventSubscriberInterface {
       // Only VDB providers apply.
       if (
         isset($data['backend']) && $data['backend'] == 'search_api_ai_search' &&
-        isset($data['backend_config']['database']) && $this->vdbProvider->getDefinition($data['backend_config']['database'])
+        isset($data['backend_config']['database']) && $this->vdbProvider->hasDefinition($data['backend_config']['database'])
       ) {
         $vdb_provider = $this->vdbProvider->createInstance($data['backend_config']['database']);
-        // Check if the collection exists.
-        $collections = $vdb_provider->getCollections($data['backend_config']['database_settings']['database_name']);
-        if (is_array($collections) && in_array($data['backend_config']['database_settings']['collection'], $collections)) {
-          return;
-        }
-        // Otherwise create the collection.
-        $vdb_provider->createCollection(
-          $data['backend_config']['database_settings']['collection'],
-          $data['backend_config']['embeddings_engine_configuration']['dimensions'],
-          VdbSimilarityMetrics::from($data['backend_config']['database_settings']['metric']),
-          $data['backend_config']['database_settings']['database_name'],
-        );
+        $this->vdbProvider->ensureCollectionExists($vdb_provider, $data['backend_config']);
       }
     }
   }
@@ -60,7 +48,7 @@ class NewServerEventSubscriber implements EventSubscriberInterface {
   /**
    * {@inheritdoc}
    */
-  public static function getSubscribedEvents() {
+  public static function getSubscribedEvents(): array {
     return [
       ConfigEvents::SAVE => 'onConfigSave',
     ];

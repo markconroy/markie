@@ -3,6 +3,7 @@
 namespace Drupal\ai_provider_openai;
 
 use Drupal\Component\Serialization\Json;
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use GuzzleHttp\Client;
@@ -16,14 +17,23 @@ class OpenAiHelper {
   use StringTranslationTrait;
 
   /**
+   * The config factory service.
+   */
+  protected ConfigFactoryInterface $configFactory;
+
+  /**
    * Constructor.
    *
    * @param \Drupal\Core\Messenger\MessengerInterface $messenger
    *   The messenger service.
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
+   *   The config factory service.
    */
   public function __construct(
     private readonly MessengerInterface $messenger,
+    ConfigFactoryInterface $config_factory,
   ) {
+    $this->configFactory = $config_factory;
   }
 
   /**
@@ -44,9 +54,13 @@ class OpenAiHelper {
       },
     ]);
 
+    // Build the endpoint from config.
+    $host = $this->configFactory->get('ai_provider_openai.settings')->get('host');
+    $endpoint = 'https://' . ($host ?: 'api.openai.com/v1') . '/chat/completions';
+
     // We need to catch errors, since the API key might be invalid, so plain
     // Guzzle is used.
-    $content = $guzzle->request('POST', 'https://api.openai.com/v1/chat/completions', [
+    $content = $guzzle->request('POST', $endpoint, [
       'headers' => [
         'Authorization' => 'Bearer ' . $api_key,
       ],

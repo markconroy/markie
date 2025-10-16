@@ -2,6 +2,7 @@
 
 namespace Drupal\ai\OperationType\TextToImage;
 
+use Drupal\ai\OperationType\GenericType\ImageFile;
 use Drupal\ai\OperationType\OutputInterface;
 
 /**
@@ -10,9 +11,9 @@ use Drupal\ai\OperationType\OutputInterface;
 class TextToImageOutput implements OutputInterface {
 
   /**
-   * The normalized ImageType.
+   * The normalized ImageFile.
    *
-   * @var \Drupal\ai\OperationType\GenericType\ImageType[]
+   * @var \Drupal\ai\OperationType\GenericType\ImageFile[]
    */
   private array $normalized;
 
@@ -47,10 +48,10 @@ class TextToImageOutput implements OutputInterface {
   }
 
   /**
-   * Returns an array of ImageType objects.
+   * Returns an array of ImageFile objects.
    *
-   * @return \Drupal\ai\OperationType\GenericType\ImageType[]
-   *   The ImageType objects.
+   * @return \Drupal\ai\OperationType\GenericType\ImageFile[]
+   *   The ImageFile objects.
    */
   public function getNormalized(): array {
     return $this->normalized;
@@ -80,11 +81,32 @@ class TextToImageOutput implements OutputInterface {
    * {@inheritdoc}
    */
   public function toArray(): array {
+    $images = [];
+    foreach ($this->normalized as $image) {
+      $images[] = $image->toArray();
+    }
     return [
-      'normalized' => $this->normalized,
+      'normalized' => $images,
       'rawOutput' => $this->rawOutput,
       'metadata' => $this->metadata,
     ];
+  }
+
+  /**
+   * Create an instance from an array.
+   *
+   * @param array $data
+   *   The data to create the instance from.
+   *
+   * @return static
+   *   The created instance.
+   */
+  public static function fromArray(array $data): static {
+    $normalized = [];
+    foreach ($data['normalized'] ?? [] as $imageData) {
+      $normalized[] = ImageFile::fromArray($imageData);
+    }
+    return new static($normalized, $data['rawOutput'] ?? NULL, $data['metadata'] ?? NULL);
   }
 
 }

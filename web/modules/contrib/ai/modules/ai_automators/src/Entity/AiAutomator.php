@@ -31,10 +31,10 @@ use Drupal\ai_automators\AiAutomatorInterface;
  *   config_prefix = "ai_automator",
  *   admin_permission = "administer ai_automator",
  *   links = {
- *     "collection" = "/admin/structure/ai-automator",
- *     "add-form" = "/admin/structure/ai-automator/add",
- *     "edit-form" = "/admin/structure/ai-automator/{ai_automator}",
- *     "delete-form" = "/admin/structure/ai-automator/{ai_automator}/delete",
+ *     "collection" = "/admin/config/ai/ai-automators/ai-automator",
+ *     "add-form" = "/admin/config/ai/ai-automators/ai-automator/add",
+ *     "edit-form" = "/admin/config/ai/ai-automators/ai-automator/{ai_automator}",
+ *     "delete-form" = "/admin/config/ai/ai-automators/ai-automator/{ai_automator}/delete",
  *   },
  *   entity_keys = {
  *     "id" = "id",

@@ -84,34 +84,120 @@ final class TranslationGenerator extends AiApiExplorerPluginBase {
    * {@inheritdoc}
    */
   public function getResponse(array &$form, FormStateInterface $form_state): array {
-    $provider = $this->aiProviderHelper->generateAiProviderFromFormSubmit($form, $form_state, 'translate_text', 'tt');
-    $text = $form_state->getValue('text');
-    $sourceLanguage = $form_state->getValue('source_language') ?? NULL;
-    $targetLang = $form_state->getValue('target_language');
-    $model = $form_state->getValue('tt_ai_model');
-    $input = new TranslateTextInput($text, $sourceLanguage, $targetLang);
-    if (empty($text) && empty($targetLang)) {
-      try {
-        $translation = $provider->translateText($input, $model, []);
+    try {
+      $provider = $this->aiProviderHelper->generateAiProviderFromFormSubmit($form, $form_state, 'translate_text', 'translate_text');
+      $text = $form_state->getValue('text');
+      $sourceLanguage = $form_state->getValue('source_language') ?? NULL;
+      $targetLang = $form_state->getValue('target_language');
+      $model = $form_state->getValue('tt_ai_model');
+
+      if (empty($text)) {
+        $form['right']['response']['#context']['ai_response'] = [
+          'heading' => [
+            '#type' => 'html_tag',
+            '#tag' => 'h3',
+            '#value' => $this->t('No Text Provided'),
+          ],
+          'message' => [
+            '#type' => 'html_tag',
+            '#tag' => 'div',
+            '#value' => $this->t('Please enter text to translate.'),
+            '#attributes' => [
+              'class' => ['ai-text-response', 'ai-error-message'],
+            ],
+          ],
+        ];
+        $form_state->setRebuild();
+        return $form['right'];
+      }
+
+      if (empty($targetLang)) {
+        $form['right']['response']['#context']['ai_response'] = [
+          'heading' => [
+            '#type' => 'html_tag',
+            '#tag' => 'h3',
+            '#value' => $this->t('No Target Language Provided'),
+          ],
+          'message' => [
+            '#type' => 'html_tag',
+            '#tag' => 'div',
+            '#value' => $this->t('Please specify a target language for translation.'),
+            '#attributes' => [
+              'class' => ['ai-text-response', 'ai-error-message'],
+            ],
+          ],
+        ];
+        $form_state->setRebuild();
+        return $form['right'];
+      }
+
+      $input = new TranslateTextInput($text, $sourceLanguage, $targetLang);
+      $translation = $provider->translateText($input, $model, ['ai_api_explorer'])->getNormalized();
+
+      if (!empty($translation) && is_string($translation)) {
         $form['right']['response']['#context']['ai_response']['response'] = [
-          '#type' => 'inline_template',
-          '#template' => '{{ response|raw }}',
-          '#context' => [
-            'response' => $translation->getNormalized(),
+          '#type' => 'html_tag',
+          '#tag' => 'div',
+          '#value' => htmlspecialchars($translation, ENT_QUOTES, 'UTF-8'),
+          '#attributes' => [
+            'class' => ['ai-text-response'],
           ],
         ];
       }
-      catch (\Exception $e) {
-        $form['right']['response']['#context']['ai_response']['response'] = [
-          '#type' => 'inline_template',
-          '#template' => '{{ error|raw }}',
-          '#context' => [
-            'error' => $this->explorerHelper->renderException($e),
+      else {
+        $form['right']['response']['#context']['ai_response'] = [
+          'heading' => [
+            '#type' => 'html_tag',
+            '#tag' => 'h3',
+            '#value' => $this->t('No Translation Generated'),
+          ],
+          'message' => [
+            '#type' => 'html_tag',
+            '#tag' => 'div',
+            '#value' => $this->t('The provider did not generate a valid translation. Please check your input and try again.'),
+            '#attributes' => [
+              'class' => ['ai-text-response', 'ai-error-message'],
+            ],
           ],
         ];
       }
     }
+    catch (\TypeError $e) {
+      $form['right']['response']['#context']['ai_response'] = [
+        'heading' => [
+          '#type' => 'html_tag',
+          '#tag' => 'h3',
+          '#value' => $this->t('Configuration Error'),
+        ],
+        'message' => [
+          '#type' => 'html_tag',
+          '#tag' => 'div',
+          '#value' => $this->t('The AI provider could not be used. Please make sure a model is selected and the provider is properly configured.'),
+          '#attributes' => [
+            'class' => ['ai-text-response', 'ai-error-message'],
+          ],
+        ],
+      ];
+    }
+    catch (\Exception $e) {
+      $form['right']['response']['#context']['ai_response'] = [
+        'heading' => [
+          '#type' => 'html_tag',
+          '#tag' => 'h3',
+          '#value' => $this->t('Error'),
+        ],
+        'message' => [
+          '#type' => 'html_tag',
+          '#tag' => 'div',
+          '#value' => $this->explorerHelper->renderException($e),
+          '#attributes' => [
+            'class' => ['ai-text-response', 'ai-error-message'],
+          ],
+        ],
+      ];
+    }
 
+    $form_state->setRebuild();
     return $form['right'];
   }
 

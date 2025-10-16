@@ -8,7 +8,6 @@ services:
     class: Drupal\ai_translate\TextExtractor
     arguments:
       - '@entity_type.manager'
-      - '@entity_field.manager'
       - '@plugin.manager.text_extractor'
   ai_translate.text_translator:
     class: Drupal\ai_translate\TextTranslator

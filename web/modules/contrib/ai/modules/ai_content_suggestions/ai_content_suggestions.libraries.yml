@@ -6,8 +6,6 @@ ai_content_suggestions_js:
     - core/once
 
 field_widget:
-  js:
-    js/field_widget.js: { }
   css:
     theme:
       css/field_widget.css: { }

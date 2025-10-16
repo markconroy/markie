@@ -24,7 +24,7 @@ block.settings.ai_chatbot_block:
       type: string
       label: Default Avatar
     first_message:
-      type: string
+      type: label
       label: First Message
     stream:
       type: integer

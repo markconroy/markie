@@ -109,26 +109,109 @@ class ContentTranslationControllerOverride extends ContentTranslationController 
       }
     }
 
-    if ($overview) {
+    if (!$overview) {
+      return;
+    }
+
+    $languages = $this->languageManager()->getLanguages();
+
+    $entity = $route_match->getParameter($entity_type_id);
+    $entity_id = $entity->id();
+    /** @var Drupal\Core\Entity\RevisionableStorageInterface $storage */
+    $storage = $this->entityTypeManager()->getStorage($entity_type_id);
+    $default_revision = $storage->load($entity_id);
+    $entity_type = $entity->getEntityType();
+
+    $use_latest_revisions = $entity_type->isRevisionable() && ContentTranslationManager::isPendingRevisionSupportEnabled($entity_type_id, $entity->bundle());
+    $lang_from = $entity->getUntranslated()->language()->getId();
+
+    $config = $this->config('ai_translate.settings');
+    $key = 0;
+
+    // Process translation in 2 passes.
+    // In the first pass, build translation links with access check.
+    // In the second pass, add translation links to the overview.
+    // Do the second pass only if there is at least one link to translate.
+    $hasTranslationLinks = FALSE;
+    $aiTranslationLinks = [];
+
+    // Pass 1.
+    foreach ($languages as $langcode => $language) {
+      if (isset($overview['#rows'][$key])) {
+        $row = &$overview['#rows'][$key];
+        $key++;
+      }
+      elseif (isset($overview['#options'][$langcode])) {
+        $row = &$overview['#options'][$langcode];
+      }
+      else {
+        $row = NULL;
+      }
+
+      // If we don't have a row, we cannot do anything.
+      if ($row) {
+        // Get the latest revision.
+        // This logic comes from web/core/modules/content_translation/src/Controller/ContentTranslationController.php.
+        if ($use_latest_revisions) {
+          $entity = $default_revision;
+          $latest_revision_id = $storage->getLatestTranslationAffectedRevisionId($entity->id(), $langcode);
+          if ($latest_revision_id) {
+            /** @var \Drupal\Core\Entity\ContentEntityInterface $latest_revision */
+            $latest_revision = $storage->loadRevision($latest_revision_id);
+            // Make sure we do not list removed translations, i.e.
+            // translations that have been part of a default revision but no
+            // longer are.
+            if (!$latest_revision->wasDefaultRevision() || $default_revision->hasTranslation($langcode)) {
+              $entity = $latest_revision;
+            }
+          }
+        }
+
+        $ai_model = FALSE;
+        $additional = '';
+        if ($lang_from !== $langcode && !$entity->hasTranslation($langcode)) {
+          $model = $config->get('language_settings')[$langcode]['model'] ?? '';
+          $parts = explode('__', $model);
+          if ($model == "" || empty($parts[0])) {
+            $default_model = $this->providerManager->getSimpleDefaultProviderOptions('translate_text');
+            if ($default_model !== "") {
+              $parts1 = explode('__', $default_model);
+              $ai_model = $parts1[1];
+            }
+          }
+          else {
+            $ai_model = $parts[1];
+          }
+          if ($ai_model) {
+            $additional = Link::createFromRoute($this->t('Translate using @ai', ['@ai' => $ai_model]),
+              'ai_translate.translate_content', [
+                'entity_type' => $entity_type_id,
+                'entity_id' => $entity_id,
+                'lang_from' => $lang_from,
+                'lang_to' => $langcode,
+              ]
+            );
+            if ($additional->getUrl()->access()) {
+              $additional = $additional->toString();
+              $hasTranslationLinks = TRUE;
+            }
+            else {
+              $additional = '';
+            }
+          }
+        }
+        else {
+          $additional = $this->t('n/a');
+        }
+        $aiTranslationLinks[$langcode] = $additional;
+      }
+    }
+    // Pass 2. Add a column to the table header, and translation link(s).
+    if ($hasTranslationLinks) {
       // Inject our additional column into the header.
-      array_splice($overview['#header'], -1, 0, [$this->t('AI Translations')]);
-
-      $languages = $this->languageManager()->getLanguages();
-
-      $entity = $route_match->getParameter($entity_type_id);
-      $entity_id = $entity->id();
-
-      /** @var \Drupal\Core\Entity\RevisionableStorageInterface $storage */
-      $storage = $this->entityTypeManager()->getStorage($entity_type_id);
-      $default_revision = $storage->load($entity_id);
-      $entity_type = $entity->getEntityType();
-
-      $use_latest_revisions = $entity_type->isRevisionable() && ContentTranslationManager::isPendingRevisionSupportEnabled($entity_type_id, $entity->bundle());
-      $lang_from = $entity->getUntranslated()->language()->getId();
-
-      $config = $this->config('ai_translate.settings');
+      array_splice($overview['#header'], -1, 0,
+        [$this->t('AI Translations')]);
       $key = 0;
-
       foreach ($languages as $langcode => $language) {
         if (isset($overview['#rows'][$key])) {
           $row = &$overview['#rows'][$key];
@@ -138,61 +221,9 @@ class ContentTranslationControllerOverride extends ContentTranslationController 
           $row = &$overview['#options'][$langcode];
         }
         else {
-          $row = NULL;
+          continue;
         }
-
-        // If we don't have a row, we cannot do anything.
-        if ($row) {
-
-          // Get the latest revision.
-          // This logic comes from web/core/modules/content_translation/src/Controller/ContentTranslationController.php.
-          if ($use_latest_revisions) {
-            $entity = $default_revision;
-            $latest_revision_id = $storage->getLatestTranslationAffectedRevisionId($entity->id(), $langcode);
-            if ($latest_revision_id) {
-              /** @var \Drupal\Core\Entity\ContentEntityInterface $latest_revision */
-              $latest_revision = $storage->loadRevision($latest_revision_id);
-              // Make sure we do not list removed translations, i.e.
-              // translations that have been part of a default revision but no
-              // longer are.
-              if (!$latest_revision->wasDefaultRevision() || $default_revision->hasTranslation($langcode)) {
-                $entity = $latest_revision;
-              }
-            }
-          }
-
-          $ai_model = FALSE;
-          $additional = '';
-          if ($lang_from !== $langcode && !$entity->hasTranslation($langcode)) {
-            $model = $config->get($langcode . '_model') ?? '';
-            $parts = explode('__', $model);
-            if ($model == "" || empty($parts[0])) {
-              $default_model = $this->providerManager->getSimpleDefaultProviderOptions('translate_text');
-              if ($default_model !== "") {
-                $parts1 = explode('__', $default_model);
-                $ai_model = $parts1[1];
-              }
-            }
-            else {
-              $ai_model = $parts[1];
-            }
-            if ($ai_model) {
-              $additional = Link::createFromRoute($this->t('Translate using @ai', ['@ai' => $ai_model]),
-                'ai_translate.translate_content', [
-                  'entity_type' => $entity_type_id,
-                  'entity_id' => $entity_id,
-                  'lang_from' => $lang_from,
-                  'lang_to' => $langcode,
-                ]
-              )->toString();
-            }
-          }
-          else {
-            $additional = $this->t('NA');
-          }
-
-          array_splice($row, -1, 0, [$additional]);
-        }
+        array_splice($row, -1, 0, [$aiTranslationLinks[$langcode]]);
       }
     }
   }

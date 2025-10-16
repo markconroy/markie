@@ -183,7 +183,6 @@ class ToolsPropertyResultTest extends TestCase {
       ['test', 'integer', TRUE],
       ['test', 'float', TRUE],
       ['test', 'boolean', TRUE],
-      ['false', 'bool', FALSE],
       ['test', 'array', TRUE],
       ['test', 'object', TRUE],
       [NULL, 'null', FALSE],

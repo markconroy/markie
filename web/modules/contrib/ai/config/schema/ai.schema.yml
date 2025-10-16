@@ -42,6 +42,9 @@ ai.settings:
         text_to_speech:
           label: 'Default text to speech provider'
           type: ai.default_operation_provider
+    default_vdb_provider:
+      label: 'Default Vector Database Provider'
+      type: string
     models:
       type: sequence
       label: The overriden/added models.

@@ -47,16 +47,9 @@ ai_content_suggestions.tone:
       type: boolean
       label: 'Enable custom tone taxonomy'
 
-field.widget.third_party.ai_content_suggestions:
-  type: ai_content_suggestions.third_party_settings
-
-ai_content_suggestions.third_party_settings:
-  type: mapping
-  label: 'AI Content Suggestions third party settings'
+field_widget_action.plugin.prompt_content_suggestion:
+  type: field_widget_action_plugin_base
   mapping:
-    enabled:
-      type: boolean
-      label: 'Enabled'
     settings:
       type: mapping
       mapping:
@@ -66,6 +59,6 @@ ai_content_suggestions.third_party_settings:
         prompt:
           type: text
           label: 'Prompt'
-        button:
-          type: label
-          label: 'Button label'
+        display_on_focus:
+          type: boolean
+          label: 'Display buttons on focus'

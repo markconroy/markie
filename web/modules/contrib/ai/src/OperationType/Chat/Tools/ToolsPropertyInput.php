@@ -75,6 +75,20 @@ class ToolsPropertyInput implements ToolsPropertyInputInterface {
   private $maximum = NULL;
 
   /**
+   * The minimum number of items in an array.
+   *
+   * @var mixed
+   */
+  private $minItems = NULL;
+
+  /**
+   * The maximum number of items in an array.
+   *
+   * @var mixed
+   */
+  private $maxItems = NULL;
+
+  /**
    * The minimum length of the property.
    *
    * @var int
@@ -308,6 +322,34 @@ class ToolsPropertyInput implements ToolsPropertyInputInterface {
   /**
    * {@inheritDoc}
    */
+  public function getMinItems(): ?int {
+    return $this->minItems;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public function setMinItems(int $minItems) {
+    $this->minItems = $minItems;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public function getMaxItems(): ?int {
+    return $this->maxItems;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public function setMaxItems(int $maxItems) {
+    $this->maxItems = $maxItems;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
   public function getMinLength(): ?int {
     return $this->minLength;
   }
@@ -453,6 +495,12 @@ class ToolsPropertyInput implements ToolsPropertyInputInterface {
     if (isset($property['maximum'])) {
       $this->setMaximum($property['maximum']);
     }
+    if (isset($property['minItems'])) {
+      $this->setMinItems($property['minItems']);
+    }
+    if (isset($property['maxItems'])) {
+      $this->setMaxItems($property['maxItems']);
+    }
     if (isset($property['minLength'])) {
       $this->setMinLength($property['minLength']);
     }
@@ -549,6 +597,12 @@ class ToolsPropertyInput implements ToolsPropertyInputInterface {
     }
     if (!empty($this->maximum)) {
       $property['maximum'] = $this->maximum;
+    }
+    if (!empty($this->minItems)) {
+      $property['minItems'] = $this->minItems;
+    }
+    if (!empty($this->maxItems)) {
+      $property['maxItems'] = $this->maxItems;
     }
     if (!empty($this->minLength)) {
       $property['minLength'] = $this->minLength;

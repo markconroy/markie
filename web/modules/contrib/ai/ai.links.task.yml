@@ -1,0 +1,9 @@
+entity.ai_prompt.collection:
+  title: 'AI Prompts'
+  route_name: entity.ai_prompt.collection
+  base_route: ai.admin_settings
+
+entity.ai_prompt_type.collection:
+  title: 'AI Prompt Types'
+  route_name: entity.ai_prompt_type.collection
+  base_route: entity.ai_prompt.collection

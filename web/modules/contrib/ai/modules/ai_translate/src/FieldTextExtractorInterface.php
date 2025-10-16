@@ -11,6 +11,14 @@ use Drupal\Core\Field\FieldConfigInterface;
 interface FieldTextExtractorInterface {
 
   /**
+   * The field columns to extract.
+   *
+   * @return string[]
+   *   An array of field columns.
+   */
+  public function getColumns(): array;
+
+  /**
    * Check whether this field should be extracted.
    *
    * @param \Drupal\Core\Entity\ContentEntityInterface $entity
@@ -21,10 +29,7 @@ interface FieldTextExtractorInterface {
    * @return bool
    *   TRUE to attempt to extract texts from this field.
    */
-  public function shouldExtract(
-    ContentEntityInterface $entity,
-    FieldConfigInterface $fieldDefinition,
-  ) : bool;
+  public function shouldExtract(ContentEntityInterface $entity, FieldConfigInterface $fieldDefinition) : bool;
 
   /**
    * Extract text metadata from an entity field.
@@ -48,8 +53,7 @@ interface FieldTextExtractorInterface {
    *   ].
    *   Default value for '_columns' is ['value'].
    */
-  public function extract(ContentEntityInterface $entity, string $fieldName)
-    : array;
+  public function extract(ContentEntityInterface $entity, string $fieldName): array;
 
   /**
    * Set translation values in the field.
@@ -61,10 +65,6 @@ interface FieldTextExtractorInterface {
    * @param array $textMeta
    *   Text metadata including translation.
    */
-  public function setValue(
-    ContentEntityInterface $entity,
-    string $fieldName,
-    array $textMeta,
-  ) : void;
+  public function setValue(ContentEntityInterface $entity, string $fieldName, array $textMeta) : void;
 
 }

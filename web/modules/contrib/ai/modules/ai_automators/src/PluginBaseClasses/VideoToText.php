@@ -204,7 +204,7 @@ class VideoToText extends RuleBase implements ContainerFactoryPluginInterface {
     }
 
     $total = [];
-    foreach ($entity->{$automatorConfig['base_field']} as $entityWrapper) {
+    foreach ($entity->get($automatorConfig['base_field']) as $entityWrapper) {
       if ($entityWrapper->entity) {
         $fileEntity = $entityWrapper->entity;
         if (in_array($fileEntity->getMimeType(), [

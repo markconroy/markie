@@ -85,4 +85,14 @@ class ImageClassificationInput extends InputBase implements InputInterface {
     return $this->file->getFilename();
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function toArray(): array {
+    return [
+      'file' => $this->file->toArray(),
+      'labels' => $this->labels,
+    ];
+  }
+
 }

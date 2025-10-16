@@ -1,0 +1,8 @@
+services:
+  ai_observability.ai_events_subscriber:
+    class: 'Drupal\ai_observability\EventSubscriber\AiEventsSubscriber'
+    arguments:
+    - '@config.factory'
+    - '@logger.factory'
+    tags:
+      - name: 'event_subscriber'

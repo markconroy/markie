@@ -75,33 +75,95 @@ final class SpeechToTextGenerator extends AiApiExplorerPluginBase {
    * {@inheritdoc}
    */
   public function getResponse(array &$form, FormStateInterface $form_state): array {
-    $file = $form_state->getValue('file');
-    if (!empty($file)) {
-      $provider = $this->aiProviderHelper->generateAiProviderFromFormSubmit($form, $form_state, 'speech_to_text', 'stt');
-      if ($audio_file = $this->generateFile()) {
-        $raw_file = new SpeechToTextInput($audio_file);
+    try {
+      $provider = $this->aiProviderHelper->generateAiProviderFromFormSubmit($form, $form_state, 'speech_to_text', 'speech_to_text');
+      $audio_file = $this->generateFile();
 
-        try {
-          $form['right']['response']['#context']['ai_response']['response'] = [
+      if (!$audio_file) {
+        $form['right']['response']['#context']['ai_response'] = [
+          'heading' => [
             '#type' => 'html_tag',
-            '#tag' => 'p',
-            '#value' => $provider->speechToText($raw_file, $form_state->getValue('stt_ai_model'), ['ai_api_explorer'])
-              ->getNormalized(),
-          ];
-          $form['right']['response']['#context']['ai_response']['code'] = $this->normalizeCodeExample($provider, $form_state, $audio_file->getFilename());
-        }
-        catch (\Exception $e) {
-          $form['right']['response']['#context']['ai_response']['response'] = [
-            '#type' => 'inline_template',
-            '#template' => '{{ error|raw }}',
-            '#context' => [
-              'error' => $this->explorerHelper->renderException($e),
+            '#tag' => 'h3',
+            '#value' => $this->t('No Audio File Provided'),
+          ],
+          'message' => [
+            '#type' => 'html_tag',
+            '#tag' => 'div',
+            '#value' => $this->t('Please upload an audio file (MP3) to transcribe.'),
+            '#attributes' => [
+              'class' => ['ai-text-response', 'ai-error-message'],
             ],
-          ];
-        }
+          ],
+        ];
+        $form_state->setRebuild();
+        return $form['right'];
+      }
+
+      $input = new SpeechToTextInput($audio_file);
+      $transcription = $provider->speechToText($input, $form_state->getValue('speech_to_text_ai_model'), ['ai_api_explorer'])->getNormalized();
+
+      if (!empty($transcription) && is_string($transcription)) {
+        $form['right']['response']['#context']['ai_response']['response'] = [
+          '#type' => 'html_tag',
+          '#tag' => 'p',
+          '#value' => $transcription,
+        ];
+        $form['right']['response']['#context']['ai_response']['code'] = $this->normalizeCodeExample($provider, $form_state, $audio_file->getFilename());
+      }
+      else {
+        $form['right']['response']['#context']['ai_response'] = [
+          'heading' => [
+            '#type' => 'html_tag',
+            '#tag' => 'h3',
+            '#value' => $this->t('No Transcription Generated'),
+          ],
+          'message' => [
+            '#type' => 'html_tag',
+            '#tag' => 'div',
+            '#value' => $this->t('The provider did not generate a transcription. Please check your input file and try again.'),
+            '#attributes' => [
+              'class' => ['ai-text-response', 'ai-error-message'],
+            ],
+          ],
+        ];
       }
     }
+    catch (\TypeError $e) {
+      $form['right']['response']['#context']['ai_response'] = [
+        'heading' => [
+          '#type' => 'html_tag',
+          '#tag' => 'h3',
+          '#value' => $this->t('Configuration Error'),
+        ],
+        'message' => [
+          '#type' => 'html_tag',
+          '#tag' => 'div',
+          '#value' => $this->t('The AI provider could not be used. Please make sure a model is selected and the provider is properly configured.'),
+          '#attributes' => [
+            'class' => ['ai-text-response', 'ai-error-message'],
+          ],
+        ],
+      ];
+    }
+    catch (\Exception $e) {
+      $form['right']['response']['#context']['ai_response'] = [
+        'heading' => [
+          '#type' => 'html_tag',
+          '#tag' => 'h3',
+          '#value' => $this->t('Error'),
+        ],
+        'message' => [
+          '#type' => 'html_tag',
+          '#tag' => 'div',
+          '#value' => $this->explorerHelper->renderException($e),
+          '#attributes' => [
+            'class' => ['ai-text-response', 'ai-error-message'],
+          ],
+        ],
+      ];
+    }
 
+    $form_state->setRebuild();
     return $form['right'];
   }
 

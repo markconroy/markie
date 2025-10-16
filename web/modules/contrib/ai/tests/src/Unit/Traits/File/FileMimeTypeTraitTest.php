@@ -28,6 +28,7 @@ class FileMimeTypeTraitTest extends TestCase {
    * {@inheritdoc}
    */
   protected function setUp(): void {
+    parent::setUp();
     // Create a mock for the MimeTypeGuesser.
     $this->mimeTypeGuesser = $this->createMock(MimeTypeGuesser::class);
 

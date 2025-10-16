@@ -14,6 +14,20 @@ use Drupal\ai\OperationType\Chat\ChatOutput;
 class AgentRunner {
 
   /**
+   * The agent to keep for the streaming.
+   *
+   * @var \Drupal\ai_agents\PluginInterfaces\ConfigAiAgentInterface|null
+   */
+  protected $agent = NULL;
+
+  /**
+   * The job id.
+   *
+   * @var string|null
+   */
+  protected ?string $jobId = NULL;
+
+  /**
    * Constructor.
    *
    * @param \Drupal\ai\AiProviderPluginManager $aiProvider
@@ -33,22 +47,22 @@ class AgentRunner {
   /**
    * The assistant.
    *
-   * @var string $assistant_id
+   * @param string $assistant_id
    *   The assistant id.
-   * @var array $chat_history
+   * @param array $chat_history
    *   The chat history.
-   * @var array $defaults
+   * @param array $defaults
    *   The defaults.
-   * @var string $job_id
+   * @param string $job_id
    *   The job id.
-   * @var bool $verbose_mode
+   * @param bool $verbose_mode
    *   Whether to run in verbose mode.
    *
    * @return \Drupal\ai\OperationType\Chat\ChatOutput
    *   The chat output.
    */
   public function runAsAgent(string $assistant_id, array $chat_history, array $defaults, string $job_id, bool $verbose_mode = FALSE): ChatOutput {
-
+    $this->jobId = $job_id;
     /** @var \Drupal\ai_agents\PluginInterfaces\ConfigAiAgentInterface $agent */
     $agent = $this->aiAgentPluginManager->createInstance($assistant_id);
     // Load the agent from temp store if it exists.
@@ -61,7 +75,8 @@ class AgentRunner {
       foreach ($chat_history as $message) {
         $new_messages[] = new ChatMessage($message['role'], $message['message']);
       }
-      $agent->setChatInput(new ChatInput($new_messages));
+      $input = new ChatInput($new_messages, []);
+      $agent->setChatInput($input);
       $agent->setAiProvider($this->aiProvider->createInstance($defaults['provider_id']));
       $agent->setModelName($defaults['model_id']);
       $agent->setCreateDirectly(TRUE);
@@ -81,6 +96,7 @@ class AgentRunner {
     }
     // Job will always be solvable if we are here.
     $response = $agent->solve();
+
     // Check if tools was used.
     $message = new ChatMessage('assistant', $response);
 

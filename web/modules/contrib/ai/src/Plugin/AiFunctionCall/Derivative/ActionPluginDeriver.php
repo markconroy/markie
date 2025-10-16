@@ -43,7 +43,7 @@ class ActionPluginDeriver extends DeriverBase implements ContainerDeriverInterfa
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, $base_plugin_id) {
-    return new static(
+    return new self(
       $container->get('plugin.manager.action'),
       $container->get('entity_type.manager'),
       $container->get('config.typed'),
@@ -128,22 +128,33 @@ class ActionPluginDeriver extends DeriverBase implements ContainerDeriverInterfa
   }
 
   /**
-   * Get the context definitions for the action plugin.
+   * Get the data types for the action plugin.
    *
    * @param \Drupal\Core\Action\ActionInterface $action_plugin
    *   The action plugin.
    *
    * @return array
-   *   An array of context definitions.
+   *   An array of data types.
    */
   protected function getContextDefinitions(ActionInterface $action_plugin) {
     $context_definitions = [];
+
     if ($action_plugin->getPluginDefinition()['type'] === 'entity') {
       $context_definitions['entity'] = new ContextDefinition('entity', $this->t('Entity'), TRUE, FALSE, $this->t("The contextual entity used to perform the action."));
     }
     elseif ($entity_type = $this->entityTypeManager->getDefinition($action_plugin->getPluginDefinition()['type'], FALSE)) {
-      $context_definitions['entity:' . $entity_type->id()] = EntityContextDefinition::fromEntityType($entity_type);
+      $entity_context = EntityContextDefinition::fromEntityType($entity_type);
+
+      // Enhance description with format example for AI agents.
+      $original_description = $entity_context->getDescription();
+      $enhanced_description = ($original_description ?: 'Entity') . ' ' . $this->t('(e.g. @example)', [
+        '@example' => $entity_type->id() . ':123',
+      ]);
+      $entity_context->setDescription($enhanced_description);
+
+      $context_definitions['entity:' . $entity_type->id()] = $entity_context;
     }
+
     if ($action_plugin instanceof ConfigurableInterface) {
       // Only validate if configuration exists.
       $config_schema_definition = NULL;
@@ -159,7 +170,26 @@ class ActionPluginDeriver extends DeriverBase implements ContainerDeriverInterfa
         // @todo Handle missing schema.
         foreach ($config_schema_definition['mapping'] as $key => $info) {
           $constraints = $info['constraints'] ?? [];
-          // If the type is a sequence, extract its inner type, so one works.
+
+          // Create context-specific descriptions.
+          $description = $info['description'] ?? $info['label'];
+          if ($description === $info['label']) {
+            // Provide specific guidance for common field types.
+            switch ($key) {
+              case 'url':
+                $description = $this->t('(e.g. /node/123 or https://example.com)');
+                break;
+
+              case 'message':
+                $description = $this->t('(e.g. The action was successful!)');
+                break;
+
+              default:
+                $description = $this->t('(e.g. enter the @label)', ['@label' => strtolower($info['label'])]);
+                break;
+            }
+          }
+
           if ($info['type'] === 'sequence' && isset($info['sequence']['type'])) {
             $type = $this->resolveRootDataType($info['sequence']['type']);
           }
@@ -168,11 +198,12 @@ class ActionPluginDeriver extends DeriverBase implements ContainerDeriverInterfa
             $type = $this->resolveRootDataType($info['type']);
           }
           if (!empty($type)) {
-            $context_definitions[$key] = new ContextDefinition($type, $info['label'], $info['required'] ?? FALSE, FALSE, $info['label'], $info['default_value'] ?? NULL, $constraints);
+            $context_definitions[$key] = new ContextDefinition($type, $info['label'], $info['required'] ?? FALSE, FALSE, $description, $info['default_value'] ?? NULL, $constraints);
           }
         }
       }
     }
+
     return $context_definitions;
   }
 

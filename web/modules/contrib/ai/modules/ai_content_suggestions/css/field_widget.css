@@ -1,65 +1,16 @@
 /* Suggestions Button */
+.ai-content-suggestions--enabled .button--primary,
+.ai-content-suggestions--enabled .button--primary:not(:focus),
 .ai-content-suggestions.form-submit {
-  background-image: url("../icons/ai_spark_icon_black.svg");
+  background-image: url("../../../icons/ai_spark_icon_red.svg");
   background-position: 8px 8px;
   background-size: 25px;
   background-repeat: no-repeat;
   padding-left: 40px !important;
 }
+.ai-content-suggestions--enabled .button--primary:hover,
 .ai-content-suggestions.form-submit:hover {
-  background-image: url("../icons/ai_spark_icon_purple.svg");
-}
-
-/* Suggestions Dialog */
-.ui-dialog-ai-suggestions .ui-dialog-content {
-  padding: 16px;
-}
-
-.ui-dialog-ai-suggestions ol {
-  list-style-type: none;
-}
-
-.ui-dialog-ai-suggestions li {
-  position: relative;
-  margin-bottom: 8px;
-  border-bottom: 1px solid lightgray;
-  padding-bottom: 8px;
-}
-.ui-dialog-ai-suggestions li:last-child {
-  border-bottom: none;
-}
-
-.ui-dialog-ai-suggestions .ai-content-suggestion {
-  padding: 24px 16px;
-  display: block;
-  font-size: 18px;
-  padding-right: 64px;
-  position: relative;
-}
-.ui-dialog-ai-suggestions li:hover .ai-content-suggestion {
-  background: #01004326;
-  border-radius: 8px;
-}
-.ui-dialog-ai-suggestions .ai-content-suggestion::after {
-  content: "";
-  display: block;
-  width: 32px;
-  height: 40px;
-  position: absolute;
-  top: 0;
-  right: 16px;
-  bottom: 0;
-  background-image: url("../icons/caret-right.svg");
-  background-repeat: no-repeat;
-  align-self: center;
-  pointer-events: none;
-}
-
-.ui-dialog-ai-suggestions .ai-use-cs {
-  position: absolute;
-  inset: 0;
-  cursor: pointer;
-  padding: 8px;
+  background-image: url("../../../icons/ai_spark_icon_purple.svg");
 }
 
 /* Long text */
@@ -89,7 +40,8 @@
   position: relative;
 }
 .field--type-string.ai-content-suggestions--enabled .ai-content-suggestions.button,
-.field--type-string-long.ai-content-suggestions--enabled .ai-content-suggestions.button {
+.field--type-string-long.ai-content-suggestions--enabled .ai-content-suggestions.button,
+.field--type-string.ai-content-suggestions--enabled .field-widget-action-widget-button {
   margin-left: 16px;
 }
 .field--type-string.ai-content-suggestions--enabled,
@@ -106,9 +58,9 @@
 }
 
 /* AI function indicator */
-.field--type-string.ai-content-suggestions--enabled *:has( > .form-element)::after,
-.field--type-string-long.ai-content-suggestions--enabled .form-textarea-wrapper::after,
-.field--type-text-long.ai-content-suggestions--enabled .form-textarea-wrapper::after {
+.field--type-string.ai-content-suggestions--on-focus *:has( > .form-element)::after,
+.field--type-string-long.ai-content-suggestions--on-focus .form-textarea-wrapper::after,
+.field--type-text-long.ai-content-suggestions--on-focus .form-textarea-wrapper::after {
   content: "AI Function";
   pointer-events: none;
   font-size: 14px;
@@ -117,7 +69,7 @@
   display: block;
   position: absolute;
   right: 12px;
-  background-image: url("../icons/ai_spark.svg");
+  background-image: url("../../../icons/ai_spark.svg");
   background-position: 8px;
   background-size: 16px;
   padding-left: 32px;
@@ -126,18 +78,21 @@
   opacity: 1;
   transition: all 0.25s ease-in-out;
 }
-.field--type-string.ai-content-suggestions--enabled:has(input:focus) .form-item::after,
-.field--type-string-long.ai-content-suggestions--enabled:has(textarea:focus) .form-textarea-wrapper::after,
-.field--type-text-long.ai-content-suggestions--enabled:has(.ck-focused) .form-textarea-wrapper::after {
+.field--type-string.ai-content-suggestions--on-focus:has(input:focus) .form-item::after,
+.field--type-string-long.ai-content-suggestions--on-focus:has(textarea:focus) .form-textarea-wrapper::after,
+.field--type-text-long.ai-content-suggestions--on-focus:has(.ck-focused) .form-textarea-wrapper::after {
   opacity: 0;
 }
 
 /* Only show button when fields are focused */
-.ai-content-suggestions.button {
+.ai-content-suggestions--on-focus .field-widget-action-widget-button {
   display: none;
 }
-.field--type-string.ai-content-suggestions--enabled:has(input:focus) .ai-content-suggestions.button,
-.field--type-string-long.ai-content-suggestions--enabled:has(textarea:focus) .ai-content-suggestions.button,
-.field--type-text-long.ai-content-suggestions--enabled:has(.ck-focused) .ai-content-suggestions.button {
+
+.field--type-string.ai-content-suggestions--on-focus:has(input:focus) .field-widget-action-widget-button,
+.field--type-text-long.ai-content-suggestions--on-focus:has(.ck-focused) .field-widget-action-widget-button,
+.field--type-string.ai-content-suggestions--on-focus:has(input:focus) .ai-content-suggestions.button,
+.field--type-string-long.ai-content-suggestions--on-focus:has(textarea:focus) .ai-content-suggestions.button,
+.field--type-text-long.ai-content-suggestions--on-focus:has(.ck-focused) .ai-content-suggestions.button {
   display: block;
 }

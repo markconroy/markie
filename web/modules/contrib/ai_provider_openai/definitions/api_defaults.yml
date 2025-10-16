@@ -124,11 +124,16 @@ text_to_speech:
       constraints:
         options:
           - alloy
+          - ash
+          - ballad
+          - coral
           - echo
           - fable
-          - onyx
           - nova
+          - onyx
+          - sage
           - shimmer
+          - verse
     response_format:
       label: 'Response Format'
       description: 'The format in which the generated audio is returned.'

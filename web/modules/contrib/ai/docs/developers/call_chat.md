@@ -13,9 +13,9 @@ use Drupal\ai\OperationType\Chat\ChatMessage;
 $messages = new ChatInput([
   new ChatMessage('user', 'Hello!'),
 ]);
-$provider =  \Drupal::service('ai.provider')->createInstance('openai');
 // Set a system message.
-$provider->setChatSystemRole('You are a really rude assistant that will not great people.');
+$messages->setSystemPrompt('You are a really rude assistant that will not greet people.');
+$provider =  \Drupal::service('ai.provider')->createInstance('openai');
 /** @var \Drupal\ai\OperationType\Chat\ChatOutput $response */
 $response = $provider->chat($messages, 'gpt-4o', ['my-custom-call']);
 /** @var \Drupal\ai\OperationType\Chat\ChatMessage $return_message */
@@ -35,12 +35,18 @@ The following files defines the methods available when doing a chat call as well
 * [ChatOutput.php](https://git.drupalcode.org/project/ai/-/blob/1.0.x/src/OperationType/Chat/ChatOutput.php?ref_type=heads)
 
 ### Setting system messages.
-There is an abstracted way to set system messages for the providers that allows for it, the method is called `setChatSystemRole` and just takes the system role you want to set. Note that different providers weights these instructions more or less, so in certain cases it might make more sense to use two user messages instead.
+There is an abstracted way to set system messages for the providers that allows for it, the method is called `setSystemPrompt` on the `ChatInput` and it will just takes the system role you want to set. Note that different providers weights these instructions more or less, so in  certain cases it might make more sense to use two user messages instead.
 
 ### Streaming vs None-Streaming output.
-There is a helper method when using the chat providers that makes it possible to stream the output, if the chat provider has the possibility to do so. This can be set via the method `$provider->streamedOutput(TRUE);`. This will give you back an iterator or generator that you can do a foreach on flush the output buffers each time. See the section in [Develop Third Party module](develop_third_party_module.md/#streaming-chat) about how to add checks for it.
+There is a helper method when using the chat providers that makes it possible to stream the output, if the chat provider has the possibility to do so. This can be set via the method `$input->setStreamedOutput(TRUE);` on the ChatInput object. This will give you back an iterator or generator that you can do a foreach on flush the output buffers each time. See the section in [Develop Third Party module](develop_third_party_module.md/#streaming-chat) about how to add checks for it.
 
 ### Chat Explorer
 If you install the AI API Explorer, you can go `configuration > AI > AI API Explorer > Chat Generation Explorer` under `/admin/config/ai/explorers/chat-generation` to test out different calls and see the code that you need for it.
 
 Here comes some examples of different type of levels you might want to integrate the module at. In these examples the code is loaded as a static, for best practice use Dependency Injection.
+
+### Running in Fibers
+Some of the providers supports running the requests in Fibers, meaning that you can run multiple requests in parallel. This is very useful when you have multiple calls that are not dependent on each other. There is a AiProviderCapability enum that you can check if the provider supports it.
+
+The providers that supports this will realize that they are running in a fiber and start a fiber for each request. See the tests/src/AiLlm/FiberTest.php for an example of how to do this.
+

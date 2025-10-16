@@ -62,11 +62,31 @@ final class ModerationGenerator extends AiApiExplorerPluginBase {
    * {@inheritdoc}
    */
   public function getResponse(array &$form, FormStateInterface $form_state): array {
-    $provider = $this->aiProviderHelper->generateAiProviderFromFormSubmit($form, $form_state, 'moderation', 'moderation');
-    $prompt = $form_state->getValue('prompt');
-    if (!empty($prompt)) {
+    try {
+      $provider = $this->aiProviderHelper->generateAiProviderFromFormSubmit($form, $form_state, 'moderation', 'moderation');
+      $prompt = $form_state->getValue('prompt');
 
-      $response = $provider->moderation($form_state->getValue('prompt'), $form_state->getValue('moderation_ai_model'), ['moderation_generation'])->getNormalized();
+      if (empty($prompt)) {
+        $form['right']['response']['#context']['ai_response'] = [
+          'heading' => [
+            '#type' => 'html_tag',
+            '#tag' => 'h3',
+            '#value' => $this->t('No Prompt Provided'),
+          ],
+          'message' => [
+            '#type' => 'html_tag',
+            '#tag' => 'div',
+            '#value' => $this->t('Please enter a prompt to moderate.'),
+            '#attributes' => [
+              'class' => ['ai-text-response', 'ai-error-message'],
+            ],
+          ],
+        ];
+        $form_state->setRebuild();
+        return $form['right'];
+      }
+
+      $response = $provider->moderation($prompt, $form_state->getValue('moderation_ai_model'), ['moderation_generation'])->getNormalized();
 
       if (get_class($response) == ModerationResponse::class) {
         $form['right']['response']['#context']['ai_response']['response'] = [
@@ -86,7 +106,7 @@ final class ModerationGenerator extends AiApiExplorerPluginBase {
           ],
         ];
 
-        $form['right']['response']['#context']['ai_response']['code'] = $this->normalizeCodeExample($form_state, $form_state->getValue('prompt'));
+        $form['right']['response']['#context']['ai_response']['code'] = $this->normalizeCodeExample($form_state, $prompt);
       }
       else {
         $form['right']['response']['#context']['ai_response']['error'] = [
@@ -96,7 +116,42 @@ final class ModerationGenerator extends AiApiExplorerPluginBase {
         ];
       }
     }
+    catch (\TypeError $e) {
+      $form['right']['response']['#context']['ai_response'] = [
+        'heading' => [
+          '#type' => 'html_tag',
+          '#tag' => 'h3',
+          '#value' => $this->t('Configuration Error'),
+        ],
+        'message' => [
+          '#type' => 'html_tag',
+          '#tag' => 'div',
+          '#value' => $this->t('The AI provider could not be used. Please make sure a model is selected and the provider is properly configured.'),
+          '#attributes' => [
+            'class' => ['ai-text-response', 'ai-error-message'],
+          ],
+        ],
+      ];
+    }
+    catch (\Exception $e) {
+      $form['right']['response']['#context']['ai_response'] = [
+        'heading' => [
+          '#type' => 'html_tag',
+          '#tag' => 'h3',
+          '#value' => $this->t('Error'),
+        ],
+        'message' => [
+          '#type' => 'html_tag',
+          '#tag' => 'div',
+          '#value' => $this->explorerHelper->renderException($e),
+          '#attributes' => [
+            'class' => ['ai-text-response', 'ai-error-message'],
+          ],
+        ],
+      ];
+    }
 
+    $form_state->setRebuild();
     return $form['right'];
   }
 

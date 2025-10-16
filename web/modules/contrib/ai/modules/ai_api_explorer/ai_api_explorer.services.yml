@@ -14,3 +14,6 @@ services:
   plugin.manager.ai_api_explorer:
     class: Drupal\ai_api_explorer\AiApiExplorerPluginManager
     parent: default_plugin_manager
+  Drupal\ai_api_explorer\Hook\AiApiExplorer:
+    class: Drupal\ai_api_explorer\Hook\AiApiExplorer
+    autowire: true

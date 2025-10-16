@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace Drupal\ai;
 
+use Drupal\ai\Enum\VdbSimilarityMetrics;
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Plugin\DefaultPluginManager;
 use Drupal\ai\Attribute\AiVdbProvider;
+use Drupal\Core\Utility\Error;
 
 /**
  * Vector DB plugin manager.
@@ -94,6 +96,55 @@ final class AiVdbProviderPluginManager extends DefaultPluginManager {
       $plugins[$definition['id']] = $definition['label']->__toString();
     }
     return $plugins;
+  }
+
+  /**
+   * Ensure that the collection exists and can be successfully accessed.
+   *
+   * It will attempt to create the collection if it does not exist.
+   *
+   * @param \Drupal\ai\AiVdbProviderInterface $provider
+   *   The provider.
+   * @param array $configuration
+   *   The configuration to validate against.
+   *
+   * @return bool
+   *   Whether the collection exists.
+   */
+  public function ensureCollectionExists(AiVdbProviderInterface $provider, array $configuration) {
+    try {
+      // Check if the collection exists.
+      $collections = $provider->getCollections($configuration['database_settings']['database_name']);
+      if (is_array($collections) && in_array($configuration['database_settings']['collection'], $collections)) {
+        return TRUE;
+      }
+
+      // Check if the metric is defined, if not, use cosine similarity.
+      if (isset($configuration['database_settings']['metric'])) {
+        $metric = VdbSimilarityMetrics::from($configuration['database_settings']['metric']);
+      }
+      else {
+        $metric = VdbSimilarityMetrics::CosineSimilarity;
+      }
+
+      // Otherwise create the collection.
+      $provider->createCollection(
+        $configuration['database_settings']['collection'],
+        $configuration['embeddings_engine_configuration']['dimensions'],
+        $metric,
+        $configuration['database_settings']['database_name'],
+      );
+      return TRUE;
+    }
+    catch (\Exception $exception) {
+      /** @var \Psr\Log\LoggerInterface $logger */
+      // phpcs:disable
+      // @phpstan-ignore-next-line
+      $logger = \Drupal::logger('ai_search');
+      // phpcs:enable
+      Error::logException($logger, $exception, '%type: @message in %function (line %line of %file).');
+      return FALSE;
+    }
   }
 
 }

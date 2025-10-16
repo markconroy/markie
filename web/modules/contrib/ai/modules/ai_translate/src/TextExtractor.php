@@ -4,7 +4,6 @@ namespace Drupal\ai_translate;
 
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Entity\ContentEntityInterface;
-use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 
@@ -25,14 +24,11 @@ class TextExtractor implements TextExtractorInterface {
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
    *   The entity type manager.
-   * @param \Drupal\Core\Entity\EntityFieldManagerInterface $entityFieldManager
-   *   The entity field manager.
    * @param \Drupal\ai_translate\FieldTextExtractorPluginManagerInterface $extractorManager
    *   Field text extractor plugin manager.
    */
   final public function __construct(
     protected EntityTypeManagerInterface $entityTypeManager,
-    protected EntityFieldManagerInterface $entityFieldManager,
     protected FieldTextExtractorPluginManagerInterface $extractorManager,
   ) {}
 
@@ -41,13 +37,15 @@ class TextExtractor implements TextExtractorInterface {
    */
   public function extractTextMetadata(ContentEntityInterface $entity, array $parents = []) : array {
     $metadata = [];
-    foreach ($this->entityFieldManager->getFieldDefinitions(
-      $entity->getEntityTypeId(), $entity->bundle()) as $field_name => $field_definition) {
+    foreach ($entity->getFieldDefinitions() as $field_name => $field_definition) {
       $fieldType = $field_definition->getType();
       if (!isset($this->plugins[$fieldType])) {
         // Use FALSE instead of NULL to prevent re-getting missing plugin.
         $this->plugins[$fieldType] = $this->extractorManager
           ->getExtractor($fieldType) ?? FALSE;
+      }
+      if (empty($this->plugins[$fieldType])) {
+        continue;
       }
       if (!$this->shouldExtract($entity, $field_definition)) {
         continue;
@@ -66,7 +64,7 @@ class TextExtractor implements TextExtractorInterface {
           $meta['parents'] = $fieldParents;
 
           if (!isset($meta['_columns'])) {
-            $meta['_columns'] = ['value'];
+            $meta['_columns'] = $this->plugins[$fieldType]->getColumns();
           }
           $metadata[] = [
             'field_name' => $field_name,
@@ -129,9 +127,6 @@ class TextExtractor implements TextExtractorInterface {
     }
     $fieldName = $fieldDefinition->getName();
     $fieldType = $fieldDefinition->getType();
-    if (empty($this->plugins[$fieldType])) {
-      return FALSE;
-    }
     if ($fieldDefinition->getName() === $entity->getEntityType()->getKey('label')) {
       return $fieldDefinition->isTranslatable();
     }
@@ -144,8 +139,7 @@ class TextExtractor implements TextExtractorInterface {
     ];
     foreach ($supportedFieldNames as $pattern) {
       if (preg_match("/$pattern/", $fieldName)) {
-        return $this->plugins[$fieldType]->shouldExtract(
-          $entity, $fieldDefinition);
+        return $this->plugins[$fieldType]->shouldExtract($entity, $fieldDefinition);
       }
     }
     return FALSE;

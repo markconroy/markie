@@ -35,4 +35,13 @@ abstract class InputBase implements InputInterface {
     $this->debugData[$key] = $value;
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function toArray(): array {
+    return [
+      'debug_data' => $this->getDebugData(),
+    ];
+  }
+
 }

@@ -312,4 +312,24 @@ class FileHelper {
     return $media;
   }
 
+  /**
+   * Get the File System interface.
+   *
+   * @return \Drupal\Core\File\FileSystemInterface
+   *   The file system interface.
+   */
+  public function getFileSystem(): FileSystemInterface {
+    return $this->fileSystem;
+  }
+
+  /**
+   * Get the File Repository interface.
+   *
+   * @return \Drupal\file\FileRepositoryInterface
+   *   The file repository interface.
+   */
+  public function getFileRepository(): FileRepositoryInterface {
+    return $this->fileRepo;
+  }
+
 }

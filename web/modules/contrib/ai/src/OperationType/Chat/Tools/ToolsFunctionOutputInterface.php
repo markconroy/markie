@@ -38,18 +38,18 @@ interface ToolsFunctionOutputInterface extends ToolsInterface {
   /**
    * Get the input function.
    *
-   * @return \Drupal\ai\OperationType\Chat\Tools\ToolsFunctionInputInterface
+   * @return \Drupal\ai\OperationType\Chat\Tools\ToolsFunctionInputInterface|null
    *   The input.
    */
-  public function getInputFunction(): ToolsFunctionInputInterface;
+  public function getInputFunction(): ToolsFunctionInputInterface|NULL;
 
   /**
    * Set the input function.
    *
-   * @param \Drupal\ai\OperationType\Chat\Tools\ToolsFunctionInputInterface $input
+   * @param \Drupal\ai\OperationType\Chat\Tools\ToolsFunctionInputInterface|null $input
    *   The input.
    */
-  public function setInputFunction(ToolsFunctionInputInterface $input);
+  public function setInputFunction(?ToolsFunctionInputInterface $input);
 
   /**
    * Get the arguments.

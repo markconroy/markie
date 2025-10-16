@@ -301,7 +301,7 @@ abstract class AiContentSuggestionsPluginBase extends PluginBase implements AiCo
         new chatMessage('user', $prompt),
       ]);
 
-      $ai_provider->setChatSystemRole('You are helpful assistant.');
+      $messages->setSystemPrompt('You are helpful assistant.');
 
       /** @var \Drupal\ai\OperationType\Chat\ChatMessage $response */
       $response = $ai_provider->chat($messages, $provider_config['model_id'], [

@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Drupal\ai_content_suggestions\Plugin\AiContentSuggestions;
 
+use Drupal\ai\Entity\AiPrompt;
 use Drupal\Component\Serialization\Json;
+use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityInterface;
@@ -25,19 +27,6 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * )
  */
 final class Taxonomy extends AiContentSuggestionsPluginBase {
-
-  /**
-   * The Default prompt for this functionality.
-   *
-   * @var string
-   */
-  private string $defaultFromVocPrompt = 'Choose no more than five words to classify the following text using the same language as the input text:';
-  /**
-   * The Default prompt for this functionality.
-   *
-   * @var string
-   */
-  private string $defaultOpenPrompt = 'Suggest no more than five words to classify the following text using the same language as the input text. The words must be nouns or adjectives in a comma delimited list';
 
   /**
    * Configuration object for this plugin.
@@ -131,9 +120,10 @@ final class Taxonomy extends AiContentSuggestionsPluginBase {
     $prompt = $this->promptConfig->get($this->getPluginId() . '_open');
     $form[$this->getPluginId()][$this->getPluginId() . '_prompt_open'] = [
       '#title' => $this->t('Suggest taxonomy prompt (not limited to vocabulary)'),
-      '#type' => 'textarea',
+      '#type' => 'ai_prompt',
+      '#prompt_types' => ['suggest_tags'],
       '#required' => TRUE,
-      '#default_value' => $prompt ?? $this->defaultOpenPrompt . PHP_EOL,
+      '#default_value' => $prompt ?? 'suggest_tags__suggest_tags_default',
       '#parents' => ['plugins', $this->getPluginId(), $this->getPluginId() . '_prompt_open'],
       '#states' => [
         'visible' => [
@@ -144,9 +134,10 @@ final class Taxonomy extends AiContentSuggestionsPluginBase {
     $prompt = $this->promptConfig->get($this->getPluginId() . '_from_voc');
     $form[$this->getPluginId()][$this->getPluginId() . '_prompt_from_voc'] = [
       '#title' => $this->t('Suggest taxonomy prompt (limited to vocabulary)'),
-      '#type' => 'textarea',
+      '#type' => 'ai_prompt',
+      '#prompt_types' => ['suggest_vocabulary'],
       '#required' => TRUE,
-      '#default_value' => $prompt ?? $this->defaultFromVocPrompt . PHP_EOL,
+      '#default_value' => $prompt ?? 'suggest_vocabulary__suggest_vocabulary_default',
       '#parents' => ['plugins', $this->getPluginId(), $this->getPluginId() . '_prompt_from_voc'],
       '#states' => [
         'visible' => [
@@ -160,7 +151,8 @@ final class Taxonomy extends AiContentSuggestionsPluginBase {
    * {@inheritdoc}
    */
   public function saveSettingsForm(array &$form, FormStateInterface $form_state): void {
-    $value = $form_state->getValue(['plugins', $this->getPluginId()]);
+    $values = $form_state->getValues();
+    $value = NestedArray::getValue($values, ['plugins', $this->getPluginId()]);
     $prompt_open = $value[$this->getPluginId() . '_prompt_open'];
     $this->promptConfig->set($this->getPluginId() . '_open', $prompt_open)->save();
     $prompt_from_voc = $value[$this->getPluginId() . '_prompt_from_voc'];
@@ -181,12 +173,11 @@ final class Taxonomy extends AiContentSuggestionsPluginBase {
         $terms_json = $this->getTermsJson($source_vocabulary, $use_source_vocabulary_hierarchy);
 
         // Build our prompt.
-        $tax_prompt = $this->promptConfig->get($this->getPluginId() . '_from_voc');
+        $tax_prompt_id = $this->promptConfig->get($this->getPluginId() . '_from_voc');
+        $tax_prompt = AiPrompt::load($tax_prompt_id)->getPrompt();
+        $prompt = '';
         if (!empty($tax_prompt)) {
           $prompt = $tax_prompt;
-        }
-        else {
-          $prompt = $this->defaultFromVocPrompt;
         }
         $prompt = $prompt . '\r\n"""' . $value . '"""\r\n\r\n';
 
@@ -198,15 +189,13 @@ final class Taxonomy extends AiContentSuggestionsPluginBase {
         }
       }
       else {
-        $tax_prompt = $this->promptConfig->get($this->getPluginId() . '_open');
+        $tax_prompt_id = $this->promptConfig->get($this->getPluginId() . '_open');
+        $tax_prompt = AiPrompt::load($tax_prompt_id)->getPrompt();
+        $prompt = '';
         if (!empty($tax_prompt)) {
           $prompt = $tax_prompt;
         }
-        else {
-          $prompt = $this->defaultOpenPrompt . ':\r\n"""' . $value . '"""';
-        }
         $prompt = $prompt . '\r\n"""' . $value . '"""';
-
       }
 
       $message = $this->sendChat($prompt);

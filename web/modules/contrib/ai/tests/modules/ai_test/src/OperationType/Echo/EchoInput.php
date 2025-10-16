@@ -55,4 +55,13 @@ class EchoInput implements InputInterface {
     return $this->toString();
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function toArray(): array {
+    return [
+      'input' => $this->input,
+    ];
+  }
+
 }

@@ -7,6 +7,7 @@ use Drupal\Core\Form\SubformStateInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\ai\AiProviderInterface;
 use Drupal\ai\Plugin\ProviderProxy;
+use Drupal\search_api\LoggerTrait;
 
 /**
  * Trait for Search API AI Embeddings Engine.
@@ -18,6 +19,7 @@ use Drupal\ai\Plugin\ProviderProxy;
 trait AiSearchBackendEmbeddingsEngineTrait {
 
   use StringTranslationTrait;
+  use LoggerTrait;
 
   /**
    * The configuration.
@@ -175,8 +177,15 @@ trait AiSearchBackendEmbeddingsEngineTrait {
     $plugin_manager = \Drupal::service('ai.provider');
     foreach ($plugin_manager->getProvidersForOperationType('embeddings') as $id => $definition) {
       $provider = $plugin_manager->createInstance($id);
-      foreach ($provider->getConfiguredModels('embeddings') as $model => $label) {
-        $options[$id . '__' . $model] = $definition['label']->__toString() . ' | ' . $label;
+      try {
+        foreach ($provider->getConfiguredModels('embeddings') as $model => $label) {
+          $options[$id . '__' . $model] = $definition['label']->__toString() . ' | ' . $label;
+        }
+      }
+      catch (\Exception $e) {
+        $this->logException($e, '%type while getting models for provider %provider: @message in %function (line %line of %file).', [
+          '%provider' => $id,
+        ]);
       }
     }
     // Send a warning message if there are no available embedding engines.

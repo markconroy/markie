@@ -23,6 +23,7 @@ use Drupal\key\KeyRepositoryInterface;
 use Psr\Http\Client\ClientInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\Yaml\Yaml;
 
 /**
  * Service to handle API requests server.
@@ -231,7 +232,10 @@ abstract class AiProviderClientBase implements AiProviderInterface, ContainerFac
    * @return \Drupal\Core\Config\ImmutableConfig
    *   Configuration of module.
    */
-  abstract public function getConfig(): ImmutableConfig;
+  public function getConfig(): ImmutableConfig {
+    $module_name = $this->pluginDefinition['provider'];
+    return $this->configFactory->get($module_name . '.settings');
+  }
 
   /**
    * Returns array of API definition.
@@ -239,7 +243,28 @@ abstract class AiProviderClientBase implements AiProviderInterface, ContainerFac
    * @return array
    *   The plugin configuration array.
    */
-  abstract public function getApiDefinition(): array;
+  public function getApiDefinition(): array {
+    $module_name = $this->pluginDefinition['provider'];
+    $module_path = $this->moduleHandler->getModule($module_name)->getPath();
+    $definition_file = $module_path . '/definitions/api_defaults.yml';
+
+    if (file_exists($definition_file)) {
+      try {
+        return Yaml::parseFile($definition_file);
+      }
+      catch (\Exception $e) {
+        $this->loggerFactory->get('ai')->error(
+          'Failed to parse API definition file @file: @message', [
+            '@file' => $definition_file,
+            '@message' => $e->getMessage(),
+          ]
+        );
+        return [];
+      }
+    }
+
+    return [];
+  }
 
   /**
    * Returns array of models custom settings.
@@ -329,7 +354,14 @@ abstract class AiProviderClientBase implements AiProviderInterface, ContainerFac
   }
 
   /**
-   * {@inheritdoc}
+   * Sets the chat system role.
+   *
+   * @param string $message
+   *   The system role message.
+   *
+   * @deprecated in ai:1.2.0 and is removed from ai:2.0.0. Please use
+   * setSystemPrompt() in the ChatInput class instead.
+   * @see https://www.drupal.org/project/ai/issues/3535820
    */
   public function setChatSystemRole(string $message): void {
     $this->chatSystemRole = $message;
@@ -337,7 +369,14 @@ abstract class AiProviderClientBase implements AiProviderInterface, ContainerFac
   }
 
   /**
-   * {@inheritdoc}
+   * Gets the chat system role.
+   *
+   * @deprecated in ai:1.2.0 and is removed from ai:2.0.0. Please use
+   * getSystemPrompt() in the ChatInput class instead.
+   * @see https://www.drupal.org/project/ai/issues/3535820
+   *
+   * @return string
+   *   The chat system role message.
    */
   public function getChatSystemRole(): string {
     return $this->chatSystemRole;
@@ -517,11 +556,29 @@ abstract class AiProviderClientBase implements AiProviderInterface, ContainerFac
    *
    * @param bool $streamed
    *   Streamed output or not.
+   *
+   * @deprecated in ai:1.2.0 and is removed from ai:2.0.0. Use the method
+   * setStreamedOutput() on the ChatInput object instead.
+   * @see https://www.drupal.org/project/ai/issues/3535821
    */
   public function streamedOutput(bool $streamed = TRUE): void {
     $this->streamed = $streamed;
     // We add for debugging that its streamed.
     $this->setDebugData('is_streamed', $streamed);
+  }
+
+  /**
+   * Get if we should stream the output.
+   *
+   * @deprecated in ai:1.2.0 and is removed from ai:2.0.0. Use the method
+   * isStreamedOutput() on the ChatInput object instead.
+   * @see https://www.drupal.org/project/ai/issues/3535821
+   *
+   * @return bool
+   *   TRUE if the output should be streamed, FALSE otherwise.
+   */
+  public function isStreamedOutput(): bool {
+    return $this->streamed;
   }
 
   /**

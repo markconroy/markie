@@ -124,4 +124,15 @@ class TranslateTextInput extends InputBase implements InputInterface {
     return $this->toString();
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function toArray(): array {
+    return [
+      'text' => $this->text,
+      'source_language' => $this->sourceLanguage,
+      'target_language' => $this->targetLanguage,
+    ];
+  }
+
 }

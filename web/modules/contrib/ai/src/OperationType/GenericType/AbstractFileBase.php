@@ -138,4 +138,39 @@ abstract class AbstractFileBase implements FileBaseInterface {
     $this->filename = $file->getFilename();
   }
 
+  /**
+   * Create an array representation of the file.
+   *
+   * @return array
+   *   The array representation of the file.
+   */
+  public function toArray(): array {
+    return [
+      'type' => static::class,
+      'binary' => $this->getBinary(),
+      'mime_type' => $this->getMimeType(),
+      'filename' => $this->getFilename(),
+    ];
+  }
+
+  /**
+   * Create from array.
+   *
+   * @param array $data
+   *   The data to create the file from.
+   */
+  public static function fromArray(array $data): static {
+    $instance = new static();
+    if (isset($data['binary'])) {
+      $instance->setBinary($data['binary']);
+    }
+    if (isset($data['mime_type'])) {
+      $instance->setMimeType($data['mime_type']);
+    }
+    if (isset($data['filename'])) {
+      $instance->setFilename($data['filename']);
+    }
+    return $instance;
+  }
+
 }

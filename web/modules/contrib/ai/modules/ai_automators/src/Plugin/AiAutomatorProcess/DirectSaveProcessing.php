@@ -5,7 +5,7 @@ namespace Drupal\ai_automators\Plugin\AiAutomatorProcess;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
-use Drupal\Core\Messenger\Messenger;
+use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\ai_automators\AiAutomatorRuleRunner;
@@ -40,12 +40,12 @@ class DirectSaveProcessing implements AiAutomatorFieldProcessInterface, Containe
   /**
    * The Drupal messenger service.
    */
-  protected Messenger $messenger;
+  protected MessengerInterface $messenger;
 
   /**
    * Constructor.
    */
-  final public function __construct(AiAutomatorRuleRunner $aiRunner, LoggerChannelFactoryInterface $logger, Messenger $messenger) {
+  final public function __construct(AiAutomatorRuleRunner $aiRunner, LoggerChannelFactoryInterface $logger, MessengerInterface $messenger) {
     $this->aiRunner = $aiRunner;
     $this->loggerFactory = $logger;
     $this->messenger = $messenger;

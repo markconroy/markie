@@ -2,13 +2,13 @@ name: 'AI Assistant API'
 type: module
 description: Adds decoupled AI Assistants for any frontend to work with.
 package: AI Tools
-core_version_requirement: ^10.2 || ^11
+core_version_requirement: ^10.4 || ^11
 configure: entity.ai_assistant.collection
 
 dependencies:
   - ai:ai
 
-# Information added by Drupal.org packaging script on 2025-09-17
-version: '1.1.4'
+# Information added by Drupal.org packaging script on 2025-10-15
+version: '1.2.1'
 project: 'ai'
-datestamp: 1758116446
+datestamp: 1760514354

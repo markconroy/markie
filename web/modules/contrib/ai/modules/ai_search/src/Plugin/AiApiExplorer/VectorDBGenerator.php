@@ -88,6 +88,11 @@ final class VectorDBGenerator extends AiApiExplorerPluginBase {
       // Ensure the method returns a value by catching any exceptions.
     }
 
+    // Also look for providers that support embeddings.
+    if (!$this->providerManager->hasProvidersForOperationType('embeddings')) {
+      $return = FALSE;
+    }
+
     return $return;
   }
 
@@ -170,22 +175,47 @@ final class VectorDBGenerator extends AiApiExplorerPluginBase {
         '#type' => 'table',
         '#header' => [
           'label' => $this->t('Score'),
-          'score' => $this->t('Chunk'),
         ],
         '#rows' => [],
         '#empty' => $this->t('No results found.'),
       ];
 
+      $converter = NULL;
+      if (class_exists('League\CommonMark\CommonMarkConverter')) {
+        // Ignore the non-use statement loading since this dependency may not
+        // exist.
+        // @codingStandardsIgnoreLine
+        $converter = new \League\CommonMark\CommonMarkConverter();
+      }
+
       foreach ($results as $row) {
-        $content = $row->getExtraData('content');
-        $form['right']['response']['#context']['ai_response']['table']['#rows'][] = [
-          $this->t('<strong>:score</strong>', [
-            ':score' => $row->getScore(),
-          ]),
-          $this->t('<em>:chunk</em>', [
-            ':chunk' => ($content ? nl2br($content) : ''),
-          ]),
+        $all_data = $row->getAllExtraData();
+        $row_data = [];
+
+        // First column: Score.
+        $row_data['label'] = [
+          'data' => [
+            '#markup' => '<strong>' . $row->getScore() . '</strong>',
+          ],
         ];
+
+        // Dynamically build the rest of the row based on keys in $allData.
+        foreach ($all_data as $key => $value) {
+          // Add header if missing.
+          if (!isset($form['right']['response']['#context']['ai_response']['table']['#header'][$key])) {
+            $form['right']['response']['#context']['ai_response']['table']['#header'][$key] = ucfirst($key);
+          }
+
+          $html = $converter ? $converter->convert($value) : $value;
+
+          $row_data[$key] = [
+            'data' => [
+              '#markup' => $html,
+            ],
+          ];
+        }
+
+        $form['right']['response']['#context']['ai_response']['table']['#rows'][] = $row_data;
       }
     }
     catch (\Exception $e) {

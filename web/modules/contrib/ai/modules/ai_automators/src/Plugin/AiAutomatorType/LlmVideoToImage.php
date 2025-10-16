@@ -114,7 +114,7 @@ class LlmVideoToImage extends VideoToText implements AiAutomatorTypeInterface {
     $cutPrompt = $this->renderTokenPrompt($automatorConfig['cutting_prompt'], $entity);
 
     $total = [];
-    foreach ($entity->{$automatorConfig['base_field']} as $entityWrapper) {
+    foreach ($entity->get($automatorConfig['base_field']) as $entityWrapper) {
       if ($entityWrapper->entity) {
         $fileEntity = $entityWrapper->entity;
         if (in_array($fileEntity->getMimeType(), [
@@ -172,11 +172,13 @@ class LlmVideoToImage extends VideoToText implements AiAutomatorTypeInterface {
 
     // First cut out the videos.
     $baseField = $automatorConfig['base_field'] ?? '';
-    $realPath = $this->fileSystem->realpath($entity->{$baseField}->entity->getFileUri());
+    $realPath = $this->fileSystem->realpath($entity->get($baseField)->entity
+      ->getFileUri());
 
     // Get the actual file name and replace it with _cut.
     $fileName = pathinfo($realPath, PATHINFO_FILENAME);
-    $newFile = str_replace($fileName, $fileName . '_cut', $entity->{$baseField}->entity->getFileUri()) . '.jpg';
+    $newFile = str_replace($fileName, $fileName . '_cut', $entity
+      ->get($baseField)->entity->getFileUri()) . '.jpg';
 
     $tmpName = "";
     foreach ($values as $keys) {

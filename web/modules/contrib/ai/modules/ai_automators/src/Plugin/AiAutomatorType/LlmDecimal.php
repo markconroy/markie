@@ -4,7 +4,7 @@ namespace Drupal\ai_automators\Plugin\AiAutomatorType;
 
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\ai_automators\Attribute\AiAutomatorType;
-use Drupal\ai_automators\PluginBaseClasses\Numeric;
+use Drupal\ai_automators\PluginBaseClasses\NumericRule;
 use Drupal\ai_automators\PluginInterfaces\AiAutomatorTypeInterface;
 
 /**
@@ -16,7 +16,7 @@ use Drupal\ai_automators\PluginInterfaces\AiAutomatorTypeInterface;
   field_rule: 'decimal',
   target: '',
 )]
-class LlmDecimal extends Numeric implements AiAutomatorTypeInterface {
+class LlmDecimal extends NumericRule implements AiAutomatorTypeInterface {
 
   /**
    * {@inheritDoc}

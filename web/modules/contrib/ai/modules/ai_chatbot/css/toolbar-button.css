@@ -1,0 +1,32 @@
+.top-bar__tools .button.button--ai-chatbot:not(.hidden) {
+  display: flex;
+  gap: 8px;
+  margin: 0 4px 0px 0px;
+  order: -1;
+}
+
+.top-bar__tools .button.button--ai-chatbot:before {
+  content: ' ';
+  mask-image: url('../assets/ai-icon.svg');
+  background-color: currentColor;
+  width: 16px;
+  height: 16px;
+}
+.top-bar__tools .button.button--ai-chatbot:is(:hover, :focus):before {
+  mask-image: url('../assets/ai-icon-animated.svg');
+}
+
+.ai-chatbot-opened .top-bar__tools .button.button--ai-chatbot {
+  display: none;
+}
+
+.toolbar .toolbar-bar .toolbar-tab.ai-chatbot-toolbar-tab .toolbar-item.toolbar-icon-ai-chatbot:before {
+  mask-image: url(../assets/ai-icon.svg);
+  -webkit-mask-image: url(../assets/ai-icon.svg);
+}
+
+.toolbar .toolbar-bar .toolbar-tab.ai-chatbot-toolbar-tab .toolbar-item.toolbar-icon-ai-chatbot:is(:hover, :focus):before {
+  mask-image: url(../assets/ai-icon-animated.svg);
+  -webkit-mask-image: url(../assets/ai-icon-animated.svg);
+  mask-size: 20px;
+}

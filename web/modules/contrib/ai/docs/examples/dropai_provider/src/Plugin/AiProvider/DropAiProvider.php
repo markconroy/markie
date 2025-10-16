@@ -10,6 +10,7 @@ use Drupal\ai\OperationType\Chat\ChatInterface;
 use Drupal\ai\OperationType\Chat\ChatMessage;
 use Drupal\ai\OperationType\Chat\ChatOutput;
 use Drupal\Core\Config\ImmutableConfig;
+use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\dropai_provider\MockDropAiClient;
 use Drupal\dropai_provider\MockDropAiClient as Client;
@@ -27,6 +28,8 @@ use Symfony\Component\Yaml\Yaml;
   label: new TranslatableMarkup('DropAI')
 )]
 class DropAiProvider extends AiProviderClientBase implements ChatInterface {
+
+  use StringTranslationTrait;
 
   /**
    * The client object for interacting with the DropAI service.
@@ -269,6 +272,28 @@ class DropAiProvider extends AiProviderClientBase implements ChatInterface {
 
     // Doing this just for demonstration.
     $this->systemMessage = $configuration['system_message'] ?? NULL;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function loadModelsForm(array $form, $form_state, string $operation_type, string|NULL $model_id = NULL): array {
+    // This function is called from getModelsTable() via DropAiConfigForm.
+    // See DropAiConfigForm.php in DropAiConfigForm::buildForm()
+    // to enable this function.
+    $form = parent::loadModelsForm($form, $form_state, $operation_type, $model_id);
+    $config = $this->loadModelConfig($operation_type, $model_id);
+
+    $form['model_data']['example_endpoint'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Endpoint'),
+      '#description' => $this->t('Example endpoint'),
+      '#default_value' => $config['example_endpoint'] ?? '',
+      '#required' => FALSE,
+      '#weight' => -10,
+    ];
+
+    return $form;
   }
 
 }

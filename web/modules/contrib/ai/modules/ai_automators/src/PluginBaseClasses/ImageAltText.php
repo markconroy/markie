@@ -28,8 +28,17 @@ class ImageAltText extends RuleBase {
    * {@inheritDoc}
    */
   public function checkIfEmpty($value, array $automatorConfig = []) {
-    // Check if the alt is empty.
-    return !empty($value[0]['alt']) ? [$value[0]['alt']] : NULL;
+    // Check if the alt is empty in all values.
+    foreach ($value as $item) {
+      // If one is empty, we return empty array.
+      if (empty($item['alt'])) {
+        return [];
+      }
+    }
+    // Otherwise we return a set value.
+    return [
+      'alt' => 'This is an image with alt text.',
+    ];
   }
 
   /**
@@ -41,7 +50,7 @@ class ImageAltText extends RuleBase {
 
     // Add JSON output.
     foreach ($prompts as $key => $prompt) {
-      $prompt .= "\n\nDo not include any explanations, only provide a RFC8259 compliant JSON response following this format without deviation.\n[{\"value\": {\"alt\": \"The alt text\"}}]";
+      $prompt .= "\n\nDo not include any explanations, only provide a RFC8259 compliant JSON response following this format without deviation.\n[{\"value\": {\"alt\": \"The alt text\"}}]. You should create one item for each image and give it back in the order it was provided.\n\n";
       $prompts[$key] = $prompt;
     }
     $total = [];
@@ -73,9 +82,14 @@ class ImageAltText extends RuleBase {
    */
   public function storeValues(ContentEntityInterface $entity, array $values, FieldDefinitionInterface $fieldDefinition, array $automatorConfig) {
     $items = [];
-    foreach ($entity->{$fieldDefinition->getName()} as $delta => $item) {
+    foreach ($entity->get($fieldDefinition->getName()) as $delta => $item) {
       $items[$delta] = $item->getValue();
-      $items[$delta] = array_merge($items[$delta], $values[$delta]);
+      // Don't set the alt text if its already set.
+      if (isset($items[$delta]['alt']) && !empty($items[$delta]['alt'])) {
+        continue;
+      }
+      // Set the alt text from the values.
+      $items[$delta]['alt'] = $values[$delta]['alt'] ?? '';
     }
     $entity->set($fieldDefinition->getName(), $items);
   }

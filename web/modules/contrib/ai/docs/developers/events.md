@@ -4,6 +4,8 @@ There are three important events that are currently available in the AI module. 
 
 These three makes it possible to change prompts, change responses, log, find bugs etc.
 
+With the PreGenerateResponseEvent that is triggered before the request is sent, you can choose to create an exception to make sure that the request never happens or there is a method called setForcedOutputObject, where you can give an OutputInterface and it will answer with this one without doing the request.
+
 There is also an event that is triggered when an AI provider gets uninstalled/disabled. This is good for 3rd party modules that might rely on a specific provider existing due to 3rd party provider settings.
 
 ## Example #1: Pre request.

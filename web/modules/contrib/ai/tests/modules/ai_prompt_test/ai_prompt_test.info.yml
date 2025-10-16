@@ -1,0 +1,14 @@
+name: AI Prompt tests
+type: module
+description: Adds prompt management testing.
+package: Testing
+core_version_requirement: ^10.3 || ^11
+
+dependencies:
+  - ai:ai
+  - ai:ai_content_suggestions
+
+# Information added by Drupal.org packaging script on 2025-10-15
+version: '1.2.1'
+project: 'ai'
+datestamp: 1760514354

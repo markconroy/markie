@@ -21,8 +21,8 @@ final class FieldTextExtractor extends AttributeBase {
    *   available only if the ID follows a specific pattern. It must be either
    *   identical to group or prefixed with the group. E.g. if the group is "foo"
    *   the ID must be either "foo" or "foo:bar".
-   * @param \Drupal\Core\StringTranslation\TranslatableMarkup|null $label
-   *   (optional) The human-readable name of the plugin.
+   * @param \Drupal\Core\StringTranslation\TranslatableMarkup $label
+   *   The human-readable name of the plugin.
    * @param array $field_types
    *   Array of supported field types.
    * @param class-string|null $deriver

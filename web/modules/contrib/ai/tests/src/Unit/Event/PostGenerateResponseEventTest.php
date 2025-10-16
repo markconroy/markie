@@ -3,6 +3,8 @@
 namespace Drupal\Tests\ai\Unit\Event;
 
 use Drupal\ai\Event\PostGenerateResponseEvent;
+use Drupal\ai\OperationType\Chat\ChatMessage;
+use Drupal\ai\OperationType\Chat\ChatOutput;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -60,7 +62,7 @@ class PostGenerateResponseEventTest extends TestCase {
    */
   public function testGetOutput(): void {
     $event = $this->getEvent();
-    $this->assertEquals('It sure is!', $event->getOutput());
+    $this->assertEquals('It sure is!', $event->getOutput()->getNormalized()->getText());
   }
 
   /**
@@ -110,8 +112,15 @@ class PostGenerateResponseEventTest extends TestCase {
    */
   public function testSetOutput(): void {
     $event = $this->getEvent();
-    $event->setOutput('It is not!');
-    $this->assertEquals('It is not!', $event->getOutput());
+    $output = new ChatOutput(
+      new ChatMessage('Assistant', 'It is not!'),
+      [
+        'text' => 'It is not!',
+      ],
+      [],
+    );
+    $event->setOutput($output);
+    $this->assertEquals($output, $event->getOutput());
   }
 
   /**
@@ -129,12 +138,19 @@ class PostGenerateResponseEventTest extends TestCase {
    *   The event.
    */
   public function getEvent(): PostGenerateResponseEvent {
+    $output = new ChatOutput(
+      new ChatMessage('Assistant', 'It sure is!'),
+      [
+        'text' => 'It sure is!',
+      ],
+      [],
+    );
     return new PostGenerateResponseEvent('unique_id', 'test', 'chat', [
       'test' => 'testing',
     ],
       'This is a test',
       'model1',
-      'It sure is!',
+      $output,
       ['ai-test'],
       [
         'streamed' => TRUE,

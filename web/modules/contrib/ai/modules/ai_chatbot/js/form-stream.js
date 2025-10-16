@@ -57,6 +57,42 @@
     });
   }
 
+  // Add new behavior for chat height adjustment
+  Drupal.behaviors.adjustChatHeight = {
+    attach: function (context, settings) {
+      if (drupalSettings.theme !== 'olivero') {
+        return;
+      } else {
+        once('adjust-chat-height', '#live-chat', context).forEach((chatElement) => {
+          // Initial configuration
+          const initialChatWindowHeight = '345px';
+          const expandedChatWindowHeight = '516px';
+          const initialChatHistoryHeight = '186px';
+          const expandedChatHistoryHeight = '345px';
+
+          // Set initial height
+          $(chatElement).css('height', initialChatWindowHeight);
+          $(chatElement).find('.chat-history').css('height', initialChatHistoryHeight);
+
+          // Set up scroll handler
+          $(window).on('scroll', function () {
+            // Calculate scroll percentage
+            const scrollPercent = (window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100;
+
+            // When scrolled past 10%, expand the chat height
+            if (scrollPercent >= 10) {
+              $(chatElement).css('height', expandedChatWindowHeight);
+              $(chatElement).find('.chat-history').css('height', expandedChatHistoryHeight);
+            } else {
+              $(chatElement).css('height', initialChatWindowHeight);
+              $(chatElement).find('.chat-history').css('height', initialChatHistoryHeight);
+            }
+          });
+        });
+      }
+    }
+  };
+
   function renderBotChatMessage(form, sendMessage = '') {
     let converter = new showdown.Converter({
       disableForced4SpacesIndentedSublists: true,
@@ -110,6 +146,8 @@
 
   // Logic for minimizing the chatbot.
   $(document).ready(() => {
+    const isOlivero = drupalSettings.theme === 'olivero';
+
     if (drupalSettings.ai_chatbot.output_type === 'markdown') {
       rerenderChatMessages();
     }
@@ -121,22 +159,74 @@
     else if (drupalSettings.ai_chatbot.toggle_state == 'open') {
       chatStatus = 'false';
     }
-    if (chatStatus == 'false') {
-      $('#live-chat .chat').show();
-    }
-    // If its open.
-    $('.chat-history').scrollTop($('.chat-history')[0].scrollHeight);
-    $('#live-chat header').click(function() {
-      $('.chat').toggle(function () {
-        localStorage.setItem("livechat.closed", localStorage.getItem("livechat.closed") == 'true' ? 'false' : 'true');
-        $(this).animate({
-          display: 'block',
-        }, 100, () => {
-          // Go to the bottom of the chat history.
-          $('.chat-history').scrollTop($('.chat-history')[0].scrollHeight);
+
+    // Check the active theme.
+    if (isOlivero) {
+      const chatWindow = document.querySelector("#live-chat");
+      const $chat = $('#live-chat .chat');
+
+      // Helper function to adjust chatWindow bottom based on scroll and status
+      function adjustBottomPosition() {
+        const scrollPercent = (window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100;
+
+        if (!$chat.is(':visible')) {
+          chatWindow.style.bottom = scrollPercent > 10 ? '-28.8rem' : '-18rem';
+        } else {
+          chatWindow.style.bottom = '0';
+        }
+      }
+
+      // Initial display based on remembered state
+      if (chatStatus == 'false') {
+        $chat.show();
+        chatWindow.style.bottom = '0';
+      } else {
+        $chat.hide();
+        chatWindow.style.bottom = '-18rem';
+        adjustBottomPosition();
+      }
+
+      $('.chat-history').scrollTop($('.chat-history')[0]?.scrollHeight || 0);
+
+      $('#live-chat header').click(function () {
+        const isVisible = $chat.is(':visible');
+
+        if (isVisible) {
+          $chat.slideUp(200);
+          localStorage.setItem("livechat.closed", 'true');
+
+          const scrollPercent = (window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100;
+          chatWindow.style.bottom = scrollPercent > 10 ? '-28.8rem' : '-18rem';
+        } else {
+          $chat.slideDown(200, () => {
+            $('.chat-history').scrollTop($('.chat-history')[0]?.scrollHeight || 0);
+            chatWindow.style.bottom = '0';
+          });
+          localStorage.setItem("livechat.closed", 'false');
+        }
+      });
+
+      $(window).on('scroll', adjustBottomPosition);
+
+    } else {
+      // Legacy code for all non-Olivero themes
+      if (chatStatus == 'false') {
+        $('#live-chat .chat').show();
+      }
+
+      $('.chat-history').scrollTop($('.chat-history')[0]?.scrollHeight || 0);
+
+      $('#live-chat header').click(function () {
+        $('.chat').toggle(function () {
+          localStorage.setItem("livechat.closed", localStorage.getItem("livechat.closed") == 'true' ? 'false' : 'true');
+          $(this).animate({
+            display: 'block',
+          }, 100, () => {
+            $('.chat-history').scrollTop($('.chat-history')[0]?.scrollHeight || 0);
+          });
         });
-      })
-    });
+      });
+    }
 
     $('.chat-form-clear-history').click((event) => {
       event.preventDefault();

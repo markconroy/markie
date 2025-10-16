@@ -464,7 +464,6 @@ class AiAssistantApiRunner {
       $message = "No actions have been run, this means that you have done nothing since the last instruction.";
     }
     $assistant_message = $assistant_message . $message;
-    $provider->setChatSystemRole($assistant_message);
 
     $messages = [];
 
@@ -475,15 +474,17 @@ class AiAssistantApiRunner {
       }
     }
     $provider->setConfiguration($config);
-    if ($this->streaming) {
-      $provider->streamedOutput(TRUE);
-    }
+
     // Get the history.
     $history = $this->getMessageHistory();
     foreach ($history as $key => $message) {
       $messages[] = new ChatMessage($message['role'], $message['message']);
     }
     $input = new ChatInput($messages);
+    if ($this->streaming) {
+      $input->setStreamedOutput(TRUE);
+    }
+    $input->setSystemPrompt($assistant_message);
     // If its preprompt and function calling, we set the function calling.
     if ($pre_prompt && $this->assistant->get('use_function_calling')) {
       $tools = $this->assistantMessageBuilder->getFunctionCalls();
@@ -508,10 +509,6 @@ class AiAssistantApiRunner {
     if (method_exists($values, 'getTools')) {
       // Output the tools if they exist.
       $tools = $values->getTools();
-      if ($tools) {
-        print_r($tools);
-        exit;
-      }
     }
     $response = $this->promptJsonDecoder->decode($values, 20);
 

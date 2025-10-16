@@ -52,3 +52,55 @@ function ai_module_preuninstall($module) {
     }
   }
 }
+
+/**
+ * Implements hook_theme().
+ *
+ * Overrides the core html theme to use a custom template for iframes.
+ */
+function ai_theme() {
+  return [
+    'html__admin__config__ai__tools' => [
+      'template' => 'html--admin--config--ai--tools',
+      'render element' => 'html',
+      'preprocess functions' => ['template_preprocess_html'],
+    ],
+    'page__admin__config__ai__tools' => [
+      'template' => 'page--admin--config--ai--tools',
+      'render element' => 'html',
+      'preprocess functions' => ['template_preprocess_page'],
+    ],
+    'ai_tools_library_item' => [
+      'variables' => [
+        'title' => '',
+        'description' => '',
+        'tool_id' => '',
+        'widget_id' => '',
+        'buttons' => [],
+      ],
+    ],
+    'ai_tools_library_wrapper' => [
+      'variables' => [
+        'menu' => [],
+        'content' => [],
+      ],
+    ],
+  ];
+}
+
+/**
+ * Implements hook_preprocess_links__ai_tools_library_menu().
+ *
+ * This targets the menu of available ai tools group in the ai tools library's
+ * modal dialog.
+ *
+ * @todo Do this in the relevant template once
+ *   https://www.drupal.org/project/drupal/issues/3088856 is resolved.
+ */
+function ai_preprocess_links__ai_tools_library_menu(array &$variables): void {
+  foreach ($variables['links'] as &$link) {
+    // Add a class to the AI Tools Library menu items.
+    $link['attributes']->addClass('ai-tools-library-menu__item');
+    $link['link']['#options']['attributes']['class'][] = 'ai-tools-library-menu__link';
+  }
+}

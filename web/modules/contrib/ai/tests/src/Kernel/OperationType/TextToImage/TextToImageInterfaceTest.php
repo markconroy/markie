@@ -49,6 +49,7 @@ class TextToImageInterfaceTest extends KernelTestBase {
     $this->installEntitySchema('user');
     $this->installEntitySchema('file');
     $this->installEntitySchema('media');
+    $this->installEntitySchema('ai_mock_provider_result');
     $this->installSchema('file', [
       'file_usage',
     ]);

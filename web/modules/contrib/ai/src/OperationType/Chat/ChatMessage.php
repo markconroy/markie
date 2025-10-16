@@ -2,6 +2,9 @@
 
 namespace Drupal\ai\OperationType\Chat;
 
+use Drupal\Component\Serialization\Json;
+use Drupal\ai\OperationType\Chat\Tools\ToolsFunctionOutput;
+use Drupal\ai\OperationType\GenericType\FileBaseInterface;
 use Drupal\ai\OperationType\GenericType\ImageFile;
 use Drupal\ai\Traits\File\FileMimeTypeTrait;
 use Drupal\file\Entity\File;
@@ -28,25 +31,25 @@ class ChatMessage {
   private string $text;
 
   /**
-   * The images files in an array.
+   * The files in an array.
    *
-   * @var \Drupal\ai\OperationType\GenericType\ImageFile[]
+   * @var \Drupal\ai\OperationType\GenericType\FileBaseInterface[]
    */
-  private array $images;
+  private array $files;
 
   /**
    * The tools.
    *
-   * @var \Drupal\ai\OperationType\Chat\Tools\ToolsOutputInterface[]|null
+   * @var \Drupal\ai\OperationType\Chat\Tools\ToolsFunctionOutputInterface[]|null
    */
   private ?array $tools = NULL;
 
   /**
    * The tool id if any.
    *
-   * @var string
+   * @var string|null
    */
-  private string $toolId = "";
+  private ?string $toolId = NULL;
 
   /**
    * The constructor.
@@ -55,13 +58,13 @@ class ChatMessage {
    *   The role of the message.
    * @param string $text
    *   The text.
-   * @param \Drupal\ai\OperationType\GenericType\ImageFile[] $images
-   *   The images.
+   * @param \Drupal\ai\OperationType\GenericType\FileBaseInterface[] $images
+   *   The files.
    */
   public function __construct(string $role = "", string $text = "", array $images = []) {
     $this->role = $role;
     $this->text = $text;
-    $this->images = $images;
+    $this->files = $images;
   }
 
   /**
@@ -105,13 +108,34 @@ class ChatMessage {
   }
 
   /**
+   * Get the files.
+   *
+   * @return \Drupal\ai\OperationType\GenericType\FileBaseInterface[]
+   *   The files.
+   */
+  public function getFiles(): array {
+    return $this->files;
+  }
+
+  /**
    * Get the images.
    *
    * @return \Drupal\ai\OperationType\GenericType\ImageFile[]
    *   The images.
    */
   public function getImages(): array {
-    return $this->images;
+    // As part of the BC we return only images here.
+    return array_filter($this->files, fn($file) => $file instanceof ImageFile);
+  }
+
+  /**
+   * Set the file.
+   *
+   * @param \Drupal\ai\OperationType\GenericType\FileBaseInterface $file
+   *   The file.
+   */
+  public function setFile(FileBaseInterface $file): void {
+    $this->files[] = $file;
   }
 
   /**
@@ -121,13 +145,13 @@ class ChatMessage {
    *   The image.
    */
   public function setImage(ImageFile $image): void {
-    $this->images[] = $image;
+    $this->files[] = $image;
   }
 
   /**
    * Get the tools.
    *
-   * @return \Drupal\ai\OperationType\Chat\Tools\ToolsOutputInterface[]|null
+   * @return \Drupal\ai\OperationType\Chat\Tools\ToolsFunctionOutputInterface[]|null
    *   The tools.
    */
   public function getTools(): ?array {
@@ -137,7 +161,7 @@ class ChatMessage {
   /**
    * Set the tools.
    *
-   * @param \Drupal\ai\OperationType\Chat\Tools\ToolsOutputInterface[] $tools
+   * @param \Drupal\ai\OperationType\Chat\Tools\ToolsFunctionOutputInterface[] $tools
    *   The tools.
    */
   public function setTools(array $tools): void {
@@ -163,10 +187,10 @@ class ChatMessage {
   /**
    * Get the tool id.
    *
-   * @return string
+   * @return string|null
    *   The tool id.
    */
-  public function getToolsId(): string {
+  public function getToolsId(): string|null {
     return $this->toolId;
   }
 
@@ -189,7 +213,7 @@ class ChatMessage {
    *   The mime type.
    */
   public function setImageFromBinary(string $binary, string $mime_type): void {
-    $this->images[] = new ImageFile($binary, $mime_type);
+    $this->files[] = new ImageFile($binary, $mime_type);
   }
 
   /**
@@ -202,7 +226,7 @@ class ChatMessage {
     // Get mime type from the uri.
     $mime_type = $this->getFileMimeTypeGuesser()->guessMimeType($url);
     $filename = basename($url);
-    $this->images[] = new ImageFile(file_get_contents($url), $mime_type, $filename);
+    $this->files[] = new ImageFile(file_get_contents($url), $mime_type, $filename);
   }
 
   /**
@@ -215,7 +239,7 @@ class ChatMessage {
     // Get mime type from the uri.
     $mime_type = $this->getFileMimeTypeGuesser()->guessMimeType($uri);
     $filename = basename($uri);
-    $this->images[] = new ImageFile(file_get_contents($uri), $mime_type, $filename);
+    $this->files[] = new ImageFile(file_get_contents($uri), $mime_type, $filename);
   }
 
   /**
@@ -225,7 +249,7 @@ class ChatMessage {
    *   The file.
    */
   public function setImageFromFile(File $file): void {
-    $this->images[] = new ImageFile(file_get_contents($file->getFileUri()), $file->getMimeType(), $file->getFilename());
+    $this->files[] = new ImageFile(file_get_contents($file->getFileUri()), $file->getMimeType(), $file->getFilename());
   }
 
   /**
@@ -236,16 +260,59 @@ class ChatMessage {
    */
   public function toArray(): array {
     $images = [];
-    foreach ($this->images as $image) {
+    foreach ($this->files as $image) {
       $images[] = $image->getBinary();
     }
     return [
       'role' => $this->role,
       'text' => $this->text,
+      // @todo find out if this can be changed to 'files'
       'images' => $images,
       'tools' => $this->tools ? $this->getRenderedTools() : NULL,
-      'tool_id' => $this->toolId,
+      'tool_id' => $this->toolId ?? NULL,
     ];
+  }
+
+  /**
+   * Create an instance from an array.
+   *
+   * @param array $data
+   *   The data to create the instance from.
+   *
+   * @return static
+   *   The created instance.
+   */
+  public static function fromArray(array $data): static {
+    $instance = new static($data['role'] ?? '', $data['text'] ?? '', []);
+    if (isset($data['images'])) {
+      foreach ($data['images'] as $imageData) {
+        $instance->setImage(ImageFile::fromArray($imageData));
+      }
+    }
+    if (isset($data['tools'])) {
+      $tools = [];
+      $function_call_manager = \Drupal::service('plugin.manager.ai.function_calls');
+      foreach ($data['tools'] as $tool_data) {
+        // Get the real actual plugin.
+        $tool = $function_call_manager->getFunctionCallFromFunctionName($tool_data['function']['name']);
+        // Set a new ToolsFunctionOutput.
+        $input = $tool->normalize();
+        $tools[] = new ToolsFunctionOutput($input, $tool_data['id'], Json::decode($tool_data['function']['arguments']));
+      }
+      // Now we set it all.
+      $instance->setTools($tools);
+    }
+    if (isset($data['tool_id'])) {
+      $instance->setToolsId($data['tool_id']);
+    }
+    if (isset($data['text'])) {
+      $instance->setText($data['text']);
+    }
+    if (isset($data['role'])) {
+      $instance->setRole($data['role']);
+    }
+    // @todo Files.
+    return $instance;
   }
 
 }

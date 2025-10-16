@@ -145,6 +145,9 @@ class AiAutomatorFieldConfig {
             'checked' => TRUE,
           ],
         ],
+        'required' => [
+          ':input[name="automator_enabled"]' => ['checked' => TRUE],
+        ],
       ],
       // Update dynamically.
       '#ajax' => [
@@ -235,7 +238,7 @@ class AiAutomatorFieldConfig {
       // Create Options for base field.
       $baseFieldOptions = [];
       foreach ($fields as $fieldId => $fieldData) {
-        if (in_array($fieldData->getType(), $rule->allowedInputs()) && $fieldId != $fieldName) {
+        if (in_array($fieldData->getType(), $rule->allowedInputs())) {
           $baseFieldOptions[$fieldId] = $fieldData->getLabel();
         }
       }
@@ -367,8 +370,8 @@ class AiAutomatorFieldConfig {
 
       $subForm = $rule->extraAdvancedFormFields($entity, $fieldInfo, $formState, $defaultValues);
       $form['automator_container']['automator_advanced'] = array_merge($form['automator_container']['automator_advanced'], $subForm);
-      $form['#validate'][] = [$this, 'validateConfigValues'];
     }
+    $form['#validate'][] = [$this, 'validateConfigValues'];
     $form['#entity_builders'][] = [$this, 'addConfigValues'];
   }
 
@@ -398,23 +401,25 @@ class AiAutomatorFieldConfig {
   public function validateConfigValues(&$form, FormStateInterface $formState): bool {
     if ($formState->getValue('automator_enabled')) {
       $values = $formState->getValues();
-      foreach ($values as $key => $val) {
-        if (str_starts_with($key, 'automator_')) {
-          // Find the rule. If not found don't do anything.
-          $rule = $this->fieldRules->findRule($formState->getValue('automator_rule'));
 
-          // Validate the configuration.
-          if ($rule->needsPrompt() && $formState->getValue('automator_mode') == 'base' && !$formState->getValue('automator_prompt')) {
-            $formState->setErrorByName('automator_prompt', $this->t('If you enable AI Automator, you have to give a prompt.'));
-          }
-          if ($formState->getValue('automator_mode') == 'base' && !$formState->getValue('automator_base_field')) {
-            $formState->setErrorByName('automator_base_field', $this->t('If you enable AI Automator, you have to give a base field.'));
-          }
-          // Run the rule validation.
-          if (method_exists($rule, 'validateConfigValues')) {
-            $rule->validateConfigValues($form, $formState);
-          }
-        }
+      // Validate whether an AI Automator Type is selected.
+      if (empty($values['automator_rule'])) {
+        $formState->setErrorByName('automator_rule', $this->t('If you enable AI Automator, you have to choose an AI Automator Type.'));
+        return FALSE;
+      }
+      // Find the rule. If not found don't do anything.
+      $rule = $this->fieldRules->findRule($formState->getValue('automator_rule'));
+
+      // Validate the configuration.
+      if ($rule->needsPrompt() && $formState->getValue('automator_mode') == 'base' && !$formState->getValue('automator_prompt')) {
+        $formState->setErrorByName('automator_prompt', $this->t('If you enable AI Automator, you have to give a prompt.'));
+      }
+      if ($formState->getValue('automator_mode') == 'base' && !$formState->getValue('automator_base_field')) {
+        $formState->setErrorByName('automator_base_field', $this->t('If you enable AI Automator, you have to give a base field.'));
+      }
+      // Run the rule validation.
+      if (method_exists($rule, 'validateConfigValues')) {
+        $rule->validateConfigValues($form, $formState);
       }
     }
 

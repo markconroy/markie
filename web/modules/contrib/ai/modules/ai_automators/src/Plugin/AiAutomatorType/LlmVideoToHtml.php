@@ -85,7 +85,7 @@ class LlmVideoToHtml extends VideoToText implements AiAutomatorTypeInterface {
     $cutPrompt = $this->renderTokenPrompt($automatorConfig['generating_prompt'], $entity);
 
     $total = [];
-    foreach ($entity->{$automatorConfig['base_field']} as $entityWrapper) {
+    foreach ($entity->get($automatorConfig['base_field']) as $entityWrapper) {
       if ($entityWrapper->entity) {
         $fileEntity = $entityWrapper->entity;
         if (in_array($fileEntity->getMimeType(), [
@@ -156,7 +156,7 @@ class LlmVideoToHtml extends VideoToText implements AiAutomatorTypeInterface {
             $cropData = $parts;
           }
         }
-        $screenShot = $this->screenshotFromTimestamp($entity->{$baseField}->entity, $match, $cropData);
+        $screenShot = $this->screenshotFromTimestamp($entity->get($baseField)->entity, $match, $cropData);
         $value = str_replace($match, $screenShot->createFileUrl(TRUE), $value);
         $value = preg_replace('/data-crop="(.*)"/', '', $value);
       }

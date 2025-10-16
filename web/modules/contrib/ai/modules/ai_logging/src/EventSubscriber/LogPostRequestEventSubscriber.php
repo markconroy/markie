@@ -117,8 +117,9 @@ class LogPostRequestEventSubscriber implements EventSubscriberInterface {
       /** @var \Drupal\ai_logging\Entity\AiLog $log */
       $log = $storage->load($this->streamingUuids[$event->getRequestThreadId()]);
 
-      if ($log) {
-        $log->set('output_text', json_encode($event->getOutput()));
+      if ($log && $event->getOutput()) {
+        $output = $event->getOutput()->getRawOutput();
+        $log->set('output_text', json_encode($output));
         $log->save();
       }
     }

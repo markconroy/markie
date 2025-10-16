@@ -3,6 +3,7 @@
 namespace Drupal\ai\OperationType\Chat;
 
 use Drupal\ai\OperationType\OutputInterface;
+use Drupal\ai\Dto\TokenUsageDto;
 
 /**
  * Data transfer output object for chat output.
@@ -31,29 +32,9 @@ class ChatOutput implements OutputInterface {
   private mixed $metadata;
 
   /**
-   * The amount of input tokens from the AI provider.
+   * The token usage DTO.
    */
-  private ?int $inputTokensUsage = NULL;
-
-  /**
-   * The amount of output tokens from the AI provider.
-   */
-  private ?int $outputTokensUsage = NULL;
-
-  /**
-   * The amount of total tokens from the AI provider.
-   */
-  private ?int $totalTokensUsage = NULL;
-
-  /**
-   * The amount of reasoning tokens from the AI provider.
-   */
-  private ?int $reasoningTokensUsage = NULL;
-
-  /**
-   * The amount of cached tokens from the AI provider.
-   */
-  private ?int $cachedTokensUsage = NULL;
+  private TokenUsageDto $tokenUsage;
 
   /**
    * The constructor.
@@ -64,11 +45,14 @@ class ChatOutput implements OutputInterface {
    *   The raw output from the AI provider.
    * @param mixed $metadata
    *   The metadata from the AI provider.
+   * @param \Drupal\ai\Dto\TokenUsageDto|null $tokenUsage
+   *   The token usage.
    */
-  public function __construct(ChatMessage|StreamedChatMessageIteratorInterface $normalized, mixed $rawOutput, mixed $metadata) {
+  public function __construct(ChatMessage|StreamedChatMessageIteratorInterface $normalized, mixed $rawOutput, mixed $metadata, ?TokenUsageDto $tokenUsage = NULL) {
     $this->normalized = $normalized;
     $this->rawOutput = $rawOutput;
     $this->metadata = $metadata;
+    $this->tokenUsage = $tokenUsage ?? new TokenUsageDto();
   }
 
   /**
@@ -102,13 +86,37 @@ class ChatOutput implements OutputInterface {
   }
 
   /**
+   * Set the token usage.
+   *
+   * @param \Drupal\ai\Dto\TokenUsageDto $tokenUsage
+   *   The token usage.
+   */
+  public function setTokenUsage(TokenUsageDto $tokenUsage): void {
+    $this->tokenUsage = $tokenUsage;
+  }
+
+  /**
+   * Gets the token usage.
+   *
+   * @return \Drupal\ai\Dto\TokenUsageDto
+   *   The token usage.
+   */
+  public function getTokenUsage(): TokenUsageDto {
+    return $this->tokenUsage;
+  }
+
+  /**
    * Set the total tokens used by the AI provider.
    *
    * @param int $tokens
    *   The amount of tokens.
+   *
+   * @deprecated in ai:1.2.0 and is removed from ai:2.0.0. Use
+   * setTokenUsage() in the ChatOutput class instead.
+   * @see https://www.drupal.org/project/ai/issues/3541284
    */
-  public function setTotalTokenUsage(int $tokens): void {
-    $this->totalTokensUsage = $tokens;
+  public function setTotalTokenUsage(?int $tokens): void {
+    $this->tokenUsage->total = $tokens;
   }
 
   /**
@@ -116,9 +124,13 @@ class ChatOutput implements OutputInterface {
    *
    * @param int $tokens
    *   The amount of tokens.
+   *
+   * @deprecated in ai:1.2.0 and is removed from ai:2.0.0. Use
+   * setTokenUsage() in the ChatOutput class instead.
+   * @see https://www.drupal.org/project/ai/issues/3541284
    */
-  public function setInputTokenUsage(int $tokens): void {
-    $this->inputTokensUsage = $tokens;
+  public function setInputTokenUsage(?int $tokens): void {
+    $this->tokenUsage->input = $tokens;
   }
 
   /**
@@ -126,9 +138,13 @@ class ChatOutput implements OutputInterface {
    *
    * @param int $tokens
    *   The amount of tokens.
+   *
+   * @deprecated in ai:1.2.0 and is removed from ai:2.0.0. Use
+   * setTokenUsage() in the ChatOutput class instead.
+   * @see https://www.drupal.org/project/ai/issues/3541284
    */
-  public function setOutputTokenUsage(int $tokens): void {
-    $this->outputTokensUsage = $tokens;
+  public function setOutputTokenUsage(?int $tokens): void {
+    $this->tokenUsage->output = $tokens;
   }
 
   /**
@@ -136,9 +152,13 @@ class ChatOutput implements OutputInterface {
    *
    * @param int $tokens
    *   The amount of tokens.
+   *
+   * @deprecated in ai:1.2.0 and is removed from ai:2.0.0. Use
+   * setTokenUsage() in the ChatOutput class instead.
+   * @see https://www.drupal.org/project/ai/issues/3541284
    */
-  public function setReasoningTokenUsage(int $tokens): void {
-    $this->reasoningTokensUsage = $tokens;
+  public function setReasoningTokenUsage(?int $tokens): void {
+    $this->tokenUsage->reasoning = $tokens;
   }
 
   /**
@@ -146,77 +166,117 @@ class ChatOutput implements OutputInterface {
    *
    * @param int $tokens
    *   The amount of tokens.
+   *
+   * @deprecated in ai:1.2.0 and is removed from ai:2.0.0. Use
+   * setTokenUsage() in the ChatOutput class instead.
+   * @see https://www.drupal.org/project/ai/issues/3541284
    */
-  public function setCachedTokenUsage(int $tokens): void {
-    $this->cachedTokensUsage = $tokens;
+  public function setCachedTokenUsage(?int $tokens): void {
+    $this->tokenUsage->cached = $tokens;
   }
 
   /**
    * Gets the total tokens used by the AI provider.
    *
+   * @deprecated in ai:1.2.0 and is removed from ai:2.0.0. Use
+   * getTokenUsage() in the ChatOutput class instead.
+   * @see https://www.drupal.org/project/ai/issues/3541284
+   *
    * @return int|null
    *   The total token usage.
    */
   public function getTotalTokenUsage(): ?int {
-    return $this->totalTokensUsage;
+    return $this->tokenUsage->total;
   }
 
   /**
    * Gets the input tokens used by the AI provider.
    *
+   * @deprecated in ai:1.2.0 and is removed from ai:2.0.0. Use
+   * getTokenUsage() in the ChatOutput class instead.
+   * @see https://www.drupal.org/project/ai/issues/3541284
+   *
    * @return int|null
    *   The input token usage.
    */
   public function getInputTokenUsage(): ?int {
-    return $this->inputTokensUsage;
+    return $this->tokenUsage->input;
   }
 
   /**
    * Gets the output tokens used by the AI provider.
    *
+   * @deprecated in ai:1.2.0 and is removed from ai:2.0.0. Use
+   * getTokenUsage() in the ChatOutput class instead.
+   * @see https://www.drupal.org/project/ai/issues/3541284
+   *
    * @return int|null
    *   The output token usage.
    */
   public function getOutputTokenUsage(): ?int {
-    return $this->outputTokensUsage;
+    return $this->tokenUsage->output;
   }
 
   /**
    * Gets the reasoning tokens used by the AI provider.
    *
+   * @deprecated in ai:1.2.0 and is removed from ai:2.0.0. Use
+   * getTokenUsage() in the ChatOutput class instead.
+   * @see https://www.drupal.org/project/ai/issues/3541284
+   *
    * @return int|null
    *   The reasoning token usage.
    */
   public function getReasoningTokenUsage(): ?int {
-    return $this->reasoningTokensUsage;
+    return $this->tokenUsage->reasoning;
   }
 
   /**
    * Gets the cached tokens used by the AI provider.
    *
+   * @deprecated in ai:1.2.0 and is removed from ai:2.0.0. Use
+   * getTokenUsage() in the ChatOutput class instead.
+   * @see https://www.drupal.org/project/ai/issues/3541284
+   *
    * @return int|null
    *   The cached token usage.
    */
   public function getCachedTokenUsage(): ?int {
-    return $this->cachedTokensUsage;
+    return $this->tokenUsage->cached;
   }
 
   /**
    * {@inheritdoc}
    */
   public function toArray(): array {
+    if ($this->normalized instanceof StreamedChatMessageIteratorInterface) {
+      return [];
+    }
     return [
-      'normalized' => $this->normalized,
+      'normalized' => $this->normalized->toArray(),
       'rawOutput' => $this->rawOutput,
       'metadata' => $this->metadata,
-      'tokenUsage' => [
-        'input' => $this->inputTokensUsage,
-        'output' => $this->outputTokensUsage,
-        'total' => $this->totalTokensUsage,
-        'reasoning' => $this->reasoningTokensUsage,
-        'cached' => $this->cachedTokensUsage,
-      ],
+      'tokenUsage' => $this->tokenUsage->toArray(),
     ];
+  }
+
+  /**
+   * Create an instance from an array.
+   *
+   * @param array $data
+   *   The data to create the instance from.
+   *
+   * @return \Drupal\ai\OperationType\Chat\ChatOutput
+   *   The output instance.
+   */
+  public static function fromArray(array $data): ChatOutput {
+    $normalized = $data['normalized'] ?? NULL;
+    $normalized = ChatMessage::fromArray($normalized);
+    $raw_output = $data['rawOutput'] ?? NULL;
+    $metadata = $data['metadata'] ?? NULL;
+    $tokenUsage = isset($data['tokenUsage']) ? TokenUsageDto::create($data['tokenUsage']) : NULL;
+    $output = new static($normalized, $raw_output, $metadata, $tokenUsage);
+    return $output;
   }
 
 }

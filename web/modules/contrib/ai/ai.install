@@ -71,3 +71,19 @@ function ai_update_10302() {
   // is still available.
   // See: https://www.drupal.org/i/3521487
 }
+
+/**
+ * Create the AI Prompt Type and AI Prompt configuration entities.
+ */
+function ai_update_10303() {
+  $update_manager = \Drupal::entityDefinitionUpdateManager();
+  $entity_type_manager = \Drupal::entityTypeManager();
+  if (!$update_manager->getEntityType('ai_prompt_type')) {
+    $entity_type = $entity_type_manager->getDefinition('ai_prompt_type');
+    $update_manager->installEntityType($entity_type);
+  }
+  if (!$update_manager->getEntityType('ai_prompt')) {
+    $entity_type = $entity_type_manager->getDefinition('ai_prompt');
+    $update_manager->installEntityType($entity_type);
+  }
+}

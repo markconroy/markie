@@ -2,3 +2,40 @@ ai_setup_form:
   css:
     component:
       assets/css/ai_setup_form.css: {}
+
+tools_library_item:
+  css:
+    component:
+      assets/css/ai_tools_library_item.css: {}
+
+tools_library:
+  css:
+    component:
+      assets/css/ai_tools_library.css: {}
+  js:
+    assets/js/ai_tools_library.js: { }
+  dependencies:
+    - core/drupal.ajax
+    - core/drupal.announce
+    - core/drupal.debounce
+    - core/once
+    - core/jquery
+    - core/tabbable
+    - ai/tools_library_item
+
+tools_library_form_element:
+  js:
+    assets/js/ai_tools_library_form_element.js: {  }
+  dependencies:
+    - core/jquery
+    - core/once
+    - core/drupal.dialog.ajax
+
+chat_history_element:
+  js:
+    assets/js/chat_history_element.js: {}
+  dependencies:
+    - core/once
+  css:
+    theme:
+      assets/css/chat_history_element.css: {}

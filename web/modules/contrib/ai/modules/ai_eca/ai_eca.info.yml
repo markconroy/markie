@@ -1,16 +1,17 @@
 name: AI ECA integration
 type: module
-description: Adds integration with the ECA module.
+description: 'Deprecated and being removed in AI 2.0.0.'
 package: AI
 core_version_requirement: ^10.3 || ^11
-lifecycle: experimental
+lifecycle: deprecated
+lifecycle_link: 'https://www.drupal.org/project/ai/issues/3503947'
 dependencies:
   - ai:ai
   - drupal:file
   - eca:eca
   - eca_content:eca_content
 
-# Information added by Drupal.org packaging script on 2025-09-17
-version: '1.1.4'
+# Information added by Drupal.org packaging script on 2025-10-15
+version: '1.2.1'
 project: 'ai'
-datestamp: 1758116446
+datestamp: 1760514354

@@ -7,4 +7,5 @@ namespace Drupal\ai\Enum;
  */
 enum AiProviderCapability: string {
   case StreamChatOutput = 'stream_chat_output';
+  case ChatFiberSupport = 'chat_fiber_support';
 }

@@ -142,8 +142,8 @@ class AiRequest implements ContainerInjectionInterface {
       ]);
 
       // Add the system message.
-      $ai_provider->setChatSystemRole('You are helpful website assistant for content writing and editing. Do not give responses in the first, second or third person form. Do not add any commentary to the answer.');
-      $ai_provider->streamedOutput();
+      $messages->setStreamedOutput(TRUE);
+      $messages->setSystemPrompt('You are helpful website assistant for content writing and editing. Do not give responses in the first, second or third person form. Do not add any commentary to the answer.');
 
       /** @var \Drupal\ai\OperationType\Chat\StreamedChatMessageIteratorInterface $response */
       $response = $ai_provider->chat($messages, $ai_model, ['ai_ckeditor'])->getNormalized();

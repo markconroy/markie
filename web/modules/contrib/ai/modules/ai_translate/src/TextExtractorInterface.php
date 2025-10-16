@@ -30,9 +30,6 @@ interface TextExtractorInterface {
    * @param array $metadata
    *   Text metadata.
    */
-  public function insertTextMetadata(
-    ContentEntityInterface $entity,
-    array $metadata,
-  ) : void;
+  public function insertTextMetadata(ContentEntityInterface $entity, array $metadata) : void;
 
 }

@@ -65,4 +65,28 @@ class AudioToAudioInput extends InputBase implements InputInterface {
     return $this->toString();
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function toArray(): array {
+    return [
+      'file' => $this->file->toArray(),
+    ];
+  }
+
+  /**
+   * Create an instance from an array.
+   *
+   * @param array $data
+   *   The data to create the instance from.
+   *
+   * @return \Drupal\ai\OperationType\AudioToAudio\AudioToAudioInput
+   *   The input instance.
+   */
+  public static function fromArray(array $data): InputInterface {
+    // If there is a file, create it from array as well.
+    $file = isset($data['file']) ? AudioFile::fromArray($data['file']) : NULL;
+    return new static($file);
+  }
+
 }

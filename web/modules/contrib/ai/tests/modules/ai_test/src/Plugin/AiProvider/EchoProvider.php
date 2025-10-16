@@ -2,7 +2,9 @@
 
 namespace Drupal\ai_test\Plugin\AiProvider;
 
+use Drupal\Component\Serialization\Json;
 use Drupal\Core\Config\ImmutableConfig;
+use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Tests\ai\Mock\MockIterator;
 use Drupal\Tests\ai\Mock\MockStreamedChatIterator;
@@ -25,6 +27,10 @@ use Drupal\ai\OperationType\ImageClassification\ImageClassificationInput;
 use Drupal\ai\OperationType\ImageClassification\ImageClassificationInterface;
 use Drupal\ai\OperationType\ImageClassification\ImageClassificationItem;
 use Drupal\ai\OperationType\ImageClassification\ImageClassificationOutput;
+use Drupal\ai\OperationType\ImageToImage\ImageToImageInput;
+use Drupal\ai\OperationType\ImageToImage\ImageToImageInterface;
+use Drupal\ai\OperationType\ImageToImage\ImageToImageOutput;
+use Drupal\ai\OperationType\InputInterface;
 use Drupal\ai\OperationType\Moderation\ModerationInput;
 use Drupal\ai\OperationType\Moderation\ModerationInterface;
 use Drupal\ai\OperationType\Moderation\ModerationOutput;
@@ -38,9 +44,11 @@ use Drupal\ai\OperationType\TextToImage\TextToImageOutput;
 use Drupal\ai\OperationType\TextToSpeech\TextToSpeechInput;
 use Drupal\ai\OperationType\TextToSpeech\TextToSpeechInterface;
 use Drupal\ai\OperationType\TextToSpeech\TextToSpeechOutput;
+use Drupal\ai\Traits\OperationType\ImageToImageTrait;
 use Drupal\ai_test\OperationType\Echo\EchoInput;
 use Drupal\ai_test\OperationType\Echo\EchoInterface;
 use Drupal\ai_test\OperationType\Echo\EchoOutput;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Yaml\Yaml;
 
 /**
@@ -58,7 +66,41 @@ class EchoProvider extends AiProviderClientBase implements
   TextToSpeechInterface,
   ImageClassificationInterface,
   TextToImageInterface,
-  EchoInterface {
+  EchoInterface,
+  ImageToImageInterface {
+
+  use ImageToImageTrait;
+
+  /**
+   * The module handler interface.
+   *
+   * @var \Drupal\Core\Extension\ModuleHandlerInterface
+   */
+  protected ModuleHandlerInterface $moduleHandler;
+
+  /**
+   * The entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected $entityTypeManager;
+
+  /**
+   * The variable for the sub directory to search in.
+   *
+   * @var string
+   */
+  public static string $requestTestSubDirectory = 'tests/resources/ai_test/requests';
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
+    $parent_instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
+    $parent_instance->moduleHandler = $container->get('module_handler');
+    $parent_instance->entityTypeManager = $container->get('entity_type.manager');
+    return $parent_instance;
+  }
 
   /**
    * {@inheritdoc}
@@ -124,11 +166,22 @@ class EchoProvider extends AiProviderClientBase implements
    * {@inheritdoc}
    */
   public function chat(array|string|ChatInput $input, string $model_id, array $tags = []): ChatOutput {
+    // First try to match the request with the requests to test.
+    $matched_request = $this->getMatchingRequest('chat', $input);
+    if ($matched_request) {
+      if (!empty($matched_request['wait'])) {
+        // If there is a wait time, sleep for that time.
+        usleep($matched_request['wait'] * 1000);
+      }
+      // Return the response.
+      return ChatOutput::fromArray($matched_request['response']);
+    }
     $response = [];
     $normalized_input = '';
     if ($input instanceof ChatInput) {
       $normalized_input = $input->getMessages()[0]->getText();
     }
+
     if ($this->streamed) {
       $output[] = sprintf('Hello world! Input: %s. Config: %s.', $normalized_input ?? $input, json_encode($this->configuration));
       $iterator = new MockIterator($output);
@@ -184,7 +237,28 @@ class EchoProvider extends AiProviderClientBase implements
         }
       }
     }
-
+    // Mock an OpenAI response by default.
+    $response = [
+      'id' => 'chatcmpl-1234567890',
+      'object' => 'chat.completion',
+      'created' => time(),
+      'model' => $model_id,
+      'choices' => [
+        [
+          'index' => 0,
+          'message' => [
+            'role' => 'assistant',
+            'content' => $message instanceof ChatMessage ? $message->getText() : 'Hello world! This is a mock response.',
+          ],
+          'finish_reason' => 'stop',
+        ],
+      ],
+      'usage' => [
+        'prompt_tokens' => 10,
+        'completion_tokens' => 20,
+        'total_tokens' => 30,
+      ],
+    ];
     return new ChatOutput($message, $response, []);
   }
 
@@ -270,6 +344,14 @@ class EchoProvider extends AiProviderClientBase implements
   /**
    * {@inheritdoc}
    */
+  public function imageToImage(string|array|ImageToImageInput $input, string $model_id, array $tags = []): ImageToImageOutput {
+    // Use the ImageToImageTrait to handle the image to image operation.
+    return new ImageToImageOutput([$input->getImageFile()], [], []);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function imageClassification(string|array|ImageClassificationInput $input, string $model_id, array $tags = []): ImageClassificationOutput {
     $output = [];
     $response = [];
@@ -295,6 +377,139 @@ class EchoProvider extends AiProviderClientBase implements
       $input = new EchoInput($input);
     }
     return new EchoOutput((string) $input, ['echo' => (string) $input], []);
+  }
+
+  /**
+   * Function to get a matching request from the modules.
+   *
+   * @param string $operation_type
+   *   The operation type to check.
+   * @param mixed $input
+   *   The input to check against.
+   *
+   * @return array|null
+   *   An array with the matching response, and wait microtime or NULL if no
+   *   match is found.
+   */
+  public function getMatchingRequest(string $operation_type, mixed $input): ?array {
+    // If its not an inputInterface, we cannot match it.
+    if (!$input instanceof InputInterface) {
+      return [];
+    }
+    // Get all the requests to test against.
+    $requests = $this->dbRequestsToTest($operation_type);
+    $requests = array_merge($requests, $this->testRequestsToTest($operation_type));
+    foreach ($requests as $request) {
+      $array = $input->toArray();
+      if (isset($request['request']) && is_array($request['request']) && Json::encode($request['request']) === Json::encode($array)) {
+        // If the request matches, return the response.
+        if (isset($request['response']) && is_array($request['response'])) {
+          $response = $request['response'];
+          // If there is a wait time, set it.
+          $wait = isset($request['wait']) ? (int) $request['wait'] : 0;
+          return [
+            'response' => $response,
+            'wait' => $wait,
+          ];
+        }
+      }
+    }
+    return NULL;
+  }
+
+  /**
+   * Function that will get all enabled tests.
+   *
+   * @param string $operation_type
+   *   The operation type to check.
+   *
+   * @return array
+   *   An array of all requests to try to match.
+   */
+  public function dbRequestsToTest(string $operation_type = 'chat'): array {
+    // Verify that operation type is alphanumeric only.
+    if (!preg_match('/^[a-zA-Z0-9_]+$/', $operation_type)) {
+      throw new \InvalidArgumentException('Operation type must be alphanumeric only.');
+    }
+
+    // Check so the entity type exists.
+    if (!$this->entityTypeManager->hasDefinition('ai_mock_provider_result')) {
+      return [];
+    }
+
+    // Load all the requests that are of operation type chat and enabled.
+    /** @var \Drupal\ai_test\AIMockProviderResultInterface[] $entities */
+    $entities = $this->entityTypeManager->getStorage('ai_mock_provider_result')
+      ->loadByProperties([
+        'operation_type' => $operation_type,
+        'mock_enabled' => TRUE,
+      ]);
+
+    $responses = [];
+    foreach ($entities as $entity) {
+      $responses[] = [
+        'request' => Yaml::parse($entity->get('request')->value),
+        'response' => Yaml::parse($entity->get('response')->value),
+        'wait' => $entity->get('sleep_time')->value,
+      ];
+    }
+
+    return $responses;
+  }
+
+  /**
+   * Function that will find the modules for example tests.
+   *
+   * @param string $operation_type
+   *   The operation type to check.
+   *
+   * @return array
+   *   An array of all requests to try to match.
+   */
+  public function testRequestsToTest(string $operation_type = 'chat'): array {
+    // Verify that operation type is alphanumeric only.
+    if (!preg_match('/^[a-zA-Z0-9_]+$/', $operation_type)) {
+      throw new \InvalidArgumentException('Operation type must be alphanumeric only.');
+    }
+
+    // Key is based on module list and operation type.
+    $module_list = md5(implode('_', array_keys($this->moduleHandler->getModuleList())));
+    // Create a cache key based on the operation type and module list.
+    $cache_key = 'ai_test_requests_' . $operation_type . '_' . $module_list;
+    // Check if the cache is already set.
+    $cache = $this->cacheBackend->get($cache_key);
+    if ($cache) {
+      return $cache->data;
+    }
+
+    $requests = [];
+    foreach ($this->moduleHandler->getModuleList() as $extension) {
+      $path = $extension->getPath();
+      $path_to_explore = $path . '/' . self::$requestTestSubDirectory . '/' . $operation_type;
+      if (is_dir($path_to_explore)) {
+        $files = scandir($path_to_explore);
+        foreach ($files as $file) {
+          // Make sure its yaml or yml file.
+          if (preg_match('/\.(yaml|yml)$/', $file)) {
+            $file_path = $path_to_explore . '/' . $file;
+            if (is_file($file_path)) {
+              $file_contents = file_get_contents($file_path);
+              if ($file_contents !== FALSE) {
+                $data = Yaml::parse($file_contents);
+                if (!empty($data)) {
+                  $requests[] = $data;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // Set the cache for the requests.
+    $this->cacheBackend->set($cache_key, $requests, (time() + 60));
+
+    return $requests;
   }
 
 }

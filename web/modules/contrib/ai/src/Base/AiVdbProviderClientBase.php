@@ -437,4 +437,11 @@ abstract class AiVdbProviderClientBase implements AiVdbProviderInterface, AiVdbP
     return TRUE;
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function getRawEmbeddingFieldName(): ?string {
+    return NULL;
+  }
+
 }

@@ -53,3 +53,6 @@ plugin.plugin_configuration.search_api_backend.search_api_ai_search:
     embedding_strategy_details:
       type: string
       label: 'Additional details for the embedding strategy'
+    include_raw_embedding_vector:
+      type: boolean
+      label: 'Whether to include raw embedding vector in results'

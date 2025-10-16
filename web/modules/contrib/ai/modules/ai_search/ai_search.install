@@ -206,3 +206,40 @@ function ai_search_update_10004() {
   // pre and post 10001 scenarios.
   return ai_search_update_10002();
 }
+
+/**
+ * Update the search servers to include include_raw_embedding_vector setting.
+ */
+function ai_search_update_10005() {
+  $config_factory = \Drupal::configFactory();
+  $servers = $config_factory->listAll('search_api.server.');
+  if (empty($servers)) {
+    return t('No Search API servers found to review for changes.');
+  }
+
+  $updated_servers = 0;
+  foreach ($servers as $server) {
+    $config_object = $config_factory->getEditable($server);
+    $config = $config_object->getRawData();
+
+    // It must be an AI Search server.
+    if (
+      empty($config['dependencies']['module'])
+      || !in_array('ai_search', $config['dependencies']['module'])
+    ) {
+      continue;
+    }
+
+    // Add the new include_raw_embedding_vector setting if it doesn't exist.
+    if (!isset($config['backend_config']['include_raw_embedding_vector'])) {
+      $config['backend_config']['include_raw_embedding_vector'] = FALSE;
+      $config_object->set('backend_config', $config['backend_config']);
+      $config_object->save();
+      $updated_servers++;
+    }
+  }
+
+  return t('Search API Servers using the AI Search module updated with include_raw_embedding_vector setting: @number.', [
+    '@number' => $updated_servers,
+  ]);
+}

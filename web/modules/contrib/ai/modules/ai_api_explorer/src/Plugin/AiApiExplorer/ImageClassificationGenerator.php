@@ -132,9 +132,30 @@ final class ImageClassificationGenerator extends AiApiExplorerPluginBase {
    * {@inheritdoc}
    */
   public function getResponse(array &$form, FormStateInterface $form_state): array {
-    $provider = $this->aiProviderHelper->generateAiProviderFromFormSubmit($form, $form_state, 'image_classification', 'image_class');
+    try {
+      $provider = $this->aiProviderHelper->generateAiProviderFromFormSubmit($form, $form_state, 'image_classification', 'image_class');
+      $image_file = $this->generateFile('image');
 
-    if ($image_file = $this->generateFile('image')) {
+      if (!$image_file) {
+        $form['right']['response']['#context']['ai_response'] = [
+          'heading' => [
+            '#type' => 'html_tag',
+            '#tag' => 'h3',
+            '#value' => $this->t('No Image Provided'),
+          ],
+          'message' => [
+            '#type' => 'html_tag',
+            '#tag' => 'div',
+            '#value' => $this->t('Please upload an image file (JPG, JPEG, or PNG) to classify.'),
+            '#attributes' => [
+              'class' => ['ai-text-response', 'ai-error-message'],
+            ],
+          ],
+        ];
+        $form_state->setRebuild();
+        return $form['right'];
+      }
+
       // Get the labels.
       $labels = explode("\n", $form_state->getValue('labels'));
       $labels = array_map('trim', $labels);
@@ -144,22 +165,7 @@ final class ImageClassificationGenerator extends AiApiExplorerPluginBase {
       });
 
       $input = new ImageClassificationInput($image_file, $labels);
-
-      try {
-        $classification = $provider->imageClassification($input, $form_state->getValue('image_class_ai_model'), ['ai_api_explorer'])->getNormalized();
-      }
-      catch (\Exception $e) {
-        $form['right']['response']['#context']['ai_response']['response'] = [
-          '#type' => 'inline_template',
-          '#template' => '{{ error|raw }}',
-          '#context' => [
-            'error' => $this->explorerHelper->renderException($e),
-          ],
-        ];
-
-        // Early return if we've hit an error.
-        return $form['right'];
-      }
+      $classification = $provider->imageClassification($input, $form_state->getValue('image_class_ai_model'), ['ai_api_explorer'])->getNormalized();
 
       if ($classification) {
         $form['right']['response']['#context']['ai_response']['table'] = [
@@ -184,8 +190,60 @@ final class ImageClassificationGenerator extends AiApiExplorerPluginBase {
 
         $form['right']['response']['#context']['ai_response']['code'] = $this->normalizeCodeExample($provider, $form_state, $image_file->getFilename(), $labels);
       }
+      else {
+        $form['right']['response']['#context']['ai_response'] = [
+          'heading' => [
+            '#type' => 'html_tag',
+            '#tag' => 'h3',
+            '#value' => $this->t('No Classification Generated'),
+          ],
+          'message' => [
+            '#type' => 'html_tag',
+            '#tag' => 'div',
+            '#value' => $this->t('The provider did not generate a classification. Please check your image and try again.'),
+            '#attributes' => [
+              'class' => ['ai-text-response', 'ai-error-message'],
+            ],
+          ],
+        ];
+      }
+    }
+    catch (\TypeError $e) {
+      $form['right']['response']['#context']['ai_response'] = [
+        'heading' => [
+          '#type' => 'html_tag',
+          '#tag' => 'h3',
+          '#value' => $this->t('Configuration Error'),
+        ],
+        'message' => [
+          '#type' => 'html_tag',
+          '#tag' => 'div',
+          '#value' => $this->t('The AI provider could not be used. Please make sure a model is selected and the provider is properly configured.'),
+          '#attributes' => [
+            'class' => ['ai-text-response', 'ai-error-message'],
+          ],
+        ],
+      ];
+    }
+    catch (\Exception $e) {
+      $form['right']['response']['#context']['ai_response'] = [
+        'heading' => [
+          '#type' => 'html_tag',
+          '#tag' => 'h3',
+          '#value' => $this->t('Error'),
+        ],
+        'message' => [
+          '#type' => 'html_tag',
+          '#tag' => 'div',
+          '#value' => $this->explorerHelper->renderException($e),
+          '#attributes' => [
+            'class' => ['ai-text-response', 'ai-error-message'],
+          ],
+        ],
+      ];
     }
 
+    $form_state->setRebuild();
     return $form['right'];
   }
 

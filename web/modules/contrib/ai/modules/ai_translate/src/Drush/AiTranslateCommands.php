@@ -71,12 +71,12 @@ class AiTranslateCommands extends DrushCommands {
     name: 'ai:translate-entity'
   )]
   #[Argument(name: 'entityType', description: 'Entity type (i.e. node)')]
-  #[Argument(name: 'entityId', description: 'Entity ID (i.e. 16)')]
+  #[Argument(name: 'entityIds', description: 'Comma-separated entity IDs (i.e 16,18,20,21)')]
   #[Argument(name: 'langFrom', description: 'Source language code (i.e. fr)')]
   #[Argument(name: 'langTo', description: 'Target language code (i.e. en)')]
-  public function translateEntity(
+  public function translateEntities(
     string $entityType,
-    string $entityId,
+    string $entityIds,
     string $langFrom,
     string $langTo,
   ) {
@@ -84,53 +84,56 @@ class AiTranslateCommands extends DrushCommands {
     if (empty($langNames)) {
       $langNames = $this->languageManager->getNativeLanguages();
     }
-    $entity = $this->entityTypeManager->getStorage($entityType)
-      ->load($entityId);
-    if ($entity->language()->getId() !== $langFrom
-      && $entity->hasTranslation($langFrom)) {
-      $entity = $entity->getTranslation($langFrom);
-    }
-    if ($entity->hasTranslation($langTo)) {
-      $this->messenger()->addMessage(
-        $this->t('Translation already exists.'));
-      return;
-    }
-    $textMetadata = $this->textExtractor->extractTextMetadata($entity);
-    foreach ($textMetadata as &$singleField) {
-      // Get translations for each extracted field property.
-      foreach ($singleField['_columns'] as $column) {
-        try {
-          $singleField['translated'][$column] = '';
-          if (!empty($singleField[$column])) {
-            $singleField['translated'][$column] = $this->textTranslator->translateContent(
-              $singleField[$column], $langNames[$langTo], $langNames[$langFrom] ?? NULL);
+    $ids = array_filter(explode(',', $entityIds));
+    $entityStorage = $this->entityTypeManager->getStorage($entityType);
+    foreach ($entityStorage->loadMultiple($ids) as $entity) {
+      if ($entity->language()->getId() !== $langFrom
+        && $entity->hasTranslation($langFrom)) {
+        $entity = $entity->getTranslation($langFrom);
+      }
+      if ($entity->hasTranslation($langTo)) {
+        $this->messenger()->addMessage(
+          $this->t('Translation already exists.'));
+        continue;
+      }
+      $textMetadata = $this->textExtractor->extractTextMetadata($entity);
+      foreach ($textMetadata as &$singleField) {
+        // Get translations for each extracted field property.
+        foreach ($singleField['_columns'] as $column) {
+          try {
+            $singleField['translated'][$column] = '';
+            if (!empty($singleField[$column])) {
+              $singleField['translated'][$column] = $this->textTranslator->translateContent(
+                $singleField[$column], $langNames[$langTo], $langNames[$langFrom] ?? NULL);
+            }
+          }
+          catch (TranslationException) {
+            // Error already logged by text_translate service.
+            $this->messenger()->addError('Error translating content.');
+            continue;
           }
         }
-        catch (TranslationException) {
-          // Error already logged by text_translate service.
-          $this->messenger()->addError('Error translating content.');
-          return;
+
+        // Decodes HTML entities in translation.
+        // Because of sanitation in StringFormatter/Markup, this should be safe.
+        foreach ($singleField['translated'] as &$translated_text_item) {
+          $translated_text_item = html_entity_decode($translated_text_item);
         }
       }
-
-      // Decodes HTML entities in translation.
-      // Because of sanitation in StringFormatter/Markup, this should be safe.
-      foreach ($singleField['translated'] as &$translated_text_item) {
-        $translated_text_item = html_entity_decode($translated_text_item);
+      $translation = $entity->addTranslation($langTo, $entity->toArray());
+      $this->textExtractor->insertTextMetadata($translation,
+        $textMetadata);
+      try {
+        $entityStorage->save($translation);
+        $this->messenger()
+          ->addStatus($this->t('Content translated successfully.'));
+      }
+      catch (\Throwable $exception) {
+        $this->getLogger('ai_translate')->warning($exception->getMessage());
+        $this->messenger()
+          ->addError($this->t('There was some issue with content translation.'));
       }
     }
-    $translation = $entity->addTranslation($langTo);
-    $this->textExtractor->insertTextMetadata($translation,
-      $textMetadata);
-    try {
-      $translation->save();
-      $this->messenger()->addStatus($this->t('Content translated successfully.'));
-    }
-    catch (\Throwable $exception) {
-      $this->getLogger('ai_translate')->warning($exception->getMessage());
-      $this->messenger()->addError($this->t('There was some issue with content translation.'));
-    }
-
   }
 
   /**

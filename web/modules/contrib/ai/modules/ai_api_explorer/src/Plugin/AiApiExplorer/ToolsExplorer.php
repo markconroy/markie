@@ -220,50 +220,55 @@ final class ToolsExplorer extends AiApiExplorerPluginBase {
     else {
       $form['left']['properties']['#description'] = '';
       // Load an instance of the function.
-      $sub_form = $this->propertyFormBuilder->createFormElements($tool);
-      $form['left']['properties'] += $sub_form;
+      try {
+        $sub_form = $this->propertyFormBuilder->createFormElements($tool);
+        $form['left']['properties'] += $sub_form;
 
-      // Expose the usage limit.
-      $form['left']['properties']['limits'] = [
-        '#type' => 'details',
-        '#open' => FALSE,
-        '#title' => $this->t('Limits'),
-        '#parents' => ['property_limits'],
-      ];
-      $tool_definition = $this->functionCallPluginManager->getDefinition($tool);
-      foreach ($tool_definition['context_definitions'] as $name => $definition) {
-        $form['left']['properties']['limits'][$name] = [
+        // Expose the usage limit.
+        $form['left']['properties']['limits'] = [
           '#type' => 'details',
           '#open' => FALSE,
-          '#title' => $definition->getLabel(),
+          '#title' => $this->t('Limits'),
+          '#parents' => ['property_limits'],
         ];
-        $form['left']['properties']['limits'][$name]['action'] = [
-          '#type' => 'select',
-          '#title' => $this->t('Restrictions for property %name', [
-            '%name' => $definition->getLabel(),
-          ]),
-          '#options' => [
-            '' => $this->t('Allow all'),
-            'only_allow' => $this->t('Only allow certain values'),
-            'force_value' => $this->t('Force value'),
-          ],
-          '#description' => $this->t('Restrict the allowed values or enforce a value.'),
-        ];
-        $form['left']['properties']['limits'][$name]['values'] = [
-          '#type' => 'textarea',
-          '#title' => $this->t('Values'),
-          '#description' => $this->t('The values that are allowed or the value that should be set. If you pick to only allow certain values, you can set the allowed values new line separated if there are more then one. If you pick to force a value, you can set the value that should be set.'),
-          '#rows' => 2,
-          '#states' => [
-            'visible' => [
-              ':input[name="property_limits[' . $name . '][action]"]' => [
-                ['value' => 'only_allow'],
-                'or',
-                ['value' => 'force_value'],
+        $tool_definition = $this->functionCallPluginManager->getDefinition($tool);
+        foreach ($tool_definition['context_definitions'] as $name => $definition) {
+          $form['left']['properties']['limits'][$name] = [
+            '#type' => 'details',
+            '#open' => FALSE,
+            '#title' => $definition->getLabel(),
+          ];
+          $form['left']['properties']['limits'][$name]['action'] = [
+            '#type' => 'select',
+            '#title' => $this->t('Restrictions for property %name', [
+              '%name' => $definition->getLabel(),
+            ]),
+            '#options' => [
+              '' => $this->t('Allow all'),
+              'only_allow' => $this->t('Only allow certain values'),
+              'force_value' => $this->t('Force value'),
+            ],
+            '#description' => $this->t('Restrict the allowed values or enforce a value.'),
+          ];
+          $form['left']['properties']['limits'][$name]['values'] = [
+            '#type' => 'textarea',
+            '#title' => $this->t('Values'),
+            '#description' => $this->t('The values that are allowed or the value that should be set. If you pick to only allow certain values, you can set the allowed values new line separated if there are more then one. If you pick to force a value, you can set the value that should be set.'),
+            '#rows' => 2,
+            '#states' => [
+              'visible' => [
+                ':input[name="property_limits[' . $name . '][action]"]' => [
+                  ['value' => 'only_allow'],
+                  'or',
+                  ['value' => 'force_value'],
+                ],
               ],
             ],
-          ],
-        ];
+          ];
+        }
+      }
+      catch (\Exception $e) {
+        $form['left']['properties']['#description'] = $this->t('Failed to load tool properties: @error', ['@error' => $e->getMessage()]);
       }
     }
     return $form['left']['properties'];
@@ -273,8 +278,28 @@ final class ToolsExplorer extends AiApiExplorerPluginBase {
    * {@inheritdoc}
    */
   public function getResponse(array &$form, FormStateInterface $form_state): array {
-    $tool = $form_state->getValue('tool');
-    if (!empty($tool)) {
+    try {
+      $tool = $form_state->getValue('tool');
+      if (empty($tool)) {
+        $form['right']['response']['#context']['ai_response'] = [
+          'heading' => [
+            '#type' => 'html_tag',
+            '#tag' => 'h3',
+            '#value' => $this->t('No Tool Selected'),
+          ],
+          'message' => [
+            '#type' => 'html_tag',
+            '#tag' => 'div',
+            '#value' => $this->t('Please select a valid tool to execute.'),
+            '#attributes' => [
+              'class' => ['ai-text-response', 'ai-error-message'],
+            ],
+          ],
+        ];
+        $form_state->setRebuild();
+        return $form['right'];
+      }
+
       /** @var \Drupal\ai\Service\FunctionCalling\ExecutableFunctionCallInterface|\Drupal\ai\Base\FunctionCallBase $function_call */
       $function_call = $this->functionCallPluginManager->createInstance($tool);
       // Run through and fill all the properties.
@@ -325,6 +350,42 @@ final class ToolsExplorer extends AiApiExplorerPluginBase {
         ];
       }
     }
+    catch (\TypeError $e) {
+      $form['right']['response']['#context']['ai_response'] = [
+        'heading' => [
+          '#type' => 'html_tag',
+          '#tag' => 'h3',
+          '#value' => $this->t('Configuration Error'),
+        ],
+        'message' => [
+          '#type' => 'html_tag',
+          '#tag' => 'div',
+          '#value' => $this->t('The tool could not be executed. Please ensure the tool is properly configured.'),
+          '#attributes' => [
+            'class' => ['ai-text-response', 'ai-error-message'],
+          ],
+        ],
+      ];
+    }
+    catch (\Exception $e) {
+      $form['right']['response']['#context']['ai_response'] = [
+        'heading' => [
+          '#type' => 'html_tag',
+          '#tag' => 'h3',
+          '#value' => $this->t('Error'),
+        ],
+        'message' => [
+          '#type' => 'html_tag',
+          '#tag' => 'div',
+          '#value' => $this->explorerHelper->renderException($e),
+          '#attributes' => [
+            'class' => ['ai-text-response', 'ai-error-message'],
+          ],
+        ],
+      ];
+    }
+
+    $form_state->setRebuild();
     return $form['right'];
   }
 

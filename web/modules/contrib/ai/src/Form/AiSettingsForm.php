@@ -6,6 +6,7 @@ use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 use Drupal\ai\AiProviderPluginManager;
+use Drupal\ai\AiVdbProviderPluginManager;
 use Drupal\ai\Enum\AiModelCapability;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -25,6 +26,13 @@ class AiSettingsForm extends ConfigFormBase {
    * @var \Drupal\ai\AiProviderPluginManager
    */
   protected $providerManager;
+
+  /**
+   * The AI VDB Provider service.
+   *
+   * @var \Drupal\ai\AiVdbProviderPluginManager
+   */
+  protected $vdbProviderManager;
 
   /**
    * The hard coded selections to add for filtering purposes.
@@ -61,8 +69,9 @@ class AiSettingsForm extends ConfigFormBase {
   /**
    * Constructor.
    */
-  final public function __construct(AiProviderPluginManager $provider_manager) {
+  final public function __construct(AiProviderPluginManager $provider_manager, AiVdbProviderPluginManager $vdb_provider_manager) {
     $this->providerManager = $provider_manager;
+    $this->vdbProviderManager = $vdb_provider_manager;
   }
 
   /**
@@ -70,7 +79,8 @@ class AiSettingsForm extends ConfigFormBase {
    */
   public static function create(ContainerInterface $container) {
     return new static(
-      $container->get('ai.provider')
+      $container->get('ai.provider'),
+      $container->get('ai.vdb_provider')
     );
   }
 
@@ -250,6 +260,26 @@ class AiSettingsForm extends ConfigFormBase {
       ];
     }
 
+    // Add VDB provider selection.
+    $form['default_vdb_provider'] = [
+      '#type' => 'details',
+      '#title' => $this->t('Default Vector Database Provider'),
+      '#open' => TRUE,
+      '#weight' => 20,
+      '#description' => $this->t('Select the default vector database provider to use when setting up VDB servers automatically.'),
+    ];
+
+    $vdb_providers = $this->vdbProviderManager->getProviders();
+    $vdb_options = ['' => $this->t('- Select -')] + $vdb_providers;
+
+    $form['default_vdb_provider']['default_vdb_provider'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Vector Database Provider'),
+      '#options' => $vdb_options,
+      '#default_value' => $config->get('default_vdb_provider') ?? '',
+      '#description' => $this->t('This provider will be used as the default when setting up VDB servers through configuration actions.'),
+    ];
+
     return parent::buildForm($form, $form_state);
   }
 
@@ -323,6 +353,7 @@ class AiSettingsForm extends ConfigFormBase {
     // Retrieve the configuration.
     $this->config(static::CONFIG_NAME)
       ->set('default_providers', $default_providers)
+      ->set('default_vdb_provider', $form_state->getValue('default_vdb_provider'))
       ->save();
 
     parent::submitForm($form, $form_state);

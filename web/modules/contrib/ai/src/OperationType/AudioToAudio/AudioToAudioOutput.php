@@ -2,6 +2,7 @@
 
 namespace Drupal\ai\OperationType\AudioToAudio;
 
+use Drupal\ai\OperationType\GenericType\AudioFile;
 use Drupal\ai\OperationType\OutputInterface;
 
 /**
@@ -81,10 +82,33 @@ class AudioToAudioOutput implements OutputInterface {
    */
   public function toArray(): array {
     return [
-      'normalized' => $this->normalized,
+      'normalized' => array_map(
+        fn($item) => $item->toArray(),
+        $this->normalized
+      ),
       'rawOutput' => $this->rawOutput,
       'metadata' => $this->metadata,
     ];
+  }
+
+  /**
+   * Create the output from an array.
+   *
+   * @param array $data
+   *   The data to create the output from.
+   *
+   * @return \Drupal\ai\OperationType\AudioToAudio\AudioToAudioOutput
+   *   The output object.
+   */
+  public static function fromArray(array $data): AudioToAudioOutput {
+    return new self(
+      array_map(
+        fn($item) => AudioFile::fromArray($item),
+        $data['normalized']
+      ),
+      $data['rawOutput'],
+      $data['metadata']
+    );
   }
 
 }
