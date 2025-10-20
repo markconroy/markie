@@ -17,6 +17,7 @@
 
 .header .menu-item,
 .footer .menu-item {
+  padding-block-start: 0;
   background-color: var(--color-primary);
 }
 
@@ -27,6 +28,14 @@
   background-color: var(--color-secondary);
   font-weight: bold;
   padding: var(--spacing-small) var(--spacing-medium);
+}
+
+.header .menu a.is-active,
+.footer .menu a.is-active {
+  background-color: var(--color-primary);
+  color: var(--color-white);
+  transform: translateY(-3px);
+  text-decoration: none;
 }
 
 .header .menu a:hover,

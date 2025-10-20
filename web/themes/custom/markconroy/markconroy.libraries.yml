@@ -26,10 +26,10 @@ homepage:
     component:
       css/components/homepage.css: {}
 
-pager:
-  css:
-    component:
-      ../../../../core/themes/starterkit_theme/css/components/pager.css: {}
+# pager:
+#   css:
+#     component:
+#       ../../../../core/themes/starterkit_theme/css/components/pager.css: {}
 
 course-signup-popup-form:
   js:
