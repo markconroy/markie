@@ -1,6 +1,0 @@
-_core:
-  default_config_hash: p_qzzTwtOMiIPE7CyG0wD6M-UCpBp6Y5E4LhNCnCRpY
-read_only: true
-maintenance_header_retry_seconds:
-  min: 5
-  max: 10

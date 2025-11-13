@@ -29,8 +29,6 @@ module:
   image: 0
   image_widget_crop: 0
   inline_form_errors: 0
-  jsonapi: 0
-  jsonapi_extras: 0
   key: 0
   link: 0
   markie: 0
@@ -51,7 +49,6 @@ module:
   redirect_404: 0
   responsive_image: 0
   search: 0
-  serialization: 0
   settings_tray: 0
   shortcut: 0
   system: 0
