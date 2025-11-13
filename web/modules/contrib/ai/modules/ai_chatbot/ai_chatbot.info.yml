@@ -6,7 +6,7 @@ core_version_requirement: ^10.4 || ^11
 dependencies:
   - ai:ai_assistant_api
 
-# Information added by Drupal.org packaging script on 2025-10-15
-version: '1.2.1'
+# Information added by Drupal.org packaging script on 2025-11-12
+version: '1.2.3'
 project: 'ai'
-datestamp: 1760514354
+datestamp: 1762955701

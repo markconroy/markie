@@ -75,13 +75,18 @@ $form[$this->getPluginId()][$this->getPluginId() . '_prompt_open'] = [
   '#prompt_types' => ['my_prompt_type'],
   // Optionally set the default value to be the AI Prompt you create below.
   '#default_value' => 'my_prompt',
+  // Optionally, provide a parents array if the element is rendered within a
+  // tree structure.
+  '#parents' => ['plugins', $this->getPluginId(), $this->getPluginId() . '_prompt_open'],
 ];
 ```
+
+This form element should be used in your module's configuration form, to store a
+reference to a specific prompt, where relevant.
 
 ## What gets stored when a site builder saves a form with the element in it?
 
 The element stores the ID from the Ai Prompt element.
-
 So previously, your config for your module might have been:
 
 `config/install/my_module.prompts.yml`
@@ -96,9 +101,21 @@ my_prompt: my_prompt_type__synonym_suggestions
 
 Notes:
 
-- The `__` always follows the prompt type two avoid machine name clashes.
+- The `__` always follows the prompt type to avoid machine name clashes.
 - No change to /config/schema is needed as the prompt machine name is still a
-string.
+string. However, it is recommended to add a constraint in your schema, to make
+sure your configuration is pointing to a valid AI prompt config entity:
+```
+(...)
+my_prompt:
+  type: string
+  label: 'Configured AI prompt'
+  description: 'The AI prompt config entity to use.'
+  constraints:
+    ConfigExists:
+      prefix: 'ai.ai_prompt.'
+(...)
+```
 
 # Updating an existing form to use the AI Prompt Element.
 
@@ -107,6 +124,7 @@ To convert an existing prompt textarea to an AI prompt there are three steps:
 2. Create the AI Prompt configuration in your module's /config/install. 
 3. Write an update hook to convert the prompt string to the AI Prompt machine
    name.
+4. Update the prompt usage implementation logic.
 
 ## 1. Create the AI Prompt Type configuration
 
@@ -124,14 +142,13 @@ variables:
     required: 1
 tokens: {  }
 ```
-More complex examples below.
 
 ## 2. Create the AI Prompt configuration
 
 You can now create many example AI prompts. You should create at least one
-and that should be your recommended one for users of your module/
+and that should be your recommended one for users of your module.
 
-E.g. create a file like `/config/install/ai.ai_prompt.my_prompt.yml`
+E.g. create a file like `/config/install/ai.ai_prompt.my_prompt_type__my_prompt.yml`
 
 ```yaml
 langcode: en
@@ -148,14 +165,16 @@ followed by double underscore `__`.
 ## 3. Add your update hook to update existing configuration.
 
 This step is only needed if your module is already in use and user's will
-have existing configuration containing the raw prompt string.
+have existing configuration containing the raw prompt string. Add this as an
+update hook to your module's my_module.install file, or
+my_module.post_update.php file (as in the example below).
 
 ```php
 
 /**
  * Converts the existing plain text prompt to an AI Prompt entity.
  */
-function ai_prompt_test_update_test() {
+function ai_prompt_test_post_update_convert() {
   // Automatically install any missing prompt types and prompts from your
   // module's config/install/ folder.
   /** @var \Drupal\ai\Service\AiPromptManager $prompt_manager */
@@ -168,13 +187,13 @@ function ai_prompt_test_update_test() {
   // Wherever your prompt is currently stored, e.g. `my_module.settings`.
   $config = $config_factory->getEditable('my_module.settings');
   $original_prompt = $config->get('my_prompt_value');
-  $config->set('my_prompt_value', 'my_prompt');
+  $config->set('my_prompt_value', 'my_prompt_type__my_prompt');
 
   // If the user modified the prompt, create it as a separate one.
-  $prompt = $config_factory->get('ai.ai_prompt.my_prompt')->get('prompt');
+  $prompt = $config_factory->get('ai.ai_prompt.my_prompt_type__my_prompt')->get('prompt');
   if ($prompt && $original_prompt && trim($prompt) !== ($original_prompt)) {
     $prompt = $prompt_manager->upsertPrompt([
-      'id' => 'my_prompt_modified',
+      'id' => 'my_prompt_type__my_prompt_modified',
       'label' => t('My prompt modified'),
       'prompt' => $original_prompt,
       'type' => 'my_prompt_type',
@@ -186,6 +205,25 @@ function ai_prompt_test_update_test() {
   // Save the config.
   $config->save();
 }
+```
+
+## 4. Update the prompt usage implementation logic.
+
+Previously, your module would have retrieved the prompt value in a way similar
+to this:
+
+```php
+  // Get the prompt text.
+  $myPromptText = \Drupal::config('my_module.settings')->get('my_prompt');
+  $myService->performAiMagic($myPromptText);
+```
+This should be changed into something like this:
+
+```php
+  // Get the configured ai_prompt config entity ID.
+  $myPromptId = \Drupal::config('my_module.settings')->get('my_prompt');
+  $myPromptText = \Drupal::config('ai.ai_prompt.' . $myPromptId)->get('prompt');
+  $myService->performAiMagic($myPromptText);
 ```
 
 # Giving a site editor control over prompts.

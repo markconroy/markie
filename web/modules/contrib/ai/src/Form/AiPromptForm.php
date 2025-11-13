@@ -166,8 +166,14 @@ class AiPromptForm extends EntityForm {
 
     // Filter the options to keep only allowed prompt types if we are coming
     // from the form element in context.
-    $prompt_types = $this->getRequest()->get('prompt_types');
-    if ($prompt_types) {
+    // @todo Change to leverage https://www.drupal.org/project/drupal/issues/3555532
+    // once it is resolved.
+    $request = $this->getRequest();
+    $prompt_types = $request->query->all('prompt_types');
+    if (empty($prompt_types)) {
+      $prompt_types = $request->request->all('prompt_types');
+    }
+    if (!empty($prompt_types)) {
       $form['type']['#options'] = array_intersect_key(
         $form['type']['#options'],
         array_flip($prompt_types)

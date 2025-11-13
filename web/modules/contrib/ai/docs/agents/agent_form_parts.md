@@ -86,7 +86,24 @@ Each of the detailed tool usage has per tool:
 
 ### Return Directly
 
-By default the agent will return the result of the tools as a text output. This takes time and costs tokens, so if you know which tool you want to result, you can check here and the result of the agent will be the result of the tool instead of the text output.
+By default the agent will use the result of the tools to generate a natural language text output or summary. This costs time and tokens. But if you know that the tool's result is a perfectly good answer, enabling this option will save processing time and reduce token costs by bypassing the agent's text generation step.
+
+### Require Usage
+By default the agent can decide whether to use a tool or not. This option forces the agent to use the tool at least once before completing its task. This is useful if you know that the tool is essential for solving the task. The system will validate that the tool was called before accepting a final text response. So make sure to set the number of loops accordingly.
+
+### Override Tool Description
+For production deployments, custom descriptions help you explain how the agent understands and uses the tool, leading to more reliable and predictable behavior. This replaces the default tool description with your custom instructions.
+
+### Use Artifact Storage
+By default the agent will store the result in the history of the agent. This is useful if the agent has to reason in a later loop about what it has done in a previous loop.
+
+There are however use cases where the agent's reasoning is not dependent on the output of the tool, but rather just needs to perform an action and move that output to the input of another tool. In these cases, you can enable this option and the output of the tool will be stored in artifact storage instead of the history. Using artifact storage can significantly reduce input tokens. If you enable artifact storage, just make sure that you specify in the Agent Instructions (system prompt) how the agent should use the artifact token. For example:
+
+```
+You are a looping agent that specializes in Drupal 11. You have access to the following tools
+- Tool A: Does something and stores the result in the token {{artifact:ai_agents:tool_a:1}}. You should use this token when using Tool B.
+- Tool B: Does something with the result of Tool A. For the input parameter text, you should use the token {{artifact:ai_agents:tool_a:1}}.
+```
 
 ### Property Restrictions/Restrictions for property {name}
 

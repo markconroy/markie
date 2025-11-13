@@ -893,7 +893,17 @@ final class AiSetupForm extends FormBase {
    * @throws \Drupal\Component\Plugin\Exception\PluginException
    */
   private function getStage(): int {
-    if (!$stage = $this->getRequest()->get('stage')) {
+
+    // Get the stage from the request POST or GET.
+    // @todo Change to leverage https://www.drupal.org/project/drupal/issues/3555532
+    // once it is resolved.
+    $request = $this->getRequest();
+    $stage = $request->query->get('stage');
+    if (!$stage) {
+      $stage = $request->request->get('stage');
+    }
+
+    if (!$stage) {
       $stage = $this->calculateStart();
     }
     else {

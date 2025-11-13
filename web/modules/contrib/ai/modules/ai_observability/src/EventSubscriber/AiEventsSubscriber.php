@@ -160,7 +160,14 @@ class AiEventsSubscriber implements EventSubscriberInterface {
     ];
 
     if ($event instanceof AiProviderResponseBaseEvent) {
-      $context['metadata']['token_usage'] = $event->getOutput()->getTokenUsage()->toArray();
+      $output = $event->getOutput();
+      // Not every AI output type provides the token usage info yet, therefore
+      // we need to check if the method exists before calling it.
+      // @todo Remove the method_exists check when all output types implement
+      // the getTokenUsage method and it is added to the OutputInterface.
+      if (method_exists($output, 'getTokenUsage')) {
+        $context['metadata']['token_usage'] = $event->getOutput()->getTokenUsage()->toArray();
+      }
     }
 
     if ($this->config->get(self::CONFIG_KEY_LOG_INPUT)) {

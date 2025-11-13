@@ -5,7 +5,7 @@ prompt_logging_tags: ''
 default_providers:
   chat:
     provider_id: openai
-    model_id: gpt-4o
+    model_id: gpt-5
   chat_with_complex_json:
     provider_id: openai
     model_id: gpt-4o
@@ -30,3 +30,4 @@ default_providers:
   text_to_speech:
     provider_id: openai
     model_id: tts-1-hd
+default_vdb_provider: ''

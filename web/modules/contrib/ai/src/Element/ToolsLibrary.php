@@ -139,8 +139,6 @@ class ToolsLibrary extends FormElementBase {
           'data-ai-tools-library-form-element-update' => $hidden_id,
           'class' => ['js-hide'],
         ],
-        // Limit validation has to happen on the updated widget as well.
-        '#limit_validation_errors' => [],
         '#submit' => [[static::class, 'updateItem']],
         '#ajax' => [
           'callback' => [static::class, 'updateFormElement'],

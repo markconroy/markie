@@ -2,6 +2,14 @@
   --toolbar-chatbot-width: 21rem;
 }
 
+/* Klaro applies the same display style as the element it wraps, 
+   which can stop the container from scrolling properly. 
+   To fix this, we override it with 'contents' to ignore the wrapper.
+   Only applies when consent has been given (i.e., not display: none). */
+.ai-deepchat.toolbar > [data-modified-by-klaro]:not([style*="display: none"]) {
+  display: contents !important;
+}
+
 /* Chatbot positioning */
 .block-ai-deepchat-block {
   position: fixed;
