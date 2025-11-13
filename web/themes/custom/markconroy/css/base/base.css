@@ -59,6 +59,10 @@ h6 {
   --scale-factor-calculated: 1;
 }
 
+.field--name-body > * + :where(h2, h3, h4, h5, h6) {
+  margin-block: var(--spacing-largest) var(--spacing-medium);
+}
+
 img {
   max-width: 100%;
   height: auto;
@@ -101,4 +105,17 @@ a:hover {
 
 .messages__wrapper {
   margin-block-end: var(--spacing-largest);
+}
+
+blockquote {
+  border-left: 4px solid var(--color-secondary);
+  padding-block: var(--spacing);
+  padding-inline-start: var(--spacing-largest);
+  margin-block-start: var(--spacing-largest);
+  margin-block-end: var(--spacing-largest);
+  font-style: italic;
+}
+
+blockquote > * + * {
+  margin-block-start: var(--spacing-small);
 }
