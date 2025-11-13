@@ -479,17 +479,20 @@ abstract class ContentEntityStorageBase extends EntityStorageBase implements Con
       return NULL;
     }
 
-    if (!isset($this->latestRevisionIds[$entity_id][LanguageInterface::LANGCODE_DEFAULT])) {
+    $cached = $this->memoryCache->get("latest_revision_id:{$this->entityTypeId}:$entity_id");
+    $latest_revision_ids = $cached ? $cached->data : [];
+    if (!isset($latest_revision_ids[LanguageInterface::LANGCODE_DEFAULT])) {
       $result = $this->getQuery()
         ->latestRevision()
         ->condition($this->entityType->getKey('id'), $entity_id)
         ->accessCheck(FALSE)
         ->execute();
 
-      $this->latestRevisionIds[$entity_id][LanguageInterface::LANGCODE_DEFAULT] = key($result);
+      $latest_revision_ids[LanguageInterface::LANGCODE_DEFAULT] = key($result);
+      $this->memoryCache->set("latest_revision_id:{$this->entityTypeId}:$entity_id", $latest_revision_ids, MemoryCacheInterface::CACHE_PERMANENT, [$this->memoryCacheTag]);
     }
 
-    return $this->latestRevisionIds[$entity_id][LanguageInterface::LANGCODE_DEFAULT];
+    return $latest_revision_ids[LanguageInterface::LANGCODE_DEFAULT];
   }
 
   /**
@@ -504,7 +507,9 @@ abstract class ContentEntityStorageBase extends EntityStorageBase implements Con
       return $this->getLatestRevisionId($entity_id);
     }
 
-    if (!isset($this->latestRevisionIds[$entity_id][$langcode])) {
+    $cached = $this->memoryCache->get("latest_revision_id:{$this->entityTypeId}:$entity_id");
+    $latest_revision_ids = $cached ? $cached->data : [];
+    if (!isset($latest_revision_ids[$langcode])) {
       $result = $this->getQuery()
         ->allRevisions()
         ->condition($this->entityType->getKey('id'), $entity_id)
@@ -516,9 +521,11 @@ abstract class ContentEntityStorageBase extends EntityStorageBase implements Con
         ->addTag('latest_translated_affected_revision')
         ->execute();
 
-      $this->latestRevisionIds[$entity_id][$langcode] = key($result);
+      $latest_revision_ids[$langcode] = key($result);
+      $this->memoryCache->set("latest_revision_id:{$this->entityTypeId}:$entity_id", $latest_revision_ids, MemoryCacheInterface::CACHE_PERMANENT, [$this->memoryCacheTag]);
     }
-    return $this->latestRevisionIds[$entity_id][$langcode];
+
+    return $latest_revision_ids[$langcode];
   }
 
   /**
@@ -1202,12 +1209,13 @@ abstract class ContentEntityStorageBase extends EntityStorageBase implements Con
     if ($ids) {
       parent::resetCache($ids);
       if ($this->entityType->isPersistentlyCacheable()) {
-        $cids = [];
+        $cids = $latest_revision_cids = [];
         foreach ($ids as $id) {
-          unset($this->latestRevisionIds[$id]);
           $cids[] = $this->buildCacheId($id);
+          $latest_revision_cids[] = "latest_revision_id:{$this->entityTypeId}:$id";
         }
         $this->cacheBackend->deleteMultiple($cids);
+        $this->memoryCache->deleteMultiple($latest_revision_cids);
       }
     }
     else {
@@ -1215,7 +1223,6 @@ abstract class ContentEntityStorageBase extends EntityStorageBase implements Con
       if ($this->entityType->isPersistentlyCacheable()) {
         $this->cacheBackend->deleteAll();
       }
-      $this->latestRevisionIds = [];
     }
   }
 
