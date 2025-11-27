@@ -1,0 +1,15 @@
+{# @todo render STAGE__iframes instead #}
+{# @todo render STAGE__scripts instead #}
+{# @todo create already tagged #}
+<div class="wrapper">
+    {# create iframe with known host. #}
+    <iframe src="https://video.example.org/iframe/testing"></iframe>
+    {# create iframe with unknown host. #}
+    <iframe src="https://video.example.com/iframe/testing"></iframe>
+</div>
+<div class="wrapper">
+    {# create script that uses a known host. #}
+    <script src="https://example.example.org/js/script.js"></script>
+    {# create script with unknown host. #}
+    <script src="https://example.example.com/js/script.js"></script>
+</div>

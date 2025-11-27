@@ -1,0 +1,7 @@
+klaro__testing.klaro_testing:
+  path: '/klaro--testing/{stage}'
+  defaults:
+    _title: 'Klaro Testing Stage'
+    _controller: '\Drupal\klaro__testing\Controller\KlaroTestingController'
+  requirements:
+    _permission: 'access content'
