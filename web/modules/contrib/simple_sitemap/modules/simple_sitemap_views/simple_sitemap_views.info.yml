@@ -1,0 +1,14 @@
+name: 'Simple XML Sitemap (Views)'
+type: module
+description: 'Provides integration of the Simple XML Sitemap module with the Views module.'
+configure: simple_sitemap.views
+package: SEO
+core_version_requirement: ^10.3 || ^11
+dependencies:
+  - simple_sitemap:simple_sitemap
+  - drupal:views
+
+# Information added by Drupal.org packaging script on 2025-11-26
+version: '4.2.3'
+project: 'simple_sitemap'
+datestamp: 1764147270

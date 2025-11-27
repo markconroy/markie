@@ -1,0 +1,8 @@
+id: test
+label: 'Test'
+url: https://www.example.com/ping?sitemap=[sitemap]
+index_now_url: null
+sitemap_variants:
+  - default
+status: true
+langcode: en
