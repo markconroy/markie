@@ -6,6 +6,7 @@ dependencies:
     - filter.format.restricted_html
   module:
     - filter
+    - klaro
     - media
     - search
     - system
@@ -19,5 +20,6 @@ permissions:
   - 'access content'
   - 'access user profiles'
   - 'search content'
+  - 'use klaro'
   - 'use text format restricted_html'
   - 'view media'
