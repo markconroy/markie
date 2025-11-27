@@ -1,0 +1,43 @@
+<?php
+
+/**
+ * @file
+ * Install file for stage_file_proxy module.
+ */
+
+/**
+ * Set verify option.
+ */
+function stage_file_proxy_update_8001() {
+  \Drupal::configFactory()->getEditable('stage_file_proxy.settings')->set('verify', TRUE)->save();
+}
+
+/**
+ * Fix an incorrect default value for the Origin dir setting.
+ */
+function stage_file_proxy_update_8002() {
+  $config = \Drupal::configFactory()->getEditable('stage_file_proxy.settings');
+  if (FALSE === $config->get('origin_dir')) {
+    $config->set('origin_dir', '')->save();
+  }
+}
+
+/**
+ * Add new schema option proxy_headers.
+ */
+function stage_file_proxy_update_8003() {
+  $config = \Drupal::configFactory()->getEditable('stage_file_proxy.settings');
+  $config->set('proxy_headers', '')->save();
+}
+
+/**
+ * Remove trailing slash on origin if exists.
+ */
+function stage_file_proxy_update_31001(): void {
+  $config = \Drupal::configFactory()->getEditable('stage_file_proxy.settings');
+  $origin = $config->get('origin_dir');
+  if (str_ends_with($origin, '/')) {
+    $origin = substr($origin, 0, -1);
+  }
+  $config->set('origin_dir', $origin)->save();
+}

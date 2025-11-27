@@ -1,0 +1,12 @@
+name: Stage File Proxy
+type: module
+description: 'Proxies files from production server so you do not have to transfer them manually'
+package: Development
+configure: stage_file_proxy.admin_form
+core_version_requirement: ^10.3 || ^11
+dependencies:
+  - drupal:image
+# Information added by Drupal.org packaging script on 2025-09-11
+version: '3.1.6'
+project: 'stage_file_proxy'
+datestamp: 1757610589

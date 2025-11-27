@@ -3,7 +3,7 @@
         'name' => 'markconroy/markie',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => 'd1c2dd6a337d5a218c6e4b79bfa4ba66d689f943',
+        'reference' => '25d42c8adc01234918e0905c8355d58519929c68',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -505,6 +505,15 @@
             'aliases' => array(),
             'dev_requirement' => false,
         ),
+        'drupal/stage_file_proxy' => array(
+            'pretty_version' => '3.1.6',
+            'version' => '3.1.6.0',
+            'reference' => '3.1.6',
+            'type' => 'drupal-module',
+            'install_path' => __DIR__ . '/../../web/modules/contrib/stage_file_proxy',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
         'drupal/token' => array(
             'pretty_version' => '1.16.0',
             'version' => '1.16.0.0',
@@ -661,7 +670,7 @@
         'markconroy/markie' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => 'd1c2dd6a337d5a218c6e4b79bfa4ba66d689f943',
+            'reference' => '25d42c8adc01234918e0905c8355d58519929c68',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
