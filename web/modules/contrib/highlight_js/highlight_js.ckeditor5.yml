@@ -1,0 +1,29 @@
+highlight_js_highlightJs:
+  provider: highlight_js
+  ckeditor5:
+    plugins:
+      - highlightJs.HighlightJs
+    config:
+      highlightJs:
+        openDialog:
+          func:
+            name: Drupal.ckeditor5.openDialog
+            invoke: false
+        dialogSettings:
+          width: 75%
+          height: 75%
+          dialogClass: "highlight-js-widget-modal ui-dialog--wide"
+          title: Insert Source Code
+  drupal:
+    label: Highlight js
+    elements:
+      - <highlight-js>
+      - <highlight-js data-plugin-config data-plugin-id>
+    admin_library: highlight_js/admin.highlight_js
+    class: Drupal\highlight_js\Plugin\CKEditor5Plugin\HighlightJs
+    library: highlight_js/highlight_js
+    toolbar_items:
+      highlightJs:
+        label: Highlight Js
+    conditions:
+      filter: highlight_js

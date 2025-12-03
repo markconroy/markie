@@ -1,0 +1,23 @@
+highlight_js.dialog:
+  path: '/highlight-js/dialog/{uuid}'
+  defaults:
+    _title: 'Insert highlight js'
+    _form: '\Drupal\highlight_js\Form\HighlightJsDialogForm'
+    uuid: null
+  requirements:
+    _permission: 'use text format advanced'
+
+highlight_js.preview:
+  path: '/highlight-js/preview/{editor}'
+  defaults:
+    _controller: '\Drupal\highlight_js\Controller\HighlightJsPreview::preview'
+  requirements:
+    _custom_access: '\Drupal\highlight_js\Controller\HighlightJsPreview::checkAccess'
+
+highlight_js.settings:
+  path: '/admin/config/content/highlight-js'
+  defaults:
+    _form: '\Drupal\highlight_js\Form\HighlightJsSettingsForm'
+    _title: 'Highlight Js Configuration'
+  requirements:
+    _permission: 'administer highlight_js configuration'

@@ -3,7 +3,7 @@
         'name' => 'markconroy/markie',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => 'f4b93eaecd5e6cc77133c78cdf44c2d4c8dcc954',
+        'reference' => 'b6095b2affdd656fd262366d7c3f815a7887f54d',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -424,6 +424,15 @@
             'aliases' => array(),
             'dev_requirement' => false,
         ),
+        'drupal/highlight_js' => array(
+            'pretty_version' => '1.2.0',
+            'version' => '1.2.0.0',
+            'reference' => '1.2.0',
+            'type' => 'drupal-module',
+            'install_path' => __DIR__ . '/../../web/modules/contrib/highlight_js',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
         'drupal/image_widget_crop' => array(
             'pretty_version' => '3.0.0',
             'version' => '3.0.0.0',
@@ -670,7 +679,7 @@
         'markconroy/markie' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => 'f4b93eaecd5e6cc77133c78cdf44c2d4c8dcc954',
+            'reference' => 'b6095b2affdd656fd262366d7c3f815a7887f54d',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),

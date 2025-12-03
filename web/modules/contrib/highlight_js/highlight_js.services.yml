@@ -1,0 +1,4 @@
+services:
+  plugin.manager.ckedito5_highlight_js:
+    class: Drupal\highlight_js\HighlightJsPluginManager
+    parent: default_plugin_manager

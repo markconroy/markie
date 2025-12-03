@@ -1,0 +1,1260 @@
+highlight_js:
+  js:
+    js/build/highlightJs.js: { preprocess: false, minified: true }
+  css:
+    theme:
+      css/highlight-js.css: { }
+  dependencies:
+    - ckeditor5/ckeditor5
+    - editor/drupal.editor.dialog
+
+highlight_js.js:
+  js:
+    https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js: { type: external, minified: true }
+    https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.8/clipboard.min.js: { type: external, minified: true }
+  dependencies:
+    - core/jquery
+    - core/drupal
+
+highlight_js.custom:
+  js:
+    js/highlight-custom.js: {}
+  css:
+    theme:
+      css/highlight-custom.css: { }
+  dependencies:
+    - highlight_js/highlight_js.js
+    - core/jquery
+    - core/drupal
+    - core/drupalSettings
+    - core/once
+
+admin.highlight_js:
+  css:
+    theme:
+      css/highlight-js.admin.css: { }
+
+highlight_js.highlight_js:
+  css:
+    theme:
+      css/highlight-js.admin.css: { }
+
+highlight_js.style-3024:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/3024.min.css: { type: external, minified: true }
+
+highlight_js.style-apathy:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/apathy.min.css: { type: external, minified: true }
+
+highlight_js.style-apprentice:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/apprentice.min.css: { type: external, minified: true }
+
+highlight_js.style-ashes:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/ashes.min.css: { type: external, minified: true }
+
+highlight_js.style-atelier-cave-light:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/atelier-cave-light.min.css: { type: external, minified: true }
+
+highlight_js.style-atelier-cave:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/atelier-cave.min.css: { type: external, minified: true }
+
+highlight_js.style-atelier-dune-light:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/atelier-dune-light.min.css: { type: external, minified: true }
+
+highlight_js.style-atelier-dune:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/atelier-dune.min.css: { type: external, minified: true }
+
+highlight_js.style-atelier-estuary-light:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/atelier-estuary-light.min.css: { type: external, minified: true }
+
+highlight_js.style-atelier-estuary:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/atelier-estuary.min.css: { type: external, minified: true }
+
+highlight_js.style-atelier-forest-light:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/atelier-forest-light.min.css: { type: external, minified: true }
+
+highlight_js.style-atelier-forest:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/atelier-forest.min.css: { type: external, minified: true }
+
+highlight_js.style-atelier-heath-light:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/atelier-heath-light.min.css: { type: external, minified: true }
+
+highlight_js.style-atelier-heath:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/atelier-heath.min.css: { type: external, minified: true }
+
+highlight_js.style-atelier-lakeside-light:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/atelier-lakeside-light.min.css: { type: external, minified: true }
+
+highlight_js.style-atelier-lakeside:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/atelier-lakeside.min.css: { type: external, minified: true }
+
+highlight_js.style-atelier-plateau-light:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/atelier-plateau-light.min.css: { type: external, minified: true }
+
+highlight_js.style-atelier-plateau:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/atelier-plateau.min.css: { type: external, minified: true }
+
+highlight_js.style-atelier-savanna-light:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/atelier-savanna-light.min.css: { type: external, minified: true }
+
+highlight_js.style-atelier-savanna:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/atelier-savanna.min.css: { type: external, minified: true }
+
+highlight_js.style-atelier-seaside-light:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/atelier-seaside-light.min.css: { type: external, minified: true }
+
+highlight_js.style-atelier-seaside:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/atelier-seaside.min.css: { type: external, minified: true }
+
+highlight_js.style-atelier-sulphurpool-light:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/atelier-sulphurpool-light.min.css: { type: external, minified: true }
+
+highlight_js.style-atelier-sulphurpool:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/atelier-sulphurpool.min.css: { type: external, minified: true }
+
+highlight_js.style-atlas:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/atlas.min.css: { type: external, minified: true }
+
+highlight_js.style-bespin:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/bespin.min.css: { type: external, minified: true }
+
+highlight_js.style-black-metal-bathory:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/black-metal-bathory.min.css: { type: external, minified: true }
+
+highlight_js.style-black-metal-burzum:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/black-metal-burzum.min.css: { type: external, minified: true }
+
+highlight_js.style-black-metal-dark-funeral:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/black-metal-dark-funeral.min.css: { type: external, minified: true }
+
+highlight_js.style-black-metal-gorgoroth:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/black-metal-gorgoroth.min.css: { type: external, minified: true }
+
+highlight_js.style-black-metal-immortal:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/black-metal-immortal.min.css: { type: external, minified: true }
+
+highlight_js.style-black-metal-khold:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/black-metal-khold.min.css: { type: external, minified: true }
+
+highlight_js.style-black-metal-marduk:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/black-metal-marduk.min.css: { type: external, minified: true }
+
+highlight_js.style-black-metal-mayhem:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/black-metal-mayhem.min.css: { type: external, minified: true }
+
+highlight_js.style-black-metal-nile:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/black-metal-nile.min.css: { type: external, minified: true }
+
+highlight_js.style-black-metal-venom:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/black-metal-venom.min.css: { type: external, minified: true }
+
+highlight_js.style-black-metal:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/black-metal.min.css: { type: external, minified: true }
+
+highlight_js.style-brewer:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/brewer.min.css: { type: external, minified: true }
+
+highlight_js.style-bright:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/bright.min.css: { type: external, minified: true }
+
+highlight_js.style-brogrammer:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/brogrammer.min.css: { type: external, minified: true }
+
+highlight_js.style-brush-trees-dark:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/brush-trees-dark.min.css: { type: external, minified: true }
+
+highlight_js.style-brush-trees:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/brush-trees.min.css: { type: external, minified: true }
+
+highlight_js.style-chalk:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/chalk.min.css: { type: external, minified: true }
+
+highlight_js.style-circus:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/circus.min.css: { type: external, minified: true }
+
+highlight_js.style-classic-dark:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/classic-dark.min.css: { type: external, minified: true }
+
+highlight_js.style-classic-light:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/classic-light.min.css: { type: external, minified: true }
+
+highlight_js.style-codeschool:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/codeschool.min.css: { type: external, minified: true }
+
+highlight_js.style-colors:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/colors.min.css: { type: external, minified: true }
+
+highlight_js.style-cupcake:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/cupcake.min.css: { type: external, minified: true }
+
+highlight_js.style-cupertino:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/cupertino.min.css: { type: external, minified: true }
+
+highlight_js.style-danqing:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/danqing.min.css: { type: external, minified: true }
+
+highlight_js.style-darcula:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/darcula.min.css: { type: external, minified: true }
+
+highlight_js.style-dark-violet:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/dark-violet.min.css: { type: external, minified: true }
+
+highlight_js.style-darkmoss:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/darkmoss.min.css: { type: external, minified: true }
+
+highlight_js.style-darktooth:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/darktooth.min.css: { type: external, minified: true }
+
+highlight_js.style-decaf:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/decaf.min.css: { type: external, minified: true }
+
+highlight_js.style-default-dark:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/default-dark.min.css: { type: external, minified: true }
+
+highlight_js.style-default-light:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/default-light.min.css: { type: external, minified: true }
+
+highlight_js.style-dirtysea:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/dirtysea.min.css: { type: external, minified: true }
+
+highlight_js.style-dracula:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/dracula.min.css: { type: external, minified: true }
+
+highlight_js.style-edge-dark:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/edge-dark.min.css: { type: external, minified: true }
+
+highlight_js.style-edge-light:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/edge-light.min.css: { type: external, minified: true }
+
+highlight_js.style-eighties:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/eighties.min.css: { type: external, minified: true }
+
+highlight_js.style-embers:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/embers.min.css: { type: external, minified: true }
+
+highlight_js.style-equilibrium-dark:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/equilibrium-dark.min.css: { type: external, minified: true }
+
+highlight_js.style-equilibrium-gray-dark:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/equilibrium-gray-dark.min.css: { type: external, minified: true }
+
+highlight_js.style-equilibrium-gray-light:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/equilibrium-gray-light.min.css: { type: external, minified: true }
+
+highlight_js.style-equilibrium-light:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/equilibrium-light.min.css: { type: external, minified: true }
+
+highlight_js.style-espresso:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/espresso.min.css: { type: external, minified: true }
+
+highlight_js.style-eva-dim:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/eva-dim.min.css: { type: external, minified: true }
+
+highlight_js.style-eva:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/eva.min.css: { type: external, minified: true }
+
+highlight_js.style-flat:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/flat.min.css: { type: external, minified: true }
+
+highlight_js.style-framer:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/framer.min.css: { type: external, minified: true }
+
+highlight_js.style-fruit-soda:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/fruit-soda.min.css: { type: external, minified: true }
+
+highlight_js.style-gigavolt:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/gigavolt.min.css: { type: external, minified: true }
+
+highlight_js.style-google-dark:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/google-dark.min.css: { type: external, minified: true }
+
+highlight_js.style-google-light:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/google-light.min.css: { type: external, minified: true }
+
+highlight_js.style-grayscale-dark:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/grayscale-dark.min.css: { type: external, minified: true }
+
+highlight_js.style-grayscale-light:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/grayscale-light.min.css: { type: external, minified: true }
+
+highlight_js.style-green-screen:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/green-screen.min.css: { type: external, minified: true }
+
+highlight_js.style-gruvbox-dark-hard:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/gruvbox-dark-hard.min.css: { type: external, minified: true }
+
+highlight_js.style-gruvbox-dark-medium:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/gruvbox-dark-medium.min.css: { type: external, minified: true }
+
+highlight_js.style-gruvbox-dark-pale:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/gruvbox-dark-pale.min.css: { type: external, minified: true }
+
+highlight_js.style-gruvbox-dark-soft:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/gruvbox-dark-soft.min.css: { type: external, minified: true }
+
+highlight_js.style-gruvbox-light-hard:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/gruvbox-light-hard.min.css: { type: external, minified: true }
+
+highlight_js.style-gruvbox-light-medium:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/gruvbox-light-medium.min.css: { type: external, minified: true }
+
+highlight_js.style-gruvbox-light-soft:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/gruvbox-light-soft.min.css: { type: external, minified: true }
+
+highlight_js.style-hardcore:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/hardcore.min.css: { type: external, minified: true }
+
+highlight_js.style-harmonic16-dark:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/harmonic16-dark.min.css: { type: external, minified: true }
+
+highlight_js.style-harmonic16-light:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/harmonic16-light.min.css: { type: external, minified: true }
+
+highlight_js.style-heetch-dark:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/heetch-dark.min.css: { type: external, minified: true }
+
+highlight_js.style-heetch-light:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/heetch-light.min.css: { type: external, minified: true }
+
+highlight_js.style-helios:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/helios.min.css: { type: external, minified: true }
+
+highlight_js.style-hopscotch:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/hopscotch.min.css: { type: external, minified: true }
+
+highlight_js.style-horizon-dark:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/horizon-dark.min.css: { type: external, minified: true }
+
+highlight_js.style-horizon-light:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/horizon-light.min.css: { type: external, minified: true }
+
+highlight_js.style-humanoid-dark:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/humanoid-dark.min.css: { type: external, minified: true }
+
+highlight_js.style-humanoid-light:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/humanoid-light.min.css: { type: external, minified: true }
+
+highlight_js.style-ia-dark:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/ia-dark.min.css: { type: external, minified: true }
+
+highlight_js.style-ia-light:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/ia-light.min.css: { type: external, minified: true }
+
+highlight_js.style-icy-dark:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/icy-dark.min.css: { type: external, minified: true }
+
+highlight_js.style-isotope:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/isotope.min.css: { type: external, minified: true }
+
+highlight_js.style-kimber:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/kimber.min.css: { type: external, minified: true }
+
+highlight_js.style-london-tube:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/london-tube.min.css: { type: external, minified: true }
+
+highlight_js.style-macintosh:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/macintosh.min.css: { type: external, minified: true }
+
+highlight_js.style-marrakesh:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/marrakesh.min.css: { type: external, minified: true }
+
+highlight_js.style-materia:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/materia.min.css: { type: external, minified: true }
+
+highlight_js.style-material-darker:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/material-darker.min.css: { type: external, minified: true }
+
+highlight_js.style-material-lighter:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/material-lighter.min.css: { type: external, minified: true }
+
+highlight_js.style-material-palenight:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/material-palenight.min.css: { type: external, minified: true }
+
+highlight_js.style-material-vivid:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/material-vivid.min.css: { type: external, minified: true }
+
+highlight_js.style-material:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/material.min.css: { type: external, minified: true }
+
+highlight_js.style-mellow-purple:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/mellow-purple.min.css: { type: external, minified: true }
+
+highlight_js.style-mexico-light:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/mexico-light.min.css: { type: external, minified: true }
+
+highlight_js.style-mocha:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/mocha.min.css: { type: external, minified: true }
+
+highlight_js.style-nebula:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/nebula.min.css: { type: external, minified: true }
+
+highlight_js.style-nova:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/nova.min.css: { type: external, minified: true }
+
+highlight_js.style-ocean:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/ocean.min.css: { type: external, minified: true }
+
+highlight_js.style-oceanicnext:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/oceanicnext.min.css: { type: external, minified: true }
+
+highlight_js.style-one-light:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/one-light.min.css: { type: external, minified: true }
+
+highlight_js.style-onedark:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/onedark.min.css: { type: external, minified: true }
+
+highlight_js.style-outrun-dark:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/outrun-dark.min.css: { type: external, minified: true }
+
+highlight_js.style-papercolor-dark:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/papercolor-dark.min.css: { type: external, minified: true }
+
+highlight_js.style-papercolor-light:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/papercolor-light.min.css: { type: external, minified: true }
+
+highlight_js.style-paraiso:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/paraiso.min.css: { type: external, minified: true }
+
+highlight_js.style-pasque:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/pasque.min.css: { type: external, minified: true }
+
+highlight_js.style-phd:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/phd.min.css: { type: external, minified: true }
+
+highlight_js.style-pico:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/pico.min.css: { type: external, minified: true }
+
+highlight_js.style-pop:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/pop.min.css: { type: external, minified: true }
+
+highlight_js.style-porple:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/porple.min.css: { type: external, minified: true }
+
+highlight_js.style-qualia:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/qualia.min.css: { type: external, minified: true }
+
+highlight_js.style-railscasts:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/railscasts.min.css: { type: external, minified: true }
+
+highlight_js.style-rebecca:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/rebecca.min.css: { type: external, minified: true }
+
+highlight_js.style-ros-pine-dawn:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/ros-pine-dawn.min.css: { type: external, minified: true }
+
+highlight_js.style-ros-pine-moon:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/ros-pine-moon.min.css: { type: external, minified: true }
+
+highlight_js.style-ros-pine:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/ros-pine.min.css: { type: external, minified: true }
+
+highlight_js.style-sagelight:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/sagelight.min.css: { type: external, minified: true }
+
+highlight_js.style-sandcastle:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/sandcastle.min.css: { type: external, minified: true }
+
+highlight_js.style-seti-ui:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/seti-ui.min.css: { type: external, minified: true }
+
+highlight_js.style-shapeshifter:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/shapeshifter.min.css: { type: external, minified: true }
+
+highlight_js.style-silk-dark:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/silk-dark.min.css: { type: external, minified: true }
+
+highlight_js.style-silk-light:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/silk-light.min.css: { type: external, minified: true }
+
+highlight_js.style-snazzy:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/snazzy.min.css: { type: external, minified: true }
+
+highlight_js.style-solar-flare-light:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/solar-flare-light.min.css: { type: external, minified: true }
+
+highlight_js.style-solar-flare:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/solar-flare.min.css: { type: external, minified: true }
+
+highlight_js.style-solarized-dark:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/solarized-dark.min.css: { type: external, minified: true }
+
+highlight_js.style-solarized-light:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/solarized-light.min.css: { type: external, minified: true }
+
+highlight_js.style-spacemacs:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/spacemacs.min.css: { type: external, minified: true }
+
+highlight_js.style-summercamp:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/summercamp.min.css: { type: external, minified: true }
+
+highlight_js.style-summerfruit-dark:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/summerfruit-dark.min.css: { type: external, minified: true }
+
+highlight_js.style-summerfruit-light:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/summerfruit-light.min.css: { type: external, minified: true }
+
+highlight_js.style-synth-midnight-terminal-dark:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/synth-midnight-terminal-dark.min.css: { type: external, minified: true }
+
+highlight_js.style-synth-midnight-terminal-light:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/synth-midnight-terminal-light.min.css: { type: external, minified: true }
+
+highlight_js.style-tango:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/tango.min.css: { type: external, minified: true }
+
+highlight_js.style-tender:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/tender.min.css: { type: external, minified: true }
+
+highlight_js.style-tomorrow-night:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/tomorrow-night.min.css: { type: external, minified: true }
+
+highlight_js.style-tomorrow:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/tomorrow.min.css: { type: external, minified: true }
+
+highlight_js.style-twilight:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/twilight.min.css: { type: external, minified: true }
+
+highlight_js.style-unikitty-dark:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/unikitty-dark.min.css: { type: external, minified: true }
+
+highlight_js.style-unikitty-light:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/unikitty-light.min.css: { type: external, minified: true }
+
+highlight_js.style-vulcan:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/vulcan.min.css: { type: external, minified: true }
+
+highlight_js.style-windows-10-light:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/windows-10-light.min.css: { type: external, minified: true }
+
+highlight_js.style-windows-10:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/windows-10.min.css: { type: external, minified: true }
+
+highlight_js.style-windows-95-light:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/windows-95-light.min.css: { type: external, minified: true }
+
+highlight_js.style-windows-95:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/windows-95.min.css: { type: external, minified: true }
+
+highlight_js.style-windows-high-contrast-light:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/windows-high-contrast-light.min.css: { type: external, minified: true }
+
+highlight_js.style-windows-high-contrast:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/windows-high-contrast.min.css: { type: external, minified: true }
+
+highlight_js.style-windows-nt-light:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/windows-nt-light.min.css: { type: external, minified: true }
+
+highlight_js.style-windows-nt:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/windows-nt.min.css: { type: external, minified: true }
+
+highlight_js.style-woodland:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/woodland.min.css: { type: external, minified: true }
+
+highlight_js.style-xcode-dusk:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/xcode-dusk.min.css: { type: external, minified: true }
+
+highlight_js.style-zenburn:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/zenburn.min.css: { type: external, minified: true }
+
+highlight_js.style-a11y-dark:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/a11y-dark.min.css: { type: external, minified: true }
+
+highlight_js.style-a11y-light:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/a11y-light.min.css: { type: external, minified: true }
+
+highlight_js.style-agate:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/agate.min.css: { type: external, minified: true }
+
+highlight_js.style-an-old-hope:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/an-old-hope.min.css: { type: external, minified: true }
+
+highlight_js.style-androidstudio:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/androidstudio.min.css: { type: external, minified: true }
+
+highlight_js.style-arduino-light:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/arduino-light.min.css: { type: external, minified: true }
+
+highlight_js.style-arta:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/arta.min.css: { type: external, minified: true }
+
+highlight_js.style-ascetic:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/ascetic.min.css: { type: external, minified: true }
+
+highlight_js.style-atom-one-dark-reasonable:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark-reasonable.min.css: { type: external, minified: true }
+
+highlight_js.style-atom-one-dark:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css: { type: external, minified: true }
+
+highlight_js.style-atom-one-light:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-light.min.css: { type: external, minified: true }
+
+highlight_js.style-brown-paper:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/brown-paper.min.css: { type: external, minified: true }
+
+highlight_js.style-codepen-embed:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/codepen-embed.min.css: { type: external, minified: true }
+
+highlight_js.style-color-brewer:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/color-brewer.min.css: { type: external, minified: true }
+
+highlight_js.style-dark:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/dark.min.css: { type: external, minified: true }
+
+highlight_js.style-default:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css: { type: external, minified: true }
+
+highlight_js.style-devibeans:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/devibeans.min.css: { type: external, minified: true }
+
+highlight_js.style-docco:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/docco.min.css: { type: external, minified: true }
+
+highlight_js.style-far:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/far.min.css: { type: external, minified: true }
+
+highlight_js.style-felipec:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/felipec.min.css: { type: external, minified: true }
+
+highlight_js.style-foundation:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/foundation.min.css: { type: external, minified: true }
+
+highlight_js.style-github-dark-dimmed:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark-dimmed.min.css: { type: external, minified: true }
+
+highlight_js.style-github-dark:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css: { type: external, minified: true }
+
+highlight_js.style-github:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css: { type: external, minified: true }
+
+highlight_js.style-gml:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/gml.min.css: { type: external, minified: true }
+
+highlight_js.style-googlecode:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/googlecode.min.css: { type: external, minified: true }
+
+highlight_js.style-gradient-dark:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/gradient-dark.min.css: { type: external, minified: true }
+
+highlight_js.style-gradient-light:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/gradient-light.min.css: { type: external, minified: true }
+
+highlight_js.style-grayscale:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/grayscale.min.css: { type: external, minified: true }
+
+highlight_js.style-hybrid:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/hybrid.min.css: { type: external, minified: true }
+
+highlight_js.style-idea:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/idea.min.css: { type: external, minified: true }
+
+highlight_js.style-intellij-light:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/intellij-light.min.css: { type: external, minified: true }
+
+highlight_js.style-ir-black:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/ir-black.min.css: { type: external, minified: true }
+
+highlight_js.style-isbl-editor-dark:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/isbl-editor-dark.min.css: { type: external, minified: true }
+
+highlight_js.style-isbl-editor-light:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/isbl-editor-light.min.css: { type: external, minified: true }
+
+highlight_js.style-kimbie-dark:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/kimbie-dark.min.css: { type: external, minified: true }
+
+highlight_js.style-kimbie-light:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/kimbie-light.min.css: { type: external, minified: true }
+
+highlight_js.style-lightfair:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/lightfair.min.css: { type: external, minified: true }
+
+highlight_js.style-lioshi:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/lioshi.min.css: { type: external, minified: true }
+
+highlight_js.style-magula:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/magula.min.css: { type: external, minified: true }
+
+highlight_js.style-mono-blue:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/mono-blue.min.css: { type: external, minified: true }
+
+highlight_js.style-monokai-sublime:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai-sublime.min.css: { type: external, minified: true }
+
+highlight_js.style-monokai:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css: { type: external, minified: true }
+
+highlight_js.style-night-owl:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/night-owl.min.css: { type: external, minified: true }
+
+highlight_js.style-nnfx-dark:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/nnfx-dark.min.css: { type: external, minified: true }
+
+highlight_js.style-nnfx-light:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/nnfx-light.min.css: { type: external, minified: true }
+
+highlight_js.style-nord:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/nord.min.css: { type: external, minified: true }
+
+highlight_js.style-obsidian:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/obsidian.min.css: { type: external, minified: true }
+
+highlight_js.style-panda-syntax-dark:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/panda-syntax-dark.min.css: { type: external, minified: true }
+
+highlight_js.style-panda-syntax-light:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/panda-syntax-light.min.css: { type: external, minified: true }
+
+highlight_js.style-paraiso-dark:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/paraiso-dark.min.css: { type: external, minified: true }
+
+highlight_js.style-paraiso-light:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/paraiso-light.min.css: { type: external, minified: true }
+
+highlight_js.style-pojoaque:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/pojoaque.min.css: { type: external, minified: true }
+
+highlight_js.style-purebasic:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/purebasic.min.css: { type: external, minified: true }
+
+highlight_js.style-qtcreator-dark:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/qtcreator-dark.min.css: { type: external, minified: true }
+
+highlight_js.style-qtcreator-light:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/qtcreator-light.min.css: { type: external, minified: true }
+
+highlight_js.style-rainbow:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/rainbow.min.css: { type: external, minified: true }
+
+highlight_js.style-routeros:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/routeros.min.css: { type: external, minified: true }
+
+highlight_js.style-school-book:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/school-book.min.css: { type: external, minified: true }
+
+highlight_js.style-shades-of-purple:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/shades-of-purple.min.css: { type: external, minified: true }
+
+highlight_js.style-srcery:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/srcery.min.css: { type: external, minified: true }
+
+highlight_js.style-stackoverflow-dark:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/stackoverflow-dark.min.css: { type: external, minified: true }
+
+highlight_js.style-stackoverflow-light:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/stackoverflow-light.min.css: { type: external, minified: true }
+
+highlight_js.style-sunburst:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/sunburst.min.css: { type: external, minified: true }
+
+highlight_js.style-tokyo-night-dark:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/tokyo-night-dark.min.css: { type: external, minified: true }
+
+highlight_js.style-tokyo-night-light:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/tokyo-night-light.min.css: { type: external, minified: true }
+
+highlight_js.style-tomorrow-night-blue:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/tomorrow-night-blue.min.css: { type: external, minified: true }
+
+highlight_js.style-tomorrow-night-bright:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/tomorrow-night-bright.min.css: { type: external, minified: true }
+
+highlight_js.style-vs:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/vs.min.css: { type: external, minified: true }
+
+highlight_js.style-vs2015:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/vs2015.min.css: { type: external, minified: true }
+
+highlight_js.style-xcode:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/xcode.min.css: { type: external, minified: true }
+
+highlight_js.style-xt256:
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/xt256.min.css: { type: external, minified: true }

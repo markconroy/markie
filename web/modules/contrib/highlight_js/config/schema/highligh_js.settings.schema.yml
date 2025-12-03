@@ -1,0 +1,44 @@
+highlight_js.settings:
+  type: config_object
+  label: 'Highlight JS settings'
+  mapping:
+    copy_enable:
+      type: boolean
+      label: 'Enable copy button'
+    copy_bg_transparent:
+      type: boolean
+      label: 'Copy button transparent background'
+    copy_bg_color:
+      type: string
+      label: 'Copy button background bolor'
+    copy_txt_color:
+      type: string
+      label: 'Copy button text color'
+    copy_btn_text:
+      type: label
+      label: 'Copy button text'
+    copy_success_text:
+      type: label
+      label: 'Copy success text'
+    success_txt_color:
+      type: string
+      label: 'Copy success text color'
+    role_copy_access:
+      type: ignore
+      label: 'User roles'
+      constraints:
+        NotNull: []
+    languages:
+      type: ignore
+      label: 'Select available languages'
+      constraints:
+        NotNull: []
+    theme:
+      type: string
+      label: 'Default theme'
+    success_bg_transparent:
+      type: boolean
+      label: 'Copy success transparent background'
+    success_bg_color:
+      type: string
+      label: 'Copy success background color'

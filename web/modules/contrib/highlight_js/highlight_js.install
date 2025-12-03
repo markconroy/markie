@@ -1,0 +1,27 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the highlight_js module.
+ */
+
+/**
+ * Populate newly added settings config.
+ */
+function highlight_js_update_11001(&$sandbox) {
+  $default_values = [
+    'success_bg_transparent' => TRUE,
+    'success_bg_color' => '#4243b1',
+  ];
+  $config = \Drupal::configFactory()->getEditable('highlight_js.settings');
+  foreach ($default_values as $option => $default_value) {
+    // Only set the value when it doesn't already exist to avoid overwriting an
+    // administrator's deliberate setting.
+    if ($config->get($option) === NULL) {
+      $config->set($option, $default_value);
+    }
+  }
+  // Re-save config in any case to invalidate caches of filtered texts
+  // as it depends on the config.
+  $config->save();
+}

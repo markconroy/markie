@@ -1,0 +1,5 @@
+highlight_js.settings:
+  title: Highlight Js Configuration
+  description: Manage Highlight Js
+  parent: system.admin_config_content
+  route_name: highlight_js.settings

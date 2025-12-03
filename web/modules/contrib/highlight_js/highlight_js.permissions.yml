@@ -1,0 +1,4 @@
+administer highlight_js configuration:
+  title: Adminster Highlight Js
+  description: Adminster Highlight Js configuration
+  restrict access: TRUE
