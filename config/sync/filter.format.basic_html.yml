@@ -6,6 +6,7 @@ dependencies:
     - core.entity_view_mode.media.preview
   module:
     - editor
+    - highlight_js
     - media
 _core:
   default_config_hash: P8ddpAIKtawJDi5SzOwCzVnnNYqONewSTJ6Xn0dW_aQ
@@ -37,7 +38,7 @@ filters:
     status: true
     weight: -10
     settings:
-      allowed_html: '<br> <p class="text-align-left text-align-center text-align-right text-align-justify"> <h2 id class="text-align-left text-align-center text-align-right text-align-justify"> <h3 id class="text-align-left text-align-center text-align-right text-align-justify"> <h4 id class="text-align-left text-align-center text-align-right text-align-justify"> <h5 id class="text-align-left text-align-center text-align-right text-align-justify"> <h6 id class="text-align-left text-align-center text-align-right text-align-justify"> <cite> <dl> <dt> <dd> <span> <code class> <blockcode type> <img src alt data-entity-type data-entity-uuid data-align data-caption width height> <pre class> <a hreflang href> <blockquote cite> <ul type> <ol type start> <drupal-media title data-entity-type data-entity-uuid alt data-view-mode data-caption data-align> <strong> <em> <s> <li>'
+      allowed_html: '<br> <p class="text-align-left text-align-center text-align-right text-align-justify"> <h2 id class="text-align-left text-align-center text-align-right text-align-justify"> <h3 id class="text-align-left text-align-center text-align-right text-align-justify"> <h4 id class="text-align-left text-align-center text-align-right text-align-justify"> <h5 id class="text-align-left text-align-center text-align-right text-align-justify"> <h6 id class="text-align-left text-align-center text-align-right text-align-justify"> <cite> <dl> <dt> <dd> <span> <code class> <blockcode type> <img src alt data-entity-type data-entity-uuid data-align data-caption width height> <pre class> <a hreflang href> <blockquote cite> <ul type> <ol type start> <drupal-media title data-entity-type data-entity-uuid alt data-view-mode data-caption data-align> <strong> <em> <s> <li> <highlight-js data-plugin-config data-plugin-id>'
       filter_html_help: false
       filter_html_nofollow: false
   filter_html_image_secure:
@@ -51,6 +52,12 @@ filters:
     provider: filter
     status: true
     weight: 12
+    settings: {  }
+  highlight_js:
+    id: highlight_js
+    provider: highlight_js
+    status: true
+    weight: 100
     settings: {  }
   media_embed:
     id: media_embed
