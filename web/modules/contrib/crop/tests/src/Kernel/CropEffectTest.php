@@ -92,7 +92,7 @@ class CropEffectTest extends CropUnitTestBase {
     $effect = $this->imageEffectManager->createInstance('crop_crop', ['data' => ['crop_type' => $this->cropType->id()]]);
     $effect->transformDimensions($dimensions, $file_uri);
 
-    $this->assertEquals($crop->size(), $dimensions, t('CropEffect::transformDimensions() transform image dimensions correctly.'));
+    $this->assertEquals($crop->size(), $dimensions, 'CropEffect::transformDimensions() transform image dimensions correctly.');
   }
 
 }

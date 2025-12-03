@@ -79,7 +79,7 @@ class ResourceIdentifierNormalizer extends JsonApiNormalizerDecoratorBase {
     return new CacheableNormalization(
       // This was passed by reference but often, merging creates a new object.
       $context->offsetGet(CacheableNormalizerInterface::SERIALIZATION_CONTEXT_CACHEABILITY),
-      array_intersect_key($transformed, array_flip(['id', 'type', 'meta']))
+      array_intersect_key($transformed ?? [], array_flip(['id', 'type', 'meta']))
     );
   }
 

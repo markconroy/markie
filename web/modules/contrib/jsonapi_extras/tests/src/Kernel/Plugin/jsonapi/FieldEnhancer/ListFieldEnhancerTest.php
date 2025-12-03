@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\jsonapi_extras\Kernel\Plugin\jsonapi\FieldEnhancer;
 
-use Drupal\jsonapi_extras\Plugin\jsonapi\FieldEnhancer\ListFieldEnhancer;
 use Drupal\KernelTests\KernelTestBase;
+use Drupal\jsonapi_extras\Plugin\jsonapi\FieldEnhancer\ListFieldEnhancer;
 use Drupal\options\Plugin\Field\FieldType\ListIntegerItem;
 use Shaper\Util\Context;
 

@@ -8,7 +8,7 @@ dependencies:
   - ai:ai
   - drupal:content_translation
 
-# Information added by Drupal.org packaging script on 2025-11-12
-version: '1.2.3'
+# Information added by Drupal.org packaging script on 2025-12-03
+version: '1.2.4'
 project: 'ai'
-datestamp: 1762955701
+datestamp: 1764754932

@@ -17,7 +17,7 @@ class JsonapiDefaults implements JsonapiDefaultsInterface {
   /**
    * {@inheritdoc}
    */
-  public function getResourceConfigFromRequest(Request $request, ResourceType $resourceType = NULL): ?JsonapiResourceConfig {
+  public function getResourceConfigFromRequest(Request $request, ?ResourceType $resourceType = NULL): ?JsonapiResourceConfig {
     $resourceType = !$resourceType ? $request->get(Routes::RESOURCE_TYPE_KEY) : $resourceType;
 
     if ($resourceType instanceof ConfigurableResourceType) {

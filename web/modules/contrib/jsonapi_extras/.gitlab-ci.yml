@@ -56,6 +56,7 @@ variables:
 
   # Ignore logo.psd file from cspell check.
   _CSPELL_IGNORE_PATHS: "\"logo.psd\""
+  _CSPELL_WORDS: 'blacklist, whitelist'
 
 ###################################################################################
 #

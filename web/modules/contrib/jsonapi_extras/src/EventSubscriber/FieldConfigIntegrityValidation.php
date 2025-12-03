@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Drupal\jsonapi_extras\EventSubscriber;
 
+use Drupal\Core\Config\ConfigImportValidateEventSubscriberBase;
 use Drupal\Core\Config\ConfigImporter;
 use Drupal\Core\Config\ConfigImporterEvent;
-use Drupal\Core\Config\ConfigImportValidateEventSubscriberBase;
 use Drupal\Core\Config\ConfigManagerInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\jsonapi_extras\ResourceType\ConfigurableResourceType;

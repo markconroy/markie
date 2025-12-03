@@ -20,8 +20,8 @@ class JsonapiDefaultsServiceProvider extends ServiceProviderBase {
       /** @var \Symfony\Component\DependencyInjection\Definition $definition */
       $definition = $container->getDefinition('jsonapi.entity_resource');
       $definition->setClass('Drupal\jsonapi_defaults\Controller\EntityResource')
-        ->addArgument(new Reference('jsonapi_defaults_includes'))
-        ->addArgument(new Reference('logger.factory'));
+        ->addMethodCall('setJsonapiDefaults', [new Reference('jsonapi_defaults_includes')])
+        ->addMethodCall('setLogger', [new Reference('logger.factory')]);
     }
 
     if ($container->has('cache_context.url.query_args')) {

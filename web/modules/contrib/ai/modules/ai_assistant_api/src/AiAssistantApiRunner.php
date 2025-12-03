@@ -3,6 +3,7 @@
 namespace Drupal\ai_assistant_api;
 
 use Drupal\Component\Utility\Crypt;
+use Drupal\Core\Access\AccessException;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
@@ -11,6 +12,7 @@ use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\Session\SessionManagerInterface;
 use Drupal\Core\Site\Settings;
 use Drupal\Core\TempStore\PrivateTempStoreFactory;
+use Drupal\Core\TempStore\TempStoreException;
 use Drupal\ai\AiProviderPluginManager;
 use Drupal\ai\OperationType\Chat\ChatInput;
 use Drupal\ai\OperationType\Chat\ChatMessage;
@@ -21,6 +23,7 @@ use Drupal\ai_assistant_api\Entity\AiAssistant;
 use Drupal\ai_assistant_api\Event\AiAssistantSystemRoleEvent;
 use Drupal\ai_assistant_api\Service\AssistantMessageBuilder;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\Routing\Exception\ResourceNotFoundException;
 
 /**
  * The runner for the AI assistant.
@@ -599,7 +602,17 @@ class AiAssistantApiRunner {
    */
   public function resetThread($thread_id) {
     $this->setThreadsKey($thread_id);
-    $this->getTempStore()->delete($thread_id);
+    try {
+      if (is_null($this->getTempStore()->get($thread_id))) {
+        throw new ResourceNotFoundException();
+      }
+      if (!$this->getTempStore()->delete($thread_id)) {
+        throw new TempStoreException();
+      }
+    }
+    catch (TempStoreException) {
+      throw new AccessException();
+    }
     $this->removeCurrentThreadsKey();
     $this->unsetThreadsKey();
     return $this->getThreadsKey();

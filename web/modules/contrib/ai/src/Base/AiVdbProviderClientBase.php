@@ -384,10 +384,10 @@ abstract class AiVdbProviderClientBase implements AiVdbProviderInterface, AiVdbP
       database: $configuration['database_settings']['database_name'],
     );
     if ($vdbIds) {
-      $this->getClient()->deleteFromCollection(
+      $this->deleteFromCollection(
         collection_name: $configuration['database_settings']['collection'],
         ids: $vdbIds,
-        database_name: $configuration['database_settings']['database_name'],
+        database: $configuration['database_settings']['database_name'],
       );
     }
   }
@@ -426,15 +426,21 @@ abstract class AiVdbProviderClientBase implements AiVdbProviderInterface, AiVdbP
    */
   public function isMultiple(FieldInterface $field): bool {
     [$fieldName] = explode(':', $field->getPropertyPath());
-    [, $entity_type] = explode(':', $field->getDatasourceId());
-    $fields = $this->entityFieldManager->getFieldStorageDefinitions($entity_type);
-    foreach ($fields as $field) {
-      if ($field->getName() === $fieldName) {
-        $cardinality = $field->getCardinality();
-        return !($cardinality === 1);
-      }
+    $datasource = $field->getDatasourceId();
+    if ($datasource && str_contains($datasource, ':')) {
+      [, $entity_type] = explode(':', $field->getDatasourceId());
     }
-    return TRUE;
+    if (!empty($entity_type)) {
+      $fields = $this->entityFieldManager->getFieldStorageDefinitions($entity_type);
+      foreach ($fields as $field) {
+        if ($field->getName() === $fieldName) {
+          $cardinality = $field->getCardinality();
+          return !($cardinality === 1);
+        }
+      }
+      return TRUE;
+    }
+    return $field->getDataDefinition()->isList();
   }
 
   /**

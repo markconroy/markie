@@ -2,19 +2,20 @@
 
 namespace Drupal\jsonapi_extras\Plugin\jsonapi\FieldEnhancer;
 
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\jsonapi_extras\Attribute\ResourceFieldEnhancer;
 use Drupal\jsonapi_extras\Plugin\ResourceFieldEnhancerBase;
 use Drupal\options\Plugin\Field\FieldType\ListItemBase;
 use Shaper\Util\Context;
 
 /**
  * Perform additional manipulations to list fields.
- *
- * @ResourceFieldEnhancer(
- *   id = "list",
- *   label = @Translation("List Field"),
- *   description = @Translation("Formats a list field based on labels and values.")
- * )
  */
+#[ResourceFieldEnhancer(
+  id: 'list',
+  label: new TranslatableMarkup('List Field'),
+  description: new TranslatableMarkup('Formats a list field based on labels and values.'),
+)]
 class ListFieldEnhancer extends ResourceFieldEnhancerBase {
 
   /**

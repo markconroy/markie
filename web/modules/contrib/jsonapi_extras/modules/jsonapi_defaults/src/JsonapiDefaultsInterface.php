@@ -22,7 +22,7 @@ interface JsonapiDefaultsInterface {
    * @return \Drupal\jsonapi_extras\Entity\JsonapiResourceConfig|null
    *   The jsonapi_resource_config entity or NULL.
    */
-  public function getResourceConfigFromRequest(Request $request, ResourceType $resourceType = NULL): ?JsonapiResourceConfig;
+  public function getResourceConfigFromRequest(Request $request, ?ResourceType $resourceType = NULL): ?JsonapiResourceConfig;
 
   /**
    * Returns the correct resource type when operating on related fields.

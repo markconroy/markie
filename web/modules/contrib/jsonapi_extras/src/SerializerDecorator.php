@@ -119,7 +119,7 @@ class SerializerDecorator implements SerializerInterface, NormalizerInterface, D
   /**
    * {@inheritdoc}
    */
-  public function supportsDenormalization($data, string $type, string $format = NULL, array $context = []): bool {
+  public function supportsDenormalization($data, string $type, ?string $format = NULL, array $context = []): bool {
     return $this->relay(__FUNCTION__, func_get_args());
   }
 

@@ -4,13 +4,13 @@ namespace Drupal\Tests\jsonapi_extras\Kernel\Controller;
 
 use Drupal\Component\Serialization\Json;
 use Drupal\Core\Config\ConfigException;
+use Drupal\KernelTests\KernelTestBase;
 use Drupal\jsonapi\Access\EntityAccessChecker;
 use Drupal\jsonapi\Controller\EntityResource;
 use Drupal\jsonapi\JsonApiResource\JsonApiDocumentTopLevel as JsonApiDocumentTopLevel2;
 use Drupal\jsonapi\JsonApiResource\ResourceObject;
 use Drupal\jsonapi\ResourceType\ResourceType;
 use Drupal\jsonapi\ResourceType\ResourceTypeAttribute;
-use Drupal\KernelTests\KernelTestBase;
 use Drupal\node\Entity\NodeType;
 use Drupal\user\Entity\Role;
 use Drupal\user\RoleInterface;

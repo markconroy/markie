@@ -12,7 +12,7 @@ ai_chatbot.reset_conversation:
     _format: json
   requirements:
     _method: POST
-    _permission: 'access content'
+    _permission: 'access deepchat api'
 ai_chatbot.api:
   path: '/api/deepchat'
   defaults:

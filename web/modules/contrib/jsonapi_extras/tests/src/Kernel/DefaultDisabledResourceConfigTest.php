@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Drupal\Tests\jsonapi_extras\Kernel;
 
 use Drupal\Core\Cache\Cache;
+use Drupal\KernelTests\KernelTestBase;
 use Drupal\jsonapi_extras\Entity\JsonapiResourceConfig;
 use Drupal\jsonapi_extras\ResourceType\ConfigurableResourceTypeRepository;
-use Drupal\KernelTests\KernelTestBase;
 
 /**
  * Defines a test for the 'default_disabled' setting on resource configs.

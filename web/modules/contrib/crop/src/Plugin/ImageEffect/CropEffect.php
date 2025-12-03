@@ -200,6 +200,7 @@ class CropEffect extends ConfigurableImageEffectBase implements ContainerFactory
     foreach ($this->typeStorage->loadMultiple() as $type) {
       $options[$type->id()] = $type->label();
     }
+    natcasesort($options);
 
     return $options;
   }

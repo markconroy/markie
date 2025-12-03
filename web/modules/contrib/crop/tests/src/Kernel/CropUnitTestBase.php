@@ -3,8 +3,8 @@
 namespace Drupal\Tests\crop\Kernel;
 
 use Drupal\Core\StreamWrapper\PublicStream;
-use Drupal\file\FileInterface;
 use Drupal\KernelTests\KernelTestBase;
+use Drupal\file\FileInterface;
 
 /**
  * Tests the crop entity CRUD operations.

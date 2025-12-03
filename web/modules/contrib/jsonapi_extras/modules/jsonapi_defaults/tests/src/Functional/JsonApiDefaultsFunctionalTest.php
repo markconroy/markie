@@ -3,9 +3,9 @@
 namespace Drupal\Tests\jsonapi_defaults\Functional;
 
 use Drupal\Component\Serialization\Json;
+use Drupal\Tests\jsonapi_extras\Functional\JsonApiExtrasFunctionalTestBase;
 use Drupal\jsonapi\Query\OffsetPage;
 use Drupal\jsonapi_extras\Entity\JsonapiResourceConfig;
-use Drupal\Tests\jsonapi_extras\Functional\JsonApiExtrasFunctionalTestBase;
 use GuzzleHttp\Psr7\Query;
 
 /**

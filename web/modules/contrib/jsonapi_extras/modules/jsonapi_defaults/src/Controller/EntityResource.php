@@ -2,26 +2,15 @@
 
 namespace Drupal\jsonapi_defaults\Controller;
 
-use Drupal\Component\Datetime\TimeInterface;
-use Drupal\Core\Entity\EntityFieldManagerInterface;
-use Drupal\Core\Entity\EntityRepositoryInterface;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\Logger\LoggerChannelInterface;
-use Drupal\Core\Render\RendererInterface;
-use Drupal\Core\Session\AccountInterface;
-use Drupal\jsonapi\Access\EntityAccessChecker;
-use Drupal\jsonapi\Context\FieldResolver;
 use Drupal\jsonapi\Controller\EntityResource as JsonApiEntityResource;
-use Drupal\jsonapi\IncludeResolver;
 use Drupal\jsonapi\Query\OffsetPage;
 use Drupal\jsonapi\Query\Sort;
 use Drupal\jsonapi\ResourceType\ResourceType;
-use Drupal\jsonapi\ResourceType\ResourceTypeRepositoryInterface;
 use Drupal\jsonapi_defaults\JsonapiDefaultsInterface;
 use Drupal\jsonapi_extras\Entity\JsonapiResourceConfig;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Serializer\SerializerInterface;
 
 /**
  * Overrides jsonapi module EntityResource controller.
@@ -43,65 +32,29 @@ class EntityResource extends JsonApiEntityResource {
   protected LoggerChannelInterface $logger;
 
   /**
-   * Instantiates an EntityResource object.
+   * Sets the jsonapi defaults service.
    *
-   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
-   *   The entity type manager.
-   * @param \Drupal\Core\Entity\EntityFieldManagerInterface $field_manager
-   *   The entity type field manager.
-   * @param \Drupal\jsonapi\ResourceType\ResourceTypeRepositoryInterface $resource_type_repository
-   *   The JSON:API resource type repository.
-   * @param \Drupal\Core\Render\RendererInterface $renderer
-   *   The renderer.
-   * @param \Drupal\Core\Entity\EntityRepositoryInterface $entity_repository
-   *   The entity repository.
-   * @param \Drupal\jsonapi\IncludeResolver $include_resolver
-   *   The include resolver.
-   * @param \Drupal\jsonapi\Access\EntityAccessChecker $entity_access_checker
-   *   The JSON:API entity access checker.
-   * @param \Drupal\jsonapi\Context\FieldResolver $field_resolver
-   *   The JSON:API field resolver.
-   * @param \Symfony\Component\Serializer\SerializerInterface $serializer
-   *   The JSON:API serializer.
-   * @param \Drupal\Component\Datetime\TimeInterface $time
-   *   The time service.
-   * @param \Drupal\Core\Session\AccountInterface $user
-   *   The current user account.
-   * @param \Drupal\jsonapi_defaults\JsonapiDefaultsInterface $jsonapi_defaults
-   *   The jsonapi default service.
-   * @param \Drupal\Core\Logger\LoggerChannelFactoryInterface $loggerFactory
-   *   The logger service.
+   * @param \Drupal\jsonapi_defaults\JsonapiDefaultsInterface $jsonapiDefaults
+   *   The JsonapiDefaults object.
+   *
+   * @return $this
    */
-  public function __construct(
-    EntityTypeManagerInterface $entity_type_manager,
-    EntityFieldManagerInterface $field_manager,
-    ResourceTypeRepositoryInterface $resource_type_repository,
-    RendererInterface $renderer,
-    EntityRepositoryInterface $entity_repository,
-    IncludeResolver $include_resolver,
-    EntityAccessChecker $entity_access_checker,
-    FieldResolver $field_resolver,
-    SerializerInterface $serializer,
-    TimeInterface $time,
-    AccountInterface $user,
-    JsonapiDefaultsInterface $jsonapi_defaults,
-    LoggerChannelFactoryInterface $loggerFactory,
-  ) {
-    parent::__construct(
-      $entity_type_manager,
-      $field_manager,
-      $resource_type_repository,
-      $renderer,
-      $entity_repository,
-      $include_resolver,
-      $entity_access_checker,
-      $field_resolver,
-      $serializer,
-      $time,
-      $user,
-    );
-    $this->jsonapiDefaults = $jsonapi_defaults;
+  public function setJsonapiDefaults(JsonapiDefaultsInterface $jsonapiDefaults): static {
+    $this->jsonapiDefaults = $jsonapiDefaults;
+    return $this;
+  }
+
+  /**
+   * Sets the logger.
+   *
+   * @param \Drupal\Core\Logger\LoggerChannelFactoryInterface $loggerFactory
+   *   The logger factory.
+   *
+   * @return $this
+   */
+  public function setLogger(LoggerChannelFactoryInterface $loggerFactory): static {
     $this->logger = $loggerFactory->get('jsonapi_defaults');
+    return $this;
   }
 
   /**
