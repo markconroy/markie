@@ -291,7 +291,8 @@
             labels[i].removeAttribute('tabindex');
           }
         }
-        labels[0].focus();
+        // Set focus to first possible label.
+        document.querySelector('#klaro input:not(:disabled)+label')?.focus();
       }
       // Add accessibility features to the preferences dialog : role dialog, aria-modal and aria-labelledby.
       if (document.querySelector('.cm-modal.cm-klaro')) {
@@ -341,7 +342,7 @@
    */
   Drupal.behaviors.klaroLink = {
     attach: function (context, settings) {
-      var elements = once('klaroLink', '[rel*="open-consent-manager"]', context);
+      var elements = once('klaroLink', '[rel*="open-consent-manager"], [href*="#klaro"], .open-consent-manager', context);
       Array.prototype.forEach.call(elements, function(element) {
         element.addEventListener('click', function (event) {
           klaro.show(Drupal.behaviors.klaro.config);

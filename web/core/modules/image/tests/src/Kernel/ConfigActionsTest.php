@@ -7,10 +7,14 @@ namespace Drupal\Tests\image\Kernel;
 use Drupal\Core\Config\Action\ConfigActionManager;
 use Drupal\image\Entity\ImageStyle;
 use Drupal\KernelTests\KernelTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
- * @group image
+ * Tests Config Actions.
  */
+#[Group('image')]
+#[RunTestsInSeparateProcesses]
 class ConfigActionsTest extends KernelTestBase {
 
   /**
@@ -28,7 +32,7 @@ class ConfigActionsTest extends KernelTestBase {
    */
   protected function setUp(): void {
     parent::setUp();
-    $this->installConfig(['image', 'system']);
+    $this->installConfig(['system', 'image']);
     $this->configActionManager = $this->container->get('plugin.manager.config_action');
   }
 

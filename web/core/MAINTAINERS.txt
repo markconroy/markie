@@ -113,7 +113,6 @@ Bootstrap
 
 Breakpoint
 - Peter Droogmans 'attiks' https://www.drupal.org/u/attiks
-- Heather Brooke Drummond 'RainbowArray' https://www.drupal.org/u/rainbowarray
 
 Cache
 - Nathaniel Catchpole 'catch' https://www.drupal.org/u/catch
@@ -363,7 +362,6 @@ REST
 
 Responsive Image
 - Peter Droogmans 'attiks' https://www.drupal.org/u/attiks
-- Heather Brooke Drummond 'RainbowArray' https://www.drupal.org/u/rainbowarray
 
 Routing
 - Tim Plunkett 'tim.plunkett' https://www.drupal.org/u/tim.plunkett
@@ -425,7 +423,6 @@ Typed Data
 
 Umami demo
 - Mark Conroy 'markconroy' https://www.drupal.org/u/markconroy
-- Gareth Goodwin 'smaz' https://www.drupal.org/u/smaz
 - Keith Jay 'kjay' https://www.drupal.org/u/kjay
 - Ivan Berdinsky 'finnsky' https://www.drupal.org/u/finnsky
 

@@ -13,7 +13,9 @@ For exact instructions see [Contribute Documentation](../contribute/documentatio
 ## How do I test the changes locally
 The documentation uses `mkdocs` and the `material` theme, so you can install with:
 
-`pip install mkdocs mkdocs-material`
+```
+pip install mkdocs mike mkdocs-material mkdocs-include-markdown-plugin
+```
 
 Then you can run `mkdocs serve` in the root directory of the AI module and it will be available under `http://localhost:8000` by default.
 

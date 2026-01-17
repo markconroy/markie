@@ -14,7 +14,9 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
- * KeyConfigOverrideAddForm class.
+ * Form to add a configuration override for a key entity.
+ *
+ * @package Drupal\key\Form
  */
 class KeyConfigOverrideAddForm extends EntityForm {
 

@@ -8,14 +8,19 @@ use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\file\Entity\File;
 use Drupal\media\Entity\Media;
+use Drupal\media\Plugin\Field\FieldFormatter\MediaThumbnailFormatter;
 use Drupal\Tests\media\Functional\MediaFunctionalTestBase;
 use Drupal\Tests\TestFileCreationTrait;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
- * @covers \Drupal\media\Plugin\Field\FieldFormatter\MediaThumbnailFormatter
- *
- * @group media
+ * Tests Media Thumbnail Formatter.
  */
+#[Group('media')]
+#[CoversClass(MediaThumbnailFormatter::class)]
+#[RunTestsInSeparateProcesses]
 class MediaThumbnailFormatterTest extends MediaFunctionalTestBase {
 
   use TestFileCreationTrait;

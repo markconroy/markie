@@ -7,14 +7,17 @@ namespace Drupal\Tests\field\Kernel;
 use Drupal\entity_test\Entity\EntityTest;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests field storages and fields deletion during config synchronization.
  *
- * @group field
  * @see \Drupal\field\ConfigImporterFieldPurger
  * @see field_config_import_steps_alter()
  */
+#[Group('field')]
+#[RunTestsInSeparateProcesses]
 class FieldImportDeleteUninstallTest extends FieldKernelTestBase {
 
   /**
@@ -90,7 +93,7 @@ class FieldImportDeleteUninstallTest extends FieldKernelTestBase {
     unset($core_extension['module']['telephone']);
     $sync->write('core.extension', $core_extension);
 
-    // Stage the field deletion
+    // Stage the field deletion.
     $sync->delete('field.storage.entity_test.field_test');
     $sync->delete('field.field.entity_test.entity_test.field_test');
 

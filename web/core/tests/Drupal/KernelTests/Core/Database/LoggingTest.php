@@ -5,14 +5,17 @@ declare(strict_types=1);
 namespace Drupal\KernelTests\Core\Database;
 
 use Drupal\Core\Database\Database;
+use Drupal\Core\Database\Log;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the query logging facility.
- *
- * @coversDefaultClass \Drupal\Core\Database\Log
- *
- * @group Database
  */
+#[CoversClass(Log::class)]
+#[Group('Database')]
+#[RunTestsInSeparateProcesses]
 class LoggingTest extends DatabaseTestBase {
 
   /**
@@ -26,7 +29,10 @@ class LoggingTest extends DatabaseTestBase {
     $this->connection->query('SELECT [age] FROM {test} WHERE [name] = :name', [':name' => 'Ringo'])->fetchCol();
 
     // Trigger a call that does not have file in the backtrace.
-    call_user_func_array([Database::getConnection(), 'query'], ['SELECT [age] FROM {test} WHERE [name] = :name', [':name' => 'Ringo']])->fetchCol();
+    call_user_func_array(
+      [Database::getConnection(), 'query'],
+      ['SELECT [age] FROM {test} WHERE [name] = :name', [':name' => 'Ringo']]
+    )->fetchCol();
 
     $queries = Database::getLog('testing', 'default');
 

@@ -8,6 +8,7 @@ use Drupal\Component\Utility\Variable;
 use Drupal\Component\Utility\Xss;
 use Drupal\Core\Access\AccessResultInterface;
 use Drupal\Core\Cache\Cache;
+use Drupal\Core\Cache\CacheableDependencyInterface;
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Form\FormHelper;
 use Drupal\Core\Render\Element\RenderCallbackInterface;
@@ -15,6 +16,7 @@ use Drupal\Core\Security\TrustedCallbackInterface;
 use Drupal\Core\Security\DoTrustedCallbackTrait;
 use Drupal\Core\Theme\ThemeManagerInterface;
 use Drupal\Core\Utility\CallableResolver;
+use Drupal\Core\Utility\FiberResumeType;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
@@ -199,7 +201,7 @@ class Renderer implements RendererInterface {
    * {@inheritdoc}
    */
   public function renderPlaceholder($placeholder, array $elements) {
-    // Get the render array for the given placeholder
+    // Get the render array for the given placeholder.
     $placeholder_element = $elements['#attached']['placeholders'][$placeholder];
     $markup = $this->doRenderPlaceholder($placeholder_element);
     return $this->doReplacePlaceholder($placeholder, $markup, $elements, $placeholder_element);
@@ -211,6 +213,7 @@ class Renderer implements RendererInterface {
   public function render(/* array */&$elements, $is_root_call = FALSE) {
 
     if (!is_array($elements)) {
+      trigger_error('Calling ' . __METHOD__ . ' with NULL is deprecated in drupal:11.3.0 and is removed from drupal:12.0.0. Either pass an array or skip the call. See https://www.drupal.org/node/3534020.');
       return '';
     }
 
@@ -619,12 +622,40 @@ class Renderer implements RendererInterface {
    * {@inheritdoc}
    */
   public function executeInRenderContext(RenderContext $context, callable $callable) {
-    // Store the current render context.
+    // When executing in a render context, we need to isolate any bubbled
+    // context within this method. To allow for async rendering, it's necessary
+    // to detect if a fiber suspends within a render context. When this happens,
+    // we swap the previous render context in before suspending upwards, then
+    // back out again before resuming.
     $previous_context = $this->getCurrentRenderContext();
-
     // Set the provided context and call the callable, it will use that context.
     $this->setCurrentRenderContext($context);
-    $result = $callable();
+
+    $fiber = new \Fiber(static fn () => $callable());
+    $fiber->start();
+    $resume_type = NULL;
+    while (!$fiber->isTerminated()) {
+      if ($fiber->isSuspended()) {
+        // When ::executeInRenderContext() is executed within a Fiber, which is
+        // always the case when rendering placeholders, if the callback results
+        // in this fiber being suspended, we need to suspend again up to the
+        // parent Fiber. Doing so allows other placeholders to be rendered
+        // before returning here.
+        if (\Fiber::getCurrent() !== NULL) {
+          $this->setCurrentRenderContext($previous_context);
+          \Fiber::suspend();
+          $this->setCurrentRenderContext($context);
+        }
+        $resume_type = $fiber->resume();
+      }
+      // If the fiber has been suspended and has not signaled that it can be
+      // immediately resumed, assume that the fiber is waiting on an async
+      // operation and wait a bit.
+      if (!$fiber->isTerminated() && $resume_type !== FiberResumeType::Immediate) {
+        usleep(500);
+      }
+    }
+    $result = $fiber->getReturn();
     assert($context->count() <= 1, 'Bubbling failed.');
 
     // Restore the original render context.
@@ -724,7 +755,7 @@ class Renderer implements RendererInterface {
         $message_placeholders[] = $placeholder;
       }
       else {
-        // Get the render array for the given placeholder
+        // Get the render array for the given placeholder.
         $fibers[$placeholder] = new \Fiber(function () use ($placeholder_element) {
           return [$this->doRenderPlaceholder($placeholder_element), $placeholder_element];
         });
@@ -783,6 +814,9 @@ class Renderer implements RendererInterface {
    * {@inheritdoc}
    */
   public function addCacheableDependency(array &$elements, $dependency) {
+    if (!$dependency instanceof CacheableDependencyInterface) {
+      @trigger_error(sprintf("Calling %s() with an object that doesn't implement %s is deprecated in drupal:11.3.0 and will throw an error in drupal:13.0.0. See https://www.drupal.org/node/3525389", __METHOD__, CacheableDependencyInterface::class), E_USER_DEPRECATED);
+    }
     $meta_a = CacheableMetadata::createFromRenderArray($elements);
     $meta_b = CacheableMetadata::createFromObject($dependency);
     $meta_a->merge($meta_b)->applyTo($elements);

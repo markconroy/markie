@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Drupal\Tests\system\Functional\Form;
 
 use Drupal\Tests\BrowserTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests a multistep form using form storage.
@@ -14,9 +16,9 @@ use Drupal\Tests\BrowserTestBase;
  * constructions, with and without manual form caching activated. Furthermore
  * when a validation error occurs, it makes sure that changed form element
  * values are not lost due to a wrong form rebuild.
- *
- * @group Form
  */
+#[Group('Form')]
+#[RunTestsInSeparateProcesses]
 class StorageTest extends BrowserTestBase {
 
   /**

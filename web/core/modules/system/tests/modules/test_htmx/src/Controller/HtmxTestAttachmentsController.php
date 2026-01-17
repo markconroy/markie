@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Drupal\test_htmx\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\EventSubscriber\MainContentViewSubscriber;
+use Drupal\Core\Htmx\Htmx;
 use Drupal\Core\Url;
 
 /**
@@ -33,13 +35,23 @@ final class HtmxTestAttachmentsController extends ControllerBase {
   }
 
   /**
-   * Builds a response with an `afterend` swap..
+   * Builds a response with an `afterend` swap.
    *
    * @return mixed[]
    *   A render array.
    */
   public function after(): array {
     return self::generateHtmxButton('afterend');
+  }
+
+  /**
+   * Builds a response with an the wrapper format parameter on the request.
+   *
+   * @return mixed[]
+   *   A render array.
+   */
+  public function withWrapperFormat(): array {
+    return self::generateHtmxButton('', TRUE);
   }
 
   /**
@@ -79,28 +91,34 @@ final class HtmxTestAttachmentsController extends ControllerBase {
    * @return array
    *   The render array.
    */
-  public static function generateHtmxButton(string $swap = ''): array {
-    $url = Url::fromRoute('test_htmx.attachments.replace');
+  public static function generateHtmxButton(string $swap = '', bool $useWrapperFormat = FALSE): array {
+    $options = [];
+    if ($useWrapperFormat) {
+      $options = [
+        'query' => [
+          MainContentViewSubscriber::WRAPPER_FORMAT => 'drupal_htmx',
+        ],
+      ];
+    }
+    $url = Url::fromRoute('test_htmx.attachments.replace', [], $options);
     $build['replace'] = [
       '#type' => 'html_tag',
       '#tag' => 'button',
       '#attributes' => [
         'type' => 'button',
         'name' => 'replace',
-        'data-hx-get' => $url->toString(),
-        'data-hx-select' => 'div.ajax-content',
-        'data-hx-target' => '[data-drupal-htmx-target]',
       ],
       '#value' => 'Click this',
-      '#attached' => [
-        'library' => [
-          'core/drupal.htmx',
-        ],
-      ],
     ];
+    $replace_htmx = (new Htmx())
+      ->get($url)
+      ->onlyMainContent($useWrapperFormat)
+      ->select('div.ajax-content')
+      ->target('[data-drupal-htmx-target]');
     if ($swap !== '') {
-      $build['replace']['#attributes']['data-hx-swap'] = $swap;
+      $replace_htmx->swap($swap);
     }
+    $replace_htmx->applyTo($build['replace']);
 
     $build['content'] = [
       '#type' => 'container',

@@ -7,12 +7,14 @@ namespace Drupal\Tests\responsive_image\FunctionalJavascript;
 use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
 use Drupal\responsive_image\Entity\ResponsiveImageStyle;
 use Drupal\Tests\field_ui\Traits\FieldUiJSTestTrait;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the responsive image field UI.
- *
- * @group responsive_image
  */
+#[Group('responsive_image')]
+#[RunTestsInSeparateProcesses]
 class ResponsiveImageFieldUiTest extends WebDriverTestBase {
 
   use FieldUiJSTestTrait;
@@ -92,7 +94,7 @@ class ResponsiveImageFieldUiTest extends WebDriverTestBase {
     $this->assertEquals('Select a responsive image style. Loading attribute: lazy', $summary_text->getText());
 
     $page->pressButton('Save');
-    $assert_session->responseContains("Select a responsive image style.");
+    $this->assertTrue($assert_session->waitForText('Select a responsive image style.'));
 
     // Create responsive image styles.
     $responsive_image_style = ResponsiveImageStyle::create([

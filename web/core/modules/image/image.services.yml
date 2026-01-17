@@ -1,3 +1,6 @@
+parameters:
+  image.skip_procedural_hook_scan: true
+
 services:
   _defaults:
     autoconfigure: true
@@ -9,3 +12,6 @@ services:
   plugin.manager.image.effect:
     class: Drupal\image\ImageEffectManager
     parent: default_plugin_manager
+  logger.channel.image:
+    parent: logger.channel_base
+    arguments: ['image']

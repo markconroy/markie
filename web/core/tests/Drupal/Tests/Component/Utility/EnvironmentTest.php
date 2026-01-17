@@ -5,15 +5,16 @@ declare(strict_types=1);
 namespace Drupal\Tests\Component\Utility;
 
 use Drupal\Component\Utility\Environment;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 
 /**
  * Test PHP Environment helper methods.
- *
- * @group Utility
- *
- * @coversDefaultClass \Drupal\Component\Utility\Environment
  */
+#[CoversClass(Environment::class)]
+#[Group('Utility')]
 class EnvironmentTest extends TestCase {
 
   /**
@@ -29,9 +30,9 @@ class EnvironmentTest extends TestCase {
    *   The expected return value from
    *   \Drupal\Component\Utility\Environment::checkMemoryLimit().
    *
-   * @dataProvider providerTestCheckMemoryLimit
-   * @covers ::checkMemoryLimit
+   * @legacy-covers ::checkMemoryLimit
    */
+  #[DataProvider('providerTestCheckMemoryLimit')]
   public function testCheckMemoryLimit($required, $custom_memory_limit, $expected): void {
     $actual = Environment::checkMemoryLimit($required, $custom_memory_limit);
     $this->assertEquals($expected, $actual);
@@ -45,7 +46,7 @@ class EnvironmentTest extends TestCase {
    *   \Drupal\Component\Utility\Environment::checkMemoryLimit():
    *   required and memory_limit, and the expected return value.
    */
-  public static function providerTestCheckMemoryLimit() {
+  public static function providerTestCheckMemoryLimit(): array {
     return [
       // Minimal amount of memory should be available.
       ['30MB', NULL, TRUE],

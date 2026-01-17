@@ -6,10 +6,14 @@ namespace Drupal\Tests\search\Functional\Rest;
 
 use Drupal\Tests\rest\Functional\AnonResourceTestTrait;
 use Drupal\Tests\rest\Functional\EntityResource\XmlEntityNormalizationQuirksTrait;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
- * @group rest
+ * Tests Search Page Xml Anon.
  */
+#[Group('rest')]
+#[RunTestsInSeparateProcesses]
 class SearchPageXmlAnonTest extends SearchPageResourceTestBase {
 
   use AnonResourceTestTrait;

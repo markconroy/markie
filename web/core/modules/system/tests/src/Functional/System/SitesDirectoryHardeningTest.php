@@ -7,12 +7,14 @@ namespace Drupal\Tests\system\Functional\System;
 use Drupal\Core\Extension\Requirement\RequirementSeverity;
 use Drupal\Core\Site\Settings;
 use Drupal\Tests\BrowserTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests Drupal permissions hardening of /sites subdirectories.
- *
- * @group system
  */
+#[Group('system')]
+#[RunTestsInSeparateProcesses]
 class SitesDirectoryHardeningTest extends BrowserTestBase {
 
   /**
@@ -92,8 +94,7 @@ class SitesDirectoryHardeningTest extends BrowserTestBase {
    *   An array of system requirements.
    */
   protected function checkSystemRequirements() {
-    \Drupal::moduleHandler()->loadInclude('system', 'install');
-    return system_requirements('runtime');
+    return \Drupal::moduleHandler()->invoke('system', 'runtime_requirements');
   }
 
   /**

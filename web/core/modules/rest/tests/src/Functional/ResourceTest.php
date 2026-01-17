@@ -12,12 +12,14 @@ use Drupal\Tests\BrowserTestBase;
 use Drupal\user\Entity\Role;
 use Drupal\user\RoleInterface;
 use GuzzleHttp\RequestOptions;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the structure of a REST resource.
- *
- * @group rest
  */
+#[Group('rest')]
+#[RunTestsInSeparateProcesses]
 class ResourceTest extends BrowserTestBase {
 
   /**

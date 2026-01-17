@@ -8,10 +8,14 @@ use Drupal\Core\Entity\EntityDisplayRepositoryInterface;
 use Drupal\entity_test\Entity\EntityTestBundle;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\layout_builder\Entity\LayoutBuilderEntityViewDisplay;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
- * @group Recipe
+ * Tests Config Actions.
  */
+#[Group('Recipe')]
+#[RunTestsInSeparateProcesses]
 class ConfigActionsTest extends KernelTestBase {
 
   /**
@@ -22,6 +26,7 @@ class ConfigActionsTest extends KernelTestBase {
     'field',
     'layout_builder',
     'layout_discovery',
+    'user',
   ];
 
   /**

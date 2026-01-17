@@ -4,15 +4,18 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\views\Kernel\Plugin;
 
-use Drupal\views\Views;
 use Drupal\views\ViewExecutable;
+use Drupal\views\Views;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the grid style plugin.
  *
- * @group views
  * @see \Drupal\views\Plugin\views\style\Grid
  */
+#[Group('views')]
+#[RunTestsInSeparateProcesses]
 class StyleGridTest extends PluginKernelTestBase {
 
   /**

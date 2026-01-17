@@ -4,12 +4,16 @@ declare(strict_types=1);
 
 namespace Drupal\FunctionalJavascriptTests;
 
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\IgnoreDeprecations;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
+
 /**
  * Tests Javascript deprecation notices.
- *
- * @group javascript
- * @group legacy
  */
+#[Group('javascript')]
+#[IgnoreDeprecations]
+#[RunTestsInSeparateProcesses]
 class JavascriptDeprecationTest extends WebDriverTestBase {
 
   /**

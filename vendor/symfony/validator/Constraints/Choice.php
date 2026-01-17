@@ -45,8 +45,15 @@ class Choice extends Constraint
     public string $maxMessage = 'You must select at most {{ limit }} choice.|You must select at most {{ limit }} choices.';
     public bool $match = true;
 
+    /**
+     * @deprecated since Symfony 7.4
+     */
     public function getDefaultOption(): ?string
     {
+        if (0 === \func_num_args() || func_get_arg(0)) {
+            trigger_deprecation('symfony/validator', '7.4', 'The %s() method is deprecated.', __METHOD__);
+        }
+
         return 'choices';
     }
 
@@ -62,7 +69,7 @@ class Choice extends Constraint
      */
     #[HasNamedArguments]
     public function __construct(
-        string|array $options = [],
+        string|array|null $options = null,
         ?array $choices = null,
         callable|string|null $callback = null,
         ?bool $multiple = null,
@@ -78,18 +85,16 @@ class Choice extends Constraint
         ?bool $match = null,
     ) {
         if (\is_array($options) && $options && array_is_list($options)) {
+            trigger_deprecation('symfony/validator', '7.4', 'Support for passing the choices as the first argument to %s is deprecated.', static::class);
             $choices ??= $options;
-            $options = [];
+            $options = null;
         } elseif (\is_array($options) && [] !== $options) {
             trigger_deprecation('symfony/validator', '7.3', 'Passing an array of options to configure the "%s" constraint is deprecated, use named arguments instead.', static::class);
         }
 
-        if (null !== $choices) {
-            $options['value'] = $choices;
-        }
-
         parent::__construct($options, $groups, $payload);
 
+        $this->choices = $choices ?? $this->choices;
         $this->callback = $callback ?? $this->callback;
         $this->multiple = $multiple ?? $this->multiple;
         $this->strict = $strict ?? $this->strict;

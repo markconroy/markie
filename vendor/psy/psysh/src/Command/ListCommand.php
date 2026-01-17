@@ -51,7 +51,7 @@ class ListCommand extends ReflectingCommand implements PresenterAware
     /**
      * {@inheritdoc}
      */
-    protected function configure()
+    protected function configure(): void
     {
         list($grep, $insensitive, $invert) = FilterOptions::getOptions();
 
@@ -181,9 +181,20 @@ HELP
             return;
         }
 
+        $formatter = $output->getFormatter();
+
         foreach ($result as $label => $items) {
-            $names = \array_map([$this, 'formatItemName'], $items);
-            $output->writeln(\sprintf('<strong>%s</strong>: %s', $label, \implode(', ', $names)));
+            // Pre-format each item individually to avoid O(n^2) performance
+            // in Symfony's OutputFormatter when processing large strings with many style tags.
+            $names = \array_map(function ($item) use ($formatter) {
+                return $formatter->format($this->formatItemName($item));
+            }, $items);
+
+            // Pre-format the label and join with pre-formatted names
+            $line = $formatter->format(\sprintf('<strong>%s</strong>: ', $label)).\implode(', ', $names);
+
+            // Write raw since we've already formatted everything
+            $output->writeln($line, OutputInterface::OUTPUT_RAW);
         }
     }
 

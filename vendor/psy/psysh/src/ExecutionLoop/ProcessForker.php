@@ -30,6 +30,7 @@ class ProcessForker extends AbstractListener
     private $up;
     private bool $sigintHandlerInstalled = false;
     private bool $restoreStty = false;
+    private ?string $originalStty = null;
 
     public const PCNTL_FUNCTIONS = [
         'pcntl_fork',
@@ -177,12 +178,14 @@ class ProcessForker extends AbstractListener
 
                 if ($n === false) {
                     $err = \error_get_last();
-                    if (!isset($err['message']) || \stripos($err['message'], 'interrupted system call') === false) {
-                        $msg = $err['message'] ?
-                            \sprintf('Error waiting for execution loop: %s', $err['message']) :
-                            'Error waiting for execution loop';
-                        throw new \RuntimeException($msg);
+                    $errMessage = \is_array($err) ? ($err['message'] ?? null) : null;
+
+                    // If there's no error message, or it's an interrupted system call, just retry
+                    if ($errMessage === null || \stripos($errMessage, 'interrupted system call') !== false) {
+                        continue;
                     }
+
+                    throw new \RuntimeException(\sprintf('Error waiting for execution loop: %s', $errMessage));
                 }
             } while ($n < 1);
 
@@ -223,6 +226,11 @@ class ProcessForker extends AbstractListener
 
         // Save this; we'll need to close it in `afterRun`
         $this->up = $up;
+
+        // Save original stty state so we can restore on exit
+        if (@\posix_isatty(\STDIN)) {
+            $this->originalStty = @\shell_exec('stty -g 2>/dev/null');
+        }
     }
 
     /**
@@ -303,6 +311,15 @@ class ProcessForker extends AbstractListener
             // Suppress errors in case the pipe is broken (e.g., if parent was interrupted)
             @\fwrite($this->up, $data);
             @\fclose($this->up);
+
+            // Restore original terminal state before exiting.
+            //
+            // We set `stty isig` during execution, so Ctrl-C can interrupt, and
+            // `stty -isig` after, so readline can handle it at the prompt.
+            // Let's put things back the way we found them.
+            if ($this->originalStty !== null) {
+                @\shell_exec('stty '.\escapeshellarg(\trim($this->originalStty)).' 2>/dev/null');
+            }
 
             \posix_kill(\posix_getpid(), \SIGKILL);
         }

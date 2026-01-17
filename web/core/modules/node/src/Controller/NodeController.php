@@ -92,7 +92,7 @@ class NodeController extends ControllerBase implements ContainerInjectionInterfa
     // Bypass the node/add listing if only one content type is available.
     if (count($content) == 1) {
       $type = array_shift($content);
-      return $this->redirect('node.add', ['node_type' => $type->id()]);
+      return $this->redirect('entity.node.add_form', ['node_type' => $type->id()]);
     }
 
     $build['#content'] = $content;
@@ -117,22 +117,6 @@ class NodeController extends ControllerBase implements ContainerInjectionInterfa
   }
 
   /**
-   * Page title callback for a node revision.
-   *
-   * @param \Drupal\node\NodeInterface $node_revision
-   *   The node revision.
-   *
-   * @return string
-   *   The page title.
-   */
-  public function revisionPageTitle(NodeInterface $node_revision) {
-    return $this->t('Revision of %title from %date', [
-      '%title' => $node_revision->label(),
-      '%date' => $this->dateFormatter->format($node_revision->getRevisionCreationTime()),
-    ]);
-  }
-
-  /**
    * Generates an overview table of older revisions of a node.
    *
    * @param \Drupal\node\NodeInterface $node
@@ -153,7 +137,9 @@ class NodeController extends ControllerBase implements ContainerInjectionInterfa
     $has_translations = (count($languages) > 1);
     $node_storage = $this->entityTypeManager()->getStorage('node');
 
-    $build['#title'] = $has_translations ? $this->t('@language_name revisions for %title', ['@language_name' => $language_name, '%title' => $node->label()]) : $this->t('Revisions for %title', ['%title' => $node->label()]);
+    $build['#title'] = $has_translations
+      ? $this->t('@language_name revisions for %title', ['@language_name' => $language_name, '%title' => $node->label()])
+      : $this->t('Revisions for %title', ['%title' => $node->label()]);
     $header = [$this->t('Revision'), $this->t('Operations')];
 
     $rows = [];
@@ -179,7 +165,10 @@ class NodeController extends ControllerBase implements ContainerInjectionInterfa
         // this case.
         $is_current_revision = $revision->isDefaultRevision() || (!$current_revision_displayed && $revision->wasDefaultRevision());
         if (!$is_current_revision) {
-          $link = Link::fromTextAndUrl($date, new Url('entity.node.revision', ['node' => $node->id(), 'node_revision' => $vid]))->toString();
+          $link = Link::fromTextAndUrl($date, new Url('entity.node.revision', [
+            'node' => $node->id(),
+            'node_revision' => $vid,
+          ]))->toString();
         }
         else {
           $link = $node->toLink($date)->toString();
@@ -196,10 +185,12 @@ class NodeController extends ControllerBase implements ContainerInjectionInterfa
               'username' => $username,
               'message' => ['#markup' => $revision->revision_log->value, '#allowed_tags' => Xss::getHtmlTagList()],
             ],
+            // @todo Fix this properly in https://www.drupal.org/project/drupal/issues/3227637.
+            '#cache' => [
+              'max-age' => 0,
+            ],
           ],
         ];
-        // @todo Simplify once https://www.drupal.org/node/2334319 lands.
-        $this->renderer->addCacheableDependency($column['data'], $username);
         $row[] = $column;
 
         if ($is_current_revision) {
@@ -221,9 +212,16 @@ class NodeController extends ControllerBase implements ContainerInjectionInterfa
           if ($revision->access('revert revision')) {
             $links['revert'] = [
               'title' => $vid < $node->getRevisionId() ? $this->t('Revert') : $this->t('Set as current revision'),
-              'url' => $has_translations ?
-              Url::fromRoute('node.revision_revert_translation_confirm', ['node' => $node->id(), 'node_revision' => $vid, 'langcode' => $langcode]) :
-              Url::fromRoute('node.revision_revert_confirm', ['node' => $node->id(), 'node_revision' => $vid]),
+              'url' => $has_translations
+                ? Url::fromRoute('node.revision_revert_translation_confirm', [
+                  'node' => $node->id(),
+                  'node_revision' => $vid,
+                  'langcode' => $langcode,
+                ])
+                : Url::fromRoute('node.revision_revert_confirm', [
+                  'node' => $node->id(),
+                  'node_revision' => $vid,
+                ]),
             ];
           }
 

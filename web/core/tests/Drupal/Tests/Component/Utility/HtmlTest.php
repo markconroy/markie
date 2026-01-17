@@ -8,17 +8,17 @@ use Drupal\Component\Render\MarkupInterface;
 use Drupal\Component\Render\MarkupTrait;
 use Drupal\Component\Utility\Html;
 use Drupal\Component\Utility\Random;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 
 // cspell:ignore répét répété
-
 /**
  * Tests \Drupal\Component\Utility\Html.
- *
- * @group Common
- *
- * @coversDefaultClass \Drupal\Component\Utility\Html
  */
+#[CoversClass(Html::class)]
+#[Group('Common')]
 class HtmlTest extends TestCase {
 
   /**
@@ -42,10 +42,9 @@ class HtmlTest extends TestCase {
    *   (optional) An array of string replacements to use on the identifier. If
    *   NULL, no filter will be passed and a default will be used.
    *
-   * @dataProvider providerTestCleanCssIdentifier
-   *
-   * @covers ::cleanCssIdentifier
+   * @legacy-covers ::cleanCssIdentifier
    */
+  #[DataProvider('providerTestCleanCssIdentifier')]
   public function testCleanCssIdentifier($expected, $source, $filter = NULL): void {
     if ($filter !== NULL) {
       $this->assertSame($expected, Html::cleanCssIdentifier($source, $filter));
@@ -61,7 +60,7 @@ class HtmlTest extends TestCase {
    * @return array
    *   Test data.
    */
-  public static function providerTestCleanCssIdentifier() {
+  public static function providerTestCleanCssIdentifier(): array {
     $id1 = 'abcdefghijklmnopqrstuvwxyz_ABCDEFGHIJKLMNOPQRSTUVWXYZ-0123456789';
     $id2 = '¡¢£¤¥';
     $id3 = 'css__identifier__with__double__underscores';
@@ -94,7 +93,7 @@ class HtmlTest extends TestCase {
   /**
    * Tests that Html::getClass() cleans the class name properly.
    *
-   * @covers ::getClass
+   * @legacy-covers ::getClass
    */
   public function testHtmlClass(): void {
     // Verify Drupal coding standards are enforced.
@@ -116,10 +115,9 @@ class HtmlTest extends TestCase {
    * @param bool $reset
    *   (optional) If TRUE, reset the list of seen IDs. Defaults to FALSE.
    *
-   * @dataProvider providerTestHtmlGetUniqueId
-   *
-   * @covers ::getUniqueId
+   * @legacy-covers ::getUniqueId
    */
+  #[DataProvider('providerTestHtmlGetUniqueId')]
   public function testHtmlGetUniqueId($expected, $source, $reset = FALSE): void {
     if ($reset) {
       Html::resetSeenIds();
@@ -133,7 +131,7 @@ class HtmlTest extends TestCase {
    * @return array
    *   Test data.
    */
-  public static function providerTestHtmlGetUniqueId() {
+  public static function providerTestHtmlGetUniqueId(): array {
     // cSpell:disable
     $id = 'abcdefghijklmnopqrstuvwxyz-0123456789';
     return [
@@ -159,10 +157,9 @@ class HtmlTest extends TestCase {
    * @param string $source
    *   The string being transformed to an ID.
    *
-   * @dataProvider providerTestHtmlGetUniqueIdWithAjaxIds
-   *
-   * @covers ::getUniqueId
+   * @legacy-covers ::getUniqueId
    */
+  #[DataProvider('providerTestHtmlGetUniqueIdWithAjaxIds')]
   public function testHtmlGetUniqueIdWithAjaxIds($expected, $source): void {
     Html::setIsAjax(TRUE);
     $id = Html::getUniqueId($source);
@@ -185,7 +182,7 @@ class HtmlTest extends TestCase {
    * @return array
    *   Test data.
    */
-  public static function providerTestHtmlGetUniqueIdWithAjaxIds() {
+  public static function providerTestHtmlGetUniqueIdWithAjaxIds(): array {
     return [
       ['test-unique-id1--', 'test-unique-id1'],
       // Note, we truncate two hyphens at the end.
@@ -203,10 +200,9 @@ class HtmlTest extends TestCase {
    * @param string $source
    *   The string being transformed to an ID.
    *
-   * @dataProvider providerTestHtmlGetId
-   *
-   * @covers ::getId
+   * @legacy-covers ::getId
    */
+  #[DataProvider('providerTestHtmlGetId')]
   public function testHtmlGetId($expected, $source): void {
     Html::setIsAjax(FALSE);
     $this->assertSame($expected, Html::getId($source));
@@ -218,7 +214,7 @@ class HtmlTest extends TestCase {
    * @return array
    *   Test data.
    */
-  public static function providerTestHtmlGetId() {
+  public static function providerTestHtmlGetId(): array {
     // cSpell:disable
     $id = 'abcdefghijklmnopqrstuvwxyz-0123456789';
     return [
@@ -238,9 +234,9 @@ class HtmlTest extends TestCase {
   /**
    * Tests Html::decodeEntities().
    *
-   * @dataProvider providerDecodeEntities
-   * @covers ::decodeEntities
+   * @legacy-covers ::decodeEntities
    */
+  #[DataProvider('providerDecodeEntities')]
   public function testDecodeEntities($text, $expected): void {
     $this->assertEquals($expected, Html::decodeEntities($text));
   }
@@ -250,7 +246,7 @@ class HtmlTest extends TestCase {
    *
    * @see testDecodeEntities()
    */
-  public static function providerDecodeEntities() {
+  public static function providerDecodeEntities(): array {
     return [
       ['Drupal', 'Drupal'],
       ['<script>', '<script>'],
@@ -279,9 +275,9 @@ class HtmlTest extends TestCase {
   /**
    * Tests Html::escape().
    *
-   * @dataProvider providerEscape
-   * @covers ::escape
+   * @legacy-covers ::escape
    */
+  #[DataProvider('providerEscape')]
   public function testEscape($expected, $text): void {
     $this->assertEquals($expected, Html::escape($text));
   }
@@ -291,7 +287,7 @@ class HtmlTest extends TestCase {
    *
    * @see testEscape()
    */
-  public static function providerEscape() {
+  public static function providerEscape(): array {
     return [
       ['Drupal', 'Drupal'],
       ['&lt;script&gt;', '<script>'],
@@ -313,8 +309,8 @@ class HtmlTest extends TestCase {
   /**
    * Tests relationship between escaping and decoding HTML entities.
    *
-   * @covers ::decodeEntities
-   * @covers ::escape
+   * @legacy-covers ::decodeEntities
+   * @legacy-covers ::escape
    */
   public function testDecodeEntitiesAndEscape(): void {
     $string = "<em>répét&eacute;</em>";
@@ -335,7 +331,7 @@ class HtmlTest extends TestCase {
    * serialization would cause errors in getElementsByTagName() in the
    * serialization function.
    *
-   * @covers ::serialize
+   * @legacy-covers ::serialize
    */
   public function testSerialize(): void {
     $document = new \DOMDocument();
@@ -344,17 +340,17 @@ class HtmlTest extends TestCase {
   }
 
   /**
-   * @covers ::transformRootRelativeUrlsToAbsolute
-   * @dataProvider providerTestTransformRootRelativeUrlsToAbsolute
+   * @legacy-covers ::transformRootRelativeUrlsToAbsolute
    */
+  #[DataProvider('providerTestTransformRootRelativeUrlsToAbsolute')]
   public function testTransformRootRelativeUrlsToAbsolute($html, $scheme_and_host, $expected_html): void {
     $this->assertSame($expected_html ?: $html, Html::transformRootRelativeUrlsToAbsolute($html, $scheme_and_host));
   }
 
   /**
-   * @covers ::transformRootRelativeUrlsToAbsolute
-   * @dataProvider providerTestTransformRootRelativeUrlsToAbsoluteAssertion
+   * @legacy-covers ::transformRootRelativeUrlsToAbsolute
    */
+  #[DataProvider('providerTestTransformRootRelativeUrlsToAbsoluteAssertion')]
   public function testTransformRootRelativeUrlsToAbsoluteAssertion($scheme_and_host): void {
     $this->expectException(\AssertionError::class);
     Html::transformRootRelativeUrlsToAbsolute('', $scheme_and_host);
@@ -382,25 +378,65 @@ class HtmlTest extends TestCase {
       // The only attribute that has more than just a URL as its value, is
       // 'srcset', so special-case it.
       $data += [
-        "$tag_name, srcset, $base_path: root-relative" => ["<$tag_name srcset=\"http://example.com{$base_path}already-absolute 200w, {$base_path}root-relative 300w\">root-relative test</$tag_name>", 'http://example.com', "<$tag_name srcset=\"http://example.com{$base_path}already-absolute 200w, http://example.com{$base_path}root-relative 300w\">root-relative test</$tag_name>"],
-        "$tag_name, srcset, $base_path: protocol-relative" => ["<$tag_name srcset=\"http://example.com{$base_path}already-absolute 200w, //example.com{$base_path}protocol-relative 300w\">protocol-relative test</$tag_name>", 'http://example.com', FALSE],
-        "$tag_name, srcset, $base_path: absolute" => ["<$tag_name srcset=\"http://example.com{$base_path}already-absolute 200w, http://example.com{$base_path}absolute 300w\">absolute test</$tag_name>", 'http://example.com', FALSE],
-        "$tag_name, empty srcset" => ["<$tag_name srcset>empty test</$tag_name>", 'http://example.com', FALSE],
+        "$tag_name, srcset, $base_path: root-relative" => [
+          "<$tag_name srcset=\"http://example.com{$base_path}already-absolute 200w, {$base_path}root-relative 300w\">root-relative test</$tag_name>",
+          'http://example.com',
+          "<$tag_name srcset=\"http://example.com{$base_path}already-absolute 200w, http://example.com{$base_path}root-relative 300w\">root-relative test</$tag_name>",
+        ],
+        "$tag_name, srcset, $base_path: protocol-relative" => [
+          "<$tag_name srcset=\"http://example.com{$base_path}already-absolute 200w, //example.com{$base_path}protocol-relative 300w\">protocol-relative test</$tag_name>",
+          'http://example.com',
+          FALSE,
+        ],
+        "$tag_name, srcset, $base_path: absolute" => [
+          "<$tag_name srcset=\"http://example.com{$base_path}already-absolute 200w, http://example.com{$base_path}absolute 300w\">absolute test</$tag_name>",
+          'http://example.com',
+          FALSE,
+        ],
+        "$tag_name, empty srcset" => [
+          "<$tag_name srcset>empty test</$tag_name>",
+          'http://example.com',
+          FALSE,
+        ],
       ];
 
       foreach (['href', 'poster', 'src', 'cite', 'data', 'action', 'formaction', 'about'] as $attribute) {
         $data += [
-          "$tag_name, $attribute, $base_path: root-relative" => ["<$tag_name $attribute=\"{$base_path}root-relative\">root-relative test</$tag_name>", 'http://example.com', "<$tag_name $attribute=\"http://example.com{$base_path}root-relative\">root-relative test</$tag_name>"],
-          "$tag_name, $attribute, $base_path: protocol-relative" => ["<$tag_name $attribute=\"//example.com{$base_path}protocol-relative\">protocol-relative test</$tag_name>", 'http://example.com', FALSE],
-          "$tag_name, $attribute, $base_path: absolute" => ["<$tag_name $attribute=\"http://example.com{$base_path}absolute\">absolute test</$tag_name>", 'http://example.com', FALSE],
+          "$tag_name, $attribute, $base_path: root-relative" => [
+            "<$tag_name $attribute=\"{$base_path}root-relative\">root-relative test</$tag_name>",
+            'http://example.com',
+            "<$tag_name $attribute=\"http://example.com{$base_path}root-relative\">root-relative test</$tag_name>",
+          ],
+          "$tag_name, $attribute, $base_path: protocol-relative" => [
+            "<$tag_name $attribute=\"//example.com{$base_path}protocol-relative\">protocol-relative test</$tag_name>",
+            'http://example.com',
+            FALSE,
+          ],
+          "$tag_name, $attribute, $base_path: absolute" => [
+            "<$tag_name $attribute=\"http://example.com{$base_path}absolute\">absolute test</$tag_name>",
+            'http://example.com',
+            FALSE,
+          ],
         ];
       }
     }
 
     // Double-character carriage return should be normalized.
-    $data['line break with double special character'] = ["Test without links but with\r\nsome special characters", 'http://example.com', "Test without links but with\nsome special characters"];
-    $data['line break with single special character'] = ["Test without links but with&#13;\nsome special characters", 'http://example.com', "Test without links but with\nsome special characters"];
-    $data['carriage return within html'] = ["<a\rhref='/node'>My link</a>", 'http://example.com', '<a href="http://example.com/node">My link</a>'];
+    $data['line break with double special character'] = [
+      "Test without links but with\r\nsome special characters",
+      'http://example.com',
+      "Test without links but with\nsome special characters",
+    ];
+    $data['line break with single special character'] = [
+      "Test without links but with&#13;\nsome special characters",
+      'http://example.com',
+      "Test without links but with\nsome special characters",
+    ];
+    $data['carriage return within html'] = [
+      "<a\rhref='/node'>My link</a>",
+      'http://example.com',
+      '<a href="http://example.com/node">My link</a>',
+    ];
 
     return $data;
   }
@@ -411,7 +447,7 @@ class HtmlTest extends TestCase {
    * @return array
    *   Test data.
    */
-  public static function providerTestTransformRootRelativeUrlsToAbsoluteAssertion() {
+  public static function providerTestTransformRootRelativeUrlsToAbsoluteAssertion(): array {
     return [
       'only relative path' => ['llama'],
       'only root-relative path' => ['/llama'],

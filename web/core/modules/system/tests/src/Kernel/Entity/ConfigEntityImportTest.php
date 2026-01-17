@@ -12,12 +12,14 @@ use Drupal\KernelTests\KernelTestBase;
 use Drupal\search\Entity\SearchPage;
 use Drupal\system\Entity\Action;
 use Drupal\Tests\block\Traits\BlockCreationTrait;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests ConfigEntity importing.
- *
- * @group Entity
  */
+#[Group('Entity')]
+#[RunTestsInSeparateProcesses]
 class ConfigEntityImportTest extends KernelTestBase {
 
   use BlockCreationTrait;
@@ -39,7 +41,7 @@ class ConfigEntityImportTest extends KernelTestBase {
    * Runs test methods for each module within a single test run.
    */
   public function testConfigUpdateImport(): void {
-    $this->installConfig(['block', 'filter', 'image']);
+    $this->installConfig(['system', 'block', 'filter', 'image']);
     $this->container->get('theme_installer')->install(['olivero']);
     $config_storage = $this->container->get('config.storage');
     // Ensure the 'system.site' config.

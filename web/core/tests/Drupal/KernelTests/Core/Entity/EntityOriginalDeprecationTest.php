@@ -5,13 +5,16 @@ declare(strict_types=1);
 namespace Drupal\KernelTests\Core\Entity;
 
 use Drupal\entity_test\Entity\EntityTest;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\IgnoreDeprecations;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the deprecations of the original property.
- *
- * @group Entity
- * @group legacy
  */
+#[Group('Entity')]
+#[IgnoreDeprecations]
+#[RunTestsInSeparateProcesses]
 class EntityOriginalDeprecationTest extends EntityKernelTestBase {
 
   /**

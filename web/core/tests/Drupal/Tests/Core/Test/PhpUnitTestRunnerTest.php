@@ -9,19 +9,23 @@ use Drupal\Core\Test\SimpletestTestRunResultsStorage;
 use Drupal\Core\Test\TestRun;
 use Drupal\Core\Test\TestStatus;
 use Drupal\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
- * @coversDefaultClass \Drupal\Core\Test\PhpUnitTestRunner
- * @group Test
+ * Tests Drupal\Core\Test\PhpUnitTestRunner.
  *
  * @see Drupal\Tests\simpletest\Unit\SimpletestPhpunitRunCommandTest
  */
+#[CoversClass(PhpUnitTestRunner::class)]
+#[Group('Test')]
 class PhpUnitTestRunnerTest extends UnitTestCase {
 
   /**
    * Tests an error in the test running phase.
    *
-   * @covers ::execute
+   * @legacy-covers ::execute
    */
   public function testRunTestsError(): void {
     $test_id = 23;
@@ -80,12 +84,15 @@ class PhpUnitTestRunnerTest extends UnitTestCase {
       'function' => '*** Process execution output ***',
       'line' => '0',
       'file' => $log_path,
+      'exit_code' => 3,
     ];
     $this->assertEquals($fail_row, $row);
   }
 
   /**
-   * @covers ::phpUnitCommand
+   * Tests php unit command.
+   *
+   * @legacy-covers ::phpUnitCommand
    */
   public function testPhpUnitCommand(): void {
     $runner = new PhpUnitTestRunner($this->root, sys_get_temp_dir());
@@ -93,14 +100,16 @@ class PhpUnitTestRunnerTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::xmlLogFilePath
+   * Tests xml log file path.
+   *
+   * @legacy-covers ::xmlLogFilePath
    */
   public function testXmlLogFilePath(): void {
     $runner = new PhpUnitTestRunner($this->root, sys_get_temp_dir());
     $this->assertStringEndsWith('phpunit-23.xml', $runner->xmlLogFilePath(23));
   }
 
-  public static function providerTestSummarizeResults() {
+  public static function providerTestSummarizeResults(): array {
     return [
       [
         [
@@ -146,9 +155,11 @@ class PhpUnitTestRunnerTest extends UnitTestCase {
   }
 
   /**
-   * @dataProvider providerTestSummarizeResults
-   * @covers ::summarizeResults
+   * Tests summarize results.
+   *
+   * @legacy-covers ::summarizeResults
    */
+  #[DataProvider('providerTestSummarizeResults')]
   public function testSummarizeResults($results, $has_status): void {
     $runner = new PhpUnitTestRunner($this->root, sys_get_temp_dir());
     $summary = $runner->summarizeResults($results);

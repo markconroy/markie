@@ -185,6 +185,9 @@ interface FileSystemInterface {
    * @see basename()
    *
    * @ingroup php_wrappers
+   *
+   * @deprecated in drupal:11.3.0 and is removed from drupal:13.0.0. Use PHP native basename() instead.
+   * @see https://www.drupal.org/node/3530869
    */
   public function basename($uri, $suffix = NULL);
 
@@ -252,7 +255,7 @@ interface FileSystemInterface {
    *   The prefix of the generated temporary filename.
    *   Note: Windows uses only the first three characters of prefix.
    *
-   * @return string|bool
+   * @return string|false
    *   The new temporary filename, or FALSE on failure.
    *
    * @see tempnam()
@@ -456,7 +459,7 @@ interface FileSystemInterface {
    * @param \Drupal\Core\File\FileExists|int $fileExists
    *   Replace behavior when the destination file already exists.
    *
-   * @return string|bool
+   * @return string|false
    *   The destination filepath, or FALSE if the file already exists
    *   and FileExists::Error is specified.
    *

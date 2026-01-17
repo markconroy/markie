@@ -13,11 +13,15 @@ use Drupal\Core\Asset\LibraryDependencyResolver;
 use Drupal\Core\Cache\MemoryBackend;
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
- * @coversDefaultClass \Drupal\Core\Asset\AssetResolver
- * @group Asset
+ * Tests Drupal\Core\Asset\AssetResolver.
  */
+#[CoversClass(AssetResolver::class)]
+#[Group('Asset')]
 class AssetResolverTest extends UnitTestCase {
 
   /**
@@ -199,9 +203,11 @@ class AssetResolverTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::getCssAssets
-   * @dataProvider providerAttachedCssAssets
+   * Tests get css assets.
+   *
+   * @legacy-covers ::getCssAssets
    */
+  #[DataProvider('providerAttachedCssAssets')]
   public function testGetCssAssets(AttachedAssetsInterface $assets_a, AttachedAssetsInterface $assets_b, $expected_css_cache_item_count): void {
     $this->libraryDiscovery->expects($this->any())
       ->method('getLibraryByName')
@@ -213,7 +219,7 @@ class AssetResolverTest extends UnitTestCase {
     $this->assertCount($expected_css_cache_item_count, $this->cache->getAllCids());
   }
 
-  public static function providerAttachedCssAssets() {
+  public static function providerAttachedCssAssets(): array {
     return [
       'one js only library and one css only library' => [
         (new AttachedAssets())->setAlreadyLoadedLibraries([])->setLibraries(['core/drupal']),
@@ -229,9 +235,11 @@ class AssetResolverTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::getJsAssets
-   * @dataProvider providerAttachedJsAssets
+   * Tests get js assets.
+   *
+   * @legacy-covers ::getJsAssets
    */
+  #[DataProvider('providerAttachedJsAssets')]
   public function testGetJsAssets(AttachedAssetsInterface $assets_a, AttachedAssetsInterface $assets_b, $expected_js_cache_item_count, $expected_multilingual_js_cache_item_count): void {
     $this->libraryDiscovery->expects($this->any())
       ->method('getLibraryByName')
@@ -247,7 +255,7 @@ class AssetResolverTest extends UnitTestCase {
     $this->assertCount($expected_multilingual_js_cache_item_count, $this->cache->getAllCids());
   }
 
-  public static function providerAttachedJsAssets() {
+  public static function providerAttachedJsAssets(): array {
     $time = time();
     return [
       'same libraries, different timestamps' => [

@@ -5,14 +5,15 @@ declare(strict_types=1);
 namespace Drupal\Tests\package_manager\Build;
 
 use Drupal\package_manager_test_api\ControllerSandboxManager;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests updating packages in a stage directory.
  *
- * @group package_manager
- * @group #slow
  * @internal
  */
+#[Group('package_manager')]
+#[Group('#slow')]
 class PackageUpdateTest extends TemplateProjectTestBase {
 
   /**
@@ -39,7 +40,7 @@ class PackageUpdateTest extends TemplateProjectTestBase {
     // Change both modules' upstream version.
     static::copyFixtureFilesTo("$fixtures/alpha/1.1.0", $alpha_repo_path);
     static::copyFixtureFilesTo("$fixtures/updated_module/1.1.0", $updated_module_repo_path);
-    // Make .git folder
+    // Make .git folder.
 
     // Use the API endpoint to create a stage and update updated_module to
     // 1.1.0. Even though both modules have version 1.1.0 available, only

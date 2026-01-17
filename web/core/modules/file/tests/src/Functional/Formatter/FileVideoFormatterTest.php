@@ -6,11 +6,18 @@ namespace Drupal\Tests\file\Functional\Formatter;
 
 use Drupal\entity_test\Entity\EntityTest;
 use Drupal\file\Entity\File;
+use Drupal\file\Plugin\Field\FieldFormatter\FileVideoFormatter;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
- * @coversDefaultClass \Drupal\file\Plugin\Field\FieldFormatter\FileVideoFormatter
- * @group file
+ * Tests Drupal\file\Plugin\Field\FieldFormatter\FileVideoFormatter.
  */
+#[CoversClass(FileVideoFormatter::class)]
+#[Group('file')]
+#[RunTestsInSeparateProcesses]
 class FileVideoFormatterTest extends FileMediaFormatterTestBase {
 
   /**
@@ -19,10 +26,11 @@ class FileVideoFormatterTest extends FileMediaFormatterTestBase {
   protected $defaultTheme = 'stark';
 
   /**
-   * @covers ::viewElements
+   * Tests render.
    *
-   * @dataProvider dataProvider
+   * @legacy-covers ::viewElements
    */
+  #[DataProvider('dataProvider')]
   public function testRender($tag_count, $formatter_settings): void {
     $field_config = $this->createMediaField('file_video', 'mp4', $formatter_settings);
 

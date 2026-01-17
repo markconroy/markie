@@ -4,106 +4,40 @@ namespace Drupal\views;
 
 use Drupal\Component\Plugin\PluginManagerInterface;
 use Drupal\Core\Config\TypedConfigManagerInterface;
-use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
+use Drupal\Core\Entity\EntityDisplayRepositoryInterface;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 /**
  * Provides a BC layer for modules providing old configurations.
  *
  * @internal
  */
-class ViewsConfigUpdater implements ContainerInjectionInterface {
-
-  /**
-   * The entity type manager.
-   *
-   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
-   */
-  protected $entityTypeManager;
-
-  /**
-   * The entity field manager.
-   *
-   * @var \Drupal\Core\Entity\EntityFieldManagerInterface
-   */
-  protected $entityFieldManager;
-
-  /**
-   * The typed config manager.
-   *
-   * @var \Drupal\Core\Config\TypedConfigManagerInterface
-   */
-  protected $typedConfigManager;
-
-  /**
-   * The views data service.
-   *
-   * @var \Drupal\views\ViewsData
-   */
-  protected $viewsData;
-
-  /**
-   * The formatter plugin manager service.
-   *
-   * @var \Drupal\Component\Plugin\PluginManagerInterface
-   */
-  protected $formatterPluginManager;
+class ViewsConfigUpdater {
 
   /**
    * Flag determining whether deprecations should be triggered.
-   *
-   * @var bool
    */
-  protected $deprecationsEnabled = TRUE;
+  protected bool $deprecationsEnabled = TRUE;
 
   /**
    * Stores which deprecations were triggered.
-   *
-   * @var bool
    */
-  protected $triggeredDeprecations = [];
+  protected array $triggeredDeprecations = [];
 
   /**
    * ViewsConfigUpdater constructor.
-   *
-   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
-   *   The entity type manager.
-   * @param \Drupal\Core\Entity\EntityFieldManagerInterface $entity_field_manager
-   *   The entity field manager.
-   * @param \Drupal\Core\Config\TypedConfigManagerInterface $typed_config_manager
-   *   The typed config manager.
-   * @param \Drupal\views\ViewsData $views_data
-   *   The views data service.
-   * @param \Drupal\Component\Plugin\PluginManagerInterface $formatter_plugin_manager
-   *   The formatter plugin manager service.
    */
   public function __construct(
-    EntityTypeManagerInterface $entity_type_manager,
-    EntityFieldManagerInterface $entity_field_manager,
-    TypedConfigManagerInterface $typed_config_manager,
-    ViewsData $views_data,
-    PluginManagerInterface $formatter_plugin_manager,
+    private readonly EntityTypeManagerInterface $entityTypeManager,
+    private readonly EntityFieldManagerInterface $entityFieldManager,
+    private readonly TypedConfigManagerInterface $typedConfigManager,
+    private readonly ViewsData $viewsData,
+    #[Autowire(service: 'plugin.manager.field.formatter')]
+    private readonly PluginManagerInterface $formatterPluginManager,
+    protected EntityDisplayRepositoryInterface $entityDisplayRepository,
   ) {
-    $this->entityTypeManager = $entity_type_manager;
-    $this->entityFieldManager = $entity_field_manager;
-    $this->typedConfigManager = $typed_config_manager;
-    $this->viewsData = $views_data;
-    $this->formatterPluginManager = $formatter_plugin_manager;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function create(ContainerInterface $container) {
-    return new static(
-      $container->get('entity_type.manager'),
-      $container->get('entity_field.manager'),
-      $container->get('config.typed'),
-      $container->get('views.views_data'),
-      $container->get('plugin.manager.field.formatter')
-    );
   }
 
   /**
@@ -112,8 +46,15 @@ class ViewsConfigUpdater implements ContainerInjectionInterface {
    * @param bool $enabled
    *   Whether deprecations should be enabled.
    */
-  public function setDeprecationsEnabled($enabled) {
+  public function setDeprecationsEnabled(bool $enabled): void {
     $this->deprecationsEnabled = $enabled;
+  }
+
+  /**
+   * Whether deprecations are enabled.
+   */
+  public function areDeprecationsEnabled(): bool {
+    return $this->deprecationsEnabled;
   }
 
   /**
@@ -135,6 +76,12 @@ class ViewsConfigUpdater implements ContainerInjectionInterface {
         $changed = TRUE;
       }
       if ($this->processTableCssClassUpdate($view)) {
+        $changed = TRUE;
+      }
+      if ($this->processBlockContentListingEmptyUpdate($view)) {
+        $changed = TRUE;
+      }
+      if ($this->processRssViewModeUpdate($view)) {
         $changed = TRUE;
       }
       return $changed;
@@ -259,12 +206,51 @@ class ViewsConfigUpdater implements ContainerInjectionInterface {
     }
 
     $deprecations_triggered = &$this->triggeredDeprecations['2640994'][$view->id()];
-    if ($this->deprecationsEnabled && $changed && !$deprecations_triggered) {
+    if ($this->areDeprecationsEnabled() && $changed && !$deprecations_triggered) {
       $deprecations_triggered = TRUE;
       @trigger_error(sprintf('The update to convert "numeric" arguments to "entity_target_id" for entity reference fields for view "%s" is deprecated in drupal:10.3.0 and is removed from drupal:12.0.0. Profile, module and theme provided configuration should be updated. See https://www.drupal.org/node/3441945', $view->id()), E_USER_DEPRECATED);
     }
 
     return $changed;
+  }
+
+  /**
+   * Checks for fields with the format plural option set.
+   *
+   * @param \Drupal\views\ViewEntityInterface $view
+   *   The View to update.
+   *
+   * @return bool
+   *   TRUE if view has fields with the format plural option.
+   */
+  public function needsFormatPluralUpdate(ViewEntityInterface $view): bool {
+    return $this->processDisplayHandlers($view, FALSE, function (&$handler, $handler_type) {
+      return $this->processFieldHandlerWithFormatPlural($handler, $handler_type);
+    });
+  }
+
+  /**
+   * Processes fields with the format plural option set.
+   *
+   * This option is only set for fields using an aggregation function such as
+   * COUNT or SUM. The data type is changed so it matches the field schema.
+   *
+   * @param array $handler
+   *   A display handler.
+   * @param string $handler_type
+   *   The handler type.
+   *
+   * @return bool
+   *   Whether the handler was updated.
+   */
+  protected function processFieldHandlerWithFormatPlural(array &$handler, string $handler_type): bool {
+    // Force view re-save if the format plural option exists.
+    if ($handler_type === 'field' && isset($handler['format_plural'])) {
+      // Cast to the correct data type. This changes 1/0 to true/false.
+      $handler['format_plural'] = (bool) $handler['format_plural'];
+      return TRUE;
+    }
+    return FALSE;
   }
 
   /**
@@ -351,9 +337,136 @@ class ViewsConfigUpdater implements ContainerInjectionInterface {
     }
 
     $deprecations_triggered = &$this->triggeredDeprecations['table_css_class'][$view->id()];
-    if ($this->deprecationsEnabled && $changed && !$deprecations_triggered) {
+    if ($this->areDeprecationsEnabled() && $changed && !$deprecations_triggered) {
       $deprecations_triggered = TRUE;
       @trigger_error(sprintf('The update to add a default table CSS class for view "%s" is deprecated in drupal:11.2.0 and is removed from drupal:12.0.0. Profile, module and theme provided configuration should be updated. See https://www.drupal.org/node/3499943', $view->id()), E_USER_DEPRECATED);
+    }
+
+    return $changed;
+  }
+
+  /**
+   * Checks if 'block_content_listing_empty' needs to be removed.
+   *
+   * @param \Drupal\views\ViewEntityInterface $view
+   *   The view entity.
+   *
+   * @return bool
+   *   TRUE if the view has the plugin.
+   */
+  public function needsBlockContentListingEmptyUpdate(ViewEntityInterface $view): bool {
+    return $this->processDisplayHandlers($view, TRUE, function (&$handler, $handler_type) use ($view) {
+      return $this->processBlockContentListingEmptyUpdate($view);
+    });
+  }
+
+  /**
+   * Processes area plugins and removes block_content_listing_empty.
+   *
+   * @param \Drupal\views\ViewEntityInterface $view
+   *   The view entity.
+   *
+   * @return bool
+   *   Whether the handler was updated.
+   */
+  public function processBlockContentListingEmptyUpdate(ViewEntityInterface $view): bool {
+    $changed = FALSE;
+    $displays = $view->get('display');
+
+    foreach ($displays as &$display) {
+      foreach ($display['display_options']['empty'] ?? [] as $id => $emptyOptions) {
+        if ($emptyOptions['id'] === 'block_content_listing_empty') {
+          $changed = TRUE;
+          unset($display['display_options']['empty'][$id]);
+        }
+      }
+    }
+
+    if ($changed) {
+      $view->set('display', $displays);
+    }
+
+    $deprecations_triggered = &$this->triggeredDeprecations['block_content_listing_empty'][$view->id()];
+    if ($this->deprecationsEnabled && $changed && !$deprecations_triggered) {
+      $deprecations_triggered = TRUE;
+      @trigger_error(sprintf('The update to remove the block_content_listing_empty plugin from view "%s" is deprecated in drupal:11.3.0 and is removed from drupal:13.0.0. Profile, module and theme provided configuration should be updated. See https://www.drupal.org/node/3336219', $view->id()), E_USER_DEPRECATED);
+    }
+
+    return $changed;
+  }
+
+  /**
+   * Checks for views needing a default RSS view mode.
+   *
+   * @param \Drupal\views\ViewEntityInterface $view
+   *   The view entity.
+   * @param string|null $previous_view_mode
+   *   The previous view mode.
+   *
+   * @return bool
+   *   TRUE if the view has been updated.
+   */
+  public function needsRssViewModeUpdate(ViewEntityInterface $view, ?string $previous_view_mode = NULL): bool {
+    return $this->processRssViewModeUpdate($view, $previous_view_mode);
+  }
+
+  /**
+   * Processes views and sets the default RSS view mode if necessary.
+   *
+   * @param \Drupal\views\ViewEntityInterface $view
+   *   The view entity.
+   * @param string|null $previous_view_mode
+   *   The previous view mode.
+   *
+   * @return bool
+   *   TRUE if the view was updated with a default RSS view mode.
+   */
+  public function processRssViewModeUpdate(ViewEntityInterface $view, ?string $previous_view_mode = NULL) : bool {
+    $changed = FALSE;
+    $displays = $view->get('display');
+
+    // Row types that need updating.
+    $row_types = [
+      'comment_rss' => 'comment',
+      'node_rss' => 'node',
+    ];
+
+    foreach ($displays as &$display) {
+      if (isset($display['display_options']['row']['options']['view_mode']) &&
+        array_key_exists($display['display_options']['row']['type'], $row_types) &&
+        $display['display_options']['row']['options']['view_mode'] === 'default') {
+
+        // When system.rss is already removed but a view is saved, we still need
+        // to try and set the view_mode to something more sane. But detecting
+        // if the view mode was always default, or default because it used the
+        // system.rss setting is hard. So if there is a default mode available
+        // it will use that.
+        // It would make sense to use any RSS view_mode if available, but that
+        // would mean 'default' can never be set as a view mode. That is an
+        // issue, therefore, if we have a default view mode available, we will
+        // use that.
+        if ($previous_view_mode === NULL) {
+          $view_modes = $this->entityDisplayRepository->getViewModes($row_types[$display['display_options']['row']['type']]);
+          if (array_key_exists('default', $view_modes)) {
+            return FALSE;
+          }
+
+          // If there is no default, the most likely view mode is RSS. If that
+          // is available we use that. Otherwise, fall back to the first
+          // available.
+          $probable_view_mode = isset($view_modes['rss']) ? 'rss' : array_key_first($view_modes);
+          $display['display_options']['row']['options']['view_mode'] = $probable_view_mode;
+          $changed = TRUE;
+        }
+        else {
+          $display['display_options']['row']['options']['view_mode'] = $previous_view_mode;
+          $changed = TRUE;
+        }
+      }
+    }
+
+    if ($changed) {
+      $view->set('display', $displays);
     }
 
     return $changed;

@@ -273,7 +273,10 @@ class FileItem extends EntityReferenceItem {
       if (!in_array('txt', $extension_array, TRUE) && !\Drupal::config('system.file')->get('allow_insecure_uploads')) {
         foreach ($extension_array as $extension) {
           if (preg_match(FileSystemInterface::INSECURE_EXTENSION_REGEX, 'test.' . $extension)) {
-            $form_state->setError($element, new TranslatableMarkup('Add %txt_extension to the list of allowed extensions to securely upload files with a %extension extension. The %txt_extension extension will then be added automatically.', ['%extension' => $extension, '%txt_extension' => 'txt']));
+            $form_state->setError($element, new TranslatableMarkup('Add %txt_extension to the list of allowed extensions to securely upload files with a %extension extension. The %txt_extension extension will then be added automatically.', [
+              '%extension' => $extension,
+              '%txt_extension' => 'txt',
+            ]));
 
             break;
           }
@@ -363,8 +366,15 @@ class FileItem extends EntityReferenceItem {
     // Ensure directory ends with a slash.
     $dirname .= str_ends_with($dirname, '/') ? '' : '/';
 
+    // Determine which extension to use when generating.
+    $extension = 'txt';
+    if (!empty($settings['file_extensions'])) {
+      $extensions = explode(' ', $settings['file_extensions']);
+      $extension = array_rand(array_flip($extensions), 1);
+    }
+
     // Generate a file entity.
-    $destination = $dirname . $random->name(10) . '.txt';
+    $destination = $dirname . $random->name(10, TRUE) . '.' . $extension;
     $data = $random->paragraphs(3);
     /** @var \Drupal\file\FileRepositoryInterface $file_repository */
     $file_repository = \Drupal::service('file.repository');

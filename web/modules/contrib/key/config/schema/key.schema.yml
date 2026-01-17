@@ -45,9 +45,9 @@ key.type.encryption:
   type: mapping
   label: 'Encryption key type settings'
   mapping:
-      key_size:
-        type: integer
-        label: 'Key size'
+    key_size:
+      type: integer
+      label: 'Key size'
 
 key.provider.config:
   type: mapping
@@ -95,28 +95,28 @@ key.input.text_field:
   type: mapping
   label: 'Text field key input settings'
   mapping:
-      base64_encoded:
-        type: boolean
-        label: 'Base64-encoded'
+    base64_encoded:
+      type: boolean
+      label: 'Base64-encoded'
 
 key.input.textarea_field:
   type: mapping
   label: 'Textarea field key input settings'
   mapping:
-      base64_encoded:
-        type: boolean
-        label: 'Base64-encoded'
+    base64_encoded:
+      type: boolean
+      label: 'Base64-encoded'
 
 key.input.generate:
   type: mapping
   label: 'Generate key input settings'
   mapping:
-      generated:
-        type: boolean
-        label: 'Generated'
-      display_once:
-        type: boolean
-        label: 'Display once'
+    generated:
+      type: boolean
+      label: 'Generated'
+    display_once:
+      type: boolean
+      label: 'Display once'
 
 key.config_override.*:
   type: config_entity
@@ -143,3 +143,11 @@ key.config_override.*:
     key_id:
       type: string
       label: 'Key ID'
+
+key.provider.state:
+  type: mapping
+  label: 'State key provider settings'
+  mapping:
+    key:
+      type: string
+      label: 'Key'

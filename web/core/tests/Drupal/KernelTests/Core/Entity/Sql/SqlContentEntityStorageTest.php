@@ -5,23 +5,20 @@ declare(strict_types=1);
 namespace Drupal\KernelTests\Core\Entity\Sql;
 
 use Drupal\Core\Database\Event\StatementEvent;
-use Drupal\Core\Entity\Sql\DefaultTableMapping;
 use Drupal\Core\Database\Log;
 use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Entity\Sql\DefaultTableMapping;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\KernelTests\KernelTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests that the deleteFromDedicatedTables() method only executes one DELETE query.
- *
- * @group Entity
  */
+#[Group('Entity')]
+#[RunTestsInSeparateProcesses]
 class SqlContentEntityStorageTest extends KernelTestBase {
-
-  /**
-   * {@inheritdoc}
-   */
-  protected static $modules = ['system'];
 
   /**
    * Tests that only one SQL DELETE is executed on dedicated data tables.

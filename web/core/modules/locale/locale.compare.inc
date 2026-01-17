@@ -5,7 +5,6 @@
  */
 
 use Drupal\Core\Batch\BatchBuilder;
-use Drupal\Core\Hook\Attribute\ProceduralHookScanStop;
 use Drupal\Core\Utility\ProjectInfo;
 
 /**
@@ -18,7 +17,6 @@ require_once __DIR__ . '/locale.translation.inc';
 /**
  * Clear the project data table.
  */
-#[ProceduralHookScanStop]
 function locale_translation_flush_projects(): void {
   \Drupal::service('locale.project')->deleteAll();
 }
@@ -56,7 +54,7 @@ function locale_translation_build_projects() {
     // to fall back to the latest stable release for that branch.
     if (isset($data['info']['version']) && strpos($data['info']['version'], '-dev')) {
       if (preg_match("/^(\d+\.x-\d+\.).*$/", $data['info']['version'], $matches)) {
-        // Example matches: 8.x-1.x-dev, 8.x-1.0-alpha1+5-dev => 8.x-1.x
+        // Example matches: "8.x-1.x-dev", "8.x-1.0-alpha1+5-dev => 8.x-1.x".
         $data['info']['version'] = $matches[1] . 'x';
       }
       elseif (preg_match("/^(\d+\.\d+\.).*$/", $data['info']['version'], $matches)) {

@@ -23,6 +23,7 @@ use Drupal\layout_builder\Plugin\SectionStorage\OverridesSectionStorage;
 use Drupal\layout_builder\Section;
 use Drupal\layout_builder\SectionComponent;
 use Drupal\layout_builder\SectionListTrait;
+use Drupal\layout_builder\SectionStorage\SupportAwareSectionStorageManagerInterface;
 
 /**
  * Provides an entity view display entity that has a layout.
@@ -155,7 +156,14 @@ class LayoutBuilderEntityViewDisplay extends BaseEntityViewDisplay implements La
         // Sort the components by weight.
         uasort($components, 'Drupal\Component\Utility\SortArray::sortByWeightElement');
         foreach ($components as $name => $component) {
+          // We need to call setComponent so fields are added to the default
+          // section if enabled. However, this also adds the fields to the
+          // content key because of EntityDisplayBase::setComponent.
+          // Therefore, we need to hide the fields afterward.
+          // @todo simplify this in https://www.drupal.org/project/drupal/issues/3423225
           $this->setComponent($name, $component);
+          $this->hidden[$name] = $name;
+          unset($this->content[$name]);
         }
       }
       else {
@@ -293,7 +301,11 @@ class LayoutBuilderEntityViewDisplay extends BaseEntityViewDisplay implements La
       return $build_list;
     }
 
+    $sectionStorageManager = $this->sectionStorageManager();
     foreach ($entities as $id => $entity) {
+      if ($sectionStorageManager instanceof SupportAwareSectionStorageManagerInterface && $sectionStorageManager->notSupported($entity->getEntityTypeId(), $entity->bundle(), $this->mode)) {
+        continue;
+      }
       $build_list[$id]['_layout_builder'] = $this->buildSections($entity);
 
       // If there are any sections, remove all fields with configurable display

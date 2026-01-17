@@ -7,12 +7,14 @@ namespace Drupal\Tests\system\Kernel\Entity;
 use Drupal\Core\Entity\Attribute\EntityType;
 use Drupal\Core\Plugin\Discovery\AttributeClassDiscovery;
 use Drupal\KernelTests\KernelTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests that entity type labels use sentence-case.
- *
- * @group Entity
  */
+#[Group('Entity')]
+#[RunTestsInSeparateProcesses]
 class EntityLabelTest extends KernelTestBase {
 
   /**

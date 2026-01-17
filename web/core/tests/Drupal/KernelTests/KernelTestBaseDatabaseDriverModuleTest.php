@@ -5,14 +5,18 @@ declare(strict_types=1);
 namespace Drupal\KernelTests;
 
 use Drupal\Core\Database\Database;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
- * @coversDefaultClass \Drupal\KernelTests\KernelTestBase
- *
- * @group PHPUnit
- * @group Test
- * @group KernelTests
+ * Tests Drupal\KernelTests\KernelTestBase.
  */
+#[CoversClass(KernelTestBase::class)]
+#[Group('PHPUnit')]
+#[Group('Test')]
+#[Group('KernelTests')]
+#[RunTestsInSeparateProcesses]
 class KernelTestBaseDatabaseDriverModuleTest extends KernelTestBase {
 
   /**
@@ -25,7 +29,7 @@ class KernelTestBaseDatabaseDriverModuleTest extends KernelTestBase {
       throw new \Exception('There is no database connection so no tests can be run. You must provide a SIMPLETEST_DB environment variable to run PHPUnit based functional tests outside of run-tests.sh. See https://www.drupal.org/node/2116263#skipped-tests for more information.');
     }
     else {
-      $database = Database::convertDbUrlToConnectionInfo($db_url, $this->root);
+      $database = Database::convertDbUrlToConnectionInfo($db_url);
 
       if (in_array($database['driver'], ['mysql', 'pgsql'])) {
         // Change the used database driver to the one provided by the module
@@ -53,7 +57,9 @@ class KernelTestBaseDatabaseDriverModuleTest extends KernelTestBase {
   }
 
   /**
-   * @covers ::bootEnvironment
+   * Tests database driver module enabled.
+   *
+   * @legacy-covers ::bootEnvironment
    */
   public function testDatabaseDriverModuleEnabled(): void {
     $driver = Database::getConnection()->driver();

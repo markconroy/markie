@@ -7,12 +7,14 @@ namespace Drupal\Tests\node\Kernel;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\node\Entity\NodeType;
 use Drupal\Tests\node\Traits\NodeCreationTrait;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests node template suggestions.
- *
- * @group node
  */
+#[Group('node')]
+#[RunTestsInSeparateProcesses]
 class NodeTemplateSuggestionsTest extends KernelTestBase {
 
   use NodeCreationTrait;
@@ -27,7 +29,9 @@ class NodeTemplateSuggestionsTest extends KernelTestBase {
   ];
 
   /**
-   * Tests if template_preprocess_node() generates the correct suggestions.
+   * Tests node template suggestions.
+   *
+   * @see \Drupal\node\Hook\NodeThemeHooks::themeSuggestionsNode
    */
   public function testNodeThemeHookSuggestions(): void {
     $this->installEntitySchema('user');

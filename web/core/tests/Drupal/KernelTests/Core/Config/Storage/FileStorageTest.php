@@ -8,12 +8,14 @@ use Drupal\Core\Config\FileStorage;
 use Drupal\Core\Config\UnsupportedDataTypeConfigException;
 use Drupal\Core\Serialization\Yaml;
 use Drupal\Core\StreamWrapper\PublicStream;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests FileStorage operations.
- *
- * @group config
  */
+#[Group('config')]
+#[RunTestsInSeparateProcesses]
 class FileStorageTest extends ConfigStorageTestBase {
 
   /**

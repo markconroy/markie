@@ -13,13 +13,17 @@ use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\views\EntityViewsData;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\IgnoreDeprecations;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests entity views data.
- *
- * @coversDefaultClass \Drupal\views\EntityViewsData
- * @group views
  */
+#[CoversClass(EntityViewsData::class)]
+#[Group('views')]
+#[RunTestsInSeparateProcesses]
 class EntityViewsDataTest extends KernelTestBase {
 
   /**
@@ -50,10 +54,7 @@ class EntityViewsDataTest extends KernelTestBase {
    */
   protected static $modules = [
     'user',
-    'system',
-    'field',
     'text',
-    'filter',
   ];
 
   /**
@@ -123,7 +124,7 @@ class EntityViewsDataTest extends KernelTestBase {
       ->setTranslatable(TRUE)
       ->setSetting('max_length', 255);
 
-    // A base field with cardinality > 1
+    // A base field with cardinality > 1.
     $this->commonBaseFields['string'] = BaseFieldDefinition::create('string')
       ->setLabel('Strong')
       ->setTranslatable(TRUE)
@@ -675,9 +676,8 @@ class EntityViewsDataTest extends KernelTestBase {
 
   /**
    * Tests EntityViewsData deprecations.
-   *
-   * @group legacy
    */
+  #[IgnoreDeprecations]
   public function testDeprecations(): void {
     $this->baseEntityType->setHandlerClass('views_data', EntityViewsDataWithDeprecations::class);
     $this->setUpEntityType($this->baseEntityType, $this->commonBaseFields);

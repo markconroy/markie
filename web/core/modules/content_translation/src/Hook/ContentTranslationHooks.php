@@ -10,7 +10,6 @@ use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
-use Drupal\content_translation\ContentTranslationManager;
 use Drupal\content_translation\BundleTranslationSettingsInterface;
 use Drupal\language\ContentLanguageSettingsInterface;
 use Drupal\Core\Language\LanguageInterface;
@@ -18,6 +17,7 @@ use Drupal\Core\Url;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Hook\Attribute\Hook;
 use Drupal\Core\Hook\Order\Order;
+use Drupal\workflows\Entity\Workflow;
 
 /**
  * Hook implementations for content_translation.
@@ -231,11 +231,27 @@ class ContentTranslationHooks {
         $bundle_info['translatable'] = $content_translation_manager->isEnabled($entity_type_id, $bundle);
         if ($bundle_info['translatable'] && $content_translation_manager instanceof BundleTranslationSettingsInterface) {
           $settings = $content_translation_manager->getBundleTranslationSettings($entity_type_id, $bundle);
-          // If pending revision support is enabled for this bundle, we need to
-          // hide untranslatable field widgets, otherwise changes in pending
-          // revisions might be overridden by changes in later default
-          // revisions.
-          $bundle_info['untranslatable_fields.default_translation_affected'] = !empty($settings['untranslatable_fields_hide']) || ContentTranslationManager::isPendingRevisionSupportEnabled($entity_type_id, $bundle);
+          $bundle_info['untranslatable_fields.default_translation_affected'] = !empty($settings['untranslatable_fields_hide']);
+        }
+      }
+    }
+
+    // Always hide untranslatable field widgets if pending revision support is
+    // enabled otherwise changes in pending
+    // revisions might be overridden by changes in later default revisions.
+    // This can't use
+    // Drupal\content_translation\ContentTranslationManager::isPendingRevisionSupportEnabled()
+    // since that depends on entity bundle information to be completely built.
+    if (\Drupal::moduleHandler()->moduleExists('content_moderation')) {
+      foreach (Workflow::loadMultipleByType('content_moderation') as $workflow) {
+        /** @var \Drupal\content_moderation\Plugin\WorkflowType\ContentModeration $plugin */
+        $plugin = $workflow->getTypePlugin();
+        foreach ($plugin->getEntityTypes() as $entity_type_id) {
+          foreach ($plugin->getBundlesForEntityType($entity_type_id) as $bundle_id) {
+            if (isset($bundles[$entity_type_id][$bundle_id])) {
+              $bundles[$entity_type_id][$bundle_id]['untranslatable_fields.default_translation_affected'] = TRUE;
+            }
+          }
         }
       }
     }
@@ -324,7 +340,7 @@ class ContentTranslationHooks {
     $manager = \Drupal::service('content_translation.manager');
     foreach ($entity_types as $entity_type_id => $entity_type) {
       $base_table = $entity_type->getBaseTable();
-      if (isset($data[$base_table]) && $entity_type->hasLinkTemplate('drupal:content-translation-overview') && $manager->isEnabled($entity_type_id)) {
+      if (isset($base_table, $data[$base_table]) && $entity_type->hasLinkTemplate('drupal:content-translation-overview') && $manager->isEnabled($entity_type_id)) {
         $t_arguments = ['@entity_type_label' => $entity_type->getLabel()];
         $data[$base_table]['translation_link'] = [
           'field' => [
@@ -361,7 +377,11 @@ class ContentTranslationHooks {
     // Let the content translation handler alter the content entity form. This
     // can be the 'add' or 'edit' form. It also tries a 'default' form in case
     // neither of the aforementioned forms are defined.
-    if ($entity instanceof ContentEntityInterface && $entity->isTranslatable() && count($entity->getTranslationLanguages()) > 1 && in_array($op, ['edit', 'add', 'default'], TRUE)) {
+    if ($entity instanceof ContentEntityInterface
+      && $entity->isTranslatable()
+      && count($entity->getTranslationLanguages()) > 1
+      && in_array($op, ['edit', 'add', 'default'], TRUE)
+    ) {
       $controller = \Drupal::entityTypeManager()->getHandler($entity->getEntityTypeId(), 'translation');
       $controller->entityFormAlter($form, $form_state, $entity);
       // @todo Move the following lines to the code generating the property form
@@ -545,7 +565,13 @@ class ContentTranslationHooks {
           else {
             $url = $entity->toUrl('canonical')->setOption('language', $language)->setAbsolute()->toString();
           }
-          $page['#attached']['html_head_link'][] = [['rel' => 'alternate', 'hreflang' => $language->getId(), 'href' => $url]];
+          $page['#attached']['html_head_link'][] = [
+            [
+              'rel' => 'alternate',
+              'hreflang' => $language->getId(),
+              'href' => $url,
+            ],
+          ];
         }
       }
       // Since entity was found, no need to iterate further.

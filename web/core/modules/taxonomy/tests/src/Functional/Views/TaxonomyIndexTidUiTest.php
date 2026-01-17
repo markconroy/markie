@@ -4,19 +4,22 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\taxonomy\Functional\Views;
 
-use Drupal\Tests\field\Traits\EntityReferenceFieldCreationTrait;
 use Drupal\taxonomy\Entity\Term;
 use Drupal\taxonomy\Entity\Vocabulary;
+use Drupal\Tests\field\Traits\EntityReferenceFieldCreationTrait;
 use Drupal\Tests\views_ui\Functional\UITestBase;
-use Drupal\views\Tests\ViewTestData;
 use Drupal\views\Entity\View;
+use Drupal\views\Tests\ViewTestData;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the taxonomy index filter handler UI.
  *
- * @group taxonomy
  * @see \Drupal\taxonomy\Plugin\views\field\TaxonomyIndexTid
  */
+#[Group('taxonomy')]
+#[RunTestsInSeparateProcesses]
 class TaxonomyIndexTidUiTest extends UITestBase {
 
   use EntityReferenceFieldCreationTrait;

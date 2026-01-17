@@ -8,13 +8,16 @@ use Drupal\user\Entity\Role;
 use Drupal\user\Entity\User;
 use Drupal\user\RoleInterface;
 use Drupal\views\Views;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests a user bulk form.
  *
- * @group user
  * @see \Drupal\user\Plugin\views\field\UserBulkForm
  */
+#[Group('user')]
+#[RunTestsInSeparateProcesses]
 class BulkFormTest extends UserTestBase {
 
   /**

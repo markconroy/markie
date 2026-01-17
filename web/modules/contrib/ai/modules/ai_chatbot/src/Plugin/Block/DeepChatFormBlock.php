@@ -3,6 +3,7 @@
 namespace Drupal\ai_chatbot\Plugin\Block;
 
 use Drupal\Component\Serialization\Json;
+use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Block\BlockBase;
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
@@ -395,14 +396,26 @@ class DeepChatFormBlock extends BlockBase implements ContainerFactoryPluginInter
    *   The updated form.
    */
   public function updateForm(array $form, FormStateInterface $form_state) {
-    // Set a state of the assistant picked.
-    $this->configuration['ai_assistant'] = $form_state->getUserInput()['settings']['ai_assistant'] ?? $this->configuration['ai_assistant'];
+    // Get the triggering element.
+    $trigger = $form_state->getTriggeringElement();
 
-    // Rebuild the form with the new AI assistant.
+    $array_parents = array_slice($trigger['#array_parents'], 0, -1);
+    $input_parents = array_slice($trigger['#parents'], 0, -1);
+
+    // Get the settings input from the nested structure.
+    $user_input = $form_state->getUserInput();
+    $settings_input = NestedArray::getValue($user_input, $input_parents);
+
+    // Update configuration.
+    $this->configuration['ai_assistant'] = $settings_input['ai_assistant'] ?? $this->configuration['ai_assistant'];
+
+    // Get and return the relevant form element.
+    $element = NestedArray::getValue($form, $array_parents);
+
+    // Rebuild the form.
     $form_state->setRebuild();
 
-    // Return the updated form.
-    return $form['settings'];
+    return $element;
   }
 
   /**

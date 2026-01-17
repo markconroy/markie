@@ -4,15 +4,17 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\announcements_feed\FunctionalJavascript;
 
-use Drupal\Tests\system\FunctionalJavascript\OffCanvasTestBase;
 use Drupal\announce_feed_test\AnnounceTestHttpClientMiddleware;
+use Drupal\Tests\system\FunctionalJavascript\OffCanvasTestBase;
 use Drupal\user\UserInterface;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Test the access announcement according to json feed changes.
- *
- * @group announcements_feed
  */
+#[Group('announcements_feed')]
+#[RunTestsInSeparateProcesses]
 class AlertsJsonFeedTest extends OffCanvasTestBase {
 
   /**

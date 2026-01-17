@@ -18,7 +18,9 @@ form-stream:
     - core/once
 deepchat:
   js:
-    deepchat/deepchat.bundle.js: {  attributes: { type: module } }
+    deepchat/deepchat.bundle.js:
+      attributes: { type: module }
+      minified: true
     js/deepchat-init.js : {}
   dependencies:
     - core/jquery

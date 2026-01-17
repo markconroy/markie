@@ -4,14 +4,16 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\taxonomy\Functional\Views;
 
-use Drupal\views\Views;
 use Drupal\taxonomy\Entity\Vocabulary;
+use Drupal\views\Views;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the "All terms" taxonomy term field handler.
- *
- * @group taxonomy
  */
+#[Group('taxonomy')]
+#[RunTestsInSeparateProcesses]
 class TaxonomyFieldAllTermsTest extends TaxonomyTestBase {
 
   /**

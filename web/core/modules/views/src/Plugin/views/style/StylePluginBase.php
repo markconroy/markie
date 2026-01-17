@@ -117,7 +117,7 @@ abstract class StylePluginBase extends PluginBase {
    *
    * @var string[]
    */
-  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName, Drupal.Commenting.VariableComment.Missing
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
   public array $render_tokens = [];
 
   /**
@@ -484,7 +484,7 @@ abstract class StylePluginBase extends PluginBase {
    *   Each set contains the following associative array:
    *   - group: The group content.
    *   - level: The hierarchical level of the grouping.
-   *   - rows: The result rows to be rendered in this group..
+   *   - rows: The result rows to be rendered in this group.
    *
    * @return array
    *   Render array of grouping sets.
@@ -575,7 +575,7 @@ abstract class StylePluginBase extends PluginBase {
       $groupings = [['field' => $groupings, 'rendered' => $rendered]];
     }
 
-    // Make sure fields are rendered
+    // Make sure fields are rendered.
     $this->renderFields($this->view->result);
     $sets = [];
     if ($groupings) {
@@ -710,7 +710,7 @@ abstract class StylePluginBase extends PluginBase {
           // - HTML views are rendered inside a render context: then we want to
           //   use ::render(), so that attachments and cacheability are bubbled.
           // - non-HTML views are rendered outside a render context: then we
-          //   want to use ::renderInIsolation(), so that no bubbling happens
+          //   want to use ::renderInIsolation(), so that no bubbling happens.
           if ($renderer->hasRenderContext()) {
             $renderer->render($data);
           }

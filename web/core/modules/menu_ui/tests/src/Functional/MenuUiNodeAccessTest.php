@@ -7,12 +7,14 @@ namespace Drupal\Tests\menu_ui\Functional;
 use Drupal\menu_link_content\Entity\MenuLinkContent;
 use Drupal\node\Entity\Node;
 use Drupal\Tests\BrowserTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Edit a node when you don't have permission to add or edit menu links.
- *
- * @group menu_ui
  */
+#[Group('menu_ui')]
+#[RunTestsInSeparateProcesses]
 class MenuUiNodeAccessTest extends BrowserTestBase {
 
   /**

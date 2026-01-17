@@ -4,15 +4,17 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\Core\Plugin;
 
-use Drupal\Component\Plugin\ConfigurableInterface;
-use Drupal\Component\Plugin\PluginBase;
+use Drupal\Core\Plugin\ConfigurablePluginBase;
 use Drupal\Core\Plugin\DefaultSingleLazyPluginCollection;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\MockObject\Rule\InvocationOrder;
 
 /**
- * @coversDefaultClass \Drupal\Core\Plugin\DefaultSingleLazyPluginCollection
- * @group Plugin
+ * Tests Drupal\Core\Plugin\DefaultSingleLazyPluginCollection.
  */
+#[CoversClass(DefaultSingleLazyPluginCollection::class)]
+#[Group('Plugin')]
 class DefaultSingleLazyPluginCollectionTest extends LazyPluginCollectionTestBase {
 
   /**
@@ -30,7 +32,10 @@ class DefaultSingleLazyPluginCollectionTest extends LazyPluginCollectionTestBase
         return $this->pluginInstances[$id];
       });
 
-    $this->defaultPluginCollection = new DefaultSingleLazyPluginCollection($this->pluginManager, 'apple', ['id' => 'apple', 'key' => 'value']);
+    $this->defaultPluginCollection = new DefaultSingleLazyPluginCollection($this->pluginManager, 'apple', [
+      'id' => 'apple',
+      'key' => 'value',
+    ]);
   }
 
   /**
@@ -44,9 +49,11 @@ class DefaultSingleLazyPluginCollectionTest extends LazyPluginCollectionTestBase
   }
 
   /**
-   * @covers ::addInstanceId
-   * @covers ::getConfiguration
-   * @covers ::setConfiguration
+   * Tests add instance id.
+   *
+   * @legacy-covers ::addInstanceId
+   * @legacy-covers ::getConfiguration
+   * @legacy-covers ::setConfiguration
    */
   public function testAddInstanceId(): void {
     $this->setupPluginCollection($this->any());
@@ -62,7 +69,9 @@ class DefaultSingleLazyPluginCollectionTest extends LazyPluginCollectionTestBase
   }
 
   /**
-   * @covers ::getInstanceIds
+   * Tests get instance ids.
+   *
+   * @legacy-covers ::getInstanceIds
    */
   public function testGetInstanceIds(): void {
     $this->setupPluginCollection($this->any());
@@ -73,7 +82,9 @@ class DefaultSingleLazyPluginCollectionTest extends LazyPluginCollectionTestBase
   }
 
   /**
-   * @covers ::setConfiguration
+   * Tests configurable set configuration.
+   *
+   * @legacy-covers ::setConfiguration
    */
   public function testConfigurableSetConfiguration(): void {
     $this->setupPluginCollection($this->any());
@@ -98,24 +109,5 @@ class DefaultSingleLazyPluginCollectionTest extends LazyPluginCollectionTestBase
 /**
  * Stub configurable plugin class for testing.
  */
-class ConfigurablePlugin extends PluginBase implements ConfigurableInterface {
-
-  public function __construct(array $configuration, $plugin_id, $plugin_definition) {
-    parent::__construct($configuration, $plugin_id, $plugin_definition);
-
-    $this->configuration = $configuration + $this->defaultConfiguration();
-  }
-
-  public function defaultConfiguration() {
-    return [];
-  }
-
-  public function getConfiguration() {
-    return $this->configuration;
-  }
-
-  public function setConfiguration(array $configuration): void {
-    $this->configuration = $configuration;
-  }
-
+class ConfigurablePlugin extends ConfigurablePluginBase {
 }

@@ -8,13 +8,16 @@ use Drupal\Tests\system\Functional\Cache\AssertPageCacheContextsAndTagsTrait;
 use Drupal\Tests\views\Functional\ViewTestBase;
 use Drupal\views\Plugin\views\display\DisplayPluginBase;
 use Drupal\views\Views;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests pluggable caching for views via a web test.
  *
- * @group views
  * @see views_plugin_cache
  */
+#[Group('views')]
+#[RunTestsInSeparateProcesses]
 class CacheWebTest extends ViewTestBase {
 
   use AssertPageCacheContextsAndTagsTrait;

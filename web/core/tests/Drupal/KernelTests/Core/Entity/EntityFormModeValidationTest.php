@@ -6,13 +6,16 @@ namespace Drupal\KernelTests\Core\Entity;
 
 use Drupal\Core\Entity\Entity\EntityFormMode;
 use Drupal\KernelTests\Core\Config\ConfigEntityValidationTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests validation of entity_form_mode entities.
- *
- * @group Entity
- * @group Validation
  */
+#[Group('Entity')]
+#[Group('Validation')]
+#[Group('config')]
+#[RunTestsInSeparateProcesses]
 class EntityFormModeValidationTest extends ConfigEntityValidationTestBase {
 
   /**

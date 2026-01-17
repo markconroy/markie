@@ -5,16 +5,13 @@
  */
 
 use Drupal\Component\Utility\Crypt;
-use Drupal\Component\Utility\Unicode;
-use Drupal\Core\Access\AccessibleInterface;
 use Drupal\Core\Batch\BatchBuilder;
-use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Render\Element;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Session\AnonymousUserSession;
 use Drupal\Core\Site\Settings;
 use Drupal\Core\Url;
 use Drupal\user\Entity\User;
+use Drupal\user\Hook\UserThemeHooks;
 use Drupal\user\UserInterface;
 
 /**
@@ -112,19 +109,6 @@ function user_is_blocked($name) {
 }
 
 /**
- * Implements hook_preprocess_HOOK() for block templates.
- */
-function user_preprocess_block(&$variables): void {
-  if ($variables['configuration']['provider'] == 'user') {
-    switch ($variables['elements']['#plugin_id']) {
-      case 'user_login_block':
-        $variables['attributes']['role'] = 'form';
-        break;
-    }
-  }
-}
-
-/**
  * Prepares variables for username templates.
  *
  * Default template: username.html.twig.
@@ -135,68 +119,15 @@ function user_preprocess_block(&$variables): void {
  * @param array $variables
  *   An associative array containing:
  *   - account: The user account (\Drupal\Core\Session\AccountInterface).
+ *
+ * @deprecated in drupal:11.3.0 and is removed from drupal:12.0.0. Initial
+ *    template_preprocess functions are registered directly in hook_theme().
+ *
+ * @see https://www.drupal.org/node/3504125
  */
 function template_preprocess_username(&$variables): void {
-  $account = $variables['account'] ?: new AnonymousUserSession();
-
-  $variables['extra'] = '';
-  $variables['uid'] = $account->id();
-  if (empty($variables['uid'])) {
-    if (theme_get_setting('features.comment_user_verification')) {
-      $variables['extra'] = ' (' . t('not verified') . ')';
-    }
-  }
-
-  // Set the name to a formatted name that is safe for printing and
-  // that won't break tables by being too long. Keep an un-shortened,
-  // unsanitized version, in case other preprocess functions want to implement
-  // their own shortening logic or add markup. If they do so, they must ensure
-  // that $variables['name'] is safe for printing.
-  $name = $account->getDisplayName();
-  $variables['name_raw'] = $account->getAccountName();
-  if (mb_strlen($name) > 20) {
-    $name = Unicode::truncate($name, 15, FALSE, TRUE);
-    $variables['truncated'] = TRUE;
-  }
-  else {
-    $variables['truncated'] = FALSE;
-  }
-  $variables['name'] = $name;
-  if ($account instanceof AccessibleInterface) {
-    $variables['profile_access'] = $account->access('view');
-  }
-  else {
-    $variables['profile_access'] = \Drupal::currentUser()->hasPermission('access user profiles');
-  }
-
-  $external = FALSE;
-  // Populate link path and attributes if appropriate.
-  if ($variables['uid'] && $variables['profile_access']) {
-    // We are linking to a local user.
-    $variables['attributes']['title'] = t('View user profile.');
-    $variables['link_path'] = 'user/' . $variables['uid'];
-  }
-  elseif (!empty($account->homepage)) {
-    // Like the 'class' attribute, the 'rel' attribute can hold a
-    // space-separated set of values, so initialize it as an array to make it
-    // easier for other preprocess functions to append to it.
-    $variables['attributes']['rel'] = 'nofollow';
-    $variables['link_path'] = $account->homepage;
-    $variables['homepage'] = $account->homepage;
-    $external = TRUE;
-  }
-  // We have a link path, so we should generate a URL.
-  if (isset($variables['link_path'])) {
-    if ($external) {
-      $variables['attributes']['href'] = Url::fromUri($variables['link_path'], $variables['link_options'])
-        ->toString();
-    }
-    else {
-      $variables['attributes']['href'] = Url::fromRoute('entity.user.canonical', [
-        'user' => $variables['uid'],
-      ])->toString();
-    }
-  }
+  @trigger_error(__FUNCTION__ . '() is deprecated in drupal:11.3.0 and is removed from drupal:12.0.0. Initial template_preprocess functions are registered directly in hook_theme(). See https://www.drupal.org/node/3504125', E_USER_DEPRECATED);
+  \Drupal::service(UserThemeHooks::class)->preprocessUsername($variables);
 }
 
 /**
@@ -635,9 +566,10 @@ function user_role_revoke_permissions($rid, array $permissions = []): void {
  *   The user object of the account being notified. Must contain at
  *   least the fields 'uid', 'name', and 'mail'.
  *
- * @return array
- *   An array containing various information about the message.
- *   See \Drupal\Core\Mail\MailManagerInterface::mail() for details.
+ * @return array|null
+ *   An array containing various information about the message. See
+ *   \Drupal\Core\Mail\MailManagerInterface::mail() for details. Or null if the
+ *   account does not have an email address.
  *
  * @see user_mail_tokens()
  */
@@ -656,7 +588,15 @@ function _user_mail_notify($op, AccountInterface $account) {
     if (empty($site_mail)) {
       $site_mail = ini_get('sendmail_from');
     }
-    $mail = \Drupal::service('plugin.manager.mail')->mail('user', $op, $account->getEmail(), $account->getPreferredLangcode(), $params, $site_mail);
+    if ($account->getEmail()) {
+      $mail = \Drupal::service('plugin.manager.mail')->mail('user', $op, $account->getEmail(), $account->getPreferredLangcode(), $params, $site_mail);
+    }
+    else {
+      \Drupal::logger('user')->info('The User module could not send an email for the operation "%op" because the user account %account does not have an email address.', [
+        '%op' => $op,
+        '%account' => $account->getDisplayName(),
+      ]);
+    }
     if ($op == 'register_pending_approval') {
       // If a user registered requiring admin approval, notify the admin, too.
       // We use the site default language for this.
@@ -761,22 +701,13 @@ function user_logout(): void {
  *     - #user: A \Drupal\user\Entity\User object. The user account of the
  *       profile being viewed.
  *   - attributes: HTML attributes for the containing element.
+ *
+ * @deprecated in drupal:11.3.0 and is removed from drupal:12.0.0. Initial
+ *    template_preprocess functions are registered directly in hook_theme().
+ *
+ * @see https://www.drupal.org/node/3504125
  */
 function template_preprocess_user(&$variables): void {
-  $variables['user'] = $variables['elements']['#user'];
-  // Helpful $content variable for templates.
-  foreach (Element::children($variables['elements']) as $key) {
-    $variables['content'][$key] = $variables['elements'][$key];
-  }
-}
-
-/**
- * Additional submit handler for \Drupal\system\Form\RegionalForm.
- */
-function user_form_system_regional_settings_submit($form, FormStateInterface $form_state): void {
-  \Drupal::configFactory()->getEditable('system.date')
-    ->set('timezone.user.configurable', $form_state->getValue('configurable_timezones'))
-    ->set('timezone.user.warn', $form_state->getValue('empty_timezone_message'))
-    ->set('timezone.user.default', $form_state->getValue('user_default_timezone'))
-    ->save();
+  @trigger_error(__FUNCTION__ . '() is deprecated in drupal:11.3.0 and is removed from drupal:12.0.0. Initial template_preprocess functions are registered directly in hook_theme(). See https://www.drupal.org/node/3504125', E_USER_DEPRECATED);
+  \Drupal::service(UserThemeHooks::class)->preprocessUser($variables);
 }

@@ -7,12 +7,15 @@ namespace Drupal\Tests\migrate_drupal\Kernel;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\migrate\Plugin\migrate\source\SourcePluginBase;
 use Drupal\migrate\Plugin\MigrationInterface;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests instantiating migrate source plugins using I18nQueryTrait.
- *
- * @group migrate_drupal
  */
+#[Group('migrate_drupal')]
+#[RunTestsInSeparateProcesses]
 class I18nQueryTraitTest extends KernelTestBase {
 
   /**
@@ -35,9 +38,8 @@ class I18nQueryTraitTest extends KernelTestBase {
    *
    * @param string $plugin_id
    *   The ID of a Migrate source plugin that uses I18nQueryTrait.
-   *
-   * @dataProvider providerI18nQueryTraitPlugins
    */
+  #[DataProvider('providerI18nQueryTraitPlugins')]
   public function testMigrateSourcePluginUsingI18nQueryTraitDiscovery(string $plugin_id): void {
     // Namespace for uninstalled module content_translation needs to be removed
     // for this test.

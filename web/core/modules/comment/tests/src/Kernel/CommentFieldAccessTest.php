@@ -16,13 +16,15 @@ use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
 use Drupal\Tests\Traits\Core\GeneratePermutationsTrait;
 use Drupal\user\Entity\Role;
 use Drupal\user\RoleInterface;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests comment field level access.
- *
- * @group comment
- * @group Access
  */
+#[Group('comment')]
+#[Group('Access')]
+#[RunTestsInSeparateProcesses]
 class CommentFieldAccessTest extends EntityKernelTestBase {
 
   use CommentTestTrait;

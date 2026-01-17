@@ -5,18 +5,15 @@ declare(strict_types=1);
 namespace Drupal\Tests\workspaces\Functional\Update;
 
 use Drupal\FunctionalTests\Update\UpdatePathTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the update path for string IDs in workspace_association.
- *
- * @group workspaces
  */
+#[Group('workspaces')]
+#[RunTestsInSeparateProcesses]
 class WorkspaceAssociationStringIdsUpdatePathTest extends UpdatePathTestBase {
-
-  /**
-   * {@inheritdoc}
-   */
-  protected $checkEntityFieldDefinitionUpdates = FALSE;
 
   /**
    * {@inheritdoc}
@@ -24,7 +21,7 @@ class WorkspaceAssociationStringIdsUpdatePathTest extends UpdatePathTestBase {
   protected function setDatabaseDumpFiles(): void {
     $this->databaseDumpFiles = [
       __DIR__ . '/../../../../../system/tests/fixtures/update/drupal-10.3.0.bare.standard.php.gz',
-      __DIR__ . '/../../../fixtures/update/workspaces.php',
+      __DIR__ . '/../../../fixtures/update/workspaces-10.3.0.php',
     ];
   }
 

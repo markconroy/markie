@@ -6,10 +6,14 @@ namespace Drupal\Tests\menu_link_content\Functional\Rest;
 
 use Drupal\Tests\rest\Functional\CookieResourceTestTrait;
 use Drupal\Tests\rest\Functional\EntityResource\XmlEntityNormalizationQuirksTrait;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
- * @group rest
+ * Tests Menu Link Content Xml Cookie.
  */
+#[Group('rest')]
+#[RunTestsInSeparateProcesses]
 class MenuLinkContentXmlCookieTest extends MenuLinkContentResourceTestBase {
 
   use CookieResourceTestTrait;

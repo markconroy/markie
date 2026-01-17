@@ -90,6 +90,16 @@ nav:
       - Mock Provider Calls: contribute/testing/spoof_provider.md
     - Contribute Features: contribute/features.md
     - Developer Information: contribute/developer_information.md
+    - Release Management:
+      - Overview: contribute/releases/index.md
+      - General Rules: contribute/releases/general_rules.md
+      - Versioning Rules: contribute/releases/versioning.md
+      - Tagging a Release: contribute/releases/tagging_a_release.md
+      - Publishing a Patch Release: contribute/releases/publishing_a_patch_release.md
+      - Publishing a Minor/Major Release: contribute/releases/publishing_a_minor_major_release.md
+      - Publishing a Security Release: contribute/releases/publishing_a_security_release.md
+      - Release Notes: contribute/releases/release_notes.md
+      - Breaking Changes: contribute/releases/breaking_changes.md
   - Providers: providers/matris.md
   - Agents:
     - Getting Started: agents/index.md
@@ -112,9 +122,14 @@ nav:
         - View Results, Export, Import Tests: agents/testing/ai_agent_test/result_export_import.md
         - Drush Commands: agents/testing/ai_agent_test/drush.md
   - Documentation (How to): documentation/index.md
+  - Changelog: changelog.md
 docs_dir: docs
 site_dir: site
 plugins:
+  # Include Markdown: Allows embedding markdown files in one another with {% include-markdown "file.md" %}
+  # https://github.com/mondeja/mkdocs-include-markdown-plugin
+  - include-markdown:
+      encoding: ascii
   - search:
       lang: en
   - mike:

@@ -10,12 +10,18 @@ use Drupal\Core\Block\BlockPluginInterface;
 use Drupal\migrate\MigrateExecutableInterface;
 use Drupal\migrate\Row;
 use Drupal\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\IgnoreDeprecations;
 use Prophecy\Argument;
 
 /**
- * @coversDefaultClass \Drupal\block\Plugin\migrate\process\BlockSettings
- * @group block
+ * Tests Drupal\block\Plugin\migrate\process\BlockSettings.
  */
+#[CoversClass(BlockSettings::class)]
+#[Group('block')]
+#[IgnoreDeprecations]
 class BlockSettingsTest extends UnitTestCase {
 
   /**
@@ -26,10 +32,9 @@ class BlockSettingsTest extends UnitTestCase {
    * @param array $expected
    *   The expected result.
    *
-   * @covers ::transform
-   *
-   * @dataProvider providerTestTransform
+   * @legacy-covers ::transform
    */
+  #[DataProvider('providerTestTransform')]
   public function testTransform($value, $expected): void {
     $executable = $this->prophesize(MigrateExecutableInterface::class)
       ->reveal();

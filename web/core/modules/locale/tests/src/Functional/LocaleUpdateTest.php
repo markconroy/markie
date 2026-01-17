@@ -7,14 +7,15 @@ namespace Drupal\Tests\locale\Functional;
 use Drupal\Core\Database\Database;
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 // cspell:ignore extraday lundi
-
 /**
  * Tests for updating the interface translations of projects.
- *
- * @group locale
  */
+#[Group('locale')]
+#[RunTestsInSeparateProcesses]
 class LocaleUpdateTest extends LocaleUpdateBase {
 
   use StringTranslationTrait;
@@ -116,7 +117,7 @@ class LocaleUpdateTest extends LocaleUpdateBase {
    *
    * Test conditions:
    *  - Source: remote and local files
-   *  - Import overwrite: all existing translations
+   *  - Import overwrite: all existing translations.
    */
   public function testUpdateImportSourceRemote(): void {
     $config = $this->config('locale.settings');
@@ -187,7 +188,7 @@ class LocaleUpdateTest extends LocaleUpdateBase {
    *
    * Test conditions:
    *  - Source: local files only
-   *  - Import overwrite: all existing translations
+   *  - Import overwrite: all existing translations.
    */
   public function testUpdateImportSourceLocal(): void {
     $config = $this->config('locale.settings');
@@ -247,7 +248,7 @@ class LocaleUpdateTest extends LocaleUpdateBase {
    *
    * Test conditions:
    *  - Source: remote and local files
-   *  - Import overwrite: only overwrite non-customized translations
+   *  - Import overwrite: only overwrite non-customized translations.
    */
   public function testUpdateImportModeNonCustomized(): void {
     $config = $this->config('locale.settings');
@@ -287,7 +288,7 @@ class LocaleUpdateTest extends LocaleUpdateBase {
    *
    * Test conditions:
    *  - Source: remote and local files
-   *  - Import overwrite: don't overwrite any existing translation
+   *  - Import overwrite: don't overwrite any existing translation.
    */
   public function testUpdateImportModeNone(): void {
     $config = $this->config('locale.settings');

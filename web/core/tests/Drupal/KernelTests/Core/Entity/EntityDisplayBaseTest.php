@@ -6,16 +6,21 @@ namespace Drupal\KernelTests\Core\Entity;
 
 use Drupal\comment\Entity\CommentType;
 use Drupal\Core\Entity\Entity\EntityViewDisplay;
+use Drupal\Core\Entity\EntityDisplayBase;
 use Drupal\Core\Entity\EntityDisplayRepositoryInterface;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\KernelTests\KernelTestBase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
- * @coversDefaultClass \Drupal\Core\Entity\EntityDisplayBase
- *
- * @group Entity
+ * Tests Drupal\Core\Entity\EntityDisplayBase.
  */
+#[CoversClass(EntityDisplayBase::class)]
+#[Group('Entity')]
+#[RunTestsInSeparateProcesses]
 class EntityDisplayBaseTest extends KernelTestBase {
 
   /**
@@ -26,7 +31,6 @@ class EntityDisplayBaseTest extends KernelTestBase {
     'entity_test_third_party',
     'field',
     'field_test',
-    'system',
     'comment',
     'user',
   ];
@@ -42,7 +46,9 @@ class EntityDisplayBaseTest extends KernelTestBase {
   }
 
   /**
-   * @covers ::preSave
+   * Tests pre save.
+   *
+   * @legacy-covers ::preSave
    */
   public function testPreSave(): void {
     $entity_display = EntityViewDisplay::create([
@@ -79,7 +85,9 @@ class EntityDisplayBaseTest extends KernelTestBase {
   }
 
   /**
-   * @covers ::onDependencyRemoval
+   * Tests on dependency removal.
+   *
+   * @legacy-covers ::onDependencyRemoval
    */
   public function testOnDependencyRemoval(): void {
     // Create a comment field for entity_test.
@@ -125,7 +133,13 @@ class EntityDisplayBaseTest extends KernelTestBase {
       'mode' => 'default',
       'status' => TRUE,
       'content' => [
-        'test_field' => ['type' => 'comment_default', 'region' => 'content', 'settings' => ['view_mode' => 'default'], 'label' => 'hidden', 'third_party_settings' => []],
+        'test_field' => [
+          'type' => 'comment_default',
+          'region' => 'content',
+          'settings' => ['view_mode' => 'default'],
+          'label' => 'hidden',
+          'third_party_settings' => [],
+        ],
       ],
       'third_party_settings' => [
         'entity_test_third_party' => [

@@ -8,11 +8,16 @@ use Drupal\Core\Recipe\Recipe;
 use Drupal\Core\Recipe\RecipeFileException;
 use Drupal\Core\TypedData\PrimitiveInterface;
 use Drupal\KernelTests\KernelTestBase;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
- * @group Recipe
- * @group #slow
+ * Tests Recipe Validation.
  */
+#[Group('Recipe')]
+#[Group('#slow')]
+#[RunTestsInSeparateProcesses]
 class RecipeValidationTest extends KernelTestBase {
 
   /**
@@ -347,6 +352,29 @@ YAML,
           'Config actions cannot be applied to 0 because the 0 extension is not installed, and is not installed by this recipe or any of the recipes it depends on.',
         ],
       ],
+    ];
+    yield 'config action targets an unknown extension' => [
+      <<<YAML
+name: Config action targets unknown extension
+config:
+  actions:
+    node.settings:
+      simpleConfigUpdate:
+        use_admin_theme: true
+YAML,
+      [
+        '[config][actions][node.settings]' => ['Config actions cannot be applied to node.settings because the node extension is not installed, and is not installed by this recipe or any of the recipes it depends on.'],
+      ],
+    ];
+    yield 'optional config action targets an unknown extension' => [
+      <<<YAML
+name: Optional config action targets unknown extension
+config:
+  actions:
+    ?node.type.test:
+      setDescription: 'Hello there'
+YAML,
+      NULL,
     ];
     yield 'input definitions are an indexed array' => [
       <<<YAML
@@ -761,6 +789,36 @@ extra:
 YAML,
       NULL,
     ];
+    yield 'input env variable name is not a string' => [
+      <<<YAML
+name: Bad input
+input:
+  bad_news:
+    data_type: string
+    description: 'Bad default definition'
+    default:
+      source: env
+      env: -40
+YAML,
+      [
+        '[input][bad_news][default][env]' => ['This value should be of type string.'],
+      ],
+    ];
+    yield 'input env variable name is empty' => [
+      <<<YAML
+name: Bad input
+input:
+  bad_news:
+    data_type: string
+    description: 'Bad default definition'
+    default:
+      source: env
+      env: ''
+YAML,
+      [
+        '[input][bad_news][default][env]' => ['This value should not be blank.'],
+      ],
+    ];
   }
 
   /**
@@ -775,9 +833,8 @@ YAML,
    * @param string|null $recipe_name
    *   (optional) The name of the directory containing `recipe.yml`, or NULL to
    *   randomly generate one.
-   *
-   * @dataProvider providerRecipeValidation
    */
+  #[DataProvider('providerRecipeValidation')]
   public function testRecipeValidation(string $recipe, ?array $expected_violations, ?string $recipe_name = NULL): void {
     $dir = 'public://' . ($recipe_name ?? uniqid());
     mkdir($dir);

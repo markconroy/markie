@@ -6,11 +6,16 @@ namespace Drupal\Tests\language\Unit\process;
 
 use Drupal\language\Plugin\migrate\process\LanguageDomains;
 use Drupal\Tests\migrate\Unit\process\MigrateProcessTestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\IgnoreDeprecations;
 
 /**
- * @coversDefaultClass \Drupal\language\Plugin\migrate\process\LanguageDomains
- * @group language
+ * Tests Drupal\language\Plugin\migrate\process\LanguageDomains.
  */
+#[CoversClass(LanguageDomains::class)]
+#[Group('language')]
+#[IgnoreDeprecations]
 class LanguageDomainsTest extends MigrateProcessTestCase {
 
   /**
@@ -37,7 +42,9 @@ class LanguageDomainsTest extends MigrateProcessTestCase {
   }
 
   /**
-   * @covers ::transform
+   * Tests transform.
+   *
+   * @legacy-covers ::transform
    */
   public function testTransform(): void {
     $source = [

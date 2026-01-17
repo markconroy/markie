@@ -7,14 +7,16 @@ namespace Drupal\Tests\navigation\Kernel;
 use Drupal\Core\Menu\MenuTreeParameters;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\navigation\Menu\NavigationMenuLinkTree;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests \Drupal\navigation\Menu\NavigationMenuLinkTree.
  *
- * @group navigation
- *
  * @see \Drupal\navigation\Menu\NavigationMenuLinkTree
  */
+#[Group('navigation')]
+#[RunTestsInSeparateProcesses]
 class NavigationMenuLinkTreeTest extends KernelTestBase {
 
   /**
@@ -28,9 +30,7 @@ class NavigationMenuLinkTreeTest extends KernelTestBase {
    * {@inheritdoc}
    */
   protected static $modules = [
-    'field',
     'layout_builder',
-    'layout_discovery',
     'link',
     'menu_link_content',
     'menu_test',

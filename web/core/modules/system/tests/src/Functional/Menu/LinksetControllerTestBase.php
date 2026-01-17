@@ -26,8 +26,6 @@ use GuzzleHttp\RequestOptions;
  *
  * For a full list, refer to the methods of this class.
  *
- * @group decoupled_menus
- *
  * @see https://tools.ietf.org/html/draft-ietf-httpapi-linkset-00
  */
 abstract class LinksetControllerTestBase extends BrowserTestBase {

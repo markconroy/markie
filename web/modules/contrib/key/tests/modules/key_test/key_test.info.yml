@@ -5,7 +5,7 @@ package: Testing
 dependencies:
   - key:key
 
-# Information added by Drupal.org packaging script on 2025-04-13
-version: '8.x-1.20'
+# Information added by Drupal.org packaging script on 2025-12-18
+version: '8.x-1.21'
 project: 'key'
-datestamp: 1744582170
+datestamp: 1766088926

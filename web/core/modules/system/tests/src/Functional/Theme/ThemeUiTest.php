@@ -6,13 +6,16 @@ namespace Drupal\Tests\system\Functional\Theme;
 
 use Drupal\Tests\BrowserTestBase;
 use Drupal\TestTools\Extension\InfoWriterTrait;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the theme UI.
- *
- * @group Theme
- * @group #slow
  */
+#[Group('Theme')]
+#[Group('#slow')]
+#[RunTestsInSeparateProcesses]
 class ThemeUiTest extends BrowserTestBase {
   use InfoWriterTrait;
 
@@ -85,9 +88,8 @@ class ThemeUiTest extends BrowserTestBase {
    *   The name of the theme $theme_name has set as a base theme.
    * @param string[] $base_theme_module_names
    *   Machine names of the modules required by $base_theme_to_uninstall.
-   *
-   * @dataProvider providerTestThemeInstallWithModuleDependencies
    */
+  #[DataProvider('providerTestThemeInstallWithModuleDependencies')]
   public function testThemeInstallWithModuleDependencies($theme_name, array $first_modules, array $second_modules, array $required_by_messages, $base_theme_to_uninstall, array $base_theme_module_names): void {
     $assert_session = $this->assertSession();
     $page = $this->getSession()->getPage();
@@ -321,7 +323,10 @@ class ThemeUiTest extends BrowserTestBase {
    * Tests installing a theme with incompatible module dependencies.
    */
   public function testInstallModuleWithIncompatibleDependencies(): void {
-    $this->container->get('module_installer')->install(['test_module_compatible_constraint', 'test_module_incompatible_constraint']);
+    $this->container->get('module_installer')->install([
+      'test_module_compatible_constraint',
+      'test_module_incompatible_constraint',
+    ]);
     $this->drupalGet('admin/appearance');
     $theme_container = $this->getSession()->getPage()->find('css', 'h3:contains("Test Theme Depending on Version Constrained Modules")')->getParent();
     $this->assertStringContainsString('Requires: Test Module Theme Depends on with Compatible ConstraintTest Module Theme Depends on with Incompatible Constraint (>=8.x-2.x) (incompatible with version 8.x-1.8)', $theme_container->getText());

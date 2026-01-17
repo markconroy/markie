@@ -9,11 +9,15 @@ use Drupal\Core\Recipe\Recipe;
 use Drupal\Core\Recipe\RecipeAppliedEvent;
 use Drupal\Core\Recipe\RecipeRunner;
 use Drupal\KernelTests\KernelTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
- * @group Recipe
+ * Tests Recipe Events.
  */
+#[Group('Recipe')]
+#[RunTestsInSeparateProcesses]
 class RecipeEventsTest extends KernelTestBase implements EventSubscriberInterface {
 
   /**

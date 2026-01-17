@@ -1,3 +1,6 @@
+parameters:
+  user.skip_procedural_hook_scan: true
+
 services:
   _defaults:
     autoconfigure: true
@@ -45,6 +48,7 @@ services:
   user.auth:
     class: Drupal\user\UserAuthentication
     arguments: ['@entity_type.manager', '@password']
+  Drupal\user\UserAuthenticationInterface: '@user.auth'
   Drupal\user\UserAuthInterface: '@user.auth'
   user.permissions:
     class: Drupal\user\PermissionHandler

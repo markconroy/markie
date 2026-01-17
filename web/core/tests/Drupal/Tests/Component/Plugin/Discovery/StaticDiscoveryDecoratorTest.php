@@ -7,12 +7,16 @@ namespace Drupal\Tests\Component\Plugin\Discovery;
 use Drupal\Component\Plugin\Discovery\DiscoveryInterface;
 use Drupal\Component\Plugin\Discovery\StaticDiscovery;
 use Drupal\Component\Plugin\Discovery\StaticDiscoveryDecorator;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @group Plugin
- * @coversDefaultClass \Drupal\Component\Plugin\Discovery\StaticDiscoveryDecorator
+ * Tests Drupal\Component\Plugin\Discovery\StaticDiscoveryDecorator.
  */
+#[CoversClass(StaticDiscoveryDecorator::class)]
+#[Group('Plugin')]
 class StaticDiscoveryDecoratorTest extends TestCase {
 
   /**
@@ -45,7 +49,7 @@ class StaticDiscoveryDecoratorTest extends TestCase {
    *   - A plugin definition.
    *   - Base plugin ID.
    */
-  public static function providerGetDefinition() {
+  public static function providerGetDefinition(): array {
     return [
       ['is_defined', TRUE, FALSE, ['plugin-definition' => 'is_defined'], 'plugin-definition'],
       // Make sure we don't call the decorated method if we shouldn't.
@@ -58,9 +62,9 @@ class StaticDiscoveryDecoratorTest extends TestCase {
   }
 
   /**
-   * @covers ::getDefinition
-   * @dataProvider providerGetDefinition
+   * @legacy-covers ::getDefinition
    */
+  #[DataProvider('providerGetDefinition')]
   public function testGetDefinition($expected, $has_register_definitions, $exception_on_invalid, $definitions, $base_plugin_id): void {
     // Mock our StaticDiscoveryDecorator.
     $mock_decorator = $this->getMockBuilder(StaticDiscoveryDecorator::class)
@@ -115,7 +119,7 @@ class StaticDiscoveryDecoratorTest extends TestCase {
    *   - bool Whether the test mock has a callback.
    *   - array Plugin definitions.
    */
-  public static function providerGetDefinitions() {
+  public static function providerGetDefinitions(): array {
     return [
       [TRUE, ['definition' => 'is_fake']],
       [FALSE, ['definition' => 'array_of_stuff']],
@@ -123,9 +127,9 @@ class StaticDiscoveryDecoratorTest extends TestCase {
   }
 
   /**
-   * @covers ::getDefinitions
-   * @dataProvider providerGetDefinitions
+   * @legacy-covers ::getDefinitions
    */
+  #[DataProvider('providerGetDefinitions')]
   public function testGetDefinitions($has_register_definitions, $definitions): void {
     // Mock our StaticDiscoveryDecorator.
     $mock_decorator = $this->getMockBuilder(StaticDiscoveryDecorator::class)
@@ -178,7 +182,7 @@ class StaticDiscoveryDecoratorTest extends TestCase {
    *   - Array of arguments to pass to the method, with the expectation that our
    *     mocked __call() will return them.
    */
-  public static function providerCall() {
+  public static function providerCall(): array {
     return [
       ['complexArguments', ['1', 2.0, 3, ['4' => 'five']]],
       ['noArguments', []],
@@ -186,9 +190,9 @@ class StaticDiscoveryDecoratorTest extends TestCase {
   }
 
   /**
-   * @covers ::__call
-   * @dataProvider providerCall
+   * @legacy-covers ::__call
    */
+  #[DataProvider('providerCall')]
   public function testCall($method, $args): void {
     // Mock a decorated object.
     $mock_decorated = $this->getMockBuilder(StaticDiscoveryTestDecoratedClass::class)

@@ -18,13 +18,13 @@ class StatisticsLastCommentName extends FieldPluginBase {
   /**
    * The users table.
    */
-  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName, Drupal.Commenting.VariableComment.Missing
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
   protected ?string $user_table;
 
   /**
    * The user name field.
    */
-  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName, Drupal.Commenting.VariableComment.Missing
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
   protected string $user_field;
 
   /**
@@ -39,7 +39,7 @@ class StatisticsLastCommentName extends FieldPluginBase {
     // last_comment_name only contains data if the user is anonymous. So we
     // have to join in a specially related user table.
     $this->ensureMyTable();
-    // Join 'users' to this table via vid
+    // Join 'users' to this table via vid.
     $definition = [
       'table' => 'users_field_data',
       'field' => 'uid',

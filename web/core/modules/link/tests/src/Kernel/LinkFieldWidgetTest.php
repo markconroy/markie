@@ -6,15 +6,18 @@ namespace Drupal\Tests\link\Kernel;
 
 use Drupal\entity_test\Entity\EntityTest;
 use Drupal\field\Entity\FieldConfig;
-use Drupal\link\LinkItemInterface;
 use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\link\LinkItemInterface;
+use Drupal\link\LinkTitleVisibility;
 use Drupal\Tests\field\Kernel\FieldKernelTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests link field widgets.
- *
- * @group link
  */
+#[Group('link')]
+#[RunTestsInSeparateProcesses]
 class LinkFieldWidgetTest extends FieldKernelTestBase {
 
   /**
@@ -49,7 +52,7 @@ class LinkFieldWidgetTest extends FieldKernelTestBase {
       'label' => 'Read more about this entity',
       'bundle' => 'entity_test',
       'settings' => [
-        'title' => DRUPAL_OPTIONAL,
+        'title' => LinkTitleVisibility::Optional->value,
         'link_type' => $link_type,
       ],
     ])->save();

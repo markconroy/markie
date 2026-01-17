@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace Drupal\Tests\user\Functional;
 
 use Drupal\Tests\BrowserTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Verifies that sensitive information is hidden from unauthorized users.
- *
- * @group user
  */
+#[Group('user')]
+#[RunTestsInSeparateProcesses]
 class UserSearchTest extends BrowserTestBase {
 
   /**
@@ -93,7 +95,7 @@ class UserSearchTest extends BrowserTestBase {
     $this->assertSession()->pageTextContains($keys);
     $this->assertSession()->pageTextContains($user2->getAccountName());
 
-    // Verify that wildcard search works for email
+    // Verify that wildcard search works for email.
     $subkey = substr($keys, 0, 2) . '*' . substr($keys, 4, 2);
     $edit = ['keys' => $subkey];
     $this->drupalGet('search/user');

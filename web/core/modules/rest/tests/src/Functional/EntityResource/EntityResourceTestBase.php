@@ -227,10 +227,12 @@ abstract class EntityResourceTestBase extends ResourceTestBase {
         ->setTranslatable(FALSE)
         ->save();
 
-      // Reload entity so that it has the new field.
-      $reloaded_entity = $this->entityStorage->loadUnchanged($this->entity->id());
-      // Some entity types are not stored, hence they cannot be reloaded.
-      if ($reloaded_entity !== NULL) {
+      $entity_id = $this->entity->id();
+      // Some entity types have no ID, hence they cannot be reloaded.
+      if ($entity_id !== NULL) {
+        // Reload entity so that it has the new field.
+        $reloaded_entity = $this->entityStorage->loadUnchanged($entity_id);
+
         $this->entity = $reloaded_entity;
 
         // Set a default value on the fields.
@@ -507,7 +509,10 @@ abstract class EntityResourceTestBase extends ResourceTestBase {
     $response = $this->request('GET', $url, $request_options);
     if ($has_canonical_url) {
       $this->assertSame(403, $response->getStatusCode());
-      $dynamic_cache = str_starts_with($response->getHeader('X-Drupal-Cache-Max-Age')[0], '0') || !empty(array_intersect(['user', 'session'], explode(' ', $response->getHeader('X-Drupal-Cache-Contexts')[0]))) ? 'UNCACHEABLE (poor cacheability)' : 'MISS';
+      $dynamic_cache = str_starts_with($response->getHeader('X-Drupal-Cache-Max-Age')[0], '0')
+        || !empty(array_intersect(
+          ['user', 'session'],
+          explode(' ', $response->getHeader('X-Drupal-Cache-Contexts')[0]))) ? 'UNCACHEABLE (poor cacheability)' : 'MISS';
       $this->assertSame([$dynamic_cache], $response->getHeader('X-Drupal-Dynamic-Cache'));
     }
     else {
@@ -615,7 +620,14 @@ abstract class EntityResourceTestBase extends ResourceTestBase {
     // 'Vary' headers are also added to the list of headers to ignore, as they
     // may be added to GET requests, depending on web server configuration. They
     // are usually 'Transfer-Encoding: chunked' and 'Vary: Accept-Encoding'.
-    $ignored_headers = ['Date', 'Content-Length', 'X-Drupal-Cache', 'X-Drupal-Dynamic-Cache', 'Transfer-Encoding', 'Vary'];
+    $ignored_headers = [
+      'Date',
+      'Content-Length',
+      'X-Drupal-Cache',
+      'X-Drupal-Dynamic-Cache',
+      'Transfer-Encoding',
+      'Vary',
+    ];
     $header_cleaner = function ($headers) use ($ignored_headers) {
       foreach ($headers as $header => $value) {
         if (str_starts_with($header, 'X-Drupal-Assertion-') || in_array($header, $ignored_headers)) {
@@ -669,7 +681,11 @@ abstract class EntityResourceTestBase extends ResourceTestBase {
 
     // DX: 404 when GETting non-existing entity.
     $response = $this->request('GET', $url, $request_options);
-    $path = str_replace('987654321', '{' . static::$entityTypeId . '}', $url->setAbsolute()->setOptions(['base_url' => '', 'query' => []])->toString());
+    $path = str_replace(
+      '987654321',
+      '{' . static::$entityTypeId . '}',
+      $url->setAbsolute()->setOptions(['base_url' => '', 'query' => []])->toString(),
+    );
     $message = 'The "' . static::$entityTypeId . '" parameter was not converted for the path "' . $path . '" (route name: "rest.entity.' . static::$entityTypeId . '.GET")';
     $this->assertResourceErrorResponse(404, $message, $response);
   }

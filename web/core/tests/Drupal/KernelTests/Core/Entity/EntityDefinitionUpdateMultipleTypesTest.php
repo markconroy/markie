@@ -8,6 +8,7 @@ use Drupal\Component\Plugin\Exception\PluginNotFoundException;
 use Drupal\Core\Database\Database;
 use Drupal\Core\Database\IntegrityConstraintViolationException;
 use Drupal\Core\Entity\ContentEntityType;
+use Drupal\Core\Entity\EntityDefinitionUpdateManager;
 use Drupal\Core\Entity\EntityStorageException;
 use Drupal\Core\Entity\EntityTypeEvents;
 use Drupal\Core\Entity\Exception\FieldStorageDefinitionUpdateForbiddenException;
@@ -20,15 +21,17 @@ use Drupal\entity_test\EntityTestHelper;
 use Drupal\entity_test\FieldStorageDefinition;
 use Drupal\entity_test_update\Entity\EntityTestUpdate;
 use Drupal\Tests\system\Functional\Entity\Traits\EntityDefinitionTestTrait;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests EntityDefinitionUpdateManager functionality.
- *
- * @coversDefaultClass \Drupal\Core\Entity\EntityDefinitionUpdateManager
- *
- * @group Entity
- * @group #slow
  */
+#[CoversClass(EntityDefinitionUpdateManager::class)]
+#[Group('Entity')]
+#[Group('#slow')]
+#[RunTestsInSeparateProcesses]
 class EntityDefinitionUpdateMultipleTypesTest extends EntityKernelTestBase {
 
   use EntityDefinitionTestTrait;
@@ -133,7 +136,7 @@ class EntityDefinitionUpdateMultipleTypesTest extends EntityKernelTestBase {
   /**
    * Tests creating a fieldable entity type that doesn't exist in code anymore.
    *
-   * @covers ::installFieldableEntityType
+   * @legacy-covers ::installFieldableEntityType
    */
   public function testInstallFieldableEntityTypeWithoutInCodeDefinition(): void {
     $entity_type = clone $this->entityTypeManager->getDefinition('entity_test_update');
@@ -151,7 +154,7 @@ class EntityDefinitionUpdateMultipleTypesTest extends EntityKernelTestBase {
   /**
    * Tests updating an entity type that doesn't exist in code anymore.
    *
-   * @covers ::updateEntityType
+   * @legacy-covers ::updateEntityType
    */
   public function testUpdateEntityTypeWithoutInCodeDefinition(): void {
     $entity_type = clone $this->entityTypeManager->getDefinition('entity_test_update');
@@ -171,7 +174,7 @@ class EntityDefinitionUpdateMultipleTypesTest extends EntityKernelTestBase {
   /**
    * Tests updating a fieldable entity type that doesn't exist in code anymore.
    *
-   * @covers ::updateFieldableEntityType
+   * @legacy-covers ::updateFieldableEntityType
    */
   public function testUpdateFieldableEntityTypeWithoutInCodeDefinition(): void {
     $entity_type = clone $this->entityTypeManager->getDefinition('entity_test_update');
@@ -193,7 +196,7 @@ class EntityDefinitionUpdateMultipleTypesTest extends EntityKernelTestBase {
   /**
    * Tests uninstalling an entity type that doesn't exist in code anymore.
    *
-   * @covers ::uninstallEntityType
+   * @legacy-covers ::uninstallEntityType
    */
   public function testUninstallEntityTypeWithoutInCodeDefinition(): void {
     $entity_type = clone $this->entityTypeManager->getDefinition('entity_test_update');
@@ -211,7 +214,7 @@ class EntityDefinitionUpdateMultipleTypesTest extends EntityKernelTestBase {
   /**
    * Tests uninstalling a revisionable entity type that doesn't exist in code.
    *
-   * @covers ::uninstallEntityType
+   * @legacy-covers ::uninstallEntityType
    */
   public function testUninstallRevisionableEntityTypeWithoutInCodeDefinition(): void {
     $this->updateEntityTypeToRevisionable(TRUE);
@@ -289,7 +292,7 @@ class EntityDefinitionUpdateMultipleTypesTest extends EntityKernelTestBase {
   /**
    * Tests creating, updating, and deleting a base field with no label set.
    *
-   * See testBaseFieldCreateUpdateDeleteWithoutData() for more details
+   * See testBaseFieldCreateUpdateDeleteWithoutData() for more details.
    */
   public function testBaseFieldWithoutLabelCreateUpdateDelete(): void {
     // Add a base field, ensure the update manager reports it with the
@@ -579,7 +582,10 @@ class EntityDefinitionUpdateMultipleTypesTest extends EntityKernelTestBase {
 
     // Save an entity with the bundle field populated.
     EntityTestHelper::createBundle('custom');
-    $this->entityTypeManager->getStorage('entity_test_update')->create(['type' => 'test_bundle', 'new_bundle_field' => 'foo'])->save();
+    $this->entityTypeManager
+      ->getStorage('entity_test_update')
+      ->create(['type' => 'test_bundle', 'new_bundle_field' => 'foo'])
+      ->save();
 
     // Change the field's field type and apply updates. It's expected to
     // throw an exception.
@@ -774,7 +780,7 @@ class EntityDefinitionUpdateMultipleTypesTest extends EntityKernelTestBase {
     $this->assertTrue($this->database->schema()->fieldExists('entity_test_update', 'new_base_field'), "New field 'new_base_field' has been created on the 'entity_test_update' table.");
     $this->assertTrue($this->database->schema()->indexExists('entity_test_update', 'entity_test_update_field__new_base_field'), "New index 'entity_test_update_field__new_base_field' has been created on the 'entity_test_update' table.");
     // Check index size in for MySQL.
-    if (Database::getConnection()->driver() == 'mysql') {
+    if (in_array(Database::getConnection()->driver(), ['mysql', 'mysqli'])) {
       $result = Database::getConnection()->query('SHOW INDEX FROM {entity_test_update} WHERE key_name = \'entity_test_update_field__new_base_field\' and column_name = \'new_base_field\'')->fetchObject();
       $this->assertEquals(191, $result->Sub_part, 'The index length has been restricted to 191 characters for UTF8MB4 compatibility.');
     }
@@ -803,7 +809,7 @@ class EntityDefinitionUpdateMultipleTypesTest extends EntityKernelTestBase {
 
     $this->assertTrue($this->database->schema()->indexExists('entity_test_update', 'entity_test_update__type_index'), "New index 'entity_test_update__type_index' has been created on the 'entity_test_update' table.");
     // Check index size in for MySQL.
-    if (Database::getConnection()->driver() == 'mysql') {
+    if (in_array(Database::getConnection()->driver(), ['mysql', 'mysqli'])) {
       $result = Database::getConnection()->query('SHOW INDEX FROM {entity_test_update} WHERE key_name = \'entity_test_update__type_index\' and column_name = \'type\'')->fetchObject();
       $this->assertEquals(191, $result->Sub_part, 'The index length has been restricted to 191 characters for UTF8MB4 compatibility.');
     }
@@ -1024,7 +1030,10 @@ class EntityDefinitionUpdateMultipleTypesTest extends EntityKernelTestBase {
         ->setName('new_base_field')
         ->setLabel('A new base field')
         ->setInitialValueFromField('initial_field');
-      $this->state->set('entity_test_update.additional_base_field_definitions', ['initial_field' => $initial_field, 'new_base_field' => $new_base_field]);
+      $this->state->set(
+        'entity_test_update.additional_base_field_definitions',
+        ['initial_field' => $initial_field, 'new_base_field' => $new_base_field]
+      );
       $this->entityDefinitionUpdateManager->installFieldStorageDefinition('new_base_field', 'entity_test_update', 'entity_test', $new_base_field);
       $this->fail('Using a field that is not stored in the shared tables as initial value does not work.');
     }

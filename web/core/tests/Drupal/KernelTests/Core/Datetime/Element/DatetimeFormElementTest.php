@@ -6,18 +6,21 @@ namespace Drupal\KernelTests\Core\Datetime\Element;
 
 use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\Datetime\Element\Datetime;
-use Drupal\Core\Form\FormState;
 use Drupal\Core\Form\FormInterface;
+use Drupal\Core\Form\FormState;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
 use Drupal\Tests\EntityViewTrait;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests static callbacks returns and form submission with datetime elements.
- *
- * @coversDefaultClass \Drupal\Core\Datetime\Element\Datetime
- * @group Datetime
  */
+#[CoversClass(Datetime::class)]
+#[Group('Datetime')]
+#[RunTestsInSeparateProcesses]
 class DatetimeFormElementTest extends EntityKernelTestBase implements FormInterface {
 
   use EntityViewTrait;
@@ -28,14 +31,6 @@ class DatetimeFormElementTest extends EntityKernelTestBase implements FormInterf
    * @var \Drupal\Core\Form\FormBuilder
    */
   protected $formBuilder;
-
-  /**
-   * {@inheritdoc}
-   */
-  protected static $modules = [
-    'system',
-    'datetime',
-  ];
 
   /**
    * {@inheritdoc}
@@ -66,6 +61,14 @@ class DatetimeFormElementTest extends EntityKernelTestBase implements FormInterf
       '#date_time_element' => 'none',
     ];
 
+    // Test time-only element.
+    $form['datetime_time_only'] = [
+      '#type' => 'datetime',
+      '#date_date_element' => 'none',
+      '#date_time_element' => 'time',
+      '#date_time_format' => 'H:i',
+    ];
+
     $form['submit'] = [
       '#type' => 'submit',
       '#value' => 'Submit',
@@ -89,7 +92,7 @@ class DatetimeFormElementTest extends EntityKernelTestBase implements FormInterf
   /**
    * Checks we have no errors on form submit.
    *
-   * @covers ::validateDatetime
+   * @legacy-covers ::validateDatetime
    */
   public function testNoErrorMetOnFormSubmit(): void {
     // No error expected when form elements have no value.
@@ -100,6 +103,7 @@ class DatetimeFormElementTest extends EntityKernelTestBase implements FormInterf
     // No error expected when a datetime-local element has a valid value.
     $form_state = new FormState();
     $form_state->setValue('datetime_local_picker', ['date' => '2025-02-18T12:00']);
+    $form_state->setValue('datetime_time_only', ['time' => '12:00']);
     $this->formBuilder->submitForm($this, $form_state);
     $this->assertEmpty($form_state->getErrors());
   }
@@ -109,7 +113,7 @@ class DatetimeFormElementTest extends EntityKernelTestBase implements FormInterf
    *
    * Test only applied to 'datetime-local' date element.
    *
-   * @covers ::valueCallback
+   * @legacy-covers ::valueCallback
    */
   public function testDatetimeLocalValueCallback(): void {
     $element = [
@@ -139,7 +143,7 @@ class DatetimeFormElementTest extends EntityKernelTestBase implements FormInterf
    *
    * Test only applied to 'datetime-local' date element.
    *
-   * @covers ::processDatetime
+   * @legacy-covers ::processDatetime
    */
   public function testDatetimeLocalProcessDatetime(): void {
     $form = [
@@ -178,6 +182,35 @@ class DatetimeFormElementTest extends EntityKernelTestBase implements FormInterf
     $this->assertArrayHasKey('max', $result['date']['#attributes']);
     $this->assertEquals('2050-12-31T23:59:59', $result['date']['#attributes']['max']);
     $this->assertArrayNotHasKey('time', $result);
+  }
+
+  /**
+   * Checks expected values are returned by ::valueCallback().
+   *
+   * Test only applied to time-only datetime element.
+   *
+   * @legacy-covers ::valueCallback
+   */
+  public function testDatetimeTimeOnlyValueCallback(): void {
+    $element = [
+      '#type' => 'datetime',
+      '#date_date_element' => 'none',
+      '#date_time_element' => 'time',
+      '#date_time_format' => 'H:i:s',
+    ];
+    $input = [
+      'time' => '14:30:00',
+    ];
+    $form_state = new FormState();
+    $form_state->setValue('datetime_time_only', ['time' => '14:30']);
+
+    $result = Datetime::valueCallback($element, $input, $form_state);
+    $this->assertIsArray($result);
+    $this->assertArrayHasKey('time', $result);
+    $this->assertEquals('14:30:00', $result['time']);
+    $this->assertArrayHasKey('object', $result);
+    $this->assertInstanceOf(DrupalDateTime::class, $result['object']);
+    $this->assertEquals('14:30:00', $result['object']->format('H:i:s'));
   }
 
 }

@@ -4,21 +4,25 @@ declare(strict_types=1);
 
 namespace Drupal\KernelTests\Core\File\MimeType;
 
+use Drupal\Core\File\MimeType\ExtensionMimeTypeGuesser;
 use Drupal\KernelTests\KernelTestBase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\IgnoreDeprecations;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 // cspell:ignore garply tarz
-
 /**
  * Tests filename mimetype detection.
  *
  * Installing the 'file_deprecated_test' module allows the legacy hook
  * file_deprecated_test_file_mimetype_mapping_alter to execute and add some
  * mappings. We check here that they are.
- *
- * @group File
- * @group legacy
- * @coversDefaultClass \Drupal\Core\File\MimeType\ExtensionMimeTypeGuesser
  */
+#[CoversClass(ExtensionMimeTypeGuesser::class)]
+#[Group('File')]
+#[IgnoreDeprecations]
+#[RunTestsInSeparateProcesses]
 class ExtensionMimeTypeGuesserLegacyTest extends KernelTestBase {
 
   /**
@@ -29,7 +33,7 @@ class ExtensionMimeTypeGuesserLegacyTest extends KernelTestBase {
   /**
    * Tests mapping of mimetypes from filenames.
    *
-   * @covers ::guessMimeType
+   * @legacy-covers ::guessMimeType
    */
   public function testGuessMimeType(): void {
     $prefixes = ['public://', 'private://', 'temporary://', 'dummy-remote://'];
@@ -60,7 +64,7 @@ class ExtensionMimeTypeGuesserLegacyTest extends KernelTestBase {
     ];
 
     $this->expectDeprecation(
-      'The deprecated alter hook hook_file_mimetype_mapping_alter() is implemented in these locations: file_deprecated_test_file_mimetype_mapping_alter. This hook is deprecated in drupal:11.2.0 and is removed from drupal:12.0.0. Implement a \Drupal\Core\File\Event\MimeTypeMapLoadedEvent listener instead. See https://www.drupal.org/node/3494040'
+      'The deprecated alter hook hook_file_mimetype_mapping_alter() is implemented in these locations: Drupal\file_deprecated_test\Hook\FileDeprecatedTestThemeHooks::fileMimetypeMappingAlter. This hook is deprecated in drupal:11.2.0 and is removed from drupal:12.0.0. Implement a \Drupal\Core\File\Event\MimeTypeMapLoadedEvent listener instead. See https://www.drupal.org/node/3494040'
     );
 
     /** @var \Drupal\Core\File\MimeType\ExtensionMimeTypeGuesser $guesser */
@@ -82,8 +86,8 @@ class ExtensionMimeTypeGuesserLegacyTest extends KernelTestBase {
   /**
    * Tests mapping of mimetypes from filenames.
    *
-   * @covers ::guessMimeType
-   * @covers ::setMapping
+   * @legacy-covers ::guessMimeType
+   * @legacy-covers ::setMapping
    */
   public function testFileMimeTypeDetectionCustomMapping(): void {
     /** @var \Drupal\Core\File\MimeType\ExtensionMimeTypeGuesser $extension_guesser */

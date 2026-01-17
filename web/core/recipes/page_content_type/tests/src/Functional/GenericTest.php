@@ -5,8 +5,12 @@ declare(strict_types=1);
 namespace Drupal\FunctionalTests\Recipe\Core\page_content_type;
 
 use Drupal\Tests\system\Functional\Recipe\GenericRecipeTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
- * @group core_page_content_type_recipe
+ * Tests Generic.
  */
+#[Group('core_page_content_type_recipe')]
+#[RunTestsInSeparateProcesses]
 class GenericTest extends GenericRecipeTestBase {}

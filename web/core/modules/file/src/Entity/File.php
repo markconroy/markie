@@ -46,6 +46,10 @@ use Drupal\user\EntityOwnerTrait;
     'list_builder' => EntityListBuilder::class,
     'form' => ['delete' => ContentEntityDeleteForm::class],
     'route_provider' => ['html' => FileRouteProvider::class],
+    'link_target' => [
+      'view' => FileLinkTarget::class,
+      'download' => FileLinkTarget::class,
+    ],
   ],
   links: [
     'delete-form' => '/file/{file}/delete',
@@ -169,7 +173,7 @@ class File extends ContentEntityBase implements FileInterface {
   public static function preCreate(EntityStorageInterface $storage, array &$values) {
     // Automatically detect filename if not set.
     if (!isset($values['filename']) && isset($values['uri'])) {
-      $values['filename'] = \Drupal::service('file_system')->basename($values['uri']);
+      $values['filename'] = basename($values['uri']);
     }
 
     // Automatically detect filemime if not set.

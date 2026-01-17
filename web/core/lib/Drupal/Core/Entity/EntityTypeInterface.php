@@ -69,6 +69,17 @@ interface EntityTypeInterface extends PluginDefinitionInterface {
   public function getOriginalClass();
 
   /**
+   * Gets the list of all the classes for this entity type.
+   *
+   * In case the class name was changed with setClass(), this will return
+   * the list of all the changes.
+   *
+   * @return class-string[]
+   *   The list of classes.
+   */
+  public function getDecoratedClasses(): array;
+
+  /**
    * Gets an array of entity keys.
    *
    * @return array
@@ -385,7 +396,7 @@ interface EntityTypeInterface extends PluginDefinitionInterface {
    * with more complex permissions can extend this class to do their own access
    * checks.
    *
-   * @return string|bool
+   * @return string|false
    *   The name of the administrative permission. Defaults to FALSE, if the
    *   permission does not exist.
    */
@@ -447,7 +458,7 @@ interface EntityTypeInterface extends PluginDefinitionInterface {
    * @param string $key
    *   The link type.
    *
-   * @return string|bool
+   * @return string|false
    *   The path for this link, or FALSE if it doesn't exist.
    */
   public function getLinkTemplate($key);

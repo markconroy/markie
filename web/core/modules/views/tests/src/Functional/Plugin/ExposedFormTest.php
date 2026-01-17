@@ -8,17 +8,20 @@ use Drupal\Component\Utility\Html;
 use Drupal\entity_test\Entity\EntityTest;
 use Drupal\Tests\system\Functional\Cache\AssertPageCacheContextsAndTagsTrait;
 use Drupal\Tests\views\Functional\ViewTestBase;
-use Drupal\views\ViewExecutable;
-use Drupal\views\Views;
 use Drupal\views\Entity\View;
 use Drupal\views\Plugin\views\filter\FilterPluginBase;
+use Drupal\views\ViewExecutable;
+use Drupal\views\Views;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests exposed forms functionality.
- *
- * @group views
- * @group #slow
  */
+#[Group('views')]
+#[Group('#slow')]
+#[RunTestsInSeparateProcesses]
 class ExposedFormTest extends ViewTestBase {
 
   use AssertPageCacheContextsAndTagsTrait;
@@ -28,7 +31,13 @@ class ExposedFormTest extends ViewTestBase {
    *
    * @var array
    */
-  public static $testViews = ['test_exposed_form_buttons', 'test_exposed_block', 'test_exposed_form_sort_items_per_page', 'test_exposed_form_pager', 'test_remember_selected'];
+  public static $testViews = [
+    'test_exposed_form_buttons',
+    'test_exposed_block',
+    'test_exposed_form_sort_items_per_page',
+    'test_exposed_form_pager',
+    'test_remember_selected',
+  ];
 
   /**
    * {@inheritdoc}
@@ -247,16 +256,15 @@ class ExposedFormTest extends ViewTestBase {
 
   /**
    * Tests the exposed block functionality.
-   *
-   * @dataProvider providerTestExposedBlock
    */
+  #[DataProvider('providerTestExposedBlock')]
   public function testExposedBlock($display): void {
     $view = Views::getView('test_exposed_block');
     $view->setDisplay($display);
     $block = $this->drupalPlaceBlock('views_exposed_filter_block:test_exposed_block-' . $display);
 
     // Set label to display on the exposed filter form block.
-    $block->getPlugin()->setConfigurationValue('label_display', TRUE);
+    $block->getPlugin()->setConfigurationValue('label_display', 'visible');
     $block->save();
 
     // Assert that the only two occurrences of `$view->getTitle()` are the title
@@ -275,7 +283,7 @@ class ExposedFormTest extends ViewTestBase {
     $this->assertSession()->responseContains('<strong>Custom</strong> title alert("hacked!");');
 
     // Set label to hidden on the exposed filter form block.
-    $block->getPlugin()->setConfigurationValue('label_display', FALSE);
+    $block->getPlugin()->setConfigurationValue('label_display', '0');
     $block->save();
 
     // Test that the label is removed.
@@ -414,11 +422,22 @@ class ExposedFormTest extends ViewTestBase {
     $this->assertCacheContexts($contexts);
     $this->assertIds(range(50, 41, 1));
 
-    $this->drupalGet('test_exposed_form_sort_items_per_page', ['query' => ['sort_order' => 'DESC', 'items_per_page' => 25]]);
+    $this->drupalGet('test_exposed_form_sort_items_per_page', [
+      'query' => [
+        'sort_order' => 'DESC',
+        'items_per_page' => 25,
+      ],
+    ]);
     $this->assertCacheContexts($contexts);
     $this->assertIds(range(50, 26, 1));
 
-    $this->drupalGet('test_exposed_form_sort_items_per_page', ['query' => ['sort_order' => 'DESC', 'items_per_page' => 25, 'offset' => 10]]);
+    $this->drupalGet('test_exposed_form_sort_items_per_page', [
+      'query' => [
+        'sort_order' => 'DESC',
+        'items_per_page' => 25,
+        'offset' => 10,
+      ],
+    ]);
     $this->assertCacheContexts($contexts);
     $this->assertIds(range(40, 16, 1));
 

@@ -5,22 +5,25 @@ declare(strict_types=1);
 namespace Drupal\Tests\views\Kernel\Handler;
 
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
+use Drupal\node\Entity\Node;
+use Drupal\node\Entity\NodeType;
 use Drupal\node\NodeTypeInterface;
+use Drupal\taxonomy\Entity\Term;
+use Drupal\taxonomy\Entity\Vocabulary;
+use Drupal\taxonomy\TermInterface;
 use Drupal\taxonomy\VocabularyInterface;
 use Drupal\Tests\field\Traits\EntityReferenceFieldCreationTrait;
 use Drupal\Tests\views\Kernel\ViewsKernelTestBase;
-use Drupal\node\Entity\Node;
-use Drupal\node\Entity\NodeType;
-use Drupal\taxonomy\Entity\Term;
-use Drupal\taxonomy\TermInterface;
-use Drupal\taxonomy\Entity\Vocabulary;
+use Drupal\views\Hook\ViewsThemeHooks;
 use Drupal\views\Views;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the summary of results when an argument is not provided.
- *
- * @group views
  */
+#[Group('views')]
+#[RunTestsInSeparateProcesses]
 class ArgumentSummaryTest extends ViewsKernelTestBase {
 
   use EntityReferenceFieldCreationTrait;
@@ -38,8 +41,6 @@ class ArgumentSummaryTest extends ViewsKernelTestBase {
     'node',
     'taxonomy',
     'text',
-    'user',
-    'views',
   ];
 
   /**
@@ -154,7 +155,6 @@ class ArgumentSummaryTest extends ViewsKernelTestBase {
    * Tests that the active link is set correctly.
    */
   public function testActiveLink(): void {
-    require_once $this->root . '/core/modules/views/views.theme.inc';
 
     // We need at least one node.
     Node::create([
@@ -170,17 +170,17 @@ class ArgumentSummaryTest extends ViewsKernelTestBase {
       'rows' => $view->result,
     ];
 
-    template_preprocess_views_view_summary_unformatted($variables);
+    \Drupal::service(ViewsThemeHooks::class)->preprocessViewsViewSummaryUnformatted($variables);
     $this->assertFalse($variables['rows'][0]->active);
 
-    template_preprocess_views_view_summary($variables);
+    \Drupal::service(ViewsThemeHooks::class)->preprocessViewsViewSummary($variables);
     $this->assertFalse($variables['rows'][0]->active);
 
     // Checks that the row with the current path is active.
     \Drupal::service('path.current')->setPath('/test-argument-summary');
-    template_preprocess_views_view_summary_unformatted($variables);
+    \Drupal::service(ViewsThemeHooks::class)->preprocessViewsViewSummaryUnformatted($variables);
     $this->assertTrue($variables['rows'][0]->active);
-    template_preprocess_views_view_summary($variables);
+    \Drupal::service(ViewsThemeHooks::class)->preprocessViewsViewSummary($variables);
     $this->assertTrue($variables['rows'][0]->active);
   }
 

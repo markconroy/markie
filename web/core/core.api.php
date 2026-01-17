@@ -467,6 +467,9 @@
  *   - data: Contains data that can vary by path or similar context.
  *   - discovery: Contains cached discovery data for things such as plugins,
  *     views_data, or YAML discovered data such as library info.
+ *   - memory: An in-memory cache bin, also called static cache. Useful
+ *     alternative to properties when cache invalidation is needed, for example
+ *     through cache tags.
  *
  * A module can define a cache bin by defining a service in its
  * modulename.services.yml file as follows (substituting the desired name for
@@ -479,6 +482,15 @@
  *   factory: ['@cache_factory', 'get']
  *   arguments: [name_of_bin]
  * @endcode
+ *
+ * The tag can also include a default backend, which is useful for example
+ * when defining in-memory (which uses a separate tag) or fast chained bin.
+ *
+ * @code
+ * - { name: cache.bin, default_backend: cache.backend.chainedfast }
+ * - { name: cache.bin.memory, default_backend: cache.backend.memory.memory }
+ * @endcode
+ *
  * See the @link container Services topic @endlink for more on defining
  * services.
  *
@@ -1138,15 +1150,13 @@
  *     subdirectory)
  *
  * Some notes about writing PHP test classes:
- * - The class needs a phpDoc comment block with a description and
- *   @group annotation, which gives information about the test.
- * - For unit tests, this comment block should also have @coversDefaultClass
- *   annotation.
+ * - The class needs a phpDoc comment block with a description of the test, and
+ *   a #[Group(...)] attribute, which gives information about the test.
+ * - For unit tests, this comment block should also have a #[CoversClass(...)]
+ *   attribute.
  * - When writing tests, put the test code into public methods, each covering a
  *   logical subset of the functionality that is being tested.
- * - The test methods must have names starting with 'test'. For unit tests, the
- *   test methods need to have a phpDoc block with @covers annotation telling
- *   which class method they are testing.
+ * - The test methods must have names starting with 'test'.
  * - In some cases, you may need to write a test module to support your test;
  *   put such modules under the your_module/tests/modules directory.
  *
@@ -1672,8 +1682,10 @@
  * - hook_install_tasks()
  * - hook_install_tasks_alter()
  * - hook_post_update_NAME()
+ * - hook_removed_post_updates()
  * - hook_schema()
  * - hook_uninstall()
+ * - hook_update_dependencies()
  * - hook_update_last_removed()
  * - hook_update_N()
  *
@@ -2279,7 +2291,7 @@ function hook_mail($key, &$message, $params): void {
     $variables += [
       '%uid' => $node->getOwnerId(),
       '%url' => $node->toUrl('canonical', ['absolute' => TRUE])->toString(),
-      '%node_type' => node_get_type_label($node),
+      '%node_type' => $node->getBundleEntity()->label(),
       '%title' => $node->getTitle(),
       '%teaser' => $node->teaser,
       '%body' => $node->body,
@@ -2707,9 +2719,10 @@ function hook_validation_constraint_alter(array &$definitions) {
  * the proxy service, and not on all the dependencies of the lazy service.
  *
  * To define a service as lazy, add "lazy: true" to the service definition, and
- * use the "core/scripts/generate-proxy.sh" script to generate the proxy class.
+ * use the "core/scripts/generate-proxy-class.php" script to generate the proxy
+ * class.
  *
- * @see core/scripts/generate-proxy.sh
+ * @see core/scripts/generate-proxy-class.php
  */
 
 /**

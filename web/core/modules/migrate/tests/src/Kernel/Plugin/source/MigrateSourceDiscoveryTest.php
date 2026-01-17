@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Drupal\Tests\migrate\Kernel\Plugin\source;
 
 use Drupal\KernelTests\KernelTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests discovery of source plugins with annotations.
@@ -13,9 +15,9 @@ use Drupal\KernelTests\KernelTestBase;
  * providers. This tests that the backwards compatibility of discovery for
  * plugin classes using annotations still works, even after all core plugins
  * have been converted to attributes.
- *
- * @group migrate
  */
+#[Group('migrate')]
+#[RunTestsInSeparateProcesses]
 class MigrateSourceDiscoveryTest extends KernelTestBase {
 
   /**
@@ -24,7 +26,9 @@ class MigrateSourceDiscoveryTest extends KernelTestBase {
   protected static $modules = ['migrate'];
 
   /**
-   * @covers \Drupal\migrate\Plugin\MigrateSourcePluginManager::getDefinitions
+   * Tests get definitions.
+   *
+   * @legacy-covers \Drupal\migrate\Plugin\MigrateSourcePluginManager::getDefinitions
    */
   public function testGetDefinitions(): void {
     // First, check the expected plugins are provided by migrate only.
@@ -35,10 +39,21 @@ class MigrateSourceDiscoveryTest extends KernelTestBase {
 
     // Next, install the file module, which has 4 migrate source plugins, all of
     // which depend on migrate_drupal. Since migrate_drupal is not installed,
-    // none of the source plugins from file should be discovered. However, the
-    // content_entity source for the file entity type should be discovered.
-    $expected = ['config_entity', 'content_entity:file', 'embedded_data', 'empty'];
+    // none of the source plugins from file should be discovered. Note that the
+    // content_entity:file plugin should not be discovered either, because it
+    // has an implicit dependency on the user module which has not been
+    // installed.
+    $expected = ['config_entity', 'embedded_data', 'empty'];
     $this->enableModules(['file']);
+    $source_plugins = \Drupal::service('plugin.manager.migrate.source')->getDefinitions();
+    ksort($source_plugins);
+    $this->assertSame($expected, array_keys($source_plugins));
+
+    // Install user and 'content_entity:file', 'content_entity:user' should now
+    // be discovered. The other source plugins in the user modules all depend
+    // on migrate_drupal, so those should not be discovered, either.
+    $expected = ['config_entity', 'content_entity:file', 'content_entity:user', 'embedded_data', 'empty'];
+    $this->enableModules(['user']);
     $source_plugins = \Drupal::service('plugin.manager.migrate.source')->getDefinitions();
     ksort($source_plugins);
     $this->assertSame($expected, array_keys($source_plugins));
@@ -60,7 +75,9 @@ class MigrateSourceDiscoveryTest extends KernelTestBase {
   }
 
   /**
-   * @covers \Drupal\migrate\Plugin\MigrateSourcePluginManager::getDefinitions
+   * Tests annotation get definitions backwards compatibility.
+   *
+   * @legacy-covers \Drupal\migrate\Plugin\MigrateSourcePluginManager::getDefinitions
    */
   public function testAnnotationGetDefinitionsBackwardsCompatibility(): void {
     // First, test attribute-only discovery.

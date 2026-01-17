@@ -7,13 +7,16 @@ namespace Drupal\Tests\views_ui\Functional;
 use Drupal\block\Entity\Block;
 use Drupal\entity_test\Entity\EntityTest;
 use Drupal\views\Entity\View;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the entity area UI test.
  *
  * @see \Drupal\views\Plugin\views\area\Entity
- * @group views_ui
  */
+#[Group('views_ui')]
+#[RunTestsInSeparateProcesses]
 class AreaEntityUITest extends UITestBase {
 
   /**

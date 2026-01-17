@@ -42,6 +42,12 @@ information on how to develop for the AI module.
 This documentation is generated using MKDocs from the source files located in
 the `docs/` directory. To build the docs locally:
 
-1. Install MkDocs: `pip install mkdocs mkdocs-material`
-2. Run `mkdocs serve` in the project root
+1. Install MkDocs and associated plugins:
+    ```
+    pip install mkdocs mkdocs-material mike mkdocs-include-markdown-plugin
+    ```
+2. Run the MkDocs server in the project root:
+    ```
+    mkdocs serve
+    ```
 3. Open `http://localhost:8000` in your browser

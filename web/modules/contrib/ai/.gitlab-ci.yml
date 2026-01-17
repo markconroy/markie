@@ -1,7 +1,11 @@
 # Use the Drupal GitLab CI template.
 include:
   - project: $_GITLAB_TEMPLATES_REPO
-    ref: $_GITLAB_TEMPLATES_REF
+    # We hard code to "main" based on having the latest templates, before they
+    # are merged. This will be possible until gitlab_templates project has a 2.x
+    # branch.
+    # See: https://www.drupal.org/project/gitlab_templates/issues/3404175
+    ref: main
     file:
       - '/includes/include.drupalci.main.yml'
       - '/includes/include.drupalci.variables.yml'
@@ -127,7 +131,7 @@ pages:
         exit 1
       fi
     - cd $CI_PROJECT_DIR && pwd
-    - pip install mkdocs-material mike mkdocs-glightbox
+    - pip install mkdocs-material mike mkdocs-glightbox mkdocs-include-markdown-plugin
     - echo "Pulling latest changes from origin to get mike versions"
     - git fetch origin gh-pages --depth=1
     - pwd && ls -l logo* && ls -l docs/logo* || true

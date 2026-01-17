@@ -7,12 +7,14 @@ namespace Drupal\Tests\system\Functional\Theme;
 use Drupal\Core\Render\Markup;
 use Drupal\Tests\BrowserTestBase;
 use Drupal\twig_extension_test\TwigExtension\TestExtension;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests Twig extensions.
- *
- * @group Theme
  */
+#[Group('Theme')]
+#[RunTestsInSeparateProcesses]
 class TwigExtensionTest extends BrowserTestBase {
 
   /**

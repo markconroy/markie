@@ -9,8 +9,6 @@ use Drupal\Tests\UnitTestCase;
 
 /**
  * Base class used for testing the various LanguageNegotiation plugins.
- *
- * @group language
  */
 abstract class LanguageNegotiationTestBase extends UnitTestCase {
 

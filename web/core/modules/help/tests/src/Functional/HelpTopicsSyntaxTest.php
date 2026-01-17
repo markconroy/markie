@@ -4,20 +4,22 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\help\Functional;
 
-use Drupal\Core\Extension\ExtensionLifecycle;
 use Drupal\Component\FrontMatter\FrontMatter;
-use Drupal\Tests\BrowserTestBase;
+use Drupal\Core\Extension\ExtensionLifecycle;
 use Drupal\help\HelpTopicDiscovery;
 use Drupal\help_topics_twig_tester\HelpTestTwigNodeVisitor;
-use PHPUnit\Framework\ExpectationFailedException;
+use Drupal\Tests\BrowserTestBase;
 use PHPUnit\Framework\AssertionFailedError;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
+use PHPUnit\Framework\ExpectationFailedException;
 
 /**
  * Verifies that all core Help topics can be rendered and comply with standards.
- *
- * @group help
- * @group #slow
  */
+#[Group('help')]
+#[Group('#slow')]
+#[RunTestsInSeparateProcesses]
 class HelpTopicsSyntaxTest extends BrowserTestBase {
 
   /**
@@ -196,12 +198,11 @@ class HelpTopicsSyntaxTest extends BrowserTestBase {
     $doc->strictErrorChecking = TRUE;
     $doc->validateOnParse = FALSE;
     libxml_use_internal_errors(TRUE);
+    libxml_clear_errors();
     if (!$doc->loadXML('<html><body>' . $body . '</body></html>')) {
       foreach (libxml_get_errors() as $error) {
         $this->fail('Topic ' . $id . ' fails HTML validation: ' . $error->message);
       }
-
-      libxml_clear_errors();
     }
 
     // Check for headings hierarchy.

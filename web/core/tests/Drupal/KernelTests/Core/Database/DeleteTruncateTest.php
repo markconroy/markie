@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Drupal\KernelTests\Core\Database;
 
 use Drupal\Core\Database\DatabaseExceptionWrapper;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests delete and truncate queries.
@@ -16,9 +18,9 @@ use Drupal\Core\Database\DatabaseExceptionWrapper;
  * The TRUNCATE tests are not extensive either, because the behavior of
  * TRUNCATE queries is not consistent across database engines. We only test
  * that a TRUNCATE query actually deletes all rows from the target table.
- *
- * @group Database
  */
+#[Group('Database')]
+#[RunTestsInSeparateProcesses]
 class DeleteTruncateTest extends DatabaseTestBase {
 
   /**

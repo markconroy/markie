@@ -12,17 +12,22 @@ use Drupal\jsonapi\JsonApiResource\ResourceObject;
 use Drupal\jsonapi\Normalizer\Value\CacheableNormalization;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\user\Entity\User;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\TerminateEvent;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 
 /**
- * @coversDefaultClass \Drupal\jsonapi\EventSubscriber\ResourceObjectNormalizationCacher
- * @group jsonapi
+ * Tests Drupal\jsonapi\EventSubscriber\ResourceObjectNormalizationCacher.
  *
  * @internal
  */
+#[CoversClass(ResourceObjectNormalizationCacher::class)]
+#[Group('jsonapi')]
+#[RunTestsInSeparateProcesses]
 class ResourceObjectNormalizerCacherTest extends KernelTestBase {
 
   /**
@@ -31,7 +36,6 @@ class ResourceObjectNormalizerCacherTest extends KernelTestBase {
   protected static $modules = [
     'entity_test',
     'file',
-    'system',
     'serialization',
     'text',
     'jsonapi',
@@ -131,7 +135,7 @@ class ResourceObjectNormalizerCacherTest extends KernelTestBase {
     $this->installEntitySchema('entity_test_computed_field');
 
     // Use EntityTestComputedField since ComputedTestCacheableStringItemList has
-    // a max age of 800
+    // a max age of 800.
     $baseMaxAge = 800;
     $entity = EntityTestComputedField::create([]);
     $entity->save();
@@ -149,7 +153,7 @@ class ResourceObjectNormalizerCacherTest extends KernelTestBase {
     $event = new TerminateEvent($http_kernel->reveal(), $request->reveal(), $response->reveal());
     $this->cacher->onTerminate($event);
 
-    // Change request time to 500 seconds later
+    // Change request time to 500 seconds later.
     $current_request = \Drupal::requestStack()->getCurrentRequest();
     $current_request->server->set('REQUEST_TIME', $current_request->server->get('REQUEST_TIME') + 500);
     $resource_normalization = $this->serializer

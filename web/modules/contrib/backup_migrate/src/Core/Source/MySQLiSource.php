@@ -191,7 +191,7 @@ class MySQLiSource extends DatabaseSource implements PluginCallerInterface {
       }
 
       // Throw an error on fail.
-      if ($this->connection->connect_errno || !$this->connection->ping()) {
+      if ($this->connection->connect_errno) {
         throw new BackupMigrateException("Failed to connect to MySQL server.");
       }
       // Ensure, that the character set is utf8mb4.

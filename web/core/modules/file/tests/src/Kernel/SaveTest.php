@@ -7,12 +7,14 @@ namespace Drupal\Tests\file\Kernel;
 use Drupal\file\Entity\File;
 use Drupal\file_test\FileTestHelper;
 use Drupal\Tests\user\Traits\UserCreationTrait;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * File saving tests.
- *
- * @group file
  */
+#[Group('file')]
+#[RunTestsInSeparateProcesses]
 class SaveTest extends FileManagedUnitTestBase {
 
   use UserCreationTrait;

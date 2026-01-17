@@ -7,12 +7,14 @@ namespace Drupal\Tests\file\Functional;
 use Drupal\Core\Database\Database;
 use Drupal\Core\File\FileSystemInterface;
 use Drupal\file_test\FileTestHelper;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests for download/file transfer functions.
- *
- * @group file
  */
+#[Group('file')]
+#[RunTestsInSeparateProcesses]
 class DownloadTest extends FileManagedTestBase {
 
   /**

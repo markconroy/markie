@@ -325,7 +325,10 @@ abstract class EntityCacheTagsTestBase extends PageCacheTagsTestBase {
     // The default cache contexts for rendered entities.
     $default_cache_contexts = ['languages:' . LanguageInterface::TYPE_INTERFACE, 'theme', 'user.permissions'];
     $entity_cache_contexts = Cache::mergeContexts($default_cache_contexts, ['url.site']);
-    $page_cache_contexts = Cache::mergeContexts($default_cache_contexts, ['url.query_args:' . MainContentViewSubscriber::WRAPPER_FORMAT, 'user.roles:authenticated']);
+    $page_cache_contexts = Cache::mergeContexts(
+      $default_cache_contexts,
+      ['url.query_args:' . MainContentViewSubscriber::WRAPPER_FORMAT, 'user.roles:authenticated'],
+    );
 
     // Cache tags present on every rendered page.
     // 'user.permissions' is a required cache context, and responses that vary
@@ -620,7 +623,7 @@ abstract class EntityCacheTagsTestBase extends PageCacheTagsTestBase {
    * Use ::getRenderVariationCache() instead, which is inherited
    * from CacheTestTrait.
    *
-   * @see https://www.drupal.org/node/3508905
+   * @see https://www.drupal.org/project/drupal/issues/3085475
    *
    * @return \Drupal\Core\Cache\VariationCacheInterface
    *   The render cache backend as a variation cache.

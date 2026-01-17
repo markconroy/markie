@@ -8,12 +8,14 @@ use Drupal\Core\Action\ActionInterface;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\system\Entity\Action;
 use Drupal\user\RoleInterface;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests action plugins.
- *
- * @group Action
  */
+#[Group('Action')]
+#[RunTestsInSeparateProcesses]
 class ActionTest extends KernelTestBase {
 
   /**

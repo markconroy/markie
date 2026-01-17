@@ -4,16 +4,18 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\jsonapi\Functional;
 
-use Drupal\jsonapi\JsonApiSpec;
 use Drupal\block\Entity\Block;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Url;
+use Drupal\jsonapi\JsonApiSpec;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * JSON:API integration test for the "Block" config entity type.
- *
- * @group jsonapi
  */
+#[Group('jsonapi')]
+#[RunTestsInSeparateProcesses]
 class BlockTest extends ConfigEntityResourceTestBase {
 
   /**
@@ -184,7 +186,7 @@ class BlockTest extends ConfigEntityResourceTestBase {
         'http_response',
         'user:2',
       ])
-      ->setCacheContexts(['url.query_args', 'url.site', 'user.roles']);
+      ->setCacheContexts(['url.query_args', 'url.site', 'user.permissions', 'user.roles']);
   }
 
   /**

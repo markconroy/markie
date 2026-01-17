@@ -1,3 +1,6 @@
+parameters:
+  views.skip_procedural_hook_scan: false
+
 services:
   _defaults:
     autoconfigure: true
@@ -107,3 +110,5 @@ services:
     tags:
       - { name: backend_overridable }
   Drupal\views\Plugin\views\query\CastSqlInterface: '@views.cast_sql'
+  Drupal\views\ViewsConfigUpdater:
+    autowire: true

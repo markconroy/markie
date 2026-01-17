@@ -9,8 +9,6 @@ use Drupal\KernelTests\KernelTestBase;
 
 /**
  * Tests the behavior of a theme when base_theme info key is missing.
- *
- * @group Theme
  */
 abstract class StableLibraryOverrideTestBase extends KernelTestBase {
 

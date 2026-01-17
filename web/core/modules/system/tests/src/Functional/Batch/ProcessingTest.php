@@ -7,12 +7,14 @@ namespace Drupal\Tests\system\Functional\Batch;
 use Drupal\batch_test\BatchTestHelper;
 use Drupal\Core\Url;
 use Drupal\Tests\BrowserTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests batch processing in form and non-form workflow.
- *
- * @group Batch
  */
+#[Group('Batch')]
+#[RunTestsInSeparateProcesses]
 class ProcessingTest extends BrowserTestBase {
 
   /**

@@ -9,13 +9,16 @@ use Drupal\package_manager\Exception\SandboxException;
 use Drupal\package_manager\Exception\SandboxOwnershipException;
 use Drupal\package_manager_test_validation\EventSubscriber\TestSubscriber;
 use Drupal\Tests\user\Traits\UserCreationTrait;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests that ownership of the stage is enforced.
  *
- * @group package_manager
  * @internal
  */
+#[Group('package_manager')]
+#[RunTestsInSeparateProcesses]
 class StageOwnershipTest extends PackageManagerKernelTestBase {
 
   use UserCreationTrait;
@@ -24,7 +27,6 @@ class StageOwnershipTest extends PackageManagerKernelTestBase {
    * {@inheritdoc}
    */
   protected static $modules = [
-    'system',
     'user',
     'package_manager_test_validation',
   ];

@@ -6,10 +6,14 @@ namespace Drupal\Tests\media\Functional\Rest;
 
 use Drupal\Tests\rest\Functional\AnonResourceTestTrait;
 use Drupal\Tests\rest\Functional\EntityResource\XmlEntityNormalizationQuirksTrait;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
- * @group rest
+ * Tests Media Xml Anon.
  */
+#[Group('rest')]
+#[RunTestsInSeparateProcesses]
 class MediaXmlAnonTest extends MediaResourceTestBase {
 
   use AnonResourceTestTrait;

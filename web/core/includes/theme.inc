@@ -9,18 +9,16 @@
  */
 
 use Drupal\Core\Datetime\DatePreprocess;
+use Drupal\Core\Extension\ThemeSettingsProvider;
+use Drupal\Core\Field\FieldPreprocess;
+use Drupal\Core\Pager\PagerPreprocess;
+use Drupal\Core\Breadcrumb\BreadcrumbPreprocess;
+use Drupal\Core\Menu\MenuPreprocess;
+use Drupal\Core\Theme\ImagePreprocess;
 use Drupal\Core\Theme\ThemePreprocess;
-use Drupal\Core\Url;
-use Drupal\Component\Utility\Html;
 use Drupal\Core\Config\Config;
-use Drupal\Core\Config\StorageException;
-use Drupal\Core\Template\Attribute;
 use Drupal\Core\Template\AttributeHelper;
 use Drupal\Core\Theme\ThemeCommonElements;
-use Drupal\Core\Theme\ThemeSettings;
-use Drupal\Core\Render\Element;
-use Drupal\Core\Utility\TableSort;
-use Drupal\Core\Installer\InstallerKernel;
 
 /**
  * @defgroup content_flags Content markers
@@ -68,16 +66,15 @@ const RESPONSIVE_PRIORITY_LOW = 'priority-low';
 /**
  * Returns an array of default theme features.
  *
- * @see \Drupal\Core\Extension\ThemeExtensionList::$defaults
+ * @deprecated in drupal:11.3.0 and is removed from drupal:13.0.0. Use
+ *   \Drupal\Core\Extension\ThemeSettingsProvider::DEFAULT_THEME_FEATURES
+ *   instead.
+ *
+ * @see https://www.drupal.org/node/3554127
  */
 function _system_default_theme_features() {
-  return [
-    'favicon',
-    'logo',
-    'node_user_picture',
-    'comment_user_picture',
-    'comment_user_verification',
-  ];
+  @trigger_error('_system_default_theme_features() is deprecated in drupal:11.3.0 and is removed from drupal:13.0.0. Use \Drupal\Core\Extension\ThemeSettingsProvider::DEFAULT_THEME_FEATURES instead. See https://www.drupal.org/node/3554127', E_USER_DEPRECATED);
+  return ThemeSettingsProvider::DEFAULT_THEME_FEATURES;
 }
 
 /**
@@ -204,81 +201,16 @@ function drupal_find_theme_templates($cache, $extension, $path): array {
  *
  * @return mixed
  *   The value of the requested setting, NULL if the setting does not exist.
+ *
+ * @deprecated in drupal:11.3.0 and is removed from drupal:13.0.0. Use
+ *   \Drupal::service('Drupal\Core\Extension\ThemeSettingsProvider')->getSetting()
+ *   instead.
+ *
+ * @see https://www.drupal.org/node/3035289
  */
 function theme_get_setting($setting_name, $theme = NULL) {
-  /** @var \Drupal\Core\Theme\ThemeSettings[] $cache */
-  $cache = &drupal_static(__FUNCTION__, []);
-
-  // If no key is given, use the current theme if we can determine it.
-  if (!isset($theme)) {
-    $theme = \Drupal::theme()->getActiveTheme()->getName();
-  }
-
-  if (empty($cache[$theme])) {
-    // Create a theme settings object.
-    $cache[$theme] = new ThemeSettings($theme);
-    // Get the global settings from configuration.
-    $cache[$theme]->setData(\Drupal::config('system.theme.global')->get());
-
-    // Get the values for the theme-specific settings from the .info.yml files
-    // of the theme and all its base themes.
-    $themes = \Drupal::service('theme_handler')->listInfo();
-    if (isset($themes[$theme])) {
-      $theme_object = $themes[$theme];
-
-      // Retrieve configured theme-specific settings, if any.
-      try {
-        if ($theme_settings = \Drupal::config($theme . '.settings')->get()) {
-          $cache[$theme]->merge($theme_settings);
-        }
-      }
-      catch (StorageException) {
-      }
-
-      // If the theme does not support a particular feature, override the global
-      // setting and set the value to NULL.
-      if (!empty($theme_object->info['features'])) {
-        foreach (_system_default_theme_features() as $feature) {
-          if (!in_array($feature, $theme_object->info['features'])) {
-            $cache[$theme]->set('features.' . $feature, NULL);
-          }
-        }
-      }
-
-      /** @var \Drupal\Core\File\FileUrlGeneratorInterface $file_url_generator */
-      $file_url_generator = \Drupal::service('file_url_generator');
-
-      // Generate the path to the logo image.
-      if ($cache[$theme]->get('logo.use_default')) {
-        $logo = \Drupal::service('theme.initialization')->getActiveThemeByName($theme)->getLogo();
-        $cache[$theme]->set('logo.url', $file_url_generator->generateString($logo));
-      }
-      elseif ($logo_path = $cache[$theme]->get('logo.path')) {
-        $cache[$theme]->set('logo.url', $file_url_generator->generateString($logo_path));
-      }
-
-      // Generate the path to the favicon.
-      if ($cache[$theme]->get('features.favicon')) {
-        $favicon_path = $cache[$theme]->get('favicon.path');
-        if ($cache[$theme]->get('favicon.use_default')) {
-          if (file_exists($favicon = $theme_object->getPath() . '/favicon.ico')) {
-            $cache[$theme]->set('favicon.url', $file_url_generator->generateString($favicon));
-          }
-          else {
-            $cache[$theme]->set('favicon.url', $file_url_generator->generateString('core/misc/favicon.ico'));
-          }
-        }
-        elseif ($favicon_path) {
-          $cache[$theme]->set('favicon.url', $file_url_generator->generateString($favicon_path));
-        }
-        else {
-          $cache[$theme]->set('features.favicon', FALSE);
-        }
-      }
-    }
-  }
-
-  return $cache[$theme]->get($setting_name);
+  @trigger_error('theme_get_setting() is deprecated in drupal:11.3.0 and is removed from drupal:13.0.0. Use \Drupal::service(\'\Drupal\Core\Extension\ThemeSettingsProvider\')->getSetting() instead. See https://www.drupal.org/node/3035289', E_USER_DEPRECATED);
+  return \Drupal::service(ThemeSettingsProvider::class)->getSetting($setting_name, $theme);
 }
 
 /**
@@ -483,49 +415,15 @@ function template_preprocess_links(&$variables): void {
  *   - sizes: The sizes attribute for viewport-based selection of images.
  *     phpcs:ignore
  *     - http://www.whatwg.org/specs/web-apps/current-work/multipage/embedded-content.html#introduction-3:viewport-based-selection-2
+ *
+ * @deprecated in drupal:11.3.0 and is removed from drupal:12.0.0. Initial
+ *   template_preprocess functions are registered directly in hook_theme().
+ *
+ * @see https://www.drupal.org/node/3504125
  */
 function template_preprocess_image(&$variables): void {
-  /** @var \Drupal\Core\File\FileUrlGeneratorInterface $file_url_generator */
-  $file_url_generator = \Drupal::service('file_url_generator');
-
-  if (!empty($variables['uri'])) {
-    $variables['attributes']['src'] = $file_url_generator->generateString($variables['uri']);
-  }
-  // Generate a srcset attribute conforming to the spec at
-  // https://www.w3.org/html/wg/drafts/html/master/embedded-content.html#attr-img-srcset
-  if (!empty($variables['srcset'])) {
-    $srcset = [];
-    foreach ($variables['srcset'] as $src) {
-      // URI is mandatory.
-      $source = $file_url_generator->generateString($src['uri']);
-      if (isset($src['width']) && !empty($src['width'])) {
-        $source .= ' ' . $src['width'];
-      }
-      elseif (isset($src['multiplier']) && !empty($src['multiplier'])) {
-        $source .= ' ' . $src['multiplier'];
-      }
-      $srcset[] = $source;
-    }
-    $variables['attributes']['srcset'] = implode(', ', $srcset);
-  }
-
-  foreach (['width', 'height', 'alt', 'title', 'sizes'] as $key) {
-    if (isset($variables[$key])) {
-      // If the property has already been defined in the attributes,
-      // do not override, including NULL.
-      if (AttributeHelper::attributeExists($key, $variables['attributes'])) {
-        continue;
-      }
-      $variables['attributes'][$key] = $variables[$key];
-    }
-  }
-
-  // Without dimensions specified, layout shifts can occur,
-  // which are more noticeable on pages that take some time to load.
-  // As a result, only mark images as lazy load that have dimensions.
-  if (isset($variables['width'], $variables['height']) && !isset($variables['attributes']['loading'])) {
-    $variables['attributes']['loading'] = 'lazy';
-  }
+  @trigger_error(__FUNCTION__ . '() is deprecated in drupal:11.3.0 and is removed from drupal:12.0.0. Initial template_preprocess functions are registered directly in hook_theme(). See https://www.drupal.org/node/3504125', E_USER_DEPRECATED);
+  \Drupal::service(ImagePreprocess::class)->preprocessImage($variables);
 }
 
 /**
@@ -619,167 +517,15 @@ function template_preprocess_image(&$variables): void {
  *   - sticky: Use a "sticky" table header.
  *   - empty: The message to display in an extra row if table does not have any
  *     rows.
+ *
+ * @deprecated in drupal:11.3.0 and is removed from drupal:12.0.0. Initial
+ *   template_preprocess functions are registered directly in hook_theme().
+ *
+ * @see https://www.drupal.org/node/3504125
  */
 function template_preprocess_table(&$variables): void {
-  // Format the table columns:
-  if (!empty($variables['colgroups'])) {
-    foreach ($variables['colgroups'] as &$colgroup) {
-      // Check if we're dealing with a simple or complex column
-      if (isset($colgroup['data'])) {
-        $cols = $colgroup['data'];
-        unset($colgroup['data']);
-        $colgroup_attributes = $colgroup;
-      }
-      else {
-        $cols = $colgroup;
-        $colgroup_attributes = [];
-      }
-      $colgroup = [];
-      $colgroup['attributes'] = new Attribute($colgroup_attributes);
-      $colgroup['cols'] = [];
-
-      // Build columns.
-      if (is_array($cols) && !empty($cols)) {
-        foreach ($cols as $col_key => $col) {
-          $colgroup['cols'][$col_key]['attributes'] = new Attribute($col);
-        }
-      }
-    }
-  }
-
-  // Build an associative array of responsive classes keyed by column.
-  $responsive_classes = [];
-
-  // Format the table header:
-  $ts = [];
-  $header_columns = 0;
-  if (!empty($variables['header'])) {
-    $ts = TableSort::getContextFromRequest($variables['header'], \Drupal::request());
-
-    // Use a separate index with responsive classes as headers
-    // may be associative.
-    $responsive_index = -1;
-    foreach ($variables['header'] as $col_key => $cell) {
-      // Increase the responsive index.
-      $responsive_index++;
-
-      if (!is_array($cell)) {
-        $header_columns++;
-        $cell_content = $cell;
-        $cell_attributes = new Attribute();
-        $is_header = TRUE;
-      }
-      else {
-        if (isset($cell['colspan'])) {
-          $header_columns += $cell['colspan'];
-        }
-        else {
-          $header_columns++;
-        }
-        $cell_content = '';
-        if (isset($cell['data'])) {
-          $cell_content = $cell['data'];
-          unset($cell['data']);
-        }
-        // Flag the cell as a header or not and remove the flag.
-        $is_header = $cell['header'] ?? TRUE;
-        unset($cell['header']);
-
-        // Track responsive classes for each column as needed. Only the header
-        // cells for a column are marked up with the responsive classes by a
-        // module developer or themer. The responsive classes on the header
-        // cells must be transferred to the content cells.
-        if (!empty($cell['class']) && is_array($cell['class'])) {
-          if (in_array(RESPONSIVE_PRIORITY_MEDIUM, $cell['class'])) {
-            $responsive_classes[$responsive_index] = RESPONSIVE_PRIORITY_MEDIUM;
-          }
-          elseif (in_array(RESPONSIVE_PRIORITY_LOW, $cell['class'])) {
-            $responsive_classes[$responsive_index] = RESPONSIVE_PRIORITY_LOW;
-          }
-        }
-
-        TableSort::header($cell_content, $cell, $variables['header'], $ts);
-
-        // TableSort::header() removes the 'sort', 'initial_click_sort' and
-        // 'field' keys.
-        $cell_attributes = new Attribute($cell);
-      }
-      $variables['header'][$col_key] = [];
-      $variables['header'][$col_key]['tag'] = $is_header ? 'th' : 'td';
-      $variables['header'][$col_key]['attributes'] = $cell_attributes;
-      $variables['header'][$col_key]['content'] = $cell_content;
-    }
-  }
-  $variables['header_columns'] = $header_columns;
-
-  // Rows and footer have the same structure.
-  $sections = ['rows' , 'footer'];
-  foreach ($sections as $section) {
-    if (!empty($variables[$section])) {
-      foreach ($variables[$section] as $row_key => $row) {
-        $cells = $row;
-        $row_attributes = [];
-
-        // Check if we're dealing with a simple or complex row
-        if (isset($row['data'])) {
-          $cells = $row['data'];
-          $variables['no_striping'] = $row['no_striping'] ?? FALSE;
-
-          // Set the attributes array and exclude 'data' and 'no_striping'.
-          $row_attributes = $row;
-          unset($row_attributes['data']);
-          unset($row_attributes['no_striping']);
-        }
-
-        // Build row.
-        $variables[$section][$row_key] = [];
-        $variables[$section][$row_key]['attributes'] = new Attribute($row_attributes);
-        $variables[$section][$row_key]['cells'] = [];
-        if (!empty($cells)) {
-          // Reset the responsive index.
-          $responsive_index = -1;
-          foreach ($cells as $col_key => $cell) {
-            // Increase the responsive index.
-            $responsive_index++;
-
-            if (!is_array($cell)) {
-              $cell_content = $cell;
-              $cell_attributes = [];
-              $is_header = FALSE;
-            }
-            else {
-              $cell_content = '';
-              if (isset($cell['data'])) {
-                $cell_content = $cell['data'];
-                unset($cell['data']);
-              }
-
-              // Flag the cell as a header or not and remove the flag.
-              $is_header = !empty($cell['header']);
-              unset($cell['header']);
-
-              $cell_attributes = $cell;
-            }
-            // Active table sort information.
-            if (isset($variables['header'][$col_key]['data']) && $variables['header'][$col_key]['data'] == $ts['name'] && !empty($variables['header'][$col_key]['field'])) {
-              $variables[$section][$row_key]['cells'][$col_key]['active_table_sort'] = TRUE;
-            }
-            // Copy RESPONSIVE_PRIORITY_LOW/RESPONSIVE_PRIORITY_MEDIUM
-            // class from header to cell as needed.
-            if (isset($responsive_classes[$responsive_index])) {
-              $cell_attributes['class'][] = $responsive_classes[$responsive_index];
-            }
-            $variables[$section][$row_key]['cells'][$col_key]['tag'] = $is_header ? 'th' : 'td';
-            $variables[$section][$row_key]['cells'][$col_key]['attributes'] = new Attribute($cell_attributes);
-            $variables[$section][$row_key]['cells'][$col_key]['content'] = $cell_content;
-          }
-        }
-      }
-    }
-  }
-  if (empty($variables['no_striping'])) {
-    $variables['attributes']['data-striping'] = 1;
-  }
+  @trigger_error(__FUNCTION__ . '() is deprecated in drupal:11.3.0 and is removed from drupal:12.0.0. Initial template_preprocess functions are registered directly in hook_theme(). See https://www.drupal.org/node/3504125', E_USER_DEPRECATED);
+  \Drupal::service(ThemePreprocess::class)->preprocessTable($variables);
 }
 
 /**
@@ -799,55 +545,14 @@ function template_preprocess_table(&$variables): void {
  *   - list_type: The type of list to return (e.g. "ul", "ol").
  *   - wrapper_attributes: HTML attributes to be applied to the list wrapper.
  *
- * @see https://www.drupal.org/node/1842756
+ * @deprecated in drupal:11.3.0 and is removed from drupal:12.0.0. Initial
+ *  template_preprocess functions are registered directly in hook_theme().
+ *
+ * @see https://www.drupal.org/node/3504125
  */
 function template_preprocess_item_list(&$variables): void {
-  $variables['wrapper_attributes'] = new Attribute($variables['wrapper_attributes']);
-  foreach ($variables['items'] as &$item) {
-    $attributes = [];
-    // If the item value is an array, then it is a render array.
-    if (is_array($item)) {
-      // List items support attributes via the '#wrapper_attributes' property.
-      if (isset($item['#wrapper_attributes'])) {
-        $attributes = $item['#wrapper_attributes'];
-      }
-      // Determine whether there are any child elements in the item that are not
-      // fully-specified render arrays. If there are any, then the child
-      // elements present nested lists and we automatically inherit the render
-      // array properties of the current list to them.
-      foreach (Element::children($item) as $key) {
-        $child = &$item[$key];
-        // If this child element does not specify how it can be rendered, then
-        // we need to inherit the render properties of the current list.
-        if (!isset($child['#type']) && !isset($child['#theme']) && !isset($child['#markup'])) {
-          // Since item-list.html.twig supports both strings and render arrays
-          // as items, the items of the nested list may have been specified as
-          // the child elements of the nested list, instead of #items. For
-          // convenience, we automatically move them into #items.
-          if (!isset($child['#items'])) {
-            // This is the same condition as in
-            // \Drupal\Core\Render\Element::children(), which cannot be used
-            // here, since it triggers an error on string values.
-            foreach ($child as $child_key => $child_value) {
-              if (is_int($child_key) || $child_key === '' || $child_key[0] !== '#') {
-                $child['#items'][$child_key] = $child_value;
-                unset($child[$child_key]);
-              }
-            }
-          }
-          // Lastly, inherit the original theme variables of the current list.
-          $child['#theme'] = $variables['theme_hook_original'];
-          $child['#list_type'] = $variables['list_type'];
-        }
-      }
-    }
-
-    // Set the item's value and attributes for the template.
-    $item = [
-      'value' => $item,
-      'attributes' => new Attribute($attributes),
-    ];
-  }
+  @trigger_error(__FUNCTION__ . '() is deprecated in drupal:11.3.0 and is removed from drupal:12.0.0. Initial template_preprocess functions are registered directly in hook_theme(). See https://www.drupal.org/node/3504125', E_USER_DEPRECATED);
+  \Drupal::service(ThemePreprocess::class)->preprocessItemList($variables);
 }
 
 /**
@@ -881,27 +586,15 @@ function template_preprocess_container(&$variables): void {
  *     It's the caller's responsibility to ensure this array's items contain no
  *     dangerous HTML such as <script> tags.
  *   - active: The key for the currently active maintenance task.
+ *
+ * @deprecated in drupal:11.3.0 and is removed from drupal:12.0.0. Initial
+ *  template_preprocess functions are registered directly in hook_theme().
+ *
+ * @see https://www.drupal.org/node/3504125
  */
 function template_preprocess_maintenance_task_list(&$variables): void {
-  $items = $variables['items'];
-  $active = $variables['active'];
-
-  $done = isset($items[$active]) || $active == NULL;
-  foreach ($items as $k => $item) {
-    $variables['tasks'][$k]['item'] = $item;
-    $variables['tasks'][$k]['attributes'] = new Attribute();
-    if ($active == $k) {
-      $variables['tasks'][$k]['attributes']->addClass('is-active');
-      $variables['tasks'][$k]['status'] = t('active');
-      $done = FALSE;
-    }
-    else {
-      if ($done) {
-        $variables['tasks'][$k]['attributes']->addClass('done');
-        $variables['tasks'][$k]['status'] = t('done');
-      }
-    }
-  }
+  @trigger_error(__FUNCTION__ . '() is deprecated in drupal:11.3.0 and is removed from drupal:12.0.0. Initial template_preprocess functions are registered directly in hook_theme(). See https://www.drupal.org/node/3504125', E_USER_DEPRECATED);
+  \Drupal::service(ThemePreprocess::class)->preprocessMaintenanceTaskList($variables);
 }
 
 /**
@@ -1051,9 +744,15 @@ function theme_get_suggestions($args, $base, $delimiter = '__'): array {
  * Prepares variables for tablesort indicators.
  *
  * Default template: tablesort-indicator.html.twig.
+ *
+ * @deprecated in drupal:11.3.0 and is removed from drupal:12.0.0. Initial
+ *    template_preprocess functions are registered directly in hook_theme().
+ *
+ * @see https://www.drupal.org/node/3504125
  */
 function template_preprocess_tablesort_indicator(&$variables): void {
-  $variables['#attached']['library'][] = 'core/drupal.tablesort';
+  @trigger_error(__FUNCTION__ . '() is deprecated in drupal:11.3.0 and is removed from drupal:12.0.0. Initial template_preprocess functions are registered directly in hook_theme(). See https://www.drupal.org/node/3504125', E_USER_DEPRECATED);
+  \Drupal::service(ThemePreprocess::class)->preprocessTablesortIndicator($variables);
 }
 
 /**
@@ -1065,25 +764,14 @@ function template_preprocess_tablesort_indicator(&$variables): void {
  *   An associative array containing:
  *   - content - An array of page content.
  *
- * @see system_page_attachments()
+ * @deprecated in drupal:11.3.0 and is removed from drupal:12.0.0. Initial
+ *  template_preprocess functions are registered directly in hook_theme().
+ *
+ * @see https://www.drupal.org/node/3504125
  */
 function template_preprocess_maintenance_page(&$variables): void {
-  // @todo Rename the templates to page--maintenance + page--install.
-  \Drupal::service(ThemePreprocess::class)->preprocessPage($variables);
-
-  // @see system_page_attachments()
-  $variables['#attached']['library'][] = 'system/maintenance';
-
-  // Maintenance page and install page need branding info in variables because
-  // there is no blocks.
-  $site_config = \Drupal::config('system.site');
-  $variables['logo'] = theme_get_setting('logo.url');
-  $variables['site_name'] = $site_config->get('name');
-  $variables['site_slogan'] = $site_config->get('slogan');
-
-  // Maintenance page and install page need page title in variable because there
-  // are no blocks.
-  $variables['title'] = $variables['page']['#title'];
+  @trigger_error(__FUNCTION__ . '() is deprecated in drupal:11.3.0 and is removed from drupal:12.0.0. Initial template_preprocess functions are registered directly in hook_theme(). See https://www.drupal.org/node/3504125', E_USER_DEPRECATED);
+  \Drupal::service(ThemePreprocess::class)->preprocessMaintenancePage($variables);
 }
 
 /**
@@ -1095,21 +783,14 @@ function template_preprocess_maintenance_page(&$variables): void {
  *   An associative array containing:
  *   - content - An array of page content.
  *
- * @see template_preprocess_maintenance_page()
+ * @deprecated in drupal:11.3.0 and is removed from drupal:12.0.0. Initial
+ *   template_preprocess functions are registered directly in hook_theme().
+ *
+ * @see https://www.drupal.org/node/3504125
  */
 function template_preprocess_install_page(&$variables): void {
-  $installer_active_task = NULL;
-  if (defined('MAINTENANCE_MODE') && MAINTENANCE_MODE === 'install' && InstallerKernel::installationAttempted()) {
-    $installer_active_task = $GLOBALS['install_state']['active_task'];
-  }
-
-  template_preprocess_maintenance_page($variables);
-
-  // Override the site name that is displayed on the page, since Drupal is
-  // still in the process of being installed.
-  $distribution_name = drupal_install_profile_distribution_name();
-  $variables['site_name'] = $distribution_name;
-  $variables['site_version'] = $installer_active_task ? drupal_install_profile_distribution_version() : '';
+  @trigger_error(__FUNCTION__ . '() is deprecated in drupal:11.3.0 and is removed from drupal:12.0.0. Initial template_preprocess functions are registered directly in hook_theme(). See https://www.drupal.org/node/3504125', E_USER_DEPRECATED);
+  \Drupal::service(ThemePreprocess::class)->preprocessInstallPage($variables);
 }
 
 /**
@@ -1124,11 +805,15 @@ function template_preprocess_install_page(&$variables): void {
  * @param array $variables
  *   An associative array containing:
  *   - elements: An associative array containing properties of the region.
+ *
+ * @deprecated in drupal:11.3.0 and is removed from drupal:12.0.0. Initial
+ *   template_preprocess functions are registered directly in hook_theme().
+ *
+ * @see https://www.drupal.org/node/3504125
  */
 function template_preprocess_region(&$variables): void {
-  // Create the $content variable that templates expect.
-  $variables['content'] = $variables['elements']['#children'];
-  $variables['region'] = $variables['elements']['#region'];
+  @trigger_error(__FUNCTION__ . '() is deprecated in drupal:11.3.0 and is removed from drupal:12.0.0. Initial template_preprocess functions are registered directly in hook_theme(). See https://www.drupal.org/node/3504125', E_USER_DEPRECATED);
+  \Drupal::service(ThemePreprocess::class)->preprocessRegion($variables);
 }
 
 /**
@@ -1141,55 +826,15 @@ function template_preprocess_region(&$variables): void {
  *   - element: A render element representing the field.
  *   - attributes: A string containing the attributes for the wrapping div.
  *   - title_attributes: A string containing the attributes for the title.
+ *
+ * @deprecated in drupal:11.3.0 and is removed from drupal:12.0.0. Initial
+ *    template_preprocess functions are registered directly in hook_theme().
+ *
+ * @see https://www.drupal.org/node/3504125
  */
 function template_preprocess_field(&$variables, $hook): void {
-  $element = $variables['element'];
-
-  // Creating variables for the template.
-  $variables['entity_type'] = $element['#entity_type'];
-  $variables['field_name'] = $element['#field_name'];
-  $variables['field_type'] = $element['#field_type'];
-  $variables['label_display'] = $element['#label_display'];
-
-  $variables['label_hidden'] = ($element['#label_display'] == 'hidden');
-  // Always set the field label - allow themes to decide whether to display it.
-  // In addition the label should be rendered but hidden to support screen
-  // readers.
-  $variables['label'] = $element['#title'];
-
-  $variables['multiple'] = $element['#is_multiple'];
-
-  static $default_attributes;
-  if (!isset($default_attributes)) {
-    $default_attributes = new Attribute();
-  }
-
-  // Merge attributes when a single-value field has a hidden label.
-  if ($element['#label_display'] == 'hidden' && !$variables['multiple'] && !empty($element['#items'][0]->_attributes)) {
-    $variables['attributes'] = AttributeHelper::mergeCollections($variables['attributes'], (array) $element['#items'][0]->_attributes);
-  }
-
-  // We want other preprocess functions and the theme implementation to have
-  // fast access to the field item render arrays. The item render array keys
-  // (deltas) should always be numerically indexed starting from 0, and looping
-  // on those keys is faster than calling Element::children() or looping on all
-  // keys within $element, since that requires traversal of all element
-  // properties.
-  $variables['items'] = [];
-  $delta = 0;
-  while (!empty($element[$delta])) {
-    $variables['items'][$delta]['content'] = $element[$delta];
-
-    // Modules can add field item attributes (to
-    // $item->_attributes) within hook_entity_prepare_view(). Some field
-    // formatters move those attributes into some nested formatter-specific
-    // element in order have them rendered on the desired HTML element (e.g., on
-    // the <a> element of a field item being rendered as a link). Other field
-    // formatters leave them within $element['#items'][$delta]['_attributes'] to
-    // be rendered on the item wrappers provided by field.html.twig.
-    $variables['items'][$delta]['attributes'] = !empty($element['#items'][$delta]->_attributes) ? new Attribute($element['#items'][$delta]->_attributes) : clone($default_attributes);
-    $delta++;
-  }
+  @trigger_error(__FUNCTION__ . '() is deprecated in drupal:11.3.0 and is removed from drupal:12.0.0. Initial template_preprocess functions are registered directly in hook_theme(). See https://www.drupal.org/node/3504125', E_USER_DEPRECATED);
+  \Drupal::service(FieldPreprocess::class)->preprocessField($variables);
 }
 
 /**
@@ -1202,112 +847,15 @@ function template_preprocess_field(&$variables, $hook): void {
  * @param array $variables
  *   An associative array containing:
  *   - element: A render element representing the form element.
+ *
+ * @deprecated in drupal:11.3.0 and is removed from drupal:12.0.0. Initial
+ *    template_preprocess functions are registered directly in hook_theme().
+ *
+ * @see https://www.drupal.org/node/3504125
  */
 function template_preprocess_field_multiple_value_form(&$variables): void {
-  $element = $variables['element'];
-  $variables['multiple'] = $element['#cardinality_multiple'];
-  $variables['attributes'] = $element['#attributes'];
-
-  if ($variables['multiple']) {
-    $table_id = Html::getUniqueId($element['#field_name'] . '_values');
-    // Using table id allows handing nested content with the same field names.
-    $order_class = $table_id . '-delta-order';
-    $header_attributes = new Attribute(['class' => ['label']]);
-    if (!empty($element['#required'])) {
-      $header_attributes['class'][] = 'js-form-required';
-      $header_attributes['class'][] = 'form-required';
-    }
-    $header = [
-      [
-        'data' => [
-          '#type' => 'html_tag',
-          '#tag' => 'h4',
-          '#value' => $element['#title'],
-          '#attributes' => $header_attributes,
-        ],
-        'colspan' => 2,
-        'class' => ['field-label'],
-      ],
-      [],
-      t('Order', [], ['context' => 'Sort order']),
-    ];
-    $rows = [];
-
-    // Sort items according to '_weight' (needed when the form comes back after
-    // preview or failed validation).
-    $items = [];
-    $variables['button'] = [];
-    foreach (Element::children($element) as $key) {
-      if ($key === 'add_more') {
-        $variables['button'] = &$element[$key];
-      }
-      else {
-        $items[] = &$element[$key];
-      }
-    }
-    usort($items, '_field_multiple_value_form_sort_helper');
-
-    // Add the items as table rows.
-    foreach ($items as $item) {
-      $item['_weight']['#attributes']['class'] = [$order_class];
-
-      // Remove weight form element from item render array so it can be rendered
-      // in a separate table column.
-      $delta_element = $item['_weight'];
-      unset($item['_weight']);
-
-      // Render actions in a separate column.
-      $actions = [];
-      if (isset($item['_actions'])) {
-        $actions = $item['_actions'];
-        unset($item['_actions']);
-      }
-
-      $cells = [
-        ['data' => '', 'class' => ['field-multiple-drag']],
-        ['data' => $item],
-        ['data' => $actions],
-        ['data' => $delta_element, 'class' => ['delta-order']],
-      ];
-      $rows[] = [
-        'data' => $cells,
-        'class' => ['draggable'],
-      ];
-    }
-
-    $variables['table'] = [
-      '#type' => 'table',
-      '#header' => $header,
-      '#rows' => $rows,
-      '#attributes' => [
-        'id' => $table_id,
-        'class' => ['field-multiple-table'],
-      ],
-      '#tabledrag' => [
-        [
-          'action' => 'order',
-          'relationship' => 'sibling',
-          'group' => $order_class,
-        ],
-      ],
-    ];
-
-    if (!empty($element['#description'])) {
-      $description_id = $element['#attributes']['aria-describedby'];
-      $description_attributes['id'] = $description_id;
-      $variables['description']['attributes'] = new Attribute($description_attributes);
-      $variables['description']['content'] = $element['#description'];
-
-      // Add the description's id to the table aria attributes.
-      $variables['table']['#attributes']['aria-describedby'] = $element['#attributes']['aria-describedby'];
-    }
-  }
-  else {
-    $variables['elements'] = [];
-    foreach (Element::children($element) as $key) {
-      $variables['elements'][] = $element[$key];
-    }
-  }
+  @trigger_error(__FUNCTION__ . '() is deprecated in drupal:11.3.0 and is removed from drupal:12.0.0. Initial template_preprocess functions are registered directly in hook_theme(). See https://www.drupal.org/node/3504125', E_USER_DEPRECATED);
+  \Drupal::service(FieldPreprocess::class)->preprocessFieldMultipleValueForm($variables);
 }
 
 /**
@@ -1318,13 +866,15 @@ function template_preprocess_field_multiple_value_form(&$variables): void {
  * @param array $variables
  *   An associative array containing:
  *   - links: A list of \Drupal\Core\Link objects which should be rendered.
+ *
+ * @deprecated in drupal:11.3.0 and is removed from drupal:12.0.0. Initial
+ *   template_preprocess functions are registered directly in hook_theme().
+ *
+ * @see https://www.drupal.org/node/3504125
  */
 function template_preprocess_breadcrumb(&$variables): void {
-  $variables['breadcrumb'] = [];
-  /** @var \Drupal\Core\Link $link */
-  foreach ($variables['links'] as $key => $link) {
-    $variables['breadcrumb'][$key] = ['text' => $link->getText(), 'url' => $link->getUrl()->toString()];
-  }
+  @trigger_error(__FUNCTION__ . '() is deprecated in drupal:11.3.0 and is removed from drupal:12.0.0. Initial template_preprocess functions are registered directly in hook_theme(). See https://www.drupal.org/node/3504125', E_USER_DEPRECATED);
+  \Drupal::service(BreadcrumbPreprocess::class)->preprocessBreadcrumb($variables);
 }
 
 /**
@@ -1347,137 +897,15 @@ function template_preprocess_breadcrumb(&$variables): void {
  *       to the pager links.
  *     - #route_parameters: An associative array of the route parameters.
  *     - #quantity: The number of pages in the list.
+ *
+ * @deprecated in drupal:11.3.0 and is removed from drupal:12.0.0. Initial
+ *   template_preprocess functions are registered directly in hook_theme().
+ *
+ * @see https://www.drupal.org/node/3504125
  */
 function template_preprocess_pager(&$variables): void {
-  $element = $variables['pager']['#element'];
-  $parameters = $variables['pager']['#parameters'];
-  $quantity = empty($variables['pager']['#quantity']) ? 0 : $variables['pager']['#quantity'];
-  $route_name = $variables['pager']['#route_name'];
-  $route_parameters = $variables['pager']['#route_parameters'] ?? [];
-
-  /** @var \Drupal\Core\Pager\PagerManagerInterface $pager_manager */
-  $pager_manager = \Drupal::service('pager.manager');
-
-  $pager = $pager_manager->getPager($element);
-
-  // Nothing to do if there is no pager.
-  if (!isset($pager)) {
-    return;
-  }
-
-  $pager_max = $pager->getTotalPages();
-
-  // Nothing to do if there is only one page.
-  if ($pager_max <= 1) {
-    return;
-  }
-
-  $tags = $variables['pager']['#tags'];
-
-  // Calculate various markers within this pager piece:
-  // Middle is used to "center" pages around the current page.
-  $pager_middle = ceil($quantity / 2);
-  $current_page = $pager->getCurrentPage();
-  // The current pager is the page we are currently paged to.
-  $pager_current = $current_page + 1;
-  // The first pager is the first page listed by this pager piece (re quantity).
-  $pager_first = $pager_current - $pager_middle + 1;
-  // The last is the last page listed by this pager piece (re quantity).
-  $pager_last = $pager_current + $quantity - $pager_middle;
-  // End of marker calculations.
-
-  // Prepare for generation loop.
-  $i = $pager_first;
-  if ($pager_last > $pager_max) {
-    // Adjust "center" if at end of query.
-    $i = $i + ($pager_max - $pager_last);
-    $pager_last = $pager_max;
-  }
-  if ($i <= 0) {
-    // Adjust "center" if at start of query.
-    $pager_last = $pager_last + (1 - $i);
-    $i = 1;
-  }
-  // End of generation loop preparation.
-
-  // Create the "first" and "previous" links if we are not on the first page.
-  if ($current_page > 0) {
-    $items['first'] = [];
-    $items['first']['attributes'] = new Attribute();
-    $options = [
-      'query' => $pager_manager->getUpdatedParameters($parameters, $element, 0),
-    ];
-    $items['first']['href'] = Url::fromRoute($route_name, $route_parameters, $options)->toString();
-    if (isset($tags[0])) {
-      $items['first']['text'] = $tags[0];
-    }
-
-    $items['previous'] = [];
-    $items['previous']['attributes'] = new Attribute();
-    $options = [
-      'query' => $pager_manager->getUpdatedParameters($parameters, $element, $current_page - 1),
-    ];
-    $items['previous']['href'] = Url::fromRoute($route_name, $route_parameters, $options)->toString();
-    if (isset($tags[1])) {
-      $items['previous']['text'] = $tags[1];
-    }
-  }
-
-  // Add an ellipsis if there are further previous pages.
-  if ($i > 1) {
-    $variables['ellipses']['previous'] = TRUE;
-  }
-  // Now generate the actual pager piece.
-  for (; $i <= $pager_last && $i <= $pager_max; $i++) {
-    $options = [
-      'query' => $pager_manager->getUpdatedParameters($parameters, $element, $i - 1),
-    ];
-    $items['pages'][$i]['href'] = Url::fromRoute($route_name, $route_parameters, $options)->toString();
-    $items['pages'][$i]['attributes'] = new Attribute();
-    if ($i == $pager_current) {
-      $variables['current'] = $i;
-      $items['pages'][$i]['attributes']->setAttribute('aria-current', 'page');
-    }
-  }
-  // Add an ellipsis if there are further next pages.
-  if ($i < $pager_max + 1) {
-    $variables['ellipses']['next'] = TRUE;
-  }
-
-  // Create the "next" and "last" links if we are not on the last page.
-  if ($current_page < ($pager_max - 1)) {
-    $items['next'] = [];
-    $items['next']['attributes'] = new Attribute();
-    $options = [
-      'query' => $pager_manager->getUpdatedParameters($parameters, $element, $current_page + 1),
-    ];
-    $items['next']['href'] = Url::fromRoute($route_name, $route_parameters, $options)->toString();
-    if (isset($tags[3])) {
-      $items['next']['text'] = $tags[3];
-    }
-
-    $items['last'] = [];
-    $items['last']['attributes'] = new Attribute();
-    $options = [
-      'query' => $pager_manager->getUpdatedParameters($parameters, $element, $pager_max - 1),
-    ];
-    $items['last']['href'] = Url::fromRoute($route_name, $route_parameters, $options)->toString();
-    if (isset($tags[4])) {
-      $items['last']['text'] = $tags[4];
-    }
-  }
-
-  $variables['items'] = $items;
-  $variables['heading_id'] = Html::getUniqueId('pagination-heading');
-  $variables['pagination_heading_level'] = $variables['pager']['#pagination_heading_level'] ?? 'h4';
-  if (!preg_match('/^h[1-6]$/', $variables['pagination_heading_level'])) {
-    $variables['pagination_heading_level'] = 'h4';
-  }
-
-  // The rendered link needs to play well with any other query parameter used
-  // on the page, like exposed filters, so for the cacheability all query
-  // parameters matter.
-  $variables['#cache']['contexts'][] = 'url.query_args';
+  @trigger_error(__FUNCTION__ . '() is deprecated in drupal:11.3.0 and is removed from drupal:12.0.0. Initial template_preprocess functions are registered directly in hook_theme(). See https://www.drupal.org/node/3504125', E_USER_DEPRECATED);
+  \Drupal::service(PagerPreprocess::class)->preprocessPager($variables);
 }
 
 /**
@@ -1491,26 +919,15 @@ function template_preprocess_pager(&$variables): void {
  *     - #link: A menu link array with 'title', 'url', and (optionally)
  *       'localized_options' keys.
  *     - #active: A boolean indicating whether the local task is active.
+ *
+ * @deprecated in drupal:11.3.0 and is removed from drupal:12.0.0. Initial
+ *   template_preprocess functions are registered directly in hook_theme().
+ *
+ * @see https://www.drupal.org/node/3504125
  */
 function template_preprocess_menu_local_task(&$variables): void {
-  $link = $variables['element']['#link'];
-  $link += [
-    'localized_options' => [],
-  ];
-  $link_text = $link['title'];
-
-  if (!empty($variables['element']['#active'])) {
-    $variables['is_active'] = TRUE;
-  }
-
-  $link['localized_options']['set_active_class'] = TRUE;
-
-  $variables['link'] = [
-    '#type' => 'link',
-    '#title' => $link_text,
-    '#url' => $link['url'],
-    '#options' => $link['localized_options'],
-  ];
+  @trigger_error(__FUNCTION__ . '() is deprecated in drupal:11.3.0 and is removed from drupal:12.0.0. Initial template_preprocess functions are registered directly in hook_theme(). See https://www.drupal.org/node/3504125', E_USER_DEPRECATED);
+  \Drupal::service(MenuPreprocess::class)->preprocessMenuLocalTask($variables);
 }
 
 /**
@@ -1523,30 +940,29 @@ function template_preprocess_menu_local_task(&$variables): void {
  *   - element: A render element containing:
  *     - #link: A menu link array with 'title', 'url', and (optionally)
  *       'localized_options' keys.
+ *
+ * @deprecated in drupal:11.3.0 and is removed from drupal:12.0.0. Initial
+ *   template_preprocess functions are registered directly in hook_theme().
+ *
+ * @see https://www.drupal.org/node/3504125
  */
 function template_preprocess_menu_local_action(&$variables): void {
-  $link = $variables['element']['#link'];
-  $link += [
-    'localized_options' => [],
-  ];
-  $link['localized_options']['attributes']['class'][] = 'button';
-  $link['localized_options']['attributes']['class'][] = 'button-action';
-  $link['localized_options']['set_active_class'] = TRUE;
-
-  $variables['link'] = [
-    '#type' => 'link',
-    '#title' => $link['title'],
-    '#options' => $link['localized_options'],
-    '#url' => $link['url'],
-  ];
+  @trigger_error(__FUNCTION__ . '() is deprecated in drupal:11.3.0 and is removed from drupal:12.0.0. Initial template_preprocess functions are registered directly in hook_theme(). See https://www.drupal.org/node/3504125', E_USER_DEPRECATED);
+  \Drupal::service(MenuPreprocess::class)->preprocessMenuLocalAction($variables);
 }
 
 /**
- * Callback for usort() within template_preprocess_field_multiple_value_form().
+ * Callback for usort() of field item form elements.
  *
  * Sorts using ['_weight']['#value']
+ *
+ * @deprecated in drupal:11.3.0 and is removed from drupal:12.0.0. There is no
+ *   replacement.
+ *
+ * @see https://www.drupal.org/node/3504125
  */
 function _field_multiple_value_form_sort_helper($a, $b) {
+  @trigger_error(__FUNCTION__ . '() is deprecated in drupal:11.3.0 and is removed from drupal:12.0.0. Initial template_preprocess functions are registered directly in hook_theme(). See https://www.drupal.org/node/3504125', E_USER_DEPRECATED);
   $a_weight = (is_array($a) && isset($a['_weight']['#value']) ? $a['_weight']['#value'] : 0);
   $b_weight = (is_array($b) && isset($b['_weight']['#value']) ? $b['_weight']['#value'] : 0);
   return $a_weight - $b_weight;
@@ -1563,4 +979,46 @@ function _field_multiple_value_form_sort_helper($a, $b) {
 function drupal_common_theme(): array {
   @trigger_error('drupal_common_theme() is deprecated in drupal:11.1.0 and is removed from drupal:12.0.0. Use \Drupal\Core\Theme\ThemeCommonElements::commonElements() instead. See https://www.drupal.org/node/3488470', E_USER_DEPRECATED);
   return ThemeCommonElements::commonElements();
+}
+
+/**
+ * Prepares variables for authorize.php operation report templates.
+ *
+ * This report displays the results of an operation run via authorize.php.
+ *
+ * Default template: authorize-report.html.twig.
+ *
+ * @param array $variables
+ *   An associative array containing:
+ *   - messages: An array of result messages.
+ *
+ * @deprecated in drupal:11.2.0 and is removed from drupal:12.0.0. There is no
+ *   replacement. Use composer to manage the code for your site.
+ *
+ * @see https://www.drupal.org/node/3522119
+ */
+function template_preprocess_authorize_report(&$variables): void {
+  @trigger_error(__FUNCTION__ . '() is deprecated in drupal:11.2.0 and is removed from drupal:12.0.0. There is no replacement. Use composer to manage the code for your site. See https://www.drupal.org/node/3522119', E_USER_DEPRECATED);
+  $messages = [];
+  if (!empty($variables['messages'])) {
+    foreach ($variables['messages'] as $heading => $logs) {
+      $items = [];
+      foreach ($logs as $number => $log_message) {
+        if ($number === '#abort') {
+          continue;
+        }
+        $class = 'authorize-results__' . ($log_message['success'] ? 'success' : 'failure');
+        $items[] = [
+          '#wrapper_attributes' => ['class' => [$class]],
+          '#markup' => $log_message['message'],
+        ];
+      }
+      $messages[] = [
+        '#theme' => 'item_list',
+        '#items' => $items,
+        '#title' => $heading,
+      ];
+    }
+  }
+  $variables['messages'] = $messages;
 }

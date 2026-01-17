@@ -6,21 +6,25 @@ namespace Drupal\Tests\migrate_drupal\Kernel\d7;
 
 use Drupal\comment\Entity\CommentType;
 use Drupal\field\Plugin\migrate\source\d7\FieldInstance;
+use Drupal\field_discovery_test\FieldDiscoveryTestClass;
+use Drupal\migrate_drupal\FieldDiscovery;
 use Drupal\migrate_drupal\FieldDiscoveryInterface;
 use Drupal\node\Entity\NodeType;
 use Drupal\taxonomy\Entity\Vocabulary;
 use Drupal\Tests\migrate_drupal\Traits\FieldDiscoveryTestTrait;
-use Drupal\field_discovery_test\FieldDiscoveryTestClass;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 // cspell:ignore filefield imagelink entityreference nodelink spamspan
-
 /**
  * Test FieldDiscovery Service against Drupal 7.
- *
- * @group migrate_drupal
- * @group #slow
- * @coversDefaultClass \Drupal\migrate_drupal\FieldDiscovery
  */
+#[CoversClass(FieldDiscovery::class)]
+#[Group('migrate_drupal')]
+#[Group('#slow')]
+#[RunTestsInSeparateProcesses]
 class FieldDiscoveryTest extends MigrateDrupal7TestBase {
 
   use FieldDiscoveryTestTrait;
@@ -36,7 +40,6 @@ class FieldDiscoveryTest extends MigrateDrupal7TestBase {
     'image',
     'link',
     'node',
-    'system',
     'taxonomy',
     'telephone',
     'text',
@@ -116,7 +119,7 @@ class FieldDiscoveryTest extends MigrateDrupal7TestBase {
   /**
    * Tests the addAllFieldProcesses method.
    *
-   * @covers ::addAllFieldProcesses
+   * @legacy-covers ::addAllFieldProcesses
    */
   public function testAddAllFieldProcesses(): void {
     $expected_process_keys = [
@@ -170,9 +173,9 @@ class FieldDiscoveryTest extends MigrateDrupal7TestBase {
   /**
    * Tests the addAllFieldProcesses method for field migrations.
    *
-   * @covers ::addAllFieldProcesses
-   * @dataProvider addAllFieldProcessesAltersData
+   * @legacy-covers ::addAllFieldProcesses
    */
+  #[DataProvider('addAllFieldProcessesAltersData')]
   public function testAddAllFieldProcessesAlters($field_plugin_method, $expected_process): void {
     $this->assertFieldProcess($this->fieldDiscovery, $this->migrationPluginManager, FieldDiscoveryInterface::DRUPAL_7, $field_plugin_method, $expected_process);
   }
@@ -321,7 +324,7 @@ class FieldDiscoveryTest extends MigrateDrupal7TestBase {
   /**
    * Tests the getAllFields method.
    *
-   * @covers ::getAllFields
+   * @legacy-covers ::getAllFields
    */
   public function testGetAllFields(): void {
     $field_discovery_test = new FieldDiscoveryTestClass($this->fieldPluginManager, $this->migrationPluginManager, $this->logger);
@@ -347,7 +350,7 @@ class FieldDiscoveryTest extends MigrateDrupal7TestBase {
   /**
    * Tests the getSourcePlugin method.
    *
-   * @covers ::getSourcePlugin
+   * @legacy-covers ::getSourcePlugin
    */
   public function testGetSourcePlugin(): void {
     $this->assertSourcePlugin('7', FieldInstance::class, [

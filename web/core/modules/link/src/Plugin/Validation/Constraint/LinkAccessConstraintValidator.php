@@ -18,7 +18,7 @@ class LinkAccessConstraintValidator extends ConstraintValidator implements Conta
    *
    * @var \Drupal\Core\Session\AccountProxyInterface
    */
-  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName, Drupal.Commenting.VariableComment.Missing
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
   protected $current_user;
 
   /**
@@ -56,7 +56,9 @@ class LinkAccessConstraintValidator extends ConstraintValidator implements Conta
       // permission nor can access this URI.
       $allowed = $this->current_user->hasPermission('link to any page') || $url->access();
       if (!$allowed) {
-        $this->context->addViolation($constraint->message, ['@uri' => $value->uri]);
+        $this->context->buildViolation($constraint->message, ['@uri' => $value->uri])
+          ->atPath('uri')
+          ->addViolation();
       }
     }
   }

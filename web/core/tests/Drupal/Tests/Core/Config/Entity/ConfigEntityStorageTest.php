@@ -33,9 +33,10 @@ use Prophecy\Argument;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 /**
- * @coversDefaultClass \Drupal\Core\Config\Entity\ConfigEntityStorage
- * @group Config
+ * Tests Drupal\Core\Config\Entity\ConfigEntityStorage.
  */
+#[\PHPUnit\Framework\Attributes\CoversClass(\Drupal\Core\Config\Entity\ConfigEntityStorage::class)]
+#[\PHPUnit\Framework\Attributes\Group('Config')]
 class ConfigEntityStorageTest extends UnitTestCase {
 
   /**
@@ -104,7 +105,7 @@ class ConfigEntityStorageTest extends UnitTestCase {
   /**
    * {@inheritdoc}
    *
-   * @covers ::__construct
+   * @legacy-covers ::__construct
    */
   protected function setUp(): void {
     parent::setUp();
@@ -167,8 +168,10 @@ class ConfigEntityStorageTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::create
-   * @covers ::doCreate
+   * Tests create with predefined uuid.
+   *
+   * @legacy-covers ::create
+   * @legacy-covers ::doCreate
    */
   public function testCreateWithPredefinedUuid(): void {
     $this->cacheTagsInvalidator->invalidateTags(Argument::cetera())->shouldNotBeCalled();
@@ -186,11 +189,13 @@ class ConfigEntityStorageTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::create
-   * @covers ::doCreate
+   * Tests create.
    *
    * @return \Drupal\Core\Entity\EntityInterface
    *   The created entity with ID, language code, and UUID set.
+   *
+   * @legacy-covers ::create
+   * @legacy-covers ::doCreate
    */
   public function testCreate() {
     $this->cacheTagsInvalidator->invalidateTags(Argument::cetera())->shouldNotBeCalled();
@@ -210,8 +215,10 @@ class ConfigEntityStorageTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::create
-   * @covers ::doCreate
+   * Tests create with current language.
+   *
+   * @legacy-covers ::create
+   * @legacy-covers ::doCreate
    */
   public function testCreateWithCurrentLanguage(): void {
     $this->languageManager->getLanguage('hu')->willReturn(new Language(['id' => 'hu']));
@@ -221,8 +228,10 @@ class ConfigEntityStorageTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::create
-   * @covers ::doCreate
+   * Tests create with explicit language.
+   *
+   * @legacy-covers ::create
+   * @legacy-covers ::doCreate
    */
   public function testCreateWithExplicitLanguage(): void {
     $this->languageManager->getLanguage('en')->willReturn(new Language(['id' => 'en']));
@@ -232,8 +241,7 @@ class ConfigEntityStorageTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::save
-   * @covers ::doSave
+   * Tests save insert.
    *
    * @param \Drupal\Core\Entity\EntityInterface $entity
    *   The entity to test.
@@ -241,9 +249,11 @@ class ConfigEntityStorageTest extends UnitTestCase {
    * @return \Drupal\Core\Entity\EntityInterface
    *   The saved entity after insertion.
    *
-   * @depends testCreate
+   * @legacy-covers ::save
+   * @legacy-covers ::doSave
    */
-  public function testSaveInsert(EntityInterface $entity) {
+  #[\PHPUnit\Framework\Attributes\Depends('testCreate')]
+  public function testSaveInsert(EntityInterface $entity): EntityInterface {
     $immutable_config_object = $this->prophesize(ImmutableConfig::class);
     $immutable_config_object->isNew()->willReturn(TRUE);
 
@@ -258,7 +268,13 @@ class ConfigEntityStorageTest extends UnitTestCase {
       ])
       ->shouldBeCalled();
     $config_object->save(FALSE)->shouldBeCalled();
-    $config_object->get()->willReturn([]);
+    $config_object->get()->willReturn([
+      'id' => 'foo',
+      'uuid' => 'bar',
+      'dependencies' => [],
+      'langcode' => 'hu',
+      'status' => TRUE,
+    ])->shouldBeCalled();
 
     $this->cacheTagsInvalidator->invalidateTags([$this->entityTypeId . '_list'])
       ->shouldBeCalled();
@@ -286,8 +302,7 @@ class ConfigEntityStorageTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::save
-   * @covers ::doSave
+   * Tests save update.
    *
    * @param \Drupal\Core\Entity\EntityInterface $entity
    *   The entity to test.
@@ -295,9 +310,11 @@ class ConfigEntityStorageTest extends UnitTestCase {
    * @return \Drupal\Core\Entity\EntityInterface
    *   The saved entity after update.
    *
-   * @depends testSaveInsert
+   * @legacy-covers ::save
+   * @legacy-covers ::doSave
    */
-  public function testSaveUpdate(EntityInterface $entity) {
+  #[\PHPUnit\Framework\Attributes\Depends('testSaveInsert')]
+  public function testSaveUpdate(EntityInterface $entity): EntityInterface {
     $immutable_config_object = $this->prophesize(ImmutableConfig::class);
     $immutable_config_object->isNew()->willReturn(FALSE);
 
@@ -312,7 +329,13 @@ class ConfigEntityStorageTest extends UnitTestCase {
       ])
       ->shouldBeCalled();
     $config_object->save(FALSE)->shouldBeCalled();
-    $config_object->get()->willReturn([]);
+    $config_object->get()->willReturn([
+      'id' => 'foo',
+      'uuid' => 'bar',
+      'dependencies' => [],
+      'langcode' => 'hu',
+      'status' => TRUE,
+    ])->shouldBeCalled();
 
     $this->cacheTagsInvalidator->invalidateTags([$this->entityTypeId . '_list'])
       ->shouldBeCalled();
@@ -347,11 +370,12 @@ class ConfigEntityStorageTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::save
-   * @covers ::doSave
+   * Tests save rename.
    *
-   * @depends testSaveInsert
+   * @legacy-covers ::save
+   * @legacy-covers ::doSave
    */
+  #[\PHPUnit\Framework\Attributes\Depends('testSaveInsert')]
   public function testSaveRename(ConfigEntityInterface $entity): void {
     $immutable_config_object = $this->prophesize(ImmutableConfig::class);
     $immutable_config_object->isNew()->willReturn(FALSE);
@@ -368,7 +392,13 @@ class ConfigEntityStorageTest extends UnitTestCase {
       ->shouldBeCalled();
     $config_object->save(FALSE)
       ->shouldBeCalled();
-    $config_object->get()->willReturn([]);
+    $config_object->get()->willReturn([
+      'id' => 'bar',
+      'uuid' => 'bar',
+      'dependencies' => [],
+      'langcode' => 'hu',
+      'status' => TRUE,
+    ])->shouldBeCalled();
 
     $this->cacheTagsInvalidator->invalidateTags([$this->entityTypeId . '_list'])
       ->shouldBeCalled();
@@ -396,7 +426,9 @@ class ConfigEntityStorageTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::save
+   * Tests save invalid.
+   *
+   * @legacy-covers ::save
    */
   public function testSaveInvalid(): void {
     $this->cacheTagsInvalidator->invalidateTags(Argument::cetera())
@@ -409,8 +441,10 @@ class ConfigEntityStorageTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::save
-   * @covers ::doSave
+   * Tests save duplicate.
+   *
+   * @legacy-covers ::save
+   * @legacy-covers ::doSave
    */
   public function testSaveDuplicate(): void {
     $config_object = $this->prophesize(ImmutableConfig::class);
@@ -430,8 +464,10 @@ class ConfigEntityStorageTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::save
-   * @covers ::doSave
+   * Tests save mismatch.
+   *
+   * @legacy-covers ::save
+   * @legacy-covers ::doSave
    */
   public function testSaveMismatch(): void {
     $config_object = $this->prophesize(ImmutableConfig::class);
@@ -453,15 +489,23 @@ class ConfigEntityStorageTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::save
-   * @covers ::doSave
+   * Tests save no mismatch.
+   *
+   * @legacy-covers ::save
+   * @legacy-covers ::doSave
    */
   public function testSaveNoMismatch(): void {
     $immutable_config_object = $this->prophesize(ImmutableConfig::class);
     $immutable_config_object->isNew()->willReturn(TRUE);
 
     $config_object = $this->prophesize(Config::class);
-    $config_object->get()->willReturn([]);
+    $config_object->get()->willReturn([
+      'id' => 'foo',
+      'uuid' => NULL,
+      'dependencies' => [],
+      'langcode' => 'en',
+      'status' => TRUE,
+    ])->shouldBeCalled();
     $config_object
       ->setData([
         'id' => 'foo',
@@ -495,8 +539,10 @@ class ConfigEntityStorageTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::save
-   * @covers ::doSave
+   * Tests save changed uuid.
+   *
+   * @legacy-covers ::save
+   * @legacy-covers ::doSave
    */
   public function testSaveChangedUuid(): void {
     $config_object = $this->prophesize(ImmutableConfig::class);
@@ -529,10 +575,12 @@ class ConfigEntityStorageTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::load
-   * @covers ::postLoad
-   * @covers ::mapFromStorageRecords
-   * @covers ::doLoadMultiple
+   * Tests load.
+   *
+   * @legacy-covers ::load
+   * @legacy-covers ::postLoad
+   * @legacy-covers ::mapFromStorageRecords
+   * @legacy-covers ::doLoadMultiple
    */
   public function testLoad(): void {
     $config_object = $this->prophesize(ImmutableConfig::class);
@@ -556,10 +604,12 @@ class ConfigEntityStorageTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::loadMultiple
-   * @covers ::postLoad
-   * @covers ::mapFromStorageRecords
-   * @covers ::doLoadMultiple
+   * Tests load multiple all.
+   *
+   * @legacy-covers ::loadMultiple
+   * @legacy-covers ::postLoad
+   * @legacy-covers ::mapFromStorageRecords
+   * @legacy-covers ::doLoadMultiple
    */
   public function testLoadMultipleAll(): void {
     $foo_config_object = $this->prophesize(ImmutableConfig::class);
@@ -594,10 +644,12 @@ class ConfigEntityStorageTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::loadMultiple
-   * @covers ::postLoad
-   * @covers ::mapFromStorageRecords
-   * @covers ::doLoadMultiple
+   * Tests load multiple ids.
+   *
+   * @legacy-covers ::loadMultiple
+   * @legacy-covers ::postLoad
+   * @legacy-covers ::mapFromStorageRecords
+   * @legacy-covers ::doLoadMultiple
    */
   public function testLoadMultipleIds(): void {
     $config_object = $this->prophesize(ImmutableConfig::class);
@@ -619,8 +671,10 @@ class ConfigEntityStorageTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::delete
-   * @covers ::doDelete
+   * Tests delete.
+   *
+   * @legacy-covers ::delete
+   * @legacy-covers ::doDelete
    */
   public function testDelete(): void {
     // Dependencies are tested in
@@ -661,8 +715,10 @@ class ConfigEntityStorageTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::delete
-   * @covers ::doDelete
+   * Tests delete nothing.
+   *
+   * @legacy-covers ::delete
+   * @legacy-covers ::doDelete
    */
   public function testDeleteNothing(): void {
     $this->moduleHandler->invokeAll(Argument::cetera())->shouldNotBeCalled();
