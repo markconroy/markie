@@ -13,6 +13,7 @@ namespace Symfony\Component\Serializer\Normalizer;
 
 use Symfony\Component\PropertyAccess\Exception\InvalidArgumentException as PropertyAccessInvalidArgumentException;
 use Symfony\Component\PropertyAccess\Exception\InvalidTypeException;
+use Symfony\Component\PropertyAccess\Exception\NoSuchIndexException;
 use Symfony\Component\PropertyAccess\Exception\NoSuchPropertyException;
 use Symfony\Component\PropertyAccess\Exception\UninitializedPropertyException;
 use Symfony\Component\PropertyAccess\PropertyAccess;
@@ -213,12 +214,11 @@ abstract class AbstractObjectNormalizer extends AbstractNormalizer
         foreach ($stack as $attribute => $attributeValue) {
             $attributeContext = $this->getAttributeNormalizationContext($data, $attribute, $context);
 
-            if (null === $attributeValue || \is_scalar($attributeValue)) {
-                $normalizedData = $this->updateData($normalizedData, $attribute, $attributeValue, $class, $format, $attributeContext, $attributesMetadata, $classMetadata);
-                continue;
-            }
-
             if (!$this->serializer instanceof NormalizerInterface) {
+                if (null === $attributeValue || \is_scalar($attributeValue)) {
+                    $normalizedData = $this->updateData($normalizedData, $attribute, $attributeValue, $class, $format, $attributeContext, $attributesMetadata, $classMetadata);
+                    continue;
+                }
                 throw new LogicException(\sprintf('Cannot normalize attribute "%s" because the injected serializer is not a normalizer.', $attribute));
             }
 
@@ -324,15 +324,16 @@ abstract class AbstractObjectNormalizer extends AbstractNormalizer
 
         $nestedAttributes = $this->getNestedAttributes($mappedClass);
         $nestedData = $originalNestedData = [];
-        $propertyAccessor = PropertyAccess::createPropertyAccessor();
+        $propertyAccessor = PropertyAccess::createPropertyAccessorBuilder()->enableExceptionOnInvalidIndex()->getPropertyAccessor();
         foreach ($nestedAttributes as $property => $serializedPath) {
-            if (null === $value = $propertyAccessor->getValue($normalizedData, $serializedPath)) {
-                continue;
+            try {
+                $value = $propertyAccessor->getValue($normalizedData, $serializedPath);
+                $convertedProperty = $this->nameConverter ? $this->nameConverter->normalize($property, $mappedClass, $format, $context) : $property;
+                $nestedData[$convertedProperty] = $value;
+                $originalNestedData[$property] = $value;
+                $normalizedData = $this->removeNestedValue($serializedPath->getElements(), $normalizedData);
+            } catch (NoSuchIndexException) {
             }
-            $convertedProperty = $this->nameConverter ? $this->nameConverter->normalize($property, $mappedClass, $format, $context) : $property;
-            $nestedData[$convertedProperty] = $value;
-            $originalNestedData[$property] = $value;
-            $normalizedData = $this->removeNestedValue($serializedPath->getElements(), $normalizedData);
         }
 
         $normalizedData = $nestedData + $normalizedData;
@@ -459,7 +460,7 @@ abstract class AbstractObjectNormalizer extends AbstractNormalizer
 
             // This try-catch should cover all NotNormalizableValueException (and all return branches after the first
             // exception) so we could try denormalizing all types of an union type. If the target type is not an union
-            // type, we will just re-throw the catched exception.
+            // type, we will just re-throw the caught exception.
             // In the case of no denormalization succeeds with an union type, it will fall back to the default exception
             // with the acceptable types list.
             try {
@@ -712,7 +713,7 @@ abstract class AbstractObjectNormalizer extends AbstractNormalizer
 
             // This try-catch should cover all NotNormalizableValueException (and all return branches after the first
             // exception) so we could try denormalizing all types of an union type. If the target type is not an union
-            // type, we will just re-throw the catched exception.
+            // type, we will just re-throw the caught exception.
             // In the case of no denormalization succeeds with an union type, it will fall back to the default exception
             // with the acceptable types list.
             try {
@@ -1057,7 +1058,7 @@ abstract class AbstractObjectNormalizer extends AbstractNormalizer
      */
     private function isMaxDepthReached(array $attributesMetadata, string $class, string $attribute, array &$context): bool
     {
-        if (!($enableMaxDepth = $context[self::ENABLE_MAX_DEPTH] ?? $this->defaultContext[self::ENABLE_MAX_DEPTH] ?? false)
+        if (!($context[self::ENABLE_MAX_DEPTH] ?? $this->defaultContext[self::ENABLE_MAX_DEPTH] ?? false)
             || !isset($attributesMetadata[$attribute]) || null === $maxDepth = $attributesMetadata[$attribute]?->getMaxDepth()
         ) {
             return false;

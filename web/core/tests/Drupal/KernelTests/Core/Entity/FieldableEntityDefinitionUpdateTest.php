@@ -4,19 +4,22 @@ declare(strict_types=1);
 
 namespace Drupal\KernelTests\Core\Entity;
 
+use Drupal\Core\Entity\EntityDefinitionUpdateManager;
 use Drupal\Core\Entity\EntityStorageException;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Site\Settings;
 use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\Tests\system\Functional\Entity\Traits\EntityDefinitionTestTrait;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests EntityDefinitionUpdateManager's fieldable entity update functionality.
- *
- * @coversDefaultClass \Drupal\Core\Entity\EntityDefinitionUpdateManager
- *
- * @group Entity
  */
+#[CoversClass(EntityDefinitionUpdateManager::class)]
+#[Group('Entity')]
+#[RunTestsInSeparateProcesses]
 class FieldableEntityDefinitionUpdateTest extends EntityKernelTestBase {
 
   use EntityDefinitionTestTrait;
@@ -81,7 +84,6 @@ class FieldableEntityDefinitionUpdateTest extends EntityKernelTestBase {
    * {@inheritdoc}
    */
   protected static $modules = [
-    'content_translation',
     'entity_test_update',
     'language',
   ];

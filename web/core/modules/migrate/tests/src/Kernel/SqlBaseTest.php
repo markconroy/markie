@@ -4,22 +4,25 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\migrate\Kernel;
 
+use Drupal\Core\Database\Database;
 use Drupal\Core\Database\Query\ConditionInterface;
 use Drupal\Core\Database\Query\SelectInterface;
 use Drupal\Core\Database\Statement\FetchAs;
 use Drupal\Core\Database\StatementInterface;
 use Drupal\migrate\Exception\RequirementsException;
-use Drupal\Core\Database\Database;
 use Drupal\migrate\MigrateExecutable;
 use Drupal\migrate\MigrateMessage;
 use Drupal\migrate\Plugin\migrate\source\SqlBase;
 use Drupal\migrate\Plugin\MigrationInterface;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the functionality of SqlBase.
- *
- * @group migrate
  */
+#[Group('migrate')]
+#[RunTestsInSeparateProcesses]
 class SqlBaseTest extends MigrateTestBase {
 
   /**
@@ -160,9 +163,8 @@ class SqlBaseTest extends MigrateTestBase {
    *   (optional) The high-water value to set.
    * @param array $query_result
    *   (optional) The expected query results.
-   *
-   * @dataProvider highWaterDataProvider
    */
+  #[DataProvider('highWaterDataProvider')]
   public function testHighWater($high_water = NULL, array $query_result = []): void {
     $configuration = [
       'high_water_property' => [
@@ -206,7 +208,7 @@ class SqlBaseTest extends MigrateTestBase {
    */
   public function testPrepareQuery(): void {
     $this->prepareSourceData();
-    $this->enableModules(['migrate_sql_prepare_query_test', 'entity_test']);
+    $this->enableModules(['migrate_sql_prepare_query_test', 'entity_test', 'user']);
 
     /** @var \Drupal\migrate\Plugin\MigrationInterface $migration */
     $migration = $this->container->get('plugin.manager.migration')

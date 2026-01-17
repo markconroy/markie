@@ -7,15 +7,20 @@ namespace Drupal\Tests\layout_builder\FunctionalJavascript;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
+use Drupal\layout_builder\Plugin\Block\FieldBlock;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\IgnoreDeprecations;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 // cspell:ignore datefield
-
 /**
- * @coversDefaultClass \Drupal\layout_builder\Plugin\Block\FieldBlock
- *
- * @group field
- * @group legacy
+ * Tests Drupal\layout_builder\Plugin\Block\FieldBlock.
  */
+#[CoversClass(FieldBlock::class)]
+#[Group('field')]
+#[IgnoreDeprecations]
+#[RunTestsInSeparateProcesses]
 class FieldBlockTest extends WebDriverTestBase {
 
   /**

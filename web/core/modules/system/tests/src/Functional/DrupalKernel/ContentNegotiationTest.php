@@ -5,14 +5,15 @@ declare(strict_types=1);
 namespace Drupal\Tests\system\Functional\DrupalKernel;
 
 use Drupal\Tests\BrowserTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 // cspell:ignore msword pjpeg silverlight xbap
-
 /**
  * Tests content negotiation.
- *
- * @group DrupalKernel
  */
+#[Group('DrupalKernel')]
+#[RunTestsInSeparateProcesses]
 class ContentNegotiationTest extends BrowserTestBase {
 
   /**

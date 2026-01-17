@@ -5,17 +5,19 @@ declare(strict_types=1);
 namespace Drupal\Tests\system\Functional\System;
 
 use Drupal\Component\Utility\Bytes;
+use Drupal\Core\StringTranslation\PluralTranslatableMarkup;
 use Drupal\Core\Url;
 use Drupal\Tests\BrowserTestBase;
-use Drupal\Core\StringTranslation\PluralTranslatableMarkup;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\IgnoreDeprecations;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 // cspell:ignore postupdate
-
 /**
  * Tests output on the status overview page.
- *
- * @group system
  */
+#[Group('system')]
+#[RunTestsInSeparateProcesses]
 class StatusTest extends BrowserTestBase {
 
   /**
@@ -50,9 +52,8 @@ class StatusTest extends BrowserTestBase {
 
   /**
    * Tests that the status page returns.
-   *
-   * @group legacy
    */
+  #[IgnoreDeprecations]
   public function testStatusPage(): void {
     // Verify if the 'Status report' is the first item link.
     $this->drupalGet('admin/reports');
@@ -97,6 +98,8 @@ class StatusTest extends BrowserTestBase {
 
     $this->drupalGet('admin/reports/status/php');
     $this->assertSession()->statusCodeEquals(200);
+    $this->assertSession()->pageTextContains('PHP');
+    $this->assertSession()->pageTextNotContains('$_COOKIE');
 
     $settings['settings']['sa_core_2023_004_phpinfo_flags'] = (object) [
       'value' => INFO_ALL,

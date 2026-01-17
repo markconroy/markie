@@ -10,12 +10,16 @@ use Drupal\Core\Site\Settings;
 use Drupal\Core\StreamWrapper\StreamWrapperManagerInterface;
 use Drupal\Tests\UnitTestCase;
 use org\bovigo\vfs\vfsStream;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\IgnoreDeprecations;
 
 /**
- * @coversDefaultClass \Drupal\Core\File\FileSystem
- *
- * @group File
+ * Tests Drupal\Core\File\FileSystem.
  */
+#[CoversClass(FileSystem::class)]
+#[Group('File')]
 class FileSystemTest extends UnitTestCase {
 
   /**
@@ -49,7 +53,9 @@ class FileSystemTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::chmod
+   * Tests chmod file.
+   *
+   * @legacy-covers ::chmod
    */
   public function testChmodFile(): void {
     vfsStream::setup('dir');
@@ -63,7 +69,9 @@ class FileSystemTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::chmod
+   * Tests chmod dir.
+   *
+   * @legacy-covers ::chmod
    */
   public function testChmodDir(): void {
     vfsStream::setup('dir');
@@ -77,7 +85,9 @@ class FileSystemTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::chmod
+   * Tests chmod unsuccessful.
+   *
+   * @legacy-covers ::chmod
    */
   public function testChmodUnsuccessful(): void {
     vfsStream::setup('dir');
@@ -85,7 +95,9 @@ class FileSystemTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::unlink
+   * Tests unlink.
+   *
+   * @legacy-covers ::unlink
    */
   public function testUnlink(): void {
     vfsStream::setup('dir');
@@ -102,15 +114,18 @@ class FileSystemTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::basename
+   * Tests basename.
    *
-   * @dataProvider providerTestBasename
+   * @legacy-covers ::basename
    */
+  #[IgnoreDeprecations]
+  #[DataProvider('providerTestBasename')]
   public function testBasename($uri, $expected, $suffix = NULL): void {
+    $this->expectDeprecation("Calling FileSystem::basename() is deprecated in drupal:11.3.0 and is removed from drupal:13.0.0. Use PHP native basename() instead. See https://www.drupal.org/node/3530869");
     $this->assertSame($expected, $this->fileSystem->basename($uri, $suffix));
   }
 
-  public static function providerTestBasename() {
+  public static function providerTestBasename(): array {
     $data = [];
     $data[] = [
       'public://nested/dir',
@@ -149,7 +164,7 @@ class FileSystemTest extends UnitTestCase {
   /**
    * Tests that invalid UTF-8 results in an exception.
    *
-   * @covers ::createFilename
+   * @legacy-covers ::createFilename
    */
   public function testInvalidUTF8(): void {
     vfsStream::setup('dir');

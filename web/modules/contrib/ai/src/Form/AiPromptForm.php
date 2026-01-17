@@ -10,6 +10,8 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Drupal\Core\Form\EnforcedResponseException;
 
 /**
  * Form handler for AI Prompt add and edit forms.
@@ -130,6 +132,17 @@ class AiPromptForm extends EntityForm {
         ->load($prompt_type_id);
       if (!$prompt_type instanceof AiPromptTypeInterface) {
         return $this->promptTypeNonExistentForm($form, $form_state);
+      }
+      if (!$ai_prompt->bundle()) {
+        // Redirect to add form if only one prompt type.
+        $type_options = $this->promptManager->getTypeOptions();
+        if (count($type_options) === 1) {
+          $only_type = array_key_first($type_options);
+          $url = Url::fromRoute('entity.ai_prompt.add_type_form', ['ai_prompt_type' => $only_type])->toString();
+          // Redirect to the add form for the only available prompt type.
+          $response = new RedirectResponse($url);
+          throw new EnforcedResponseException($response);
+        }
       }
     }
 

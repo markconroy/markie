@@ -194,7 +194,6 @@ class SearchPageListBuilder extends DraggableListBuilder implements FormInterfac
       }
     }
 
-    $this->moduleHandler->loadAllIncludes('admin.inc');
     $count = $this->formatPlural($remaining, 'There is 1 item left to index.', 'There are @count items left to index.');
     $done = $total - $remaining;
     // Use floor() to calculate the percentage, so if it is not quite 100%, it
@@ -314,7 +313,7 @@ class SearchPageListBuilder extends DraggableListBuilder implements FormInterfac
   /**
    * {@inheritdoc}
    */
-  public function getDefaultOperations(EntityInterface $entity) {
+  public function getDefaultOperations(EntityInterface $entity/* , ?CacheableMetadata $cacheability = NULL */) {
     /** @var \Drupal\search\SearchPageInterface $entity */
     $operations = parent::getDefaultOperations($entity);
 

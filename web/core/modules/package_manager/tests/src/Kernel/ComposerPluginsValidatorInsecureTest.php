@@ -10,12 +10,19 @@ use Drupal\package_manager\Event\PreApplyEvent;
 use Drupal\package_manager\Event\PreCreateEvent;
 use Drupal\package_manager\Exception\SandboxEventException;
 use Drupal\package_manager\ValidationResult;
+use Drupal\package_manager\Validator\ComposerPluginsValidator;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
- * @covers \Drupal\package_manager\Validator\ComposerPluginsValidator
- * @group package_manager
+ * Tests Composer Plugins Validator Insecure.
+ *
  * @internal
  */
+#[Group('package_manager')]
+#[CoversClass(ComposerPluginsValidator::class)]
+#[RunTestsInSeparateProcesses]
 class ComposerPluginsValidatorInsecureTest extends PackageManagerKernelTestBase {
 
   /**

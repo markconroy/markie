@@ -7,10 +7,7 @@
  * page.
  */
 
-(function (Drupal, drupalSettings, loadjs, htmx) {
-  // Disable htmx loading of script tags since we're handling it.
-  htmx.config.allowScriptTags = false;
-
+(function (Drupal, drupalSettings, htmx) {
   /**
    * Used to hold the loadjs promise.
    *
@@ -22,45 +19,11 @@
   const requestAssetsLoaded = new WeakMap();
 
   /**
-   * Helper function to merge two objects recursively.
    *
-   * @param current
-   *   The object to receive the merged values.
-   * @param sources
-   *   The objects to merge into current.
-   *
-   * @return object
-   *   The merged object.
-   *
-   * @see https://youmightnotneedjquery.com/#deep_extend
    */
-  function mergeSettings(current, ...sources) {
-    if (!current) {
-      return {};
-    }
-
-    sources
-      .filter((obj) => Boolean(obj))
-      .forEach((obj) => {
-        Object.entries(obj).forEach(([key, value]) => {
-          switch (Object.prototype.toString.call(value)) {
-            case '[object Object]':
-              current[key] = current[key] || {};
-              current[key] = mergeSettings(current[key], value);
-              break;
-
-            case '[object Array]':
-              current[key] = mergeSettings(new Array(value.length), value);
-              break;
-
-            default:
-              current[key] = value;
-          }
-        });
-      });
-
-    return current;
-  }
+  htmx.on('htmx:beforeRequest', ({ detail }) => {
+    requestAssetsLoaded.set(detail.xhr, Promise.resolve());
+  });
 
   /**
    * Send the current ajax page state with each request.
@@ -74,8 +37,15 @@
    * @see https://htmx.org/events/#htmx:configRequest
    */
   htmx.on('htmx:configRequest', ({ detail }) => {
-    const url = new URL(detail.path, document.location.href);
-    if (Drupal.url.isLocal(url.toString())) {
+    if (Drupal.url.isLocal(detail.path)) {
+      if (detail.elt.hasAttribute('data-hx-drupal-only-main-content')) {
+        // Add _wrapper_format query parameter for all non full page requests.
+        // Drupal expects this parameter to be in the query string, not the post
+        // values.
+        const url = new URL(detail.path, window.location);
+        url.searchParams.set('_wrapper_format', 'drupal_htmx');
+        detail.path = url.toString();
+      }
       // Allow Drupal to return new JavaScript and CSS files to load without
       // returning the ones already loaded.
       // @see \Drupal\Core\StackMiddleWare\AjaxPageState
@@ -86,13 +56,38 @@
       detail.parameters['ajax_page_state[theme]'] = pageState.theme;
       detail.parameters['ajax_page_state[theme_token]'] = pageState.theme_token;
       detail.parameters['ajax_page_state[libraries]'] = pageState.libraries;
+      if (detail.headers['HX-Trigger-Name']) {
+        detail.parameters._triggering_element_name =
+          detail.headers['HX-Trigger-Name'];
+      }
     }
+  });
+
+  // When saving to the browser history always remove wrapper format and ajax
+  // page state from the query string.
+  htmx.on('htmx:beforeHistoryUpdate', ({ detail }) => {
+    const url = new URL(detail.history.path, window.location);
+    [
+      '_wrapper_format',
+      'ajax_page_state[theme]',
+      'ajax_page_state[theme_token]',
+      'ajax_page_state[libraries]',
+      '_triggering_element_name',
+      '_triggering_element_value',
+    ].forEach((key) => {
+      url.searchParams.delete(key);
+    });
+    detail.history.path = url.toString();
   });
 
   // @see https://htmx.org/events/#htmx:beforeSwap
   htmx.on('htmx:beforeSwap', ({ detail }) => {
     // Custom event to detach behaviors.
     htmx.trigger(detail.elt, 'htmx:drupal:unload');
+
+    if (!detail.xhr) {
+      return;
+    }
 
     // We need to parse the response to find all the assets to load.
     // htmx cleans up too many things to be able to rely on their dom fragment.
@@ -103,73 +98,49 @@
     const settingsElement = responseHTML.querySelector(
       ':is(head, body) > script[type="application/json"][data-drupal-selector="drupal-settings-json"]',
     );
+    // Remove so that HTML doesn't add this during swap.
+    settingsElement?.remove();
+
     if (settingsElement !== null) {
-      mergeSettings(drupalSettings, JSON.parse(settingsElement.textContent));
+      Drupal.htmx.mergeSettings(
+        drupalSettings,
+        JSON.parse(settingsElement.textContent),
+      );
     }
 
     // Load all assets files. We sent ajax_page_state in the request so this is only the diff with the current page.
-    const assetsTags = responseHTML.querySelectorAll(
+    const assetsElements = responseHTML.querySelectorAll(
       'link[rel="stylesheet"][href], script[src]',
     );
-    const bundleIds = Array.from(assetsTags)
-      .filter(({ href, src }) => !loadjs.isDefined(href ?? src))
-      .map(({ href, src, type, attributes }) => {
-        const bundleId = href ?? src;
-        let prefix = 'css!';
-        if (src) {
-          prefix = type === 'module' ? 'module!' : 'js!';
-        }
+    // Remove all assets from the serverResponse where we handle the loading.
+    assetsElements.forEach((element) => element.remove());
 
-        loadjs(prefix + bundleId, bundleId, {
-          // JS files are loaded in order, so this needs to be false when 'src'
-          // is defined.
-          async: !src,
-          // Copy asset tag attributes to the new element.
-          before(path, element) {
-            // This allows all attributes to be added, like defer, async and
-            // crossorigin.
-            Object.values(attributes).forEach((attr) => {
-              element.setAttribute(attr.name, attr.value);
-            });
-          },
-        });
-
-        return bundleId;
+    // Transform the data from the DOM into an ajax command like format.
+    const data = Array.from(assetsElements).map(({ attributes }) => {
+      const attrs = {};
+      Object.values(attributes).forEach(({ name, value }) => {
+        attrs[name] = value;
       });
+      return attrs;
+    });
+
+    // The response is the whole page without the assets we handle with loadjs.
+    detail.serverResponse = responseHTML.documentElement.outerHTML;
 
     // Helps with memory management.
     responseHTML = null;
 
-    // Nothing to load, we resolve the promise right away.
-    let assetsLoaded = Promise.resolve();
-    // If there are assets to load, use loadjs to manage this process.
-    if (bundleIds.length) {
-      // Trigger the event once all the dependencies have loaded.
-      assetsLoaded = new Promise((resolve, reject) => {
-        loadjs.ready(bundleIds, {
-          success: resolve,
-          error(depsNotFound) {
-            const message = Drupal.t(
-              `The following files could not be loaded: @dependencies`,
-              { '@dependencies': depsNotFound.join(', ') },
-            );
-            reject(message);
-          },
-        });
-      });
-    }
-
-    requestAssetsLoaded.set(detail.xhr, assetsLoaded);
+    requestAssetsLoaded.get(detail.xhr).then(() => Drupal.htmx.addAssets(data));
   });
 
   // Trigger the Drupal processing once all assets have been loaded.
   // @see https://htmx.org/events/#htmx:afterSettle
   htmx.on('htmx:afterSettle', ({ detail }) => {
-    requestAssetsLoaded.get(detail.xhr).then(() => {
+    (requestAssetsLoaded.get(detail.xhr) || Promise.resolve()).then(() => {
       // Some HTMX swaps put the incoming element before or after detail.elt.
       htmx.trigger(detail.elt.parentNode, 'htmx:drupal:load');
       // This should be automatic but don't wait for the garbage collector.
       requestAssetsLoaded.delete(detail.xhr);
     });
   });
-})(Drupal, drupalSettings, loadjs, htmx);
+})(Drupal, drupalSettings, htmx);

@@ -4,34 +4,30 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\serialization\Kernel;
 
+use Drupal\Component\Datetime\DateTimePlus;
+use Drupal\Component\Serialization\Json;
 use Drupal\Core\Cache\CacheableDependencyInterface;
 use Drupal\Core\Cache\CacheableMetadata;
-use Drupal\entity_test\Entity\EntityTestComputedField;
-use Drupal\Component\Serialization\Json;
-use Drupal\Component\Datetime\DateTimePlus;
 use Drupal\entity_test\Entity\EntitySerializedField;
+use Drupal\entity_test\Entity\EntityTestComputedField;
 use Drupal\entity_test\Entity\EntityTestMulRev;
 use Drupal\filter\Entity\FilterFormat;
 use Drupal\serialization\Normalizer\CacheableNormalizerInterface;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests that entities can be serialized to supported core formats.
- *
- * @group serialization
  */
+#[Group('serialization')]
+#[RunTestsInSeparateProcesses]
 class EntitySerializationTest extends NormalizerTestBase {
 
   /**
    * {@inheritdoc}
    */
   protected static $modules = [
-    'serialization',
-    'system',
-    'field',
     'entity_test',
-    'text',
-    'filter',
-    'user',
     'entity_serialization_test',
   ];
 

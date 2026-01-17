@@ -4,22 +4,24 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\responsive_image\Functional;
 
+use Drupal\file\Entity\File;
 use Drupal\image\Entity\ImageStyle;
 use Drupal\image\ImageStyleInterface;
 use Drupal\node\Entity\Node;
-use Drupal\file\Entity\File;
-use Drupal\responsive_image\Plugin\Field\FieldFormatter\ResponsiveImageFormatter;
 use Drupal\responsive_image\Entity\ResponsiveImageStyle;
+use Drupal\responsive_image\Plugin\Field\FieldFormatter\ResponsiveImageFormatter;
 use Drupal\responsive_image\ResponsiveImageStyleInterface;
 use Drupal\Tests\image\Functional\ImageFieldTestBase;
 use Drupal\Tests\TestFileCreationTrait;
 use Drupal\user\RoleInterface;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests responsive image display formatter.
- *
- * @group responsive_image
  */
+#[Group('responsive_image')]
+#[RunTestsInSeparateProcesses]
 class ResponsiveImageFieldDisplayTest extends ImageFieldTestBase {
 
   use TestFileCreationTrait;
@@ -417,6 +419,38 @@ class ResponsiveImageFieldDisplayTest extends ImageFieldTestBase {
   }
 
   /**
+   * Tests formatter passes down any attributes in the render array.
+   */
+  public function testResponsiveImageFieldFormatterAttributesInRenderArray(): void {
+    /** @var \Drupal\Core\Render\RendererInterface $renderer */
+    $renderer = $this->container->get('renderer');
+    $node_storage = $this->container->get('entity_type.manager')->getStorage('node');
+    $field_name = $this->randomMachineName();
+    $this->createImageField($field_name, 'node', 'article', ['uri_scheme' => 'public']);
+
+    // Create a new node with an image attached.
+    $test_image = current($this->getTestFiles('image'));
+    $nid = $this->uploadNodeImage($test_image, $field_name, 'article', $this->randomMachineName());
+    $node_storage->resetCache([$nid]);
+    $node = $node_storage->load($nid);
+
+    $image = [
+      '#theme' => 'responsive_image_formatter',
+      '#item' => $node->{$field_name}[0],
+      '#responsive_image_style_id' => 'style_one',
+      '#attributes' => [
+        'alt' => 'test alt',
+        'data-test1' => 'test1',
+        'data-test2' => 'test2',
+      ],
+    ];
+    $html_output = str_replace("\n", '', (string) $renderer->renderRoot($image));
+    $this->assertStringContainsString('alt="test alt"', $html_output);
+    $this->assertStringContainsString('data-test1="test1"', $html_output);
+    $this->assertStringContainsString('data-test2="test2"', $html_output);
+  }
+
+  /**
    * Tests responsive image formatter on node display with one and two sources.
    */
   public function testResponsiveImageFieldFormattersMultipleSources(): void {
@@ -537,7 +571,7 @@ class ResponsiveImageFieldDisplayTest extends ImageFieldTestBase {
     // Ensure that preview works.
     $this->previewNodeImage($test_image, $field_name, 'article');
 
-    // Look for a picture tag in the preview output
+    // Look for a picture tag in the preview output.
     $this->assertSession()->responseMatches('/picture/');
 
     $nid = $this->uploadNodeImage($test_image, $field_name, 'article');

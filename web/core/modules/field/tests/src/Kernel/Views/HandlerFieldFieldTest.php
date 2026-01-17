@@ -13,16 +13,17 @@ use Drupal\Tests\node\Traits\NodeCreationTrait;
 use Drupal\views\Tests\ViewTestData;
 use Drupal\views\ViewExecutable;
 use Drupal\views\Views;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the field rendering in views.
  *
- * @group field
- *
  * @todo Extend test coverage in #3046722.
- *
  * @see https://www.drupal.org/project/drupal/issues/3046722
  */
+#[Group('field')]
+#[RunTestsInSeparateProcesses]
 class HandlerFieldFieldTest extends KernelTestBase {
 
   use NodeCreationTrait;
@@ -199,7 +200,7 @@ class HandlerFieldFieldTest extends KernelTestBase {
     $view->style_plugin->getField(4, $this->fieldStorages[4]->getName());
     $view->destroy();
 
-    // Test delta limit + offset
+    // Test delta limit + offset.
     $this->prepareView($view);
     $view->displayHandlers->get('default')->options['fields'][$field_name]['group_rows'] = TRUE;
     $view->displayHandlers->get('default')->options['fields'][$field_name]['delta_limit'] = 3;

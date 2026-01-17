@@ -7,13 +7,16 @@ namespace Drupal\Tests\layout_builder\FunctionalJavascript;
 use Behat\Mink\Element\NodeElement;
 use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
 use Drupal\layout_builder\Entity\LayoutBuilderEntityViewDisplay;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\IgnoreDeprecations;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the JavaScript functionality of the block add filter.
- *
- * @group layout_builder
- * @group legacy
  */
+#[Group('layout_builder')]
+#[IgnoreDeprecations]
+#[RunTestsInSeparateProcesses]
 class BlockFilterTest extends WebDriverTestBase {
 
   /**
@@ -115,7 +118,7 @@ class BlockFilterTest extends WebDriverTestBase {
     $visible_categories = $this->filterVisibleElements($categories);
     $this->assertCount(3, $visible_categories);
 
-    // Test blocks reappear after being filtered by repeating search for "a"
+    // Test blocks reappear after being filtered by repeating search for "a".
     $filter->setValue('a');
     $this->assertAnnounceContains('All available blocks are listed.');
 

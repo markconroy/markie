@@ -10,12 +10,14 @@ use Drupal\node\Entity\NodeType;
 use Drupal\Tests\SchemaCheckTestTrait;
 use Drupal\Tests\views\Functional\ViewTestBase;
 use Drupal\views\Views;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the core Drupal\views\Plugin\views\filter\Date handler.
- *
- * @group views
  */
+#[Group('views')]
+#[RunTestsInSeparateProcesses]
 class FilterDateTest extends ViewTestBase {
   use SchemaCheckTestTrait;
 

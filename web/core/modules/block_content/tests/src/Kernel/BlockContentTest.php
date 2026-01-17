@@ -7,17 +7,19 @@ namespace Drupal\Tests\block_content\Kernel;
 use Drupal\block\Entity\Block;
 use Drupal\block_content\Entity\BlockContent;
 use Drupal\block_content\Entity\BlockContentType;
+use Drupal\block_content\Hook\BlockContentHooks;
 use Drupal\Component\Plugin\PluginBase;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\Tests\user\Traits\UserCreationTrait;
-use Drupal\block_content\Hook\BlockContentHooks;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the block content.
- *
- * @group block_content
  */
+#[Group('block_content')]
+#[RunTestsInSeparateProcesses]
 class BlockContentTest extends KernelTestBase {
 
   use UserCreationTrait;
@@ -35,6 +37,19 @@ class BlockContentTest extends KernelTestBase {
     parent::setUp();
     $this->installEntitySchema('user');
     $this->installEntitySchema('block_content');
+  }
+
+  /**
+   * Tests BlockContentType functionality.
+   */
+  public function testBlockContentType(): void {
+    $type = BlockContentType::create([
+      'id' => 'foo',
+      'label' => 'Foo',
+    ]);
+    $this->assertSame('', $type->getDescription());
+    $type->setDescription('Test description');
+    $this->assertSame('Test description', $type->getDescription());
   }
 
   /**

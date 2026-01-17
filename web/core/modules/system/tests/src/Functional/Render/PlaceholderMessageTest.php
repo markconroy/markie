@@ -6,12 +6,14 @@ namespace Drupal\Tests\system\Functional\Render;
 
 use Drupal\Core\Url;
 use Drupal\Tests\BrowserTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Functional test verifying that messages set in placeholders always appear.
- *
- * @group Render
  */
+#[Group('Render')]
+#[RunTestsInSeparateProcesses]
 class PlaceholderMessageTest extends BrowserTestBase {
 
   /**

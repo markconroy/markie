@@ -139,7 +139,7 @@ class KeyConfigOverride extends ConfigEntityBase implements KeyConfigOverrideInt
    */
   public function getKey() {
     if (!isset($this->key)) {
-      // TODO: Get the key entity.
+      // @todo Get the key entity.
     }
 
     return $this->key;

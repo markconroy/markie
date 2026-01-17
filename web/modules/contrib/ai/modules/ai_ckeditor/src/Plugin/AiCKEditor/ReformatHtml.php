@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\ai_ckeditor\Plugin\AICKEditor;
+namespace Drupal\ai_ckeditor\Plugin\AiCKEditor;
 
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Form\FormStateInterface;

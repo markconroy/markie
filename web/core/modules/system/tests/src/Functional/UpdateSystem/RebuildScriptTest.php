@@ -6,13 +6,15 @@ namespace Drupal\Tests\system\Functional\UpdateSystem;
 
 use Drupal\Core\Url;
 use Drupal\Tests\BrowserTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Symfony\Component\Filesystem\Filesystem;
 
 /**
  * Tests the rebuild script access and functionality.
- *
- * @group Rebuild
  */
+#[Group('Rebuild')]
+#[RunTestsInSeparateProcesses]
 class RebuildScriptTest extends BrowserTestBase {
 
   /**

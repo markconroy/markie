@@ -12,15 +12,17 @@ use Drupal\Tests\BrowserTestBase;
 use Drupal\Tests\Traits\Core\CronRunTrait;
 use Drupal\Tests\Traits\Core\PathAliasTestTrait;
 use Drupal\TestTools\Extension\Dump\DebugDump;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\IgnoreDeprecations;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use PHPUnit\Framework\ExpectationFailedException;
 
 // cspell:ignore htkey
-
 /**
  * Tests BrowserTestBase functionality.
- *
- * @group browsertestbase
  */
+#[Group('browsertestbase')]
+#[RunTestsInSeparateProcesses]
 class BrowserTestBaseTest extends BrowserTestBase {
   use PathAliasTestTrait;
   use CronRunTrait;
@@ -491,7 +493,7 @@ class BrowserTestBaseTest extends BrowserTestBase {
    */
   public function testLocalTimeZone(): void {
     $expected = 'Australia/Sydney';
-    // The 'Australia/Sydney' time zone is set in core/tests/bootstrap.php
+    // The 'Australia/Sydney' time zone is set in core/tests/bootstrap.php.
     $this->assertEquals($expected, date_default_timezone_get());
 
     // The 'Australia/Sydney' time zone is also set in
@@ -574,10 +576,9 @@ class BrowserTestBaseTest extends BrowserTestBase {
   /**
    * Tests that deprecation headers do not get duplicated.
    *
-   * @group legacy
-   *
    * @see \Drupal\Core\Test\HttpClientMiddleware\TestHttpClientMiddleware::__invoke()
    */
+  #[IgnoreDeprecations]
   public function testDeprecationHeaders(): void {
     $this->drupalGet('/test-deprecations');
 

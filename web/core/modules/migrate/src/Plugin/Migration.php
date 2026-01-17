@@ -206,7 +206,7 @@ class Migration extends PluginBase implements MigrationInterface, RequirementsIn
    *
    * @var array
    */
-  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName, Drupal.Commenting.VariableComment.Missing
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
   protected $migration_tags = [];
 
   /**
@@ -656,7 +656,10 @@ class Migration extends PluginBase implements MigrationInterface, RequirementsIn
     // otherwise simply set it.
     $current_process = $this->getProcess();
     if (isset($current_process[$property])) {
-      $this->process = NestedArray::mergeDeepArray([$current_process, $this->getProcessNormalized([$property => $process_of_property])], TRUE);
+      $this->process = NestedArray::mergeDeepArray([
+        $current_process,
+        $this->getProcessNormalized([$property => $process_of_property]),
+      ], TRUE);
     }
     else {
       $this->setProcessOfProperty($property, $process_of_property);

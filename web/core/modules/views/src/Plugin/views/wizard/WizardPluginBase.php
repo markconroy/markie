@@ -42,7 +42,7 @@ abstract class WizardPluginBase extends PluginBase implements WizardInterface {
    *
    * @var string
    */
-  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName, Drupal.Commenting.VariableComment.Missing
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
   protected $base_table;
 
   /**
@@ -67,7 +67,7 @@ abstract class WizardPluginBase extends PluginBase implements WizardInterface {
    *
    * @var array
    */
-  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName, Drupal.Commenting.VariableComment.Missing
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
   protected $validated_views = [];
 
   /**
@@ -106,7 +106,7 @@ abstract class WizardPluginBase extends PluginBase implements WizardInterface {
    *
    * @var array
    */
-  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName, Drupal.Commenting.VariableComment.Missing
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
   protected $filter_defaults = [
     'id' => NULL,
     'expose' => ['operator' => FALSE],
@@ -153,7 +153,12 @@ abstract class WizardPluginBase extends PluginBase implements WizardInterface {
 
     $entity_types = \Drupal::entityTypeManager()->getDefinitions();
     foreach ($entity_types as $entity_type_id => $entity_type) {
-      if (in_array($this->base_table, [$entity_type->getBaseTable(), $entity_type->getDataTable(), $entity_type->getRevisionTable(), $entity_type->getRevisionDataTable()], TRUE)) {
+      if (in_array($this->base_table, [
+        $entity_type->getBaseTable(),
+        $entity_type->getDataTable(),
+        $entity_type->getRevisionTable(),
+        $entity_type->getRevisionDataTable(),
+      ], TRUE)) {
         $this->entityType = $entity_type;
         $this->entityTypeId = $entity_type_id;
       }
@@ -421,7 +426,11 @@ abstract class WizardPluginBase extends PluginBase implements WizardInterface {
         '#options' => $style_options,
       ];
       $style_form = &$form['displays']['block']['options']['style'];
-      $style_form['style_plugin']['#default_value'] = static::getSelected($form_state, ['block', 'style', 'style_plugin'], 'default', $style_form['style_plugin']);
+      $style_form['style_plugin']['#default_value'] = static::getSelected($form_state, [
+        'block',
+        'style',
+        'style_plugin',
+      ], 'default', $style_form['style_plugin']);
       // Changing this dropdown updates $form['displays']['block']['options']
       // via AJAX.
       views_ui_add_ajax_trigger($style_form, 'style_plugin', ['displays', 'block', 'options']);
@@ -628,7 +637,7 @@ abstract class WizardPluginBase extends PluginBase implements WizardInterface {
   protected function buildFilters(&$form, FormStateInterface $form_state) {
     \Drupal::moduleHandler()->loadInclude('views_ui', 'inc', 'admin');
 
-    $bundles = $this->bundleInfoService->getBundleInfo($this->entityTypeId);
+    $bundles = isset($this->entityTypeId) ? $this->bundleInfoService->getBundleInfo($this->entityTypeId) : [];
     // If the current base table support bundles and has more than one (like
     // user).
     if (!empty($bundles) && $this->entityType && $this->entityType->hasKey('bundle')) {
@@ -722,7 +731,7 @@ abstract class WizardPluginBase extends PluginBase implements WizardInterface {
    *   arrays of options for that display.
    */
   protected function buildDisplayOptions($form, FormStateInterface $form_state) {
-    // Display: Default
+    // Display: Default.
     $display_options['default'] = $this->defaultDisplayOptions();
     $display_options['default'] += [
       'filters' => [],
@@ -731,17 +740,17 @@ abstract class WizardPluginBase extends PluginBase implements WizardInterface {
     $display_options['default']['filters'] += $this->defaultDisplayFilters($form, $form_state);
     $display_options['default']['sorts'] += $this->defaultDisplaySorts($form, $form_state);
 
-    // Display: Page
+    // Display: Page.
     if (!$form_state->isValueEmpty(['page', 'create'])) {
       $display_options['page'] = $this->pageDisplayOptions($form, $form_state);
 
-      // Display: Feed (attached to the page)
+      // Display: Feed (attached to the page).
       if (!$form_state->isValueEmpty(['page', 'feed'])) {
         $display_options['feed'] = $this->pageFeedDisplayOptions($form, $form_state);
       }
     }
 
-    // Display: Block
+    // Display: Block.
     if (!$form_state->isValueEmpty(['block', 'create'])) {
       $display_options['block'] = $this->blockDisplayOptions($form, $form_state);
     }
@@ -773,13 +782,13 @@ abstract class WizardPluginBase extends PluginBase implements WizardInterface {
     // instances.
     $executable = $view->getExecutable();
 
-    // Display: Default
+    // Display: Default.
     $default_display = $executable->newDisplay('default', 'Default', 'default');
     foreach ($display_options['default'] as $option => $value) {
       $default_display->setOption($option, $value);
     }
 
-    // Display: Page
+    // Display: Page.
     if (isset($display_options['page'])) {
       $display = $executable->newDisplay('page', 'Page', 'page_1');
       // The page display is usually the main one (from the user's point of

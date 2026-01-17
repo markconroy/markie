@@ -11,6 +11,7 @@ use Drupal\Core\DependencyInjection\Compiler\CorsCompilerPass;
 use Drupal\Core\DependencyInjection\Compiler\DeprecatedServicePass;
 use Drupal\Core\DependencyInjection\Compiler\DevelopmentSettingsPass;
 use Drupal\Core\Hook\HookCollectorPass;
+use Drupal\Core\Hook\HookCollectorKeyValueWritePass;
 use Drupal\Core\DependencyInjection\Compiler\LoggerAwarePass;
 use Drupal\Core\DependencyInjection\Compiler\ModifyServiceDefinitionsPass;
 use Drupal\Core\DependencyInjection\Compiler\ProxyServicesPass;
@@ -27,6 +28,7 @@ use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\DependencyInjection\ServiceModifierInterface;
 use Drupal\Core\DependencyInjection\ServiceProviderInterface;
 use Drupal\Core\Extension\ModuleUninstallValidatorInterface;
+use Drupal\Core\Hook\ThemeHookCollectorPass;
 use Drupal\Core\Plugin\PluginManagerPass;
 use Drupal\Core\PreWarm\PreWarmableInterface;
 use Drupal\Core\Queue\QueueFactoryInterface;
@@ -63,6 +65,8 @@ class CoreServiceProvider implements ServiceProviderInterface, ServiceModifierIn
     }
 
     $container->addCompilerPass(new HookCollectorPass());
+    $container->addCompilerPass(new ThemeHookCollectorPass());
+    $container->addCompilerPass(new HookCollectorKeyValueWritePass(), PassConfig::TYPE_OPTIMIZE);
     // Add the compiler pass that lets service providers modify existing
     // service definitions. This pass must come before all passes operating on
     // services so that later list-building passes are operating on the

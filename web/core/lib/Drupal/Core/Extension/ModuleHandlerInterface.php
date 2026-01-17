@@ -46,7 +46,7 @@ interface ModuleHandlerInterface {
   /**
    * Returns the list of currently active modules.
    *
-   * @return \Drupal\Core\Extension\Extension[]
+   * @return array<string, \Drupal\Core\Extension\Extension>
    *   An associative array whose keys are the names of the modules and whose
    *   values are Extension objects.
    */
@@ -69,7 +69,7 @@ interface ModuleHandlerInterface {
   /**
    * Sets an explicit list of currently active modules.
    *
-   * @param \Drupal\Core\Extension\Extension[] $module_list
+   * @param array<string, \Drupal\Core\Extension\Extension> $module_list
    *   An associative array whose keys are the names of the modules and whose
    *   values are Extension objects.
    */
@@ -106,12 +106,12 @@ interface ModuleHandlerInterface {
   /**
    * Determines which modules require and are required by each module.
    *
-   * @param array $modules
+   * @param array<string, \Drupal\Core\Extension\Extension> $modules
    *   An array of module objects keyed by module name. Each object contains
    *   information discovered during a Drupal\Core\Extension\ExtensionDiscovery
    *   scan.
    *
-   * @return array
+   * @return array<string, \Drupal\Core\Extension\Extension>
    *   The same array with the new keys for each module:
    *   - requires: An array with the keys being the modules that this module
    *     requires.
@@ -141,6 +141,11 @@ interface ModuleHandlerInterface {
    * @param string $name
    *   (optional) The base file name (without the $type extension). If omitted,
    *   each module's name is used; i.e., "$module.$type" by default.
+   *
+   * @deprecated in drupal:11.3.0 and is removed from drupal:13.0.0. There is no
+   *   replacement.
+   *
+   * @see https://www.drupal.org/node/3536432
    */
   public function loadAllIncludes($type, $name = NULL);
 
@@ -171,7 +176,7 @@ interface ModuleHandlerInterface {
   /**
    * Retrieves a list of hooks that are declared through hook_hook_info().
    *
-   * @return array
+   * @return array<string, array{group: string}>
    *   An associative array whose keys are hook names and whose values are an
    *   associative array containing a group name. The structure of the array
    *   is the same as the return value of hook_hook_info().
@@ -411,7 +416,7 @@ interface ModuleHandlerInterface {
    * This is useful for tasks such as finding a file that exists in all module
    * directories.
    *
-   * @return array
+   * @return array<string, string>
    *   An associative array of the directories for all enabled modules, keyed by
    *   the extension machine name.
    */

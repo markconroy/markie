@@ -5,12 +5,15 @@ declare(strict_types=1);
 namespace Drupal\Tests\system\Kernel\Common;
 
 use Drupal\KernelTests\KernelTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\IgnoreDeprecations;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests alteration of arguments passed to \Drupal::moduleHandler->alter().
- *
- * @group Common
  */
+#[Group('Common')]
+#[RunTestsInSeparateProcesses]
 class AlterTest extends KernelTestBase {
 
   /**
@@ -25,14 +28,13 @@ class AlterTest extends KernelTestBase {
 
   /**
    * Tests if the theme has been altered.
-   *
-   * @group legacy
    */
+  #[IgnoreDeprecations]
   public function testDrupalAlter(): void {
     // This test depends on Olivero, so make sure that it is always the current
     // active theme.
-    \Drupal::service('theme_installer')->install(['olivero']);
-    \Drupal::theme()->setActiveTheme(\Drupal::service('theme.initialization')->initTheme('olivero'));
+    \Drupal::service('theme_installer')->install(['test_theme_alter']);
+    \Drupal::theme()->setActiveTheme(\Drupal::service('theme.initialization')->initTheme('test_theme_alter'));
 
     $array = ['foo' => 'bar'];
     $entity = new \stdClass();

@@ -1,6 +1,20 @@
 CHANGELOG
 =========
 
+7.4
+---
+
+ * Add `#[ExtendsSerializationFor]` to declare new serialization attributes for a class
+ * Add `AttributeMetadataPass` to declare compile-time constraint metadata using attributes
+ * Add `CDATA_WRAPPING_NAME_PATTERN` support to `XmlEncoder`
+ * Add support for `can*()` methods to `AttributeLoader`
+ * Make `AttributeMetadata` and `ClassMetadata` final
+ * Add `XmlEncoder::PRESERVE_NUMERIC_KEYS` context option
+ * Deprecate class aliases in the `Annotation` namespace, use attributes instead
+ * Deprecate getters in attribute classes in favor of public properties
+ * Deprecate `ClassMetadataFactoryCompiler`
+ * Add `FORCE_TIMEZONE_KEY` to `DateTimeNormalizer` to force the timezone during denormalization
+
 7.3
 ---
 
@@ -30,7 +44,7 @@ CHANGELOG
  * Add `Default` and "class name" default groups
  * Add `AbstractNormalizer::FILTER_BOOL` context option
  * Add `CamelCaseToSnakeCaseNameConverter::REQUIRE_SNAKE_CASE_PROPERTIES` context option
- * Deprecate `AbstractNormalizerContextBuilder::withDefaultContructorArguments(?array $defaultContructorArguments)`, use `withDefaultConstructorArguments(?array $defaultConstructorArguments)` instead (note the missing `s` character in Contructor word in deprecated method)
+ * Deprecate `AbstractNormalizerContextBuilder::withDefaultContructorArguments(?array $defaultContructorArguments)`, use `withDefaultConstructorArguments(?array $defaultConstructorArguments)` instead (note the missing `s` character in Constructor word in deprecated method)
  * Add `XmlEncoder::CDATA_WRAPPING_PATTERN` context option
 
 7.0

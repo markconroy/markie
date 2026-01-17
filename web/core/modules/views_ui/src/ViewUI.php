@@ -43,7 +43,7 @@ class ViewUI implements ViewEntityInterface {
    *
    * @var array
    */
-  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName, Drupal.Commenting.VariableComment.Missing
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
   public $changed_display;
 
   /**
@@ -51,7 +51,7 @@ class ViewUI implements ViewEntityInterface {
    *
    * @var float
    */
-  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName, Drupal.Commenting.VariableComment.Missing
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
   public $render_time;
 
   /**
@@ -76,7 +76,7 @@ class ViewUI implements ViewEntityInterface {
    *
    * @var array
    */
-  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName, Drupal.Commenting.VariableComment.Missing
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
   public $temporary_options;
 
   /**
@@ -91,7 +91,7 @@ class ViewUI implements ViewEntityInterface {
    *
    * @var bool
    */
-  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName, Drupal.Commenting.VariableComment.Missing
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
   public $live_preview;
 
   /**
@@ -338,7 +338,11 @@ class ViewUI implements ViewEntityInterface {
     }
 
     // Create a "Cancel" button. For purely informational forms, label it "OK".
-    $cancel_submit = function_exists($form_id . '_cancel') ? $form_id . '_cancel' : [$this, 'standardCancel'];
+    $cancel_submit = [$this, 'standardCancel'];
+    if (function_exists($form_id . '_cancel')) {
+      @trigger_error('Support for magic cancel submit handlers such as ' . $form_id . '_cancel() is deprecated in drupal:11.3.0 and removed in drupal:13.0.0. Specify a submit handler in a class method instead. See https://www.drupal.org/node/3536715', E_USER_DEPRECATED);
+      $cancel_submit = $form_id . '_cancel';
+    }
     $form['actions']['cancel'] = [
       '#type' => 'submit',
       '#value' => !$form_state->get('ok_button') ? $this->t('Cancel') : $this->t('Ok'),
@@ -477,7 +481,7 @@ class ViewUI implements ViewEntityInterface {
         }
         $id = $this->getExecutable()->addHandler($display_id, $type, $table, $field);
 
-        // Check to see if we have group by settings
+        // Check to see if we have group by settings.
         $key = $type;
         // Footer,header and empty text have a different internal handler
         // type(area).
@@ -494,11 +498,11 @@ class ViewUI implements ViewEntityInterface {
         }
 
         // Check to see if this type has settings, if so add the settings form
-        // first
+        // first.
         if ($handler && $handler->hasExtraOptions()) {
           $this->addFormToStack('handler-extra', $display_id, $type, $id);
         }
-        // Then add the form to the stack
+        // Then add the form to the stack.
         $this->addFormToStack('handler', $display_id, $type, $id);
       }
     }
@@ -507,7 +511,7 @@ class ViewUI implements ViewEntityInterface {
       unset($this->form_cache);
     }
 
-    // Store in cache
+    // Store in cache.
     $this->cacheSet();
   }
 
@@ -856,7 +860,7 @@ class ViewUI implements ViewEntityInterface {
   /**
    * Get the user's current progress through the form stack.
    *
-   * @return array|bool
+   * @return array|false
    *   FALSE if the user is not currently in a multiple-form stack. Otherwise,
    *   an associative array with the following keys:
    *   - current: The number of the current form on the stack.

@@ -5,7 +5,7 @@ type: module
 core_version_requirement: ^9.5 || ^10 || ^11
 configure: backup_migrate.quick_backup
 
-# Information added by Drupal.org packaging script on 2024-11-19
-version: '5.1.0'
+# Information added by Drupal.org packaging script on 2026-01-13
+version: '5.1.3'
 project: 'backup_migrate'
-datestamp: 1732034638
+datestamp: 1768291346

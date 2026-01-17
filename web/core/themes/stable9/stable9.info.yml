@@ -73,6 +73,11 @@ libraries-override:
       component:
         misc/components/fieldgroup.module.css: css/core/components/fieldgroup.module.css
 
+  core/drupal.item-list:
+    css:
+      component:
+        misc/components/item-list.module.css: css/core/components/item-list.module.css
+
   core/drupal.progress:
     css:
       component:
@@ -103,6 +108,11 @@ libraries-override:
     css:
       component:
         misc/vertical-tabs.css: css/core/vertical-tabs.css
+
+  core/drupal.reset-appearance:
+    css:
+      component:
+        misc/components/reset-appearance.module.css: css/core/components/reset-appearance.module.css
 
   # Load version 3.0.3 of normalize.css for backwards compatibility.
   core/normalize: stable9/normalize
@@ -199,6 +209,21 @@ libraries-override:
       component:
         css/components/upgrade-analysis-report-tables.css: css/migrate_drupal_ui/components/upgrade-analysis-report-tables.css
 
+  navigation/admin-reset-styles:
+    css:
+      base:
+        css/base/admin-reset-styles.css: css/navigation/admin-reset-styles.css
+
+  navigation/body-scroll-lock:
+    css:
+      base:
+        css/components/body-scroll-lock.css: css/navigation/body-scroll-lock.css
+
+  navigation/navigation.layoutBuilder:
+    css:
+      base:
+        css/base/layout-builder.css: css/navigation/layout-builder.css
+
   node/drupal.node:
     css:
       layout:
@@ -238,10 +263,7 @@ libraries-override:
         css/components/container-inline.module.css: css/system/components/container-inline.module.css
         css/components/clearfix.module.css: css/system/components/clearfix.module.css
         css/components/hidden.module.css: css/system/components/hidden.module.css
-        css/components/item-list.module.css: css/system/components/item-list.module.css
         css/components/js.module.css: css/system/components/js.module.css
-        css/components/position-container.module.css: css/system/components/position-container.module.css
-        css/components/reset-appearance.module.css: css/system/components/reset-appearance.module.css
   system/admin:
     css:
       theme:

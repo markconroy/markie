@@ -8,12 +8,14 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormState;
 use Drupal\entity_test\Entity\EntityTestCompositeConstraint;
 use Drupal\KernelTests\KernelTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests validation constraints for FieldWidgetConstraintValidatorTest.
- *
- * @group Entity
  */
+#[Group('Entity')]
+#[RunTestsInSeparateProcesses]
 class FieldWidgetConstraintValidatorTest extends KernelTestBase {
 
   /**
@@ -21,7 +23,6 @@ class FieldWidgetConstraintValidatorTest extends KernelTestBase {
    */
   protected static $modules = [
     'entity_test',
-    'field',
     'field_test',
     'user',
     'system',

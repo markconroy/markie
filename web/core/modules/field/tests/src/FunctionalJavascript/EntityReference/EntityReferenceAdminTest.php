@@ -6,17 +6,19 @@ namespace Drupal\Tests\field\FunctionalJavascript\EntityReference;
 
 use Behat\Mink\Element\NodeElement;
 use Drupal\Core\Url;
+use Drupal\field\Entity\FieldConfig;
+use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
 use Drupal\Tests\field_ui\Traits\FieldUiJSTestTrait;
 use Drupal\Tests\field_ui\Traits\FieldUiTestTrait;
-use Drupal\field\Entity\FieldConfig;
-use Drupal\field\Entity\FieldStorageConfig;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests for the administrative UI.
- *
- * @group entity_reference
  */
+#[Group('entity_reference')]
+#[RunTestsInSeparateProcesses]
 class EntityReferenceAdminTest extends WebDriverTestBase {
 
   use FieldUiTestTrait;

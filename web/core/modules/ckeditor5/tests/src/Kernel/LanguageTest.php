@@ -9,14 +9,18 @@ use Drupal\filter\Entity\FilterFormat;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\TestTools\Random;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Symfony\Component\Yaml\Yaml;
 
 /**
  * Tests language resolving for CKEditor 5.
  *
- * @group ckeditor5
  * @internal
  */
+#[Group('ckeditor5')]
+#[RunTestsInSeparateProcesses]
 class LanguageTest extends KernelTestBase {
 
   /**
@@ -57,7 +61,7 @@ class LanguageTest extends KernelTestBase {
       ],
     ])->save();
 
-    $this->installConfig(['language']);
+    $this->installConfig(['system', 'language']);
   }
 
   /**
@@ -69,9 +73,8 @@ class LanguageTest extends KernelTestBase {
    *   The language code in CKEditor 5.
    * @param bool $is_missing_mapping
    *   Whether this mapping is expected to be missing from language.mappings.
-   *
-   * @dataProvider provider
    */
+  #[DataProvider('provider')]
   public function test(string $drupal_langcode, string $cke5_langcode, bool $is_missing_mapping = FALSE): void {
     $editor = Editor::load('basic_html');
 

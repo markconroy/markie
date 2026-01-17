@@ -201,13 +201,17 @@ class ResolveBindingsPass extends AbstractRecursivePass
                 if ($typeHint && (
                     \array_key_exists($k = preg_replace('/(^|[(|&])\\\\/', '\1', $typeHint).' $'.$name, $bindings)
                     || \array_key_exists($k = preg_replace('/(^|[(|&])\\\\/', '\1', $typeHint).' $'.$parsedName, $bindings)
+                    || ($name !== $parameter->name && \array_key_exists($k = preg_replace('/(^|[(|&])\\\\/', '\1', $typeHint).' $'.$parameter->name, $bindings))
                 )) {
                     $arguments[$key] = $this->getBindingValue($bindings[$k]);
 
                     continue;
                 }
 
-                if (\array_key_exists($k = '$'.$name, $bindings) || \array_key_exists($k = '$'.$parsedName, $bindings)) {
+                if (\array_key_exists($k = '$'.$name, $bindings)
+                    || \array_key_exists($k = '$'.$parsedName, $bindings)
+                    || ($name !== $parameter->name && \array_key_exists($k = '$'.$parameter->name, $bindings))
+                ) {
                     $arguments[$key] = $this->getBindingValue($bindings[$k]);
 
                     continue;

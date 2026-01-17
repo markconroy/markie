@@ -6,12 +6,14 @@ namespace Drupal\KernelTests\Core\Session;
 
 use Drupal\Core\Session\UserSession;
 use Drupal\KernelTests\KernelTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Test case for account switching.
- *
- * @group Session
  */
+#[Group('Session')]
+#[RunTestsInSeparateProcesses]
 class AccountSwitcherTest extends KernelTestBase {
 
   /**

@@ -1,7 +1,12 @@
 .ai-tools-library-wrapper {
   display: flex;
+  flex-wrap: wrap;
   margin-block-start: 0;
   margin-inline: calc(var(--gin-spacing-xxs) * -1);
+}
+
+#drupal-modal .ai-tools-library-wrapper {
+  flex-wrap: nowrap;
 }
 
 [dir="rtl"] .ai-tools-library-wrapper {

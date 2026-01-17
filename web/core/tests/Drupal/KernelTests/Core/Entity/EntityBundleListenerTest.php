@@ -4,13 +4,18 @@ declare(strict_types=1);
 
 namespace Drupal\KernelTests\Core\Entity;
 
+use Drupal\Core\Entity\EntityBundleListener;
 use Drupal\entity_test\EntityTestHelper;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
- * @coversDefaultClass \Drupal\Core\Entity\EntityBundleListener
- *
- * @group Entity
+ * Tests Drupal\Core\Entity\EntityBundleListener.
  */
+#[CoversClass(EntityBundleListener::class)]
+#[Group('Entity')]
+#[RunTestsInSeparateProcesses]
 class EntityBundleListenerTest extends EntityKernelTestBase {
 
   /**
@@ -20,7 +25,7 @@ class EntityBundleListenerTest extends EntityKernelTestBase {
    * was written to cover, as the field map cache is cleared manually by
    * \Drupal\Core\Field\FieldDefinitionListener::onFieldDefinitionCreate().
    *
-   * @covers ::onBundleCreate
+   * @legacy-covers ::onBundleCreate
    */
   public function testOnBundleCreate(): void {
     $field_map = $this->container->get('entity_field.manager')->getFieldMap();

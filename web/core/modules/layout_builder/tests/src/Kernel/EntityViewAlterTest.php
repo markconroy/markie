@@ -9,17 +9,21 @@ use Drupal\entity_test\Entity\EntityTest;
 use Drupal\entity_test\EntityTestHelper;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\layout_builder\Entity\LayoutBuilderEntityViewDisplay;
+use Drupal\layout_builder\Hook\LayoutBuilderHooks;
+use PHPUnit\Framework\Attributes\CoversMethod;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
 use Symfony\Component\Routing\Route;
-use Drupal\layout_builder\Hook\LayoutBuilderHooks;
 
 /**
- * @covers \Drupal\layout_builder\Hook\LayoutBuilderHooks::entityViewAlter
- *
- * @group layout_builder
+ * Tests Entity View Alter.
  */
+#[Group('layout_builder')]
+#[CoversMethod(LayoutBuilderHooks::class, 'entityViewAlter')]
+#[RunTestsInSeparateProcesses]
 class EntityViewAlterTest extends KernelTestBase {
 
   /**

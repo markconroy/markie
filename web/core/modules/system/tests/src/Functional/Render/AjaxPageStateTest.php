@@ -6,12 +6,14 @@ namespace Drupal\Tests\system\Functional\Render;
 
 use Drupal\Component\Utility\UrlHelper;
 use Drupal\Tests\BrowserTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Performs tests for the effects of the ajax_page_state query parameter.
- *
- * @group Render
  */
+#[Group('Render')]
+#[RunTestsInSeparateProcesses]
 class AjaxPageStateTest extends BrowserTestBase {
 
   /**

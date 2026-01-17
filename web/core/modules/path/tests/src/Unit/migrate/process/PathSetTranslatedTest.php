@@ -6,13 +6,17 @@ namespace Drupal\Tests\path\Unit\migrate\process;
 
 use Drupal\path\Plugin\migrate\process\PathSetTranslated;
 use Drupal\Tests\migrate\Unit\process\MigrateProcessTestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\IgnoreDeprecations;
 
 /**
  * Tests the path_set_translated process plugin.
- *
- * @group path
- * @coversDefaultClass \Drupal\path\Plugin\migrate\process\PathSetTranslated
  */
+#[CoversClass(PathSetTranslated::class)]
+#[Group('path')]
+#[IgnoreDeprecations]
 class PathSetTranslatedTest extends MigrateProcessTestCase {
 
   /**
@@ -25,10 +29,9 @@ class PathSetTranslatedTest extends MigrateProcessTestCase {
    * @param string $expected_result
    *   The expected result.
    *
-   * @covers ::transform
-   *
-   * @dataProvider transformDataProvider
+   * @legacy-covers ::transform
    */
+  #[DataProvider('transformDataProvider')]
   public function testTransform($path, $node_translation, $expected_result): void {
     $plugin = new PathSetTranslated([], 'path_set_translated', []);
     $this->assertSame($expected_result, $plugin->transform([$path, $node_translation], $this->migrateExecutable, $this->row, 'destination_property'));

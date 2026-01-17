@@ -74,13 +74,21 @@ class ConfigHandlerGroup extends ViewsFormBase {
     if ($item) {
       $handler = $executable->display_handler->getHandler($type, $id);
       if (empty($handler)) {
-        $form['markup'] = ['#markup' => $this->t("Error: handler for @table > @field doesn't exist!", ['@table' => $item['table'], '@field' => $item['field']])];
+        $form['markup'] = [
+          '#markup' => $this->t("Error: handler for @table > @field doesn't exist!", [
+            '@table' => $item['table'],
+            '@field' => $item['field'],
+          ]),
+        ];
       }
       else {
         $handler->init($executable, $executable->display_handler, $item);
         $types = ViewExecutable::getHandlerTypes();
 
-        $form['#title'] = $this->t('Configure aggregation settings for @type %item', ['@type' => $types[$type]['lstitle'], '%item' => $handler->adminLabel()]);
+        $form['#title'] = $this->t('Configure aggregation settings for @type %item', [
+          '@type' => $types[$type]['lstitle'],
+          '%item' => $handler->adminLabel(),
+        ]);
 
         $handler->buildGroupByForm($form['options'], $form_state);
         $form_state->set('handler', $handler);
@@ -105,10 +113,10 @@ class ConfigHandlerGroup extends ViewsFormBase {
 
     $handler->submitGroupByForm($form, $form_state);
 
-    // Store the item back on the view
+    // Store the item back on the view.
     $executable->setHandler($form_state->get('display_id'), $form_state->get('type'), $form_state->get('id'), $item);
 
-    // Write to cache
+    // Write to cache.
     $view->cacheSet();
   }
 

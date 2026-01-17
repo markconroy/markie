@@ -26,8 +26,6 @@ use Drupal\backup_migrate\SettingsProfileInterface;
  *     },
  *   },
  *   links = {
- *     "canonical" =
- *        "/admin/config/development/backup_migrate/settings/{backup_migrate_settings}",
  *     "add-form" = "/admin/config/development/backup_migrate/settings/add",
  *     "edit-form" = "/admin/config/development/backup_migrate/settings/{backup_migrate_settings}/edit",
  *     "delete-form" = "/admin/config/development/backup_migrate/settings/{backup_migrate_settings}/delete",

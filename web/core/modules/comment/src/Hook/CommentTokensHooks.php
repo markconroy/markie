@@ -41,13 +41,9 @@ class CommentTokensHooks {
           'name' => $this->t("Comment count"),
           'description' => $this->t("The number of comments posted on an entity."),
         ];
-        $tokens[$token_type]['comment-count-new'] = [
-          'name' => $this->t("New comment count"),
-          'description' => $this->t("The number of comments posted on an entity since the reader last viewed it."),
-        ];
       }
     }
-    // Core comment tokens
+    // Core comment tokens.
     $comment['cid'] = ['name' => $this->t("Comment ID"), 'description' => $this->t("The unique ID of the comment.")];
     $comment['uuid'] = ['name' => $this->t('UUID'), 'description' => $this->t("The UUID of the comment.")];
     $comment['hostname'] = [
@@ -76,7 +72,7 @@ class CommentTokensHooks {
       'name' => $this->t("Edit URL"),
       'description' => $this->t("The URL of the comment's edit page."),
     ];
-    // Chained tokens for comments
+    // Chained tokens for comments.
     $comment['created'] = [
       'name' => $this->t("Date created"),
       'description' => $this->t("The date the comment was posted."),
@@ -248,10 +244,6 @@ class CommentTokensHooks {
               $count += $entity->get($field_name)->comment_count;
             }
             $replacements[$original] = $count;
-            break;
-
-          case 'comment-count-new':
-            $replacements[$original] = \Drupal::service('comment.manager')->getCountNewComments($entity);
             break;
         }
       }

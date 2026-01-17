@@ -240,7 +240,7 @@ class FileTransferAuthorizeForm extends FormBase {
    * @param array $settings
    *   Array of settings for the FileTransfer.
    *
-   * @return \Drupal\Core\FileTransfer\FileTransfer|bool
+   * @return \Drupal\Core\FileTransfer\FileTransfer|false
    *   An instantiated FileTransfer object for the requested method and
    *   settings, or FALSE if there was an error finding or instantiating it.
    */
@@ -291,7 +291,7 @@ class FileTransferAuthorizeForm extends FormBase {
    *
    * @param array $element
    *   Reference to the Form API form element we're operating on.
-   * @param string $key
+   * @param string|null $key
    *   The key for our current form element, if any.
    * @param array $defaults
    *   The default settings for the file transfer backend we're operating on.
@@ -309,14 +309,14 @@ class FileTransferAuthorizeForm extends FormBase {
     // processing, pass in that subarray to the recursive call. Otherwise, just
     // pass on the whole $defaults array.
     foreach (Element::children($element) as $child_key) {
-      $this->setConnectionSettingsDefaults($element[$child_key], $child_key, ((isset($defaults[$key]) && is_array($defaults[$key])) ? $defaults[$key] : $defaults));
+      $this->setConnectionSettingsDefaults($element[$child_key], $child_key, ((isset($key, $defaults[$key]) && is_array($defaults[$key])) ? $defaults[$key] : $defaults));
     }
   }
 
   /**
    * Runs the operation specified in 'authorize_operation' session property.
    *
-   * @param array $filetransfer
+   * @param \Drupal\Core\FileTransfer\FileTransfer|false $filetransfer
    *   The FileTransfer object to use for running the operation.
    *
    * @return \Symfony\Component\HttpFoundation\Response|null

@@ -68,7 +68,7 @@ class ViewExecutable {
    *
    * @var array
    */
-  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName, Drupal.Commenting.VariableComment.Missing
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
   public $build_info = [];
 
   /**
@@ -81,13 +81,13 @@ class ViewExecutable {
   /**
    * The plugin name.
    */
-  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName, Drupal.Commenting.VariableComment.Missing
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
   public ?string $plugin_name;
 
   /**
    * The build execution time.
    */
-  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName, Drupal.Commenting.VariableComment.Missing
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
   public string|float $build_time;
 
   /**
@@ -106,7 +106,7 @@ class ViewExecutable {
    *
    * @var int
    */
-  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName, Drupal.Commenting.VariableComment.Missing
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
   protected $current_page = NULL;
 
   /**
@@ -114,7 +114,7 @@ class ViewExecutable {
    *
    * @var int
    */
-  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName, Drupal.Commenting.VariableComment.Missing
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
   protected $items_per_page = NULL;
 
   /**
@@ -122,7 +122,7 @@ class ViewExecutable {
    *
    * @var int
    */
-  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName, Drupal.Commenting.VariableComment.Missing
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
   protected $offset = NULL;
 
   /**
@@ -130,7 +130,7 @@ class ViewExecutable {
    *
    * @var int
    */
-  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName, Drupal.Commenting.VariableComment.Missing
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
   public $total_rows = NULL;
 
   /**
@@ -138,7 +138,7 @@ class ViewExecutable {
    *
    * @var array
    */
-  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName, Drupal.Commenting.VariableComment.Missing
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
   public $attachment_before = [];
 
   /**
@@ -146,7 +146,7 @@ class ViewExecutable {
    *
    * @var array
    */
-  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName, Drupal.Commenting.VariableComment.Missing
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
   public $attachment_after = [];
 
   /**
@@ -154,17 +154,17 @@ class ViewExecutable {
    *
    * @var array
    */
-  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName, Drupal.Commenting.VariableComment.Missing
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
   public $feedIcons = [];
 
-  // Exposed widget input
+  // Exposed widget input.
 
   /**
    * All the form data from $form_state->getValues().
    *
    * @var array
    */
-  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName, Drupal.Commenting.VariableComment.Missing
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
   public $exposed_data = [];
 
   /**
@@ -172,7 +172,7 @@ class ViewExecutable {
    *
    * @var array
    */
-  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName, Drupal.Commenting.VariableComment.Missing
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
   protected $exposed_input = [];
 
   /**
@@ -180,7 +180,7 @@ class ViewExecutable {
    *
    * @var array
    */
-  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName, Drupal.Commenting.VariableComment.Missing
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
   public $exposed_raw_input = [];
 
   /**
@@ -188,7 +188,7 @@ class ViewExecutable {
    *
    * @var \Drupal\views\ViewExecutable[]
    */
-  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName, Drupal.Commenting.VariableComment.Missing
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
   public $old_view = [];
 
   /**
@@ -196,7 +196,7 @@ class ViewExecutable {
    *
    * @var \Drupal\views\ViewExecutable[]
    */
-  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName, Drupal.Commenting.VariableComment.Missing
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
   public $parent_views = [];
 
   /**
@@ -204,7 +204,7 @@ class ViewExecutable {
    *
    * @var bool
    */
-  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName, Drupal.Commenting.VariableComment.Missing
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
   public $is_attachment = NULL;
 
   /**
@@ -212,7 +212,7 @@ class ViewExecutable {
    *
    * @var string
    */
-  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName, Drupal.Commenting.VariableComment.Missing
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
   public $current_display;
 
   /**
@@ -227,7 +227,7 @@ class ViewExecutable {
    *
    * @var \Drupal\views\Plugin\views\pager\PagerPluginBase
    */
-  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName, Drupal.Commenting.VariableComment.Missing
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
   public $pager = NULL;
 
   /**
@@ -235,7 +235,7 @@ class ViewExecutable {
    *
    * @var \Drupal\views\Plugin\views\display\DisplayPluginBase
    */
-  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName, Drupal.Commenting.VariableComment.Missing
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
   public $display_handler;
 
   /**
@@ -253,7 +253,7 @@ class ViewExecutable {
    *
    * @var \Drupal\views\Plugin\views\style\StylePluginBase
    */
-  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName, Drupal.Commenting.VariableComment.Missing
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
   public $style_plugin;
 
   /**
@@ -268,7 +268,7 @@ class ViewExecutable {
    *
    * @var int
    */
-  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName, Drupal.Commenting.VariableComment.Missing
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
   public $row_index;
 
   /**
@@ -276,7 +276,7 @@ class ViewExecutable {
    *
    * @var \Drupal\Core\Url
    */
-  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName, Drupal.Commenting.VariableComment.Missing
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
   public $override_url;
 
 
@@ -285,15 +285,15 @@ class ViewExecutable {
    *
    * @var string
    */
-  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName, Drupal.Commenting.VariableComment.Missing
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
   public $override_path = NULL;
 
   /**
    * Allow to override the used database which is used for this query.
    *
-   * @var bool
+   * @var string|null
    */
-  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName, Drupal.Commenting.VariableComment.Missing
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
   public $base_database = NULL;
 
   // Handlers which are active on this view.
@@ -387,7 +387,7 @@ class ViewExecutable {
    *
    * @var array
    */
-  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName, Drupal.Commenting.VariableComment.Missing
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
   public $exposed_widgets;
 
   /**
@@ -422,7 +422,7 @@ class ViewExecutable {
    *
    * @var array
    */
-  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName, Drupal.Commenting.VariableComment.Missing
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
   public $many_to_one_tables;
 
   /**
@@ -430,7 +430,7 @@ class ViewExecutable {
    *
    * @var string
    */
-  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName, Drupal.Commenting.VariableComment.Missing
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
   public $dom_id;
 
   /**
@@ -1177,7 +1177,7 @@ class ViewExecutable {
         // use whatever value the argument handler now has, not the raw value.
         $substitutions["{{ raw_arguments.$id }}"] = strip_tags(Html::decodeEntities($argument->getValue()));
 
-        // Test to see if we should use this argument's title
+        // Test to see if we should use this argument's title.
         if (!empty($argument->options['title_enable']) && !empty($argument->options['title'])) {
           $title = $argument->options['title'];
         }
@@ -1385,7 +1385,7 @@ class ViewExecutable {
     $this->built = TRUE;
     $this->build_time = microtime(TRUE) - $start;
 
-    // Attach displays
+    // Attach displays.
     $this->attachDisplays();
 
     // Let modules modify the view just after building it.
@@ -1531,9 +1531,8 @@ class ViewExecutable {
 
     // @todo In the long run, it would be great to execute a view without
     //   the theme system at all. See https://www.drupal.org/node/2322623.
-    $active_theme = \Drupal::theme()->getActiveTheme();
-    $themes = array_reverse(array_keys($active_theme->getBaseThemeExtensions()));
-    $themes[] = $active_theme->getName();
+    /** @var \Drupal\Core\Theme\ThemeManager $theme_manager */
+    $theme_manager = \Drupal::theme();
 
     // Check for already-cached output.
     /** @var \Drupal\views\Plugin\views\cache\CachePluginBase $cache */
@@ -1585,12 +1584,9 @@ class ViewExecutable {
     $module_handler->invokeAll('views_pre_render', [$this]);
 
     // Let the themes play too, because prerender is a very themey thing.
-    foreach ($themes as $theme_name) {
-      $function = $theme_name . '_views_pre_render';
-      if (function_exists($function)) {
-        $function($this);
-      }
-    }
+    $theme_manager->invokeAllWith('views_pre_render', function (callable $hook_listener, string $theme) {
+      $hook_listener($this);
+    });
 
     $this->display_handler->output = $this->display_handler->render();
 
@@ -1602,12 +1598,10 @@ class ViewExecutable {
     $module_handler->invokeAll('views_post_render', [$this, &$this->display_handler->output, $cache]);
 
     // Let the themes play too, because post render is a very themey thing.
-    foreach ($themes as $theme_name) {
-      $function = $theme_name . '_views_post_render';
-      if (function_exists($function)) {
-        $function($this, $this->display_handler->output, $cache);
-      }
-    }
+    $theme_manager->invokeAllWith('views_post_render', function (callable $hook_listener, string $theme) use ($cache) {
+      $display_output = &$this->display_handler->output;
+      $hook_listener($this, $display_output, $cache);
+    });
 
     return $this->display_handler->output;
   }
@@ -1688,7 +1682,7 @@ class ViewExecutable {
 
     $this->preExecute($args);
 
-    // Execute the view
+    // Execute the view.
     $output = $this->display_handler->execute();
 
     $this->postExecute();
@@ -1750,7 +1744,7 @@ class ViewExecutable {
     // Allow hook_views_pre_view() to set the dom_id, then ensure it is set.
     $this->dom_id = !empty($this->dom_id) ? $this->dom_id : hash('sha256', $this->storage->id() . \Drupal::time()->getRequestTime() . mt_rand());
 
-    // Allow the display handler to set up for execution
+    // Allow the display handler to set up for execution.
     $this->display_handler->preExecute();
   }
 
@@ -2336,10 +2330,10 @@ class ViewExecutable {
   public function getHandler($display_id, $type, $id) {
     // Get info about the types so we can get the right data.
     $types = static::getHandlerTypes();
-    // Initialize the display
+    // Initialize the display.
     $this->setDisplay($display_id);
 
-    // Get the existing configuration
+    // Get the existing configuration.
     $fields = $this->displayHandlers->get($display_id)->getOption($types[$type]['plural']);
 
     return $fields[$id] ?? NULL;

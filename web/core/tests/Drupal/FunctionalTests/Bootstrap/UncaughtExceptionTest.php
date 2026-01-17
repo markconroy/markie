@@ -6,12 +6,14 @@ namespace Drupal\FunctionalTests\Bootstrap;
 
 use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Tests\BrowserTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests kernel panic when things are really messed up.
- *
- * @group system
  */
+#[Group('system')]
+#[RunTestsInSeparateProcesses]
 class UncaughtExceptionTest extends BrowserTestBase {
 
   /**
@@ -203,6 +205,7 @@ class UncaughtExceptionTest extends BrowserTestBase {
     switch ($this->container->get('database')->driver()) {
       case 'pgsql':
       case 'mysql':
+      case 'mysqli':
         $this->expectedExceptionMessage = $incorrect_username;
         break;
 
@@ -245,7 +248,7 @@ class UncaughtExceptionTest extends BrowserTestBase {
     $this->assertSession()->pageTextContains('The website encountered an unexpected error. Try again later.');
     $this->assertSession()->pageTextContains($this->expectedExceptionMessage);
 
-    // Find fatal error logged to the error.log
+    // Find fatal error logged to the error.log.
     $errors = file(\Drupal::root() . '/' . $this->siteDirectory . '/error.log');
     $this->assertCount(10, $errors, 'The error + the error that the logging service is broken has been written to the error log.');
     $this->assertStringContainsString('Failed to log error', $errors[0], 'The error handling logs when an error could not be logged to the logger.');

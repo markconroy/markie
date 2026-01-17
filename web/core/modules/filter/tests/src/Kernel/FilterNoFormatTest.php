@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace Drupal\Tests\filter\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the behavior of check_markup() when it is called without text format.
- *
- * @group filter
  */
+#[Group('filter')]
+#[RunTestsInSeparateProcesses]
 class FilterNoFormatTest extends KernelTestBase {
 
   /**

@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace Drupal\KernelTests\Core\Theme;
 
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
+
 /**
  * Tests Stable 9's library overrides.
- *
- * @group Theme
- * @group #slow
  */
+#[Group('Theme')]
+#[Group('#slow')]
+#[RunTestsInSeparateProcesses]
 class Stable9LibraryOverrideTest extends StableLibraryOverrideTestBase {
 
   /**
@@ -47,7 +50,9 @@ class Stable9LibraryOverrideTest extends StableLibraryOverrideTestBase {
   protected function setUp(): void {
     parent::setUp();
 
+    $this->installConfig('system');
     $this->container->get('theme_installer')->install(['stable9']);
+    $this->config('system.theme')->set('default', 'stable9')->save();
 
     // Enable all core modules.
     $this->enableVisibleAndStableCoreModules();

@@ -6,13 +6,16 @@ namespace Drupal\Tests\ckeditor5\FunctionalJavascript;
 
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests read-only mode for CKEditor 5.
  *
- * @group ckeditor5
  * @internal
  */
+#[Group('ckeditor5')]
+#[RunTestsInSeparateProcesses]
 class CKEditor5ReadOnlyModeTest extends CKEditor5TestBase {
 
   /**
@@ -30,7 +33,7 @@ class CKEditor5ReadOnlyModeTest extends CKEditor5TestBase {
     $field_storage = FieldStorageConfig::create([
       'field_name' => 'field_second_ckeditor5_field',
       'entity_type' => 'node',
-      'type' => 'text_with_summary',
+      'type' => 'text_long',
       'cardinality' => 1,
     ]);
     $field_storage->save();
@@ -44,7 +47,7 @@ class CKEditor5ReadOnlyModeTest extends CKEditor5TestBase {
     $this->container->get('entity_display.repository')
       ->getFormDisplay('node', 'page')
       ->setComponent('field_second_ckeditor5_field', [
-        'type' => 'text_textarea_with_summary',
+        'type' => 'text_textarea',
       ])
       ->save();
   }

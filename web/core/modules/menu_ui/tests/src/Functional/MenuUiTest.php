@@ -9,21 +9,23 @@ use Drupal\Core\EventSubscriber\MainContentViewSubscriber;
 use Drupal\Core\Menu\MenuLinkInterface;
 use Drupal\Core\Url;
 use Drupal\menu_link_content\Entity\MenuLinkContent;
-use Drupal\system\Entity\Menu;
 use Drupal\node\Entity\Node;
 use Drupal\node\NodeInterface;
+use Drupal\system\Entity\Menu;
 use Drupal\system\MenuStorage;
 use Drupal\Tests\BrowserTestBase;
 use Drupal\Tests\menu_ui\Traits\MenuUiTrait;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the menu UI.
  *
  * This test adds a custom menu, adds menu links to the custom menu and the
  * Tools menu, checks their data, and deletes them using the UI.
- *
- * @group menu_ui
  */
+#[Group('menu_ui')]
+#[RunTestsInSeparateProcesses]
 class MenuUiTest extends BrowserTestBase {
 
   use MenuUiTrait;
@@ -261,7 +263,10 @@ class MenuUiTest extends BrowserTestBase {
     $this->drupalGet('admin/structure/menu');
     $this->assertSession()->pageTextContains($new_label);
     // Click the "Delete menu" operation in the Tools row.
-    $links = $this->xpath('//*/td[contains(text(),:menu_label)]/following::a[normalize-space()=:link_label]', [':menu_label' => $new_label, ':link_label' => 'Delete menu']);
+    $links = $this->xpath(
+      '//*/td[contains(text(),:menu_label)]/following::a[normalize-space()=:link_label]',
+      [':menu_label' => $new_label, ':link_label' => 'Delete menu'],
+    );
     $links[0]->click();
     $this->submitForm([], 'Delete');
     $this->assertSession()->addressEquals('admin/structure/menu');
@@ -367,7 +372,10 @@ class MenuUiTest extends BrowserTestBase {
     // Test adding a menu link direct from the menus listing page.
     $this->drupalGet('admin/structure/menu');
     // Click the "Add link" operation in the Tools row.
-    $links = $this->xpath('//*/td[contains(text(),:menu_label)]/following::a[normalize-space()=:link_label]', [':menu_label' => 'Tools', ':link_label' => 'Add link']);
+    $links = $this->xpath(
+      '//*/td[contains(text(),:menu_label)]/following::a[normalize-space()=:link_label]',
+      [':menu_label' => 'Tools', ':link_label' => 'Add link'],
+    );
     $links[0]->click();
     $this->assertMatchesRegularExpression('#admin/structure/menu/manage/tools/add\?destination=(/[^/]*)*/admin/structure/menu/manage/tools$#', $this->getSession()->getCurrentUrl());
     $link_title = $this->randomMachineName();
@@ -382,7 +390,13 @@ class MenuUiTest extends BrowserTestBase {
     $this->drupalGet('admin/structure/menu');
 
     // Select the edit menu link for our menu.
-    $links = $this->xpath('//*/td[contains(text(),:menu_label)]/following::a[normalize-space()=:link_label]', [':menu_label' => (string) $this->menu->label(), ':link_label' => 'Edit menu']);
+    $links = $this->xpath(
+      '//*/td[contains(text(),:menu_label)]/following::a[normalize-space()=:link_label]',
+      [
+        ':menu_label' => (string) $this->menu->label(),
+        ':link_label' => 'Edit menu',
+      ],
+    );
     $links[0]->click();
 
     // Test the 'Add link' local action.
@@ -408,7 +422,10 @@ class MenuUiTest extends BrowserTestBase {
     $this->drupalGet('admin/structure/menu');
 
     // Select the edit menu link for our menu.
-    $links = $this->xpath('//*/td[contains(text(),:menu_label)]/following::a[normalize-space()=:link_label]', [':menu_label' => (string) $this->menu->label(), ':link_label' => 'Edit menu']);
+    $links = $this->xpath(
+      '//*/td[contains(text(),:menu_label)]/following::a[normalize-space()=:link_label]',
+      [':menu_label' => (string) $this->menu->label(), ':link_label' => 'Edit menu'],
+    );
     $links[0]->click();
 
     // Test the 'Add link' local action.
@@ -902,7 +919,7 @@ class MenuUiTest extends BrowserTestBase {
    *
    * @param \Drupal\menu_link_content\Entity\MenuLinkContent $item
    *   The menu link item to move.
-   * @param int $parent
+   * @param string $parent
    *   The id of the new parent.
    * @param string $menu_name
    *   The menu the menu link will be moved to.

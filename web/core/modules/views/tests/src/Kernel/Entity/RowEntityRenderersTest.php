@@ -12,13 +12,16 @@ use Drupal\Tests\views\Kernel\ViewsKernelTestBase;
 use Drupal\user\Entity\User;
 use Drupal\views\Tests\ViewTestData;
 use Drupal\views\Views;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the entity row renderers.
  *
- * @group views
  * @see \Drupal\views\Entity\Render\RendererBase
  */
+#[Group('views')]
+#[RunTestsInSeparateProcesses]
 class RowEntityRenderersTest extends ViewsKernelTestBase {
 
   /**
@@ -26,10 +29,7 @@ class RowEntityRenderersTest extends ViewsKernelTestBase {
    */
   protected static $modules = [
     'field',
-    'filter',
-    'text',
     'node',
-    'user',
     'language',
     'views_test_language',
   ];

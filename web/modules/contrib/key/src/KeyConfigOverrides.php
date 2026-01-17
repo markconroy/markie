@@ -45,14 +45,14 @@ class KeyConfigOverrides implements ConfigFactoryOverrideInterface {
   /**
    * Creates a new ModuleConfigOverrides instance.
    *
-   * @param \Drupal\Core\Config\ConfigFactoryInterface|null $config_factory
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
    *   The config factory.
-   * @param \Drupal\Core\Cache\CacheBackendInterface|null $cache_backend
+   * @param \Drupal\Core\Cache\CacheBackendInterface $cache_backend
    *   The cache backend.
    */
-  public function __construct(?ConfigFactoryInterface $config_factory = NULL, ?CacheBackendInterface $cache_backend = NULL) {
-    $this->configFactory = $config_factory ?: \Drupal::configFactory();
-    $this->cacheBackend = $cache_backend ?: \Drupal::cache('data');
+  public function __construct(ConfigFactoryInterface $config_factory, CacheBackendInterface $cache_backend) {
+    $this->configFactory = $config_factory;
+    $this->cacheBackend = $cache_backend;
   }
 
   /**
@@ -70,6 +70,7 @@ class KeyConfigOverrides implements ConfigFactoryOverrideInterface {
     }
 
     try {
+      // @phpstan-ignore-next-line
       $storage = \Drupal::entityTypeManager()->getStorage('key');
     }
     catch (\Exception $e) {
@@ -86,7 +87,8 @@ class KeyConfigOverrides implements ConfigFactoryOverrideInterface {
       $override = [];
 
       foreach ($mapping[$name] as $config_item => $key_id) {
-        $key_value = $storage->load($key_id)->getKeyValue();
+        $key_storage = $storage->load($key_id);
+        $key_value = $key_storage ? $key_storage->getKeyValue() : NULL;
 
         if (!isset($key_value)) {
           continue;

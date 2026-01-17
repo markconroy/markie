@@ -4,15 +4,17 @@ declare(strict_types=1);
 
 namespace Drupal\FunctionalTests\Installer;
 
-use Drupal\Core\DrupalKernel;
 use Drupal\Core\Database\Database;
+use Drupal\Core\DrupalKernel;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Tests the installer with an existing settings file but no install profile.
- *
- * @group Installer
  */
+#[Group('Installer')]
+#[RunTestsInSeparateProcesses]
 class InstallerExistingSettingsNoProfileTest extends InstallerTestBase {
 
   /**

@@ -5,14 +5,16 @@ declare(strict_types=1);
 namespace Drupal\Tests\block\Kernel\Migrate\d6;
 
 use Drupal\block\Entity\Block;
-use Drupal\Tests\migrate_drupal\Kernel\d6\MigrateDrupal6TestBase;
 use Drupal\block\Hook\BlockHooks;
+use Drupal\Tests\migrate_drupal\Kernel\d6\MigrateDrupal6TestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests migration of blocks to configuration entities.
- *
- * @group migrate_drupal_6
  */
+#[Group('migrate_drupal_6')]
+#[RunTestsInSeparateProcesses]
 class MigrateBlockTest extends MigrateDrupal6TestBase {
 
   /**
@@ -21,11 +23,7 @@ class MigrateBlockTest extends MigrateDrupal6TestBase {
   protected static $modules = [
     'block',
     'views',
-    'comment',
-    'menu_ui',
     'block_content',
-    'taxonomy',
-    'node',
     'path_alias',
   ];
 
@@ -51,6 +49,7 @@ class MigrateBlockTest extends MigrateDrupal6TestBase {
       'd6_filter_format',
       'block_content_type',
       'block_content_body_field',
+      'block_content_body_field_storage',
       'd6_menu',
       'd6_custom_block',
       'd6_user_role',
@@ -265,8 +264,6 @@ class MigrateBlockTest extends MigrateDrupal6TestBase {
       'label' => 'Static Block',
       'provider' => 'block_content',
       'label_display' => 'visible',
-      'status' => TRUE,
-      'info' => '',
       'view_mode' => 'full',
     ];
     $this->assertEntity('block', $visibility, 'content', 'olivero', 0, $settings);
@@ -283,8 +280,6 @@ class MigrateBlockTest extends MigrateDrupal6TestBase {
       'label' => 'Another Static Block',
       'provider' => 'block_content',
       'label_display' => 'visible',
-      'status' => TRUE,
-      'info' => '',
       'view_mode' => 'full',
     ];
     // We expect this block to be disabled because '' is not a valid region,
@@ -296,8 +291,6 @@ class MigrateBlockTest extends MigrateDrupal6TestBase {
       'label' => '',
       'provider' => 'block_content',
       'label_display' => '0',
-      'status' => TRUE,
-      'info' => '',
       'view_mode' => 'full',
     ];
     $this->assertEntity('block_2', [], 'right', 'test_theme', -7, $settings);
@@ -309,10 +302,10 @@ class MigrateBlockTest extends MigrateDrupal6TestBase {
     // Check migrate messages.
     $messages = iterator_to_array($this->getMigration('d6_block')->getIdMap()->getMessages());
     $this->assertCount(7, $messages);
-    $this->assertSame($messages[0]->message, 'Schema errors for block.block.block_1 with the following errors: 0 [dependencies.theme.0] Theme &#039;bluemarine&#039; is not installed., 1 [theme] Theme &#039;bluemarine&#039; is not installed., 2 [region] This value should not be blank., 3 [region] This is not a valid region of the &lt;em class=&quot;placeholder&quot;&gt;bluemarine&lt;/em&gt; theme.');
-    $this->assertSame($messages[1]->message, "d6_block:visibility: The block with bid '13' from module 'block' will have no PHP or request_path visibility configuration.");
-    $this->assertSame($messages[2]->message, 'Schema errors for block.block.aggregator with the following errors: block.block.aggregator:settings.block_count missing schema, block.block.aggregator:settings.feed missing schema, 0 [settings.feed] &#039;feed&#039; is not a supported key., 1 [settings] &#039;block_count&#039; is an unknown key because plugin is aggregator_feed_block (see config schema type block.settings.*).');
-    $this->assertSame($messages[3]->message, 'Schema errors for block.block.book with the following errors: block.block.book:settings.block_mode missing schema, 0 [settings.block_mode] &#039;block_mode&#039; is not a supported key.');
+    $this->assertSame('Schema errors for block.block.block_1 with the following errors: 0 [dependencies.theme.0] Theme &#039;bluemarine&#039; is not installed., 1 [theme] Theme &#039;bluemarine&#039; is not installed., 2 [region] This value should not be blank.', $messages[0]->message);
+    $this->assertSame("d6_block:visibility: The block with bid '13' from module 'block' will have no PHP or request_path visibility configuration.", $messages[1]->message);
+    $this->assertSame('Schema errors for block.block.aggregator with the following errors: block.block.aggregator:settings.block_count missing schema, block.block.aggregator:settings.feed missing schema, 0 [settings.feed] &#039;feed&#039; is not a supported key., 1 [settings] &#039;block_count&#039; is an unknown key because plugin is aggregator_feed_block (see config schema type block.settings.*).', $messages[2]->message);
+    $this->assertSame('Schema errors for block.block.book with the following errors: block.block.book:settings.block_mode missing schema, 0 [settings.block_mode] &#039;block_mode&#039; is not a supported key.', $messages[3]->message);
     $this->assertSame('Schema errors for block.block.forum with the following errors: block.block.forum:settings.block_count missing schema, 0 [settings] &#039;block_count&#039; is an unknown key because plugin is forum_active_block (see config schema type block.settings.*).', $messages[4]->message);
     $this->assertSame('Schema errors for block.block.forum_1 with the following errors: block.block.forum_1:settings.block_count missing schema, 0 [settings] &#039;block_count&#039; is an unknown key because plugin is forum_new_block (see config schema type block.settings.*).', $messages[5]->message);
     $this->assertSame('Schema errors for block.block.statistics with the following errors: block.block.statistics:settings.top_day_num missing schema, block.block.statistics:settings.top_all_num missing schema, block.block.statistics:settings.top_last_num missing schema, 0 [settings.top_day_num] &#039;top_day_num&#039; is not a supported key., 1 [settings.top_all_num] &#039;top_all_num&#039; is not a supported key., 2 [settings.top_last_num] &#039;top_last_num&#039; is not a supported key.', $messages[6]->message);

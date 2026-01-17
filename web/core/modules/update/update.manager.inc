@@ -2,13 +2,19 @@
 
 /**
  * @file
+ *
+ * @deprecated in drupal:11.3.0 and is removed from drupal:12.0.0.
+ *   Functions have been deprecated.
+ *
+ * @see https://www.drupal.org/node/3512364
  */
 
 use Drupal\Core\File\Exception\FileException;
 use Drupal\Core\File\Exception\InvalidStreamWrapperException;
 use Drupal\Core\File\FileExists;
-use Drupal\Core\Hook\Attribute\ProceduralHookScanStop;
 use Psr\Http\Client\ClientExceptionInterface;
+
+@trigger_error(__FILE__ . ' is deprecated in drupal:11.3.0 and is removed from drupal:12.0.0. Functions have been deprecated. See https://www.drupal.org/node/3512364', E_USER_DEPRECATED);
 
 /**
  * Checks for file transfer backends and prepares a form fragment about them.
@@ -24,7 +30,6 @@ use Psr\Http\Client\ClientExceptionInterface;
  *   workflow, or FALSE if we've hit a fatal configuration and must halt the
  *   workflow.
  */
-#[ProceduralHookScanStop]
 function _update_manager_check_backends(&$form, $operation) {
   @trigger_error(__FUNCTION__ . '() is deprecated in drupal:11.2.0 and is removed from drupal:12.0.0. There is no replacement. Use composer to manage the code for your site. See https://www.drupal.org/node/3512364', E_USER_DEPRECATED);
 
@@ -97,6 +102,7 @@ function update_manager_archive_extract($file, $directory) {
   @trigger_error(__FUNCTION__ . '() is deprecated in drupal:11.2.0 and is removed from drupal:12.0.0. There is no replacement. Use composer to manage the code for your site. See https://www.drupal.org/node/3512364', E_USER_DEPRECATED);
 
   /** @var \Drupal\Core\Archiver\ArchiverInterface $archiver */
+  // @phpstan-ignore staticServiceDeprecatedService.deprecated, method.deprecatedClass
   $archiver = \Drupal::service('plugin.manager.archiver')->getInstance([
     'filepath' => $file,
   ]);
@@ -107,6 +113,7 @@ function update_manager_archive_extract($file, $directory) {
   // Remove the directory if it exists, otherwise it might contain a mixture of
   // old files mixed with the new files (e.g. in cases where files were removed
   // from a later release).
+  // @phpstan-ignore method.deprecatedInterface
   $files = $archiver->listContents();
 
   // Unfortunately, we can only use the directory name to determine the project
@@ -124,6 +131,7 @@ function update_manager_archive_extract($file, $directory) {
     }
   }
 
+  // @phpstan-ignore method.deprecatedInterface
   $archiver->extract($directory);
   return $archiver;
 }
@@ -174,7 +182,7 @@ function update_manager_file_get($url) {
   // Check the cache and download the file if needed.
   // @phpstan-ignore function.deprecated
   $cache_directory = _update_manager_cache_directory();
-  $local = $cache_directory . '/' . \Drupal::service('file_system')->basename($parsed_url['path']);
+  $local = $cache_directory . '/' . basename($parsed_url['path']);
 
   // @phpstan-ignore function.deprecated
   if (!file_exists($local) || update_delete_file_if_stale($local)) {

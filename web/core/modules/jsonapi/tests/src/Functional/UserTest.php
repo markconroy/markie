@@ -4,23 +4,25 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\jsonapi\Functional;
 
-use Drupal\jsonapi\JsonApiSpec;
 use Drupal\Component\Serialization\Json;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Url;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\jsonapi\JsonApiSpec;
 use Drupal\node\Entity\Node;
 use Drupal\user\Entity\User;
 use Drupal\user\UserInterface;
 use GuzzleHttp\RequestOptions;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * JSON:API integration test for the "User" content entity type.
- *
- * @group jsonapi
  */
+#[Group('jsonapi')]
+#[RunTestsInSeparateProcesses]
 class UserTest extends ResourceTestBase {
 
   const BATCH_TEST_NODE_COUNT = 15;
@@ -473,8 +475,18 @@ class UserTest extends ResourceTestBase {
     $this->grantPermissionsToTestedRole(['administer users']);
 
     $response = $this->request('GET', $collection_url, $request_options);
-    $expected_cache_contexts = ['url.path', 'url.query_args', 'url.site'];
-    $this->assertResourceErrorResponse(400, "Filtering on config entities is not supported by Drupal's entity API. You tried to filter on a Role config entity.", $collection_url, $response, FALSE, ['4xx-response', 'http_response'], $expected_cache_contexts, NULL, 'MISS');
+    $expected_cache_contexts = ['url.path', 'url.query_args', 'url.site', 'user.permissions'];
+    $this->assertResourceErrorResponse(
+      400,
+      "Filtering on config entities is not supported by Drupal's entity API. You tried to filter on a Role config entity.",
+      $collection_url,
+      $response,
+      FALSE,
+      ['4xx-response', 'http_response'],
+      $expected_cache_contexts,
+      NULL,
+      'MISS',
+    );
   }
 
   /**
@@ -691,9 +703,8 @@ class UserTest extends ResourceTestBase {
 
   /**
    * Tests if JSON:API respects user.settings.cancel_method: user_cancel_block_unpublish.
-   *
-   * @group jsonapi
    */
+  #[Group('jsonapi')]
   public function testDeleteRespectsUserCancelBlockUnpublishAndProcessesBatches(): void {
     $cancel_method = 'user_cancel_block_unpublish';
     $this->config('jsonapi.settings')->set('read_only', FALSE)->save(TRUE);

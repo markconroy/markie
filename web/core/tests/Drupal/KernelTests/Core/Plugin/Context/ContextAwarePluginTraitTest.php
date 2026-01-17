@@ -19,14 +19,17 @@ use Drupal\Core\TypedData\DataDefinition;
 use Drupal\Core\TypedData\Plugin\DataType\StringData;
 use Drupal\Core\TypedData\TypedDataManagerInterface;
 use Drupal\KernelTests\KernelTestBase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 // cspell:ignore sisko
-
 /**
- * @coversDefaultClass \Drupal\Core\Plugin\ContextAwarePluginTrait
- *
- * @group Plugin
+ * Tests Drupal\Core\Plugin\ContextAwarePluginTrait.
  */
+#[CoversClass(ContextAwarePluginTrait::class)]
+#[Group('Plugin')]
+#[RunTestsInSeparateProcesses]
 class ContextAwarePluginTraitTest extends KernelTestBase {
 
   /**
@@ -55,14 +58,18 @@ class ContextAwarePluginTraitTest extends KernelTestBase {
   }
 
   /**
-   * @covers ::getContextDefinitions
+   * Tests get context definitions.
+   *
+   * @legacy-covers ::getContextDefinitions
    */
   public function testGetContextDefinitions(): void {
     $this->assertIsArray($this->plugin->getContextDefinitions());
   }
 
   /**
-   * @covers ::getContextDefinition
+   * Tests get context definition.
+   *
+   * @legacy-covers ::getContextDefinition
    */
   public function testGetContextDefinition(): void {
     // The context is not defined, so an exception will be thrown.
@@ -72,7 +79,9 @@ class ContextAwarePluginTraitTest extends KernelTestBase {
   }
 
   /**
-   * @covers ::getContextValue
+   * Tests get context value.
+   *
+   * @legacy-covers ::getContextValue
    */
   public function testGetContextValue(): void {
     $this->plugin->setContextValue('nato_letter', 'Alpha');
@@ -80,7 +89,9 @@ class ContextAwarePluginTraitTest extends KernelTestBase {
   }
 
   /**
-   * @covers ::setContextValue
+   * Tests set context value.
+   *
+   * @legacy-covers ::setContextValue
    */
   public function testSetContextValue(): void {
     $typed_data_manager = $this->prophesize(TypedDataManagerInterface::class);
@@ -142,14 +153,14 @@ class TestConfigurableContextAwarePlugin extends PluginBase implements Configura
   /**
    * {@inheritdoc}
    */
-  public function defaultConfiguration() {
+  public function defaultConfiguration(): array {
     return [];
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getConfiguration() {
+  public function getConfiguration(): array {
     return [
       'context' => [
         'nato_letter' => 'Alpha',

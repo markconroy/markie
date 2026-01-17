@@ -208,6 +208,9 @@ this css selector: `klaro_toggle_dialog.klaro_toggle_dialog_override`
   `rel="open-consent-manager"`. You can use the module [link_attributes](https://www.drupal.org/project/link_attributes) for this.
 * If there is / are already any `rel`-value(s) just extend the value e.g.
   `rel="nofollow open-consent-manager noindex"`.
+* You can also use a link with `href=“#klaro”` or any element with the class
+  `open-consent-manager` to mark an element for opening  the Klaro! consent
+  manager interface.
 
 ## AUTOMATIC ATTRIBUTION OF RESOURCES
 

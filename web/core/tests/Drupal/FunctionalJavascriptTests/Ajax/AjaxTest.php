@@ -6,12 +6,14 @@ namespace Drupal\FunctionalJavascriptTests\Ajax;
 
 use Drupal\Component\Utility\UrlHelper;
 use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests AJAX responses.
- *
- * @group Ajax
  */
+#[Group('Ajax')]
+#[RunTestsInSeparateProcesses]
 class AjaxTest extends WebDriverTestBase {
 
   /**

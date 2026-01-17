@@ -5,7 +5,6 @@
  */
 
 use Drupal\Core\Extension\ExtensionVersion;
-use Drupal\Core\Hook\Attribute\ProceduralHookScanStop;
 use Drupal\Core\Utility\Error;
 use Drupal\update\ProjectRelease;
 use Drupal\update\UpdateFetcherInterface;
@@ -23,7 +22,6 @@ use Drupal\update\ProjectCoreCompatibility;
  *   Array of project information from
  *   \Drupal\update\UpdateManager::getProjects().
  */
-#[ProceduralHookScanStop]
 function update_process_project_info(&$projects): void {
   foreach ($projects as $key => $project) {
     // Assume an official release until we see otherwise.
@@ -32,7 +30,7 @@ function update_process_project_info(&$projects): void {
     $info = $project['info'];
 
     if (isset($info['version'])) {
-      // Check for development snapshots
+      // Check for development snapshots.
       if (preg_match('@(dev|HEAD)@', $info['version'])) {
         $install_type = 'dev';
       }

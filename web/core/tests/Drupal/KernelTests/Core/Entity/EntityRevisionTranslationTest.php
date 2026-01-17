@@ -9,12 +9,14 @@ use Drupal\entity_test\Entity\EntityTestMulRev;
 use Drupal\entity_test\EntityTestHelper;
 use Drupal\entity_test\EntityTestTypesFilter;
 use Drupal\language\Entity\ConfigurableLanguage;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests proper revision propagation of entities.
- *
- * @group Entity
  */
+#[Group('Entity')]
+#[RunTestsInSeparateProcesses]
 class EntityRevisionTranslationTest extends EntityKernelTestBase {
 
   /**
@@ -170,7 +172,9 @@ class EntityRevisionTranslationTest extends EntityKernelTestBase {
   }
 
   /**
-   * @covers \Drupal\Core\Entity\ContentEntityBase::setNewRevision
+   * Tests set new revision.
+   *
+   * @legacy-covers \Drupal\Core\Entity\ContentEntityBase::setNewRevision
    */
   public function testSetNewRevision(): void {
     $user = $this->createUser();
@@ -202,7 +206,7 @@ class EntityRevisionTranslationTest extends EntityKernelTestBase {
   /**
    * Tests that revision translations are correctly detected.
    *
-   * @covers \Drupal\Core\Entity\ContentEntityStorageBase::isAnyStoredRevisionTranslated
+   * @legacy-covers \Drupal\Core\Entity\ContentEntityStorageBase::isAnyStoredRevisionTranslated
    */
   public function testIsAnyStoredRevisionTranslated(): void {
     /** @var \Drupal\Core\Entity\ContentEntityStorageInterface $storage */

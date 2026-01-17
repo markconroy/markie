@@ -83,7 +83,7 @@ abstract class KeyFormBase extends EntityForm {
    * {@inheritdoc}
    */
   public function form(array $form, FormStateInterface $form_state) {
-    /* @var $key \Drupal\key\Entity\Key */
+    /** @var \Drupal\key\Entity\Key $key */
     $key = $this->entity;
 
     $form['label'] = [
@@ -352,10 +352,10 @@ abstract class KeyFormBase extends EntityForm {
    * Update the Key Type plugin.
    */
   protected function updateKeyType(FormStateInterface $form_state) {
-    /* @var $key \Drupal\key\Entity\Key */
+    /** @var \Drupal\key\Entity\Key $key */
     $key = $this->entity;
 
-    /* @var $plugin \Drupal\key\Plugin\KeyPluginInterface */
+    /** @var \Drupal\key\Plugin\KeyPluginInterface $plugin */
     $plugin = $key->getKeyType();
 
     $key->setPlugin('key_type', $plugin->getPluginId());
@@ -379,10 +379,10 @@ abstract class KeyFormBase extends EntityForm {
    * Update the Key Provider plugin.
    */
   protected function updateKeyProvider(FormStateInterface $form_state) {
-    /* @var $key \Drupal\key\Entity\Key */
+    /** @var \Drupal\key\Entity\Key $key */
     $key = $this->entity;
 
-    /* @var $plugin \Drupal\key\Plugin\KeyPluginInterface */
+    /** @var \Drupal\key\Plugin\KeyPluginInterface $plugin */
     $plugin = $key->getKeyProvider();
 
     $key->setPlugin('key_provider', $plugin->getPluginId());
@@ -409,10 +409,10 @@ abstract class KeyFormBase extends EntityForm {
    *   The form state.
    */
   protected function updateKeyInput(FormStateInterface $form_state) {
-    /* @var $key \Drupal\key\Entity\Key */
+    /** @var \Drupal\key\Entity\Key $key */
     $key = $this->entity;
 
-    /* @var $plugin \Drupal\key\Plugin\KeyPluginInterface */
+    /** @var \Drupal\key\Plugin\KeyPluginInterface $plugin */
     $plugin = $key->getKeyInput();
 
     // Get the current key value data.

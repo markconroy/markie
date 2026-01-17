@@ -8,12 +8,11 @@
     "license": "GPL-2.0-or-later",
     "require": {
         "php": ">=8.3.0",
-        "doctrine/annotations": "^2.0",
-        "doctrine/lexer": "^2.0",
-        "drupal/core-class-finder": "^11.2",
-        "drupal/core-file-cache": "^11.2",
-        "drupal/core-plugin": "^11.2",
-        "drupal/core-utility": "^11.2"
+        "doctrine/lexer": "^2 || ^3",
+        "drupal/core-class-finder": "^11.3",
+        "drupal/core-file-cache": "^11.3",
+        "drupal/core-plugin": "^11.3",
+        "drupal/core-utility": "^11.3"
     },
     "autoload": {
         "psr-4": {

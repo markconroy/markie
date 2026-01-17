@@ -54,7 +54,7 @@ class DrupalBrowserUploadDestination extends PluginBase implements ReadableDesti
    * {@inheritdoc}
    */
   public function fileExists($id) {
-    return (boolean) \Drupal::request()->files->has("files[$id]");
+    return (bool) \Drupal::request()->files->has("files[$id]");
   }
 
 }

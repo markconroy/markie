@@ -6,10 +6,14 @@ namespace Drupal\Tests\language\Functional\Rest;
 
 use Drupal\Tests\rest\Functional\AnonResourceTestTrait;
 use Drupal\Tests\rest\Functional\EntityResource\XmlEntityNormalizationQuirksTrait;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
- * @group rest
+ * Tests Configurable Language Xml Anon.
  */
+#[Group('rest')]
+#[RunTestsInSeparateProcesses]
 class ConfigurableLanguageXmlAnonTest extends ConfigurableLanguageResourceTestBase {
 
   use AnonResourceTestTrait;

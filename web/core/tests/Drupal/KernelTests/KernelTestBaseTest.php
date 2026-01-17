@@ -9,20 +9,27 @@ use Drupal\Core\Database\Database;
 use Drupal\TestTools\Extension\Dump\DebugDump;
 use org\bovigo\vfs\vfsStream;
 use org\bovigo\vfs\visitor\vfsStreamStructureVisitor;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Depends;
 use PHPUnit\Framework\Attributes\DoesNotPerformAssertions;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Psr\Http\Client\ClientExceptionInterface;
 
 /**
- * @coversDefaultClass \Drupal\KernelTests\KernelTestBase
- *
- * @group PHPUnit
- * @group Test
- * @group KernelTests
+ * Tests Drupal\KernelTests\KernelTestBase.
  */
+#[CoversClass(KernelTestBase::class)]
+#[Group('PHPUnit')]
+#[Group('Test')]
+#[Group('KernelTests')]
+#[RunTestsInSeparateProcesses]
 class KernelTestBaseTest extends KernelTestBase {
 
   /**
-   * @covers ::setUpBeforeClass
+   * Tests set up before class.
+   *
+   * @legacy-covers ::setUpBeforeClass
    */
   public function testSetUpBeforeClass(): void {
     // Note: PHPUnit automatically restores the original working directory.
@@ -30,7 +37,9 @@ class KernelTestBaseTest extends KernelTestBase {
   }
 
   /**
-   * @covers ::bootEnvironment
+   * Tests boot environment.
+   *
+   * @legacy-covers ::bootEnvironment
    */
   public function testBootEnvironment(): void {
     $this->assertMatchesRegularExpression('/^test\d{8}$/', $this->databasePrefix);
@@ -53,7 +62,9 @@ class KernelTestBaseTest extends KernelTestBase {
   }
 
   /**
-   * @covers ::getDatabaseConnectionInfo
+   * Tests get database connection info with out manual set db url.
+   *
+   * @legacy-covers ::getDatabaseConnectionInfo
    */
   public function testGetDatabaseConnectionInfoWithOutManualSetDbUrl(): void {
     $options = $this->container->get('database')->getConnectionOptions();
@@ -61,7 +72,9 @@ class KernelTestBaseTest extends KernelTestBase {
   }
 
   /**
-   * @covers ::setUp
+   * Tests set up.
+   *
+   * @legacy-covers ::setUp
    */
   public function testSetUp(): void {
     $this->assertTrue($this->container->has('request_stack'));
@@ -90,9 +103,11 @@ class KernelTestBaseTest extends KernelTestBase {
   }
 
   /**
-   * @covers ::setUp
-   * @depends testSetUp
+   * Tests set up does not leak.
+   *
+   * @legacy-covers ::setUp
    */
+  #[Depends('testSetUp')]
   public function testSetUpDoesNotLeak(): void {
     // Ensure that we have a different database prefix.
     $schema = $this->container->get('database')->schema();
@@ -100,7 +115,9 @@ class KernelTestBaseTest extends KernelTestBase {
   }
 
   /**
-   * @covers ::register
+   * Tests register.
+   *
+   * @legacy-covers ::register
    */
   public function testRegister(): void {
     // Verify that this container is identical to the actual container.
@@ -148,9 +165,8 @@ class KernelTestBaseTest extends KernelTestBase {
 
   /**
    * Tests whether the fixture can re-install modules and configuration.
-   *
-   * @depends testContainerIsolation
    */
+  #[Depends('testContainerIsolation')]
   public function testSubsequentContainerIsolation(): void {
     $this->enableModules(['system', 'user']);
     $this->assertNull($this->installConfig('user'));
@@ -175,7 +191,9 @@ class KernelTestBaseTest extends KernelTestBase {
   }
 
   /**
-   * @covers ::render
+   * Tests render.
+   *
+   * @legacy-covers ::render
    */
   public function testRender(): void {
     $type = 'processed_text';
@@ -203,7 +221,9 @@ class KernelTestBaseTest extends KernelTestBase {
   }
 
   /**
-   * @covers ::render
+   * Tests render with theme.
+   *
+   * @legacy-covers ::render
    */
   public function testRenderWithTheme(): void {
     $this->enableModules(['system']);
@@ -223,7 +243,9 @@ class KernelTestBaseTest extends KernelTestBase {
   }
 
   /**
-   * @covers ::bootKernel
+   * Tests boot kernel.
+   *
+   * @legacy-covers ::bootKernel
    */
   public function testBootKernel(): void {
     $this->assertNull($this->container->get('request_stack')->getParentRequest(), 'There should only be one request on the stack');
@@ -233,7 +255,7 @@ class KernelTestBaseTest extends KernelTestBase {
   /**
    * Tests that a usable session is on the request.
    *
-   * @covers ::bootKernel
+   * @legacy-covers ::bootKernel
    */
   public function testSessionOnRequest(): void {
     /** @var \Symfony\Component\HttpFoundation\Session\Session $session */
@@ -250,7 +272,7 @@ class KernelTestBaseTest extends KernelTestBase {
    * Tests the assumption that local time is in 'Australia/Sydney'.
    */
   public function testLocalTimeZone(): void {
-    // The 'Australia/Sydney' time zone is set in core/tests/bootstrap.php
+    // The 'Australia/Sydney' time zone is set in core/tests/bootstrap.php.
     $this->assertEquals('Australia/Sydney', date_default_timezone_get());
   }
 
@@ -320,7 +342,9 @@ class KernelTestBaseTest extends KernelTestBase {
   }
 
   /**
-   * @covers ::bootEnvironment
+   * Tests database driver module enabled.
+   *
+   * @legacy-covers ::bootEnvironment
    */
   public function testDatabaseDriverModuleEnabled(): void {
     $module = Database::getConnection()->getProvider();

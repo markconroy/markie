@@ -5,13 +5,15 @@ declare(strict_types=1);
 namespace Drupal\Tests\workspaces\Functional;
 
 use Drupal\Tests\BrowserTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests workspace integration for custom menu links.
- *
- * @group workspaces
- * @group menu_link_content
  */
+#[Group('workspaces')]
+#[Group('menu_link_content')]
+#[RunTestsInSeparateProcesses]
 class WorkspaceMenuLinkContentIntegrationTest extends BrowserTestBase {
 
   use WorkspaceTestUtilities;

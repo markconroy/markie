@@ -7,12 +7,15 @@ namespace Drupal\Tests\user\Kernel;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\user\UserInterface;
 use Drupal\user\UserNameValidator;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Verify that user validity checks behave as designed.
- *
- * @group user
  */
+#[Group('user')]
+#[RunTestsInSeparateProcesses]
 class UserNameValidatorTest extends KernelTestBase {
 
   /**
@@ -35,9 +38,8 @@ class UserNameValidatorTest extends KernelTestBase {
 
   /**
    * Tests valid user name validation.
-   *
-   * @dataProvider validUsernameProvider
    */
+  #[DataProvider('validUsernameProvider')]
   public function testValidUsernames($name): void {
     $violations = $this->userValidator->validateName($name);
     $this->assertEmpty($violations);
@@ -45,9 +47,8 @@ class UserNameValidatorTest extends KernelTestBase {
 
   /**
    * Tests invalid user name validation.
-   *
-   * @dataProvider invalidUserNameProvider
    */
+  #[DataProvider('invalidUserNameProvider')]
   public function testInvalidUsernames($name, $expectedMessage): void {
     $violations = $this->userValidator->validateName($name);
     $this->assertNotEmpty($violations);

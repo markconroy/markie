@@ -89,12 +89,12 @@ interface KeyInterface extends ConfigEntityInterface {
   /**
    * Sets the value of the key.
    *
+   * Note, in very early 8.x-1.x versions of key, this method returned a value.
+   * With issue #2693145, setting the key value is done directly and no longer
+   * returns any value.
+   *
    * @param string $key_value
    *   The key value to set.
-   *
-   * @return string|bool
-   *   The key value or FALSE if the value could not be set, because the
-   *   provider does not support setting a key value, for instance.
    */
   public function setKeyValue($key_value);
 

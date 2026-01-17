@@ -16,12 +16,17 @@ use Drupal\Core\KeyValueStore\KeyValueMemoryFactory;
 use Drupal\Core\Lock\NullLockBackend;
 use Drupal\Core\State\State;
 use Drupal\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\IgnoreDeprecations;
 use Prophecy\Argument;
 
 /**
- * @coversDefaultClass \Drupal\Core\Extension\ThemeExtensionList
- * @group Extension
+ * Tests Drupal\Core\Extension\ThemeExtensionList.
  */
+#[CoversClass(ThemeExtensionList::class)]
+#[Group('Extension')]
 class ThemeExtensionListTest extends UnitTestCase {
 
   /**
@@ -116,11 +121,9 @@ class ThemeExtensionListTest extends UnitTestCase {
    *   The theme name to find all its base themes.
    * @param array $expected
    *   The expected base themes.
-   *
-   * @dataProvider providerTestDoGetBaseThemes
-   *
-   * @group legacy
    */
+  #[DataProvider('providerTestDoGetBaseThemes')]
+  #[IgnoreDeprecations]
   public function testGetBaseThemes(array $themes, $theme, array $expected): void {
     // Mocks and stubs.
     $module_handler = $this->prophesize(ModuleHandlerInterface::class);
@@ -144,9 +147,8 @@ class ThemeExtensionListTest extends UnitTestCase {
    *   The theme name to find all its base themes.
    * @param array $expected
    *   The expected base themes.
-   *
-   * @dataProvider providerTestDoGetBaseThemes
    */
+  #[DataProvider('providerTestDoGetBaseThemes')]
   public function testDoGetBaseThemes(array $themes, $theme, array $expected): void {
     // Mocks and stubs.
     $module_handler = $this->prophesize(ModuleHandlerInterface::class);
@@ -167,7 +169,7 @@ class ThemeExtensionListTest extends UnitTestCase {
    * @return array
    *   An array of theme test data.
    */
-  public static function providerTestDoGetBaseThemes() {
+  public static function providerTestDoGetBaseThemes(): array {
     $data = [];
 
     // Tests a theme without any base theme.

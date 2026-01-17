@@ -9,9 +9,8 @@ use PHPUnit\Framework\TestCase;
 /**
  * Drupal's PHPUnit extension to manage code deprecation.
  *
- * This class is a replacement for symfony/phpunit-bridge that does not
- * support PHPUnit 10. In the future this extension might be dropped if
- * PHPUnit adds support for all deprecation management needs.
+ * In the future this extension might be dropped if PHPUnit adds support for
+ * ignoring a specified list of deprecations.
  *
  * @internal
  */
@@ -110,7 +109,7 @@ final class DeprecationHandler {
       if (!is_file($ignoreFile)) {
         throw new \InvalidArgumentException(sprintf('The ignoreFile "%s" does not exist.', $ignoreFile));
       }
-      set_error_handler(static function ($t, $m) use ($ignoreFile, &$line) {
+      set_error_handler(static function ($t, $m) use ($ignoreFile, &$line): void {
         throw new \RuntimeException(sprintf('Invalid pattern found in "%s" on line "%d"', $ignoreFile, 1 + $line) . substr($m, 12));
       });
       try {
@@ -188,7 +187,9 @@ final class DeprecationHandler {
     if (!self::isEnabled()) {
       return;
     }
-    self::$collectedDeprecations[] = $message;
+    if (!array_search($message, self::$collectedDeprecations, TRUE)) {
+      self::$collectedDeprecations[] = $message;
+    }
   }
 
   /**

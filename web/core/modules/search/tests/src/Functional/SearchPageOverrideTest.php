@@ -5,15 +5,17 @@ declare(strict_types=1);
 namespace Drupal\Tests\search\Functional;
 
 use Drupal\Tests\BrowserTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests if the result page can be overridden.
  *
  * Verifies that a plugin can override the buildResults() method to
  * control what the search results page looks like.
- *
- * @group search
  */
+#[Group('search')]
+#[RunTestsInSeparateProcesses]
 class SearchPageOverrideTest extends BrowserTestBase {
 
   /**

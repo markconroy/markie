@@ -6,12 +6,14 @@ namespace Drupal\Tests\taxonomy\Functional;
 
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\language\Entity\ConfigurableLanguage;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the language functionality for the taxonomy terms.
- *
- * @group taxonomy
  */
+#[Group('taxonomy')]
+#[RunTestsInSeparateProcesses]
 class TermLanguageTest extends TaxonomyTestBase {
 
   /**
@@ -164,7 +166,7 @@ class TermLanguageTest extends TaxonomyTestBase {
     ]);
     $term->save();
 
-    // Overview page in the other language shows the translated term
+    // Overview page in the other language shows the translated term.
     $this->drupalGet('bb/admin/structure/taxonomy/manage/' . $this->vocabulary->id() . '/overview');
     $this->assertSession()->responseMatches('|<a[^>]*>' . $translated_title . '</a>|');
   }

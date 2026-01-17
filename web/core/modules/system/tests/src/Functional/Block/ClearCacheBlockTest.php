@@ -6,14 +6,16 @@ namespace Drupal\Tests\system\Functional\Block;
 
 use Drupal\block\BlockInterface;
 use Drupal\Tests\BrowserTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests clear cache block behavior.
  *
- * @group Block
- *
  * @see \Drupal\system\Plugin\Block\ClearCacheBlock
  */
+#[Group('Block')]
+#[RunTestsInSeparateProcesses]
 class ClearCacheBlockTest extends BrowserTestBase {
 
   /**

@@ -14,12 +14,14 @@ use Drupal\Tests\field\Traits\EntityReferenceFieldCreationTrait;
 use Drupal\Tests\node\Traits\ContentTypeCreationTrait;
 use Drupal\user\Entity\Role;
 use Drupal\user\Entity\User;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests validation constraints for ValidReferenceConstraintValidator.
- *
- * @group Validation
  */
+#[Group('Validation')]
+#[RunTestsInSeparateProcesses]
 class ValidReferenceConstraintValidatorTest extends EntityKernelTestBase {
 
   use EntityReferenceFieldCreationTrait;
@@ -30,7 +32,7 @@ class ValidReferenceConstraintValidatorTest extends EntityKernelTestBase {
    *
    * @var \Drupal\Core\TypedData\TypedDataManager
    */
-  protected $typedData;
+  protected $typedDataManager;
 
   /**
    * {@inheritdoc}
@@ -45,7 +47,7 @@ class ValidReferenceConstraintValidatorTest extends EntityKernelTestBase {
     $this->installSchema('user', ['users_data']);
     $this->installSchema('node', ['node_access']);
     $this->installConfig('node');
-    $this->typedData = $this->container->get('typed_data_manager');
+    $this->typedDataManager = $this->container->get('typed_data_manager');
 
     $this->createContentType(['type' => 'article', 'name' => 'Article']);
     $this->createContentType(['type' => 'page', 'name' => 'Basic page']);
@@ -61,16 +63,16 @@ class ValidReferenceConstraintValidatorTest extends EntityKernelTestBase {
     $definition = BaseFieldDefinition::create('entity_reference')
       ->setSettings(['target_type' => 'user']);
 
-    $typed_data = $this->typedData->create($definition, ['target_id' => $entity->id()]);
+    $typed_data = $this->typedDataManager->create($definition, ['target_id' => $entity->id()]);
     $violations = $typed_data->validate();
     $this->assertEquals(0, $violations->count(), 'Validation passed for correct value.');
 
     // NULL is also considered a valid reference.
-    $typed_data = $this->typedData->create($definition, ['target_id' => NULL]);
+    $typed_data = $this->typedDataManager->create($definition, ['target_id' => NULL]);
     $violations = $typed_data->validate();
     $this->assertEquals(0, $violations->count(), 'Validation passed for correct value.');
 
-    $typed_data = $this->typedData->create($definition, ['target_id' => $entity->id()]);
+    $typed_data = $this->typedDataManager->create($definition, ['target_id' => $entity->id()]);
     // Delete the referenced entity.
     $entity->delete();
     $violations = $typed_data->validate();
@@ -99,8 +101,10 @@ class ValidReferenceConstraintValidatorTest extends EntityKernelTestBase {
     $role_without_access->grantPermission('access content');
     $role_without_access->save();
 
-    $user_with_access = User::create(['roles' => ['role_with_access']]);
-    $user_without_access = User::create(['roles' => ['role_without_access']]);
+    $user_with_access = User::create(['name' => $this->randomString(), 'roles' => ['role_with_access']]);
+    $user_with_access->save();
+    $user_without_access = User::create(['name' => $this->randomString(), 'roles' => ['role_without_access']]);
+    $user_without_access->save();
 
     // Add an entity reference field.
     $this->createEntityReferenceField(

@@ -6,12 +6,14 @@ namespace Drupal\KernelTests\Core\Field;
 
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\KernelTests\KernelTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the field storage create check subscriber.
- *
- * @group Field
  */
+#[Group('Field')]
+#[RunTestsInSeparateProcesses]
 class FieldStorageCreateCheckTest extends KernelTestBase {
 
   /**
@@ -19,7 +21,7 @@ class FieldStorageCreateCheckTest extends KernelTestBase {
    *
    * @var array
    */
-  protected static $modules = ['entity_test', 'field'];
+  protected static $modules = ['entity_test', 'field', 'user'];
 
   /**
    * Tests the field storage create check subscriber.

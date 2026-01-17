@@ -26,7 +26,7 @@ class Traverse extends Constraint
     public bool $traverse = true;
 
     /**
-     * @param bool|array<string,mixed>|null $traverse Whether to traverse the given object or not (defaults to true). Pass an associative array to configure the constraint's options (e.g. payload).
+     * @param bool|null $traverse Whether to traverse the given object or not (defaults to true). Pass an associative array to configure the constraint's options (e.g. payload).
      */
     #[HasNamedArguments]
     public function __construct(bool|array|null $traverse = null, mixed $payload = null)
@@ -37,13 +37,24 @@ class Traverse extends Constraint
 
         if (\is_array($traverse)) {
             trigger_deprecation('symfony/validator', '7.3', 'Passing an array of options to configure the "%s" constraint is deprecated, use named arguments instead.', static::class);
+            $options = $traverse;
+            $traverse = $options['traverse'] ?? null;
         }
 
-        parent::__construct($traverse, null, $payload);
+        parent::__construct($options ?? null, $payload);
+
+        $this->traverse = $traverse ?? $this->traverse;
     }
 
+    /**
+     * @deprecated since Symfony 7.4
+     */
     public function getDefaultOption(): ?string
     {
+        if (0 === \func_num_args() || func_get_arg(0)) {
+            trigger_deprecation('symfony/validator', '7.4', 'The %s() method is deprecated.', __METHOD__);
+        }
+
         return 'traverse';
     }
 

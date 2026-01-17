@@ -7,13 +7,15 @@ namespace Drupal\Tests\update\Functional;
 use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\Url;
 use Drupal\Tests\BrowserTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the update_settings form.
- *
- * @group update
- * @group Form
  */
+#[Group('update')]
+#[Group('Form')]
+#[RunTestsInSeparateProcesses]
 class UpdateSettingsFormTest extends BrowserTestBase {
 
   /**
@@ -92,6 +94,15 @@ class UpdateSettingsFormTest extends BrowserTestBase {
     $this->assertSession()->statusMessageNotExists(MessengerInterface::TYPE_ERROR);
     $this->assertFalse($this->assertSession()->fieldExists('update_notify_emails')->hasClass('error'));
     $this->assertSame(['sofie@example.com', 'dries@example.com'], $this->config('update.settings')->get('notification.emails'));
+
+    // Fill with an empty value to make sure it's saved as an empty array.
+    $this->assertSession()->fieldExists('update_notify_emails')->setValue("");
+    $this->submitForm([], 'Save configuration');
+    $this->assertSession()->statusMessageContains('The configuration options have been saved.', MessengerInterface::TYPE_STATUS);
+    $this->assertSession()->statusMessageNotExists(MessengerInterface::TYPE_WARNING);
+    $this->assertSession()->statusMessageNotExists(MessengerInterface::TYPE_ERROR);
+    $this->assertSame([], $this->config('update.settings')->get('notification.emails'));
+
   }
 
 }

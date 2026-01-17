@@ -7,12 +7,14 @@ namespace Drupal\Tests\system\Functional\Form;
 use Drupal\Core\Form\FormState;
 use Drupal\form_test\Callbacks;
 use Drupal\Tests\BrowserTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the tableselect form element for expected behavior.
- *
- * @group Form
  */
+#[Group('Form')]
+#[RunTestsInSeparateProcesses]
 class ElementsTableSelectTest extends BrowserTestBase {
 
   /**

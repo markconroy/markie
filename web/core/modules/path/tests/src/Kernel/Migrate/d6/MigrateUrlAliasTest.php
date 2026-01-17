@@ -4,18 +4,20 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\path\Kernel\Migrate\d6;
 
-use Drupal\path_alias\PathAliasInterface;
-use Drupal\migrate\Plugin\MigrateIdMapInterface;
 use Drupal\Core\Database\Database;
+use Drupal\migrate\Plugin\MigrateIdMapInterface;
+use Drupal\path_alias\PathAliasInterface;
 use Drupal\Tests\migrate_drupal\Kernel\d6\MigrateDrupal6TestBase;
 use Drupal\Tests\Traits\Core\PathAliasTestTrait;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * URL alias migration.
- *
- * @group #slow
- * @group migrate_drupal_6
  */
+#[Group('#slow')]
+#[Group('migrate_drupal_6')]
+#[RunTestsInSeparateProcesses]
 class MigrateUrlAliasTest extends MigrateDrupal6TestBase {
 
   use PathAliasTestTrait;

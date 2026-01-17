@@ -9,12 +9,13 @@ use Drupal\performance_test\Cache\CacheTagOperation;
 use OpenTelemetry\API\Trace\SpanKind;
 use OpenTelemetry\Contrib\Otlp\OtlpHttpTransportFactory;
 use OpenTelemetry\Contrib\Otlp\SpanExporter;
-use OpenTelemetry\SDK\Trace\SpanProcessor\SimpleSpanProcessor;
-use OpenTelemetry\SDK\Trace\TracerProvider;
+use OpenTelemetry\SDK\Common\Attribute\Attributes;
 use OpenTelemetry\SDK\Resource\ResourceInfo;
 use OpenTelemetry\SDK\Resource\ResourceInfoFactory;
-use OpenTelemetry\SDK\Common\Attribute\Attributes;
-use OpenTelemetry\SemConv\ResourceAttributes;
+use OpenTelemetry\SDK\Trace\SpanProcessor\SimpleSpanProcessor;
+use OpenTelemetry\SDK\Trace\TracerProvider;
+use OpenTelemetry\SemConv\Incubating\Attributes\DeploymentIncubatingAttributes;
+use OpenTelemetry\SemConv\Incubating\Attributes\ServiceIncubatingAttributes;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -46,7 +47,7 @@ trait PerformanceTestTrait {
    *
    * @see \Drupal\Tests\BrowserTestBase::installModulesFromClassProperty()
    */
-  private function doInstallModulesFromClassProperty(ContainerInterface $container) {
+  private function doInstallModulesFromClassProperty(ContainerInterface $container): void {
     // Bypass everything that WebDriverTestBase does here to get closer to
     // a production configuration.
     BrowserTestBase::installModulesFromClassProperty($container);
@@ -263,7 +264,9 @@ trait PerformanceTestTrait {
       $args[':keys__0'] = 'KEY';
     }
 
-    // Inline query arguments and log the query.
+    // Inline query arguments and log the query, reverse arguments to avoid
+    // matches on placeholders with 2+ digits.
+    $args = array_reverse($args);
     $query = str_replace(array_keys($args), array_values(static::quoteQueryArgs($args)), $query);
     $performance_data->logQuery($query);
   }
@@ -339,10 +342,11 @@ trait PerformanceTestTrait {
       // Therefore, continue collecting performance data until all of the
       // following are true, or until 30 seconds has passed:
       // - a largestContentfulPaint::candidate event has been fired
+      //   (only if an OTEL_COLLECTOR is set)
       // - all network requests have received a response
       // - no new performance log events have been recorded since the last
       //   iteration.
-      if ($lcp_count && empty($performance_log) && ($request_count === $response_count)) {
+      if (($lcp_count || !getenv('OTEL_COLLECTOR')) && empty($performance_log) && ($request_count === $response_count)) {
         break;
       }
       sleep(1);
@@ -393,31 +397,41 @@ trait PerformanceTestTrait {
     // 'encodedDataLength' for network requests, however in the case that the
     // file has already been requested by the browser, this will be the length
     // of a HEAD response for 304 not modified or similar. Additionally, core's
-    // aggregation adds the base path to CSS aggregates, resulting in slightly
+    // aggregation adds the basepath to CSS aggregates, resulting in slightly
     // different file sizes depending on whether tests run in a subdirectory or
     // not.
     foreach ($stylesheet_urls as $url) {
       $stylesheet_count++;
-      if ($GLOBALS['base_path'] === '/') {
-        $filename = ltrim(parse_url($url, PHP_URL_PATH), '/');
-        $stylesheet_bytes += strlen(file_get_contents($filename));
+      if (!str_starts_with($url, $GLOBALS['base_url'])) {
+        $stylesheet_bytes += strlen(file_get_contents($url));
       }
       else {
-        $filename = str_replace($GLOBALS['base_path'], '', parse_url($url, PHP_URL_PATH));
-        // Strip the base path from the contents of the file so that tests
-        // running in a subdirectory get the same results.
-        $stylesheet_bytes += strlen(str_replace($GLOBALS['base_path'], '/', file_get_contents($filename)));
+        if ($GLOBALS['base_path'] === '/') {
+          $filename = ltrim(parse_url($url, PHP_URL_PATH), '/');
+          $stylesheet_bytes += strlen(file_get_contents($filename));
+        }
+        else {
+          $filename = str_replace($GLOBALS['base_path'], '', parse_url($url, PHP_URL_PATH));
+          // Strip the basepath from the contents of the file so that tests
+          // running in a subdirectory get the same results.
+          $stylesheet_bytes += strlen(str_replace($GLOBALS['base_path'], '/', file_get_contents($filename)));
+        }
       }
     }
     foreach ($script_urls as $url) {
       $script_count++;
-      if ($GLOBALS['base_path'] === '/') {
-        $filename = ltrim(parse_url($url, PHP_URL_PATH), '/');
+      if (!str_starts_with($url, $GLOBALS['base_url'])) {
+        $script_bytes += strlen(file_get_contents($url));
       }
       else {
-        $filename = str_replace($GLOBALS['base_path'], '', parse_url($url, PHP_URL_PATH));
+        if ($GLOBALS['base_path'] === '/') {
+          $filename = ltrim(parse_url($url, PHP_URL_PATH), '/');
+        }
+        else {
+          $filename = str_replace($GLOBALS['base_path'], '', parse_url($url, PHP_URL_PATH));
+        }
+        $script_bytes += strlen(file_get_contents($filename));
       }
-      $script_bytes += strlen(file_get_contents($filename));
     }
 
     $performance_data->setStylesheetCount($stylesheet_count);
@@ -485,11 +499,11 @@ trait PerformanceTestTrait {
     //   @see https://www.drupal.org/project/drupal/issues/3379761
     $resource = ResourceInfoFactory::defaultResource();
     $resource = $resource->merge(ResourceInfo::create(Attributes::create([
-      ResourceAttributes::SERVICE_NAMESPACE => 'Drupal',
-      ResourceAttributes::SERVICE_NAME => $service_name,
-      ResourceAttributes::SERVICE_INSTANCE_ID => 1,
-      ResourceAttributes::SERVICE_VERSION => \Drupal::VERSION,
-      ResourceAttributes::DEPLOYMENT_ENVIRONMENT_NAME => 'local',
+      ServiceIncubatingAttributes::SERVICE_NAMESPACE => 'Drupal',
+      ServiceIncubatingAttributes::SERVICE_NAME => $service_name,
+      ServiceIncubatingAttributes::SERVICE_INSTANCE_ID => 1,
+      ServiceIncubatingAttributes::SERVICE_VERSION => \Drupal::VERSION,
+      DeploymentIncubatingAttributes::DEPLOYMENT_ENVIRONMENT_NAME => 'local',
     ])));
 
     $otel_collector_headers = getenv('OTEL_COLLECTOR_HEADERS') ?: [];
@@ -630,7 +644,7 @@ trait PerformanceTestTrait {
   /**
    * Checks whether a database event is from the database cache implementation.
    *
-   * @param Drupal\Core\Database\Event\DatabaseEvent $event
+   * @param \Drupal\Core\Database\Event\DatabaseEvent $event
    *   The database event.
    *
    * @return bool

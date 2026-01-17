@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace Drupal\FunctionalTests\Installer;
 
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
+
 /**
  * Tests the interactive installer installing the standard profile.
- *
- * @group Installer
  */
+#[Group('Installer')]
+#[RunTestsInSeparateProcesses]
 class StandardInstallerTest extends ConfigAfterInstallerTestBase {
 
   /**
@@ -44,7 +47,6 @@ class StandardInstallerTest extends ConfigAfterInstallerTestBase {
     // and simpletest@example.com as mail address.
     $skipped_config['system.site'][] = 'name: Drupal';
     $skipped_config['system.site'][] = 'mail: simpletest@example.com';
-    $skipped_config['contact.form.feedback'][] = '- simpletest@example.com';
     // \Drupal\filter\Entity\FilterFormat::toArray() drops the roles of filter
     // formats.
     $skipped_config['filter.format.basic_html'][] = 'roles:';

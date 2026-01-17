@@ -40,7 +40,7 @@ class MultiValueKeyType extends KeyTypeBase implements KeyTypeMultivalueInterfac
   public function validateKeyValue(
     array $form,
     FormStateInterface $form_state,
-    $key_value
+    $key_value,
   ) {
 
   }

@@ -7,13 +7,15 @@ namespace Drupal\FunctionalTests\Installer;
 use Drupal\Component\Serialization\Yaml;
 use Drupal\Core\Database\Database;
 use Drupal\Core\DrupalKernel;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Tests distribution profile support with existing settings.
- *
- * @group Installer
  */
+#[Group('Installer')]
+#[RunTestsInSeparateProcesses]
 class DistributionProfileExistingSettingsTest extends InstallerTestBase {
 
   /**

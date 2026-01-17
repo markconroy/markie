@@ -16,6 +16,12 @@ documentation at [https://project.pages.drupalcode.org/ai/](https://project.page
 The documentation source files are located in the `docs/` directory, and to
 build your own local version of the documentation please follow these steps:
 
-1. Install MkDocs: `pip install mkdocs mkdocs-material`
-2. Run `mkdocs serve` in the project root
+1. Install MkDocs and associated plugins:
+    ```
+    pip install mkdocs mkdocs-material mike mkdocs-include-markdown-plugin
+    ```
+2. Run the MkDocs server in the project root:
+    ```
+    mkdocs serve
+    ```
 3. Open `http://localhost:8000` in your browser

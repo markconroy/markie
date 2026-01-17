@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace Drupal\KernelTests\Core\Plugin\Condition;
 
 use Drupal\KernelTests\KernelTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the CurrentThemeCondition plugin.
- *
- * @group Condition
  */
+#[Group('Condition')]
+#[RunTestsInSeparateProcesses]
 class CurrentThemeConditionTest extends KernelTestBase {
 
   /**

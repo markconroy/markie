@@ -26,7 +26,7 @@ class Name extends InOperator {
   /**
    * The validated exposed input.
    */
-  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName, Drupal.Commenting.VariableComment.Missing
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
   protected array $validated_exposed_input;
 
   /**
@@ -133,7 +133,7 @@ class Name extends InOperator {
    * {@inheritdoc}
    */
   public function adminSummary() {
-    // Set up $this->valueOptions for the parent summary
+    // Set up $this->valueOptions for the parent summary.
     $this->valueOptions = [];
 
     if ($this->value) {

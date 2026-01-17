@@ -4,12 +4,16 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\views_ui\Functional;
 
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
+
 /**
  * Tests the UI for feed display plugin.
  *
- * @group views_ui
  * @see \Drupal\views\Plugin\views\display\Feed
  */
+#[Group('views_ui')]
+#[RunTestsInSeparateProcesses]
 class DisplayFeedTest extends UITestBase {
 
   /**

@@ -7,7 +7,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 
 /**
- * Class KeyEditForm.
+ * Form for editing a key entity.
  *
  * @package Drupal\key\Form
  */
@@ -26,7 +26,7 @@ class KeyEditForm extends KeyFormBase {
   public function buildForm(array $form, FormStateInterface $form_state) {
     // Only when the form is first built.
     if (!$form_state->isRebuilding()) {
-      /* @var $key \Drupal\key\Entity\Key */
+      /** @var \Drupal\key\Entity\Key $key */
       $key = $this->entity;
       $this->originalKey = clone $key;
 

@@ -8,12 +8,14 @@ use Drupal\comment\Plugin\Field\FieldType\CommentItemInterface;
 use Drupal\comment\Tests\CommentTestTrait;
 use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\Tests\content_translation\Functional\ContentTranslationUITestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the Comment Translation UI.
- *
- * @group comment
  */
+#[Group('comment')]
+#[RunTestsInSeparateProcesses]
 class CommentTranslationUITest extends ContentTranslationUITestBase {
 
   use CommentTestTrait;
@@ -201,7 +203,11 @@ class CommentTranslationUITest extends ContentTranslationUITestBase {
    * Tests translate link on comment content admin page.
    */
   public function testTranslateLinkCommentAdminPage(): void {
-    $this->adminUser = $this->drupalCreateUser(array_merge(parent::getTranslatorPermissions(), ['access administration pages', 'administer comments', 'skip comment approval']));
+    $this->adminUser = $this->drupalCreateUser(array_merge(parent::getTranslatorPermissions(), [
+      'access administration pages',
+      'administer comments',
+      'skip comment approval',
+    ]));
     $this->drupalLogin($this->adminUser);
 
     $cid_translatable = $this->createEntity([], $this->langcodes[0]);

@@ -65,6 +65,9 @@ ckeditor5.plugin.ai_ckeditor_ai_base:
       type: string
       label: 'AI Provider-model'
 
+ckeditor5.plugin.ai_ckeditor_ai.ai_ckeditor_help:
+  type: ckeditor5.plugin.ai_ckeditor_ai_base
+
 ckeditor5.plugin.ai_ckeditor_ai.ai_ckeditor_completion:
   type: ckeditor5.plugin.ai_ckeditor_ai_base
 
@@ -80,7 +83,7 @@ ckeditor5.plugin.ai_ckeditor_ai.ai_ckeditor_spellfix:
 ckeditor5.plugin.ai_ckeditor_ai.ai_ckeditor_summarize:
   type: ckeditor5.plugin.ai_ckeditor_ai_base
 
-ckeditor5.plugin.ai_ckeditor_ai_taxonomy_base.ai_ckeditor_tone:
+ckeditor5.plugin.ai_ckeditor_ai.ai_ckeditor_tone:
   type: ckeditor5.plugin.ai_ckeditor_ai_base
   mapping:
     autocreate:
@@ -93,9 +96,17 @@ ckeditor5.plugin.ai_ckeditor_ai_taxonomy_base.ai_ckeditor_tone:
       type: boolean
       label: 'Use description'
 
-ckeditor5.plugin.ai_ckeditor_ai_taxonomy_base.ai_ckeditor_translate:
+ckeditor5.plugin.ai_ckeditor_ai.ai_ckeditor_translate:
   type: ckeditor5.plugin.ai_ckeditor_ai_base
   mapping:
+    language_source:
+      type: string
+      label: 'Language source'
+      constraints:
+        Choice:
+          choices:
+            - lang
+            - tax
     autocreate:
       type: boolean
       label: 'Autocreate'

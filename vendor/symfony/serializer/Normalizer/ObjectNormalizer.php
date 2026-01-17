@@ -95,7 +95,7 @@ final class ObjectNormalizer extends AbstractObjectNormalizer
                 'i' => str_starts_with($name, 'is') && isset($name[$i = 2]),
                 default => false,
             } && !ctype_lower($name[$i])) {
-                if ($reflClass->hasProperty($name)) {
+                if ($this->hasProperty($reflMethod->getDeclaringClass(), $name)) {
                     $attributeName = $name;
                 } else {
                     $attributeName = substr($name, $i);
@@ -125,6 +125,17 @@ final class ObjectNormalizer extends AbstractObjectNormalizer
         }
 
         return array_keys($attributes);
+    }
+
+    private function hasProperty(\ReflectionClass $class, string $propName): bool
+    {
+        do {
+            if ($class->hasProperty($propName)) {
+                return true;
+            }
+        } while ($class = $class->getParentClass());
+
+        return false;
     }
 
     protected function getAttributeValue(object $object, string $attribute, ?string $format = null, array $context = []): mixed

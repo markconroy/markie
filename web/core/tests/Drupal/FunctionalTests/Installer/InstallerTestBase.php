@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\FunctionalTests\Installer;
 
+use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\DrupalKernel;
 use Drupal\Core\Language\Language;
 use Drupal\Core\Session\UserSession;
@@ -13,7 +14,6 @@ use Drupal\Core\Utility\PhpRequirements;
 use Drupal\Tests\BrowserTestBase;
 use Drupal\Tests\RequirementsPageTrait;
 use GuzzleHttp\HandlerStack;
-use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -95,7 +95,7 @@ abstract class InstallerTestBase extends BrowserTestBase {
   /**
    * We are testing the installer, so set up a minimal environment for that.
    */
-  public function installDrupal() {
+  public function installDrupal(): void {
     // Define information about the user 1 account.
     $this->rootUser = new UserSession([
       'uid' => 1,
@@ -123,7 +123,7 @@ abstract class InstallerTestBase extends BrowserTestBase {
     // @see install_begin_request()
     $request = Request::create($GLOBALS['base_url'] . '/core/install.php', 'GET', [], $_COOKIE, [], $_SERVER);
     $request->setSession(new Session(new MockArraySessionStorage()));
-    $this->container = new ContainerBuilder();
+    \Drupal::setContainer(new ContainerBuilder());
     $request_stack = new RequestStack();
     $request_stack->push($request);
     $this->container
@@ -150,7 +150,6 @@ abstract class InstallerTestBase extends BrowserTestBase {
 
     $this->container
       ->setParameter('app.root', DRUPAL_ROOT);
-    \Drupal::setContainer($this->container);
   }
 
   /**
@@ -271,7 +270,7 @@ abstract class InstallerTestBase extends BrowserTestBase {
    * Override this method to test specific requirements warnings or errors
    * during the installer.
    *
-   * @see system_requirements()
+   * @see \Drupal\system\Install\SystemRequirements
    */
   protected function setUpRequirementsProblem() {
     if (version_compare(phpversion(), PhpRequirements::getMinimumSupportedPhp()) < 0) {

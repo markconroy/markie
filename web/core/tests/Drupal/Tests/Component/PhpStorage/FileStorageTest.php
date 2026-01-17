@@ -8,12 +8,15 @@ use Drupal\Component\PhpStorage\FileStorage;
 use Drupal\Component\Utility\Random;
 use Drupal\TestTools\Extension\DeprecationBridge\ExpectDeprecationTrait;
 use org\bovigo\vfs\vfsStreamDirectory;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
- * @coversDefaultClass \Drupal\Component\PhpStorage\FileStorage
- * @group Drupal
- * @group PhpStorage
+ * Tests Drupal\Component\PhpStorage\FileStorage.
  */
+#[CoversClass(FileStorage::class)]
+#[Group('Drupal')]
+#[Group('PhpStorage')]
 class FileStorageTest extends PhpStorageTestBase {
 
   use ExpectDeprecationTrait;
@@ -40,10 +43,10 @@ class FileStorageTest extends PhpStorageTestBase {
   /**
    * Tests basic load/save/delete operations.
    *
-   * @covers ::load
-   * @covers ::save
-   * @covers ::exists
-   * @covers ::delete
+   * @legacy-covers ::load
+   * @legacy-covers ::save
+   * @legacy-covers ::exists
+   * @legacy-covers ::delete
    */
   public function testCRUD(): void {
     $php = new FileStorage($this->standardSettings);
@@ -51,7 +54,7 @@ class FileStorageTest extends PhpStorageTestBase {
   }
 
   /**
-   * @covers ::deleteAll
+   * @legacy-covers ::deleteAll
    */
   public function testDeleteAll(): void {
     // Random generator.
@@ -86,7 +89,7 @@ class FileStorageTest extends PhpStorageTestBase {
   }
 
   /**
-   * @covers ::createDirectory
+   * @legacy-covers ::createDirectory
    */
   public function testCreateDirectoryFailWarning(): void {
     $directory = new vfsStreamDirectory('permissionDenied', 0200);
@@ -96,7 +99,7 @@ class FileStorageTest extends PhpStorageTestBase {
     ]);
     $code = "<?php\n echo 'here';";
 
-    // PHPUnit 10 cannot expect warnings, so we have to catch them ourselves.
+    // PHPUnit cannot expect warnings, so we have to catch them ourselves.
     $messages = [];
     set_error_handler(function (int $errno, string $errstr) use (&$messages): void {
       $messages[] = [$errno, $errstr];
