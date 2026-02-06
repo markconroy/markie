@@ -1,0 +1,38 @@
+.mailing-list-form {
+  background-color: var(--color-grey-50);
+  border: 1px solid var(--color-grey-200);
+  padding: var(--spacing-large);
+  margin-top: var(--spacing-largest);
+}
+
+.mailing-list-form.mailing-list-form .inline-container {
+  background-color: var(--color-grey-50);
+}
+.mailing-list-form.mailing-list-form .inline-container .form-container {
+  margin: 0;
+}
+
+.mailing-list-form.mailing-list-form form {
+  max-width: 30rem;
+}
+
+.mailing-list-form.mailing-list-form form .emailoctopus-form-row {
+  margin: 0 !important;
+  margin-bottom: var(--spacing) !important;
+}
+
+.mailing-list-form.mailing-list-form input {
+  width: 100%;
+}
+
+.mailing-list-form form input.btn[type="submit"] {
+  width: auto;
+  flex-grow: 0;
+  margin-inline-end: auto;
+}
+.mailing-list-form form input.btn[type="submit"]:focus,
+.mailing-list-form form input.btn[type="submit"]:hover {
+  background-color: var(--color-secondary);
+  border-color: var(--color-secondary);
+  text-decoration: underline;
+}

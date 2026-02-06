@@ -31,13 +31,23 @@ homepage:
 #     component:
 #       ../../../../core/themes/starterkit_theme/css/components/pager.css: {}
 
+mailing-list-form:
+  css:
+    component:
+      css/components/mailing-list-form.css: {}
+
 course-signup-popup-form:
   js:
     https://eomail5.com/form/2acee644-8334-11f0-b9ec-595e60d01c50.js: { type=external, data-form="2acee644-8334-11f0-b9ec-595e60d01c50", async: true }
 
 course-signup-inline-form:
-  css:
-    component:
-      css/components/course-form.css: {}
   js:
     https://eomail5.com/form/02e55ac2-7205-11f0-afe3-6f416b030533.js: { type=external, data-form="02e55ac2-7205-11f0-afe3-6f416b030533", async: true }
+
+mailing-list-signup-popup-form:
+  js:
+    https://eomail5.com/form/d8730bd4-c81c-11ed-9794-af315f113760.js: { type=external, data-form="d8730bd4-c81c-11ed-9794-af315f113760", async: true }
+
+mailing-list-signup-inline-form:
+  js:
+    https://eomail5.com/form/af2b57ca-037b-11f1-ad87-97bb55559f40.js: { type=external, data-form="af2b57ca-037b-11f1-ad87-97bb55559f40", async: true }

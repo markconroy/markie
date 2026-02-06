@@ -120,13 +120,22 @@
     {{ content|without('field_main_image', 'field_tags') }}
 
     {% if content_type == 'article' %}
-      <div class="course-form container container--narrow">
-        <h2>Course: Build a LocalGov Drupal Website</h2>
+      <div class="mailing-list-form container container--narrow">
+        <h2>Join the "Something nice ..." newsletter</h2>
+        <p>The full title is "Something nice, something quirky, something else".</p>
         <p>
-          Subscribe to get updates about the course (and perhaps a discount code
-          before it is launched).
+          I send an email once a week with something nice, something quirky, and something else that I think is interesting (all with a web development theme, of course).
         </p>
-        <script async src="https://eomail5.com/form/02e55ac2-7205-11f0-afe3-6f416b030533.js" data-form="02e55ac2-7205-11f0-afe3-6f416b030533"></script>
+        <script async src="https://eomail5.com/form/af2b57ca-037b-11f1-ad87-97bb55559f40.js" data-form="af2b57ca-037b-11f1-ad87-97bb55559f40"></script>
+
+        {#
+          <h2>Course: Build a LocalGov Drupal Website</h2>
+          <p>
+            Subscribe to get updates about the course (and perhaps a discount code
+            before it is launched).
+          </p>
+          <script async src="https://eomail5.com/form/02e55ac2-7205-11f0-afe3-6f416b030533.js" data-form="02e55ac2-7205-11f0-afe3-6f416b030533"></script>
+        #}
       </div>
     {% endif %}
 

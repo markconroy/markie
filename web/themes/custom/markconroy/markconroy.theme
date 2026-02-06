@@ -24,7 +24,8 @@ function markconroy_preprocess_image_widget(array &$variables) {
  * Implements hook_preprocess_HOOK() for page templates.
  */
 function markconroy_preprocess_page(array &$variables) {
-  $variables['#attached']['library'][] = 'markconroy/course-signup-popup-form';
+  // $variables['#attached']['library'][] = 'markconroy/course-signup-popup-form';
+  $variables['#attached']['library'][] = 'markconroy/mailing-list-signup-popup-form';
 }
 
 /**
@@ -34,10 +35,9 @@ function markconroy_preprocess_node(array &$variables) {
   if ($variables['view_mode'] === 'full') {
     $variables['#attached']['library'][] = 'markconroy/full-page';
     if ($variables['node']->getType() === 'article') {
-      $variables['#attached']['library'][] = 'markconroy/course-signup-inline-form';
+      $variables['#attached']['library'][] = 'markconroy/mailing-list-form';
     }
   }
-
 }
 
 /**
