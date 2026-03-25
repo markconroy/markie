@@ -5,8 +5,12 @@ This document outlines the steps the Preparation Manager needs to take to pre-pu
 1. [Tag the security release](tagging_a_release.md) and push it up to the remote repository
 2. Visit https://git.drupalcode.org/project/ai/-/tags and verify that the tag corresponds to the correct version number and includes all intended changes.
 3. Check the diff between the last release and the new tag to ensure it matches the intended changes.
+4. Verify in the tag branch that the following UIs have been built and committed:
+   - `ui/mdxeditor/dist/assets`
+   - `ui/json-schema-editor/dist`
+   - `modules/ai_ckeditor/js/build`
 
-## Confirm Fixed Issues
+## QA Test
 1. Review the list of issues and merge requests that were intended to be included in the security release.
 2. Try out and verify that the issues have been resolved in the codebase.
 3. A full test of the module is not required for security releases, but if you have time, it is recommended to do a quick smoke test of the main functionality.
@@ -27,5 +31,5 @@ This document outlines the steps the Preparation Manager needs to take to pre-pu
 1. Let the security team know that the release has been pre-published and is ready for their review on the security issue on Drupal.org.
 
 ## Communicate the Release
-1. Once the release is made public by the Drupal Security Team, communicate the release to the relevant stakeholders and on the #ai-contrib channel on Drupal Slack.
-2. Include the version number, do not include any security details, just that people should update depending on the circumstances and their modules used.
+1. Ensure the release is officially published on Drupal.org
+2. [Communicate the release on Slack](communicating_a_release.md)

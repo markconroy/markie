@@ -41,6 +41,12 @@ It is useful for auto-creating relevant FAQs from content or descriptions.
   ```
 - Directly stores the structured FAQ data on the field.
 
+## Field Widget Action Integration
+
+To use this automator with a Field Widget Action button in the content edit form, see the complete setup guide:
+
+- [FAQ Field + `faqfield_default` widget example](../examples/faq-field.md)
+
 ---
 
 *This documentation was AI-generated.*

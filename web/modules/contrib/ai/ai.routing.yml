@@ -74,7 +74,7 @@ ai.tools_library:
 entity.ai_prompt.collection:
   path: '/admin/config/ai/prompts'
   defaults:
-    _entity_list: 'ai_prompt'
+    _controller: '\Drupal\ai\Controller\AiPromptCollectionController::collection'
     _title: 'AI Prompts'
   requirements:
     _permission: 'manage ai prompts'
@@ -136,7 +136,7 @@ entity.ai_prompt_type.add_form:
   path: '/admin/config/ai/prompts/prompt-types/add'
   defaults:
     _entity_form: 'ai_prompt_type.add'
-    _title: 'Add AI Prompt types'
+    _title: 'Add AI Prompt type'
   requirements:
     _permission: 'administer ai prompt types'
   options:
@@ -161,3 +161,69 @@ entity.ai_prompt_type.delete_form:
     _permission: 'administer ai prompt types'
   options:
     _admin_route: TRUE
+
+# Guardrails management.
+entity.ai_guardrail.collection:
+  path: '/admin/config/ai/guardrails'
+  defaults:
+    _entity_list: 'ai_guardrail'
+    _title: 'AI Guardrails configuration'
+  requirements:
+    _permission: 'administer guardrails'
+
+entity.ai_guardrail.add_form:
+  path: '/admin/config/ai/guardrails/add'
+  defaults:
+    _entity_form: 'ai_guardrail.add'
+    _title: 'Add an AI guardrail'
+  requirements:
+    _permission: 'administer guardrails'
+
+entity.ai_guardrail.edit_form:
+  path: '/admin/config/ai/guardrails/{ai_guardrail}'
+  defaults:
+    _entity_form: 'ai_guardrail.edit'
+    _title: 'Edit an AI guardrail'
+  requirements:
+    _permission: 'administer guardrails'
+
+entity.ai_guardrail.delete_form:
+  path: '/admin/config/ai/guardrails/{ai_guardrail}/delete'
+  defaults:
+    _entity_form: 'ai_guardrail.delete'
+    _title: 'Delete an AI guardrail'
+  requirements:
+    _permission: 'administer guardrails'
+
+# Guardrail sets management.
+entity.ai_guardrail_set.collection:
+  path: '/admin/config/ai/guardrails/guardrail-sets'
+  defaults:
+    _entity_list: 'ai_guardrail_set'
+    _title: 'AI Guardrails sets configuration'
+  requirements:
+    _permission: 'administer guardrail sets'
+
+entity.ai_guardrail_set.add_form:
+  path: '/admin/config/ai/guardrails/guardrail_sets/add'
+  defaults:
+    _entity_form: 'ai_guardrail_set.add'
+    _title: 'Add an AI guardrail set'
+  requirements:
+    _permission: 'administer guardrail sets'
+
+entity.ai_guardrail_set.edit_form:
+  path: '/admin/config/ai/guardrails/guardrail_sets/{ai_guardrail_set}'
+  defaults:
+    _entity_form: 'ai_guardrail_set.edit'
+    _title: 'Edit an AI guardrail set'
+  requirements:
+    _permission: 'administer guardrail sets'
+
+entity.ai_guardrail_set.delete_form:
+  path: '/admin/config/ai/guardrails/guardrail_sets/{ai_guardrail_set}/delete'
+  defaults:
+    _entity_form: 'ai_guardrail_set.delete'
+    _title: 'Delete an AI guardrail set'
+  requirements:
+    _permission: 'administer guardrail sets'

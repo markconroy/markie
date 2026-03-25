@@ -325,7 +325,36 @@ class AiProviderFormHelper {
   public static function loadModelsAjaxCallback(array &$form, FormStateInterface $form_state) {
     $prefix = $form_state->getTriggeringElement()['#ajax']['data-prefix'];
     $form_state->setRebuild();
-    return $form[$prefix . 'ajax_prefix'] ?? $form['left'][$prefix . 'ajax_prefix'] ?? $form['right'][$prefix . 'ajax_prefix'];
+
+    return self::findFormElementRecursive($form, $prefix . 'ajax_prefix');
+  }
+
+  /**
+   * Recursive helper function to find a form element by name.
+   *
+   * @param array $value
+   *   The form array.
+   * @param string $form_element_name
+   *   The form element name to find.
+   *
+   * @return array
+   *   The found form element or an empty array.
+   */
+  public static function findFormElementRecursive(array &$value, string $form_element_name): array {
+    if (isset($value[$form_element_name]['#type']) && $value[$form_element_name]['#type'] == 'details') {
+      return $value[$form_element_name];
+    }
+
+    foreach ($value as $subvalue) {
+      if (is_array($subvalue)) {
+        $result = self::findFormElementRecursive($subvalue, $form_element_name);
+        if ($result) {
+          return $result;
+        }
+      }
+    }
+
+    return [];
   }
 
   /**

@@ -22,6 +22,7 @@ It helps improve SEO and sharing by filling out relevant metadata.
 ## Form configuration options
 
 For each metatag field:
+
 - **Setup** — Define instructions for generating this tag's value.
 - **Example** — Provide an example output for this tag to guide the AI.
 

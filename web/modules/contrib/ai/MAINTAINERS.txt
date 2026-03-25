@@ -33,7 +33,8 @@ Product managers
 - ?
 
 User Experience (UX) managers
--
+- James Abrahams  'yautja_cetanu' https://www.drupal.org/u/yautja_cetanu
+- Aidan Foster 'afoster' https://www.drupal.org/u/afoster
 
 Subsystem maintainers
 

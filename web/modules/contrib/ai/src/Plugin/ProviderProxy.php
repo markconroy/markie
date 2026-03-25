@@ -17,9 +17,12 @@ use Drupal\ai\Exception\AiRequestErrorException;
 use Drupal\ai\Exception\AiResponseErrorException;
 use Drupal\ai\Exception\AiUnsafePromptException;
 use Drupal\ai\OperationType\Chat\ChatInput;
+use Drupal\ai\OperationType\Chat\ChatMessage;
+use Drupal\ai\OperationType\Chat\ChatOutput;
 use Drupal\ai\OperationType\InputInterface;
 use Drupal\ai\OperationType\OperationTypeInterface;
 use Drupal\ai\OperationType\Chat\StreamedChatMessageIteratorInterface;
+use Drupal\ai\Service\HostnameFilter;
 use Psr\Http\Client\ClientExceptionInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
@@ -64,6 +67,13 @@ class ProviderProxy {
   protected $uuid;
 
   /**
+   * The Hostname filter service.
+   *
+   * @var \Drupal\ai\Service\HostnameFilter
+   */
+  protected $hostnameFilterService;
+
+  /**
    * The request parent id.
    *
    * @var string
@@ -103,13 +113,16 @@ class ProviderProxy {
    *   The UUID service.
    * @param \Drupal\Core\Cache\CacheBackendInterface $cache_backend
    *   The cache backend.
+   * @param \Drupal\ai\Service\HostnameFilter $hostname_filter_service
+   *   The hostname filter service.
    */
-  public function __construct(AiProviderClientBase $plugin, EventDispatcherInterface $event_dispatcher, LoggerChannelFactoryInterface $logger_factory, UuidInterface $uuid, CacheBackendInterface $cache_backend) {
+  public function __construct(AiProviderClientBase $plugin, EventDispatcherInterface $event_dispatcher, LoggerChannelFactoryInterface $logger_factory, UuidInterface $uuid, CacheBackendInterface $cache_backend, HostnameFilter $hostname_filter_service) {
     $this->plugin = $plugin;
     $this->eventDispatcher = $event_dispatcher;
     $this->loggerFactory = $logger_factory;
     $this->uuid = $uuid;
     $this->cacheBackend = $cache_backend;
+    $this->hostnameFilterService = $hostname_filter_service;
   }
 
   /**
@@ -325,6 +338,16 @@ class ProviderProxy {
     // Too not have breaking changes, it can't be in the constructor and check.
     if (method_exists($post_generate_event, 'setRequestParentId') && $this->requestParentId) {
       $post_generate_event->setRequestParentId($this->requestParentId);
+    }
+    // If the output is a none-streamed ChatOutput we apply host validation.
+    if ($response instanceof ChatOutput && $response->getNormalized() instanceof ChatMessage) {
+      // Check if a HostnameFilterDto is set on the ChatInput.
+      if ($arguments[0] instanceof ChatInput && $arguments[0]->getHostnameFilter()) {
+        $this->hostnameFilterService->applySettings($arguments[0]->getHostnameFilter());
+      }
+      // Filter the content.
+      $new_text = $this->hostnameFilterService->filterText($response->getNormalized()->getText());
+      $response->getNormalized()->setText($new_text);
     }
     $this->eventDispatcher->dispatch($post_generate_event, PostGenerateResponseEvent::EVENT_NAME);
     // Get a potential new response from the event.

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\ai_automators\Form;
 
+use Drupal\ai\Utility\Textarea;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityForm;
 use Drupal\Core\Form\FormStateInterface;
@@ -127,6 +128,14 @@ final class AutomatorsToolForm extends EntityForm {
       '#title' => $this->t('Description'),
       '#default_value' => $this->entity->get('description'),
       '#required' => TRUE,
+      // This property will land into core soon, see
+      // https://www.drupal.org/project/drupal/issues/3202631. It can stay
+      // after this is added to Drupal core.
+      '#normalize_newlines' => TRUE,
+      // Until that the custom value callback is needed. Should be removed
+      // after the issue mentioned above is merged into core and the minimum
+      // supported Drupal version includes `#normalize_newlines` property.
+      '#value_callback' => [Textarea::class, 'valueCallback'],
     ];
 
     $workflow = $form_state->getValue('workflow') ?? $this->entity->get('workflow');
@@ -237,6 +246,15 @@ final class AutomatorsToolForm extends EntityForm {
                 ':input[name="field_connections[' . $i . '][agent_process]"]' => ['value' => 'input'],
               ],
             ],
+            // This property will land into core soon, see
+            // https://www.drupal.org/project/drupal/issues/3202631. It can stay
+            // after this is added to Drupal core.
+            '#normalize_newlines' => TRUE,
+            // Until that the custom value callback is needed. Should be removed
+            // after the issue mentioned above is merged into core and the
+            // minimum supported Drupal version includes `#normalize_newlines`
+            // property.
+            '#value_callback' => [Textarea::class, 'valueCallback'],
           ];
 
           $form['field_connections'][$i]['required'] = [
@@ -265,6 +283,15 @@ final class AutomatorsToolForm extends EntityForm {
                 ':input[name="field_connections[' . $i . '][agent_process]"]' => ['value' => 'output'],
               ],
             ],
+            // This property will land into core soon, see
+            // https://www.drupal.org/project/drupal/issues/3202631. It can stay
+            // after this is added to Drupal core.
+            '#normalize_newlines' => TRUE,
+            // Until that the custom value callback is needed. Should be removed
+            // after the issue mentioned above is merged into core and the
+            // minimum supported Drupal version includes `#normalize_newlines`
+            // property.
+            '#value_callback' => [Textarea::class, 'valueCallback'],
           ];
 
           $form['field_connections'][$i]['default_value'] = [

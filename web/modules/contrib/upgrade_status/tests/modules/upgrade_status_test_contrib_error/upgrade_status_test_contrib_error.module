@@ -1,13 +1,19 @@
 <?php
 
 /**
+ * @file
+ * Deprecation messages.
+ */
+
+/**
  * Tests function deprecation detection from Drupal 9 to 10.
  *
  * @deprecated in drupal:9.1.0 and is removed from drupal:10.0.0. Use the
  *   replacement instead.
+ * @see https://www.drupal.org/project/upgrade_status/issues/3459216
  */
 function upgrade_status_test_contrib_error_function_9_to_10() {
-  @trigger_error("upgrade_status_test_contrib_error_function_9_to_10() is deprecated in Drupal 9.1.0 and will be removed before Drupal 10.0.0. Use the replacement instead. See LINK", E_USER_DEPRECATED);
+  @trigger_error("upgrade_status_test_contrib_error_function_9_to_10() is deprecated in drupal:9.1.0 and is removed from drupal:10.0.0. Use the replacement instead. See https://www.drupal.org/project/upgrade_status/issues/3459216", E_USER_DEPRECATED);
 }
 
 /**
@@ -15,9 +21,10 @@ function upgrade_status_test_contrib_error_function_9_to_10() {
  *
  * @deprecated in drupal:9.1.0 and is removed from drupal:11.0.0. Use the
  *   replacement instead.
+ * @see https://www.drupal.org/project/upgrade_status/issues/3459216
  */
 function upgrade_status_test_contrib_error_function_9_to_11() {
-  @trigger_error("upgrade_status_test_contrib_error_function_9_to_11() is deprecated in Drupal 9.1.0 and will be removed before Drupal 11.0.0. Use the replacement instead. See LINK", E_USER_DEPRECATED);
+  @trigger_error("upgrade_status_test_contrib_error_function_9_to_11() is deprecated in drupal:9.1.0 and is removed from drupal:11.0.0. Use the replacement instead. See https://www.drupal.org/project/upgrade_status/issues/3459216", E_USER_DEPRECATED);
 }
 
 /**
@@ -25,9 +32,10 @@ function upgrade_status_test_contrib_error_function_9_to_11() {
  *
  * @deprecated in drupal:10.3.0 and is removed from drupal:11.0.0. Use the
  *   replacement instead.
+ * @see https://www.drupal.org/project/upgrade_status/issues/3459216
  */
 function upgrade_status_test_contrib_error_function_10_to_11() {
-  @trigger_error("upgrade_status_test_contrib_error_function_10_to_11() is deprecated in Drupal 10.3.0 and will be removed before Drupal 11.0.0. Use the replacement instead. See LINK", E_USER_DEPRECATED);
+  @trigger_error("upgrade_status_test_contrib_error_function_10_to_11() is deprecated in drupal:10.3.0 and is removed from drupal:11.0.0. Use the replacement instead. See https://www.drupal.org/project/upgrade_status/issues/3459216", E_USER_DEPRECATED);
 }
 
 /**
@@ -35,17 +43,19 @@ function upgrade_status_test_contrib_error_function_10_to_11() {
  *
  * @deprecated in drupal:10.0.0 and is removed from drupal:12.0.0. Use the
  *   replacement instead.
+ * @see https://www.drupal.org/project/upgrade_status/issues/3459216
  */
 function upgrade_status_test_contrib_error_function_10_to_12() {
-  @trigger_error("upgrade_status_test_contrib_error_function_10_to_12() is deprecated in Drupal 10.0.0 and will be removed before Drupal 12.0.0. Use the replacement instead. See LINK", E_USER_DEPRECATED);
+  @trigger_error("upgrade_status_test_contrib_error_function_10_to_12() is deprecated in drupal:10.0.0 and is removed from drupal:12.0.0. Use the replacement instead. See https://www.drupal.org/project/upgrade_status/issues/3459216", E_USER_DEPRECATED);
 }
 
 /**
- * Tests function deprecation detection from Drupal 11.1 to 13.0
+ * Tests function deprecation detection from Drupal 11.1 to 13.0.
  *
  * @deprecated in drupal:11.1.0 and is removed from drupal:13.0.0. Use the
  *   replacement instead.
+ * @see https://www.drupal.org/project/upgrade_status/issues/3459216
  */
 function upgrade_status_test_contrib_error_function_11_to_13() {
-  @trigger_error("upgrade_status_test_contrib_error_function_11_to_13() is deprecated in Drupal 11.1.0 and will be removed before Drupal 13.0.0. Use the replacement instead. See LINK", E_USER_DEPRECATED);
+  @trigger_error("upgrade_status_test_contrib_error_function_11_to_13() is deprecated in drupal:11.1.0 and is removed from drupal:13.0.0. Use the replacement instead. See https://www.drupal.org/project/upgrade_status/issues/3459216", E_USER_DEPRECATED);
 }

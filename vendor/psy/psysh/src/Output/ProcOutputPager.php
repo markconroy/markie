@@ -3,7 +3,7 @@
 /*
  * This file is part of Psy Shell.
  *
- * (c) 2012-2025 Justin Hileman
+ * (c) 2012-2026 Justin Hileman
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -82,11 +82,11 @@ class ProcOutputPager extends StreamOutput implements OutputPager
      */
     public function close()
     {
-        if (isset($this->pipe)) {
+        if (\is_resource($this->pipe)) {
             \fclose($this->pipe);
         }
 
-        if (isset($this->proc)) {
+        if (\is_resource($this->proc)) {
             $exit = \proc_close($this->proc);
             if ($exit !== 0) {
                 throw new \RuntimeException('Error closing output stream');

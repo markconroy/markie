@@ -29,6 +29,7 @@ ai.external_moderation_settings:
   parent: ai.admin_settings
   route_name: ai.external_moderation_settings
   weight: 10
+
 entity.ai_prompt.collection:
   title: 'AI Prompts'
   description: 'Create and manage AI Prompts for use and re-use throughout the AI ecosystem'
@@ -40,3 +41,15 @@ entity.ai_prompt_type.collection:
   description: 'Manage AI Prompt Types. These are typically provided by the AI Ecosystem to determine required variables and/or tokens needed for a given AI Prompt.'
   route_name: entity.ai_prompt_type.collection
   parent: entity.ai_prompt.collection
+
+entity.ai_guardrail.collection:
+  title: 'AI Guardrails'
+  description: 'List of guardrails to filter and moderate AI generated content.'
+  route_name: entity.ai_guardrail.collection
+  parent: ai.admin_settings
+
+entity.ai_guardrail_set.collection:
+  title: 'AI Guardrail sets'
+  description: 'List of guardrail sets to wrap multiple guardrails together.'
+  route_name: entity.ai_guardrail_set.collection
+  parent: entity.ai_guardrail.collection

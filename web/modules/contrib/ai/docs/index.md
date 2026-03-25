@@ -13,7 +13,7 @@ integrating various AI models and services into your Drupal site.
 
 1. Enable the AI module.
 2. Choose and enable an AI Provider module:
-   1. Choose the AI Provider for your chosen LLM/AI service from the list at [https://project.pages.drupalcode.org/ai/providers/matris/](/providers/matris/)
+   1. Choose the AI Provider for your chosen LLM/AI service from the list at [https://project.pages.drupalcode.org/ai/providers/matris/](providers/matris/)
    2. Download the AI Provider and install and configure according to its
       instructions.
 3. Once your AI Provider(s) is configured, the AI module will select appropriate
@@ -34,8 +34,7 @@ These platforms provide trial environments for Drupal AI with pre-configured pro
 
 ## Develop for it
 
-Check the [developers guide](developers/developer_information.md) for
-information on how to develop for the AI module.
+Check the [developers guide](developers/developer_information.md) as well as the [AI UX Principles](./ux/core_ux_principles.md) and [Organizing AI Modules & Features](./ux/organizing_ai_modules_and_features.md) for information on how to develop for the AI module.
 
 ## Documentation
 

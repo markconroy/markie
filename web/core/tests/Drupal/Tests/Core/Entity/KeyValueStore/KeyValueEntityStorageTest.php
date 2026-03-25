@@ -100,7 +100,7 @@ class KeyValueEntityStorageTest extends UnitTestCase {
   /**
    * Prepares the key value entity storage.
    *
-   * @param string $uuid_key
+   * @param string|null $uuid_key
    *   (optional) The entity key used for the UUID. Defaults to 'uuid'.
    *
    * @legacy-covers ::__construct
@@ -504,8 +504,6 @@ class KeyValueEntityStorageTest extends UnitTestCase {
 
   /**
    * Tests load missing entity.
-   *
-   * @legacy-covers ::load
    */
   public function testLoadMissingEntity(): void {
     $this->setUpKeyValueEntityStorage();

@@ -224,6 +224,7 @@ final class Tone extends AiContentSuggestionsPluginBase {
     if (!empty($vocabulary_options)) {
       $form[$this->getPluginId()][$this->getPluginId() . '_taxonomy_enabled'] = [
         '#parents' => [
+          'plugins',
           $this->getPluginId(),
           $this->getPluginId() . '_taxonomy_enabled',
         ],
@@ -240,6 +241,7 @@ final class Tone extends AiContentSuggestionsPluginBase {
 
       $form[$this->getPluginId()][$this->getPluginId() . '_taxonomy'] = [
         '#parents' => [
+          'plugins',
           $this->getPluginId(),
           $this->getPluginId() . '_taxonomy',
         ],
@@ -251,7 +253,7 @@ final class Tone extends AiContentSuggestionsPluginBase {
         '#states' => [
           'visible' => [
             ':input[name="' . $this->getPluginId() . '[' . $this->getPluginId() . '_enabled]"]' => ['checked' => TRUE],
-            ':input[name="' . $this->getPluginId() . '[' . $this->getPluginId() . '_taxonomy_enabled]"]' => ['checked' => TRUE],
+            ':input[name="plugins[' . $this->getPluginId() . '][' . $this->getPluginId() . '_taxonomy_enabled]"]' => ['checked' => TRUE],
           ],
         ],
       ];
@@ -262,7 +264,7 @@ final class Tone extends AiContentSuggestionsPluginBase {
    * {@inheritdoc}
    */
   public function saveSettingsForm(array &$form, FormStateInterface $form_state): void {
-    $value = $form_state->getValue($this->getPluginId());
+    $value = $form_state->getValue(['plugins', $this->getPluginId()]);
     $taxonomy = $value[$this->getPluginId() . '_taxonomy'] ?? '';
     $this->toneConfig->set($this->getPluginId() . '_taxonomy', $taxonomy)->save();
     $taxonomy_enabled = $value[$this->getPluginId() . '_taxonomy_enabled'] ?? 0;

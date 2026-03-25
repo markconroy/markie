@@ -77,7 +77,7 @@
 }
 
 /* Live chat courtesy of https://codepen.io/mehmetmert/pen/zYZRKZ */
-#live-chat {
+.ai-live-chat {
   position: fixed;
   z-index: 1000;
   right: 24px;
@@ -89,11 +89,11 @@
 }
 
 /* Specific change for Gin Admin theme */
-#live-chat #gin_sidebar {
+.ai-live-chat #gin_sidebar {
   display: none;
 }
 
-#live-chat input[type="submit"].chat-form-send {
+.ai-live-chat input[type="submit"].chat-form-send {
   display: none;
 }
 
@@ -121,12 +121,12 @@ form input[type="submit"].chat-form-clear-history:hover {
   background-color: #e62727;
 }
 
-#live-chat input[type="submit"].chat-form-clear-history:active {
+.ai-live-chat input[type="submit"].chat-form-clear-history:active {
   border: none;
   background-color: #c21f1f;
 }
 
-#live-chat header {
+.ai-live-chat header {
   padding: 16px 24px;
   cursor: pointer;
   color: #fff;
@@ -134,7 +134,15 @@ form input[type="submit"].chat-form-clear-history:hover {
   background: #293239;
 }
 
-#live-chat h4::before {
+.ai-live-chat .chat-name {
+  margin: 0;
+  padding: 0;
+  font-size: 12px;
+  font-weight: bold;
+  color: #fff;
+}
+
+.ai-live-chat .chat-name::before {
   display: inline-block;
   width: 8px;
   height: 8px;
@@ -144,30 +152,25 @@ form input[type="submit"].chat-form-clear-history:hover {
   background: #1a8a34;
 }
 
-#live-chat h4 {
-  margin: 0;
-  padding: 0;
-  font-size: 12px;
-  color: #fff;
-}
-
-#live-chat h5 {
+.ai-live-chat .chat-user {
+  display: block;
   font-size: 10px;
+  font-weight: bold;
 }
 
-#live-chat form {
+.ai-live-chat form {
   padding: 24px;
 }
 
-#live-chat form label {
+.ai-live-chat form label {
   display: none;
 }
 
-#live-chat form .form-item {
+.ai-live-chat form .form-item {
   margin-block: 0;
 }
 
-#live-chat textarea {
+.ai-live-chat textarea {
   width: 100%;
   min-height: 65px;
   max-height: 130px;

@@ -2,6 +2,7 @@
 
 namespace Drupal\ai_ckeditor\Plugin\AiCKEditor;
 
+use Drupal\ai\Utility\Textarea;
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
@@ -36,9 +37,7 @@ final class SpellFix extends AiCKEditorPluginBase {
    * {@inheritdoc}
    */
   public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
-    $options = $this->aiProviderManager->getSimpleProviderModelOptions('chat');
-    array_shift($options);
-    array_splice($options, 0, 1);
+    $options = $this->aiProviderManager->getSimpleProviderModelOptions('chat', FALSE);
     $form['provider'] = [
       '#type' => 'select',
       '#title' => $this->t('AI provider'),
@@ -59,6 +58,14 @@ final class SpellFix extends AiCKEditorPluginBase {
           ':input[name="editor[settings][plugins][ai_ckeditor_ai][plugins][ai_ckeditor_spellfix][enabled]"]' => ['checked' => TRUE],
         ],
       ],
+      // This property will land into core soon, see
+      // https://www.drupal.org/project/drupal/issues/3202631. It can stay
+      // after this is added to Drupal core.
+      '#normalize_newlines' => TRUE,
+      // Until that the custom value callback is needed. Should be removed
+      // after the issue mentioned above is merged into core and the minimum
+      // supported Drupal version includes `#normalize_newlines` property.
+      '#value_callback' => [Textarea::class, 'valueCallback'],
     ];
 
     return $form;

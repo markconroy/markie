@@ -7,6 +7,7 @@ use Drupal\ai\OperationType\Chat\ChatMessage;
 use Drupal\ai\OperationType\Chat\Tools\ToolsFunctionInput;
 use Drupal\ai\OperationType\Chat\Tools\ToolsInput;
 use Drupal\ai\OperationType\Chat\Tools\ToolsPropertyInput;
+use Drupal\ai\OperationType\GenericType\ImageFile;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -54,7 +55,6 @@ class ChatArrayTest extends TestCase {
       ],
       'debug_data' => [],
       'chat_tools' => NULL,
-      'chat_structured_json_schema' => [],
       'chat_strict_schema' => FALSE,
     ]);
     $this->assertInstanceOf(ChatInput::class, $input);
@@ -64,6 +64,7 @@ class ChatArrayTest extends TestCase {
     $this->assertEmpty($input->getMessages()[0]->getFiles());
     $this->assertNull($input->getChatTools());
     $this->assertEmpty($input->getChatStructuredJsonSchema());
+    // @phpstan-ignore-next-line method.deprecated
     $this->assertFalse($input->getChatStrictSchema());
   }
 
@@ -90,7 +91,6 @@ class ChatArrayTest extends TestCase {
       ],
       'debug_data' => [],
       'chat_tools' => NULL,
-      'chat_structured_json_schema' => [],
       'chat_strict_schema' => FALSE,
     ]);
     $this->assertCount(2, $input->getMessages());
@@ -102,6 +102,7 @@ class ChatArrayTest extends TestCase {
     $this->assertEmpty($input->getMessages()[1]->getFiles());
     $this->assertNull($input->getChatTools());
     $this->assertEmpty($input->getChatStructuredJsonSchema());
+    // @phpstan-ignore-next-line method.deprecated
     $this->assertFalse($input->getChatStrictSchema());
   }
 
@@ -175,7 +176,6 @@ class ChatArrayTest extends TestCase {
           ],
         ],
       ],
-      'chat_structured_json_schema' => [],
       'chat_strict_schema' => FALSE,
     ];
     $input = ChatInput::fromArray($array);
@@ -185,6 +185,159 @@ class ChatArrayTest extends TestCase {
     $this->assertEmpty($input->getMessages()[0]->getFiles());
     $this->assertNotNull($input->getChatTools());
     $this->assertEquals($array['chat_tools'], $input->getChatTools()->renderToolsArray());
+  }
+
+  /**
+   * Test ChatMessage toArray with an attached image uses base64.
+   */
+  public function testChatMessageWithImageToArray(): void {
+    $binaryData = 'fake image binary data';
+    $mimeType = 'image/png';
+    $filename = 'test.png';
+
+    $image = new ImageFile($binaryData, $mimeType, $filename);
+    $message = new ChatMessage('user', 'Describe this image');
+    $message->setImage($image);
+
+    $array = $message->toArray();
+
+    $this->assertEquals('user', $array['role']);
+    $this->assertEquals('Describe this image', $array['text']);
+    $this->assertCount(1, $array['images']);
+    $this->assertArrayHasKey('base64', $array['images'][0]);
+    $this->assertArrayHasKey('mime_type', $array['images'][0]);
+    $this->assertArrayHasKey('filename', $array['images'][0]);
+    $this->assertArrayHasKey('type', $array['images'][0]);
+    $this->assertEquals($mimeType, $array['images'][0]['mime_type']);
+    $this->assertEquals($filename, $array['images'][0]['filename']);
+    $this->assertEquals(ImageFile::class, $array['images'][0]['type']);
+    // Verify it's base64 encoded with data URL scheme.
+    $expectedBase64 = 'data:' . $mimeType . ';base64,' . base64_encode($binaryData);
+    $this->assertEquals($expectedBase64, $array['images'][0]['base64']);
+  }
+
+  /**
+   * Test ChatMessage fromArray with base64 image data.
+   */
+  public function testChatMessageWithImageFromArray(): void {
+    $binaryData = 'fake image binary data';
+    $mimeType = 'image/jpeg';
+    $filename = 'photo.jpg';
+    $base64Data = 'data:' . $mimeType . ';base64,' . base64_encode($binaryData);
+
+    $array = [
+      'role' => 'user',
+      'text' => 'What is in this photo?',
+      'images' => [
+        [
+          'type' => ImageFile::class,
+          'base64' => $base64Data,
+          'mime_type' => $mimeType,
+          'filename' => $filename,
+        ],
+      ],
+      'tools' => NULL,
+      'tool_id' => NULL,
+    ];
+
+    $message = ChatMessage::fromArray($array);
+
+    $this->assertEquals('user', $message->getRole());
+    $this->assertEquals('What is in this photo?', $message->getText());
+    $this->assertCount(1, $message->getFiles());
+    $this->assertCount(1, $message->getImages());
+
+    $restoredImage = $message->getImages()[0];
+    $this->assertInstanceOf(ImageFile::class, $restoredImage);
+    $this->assertEquals($binaryData, $restoredImage->getBinary());
+    $this->assertEquals($mimeType, $restoredImage->getMimeType());
+    $this->assertEquals($filename, $restoredImage->getFilename());
+  }
+
+  /**
+   * Test ChatMessage round-trip with image preserves data.
+   */
+  public function testChatMessageWithImageRoundTrip(): void {
+    $binaryData = 'test image content for round trip';
+    $mimeType = 'image/gif';
+    $filename = 'animation.gif';
+
+    // Create original message with image.
+    $image = new ImageFile($binaryData, $mimeType, $filename);
+    $originalMessage = new ChatMessage('user', 'Check this animation');
+    $originalMessage->setImage($image);
+
+    // Convert to array and back.
+    $array = $originalMessage->toArray();
+    $restoredMessage = ChatMessage::fromArray($array);
+
+    // Verify all data is preserved.
+    $this->assertEquals($originalMessage->getRole(), $restoredMessage->getRole());
+    $this->assertEquals($originalMessage->getText(), $restoredMessage->getText());
+    $this->assertCount(1, $restoredMessage->getImages());
+
+    $restoredImage = $restoredMessage->getImages()[0];
+    $this->assertEquals($binaryData, $restoredImage->getBinary());
+    $this->assertEquals($mimeType, $restoredImage->getMimeType());
+    $this->assertEquals($filename, $restoredImage->getFilename());
+  }
+
+  /**
+   * Test ChatInput with image message toArray and fromArray.
+   */
+  public function testChatInputWithImageMessageRoundTrip(): void {
+    $binaryData = 'sample image data';
+    $mimeType = 'image/webp';
+    $filename = 'sample.webp';
+
+    $image = new ImageFile($binaryData, $mimeType, $filename);
+    $message = new ChatMessage('user', 'Analyze this image');
+    $message->setImage($image);
+
+    $input = new ChatInput([$message]);
+    $array = $input->toArray();
+
+    // Verify the array structure.
+    $this->assertCount(1, $array['messages']);
+    $this->assertCount(1, $array['messages'][0]['images']);
+    $this->assertArrayHasKey('base64', $array['messages'][0]['images'][0]);
+
+    // Restore from array.
+    $restoredInput = ChatInput::fromArray($array);
+
+    $this->assertCount(1, $restoredInput->getMessages());
+    $restoredMessage = $restoredInput->getMessages()[0];
+    $this->assertEquals('user', $restoredMessage->getRole());
+    $this->assertEquals('Analyze this image', $restoredMessage->getText());
+    $this->assertCount(1, $restoredMessage->getImages());
+
+    $restoredImage = $restoredMessage->getImages()[0];
+    $this->assertEquals($binaryData, $restoredImage->getBinary());
+    $this->assertEquals($mimeType, $restoredImage->getMimeType());
+    $this->assertEquals($filename, $restoredImage->getFilename());
+  }
+
+  /**
+   * Test ChatMessage with multiple images toArray.
+   */
+  public function testChatMessageWithMultipleImagesToArray(): void {
+    $image1Binary = 'first image data';
+    $image2Binary = 'second image data';
+
+    $image1 = new ImageFile($image1Binary, 'image/png', 'first.png');
+    $image2 = new ImageFile($image2Binary, 'image/jpeg', 'second.jpg');
+
+    $message = new ChatMessage('user', 'Compare these images');
+    $message->setImage($image1);
+    $message->setImage($image2);
+
+    $array = $message->toArray();
+
+    $this->assertCount(2, $array['images']);
+    $this->assertArrayHasKey('base64', $array['images'][0]);
+    $this->assertArrayHasKey('base64', $array['images'][1]);
+    $this->assertEquals('image/png', $array['images'][0]['mime_type']);
+    $this->assertEquals('image/jpeg', $array['images'][1]['mime_type']);
   }
 
 }

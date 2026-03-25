@@ -64,22 +64,32 @@ nav:
       - Image Classification Call: developers/call_image_classification.md
       - Translate Text Call: developers/call_translate_text.md
       - Image-To-Image Call: developers/call_image_to_image.md
+      - Object Detection Call: developers/call_object_detection.md
     - Plugins/Managers:
+      - Function Call Plugins: developers/function_call.md
       - Function Call Schema: developers/function_call_schema.md
       - Short-Term Memory: developers/short_term_memory.md
     - Helper Services:
       - Chat History Form Element: developers/chat_history_element.md
+      - CSS / JS / Icon Utility Library: developers/css_utility_library.md
+      - Provider Config Schema: developers/provider_config_schema.md
+    - Develop an AI Provider:
+      - Getting Started: developers/writing_an_ai_provider.md
+      - Testing a Provider: developers/testing_an_ai_provider.md
     - Develop a third-party module: developers/develop_third_party_module.md
     - Events: developers/events.md
     - DDEV: developers/ddev.md
     - Prompt Management: developers/ai_prompt_management.md
     - Mock a Provider: developers/virtual_provider.md
+    - Form Elements:
+      - Chat History: developers/chat_history_element.md
+      - MDXEditor: developers/mdxeditor.md
+      - JSON Schema Editor: developers/json_schema_editor.md
     - Develop for submodules:
-        - AI Assistant API Action: developers/develop_api_assistant_action.md
-        - Develop an AI API Explorer plugin: developers/ai_api_explorer.md
-        - Develop an AI Automators plugin: developers/writing_an_ai_automators_plugin.md
-        - AI CKEditor: developers/ck_editor_plugin.md
-        - Develop an AI Provider: developers/writing_an_ai_provider.md
+      - AI Assistant API Action: developers/develop_api_assistant_action.md
+      - Develop an AI API Explorer plugin: developers/ai_api_explorer.md
+      - Develop an AI Automators plugin: developers/writing_an_ai_automators_plugin.md
+      - AI CKEditor: developers/ck_editor_plugin.md
   - Contribute:
     - Getting Started: contribute/index.md
     - Issue Guidelines: contribute/issue_guidelines.md
@@ -87,6 +97,7 @@ nav:
     - Contribute Bug Reports: contribute/bug_finding.md
     - Contribute Testings:
       - Getting Started: contribute/testing.md
+      - Full Patch Test: contribute/testing/full_patch_test.md
       - Mock Provider Calls: contribute/testing/spoof_provider.md
     - Contribute Features: contribute/features.md
     - Developer Information: contribute/developer_information.md
@@ -121,6 +132,12 @@ nav:
         - Run a Test Group: agents/testing/ai_agent_test/running_test_group.md
         - View Results, Export, Import Tests: agents/testing/ai_agent_test/result_export_import.md
         - Drush Commands: agents/testing/ai_agent_test/drush.md
+  - AI User Experience:
+    - Core UX Principles: ux/core_ux_principles.md
+    - Organizing AI Modules & Features: ux/organizing_ai_modules_and_features.md
+    - Request UX Support for AI modules: ux/request_ux_support.md
+    - UX Improvement Projects: ux/ux_improvement_projects.md
+    - How to Contribute to UX: ux/how_to_contribute.md
   - Documentation (How to): documentation/index.md
   - Changelog: changelog.md
 docs_dir: docs

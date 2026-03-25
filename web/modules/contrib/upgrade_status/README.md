@@ -1,13 +1,18 @@
 # Upgrade Status
 
-Review Drupal major upgrade readiness of the environment and components of the site.
+Review Drupal major upgrade readiness of the environment
+and components of the site.
 
 The module provides the following key features:
 
 - Checks if you are using a version of Drupal that supports an upgrade.
 - Checks if your system meets the next major version's system requirements.
-- Integrates with the Update Status core module to inform you to update your contributed projects. Projects can be compatible with multiple major Drupal versions, so most projects can be updated on your existing site before doing the core major update.
-- Runs phpstan checks and a whole set of other checks to find any compatibility issues with the next Drupal major version that may remain.
+- Integrates with the Update Status core module to inform you to update
+ your contributed projects. Projects can be compatible with multiple major
+ Drupal versions, so most projects can be updated on your existing site
+ before doing the core major update.
+- Runs phpstan checks and a whole set of other checks to find any compatibility
+ issues with the next Drupal major version that may remain.
 - Integrates with drush for command line usage and to plug into CI systems.
 
 For a full description of the module, visit the

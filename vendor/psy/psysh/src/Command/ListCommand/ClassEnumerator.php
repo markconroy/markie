@@ -3,7 +3,7 @@
 /*
  * This file is part of Psy Shell.
  *
- * (c) 2012-2025 Justin Hileman
+ * (c) 2012-2026 Justin Hileman
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -95,9 +95,7 @@ class ClassEnumerator extends Enumerator
         }
 
         if (!$user && !$internal) {
-            $ret[$key] = \array_filter($classes, function ($class) use ($prefix) {
-                return $prefix === null || \strpos(\strtolower($class), $prefix) === 0;
-            });
+            $ret[$key] = \array_filter($classes, fn ($class) => $prefix === null || \strpos(\strtolower($class), $prefix) === 0);
         }
 
         return $ret;

@@ -3,7 +3,7 @@
 The AI CKEditor integration module provides a number of plugins that integrate
 with core's CK Editor 5 module. These plugins allow data to be passed to an LLM
 to allow it to make suggests about content, from translations to tone
-suggestions to text completion. 
+suggestions to text completion.
 
 ## Dependencies
 The AI CKEditor integration requires the AI Core module to be installed and
@@ -34,3 +34,14 @@ Some plugins require additional configuration to use.
 When adding/editing content that uses CK Editor in its Text Form, you will see
 an "AI Tools" button on the CK editor toolbar. Pressing that will allow you to
 choose one of your configured plugins.
+
+## Development
+The built plugin assets are only committed to the tagged versions of the module. When you checkout a branch for
+development you need to build the assets yourself. Follow the instructions:
+
+1. Make sure you have `node` and `npm` installed.
+2. Navigate to `modules/ai_ckeditor` folder.
+3. Run `nvm use` if you have `nvm` installed. Otherwise, run `npm ci`.
+4. Run `npm run build`
+5. Do not include `modules/ai_ckeditor/js/build` into your commits.
+6. When changing the packages for the plugin do include `packages.json` and `packages-lock.json` into your commit.

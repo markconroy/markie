@@ -3,7 +3,7 @@
 /*
  * This file is part of Psy Shell.
  *
- * (c) 2012-2025 Justin Hileman
+ * (c) 2012-2026 Justin Hileman
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -17,6 +17,7 @@ use Psy\Exception\ParseErrorException;
 use Psy\OutputAware;
 use Psy\ParserFactory;
 use Psy\Shell;
+use Psy\Util\Docblock;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
@@ -98,6 +99,9 @@ class RunkitReloader extends AbstractListener implements OutputAware
         if (\count($modified) === 0) {
             return;
         }
+
+        // Clear magic method/property cache since docblocks may have changed
+        Docblock::clearMagicCache();
 
         // Notify user about reload attempts
         if ($this->output) {

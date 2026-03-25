@@ -73,6 +73,8 @@ You can have this running and provide an empty value and it will not fail, it wi
 
 In this example we want to setup the OpenAI Provider by asking the end user for the API Key.
 
+If you want to setup a provider where the key is already setup, you can add the value `no_key_needed: true` to the setupAiProvider config and it will run the setup regardless of if a key is provided or not.
+
 ```
 input:
   openai_api_key:

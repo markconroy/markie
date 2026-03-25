@@ -143,27 +143,23 @@ When you have turned this on, its important to note that not all providers suppo
 
 ```php
 use Drupal\ai\OperationType\Chat\StreamedChatMessageIteratorInterface;
+use Drupal\ai\Response\AiStreamedResponse;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\StreamedResponse;
 
 $response = $ai_provider->chat($some_messages, 'model')->getNormalized();
 // If its streaming.
 if (is_object($response) && $response instanceof StreamedChatMessageIteratorInterface) {
-  // Streamed response.
-  return new StreamedResponse(function () use ($response) {
+  // AiStreamedResponse sets the required headers for streaming
+  // (X-Accel-Buffering, Cache-Control, Content-Type) and clears
+  // output buffers automatically.
+  return new AiStreamedResponse(function () use ($response) {
     // Iterate the response.
     foreach ($response as $message) {
       // Echo and flush.
       echo $message->getText();
-      ob_flush();
       flush();
     }
-    // Make sure not to cache.
-  }, 200, [
-    'Cache-Control' => 'no-cache, must-revalidate',
-    'Content-Type' => 'text/event-stream',
-    'X-Accel-Buffering' => 'no',
-  ]);
+  });
 }
 // Otherwise non-streaming.
 else {

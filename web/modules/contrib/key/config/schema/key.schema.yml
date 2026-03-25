@@ -148,6 +148,6 @@ key.provider.state:
   type: mapping
   label: 'State key provider settings'
   mapping:
-    key:
+    state_key:
       type: string
       label: 'Key'

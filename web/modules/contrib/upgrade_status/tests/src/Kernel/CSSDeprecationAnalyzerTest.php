@@ -15,6 +15,8 @@ class CSSDeprecationAnalyzerTest extends KernelTestBase {
 
   /**
    * The temporary directory path.
+   *
+   * @var string
    */
   protected $tempPath;
 
@@ -43,7 +45,7 @@ class CSSDeprecationAnalyzerTest extends KernelTestBase {
   /**
    * @covers ::getAllCSSFiles
    */
-  public function testGetAllCSSFiles() {
+  public function testGetAllCssFiles() {
     touch($this->tempPath . '/test.css');
     mkdir($this->tempPath . '/subdir');
     touch($this->tempPath . '/subdir/test.css');

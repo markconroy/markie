@@ -7,13 +7,14 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\field_widget_actions\Attribute\FieldWidgetAction;
 
 /**
- * Provides a Field Widget Action for options_select widget.
+ * Provides a Field Widget Action for options_select and chosen_select widgets.
  */
 #[FieldWidgetAction(
   id: 'classification_options_select',
-  label: new TranslatableMarkup('Classification (Options Select)'),
-  widget_types: ['options_select'],
+  label: new TranslatableMarkup('Classification (Options/Chosen Select)'),
+  widget_types: ['options_select', 'chosen_select'],
   field_types: ['entity_reference'],
+  multiple: FALSE,
 )]
 class ClassificationOptionsSelect extends AutomatorBaseAction {
 

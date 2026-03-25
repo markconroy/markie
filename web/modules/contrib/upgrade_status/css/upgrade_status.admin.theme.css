@@ -90,9 +90,7 @@
   background-image: url(../icons/warning.svg);
 }
 
-.upgrade-status-project-result-group
-  tr.color-warning.known-later
-  > td.status-info,
+.upgrade-status-project-result-group tr.color-warning.known-later > td.status-info,
 .upgrade-status-next-step td.status-info-na {
   background-image: url(../icons/ex.svg);
 }
@@ -103,9 +101,7 @@
   background-image: url(../icons/check.svg);
 }
 
-.upgrade-status-project-result-group
-  tr.color-warning.rector-covered
-  > td.status-info {
+.upgrade-status-project-result-group tr.color-warning.rector-covered > td.status-info {
   background-image: url(../icons/wrench.svg);
 }
 
@@ -134,7 +130,7 @@ html.gin--dark-mode .upgrade-status-next-step td.status-info-unchecked {
   stroke-linecap: round;
   animation-duration: 1s;
   animation-timing-function: ease-out;
-  animation-direction: forwards;
+  animation-fill-mode: forwards;
   stroke: #325e1c;
 }
 .upgrade-status-of-site-circle .percentage {

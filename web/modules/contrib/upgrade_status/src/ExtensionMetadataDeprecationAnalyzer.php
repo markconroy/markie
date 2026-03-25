@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Drupal\upgrade_status;
 
-use Drupal\Component\Serialization\Yaml;
 use Drupal\Component\Serialization\Exception\InvalidDataTypeException;
+use Drupal\Component\Serialization\Yaml;
 use Drupal\Core\Extension\Extension;
 
 /**
@@ -17,7 +17,7 @@ final class ExtensionMetadataDeprecationAnalyzer {
    * Analyzes usages of deprecated extension metadata in an extension.
    *
    * @param \Drupal\Core\Extension\Extension $extension
-   *  The extension to be analyzed.
+   *   The extension to be analyzed.
    *
    * @return \Drupal\upgrade_status\DeprecationMessage[]
    *   A list of deprecation messages.
@@ -59,9 +59,8 @@ final class ExtensionMetadataDeprecationAnalyzer {
           $deprecations[] = new DeprecationMessage("Value of core_version_requirement: {$info['core_version_requirement']} is not compatible with the next major version of Drupal core. See https://drupal.org/node/3070687.", $error_path, $line, 'ExtensionMetadataDeprecationAnalyzer');
         }
 
-        // @todo
-        //   Change values to ExtensionLifecycle class constants once at least
-        //   Drupal 9.3 is required.
+        // @todo Change values to ExtensionLifecycle class constants
+        // once at least Drupal 9.3 is required.
         if (!empty($info['lifecycle'])) {
           $line = $this->findKeyLine('lifecycle:', $file_contents);
           $link = !empty($info['lifecycle_link']) ? $info['lifecycle_link'] : 'https://www.drupal.org/node/3215042';
@@ -73,7 +72,8 @@ final class ExtensionMetadataDeprecationAnalyzer {
           }
         }
 
-      } catch (InvalidDataTypeException $e) {
+      }
+      catch (InvalidDataTypeException $e) {
         $deprecations[] = new DeprecationMessage('Parse error. ' . $e->getMessage(), $error_path, 1, 'ExtensionMetadataDeprecationAnalyzer');
       }
 
@@ -89,10 +89,10 @@ final class ExtensionMetadataDeprecationAnalyzer {
       if (empty($composer_json) || !is_object($composer_json)) {
         $deprecations[] = new DeprecationMessage("Parse error in composer.json. Having a composer.json is not a requirement in general, but if there is one, it should be valid. See https://drupal.org/node/2514612.", $error_path, 1, 'ExtensionMetadataDeprecationAnalyzer');
       }
-      elseif (!empty($composer_json->require->{'drupal/core'}) && !projectCollector::isCompatibleWithNextMajorDrupal($composer_json->require->{'drupal/core'})) {
+      elseif (!empty($composer_json->require->{'drupal/core'}) && !ProjectCollector::isCompatibleWithNextMajorDrupal($composer_json->require->{'drupal/core'})) {
         $deprecations[] = new DeprecationMessage("The drupal/core requirement is not compatible with the next major version of Drupal. Either remove it or update it to be compatible. See https://www.drupal.org/docs/develop/using-composer/add-a-composerjson-file#core-compatibility.", $error_path, 1, 'ExtensionMetadataDeprecationAnalyzer');
       }
-      elseif (!empty($composer_json->require->{'php'}) && !projectCollector::isCompatibleWithPHP($composer_json->require->{'php'}, '8.1.0')) {
+      elseif (!empty($composer_json->require->{'php'}) && !ProjectCollector::isCompatibleWithPhp($composer_json->require->{'php'}, '8.1.0')) {
         $deprecations[] = new DeprecationMessage("The PHP requirement is not compatible with PHP 8.1. Once the codebase is actually compatible, either remove this limitation or update it to be compatible.", $error_path, 1, 'ExtensionMetadataDeprecationAnalyzer');
       }
     }
@@ -110,7 +110,7 @@ final class ExtensionMetadataDeprecationAnalyzer {
    */
   private function getSubExtensionInfoFiles(string $path) {
     $files = [];
-    foreach(glob($path . '/*.info.yml') as $file) {
+    foreach (glob($path . '/*.info.yml') as $file) {
       // Make sure the filename matches rules for an extension. There may be
       // info.yml files in shipped configuration which would have more parts.
       $parts = explode('.', basename($file));
@@ -118,7 +118,7 @@ final class ExtensionMetadataDeprecationAnalyzer {
         $files[] = $file;
       }
     }
-    foreach (glob($path . '/*', GLOB_ONLYDIR|GLOB_NOSORT) as $dir) {
+    foreach (glob($path . '/*', GLOB_ONLYDIR | GLOB_NOSORT) as $dir) {
       $files = array_merge($files, $this->getSubExtensionInfoFiles($dir));
     }
     return $files;
@@ -126,12 +126,13 @@ final class ExtensionMetadataDeprecationAnalyzer {
 
   /**
    * Finds the line that contains the substring.
-   * 
+   *
    * @param string $substring
    *   The string to find.
    * @param string $file_contents
    *   String contents of a file.
-   * @return
+   *
+   * @return int
    *   Line number if found, 1 otherwise.
    */
   private function findKeyLine($substring, $file_contents) {

@@ -224,7 +224,10 @@ class AiCKEditor extends CKEditor5PluginDefault implements ContainerFactoryPlugi
       $static_plugin_config['ai_ckeditor_ai']['dialogSettings']['autoResize'] = (is_string($config["dialog"]["autoresize"]) && !empty($config["dialog"]["autoresize"])) ? $config["dialog"]["autoresize"] : FALSE;
       $static_plugin_config['ai_ckeditor_ai']['dialogSettings']['height'] = is_string($config["dialog"]["height"]) ? $config["dialog"]["height"] : $this->defaultConfiguration()['height'];
       $static_plugin_config['ai_ckeditor_ai']['dialogSettings']['width'] = is_string($config["dialog"]["width"]) ? $config["dialog"]["width"] : $this->defaultConfiguration()['width'];
-      $static_plugin_config['ai_ckeditor_ai']['dialogSettings']['dialogClass'] = is_string($config["dialog"]["dialog_class"]) ? $config["dialog"]["dialog_class"] : $this->defaultConfiguration()['dialog_class'];
+      // Use 'classes' instead of deprecated 'dialogClass' for Drupal 10.3+.
+      // @see https://www.drupal.org/node/3440844
+      $dialog_class = is_string($config["dialog"]["dialog_class"]) ? $config["dialog"]["dialog_class"] : $this->defaultConfiguration()['dialog_class'];
+      $static_plugin_config['ai_ckeditor_ai']['dialogSettings']['classes'] = ['ui-dialog' => $dialog_class];
     }
 
     $all_disabled = TRUE;

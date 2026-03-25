@@ -88,8 +88,6 @@ class ViewExecutableFactoryTest extends UnitTestCase {
 
   /**
    * Tests the get method.
-   *
-   * @legacy-covers ::get
    */
   public function testGet(): void {
     $request_1 = new Request();
@@ -111,6 +109,19 @@ class ViewExecutableFactoryTest extends UnitTestCase {
     $this->assertInstanceOf('Drupal\views\ViewExecutable', $executable);
     $this->assertSame($executable->getRequest(), $request_2);
     $this->assertSame($executable->getUser(), $this->user);
+  }
+
+  /**
+   * Tests the get method when current request is null.
+   *
+   * @legacy-covers ::get
+   */
+  public function testGetNoRequest(): void {
+    $executable = $this->viewExecutableFactory->get($this->view);
+
+    $this->assertInstanceOf('Drupal\views\ViewExecutable', $executable);
+    $this->assertSame($executable->getUser(), $this->user);
+    $this->assertSame($executable->getRequest(), NULL);
   }
 
 }

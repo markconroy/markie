@@ -127,6 +127,11 @@ class PropertyFormBuilder {
           $form_element['#type'] = 'textarea';
           $form_element['#rows'] = 5;
           $form_element['#value_callback'] = [self::class, 'splitContextList'];
+          // Convert array default value to newline-separated string for
+          // textarea.
+          if (is_array($form_element['#default_value'])) {
+            $form_element['#default_value'] = implode("\n", $form_element['#default_value']);
+          }
           $form_element['#description'] .= new FormattableMarkup(
             '@description @list',
             [

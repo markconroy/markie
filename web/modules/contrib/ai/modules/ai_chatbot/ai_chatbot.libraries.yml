@@ -52,3 +52,8 @@ toolbar-chatbot:
   dependencies:
     - core/drupal
     - core/once
+
+toolbar-fullscreen:
+  css:
+    theme:
+      css/toolbar-fullscreen.css: {}

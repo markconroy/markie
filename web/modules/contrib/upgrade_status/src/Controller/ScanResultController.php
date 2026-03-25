@@ -4,12 +4,16 @@ namespace Drupal\upgrade_status\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Render\RendererInterface;
+use Drupal\upgrade_status\DeprecationAnalyzer;
 use Drupal\upgrade_status\ProjectCollector;
 use Drupal\upgrade_status\ScanResultFormatter;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * Scan result controller.
+ */
 class ScanResultController extends ControllerBase {
 
   /**
@@ -34,6 +38,13 @@ class ScanResultController extends ControllerBase {
   protected $renderer;
 
   /**
+   * The deprecation analyzer.
+   *
+   * @var \Drupal\upgrade_status\DeprecationAnalyzer
+   */
+  protected $deprecationAnalyzer;
+
+  /**
    * Constructs a \Drupal\upgrade_status\Controller\ScanResultController.
    *
    * @param \Drupal\upgrade_status\ScanResultFormatter $result_formatter
@@ -42,15 +53,19 @@ class ScanResultController extends ControllerBase {
    *   The project collector service.
    * @param \Drupal\Core\Render\RendererInterface $renderer
    *   The renderer service.
+   * @param \Drupal\upgrade_status\DeprecationAnalyzer $deprecation_analyzer
+   *   The deprecation analyzer.
    */
   public function __construct(
     ScanResultFormatter $result_formatter,
     ProjectCollector $project_collector,
-    RendererInterface $renderer
+    RendererInterface $renderer,
+    DeprecationAnalyzer $deprecation_analyzer,
   ) {
     $this->resultFormatter = $result_formatter;
     $this->projectCollector = $project_collector;
     $this->renderer = $renderer;
+    $this->deprecationAnalyzer = $deprecation_analyzer;
   }
 
   /**
@@ -60,7 +75,8 @@ class ScanResultController extends ControllerBase {
     return new static(
       $container->get('upgrade_status.result_formatter'),
       $container->get('upgrade_status.project_collector'),
-      $container->get('renderer')
+      $container->get('renderer'),
+      $container->get('upgrade_status.deprecation_analyzer'),
     );
   }
 
@@ -98,12 +114,12 @@ class ScanResultController extends ControllerBase {
       $format = 'html';
     }
 
-    $build = ['#theme' =>  'upgrade_status_' . $format . '_export' ];
+    $build = ['#theme' => 'upgrade_status_' . $format . '_export'];
     $build['#projects'][$extension->info['upgrade_status_type'] == ProjectCollector::TYPE_CUSTOM ? 'custom' : 'contrib'] = [
       $project_machine_name =>
-        $format == 'html' ?
-          $this->resultFormatter->formatResult($extension) :
-          $this->resultFormatter->formatAsciiResult($extension) ,
+      $format == 'html' ?
+      $this->resultFormatter->formatResult($extension) :
+      $this->resultFormatter->formatAsciiResult($extension),
     ];
 
     $fileDate = $this->resultFormatter->formatDateTime($result['date'], 'html_datetime');
@@ -135,10 +151,11 @@ class ScanResultController extends ControllerBase {
     else {
       // Dealing with a real project.
       $extension = $this->projectCollector->loadProject($project_machine_name);
-      \Drupal::service('upgrade_status.deprecation_analyzer')->analyze($extension);
+      $this->deprecationAnalyzer->analyze($extension);
       return new JsonResponse(
         ['message' => $this->t('Scanned @project', ['@project' => $extension->getName()])]
       );
     }
   }
+
 }

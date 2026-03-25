@@ -20,4 +20,12 @@ interface FieldWidgetActionManagerInterface {
    */
   public function getAllowedFieldWidgetActions($widget_type, $field_type): array;
 
+  /**
+   * Gets allowed form-based field widget actions.
+   *
+   * @return \Drupal\field_widget_actions\FieldWidgetFormActionInterface[]
+   *   The list of allowed form-based plugins.
+   */
+  public function getFieldWidgetActionFormDefinitions(): array;
+
 }

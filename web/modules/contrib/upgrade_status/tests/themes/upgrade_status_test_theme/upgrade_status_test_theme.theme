@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * Theme override for testing purposes.
+ */
+
+/**
  * Theme function override for testing purposes.
  */
 function upgrade_status_test_theme_upgrade_status_test_theme_function_theme_function_override() {

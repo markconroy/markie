@@ -5,7 +5,7 @@ We have two ways to generate release notes for the AI module - the AI Release No
 1. Visit https://github.com/ivanboring/ai-release-notes and clone the repository.
 2. Run `composer install` to install the dependencies.
 3. Create a complete list of all issue numbers included in the release. See the project's readme for more details on how to do this. You can use GitLab or `git log` to get the commit messages between two tags and extract the issue numbers into a text file.
-4. Run the script to get release notes from Drupal.org - `php generate_release_notes.php`. This might take some time, because it retrieves data from Drupal.org via a browser.
+4. Run the script to get release notes from Drupal.org - `php get_release_notes.php`. This might take some time, because it retrieves data from Drupal.org via a browser.
 5. Write the release notes in plain text format using `php write_release_notes.php ai <previous_version>`, replacing `<previous_version>` with the most recent release version. If you want HTML format instead, add `true` as a third argument - so it would be `php write_release_notes.php ai <previous_version> true`.
 6. The release notes will be printed to the console. Copy them and use them when creating the tag.
 7. If there are any issues tagged Breaking Changes, or `(BC)`, ensure you add a section highlighting them as [Breaking Changes](breaking_changes.md)

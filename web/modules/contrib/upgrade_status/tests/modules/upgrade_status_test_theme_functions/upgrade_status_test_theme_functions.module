@@ -1,12 +1,17 @@
 <?php
 
 /**
+ * @file
+ * Test theme functions.
+ */
+
+/**
  * Implements hook_theme().
  */
 function upgrade_status_test_theme_functions_theme() {
   return [
     'upgrade_status_test_theme_function' => [
-      'function' => 'upgrade_status_test_theme_function'
+      'function' => 'upgrade_status_test_theme_functions_test_function',
     ],
     'upgrade_status_test_theme_function_another_function' => [],
     'upgrade_status_test_theme_function_theme_function_override' => [],
@@ -24,6 +29,6 @@ function upgrade_status_test_theme_functions_theme_registry_alter(&$theme_regist
 /**
  * Theme function used for testing.
  */
-function upgrade_status_test_theme_function() {
+function upgrade_status_test_theme_functions_test_function() {
   return 'kitten';
 }

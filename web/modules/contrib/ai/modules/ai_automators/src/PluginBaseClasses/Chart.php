@@ -54,7 +54,7 @@ class Chart extends RuleBase implements AiAutomatorTypeInterface {
 
     // Add JSON output.
     foreach ($prompts as $key => $prompt) {
-      $prompt .= "\n-------------------------------------\n\nDo not include any explanations, only provide a CSV file withe keys in the first row and the values in the second rows without deviation. The keys should have the prefix or suffix in paranthesis and the value should be stripped of it.\n\n";
+      $prompt .= "\n-------------------------------------\n\nDo not include any explanations, only provide a CSV file with keys in the first row and the values in the second rows without deviation. Use semicolon (;) as delimiter. Always quote text values that contain commas, semicolons, or special characters. Numeric values should not be quoted. The keys should have the prefix or suffix in parentheses and the value should be stripped of it.\n\n";
       $prompt .= "Examples would be:\n";
       $prompt .= "\"Hotel Name\"; \"Max Capacity (people)\"; \"Hotel Size (sqm)\"\n";
       $prompt .= "\"Hotel Radisson, Berlin\"; 300; 1280\n";
@@ -97,7 +97,12 @@ class Chart extends RuleBase implements AiAutomatorTypeInterface {
     $cols = explode("\n", $values[0]);
     $data = [];
     foreach ($cols as $colKey => $col) {
-      $rows = explode(";", $col);
+      if (strpos($col, ';') !== FALSE) {
+        $rows = str_getcsv($col, ';');
+      }
+      else {
+        $rows = str_getcsv($col, ',');
+      }
       if (count($rows) < 2) {
         continue;
       }

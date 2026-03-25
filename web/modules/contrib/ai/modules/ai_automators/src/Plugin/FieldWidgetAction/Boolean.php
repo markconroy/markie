@@ -46,8 +46,8 @@ class Boolean extends AutomatorBaseAction {
    */
   protected function saveFormValues(array &$form, string $form_key, $entity, ?int $key = NULL): array {
     // Get the first (and only) item from the boolean field.
-    if (isset($entity->get($form_key)->getValue()[0]) && $entity->get($form_key)->getValue()[0]->get($this->formElementProperty) != NULL) {
-      $value = $entity->get($form_key)->getValue()[0]->get($this->formElementProperty)->getValue();
+    if (isset($entity->get($form_key)->getValue()[0]) && $entity->get($form_key)->getValue()[0][$this->formElementProperty] != NULL) {
+      $value = $entity->get($form_key)->getValue()[0][$this->formElementProperty];
       // For boolean fields, set both value and checked state.
       $form[$form_key]['widget'][$this->formElementProperty]['#value'] = $value ? 1 : 0;
       $form[$form_key]['widget'][$this->formElementProperty]['#checked'] = (bool) $value;

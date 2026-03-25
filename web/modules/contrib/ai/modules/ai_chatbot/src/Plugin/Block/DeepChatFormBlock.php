@@ -4,16 +4,17 @@ namespace Drupal\ai_chatbot\Plugin\Block;
 
 use Drupal\Component\Serialization\Json;
 use Drupal\Component\Utility\NestedArray;
+use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Block\BlockBase;
+use Drupal\Core\Cache\Cache;
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBuilderInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Link;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
-use Drupal\Core\Url;
-use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\Url;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Yaml\Yaml;
 
@@ -147,22 +148,24 @@ class DeepChatFormBlock extends BlockBase implements ContainerFactoryPluginInter
     return [
       'ai_assistant' => NULL,
       'bot_name' => 'Assistant',
-      'bot_image' => '/modules/contrib/ai/modules/ai_chatbot/assets/ai-star-avatar.svg',
+      'bot_image' => '/modules/contrib/ai/modules/ai_chatbot/assets/ai-icon-gradient.svg',
       'use_username' => FALSE,
       'default_username' => '',
       'use_avatar' => FALSE,
       'default_avatar' => '',
       'first_message' => '',
+      'loading_message' => '',
       'stream' => FALSE,
       'toggle_state' => 'remember',
-      'width' => 'auto',
-      'height' => '100%',
+      'width' => '500px',
+      'height' => '500px',
       'placement' => 'toolbar',
       'show_structured_results' => FALSE,
       'collapse_minimal' => FALSE,
-      'style_file' => 'toolbar.yml',
+      'style_file' => 'module:ai_chatbot:toolbar.yml',
       'show_copy_icon' => TRUE,
       'verbose_mode' => TRUE,
+      'expansion_method' => 'expand',
     ];
   }
 
@@ -242,6 +245,18 @@ class DeepChatFormBlock extends BlockBase implements ContainerFactoryPluginInter
       '#default_value' => $this->configuration['first_message'],
     ];
 
+    $form['messages']['loading_message'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Loading Message'),
+      '#description' => $this->t('The message shown while generating a response. Leave blank to use the default animated ellipsis. <br> Only shown when Verbose Mode is disabled.'),
+      '#default_value' => $this->configuration['loading_message'] ?? '',
+      '#states' => [
+        'disabled' => [
+          ':input[name="settings[advanced][verbose_mode]"]' => ['checked' => TRUE],
+        ],
+      ],
+    ];
+
     $form['messages']['bot_name'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Bot name'),
@@ -293,29 +308,6 @@ class DeepChatFormBlock extends BlockBase implements ContainerFactoryPluginInter
     // Get the available styles.
     $styles = $this->getStyles();
 
-    $form['styling']['style_file'] = [
-      '#type' => 'select',
-      '#title' => $this->t('Style'),
-      '#description' => $this->t('The style of the chat window.'),
-      '#options' => $styles,
-      '#default_value' => $this->configuration['style_file'],
-      '#required' => TRUE,
-    ];
-
-    $form['styling']['width'] = [
-      '#type' => 'textfield',
-      '#title' => $this->t('Width'),
-      '#description' => $this->t('The width of the chat window.'),
-      '#default_value' => $this->configuration['width'],
-    ];
-
-    $form['styling']['height'] = [
-      '#type' => 'textfield',
-      '#title' => $this->t('Height'),
-      '#description' => $this->t('The height of the chat window.'),
-      '#default_value' => $this->configuration['height'],
-    ];
-
     $form['styling']['placement'] = [
       '#type' => 'select',
       '#title' => $this->t('Placement'),
@@ -329,17 +321,80 @@ class DeepChatFormBlock extends BlockBase implements ContainerFactoryPluginInter
       '#default_value' => $this->configuration['placement'],
     ];
 
+    $form['styling']['style_file'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Style'),
+      '#description' => $this->t('The style of the chat window.'),
+      '#options' => $styles,
+      '#default_value' => $this->configuration['style_file'],
+      '#required' => TRUE,
+      // Only show if the placement is not toolbar.
+      '#states' => [
+        'visible' => [
+          ':input[name="settings[styling][placement]"]' => ['!value' => 'toolbar'],
+        ],
+      ],
+    ];
+
+    $form['styling']['width'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Width'),
+      '#description' => $this->t('The width of the chat window.'),
+      '#default_value' => $this->configuration['width'],
+      // Only show if the placement is not toolbar.
+      '#states' => [
+        'visible' => [
+          ':input[name="settings[styling][placement]"]' => ['!value' => 'toolbar'],
+        ],
+      ],
+    ];
+
+    $form['styling']['height'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Height'),
+      '#description' => $this->t('The height of the chat window.'),
+      '#default_value' => $this->configuration['height'],
+      // Only show if the placement is not toolbar.
+      '#states' => [
+        'visible' => [
+          ':input[name="settings[styling][placement]"]' => ['!value' => 'toolbar'],
+        ],
+      ],
+    ];
+
     $form['styling']['collapse_minimal'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Collapsed minimal'),
       '#description' => $this->t('Show a minimal toggle button when minimized.'),
       '#default_value' => $this->configuration['collapse_minimal'],
+      '#states' => [
+        'visible' => [
+          ':input[name="settings[styling][placement]"]' => ['!value' => 'toolbar'],
+        ],
+      ],
     ];
     $form['styling']['show_copy_icon'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Add copy icon'),
       '#description' => $this->t('Adds a copy icon below each text so you can easily copy paste it.'),
       '#default_value' => $this->configuration['show_copy_icon'],
+    ];
+
+    $form['styling']['expansion_method'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Expansion method'),
+      '#description' => $this->t('Choose how users can expand the chatbot for improved readability.'),
+      '#options' => [
+        'none' => $this->t('None'),
+        'expand' => $this->t('Expand'),
+        'fullscreen' => $this->t('Full screen'),
+      ],
+      '#default_value' => $this->configuration['expansion_method'] ?? 'expand',
+      '#states' => [
+        'visible' => [
+          ':input[name="settings[styling][placement]"]' => ['value' => 'toolbar'],
+        ],
+      ],
     ];
 
     $form['advanced'] = [
@@ -430,12 +485,20 @@ class DeepChatFormBlock extends BlockBase implements ContainerFactoryPluginInter
     $this->configuration['use_avatar'] = $form_state->getValue('messages')['use_avatar'];
     $this->configuration['default_avatar'] = $form_state->getValue('messages')['default_avatar'];
     $this->configuration['first_message'] = $form_state->getValue('messages')['first_message'];
+    $this->configuration['loading_message'] = $form_state->getValue('messages')['loading_message'] ?? '';
     $this->configuration['style_file'] = $form_state->getValue('styling')['style_file'];
     $this->configuration['width'] = $form_state->getValue('styling')['width'];
     $this->configuration['height'] = $form_state->getValue('styling')['height'];
     $this->configuration['placement'] = $form_state->getValue('styling')['placement'];
+    // If the placement is toolbar, we force the toolbar style.
+    if ($this->configuration['placement'] == 'toolbar') {
+      $this->configuration['style_file'] = 'module:ai_chatbot:toolbar.yml';
+      $this->configuration['width'] = '100%';
+      $this->configuration['height'] = 'auto';
+    }
     $this->configuration['collapse_minimal'] = $form_state->getValue('styling')['collapse_minimal'];
     $this->configuration['show_copy_icon'] = $form_state->getValue('styling')['show_copy_icon'];
+    $this->configuration['expansion_method'] = $form_state->getValue('styling')['expansion_method'] ?? 'expand';
     $this->configuration['stream'] = $form_state->getValue('advanced')['stream'] ?? FALSE;
     $this->configuration['show_structured_results'] = $form_state->getValue('advanced')['show_structured_results'] ?? FALSE;
     $this->configuration['toggle_state'] = $form_state->getValue('advanced')['toggle_state'];
@@ -496,16 +559,18 @@ class DeepChatFormBlock extends BlockBase implements ContainerFactoryPluginInter
     $block['#attached']['drupalSettings']['ai_deepchat']['default_username'] = $user_data['username'];
     $block['#attached']['drupalSettings']['ai_deepchat']['default_avatar'] = $user_data['avatar'];
     $block['#attached']['drupalSettings']['ai_deepchat']['toggle_state'] = $this->configuration['toggle_state'];
-    $block['#attached']['drupalSettings']['ai_deepchat']['width'] = $this->configuration['width'];
-    $block['#attached']['drupalSettings']['ai_deepchat']['height'] = $this->configuration['height'];
+    $block['#attached']['drupalSettings']['ai_deepchat']['width'] = $this->configuration['placement'] == 'toolbar' ? '100%' : $this->configuration['width'];
+    $block['#attached']['drupalSettings']['ai_deepchat']['height'] = $this->configuration['placement'] == 'toolbar' ? 'auto' : $this->configuration['height'];
     $block['#attached']['drupalSettings']['ai_deepchat']['first_message'] = $this->configuration['first_message'];
     $block['#attached']['drupalSettings']['ai_deepchat']['placement'] = $this->configuration['placement'];
     $block['#attached']['drupalSettings']['ai_deepchat']['show_structured_results'] = $this->configuration['show_structured_results'];
     $block['#attached']['drupalSettings']['ai_deepchat']['collapse_minimal'] = $this->configuration['collapse_minimal'];
     $block['#attached']['drupalSettings']['ai_deepchat']['show_copy_icon'] = $this->configuration['show_copy_icon'];
+    $block['#attached']['drupalSettings']['ai_deepchat']['expansion_method'] = $this->configuration['expansion_method'] ?? 'expand';
     $block['#attached']['drupalSettings']['ai_deepchat']['messages'] = $this->historicalMessages();
     $block['#attached']['drupalSettings']['ai_deepchat']['session_exists'] = $this->requestStack->getCurrentRequest()->getSession()->isStarted();
     $block['#attached']['drupalSettings']['ai_deepchat']['verbose_mode'] = $this->configuration['verbose_mode'];
+    $block['#attached']['drupalSettings']['ai_deepchat']['loading_message'] = $this->configuration['loading_message'] ?? '';
     $block['#cache']['contexts'][] = 'session.exists';
     return $block;
   }
@@ -536,7 +601,9 @@ class DeepChatFormBlock extends BlockBase implements ContainerFactoryPluginInter
     if ($style && substr($style, -1) != ';') {
       $style .= '; ';
     }
-    $style .= 'height: ' . $this->configuration['height'] . '; width: ' . $this->configuration['width'] . ';';
+    $height = $this->configuration['placement'] == 'toolbar' ? '100%' : $this->configuration['height'];
+    $width = $this->configuration['placement'] == 'toolbar' ? 'auto' : $this->configuration['width'];
+    $style .= 'height: ' . $height . '; width: ' . $width . ';';
 
     if ($style_parameters) {
       unset($style_parameters['style']);
@@ -817,6 +884,15 @@ class DeepChatFormBlock extends BlockBase implements ContainerFactoryPluginInter
     }
     // Otherwise return block settings.
     return $this->configuration['stream'] ?? FALSE;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getCacheTags() {
+    return Cache::mergeTags(parent::getCacheTags(), [
+      'block:' . $this->getPluginId(),
+    ]);
   }
 
 }

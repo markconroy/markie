@@ -4,11 +4,11 @@
 
 The AI Prompt management provides two mechanisms to manage prompts:
 
-- **An 'ai_prompt' Form API element**  
+- **An 'ai_prompt' Form API element**
   This allows selection from existing prompts of the same type as well as
   creation of new prompts. This element can be used anywhere where Drupal Form
   API is used.
-- **A prompt management interface**  
+- **A prompt management interface**
   Found within the AI configuration area, the Prompt Management area lists
   prompts and provides a central location to find all existing prompts, as well
   as create new prompts. Similarly it allows management of AI Prompt Types.
@@ -40,12 +40,12 @@ Variables and Tokens are placeholder texts that - when marked as required -
 will be forced to have these variables in the AI Prompt text.
 
 AI Prompt Management does not replace the variables for you. As a module
-developer, you are expected to replace your variables using your own logic, 
+developer, you are expected to replace your variables using your own logic,
 e.g.:
 ```php
 $prompt = str_replace(
-  '{MY_VARIABLE}', 
-  $some_value, 
+  '{MY_VARIABLE}',
+  $some_value,
   $prompt,
 );
 ```
@@ -58,7 +58,12 @@ $prompt = Drupal::token()->replace($prompt, [
 
 #### Prompt autocomplete
 
-TODO
+Since version 1.3.0 prompt field of AI Prompt entity uses [MDXEditor](https://mdxeditor.dev/).
+More about the editor read [here](mdxeditor.md)
+The editor has a typeahead plugin that is used as autocomplete for variables and tokens
+that are allowed to be used for given AI Prompt Type. By typing `{{` one can trigger
+the selection of variables, for tokens start typing `[`. If no variables nor tokens
+are defined in AI Prompt Type, the autocomplete will not be available.
 
 # AI Prompt Element.
 
@@ -120,8 +125,9 @@ my_prompt:
 # Updating an existing form to use the AI Prompt Element.
 
 To convert an existing prompt textarea to an AI prompt there are three steps:
-1. Create the AI Prompt Type configuration in your module's /config/install. 
-2. Create the AI Prompt configuration in your module's /config/install. 
+
+1. Create the AI Prompt Type configuration in your module's /config/install.
+2. Create the AI Prompt configuration in your module's /config/install.
 3. Write an update hook to convert the prompt string to the AI Prompt machine
    name.
 4. Update the prompt usage implementation logic.
@@ -243,6 +249,6 @@ And also avoid a specific configuration in your module settings:
 ```yaml
 ai_module_name.settings:my_selected_prompt_field
 ```
-This example is for a form with the field 'my_selected_prompt_field' using the 
-'ai_prompt' form element and you want that particular field to be changeable 
+This example is for a form with the field 'my_selected_prompt_field' using the
+'ai_prompt' form element and you want that particular field to be changeable
 in the configuration of your module, but nothing else.

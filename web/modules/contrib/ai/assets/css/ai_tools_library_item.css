@@ -136,9 +136,6 @@
 }
 
 @media screen and (min-width: 77em) {
-  .ai-tools-library-item--grid {
-    width: 16.6%;
-  }
 
   /* Change the width for the modal and widget since there is less space. */
   .ai-tools-library-selection .ai-tools-library-item--grid {

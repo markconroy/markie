@@ -75,7 +75,7 @@ function ai_update_10302() {
 /**
  * Create the AI Prompt Type and AI Prompt configuration entities.
  */
-function ai_update_10303() {
+function ai_update_12001() {
   $update_manager = \Drupal::entityDefinitionUpdateManager();
   $entity_type_manager = \Drupal::entityTypeManager();
   if (!$update_manager->getEntityType('ai_prompt_type')) {
@@ -85,5 +85,61 @@ function ai_update_10303() {
   if (!$update_manager->getEntityType('ai_prompt')) {
     $entity_type = $entity_type_manager->getDefinition('ai_prompt');
     $update_manager->installEntityType($entity_type);
+  }
+}
+
+/**
+ * Clear the cache so the new AI Embeddings cache bin becomes available.
+ */
+function ai_update_13001() {
+  // Empty cache clear so new cache bin is recognized.
+}
+
+/**
+ * Clear modules list to discover new locations of submodules.
+ */
+function ai_update_13002() {
+  \Drupal::service('extension.list.module')->reset();
+}
+
+/**
+ * Create the AI Guardrail and AI Guardrail set configuration entities.
+ */
+function ai_update_13003(): void {
+  $update_manager = \Drupal::entityDefinitionUpdateManager();
+  $entity_type_manager = \Drupal::entityTypeManager();
+  if (!$update_manager->getEntityType('ai_guardrail')) {
+    $entity_type = $entity_type_manager->getDefinition('ai_guardrail');
+    $update_manager->installEntityType($entity_type);
+  }
+  if (!$update_manager->getEntityType('ai_guardrail_set')) {
+    $entity_type = $entity_type_manager->getDefinition('ai_guardrail_set');
+    $update_manager->installEntityType($entity_type);
+  }
+}
+
+/**
+ * Add default request timeout configuration for existing installations.
+ */
+function ai_update_13004(): void {
+  $config = \Drupal::configFactory()->getEditable('ai.settings');
+
+  // Only set the default timeout if it's not already configured.
+  if ($config->get('request_timeout') === NULL) {
+    $config->set('request_timeout', 60)->save();
+  }
+}
+
+/**
+ * Update the AI settings to include the default values for hostname settings.
+ */
+function ai_update_13005() {
+  $config = \Drupal::configFactory()->getEditable('ai.settings');
+  $settings = $config->getRawData();
+  if (!isset($settings['allowed_hosts'])) {
+    $config->set('allowed_hosts', [])->save();
+  }
+  if (!isset($settings['allowed_hosts_rewrite_links'])) {
+    $config->set('allowed_hosts_rewrite_links', FALSE)->save();
   }
 }

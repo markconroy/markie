@@ -6,11 +6,12 @@ use Drupal\Component\Serialization\Json;
 use Drupal\Core\Config\ImmutableConfig;
 use Drupal\Core\File\FileExists;
 use Drupal\ai\Dto\TokenUsageDto;
+use Drupal\ai\Dto\ChatProviderLimitsDto;
 use Drupal\ai\Enum\AiProviderCapability;
 use Drupal\ai\Exception\AiQuotaException;
 use Drupal\ai\Exception\AiRateLimitException;
+use Drupal\ai\Exception\AiRequestErrorException;
 use Drupal\ai\Exception\AiResponseErrorException;
-use Drupal\ai\Exception\AiSetupFailureException;
 use Drupal\ai\OperationType\Chat\ChatInput;
 use Drupal\ai\OperationType\Chat\ChatInterface;
 use Drupal\ai\OperationType\Chat\ChatMessage;
@@ -38,6 +39,7 @@ use Drupal\ai\OperationType\TextToSpeech\TextToSpeechOutput;
 use Drupal\ai\ProviderClient\OpenAiBasedProviderClientInterface;
 use Drupal\ai\Traits\OperationType\EmbeddingsTrait;
 use OpenAI\Client;
+use OpenAI\Responses\Meta\MetaInformation;
 use Psr\Http\Client\ClientInterface;
 use Symfony\Component\Yaml\Yaml;
 
@@ -77,6 +79,13 @@ abstract class OpenAiBasedProviderClientBase extends AiProviderClientBase implem
   protected string $endpoint = '';
 
   /**
+   * The rate limit headers.
+   *
+   * @var array
+   */
+  protected array $rateLimitHeaders = [];
+
+  /**
    * {@inheritdoc}
    */
   public function isUsable(?string $operation_type = NULL, array $capabilities = []): bool {
@@ -112,7 +121,7 @@ abstract class OpenAiBasedProviderClientBase extends AiProviderClientBase implem
    * {@inheritdoc}
    */
   public function hasAuthentication(): bool {
-    return !empty($this->apiKey);
+    return TRUE;
   }
 
   /**
@@ -134,18 +143,12 @@ abstract class OpenAiBasedProviderClientBase extends AiProviderClientBase implem
 
   /**
    * Loads the OpenAI Client with authentication if not initialized.
+   *
+   * @throws \Drupal\ai\Exception\AiSetupFailureException
+   *   Thrown when the API key cannot be loaded or authentication setup fails.
    */
   protected function loadClient(): void {
     if (empty($this->client)) {
-      if (!$this->hasAuthentication()) {
-        try {
-          $this->setAuthentication($this->loadApiKey());
-        }
-        catch (AiSetupFailureException $e) {
-          throw new AiSetupFailureException('Failed to authenticate with AI provider: ' . $e->getMessage(), $e->getCode(), $e);
-        }
-      }
-
       $this->client = $this->createClient();
     }
   }
@@ -185,12 +188,19 @@ abstract class OpenAiBasedProviderClientBase extends AiProviderClientBase implem
    *
    * @return \OpenAI\Client
    *   The configured OpenAI client instance.
+   *
+   * @throws \Drupal\ai\Exception\AiSetupFailureException
+   *   Thrown when the API key cannot be loaded or authentication setup fails.
    */
   protected function createClient(): Client {
     $clientFactory = \OpenAI::factory();
 
     // Only set the API key if it is not empty.
     if ($this->hasAuthentication()) {
+      // Only set authentication when not set.
+      if (empty($this->apiKey)) {
+        $this->setAuthentication($this->loadApiKey());
+      }
       $clientFactory = $clientFactory->withApiKey($this->apiKey);
     }
 
@@ -336,7 +346,9 @@ abstract class OpenAiBasedProviderClientBase extends AiProviderClientBase implem
         $chat_output = new ChatOutput($message, $response, []);
       }
       else {
-        $response = $this->client->chat()->create($payload)->toArray();
+        $initialResponse = $this->client->chat()->create($payload);
+        $this->captureRateLimitHeaders($initialResponse?->meta());
+        $response = $initialResponse->toArray();
         $message = new ChatMessage($response['choices'][0]['message']['role'], $response['choices'][0]['message']['content'] ?? '', []);
 
         // Handle tool calls if present.
@@ -353,6 +365,9 @@ abstract class OpenAiBasedProviderClientBase extends AiProviderClientBase implem
           }
         }
         $chat_output = new ChatOutput($message, $response, []);
+        if ($rate_limits = $this->mapRateLimits()) {
+          $chat_output->setRateLimits($rate_limits);
+        }
         $chat_output = $this->setChatTokenUsage($chat_output, $response);
       }
 
@@ -371,12 +386,17 @@ abstract class OpenAiBasedProviderClientBase extends AiProviderClientBase implem
   public function moderation(string|ModerationInput $input, ?string $model_id = NULL, array $tags = []): ModerationOutput {
     $this->loadClient();
 
+    // Do not allow empty model IDs for moderation.
+    if (empty($model_id)) {
+      throw new AiRequestErrorException('Model ID is required for moderation requests.');
+    }
+
     if ($input instanceof ModerationInput) {
       $input = $input->getPrompt();
     }
 
     $payload = [
-      'model' => $model_id ?? 'text-moderation-latest',
+      'model' => $model_id,
       'input' => $input,
     ] + $this->configuration;
 
@@ -497,6 +517,11 @@ abstract class OpenAiBasedProviderClientBase extends AiProviderClientBase implem
       $this->handleApiException($e);
       throw $e;
     }
+    finally {
+      if (is_resource($input)) {
+        fclose($input);
+      }
+    }
   }
 
   /**
@@ -564,6 +589,73 @@ abstract class OpenAiBasedProviderClientBase extends AiProviderClientBase implem
       cached: $response['usage']['prompt_tokens_details']['cached_tokens'] ?? NULL,
     ));
     return $chat_output;
+  }
+
+  /**
+   * Maps rate limit headers to a ChatProviderLimitsDto object.
+   *
+   * @return \Drupal\ai\Dto\ChatProviderLimitsDto|null
+   *   The rate limits DTO or NULL if no headers are available.
+   */
+  protected function mapRateLimits(): ?ChatProviderLimitsDto {
+    if (empty($this->rateLimitHeaders)) {
+      return NULL;
+    }
+
+    $dto = new ChatProviderLimitsDto(
+      rateLimitMaxRequests: isset($this->rateLimitHeaders['x-ratelimit-limit-requests']) ? (int) $this->rateLimitHeaders['x-ratelimit-limit-requests'] : NULL,
+      rateLimitMaxTokens: isset($this->rateLimitHeaders['x-ratelimit-limit-tokens']) ? (int) $this->rateLimitHeaders['x-ratelimit-limit-tokens'] : NULL,
+      rateLimitRemainingRequests: isset($this->rateLimitHeaders['x-ratelimit-remaining-requests']) ? (int) $this->rateLimitHeaders['x-ratelimit-remaining-requests'] : NULL,
+      rateLimitRemainingTokens: isset($this->rateLimitHeaders['x-ratelimit-remaining-tokens']) ? (int) $this->rateLimitHeaders['x-ratelimit-remaining-tokens'] : NULL,
+      rateLimitResetRequests: isset($this->rateLimitHeaders['x-ratelimit-reset-requests']) ? $this->parseResetTime($this->rateLimitHeaders['x-ratelimit-reset-requests']) : NULL,
+      rateLimitResetTokens: isset($this->rateLimitHeaders['x-ratelimit-reset-tokens']) ? $this->parseResetTime($this->rateLimitHeaders['x-ratelimit-reset-tokens']) : NULL,
+    );
+
+    if ($dto->empty()) {
+      return NULL;
+    }
+    return $dto;
+
+  }
+
+  /**
+   * Parses reset time to seconds.
+   *
+   * @param string $resetTime
+   *   The reset time string.
+   *
+   * @return int|null
+   *   The time in seconds or NULL.
+   */
+  protected function parseResetTime(string $resetTime): ?int {
+    if (preg_match('/(\d+)m(\d+)s/', $resetTime, $matches)) {
+      return ((int) $matches[1] * 60) + (int) $matches[2];
+    }
+    if (preg_match('/(\d+)s/', $resetTime, $matches)) {
+      return (int) $matches[1];
+    }
+    if (preg_match('/(\d+)ms/', $resetTime, $matches)) {
+      return 0;
+    }
+    if (is_numeric($resetTime)) {
+      return max(0, (int) $resetTime - time());
+    }
+    return NULL;
+  }
+
+  /**
+   * Captures rate limit headers from the response object.
+   *
+   * @param \OpenAI\Responses\Meta\MetaInformation|null $metaInformation
+   *   Open AI meta information object.
+   */
+  protected function captureRateLimitHeaders(?MetaInformation $metaInformation): void {
+    $this->rateLimitHeaders['x-ratelimit-limit-requests'] = $metaInformation?->requestLimit?->limit;
+    $this->rateLimitHeaders['x-ratelimit-remaining-requests'] = $metaInformation?->requestLimit?->remaining;
+    $this->rateLimitHeaders['x-ratelimit-reset-requests'] = $metaInformation?->requestLimit?->reset;
+    $this->rateLimitHeaders['x-ratelimit-limit-tokens'] = $metaInformation?->tokenLimit?->limit;
+    $this->rateLimitHeaders['x-ratelimit-remaining-tokens'] = $metaInformation?->tokenLimit?->remaining;
+    $this->rateLimitHeaders['x-ratelimit-reset-tokens'] = $metaInformation?->tokenLimit?->reset;
   }
 
 }

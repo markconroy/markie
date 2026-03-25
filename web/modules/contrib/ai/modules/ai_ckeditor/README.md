@@ -9,6 +9,7 @@ suggestions to text completion.
 The module includes a contextual balloon menu that appears automatically when you select text in the editor. This provides quick access to AI actions like translation, tone modification, and summarization without having to use the toolbar button.
 
 To use this feature:
+
 1. Select text in the CKEditor
 2. A contextual menu will appear near your selection
 3. Choose the AI action you want to perform on the selected text

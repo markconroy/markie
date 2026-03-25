@@ -48,6 +48,12 @@ It generates CSV output, parses it into chart configurations, and stores it in `
 - The tool expects a well-formed CSV with keys and data on separate lines.
 - Validation checks that the CSV is non-empty but does not perform deep data validation — extend as needed.
 
+## Field Widget Action Integration
+
+To use this automator with a Field Widget Action button in the content edit form, see the complete setup guide:
+
+- [Chart Field + `chart_config_default` widget example](../examples/chart-field.md)
+
 ---
 
 *This documentation was AI-generated.*

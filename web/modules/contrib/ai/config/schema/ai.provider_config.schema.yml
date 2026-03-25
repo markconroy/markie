@@ -1,0 +1,27 @@
+# Schema for linkable provider configuration.
+# This schema provides a standardized way to configure AI providers across
+# different modules and features.
+ai.provider_config:
+  type: mapping
+  # Someone might want to not set this at all.
+  nullable: true
+  label: 'AI Provider Configuration'
+  mapping:
+    use_default:
+      type: boolean
+      label: 'Use default provider'
+    provider_id:
+      type: string
+      label: 'Provider ID'
+    model_id:
+      type: string
+      label: 'Model ID'
+    configuration:
+      type: mapping
+      label: 'Provider Configuration'
+      nullable: true
+      mapping:
+        type: ignore
+  constraints:
+    ProviderModelDependency: ~
+    FullyValidatable: ~

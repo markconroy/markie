@@ -452,7 +452,7 @@ FOOTER;
    */
   protected function query($query) {
     if ($conn = $this->_getConnection()) {
-      return $conn->query($query);
+      return $conn->query($query, MYSQLI_USE_RESULT);
     }
     else {
       throw new \Exception('Could not run any queries on the database as a connection could not be established');

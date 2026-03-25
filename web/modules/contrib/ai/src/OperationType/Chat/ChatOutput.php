@@ -4,6 +4,7 @@ namespace Drupal\ai\OperationType\Chat;
 
 use Drupal\ai\OperationType\OutputInterface;
 use Drupal\ai\Dto\TokenUsageDto;
+use Drupal\ai\Dto\ChatProviderLimitsDto;
 
 /**
  * Data transfer output object for chat output.
@@ -37,6 +38,11 @@ class ChatOutput implements OutputInterface {
   private TokenUsageDto $tokenUsage;
 
   /**
+   * The rate limits DTO.
+   */
+  private ChatProviderLimitsDto $rateLimits;
+
+  /**
    * The constructor.
    *
    * @param \Drupal\ai\OperationType\Chat\ChatMessage|\Drupal\ai\OperationType\Chat\StreamedChatMessageIteratorInterface $normalized
@@ -53,6 +59,7 @@ class ChatOutput implements OutputInterface {
     $this->rawOutput = $rawOutput;
     $this->metadata = $metadata;
     $this->tokenUsage = $tokenUsage ?? new TokenUsageDto();
+    $this->rateLimits = new ChatProviderLimitsDto();
   }
 
   /**
@@ -103,6 +110,26 @@ class ChatOutput implements OutputInterface {
    */
   public function getTokenUsage(): TokenUsageDto {
     return $this->tokenUsage;
+  }
+
+  /**
+   * Set the rate limits.
+   *
+   * @param \Drupal\ai\Dto\ChatProviderLimitsDto $rateLimits
+   *   The rate limits.
+   */
+  public function setRateLimits(ChatProviderLimitsDto $rateLimits): void {
+    $this->rateLimits = $rateLimits;
+  }
+
+  /**
+   * Gets the rate limits.
+   *
+   * @return \Drupal\ai\Dto\ChatProviderLimitsDto
+   *   The rate limits.
+   */
+  public function getRateLimits(): ChatProviderLimitsDto {
+    return $this->rateLimits;
   }
 
   /**
@@ -257,6 +284,7 @@ class ChatOutput implements OutputInterface {
       'rawOutput' => $this->rawOutput,
       'metadata' => $this->metadata,
       'tokenUsage' => $this->tokenUsage->toArray(),
+      'rateLimits' => $this->rateLimits->toArray(),
     ];
   }
 
@@ -275,7 +303,11 @@ class ChatOutput implements OutputInterface {
     $raw_output = $data['rawOutput'] ?? NULL;
     $metadata = $data['metadata'] ?? NULL;
     $tokenUsage = isset($data['tokenUsage']) ? TokenUsageDto::create($data['tokenUsage']) : NULL;
+    $rateLimits = isset($data['rateLimits']) ? ChatProviderLimitsDto::create($data['rateLimits']) : NULL;
     $output = new static($normalized, $raw_output, $metadata, $tokenUsage);
+    if ($rateLimits) {
+      $output->setRateLimits($rateLimits);
+    }
     return $output;
   }
 

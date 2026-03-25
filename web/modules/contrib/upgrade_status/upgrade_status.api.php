@@ -5,8 +5,8 @@
  * Hooks defined by Upgrade Status.
  */
 
-use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Extension\Extension;
+use Drupal\Core\Form\FormStateInterface;
 
 /**
  * @addtogroup hooks

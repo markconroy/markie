@@ -20,7 +20,7 @@ use Drupal\editor\EditorInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\StreamedResponse;
+use Drupal\ai\Response\AiStreamedResponse;
 
 /**
  * Returns responses for CKEditor integration routes.
@@ -87,10 +87,10 @@ class AiRequest implements ContainerInjectionInterface {
    * @param \Drupal\ai_ckeditor\PluginInterfaces\AiCKEditorPluginInterface $ai_ckeditor_plugin
    *   The CK Editor plugin.
    *
-   * @return \Symfony\Component\HttpFoundation\StreamedResponse|\Symfony\Component\HttpFoundation\Response
+   * @return \Drupal\ai\Response\AiStreamedResponse|\Symfony\Component\HttpFoundation\Response
    *   The AI response.
    */
-  public function doRequest(Request $request, EditorInterface $editor, AiCKEditorPluginInterface $ai_ckeditor_plugin): StreamedResponse|Response {
+  public function doRequest(Request $request, EditorInterface $editor, AiCKEditorPluginInterface $ai_ckeditor_plugin): AiStreamedResponse|Response {
     $data = json_decode($request->getContent());
 
     try {
@@ -149,17 +149,12 @@ class AiRequest implements ContainerInjectionInterface {
       $response = $ai_provider->chat($messages, $ai_model, ['ai_ckeditor'])->getNormalized();
 
       if ($response instanceof StreamedChatMessageIteratorInterface) {
-        return new StreamedResponse(function () use ($response) {
+        return new AiStreamedResponse(function () use ($response) {
           foreach ($response as $message) {
             echo $message->getText();
-            ob_flush();
             flush();
           }
-        }, 200, [
-          'Cache-Control' => 'no-cache, must-revalidate',
-          'Content-Type' => 'text/event-stream',
-          'X-Accel-Buffering' => 'no',
-        ]);
+        });
       }
       else {
         return new Response($response->getText());

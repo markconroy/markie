@@ -2,6 +2,7 @@
 
 namespace Drupal\ai_automators\FormAlter;
 
+use Drupal\ai\Utility\Textarea;
 use Drupal\Core\DependencyInjection\DependencySerializationTrait;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
@@ -263,6 +264,14 @@ class AiAutomatorFieldConfig {
           ],
           '#default_value' => !is_null($aiConfig) ? $aiConfig->get('prompt') : NULL,
           '#weight' => 10,
+          // This property will land into core soon, see
+          // https://www.drupal.org/project/drupal/issues/3202631. It can stay
+          // after this is added to Drupal core.
+          '#normalize_newlines' => TRUE,
+          // Until that the custom value callback is needed. Should be removed
+          // after the issue mentioned above is merged into core and the minimum
+          // supported Drupal version includes `#normalize_newlines` property.
+          '#value_callback' => [Textarea::class, 'valueCallback'],
         ];
 
         // Placeholders available.
@@ -304,6 +313,14 @@ class AiAutomatorFieldConfig {
           '#title' => $this->t('Automator Prompt (Token)'),
           '#description' => $this->t('The prompt to use to fill this field.'),
           '#default_value' => !is_null($aiConfig) ? $aiConfig->get('token') : NULL,
+          // This property will land into core soon, see
+          // https://www.drupal.org/project/drupal/issues/3202631. It can stay
+          // after this is added to Drupal core.
+          '#normalize_newlines' => TRUE,
+          // Until that the custom value callback is needed. Should be removed
+          // after the issue mentioned above is merged into core and the minimum
+          // supported Drupal version includes `#normalize_newlines` property.
+          '#value_callback' => [Textarea::class, 'valueCallback'],
         ];
 
         $form['automator_container']['token_prompt']['token_help'] = [

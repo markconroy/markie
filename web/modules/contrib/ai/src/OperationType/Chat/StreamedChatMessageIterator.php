@@ -7,6 +7,7 @@ use Drupal\ai\Dto\TokenUsageDto;
 use Drupal\ai\Event\PostStreamingResponseEvent;
 use Drupal\ai\OperationType\Chat\Tools\ToolsFunctionOutput;
 use Drupal\ai\Traits\OperationType\EventDispatcherTrait;
+use Drupal\ai\Traits\OperationType\StreamChatMessageIteratorTrait;
 
 /**
  * Streamed chat message iterator interface.
@@ -14,6 +15,7 @@ use Drupal\ai\Traits\OperationType\EventDispatcherTrait;
 abstract class StreamedChatMessageIterator implements StreamedChatMessageIteratorInterface {
 
   use EventDispatcherTrait;
+  use StreamChatMessageIteratorTrait;
 
   /**
    * The iterator.
@@ -161,6 +163,34 @@ abstract class StreamedChatMessageIterator implements StreamedChatMessageIterato
   protected array $tags = [];
 
   /**
+   * Message buffer.
+   *
+   * Because we need to be able to filter html and images for html reasons,
+   * we will keep a buffer when a html/markdown starts with this, until its
+   * finally finished, so that it can run on the full markup.
+   *
+   * @var string
+   */
+  protected string $buffer = '';
+
+  /**
+   * The max buffer size.
+   *
+   * We always try to buffer on a natural paragraph, but longer text or inject
+   * attack can make it go for longer, so we need a max buffer for streaming.
+   *
+   * @var int
+   */
+  private int $maxBufferSize = 100;
+
+  /**
+   * The closing pattern we are looking for.
+   *
+   * @var string
+   */
+  protected $bufferClosingPattern = '';
+
+  /**
    * Constructor.
    */
   public function __construct(\Traversable $iterator) {
@@ -306,6 +336,13 @@ abstract class StreamedChatMessageIterator implements StreamedChatMessageIterato
     foreach ($this->doIterate() as $data) {
       yield $data;
     }
+    // Flush the buffer at the end of the stream.
+    if (!empty($this->buffer)) {
+      $text_message = $this->flushInternal();
+      $message = new StreamedChatMessage('assistant', $text_message, []);
+      $this->messages[] = $message;
+      yield $message;
+    }
     $this->reconstructChatOutput();
     $this->triggerEvent();
 
@@ -380,7 +417,16 @@ abstract class StreamedChatMessageIterator implements StreamedChatMessageIterato
     ?array $tools = NULL,
     ?array $raw = NULL,
   ): StreamedChatMessageInterface {
-    $message = new StreamedChatMessage($role, $message, $metadata, $tools, $raw);
+    // Check if we need to buffer the output.
+    $this->buffer .= $message;
+    // Return empty chunk if we are buffering.
+    if (!$this->shouldFlush()) {
+      $message = new StreamedChatMessage($role, '', $metadata, $tools, $raw);
+      $this->messages[] = $message;
+      return $message;
+    }
+    $text_message = $this->flushInternal();
+    $message = new StreamedChatMessage($role, $text_message, $metadata, $tools, $raw);
     $this->messages[] = $message;
     return $message;
   }
@@ -555,6 +601,58 @@ abstract class StreamedChatMessageIterator implements StreamedChatMessageIterato
    */
   public function getFinishReason(): ?string {
     return $this->finishReason;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getMaxBufferSize(): int {
+    return $this->maxBufferSize;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public function setMaxBufferSize(int $size): void {
+    $this->maxBufferSize = $size;
+  }
+
+  /**
+   * Flushes buffer and sanitizes content.
+   *
+   * @return string
+   *   Sanitized HTML output.
+   */
+  private function flushInternal(): string {
+    $raw = $this->buffer;
+    $this->buffer = '';
+
+    return $this->getHostnameFilterService()->filterText($raw);
+  }
+
+  /**
+   * Determines whether buffer is safe to flush.
+   *
+   * @return bool
+   *   TRUE if buffer should flush.
+   */
+  private function shouldFlush(): bool {
+    // If a URL is being built, hold the buffer until it's complete.
+    if (preg_match('/"(?:http|\/\/:)[^"]*$/', $this->buffer) || preg_match('/\((?:http|\/\/:)[^)]*$/', $this->buffer)) {
+      return FALSE;
+    }
+
+    // Paragraph or block boundary.
+    if (str_contains($this->buffer, "\n")) {
+      return TRUE;
+    }
+
+    // It reached max buffer size.
+    if (strlen($this->buffer) >= $this->maxBufferSize) {
+      return TRUE;
+    }
+
+    return FALSE;
   }
 
 }

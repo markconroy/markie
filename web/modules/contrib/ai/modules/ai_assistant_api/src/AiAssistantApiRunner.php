@@ -187,6 +187,16 @@ class AiAssistantApiRunner {
   }
 
   /**
+   * Gets the context.
+   *
+   * @return array
+   *   The context.
+   */
+  public function getContext() {
+    return $this->context;
+  }
+
+  /**
    * Set streaming.
    *
    * @param bool $streaming
@@ -322,6 +332,7 @@ class AiAssistantApiRunner {
         $this->getProviderAndModel(),
         $this->getThreadsKey(),
         $this->getVerboseMode(),
+        $this->getContext(),
       );
     }
 

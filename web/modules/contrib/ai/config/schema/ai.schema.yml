@@ -33,6 +33,9 @@ ai.settings:
         moderation:
           label: 'Default moderation provider'
           type: ai.default_operation_provider
+        rerank:
+          label: 'Default rerank provider'
+          type: ai.default_operation_provider
         speech_to_text:
           label: 'Default speech to text provider'
           type: ai.default_operation_provider
@@ -45,12 +48,27 @@ ai.settings:
     default_vdb_provider:
       label: 'Default Vector Database Provider'
       type: string
+    request_timeout:
+      label: 'HTTP request timeout in seconds'
+      type: integer
+      constraints:
+        Range:
+          min: 1
+          max: 3600
     models:
       type: sequence
       label: The overriden/added models.
       required: false
       sequence:
         type: ignore
+    allowed_hosts:
+      type: sequence
+      label: 'Allowed hosts for external AI requests'
+      sequence:
+        type: string
+    allowed_hosts_rewrite_links:
+      type: boolean
+      label: 'If links to allowed hosts should be rewritten'
 
 ai.default_operation_provider:
   type: mapping
@@ -62,3 +80,53 @@ ai.default_operation_provider:
     model_id:
       label: 'Model ID'
       type: string
+
+ai.ai_guardrail.*:
+  type: config_entity
+  label: Guardrail
+  mapping:
+    id:
+      type: string
+      label: ID
+    label:
+      type: label
+      label: Label
+    uuid:
+      type: string
+    description:
+      type: string
+    guardrail:
+      type: string
+      label: Guardrail plugin ID
+
+ai.ai_guardrail_set.*:
+  type: config_entity
+  label: Guardrail set
+  mapping:
+    id:
+      type: string
+      label: ID
+    label:
+      type: label
+      label: Label
+    uuid:
+      type: string
+    description:
+      type: string
+    pre_generate_guardrails:
+        type: mapping
+        label: Pre-generate guardrails
+        mapping:
+          plugin_id:
+            type: sequence
+            sequence:
+              type: string
+    post_generate_guardrails:
+        type: mapping
+        label: Post-generate guardrails
+        mapping:
+          plugin_id:
+            type: mapping
+            mapping:
+              plugin_id:
+                type: string

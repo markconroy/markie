@@ -144,6 +144,13 @@
             // Add the new csrf token.
             deepchatElement.connect.url = newUrl + '?token=' + Drupal.behaviors.deepChatToggle.csrfToken;
           }
+
+          if (!drupalSettings.ai_deepchat.verbose_mode && drupalSettings.ai_deepchat.loading_message) {
+            deepchatElement.addMessage({
+              role: 'ai',
+              html: '<div class="deep-chat-temporary-message"><span>' + drupalSettings.ai_deepchat.loading_message + '</span></div>',
+            });
+          }
         }
 
         deepchatElement.addEventListener('render', async () => {

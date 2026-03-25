@@ -46,8 +46,6 @@ class AliasTest extends KernelTestBase {
 
   /**
    * Tests preload path alias.
-   *
-   * @legacy-covers ::preloadPathAlias
    */
   public function testPreloadPathAlias(): void {
     $path_alias_repository = $this->container->get('path_alias.repository');
@@ -292,8 +290,6 @@ class AliasTest extends KernelTestBase {
 
   /**
    * Tests lookup by system path.
-   *
-   * @legacy-covers ::lookupBySystemPath
    */
   public function testLookupBySystemPath(): void {
     $this->createPathAlias('/test-source-Case', '/test-alias');
@@ -305,8 +301,6 @@ class AliasTest extends KernelTestBase {
 
   /**
    * Tests lookup by alias.
-   *
-   * @legacy-covers ::lookupByAlias
    */
   public function testLookupByAlias(): void {
     $this->createPathAlias('/test-source', '/test-alias-Case');
@@ -331,6 +325,11 @@ class AliasTest extends KernelTestBase {
     $path_alias = $this->createPathAlias('/user/1', '/foo');
     $this->assertEquals($path_alias->getAlias(), $aliasManager->getAliasByPath($path_alias->getPath()), 'Basic alias lookup works.');
     $this->assertEquals($path_alias->getPath(), $aliasManager->getPathByAlias($path_alias->getAlias()), 'Basic source lookup works.');
+
+    // Ensure that path alias data is used.
+    $path_alias = $this->createPathAlias('/user/2', '/bar');
+    $this->assertEquals($path_alias->getPath(), $aliasManager->getPathByAlias(strtoupper($path_alias->getAlias())), 'Basic source lookup is case insensitive.');
+    $this->assertEquals($path_alias->getAlias(), $aliasManager->getAliasByPath($path_alias->getPath()), 'Basic alias lookup returns the stored alias if getPathByAlias() is called with a case insensitive alias.');
 
     // Create a language specific alias for the default language (English).
     $path_alias = $this->createPathAlias('/user/1', '/users/Dries', 'en');

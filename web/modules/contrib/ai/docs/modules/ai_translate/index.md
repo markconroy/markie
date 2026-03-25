@@ -13,6 +13,7 @@ configured.
 ## Installation & configuration
 **Note**; if you have not set up your translation languages before you configure
 this module, you may get unexpected results.
+
 1. Enable the module
 2. Navigate to /admin/config/ai/ai-translate
 3. Select the model from your providers that you wish to use.

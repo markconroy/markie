@@ -137,6 +137,10 @@
   opacity: 1;
 }
 
+.deepchat-element {
+  display: block;
+}
+
 .chat-dropdown {
   position: relative;
   display: inline-block;
@@ -165,7 +169,7 @@
   transform: rotate(0);
 }
 
-.chevron-icon.rotate {
+.chevron-icon--rotate {
   transform: rotate(-180deg);
 }
 

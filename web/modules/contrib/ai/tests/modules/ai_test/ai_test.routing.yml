@@ -17,3 +17,11 @@ ai_test.export_file:
     parameters:
       result:
         type: 'entity:ai_mock_provider_result'
+
+ai_test.form_elements:
+  path: '/admin/config/ai/test-form-elements'
+  defaults:
+    _title: 'AI Form Elements'
+    _form: 'Drupal\ai_test\Form\FormElementForm'
+  requirements:
+    _permission: 'administer ai'

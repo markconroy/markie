@@ -37,6 +37,37 @@ The following files defines the methods available when doing a chat call as well
 ### Setting system messages.
 There is an abstracted way to set system messages for the providers that allows for it, the method is called `setSystemPrompt` on the `ChatInput` and it will just takes the system role you want to set. Note that different providers weights these instructions more or less, so in  certain cases it might make more sense to use two user messages instead.
 
+### Structured output
+
+To request that the model returns a response in a specific JSON structure (e.g. for parsing or validation), use the **StructuredOutputSchema** DTO and pass it to `ChatInput::setChatStructuredJsonSchema()`. The schema defines `name`, optional `description`, `strict` (whether the provider must follow the schema strictly), and the schema content (the JSON Schema that describes the expected shape of the response). The array shape uses the key **`schema`** for the schema content (documented format used by most providers); **`json_schema`** is accepted on input for backwards compatibility.
+
+**Using the DTO (recommended):**
+
+```php
+use Drupal\ai\Dto\StructuredOutputSchema;
+use Drupal\ai\OperationType\Chat\ChatInput;
+use Drupal\ai\OperationType\Chat\ChatMessage;
+
+$schema = new StructuredOutputSchema(
+  name: 'weather_response',
+  description: 'Structured weather data',
+  strict: TRUE,
+  json_schema: [
+    'properties' => [
+      'temperature' => ['type' => 'number'],
+      'location' => ['type' => 'string'],
+    ],
+  ],
+);
+
+$input = new ChatInput([new ChatMessage('user', 'What is the weather in Paris?')]);
+$input->setChatStructuredJsonSchema($schema);
+
+$response = $provider->chat($input, 'gpt-4o');
+```
+
+You can also create the schema from an array with `StructuredOutputSchema::fromArray([...])`, or pass a plain array directly to `setChatStructuredJsonSchema()` (keys: `name`, `description`, `strict`, and `schema` or `json_schema` for the schema content). The DTO validates the schema (e.g. `name` must be lowercase letters, numbers, underscores, hyphens; schema content must be a non-empty array). See `\Drupal\ai\Dto\StructuredOutputSchema` and `ChatInput::setChatStructuredJsonSchema()` in the codebase for full usage and validation details.
+
 ### Streaming vs None-Streaming output.
 There is a helper method when using the chat providers that makes it possible to stream the output, if the chat provider has the possibility to do so. This can be set via the method `$input->setStreamedOutput(TRUE);` on the ChatInput object. This will give you back an iterator or generator that you can do a foreach on flush the output buffers each time. See the section in [Develop Third Party module](develop_third_party_module.md/#streaming-chat) about how to add checks for it.
 
@@ -50,3 +81,5 @@ Some of the providers supports running the requests in Fibers, meaning that you 
 
 The providers that supports this will realize that they are running in a fiber and start a fiber for each request. See the tests/src/AiLlm/FiberTest.php for an example of how to do this.
 
+### Getting rate limits from the provider
+If your provider has rate limits, you can set them on the `ChatOutput` object returned by the `chat` method using `setRateLimits()`. This lets your provider return a `ChatProviderLimitsDto` object with values such as maximum requests, remaining requests, and reset time. Consumers can then read this data with `getRateLimits()` to manage and display provider rate limit status.

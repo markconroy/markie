@@ -58,7 +58,7 @@ final class SetupAiProvider implements ConfigActionPluginInterface, ContainerFac
     }
 
     // Stop if we don't have a key for this provider.
-    if (empty($value['key_value'])) {
+    if (empty($value['key_value']) && empty($value['no_key_needed'])) {
       return;
     }
 
@@ -73,13 +73,17 @@ final class SetupAiProvider implements ConfigActionPluginInterface, ContainerFac
     if ($provider->getSetupData()) {
       $setupData = $provider->getSetupData();
     }
-    if (!empty($setupData['key_config_name'])) {
+    if (!empty($value['key_value'])) {
       // Create a key and set against the provider config.
       $key = $this->createKeyFromApiKey($value['key_name'], $value['key_label'], $value['key_value']);
 
       $this->simpleConfigUpdate->apply($configName, [
         $setupData['key_config_name'] => $key->id(),
       ]);
+    }
+
+    // Run the setup if the key exists or if explicitly stated no key is needed.
+    if (!empty($value['no_key_needed']) || !empty($value['key_value'])) {
       if (!empty($value['default_models'])) {
         foreach ($value['default_models'] as $operation => $model) {
           $this->aiProviderPluginManager->defaultIfNone($operation, $value['provider'], $model);

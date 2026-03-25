@@ -18,6 +18,7 @@ Security releases follow the same versioning as patch releases. For example, if 
 
 ## Stability suffix
 The stability suffix indicates the stability of the release. The AI module uses the following stability suffixes:
+
 - `-dev`: Development version, not recommended for production use. Do not have upgrade paths.
 - `-alpha`: Alpha version, may contain incomplete features and bugs. Not recommended for production use. Do not have upgrade paths.
 - `-beta`: Beta version, more stable than alpha, but may still contain bugs. Not recommended for production use. Do not have upgrade paths.

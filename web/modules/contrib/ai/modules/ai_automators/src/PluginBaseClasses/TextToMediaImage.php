@@ -117,8 +117,8 @@ class TextToMediaImage extends RuleBase implements ContainerFactoryPluginInterfa
   /**
    * {@inheritDoc}
    */
-  public function extraAdvancedFormFields(ContentEntityInterface $entity, FieldDefinitionInterface $fieldDefinition, FormStateInterface $formState, array $defaultValues = []) {
-    $form = parent::extraAdvancedFormFields($entity, $fieldDefinition, $formState, $defaultValues);
+  public function extraFormFields(ContentEntityInterface $entity, FieldDefinitionInterface $fieldDefinition, FormStateInterface $formState, array $defaultValues = []) {
+    $form = parent::extraFormFields($entity, $fieldDefinition, $formState, $defaultValues);
 
     $options = [];
     $types = $this->entityTypeBundleInfo->getBundleInfo('media');
@@ -129,10 +129,12 @@ class TextToMediaImage extends RuleBase implements ContainerFactoryPluginInterfa
     $form['automator_llm_media_type'] = [
       '#type' => 'select',
       '#title' => 'Media Type',
-      '#description' => $this->t('Media Type to create'),
+      '#description' => $this->t('The media type to use for the generated image. Avoid having required fields default to empty values, e.g. use automators to set them based upon the generated image.'),
       '#options' => $options,
       '#default_value' => $defaultValues['automator_llm_media_type'] ?? '',
       '#empty_option' => $this->t('- Please select -'),
+      '#required' => TRUE,
+      '#weight' => 4,
     ];
 
     return $form;

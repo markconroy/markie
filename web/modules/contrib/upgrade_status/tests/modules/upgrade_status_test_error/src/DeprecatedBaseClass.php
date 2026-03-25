@@ -9,6 +9,7 @@ namespace Drupal\upgrade_status_test_error;
  *
  * @deprecated in drupal:9.1.0 and is removed from drupal:10.0.0. Instead,
  *   use so and so. See https://www.drupal.org/project/upgrade_status.
+ * @see https://www.drupal.org/project/upgrade_status/issues/3459216
  */
 class DeprecatedBaseClass {
 

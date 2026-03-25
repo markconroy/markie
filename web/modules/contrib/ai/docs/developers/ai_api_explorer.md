@@ -16,6 +16,7 @@ which details the required methods. Please be aware that some of these are
 implemented by default by the base plugin, but may be overridden.
 
 The plugin will, as a minimum, need to:
+
 1. Have an id, label and description annotations. These will display within the
    automatically generated menu item for the plugin.
 2. Implement isActive() to determine if the plugin can be used.
@@ -35,6 +36,7 @@ for you to add routing or menu files into your module for your form to be used.
 
 The AI API Explorer module implements a number of plugins, which can be used as
 examples to aid your development:
+
 - The AI Search module's SearchGenerator plugin demonstrates a more complex
   method of deciding if the plugin should be active.
 - The AudioToAudioGenerator plugin demonstrates how to send a file to the LLM,

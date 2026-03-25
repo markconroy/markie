@@ -72,14 +72,14 @@ class ChatHistory extends FormElementBase {
       $element[$i] = [
         '#type' => 'container',
         '#attributes' => [
-          'class' => ['chat-message'],
+          'class' => [
+            'chat-message',
+            'chat-history-item',
+            'chat-history-item-' . ($value[$i]['role'] ?? 'user'),
+            'draggable',
+          ],
           'draggable' => 'true',
         ],
-      ];
-      $element[$i]['#attributes']['class'] = [
-        'chat-history-item',
-        'chat-history-item-' . $value[$i]['role'],
-        'draggable',
       ];
       $element[$i]['#chat_index'] = $i;
 

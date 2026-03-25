@@ -5,7 +5,10 @@
  * AI module file.
  */
 
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Core\Site\Settings;
+use Drupal\ai\Hook\FormElement;
 
 /**
  * Implements hook_modules_installed().
@@ -89,6 +92,13 @@ function ai_theme() {
 }
 
 /**
+ * Implements hook_page_attachments().
+ */
+function ai_page_attachments(array &$attachments) {
+  $attachments['#attached']['library'][] = 'ai/ai_global';
+}
+
+/**
  * Implements hook_preprocess_links__ai_tools_library_menu().
  *
  * This targets the menu of available ai tools group in the ai tools library's
@@ -102,5 +112,25 @@ function ai_preprocess_links__ai_tools_library_menu(array &$variables): void {
     // Add a class to the AI Tools Library menu items.
     $link['attributes']->addClass('ai-tools-library-menu__item');
     $link['link']['#options']['attributes']['class'][] = 'ai-tools-library-menu__link';
+  }
+}
+
+/**
+ * Implements hook_element_info_alter().
+ */
+function ai_element_info_alter(array &$info) {
+  \Drupal::service(FormElement::class)->elementInfoAlter($info);
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter() for ai_settings_form.
+ */
+function ai_form_ai_settings_alter(&$form, FormStateInterface $form_state) {
+  if (!empty(Settings::get('ai_output')['full_trust_mode'])) {
+    $form['advanced_settings']['allowed_host_wrapper']['allowed_hosts_rewrite_links']['rewrite']['#attributes']['disabled'] = 'disabled';
+    $form['advanced_settings']['allowed_host_wrapper']['allowed_hosts_rewrite_links']['delete']['#attributes']['disabled'] = 'disabled';
+  }
+  else {
+    $form['advanced_settings']['allowed_host_wrapper']['allowed_hosts_rewrite_links']['full_trust']['#attributes']['disabled'] = 'disabled';
   }
 }

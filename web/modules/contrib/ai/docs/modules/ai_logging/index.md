@@ -8,6 +8,7 @@ environment, it stores a large amount of data into the database and so is
 
 ## Dependencies
 This module requires:
+
 1. The AI Base module to be enabled and configured.
 2. The core Views module to be enabled (for displaying the log messages).
 
@@ -20,6 +21,7 @@ functionality is also enabled.
 The module should be enabled as normal, which will add the bundlable AI Log
 entity to the site. However, due to the large amount of data logging produces,
 no logging will begin until the module is configured:
+
 1. Visit /admin/config/ai/logging/settings
 2. Check the "Log requests" checkbox to enable logging of requests.
 3. If you also wish to log the response from the LLM, check the "Log response"
@@ -40,6 +42,7 @@ no logging will begin until the module is configured:
 
 ## Using the logs
 The request log entities will store the following data:
+
 1. **The provider**: The name of the provider used by the call. 
 2. **The model**: The ID of the model used.
 3. **The operation type**: The operation type used by the provider.

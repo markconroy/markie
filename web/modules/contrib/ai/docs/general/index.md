@@ -17,6 +17,9 @@ You will be able to set a default model for each operation type that your provid
 
 What this does is tell other modules that use the AI module which model to use by default when they call the AI Core module. This is useful so they can "just work" without having to configure a model for each operation. Most contrib modules will allow you to override the default model for each operation type, so you can still customize the behavior as needed.
 
+## How to change the timeout for AI operations
+Some AI operations can take a long time to complete, especially if they involve complex tasks like translations or thinking models. The AI module allows you to configure the HTTP request timeout for AI operations to ensure that your site remains responsive. Visit the AI module's configuration page at `/admin/config/ai/settings` to adjust the timeout settings according to your needs. The timeout is under the "Advanced Settings" section, and you can set it to a value that works best for your use case. The default timeout is 60 seconds, but you may want to increase it for operations that are expected to take longer.
+
 ## How to setup moderation in the AI module
 Moderation is a crucial aspect of AI applications, especially when dealing with user-generated content. Many AI Provider services will kick you off their platform if you send to many requests that are breaking their content policies, so it is important to have a moderation layer in place if you will expose the AI module to end users or editors.
 

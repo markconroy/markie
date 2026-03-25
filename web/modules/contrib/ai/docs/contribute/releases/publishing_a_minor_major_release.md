@@ -5,7 +5,11 @@ This document outlines the steps the Publishing Manager needs to take to publish
 1. [Tag the minor/major release](tagging_a_release.md) and push it up to the remote repository
 2. Visit https://git.drupalcode.org/project/ai/-/tags and verify that the tag corresponds to the correct version number and includes all intended changes.
 3. Check the diff between the last release and the new tag to ensure it matches the intended changes.
-4. No code confirmation should be needed for minor/major releases, since these should have been fully tested by QA.
+4. Verify in the tag branch that the following UIs have been built and committed:
+   - `ui/mdxeditor/dist/assets`
+   - `ui/json-schema-editor/dist`
+   - `modules/ai_ckeditor/js/build`
+5. No code confirmation should be needed for minor/major releases, since these should have been fully tested by QA.
 
 ## Publish a Release
 1. The time for the release should have been agreed upon with the marketing team in advance to ensure proper communication.
@@ -19,4 +23,5 @@ This document outlines the steps the Publishing Manager needs to take to publish
 9. Click Save to publish the release.
 
 ## Communicate the Release
-1. Once the release is published, communicate the release to [Paul Johnson](https://www.drupal.org/u/pdjohnson) and the marketing team on Slack under #ai-initiative-marketing.
+1. Ensure the release is officially published on Drupal.org
+2. [Communicate the release on Slack](communicating_a_release.md)

@@ -7,13 +7,13 @@ Releases of patches and security updates for the AI module always happen on Wedn
 
 Minor and major releases can be scheduled as needed, but should ideally not conflict with patch release days.
 
-The current patch release cycle is every other week on Wednesdays.
+The current patch release cycle is every two weeks on Wednesdays.
 
 So in table form:
 
 | Release Type          | Frequency          | Day       |
 |-----------------------|--------------------|-----------|
-| Patch Releases        | Every other week   | Wednesday |
+| Patch Releases        | Bi-weekly          | Wednesday |
 | Minor/Major Releases  | As needed          | Any day   |
 | Security Releases     | As needed          | Wednesday |
 

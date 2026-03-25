@@ -12,6 +12,9 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\Process\PhpExecutableFinder;
 use Symfony\Component\Process\Process;
 
+/**
+ * Deprecation Analyzer.
+ */
 final class DeprecationAnalyzer {
 
   /**
@@ -124,7 +127,7 @@ final class DeprecationAnalyzer {
    *
    * @var \Drupal\upgrade_status\CSSDeprecationAnalyzer
    */
-  protected $CSSDeprecationAnalyzer;
+  protected $cssDeprecationAnalyzer;
 
   /**
    * The time service.
@@ -187,7 +190,7 @@ final class DeprecationAnalyzer {
     ExtensionMetadataDeprecationAnalyzer $extension_metadata_analyzer,
     ConfigSchemaDeprecationAnalyzer $config_schema_analyzer,
     CSSDeprecationAnalyzer $css_deprecation_analyzer,
-    TimeInterface $time
+    TimeInterface $time,
   ) {
     $this->scanResultStorage = $key_value_factory->get('upgrade_status_scan_results');
     $this->logger = $logger;
@@ -199,7 +202,7 @@ final class DeprecationAnalyzer {
     $this->routeDeprecationAnalyzer = $route_deprecation_analyzer;
     $this->extensionMetadataDeprecationAnalyzer = $extension_metadata_analyzer;
     $this->configSchemaDeprecationAnalyzer = $config_schema_analyzer;
-    $this->CSSDeprecationAnalyzer = $css_deprecation_analyzer;
+    $this->cssDeprecationAnalyzer = $css_deprecation_analyzer;
     $this->time = $time;
   }
 
@@ -367,7 +370,7 @@ final class DeprecationAnalyzer {
       '--memory-limit=' . $memory_limit,
       '--error-format=json',
       '--configuration=' . $this->phpstanNeonPath,
-      $project_dir
+      $project_dir,
     ];
 
     $process = new Process($command, DRUPAL_ROOT, NULL, NULL, NULL);
@@ -422,7 +425,7 @@ final class DeprecationAnalyzer {
       $json['totals']['file_errors']++;
     }
 
-    // Convert "non-file" errors to file errors
+    // Convert "non-file" errors to file errors.
     foreach ($json['errors'] as $error) {
       if (preg_match('!^(.+) on line (\d+) while analysing file (.+)$!', $error, $parts)) {
         $json['totals']['file_errors']++;
@@ -452,12 +455,13 @@ final class DeprecationAnalyzer {
       $this->twigDeprecationAnalyzer->analyze($extension),
       $this->libraryDeprecationAnalyzer->analyze($extension),
       $this->routeDeprecationAnalyzer->analyze($extension),
-      $this->CSSDeprecationAnalyzer->analyze($extension),
+      $this->cssDeprecationAnalyzer->analyze($extension),
       $this->configSchemaDeprecationAnalyzer->analyze($extension),
       $metadataDeprecations,
     );
-    if (projectCollector::getDrupalCoreMajorVersion() < 10) {
-      // Theme function support is not present in Drupal 10 and cannot be checked.
+    if (ProjectCollector::getDrupalCoreMajorVersion() < 10) {
+      // Theme function support is not present in Drupal 10
+      // and cannot be checked.
       $more_deprecations = array_merge($more_deprecations,
         $this->themeFunctionDeprecationAnalyzer->analyze($extension),
       );
@@ -654,16 +658,19 @@ final class DeprecationAnalyzer {
       $category = 'ignore';
     }
 
-    // If the deprecation is already for after the next Drupal major, put it in the
-    // ignore category. This overwrites any categorization before intentionally.
+    // If the deprecation is already for after the next Drupal major,
+    // put it in the ignore category.
+    // This overwrites any categorization before intentionally.
     if (preg_match('!(will be|is) removed (before|from) [Dd]rupal[ :](\d+)\.!', $error, $version_removed)) {
       if ($version_removed[3] > ProjectCollector::getDrupalCoreMajorVersion() + 1) {
         $category = 'ignore';
       }
     }
 
-    // Check for "guzzlehttp/guzzle:8.0" and ignore those errors. That major is not
-    // released yet, so compatibility cannot be proven. Stop ignoring this error from
+    // Check for "guzzlehttp/guzzle:8.0" and ignore those errors.
+    // That major is not
+    // released yet, so compatibility cannot be proven.
+    // Stop ignoring this error from
     // Drupal 11 as a safeguard.
     if (strpos($error, 'guzzlehttp/guzzle:8.0') !== FALSE && ProjectCollector::getDrupalCoreMajorVersion() < 11) {
       $category = 'ignore';
@@ -683,6 +690,7 @@ final class DeprecationAnalyzer {
    * Checks whether an error message is covered by rector.
    *
    * @return bool
+   *   Returns bool value.
    */
   protected function isRectorCovered($string) {
     // Hardcoded lo-fi implementation for now. This should be the same as in
@@ -744,12 +752,13 @@ final class DeprecationAnalyzer {
       'Call to deprecated method format() of class Drupal\Component\Utility\SafeMarkup. Deprecated in drupal:8.0.0 and is removed from drupal:9.0.0. Use Drupal\Component\Render\FormattableMarkup.',
       'Call to deprecated constant FILE_EXISTS_RENAME: Deprecated in drupal:8.7.0 and is removed from drupal:9.0.0. Use Drupal\Core\File\FileSystemInterface::EXISTS_RENAME.',
       // Covered below with the pattern.
-      //'Call to deprecated method l() of class [redacted]. Deprecated in drupal:8.0.0 and is removed from drupal:9.0.0. Use Drupal\Core\Link::fromTextAndUrl() instead.',
+      // 'Call to deprecated method l() of class [redacted].
+      // Deprecated in drupal:8.0.0 and is removed from
+      // drupal:9.0.0. Use Drupal\Core\Link::fromTextAndUrl() instead.',.
       'Call to deprecated function entity_create(). Deprecated in drupal:8.0.0 and is removed from drupal:9.0.0. Use The method overriding Entity::create() for the entity type, e.g. \Drupal\node\Entity\Node::create() if the entity type is known. If the entity type is variable, use the entity storage\'s create() method to construct a new entity:',
 
       // 0.5.5
       // No new rules
-
       // 0.5.6
       'Call to deprecated constant DATETIME_STORAGE_TIMEZONE: Deprecated in drupal:8.5.0 and is removed from drupal:9.0.0. Use Drupal\datetime\Plugin\Field\FieldType\DateTimeItemInterface::STORAGE_TIMEZONE instead.',
       'Call to deprecated constant DATETIME_DATETIME_STORAGE_FORMAT: Deprecated in drupal:8.5.0 and is removed from drupal:9.0.0. Use Drupal\datetime\Plugin\Field\FieldType\DateTimeItemInterface::DATETIME_STORAGE_FORMAT instead.',
@@ -762,7 +771,6 @@ final class DeprecationAnalyzer {
 
       // 0.11.0
       // No new rules
-
       // 0.11.1
       'Call to deprecated method drupalPostForm() of class Drupal\Tests\BrowserTestBase. Deprecated in drupal:9.1.0 and is removed from drupal:10.0.0. Use $this->submitForm() instead.',
 
@@ -835,7 +843,6 @@ final class DeprecationAnalyzer {
 
       // 0.12.2
       // No new rules
-
       // 0.12.3
       'Call to deprecated function user_password(). Deprecated in drupal:9.1.0 and is removed from drupal:10.0.0. Use Drupal\Core\Password\PasswordGeneratorInterface::generate() instead.',
 
@@ -844,31 +851,33 @@ final class DeprecationAnalyzer {
 
       // 0.13.0
       // No new rules
-
       // 0.13.1
-      // Covers https://www.drupal.org/node/2909426 ($modules property in tests), but not identified in contrib by phpstan.
-
+      // Covers https://www.drupal.org/node/2909426
+      // ($modules property in tests), but not
+      // identified in contrib by phpstan.
       // 0.15.0
       // No new rules
-
       // 0.15.1
       // No new rules
-
       // 0.18.0
-      // Add TwigSetList::TWIG_240 to D9 deprecations (https://github.com/palantirnet/drupal-rector/pull/223) -- not tracking non-Drupal coverage here
-      // system_sort_modules_by_info_name: (https://www.drupal.org/node/3225999) -- not found in contrib
+      // Add TwigSetList::TWIG_240 to D9 deprecations
+      // (https://github.com/palantirnet/drupal-rector/pull/223)
+      // -- not tracking non-Drupal coverage here
+      // system_sort_modules_by_info_name:
+      // (https://www.drupal.org/node/3225999)
+      // -- not found in contrib
       'Call to deprecated function module_load_install(). Deprecated in drupal:9.4.0 and is removed from drupal:10.0.0. Use Drupal::moduleHandler()->loadInclude($module, \'install\') instead. Note, the replacement no longer allows including code from uninstalled modules.',
       'Call to deprecated function watchdog_exception(). Deprecated in drupal:10.1.0 and is removed from drupal:11.0.0. Use Use Drupal\Core\Utility\Error::logException() instead.',
       'Call to deprecated function taxonomy_vocabulary_get_names(). Deprecated in drupal:9.3.0 and is removed from drupal:10.0.0. Use Drupal::entityQuery(\'taxonomy_vocabulary\')->execute() instead.',
-      // taxonomy_term_uri
+      // taxonomy_term_uri.
       'Call to deprecated function taxonomy_term_load_multiple_by_name(). Deprecated in drupal:9.3.0 and is removed from drupal:10.0.0. Use Drupal::entityTypeManager()->getStorage(\'taxonomy_term\')->loadByProperties([\'name\' => $name, \'vid\' => $vid]) instead, to get a list of taxonomy term entities having the same name and keyed by their term ID.',
       // taxonomy_terms_static_reset -- not found in contrib
-      // taxonomy_vocabulary_static_reset -- not found in contrib
+      // taxonomy_vocabulary_static_reset -- not found in contrib.
       'Call to deprecated function taxonomy_implode_tags(). Deprecated in drupal:9.3.0 and is removed from drupal:10.0.0. Use Drupal\Core\Entity\Element\EntityAutocomplete::getEntityLabels() instead.',
       // taxonomy_term_title -- not found in contrib
-      // Drupal 9 rector now includes PHPUnit rector (PHPUnitLevelSetList::UP_TO_PHPUNIT_90)
-
-      // 0.18.1
+      // Drupal 9 rector now includes PHPUnit rector
+      // (PHPUnitLevelSetList::UP_TO_PHPUNIT_90)
+      // 0.18.1.
       'Drupal\Tests\BrowserTestBase::$defaultTheme is required in drupal:9.0.0 when using an install profile that does not set a default theme. See https://www.drupal.org/node/3083055, which includes recommendations on which theme to use.',
 
       // 0.18.2
@@ -888,20 +897,18 @@ final class DeprecationAnalyzer {
 
       // 0.18.6
       // no new rules
-
       // 0.19.0
       'Call to deprecated function format_size(). Deprecated in drupal:10.2.0 and is removed from drupal:11.0.0. Use Drupal\Core\StringTranslation\ByteSizeMarkup::create($size, $langcode) instead.',
 
       // 0.19.1
       // no new rules
-
       // 0.19.2
       // no new rules
-
       // 0.20.0
       'Call to deprecated method getResource() of class Drupal\system\Plugin\ImageToolkit\GDToolkit. Deprecated in drupal:10.2.0 and is removed from drupal:11.0.0. Use Drupal\system\Plugin\ImageToolkit\GDToolkit::getImage() instead.',
       'Call to deprecated method setResource() of class Drupal\system\Plugin\ImageToolkit\GDToolkit. Deprecated in drupal:10.2.0 and is removed from drupal:11.0.0. Use Drupal\system\Plugin\ImageToolkit\GDToolkit::setImage() instead.',
-      // Symfony level was added, adding support for multiple non-drupal deprecations
+      // Symfony level was added, adding support for multiple
+      // non-drupal deprecations.
       'Fetching deprecated class constant MASTER_REQUEST of interface Symfony\Component\HttpKernel\HttpKernelInterface: since symfony/http-kernel 5.3, use MAIN_REQUEST instead. To ease the migration, this constant won\'t be removed until Symfony 7.0.',
       'Call to deprecated method getContentType() of class Symfony\Component\HttpFoundation\Request: since Symfony 6.2, use getContentTypeFormat() instead',
       'Call to deprecated method enableAnnotationMapping() of class Symfony\Component\Validator\ValidatorBuilder: since Symfony 6.4, use "enableAttributeMapping()" instead.',
@@ -922,8 +929,7 @@ final class DeprecationAnalyzer {
       'Call to deprecated method setMethods() of class PHPUnit\Framework\MockObject\MockBuilder: https://github.com/sebastianbergmann/phpunit/pull/3687',
 
     ];
-    return
-      in_array($string, $rector_covered) ||
+    return in_array($string, $rector_covered) ||
       strpos($string, 'Call to deprecated method l() of class Drupal') === 0;
   }
 

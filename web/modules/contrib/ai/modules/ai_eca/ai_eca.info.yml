@@ -11,7 +11,7 @@ dependencies:
   - eca:eca
   - eca_content:eca_content
 
-# Information added by Drupal.org packaging script on 2026-01-07
-version: '1.2.5'
+# Information added by Drupal.org packaging script on 2026-03-18
+version: '1.3.1'
 project: 'ai'
-datestamp: 1767806246
+datestamp: 1773841089

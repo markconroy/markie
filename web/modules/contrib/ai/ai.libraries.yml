@@ -33,9 +33,43 @@ tools_library_form_element:
 
 chat_history_element:
   js:
-    assets/js/chat_history_element.js: {}
+    assets/js/ai_chat_history_element.js: {}
   dependencies:
     - core/once
   css:
     theme:
-      assets/css/chat_history_element.css: {}
+      assets/css/ai_chat_history_element.css: {}
+
+ai_global:
+  js:
+    assets/js/ai_global.js: { }
+  dependencies:
+    - core/once
+  css:
+    component:
+      assets/css/ai_global.css: {}
+
+mdx_editor:
+  js:
+    ui/mdxeditor/dist/assets/main.js:
+      attributes: { type: module }
+      minified: true
+  css:
+    component:
+      ui/mdxeditor/dist/assets/index.css: {}
+
+json_schema_editor:
+  js:
+    ui/json-schema-editor/dist/ai-json-schema.js:
+      attributes:
+        type: module
+  dependencies:
+    - core/once
+  css:
+    theme:
+      assets/css/ai_json_schema.css: {}
+
+ai_settings_form:
+  css:
+    component:
+      assets/css/ai_settings_form.css: {}

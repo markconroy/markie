@@ -9,8 +9,11 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\ai_automators\Event\AutomatorConfigEvent;
 use Drupal\ai_automators\Event\ProcessFieldEvent;
+use Drupal\ai_automators\Event\ShouldProcessFieldEvent;
 use Drupal\ai_automators\PluginInterfaces\AiAutomatorDirectProcessInterface;
 use Drupal\ai_automators\PluginInterfaces\AiAutomatorFieldProcessInterface;
+use Drupal\ai_automators\PluginInterfaces\AiAutomatorPostCheckIfEmptyInterface;
+use Drupal\ai_automators\PluginInterfaces\AiAutomatorTypeInterface;
 use Drupal\ai_automators\PluginManager\AiAutomatorFieldProcessManager;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
@@ -245,10 +248,10 @@ class AiAutomatorEntityModifier {
     }
 
     // Otherwise continue as normal.
-    if ((!isset($automatorConfig['mode']) || $automatorConfig['mode'] == 'base') && !$this->baseShouldSave($entity, $automatorConfig)) {
+    if ((!isset($automatorConfig['mode']) || $automatorConfig['mode'] === 'base') && !$this->baseShouldSave($entity, $fieldDefinition, $automatorConfig)) {
       return FALSE;
     }
-    elseif (isset($automatorConfig['mode']) && $automatorConfig['mode'] == 'token' && !$this->tokenShouldSave($entity, $automatorConfig)) {
+    elseif (isset($automatorConfig['mode']) && $automatorConfig['mode'] === 'token' && !$this->tokenShouldSave($entity, $fieldDefinition, $automatorConfig)) {
       return FALSE;
     }
 
@@ -258,47 +261,130 @@ class AiAutomatorEntityModifier {
   /**
    * If token mode, check if it should run.
    */
-  private function tokenShouldSave(ContentEntityInterface $entity, array $automatorConfig) {
+  private function tokenShouldSave(ContentEntityInterface $entity, FieldDefinitionInterface $fieldDefinition, array $automatorConfig) {
     // Get rule.
     $rule = $this->fieldRules->findRule($automatorConfig['rule']);
     // Check if a value exists.
     $value = $entity->get($automatorConfig['field_name'])->getValue();
     $value = $rule->checkIfEmpty($value, $automatorConfig);
+    $value = $this->applyPostCheckIfEmpty($rule, $entity, $value, $automatorConfig);
 
-    // Get prompt.
-    if (!empty($value) && !empty($value[0])) {
-      return FALSE;
-    }
-    return TRUE;
+    // Determine if should process based on isEmpty check.
+    $shouldProcess = $this->isValueEmptyAfterCheck($value);
+
+    // Dispatch event to allow modifying the decision after isEmpty check.
+    $event = new ShouldProcessFieldEvent($entity, $fieldDefinition, $automatorConfig, $shouldProcess);
+    $this->eventDispatcher->dispatch($event, ShouldProcessFieldEvent::EVENT_NAME);
+
+    return $event->shouldProcess();
   }
 
   /**
    * If base mode, check if it should run.
    */
-  private function baseShouldSave(ContentEntityInterface $entity, array $automatorConfig) {
+  private function baseShouldSave(ContentEntityInterface $entity, FieldDefinitionInterface $fieldDefinition, array $automatorConfig) {
     // Check if a value exists.
     $value = $entity->get($automatorConfig['field_name'])->getValue();
 
-    $original = isset($entity->original) && json_encode($entity->original->get($automatorConfig['base_field'])->getValue()) ?? NULL;
+    $originalEntity = $this->getOriginalEntity($entity);
+    $original = $originalEntity ? json_encode($originalEntity->get($automatorConfig['base_field'])->getValue()) : NULL;
     $change = json_encode($entity->get($automatorConfig['base_field'])->getValue()) !== $original;
 
     // Get the rule to check the value.
     $rule = $this->fieldRules->findRule($automatorConfig['rule']);
     $value = $rule->checkIfEmpty($value, $automatorConfig);
+    $value = $this->applyPostCheckIfEmpty($rule, $entity, $value, $automatorConfig);
 
-    // If the base field is not filled out.
-    if (!empty($value) && !empty($value[0])) {
-      return FALSE;
+    $shouldProcess = FALSE;
+
+    // If edit mode is on and there is a change, return true
+    // independent of current value.
+    if (!empty($automatorConfig['edit_mode']) && $change) {
+      $shouldProcess = TRUE;
     }
-    // If the value exists and we don't have edit mode, we do nothing.
-    if (!empty($value) && !empty($value[0]) && !$automatorConfig['edit_mode']) {
-      return FALSE;
+    // If no value is set, return true.
+    elseif ($this->isValueEmptyAfterCheck($value)) {
+      $shouldProcess = TRUE;
     }
-    // Otherwise look for a change.
-    if ($automatorConfig['edit_mode'] && !$change && !empty($value) && !empty($value[0])) {
-      return FALSE;
+
+    // Dispatch event to allow modifying the decision after isEmpty check.
+    $event = new ShouldProcessFieldEvent($entity, $fieldDefinition, $automatorConfig, $shouldProcess);
+    $this->eventDispatcher->dispatch($event, ShouldProcessFieldEvent::EVENT_NAME);
+
+    return $event->shouldProcess();
+  }
+
+  /**
+   * Applies optional post-check hook from rules when available.
+   *
+   * @param \Drupal\ai_automators\PluginInterfaces\AiAutomatorTypeInterface $rule
+   *   The resolved rule plugin instance.
+   * @param \Drupal\Core\Entity\ContentEntityInterface $entity
+   *   The entity being evaluated.
+   * @param mixed $value
+   *   The value returned from checkIfEmpty().
+   * @param array $automatorConfig
+   *   The automator configuration.
+   *
+   * @return mixed
+   *   The post-processed value.
+   */
+  private function applyPostCheckIfEmpty(AiAutomatorTypeInterface $rule, ContentEntityInterface $entity, mixed $value, array $automatorConfig): mixed {
+    if (!is_array($value)) {
+      return $value;
     }
-    return TRUE;
+
+    if ($rule instanceof AiAutomatorPostCheckIfEmptyInterface) {
+      $newValue = $rule->postCheckIfEmpty($entity, $value, $automatorConfig);
+
+      return is_array($newValue) ? $newValue : $value;
+    }
+
+    return $value;
+  }
+
+  /**
+   * Determines if a normalized checkIfEmpty() value should count as empty.
+   *
+   * @param mixed $value
+   *   The normalized value after checkIfEmpty() and optional post-check hook.
+   *
+   * @return bool
+   *   TRUE when the value should be considered empty, FALSE otherwise.
+   */
+  private function isValueEmptyAfterCheck(mixed $value): bool {
+    if (is_array($value)) {
+      return empty($value) || empty($value[0]);
+    }
+
+    return empty($value);
+  }
+
+  /**
+   * Returns the original entity during save operations (D10/D11 compatible).
+   *
+   * @param \Drupal\Core\Entity\ContentEntityInterface $entity
+   *   The entity being saved.
+   *
+   * @return \Drupal\Core\Entity\ContentEntityInterface|null
+   *   The original entity when available.
+   */
+  private function getOriginalEntity(ContentEntityInterface $entity): ?ContentEntityInterface {
+    // Drupal 11.2+.
+    if (method_exists($entity, 'getOriginal')) {
+      $original = $entity->getOriginal();
+
+      return $original instanceof ContentEntityInterface ? $original : NULL;
+    }
+
+    // Drupal 10.x / Drupal 11.0-11.1.
+    if (isset($entity->original)) {
+      $original = $entity->original;
+
+      return $original instanceof ContentEntityInterface ? $original : NULL;
+    }
+
+    return NULL;
   }
 
 }

@@ -42,3 +42,14 @@ Step #2: Manage form display
    - Save
 
 Now when you edit an article, you should now see the ««Generate tags» action button under the Tags field.
+
+## Field Widget Action Examples
+
+For detailed, step-by-step examples of configuring specific Field Widget Actions with AI Automators, see the [AI Automators Examples](../ai_automators/examples/) section:
+
+- [FAQ Field + `faqfield_default` widget](../ai_automators/examples/faq-field.md) - Generate FAQ entries from content using the `LLM: FAQ Field` automator
+- [Chart Field + `chart_config_default` widget](../ai_automators/examples/chart-field.md) - Generate chart data from content using the `LLM: Chart From Text` automator
+- [Text to Audio Media](../ai_automators/examples/text_to_audio_media_automator.md) - Generate audio from content using the `LLM: Media Audio Generation` automator
+- [Text to Image Field](../ai_automators/examples/text_to_image_automator.md) - Generate image from content using the `LLM: Image Generation` automator
+- [Text to Image Media Field](../ai_automators/examples/text_to_image_media_automator.md) - Generate image as Media entity using the `LLM: Media Image Generation` automator
+- [Text to Address Field](../ai_automators/address_automator.md) - Generate address from content using the `LLM: Address` automator

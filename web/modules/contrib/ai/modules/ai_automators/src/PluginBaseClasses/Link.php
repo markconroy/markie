@@ -2,13 +2,51 @@
 
 namespace Drupal\ai_automators\PluginBaseClasses;
 
+use Drupal\ai\AiProviderPluginManager;
+use Drupal\ai\Service\AiProviderFormHelper;
+use Drupal\ai\Service\HostnameFilter;
+use Drupal\ai\Service\PromptJsonDecoder\PromptJsonDecoderInterface;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * This is a base class that can be used for LLMs simple link rules.
  */
 class Link extends RuleBase {
+
+  /**
+   * Constructs a new AiClientBase abstract class.
+   *
+   * @param \Drupal\ai\AiProviderPluginManager $pluginManager
+   *   The plugin manager.
+   * @param \Drupal\ai\Service\AiProviderFormHelper $formHelper
+   *   The form helper.
+   * @param \Drupal\ai\Service\PromptJsonDecoder\PromptJsonDecoderInterface $promptJsonDecoder
+   *   The prompt json decoder.
+   * @param \Drupal\ai\Service\HostnameFilter $hostnameFilter
+   *   The hostname filter.
+   */
+  final public function __construct(
+    AiProviderPluginManager $pluginManager,
+    AiProviderFormHelper $formHelper,
+    PromptJsonDecoderInterface $promptJsonDecoder,
+    protected HostnameFilter $hostnameFilter,
+  ) {
+    parent::__construct($pluginManager, $formHelper, $promptJsonDecoder);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
+    return new static(
+      $container->get('ai.provider'),
+      $container->get('ai.form_helper'),
+      $container->get('ai.prompt_json_decode'),
+      $container->get('ai.hostname_filter_service'),
+    );
+  }
 
   /**
    * {@inheritDoc}
@@ -72,11 +110,21 @@ class Link extends RuleBase {
    */
   public function storeValues(ContentEntityInterface $entity, array $values, FieldDefinitionInterface $fieldDefinition, array $automatorConfig) {
     $config = $fieldDefinition->getConfig($entity->bundle())->getSettings();
+    // Set plain text mode, so it catches none html/markdown links.
+    $this->hostnameFilter->setPlainTextMode(TRUE);
     foreach ($values as $key => $value) {
       if ($config['title'] == 0) {
         $value['title'] = '';
       }
+      // If title is not empty, we need to run the hostname filter.
+      if (!empty($value['title'])) {
+        $value['uri'] = $this->hostnameFilter->filterText($value['uri']);
+      }
       $values[$key] = $value;
+      // Remove the link if no uri exists after filter.
+      if (empty($value['uri'])) {
+        unset($values[$key]);
+      }
     }
     $entity->set($fieldDefinition->getName(), $values);
     return TRUE;

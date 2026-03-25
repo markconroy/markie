@@ -117,6 +117,12 @@ class OpenAiProvider extends OpenAiBasedProviderClientBase {
         $generalConfig['max_completion_tokens'] = $generalConfig['max_tokens'];
         unset($generalConfig['max_tokens']);
       }
+      // Also remove specific configs for these models.
+      foreach (['frequency_penalty', 'top_p', 'presence_penalty', 'temperature'] as $config) {
+        if (isset($generalConfig[$config])) {
+          unset($generalConfig[$config]);
+        }
+      }
     }
     // Handle image generation models.
     if (($model_id == 'dall-e-3') || strpos($model_id, 'gpt-image') === 0) {
@@ -274,18 +280,19 @@ class OpenAiProvider extends OpenAiBasedProviderClientBase {
     if ($input instanceof ChatInput) {
       $chat_input = [];
       // Add a system role if wanted.
-      if ($this->chatSystemRole) {
+      $system_prompt = $input->getSystemPrompt();
+      if ($system_prompt) {
         // If its o1 or o3 in it, we add it as a user message.
         if (preg_match('/(o1|o3)/i', $model_id)) {
           $chat_input[] = [
             'role' => 'user',
-            'content' => $this->chatSystemRole,
+            'content' => $system_prompt,
           ];
         }
         else {
           $chat_input[] = [
             'role' => 'system',
-            'content' => $this->chatSystemRole,
+            'content' => $system_prompt,
           ];
         }
       }
@@ -367,25 +374,26 @@ class OpenAiProvider extends OpenAiBasedProviderClientBase {
         'json_schema' => $input->getChatStructuredJsonSchema(),
       ];
     }
-    // Include usage for streamed responses.
-    if ($this->streamed) {
-      $payload['stream_options']['include_usage'] = TRUE;
-    }
+
+    $usage = [];
     try {
       if ($this->streamed) {
+        $payload['stream_options']['include_usage'] = TRUE;
         $response = $this->client->chat()->createStreamed($payload);
         $message = new OpenAiChatMessageIterator($response);
       }
       // If we are in a fibre, we will use a streamed response as the SDK
       // doesn't support direct async.
       elseif (\Fiber::getCurrent()) {
-        $payload['stream_options'] = [
-          'include_usage' => TRUE,
-        ];
+        $payload['stream_options']['include_usage'] = TRUE;
         $response = $this->client->chat()->createStreamed($payload);
         $stream = new OpenAiChatMessageIterator($response);
         // We consume the stream in a fiber.
         foreach ($stream as $chunk) {
+          // Set the usage if it is available.
+          if (is_array($chunk->getRaw()) && count($chunk->getRaw()) && !empty($chunk->getRaw()['usage'])) {
+            $usage['usage'] = $chunk->getRaw()['usage'];
+          }
           // Suspend fiber if we haven't finished yet.
           if (empty($stream->getFinishReason())) {
             \Fiber::suspend();
@@ -409,6 +417,7 @@ class OpenAiProvider extends OpenAiBasedProviderClientBase {
         if (!empty($tools)) {
           $message->setTools($tools);
         }
+        $usage['usage'] = $response['usage'] ?? [];
       }
     }
     catch (\Exception $e) {
@@ -431,8 +440,8 @@ class OpenAiProvider extends OpenAiBasedProviderClientBase {
     $chat_output = new ChatOutput($message, $response, []);
 
     // We only set the token usage if its not streamed or in a fiber.
-    if (!$this->streamed && !\Fiber::getCurrent()) {
-      $this->setChatTokenUsage($chat_output, $response);
+    if (count($usage)) {
+      $this->setChatTokenUsage($chat_output, $usage);
     }
 
     return $chat_output;
@@ -674,11 +683,11 @@ class OpenAiProvider extends OpenAiBasedProviderClientBase {
     return [
       'key_config_name' => 'api_key',
       'default_models' => [
-        'chat' => 'gpt-4.1',
-        'chat_with_image_vision' => 'gpt-4.1',
-        'chat_with_complex_json' => 'gpt-4.1',
-        'chat_with_tools' => 'gpt-4.1',
-        'chat_with_structured_response' => 'gpt-4.1',
+        'chat' => 'gpt-5.2',
+        'chat_with_image_vision' => 'gpt-5.2',
+        'chat_with_complex_json' => 'gpt-5.2',
+        'chat_with_tools' => 'gpt-5.2',
+        'chat_with_structured_response' => 'gpt-5.2',
         'text_to_image' => 'dall-e-3',
         'embeddings' => 'text-embedding-3-small',
         'moderation' => 'omni-moderation-latest',
@@ -824,7 +833,19 @@ class OpenAiProvider extends OpenAiBasedProviderClientBase {
       }
 
       // Include all GPT models for JSON output capability.
-      if (in_array(AiModelCapability::ChatJsonOutput, $capabilities) && !preg_match('/^(gpt-4|gpt-4o|o1|o3|gpt-4-turbo)/i', $model['id'])) {
+      if (in_array(AiModelCapability::ChatJsonOutput, $capabilities) && !preg_match('/^(gpt-4|gpt-4o|o1|o3|gpt-4-turbo|gpt-5)/i', $model['id'])) {
+        continue;
+      }
+      // Only allow models that support tools/function calling.
+      if (in_array(AiModelCapability::ChatTools, $capabilities) && !preg_match('/^(gpt-4\.1(?![0-9])|gpt-4o|gpt-4-turbo|gpt-5|o1|o3|o4)/i', $model['id'])) {
+        continue;
+      }
+      // Only allow models that support structured responses.
+      if (in_array(AiModelCapability::ChatStructuredResponse, $capabilities) && !preg_match('/^(gpt-4\.1(?![0-9])|gpt-4o|gpt-4-turbo|gpt-5|o1|o3|o4)/i', $model['id'])) {
+        continue;
+      }
+      // Only allow models that support both tools and structured responses.
+      if (in_array(AiModelCapability::ChatCombinedToolsAndStructuredResponse, $capabilities) && !preg_match('/^(gpt-4\.1(?![0-9])|gpt-4o|gpt-4-turbo|gpt-5|o1|o3|o4)/i', $model['id'])) {
         continue;
       }
       // Don't allow audio or video for now.

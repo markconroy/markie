@@ -2,6 +2,7 @@
 
 namespace Drupal\ai_ckeditor\Plugin\AiCKEditor;
 
+use Drupal\ai\Utility\Textarea;
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
@@ -73,9 +74,7 @@ final class Tone extends AiCKEditorPluginBase {
       '#default_value' => $this->configuration['use_description'] ?? FALSE,
     ];
 
-    $options = $this->aiProviderManager->getSimpleProviderModelOptions('chat');
-    array_shift($options);
-    array_splice($options, 0, 1);
+    $options = $this->aiProviderManager->getSimpleProviderModelOptions('chat', FALSE);
     $form['provider'] = [
       '#type' => 'select',
       "#empty_option" => $this->t('-- Default from AI module (chat) --'),
@@ -96,6 +95,14 @@ final class Tone extends AiCKEditorPluginBase {
           ':input[name="editor[settings][plugins][ai_ckeditor_ai][plugins][ai_ckeditor_tone][enabled]"]' => ['checked' => TRUE],
         ],
       ],
+      // This property will land into core soon, see
+      // https://www.drupal.org/project/drupal/issues/3202631. It can stay
+      // after this is added to Drupal core.
+      '#normalize_newlines' => TRUE,
+      // Until that the custom value callback is needed. Should be removed
+      // after the issue mentioned above is merged into core and the minimum
+      // supported Drupal version includes `#normalize_newlines` property.
+      '#value_callback' => [Textarea::class, 'valueCallback'],
     ];
 
     return $form;

@@ -18,6 +18,7 @@ depending on your specific needs.
 Some of the other sub-modules provided by the AI Core module interact with the
 AI Automators, and you may wish to use them depending on how complex your use
 case is.
+
 1. The AI CKEditor Integration module can be optionally enabled to allow content
    creators choose to run selected AI Automators against WYSIWYG fields. See the
    [Advanced section](#advanced-usage) for more details.
@@ -32,6 +33,7 @@ modules installed on your site to allow use in a number of different ways.
 By default, the module will allow a single AI Automator to be added to a field
 on an entity. **In order to add or configure the AI Automator you MUST have the
 Field UI module enabled**.
+
 1. Go to the "Manage Fields" tab of your entity type.
 2. Select the field you wish to add/configure the AI Automator on and click its
    "edit" operation.
@@ -46,55 +48,63 @@ Field UI module enabled**.
    This form may contain different elements depending on the selected AI
    Automator: follow the instructions in the forms to configure your choice.
    Some settings are shared across multiple AI providers, such as:
-   1. **Automator Input Mode**: A dropdown to select the method of applying the
-      AI Automator. Basic allows you to specify a single field attached to the
-      entity to provide the context for the AI Automator; Advanced Mode (Token)
-      allow you to use supported tokens (see [the Token module for more information](https://www.drupal.org/project/token))
-      to inject multiple conditional values into the context.
-   2. **Automator Base Field**: Selects the field to use the value of to provide
-      context to the AI.
-   3. **Automator Prompt**: Allows you to add a custom prompt to send to the AI
-      to explain what you want it to do. For some more complex AI Automators,
-      placeholder text will be shown to detail any requirements on the prompt
-      structure.
-   4. **Automator Prompt (Token)**: As above, except with additional token
-      support.
-   5. **Edit when changed**: Check to update the generated field's content every
-      time the source field is amended. Leave unchecked to generate the field
-      only when it is empty.
-   6. **Advanced Settings**: Click this to reveal any additional advanced
-      settings for the AI Automator (some detailed below).
-   7. **Automator Label**: The label that will display in the admin interface
-      for this automator.
-   8. **Automator Weight**: Controls the order multiple AI Automators on this
-      entity will be run in: lower weights will run before higher weights,
-      allowing you to generate a field value past on a previously generated
-      value.
-   9. **Automator Worker**: Control how the automator is run:
-      1. Direct: runs the automator and stores the generated result as the
-         entity is saved. This provides the result sooner but may slow down the
-         save process.
-      2. Batch: runs the automator in a batched process controlled by
-         javascript. Can prevent issues where there are large numbers of AI
-         Automators running on the same entity save, but **will not trigger the
-         AI Automator if the entity is saved programmatically**.
-      3. Queue/Cron: runs the AI Automator in a cron-controlled queue, meaning
-         that the field value is generated the next time cron runs on your site
-         after the entity is saved. This prevents issues from large numbers of
-         processes running at save, but can cause large delays between save and
-         field population, particularly if there are large numbers of AI
-         Automators waiting to be processed across the site.
-   10. **AI Provider**: If you want to use a specific AI Provider to run the AI
-       Automator, you can select it here. For more information about AI
-       Providers, please see [the documentation here](https://project.pages.drupalcode.org/ai/providers/matris/).
-   11. **Provider Configuration**: If you are not using the default AI Provider
-       (see above), this is where you will see the specific settings for your
-       chosen provider. Please refer to your AI Provider module's instructions
-       for more information on filling these in.
-   12. **Joiner**: if your AI Automator returns multiple values, you can select
-       the method for them to be combined into the field's value: the default is
-       to leave the values separate and let the AI Automator decide what to set
-       as the value.
+    1. **Automator Input Mode**: A dropdown to select the method of applying the
+       AI Automator. Basic allows you to specify a single field attached to the
+       entity to provide the context for the AI Automator; Advanced Mode (Token)
+       allow you to use supported tokens (see [the Token module for more information](https://www.drupal.org/project/token))
+       to inject multiple conditional values into the context.
+    2. **Automator Base Field**: Selects the field to use the value of to provide
+       context to the AI.
+    3. **Automator Prompt**: Allows you to add a custom prompt to send to the AI
+       to explain what you want it to do. For some more complex AI Automators,
+       placeholder text will be shown to detail any requirements on the prompt
+       structure.
+    4. **Automator Prompt (Token)**: As above, except with additional token
+       support.
+    5. **Edit when changed**: Check to update the generated field's content every
+       time the source field is amended. Leave unchecked to generate the field
+       only when it is empty.
+    6. **Advanced Settings**: Click this to reveal any additional advanced
+       settings for the AI Automator (some detailed below).
+    7. **Automator Label**: The label that will display in the admin interface
+       for this automator.
+    8. **Automator Weight**: Controls the order multiple AI Automators on this
+       entity will be run in: lower weights will run before higher weights,
+       allowing you to generate a field value past on a previously generated
+       value.
+    9. **Automator Worker**: Control how the automator is run:
+        1. Direct: runs the automator and stores the generated result as the
+           entity is saved. This provides the result sooner but may slow down the
+           save process.
+        2. Batch: runs the automator in a batched process controlled by
+           javascript. Can prevent issues where there are large numbers of AI
+           Automators running on the same entity save, but **will not trigger the
+           AI Automator if the entity is saved programmatically**.
+        3. Queue/Cron: runs the AI Automator in a cron-controlled queue, meaning
+           that the field value is generated the next time cron runs on your site
+           after the entity is saved. This prevents issues from large numbers of
+           processes running at save, but can cause large delays between save and
+           field population, particularly if there are large numbers of AI
+           Automators waiting to be processed across the site.
+        4. Field Widget: processes the automator when triggered from a
+           Field Widget Action button in the content edit form. This allows
+           content creators to manually trigger AI generation on-demand via
+           AJAX without saving the entity. Use this worker type when you
+           want to add a "Generate" button to a field widget using the
+           Field Widget Actions module. The generated values are populated
+           directly into the form without saving the entity, allowing users
+           to review and edit before saving.
+    10. **AI Provider**: If you want to use a specific AI Provider to run the AI
+        Automator, you can select it here. For more information about AI
+        Providers, please see [the documentation here](https://project.pages.drupalcode.org/ai/providers/matris/).
+    11. **Provider Configuration**: If you are not using the default AI Provider
+        (see above), this is where you will see the specific settings for your
+        chosen provider. Please refer to your AI Provider module's instructions
+        for more information on filling these in.
+    12. **Joiner**: if your AI Automator returns multiple values, you can select
+        the method for them to be combined into the field's value: the default is
+        to leave the values separate and let the AI Automator decide what to set
+        as the value.
 6. Save the Field's settings form and your AI Automator's settings will be
    stored with the other settings. Generation for the fields will be triggered
    when new content is saved, based on your chosen settings.
@@ -129,6 +139,7 @@ in a photograph, your AI Automator chain would have a field for the input image,
 a text field for the AI generated location the image was of, an address field to
 store an address for the location, and lastly a field to store the actual output
 to be returned after the chain has run. When run, the AI Automator chain would:
+
 1. Populate the image field with your input image
 2. Ask the AI to identify the location
 3. Store the response in the text field
@@ -238,6 +249,18 @@ own implementation.
    }
   }
 ```
+
+## Field Widget Action Examples
+
+For step-by-step examples of configuring AI Automators with Field Widget Actions (FWA) to add "Generate" buttons in content edit forms, see the [Examples](examples/) section:
+
+- [FAQ Field + `faqfield_default` widget](examples/faq-field.md) - Generate FAQ entries from content using the `LLM: FAQ Field` automator
+- [Chart Field + `chart_config_default` widget](examples/chart-field.md) - Generate chart data from content using the `LLM: Chart From Text` automator
+- [Text to Audio Media](examples/text_to_audio_media_automator.md) - Generate audio from content using the `LLM: Media Audio Generation` automator
+- [Text to Image Field](examples/text_to_image_automator.md) - Generate image from content using the `LLM: Media Image Generation` automator
+- [Text to Image Media Field](examples/text_to_image_media_automator.md) - Generate image from content using the `LLM: Media Image Generation` automator
+- [Text to Address Field](examples/address_automator.md) - Generate address from content using the `LLM: Address` automator
+- [Metatag](examples/metatag_automator.md) - Generate metatags for content using the `LLM: Metatag` automator
 
 ## Developer documentation
 Check the [developers guide](../../developers/writing_an_ai_automators_plugin.md) for

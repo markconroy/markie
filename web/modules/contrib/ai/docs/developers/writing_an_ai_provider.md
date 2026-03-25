@@ -441,3 +441,6 @@ class DropAiProvider extends AiProviderClientBase implements ChatInterface {
 Finally you will need to define some API defaults, which reflect the parameters that your provider supports — for example the temperature, or topN, that most AI providers have. But you need to follow the documentation of the AI service, you are building the provider for. [Here](https://git.drupalcode.org/project/ai/-/tree/1.0.x/docs/examples/dropai_provider/definitions/api_defaults.yml) you can check the example for this.
 
 After all of this, you will be able to see your newly implemented provider in the AI Explorer of the AI module and use it like other providers.
+
+### Rate Limits
+If your provider has rate limits, you can set them on the `ChatOutput` object returned by the `chat` method using `setRateLimits()`. Create a `ChatProviderLimitsDto` object and set the appropriate values, such as maximum requests, remaining requests, and reset time. This information can then be consumed through `getRateLimits()` and used by the AI module to manage and display rate limit status to users.

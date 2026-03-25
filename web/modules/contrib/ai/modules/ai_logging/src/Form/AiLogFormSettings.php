@@ -75,6 +75,18 @@ class AiLogFormSettings extends ConfigFormBase {
       ],
     ];
 
+    $form['prompt_logging_excluded_tags'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Exclude automated logging by request tags'),
+      '#description' => $this->t('Comma-separated list of tags to exclude from logging. If a request has any of these tags, it will not be logged, regardless of the included tags setting above.'),
+      '#default_value' => $config->get('prompt_logging_excluded_tags'),
+      '#states' => [
+        'visible' => [
+          ':input[name="prompt_logging"]' => ['checked' => TRUE],
+        ],
+      ],
+    ];
+
     $form['prompt_logging_max_messages'] = [
       '#type' => 'number',
       '#title' => $this->t('Maximum number messages to keep stored in the log'),
@@ -100,6 +112,7 @@ class AiLogFormSettings extends ConfigFormBase {
     $this->config(static::CONFIG_NAME)
       ->set('prompt_logging', $form_state->getValue('prompt_logging'))
       ->set('prompt_logging_tags', $form_state->getValue('prompt_logging_tags'))
+      ->set('prompt_logging_excluded_tags', $form_state->getValue('prompt_logging_excluded_tags'))
       ->set('prompt_logging_output', $form_state->getValue('prompt_logging_output'))
       ->set('prompt_logging_bundles', $form_state->getValue('prompt_logging_bundles'))
       ->set('prompt_logging_max_messages', $form_state->getValue('prompt_logging_max_messages'))

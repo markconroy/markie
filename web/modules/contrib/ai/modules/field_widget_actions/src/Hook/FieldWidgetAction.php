@@ -293,6 +293,9 @@ class FieldWidgetAction {
         continue;
       }
       $field_widget_action = $this->fieldWidgetActionManager->createInstance($plugin_id, $action);
+      if (isset($context['items'])) {
+        $field_widget_action->setFieldDefinition($context['items']->getFieldDefinition());
+      }
       if ($field_widget_action instanceof FieldWidgetActionInterface && $field_widget_action->isAvailable()) {
         $context['action_id'] = $action_id;
         $field_widget_action->completeFormAlter($field_widget_complete_form, $form_state, $context);
@@ -319,6 +322,9 @@ class FieldWidgetAction {
         continue;
       }
       $field_widget_action = $this->fieldWidgetActionManager->createInstance($plugin_id, $action);
+      if (isset($context['items'])) {
+        $field_widget_action->setFieldDefinition($context['items']->getFieldDefinition());
+      }
       if ($field_widget_action instanceof FieldWidgetActionInterface && $field_widget_action->isAvailable()) {
         $context['action_id'] = $action_id;
         $field_widget_action->singleElementFormAlter($element, $form_state, $context);

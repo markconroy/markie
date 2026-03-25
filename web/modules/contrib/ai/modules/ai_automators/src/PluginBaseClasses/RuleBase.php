@@ -8,6 +8,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\ai\AiProviderPluginManager;
+use Drupal\ai\Dto\HostnameFilterDto;
 use Drupal\ai\Enum\AiModelCapability;
 use Drupal\ai\OperationType\Chat\ChatInput;
 use Drupal\ai\OperationType\Chat\ChatMessage;
@@ -17,6 +18,7 @@ use Drupal\ai\Service\PromptJsonDecoder\PromptJsonDecoderInterface;
 use Drupal\ai\Utility\CastUtility;
 use Drupal\ai_automators\Exceptions\AiAutomatorResponseErrorException;
 use Drupal\ai_automators\Exceptions\AiAutomatorTypeNotRunnable;
+use Drupal\ai_automators\PluginInterfaces\AiAutomatorPostCheckIfEmptyInterface;
 use Drupal\ai_automators\PluginInterfaces\AiAutomatorTypeInterface;
 use Drupal\ai_automators\Traits\GeneralHelperTrait;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -24,7 +26,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * This is a base class for all LLM rule helpers.
  */
-abstract class RuleBase implements AiAutomatorTypeInterface, ContainerFactoryPluginInterface {
+abstract class RuleBase implements AiAutomatorTypeInterface, AiAutomatorPostCheckIfEmptyInterface, ContainerFactoryPluginInterface {
 
   use GeneralHelperTrait;
   use StringTranslationTrait;
@@ -113,6 +115,25 @@ abstract class RuleBase implements AiAutomatorTypeInterface, ContainerFactoryPlu
    * {@inheritDoc}
    */
   public function checkIfEmpty(array $value, array $automatorConfig = []) {
+    return $value;
+  }
+
+  /**
+   * Optional post-check hook for complex empty-state normalization.
+   *
+   * Rules can override this to adjust values after checkIfEmpty().
+   *
+   * @param \Drupal\Core\Entity\ContentEntityInterface $entity
+   *   The entity being worked on.
+   * @param array $value
+   *   The value response.
+   * @param array $automatorConfig
+   *   The automator config.
+   *
+   * @return array
+   *   Returns an empty array if the value should be considered empty.
+   */
+  public function postCheckIfEmpty(ContentEntityInterface $entity, array $value, array $automatorConfig = []): array {
     return $value;
   }
 
@@ -638,6 +659,12 @@ abstract class RuleBase implements AiAutomatorTypeInterface, ContainerFactoryPlu
     }
 
     $model = $this->getModel($automatorConfig);
+    // Check the field type of the field.
+    $field_type = $entity ? $entity->get($automatorConfig['field_name'])->getFieldDefinition()->getType() : 'string';
+    // If its text_long or text_with_summary, we filter host names.
+    if (in_array($field_type, ['text_long', 'text_with_summary'])) {
+      $input->setHostnameFilter(new HostnameFilterDto(plainTextMode: TRUE));
+    }
     $response = $instance->chat($input, $model, $this->getTags($prompt, $automatorConfig, $instance, $entity))->getNormalized();
 
     return $response;

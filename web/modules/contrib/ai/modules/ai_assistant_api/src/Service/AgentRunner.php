@@ -2,11 +2,13 @@
 
 namespace Drupal\ai_assistant_api\Service;
 
+use Drupal\ai_assistant_api\Event\AiAssistantPassContextToAgentEvent;
 use Drupal\Core\TempStore\PrivateTempStoreFactory;
 use Drupal\ai\AiProviderPluginManager;
 use Drupal\ai\OperationType\Chat\ChatInput;
 use Drupal\ai\OperationType\Chat\ChatMessage;
 use Drupal\ai\OperationType\Chat\ChatOutput;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
  * Class AgentRunner, runs agents as assistants.
@@ -34,12 +36,15 @@ class AgentRunner {
    *   The AI provider.
    * @param \Drupal\Core\TempStore\PrivateTempStoreFactory $tempStore
    *   The private temp store.
+   * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $eventDispatcher
+   *   The event dispatcher.
    * @param mixed $aiAgentPluginManager
    *   The AI agent plugin manager if it exists.
    */
   public function __construct(
     public AiProviderPluginManager $aiProvider,
     protected PrivateTempStoreFactory $tempStore,
+    protected EventDispatcherInterface $eventDispatcher,
     protected mixed $aiAgentPluginManager = NULL,
   ) {
   }
@@ -57,11 +62,13 @@ class AgentRunner {
    *   The job id.
    * @param bool $verbose_mode
    *   Whether to run in verbose mode.
+   * @param array $context
+   *   The context from assistant.
    *
    * @return \Drupal\ai\OperationType\Chat\ChatOutput
    *   The chat output.
    */
-  public function runAsAgent(string $assistant_id, array $chat_history, array $defaults, string $job_id, bool $verbose_mode = FALSE): ChatOutput {
+  public function runAsAgent(string $assistant_id, array $chat_history, array $defaults, string $job_id, bool $verbose_mode = FALSE, array $context = []): ChatOutput {
     $this->jobId = $job_id;
     /** @var \Drupal\ai_agents\PluginInterfaces\ConfigAiAgentInterface $agent */
     $agent = $this->aiAgentPluginManager->createInstance($assistant_id);
@@ -85,6 +92,8 @@ class AgentRunner {
         $agent->setLooped(FALSE);
       }
     }
+    $event = new AiAssistantPassContextToAgentEvent($agent, $context);
+    $this->eventDispatcher->dispatch($event, AiAssistantPassContextToAgentEvent::EVENT_NAME);
     $agent->determineSolvability();
     // If the agent is still running, we store it for the next run.
     if (!$agent->isFinished()) {

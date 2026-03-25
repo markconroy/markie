@@ -5,8 +5,8 @@
  * The base module for upgrade status.
  */
 
-use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Extension\Extension;
+use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\upgrade_status\ProjectCollector;
 
 /**
@@ -33,8 +33,8 @@ function upgrade_status_help($route_name, RouteMatchInterface $route_match) {
       $help .= '<p>' . t('There are no configuration options on Upgrade Status, now that is installed go to <a href=":upgrade_status_report">Administration » Reports » Upgrade status</a> to use', [':upgrade_status_report' => '/admin/reports/upgrade-status']) . '</p>';
 
       $help .= '<ul>';
-      $help .= '<li>' . t('For a full description, visit the <a href="!project_page">project page</a>', ['!project_page' => 'https://www.drupal.org/project/upgrade_status']) . '</li>';
-      $help .= '<li>' . t('To submit bug reports and feature suggestions, or to track changes, visit the <a href="!project_issue_queue">project issue queue</a>', ['!project_issue_queue' => 'https://www.drupal.org/project/issues/upgrade_status'])  . '</li>';
+      $help .= '<li>' . t('For a full description, visit the <a href="@project_page">project page</a>', ['@project_page' => 'https://www.drupal.org/project/upgrade_status']) . '</li>';
+      $help .= '<li>' . t('To submit bug reports and feature suggestions, or to track changes, visit the <a href="@project_issue_queue">project issue queue</a>', ['@project_issue_queue' => 'https://www.drupal.org/project/issues/upgrade_status']) . '</li>';
       $help .= '</ul>';
       return $help;
   }

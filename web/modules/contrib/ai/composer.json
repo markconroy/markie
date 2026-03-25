@@ -9,10 +9,12 @@
         "openai-php/client": ">=v0.10.1"
     },
     "require-dev": {
-        "drupal/eca": "^2.0",
+        "drupal/address": "^2.0",
         "drupal/field_validation": "^3.0@beta",
         "drupal/search_api": "^1.x-dev",
         "drupal/search_api_solr": "^4.0",
+        "drupal/test_helpers": "^1.5",
+        "drupal/opentelemetry": "^1.0@beta",
         "drupal/token": "^1.14",
         "drush/drush": "^12|^13",
         "allanpichardo/mysql-vector": "^2.0"

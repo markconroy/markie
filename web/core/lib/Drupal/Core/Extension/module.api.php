@@ -853,7 +853,8 @@ function hook_update_N(&$sandbox) {
  * a THEME.post_update.php file.
  *
  * These updates are executed after all hook_update_N() implementations. At this
- * stage Drupal is already fully repaired so you can use any API as you wish.
+ * stage Drupal is already fully bootstrapped so you can use any API as you
+ * wish.
  *
  * NAME can be arbitrary machine names. In contrast to hook_update_N() the
  * alphanumeric naming of functions in the file is the only thing which ensures
@@ -942,8 +943,9 @@ function hook_post_update_NAME(&$sandbox) {
 function hook_removed_post_updates(): array {
   return [
     'my_module_post_update_foo' => '8.x-2.0',
-    'my_module_post_update_bar' => '8.x-3.0',
-    'my_module_post_update_baz' => '8.x-3.0',
+    'my_module_post_update_bar' => '3.0.0',
+    'my_module_post_update_baz' => '4.0.0',
+    'my_module_post_update_qux' => '4.0.0',
   ];
 }
 

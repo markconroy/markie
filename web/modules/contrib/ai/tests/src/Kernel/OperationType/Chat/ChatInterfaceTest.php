@@ -95,10 +95,12 @@ class ChatInterfaceTest extends KernelTestBase {
     // Response should be a string and be the following.
     $response_text = "Hello world! Input: $text. Config: [].";
     // Its an iterator.
+    $total_text = '';
     foreach ($message as $message_part) {
       $this->assertIsString($message_part->getText());
-      $this->assertEquals($response_text, trim($message_part->getText(), "\n"));
+      $total_text .= $message_part->getText();
     }
+    $this->assertEquals($response_text, trim($total_text, "\n"));
   }
 
   /**

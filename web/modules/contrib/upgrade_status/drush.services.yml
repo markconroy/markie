@@ -6,5 +6,6 @@ services:
       - '@upgrade_status.project_collector'
       - '@upgrade_status.deprecation_analyzer'
       - '@date.formatter'
+      - '@keyvalue'
     tags:
       - { name: drush.command }

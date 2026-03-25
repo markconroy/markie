@@ -3,11 +3,14 @@
 namespace Drupal\ai\OperationType\Chat\Tools;
 
 use Drupal\ai\Exception\AiToolsValidationException;
+use Drupal\ai\Traits\OperationType\ChatTrait;
 
 /**
  * The property results.
  */
 class ToolsPropertyResult implements ToolsPropertyResultInterface {
+
+  use ChatTrait;
 
   /**
    * The name of the property.
@@ -66,6 +69,20 @@ class ToolsPropertyResult implements ToolsPropertyResultInterface {
    * {@inheritDoc}
    */
   public function setValue($value) {
+    switch (gettype($value)) {
+      case 'string':
+        $value = $this->getHostnameFilterService()->filterText((string) $value);
+        break;
+
+      case 'array':
+        // Itterate all values that are strings and filter them.
+        foreach ($value as $key => $item) {
+          if (is_string($item)) {
+            $value[$key] = $this->getHostnameFilterService()->filterText((string) $item);
+          }
+        }
+        break;
+    }
     $this->value = $value;
   }
 

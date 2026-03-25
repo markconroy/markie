@@ -5,11 +5,16 @@ This document outlines the steps the Publishing Manager needs to take to publish
 1. [Tag the patch release](tagging_a_release.md) and push it up to the remote repository
 2. Visit https://git.drupalcode.org/project/ai/-/tags and verify that the tag corresponds to the correct version number and includes all intended changes.
 3. Check the diff between the last release and the new tag to ensure it matches the intended changes.
+4. Verify in the tag branch that the following UIs have been built and committed:
+   - `ui/mdxeditor/dist/assets`
+   - `ui/json-schema-editor/dist`
+   - `modules/ai_ckeditor/js/build`
 
-## Confirm Fixed Issues
+## QA Test
 1. Review the list of issues and merge requests that were intended to be included in the patch release.
 2. Try out and verify that the issues have been resolved in the codebase.
 3. A full test of the module is not required for patch releases, but if you have time it is recommended to do a quick smoke test of the main functionality.
+
 
 ## Publish a Release
 1. (If scheduled) The time to publish the release should be between 16:00 and 20:00 UTC on a Wednesday. Outside of this time frame, only critical patch releases should be published (see below).
@@ -24,5 +29,5 @@ This document outlines the steps the Publishing Manager needs to take to publish
 10. Click Save to publish the release.
 
 ## Communicate the Release
-1. Once the release is published, communicate the release to the relevant stakeholders and on the #ai-contrib channel on Drupal Slack.
-2. Include the version number, a brief summary of the changes, and a link to the release notes on the Drupal.org project page.
+1. Ensure the release is officially published on Drupal.org
+2. [Communicate the release on Slack](communicating_a_release.md)
