@@ -24,8 +24,8 @@ function markconroy_preprocess_image_widget(array &$variables) {
  * Implements hook_preprocess_HOOK() for page templates.
  */
 function markconroy_preprocess_page(array &$variables) {
-  // $variables['#attached']['library'][] = 'markconroy/course-signup-popup-form';
-  $variables['#attached']['library'][] = 'markconroy/mailing-list-signup-popup-form';
+  $variables['#attached']['library'][] =
+    'markconroy/mailing-list-signup-popup-form';
 }
 
 /**
