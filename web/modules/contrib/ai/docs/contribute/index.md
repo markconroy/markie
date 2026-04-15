@@ -70,12 +70,12 @@ After installation…
 1. Add your API key to the Key module at `/admin/config/system/keys/add`.
 2. Visit `/admin/config/ai/providers/openai` and link the key you created.
 3. Once your AI Provider(s) is configured, the AI module will select appropriate
-   defaults for the various [Operation Types](/developers/base_calls/#the-operation-types-and-how-to-use-them).
+   defaults for the various [Operation Types](../developers/base_calls.md#the-operation-types-and-how-to-use-them).
    You can make your own selections by visiting `/admin/config/ai/settings` and
    updating the settings manually.
 4. Enable your desired submodules for specific functionality.
 
-For advanced setup options, see the [DDEV documentation for Drupal AI](../developers/ddev/).
+For advanced setup options, see the [DDEV documentation for Drupal AI](../developers/ddev.md).
 
 ### Creating an Issue Fork and Merge Request
 

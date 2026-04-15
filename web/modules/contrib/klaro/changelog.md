@@ -1,3 +1,15 @@
+**V.3.0.10**
+
+- Issue #3584237: Update-Hook breaks services and produces WPOD [Bugfix]
+
+**V.3.0.9**
+
+- Issue #3567998: Errors in callback code should not kill the Klaro consent banner
+- Issue #3568001: Posthog Service callback code doesn't work anymore [Bugfix]
+                  (please review javascript callback function after dbupdate!)
+- Issue #3568262: Add a Stripe (commerce_stripe) service
+- Issue #3568267: Scripts matching source + Opt-Out + Toggled by default (+required) should not get blocked server-side
+
 **V.3.0.8**
 
 - Issue #3491519: Add service to block Posthog

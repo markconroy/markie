@@ -12,7 +12,7 @@ use Drupal\field_widget_actions\Attribute\FieldWidgetAction;
 #[FieldWidgetAction(
   id: 'classification_options_select',
   label: new TranslatableMarkup('Classification (Options/Chosen Select)'),
-  widget_types: ['options_select', 'chosen_select'],
+  widget_types: ['options_select', 'chosen_select', 'cshs'],
   field_types: ['entity_reference'],
   multiple: FALSE,
 )]

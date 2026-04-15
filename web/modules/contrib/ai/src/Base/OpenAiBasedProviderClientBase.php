@@ -2,6 +2,7 @@
 
 namespace Drupal\ai\Base;
 
+use Drupal\ai\Exception\AiSetupFailureException;
 use Drupal\Component\Serialization\Json;
 use Drupal\Core\Config\ImmutableConfig;
 use Drupal\Core\File\FileExists;
@@ -199,9 +200,19 @@ abstract class OpenAiBasedProviderClientBase extends AiProviderClientBase implem
     if ($this->hasAuthentication()) {
       // Only set authentication when not set.
       if (empty($this->apiKey)) {
-        $this->setAuthentication($this->loadApiKey());
+        try {
+          $key = $this->loadApiKey();
+        }
+        catch (AiSetupFailureException $e) {
+          $this->loggerFactory->get('ai')->error($e->getMessage());
+        }
+        if (!empty($key)) {
+          $this->setAuthentication($key);
+        }
       }
-      $clientFactory = $clientFactory->withApiKey($this->apiKey);
+      if (!empty($this->apiKey)) {
+        $clientFactory = $clientFactory->withApiKey($this->apiKey);
+      }
     }
 
     $client = $clientFactory->withHttpClient($this->httpClient);
@@ -373,8 +384,8 @@ abstract class OpenAiBasedProviderClientBase extends AiProviderClientBase implem
 
       return $chat_output;
     }
-    catch (\Exception $e) {
-      $this->handleApiException($e);
+    catch (\Throwable $e) {
+      $this->handleApiThrowable($e);
       throw $e;
     }
     return new ChatOutput($message, $response, []);
@@ -402,13 +413,13 @@ abstract class OpenAiBasedProviderClientBase extends AiProviderClientBase implem
 
     try {
       $response = $this->client->moderations()->create($payload)->toArray();
-      $normalized = new ModerationResponse($response['results'][0]['flagged'], $response['results'][0]['category_scores']);
-      return new ModerationOutput($normalized, $response, []);
     }
-    catch (\Exception $e) {
-      $this->handleApiException($e);
+    catch (\Throwable $e) {
+      $this->handleApiThrowable($e);
       throw $e;
     }
+    $normalized = new ModerationResponse($response['results'][0]['flagged'], $response['results'][0]['category_scores']);
+    return new ModerationOutput($normalized, $response, []);
   }
 
   /**
@@ -429,8 +440,8 @@ abstract class OpenAiBasedProviderClientBase extends AiProviderClientBase implem
     try {
       $response = $this->client->images()->create($payload)->toArray();
     }
-    catch (\Exception $e) {
-      $this->handleApiException($e);
+    catch (\Throwable $e) {
+      $this->handleApiThrowable($e);
     }
 
     $images = [];
@@ -449,7 +460,7 @@ abstract class OpenAiBasedProviderClientBase extends AiProviderClientBase implem
             $images[] = new ImageFile($image_content, 'image/png', 'generated.png');
           }
         }
-        catch (\Exception $e) {
+        catch (\Throwable $e) {
           $this->loggerFactory->get('ai')->error('Failed to fetch image from URL @url: @message', [
             '@url' => $data['url'],
             '@message' => $e->getMessage(),
@@ -482,13 +493,13 @@ abstract class OpenAiBasedProviderClientBase extends AiProviderClientBase implem
 
     try {
       $response = $this->client->audio()->speech($payload);
-      $output = new AudioFile($response, 'audio/mpeg', 'speech.mp3');
-      return new TextToSpeechOutput([$output], $response, []);
     }
-    catch (\Exception $e) {
-      $this->handleApiException($e);
+    catch (\Throwable $e) {
+      $this->handleApiThrowable($e);
       throw $e;
     }
+    $output = new AudioFile($response, 'audio/mpeg', 'speech.mp3');
+    return new TextToSpeechOutput([$output], $response, []);
   }
 
   /**
@@ -511,10 +522,9 @@ abstract class OpenAiBasedProviderClientBase extends AiProviderClientBase implem
 
     try {
       $response = $this->client->audio()->transcribe($payload)->toArray();
-      return new SpeechToTextOutput($response['text'], $response, []);
     }
-    catch (\Exception $e) {
-      $this->handleApiException($e);
+    catch (\Throwable $e) {
+      $this->handleApiThrowable($e);
       throw $e;
     }
     finally {
@@ -522,6 +532,7 @@ abstract class OpenAiBasedProviderClientBase extends AiProviderClientBase implem
         fclose($input);
       }
     }
+    return new SpeechToTextOutput($response['text'], $response, []);
   }
 
   /**
@@ -541,12 +552,12 @@ abstract class OpenAiBasedProviderClientBase extends AiProviderClientBase implem
 
     try {
       $response = $this->client->embeddings()->create($payload)->toArray();
-      return new EmbeddingsOutput($response['data'][0]['embedding'], $response, []);
     }
-    catch (\Exception $e) {
-      $this->handleApiException($e);
+    catch (\Throwable $e) {
+      $this->handleApiThrowable($e);
       throw $e;
     }
+    return new EmbeddingsOutput($response['data'][0]['embedding'], $response, []);
   }
 
   /**
@@ -567,6 +578,43 @@ abstract class OpenAiBasedProviderClientBase extends AiProviderClientBase implem
       throw new AiQuotaException($e->getMessage());
     }
     throw $e;
+  }
+
+  /**
+   * Handle any Throwable from the API client.
+   *
+   * Call sites catching \Throwable should route through this method. PHP
+   * errors (e.g. \TypeError from the OpenAI PHP client) are wrapped in an
+   * AiResponseErrorException so that all consumers receive a regular
+   * exception they can catch. Everything else delegates to
+   * handleApiException(), preserving backwards compatibility with
+   * subclasses that override handleApiException(\Exception $e).
+   *
+   * Subclasses that want a single hook covering both exceptions and errors
+   * may override this method directly.
+   *
+   * Two methods exist — handleApiException(\Exception) and
+   * handleApiThrowable(\Throwable) — because a previous widening of
+   * handleApiException() to \Throwable was an incompatible change
+   * that broke subclasses (e.g. the Anthropic provider) overriding it with
+   * \Exception. The wider hook was reintroduced here as an opt-in method
+   * so contributed providers can keep their existing overrides.
+   *
+   * @param \Throwable $e
+   *   The throwable to handle.
+   *
+   * @throws \Drupal\ai\Exception\AiRateLimitException
+   * @throws \Drupal\ai\Exception\AiQuotaException
+   * @throws \Drupal\ai\Exception\AiResponseErrorException
+   * @throws \Exception
+   */
+  protected function handleApiThrowable(\Throwable $e): void {
+    // Wrap PHP errors (TypeError, ValueError, etc.) in an
+    // AiResponseErrorException so consumers can catch a single exception type.
+    if ($e instanceof \Error) {
+      throw new AiResponseErrorException($e->getMessage(), $e->getCode(), $e);
+    }
+    $this->handleApiException($e);
   }
 
   /**

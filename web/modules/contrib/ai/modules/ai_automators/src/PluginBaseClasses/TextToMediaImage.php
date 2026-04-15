@@ -214,7 +214,7 @@ class TextToMediaImage extends RuleBase implements ContainerFactoryPluginInterfa
       $path = $fileHelper->createFilePathFromFieldConfig($value['filename'], $mediaFields[$fileField], $entity);
       $imageData = $fileHelper->generateImageMetaDataFromBinary($value['binary'], $path);
       $media = $mediaStorage->create([
-        'name' => substr($value['prompt'], 0, 250),
+        'name' => mb_substr($value['prompt'], 0, 250),
         'bundle' => $mediaType,
         $fileField => $imageData,
       ]);

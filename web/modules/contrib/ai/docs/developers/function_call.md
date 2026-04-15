@@ -193,11 +193,38 @@ Function Call plugins can be organized into groups using the `group` parameter i
 
 Groups are defined as separate plugins using the `#[FunctionGroup]` attribute. The AI module provides several built-in groups like `information_tools` and `modification_tools`.
 
+### Overriding context definitions per instance
+
+The static `context_definitions` declared in the `#[FunctionCall]` attribute are shared by every instance of the plugin. Sometimes you need to adjust a parameter for a single call without affecting the underlying plugin definition - for example, to tighten a constraint, change a label, or add an additional parameter that only applies in a specific context.
+
+`FunctionCallBase` implements `OverridableFunctionCallInterface`, which exposes a `setContextDefinitionOverride()` method for this purpose. Overrides apply only to the instance they are set on and take precedence over the definition declared in the attribute.
+
+```php
+use Drupal\Core\Plugin\Context\ContextDefinition;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+
+$instance = $function_call_manager->createInstance('my_module:hello_world');
+
+$instance->setContextDefinitionOverride('name', new ContextDefinition(
+  data_type: 'string',
+  label: new TranslatableMarkup('Customer name'),
+  description: new TranslatableMarkup('The customer to greet by name.'),
+  required: TRUE,
+));
+
+// getContextDefinition() and getContextDefinitions() now return the
+// overridden definition for this instance. Other instances are unaffected.
+$definition = $instance->getContextDefinition('name');
+```
+
+Use this when you need to specialize a plugin for a specific caller. For anything that should apply globally, change the `#[FunctionCall]` attribute on the plugin instead.
+
 ### Related files
 
 * [FunctionCallBase.php](https://git.drupalcode.org/project/ai/-/blob/1.2.x/src/Base/FunctionCallBase.php) - Base class with default implementations
 * [ExecutableFunctionCallInterface.php](https://git.drupalcode.org/project/ai/-/blob/1.2.x/src/Service/FunctionCalling/ExecutableFunctionCallInterface.php) - Interface for executable function calls
 * [StructuredExecutableFunctionCallInterface.php](https://git.drupalcode.org/project/ai/-/blob/1.2.x/src/Service/FunctionCalling/StructuredExecutableFunctionCallInterface.php) - Interface for structured output
+* [OverridableFunctionCallInterface.php](https://git.drupalcode.org/project/ai/-/blob/1.2.x/src/Service/FunctionCalling/OverridableFunctionCallInterface.php) - Interface for per-instance context definition overrides
 * [FunctionCall Schema](function_call_schema.md) - Documentation on parameter constraints
 
 ### Next steps

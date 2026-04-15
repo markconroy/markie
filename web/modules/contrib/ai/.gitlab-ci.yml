@@ -28,6 +28,9 @@ variables:
   # showdown.js is full of emoji words.
   _CSPELL_IGNORE_PATHS: "'assets/js/ai_chat_history_element.js', 'modules/*/tests/resources/ai_test/requests/*/*.yml', 'modules/ai_api_explorer/css', 'modules/ai_api_explorer/js', 'modules/ai_chatbot/js', 'modules/ai_chatbot/deepchat', 'modules/ai_chatbot/css', 'modules/ai_automators/tests/config', '.cspell-project-words.txt', 'grumphp.yml', 'ui'"
   COMPOSER_IGNORE_PLATFORM_REQS: 'ext-ffi'
+  # Selenium hostname for video recording in FunctionalJavascript tests.
+  # The Drupal CI template uses 'selenium' as the service alias.
+  DRUPAL_TEST_WEBDRIVER_HOSTNAME: selenium
 
 phpunit (previous major):
   allow_failure: true
@@ -88,6 +91,21 @@ js_build:
       npm install
       npm run build
       cd $CI_PROJECT_DIR
+
+mkdocs:
+  stage: test
+  image: python:3.12-alpine
+  rules:
+    - changes:
+        - mkdocs.yml
+        - docs/**/*
+        - docs/*
+        - README.md
+      when: on_success
+    - when: never
+  script:
+    - pip install mkdocs mkdocs-material mike mkdocs-glightbox mkdocs-include-markdown-plugin
+    - mkdocs build --strict
 
 pages:
   stage: .post
@@ -154,11 +172,42 @@ phpstan:
     - echo "ffi.enable=true" >> /usr/local/etc/php/conf.d/docker-php-ext-ffi.ini
     # Show the configuration for debugging purposes.
     - php --ri ffi
+    # Filter FunctionalJavascript tests and conditionally install ffmpeg.
+    # See scripts/filter-functionaljavascript-tests.sh for details.
+    - source $CI_PROJECT_DIR/scripts/filter-functionaljavascript-tests.sh
+    - |
+      if [ "${HAS_FJS:-0}" = "1" ]; then
+        apt-get update && apt-get install -y --no-install-recommends ffmpeg
+      else
+        echo "No FunctionalJavascript tests to run, skipping ffmpeg installation."
+      fi
+
+composer:
+  before_script:
+    # Workaround for https://www.drupal.org/project/opentelemetry/issues/3581743
+    - composer require "google/protobuf:4.33.6 as 3.25.0" --no-update
 
 composer (previous major):
   before_script:
     # We need doctrine/instantiator to still be on 2.0 for previous major.
     - composer require doctrine/instantiator:"2.0.0" --no-update
+    # Workaround for https://www.drupal.org/project/opentelemetry/issues/3581743
+    - composer require "google/protobuf:4.33.6 as 3.25.0" --no-update
+
+composer (previous minor):
+  before_script:
+    # Workaround for https://www.drupal.org/project/opentelemetry/issues/3581743
+    - composer require "google/protobuf:4.33.6 as 3.25.0" --no-update
+
+composer (next minor):
+  before_script:
+    # Workaround for https://www.drupal.org/project/opentelemetry/issues/3581743
+    - composer require "google/protobuf:4.33.6 as 3.25.0" --no-update
+
+composer (max PHP version):
+  before_script:
+    # Workaround for https://www.drupal.org/project/opentelemetry/issues/3581743
+    - composer require "google/protobuf:4.33.6 as 3.25.0" --no-update
 
 # Add js_build to `needs` of all phpunit jobs as it has mdxeditor assets.
 phpunit (max PHP version):

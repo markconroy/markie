@@ -8,7 +8,7 @@ services:
     arguments: ['@service_container', '@messenger', '@uuid', '@ai.hostname_filter_service']
   ai.form_helper:
     class: Drupal\ai\Service\AiProviderFormHelper
-    arguments: ['@ai.provider', '@path.current']
+    arguments: ['@ai.provider', '@path.current', '@messenger']
   ai.prompt_json_decode:
     class: Drupal\ai\Service\PromptJsonDecoder\PromptJsonDecoder
   ai.prompt_code_block_extractor:

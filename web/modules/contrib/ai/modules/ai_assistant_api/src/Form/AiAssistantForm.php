@@ -182,6 +182,7 @@ final class AiAssistantForm extends EntityForm {
         'rows' => 2,
         'placeholder' => $this->t('An assistant that can find old articles and also publish and unpublish them.'),
       ],
+      '#required' => TRUE,
       // This property will land into core soon, see
       // https://www.drupal.org/project/drupal/issues/3202631. It can stay
       // after this is added to Drupal core.
@@ -196,11 +197,11 @@ final class AiAssistantForm extends EntityForm {
       '#type' => 'textarea',
       '#title' => $this->t('Instructions'),
       '#default_value' => $agent_entity ? $agent_entity->get('system_prompt') : $entity->get('instructions') ?? '',
-      '#required' => FALSE,
       '#attributes' => [
         'rows' => 15,
         'placeholder' => $this->t('If the user asks questions about unpublished articles, make sure to add status unpublished somewhere in the lookup.'),
       ],
+      '#required' => TRUE,
       // This property will land into core soon, see
       // https://www.drupal.org/project/drupal/issues/3202631. It can stay
       // after this is added to Drupal core.

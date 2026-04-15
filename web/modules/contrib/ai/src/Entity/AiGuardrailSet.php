@@ -125,4 +125,25 @@ final class AiGuardrailSet extends ConfigEntityBase implements AiGuardrailSetInt
     return $this->stop_threshold;
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function calculateDependencies(): static {
+    parent::calculateDependencies();
+    // Collect all used guardrail plugin ids.
+    $guardrail_ids = array_merge(
+      $this->pre_generate_guardrails['plugin_id'] ?? [],
+      $this->post_generate_guardrails['plugin_id'] ?? [],
+    );
+    // Create unique list of plugin ids.
+    $guardrail_ids = array_unique($guardrail_ids);
+    if (!empty($guardrail_ids)) {
+      // In case there are guardrails, add them as config dependencies.
+      foreach (AiGuardrail::loadMultiple($guardrail_ids) as $guardrail) {
+        $this->addDependency('config', $guardrail->getConfigDependencyName());
+      }
+    }
+    return $this;
+  }
+
 }

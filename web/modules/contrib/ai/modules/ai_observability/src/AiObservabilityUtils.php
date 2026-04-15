@@ -69,15 +69,15 @@ class AiObservabilityUtils {
    *   The stringified AI payload.
    */
   public static function summarizeAiPayloadData(string $payload, int $maxLength = 1024): string {
-    if (strlen($payload) <= $maxLength) {
+    if (mb_strlen($payload) <= $maxLength) {
       return $payload;
     }
     // If truncation is needed, insert '...' in the middle.
     $ellipsis = '[...]';
-    $keep = $maxLength - strlen($ellipsis);
+    $keep = $maxLength - mb_strlen($ellipsis);
     $start = (int) ceil($keep / 2);
     $end = (int) floor($keep / 2);
-    return substr($payload, 0, $start) . $ellipsis . substr($payload, -$end);
+    return mb_substr($payload, 0, $start) . $ellipsis . mb_substr($payload, -$end);
   }
 
 }

@@ -588,9 +588,13 @@ class AiAssistantApiRunner {
       return $history;
     }
     // Otherwise just return the last message.
-    return [
-      ['role' => 'user', 'message' => $this->userMessage->getMessage()],
-    ];
+    if (isset($this->userMessage) && $this->userMessage instanceof UserMessage) {
+      return [
+        ['role' => 'user', 'message' => $this->userMessage->getMessage()],
+      ];
+    }
+    // No message yet, return empty history.
+    return [];
   }
 
   /**

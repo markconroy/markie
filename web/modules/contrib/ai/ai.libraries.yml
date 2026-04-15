@@ -35,6 +35,7 @@ chat_history_element:
   js:
     assets/js/ai_chat_history_element.js: {}
   dependencies:
+    - core/drupal
     - core/once
   css:
     theme:
@@ -44,6 +45,7 @@ ai_global:
   js:
     assets/js/ai_global.js: { }
   dependencies:
+    - core/drupal
     - core/once
   css:
     component:

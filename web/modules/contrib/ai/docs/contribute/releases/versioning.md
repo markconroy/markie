@@ -5,7 +5,7 @@ The AI module generally follows the principles of [Semantic Versioning](https://
 This means that version numbers are in the format of `MAJOR.MINOR.PATCH-{stability}`. This means that the version number is made up of three parts:
 
 ## MAJOR version
-The MAJOR version is incremented when there are incompatible API changes, backward-incompatible changes, full deprecations or significant changes that may require users to make adjustments when upgrading. In these cases we can not always guarantee that you will have an working upgrade path without manual intervention, though we will always try to provide as smooth an upgrade path as possible. Follow the [Breaking Changes document](breaking_changes.md) to get a sense of how to communicate those effectively.
+The MAJOR version is incremented when there are incompatible API changes, backward-incompatible changes, full deprecations or significant changes that may require users to make adjustments when upgrading. In these cases we can not always guarantee that you will have a working upgrade path without manual intervention, though we will always try to provide as smooth an upgrade path as possible. Follow the [Breaking Changes document](breaking_changes.md) to get a sense of how to communicate those effectively.
 
 ## MINOR version
 The MINOR version is incremented when functionality is added in a backward-compatible manner. This includes new features, enhancements, and improvements that do not break existing functionality. Minor versions may also include deprecations, but these should not affect existing functionality.

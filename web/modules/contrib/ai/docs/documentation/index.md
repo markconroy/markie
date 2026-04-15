@@ -1,7 +1,7 @@
 # Documentation (How To)
 
 ## Where do I find this documentation
-In the Gitlab [repository](https://git.drupalcode.org/project/ai) there is a docs repository. All documentation you see on this page have been built from that.
+In the Gitlab [repository](https://git.drupalcode.org/project/ai) there is a docs repository. All documentation you see on this page has been built from that.
 
 This means that if you want an offline version of this documentation, this is where you can find it.
 
@@ -20,15 +20,15 @@ pip install mkdocs mike mkdocs-material mkdocs-include-markdown-plugin
 Then you can run `mkdocs serve` in the root directory of the AI module and it will be available under `http://localhost:8000` by default.
 
 ## My changes only apply for specific versions
-Just make the MR to latest version it applied to it, and they you can tag the issue as "Backport to version x.x.x" and the maintainer that merges it will make sure it shows up on all the different documentations.
+Just make the MR to the latest version it applies to, and then you can tag the issue as "Backport to version x.x.x" and the maintainer that merges it will make sure it shows up on all the different documentations.
 
 ## What should go into this documentation
-In general its quite broad - of course anything that affects AI and its submodules, but also big stroke documentation for Providers and AI Agents.
+In general it's quite broad - of course anything that affects AI and its submodules, but also big stroke documentation for Providers and AI Agents.
 
-If you contribute to an Provider and want to promote it or write installation instructions, feel free to push it under the providers directory.
+If you contribute to a Provider and want to promote it or write installation instructions, feel free to push it under the providers directory.
 
 ## How do you switch the default version (for Maintainers)
-This can only be done by maintainers that has the right to push to the repo. When you have decided that we for instance have a stable release or near stable release of a version and want to make that the default when you visit https://project.pages.drupalcode.org/ai/ these are the following things you need to to.
+This can only be done by maintainers that have the right to push to the repo. When you have decided that we for instance have a stable release or near stable release of a version and want to make that the default when you visit https://project.pages.drupalcode.org/ai/ these are the following things you need to do.
 
 In this case we do 3.1.x for instance.
 

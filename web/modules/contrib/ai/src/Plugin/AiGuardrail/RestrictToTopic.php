@@ -234,8 +234,18 @@ final class RestrictToTopic extends AiGuardrailPluginBase implements Configurabl
     }
 
     $text = $last_message->getText();
-    $valid_topics = array_filter(array_map('trim', explode("\n", $this->configuration['valid_topics'] ?? '')));
-    $invalid_topics = array_filter(array_map('trim', explode("\n", $this->configuration['invalid_topics'] ?? '')));
+    $valid_topics = array_filter(
+      array_map(
+        'mb_strtolower',
+        array_map('trim', explode("\n", $this->configuration['valid_topics'] ?? ''))
+      )
+    );
+    $invalid_topics = array_filter(
+      array_map(
+        'mb_strtolower',
+        array_map('trim', explode("\n", $this->configuration['invalid_topics'] ?? ''))
+      )
+    );
     $all_topics = array_merge($valid_topics, $invalid_topics);
     $all_topics_formatted = implode(',', $all_topics);
 
@@ -284,7 +294,10 @@ PROMPT;
       ->chat($input, $model, ['ai'])
       ->getNormalized();
     $response_decoded = json_decode($response->getText());
-    $topics_present = $response_decoded->topics_present ?? [];
+    $topics_present = array_map(
+      'mb_strtolower',
+      $response_decoded->topics_present ?? []
+    );
 
     $invalid_topics_found = [];
     $valid_topics_found = [];

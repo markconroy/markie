@@ -33,14 +33,14 @@ this module, you may get unexpected results.
    be sent to your chosen LLM, and a translation in the selected language
    automatically created. **It is highly recommended that this translation is
    reviewed manually** as the translation is automatically created from the LLM
-   response: in cases of errors, this will be the error message sent my the LLM.
+   response: in cases of errors, this will be the error message sent by the LLM.
 
 ## Recommended modules
 - If you are using async translations and paragraphs, we recommend the
   [Translate Paragraph Asymetric (with AI)](https://www.drupal.org/project/ai_translate_paragraph_asymetric) module.
 
 ## Layout builder
-WIf you are interested in Layout Builder integration with this module, please see [this issue](https://www.drupal.org/project/ai/issues/3467075).
+If you are interested in Layout Builder integration with this module, please see [this issue](https://www.drupal.org/project/ai/issues/3467075).
 
 ## Similar modules
 - https://www.drupal.org/project/ai_tmgmt Ai Translation management tools (use tmgmt with the ai module as a translation provider)

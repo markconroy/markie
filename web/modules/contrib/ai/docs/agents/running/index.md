@@ -8,7 +8,7 @@ The initial agents created for Drupal 1.0.0 had extra metadata to the output to 
 For backwards compatibility, we will still support the old output format, but we will be replacing this in future versions to a simpler way of running agents.
 
 ## Running Agents in Custom Code
-To run an agent in your custom code, its as simple as loading the agents id via the plugin manager and calling the `solve` method.
+To run an agent in your custom code, it's as simple as loading the agent's id via the plugin manager and calling the `solve` method.
 
 The simplest implementation looks something like this:
 

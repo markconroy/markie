@@ -25,3 +25,11 @@ ai_test.form_elements:
     _form: 'Drupal\ai_test\Form\FormElementForm'
   requirements:
     _permission: 'administer ai'
+
+ai_test.provider_configuration_test:
+  path: '/admin/config/ai/test-provider-configuration-values'
+  defaults:
+    _title: 'AI Provider Configuration Value Test'
+    _form: 'Drupal\ai_test\Form\AiProviderConfigurationTestForm'
+  requirements:
+    _permission: 'administer ai'

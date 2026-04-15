@@ -1,6 +1,6 @@
 ## Chat
 
-Chat is probably the most used by far - this the "ChatGPT call" or usually how you interact with a LLM. So it takes a message conversation back and forth and returns the message from the service.
+Chat is probably the most used by far - this is the "ChatGPT call" or usually how you interact with an LLM. So it takes a message conversation back and forth and returns the message from the service.
 
 ### Example normalized Chat call
 
@@ -28,14 +28,14 @@ Note that if a model takes images, you can give that as the third parameter of t
 
 ### Chat Interfaces & Models
 
-The following files defines the methods available when doing a chat call as well as the input and output.
+The following files define the methods available when doing a chat call as well as the input and output.
 
 * [ChatInterface.php](https://git.drupalcode.org/project/ai/-/blob/1.0.x/src/OperationType/Chat/ChatInterface.php?ref_type=heads)
 * [ChatInput.php](https://git.drupalcode.org/project/ai/-/blob/1.0.x/src/OperationType/Chat/ChatInput.php?ref_type=heads)
 * [ChatOutput.php](https://git.drupalcode.org/project/ai/-/blob/1.0.x/src/OperationType/Chat/ChatOutput.php?ref_type=heads)
 
 ### Setting system messages.
-There is an abstracted way to set system messages for the providers that allows for it, the method is called `setSystemPrompt` on the `ChatInput` and it will just takes the system role you want to set. Note that different providers weights these instructions more or less, so in  certain cases it might make more sense to use two user messages instead.
+There is an abstracted way to set system messages for the providers that allow for it, the method is called `setSystemPrompt` on the `ChatInput` and it just takes the system role you want to set. Note that different providers weight these instructions more or less, so in certain cases it might make more sense to use two user messages instead.
 
 ### Structured output
 
@@ -68,18 +68,18 @@ $response = $provider->chat($input, 'gpt-4o');
 
 You can also create the schema from an array with `StructuredOutputSchema::fromArray([...])`, or pass a plain array directly to `setChatStructuredJsonSchema()` (keys: `name`, `description`, `strict`, and `schema` or `json_schema` for the schema content). The DTO validates the schema (e.g. `name` must be lowercase letters, numbers, underscores, hyphens; schema content must be a non-empty array). See `\Drupal\ai\Dto\StructuredOutputSchema` and `ChatInput::setChatStructuredJsonSchema()` in the codebase for full usage and validation details.
 
-### Streaming vs None-Streaming output.
-There is a helper method when using the chat providers that makes it possible to stream the output, if the chat provider has the possibility to do so. This can be set via the method `$input->setStreamedOutput(TRUE);` on the ChatInput object. This will give you back an iterator or generator that you can do a foreach on flush the output buffers each time. See the section in [Develop Third Party module](develop_third_party_module.md/#streaming-chat) about how to add checks for it.
+### Streaming vs Non-Streaming output.
+There is a helper method when using the chat providers that makes it possible to stream the output, if the chat provider has the possibility to do so. This can be set via the method `$input->setStreamedOutput(TRUE);` on the ChatInput object. This will give you back an iterator or generator that you can do a foreach on and flush the output buffers each time. See the section in [Develop Third Party module](develop_third_party_module.md/#streaming-chat) about how to add checks for it.
 
 ### Chat Explorer
 If you install the AI API Explorer, you can go `configuration > AI > AI API Explorer > Chat Generation Explorer` under `/admin/config/ai/explorers/chat-generation` to test out different calls and see the code that you need for it.
 
-Here comes some examples of different type of levels you might want to integrate the module at. In these examples the code is loaded as a static, for best practice use Dependency Injection.
+Here are some examples of different types of levels you might want to integrate the module at. In these examples the code is loaded as a static, for best practice use Dependency Injection.
 
 ### Running in Fibers
-Some of the providers supports running the requests in Fibers, meaning that you can run multiple requests in parallel. This is very useful when you have multiple calls that are not dependent on each other. There is a AiProviderCapability enum that you can check if the provider supports it.
+Some of the providers support running the requests in Fibers, meaning that you can run multiple requests in parallel. This is very useful when you have multiple calls that are not dependent on each other. There is an AiProviderCapability enum that you can check if the provider supports it.
 
-The providers that supports this will realize that they are running in a fiber and start a fiber for each request. See the tests/src/AiLlm/FiberTest.php for an example of how to do this.
+The providers that support this will realize that they are running in a fiber and start a fiber for each request. See the tests/src/AiLlm/FiberTest.php for an example of how to do this.
 
 ### Getting rate limits from the provider
 If your provider has rate limits, you can set them on the `ChatOutput` object returned by the `chat` method using `setRateLimits()`. This lets your provider return a `ChatProviderLimitsDto` object with values such as maximum requests, remaining requests, and reset time. Consumers can then read this data with `getRateLimits()` to manage and display provider rate limit status.

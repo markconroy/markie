@@ -6,10 +6,10 @@ information like request duration, token usage, optionally input prompts text
 and output, etc.
 
 This makes it possible to track the usage of tokens per user, per provider,
-build aggregated reports and usage charts, calculate cost usage an expenses,
+build aggregated reports and usage charts, calculate cost usage and expenses,
 limit per-week token usage per user, and many more.
 
-This module only produce logs, that can be stored anywhere - in the local Drupal
+This module only produces logs, that can be stored anywhere - in the local Drupal
 database, Syslog, file, cloud log collectors.
 
 For quick start and local development it's recommended to use the "Extended Logger"

@@ -108,7 +108,9 @@ class RegexpGuardrail extends AiGuardrailPluginBase implements ConfigurableInter
       '#type' => 'textfield',
       '#required' => TRUE,
       '#title' => $this->t('Regexp Pattern'),
-      '#description' => $this->t('The regular expression pattern to match.'),
+      '#description' => $this->t('Enter a regular expression pattern, including delimiters. Example: @example', [
+        '@example' => '/[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,}/i',
+      ]),
       '#default_value' => $this->configuration['regexp_pattern'] ?? '',
       // This property will land into core soon, see
       // https://www.drupal.org/project/drupal/issues/3202631. It can stay
@@ -147,6 +149,34 @@ class RegexpGuardrail extends AiGuardrailPluginBase implements ConfigurableInter
     array &$form,
     FormStateInterface $form_state,
   ): void {
+    $pattern = $form_state->getValue('regexp_pattern');
+    if (!empty($pattern)) {
+      // Use a recording error handler to capture the actual PCRE compiler
+      // diagnostic from the E_WARNING text (e.g. "Compilation failed: missing
+      // terminating ] at offset 5"). The @ operator and error_get_last() cannot
+      // be used here because @ suppresses the error before it is stored.
+      // preg_last_error_msg() only returns generic codes like "Internal error".
+      $error_message = NULL;
+      set_error_handler(
+        static function () use (&$error_message): bool {
+          $errstr = (string) func_get_arg(1);
+          $error_message = preg_replace('/^preg_match\(\): /', '', $errstr);
+          return TRUE;
+        },
+        E_WARNING
+      );
+      $result = preg_match($pattern, '');
+      restore_error_handler();
+
+      if ($result === FALSE) {
+        $form_state->setErrorByName(
+          'regexp_pattern',
+          $this->t('Invalid regular expression: @error', [
+            '@error' => $error_message ?? preg_last_error_msg(),
+          ])
+        );
+      }
+    }
   }
 
   /**

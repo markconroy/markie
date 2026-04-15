@@ -2,7 +2,7 @@
 
 When you want to develop a third party module using the available [calls](base_calls.md) in the AI module, here are some tips and pointers.
 
-## First check so a provider exists for you operation type.
+## First check so a provider exists for your operation type.
 
 If you want your third party module to use chat for instance and there is no chat provider installed, you have to have some graceful fallback where you tell that to the user.
 
@@ -19,7 +19,7 @@ if (!\Drupal::service('ai_provider')->hasProvidersForOperationType('chat', TRUE)
 
 ## Default model for operation type
 
-For each operation type the end user can set an default provider and model. There are also a couple of pseudo operation types, that are based on capabilities + operation type, like Chat with Image Vision (chat_with_image_vision) and Chat with Complex JSON (chat_with_complex_json).
+For each operation type the end user can set a default provider and model. There are also a couple of pseudo operation types, that are based on capabilities + operation type, like Chat with Image Vision (chat_with_image_vision) and Chat with Complex JSON (chat_with_complex_json).
 
 If you load the AI Provider Plugin service (`ai.provider`), you can use the method `getDefaultProviderForOperationType` that takes the operation type data name and gives back an array if it exists, so you can write something like this:
 
@@ -92,7 +92,7 @@ This one is not set in stone yet and will most likely change before going into p
 
 It goes a little bit like this.
 
-In you config form:
+In your config form:
 
 ```php
 
@@ -122,7 +122,7 @@ Sometimes when you have your own provider picker, you might need to listen for e
 via the [Provider Disabled event](events.md)
 
 ### Setting Chat system messages.
-There is an abstracted way to set system messages for the providers that allows for it, the method is called `setSystemPrompt` and just takes the system role you want to set. Note that different providers weights these instructions more or less, so in certain cases it might make more sense to use two user messages instead.
+There is an abstracted way to set system messages for the providers that allow for it, the method is called `setSystemPrompt` and just takes the system role you want to set. Note that different providers weight these instructions more or less, so in certain cases it might make more sense to use two user messages instead.
 
 So it would be something like this:
 
@@ -139,7 +139,7 @@ $input->setSystemPrompt('You are an expert at bananas.')
 
 There is a way to output the chat as a stream, meaning that it outputs the words as they come in. For your third party provider to support it, you need to first turn this on (or have it as a config) via the method `$input->setStreamedOutput(TRUE);` on the ChatInput object.
 
-When you have turned this on, its important to note that not all providers support this, so you have to add a check and respond correctly depending on how it works. This is an example of how to do this.
+When you have turned this on, it's important to note that not all providers support this, so you have to add a check and respond correctly depending on how it works. This is an example of how to do this.
 
 ```php
 use Drupal\ai\OperationType\Chat\StreamedChatMessageIteratorInterface;
@@ -147,7 +147,7 @@ use Drupal\ai\Response\AiStreamedResponse;
 use Symfony\Component\HttpFoundation\Response;
 
 $response = $ai_provider->chat($some_messages, 'model')->getNormalized();
-// If its streaming.
+// If it's streaming.
 if (is_object($response) && $response instanceof StreamedChatMessageIteratorInterface) {
   // AiStreamedResponse sets the required headers for streaming
   // (X-Accel-Buffering, Cache-Control, Content-Type) and clears

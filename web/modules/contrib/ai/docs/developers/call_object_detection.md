@@ -6,7 +6,7 @@ Object Detection calls are calls that can take an image and identify objects wit
 
 ### Example normalized Object Detection call
 
-The following is an example of sending the file street_photo.jpg into Huggingface with the facebook/detr-resnet-50 model and getting the detected objects back in form of an array of ObjectDetectionItem.
+The following is an example of sending the file street_photo.jpg into Huggingface with the facebook/detr-resnet-50 model and getting the detected objects back in the form of an array of ObjectDetectionItem.
 
 ```php
 use Drupal\ai\OperationType\GenericType\ImageFile;
@@ -27,7 +27,7 @@ foreach ($detection_items as $item) {
 
 ### Object Detection Interfaces & Models
 
-The following files defines the methods available when doing a Object Detection call as well as the input and output.
+The following files define the methods available when doing an Object Detection call as well as the input and output.
 
 * [ObjectDetectionInterface.php](https://git.drupalcode.org/project/ai/-/blob/HEAD/src/OperationType/ObjectDetection/ObjectDetectionInterface.php)
 * [ObjectDetectionInput.php](https://git.drupalcode.org/project/ai/-/blob/HEAD/src/OperationType/ObjectDetection/ObjectDetectionInput.php)

@@ -2,7 +2,7 @@
 ## What is the AI CKEditor integration module?
 The AI CKEditor integration module provides a number of plugins that integrate
 with core's CK Editor 5 module. These plugins allow data to be passed to an LLM
-to allow it to make suggests about content, from translations to tone
+to allow it to make suggestions about content, from translations to tone
 suggestions to text completion.
 
 ## Dependencies

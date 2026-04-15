@@ -75,7 +75,10 @@ Subsystem maintainers
     - Artem Dmitriiev 'admitriiev' https://www.drupal.org/u/admitriiev
 
 Release managers
- - ?
+ - Marcus Johansson 'marcus_johansson' https://www.drupal.org/u/marcus_johansson
+ - Artem Dmitriiev 'admitriiev' https://www.drupal.org/u/admitriiev
+ - Abhisek Mazumdar 'abhisekmazumdar' https://www.drupal.org/u/abhisekmazumdar
+ - Rob Loach 'robloach' https://www.drupal.org/u/robloach
 
 Coordination with AI initiative
   - Kristen Pol 'kristen pol' https://www.drupal.org/u/kristen-pol

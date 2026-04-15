@@ -560,6 +560,10 @@ class GeneralHelper {
       return NULL;
     }
     $formatsAllowed = $fieldDefinition->getSetting('allowed_formats');
+    // If no formats are allowed, return NULL.
+    if ($formatsAllowed === NULL) {
+      return NULL;
+    }
     // All formats are allowed.
     if (empty($formatsAllowed)) {
       $formatsAllowed = array_keys($allFormats);

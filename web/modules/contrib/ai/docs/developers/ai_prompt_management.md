@@ -17,7 +17,7 @@ The AI Prompt management provides two mechanisms to manage prompts:
 
 AI Prompts and AI Prompt Types are stored as configuration and therefore work
 with config install, drush deployments, and other useful configuration features.
-Site builders wishing to pass on control to content editors to management
+Site builders wishing to pass on control to content editors to manage
 prompts can utilize the Config Ignore module.
 
 ### AI Prompt Type
@@ -58,12 +58,12 @@ $prompt = Drupal::token()->replace($prompt, [
 
 #### Prompt autocomplete
 
-Since version 1.3.0 prompt field of AI Prompt entity uses [MDXEditor](https://mdxeditor.dev/).
-More about the editor read [here](mdxeditor.md)
+Since version 1.3.0 the prompt field of the AI Prompt entity uses [MDXEditor](https://mdxeditor.dev/).
+Read more about the editor [here](mdxeditor.md).
 The editor has a typeahead plugin that is used as autocomplete for variables and tokens
-that are allowed to be used for given AI Prompt Type. By typing `{{` one can trigger
-the selection of variables, for tokens start typing `[`. If no variables nor tokens
-are defined in AI Prompt Type, the autocomplete will not be available.
+that are allowed to be used for a given AI Prompt Type. By typing `{{` one can trigger
+the selection of variables; for tokens, start typing `[`. If no variables or tokens
+are defined in the AI Prompt Type, the autocomplete will not be available.
 
 # AI Prompt Element.
 
@@ -98,7 +98,7 @@ So previously, your config for your module might have been:
 ```yaml
 my_prompt: "Suggest five synonyms for the word: {word}"
 ```
-But instead now would be the machine name of the AI Prompt, so at file:
+But instead now would be the machine name of the AI Prompt, so at the file:
 `config/install/ai.ai_prompt.my_prompt_type__synonym_suggestions`.
 ```yaml
 my_prompt: my_prompt_type__synonym_suggestions
@@ -170,7 +170,7 @@ followed by double underscore `__`.
 
 ## 3. Add your update hook to update existing configuration.
 
-This step is only needed if your module is already in use and user's will
+This step is only needed if your module is already in use and users will
 have existing configuration containing the raw prompt string. Add this as an
 update hook to your module's my_module.install file, or
 my_module.post_update.php file (as in the example below).

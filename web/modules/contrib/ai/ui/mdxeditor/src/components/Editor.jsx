@@ -116,7 +116,6 @@ function Editor({
             },
           }),
           toolbarPlugin({
-            toolbarClassName: "my-classname",
             toolbarContents: () => (
               <DiffSourceToggleWrapper>
                 <UndoRedo />

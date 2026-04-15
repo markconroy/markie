@@ -4,8 +4,8 @@ This module provides a UI to allow admins to test various LLM prompts against
 different LLMs to refine the prompts. The form passes a prompt to an LLM and
 displays the result, but in most cases doesn't perform any further actions with
 the output (some of the forms that generate file, audio or image outputs do
-provide the ability to store the output as a Media item, but is not intended to
-be used for bulk generation).
+provide the ability to store the output as a Media item, but it is not intended
+to be used for bulk generation).
 
 ## Providing your own forms
 The forms themselves are provided by a [Drupal plugin](https://www.drupal.org/docs/drupal-apis/plugin-api).

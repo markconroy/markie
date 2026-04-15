@@ -82,6 +82,13 @@ function klaro_js_alter(&$javascript, AttachedAssetsInterface $assets) {
     if ($script['type'] !== 'setting') {
       $app = $helper->matchKlaroApp($path);
       if ($app) {
+        // This Klaro app uses both ‘opt_out’ and ‘required’, so it must not be
+        // blocked server‑side to avoid altering its behavior:
+        // @todo Should we move this inside "matchKlaroApp" instead, or
+        // somewhere else?
+        if ($app->get('opt_out') === TRUE && $app->get('required') === TRUE) {
+          continue;
+        }
         $script['preprocess'] = FALSE;
         $script['klaro'] = $app->id();
       }

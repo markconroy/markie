@@ -4,6 +4,7 @@ namespace Drupal\ai\Service;
 
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Link;
+use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\Path\CurrentPathStack;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
@@ -50,16 +51,26 @@ class AiProviderFormHelper {
   protected $currentPath;
 
   /**
+   * The messenger service.
+   *
+   * @var \Drupal\Core\Messenger\MessengerInterface
+   */
+  protected $messenger;
+
+  /**
    * Constructs a new AiProviderHelper object.
    *
    * @param \Drupal\ai\AiProviderPluginManager $aiProviderPluginManager
    *   The LLM Providers plugin manager.
    * @param \Drupal\Core\Path\CurrentPathStack $currentPath
    *   The current path.
+   * @param \Drupal\Core\Messenger\MessengerInterface $messenger
+   *   The messenger service.
    */
-  public function __construct(AiProviderPluginManager $aiProviderPluginManager, CurrentPathStack $currentPath) {
+  public function __construct(AiProviderPluginManager $aiProviderPluginManager, CurrentPathStack $currentPath, MessengerInterface $messenger) {
     $this->aiProviderPluginManager = $aiProviderPluginManager;
     $this->currentPath = $currentPath;
+    $this->messenger = $messenger;
   }
 
   /**
@@ -179,7 +190,7 @@ class AiProviderFormHelper {
         }
       }
       catch (\Exception $e) {
-
+        $this->messenger->addWarning($this->t('The selected provider or model is not valid and has been reverted to the default. If no default is available, it has been cleared.'));
       }
 
     }

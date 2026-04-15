@@ -183,7 +183,9 @@ class EchoProvider extends AiProviderClientBase implements
     }
 
     if ($this->streamed) {
-      $output[] = sprintf('Hello world! Input: %s. Config: %s.', $normalized_input ?? $input, json_encode($this->configuration));
+      $string = sprintf('Hello world! Input: %s. Config: %s.', $normalized_input ?? $input, json_encode($this->configuration));
+      // Split the string every 10 characters to simulate streaming.
+      $output = str_split($string, 10);
       $iterator = new MockIterator($output);
       $message = new MockStreamedChatIterator($iterator);
     }

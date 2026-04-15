@@ -1,6 +1,6 @@
 # Polling for Agent Progress
 
-When you are setting up an UI for agents, one of the worst thing that can happen is that the user has to wait for minutes for some complex agent and the only thing they see is a loading spinner. Many users will assume that something is broken and leave the page.
+When you are setting up a UI for agents, one of the worst things that can happen is that the user has to wait for minutes for some complex agent and the only thing they see is a loading spinner. Many users will assume that something is broken and leave the page.
 
 Another issue is that we might want to debug what the agent is doing, while we are developing for it. Any debug tool, needs to be able to show the progress of the agent, what tools it has used, what contexts it has added and so on.
 
@@ -11,7 +11,7 @@ We have a progress service for this!
 ## The Poller Service
 The progress service is a service that you can use to poll for the progress of an agent. It is a simple service that you call with some unique identifier when you start an agent and then you can poll for the progress of that agent using the same identifier.
 
-The poller service is granular, meaning that you can tell the service before you start the agent, what type of progress you want to track. All events has some base data like the microtime started, runner id of the current agent, the caller id of a sub-agent. You can track the following event in order of when they occur:
+The poller service is granular, meaning that you can tell the service before you start the agent, what type of progress you want to track. All events have some base data like the microtime started, runner id of the current agent, the caller id of a sub-agent. You can track the following events in order of when they occur:
 
 * **AgentIterationExecutionInterface** - This gets called every time the agent starts a new iteration in the loop.
 * **AgentChatHistoryInterface** - This gets the chat history of the input and the loop number.
@@ -34,7 +34,7 @@ To run the poller service, you need to do one of the following:
 * Use the method setProgressThreadId($thread_id) on the agent before you call the determineSolvability() method. This will start the poller service with the given thread id. This is recommended.
 * Use the method setProgressTracking(TRUE) on the agent before you call the determineSolvability() method. This will start the poller service with a random thread id that you can get by calling getProgressThreadId() after you have called determineSolvability().
 
-NOTE: The storage of the poller service is an interface, so in the future new ways of storing this might be added. Currently there is only a PrivateTempStore implementation to make sure that the data is not stored permanently and that is secure for the user. This means that this will only work on anonymous users if you start a sessions for them. This also means that you can have the same thread id for different users, if you are sure that your application will not run in multiple tabs or browsers at the same time. Or with shared sessions/accounts.
+NOTE: The storage of the poller service is an interface, so in the future new ways of storing this might be added. Currently there is only a PrivateTempStore implementation to make sure that the data is not stored permanently and that is secure for the user. This means that this will only work on anonymous users if you start a session for them. This also means that you can have the same thread id for different users, if you are sure that your application will not run in multiple tabs or browsers at the same time. Or with shared sessions/accounts.
 
 Since you normally can't output information, unless you stream it, it is recommended that you use the thread id method, so that you can store the thread id in your UI and poll for it. The other option is that this is stored in a session or cookie.
 
@@ -60,7 +60,7 @@ $output = $agent->solve();
 ```
 
 ### How to poll for the progress of an agent
-To poll for the progress of an agent, you need to use the `ai_agents.agent_status_poller` service and call the `getProgress($thread_id)` method. This will return an array with implementation of each of the interfaces mentioned above. All those classes has a toArray() and toJson() method to make it easy to output the data.
+To poll for the progress of an agent, you need to use the `ai_agents.agent_status_poller` service and call the `getProgress($thread_id)` method. This will return an array with implementation of each of the interfaces mentioned above. All those classes have a toArray() and toJson() method to make it easy to output the data.
 
 Here is an example of how to poll for the progress of an agent:
 
@@ -76,7 +76,7 @@ foreach ($progress->getItems() as $event) {
 ### How to remove the progress of an agent
 When you are done with the progress of an agent, you can remove it from the storage by calling the `clearProgress($thread_id)` method on the `ai_agents.agent_status_poller` service. This will remove all the data for that thread id. Since it is PrivateTempStore, it will also be removed automatically after some time.
 
-This is recommended to do if you want to reuse the same thread id for another agent run and to reduce the amount of data stored. One nice way of doing it, is that you remove it when the next agent run start, instead of directly after the agent is done, in case you want to show the progress of the last run.
+This is recommended to do if you want to reuse the same thread id for another agent run and to reduce the amount of data stored. One nice way of doing it, is that you remove it when the next agent run starts, instead of directly after the agent is done, in case you want to show the progress of the last run.
 
 ## Making nicer output messages
 One problem with the current output is that it is very raw - so you could write "Running tool X" or "Calling LLM with Y" - but that is not very user friendly. What exists in the agent form as part of this, is that for each tool you can in the UI, set a feedback message.

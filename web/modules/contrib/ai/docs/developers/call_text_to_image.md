@@ -30,7 +30,7 @@ $file = $image->getAsFileEntity("public://", "image.png");
 
 ### Text-To-Image Interfaces & Models
 
-The following files defines the methods available when doing a text-to-image call as well as the input and output.
+The following files define the methods available when doing a text-to-image call as well as the input and output.
 
 * [TextToImageInterface.php](https://git.drupalcode.org/project/ai/-/blob/1.0.x/src/OperationType/TextToImage/TextToImageInterface.php?ref_type=heads)
 * [TextToImageInput.php](https://git.drupalcode.org/project/ai/-/blob/1.0.x/src/OperationType/TextToImage/TextToImageInput.php?ref_type=heads)

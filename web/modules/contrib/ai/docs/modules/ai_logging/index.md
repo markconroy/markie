@@ -55,7 +55,7 @@ The request log entities will store the following data:
 
 The logs are intended to be used short-term to assist developers with crafting
 their own prompts or custom code using the AI Base module's services. More
-general logging of LLM request may have performance, data protection and privacy
+general logging of LLM requests may have performance, data protection and privacy
 implications that developers should consider before enabling this module on a
 public-facing site.
 

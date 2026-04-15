@@ -2,6 +2,7 @@
 
 namespace Drupal\ai_chatbot\Plugin\Block;
 
+use Drupal\ai_assistant_api\AiAssistantInterface;
 use Drupal\Component\Serialization\Json;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Access\AccessResult;
@@ -509,33 +510,55 @@ class DeepChatFormBlock extends BlockBase implements ContainerFactoryPluginInter
    * {@inheritdoc}
    */
   protected function blockAccess(AccountInterface $account) {
-    // Load the AI assistant entity based on the block configuration.
-    $assistant = $this->entityTypeManager->getStorage('ai_assistant')->load($this->configuration['ai_assistant']);
-
-    // Check if the assistant exists and is enabled.
-    if (!$assistant || !$assistant->status()) {
+    if (empty($this->configuration['ai_assistant'])) {
       return AccessResult::forbidden();
+    }
+
+    // Load the AI assistant entity based on the block configuration.
+    /** @var \Drupal\ai_assistant_api\AiAssistantInterface $assistant */
+    $assistant = $this->entityTypeManager
+      ->getStorage('ai_assistant')
+      ->load($this->configuration['ai_assistant']);
+
+    // Check if the assistant exists.
+    if (!$assistant instanceof AiAssistantInterface) {
+      return AccessResult::forbidden()->addCacheTags(['ai_assistant_list']);
+    }
+
+    // Check if the assistant is enabled.
+    if (!$assistant->status()) {
+      return AccessResult::forbidden()->addCacheableDependency($assistant);
     }
 
     // Set the assistant in the runner and check setup and access.
     $this->aiAssistantRunner->setAssistant($assistant);
     if (!$this->aiAssistantRunner->isSetup()) {
-      return AccessResult::forbidden();
+      return AccessResult::forbidden()->addCacheableDependency($assistant);
     }
     if (!$this->aiAssistantRunner->userHasAccess()) {
-      return AccessResult::forbidden();
+      return AccessResult::forbidden()->addCacheableDependency($assistant)->cachePerUser();
     }
 
     // If all checks pass, allow access.
-    return AccessResult::allowed();
+    return AccessResult::allowed()->addCacheableDependency($assistant)->cachePerUser();
   }
 
   /**
    * {@inheritdoc}
    */
   public function build() {
-    /** @var \Drupal\ai_assistant_api\Entity\AiAssistant $assistant */
-    $assistant = $this->entityTypeManager->getStorage('ai_assistant')->load($this->configuration['ai_assistant']);
+    if (empty($this->configuration['ai_assistant'])) {
+      return [];
+    }
+
+    /** @var \Drupal\ai_assistant_api\AiAssistantInterface $assistant */
+    $assistant = $this->entityTypeManager->getStorage('ai_assistant')
+      ->load($this->configuration['ai_assistant']);
+
+    if (!$assistant instanceof AiAssistantInterface || !$assistant->status()) {
+      return [];
+    }
+
     $active_theme = $this->themeManager->getActiveTheme()->getName();
 
     $this->aiAssistantRunner->setAssistant($assistant);

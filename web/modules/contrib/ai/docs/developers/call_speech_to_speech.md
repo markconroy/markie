@@ -34,7 +34,7 @@ $file = $audio->getAsFileEntity("public://", "audio.mp3");
 
 ### Speech-To-Speech Interfaces & Models
 
-The following files defines the methods available when doing a Speech-To-Speech call as well as the input and output.
+The following files define the methods available when doing a Speech-To-Speech call as well as the input and output.
 
 * [SpeechToSpeechInterface.php](https://git.drupalcode.org/project/ai/-/blob/1.0.x/src/OperationType/SpeechToSpeech/SpeechToSpeechInterface.php?ref_type=heads)
 * [SpeechToSpeechInput.php](https://git.drupalcode.org/project/ai/-/blob/1.0.x/src/OperationType/SpeechToSpeech/SpeechToSpeechInput.php?ref_type=heads)

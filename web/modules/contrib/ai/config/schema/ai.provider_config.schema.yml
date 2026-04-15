@@ -17,11 +17,9 @@ ai.provider_config:
       type: string
       label: 'Model ID'
     configuration:
-      type: mapping
+      type: ignore
       label: 'Provider Configuration'
       nullable: true
-      mapping:
-        type: ignore
   constraints:
     ProviderModelDependency: ~
     FullyValidatable: ~

@@ -5,9 +5,9 @@ entity.automator_chain_type.collection:
   route_name: entity.automator_chain_type.collection
 
 ai_automators.list:
-  title: 'AI Automators'
-  description: 'Configure the AI Automators.'
-  parent: ai.admin_settings
+  title: 'AI Automation Workflows'
+  description: 'Configure automated AI-powered workflows for content processing and field generation.'
+  parent: ai.admin_config_tools
   route_name: ai_automators.list
 
 entity.automators_tool.overview:

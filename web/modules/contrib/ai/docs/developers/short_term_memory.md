@@ -6,7 +6,7 @@ For more information please see the [OpenAI Cookbook on Short-Term Memory](https
 
 ## Implementing Short-Term Memory in the AI Module
 
-If you are implementing a custom AI solution, that is looping over many thread or that might have to take long chat histories into account, you should consider implementing or using a custom Short-Term Memory plugin. The AI module comes with an API for this, as well as two default implementations:
+If you are implementing a custom AI solution, that is looping over many threads or that might have to take long chat histories into account, you should consider implementing or using a custom Short-Term Memory plugin. The AI module comes with an API for this, as well as two default implementations:
 
 **Last N** - This uses simple context trimming, where only the last N messages are kept in the context. This is useful for simple use cases, or when you want to make sure that the AI always has the most recent context.
 **Agent Memory Summarizer** - This plugin uses a more advanced approach, where it keeps track of tool calls and their results, and summarizes the context based on this. This is useful for more complex use cases, where the AI might have to take into account many different pieces of information, but only a few are relevant for the current task. Note that the default prompt of this plugin is generic, and you should consider customizing it for your specific use case.

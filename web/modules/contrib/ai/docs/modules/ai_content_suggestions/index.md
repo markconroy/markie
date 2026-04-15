@@ -1,6 +1,6 @@
 # AI Content Suggestions
 ## What is the AI Content Suggestions module?
-This module assistants content editors obtain feedback from a configured LLM
+This module assists content editors to obtain feedback from a configured LLM
 about the node they are editing.
 
 ## Dependencies

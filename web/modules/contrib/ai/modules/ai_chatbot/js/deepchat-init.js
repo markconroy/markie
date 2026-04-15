@@ -356,6 +356,17 @@
         Drupal.behaviors.deepChatToggle.stepMessages = [];
         // Reset the should continue.
         Drupal.behaviors.deepChatToggle.shouldContinue = false;
+
+        const agentCallEvent = new CustomEvent("agent-call-completed", {
+          detail: {
+            message: {
+              role: 'ai',
+              html: data.html
+            }
+          }
+        });
+
+        deepchatElement.dispatchEvent(agentCallEvent);
       }
       // Empty
     }).catch(error => {

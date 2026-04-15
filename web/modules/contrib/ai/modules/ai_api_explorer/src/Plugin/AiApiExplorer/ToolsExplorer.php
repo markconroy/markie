@@ -312,7 +312,7 @@ final class ToolsExplorer extends AiApiExplorerPluginBase {
           // Set constant value (forced value).
           case 'force_value':
             $property->addConstraint('FixedValue', $values[0]);
-            $property->setDefaultValue($limit['values'][0]);
+            $property->setDefaultValue($values[0]);
             $property->setRequired(FALSE);
             break;
 

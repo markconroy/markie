@@ -2,11 +2,11 @@
 
 ## Audio-To-Audio
 
-Audio-To-Audio calls are calls that can take an audio file and convert it to another audio file. For instance Auphonic is a provider that can fix audio levels and background noise on audio using AI.
+Audio-To-Audio calls are calls that can take an audio file and convert it to another audio file. For instance, Auphonic is a provider that can fix audio levels and background noise on audio using AI.
 
 ### Example normalized Audio-To-Audio call
 
-The following is an example of sending the file hello_there.mp3 into Auphonics model/preset default and getting the audio file back.
+The following is an example of sending the file hello_there.mp3 into Auphonic's model/preset default and getting the audio file back.
 
 ```php
 use Drupal\ai\OperationType\GenericType\AudioFile;
@@ -34,7 +34,7 @@ $file = $audio->getAsFileEntity("public://", "audio.mp3");
 
 ### Audio-To-Audio Interfaces & Models
 
-The following files defines the methods available when doing a Audio-To-Audio call as well as the input and output.
+The following files define the methods available when doing an Audio-To-Audio call as well as the input and output.
 
 * [AudioToAudioInterface.php](https://git.drupalcode.org/project/ai/-/blob/1.0.x/src/OperationType/AudioToAudio/AudioToAudioInterface.php?ref_type=heads)
 * [AudioToAudioInput.php](https://git.drupalcode.org/project/ai/-/blob/1.0.x/src/OperationType/AudioToAudio/AudioToAudioInput.php?ref_type=heads)

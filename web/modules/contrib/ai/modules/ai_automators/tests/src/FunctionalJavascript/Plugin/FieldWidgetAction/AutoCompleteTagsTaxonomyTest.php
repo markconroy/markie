@@ -1,6 +1,8 @@
 <?php
 
-namespace Drupal\Tests\ai_automators\FunctionalJavascriptTests\Plugin\FieldWidgetAction;
+declare(strict_types=1);
+
+namespace Drupal\Tests\ai_automators\FunctionalJavascript\Plugin\FieldWidgetAction;
 
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
@@ -12,8 +14,14 @@ use Symfony\Component\Yaml\Yaml;
  * Tests the field widget action for AutoCompleteTagsTaxonomy.
  *
  * @group ai_automators
+ * @group 3577469
  */
 class AutoCompleteTagsTaxonomyTest extends BaseClassFunctionalJavascriptTests {
+
+  /**
+   * {@inheritdoc}
+   */
+  protected bool $videoRecording = TRUE;
 
   /**
    * {@inheritdoc}
@@ -35,7 +43,7 @@ class AutoCompleteTagsTaxonomyTest extends BaseClassFunctionalJavascriptTests {
   /**
    * {@inheritdoc}
    */
-  protected $screenshotModuleName = 'ai_automators';
+  protected string $screenshotModuleName = 'ai_automators';
 
   /**
    * {@inheritdoc}

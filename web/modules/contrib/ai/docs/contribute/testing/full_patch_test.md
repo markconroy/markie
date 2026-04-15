@@ -1,6 +1,6 @@
-# Full patch test 1.2.x
+# Full patch test 1.3.x
 
-This is a full patch test for the 1.2.x branch. It includes all changes made since the last full patch test. Note that this is very shallow testing and does not cover all edge cases. Please go through all the issues being added in this patch and test the relevant functionality as well.
+This is a full patch test for the 1.3.x branch. It includes all changes made since the last full patch test. Note that this is very shallow testing and does not cover all edge cases. Please go through all the issues being added in this patch and test the relevant functionality as well.
 
 ## Setup a new environment
 1. Create a new folder called `drupal-11-test` with latest version of Drupal 11.
@@ -10,7 +10,7 @@ This is a full patch test for the 1.2.x branch. It includes all changes made sin
 5. `ddev composer create-project "drupal/recommended-project:^11"`
 6. `ddev composer require drush/drush`
 7. `ddev drush site:install --account-name=admin --account-pass=admin -y`
-8. `ddev composer require 'drupal/ai:^1.2' 'drupal/ai_agents:^1.2' 'drupal/ai_provider_openai:^1.2' 'drupal/ai_vdb_provider_milvus:^1.1@beta'`
+8. `ddev composer require 'drupal/ai:^1.3' 'drupal/ai_agents:^1.2' 'drupal/ai_provider_openai:^1.2' 'drupal/ai_vdb_provider_milvus:^1.1@beta'`
 9. `ddev composer require 'drupal/field_validation:^3.0@beta' 'drupal/search_api:^1.40' 'drupal/token:^1.17' 'drupal/admin_toolbar:^3.6'`
 10. Copy the file [docker-compose.milvus.yaml](./resources/docker-compose.milvus.yaml) to the `.ddev` folder.
 11. `ddev restart`
@@ -37,7 +37,7 @@ This is a full patch test for the 1.2.x branch. It includes all changes made sin
 7. Click `Save configuration`
 
 ## Test the base functionality
-1. You can see this under [Testing a AI Provider](../../developers/testing_an_ai_provider.md). Just test the OpenAI provider as normal.
+1. You can see this under [Testing an AI Provider](../../developers/testing_an_ai_provider.md). Just test the OpenAI provider as normal.
 
 ## Setup AI Search
 1. Visit https://drupal11-test.ddev.site/admin/config/search/search-api
@@ -84,6 +84,39 @@ This is a full patch test for the 1.2.x branch. It includes all changes made sin
 2. Click `Edit`
 3. Click `Save` without changing anything.
 4. After the page reloads, the Tags field should be populated with 2 tags that fit the article.
+
+## Field Widget Actions
+
+### Field Widget Action Text-To-Image
+1. Make sure that AI Automators and Field Widget Action modules are enabled.
+2. Create a content type under https://drupal11-test.ddev.site/admin/structure/types/add
+3. In label set "Image Creation"
+4. Click "Save and manage fields"
+5. Click "Create a new field"
+6. Pick "File upload"
+7. Set the label to "Created Image"
+8. Pick "Image" from the checkbox and click "Continue"
+9. Scroll down and check "Enable AI Automator"
+10. In the "Choose AI Automator Type" the "Image Generation"
+11. In "Automator Base Field" pick "Title"
+12. In Automator Prompt write "Create an image about {{ context }}"
+13. Open "Advanced Settings"
+14. Pick "Field Widget" under "Automator Worker"
+15. Click Save.
+16. Goto form display for the content type: https://drupal11-test.ddev.site/admin/structure/types/manage/image_creation/form-display
+17. On Created Image, click the cogwheel to edit the field settings.
+18. Open "Field Widget Actions"
+19. Under "Add new action" choose Text to Image and click "Add action"
+20. Check "Enable Automators"
+21. Open "Enable an Automator" and click "Created Image Default"
+22. Click "Update"
+23. Click "Save"
+24. Go to Create Image Creation under https://drupal11-test.ddev.site/node/add/image_creation
+25. In the title write "A cat playing chess"
+26. Click "Text to Image" button - this might take a while.
+27. You should see that an image is generated and attached to the Created Image field.
+28. Make sure to delete the entity if you created it.
+29. Delete the content type: https://drupal11-test.ddev.site/admin/structure/types/manage/image_creation/delete
 
 ## Test Agents
 1. Visit https://drupal11-test.ddev.site/admin/config/ai/agents
@@ -209,13 +242,75 @@ This is a full patch test for the 1.2.x branch. It includes all changes made sin
 8. In the input, enter `What content types are available on this website?`
 9. The assistant should respond with `The available content types on this website are Article and Basic page.`
 
+## Guardrails
+
+### First Guardrail
+1. Visit Guardrails page at: https://drupal11-test.ddev.site/admin/config/ai/guardrails
+2. Click "Add guardrail"
+3. Set Label to "Banana Guardrail"
+4. Set Guardrail to "Restrict to Topic"
+5. Set "Valid Response Message" to:
+   ```
+   bananas
+   fruit
+   ```
+6. Set "Message to send if valid topics are present" to "You can only ask questions about bananas."
+7. Click "Save"
+
+### Second Guardrail
+1. Visit Guardrails page at: https://drupal11-test.ddev.site/admin/config/ai/guardrails
+2. Click "Add guardrail"
+3. Set Label to "Orange Regex Guardrail"
+4. Set Guardrail to "Regex Guardrail"
+5. Set "Regexp Pattern" to "/orange/i"
+6. Set "Violation Message" to "The request contains oranges - we do not like that."
+7. Click "Save"
+
+### Create Guardrail Set
+1. Visit Guardrails page at: https://drupal11-test.ddev.site/admin/config/ai/guardrails
+2. Click tab "AI Guardrail sets"
+3. Click "Add guardrail set"
+4. Set Label to "Fruit Guardrail Set"
+5. In "Pre generated guardrails" select "Orange Regex Guardrail" and click "Add Guardrail"
+6. In "Pre generated guardrails" select "Banana Guardrail" and click "Add Guardrail"
+7. In "Pre generated guardrails" select "Orange Regex Guardrail" and click "Add Guardrail"
+8. On the right side of Orange Regex Guardrail, click "Remove" to see that ajax removal works.
+9. Click "Save"
+
+### Test the Guardrail Set Regex Guardrail
+1. Enable the AI API Explorer module if you haven't already.
+2. Visit the Chat Explorer on: https://drupal11-test.ddev.site/admin/config/ai/explorers/chat_generator
+3. In the "System Prompt" field enter "Always answer with an answer about Mercedes."
+4. In the message field enter "Talk about oranges please!"
+5. Open "Advanced" and then Guardrails and select "Fruit Guardrail Set"
+6. Click "Ask the AI"
+7. You should get back a response that says "The request contains oranges - we do not like that." if the guardrail is working correctly.
+
+### Test the Guardrail Set Topic Guardrail.
+1. Enable the AI API Explorer module if you haven't already.
+2. Visit the Chat Explorer on: https://drupal11-test.ddev.site/admin/config/ai/explorers/chat_generator
+3. In the "System Prompt" field enter "Always answer with an answer about Mercedes."
+4. In the message field enter "What is Mercedes really about?"
+5. Open "Advanced" and then Guardrails and select "Fruit Guardrail Set"
+6. Click "Ask the AI"
+7. You should get back a response that says "You can only ask questions about bananas." if the guardrail is working correctly.
+
+### Test that it bypassed valid requests.
+1. Enable the AI API Explorer module if you haven't already.
+2. Visit the Chat Explorer on: https://drupal11-test.ddev.site/admin/config/ai/explorers/chat_generator
+3. In the "System Prompt" field enter "Always answer with an answer about Mercedes."
+4. In the message field enter "Bananas sure taste great!"
+5. Open "Advanced" and then Guardrails and select "Fruit Guardrail Set"
+6. Click "Ask the AI"
+7. You should get back an AI generated response about Mercedes and fruit or something similar to it.
+
 ## Upgrade test (on first run only)
-1. Now run `ddev composer require 'drupal/ai:1.2.x-dev@dev'` to get the latest changes in the 1.2.x branch.
+1. Now run `ddev composer require 'drupal/ai:1.3.x-dev@dev'` to get the latest changes in the 1.3.x branch.
 2. Run database updates with `ddev drush updb -y`. Usually this is not needed for patch releases, but run it to be sure.
 3. Clear caches with `ddev drush cr`
 
 ## Re-test the base functionality
-1. No rerun all test categories above to ensure everything still works after the upgrade.
+1. Now rerun all test categories above to ensure everything still works after the upgrade.
 
 ## Re-test with the updated code on install
 1. Run `ddev delete -O && ddev start` to delete the environment.

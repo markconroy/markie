@@ -3,7 +3,7 @@
 namespace Drupal\Tests\ai\Unit\Traits\File;
 
 use Drupal\Core\DependencyInjection\ContainerBuilder;
-use Drupal\Core\ProxyClass\File\MimeType\MimeTypeGuesser;
+use Drupal\Core\File\MimeType\MimeTypeGuesser;
 use Drupal\ai\Traits\File\FileMimeTypeTrait;
 use PHPUnit\Framework\TestCase;
 
@@ -20,7 +20,7 @@ class FileMimeTypeTraitTest extends TestCase {
   /**
    * The mime type guesser mock.
    *
-   * @var \Drupal\Core\ProxyClass\File\MimeType\MimeTypeGuesser|\PHPUnit\Framework\MockObject\MockObject
+   * @var \Drupal\Core\File\MimeType\MimeTypeGuesser|\PHPUnit\Framework\MockObject\MockObject
    */
   protected $mimeTypeGuesser;
 

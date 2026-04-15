@@ -607,10 +607,13 @@ abstract class AiProviderClientBase implements AiProviderInterface, ContainerFac
    *   Thrown when API key could not be loaded or empty.
    */
   protected function loadApiKey(): string {
-    $key = $this->keyRepository->getKey($this->getConfig()->get('api_key'));
-    // If it came here, but the key is missing, something is wrong with the env.
-    if (!$key || !($api_key = $key->getKeyValue())) {
-      throw new AiSetupFailureException(sprintf('Could not load the %s API key, please check your environment settings or your setup key.', $this->getPluginDefinition()['label']));
+    $api_key = $this->keyRepository->getKey($this->getConfig()->get('api_key') ?? '')?->getKeyValue();
+    if (!$api_key) {
+      throw new AiSetupFailureException(
+        sprintf(
+          'Could not load the %s API key, please check your environment settings or your setup key.',
+          $this->getPluginDefinition()['label']),
+      );
     }
     return $api_key;
   }

@@ -84,6 +84,7 @@ abstract class EntityReference extends RuleBase {
     'decimal',
     'float',
     'list_float',
+    'link',
   ];
 
   /**

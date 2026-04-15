@@ -10,7 +10,9 @@
 }
 
 .ai-tools-library-menu {
-  position: relative;
+  position: sticky;
+  top: 0;
+  align-self: flex-start;
   display: block;
   width: var(--vertical-tabs-menu-width);
   margin: 0;
@@ -147,6 +149,7 @@
   width: 100%;
   padding: 1em;
   outline: none;
+  overflow-y: auto;
 }
 
 .ai-tools-library-menu + .ai-tools-library-content {

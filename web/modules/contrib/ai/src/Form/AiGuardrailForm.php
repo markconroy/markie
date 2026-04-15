@@ -150,6 +150,29 @@ final class AiGuardrailForm extends EntityForm {
   /**
    * {@inheritdoc}
    */
+  public function validateForm(
+    array &$form,
+    FormStateInterface $form_state,
+  ): void {
+    parent::validateForm($form, $form_state);
+
+    $guardrail_id = $form_state->getValue('guardrail');
+    if ($guardrail_id) {
+      $guardrail = $this->aiGuardrailPluginManager->createInstance($guardrail_id);
+      if ($guardrail instanceof PluginFormInterface) {
+        $plugin_form_state = $this->createPluginFormState($form_state);
+        $guardrail->validateConfigurationForm($form, $plugin_form_state);
+        // Copy errors back from the cloned plugin form state to the main state.
+        foreach ($plugin_form_state->getErrors() as $name => $error) {
+          $form_state->setErrorByName($name, $error);
+        }
+      }
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function submitForm(
     array &$form,
     FormStateInterface $form_state,

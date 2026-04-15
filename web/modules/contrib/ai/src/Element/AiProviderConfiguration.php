@@ -90,7 +90,7 @@ class AiProviderConfiguration extends FormElementBase {
     if (is_array($input)) {
       // Input is an array structure like
       // ['provider_model' => 'provider__model', 'config' => [...]].
-      $selected_value = NestedArray::getValue($input, $select_parents) ?? '';
+      $selected_value = NestedArray::getValue($form_state->getUserInput(), $select_parents) ?? '';
     }
     elseif (is_string($input)) {
       // If input is a string (legacy/fallback), use it directly.
@@ -150,7 +150,7 @@ class AiProviderConfiguration extends FormElementBase {
       // Try to get config from $input first (if it's an array structure).
       $config_input = [];
       if (is_array($input)) {
-        $config_input = NestedArray::getValue($input, $config_parents) ?? [];
+        $config_input = NestedArray::getValue($form_state->getUserInput(), $config_parents) ?? [];
       }
 
       // Fallback to user input if not found in $input.

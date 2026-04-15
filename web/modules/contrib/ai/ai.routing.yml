@@ -2,6 +2,63 @@ ai.settings.menu:
   path: '/admin/config/ai'
   defaults:
     _title: 'AI'
+    _controller: '\Drupal\ai\Controller\AiAdminController::overview'
+  requirements:
+    _permission: 'administer ai'
+
+# Category routes for grouped menu display.
+ai.admin_config_infrastructure:
+  path: '/admin/config/ai/infrastructure'
+  defaults:
+    _title: 'AI Infrastructure'
+    _controller: '\Drupal\system\Controller\SystemController::systemAdminMenuBlockPage'
+  requirements:
+    _permission: 'administer ai'
+
+ai.admin_config_tools:
+  path: '/admin/config/ai/tools-automation'
+  defaults:
+    _title: 'Tools & Automation'
+    _controller: '\Drupal\system\Controller\SystemController::systemAdminMenuBlockPage'
+  requirements:
+    _permission: 'administer ai'
+
+ai.admin_config_content:
+  path: '/admin/config/ai/content-creation'
+  defaults:
+    _title: 'Content Creation & Support'
+    _controller: '\Drupal\system\Controller\SystemController::systemAdminMenuBlockPage'
+  requirements:
+    _permission: 'administer ai'
+
+ai.admin_config_people:
+  path: '/admin/config/ai/people-accounts'
+  defaults:
+    _title: 'People, Accounts & Users'
+    _controller: '\Drupal\system\Controller\SystemController::systemAdminMenuBlockPage'
+  requirements:
+    _permission: 'administer ai'
+
+ai.admin_config_safety:
+  path: '/admin/config/ai/safety-compliance'
+  defaults:
+    _title: 'Safety & Compliance'
+    _controller: '\Drupal\system\Controller\SystemController::systemAdminMenuBlockPage'
+  requirements:
+    _permission: 'administer ai'
+
+ai.admin_config_search:
+  path: '/admin/config/ai/search-discovery'
+  defaults:
+    _title: 'Search & Discovery'
+    _controller: '\Drupal\system\Controller\SystemController::systemAdminMenuBlockPage'
+  requirements:
+    _permission: 'administer ai'
+
+ai.admin_config_site_building:
+  path: '/admin/config/ai/site-building'
+  defaults:
+    _title: 'Site Building & Design'
     _controller: '\Drupal\system\Controller\SystemController::systemAdminMenuBlockPage'
   requirements:
     _permission: 'administer ai'

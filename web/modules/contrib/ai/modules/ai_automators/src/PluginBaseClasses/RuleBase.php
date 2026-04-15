@@ -193,8 +193,26 @@ abstract class RuleBase implements AiAutomatorTypeInterface, AiAutomatorPostChec
    * {@inheritDoc}
    */
   public function extraAdvancedFormFields(ContentEntityInterface $entity, FieldDefinitionInterface $fieldDefinition, FormStateInterface $formState, array $defaultValues = []) {
+    $form = [];
+
     // Load the AI models.
     $providers = $this->formHelper->getAiProvidersOptions($this->llmType);
+
+    // If no providers are available, show an inline message and return early.
+    if (empty($providers)) {
+      $operation_type = $this->aiPluginManager->getOperationType($this->llmType, TRUE);
+      $operation_label = $operation_type['label'] ?? $this->llmType;
+      $form['no_providers_message'] = [
+        '#markup' => $this->t('No AI providers are configured for %type automator. Please <a href=":url" target="_blank">configure a provider</a> to use this feature.', [
+          '%type' => $operation_label,
+          ':url' => 'https://project.pages.drupalcode.org/ai/latest/providers/matris/',
+        ]),
+        '#prefix' => '<div class="messages messages--warning">',
+        '#suffix' => '</div>',
+      ];
+      return $form;
+    }
+
     // Add to the start of the array.
     if ($this->llmType == 'chat') {
       $providers = [
@@ -757,8 +775,8 @@ abstract class RuleBase implements AiAutomatorTypeInterface, AiAutomatorPostChec
         if (is_array($val) && isset($val[key($val)])) {
           $values[] = $val[key($val)];
         }
-        return $values;
       }
+      return $values;
     }
     // Sometimes it does not return with values in GPT 3.5.
     elseif (is_array($json) && isset($json[0][0])) {

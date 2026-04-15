@@ -5,7 +5,7 @@ core_version_requirement: ^10.3 || ^11.1
 lifecycle: deprecated
 lifecycle_link: https://www.drupal.org/node/3568339
 
-# Information added by Drupal.org packaging script on 2026-03-18
-version: '1.3.1'
+# Information added by Drupal.org packaging script on 2026-04-15
+version: '1.3.3'
 project: 'ai'
-datestamp: 1773841089
+datestamp: 1776263306

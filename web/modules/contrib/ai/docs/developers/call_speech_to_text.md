@@ -6,7 +6,7 @@ Speech-To-Text calls are calls that can take an audio file and listen to it and 
 
 ### Example normalized Speech-To-Text call
 
-The following is an example of sending the file hello_there.mp3 into Deepgrams model nova-2 and getting the text back.
+The following is an example of sending the file hello_there.mp3 into Deepgram's model nova-2 and getting the text back.
 
 ```php
 use Drupal\ai\OperationType\GenericType\AudioFile;
@@ -23,7 +23,7 @@ echo $return_object->getNormalized();
 
 ### Speech-To-Text Interfaces & Models
 
-The following files defines the methods available when doing a speech-to-text call as well as the input and output.
+The following files define the methods available when doing a speech-to-text call as well as the input and output.
 
 * [SpeechToTextInterface.php](https://git.drupalcode.org/project/ai/-/blob/1.0.x/src/OperationType/SpeechToText/SpeechToTextInterface.php?ref_type=heads)
 * [SpeechToTextInput.php](https://git.drupalcode.org/project/ai/-/blob/1.0.x/src/OperationType/SpeechToText/SpeechToTextInput.php?ref_type=heads)

@@ -11,7 +11,7 @@ operation. For more information on AI Providers and Operation Types, please see
 [the documentation](https://project.pages.drupalcode.org/ai/developers/base_calls/).
 
 ## How to configure a Field Widget Action (FWA)
-Configuring a «Generate tags» in the Article content type is a 2 steps process.
+Configuring a «Generate tags» in the Article content type is a 2 step process.
 
 Step #1: Manage fields
 
@@ -41,15 +41,16 @@ Step #2: Manage form display
       - Update
    - Save
 
-Now when you edit an article, you should now see the ««Generate tags» action button under the Tags field.
+Now when you edit an article, you should now see the «Generate tags» action button under the Tags field.
 
 ## Field Widget Action Examples
 
-For detailed, step-by-step examples of configuring specific Field Widget Actions with AI Automators, see the [AI Automators Examples](../ai_automators/examples/) section:
+For detailed, step-by-step examples of configuring specific Field Widget Actions with AI Automators, see the [AI Automators Examples](../ai_automators/examples/index.md) section:
 
 - [FAQ Field + `faqfield_default` widget](../ai_automators/examples/faq-field.md) - Generate FAQ entries from content using the `LLM: FAQ Field` automator
 - [Chart Field + `chart_config_default` widget](../ai_automators/examples/chart-field.md) - Generate chart data from content using the `LLM: Chart From Text` automator
 - [Text to Audio Media](../ai_automators/examples/text_to_audio_media_automator.md) - Generate audio from content using the `LLM: Media Audio Generation` automator
 - [Text to Image Field](../ai_automators/examples/text_to_image_automator.md) - Generate image from content using the `LLM: Image Generation` automator
 - [Text to Image Media Field](../ai_automators/examples/text_to_image_media_automator.md) - Generate image as Media entity using the `LLM: Media Image Generation` automator
-- [Text to Address Field](../ai_automators/address_automator.md) - Generate address from content using the `LLM: Address` automator
+- [Metatag Automator](../ai_automators/examples/metatag_automator.md) - Generate metatags from content using the `LLM: Metatag` automator
+- [Text to Address Field](../ai_automators/examples/address_automator.md) - Generate address from content using the `LLM: Address` automator

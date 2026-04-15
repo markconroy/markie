@@ -126,8 +126,7 @@ class AiSettingsForm extends ConfigFormBase {
       $this->messenger()->addWarning($this->t('Choose at least one AI provider module from those listed on the AI module homepage, add to your project, install and configure it. Then update the AI Settings on this page.'));
     }
 
-    // Add hardcoded operation types.
-    $operation_types = array_merge($this->providerManager->getOperationTypes(), PseudoOperationTypes::getDefaultPseudoOperationTypes());
+    $operation_types = $this->getOperationTypes();
 
     // Check if we're simulating no JavaScript or if a non-JS button
     // was clicked.
@@ -995,8 +994,7 @@ class AiSettingsForm extends ConfigFormBase {
     }
 
     $values = $form_state->getValues();
-    $operation_types = array_merge($this->providerManager->getOperationTypes(), PseudoOperationTypes::getDefaultPseudoOperationTypes());
-    foreach ($operation_types as $operation_type) {
+    foreach ($this->getOperationTypes() as $operation_type) {
       // We only want to ensure a model is selected for each operation that
       // has a default.
       if (empty($values['operation__' . $operation_type['id']])) {
@@ -1027,16 +1025,24 @@ class AiSettingsForm extends ConfigFormBase {
     }
 
     // Set the default providers array.
+    $valid_operation_types = array_fill_keys(
+      array_map(static fn(array $operation_type): string => $operation_type['id'], $this->getOperationTypes()),
+      TRUE
+    );
     $default_providers = [];
     foreach ($form_state->getValues() as $key => $value) {
       if (strpos($key, 'operation__') === 0) {
         $operation_type = substr($key, 11);
-        if (empty($value)) {
+        if (!isset($valid_operation_types[$operation_type]) || $value === '' || $value === NULL) {
+          continue;
+        }
+        $model_id = $form_state->getValue('model__' . $operation_type);
+        if ($model_id === '' || $model_id === NULL) {
           continue;
         }
         $default_providers[$operation_type] = [
-          'provider_id' => $value,
-          'model_id' => $form_state->getValue('model__' . $operation_type),
+          'provider_id' => (string) $value,
+          'model_id' => (string) $model_id,
         ];
       }
     }
@@ -1145,10 +1151,9 @@ class AiSettingsForm extends ConfigFormBase {
     $provider = $this->providerManager->createInstance($provider_id);
 
     // Get the operation type definition and filters.
-    $operation_types = array_merge($this->providerManager->getOperationTypes(), PseudoOperationTypes::getDefaultPseudoOperationTypes());
     $operation_type_definition = NULL;
     $filters = [];
-    foreach ($operation_types as $type) {
+    foreach ($this->getOperationTypes() as $type) {
       if ($type['id'] === $operation_type) {
         $operation_type_definition = $type;
         $filters = $type['filter'] ?? [];
@@ -1366,6 +1371,16 @@ class AiSettingsForm extends ConfigFormBase {
     }
 
     return $this->{$type};
+  }
+
+  /**
+   * Gets the operation types used in AI settings.
+   *
+   * @return array
+   *   The operation types, including pseudo operation types.
+   */
+  public function getOperationTypes(): array {
+    return array_merge($this->providerManager->getOperationTypes(), PseudoOperationTypes::getDefaultPseudoOperationTypes());
   }
 
 }

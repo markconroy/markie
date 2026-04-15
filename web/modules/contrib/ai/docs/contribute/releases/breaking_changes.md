@@ -1,6 +1,6 @@
 # Breaking Changes
 
-In general, the AI Module supports upgrading between releases with [Update Hooks](https://api.drupal.org/api/drupal/core%21lib%21Drupal%21Core%21Extension%21module.api.php/function/hook_update_N/11.x). Though, there can be breaking changes that are not supported by update hooks that much be communicated as such. This outlines how the AI module highlights these through the release cycle and through [change records](https://www.drupal.org/about/core/policies/core-change-policies/change-records).
+In general, the AI Module supports upgrading between releases with [Update Hooks](https://api.drupal.org/api/drupal/core%21lib%21Drupal%21Core%21Extension%21module.api.php/function/hook_update_N/11.x). Though, there can be breaking changes that are not supported by update hooks that must be communicated as such. This outlines how the AI module highlights these through the release cycle and through [change records](https://www.drupal.org/about/core/policies/core-change-policies/change-records).
 
 ## Process
 
@@ -24,7 +24,7 @@ When there is a change that is not supported by an upgrade hook...
     > ### Upgrade Path
     > [#123456 Add AI Banana module](https://drupal.org/node/123456)
     >
-    > - Breaking Change: There is now new dependency on the AI Pirate module
+    > - Breaking Change: There is a new dependency on the AI Pirate module
     > - Upgrade Path: Make sure you re-run <code>composer update drupal/ai -W</code> to ensure the dependency tree resolves correctly.
 
 6. Proceed with the [major release process](publishing_a_minor_major_release.md) as usual

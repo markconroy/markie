@@ -1,7 +1,7 @@
 # AI Search
 ## What is the AI Search module?
-This module leverages the popular Drupal Search API contrib module create
-and manage vector databases of your for highly relevant and accurate retrieval
+This module leverages the popular Drupal Search API contrib module to create
+and manage vector databases of your content for highly relevant and accurate retrieval
 of content related to any given terms, phrases, or even other content as a
 whole.
 
@@ -19,7 +19,7 @@ context. This is then converted into a vector representation of the content -
 typically hundreds or thousands of dimensions. Think of the dimensions as
 sophisticated tagging where the strength of the tag is also considered - for
 example a single dimension might indicate that something might be related to
-transportation weakly but another may indicate a much stronger related to
+transportation weakly but another may indicate a much stronger relation to
 education.
 
 The query from the user or content being compared is similarly converted to
@@ -30,7 +30,7 @@ SOLR Search API indexes would use.
 
 ## How can it be used?
 ### Views integration
-Views will fulltext search can be used to query the vector database and find
+Views with fulltext search can be used to query the vector database and find
 relevant results.
 
 ### AI Assistant
@@ -81,7 +81,7 @@ via a VDB Provider (Vector Database Provider).
 
 ## Automated tests
 
-The automated tests uses:
+The automated tests use:
 
 - test_ai_provider_mysql test module to generate embeddings as a Provider.
 - test_ai_vdb_provider_mysql test module to store and search the vector database as a VDB Provider.

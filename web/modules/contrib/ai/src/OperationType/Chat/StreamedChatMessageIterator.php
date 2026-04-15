@@ -637,8 +637,9 @@ abstract class StreamedChatMessageIterator implements StreamedChatMessageIterato
    *   TRUE if buffer should flush.
    */
   private function shouldFlush(): bool {
-    // If a URL is being built, hold the buffer until it's complete.
-    if (preg_match('/"(?:http|\/\/:)[^"]*$/', $this->buffer) || preg_match('/\((?:http|\/\/:)[^)]*$/', $this->buffer)) {
+    // If a URL is being built, hold the buffer until it's complete, so we can
+    // check the full url for safety.
+    if (preg_match('/"(?:http|\/\/:|\/)[^"]*$/', $this->buffer) || preg_match('/\((?:http|\/\/:|\/)[^)]*$/', $this->buffer)) {
       return FALSE;
     }
 

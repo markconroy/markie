@@ -41,7 +41,7 @@ The following is an example of Release Notes built for the AI Module...
 >
 > ### Upgrade Path
 >
-> - [#123456](https://www.drupal.org/project/ai/issues/123456) AI Banana module is a new dependency. Run `composer update drupal/ai -W` to resolve dependencies across the the AI module
+> - [#123456](https://www.drupal.org/project/ai/issues/123456) AI Banana module is a new dependency. Run `composer update drupal/ai -W` to resolve dependencies across the AI module
 >
 > ### Organizations
 >

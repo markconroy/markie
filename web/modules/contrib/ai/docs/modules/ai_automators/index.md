@@ -20,7 +20,7 @@ AI Automators, and you may wish to use them depending on how complex your use
 case is.
 
 1. The AI CKEditor Integration module can be optionally enabled to allow content
-   creators choose to run selected AI Automators against WYSIWYG fields. See the
+   creators to choose to run selected AI Automators against WYSIWYG fields. See the
    [Advanced section](#advanced-usage) for more details.
 2. The AI ECA module integrates AI Core with the [ECA](https://www.drupal.org/project/eca) module
    and can be used to trigger AI Automators within ECA workflows.
@@ -70,7 +70,7 @@ Field UI module enabled**.
        for this automator.
     8. **Automator Weight**: Controls the order multiple AI Automators on this
        entity will be run in: lower weights will run before higher weights,
-       allowing you to generate a field value past on a previously generated
+       allowing you to generate a field value based on a previously generated
        value.
     9. **Automator Worker**: Control how the automator is run:
         1. Direct: runs the automator and stores the generated result as the
@@ -167,7 +167,7 @@ enabled).
 1. Visit the Automator Chain settings page (/admin/structure/ai/automator_chain_types)
 2. Add a new AI Automator Chain for each group of processes you wish to run on a
    single input.
-3. An an input field of the correct type for the input that will be sent (for
+3. Add an input field of the correct type for the input that will be sent (for
    example an image field if the input is an image). **Mark the field as required**
    as this is how the AI Automator Chain identifies the input field. This field
    DOES NOT require an AI automator to be configured on it.
@@ -252,7 +252,7 @@ own implementation.
 
 ## Field Widget Action Examples
 
-For step-by-step examples of configuring AI Automators with Field Widget Actions (FWA) to add "Generate" buttons in content edit forms, see the [Examples](examples/) section:
+For step-by-step examples of configuring AI Automators with Field Widget Actions (FWA) to add "Generate" buttons in content edit forms, see the [Examples](examples/index.md) section:
 
 - [FAQ Field + `faqfield_default` widget](examples/faq-field.md) - Generate FAQ entries from content using the `LLM: FAQ Field` automator
 - [Chart Field + `chart_config_default` widget](examples/chart-field.md) - Generate chart data from content using the `LLM: Chart From Text` automator

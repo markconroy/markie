@@ -2,7 +2,7 @@
 
 namespace Drupal\ai\OperationType\GenericType;
 
-use Drupal\Core\ProxyClass\File\MimeType\MimeTypeGuesser;
+use Drupal\Core\File\MimeType\MimeTypeGuesser;
 use Drupal\file\Entity\File;
 
 /**
@@ -105,7 +105,7 @@ interface FileBaseInterface {
   /**
    * Get the file mime type guesser.
    *
-   * @return \Drupal\Core\ProxyClass\File\MimeType\MimeTypeGuesser
+   * @return \Drupal\Core\File\MimeType\MimeTypeGuesser
    *   The stream wrapper.
    */
   public function getFileMimeTypeGuesser(): MimeTypeGuesser;

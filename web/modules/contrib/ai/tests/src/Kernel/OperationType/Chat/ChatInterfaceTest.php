@@ -104,6 +104,72 @@ class ChatInterfaceTest extends KernelTestBase {
   }
 
   /**
+   * Test that the streaming chat does not cut of longer relative links.
+   */
+  public function testChatStreamLongRelativeLinkMarkdown(): void {
+    $text = 'Can you help me with something? Here is a link: [link](/this/is/a/very/long/relative/link/that/should/not/be/cut/off)';
+    $provider = \Drupal::service('ai.provider')->createInstance('echoai');
+    $input = new ChatInput([
+      new ChatMessage('user', $text),
+    ]);
+    // Set to streaming.
+    $input->setStreamedOutput(TRUE);
+    $chat_response = $provider->chat($input, 'test_long_relative_link');
+    // Should be a ChatOutput object.
+    $this->assertInstanceOf(ChatOutput::class, $chat_response);
+    // Should have a streaming response.
+    $message = $chat_response->getNormalized();
+    $this->assertInstanceOf(StreamedChatMessageIteratorInterface::class, $message);
+
+    // Response should be a string and be the following.
+    $response_text = "Hello world! Input: $text. Config: [].";
+    // Its an iterator.
+    $total_text = '';
+    foreach ($message as $message_part) {
+      $this->assertIsString($message_part->getText());
+      $total_text .= $message_part->getText();
+    }
+    $this->assertEquals($response_text, trim($total_text, "\n"));
+    // Also get the reconstructed message and test it since this is how Fibers
+    // reconstructs the message.
+    $reconstructed_message = $message->reconstructChatOutput()->getNormalized();
+    $this->assertEquals($response_text, $reconstructed_message->getText());
+  }
+
+  /**
+   * Test that html links also works.
+   */
+  public function testChatStreamLongRelativeLinkHtml(): void {
+    $text = 'Can you help me with something? Here is a link: <a href="/this/is/a/very/long/relative/link/that/should/not/be/cut/off">link</a>';
+    $provider = \Drupal::service('ai.provider')->createInstance('echoai');
+    $input = new ChatInput([
+      new ChatMessage('user', $text),
+    ]);
+    // Set to streaming.
+    $input->setStreamedOutput(TRUE);
+    $chat_response = $provider->chat($input, 'test_long_relative_link_html');
+    // Should be a ChatOutput object.
+    $this->assertInstanceOf(ChatOutput::class, $chat_response);
+    // Should have a streaming response.
+    $message = $chat_response->getNormalized();
+    $this->assertInstanceOf(StreamedChatMessageIteratorInterface::class, $message);
+
+    // Response should be a string and be the following.
+    $response_text = "Hello world! Input: $text. Config: [].";
+    // Its an iterator.
+    $total_text = '';
+    foreach ($message as $message_part) {
+      $this->assertIsString($message_part->getText());
+      $total_text .= $message_part->getText();
+    }
+    $this->assertEquals($response_text, trim($total_text, "\n"));
+    // Also get the reconstructed message and test it since this is how Fibers
+    // reconstructs the message.
+    $reconstructed_message = $message->reconstructChatOutput()->getNormalized();
+    $this->assertEquals($response_text, $reconstructed_message->getText());
+  }
+
+  /**
    * Test some errors.
    */
   public function testErrors(): void {

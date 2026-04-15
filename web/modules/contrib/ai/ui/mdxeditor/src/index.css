@@ -7,6 +7,10 @@
   position: absolute;
 }
 
+.mdxeditor .mdxeditor-rich-text-editor [contenteditable] {
+  min-height: 240px;
+}
+
 .mdxeditor-root-contenteditable [contenteditable="true"][role="textbox"]:focus {
   outline: none;
   box-shadow: none;

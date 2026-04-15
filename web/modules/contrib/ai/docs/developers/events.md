@@ -2,7 +2,7 @@
 
 There are three important events that are currently available in the AI module. One that is triggered before the request is being sent, one that is triggered before the response is given from the AI Provider plugin and one that is triggered after a streaming response is done.
 
-These three makes it possible to change prompts, change responses, log, find bugs etc.
+These three make it possible to change prompts, change responses, log, find bugs etc.
 
 With the PreGenerateResponseEvent that is triggered before the request is sent, you can choose to create an exception to make sure that the request never happens or there is a method called setForcedOutputObject, where you can give an OutputInterface and it will answer with this one without doing the request.
 

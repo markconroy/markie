@@ -2,7 +2,9 @@
 
 namespace Drupal\ai\Base;
 
+use Drupal\ai\Service\FunctionCalling\OverridableFunctionCallInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Drupal\Core\Plugin\Context\ContextDefinitionInterface;
 use Drupal\Core\Plugin\ContextAwarePluginTrait;
 use Drupal\Core\Plugin\PluginBase;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
@@ -17,12 +19,14 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * Function call base class.
  */
-abstract class FunctionCallBase extends PluginBase implements FunctionCallInterface, ContainerFactoryPluginInterface {
+abstract class FunctionCallBase extends PluginBase implements OverridableFunctionCallInterface, ContainerFactoryPluginInterface {
 
   use AiDataTypeConverterPluginManagerTrait;
   use StringTranslationTrait;
   use ContextAwarePluginTrait {
     setContextValue as protected traitSetContextValue;
+    getContextDefinition as protected traitGetContextDefinition;
+    getContextDefinitions as protected traitGetContextDefinitions;
   }
 
   /**
@@ -55,6 +59,17 @@ abstract class FunctionCallBase extends PluginBase implements FunctionCallInterf
    * @var array
    */
   protected array $structuredOutput = [];
+
+  /**
+   * Per-instance context definition overrides.
+   *
+   * Keyed by context definition name. Values take precedence over the shared
+   * plugin definition cache in getContextDefinition() and
+   * getContextDefinitions().
+   *
+   * @var array<string, \Drupal\Core\Plugin\Context\ContextDefinitionInterface>
+   */
+  protected array $contextDefinitionOverrides = [];
 
   /**
    * Constructs a FunctionCall plugin.
@@ -150,6 +165,27 @@ abstract class FunctionCallBase extends PluginBase implements FunctionCallInterf
    */
   public function setOutput(string $output): void {
     $this->stringOutput = $output;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setContextDefinitionOverride(string $name, ContextDefinitionInterface $definition): void {
+    $this->contextDefinitionOverrides[$name] = $definition;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getContextDefinition($name) {
+    return $this->contextDefinitionOverrides[$name] ?? $this->traitGetContextDefinition($name);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getContextDefinitions() {
+    return $this->contextDefinitionOverrides + $this->traitGetContextDefinitions();
   }
 
   /**

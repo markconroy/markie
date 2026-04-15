@@ -168,7 +168,12 @@
 
       // Execute callbackCode from config form.
       if (service.callbackCode.length > 0) {
-        Function('consent', 'service', service.callbackCode)(consent, service);
+        try {
+          Function('consent', 'service', service.callbackCode)(consent, service);
+        }
+        catch (error) {
+          console.error('Error executing callback code for service "' + service.name + '":', error);
+        }
       }
 
       // Do the behaviors only for consent.

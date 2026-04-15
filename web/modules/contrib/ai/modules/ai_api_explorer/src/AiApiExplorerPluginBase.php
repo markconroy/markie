@@ -277,6 +277,9 @@ abstract class AiApiExplorerPluginBase extends PluginBase implements AiApiExplor
       if (is_string($value)) {
         $code .= '&nbsp;&nbsp;"' . $key . '" => "' . $value . '",<br>';
       }
+      elseif (is_array($value)) {
+        $code .= '&nbsp;&nbsp;"' . $key . '" => ' . var_export($value, TRUE) . ',<br>';
+      }
       else {
         $code .= '&nbsp;&nbsp;"' . $key . '" => ' . $value . ',<br>';
       }
