@@ -29,6 +29,8 @@ module:
   inline_form_errors: 0
   key: 0
   klaro: 0
+  layout_builder: 0
+  layout_discovery: 0
   link: 0
   markie: 0
   media: 0
@@ -38,6 +40,7 @@ module:
   metatag_open_graph: 0
   metatag_twitter_cards: 0
   mysql: 0
+  navigation: 0
   node: 0
   options: 0
   page_cache: 0
