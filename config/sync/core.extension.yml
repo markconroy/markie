@@ -1,7 +1,4 @@
 module:
-  admin_toolbar: 0
-  admin_toolbar_search: 0
-  admin_toolbar_tools: 0
   ai: 0
   ai_ckeditor: 0
   ai_provider_openai: 0
