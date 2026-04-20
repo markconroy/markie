@@ -1552,17 +1552,17 @@
         },
         {
             "name": "drupal/core",
-            "version": "11.3.7",
-            "version_normalized": "11.3.7.0",
+            "version": "11.3.8",
+            "version_normalized": "11.3.8.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/drupal/core.git",
-                "reference": "bb36d7d09b0132185bd33be730ec2e6d35c2d627"
+                "reference": "d40f45fa436fb089cd54029d2dab387c3040fc2c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/drupal/core/zipball/bb36d7d09b0132185bd33be730ec2e6d35c2d627",
-                "reference": "bb36d7d09b0132185bd33be730ec2e6d35c2d627",
+                "url": "https://api.github.com/repos/drupal/core/zipball/d40f45fa436fb089cd54029d2dab387c3040fc2c",
+                "reference": "d40f45fa436fb089cd54029d2dab387c3040fc2c",
                 "shasum": ""
             },
             "require": {
@@ -1651,7 +1651,7 @@
             "suggest": {
                 "ext-zip": "Needed to extend the plugin.manager.archiver service capability with the handling of files in the ZIP format."
             },
-            "time": "2026-04-15T15:47:32+00:00",
+            "time": "2026-04-20T07:33:20+00:00",
             "type": "drupal-core",
             "extra": {
                 "drupal-scaffold": {
@@ -1722,14 +1722,14 @@
             ],
             "description": "Drupal is an open source content management platform powering millions of websites and applications.",
             "support": {
-                "source": "https://github.com/drupal/core/tree/11.3.7"
+                "source": "https://github.com/drupal/core/tree/11.3.8"
             },
             "install-path": "../../web/core"
         },
         {
             "name": "drupal/core-composer-scaffold",
-            "version": "11.3.7",
-            "version_normalized": "11.3.7.0",
+            "version": "11.3.8",
+            "version_normalized": "11.3.8.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/drupal/core-composer-scaffold.git",
@@ -1775,14 +1775,14 @@
                 "drupal"
             ],
             "support": {
-                "source": "https://github.com/drupal/core-composer-scaffold/tree/11.3.7"
+                "source": "https://github.com/drupal/core-composer-scaffold/tree/11.3.8"
             },
             "install-path": "../drupal/core-composer-scaffold"
         },
         {
             "name": "drupal/core-project-message",
-            "version": "11.3.7",
-            "version_normalized": "11.3.7.0",
+            "version": "11.3.8",
+            "version_normalized": "11.3.8.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/drupal/core-project-message.git",
@@ -1819,30 +1819,30 @@
                 "drupal"
             ],
             "support": {
-                "source": "https://github.com/drupal/core-project-message/tree/11.3.7"
+                "source": "https://github.com/drupal/core-project-message/tree/11.3.8"
             },
             "install-path": "../drupal/core-project-message"
         },
         {
             "name": "drupal/core-recommended",
-            "version": "11.3.7",
-            "version_normalized": "11.3.7.0",
+            "version": "11.3.8",
+            "version_normalized": "11.3.8.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/drupal/core-recommended.git",
-                "reference": "fb5d6475f4f564d5fa8a8846e4b5e1b97cdfeb94"
+                "reference": "9c1fa4615a7542504be882eed0c6763b445fb852"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/drupal/core-recommended/zipball/fb5d6475f4f564d5fa8a8846e4b5e1b97cdfeb94",
-                "reference": "fb5d6475f4f564d5fa8a8846e4b5e1b97cdfeb94",
+                "url": "https://api.github.com/repos/drupal/core-recommended/zipball/9c1fa4615a7542504be882eed0c6763b445fb852",
+                "reference": "9c1fa4615a7542504be882eed0c6763b445fb852",
                 "shasum": ""
             },
             "require": {
                 "asm89/stack-cors": "~v2.3.0",
                 "composer/semver": "~3.4.4",
                 "doctrine/lexer": "~3.0.1",
-                "drupal/core": "11.3.7",
+                "drupal/core": "11.3.8",
                 "egulias/email-validator": "~4.0.4",
                 "guzzlehttp/guzzle": "~7.10.0",
                 "guzzlehttp/promises": "~2.3.0",
@@ -1897,7 +1897,7 @@
             "conflict": {
                 "webflo/drupal-core-strict": "*"
             },
-            "time": "2026-04-15T15:47:32+00:00",
+            "time": "2026-04-20T07:33:20+00:00",
             "type": "metapackage",
             "notification-url": "https://packagist.org/downloads/",
             "license": [
@@ -1905,7 +1905,7 @@
             ],
             "description": "Core and its dependencies with known-compatible minor versions. Require this project INSTEAD OF drupal/core.",
             "support": {
-                "source": "https://github.com/drupal/core-recommended/tree/11.3.7"
+                "source": "https://github.com/drupal/core-recommended/tree/11.3.8"
             },
             "install-path": null
         },
@@ -3945,17 +3945,17 @@
         },
         {
             "name": "laravel/prompts",
-            "version": "v0.3.16",
-            "version_normalized": "0.3.16.0",
+            "version": "v0.3.17",
+            "version_normalized": "0.3.17.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/prompts.git",
-                "reference": "11e7d5f93803a2190b00e145142cb00a33d17ad2"
+                "reference": "6a82ac19a28b916ae0885828795dbd4c59d9a818"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/prompts/zipball/11e7d5f93803a2190b00e145142cb00a33d17ad2",
-                "reference": "11e7d5f93803a2190b00e145142cb00a33d17ad2",
+                "url": "https://api.github.com/repos/laravel/prompts/zipball/6a82ac19a28b916ae0885828795dbd4c59d9a818",
+                "reference": "6a82ac19a28b916ae0885828795dbd4c59d9a818",
                 "shasum": ""
             },
             "require": {
@@ -3978,7 +3978,7 @@
             "suggest": {
                 "ext-pcntl": "Required for the spinner to be animated."
             },
-            "time": "2026-03-23T14:35:33+00:00",
+            "time": "2026-04-20T16:07:33+00:00",
             "type": "library",
             "extra": {
                 "branch-alias": {
@@ -4001,7 +4001,7 @@
             "description": "Add beautiful and user-friendly forms to your command-line applications.",
             "support": {
                 "issues": "https://github.com/laravel/prompts/issues",
-                "source": "https://github.com/laravel/prompts/tree/v0.3.16"
+                "source": "https://github.com/laravel/prompts/tree/v0.3.17"
             },
             "install-path": "../laravel/prompts"
         },
@@ -4547,17 +4547,17 @@
         },
         {
             "name": "openai-php/client",
-            "version": "v0.19.1",
-            "version_normalized": "0.19.1.0",
+            "version": "v0.19.2",
+            "version_normalized": "0.19.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/openai-php/client.git",
-                "reference": "f2b1ce48b1c011ebc2abb255db5abf82ef4a6a44"
+                "reference": "12e3513527e22d5657f4f9809796f8fe254fd0a9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/openai-php/client/zipball/f2b1ce48b1c011ebc2abb255db5abf82ef4a6a44",
-                "reference": "f2b1ce48b1c011ebc2abb255db5abf82ef4a6a44",
+                "url": "https://api.github.com/repos/openai-php/client/zipball/12e3513527e22d5657f4f9809796f8fe254fd0a9",
+                "reference": "12e3513527e22d5657f4f9809796f8fe254fd0a9",
                 "shasum": ""
             },
             "require": {
@@ -4581,7 +4581,7 @@
                 "phpstan/phpstan": "^1.12.32",
                 "symfony/var-dumper": "^7.3.5"
             },
-            "time": "2026-03-17T20:53:51+00:00",
+            "time": "2026-04-19T20:35:01+00:00",
             "type": "library",
             "installation-source": "dist",
             "autoload": {
@@ -4621,7 +4621,7 @@
             ],
             "support": {
                 "issues": "https://github.com/openai-php/client/issues",
-                "source": "https://github.com/openai-php/client/tree/v0.19.1"
+                "source": "https://github.com/openai-php/client/tree/v0.19.2"
             },
             "funding": [
                 {
@@ -5342,12 +5342,12 @@
         },
         {
             "name": "phpstan/phpstan",
-            "version": "2.1.47",
-            "version_normalized": "2.1.47.0",
+            "version": "2.1.50",
+            "version_normalized": "2.1.50.0",
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/79015445d8bd79e62b29140f12e5bfced1dcca65",
-                "reference": "79015445d8bd79e62b29140f12e5bfced1dcca65",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/d452086fb4cf648c6b2d8cf3b639351f79e4f3e2",
+                "reference": "d452086fb4cf648c6b2d8cf3b639351f79e4f3e2",
                 "shasum": ""
             },
             "require": {
@@ -5356,7 +5356,7 @@
             "conflict": {
                 "phpstan/phpstan-shim": "*"
             },
-            "time": "2026-04-13T15:49:08+00:00",
+            "time": "2026-04-17T13:10:32+00:00",
             "bin": [
                 "phpstan",
                 "phpstan.phar"
