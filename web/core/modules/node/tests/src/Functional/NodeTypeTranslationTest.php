@@ -7,6 +7,8 @@ namespace Drupal\Tests\node\Functional;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\Tests\BrowserTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Ensures that node types translation work correctly.
@@ -14,9 +16,9 @@ use Drupal\Tests\BrowserTestBase;
  * Note that the child site is installed in French; therefore, when making
  * assertions on translated text it is important to provide a langcode. This
  * ensures the asserts pass regardless of the Drupal version.
- *
- * @group node
  */
+#[Group('node')]
+#[RunTestsInSeparateProcesses]
 class NodeTypeTranslationTest extends BrowserTestBase {
 
   use StringTranslationTrait;

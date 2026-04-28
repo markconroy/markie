@@ -7,12 +7,14 @@ namespace Drupal\FunctionalTests\Installer;
 use Drupal\Core\Database\Database;
 use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\user\Entity\User;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Installs Drupal in German and checks resulting site.
- *
- * @group Installer
  */
+#[Group('Installer')]
+#[RunTestsInSeparateProcesses]
 class InstallerTranslationTest extends InstallerTestBase {
 
   /**

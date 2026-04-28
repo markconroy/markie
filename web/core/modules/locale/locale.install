@@ -7,12 +7,10 @@
 
 use Drupal\Core\File\Exception\FileException;
 use Drupal\Core\File\FileSystemInterface;
-use Drupal\Core\Hook\Attribute\ProceduralHookScanStop;
 
 /**
  * Implements hook_install().
  */
-#[ProceduralHookScanStop]
 function locale_install(): void {
   // Create the interface translations directory and ensure it's writable.
   if (!$directory = \Drupal::config('locale.settings')->get('translation.path')) {
@@ -21,12 +19,6 @@ function locale_install(): void {
     \Drupal::configFactory()->getEditable('locale.settings')->set('translation.path', $directory)->save();
   }
   \Drupal::service('file_system')->prepareDirectory($directory, FileSystemInterface::CREATE_DIRECTORY | FileSystemInterface::MODIFY_PERMISSIONS);
-
-  $t_args = [
-    ':translate_status' => base_path() . 'admin/reports/translations/check?destination=' . urlencode(base_path() . 'admin/reports/translations'),
-  ];
-  $message = t('Check <a href=":translate_status">available translations</a> for your language(s).', $t_args);
-  \Drupal::messenger()->addStatus($message);
 }
 
 /**
@@ -129,7 +121,7 @@ function locale_schema(): array {
       'customized' => [
         'type' => 'int',
         'not null' => TRUE,
-        // LOCALE_NOT_CUSTOMIZED
+        // LOCALE_NOT_CUSTOMIZED.
         'default' => 0,
         'description' => 'Boolean indicating whether the translation is custom to this site.',
       ],

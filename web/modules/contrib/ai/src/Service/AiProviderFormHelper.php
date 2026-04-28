@@ -4,6 +4,7 @@ namespace Drupal\ai\Service;
 
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Link;
+use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\Path\CurrentPathStack;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
@@ -50,16 +51,26 @@ class AiProviderFormHelper {
   protected $currentPath;
 
   /**
+   * The messenger service.
+   *
+   * @var \Drupal\Core\Messenger\MessengerInterface
+   */
+  protected $messenger;
+
+  /**
    * Constructs a new AiProviderHelper object.
    *
    * @param \Drupal\ai\AiProviderPluginManager $aiProviderPluginManager
    *   The LLM Providers plugin manager.
    * @param \Drupal\Core\Path\CurrentPathStack $currentPath
    *   The current path.
+   * @param \Drupal\Core\Messenger\MessengerInterface $messenger
+   *   The messenger service.
    */
-  public function __construct(AiProviderPluginManager $aiProviderPluginManager, CurrentPathStack $currentPath) {
+  public function __construct(AiProviderPluginManager $aiProviderPluginManager, CurrentPathStack $currentPath, MessengerInterface $messenger) {
     $this->aiProviderPluginManager = $aiProviderPluginManager;
     $this->currentPath = $currentPath;
+    $this->messenger = $messenger;
   }
 
   /**
@@ -179,7 +190,7 @@ class AiProviderFormHelper {
         }
       }
       catch (\Exception $e) {
-
+        $this->messenger->addWarning($this->t('The selected provider or model is not valid and has been reverted to the default. If no default is available, it has been cleared.'));
       }
 
     }
@@ -325,7 +336,36 @@ class AiProviderFormHelper {
   public static function loadModelsAjaxCallback(array &$form, FormStateInterface $form_state) {
     $prefix = $form_state->getTriggeringElement()['#ajax']['data-prefix'];
     $form_state->setRebuild();
-    return $form[$prefix . 'ajax_prefix'] ?? $form['left'][$prefix . 'ajax_prefix'] ?? $form['right'][$prefix . 'ajax_prefix'];
+
+    return self::findFormElementRecursive($form, $prefix . 'ajax_prefix');
+  }
+
+  /**
+   * Recursive helper function to find a form element by name.
+   *
+   * @param array $value
+   *   The form array.
+   * @param string $form_element_name
+   *   The form element name to find.
+   *
+   * @return array
+   *   The found form element or an empty array.
+   */
+  public static function findFormElementRecursive(array &$value, string $form_element_name): array {
+    if (isset($value[$form_element_name]['#type']) && $value[$form_element_name]['#type'] == 'details') {
+      return $value[$form_element_name];
+    }
+
+    foreach ($value as $subvalue) {
+      if (is_array($subvalue)) {
+        $result = self::findFormElementRecursive($subvalue, $form_element_name);
+        if ($result) {
+          return $result;
+        }
+      }
+    }
+
+    return [];
   }
 
   /**

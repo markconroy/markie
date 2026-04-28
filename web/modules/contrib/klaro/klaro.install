@@ -261,3 +261,24 @@ function klaro_update_10014(&$sandbox) {
   $config_texts->save();
 
 }
+
+/**
+ * Issue #3568001: Update Posthog Klaro app callback_code.
+ */
+function klaro_update_10015() {
+  if (($config = \Drupal::configFactory()->getEditable('klaro.klaro_app.posthog')) && (!$config->isNew())) {
+    $newCallbackCode = "// NOTE: \r\n// - On initial call window.posthog and its functions may not be initialized yet:\r\n// - The posthog module detects Klaro and initializes with cookieless_mode: 'on_reject'\r\nif (window.posthog) {\r\n  if (consent === true && window.posthog.opt_in_capturing) {\r\n    window.posthog.opt_in_capturing();\r\n  }\r\n  else if (consent === false && window.posthog.opt_out_capturing) {\r\n    window.posthog.opt_out_capturing();\r\n  }\r\n}";
+    $config->set('callback_code', $newCallbackCode)->save(TRUE);
+  }
+}
+
+/**
+ * Issue #3584237: Fix possible wrong Posthog Klaro app config item.
+ */
+function klaro_update_10016() {
+  if (($config = \Drupal::configFactory()->getEditable('klaro.klaro_app.posthog')) && (!$config->isNew())) {
+    if (!$config->get('id')) {
+      $config->delete();
+    }
+  }
+}

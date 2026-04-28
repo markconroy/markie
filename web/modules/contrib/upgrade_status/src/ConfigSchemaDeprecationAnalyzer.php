@@ -15,7 +15,7 @@ final class ConfigSchemaDeprecationAnalyzer {
    * Analyzes usages of deprecated config schema elements in an extension.
    *
    * @param \Drupal\Core\Extension\Extension $extension
-   *  The extension to be analyzed.
+   *   The extension to be analyzed.
    *
    * @return \Drupal\upgrade_status\DeprecationMessage[]
    *   A list of deprecation messages.
@@ -48,10 +48,10 @@ final class ConfigSchemaDeprecationAnalyzer {
    */
   private function getViewsConfigFiles(string $path) {
     $files = [];
-    foreach(glob($path . '/views.view.*.yml') as $file) {
+    foreach (glob($path . '/views.view.*.yml') as $file) {
       $files[] = $file;
     }
-    foreach (glob($path . '/*', GLOB_ONLYDIR|GLOB_NOSORT) as $dir) {
+    foreach (glob($path . '/*', GLOB_ONLYDIR | GLOB_NOSORT) as $dir) {
       $files = array_merge($files, $this->getViewsConfigFiles($dir));
     }
     return $files;
@@ -59,12 +59,13 @@ final class ConfigSchemaDeprecationAnalyzer {
 
   /**
    * Finds the line that contains the substring.
-   * 
+   *
    * @param string $substring
    *   The string to find.
    * @param string $file_contents
    *   String contents of a file.
-   * @return
+   *
+   * @return int
    *   Line number if found, 1 otherwise.
    */
   private function findKeyLine($substring, $file_contents) {
@@ -76,5 +77,5 @@ final class ConfigSchemaDeprecationAnalyzer {
     }
     return 1;
   }
-  
+
 }

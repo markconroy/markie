@@ -22,12 +22,16 @@ use Drupal\layout_builder\Event\SectionComponentBuildRenderArrayEvent;
 use Drupal\layout_builder\EventSubscriber\BlockComponentRenderArray;
 use Drupal\layout_builder\SectionComponent;
 use Drupal\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 use Prophecy\Argument;
 
 /**
- * @coversDefaultClass \Drupal\layout_builder\EventSubscriber\BlockComponentRenderArray
- * @group layout_builder
+ * Tests Drupal\layout_builder\EventSubscriber\BlockComponentRenderArray.
  */
+#[CoversClass(BlockComponentRenderArray::class)]
+#[Group('layout_builder')]
 class BlockComponentRenderArrayTest extends UnitTestCase {
 
   /**
@@ -70,10 +74,9 @@ class BlockComponentRenderArrayTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::onBuildRender
-   *
-   * @dataProvider providerBlockTypes
+   * Tests on build render.
    */
+  #[DataProvider('providerBlockTypes')]
   public function testOnBuildRender($refinable_dependent_access): void {
     $contexts = [];
     if ($refinable_dependent_access) {
@@ -144,10 +147,9 @@ class BlockComponentRenderArrayTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::onBuildRender
-   *
-   * @dataProvider providerBlockTypes
+   * Tests on build render without preview fallback string.
    */
+  #[DataProvider('providerBlockTypes')]
   public function testOnBuildRenderWithoutPreviewFallbackString($refinable_dependent_access): void {
     $contexts = [];
     if ($refinable_dependent_access) {
@@ -217,10 +219,9 @@ class BlockComponentRenderArrayTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::onBuildRender
-   *
-   * @dataProvider providerBlockTypes
+   * Tests on build render denied.
    */
+  #[DataProvider('providerBlockTypes')]
   public function testOnBuildRenderDenied($refinable_dependent_access): void {
     $contexts = [];
     if ($refinable_dependent_access) {
@@ -275,10 +276,9 @@ class BlockComponentRenderArrayTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::onBuildRender
-   *
-   * @dataProvider providerBlockTypes
+   * Tests on build render in preview.
    */
+  #[DataProvider('providerBlockTypes')]
   public function testOnBuildRenderInPreview($refinable_dependent_access): void {
     $contexts = [];
     if ($refinable_dependent_access) {
@@ -348,7 +348,7 @@ class BlockComponentRenderArrayTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::onBuildRender
+   * Tests on build render in preview empty build.
    */
   public function testOnBuildRenderInPreviewEmptyBuild(): void {
     $block = $this->prophesize(BlockPluginInterface::class)->willImplement(PreviewFallbackInterface::class);
@@ -410,7 +410,7 @@ class BlockComponentRenderArrayTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::onBuildRender
+   * Tests on build render empty build.
    */
   public function testOnBuildRenderEmptyBuild(): void {
     $block = $this->prophesize(BlockPluginInterface::class);
@@ -455,7 +455,7 @@ class BlockComponentRenderArrayTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::onBuildRender
+   * Tests on build render empty build with cache tags.
    */
   public function testOnBuildRenderEmptyBuildWithCacheTags(): void {
     $block = $this->prophesize(BlockPluginInterface::class);
@@ -500,7 +500,7 @@ class BlockComponentRenderArrayTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::onBuildRender
+   * Tests on build render null build.
    */
   public function testOnBuildRenderNullBuild(): void {
     $block = $this->prophesize(BlockPluginInterface::class);
@@ -523,7 +523,7 @@ class BlockComponentRenderArrayTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::onBuildRender
+   * Tests on build render no block.
    */
   public function testOnBuildRenderNoBlock(): void {
     $this->blockManager->createInstance('some_block_id', ['id' => 'some_block_id'])->willReturn(NULL);

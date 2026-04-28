@@ -10,8 +10,8 @@
  *   empty.
  * - file_size: The size of the file.
  *
- * @see template_preprocess_file_link()
+ * @see \Drupal\file\Hook\FileThemeHooks::preprocessFileLink()
  */
 #}
 {{ attach_library('claro/classy.file') }}
-<span{{ attributes }}>{{ link }} <span class="file__size">({{ file_size }})</span></span>
+<span{{ attributes }}>{{ link }}{% if file_size %} <span class="file__size">({{ file_size }})</span>{% endif %}</span>

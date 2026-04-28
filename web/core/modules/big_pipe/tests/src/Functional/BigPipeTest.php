@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Drupal\Tests\big_pipe\Functional;
 
 use Behat\Mink\Element\NodeElement;
-use Drupal\big_pipe\Render\Placeholder\BigPipeStrategy;
 use Drupal\big_pipe\Render\BigPipe;
+use Drupal\big_pipe\Render\Placeholder\BigPipeStrategy;
 use Drupal\big_pipe_test\BigPipePlaceholderTestCases;
 use Drupal\Component\Serialization\Json;
 use Drupal\Component\Utility\Html;
@@ -15,6 +15,8 @@ use Drupal\Core\Database\Database;
 use Drupal\Core\Logger\RfcLogLevel;
 use Drupal\Core\Url;
 use Drupal\Tests\BrowserTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests BigPipe's no-JS detection & response delivery (with and without JS).
@@ -23,10 +25,10 @@ use Drupal\Tests\BrowserTestBase;
  * - big_pipe_page_attachments()
  * - \Drupal\big_pipe\Controller\BigPipeController
  * - \Drupal\big_pipe\EventSubscriber\HtmlResponseBigPipeSubscriber
- * - \Drupal\big_pipe\Render\BigPipe
- *
- * @group big_pipe
+ * - \Drupal\big_pipe\Render\BigPipe.
  */
+#[Group('big_pipe')]
+#[RunTestsInSeparateProcesses]
 class BigPipeTest extends BrowserTestBase {
 
   /**
@@ -74,7 +76,7 @@ class BigPipeTest extends BrowserTestBase {
    *
    * Covers:
    * - big_pipe_page_attachments()
-   * - \Drupal\big_pipe\Controller\BigPipeController
+   * - \Drupal\big_pipe\Controller\BigPipeController.
    */
   public function testNoJsDetection(): void {
     $no_js_to_js_markup = '<script>document.cookie = "' . BigPipeStrategy::NOJS_COOKIE . '=1; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT"</script>';

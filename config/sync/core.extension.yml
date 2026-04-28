@@ -1,7 +1,4 @@
 module:
-  admin_toolbar: 0
-  admin_toolbar_search: 0
-  admin_toolbar_tools: 0
   ai: 0
   ai_ckeditor: 0
   ai_provider_openai: 0
@@ -26,12 +23,13 @@ module:
   filter: 0
   help: 0
   highlight_js: 0
-  history: 0
   image: 0
   image_widget_crop: 0
   inline_form_errors: 0
   key: 0
   klaro: 0
+  layout_builder: 0
+  layout_discovery: 0
   link: 0
   markie: 0
   media: 0
@@ -41,6 +39,7 @@ module:
   metatag_open_graph: 0
   metatag_twitter_cards: 0
   mysql: 0
+  navigation: 0
   node: 0
   options: 0
   page_cache: 0
@@ -51,7 +50,6 @@ module:
   redirect_404: 0
   responsive_image: 0
   search: 0
-  settings_tray: 0
   shortcut: 0
   simple_sitemap: 0
   simple_sitemap_engines: 0

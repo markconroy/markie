@@ -30,7 +30,7 @@ class MutliValueKeyInput extends KeyInputBase {
    */
   public function buildConfigurationForm(
     array $form,
-    FormStateInterface $form_state
+    FormStateInterface $form_state,
   ) {
     return $form + [
       'first' => [

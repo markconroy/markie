@@ -187,6 +187,16 @@ class AiAssistantApiRunner {
   }
 
   /**
+   * Gets the context.
+   *
+   * @return array
+   *   The context.
+   */
+  public function getContext() {
+    return $this->context;
+  }
+
+  /**
    * Set streaming.
    *
    * @param bool $streaming
@@ -322,6 +332,7 @@ class AiAssistantApiRunner {
         $this->getProviderAndModel(),
         $this->getThreadsKey(),
         $this->getVerboseMode(),
+        $this->getContext(),
       );
     }
 
@@ -577,9 +588,13 @@ class AiAssistantApiRunner {
       return $history;
     }
     // Otherwise just return the last message.
-    return [
-      ['role' => 'user', 'message' => $this->userMessage->getMessage()],
-    ];
+    if (isset($this->userMessage) && $this->userMessage instanceof UserMessage) {
+      return [
+        ['role' => 'user', 'message' => $this->userMessage->getMessage()],
+      ];
+    }
+    // No message yet, return empty history.
+    return [];
   }
 
   /**

@@ -8,13 +8,6 @@ id: ga
 label: 'Google Analytics'
 description: 'Tracks online visits of the website as a service.'
 default: false
-required: false
-opt_out: false
-only_once: false
-contextual_consent_only: null
-contextual_consent_text: null
-info_url: 'https://marketingplatform.google.com/intl/de/about/analytics/'
-privacy_policy_url: 'https://policies.google.com/privacy'
 purposes:
   - analytics
 cookies:
@@ -30,9 +23,16 @@ cookies:
     regex: ^IDE
     path: ''
     domain: ''
-callback_code: ''
+required: false
+opt_out: false
+only_once: false
+contextual_consent_only: null
+contextual_consent_text: null
+info_url: 'https://marketingplatform.google.com/intl/de/about/analytics/'
+privacy_policy_url: 'https://policies.google.com/privacy'
 javascripts:
   - analytics.js
+callback_code: ''
 wrapper_identifier: {  }
 attachments:
   - ga4_google_analytics

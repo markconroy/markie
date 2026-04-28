@@ -6,12 +6,14 @@ namespace Drupal\Tests\views\Kernel\Handler;
 
 use Drupal\Tests\views\Kernel\ViewsKernelTestBase;
 use Drupal\views\Views;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the core Drupal\views\Plugin\views\argument\NullArgument handler.
- *
- * @group views
  */
+#[Group('views')]
+#[RunTestsInSeparateProcesses]
 class ArgumentNullTest extends ViewsKernelTestBase {
 
   /**
@@ -35,7 +37,7 @@ class ArgumentNullTest extends ViewsKernelTestBase {
    * Tests the NullArgument handler for text areas.
    */
   public function testAreaText(): void {
-    // Test validation
+    // Test validation.
     $view = Views::getView('test_view');
     $view->setDisplay();
 

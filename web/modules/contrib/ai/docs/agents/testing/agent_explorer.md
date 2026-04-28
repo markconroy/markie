@@ -19,4 +19,4 @@ To use the Agent Explorer, follow these steps:
 ## Reading the results
 On the right side of the screen, you will see the results of the agent's execution. The results are displayed in a table format for each loop iteration. Each row represents a step in the agent's decision-making process, showing the input, output, tools used, and any additional information relevant to that step.
 
-You can click on each row to open it in a new tab it and see more details about the agent's actions, including the raw provider data and the tokenized system prompt.
+You can click on each row to open it in a new tab and see more details about the agent's actions, including the raw provider data and the tokenized system prompt.

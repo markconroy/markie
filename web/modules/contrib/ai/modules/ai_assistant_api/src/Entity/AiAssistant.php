@@ -58,7 +58,7 @@ use Drupal\ai_assistant_api\AiAssistantInterface;
  *     "llm_configuration",
  *     "roles",
  *     "use_function_calling",
- *      "ai_agent",
+ *     "ai_agent",
  *   },
  * )
  */

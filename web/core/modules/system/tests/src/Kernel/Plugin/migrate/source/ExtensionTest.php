@@ -4,14 +4,18 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\system\Kernel\Plugin\migrate\source;
 
+use Drupal\system\Plugin\migrate\source\Extension;
 use Drupal\Tests\migrate\Kernel\MigrateSqlSourceTestBase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests legacy extension source plugin.
- *
- * @covers \Drupal\system\Plugin\migrate\source\Extension
- * @group migrate_drupal
  */
+#[CoversClass(Extension::class)]
+#[Group('migrate_drupal')]
+#[RunTestsInSeparateProcesses]
 class ExtensionTest extends MigrateSqlSourceTestBase {
 
   /**

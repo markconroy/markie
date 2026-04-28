@@ -76,6 +76,9 @@ if (!class_exists(TestCase::class)) {
   exit(SIMPLETEST_SCRIPT_EXIT_FAILURE);
 }
 
+// Defaults the PHPUnit configuration file path.
+$args['phpunit-configuration'] ??= \Drupal::root() . \DIRECTORY_SEPARATOR . 'core';
+
 if ($args['execute-test']) {
   simpletest_script_setup_database();
   $test_run_results_storage = simpletest_script_setup_test_run_results_storage();
@@ -89,12 +92,10 @@ if ($args['list']) {
   // Display all available tests organized by one @group annotation.
   echo "\nAvailable test groups & classes\n";
   echo "-------------------------------\n\n";
-  $test_discovery = PhpUnitTestDiscovery::instance()->setConfigurationFilePath(\Drupal::root() . \DIRECTORY_SEPARATOR . 'core');
+  $test_discovery = PhpUnitTestDiscovery::instance()->setConfigurationFilePath($args['phpunit-configuration']);
   try {
     $groups = $test_discovery->getTestClasses($args['module']);
-    foreach ($test_discovery->getWarnings() as $warning) {
-      simpletest_script_print($warning . "\n", SIMPLETEST_SCRIPT_COLOR_EXCEPTION);
-    }
+    dump_discovery_warnings();
   }
   catch (Exception $e) {
     error_log((string) $e);
@@ -122,7 +123,7 @@ if ($args['list']) {
 // @see https://www.drupal.org/node/2569585
 if ($args['list-files'] || $args['list-files-json']) {
   // List all files which could be run as tests.
-  $test_discovery = PhpUnitTestDiscovery::instance()->setConfigurationFilePath(\Drupal::root() . \DIRECTORY_SEPARATOR . 'core');
+  $test_discovery = PhpUnitTestDiscovery::instance()->setConfigurationFilePath($args['phpunit-configuration']);
   // PhpUnitTestDiscovery::findAllClassFiles() gives us a classmap similar to a
   // Composer 'classmap' array.
   $test_classes = $test_discovery->findAllClassFiles();
@@ -179,18 +180,20 @@ if (!Composer::upgradePHPUnitCheck(Version::id())) {
 
 echo "\n";
 echo "Drupal test run\n\n";
-echo sprintf("Drupal Version:   %s\n", \Drupal::VERSION);
-echo sprintf("PHP Version:      %s\n", \PHP_VERSION);
-echo sprintf("PHP Binary:       %s\n", $php ?? getenv('_'));
-echo sprintf("PHPUnit Version:  %s\n", Version::id());
+echo sprintf("Drupal Version.......: %s\n", \Drupal::VERSION);
+echo sprintf("PHP Version..........: %s\n", \PHP_VERSION);
+echo sprintf("PHP Binary...........: %s\n", $php ?? getenv('_'));
+echo sprintf("PHPUnit Version......: %s\n", Version::id());
+echo sprintf("PHPUnit configuration: %s\n", $args['phpunit-configuration']);
 if ($args['dburl']) {
   $sut_connection_info = Database::getConnectionInfo();
   $sut_tasks_class = $sut_connection_info['default']['namespace'] . "\\Install\\Tasks";
   $sut_installer = new $sut_tasks_class();
   $sut_connection = Database::getConnection();
-  echo sprintf("Database:         %s\n", (string) $sut_installer->name());
-  echo sprintf("Database Version: %s\n", $sut_connection->version());
+  echo sprintf("Database.............: %s\n", (string) $sut_installer->name());
+  echo sprintf("Database Version.....: %s\n", $sut_connection->version());
 }
+echo sprintf("Working directory....: %s\n", getcwd());
 echo "-------------------------------\n";
 echo "\n";
 
@@ -261,6 +264,10 @@ Example:      {$args['script']} Profile
 All arguments are long options.
 
   --help      Print this page.
+
+  --phpunit-configuration <path>
+              Path to the configuration file for PHPUnit. If not specified, it
+              defaults to core configuration.
 
   --list      Display all available test groups.
 
@@ -419,6 +426,7 @@ function simpletest_script_parse_args() {
   $args = [
     'script' => '',
     'help' => FALSE,
+    'phpunit-configuration' => NULL,
     'list' => FALSE,
     'list-files' => FALSE,
     'list-files-json' => FALSE,
@@ -675,7 +683,7 @@ function simpletest_script_setup_database($new = FALSE): void {
     // Remove a possibly existing default connection (from settings.php).
     Database::removeConnection('default');
     try {
-      $databases['default']['default'] = Database::convertDbUrlToConnectionInfo($args['dburl'], DRUPAL_ROOT, TRUE);
+      $databases['default']['default'] = Database::convertDbUrlToConnectionInfo($args['dburl'], TRUE);
     }
     catch (\InvalidArgumentException $e) {
       simpletest_script_print_error('Invalid --dburl. Reason: ' . $e->getMessage());
@@ -852,7 +860,7 @@ function simpletest_script_execute_batch(TestRunResultsStorageInterface $test_ru
 function simpletest_script_run_phpunit(TestRun $test_run, $class) {
   global $args;
 
-  $runner = PhpUnitTestRunner::create(\Drupal::getContainer());
+  $runner = PhpUnitTestRunner::create(\Drupal::getContainer())->setConfigurationFilePath($args['phpunit-configuration']);
   $start = microtime(TRUE);
   $results = $runner->execute($test_run, $class, $status, $args['color']);
   $time = microtime(TRUE) - $start;
@@ -942,21 +950,13 @@ function simpletest_script_command(TestRun $test_run, string $test_class): array
 function simpletest_script_get_test_list() {
   global $args;
 
-  $test_discovery = PhpUnitTestDiscovery::instance()->setConfigurationFilePath(\Drupal::root() . \DIRECTORY_SEPARATOR . 'core');
+  $test_discovery = PhpUnitTestDiscovery::instance()->setConfigurationFilePath($args['phpunit-configuration']);
   $test_list = [];
   $slow_tests = [];
   if ($args['all'] || $args['module'] || $args['directory']) {
     try {
       $groups = $test_discovery->getTestClasses($args['module'], $args['types'], $args['directory']);
-      $warnings = $test_discovery->getWarnings();
-      if (!empty($warnings)) {
-        simpletest_script_print("Test discovery warnings\n", SIMPLETEST_SCRIPT_COLOR_BRIGHT_WHITE);
-        simpletest_script_print("-----------------------\n", SIMPLETEST_SCRIPT_COLOR_BRIGHT_WHITE);
-        foreach ($warnings as $warning) {
-          simpletest_script_print('* ' . $warning . "\n\n", SIMPLETEST_SCRIPT_COLOR_EXCEPTION);
-        }
-        echo "\n";
-      }
+      dump_discovery_warnings();
     }
     catch (Exception $e) {
       echo (string) $e;
@@ -1021,9 +1021,7 @@ function simpletest_script_get_test_list() {
         else {
           try {
             $groups = $test_discovery->getTestClasses(NULL, $args['types']);
-            foreach ($test_discovery->getWarnings() as $warning) {
-              simpletest_script_print($warning . "\n", SIMPLETEST_SCRIPT_COLOR_EXCEPTION);
-            }
+            dump_discovery_warnings();
           }
           catch (Exception $e) {
             echo (string) $e;
@@ -1056,9 +1054,7 @@ function simpletest_script_get_test_list() {
     else {
       try {
         $groups = $test_discovery->getTestClasses(NULL, $args['types']);
-        foreach ($test_discovery->getWarnings() as $warning) {
-          simpletest_script_print($warning . "\n", SIMPLETEST_SCRIPT_COLOR_EXCEPTION);
-        }
+        dump_discovery_warnings();
       }
       catch (Exception $e) {
         echo (string) $e;
@@ -1256,6 +1252,7 @@ function simpletest_script_reporter_init(): void {
     'fail' => 'Fail',
     'error' => 'Error',
     'skipped' => 'Skipped',
+    'cli_fail' => 'Failure',
     'exception' => 'Exception',
     'debug' => 'Log',
   ];
@@ -1311,15 +1308,19 @@ function simpletest_script_reporter_display_summary($class, $results, $duration 
     $summary[] = $results['#debug'] . ' log(s)';
   }
 
-  if ($results['#time']) {
-    $time = sprintf('%8.3fs', $results['#time']);
-  }
-  else {
-    $time = sprintf('%8.3fs', $duration);
+  if ($results['#cli_fail']) {
+    $summary[] = 'exit code ' . $results['#exit_code'];
   }
 
+  // The key $results['#time'] holds the sum of the tests execution times,
+  // without taking into account the process spawning time and the setup
+  // times of the tests themselves. So for reporting to be consistent with
+  // PHPUnit CLI reported execution time, we report here the overall time of
+  // execution of the spawned process.
+  $time = sprintf('%8.3fs', $duration);
+
   $output = vsprintf('%s %s %s', [$time, trim_with_ellipsis($class, 70, STR_PAD_LEFT), implode(', ', $summary)]);
-  $status = ($results['#fail'] || $results['#exception'] || $results['#error'] ? 'fail' : 'pass');
+  $status = ($results['#fail'] || $results['#cli_fail'] || $results['#exception'] || $results['#error'] ? 'fail' : 'pass');
   simpletest_script_print($output . "\n", simpletest_script_color_code($status));
 }
 
@@ -1462,7 +1463,17 @@ function simpletest_script_reporter_display_results(TestRunResultsStorageInterfa
 function simpletest_script_format_result($result): void {
   global $args, $results_map, $color;
 
-  $summary = sprintf("%-9.9s %9.3fs %s\n", $results_map[$result->status], $result->time, trim_with_ellipsis($result->function, 80, STR_PAD_LEFT));
+  if ($result->time == 0) {
+    $duration = "          ";
+  }
+  elseif ($result->time < 0.001) {
+    $duration = "     <1 ms";
+  }
+  else {
+    $duration = sprintf("%9.3fs", $result->time);
+  }
+
+  $summary = sprintf("%-9.9s %s %s\n", $results_map[$result->status], $duration, trim_with_ellipsis($result->function, 80, STR_PAD_LEFT));
 
   simpletest_script_print($summary, simpletest_script_color_code($result->status));
 
@@ -1524,7 +1535,7 @@ function simpletest_script_print($message, $color_code): void {
 function simpletest_script_color_code($status) {
   return match ($status) {
     'pass' => SIMPLETEST_SCRIPT_COLOR_PASS,
-    'fail', 'error', 'exception' => SIMPLETEST_SCRIPT_COLOR_FAIL,
+    'fail', 'cli_fail', 'error', 'exception' => SIMPLETEST_SCRIPT_COLOR_FAIL,
     'skipped' => SIMPLETEST_SCRIPT_COLOR_YELLOW,
     'debug' => SIMPLETEST_SCRIPT_COLOR_CYAN,
     default => 0,
@@ -1633,4 +1644,23 @@ function trim_with_ellipsis(string $input, int $length, int $side): string {
       };
   }
   return $input;
+}
+
+/**
+ * Outputs the discovery warning messages.
+ */
+function dump_discovery_warnings(): void {
+  $warnings = PhpUnitTestDiscovery::instance()->getWarnings();
+  if (!empty($warnings)) {
+    simpletest_script_print("Test discovery warnings\n", SIMPLETEST_SCRIPT_COLOR_BRIGHT_WHITE);
+    simpletest_script_print("-----------------------\n", SIMPLETEST_SCRIPT_COLOR_BRIGHT_WHITE);
+    foreach ($warnings as $warning) {
+      $tmp = explode("\n", $warning);
+      simpletest_script_print('* ' . array_shift($tmp) . "\n", SIMPLETEST_SCRIPT_COLOR_EXCEPTION);
+      foreach ($tmp as $sub) {
+        simpletest_script_print('  ' . $sub . "\n", SIMPLETEST_SCRIPT_COLOR_EXCEPTION);
+      }
+      echo "\n";
+    }
+  }
 }

@@ -6,13 +6,16 @@ namespace Drupal\Tests\views\Kernel\Handler;
 
 use Drupal\Tests\views\Kernel\ViewsKernelTestBase;
 use Drupal\views\Views;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the token in text area handler.
  *
- * @group views
  * @see \Drupal\views\Plugin\views\area\Text
  */
+#[Group('views')]
+#[RunTestsInSeparateProcesses]
 class AreaTextTokenTest extends ViewsKernelTestBase {
 
   /**

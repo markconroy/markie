@@ -273,7 +273,7 @@ The following variables are available to use in the instructions:
       foreach ($this->getChatHistory() as $chat_message) {
         if ($chat_message->getRole() === 'assistant' && str_starts_with($chat_message->getText(), '<SummaryOfConversation>')) {
           // Append to this message before the closing tag.
-          $message = substr($chat_message->getText(), 0, -22) . "\n" . $data['message'] . "\n</SummaryOfConversation>";
+          $message = mb_substr($chat_message->getText(), 0, -22) . "\n" . $data['message'] . "\n</SummaryOfConversation>";
           $found = TRUE;
           break;
         }

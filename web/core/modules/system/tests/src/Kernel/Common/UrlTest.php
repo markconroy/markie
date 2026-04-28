@@ -10,16 +10,19 @@ use Drupal\Core\Language\Language;
 use Drupal\Core\Link;
 use Drupal\Core\Render\RenderContext;
 use Drupal\Core\Url;
+use Drupal\Core\Utility\LinkGenerator;
 use Drupal\KernelTests\KernelTestBase;
+use PHPUnit\Framework\Attributes\CoversMethod;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the Url object.
- *
- * @covers \Drupal\Component\Utility\UrlHelper::filterQueryParameters
- * @covers \Drupal\Core\Utility\LinkGenerator::generate
- *
- * @group Common
  */
+#[Group('Common')]
+#[CoversMethod(UrlHelper::class, 'filterQueryParameters')]
+#[CoversMethod(LinkGenerator::class, 'generate')]
+#[RunTestsInSeparateProcesses]
 class UrlTest extends KernelTestBase {
 
   /**

@@ -15,7 +15,6 @@ use Drupal\Core\Link;
 use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Entity\RevisionLogInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides a controller showing revision history for an entity.
@@ -59,18 +58,6 @@ class VersionHistoryController extends ControllerBase {
   ) {
     $this->entityTypeManager = $entityTypeManager;
     $this->languageManager = $languageManager;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function create(ContainerInterface $container) {
-    return new static(
-      $container->get('entity_type.manager'),
-      $container->get('language_manager'),
-      $container->get('date.formatter'),
-      $container->get('renderer'),
-    );
   }
 
   /**
@@ -223,23 +210,27 @@ class VersionHistoryController extends ControllerBase {
     $entityStorage = $this->entityTypeManager->getStorage($entity->getEntityTypeId());
     assert($entityStorage instanceof RevisionableStorageInterface);
 
-    $result = $entityStorage->getQuery()
+    $query = $entityStorage->getQuery()
       ->accessCheck(FALSE)
       ->allRevisions()
       ->condition($entityType->getKey('id'), $entity->id())
       ->sort($entityType->getKey('revision'), 'DESC')
-      ->pager(self::REVISIONS_PER_PAGE)
-      ->execute();
+      ->pager(self::REVISIONS_PER_PAGE);
+
+    // Only show revisions that are affected by the language that is being
+    // displayed.
+    if ($translatable) {
+      $query->condition($entityType->getKey('langcode'), $entity->language()->getId())
+        ->condition($entityType->getKey('revision_translation_affected'), '1');
+    }
+
+    $result = $query->execute();
 
     $currentLangcode = $this->languageManager
       ->getCurrentLanguage(LanguageInterface::TYPE_CONTENT)
       ->getId();
     foreach ($entityStorage->loadMultipleRevisions(array_keys($result)) as $revision) {
-      // Only show revisions that are affected by the language that is being
-      // displayed.
-      if (!$translatable || ($revision->hasTranslation($currentLangcode) && $revision->getTranslation($currentLangcode)->isRevisionTranslationAffected())) {
-        yield ($translatable ? $revision->getTranslation($currentLangcode) : $revision);
-      }
+      yield ($translatable ? $revision->getTranslation($currentLangcode) : $revision);
     }
   }
 

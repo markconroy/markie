@@ -3,7 +3,7 @@
 /*
  * This file is part of Psy Shell.
  *
- * (c) 2012-2025 Justin Hileman
+ * (c) 2012-2026 Justin Hileman
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -15,6 +15,8 @@ use Psy\ConfigPaths;
 use Psy\Configuration;
 use Psy\Exception\ErrorException;
 use Psy\Exception\InvalidManualException;
+use Psy\Manual\V2Manual;
+use Psy\Manual\V3Manual;
 use Psy\VersionUpdater\Downloader;
 use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\InputInterface;
@@ -319,14 +321,14 @@ class ManualUpdate
 
         try {
             if (\substr($path, -4) === '.php') {
-                $manual = new \Psy\Manual\V3Manual($path);
+                $manual = new V3Manual($path);
 
                 return $manual->getMeta();
             }
 
             if (\substr($path, -7) === '.sqlite') {
                 $pdo = new \PDO('sqlite:'.$path);
-                $manual = new \Psy\Manual\V2Manual($pdo);
+                $manual = new V2Manual($pdo);
 
                 return $manual->getMeta();
             }

@@ -4,21 +4,22 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\locale\Functional;
 
+use Drupal\Core\Database\Database;
+use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Site\Settings;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\Url;
-use Drupal\Core\Database\Database;
 use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\Tests\BrowserTestBase;
-use Drupal\Core\Language\LanguageInterface;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 // phpcs:disable Drupal.Semantics.FunctionT.NotLiteralString
-
 /**
  * Tests the validation of translation strings and search results.
- *
- * @group locale
  */
+#[Group('locale')]
+#[RunTestsInSeparateProcesses]
 class LocaleTranslationUiTest extends BrowserTestBase {
 
   use StringTranslationTrait;

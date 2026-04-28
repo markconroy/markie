@@ -6,7 +6,6 @@
 
 use Drupal\Core\Batch\BatchBuilder;
 use Drupal\Core\File\Exception\FileException;
-use Drupal\Core\Hook\Attribute\ProceduralHookScanStop;
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Url;
 use Drupal\file\FileInterface;
@@ -37,7 +36,6 @@ use Drupal\locale\Gettext;
  *   l10n_update functionality to feed in translation files alike.
  *   https://www.drupal.org/node/1191488
  */
-#[ProceduralHookScanStop]
 function locale_translate_batch_import_files(array $options, $force = FALSE) {
   $options += [
     'overwrite_options' => [],
@@ -435,7 +433,7 @@ function locale_translate_batch_finished($success, array $results): void {
  */
 function locale_translate_file_create($filepath) {
   $file = new stdClass();
-  $file->filename = \Drupal::service('file_system')->basename($filepath);
+  $file->filename = basename($filepath);
   $file->uri = $filepath;
   $file->timestamp = filemtime($file->uri);
   return $file;
@@ -468,7 +466,8 @@ function locale_translate_file_attach_properties($file, array $options = []) {
   }
 
   // Extract project, version and language code from the file name. Supported:
-  // {project}-{version}.{langcode}.po, {prefix}.{langcode}.po or {langcode}.po
+  // "{project}-{version}.{langcode}.po", "{prefix}.{langcode}.po" or
+  // "{langcode}.po".
   preg_match('!
     (                       # project OR project and version OR empty (group 1)
       ([a-z_]+)             # project name (group 2)

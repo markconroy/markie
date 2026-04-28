@@ -14,7 +14,7 @@ use Drupal\key\Entity\Key;
 class KeyDeprecationTest extends KernelTestBase {
 
   /**
-   * @inheritdoc
+   * {@inheritdoc}
    */
   protected static $modules = ['key', 'key_test'];
 

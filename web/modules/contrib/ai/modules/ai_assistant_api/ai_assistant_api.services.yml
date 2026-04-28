@@ -42,4 +42,5 @@ services:
     arguments:
       - '@ai.provider'
       - '@tempstore.private'
+      - '@event_dispatcher'
       - '@?plugin.manager.ai_agents'

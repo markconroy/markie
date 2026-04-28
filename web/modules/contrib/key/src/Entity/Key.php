@@ -2,9 +2,11 @@
 
 namespace Drupal\key\Entity;
 
+use Drupal\Core\Config\Action\Attribute\ActionMethod;
 use Drupal\Core\Config\Entity\ConfigEntityBase;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityWithPluginCollectionInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\key\Exception\KeyValueNotSetException;
 use Drupal\key\KeyInterface;
 use Drupal\key\Plugin\KeyPluginCollection;
@@ -175,6 +177,7 @@ class Key extends ConfigEntityBase implements KeyInterface, EntityWithPluginColl
   /**
    * {@inheritdoc}
    */
+  #[ActionMethod(adminLabel: new TranslatableMarkup('Set plugin'))]
   public function setPlugin($type, $id) {
     $this->$type = $id;
     $this->getPluginCollection($type)->addInstanceId($id);
@@ -290,6 +293,7 @@ class Key extends ConfigEntityBase implements KeyInterface, EntityWithPluginColl
   /**
    * {@inheritdoc}
    */
+  #[ActionMethod(adminLabel: new TranslatableMarkup('Set key value'), pluralize: FALSE)]
   public function setKeyValue($key_value) {
     $key_type = $this->getKeyType();
     if ($key_type->getPluginDefinition()['multivalue']['enabled'] && is_array($key_value)) {
@@ -301,6 +305,7 @@ class Key extends ConfigEntityBase implements KeyInterface, EntityWithPluginColl
   /**
    * {@inheritdoc}
    */
+  #[ActionMethod(adminLabel: new TranslatableMarkup('Delete key value'), pluralize: FALSE)]
   public function deleteKeyValue() {
     if ($this->getKeyProvider() instanceof KeyProviderSettableValueInterface) {
       return $this->getKeyProvider()->deleteKeyValue($this);
@@ -338,7 +343,7 @@ class Key extends ConfigEntityBase implements KeyInterface, EntityWithPluginColl
 
     // If an original key exists.
     if (isset($this->original)) {
-      /* @var $original \Drupal\key\Entity\Key */
+      /** @var \Drupal\key\Entity\Key $original */
       $original = $this->original;
 
       // If the original key's provider allows setting a key value and
@@ -360,7 +365,7 @@ class Key extends ConfigEntityBase implements KeyInterface, EntityWithPluginColl
    */
   public static function postDelete(EntityStorageInterface $storage, array $entities) {
     foreach ($entities as $key) {
-      /* @var $key \Drupal\key\Entity\Key */
+      /** @var \Drupal\key\Entity\Key $key */
       // Give the key provider plugin the opportunity to delete the key value.
       if ($key->getKeyProvider() instanceof KeyProviderSettableValueInterface) {
         $key->deleteKeyValue();

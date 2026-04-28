@@ -42,11 +42,10 @@ class Timezone extends Constraint
     ];
 
     /**
-     * @param int|array<string,mixed>|null $zone           Restrict valid timezones to this geographical zone (defaults to {@see \DateTimeZone::ALL})
-     * @param string|null                  $countryCode    Restrict the valid timezones to this country if the zone option is {@see \DateTimeZone::PER_COUNTRY}
-     * @param bool|null                    $intlCompatible Whether to restrict valid timezones to ones available in PHP's intl (defaults to false)
-     * @param string[]|null                $groups
-     * @param array<string,mixed>|null     $options
+     * @param int|null      $zone           Restrict valid timezones to this geographical zone (defaults to {@see \DateTimeZone::ALL})
+     * @param string|null   $countryCode    Restrict the valid timezones to this country if the zone option is {@see \DateTimeZone::PER_COUNTRY}
+     * @param bool|null     $intlCompatible Whether to restrict valid timezones to ones available in PHP's intl (defaults to false)
+     * @param string[]|null $groups
      *
      * @see \DateTimeZone
      */
@@ -64,18 +63,18 @@ class Timezone extends Constraint
             trigger_deprecation('symfony/validator', '7.3', 'Passing an array of options to configure the "%s" constraint is deprecated, use named arguments instead.', static::class);
 
             $options = array_merge($zone, $options ?? []);
+            $zone = null;
         } elseif (null !== $zone) {
             if (\is_array($options)) {
                 trigger_deprecation('symfony/validator', '7.3', 'Passing an array of options to configure the "%s" constraint is deprecated, use named arguments instead.', static::class);
-            } else {
-                $options = [];
-            }
 
-            $options['value'] = $zone;
+                $options['value'] = $zone;
+            }
         }
 
         parent::__construct($options, $groups, $payload);
 
+        $this->zone = $zone ?? $this->zone;
         $this->message = $message ?? $this->message;
         $this->countryCode = $countryCode ?? $this->countryCode;
         $this->intlCompatible = $intlCompatible ?? $this->intlCompatible;
@@ -92,8 +91,15 @@ class Timezone extends Constraint
         }
     }
 
+    /**
+     * @deprecated since Symfony 7.4
+     */
     public function getDefaultOption(): ?string
     {
+        if (0 === \func_num_args() || func_get_arg(0)) {
+            trigger_deprecation('symfony/validator', '7.4', 'The %s() method is deprecated.', __METHOD__);
+        }
+
         return 'zone';
     }
 }

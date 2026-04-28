@@ -80,15 +80,16 @@ final class GetSetMethodNormalizer extends AbstractObjectNormalizer
     }
 
     /**
-     * Checks if a method's name matches /^(get|is|has).+$/ and can be called non-statically without parameters.
+     * Checks if a method's name matches /^(get|is|has|can).+$/ and can be called non-statically without parameters.
      */
     private function isGetMethod(\ReflectionMethod $method): bool
     {
         return !$method->isStatic()
             && !($method->getAttributes(Ignore::class) || $method->getAttributes(LegacyIgnore::class))
             && !$method->getNumberOfRequiredParameters()
+            && !\in_array((string) $method->getReturnType(), ['void', 'never'], true)
             && ((2 < ($methodLength = \strlen($method->name)) && str_starts_with($method->name, 'is') && !ctype_lower($method->name[2]))
-                || (3 < $methodLength && (str_starts_with($method->name, 'has') || str_starts_with($method->name, 'get')) && !ctype_lower($method->name[3]))
+                || (3 < $methodLength && (str_starts_with($method->name, 'has') || str_starts_with($method->name, 'get') || str_starts_with($method->name, 'can')) && !ctype_lower($method->name[3]))
             );
     }
 
@@ -144,6 +145,11 @@ final class GetSetMethodNormalizer extends AbstractObjectNormalizer
             return $object->$haser();
         }
 
+        $caner = 'can'.$attribute;
+        if (method_exists($object, $caner) && \is_callable([$object, $caner])) {
+            return $object->$caner();
+        }
+
         return null;
     }
 
@@ -180,7 +186,7 @@ final class GetSetMethodNormalizer extends AbstractObjectNormalizer
         $reflection = self::$reflectionCache[$class];
 
         if ($context['_read_attributes'] ?? true) {
-            foreach (['get', 'is', 'has'] as $getterPrefix) {
+            foreach (['get', 'is', 'has', 'can'] as $getterPrefix) {
                 $getter = $getterPrefix.$attribute;
                 $reflectionMethod = $reflection->hasMethod($getter) ? $reflection->getMethod($getter) : null;
                 if ($reflectionMethod && $this->isGetMethod($reflectionMethod)) {

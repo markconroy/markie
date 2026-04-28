@@ -13,13 +13,15 @@ use Drupal\Tests\file\Kernel\Migrate\d7\FileMigrationSetupTrait;
 use Drupal\Tests\migrate_drupal\Kernel\d7\MigrateDrupal7TestBase;
 use Drupal\Tests\migrate_drupal\Traits\CreateTestContentEntitiesTrait;
 use Drupal\Tests\migrate_drupal\Traits\NodeMigrateTypeTestTrait;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Test class for a complete node migration for Drupal 7.
- *
- * @group migrate_drupal_7
- * @group #slow
  */
+#[Group('migrate_drupal_7')]
+#[Group('#slow')]
+#[RunTestsInSeparateProcesses]
 class MigrateNodeCompleteTest extends MigrateDrupal7TestBase {
 
   use FileMigrationSetupTrait;

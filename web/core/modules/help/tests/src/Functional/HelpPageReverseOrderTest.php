@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\help\Functional;
 
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
+
 /**
  * Verify the order of the help page with an alter hook.
- *
- * @group help
  */
+#[Group('help')]
+#[RunTestsInSeparateProcesses]
 class HelpPageReverseOrderTest extends HelpPageOrderTest {
 
   /**

@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace Drupal\Tests\help\Functional;
 
 use Drupal\Tests\BrowserTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Verify help display and user access to help based on permissions.
- *
- * @group help
  */
+#[Group('help')]
+#[RunTestsInSeparateProcesses]
 class HelpTest extends BrowserTestBase {
 
   /**
@@ -29,7 +31,6 @@ class HelpTest extends BrowserTestBase {
     'help',
     'help_page_test',
     'help_test',
-    'history',
   ];
 
   /**
@@ -114,7 +115,7 @@ class HelpTest extends BrowserTestBase {
     $page_text = $this->getTextContent();
     $start = strpos($page_text, 'Module overviews');
     $pos = $start;
-    $list = ['Block', 'Block Content', 'Breakpoint', 'History', 'Text Editor'];
+    $list = ['Block', 'Block Content', 'Breakpoint', 'Text Editor'];
     foreach ($list as $name) {
       $this->assertSession()->linkExists($name);
       $new_pos = strpos($page_text, $name, $start);

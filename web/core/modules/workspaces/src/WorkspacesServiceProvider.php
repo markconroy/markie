@@ -5,6 +5,7 @@ namespace Drupal\workspaces;
 use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\DependencyInjection\ServiceProviderBase;
 use Drupal\Core\Update\UpdateKernel;
+use Drupal\workspaces\Provider\WorkspaceProviderInterface;
 use Symfony\Component\DependencyInjection\Reference;
 
 /**
@@ -27,6 +28,9 @@ class WorkspacesServiceProvider extends ServiceProviderBase {
         ->setPublic(FALSE)
         ->setDecoratedService('pgsql.entity.query.sql', NULL, 50);
     }
+
+    $container->registerForAutoconfiguration(WorkspaceProviderInterface::class)
+      ->addTag('workspace_provider');
   }
 
   /**
@@ -37,15 +41,6 @@ class WorkspacesServiceProvider extends ServiceProviderBase {
     $renderer_config = $container->getParameter('renderer.config');
     $renderer_config['required_cache_contexts'][] = 'workspace';
     $container->setParameter('renderer.config', $renderer_config);
-
-    // Decorate the 'path_alias.manager' service.
-    if ($container->hasDefinition('path_alias.manager')) {
-      $container->register('workspaces.path_alias.manager', WorkspacesAliasManager::class)
-        ->setPublic(FALSE)
-        ->setDecoratedService('path_alias.manager', NULL, 50)
-        ->addArgument(new Reference('workspaces.path_alias.manager.inner'))
-        ->addArgument(new Reference('workspaces.manager'));
-    }
 
     // Replace the class of the 'path_alias.repository' service.
     if ($container->hasDefinition('path_alias.repository')) {

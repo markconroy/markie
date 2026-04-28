@@ -1,7 +1,11 @@
 # Use the Drupal GitLab CI template.
 include:
   - project: $_GITLAB_TEMPLATES_REPO
-    ref: $_GITLAB_TEMPLATES_REF
+    # We hard code to "main" based on having the latest templates, before they
+    # are merged. This will be possible until gitlab_templates project has a 2.x
+    # branch.
+    # See: https://www.drupal.org/project/gitlab_templates/issues/3404175
+    ref: main
     file:
       - '/includes/include.drupalci.main.yml'
       - '/includes/include.drupalci.variables.yml'
@@ -14,7 +18,7 @@ variables:
   OPT_IN_TEST_PREVIOUS_MAJOR: 1
   OPT_IN_TEST_PREVIOUS_MINOR: 1
   OPT_IN_TEST_NEXT_MINOR: 1
-  OPT_IN_TEST_NEXT_MAJOR: 1
+  OPT_IN_TEST_NEXT_MAJOR: 0
   OPT_IN_TEST_MAX_PHP: 1
   # Use runtests.sh which gives better output.
   _PHPUNIT_CONCURRENT: 1
@@ -22,10 +26,17 @@ variables:
   SKIP_ESLINT: 1
   SKIP_STYLELINT: 1   # Until fixed in gitlab templates.
   # showdown.js is full of emoji words.
-  _CSPELL_IGNORE_PATHS: "'assets/js/chat_history_element.js', 'modules/*/tests/resources/ai_test/requests/*/*.yml', 'modules/ai_api_explorer/css', 'modules/ai_api_explorer/js', 'modules/ai_chatbot/js', 'modules/ai_chatbot/deepchat', 'modules/ai_chatbot/css', 'modules/ai_automators/tests/config', '.cspell-project-words.txt', 'grumphp.yml"
+  _CSPELL_IGNORE_PATHS: "'assets/js/ai_chat_history_element.js', 'modules/*/tests/resources/ai_test/requests/*/*.yml', 'modules/ai_api_explorer/css', 'modules/ai_api_explorer/js', 'modules/ai_chatbot/js', 'modules/ai_chatbot/deepchat', 'modules/ai_chatbot/css', 'modules/ai_automators/tests/config', '.cspell-project-words.txt', 'grumphp.yml', 'ui'"
   COMPOSER_IGNORE_PLATFORM_REQS: 'ext-ffi'
+  # Selenium hostname for video recording in FunctionalJavascript tests.
+  # The Drupal CI template uses 'selenium' as the service alias.
+  DRUPAL_TEST_WEBDRIVER_HOSTNAME: selenium
 
 phpunit (previous major):
+  allow_failure: true
+  needs:
+    - composer (previous major)
+    - js_build
   before_script:
     # We need to build 8.1 with the FFI extension enabled.
     # Install dependencies.
@@ -49,59 +60,52 @@ phpunit (previous major):
     # Show the configuration for debugging purposes.
     - php -i | grep ffi
 
-# Build JS artifacts as this can sometimes be forgotten.
+# Build JS artifacts. They are needed for tests.
 js_build:
   stage: build
   image: node:20.14.0-alpine
-  variables:
-    GIT_STRATEGY: fetch
-    GIT_CHECKOUT: "true"
-  cache:
-    key:
-      files:
-        - modules/ai_ckeditor/package.json
-    paths:
-      - modules/ai_ckeditor/node_modules
   # Provide artifacts for subsequent jobs.
   artifacts:
     paths:
       - modules/ai_ckeditor/js/build
+      - ui/mdxeditor/dist
+      - ui/json-schema-editor
     expire_in: 1h
-  # Build artifacts and push them if we are in the main repository.
+  # Build artifacts.
   script:
     - |
-      apk add --no-cache bash git openssh
+      # Build ai_ckeditor JS artifacts
       cd modules/ai_ckeditor
-
-      # Set author info from last commit
-      GIT_AUTHOR_NAME=$(git log -1 --pretty=format:'%an')
-
-      # Configure git
-      git config --global user.name "CI Bot AI"
-      git config --global user.email "ci-bot-ai@drupal.org"
-
-      # Build JS artifacts
       npm install
       npm run build
+      cd $CI_PROJECT_DIR
 
-      # Stage built files
-      git add js/build || true
+      # Build mdxeditor JS artifacts
+      cd ui/mdxeditor
+      npm install
+      npm run build
+      cd $CI_PROJECT_DIR
 
-      # Only commit and push if there are changes
-      if ! git diff --cached --quiet; then
-        git commit -m "[CI Bot AI] Rebuild JS artifacts (initiated by $GIT_AUTHOR_NAME)"
-        if [[ "$CI_PROJECT_PATH" == "project/ai" ]]; then
-          git remote set-url origin https://oauth2:${ACCESS_TOKEN}@git.drupalcode.org/project/ai.git
-          # When running in a merge request push to the target branch, otherwise to current branch
-          TARGET_BRANCH="${CI_MERGE_REQUEST_TARGET_BRANCH_NAME:-$CI_COMMIT_REF_NAME}"
-          # Push with CI skip to avoid loop
-          git push -o ci.skip origin HEAD:$TARGET_BRANCH
-        else
-          echo "'$CI_PROJECT_PATH' is not 'project/ai', skipping push"
-        fi
-      else
-        echo "No changes to commit"
-      fi
+      # Build JSON Schema Editor artifacts
+      cd ui/json-schema-editor
+      npm install
+      npm run build
+      cd $CI_PROJECT_DIR
+
+mkdocs:
+  stage: test
+  image: python:3.12-alpine
+  rules:
+    - changes:
+        - mkdocs.yml
+        - docs/**/*
+        - docs/*
+        - README.md
+      when: on_success
+    - when: never
+  script:
+    - pip install mkdocs mkdocs-material mike mkdocs-glightbox mkdocs-include-markdown-plugin
+    - mkdocs build --strict
 
 pages:
   stage: .post
@@ -127,7 +131,7 @@ pages:
         exit 1
       fi
     - cd $CI_PROJECT_DIR && pwd
-    - pip install mkdocs-material mike mkdocs-glightbox
+    - pip install mkdocs-material mike mkdocs-glightbox mkdocs-include-markdown-plugin
     - echo "Pulling latest changes from origin to get mike versions"
     - git fetch origin gh-pages --depth=1
     - pwd && ls -l logo* && ls -l docs/logo* || true
@@ -159,10 +163,69 @@ phpstan:
   allow_failure: false
 
 .phpunit-base:
+  needs:
+    - composer
+    - js_build
   before_script:
     # Enable the FFI module.
     - echo "extension=ffi" > /usr/local/etc/php/conf.d/docker-php-ext-ffi.ini
     - echo "ffi.enable=true" >> /usr/local/etc/php/conf.d/docker-php-ext-ffi.ini
     # Show the configuration for debugging purposes.
     - php --ri ffi
+    # Filter FunctionalJavascript tests and conditionally install ffmpeg.
+    # See scripts/filter-functionaljavascript-tests.sh for details.
+    - source $CI_PROJECT_DIR/scripts/filter-functionaljavascript-tests.sh
+    - |
+      if [ "${HAS_FJS:-0}" = "1" ]; then
+        apt-get update && apt-get install -y --no-install-recommends ffmpeg
+      else
+        echo "No FunctionalJavascript tests to run, skipping ffmpeg installation."
+      fi
 
+composer:
+  before_script:
+    # Workaround for https://www.drupal.org/project/opentelemetry/issues/3581743
+    - composer require "google/protobuf:4.33.6 as 3.25.0" --no-update
+
+composer (previous major):
+  before_script:
+    # We need doctrine/instantiator to still be on 2.0 for previous major.
+    - composer require doctrine/instantiator:"2.0.0" --no-update
+    # Workaround for https://www.drupal.org/project/opentelemetry/issues/3581743
+    - composer require "google/protobuf:4.33.6 as 3.25.0" --no-update
+
+composer (previous minor):
+  before_script:
+    # Workaround for https://www.drupal.org/project/opentelemetry/issues/3581743
+    - composer require "google/protobuf:4.33.6 as 3.25.0" --no-update
+
+composer (next minor):
+  before_script:
+    # Workaround for https://www.drupal.org/project/opentelemetry/issues/3581743
+    - composer require "google/protobuf:4.33.6 as 3.25.0" --no-update
+
+composer (max PHP version):
+  before_script:
+    # Workaround for https://www.drupal.org/project/opentelemetry/issues/3581743
+    - composer require "google/protobuf:4.33.6 as 3.25.0" --no-update
+
+# Add js_build to `needs` of all phpunit jobs as it has mdxeditor assets.
+phpunit (max PHP version):
+  needs:
+    - composer (max PHP version)
+    - js_build
+
+phpunit (previous minor):
+  needs:
+    - composer (previous minor)
+    - js_build
+
+phpunit (next minor):
+  needs:
+    - composer (next minor)
+    - js_build
+
+phpunit (next major):
+  needs:
+    - composer (next major)
+    - js_build

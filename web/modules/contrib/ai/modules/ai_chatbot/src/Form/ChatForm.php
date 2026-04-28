@@ -14,7 +14,7 @@ use Drupal\ai_assistant_api\Data\UserMessage;
 use Drupal\Component\Utility\Xss;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\StreamedResponse;
+use Drupal\ai\Response\AiStreamedResponse;
 use Symfony\Component\Yaml\Yaml;
 
 /**
@@ -167,7 +167,6 @@ class ChatForm extends FormBase {
     // Send the query to OpenAI.
     if ($this->getRequest()->isXmlHttpRequest()) {
       try {
-        $http_response = new StreamedResponse();
         // Process.
         $response = $this->aiAssistantRunner->process();
         // If its a failure, the variable is a string, just output;.
@@ -187,13 +186,13 @@ class ChatForm extends FormBase {
           $form_state->setResponse($http_response);
         }
         else {
+          $http_response = new AiStreamedResponse();
           $http_response->setCallback(function () use ($response, $form_state) {
             $full_response = "";
             $this->aiAssistantRunner->startSession();
             foreach ($response->getNormalized() as $message) {
               echo $message->getText();
               $full_response .= $message->getText();
-              ob_flush();
               flush();
             }
             // Sanitize the full response.
@@ -204,7 +203,6 @@ class ChatForm extends FormBase {
               if ($structured) {
                 echo "\n\n<details>\n\n```\n" . Yaml::dump($structured, 10) . "\n```\n\n</details>";
                 $full_response .= "\n\n<details>\n\n```\n" . Yaml::dump($structured, 10) . "\n```\n\n</details>";
-                ob_flush();
                 flush();
               }
             }

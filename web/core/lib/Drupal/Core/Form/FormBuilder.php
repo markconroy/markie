@@ -13,15 +13,17 @@ use Drupal\Core\DependencyInjection\ClassResolverInterface;
 use Drupal\Core\EventSubscriber\MainContentViewSubscriber;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\Exception\BrokenPostRequestException;
+use Drupal\Core\Htmx\Htmx;
 use Drupal\Core\Render\Element;
 use Drupal\Core\Render\ElementInfoManagerInterface;
 use Drupal\Core\Security\TrustedCallbackInterface;
 use Drupal\Core\Theme\ThemeManagerInterface;
-use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
+use Drupal\Core\Utility\CallableResolver;
 use Symfony\Component\HttpFoundation\FileBag;
 use Symfony\Component\HttpFoundation\InputBag;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 /**
  * Provides form building and processing.
@@ -108,6 +110,11 @@ class FormBuilder implements FormBuilderInterface, FormValidatorInterface, FormS
   protected $formCache;
 
   /**
+   * The callable resolver.
+   */
+  protected CallableResolver $callableResolver;
+
+  /**
    * Defines callables that are safe to run with invalid CSRF tokens.
    *
    * These Element value callables are safe to run even when the form state has
@@ -148,31 +155,19 @@ class FormBuilder implements FormBuilderInterface, FormValidatorInterface, FormS
     'Drupal\Core\Render\Element\Weight::valueCallback',
   ];
 
-  /**
-   * Constructs a new FormBuilder.
-   *
-   * @param \Drupal\Core\Form\FormValidatorInterface $form_validator
-   *   The form validator.
-   * @param \Drupal\Core\Form\FormSubmitterInterface $form_submitter
-   *   The form submission processor.
-   * @param \Drupal\Core\Form\FormCacheInterface $form_cache
-   *   The form cache.
-   * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
-   *   The module handler.
-   * @param \Symfony\Contracts\EventDispatcher\EventDispatcherInterface $event_dispatcher
-   *   The event dispatcher.
-   * @param \Symfony\Component\HttpFoundation\RequestStack $request_stack
-   *   The request stack.
-   * @param \Drupal\Core\DependencyInjection\ClassResolverInterface $class_resolver
-   *   The class resolver.
-   * @param \Drupal\Core\Render\ElementInfoManagerInterface $element_info
-   *   The element info manager.
-   * @param \Drupal\Core\Theme\ThemeManagerInterface $theme_manager
-   *   The theme manager.
-   * @param \Drupal\Core\Access\CsrfTokenGenerator $csrf_token
-   *   The CSRF token generator.
-   */
-  public function __construct(FormValidatorInterface $form_validator, FormSubmitterInterface $form_submitter, FormCacheInterface $form_cache, ModuleHandlerInterface $module_handler, EventDispatcherInterface $event_dispatcher, RequestStack $request_stack, ClassResolverInterface $class_resolver, ElementInfoManagerInterface $element_info, ThemeManagerInterface $theme_manager, ?CsrfTokenGenerator $csrf_token = NULL) {
+  public function __construct(
+    FormValidatorInterface $form_validator,
+    FormSubmitterInterface $form_submitter,
+    FormCacheInterface $form_cache,
+    ModuleHandlerInterface $module_handler,
+    EventDispatcherInterface $event_dispatcher,
+    RequestStack $request_stack,
+    ClassResolverInterface $class_resolver,
+    ElementInfoManagerInterface $element_info,
+    ThemeManagerInterface $theme_manager,
+    ?CsrfTokenGenerator $csrf_token = NULL,
+    ?CallableResolver $callableResolver = NULL,
+  ) {
     $this->formValidator = $form_validator;
     $this->formSubmitter = $form_submitter;
     $this->formCache = $form_cache;
@@ -183,6 +178,35 @@ class FormBuilder implements FormBuilderInterface, FormValidatorInterface, FormS
     $this->elementInfo = $element_info;
     $this->csrfToken = $csrf_token;
     $this->themeManager = $theme_manager;
+    if (!$callableResolver) {
+      @trigger_error(sprintf('Calling %s() without the $callableResolver param is deprecated in drupal:11.3.0 and is required in drupal:12.0.0. See https://www.drupal.org/node/3548821', __METHOD__), E_USER_DEPRECATED);
+      $callableResolver = \Drupal::service(CallableResolver::class);
+    }
+    $this->callableResolver = $callableResolver;
+  }
+
+  /**
+   * Determines if the element is accessible based on the #access property.
+   *
+   * @param array $element
+   *   A renderable array element.
+   *
+   * @return bool
+   *   TRUE if the element should be considered accessible.
+   */
+  protected function isElementAccessible(array $element): bool {
+    // Elements are accessible by default.
+    if (!isset($element['#access'])) {
+      return TRUE;
+    }
+
+    // Check for #access as an AccessResultInterface object.
+    if ($element['#access'] instanceof AccessResultInterface) {
+      return $element['#access']->isAllowed();
+    }
+
+    // Otherwise, #access must be a boolean.
+    return $element['#access'] === TRUE;
   }
 
   /**
@@ -302,8 +326,10 @@ class FormBuilder implements FormBuilderInterface, FormValidatorInterface, FormS
       }
     }
 
-    // If this form is an AJAX request, disable all form redirects.
-    if ($ajax_form_request = $request->query->has(static::AJAX_FORM_REQUEST)) {
+    // If this form is an AJAX request or an HTMX request,
+    // disable all form redirects.
+    $ajax_form_request = $request->query->has(static::AJAX_FORM_REQUEST);
+    if ($ajax_form_request || $request->headers->has(static::HTMX_REQUEST)) {
       $form_state->disableRedirect();
     }
 
@@ -736,6 +762,34 @@ class FormBuilder implements FormBuilderInterface, FormValidatorInterface, FormS
       '#attributes' => ['autocomplete' => 'off'],
     ];
 
+    $current_request_headers = $this->requestStack->getCurrentRequest()->headers;
+    // Figure out if we need to update the form_build_id value, this is
+    // specific to HTMX requests. The corresponding code path in the Ajax
+    // framework is in `FormAjaxResponseBuilder::buildResponse`.
+    // Make sure that we're looking at the right form if there are several on
+    // the page.
+    $input = $form_state->getUserInput();
+    $old_build_id = $input['form_build_id'] ?? NULL;
+    $returned_form_id = $input['form_id'] ?? NULL;
+    if ($current_request_headers->has(self::HTMX_REQUEST) && $form_id === $returned_form_id && $old_build_id) {
+      // Update the build_id by using an oob swap only
+      // in the following situation:
+      // - Headers `HX-Target` and `HX-Trigger` on the request show this is an
+      //   HTMX request.
+      // - The target to replace is not a whole form, the build_id will not be
+      //   part of the main swap.
+      // - The target is a different form from the one that triggered the
+      //   call, update the build id of the calling form.
+      $hx_target = $current_request_headers->get('hx-target');
+      $hx_trigger = $current_request_headers->get('hx-trigger');
+      $target_is_form = str_ends_with($hx_target ?? '', '-form');
+      if (!$target_is_form || ($target_is_form && $hx_target !== $hx_trigger)) {
+        (new Htmx())
+          ->swapOob('outerHTML:input[name="form_build_id"][value="' . $old_build_id . '"]')
+          ->applyTo($form['form_build_id']);
+      }
+    }
+
     // Add a token, based on either #token or form_id, to any form displayed to
     // authenticated users. This ensures that any submitted form was actually
     // requested previously by the user and protects against cross site request
@@ -852,7 +906,7 @@ class FormBuilder implements FormBuilderInterface, FormValidatorInterface, FormS
     $request_uri = $request->getRequestUri();
 
     // Prevent cross site requests via the Form API by using an absolute URL
-    // when the request uri starts with multiple slashes..
+    // when the request uri starts with multiple slashes.
     if (str_starts_with($request_uri, '//')) {
       $request_uri = $request->getUri();
     }
@@ -1007,11 +1061,8 @@ class FormBuilder implements FormBuilderInterface, FormValidatorInterface, FormS
     if (isset($element['#process']) && !$element['#processed']) {
       foreach ($element['#process'] as $callback) {
         $complete_form = &$form_state->getCompleteForm();
-        $element = call_user_func_array($form_state->prepareCallback($callback), [
-          &$element,
-          &$form_state,
-          &$complete_form,
-        ]);
+        $callable = $this->callableResolver->getCallableFromDefinition($form_state->prepareCallback($callback));
+        $element = $callable($element, $form_state, $complete_form);
       }
       $element['#processed'] = TRUE;
     }
@@ -1082,7 +1133,8 @@ class FormBuilder implements FormBuilderInterface, FormValidatorInterface, FormS
     // after normal input parsing has been completed.
     if (isset($element['#after_build']) && !isset($element['#after_build_done'])) {
       foreach ($element['#after_build'] as $callback) {
-        $element = call_user_func_array($form_state->prepareCallback($callback), [$element, &$form_state]);
+        $callable = $this->callableResolver->getCallableFromDefinition($form_state->prepareCallback($callback));
+        $element = $callable($element, $form_state);
       }
       $element['#after_build_done'] = TRUE;
     }
@@ -1228,7 +1280,7 @@ class FormBuilder implements FormBuilderInterface, FormValidatorInterface, FormS
       !in_array($element['#type'], ['item', 'value'], TRUE) &&
       (
         ($form_state->isProgrammed() && $form_state->isBypassingProgrammedAccessChecks()) ||
-        ($form_state->isProcessingInput() && (!isset($element['#access']) || (($element['#access'] instanceof AccessResultInterface && $element['#access']->isAllowed()) || ($element['#access'] === TRUE))))
+        ($form_state->isProcessingInput() && $this->isElementAccessible($element))
       );
 
     // Set the element's #value property.
@@ -1299,7 +1351,7 @@ class FormBuilder implements FormBuilderInterface, FormValidatorInterface, FormS
     // \Drupal\Core\Form\FormState::cleanValues(). Enforce the same input
     // processing restrictions as above.
     if ($process_input) {
-      // Detect if the element triggered the submission via Ajax.
+      // Detect if the element triggered the submission via Ajax or HTMX.
       if ($this->elementTriggeredScriptedSubmission($element, $form_state)) {
         $form_state->setTriggeringElement($element);
       }

@@ -13,7 +13,7 @@ The plugin itself is a Drupal configurable plugin with a form. Advanced users
 can create a new plugin in their module's /src/Plugin/AiAssistantAction folder
 that implements the ApiAssistantActionInterface for complete control of the
 process. However, the majority of the plugins will share a number of
-requirements - the ability to access to configured AI Assistant, for example -
+requirements - the ability to access the configured AI Assistant, for example -
 so the AiAssistantActionBase has been created to help reduce duplication. In
 most cases, we would expect developers to extend this base class to provide new
 action plugins.
@@ -27,11 +27,11 @@ required by developers.
 
 If the plugin requires specific configuration to be set by site builders, the
 buildConfigurationForm(), validateConfigurationForm() and
-submitConfigurationForm() methods will probably need to overridden in your
+submitConfigurationForm() methods will probably need to be overridden in your
 plugin.
 
 The plugin itself can implement multiple actions, to prevent duplication between
-actions the require similar coding. The listActions() method should be
+actions that require similar coding. The listActions() method should be
 implemented to provide details of each action that the plugin can perform,
 including a unique id and user-readable label.
 

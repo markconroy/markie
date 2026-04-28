@@ -7,12 +7,14 @@ namespace Drupal\Tests\taxonomy\Functional;
 use Drupal\Component\Utility\Html;
 use Drupal\Core\Url;
 use Drupal\taxonomy\Entity\Vocabulary;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the taxonomy vocabulary interface.
- *
- * @group taxonomy
  */
+#[Group('taxonomy')]
+#[RunTestsInSeparateProcesses]
 class VocabularyUiTest extends TaxonomyTestBase {
 
   /**
@@ -185,6 +187,15 @@ class VocabularyUiTest extends TaxonomyTestBase {
     $this->assertSession()->pageTextContains("Deleted vocabulary {$vocabulary->label()}.");
     $this->container->get('entity_type.manager')->getStorage('taxonomy_vocabulary')->resetCache();
     $this->assertNull(Vocabulary::load($vid), 'Vocabulary not found.');
+  }
+
+  /**
+   * Tests that the overview form is overridable in hook_entity_type_alter().
+   */
+  public function testOverviewOverride(): void {
+    \Drupal::service('module_installer')->install(['taxonomy_overview_override_test']);
+    $this->drupalGet($this->vocabulary->toUrl('overview-form'));
+    $this->assertSession()->pageTextContains('No unicorns here, only llamas');
   }
 
 }

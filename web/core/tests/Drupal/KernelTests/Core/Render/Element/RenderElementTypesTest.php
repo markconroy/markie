@@ -7,12 +7,14 @@ namespace Drupal\KernelTests\Core\Render\Element;
 use Drupal\Component\Utility\Html;
 use Drupal\Core\Url;
 use Drupal\KernelTests\KernelTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the rendered markup of core render element types.
- *
- * @group Common
  */
+#[Group('Common')]
+#[RunTestsInSeparateProcesses]
 class RenderElementTypesTest extends KernelTestBase {
 
   /**

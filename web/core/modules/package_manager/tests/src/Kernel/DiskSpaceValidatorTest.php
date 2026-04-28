@@ -4,17 +4,24 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\package_manager\Kernel;
 
+use Drupal\Component\Utility\Bytes;
 use Drupal\package_manager\Event\PreApplyEvent;
 use Drupal\package_manager\Event\PreCreateEvent;
 use Drupal\package_manager\ValidationResult;
-use Drupal\Component\Utility\Bytes;
 use Drupal\package_manager\Validator\DiskSpaceValidator;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
- * @covers \Drupal\package_manager\Validator\DiskSpaceValidator
- * @group package_manager
+ * Tests Disk Space Validator.
+ *
  * @internal
  */
+#[Group('package_manager')]
+#[CoversClass(DiskSpaceValidator::class)]
+#[RunTestsInSeparateProcesses]
 class DiskSpaceValidatorTest extends PackageManagerKernelTestBase {
 
   /**
@@ -143,9 +150,8 @@ class DiskSpaceValidatorTest extends PackageManagerKernelTestBase {
    *   \Drupal\Component\Utility\Bytes::toNumber().
    * @param \Drupal\package_manager\ValidationResult[] $expected_results
    *   The expected validation results.
-   *
-   * @dataProvider providerDiskSpaceValidation
    */
+  #[DataProvider('providerDiskSpaceValidation')]
   public function testDiskSpaceValidation(bool $shared_disk, array $free_space, array $expected_results): void {
     $free_space = array_flip($this->resolvePlaceholdersInArrayValuesWithRealPaths(array_flip($free_space)));
 
@@ -170,9 +176,8 @@ class DiskSpaceValidatorTest extends PackageManagerKernelTestBase {
    *   \Drupal\Component\Utility\Bytes::toNumber().
    * @param \Drupal\package_manager\ValidationResult[] $expected_results
    *   The expected validation results.
-   *
-   * @dataProvider providerDiskSpaceValidation
    */
+  #[DataProvider('providerDiskSpaceValidation')]
   public function testDiskSpaceValidationDuringPreApply(bool $shared_disk, array $free_space, array $expected_results): void {
     $free_space = array_flip($this->resolvePlaceholdersInArrayValuesWithRealPaths(array_flip($free_space)));
 

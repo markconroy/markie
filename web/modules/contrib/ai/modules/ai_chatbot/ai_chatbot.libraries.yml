@@ -18,7 +18,9 @@ form-stream:
     - core/once
 deepchat:
   js:
-    deepchat/deepchat.bundle.js: {  attributes: { type: module } }
+    deepchat/deepchat.bundle.js:
+      attributes: { type: module }
+      minified: true
     js/deepchat-init.js : {}
   dependencies:
     - core/jquery
@@ -50,3 +52,8 @@ toolbar-chatbot:
   dependencies:
     - core/drupal
     - core/once
+
+toolbar-fullscreen:
+  css:
+    theme:
+      css/toolbar-fullscreen.css: {}

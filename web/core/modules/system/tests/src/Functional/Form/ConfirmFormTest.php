@@ -6,12 +6,14 @@ namespace Drupal\Tests\system\Functional\Form;
 
 use Drupal\Core\Url;
 use Drupal\Tests\BrowserTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests confirmation forms.
- *
- * @group Form
  */
+#[Group('Form')]
+#[RunTestsInSeparateProcesses]
 class ConfirmFormTest extends BrowserTestBase {
 
   /**

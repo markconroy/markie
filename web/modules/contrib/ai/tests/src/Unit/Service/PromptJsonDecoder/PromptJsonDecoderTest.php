@@ -5,10 +5,7 @@ declare(strict_types=1);
 namespace Drupal\Tests\ai\Unit\Service\PromptJsonDecoder;
 
 use Drupal\Tests\UnitTestCase;
-use Drupal\Tests\ai\Mock\MockIterator;
-use Drupal\Tests\ai\Mock\MockStreamedChatIterator;
 use Drupal\ai\OperationType\Chat\ChatMessage;
-use Drupal\ai\OperationType\Chat\StreamedChatMessageIteratorInterface;
 use Drupal\ai\Service\PromptJsonDecoder\PromptJsonDecoder;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Yaml\Yaml;
@@ -50,28 +47,6 @@ class PromptJsonDecoderTest extends UnitTestCase {
     }
     else {
       $this->assertInstanceOf(ChatMessage::class, $decoded);
-    }
-
-    // Now test as a streaming message.
-    $iterator = new MockIterator(explode("\n", $message));
-    $chat_message = new MockStreamedChatIterator($iterator);
-
-    $chat_message->setEventDispatcher($mock_event_dispatcher);
-    $decoded = $prompt_json_decoder->decode($chat_message, $placements);
-
-    if ($json_exist) {
-      $this->assertIsArray($decoded);
-    }
-    else {
-      $this->assertInstanceOf(StreamedChatMessageIteratorInterface::class, $decoded);
-    }
-
-    // If the placement is over 10, we try 5 steps earlier to see if it fails.
-    if ($placements > 10) {
-      $iterator = new MockIterator(explode("\n", $message));
-      $chat_message = new MockStreamedChatIterator($iterator);
-      $decoded = $prompt_json_decoder->decode($chat_message, ($placements - 5));
-      $this->assertInstanceOf(StreamedChatMessageIteratorInterface::class, $decoded);
     }
   }
 

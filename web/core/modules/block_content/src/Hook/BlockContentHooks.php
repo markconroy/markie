@@ -2,7 +2,9 @@
 
 namespace Drupal\block_content\Hook;
 
+use Drupal\block\BlockConfigUpdater;
 use Drupal\block\BlockInterface;
+use Drupal\block_content\Plugin\EntityReferenceSelection\BlockContentSelection;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\block_content\BlockContentInterface;
 use Drupal\Core\Database\Query\SelectInterface;
@@ -29,11 +31,14 @@ class BlockContentHooks {
         $field_ui = \Drupal::moduleHandler()->moduleExists('field_ui') ? Url::fromRoute('help.page', ['name' => 'field_ui'])->toString() : '#';
         $output = '';
         $output .= '<h2>' . $this->t('About') . '</h2>';
-        $output .= '<p>' . $this->t('The Block Content module allows you to create and manage custom <em>block types</em> and <em>content-containing blocks</em>. For more information, see the <a href=":online-help">online documentation for the Block Content module</a>.', [':online-help' => 'https://www.drupal.org/documentation/modules/block_content']) . '</p>';
+        $output .= '<p>' . $this->t('The Block Content module manages the creation, editing, and deletion of content blocks. Content blocks are field-able content entities managed by the <a href=":field">Field module</a>. For more information, see the <a href=":block-content">online documentation for the Block Content module</a>.', [
+          ':block-content' => 'https://www.drupal.org/documentation/modules/block_content',
+          ':field' => Url::fromRoute('help.page', ['name' => 'field'])->toString(),
+        ]) . '</p>';
         $output .= '<h2>' . $this->t('Uses') . '</h2>';
         $output .= '<dl>';
         $output .= '<dt>' . $this->t('Creating and managing block types') . '</dt>';
-        $output .= '<dd>' . $this->t('Users with the <em>Administer blocks</em> permission can create and edit block types with fields and display settings, from the <a href=":types">Block types</a> page under the Structure menu. For more information about managing fields and display settings, see the <a href=":field-ui">Field UI module help</a> and <a href=":field">Field module help</a>.', [
+        $output .= '<dd>' . $this->t('Users with the <em>Administer block types</em> permission can create and edit block types with fields and display settings, from the <a href=":types">Block types</a> page under the Structure menu. For more information about managing fields and display settings, see the <a href=":field-ui">Field UI module help</a> and <a href=":field">Field module help</a>.', [
           ':types' => Url::fromRoute('entity.block_content_type.collection')->toString(),
           ':field-ui' => $field_ui,
           ':field' => Url::fromRoute('help.page', [
@@ -41,9 +46,9 @@ class BlockContentHooks {
           ])->toString(),
         ]) . '</dd>';
         $output .= '<dt>' . $this->t('Creating content blocks') . '</dt>';
-        $output .= '<dd>' . $this->t('Users with the <em>Administer blocks</em> permission can create, edit, and delete content blocks of each defined block type, from the <a href=":block-library">Content blocks page</a>. After creating a block, place it in a region from the <a href=":blocks">Block layout page</a>, just like blocks provided by other modules.', [
-          ':blocks' => Url::fromRoute('block.admin_display')->toString(),
-          ':block-library' => Url::fromRoute('entity.block_content.collection')->toString(),
+        $output .= '<dd>' . $this->t('Users with the <em>Administer block content</em> or <em>Create new content block</em> permissions for an individual block type are able to add content blocks. These can be created on the <a href=":add-content-block">Add content block page</a> or on the <em>Place block</em> modal on the <a href=":block-layout">Block Layout page</a> and are reusable across the entire site. Content blocks created in Layout Builder for a content type or individual node layouts are not reusable and also called inline blocks.', [
+          ':add-content-block' => Url::fromRoute('block_content.add_page')->toString(),
+          ':block-layout' => Url::fromRoute('block.admin_display')->toString(),
         ]) . '</dd>';
         $output .= '</dl>';
         return $output;
@@ -61,7 +66,7 @@ class BlockContentHooks {
         'variables' => [
           'content' => NULL,
         ],
-        'file' => 'block_content.pages.inc',
+        'deprecated' => 'The "block_content_add_list" template is deprecated in drupal:11.3.0 and is removed from drupal:12.0.0. Use "entity_add_list" instead. See https://www.drupal.org/node/3530643.',
       ],
     ];
   }
@@ -105,9 +110,16 @@ class BlockContentHooks {
    */
   #[Hook('query_entity_reference_alter')]
   public function queryEntityReferenceAlter(AlterableInterface $query): void {
+    if (($query->alterMetaData['entity_reference_selection_handler'] ?? NULL) instanceof BlockContentSelection) {
+      // The entity reference selection plugin module provided by this module
+      // already filters out non-reusable blocks so no altering of the query is
+      // needed.
+      return;
+    }
     if ($query instanceof SelectInterface && $query->getMetaData('entity_type') === 'block_content' && $query->hasTag('block_content_access')) {
       $data_table = \Drupal::entityTypeManager()->getDefinition('block_content')->getDataTable();
       if (array_key_exists($data_table, $query->getTables()) && !_block_content_has_reusable_condition($query->conditions(), $query->getTables())) {
+        @trigger_error('Automatically filtering block_content entity reference selection queries to only reusable blocks is deprecated in drupal:11.3.0 and is removed from drupal:12.0.0. Either add the condition manually in buildEntityQuery, or extend \Drupal\block_content\Plugin\EntityReferenceSelection\BlockContentSelection. See https://www.drupal.org/node/3521459', E_USER_DEPRECATED);
         $query->condition("{$data_table}.reusable", TRUE);
       }
     }
@@ -158,6 +170,17 @@ class BlockContentHooks {
       }
     }
     return $operations;
+  }
+
+  /**
+   * Implements hook_ENTITY_TYPE_presave().
+   */
+  #[Hook('block_presave')]
+  public function blockPreSave(BlockInterface $block): void {
+    // Use an inline service since DI would require enabling the block module
+    // in any Kernel test that installs block_content. This is BC code so will
+    // be removed in Drupal 12 anyway.
+    \Drupal::service(BlockConfigUpdater::class)->updateBlock($block);
   }
 
 }

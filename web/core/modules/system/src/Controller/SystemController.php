@@ -15,7 +15,7 @@ use Drupal\Core\Menu\MenuTreeParameters;
 use Drupal\Core\Theme\ThemeAccessCheck;
 use Drupal\Core\Url;
 use Drupal\system\SystemManager;
-use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 /**
  * Returns responses for System routes.
@@ -82,27 +82,21 @@ class SystemController extends ControllerBase {
    * @param \Drupal\Core\Extension\ThemeExtensionList $theme_extension_list
    *   The theme extension list.
    */
-  public function __construct(SystemManager $systemManager, ThemeAccessCheck $theme_access, FormBuilderInterface $form_builder, MenuLinkTreeInterface $menu_link_tree, ModuleExtensionList $module_extension_list, ThemeExtensionList $theme_extension_list) {
+  public function __construct(
+    SystemManager $systemManager,
+    #[Autowire(service: 'access_check.theme')]
+    ThemeAccessCheck $theme_access,
+    FormBuilderInterface $form_builder,
+    MenuLinkTreeInterface $menu_link_tree,
+    ModuleExtensionList $module_extension_list,
+    ThemeExtensionList $theme_extension_list,
+  ) {
     $this->systemManager = $systemManager;
     $this->themeAccess = $theme_access;
     $this->formBuilder = $form_builder;
     $this->menuLinkTree = $menu_link_tree;
     $this->moduleExtensionList = $module_extension_list;
     $this->themeExtensionList = $theme_extension_list;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function create(ContainerInterface $container) {
-    return new static(
-      $container->get('system.manager'),
-      $container->get('access_check.theme'),
-      $container->get('form_builder'),
-      $container->get('menu.link_tree'),
-      $container->get('extension.list.module'),
-      $container->get('extension.list.theme'),
-    );
   }
 
   /**
@@ -280,8 +274,6 @@ class SystemController extends ControllerBase {
             continue;
           }
 
-          // @todo Add logic for not displaying hidden modules in
-          //   https://drupal.org/node/3117829.
           $module_name = $modules[$dependency]->info['name'];
           $theme->module_dependencies_list[$dependency] = $modules[$dependency]->status ? $this->t('@module_name', ['@module_name' => $module_name]) : $this->t('@module_name (<span class="admin-disabled">disabled</span>)', ['@module_name' => $module_name]);
 

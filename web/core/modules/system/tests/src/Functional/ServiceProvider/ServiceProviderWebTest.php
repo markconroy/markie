@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace Drupal\Tests\system\Functional\ServiceProvider;
 
 use Drupal\Tests\BrowserTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests service provider registration to the DIC.
- *
- * @group ServiceProvider
  */
+#[Group('ServiceProvider')]
+#[RunTestsInSeparateProcesses]
 class ServiceProviderWebTest extends BrowserTestBase {
 
   /**

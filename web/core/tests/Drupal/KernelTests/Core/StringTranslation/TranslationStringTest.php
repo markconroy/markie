@@ -7,12 +7,14 @@ namespace Drupal\KernelTests\Core\StringTranslation;
 use Drupal\Core\Site\Settings;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\language\Entity\ConfigurableLanguage;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the TranslatableMarkup class.
- *
- * @group StringTranslation
  */
+#[Group('StringTranslation')]
+#[RunTestsInSeparateProcesses]
 class TranslationStringTest extends KernelTestBase {
 
   /**

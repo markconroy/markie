@@ -6,12 +6,14 @@ namespace Drupal\Tests\media\FunctionalJavascript;
 
 use Drupal\media\Entity\Media;
 use Drupal\media\Plugin\media\Source\File;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the file media source.
- *
- * @group media
  */
+#[Group('media')]
+#[RunTestsInSeparateProcesses]
 class MediaSourceFileTest extends MediaSourceTestBase {
 
   /**
@@ -52,6 +54,7 @@ class MediaSourceFileTest extends MediaSourceTestBase {
     $page->selectFieldOption("field_map[" . File::METADATA_ATTRIBUTE_SIZE . "]", 'field_string_file_size');
     $page->selectFieldOption("field_map[" . File::METADATA_ATTRIBUTE_MIME . "]", 'field_string_mime_type');
     $page->pressButton('Save');
+    $assert_session->waitForElement('css', '.messages--status');
 
     $test_filename = $this->randomMachineName() . '.txt';
     $test_filepath = 'public://' . $test_filename;
@@ -63,7 +66,7 @@ class MediaSourceFileTest extends MediaSourceTestBase {
     $result = $assert_session->waitForButton('Remove');
     $this->assertNotEmpty($result);
     $page->pressButton('Save');
-
+    $assert_session->waitForElement('css', '.messages--status');
     $assert_session->addressEquals('admin/content/media');
 
     // Get the media entity view URL from the creation message.
@@ -95,6 +98,7 @@ class MediaSourceFileTest extends MediaSourceTestBase {
     $result = $assert_session->waitForButton('Remove');
     $this->assertNotEmpty($result);
     $page->pressButton('Save');
+    $assert_session->waitForElement('css', '.messages--status');
     $assert_session->elementAttributeContains('css', 'img', 'src', 'text--plain.png');
 
     // Check if the mapped name is automatically updated.
@@ -109,10 +113,10 @@ class MediaSourceFileTest extends MediaSourceTestBase {
     $result = $assert_session->waitForButton('Remove');
     $this->assertNotEmpty($result);
     $page->pressButton('Save');
+    $assert_session->statusMessageContains("$new_filename has been updated.", 'status');
     /** @var \Drupal\media\MediaInterface $media */
     $media = \Drupal::entityTypeManager()->getStorage('media')->loadUnchanged(1);
     $this->assertEquals($new_filename, $media->getName());
-    $assert_session->statusMessageContains("$new_filename has been updated.", 'status');
   }
 
 }

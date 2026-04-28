@@ -21,9 +21,6 @@ default:
   title:
     -
       value: 'No Owner'
-  created:
-    -
-      value: 1711638565
   promote:
     -
       value: false
@@ -35,8 +32,14 @@ default:
       value: true
   path:
     -
-      alias: ''
+      alias: null
       langcode: en
+  content_translation_source:
+    -
+      value: und
+  content_translation_outdated:
+    -
+      value: false
   body:
     -
       value: 'This page was authored by a non-existent user.'

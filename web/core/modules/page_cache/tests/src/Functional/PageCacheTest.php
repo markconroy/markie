@@ -5,22 +5,23 @@ declare(strict_types=1);
 namespace Drupal\Tests\page_cache\Functional;
 
 use Drupal\Component\Datetime\DateTimePlus;
+use Drupal\Core\Cache\Cache;
 use Drupal\Core\Site\Settings;
 use Drupal\Core\Url;
 use Drupal\entity_test\Entity\EntityTest;
-use Drupal\Core\Cache\Cache;
 use Drupal\Tests\BrowserTestBase;
 use Drupal\Tests\system\Functional\Cache\AssertPageCacheContextsAndTagsTrait;
 use Drupal\user\RoleInterface;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 // cspell:ignore curlopt returntransfer
-
 /**
  * Enables the page cache and tests it with various HTTP requests.
- *
- * @group page_cache
- * @group #slow
  */
+#[Group('page_cache')]
+#[Group('#slow')]
+#[RunTestsInSeparateProcesses]
 class PageCacheTest extends BrowserTestBase {
 
   use AssertPageCacheContextsAndTagsTrait;
@@ -251,7 +252,9 @@ class PageCacheTest extends BrowserTestBase {
     $this->enablePageCaching();
 
     // Fill the cache.
-    $this->drupalGet('system-test/set-header', ['query' => ['name' => 'Foo', 'value' => 'bar']]);
+    $this->drupalGet('system-test/set-header', [
+      'query' => ['name' => 'Foo', 'value' => 'bar'],
+    ]);
     $this->assertSession()->responseHeaderEquals('X-Drupal-Cache', 'MISS');
     $this->assertSession()->responseHeaderContains('Vary', 'cookie');
     // Symfony's Response logic determines a specific order for the subvalues
@@ -262,7 +265,9 @@ class PageCacheTest extends BrowserTestBase {
     $this->assertSession()->responseHeaderEquals('Foo', 'bar');
 
     // Check cache.
-    $this->drupalGet('system-test/set-header', ['query' => ['name' => 'Foo', 'value' => 'bar']]);
+    $this->drupalGet('system-test/set-header', [
+      'query' => ['name' => 'Foo', 'value' => 'bar'],
+    ]);
     $this->assertSession()->responseHeaderEquals('X-Drupal-Cache', 'HIT');
     $this->assertSession()->responseHeaderContains('Vary', 'cookie');
     $this->assertCacheMaxAge(300);
@@ -270,15 +275,27 @@ class PageCacheTest extends BrowserTestBase {
     $this->assertSession()->responseHeaderEquals('Foo', 'bar');
 
     // Check replacing default headers.
-    $this->drupalGet('system-test/set-header', ['query' => ['name' => 'Expires', 'value' => 'Fri, 19 Nov 2008 05:00:00 GMT']]);
+    $this->drupalGet('system-test/set-header', [
+      'query' => [
+        'name' => 'Expires',
+        'value' => 'Fri, 19 Nov 2008 05:00:00 GMT',
+      ],
+    ]);
     $this->assertSession()->responseHeaderEquals('Expires', 'Fri, 19 Nov 2008 05:00:00 GMT');
-    $this->drupalGet('system-test/set-header', ['query' => ['name' => 'Vary', 'value' => 'User-Agent']]);
+    $this->drupalGet('system-test/set-header', [
+      'query' => [
+        'name' => 'Vary',
+        'value' => 'User-Agent',
+      ],
+    ]);
     $this->assertSession()->responseHeaderContains('Vary', 'user-agent');
 
     // Check that authenticated users bypass the cache.
     $user = $this->drupalCreateUser();
     $this->drupalLogin($user);
-    $this->drupalGet('system-test/set-header', ['query' => ['name' => 'Foo', 'value' => 'bar']]);
+    $this->drupalGet('system-test/set-header', [
+      'query' => ['name' => 'Foo', 'value' => 'bar'],
+    ]);
     $this->assertSession()->responseHeaderEquals('X-Drupal-Cache', 'UNCACHEABLE (request policy)');
     $this->assertSession()->responseHeaderNotContains('Vary', 'cookie');
     $this->assertSession()->responseHeaderEquals('Cache-Control', 'must-revalidate, no-cache, private');

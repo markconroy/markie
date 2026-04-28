@@ -9,7 +9,6 @@ use Drupal\Core\Database\Database;
 use Drupal\Core\Database\Query\PagerSelectExtender;
 use Drupal\Core\Pager\PagerParametersInterface;
 use Drupal\Core\Security\TrustedCallbackInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Controller routine for testing the pager.
@@ -22,13 +21,6 @@ class PagerTestController extends ControllerBase implements TrustedCallbackInter
    * @var \Drupal\Core\Pager\PagerParametersInterface
    */
   protected $pagerParams;
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function create(ContainerInterface $container) {
-    return new static($container->get('pager.parameters'));
-  }
 
   /**
    * Construct a new PagerTestController object.
@@ -118,6 +110,7 @@ class PagerTestController extends ControllerBase implements TrustedCallbackInter
       '#attributes' => ['class' => ['test-pager-0']],
       'pager' => [
         '#type' => 'pager',
+        '#route_name' => '<current>',
         '#element' => 0,
       ],
     ];
@@ -128,6 +121,7 @@ class PagerTestController extends ControllerBase implements TrustedCallbackInter
       '#attributes' => ['class' => ['test-pager-1']],
       'pager' => [
         '#type' => 'pager',
+        '#route_name' => '<current>',
         '#element' => 1,
       ],
     ];
@@ -138,6 +132,7 @@ class PagerTestController extends ControllerBase implements TrustedCallbackInter
       '#attributes' => ['class' => ['test-pager-4']],
       'pager' => [
         '#type' => 'pager',
+        '#route_name' => '<current>',
         '#element' => 4,
       ],
     ];

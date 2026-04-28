@@ -2,17 +2,18 @@
 
 namespace Drupal\ai\OperationType\Chat;
 
+use Drupal\ai\Dto\HostnameFilterDto;
+use Drupal\ai\Dto\StructuredOutputSchema;
 use Drupal\ai\OperationType\Chat\Tools\ToolsFunctionInput;
 use Drupal\ai\OperationType\Chat\Tools\ToolsInput;
 use Drupal\ai\OperationType\Chat\Tools\ToolsInputInterface;
 use Drupal\ai\OperationType\Chat\Tools\ToolsPropertyInput;
 use Drupal\ai\OperationType\InputBase;
-use Drupal\ai\OperationType\InputInterface;
 
 /**
  * Input object for chat input.
  */
-class ChatInput extends InputBase implements InputInterface {
+class ChatInput extends InputBase {
 
   /**
    * The message to convert to text.
@@ -62,6 +63,13 @@ class ChatInput extends InputBase implements InputInterface {
    * @var string
    */
   protected string $systemPrompt = '';
+
+  /**
+   * The hostname settings.
+   *
+   * @var \Drupal\ai\Dto\HostnameFilterDto|null
+   */
+  protected ?HostnameFilterDto $hostnameFilter = NULL;
 
   /**
    * The constructor.
@@ -136,21 +144,92 @@ class ChatInput extends InputBase implements InputInterface {
   }
 
   /**
-   * Set the the structured JSON schema.
+   * Sets the structured output schema for the chat response.
    *
-   * @param array $schema
-   *   The structured JSON schema.
+   * Accepts either a StructuredOutputSchema DTO (recommended) or a plain array.
+   * The schema tells the AI provider how to structure its response (e.g. JSON
+   * with specific properties). Name and description are optional but useful for
+   * provider compatibility (e.g. OpenAI); strict controls whether the schema
+   * must be followed strictly.
+   *
+   * Using the DTO (recommended):
+   * @code
+   * use Drupal\ai\Dto\StructuredOutputSchema;
+   *
+   * $schema = new StructuredOutputSchema(
+   *   name: 'my_schema',
+   *   description: 'Optional description',
+   *   strict: FALSE,
+   *   json_schema: [
+   *     'properties' => [
+   *       'answer' => ['type' => 'string'],
+   *     ],
+   *   ],
+   * );
+   * $chatInput->setChatStructuredJsonSchema($schema);
+   * @endcode
+   *
+   * Using an array (backwards compatible; same shape as DTO::toArray()):
+   * @code
+   * $chatInput->setChatStructuredJsonSchema([
+   *   'name' => 'json_schema',
+   *   'description' => NULL,
+   *   'strict' => FALSE,
+   *   'schema' => [
+   *     'properties' => [
+   *       'answer' => ['type' => 'string'],
+   *     ],
+   *   ],
+   * ]);
+   * @endcode
+   *
+   * The schema content may be passed under key 'schema' (default, documented)
+   * or 'json_schema' (accepted for backwards compatibility). Stored and
+   * returned value always uses key 'schema' for provider compatibility.
+   *
+   * @param array|\Drupal\ai\Dto\StructuredOutputSchema $schema
+   *   The structured JSON schema as a DTO or an array with keys: name
+   *   (optional, default "json_schema"), description (optional), strict
+   *   (optional, default FALSE), and schema or json_schema (required,
+   *   non-empty array).
+   *
+   * @throws \InvalidArgumentException
+   *   If schema content is missing, not an array, or empty.
    */
-  public function setChatStructuredJsonSchema(array $schema): void {
-    $this->setDebugDataValue('chat_structured_json_schema', $schema);
-    $this->chatStructuredJsonSchema = $schema;
+  public function setChatStructuredJsonSchema(array|StructuredOutputSchema $schema): void {
+    if ($schema instanceof StructuredOutputSchema) {
+      // Backwards compatible: also set strict flag from object.
+      // @phpstan-ignore-next-line method.deprecated
+      $this->setChatStrictSchema($schema->isStrict());
+      $schema = $schema->toArray();
+    }
+    // Accept 'schema' (default, documented) or 'json_schema'
+    // for backwards compatibility.
+    $content = $schema['schema'] ?? $schema['json_schema'] ?? [];
+    if (!is_array($content) || $content === []) {
+      $this->setDebugDataValue('chat_structured_json_schema', []);
+      $this->chatStructuredJsonSchema = [];
+      return;
+    }
+    $normalized = [
+      'name' => isset($schema['name']) && is_string($schema['name']) && $schema['name'] !== '' ? $schema['name'] : 'json_schema',
+      'description' => $schema['description'] ?? NULL,
+      'strict' => array_key_exists('strict', $schema) ? (bool) $schema['strict'] : FALSE,
+      'schema' => $content,
+    ];
+    $this->setDebugDataValue('chat_structured_json_schema', $normalized);
+    $this->chatStructuredJsonSchema = $normalized;
   }
 
   /**
-   * Get the structured JSON schema.
+   * Gets the structured JSON schema (as stored for the provider).
+   *
+   * The returned array has keys name, description, strict, and schema (the
+   * schema content). This shape matches the documented format used by most
+   * providers (e.g. OpenAI response_format.json_schema).
    *
    * @return array
-   *   The structured JSON schema.
+   *   The structured output array (name, description, strict, schema).
    */
   public function getChatStructuredJsonSchema(): array {
     return $this->chatStructuredJsonSchema;
@@ -161,8 +240,13 @@ class ChatInput extends InputBase implements InputInterface {
    *
    * @param bool $strict
    *   Whether to follow strict schema.
+   *
+   * @deprecated in ai:1.3.0 and is removed from ai:2.0.0. Set strict on the
+   * StructuredOutputSchema passed to setChatStructuredJsonSchema() instead.
+   * @see https://www.drupal.org/project/ai/issues/3548217
    */
   public function setChatStrictSchema(bool $strict): void {
+    @trigger_error('ChatInput::setChatStrictSchema() is deprecated in ai:1.3.0 and is removed from ai:2.0.0. Set strict on setChatStructuredJsonSchema() DTO instead. See https://www.drupal.org/project/ai/issues/3548217', E_USER_DEPRECATED);
     $this->setDebugDataValue('chat_strict_schema', $strict);
     $this->chatStrictSchema = $strict;
   }
@@ -172,8 +256,13 @@ class ChatInput extends InputBase implements InputInterface {
    *
    * @return bool
    *   Whether to follow strict schema.
+   *
+   * @deprecated in ai:1.3.0 and is removed from ai:2.0.0. Read strict from the
+   * StructuredOutputSchema used with setChatStructuredJsonSchema().
+   * @see https://www.drupal.org/project/ai/issues/3548217
    */
   public function getChatStrictSchema(): bool {
+    @trigger_error('ChatInput::getChatStrictSchema() is deprecated in ai:1.3.0 and is removed from ai:2.0.0. Use the strict property on setChatStructuredJsonSchema() DTO instead. See https://www.drupal.org/project/ai/issues/3548217', E_USER_DEPRECATED);
     return $this->chatStrictSchema;
   }
 
@@ -196,6 +285,26 @@ class ChatInput extends InputBase implements InputInterface {
    */
   public function getChatTools(): ?ToolsInputInterface {
     return $this->chatTools;
+  }
+
+  /**
+   * Set the hostname filter settings.
+   *
+   * @param \Drupal\ai\Dto\HostnameFilterDto $hostnameFilter
+   *   The hostname filter settings.
+   */
+  public function setHostnameFilter(HostnameFilterDto $hostnameFilter): void {
+    $this->hostnameFilter = $hostnameFilter;
+  }
+
+  /**
+   * Get the hostname filter settings.
+   *
+   * @return \Drupal\ai\Dto\HostnameFilterDto|null
+   *   The hostname filter settings or NULL if not set.
+   */
+  public function getHostnameFilter(): ?HostnameFilterDto {
+    return $this->hostnameFilter;
   }
 
   /**
@@ -295,6 +404,7 @@ class ChatInput extends InputBase implements InputInterface {
       $instance->setChatStructuredJsonSchema($data['chat_structured_json_schema']);
     }
     if (isset($data['chat_strict_schema'])) {
+      // @phpstan-ignore-next-line method.deprecated
       $instance->setChatStrictSchema($data['chat_strict_schema']);
     }
     return $instance;

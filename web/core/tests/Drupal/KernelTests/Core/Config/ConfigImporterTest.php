@@ -9,13 +9,16 @@ use Drupal\Core\Config\ConfigCollectionEvents;
 use Drupal\Core\Config\ConfigEvents;
 use Drupal\Core\Config\ConfigImporter;
 use Drupal\Core\Config\ConfigImporterException;
+use Drupal\Core\Extension\ThemeHandlerInterface;
 use Drupal\KernelTests\KernelTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests importing configuration from files into active configuration.
- *
- * @group config
  */
+#[Group('config')]
+#[RunTestsInSeparateProcesses]
 class ConfigImporterTest extends KernelTestBase {
 
   /**
@@ -831,8 +834,9 @@ class ConfigImporterTest extends KernelTestBase {
     $this->assertTrue($state['global_state::delete'], '\Drupal::isConfigSyncing() returns TRUE');
     $this->assertTrue($state['entity_state::delete'], 'ConfigEntity::isSyncing() returns TRUE');
 
-    // Test that isSyncing is TRUE in hook_module_preinstall() when installing
-    // module via config import.
+    // Test that isSyncing is TRUE in hook_module_preinstall() and
+    // hook_modules_installed() when installing a single module via config
+    // import.
     $extensions = $sync->read('core.extension');
     // First, install system_test so that its hook_module_preinstall() will run
     // when module_test is installed.
@@ -850,6 +854,32 @@ class ConfigImporterTest extends KernelTestBase {
     // when module is installed via config import.
     $this->assertTrue(\Drupal::state()->get('system_test_preinstall_module_config_installer_syncing'), '\Drupal::isConfigSyncing() in system_test_module_preinstall() returns TRUE');
     $this->assertTrue(\Drupal::state()->get('system_test_preinstall_module_syncing_param'), 'system_test_module_preinstall() $is_syncing value is TRUE');
+    // Syncing values stored in state by hook_modules_installed should be TRUE
+    // when module is installed via config import.
+    $this->assertTrue(\Drupal::state()->get('system_test_modules_installed_module_config_installer_syncing'));
+    $this->assertTrue(\Drupal::state()->get('system_test_modules_installed_module_syncing_param'));
+
+    // Reset the state values before testing multiple module install.
+    \Drupal::state()->set('system_test_preinstall_module_config_installer_syncing', FALSE);
+    \Drupal::state()->set('system_test_preinstall_module_syncing_param', FALSE);
+    \Drupal::state()->set('system_test_modules_installed_module_config_installer_syncing', FALSE);
+    \Drupal::state()->set('system_test_modules_installed_module_syncing_param', FALSE);
+    // Test isSyncing is TRUE in hook_module_preinstall() and
+    // hook_modules_installed() when installing multiple module via config
+    // import.
+    $extensions['module']['generic_module1_test'] = 0;
+    $extensions['module']['generic_module2_test'] = 0;
+    $sync->write('core.extension', $extensions);
+    $this->configImporter()->import();
+
+    // Syncing values stored in state by hook_module_preinstall should be TRUE
+    // when multiple modules are installed via config import.
+    $this->assertTrue(\Drupal::state()->get('system_test_preinstall_module_config_installer_syncing'), '\Drupal::isConfigSyncing() in system_test_module_preinstall() returns TRUE');
+    $this->assertTrue(\Drupal::state()->get('system_test_preinstall_module_syncing_param'), 'system_test_module_preinstall() $is_syncing value is TRUE');
+    // Syncing values stored in state by hook_modules_installed should be TRUE
+    // when multiple modules are installed via config import.
+    $this->assertTrue(\Drupal::state()->get('system_test_modules_installed_module_config_installer_syncing'));
+    $this->assertTrue(\Drupal::state()->get('system_test_modules_installed_module_syncing_param'));
 
     // Syncing value stored in state by uninstall hooks should be FALSE
     // when uninstalling outside of config import.
@@ -944,6 +974,30 @@ class ConfigImporterTest extends KernelTestBase {
     \Drupal::configFactory()->reset($cronName);
     $this->assertEquals('Foo', $this->config($systemSiteName)->get('name'));
     $this->assertEquals(0, $this->config($cronName)->get('logging'));
+  }
+
+  /**
+   * Tests that installing a theme will reload all service dependencies.
+   */
+  public function testThemeInstallReloadsServices(): void {
+    $this->assertFalse(\Drupal::service(ThemeHandlerInterface::class)->themeExists('test_base_theme'));
+
+    $sync = $this->container->get('config.storage.sync');
+    // Ensure that the config import will install the theme.
+    $extensions = $sync->read('core.extension');
+    $extensions['theme']['test_base_theme'] = 0;
+    $sync->write('core.extension', $extensions);
+
+    $importer = $this->configImporter();
+    $property = new \ReflectionProperty($importer, 'themeHandler');
+    $old_theme_handler = $property->getValue($importer);
+    $this->assertIsObject($old_theme_handler);
+
+    $importer->import();
+    $this->assertTrue(\Drupal::service(ThemeHandlerInterface::class)->themeExists('test_base_theme'));
+    $new_theme_handler = $property->getValue($importer);
+    $this->assertIsObject($new_theme_handler);
+    $this->assertNotSame($old_theme_handler, $new_theme_handler);
   }
 
   /**

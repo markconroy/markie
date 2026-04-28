@@ -10,6 +10,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Defines a key provider that stores in memory.
+ *
  * @KeyProvider(
  *   id = "key_test_state",
  *   label = @Translation("State ☠️"),
@@ -39,7 +40,7 @@ class State extends KeyProviderBase implements KeyProviderSettableValueInterface
     ContainerInterface $container,
     array $configuration,
     $plugin_id,
-    $plugin_definition
+    $plugin_definition,
   ) {
     /** @var self $instance */
     $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);

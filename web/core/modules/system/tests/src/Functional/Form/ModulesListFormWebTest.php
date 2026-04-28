@@ -6,12 +6,14 @@ namespace Drupal\Tests\system\Functional\Form;
 
 use Drupal\Tests\BrowserTestBase;
 use Drupal\TestTools\Extension\InfoWriterTrait;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests \Drupal\system\Form\ModulesListForm.
- *
- * @group Form
  */
+#[Group('Form')]
+#[RunTestsInSeparateProcesses]
 class ModulesListFormWebTest extends BrowserTestBase {
   use InfoWriterTrait;
 

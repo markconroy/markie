@@ -2,7 +2,7 @@
 
 ## Embeddings
 
-Embeddings calls are calls that can generate vector outputs of weight for a text. While this might sound boring, its an important part of RAG/vector search.
+Embeddings calls are calls that can generate vector outputs of weight for a text. While this might sound boring, it's an important part of RAG/vector search.
 
 ### Example normalized Embeddings call
 
@@ -21,7 +21,7 @@ print_r($vector_object->getNormalized());
 
 ### Embeddings Interfaces & Models
 
-The following files defines the methods available when doing a embeddings call as well as the input and output.
+The following files define the methods available when doing an embeddings call as well as the input and output.
 
 * [EmbeddingsInterface.php](https://git.drupalcode.org/project/ai/-/blob/1.0.x/src/OperationType/Embeddings/EmbeddingsInterface.php?ref_type=heads)
 * [EmbeddingsInput.php](https://git.drupalcode.org/project/ai/-/blob/1.0.x/src/OperationType/Embeddings/EmbeddingsInput.php?ref_type=heads)

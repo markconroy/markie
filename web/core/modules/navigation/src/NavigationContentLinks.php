@@ -17,7 +17,7 @@ use Symfony\Component\Routing\Exception\RouteNotFoundException;
  * The content menu contains a "Create" section, along with links to other
  * overview pages for different entity types.
  *
- * @internal The navigation module is experimental.
+ * @internal
  */
 final class NavigationContentLinks implements ContainerInjectionInterface {
 
@@ -55,7 +55,7 @@ final class NavigationContentLinks implements ContainerInjectionInterface {
     // array keys.
     $content_links = [
       'navigation.create' => [
-        'route_name' => 'node.add_page',
+        'route_name' => 'entity.node.add_page',
         'title' => $this->t('Create'),
         'weight' => -10,
       ],
@@ -82,7 +82,7 @@ final class NavigationContentLinks implements ContainerInjectionInterface {
     }
 
     // Add supported add links under the Create button.
-    $this->addCreateEntityLinks('node_type', 'node.add', $links);
+    $this->addCreateEntityLinks('node_type', 'entity.node.add_form', $links);
     $this->addCreateEntityLinks('media_type', 'entity.media.add_form', $links, ['document', 'image']);
 
     // Finally, add the bundleless User link and pin it to the bottom.

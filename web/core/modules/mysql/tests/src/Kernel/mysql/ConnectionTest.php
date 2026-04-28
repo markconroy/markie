@@ -7,12 +7,14 @@ namespace Drupal\Tests\mysql\Kernel\mysql;
 use Drupal\Core\Database\Database;
 use Drupal\Core\Database\DatabaseExceptionWrapper;
 use Drupal\KernelTests\Core\Database\DriverSpecificDatabaseTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * MySQL-specific connection tests.
- *
- * @group Database
  */
+#[Group('Database')]
+#[RunTestsInSeparateProcesses]
 class ConnectionTest extends DriverSpecificDatabaseTestBase {
 
   /**

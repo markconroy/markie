@@ -754,7 +754,7 @@ class ConfigImporter {
    * installs are processed with modules coming before themes. This order is
    * necessary because themes can depend on modules.
    *
-   * @return array|bool
+   * @return array|false
    *   An array containing the next operation and extension name to perform it
    *   on. If there is nothing left to do returns FALSE;
    */
@@ -784,7 +784,7 @@ class ConfigImporter {
   /**
    * Gets the next configuration operation to perform.
    *
-   * @return array|bool
+   * @return array|false
    *   An array containing the next operation and configuration name to perform
    *   it on. If there is nothing left to do returns FALSE;
    */
@@ -927,6 +927,9 @@ class ConfigImporter {
         $this->processedSystemTheme = TRUE;
       }
       \Drupal::service('theme_installer')->$op($names);
+      // Installing a theme can also cause a kernel boot, so re-inject services
+      // as is done with modules.
+      $this->reInjectMe();
     }
     $this->setProcessedExtension($type, $op, $names);
   }

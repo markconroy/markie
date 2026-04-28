@@ -6,12 +6,14 @@ namespace Drupal\Tests\views\Kernel\Handler;
 
 use Drupal\entity_test\Entity\EntityTest;
 use Drupal\language\Entity\ConfigurableLanguage;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests base field access in Views for the entity_test entity.
- *
- * @group entity_test
  */
+#[Group('entity_test')]
+#[RunTestsInSeparateProcesses]
 class EntityTestViewsFieldAccessTest extends FieldFieldAccessTestBase {
 
   /**

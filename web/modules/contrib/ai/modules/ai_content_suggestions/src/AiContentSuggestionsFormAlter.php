@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\ai_content_suggestions;
 
+use Drupal\Core\Entity\ContentEntityFormInterface;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
@@ -35,6 +36,11 @@ final class AiContentSuggestionsFormAlter implements AiContentSuggestionsFormAlt
 
           /** @var \Drupal\Core\Entity\ContentEntityFormInterface $form_object */
           $form_object = $form_state->getFormObject();
+
+          // Check if form object implements ContentEntityFormInterface.
+          if (!$form_object instanceof ContentEntityFormInterface) {
+            continue;
+          }
 
           /** @var \Drupal\Core\Entity\ContentEntityInterface $entity */
           $entity = $form_object->getEntity();

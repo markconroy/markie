@@ -6,14 +6,15 @@ namespace Drupal\Tests\responsive_image\Functional;
 
 use Drupal\responsive_image\ResponsiveImageStyleInterface;
 use Drupal\Tests\BrowserTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 // cspell:ignore modulenarrow
-
 /**
  * Thoroughly test the administrative interface of the Responsive Image module.
- *
- * @group responsive_image
  */
+#[Group('responsive_image')]
+#[RunTestsInSeparateProcesses]
 class ResponsiveImageAdminUITest extends BrowserTestBase {
 
   /**

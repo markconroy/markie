@@ -7,14 +7,15 @@ namespace Drupal\Tests\image\Functional;
 use Drupal\file\Entity\File;
 use Drupal\Tests\content_translation\Traits\ContentTranslationTestTrait;
 use Drupal\Tests\TestFileCreationTrait;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 // cspell:ignore Scarlett Johansson ribisi
-
 /**
  * Uploads images to translated nodes.
- *
- * @group image
  */
+#[Group('image')]
+#[RunTestsInSeparateProcesses]
 class ImageOnTranslatedEntityTest extends ImageFieldTestBase {
 
   use ContentTranslationTestTrait;
@@ -101,7 +102,10 @@ class ImageOnTranslatedEntityTest extends ImageFieldTestBase {
     $edit[$name] = \Drupal::service('file_system')->realpath($this->drupalGetTestFiles('image')[0]->uri);
     $this->drupalGet('node/' . $default_language_node->id() . '/edit');
     $this->submitForm($edit, 'Save');
-    $edit = [$this->fieldName . '[0][alt]' => 'Lost in translation image', $this->fieldName . '[0][title]' => 'Lost in translation image title'];
+    $edit = [
+      $this->fieldName . '[0][alt]' => 'Lost in translation image',
+      $this->fieldName . '[0][title]' => 'Lost in translation image title',
+    ];
     $this->submitForm($edit, 'Save');
     $first_fid = $this->getLastFileId();
 
@@ -115,7 +119,10 @@ class ImageOnTranslatedEntityTest extends ImageFieldTestBase {
     $name = 'files[' . $this->fieldName . '_0]';
     $edit[$name] = \Drupal::service('file_system')->realpath($this->drupalGetTestFiles('image')[1]->uri);
     $this->submitForm($edit, 'Save (this translation)');
-    $edit = [$this->fieldName . '[0][alt]' => 'Scarlett Johansson image', $this->fieldName . '[0][title]' => 'Scarlett Johansson image title'];
+    $edit = [
+      $this->fieldName . '[0][alt]' => 'Scarlett Johansson image',
+      $this->fieldName . '[0][title]' => 'Scarlett Johansson image title',
+    ];
     $this->submitForm($edit, 'Save (this translation)');
     // This inspects the HTML after the post of the translation, the image
     // should be displayed on the original node.
@@ -148,7 +155,10 @@ class ImageOnTranslatedEntityTest extends ImageFieldTestBase {
     $name = 'files[' . $this->fieldName . '_0]';
     $edit[$name] = \Drupal::service('file_system')->realpath($this->drupalGetTestFiles('image')[2]->uri);
     $this->submitForm($edit, 'Save (this translation)');
-    $edit = [$this->fieldName . '[0][alt]' => 'Ada Lovelace image', $this->fieldName . '[0][title]' => 'Ada Lovelace image title'];
+    $edit = [
+      $this->fieldName . '[0][alt]' => 'Ada Lovelace image',
+      $this->fieldName . '[0][title]' => 'Ada Lovelace image title',
+    ];
     $this->submitForm($edit, 'Save (this translation)');
     $third_fid = $this->getLastFileId();
 

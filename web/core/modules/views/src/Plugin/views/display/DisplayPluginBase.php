@@ -36,16 +36,19 @@ abstract class DisplayPluginBase extends PluginBase implements DisplayPluginInte
   public $view = NULL;
 
   /**
-   * An array of instantiated handlers used in this display.
+   * A multi-dimensional array of instantiated handlers used in this display.
    *
-   * @var \Drupal\views\Plugin\views\ViewsHandlerInterface[]
+   * The array keys are the handler type, and each value is an array of
+   * handlers for that type.
+   *
+   * @var array<string, \Drupal\views\Plugin\views\ViewsHandlerInterface[]>
    */
   public $handlers = [];
 
   /**
    * An array of instantiated plugins used in this display.
    *
-   * @var \Drupal\views\Plugin\views\ViewsPluginInterface[]
+   * @var \Drupal\views\Plugin\views\ViewsPluginInterface[][]
    */
   protected $plugins = [];
 
@@ -108,13 +111,6 @@ abstract class DisplayPluginBase extends PluginBase implements DisplayPluginInte
   protected $usesAreas = TRUE;
 
   /**
-   * Static cache for unpackOptions, but not if we are in the UI.
-   *
-   * @var array
-   */
-  protected static $unpackOptions = [];
-
-  /**
    * The display information coming directly from the view entity.
    *
    * @var array
@@ -128,13 +124,13 @@ abstract class DisplayPluginBase extends PluginBase implements DisplayPluginInte
   /**
    * Keeps track whether the display uses exposed filters.
    */
-  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName, Drupal.Commenting.VariableComment.Missing
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
   public bool $has_exposed;
 
   /**
    * The default display.
    */
-  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName, Drupal.Commenting.VariableComment.Missing
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
   public DisplayPluginInterface $default_display;
 
   /**
@@ -195,21 +191,7 @@ abstract class DisplayPluginBase extends PluginBase implements DisplayPluginInte
       unset($options['defaults']);
     }
 
-    $cid = 'views:unpack_options:' . hash('sha256', serialize([$this->options, $options])) . ':' . \Drupal::languageManager()->getCurrentLanguage()->getId();
-    if (empty(static::$unpackOptions[$cid])) {
-      $cache = \Drupal::cache('data')->get($cid);
-      if (!empty($cache->data)) {
-        $this->options = $cache->data;
-      }
-      else {
-        $this->unpackOptions($this->options, $options);
-        \Drupal::cache('data')->set($cid, $this->options, Cache::PERMANENT, $this->view->storage->getCacheTags());
-      }
-      static::$unpackOptions[$cid] = $this->options;
-    }
-    else {
-      $this->options = static::$unpackOptions[$cid];
-    }
+    $this->unpackOptions($this->options, $options);
 
     // Mark the view as changed so the user has a chance to save it.
     if ($changed) {
@@ -763,7 +745,7 @@ abstract class DisplayPluginBase extends PluginBase implements DisplayPluginInte
       return $this->view->displayHandlers->get($display_id)->getRoutedDisplay();
     }
 
-    // No routed display exists, so return NULL
+    // No routed display exists, so return NULL.
     return NULL;
   }
 
@@ -2453,7 +2435,9 @@ abstract class DisplayPluginBase extends PluginBase implements DisplayPluginInte
       $this->view->element['#cache'] += ['keys' => []];
       // Places like \Drupal\views\ViewExecutable::setCurrentPage() set up an
       // additional cache context.
-      $this->view->element['#cache']['keys'] = array_merge(['views', 'display', $this->view->element['#name'], $this->view->element['#display_id']], $this->view->element['#cache']['keys']);
+      $this->view->element['#cache']['keys'] = array_merge(
+        ['views', 'display', $this->view->element['#name'], $this->view->element['#display_id']],
+        $this->view->element['#cache']['keys']);
 
       // Add arguments to the cache key.
       if ($args) {
@@ -2656,7 +2640,10 @@ abstract class DisplayPluginBase extends PluginBase implements DisplayPluginInte
 
     if ($this->usesExposedFormInBlock()) {
       $delta = '-exp-' . $this->view->storage->id() . '-' . $this->display['id'];
-      $desc = $this->t('Exposed form: @view-@display_id', ['@view' => $this->view->storage->id(), '@display_id' => $this->display['id']]);
+      $desc = $this->t('Exposed form: @view-@display_id', [
+        '@view' => $this->view->storage->id(),
+        '@display_id' => $this->display['id'],
+      ]);
 
       $blocks[$delta] = [
         'info' => $desc,

@@ -7,14 +7,19 @@ namespace Drupal\KernelTests\Core\Test;
 use Drupal\Core\Database\Database;
 use Drupal\Core\Test\JUnitConverter;
 use Drupal\Core\Test\PhpUnitTestRunner;
-use Drupal\Core\Test\TestRun;
 use Drupal\Core\Test\SimpletestTestRunResultsStorage;
+use Drupal\Core\Test\TestRun;
 use Drupal\KernelTests\KernelTestBase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
- * @coversDefaultClass \Drupal\Core\Test\TestRun
- * @group Test
+ * Tests Drupal\Core\Test\TestRun.
  */
+#[CoversClass(TestRun::class)]
+#[Group('Test')]
+#[RunTestsInSeparateProcesses]
 class TestRunTest extends KernelTestBase {
 
   /**
@@ -45,13 +50,15 @@ class TestRunTest extends KernelTestBase {
   }
 
   /**
-   * @covers ::createNew
-   * @covers ::get
-   * @covers ::id
-   * @covers ::insertLogEntry
-   * @covers ::setDatabasePrefix
-   * @covers ::getDatabasePrefix
-   * @covers ::getTestClass
+   * Tests create and get.
+   *
+   * @legacy-covers ::createNew
+   * @legacy-covers ::get
+   * @legacy-covers ::id
+   * @legacy-covers ::insertLogEntry
+   * @legacy-covers ::setDatabasePrefix
+   * @legacy-covers ::getDatabasePrefix
+   * @legacy-covers ::getTestClass
    */
   public function testCreateAndGet(): void {
     // Test ::createNew.
@@ -81,10 +88,12 @@ class TestRunTest extends KernelTestBase {
   }
 
   /**
-   * @covers ::createNew
-   * @covers ::id
-   * @covers ::insertLogEntry
-   * @covers ::setDatabasePrefix
+   * Tests create and remove.
+   *
+   * @legacy-covers ::createNew
+   * @legacy-covers ::id
+   * @legacy-covers ::insertLogEntry
+   * @legacy-covers ::setDatabasePrefix
    */
   public function testCreateAndRemove(): void {
     $test_run_1 = TestRun::createNew($this->testRunResultsStorage);
@@ -107,12 +116,14 @@ class TestRunTest extends KernelTestBase {
   }
 
   /**
-   * @covers ::createNew
-   * @covers ::insertLogEntry
-   * @covers ::setDatabasePrefix
-   * @covers ::getLogEntriesByTestClass
-   * @covers ::getDatabasePrefix
-   * @covers ::getTestClass
+   * Tests get log entries by test class.
+   *
+   * @legacy-covers ::createNew
+   * @legacy-covers ::insertLogEntry
+   * @legacy-covers ::setDatabasePrefix
+   * @legacy-covers ::getLogEntriesByTestClass
+   * @legacy-covers ::getDatabasePrefix
+   * @legacy-covers ::getTestClass
    */
   public function testGetLogEntriesByTestClass(): void {
     $test_run = TestRun::createNew($this->testRunResultsStorage);
@@ -131,6 +142,7 @@ class TestRunTest extends KernelTestBase {
         'line' => '0',
         'file' => 'Unknown',
         'time' => '0',
+        'exit_code' => '0',
       ],
       1 => (object) [
         'message_id' => '1',
@@ -143,6 +155,7 @@ class TestRunTest extends KernelTestBase {
         'line' => '0',
         'file' => 'Unknown',
         'time' => '0',
+        'exit_code' => '0',
       ],
     ], $test_run->getLogEntriesByTestClass());
     $this->assertEquals('oddity1234', $test_run->getDatabasePrefix());
@@ -150,10 +163,12 @@ class TestRunTest extends KernelTestBase {
   }
 
   /**
-   * @covers ::createNew
-   * @covers ::setDatabasePrefix
-   * @covers ::processPhpErrorLogFile
-   * @covers ::getLogEntriesByTestClass
+   * Tests process php error log file.
+   *
+   * @legacy-covers ::createNew
+   * @legacy-covers ::setDatabasePrefix
+   * @legacy-covers ::processPhpErrorLogFile
+   * @legacy-covers ::getLogEntriesByTestClass
    */
   public function testProcessPhpErrorLogFile(): void {
     $test_run = TestRun::createNew($this->testRunResultsStorage);
@@ -171,6 +186,7 @@ class TestRunTest extends KernelTestBase {
         'line' => '18',
         'file' => '/var/www/core/tests/Drupal/FunctionalTests/Bootstrap/ErrorContainer.php on line 20 in /var/www/core/tests/Drupal/FunctionalTests/Bootstrap/ErrorContainer.php',
         'time' => '0',
+        'exit_code' => '0',
       ],
       1 => (object) [
         'message_id' => '2',
@@ -183,6 +199,7 @@ class TestRunTest extends KernelTestBase {
         'line' => '0',
         'file' => 'Unknown',
         'time' => '0',
+        'exit_code' => '0',
       ],
       2 => (object) [
         'message_id' => '3',
@@ -195,6 +212,7 @@ class TestRunTest extends KernelTestBase {
         'line' => '0',
         'file' => 'Unknown',
         'time' => '0',
+        'exit_code' => '0',
       ],
       3 => (object) [
         'message_id' => '4',
@@ -207,6 +225,7 @@ class TestRunTest extends KernelTestBase {
         'line' => '0',
         'file' => 'Unknown',
         'time' => '0',
+        'exit_code' => '0',
       ],
       4 => (object) [
         'message_id' => '5',
@@ -219,6 +238,7 @@ class TestRunTest extends KernelTestBase {
         'line' => '0',
         'file' => 'Unknown',
         'time' => '0',
+        'exit_code' => '0',
       ],
       5 => (object) [
         'message_id' => '6',
@@ -231,6 +251,7 @@ class TestRunTest extends KernelTestBase {
         'line' => '17',
         'file' => '/var/www/core/tests/Drupal/FunctionalTests/Bootstrap/ExceptionContainer.php',
         'time' => '0',
+        'exit_code' => '0',
       ],
       6 => (object) [
         'message_id' => '7',
@@ -243,6 +264,7 @@ class TestRunTest extends KernelTestBase {
         'line' => '0',
         'file' => 'Unknown',
         'time' => '0',
+        'exit_code' => '0',
       ],
       7 => (object) [
         'message_id' => '8',
@@ -255,6 +277,7 @@ class TestRunTest extends KernelTestBase {
         'line' => '0',
         'file' => 'Unknown',
         'time' => '0',
+        'exit_code' => '0',
       ],
       8 => (object) [
         'message_id' => '9',
@@ -267,12 +290,15 @@ class TestRunTest extends KernelTestBase {
         'line' => '0',
         'file' => 'Unknown',
         'time' => '0',
+        'exit_code' => '0',
       ],
     ], $test_run->getLogEntriesByTestClass());
   }
 
   /**
-   * @covers ::insertLogEntry
+   * Tests process php unit results.
+   *
+   * @legacy-covers ::insertLogEntry
    */
   public function testProcessPhpUnitResults(): void {
     $phpunit_error_xml = __DIR__ . '/../../../../fixtures/phpunit_error.xml';

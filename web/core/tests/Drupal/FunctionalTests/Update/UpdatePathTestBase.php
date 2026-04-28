@@ -6,13 +6,13 @@ namespace Drupal\FunctionalTests\Update;
 
 use Drupal\Component\Utility\Crypt;
 use Drupal\Component\Utility\Html;
-use Drupal\Core\Site\Settings;
-use Drupal\Tests\BrowserTestBase;
 use Drupal\Core\Database\Database;
 use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\Language\Language;
+use Drupal\Core\Site\Settings;
 use Drupal\Core\Url;
+use Drupal\Tests\BrowserTestBase;
 use Drupal\Tests\UpdatePathTestTrait;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpFoundation\Request;
@@ -93,7 +93,7 @@ abstract class UpdatePathTestBase extends BrowserTestBase {
    * then needed to set various things such as the config directories and the
    * container that would normally be done via the installer.
    */
-  public function installDrupal() {
+  public function installDrupal(): void {
     // Set the update URL. This must be set here rather than in
     // self::__construct() or the old URL generator will leak additional test
     // sites. Additionally, we need to prevent the path alias processor from
@@ -137,6 +137,16 @@ abstract class UpdatePathTestBase extends BrowserTestBase {
 
     // Load the database(s).
     foreach ($this->databaseDumpFiles as $file) {
+      // Determine the version of the database dump if specified.
+      $matches = [];
+      $dumpVersion = preg_match('/drupal-(\d+\.\d+\.\d+)\./', $file, $matches) === 1 ? $matches[1] : NULL;
+
+      // If the db driver is mysqli, we do not need to run the update tests for
+      // db dumps prior to 11.2 when the module was introduced.
+      if (Database::getConnection()->getProvider() === 'mysqli' && $dumpVersion && version_compare($dumpVersion, '11.2.0', '<')) {
+        $this->markTestSkipped("The mysqli driver was introduced in Drupal 11.2, skip update tests from database at version {$dumpVersion}");
+      }
+
       if (str_ends_with($file, '.gz')) {
         $file = "compress.zlib://$file";
       }
@@ -260,7 +270,7 @@ abstract class UpdatePathTestBase extends BrowserTestBase {
       ->fetchAllKeyed(0, 1);
     // For the purpose of fetching the notices and displaying more helpful error
     // messages, let's override the error handler temporarily.
-    set_error_handler(function ($severity, $message, $filename, $lineno) {
+    set_error_handler(function ($severity, $message, $filename, $lineno): void {
       throw new \ErrorException($message, 0, $severity, $filename, $lineno);
     });
     foreach ($result as $route_name => $route) {

@@ -5,13 +5,17 @@ declare(strict_types=1);
 namespace Drupal\Tests\Component\Utility;
 
 use Drupal\Component\Utility\UrlHelper;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunInSeparateProcess;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @group Utility
- *
- * @coversDefaultClass \Drupal\Component\Utility\UrlHelper
+ * Tests Drupal\Component\Utility\UrlHelper.
  */
+#[CoversClass(UrlHelper::class)]
+#[Group('Utility')]
 class UrlHelperTest extends TestCase {
 
   /**
@@ -23,13 +27,33 @@ class UrlHelperTest extends TestCase {
    *   - string $expected: The expected query string.
    *   - string $message: The assertion message.
    */
-  public static function providerTestBuildQuery() {
+  public static function providerTestBuildQuery(): array {
     return [
-      [['a' => ' &#//+%20@۞'], 'a=%20%26%23//%2B%2520%40%DB%9E', 'Value was properly encoded.'],
-      [[' &#//+%20@۞' => 'a'], '%20%26%23%2F%2F%2B%2520%40%DB%9E=a', 'Key was properly encoded.'],
-      [['a' => '1', 'b' => '2', 'c' => '3'], 'a=1&b=2&c=3', 'Multiple values were properly concatenated.'],
-      [['a' => ['b' => '2', 'c' => '3'], 'd' => 'foo'], 'a%5Bb%5D=2&a%5Bc%5D=3&d=foo', 'Nested array was properly encoded.'],
-      [['foo' => NULL], 'foo', 'Simple parameters are properly added.'],
+      [
+        ['a' => ' &#//+%20@۞'],
+        'a=%20%26%23//%2B%2520%40%DB%9E',
+        'Value was properly encoded.',
+      ],
+      [
+        [' &#//+%20@۞' => 'a'],
+        '%20%26%23%2F%2F%2B%2520%40%DB%9E=a',
+        'Key was properly encoded.',
+      ],
+      [
+        ['a' => '1', 'b' => '2', 'c' => '3'],
+        'a=1&b=2&c=3',
+        'Multiple values were properly concatenated.',
+      ],
+      [
+        ['a' => ['b' => '2', 'c' => '3'], 'd' => 'foo'],
+        'a%5Bb%5D=2&a%5Bc%5D=3&d=foo',
+        'Nested array was properly encoded.',
+      ],
+      [
+        ['foo' => NULL],
+        'foo',
+        'Simple parameters are properly added.',
+      ],
     ];
   }
 
@@ -42,10 +66,8 @@ class UrlHelperTest extends TestCase {
    *   The expected query string.
    * @param string $message
    *   The assertion message.
-   *
-   * @dataProvider providerTestBuildQuery
-   * @covers ::buildQuery
    */
+  #[DataProvider('providerTestBuildQuery')]
   public function testBuildQuery($query, $expected, $message): void {
     $this->assertEquals(UrlHelper::buildQuery($query), $expected, $message);
   }
@@ -91,9 +113,9 @@ class UrlHelperTest extends TestCase {
    * @param string $scheme
    *   The scheme to test.
    *
-   * @dataProvider providerTestValidAbsoluteData
-   * @covers ::isValid
+   * @legacy-covers ::isValid
    */
+  #[DataProvider('providerTestValidAbsoluteData')]
   public function testValidAbsolute(string $url, string $scheme): void {
     $test_url = $scheme . '://' . $url;
     $valid_url = UrlHelper::isValid($test_url, TRUE);
@@ -147,9 +169,9 @@ class UrlHelperTest extends TestCase {
    * @param string $scheme
    *   The scheme to test.
    *
-   * @dataProvider providerTestInvalidAbsolute
-   * @covers ::isValid
+   * @legacy-covers ::isValid
    */
+  #[DataProvider('providerTestInvalidAbsolute')]
   public function testInvalidAbsolute(string $url, string $scheme): void {
     $test_url = $scheme . '://' . $url;
     $valid_url = UrlHelper::isValid($test_url, TRUE);
@@ -182,9 +204,9 @@ class UrlHelperTest extends TestCase {
    * @param string $prefix
    *   The prefix to test.
    *
-   * @dataProvider providerTestValidRelativeData
-   * @covers ::isValid
+   * @legacy-covers ::isValid
    */
+  #[DataProvider('providerTestValidRelativeData')]
   public function testValidRelative(string $url, string $prefix): void {
     $test_url = $prefix . $url;
     $valid_url = UrlHelper::isValid($test_url);
@@ -215,9 +237,9 @@ class UrlHelperTest extends TestCase {
    * @param string $prefix
    *   The prefix to test.
    *
-   * @dataProvider providerTestInvalidRelativeData
-   * @covers ::isValid
+   * @legacy-covers ::isValid
    */
+  #[DataProvider('providerTestInvalidRelativeData')]
   public function testInvalidRelative(string $url, string $prefix): void {
     $test_url = $prefix . $url;
     $valid_url = UrlHelper::isValid($test_url);
@@ -234,10 +256,8 @@ class UrlHelperTest extends TestCase {
    *   nested items.
    * @param array $expected
    *   An array containing query parameters.
-   *
-   * @dataProvider providerTestFilterQueryParameters
-   * @covers ::filterQueryParameters
    */
+  #[DataProvider('providerTestFilterQueryParameters')]
   public function testFilterQueryParameters($query, $exclude, $expected): void {
     $filtered = UrlHelper::filterQueryParameters($query, $exclude);
     $this->assertEquals($expected, $filtered, 'The query was not properly filtered.');
@@ -273,10 +293,8 @@ class UrlHelperTest extends TestCase {
    *   URL to test.
    * @param array $expected
    *   Associative array with expected parameters.
-   *
-   * @dataProvider providerTestParse
-   * @covers ::parse
    */
+  #[DataProvider('providerTestParse')]
   public function testParse($url, $expected): void {
     $parsed = UrlHelper::parse($url);
     $this->assertEquals($expected, $parsed, 'The URL was not properly parsed.');
@@ -288,7 +306,7 @@ class UrlHelperTest extends TestCase {
    * @return array
    *   An array of test cases with URLs and expected parsed results.
    */
-  public static function providerTestParse() {
+  public static function providerTestParse(): array {
     return [
       [
         'http://www.example.com/my/path',
@@ -404,10 +422,8 @@ class UrlHelperTest extends TestCase {
    *   A path to encode.
    * @param string $expected
    *   The expected encoded path.
-   *
-   * @dataProvider providerTestEncodePath
-   * @covers ::encodePath
    */
+  #[DataProvider('providerTestEncodePath')]
   public function testEncodePath($path, $expected): void {
     $encoded = UrlHelper::encodePath($path);
     $this->assertEquals($expected, $encoded);
@@ -419,7 +435,7 @@ class UrlHelperTest extends TestCase {
    * @return array
    *   An array of test cases with unencoded paths and expected encoded paths.
    */
-  public static function providerTestEncodePath() {
+  public static function providerTestEncodePath(): array {
     return [
       ['unencoded path with spaces', 'unencoded%20path%20with%20spaces'],
       ['slashes/should/be/preserved', 'slashes/should/be/preserved'],
@@ -433,10 +449,8 @@ class UrlHelperTest extends TestCase {
    *   URL or path to test.
    * @param bool $expected
    *   Expected result.
-   *
-   * @dataProvider providerTestIsExternal
-   * @covers ::isExternal
    */
+  #[DataProvider('providerTestIsExternal')]
   public function testIsExternal($path, $expected): void {
     $isExternal = UrlHelper::isExternal($path);
     $this->assertEquals($expected, $isExternal);
@@ -448,7 +462,7 @@ class UrlHelperTest extends TestCase {
    * @return array
    *   An array of test cases with paths and their expected external status.
    */
-  public static function providerTestIsExternal() {
+  public static function providerTestIsExternal(): array {
     return [
       ['/internal/path', FALSE],
       ['https://example.com/external/path', TRUE],
@@ -494,11 +508,11 @@ class UrlHelperTest extends TestCase {
    * @param array $protocols
    *   Protocols to allow.
    *
-   * @dataProvider providerTestFilterBadProtocol
-   * @covers ::setAllowedProtocols
-   * @covers ::filterBadProtocol
-   * @runInSeparateProcess
+   * @legacy-covers ::setAllowedProtocols
+   * @legacy-covers ::filterBadProtocol
    */
+  #[DataProvider('providerTestFilterBadProtocol')]
+  #[RunInSeparateProcess]
   public function testFilterBadProtocol($uri, $expected, $protocols): void {
     UrlHelper::setAllowedProtocols($protocols);
     $this->assertEquals($expected, UrlHelper::filterBadProtocol($uri));
@@ -513,7 +527,7 @@ class UrlHelperTest extends TestCase {
    * @return array
    *   An array of test cases with URIs, expected filtered results, and allowed protocols.
    */
-  public static function providerTestFilterBadProtocol() {
+  public static function providerTestFilterBadProtocol(): array {
     return [
       ['javascript://example.com?foo&bar', '//example.com?foo&amp;bar', ['http', 'https']],
       // Test custom protocols.
@@ -535,11 +549,11 @@ class UrlHelperTest extends TestCase {
    * @param array $protocols
    *   Protocols to allow.
    *
-   * @dataProvider providerTestStripDangerousProtocols
-   * @covers ::setAllowedProtocols
-   * @covers ::stripDangerousProtocols
-   * @runInSeparateProcess
+   * @legacy-covers ::setAllowedProtocols
+   * @legacy-covers ::stripDangerousProtocols
    */
+  #[DataProvider('providerTestStripDangerousProtocols')]
+  #[RunInSeparateProcess]
   public function testStripDangerousProtocols($uri, $expected, $protocols): void {
     UrlHelper::setAllowedProtocols($protocols);
     $stripped = UrlHelper::stripDangerousProtocols($uri);
@@ -552,7 +566,7 @@ class UrlHelperTest extends TestCase {
    * @return array
    *   An array of test cases with URIs, expected stripped results, and allowed protocols.
    */
-  public static function providerTestStripDangerousProtocols() {
+  public static function providerTestStripDangerousProtocols(): array {
     return [
       ['javascript://example.com', '//example.com', ['http', 'https']],
       // Test custom protocols.
@@ -614,10 +628,8 @@ class UrlHelperTest extends TestCase {
    * @param bool $expected
    *   TRUE if an external URL points to this installation as determined by the
    *   base URL.
-   *
-   * @covers ::externalIsLocal
-   * @dataProvider providerTestExternalIsLocal
    */
+  #[DataProvider('providerTestExternalIsLocal')]
   public function testExternalIsLocal($url, $base_url, $expected): void {
     $this->assertSame($expected, UrlHelper::externalIsLocal($url, $base_url));
   }
@@ -627,7 +639,7 @@ class UrlHelperTest extends TestCase {
    *
    * @see \Drupal\Tests\Component\Utility\UrlHelperTest::testExternalIsLocal()
    */
-  public static function providerTestExternalIsLocal() {
+  public static function providerTestExternalIsLocal(): array {
     return [
       // Different mixes of trailing slash.
       ['http://example.com', 'http://example.com', TRUE],
@@ -666,10 +678,8 @@ class UrlHelperTest extends TestCase {
    *   The URL to test.
    * @param string $base_url
    *   The base URL.
-   *
-   * @covers ::externalIsLocal
-   * @dataProvider providerTestExternalIsLocalInvalid
    */
+  #[DataProvider('providerTestExternalIsLocalInvalid')]
   public function testExternalIsLocalInvalid($url, $base_url): void {
     $this->expectException(\InvalidArgumentException::class);
     UrlHelper::externalIsLocal($url, $base_url);
@@ -680,7 +690,7 @@ class UrlHelperTest extends TestCase {
    *
    * @see \Drupal\Tests\Component\Utility\UrlHelperTest::testExternalIsLocalInvalid()
    */
-  public static function providerTestExternalIsLocalInvalid() {
+  public static function providerTestExternalIsLocalInvalid(): array {
     return [
       ['http://example.com/foo', ''],
       ['http://example.com/foo', 'bar'],

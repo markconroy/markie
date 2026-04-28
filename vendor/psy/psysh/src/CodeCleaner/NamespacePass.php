@@ -3,7 +3,7 @@
 /*
  * This file is part of Psy Shell.
  *
- * (c) 2012-2025 Justin Hileman
+ * (c) 2012-2026 Justin Hileman
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -106,7 +106,7 @@ class NamespacePass extends NamespaceAwarePass
         $this->cleaner->setNamespace($namespace);
 
         // Always clear aliases when changing namespace
-        $this->cleaner->setAliasesForNamespace($namespace, []);
+        $this->cleaner->setAliasesByTypeForNamespace($namespace, []);
     }
 
     /**

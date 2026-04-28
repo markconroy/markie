@@ -10,7 +10,7 @@ use Drupal\Core\Render\BubbleableMetadata;
 use Drupal\Core\Hook\Attribute\Hook;
 
 /**
- * Hook implementations for node.
+ * Token hook implementations for node.
  */
 class NodeTokensHooks {
 
@@ -109,7 +109,7 @@ class NodeTokensHooks {
             break;
 
           case 'type-name':
-            $type_name = node_get_type_label($node);
+            $type_name = $node->getBundleEntity()->label();
             $replacements[$original] = $type_name;
             break;
 

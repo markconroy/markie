@@ -6,12 +6,15 @@ namespace Drupal\FunctionalTests\Installer;
 
 use Drupal\Core\Serialization\Yaml;
 use Drupal\user\Entity\User;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests superuser access and the installer.
- *
- * @group Installer
  */
+#[Group('Installer')]
+#[RunTestsInSeparateProcesses]
 class SuperUserAccessInstallTest extends InstallerTestBase {
 
   /**
@@ -70,9 +73,8 @@ class SuperUserAccessInstallTest extends InstallerTestBase {
 
   /**
    * Confirms that the installation succeeded.
-   *
-   * @dataProvider getInstallTests
    */
+  #[DataProvider('getInstallTests')]
   public function testInstalled(bool $expected_runtime_has_permission, bool $expected_no_access_message, array $expected_roles, string $install_code, bool $super_user_policy): void {
     $user = User::load(1);
     $this->assertSame($expected_runtime_has_permission, $user->hasPermission('administer software updates'));

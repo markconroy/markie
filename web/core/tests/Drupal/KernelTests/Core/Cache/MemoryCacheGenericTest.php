@@ -6,12 +6,14 @@ namespace Drupal\KernelTests\Core\Cache;
 
 use Drupal\Component\Datetime\TimeInterface;
 use Drupal\Core\Cache\MemoryCache\MemoryCache;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Unit test of the memory cache using the generic cache unit test base.
- *
- * @group Cache
  */
+#[Group('Cache')]
+#[RunTestsInSeparateProcesses]
 class MemoryCacheGenericTest extends GenericCacheBackendUnitTestBase {
 
   /**
@@ -25,7 +27,7 @@ class MemoryCacheGenericTest extends GenericCacheBackendUnitTestBase {
    * @return \Drupal\Core\Cache\CacheBackendInterface
    *   A new MemoryBackend object.
    */
-  protected function createCacheBackend($bin) {
+  protected function createCacheBackend($bin): MemoryCache {
     $backend = new MemoryCache(\Drupal::service(TimeInterface::class));
     \Drupal::service('cache_tags.invalidator')->addInvalidator($backend);
     return $backend;

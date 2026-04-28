@@ -6,14 +6,15 @@ namespace Drupal\Tests\migrate\Unit\process;
 
 use Drupal\migrate\MigrateException;
 use Drupal\migrate\Plugin\migrate\process\FormatDate;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests the format date process plugin.
- *
- * @group migrate
- *
- * @coversDefaultClass Drupal\migrate\Plugin\migrate\process\FormatDate
  */
+#[CoversClass(FormatDate::class)]
+#[Group('migrate')]
 class FormatDateTest extends MigrateProcessTestCase {
 
   /**
@@ -85,10 +86,8 @@ class FormatDateTest extends MigrateProcessTestCase {
    *   The source value for the migration process plugin.
    * @param string $expected
    *   The expected value of the migration process plugin.
-   *
-   * @covers ::transform
-   * @dataProvider datesDataProvider
    */
+  #[DataProvider('datesDataProvider')]
   public function testTransform($configuration, $value, $expected): void {
     $this->plugin = new FormatDate($configuration, 'test_format_date', []);
     $actual = $this->plugin->transform($value, $this->migrateExecutable, $this->row, 'field_date');

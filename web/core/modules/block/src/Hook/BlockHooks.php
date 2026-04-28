@@ -12,6 +12,7 @@ use Drupal\Core\Link;
 use Drupal\Core\Url;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Hook\Attribute\Hook;
+use Drupal\Core\Installer\InstallerKernel;
 
 /**
  * Hook implementations for block.
@@ -148,7 +149,7 @@ class BlockHooks {
   /**
    * Implements hook_modules_installed().
    *
-   * @see block_themes_installed()
+   * @see BlockHooks::themesInstalled()
    */
   #[Hook('modules_installed')]
   public function modulesInstalled($modules, bool $is_syncing): void {
@@ -171,6 +172,38 @@ class BlockHooks {
   }
 
   /**
+   * Implements hook_themes_installed().
+   *
+   * Initializes blocks for installed themes.
+   *
+   * @param string[] $theme_list
+   *   An array of theme names.
+   *
+   * @see BlockHooks::modulesInstalled()
+   */
+  #[Hook('themes_installed')]
+  public function themesInstalled($theme_list): void {
+    // Do not create blocks during config sync.
+    if (\Drupal::service('config.installer')->isSyncing()) {
+      return;
+    }
+    // Disable this functionality prior to install profile installation because
+    // block configuration is often optional or provided by the install profile
+    // itself. block_theme_initialize() will be called when the install profile
+    // is installed.
+    if (InstallerKernel::installationAttempted() && \Drupal::config('core.extension')->get('module.' . \Drupal::installProfile()) === NULL) {
+      return;
+    }
+
+    foreach ($theme_list as $theme) {
+      // Don't initialize themes that are not displayed in the UI.
+      if (\Drupal::service('theme_handler')->hasUi($theme)) {
+        block_theme_initialize($theme);
+      }
+    }
+  }
+
+  /**
    * Implements hook_rebuild().
    */
   #[Hook('rebuild')]
@@ -184,7 +217,11 @@ class BlockHooks {
           // Disable blocks in invalid regions.
           if (!isset($regions[$block->getRegion()])) {
             if ($block->status()) {
-              \Drupal::messenger()->addWarning($this->t('The block %info was assigned to the invalid region %region and has been disabled.', ['%info' => $block_id, '%region' => $block->getRegion()]));
+              \Drupal::messenger()
+                ->addWarning($this->t('The block %info was assigned to the invalid region %region and has been disabled.', [
+                  '%info' => $block_id,
+                  '%region' => $block->getRegion(),
+                ]));
             }
             $block->setRegion(system_default_region($theme))->disable()->save();
           }

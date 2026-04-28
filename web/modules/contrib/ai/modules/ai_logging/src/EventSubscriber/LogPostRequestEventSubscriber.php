@@ -2,14 +2,15 @@
 
 namespace Drupal\ai_logging\EventSubscriber;
 
+use Drupal\ai\Event\PostGenerateResponseEvent;
+use Drupal\ai\Event\PostStreamingResponseEvent;
+use Drupal\ai\OperationType\InputInterface;
+use Drupal\Component\Datetime\TimeInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Link;
 use Drupal\Core\Url;
-use Drupal\ai\Event\PostGenerateResponseEvent;
-use Drupal\ai\Event\PostStreamingResponseEvent;
-use Drupal\ai\OperationType\InputInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
@@ -48,12 +49,20 @@ class LogPostRequestEventSubscriber implements EventSubscriberInterface {
   protected $streamingUuids = [];
 
   /**
+   * The time service.
+   *
+   * @var \Drupal\Component\Datetime\TimeInterface
+   */
+  protected $time;
+
+  /**
    * Constructor.
    */
-  public function __construct(EntityTypeManagerInterface $entityTypeManager, ConfigFactoryInterface $configFactory, ModuleHandlerInterface $moduleHandler) {
+  public function __construct(EntityTypeManagerInterface $entityTypeManager, ConfigFactoryInterface $configFactory, ModuleHandlerInterface $moduleHandler, TimeInterface $time) {
     $this->entityTypeManager = $entityTypeManager;
     $this->aiSettings = $configFactory->get('ai_logging.settings');
     $this->moduleHandler = $moduleHandler;
+    $this->time = $time;
   }
 
   /**
@@ -89,6 +98,7 @@ class LogPostRequestEventSubscriber implements EventSubscriberInterface {
         'tags' => $event->getTags(),
         'prompt' => $this->getInputText($event->getInput()),
         'extra_data' => json_encode($event->getDebugData()),
+        'created' => $this->time->getCurrentTime(),
       ]);
       if ($this->aiSettings->get('prompt_logging_output')) {
         $log->set('output_text', json_encode($event->getOutput()->getRawOutput()));
@@ -140,14 +150,30 @@ class LogPostRequestEventSubscriber implements EventSubscriberInterface {
     if (empty($this->aiSettings->get('prompt_logging'))) {
       return FALSE;
     }
-    // Check if the tags are empty.
-    $prompt_logging_tags = $this->aiSettings->get('prompt_logging_tags');
-    if (empty($prompt_logging_tags)) {
-      return TRUE;
-    }
+
+    // Normalize tags for comparison.
     $normalized_tags = [];
     foreach ($tags as $tag) {
       $normalized_tags[] = strtolower(trim($tag));
+    }
+
+    // Check excluded tags first - if any match, don't log.
+    $prompt_logging_excluded_tags = $this->aiSettings->get('prompt_logging_excluded_tags');
+    if (!empty($prompt_logging_excluded_tags)) {
+      $excluded_tags = array_filter(array_map(
+        static fn($tag) => strtolower(trim($tag)),
+        explode(',', $prompt_logging_excluded_tags)
+      ));
+
+      if (array_intersect($excluded_tags, $normalized_tags)) {
+        return FALSE;
+      }
+    }
+
+    // Check if the included tags are empty.
+    $prompt_logging_tags = $this->aiSettings->get('prompt_logging_tags');
+    if (empty($prompt_logging_tags)) {
+      return TRUE;
     }
     $compare_tags = explode(',', $prompt_logging_tags);
     foreach ($compare_tags as $tag) {

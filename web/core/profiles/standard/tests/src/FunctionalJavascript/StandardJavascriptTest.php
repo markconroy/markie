@@ -6,12 +6,14 @@ namespace Drupal\Tests\standard\FunctionalJavascript;
 
 use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
 use Drupal\node\Entity\Node;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests Standard installation profile JavaScript expectations.
- *
- * @group standard
  */
+#[Group('standard')]
+#[RunTestsInSeparateProcesses]
 class StandardJavascriptTest extends WebDriverTestBase {
 
   /**

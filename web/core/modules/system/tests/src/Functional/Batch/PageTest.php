@@ -6,12 +6,14 @@ namespace Drupal\Tests\system\Functional\Batch;
 
 use Drupal\batch_test\BatchTestHelper;
 use Drupal\Tests\BrowserTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the content of the progress page.
- *
- * @group Batch
  */
+#[Group('Batch')]
+#[RunTestsInSeparateProcesses]
 class PageTest extends BrowserTestBase {
 
   /**

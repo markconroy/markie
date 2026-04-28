@@ -11,12 +11,14 @@ use Drupal\Tests\contextual\FunctionalJavascript\ContextualLinkClickTrait;
 use Drupal\Tests\layout_builder\FunctionalJavascript\LayoutBuilderSortTrait;
 use Drupal\Tests\system\Traits\OffCanvasTestTrait;
 use Drupal\user\UserInterface;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests that the navigation block UI exists and stores data correctly.
- *
- * @group navigation
  */
+#[Group('navigation')]
+#[RunTestsInSeparateProcesses]
 class NavigationBlockUiTest extends WebDriverTestBase {
 
   use BlockCreationTrait;
@@ -133,7 +135,7 @@ class NavigationBlockUiTest extends WebDriverTestBase {
     $this->getSession()->getPage()->pressButton('Enable edit mode');
     $this->assertSession()->assertWaitOnAjaxRequest();
 
-    // Add section should not be present
+    // Add section should not be present.
     $this->assertSession()->linkNotExists('Add section');
     // Configure section should not be present.
     $this->assertSession()->linkNotExists('Configure Section 1');

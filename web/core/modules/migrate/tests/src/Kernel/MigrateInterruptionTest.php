@@ -4,17 +4,19 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\migrate\Kernel;
 
-use Drupal\migrate\Event\MigratePostRowSaveEvent;
-use Drupal\migrate\Plugin\MigrationInterface;
-use Drupal\migrate\Event\MigrateEvents;
-use Drupal\migrate\MigrateExecutable;
 use Drupal\KernelTests\KernelTestBase;
+use Drupal\migrate\Event\MigrateEvents;
+use Drupal\migrate\Event\MigratePostRowSaveEvent;
+use Drupal\migrate\MigrateExecutable;
+use Drupal\migrate\Plugin\MigrationInterface;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests interruptions triggered during migrations.
- *
- * @group migrate
  */
+#[Group('migrate')]
+#[RunTestsInSeparateProcesses]
 class MigrateInterruptionTest extends KernelTestBase {
 
   /**

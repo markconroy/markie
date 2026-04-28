@@ -1,0 +1,23 @@
+# Based on https://git.drupalcode.org/project/gitlab_templates/-/blob/main/assets/phpstan.neon
+# Added phpstan-baseline.neon inclusion for intentional deprecation errors in
+# test fixtures. Added excludePaths for a test fixture file that intentionally
+# contains a PHP fatal error to test parse error handling.
+includes:
+    - phpstan-baseline.neon
+parameters:
+    level: 0
+    fileExtensions:
+        - php
+        - module
+        - inc
+        - install
+        - theme
+        - profile
+    reportUnmatchedIgnoredErrors: false
+    ignoreErrors:
+        # new static() is a best practice in Drupal, so we cannot fix that.
+        - "#^Unsafe usage of new static#"
+    excludePaths:
+        # This file intentionally contains a PHP fatal error to test
+        # upgrade_status parse error handling. It must not be analysed.
+        - tests/modules/upgrade_status_test_fatal/fatal.php

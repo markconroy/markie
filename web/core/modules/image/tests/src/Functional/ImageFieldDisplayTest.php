@@ -12,12 +12,14 @@ use Drupal\image\Entity\ImageStyle;
 use Drupal\Tests\system\Functional\Cache\AssertPageCacheContextsAndTagsTrait;
 use Drupal\Tests\TestFileCreationTrait;
 use Drupal\user\RoleInterface;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the display of image fields.
- *
- * @group image
  */
+#[Group('image')]
+#[RunTestsInSeparateProcesses]
 class ImageFieldDisplayTest extends ImageFieldTestBase {
 
   use AssertPageCacheContextsAndTagsTrait;
@@ -81,7 +83,7 @@ class ImageFieldDisplayTest extends ImageFieldTestBase {
     $this->submitForm([], "{$field_name}_settings_edit");
     $this->assertSession()->linkByHrefNotExists(Url::fromRoute('entity.image_style.collection')->toString(), 'Link to image styles configuration is absent when permissions are insufficient');
 
-    // Restore 'administer image styles' permission to testing admin user
+    // Restore 'administer image styles' permission to testing admin user.
     user_role_change_permissions(reset($admin_user_roles), ['administer image styles' => TRUE]);
 
     // Create a new node with an image attached.
@@ -384,7 +386,7 @@ class ImageFieldDisplayTest extends ImageFieldTestBase {
     $this->submitForm([], "{$field_name}_settings_edit");
     $this->assertSession()->linkByHrefNotExists(Url::fromRoute('entity.image_style.collection')->toString(), 'Link to image styles configuration is absent when permissions are insufficient');
 
-    // Restore 'administer image styles' permission to testing admin user
+    // Restore 'administer image styles' permission to testing admin user.
     user_role_change_permissions(reset($admin_user_roles), ['administer image styles' => TRUE]);
 
     // Create a new node with an image attached.

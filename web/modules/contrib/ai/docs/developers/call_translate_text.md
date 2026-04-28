@@ -39,7 +39,7 @@ return $translation->getNormalized();
 
 ### Text Translation Interfaces & Models
 
-The following files defines the methods available when doing a text translation call as well as the input and output.
+The following files define the methods available when doing a text translation call as well as the input and output.
 
 * [TranslateTextInterface.php](https://git.drupalcode.org/project/ai/-/blob/1.0.x/src/OperationType/TranslateText/TranslateTextInterface.php?ref_type=heads)
 * [TranslateTextInput.php](https://git.drupalcode.org/project/ai/-/blob/1.0.x/src/OperationType/TranslateText/TranslateTextInput.php?ref_type=heads)

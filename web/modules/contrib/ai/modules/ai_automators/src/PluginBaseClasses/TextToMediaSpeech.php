@@ -276,7 +276,7 @@ class TextToMediaSpeech extends RuleBase implements ContainerFactoryPluginInterf
       // Create the media entity.
       $media = $mediaStorage->create([
         'bundle' => $mediaType,
-        'name' => substr($value['prompt'], 0, 250),
+        'name' => mb_substr($value['prompt'], 0, 250),
         $fileField => [
           'target_id' => $file->id(),
         ],

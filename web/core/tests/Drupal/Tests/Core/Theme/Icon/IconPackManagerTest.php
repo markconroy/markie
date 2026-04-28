@@ -18,8 +18,6 @@ use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests Drupal\Core\Theme\Icon\Plugin\IconPackManager.
- *
- * @group icon
  */
 #[CoversClass(IconPackManager::class)]
 #[Group('icon')]
@@ -89,7 +87,6 @@ class IconPackManagerTest extends UnitTestCase {
 
     $reflection = new \ReflectionClass($iconPackManager);
     $method = $reflection->getMethod('validateDefinition');
-    $method->setAccessible(TRUE);
 
     try {
       $result = $method->invoke($iconPackManager, $definition);

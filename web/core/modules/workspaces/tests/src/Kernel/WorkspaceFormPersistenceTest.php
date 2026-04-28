@@ -12,13 +12,15 @@ use Drupal\KernelTests\KernelTestBase;
 use Drupal\Tests\user\Traits\UserCreationTrait;
 use Drupal\workspaces\Entity\Workspace;
 use Drupal\workspaces_test\Form\ActiveWorkspaceTestForm;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Tests form persistence for the active workspace.
- *
- * @group workspaces
  */
+#[Group('workspaces')]
+#[RunTestsInSeparateProcesses]
 class WorkspaceFormPersistenceTest extends KernelTestBase {
 
   use UserCreationTrait;
@@ -73,6 +75,13 @@ class WorkspaceFormPersistenceTest extends KernelTestBase {
     $this->switchToWorkspace('ham');
     $form_state_1 = new FormState();
     $form_1 = $this->formBuilder->buildForm($form_arg, $form_state_1);
+
+    $this->assertSame([
+      'media_library_opener_id' => 'test',
+      'workspace' => 'ham',
+      'token' => $form_1['collision_test']['#ajax']['options']['query']['token'],
+      'persist' => FALSE,
+    ], $form_1['collision_test']['#ajax']['options']['query']);
 
     $this->switchToWorkspace('cheese');
     $form_state_2 = new FormState();

@@ -8,6 +8,9 @@ ai_logging.settings:
     prompt_logging_tags:
       type: string
       label: 'Tags to log prompts with'
+    prompt_logging_excluded_tags:
+      type: string
+      label: 'Tags to exclude from logging'
     prompt_logging_max_messages:
       type: integer
       label: 'Maximum number of messages to log'

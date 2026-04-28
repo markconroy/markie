@@ -6,13 +6,16 @@ namespace Drupal\Tests\layout_builder\FunctionalJavascript;
 
 use Drupal\layout_builder\Entity\LayoutBuilderEntityViewDisplay;
 use Drupal\node\Entity\Node;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests that the inline block feature works correctly.
- *
- * @group layout_builder
- * @group #slow
  */
+#[Group('layout_builder')]
+#[Group('#slow')]
+#[RunTestsInSeparateProcesses]
 class InlineBlockTest extends InlineBlockTestBase {
 
   /**
@@ -113,9 +116,8 @@ class InlineBlockTest extends InlineBlockTestBase {
 
   /**
    * Tests adding a new entity block and then not saving the layout.
-   *
-   * @dataProvider layoutNoSaveProvider
    */
+  #[DataProvider('layoutNoSaveProvider')]
   public function testNoLayoutSave($operation, $no_save_button_text, $confirm_button_text): void {
     $this->drupalLogin($this->drupalCreateUser([
       'access contextual links',
@@ -509,22 +511,12 @@ class InlineBlockTest extends InlineBlockTestBase {
     $this->assertSaveLayout();
     $node_1_block_id = $this->getLatestBlockEntityId();
 
-    $this->drupalGet("admin/content/block/$node_1_block_id");
-    $assert_session->pageTextNotContains('You are not authorized to access this page');
-
-    $this->drupalLogout();
-    $this->drupalLogin($this->drupalCreateUser([
-      'administer nodes',
-    ]));
-
-    $this->drupalGet("admin/content/block/$node_1_block_id");
+    // Inline blocks cannot be edited via normal block_content routes.
+    $blockContent = $this->blockStorage->load($node_1_block_id);
+    $this->drupalGet($blockContent->toUrl());
     $assert_session->pageTextContains('You are not authorized to access this page');
-
-    $this->drupalLogin($this->drupalCreateUser([
-      'create and edit custom blocks',
-    ]));
-    $this->drupalGet("admin/content/block/$node_1_block_id");
-    $assert_session->pageTextNotContains('You are not authorized to access this page');
+    // The block should still be editable (e.g via layout builder).
+    $this->assertTrue($blockContent->access('update'));
   }
 
   /**

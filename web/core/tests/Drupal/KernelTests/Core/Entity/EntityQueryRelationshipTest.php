@@ -4,19 +4,21 @@ declare(strict_types=1);
 
 namespace Drupal\KernelTests\Core\Entity;
 
-use Drupal\Component\Plugin\Exception\PluginNotFoundException;
 use Drupal\Core\Entity\Query\QueryException;
 use Drupal\entity_test\Entity\EntityTest;
 use Drupal\entity_test\EntityTestHelper;
-use Drupal\taxonomy\Entity\Vocabulary;
 use Drupal\taxonomy\Entity\Term;
+use Drupal\taxonomy\Entity\Vocabulary;
 use Drupal\Tests\field\Traits\EntityReferenceFieldCreationTrait;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the Entity Query relationship API.
- *
- * @group Entity
  */
+#[Group('Entity')]
+#[RunTestsInSeparateProcesses]
 class EntityQueryRelationshipTest extends EntityKernelTestBase {
 
   use EntityReferenceFieldCreationTrait;
@@ -215,7 +217,8 @@ class EntityQueryRelationshipTest extends EntityKernelTestBase {
    * Tests the invalid specifier in the query relationship.
    */
   public function testInvalidSpecifier(): void {
-    $this->expectException(PluginNotFoundException::class);
+    $this->expectException(QueryException::class);
+    $this->expectExceptionMessage("Cannot determine entity type for relationship 'language' for field 'langcode.language.foo'");
     $this->container
       ->get('entity_type.manager')
       ->getStorage('taxonomy_term')
@@ -227,9 +230,8 @@ class EntityQueryRelationshipTest extends EntityKernelTestBase {
 
   /**
    * Tests a non-existent field name in a complex query relationship.
-   *
-   * @dataProvider providerTestInvalidFieldName
    */
+  #[DataProvider('providerTestInvalidFieldName')]
   public function testInvalidFieldName(string $field_name): void {
     $this->expectException(QueryException::class);
     $this->expectExceptionMessage("'non_existent_field_name' not found");

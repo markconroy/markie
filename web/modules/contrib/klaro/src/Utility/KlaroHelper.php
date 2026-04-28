@@ -261,10 +261,11 @@ class KlaroHelper {
    *   The drupalSettings array.
    */
   public function processDrupalSettings(): array {
+    $settings = [];
     $config = $this->configFactory->get('klaro.settings');
     $config_texts = $this->configFactory->get('klaro.texts');
-    $settings = [];
-    $settings['config'] = static::snakeToCamel($config->get('library'));
+    $library_config = $config->get('library') ?? [];
+    $settings['config'] = static::snakeToCamel($library_config);
 
     // Set dialog mode.
     $dialog_mode = $config->get('dialog_mode');
@@ -342,6 +343,8 @@ class KlaroHelper {
     $settings['config']['translations'][$langcode] = $translations;
     $settings['config']['translations'][$langcode]['privacyPolicy'] = $translations['consentModal']['privacyPolicy'];
     $settings['config']['translations'][$langcode]['purposes'] = $this->optionPurposes(TRUE);
+
+    $settings['config']['purposeOrder'] = array_keys($this->optionPurposes());
 
     $settings['show_toggle_button'] = $config->get('show_toggle_button');
     $settings['toggle_button_icon'] = $config->get('toggle_button_icon');
@@ -742,7 +745,7 @@ class KlaroHelper {
 
     $klaro_apps = $this->getApps();
 
-    $complete_html = strpos($html, '<!DOCTYPE') !== FALSE;
+    $complete_html = strpos(strtoupper($html), '<!DOCTYPE') !== FALSE;
     // If "complete html" is supplied use DomDocument to create.
     if ($complete_html) {
       $dom = new \DOMDocument();

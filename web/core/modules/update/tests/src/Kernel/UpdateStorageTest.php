@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace Drupal\Tests\update\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the Update Status module storage is cleared correctly.
- *
- * @group update
  */
+#[Group('update')]
+#[RunTestsInSeparateProcesses]
 class UpdateStorageTest extends KernelTestBase {
 
   /**

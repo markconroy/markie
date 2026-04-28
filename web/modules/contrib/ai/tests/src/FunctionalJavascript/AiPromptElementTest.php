@@ -174,10 +174,34 @@ class AiPromptElementTest extends WebDriverTestBase {
     $this->drupalGet('admin/config/ai/prompts/suggest_tags__suggest_tags_default');
     $this->assertSession()->fieldValueEquals('label', 'Default prompt for suggest tags');
     $this->assertSession()->fieldValueEquals('prompt', 'Suggest no more than five words to classify the following text using the same language as the input text. The words must be nouns or adjectives in a comma delimited list');
-    $this->submitForm([
-      'label' => 'Updated label',
-      'prompt' => 'Updated prompt',
-    ], 'Save');
+    $source_text_area = $this->assertSession()->waitForElementVisible('css', '.mdxeditor-rich-text-editor [contenteditable="true"]');
+    $this->assertNotEmpty($source_text_area);
+    $source_text_area->click();
+    $this->getSession()->executeScript("
+      const editor = document.querySelector('.mdxeditor-rich-text-editor [contenteditable=\"true\"]');
+      // Clear existing content and type
+      editor.focus();
+      document.execCommand('selectAll', false, null);
+      // Simulate the physical key sequence
+      const backspaceEvent = new KeyboardEvent('keydown', {
+        key: 'Backspace',
+        code: 'Backspace',
+        keyCode: 8,
+        which: 8,
+        bubbles: true
+      });
+      editor.dispatchEvent(backspaceEvent);
+      document.execCommand('delete', false, null);
+      editor.focus();
+      document.execCommand('insertText', false, 'Updated prompt');
+      // Dispatch an input event to force React/Lexical to sync
+      editor.dispatchEvent(new Event('input', { bubbles: true }));
+      editor.dispatchEvent(new Event('change', { bubbles: true }));
+      editor.blur();
+    ");
+    $this->getSession()->getPage()->fillField('label', 'Updated label');
+    // Save the form.
+    $this->submitForm([], 'Save');
     $this->assertSession()->pageTextContains('The AI Prompt has been updated.');
     $this->assertSession()->pageTextContains('Updated label');
     $this->assertSession()->pageTextContains('Updated prompt');

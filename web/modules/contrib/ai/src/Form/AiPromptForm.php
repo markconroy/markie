@@ -10,6 +10,8 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Drupal\Core\Form\EnforcedResponseException;
 
 /**
  * Form handler for AI Prompt add and edit forms.
@@ -131,6 +133,17 @@ class AiPromptForm extends EntityForm {
       if (!$prompt_type instanceof AiPromptTypeInterface) {
         return $this->promptTypeNonExistentForm($form, $form_state);
       }
+      if (!$ai_prompt->bundle()) {
+        // Redirect to add form if only one prompt type.
+        $type_options = $this->promptManager->getTypeOptions();
+        if (count($type_options) === 1) {
+          $only_type = array_key_first($type_options);
+          $url = Url::fromRoute('entity.ai_prompt.add_type_form', ['ai_prompt_type' => $only_type])->toString();
+          // Redirect to the add form for the only available prompt type.
+          $response = new RedirectResponse($url);
+          throw new EnforcedResponseException($response);
+        }
+      }
     }
 
     // No cache available for subform, or we get closure serialization errors.
@@ -202,12 +215,12 @@ class AiPromptForm extends EntityForm {
       '#theme' => 'status_messages',
       '#message_list' => [
         'warning' => [
-          $this->t('No AI Prompt Types exist. These are normally provided by modules within the AI Ecosystem; however, you can also create your own for use in your own project implementations.'),
+          $this->t('No AI Prompt Types exist yet. Before you can create an AI Prompt, you need to add at least one AI Prompt Type. These are normally provided by modules within the AI Ecosystem; however, you can also create your own for use in your own project implementations.'),
         ],
       ],
     ];
 
-    $link_url = Url::fromRoute('entity.ai_prompt_type.collection');
+    $link_url = Url::fromRoute('entity.ai_prompt_type.add_form');
     $link_url->setOptions([
       'attributes' => [
         'class' => ['button', 'button--primary'],
@@ -215,7 +228,7 @@ class AiPromptForm extends EntityForm {
     ]);
     $form['link'] = [
       '#type' => 'link',
-      '#title' => $this->t('Manage Prompt Types'),
+      '#title' => $this->t('Add AI Prompt Type'),
       '#url' => $link_url,
     ];
 
@@ -317,7 +330,7 @@ class AiPromptForm extends EntityForm {
     // If we are creating via the form element, we may have to select a prompt
     // type.
     if ($this->requestStack) {
-      $prompt_types = $this->requestStack->getCurrentRequest()->get('prompt_types');
+      $prompt_types = $this->requestStack->getCurrentRequest()->query->get('prompt_types');
       if ($prompt_types && count($prompt_types) === 1) {
         $type = reset($prompt_types);
         $form_state->setValue('type', $type);

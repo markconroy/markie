@@ -9,14 +9,22 @@ use Drupal\package_manager\Event\PreCreateEvent;
 use Drupal\package_manager\Exception\SandboxEventException;
 use Drupal\package_manager\PathLocator;
 use Drupal\package_manager\ValidationResult;
+use Drupal\package_manager\Validator\SymlinkValidator;
 use PhpTuf\ComposerStager\API\Environment\Service\EnvironmentInterface;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Depends;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Prophecy\Argument;
 
 /**
- * @covers \Drupal\package_manager\Validator\SymlinkValidator
- * @group package_manager
+ * Tests Symlink Validator.
+ *
  * @internal
  */
+#[Group('package_manager')]
+#[CoversClass(SymlinkValidator::class)]
+#[RunTestsInSeparateProcesses]
 class SymlinkValidatorTest extends PackageManagerKernelTestBase {
 
   use StringTranslationTrait;
@@ -184,11 +192,10 @@ class SymlinkValidatorTest extends PackageManagerKernelTestBase {
   /**
    * Tests that unsupported links are excluded if they're under excluded paths.
    *
-   * @depends testAbsoluteSymlinks
-   *
-   * @covers \Drupal\package_manager\PathExcluder\GitExcluder
-   * @covers \Drupal\package_manager\PathExcluder\NodeModulesExcluder
+   * @legacy-covers \Drupal\package_manager\PathExcluder\GitExcluder
+   * @legacy-covers \Drupal\package_manager\PathExcluder\NodeModulesExcluder
    */
+  #[Depends('testAbsoluteSymlinks')]
   public function testUnsupportedLinkUnderExcludedPath(): void {
     $project_root = $this->container->get(PathLocator::class)
       ->getProjectRoot();

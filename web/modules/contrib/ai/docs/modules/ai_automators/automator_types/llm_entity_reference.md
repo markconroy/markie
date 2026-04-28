@@ -25,6 +25,7 @@ When configuring the automator:
 
 ✅ **Bundle selection:** Choose the target entity bundle for reference creation.
 ✅ **Field setup:** For each eligible field (e.g., string, text), specify:
+
 - Whether to generate it.
 - A sub-prompt describing how AI should generate the field.
 

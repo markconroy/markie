@@ -15,12 +15,14 @@ use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
 use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\Tests\TestFileCreationTrait;
 use Drupal\user\Entity\User;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the field synchronization logic when revisions are involved.
- *
- * @group content_translation
  */
+#[Group('content_translation')]
+#[RunTestsInSeparateProcesses]
 class ContentTranslationFieldSyncRevisionTest extends EntityKernelTestBase {
 
   use TestFileCreationTrait;
@@ -62,6 +64,8 @@ class ContentTranslationFieldSyncRevisionTest extends EntityKernelTestBase {
    */
   protected function setUp(): void {
     parent::setUp();
+
+    $this->installConfig('system');
 
     $entity_type_id = 'entity_test_mulrev';
     $this->installEntitySchema($entity_type_id);
@@ -120,12 +124,12 @@ class ContentTranslationFieldSyncRevisionTest extends EntityKernelTestBase {
   /**
    * Checks that field synchronization works as expected with revisions.
    *
-   * @covers \Drupal\content_translation\Plugin\Validation\Constraint\ContentTranslationSynchronizedFieldsConstraintValidator::create
-   * @covers \Drupal\content_translation\Plugin\Validation\Constraint\ContentTranslationSynchronizedFieldsConstraintValidator::validate
-   * @covers \Drupal\content_translation\Plugin\Validation\Constraint\ContentTranslationSynchronizedFieldsConstraintValidator::hasSynchronizedPropertyChanges
-   * @covers \Drupal\content_translation\FieldTranslationSynchronizer::getFieldSynchronizedProperties
-   * @covers \Drupal\content_translation\FieldTranslationSynchronizer::synchronizeFields
-   * @covers \Drupal\content_translation\FieldTranslationSynchronizer::synchronizeItems
+   * @legacy-covers \Drupal\content_translation\Plugin\Validation\Constraint\ContentTranslationSynchronizedFieldsConstraintValidator::create
+   * @legacy-covers \Drupal\content_translation\Plugin\Validation\Constraint\ContentTranslationSynchronizedFieldsConstraintValidator::validate
+   * @legacy-covers \Drupal\content_translation\Plugin\Validation\Constraint\ContentTranslationSynchronizedFieldsConstraintValidator::hasSynchronizedPropertyChanges
+   * @legacy-covers \Drupal\content_translation\FieldTranslationSynchronizer::getFieldSynchronizedProperties
+   * @legacy-covers \Drupal\content_translation\FieldTranslationSynchronizer::synchronizeFields
+   * @legacy-covers \Drupal\content_translation\FieldTranslationSynchronizer::synchronizeItems
    */
   public function testFieldSynchronizationAndValidation(): void {
     // Test that when untranslatable field widgets are displayed, synchronized

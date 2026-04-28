@@ -9,10 +9,14 @@ use Drupal\entity_test\Entity\EntityTestBundle;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\KernelTests\KernelTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
- * @group field
+ * Tests Config Actions.
  */
+#[Group('field')]
+#[RunTestsInSeparateProcesses]
 class ConfigActionsTest extends KernelTestBase {
 
   /**

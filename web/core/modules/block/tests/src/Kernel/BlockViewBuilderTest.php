@@ -4,18 +4,20 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\block\Kernel;
 
+use Drupal\block\Entity\Block;
 use Drupal\Component\Utility\Html;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\KernelTests\KernelTestBase;
-use Drupal\block\Entity\Block;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the block view builder.
- *
- * @group block
  */
+#[Group('block')]
+#[RunTestsInSeparateProcesses]
 class BlockViewBuilderTest extends KernelTestBase {
 
   /**
@@ -229,6 +231,43 @@ class BlockViewBuilderTest extends KernelTestBase {
   }
 
   /**
+   * Tests block render cache handling of cache-optional blocks.
+   */
+  public function testBlockViewBuilderCacheOptional(): void {
+    // Verify cache handling for a non-empty block.
+    $this->verifyRenderCacheHandling();
+
+    // Create a block with a plugin implementing CacheOptionalInterface.
+    $this->block = $this->controller->create([
+      'id' => 'test_block',
+      'theme' => 'stark',
+      'plugin' => 'test_cache_optional',
+    ]);
+    $this->block->save();
+    \Drupal::keyValue('block_test')->set('content', 'This is content for a block that is not render cached.');
+
+    /** @var \Drupal\Core\Cache\VariationCacheFactoryInterface $variation_cache_factory */
+    $variation_cache_factory = \Drupal::service('variation_cache_factory');
+    $cache_bin = $variation_cache_factory->get('render');
+
+    // Force a request via GET so we can test the render cache.
+    $request = \Drupal::request();
+    $request_method = $request->server->get('REQUEST_METHOD');
+    $request->setMethod('GET');
+
+    // Test that an entry for the block is not created in the render cache.
+    $build = $this->getBlockRenderArray();
+    $cache_keys = ['entity_view', 'block', 'test_block'];
+    $markup = $this->renderer->renderRoot($build);
+    $this->assertTrue(str_contains((string) $markup, 'This is content for a block that is not render cached.'));
+    $this->assertFalse($cache_bin->get($cache_keys, CacheableMetadata::createFromRenderArray($build)));
+    // Confirm that build render array has no cache keys.
+    $this->assertArrayNotHasKey('keys', $build['#cache']);
+    // Restore the previous request method.
+    $request->setMethod($request_method);
+  }
+
+  /**
    * Tests block view altering.
    *
    * @see hook_block_view_alter()
@@ -348,17 +387,17 @@ class BlockViewBuilderTest extends KernelTestBase {
 
     $required_cache_contexts = ['languages:' . LanguageInterface::TYPE_INTERFACE, 'theme', 'user.permissions'];
 
-    // Check that the expected cacheability metadata is present in:
-    // - the built render array;
+    // Check that the expected cacheability metadata is present in the built
+    // render array.
     $build = $this->getBlockRenderArray();
     $this->assertSame($expected_keys, $build['#cache']['keys']);
     $this->assertEqualsCanonicalizing($expected_contexts, $build['#cache']['contexts']);
     $this->assertEqualsCanonicalizing($expected_tags, $build['#cache']['tags']);
     $this->assertSame($expected_max_age, $build['#cache']['max-age']);
     $this->assertFalse(isset($build['#create_placeholder']));
-    // - the rendered render array;
+    // And also in the rendered render array.
     $this->renderer->renderRoot($build);
-    // - the render cache item.
+    // And also in the render cache item.
     $final_cache_contexts = Cache::mergeContexts($expected_contexts, $required_cache_contexts);
     $cache_item = $cache_bin->get($expected_keys, CacheableMetadata::createFromRenderArray($build));
     $this->assertNotEmpty($cache_item, 'The block render element has been cached with the expected cache keys.');

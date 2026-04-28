@@ -3,7 +3,7 @@
 /*
  * This file is part of Psy Shell.
  *
- * (c) 2012-2025 Justin Hileman
+ * (c) 2012-2026 Justin Hileman
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -27,8 +27,9 @@ class TimeitCommand extends Command
     const RESULT_MSG = '<info>Command took %.6f seconds to complete.</info>';
     const AVG_RESULT_MSG = '<info>Command took %.6f seconds on average (%.6f median; %.6f total) to complete.</info>';
 
-    // All times stored as nanoseconds!
-    private static ?int $start = null;
+    // All times stored as nanoseconds (int on 64-bit, float on 32-bit overflow)
+    /** @var int|float|null */
+    private static $start = null;
     private static array $times = [];
 
     private CodeArgumentParser $parser;
@@ -54,7 +55,7 @@ class TimeitCommand extends Command
     /**
      * {@inheritdoc}
      */
-    protected function configure()
+    protected function configure(): void
     {
         $this
             ->setName('timeit')

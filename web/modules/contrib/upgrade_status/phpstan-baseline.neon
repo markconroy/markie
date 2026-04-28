@@ -1,0 +1,53 @@
+parameters:
+	ignoreErrors:
+		# These test module controllers intentionally call deprecated functions
+		# to verify upgrade_status detects them correctly.
+		-
+			message: '#^Call to deprecated function upgrade_status_test_contrib_error_function_9_to_10\(\)#'
+			identifier: function.deprecated
+			path: tests/modules/upgrade_status_test_contrib_error/src/Controller/UpgradeStatusTestContribErrorController.php
+			count: 1
+		-
+			message: '#^Call to deprecated function upgrade_status_test_contrib_error_function_9_to_11\(\)#'
+			identifier: function.deprecated
+			path: tests/modules/upgrade_status_test_contrib_error/src/Controller/UpgradeStatusTestContribErrorController.php
+			count: 1
+		-
+			message: '#^Call to deprecated function upgrade_status_test_contrib_error_function_10_to_11\(\)#'
+			identifier: function.deprecated
+			path: tests/modules/upgrade_status_test_contrib_error/src/Controller/UpgradeStatusTestContribErrorController.php
+			count: 1
+		-
+			message: '#^Call to deprecated function upgrade_status_test_contrib_error_function_10_to_12\(\)#'
+			identifier: function.deprecated
+			path: tests/modules/upgrade_status_test_contrib_error/src/Controller/UpgradeStatusTestContribErrorController.php
+			count: 1
+		-
+			message: '#^Call to deprecated function upgrade_status_test_contrib_error_function_11_to_13\(\)#'
+			identifier: function.deprecated
+			path: tests/modules/upgrade_status_test_contrib_error/src/Controller/UpgradeStatusTestContribErrorController.php
+			count: 1
+		-
+			message: '#^Call to deprecated function upgrade_status_test_contrib_error_function_9_to_10\(\)#'
+			identifier: function.deprecated
+			path: tests/modules/upgrade_status_test_error/src/Controller/UpgradeStatusTestErrorController.php
+			count: 1
+		-
+			message: '#^Call to deprecated function upgrade_status_test_contrib_error_function_11_to_13\(\)#'
+			identifier: function.deprecated
+			path: tests/modules/upgrade_status_test_11_compatible/node_modules/upgrade_status_test_11_compatible.inc
+			count: 1
+		# This test entity intentionally omits config_export to verify
+		# upgrade_status detects the missing key via phpstan-drupal.
+		-
+			message: '#^Configuration entity must define a `config_export` key\.#'
+			identifier: configEntityConfigExport.noConfigExportKey
+			path: tests/modules/upgrade_status_test_error/src/UpgradeStatusTestErrorEntity.php
+			count: 1
+		# This test class intentionally extends a deprecated class to verify
+		# upgrade_status detects deprecated class extension.
+		-
+			message: '#^Class Drupal\\upgrade_status_test_error\\ExtendingClass extends deprecated class#'
+			identifier: class.extendsDeprecatedClass
+			path: tests/modules/upgrade_status_test_error/src/ExtendingClass.php
+			count: 1

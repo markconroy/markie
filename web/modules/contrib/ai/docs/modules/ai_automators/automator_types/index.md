@@ -30,6 +30,8 @@ The Automator Types are the rules that can generate content on a field type usin
 | [LLM: Metatag](llm_metatag.md) | metatag | AI Automators | Uses a large language model to automatically generate values for various metatag fields. |
 | [LLM: Moderation State](llm_moderation_state.md) | string | AI Automators | Analyzes content and automatically determines the appropriate moderation state for an entity. |
 | [LLM: Office Hours](llm_office_hours.md) | office_hours | AI Automators | Extracts and normalizes office hours from free-text context using AI chat models. |
+| [LLM: Summarize: Text (String Long)](llm_summary_string_long.md) | string_long | AI Automators | Generates condensed summaries from longer text content using the AI summarize endpoint. |
+| [LLM: Summarize: Text (Text Long)](llm_summary_text_long.md) | text_long | AI Automators | Generates condensed summaries from longer text content using the AI summarize endpoint. |
 | [LLM: Text (simple, String Long)](llm_simple_string_long.md) | string_long | AI Automators | Generates or transforms longer plain text strings using a simple language model chat interface. |
 | [LLM: Text (simple, String)](llm_simple_string.md) | string | AI Automators | Designed for plain string fields, generating or processing short text values using a simple language model. |
 | [LLM: Text (simple, Text Long)](llm_simple_text_long.md) | text_long | AI Automators | Generates or transforms long-form text using a simple language model chat interface. |

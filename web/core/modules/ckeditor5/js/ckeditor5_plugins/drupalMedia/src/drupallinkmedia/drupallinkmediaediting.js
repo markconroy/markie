@@ -7,10 +7,10 @@ import { toMap } from 'ckeditor5/src/utils';
 /**
  * Returns the first drupal-media element in a given view element.
  *
- * @param {module:engine/view/element~Element} viewElement
+ * @param {module:engine/view/element~ModelElement} viewElement
  *   The view element.
  *
- * @return {module:engine/view/element~Element|undefined}
+ * @return {module:engine/view/element~ModelElement|undefined}
  *   The first <drupal-media> element or undefined if the element doesn't have
  *   <drupal-media> as a child element.
  */
@@ -105,8 +105,23 @@ function dataDowncastMediaLink() {
         // if the attribute is empty. But if it does not exist. Let's wrap already
         // converted drupalMedia by newly created link element.
         // 1. Create an empty <a> element.
+
+        const additionalAttributes = {};
+        const modelEntityLinkAttrs = {
+          drupalLinkEntityType: 'data-entity-type',
+          drupalLinkEntityUuid: 'data-entity-uuid',
+          drupalLinkEntityMetadata: 'data-entity-metadata',
+        };
+        Object.keys(modelEntityLinkAttrs).forEach((modelAttribute) => {
+          if (data.item.hasAttribute(modelAttribute)) {
+            const viewAttribute = modelEntityLinkAttrs[modelAttribute];
+            const viewValue = data.item.getAttribute(modelAttribute);
+            additionalAttributes[viewAttribute] = viewValue;
+          }
+        });
         const linkElement = writer.createContainerElement('a', {
           href: data.attributeNewValue,
+          ...additionalAttributes,
         });
 
         // 2. Insert <a> before the <drupal-media> element.
@@ -172,8 +187,23 @@ function editingDowncastMediaLink() {
             (child) => child.getAttribute('data-drupal-media-preview'),
           );
           // 1. Create an empty <a> element.
+          const additionalAttributes = {};
+          const modelEntityLinkAttrs = {
+            drupalLinkEntityType: 'data-entity-type',
+            drupalLinkEntityUuid: 'data-entity-uuid',
+            drupalLinkEntityMetadata: 'data-entity-metadata',
+          };
+          Object.keys(modelEntityLinkAttrs).forEach((modelAttribute) => {
+            if (data.item.hasAttribute(modelAttribute)) {
+              const viewAttribute = modelEntityLinkAttrs[modelAttribute];
+              const viewValue = data.item.getAttribute(modelAttribute);
+              additionalAttributes[viewAttribute] = viewValue;
+            }
+          });
+
           const linkElement = writer.createContainerElement('a', {
             href: data.attributeNewValue,
+            ...additionalAttributes,
           });
 
           // 2. Insert <a> inside the media container.

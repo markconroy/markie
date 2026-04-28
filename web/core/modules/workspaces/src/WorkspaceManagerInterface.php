@@ -18,8 +18,8 @@ interface WorkspaceManagerInterface {
   /**
    * Gets the active workspace.
    *
-   * @return \Drupal\workspaces\WorkspaceInterface
-   *   The active workspace entity object.
+   * @return \Drupal\workspaces\WorkspaceInterface|null
+   *   The active workspace entity, or NULL if there's no active workspace.
    */
   public function getActiveWorkspace();
 
@@ -73,6 +73,11 @@ interface WorkspaceManagerInterface {
 
   /**
    * Deletes the revisions associated with deleted workspaces.
+   *
+   * @deprecated in drupal:11.3.0 and is removed from drupal:12.0.0. There is
+   *   no replacement.
+   *
+   * @see https://www.drupal.org/node/3553582
    */
   public function purgeDeletedWorkspacesBatch();
 

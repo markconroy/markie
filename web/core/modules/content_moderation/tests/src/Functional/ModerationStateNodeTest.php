@@ -6,12 +6,14 @@ namespace Drupal\Tests\content_moderation\Functional;
 
 use Drupal\Core\Url;
 use Drupal\node\Entity\Node;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests general content moderation workflow for nodes.
- *
- * @group content_moderation
  */
+#[Group('content_moderation')]
+#[RunTestsInSeparateProcesses]
 class ModerationStateNodeTest extends ModerationStateTestBase {
 
   /**
@@ -89,23 +91,22 @@ class ModerationStateNodeTest extends ModerationStateTestBase {
     $this->drupalGet('node/add/moderated_content');
     $this->submitForm([
       'title[0][value]' => 'Some moderated content',
-      'body[0][value]' => 'First version of the content.',
       'moderation_state[0][state]' => 'draft',
     ], 'Save');
 
     $node = $this->drupalGetNodeByTitle('Some moderated content');
-    $edit_path = sprintf('node/%d/edit', $node->id());
+    $edit_path = $node->toUrl('edit-form');
 
     // After saving, we should be at the canonical URL and viewing the first
     // revision.
     $this->assertSession()->addressEquals(Url::fromRoute('entity.node.canonical', ['node' => $node->id()]));
-    $this->assertSession()->pageTextContains('First version of the content.');
+    $this->assertSession()->pageTextContains('Some moderated content');
 
     // Create a new draft; after saving, we should still be on the canonical
     // URL, but viewing the second revision.
     $this->drupalGet($edit_path);
     $this->submitForm([
-      'body[0][value]' => 'Second version of the content.',
+      'title[0][value]' => 'Second version of the content.',
       'moderation_state[0][state]' => 'draft',
     ], 'Save');
     $this->assertSession()->addressEquals(Url::fromRoute('entity.node.canonical', ['node' => $node->id()]));
@@ -115,7 +116,7 @@ class ModerationStateNodeTest extends ModerationStateTestBase {
     // canonical URL.
     $this->drupalGet($edit_path);
     $this->submitForm([
-      'body[0][value]' => 'Third version of the content.',
+      'title[0][value]' => 'Third version of the content.',
       'moderation_state[0][state]' => 'published',
     ], 'Save');
     $this->assertSession()->addressEquals(Url::fromRoute('entity.node.canonical', ['node' => $node->id()]));
@@ -125,7 +126,7 @@ class ModerationStateNodeTest extends ModerationStateTestBase {
     // version" tab.
     $this->drupalGet($edit_path);
     $this->submitForm([
-      'body[0][value]' => 'Fourth version of the content.',
+      'title[0][value]' => 'Fourth version of the content.',
       'moderation_state[0][state]' => 'draft',
     ], 'Save');
     $this->assertSession()->addressEquals(Url::fromRoute('entity.node.latest_version', ['node' => $node->id()]));

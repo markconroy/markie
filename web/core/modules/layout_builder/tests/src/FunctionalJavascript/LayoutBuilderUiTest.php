@@ -4,19 +4,21 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\layout_builder\FunctionalJavascript;
 
-use Drupal\block_content\Entity\BlockContentType;
 use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
+use Drupal\Tests\block_content\Traits\BlockContentCreationTrait;
 use Drupal\Tests\contextual\FunctionalJavascript\ContextualLinkClickTrait;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 // cspell:ignore blocknodebundle fieldbody fieldlayout
-
 /**
  * Tests the Layout Builder UI.
- *
- * @group layout_builder
  */
+#[Group('layout_builder')]
+#[RunTestsInSeparateProcesses]
 class LayoutBuilderUiTest extends WebDriverTestBase {
 
+  use BlockContentCreationTrait;
   use ContextualLinkClickTrait;
 
   /**
@@ -153,13 +155,11 @@ class LayoutBuilderUiTest extends WebDriverTestBase {
     $assert_session = $this->assertSession();
     $page = $this->getSession()->getPage();
 
-    $bundle = BlockContentType::create([
+    $this->createBlockContentType([
       'id' => 'basic',
       'label' => 'Basic block',
       'revision' => 1,
-    ]);
-    $bundle->save();
-    block_content_add_body_field($bundle->id());
+    ], TRUE);
 
     $this->drupalGet(static::FIELD_UI_PREFIX . '/display/default/layout');
     $assert_session->elementsCount('css', '.layout-builder__add-section', 2);

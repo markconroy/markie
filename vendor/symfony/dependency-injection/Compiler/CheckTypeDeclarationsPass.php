@@ -139,13 +139,14 @@ final class CheckTypeDeclarationsPass extends AbstractRecursivePass
             if (!$p->hasType() || $p->isVariadic()) {
                 continue;
             }
+            $key = $i;
             if (\array_key_exists($p->name, $values)) {
-                $i = $p->name;
+                $key = $p->name;
             } elseif (!\array_key_exists($i, $values)) {
                 continue;
             }
 
-            $this->checkType($checkedDefinition, $values[$i], $p, $envPlaceholderUniquePrefix);
+            $this->checkType($checkedDefinition, $values[$key], $p, $envPlaceholderUniquePrefix);
         }
 
         if ($reflectionFunction->isVariadic() && ($lastParameter = end($reflectionParameters))->hasType()) {
@@ -274,7 +275,7 @@ final class CheckTypeDeclarationsPass extends AbstractRecursivePass
             return;
         }
 
-        if ('string' === $type && $class instanceof \Stringable) {
+        if ('string' === $type && is_a($class, \Stringable::class, true)) {
             return;
         }
 

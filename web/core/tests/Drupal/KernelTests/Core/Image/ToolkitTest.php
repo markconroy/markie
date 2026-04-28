@@ -9,12 +9,14 @@ use Drupal\Core\ImageToolkit\ImageToolkitInterface;
 use Drupal\image\ImageEffectManager;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\Tests\Traits\Core\Image\ToolkitTestTrait;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the image toolkit.
- *
- * @group Image
  */
+#[Group('Image')]
+#[RunTestsInSeparateProcesses]
 class ToolkitTest extends KernelTestBase {
 
   use ToolkitTestTrait;
@@ -24,7 +26,6 @@ class ToolkitTest extends KernelTestBase {
    */
   protected static $modules = [
     'image_test',
-    'system',
   ];
 
   /**

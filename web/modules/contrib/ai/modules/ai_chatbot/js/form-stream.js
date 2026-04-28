@@ -253,11 +253,14 @@
   }
 
   function expandTextarea(id) {
-    document.getElementById(id).addEventListener('keyup', function () {
-      this.style.overflow = 'hidden';
-      this.style.height = 0;
-      this.style.height = this.scrollHeight + 'px';
-    }, false);
+    var el = document.getElementById(id);
+    if (el) {
+      el.addEventListener('keyup', function () {
+        this.style.overflow = 'hidden';
+        this.style.height = 0;
+        this.style.height = this.scrollHeight + 'px';
+      }, false);
+    }
   }
 
   function hideHasHistory() {

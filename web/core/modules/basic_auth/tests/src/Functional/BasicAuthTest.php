@@ -5,16 +5,18 @@ declare(strict_types=1);
 namespace Drupal\Tests\basic_auth\Functional;
 
 use Drupal\Core\Url;
-use Drupal\Tests\basic_auth\Traits\BasicAuthTestTrait;
 use Drupal\language\Entity\ConfigurableLanguage;
+use Drupal\Tests\basic_auth\Traits\BasicAuthTestTrait;
 use Drupal\Tests\BrowserTestBase;
 use Drupal\user\Entity\Role;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests for BasicAuth authentication provider.
- *
- * @group basic_auth
  */
+#[Group('basic_auth')]
+#[RunTestsInSeparateProcesses]
 class BasicAuthTest extends BrowserTestBase {
 
   use BasicAuthTestTrait;

@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace Drupal\Tests\locale\Functional;
 
 use Drupal\Tests\BrowserTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Test for proper version fallback in case of a development release.
- *
- * @group language
  */
+#[Group('language')]
+#[RunTestsInSeparateProcesses]
 class LocaleUpdateDevelopmentReleaseTest extends BrowserTestBase {
 
   /**
@@ -41,7 +43,9 @@ class LocaleUpdateDevelopmentReleaseTest extends BrowserTestBase {
   }
 
   /**
-   * @covers ::\locale_translation_build_projects
+   * Tests locale update development release.
+   *
+   * @legacy-covers ::\locale_translation_build_projects
    */
   public function testLocaleUpdateDevelopmentRelease(): void {
     $projects = locale_translation_build_projects();

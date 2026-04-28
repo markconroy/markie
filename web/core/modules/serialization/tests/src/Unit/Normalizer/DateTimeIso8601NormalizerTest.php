@@ -17,6 +17,9 @@ use Drupal\datetime\Plugin\Field\FieldType\DateTimeItem;
 use Drupal\serialization\Normalizer\DateTimeIso8601Normalizer;
 use Drupal\Tests\serialization\Traits\JsonSchemaTestTrait;
 use Drupal\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 use Prophecy\Argument;
 use Symfony\Component\Serializer\Exception\InvalidArgumentException;
 use Symfony\Component\Serializer\Exception\UnexpectedValueException;
@@ -24,11 +27,11 @@ use Symfony\Component\Serializer\Exception\UnexpectedValueException;
 /**
  * Unit test coverage for the "datetime_iso8601" @DataType.
  *
- * @coversDefaultClass \Drupal\serialization\Normalizer\DateTimeIso8601Normalizer
- * @group serialization
  * @see \Drupal\Core\TypedData\Plugin\DataType\DateTimeIso8601
  * @see \Drupal\datetime\Plugin\Field\FieldType\DateTimeItem::DATETIME_TYPE_DATE
  */
+#[CoversClass(DateTimeIso8601Normalizer::class)]
+#[Group('serialization')]
 class DateTimeIso8601NormalizerTest extends UnitTestCase {
 
   use JsonSchemaTestTrait;
@@ -65,7 +68,7 @@ class DateTimeIso8601NormalizerTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::supportsNormalization
+   * Tests supports normalization.
    */
   public function testSupportsNormalization(): void {
     $this->assertTrue($this->normalizer->supportsNormalization($this->data->reveal()));
@@ -78,16 +81,16 @@ class DateTimeIso8601NormalizerTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::supportsDenormalization
+   * Tests supports denormalization.
    */
   public function testSupportsDenormalization(): void {
     $this->assertTrue($this->normalizer->supportsDenormalization($this->data->reveal(), DateTimeIso8601::class));
   }
 
   /**
-   * @covers ::normalize
-   * @dataProvider providerTestNormalize
+   * Tests normalize.
    */
+  #[DataProvider('providerTestNormalize')]
   public function testNormalize($parent_field_item_class, $datetime_type, $expected_format): void {
     $formatted_string = $this->randomMachineName();
 
@@ -122,9 +125,9 @@ class DateTimeIso8601NormalizerTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::normalize
-   * @dataProvider providerTestNormalize
+   * Tests normalize when null.
    */
+  #[DataProvider('providerTestNormalize')]
   public function testNormalizeWhenNull($parent_field_item_class, $datetime_type, $expected_format): void {
     $field_item = $this->prophesize($parent_field_item_class);
     if ($parent_field_item_class === DateTimeItem::class) {
@@ -183,10 +186,8 @@ class DateTimeIso8601NormalizerTest extends UnitTestCase {
 
   /**
    * Tests the denormalize function with good data.
-   *
-   * @covers ::denormalize
-   * @dataProvider providerTestDenormalizeValidFormats
    */
+  #[DataProvider('providerTestDenormalizeValidFormats')]
   public function testDenormalizeValidFormats($type, $normalized, $expected): void {
     $field_definition = $this->prophesize(FieldDefinitionInterface::class);
     $field_definition->getSetting('datetime_type')->willReturn($type === 'date-only' ? DateTimeItem::DATETIME_TYPE_DATE : DateTimeItem::DATETIME_TYPE_DATETIME);
@@ -219,8 +220,6 @@ class DateTimeIso8601NormalizerTest extends UnitTestCase {
 
   /**
    * Tests the denormalize function with bad data for the date-only case.
-   *
-   * @covers ::denormalize
    */
   public function testDenormalizeDateOnlyException(): void {
     $this->expectException(UnexpectedValueException::class);
@@ -235,8 +234,6 @@ class DateTimeIso8601NormalizerTest extends UnitTestCase {
 
   /**
    * Tests the denormalize function with bad data for the date+time case.
-   *
-   * @covers ::denormalize
    */
   public function testDenormalizeDateAndTimeException(): void {
     $this->expectException(UnexpectedValueException::class);
@@ -251,8 +248,6 @@ class DateTimeIso8601NormalizerTest extends UnitTestCase {
 
   /**
    * Tests the denormalize function with incomplete serialization context.
-   *
-   * @covers ::denormalize
    */
   public function testDenormalizeNoTargetInstanceOrFieldDefinitionException(): void {
     $this->expectException(InvalidArgumentException::class);

@@ -441,6 +441,12 @@ use Drupal\node\Entity\NodeType;
  *   - delete-form: Confirmation form to delete the entity.
  *   - edit-form: Editing form.
  *   - Other link types specific to your entity type can also be defined.
+ * - If linking to entities of your content entity type should happen with URLs
+ *   other than the canonical one, or if it does not have a route where it can
+ *   be viewed, then a link_target handler should be implemented. At minimum,
+ *   provide a link_target.view handler: a class implementing
+ *   \Drupal\Core\Entity\EntityLinkTargetInterface. Optionally, if the content
+ *   entity type is downloadable, also provide a link_target.download handler.
  * - If your content entity is fieldable, provide the 'field_ui_base_route'
  *   annotation property, giving the name of the route that the Manage Fields,
  *   Manage Display, and Manage Form Display pages from the Field UI module
@@ -950,7 +956,9 @@ function hook_entity_bundle_delete($entity_type_id, $bundle): void {
 /**
  * Acts when creating a new entity.
  *
- * This hook runs after a new entity object has just been instantiated.
+ * This hook runs after a new entity object has been instantiated, but before
+ * it is stored in the database. To react to an entity being stored for the
+ * first time, use hook_entity_insert().
  *
  * @param \Drupal\Core\Entity\EntityInterface $entity
  *   The entity object.
@@ -965,7 +973,9 @@ function hook_entity_create(\Drupal\Core\Entity\EntityInterface $entity): void {
 /**
  * Acts when creating a new entity of a specific type.
  *
- * This hook runs after a new entity object has just been instantiated.
+ * This hook runs after a new entity object has been instantiated, but before
+ * it is stored in the database. To react to an entity being stored for the
+ * first time, use hook_entity_insert().
  *
  * @param \Drupal\Core\Entity\EntityInterface $entity
  *   The entity object.
@@ -2130,6 +2140,9 @@ function hook_entity_field_storage_info_alter(&$fields, \Drupal\Core\Entity\Enti
  *
  * @param \Drupal\Core\Entity\EntityInterface $entity
  *   The entity on which the linked operations will be performed.
+ * @param \Drupal\Core\Cache\CacheableMetadata $cacheability
+ *   The cacheable metadata to add to if your operations vary by or depend on
+ *   something.
  *
  * @return array
  *   An operations array as returned by
@@ -2137,7 +2150,7 @@ function hook_entity_field_storage_info_alter(&$fields, \Drupal\Core\Entity\Enti
  *
  * @see \Drupal\Core\Entity\EntityListBuilderInterface::getOperations()
  */
-function hook_entity_operation(\Drupal\Core\Entity\EntityInterface $entity): array {
+function hook_entity_operation(\Drupal\Core\Entity\EntityInterface $entity, \Drupal\Core\Cache\CacheableMetadata $cacheability): array {
   $operations = [];
   $operations['translate'] = [
     'title' => t('Translate'),
@@ -2156,8 +2169,11 @@ function hook_entity_operation(\Drupal\Core\Entity\EntityInterface $entity): arr
  *   \Drupal\Core\Entity\EntityListBuilderInterface::getOperations().
  * @param \Drupal\Core\Entity\EntityInterface $entity
  *   The entity on which the linked operations will be performed.
+ * @param \Drupal\Core\Cache\CacheableMetadata $cacheability
+ *   The cacheable metadata to add to if your operations vary by or depend on
+ *   something.
  */
-function hook_entity_operation_alter(array &$operations, \Drupal\Core\Entity\EntityInterface $entity) {
+function hook_entity_operation_alter(array &$operations, \Drupal\Core\Entity\EntityInterface $entity, \Drupal\Core\Cache\CacheableMetadata $cacheability) {
   // Alter the title and weight.
   $operations['translate']['title'] = t('Translate @entity_type', [
     '@entity_type' => $entity->getEntityTypeId(),
@@ -2226,7 +2242,7 @@ function hook_entity_field_access_alter(array &$grants, array $context) {
     // take out node module's part in the access handling of this field. We also
     // don't want to switch node module's grant to
     // AccessResultInterface::isAllowed() , because the grants of other modules
-    // should still decide on their own if this field is accessible or not
+    // should still decide on their own if this field is accessible or not.
     $grants['node'] = AccessResult::neutral()->inheritCacheability($grants['node']);
   }
 }

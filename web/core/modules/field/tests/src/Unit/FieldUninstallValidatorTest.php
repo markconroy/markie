@@ -4,12 +4,16 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\field\Unit;
 
+use Drupal\field\FieldUninstallValidator;
 use Drupal\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
- * @coversDefaultClass \Drupal\field\FieldUninstallValidator
- * @group field
+ * Tests Drupal\field\FieldUninstallValidator.
  */
+#[CoversClass(FieldUninstallValidator::class)]
+#[Group('field')]
 class FieldUninstallValidatorTest extends UnitTestCase {
 
   /**
@@ -39,7 +43,7 @@ class FieldUninstallValidatorTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::validate
+   * Tests validate no storages.
    */
   public function testValidateNoStorages(): void {
     $this->fieldUninstallValidator->expects($this->once())
@@ -53,7 +57,7 @@ class FieldUninstallValidatorTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::validate
+   * Tests validate deleted.
    */
   public function testValidateDeleted(): void {
     $field_storage = $this->getMockBuilder('Drupal\field\Entity\FieldStorageConfig')
@@ -73,7 +77,7 @@ class FieldUninstallValidatorTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::validate
+   * Tests validate no deleted.
    */
   public function testValidateNoDeleted(): void {
     $field_storage = $this->getMockBuilder('Drupal\field\Entity\FieldStorageConfig')

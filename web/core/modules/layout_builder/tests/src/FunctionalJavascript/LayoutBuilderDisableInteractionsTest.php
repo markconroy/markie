@@ -6,22 +6,24 @@ namespace Drupal\Tests\layout_builder\FunctionalJavascript;
 
 use Behat\Mink\Element\NodeElement;
 use Drupal\block_content\Entity\BlockContent;
-use Drupal\block_content\Entity\BlockContentType;
 use Drupal\FunctionalJavascriptTests\JSWebAssert;
 use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
+use Drupal\Tests\block_content\Traits\BlockContentCreationTrait;
 use Drupal\Tests\contextual\FunctionalJavascript\ContextualLinkClickTrait;
 use Drupal\Tests\system\Traits\OffCanvasTestTrait;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 // cspell:ignore blocknodebundle fieldbody
-
 /**
  * Tests the Layout Builder disables interactions of rendered blocks.
- *
- * @group layout_builder
- * @group #slow
  */
+#[Group('layout_builder')]
+#[Group('#slow')]
+#[RunTestsInSeparateProcesses]
 class LayoutBuilderDisableInteractionsTest extends WebDriverTestBase {
 
+  use BlockContentCreationTrait;
   use ContextualLinkClickTrait;
   use OffCanvasTestTrait;
 
@@ -63,13 +65,11 @@ class LayoutBuilderDisableInteractionsTest extends WebDriverTestBase {
       ],
     ]);
 
-    $bundle = BlockContentType::create([
+    $this->createBlockContentType([
       'id' => 'basic',
       'label' => 'Basic block',
       'revision' => 1,
-    ]);
-    $bundle->save();
-    block_content_add_body_field($bundle->id());
+    ], TRUE);
 
     BlockContent::create([
       'type' => 'basic',

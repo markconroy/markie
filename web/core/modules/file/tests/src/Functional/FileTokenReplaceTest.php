@@ -8,12 +8,14 @@ use Drupal\Component\Utility\Html;
 use Drupal\Core\Render\BubbleableMetadata;
 use Drupal\Core\StringTranslation\ByteSizeMarkup;
 use Drupal\file\Entity\File;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests file token replacement.
- *
- * @group file
  */
+#[Group('file')]
+#[RunTestsInSeparateProcesses]
 class FileTokenReplaceTest extends FileFieldTestBase {
 
   /**
@@ -101,7 +103,10 @@ class FileTokenReplaceTest extends FileFieldTestBase {
     $tests['[file:size]'] = ByteSizeMarkup::create($file->getSize());
 
     foreach ($tests as $input => $expected) {
-      $output = $token_service->replace($input, ['file' => $file], ['langcode' => $language_interface->getId(), 'sanitize' => FALSE]);
+      $output = $token_service->replace($input, ['file' => $file], [
+        'langcode' => $language_interface->getId(),
+        'sanitize' => FALSE,
+      ]);
       $this->assertEquals($expected, $output, "Unsanitized file token $input replaced.");
     }
   }

@@ -4,26 +4,26 @@ The widgets that you can see in CKEditor after the AI CKEditor button has been i
 
 ## How does it work in the background
 
-The CKEditors own system for extending and writing plugins can be quite daunting, especially if you are coming from a backend first background. Because this we have built a system where you will be able to add a plugin using mainly PHP code.
+The CKEditor's own system for extending and writing plugins can be quite daunting, especially if you are coming from a backend first background. Because of this we have built a system where you will be able to add a plugin using mainly PHP code.
 
-The idea is that everything that one feature for the AI CKEditor does is take a known input, that can be anything or nothing - this is exposed via Drupal forms api and then produce via Ajax a HTML output to one response form element. The response form elements output can then be used to append or replace marked text in the main CKEditor window.
+The idea is that everything that one feature for the AI CKEditor does is take a known input, that can be anything or nothing - this is exposed via Drupal forms api and then produce via Ajax an HTML output to one response form element. The response form elements output can then be used to append or replace marked text in the main CKEditor window.
 
 ## What to think about
-One plugin can offer multiple features, this means that you can also dynamically create features on the fly depending on database or some other context. See how the [AI Automators](https://git.drupalcode.org/project/ai/-/blob/1.0.x/modules/ai_automators/src/Plugin/AiCKEditor/AiAutomatorsCKEditor.php?ref_type=heads) implements there solution.
+One plugin can offer multiple features, this means that you can also dynamically create features on the fly depending on database or some other context. See how the [AI Automators](https://git.drupalcode.org/project/ai/-/blob/1.0.x/modules/ai_automators/src/Plugin/AiCKEditor/AiAutomatorsCKEditor.php?ref_type=heads) implement their solution.
 
 Make sure that you also look through the general tips for [third-party modules](develop_third_party_module.md), since many of them might be connected to creating this plugin.
 
-Also note that the [AI Automators](https://git.drupalcode.org/project/ai/-/blob/1.0.x/modules/ai_automators/src/Plugin/AiCKEditor/AiAutomatorsCKEditor.php?ref_type=heads) exposes a plugin that can run a disposable AI Automator Type. This means that you can setup the coolest workflows just using site building and share them via recipes. [Example video](https://youtu.be/vz0hIVpKYOQ). Don't write code unless you have too or unless you don't want to install the AI Automators!
+Also note that the [AI Automators](https://git.drupalcode.org/project/ai/-/blob/1.0.x/modules/ai_automators/src/Plugin/AiCKEditor/AiAutomatorsCKEditor.php?ref_type=heads) expose a plugin that can run a disposable AI Automator Type. This means that you can set up the coolest workflows just using site building and share them via recipes. [Example video](https://youtu.be/vz0hIVpKYOQ). Don't write code unless you have to or unless you don't want to install the AI Automators!
 
-## Build you first plugin
+## Build your first plugin
 
 In your custom module, you will need to add a file to the plugin directory called AiCKEditor. So your file would be put into `src/Plugin/AiCKEditor/{filename}`.
 
-This file should the interface [AiCKEditorPluginInterface](https://git.drupalcode.org/project/ai/-/blob/1.0.x/modules/ai_ckeditor/src/PluginInterfaces/AiCKEditorPluginInterface.php?ref_type=heads) in how it creates this file, but to help you out we have an abstract base class called [AiCKEditorPluginBase](https://git.drupalcode.org/project/ai/-/blob/1.0.x/modules/ai_ckeditor/src/AiCKEditorPluginBase.php?ref_type=heads) that you can extend on.
+This file should implement the interface [AiCKEditorPluginInterface](https://git.drupalcode.org/project/ai/-/blob/1.0.x/modules/ai_ckeditor/src/PluginInterfaces/AiCKEditorPluginInterface.php?ref_type=heads) in how it creates this file, but to help you out we have an abstract base class called [AiCKEditorPluginBase](https://git.drupalcode.org/project/ai/-/blob/1.0.x/modules/ai_ckeditor/src/AiCKEditorPluginBase.php?ref_type=heads) that you can extend on.
 
 The attribute you need to add for discovery is called [AiCKEditor](https://git.drupalcode.org/project/ai/-/blob/1.0.x/modules/ai_ckeditor/src/Attribute/AiCKEditor.php?ref_type=heads).
 
-This mean that you should start with a skeleton that looks like this:
+This means that you should start with a skeleton that looks like this:
 
 ```php
 <?php
@@ -51,7 +51,7 @@ final class MyCustomFeatureCKEditor extends AiCKEditorPluginBase {
 #### buildConfigurationForm
 Since this is built on top of the PluginFormInterface we have a configuration form for setting up the feature. This means that you can ask for which provider or model they should use here or other settings.
 
-If not setting is needed and you used the base class, you can skip this method.
+If no setting is needed and you used the base class, you can skip this method.
 
 If you are going to expose providers and use the AIRequestCommand - see below, you can use the following code:
 
@@ -81,7 +81,7 @@ Set up the default configuration before the initial setup is done.
 #### buildCkEditorModalForm
 This is the form that the end user will be exposed to. There are some special tricks here to think about.
 
-Always start by inheriting from the parent if you want to use simpler method we provide for you.
+Always start by inheriting from the parent if you want to use a simpler method we provide for you.
 
 The response_text form item should really always be there and have the prefix and suffix that wraps it in `<div id="ai-ckeditor-response"></div>`. It should also set the inherited #allowed_formats and #formats. So it would look something like this.
 

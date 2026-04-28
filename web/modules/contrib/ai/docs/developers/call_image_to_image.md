@@ -25,7 +25,7 @@ foreach ($classification_items as $item) {
 
 ### Image To Image Interfaces & Models
 
-The following files defines the methods available when doing a Image Classification call as well as the input and output.
+The following files define the methods available when doing an Image To Image call as well as the input and output.
 
 * [ImageToImageInterface.php](https://git.drupalcode.org/project/ai/-/blob/1.2.x/src/OperationType/ImageToImage/ImageToImageInterface.php?ref_type=heads)
 * [ImageToImageInput.php](https://git.drupalcode.org/project/ai/-/blob/1.2.x/src/OperationType/ImageToImage/ImageToImageInput.php?ref_type=heads)

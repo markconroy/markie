@@ -7,17 +7,19 @@ namespace Drupal\Tests\Composer\Plugin\Scaffold\Integration;
 use Drupal\Composer\Plugin\Scaffold\Operations\ReplaceOp;
 use Drupal\Composer\Plugin\Scaffold\ScaffoldOptions;
 use Drupal\Tests\Composer\Plugin\Scaffold\Fixtures;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @coversDefaultClass \Drupal\Composer\Plugin\Scaffold\Operations\ReplaceOp
- *
- * @group Scaffold
+ * Tests Drupal\Composer\Plugin\Scaffold\Operations\ReplaceOp.
  */
+#[CoversClass(ReplaceOp::class)]
+#[Group('Scaffold')]
 class ReplaceOpTest extends TestCase {
 
   /**
-   * @covers ::process
+   * Tests process.
    */
   public function testProcess(): void {
     $fixtures = new Fixtures();
@@ -40,7 +42,9 @@ class ReplaceOpTest extends TestCase {
   }
 
   /**
-   * @covers ::process
+   * Tests empty file.
+   *
+   * @legacy-covers ::process
    */
   public function testEmptyFile(): void {
     $fixtures = new Fixtures();

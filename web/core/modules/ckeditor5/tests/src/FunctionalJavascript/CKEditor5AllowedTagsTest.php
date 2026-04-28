@@ -7,16 +7,18 @@ namespace Drupal\Tests\ckeditor5\FunctionalJavascript;
 use Drupal\Core\Entity\Entity\EntityViewMode;
 use Drupal\editor\Entity\Editor;
 use Drupal\filter\Entity\FilterFormat;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Symfony\Component\Yaml\Yaml;
 
 // cspell:ignore esque imageUpload sourceediting Editing's
-
 /**
  * Tests for CKEditor 5.
  *
- * @group ckeditor5
  * @internal
  */
+#[Group('ckeditor5')]
+#[RunTestsInSeparateProcesses]
 class CKEditor5AllowedTagsTest extends CKEditor5TestBase {
 
   /**
@@ -52,7 +54,7 @@ class CKEditor5AllowedTagsTest extends CKEditor5TestBase {
    *
    * @var string
    */
-  protected $defaultElementsAfterUpdatingToCkeditor5 = '<br> <p> <h2 id="jump-*"> <h3 id> <h4 id> <h5 id> <h6 id> <cite> <dl> <dt> <dd> <a hreflang href> <blockquote cite> <ul type> <ol type="1 A I" reversed start> <strong> <em> <code> <li>';
+  protected $defaultElementsAfterUpdatingToCkeditor5 = '<br> <p> <h2 id="jump-*"> <h3 id> <h4 id> <h5 id> <h6 id> <cite> <dl> <dt> <dd> <a hreflang href> <blockquote cite> <strong> <em> <code> <ul type> <ol type reversed start> <li>';
 
   /**
    * Test enabling CKEditor 5 in a way that triggers validation.

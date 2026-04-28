@@ -5,17 +5,20 @@ declare(strict_types=1);
 namespace Drupal\Tests\migrate_drupal_ui\Functional\d6;
 
 use Drupal\Tests\migrate_drupal_ui\Functional\NoMultilingualReviewPageTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\IgnoreDeprecations;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 // cspell:ignore multigroup nodeaccess
-
 /**
  * Tests migrate upgrade review page for Drupal 6 without translations.
  *
  * Tests with the translation modules disabled.
- *
- * @group migrate_drupal_6
- * @group migrate_drupal_ui
  */
+#[Group('migrate_drupal_6')]
+#[Group('migrate_drupal_ui')]
+#[IgnoreDeprecations]
+#[RunTestsInSeparateProcesses]
 class NoMultilingualReviewPageTest extends NoMultilingualReviewPageTestBase {
 
   /**
@@ -56,7 +59,6 @@ class NoMultilingualReviewPageTest extends NoMultilingualReviewPageTestBase {
       'Blog API',
       'Calendar Signup',
       'Comment',
-      'Contact',
       'Content',
       'Content Copy',
       'Content Multigroup',
@@ -139,6 +141,7 @@ class NoMultilingualReviewPageTest extends NoMultilingualReviewPageTestBase {
       'Book',
       'CCK translation',
       'Color',
+      'Contact',
       'Content type translation',
       'Devel',
       'Devel generate',

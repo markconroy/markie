@@ -4,16 +4,20 @@ declare(strict_types=1);
 
 namespace Drupal\KernelTests\Core\Extension;
 
+use Drupal\Core\Extension\ModuleHandler;
 use Drupal\KernelTests\KernelTestBase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\IgnoreDeprecations;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Test whether deprecated hook invocations trigger errors.
- *
- * @group Extension
- * @group legacy
- *
- * @coversDefaultClass Drupal\Core\Extension\ModuleHandler
  */
+#[CoversClass(ModuleHandler::class)]
+#[Group('Extension')]
+#[IgnoreDeprecations]
+#[RunTestsInSeparateProcesses]
 class ModuleHandlerDeprecatedHookTest extends KernelTestBase {
 
   /**
@@ -25,7 +29,7 @@ class ModuleHandlerDeprecatedHookTest extends KernelTestBase {
   ];
 
   /**
-   * @covers ::invokeDeprecated
+   * Tests invoke deprecated.
    */
   public function testInvokeDeprecated(): void {
     $this->expectDeprecation('The deprecated hook hook_deprecated_hook() is implemented in these modules: deprecation_test, deprecation_hook_attribute_test. Use something else.');
@@ -39,7 +43,7 @@ class ModuleHandlerDeprecatedHookTest extends KernelTestBase {
   }
 
   /**
-   * @covers ::invokeAllDeprecated
+   * Tests invoke all deprecated.
    */
   public function testInvokeAllDeprecated(): void {
     $this->expectDeprecation('The deprecated hook hook_deprecated_hook() is implemented in these modules: deprecation_test, deprecation_hook_attribute_test. Use something else.');
@@ -56,7 +60,7 @@ class ModuleHandlerDeprecatedHookTest extends KernelTestBase {
   }
 
   /**
-   * @covers ::alterDeprecated
+   * Tests alter deprecated.
    */
   public function testAlterDeprecated(): void {
     $this->expectDeprecation('The deprecated alter hook hook_deprecated_alter_alter() is implemented in these locations: deprecation_test_deprecated_alter_alter, Drupal\deprecation_hook_attribute_test\Hook\DeprecationHookAttributeTestHooks::deprecatedAlterAlterFirst. Alter something else.');

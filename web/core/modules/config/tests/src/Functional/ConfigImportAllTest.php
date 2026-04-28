@@ -7,18 +7,21 @@ namespace Drupal\Tests\config\Functional;
 use Drupal\Core\Config\StorageComparer;
 use Drupal\Core\Entity\ContentEntityTypeInterface;
 use Drupal\Core\Extension\ExtensionLifecycle;
+use Drupal\Core\Extension\ModuleExtensionList;
 use Drupal\Tests\SchemaCheckTestTrait;
 use Drupal\Tests\system\Functional\Module\ModuleTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the largest configuration import possible with all available modules.
  *
  * Note that the use of SchemaCheckTestTrait means that the schema conformance
  * of all default configuration is also tested.
- *
- * @group config
- * @group #slow
  */
+#[Group('config')]
+#[Group('#slow')]
+#[RunTestsInSeparateProcesses]
 class ConfigImportAllTest extends ModuleTestBase {
 
   use SchemaCheckTestTrait;
@@ -96,7 +99,8 @@ class ConfigImportAllTest extends ModuleTestBase {
     // example, if a comment field exists then Comment cannot be uninstalled.
     $entity_type_manager = \Drupal::entityTypeManager();
     foreach ($entity_type_manager->getDefinitions() as $entity_type) {
-      if (($entity_type instanceof ContentEntityTypeInterface || in_array($entity_type->id(), ['field_storage_config', 'filter_format'], TRUE))
+      if (($entity_type instanceof ContentEntityTypeInterface
+          || in_array($entity_type->id(), ['field_storage_config', 'filter_format'], TRUE))
         && !in_array($entity_type->getProvider(), ['system', 'user'], TRUE)) {
         $storage = $entity_type_manager->getStorage($entity_type->id());
         $storage->delete($storage->loadMultiple());
@@ -109,6 +113,9 @@ class ConfigImportAllTest extends ModuleTestBase {
     $all_modules = \Drupal::service('extension.list.module')->getList();
     $database_module = \Drupal::service('database')->getProvider();
     $expected_modules = ['path_alias', 'system', 'user', $database_module];
+    // If the database module has dependencies, they are expected too.
+    $database_module_extension = \Drupal::service(ModuleExtensionList::class)->get($database_module);
+    $database_module_dependencies = $database_module_extension->requires ? array_keys($database_module_extension->requires) : [];
 
     // Ensure that only core required modules and the install profile can not be
     // uninstalled.
@@ -127,8 +134,11 @@ class ConfigImportAllTest extends ModuleTestBase {
     // Can not uninstall config and use admin/config/development/configuration!
     unset($modules_to_uninstall['config']);
 
-    // Can not uninstall the database module.
+    // Can not uninstall the database module and its dependencies.
     unset($modules_to_uninstall[$database_module]);
+    foreach ($database_module_dependencies as $dependency) {
+      unset($modules_to_uninstall[$dependency]);
+    }
 
     $this->assertTrue(isset($modules_to_uninstall['comment']), 'The comment module will be disabled');
     $this->assertTrue(isset($modules_to_uninstall['file']), 'The File module will be disabled');

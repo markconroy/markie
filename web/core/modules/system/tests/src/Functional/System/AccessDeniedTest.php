@@ -7,12 +7,14 @@ namespace Drupal\Tests\system\Functional\System;
 use Drupal\Tests\BrowserTestBase;
 use Drupal\Tests\system\Functional\Cache\AssertPageCacheContextsAndTagsTrait;
 use Drupal\user\RoleInterface;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests page access denied functionality, including custom 403 pages.
- *
- * @group system
  */
+#[Group('system')]
+#[RunTestsInSeparateProcesses]
 class AccessDeniedTest extends BrowserTestBase {
 
   use AssertPageCacheContextsAndTagsTrait;
@@ -115,7 +117,7 @@ class AccessDeniedTest extends BrowserTestBase {
     $this->assertSession()->statusCodeEquals(403);
     $this->assertSession()->pageTextContains('Username');
 
-    // Log back in, set the custom 403 page to /user/login and remove the block
+    // Log back in, set the custom 403 page to /user/login and remove the block.
     $this->drupalLogin($this->adminUser);
     $this->config('system.site')->set('page.403', '/user/login')->save();
     $block->disable()->save();

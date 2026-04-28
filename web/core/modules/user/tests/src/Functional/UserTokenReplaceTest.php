@@ -4,17 +4,19 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\user\Functional;
 
-use Drupal\Core\Url;
 use Drupal\Core\Render\BubbleableMetadata;
+use Drupal\Core\Url;
 use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\Tests\BrowserTestBase;
 use Drupal\user\Entity\User;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the replacement of user tokens.
- *
- * @group user
  */
+#[Group('user')]
+#[RunTestsInSeparateProcesses]
 class UserTokenReplaceTest extends BrowserTestBase {
 
   /**
@@ -150,24 +152,43 @@ class UserTokenReplaceTest extends BrowserTestBase {
     // Generate tokens with interface language.
     $link = Url::fromRoute('user.page', [], ['absolute' => TRUE])->toString();
     foreach ($tests as $input => $expected) {
-      $output = $token_service->replace($input, ['user' => $account], ['langcode' => $language_interface->getId(), 'callback' => 'user_mail_tokens', 'clear' => TRUE]);
+      $output = $token_service->replace(
+        $input,
+        ['user' => $account],
+        ['langcode' => $language_interface->getId(), 'callback' => 'user_mail_tokens', 'clear' => TRUE],
+      );
       $this->assertStringStartsWith($link, $output, 'Generated URL is in interface language.');
     }
 
     // Generate tokens with the user's preferred language.
     $account->preferred_langcode = 'de';
     $account->save();
-    $link = Url::fromRoute('user.page', [], ['language' => \Drupal::languageManager()->getLanguage($account->getPreferredLangcode()), 'absolute' => TRUE])->toString();
+    $link = Url::fromRoute(
+      'user.page',
+      [],
+      ['language' => \Drupal::languageManager()->getLanguage($account->getPreferredLangcode()), 'absolute' => TRUE],
+    )->toString();
     foreach ($tests as $input => $expected) {
-      $output = $token_service->replace($input, ['user' => $account], ['callback' => 'user_mail_tokens', 'clear' => TRUE]);
+      $output = $token_service->replace($input, ['user' => $account], [
+        'callback' => 'user_mail_tokens',
+        'clear' => TRUE,
+      ]);
       $this->assertStringStartsWith($link, $output, "Generated URL is in the user's preferred language.");
     }
 
     // Generate tokens with one specific language.
-    $link = Url::fromRoute('user.page', [], ['language' => \Drupal::languageManager()->getLanguage('de'), 'absolute' => TRUE])->toString();
+    $link = Url::fromRoute(
+      'user.page',
+      [],
+      ['language' => \Drupal::languageManager()->getLanguage('de'), 'absolute' => TRUE],
+    )->toString();
     foreach ($tests as $input => $expected) {
       foreach ([$user1, $user2] as $account) {
-        $output = $token_service->replace($input, ['user' => $account], ['langcode' => 'de', 'callback' => 'user_mail_tokens', 'clear' => TRUE]);
+        $output = $token_service->replace($input, ['user' => $account], [
+          'langcode' => 'de',
+          'callback' => 'user_mail_tokens',
+          'clear' => TRUE,
+        ]);
         $this->assertStringStartsWith($link, $output, "Generated URL in the requested language.");
       }
     }

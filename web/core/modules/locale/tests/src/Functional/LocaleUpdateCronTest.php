@@ -5,14 +5,16 @@ declare(strict_types=1);
 namespace Drupal\Tests\locale\Functional;
 
 use Drupal\Core\Database\Database;
-use Drupal\Tests\Traits\Core\CronRunTrait;
 use Drupal\locale\Hook\LocaleHooks;
+use Drupal\Tests\Traits\Core\CronRunTrait;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests for using cron to update project interface translations.
- *
- * @group locale
  */
+#[Group('locale')]
+#[RunTestsInSeparateProcesses]
 class LocaleUpdateCronTest extends LocaleUpdateBase {
 
   use CronRunTrait;

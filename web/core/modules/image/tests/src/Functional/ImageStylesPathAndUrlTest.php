@@ -11,12 +11,14 @@ use Drupal\image\Entity\ImageStyle;
 use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\Tests\BrowserTestBase;
 use Drupal\Tests\TestFileCreationTrait;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the functions for generating paths and URLs for image styles.
- *
- * @group image
  */
+#[Group('image')]
+#[RunTestsInSeparateProcesses]
 class ImageStylesPathAndUrlTest extends BrowserTestBase {
 
   use TestFileCreationTrait {
@@ -259,7 +261,7 @@ class ImageStylesPathAndUrlTest extends BrowserTestBase {
       // make sure that access is denied.
       $file_no_access = array_shift($files);
       $original_uri_no_access = $file_system->copy($file_no_access->uri, $scheme . '://', FileExists::Rename);
-      $generated_uri_no_access = $scheme . '://styles/' . $this->style->id() . '/' . $scheme . '/' . $file_system->basename($original_uri_no_access);
+      $generated_uri_no_access = $scheme . '://styles/' . $this->style->id() . '/' . $scheme . '/' . basename($original_uri_no_access);
       $this->assertFileDoesNotExist($generated_uri_no_access);
       $generate_url_no_access = $this->style->buildUrl($original_uri_no_access);
 

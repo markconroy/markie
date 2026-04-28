@@ -65,4 +65,15 @@ class ImageFilename extends AutomatorBaseAction {
     return $form;
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  protected function saveFormValues(array &$form, string $form_key, $entity, ?int $key = NULL): array {
+    // Image fields do not have a 'value' property. The automator
+    // (LlmRewriteImageFilename) already renames and saves the File entity
+    // directly in storeValues(), so there is nothing to write back into the
+    // form element here.
+    return $form[$form_key];
+  }
+
 }

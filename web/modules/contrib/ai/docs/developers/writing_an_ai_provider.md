@@ -135,7 +135,7 @@ final class DropAiConfigForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state): void {
-    // Do a check if its getting setup or disabled.
+    // Do a check if it's getting set up or disabled.
     if ($form_state->getValue('api_key')) {
       // Here we set the default providers per the operation for our provider.
       $this->aiProviderManager->defaultIfNone('chat', 'dropai', 'drop-ai-text-model-1');
@@ -164,7 +164,7 @@ Here is the plugin implementation for our fictional provider. We implement *Chat
 
 Most parts of the code are mock, to be used as a starter. You will need to modify it and implement based on your provider.
 
-You can see the entire codebase in the [dropai module](https://git.drupalcode.org/project/ai/-/tree/1.0.x/docs/examples/dropai_provider) and find the parts where we load the api key for nothing (to demonstrate the idea), you will use it to authenticate with your provider. Also there is a mock provider client implemented in the example module, which generates dummy text responses — you will need to use the specific client for your provider. Many the popular providers already have the PHP libraries and its better to use them.
+You can see the entire codebase in the [dropai module](https://git.drupalcode.org/project/ai/-/tree/1.0.x/docs/examples/dropai_provider) and find the parts where we load the api key for nothing (to demonstrate the idea), you will use it to authenticate with your provider. Also there is a mock provider client implemented in the example module, which generates dummy text responses — you will need to use the specific client for your provider. Many of the popular providers already have the PHP libraries and it's better to use them.
 
 Following is the plugin implementation for the provider — the central part of the provider. You can use comments to understand more.
 
@@ -441,3 +441,6 @@ class DropAiProvider extends AiProviderClientBase implements ChatInterface {
 Finally you will need to define some API defaults, which reflect the parameters that your provider supports — for example the temperature, or topN, that most AI providers have. But you need to follow the documentation of the AI service, you are building the provider for. [Here](https://git.drupalcode.org/project/ai/-/tree/1.0.x/docs/examples/dropai_provider/definitions/api_defaults.yml) you can check the example for this.
 
 After all of this, you will be able to see your newly implemented provider in the AI Explorer of the AI module and use it like other providers.
+
+### Rate Limits
+If your provider has rate limits, you can set them on the `ChatOutput` object returned by the `chat` method using `setRateLimits()`. Create a `ChatProviderLimitsDto` object and set the appropriate values, such as maximum requests, remaining requests, and reset time. This information can then be consumed through `getRateLimits()` and used by the AI module to manage and display rate limit status to users.

@@ -4,10 +4,14 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\language\Functional;
 
+use Drupal\block\Entity\Block;
 use Drupal\Core\Cache\Cache;
+use Drupal\Core\Language\Language;
+use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Url;
 use Drupal\file\Entity\File;
 use Drupal\language\Entity\ConfigurableLanguage;
+use Drupal\language\LanguageNegotiatorInterface;
 use Drupal\language\Plugin\LanguageNegotiation\LanguageNegotiationBrowser;
 use Drupal\language\Plugin\LanguageNegotiation\LanguageNegotiationSelected;
 use Drupal\language\Plugin\LanguageNegotiation\LanguageNegotiationSession;
@@ -15,11 +19,9 @@ use Drupal\language\Plugin\LanguageNegotiation\LanguageNegotiationUrl;
 use Drupal\Tests\BrowserTestBase;
 use Drupal\user\Plugin\LanguageNegotiation\LanguageNegotiationUser;
 use Drupal\user\Plugin\LanguageNegotiation\LanguageNegotiationUserAdmin;
-use Drupal\Core\Language\Language;
-use Drupal\Core\Language\LanguageInterface;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Symfony\Component\HttpFoundation\Request;
-use Drupal\language\LanguageNegotiatorInterface;
-use Drupal\block\Entity\Block;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
 
@@ -40,9 +42,9 @@ use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
  * - admin/config: Tests the UI using the precedence rules.
  * - zh-hans/admin/config: Tests the UI in Chinese.
  * - blah-blah/admin/config: Tests the 404 page.
- *
- * @group language
  */
+#[Group('language')]
+#[RunTestsInSeparateProcesses]
 class LanguageUILanguageNegotiationTest extends BrowserTestBase {
 
   /**
@@ -258,7 +260,11 @@ class LanguageUILanguageNegotiationTest extends BrowserTestBase {
       ],
       // Default, browser language preference is not one of site's lang.
       [
-        'language_negotiation' => [LanguageNegotiationUrl::METHOD_ID, LanguageNegotiationBrowser::METHOD_ID, LanguageNegotiationSelected::METHOD_ID],
+        'language_negotiation' => [
+          LanguageNegotiationUrl::METHOD_ID,
+          LanguageNegotiationBrowser::METHOD_ID,
+          LanguageNegotiationSelected::METHOD_ID,
+        ],
         'path' => 'admin/config',
         'expect' => $default_string,
         'expected_method_id' => LanguageNegotiatorInterface::METHOD_ID,

@@ -10,12 +10,14 @@ use Drupal\media\Entity\Media;
 use Drupal\Tests\system\Functional\Cache\AssertPageCacheContextsAndTagsTrait;
 use Drupal\user\Entity\Role;
 use Drupal\user\RoleInterface;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Basic access tests for Media.
- *
- * @group media
  */
+#[Group('media')]
+#[RunTestsInSeparateProcesses]
 class MediaAccessTest extends MediaFunctionalTestBase {
 
   use AssertPageCacheContextsAndTagsTrait;
@@ -130,7 +132,7 @@ class MediaAccessTest extends MediaFunctionalTestBase {
     $this->assertCacheContext('user');
     $assert_session->statusCodeEquals(200);
     $this->drupalGet('media/' . $user_media->id() . '/revisions/' . $previous_revision . '/view');
-    $this->assertCacheContext('user.permissions');
+    $this->assertCacheContext('user');
     $assert_session->statusCodeEquals(200);
     $role->revokePermission('view own unpublished media')->save();
     $this->drupalGet('media/' . $user_media->id() . '/revisions/' . $user_media->getRevisionId() . '/view');

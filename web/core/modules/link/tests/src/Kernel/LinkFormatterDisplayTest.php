@@ -4,23 +4,25 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\link\Kernel;
 
-use Drupal\Tests\field\Kernel\FieldKernelTestBase;
-use Drupal\Tests\link\Traits\LinkInputValuesTraits;
 use Drupal\entity_test\Entity\EntityTest;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\link\LinkItemInterface;
+use Drupal\link\LinkTitleVisibility;
+use Drupal\Tests\field\Kernel\FieldKernelTestBase;
+use Drupal\Tests\link\Traits\LinkInputValuesTraits;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 // cspell:ignore Fragm
-
 /**
  * Tests the default 'link' field formatter.
  *
  * The formatter is tested with several forms of complex query parameters. And
  * each form is tested with different display settings.
- *
- * @group link
  */
+#[Group('link')]
+#[RunTestsInSeparateProcesses]
 class LinkFormatterDisplayTest extends FieldKernelTestBase {
 
   use LinkInputValuesTraits;
@@ -47,7 +49,7 @@ class LinkFormatterDisplayTest extends FieldKernelTestBase {
       'field_name' => 'field_test',
       'bundle' => 'entity_test',
       'settings' => [
-        'title' => DRUPAL_OPTIONAL,
+        'title' => LinkTitleVisibility::Optional->value,
         'link_type' => LinkItemInterface::LINK_GENERIC,
       ],
     ])->save();

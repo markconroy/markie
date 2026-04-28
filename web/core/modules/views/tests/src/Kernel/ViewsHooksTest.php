@@ -7,14 +7,16 @@ namespace Drupal\Tests\views\Kernel;
 use Drupal\Core\Render\RenderContext;
 use Drupal\views\Form\ViewsFormMainForm;
 use Drupal\views\Views;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests that views hooks are registered when defined in $module.views.inc.
  *
- * @group views
- *
  * @see views_hook_info()
  */
+#[Group('views')]
+#[RunTestsInSeparateProcesses]
 class ViewsHooksTest extends ViewsKernelTestBase {
 
   /**

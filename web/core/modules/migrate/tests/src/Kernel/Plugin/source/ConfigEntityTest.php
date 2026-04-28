@@ -4,14 +4,18 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\migrate\Kernel\Plugin\source;
 
+use Drupal\migrate\Plugin\migrate\source\ConfigEntity;
 use Drupal\Tests\migrate\Kernel\MigrateSqlSourceTestBase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the config source plugin.
- *
- * @covers \Drupal\migrate\Plugin\migrate\source\ConfigEntity
- * @group migrate
  */
+#[CoversClass(ConfigEntity::class)]
+#[Group('migrate')]
+#[RunTestsInSeparateProcesses]
 class ConfigEntityTest extends MigrateSqlSourceTestBase {
 
   /**

@@ -6,10 +6,14 @@ namespace Drupal\Tests\field\Functional\Rest;
 
 use Drupal\Tests\rest\Functional\CookieResourceTestTrait;
 use Drupal\Tests\rest\Functional\EntityResource\XmlEntityNormalizationQuirksTrait;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
- * @group rest
+ * Tests Field Storage Config Xml Cookie.
  */
+#[Group('rest')]
+#[RunTestsInSeparateProcesses]
 class FieldStorageConfigXmlCookieTest extends FieldStorageConfigResourceTestBase {
 
   use CookieResourceTestTrait;

@@ -6,12 +6,13 @@ namespace Drupal\Tests\Core\Common;
 
 use Drupal\Core\Template\Attribute;
 use Drupal\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests the Drupal\Core\Template\Attribute functionality.
- *
- * @group Common
  */
+#[Group('Common')]
 class AttributesTest extends UnitTestCase {
 
   /**
@@ -20,7 +21,7 @@ class AttributesTest extends UnitTestCase {
    * @return array
    *   An array of attributes, expected output, and descriptions.
    */
-  public static function providerTestAttributeData() {
+  public static function providerTestAttributeData(): array {
     return [
       // Verify that special characters are HTML encoded.
       [['&"\'<>' => 'value'], ' &amp;&quot;&#039;&lt;&gt;="value"', 'HTML encode attribute names.'],
@@ -52,9 +53,8 @@ class AttributesTest extends UnitTestCase {
    * Tests casting an Attribute object to a string.
    *
    * @see \Drupal\Core\Template\Attribute::__toString()
-   *
-   * @dataProvider providerTestAttributeData
    */
+  #[DataProvider('providerTestAttributeData')]
   public function testDrupalAttributes($attributes, $expected, $message): void {
     $this->assertSame($expected, (string) new Attribute($attributes), $message);
   }

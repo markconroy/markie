@@ -6,14 +6,17 @@ namespace Drupal\Tests\mysql\Unit;
 
 use Drupal\mysql\Driver\Database\mysql\Connection;
 use Drupal\Tests\UnitTestCase;
+use Pdo\Mysql;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\MockObject\MockObject;
 
 /**
  * Tests MySQL database connections.
- *
- * @coversDefaultClass \Drupal\mysql\Driver\Database\mysql\Connection
- * @group Database
  */
+#[CoversClass(Connection::class)]
+#[Group('Database')]
 class ConnectionTest extends UnitTestCase {
 
   /**
@@ -29,16 +32,19 @@ class ConnectionTest extends UnitTestCase {
   protected function setUp(): void {
     parent::setUp();
     $this->connection = $this->getMockBuilder(Connection::class)
-      ->setConstructorArgs([$this->createMock(\PDO::class), []])
+      // @phpstan-ignore class.notFound
+      ->setConstructorArgs([$this->createMock(\PHP_VERSION_ID >= 80400 ? Mysql::class : \PDO::class), []])
       ->onlyMethods(['getServerVersion'])
       ->getMock();
   }
 
   /**
-   * @covers ::version
-   * @covers ::isMariaDb
-   * @dataProvider providerVersionAndIsMariaDb
+   * Tests version and is maria db.
+   *
+   * @legacy-covers ::version
+   * @legacy-covers ::isMariaDb
    */
+  #[DataProvider('providerVersionAndIsMariaDb')]
   public function testVersionAndIsMariaDb(bool $expected_is_mariadb, string $server_version, string $expected_version): void {
     $this->connection
       ->method('getServerVersion')

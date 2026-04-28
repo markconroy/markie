@@ -55,14 +55,16 @@ class UpgradeStatusUiTest extends UpgradeStatusTestBase {
     $this->assertSame($this->getDrupalCoreMajorVersion() < 11 ? 'No problems found' : '1 problem', strip_tags($page->find('css', 'tr.project-upgrade_status_test_11_compatible td.scan-result')->getHtml()));
     $this->assertSame('No problems found', strip_tags($page->find('css', 'tr.project-upgrade_status_test_12_compatible td.scan-result')->getHtml()));
 
-    // Parent module should show up without errors and submodule should not appear.
+    // Parent module should show up without errors and submodule
+    // should not appear.
     $this->assertSame($this->getDrupalCoreMajorVersion() < 11 ? 'No problems found' : '2 problems', strip_tags($page->find('css', 'tr.project-upgrade_status_test_submodules td.scan-result')->getHtml()));
     $this->assertEmpty($page->find('css', 'tr.upgrade_status_test_submodules_a'));
 
     // Contrib test modules should show with results.
     $this->assertSame('6 problems', strip_tags($page->find('css', 'tr.project-upgrade_status_test_contrib_error td.scan-result')->getHtml()));
     $this->assertSame($this->getDrupalCoreMajorVersion() < 11 ? 'No problems found' : '1 problem', strip_tags($page->find('css', 'tr.project-upgrade_status_test_contrib_11_compatible td.scan-result')->getHtml()));
-    // This contrib module has a different project name. Ensure the drupal.org link used that.
+    // This contrib module has a different project name.
+    // Ensure the drupal.org link used that.
     $next_major = $this->getDrupalCoreMajorVersion() + 1;
     $this->assertSession()->linkByHrefExists('https://drupal.org/project/issues/upgrade_status_test_contributed_11_compatible?text=Drupal+' . $next_major . '&status=All');
 

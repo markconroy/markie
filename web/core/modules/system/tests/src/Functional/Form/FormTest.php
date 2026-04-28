@@ -4,22 +4,24 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\system\Functional\Form;
 
+use Behat\Mink\Element\NodeElement;
 use Drupal\Component\Serialization\Json;
 use Drupal\Component\Utility\Html;
 use Drupal\Core\Form\FormState;
 use Drupal\Core\Render\Element;
 use Drupal\Core\Url;
+use Drupal\filter\Entity\FilterFormat;
 use Drupal\form_test\Form\FormTestDisabledElementsForm;
 use Drupal\Tests\BrowserTestBase;
 use Drupal\user\RoleInterface;
-use Drupal\filter\Entity\FilterFormat;
-use Behat\Mink\Element\NodeElement;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests various form element validation mechanisms.
- *
- * @group Form
  */
+#[Group('Form')]
+#[RunTestsInSeparateProcesses]
 class FormTest extends BrowserTestBase {
 
   /**
@@ -59,7 +61,14 @@ class FormTest extends BrowserTestBase {
   public function testRequiredFields(): void {
     // Originates from https://www.drupal.org/node/117748.
     // Sets of empty strings and arrays.
-    $empty_strings = ['""' => "", '"\n"' => "\n", '" "' => " ", '"\t"' => "\t", '" \n\t "' => " \n\t ", '"\n\n\n\n\n"' => "\n\n\n\n\n"];
+    $empty_strings = [
+      '""' => "",
+      '"\n"' => "\n",
+      '" "' => " ",
+      '"\t"' => "\t",
+      '" \n\t "' => " \n\t ",
+      '"\n\n\n\n\n"' => "\n\n\n\n\n",
+    ];
     $empty_arrays = ['array()' => []];
     $empty_checkbox = [NULL];
 
@@ -87,16 +96,46 @@ class FormTest extends BrowserTestBase {
     $elements['textarea']['element'] = ['#title' => $this->randomMachineName(), '#type' => 'textarea'];
     $elements['textarea']['empty_values'] = $empty_strings;
 
-    $elements['radios']['element'] = ['#title' => $this->randomMachineName(), '#type' => 'radios', '#options' => ['' => 'None', $this->randomMachineName(), $this->randomMachineName(), $this->randomMachineName()]];
+    $elements['radios']['element'] = [
+      '#title' => $this->randomMachineName(),
+      '#type' => 'radios',
+      '#options' => [
+        '' => 'None',
+        $this->randomMachineName(),
+        $this->randomMachineName(),
+        $this->randomMachineName(),
+      ],
+    ];
     $elements['radios']['empty_values'] = $empty_arrays;
 
-    $elements['checkbox']['element'] = ['#title' => $this->randomMachineName(), '#type' => 'checkbox', '#required' => TRUE];
+    $elements['checkbox']['element'] = [
+      '#title' => $this->randomMachineName(),
+      '#type' => 'checkbox',
+      '#required' => TRUE,
+    ];
     $elements['checkbox']['empty_values'] = $empty_checkbox;
 
-    $elements['checkboxes']['element'] = ['#title' => $this->randomMachineName(), '#type' => 'checkboxes', '#options' => [$this->randomMachineName(), $this->randomMachineName(), $this->randomMachineName()]];
+    $elements['checkboxes']['element'] = [
+      '#title' => $this->randomMachineName(),
+      '#type' => 'checkboxes',
+      '#options' => [
+        $this->randomMachineName(),
+        $this->randomMachineName(),
+        $this->randomMachineName(),
+      ],
+    ];
     $elements['checkboxes']['empty_values'] = $empty_arrays;
 
-    $elements['select']['element'] = ['#title' => $this->randomMachineName(), '#type' => 'select', '#options' => ['' => 'None', $this->randomMachineName(), $this->randomMachineName(), $this->randomMachineName()]];
+    $elements['select']['element'] = [
+      '#title' => $this->randomMachineName(),
+      '#type' => 'select',
+      '#options' => [
+        '' => 'None',
+        $this->randomMachineName(),
+        $this->randomMachineName(),
+        $this->randomMachineName(),
+      ],
+    ];
     $elements['select']['empty_values'] = $empty_strings;
 
     $elements['file']['element'] = ['#title' => $this->randomMachineName(), '#type' => 'file'];
@@ -306,12 +345,12 @@ class FormTest extends BrowserTestBase {
     ];
     $this->submitForm($edit, 'Submit');
     // Verify that the error message is displayed with invalid token even when
-    // required fields are filled.'
+    // required fields are filled.
     $this->assertSession()->elementExists('xpath', '//div[contains(@class, "error")]');
     $this->assertSession()->pageTextContains('The form has become outdated.');
     $this->assertSession()->fieldValueEquals('integer_step', 5);
 
-    // Check a form with a URL field
+    // Check a form with a URL field.
     $this->drupalGet(Url::fromRoute('form_test.url'));
     $this->assertSession()
       ->elementExists('css', 'input[name="form_token"]')

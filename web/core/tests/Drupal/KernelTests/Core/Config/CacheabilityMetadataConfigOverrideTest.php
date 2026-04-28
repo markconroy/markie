@@ -6,12 +6,14 @@ namespace Drupal\KernelTests\Core\Config;
 
 use Drupal\config_override_test\Cache\PirateDayCacheContext;
 use Drupal\KernelTests\KernelTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests if configuration overrides correctly affect cacheability metadata.
- *
- * @group config
  */
+#[Group('config')]
+#[RunTestsInSeparateProcesses]
 class CacheabilityMetadataConfigOverrideTest extends KernelTestBase {
 
   /**
@@ -20,12 +22,9 @@ class CacheabilityMetadataConfigOverrideTest extends KernelTestBase {
   protected static $modules = [
     'block',
     'block_content',
-    'config',
     'config_override_test',
-    'field',
     'path_alias',
     'system',
-    'text',
     'user',
   ];
 

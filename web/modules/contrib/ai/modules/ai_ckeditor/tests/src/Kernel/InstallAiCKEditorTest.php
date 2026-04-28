@@ -16,7 +16,7 @@ class InstallAiCKEditorTest extends KernelTestBase {
    *
    * @var array
    */
-  protected static $modules = ['system', 'user', 'ckeditor5', 'editor', 'ai'];
+  protected static $modules = ['system', 'user', 'filter', 'editor', 'ckeditor5', 'ai'];
 
   /**
    * Tests if the module installs successfully.

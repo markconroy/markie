@@ -9,12 +9,14 @@ use Drupal\Core\StreamWrapper\StreamWrapperManager;
 use Drupal\node\Entity\Node;
 use Drupal\Tests\BrowserTestBase;
 use Drupal\Tests\TestFileCreationTrait;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the theme administration user interface.
- *
- * @group system
  */
+#[Group('system')]
+#[RunTestsInSeparateProcesses]
 class ThemeTest extends BrowserTestBase {
 
   use TestFileCreationTrait {
@@ -316,7 +318,7 @@ class ThemeTest extends BrowserTestBase {
     foreach ($valid_hex_codes as $valid_hex) {
       $this->submitForm(['base_primary_color' => $valid_hex], 'Save configuration');
       $this->assertSession()->statusMessageContains('The configuration options have been saved.', 'status');
-      $this->assertSame($valid_hex, $this->config('olivero.settings')->get('base_primary_color'));
+      $this->assertSame($valid_hex, \Drupal::service('config.factory')->getEditable('olivero.settings')->get('base_primary_color'));
     }
   }
 

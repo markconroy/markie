@@ -4,20 +4,23 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\pgsql\Kernel\pgsql;
 
-use Drupal\Core\Database\Database;
 use Drupal\Core\Database\Connection;
+use Drupal\Core\Database\Database;
 use Drupal\KernelTests\Core\Database\DatabaseTestSchemaDataTrait;
 use Drupal\KernelTests\Core\Database\DatabaseTestSchemaInstallTrait;
 use Drupal\KernelTests\Core\Database\DriverSpecificKernelTestBase;
+use Drupal\pgsql\Driver\Database\pgsql\Schema;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 // cSpell:ignore nspname schemaname upserting indexdef
-
 /**
  * Tests schema API for non-public schema for the PostgreSQL driver.
- *
- * @group Database
- * @coversDefaultClass \Drupal\pgsql\Driver\Database\pgsql\Schema
  */
+#[CoversClass(Schema::class)]
+#[Group('Database')]
+#[RunTestsInSeparateProcesses]
 class NonPublicSchemaTest extends DriverSpecificKernelTestBase {
 
   use DatabaseTestSchemaDataTrait;
@@ -90,25 +93,29 @@ class NonPublicSchemaTest extends DriverSpecificKernelTestBase {
    * {@inheritdoc}
    */
   protected function tearDown(): void {
-    // We overwrite this function because the regular teardown will not drop the
-    // tables from a specified schema.
-    $tables = $this->testingFakeConnection->schema()->findTables('%');
-    foreach ($tables as $table) {
-      if ($this->testingFakeConnection->schema()->dropTable($table)) {
-        unset($tables[$table]);
+    if (isset($this->testingFakeConnection)) {
+      // We overwrite this function because the regular teardown will not drop the
+      // tables from a specified schema.
+      $tables = $this->testingFakeConnection->schema()->findTables('%');
+      foreach ($tables as $table) {
+        if ($this->testingFakeConnection->schema()->dropTable($table)) {
+          unset($tables[$table]);
+        }
       }
+
+      $this->assertEmpty($this->testingFakeConnection->schema()->findTables('%'));
+
+      Database::removeConnection('testing_fake');
     }
-
-    $this->assertEmpty($this->testingFakeConnection->schema()->findTables('%'));
-
-    Database::removeConnection('testing_fake');
 
     parent::tearDown();
   }
 
   /**
-   * @covers ::extensionExists
-   * @covers ::tableExists
+   * Tests extension exists.
+   *
+   * @legacy-covers ::extensionExists
+   * @legacy-covers ::tableExists
    */
   public function testExtensionExists(): void {
     // Check if PG_trgm extension is present.
@@ -122,10 +129,12 @@ class NonPublicSchemaTest extends DriverSpecificKernelTestBase {
   }
 
   /**
-   * @covers ::addField
-   * @covers ::fieldExists
-   * @covers ::dropField
-   * @covers ::changeField
+   * Tests field.
+   *
+   * @legacy-covers ::addField
+   * @legacy-covers ::fieldExists
+   * @legacy-covers ::dropField
+   * @legacy-covers ::changeField
    */
   public function testField(): void {
     $this->testingFakeConnection->schema()
@@ -155,8 +164,10 @@ class NonPublicSchemaTest extends DriverSpecificKernelTestBase {
   }
 
   /**
-   * @covers \Drupal\Core\Database\Connection::insert
-   * @covers \Drupal\Core\Database\Connection::select
+   * Tests insert.
+   *
+   * @legacy-covers \Drupal\Core\Database\Connection::insert
+   * @legacy-covers \Drupal\Core\Database\Connection::select
    */
   public function testInsert(): void {
     $num_records_before = $this->testingFakeConnection->query('SELECT COUNT(*) FROM {faking_table}')->fetchField();
@@ -179,7 +190,9 @@ class NonPublicSchemaTest extends DriverSpecificKernelTestBase {
   }
 
   /**
-   * @covers \Drupal\Core\Database\Connection::update
+   * Tests update.
+   *
+   * @legacy-covers \Drupal\Core\Database\Connection::update
    */
   public function testUpdate(): void {
     $updated_record = $this->testingFakeConnection->update('faking_table')
@@ -195,7 +208,9 @@ class NonPublicSchemaTest extends DriverSpecificKernelTestBase {
   }
 
   /**
-   * @covers \Drupal\Core\Database\Connection::upsert
+   * Tests upsert.
+   *
+   * @legacy-covers \Drupal\Core\Database\Connection::upsert
    */
   public function testUpsert(): void {
     $num_records_before = $this->testingFakeConnection->query('SELECT COUNT(*) FROM {faking_table}')->fetchField();
@@ -234,7 +249,9 @@ class NonPublicSchemaTest extends DriverSpecificKernelTestBase {
   }
 
   /**
-   * @covers \Drupal\Core\Database\Connection::merge
+   * Tests merge.
+   *
+   * @legacy-covers \Drupal\Core\Database\Connection::merge
    */
   public function testMerge(): void {
     $num_records_before = $this->testingFakeConnection->query('SELECT COUNT(*) FROM {faking_table}')->fetchField();
@@ -255,8 +272,10 @@ class NonPublicSchemaTest extends DriverSpecificKernelTestBase {
   }
 
   /**
-   * @covers \Drupal\Core\Database\Connection::delete
-   * @covers \Drupal\Core\Database\Connection::truncate
+   * Tests delete.
+   *
+   * @legacy-covers \Drupal\Core\Database\Connection::delete
+   * @legacy-covers \Drupal\Core\Database\Connection::truncate
    */
   public function testDelete(): void {
     $num_records_before = $this->testingFakeConnection->query('SELECT COUNT(*) FROM {faking_table}')->fetchField();
@@ -279,9 +298,11 @@ class NonPublicSchemaTest extends DriverSpecificKernelTestBase {
   }
 
   /**
-   * @covers ::addIndex
-   * @covers ::indexExists
-   * @covers ::dropIndex
+   * Tests index.
+   *
+   * @legacy-covers ::addIndex
+   * @legacy-covers ::indexExists
+   * @legacy-covers ::dropIndex
    */
   public function testIndex(): void {
     $this->testingFakeConnection->schema()->addIndex('faking_table', 'test_field', ['test_field'], []);
@@ -301,9 +322,11 @@ class NonPublicSchemaTest extends DriverSpecificKernelTestBase {
   }
 
   /**
-   * @covers ::addUniqueKey
-   * @covers ::indexExists
-   * @covers ::dropUniqueKey
+   * Tests unique key.
+   *
+   * @legacy-covers ::addUniqueKey
+   * @legacy-covers ::indexExists
+   * @legacy-covers ::dropUniqueKey
    */
   public function testUniqueKey(): void {
     $this->testingFakeConnection->schema()->addUniqueKey('faking_table', 'test_field', ['test_field']);
@@ -334,8 +357,10 @@ class NonPublicSchemaTest extends DriverSpecificKernelTestBase {
   }
 
   /**
-   * @covers ::addPrimaryKey
-   * @covers ::dropPrimaryKey
+   * Tests primary key.
+   *
+   * @legacy-covers ::addPrimaryKey
+   * @legacy-covers ::dropPrimaryKey
    */
   public function testPrimaryKey(): void {
     $this->testingFakeConnection->schema()->dropPrimaryKey('faking_table');
@@ -359,10 +384,12 @@ class NonPublicSchemaTest extends DriverSpecificKernelTestBase {
   }
 
   /**
-   * @covers ::renameTable
-   * @covers ::tableExists
-   * @covers ::findTables
-   * @covers ::dropTable
+   * Tests table.
+   *
+   * @legacy-covers ::renameTable
+   * @legacy-covers ::tableExists
+   * @legacy-covers ::findTables
+   * @legacy-covers ::dropTable
    */
   public function testTable(): void {
     $this->testingFakeConnection->schema()->renameTable('faking_table', 'new_faking_table');

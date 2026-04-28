@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Drupal\TestSite;
 
+use Drupal\comment\Entity\Comment;
 use Drupal\Core\Extension\ModuleInstallerInterface;
 use Drupal\Core\Extension\ThemeInstallerInterface;
 use Drupal\node\Entity\Node;
-use Drupal\comment\Entity\Comment;
 
 /**
  * Setup file used by TestSiteInstallTestScript.
@@ -19,7 +19,7 @@ class TestSiteOliveroInstallTestScript implements TestSetupInterface {
   /**
    * {@inheritdoc}
    */
-  public function setup() {
+  public function setup(): void {
     // Install required module for the Olivero front page.
     $module_installer = \Drupal::service('module_installer');
     assert($module_installer instanceof ModuleInstallerInterface);
@@ -32,17 +32,17 @@ class TestSiteOliveroInstallTestScript implements TestSetupInterface {
     $system_theme_config = \Drupal::configFactory()->getEditable('system.theme');
     $system_theme_config->set('default', 'olivero')->save();
 
-    // Create an article that will have no comments
+    // Create an article that will have no comments.
     $article_no_comments = Node::create(['type' => 'article']);
     $article_no_comments->set('title', 'Article without comments');
-    // Enable comments
+    // Enable comments.
     $article_no_comments->set('comment', 2);
     $article_no_comments->save();
 
-    // Create an article that will have comments
+    // Create an article that will have comments.
     $article_with_comments = Node::create(['type' => 'article']);
     $article_with_comments->set('title', 'Article with comments');
-    // Enable comments
+    // Enable comments.
     $article_with_comments->set('comment', 2);
     $article_with_comments->save();
 
@@ -60,7 +60,7 @@ class TestSiteOliveroInstallTestScript implements TestSetupInterface {
       // Whether the comment is 'approved' or not.
       'status' => 1,
     ];
-    // Create comment entities out of our field values
+    // Create comment entities out of our field values.
     $comment1 = Comment::create($values);
     $comment1->save();
 

@@ -2,13 +2,13 @@
 
 This document will provide information on how you can use one of the providers once and then replay that request over and over while you are developing your module.
 
-This is useful when your biggest pain points are developing your module and the code around that, rather then the API call. This makes it faster to develop, with less waiting time and less costs.
+This is useful when your biggest pain points are developing your module and the code around that, rather than the API call. This makes it faster to develop, with less waiting time and less costs.
 
 This can also be used for kernel and functional tests, where you can record a request and then replay it in your tests, making it easier to test your module without having to rely on the provider calls.
 
 ## How to enable it.
 
-The provider is the so called EchoAI provider that is part of the modules in the test folder. You can find them under tests/modules. Its made by default to echo the request you send it, hence the name EchoAI.
+The provider is the so called EchoAI provider that is part of the modules in the test folder. You can find them under tests/modules. It's made by default to echo the request you send it, hence the name EchoAI.
 
 However it can also be used to record a full request, and if the exact same request is made again, it will return the same response as before.
 
@@ -31,7 +31,7 @@ After you enabled it follow the following steps to start recording requests:
 ## How to replay requests.
 To replay the requests you recorded, you can do the following:
 
-1. Click no Edit on the request you want to replay.
+1. Click on Edit on the request you want to replay.
 2. Rename it from Unnamed to something more descriptive.
 3. Check `Mock enabled`
 4. Change anything else with the sleep time, request or response if you would like to

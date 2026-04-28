@@ -20,7 +20,7 @@ use PHPUnit\Framework\Attributes\IgnoreDeprecations;
 #[IgnoreDeprecations]
 class TestFileParserTest extends UnitTestCase {
 
-  public static function provideTestFileContents() {
+  public static function provideTestFileContents(): array {
     return [
       'empty' => [[], ''],
       'no-namespace' => [['ConcreteClass'],
@@ -72,7 +72,7 @@ COMPOUND
   }
 
   /**
-   * @legacy-covers ::parseContents
+   * Tests parse contents.
    */
   #[DataProvider('provideTestFileContents')]
   public function testParseContents($expected, $contents): void {
@@ -84,7 +84,7 @@ COMPOUND
   }
 
   /**
-   * @legacy-covers ::getTestListFromFile
+   * Tests get test list from file.
    */
   public function testGetTestListFromFile(): void {
     $parser = new TestFileParser();

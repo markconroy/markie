@@ -6,18 +6,23 @@ namespace Drupal\Tests\update\Unit;
 
 use Drupal\Tests\UnitTestCase;
 use Drupal\update\ProjectCoreCompatibility;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
- * @coversDefaultClass \Drupal\update\ProjectCoreCompatibility
- *
- * @group update
+ * Tests Drupal\update\ProjectCoreCompatibility.
  */
+#[CoversClass(ProjectCoreCompatibility::class)]
+#[Group('update')]
 class ProjectCoreCompatibilityTest extends UnitTestCase {
 
   /**
-   * @covers ::setReleaseMessage
-   * @dataProvider providerSetProjectCoreCompatibilityRanges
+   * Tests set project core compatibility ranges.
+   *
+   * @legacy-covers ::setReleaseMessage
    */
+  #[DataProvider('providerSetProjectCoreCompatibilityRanges')]
   public function testSetProjectCoreCompatibilityRanges(array $project_data, $core_data, array $supported_branches, array $core_releases, array $expected_releases, array $expected_security_updates): void {
     $project_compatibility = new ProjectCoreCompatibility($core_data, $core_releases, $supported_branches);
     $project_compatibility->setStringTranslation($this->getStringTranslationStub());
@@ -154,12 +159,18 @@ class ProjectCoreCompatibilityTest extends UnitTestCase {
         'core_compatibility_message' => 'Requires Drupal core: 8.9.0, 8.9.2, 9.0.1 to 9.0.2',
       ],
     ];
+
+    // Ensure that invalid version strings like "main" are filtered out and
+    // do not cause exceptions.
+    $test_cases['with invalid version string in releases'] = $test_cases['with 9 full releases, supported'];
+    $test_cases['with invalid version string in releases']['supported_branches'][] = 'main';
+    $test_cases['with invalid version string in releases']['core_releases']['main'] = [];
+
     return $test_cases;
   }
 
   /**
-   * @covers ::isCoreCompatible
-   * @dataProvider providerIsCoreCompatible
+   * Tests is core compatible.
    *
    * @param string $constraint
    *   The core_version_constraint to test.
@@ -168,6 +179,7 @@ class ProjectCoreCompatibilityTest extends UnitTestCase {
    * @param bool $expected
    *   The expected result.
    */
+  #[DataProvider('providerIsCoreCompatible')]
   public function testIsCoreCompatible(string $constraint, string $installed_core, bool $expected): void {
     $core_data['existing_version'] = $installed_core;
     $project_compatibility = new ProjectCoreCompatibility($core_data, [], []);

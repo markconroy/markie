@@ -15,7 +15,7 @@ final class RouteDeprecationAnalyzer {
    * Analyzes usages of deprecated route elements in an extension.
    *
    * @param \Drupal\Core\Extension\Extension $extension
-   *  The extension to be analyzed.
+   *   The extension to be analyzed.
    *
    * @return \Drupal\upgrade_status\DeprecationMessage[]
    *   A list of deprecation messages.
@@ -48,7 +48,7 @@ final class RouteDeprecationAnalyzer {
    */
   private function getAllRoutingFiles(string $path) {
     $files = [];
-    foreach(glob($path . '/*.routing.yml') as $file) {
+    foreach (glob($path . '/*.routing.yml') as $file) {
       // Make sure the filename matches rules for an extension. There may be
       // routing.yml files in shipped configuration which would have more parts.
       $parts = explode('.', basename($file));
@@ -56,7 +56,7 @@ final class RouteDeprecationAnalyzer {
         $files[] = $file;
       }
     }
-    foreach (glob($path . '/*', GLOB_ONLYDIR|GLOB_NOSORT) as $dir) {
+    foreach (glob($path . '/*', GLOB_ONLYDIR | GLOB_NOSORT) as $dir) {
       $files = array_merge($files, $this->getAllRoutingFiles($dir));
     }
     return $files;

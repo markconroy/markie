@@ -7,19 +7,16 @@ namespace Drupal\Tests\views\Kernel\Handler;
 use Drupal\Core\Database\Database;
 use Drupal\Tests\views\Kernel\ViewsKernelTestBase;
 use Drupal\views\Views;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the core Drupal\views\Plugin\views\filter\StringFilter handler.
- *
- * @group views
- * @group #slow
  */
+#[Group('views')]
+#[Group('#slow')]
+#[RunTestsInSeparateProcesses]
 class FilterStringTest extends ViewsKernelTestBase {
-
-  /**
-   * {@inheritdoc}
-   */
-  protected static $modules = ['system'];
 
   /**
    * Views used by this test.
@@ -102,7 +99,7 @@ class FilterStringTest extends ViewsKernelTestBase {
     $view = Views::getView('test_view');
     $view->setDisplay();
 
-    // Change the filtering
+    // Change the filtering.
     $view->displayHandlers->get('default')->overrideOption('filters', [
       'name' => [
         'id' => 'name',
@@ -123,7 +120,7 @@ class FilterStringTest extends ViewsKernelTestBase {
     $this->assertIdenticalResultset($view, $resultset, $this->columnMap);
     $view->destroy();
 
-    // Get the original dataset
+    // Get the original dataset.
     $data_set = $this->dataSet();
     // Adds a new data point in the views_test_data table.
     $query = Database::getConnection()->insert('views_test_data')
@@ -141,7 +138,7 @@ class FilterStringTest extends ViewsKernelTestBase {
     $view = Views::getView('test_view');
     $view->setDisplay();
 
-    // Change the filtering
+    // Change the filtering.
     $view->displayHandlers->get('default')->overrideOption('filters', [
       'name' => [
         'id' => 'name',
@@ -169,7 +166,7 @@ class FilterStringTest extends ViewsKernelTestBase {
     $filters = $this->getGroupedExposedFilters();
     $view = $this->getBasicPageView();
 
-    // Filter: Name, Operator: =, Value: Ringo
+    // Filter: Name, Operator: =, Value: Ringo.
     $filters['name']['group_info']['default_group'] = 1;
     $view->setDisplay('page_1');
     $view->displayHandlers->get('page_1')->overrideOption('filters', $filters);
@@ -193,7 +190,7 @@ class FilterStringTest extends ViewsKernelTestBase {
     $view = Views::getView('test_view');
     $view->setDisplay();
 
-    // Change the filtering
+    // Change the filtering.
     $view->displayHandlers->get('default')->overrideOption('filters', [
       'name' => [
         'id' => 'name',
@@ -230,7 +227,7 @@ class FilterStringTest extends ViewsKernelTestBase {
     $filters = $this->getGroupedExposedFilters();
     $view = $this->getBasicPageView();
 
-    // Filter: Name, Operator: !=, Value: Ringo
+    // Filter: Name, Operator: !=, Value: Ringo.
     $filters['name']['group_info']['default_group'] = '2';
 
     $view->setDisplay('page_1');
@@ -264,7 +261,7 @@ class FilterStringTest extends ViewsKernelTestBase {
     $view = Views::getView('test_view');
     $view->setDisplay();
 
-    // Change the filtering
+    // Change the filtering.
     $view->displayHandlers->get('default')->overrideOption('filters', [
       'name' => [
         'id' => 'name',
@@ -292,7 +289,7 @@ class FilterStringTest extends ViewsKernelTestBase {
     $filters = $this->getGroupedExposedFilters();
     $view = $this->getBasicPageView();
 
-    // Filter: Name, Operator: contains, Value: ing
+    // Filter: Name, Operator: contains, Value: ing.
     $filters['name']['group_info']['default_group'] = '3';
     $view->setDisplay('page_1');
     $view->displayHandlers->get('page_1')->overrideOption('filters', $filters);
@@ -316,7 +313,7 @@ class FilterStringTest extends ViewsKernelTestBase {
     $view = Views::getView('test_view');
     $view->setDisplay();
 
-    // Change the filtering
+    // Change the filtering.
     $view->displayHandlers->get('default')->overrideOption('filters', [
       'description' => [
         'id' => 'description',
@@ -343,7 +340,7 @@ class FilterStringTest extends ViewsKernelTestBase {
     $view = Views::getView('test_view');
     $view->setDisplay();
 
-    // Change the filtering
+    // Change the filtering.
     $view->displayHandlers->get('default')->overrideOption('filters', [
       'description' => [
         'id' => 'description',
@@ -407,7 +404,7 @@ class FilterStringTest extends ViewsKernelTestBase {
     $filters = $this->getGroupedExposedFilters();
     $view = $this->getBasicPageView();
 
-    // Filter: Name, Operator: contains, Value: ing
+    // Filter: Name, Operator: contains, Value: ing.
     $filters['name']['group_info']['default_group'] = '3';
     $view->setDisplay('page_1');
     $view->displayHandlers->get('page_1')->overrideOption('filters', $filters);
@@ -427,7 +424,7 @@ class FilterStringTest extends ViewsKernelTestBase {
     $filters = $this->getGroupedExposedFilters();
     $view = $this->getBasicPageView();
 
-    // Filter: Description, Operator: contains, Value: actor
+    // Filter: Description, Operator: contains, Value: actor.
     $filters['description']['group_info']['default_group'] = '1';
     $view->setDisplay('page_1');
     $view->displayHandlers->get('page_1')->overrideOption('filters', $filters);
@@ -451,7 +448,7 @@ class FilterStringTest extends ViewsKernelTestBase {
     $view = Views::getView('test_view');
     $view->setDisplay();
 
-    // Change the filtering
+    // Change the filtering.
     $view->displayHandlers->get('default')->overrideOption('filters', [
       'description' => [
         'id' => 'description',
@@ -479,7 +476,7 @@ class FilterStringTest extends ViewsKernelTestBase {
     $filters = $this->getGroupedExposedFilters();
     $view = $this->getBasicPageView();
 
-    // Filter: Name, Operator: starts, Value: George
+    // Filter: Name, Operator: starts, Value: George.
     $filters['description']['group_info']['default_group'] = 2;
     $view->setDisplay('page_1');
     $view->displayHandlers->get('page_1')->overrideOption('filters', $filters);
@@ -502,7 +499,7 @@ class FilterStringTest extends ViewsKernelTestBase {
     $filters = $this->getGroupedExposedFilters();
     $view = $this->getBasicPageView();
 
-    // Filter: Name, Operator: not_regular_expression, Value: ^Rin
+    // Filter: Name, Operator: not_regular_expression, Value: ^Rin.
     $filters['name']['group_info']['default_group'] = 6;
     $view->setDisplay('page_1');
     $view->displayHandlers->get('page_1')->overrideOption('filters', $filters);
@@ -535,7 +532,7 @@ class FilterStringTest extends ViewsKernelTestBase {
     $view = Views::getView('test_view');
     $view->setDisplay();
 
-    // Change the filtering
+    // Change the filtering.
     $view->displayHandlers->get('default')->overrideOption('filters', [
       'description' => [
         'id' => 'description',
@@ -558,7 +555,7 @@ class FilterStringTest extends ViewsKernelTestBase {
       [
         'name' => 'Paul',
       ],
-      // There is no Meredith returned because their description is empty
+      // There is no Meredith returned because their description is empty.
     ];
     $this->assertIdenticalResultset($view, $resultset, $this->columnMap);
   }
@@ -570,7 +567,7 @@ class FilterStringTest extends ViewsKernelTestBase {
     $filters = $this->getGroupedExposedFilters();
     $view = $this->getBasicPageView();
 
-    // Filter: Name, Operator: not_starts, Value: George
+    // Filter: Name, Operator: not_starts, Value: George.
     $filters['description']['group_info']['default_group'] = 3;
     $view->setDisplay('page_1');
     $view->displayHandlers->get('page_1')->overrideOption('filters', $filters);
@@ -588,7 +585,7 @@ class FilterStringTest extends ViewsKernelTestBase {
       [
         'name' => 'Paul',
       ],
-      // There is no Meredith returned because their description is empty
+      // There is no Meredith returned because their description is empty.
     ];
     $this->assertIdenticalResultset($view, $resultset, $this->columnMap);
   }
@@ -600,7 +597,7 @@ class FilterStringTest extends ViewsKernelTestBase {
     $view = Views::getView('test_view');
     $view->setDisplay();
 
-    // Change the filtering
+    // Change the filtering.
     $view->displayHandlers->get('default')->overrideOption('filters', [
       'description' => [
         'id' => 'description',
@@ -631,7 +628,7 @@ class FilterStringTest extends ViewsKernelTestBase {
     $filters = $this->getGroupedExposedFilters();
     $view = $this->getBasicPageView();
 
-    // Filter: Description, Operator: ends, Value: Beatles
+    // Filter: Description, Operator: ends, Value: Beatles.
     $filters['description']['group_info']['default_group'] = 4;
     $view->setDisplay('page_1');
     $view->displayHandlers->get('page_1')->overrideOption('filters', $filters);
@@ -657,7 +654,7 @@ class FilterStringTest extends ViewsKernelTestBase {
     $view = Views::getView('test_view');
     $view->setDisplay();
 
-    // Change the filtering
+    // Change the filtering.
     $view->displayHandlers->get('default')->overrideOption('filters', [
       'description' => [
         'id' => 'description',
@@ -677,7 +674,7 @@ class FilterStringTest extends ViewsKernelTestBase {
       [
         'name' => 'Paul',
       ],
-      // There is no Meredith returned because their description is empty
+      // There is no Meredith returned because their description is empty.
     ];
     $this->assertIdenticalResultset($view, $resultset, $this->columnMap);
   }
@@ -689,7 +686,7 @@ class FilterStringTest extends ViewsKernelTestBase {
     $filters = $this->getGroupedExposedFilters();
     $view = $this->getBasicPageView();
 
-    // Filter: Description, Operator: not_ends, Value: Beatles
+    // Filter: Description, Operator: not_ends, Value: Beatles.
     $filters['description']['group_info']['default_group'] = 5;
     $view->setDisplay('page_1');
     $view->displayHandlers->get('page_1')->overrideOption('filters', $filters);
@@ -704,7 +701,7 @@ class FilterStringTest extends ViewsKernelTestBase {
       [
         'name' => 'Paul',
       ],
-      // There is no Meredith returned because their description is empty
+      // There is no Meredith returned because their description is empty.
     ];
     $this->assertIdenticalResultset($view, $resultset, $this->columnMap);
   }
@@ -716,7 +713,7 @@ class FilterStringTest extends ViewsKernelTestBase {
     $view = Views::getView('test_view');
     $view->setDisplay();
 
-    // Change the filtering
+    // Change the filtering.
     $view->displayHandlers->get('default')->overrideOption('filters', [
       'description' => [
         'id' => 'description',
@@ -736,7 +733,7 @@ class FilterStringTest extends ViewsKernelTestBase {
       [
         'name' => 'Paul',
       ],
-      // There is no Meredith returned because their description is empty
+      // There is no Meredith returned because their description is empty.
     ];
     $this->assertIdenticalResultset($view, $resultset, $this->columnMap);
   }
@@ -748,7 +745,7 @@ class FilterStringTest extends ViewsKernelTestBase {
     $filters = $this->getGroupedExposedFilters();
     $view = $this->getBasicPageView();
 
-    // Filter: Description, Operator: not (does not contains), Value: Beatles
+    // Filter: Description, Operator: not (does not contains), Value: Beatles.
     $filters['description']['group_info']['default_group'] = 6;
     $view->setDisplay('page_1');
     $view->displayHandlers->get('page_1')->overrideOption('filters', $filters);
@@ -763,7 +760,7 @@ class FilterStringTest extends ViewsKernelTestBase {
       [
         'name' => 'Paul',
       ],
-      // There is no Meredith returned because their description is empty
+      // There is no Meredith returned because their description is empty.
     ];
     $this->assertIdenticalResultset($view, $resultset, $this->columnMap);
 
@@ -776,7 +773,7 @@ class FilterStringTest extends ViewsKernelTestBase {
     $view = Views::getView('test_view');
     $view->setDisplay();
 
-    // Change the filtering
+    // Change the filtering.
     $view->displayHandlers->get('default')->overrideOption('filters', [
       'name' => [
         'id' => 'name',
@@ -807,7 +804,7 @@ class FilterStringTest extends ViewsKernelTestBase {
     $filters = $this->getGroupedExposedFilters();
     $view = $this->getBasicPageView();
 
-    // Filter: Name, Operator: shorterthan, Value: 5
+    // Filter: Name, Operator: shorterthan, Value: 5.
     $filters['name']['group_info']['default_group'] = 4;
     $view->setDisplay('page_1');
     $view->displayHandlers->get('page_1')->overrideOption('filters', $filters);
@@ -832,7 +829,7 @@ class FilterStringTest extends ViewsKernelTestBase {
     $view = Views::getView('test_view');
     $view->setDisplay();
 
-    // Change the filtering
+    // Change the filtering.
     $view->displayHandlers->get('default')->overrideOption('filters', [
       'name' => [
         'id' => 'name',
@@ -860,7 +857,7 @@ class FilterStringTest extends ViewsKernelTestBase {
     $filters = $this->getGroupedExposedFilters();
     $view = $this->getBasicPageView();
 
-    // Filter: Name, Operator: longerthan, Value: 4
+    // Filter: Name, Operator: longerthan, Value: 4.
     $filters['name']['group_info']['default_group'] = 5;
     $view->setDisplay('page_1');
     $view->displayHandlers->get('page_1')->overrideOption('filters', $filters);
@@ -882,7 +879,7 @@ class FilterStringTest extends ViewsKernelTestBase {
     $view = Views::getView('test_view');
     $view->setDisplay();
 
-    // Change the filtering
+    // Change the filtering.
     $view->displayHandlers->get('default')->overrideOption('filters', [
       'description' => [
         'id' => 'description',

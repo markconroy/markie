@@ -7,15 +7,18 @@ namespace Drupal\KernelTests\Core\Render\Element;
 use Drupal\Core\Extension\Requirement\RequirementSeverity;
 use Drupal\Core\Render\Element\StatusReport;
 use Drupal\KernelTests\KernelTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\IgnoreDeprecations;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 include_once \DRUPAL_ROOT . '/core/includes/install.inc';
 
 /**
  * Tests the status report element.
- *
- * @group Render
- * @group legacy
  */
+#[Group('Render')]
+#[IgnoreDeprecations]
+#[RunTestsInSeparateProcesses]
 class StatusReportTest extends KernelTestBase {
 
   /**

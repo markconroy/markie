@@ -5,15 +5,16 @@ declare(strict_types=1);
 namespace Drupal\FunctionalTests\Installer;
 
 use Drupal\Core\Database\Database;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 // cspell:ignore drupaldriver testdriverdatabasedrivertestmysql
 // cspell:ignore testdriverdatabasedrivertestpgsql
-
 /**
  * Tests the interactive installer.
- *
- * @group Installer
  */
+#[Group('Installer')]
+#[RunTestsInSeparateProcesses]
 class InstallerNonDefaultDatabaseDriverTest extends InstallerTestBase {
 
   /**
@@ -90,8 +91,8 @@ class InstallerNonDefaultDatabaseDriverTest extends InstallerTestBase {
     // uninstalled being dependencies of the "driver_test" module.
     $this->drupalGet('admin/modules/uninstall');
     $this->assertSession()->elementTextContains('xpath', '//tr[@data-drupal-selector="edit-driver-test"]', "The following reason prevents Contrib database driver test from being uninstalled: The module 'Contrib database driver test' is providing the database driver '{$this->testDriverName}'.");
-    $this->assertSession()->elementTextContains('xpath', '//tr[@data-drupal-selector="edit-mysql"]', "The following reason prevents MySQL from being uninstalled: Required by: driver_test");
-    $this->assertSession()->elementTextContains('xpath', '//tr[@data-drupal-selector="edit-pgsql"]', "The following reason prevents PostgreSQL from being uninstalled: Required by: driver_test");
+    $this->assertSession()->elementTextContains('xpath', '//tr[@data-drupal-selector="edit-mysql"]', "The following reason prevents MySQL from being uninstalled: Required by: Contrib database driver test (driver_test)");
+    $this->assertSession()->elementTextContains('xpath', '//tr[@data-drupal-selector="edit-pgsql"]', "The following reason prevents PostgreSQL from being uninstalled: Required by: Contrib database driver test (driver_test)");
   }
 
   /**

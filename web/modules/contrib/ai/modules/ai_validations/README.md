@@ -1,3 +1,7 @@
+# DEPRECATED
+
+This module is being deprecated in favor of the [standalone project](https://www.drupal.org/project/ai_validations).
+
 # AI Validations
 ## What is the AI Validations module
 The AI Validations module integrates with the contributed Field

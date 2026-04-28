@@ -147,7 +147,7 @@ abstract class AbstractFileBase implements FileBaseInterface {
   public function toArray(): array {
     return [
       'type' => static::class,
-      'binary' => $this->getBinary(),
+      'base64' => $this->getAsBase64EncodedString(),
       'mime_type' => $this->getMimeType(),
       'filename' => $this->getFilename(),
     ];
@@ -161,8 +161,8 @@ abstract class AbstractFileBase implements FileBaseInterface {
    */
   public static function fromArray(array $data): static {
     $instance = new static();
-    if (isset($data['binary'])) {
-      $instance->setBinary($data['binary']);
+    if (isset($data['base64'])) {
+      $instance->setFromBase64EncodedString($data['base64']);
     }
     if (isset($data['mime_type'])) {
       $instance->setMimeType($data['mime_type']);

@@ -13,14 +13,18 @@ use Drupal\Core\TypedData\Plugin\DataType\FloatData;
 use Drupal\Core\TypedData\Plugin\DataType\IntegerData;
 use Drupal\Core\TypedData\Plugin\DataType\StringData;
 use Drupal\Core\TypedData\Plugin\DataType\Uri;
+use Drupal\serialization\Normalizer\PrimitiveDataNormalizer;
 use Drupal\Tests\serialization\Traits\JsonSchemaTestTrait;
 use Drupal\Tests\UnitTestCase;
-use Drupal\serialization\Normalizer\PrimitiveDataNormalizer;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
- * @coversDefaultClass \Drupal\serialization\Normalizer\PrimitiveDataNormalizer
- * @group serialization
+ * Tests Drupal\serialization\Normalizer\PrimitiveDataNormalizer.
  */
+#[CoversClass(PrimitiveDataNormalizer::class)]
+#[Group('serialization')]
 class PrimitiveDataNormalizerTest extends UnitTestCase {
 
   use JsonSchemaTestTrait;
@@ -42,15 +46,15 @@ class PrimitiveDataNormalizerTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::supportsNormalization
-   * @dataProvider dataProviderPrimitiveData
+   * Tests supports normalization.
    */
+  #[DataProvider('dataProviderPrimitiveData')]
   public function testSupportsNormalization($primitive_data, $expected): void {
     $this->assertTrue($this->normalizer->supportsNormalization($primitive_data));
   }
 
   /**
-   * @covers ::supportsNormalization
+   * Tests supports normalization fail.
    */
   public function testSupportsNormalizationFail(): void {
     // Test that an object not implementing PrimitiveInterface fails.
@@ -58,9 +62,9 @@ class PrimitiveDataNormalizerTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::normalize
-   * @dataProvider dataProviderPrimitiveData
+   * Tests normalize.
    */
+  #[DataProvider('dataProviderPrimitiveData')]
   public function testNormalize($primitive_data, $expected): void {
     $this->assertSame($expected, $this->normalizer->normalize($primitive_data));
   }

@@ -5,17 +5,18 @@ declare(strict_types=1);
 namespace Drupal\FunctionalTests\Installer;
 
 use Drupal\Core\Database\Database;
+use Drupal\Core\Extension\ModuleUninstallValidatorException;
 use Drupal\Core\Routing\RoutingEvents;
 use Drupal\Core\Test\PerformanceTestRecorder;
-use Drupal\Core\Extension\ModuleUninstallValidatorException;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 // cspell:ignore drupalmysqldriverdatabasemysql drupalpgsqldriverdatabasepgsql
-
 /**
  * Tests the interactive installer.
- *
- * @group Installer
  */
+#[Group('Installer')]
+#[RunTestsInSeparateProcesses]
 class InstallerTest extends InstallerTestBase {
 
   /**
@@ -59,6 +60,9 @@ class InstallerTest extends InstallerTestBase {
     // metatags as expected to the first page of the installer.
     $this->assertSession()->responseContains("css/components/button.css");
     $this->assertSession()->responseContains('<meta charset="utf-8" />');
+
+    // Test that the default installer theme is being used.
+    $this->assertSession()->responseContains("claro/css/theme/install-page.css");
 
     // Assert that the expected title is present.
     $this->assertEquals('Choose language', $this->cssSelect('main h2')[0]->getText());

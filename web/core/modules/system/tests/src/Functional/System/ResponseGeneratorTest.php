@@ -6,12 +6,14 @@ namespace Drupal\Tests\system\Functional\System;
 
 use Drupal\rest\Entity\RestResourceConfig;
 use Drupal\Tests\BrowserTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests to see if generator header is added.
- *
- * @group system
  */
+#[Group('system')]
+#[RunTestsInSeparateProcesses]
 class ResponseGeneratorTest extends BrowserTestBase {
 
   /**

@@ -4,15 +4,17 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\field\Kernel\KernelString;
 
+use Drupal\Component\Uuid\Uuid;
 use Drupal\entity_test\Entity\EntityTest;
 use Drupal\Tests\field\Kernel\FieldKernelTestBase;
-use Drupal\Component\Uuid\Uuid;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the UUID field.
- *
- * @group field
  */
+#[Group('field')]
+#[RunTestsInSeparateProcesses]
 class UuidItemTest extends FieldKernelTestBase {
 
   /**

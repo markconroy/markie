@@ -16,6 +16,7 @@ use Symfony\Component\Validator\Constraints\File;
 use Symfony\Component\Validator\Constraints\IdenticalTo;
 use Symfony\Component\Validator\Constraints\Image;
 use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints\PositiveOrZero;
 
 /**
  * Constraint plugin manager.
@@ -128,6 +129,11 @@ class ConstraintManager extends DefaultPluginManager {
       'label' => new TranslatableMarkup('Image'),
       'class' => Image::class,
       'type' => ['string'],
+    ]);
+    $this->getDiscovery()->setDefinition('PositiveOrZero', [
+      'label' => new TranslatableMarkup('Positive or zero'),
+      'class' => PositiveOrZero::class,
+      'type' => ['integer'],
     ]);
     $this->getDiscovery()->setDefinition('IdenticalTo', [
       'label' => new TranslatableMarkup('IdenticalTo'),

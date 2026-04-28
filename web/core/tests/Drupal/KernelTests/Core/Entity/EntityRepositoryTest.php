@@ -4,18 +4,21 @@ declare(strict_types=1);
 
 namespace Drupal\KernelTests\Core\Entity;
 
+use Drupal\Core\Entity\EntityRepository;
 use Drupal\entity_test\Entity\EntityTest;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\Tests\user\Traits\UserCreationTrait;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the entity repository.
- *
- * @group Entity
- *
- * @coversDefaultClass \Drupal\Core\Entity\EntityRepository
  */
+#[CoversClass(EntityRepository::class)]
+#[Group('Entity')]
+#[RunTestsInSeparateProcesses]
 class EntityRepositoryTest extends KernelTestBase {
 
   use UserCreationTrait;
@@ -75,8 +78,8 @@ class EntityRepositoryTest extends KernelTestBase {
   /**
    * Tests retrieving active variants.
    *
-   * @covers ::getActive
-   * @covers ::getActiveMultiple
+   * @legacy-covers ::getActive
+   * @legacy-covers ::getActiveMultiple
    */
   public function testGetActive(): void {
     $en_contexts = $this->getLanguageContexts('en');
@@ -208,8 +211,8 @@ class EntityRepositoryTest extends KernelTestBase {
   /**
    * Tests retrieving canonical variants.
    *
-   * @covers ::getCanonical
-   * @covers ::getCanonicalMultiple
+   * @legacy-covers ::getCanonical
+   * @legacy-covers ::getCanonicalMultiple
    */
   public function testGetCanonical(): void {
     // Check that when the entity does not exist NULL is returned.

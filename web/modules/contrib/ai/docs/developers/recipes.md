@@ -1,15 +1,15 @@
-The AI module has a lot of frameworks that does not actually do anything by themselves, but needs to be setup to work correctly. The AI Automators, AI Search, Field Widgets and AI Agents are all useless without actual setups.
+The AI module has a lot of frameworks that do not actually do anything by themselves, but need to be set up to work correctly. The AI Automators, AI Search, Field Widgets and AI Agents are all useless without actual setups.
 
-Since AI can solve very specific business cases, its very hard to ship the AI module one-size-fits-all solutions and that's where recipes comes in.
+Since AI can solve very specific business cases, it's very hard to ship the AI module one-size-fits-all solutions and that's where recipes come in.
 
 However to be able to utilize recipes correctly we have added some config actions that you can use to setup recipes.
 
 ### verifySetupAi
-In many cases a recipe doesn't really care if its Gemini or OpenAI behind the scenes, it might just care about what is the capabilities of the model that is setup.
+In many cases a recipe doesn't really care if it's Gemini or OpenAI behind the scenes, it might just care about what the capabilities of the model that is setup are.
 
-Or we might have 20 recipes that sets up one AI button or AI Agent each and we do not want all of those to be inheriting from a AI Provider setup recipe, when the site might already have a AI provider setup.
+Or we might have 20 recipes that set up one AI button or AI Agent each and we do not want all of those to be inheriting from an AI Provider setup recipe, when the site might already have an AI provider setup.
 
-This action helps with that - its not actually an action though, its a workaround that check if all the dependencies on the system are met, and if not it will throw an exception so the recipe reverts any changes.
+This action helps with that - it's not actually an action though, it's a workaround that checks if all the dependencies on the system are met, and if not it will throw an exception so the recipe reverts any changes.
 
 There are 4 things you can verify (and you can mix)
 
@@ -72,6 +72,8 @@ This makes it possible to setup an AI Provider, but also automatically fill out 
 You can have this running and provide an empty value and it will not fail, it will simply not setup the provider. This is good if you are asking for multiple providers and the user only wants to setup one of them.
 
 In this example we want to setup the OpenAI Provider by asking the end user for the API Key.
+
+If you want to setup a provider where the key is already setup, you can add the value `no_key_needed: true` to the setupAiProvider config and it will run the setup regardless of if a key is provided or not.
 
 ```
 input:

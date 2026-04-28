@@ -4,17 +4,24 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\content_moderation\Kernel;
 
+use Drupal\content_moderation\Plugin\Validation\Constraint\ModerationStateConstraintValidator;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
 use Drupal\Tests\content_moderation\Traits\ContentModerationTestTrait;
 use Drupal\Tests\user\Traits\UserCreationTrait;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
- * @coversDefaultClass \Drupal\content_moderation\Plugin\Validation\Constraint\ModerationStateConstraintValidator
- * @group content_moderation
+ * Tests Drupal\content_moderation\Plugin\Validation\Constraint\ModerationStateConstraintValidator.
  */
+#[CoversClass(ModerationStateConstraintValidator::class)]
+#[Group('content_moderation')]
+#[RunTestsInSeparateProcesses]
 class EntityStateChangeValidationTest extends KernelTestBase {
 
   use ContentModerationTestTrait;
@@ -29,7 +36,6 @@ class EntityStateChangeValidationTest extends KernelTestBase {
     'user',
     'system',
     'language',
-    'content_translation',
     'workflows',
   ];
 
@@ -58,7 +64,7 @@ class EntityStateChangeValidationTest extends KernelTestBase {
   /**
    * Tests valid transitions.
    *
-   * @covers ::validate
+   * @legacy-covers ::validate
    */
   public function testValidTransition(): void {
 
@@ -89,7 +95,7 @@ class EntityStateChangeValidationTest extends KernelTestBase {
   /**
    * Tests invalid transitions.
    *
-   * @covers ::validate
+   * @legacy-covers ::validate
    */
   public function testInvalidTransition(): void {
     $this->setCurrentUser($this->adminUser);
@@ -333,8 +339,9 @@ class EntityStateChangeValidationTest extends KernelTestBase {
   }
 
   /**
-   * @dataProvider transitionAccessValidationTestCases
-   */
+ * Tests transition access validation.
+ */
+  #[DataProvider('transitionAccessValidationTestCases')]
   public function testTransitionAccessValidation($permissions, $target_state, $messages): void {
     $node_type = NodeType::create([
       'type' => 'example',

@@ -7,12 +7,14 @@ namespace Drupal\Tests\locale\Kernel;
 use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\Language\Language;
 use Drupal\language\Entity\ConfigurableLanguage;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests default configuration handling with a foreign default language.
- *
- * @group locale
  */
+#[Group('locale')]
+#[RunTestsInSeparateProcesses]
 class LocaleConfigSubscriberForeignTest extends LocaleConfigSubscriberTest {
 
   /**
@@ -117,6 +119,22 @@ class LocaleConfigSubscriberForeignTest extends LocaleConfigSubscriberTest {
     $this->deleteLocaleTranslationData($config_name, 'test', 'English test', 'hu');
     // Deleting the locale translation should not change active config.
     $this->assertEquals('Hungarian test', $this->configFactory->getEditable($config_name)->get('test'));
+  }
+
+  /**
+   * Tests that unchanged active translations are not re-saved.
+   */
+  public function testUnchangedActiveTranslationNotResaved(): void {
+    $config_name = 'locale_test.translation';
+
+    // After setUp(), the Hungarian active translation already exists. Calling
+    // updateConfigTranslations() again without changes should not re-save it.
+    $this->localeConfigManager->reset();
+    $count = $this->localeConfigManager->updateConfigTranslations([$config_name], ['hu']);
+    $this->assertSame(0, $count, 'Unchanged active config translation should not be re-saved.');
+
+    // Verify the active config is still intact.
+    $this->assertActiveConfig($config_name, 'test', 'Hungarian test', 'hu');
   }
 
   /**

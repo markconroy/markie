@@ -9,6 +9,7 @@ use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\KeyValueStore\KeyValueFactoryInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\Url;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use dekor\ArrayToTextTable;
 
 /**
@@ -62,7 +63,7 @@ class ScanResultFormatter {
     KeyValueFactoryInterface $key_value_factory,
     DateFormatterInterface $dateFormatter,
     TimeInterface $time,
-    ModuleHandlerInterface $module_handler
+    ModuleHandlerInterface $module_handler,
   ) {
     $this->scanResultStorage = $key_value_factory->get('upgrade_status_scan_results');
     $this->dateFormatter = $dateFormatter;
@@ -87,6 +88,7 @@ class ScanResultFormatter {
    *
    * @param \Drupal\Core\Extension\Extension $extension
    *   Drupal extension object.
+   *
    * @return null|array
    *   Scan results array or null if no scan results are saved.
    */
@@ -117,7 +119,7 @@ class ScanResultFormatter {
           '#markup' => $this->t(
             'No deprecation scanning data available. <a href="@url">Go to the Upgrade Status form</a>.',
             [
-              '@url' => Url::fromRoute('upgrade_status.report')->toString()
+              '@url' => Url::fromRoute('upgrade_status.report')->toString(),
             ]
           ),
         ],
@@ -164,7 +166,7 @@ class ScanResultFormatter {
           $short_path = 'web/' . $short_path;
         }
         // Allow paths and namespaces to wrap. Emphasize filename as it may
-        // show up in the middle of the info
+        // show up in the middle of the info.
         $short_path = str_replace('/', '/<wbr>', $short_path);
         if (strpos($short_path, 'in context of')) {
           $short_path = preg_replace('!/([^/]+)( \(in context of)!', '/<strong>\1</strong>\2', $short_path);
@@ -175,10 +177,10 @@ class ScanResultFormatter {
         }
 
         // @todo could be more accurate with reflection but not sure it is even possible as the reflected
-        //   code may not be in the runtime at this point (eg. functions in include files)
+        //   code may not be in the runtime at this point
+        //   (eg. functions in include files)
         //   see https://www.php.net/manual/en/reflectionfunctionabstract.getfilename.php
         //   see https://www.php.net/manual/en/reflectionclass.getfilename.php
-
         // Link to documentation for a function in this specific Drupal version.
         $api_version = preg_replace('!^(8\.\d+)\..+$!', '\1', \Drupal::VERSION) . '.x';
         $api_link = 'https://api.drupal.org/api/drupal/' . $api_version . '/search/';
@@ -201,7 +203,7 @@ class ScanResultFormatter {
             }
 
             if (count($path_parts)) {
-              $class_file .= '!' . join('!', $path_parts);
+              $class_file .= '!' . implode('!', $path_parts);
             }
 
             $class_file .= '!' . $class . '.php';
@@ -234,7 +236,7 @@ class ScanResultFormatter {
             '#markup' => $short_path,
             '#wrapper_attributes' => [
               'class' => ['status-info'],
-            ]
+            ],
           ],
           'line' => [
             '#type' => 'markup',
@@ -273,8 +275,8 @@ class ScanResultFormatter {
         // Issues to fix later need different guidance based on whether they
         // were found in a contributed project or a custom project.
         !empty($extension->info['project']) ?
-          $this->t('Based on the Drupal deprecation version number of these, fixing them may make the contributed project incompatible with supported Drupal core versions.') :
-          $this->t('Based on the Drupal deprecation version number of these, fixing them will likely make them incompatible with your current Drupal version.')
+        $this->t('Based on the Drupal deprecation version number of these, fixing them may make the contributed project incompatible with supported Drupal core versions.') :
+        $this->t('Based on the Drupal deprecation version number of these, fixing them will likely make them incompatible with your current Drupal version.'),
       ],
       'ignore' => [
         $this->t('Ignore'),
@@ -325,7 +327,7 @@ class ScanResultFormatter {
     }
     $build['summary'] = [
       '#type' => '#markup',
-      '#markup' => '<div class="list-description">' . join(' ', $summary) . '</div>',
+      '#markup' => '<div class="list-description">' . implode(' ', $summary) . '</div>',
       '#weight' => 5,
     ];
 
@@ -407,7 +409,7 @@ class ScanResultFormatter {
       '#title' => $label,
       'date' => [
         '#type' => 'markup',
-        '#markup' =>  wordwrap($this->t('Scanned on @date.', ['@date' => $this->dateFormatter->format($result['date'])]), 80, "\n", true),
+        '#markup' => wordwrap($this->t('Scanned on @date.', ['@date' => $this->dateFormatter->format($result['date'])]), 80, "\n", TRUE),
         '#weight' => -10,
       ],
     ];
@@ -458,9 +460,9 @@ class ScanResultFormatter {
 
         $message = str_replace("\n", ' ', $error['message']);
         $table[] = [
-          'status' => wordwrap($level_label, 8, "\n", true),
-          'line' => wordwrap($error['line'], 7, "\n", true),
-          'message' => wordwrap($message . "\n", 60, "\n", true)
+          'status' => wordwrap($level_label, 8, "\n", TRUE),
+          'line' => wordwrap($error['line'], 7, "\n", TRUE),
+          'message' => wordwrap($message . "\n", 60, "\n", TRUE),
         ];
       }
       $asciiRenderer = new ArrayToTextTable($table);
@@ -480,7 +482,7 @@ class ScanResultFormatter {
     }
     $build['summary'] = [
       '#type' => '#markup',
-      '#markup' => wordwrap(join(' ', $summary), 80, "\n", true),
+      '#markup' => wordwrap(implode(' ', $summary), 80, "\n", TRUE),
       '#weight' => 5,
     ];
 

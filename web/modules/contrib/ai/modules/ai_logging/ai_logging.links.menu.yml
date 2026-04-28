@@ -1,7 +1,7 @@
 ai_log.logging:
   title: 'AI Logging'
-  description: 'Setup and view AI Logs.'
-  parent: ai.admin_settings
+  description: 'View and configure logs of AI operations for auditing and debugging.'
+  parent: ai.admin_config_safety
   route_name: ai_logging.list_page
 
 ai_log.collection:

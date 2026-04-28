@@ -3,6 +3,7 @@
 namespace Drupal\Core\Ajax;
 
 use Drupal\Component\Render\PlainTextOutput;
+use Drupal\Component\Utility\Xss;
 
 /**
  * Defines an AJAX command to open certain content in a dialog.
@@ -74,12 +75,19 @@ class OpenDialogCommand implements CommandInterface, CommandWithAttachedAssetsIn
    */
   public function __construct($selector, string|\Stringable|null $title, $content, array $dialog_options = [], $settings = NULL) {
     $title = PlainTextOutput::renderFromHtml($title);
-
     $dialog_options += ['title' => $title];
+
+    $classes = [];
+    if (isset($dialog_options['classes']['ui-dialog'])) {
+      $classes[] = $dialog_options['classes']['ui-dialog'];
+    }
     if (isset($dialog_options['dialogClass'])) {
       @trigger_error('Passing $dialog_options[\'dialogClass\'] to OpenDialogCommand::__construct() is deprecated in drupal:10.3.0 and will be removed in drupal:12.0.0. Use $dialog_options[\'classes\'] instead. See https://www.drupal.org/node/3440844', E_USER_DEPRECATED);
-      $dialog_options['classes']['ui-dialog'] = $dialog_options['dialogClass'];
+      $classes[] = $dialog_options['dialogClass'];
       unset($dialog_options['dialogClass']);
+    }
+    if ($classes) {
+      $dialog_options['classes']['ui-dialog'] = implode(' ', $classes);
     }
 
     $this->selector = $selector;
@@ -139,6 +147,20 @@ class OpenDialogCommand implements CommandInterface, CommandWithAttachedAssetsIn
   public function render() {
     // For consistency ensure the modal option is set to TRUE or FALSE.
     $this->dialogOptions['modal'] = isset($this->dialogOptions['modal']) && $this->dialogOptions['modal'];
+
+    if (!empty($this->dialogOptions['buttons'])) {
+      foreach ($this->dialogOptions['buttons'] as &$button) {
+        // Only allow specific attributes to be defined for a button.
+        $button = \array_intersect_key($button, \array_flip(['disabled', 'icons', 'label', 'text']));
+        foreach ($button as &$value) {
+          if (is_string($value)) {
+            // Apply Xss::filter to button attribute values.
+            $value = Xss::filter($value);
+          }
+        }
+      }
+    }
+
     return [
       'command' => 'openDialog',
       'selector' => $this->selector,

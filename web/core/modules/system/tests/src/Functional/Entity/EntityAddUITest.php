@@ -9,12 +9,14 @@ use Drupal\entity_test\Entity\EntityTestMul;
 use Drupal\entity_test\Entity\EntityTestWithBundle;
 use Drupal\entity_test\EntityTestHelper;
 use Drupal\Tests\BrowserTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the /add and /add/{type} controllers.
- *
- * @group entity
  */
+#[Group('entity')]
+#[RunTestsInSeparateProcesses]
 class EntityAddUITest extends BrowserTestBase {
 
   /**
@@ -61,6 +63,10 @@ class EntityAddUITest extends BrowserTestBase {
     ])->save();
     $this->drupalGet('/entity_test_with_bundle/add');
     $this->assertSession()->addressEquals('/entity_test_with_bundle/add/test');
+
+    // Confirm redirection also forwards query parameters.
+    $this->drupalGet('/entity_test_with_bundle/add', ['query' => ['donkeys' => 'ponies', 'unicorns' => 'rainbows']]);
+    $this->assertSession()->addressEquals('/entity_test_with_bundle/add/test?donkeys=ponies&unicorns=rainbows');
 
     // Two bundles exist. Confirm both are shown and that they are ordered
     // alphabetically by their labels, not by their IDs.

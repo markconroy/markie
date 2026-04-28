@@ -8,6 +8,7 @@ use Drupal\field_widget_actions\FieldWidgetActionManagerInterface;
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Plugin\DefaultPluginManager;
+use Drupal\field_widget_actions\FieldWidgetFormActionInterface;
 
 /**
  * Provides a plugin manager for Field Widget Actions.
@@ -43,6 +44,20 @@ class FieldWidgetActionManager extends DefaultPluginManager implements FieldWidg
   public function getAllowedFieldWidgetActions($widget_type, $field_type): array {
     return array_filter($this->getDefinitions(), function ($plugin) use ($field_type, $widget_type) {
       return (in_array($field_type, $plugin['field_types']) || empty($plugin['field_types'])) && (in_array($widget_type, $plugin['widget_types']) || empty($plugin['widget_types']));
+    });
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getFieldWidgetActionFormDefinitions(): array {
+    return array_filter($this->getDefinitions(), function ($plugin) {
+      try {
+        return $this->createInstance($plugin['id']) instanceof FieldWidgetFormActionInterface;
+      }
+      catch (\Exception $exception) {
+        return FALSE;
+      }
     });
   }
 

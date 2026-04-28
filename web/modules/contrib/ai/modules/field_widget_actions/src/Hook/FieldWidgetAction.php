@@ -157,6 +157,10 @@ class FieldWidgetAction {
         }
       }
       if (empty($enabled_plugins)) {
+        // NULL (can be a result of NestedArray::getValue) is also empty, but we
+        // need to make sure that it is possible to iterate through this
+        // variable as it is used in foreach later.
+        $enabled_plugins = [];
         // If there are no actions, no need to show the information about their
         // sorting.
         $element['new']['add']['#suffix'] = '';
@@ -289,6 +293,9 @@ class FieldWidgetAction {
         continue;
       }
       $field_widget_action = $this->fieldWidgetActionManager->createInstance($plugin_id, $action);
+      if (isset($context['items'])) {
+        $field_widget_action->setFieldDefinition($context['items']->getFieldDefinition());
+      }
       if ($field_widget_action instanceof FieldWidgetActionInterface && $field_widget_action->isAvailable()) {
         $context['action_id'] = $action_id;
         $field_widget_action->completeFormAlter($field_widget_complete_form, $form_state, $context);
@@ -315,6 +322,9 @@ class FieldWidgetAction {
         continue;
       }
       $field_widget_action = $this->fieldWidgetActionManager->createInstance($plugin_id, $action);
+      if (isset($context['items'])) {
+        $field_widget_action->setFieldDefinition($context['items']->getFieldDefinition());
+      }
       if ($field_widget_action instanceof FieldWidgetActionInterface && $field_widget_action->isAvailable()) {
         $context['action_id'] = $action_id;
         $field_widget_action->singleElementFormAlter($element, $form_state, $context);

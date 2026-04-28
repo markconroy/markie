@@ -8,12 +8,14 @@ use Drupal\comment\Tests\CommentTestTrait;
 use Drupal\Tests\BrowserTestBase;
 use Drupal\user\Entity\Role;
 use Drupal\user\RoleInterface;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Verifies role permissions can be added and removed via the permissions page.
- *
- * @group user
  */
+#[Group('user')]
+#[RunTestsInSeparateProcesses]
 class UserPermissionsTest extends BrowserTestBase {
 
   use CommentTestTrait;
@@ -273,18 +275,18 @@ class UserPermissionsTest extends BrowserTestBase {
   public function testAccessBundlePermission(): void {
     $this->drupalLogin($this->adminUser);
 
-    \Drupal::service('module_installer')->install(['contact', 'taxonomy']);
-    $this->grantPermissions(Role::load($this->rid), ['administer contact forms', 'administer taxonomy']);
+    \Drupal::service('module_installer')->install(['comment', 'taxonomy']);
+    $this->grantPermissions(Role::load($this->rid), ['administer comment types', 'administer taxonomy']);
 
     // Bundles that do not have permissions have no permissions pages.
     $edit = [];
-    $edit['label'] = 'Test contact type';
-    $edit['id'] = 'test_contact_type';
-    $edit['recipients'] = 'webmaster@example.com';
-    $this->drupalGet('admin/structure/contact/add');
+    $edit['label'] = 'Test bundle type';
+    $edit['id'] = 'test_bundle_type';
+    $edit['target_entity_type_id'] = 'taxonomy_term';
+    $this->drupalGet('admin/structure/comment/types/add');
     $this->submitForm($edit, 'Save');
-    $this->assertSession()->pageTextContains('Contact form ' . $edit['label'] . ' has been added.');
-    $this->drupalGet('admin/structure/contact/manage/test_contact_type/permissions');
+    $this->assertSession()->pageTextContains('Comment type ' . $edit['label'] . ' has been added.');
+    $this->drupalGet('admin/structure/comment/manage/test_bundle_type/permissions');
     $this->assertSession()->statusCodeEquals(200);
     $this->assertSession()->pageTextContains('No permissions found.');
 
@@ -310,7 +312,7 @@ class UserPermissionsTest extends BrowserTestBase {
     $this->drupalLogout();
     $this->drupalGet('admin/structure/taxonomy/manage/test_vocabulary/overview/permissions');
     $this->assertSession()->statusCodeEquals(403);
-    $this->drupalGet('admin/structure/contact/manage/test_contact_type/permissions');
+    $this->drupalGet('admin/structure/comment/manage/test_bundle_type/permissions');
     $this->assertSession()->statusCodeEquals(403);
   }
 

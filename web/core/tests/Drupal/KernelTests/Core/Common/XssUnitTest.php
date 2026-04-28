@@ -7,6 +7,8 @@ namespace Drupal\KernelTests\Core\Common;
 use Drupal\Component\Utility\UrlHelper;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\KernelTests\KernelTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests XSS filtering.
@@ -14,9 +16,9 @@ use Drupal\KernelTests\KernelTestBase;
  * @see \Drupal\Component\Utility\Xss::filter()
  * @see \Drupal\Component\Utility\UrlHelper::filterBadProtocol
  * @see \Drupal\Component\Utility\UrlHelper::stripDangerousProtocols
- *
- * @group Common
  */
+#[Group('Common')]
+#[RunTestsInSeparateProcesses]
 class XssUnitTest extends KernelTestBase {
 
   use StringTranslationTrait;

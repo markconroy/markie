@@ -11,7 +11,6 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Entity\TranslatableInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
-use Drupal\Core\Plugin\Context\Context;
 use Drupal\Core\Plugin\Context\ContextDefinition;
 use Drupal\Core\Plugin\Context\EntityContext;
 use Drupal\Core\Session\AccountInterface;
@@ -19,6 +18,8 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 use Drupal\layout_builder\Attribute\SectionStorage;
 use Drupal\layout_builder\Entity\LayoutBuilderEntityViewDisplay;
+use Drupal\layout_builder\Entity\LayoutEntityDisplayInterface;
+use Drupal\layout_builder\LayoutEntityHelperTrait;
 use Drupal\layout_builder\OverridesSectionStorageInterface;
 use Drupal\layout_builder\SectionStorage\SectionStorageManagerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -57,6 +58,8 @@ use Symfony\Component\Routing\RouteCollection;
 )]
 class OverridesSectionStorage extends SectionStorageBase implements ContainerFactoryPluginInterface, OverridesSectionStorageInterface, SectionStorageLocalTaskProviderInterface {
 
+  use LayoutEntityHelperTrait;
+
   /**
    * The field name used by this storage.
    *
@@ -77,13 +80,6 @@ class OverridesSectionStorage extends SectionStorageBase implements ContainerFac
    * @var \Drupal\Core\Entity\EntityFieldManagerInterface
    */
   protected $entityFieldManager;
-
-  /**
-   * The section storage manager.
-   *
-   * @var \Drupal\layout_builder\SectionStorage\SectionStorageManagerInterface
-   */
-  protected $sectionStorageManager;
 
   /**
    * The entity repository.
@@ -176,14 +172,7 @@ class OverridesSectionStorage extends SectionStorageBase implements ContainerFac
     $contexts = [];
 
     if ($entity = $this->extractEntityFromRoute($value, $defaults)) {
-      $contexts['entity'] = EntityContext::fromEntity($entity);
-      // @todo Expand to work for all view modes in
-      //   https://www.drupal.org/node/2907413.
-      $view_mode = 'full';
-      // Retrieve the actual view mode from the returned view display as the
-      // requested view mode may not exist and a fallback will be used.
-      $view_mode = LayoutBuilderEntityViewDisplay::collectRenderDisplay($entity, $view_mode)->getMode();
-      $contexts['view_mode'] = new Context(new ContextDefinition('string'), $view_mode);
+      $contexts = $this->getSectionStorageContextsForEntity($entity);
     }
     return $contexts;
   }
@@ -412,6 +401,21 @@ class OverridesSectionStorage extends SectionStorageBase implements ContainerFac
     // storage has been overridden. Do not use count() as it does not include
     // blank sections.
     return !empty($this->getSections());
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function isSupported(string $entity_type_id, string $bundle, string $view_mode): bool {
+    // Layout builder currently only supports the default view mode.
+    // @see https://www.drupal.org/node/2907413
+    if ($view_mode !== 'default') {
+      return FALSE;
+    }
+    $id = "$entity_type_id.$bundle.$view_mode";
+    $storage = $this->entityTypeManager->getStorage('entity_view_display');
+    $display = $storage->load($id);
+    return $display instanceof LayoutEntityDisplayInterface && $display->isOverridable();
   }
 
 }

@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace Drupal\FunctionalTests\Asset;
 
 use Drupal\Tests\BrowserTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests asset aggregation.
- *
- * @group asset
  */
+#[Group('asset')]
+#[RunTestsInSeparateProcesses]
 class UnversionedAssetTest extends BrowserTestBase {
 
   /**

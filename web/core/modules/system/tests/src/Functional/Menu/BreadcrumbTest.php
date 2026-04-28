@@ -9,16 +9,23 @@ use Drupal\Core\Url;
 use Drupal\node\Entity\NodeType;
 use Drupal\Tests\BrowserTestBase;
 use Drupal\user\RoleInterface;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use PHPUnit\Framework\ExpectationFailedException;
 
 /**
  * Tests breadcrumbs functionality.
- *
- * @group Menu
  */
+#[Group('Menu')]
+#[RunTestsInSeparateProcesses]
 class BreadcrumbTest extends BrowserTestBase {
 
   use AssertBreadcrumbTrait;
+
+  /**
+   * {@inheritdoc}
+   */
+  protected $profile = 'minimal';
 
   /**
    * {@inheritdoc}

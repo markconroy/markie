@@ -10,15 +10,17 @@ use Drupal\comment\Tests\CommentTestTrait;
 use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
-use Drupal\Tests\node\Traits\NodeAccessTrait;
 use Drupal\Tests\BrowserTestBase;
+use Drupal\Tests\node\Traits\NodeAccessTrait;
 use Drupal\user\Entity\User;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Ensure that account cancellation methods work as expected.
- *
- * @group user
  */
+#[Group('user')]
+#[RunTestsInSeparateProcesses]
 class UserCancelTest extends BrowserTestBase {
 
   use CommentTestTrait;
@@ -279,7 +281,7 @@ class UserCancelTest extends BrowserTestBase {
   public function testUserBlockUnpublishNodeAccess(): void {
     \Drupal::service('module_installer')->install(['node_access_test', 'user_form_test']);
 
-    // Setup node access
+    // Setup node access.
     node_access_rebuild();
     $this->addPrivateField(NodeType::load('page'));
     \Drupal::state()->set('node_access_test.private', TRUE);
@@ -394,6 +396,8 @@ class UserCancelTest extends BrowserTestBase {
 
   /**
    * Delete account and anonymize all content using a batch process.
+   *
+   * @see \Drupal\node\NodeBulkUpdate::process()
    */
   public function testUserAnonymizeBatch(): void {
     $node_storage = $this->container->get('entity_type.manager')->getStorage('node');
@@ -406,8 +410,7 @@ class UserCancelTest extends BrowserTestBase {
     // Load a real user object.
     $account = $user_storage->load($account->id());
 
-    // Create 11 nodes in order to trigger batch processing in
-    // node_mass_update().
+    // Create 11 nodes in order to trigger batch processing.
     $nodes = [];
     for ($i = 0; $i < 11; $i++) {
       $node = $this->drupalCreateNode(['uid' => $account->id()]);

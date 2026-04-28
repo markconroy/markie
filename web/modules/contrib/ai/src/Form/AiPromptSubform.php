@@ -5,6 +5,9 @@ namespace Drupal\ai\Form;
 use Drupal\ai\Entity\AiPrompt;
 use Drupal\ai\Entity\AiPromptInterface;
 use Drupal\ai\Entity\AiPromptTypeInterface;
+use Drupal\ai\Utility\Textarea;
+use Drupal\Component\Datetime\TimeInterface;
+use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBuilderInterface;
 use Drupal\Core\Form\FormStateInterface;
@@ -42,10 +45,13 @@ class AiPromptSubform {
    *   The form builder.
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
    *   The entity type manager.
+   * @param \Drupal\Component\Datetime\TimeInterface $time
+   *   The time service.
    */
   public function __construct(
     protected FormBuilderInterface $formBuilder,
     protected EntityTypeManagerInterface $entityTypeManager,
+    protected TimeInterface $time,
   ) {
   }
 
@@ -148,7 +154,8 @@ class AiPromptSubform {
       ],
     ];
     $form = $this->setFormElementName($form, 'id', $set_name);
-
+    $editor_id = hash('sha256', $this->aiPromptType->id() . $this->time->getRequestTime() . mt_rand());
+    $typeahead_config = $this->getTypeAheadConfig();
     $form['prompt'] = [
       '#type' => 'textarea',
       '#title' => $this->t('Prompt'),
@@ -156,7 +163,27 @@ class AiPromptSubform {
       '#description' => $this->buildPromptDescription(),
       '#attributes' => [
         'data-context' => $this->aiPromptType->id(),
+        'data-mdxeditor' => $editor_id,
       ],
+      '#attached' => [
+        'drupalSettings' => [
+          'mdxeditor' => [
+            $editor_id => [
+              'plugins' => [
+                'typeaheadPlugin' => $typeahead_config,
+              ],
+            ],
+          ],
+        ],
+      ],
+      // This property will land into core soon, see
+      // https://www.drupal.org/project/drupal/issues/3202631. It can stay
+      // after this is added to Drupal core.
+      '#normalize_newlines' => TRUE,
+      // Until that the custom value callback is needed. Should be removed
+      // after the issue mentioned above is merged into core and the minimum
+      // supported Drupal version includes `#normalize_newlines` property.
+      '#value_callback' => [Textarea::class, 'valueCallback'],
     ];
     $form = $this->setFormElementName($form, 'prompt', $set_name);
 
@@ -255,10 +282,10 @@ class AiPromptSubform {
 
     $prompt_parts = [];
     foreach ($this->aiPromptType->getVariables() as $variable) {
-      $prompt_parts[] = '@' . $variable['name'];
+      $prompt_parts[] = '`{{ ' . $variable['name'] . ' }}`';
     }
     foreach ($this->aiPromptType->getTokens() as $token) {
-      $prompt_parts[] = '@' . $token['name'];
+      $prompt_parts[] = '`[' . $token['name'] . ']`';
     }
     return implode("\n", $prompt_parts);
   }
@@ -351,6 +378,52 @@ class AiPromptSubform {
   public function submitForm(array &$form, FormStateInterface $form_state) {
     // Do nothing here, we need to save independently at the two
     // implementations of this subform.
+  }
+
+  /**
+   * Collects typeahead types and values.
+   */
+  protected function getTypeAheadConfig() {
+    $typeahead_config = [];
+    $token_values = [];
+    foreach ($this->aiPromptType->getTokens() as $token) {
+      $token_values[] = [
+        'value' => '[' . $token['name'] . ']',
+        'displayValue' => $token['help_text'],
+        'description' => $token['required'] ? $this->t('This token is required. Prompt validation will check it.') : '',
+      ];
+    }
+    if (!empty($token_values)) {
+      $typeahead_config = [
+        'types' => [
+          [
+            'name' => 'tokens',
+            'trigger' => '[',
+            'values' => $token_values,
+          ],
+        ],
+      ];
+    }
+    $variable_values = [];
+    foreach ($this->aiPromptType->getVariables() as $variable) {
+      $variable_values[] = [
+        'value' => '{{ ' . $variable['name'] . ' }}',
+        'displayValue' => $variable['help_text'],
+        'description' => $variable['required'] ? $this->t('This variable is required. Prompt validation will check it.') : '',
+      ];
+    }
+    if (!empty($variable_values)) {
+      $typeahead_config = NestedArray::mergeDeep($typeahead_config, [
+        'types' => [
+          [
+            'name' => 'variables',
+            'trigger' => '{{',
+            'values' => $variable_values,
+          ],
+        ],
+      ]);
+    }
+    return $typeahead_config;
   }
 
 }

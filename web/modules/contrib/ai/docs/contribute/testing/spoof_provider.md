@@ -3,4 +3,4 @@ One of the problems when working with testing of the AI module is that the provi
 
 We have added a provider called AI Test, that you can find under tests/modules/ai_test, that is a spoof provider. It has the functionality to look for matching requests and return a predefined response. These requests can be defined in YAML and be added to your contrib module, meaning we have a standardized way to run kernel and functional tests with the AI module.
 
-To read more about how to mock read more under the [Mock a Provider](../../developers/virtual_provider.md) documentation.
+To read more about how to mock, see the [Mock a Provider](../../developers/virtual_provider.md) documentation.

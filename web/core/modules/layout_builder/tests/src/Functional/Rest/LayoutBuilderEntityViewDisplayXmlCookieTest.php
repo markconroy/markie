@@ -6,11 +6,15 @@ namespace Drupal\Tests\layout_builder\Functional\Rest;
 
 use Drupal\Tests\rest\Functional\CookieResourceTestTrait;
 use Drupal\Tests\rest\Functional\EntityResource\XmlEntityNormalizationQuirksTrait;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
- * @group layout_builder
- * @group rest
+ * Tests Layout Builder Entity View Display Xml Cookie.
  */
+#[Group('layout_builder')]
+#[Group('rest')]
+#[RunTestsInSeparateProcesses]
 class LayoutBuilderEntityViewDisplayXmlCookieTest extends LayoutBuilderEntityViewDisplayResourceTestBase {
 
   use CookieResourceTestTrait;

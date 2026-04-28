@@ -8,12 +8,14 @@ use Drupal\Component\Serialization\Json;
 use Drupal\editor\Entity\Editor;
 use Drupal\filter\Entity\FilterFormat;
 use Drupal\Tests\BrowserTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests XSS protection for content creators when using text editors.
- *
- * @group editor
  */
+#[Group('editor')]
+#[RunTestsInSeparateProcesses]
 class EditorSecurityTest extends BrowserTestBase {
 
   /**

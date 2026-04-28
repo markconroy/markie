@@ -5,14 +5,18 @@ declare(strict_types=1);
 namespace Drupal\Tests\content_moderation\Functional;
 
 use Drupal\block_content\Entity\BlockContent;
-use Drupal\block_content\Entity\BlockContentType;
+use Drupal\Tests\block_content\Traits\BlockContentCreationTrait;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests general content moderation workflow for blocks.
- *
- * @group content_moderation
  */
+#[Group('content_moderation')]
+#[RunTestsInSeparateProcesses]
 class ModerationStateBlockTest extends ModerationStateTestBase {
+
+  use BlockContentCreationTrait;
 
   /**
    * {@inheritdoc}
@@ -36,15 +40,11 @@ class ModerationStateBlockTest extends ModerationStateTestBase {
     parent::setUp();
 
     // Create the "basic" block type.
-    $bundle = BlockContentType::create([
+    $this->createBlockContentType([
       'id' => 'basic',
       'label' => 'basic',
       'revision' => FALSE,
-    ]);
-    $bundle->save();
-
-    // Add the body field to it.
-    block_content_add_body_field($bundle->id());
+    ], TRUE);
   }
 
   /**

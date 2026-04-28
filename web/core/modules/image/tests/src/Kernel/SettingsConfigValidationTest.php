@@ -6,10 +6,14 @@ namespace Drupal\Tests\image\Kernel;
 
 use Drupal\Core\Config\Schema\SchemaIncompleteException;
 use Drupal\KernelTests\KernelTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
- * @group image
+ * Tests Settings Config Validation.
  */
+#[Group('image')]
+#[RunTestsInSeparateProcesses]
 class SettingsConfigValidationTest extends KernelTestBase {
 
   /**
@@ -21,7 +25,7 @@ class SettingsConfigValidationTest extends KernelTestBase {
    * Tests that the preview_image setting must be an existing image file.
    */
   public function testPreviewImagePathIsValidated(): void {
-    $this->installConfig('image');
+    $this->installConfig(['system', 'image']);
 
     // Drupal does not have a hard dependency on the fileinfo extension and
     // implements an extension-based mimetype guesser. Therefore, we must use

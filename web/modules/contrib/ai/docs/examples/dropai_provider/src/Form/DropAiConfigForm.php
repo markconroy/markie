@@ -6,7 +6,6 @@ namespace Drupal\dropai_provider\Form;
 
 use Drupal\ai\AiProviderPluginManager;
 use Drupal\ai\Service\AiProviderFormHelper;
-use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -36,19 +35,11 @@ final class DropAiConfigForm extends ConfigFormBase {
   protected $formHelper;
 
   /**
-   * Module Handler.
-   *
-   * @var \Drupal\Core\Extension\ModuleHandlerInterface
+   * Constructs a new DropAiConfigForm object.
    */
-  protected $moduleHandler;
-
-  /**
-   * Constructs a new AnthropicConfigForm object.
-   */
-  final public function __construct(AiProviderPluginManager $ai_provider_manager, AiProviderFormHelper $form_helper, ModuleHandlerInterface $module_handler) {
+  final public function __construct(AiProviderPluginManager $ai_provider_manager, AiProviderFormHelper $form_helper) {
     $this->aiProviderManager = $ai_provider_manager;
     $this->formHelper = $form_helper;
-    $this->moduleHandler = $module_handler;
   }
 
   /**
@@ -57,8 +48,7 @@ final class DropAiConfigForm extends ConfigFormBase {
   final public static function create(ContainerInterface $container) {
     return new static(
       $container->get('ai.provider'),
-      $container->get('ai.form_helper'),
-      $container->get('module_handler')
+      $container->get('ai.form_helper')
     );
   }
 

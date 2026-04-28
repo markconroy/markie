@@ -4,18 +4,21 @@ declare(strict_types=1);
 
 namespace Drupal\KernelTests\Core\Entity;
 
-use Drupal\Core\Entity\EntityFieldManagerInterface;
-use Drupal\Core\Entity\EntityDefinitionUpdateManagerInterface;
 use Drupal\Core\Entity\ContentEntityTypeInterface;
+use Drupal\Core\Entity\EntityDefinitionUpdateManagerInterface;
+use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Tests\system\Functional\Entity\Traits\EntityDefinitionTestTrait;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the default entity storage schema handler.
- *
- * @group Entity
  */
+#[Group('Entity')]
+#[RunTestsInSeparateProcesses]
 class EntitySchemaTest extends EntityKernelTestBase {
 
   use EntityDefinitionTestTrait;
@@ -106,7 +109,12 @@ class EntitySchemaTest extends EntityKernelTestBase {
     \Drupal::service('field_storage_definition.listener')->onFieldStorageDefinitionCreate($storage_definitions['custom_base_field']);
     \Drupal::service('field_storage_definition.listener')->onFieldStorageDefinitionCreate($storage_definitions['custom_bundle_field']);
     $schema_handler = $this->database->schema();
-    $tables = ['entity_test_update', 'entity_test_update_revision', 'entity_test_update_data', 'entity_test_update_revision_data'];
+    $tables = [
+      'entity_test_update',
+      'entity_test_update_revision',
+      'entity_test_update_data',
+      'entity_test_update_revision_data',
+    ];
     $dedicated_tables = ['entity_test_update__custom_bundle_field', 'entity_test_update_revision__custom_bundle_field'];
 
     // Initially only the base table and the dedicated field data table should
@@ -142,9 +150,8 @@ class EntitySchemaTest extends EntityKernelTestBase {
    *   The ID of the entity type whose schema is being tested.
    * @param string $field_name
    *   The name of the field that is being re-installed.
-   *
-   * @dataProvider providerTestPrimaryKeyUpdate
    */
+  #[DataProvider('providerTestPrimaryKeyUpdate')]
   public function testPrimaryKeyUpdate($entity_type_id, $field_name): void {
     // EntityKernelTestBase::setUp() already installs the schema for the
     // 'entity_test' entity type.
@@ -270,7 +277,7 @@ class EntitySchemaTest extends EntityKernelTestBase {
    * @return array
    *   An array of test cases consisting of an entity type ID and a field name.
    */
-  public static function providerTestPrimaryKeyUpdate() {
+  public static function providerTestPrimaryKeyUpdate(): array {
     // Build up test cases for all possible entity type configurations.
     // For each entity type we test reinstalling each field that is part of
     // any table's primary key.

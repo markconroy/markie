@@ -5,12 +5,15 @@ declare(strict_types=1);
 namespace Drupal\Tests\user\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests validating user modules' configuration.
- *
- * @group user
  */
+#[Group('user')]
+#[RunTestsInSeparateProcesses]
 class UserConfigValidationTest extends KernelTestBase {
 
   /**
@@ -54,9 +57,8 @@ class UserConfigValidationTest extends KernelTestBase {
 
   /**
    * Tests invalid values in 'user.settings' config properties.
-   *
-   * @dataProvider providerTestUserSettings
    */
+  #[DataProvider('providerTestUserSettings')]
   public function testUserSettings($property, $property_value, $expected_message): void {
     $config_name = 'user.settings';
     $config = $this->config($config_name);

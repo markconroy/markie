@@ -213,4 +213,25 @@ interface StreamedChatMessageIteratorInterface extends \IteratorAggregate {
    */
   public function setMetadata(array $metadata): void;
 
+  /**
+   * Get the max buffer size for streaming chunks.
+   *
+   * We buffer them for security reason to look for malicious injections.
+   *
+   * @return int
+   *   The max buffer size.
+   */
+  public function getMaxBufferSize(): int;
+
+  /**
+   * Set the max buffer size for streaming chunks.
+   *
+   * We buffer them for security reason to look for malicious injections. Too
+   * low number may impact security.
+   *
+   * @param int $size
+   *   The max buffer size.
+   */
+  public function setMaxBufferSize(int $size): void;
+
 }

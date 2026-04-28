@@ -8,14 +8,15 @@ use Drupal\Component\Utility\Html;
 use Drupal\Core\Url;
 use Drupal\Tests\BrowserTestBase;
 use Drupal\Tests\taxonomy\Traits\TaxonomyTestTrait;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 // cspell:ignore ragdoll
-
 /**
  * Tests local tasks derived from router and added/altered via hooks.
- *
- * @group Menu
  */
+#[Group('Menu')]
+#[RunTestsInSeparateProcesses]
 class LocalTasksTest extends BrowserTestBase {
 
   use TaxonomyTestTrait;
@@ -170,7 +171,7 @@ class LocalTasksTest extends BrowserTestBase {
     $this->assertEquals('Settings', $result[0]->getText(), 'The settings tab is active.');
     $this->assertEquals('Derive 1', $result[1]->getText(), 'The derive1 tab is active.');
 
-    // Ensures that the local tasks contains the proper 'provider key'
+    // Ensures that the local tasks contains the proper 'provider key'.
     $definitions = $this->container->get('plugin.manager.menu.local_task')->getDefinitions();
     $this->assertEquals('menu_test', $definitions['menu_test.local_task_test_tasks_view']['provider']);
     $this->assertEquals('menu_test', $definitions['menu_test.local_task_test_tasks_edit']['provider']);

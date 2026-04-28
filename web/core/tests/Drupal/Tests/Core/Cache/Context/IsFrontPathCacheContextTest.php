@@ -7,16 +7,19 @@ namespace Drupal\Tests\Core\Cache\Context;
 use Drupal\Core\Cache\Context\IsFrontPathCacheContext;
 use Drupal\Core\Path\PathMatcherInterface;
 use Drupal\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Group;
 use Prophecy\Prophecy\ObjectProphecy;
 
 /**
- * @coversDefaultClass \Drupal\Core\Cache\Context\IsFrontPathCacheContext
- * @group Cache
+ * Tests Drupal\Core\Cache\Context\IsFrontPathCacheContext.
  */
+#[CoversClass(IsFrontPathCacheContext::class)]
+#[Group('Cache')]
 class IsFrontPathCacheContextTest extends UnitTestCase {
 
   /**
-   * @covers ::getContext
+   * Tests get context front.
    */
   public function testGetContextFront(): void {
     $cache_context = new IsFrontPathCacheContext($this->createPathMatcher(TRUE)->reveal());
@@ -24,7 +27,7 @@ class IsFrontPathCacheContextTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::getContext
+   * Tests get context not front.
    */
   public function testGetContextNotFront(): void {
     $cache_context = new IsFrontPathCacheContext($this->createPathMatcher(FALSE)->reveal());

@@ -52,13 +52,13 @@ class BooleanOperator extends FilterPluginBase implements FilterOperatorsInterfa
    *
    * @var bool
    */
-  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName, Drupal.Commenting.VariableComment.Missing
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
   public $accept_null = FALSE;
 
   /**
    * The value title.
    */
-  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName, Drupal.Commenting.VariableComment.Missing
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
   public string $value_value;
 
   /**
@@ -252,7 +252,8 @@ class BooleanOperator extends FilterPluginBase implements FilterOperatorsInterfa
    * {@inheritdoc}
    */
   protected function valueValidate($form, FormStateInterface $form_state) {
-    if ($form_state->getValue(['options', 'value']) == 'All' && !$form_state->isValueEmpty(['options', 'expose', 'required'])) {
+    if ($form_state->getValue(['options', 'value']) == 'All'
+      && !$form_state->isValueEmpty(['options', 'expose', 'required'])) {
       $form_state->setErrorByName('value', $this->t('You must select a value unless this is an non-required exposed filter.'));
     }
   }

@@ -4,7 +4,7 @@ namespace Drupal\views;
 
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
-use Drupal\Core\Entity\EntityTypeManager;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\Sql\SqlContentEntityStorage;
 use Drupal\Core\Field\FieldTypePluginManagerInterface;
 use Drupal\Core\Render\Markup;
@@ -20,7 +20,7 @@ class FieldViewsDataProvider {
   use StringTranslationTrait;
 
   public function __construct(
-    protected readonly EntityTypeManager $entityTypeManager,
+    protected readonly EntityTypeManagerInterface $entityTypeManager,
     protected readonly FieldTypePluginManagerInterface $fieldTypePluginManager,
     protected readonly EntityFieldManagerInterface $entityFieldManager,
   ) {}
@@ -173,22 +173,24 @@ class FieldViewsDataProvider {
       ];
     }
 
-    if ($translation_join_type === 'language_bundle') {
-      $data[$table_alias]['table']['join'][$data_table]['join_id'] = 'field_or_language_join';
-      $data[$table_alias]['table']['join'][$data_table]['extra'][] = [
-        'left_field' => 'langcode',
-        'field' => 'langcode',
-      ];
-      $data[$table_alias]['table']['join'][$data_table]['extra'][] = [
-        'field' => 'bundle',
-        'value' => $untranslatable_config_bundles,
-      ];
-    }
-    elseif ($translation_join_type === 'language') {
-      $data[$table_alias]['table']['join'][$data_table]['extra'][] = [
-        'left_field' => 'langcode',
-        'field' => 'langcode',
-      ];
+    if ($data_table) {
+      if ($translation_join_type === 'language_bundle') {
+        $data[$table_alias]['table']['join'][$data_table]['join_id'] = 'field_or_language_join';
+        $data[$table_alias]['table']['join'][$data_table]['extra'][] = [
+          'left_field' => 'langcode',
+          'field' => 'langcode',
+        ];
+        $data[$table_alias]['table']['join'][$data_table]['extra'][] = [
+          'field' => 'bundle',
+          'value' => $untranslatable_config_bundles,
+        ];
+      }
+      elseif ($translation_join_type === 'language') {
+        $data[$table_alias]['table']['join'][$data_table]['extra'][] = [
+          'left_field' => 'langcode',
+          'field' => 'langcode',
+        ];
+      }
     }
 
     if ($supports_revisions) {
@@ -226,7 +228,7 @@ class FieldViewsDataProvider {
           'field' => 'bundle',
         ];
       }
-      elseif ($translation_join_type === 'language') {
+      elseif ($translation_join_type === 'language' && $entity_revision_data_table) {
         $data[$table_alias]['table']['join'][$entity_revision_data_table]['extra'][] = [
           'left_field' => 'langcode',
           'field' => 'langcode',
@@ -509,7 +511,7 @@ class FieldViewsDataProvider {
    * @param \Drupal\field\FieldStorageConfigInterface $field_storage
    *   The field storage definition.
    *
-   * @return \Drupal\Core\Entity\Sql\SqlContentEntityStorage|bool
+   * @return \Drupal\Core\Entity\Sql\SqlContentEntityStorage|false
    *   Returns the entity type storage if supported and FALSE otherwise.
    */
   public function getSqlStorageForField(FieldStorageConfigInterface $field_storage): SqlContentEntityStorage|bool {

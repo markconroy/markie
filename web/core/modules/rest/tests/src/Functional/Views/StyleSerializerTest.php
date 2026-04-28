@@ -12,16 +12,19 @@ use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\Tests\system\Functional\Cache\AssertPageCacheContextsAndTagsTrait;
 use Drupal\Tests\views\Functional\ViewTestBase;
 use Drupal\views\Views;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the serializer style plugin.
  *
- * @group rest
  * @see \Drupal\rest\Plugin\views\display\RestExport
  * @see \Drupal\rest\Plugin\views\style\Serializer
  * @see \Drupal\rest\Plugin\views\row\DataEntityRow
  * @see \Drupal\rest\Plugin\views\row\DataFieldRow
  */
+#[Group('rest')]
+#[RunTestsInSeparateProcesses]
 class StyleSerializerTest extends ViewTestBase {
 
   use AssertPageCacheContextsAndTagsTrait;
@@ -50,7 +53,14 @@ class StyleSerializerTest extends ViewTestBase {
    *
    * @var array
    */
-  public static $testViews = ['test_serializer_display_field', 'test_serializer_display_entity', 'test_serializer_display_entity_translated', 'test_serializer_node_display_field', 'test_serializer_node_exposed_filter', 'test_serializer_shared_path'];
+  public static $testViews = [
+    'test_serializer_display_field',
+    'test_serializer_display_entity',
+    'test_serializer_display_entity_translated',
+    'test_serializer_node_display_field',
+    'test_serializer_node_exposed_filter',
+    'test_serializer_shared_path',
+  ];
 
   /**
    * A user with permissions to look at test entity and configure views.
@@ -261,7 +271,14 @@ class StyleSerializerTest extends ViewTestBase {
     $this->assertSame($expected, $result, 'Querying a view with no exposed filter returns all nodes.');
 
     // Test that title starts with 'Node 11' query finds 2 of the 3 nodes.
-    $result = Json::decode($this->drupalGet('test/serialize/node-exposed-filter', ['query' => ['_format' => 'json', 'title' => 'Node 11']]));
+    $result = Json::decode(
+      $this->drupalGet('test/serialize/node-exposed-filter', [
+        'query' => [
+          '_format' => 'json',
+          'title' => 'Node 11',
+        ],
+      ])
+    );
 
     $expected = [
       0 => [

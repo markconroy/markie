@@ -7,12 +7,14 @@ namespace Drupal\Tests\config\Functional;
 use Drupal\Core\Config\InstallStorage;
 use Drupal\Core\Serialization\Yaml;
 use Drupal\Tests\BrowserTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the user interface for importing configuration.
- *
- * @group config
  */
+#[Group('config')]
+#[RunTestsInSeparateProcesses]
 class ConfigImportUITest extends BrowserTestBase {
 
   /**
@@ -327,7 +329,7 @@ class ConfigImportUITest extends BrowserTestBase {
     // Verify diff colors are displayed.
     $this->assertSession()->elementsCount('xpath', '//table[contains(@class, "diff")]', 1);
 
-    // Reset data back to original, and remove a key
+    // Reset data back to original, and remove a key.
     $sync_data = $original_data;
     unset($sync_data[$remove_key]);
     $sync->write($config_name, $sync_data);
@@ -340,7 +342,7 @@ class ConfigImportUITest extends BrowserTestBase {
     // Removed key is escaped.
     $this->assertSession()->pageTextContains("404: '<em>herp</em>'");
 
-    // Reset data back to original and add a key
+    // Reset data back to original and add a key.
     $sync_data = $original_data;
     $sync_data[$add_key] = $add_data;
     $sync->write($config_name, $sync_data);

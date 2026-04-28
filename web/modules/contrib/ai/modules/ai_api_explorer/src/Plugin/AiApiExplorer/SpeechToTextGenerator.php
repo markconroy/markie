@@ -76,7 +76,7 @@ final class SpeechToTextGenerator extends AiApiExplorerPluginBase {
    */
   public function getResponse(array &$form, FormStateInterface $form_state): array {
     try {
-      $provider = $this->aiProviderHelper->generateAiProviderFromFormSubmit($form, $form_state, 'speech_to_text', 'speech_to_text');
+      $provider = $this->aiProviderHelper->generateAiProviderFromFormSubmit($form, $form_state, 'speech_to_text', 'stt');
       $audio_file = $this->generateFile();
 
       if (!$audio_file) {
@@ -100,7 +100,7 @@ final class SpeechToTextGenerator extends AiApiExplorerPluginBase {
       }
 
       $input = new SpeechToTextInput($audio_file);
-      $transcription = $provider->speechToText($input, $form_state->getValue('speech_to_text_ai_model'), ['ai_api_explorer'])->getNormalized();
+      $transcription = $provider->speechToText($input, $form_state->getValue('stt_ai_model'), ['ai_api_explorer'])->getNormalized();
 
       if (!empty($transcription) && is_string($transcription)) {
         $form['right']['response']['#context']['ai_response']['response'] = [

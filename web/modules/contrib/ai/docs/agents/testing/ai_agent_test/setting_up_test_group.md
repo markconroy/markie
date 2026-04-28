@@ -1,6 +1,6 @@
 # Setting up a Test Group
 
-When you have collected enough tests, to be a logical mass, you can setup a Test Group, which is a collection of tests that can be run together. This is useful for testing an agent's performance across multiple scenarios and ensuring it meets a certain success threshold over different providers and models.
+When you have collected enough tests, to be a logical mass, you can set up a Test Group, which is a collection of tests that can be run together. This is useful for testing an agent's performance across multiple scenarios and ensuring it meets a certain success threshold over different providers and models.
 
 You start by going to the Test Groups page (`/admin/content/ai-agents-test/group`), and clicking on the "Add AI Agents Test Group" button.
 

@@ -13,12 +13,14 @@ use Drupal\entity_test\Entity\EntityTestBaseFieldDisplay;
 use Drupal\entity_test\EntityTestHelper;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests field form handling.
- *
- * @group field
  */
+#[Group('field')]
+#[RunTestsInSeparateProcesses]
 class FormTest extends FieldTestBase {
 
   /**
@@ -138,7 +140,7 @@ class FormTest extends FieldTestBase {
     $this->assertSession()->pageTextContains("{$this->field['label']} does not accept the value -1.");
     // @todo check that the correct field is flagged for error.
 
-    // Create an entity
+    // Create an entity.
     $value = mt_rand(1, 127);
     $edit = [
       "{$field_name}[0][value]" => $value,
@@ -233,7 +235,7 @@ class FormTest extends FieldTestBase {
     $this->submitForm($edit, 'Save');
     $this->assertSession()->pageTextContains("{$this->field['label']} field is required.");
 
-    // Create an entity
+    // Create an entity.
     $value = mt_rand(1, 127);
     $edit = [
       "{$field_name}[0][value]" => $value,
@@ -316,7 +318,7 @@ class FormTest extends FieldTestBase {
       $pattern[$weight] = "<input [^>]*value=\"$value\" [^>]*";
     }
 
-    // Press 'add more' button -> 4 widgets
+    // Press 'add more' button -> 4 widgets.
     $this->submitForm($edit, 'Add another item');
     for ($delta = 0; $delta <= $delta_range; $delta++) {
       $this->assertSession()->fieldValueEquals("{$field_name}[$delta][value]", $values[$delta]);
@@ -347,7 +349,7 @@ class FormTest extends FieldTestBase {
     // Submit: check that the entity is updated with correct values
     // Re-submit: check that the field can be emptied.
 
-    // Test with several multiple fields in a form
+    // Test with several multiple fields in a form.
   }
 
   /**

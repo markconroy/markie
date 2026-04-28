@@ -75,35 +75,6 @@ class MediaHooks {
   }
 
   /**
-   * Implements hook_theme().
-   */
-  #[Hook('theme')]
-  public function theme() : array {
-    return [
-      'media' => [
-        'render element' => 'elements',
-      ],
-      'media_reference_help' => [
-        'render element' => 'element',
-        'base hook' => 'field_multiple_value_form',
-      ],
-      'media_oembed_iframe' => [
-        'variables' => [
-          'resource' => NULL,
-          'media' => NULL,
-          'placeholder_token' => '',
-        ],
-      ],
-      'media_embed_error' => [
-        'variables' => [
-          'message' => NULL,
-          'attributes' => [],
-        ],
-      ],
-    ];
-  }
-
-  /**
    * Implements hook_entity_access().
    */
   #[Hook('entity_access')]
@@ -195,10 +166,10 @@ class MediaHooks {
       $elements['#media_help']['#media_add_help'] = $this->t('Create your media on the <a href=":add_page" target="_blank">media add page</a> (opens a new window), then add it by name to the field below.', [':add_page' => $add_url]);
     }
     $elements['#theme'] = 'media_reference_help';
-    // @todo template_preprocess_field_multiple_value_form() assumes this key
-    //   exists, but it does not exist in the case of a single widget that
-    //   accepts multiple values. This is for some reason necessary to use
-    //   our template for the entity_autocomplete_tags widget.
+    // @todo \Drupal\Core\Field\FieldPreprocess::preprocessFieldMultipleValueForm()
+    //   assumes this key exists, but it does not exist in the case of a single
+    //   widget that accepts multiple values. This is for some reason necessary
+    //   to use our template for the entity_autocomplete_tags widget.
     //   Research and resolve this in https://www.drupal.org/node/2943020.
     if (empty($elements['#cardinality_multiple'])) {
       $elements['#cardinality_multiple'] = NULL;
@@ -227,10 +198,7 @@ class MediaHooks {
       if ($overview_url->access()) {
         $elements['#media_help']['#media_list_link'] = $this->t('See the <a href=":list_url" target="_blank">media list</a> (opens a new window) to help locate media.', [':list_url' => $overview_url->toString()]);
       }
-      $all_bundles = \Drupal::service('entity_type.bundle.info')->getBundleInfo('media');
-      $bundle_labels = array_map(function ($bundle) use ($all_bundles) {
-          return $all_bundles[$bundle]['label'];
-      }, $allowed_bundles);
+      $bundle_labels = array_intersect_key(\Drupal::service('entity_type.bundle.info')->getBundleLabels('media'), $allowed_bundles);
       $elements['#media_help']['#allowed_types_help'] = $this->t('Allowed media types: %types', ['%types' => implode(", ", $bundle_labels)]);
     }
   }
@@ -253,8 +221,12 @@ class MediaHooks {
   #[Hook('form_filter_format_edit_form_alter')]
   public function formFilterFormatEditFormAlter(array &$form, FormStateInterface $form_state, $form_id) : void {
     // Add an additional validate callback so we can ensure the order of filters
-    // is correct.
-    $form['#validate'][] = 'media_filter_format_edit_form_validate';
+    // is correct, this is not necessary when using ckeditor5 since allowed tags
+    // are added automatically by CKEditor 5. The validator would conflict with
+    // the automatic addition of those allowed tags.
+    if ($form_state->getValue('editor') !== 'ckeditor5') {
+      $form['#validate'][] = 'media_filter_format_edit_form_validate';
+    }
   }
 
   /**
@@ -263,8 +235,12 @@ class MediaHooks {
   #[Hook('form_filter_format_add_form_alter')]
   public function formFilterFormatAddFormAlter(array &$form, FormStateInterface $form_state, $form_id) : void {
     // Add an additional validate callback so we can ensure the order of filters
-    // is correct.
-    $form['#validate'][] = 'media_filter_format_edit_form_validate';
+    // is correct, this is not necessary when using ckeditor5 since allowed tags
+    // are added automatically by CKEditor 5. The validator would conflict with
+    // the automatic addition of those allowed tags.
+    if ($form_state->getValue('editor') !== 'ckeditor5') {
+      $form['#validate'][] = 'media_filter_format_edit_form_validate';
+    }
   }
 
   /**

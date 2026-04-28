@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\package_manager\Kernel;
 
+use Drupal\Core\Recipe\Recipe;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\fixture_manipulator\ActiveFixtureManipulator;
 use Drupal\package_manager\ComposerInspector;
@@ -11,14 +12,21 @@ use Drupal\package_manager\Event\PostCreateEvent;
 use Drupal\package_manager\Event\PreApplyEvent;
 use Drupal\package_manager\PathLocator;
 use Drupal\package_manager\ValidationResult;
+use Drupal\package_manager\Validator\OverwriteExistingPackagesValidator;
 use Drupal\package_manager\Validator\SupportedReleaseValidator;
 use Drupal\Tests\package_manager\Traits\ComposerInstallersTrait;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
- * @covers \Drupal\package_manager\Validator\OverwriteExistingPackagesValidator
- * @group package_manager
+ * Tests Overwrite Existing Packages Validator.
+ *
  * @internal
  */
+#[Group('package_manager')]
+#[CoversClass(OverwriteExistingPackagesValidator::class)]
+#[RunTestsInSeparateProcesses]
 class OverwriteExistingPackagesValidatorTest extends PackageManagerKernelTestBase {
 
   use ComposerInstallersTrait;
@@ -156,6 +164,34 @@ class OverwriteExistingPackagesValidatorTest extends PackageManagerKernelTestBas
       ]),
     ];
     $this->assertResults($expected_results, PreApplyEvent::class);
+  }
+
+  /**
+   * Tests that things in the `recipes` directory can be overwritten.
+   */
+  public function testRecipeOverwriteIsAllowed(): void {
+    (new ActiveFixtureManipulator())
+      ->addProjectAtPath('recipes/test_recipe', file_name: 'recipe.yml')
+      ->commitChanges();
+    $stage_manipulator = $this->getStageFixtureManipulator();
+
+    // This should not raise an error because, even though it's going to
+    // overwrite an existing directory, it's at a path which specifically allows
+    // that.
+    $stage_manipulator->addPackage(
+      [
+        'name' => 'drupal/test_recipe',
+        'version' => '1.0.0',
+        'type' => Recipe::COMPOSER_PROJECT_TYPE,
+      ],
+      FALSE,
+      TRUE
+    );
+    $installer_paths = [
+      'recipes/test_recipe' => ['drupal/test_recipe'],
+    ];
+    $this->setInstallerPaths($installer_paths, $this->container->get(PathLocator::class)->getProjectRoot());
+    $this->assertResults([], PreApplyEvent::class);
   }
 
 }

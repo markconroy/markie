@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * Test library preprocess hook.
+ */
+
+/**
  * Implements hook_preprocess_html().
  */
 function upgrade_status_test_library_preprocess_html(&$variables) {

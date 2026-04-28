@@ -10,16 +10,21 @@ use Drupal\Core\Field\Entity\BaseFieldOverride;
 use Drupal\Core\Language\Language;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\language\Entity\ContentLanguageSettings;
+use Drupal\language\Form\ContentLanguageSettingsForm;
 use Drupal\Tests\BrowserTestBase;
 use Drupal\Tests\field_ui\Traits\FieldUiTestTrait;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\CoversFunction;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the content translation settings UI.
- *
- * @covers \Drupal\language\Form\ContentLanguageSettingsForm
- * @covers ::_content_translation_form_language_content_settings_form_alter
- * @group content_translation
  */
+#[Group('content_translation')]
+#[CoversClass(ContentLanguageSettingsForm::class)]
+#[CoversFunction('_content_translation_form_language_content_settings_form_alter')]
+#[RunTestsInSeparateProcesses]
 class ContentTranslationSettingsTest extends BrowserTestBase {
 
   use CommentTestTrait;

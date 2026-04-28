@@ -31,16 +31,16 @@ class HelpHooks {
         ]) . '</li>';
         $output .= '<li>' . $this->t('<strong>Enable additional functionality</strong> Next, visit the <a href=":modules">Extend page</a> and install modules that suit your specific needs. You can find additional modules at the <a href=":download_modules">Drupal.org modules page</a>.', [
           ':modules' => Url::fromRoute('system.modules_list')->toString(),
-          ':download_modules' => 'https://www.drupal.org/project/modules',
+          ':download_modules' => 'https://www.drupal.org/project/project_module',
         ]) . '</li>';
         $output .= '<li>' . $this->t('<strong>Customize your website design</strong> To change the "look and feel" of your website, visit the <a href=":themes">Appearance page</a>. You may choose from one of the included themes or download additional themes from the <a href=":download_themes">Drupal.org themes page</a>.', [
           ':themes' => Url::fromRoute('system.themes_page')->toString(),
-          ':download_themes' => 'https://www.drupal.org/project/themes',
+          ':download_themes' => 'https://www.drupal.org/project/project_theme',
         ]) . '</li>';
         // Display a link to the create content page if Node module is
         // installed.
         if (\Drupal::moduleHandler()->moduleExists('node')) {
-          $output .= '<li>' . $this->t('<strong>Start posting content</strong> Finally, you may <a href=":content">add new content</a> to your website.', [':content' => Url::fromRoute('node.add_page')->toString()]) . '</li>';
+          $output .= '<li>' . $this->t('<strong>Start posting content</strong> Finally, you may <a href=":content">add new content</a> to your website.', [':content' => Url::fromRoute('entity.node.add_page')->toString()]) . '</li>';
         }
         $output .= '</ol>';
         $output .= '<p>' . $this->t('For more information, refer to the help listed on this page or to the <a href=":docs">online documentation</a> and <a href=":support">support</a> pages at <a href=":drupal">drupal.org</a>.', [

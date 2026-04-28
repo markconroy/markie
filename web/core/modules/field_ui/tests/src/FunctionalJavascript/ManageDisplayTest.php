@@ -8,14 +8,15 @@ use Behat\Mink\Element\NodeElement;
 use Drupal\Core\Entity\Entity\EntityFormDisplay;
 use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
 use Drupal\Tests\field_ui\Traits\FieldUiJSTestTrait;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 // cspell:ignore onewidgetfield
-
 /**
  * Tests the Field UI "Manage display" and "Manage form display" screens.
- *
- * @group field_ui
  */
+#[Group('field_ui')]
+#[RunTestsInSeparateProcesses]
 class ManageDisplayTest extends WebDriverTestBase {
 
   use FieldUiJSTestTrait;
@@ -179,7 +180,7 @@ class ManageDisplayTest extends WebDriverTestBase {
     // Submit the form and assert that
     // hook_field_formatter_settings_summary_alter() is called.
     $button_save->click();
-    $assert_session->responseContains('field_test_field_formatter_settings_summary_alter');
+    $assert_session->waitForText('field_test_field_formatter_settings_summary_alter');
 
     // Open the settings form for the test field.
     $field_test_settings->click();
@@ -349,7 +350,7 @@ class ManageDisplayTest extends WebDriverTestBase {
     $this->assertEquals($current_setting_value, $setting_value, 'The setting was updated.');
 
     // Assert that hook_field_widget_settings_summary_alter() is called.
-    $assert_session->responseContains('field_test_field_widget_settings_summary_alter');
+    $assert_session->waitForText('field_test_field_widget_settings_summary_alter');
 
     $field_test_settings->click();
     $assert_session->assertExpectedAjaxRequest(1);
@@ -402,7 +403,9 @@ class ManageDisplayTest extends WebDriverTestBase {
     $field_test_drag_handle = $page->find('css', '#field-test .tabledrag-handle');
     $field_region = $page->findField('fields[field_test][region]');
     $weight_toggle = $page->find('css', '.tabledrag-toggle-weight');
-    $target = $page->find('css', '.region-hidden-message');
+    // The promote field is hidden by default, dragging field_test to it will
+    // hide field_test.
+    $target = $page->find('css', '#promote');
 
     // Checks if the select elements contain the specified options.
     $this->assertFieldSelectOptions($field_test_type, [

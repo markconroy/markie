@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace Drupal\KernelTests\Core\Database;
 
 use Drupal\Core\Database\IntegrityConstraintViolationException;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the insert builder.
- *
- * @group Database
  */
+#[Group('Database')]
+#[RunTestsInSeparateProcesses]
 class InsertTest extends DatabaseTestBase {
 
   /**
@@ -168,7 +170,7 @@ class InsertTest extends DatabaseTestBase {
     // INSERT INTO test (age, name, job)
     // SELECT tp.age AS age, tp.name AS name, tp.job AS job
     // FROM test_people tp
-    // WHERE tp.name = 'Meredith'
+    // WHERE tp.name = 'Meredith'.
     $this->connection->insert('test')
       ->from($query)
       ->execute();
@@ -189,7 +191,7 @@ class InsertTest extends DatabaseTestBase {
     // INSERT INTO test_people_copy
     // SELECT *
     // FROM test_people tp
-    // WHERE tp.name = 'Meredith'
+    // WHERE tp.name = 'Meredith'.
     $this->connection->insert('test_people_copy')
       ->from($query)
       ->execute();
@@ -232,6 +234,49 @@ class InsertTest extends DatabaseTestBase {
       ->fields(['name'])
       ->values(['name' => 'Elvis'])
       ->execute();
+  }
+
+  /**
+   * Tests inserting from a select into a table that has a serial primary key.
+   */
+  public function testInsertFromWithSerialKey(): void {
+    // Create a copy of the test table.
+    $schema = database_test_schema();
+    $this->connection->schema()->createTable('test_backup', $schema['test']);
+
+    $this->connection->insert('test_backup')->from($this->connection->select('test')->fields('test'))->execute();
+    $this->assertSame(4, (int) $this->connection->select('test_backup')->countQuery()->execute()->fetchField());
+    $this->connection->insert('test_backup')->fields([
+      'name' => 'Larry',
+      'age' => '30',
+    ])->execute();
+    $this->assertSame(5, (int) $this->connection->select('test_backup')->countQuery()->execute()->fetchField());
+
+    // Recreate table to reset the serial counters.
+    $this->connection->schema()->dropTable('test_backup');
+    $this->connection->schema()->createTable('test_backup', $schema['test']);
+
+    // Add fields to the select query, so that the primary key is included.
+    $this->connection->insert('test_backup')->from($this->connection->select('test')->fields('test', ['id', 'name']))->execute();
+    $this->assertSame(4, (int) $this->connection->select('test_backup')->countQuery()->execute()->fetchField());
+    $this->connection->insert('test_backup')->fields([
+      'name' => 'Larry',
+      'age' => '30',
+    ])->execute();
+    $this->assertSame(5, (int) $this->connection->select('test_backup')->countQuery()->execute()->fetchField());
+
+    // Recreate table to reset the serial counters.
+    $this->connection->schema()->dropTable('test_backup');
+    $this->connection->schema()->createTable('test_backup', $schema['test']);
+
+    // Add fields to the select query, so that the primary key is included.
+    $this->connection->insert('test_backup')->from($this->connection->select('test')->fields('test', ['name']))->execute();
+    $this->assertSame(4, (int) $this->connection->select('test_backup')->countQuery()->execute()->fetchField());
+    $this->connection->insert('test_backup')->fields([
+      'name' => 'Larry',
+      'age' => '30',
+    ])->execute();
+    $this->assertSame(5, (int) $this->connection->select('test_backup')->countQuery()->execute()->fetchField());
   }
 
 }

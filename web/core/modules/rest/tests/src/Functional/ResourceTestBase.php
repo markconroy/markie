@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\rest\Functional;
 
+use Drupal\Component\Utility\SortArray;
 use Drupal\Core\Url;
 use Drupal\rest\RestResourceConfigInterface;
 use Drupal\Tests\ApiRequestTrait;
@@ -149,7 +150,11 @@ abstract class ResourceTestBase extends BrowserTestBase {
    * @param string[] $methods
    *   The allowed methods for this resource.
    */
-  protected function provisionResource($formats = [], $authentication = [], array $methods = ['GET', 'POST', 'PATCH', 'DELETE']) {
+  protected function provisionResource(
+    $formats = [],
+    $authentication = [],
+    array $methods = ['GET', 'POST', 'PATCH', 'DELETE'],
+  ) {
     $this->resourceConfigStorage->create([
       'id' => static::$resourceConfigId,
       'granularity' => RestResourceConfigInterface::RESOURCE_GRANULARITY,
@@ -358,7 +363,7 @@ abstract class ResourceTestBase extends BrowserTestBase {
       // sets it to 'text/html' by default. We also cannot detect the presence
       // of Apache either here in the CLI. For now having this documented here
       // is all we can do.
-      // $this->assertFalse($response->hasHeader('Content-Type'));
+      // "$this->assertFalse($response->hasHeader('Content-Type'));".
       $this->assertSame('', (string) $response->getBody());
     }
     else {
@@ -437,15 +442,7 @@ abstract class ResourceTestBase extends BrowserTestBase {
    *   An array to sort.
    */
   protected static function recursiveKSort(array &$array) {
-    // First, sort the main array.
-    ksort($array);
-
-    // Then check for child arrays.
-    foreach ($array as &$value) {
-      if (is_array($value)) {
-        static::recursiveKSort($value);
-      }
-    }
+    SortArray::sortByKeyRecursive($array);
   }
 
 }

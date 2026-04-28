@@ -63,6 +63,9 @@ use Drupal\Core\Serialization\Attribute\JsonSchema;
  *   // Produces <input value="Highlight the &lt;em&gt; tag">
  * @endcode
  *
+ * @implements \ArrayAccess<string, \Drupal\Core\Template\AttributeValueBase>
+ * @implements \IteratorAggregate<string, \Drupal\Core\Template\AttributeValueBase>
+ *
  * @see \Drupal\Component\Utility\Html::escape()
  * @see \Drupal\Component\Render\PlainTextOutput::renderFromHtml()
  * @see \Drupal\Component\Utility\UrlHelper::stripDangerousProtocols()
@@ -72,7 +75,7 @@ class Attribute implements \ArrayAccess, \IteratorAggregate, MarkupInterface {
   /**
    * Stores the attribute data.
    *
-   * @var \Drupal\Core\Template\AttributeValueBase[]
+   * @var array<string, \Drupal\Core\Template\AttributeValueBase>
    */
   protected $storage = [];
 
@@ -145,8 +148,8 @@ class Attribute implements \ArrayAccess, \IteratorAggregate, MarkupInterface {
     elseif (is_bool($value)) {
       $value = new AttributeBoolean($name, $value);
     }
-    // As a development aid, we allow the value to be a safe string object.
-    elseif ($value instanceof MarkupInterface) {
+    // As a development aid, we allow the value to be any Stringable object.
+    elseif ($value instanceof \Stringable) {
       // Attributes are not supposed to display HTML markup, so we just convert
       // the value to plain text.
       $value = PlainTextOutput::renderFromHtml($value);
@@ -326,6 +329,9 @@ class Attribute implements \ArrayAccess, \IteratorAggregate, MarkupInterface {
     $return = '';
     /** @var \Drupal\Core\Template\AttributeValueBase $value */
     foreach ($this->storage as $value) {
+      if (!$value instanceof AttributeValueBase) {
+        throw new \RuntimeException(sprintf('Unexpected type for $value (%s).', get_debug_type($value)));
+      }
       $rendered = $value->render();
       if ($rendered) {
         $return .= ' ' . $rendered;
@@ -359,7 +365,10 @@ class Attribute implements \ArrayAccess, \IteratorAggregate, MarkupInterface {
   }
 
   /**
-   * {@inheritdoc}
+   * Retrieves the iterator for the object.
+   *
+   * @return \ArrayIterator<string, \Drupal\Core\Template\AttributeValueBase>
+   *   The iterator.
    */
   public function getIterator(): \ArrayIterator {
     return new \ArrayIterator($this->storage);

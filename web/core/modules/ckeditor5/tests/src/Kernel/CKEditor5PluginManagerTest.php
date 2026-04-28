@@ -13,24 +13,27 @@ use Drupal\ckeditor5\Plugin\CKEditor5PluginDefinition;
 use Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException;
 use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\editor\Entity\Editor;
-use Drupal\KernelTests\KernelTestBase;
 use Drupal\filter\Entity\FilterFormat;
+use Drupal\KernelTests\KernelTestBase;
 use Drupal\Tests\SchemaCheckTestTrait;
 use Drupal\TestTools\Random;
 use org\bovigo\vfs\vfsStream;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\IgnoreDeprecations;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\FrozenParameterBag;
 use Symfony\Component\Yaml\Yaml;
 
 // cspell:ignore layercake everytextcontainer justheading
-
 /**
  * Tests different ways of enabling CKEditor 5 plugins.
  *
- * @group ckeditor5
  * @internal
  */
+#[Group('ckeditor5')]
+#[RunTestsInSeparateProcesses]
 class CKEditor5PluginManagerTest extends KernelTestBase {
 
   use SchemaCheckTestTrait;
@@ -170,6 +173,10 @@ YAML,
     // @see \Drupal\Core\DrupalKernel::guessApplicationRoot()
     $container->getDefinition('module_handler')->setArgument(0, '%app.root%');
 
+    // The key value service is set directly in kernel tests, and set as
+    // synthetic and then can't be reconstructed.
+    $container->set('keyvalue', $this->container->get('keyvalue'));
+
     // To discover per-test case config schema YAML files, work around the
     // static file cache in \Drupal\Core\Extension\ExtensionDiscovery. There is
     // no work-around that allows using both the files on disk and some in vfs.
@@ -192,9 +199,11 @@ YAML,
   }
 
   /**
-   * @covers \Drupal\ckeditor5\Plugin\CKEditor5PluginManager::processDefinition
-   * @dataProvider providerTestInvalidPluginDefinitions
+   * Tests invalid plugin definitions.
+   *
+   * @legacy-covers \Drupal\ckeditor5\Plugin\CKEditor5PluginManager::processDefinition
    */
+  #[DataProvider('providerTestInvalidPluginDefinitions')]
   public function testInvalidPluginDefinitions(string $yaml, ?string $expected_exception = NULL, ?string $expected_message = NULL, ?array $additional_files = []): void {
     if ($expected_exception) {
       $this->expectException($expected_exception);
@@ -1054,9 +1063,8 @@ PHP,
 
   /**
    * Tests detection of invalid CKEditor5PluginElementsSubsetInterface classes.
-   *
-   * @dataProvider providerProvidedElementsInvalidElementSubset
    */
+  #[DataProvider('providerProvidedElementsInvalidElementSubset')]
   public function testProvidedElementsInvalidElementSubset(array $configured_subset, string $expected_exception_message): void {
     $this->enableModules(['ckeditor5_plugin_elements_subset']);
 
@@ -1292,9 +1300,9 @@ PHP,
    *   The expected allowed tags and attributes as a string, typically used
    *   in the filter_html "Allowed tags" field.
    *
-   * @covers \Drupal\ckeditor5\Plugin\CKEditor5PluginManager::getProvidedElements
-   * @dataProvider providerTestProvidedElements
+   * @legacy-covers \Drupal\ckeditor5\Plugin\CKEditor5PluginManager::getProvidedElements
    */
+  #[DataProvider('providerTestProvidedElements')]
   public function testProvidedElements(array $plugins, array $text_editor_settings, array $expected_elements, string $expected_readable_string): void {
     $this->enableModules(['ckeditor5_plugin_elements_test']);
 
@@ -1541,10 +1549,9 @@ PHP,
    * When multiple plugins support a given tag, this method decides which plugin
    * to return based on which provides the broadest attribute support.
    *
-   * @covers \Drupal\ckeditor5\Plugin\CKEditor5PluginManager::findPluginSupportingElement
-   *
-   * @dataProvider providerTestPluginSupportingElement
+   * @legacy-covers \Drupal\ckeditor5\Plugin\CKEditor5PluginManager::findPluginSupportingElement
    */
+  #[DataProvider('providerTestPluginSupportingElement')]
   public function testPluginSupportingElement(string $tag, ?string $expected_plugin_id): void {
     $this->enableModules(['ckeditor5_definition_supporting_element']);
     $plugin_id = $this->manager->findPluginSupportingElement($tag);
@@ -1596,7 +1603,9 @@ PHP,
   }
 
   /**
-   * @covers \Drupal\ckeditor5\Plugin\CKEditor5PluginDefinition::validateCKEditor5Aspects
+   * Tests automatic link decorators disallowed.
+   *
+   * @legacy-covers \Drupal\ckeditor5\Plugin\CKEditor5PluginDefinition::validateCKEditor5Aspects
    */
   public function testAutomaticLinkDecoratorsDisallowed(): void {
     $this->expectException(InvalidPluginDefinitionException::class);
@@ -1608,7 +1617,9 @@ PHP,
   }
 
   /**
-   * @covers \Drupal\ckeditor5\Plugin\CKEditor5PluginDefinition::validateCKEditor5Aspects
+   * Tests external link automatic link decorator disallowed.
+   *
+   * @legacy-covers \Drupal\ckeditor5\Plugin\CKEditor5PluginDefinition::validateCKEditor5Aspects
    */
   public function testExternalLinkAutomaticLinkDecoratorDisallowed(): void {
     $this->expectException(InvalidPluginDefinitionException::class);
@@ -1620,10 +1631,12 @@ PHP,
   }
 
   /**
-   * @covers \Drupal\ckeditor5\Plugin\CKEditor5PluginManager::getDiscovery
-   * @dataProvider providerTestDerivedPluginDefinitions
-   * @group legacy
+   * Tests derived plugin definitions.
+   *
+   * @legacy-covers \Drupal\ckeditor5\Plugin\CKEditor5PluginManager::getDiscovery
    */
+  #[DataProvider('providerTestDerivedPluginDefinitions')]
+  #[IgnoreDeprecations]
   public function testDerivedPluginDefinitions(string $yaml, ?string $expected_exception = NULL, ?string $expected_message = NULL, array $additional_files = [], ?array $expected_derived_plugin_definitions = NULL, ?string $expected_deprecation_message = NULL): void {
     if ($expected_exception) {
       $this->expectException($expected_exception);

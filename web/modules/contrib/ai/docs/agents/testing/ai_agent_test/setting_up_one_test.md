@@ -1,6 +1,6 @@
 # Setting up one test
 
-Tests are located under `/admin/content/ai-agents-test` and can be reach under `content` in the admin menu.
+Tests are located under `/admin/content/ai-agents-test` and can be reached under `content` in the admin menu.
 
 In there you reach the form by clicking the `Add AI Agents Test` button.
 
@@ -22,7 +22,7 @@ This is the agent that the test will be run against. You can select any agent th
 The history checkbox, determines if the test should be run with a conversation history or not. The rule is that agents that are called by orchestration agents, usually do not need history, while agents or assistants that are called by end-users, usually do need history. This is because the orchestration agents usually have all the context they need to make a decision, while end-user agents usually need to remember the conversation to be able to answer correctly.
 
 #### Instructions
-If you do not check the history checkbox, you can add one single instructions that will be used to set the context for the test.
+If you do not check the history checkbox, you can add one single instruction that will be used to set the context for the test.
 
 #### Chat History Role
 If you do check the history checkbox, you can add as many messages as you want to the chat history. The role is used to determine if the message is from the user or the agent. This is important for the agent to understand who is speaking and what context it has - you can check AI logs to see how much context is given at any time from for instance a Chatbot, to replicate this.

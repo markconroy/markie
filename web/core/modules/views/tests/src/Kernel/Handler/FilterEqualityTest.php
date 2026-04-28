@@ -6,18 +6,15 @@ namespace Drupal\Tests\views\Kernel\Handler;
 
 use Drupal\Tests\views\Kernel\ViewsKernelTestBase;
 use Drupal\views\Views;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the core Drupal\views\Plugin\views\filter\Equality handler.
- *
- * @group views
  */
+#[Group('views')]
+#[RunTestsInSeparateProcesses]
 class FilterEqualityTest extends ViewsKernelTestBase {
-
-  /**
-   * {@inheritdoc}
-   */
-  protected static $modules = ['system'];
 
   /**
    * Views used by this test.
@@ -51,7 +48,7 @@ class FilterEqualityTest extends ViewsKernelTestBase {
     $view = Views::getView('test_view');
     $view->setDisplay();
 
-    // Change the filtering
+    // Change the filtering.
     $view->displayHandlers->get('default')->overrideOption('filters', [
       'name' => [
         'id' => 'name',
@@ -80,7 +77,7 @@ class FilterEqualityTest extends ViewsKernelTestBase {
     $view = Views::getView('test_view');
     $view->newDisplay('page', 'Page', 'page_1');
 
-    // Filter: Name, Operator: =, Value: Ringo
+    // Filter: Name, Operator: =, Value: Ringo.
     $filters['name']['group_info']['default_group'] = 1;
     $view->setDisplay('page_1');
     $view->displayHandlers->get('page_1')->overrideOption('filters', $filters);
@@ -102,7 +99,7 @@ class FilterEqualityTest extends ViewsKernelTestBase {
     $view = Views::getView('test_view');
     $view->setDisplay();
 
-    // Change the filtering
+    // Change the filtering.
     $view->displayHandlers->get('default')->overrideOption('filters', [
       'name' => [
         'id' => 'name',
@@ -140,7 +137,7 @@ class FilterEqualityTest extends ViewsKernelTestBase {
     $view = Views::getView('test_view');
     $view->newDisplay('page', 'Page', 'page_1');
 
-    // Filter: Name, Operator: !=, Value: Ringo
+    // Filter: Name, Operator: !=, Value: Ringo.
     $filters['name']['group_info']['default_group'] = 2;
     $view->setDisplay('page_1');
     $view->displayHandlers->get('page_1')->overrideOption('filters', $filters);

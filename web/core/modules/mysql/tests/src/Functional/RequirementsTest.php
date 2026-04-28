@@ -6,12 +6,14 @@ namespace Drupal\Tests\mysql\Functional;
 
 use Drupal\Core\Database\Database;
 use Drupal\Tests\BrowserTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests isolation level warning when the config is set in settings.php.
- *
- * @group mysql
  */
+#[Group('mysql')]
+#[RunTestsInSeparateProcesses]
 class RequirementsTest extends BrowserTestBase {
 
   /**
@@ -32,7 +34,7 @@ class RequirementsTest extends BrowserTestBase {
 
     // The isolation_level option is only available for MySQL.
     $connection = Database::getConnection();
-    if ($connection->driver() !== 'mysql') {
+    if (!in_array($connection->driver(), ['mysql', 'mysqli'])) {
       $this->markTestSkipped("This test does not support the {$connection->driver()} database driver.");
     }
   }

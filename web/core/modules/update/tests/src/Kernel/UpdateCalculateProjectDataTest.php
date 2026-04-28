@@ -11,12 +11,15 @@ use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\Utils;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Test the values set in update_calculate_project_data().
- *
- * @group update
  */
+#[Group('update')]
+#[RunTestsInSeparateProcesses]
 class UpdateCalculateProjectDataTest extends KernelTestBase {
 
   /**
@@ -113,10 +116,9 @@ class UpdateCalculateProjectDataTest extends KernelTestBase {
   /**
    * Tests the project_status of the project.
    *
-   * @dataProvider providerProjectStatus
-   *
-   * @covers update_calculate_project_update_status
+   * @legacy-covers update_calculate_project_update_status
    */
+  #[DataProvider('providerProjectStatus')]
   public function testProjectStatus(string $fixture, int $status, string $label, string $expected_error_message): void {
     update_storage_clear();
     $this->setReleaseMetadata(__DIR__ . $fixture);

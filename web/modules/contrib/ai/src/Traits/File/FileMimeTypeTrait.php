@@ -2,7 +2,7 @@
 
 namespace Drupal\ai\Traits\File;
 
-use Drupal\Core\ProxyClass\File\MimeType\MimeTypeGuesser;
+use Drupal\Core\File\MimeType\MimeTypeGuesser;
 
 /**
  * Trait to add the possibility to get the file mime type guesser.

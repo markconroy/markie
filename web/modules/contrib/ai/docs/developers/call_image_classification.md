@@ -6,7 +6,7 @@ Image Classification calls are calls that can take an image and give weights of 
 
 ### Example normalized Image Classification call
 
-The following is an example of sending the file underwear_ad.jpg into Huggingface with the Falconsai/nsfw_image_detection mode and getting the classification back in form of an array of ImageClassificationItem.
+The following is an example of sending the file underwear_ad.jpg into Huggingface with the Falconsai/nsfw_image_detection model and getting the classification back in the form of an array of ImageClassificationItem.
 
 ```php
 use Drupal\ai\OperationType\GenericType\ImageFile;
@@ -19,7 +19,7 @@ $input = new ImageClassificationInput($normalized_file);
 $classification_items =  \Drupal::service('ai.provider')->createInstance('huggingface')->imageClassification($input, 'Falconsai/nsfw_image_detection', ['my-custom-call'])->getNormalized();
 
 foreach ($classification_items as $item) {
-  // If its slightly not safe for work, we exit here.
+  // If it's slightly not safe for work, we exit here.
   if ($item->getLabel() == 'nsfw' && $item->getConfidenceScore() > 0.7) {
     throw new \Exception('Our site does not tolerate images that might not be safe for work');
   }
@@ -28,7 +28,7 @@ foreach ($classification_items as $item) {
 
 ### Image Classification Interfaces & Models
 
-The following files defines the methods available when doing a Image Classification call as well as the input and output.
+The following files define the methods available when doing an Image Classification call as well as the input and output.
 
 * [ImageClassificationInterface.php](https://git.drupalcode.org/project/ai/-/blob/1.0.x/src/OperationType/ImageClassification/ImageClassificationInterface.php?ref_type=heads)
 * [ImageClassificationInput.php](https://git.drupalcode.org/project/ai/-/blob/1.0.x/src/OperationType/ImageClassification/ImageClassificationInput.php?ref_type=heads)

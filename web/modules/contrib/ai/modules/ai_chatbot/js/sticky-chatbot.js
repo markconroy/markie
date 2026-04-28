@@ -89,7 +89,7 @@
           event.stopPropagation();
           // Toggle it
           dropDownMenu.classList.toggle('active');
-          chevron.classList.toggle('rotate');
+          chevron.classList.toggle('chevron-icon--rotate');
         }
 
         // Attach click event listener to the header

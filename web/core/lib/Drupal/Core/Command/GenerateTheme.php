@@ -66,6 +66,9 @@ class GenerateTheme extends Command {
       ->addUsage('custom_theme --name "Custom Theme" --starterkit mystarterkit');
   }
 
+  /**
+   * {@inheritdoc}
+   */
   protected function initialize(InputInterface $input, OutputInterface $output): void {
     if ($input->getOption('name') === NULL) {
       $input->setOption('name', $input->getArgument('machine-name'));
@@ -235,10 +238,16 @@ class GenerateTheme extends Command {
     return $theme;
   }
 
+  /**
+   * Returns a Symfony file finder.
+   */
   private static function createFilesFinder(string $dir): Finder {
     return (new Finder)->in($dir)->files();
   }
 
+  /**
+   * Loads the Starter Kit configuration.
+   */
   private static function loadStarterKitConfig(
     Extension $theme,
     string $version,
@@ -286,7 +295,9 @@ class GenerateTheme extends Command {
       );
 
       if (count($starterkit_config[$key]) > 0) {
-        $files = self::createFilesFinder($theme->getPath())->path($starterkit_config[$key]);
+        $files = self::createFilesFinder($theme->getPath())->path($starterkit_config[$key])
+          ->ignoreDotFiles(FALSE)
+          ->ignoreVCS(TRUE);
         $starterkit_config[$key] = array_map(static fn ($file) => $file->getRelativePathname(), iterator_to_array($files));
         if (count($starterkit_config[$key]) === 0) {
           throw new \RuntimeException("Paths were defined `$key` but no files found.");
@@ -297,6 +308,9 @@ class GenerateTheme extends Command {
     return $starterkit_config;
   }
 
+  /**
+   * Gets the Starter Kit version string.
+   */
   private static function getStarterKitVersion(
     Extension $theme,
     SymfonyStyle $io,
@@ -352,6 +366,9 @@ class GenerateTheme extends Command {
     return $source_version;
   }
 
+  /**
+   * Returns the possible file name patterns.
+   */
   private static function namePatterns(string $machine_name, string $label): array {
     return [
       'machine_name' => $machine_name,

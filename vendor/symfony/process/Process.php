@@ -51,6 +51,20 @@ class Process implements \IteratorAggregate
     public const ITER_SKIP_OUT = 4;     // Use this flag to skip STDOUT while iterating
     public const ITER_SKIP_ERR = 8;     // Use this flag to skip STDERR while iterating
 
+    /**
+     * Maximum number of UTF-16 code units allowed in the Windows environment block.
+     *
+     * The Win32 CreateProcess API encodes env vars as KEY=VALUE\0 in UTF-16LE,
+     * terminated by an extra \0. Exceeding this limit causes proc_open() to hang
+     * silently rather than returning false.
+     *
+     * @see https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-createprocessa
+     */
+    private const WINDOWS_ENV_BLOCK_MAX_LENGTH = 32767;
+
+    /**
+     * @var \Closure('out'|'err', string):bool|null
+     */
     private ?\Closure $callback = null;
     private array|string $commandline;
     private ?string $cwd;
@@ -231,8 +245,8 @@ class Process implements \IteratorAggregate
      * The STDOUT and STDERR are also available after the process is finished
      * via the getOutput() and getErrorOutput() methods.
      *
-     * @param callable|null $callback A PHP callback to run whenever there is some
-     *                                output available on STDOUT or STDERR
+     * @param (callable('out'|'err', string):void)|null $callback A PHP callback to run whenever there is some
+     *                                                            output available on STDOUT or STDERR
      *
      * @return int The exit status code
      *
@@ -257,9 +271,17 @@ class Process implements \IteratorAggregate
      * This is identical to run() except that an exception is thrown if the process
      * exits with a non-zero exit code.
      *
+     * @param (callable('out'|'err', string):void)|null $callback A PHP callback to run whenever there is some
+     *                                                            output available on STDOUT or STDERR
+     *
      * @return $this
      *
-     * @throws ProcessFailedException if the process didn't terminate successfully
+     * @throws ProcessFailedException   When process didn't terminate successfully
+     * @throws RuntimeException         When process can't be launched
+     * @throws RuntimeException         When process is already running
+     * @throws ProcessTimedOutException When process timed out
+     * @throws ProcessSignaledException When process stopped after receiving signal
+     * @throws LogicException           In case a callback is provided and output has been disabled
      *
      * @final
      */
@@ -284,8 +306,8 @@ class Process implements \IteratorAggregate
      * the output in real-time while writing the standard input to the process.
      * It allows to have feedback from the independent process during execution.
      *
-     * @param callable|null $callback A PHP callback to run whenever there is some
-     *                                output available on STDOUT or STDERR
+     * @param (callable('out'|'err', string):void)|null $callback A PHP callback to run whenever there is some
+     *                                                            output available on STDOUT or STDERR
      *
      * @throws ProcessStartFailedException When process can't be launched
      * @throws RuntimeException            When process is already running
@@ -332,9 +354,13 @@ class Process implements \IteratorAggregate
 
         $envPairs = [];
         foreach ($env as $k => $v) {
-            if (false !== $v && false === \in_array($k, ['argc', 'argv', 'ARGC', 'ARGV'], true)) {
+            if (false !== $v && !\in_array($k = (string) $k, ['', 'argc', 'argv', 'ARGC', 'ARGV'], true) && !str_contains($k, '=') && !str_contains($k, "\0")) {
                 $envPairs[] = $k.'='.$v;
             }
+        }
+
+        if ('\\' === \DIRECTORY_SEPARATOR) {
+            $this->validateWindowsEnvBlockSize($envPairs);
         }
 
         if (!is_dir($this->cwd)) {
@@ -342,7 +368,7 @@ class Process implements \IteratorAggregate
         }
 
         $lastError = null;
-        set_error_handler(function ($type, $msg) use (&$lastError) {
+        set_error_handler(static function ($type, $msg) use (&$lastError) {
             $lastError = $msg;
 
             return true;
@@ -395,8 +421,8 @@ class Process implements \IteratorAggregate
      *
      * Be warned that the process is cloned before being started.
      *
-     * @param callable|null $callback A PHP callback to run whenever there is some
-     *                                output available on STDOUT or STDERR
+     * @param (callable('out'|'err', string):void)|null $callback A PHP callback to run whenever there is some
+     *                                                            output available on STDOUT or STDERR
      *
      * @throws ProcessStartFailedException When process can't be launched
      * @throws RuntimeException            When process is already running
@@ -424,7 +450,8 @@ class Process implements \IteratorAggregate
      * from the output in real-time while writing the standard input to the process.
      * It allows to have feedback from the independent process during execution.
      *
-     * @param callable|null $callback A valid PHP callback
+     * @param (callable('out'|'err', string):void)|null $callback A PHP callback to run whenever there is some
+     *                                                            output available on STDOUT or STDERR
      *
      * @return int The exitcode of the process
      *
@@ -470,6 +497,9 @@ class Process implements \IteratorAggregate
      * The callback receives the type of output (out or err) and some bytes
      * from the output in real-time while writing the standard input to the process.
      * It allows to have feedback from the independent process during execution.
+     *
+     * @param (callable('out'|'err', string):bool)|null $callback A PHP callback to run whenever there is some
+     *                                                            output available on STDOUT or STDERR
      *
      * @throws RuntimeException         When process timed out
      * @throws LogicException           When process is not yet started
@@ -1291,22 +1321,21 @@ class Process implements \IteratorAggregate
      * The callbacks adds all occurred output to the specific buffer and calls
      * the user callback (if present) with the received output.
      *
-     * @param callable|null $callback The user defined PHP callback
+     * @param callable('out'|'err', string)|null $callback
+     *
+     * @return \Closure('out'|'err', string):bool
      */
     protected function buildCallback(?callable $callback = null): \Closure
     {
         if ($this->outputDisabled) {
-            return fn ($type, $data): bool => null !== $callback && $callback($type, $data);
+            return static fn ($type, $data): bool => null !== $callback && $callback($type, $data);
         }
 
-        $out = self::OUT;
-
-        return function ($type, $data) use ($callback, $out): bool {
-            if ($out == $type) {
-                $this->addOutput($data);
-            } else {
-                $this->addErrorOutput($data);
-            }
+        return function ($type, $data) use ($callback): bool {
+            match ($type) {
+                self::OUT => $this->addOutput($data),
+                self::ERR => $this->addErrorOutput($data),
+            };
 
             return null !== $callback && $callback($type, $data);
         };
@@ -1553,7 +1582,7 @@ class Process implements \IteratorAggregate
                     [^"%!^]*+
                 )++
             ) | [^"]*+ )"/x',
-            function ($m) use (&$env, $uid) {
+            static function ($m) use (&$env, $uid) {
                 static $varCount = 0;
                 static $varCache = [];
                 if (!isset($m[1])) {
@@ -1633,7 +1662,7 @@ class Process implements \IteratorAggregate
         if (str_contains($argument, "\0")) {
             $argument = str_replace("\0", '?', $argument);
         }
-        if (!preg_match('/[()%!^"<>&|\s]/', $argument)) {
+        if (!preg_match('/[()%!^"<>&|\s[\]=;*?\'$]/', $argument)) {
             return $argument;
         }
         $argument = preg_replace('/(\\\\+)$/', '$1$1', $argument);
@@ -1658,5 +1687,17 @@ class Process implements \IteratorAggregate
         $env = ('\\' === \DIRECTORY_SEPARATOR ? array_intersect_ukey($env, $_SERVER, 'strcasecmp') : array_intersect_key($env, $_SERVER)) ?: $env;
 
         return $_ENV + ('\\' === \DIRECTORY_SEPARATOR ? array_diff_ukey($env, $_ENV, 'strcasecmp') : $env);
+    }
+
+    private function validateWindowsEnvBlockSize(array $envPairs): void
+    {
+        $block = implode("\0", $envPairs)."\0";
+        @preg_replace('/./u', '', $block, -1, $blockLength)
+            ?? preg_replace('/./', '', $block, -1, $blockLength);
+        $blockLength += 1 + preg_match_all('/[\xF0-\xF4][\x80-\xBF]{3}/', $block);
+
+        if ($blockLength > self::WINDOWS_ENV_BLOCK_MAX_LENGTH) {
+            throw new InvalidArgumentException(\sprintf('The environment block size (%d) exceeds the Windows limit of %d UTF-16 code units.', $blockLength, self::WINDOWS_ENV_BLOCK_MAX_LENGTH));
+        }
     }
 }

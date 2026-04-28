@@ -129,6 +129,7 @@ If you will be working on an AI issue yourself and expect to be done at a certai
 #### Skill-Based Tags
 
 To organize our work around skill requirements, skill tags are added to issues. The AI team will add these tags, and the wider community are welcome to use them as well.
+
 - concept
 - design
 - UX

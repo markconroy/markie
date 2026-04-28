@@ -1,6 +1,6 @@
 # Agent Form Parts
 
-While how you add these parts might change in the future, how they actually are used will not likely change that much. These parts are the parts that builds the agent form and will showcase how they work together when running an agent.
+While how you add these parts might change in the future, how they actually are used will not likely change that much. These parts are the parts that build the agent form and will showcase how they work together when running an agent.
 
 ## Title
 
@@ -8,17 +8,17 @@ The title is the actual title of the agent. It is used to identify the agent and
 
 ## Description
 
-While people do not fill out the description field in Drupal very often, it is of uttermost importance in the case of agents. The description is used when other agents uses this agent as a tool. The decision making of the agent that is using this agent as a tool is based on the description. So if you want to use this agent in an orchestration, make sure that the description is clear, concise and verbose about what the agent's capabilities are and also what it can't solve. Because of its importance, the description field is required, in contrast to many other entity types in Drupal.
+While people do not fill out the description field in Drupal very often, it is of uttermost importance in the case of agents. The description is used when other agents use this agent as a tool. The decision making of the agent that is using this agent as a tool is based on the description. So if you want to use this agent in an orchestration, make sure that the description is clear, concise and verbose about what the agent's capabilities are and also what it can't solve. Because of its importance, the description field is required, in contrast to many other entity types in Drupal.
 
 Note that the description is not used in the decision making of the agent itself, but rather by other agents that might use this agent as a tool.
 
 ## Swarm Orchestration Agent
 
-This is a pure category checkbox that any orchestration tool can use when listing the agents. Its to tell orchestration tools that this agent is an agent that managed other agents predominantly as the main parent. This does not affect the agent itself while running and is just a categorization.
+This is a pure category checkbox that any orchestration tool can use when listing the agents. It's to tell orchestration tools that this agent is an agent that manages other agents predominantly as the main parent. This does not affect the agent itself while running and is just a categorization.
 
 ## Project Manager Agent
 
-This is a pure category checkbox to notify the user that if many agents works together to solve a complex task like Views or Webform, this agent is the one that manages the other agents, but in comparison to Orchestration Agents this agent still only has one concern. This does not affect the agent itself while running and is just a categorization.
+This is a pure category checkbox to notify the user that if many agents work together to solve a complex task like Views or Webform, this agent is the one that manages the other agents, but in comparison to Orchestration Agents this agent still only has one concern. This does not affect the agent itself while running and is just a categorization.
 
 ## Max Loops
 

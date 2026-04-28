@@ -1,7 +1,8 @@
 <?php
 
-namespace Drupal\ai_ckeditor\Plugin\AICKEditor;
+namespace Drupal\ai_ckeditor\Plugin\AiCKEditor;
 
+use Drupal\ai\Utility\Textarea;
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
@@ -68,6 +69,11 @@ final class Translate extends AiCKEditorPluginBase {
       '#options' => $vocabulary_options,
       '#description' => $this->t('Select the vocabulary that contains translation options.'),
       '#default_value' => $this->configuration['translate_vocabulary'],
+      '#states' => [
+        'visible' => [
+          'select[name="editor[settings][plugins][ai_ckeditor_ai][plugins][ai_ckeditor_translate][language_source]"]' => ['value' => 'tax'],
+        ],
+      ],
     ];
 
     $form['autocreate'] = [
@@ -75,6 +81,11 @@ final class Translate extends AiCKEditorPluginBase {
       '#title' => $this->t('Allow autocreate'),
       '#description' => $this->t('If enabled, users with access to this format are able to autocreate new terms in the chosen vocabulary, instead of a select list..'),
       '#default_value' => $this->configuration['autocreate'] ?? FALSE,
+      '#states' => [
+        'visible' => [
+          'select[name="editor[settings][plugins][ai_ckeditor_ai][plugins][ai_ckeditor_translate][language_source]"]' => ['value' => 'tax'],
+        ],
+      ],
     ];
 
     $form['use_description'] = [
@@ -82,11 +93,14 @@ final class Translate extends AiCKEditorPluginBase {
       '#title' => $this->t('Use term description for translation context'),
       '#description' => $this->t('If enabled and a description field is filled out, the translation will use this description to explain things the AI should think about when translating.'),
       '#default_value' => $this->configuration['use_description'] ?? FALSE,
+      '#states' => [
+        'visible' => [
+          'select[name="editor[settings][plugins][ai_ckeditor_ai][plugins][ai_ckeditor_translate][language_source]"]' => ['value' => 'tax'],
+        ],
+      ],
     ];
 
-    $options = $this->aiProviderManager->getSimpleProviderModelOptions('chat');
-    array_shift($options);
-    array_splice($options, 0, 1);
+    $options = $this->aiProviderManager->getSimpleProviderModelOptions('chat', FALSE);
     $form['provider'] = [
       '#type' => 'select',
       "#empty_option" => $this->t('-- Default from AI module (chat) --'),
@@ -107,6 +121,14 @@ final class Translate extends AiCKEditorPluginBase {
           ':input[name="editor[settings][plugins][ai_ckeditor_ai][plugins][ai_ckeditor_translate][enabled]"]' => ['checked' => TRUE],
         ],
       ],
+      // This property will land into core soon, see
+      // https://www.drupal.org/project/drupal/issues/3202631. It can stay
+      // after this is added to Drupal core.
+      '#normalize_newlines' => TRUE,
+      // Until that the custom value callback is needed. Should be removed
+      // after the issue mentioned above is merged into core and the minimum
+      // supported Drupal version includes `#normalize_newlines` property.
+      '#value_callback' => [Textarea::class, 'valueCallback'],
     ];
 
     return $form;
@@ -153,8 +175,10 @@ final class Translate extends AiCKEditorPluginBase {
   public function buildCkEditorModalForm(array $form, FormStateInterface $form_state, array $settings = []) {
     $form = parent::buildCkEditorModalForm($form, $form_state);
 
+    $autocreate = $this->configuration['autocreate'] && $this->configuration['language_source'] == 'tax';
+
     $form['language'] = [
-      '#type' => $this->configuration['autocreate'] ? 'entity_autocomplete' : 'select',
+      '#type' => $autocreate ? 'entity_autocomplete' : 'select',
       '#title' => $this->t('Choose language'),
       '#tags' => FALSE,
       '#required' => TRUE,
@@ -162,7 +186,7 @@ final class Translate extends AiCKEditorPluginBase {
       '#description' => $this->t('Selecting one of the options will translate the selected text.'),
     ];
 
-    if ($this->configuration['autocreate']) {
+    if ($autocreate) {
       $form['language']['#target_type'] = 'taxonomy_term';
       $form['language']['#selection_settings'] = [
         'target_bundles' => [$this->configuration['translate_vocabulary']],
@@ -175,7 +199,20 @@ final class Translate extends AiCKEditorPluginBase {
       }
     }
     else {
-      $form['language']['#options'] = $this->getTermOptions($this->configuration['translate_vocabulary']);
+      if ($this->configuration['language_source'] == 'tax') {
+        $form['language']['#options'] = $this->getTermOptions($this->configuration['translate_vocabulary']);
+      }
+      else {
+        $site_languages = $this->languageManager->getLanguages();
+        $form['language']['#options'] = [];
+        foreach ($site_languages as $langcode => $language) {
+          $form['language']['#options'][$langcode] = $language->getName();
+        }
+        // Set default value if only one language is available.
+        if (count($form['language']['#options']) === 1) {
+          $form['language']['#default_value'] = key($form['language']['#options']);
+        }
+      }
     }
 
     return $form;

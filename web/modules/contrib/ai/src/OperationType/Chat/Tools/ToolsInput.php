@@ -5,7 +5,7 @@ namespace Drupal\ai\OperationType\Chat\Tools;
 /**
  * The tools.
  */
-class ToolsInput implements ToolsInputInterface {
+class ToolsInput implements ToolsInputInterface, \JsonSerializable {
 
   /**
    * The functions.
@@ -81,6 +81,13 @@ class ToolsInput implements ToolsInputInterface {
    * {@inheritDoc}
    */
   public function toArray(): array {
+    return $this->renderToolsArray();
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public function jsonSerialize(): array {
     return $this->renderToolsArray();
   }
 

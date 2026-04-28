@@ -10,15 +10,18 @@ use Drupal\Core\Language\LanguageInterface;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\path_alias\AliasManager;
 use Drupal\path_alias\AliasPrefixList;
+use Drupal\path_alias\AliasRepository;
 use Drupal\Tests\Traits\Core\PathAliasTestTrait;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests path alias CRUD and lookup functionality.
- *
- * @coversDefaultClass \Drupal\path_alias\AliasRepository
- *
- * @group path_alias
  */
+#[CoversClass(AliasRepository::class)]
+#[Group('path_alias')]
+#[RunTestsInSeparateProcesses]
 class AliasTest extends KernelTestBase {
 
   use PathAliasTestTrait;
@@ -42,7 +45,7 @@ class AliasTest extends KernelTestBase {
   }
 
   /**
-   * @covers ::preloadPathAlias
+   * Tests preload path alias.
    */
   public function testPreloadPathAlias(): void {
     $path_alias_repository = $this->container->get('path_alias.repository');
@@ -286,7 +289,7 @@ class AliasTest extends KernelTestBase {
   }
 
   /**
-   * @covers ::lookupBySystemPath
+   * Tests lookup by system path.
    */
   public function testLookupBySystemPath(): void {
     $this->createPathAlias('/test-source-Case', '/test-alias');
@@ -297,7 +300,7 @@ class AliasTest extends KernelTestBase {
   }
 
   /**
-   * @covers ::lookupByAlias
+   * Tests lookup by alias.
    */
   public function testLookupByAlias(): void {
     $this->createPathAlias('/test-source', '/test-alias-Case');
@@ -308,8 +311,10 @@ class AliasTest extends KernelTestBase {
   }
 
   /**
-   * @covers \Drupal\path_alias\AliasManager::getPathByAlias
-   * @covers \Drupal\path_alias\AliasManager::getAliasByPath
+   * Tests lookup path.
+   *
+   * @legacy-covers \Drupal\path_alias\AliasManager::getPathByAlias
+   * @legacy-covers \Drupal\path_alias\AliasManager::getAliasByPath
    */
   public function testLookupPath(): void {
     // Create AliasManager and Path object.
@@ -320,6 +325,11 @@ class AliasTest extends KernelTestBase {
     $path_alias = $this->createPathAlias('/user/1', '/foo');
     $this->assertEquals($path_alias->getAlias(), $aliasManager->getAliasByPath($path_alias->getPath()), 'Basic alias lookup works.');
     $this->assertEquals($path_alias->getPath(), $aliasManager->getPathByAlias($path_alias->getAlias()), 'Basic source lookup works.');
+
+    // Ensure that path alias data is used.
+    $path_alias = $this->createPathAlias('/user/2', '/bar');
+    $this->assertEquals($path_alias->getPath(), $aliasManager->getPathByAlias(strtoupper($path_alias->getAlias())), 'Basic source lookup is case insensitive.');
+    $this->assertEquals($path_alias->getAlias(), $aliasManager->getAliasByPath($path_alias->getPath()), 'Basic alias lookup returns the stored alias if getPathByAlias() is called with a case insensitive alias.');
 
     // Create a language specific alias for the default language (English).
     $path_alias = $this->createPathAlias('/user/1', '/users/Dries', 'en');

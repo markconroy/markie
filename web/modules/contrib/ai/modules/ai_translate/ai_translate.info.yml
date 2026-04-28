@@ -7,8 +7,10 @@ configure: ai_translate.settings_form
 dependencies:
   - ai:ai
   - drupal:content_translation
+lifecycle: deprecated
+lifecycle_link: https://www.drupal.org/node/3570275
 
-# Information added by Drupal.org packaging script on 2025-12-03
-version: '1.2.4'
+# Information added by Drupal.org packaging script on 2026-04-15
+version: '1.3.3'
 project: 'ai'
-datestamp: 1764754932
+datestamp: 1776263306

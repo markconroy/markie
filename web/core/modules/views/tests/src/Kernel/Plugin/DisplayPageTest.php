@@ -4,21 +4,24 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\views\Kernel\Plugin;
 
-use Drupal\Core\Url;
 use Drupal\Core\Menu\MenuTreeParameters;
 use Drupal\Core\Session\AnonymousUserSession;
+use Drupal\Core\Url;
+use Drupal\Tests\views\Kernel\ViewsKernelTestBase;
 use Drupal\views\Entity\View;
 use Drupal\views\Views;
-use Drupal\Tests\views\Kernel\ViewsKernelTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 
 /**
  * Tests the page display plugin.
  *
- * @group views
  * @see \Drupal\views\Plugin\display\Page
  */
+#[Group('views')]
+#[RunTestsInSeparateProcesses]
 class DisplayPageTest extends ViewsKernelTestBase {
 
   /**
@@ -37,9 +40,6 @@ class DisplayPageTest extends ViewsKernelTestBase {
    * {@inheritdoc}
    */
   protected static $modules = [
-    'system',
-    'user',
-    'field',
     'views_test_data',
   ];
 

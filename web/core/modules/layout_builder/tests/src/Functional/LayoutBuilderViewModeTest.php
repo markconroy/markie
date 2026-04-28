@@ -6,12 +6,14 @@ namespace Drupal\Tests\layout_builder\Functional;
 
 use Drupal\layout_builder\Entity\LayoutBuilderEntityViewDisplay;
 use Drupal\Tests\layout_builder\Traits\EnableLayoutBuilderTrait;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the Layout Builder UI with view modes.
- *
- * @group layout_builder
  */
+#[Group('layout_builder')]
+#[RunTestsInSeparateProcesses]
 class LayoutBuilderViewModeTest extends LayoutBuilderTestBase {
 
   use EnableLayoutBuilderTrait;
@@ -67,8 +69,11 @@ class LayoutBuilderViewModeTest extends LayoutBuilderTestBase {
     $this->drupalGet("$field_ui_prefix/display/full");
     $assert_session->linkExists('Manage layout');
     $page->clickLink('Manage layout');
-    // Confirm the body field only is shown once.
-    $assert_session->elementsCount('css', '.field--name-body', 1);
+    // The fields have all been hidden at this point.
+    // Verify no Layout Builder blocks exist.
+    $assert_session->addressEquals("$field_ui_prefix/display/full/layout");
+    $assert_session->statusCodeEquals(200);
+    $assert_session->elementsCount('css', '.layout-builder-block', 0);
   }
 
   /**

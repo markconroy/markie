@@ -7,13 +7,15 @@ namespace Drupal\Tests\views_ui\Functional;
 use Drupal\Component\Utility\Unicode;
 use Drupal\views\Entity\View;
 use Drupal\views\Views;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the display UI.
- *
- * @group views_ui
- * @group #slow
  */
+#[Group('views_ui')]
+#[Group('#slow')]
+#[RunTestsInSeparateProcesses]
 class DisplayTest extends UITestBase {
 
   /**
@@ -131,9 +133,6 @@ class DisplayTest extends UITestBase {
    * Tests display areas.
    */
   public function testDisplayAreas(): void {
-    // Show the advanced column.
-    $this->config('views.settings')->set('ui.show.advanced_column', TRUE)->save();
-
     // Add a new data display to the view.
     $view = Views::getView('test_display');
     $view->storage->addDisplay('display_no_area_test');
@@ -161,7 +160,7 @@ class DisplayTest extends UITestBase {
     $path = 'admin/structure/views/view/test_display/edit/block_1';
     $link_display_path = 'admin/structure/views/nojs/display/test_display/block_1/link_display';
 
-    // Test the link text displays 'None' and not 'Block 1'
+    // Test the link text displays 'None' and not 'Block 1'.
     $this->drupalGet($path);
     $this->assertSession()->elementTextEquals('xpath', "//a[contains(@href, '{$link_display_path}')]", 'None');
 
@@ -187,7 +186,7 @@ class DisplayTest extends UITestBase {
 
     $this->assertSession()->linkExists('Custom URL', 0, 'The link option has custom URL as summary.');
 
-    // Test the default link_url value for new display
+    // Test the default link_url value for new display.
     $this->submitForm([], 'Add Block');
     $this->assertSession()->addressEquals('admin/structure/views/view/test_display/edit/block_2');
     $this->clickLink('Custom URL');

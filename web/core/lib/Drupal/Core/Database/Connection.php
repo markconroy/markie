@@ -1272,7 +1272,7 @@ abstract class Connection {
    *   (optional) Provides a data type hint for drivers that have alternate
    *   quoting styles. Defaults to \PDO::PARAM_STR.
    *
-   * @return string|bool
+   * @return string|false
    *   A quoted string that is theoretically safe to pass into an SQL statement.
    *   Returns FALSE if the driver does not support quoting in this way.
    *
@@ -1314,7 +1314,7 @@ abstract class Connection {
    *
    * @param string $url
    *   The URL.
-   * @param string $root
+   * @param string|null $root
    *   (deprecated) The root directory of the Drupal installation. Some
    *   database drivers, like for example SQLite, need this information.
    *

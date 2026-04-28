@@ -10,13 +10,15 @@ use Drupal\Core\Site\Settings;
 use Drupal\Core\Url;
 use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\Tests\BrowserTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Psr\Http\Message\ResponseInterface;
 
 /**
  * Tests contextual link display on the front page based on permissions.
- *
- * @group contextual
  */
+#[Group('contextual')]
+#[RunTestsInSeparateProcesses]
 class ContextualDynamicContextTest extends BrowserTestBase {
 
   /**
@@ -124,7 +126,10 @@ class ContextualDynamicContextTest extends BrowserTestBase {
     $this->assertSame('', $json[$ids[3]]);
 
     // Verify that link language is properly handled.
-    $node3->addTranslation('it')->set('title', $this->randomString())->save();
+    $node3->addTranslation('it', [
+      'title' => $this->randomString(),
+      'promote' => TRUE,
+    ])->save();
     $id = 'node:node=' . $node3->id() . ':changed=' . $node3->getChangedTime() . '&langcode=it';
     $this->drupalGet('node', ['language' => ConfigurableLanguage::createFromLangcode('it')]);
     $this->assertContextualLinkPlaceHolder($id);

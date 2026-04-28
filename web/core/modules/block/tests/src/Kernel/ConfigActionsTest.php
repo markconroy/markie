@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Drupal\Tests\block\Kernel;
 
 use Drupal\block\Entity\Block;
+use Drupal\block\Plugin\ConfigAction\PlaceBlock;
+use Drupal\block\Plugin\ConfigAction\PlaceBlockDeriver;
 use Drupal\Component\Plugin\Exception\PluginNotFoundException;
 use Drupal\Core\Config\Action\ConfigActionException;
 use Drupal\Core\Config\Action\ConfigActionManager;
@@ -12,12 +14,18 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ThemeInstallerInterface;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\Tests\block\Traits\BlockCreationTrait;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
+use PHPUnit\Framework\Attributes\TestWith;
 
 /**
- * @covers \Drupal\block\Plugin\ConfigAction\PlaceBlock
- * @covers \Drupal\block\Plugin\ConfigAction\PlaceBlockDeriver
- * @group block
+ * Tests Config Actions.
  */
+#[Group('block')]
+#[CoversClass(PlaceBlock::class)]
+#[CoversClass(PlaceBlockDeriver::class)]
+#[RunTestsInSeparateProcesses]
 class ConfigActionsTest extends KernelTestBase {
 
   use BlockCreationTrait;
@@ -37,10 +45,11 @@ class ConfigActionsTest extends KernelTestBase {
    */
   protected function setUp(): void {
     parent::setUp();
+    $this->installConfig('system');
     $this->container->get(ThemeInstallerInterface::class)->install([
       'olivero',
       'claro',
-      'umami',
+      'block_test_theme',
     ]);
     $this->config('system.theme')
       ->set('default', 'olivero')
@@ -74,9 +83,10 @@ class ConfigActionsTest extends KernelTestBase {
   }
 
   /**
-   * @testWith ["placeBlockInDefaultTheme"]
-   *           ["placeBlockInAdminTheme"]
-   */
+ * Tests place block action only works on blocks.
+ */
+  #[TestWith(["placeBlockInDefaultTheme"])]
+  #[TestWith(["placeBlockInAdminTheme"])]
   public function testPlaceBlockActionOnlyWorksOnBlocks(string $action): void {
     $this->expectException(PluginNotFoundException::class);
     $this->expectExceptionMessage("The \"user_role\" entity does not support the \"$action\" config action.");
@@ -101,9 +111,10 @@ class ConfigActionsTest extends KernelTestBase {
   }
 
   /**
-   * @testWith ["placeBlockInDefaultTheme", "olivero", "header"]
-   *           ["placeBlockInAdminTheme", "claro", "page_bottom"]
-   */
+ * Tests place block in dynamic region.
+ */
+  #[TestWith(["placeBlockInDefaultTheme", "olivero", "header"])]
+  #[TestWith(["placeBlockInAdminTheme", "claro", "page_bottom"])]
   public function testPlaceBlockInDynamicRegion(string $action, string $expected_theme, string $expected_region): void {
     $this->configActionManager->applyAction($action, 'block.block.test_block', [
       'plugin' => 'system_powered_by_block',
@@ -129,9 +140,10 @@ class ConfigActionsTest extends KernelTestBase {
   }
 
   /**
-   * @testWith ["placeBlockInDefaultTheme", "olivero"]
-   *           ["placeBlockInAdminTheme", "claro"]
-   */
+ * Tests place block in static region.
+ */
+  #[TestWith(["placeBlockInDefaultTheme", "olivero"])]
+  #[TestWith(["placeBlockInAdminTheme", "claro"])]
   public function testPlaceBlockInStaticRegion(string $action, string $expected_theme): void {
     $this->configActionManager->applyAction($action, 'block.block.test_block', [
       'plugin' => 'system_powered_by_block',
@@ -149,8 +161,8 @@ class ConfigActionsTest extends KernelTestBase {
    * Tests placing a block in the default theme's region.
    */
   public function testPlaceBlockInDefaultRegion(): void {
-    $this->config('system.theme')->set('default', 'umami')->save();
-    $this->testPlaceBlockInDynamicRegion('placeBlockInDefaultTheme', 'umami', 'content');
+    $this->config('system.theme')->set('default', 'block_test_theme')->save();
+    $this->testPlaceBlockInDynamicRegion('placeBlockInDefaultTheme', 'block_test_theme', 'content');
   }
 
   /**

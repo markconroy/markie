@@ -331,6 +331,7 @@ class ChatFormBlock extends BlockBase implements ContainerFactoryPluginInterface
           !str_contains($message['message'], '<div class="loader"></div>'))) {
           $messages[] = [
             '#theme' => 'ai_chatbot_message',
+            '#role' => $message['role'],
             '#username' => $message['role'] == 'user' ? $username : $this->configuration['bot_name'],
             '#bot_image' => $message['role'] == 'user' ? $avatar : $this->configuration['bot_image'],
             '#timestamp' => date('H:i:s', $message['timestamp']),

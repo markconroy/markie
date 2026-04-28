@@ -30,15 +30,13 @@ class ImageAltText extends RuleBase {
   public function checkIfEmpty($value, array $automatorConfig = []) {
     // Check if the alt is empty in all values.
     foreach ($value as $item) {
-      // If one is empty, we return empty array.
       if (empty($item['alt'])) {
         return [];
       }
     }
-    // Otherwise we return a set value.
-    return [
-      'alt' => 'This is an image with alt text.',
-    ];
+    // Return the original value so baseShouldSave() can properly evaluate
+    // $value[0] for the edit_mode check.
+    return $value;
   }
 
   /**
@@ -84,11 +82,10 @@ class ImageAltText extends RuleBase {
     $items = [];
     foreach ($entity->get($fieldDefinition->getName()) as $delta => $item) {
       $items[$delta] = $item->getValue();
-      // Don't set the alt text if its already set.
-      if (isset($items[$delta]['alt']) && !empty($items[$delta]['alt'])) {
+      // Preserve existing alt text unless edit_mode is enabled.
+      if (empty($automatorConfig['edit_mode']) && !empty($items[$delta]['alt'])) {
         continue;
       }
-      // Set the alt text from the values.
       $items[$delta]['alt'] = $values[$delta]['alt'] ?? '';
     }
     $entity->set($fieldDefinition->getName(), $items);

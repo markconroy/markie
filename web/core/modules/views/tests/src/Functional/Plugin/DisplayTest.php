@@ -8,12 +8,14 @@ use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\Tests\views\Functional\ViewTestBase;
 use Drupal\views\Views;
 use Drupal\views_test_data\Plugin\views\display\DisplayTest as DisplayTestPlugin;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the basic display plugin.
- *
- * @group views
  */
+#[Group('views')]
+#[RunTestsInSeparateProcesses]
 class DisplayTest extends ViewTestBase {
 
   /**
@@ -21,7 +23,16 @@ class DisplayTest extends ViewTestBase {
    *
    * @var array
    */
-  public static $testViews = ['test_filter_groups', 'test_get_attach_displays', 'test_view', 'test_display_more', 'test_display_invalid', 'test_display_empty', 'test_exposed_relationship_admin_ui', 'test_simple_argument'];
+  public static $testViews = [
+    'test_filter_groups',
+    'test_get_attach_displays',
+    'test_view',
+    'test_display_more',
+    'test_display_invalid',
+    'test_display_empty',
+    'test_exposed_relationship_admin_ui',
+    'test_simple_argument',
+  ];
 
   /**
    * {@inheritdoc}
@@ -392,7 +403,7 @@ class DisplayTest extends ViewTestBase {
 
     // Remove the relationship used by other handlers.
     $view->removeHandler('default', 'relationship', 'uid');
-    // Validate display
+    // Validate display.
     $errors = $view->validate();
     // Check that the error messages are shown.
     $this->assertCount(2, $errors['default'], 'Error messages found for required relationship');

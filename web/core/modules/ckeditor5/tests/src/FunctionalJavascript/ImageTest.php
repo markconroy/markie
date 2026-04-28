@@ -4,14 +4,21 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\ckeditor5\FunctionalJavascript;
 
-// cspell:ignore imageresize imageupload
+use Drupal\ckeditor5\Plugin\CKEditor5Plugin\Image;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
+// cspell:ignore imageresize imageupload
 /**
- * @coversDefaultClass \Drupal\ckeditor5\Plugin\CKEditor5Plugin\Image
- * @group ckeditor5
- * @group #slow
+ * Tests Drupal\ckeditor5\Plugin\CKEditor5Plugin\Image.
+ *
  * @internal
  */
+#[CoversClass(Image::class)]
+#[Group('ckeditor5')]
+#[Group('#slow')]
+#[RunTestsInSeparateProcesses]
 class ImageTest extends ImageTestTestBase {
   use ImageTestBaselineTrait;
 

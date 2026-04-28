@@ -82,6 +82,14 @@ class ComponentValidator {
       $schema['properties'] = new \stdClass();
     }
 
+    // If a slot has an empty definition,
+    // force casting to object instead of array.
+    foreach ($definition['slots'] ?? [] as $slot_name => $slot) {
+      if ($slot === []) {
+        $definition['slots'][$slot_name] = new \stdClass();
+      }
+    }
+
     // Ensure that all property types are strings. For example, a null value
     // will not automatically convert to 'null', which will lead to a PHP error
     // that is hard to trace back to the property.
@@ -136,6 +144,7 @@ class ComponentValidator {
       $this->validator->getErrors()
     );
     $message_parts = [
+      sprintf('In component %s:', $definition['id']),
       ...$message_parts,
       ...$missing_class_errors,
     ];

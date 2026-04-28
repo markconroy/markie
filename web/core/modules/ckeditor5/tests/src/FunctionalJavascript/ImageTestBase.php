@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\ckeditor5\FunctionalJavascript;
 
-use Drupal\Tests\TestFileCreationTrait;
 use Drupal\Tests\ckeditor5\Traits\CKEditor5TestTrait;
+use Drupal\Tests\TestFileCreationTrait;
 
 // cspell:ignore imageresize
 
 /**
- * @coversDefaultClass \Drupal\ckeditor5\Plugin\CKEditor5Plugin\Image
- * @group ckeditor5
+ * Tests Drupal\ckeditor5\Plugin\CKEditor5Plugin\Image.
+ *
  * @internal
  */
 abstract class ImageTestBase extends CKEditor5TestBase {

@@ -6,11 +6,15 @@ namespace Drupal\Tests\layout_builder\Functional\Rest;
 
 use Drupal\Tests\rest\Functional\BasicAuthResourceTestTrait;
 use Drupal\Tests\rest\Functional\EntityResource\XmlEntityNormalizationQuirksTrait;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
- * @group layout_builder
- * @group rest
+ * Tests Layout Builder Entity View Display Xml Basic Auth.
  */
+#[Group('layout_builder')]
+#[Group('rest')]
+#[RunTestsInSeparateProcesses]
 class LayoutBuilderEntityViewDisplayXmlBasicAuthTest extends LayoutBuilderEntityViewDisplayResourceTestBase {
 
   use BasicAuthResourceTestTrait;

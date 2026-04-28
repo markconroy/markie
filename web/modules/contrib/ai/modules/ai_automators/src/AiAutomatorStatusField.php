@@ -2,6 +2,7 @@
 
 namespace Drupal\ai_automators;
 
+use Drupal\Core\Config\Entity\ConfigEntityInterface;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityTypeManager;
 use Drupal\field\Entity\FieldConfig;
@@ -11,6 +12,11 @@ use Drupal\field\Entity\FieldStorageConfig;
  * Run one rule.
  */
 class AiAutomatorStatusField {
+
+  /**
+   * Module dependency used for uninstall visibility and cleanup.
+   */
+  const MODULE_DEPENDENCY = 'ai_automators';
 
   /**
    * The defined field name.
@@ -151,8 +157,16 @@ class AiAutomatorStatusField {
         'locked' => TRUE,
         'cardinality' => 1,
         'translatable' => FALSE,
+        'dependencies' => [
+          'enforced' => [
+            'module' => [self::MODULE_DEPENDENCY],
+          ],
+        ],
       ]);
       $storage->save();
+    }
+    else {
+      $this->ensureModuleDependency($storage);
     }
 
     $config = FieldConfig::create([
@@ -161,9 +175,16 @@ class AiAutomatorStatusField {
       'bundle' => $bundle,
       'label' => 'AI Automator Status',
       'default_value' => [
-        self::STATUS_PENDING,
+        [
+          'value' => self::STATUS_PENDING,
+        ],
       ],
       'required' => TRUE,
+      'dependencies' => [
+        'enforced' => [
+          'module' => [self::MODULE_DEPENDENCY],
+        ],
+      ],
     ]);
     $config->save();
   }
@@ -195,6 +216,24 @@ class AiAutomatorStatusField {
       if ($storage) {
         $storage->delete();
       }
+    }
+  }
+
+  /**
+   * Adds an enforced ai_automators module dependency to a config entity.
+   *
+   * @param \Drupal\Core\Config\Entity\ConfigEntityInterface $configEntity
+   *   The config entity to adjust.
+   */
+  protected function ensureModuleDependency(ConfigEntityInterface $configEntity): void {
+    $dependencies = $configEntity->get('dependencies') ?? [];
+    $modules = $dependencies['enforced']['module'] ?? [];
+    if (!in_array(self::MODULE_DEPENDENCY, $modules, TRUE)) {
+      $modules[] = self::MODULE_DEPENDENCY;
+      sort($modules);
+      $dependencies['enforced']['module'] = $modules;
+      $configEntity->set('dependencies', $dependencies);
+      $configEntity->save();
     }
   }
 

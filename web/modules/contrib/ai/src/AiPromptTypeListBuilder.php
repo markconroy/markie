@@ -16,6 +16,17 @@ class AiPromptTypeListBuilder extends ConfigEntityListBuilder {
   /**
    * {@inheritdoc}
    */
+  public function render() {
+    $build['help'] = [
+      '#markup' => '<p>' . $this->t('AI Prompt Types define the structure of AI Prompts, including the required variables and tokens. They are typically provided by modules within the AI ecosystem, but you can also create custom types for your own implementations.') . '</p>',
+    ];
+    $build += parent::render();
+    return $build;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function buildHeader() {
     $header['id'] = $this->t('ID');
     $header['prompt_type'] = $this->t('Prompt Type');

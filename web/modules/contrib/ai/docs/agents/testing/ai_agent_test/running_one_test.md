@@ -1,4 +1,4 @@
-# Running on Test
+# Running One Test
 
 ## Run the test
 On the listings page you will see a button called "Run Once". Just click this and it will run against the default AI Chat with Tools provider.

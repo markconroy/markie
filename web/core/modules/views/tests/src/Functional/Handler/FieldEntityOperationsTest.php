@@ -8,12 +8,14 @@ use Drupal\Core\Url;
 use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\node\Entity\Node;
 use Drupal\Tests\views\Functional\ViewTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the core Drupal\views\Plugin\views\field\EntityOperations handler.
- *
- * @group views
  */
+#[Group('views')]
+#[RunTestsInSeparateProcesses]
 class FieldEntityOperationsTest extends ViewTestBase {
 
   /**
@@ -105,6 +107,50 @@ class FieldEntityOperationsTest extends ViewTestBase {
     $this->drupalGet('admin/structure/views/nojs/display/test_entity_operations/page_2/style_options');
     $this->assertSession()->fieldExists('style_options[info][title][sortable]');
     $this->assertSession()->fieldNotExists('style_options[info][operations][sortable]');
+  }
+
+  /**
+   * Tests entity operations cacheability varies correctly.
+   */
+  public function testEntityOperationsCacheability(): void {
+    // It's important that both users have the same role here so cacheability
+    // doesn't vary on that.
+    $role = $this->drupalCreateRole([
+      'edit own article content',
+    ]);
+    $user1 = $this->drupalCreateUser([], 'User 1');
+    $user1->addRole($role)->save();
+    $user2 = $this->drupalCreateUser([], 'User 2');
+    $user2->addRole($role)->save();
+
+    $article = Node::create([
+      'title' => 'An article',
+      'type' => 'article',
+      'uid' => $user1->id(),
+    ]);
+    $article->save();
+    $article2 = Node::create([
+      'title' => 'Another article',
+      'type' => 'article',
+      'uid' => $user2->id(),
+    ]);
+    $article2->save();
+
+    $this->drupalLogin($user2);
+    $this->drupalGet('test-entity-operations');
+
+    // User 2 should only see the edit operation for article 2.
+    $this->assertSession()->linkByHrefExists($article2->toUrl('edit-form')->toString());
+    $this->assertSession()->linkByHrefNotExists($article->toUrl('edit-form')->toString());
+
+    $this->drupalLogin($user1);
+    $this->drupalGet('test-entity-operations');
+
+    // User 1 should only see the edit operation for article 1. This ensures
+    // cacheability has been set correctly on the entity operations.
+    $this->assertSession()->linkByHrefNotExists($article2->toUrl('edit-form')->toString());
+    $this->assertSession()->linkByHrefExists($article->toUrl('edit-form')->toString());
+
   }
 
 }

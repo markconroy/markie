@@ -68,7 +68,7 @@ abstract class KeyProviderBase extends KeyPluginBase implements KeyProviderInter
     if ($options['fixed_length']) {
       $obscured_chars = str_repeat($options['replacement_character'], $options['fixed_length'] - $options['visible_right']);
     }
-    elseif (strlen($key_value) - $options['visible_right'] > 0) {
+    elseif (!is_null($key_value) && strlen($key_value) - $options['visible_right'] > 0) {
       $obscured_chars = str_repeat($options['replacement_character'], strlen($key_value) - $options['visible_right']);
     }
 

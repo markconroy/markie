@@ -12,8 +12,7 @@ use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityRepositoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Url;
-use Symfony\Component\HttpFoundation\JsonResponse;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
@@ -255,6 +254,19 @@ class CommentController extends ControllerBase {
   }
 
   /**
+   * Title callback for the reply form.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $entity
+   *   The entity this comment belongs to.
+   *
+   * @return \Drupal\Core\StringTranslation\TranslatableMarkup
+   *   The reply form title.
+   */
+  public function replyFormTitle(EntityInterface $entity): TranslatableMarkup {
+    return $this->t('Add new comment to %label', ['%label' => $entity->label()]);
+  }
+
+  /**
    * Access check for the reply form.
    *
    * @param \Drupal\Core\Entity\EntityInterface $entity
@@ -316,35 +328,22 @@ class CommentController extends ControllerBase {
    *
    * @throws \Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException
    * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
+   *
+   * @deprecated in drupal:11.3.0 and is removed from drupal:12.0.0. Use
+   *   \Drupal\history\Controller\HistoryController::renderNewCommentsNodeLinks
+   *   instead.
+   *
+   * @see https://www.drupal.org/node/3543039
    */
   public function renderNewCommentsNodeLinks(Request $request) {
-    if ($this->currentUser()->isAnonymous()) {
-      throw new AccessDeniedHttpException();
-    }
-
-    if (!$request->request->has('node_ids') || !$request->request->has('field_name')) {
+    @trigger_error(__FUNCTION__ . ' is deprecated in drupal:11.3.0 and is removed from drupal:12.0.0. Use \Drupal\history\Controller\HistoryController::renderNewCommentsNodeLinks instead. See https://www.drupal.org/node/3543039', E_USER_DEPRECATED);
+    if (!$this->moduleHandler()->moduleExists('history')) {
       throw new NotFoundHttpException();
     }
-    $nids = $request->request->all('node_ids');
-    $field_name = $request->request->get('field_name');
-
-    // Only handle up to 100 nodes.
-    $nids = array_slice($nids, 0, 100);
-
-    $links = [];
-    foreach ($nids as $nid) {
-      $node = $this->entityTypeManager()->getStorage('node')->load($nid);
-      $new = $this->commentManager->getCountNewComments($node);
-      $page_number = $this->entityTypeManager()->getStorage('comment')
-        ->getNewCommentPageNumber($node->{$field_name}->comment_count, $new, $node, $field_name);
-      $query = $page_number ? ['page' => $page_number] : NULL;
-      $links[$nid] = [
-        'new_comment_count' => (int) $new,
-        'first_new_comment_link' => Url::fromRoute('entity.node.canonical', ['node' => $node->id()], ['query' => $query, 'fragment' => 'new'])->toString(),
-      ];
-    }
-
-    return new JsonResponse($links);
+    /** @var \Drupal\Core\Controller\ControllerResolver $resolver */
+    $resolver = \Drupal::service('controller_resolver');
+    $controller = $resolver->getControllerFromDefinition('\Drupal\history\Controller\HistoryController::renderNewCommentsNodeLinks');
+    return $controller($request);
   }
 
 }

@@ -7,10 +7,14 @@ namespace Drupal\Tests\language\Kernel;
 use Drupal\Core\Config\Action\ConfigActionManager;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\language\Entity\ConfigurableLanguage;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
- * @group language
+ * Tests Config Actions.
  */
+#[Group('language')]
+#[RunTestsInSeparateProcesses]
 class ConfigActionsTest extends KernelTestBase {
 
   /**

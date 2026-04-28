@@ -4,20 +4,30 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\menu_link_content\Functional;
 
-use Drupal\Tests\content_translation\Functional\ContentTranslationUITestBase;
 use Drupal\menu_link_content\Entity\MenuLinkContent;
+use Drupal\Tests\content_translation\Functional\ContentTranslationUITestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the menu link content translation UI.
- *
- * @group Menu
  */
+#[Group('Menu')]
+#[RunTestsInSeparateProcesses]
 class MenuLinkContentTranslationUITest extends ContentTranslationUITestBase {
 
   /**
    * {@inheritdoc}
    */
-  protected $defaultCacheContexts = ['languages:language_interface', 'session', 'theme', 'url.path', 'url.query_args', 'user.permissions', 'user.roles:authenticated'];
+  protected $defaultCacheContexts = [
+    'languages:language_interface',
+    'session',
+    'theme',
+    'url.path',
+    'url.query_args',
+    'user.permissions',
+    'user.roles:authenticated',
+  ];
 
   /**
    * {@inheritdoc}

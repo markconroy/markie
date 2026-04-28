@@ -12,15 +12,15 @@ We will create issues with test plans, that you simply have to follow and report
 
 ## Automated Testing
 
-The AI module was developed at a rapid pace, where results was priority 1, 2 and 3. This means that we have a lot of code that is not tested, and we are working on adding tests to the module. Any type of kernel or functional test, based on how the features are supposed to behave would be great to add. The main maintainers do have limited time and a lot of time initially is spent on feature development.
+The AI module was developed at a rapid pace, where results were priority 1, 2 and 3. This means that we have a lot of code that is not tested, and we are working on adding tests to the module. Any type of kernel or functional test, based on how the features are supposed to behave would be great to add. The main maintainers do have limited time and a lot of time initially is spent on feature development.
 
-The AI space is still moving in such a rapid pace that we are still pumping out new features and improvements, so we are not yet at a point where we can focus on writing tests for all the code. This means that any help with writing tests is greatly appreciated.
+The AI space is still moving at such a rapid pace that we are still pumping out new features and improvements, so we are not yet at a point where we can focus on writing tests for all the code. This means that any help with writing tests is greatly appreciated.
 
 ## Type of Tests
 
 We see that kernel and functional tests are the most useful for the AI module, as they test the functionality of the module in a real-world scenario. Unit tests are also useful, but they are usually written by the developer who created the code. However, if you find a bug and can write a unit test that shows the bug and then fix it, that would be greatly appreciated. This will ensure that the bug does not reappear in the future.
 
-## I want to contribute test, what do I do?
+## I want to contribute tests, what do I do?
 
 First of all, thank you for wanting to contribute tests! To contribute tests that you have verified are not already covered by existing tests, please follow these steps:
 
@@ -30,7 +30,7 @@ First of all, thank you for wanting to contribute tests! To contribute tests tha
 4. Push your changes back and create a merge request.
 5. We will merge your tests into the main branch and you will be credited for your contribution.
 
-## I want to help with testing, but I do not know which tests that are missing.
+## I want to help with testing, but I do not know which tests are missing.
 
 Please join the [AI-contrib Slack channel](https://www.drupal.org/slack) and ask for help. The community is active and supportive, and you can get guidance on what tests are needed or how to write tests for specific features. You can also reach out to [marcus_johansson](https://www.drupal.org/u/marcus_johansson) via the contact form on Drupal.org for mentorship or guidance on writing tests or what tests are needed.
 

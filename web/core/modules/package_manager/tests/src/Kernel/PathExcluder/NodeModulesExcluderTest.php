@@ -4,14 +4,21 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\package_manager\Kernel\PathExcluder;
 
+use Drupal\package_manager\PathExcluder\NodeModulesExcluder;
 use Drupal\package_manager\PathLocator;
 use Drupal\Tests\package_manager\Kernel\PackageManagerKernelTestBase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
- * @covers \Drupal\package_manager\PathExcluder\NodeModulesExcluder
- * @group package_manager
+ * Tests Node Modules Excluder.
+ *
  * @internal
  */
+#[Group('package_manager')]
+#[CoversClass(NodeModulesExcluder::class)]
+#[RunTestsInSeparateProcesses]
 class NodeModulesExcluderTest extends PackageManagerKernelTestBase {
 
   /**

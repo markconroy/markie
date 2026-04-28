@@ -7,12 +7,14 @@ namespace Drupal\Tests\file\Kernel;
 use Drupal\file\Entity\File;
 use Drupal\file\FileInterface;
 use Drupal\file_test\FileTestHelper;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests \Drupal\file\Entity\File::load().
- *
- * @group file
  */
+#[Group('file')]
+#[RunTestsInSeparateProcesses]
 class LoadTest extends FileManagedUnitTestBase {
 
   /**

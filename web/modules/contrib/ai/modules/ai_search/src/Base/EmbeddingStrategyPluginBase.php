@@ -46,6 +46,13 @@ abstract class EmbeddingStrategyPluginBase implements EmbeddingStrategyInterface
   protected int $chunkSize;
 
   /**
+   * If we should skip moderation (mostly NO!).
+   *
+   * @var bool
+   */
+  protected bool $skipModeration;
+
+  /**
    * The chunk minimum overlap.
    *
    * @var int
@@ -118,6 +125,7 @@ abstract class EmbeddingStrategyPluginBase implements EmbeddingStrategyInterface
     $this->textChunker->setModel($chat_model_id);
     /** @var \Drupal\ai\OperationType\Embeddings\EmbeddingsInterface $embeddingLlm */
     $this->embeddingLlm = $this->aiProviderManager->createInstance($this->providerId);
+    $this->skipModeration = !empty($configuration['skip_moderation']);
     if (!empty($configuration['chunk_size']) && is_numeric($configuration['chunk_size'])) {
       $this->chunkSize = (int) $configuration['chunk_size'];
     }
@@ -179,6 +187,14 @@ abstract class EmbeddingStrategyPluginBase implements EmbeddingStrategyInterface
     if (empty($configuration)) {
       $configuration = $this->getDefaultConfigurationValues();
     }
+
+    $form['skip_moderation'] = [
+      '#title' => $this->t('Skip moderation for embeddings (only for advanced use cases).'),
+      '#description' => $this->t('This means that the moderation layer will not check for any possible flagged content. Only do this when the moderation provider is different from the LLM provider for the chatbot or when you are using pure vector search without and LLM. Only check this if you are 100% sure what you are doing.'),
+      '#type' => 'checkbox',
+      '#default_value' => $configuration['skip_moderation'] ?? FALSE,
+    ];
+
     $form['chunk_size'] = [
       '#title' => $this->t('Maximum chunk size allowed when breaking up larger content'),
       '#description' => $this->t('When the content is longer than this in tokens (which roughly equates to syllables when oversimplified), the content should be broken into smaller "Chunks". This setting defines how to segment or break up the larger text. When configuring Fields for this Index, the fields with the indexing option "Main Content" will be split into chunks no greater than this size. This includes any added "Contextual Content" as well as the "Title" to ensure an accurate vectorized representation of the content. More details are provided when configuring the Fields within your Index. Leave this blank to use the maximum size provided by the selected model.'),

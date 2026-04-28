@@ -4,12 +4,16 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\node\Functional;
 
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\IgnoreDeprecations;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
+
 /**
  * Tests if the syndicate block is available.
- *
- * @group node
- * @group legacy
  */
+#[Group('node')]
+#[IgnoreDeprecations]
+#[RunTestsInSeparateProcesses]
 class NodeSyndicateBlockTest extends NodeTestBase {
 
   /**

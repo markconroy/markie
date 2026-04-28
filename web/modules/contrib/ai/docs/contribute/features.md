@@ -2,7 +2,7 @@
 
 > Please make sure you follow the [AI module issue guidelines](issue_guidelines.md).
 
-While we have a fairly clear roadmap set out by the maintainers and the [Drupal AI Initiative](https://new.drupal.org/ai/announcement), we are always open to new features that can enhance the AI module and its submodules
+While we have a fairly clear roadmap set out by the maintainers and the [Drupal AI Initiative](https://new.drupal.org/ai/announcement), we are always open to new features that can enhance the AI module and its submodules.
 
 ## Start by creating a feature ticket
 Since features can be quite complex and may require discussion, we recommend starting by creating a feature ticket in the [AI Issue queue](https://www.drupal.org/project/issues/ai?categories=All). This allows you to outline your proposed feature, gather feedback from the community, and ensure that it aligns with the overall goals of the AI module.

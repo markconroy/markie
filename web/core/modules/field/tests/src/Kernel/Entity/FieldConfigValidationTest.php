@@ -9,12 +9,16 @@ use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\KernelTests\Core\Config\ConfigEntityValidationTestBase;
 use Drupal\Tests\node\Traits\ContentTypeCreationTrait;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests validation of field_config entities.
- *
- * @group field
  */
+#[Group('field')]
+#[Group('config')]
+#[Group('Validation')]
+#[RunTestsInSeparateProcesses]
 class FieldConfigValidationTest extends ConfigEntityValidationTestBase {
 
   use ContentTypeCreationTrait;
@@ -75,7 +79,7 @@ class FieldConfigValidationTest extends ConfigEntityValidationTestBase {
     // First, create a field storage for which a complex default value exists.
     $this->enableModules(['text']);
     $text_field_storage_config = FieldStorageConfig::create([
-      'type' => 'text_with_summary',
+      'type' => 'text_long',
       'field_name' => 'novel',
       'entity_type' => 'user',
     ]);
@@ -87,7 +91,6 @@ class FieldConfigValidationTest extends ConfigEntityValidationTestBase {
       'default_value' => [
         0 => [
           'value' => "Multi\nLine",
-          'summary' => '',
           'format' => 'basic_html',
         ],
       ],

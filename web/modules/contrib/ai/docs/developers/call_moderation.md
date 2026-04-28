@@ -28,7 +28,7 @@ if ($moderation->isFlagged()) {
 
 ### Moderation Interfaces & Models
 
-The following files defines the methods available when doing a moderation call as well as the input and output.
+The following files define the methods available when doing a moderation call as well as the input and output.
 
 * [ModerationInterface.php](https://git.drupalcode.org/project/ai/-/blob/1.0.x/src/OperationType/Moderation/ModerationInterface.php?ref_type=heads)
 * [ModerationInput.php](https://git.drupalcode.org/project/ai/-/blob/1.0.x/src/OperationType/Moderation/ModerationInput.php?ref_type=heads)

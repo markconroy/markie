@@ -7,12 +7,14 @@ namespace Drupal\Tests\settings_tray\FunctionalJavascript;
 use Drupal\settings_tray_test\Plugin\Block\SettingsTrayFormAnnotationIsClassBlock;
 use Drupal\settings_tray_test\Plugin\Block\SettingsTrayFormAnnotationNoneBlock;
 use Drupal\user\Entity\Role;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Testing opening and saving block forms in the off-canvas dialog.
- *
- * @group settings_tray
  */
+#[Group('settings_tray')]
+#[RunTestsInSeparateProcesses]
 class SettingsTrayBlockFormTest extends SettingsTrayTestBase {
 
   /**

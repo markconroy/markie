@@ -3,7 +3,7 @@
 /*
  * This file is part of Psy Shell.
  *
- * (c) 2012-2025 Justin Hileman
+ * (c) 2012-2026 Justin Hileman
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -11,6 +11,7 @@
 
 namespace Psy\Command;
 
+use PhpParser\Error as PhpParserError;
 use PhpParser\Node;
 use PhpParser\Parser;
 use Psy\Context;
@@ -80,7 +81,7 @@ class ParseCommand extends Command implements ContextAware, PresenterAware
     /**
      * {@inheritdoc}
      */
-    protected function configure()
+    protected function configure(): void
     {
         $this
             ->setName('parse')
@@ -117,7 +118,7 @@ HELP
 
         try {
             $nodes = $this->parser->parse($code);
-        } catch (\PhpParser\Error $e) {
+        } catch (PhpParserError $e) {
             if ($this->parseErrorIsEOF($e)) {
                 $nodes = $this->parser->parse($code.';');
             } else {
@@ -125,14 +126,14 @@ HELP
             }
         }
 
-        $output->page($this->presenter->present($nodes, $depth));
+        $this->shellOutput($output)->page($this->presenter->present($nodes, $depth, Presenter::RAW), OutputInterface::OUTPUT_RAW);
 
         $this->context->setReturnValue($nodes);
 
         return 0;
     }
 
-    private function parseErrorIsEOF(\PhpParser\Error $e): bool
+    private function parseErrorIsEOF(PhpParserError $e): bool
     {
         $msg = $e->getRawMessage();
 

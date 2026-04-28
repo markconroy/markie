@@ -384,10 +384,10 @@ abstract class AiVdbProviderClientBase implements AiVdbProviderInterface, AiVdbP
       database: $configuration['database_settings']['database_name'],
     );
     if ($vdbIds) {
-      $this->deleteFromCollection(
+      $this->getClient()->deleteFromCollection(
         collection_name: $configuration['database_settings']['collection'],
         ids: $vdbIds,
-        database: $configuration['database_settings']['database_name'],
+        database_name: $configuration['database_settings']['database_name'],
       );
     }
   }

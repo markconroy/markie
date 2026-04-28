@@ -7,12 +7,14 @@ namespace Drupal\KernelTests\Core\Entity;
 use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\field\Entity\FieldStorageConfig;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests Field translation SQL Storage.
- *
- * @group Entity
  */
+#[Group('Entity')]
+#[RunTestsInSeparateProcesses]
 class FieldTranslationSqlStorageTest extends EntityLanguageTestBase {
 
   /**

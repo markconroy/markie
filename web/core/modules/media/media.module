@@ -5,11 +5,8 @@
  */
 
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Hook\Attribute\ProceduralHookScanStop;
-use Drupal\Core\Render\Element;
-use Drupal\Core\Render\Element\RenderElementBase;
-use Drupal\Core\Template\Attribute;
 use Drupal\Core\Url;
+use Drupal\media\Hook\MediaThemeHooks;
 
 /**
  * Prepares variables for media templates.
@@ -22,41 +19,15 @@ use Drupal\Core\Url;
  *   - media: The media item.
  *   - name: The label for the media item.
  *   - view_mode: View mode; e.g., 'full', 'teaser', etc.
+ *
+ * @deprecated in drupal:11.3.0 and is removed from drupal:12.0.0. Initial
+ *   template_preprocess functions are registered directly in hook_theme().
+ *
+ * @see https://www.drupal.org/node/3504125
  */
 function template_preprocess_media(array &$variables): void {
-  $variables['media'] = $variables['elements']['#media'];
-  $variables['view_mode'] = $variables['elements']['#view_mode'];
-  $variables['name'] = $variables['media']->label();
-
-  // Helpful $content variable for templates.
-  foreach (Element::children($variables['elements']) as $key) {
-    $variables['content'][$key] = $variables['elements'][$key];
-  }
-}
-
-/**
- * Implements hook_preprocess_HOOK() for media reference widgets.
- */
-function media_preprocess_media_reference_help(&$variables): void {
-  // Most of these attribute checks are copied from
-  // template_preprocess_fieldset(). Our template extends
-  // field-multiple-value-form.html.twig to provide our help text, but also
-  // groups the information within a semantic fieldset with a legend. So, we
-  // incorporate parity for both.
-  $element = $variables['element'];
-  Element::setAttributes($element, ['id']);
-  RenderElementBase::setAttributes($element);
-  $variables['attributes'] = $element['#attributes'] ?? [];
-  $variables['legend_attributes'] = new Attribute();
-  $variables['header_attributes'] = new Attribute();
-  $variables['description']['attributes'] = new Attribute();
-  $variables['legend_span_attributes'] = new Attribute();
-
-  if (!empty($element['#media_help'])) {
-    foreach ($element['#media_help'] as $key => $text) {
-      $variables[substr($key, 1)] = $text;
-    }
-  }
+  @trigger_error(__FUNCTION__ . '() is deprecated in drupal:11.3.0 and is removed from drupal:12.0.0. Initial template_preprocess functions are registered directly in hook_theme(). See https://www.drupal.org/node/3504125', E_USER_DEPRECATED);
+  \Drupal::service(MediaThemeHooks::class)->preprocessMedia($variables);
 }
 
 /**
@@ -73,7 +44,6 @@ function media_preprocess_media_reference_help(&$variables): void {
  * @internal
  *   This function is internal and may be removed in a minor release.
  */
-#[ProceduralHookScanStop]
 function _media_get_add_url($allowed_bundles) {
   $access_handler = \Drupal::entityTypeManager()->getAccessControlHandler('media');
   $create_bundles = array_filter($allowed_bundles, [$access_handler, 'createAccess']);

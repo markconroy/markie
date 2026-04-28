@@ -13,12 +13,16 @@ use Drupal\Tests\UnitTestCase;
 use Drupal\Tests\views\Unit\Plugin\HandlerTestTrait;
 use Drupal\views\Plugin\views\field\EntityField;
 use Drupal\views\ResultRow;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 /**
- * @coversDefaultClass \Drupal\views\Plugin\views\field\EntityField
- * @group views
+ * Tests Drupal\views\Plugin\views\field\EntityField.
  */
+#[CoversClass(EntityField::class)]
+#[Group('views')]
 class FieldTest extends UnitTestCase {
 
   use HandlerTestTrait;
@@ -123,7 +127,9 @@ class FieldTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::__construct
+   * Tests construct.
+   *
+   * @legacy-covers ::__construct
    */
   public function testConstruct(): void {
     $definition = [
@@ -138,7 +144,7 @@ class FieldTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::defineOptions
+   * Tests define options with no options.
    */
   public function testDefineOptionsWithNoOptions(): void {
     $definition = [
@@ -165,7 +171,7 @@ class FieldTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::defineOptions
+   * Tests define options with default formatter on field definition.
    */
   public function testDefineOptionsWithDefaultFormatterOnFieldDefinition(): void {
     $definition = [
@@ -193,7 +199,7 @@ class FieldTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::defineOptions
+   * Tests define options with default formatter on field type.
    */
   public function testDefineOptionsWithDefaultFormatterOnFieldType(): void {
     $definition = [
@@ -220,7 +226,7 @@ class FieldTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::calculateDependencies
+   * Tests calculate dependencies with base field.
    */
   public function testCalculateDependenciesWithBaseField(): void {
     $definition = [
@@ -242,7 +248,7 @@ class FieldTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::calculateDependencies
+   * Tests calculate dependencies with configured field.
    */
   public function testCalculateDependenciesWithConfiguredField(): void {
     $definition = [
@@ -268,7 +274,7 @@ class FieldTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::access
+   * Tests access.
    */
   public function testAccess(): void {
     $definition = [
@@ -320,9 +326,8 @@ class FieldTest extends UnitTestCase {
    *
    * @param string $order
    *   The sort order.
-   *
-   * @dataProvider providerSortOrders
    */
+  #[DataProvider('providerSortOrders')]
   public function testClickSortWithOutConfiguredColumn($order): void {
     $definition = [
       'entity_type' => 'test_entity',
@@ -338,12 +343,12 @@ class FieldTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::clickSort
-   * @dataProvider providerSortOrders
+   * Tests click sort with base field.
    *
    * @param string $order
    *   The sort order.
    */
+  #[DataProvider('providerSortOrders')]
   public function testClickSortWithBaseField($order): void {
     $definition = [
       'entity_type' => 'test_entity',
@@ -397,12 +402,12 @@ class FieldTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::clickSort
-   * @dataProvider providerSortOrders
+   * Tests click sort with configured field.
    *
    * @param string $order
    *   The sort order.
    */
+  #[DataProvider('providerSortOrders')]
   public function testClickSortWithConfiguredField($order): void {
     $definition = [
       'entity_type' => 'test_entity',
@@ -456,7 +461,7 @@ class FieldTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::query
+   * Tests query with group by for base field.
    */
   public function testQueryWithGroupByForBaseField(): void {
     $definition = [
@@ -518,7 +523,7 @@ class FieldTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::query
+   * Tests query with group by for config field.
    */
   public function testQueryWithGroupByForConfigField(): void {
     $definition = [
@@ -580,10 +585,9 @@ class FieldTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::prepareItemsByDelta
-   *
-   * @dataProvider providerTestPrepareItemsByDelta
+   * Tests prepare items by delta.
    */
+  #[DataProvider('providerTestPrepareItemsByDelta')]
   public function testPrepareItemsByDelta(array $options, array $expected_values): void {
     $definition = [
       'entity_type' => 'test_entity',

@@ -191,7 +191,7 @@ class MySQLiSource extends DatabaseSource implements PluginCallerInterface {
       }
 
       // Throw an error on fail.
-      if ($this->connection->connect_errno || !$this->connection->ping()) {
+      if ($this->connection->connect_errno) {
         throw new BackupMigrateException("Failed to connect to MySQL server.");
       }
       // Ensure, that the character set is utf8mb4.
@@ -452,7 +452,7 @@ FOOTER;
    */
   protected function query($query) {
     if ($conn = $this->_getConnection()) {
-      return $conn->query($query);
+      return $conn->query($query, MYSQLI_USE_RESULT);
     }
     else {
       throw new \Exception('Could not run any queries on the database as a connection could not be established');

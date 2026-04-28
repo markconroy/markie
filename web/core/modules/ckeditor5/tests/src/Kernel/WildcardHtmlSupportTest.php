@@ -4,17 +4,25 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\ckeditor5\Kernel;
 
+use Drupal\ckeditor5\Plugin\CKEditor5PluginManager;
 use Drupal\ckeditor5\Plugin\Editor\CKEditor5;
 use Drupal\editor\Entity\Editor;
 use Drupal\filter\Entity\FilterFormat;
 use Drupal\KernelTests\KernelTestBase;
+use PHPUnit\Framework\Attributes\CoversMethod;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Symfony\Component\Validator\ConstraintViolationInterface;
 
 /**
- * @covers \Drupal\ckeditor5\Plugin\CKEditor5PluginManager::getCKEditor5PluginConfig
- * @group ckeditor5
+ * Tests Wildcard Html Support.
+ *
  * @internal
  */
+#[Group('ckeditor5')]
+#[CoversMethod(CKEditor5PluginManager::class, 'getCKEditor5PluginConfig')]
+#[RunTestsInSeparateProcesses]
 class WildcardHtmlSupportTest extends KernelTestBase {
 
   /**
@@ -42,9 +50,11 @@ class WildcardHtmlSupportTest extends KernelTestBase {
   }
 
   /**
-   * @covers \Drupal\ckeditor5\Plugin\CKEditor5Plugin\SourceEditing::getDynamicPluginConfig
-   * @dataProvider providerGhsConfiguration
+   * Tests ghs configuration.
+   *
+   * @legacy-covers \Drupal\ckeditor5\Plugin\CKEditor5Plugin\SourceEditing::getDynamicPluginConfig
    */
+  #[DataProvider('providerGhsConfiguration')]
   public function testGhsConfiguration(string $filter_html_allowed, array $source_editing_tags, array $expected_ghs_configuration, ?array $additional_toolbar_items = []): void {
     FilterFormat::create([
       'format' => 'test_format',

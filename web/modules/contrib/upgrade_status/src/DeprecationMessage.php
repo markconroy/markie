@@ -47,6 +47,8 @@ class DeprecationMessage {
    *   The file related to the deprecation message.
    * @param int $line
    *   The line associated to the deprecation message.
+   * @param string $analyzer
+   *   The analyzer providing the message.
    */
   public function __construct(string $message, string $file = '', int $line = 0, string $analyzer = '') {
     $this->message = $message;
@@ -59,6 +61,7 @@ class DeprecationMessage {
    * Gets the message.
    *
    * @return string
+   *   The deprecation message.
    */
   public function getMessage(): string {
     return $this->message;
@@ -68,6 +71,7 @@ class DeprecationMessage {
    * Gets the file.
    *
    * @return string
+   *   The file related to the deprecation message.
    */
   public function getFile(): string {
     return $this->file;
@@ -77,35 +81,17 @@ class DeprecationMessage {
    * Gets the line.
    *
    * @return int
+   *   The line number associated with the deprecation message.
    */
   public function getLine(): int {
     return $this->line;
   }
 
   /**
-   * Sets the line value.
-   *
-   * @param int $line
-   *   The line associated to the deprecation message.
-   */
-  public function setLine(int $line) {
-    $this->line = $line;
-  }
-
-  /**
-   * Sets the file value.
-   *
-   * @param string $file
-   *   The file related to the deprecation message.
-   */
-  public function setFile(string $file) {
-    $this->file = $file;
-  }
-
-  /**
    * Get analyzer providing the message.
    *
    * @return string
+   *   The analyzer that generated the deprecation message.
    */
   public function getAnalyzer(): string {
     return $this->analyzer;

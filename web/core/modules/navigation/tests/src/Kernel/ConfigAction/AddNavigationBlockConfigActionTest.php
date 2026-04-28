@@ -9,12 +9,19 @@ use Drupal\Core\Plugin\Context\Context;
 use Drupal\Core\Plugin\Context\ContextDefinition;
 use Drupal\FunctionalTests\Core\Recipe\RecipeTestTrait;
 use Drupal\KernelTests\KernelTestBase;
+use Drupal\navigation\Plugin\ConfigAction\AddNavigationBlock;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
+use PHPUnit\Framework\Attributes\TestWith;
 
 /**
- * @covers \Drupal\navigation\Plugin\ConfigAction\AddNavigationBlock
- * @group navigation
- * @group Recipe
+ * Tests Add Navigation Block Config Action.
  */
+#[Group('navigation')]
+#[Group('Recipe')]
+#[CoversClass(AddNavigationBlock::class)]
+#[RunTestsInSeparateProcesses]
 class AddNavigationBlockConfigActionTest extends KernelTestBase {
 
   use RecipeTestTrait;
@@ -39,12 +46,11 @@ class AddNavigationBlockConfigActionTest extends KernelTestBase {
 
   /**
    * Tests add item logic.
-   *
-   * @testWith [0, 0]
-   * [1, 1]
-   * [3, 3]
-   * [7, 3]
    */
+  #[TestWith([0, 0])]
+  #[TestWith([1, 1])]
+  #[TestWith([3, 3])]
+  #[TestWith([7, 3])]
   public function testAddBlockToNavigation($delta, $computed_delta): void {
     // Load the navigation section storage.
     $navigation_storage = \Drupal::service('plugin.manager.layout_builder.section_storage')->load('navigation', [
@@ -58,7 +64,7 @@ class AddNavigationBlockConfigActionTest extends KernelTestBase {
       'configuration' => [
         'id' => 'navigation_menu:content',
         'label' => 'Content From Recipe',
-        'label_display' => 1,
+        'label_display' => 'visible',
         'provider' => 'navigation',
         'level' => 1,
         'depth' => 2,

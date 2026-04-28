@@ -6,14 +6,15 @@ namespace Drupal\FunctionalTests\Asset;
 
 use Drupal\Component\Utility\UrlHelper;
 use Drupal\Tests\BrowserTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 // cspell:ignore abcdefghijklmnop
-
 /**
  * Tests asset aggregation.
- *
- * @group asset
  */
+#[Group('asset')]
+#[RunTestsInSeparateProcesses]
 class AssetOptimizationTest extends BrowserTestBase {
 
   /**
@@ -27,11 +28,6 @@ class AssetOptimizationTest extends BrowserTestBase {
    * @var string
    */
   protected $fileAssetsPath;
-
-  /**
-   * {@inheritdoc}
-   */
-  protected static $modules = ['system'];
 
   /**
    * Tests that asset aggregates are rendered and created on disk.

@@ -6,13 +6,15 @@ namespace Drupal\Tests\workspaces_ui\FunctionalJavascript;
 
 use Drupal\Tests\system\FunctionalJavascript\OffCanvasTestBase;
 use Drupal\workspaces\Entity\Workspace;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests workspace settings stray integration.
- *
- * @group workspaces
- * @group workspaces_ui
  */
+#[Group('workspaces')]
+#[Group('workspaces_ui')]
+#[RunTestsInSeparateProcesses]
 class WorkspaceToolbarIntegrationTest extends OffCanvasTestBase {
 
   /**

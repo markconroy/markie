@@ -139,6 +139,7 @@ class ToolsFunctionInput implements ToolsFunctionInputInterface {
     $function = [
       'name' => $this->name,
       'description' => $this->description,
+      'parameters' => NULL,
     ];
     if (!empty($properties)) {
       $function['parameters'] = [

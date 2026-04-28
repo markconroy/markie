@@ -4,25 +4,29 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\link\Unit\Plugin\Validation\Constraint;
 
+use Drupal\Core\Session\AccountProxyInterface;
+use Drupal\link\LinkItemInterface;
 use Drupal\link\Plugin\Validation\Constraint\LinkAccessConstraint;
 use Drupal\link\Plugin\Validation\Constraint\LinkAccessConstraintValidator;
 use Drupal\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\CoversMethod;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
+use Symfony\Component\Validator\Exception\UnexpectedValueException;
+use Symfony\Component\Validator\Violation\ConstraintViolationBuilderInterface;
 
 /**
  * Tests the LinkAccessConstraintValidator validator.
- *
- * @coversDefaultClass \Drupal\link\Plugin\Validation\Constraint\LinkAccessConstraintValidator
- * @group validation
  */
+#[CoversMethod(LinkAccessConstraintValidator::class, 'validate')]
+#[Group('validation')]
 class LinkAccessConstraintValidatorTest extends UnitTestCase {
 
   /**
    * Tests the access validation constraint for links.
-   *
-   * @covers ::validate
-   * @dataProvider providerValidate
    */
+  #[DataProvider('providerValidate')]
   public function testValidate(bool $mayLinkAnyPage, bool $urlAccess, bool $valid): void {
     // Mock a Url object that returns a boolean indicating user access.
     $url = $this->getMockBuilder('Drupal\Core\Url')
@@ -53,13 +57,20 @@ class LinkAccessConstraintValidatorTest extends UnitTestCase {
       ->willReturn($mayLinkAnyPage);
 
     $context = $this->createMock(ExecutionContextInterface::class);
+
+    $constraintViolationBuilder = $this->createMock(ConstraintViolationBuilderInterface::class);
+    $constraintViolationBuilder->method('atPath')
+      ->with('uri')
+      ->willReturn($constraintViolationBuilder);
+
     if ($valid) {
       $context->expects($this->never())
-        ->method('addViolation');
+        ->method('buildViolation');
     }
     else {
       $context->expects($this->once())
-        ->method('addViolation');
+        ->method('buildViolation')
+        ->willReturn($constraintViolationBuilder);
     }
 
     $constraint = new LinkAccessConstraint();
@@ -81,6 +92,38 @@ class LinkAccessConstraintValidatorTest extends UnitTestCase {
     yield [TRUE, FALSE, TRUE];
     yield [FALSE, TRUE, TRUE];
     yield [FALSE, FALSE, FALSE];
+  }
+
+  /**
+   * Tests validating a value that isn't a LinkItemInterface.
+   */
+  public function testUnexpectedValue(): void {
+    $this->expectException(UnexpectedValueException::class);
+    $user = $this->createMock(AccountProxyInterface::class);
+    $validator = new LinkAccessConstraintValidator($user);
+    $context = $this->createMock(ExecutionContextInterface::class);
+    $validator->initialize($context);
+    $constraint = new LinkAccessConstraint();
+    $validator->validate('bad value', $constraint);
+  }
+
+  /**
+   * Tests validating an empty Link field.
+   */
+  public function testEmptyField(): void {
+    $link = $this->createMock(LinkItemInterface::class);
+    $link->expects($this->once())
+      ->method('isEmpty')
+      ->willReturn(TRUE);
+    $link->expects($this->never())
+      ->method('getUrl');
+
+    $user = $this->createMock(AccountProxyInterface::class);
+    $validator = new LinkAccessConstraintValidator($user);
+    $context = $this->createMock(ExecutionContextInterface::class);
+    $validator->initialize($context);
+    $constraint = new LinkAccessConstraint();
+    $validator->validate($link, $constraint);
   }
 
 }

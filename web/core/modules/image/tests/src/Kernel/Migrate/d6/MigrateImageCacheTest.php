@@ -7,15 +7,17 @@ namespace Drupal\Tests\image\Kernel\Migrate\d6;
 use Drupal\Core\Database\Database;
 use Drupal\image\Entity\ImageStyle;
 use Drupal\image\ImageEffectPluginCollection;
-use Drupal\migrate\Plugin\MigrationInterface;
 use Drupal\migrate\Exception\RequirementsException;
+use Drupal\migrate\Plugin\MigrationInterface;
 use Drupal\Tests\migrate_drupal\Kernel\d6\MigrateDrupal6TestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests migration of ImageCache presets to image styles.
- *
- * @group image
  */
+#[Group('image')]
+#[RunTestsInSeparateProcesses]
 class MigrateImageCacheTest extends MigrateDrupal6TestBase {
 
   /**

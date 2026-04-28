@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace Drupal\FunctionalTests\Image;
 
 use Drupal\Tests\BrowserTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests image toolkit setup form.
- *
- * @group Image
  */
+#[Group('Image')]
+#[RunTestsInSeparateProcesses]
 class ToolkitSetupFormTest extends BrowserTestBase {
 
   /**

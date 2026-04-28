@@ -30,4 +30,22 @@ trait GenerateBase64Trait {
     return $base64;
   }
 
+  /**
+   * Set from a base64 encoded string.
+   *
+   * @param string $base64_string
+   *   The base64 encoded string.
+   *
+   * @return void
+   *   Nothing.
+   */
+  public function setFromBase64EncodedString(string $base64_string): void {
+    // Remove data url scheme if exists.
+    if (preg_match('/^data:(.*);base64,/', $base64_string, $matches)) {
+      $this->setMimeType($matches[1]);
+      $base64_string = str_replace($matches[0], '', $base64_string);
+    }
+    $this->binary = base64_decode($base64_string);
+  }
+
 }

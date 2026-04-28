@@ -8,6 +8,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\ai\AiProviderPluginManager;
+use Drupal\ai\Dto\HostnameFilterDto;
 use Drupal\ai\Enum\AiModelCapability;
 use Drupal\ai\OperationType\Chat\ChatInput;
 use Drupal\ai\OperationType\Chat\ChatMessage;
@@ -17,6 +18,7 @@ use Drupal\ai\Service\PromptJsonDecoder\PromptJsonDecoderInterface;
 use Drupal\ai\Utility\CastUtility;
 use Drupal\ai_automators\Exceptions\AiAutomatorResponseErrorException;
 use Drupal\ai_automators\Exceptions\AiAutomatorTypeNotRunnable;
+use Drupal\ai_automators\PluginInterfaces\AiAutomatorPostCheckIfEmptyInterface;
 use Drupal\ai_automators\PluginInterfaces\AiAutomatorTypeInterface;
 use Drupal\ai_automators\Traits\GeneralHelperTrait;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -24,7 +26,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * This is a base class for all LLM rule helpers.
  */
-abstract class RuleBase implements AiAutomatorTypeInterface, ContainerFactoryPluginInterface {
+abstract class RuleBase implements AiAutomatorTypeInterface, AiAutomatorPostCheckIfEmptyInterface, ContainerFactoryPluginInterface {
 
   use GeneralHelperTrait;
   use StringTranslationTrait;
@@ -117,6 +119,25 @@ abstract class RuleBase implements AiAutomatorTypeInterface, ContainerFactoryPlu
   }
 
   /**
+   * Optional post-check hook for complex empty-state normalization.
+   *
+   * Rules can override this to adjust values after checkIfEmpty().
+   *
+   * @param \Drupal\Core\Entity\ContentEntityInterface $entity
+   *   The entity being worked on.
+   * @param array $value
+   *   The value response.
+   * @param array $automatorConfig
+   *   The automator config.
+   *
+   * @return array
+   *   Returns an empty array if the value should be considered empty.
+   */
+  public function postCheckIfEmpty(ContentEntityInterface $entity, array $value, array $automatorConfig = []): array {
+    return $value;
+  }
+
+  /**
    * {@inheritDoc}
    */
   public function placeholderText() {
@@ -172,8 +193,26 @@ abstract class RuleBase implements AiAutomatorTypeInterface, ContainerFactoryPlu
    * {@inheritDoc}
    */
   public function extraAdvancedFormFields(ContentEntityInterface $entity, FieldDefinitionInterface $fieldDefinition, FormStateInterface $formState, array $defaultValues = []) {
+    $form = [];
+
     // Load the AI models.
     $providers = $this->formHelper->getAiProvidersOptions($this->llmType);
+
+    // If no providers are available, show an inline message and return early.
+    if (empty($providers)) {
+      $operation_type = $this->aiPluginManager->getOperationType($this->llmType, TRUE);
+      $operation_label = $operation_type['label'] ?? $this->llmType;
+      $form['no_providers_message'] = [
+        '#markup' => $this->t('No AI providers are configured for %type automator. Please <a href=":url" target="_blank">configure a provider</a> to use this feature.', [
+          '%type' => $operation_label,
+          ':url' => 'https://project.pages.drupalcode.org/ai/latest/providers/matris/',
+        ]),
+        '#prefix' => '<div class="messages messages--warning">',
+        '#suffix' => '</div>',
+      ];
+      return $form;
+    }
+
     // Add to the start of the array.
     if ($this->llmType == 'chat') {
       $providers = [
@@ -638,6 +677,12 @@ abstract class RuleBase implements AiAutomatorTypeInterface, ContainerFactoryPlu
     }
 
     $model = $this->getModel($automatorConfig);
+    // Check the field type of the field.
+    $field_type = $entity ? $entity->get($automatorConfig['field_name'])->getFieldDefinition()->getType() : 'string';
+    // If its text_long or text_with_summary, we filter host names.
+    if (in_array($field_type, ['text_long', 'text_with_summary'])) {
+      $input->setHostnameFilter(new HostnameFilterDto(plainTextMode: TRUE));
+    }
     $response = $instance->chat($input, $model, $this->getTags($prompt, $automatorConfig, $instance, $entity))->getNormalized();
 
     return $response;
@@ -730,8 +775,8 @@ abstract class RuleBase implements AiAutomatorTypeInterface, ContainerFactoryPlu
         if (is_array($val) && isset($val[key($val)])) {
           $values[] = $val[key($val)];
         }
-        return $values;
       }
+      return $values;
     }
     // Sometimes it does not return with values in GPT 3.5.
     elseif (is_array($json) && isset($json[0][0])) {

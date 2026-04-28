@@ -13,11 +13,19 @@ use DrupalFinder\DrupalFinder;
  */
 final class TwigDeprecationAnalyzerTest extends KernelTestBase {
 
+  /**
+   * Modules to test.
+   *
+   * @var array
+   */
   protected static $modules = [
     'upgrade_status',
     'upgrade_status_test_twig',
   ];
 
+  /**
+   * Test deprecation report.
+   */
   public function testDeprecationReport() {
     $extension = $this->container->get('module_handler')->getModule('upgrade_status_test_twig');
     $templates_directory = $extension->getPath() . '/templates';

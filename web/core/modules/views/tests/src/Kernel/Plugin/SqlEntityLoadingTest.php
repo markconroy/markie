@@ -8,14 +8,16 @@ use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
 use Drupal\Tests\views\Kernel\ViewsKernelTestBase;
 use Drupal\views\Views;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the loading of entities and entity revisions.
  *
- * @group views
- *
  * @see \Drupal\views\Plugin\views\query\Sql
  */
+#[Group('views')]
+#[RunTestsInSeparateProcesses]
 class SqlEntityLoadingTest extends ViewsKernelTestBase {
 
   /**

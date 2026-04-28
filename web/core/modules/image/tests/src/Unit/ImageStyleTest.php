@@ -6,13 +6,16 @@ namespace Drupal\Tests\image\Unit;
 
 use Drupal\Component\Utility\Crypt;
 use Drupal\Core\DependencyInjection\ContainerBuilder;
+use Drupal\image\Entity\ImageStyle;
 use Drupal\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
- * @coversDefaultClass \Drupal\image\Entity\ImageStyle
- *
- * @group Image
+ * Tests Drupal\image\Entity\ImageStyle.
  */
+#[CoversClass(ImageStyle::class)]
+#[Group('Image')]
 class ImageStyleTest extends UnitTestCase {
 
   /**
@@ -96,7 +99,7 @@ class ImageStyleTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::getDerivativeExtension
+   * Tests get derivative extension.
    */
   public function testGetDerivativeExtension(): void {
     $image_effect_id = $this->randomMachineName();
@@ -118,7 +121,7 @@ class ImageStyleTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::buildUri
+   * Tests build uri.
    */
   public function testBuildUri(): void {
     // Image style that changes the extension.
@@ -148,7 +151,7 @@ class ImageStyleTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::getPathToken
+   * Tests get path token.
    */
   public function testGetPathToken(): void {
     $logger = $this->getMockBuilder('\Psr\Log\LoggerInterface')->getMock();
@@ -200,7 +203,7 @@ class ImageStyleTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::flush
+   * Tests flush.
    */
   public function testFlush(): void {
     $cache_tag_invalidator = $this->createMock('\Drupal\Core\Cache\CacheTagsInvalidator');

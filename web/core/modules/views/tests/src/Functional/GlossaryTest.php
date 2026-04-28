@@ -9,12 +9,14 @@ use Drupal\Core\Url;
 use Drupal\Tests\system\Functional\Cache\AssertPageCacheContextsAndTagsTrait;
 use Drupal\views\Tests\AssertViewsCacheTagsTrait;
 use Drupal\views\Views;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests glossary functionality of views.
- *
- * @group views
  */
+#[Group('views')]
+#[RunTestsInSeparateProcesses]
 class GlossaryTest extends ViewTestBase {
 
   use AssertPageCacheContextsAndTagsTrait;
@@ -57,7 +59,7 @@ class GlossaryTest extends ViewTestBase {
       }
     }
 
-    // Execute glossary view
+    // Execute glossary view.
     $view = Views::getView('glossary');
     $view->setDisplay('attachment_1');
     $view->executeDisplay('attachment_1');
@@ -86,7 +88,7 @@ class GlossaryTest extends ViewTestBase {
       ],
       [
         'config:views.view.glossary',
-        // Listed for letter 'a'
+        // Listed for letter 'a'.
         'node:' . $nodes_by_char['a'][0]->id(), 'node:' . $nodes_by_char['a'][1]->id(), 'node:' . $nodes_by_char['a'][2]->id(),
         // Link for letter 'd'.
         'node:1',

@@ -44,12 +44,12 @@ class Count extends Constraint
     public ?int $divisibleBy = null;
 
     /**
-     * @param int<0, max>|array<string,mixed>|null $exactly     The exact expected number of elements
-     * @param int<0, max>|null                     $min         Minimum expected number of elements
-     * @param int<0, max>|null                     $max         Maximum expected number of elements
-     * @param positive-int|null                    $divisibleBy The number the collection count should be divisible by
-     * @param string[]|null                        $groups
-     * @param array<mixed,string>|null             $options
+     * @param int<0, max>|null         $exactly     The exact expected number of elements
+     * @param int<0, max>|null         $min         Minimum expected number of elements
+     * @param int<0, max>|null         $max         Maximum expected number of elements
+     * @param positive-int|null        $divisibleBy The number the collection count should be divisible by
+     * @param string[]|null            $groups
+     * @param array<mixed,string>|null $options
      */
     #[HasNamedArguments]
     public function __construct(
@@ -72,8 +72,6 @@ class Count extends Constraint
             $exactly = $options['value'] ?? null;
         } elseif (\is_array($options)) {
             trigger_deprecation('symfony/validator', '7.3', 'Passing an array of options to configure the "%s" constraint is deprecated, use named arguments instead.', static::class);
-        } else {
-            $options = [];
         }
 
         $min ??= $options['min'] ?? null;

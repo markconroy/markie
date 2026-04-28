@@ -6,12 +6,14 @@ namespace Drupal\FunctionalJavascriptTests\Ajax;
 
 use Drupal\Component\Utility\UrlHelper;
 use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests AJAX responses.
- *
- * @group Ajax
  */
+#[Group('Ajax')]
+#[RunTestsInSeparateProcesses]
 class AjaxTest extends WebDriverTestBase {
 
   /**
@@ -357,6 +359,14 @@ JS;
     $this->assertSession()->assertWaitOnAjaxRequest();
     $has_focus_id = $this->getSession()->evaluateScript('document.activeElement.id');
     $this->assertEquals('edit-textfield-3', $has_focus_id);
+
+    $this->assertNotNull($email_field1 = $this->assertSession()->elementExists('css', '#edit-email-field-1'));
+    // Test email field with 'blur' event listener.
+    $email_field1->setValue('user@example.com');
+    $email_field1->focus();
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $has_focus_id = $this->getSession()->evaluateScript('document.activeElement.id');
+    $this->assertEquals('edit-email-field-1', $has_focus_id);
   }
 
 }

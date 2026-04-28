@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\ai_api_explorer\FunctionalJavascript\Plugin\AiApiExplorer;
 
 use Drupal\Tests\ai\FunctionalJavascriptTests\BaseClassFunctionalJavascriptTests;
@@ -8,6 +10,7 @@ use Drupal\Tests\ai\FunctionalJavascriptTests\BaseClassFunctionalJavascriptTests
  * Tests the Chat Explorer.
  *
  * @group ai_api_explorer
+ * @group 3577469
  */
 class ChatExplorerTest extends BaseClassFunctionalJavascriptTests {
 
@@ -25,23 +28,19 @@ class ChatExplorerTest extends BaseClassFunctionalJavascriptTests {
   /**
    * {@inheritdoc}
    */
-  protected $screenshotModuleName = 'ai_api_explorer';
+  protected string $screenshotModuleName = 'ai_api_explorer';
+
+  /**
+   * {@inheritdoc}
+   */
+  protected bool $videoRecording = TRUE;
 
   /**
    * {@inheritdoc}
    */
   public function setUp(): void {
     parent::setUp();
-    // Setup the ai.settings.
-    \Drupal::service('config.factory')
-      ->getEditable('ai.settings')
-      ->set('default_providers', [
-        'chat' => [
-          'provider_id' => 'echoai',
-          'model_id' => 'gpt-test',
-        ],
-      ])
-      ->save();
+    $this->setDefaultProvider('chat', 'echoai', 'gpt-test');
   }
 
   /**
@@ -78,6 +77,9 @@ class ChatExplorerTest extends BaseClassFunctionalJavascriptTests {
 
     // Take a screenshot after the ajax call.
     $this->takeScreenshot('4_after_ajax_call');
+
+    // Wait for the response text to appear in the DOM before asserting.
+    $this->assertSession()->waitForText('Hello! How can I help you today?');
 
     // Find the response.
     $this->assertSession()->pageTextContains('Hello! How can I help you today? 😊');
