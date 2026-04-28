@@ -1,4 +1,4 @@
-uuid: cf27ec53-c1fe-446c-93f3-6cae2ef0d113
+uuid: 630427f6-069d-45dc-830a-5980a719c9ae
 langcode: en
 status: true
 dependencies:
@@ -6,7 +6,7 @@ dependencies:
     - dblog
     - user
 _core:
-  default_config_hash: QxV85zTbzQHWnwqOjUQ9k-Hza0YP94TJebVvD1rVucg
+  default_config_hash: 3QZ9apklK6mQ7BzodmxzOxqO---2BCPtOLE3k9eQ0Is
 id: watchdog
 label: Watchdog
 module: views
@@ -17,7 +17,7 @@ base_field: wid
 display:
   default:
     id: default
-    display_title: Default
+    display_title: Master
     display_plugin: default
     position: 0
     display_options:
@@ -440,7 +440,6 @@ display:
         type: mini
         options:
           offset: 0
-          pagination_heading_level: h4
           items_per_page: 50
           total_pages: null
           id: 0
@@ -455,6 +454,7 @@ display:
             items_per_page_options_all_label: '- All -'
             offset: false
             offset_label: Offset
+          pagination_heading_level: h4
       exposed_form:
         type: basic
         options:
@@ -600,6 +600,8 @@ display:
           default: wid
           info:
             nothing:
+              sortable: false
+              default_sort_order: asc
               align: ''
               separator: ''
               empty_column: false

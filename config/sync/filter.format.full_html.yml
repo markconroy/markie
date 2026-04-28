@@ -1,14 +1,17 @@
-uuid: 074d2e60-8f93-40a3-b0a1-80e42117ddd4
+uuid: 59850c7d-4742-4903-ba2a-90dc32cd5efa
 langcode: en
 status: true
 dependencies:
+  config:
+    - core.entity_view_mode.media.preview
   module:
     - editor
+    - media
 _core:
-  default_config_hash: vpZysv3RHJjhYzq7O_q5q8mVlHdrSzKELmXyiX6RtV0
+  default_config_hash: hewPmBgni9jlDK_IjLxUx1HsTbinK-hdl0lOwjbteIY
 name: 'Full HTML'
 format: full_html
-weight: 2
+weight: 1
 filters:
   editor_file_reference:
     id: editor_file_reference
@@ -28,6 +31,15 @@ filters:
     status: true
     weight: 9
     settings: {  }
+  filter_html:
+    id: filter_html
+    provider: filter
+    status: false
+    weight: -10
+    settings:
+      allowed_html: ''
+      filter_html_help: true
+      filter_html_nofollow: false
   filter_htmlcorrector:
     id: filter_htmlcorrector
     provider: filter
@@ -38,5 +50,16 @@ filters:
     id: filter_image_lazy_load
     provider: filter
     status: true
-    weight: 15
+    weight: 12
     settings: {  }
+  media_embed:
+    id: media_embed
+    provider: media
+    status: true
+    weight: 100
+    settings:
+      default_view_mode: default
+      allowed_view_modes:
+        default: default
+        preview: preview
+      allowed_media_types: {  }

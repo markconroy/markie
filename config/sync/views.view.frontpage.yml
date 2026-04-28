@@ -1,4 +1,4 @@
-uuid: 27c5b491-d23b-40b1-9a05-08160d901dba
+uuid: 02e6fc43-1079-4459-842c-f1f8d36e6d17
 langcode: en
 status: true
 dependencies:
@@ -9,7 +9,7 @@ dependencies:
     - node
     - user
 _core:
-  default_config_hash: OEEnRQIjfIaCFRsz8U3VqDrE82ltQKlo8wNbQJRZXu0
+  default_config_hash: GNfx9kN8-0_KgQ-xf3fjdXCCzZwXCI8T0IPFW8SIe7g
 id: frontpage
 label: Frontpage
 module: node
@@ -20,17 +20,16 @@ base_field: nid
 display:
   default:
     id: default
-    display_title: Default
+    display_title: Master
     display_plugin: default
     position: 0
     display_options:
-      title: ''
+      title: 'Mark Conroy | Frontend Web Developer'
       fields: {  }
       pager:
         type: full
         options:
           offset: 0
-          pagination_heading_level: h4
           items_per_page: 10
           total_pages: 0
           id: 0
@@ -47,7 +46,8 @@ display:
             items_per_page_options_all_label: '- All -'
             offset: false
             offset_label: Offset
-          quantity: 9
+          quantity: 3
+          pagination_heading_level: h4
       exposed_form:
         type: basic
         options:
@@ -76,7 +76,7 @@ display:
           plugin_id: text_custom
           label: ''
           empty: true
-          content: 'No front page content has been created yet.<br/>Follow the <a target="_blank" href="https://www.drupal.org/docs/user_guide/en/index.html">User Guide</a> to start building your site.'
+          content: 'No front page content has been created yet.'
           tokenize: false
         node_listing_empty:
           id: node_listing_empty
@@ -99,7 +99,7 @@ display:
           plugin_id: title
           label: ''
           empty: true
-          title: Welcome!
+          title: 'Welcome to [site:name]'
       sorts:
         sticky:
           id: sticky
@@ -110,7 +110,7 @@ display:
           admin_label: ''
           entity_type: node
           entity_field: sticky
-          plugin_id: standard
+          plugin_id: boolean
           order: DESC
           expose:
             label: ''
@@ -301,6 +301,32 @@ display:
     display_plugin: page
     position: 1
     display_options:
+      pager:
+        type: full
+        options:
+          offset: 0
+          items_per_page: 4
+          total_pages: 0
+          id: 0
+          tags:
+            next: 'Next ›'
+            previous: '‹ Previous'
+            first: '« First'
+            last: 'Last »'
+          expose:
+            items_per_page: false
+            items_per_page_label: 'Items per page'
+            items_per_page_options: '5, 10, 25, 50'
+            items_per_page_options_all: false
+            items_per_page_options_all_label: '- All -'
+            offset: false
+            offset_label: Offset
+          quantity: 3
+          pagination_heading_level: h4
+      defaults:
+        css_class: false
+        pager: false
+      css_class: 'list--teasers layout-contained layout-contained--medium padding-horizontal'
       display_extenders: {  }
       path: node
     cache_metadata:

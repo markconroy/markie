@@ -1,35 +1,64 @@
-uuid: 547f9409-ec7e-4e5e-9910-85161c3efbea
+uuid: a6e0cf32-9a79-4f6e-8ee2-17b8d85c900e
 langcode: en
 status: true
 dependencies:
   config:
+    - field.field.user.user.field_name
     - field.field.user.user.user_picture
     - image.style.thumbnail
   module:
     - image
+    - path
     - user
 _core:
-  default_config_hash: FaQ9Ptcpxpg30AtiqRDtl_8zbJArHP1LPfug_s59TOA
+  default_config_hash: K-1rBM8mTIkFp9RqOC2tMRUukOQ1xbRCfSKK8dEddnA
 id: user.user.default
 targetEntityType: user
 bundle: user
 mode: default
 content:
   account:
-    weight: -10
+    weight: 1
     region: content
+    settings: {  }
+    third_party_settings: {  }
   contact:
     weight: 5
     region: content
-  language:
+    settings: {  }
+    third_party_settings: {  }
+  field_name:
+    type: string_textfield
     weight: 0
     region: content
-  timezone:
-    weight: 6
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  google_analytics:
+    weight: 3
     region: content
+    settings: {  }
+    third_party_settings: {  }
+  language:
+    weight: 3
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  path:
+    type: path
+    weight: 5
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  timezone:
+    weight: 4
+    region: content
+    settings: {  }
+    third_party_settings: {  }
   user_picture:
     type: image_image
-    weight: -1
+    weight: 2
     region: content
     settings:
       progress_indicator: throbber

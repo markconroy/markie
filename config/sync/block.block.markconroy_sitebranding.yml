@@ -1,0 +1,23 @@
+uuid: 2e9bdffb-7eb4-4951-a212-3da9fe30b868
+langcode: en
+status: true
+dependencies:
+  module:
+    - system
+  theme:
+    - markconroy
+id: markconroy_sitebranding
+theme: markconroy
+region: header
+weight: -4
+provider: null
+plugin: system_branding_block
+settings:
+  id: system_branding_block
+  label: 'Site branding'
+  label_display: '0'
+  provider: system
+  use_site_logo: true
+  use_site_name: true
+  use_site_slogan: true
+visibility: {  }

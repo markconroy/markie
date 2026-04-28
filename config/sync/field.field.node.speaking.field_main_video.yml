@@ -1,0 +1,29 @@
+uuid: ac8e3254-4885-44e8-9a34-c32ee3d5af92
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_main_video
+    - media.type.remote_video
+    - node.type.speaking
+id: node.speaking.field_main_video
+field_name: field_main_video
+entity_type: node
+bundle: speaking
+label: 'Main Video'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:media'
+  handler_settings:
+    target_bundles:
+      remote_video: remote_video
+    sort:
+      field: _none
+      direction: ASC
+    auto_create: false
+    auto_create_bundle: remote_video
+field_type: entity_reference

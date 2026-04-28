@@ -1,0 +1,87 @@
+uuid: 0300348d-85f4-4cb2-9453-334089f6e12c
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.node.full
+    - field.field.node.speaking.field_intro
+    - field.field.node.speaking.field_main_image
+    - field.field.node.speaking.field_main_video
+    - field.field.node.speaking.field_speaking_conference
+    - field.field.node.speaking.field_speaking_date
+    - field.field.node.speaking.field_speaking_where
+    - field.field.node.speaking.field_tags
+    - node.type.speaking
+  module:
+    - datetime
+    - text
+    - user
+id: node.speaking.full
+targetEntityType: node
+bundle: speaking
+mode: full
+content:
+  field_intro:
+    type: text_default
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    weight: 105
+    region: content
+  field_main_image:
+    type: entity_reference_entity_view
+    label: hidden
+    settings:
+      view_mode: full
+      link: false
+    third_party_settings: {  }
+    weight: 102
+    region: content
+  field_main_video:
+    type: entity_reference_entity_view
+    label: hidden
+    settings:
+      view_mode: full_width
+      link: false
+    third_party_settings: {  }
+    weight: 106
+    region: content
+  field_speaking_conference:
+    type: entity_reference_label
+    label: hidden
+    settings:
+      link: false
+    third_party_settings: {  }
+    weight: 109
+    region: content
+  field_speaking_date:
+    type: datetime_default
+    label: hidden
+    settings:
+      timezone_override: ''
+      format_type: date_month_year
+    third_party_settings: {  }
+    weight: 107
+    region: content
+  field_speaking_where:
+    type: string
+    label: hidden
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    weight: 108
+    region: content
+  field_tags:
+    type: entity_reference_label
+    label: hidden
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 103
+    region: content
+  links:
+    settings: {  }
+    third_party_settings: {  }
+    weight: 100
+    region: content
+hidden: {  }

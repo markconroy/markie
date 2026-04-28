@@ -1,0 +1,58 @@
+uuid: bc6390fb-ff5a-4122-9d1b-8abf0f2d7357
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.media.image.field_m_image_image
+    - field.field.media.image.field_media_tags
+    - image.style.thumbnail
+    - media.type.image
+  module:
+    - image_widget_crop
+_core:
+  default_config_hash: ZZ2B7_6LIYrUUDOqGeguWLySw6MoXHwz4-p7KzzRpwA
+id: media.image.default
+targetEntityType: media
+bundle: image
+mode: default
+content:
+  field_m_image_image:
+    type: image_widget_crop
+    weight: 1
+    region: content
+    settings:
+      progress_indicator: throbber
+      preview_image_style: thumbnail
+      crop_preview_image_style: crop_thumbnail
+      crop_list:
+        - square
+        - traditional_television
+        - user_defined
+        - vanity_mirror
+        - widescreen_television
+      warn_multiple_usages: true
+      show_crop_area: false
+      show_default_crop: true
+    third_party_settings: {  }
+  field_media_tags:
+    type: entity_reference_autocomplete_tags
+    weight: 3
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  name:
+    type: string_textfield
+    weight: 0
+    region: content
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+hidden:
+  created: true
+  path: true
+  uid: true

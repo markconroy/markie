@@ -1,0 +1,18 @@
+uuid: 98a8ce54-fb55-45e6-8c95-5a789ff2b89a
+langcode: en
+status: true
+dependencies:
+  theme:
+    - markconroy
+id: markconroy_primaryadminactions
+theme: markconroy
+region: tabs
+weight: 0
+provider: null
+plugin: local_actions_block
+settings:
+  id: local_actions_block
+  label: 'Primary admin actions'
+  label_display: '0'
+  provider: core
+visibility: {  }

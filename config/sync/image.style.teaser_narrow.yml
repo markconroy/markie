@@ -1,0 +1,25 @@
+uuid: f949a093-9bb0-428f-aaa3-c2e60e3972f0
+langcode: en
+status: true
+dependencies:
+  module:
+    - crop
+_core:
+  default_config_hash: 37gIW-sA8Ikn4sBCjqsTsSeGpdHJB6RklyQ6HGSVDdQ
+name: teaser_narrow
+label: 'Teaser Narrow'
+effects:
+  5030d18d-999b-41c4-8c8d-adbf6082cf0e:
+    uuid: 5030d18d-999b-41c4-8c8d-adbf6082cf0e
+    id: crop_crop
+    weight: 1
+    data:
+      crop_type: square
+  8d5e529d-2900-4952-9d07-cd69fbd985e6:
+    uuid: 8d5e529d-2900-4952-9d07-cd69fbd985e6
+    id: image_scale
+    weight: 2
+    data:
+      width: 600
+      height: null
+      upscale: true

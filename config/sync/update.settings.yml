@@ -1,13 +1,10 @@
-_core:
-  default_config_hash: cceqUa945af6yMPEeM1pWJQoA-tumoAqhThW2xGoZ04
 check:
-  disabled_extensions: true
-  interval_days: 1
+  disabled_extensions: false
+  interval_days: 7
 fetch:
   url: null
   max_attempts: 2
   timeout: 30
 notification:
-  emails:
-    - admin@example.com
-  threshold: all
+  emails: {  }
+  threshold: security

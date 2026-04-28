@@ -1,4 +1,4 @@
-uuid: b1a87d4f-f47b-45bf-bbfa-3dd4263a70d9
+uuid: 23b60a57-d38b-4ed3-b824-e896ed033c90
 langcode: en
 status: true
 dependencies:
@@ -6,8 +6,6 @@ dependencies:
     - filter.format.full_html
   module:
     - ckeditor5
-_core:
-  default_config_hash: lurcn8yf33g3Dkzdc55cTfJa9salGp9ytSYyG1s7QMI
 format: full_html
 editor: ckeditor5
 settings:
@@ -16,25 +14,43 @@ settings:
       - bold
       - italic
       - strikethrough
-      - superscript
-      - subscript
-      - removeFormat
+      - alignment
       - '|'
       - link
       - '|'
       - bulletedList
       - numberedList
       - '|'
-      - blockQuote
-      - drupalInsertImage
-      - insertTable
-      - horizontalLine
-      - '|'
       - heading
       - codeBlock
       - '|'
+      - blockQuote
+      - drupalMedia
+      - '|'
       - sourceEditing
   plugins:
+    ckeditor5_alignment:
+      enabled_alignments:
+        - left
+        - center
+        - right
+        - justify
+    ckeditor5_heading:
+      enabled_headings:
+        - heading2
+        - heading3
+        - heading4
+        - heading5
+        - heading6
+    ckeditor5_list:
+      properties:
+        reversed: true
+        startIndex: true
+      multiBlock: true
+    ckeditor5_sourceEditing:
+      allowed_tags: {  }
+    media_media:
+      allow_view_mode_override: false
     ckeditor5_codeBlock:
       languages:
         -
@@ -79,27 +95,5 @@ settings:
         -
           label: XML
           language: xml
-    ckeditor5_heading:
-      enabled_headings:
-        - heading2
-        - heading3
-        - heading4
-        - heading5
-        - heading6
-    ckeditor5_imageResize:
-      allow_resize: true
-    ckeditor5_list:
-      properties:
-        reversed: true
-        startIndex: true
-      multiBlock: true
-    ckeditor5_sourceEditing:
-      allowed_tags: {  }
 image_upload:
-  status: true
-  scheme: public
-  directory: inline-images
-  max_size: null
-  max_dimensions:
-    width: null
-    height: null
+  status: false

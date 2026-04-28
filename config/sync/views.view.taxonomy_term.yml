@@ -1,4 +1,4 @@
-uuid: 4d834c2f-819a-4d11-8217-853d29466948
+uuid: 084a6f12-bf37-4d3e-b944-6745af45e801
 langcode: en
 status: true
 dependencies:
@@ -9,7 +9,7 @@ dependencies:
     - taxonomy
     - user
 _core:
-  default_config_hash: KejdxDJQmx8SaO-t83OVekLw6ar4ldjmsJMGcotGxnQ
+  default_config_hash: Gy5PaLdfFhtFSRqJxV-DBTF5AocKgNA2CsCNNEbvx4c
 id: taxonomy_term
 label: 'Taxonomy term'
 module: taxonomy
@@ -20,7 +20,7 @@ base_field: nid
 display:
   default:
     id: default
-    display_title: Default
+    display_title: Master
     display_plugin: default
     position: 0
     display_options:
@@ -29,7 +29,6 @@ display:
         type: mini
         options:
           offset: 0
-          pagination_heading_level: h4
           items_per_page: 10
           total_pages: 0
           id: 0
@@ -44,6 +43,7 @@ display:
             items_per_page_options_all_label: '- All -'
             offset: false
             offset_label: Offset
+          pagination_heading_level: h4
       exposed_form:
         type: basic
         options:
@@ -306,6 +306,9 @@ display:
       query:
         type: views_query
         options: {  }
+      defaults:
+        css_class: false
+      css_class: 'list--teasers layout-contained layout-contained--medium padding-horizontal'
       display_extenders: {  }
       path: taxonomy/term/%
     cache_metadata:

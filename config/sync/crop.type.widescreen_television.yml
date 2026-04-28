@@ -1,0 +1,14 @@
+uuid: 4e672605-2590-4f22-ad04-f69b4ad37630
+langcode: en
+status: true
+dependencies: {  }
+_core:
+  default_config_hash: KVB_jnS0xem2gS6cUDLIVchSTn80X5dDYB7-GMbFYT0
+label: 'Widescreen Television (16:9)'
+id: widescreen_television
+description: 'This crop type is used to emulate the dimensions of a standard widescreen television - 16:9'
+aspect_ratio: '16:9'
+soft_limit_width: null
+soft_limit_height: null
+hard_limit_width: null
+hard_limit_height: null

@@ -1,4 +1,4 @@
-uuid: 64a9542b-a98d-48a1-83c1-05837d2faf66
+uuid: d56b0667-37f7-496f-a145-67e5aab756a4
 langcode: en
 status: true
 dependencies:
@@ -6,22 +6,22 @@ dependencies:
     - block_content
     - user
 _core:
-  default_config_hash: M40v7fFSz1d3AWG7BVYgglHAfF2lD5dzrjcEUZO-9OM
+  default_config_hash: msYnighLW1IbiBfyQbwbQwb2cU-5LECiFryt60k0Nfk
 id: block_content
 label: 'Content blocks'
 module: views
-description: 'Find and manage content blocks.'
+description: 'Find and manage custom blocks.'
 tag: default
 base_table: block_content_field_data
 base_field: id
 display:
   default:
     id: default
-    display_title: Default
+    display_title: Master
     display_plugin: default
     position: 0
     display_options:
-      title: 'Content blocks'
+      title: 'Custom block library'
       fields:
         info:
           id: info
@@ -210,7 +210,7 @@ display:
             custom_date_format: ''
             timezone: ''
             tooltip:
-              date_format: long
+              date_format: ''
               custom_date_format: ''
             time_diff:
               enabled: false
@@ -273,7 +273,6 @@ display:
         type: mini
         options:
           offset: 0
-          pagination_heading_level: h4
           items_per_page: 50
           total_pages: null
           id: 0
@@ -288,11 +287,12 @@ display:
             items_per_page_options_all_label: '- All -'
             offset: false
             offset_label: Offset
+          pagination_heading_level: h4
       exposed_form:
         type: basic
         options:
           submit_button: Apply
-          reset_button: true
+          reset_button: false
           reset_button_label: Reset
           exposed_sorts_label: 'Sort by'
           expose_sort_order: true
@@ -315,7 +315,7 @@ display:
           admin_label: ''
           plugin_id: text_custom
           empty: true
-          content: 'There are no content blocks available.'
+          content: 'There are no custom blocks available. '
           tokenize: false
         block_content_listing_empty:
           id: block_content_listing_empty
@@ -359,6 +359,7 @@ display:
             multiple: false
             remember_roles:
               authenticated: authenticated
+            placeholder: ''
           is_grouped: false
           group_info:
             label: ''
@@ -438,8 +439,6 @@ display:
             required: false
             remember: false
             multiple: false
-            remember_roles:
-              authenticated: authenticated
           is_grouped: false
           group_info:
             label: ''
@@ -534,8 +533,9 @@ display:
       menu:
         type: tab
         title: Blocks
-        description: 'Create and edit content blocks.'
+        description: 'Create and edit block content.'
         weight: 0
+        expanded: false
         menu_name: admin
         parent: system.admin_content
         context: '0'

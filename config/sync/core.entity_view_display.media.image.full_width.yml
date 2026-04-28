@@ -1,0 +1,36 @@
+uuid: ff8a7af9-3ac2-4837-8e04-dc8295e3798d
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.media.full_width
+    - field.field.media.image.field_m_image_image
+    - field.field.media.image.field_media_tags
+    - image.style.widescreen_television
+    - media.type.image
+  module:
+    - image
+_core:
+  default_config_hash: gDzZe51kUauMWHFXNVPnYjLmTnsN8FvrlvvvqlTgraI
+id: media.image.full_width
+targetEntityType: media
+bundle: image
+mode: full_width
+content:
+  field_m_image_image:
+    type: image
+    label: hidden
+    settings:
+      image_link: ''
+      image_style: widescreen_television
+      image_loading:
+        attribute: lazy
+    third_party_settings: {  }
+    weight: 0
+    region: content
+hidden:
+  created: true
+  field_media_tags: true
+  name: true
+  thumbnail: true
+  uid: true
