@@ -1,4 +1,4 @@
-uuid: 8f471ed8-dbc1-4055-8a52-456fc082d652
+uuid: f7b345c5-c1be-4036-a762-6ab5baec0cc9
 langcode: en
 status: true
 dependencies:
@@ -6,119 +6,29 @@ dependencies:
     - filter.format.basic_html
   module:
     - ckeditor5
+_core:
+  default_config_hash: Qi2tIe-L97EutlMmhEvhsNxZOpOoA-RH82c4BQb5n4A
 format: basic_html
 editor: ckeditor5
 settings:
   toolbar:
     items:
-      - aickeditor
       - bold
       - italic
-      - strikethrough
-      - alignment
       - '|'
       - link
       - '|'
       - bulletedList
       - numberedList
       - '|'
+      - blockQuote
+      - drupalInsertImage
+      - '|'
       - heading
+      - code
       - '|'
       - sourceEditing
-      - '|'
-      - blockQuote
-      - drupalMedia
-      - '|'
-      - code
-      - codeBlock
   plugins:
-    ai_ckeditor_ai:
-      dialog:
-        autoresize: 'min-width: 600px'
-        height: '750'
-        width: '900'
-        dialog_class: ai-ckeditor-modal
-      plugins:
-        ai_ckeditor_completion:
-          enabled: true
-          provider: ''
-        ai_ckeditor_help:
-          enabled: false
-        ai_ckeditor_modify_prompt:
-          enabled: false
-          provider: ''
-        ai_ckeditor_reformat_html:
-          enabled: false
-          provider: ''
-        ai_ckeditor_spellfix:
-          enabled: false
-          provider: ''
-        ai_ckeditor_summarize:
-          enabled: false
-          provider: ''
-        ai_ckeditor_tone:
-          autocreate: false
-          provider: ''
-          tone_vocabulary: conference
-          use_description: 0
-          enabled: false
-        ai_ckeditor_translate:
-          autocreate: false
-          provider: ''
-          translate_vocabulary: conference
-          use_description: false
-          language_source: tax
-          enabled: false
-    ckeditor5_alignment:
-      enabled_alignments:
-        - center
-        - justify
-        - left
-        - right
-    ckeditor5_codeBlock:
-      languages:
-        -
-          label: 'Plain text'
-          language: plaintext
-        -
-          label: C
-          language: c
-        -
-          label: 'C#'
-          language: cs
-        -
-          label: C++
-          language: cpp
-        -
-          label: CSS
-          language: css
-        -
-          label: Diff
-          language: diff
-        -
-          label: HTML
-          language: html
-        -
-          label: Java
-          language: java
-        -
-          label: JavaScript
-          language: javascript
-        -
-          label: PHP
-          language: php
-        -
-          label: Python
-          language: python
-        -
-          label: Ruby
-          language: ruby
-        -
-          label: TypeScript
-          language: typescript
-        -
-          label: XML
-          language: xml
     ckeditor5_heading:
       enabled_headings:
         - heading2
@@ -126,6 +36,8 @@ settings:
         - heading4
         - heading5
         - heading6
+    ckeditor5_imageResize:
+      allow_resize: true
     ckeditor5_list:
       properties:
         reversed: false
@@ -137,11 +49,6 @@ settings:
         - '<dl>'
         - '<dt>'
         - '<dd>'
-        - '<span>'
-        - '<code class>'
-        - '<blockcode type>'
-        - '<img src alt data-entity-type data-entity-uuid data-align data-caption width height>'
-        - '<pre class>'
         - '<a hreflang>'
         - '<blockquote cite>'
         - '<ul type>'
@@ -151,9 +58,6 @@ settings:
         - '<h4 id>'
         - '<h5 id>'
         - '<h6 id>'
-        - '<drupal-media title>'
-    media_media:
-      allow_view_mode_override: true
 image_upload:
   status: true
   scheme: public

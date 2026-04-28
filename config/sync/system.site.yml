@@ -1,8 +1,10 @@
+_core:
+  default_config_hash: ijfbzDTN4CbE7Sr-6ubWzy_t1vH4OtU1doNCLssVz-4
 langcode: en
-uuid: b8262141-a073-46d6-bf2e-bc48bf8d471c
-name: 'Mark Conroy'
-mail: mark@mark.ie
-slogan: 'LocalGov Drupal Consultant'
+uuid: 466bac42-0da1-4e1b-9b28-ba6821c22a52
+name: 'Drush Site-Install'
+mail: admin@example.com
+slogan: ''
 page:
   403: ''
   404: ''
@@ -10,4 +12,4 @@ page:
 admin_compact_mode: false
 weight_select_max: 100
 default_langcode: en
-mail_notification: ''
+mail_notification: null
