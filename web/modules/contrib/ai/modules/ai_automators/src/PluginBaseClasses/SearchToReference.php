@@ -45,13 +45,6 @@ abstract class SearchToReference extends RuleBase {
   protected $entityTypeManager;
 
   /**
-   * The logger channel.
-   *
-   * @var \Psr\Log\LoggerInterface
-   */
-  protected $logger;
-
-  /**
    * The config factory.
    *
    * @var \Drupal\Core\Config\ConfigFactoryInterface
@@ -74,7 +67,6 @@ abstract class SearchToReference extends RuleBase {
     $instance->aiProviderManager = $container->get('ai.provider');
     $instance->moduleHandler = $container->get('module_handler');
     $instance->entityTypeManager = $container->get('entity_type.manager');
-    $instance->logger = $container->get('logger.factory')->get('ai_automators');
     $instance->configFactory = $container->get('config.factory');
     $instance->currentUser = $container->get('current_user');
     return $instance;

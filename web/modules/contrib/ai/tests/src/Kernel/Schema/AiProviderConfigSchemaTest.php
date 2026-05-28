@@ -55,9 +55,9 @@ class AiProviderConfigSchemaTest extends KernelTestBase {
 
     $data = [
       'use_default' => FALSE,
-      'provider_id' => 'openai',
-      'model_id' => 'gpt-4',
-      'configuration' => [
+      'provider' => 'openai',
+      'model' => 'gpt-4',
+      'config' => [
         'temperature' => 0.7,
         'max_tokens' => 1024,
       ],
@@ -92,9 +92,9 @@ class AiProviderConfigSchemaTest extends KernelTestBase {
   public function testProviderConfigWithEmptyConfiguration(): void {
     $data = [
       'use_default' => FALSE,
-      'provider_id' => 'openai',
-      'model_id' => 'gpt-4',
-      'configuration' => [],
+      'provider' => 'openai',
+      'model' => 'gpt-4',
+      'config' => [],
     ];
 
     $typed = $this->typedConfigManager->createFromNameAndData(
@@ -117,9 +117,9 @@ class AiProviderConfigSchemaTest extends KernelTestBase {
   public function testProviderConfigWithNullConfiguration(): void {
     $data = [
       'use_default' => FALSE,
-      'provider_id' => 'openai',
-      'model_id' => 'gpt-4',
-      'configuration' => NULL,
+      'provider' => 'openai',
+      'model' => 'gpt-4',
+      'config' => NULL,
     ];
 
     $typed = $this->typedConfigManager->createFromNameAndData(

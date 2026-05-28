@@ -43,6 +43,10 @@ ai_automators.ai_automator.*.*.*.*:
     token:
       type: string
       label: Token
+    guardrail_set_id:
+      type: string
+      label: 'Guardrail set'
+      nullable: true
     plugin_config:
       type: sequence
       label: Plugin Config

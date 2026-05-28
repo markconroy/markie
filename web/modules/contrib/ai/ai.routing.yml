@@ -284,3 +284,12 @@ entity.ai_guardrail_set.delete_form:
     _title: 'Delete an AI guardrail set'
   requirements:
     _permission: 'administer guardrail sets'
+
+# Global guardrails settings.
+ai.global_guardrails_settings:
+  path: '/admin/config/ai/guardrails/global'
+  defaults:
+    _form: '\Drupal\ai\Form\GlobalGuardrailsSettingsForm'
+    _title: 'Global AI guardrails'
+  requirements:
+    _permission: 'administer guardrail sets'

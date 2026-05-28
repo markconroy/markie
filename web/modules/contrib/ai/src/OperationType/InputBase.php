@@ -19,11 +19,13 @@ abstract class InputBase implements InputInterface {
   private array $debugData = [];
 
   /**
-   * The guardrails set that will be applied to this input.
+   * The guardrail sets that will be applied to this input.
    *
-   * @var \Drupal\ai\Guardrail\AiGuardrailSetInterface|null
+   * Keyed by guardrail set id, insertion-ordered.
+   *
+   * @var \Drupal\ai\Guardrail\AiGuardrailSetInterface[]
    */
-  private ?AiGuardrailSetInterface $guardrails = NULL;
+  private array $guardrailSets = [];
 
   /**
    * {@inheritdoc}
@@ -50,14 +52,50 @@ abstract class InputBase implements InputInterface {
    * {@inheritdoc}
    */
   public function setGuardrailSet(AiGuardrailSetInterface $guardrails): void {
-    $this->guardrails = $guardrails;
+    @\trigger_error(
+      __METHOD__ . '() is deprecated in ai:1.4.0 and is removed from ai:2.0.0. Use ::addGuardrailSet() instead. See https://www.drupal.org/project/ai/issues/3584849',
+      \E_USER_DEPRECATED
+    );
+    $this->setGuardrailSets([$guardrails]);
   }
 
   /**
    * {@inheritdoc}
    */
   public function getGuardrailSet(): ?AiGuardrailSetInterface {
-    return $this->guardrails;
+    @\trigger_error(
+      __METHOD__ . '() is deprecated in ai:1.4.0 and is removed from ai:2.0.0. Use ::getGuardrailSets() instead. See https://www.drupal.org/project/ai/issues/3584849',
+      \E_USER_DEPRECATED
+    );
+    if ($this->guardrailSets === []) {
+      return NULL;
+    }
+    return \reset($this->guardrailSets);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function addGuardrailSet(AiGuardrailSetInterface $guardrails): void {
+    $this->guardrailSets[$guardrails->id()] = $guardrails;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setGuardrailSets(array $guardrails): void {
+    $this->guardrailSets = [];
+    foreach ($guardrails as $set) {
+      // Re-key by id so callers can pass either a list or a keyed map.
+      $this->guardrailSets[$set->id()] = $set;
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getGuardrailSets(): array {
+    return $this->guardrailSets;
   }
 
   /**
@@ -67,13 +105,28 @@ abstract class InputBase implements InputInterface {
     $applied_guardrails = $this->getDebugData()['applied_guardrails'] ?? [];
     $applied_guardrails[$mode->value] = $guardrailResult;
     $this->setDebugDataValue('applied_guardrails', $applied_guardrails);
+
+    $all_guardrail_results = $this->getDebugData()['all_guardrail_results'] ?? [];
+    $all_guardrail_results[$mode->value][] = $guardrailResult;
+    $this->setDebugDataValue('all_guardrail_results', $all_guardrail_results);
   }
 
   /**
    * {@inheritdoc}
    */
   public function getGuardrailsResults(): array {
+    @\trigger_error(
+      __METHOD__ . '() is deprecated in ai:1.4.0 and is removed from ai:2.0.0. Use ::getAllGuardrailResults() instead. See https://www.drupal.org/project/ai/issues/3584849',
+      \E_USER_DEPRECATED
+    );
     return $this->getDebugData()['applied_guardrails'] ?? [];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getAllGuardrailResults(): array {
+    return $this->getDebugData()['all_guardrail_results'] ?? [];
   }
 
   /**

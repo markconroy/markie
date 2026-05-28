@@ -27,6 +27,10 @@ use Drupal\ai\OperationType\ImageClassification\ImageClassificationInput;
 use Drupal\ai\OperationType\ImageClassification\ImageClassificationInterface;
 use Drupal\ai\OperationType\ImageClassification\ImageClassificationItem;
 use Drupal\ai\OperationType\ImageClassification\ImageClassificationOutput;
+use Drupal\ai\OperationType\TextClassification\TextClassificationInput;
+use Drupal\ai\OperationType\TextClassification\TextClassificationInterface;
+use Drupal\ai\OperationType\TextClassification\TextClassificationItem;
+use Drupal\ai\OperationType\TextClassification\TextClassificationOutput;
 use Drupal\ai\OperationType\ImageToImage\ImageToImageInput;
 use Drupal\ai\OperationType\ImageToImage\ImageToImageInterface;
 use Drupal\ai\OperationType\ImageToImage\ImageToImageOutput;
@@ -67,7 +71,8 @@ class EchoProvider extends AiProviderClientBase implements
   ImageClassificationInterface,
   TextToImageInterface,
   EchoInterface,
-  ImageToImageInterface {
+  ImageToImageInterface,
+  TextClassificationInterface {
 
   use ImageToImageTrait;
 
@@ -152,6 +157,7 @@ class EchoProvider extends AiProviderClientBase implements
       'text_to_speech',
       'moderation',
       'image_classification',
+      'text_classification',
       'echo',
     ];
   }
@@ -374,6 +380,26 @@ class EchoProvider extends AiProviderClientBase implements
   /**
    * {@inheritdoc}
    */
+  public function textClassification(string|TextClassificationInput $input, string $model_id, array $tags = []): TextClassificationOutput {
+    $output = [];
+    $response = [];
+    if ($input instanceof TextClassificationInput) {
+      $labels = $input->getLabels();
+      foreach ($labels as $label) {
+        $output[] = new TextClassificationItem($label, 0.5);
+        $response[] = [
+          'label' => $label,
+          'confidence' => 0.5,
+        ];
+      }
+    }
+
+    return new TextClassificationOutput($output, $response, []);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function echo(string|EchoInput $input, string $model_id, array $options = []): EchoOutput {
     if (!$input instanceof EchoInput) {
       $input = new EchoInput($input);
@@ -403,6 +429,25 @@ class EchoProvider extends AiProviderClientBase implements
     $requests = array_merge($requests, $this->testRequestsToTest($operation_type));
     foreach ($requests as $request) {
       $array = $input->toArray();
+      // Look in the request message for added keys and add them to the request
+      // to match against. This is important for new keys that are added to the
+      // input, to not break older tests.
+      if (isset($request['request']) && is_array($request['request'])
+        && !empty($array['messages'])
+        && isset($request['request']['messages']) && is_array($request['request']['messages'])) {
+        foreach ($array['messages'][0] as $key => $value) {
+          foreach ($request['request']['messages'] as $message_key => $message_value) {
+            if (!array_key_exists($key, $message_value)) {
+              $request['request']['messages'][$message_key][$key] = $value;
+            }
+            // Fix the order of the key in the messages.
+            $request['request']['messages'][$message_key] = array_merge(
+              array_intersect_key($array['messages'][0], $request['request']['messages'][$message_key]),
+              $request['request']['messages'][$message_key]
+            );
+          }
+        }
+      }
       if (isset($request['request']) && is_array($request['request']) && Json::encode($request['request']) === Json::encode($array)) {
         // If the request matches, return the response.
         if (isset($request['response']) && is_array($request['response'])) {

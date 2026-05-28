@@ -26,8 +26,7 @@ class ShellOutput extends ConsoleOutput
     private int $paging = 0;
     private OutputPager $pager;
     private Theme $theme;
-    /** @var callable|null */
-    private $writeListener = null;
+    private bool $visibleOutputWritten = false;
 
     /**
      * Construct a ShellOutput instance.
@@ -85,10 +84,11 @@ class ShellOutput extends ConsoleOutput
 
     /**
      * Set a listener invoked whenever visible output is written.
+     *
+     * @deprecated No longer used. ShellOutput tracks visible writes internally.
      */
     public function setWriteListener(?callable $listener): void
     {
-        $this->writeListener = $listener;
     }
 
     /**
@@ -176,9 +176,7 @@ class ShellOutput extends ConsoleOutput
      */
     public function doWrite($message, $newline): void
     {
-        if ($this->writeListener) {
-            ($this->writeListener)();
-        }
+        $this->visibleOutputWritten = true;
 
         // @todo Update OutputPager interface to require doWrite
         if ($this->paging > 0 && ($this->pager instanceof ProcOutputPager || $this->pager instanceof PassthruPager)) {
@@ -186,6 +184,17 @@ class ShellOutput extends ConsoleOutput
         } else {
             parent::doWrite($message, $newline);
         }
+    }
+
+    /**
+     * Reset visible output tracking and return whether output was written.
+     */
+    public function consumeVisibleOutputWritten(): bool
+    {
+        $written = $this->visibleOutputWritten;
+        $this->visibleOutputWritten = false;
+
+        return $written;
     }
 
     /**
@@ -258,7 +267,7 @@ class ShellOutput extends ConsoleOutput
     private function grayExists(): bool
     {
         try {
-            $this->write('<fg=gray></>');
+            $this->getFormatter()->format('<fg=gray></>');
         } catch (\InvalidArgumentException $e) {
             return false;
         }

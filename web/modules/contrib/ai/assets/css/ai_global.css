@@ -239,6 +239,10 @@ select.ai-select--wide {
   background-image: url('../icons/file.svg');
 }
 
+.ai-icon--trash {
+  background-image: url('../icons/trash.svg');
+}
+
 /* ==========================================================================
    Pills
    ========================================================================== */

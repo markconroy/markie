@@ -12,6 +12,7 @@ use Drupal\ai\OperationType\OperationTypeInterface;
 #[OperationType(
   id: 'image_to_image',
   label: new TranslatableMarkup('Image to Image'),
+  description: new TranslatableMarkup('Transform images by applying styles, enhancing quality, or making AI-powered edits.')
 )]
 interface ImageToImageInterface extends OperationTypeInterface {
 

@@ -115,7 +115,7 @@ class FieldWidgetAction {
           'event' => 'click',
           'wrapper' => $wrapper_id,
         ],
-        '#suffix' => '<p>' . $this->t('Sort the actions with drag and drop') . '</p>',
+        '#suffix' => '<p>' . $this->t('Sort the actions with drag and drop (titles of the blocks below are draggable with mouse)') . '</p>',
       ];
       $enabled_plugins = $plugin->getThirdPartySettings('field_widget_actions');
       $triggering_element = $form_state->getTriggeringElement();

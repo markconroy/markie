@@ -250,6 +250,86 @@ class MyAiGuardrail extends AiGuardrailPluginBase implements NonDeterministicGua
 
 The built-in `RestrictToTopic` guardrail is a real-world example of this pattern. It uses an LLM to determine whether the user's message matches a list of allowed or disallowed topics.
 
+### StreamableGuardrailInterface
+
+For guardrails that need to evaluate content **during streaming** — before the full response has been received — implement `StreamableGuardrailInterface`. These guardrails hook into the stream iteration itself and can buffer suspicious portions in real-time, then decide whether to release, suppress, or rewrite them.
+
+This is the right interface when you need to stop harmful content from reaching the user mid-stream rather than waiting for the full response.
+
+#### How it works
+
+1. Each incoming chunk of streamed text is checked against the pattern returned by `getStartRegex()`. If `getStartRegex()` returns an empty string, the guardrail treats the very first chunk as a match and activates immediately. Otherwise the guardrail accumulates chunks in an internal buffer and checks the combined text against the start regex on each chunk.
+2. Because a start pattern can be split across two consecutive chunks (e.g. `<sta` followed by `rt>`), the guardrail system does not pass the full buffer to the consumer straight away. Instead, it only passes content up to the last sentence boundary (period or newline) and holds the remainder back for the next chunk. If no sentence boundary exists yet, nothing is passed to the consumer until one appears or the start regex matches.
+3. Once `getStartRegex()` matches, the guardrail becomes **active**. From this point all incoming chunks are held in the buffer and nothing reaches the consumer.
+4. While active, each new chunk is appended to the buffer and the full buffer is tested against `getStopRegex()`. When the stop regex matches, `processStreamedBuffer()` is called with everything that was buffered since activation. The return value decides what the consumer receives: pass the original content through (`PassResult`), replace it with a different message (`RewriteOutputResult`), or suppress it entirely (`StopResult`).
+5. If the buffer grows beyond `maxGuardrailBufferSize` (default 8,192 characters) before the stop regex matches, `processStreamedBuffer()` is called immediately to prevent unbounded memory growth.
+6. When the stream ends, any content that was buffered while the guardrail was active is passed to `processStreamedBuffer()`. Any content that was buffered while the guardrail was inactive (held back waiting for a sentence boundary that never arrived) is passed to the consumer as-is to prevent data loss.
+
+#### Minimal example
+
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace Drupal\my_module\Plugin\AiGuardrail;
+
+use Drupal\ai\Attribute\AiGuardrail;
+use Drupal\ai\Guardrail\AiGuardrailPluginBase;
+use Drupal\ai\Guardrail\Result\GuardrailResultInterface;
+use Drupal\ai\Guardrail\Result\PassResult;
+use Drupal\ai\Guardrail\Result\StopResult;
+use Drupal\ai\Guardrail\StreamableGuardrailInterface;
+use Drupal\ai\OperationType\InputInterface;
+use Drupal\ai\OperationType\OutputInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+
+/**
+ * Blocks any content wrapped in [SENSITIVE]…[/SENSITIVE] during streaming.
+ */
+#[AiGuardrail(
+  id: 'sensitive_block_stream',
+  label: new TranslatableMarkup('Sensitive Block (streaming)'),
+  description: new TranslatableMarkup('Suppresses content between [SENSITIVE] markers during streaming.'),
+)]
+class SensitiveBlockStream extends AiGuardrailPluginBase implements StreamableGuardrailInterface {
+
+  public function getStartRegex(): string {
+    return '/\[SENSITIVE\]/';
+  }
+
+  public function getStopRegex(): string {
+    return '/\[\/SENSITIVE\]/';
+  }
+
+  public function processStreamedBuffer(string $buffered_content): GuardrailResultInterface {
+    // Content between the markers is suppressed.
+    return new StopResult('[Sensitive content was removed.]', $this);
+  }
+
+  public function processInput(InputInterface $input): GuardrailResultInterface {
+    return new PassResult('', $this);
+  }
+
+  public function processOutput(OutputInterface $output): GuardrailResultInterface {
+    return new PassResult('', $this);
+  }
+
+}
+```
+
+#### Registration
+
+Streaming guardrails are registered on the **post-generate** list of a guardrail set. The `GuardrailsEventSubscriber` automatically detects `StreamableGuardrailInterface` implementations and registers them with the stream iterator before the stream starts. They do not run through the normal `processOutput()` post-generate path.
+
+#### Tuning the max buffer size
+
+If your guardrail expects very long buffered sections, raise the limit on the iterator before starting the stream:
+
+```php
+$iterator->setMaxGuardrailBufferSize(32768); // 32 KB
+```
+
 ## Applying Guardrails to AI Input
 
 Use `AiGuardrailHelper::applyGuardrailSetToChatInput()` to attach a guardrail set to any input before making an AI call:
@@ -269,7 +349,35 @@ $input = $guardrail_helper->applyGuardrailSetToChatInput('my_guardrail_set', $in
 $response = $provider->chat($input, $model_id, ['my_module']);
 ```
 
-The method clones the input and calls `setGuardrailSet()` on it. When the AI provider fires its pre/post-generation events, the `GuardrailsEventSubscriber` picks up the attached set and runs the configured guardrails.
+The method clones the input and calls `addGuardrailSet()` on it. When the AI provider fires its pre/post-generation events, the `GuardrailsEventSubscriber` iterates every attached set and runs its configured guardrails.
+
+### Attaching multiple guardrail sets
+
+An input may carry more than one guardrail set — e.g. one attached by the caller and one by middleware. Call `applyGuardrailSetToChatInput()` repeatedly, or use the input API directly:
+
+```php
+$input->addGuardrailSet($set_a);
+$input->addGuardrailSet($set_b);
+// Or replace the whole list:
+$input->setGuardrailSets([$set_a, $set_b]);
+```
+
+Sets are keyed by id; re-adding the same id via `addGuardrailSet()` replaces that entry in place. `setGuardrailSets()` replaces the entire list in one call and accepts either a list or a keyed map — keys are ignored and re-derived from each set's id. Each set's `stop_threshold` is evaluated independently — scores are not aggregated across sets. If any set crosses its own threshold, processing of remaining sets is short-circuited and the stop message is returned as the output.
+
+The legacy single-set methods `setGuardrailSet()` / `getGuardrailSet()` are deprecated — use `addGuardrailSet()` / `getGuardrailSets()` instead.
+
+### Global guardrails
+
+Site administrators can configure one or more guardrail sets to be applied to **every** AI request, regardless of whether the caller opted in. Configure them at *Configuration → AI → AI Guardrails → Global guardrails* (`/admin/config/ai/guardrails/global`). The selected ids are stored under `ai.settings:global_guardrails`.
+
+Under the hood, `GlobalGuardrailsEventSubscriber` listens on `PreGenerateResponseEvent` at priority `100` (before the regular `GuardrailsEventSubscriber`). It **prepends** each configured global set to the input via `setGuardrailSets()`, so global safety/PII checks always evaluate the original prompt and the raw provider output before any caller-attached guardrail can rewrite them.
+
+Important consequences of that ordering:
+
+- A global set that crosses its `stop_threshold` short-circuits the pipeline before any caller-attached set runs. Global stops are non-negotiable.
+- If a caller and a site-wide config both reference the same guardrail set id, the global wins and the set sits at the front — the caller's ordering intent is intentionally overridden by the site-wide configuration.
+
+If you build your own pre-request subscriber and need to attach a set from code, subscribe at any priority `> 0` and call `$event->getInput()->addGuardrailSet($set)` (append) or `$event->getInput()->setGuardrailSets($yourSets + $event->getInput()->getGuardrailSets())` (prepend, same pattern as the global subscriber).
 
 ## Built-in Guardrail Plugins
 
@@ -309,4 +417,4 @@ Guardrails can run at three points in the AI generation lifecycle, defined by `A
 |------|-----------|------|
 | Pre-generate | `pre` | Before the AI provider call. Can stop or rewrite the input. |
 | Post-generate | `post` | After the AI provider returns. Can stop or rewrite the output. |
-| During-generate | `during` | Reserved for future use with streaming guardrails. |
+| During-generate | `during` | Mid-stream evaluation via `StreamableGuardrailInterface`. Registered on the post-generate list; runs inside the stream iterator as chunks arrive. |

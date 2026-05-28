@@ -138,7 +138,7 @@ final class RestrictToTopic extends AiGuardrailPluginBase implements Configurabl
     $form['invalid_topics_present_message'] = [
       '#type' => 'textarea',
       '#title' => $this->t('Message to send if invalid topics are present'),
-      '#default_value' => $this->configuration['invalid_topics_present_message'] ?: 'The text contains invalid topics',
+      '#default_value' => $this->configuration['invalid_topics_present_message'] ?? 'The text contains invalid topics',
       // This property will land into core soon, see
       // https://www.drupal.org/project/drupal/issues/3202631. It can stay
       // after this is added to Drupal core.
@@ -152,7 +152,7 @@ final class RestrictToTopic extends AiGuardrailPluginBase implements Configurabl
     $form['valid_topics_missing_message'] = [
       '#type' => 'textarea',
       '#title' => $this->t('Message to send if no valid topics are found'),
-      '#default_value' => $this->configuration['valid_topics_missing_message'] ?: 'The text does not contain any of the valid topics',
+      '#default_value' => $this->configuration['valid_topics_missing_message'] ?? 'The text does not contain any of the valid topics',
       // This property will land into core soon, see
       // https://www.drupal.org/project/drupal/issues/3202631. It can stay
       // after this is added to Drupal core.

@@ -2,9 +2,12 @@
 
 namespace Drupal\pathauto_string_id_test\Entity;
 
+use Drupal\Core\Entity\Attribute\ContentEntityType;
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Entity\Routing\DefaultHtmlRouteProvider;
 use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 
 /**
  * Defines a test entity with a string ID.
@@ -27,7 +30,24 @@ use Drupal\Core\Field\BaseFieldDefinition;
  *   },
  * )
  */
-class PathautoStringIdTest extends ContentEntityBase {
+#[ContentEntityType(
+  id: 'pathauto_string_id_test',
+  label: new TranslatableMarkup('Test entity with string ID'),
+  entity_keys: [
+    'id' => 'id',
+    'label' => 'name',
+  ],
+  handlers: [
+    'route_provider' => [
+      'html' => DefaultHtmlRouteProvider::class,
+    ],
+  ],
+  links: [
+    'canonical' => '/pathauto_string_id_test/{pathauto_string_id_test}',
+  ],
+  base_table: 'pathauto_string_id'
+)]
+class PathautoStringId extends ContentEntityBase {
 
   /**
    * {@inheritdoc}

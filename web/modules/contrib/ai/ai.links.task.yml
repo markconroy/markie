@@ -19,3 +19,10 @@ entity.ai_guardrail_set.collection:
   title: 'AI Guardrail sets'
   route_name: entity.ai_guardrail_set.collection
   base_route: entity.ai_guardrail.collection
+  weight: 10
+
+ai.global_guardrails_settings:
+  title: 'Global guardrails'
+  route_name: ai.global_guardrails_settings
+  base_route: entity.ai_guardrail.collection
+  weight: 20

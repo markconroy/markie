@@ -14,7 +14,6 @@ Infrastructure and Features use subcategories to group related components. Tools
 
 - **Infrastructure**
     - AI Infrastructure
-    - Vector Search Infrastructure
 - **Tools & Automation**
 - **Features**
     - Content Creation & Support
@@ -33,12 +32,11 @@ Components at this level must be configured before AI features can function. Sec
 **Examples:**
 
 - **AI Infrastructure**
-    - AI Provider Connections (API keys, authentication)  
-    - Default Model Configuration  
-    - Prompt Template Library  
-- **Vector Search Infrastructure** 
+    - AI Provider Connections (API keys, authentication)
+    - Default Model Configuration
     - Embedding Services
-    - Vector Database Connections  
+    - Prompt Template Library
+    - Vector Database Connections
 
 ## Tools & Automation
 
@@ -92,3 +90,36 @@ Some components span multiple tiers. When this happens, apply the **80/20 rule**
 **Example:** The Context Control Center has an interface where users upload context documents, but 80% of its activity happens in the background. Agents automatically attach context information during agent operations. The occasional configuration updates don't make it a Feature, so we categorize it in Tools & Automation.
 
 **When in doubt:** Ask "Where does most of the work happen?" and place the component there.
+
+## Adding Contrib Module Settings to the Admin Menu
+
+The AI module provides a grouped admin configuration page at **Administration → Configuration → AI** that mirrors the three-tier hierarchy above. Contrib modules should register their settings pages under the appropriate category so they appear in the correct grouping.
+
+### Available Parent Menu Categories
+
+Each category corresponds to a parent menu link that contrib modules can reference:
+
+| Category | Parent Value | Description |
+| :---- | :---- | :---- |
+| AI Infrastructure | `ai.admin_config_infrastructure` | AI providers, models, and core infrastructure |
+| Tools & Automation | `ai.admin_config_tools` | AI tools, agents, and automation workflows |
+| Content Creation & Support | `ai.admin_config_content` | Prompts, content generation, and support features |
+| People, Accounts & Users | `ai.admin_config_people` | User accounts and personalization |
+| Safety & Compliance | `ai.admin_config_safety` | Moderation, guardrails, and compliance settings |
+| Search & Discovery | `ai.admin_config_search` | AI-powered search and content discovery |
+| Site Building & Design | `ai.admin_config_site_building` | Site building, theming, and design |
+
+### How to Add a Menu Link
+
+In your module's `*.links.menu.yml` file, add an entry with `parent` set to the appropriate category. For example, the AI Translate module places its settings under **Content Creation & Support**:
+
+```yaml
+# ai_translate.links.menu.yml
+ai_translate.settings:
+  title: 'AI Translate'
+  description: 'Translate content between languages using AI-powered translation services.'
+  parent: ai.admin_config_content
+  route_name: ai_translate.settings_form
+```
+
+Use the [Quick Decision Framework](#quick-decision-framework) above to determine which category your module belongs in, then set the `parent` value accordingly.

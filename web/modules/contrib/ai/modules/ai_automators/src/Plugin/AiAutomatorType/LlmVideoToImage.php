@@ -138,7 +138,9 @@ class LlmVideoToImage extends VideoToText implements AiAutomatorTypeInterface {
           $input = new ChatInput([
             new ChatMessage('user', $prompt, $this->images),
           ]);
+          $input = $this->applyGuardrailsToInput($input, $automatorConfig);
           $response = $instance->chat($input, $automatorConfig['ai_model'])->getNormalized();
+          $this->assertNotStoppedByGuardrail($input);
           $json = json_decode(str_replace("\n", "", trim(str_replace(['```json', '```'], '', $response->getText()))), TRUE);
           $values = $this->decodeValueArray($json);
           // Run a second time to get the exact shot.
@@ -149,7 +151,9 @@ class LlmVideoToImage extends VideoToText implements AiAutomatorTypeInterface {
           $input = new ChatInput([
             new ChatMessage('user', $prompt, $this->images),
           ]);
+          $input = $this->applyGuardrailsToInput($input, $automatorConfig);
           $response = $instance->chat($input, $automatorConfig['ai_model'])->getNormalized();
+          $this->assertNotStoppedByGuardrail($input);
           $json = json_decode(str_replace("\n", "", trim(str_replace(['```json', '```'], '', $response->getText()))), TRUE);
           $values = $this->decodeValueArray($json);
           $total = array_merge_recursive($total, $values);

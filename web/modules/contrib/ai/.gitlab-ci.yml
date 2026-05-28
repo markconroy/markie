@@ -69,6 +69,7 @@ js_build:
     paths:
       - modules/ai_ckeditor/js/build
       - ui/mdxeditor/dist
+      - ui/default-tools-editor/dist
       - ui/json-schema-editor
     expire_in: 1h
   # Build artifacts.
@@ -88,6 +89,12 @@ js_build:
 
       # Build JSON Schema Editor artifacts
       cd ui/json-schema-editor
+      npm install
+      npm run build
+      cd $CI_PROJECT_DIR
+
+      # Build default tools editor artifacts
+      cd ui/default-tools-editor
       npm install
       npm run build
       cd $CI_PROJECT_DIR

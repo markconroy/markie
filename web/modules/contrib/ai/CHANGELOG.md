@@ -5,7 +5,7 @@ All notable changes to the AI module are documented here. While this document is
 ## [1.2.4] - 2025-12-03
 
 <h3>Security issues fixed</h3>
-<a href="/sa-contrib-2025-119">AI (Artificial Intelligence) - Moderately critical - Cross-Site Scripting - SA-CONTRIB-2025-119</a>
+<a href="https://www.drupal.org/sa-contrib-2025-119">AI (Artificial Intelligence) - Moderately critical - Cross-Site Scripting - SA-CONTRIB-2025-119</a>
 
 ## [1.2.3] - 2025-11-12
 

@@ -77,7 +77,7 @@ class VerifySetupAiTest extends KernelTestBase {
     // This should throw an error because the operation type does not exist.
     $this->expectException(\InvalidArgumentException::class);
     $this->action->apply('ai.settings', [
-      'operation_type_has_provider' => ['text_classification'],
+      'operation_type_has_provider' => ['something_funny'],
     ]);
     $this->assertTrue(TRUE, 'The action threw an error as expected when the provider does not exist.');
   }

@@ -3,6 +3,7 @@
 namespace Drupal\ai_ckeditor;
 
 use Drupal\Component\Utility\NestedArray;
+use Drupal\Component\Utility\Html;
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\CloseModalDialogCommand;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
@@ -225,12 +226,17 @@ abstract class AiCKEditorPluginBase extends PluginBase implements AiCKEditorPlug
       '#weight' => -9999,
     ];
     if ($this->needsSelectedText()) {
+      $selected_text = $storage['selected_text'] ?? '';
+      if (is_string($selected_text) && $selected_text !== '') {
+        $selected_text = Html::decodeEntities($selected_text);
+        $selected_text = str_replace("\xC2\xA0", ' ', $selected_text);
+      }
+
       $form['selected_text'] = [
         '#type' => 'textarea',
         '#title' => $this->getSelectedTextLabel(),
         '#disabled' => TRUE,
-        '#default_value' => $storage['selected_text'],
-        // Ensure this comes before the generate button.
+        '#default_value' => $selected_text,
         '#weight' => 5,
       ];
     }

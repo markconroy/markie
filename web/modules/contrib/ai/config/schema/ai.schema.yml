@@ -63,6 +63,9 @@ ai.settings:
         summarize:
           label: 'Default summarize provider'
           type: ai.default_operation_provider
+        text_classification:
+          label: 'Default text classification provider'
+          type: ai.default_operation_provider
         text_to_image:
           label: 'Default text to image provider'
           type: ai.default_operation_provider
@@ -96,6 +99,11 @@ ai.settings:
     allowed_hosts_rewrite_links:
       type: boolean
       label: 'If links to allowed hosts should be rewritten'
+    global_guardrails:
+      type: sequence
+      label: 'Global guardrail set ids applied to every AI request'
+      sequence:
+        type: string
 
 ai.default_operation_provider:
   type: mapping
@@ -132,6 +140,26 @@ ai.ai_guardrail.*:
 ai.guardrail.settings.*:
   type: mapping
   label: Default guardrail settings
+
+ai.guardrail.settings.input_length_limit:
+  type: mapping
+  label: Input Length Limit settings
+  mapping:
+    max_length:
+      type: integer
+      label: Maximum length
+    use_tokens:
+      type: boolean
+      label: Use token-based counting
+    tokenizer_model:
+      type: string
+      label: Tokenizer model
+    check_all_messages:
+      type: boolean
+      label: Check total conversation length
+    violation_message:
+      type: string
+      label: Violation message
 
 ai.guardrail.settings.regexp_guardrail:
   type: mapping

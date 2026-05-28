@@ -23,12 +23,15 @@ final class OperationType extends AttributeBase {
    *   the ID must be either "foo" or "foo:bar".
    * @param \Drupal\Core\StringTranslation\TranslatableMarkup|null $label
    *   (optional) The human-readable name of the plugin.
+   * @param string|null $description
+   *   (optional) The human-readable description of the plugin.
    * @param class-string|null $deriver
    *   (optional) The deriver class.
    */
   public function __construct(
     public readonly string $id,
     public readonly TranslatableMarkup $label,
+    public readonly ?string $description = NULL,
     public readonly ?string $deriver = NULL,
   ) {
   }

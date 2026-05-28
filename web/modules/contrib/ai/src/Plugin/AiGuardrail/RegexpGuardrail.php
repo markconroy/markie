@@ -11,6 +11,8 @@ use Drupal\ai\Guardrail\Result\PassResult;
 use Drupal\ai\Guardrail\Result\StopResult;
 use Drupal\ai\OperationType\Chat\ChatInput;
 use Drupal\ai\OperationType\Chat\ChatMessage;
+use Drupal\ai\OperationType\Chat\ChatOutput;
+use Drupal\ai\OperationType\Chat\StreamedChatMessageIteratorInterface;
 use Drupal\ai\OperationType\InputInterface;
 use Drupal\ai\OperationType\OutputInterface;
 use Drupal\ai\Utility\Textarea;
@@ -72,8 +74,81 @@ class RegexpGuardrail extends AiGuardrailPluginBase implements ConfigurableInter
   public function processOutput(
     OutputInterface $output,
   ): GuardrailResultInterface {
-    // This guardrail only processes input, not output.
-    return new PassResult('Output processing is not applicable for this guardrail.', $this);
+    if (!$output instanceof ChatOutput) {
+      return new PassResult('Output is not a chat output, skipping regexp check.', $this);
+    }
+
+    $normalized = $output->getNormalized();
+
+    if ($normalized instanceof StreamedChatMessageIteratorInterface) {
+      return new PassResult('Streamed output cannot be scanned by regexp guardrail.', $this);
+    }
+
+    if (!$normalized instanceof ChatMessage) {
+      return new PassResult('No text message found in output to analyze.', $this);
+    }
+
+    $regexp_pattern = $this->configuration['regexp_pattern'] ?? '';
+    if (empty($regexp_pattern)) {
+      return new PassResult('No regexp pattern configured, skipping check.', $this);
+    }
+
+    // Scan both the assistant text and any tool call argument values the
+    // model produced. Tool calls are LLM-authored content too, so PII or
+    // other disallowed strings can leak through tool arguments just as
+    // easily as through the message body. Argument values are walked
+    // directly instead of serialized to JSON to avoid escape artifacts
+    // (control characters, quotes, backslashes) that would hide matches.
+    $haystacks = [$normalized->getText()];
+    foreach ($normalized->getTools() ?? [] as $tool) {
+      foreach ($tool->getArguments() as $argument) {
+        $this->collectScalarStrings($argument->getValue(), $haystacks);
+      }
+    }
+
+    foreach ($haystacks as $haystack) {
+      if ($haystack !== '' && preg_match($regexp_pattern, $haystack)) {
+        $violation_message = $this->configuration['violation_message'] ?? 'The text contains invalid content matching the pattern: @pattern';
+        $violation_message = str_replace('@pattern', $regexp_pattern, $violation_message);
+
+        return new StopResult($violation_message, $this);
+      }
+    }
+
+    return new PassResult('Output text passed the regexp guardrail check.', $this);
+  }
+
+  /**
+   * Recursively collects scalar string values from a mixed input.
+   *
+   * Used to flatten tool call argument values into a list of raw strings so
+   * the configured regex can match against the original characters (including
+   * newlines, tabs and quotes) without JSON escape artifacts.
+   *
+   * @param mixed $value
+   *   The value to walk. Strings and other scalars are appended, arrays and
+   *   iterables are recursed into, objects with __toString are cast.
+   * @param array $haystacks
+   *   The list to append flattened string values to. Passed by reference.
+   */
+  private function collectScalarStrings(mixed $value, array &$haystacks): void {
+    if (is_string($value)) {
+      $haystacks[] = $value;
+      return;
+    }
+    if (is_bool($value) || is_int($value) || is_float($value)) {
+      $haystacks[] = (string) $value;
+      return;
+    }
+    if (is_array($value) || $value instanceof \Traversable) {
+      foreach ($value as $item) {
+        $this->collectScalarStrings($item, $haystacks);
+      }
+      return;
+    }
+    if (is_object($value) && method_exists($value, '__toString')) {
+      $haystacks[] = (string) $value;
+    }
   }
 
   /**
@@ -125,7 +200,7 @@ class RegexpGuardrail extends AiGuardrailPluginBase implements ConfigurableInter
     $form['violation_message'] = [
       '#type' => 'textarea',
       '#title' => $this->t('Violation Message'),
-      '#default_value' => $this->configuration['violation_message'] ?: 'The text contains invalid content matching the pattern: @pattern',
+      '#default_value' => $this->configuration['violation_message'] ?? 'The text contains invalid content matching the pattern: @pattern',
       '#description' => $this->t('You can use the placeholder %placeholder to include the pattern used.', [
         '%placeholder' => '@pattern',
       ]),

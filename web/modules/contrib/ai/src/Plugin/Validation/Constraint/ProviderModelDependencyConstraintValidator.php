@@ -23,13 +23,13 @@ class ProviderModelDependencyConstraintValidator extends ConstraintValidator {
       return;
     }
 
-    // Check if model_id is set but provider_id is not.
-    if (!empty($value['model_id']) && empty($value['provider_id'])) {
+    // Check if model is set but provider is not.
+    if (!empty($value['model']) && empty($value['provider'])) {
       $this->context->addViolation($constraint->message);
     }
 
-    // Check the reverse: if provider_id is set but model_id is not.
-    if (!empty($value['provider_id']) && empty($value['model_id'])) {
+    // Check the reverse: if provider is set but model is not.
+    if (!empty($value['provider']) && empty($value['model'])) {
       $this->context->addViolation($constraint->message);
     }
   }

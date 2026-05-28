@@ -13,3 +13,24 @@ ai_test.settings:
       label: 'Catch processing time'
       description: 'Whether to catch processing time from AI mock providers.'
       default_value: false
+    provider_config:
+      type: ai.provider_config
+      label: 'AI provider configuration'
+
+# Settings schema for the test-only counting_stub_guardrail plugin.
+ai.guardrail.settings.counting_stub_guardrail:
+  type: mapping
+  label: 'Counting Stub Guardrail settings'
+  mapping:
+    tag:
+      type: string
+      label: 'State counter tag'
+    mode:
+      type: string
+      label: 'Result mode (pass or stop)'
+    message:
+      type: string
+      label: 'Result message'
+    score:
+      type: float
+      label: 'Stop result score'

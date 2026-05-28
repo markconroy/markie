@@ -8,6 +8,8 @@
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Site\Settings;
+use Drupal\ai\Entity\AiGuardrailSet;
+use Drupal\ai\Form\GlobalGuardrailsSettingsForm;
 use Drupal\ai\Hook\FormElement;
 
 /**
@@ -120,6 +122,23 @@ function ai_preprocess_links__ai_tools_library_menu(array &$variables): void {
  */
 function ai_element_info_alter(array &$info) {
   \Drupal::service(FormElement::class)->elementInfoAlter($info);
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_delete() for ai_guardrail_set.
+ *
+ * Removes the deleted set's id from ai.settings:global_guardrails so stale
+ * references do not linger in config until an admin re-saves the form.
+ */
+function ai_ai_guardrail_set_delete(AiGuardrailSet $entity): void {
+  $config = \Drupal::configFactory()->getEditable(GlobalGuardrailsSettingsForm::CONFIG_NAME);
+  $ids = $config->get('global_guardrails') ?? [];
+  if (!is_array($ids) || !in_array($entity->id(), $ids, TRUE)) {
+    return;
+  }
+  $config
+    ->set('global_guardrails', array_values(array_diff($ids, [$entity->id()])))
+    ->save();
 }
 
 /**

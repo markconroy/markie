@@ -12,6 +12,7 @@ use Drupal\user\UserInterface;
  * Tests the AI Provider Configuration form element.
  *
  * @group ai
+ * @group 3580935
  */
 class AiProviderConfigurationElementTest extends BaseClassFunctionalJavascriptTests {
 
@@ -28,7 +29,7 @@ class AiProviderConfigurationElementTest extends BaseClassFunctionalJavascriptTe
   /**
    * {@inheritdoc}
    */
-  protected $defaultTheme = 'stark';
+  protected bool $videoRecording = TRUE;
 
   /**
    * AI Admin user.
@@ -55,11 +56,13 @@ class AiProviderConfigurationElementTest extends BaseClassFunctionalJavascriptTe
   public function testElementRenders(): void {
     $this->drupalLogin($this->aiAdmin);
     $this->drupalGet('admin/config/ai/test-form-elements');
+    $this->takeScreenshot('1_form_loaded');
 
     // Check that the element is present.
     $this->assertSession()->elementExists('css', 'select[data-drupal-selector="edit-provider-config-provider-model"]');
     $this->assertSession()->pageTextContains('AI Provider Configuration');
     $this->assertSession()->pageTextContains('Select an AI provider and model.');
+    $this->takeScreenshot('2_element_rendered');
   }
 
   /**
@@ -68,12 +71,14 @@ class AiProviderConfigurationElementTest extends BaseClassFunctionalJavascriptTe
   public function testAjaxLoadsConfiguration(): void {
     $this->drupalLogin($this->aiAdmin);
     $this->drupalGet('admin/config/ai/test-form-elements');
+    $this->takeScreenshot('1_form_loaded');
 
     $page = $this->getSession()->getPage();
     $assert = $this->assertSession();
 
     // Check that configuration wrapper exists.
     $assert->waitForElement('css', '#edit-provider_config-config');
+    $this->takeScreenshot('2_config_wrapper_present');
 
     // Select a provider/model if available.
     $select = $page->find('css', 'select[data-drupal-selector="edit-provider-config-provider-model"]');
@@ -95,6 +100,7 @@ class AiProviderConfigurationElementTest extends BaseClassFunctionalJavascriptTe
           $select->setValue($option_value);
           // Wait for AJAX to complete.
           $assert->assertWaitOnAjaxRequest();
+          $this->takeScreenshot('3_provider_selected_ajax_complete');
 
           // Wait for and verify the configuration container exists after AJAX.
           $config_wrapper = $assert->waitForElement('css', '#edit-provider_config-config');
@@ -116,6 +122,7 @@ class AiProviderConfigurationElementTest extends BaseClassFunctionalJavascriptTe
             $form_fields,
             'Configuration fields should be present when provider/model is selected'
           );
+          $this->takeScreenshot('4_configuration_fields_loaded');
         }
       }
     }
@@ -139,6 +146,7 @@ class AiProviderConfigurationElementTest extends BaseClassFunctionalJavascriptTe
     $config->set('default_providers', $default_providers)->save();
 
     $this->drupalGet('admin/config/ai/test-form-elements');
+    $this->takeScreenshot('1_form_loaded_with_default_provider_configured');
 
     $page = $this->getSession()->getPage();
     $select = $page->find('css', 'select[data-drupal-selector="edit-provider-config-provider-model"]');
@@ -148,6 +156,7 @@ class AiProviderConfigurationElementTest extends BaseClassFunctionalJavascriptTe
       foreach ($options as $option) {
         if ($option->getValue() === AiProviderInterface::DEFAULT_MODEL_VALUE) {
           $this->assertEquals('Default', $option->getText());
+          $this->takeScreenshot('2_default_option_present');
           return;
         }
       }
@@ -173,6 +182,7 @@ class AiProviderConfigurationElementTest extends BaseClassFunctionalJavascriptTe
     $config->set('default_providers', $default_providers)->save();
 
     $this->drupalGet('admin/config/ai/test-form-elements');
+    $this->takeScreenshot('1_form_loaded_with_default_provider_configured');
 
     $page = $this->getSession()->getPage();
     $select = $page->find('css', 'select[data-drupal-selector="edit-provider-config-provider-model"]');
@@ -184,6 +194,7 @@ class AiProviderConfigurationElementTest extends BaseClassFunctionalJavascriptTe
       // If default is set, it should be DEFAULT_MODEL_VALUE or
       // 'provider__model'.
       $this->assertNotEmpty($selected_value);
+      $this->takeScreenshot('2_default_value_present');
     }
   }
 
@@ -193,6 +204,7 @@ class AiProviderConfigurationElementTest extends BaseClassFunctionalJavascriptTe
   public function testFormSubmissionValueStructure(): void {
     $this->drupalLogin($this->aiAdmin);
     $this->drupalGet('admin/config/ai/test-form-elements');
+    $this->takeScreenshot('1_form_loaded');
 
     $page = $this->getSession()->getPage();
     $assert = $this->assertSession();
@@ -215,15 +227,18 @@ class AiProviderConfigurationElementTest extends BaseClassFunctionalJavascriptTe
         if ($option_value) {
           $select->setValue($option_value);
           $assert->assertWaitOnAjaxRequest();
+          $this->takeScreenshot('2_provider_selected_ajax_complete');
 
           // Submit the form.
           $page->pressButton('Submit');
+          $this->takeScreenshot('3_form_submitted');
 
           // Check that a status message appears (form was submitted).
           $assert->pageTextContains('Form submitted');
 
           // Verify the value structure contains provider, model, config keys.
           $assert->pageTextMatches('/provider.*model.*config/i');
+          $this->takeScreenshot('4_submission_output_verified');
         }
       }
     }
@@ -247,6 +262,7 @@ class AiProviderConfigurationElementTest extends BaseClassFunctionalJavascriptTe
     $config->set('default_providers', $default_providers)->save();
 
     $this->drupalGet('admin/config/ai/test-form-elements');
+    $this->takeScreenshot('1_form_loaded_with_default_provider_configured');
 
     $page = $this->getSession()->getPage();
     $assert = $this->assertSession();
@@ -262,9 +278,11 @@ class AiProviderConfigurationElementTest extends BaseClassFunctionalJavascriptTe
             $select->setValue(AiProviderInterface::DEFAULT_MODEL_VALUE);
             $assert->assertWaitOnAjaxRequest();
           }
+          $this->takeScreenshot('2_default_selected_ajax_complete');
 
           // Submit the form.
           $page->pressButton('Submit');
+          $this->takeScreenshot('3_form_submitted');
 
           // Check that a status message appears (form was submitted).
           $assert->pageTextContains('Form submitted');
@@ -272,6 +290,7 @@ class AiProviderConfigurationElementTest extends BaseClassFunctionalJavascriptTe
           // Verify the value structure contains provider and model keys.
           // When default is selected, config should be empty array.
           $assert->pageTextMatches('/provider.*model/i');
+          $this->takeScreenshot('4_submission_output_verified');
           return;
         }
       }
@@ -283,13 +302,13 @@ class AiProviderConfigurationElementTest extends BaseClassFunctionalJavascriptTe
    */
   public function testAdvancedConfigDisabled(): void {
     $this->drupalLogin($this->aiAdmin);
-    // Set advanced_config to 0 (FALSE).
-    $this->drupalGet('admin/config/ai/test-form-elements');
+    $this->drupalGet('admin/config/ai/test-form-elements', ['query' => ['advanced_config' => 0]]);
+    $this->takeScreenshot('1_form_loaded_advanced_config_disabled');
 
     $assert = $this->assertSession();
 
-    // Configuration wrapper should not exist when advanced_config is FALSE.
-    $assert->waitForElementRemoved('css', '#edit-provider_config-config');
+    $assert->elementNotExists('css', '#edit-provider_config-config');
+    $this->takeScreenshot('2_config_container_not_present');
   }
 
   /**
@@ -299,6 +318,7 @@ class AiProviderConfigurationElementTest extends BaseClassFunctionalJavascriptTe
     $this->drupalLogin($this->aiAdmin);
     // Set default_provider_allowed to 0 (FALSE).
     $this->drupalGet('admin/config/ai/test-form-elements', ['query' => ['default_provider_allowed' => 0]]);
+    $this->takeScreenshot('1_form_loaded_default_provider_disallowed');
 
     $page = $this->getSession()->getPage();
     $select = $page->find('css', 'select[data-drupal-selector="edit-provider-config-provider-model"]');
@@ -309,6 +329,7 @@ class AiProviderConfigurationElementTest extends BaseClassFunctionalJavascriptTe
       foreach ($options as $option) {
         $this->assertNotEquals(AiProviderInterface::DEFAULT_MODEL_VALUE, $option->getValue(), 'Default option should not be present when default_provider_allowed is FALSE');
       }
+      $this->takeScreenshot('2_default_option_not_present');
     }
   }
 
@@ -319,11 +340,13 @@ class AiProviderConfigurationElementTest extends BaseClassFunctionalJavascriptTe
     $this->drupalLogin($this->aiAdmin);
     // Test with a pseudo operation type.
     $this->drupalGet('admin/config/ai/test-form-elements', ['query' => ['operation_type' => 'chat_with_tools']]);
+    $this->takeScreenshot('1_form_loaded_pseudo_operation_type');
 
     $assert = $this->assertSession();
 
     // Element should still render correctly.
     $assert->elementExists('css', 'select[data-drupal-selector="edit-provider-config-provider-model"]');
+    $this->takeScreenshot('2_element_rendered');
 
     // The element should handle the pseudo operation type.
     // It should use 'chat' as actual_type.
@@ -347,6 +370,7 @@ class AiProviderConfigurationElementTest extends BaseClassFunctionalJavascriptTe
     $config->set('default_providers', $default_providers)->save();
 
     $this->drupalGet('admin/config/ai/test-form-elements');
+    $this->takeScreenshot('1_form_loaded_with_default_provider_configured');
 
     $page = $this->getSession()->getPage();
     $assert = $this->assertSession();
@@ -362,6 +386,7 @@ class AiProviderConfigurationElementTest extends BaseClassFunctionalJavascriptTe
             $select->setValue(AiProviderInterface::DEFAULT_MODEL_VALUE);
             $assert->assertWaitOnAjaxRequest();
           }
+          $this->takeScreenshot('2_default_selected_ajax_complete');
 
           // Configuration container should exist.
           $config_wrapper = $assert->waitForElement('css', '#edit-provider_config-config');
@@ -379,6 +404,8 @@ class AiProviderConfigurationElementTest extends BaseClassFunctionalJavascriptTe
               'Configuration details should exist when default is selected'
             );
           }
+
+          $this->takeScreenshot('3_config_container_checked');
           return;
         }
       }
@@ -403,6 +430,7 @@ class AiProviderConfigurationElementTest extends BaseClassFunctionalJavascriptTe
     $config->set('default_providers', $default_providers)->save();
 
     $this->drupalGet('admin/config/ai/test-form-elements');
+    $this->takeScreenshot('1_form_loaded_with_default_provider_configured');
 
     $page = $this->getSession()->getPage();
     $assert = $this->assertSession();
@@ -425,6 +453,10 @@ class AiProviderConfigurationElementTest extends BaseClassFunctionalJavascriptTe
         }
       }
 
+      if ($has_default) {
+        $this->takeScreenshot('2_default_selected_ajax_complete');
+      }
+
       // Then switch to a specific provider/model.
       if ($has_default) {
         foreach ($options as $option) {
@@ -435,6 +467,8 @@ class AiProviderConfigurationElementTest extends BaseClassFunctionalJavascriptTe
               $assert->assertWaitOnAjaxRequest();
             }
 
+            $this->takeScreenshot('3_switched_to_provider_ajax_complete');
+
             // Configuration container should be open now.
             $config_wrapper = $assert->waitForElement('css', '#edit-provider_config-config');
 
@@ -442,6 +476,8 @@ class AiProviderConfigurationElementTest extends BaseClassFunctionalJavascriptTe
               $config_wrapper,
               'Configuration wrapper should exist after switching to provider'
             );
+
+            $this->takeScreenshot('4_config_container_checked');
             return;
           }
         }
@@ -455,12 +491,14 @@ class AiProviderConfigurationElementTest extends BaseClassFunctionalJavascriptTe
   public function testEmptySelectionResultsInEmptyConfig(): void {
     $this->drupalLogin($this->aiAdmin);
     $this->drupalGet('admin/config/ai/test-form-elements');
+    $this->takeScreenshot('1_form_loaded');
 
     $page = $this->getSession()->getPage();
     $assert = $this->assertSession();
 
     // Check that configuration wrapper exists initially.
     $assert->waitForElement('css', '#edit-provider_config-config');
+    $this->takeScreenshot('2_config_wrapper_present');
 
     $select = $page->find('css', 'select[data-drupal-selector="edit-provider-config-provider-model"]');
     if ($select) {
@@ -471,13 +509,98 @@ class AiProviderConfigurationElementTest extends BaseClassFunctionalJavascriptTe
         $assert->assertWaitOnAjaxRequest();
       }
 
+      $this->takeScreenshot('3_empty_selected_ajax_complete');
+
       // Configuration container should still exist but be empty.
       $config_wrapper = $assert->waitForElement('css', '#edit-provider_config-config');
       $this->assertNotNull(
         $config_wrapper,
         'Configuration wrapper should exist even when empty'
       );
+
+      $this->takeScreenshot('4_config_container_checked');
     }
+  }
+
+  /**
+   * Tests that a saved use_default config value loads as the Default option.
+   */
+  public function testConfigTargetLoadsSavedDefaultSelection(): void {
+    $this->drupalLogin($this->aiAdmin);
+
+    /** @var \Drupal\Core\Config\ConfigFactoryInterface $config_factory */
+    $config_factory = $this->container->get('config.factory');
+
+    $default_providers = $config_factory->get('ai.settings')->get('default_providers') ?? [];
+    $default_providers['chat'] = [
+      'provider_id' => 'ai_test',
+      'model_id' => 'test_model',
+    ];
+    $config_factory->getEditable('ai.settings')
+      ->set('default_providers', $default_providers)
+      ->save();
+
+    $config_factory->getEditable('ai_test.settings')
+      ->set('provider_config', [
+        'use_default' => TRUE,
+        'provider' => 'ai_test',
+        'model' => 'test_model',
+        'config' => ['temperature' => 0.7],
+      ])
+      ->save();
+
+    $this->drupalGet('admin/config/ai/test-provider-config-target');
+    $this->takeScreenshot('1_form_loaded_config_target');
+
+    $page = $this->getSession()->getPage();
+    $select = $page->find('css', 'select[data-drupal-selector="edit-provider-config-provider-model"]');
+    $this->assertNotNull($select);
+    $this->assertSame(AiProviderInterface::DEFAULT_MODEL_VALUE, $select->getValue());
+    $this->takeScreenshot('2_default_selected_from_saved_config');
+  }
+
+  /**
+   * Tests that selecting Default saves ai.provider_config via #config_target.
+   */
+  public function testConfigTargetSavesDefaultSelection(): void {
+    $this->drupalLogin($this->aiAdmin);
+
+    /** @var \Drupal\Core\Config\ConfigFactoryInterface $config_factory */
+    $config_factory = $this->container->get('config.factory');
+
+    $default_providers = $config_factory->get('ai.settings')->get('default_providers') ?? [];
+    $default_providers['chat'] = [
+      'provider_id' => 'ai_test',
+      'model_id' => 'test_model',
+    ];
+    $config_factory->getEditable('ai.settings')
+      ->set('default_providers', $default_providers)
+      ->save();
+
+    $this->drupalGet('admin/config/ai/test-provider-config-target');
+    $this->takeScreenshot('1_form_loaded_config_target');
+
+    $page = $this->getSession()->getPage();
+    $assert = $this->assertSession();
+    $select = $page->find('css', 'select[data-drupal-selector="edit-provider-config-provider-model"]');
+
+    $this->assertNotNull($select);
+    if ($select->getValue() !== AiProviderInterface::DEFAULT_MODEL_VALUE) {
+      $select->setValue(AiProviderInterface::DEFAULT_MODEL_VALUE);
+      $assert->assertWaitOnAjaxRequest();
+    }
+
+    $this->takeScreenshot('2_default_selected_ajax_complete');
+
+    $page->pressButton('Save configuration');
+    $this->takeScreenshot('3_configuration_saved');
+    $assert->pageTextContains('The configuration options have been saved.');
+
+    $saved = $config_factory->get('ai_test.settings')->get('provider_config');
+    $this->assertTrue($saved['use_default']);
+    $this->assertSame('', $saved['provider']);
+    $this->assertSame('', $saved['model']);
+    $this->takeScreenshot('4_saved_config_verified');
   }
 
 }

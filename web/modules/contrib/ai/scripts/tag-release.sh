@@ -75,6 +75,7 @@ printf "%s[2/5] Building UIs …%s\n" "$WHITE_ON_BLUE" "$NC"
 
 build_dir modules/ai_ckeditor
 build_dir ui/mdxeditor
+build_dir ui/default-tools-editor
 build_dir ui/json-schema-editor
 
 printf "%s[3/5] Committing built UIs …%s\n" "$WHITE_ON_BLUE" "$NC"
@@ -86,6 +87,9 @@ git add -f \
   ui/mdxeditor/package.json \
   ui/mdxeditor/package-lock.json \
   ui/mdxeditor/dist \
+  ui/default-tools-editor/package.json \
+  ui/default-tools-editor/package-lock.json \
+  ui/default-tools-editor/dist \
   ui/json-schema-editor/dist
 
 git commit -q -m "Drupal AI $TAG"
@@ -104,6 +108,7 @@ reset_version() {
 
 reset_version modules/ai_ckeditor
 reset_version ui/mdxeditor
+reset_version ui/default-tools-editor
 reset_version ui/json-schema-editor
 
 git add -f \
@@ -111,12 +116,15 @@ git add -f \
   modules/ai_ckeditor/package-lock.json \
   ui/mdxeditor/package.json \
   ui/mdxeditor/package-lock.json \
+  ui/default-tools-editor/package.json \
+  ui/default-tools-editor/package-lock.json \
   ui/json-schema-editor/package.json \
   ui/json-schema-editor/package-lock.json
 
 git rm -rf \
   modules/ai_ckeditor/js/build \
   ui/mdxeditor/dist \
+  ui/default-tools-editor/dist \
   ui/json-schema-editor/dist
 
 git commit -q -m "Back to dev."

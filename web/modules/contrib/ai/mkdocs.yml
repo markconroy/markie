@@ -30,6 +30,12 @@ markdown_extensions:
   - attr_list
   - md_in_html
   - pymdownx.blocks.caption
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+
 extra:
   social:
     - icon: fontawesome/brands/gitlab
@@ -79,11 +85,13 @@ nav:
       - Audio-To-Audio Call: developers/call_audio_to_audio.md
       - Speech-To-Speech Call: developers/call_speech_to_speech.md
       - Image Classification Call: developers/call_image_classification.md
+      - Text Classification Call: developers/call_text_classification.md
       - Translate Text Call: developers/call_translate_text.md
       - Image-To-Image Call: developers/call_image_to_image.md
       - Object Detection Call: developers/call_object_detection.md
     - Plugins/Managers:
       - Function Call Plugins: developers/function_call.md
+      - ChatProcessor Plugin: developers/writing_a_chat_processor_plugin.md
       - Function Call Schema: developers/function_call_schema.md
       - Short-Term Memory: developers/short_term_memory.md
     - Helper Services:
@@ -168,5 +176,6 @@ nav:
     - How to Contribute to UX: ux/how_to_contribute.md
   - Documentation (How to): documentation/index.md
   - Changelog: changelog.md
+  - Security: security.md
 docs_dir: docs
 site_dir: site

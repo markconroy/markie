@@ -2,8 +2,8 @@
 
 namespace Drupal\ai\OperationType\GenericType;
 
-use Drupal\Core\File\MimeType\MimeTypeGuesser;
 use Drupal\file\Entity\File;
+use Symfony\Component\Mime\MimeTypeGuesserInterface;
 
 /**
  * The file base interface.
@@ -105,9 +105,9 @@ interface FileBaseInterface {
   /**
    * Get the file mime type guesser.
    *
-   * @return \Drupal\Core\File\MimeType\MimeTypeGuesser
+   * @return \Symfony\Component\Mime\MimeTypeGuesserInterface
    *   The stream wrapper.
    */
-  public function getFileMimeTypeGuesser(): MimeTypeGuesser;
+  public function getFileMimeTypeGuesser(): MimeTypeGuesserInterface;
 
 }

@@ -9,6 +9,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\ai\AiProviderPluginManager;
+use Drupal\ai\Guardrail\AiGuardrailHelper;
 use Drupal\ai\Service\AiProviderFormHelper;
 use Drupal\ai\Service\PromptJsonDecoder\PromptJsonDecoderInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -48,6 +49,8 @@ class Taxonomy extends RuleBase implements ContainerFactoryPluginInterface {
    *   The form helper.
    * @param \Drupal\ai\Service\PromptJsonDecoder\PromptJsonDecoderInterface $promptJsonDecoder
    *   The prompt json decoder.
+   * @param \Drupal\ai\Guardrail\AiGuardrailHelper $aiGuardrailHelper
+   *   The AI guardrail helper.
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
    *   The entity type manager.
    * @param \Drupal\Core\Session\AccountProxyInterface $currentUser
@@ -57,10 +60,11 @@ class Taxonomy extends RuleBase implements ContainerFactoryPluginInterface {
     AiProviderPluginManager $pluginManager,
     AiProviderFormHelper $formHelper,
     PromptJsonDecoderInterface $promptJsonDecoder,
+    AiGuardrailHelper $aiGuardrailHelper,
     EntityTypeManagerInterface $entityTypeManager,
     AccountProxyInterface $currentUser,
   ) {
-    parent::__construct($pluginManager, $formHelper, $promptJsonDecoder);
+    parent::__construct($pluginManager, $formHelper, $promptJsonDecoder, $aiGuardrailHelper);
     $this->entityTypeManager = $entityTypeManager;
     $this->currentUser = $currentUser;
   }
@@ -73,6 +77,7 @@ class Taxonomy extends RuleBase implements ContainerFactoryPluginInterface {
       $container->get('ai.provider'),
       $container->get('ai.form_helper'),
       $container->get('ai.prompt_json_decode'),
+      $container->get('ai.guardrail_helper'),
       $container->get('entity_type.manager'),
       $container->get('current_user'),
     );

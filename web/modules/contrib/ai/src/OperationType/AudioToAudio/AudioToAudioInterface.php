@@ -12,6 +12,7 @@ use Drupal\ai\OperationType\OperationTypeInterface;
 #[OperationType(
   id: 'audio_to_audio',
   label: new TranslatableMarkup('Audio to Audio'),
+  description: new TranslatableMarkup('Transform audio by changing the voice, improving quality, or applying other modifications.')
 )]
 interface AudioToAudioInterface extends OperationTypeInterface {
 

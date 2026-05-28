@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   BlockTypeSelect,
   CreateLink,
@@ -57,9 +57,16 @@ function Editor({
   initialValue,
   onChange,
   variables = [],
+  onRef,
 }) {
   const editorRef = useRef(null);
   const [markdown, setMarkdown] = useState(initialValue);
+  
+  useEffect(() => {
+    if (onRef && editorRef.current) {
+      onRef(editorRef.current);
+    }
+  }, [onRef]);
 
   function handleChange(value) {
     setMarkdown(value);

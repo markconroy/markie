@@ -2,6 +2,7 @@
 
 namespace Drupal\ai_automators\FormAlter;
 
+use Drupal\ai\Guardrail\AiGuardrailHelper;
 use Drupal\ai\Utility\Textarea;
 use Drupal\Core\DependencyInjection\DependencySerializationTrait;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
@@ -35,6 +36,8 @@ class AiAutomatorFieldConfig {
    *   The process manager.
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
    *   The entity type manager.
+   * @param \Drupal\ai\Guardrail\AiGuardrailHelper $aiGuardrailHelper
+   *   The AI guardrail helper.
    */
   public function __construct(
     protected EntityFieldManagerInterface $fieldManager,
@@ -42,6 +45,7 @@ class AiAutomatorFieldConfig {
     protected RouteMatchInterface $routeMatch,
     protected AiAutomatorFieldProcessManager $processes,
     protected EntityTypeManagerInterface $entityTypeManager,
+    protected AiGuardrailHelper $aiGuardrailHelper,
   ) {
   }
 
@@ -109,7 +113,7 @@ class AiAutomatorFieldConfig {
 
     /** @var \Drupal\ai_automators\Entity\AiAutomator $aiConfig */
     $aiConfig = $this->entityTypeManager->getStorage('ai_automator')->load($id);
-
+    $formState->set('ai_automator', $aiConfig);
     $form['automator_enabled'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Enable AI Automator'),
@@ -384,7 +388,6 @@ class AiAutomatorFieldConfig {
         '#description' => $this->t('This defines how the saving of an interpolation happens. Direct saving is the easiest, but since it can take time you need to have longer timeouts.'),
         '#default_value' => !is_null($aiConfig) ? $aiConfig->get('worker_type') : 'direct',
       ];
-
       $subForm = $rule->extraAdvancedFormFields($entity, $fieldInfo, $formState, $defaultValues);
       $form['automator_container']['automator_advanced'] = array_merge($form['automator_container']['automator_advanced'], $subForm);
     }
@@ -487,6 +490,7 @@ class AiAutomatorFieldConfig {
       $aiConfig->set('base_field', $formState->getValue('automator_base_field') ?? '');
       $aiConfig->set('prompt', $formState->getValue('automator_prompt') ?? '');
       $aiConfig->set('token', $formState->getValue('automator_token') ?? '');
+      $aiConfig->set('guardrail_set_id', $formState->getValue('automator_guardrail_set_id') ?: NULL);
 
       $pluginConfig = [];
       foreach ($formState->getValues() as $key => $val) {

@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace Drupal\ai_content_suggestions;
 
-use Drupal\Core\Entity\ContentEntityFormInterface;
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 
 /**
@@ -21,6 +22,8 @@ final class AiContentSuggestionsFormAlter implements AiContentSuggestionsFormAlt
   public function __construct(
     protected AiContentSuggestionsPluginManager $pluginManager,
     protected EntityTypeManagerInterface $entityTypeManager,
+    protected AccountProxyInterface $currentUser,
+    protected ConfigFactoryInterface $configFactory,
   ) {
 
   }
@@ -29,25 +32,52 @@ final class AiContentSuggestionsFormAlter implements AiContentSuggestionsFormAlt
    * {@inheritdoc}
    */
   public function alter(array &$form, FormStateInterface $form_state): void {
-    foreach ($this->pluginManager->getDefinitions() as $id => $definition) {
-      /** @var \Drupal\ai_content_suggestions\AiContentSuggestionsInterface $plugin */
-      if ($plugin = $this->pluginManager->createInstance($id, $definition)) {
-        if ($plugin->isEnabled()) {
-
-          /** @var \Drupal\Core\Entity\ContentEntityFormInterface $form_object */
-          $form_object = $form_state->getFormObject();
-
-          // Check if form object implements ContentEntityFormInterface.
-          if (!$form_object instanceof ContentEntityFormInterface) {
-            continue;
+    $form['#cache']['contexts'][] = 'user.permissions';
+    $form['#cache']['contexts'][] = 'ai_content_suggestions_plugins';
+    $form['#cache']['contexts'][] = 'ai_providers';
+    if ($this->currentUser->hasPermission('access ai content suggestion tools')) {
+      /** @var \Drupal\Core\Entity\ContentEntityFormInterface $form_object */
+      $form_object = $form_state->getFormObject();
+      $entity = $form_object->getEntity();
+      if (!$this->isEnabledForCurrentEntity($entity)) {
+        return;
+      }
+      foreach ($this->pluginManager->getDefinitions() as $id => $definition) {
+        /** @var \Drupal\ai_content_suggestions\AiContentSuggestionsInterface $plugin */
+        if ($plugin = $this->pluginManager->createInstance($id, $definition)) {
+          if ($plugin->isEnabled()) {
+            /** @var \Drupal\Core\Entity\ContentEntityInterface $entity */
+            $entity = $form_object->getEntity();
+            $plugin->alterForm($form, $form_state, $this->getAllTextFields($entity, $form));
           }
-
-          /** @var \Drupal\Core\Entity\ContentEntityInterface $entity */
-          $entity = $form_object->getEntity();
-          $plugin->alterForm($form, $form_state, $this->getAllTextFields($entity, $form));
         }
       }
     }
+  }
+
+  /**
+   * Check if AI suggestions are enabled for the current entity.
+   *
+   * @param \Drupal\Core\Entity\ContentEntityInterface $entity
+   *   The content entity on the form.
+   *
+   * @return bool
+   *   TRUE if AI suggestions should be shown for this entity, FALSE otherwise.
+   */
+  public function isEnabledForCurrentEntity(ContentEntityInterface $entity): bool {
+    $config = $this->configFactory->get('ai_content_suggestions.settings');
+    $entity_type_id = $entity->getEntityTypeId();
+    $bundle = $entity->bundle();
+    $entity_types = $config->get('entity_types') ?? [];
+    if (!in_array($entity_type_id, array_keys($entity_types), TRUE)) {
+      return FALSE;
+    }
+    $mode = $entity_types[$entity_type_id]['mode'] ?? 'enable';
+    $bundles = $entity_types[$entity_type_id]['bundles'] ?? [];
+    if ($mode === 'enable') {
+      return in_array($bundle, $bundles);
+    }
+    return !in_array($bundle, $bundles);
   }
 
   /**

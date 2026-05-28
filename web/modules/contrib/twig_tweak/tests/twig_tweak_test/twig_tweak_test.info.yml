@@ -11,7 +11,7 @@ dependencies:
   - drupal:path
   - drupal:twig_tweak
 
-# Information added by Drupal.org packaging script on 2025-05-29
-version: '3.4.1'
+# Information added by Drupal.org packaging script on 2026-04-21
+version: '3.4.2'
 project: 'twig_tweak'
-datestamp: 1748530581
+datestamp: 1776781836

@@ -5,14 +5,18 @@ namespace Drupal\ai_automators\PluginBaseClasses;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Logger\LoggerChannelInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\ai\AiProviderPluginManager;
 use Drupal\ai\Dto\HostnameFilterDto;
 use Drupal\ai\Enum\AiModelCapability;
+use Drupal\ai\Guardrail\AiGuardrailHelper;
+use Drupal\ai\Guardrail\Result\StopResult;
 use Drupal\ai\OperationType\Chat\ChatInput;
 use Drupal\ai\OperationType\Chat\ChatMessage;
 use Drupal\ai\OperationType\GenericType\ImageFile;
+use Drupal\ai\OperationType\InputInterface;
 use Drupal\ai\Service\AiProviderFormHelper;
 use Drupal\ai\Service\PromptJsonDecoder\PromptJsonDecoderInterface;
 use Drupal\ai\Utility\CastUtility;
@@ -67,6 +71,20 @@ abstract class RuleBase implements AiAutomatorTypeInterface, AiAutomatorPostChec
   protected PromptJsonDecoderInterface $promptJsonDecoder;
 
   /**
+   * The AI guardrail helper.
+   *
+   * @var \Drupal\ai\Guardrail\AiGuardrailHelper
+   */
+  protected AiGuardrailHelper $aiGuardrailHelper;
+
+  /**
+   * The logger channel.
+   *
+   * @var \Drupal\Core\Logger\LoggerChannelInterface|null
+   */
+  protected ?LoggerChannelInterface $logger = NULL;
+
+  /**
    * Constructs a new AiClientBase abstract class.
    *
    * @param \Drupal\ai\AiProviderPluginManager $pluginManager
@@ -75,15 +93,23 @@ abstract class RuleBase implements AiAutomatorTypeInterface, AiAutomatorPostChec
    *   The form helper.
    * @param \Drupal\ai\Service\PromptJsonDecoder\PromptJsonDecoderInterface $promptJsonDecoder
    *   The prompt JSON decoder.
+   * @param \Drupal\ai\Guardrail\AiGuardrailHelper $aiGuardrailHelper
+   *   The AI guardrail helper.
+   * @param \Drupal\Core\Logger\LoggerChannelInterface|null $logger
+   *   The logger channel for ai_automators.
    */
   public function __construct(
     AiProviderPluginManager $pluginManager,
     AiProviderFormHelper $formHelper,
     PromptJsonDecoderInterface $promptJsonDecoder,
+    AiGuardrailHelper $aiGuardrailHelper,
+    ?LoggerChannelInterface $logger = NULL,
   ) {
     $this->aiPluginManager = $pluginManager;
     $this->formHelper = $formHelper;
     $this->promptJsonDecoder = $promptJsonDecoder;
+    $this->aiGuardrailHelper = $aiGuardrailHelper;
+    $this->logger = $logger;
   }
 
   /**
@@ -93,8 +119,82 @@ abstract class RuleBase implements AiAutomatorTypeInterface, AiAutomatorPostChec
     return new static(
       $container->get('ai.provider'),
       $container->get('ai.form_helper'),
-      $container->get('ai.prompt_json_decode')
+      $container->get('ai.prompt_json_decode'),
+      $container->get('ai.guardrail_helper'),
+      $container->get('logger.factory')->get('ai_automators'),
     );
+  }
+
+  /**
+   * Apply a configured guardrail set to an input prior to dispatch.
+   *
+   * @param \Drupal\ai\OperationType\InputInterface $input
+   *   The input about to be sent to the provider.
+   * @param array $automatorConfig
+   *   The automator configuration; if it carries a `guardrail_set_id`, that set
+   *   is attached to the input.
+   *
+   * @return \Drupal\ai\OperationType\InputInterface
+   *   The (possibly cloned) input with the guardrail set attached, or the
+   *   original input if no guardrail set is configured / available.
+   */
+  protected function applyGuardrailsToInput(InputInterface $input, array $automatorConfig): InputInterface {
+    $setId = $automatorConfig['guardrail_set_id'] ?? NULL;
+    if (!$setId) {
+      return $input;
+    }
+    return $this->aiGuardrailHelper->applyGuardrailSetToChatInput($setId, $input);
+  }
+
+  /**
+   * Abort the Automator run if the guardrail set's stop threshold was reached.
+   *
+   * Mirrors the aggregation in core's GuardrailsEventSubscriber: scores from
+   * StopResult outcomes across every attached set and mode are summed and
+   * compared against the lowest stop threshold of the attached sets. If the
+   * total reaches or exceeds that threshold, the run is aborted.
+   *
+   * @param \Drupal\ai\OperationType\InputInterface $input
+   *   The input that was just sent to the provider.
+   *
+   * @throws \Drupal\ai_automators\Exceptions\AiAutomatorResponseErrorException
+   *   If the input was blocked by the configured guardrail set.
+   */
+  protected function assertNotStoppedByGuardrail(InputInterface $input): void {
+    $sets = $input->getGuardrailSets();
+    if (!$sets) {
+      return;
+    }
+    $score = 0.0;
+    $messages = [];
+    foreach ($input->getAllGuardrailResults() as $modeResults) {
+      foreach ($modeResults as $result) {
+        if ($result instanceof StopResult) {
+          $score += $result->getScore();
+          $messages[] = $result->getMessage();
+        }
+      }
+    }
+    // Use the lowest threshold across attached sets so that any set crossing
+    // its threshold blocks the run. AI Automator currently attaches a single
+    // set per call, so this matches the prior single-set behavior.
+    $threshold = PHP_FLOAT_MAX;
+    foreach ($sets as $set) {
+      $threshold = min($threshold, $set->getStopThreshold());
+    }
+    if (!$messages || $score < $threshold) {
+      return;
+    }
+    $combined = implode(' ', array_filter($messages));
+    if ($this->logger) {
+      $this->logger->warning('AI Automator run blocked by guardrail set @set (score @score >= threshold @threshold): @msg', [
+        '@set' => implode(', ', array_keys($sets)),
+        '@score' => $score,
+        '@threshold' => $threshold,
+        '@msg' => $combined,
+      ]);
+    }
+    throw new AiAutomatorResponseErrorException('Blocked by guardrail: ' . $combined);
   }
 
   /**
@@ -194,7 +294,21 @@ abstract class RuleBase implements AiAutomatorTypeInterface, AiAutomatorPostChec
    */
   public function extraAdvancedFormFields(ContentEntityInterface $entity, FieldDefinitionInterface $fieldDefinition, FormStateInterface $formState, array $defaultValues = []) {
     $form = [];
-
+    $guardrailOptions = [];
+    foreach ($this->aiGuardrailHelper->getRepository()->getAllGuardrailSets() as $guardrailSet) {
+      $guardrailOptions[$guardrailSet->id()] = $guardrailSet->label();
+    }
+    $aiConfig = $formState->get('ai_automator');
+    $form['automator_guardrail_set_id'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Guardrail set'),
+      '#description' => $this->t('If set, the Automator input and output are evaluated against this Guardrail Set. Runs that trigger a stop verdict are aborted and the field is not updated.'),
+      '#options' => $guardrailOptions,
+      '#empty_option' => $this->t('- None -'),
+      '#empty_value' => '',
+      '#default_value' => $aiConfig ? ($aiConfig->get('guardrail_set_id') ?? '') : '',
+      '#weight' => 30,
+    ];
     // Load the AI models.
     $providers = $this->formHelper->getAiProvidersOptions($this->llmType);
 
@@ -671,6 +785,7 @@ abstract class RuleBase implements AiAutomatorTypeInterface, AiAutomatorPostChec
     $input = new ChatInput([
       new ChatMessage("user", $prompt, $images),
     ]);
+    $input = $this->applyGuardrailsToInput($input, $automatorConfig);
 
     if ($this->getJsonSchema()) {
       $instance->setChatStructuredJsonSchema($this->getJsonSchema());
@@ -684,6 +799,7 @@ abstract class RuleBase implements AiAutomatorTypeInterface, AiAutomatorPostChec
       $input->setHostnameFilter(new HostnameFilterDto(plainTextMode: TRUE));
     }
     $response = $instance->chat($input, $model, $this->getTags($prompt, $automatorConfig, $instance, $entity))->getNormalized();
+    $this->assertNotStoppedByGuardrail($input);
 
     return $response;
   }

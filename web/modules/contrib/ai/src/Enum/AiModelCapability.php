@@ -12,6 +12,7 @@ enum AiModelCapability: string {
   case ChatWithImageVision = 'chat_with_image_vision';
   case ChatWithAudio = 'chat_with_audio';
   case ChatWithVideo = 'chat_with_video';
+  case ChatWithPdf = 'chat_with_pdf';
   case ChatSystemRole = 'chat_system_role';
   case ChatJsonOutput = 'chat_json_output';
   case ChatStructuredResponse = 'chat_structured_response';
@@ -44,6 +45,7 @@ enum AiModelCapability: string {
       self::ChatWithImageVision,
       self::ChatWithAudio,
       self::ChatWithVideo,
+      self::ChatWithPdf,
       self::ChatSystemRole,
       self::ChatJsonOutput => 'chat',
       self::ImageToImageUpscale,
@@ -70,6 +72,7 @@ enum AiModelCapability: string {
       self::ChatWithImageVision => 'Chat with Image Vision',
       self::ChatWithAudio => 'Chat with Audio',
       self::ChatWithVideo => 'Chat with Video',
+      self::ChatWithPdf => 'Chat with PDF',
       self::ChatSystemRole => 'Chat System Role',
       self::ChatJsonOutput => 'Chat JSON Output',
       self::ChatStructuredResponse => 'Chat Structured Response',
@@ -99,6 +102,7 @@ enum AiModelCapability: string {
       self::ChatWithImageVision => 'Is set if the chat model can include images in the chat input.',
       self::ChatWithAudio => 'Is set if the chat model can include audio in the chat input.',
       self::ChatWithVideo => 'Is set if the chat model can include video in the chat input.',
+      self::ChatWithPdf => 'Is set if the chat model can include PDF documents in the chat input.',
       self::ChatSystemRole => 'Is set if the chat model can include a system role.',
       self::ChatJsonOutput => 'Is set if the chat model can do flawless complex JSON output.',
       self::ChatStructuredResponse => 'Is set if the chat model can do structured responses.',

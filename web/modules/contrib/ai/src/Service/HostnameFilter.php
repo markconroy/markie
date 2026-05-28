@@ -202,6 +202,39 @@ class HostnameFilter {
   }
 
   /**
+   * Capture current programmatic overrides so they can later be restored.
+   *
+   * The HostnameFilter service is a singleton; callers that temporarily
+   * override its state (e.g. to scope a HostnameFilterDto to a single
+   * provider call) should snapshot before applying and restore afterwards
+   * to avoid leaking settings into unrelated calls.
+   *
+   * @return array
+   *   Opaque snapshot to pass to ::restoreSettings().
+   */
+  public function snapshotSettings(): array {
+    return [
+      'allowedDomains' => $this->allowedDomains,
+      'rewriteLinks' => $this->rewriteLinks,
+      'fullTrust' => $this->fullTrust,
+      'plainTextMode' => $this->plainTextMode,
+    ];
+  }
+
+  /**
+   * Restore a snapshot taken with ::snapshotSettings().
+   *
+   * @param array $snapshot
+   *   The snapshot returned by ::snapshotSettings().
+   */
+  public function restoreSettings(array $snapshot): void {
+    $this->allowedDomains = $snapshot['allowedDomains'] ?? NULL;
+    $this->rewriteLinks = $snapshot['rewriteLinks'] ?? NULL;
+    $this->fullTrust = $snapshot['fullTrust'] ?? NULL;
+    $this->plainTextMode = $snapshot['plainTextMode'] ?? NULL;
+  }
+
+  /**
    * Get allowed domain names.
    *
    * @return array
@@ -215,8 +248,24 @@ class HostnameFilter {
 
     // Fetch from config.
     $config = $this->configFactory->get('ai.settings');
+    $allowed_domains = $config->get('allowed_hosts');
 
-    $this->allowedDomains = $config->get('allowed_hosts') ?? [];
+    if (is_string($allowed_domains)) {
+      $allowed_domains = [$allowed_domains];
+    }
+
+    if (!is_array($allowed_domains)) {
+      $this->allowedDomains = [];
+      return $this->allowedDomains;
+    }
+
+    $this->allowedDomains = array_values(array_filter(
+      array_map(
+        static fn($host): string => trim((string) $host),
+        $allowed_domains
+      ),
+      static fn(string $host): bool => $host !== ''
+    ));
 
     return $this->allowedDomains;
   }

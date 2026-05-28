@@ -33,3 +33,11 @@ ai_test.provider_configuration_test:
     _form: 'Drupal\ai_test\Form\AiProviderConfigurationTestForm'
   requirements:
     _permission: 'administer ai'
+
+ai_test.provider_config_target:
+  path: '/admin/config/ai/test-provider-config-target'
+  defaults:
+    _title: 'AI Provider Config Target'
+    _form: 'Drupal\ai_test\Form\AiProviderConfigurationConfigTargetForm'
+  requirements:
+    _permission: 'administer ai'

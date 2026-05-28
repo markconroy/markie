@@ -21,6 +21,7 @@ parameters:
 			checkDeprecatedHooksInApiFiles: false
 			checkCoreDeprecatedHooksInApiFiles: false
 			checkContribDeprecatedHooksInApiFiles: false
+			containerHasAlwaysTrue: true
 		extensions:
 			entityFieldsViaMagicReflection: true
 			entityFieldMethodsViaMagicReflection: true
@@ -35,6 +36,10 @@ parameters:
 			pluginManagerInspectionRule: false
 			cacheableDependencyRule: false
 			hookRules: false
+			loggerFromFactoryPropertyAssignmentRule: false
+			entityStorageDirectInjectionRule: false
+			symfonyYamlParseRule: false
+			entityOperationsCacheabilityRule: false
 		entityMapping:
 			aggregator_feed:
 				class: Drupal\aggregator\Entity\Feed
@@ -255,6 +260,7 @@ parametersSchema:
 			checkDeprecatedHooksInApiFiles: boolean()
 			checkCoreDeprecatedHooksInApiFiles: boolean()
 			checkContribDeprecatedHooksInApiFiles: boolean()
+			containerHasAlwaysTrue: boolean()
 		])
 		extensions: structure([
 			entityFieldsViaMagicReflection: boolean()
@@ -271,6 +277,10 @@ parametersSchema:
 			pluginManagerInspectionRule: boolean()
 			cacheableDependencyRule: boolean()
 			hookRules: boolean()
+			loggerFromFactoryPropertyAssignmentRule: boolean()
+			entityStorageDirectInjectionRule: boolean()
+			symfonyYamlParseRule: boolean()
+			entityOperationsCacheabilityRule: boolean()
 		])
 		entityMapping: arrayOf(anyOf(
 			structure([
@@ -291,6 +301,10 @@ services:
 		class: mglaman\PHPStanDrupal\Drupal\EntityDataRepository
 		arguments:
 			entityMapping: %drupal.entityMapping%
+	-
+		class: mglaman\PHPStanDrupal\Type\EntityTypeId\EntityTypeIdTypeNodeResolverExtension
+		tags:
+			- phpstan.phpDoc.typeNodeResolverExtension
 	-
 		class: mglaman\PHPStanDrupal\Type\EntityIdNarrowedByNew
 		tags: [phpstan.broker.dynamicMethodReturnTypeExtension]
@@ -313,6 +327,8 @@ services:
 	-
 		class: mglaman\PHPStanDrupal\Type\ContainerDynamicReturnTypeExtension
 		tags: [phpstan.broker.dynamicMethodReturnTypeExtension]
+		arguments:
+			containerHasAlwaysTrue: %drupal.bleedingEdge.containerHasAlwaysTrue%
 	-
 		class: mglaman\PHPStanDrupal\Type\DrupalClassResolverDynamicReturnTypeExtension
 		tags: [phpstan.broker.dynamicMethodReturnTypeExtension]

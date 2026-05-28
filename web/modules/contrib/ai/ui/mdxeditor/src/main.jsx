@@ -52,15 +52,28 @@ function initTextareaEditors() {
 
     const variables = mdxeditorSettings?.plugins?.typeaheadPlugin?.types || [];
 
+    const editorMethods = { current: null };
+
     createRoot(wrapper).render(
       <StrictMode>
         <Editor
           initialValue={initialValue}
           onChange={handleChange}
           variables={variables}
+          onRef={(ref) => { editorMethods.current = ref; }}
         />
       </StrictMode>,
     );
+
+    textarea.addEventListener("drupal:mdx-fill", function (event) {
+      const content = event?.detail?.content;
+      if (editorMethods.current && typeof content === "string") {
+        editorMethods.current.setMarkdown(content);
+        textarea.value = content;
+        textarea.dispatchEvent(new Event("input", { bubbles: true }));
+        textarea.dispatchEvent(new Event("change", { bubbles: true }));
+      }
+    });   
   });
 }
 if (document.readyState === "loading") {

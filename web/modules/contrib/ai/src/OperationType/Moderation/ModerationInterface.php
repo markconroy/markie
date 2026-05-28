@@ -12,6 +12,7 @@ use Drupal\ai\OperationType\OperationTypeInterface;
 #[OperationType(
   id: 'moderation',
   label: new TranslatableMarkup('Moderation'),
+  description: new TranslatableMarkup('Detect and filter harmful or inappropriate content in text or images.')
 )]
 interface ModerationInterface extends OperationTypeInterface {
 

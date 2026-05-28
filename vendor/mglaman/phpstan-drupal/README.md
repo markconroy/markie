@@ -97,6 +97,44 @@ See the `extension-installer` documentation for more information: https://github
 
 ### Customizing rules
 
+#### Opt-in rules
+
+These rules are disabled by default to avoid unexpected failures in a patch release. They graduate to the default ruleset in a future minor version. Include [bleedingEdge.neon](#bleeding-edge-checks) to enable all of them at once, or enable them individually:
+
+```neon
+parameters:
+    drupal:
+        rules:
+            # Enforces that OOP hook implementations using the Hook attribute have the
+            # correct method signature for hook_form_alter, hook_form_FORM_ID_alter, etc.
+            # Requires Drupal 10.3+ (Hook attribute).
+            hookRules: true
+
+            # Flags non-abstract test classes whose names do not end with "Test".
+            testClassSuffixNameRule: true
+
+            # Flags properties that are private or read-only in classes using
+            # DependencySerializationTrait, which does not support them.
+            dependencySerializationTraitPropertyRule: true
+
+            # Flags calls to AccessResult static methods (::allowed(), ::forbidden(), etc.)
+            # whose argument type already makes the condition always true or always false.
+            accessResultConditionRule: true
+
+            # Flags addCacheableDependency() calls whose argument does not implement
+            # CacheableDependencyInterface.
+            cacheableDependencyRule: true
+
+            # Flags logger channel objects (from LoggerChannelFactoryInterface::get()) that
+            # are assigned to a property in a class using DependencySerializationTrait,
+            # which cannot serialize logger channels correctly.
+            loggerFromFactoryPropertyAssignmentRule: true
+
+            # Flags direct injection of EntityStorageInterface (or a subtype) into a
+            # constructor. Inject EntityTypeManagerInterface and call getStorage() instead.
+            entityStorageDirectInjectionRule: true
+```
+
 #### Disabling checks for extending `@internal` classes
 
 You can disable the `ClassExtendsInternalClassRule` rule by adding the following to your `phpstan.neon`:
@@ -124,6 +162,31 @@ parameters:
 ```
 
 Both options are enabled by default.
+
+#### Bleeding-edge checks
+
+`bleedingEdge.neon` enables all [opt-in rules](#opt-in-rules) plus hook deprecation checks against `.api.php` files. New rules land here first before graduating to the default ruleset in a minor release.
+
+```neon
+includes:
+    - vendor/mglaman/phpstan-drupal/bleedingEdge.neon
+```
+
+What it currently enables:
+
+- `checkCoreDeprecatedHooksInApiFiles` — reports hook implementations deprecated in Drupal core `.api.php` files
+- `checkContribDeprecatedHooksInApiFiles` — reports hook implementations deprecated in contrib module `.api.php` files
+- `hookRules` — validates OOP hook method signatures (requires Drupal 10.3+)
+- `testClassSuffixNameRule` — non-abstract test class names must end with `Test`
+- `dependencySerializationTraitPropertyRule` — flags private or read-only properties in classes using `DependencySerializationTrait`
+- `accessResultConditionRule` — flags always-true/always-false `AccessResult` conditions
+- `cacheableDependencyRule` — flags `addCacheableDependency()` calls with non-cacheable arguments
+- `loggerFromFactoryPropertyAssignmentRule` — flags logger channels assigned to properties in classes using `DependencySerializationTrait`
+- `entityStorageDirectInjectionRule` — flags direct injection of entity storage into a constructor; inject `EntityTypeManagerInterface` and call `getStorage()` instead
+- `containerHasAlwaysTrue: false` — `ContainerInterface::has()` returns `bool` instead of always-`true` for known services, preventing false positives that may cause developers to remove legitimate conditional service guards
+
+> [!NOTE]
+> `checkDeprecatedHooksInApiFiles` is deprecated. Use `checkCoreDeprecatedHooksInApiFiles` and `checkContribDeprecatedHooksInApiFiles` instead.
 
 #### Detecting @todo comments referencing the current Drupal.org issue (contrib CI)
 
@@ -155,6 +218,50 @@ rules:
 > rules is not supported directly through the template variables.
 
 Both `drupal.org/i/{nid}` and `drupal.org/project/{project}/issues/{nid}` URL formats are recognized.
+
+### Custom PHPDoc types
+
+phpstan-drupal provides custom PHPDoc types that can be used to improve type safety in Drupal code.
+
+#### `entity-type-id`
+
+The `entity-type-id` type represents a valid Drupal entity type ID string (e.g. `'node'`, `'user'`, `'taxonomy_term'`). PHPStan will report an error when a constant string that is not a known entity type ID is passed where `entity-type-id` is expected.
+
+Drupal coding standards require keeping PHPStan-specific types in `@phpstan-param` and `@phpstan-return` tags rather than in the standard `@param` and `@return` tags:
+
+```php
+/**
+ * Loads an entity by its entity type ID and entity ID.
+ *
+ * @param string $entityTypeId
+ *   The entity type ID.
+ * @param int|string $id
+ *   The entity ID.
+ *
+ * @phpstan-param entity-type-id $entityTypeId
+ */
+public function loadEntity(string $entityTypeId, int|string $id): ?EntityInterface {
+    return $this->entityTypeManager->getStorage($entityTypeId)->load($id);
+}
+```
+
+For return types:
+
+```php
+/**
+ * Returns the entity type ID.
+ *
+ * @return string
+ *   The entity type ID.
+ *
+ * @phpstan-return entity-type-id
+ */
+public function getEntityTypeId(): string {
+    return $this->entityTypeId;
+}
+```
+
+Known entity type IDs are sourced from the `drupal.entityMapping` parameter. See [Entity storage mappings](#entity-storage-mappings) for how to register custom entity types so their IDs are also recognized.
 
 ### Entity storage mappings.
 

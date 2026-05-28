@@ -32,9 +32,9 @@ For all of the tests, the following steps are true:
 
 #### System Prompt Test
 1. On the left side, click on the details "System Prompt".
-2. Enter a system prompt like `You are a helpful assistant that always responds in a haiku.`
+2. Enter a system prompt like `Always mention banana at least once.`
 3. Now enter a user message like `Tell me about the weather today.`
-4. The response should be in [haiku](https://en.wikipedia.org/wiki/Haiku) format. If not, check the logs for errors and debug as necessary.
+4. The response must contain the word `banana` at least once. If not, check the logs for errors and debug as necessary.
 
 #### Streaming Chat Test
 1. On the left side, check the box for `Streamed`.
@@ -50,6 +50,9 @@ For all of the tests, the following steps are true:
 4. The response should describe the image you uploaded. If not, check the logs for errors and debug as necessary.
 
 #### Structured Data Chat Test
+
+**Note**: If you fetched via Git or you are testing against a dev release, you need to build the JSON Schema Editor to be able to run this test. If you see a plain textarea, you can assume it was not built. You can find more information about building it here: [Why is the built editor not included?](./json-schema-editor.md#why-is-the-built-editor-not-included)
+
 1. On the left side, click the box `Advanced` and then the box `JSON Schema/Structured Output`.
 2. Enter the following structured output format into the `JSON Schema/Structured Output` field:
 

@@ -328,6 +328,178 @@ class AiAutomatorEntityModifierDecisionTest extends UnitTestCase {
   }
 
   /**
+   * Tests token mode runs when edit mode is enabled and base field changed.
+   */
+  public function testTokenModeEditModeRunsWhenBaseFieldChanges() {
+    $eventDispatcher = new EventDispatcher();
+
+    $fieldRules = $this->createMock(AiFieldRules::class);
+    $rule = $this->createMock(AiAutomatorTypeInterface::class);
+    $rule->expects($this->once())
+      ->method('checkIfEmpty')
+      ->willReturn([['value' => 'already filled']]);
+    $fieldRules->expects($this->once())
+      ->method('findRule')
+      ->with('rule_id')
+      ->willReturn($rule);
+
+    $modifier = $this->createModifier($fieldRules, $eventDispatcher);
+
+    $fieldDefinition = $this->createMock(FieldDefinitionInterface::class);
+    $entity = $this->createBaseModeEntity(
+      [['value' => 'already filled']],
+      [['value' => 'new base text']],
+      [['value' => 'old base text']]
+    );
+
+    $processor = $this->createMock(AiAutomatorFieldProcessInterface::class);
+    $processor->expects($this->once())
+      ->method('modify')
+      ->willReturn(TRUE);
+
+    $result = $modifier->callMarkFieldForProcessing(
+      $entity,
+      $fieldDefinition,
+      [
+        'mode' => 'token',
+        'edit_mode' => TRUE,
+        'rule' => 'rule_id',
+        'field_name' => 'field_target',
+        'base_field' => 'field_source',
+      ],
+      $processor
+    );
+
+    $this->assertTrue($result);
+  }
+
+  /**
+   * Tests token mode skips when edit mode is enabled but base field unchanged.
+   */
+  public function testTokenModeEditModeSkipsWhenBaseFieldUnchanged() {
+    $eventDispatcher = new EventDispatcher();
+
+    $fieldRules = $this->createMock(AiFieldRules::class);
+    $rule = $this->createMock(AiAutomatorTypeInterface::class);
+    $rule->expects($this->once())
+      ->method('checkIfEmpty')
+      ->willReturn([['value' => 'already filled']]);
+    $fieldRules->expects($this->once())
+      ->method('findRule')
+      ->with('rule_id')
+      ->willReturn($rule);
+
+    $modifier = $this->createModifier($fieldRules, $eventDispatcher);
+
+    $fieldDefinition = $this->createMock(FieldDefinitionInterface::class);
+    $entity = $this->createBaseModeEntity(
+      [['value' => 'already filled']],
+      [['value' => 'same base text']],
+      [['value' => 'same base text']]
+    );
+
+    $processor = $this->createMock(AiAutomatorFieldProcessInterface::class);
+    $processor->expects($this->never())
+      ->method('modify');
+
+    $result = $modifier->callMarkFieldForProcessing(
+      $entity,
+      $fieldDefinition,
+      [
+        'mode' => 'token',
+        'edit_mode' => TRUE,
+        'rule' => 'rule_id',
+        'field_name' => 'field_target',
+        'base_field' => 'field_source',
+      ],
+      $processor
+    );
+
+    $this->assertFalse($result);
+  }
+
+  /**
+   * Tests token mode runs when edit mode is enabled but no base field set.
+   */
+  public function testTokenModeEditModeRunsWhenNoBaseField() {
+    $eventDispatcher = new EventDispatcher();
+
+    $fieldRules = $this->createMock(AiFieldRules::class);
+    $rule = $this->createMock(AiAutomatorTypeInterface::class);
+    $rule->expects($this->once())
+      ->method('checkIfEmpty')
+      ->willReturn([['value' => 'already filled']]);
+    $fieldRules->expects($this->once())
+      ->method('findRule')
+      ->with('rule_id')
+      ->willReturn($rule);
+
+    $modifier = $this->createModifier($fieldRules, $eventDispatcher);
+
+    $fieldDefinition = $this->createMock(FieldDefinitionInterface::class);
+    $entity = $this->createEntityWithFieldValue([['value' => 'already filled']]);
+
+    $processor = $this->createMock(AiAutomatorFieldProcessInterface::class);
+    $processor->expects($this->once())
+      ->method('modify')
+      ->willReturn(TRUE);
+
+    $result = $modifier->callMarkFieldForProcessing(
+      $entity,
+      $fieldDefinition,
+      [
+        'mode' => 'token',
+        'edit_mode' => TRUE,
+        'rule' => 'rule_id',
+        'field_name' => 'field_target',
+      ],
+      $processor
+    );
+
+    $this->assertTrue($result);
+  }
+
+  /**
+   * Tests token mode skips when edit mode is disabled and field has value.
+   */
+  public function testTokenModeSkipsWhenEditModeDisabled() {
+    $eventDispatcher = new EventDispatcher();
+
+    $fieldRules = $this->createMock(AiFieldRules::class);
+    $rule = $this->createMock(AiAutomatorTypeInterface::class);
+    $rule->expects($this->once())
+      ->method('checkIfEmpty')
+      ->willReturn([['value' => 'already filled']]);
+    $fieldRules->expects($this->once())
+      ->method('findRule')
+      ->with('rule_id')
+      ->willReturn($rule);
+
+    $modifier = $this->createModifier($fieldRules, $eventDispatcher);
+
+    $fieldDefinition = $this->createMock(FieldDefinitionInterface::class);
+    $entity = $this->createEntityWithFieldValue([['value' => 'already filled']]);
+
+    $processor = $this->createMock(AiAutomatorFieldProcessInterface::class);
+    $processor->expects($this->never())
+      ->method('modify');
+
+    $result = $modifier->callMarkFieldForProcessing(
+      $entity,
+      $fieldDefinition,
+      [
+        'mode' => 'token',
+        'edit_mode' => FALSE,
+        'rule' => 'rule_id',
+        'field_name' => 'field_target',
+      ],
+      $processor
+    );
+
+    $this->assertFalse($result);
+  }
+
+  /**
    * Creates a modifier with mocked dependencies and a real event dispatcher.
    *
    * @param \Drupal\ai_automators\AiFieldRules $fieldRules

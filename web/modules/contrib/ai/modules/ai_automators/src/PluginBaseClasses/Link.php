@@ -3,6 +3,7 @@
 namespace Drupal\ai_automators\PluginBaseClasses;
 
 use Drupal\ai\AiProviderPluginManager;
+use Drupal\ai\Guardrail\AiGuardrailHelper;
 use Drupal\ai\Service\AiProviderFormHelper;
 use Drupal\ai\Service\HostnameFilter;
 use Drupal\ai\Service\PromptJsonDecoder\PromptJsonDecoderInterface;
@@ -24,6 +25,8 @@ class Link extends RuleBase {
    *   The form helper.
    * @param \Drupal\ai\Service\PromptJsonDecoder\PromptJsonDecoderInterface $promptJsonDecoder
    *   The prompt json decoder.
+   * @param \Drupal\ai\Guardrail\AiGuardrailHelper $aiGuardrailHelper
+   *   The AI guardrail helper.
    * @param \Drupal\ai\Service\HostnameFilter $hostnameFilter
    *   The hostname filter.
    */
@@ -31,9 +34,10 @@ class Link extends RuleBase {
     AiProviderPluginManager $pluginManager,
     AiProviderFormHelper $formHelper,
     PromptJsonDecoderInterface $promptJsonDecoder,
+    AiGuardrailHelper $aiGuardrailHelper,
     protected HostnameFilter $hostnameFilter,
   ) {
-    parent::__construct($pluginManager, $formHelper, $promptJsonDecoder);
+    parent::__construct($pluginManager, $formHelper, $promptJsonDecoder, $aiGuardrailHelper);
   }
 
   /**
@@ -44,6 +48,7 @@ class Link extends RuleBase {
       $container->get('ai.provider'),
       $container->get('ai.form_helper'),
       $container->get('ai.prompt_json_decode'),
+      $container->get('ai.guardrail_helper'),
       $container->get('ai.hostname_filter_service'),
     );
   }

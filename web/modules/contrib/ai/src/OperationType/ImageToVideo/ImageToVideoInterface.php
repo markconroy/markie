@@ -12,6 +12,7 @@ use Drupal\ai\OperationType\OperationTypeInterface;
 #[OperationType(
   id: 'image_to_video',
   label: new TranslatableMarkup('Image to Video'),
+  description: new TranslatableMarkup('Animate a still image to produce a short video with movement or effects.')
 )]
 interface ImageToVideoInterface extends OperationTypeInterface {
 

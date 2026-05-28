@@ -69,8 +69,10 @@ class Chart extends RuleBase implements AiAutomatorTypeInterface {
       $input = new ChatInput([
         new ChatMessage("user", $prompt),
       ]);
+      $input = $this->applyGuardrailsToInput($input, $automatorConfig);
 
       $response = $instance->chat($input, $automatorConfig['ai_model'])->getNormalized();
+      $this->assertNotStoppedByGuardrail($input);
       // Normalize the response.
       $values = [str_replace(['```csv', '```'], '', $response->getText())];
       $total = array_merge_recursive($total, $values);

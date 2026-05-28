@@ -11,6 +11,7 @@ use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\ai\AiProviderPluginManager;
+use Drupal\ai\Guardrail\AiGuardrailHelper;
 use Drupal\ai\OperationType\TextToSpeech\TextToSpeechInput;
 use Drupal\ai\Service\AiProviderFormHelper;
 use Drupal\ai\Service\PromptJsonDecoder\PromptJsonDecoderInterface;
@@ -81,6 +82,8 @@ class TextToMediaSpeech extends RuleBase implements ContainerFactoryPluginInterf
    *   The form helper.
    * @param \Drupal\ai\Service\PromptJsonDecoder\PromptJsonDecoderInterface $promptJsonDecoder
    *   The prompt json decoder.
+   * @param \Drupal\ai\Guardrail\AiGuardrailHelper $aiGuardrailHelper
+   *   The AI guardrail helper.
    * @param \Drupal\Core\Entity\EntityTypeBundleInfo $entityTypeBundleInfo
    *   The entity type bundle info.
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
@@ -96,13 +99,14 @@ class TextToMediaSpeech extends RuleBase implements ContainerFactoryPluginInterf
     AiProviderPluginManager $pluginManager,
     AiProviderFormHelper $formHelper,
     PromptJsonDecoderInterface $promptJsonDecoder,
+    AiGuardrailHelper $aiGuardrailHelper,
     EntityTypeBundleInfo $entityTypeBundleInfo,
     EntityTypeManagerInterface $entityTypeManager,
     EntityFieldManagerInterface $fieldManager,
     AiPromptHelper $aiPromptHelper,
     ModuleHandlerInterface $moduleHandler,
   ) {
-    parent::__construct($pluginManager, $formHelper, $promptJsonDecoder);
+    parent::__construct($pluginManager, $formHelper, $promptJsonDecoder, $aiGuardrailHelper);
     $this->entityTypeBundleInfo = $entityTypeBundleInfo;
     $this->entityTypeManager = $entityTypeManager;
     $this->fieldManager = $fieldManager;
@@ -118,6 +122,7 @@ class TextToMediaSpeech extends RuleBase implements ContainerFactoryPluginInterf
       $container->get('ai.provider'),
       $container->get('ai.form_helper'),
       $container->get('ai.prompt_json_decode'),
+      $container->get('ai.guardrail_helper'),
       $container->get('entity_type.bundle.info'),
       $container->get('entity_type.manager'),
       $container->get('entity_field.manager'),

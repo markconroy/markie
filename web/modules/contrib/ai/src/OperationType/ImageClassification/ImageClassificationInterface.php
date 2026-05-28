@@ -12,6 +12,7 @@ use Drupal\ai\OperationType\OperationTypeInterface;
 #[OperationType(
   id: 'image_classification',
   label: new TranslatableMarkup('Image Classification'),
+  description: new TranslatableMarkup('Automatically identify and categorize image content. Useful for tagging media libraries or organizing uploads.')
 )]
 interface ImageClassificationInterface extends OperationTypeInterface {
 

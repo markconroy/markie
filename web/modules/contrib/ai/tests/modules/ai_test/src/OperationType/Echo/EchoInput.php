@@ -2,15 +2,12 @@
 
 namespace Drupal\ai_test\OperationType\Echo;
 
-use Drupal\ai\Entity\AiGuardrailModeEnum;
-use Drupal\ai\Guardrail\AiGuardrailSetInterface;
-use Drupal\ai\Guardrail\Result\GuardrailResultInterface;
-use Drupal\ai\OperationType\InputInterface;
+use Drupal\ai\OperationType\InputBase;
 
 /**
  * Input object for echo operations.
  */
-class EchoInput implements InputInterface {
+class EchoInput extends InputBase {
 
   /**
    * The constructor.
@@ -25,54 +22,6 @@ class EchoInput implements InputInterface {
    */
   public function toString(): string {
     return $this->input;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getDebugData(): array {
-    return [];
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function setDebugData(array $debugData): void {
-    // Do nothing.
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function setDebugDataValue(string $key, $value): void {
-    // Do nothing.
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function setGuardrailSet(AiGuardrailSetInterface $guardrails): void {
-    // Do nothing.
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getGuardrailSet(): ?AiGuardrailSetInterface {
-    return NULL;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function addGuardrailResult(GuardrailResultInterface $guardrailResult, AiGuardrailModeEnum $mode): void {
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getGuardrailsResults(): array {
-    return [];
   }
 
   /**

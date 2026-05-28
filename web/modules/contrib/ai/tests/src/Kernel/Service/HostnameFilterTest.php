@@ -258,4 +258,111 @@ class HostnameFilterTest extends KernelTestBase {
     $this->assertStringNotContainsString($full_link, $collected);
   }
 
+  /**
+   * Tests getAllowedDomains returns empty array when config value is NULL.
+   *
+   * @covers ::getAllowedDomains
+   */
+  public function testGetAllowedDomainsWithNullConfig(): void {
+    $this->setRawConfigValue('allowed_hosts', NULL);
+    /** @var \Drupal\ai\Service\HostnameFilter $filter */
+    $filter = $this->container->get('ai.hostname_filter_service');
+    $this->assertSame([], $filter->getAllowedDomains());
+  }
+
+  /**
+   * Tests getAllowedDomains handles a bare empty string config value.
+   *
+   * This is the regression scenario from #3586397 where allowed_hosts
+   * is stored as '' instead of an empty array.
+   *
+   * @covers ::getAllowedDomains
+   */
+  public function testGetAllowedDomainsWithEmptyStringConfig(): void {
+    $this->setRawConfigValue('allowed_hosts', '');
+    /** @var \Drupal\ai\Service\HostnameFilter $filter */
+    $filter = $this->container->get('ai.hostname_filter_service');
+    $this->assertSame([], $filter->getAllowedDomains());
+  }
+
+  /**
+   * Tests getAllowedDomains filters out empty strings from config array.
+   *
+   * @covers ::getAllowedDomains
+   */
+  public function testGetAllowedDomainsWithEmptyStringsInArray(): void {
+    $this->config('ai.settings')->set('allowed_hosts', ['', '', ''])->save();
+    /** @var \Drupal\ai\Service\HostnameFilter $filter */
+    $filter = $this->container->get('ai.hostname_filter_service');
+    $this->assertSame([], $filter->getAllowedDomains());
+  }
+
+  /**
+   * Tests getAllowedDomains filters out whitespace-only strings.
+   *
+   * @covers ::getAllowedDomains
+   */
+  public function testGetAllowedDomainsWithWhitespaceOnlyStrings(): void {
+    $this->config('ai.settings')->set('allowed_hosts', ['  ', "\t", "\n"])->save();
+    /** @var \Drupal\ai\Service\HostnameFilter $filter */
+    $filter = $this->container->get('ai.hostname_filter_service');
+    $this->assertSame([], $filter->getAllowedDomains());
+  }
+
+  /**
+   * Tests getAllowedDomains normalizes mixed valid and invalid entries.
+   *
+   * @covers ::getAllowedDomains
+   */
+  public function testGetAllowedDomainsWithMixedValues(): void {
+    $this->config('ai.settings')->set('allowed_hosts', [
+      'example.com',
+      '',
+      '  cdn.example.com  ',
+      '   ',
+      '*.test.org',
+    ])->save();
+    /** @var \Drupal\ai\Service\HostnameFilter $filter */
+    $filter = $this->container->get('ai.hostname_filter_service');
+    $this->assertSame([
+      'example.com',
+      'cdn.example.com',
+      '*.test.org',
+    ], $filter->getAllowedDomains());
+  }
+
+  /**
+   * Tests getAllowedDomains handles a non-empty string config value.
+   *
+   * @covers ::getAllowedDomains
+   */
+  public function testGetAllowedDomainsWithNonEmptyStringConfig(): void {
+    $this->setRawConfigValue('allowed_hosts', 'example.com');
+    /** @var \Drupal\ai\Service\HostnameFilter $filter */
+    $filter = $this->container->get('ai.hostname_filter_service');
+    $this->assertSame(['example.com'], $filter->getAllowedDomains());
+  }
+
+  /**
+   * Writes a raw config value bypassing schema validation.
+   *
+   * This simulates malformed config that arrives via config import, drush,
+   * or direct YAML editing, which bypasses the schema checker.
+   *
+   * @param string $key
+   *   The config key within ai.settings.
+   * @param mixed $value
+   *   The raw value to set.
+   */
+  protected function setRawConfigValue(string $key, mixed $value): void {
+    /** @var \Drupal\Core\Config\StorageInterface $storage */
+    $storage = $this->container->get('config.storage');
+    $data = $storage->read('ai.settings');
+    $data[$key] = $value;
+    $storage->write('ai.settings', $data);
+
+    // Clear the static cache so the service reads the new value.
+    \Drupal::configFactory()->reset('ai.settings');
+  }
+
 }

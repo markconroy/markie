@@ -8,13 +8,13 @@ use Drupal\Component\Plugin\Attribute\AttributeBase;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 
 /**
- * The ai automator rules attribute.
+ * The AI API Explorer plugin attribute.
  */
 #[\Attribute(\Attribute::TARGET_CLASS)]
 final class AiApiExplorer extends AttributeBase {
 
   /**
-   * Constructs a new AiAutomatorProcessRule instance.
+   * Constructs a new AiApiExplorer instance.
    *
    * @param string $id
    *   The plugin ID. There are some implementation bugs that make the plugin
