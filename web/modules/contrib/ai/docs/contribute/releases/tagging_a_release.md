@@ -4,7 +4,7 @@ This document outlines the steps the Preparation Manager needs to take to tag a 
 All releases should be ready by 11:00 UTC on the release day to allow time for verification and publishing. For critical patch releases that happen outside of the normal schedule, the tagging should be done as soon as possible and communicated to the Publishing Manager.
 
 ## Preparation
-1. If a [Drupal.org `release` issue](https://www.drupal.org/project/issues/search?text=&projects=AI+%28Artificial+Intelligence%29&assigned=&submitted=&project_issue_followers=&status%5B%5D=Open&issue_tags_op=%3D&issue_tags=release) doesn't exist, [create it](https://www.drupal.org/node/add/project-issue/ai?title=Release x.y.z):
+1. If a [Drupal.org `release` issue](https://git.drupalcode.org/project/ai/-/work_items?sort=updated_desc&state=opened&label_name%5B%5D=release&first_page_size=100) doesn't exist, [create it](https://git.drupalcode.org/project/ai/-/work_items/new?initialCreationContext=list-route&type=ISSUE):
     - Title: `Release x.y.z and x.y.z`
 	- Category: Task
     - Description: Facilitating the release.

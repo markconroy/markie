@@ -41,3 +41,11 @@ ai_test.provider_config_target:
     _form: 'Drupal\ai_test\Form\AiProviderConfigurationConfigTargetForm'
   requirements:
     _permission: 'administer ai'
+
+ai_test.ai_prompt_element_nesting:
+  path: '/admin/config/ai/test-ai-prompt-element-nesting'
+  defaults:
+    _title: 'AI Prompt Element Nesting Test'
+    _form: 'Drupal\ai_test\Form\AiPromptElementNestingTestForm'
+  requirements:
+    _permission: 'administer ai'

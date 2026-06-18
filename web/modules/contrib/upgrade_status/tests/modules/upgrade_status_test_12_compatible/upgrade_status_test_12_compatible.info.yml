@@ -4,7 +4,7 @@ description: 'Support module for upgrade status module testing.'
 package: Testing
 core_version_requirement: ^9 || ^10 || ^11 || ^12
 
-# Information added by Drupal.org packaging script on 2026-02-23
-version: '4.3.9'
+# Information added by Drupal.org packaging script on 2026-06-08
+version: '4.3.10'
 project: 'upgrade_status'
-datestamp: 1771841609
+datestamp: 1780927636

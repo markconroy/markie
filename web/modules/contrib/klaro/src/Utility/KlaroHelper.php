@@ -18,6 +18,7 @@ use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\Theme\ThemeManager;
 use Drupal\Core\Url;
+use Drupal\Core\Utility\Error;
 use Drupal\klaro\Entity\KlaroApp;
 use Drupal\klaro\KlaroAppInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -673,7 +674,25 @@ class KlaroHelper {
     // Check if there are unknown external resources.
     if (!$found_klaro_app && ($settings->get('block_unknown') || $settings->get('log_unknown_resources'))) {
       if (UrlHelper::isExternal($str)) {
-        $external_is_local = UrlHelper::externalIsLocal($str, $this->request->getSchemeAndHttpHost());
+        try {
+          $external_is_local = UrlHelper::externalIsLocal($str, $this->request->getSchemeAndHttpHost());
+        }
+        catch (\InvalidArgumentException $e) {
+          // Log this event always.
+          Error::logException(
+            $this->logger->get('klaro'),
+            $e,
+            "Found URL %url could not be assessed. %type: @message in %function (line %line of %file).",
+            ['%url' => $str]
+          );
+
+          // Block based on the setting.
+          if ($settings->get('block_unknown')) {
+            $found_klaro_app = $klaro_apps['unknown_app'];
+          }
+          // Bypass the rest of the function.
+          $external_is_local = TRUE;
+        }
         if (!$external_is_local) {
           if ($settings->get('block_unknown')) {
             $found_klaro_app = $klaro_apps['unknown_app'];

@@ -17,6 +17,7 @@ Kellermann
 kellermann
 Kipke
 klarohq
+laro
 Livechat
 livechat
 localstorage

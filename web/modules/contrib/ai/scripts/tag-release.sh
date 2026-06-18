@@ -90,6 +90,8 @@ git add -f \
   ui/default-tools-editor/package.json \
   ui/default-tools-editor/package-lock.json \
   ui/default-tools-editor/dist \
+  ui/json-schema-editor/package.json \
+  ui/json-schema-editor/package-lock.json \
   ui/json-schema-editor/dist
 
 git commit -q -m "Drupal AI $TAG"

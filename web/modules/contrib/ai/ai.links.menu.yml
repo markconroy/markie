@@ -83,6 +83,13 @@ entity.ai_prompt_type.collection:
   route_name: entity.ai_prompt_type.collection
   parent: entity.ai_prompt.collection
 
+entity.ai_file.collection:
+  title: 'AI Files'
+  description: 'Manage AI Files uploaded to remote AI providers.'
+  route_name: entity.ai_file.collection
+  parent: ai.admin_config_infrastructure
+  weight: 15
+
 ai.external_moderation_settings:
   title: 'AI External Moderation'
   description: 'Configure moderation models from one provider before chat models from another provider.'

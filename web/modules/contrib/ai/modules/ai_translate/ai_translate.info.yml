@@ -10,7 +10,7 @@ dependencies:
 lifecycle: deprecated
 lifecycle_link: https://www.drupal.org/node/3570275
 
-# Information added by Drupal.org packaging script on 2026-05-26
-version: '1.4.0'
+# Information added by Drupal.org packaging script on 2026-06-10
+version: '1.4.2'
 project: 'ai'
-datestamp: 1779804964
+datestamp: 1781100871

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\ai\Plugin\AiGuardrail;
 
+use Drupal\ai\Attribute\AiGuardrail;
 use Drupal\ai\Guardrail\AiGuardrailPluginBase;
 use Drupal\ai\Guardrail\NeedsAiPluginManagerTrait;
 use Drupal\ai\Guardrail\NonDeterministicGuardrailInterface;
@@ -16,6 +17,7 @@ use Drupal\ai\OperationType\Chat\ChatMessage;
 use Drupal\ai\OperationType\InputInterface;
 use Drupal\ai\OperationType\OutputInterface;
 use Drupal\ai\Service\AiProviderFormHelper;
+use Drupal\ai\Service\PromptJsonDecoder\PromptJsonDecoderInterface;
 use Drupal\ai\Utility\CastUtility;
 use Drupal\ai\Utility\Textarea;
 use Drupal\Component\Plugin\ConfigurableInterface;
@@ -24,7 +26,6 @@ use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Plugin\PluginFormInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
-use Drupal\ai\Attribute\AiGuardrail;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -42,17 +43,12 @@ final class RestrictToTopic extends AiGuardrailPluginBase implements Configurabl
   use NeedsAiPluginManagerTrait;
   use StringTranslationTrait;
 
-  /**
-   * The AI provider form helper service.
-   *
-   * @var \Drupal\ai\Service\AiProviderFormHelper
-   */
-  private AiProviderFormHelper $aiProviderFormHelper;
-
   public function __construct(
     array $configuration,
     $plugin_id,
     $plugin_definition,
+    private readonly AiProviderFormHelper $aiProviderFormHelper,
+    private readonly PromptJsonDecoderInterface $promptJsonDecoder,
   ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
 
@@ -63,18 +59,13 @@ final class RestrictToTopic extends AiGuardrailPluginBase implements Configurabl
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition): self {
-    $instance = new RestrictToTopic(
+    return new self(
       $configuration,
       $plugin_id,
       $plugin_definition,
+      $container->get('ai.form_helper'),
+      $container->get('ai.prompt_json_decode'),
     );
-
-    $ai_provider_form_helper = $container->get('ai.form_helper');
-    if ($ai_provider_form_helper instanceof AiProviderFormHelper) {
-      $instance->aiProviderFormHelper = $ai_provider_form_helper;
-    }
-
-    return $instance;
   }
 
   /**
@@ -250,17 +241,25 @@ final class RestrictToTopic extends AiGuardrailPluginBase implements Configurabl
     $all_topics_formatted = implode(',', $all_topics);
 
     $prompt = <<<PROMPT
-Given a text and a list of topics, return a valid json list of which topics are present in the text. If none, just return an empty list. Don't format the output in any other way, just return the json list.
+Given a text and a list of topics, return a valid json list of which topics are present in the text. If none, just return an empty list. Don't format the output in any other way, just return the list as JSON inside a ```json code block.
 
-Output Format:
+Output example when not finding anything:
 -------------
-"topics_present": []
+```json
+{"topics_present": []}
+```
+
+Output example when finding something relevant:
+--------------
+```json
+{"topics_present": ["topic_4", "topic_6"]}
+```
 
 Text:
 ----
 "$text"
 
-Topics:
+Relevant Topics you can pick from:
 ------
 $all_topics_formatted
 
@@ -293,10 +292,13 @@ PROMPT;
     $response = $ai_provider
       ->chat($input, $model, ['ai'])
       ->getNormalized();
-    $response_decoded = json_decode($response->getText());
+    $response_decoded = $this->promptJsonDecoder->decode($response);
+    if (!is_array($response_decoded)) {
+      return new StopResult('Could not decode the AI response as JSON.', $this);
+    }
     $topics_present = array_map(
       'mb_strtolower',
-      $response_decoded->topics_present ?? []
+      $response_decoded['topics_present'] ?? []
     );
 
     $invalid_topics_found = [];

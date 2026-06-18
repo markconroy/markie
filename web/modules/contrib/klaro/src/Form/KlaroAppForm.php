@@ -116,7 +116,7 @@ class KlaroAppForm extends EntityForm {
     $form['general']['default'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Toggled by default', [], ['context' => 'klaro']),
-      '#description' => $this->t('The default state of this Klaro! service. If checked, the service is pre-enabled on the <em>consent dialog modal</em>.', [], ['context' => 'klaro']),
+      '#description' => $this->t('The default state of this Klaro! service. If checked, the service is pre-enabled on the <em>consent dialog modal</em>. If <em>silent mode</em> is enabled, this app will be loaded before consent is given.', [], ['context' => 'klaro']),
       '#default_value' => $app->isDefault(),
     ];
 
@@ -130,7 +130,7 @@ class KlaroAppForm extends EntityForm {
     $form['general']['opt_out'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Opt out', [], ['context' => 'klaro']),
-      '#description' => $this->t('Already load this Klaro! service, even before the user gives explicit consent.', [], ['context' => 'klaro']),
+      '#description' => $this->t('Already load this Klaro! service, even before the user gives explicit consent. The service must be "Toggled by default" to take effect.', [], ['context' => 'klaro']),
       '#default_value' => $app->isOptOut(),
     ];
 

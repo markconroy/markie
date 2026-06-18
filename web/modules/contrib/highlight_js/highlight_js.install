@@ -25,3 +25,34 @@ function highlight_js_update_11001(&$sandbox) {
   // as it depends on the config.
   $config->save();
 }
+
+/**
+ * Adjust language names.
+ */
+function highlight_js_update_11002(&$sandbox) {
+  $config = \Drupal::configFactory()->getEditable('highlight_js.settings');
+  $languages = $config->get('languages') ?? [];
+  if (empty($languages)) {
+    return;
+  }
+  $migrate = [
+    'sap-abap, abap' => 'abap',
+    'ballerina, bal' => 'ballerina',
+    'bash, sh, zsh' => 'bash',
+    'stan, stanfuncs' => 'stan',
+    'tcl, tk' => 'tcl',
+  ];
+  foreach ($languages as $language => $enabled) {
+    if (isset($migrate[$language])) {
+      $canonical = $migrate[$language];
+      // Preserve an already-correct canonical key if present, e.g. from a
+      // partial prior migration.
+      if (!isset($languages[$canonical])) {
+        $languages[$canonical] = $enabled;
+      }
+      unset($languages[$language]);
+    }
+  }
+  $config->set('languages', $languages);
+  $config->save();
+}

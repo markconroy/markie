@@ -103,11 +103,13 @@ endverbatim
 erging
 etcdctl
 Euser
+evals
 Explainability
 Falconsai
 faqfield
 ffprobe
 Finegrained
+finetune
 Fireworksai
 flac
 flesch
@@ -242,6 +244,7 @@ reranking
 retag
 rhristov
 robloach
+roleplay
 rppp
 RTBC
 Rulehelpers
@@ -359,3 +362,5 @@ hotlinking
 pymdownx.superfences
 python/name:pymdownx.superfences.fence_code_format
 drupalcode
+nondet
+interactable

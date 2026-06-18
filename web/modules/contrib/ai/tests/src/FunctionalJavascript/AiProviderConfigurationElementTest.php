@@ -7,6 +7,7 @@ namespace Drupal\Tests\ai\FunctionalJavascript;
 use Drupal\ai\AiProviderInterface;
 use Drupal\Tests\ai\FunctionalJavascriptTests\BaseClassFunctionalJavascriptTests;
 use Drupal\user\UserInterface;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the AI Provider Configuration form element.
@@ -14,6 +15,7 @@ use Drupal\user\UserInterface;
  * @group ai
  * @group 3580935
  */
+#[RunTestsInSeparateProcesses]
 class AiProviderConfigurationElementTest extends BaseClassFunctionalJavascriptTests {
 
   /**
@@ -22,6 +24,7 @@ class AiProviderConfigurationElementTest extends BaseClassFunctionalJavascriptTe
   protected static $modules = [
     'ai',
     'ai_test',
+    'file',
     'user',
     'system',
   ];

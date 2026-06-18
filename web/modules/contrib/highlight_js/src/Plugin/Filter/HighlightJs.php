@@ -75,7 +75,7 @@ class HighlightJs extends FilterBase implements ContainerFactoryPluginInterface,
       $plugin_id,
       $plugin_definition,
       $container->get('renderer'),
-      $container->get('plugin.manager.ckedito5_highlight_js'),
+      $container->get('plugin.manager.ckeditor5_highlight_js'),
       $container->get('current_user'),
       $container->get('config.factory')
     );
@@ -124,6 +124,16 @@ class HighlightJs extends FilterBase implements ContainerFactoryPluginInterface,
             $source_code = json_decode(html_entity_decode($source_code));
             $text_content = htmlspecialchars($source_code->text ?? '');
             $language = $source_code->language ?? '';
+            $legacy_languages = [
+              'sap-abap, abap' => 'abap',
+              'ballerina, bal' => 'ballerina',
+              'bash, sh, zsh' => 'bash',
+              'stan, stanfuncs' => 'stan',
+              'tcl, tk' => 'tcl',
+            ];
+            if (isset($legacy_languages[$language])) {
+              $language = $legacy_languages[$language];
+            }
             $role_copy_access = $source_code->role_copy_access ?? [];
             $role_based_copy = FALSE;
             if (isset($source_code->role_based_copy)) {

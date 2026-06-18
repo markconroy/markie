@@ -96,3 +96,6 @@ services:
     parent: default_plugin_manager
     arguments: ['@container.namespaces', '@cache.discovery', '@module_handler']
   Drupal\ai\PluginManager\ChatProcessorPluginManager: '@plugin.manager.ai.chat_processor'
+  ai.file_manager:
+    class: Drupal\ai\Service\AiFileManager
+    autowire: true

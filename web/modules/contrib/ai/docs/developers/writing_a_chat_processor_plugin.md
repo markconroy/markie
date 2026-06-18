@@ -257,7 +257,7 @@ The `ChatProcessorPluginManager` uses PHP 8 attribute-based discovery to find pl
 - [Base Calls](base_calls.md) - Using AI operations
 - [Chat Operations](call_chat.md) - Working with chat operations
 - [Streaming Chat](call_chat_streaming.md) - Implementing streaming
-- [AI Chatbot Module](../modules/ai_chatbot) - Reference implementation
+- [AI Chatbot Module](https://git.drupalcode.org/project/ai/-/tree/1.x/modules/ai_chatbot) - Reference implementation
 
 
 **This document was generated with AI assistance.**

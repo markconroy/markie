@@ -33,6 +33,21 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 class GuardrailsEventSubscriber implements EventSubscriberInterface {
 
   /**
+   * Per-fiber nesting depth of NonDeterministicGuardrailInterface executions.
+   *
+   * Keyed by fiber identity (spl_object_id of the current Fiber, or 'main'
+   * for non-fiber context). Incremented before calling
+   * processInput()/processOutput() on any NonDeterministicGuardrailInterface
+   * guardrail and decremented in a finally block. When a fiber suspends
+   * mid-call (e.g. during streamed inner LLM responses), other fibers that
+   * resume must not inherit this fiber's depth — each fiber tracks its own
+   * counter independently. Deterministic guardrails are never affected.
+   *
+   * @var array<int|string, int>
+   */
+  private array $llmGuardrailDepth = [];
+
+  /**
    * Constructor.
    */
   public function __construct(
@@ -41,6 +56,21 @@ class GuardrailsEventSubscriber implements EventSubscriberInterface {
     protected readonly AiProviderPluginManager $aiProviderPluginManager,
     protected readonly ConfigFactoryInterface $configFactory,
   ) {}
+
+  /**
+   * Returns the depth-counter key for the currently executing fiber.
+   *
+   * Non-fiber code all shares the 'main' bucket. Each Fiber instance gets
+   * its own bucket so that a suspended fiber's depth does not bleed into
+   * a concurrently running fiber.
+   *
+   * @return int|string
+   *   spl_object_id of the current Fiber, or 'main'.
+   */
+  private function fiberKey(): int|string {
+    $fiber = \Fiber::getCurrent();
+    return $fiber !== NULL ? \spl_object_id($fiber) : 'main';
+  }
 
   /**
    * {@inheritdoc}
@@ -83,10 +113,28 @@ class GuardrailsEventSubscriber implements EventSubscriberInterface {
 
       foreach ($guardrail_set->getPreGenerateGuardrails() as $guardrail) {
         if ($guardrail instanceof NonDeterministicGuardrailInterface) {
+          // Skip if already inside an LLM-based guardrail's execution in
+          // this fiber. Each fiber tracks its own depth so that a suspended
+          // fiber's counter does not bleed into concurrently running fibers.
+          $key = $this->fiberKey();
+          if (($this->llmGuardrailDepth[$key] ?? 0) > 0) {
+            continue;
+          }
           $guardrail->setAiPluginManager($this->aiProviderPluginManager);
+          $this->llmGuardrailDepth[$key] = ($this->llmGuardrailDepth[$key] ?? 0) + 1;
+          try {
+            $result = $guardrail->processInput($input);
+          }
+          finally {
+            $this->llmGuardrailDepth[$key]--;
+            if ($this->llmGuardrailDepth[$key] === 0) {
+              unset($this->llmGuardrailDepth[$key]);
+            }
+          }
         }
-
-        $result = $guardrail->processInput($input);
+        else {
+          $result = $guardrail->processInput($input);
+        }
         $input->addGuardrailResult($result, AiGuardrailModeEnum::PreGenerate);
 
         if ($result instanceof PassResult) {
@@ -162,6 +210,12 @@ class GuardrailsEventSubscriber implements EventSubscriberInterface {
 
       foreach ($guardrail_set->getPostGenerateGuardrails() as $guardrail) {
         if ($guardrail instanceof NonDeterministicGuardrailInterface) {
+          // Skip if already inside an LLM-based guardrail's execution in
+          // this fiber. See applyPreGenerateGuardrails() for full explanation.
+          $key = $this->fiberKey();
+          if (($this->llmGuardrailDepth[$key] ?? 0) > 0) {
+            continue;
+          }
           $guardrail->setAiPluginManager($this->aiProviderPluginManager);
         }
 
@@ -181,7 +235,22 @@ class GuardrailsEventSubscriber implements EventSubscriberInterface {
           $output = $output->getNormalized()->reconstructChatOutput();
         }
 
-        $result = $guardrail->processOutput($output);
+        if ($guardrail instanceof NonDeterministicGuardrailInterface) {
+          $key = $this->fiberKey();
+          $this->llmGuardrailDepth[$key] = ($this->llmGuardrailDepth[$key] ?? 0) + 1;
+          try {
+            $result = $guardrail->processOutput($output);
+          }
+          finally {
+            $this->llmGuardrailDepth[$key]--;
+            if ($this->llmGuardrailDepth[$key] === 0) {
+              unset($this->llmGuardrailDepth[$key]);
+            }
+          }
+        }
+        else {
+          $result = $guardrail->processOutput($output);
+        }
         $input->addGuardrailResult($result, AiGuardrailModeEnum::PostGenerate);
 
         if ($result instanceof PassResult) {

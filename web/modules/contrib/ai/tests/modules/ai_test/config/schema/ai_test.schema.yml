@@ -34,3 +34,19 @@ ai.guardrail.settings.counting_stub_guardrail:
     score:
       type: float
       label: 'Stop result score'
+
+# Same shape as the deterministic variant; defined separately because guardrail
+# settings schemas key off the plugin id.
+ai.guardrail.settings.nondet_counting_stub_guardrail:
+  type: ai.guardrail.settings.counting_stub_guardrail
+  label: 'Non-Deterministic Counting Stub Guardrail settings'
+
+# Same shape; a separate id because the schema keys off the plugin id.
+ai.guardrail.settings.inner_chat_nondet_stub_guardrail:
+  type: ai.guardrail.settings.counting_stub_guardrail
+  label: 'Inner-Chat Non-Deterministic Stub Guardrail settings'
+
+# Same shape; used by the fiber isolation test.
+ai.guardrail.settings.fiber_suspending_nondet_stub_guardrail:
+  type: ai.guardrail.settings.counting_stub_guardrail
+  label: 'Fiber-Suspending Non-Deterministic Stub Guardrail settings'

@@ -11,6 +11,7 @@ The full list of providers available.
 | [Azure](https://www.drupal.org/project/ai_provider_azure) | ☑ | | ☑ | ☑ | ☑ | ☑ | ☑ | | | | | |
 | [Deepgram](https://www.drupal.org/project/deepgram) | | | | | | ☑ | ☑ |
 | [DeepL](https://www.drupal.org/project/ai_provider_deepl) | | | | | | | | | | ☑ |  |
+| [Elasticsearch](https://www.drupal.org/project/ai_vdb_provider_elasticsearch) | | ☑ |
 | [DreamStudio](https://www.drupal.org/project/ai_provider_dreamstudio) | | | | | ☑| | | | | | | ☑  |
 | [ElevenLabs](https://www.drupal.org/project/elevenlabs)  | | | | | | ☑ | | ☑ |
 | [Fireworks AI](https://www.drupal.org/project/fireworksai) | ☑ | | ☑ | | ☑ | | |

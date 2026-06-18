@@ -272,6 +272,199 @@ class GlobalGuardrailsTest extends KernelTestBase {
   }
 
   /**
+   * During an inner LLM call, only non-deterministic guardrails are skipped.
+   *
+   * GuardrailsEventSubscriber tracks nesting depth. When depth > 0 (i.e. we
+   * are already inside a NonDeterministicGuardrailInterface execution),
+   * further NonDeterministicGuardrailInterface guardrails are skipped.
+   * Deterministic guardrails in the same set continue to run.
+   *
+   * Verified by putting both an inner-chat NonDet stub and a Deterministic
+   * stub in the same global set. The NonDet stub fires its own inner chat()
+   * while depth = 1, so on that inner call: NonDet is skipped (count stays
+   * at 1) while Det runs again (count reaches 2).
+   */
+  public function testInnerCallSkipsNonDeterministicButRunsDeterministicGuardrails(): void {
+    // Non-deterministic stub that fires an inner chat() call on first invoke.
+    AiGuardrail::create([
+      'id' => 'mixed_nondet',
+      'label' => 'mixed nondet',
+      'description' => 'inner-chat non-deterministic stub',
+      'guardrail' => 'inner_chat_nondet_stub_guardrail',
+      'guardrail_settings' => [
+        'tag' => 'stub_nondet',
+        'mode' => 'pass',
+        'message' => 'stub',
+        'score' => 1.0,
+      ],
+    ])->save();
+    // Deterministic stub: must run on both the outer call and the inner call.
+    AiGuardrail::create([
+      'id' => 'mixed_det',
+      'label' => 'mixed det',
+      'description' => 'deterministic stub',
+      'guardrail' => 'counting_stub_guardrail',
+      'guardrail_settings' => [
+        'tag' => 'stub_det',
+        'mode' => 'pass',
+        'message' => 'stub',
+        'score' => 1.0,
+      ],
+    ])->save();
+    AiGuardrailSet::create([
+      'id' => 'mixed_set',
+      'label' => 'mixed_set',
+      'description' => 'mixed set',
+      'stop_threshold' => 1.0,
+      'pre_generate_guardrails' => ['plugin_id' => ['mixed_nondet', 'mixed_det']],
+      'post_generate_guardrails' => ['plugin_id' => []],
+    ])->save();
+    $this->setGlobalGuardrails(['mixed_set']);
+
+    $input = new ChatInput([new ChatMessage('user', 'Hi')]);
+
+    $provider = \Drupal::service('ai.provider')->createInstance('echoai');
+    $result = $provider->chat($input, 'gpt-test', ['test']);
+
+    $this->assertInstanceOf(ChatOutput::class, $result);
+    $this->assertStringContainsString('Hi', $result->getNormalized()->getText());
+    // NonDet stub ran once (outer call). The inner call had depth > 0, so it
+    // was skipped — count stays at 1, not 2.
+    $this->assertSame(1, $this->invocations('stub_nondet'), 'Non-deterministic guardrail must be skipped on inner calls (depth > 0).');
+    // Deterministic stub ran twice: outer call + inner call.
+    $this->assertSame(2, $this->invocations('stub_det'), 'Deterministic guardrail must still run on inner calls.');
+  }
+
+  /**
+   * Regression: a global LLM-based guardrail's inner chat() is not re-guarded.
+   *
+   * Exercises the full recursion path the fix covers: a globally-configured
+   * NonDeterministicGuardrailInterface guardrail performs its own provider
+   * chat() inside processInput(). GuardrailsEventSubscriber's depth counter
+   * is already > 0 at that point, so the same guardrail is skipped on the
+   * inner request. The assertion pins the invocation count at exactly 1; a
+   * regression (depth counter removed, or NonDet check dropped) would let
+   * the inner request re-trigger the guardrail and push the count to 2.
+   */
+  public function testGlobalLlmGuardrailInnerChatIsNotReGuarded(): void {
+    AiGuardrail::create([
+      'id' => 'recursion_check_guardrail',
+      'label' => 'recursion check',
+      'description' => 'inner-chat non-det stub',
+      'guardrail' => 'inner_chat_nondet_stub_guardrail',
+      'guardrail_settings' => [
+        'tag' => 'stub_inner_chat',
+        'mode' => 'pass',
+        'message' => 'stub',
+        'score' => 1.0,
+      ],
+    ])->save();
+    AiGuardrailSet::create([
+      'id' => 'recursion_check_set',
+      'label' => 'recursion_check_set',
+      'description' => 'set for inner-chat recursion regression check',
+      'stop_threshold' => 1.0,
+      'pre_generate_guardrails' => ['plugin_id' => ['recursion_check_guardrail']],
+      'post_generate_guardrails' => ['plugin_id' => []],
+    ])->save();
+    $this->setGlobalGuardrails(['recursion_check_set']);
+
+    $input = new ChatInput([new ChatMessage('user', 'Hi')]);
+
+    $provider = \Drupal::service('ai.provider')->createInstance('echoai');
+    $result = $provider->chat($input, 'gpt-test', ['test']);
+
+    $this->assertInstanceOf(ChatOutput::class, $result);
+    $this->assertSame(
+      1,
+      $this->invocations('stub_inner_chat'),
+      'Inner non-deterministic chat() must not be re-guarded; the stub must be invoked exactly once per outer chat().',
+    );
+  }
+
+  /**
+   * Fiber depth counters are isolated per fiber.
+   *
+   * Verifies that GuardrailsEventSubscriber tracks depth per-fiber so that a
+   * suspended fiber's counter does not bleed into a concurrently running fiber.
+   *
+   * Scenario: two fibers each make a chat() call guarded by the same global
+   * NonDeterministicGuardrailInterface set. Fiber A's stub suspends the fiber
+   * mid-processInput() (depth[A] = 1 at that moment). Fiber B then starts and
+   * must see depth[B] = 0 — not Fiber A's depth — so its guardrail runs too.
+   * If the depth counter were a plain shared int, Fiber B would skip its
+   * guardrail and the invocation count would be 1 instead of 2.
+   */
+  public function testFiberDepthCountersAreIndependent(): void {
+    AiGuardrail::create([
+      'id' => 'fiber_guard',
+      'label' => 'fiber guard',
+      'description' => 'fiber-suspending non-det stub',
+      'guardrail' => 'fiber_suspending_nondet_stub_guardrail',
+      'guardrail_settings' => [
+        'tag' => 'stub_fiber',
+        'mode' => 'pass',
+        'message' => 'stub',
+        'score' => 1.0,
+      ],
+    ])->save();
+    AiGuardrailSet::create([
+      'id' => 'fiber_set',
+      'label' => 'fiber_set',
+      'description' => 'set for fiber isolation test',
+      'stop_threshold' => 1.0,
+      'pre_generate_guardrails' => ['plugin_id' => ['fiber_guard']],
+      'post_generate_guardrails' => ['plugin_id' => []],
+    ])->save();
+    $this->setGlobalGuardrails(['fiber_set']);
+
+    $provider = \Drupal::service('ai.provider')->createInstance('echoai');
+
+    // Fiber A: runs until the stub suspends (depth[A] = 1 at suspension point).
+    $fiber_a = new \Fiber(function () use ($provider): void {
+      $provider->chat(
+        new ChatInput([new ChatMessage('user', 'Hi from A')]),
+        'gpt-test',
+        ['test'],
+      );
+    });
+
+    // Fiber B: must see depth[B] = 0 when it starts, not Fiber A's depth.
+    $fiber_b = new \Fiber(function () use ($provider): void {
+      $provider->chat(
+        new ChatInput([new ChatMessage('user', 'Hi from B')]),
+        'gpt-test',
+        ['test'],
+      );
+    });
+
+    // Start Fiber A — runs until FiberSuspendingNonDeterministicStubGuardrail
+    // calls \Fiber::suspend(). At this point depth[fiber_a_id] = 1.
+    $fiber_a->start();
+
+    // Start Fiber B — must see depth[fiber_b_id] = 0 and run its guardrail.
+    // Runs until its own stub suspension point.
+    $fiber_b->start();
+
+    // Resume both fibers to completion.
+    if (!$fiber_a->isTerminated()) {
+      $fiber_a->resume();
+    }
+    if (!$fiber_b->isTerminated()) {
+      $fiber_b->resume();
+    }
+
+    // Both fibers must have run the guardrail exactly once each.
+    // With a shared int counter (pre-fix), Fiber B sees depth = 1 and skips —
+    // count stays at 1. With per-fiber depth (post-fix), count = 2.
+    $this->assertSame(
+      2,
+      $this->invocations('stub_fiber'),
+      'Each fiber must run the guardrail independently. A count of 1 means the second fiber incorrectly inherited the first fiber\'s depth.',
+    );
+  }
+
+  /**
    * Create a guardrail entity + set wrapping the counting stub plugin.
    *
    * The stub is wired into the pre-generate slot. Use

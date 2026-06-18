@@ -1,11 +1,22 @@
-**V.3.0.10**
+
+**V.3.1.0**
+
+- Issue #3586970: Make URL scanning more resilient to invalid URLs [Bugfix]
+- Issue #3568940: Required apps still get blocked on first load when Process final HTML is active [Bugfix]
+
+**V.3.1.0-RC2**
 
 - Issue #3584237: Update-Hook breaks services and produces WPOD [Bugfix]
+
+**V.3.1.0-RC1**
+
+- Issue #3504281: Option optOut is broken - scripts will not be loaded [Bugfix]
+- Issue #3508237: Bugfix for #536: Check for optOut state while contextual rendering [Bugfix]
 
 **V.3.0.9**
 
 - Issue #3567998: Errors in callback code should not kill the Klaro consent banner
-- Issue #3568001: Posthog Service callback code doesn't work anymore [Bugfix]
+- Issue #3568001: Posthog Service callback code doesn't work anymore
                   (please review javascript callback function after dbupdate!)
 - Issue #3568262: Add a Stripe (commerce_stripe) service
 - Issue #3568267: Scripts matching source + Opt-Out + Toggled by default (+required) should not get blocked server-side

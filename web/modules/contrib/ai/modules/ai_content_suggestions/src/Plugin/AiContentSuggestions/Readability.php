@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\ai_content_suggestions\Plugin\AiContentSuggestions;
 
-use Drupal\ai\AiProviderPluginManager;
 use Drupal\ai_content_suggestions\AiContentSuggestionsPluginBase;
-use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Form\FormStateInterface;
 
 /**
@@ -41,28 +39,6 @@ final class Readability extends AiContentSuggestionsPluginBase {
     Apart form the formatted output, return nothing else.
 
       The input text:';
-
-  /**
-   * Configuration object for this plugin.
-   *
-   * @var \Drupal\Core\Config\Config
-   */
-  private $promptConfig;
-
-  /**
-   * {@inheritdoc}
-   */
-  public function __construct(
-    array $configuration,
-    $plugin_id,
-    $plugin_definition,
-    protected AiProviderPluginManager $providerPluginManager,
-    ConfigFactoryInterface $configFactory,
-  ) {
-    parent::__construct($configuration, $plugin_id, $plugin_definition, $providerPluginManager, $configFactory);
-
-    $this->promptConfig = $configFactory->getEditable('ai_content_suggestions.prompts');
-  }
 
   /**
    * {@inheritdoc}
