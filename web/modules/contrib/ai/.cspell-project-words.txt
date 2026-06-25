@@ -364,3 +364,6 @@ python/name:pymdownx.superfences.fence_code_format
 drupalcode
 nondet
 interactable
+hostless
+mple
+cript

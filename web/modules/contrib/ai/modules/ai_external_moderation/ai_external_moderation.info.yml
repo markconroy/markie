@@ -10,7 +10,7 @@ hidden: true
 dependencies:
   - ai:ai
 
-# Information added by Drupal.org packaging script on 2026-06-10
-version: '1.4.2'
+# Information added by Drupal.org packaging script on 2026-06-24
+version: '1.4.3'
 project: 'ai'
-datestamp: 1781100871
+datestamp: 1782291481
