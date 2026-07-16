@@ -6,7 +6,7 @@ use Drupal\backup_migrate\Core\Destination\BrowserDownloadDestination;
 use Drupal\backup_migrate\Core\File\BackupFileReadableInterface;
 
 /**
- *
+ * Provides the drupal browser download destination class.
  *
  * @package Drupal\backup_migrate\Drupal\Destination
  */

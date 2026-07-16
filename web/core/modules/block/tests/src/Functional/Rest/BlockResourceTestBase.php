@@ -122,7 +122,9 @@ abstract class BlockResourceTestBase extends ConfigEntityResourceTestBase {
    */
   protected function getExpectedCacheContexts() {
     // @see ::createEntity()
-    return ['url.site'];
+    // 'session' is bubbled by URL generation for CSRF-protected routes
+    // referenced in the response normalization.
+    return ['session', 'url.site'];
   }
 
   /**
@@ -164,8 +166,8 @@ abstract class BlockResourceTestBase extends ConfigEntityResourceTestBase {
   protected function getExpectedUnauthorizedEntityAccessCacheability($is_authenticated) {
     // @see \Drupal\block\BlockAccessControlHandler::checkAccess()
     return parent::getExpectedUnauthorizedEntityAccessCacheability($is_authenticated)
+      ->addCacheTags($this->entity->getCacheTags())
       ->addCacheTags([
-        'config:block.block.llama',
         $is_authenticated ? 'user:2' : 'user:0',
       ]);
   }

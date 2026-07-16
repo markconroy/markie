@@ -6,6 +6,7 @@ namespace Drupal\Tests\layout_builder\FunctionalJavascript;
 
 use Drupal\block_content\Entity\BlockContent;
 use Drupal\Core\Url;
+use Drupal\filter\FilterFormatRepositoryInterface;
 use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
 use Drupal\Tests\block_content\Traits\BlockContentCreationTrait;
 use Drupal\Tests\contextual\FunctionalJavascript\ContextualLinkClickTrait;
@@ -77,7 +78,7 @@ class LayoutBuilderTest extends WebDriverTestBase {
       'body' => [
         [
           'value' => 'This is the block content',
-          'format' => filter_default_format(),
+          'format' => \Drupal::service(FilterFormatRepositoryInterface::class)->getDefaultFormat()->id(),
         ],
       ],
     ])->save();
@@ -116,7 +117,7 @@ class LayoutBuilderTest extends WebDriverTestBase {
     $assert_session->pageTextNotContains('Powered by Drupal');
     $assert_session->linkNotExists('Layout');
 
-    $this->enableLayoutsForBundle('admin/structure/types/manage/bundle_with_section_field/display', TRUE);
+    $this->enableLayoutsForBundle('admin/structure/types/manage/bundle_with_section_field/display/default', TRUE);
 
     // The existing content is still shown until overridden.
     $this->drupalGet($node_url);

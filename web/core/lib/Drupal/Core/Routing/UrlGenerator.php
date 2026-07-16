@@ -197,16 +197,7 @@ class UrlGenerator implements UrlGeneratorInterface {
     // gap.
     $optional = TRUE;
     // The structure of the tokens array varies according to the compiled route.
-    // Examples:
-    // @code
-    // [
-    //  [0 => 'text', 1 => '/add-link-inline'],
-    //  [0 => 'variable', 1 => '/', 2 => '[^/]++', 3 => 'shortcut_set'],
-    //  [0 => 'text', 1 => '/admin/config/user-interface/shortcut/manage'],
-    // ]
-    // @endcode
-    // This is the structure for the "shortcut.link_add_inline" route.
-    //
+    // Example:
     // @code
     // [
     //   [ 0 => 'text', 1 => '/admin/config' ]
@@ -308,9 +299,11 @@ class UrlGenerator implements UrlGeneratorInterface {
 
     $this->processRoute($name, $route, $parameters, $generated_url);
     $path = $this->getInternalPathFromRoute($name, $route, $parameters, $options['query']);
-    // Outbound path processors might need the route object for the path, e.g.
-    // to get the path pattern.
+    // Outbound path processors might need the route information for the path,
+    // e.g. to get the path pattern.
     $options['route'] = $route;
+    $options['route_name'] = $name;
+    $options['route_parameters'] = $parameters;
     if ($options['path_processing']) {
       $path = $this->processPath($path, $options, $generated_url);
     }

@@ -10,6 +10,7 @@ use Drupal\Component\Plugin\ConfigurableInterface;
 use Drupal\Core\DependencyInjection\AutowireTrait;
 use Drupal\Core\Entity\EntityForm;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Form\SubformState;
 use Drupal\ai\Entity\AiGuardrail;
 use Drupal\Core\Plugin\PluginFormInterface;
 
@@ -34,14 +35,9 @@ final class AiGuardrailForm extends EntityForm {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
-    /** @var \Drupal\ai\Entity\AiGuardrail $guardrail */
-    $guardrail = $this->entity;
-    $plugin = $guardrail->getGuardrail();
+    $plugin = $this->entity->getGuardrail();
     if ($plugin !== NULL) {
-      $configuration = $guardrail->get('guardrail_settings') ?: [];
-      $plugin->setConfiguration($configuration);
-      $form_state->setValue('guardrail_settings', []);
-      $form_state->getUserInput()['guardrail_settings'] = [];
+      $plugin->setConfiguration($this->entity->get('guardrail_settings') ?: []);
     }
 
     return parent::buildForm($form, $form_state);
@@ -106,24 +102,25 @@ final class AiGuardrailForm extends EntityForm {
       '#disabled' => !$guardrail->isNew(),
     ];
 
+    // Set #parents explicitly so SubformState can scope user input correctly
+    // before doBuildForm() has had a chance to populate it.
     $form['guardrail_wrapper']['guardrail_settings'] = [
       '#type' => 'container',
       '#title' => $this->t('Guardrail settings'),
       '#title_display' => FALSE,
       '#tree' => TRUE,
+      '#parents' => ['guardrail_settings'],
     ];
 
     if ($guardrail->getGuardrail() instanceof PluginFormInterface) {
-      $plugin_form_state = $this->createPluginFormState($form_state);
+      $plugin_form_state = SubformState::createForSubform(
+        $form['guardrail_wrapper']['guardrail_settings'],
+        $form,
+        $form_state,
+      );
       $form['guardrail_wrapper']['guardrail_settings'] += $guardrail
         ->getGuardrail()
         ->buildConfigurationForm([], $plugin_form_state);
-
-      // Save the plugin form state values to the form state.
-      $form_state->setValue(
-        'guardrail_settings',
-        $plugin_form_state->getValues()
-      );
     }
 
     return $form;
@@ -160,9 +157,13 @@ final class AiGuardrailForm extends EntityForm {
     if ($guardrail_id) {
       $guardrail = $this->aiGuardrailPluginManager->createInstance($guardrail_id);
       if ($guardrail instanceof PluginFormInterface) {
-        $plugin_form_state = $this->createPluginFormState($form_state);
-        $guardrail->validateConfigurationForm($form, $plugin_form_state);
-        // Copy errors back from the cloned plugin form state to the main state.
+        $plugin_form_state = SubformState::createForSubform(
+          $form['guardrail_wrapper']['guardrail_settings'],
+          $form,
+          $form_state,
+        );
+        $guardrail->validateConfigurationForm($form['guardrail_wrapper']['guardrail_settings'], $plugin_form_state);
+        // Copy errors back from the subform state to the main state.
         foreach ($plugin_form_state->getErrors() as $name => $error) {
           $form_state->setErrorByName($name, $error);
         }
@@ -188,8 +189,12 @@ final class AiGuardrailForm extends EntityForm {
     $this->entity->set('guardrail', $guardrail->getPluginId());
 
     if ($guardrail instanceof PluginFormInterface) {
-      $plugin_form_state = $this->createPluginFormState($form_state);
-      $guardrail->submitConfigurationForm($form, $plugin_form_state);
+      $plugin_form_state = SubformState::createForSubform(
+        $form['guardrail_wrapper']['guardrail_settings'],
+        $form,
+        $form_state,
+      );
+      $guardrail->submitConfigurationForm($form['guardrail_wrapper']['guardrail_settings'], $plugin_form_state);
       if ($guardrail instanceof ConfigurableInterface) {
         $this->entity->set('guardrail_settings', $guardrail->getConfiguration());
       }
@@ -214,32 +219,6 @@ final class AiGuardrailForm extends EntityForm {
     $form_state->setRedirectUrl($this->entity->toUrl('collection'));
 
     return $result;
-  }
-
-  /**
-   * Creates a plugin form state for the guardrail settings.
-   *
-   * This method clones the original form state and clears the values,
-   * except for the settings specific to this guardrail plugin.
-   *
-   * @param \Drupal\Core\Form\FormStateInterface $form_state
-   *   The original form state.
-   *
-   * @return \Drupal\Core\Form\FormStateInterface
-   *   The cloned and modified form state.
-   */
-  protected function createPluginFormState(
-    FormStateInterface $form_state,
-  ): FormStateInterface {
-    // Clone the form state.
-    $plugin_form_state = clone $form_state;
-
-    // Clear the values, except for this plugin type's settings.
-    $plugin_form_state->setValues(
-      $form_state->getValue('guardrail_settings', [])
-    );
-
-    return $plugin_form_state;
   }
 
 }

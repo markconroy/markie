@@ -2,6 +2,9 @@
 
 namespace Drupal\backup_migrate\Core\Service;
 
+use Drupal\Core\Language\LanguageManagerInterface;
+use Drupal\Core\Mail\MailManagerInterface;
+
 /**
  * A very basic mailer that uses the php mail function.
  *
@@ -11,6 +14,19 @@ namespace Drupal\backup_migrate\Core\Service;
  * @package Drupal\backup_migrate\Core\Environment
  */
 class Mailer implements MailerInterface {
+
+  /**
+   * Constructs a Mailer object.
+   *
+   * @param \Drupal\Core\Language\LanguageManagerInterface $languageManager
+   *   The language manager.
+   * @param \Drupal\Core\Mail\MailManagerInterface $mailManager
+   *   The mail manager.
+   */
+  public function __construct(
+    protected readonly LanguageManagerInterface $languageManager,
+    protected readonly MailManagerInterface $mailManager,
+  ) {}
 
   /**
    * {@inheritdoc}
@@ -27,8 +43,8 @@ class Mailer implements MailerInterface {
       $body = strtr($body, $replacements);
     }
 
-    $langcode = \Drupal::languageManager()->getDefaultLanguage()->getId();
-    \Drupal::service('plugin.manager.mail')->mail('backup_migrate', $key, $to, $langcode, [
+    $langcode = $this->languageManager->getDefaultLanguage()->getId();
+    $this->mailManager->mail('backup_migrate', $key, $to, $langcode, [
       'message' => $body,
       'subject' => $subject,
     ]);

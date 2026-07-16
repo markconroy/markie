@@ -6,6 +6,7 @@ namespace Drupal\Tests\text\FunctionalJavascript;
 
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\filter\FilterFormatRepositoryInterface;
 use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
@@ -20,7 +21,7 @@ class TextareaWithSummaryTest extends WebDriverTestBase {
   /**
    * {@inheritdoc}
    */
-  protected static $modules = ['text', 'node'];
+  protected static $modules = ['text', 'node', 'text_summary_test'];
 
   /**
    * {@inheritdoc}
@@ -126,7 +127,7 @@ class TextareaWithSummaryTest extends WebDriverTestBase {
         [
           'value' => $this->randomMachineName(32),
           'summary' => $this->randomMachineName(32),
-          'format' => filter_default_format(),
+          'format' => \Drupal::service(FilterFormatRepositoryInterface::class)->getDefaultFormat()->id(),
         ],
       ],
     ]);
@@ -176,6 +177,19 @@ class TextareaWithSummaryTest extends WebDriverTestBase {
     $summary_field = $page->findField('edit-' . $field_name . '-0-summary');
 
     $this->assertEquals(TRUE, $summary_field->isVisible());
+  }
+
+  /**
+   * Tests overriding markup in Edit summary button.
+   *
+   * Check that the override in text-test.js adds the "text-test-edit-link"
+   * class.
+   */
+  public function testSummaryButtonOverride(): void {
+    $this->assertSummaryToggle();
+    $this->drupalGet('node/add/page');
+    $selector = 'div.field--name-body-test span.text-test-edit-link';
+    $this->assertSession()->elementExists('css', $selector);
   }
 
 }

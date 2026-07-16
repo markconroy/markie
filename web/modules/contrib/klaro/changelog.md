@@ -1,4 +1,12 @@
 
+**V.3.1.1**
+
+- Issue #3484827: Add on_init, on_accept, on_decline callbacks per service for Google Consent Mode v2 support
+- Issue #3484827: Add services gtm_consent_mode, ga_consent_mode, google_ads_consent_mode for
+  Google Tag Manager, Google Analytics and Google Ads with Google Consent Mode v2 (disabled by default)
+- Issue #3551342: PHP Warning: Undefined array key "#formatter" in klaro_preprocess_field() [Bugfix]
+- Issue #3578931: KlaroHelper executes an entity query multiple times per request
+
 **V.3.1.0**
 
 - Issue #3586970: Make URL scanning more resilient to invalid URLs [Bugfix]
@@ -16,7 +24,7 @@
 **V.3.0.9**
 
 - Issue #3567998: Errors in callback code should not kill the Klaro consent banner
-- Issue #3568001: Posthog Service callback code doesn't work anymore
+- Issue #3568001: Posthog Service callback code doesn't work anymore [Bugfix]
                   (please review javascript callback function after dbupdate!)
 - Issue #3568262: Add a Stripe (commerce_stripe) service
 - Issue #3568267: Scripts matching source + Opt-Out + Toggled by default (+required) should not get blocked server-side

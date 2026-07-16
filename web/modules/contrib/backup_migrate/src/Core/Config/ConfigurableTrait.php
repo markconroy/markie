@@ -23,16 +23,19 @@ trait ConfigurableTrait {
   /**
    * The initial configuration.
    *
-   * These configuration options can be overridden by the config options but will
-   * not be overwritten. If the object is re-configured after construction any
-   * missing configuration options will revert to these values.
+   * Configuration options can be overridden by config options but will not be
+   * overwritten. If the object is re-configured after construction, missing
+   * configuration options will revert to these values.
    *
    * @var \Drupal\backup_migrate\Core\Config\ConfigInterface
    */
   protected $init;
 
   /**
+   * Constructs a configurable object.
+   *
    * @param ConfigInterface|array $init
+   *   The init.
    *   The initial values for the configurable item.
    */
   public function __construct($init = []) {
@@ -78,6 +81,7 @@ trait ConfigurableTrait {
    * Get the configuration object for this item.
    *
    * @return \Drupal\backup_migrate\Core\Config\ConfigInterface
+   *   The requested integer.
    */
   public function config() {
     return $this->config ? $this->config : new Config();
@@ -87,6 +91,7 @@ trait ConfigurableTrait {
    * Get the default values for the plugin.
    *
    * @return \Drupal\backup_migrate\Core\Config\Config
+   *   The return value.
    */
   public function configDefaults() {
     return new Config();
@@ -96,6 +101,7 @@ trait ConfigurableTrait {
    * Get a default (blank) schema.
    *
    * @param array $params
+   *   The message parameters.
    *   The parameters including:
    *    - operation - The operation being performed, will be one of:
    *      - 'backup': Configuration needed during a backup operation
@@ -103,6 +109,7 @@ trait ConfigurableTrait {
    *      - 'initialize': Core configuration always needed by this item.
    *
    * @return array
+   *   A render or configuration array.
    */
   public function configSchema(array $params = []) {
     return [];
@@ -112,8 +119,10 @@ trait ConfigurableTrait {
    * Get any validation errors in the config.
    *
    * @param array $params
+   *   The message parameters.
    *
    * @return array
+   *   A render or configuration array.
    */
   public function configErrors(array $params = []) {
     $out = [];

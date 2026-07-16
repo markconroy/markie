@@ -4,14 +4,16 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\ai\Kernel\Service;
 
+use Drupal\ai_test\Mock\MockIterator;
+use Drupal\ai_test\Mock\MockStreamedChatIterator;
 use Drupal\KernelTests\KernelTestBase;
-use Drupal\Tests\ai\Mock\MockIterator;
-use Drupal\Tests\ai\Mock\MockStreamedChatIterator;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * @coversDefaultClass \Drupal\ai\Service\HostnameFilter
  * @group ai
  */
+#[RunTestsInSeparateProcesses]
 class HostnameFilterTest extends KernelTestBase {
 
   /**

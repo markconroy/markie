@@ -11,12 +11,9 @@ use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\StringTranslation\PluralTranslatableMarkup;
 use Drupal\TestTools\Extension\DeprecationBridge\ExpectDeprecationTrait;
-use Drupal\TestTools\Extension\Dump\DebugDump;
-use PHPUnit\Framework\Attributes\BeforeClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Prophecy\PhpUnit\ProphecyTrait;
-use Symfony\Component\VarDumper\VarDumper;
 
 /**
  * Provides a base class and helpers for Drupal unit tests.
@@ -36,27 +33,11 @@ use Symfony\Component\VarDumper\VarDumper;
  */
 abstract class UnitTestCase extends TestCase {
 
+  use DrupalTestCaseTrait;
   use PhpUnitCompatibilityTrait;
   use ProphecyTrait;
   use ExpectDeprecationTrait;
   use RandomGeneratorTrait;
-
-  /**
-   * The app root.
-   *
-   * @var string
-   */
-  protected $root;
-
-  /**
-   * Registers the dumper CLI handler when the DebugDump extension is enabled.
-   */
-  #[BeforeClass]
-  public static function setDebugDumpHandler(): void {
-    if (DebugDump::isEnabled()) {
-      VarDumper::setHandler(DebugDump::class . '::cliHandler');
-    }
-  }
 
   /**
    * {@inheritdoc}
@@ -73,7 +54,6 @@ abstract class UnitTestCase extends TestCase {
     // Ensure that FileCacheFactory has a prefix.
     FileCacheFactory::setPrefix('prefix');
 
-    $this->root = dirname(substr(__DIR__, 0, -strlen(__NAMESPACE__)), 2);
     chdir($this->root);
   }
 

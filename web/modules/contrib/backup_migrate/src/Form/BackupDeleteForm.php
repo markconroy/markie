@@ -6,17 +6,21 @@ use Drupal\Core\Form\ConfirmFormBase;
 use Drupal\Core\Form\FormStateInterface;
 
 /**
- *
+ * Provides the backup delete form class.
  */
 class BackupDeleteForm extends ConfirmFormBase {
 
   /**
-   * @var \Drupal\backup_migrate\Entity\Destination
+   * Stores the value.
+   *
+   * @var \Drupal\backup_migrate\Entity\Destination The destination
    */
   public $destination;
 
   /**
-   * @var string
+   * Stores the value.
+   *
+   * @var string The backup id
    */
   public $backupId;
 
@@ -70,7 +74,7 @@ class BackupDeleteForm extends ConfirmFormBase {
   }
 
   /**
-   *
+   * Builds the form.
    */
   public function buildForm(array $form, FormStateInterface $form_state, $backup_migrate_destination = NULL, $backup_id = NULL) {
     $this->destination = $backup_migrate_destination;

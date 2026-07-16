@@ -113,7 +113,7 @@ class ModuleInstaller implements ModuleInstallerInterface {
    * {@inheritdoc}
    */
   public function addUninstallValidator(ModuleUninstallValidatorInterface $uninstall_validator) {
-    @trigger_error(__METHOD__ . ' is deprecated in drupal:11.1.0 and is removed from drupal:12.0.0. Inject the uninstall validators into the constructor instead. See https://www.drupal.org/node/3432595', E_USER_DEPRECATED);
+    @trigger_error(__METHOD__ . '() is deprecated in drupal:11.1.0 and is removed from drupal:12.0.0. Inject the uninstall validators into the constructor instead. See https://www.drupal.org/node/3432595', E_USER_DEPRECATED);
   }
 
   /**
@@ -150,7 +150,7 @@ class ModuleInstaller implements ModuleInstallerInterface {
       }
     }
     if ($enable_dependencies) {
-      $module_list = $module_list ? array_combine($module_list, $module_list) : [];
+      $module_list = array_combine($module_list, $module_list);
       if ($missing_modules = array_diff_key($module_list, $module_data)) {
         // One or more of the given modules doesn't exist.
         throw new MissingDependencyException(sprintf('Unable to install modules %s due to missing modules %s.', implode(', ', $module_list), implode(', ', $missing_modules)));
@@ -278,7 +278,7 @@ class ModuleInstaller implements ModuleInstallerInterface {
         array_fill_keys($module_list, 0),
         $installed_modules
       )))
-      ->save(TRUE);
+      ->save();
 
     // Prepare the new module list, sorted by weight, including filenames.
     // This list is used for both the ModuleHandler and DrupalKernel. It
@@ -614,7 +614,7 @@ class ModuleInstaller implements ModuleInstallerInterface {
       if ($core_extension->get('profile') === $module) {
         $core_extension->clear('profile');
       }
-      $core_extension->save(TRUE);
+      $core_extension->save();
 
       // Update the module handler to remove the module.
       // The current ModuleHandler instance is obsolete with the kernel rebuild

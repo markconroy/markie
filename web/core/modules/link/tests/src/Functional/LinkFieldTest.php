@@ -139,6 +139,8 @@ class LinkFieldTest extends BrowserTestBase {
       'http://www.example.com/numbers_(9999)' => 'http://www.example.com/numbers_(9999)',
     ];
     $valid_internal_entries = [
+      'route:entity.node.canonical;node=1' => 'route:entity.node.canonical;node=1',
+      'route:entity.user.canonical;user=999999' => 'route:entity.user.canonical;user=999999',
       '/entity_test/add' => '/entity_test/add',
       '/a/path/alias' => '/a/path/alias',
 
@@ -188,13 +190,17 @@ class LinkFieldTest extends BrowserTestBase {
 
     // Define some invalid URLs.
     $validation_error_1 = "The path '@link_path' is invalid.";
-    $validation_error_2 = 'Manually entered paths should start with one of the following characters: / ? #';
+    $validation_error_2 = "Enter a content title to select it, or enter an internal path starting with /, ? or #. External links must be a full URL including the protocol, such as";
     $validation_error_3 = "The path '@link_path' is inaccessible.";
+    $validation_error_4 = 'Enter a content title to select it, or enter an internal path starting with /, ? or #.';
+    $validation_error_5 = "External links must be a full URL including the protocol, such as";
     $invalid_external_entries = [
       // Invalid protocol.
       'invalid://not-a-valid-protocol' => $validation_error_1,
       // Missing host name.
       'http://' => $validation_error_1,
+      // Missing protocol schema.
+      'www.example.com' => $validation_error_2,
     ];
     $invalid_internal_entries = [
       'no-leading-slash' => $validation_error_2,
@@ -209,12 +215,14 @@ class LinkFieldTest extends BrowserTestBase {
     $this->assertInvalidEntries($field_name, $invalid_external_entries + $invalid_internal_entries);
 
     // Test external URLs for 'link_type' = LinkItemInterface::LINK_EXTERNAL.
+    $invalid_external_entries['www.example.com'] = $validation_error_5;
     $this->field->setSetting('link_type', LinkItemInterface::LINK_EXTERNAL);
     $this->field->save();
     $this->assertValidEntries($field_name, $valid_external_entries);
     $this->assertInvalidEntries($field_name, $valid_internal_entries + $invalid_external_entries);
 
     // Test external URLs for 'link_type' = LinkItemInterface::LINK_INTERNAL.
+    $invalid_internal_entries['no-leading-slash'] = $validation_error_4;
     $this->field->setSetting('link_type', LinkItemInterface::LINK_INTERNAL);
     $this->field->save();
     $this->assertValidEntries($field_name, $valid_internal_entries);
@@ -234,7 +242,7 @@ class LinkFieldTest extends BrowserTestBase {
    *
    * @param string $field_name
    *   The field name.
-   * @param array $valid_entries
+   * @param array<string, string> $valid_entries
    *   An array of valid URL entries.
    *
    * @internal
@@ -258,7 +266,7 @@ class LinkFieldTest extends BrowserTestBase {
    *
    * @param string $field_name
    *   The field name.
-   * @param array $invalid_entries
+   * @param array<string, string> $invalid_entries
    *   An array of invalid URL entries.
    *
    * @internal
@@ -382,7 +390,7 @@ class LinkFieldTest extends BrowserTestBase {
     ];
     $this->submitForm($edit, 'Save');
     preg_match('|entity_test/manage/(\d+)|', $this->getUrl(), $match);
-    $id = $match[1];
+    $id = (int) $match[1];
     $this->assertSession()->statusMessageContains('entity_test ' . $id . ' has been created.', 'status');
 
     $output = $this->renderTestEntity($id);
@@ -468,7 +476,7 @@ class LinkFieldTest extends BrowserTestBase {
   /**
    * Renders a test_entity and returns the output.
    *
-   * @param int $id
+   * @param int|string $id
    *   The test_entity ID to render.
    * @param string $view_mode
    *   (optional) The view mode to use for rendering.

@@ -108,6 +108,13 @@ class KlaroHelper {
   protected $themeManager;
 
   /**
+   * Per-request cache of loaded apps, keyed by the getApps() arguments.
+   *
+   * @var \Drupal\klaro\KlaroAppInterface[][]
+   */
+  protected array $appsCache = [];
+
+  /**
    * Constructs a KlaroHelper object.
    *
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
@@ -305,6 +312,9 @@ class KlaroHelper {
         'description' => $config->get('process_descriptions') ? $this->processDescription($app) : $app->description(),
         'purposes' => $app->purposes(),
         'callbackCode' => $app->callbackCode(),
+        'onInit' => $app->onInit(),
+        'onAccept' => $app->onAccept(),
+        'onDecline' => $app->onDecline(),
         'cookies' => $cookies,
         'required' => $app->isRequired(),
         'optOut' => $app->isOptOut(),
@@ -415,6 +425,11 @@ class KlaroHelper {
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
   public function getApps(bool $only_enabled = TRUE, bool $only_not_required = FALSE): array {
+    $cid = (int) $only_enabled . ':' . (int) $only_not_required;
+    if (isset($this->appsCache[$cid])) {
+      return $this->appsCache[$cid];
+    }
+
     $storage = $this->entityTypeManager->getStorage('klaro_app');
 
     $query = $storage->getQuery();
@@ -437,7 +452,7 @@ class KlaroHelper {
       $result["unknown_app"] = $unknown_app;
     }
 
-    return $result;
+    return $this->appsCache[$cid] = $result;
   }
 
   /**

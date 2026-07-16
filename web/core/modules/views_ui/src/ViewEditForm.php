@@ -15,6 +15,7 @@ use Drupal\Core\TempStore\SharedTempStoreFactory;
 use Drupal\Core\Theme\ThemeManagerInterface;
 use Drupal\Core\Url;
 use Drupal\views\Views;
+use Drupal\views\ViewsFormHelperTrait;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -27,6 +28,8 @@ use Drupal\Core\Extension\ModuleHandlerInterface;
  * @internal
  */
 class ViewEditForm extends ViewFormBase {
+
+  use ViewsFormHelperTrait;
 
   /**
    * The views temp store.
@@ -393,7 +396,10 @@ class ViewEditForm extends ViewFormBase {
     // page.
     if (empty($display)) {
       // @todo Improved UX for the case where a plugin is missing.
-      $build['#markup'] = $this->t("Error: Display @display refers to a plugin named '@plugin', but that plugin is not available.", ['@display' => $display->display['id'], '@plugin' => $display->display['display_plugin']]);
+      $build['#markup'] = $this->t("Error: Display @display refers to a plugin named '@plugin', but that plugin is not available.", [
+        '@display' => $display->display['id'],
+        '@plugin' => $display->display['display_plugin'],
+      ]);
     }
     // Build the content of the edit page.
     else {
@@ -440,7 +446,12 @@ class ViewEditForm extends ViewFormBase {
     if ($display['id'] != 'default') {
       $build['top']['#theme_wrappers'] = ['container'];
       $build['top']['#attributes']['id'] = 'edit-display-settings-top';
-      $build['top']['#attributes']['class'] = ['views-ui-display-tab-actions', 'edit-display-settings-top', 'views-ui-display-tab-bucket', 'clearfix'];
+      $build['top']['#attributes']['class'] = [
+        'views-ui-display-tab-actions',
+        'edit-display-settings-top',
+        'views-ui-display-tab-bucket',
+        'clearfix',
+      ];
 
       // The Delete, Duplicate and Undo Delete buttons.
       $build['top']['actions'] = [
@@ -562,7 +573,10 @@ class ViewEditForm extends ViewFormBase {
 
     $build['columns'] = [];
     $build['columns']['#theme_wrappers'] = ['container'];
-    $build['columns']['#attributes'] = ['id' => 'edit-display-settings-main', 'class' => ['clearfix', 'views-display-columns']];
+    $build['columns']['#attributes'] = [
+      'id' => 'edit-display-settings-main',
+      'class' => ['clearfix', 'views-display-columns'],
+    ];
 
     $build['columns']['first']['#theme_wrappers'] = ['container'];
     $build['columns']['first']['#attributes'] = ['class' => ['views-display-column', 'first']];
@@ -757,12 +771,20 @@ class ViewEditForm extends ViewFormBase {
       '#links' => [
         'edit-details' => [
           'title' => $this->t('Edit view name/description'),
-          'url' => Url::fromRoute('views_ui.form_edit_details', ['js' => 'nojs', 'view' => $view->id(), 'display_id' => $display_id]),
+          'url' => Url::fromRoute('views_ui.form_edit_details', [
+            'js' => 'nojs',
+            'view' => $view->id(),
+            'display_id' => $display_id,
+          ]),
           'attributes' => ['class' => ['views-ajax-link']],
         ],
         'analyze' => [
           'title' => $this->t('Analyze view'),
-          'url' => Url::fromRoute('views_ui.form_analyze', ['js' => 'nojs', 'view' => $view->id(), 'display_id' => $display_id]),
+          'url' => Url::fromRoute('views_ui.form_analyze', [
+            'js' => 'nojs',
+            'view' => $view->id(),
+            'display_id' => $display_id,
+          ]),
           'attributes' => ['class' => ['views-ajax-link']],
         ],
         'duplicate' => [
@@ -771,7 +793,11 @@ class ViewEditForm extends ViewFormBase {
         ],
         'reorder' => [
           'title' => $this->t('Reorder displays'),
-          'url' => Url::fromRoute('views_ui.form_reorder_displays', ['js' => 'nojs', 'view' => $view->id(), 'display_id' => $display_id]),
+          'url' => Url::fromRoute('views_ui.form_reorder_displays', [
+            'js' => 'nojs',
+            'view' => $view->id(),
+            'display_id' => $display_id,
+          ]),
           'attributes' => ['class' => ['views-ajax-link']],
         ],
       ],
@@ -826,7 +852,10 @@ class ViewEditForm extends ViewFormBase {
         ],
         // Allow JavaScript to remove the 'Add ' prefix from the button label
         // when placing the button in an "Add" dropdown menu.
-        '#process' => array_merge(['views_ui_form_button_was_clicked'], $this->elementInfo->getInfoProperty('submit', '#process', [])),
+        '#process' => [
+          [static::class, 'formButtonWasClicked'],
+          ...$this->elementInfo->getInfoProperty('submit', '#process', []),
+        ],
         '#values' => [$this->t('Add @display', ['@display' => $label]), $label],
       ];
     }
@@ -1014,7 +1043,12 @@ class ViewEditForm extends ViewFormBase {
     $build['#name'] = $type;
     $build['#title'] = $types[$type]['title'];
 
-    $rearrange_url = Url::fromRoute('views_ui.form_rearrange', ['js' => 'nojs', 'view' => $view->id(), 'display_id' => $display['id'], 'type' => $type]);
+    $rearrange_url = Url::fromRoute('views_ui.form_rearrange', [
+      'js' => 'nojs',
+      'view' => $view->id(),
+      'display_id' => $display['id'],
+      'type' => $type,
+    ]);
     $class = 'icon compact rearrange';
 
     // Different types now have different rearrange forms, so we use this switch
@@ -1023,7 +1057,11 @@ class ViewEditForm extends ViewFormBase {
       case 'filter':
         // The rearrange form for filters contains the and/or UI, so override
         // the used path.
-        $rearrange_url = Url::fromRoute('views_ui.form_rearrange_filter', ['js' => 'nojs', 'view' => $view->id(), 'display_id' => $display['id']]);
+        $rearrange_url = Url::fromRoute('views_ui.form_rearrange_filter', [
+          'js' => 'nojs',
+          'view' => $view->id(),
+          'display_id' => $display['id'],
+        ]);
         // @todo Add another class to have another symbol for filter rearrange.
         $class = 'icon compact rearrange';
         break;
@@ -1065,7 +1103,12 @@ class ViewEditForm extends ViewFormBase {
 
     $actions['add'] = [
       'title' => $add_text,
-      'url' => Url::fromRoute('views_ui.form_add_handler', ['js' => 'nojs', 'view' => $view->id(), 'display_id' => $display['id'], 'type' => $type]),
+      'url' => Url::fromRoute('views_ui.form_add_handler', [
+        'js' => 'nojs',
+        'view' => $view->id(),
+        'display_id' => $display['id'],
+        'type' => $type,
+      ]),
       'attributes' => ['class' => ['icon compact add', 'views-ajax-link'], 'id' => 'views-add-' . $type],
     ];
     if ($count_handlers > 0) {
@@ -1170,7 +1213,13 @@ class ViewEditForm extends ViewFormBase {
           'display_id' => $display['id'],
           'type' => $type,
           'id' => $id,
-        ], ['attributes' => ['class' => ['views-button-configure', 'views-ajax-link'], 'title' => $this->t('Aggregation settings')]]))->toString();
+        ],
+          [
+            'attributes' => [
+              'class' => ['views-button-configure', 'views-ajax-link'],
+              'title' => $this->t('Aggregation settings'),
+            ],
+          ]))->toString();
       }
 
       if ($handler->hasExtraOptions()) {
@@ -1214,7 +1263,10 @@ class ViewEditForm extends ViewFormBase {
         foreach ($contents as $key => $pid) {
           if ($key != $last) {
             $operator = $group_info['groups'][$gid] == 'OR' ? $this->t('OR') : $this->t('AND');
-            $store[$pid]['#link'] = new FormattableMarkup('@link <span>@operator</span>', ['@link' => $store[$pid]['#link'], '@operator' => $operator]);
+            $store[$pid]['#link'] = new FormattableMarkup('@link <span>@operator</span>', [
+              '@link' => $store[$pid]['#link'],
+              '@operator' => $operator,
+            ]);
           }
           $build['fields'][$pid] = $store[$pid];
         }

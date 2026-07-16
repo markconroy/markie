@@ -18,25 +18,28 @@ interface ArchiveReaderInterface {
    * be 'zip'.
    *
    * @return string
+   *   The requested string.
    */
   public function getFileExt();
 
   /**
+   * Sets the archive.
+   *
    * @param \Drupal\backup_migrate\Core\File\BackupFileReadableInterface $out
+   *   The out.
    */
   public function setArchive(BackupFileReadableInterface $out);
 
   /**
    * Extract all files to the given directory.
    *
-   * @param $directory
+   * @param mixed $directory
+   *   The directory.
    *
    * @return mixed
+   *   The return value.
    */
   public function extractTo($directory);
-
-  // Public function listFiles()
-  // public function extractFile($from, $to);.
 
   /**
    * This will be called when all files have been added.
@@ -45,6 +48,7 @@ interface ArchiveReaderInterface {
    * needed.
    *
    * @return mixed
+   *   The return value.
    */
   public function closeArchive();
 

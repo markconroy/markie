@@ -7,17 +7,21 @@ use Drupal\Core\Form\ConfirmFormBase;
 use Drupal\Core\Form\FormStateInterface;
 
 /**
- *
+ * Provides the backup restore form class.
  */
 class BackupRestoreForm extends ConfirmFormBase {
 
   /**
-   * @var \Drupal\backup_migrate\Entity\Destination
+   * Stores the value.
+   *
+   * @var \Drupal\backup_migrate\Entity\Destination The destination
    */
   public $destination;
 
   /**
-   * @var string
+   * Stores the value.
+   *
+   * @var string The backup id
    */
   public $backupId;
 
@@ -25,7 +29,7 @@ class BackupRestoreForm extends ConfirmFormBase {
    * Returns the question to ask the user.
    *
    * @return string
-   *   The form question. The page title will be set to this value.
+   *   *   The form question. The page title will be set to this value.
    */
   public function getQuestion() {
     return $this->t('Are you sure you want to restore this backup?');
@@ -42,7 +46,7 @@ class BackupRestoreForm extends ConfirmFormBase {
    * Returns the route to go to if the user cancels the action.
    *
    * @return \Drupal\Core\Url
-   *   A URL object.
+   *   *   A URL object.
    */
   public function getCancelUrl() {
     return $this->destination->toUrl('backups');
@@ -52,19 +56,26 @@ class BackupRestoreForm extends ConfirmFormBase {
    * Returns a unique string identifying the form.
    *
    * @return string
-   *   The unique string identifying the form.
+   *   *   The unique string identifying the form.
    */
   public function getFormId() {
     return 'backup_migrate_backup_restore_confirm';
   }
 
   /**
+   * Builds the form.
+   *
    * @param array $form
+   *   The form structure.
    * @param \Drupal\Core\Form\FormStateInterface $form_state
-   * @param $backup_migrate_destination
-   * @param $backupId
+   *   The form state.
+   * @param \Drupal\backup_migrate\Entity\Destination|null $backup_migrate_destination
+   *   The backup and migrate destination.
+   * @param string $backup_id
+   *   The backup ID.
    *
    * @return array
+   *   A render or configuration array.
    */
   public function buildForm(array $form, FormStateInterface $form_state, $backup_migrate_destination = NULL, $backup_id = NULL) {
     $this->destination = $backup_migrate_destination;

@@ -4,14 +4,3 @@ parameters:
 			checkDeprecatedHooksInApiFiles: false
 			checkCoreDeprecatedHooksInApiFiles: true
 			checkContribDeprecatedHooksInApiFiles: true
-			containerHasAlwaysTrue: false
-		rules:
-			testClassSuffixNameRule: true
-			dependencySerializationTraitPropertyRule: true
-			accessResultConditionRule: true
-			cacheableDependencyRule: true
-			hookRules: true
-			loggerFromFactoryPropertyAssignmentRule: true
-			entityStorageDirectInjectionRule: true
-			symfonyYamlParseRule: true
-			entityOperationsCacheabilityRule: true

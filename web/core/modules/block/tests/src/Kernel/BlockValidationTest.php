@@ -93,6 +93,10 @@ class BlockValidationTest extends ConfigEntityValidationTestBase {
     unset($cases['INVALID: period separated']);
     // And instead add a test case that verifies it is allowed for blocks.
     $cases['VALID: period separated'] = ['period.separated', TRUE];
+    // Add test cases to ensure machine names cannot start or end with a period.
+    // @see https://www.drupal.org/node/3244349
+    $cases['INVALID: begins with period'] = ['.begins_with_period', FALSE];
+    $cases['VALID: ends with period'] = ['ends_with_period.', TRUE];
     return $cases;
   }
 
@@ -183,7 +187,7 @@ class BlockValidationTest extends ConfigEntityValidationTestBase {
   public function testWeightCannotBeNull(): void {
     $this->entity->set('weight', NULL);
     $this->assertNull($this->entity->getWeight());
-    $this->expectDeprecation('Saving a block with a non-integer weight is deprecated in drupal:11.1.0 and removed in drupal:12.0.0. See https://www.drupal.org/node/3462474');
+    $this->expectUserDeprecationMessage('Saving a block with a non-integer weight is deprecated in drupal:11.1.0 and removed in drupal:12.0.0. See https://www.drupal.org/node/3462474');
     $this->entity->save();
   }
 

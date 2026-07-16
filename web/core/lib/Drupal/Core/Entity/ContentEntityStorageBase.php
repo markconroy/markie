@@ -1197,9 +1197,7 @@ abstract class ContentEntityStorageBase extends EntityStorageBase implements Con
    *   The sanitized list of entity key values.
    */
   protected function cleanIds(array $ids, $entity_key = 'id') {
-    $definitions = $this->entityFieldManager->getActiveFieldStorageDefinitions($this->entityTypeId);
-    $field_name = $this->entityType->getKey($entity_key);
-    if ($field_name && $definitions[$field_name]->getType() == 'integer') {
+    if ($entity_key === 'revision' || $this->entityType->hasIntegerId()) {
       $ids = array_filter($ids, function ($id) {
         return is_numeric($id) && $id == (int) $id;
       });
@@ -1398,6 +1396,16 @@ abstract class ContentEntityStorageBase extends EntityStorageBase implements Con
     // by explicitly removing the entity from the static cache.
     parent::resetCache($ids);
 
+    // The parent only clears the entity-keyed static cache. For revisionable
+    // entity types a 'preload' hook implementation can swap in a non-default
+    // revision, which is served from the static revision cache. Invalidate that
+    // too so the reloaded entity reflects the persisted state rather than any
+    // in-memory modifications.
+    if ($this->entityType->isStaticallyCacheable() && $this->entityType->isRevisionable()) {
+      $revision_cache_tag = "{$this->entityTypeId}:{$id}:revisions";
+      $this->memoryCache->invalidateTags([$revision_cache_tag]);
+    }
+
     // Gather entities from a 'preload' hook. This hook can be used by modules
     // that need, for example, to return a different revision than the default
     // one for revisionable entity types.
@@ -1518,6 +1526,34 @@ abstract class ContentEntityStorageBase extends EntityStorageBase implements Con
     if ($this->entityType->isPersistentlyCacheable()) {
       $this->cacheBackend->deleteMultiple($cache_ids);
     }
+  }
+
+  /**
+   * Assembles a partial entity structure with initial IDs.
+   *
+   * @param array{entity_id: int|string, revision_id?: int|string, bundle?: string} $entity_identifiers
+   *   Array with the following keys:
+   *   - entity_id (required),
+   *   - revision_id (optional),
+   *   - bundle (optional).
+   *
+   * @return \Drupal\Core\Entity\ContentEntityInterface
+   *   An entity object, initialized with the provided IDs.
+   *
+   * @internal
+   */
+  public function createEntityFromIds(array $entity_identifiers): ContentEntityInterface {
+    $id_properties = [];
+    if ($id_key = $this->entityType->getKey('id')) {
+      $id_properties[$id_key] = $entity_identifiers['entity_id'];
+    }
+    if (isset($entity_identifiers['revision_id']) && $revision_key = $this->entityType->getKey('revision')) {
+      $id_properties[$revision_key] = $entity_identifiers['revision_id'];
+    }
+    if (isset($entity_identifiers['bundle']) && $bundle_key = $this->entityType->getKey('bundle')) {
+      $id_properties[$bundle_key] = $entity_identifiers['bundle'];
+    }
+    return $this->create($id_properties);
   }
 
 }

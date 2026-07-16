@@ -6,11 +6,13 @@ use Drupal\Core\Entity\Attribute\ContentEntityType;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityChangedTrait;
+use Drupal\Core\Entity\EntityFieldValueTrait;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Flood\PrefixFloodInterface;
 use Drupal\Core\Language\LanguageInterface;
+use Drupal\Core\Session\UserSessionRepositoryInterface;
 use Drupal\user\Form\UserCancelForm;
 use Drupal\user\ProfileForm;
 use Drupal\user\ProfileTranslationHandler;
@@ -77,7 +79,7 @@ use Drupal\user\UserViewsData;
 )]
 class User extends ContentEntityBase implements UserInterface {
 
-  use EntityChangedTrait;
+  use EntityChangedTrait, EntityFieldValueTrait;
 
   /**
    * Stores a reference for a reusable anonymous user entity.
@@ -136,11 +138,11 @@ class User extends ContentEntityBase implements UserInterface {
     parent::postSave($storage, $update);
 
     if ($update) {
-      $session_manager = \Drupal::service('session_manager');
+      $session_repository = \Drupal::service(UserSessionRepositoryInterface::class);
       // If the password has been changed, delete all open sessions for the
       // user and recreate the current one.
       if ($this->pass->value != $this->getOriginal()->pass->value) {
-        $session_manager->delete($this->id());
+        $session_repository->deleteAll($this->id());
         if ($this->id() == \Drupal::currentUser()->id()) {
           \Drupal::service('session')->migrate();
         }
@@ -160,7 +162,7 @@ class User extends ContentEntityBase implements UserInterface {
 
       // If the user was blocked, delete the user's sessions to force a logout.
       if ($this->getOriginal()->status->value != $this->status->value && $this->status->value == 0) {
-        $session_manager->delete($this->id());
+        $session_repository->deleteAll($this->id());
       }
 
       // Send emails after we have the new user object.
@@ -210,7 +212,7 @@ class User extends ContentEntityBase implements UserInterface {
   /**
    * {@inheritdoc}
    */
-  public function hasRole($rid) {
+  public function hasRole(string $rid) {
     return in_array($rid, $this->getRoles());
   }
 
@@ -287,7 +289,7 @@ class User extends ContentEntityBase implements UserInterface {
    * {@inheritdoc}
    */
   public function getLastAccessedTime() {
-    return $this->get('access')->value;
+    return (int) $this->getFieldValue('access', 'value');
   }
 
   /**
@@ -317,7 +319,7 @@ class User extends ContentEntityBase implements UserInterface {
    * {@inheritdoc}
    */
   public function isActive() {
-    return $this->get('status')->value == 1;
+    return $this->getFieldValue('status', 'value') == 1;
   }
 
   /**
@@ -350,7 +352,7 @@ class User extends ContentEntityBase implements UserInterface {
    * {@inheritdoc}
    */
   public function getTimeZone() {
-    return $this->get('timezone')->value;
+    return $this->getFieldValue('timezone', 'value');
   }
 
   /**
@@ -406,7 +408,7 @@ class User extends ContentEntityBase implements UserInterface {
    * {@inheritdoc}
    */
   public function getAccountName() {
-    return $this->get('name')->value ?: '';
+    return $this->getFieldValue('name', 'value') ?: '';
   }
 
   /**
@@ -612,6 +614,16 @@ class User extends ContentEntityBase implements UserInterface {
    */
   public static function getAllowedConfigurableLanguageCodes() {
     return array_keys(\Drupal::languageManager()->getLanguages(LanguageInterface::STATE_CONFIGURABLE));
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function &__get($name): mixed {
+    if ($name == 'password') {
+      @trigger_error("Getting the password property is deprecated in drupal:11.4.0 and is removed from drupal:12.0.0. See https://www.drupal.org/node/3569185", E_USER_DEPRECATED);
+    }
+    return parent::__get($name);
   }
 
 }

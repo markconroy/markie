@@ -33,6 +33,7 @@ use Drupal\Core\Asset\AttachedAssets;
 use Drupal\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\IgnoreDeprecations;
 
 /**
  * Test coverage for various classes in the \Drupal\Core\Ajax namespace.
@@ -496,11 +497,11 @@ class AjaxCommandsTest extends UnitTestCase {
    * @legacy-covers \Drupal\Core\Ajax\OpenDialogCommand
    * @legacy-covers \Drupal\Core\Ajax\OpenOffCanvasDialogCommand
    */
-  #[Group('legacy')]
+  #[IgnoreDeprecations]
   #[DataProvider('dialogCommandProvider')]
   public function testOpenDialogCommandClass(string $class, array $args, array $expected): void {
     $short = (new \ReflectionClass($class))->getShortName();
-    $this->expectDeprecation("Passing \$dialog_options['dialogClass'] to {$short}::__construct() is deprecated in drupal:10.3.0 and will be removed in drupal:12.0.0. Use \$dialog_options['classes'] instead. See https://www.drupal.org/node/3440844");
+    $this->expectUserDeprecationMessage("Passing \$dialog_options['dialogClass'] to {$short}::__construct() is deprecated in drupal:10.3.0 and will be removed in drupal:12.0.0. Use \$dialog_options['classes'] instead. See https://www.drupal.org/node/3440844");
     $reflection = new \ReflectionClass($class);
     $command = $reflection->newInstanceArgs($args);
     $this->assertEquals($expected, $command->getDialogOptions());

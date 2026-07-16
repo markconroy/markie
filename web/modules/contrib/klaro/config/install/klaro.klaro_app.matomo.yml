@@ -21,3 +21,6 @@ javascripts:
   - matomo.js
 attachments:
   - matomo_tracking_script
+on_init: ''
+on_accept: ''
+on_decline: ''

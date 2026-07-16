@@ -59,7 +59,7 @@ class OliveroTest extends BrowserTestBase {
 
     // Optional configuration.
     \Drupal::service('module_installer')->install(
-      ['search', 'image', 'help', 'node']
+      ['search', 'image', 'help', 'node', 'search_node']
     );
     $this->rebuildAll();
     $this->drupalLogin(
@@ -86,7 +86,7 @@ class OliveroTest extends BrowserTestBase {
 
     // Enable modules that will exercise preprocess block logic.
     \Drupal::service('module_installer')->install(
-      ['search', 'menu_link_content']
+      ['search', 'menu_link_content', 'search_node']
     );
 
     // Add at least one link to the main menu.
@@ -132,6 +132,7 @@ class OliveroTest extends BrowserTestBase {
     $this->drupalGet('admin/appearance');
     $this->cssSelect('a[title="Install <strong>Test theme</strong> as default theme"]')[0]->click();
     $this->cssSelect('a[title="Uninstall Olivero theme"]')[0]->click();
+    $this->submitForm([], 'Uninstall');
     $this->assertSession()->pageTextContains('The Olivero theme has been uninstalled.');
   }
 

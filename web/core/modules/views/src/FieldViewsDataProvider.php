@@ -9,7 +9,6 @@ use Drupal\Core\Entity\Sql\SqlContentEntityStorage;
 use Drupal\Core\Field\FieldTypePluginManagerInterface;
 use Drupal\Core\Render\Markup;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
-use Drupal\field\Entity\FieldConfig;
 use Drupal\field\FieldStorageConfigInterface;
 
 /**
@@ -110,16 +109,9 @@ class FieldViewsDataProvider {
     $untranslatable_config_bundles = [];
 
     foreach ($bundles_names as $bundle) {
-      $fields[$bundle] = FieldConfig::loadByName($entity_type->id(), $bundle, $field_name);
-    }
-    foreach ($fields as $bundle => $config_entity) {
-      if (!empty($config_entity)) {
-        if ($config_entity->isTranslatable()) {
-          $translatable_configs[$bundle] = $config_entity;
-        }
-        else {
-          $untranslatable_configs[$bundle] = $config_entity;
-        }
+      $bundle_fields = $this->entityFieldManager->getFieldDefinitions($entity_type->id(), $bundle);
+      if (isset($bundle_fields[$field_name])) {
+        $fields[$bundle] = $bundle_fields[$field_name];
       }
       else {
         // https://www.drupal.org/node/2451657#comment-11462881
@@ -131,6 +123,14 @@ class FieldViewsDataProvider {
             '%field' => $field_name,
           ]
         );
+      }
+    }
+    foreach ($fields as $bundle => $config_entity) {
+      if ($config_entity->isTranslatable()) {
+        $translatable_configs[$bundle] = $config_entity;
+      }
+      else {
+        $untranslatable_configs[$bundle] = $config_entity;
       }
     }
 
@@ -293,7 +293,10 @@ class FieldViewsDataProvider {
             'title' => $label_name,
             'help' => $this->t('This is an alias of @group: @field.', ['@group' => $group_name, '@field' => $label]),
           ];
-          $also_known[] = $this->t('@group (historical data): @field', ['@group' => $group_name, '@field' => $label_name]);
+          $also_known[] = $this->t('@group (historical data): @field', [
+            '@group' => $group_name,
+            '@field' => $label_name,
+          ]);
         }
       }
       if ($aliases) {
@@ -400,7 +403,11 @@ class FieldViewsDataProvider {
               $alias_title = $this->t('@label (@name)', ['@label' => $label_name, '@name' => $field_name]);
             }
             else {
-              $alias_title = $this->t('@label (@name:@column)', ['@label' => $label_name, '@name' => $field_name, '@column' => $column]);
+              $alias_title = $this->t('@label (@name:@column)', [
+                '@label' => $label_name,
+                '@name' => $field_name,
+                '@column' => $column,
+              ]);
             }
             $aliases[] = [
               'group' => $group_name,

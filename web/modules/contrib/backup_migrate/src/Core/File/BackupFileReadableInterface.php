@@ -22,8 +22,8 @@ interface BackupFileReadableInterface extends BackupFileInterface {
    *   The number of bites to read.
    *
    * @return string
-   *   The data read from the file or NULL if the file can't be read or is at
-   *   the end of the file.
+   *   The data read from the file or empty string if the file can't be read
+   *   or is at the end of the file.
    */
   public function readBytes($size = 0);
 
@@ -61,8 +61,10 @@ interface BackupFileReadableInterface extends BackupFileInterface {
    * Move the file pointer forward a given number of bytes.
    *
    * @param int $bytes
+   *   The bytes.
    *
    * @return int
+   *   The requested integer.
    *   The number of bytes moved or -1 if the operation failed.
    */
   public function seekBytes($bytes);

@@ -3,11 +3,14 @@
 namespace Drupal\backup_migrate\Plugin\BackupMigrateSource;
 
 use Drupal\Core\Database\Database;
+use Drupal\Core\File\FileSystemInterface;
+use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\backup_migrate\Core\Config\Config;
 use Drupal\backup_migrate\Core\Filter\DBExcludeFilter;
 use Drupal\backup_migrate\Core\Main\BackupMigrateInterface;
 use Drupal\backup_migrate\Drupal\Source\DrupalMySQLiSource;
 use Drupal\backup_migrate\Drupal\EntityPlugins\SourcePluginBase;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Defines an default database source plugin.
@@ -19,12 +22,46 @@ use Drupal\backup_migrate\Drupal\EntityPlugins\SourcePluginBase;
  *   locked = true
  * )
  */
-class DefaultDBSourcePlugin extends SourcePluginBase {
+class DefaultDBSourcePlugin extends SourcePluginBase implements ContainerFactoryPluginInterface {
+
+  /**
+   * Constructs a DefaultDBSourcePlugin object.
+   *
+   * @param array $configuration
+   *   A configuration array containing information about the plugin instance.
+   * @param string $plugin_id
+   *   The plugin ID for the plugin instance.
+   * @param mixed $plugin_definition
+   *   The plugin implementation definition.
+   * @param \Drupal\Core\File\FileSystemInterface $fileSystem
+   *   The file system service.
+   */
+  public function __construct(
+    array $configuration,
+    $plugin_id,
+    $plugin_definition,
+    protected readonly FileSystemInterface $fileSystem,
+  ) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
+    return new static(
+      $configuration,
+      $plugin_id,
+      $plugin_definition,
+      $container->get('file_system')
+    );
+  }
 
   /**
    * Get the Backup and Migrate plugin object.
    *
    * @return Drupal\backup_migrate\Core\Plugin\PluginInterface
+   *   The requested integer.
    */
   public function getObject() {
     // Add the default database.
@@ -38,7 +75,7 @@ class DefaultDBSourcePlugin extends SourcePluginBase {
       foreach ($info as $key => $value) {
         $conf->set($key, $value);
       }
-      return new DrupalMySQLiSource($conf);
+      return new DrupalMySQLiSource($conf, $this->fileSystem);
     }
 
     return NULL;
@@ -54,6 +91,7 @@ class DefaultDBSourcePlugin extends SourcePluginBase {
       $config = [
         'exclude_tables' => [],
         'nodata_tables' => [
+          'cache_access_policy',
           'cache_advagg_minify',
           'cache_bootstrap',
           'cache_config',

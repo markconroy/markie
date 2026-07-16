@@ -285,6 +285,12 @@ class Renderer implements RendererInterface {
 
     // Early-return nothing if user does not have access.
     if (isset($elements['#access'])) {
+      if (!is_bool($elements['#access']) && !($elements['#access'] instanceof AccessResultInterface)) {
+        @trigger_error(
+          'Using a #access value other than a boolean or an AccessResultInterface object is deprecated in drupal:11.4.0 and is removed from drupal:13.0.0. See https://www.drupal.org/node/3549344',
+          E_USER_DEPRECATED
+        );
+      }
       // If #access is an AccessResultInterface object, we must apply its
       // cacheability metadata to the render array.
       if ($elements['#access'] instanceof AccessResultInterface) {
@@ -479,16 +485,14 @@ class Renderer implements RendererInterface {
     // Assume that if #theme is set it represents an implemented hook.
     $theme_is_implemented = isset($elements['#theme']);
     // Check the elements for insecure HTML and pass through sanitization.
-    if (isset($elements)) {
-      $markup_keys = [
-        '#description',
-        '#field_prefix',
-        '#field_suffix',
-      ];
-      foreach ($markup_keys as $key) {
-        if (!empty($elements[$key]) && is_scalar($elements[$key])) {
-          $elements[$key] = $this->xssFilterAdminIfUnsafe($elements[$key]);
-        }
+    $markup_keys = [
+      '#description',
+      '#field_prefix',
+      '#field_suffix',
+    ];
+    foreach ($markup_keys as $key) {
+      if (!empty($elements[$key]) && is_scalar($elements[$key])) {
+        $elements[$key] = $this->xssFilterAdminIfUnsafe($elements[$key]);
       }
     }
 
@@ -738,9 +742,9 @@ class Renderer implements RendererInterface {
     // depends on global state that can be modified when other placeholders are
     // being rendered: any code can add messages to render.
     // This violates the principle that each lazy builder must be able to render
-    // itself in isolation, and therefore in any order. However, we cannot
-    // change the way \Drupal\Core\Messenger\Messenger works in the Drupal 8
-    // cycle. So we have to accommodate its special needs.
+    // itself in isolation, and therefore in any order. However, we could not
+    // change the way \Drupal\Core\Messenger\Messenger worked during the
+    // Drupal 8 development cycle. So we accommodated its special needs.
     // Allowing placeholders to be rendered in a particular order (in this case:
     // last) would violate this isolation principle. Thus a monopoly is granted
     // to this one special case, with this hard-coded solution.

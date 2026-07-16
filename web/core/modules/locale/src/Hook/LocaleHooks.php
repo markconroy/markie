@@ -11,6 +11,9 @@ use Drupal\language\ConfigurableLanguageInterface;
 use Drupal\Core\Url;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Hook\Attribute\Hook;
+use Drupal\locale\LocaleSource;
+use Drupal\locale\StreamWrapper\TranslationsStream;
+use Drupal\locale\File\LocaleFileManager;
 
 /**
  * Hook implementations for locale.
@@ -125,14 +128,14 @@ class LocaleHooks {
     \Drupal::service('locale.storage')->deleteTranslations(['language' => $language->id()]);
     // Remove interface translation files.
     \Drupal::moduleHandler()->loadInclude('locale', 'inc', 'locale.bulk');
-    locale_translate_delete_translation_files([], [$language->id()]);
+    \Drupal::service(LocaleFileManager::class)->deleteTranslationFiles([], [$language->id()]);
     // Remove translated configuration objects.
     \Drupal::service('locale.config_manager')->deleteLanguageTranslations($language->id());
     // Changing the language settings impacts the interface:
     _locale_invalidate_js($language->id());
     \Drupal::cache('render')->deleteAll();
     // Clear locale translation caches.
-    locale_translation_status_delete_languages([$language->id()]);
+    \Drupal::service(LocaleSource::class)->deleteSourcesByLanguage($language->id());
     \Drupal::cache()->delete('locale:' . $language->id());
   }
 
@@ -170,22 +173,6 @@ class LocaleHooks {
   public function themesUninstalled($themes): void {
     $components['theme'] = $themes;
     locale_system_remove($components);
-  }
-
-  /**
-   * Implements hook_cron().
-   *
-   * @see \Drupal\locale\Plugin\QueueWorker\LocaleTranslation
-   */
-  #[Hook('cron')]
-  public function cron(): void {
-    // Update translations only when an update frequency was set by the admin
-    // and a translatable language was set.
-    // Update tasks are added to the queue here but processed by Drupal's cron.
-    if (\Drupal::config('locale.settings')->get('translation.update_interval_days') && locale_translatable_language_list()) {
-      \Drupal::moduleHandler()->loadInclude('locale', 'inc', 'locale.translation');
-      locale_cron_fill_queue();
-    }
   }
 
   /**
@@ -319,21 +306,14 @@ class LocaleHooks {
   #[Hook('form_system_file_system_settings_alter')]
   public function formSystemFileSystemSettingsAlter(&$form, FormStateInterface $form_state) : void {
     $form['translation_path'] = [
-      '#type' => 'textfield',
+      '#type' => 'item',
       '#title' => $this->t('Interface translations directory'),
-      '#default_value' => \Drupal::configFactory()->getEditable('locale.settings')->get('translation.path'),
-      '#maxlength' => 255,
-      '#description' => $this->t('A local file system path where interface translation files will be stored.'),
-      '#required' => TRUE,
-      '#after_build' => [
-        'system_check_directory',
-      ],
-      '#weight' => 10,
+      '#markup' => TranslationsStream::basePath(),
+      '#description' => $this->t('A local file system path where interface translation files will be stored. This must be changed in settings.php file as the "locale_translation_path" setting.'),
     ];
     if ($form['file_default_scheme']) {
       $form['file_default_scheme']['#weight'] = 20;
     }
-    $form['#submit'][] = 'locale_system_file_system_settings_submit';
   }
 
 }

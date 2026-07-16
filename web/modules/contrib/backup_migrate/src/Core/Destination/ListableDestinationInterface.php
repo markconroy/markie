@@ -18,7 +18,7 @@ interface ListableDestinationInterface extends DestinationInterface {
    * a use case for getting a list of files WITHOUT metadata?
    *
    * @return \Drupal\backup_migrate\Core\File\BackupFileInterface[]
-   *   An array of BackupFileInterface objects representing the files with
+   *   *   An array of BackupFileInterface objects representing the files with
    *   the file ids as keys. The file ids are usually file names but that
    *   is up to the implementing destination to decide. The returned files
    *   may not be readable. Use loadFileForReading to get a readable file.
@@ -29,22 +29,31 @@ interface ListableDestinationInterface extends DestinationInterface {
    * Run a basic query with sort on the list of files.
    *
    * @param array $filters
+   *   The filters.
    *   An array of metadata fields to filter by.
    * @param string $sort
+   *   The sort.
    *   A metadata field to sort by, defaults to 'datestamp'.
    * @param int $sort_direction
+   *   The sort direction.
    *   The direction to sort by, either SORT_ASC or SORT_DESC.
    * @param int $count
+   *   The maximum number of items to return.
    *   The number of records to obtain.
    * @param int $start
+   *   The start.
    *   The first item to start the result set from.
    *
    * @return mixed
+   *   The return value.
    */
   public function queryFiles(array $filters = [], $sort = 'datestamp', $sort_direction = SORT_DESC, $count = 100, $start = 0);
 
   /**
-   * @return int The number of files in the destination.
+   * Handles the count files operation.
+   *
+   * @return int
+   *   The number of files in the destination.
    */
   public function countFiles();
 
@@ -55,7 +64,7 @@ interface ListableDestinationInterface extends DestinationInterface {
    *   The id (usually the filename) of the file.
    *
    * @return bool
-   *   Whether the file exists in this destination.
+   *   *   Whether the file exists in this destination.
    */
   public function fileExists($id);
 

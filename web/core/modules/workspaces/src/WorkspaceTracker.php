@@ -125,6 +125,8 @@ class WorkspaceTracker implements WorkspaceTrackerInterface, EventSubscriberInte
           'initial_revision' => (int) $entity->isDefaultRevision(),
         ])
         ->execute();
+
+      $transaction->commitOrRelease();
     }
     catch (\Exception $e) {
       if (isset($transaction)) {
@@ -409,7 +411,7 @@ class WorkspaceTracker implements WorkspaceTrackerInterface, EventSubscriberInte
       Error::logException($this->logger, $e);
       throw $e;
     }
-    unset($transaction);
+    $transaction->commitOrRelease();
   }
 
   /**
@@ -424,6 +426,7 @@ class WorkspaceTracker implements WorkspaceTrackerInterface, EventSubscriberInte
       $transaction = $this->database->startTransaction();
       $this->doDeleteAssociations(static::TABLE, $workspace_id, $entity_type_id, $entity_ids, $revision_ids);
       $this->doDeleteAssociations(static::REVISION_TABLE, $workspace_id, $entity_type_id, $entity_ids, $revision_ids);
+      $transaction->commitOrRelease();
     }
     catch (\Exception $e) {
       if (isset($transaction)) {
@@ -551,13 +554,8 @@ class WorkspaceTracker implements WorkspaceTrackerInterface, EventSubscriberInte
     static $id_field_map = [];
 
     if (!isset($id_field_map[$entity_type_id])) {
-      $id_field = \Drupal::entityTypeManager()->getDefinition($entity_type_id)
-        ->getKey('id');
-      $field_map = \Drupal::service('entity_field.manager')->getFieldMap()[$entity_type_id];
-
-      $id_field_map[$entity_type_id] = $field_map[$id_field]['type'] !== 'integer'
-        ? 'target_entity_id_string'
-        : 'target_entity_id';
+      $entity_type = \Drupal::entityTypeManager()->getDefinition($entity_type_id);
+      $id_field_map[$entity_type_id] = $entity_type->hasIntegerId() ? 'target_entity_id' : 'target_entity_id_string';
     }
 
     return $id_field_map[$entity_type_id];

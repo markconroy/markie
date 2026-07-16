@@ -39,12 +39,11 @@ class UpdateRequirements {
    * attribute, which is an integer constant to indicate why the given status
    * is being returned (UPDATE_NOT_SECURE, UPDATE_NOT_CURRENT, or
    * UPDATE_UNKNOWN). This is used for generating the appropriate email
-   * notification messages during update_cron(), and might be useful for other
-   * modules that invoke update_runtime_requirements() to find out if the site
-   * is up to date or not.
+   * notification messages during cron runs, and might be useful for other
+   * modules to find out if the site is up to date or not.
    *
    * @see _update_message_text()
-   * @see _update_cron_notify()
+   * @see \Drupal\update\Hook\UpdateCronHooks::notify()
    * @see \Drupal\update\UpdateManagerInterface
    */
   #[Hook('runtime_requirements')]
@@ -100,7 +99,7 @@ class UpdateRequirements {
    *   An array to be included in the nested $requirements array.
    *
    * @see hook_requirements()
-   * @see update_requirements()
+   * @see Drupal\update\Hook\UpdateRequirements::runtime()
    * @see update_calculate_project_data()
    */
   protected function requirementCheck($project, $type): array {
@@ -115,9 +114,6 @@ class UpdateRequirements {
     if ($status != UpdateManagerInterface::CURRENT) {
       $requirement['reason'] = $status;
       $requirement['severity'] = RequirementSeverity::Error;
-      // When updates are available, append the available updates link to the
-      // message from _update_message_text(), and format the two translated
-      // strings together in a single paragraph.
       $requirement['description'][] = ['#markup' => _update_message_text($type, $status)];
       if (!in_array($status, [
         UpdateFetcherInterface::UNKNOWN,
@@ -125,13 +121,17 @@ class UpdateRequirements {
         UpdateFetcherInterface::NOT_FETCHED,
         UpdateFetcherInterface::FETCH_PENDING,
       ])) {
-        $requirement['description'][] = [
-          '#prefix' => ' ',
-          '#markup' => $this->t('See the <a href=":available_updates">available updates</a> page for more information.', [
-            ':available_updates' => Url::fromRoute('update.status')
-              ->toString(),
-          ]),
-        ];
+        $url = Url::fromRoute('update.status');
+        // When updates are available, if the current user has access to the
+        // available updates report, append the available updates link to the
+        // message from _update_message_text(), and format the two translated
+        // strings together in a single paragraph.
+        if ($url->access()) {
+          $requirement['description'][] = [
+            '#prefix' => ' ',
+            '#markup' => $this->t('See the <a href=":available_updates">available updates</a> page for more information.', [':available_updates' => $url->toString()]),
+          ];
+        }
       }
     }
     switch ($status) {

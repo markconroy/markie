@@ -44,6 +44,7 @@ class Source extends WrapperEntityBase {
    * Return the plugin manager.
    *
    * @return string
+   *   The requested string.
    */
   public function getPluginManager() {
     return \Drupal::service('plugin.manager.backup_migrate_source');

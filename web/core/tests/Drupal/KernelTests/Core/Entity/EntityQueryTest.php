@@ -6,6 +6,7 @@ namespace Drupal\KernelTests\Core\Entity;
 
 use Drupal\Core\Database\Database;
 use Drupal\Core\Entity\Query\QueryException;
+use Drupal\Core\Language\LanguageInterface;
 use Drupal\entity_test\Entity\EntityTest;
 use Drupal\entity_test\Entity\EntityTestMulRev;
 use Drupal\entity_test\EntityTestHelper;
@@ -288,6 +289,28 @@ class EntityQueryTest extends EntityKernelTestBase {
       ->execute();
     // Bit 0 or 1 is on but 2 and 3 are not.
     $this->assertResult(1, 2, 3);
+
+    // Passing LanguageInterface::LANGCODE_DEFAULT as the langcode makes the
+    // query join via the 'default_langcode' column instead of a literal
+    // language code match, so the condition applies to whichever language is
+    // the entity's default.
+    $entity = EntityTestMulRev::load(1);
+    $default_name = $entity->name->value;
+    $tr_name = $entity->getTranslation('tr')->name->value;
+    $this->queryResults = $this->storage
+      ->getQuery()
+      ->accessCheck(FALSE)
+      ->condition('name.value', $default_name, '=', LanguageInterface::LANGCODE_DEFAULT)
+      ->execute();
+    $this->assertResult(1);
+    // A name that lives only in a non-default translation must not match.
+    $this->queryResults = $this->storage
+      ->getQuery()
+      ->accessCheck(FALSE)
+      ->condition('name.value', $tr_name, '=', LanguageInterface::LANGCODE_DEFAULT)
+      ->execute();
+    $this->assertResult();
+
     // Now update the 'merhaba' string to xsiemax which is not a meaningful
     // word but allows us to test revisions and string operations.
     $ids = $this->storage
@@ -1469,6 +1492,28 @@ class EntityQueryTest extends EntityKernelTestBase {
       ->execute();
     $this->assertCount(1, $result);
     $this->assertEquals($entity->id(), reset($result));
+  }
+
+  /**
+   * Tests langcode key handling for revision data table joins.
+   */
+  public function testRevisionDataTableJoinUsesConfiguredLangcodeKey(): void {
+    $entity_type_manager = $this->container->get('entity_type.manager');
+    $entity_type = $entity_type_manager->getActiveDefinition('entity_test_mulrev');
+    $keys = $entity_type->getKeys();
+    $keys['langcode'] = 'language';
+    $entity_type->set('entity_keys', $keys);
+
+    $query = $this->storage
+      ->getQuery()
+      ->accessCheck(FALSE)
+      ->condition('name.value', $this->randomMachineName(), '=', 'tr')
+      ->allRevisions();
+
+    $query_string = (string) $query;
+    $this->assertStringContainsString('entity_test_mulrev_property_revision', $query_string);
+    $this->assertMatchesRegularExpression('/"entity_test_mulrev_property_revision"\."language"\s*=\s*\'tr\'/', $query_string);
+    $this->assertDoesNotMatchRegularExpression('/"entity_test_mulrev_property_revision"\."langcode"\s*=\s*\'tr\'/', $query_string);
   }
 
   /**

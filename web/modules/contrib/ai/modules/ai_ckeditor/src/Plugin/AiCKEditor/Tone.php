@@ -132,6 +132,13 @@ final class Tone extends AiCKEditorPluginBase {
   /**
    * {@inheritdoc}
    */
+  protected function getNoSelectedTextMessage(): TranslatableMarkup {
+    return $this->t('You must select some text before you can change the tone.');
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function submitConfigurationForm(array &$form, FormStateInterface $form_state) {
     $this->configuration['provider'] = $form_state->getValue('provider');
     $this->configuration['autocreate'] = (bool) $form_state->getValue('autocreate');
@@ -146,7 +153,13 @@ final class Tone extends AiCKEditorPluginBase {
    * {@inheritdoc}
    */
   public function buildCkEditorModalForm(array $form, FormStateInterface $form_state, array $settings = []) {
-    $form = parent::buildCkEditorModalForm($form, $form_state);
+    $form = parent::buildCkEditorModalForm($form, $form_state, $settings);
+
+    // If no text was selected, don't append plugin-specific fields.
+    $storage = $form_state->getStorage();
+    if (empty($storage['selected_text'])) {
+      return $form;
+    }
 
     $form['tone'] = [
       '#type' => $this->configuration['autocreate'] ? 'entity_autocomplete' : 'select',

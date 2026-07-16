@@ -27,8 +27,10 @@ class Upgrade6Test extends MigrateUpgradeExecuteTestBase {
     'config_translation',
     'contact',
     'content_translation',
+    'comment',
     'migrate_drupal_ui',
     'update',
+    'shortcut',
   ];
 
   /**
@@ -44,7 +46,7 @@ class Upgrade6Test extends MigrateUpgradeExecuteTestBase {
   protected function setUp(): void {
     parent::setUp();
     $this->loadFixture($this->getModulePath('contact') . '/tests/fixtures/drupal6.php');
-    $this->expectedLoggedErrors = 12;
+    $this->expectedLoggedErrors = 10;
     // If saving the logs, then set the admin user.
     if ($this->outputLogs) {
       $this->migratedAdminUserName = 'admin';
@@ -65,7 +67,7 @@ class Upgrade6Test extends MigrateUpgradeExecuteTestBase {
     return [
       'action' => 30,
       'base_field_override' => 6,
-      'block' => 31,
+      'block' => 28,
       'block_content' => 1,
       'block_content_type' => 1,
       'comment' => 1,
@@ -75,23 +77,22 @@ class Upgrade6Test extends MigrateUpgradeExecuteTestBase {
       'contact_message' => 0,
       'date_format' => 12,
       'editor' => 2,
-      'entity_form_display' => 7,
+      'entity_form_display' => 6,
       'entity_form_mode' => 1,
-      'entity_view_display' => 11,
-      'entity_view_mode' => 11,
-      'field_config' => 13,
-      'field_storage_config' => 10,
+      'entity_view_display' => 9,
+      'entity_view_mode' => 9,
+      'field_config' => 9,
+      'field_storage_config' => 7,
       'file' => 1,
       'filter_format' => 7,
       'image_style' => 4,
       'language_content_settings' => 4,
-      'menu' => 8,
+      'menu' => 10,
       'menu_link_content' => 6,
       'node' => 1,
       'node_type' => 2,
       'path_alias' => 0,
-      'search_page' => 3,
-      'shortcut' => 2,
+      'shortcut' => 0,
       'shortcut_set' => 1,
       'taxonomy_term' => 1,
       'taxonomy_vocabulary' => 1,
@@ -145,7 +146,6 @@ class Upgrade6Test extends MigrateUpgradeExecuteTestBase {
       'Option Widgets',
       'Path',
       'Profile translation',
-      'Search',
       'String translation',
       'Synchronize translations',
       'System',
@@ -175,6 +175,7 @@ class Upgrade6Test extends MigrateUpgradeExecuteTestBase {
       'Aggregator',
       'Book',
       'Forum',
+      'Search',
       'Statistics',
     ];
   }

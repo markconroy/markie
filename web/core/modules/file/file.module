@@ -234,15 +234,13 @@ function file_save_upload($form_field_name, $validators = [], $destination = FAL
         continue;
       }
       $file = $result->getFile();
-      // If the filename has been modified, let the user know.
-      if ($result->isRenamed()) {
-        if ($result->isSecurityRename()) {
-          $message = t('For security reasons, your upload has been renamed to %filename.', ['%filename' => $file->getFilename()]);
-        }
-        else {
-          $message = t('Your upload has been renamed to %filename.', ['%filename' => $file->getFilename()]);
-        }
-        \Drupal::messenger()->addStatus($message);
+      // Log security renames to help detect potential malicious uploads.
+      if ($result->isSecurityRename()) {
+        \Drupal::logger('file')
+          ->notice('For security reasons, the uploaded file %original_filename has been renamed to %filename.', [
+            '%original_filename' => $result->getOriginalFilename(),
+            '%filename' => $file->getFilename(),
+          ]);
       }
       $files[$i] = $file;
     }
@@ -256,7 +254,11 @@ function file_save_upload($form_field_name, $validators = [], $destination = FAL
     }
     catch (FileWriteException) {
       \Drupal::messenger()->addError(t('File upload error. Could not move uploaded file.'));
-      \Drupal::logger('file')->notice('Upload error. Could not move uploaded file %file to destination %destination.', ['%file' => $uploaded_file->getClientOriginalName(), '%destination' => $destination . '/' . $uploaded_file->getClientOriginalName()]);
+      \Drupal::logger('file')
+        ->notice('Upload error. Could not move uploaded file %file to destination %destination.', [
+          '%file' => $uploaded_file->getClientOriginalName(),
+          '%destination' => $destination . '/' . $uploaded_file->getClientOriginalName(),
+        ]);
       $files[$i] = FALSE;
     }
     catch (FileException) {
@@ -313,7 +315,11 @@ function file_managed_file_save_upload($element, FormStateInterface $form_state)
 
   $destination = $element['#upload_location'] ?? NULL;
   if (isset($destination) && !\Drupal::service('file_system')->prepareDirectory($destination, FileSystemInterface::CREATE_DIRECTORY)) {
-    \Drupal::logger('file')->notice('The upload directory %directory for the file field %name could not be created or is not accessible. A newly uploaded file could not be saved in this directory as a consequence, and the upload was canceled.', ['%directory' => $destination, '%name' => $element['#field_name']]);
+    \Drupal::logger('file')
+      ->notice('The upload directory %directory for the file field %name could not be created or is not accessible. A newly uploaded file could not be saved in this directory as a consequence, and the upload was canceled.', [
+        '%directory' => $destination,
+        '%name' => $element['#field_name'],
+      ]);
     $form_state->setError($element, t('The file could not be uploaded.'));
     return FALSE;
   }
@@ -430,7 +436,7 @@ function template_preprocess_file_upload_help(&$variables): void {
  * @param \Drupal\Core\Field\FieldDefinitionInterface|null $field
  *   (optional) A field definition to be used for this check. If given,
  *   limits the reference check to the given field. Defaults to NULL.
- * @param int $age
+ * @param string $age
  *   (optional) A constant that specifies which references to count. Use
  *   EntityStorageInterface::FIELD_LOAD_REVISION (the default) to retrieve all
  *   references within all revisions or
@@ -447,8 +453,14 @@ function template_preprocess_file_upload_help(&$variables): void {
  *   entity_id and the value is an entity referencing this file.
  *
  * @ingroup file
+ *
+ * @deprecated in drupal:11.4.0 and is removed from drupal:13.0.0. Use
+ *   \Drupal::service(\Drupal\file\FileReferenceResolver::class) instead.
+ *
+ * @see https://www.drupal.org/node/3573884
  */
 function file_get_file_references(FileInterface $file, ?FieldDefinitionInterface $field = NULL, $age = EntityStorageInterface::FIELD_LOAD_REVISION, $field_type = 'file') {
+  @trigger_error(__FUNCTION__ . '() is deprecated in drupal:11.4.0 and is removed from drupal:13.0.0. Use \Drupal::service(\Drupal\file\FileReferenceResolver::class)->getReferences($file) instead. See https://www.drupal.org/node/3573884', E_USER_DEPRECATED);
   $references = &drupal_static(__FUNCTION__, []);
   $field_columns = &drupal_static(__FUNCTION__ . ':field_columns', []);
 
@@ -524,8 +536,14 @@ function file_get_file_references(FileInterface $file, ?FieldDefinitionInterface
  * @return bool
  *   The field column if the field references {file_managed}.fid, typically
  *   fid, FALSE if it does not.
+ *
+ * @deprecated in drupal:11.4.0 and is removed from drupal:13.0.0. There is no
+ *   replacement.
+ *
+ * @see https://www.drupal.org/node/3573884
  */
 function file_field_find_file_reference_column(FieldDefinitionInterface $field) {
+  @trigger_error(__FUNCTION__ . '() is deprecated in drupal:11.4.0 and is removed from drupal:13.0.0. There is no replacement. See https://www.drupal.org/node/3573884', E_USER_DEPRECATED);
   $schema = $field->getFieldStorageDefinition()->getSchema();
   foreach ($schema['foreign keys'] as $data) {
     if ($data['table'] == 'file_managed') {
@@ -548,6 +566,6 @@ function file_field_find_file_reference_column(FieldDefinitionInterface $field) 
  * @see https://www.drupal.org/node/3534099
  */
 function file_system_settings_submit(array &$form, FormStateInterface $form_state): void {
-  @trigger_error(__FUNCTION__ . ' is deprecated in drupal:11.3.0 and is removed from drupal:12.0.0. Use \Drupal\file\Hook\FileHooks::settingsSubmit() instead. See https://www.drupal.org/node/3534099', E_USER_DEPRECATED);
+  @trigger_error(__FUNCTION__ . '() is deprecated in drupal:11.3.0 and is removed from drupal:12.0.0. Use \Drupal\file\Hook\FileHooks::settingsSubmit() instead. See https://www.drupal.org/node/3534099', E_USER_DEPRECATED);
   \Drupal::service(FileFormHooks::class)->settingsSubmit($form, $form_state);
 }

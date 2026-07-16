@@ -15,7 +15,7 @@ use Drupal\backup_migrate\Core\Service\ArchiveReaderInterface;
 use Drupal\backup_migrate\Core\Service\ArchiveWriterInterface;
 
 /**
- *
+ * Provides the file directory source class.
  *
  * @package Drupal\backup_migrate\Core\Source
  */
@@ -24,12 +24,16 @@ class FileDirectorySource extends PluginBase implements SourceInterface, FilePro
   use PluginCallerTrait;
 
   /**
-   * @var \Drupal\backup_migrate\Core\Service\ArchiveWriterInterface
+   * Stores the value.
+   *
+   * @var \Drupal\backup_migrate\Core\Service\ArchiveWriterInterface The archive writer
    */
   private $archiveWriter;
 
   /**
-   * @var \Drupal\backup_migrate\Core\Service\ArchiveReaderInterface
+   * Stores the value.
+   *
+   * @var \Drupal\backup_migrate\Core\Service\ArchiveReaderInterface The archive reader
    */
   private $archiveReader;
 
@@ -116,11 +120,14 @@ class FileDirectorySource extends PluginBase implements SourceInterface, FilePro
    * Get a list if files to be backed up from the given directory.
    *
    * @param string $dir
+   *   The dir.
    *   The name of the directory to list.
    *
    * @return array
+   *   A render or configuration array.
    *
-   * @throws \Drupal\backup_migrate\Core\Exception\BackupMigrateException
+   * @throws \Drupal\backup_migrate\Core\Exception\BackupMigrateException.
+   *
    * @throws \Drupal\backup_migrate\Core\Exception\IgnorableException
    *
    * @internal param $directory
@@ -145,7 +152,7 @@ class FileDirectorySource extends PluginBase implements SourceInterface, FilePro
     }
 
     // Get a filtered list if files from the directory.
-    list($out, $errors) = $this->getFilesFromDirectory($dir);
+    [$out, $errors] = $this->getFilesFromDirectory($dir);
 
     // Alert the user to any errors there might have been.
     if ($errors) {
@@ -162,7 +169,10 @@ class FileDirectorySource extends PluginBase implements SourceInterface, FilePro
       else {
         // @todo Finish this.
         // @code
-        // throw new IgnorableException('!count files could not be read: (!files).', ['!files' => $filesmsg]);.
+        // throw new IgnorableException(
+        //   '!count files could not be read: (!files).',
+        //   ['!files' => $filesmsg]
+        // );.
         // @encode
         // @todo Log the ignored files.
       }
@@ -172,10 +182,17 @@ class FileDirectorySource extends PluginBase implements SourceInterface, FilePro
   }
 
   /**
-   * @param $base_path
+   * Gets files from a directory.
+   *
+   * @param mixed $base_path
+   *   The base path.
    *   The name of the directory to list. This must always end in '/'.
    * @param string $subdir
+   *   The subdir.
+   *
    * @return array
+   *   A render or configuration array.
+   *
    * @internal param string $dir
    */
   protected function getFilesFromDirectory($base_path, $subdir = '') {
@@ -200,7 +217,7 @@ class FileDirectorySource extends PluginBase implements SourceInterface, FilePro
           ]);
           if ($path) {
             if (is_dir($path)) {
-              list($sub_files, $sub_errors) =
+              [$sub_files, $sub_errors] =
                 $this->getFilesFromDirectory($base_path, $subdir . $file . '/');
 
               // Add the directory if it is empty.
@@ -230,28 +247,40 @@ class FileDirectorySource extends PluginBase implements SourceInterface, FilePro
   }
 
   /**
+   * Sets the archive writer.
+   *
    * @param \Drupal\backup_migrate\Core\Service\ArchiveWriterInterface $writer
+   *   The writer.
    */
   public function setArchiveWriter(ArchiveWriterInterface $writer) {
     $this->archiveWriter = $writer;
   }
 
   /**
+   * Gets the archive writer.
+   *
    * @return \Drupal\backup_migrate\Core\Service\ArchiveWriterInterface
+   *   The requested integer.
    */
   public function getArchiveWriter() {
     return $this->archiveWriter;
   }
 
   /**
+   * Gets the archive reader.
+   *
    * @return \Drupal\backup_migrate\Core\Service\ArchiveReaderInterface
+   *   The requested integer.
    */
   public function getArchiveReader() {
     return $this->archiveReader;
   }
 
   /**
+   * Sets the archive reader.
+   *
    * @param \Drupal\backup_migrate\Core\Service\ArchiveReaderInterface $reader
+   *   The reader.
    */
   public function setArchiveReader(ArchiveReaderInterface $reader) {
     $this->archiveReader = $reader;
@@ -261,8 +290,10 @@ class FileDirectorySource extends PluginBase implements SourceInterface, FilePro
    * Get a definition for user-configurable settings.
    *
    * @param array $params
+   *   The message parameters.
    *
    * @return array
+   *   A render or configuration array.
    */
   public function configSchema(array $params = []) {
     $schema = [];
@@ -282,6 +313,7 @@ class FileDirectorySource extends PluginBase implements SourceInterface, FilePro
    * Get the default values for the plugin.
    *
    * @return \Drupal\backup_migrate\Core\Config\Config
+   *   The return value.
    */
   public function configDefaults() {
     return new Config([

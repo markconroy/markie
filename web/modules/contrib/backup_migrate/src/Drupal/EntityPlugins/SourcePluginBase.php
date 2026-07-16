@@ -5,7 +5,7 @@ namespace Drupal\backup_migrate\Drupal\EntityPlugins;
 use Drupal\backup_migrate\Core\Main\BackupMigrateInterface;
 
 /**
- *
+ * Provides the source plugin base class.
  *
  * @package Drupal\backup_migrate\Drupal\EntityPlugins
  */

@@ -81,6 +81,7 @@ return array(
     'SebastianBergmann\\Diff\\Output\\UnifiedDiffOutputBuilder' => $vendorDir . '/sebastian/diff/src/Output/UnifiedDiffOutputBuilder.php',
     'SebastianBergmann\\Diff\\Parser' => $vendorDir . '/sebastian/diff/src/Parser.php',
     'SebastianBergmann\\Diff\\TimeEfficientLongestCommonSubsequenceCalculator' => $vendorDir . '/sebastian/diff/src/TimeEfficientLongestCommonSubsequenceCalculator.php',
+    'SortDirection' => $vendorDir . '/symfony/polyfill-php86/Resources/stubs/SortDirection.php',
     'Stringable' => $vendorDir . '/marc-mabe/php-enum/stubs/Stringable.php',
     'Symfony\\Component\\DependencyInjection\\ContainerInterface' => $vendorDir . '/symfony/dependency-injection/ContainerInterface.php',
     'Symfony\\Component\\HttpFoundation\\FileBag' => $vendorDir . '/symfony/http-foundation/FileBag.php',

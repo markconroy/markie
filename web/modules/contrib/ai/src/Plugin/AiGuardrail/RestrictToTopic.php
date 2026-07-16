@@ -16,9 +16,7 @@ use Drupal\ai\OperationType\Chat\ChatInput;
 use Drupal\ai\OperationType\Chat\ChatMessage;
 use Drupal\ai\OperationType\InputInterface;
 use Drupal\ai\OperationType\OutputInterface;
-use Drupal\ai\Service\AiProviderFormHelper;
 use Drupal\ai\Service\PromptJsonDecoder\PromptJsonDecoderInterface;
-use Drupal\ai\Utility\CastUtility;
 use Drupal\ai\Utility\Textarea;
 use Drupal\Component\Plugin\ConfigurableInterface;
 use Drupal\Core\Form\FormStateInterface;
@@ -38,7 +36,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
     "Checks if text's main topic is specified within a list of valid topics."
   ),
 )]
-final class RestrictToTopic extends AiGuardrailPluginBase implements ConfigurableInterface, PluginFormInterface, ContainerFactoryPluginInterface, NonDeterministicGuardrailInterface, NonStreamableGuardrailInterface {
+final class RestrictToTopic extends AiGuardrailPluginBase implements ConfigurableInterface, ContainerFactoryPluginInterface, PluginFormInterface, NonDeterministicGuardrailInterface, NonStreamableGuardrailInterface {
 
   use NeedsAiPluginManagerTrait;
   use StringTranslationTrait;
@@ -47,7 +45,6 @@ final class RestrictToTopic extends AiGuardrailPluginBase implements Configurabl
     array $configuration,
     $plugin_id,
     $plugin_definition,
-    private readonly AiProviderFormHelper $aiProviderFormHelper,
     private readonly PromptJsonDecoderInterface $promptJsonDecoder,
   ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
@@ -63,7 +60,6 @@ final class RestrictToTopic extends AiGuardrailPluginBase implements Configurabl
       $configuration,
       $plugin_id,
       $plugin_definition,
-      $container->get('ai.form_helper'),
       $container->get('ai.prompt_json_decode'),
     );
   }
@@ -153,21 +149,21 @@ final class RestrictToTopic extends AiGuardrailPluginBase implements Configurabl
       // supported Drupal version includes `#normalize_newlines` property.
       '#value_callback' => [Textarea::class, 'valueCallback'],
     ];
-
-    if ($form_state->getValue('llm_ai_provider') == NULL) {
-      $form_state->setValue('llm_ai_provider', $this->getConfiguration()['llm_provider'] ?? $this->getConfiguration()['llm_ai_provider'] ?? NULL);
-    }
-    if ($form_state->getValue('llm_ai_model') == NULL) {
-      $form_state->setValue('llm_ai_model', $this->getConfiguration()['llm_model'] ?? ($this->getConfiguration()['llm_ajax_prefix']['llm_ai_model'] ?? NULL));
-    }
-
-    $this->aiProviderFormHelper->generateAiProvidersForm($form, $form_state, 'chat', 'llm', AiProviderFormHelper::FORM_CONFIGURATION_FULL, 0, '', $this->t('AI Provider'), $this->t('The provider of the AI models used by this guardrail.'), TRUE);
-    $llm_configs = $this->getConfiguration()['llm_config'] ?? [];
-    if ($llm_configs && count($llm_configs)) {
-      foreach ($llm_configs as $key => $value) {
-        $form['llm_ajax_prefix']['llm_ajax_prefix_configuration_' . $key]['#default_value'] = $value;
-      }
-    }
+    $default_ai_provider_value = [
+      'provider' => $this->configuration['llm_provider'] ?? '',
+      'model' => $this->configuration['llm_model'] ?? '',
+      'config' => $this->configuration['llm_config'] ?? [],
+      'use_default' => empty($this->configuration['llm_provider']),
+    ];
+    $form['llm_ai_provider'] = [
+      '#type' => 'ai_provider_configuration',
+      '#title' => $this->t('AI provider'),
+      '#description' => $this->t('The AI provider and model used for internal LLM calls. Defaults to the site-wide default provider.'),
+      '#operation_type' => 'chat',
+      '#advanced_config' => TRUE,
+      '#default_provider_allowed' => TRUE,
+      '#default_value' => $default_ai_provider_value,
+    ];
 
     return $form;
   }
@@ -175,11 +171,8 @@ final class RestrictToTopic extends AiGuardrailPluginBase implements Configurabl
   /**
    * {@inheritdoc}
    */
-  public function validateConfigurationForm(
-    array &$form,
-    FormStateInterface $form_state,
-  ): void {
-    $this->aiProviderFormHelper->validateAiProvidersConfig($form, $form_state, 'chat', 'llm');
+  public function validateConfigurationForm(array &$form, FormStateInterface $form_state): void {
+    // The ai_provider_configuration element handles its own validation.
   }
 
   /**
@@ -191,20 +184,10 @@ final class RestrictToTopic extends AiGuardrailPluginBase implements Configurabl
   ): void {
     $values = $form_state->getValues();
 
-    $values['llm_model'] = $values['llm_ajax_prefix']['llm_ai_model'];
-    $values['llm_provider'] = $values['llm_ai_provider'];
-    unset($values['llm_ajax_prefix']['llm_ai_model']);
+    $values['llm_model'] = $values['llm_ai_provider']['model'];
+    $values['llm_provider'] = $values['llm_ai_provider']['provider'];
+    $values['llm_config'] = $values['llm_ai_provider']['config'];
     unset($values['llm_ai_provider']);
-
-    $provider = $this->getAiPluginManager()->createInstance($values['llm_provider']);
-    $schema = $provider->getAvailableConfiguration('chat', $values['llm_model']);
-
-    foreach ($values['llm_ajax_prefix'] as $key => $value) {
-      $real_key = str_replace('llm_ajax_prefix_configuration_', '', $key);
-      $type = $schema[$real_key]['type'] ?? 'string';
-      $values['llm_config'][$real_key] = CastUtility::typeCast($type, $value);
-    }
-    unset($values['llm_ajax_prefix']);
 
     $this->setConfiguration($values);
   }

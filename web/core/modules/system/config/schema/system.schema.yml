@@ -208,6 +208,11 @@ system.performance:
           type: boolean
           label: 'Aggregate CSS files'
         gzip:
+          # @see Drupal\Core\Asset\AssetDumper::dumpToUri()
+          type: boolean
+          label: 'Compress CSS files'
+          deprecated: "The 'gzip' config schema is deprecated in drupal:11.4.0 and is removed from drupal:12.0.0. Use the 'compress' config schema instead. See https://www.drupal.org/node/3526344."
+        compress:
           type: boolean
           label: 'Compress CSS files'
     fast_404:
@@ -234,6 +239,11 @@ system.performance:
           type: boolean
           label: 'JavaScript preprocess'
         gzip:
+          # @see Drupal\Core\Asset\AssetDumper::dumpToUri()
+          type: boolean
+          label: 'Compress JavaScript files'
+          deprecated: "The 'gzip' config schema is deprecated in drupal:11.4.0 and is removed from drupal:12.0.0. Use the 'compress' config schema instead. See https://www.drupal.org/node/3526344."
+        compress:
           type: boolean
           label: 'Compress JavaScript files.'
 
@@ -435,6 +445,7 @@ block.settings.system_menu_block:*:
   label: 'Menu block'
   constraints:
     FullyValidatable: ~
+    IgnoreActiveTrail: ~
   mapping:
     level:
       type: integer
@@ -453,6 +464,10 @@ block.settings.system_menu_block:*:
     expand_all_items:
       type: boolean
       label: 'Expand all items'
+    ignore_active_trail:
+      type: boolean
+      label: 'Ignore active trail'
+      requiredKey: false
 
 block.settings.local_tasks_block:
   type: block_settings
@@ -475,11 +490,18 @@ condition.plugin.request_path:
 
 condition.plugin.response_status:
   type: condition.plugin
+  constraints:
+    FullyValidatable: ~
   mapping:
     status_codes:
       type: sequence
       sequence:
         type: integer
+        constraints:
+          # @see \Drupal\system\Plugin\Condition\ResponseStatus::buildConfigurationForm()
+          Choice:
+            # HTTP 200 OK, HTTP 403 FORBIDDEN, HTTP 404 NOT FOUND.
+            choices: [200, 403, 404]
 
 system.feature_flags:
   type: config_object

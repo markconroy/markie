@@ -28,6 +28,35 @@
      */
     const SIDEBAR_CONTENT_EVENT = 'toggle-admin-toolbar-content';
 
+    /**
+     * Mobile mediaQuery
+     */
+    const mobileMediaQuery = window.matchMedia('(max-width: 1023px)');
+
+    /**
+     * Selector for primary mobile toolbar trigger.
+     * @type {string}
+     */
+    const mobileTriggerSelector =
+      '[data-drupal-selector="admin-toolbar-mobile-trigger"]';
+
+    /**
+     * Creates a focus trap for the admin toolbar by adding an `inert` attribute
+     * to direct children of the `<body>` other than the admin toolbar.
+     *
+     * @param {boolean} toState The new state of the sidebar.
+     */
+    function toggleFocusTrap(newState) {
+      const contentElements = document.querySelectorAll(
+        'body > *:not(:is(.admin-toolbar, .admin-toolbar-overlay))',
+      );
+
+      contentElements.forEach((el) => {
+        el.toggleAttribute('inert', newState === true);
+        el.toggleAttribute('data-admin-toolbar-inert', newState === true);
+      });
+    }
+
     if (
       once('admin-toolbar-document-triggers-listener', document.documentElement)
         .length
@@ -39,6 +68,15 @@
       setTimeout(() => {
         doc.setAttribute('data-admin-toolbar-transitions', true);
       }, 100);
+
+      // If window is resized, ensure focus trap is placed or removed.
+      mobileMediaQuery.addEventListener('change', () => {
+        if (!mobileMediaQuery.matches) {
+          toggleFocusTrap(false);
+        } else if (doc.getAttribute('data-admin-toolbar') === 'expanded') {
+          toggleFocusTrap(true);
+        }
+      });
 
       doc.addEventListener(HTML_TRIGGER_EVENT, (e) => {
         // Prevents multiple triggering while transitioning.
@@ -58,6 +96,10 @@
           newState ? 'locked' : 'unlocked',
         );
 
+        if (mobileMediaQuery.matches) {
+          toggleFocusTrap(newState);
+        }
+
         doc.querySelector('.admin-toolbar')?.dispatchEvent(
           new CustomEvent(SIDEBAR_CONTENT_EVENT, {
             detail: {
@@ -65,6 +107,11 @@
             },
           }),
         );
+
+        // If sidebar is closed manually, move focus to trigger button.
+        if (newState === false && isUserInput) {
+          document.querySelector(mobileTriggerSelector).focus();
+        }
 
         if (isUserInput) {
           document.documentElement.setAttribute(
@@ -80,6 +127,15 @@
         }, 200);
 
         Drupal.displace(true);
+      });
+
+      doc.addEventListener('keydown', (e) => {
+        if (
+          e.key === 'Escape' &&
+          doc.getAttribute('data-admin-toolbar') === 'expanded'
+        ) {
+          document.querySelector(mobileTriggerSelector).click();
+        }
       });
     }
 
@@ -112,7 +168,7 @@
 
         const triggers = once(
           'admin-toolbar-trigger',
-          '[aria-controls="admin-toolbar"]',
+          '[aria-controls="admin-toolbar"], [admin-toolbar-trigger]',
           context,
         );
 
@@ -123,7 +179,12 @@
          */
         const toggleTriggers = (toState) => {
           triggers.forEach((trigger) => {
-            trigger.setAttribute('aria-expanded', toState);
+            // We should only set `aria-expanded` on `<button>` elements.
+            // This excludes the overlay `<div>`, which should not have
+            // ARIA attributes.
+            if (trigger.matches('button')) {
+              trigger.setAttribute('aria-expanded', toState);
+            }
             const text =
               trigger.querySelector('[data-toolbar-text]') ||
               trigger.querySelector('[data-toolbar-action]');
@@ -142,7 +203,7 @@
             'false';
 
           // We need to display closed sidebar on init on mobile.
-          if (window.matchMedia('(max-width: 1023px)').matches) {
+          if (mobileMediaQuery.matches) {
             firstState = false;
           }
 

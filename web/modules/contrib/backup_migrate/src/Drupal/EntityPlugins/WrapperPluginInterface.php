@@ -17,15 +17,19 @@ interface WrapperPluginInterface extends ConfigurableInterface, DependentPluginI
    * Alter the backup_migrate object to add the source and required services.
    *
    * @param \Drupal\backup_migrate\Core\Main\BackupMigrateInterface $bam
+   *   The backup and migrate.
    *   The BackupMigrate object to add plugins and services to.
    * @param string $key
+   *   The configuration key.
    *   The id of the source to add.
    * @param array $options
+   *   The options.
    *   The alter options.
    *
    * @see hook_backup_migrate_service_object_alter()
    *
    * @return mixed
+   *   The return value.
    */
   public function alterBackupMigrate(BackupMigrateInterface $bam, $key, array $options = []);
 

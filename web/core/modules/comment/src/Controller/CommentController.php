@@ -4,7 +4,7 @@ namespace Drupal\comment\Controller;
 
 use Drupal\comment\CommentInterface;
 use Drupal\comment\CommentManagerInterface;
-use Drupal\comment\Plugin\Field\FieldType\CommentItemInterface;
+use Drupal\comment\CommentingStatus;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Cache\CacheableResponseInterface;
 use Drupal\Core\Controller\ControllerBase;
@@ -231,7 +231,7 @@ class CommentController extends ControllerBase {
         // We make sure the field value isn't set so we don't end up with a
         // redirect loop.
         $entity = clone $entity;
-        $entity->{$field_name}->status = CommentItemInterface::HIDDEN;
+        $entity->{$field_name}->status = CommentingStatus::Hidden->value;
         // Render array of the entity full view mode.
         $build['commented_entity'] = $this->entityTypeManager()->getViewBuilder($entity->getEntityTypeId())->view($entity, 'full');
         unset($build['commented_entity']['#cache']);
@@ -295,8 +295,8 @@ class CommentController extends ControllerBase {
     $access = AccessResult::allowedIfHasPermission($account, 'post comments');
 
     // If commenting is open on the entity.
-    $status = $entity->{$field_name}->status;
-    $access = $access->andIf(AccessResult::allowedIf($status == CommentItemInterface::OPEN)
+    $status = CommentingStatus::tryFrom((int) $entity->{$field_name}->status);
+    $access = $access->andIf(AccessResult::allowedIf($status == CommentingStatus::Open)
       ->addCacheableDependency($entity))
       // And if user has access to the host entity.
       ->andIf(AccessResult::allowedIf($entity->access('view')));
@@ -336,7 +336,7 @@ class CommentController extends ControllerBase {
    * @see https://www.drupal.org/node/3543039
    */
   public function renderNewCommentsNodeLinks(Request $request) {
-    @trigger_error(__FUNCTION__ . ' is deprecated in drupal:11.3.0 and is removed from drupal:12.0.0. Use \Drupal\history\Controller\HistoryController::renderNewCommentsNodeLinks instead. See https://www.drupal.org/node/3543039', E_USER_DEPRECATED);
+    @trigger_error(__FUNCTION__ . '() is deprecated in drupal:11.3.0 and is removed from drupal:12.0.0. Use \Drupal\history\Controller\HistoryController::renderNewCommentsNodeLinks instead. See https://www.drupal.org/node/3543039', E_USER_DEPRECATED);
     if (!$this->moduleHandler()->moduleExists('history')) {
       throw new NotFoundHttpException();
     }

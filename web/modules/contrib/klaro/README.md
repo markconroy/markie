@@ -152,7 +152,35 @@ Both services can be activated and control the integration of Google code.
 
 It is also possible to integrate the Google Tag Manager (GTM) with
 **Google Consent Mode v2**, see [documentation](https://klaro.org/docs/tutorials/google_tag_manager).
-See also [Issue #3484827](https://www.drupal.org/project/klaro/issues/3484827).
+
+For this, the module ships three additional, disabled by default services
+that use the `onInit`, `onAccept` and `onDecline` callbacks (Klaro > Service >
+Advanced) instead of blocking scripts directly, since the actual tags are
+managed inside GTM:
+
+* `gtm_consent_mode` (Google Tag Manager). Required, so it always runs and
+  sets the default consent state (all denied) before GTM loads. On accept it
+  pushes a `klaro-{service}-accepted` event to the `dataLayer` for every
+  accepted service, so you can add matching custom event triggers in GTM
+  (e.g. `klaro-ga_consent_mode-accepted`) to fire tags only once the visitor
+  has consented.
+* `ga_consent_mode` (Google Analytics). Updates the `analytics_storage`
+  consent signal on accept/decline.
+* `google_ads_consent_mode` (Google Ads). Updates the `ad_storage`,
+  `ad_user_data` and `ad_personalization` consent signals on accept/decline.
+
+These are recommended over the legacy `gtm` and `ga` services since Google
+Consent Mode v2 is required to respect GDPR rules.
+
+##### Recipe google_consent_mode
+
+These services are installed only during the initial installation. Updates
+typically do not make any changes to the services or install new ones. If
+you installed the module prior to version 3.1.1, you can install the new
+services using the recipe `modules/contrib/klaro/recipes/google_consent_mode`;
+this will also rename the existing apps for Google Tag Manager and
+Google Analytics. Please note that any translations you may have made
+will not be updated.
 
 #### Further Services
 

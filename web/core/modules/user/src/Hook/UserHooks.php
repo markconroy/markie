@@ -20,6 +20,7 @@ use Drupal\Core\Asset\AttachedAssetsInterface;
 use Drupal\Core\Url;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Hook\Attribute\Hook;
+use Drupal\user\OneTimeAuthentication;
 
 /**
  * Hook implementations for user.
@@ -232,7 +233,11 @@ class UserHooks {
     $original_language = $language_manager->getConfigOverrideLanguage();
     $language_manager->setConfigOverrideLanguage($language);
     $mail_config = \Drupal::config('user.mail');
-    $token_options = ['langcode' => $langcode, 'callback' => 'user_mail_tokens', 'clear' => TRUE];
+    $token_options = [
+      'langcode' => $langcode,
+      'callback' => \Drupal::service(OneTimeAuthentication::class)->tokens(...),
+      'clear' => TRUE,
+    ];
     $message['subject'] .= PlainTextOutput::renderFromHtml($token_service->replace($mail_config->get($key . '.subject'), $variables, $token_options));
     $message['body'][] = $token_service->replacePlain($mail_config->get($key . '.body'), $variables, $token_options);
     $language_manager->setConfigOverrideLanguage($original_language);
@@ -264,7 +269,7 @@ class UserHooks {
         ],
         'plugin' => 'user_add_role_action',
       ]);
-      $action->trustData()->save();
+      $action->save();
     }
     $remove_id = 'user_remove_role_action.' . $role->id();
     if (!Action::load($remove_id)) {
@@ -279,7 +284,7 @@ class UserHooks {
         ],
         'plugin' => 'user_remove_role_action',
       ]);
-      $action->trustData()->save();
+      $action->save();
     }
   }
 
@@ -301,16 +306,6 @@ class UserHooks {
     $actions = Action::loadMultiple(['user_add_role_action.' . $role->id(), 'user_remove_role_action.' . $role->id()]);
     foreach ($actions as $action) {
       $action->delete();
-    }
-  }
-
-  /**
-   * Implements hook_element_info_alter().
-   */
-  #[Hook('element_info_alter')]
-  public function elementInfoAlter(array &$types): void {
-    if (isset($types['password_confirm'])) {
-      $types['password_confirm']['#process'][] = 'user_form_process_password_confirm';
     }
   }
 

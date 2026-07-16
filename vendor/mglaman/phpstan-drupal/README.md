@@ -97,9 +97,9 @@ See the `extension-installer` documentation for more information: https://github
 
 ### Customizing rules
 
-#### Opt-in rules
+#### Default rules promoted in 2.1.0
 
-These rules are disabled by default to avoid unexpected failures in a patch release. They graduate to the default ruleset in a future minor version. Include [bleedingEdge.neon](#bleeding-edge-checks) to enable all of them at once, or enable them individually:
+As of 2.1.0, the following rules are enabled by default. Disable any of them individually if they don't fit your project:
 
 ```neon
 parameters:
@@ -108,32 +108,42 @@ parameters:
             # Enforces that OOP hook implementations using the Hook attribute have the
             # correct method signature for hook_form_alter, hook_form_FORM_ID_alter, etc.
             # Requires Drupal 10.3+ (Hook attribute).
-            hookRules: true
+            hookFormAlterRule: false
 
             # Flags non-abstract test classes whose names do not end with "Test".
-            testClassSuffixNameRule: true
+            testClassSuffixNameRule: false
 
             # Flags properties that are private or read-only in classes using
             # DependencySerializationTrait, which does not support them.
-            dependencySerializationTraitPropertyRule: true
+            dependencySerializationTraitPropertyRule: false
 
             # Flags calls to AccessResult static methods (::allowed(), ::forbidden(), etc.)
             # whose argument type already makes the condition always true or always false.
-            accessResultConditionRule: true
+            accessResultConditionRule: false
 
             # Flags addCacheableDependency() calls whose argument does not implement
             # CacheableDependencyInterface.
-            cacheableDependencyRule: true
+            cacheableDependencyRule: false
 
             # Flags logger channel objects (from LoggerChannelFactoryInterface::get()) that
             # are assigned to a property in a class using DependencySerializationTrait,
             # which cannot serialize logger channels correctly.
-            loggerFromFactoryPropertyAssignmentRule: true
+            loggerFromFactoryPropertyAssignmentRule: false
 
             # Flags direct injection of EntityStorageInterface (or a subtype) into a
             # constructor. Inject EntityTypeManagerInterface and call getStorage() instead.
-            entityStorageDirectInjectionRule: true
+            entityStorageDirectInjectionRule: false
+
+            # Flags direct use of Symfony\Component\Yaml\Yaml::parse() on Drupal-controlled
+            # YAML files, which should go through Drupal's YAML parser.
+            symfonyYamlParseRule: false
+
+            # Flags cacheability issues in entity list builder and entity operation hooks.
+            entityOperationsCacheabilityRule: false
 ```
+
+> [!NOTE]
+> `hookRules` was renamed to `hookFormAlterRule` in 2.1.0 — update your configuration if you referenced it explicitly.
 
 #### Disabling checks for extending `@internal` classes
 
@@ -163,9 +173,21 @@ parameters:
 
 Both options are enabled by default.
 
+#### Class resolver return types
+
+`ClassResolverInterface::getInstanceFromDefinition()` and `\Drupal::classResolver()` calls are narrowed to the type of the passed class name or service ID. The return value is not guaranteed at runtime: the container is checked first, and a service definition can substitute a different class. Disable the narrowing to keep `instanceof` assertions meaningful:
+
+```neon
+parameters:
+    drupal:
+        classResolverReturnType: false
+```
+
+Enabled by default. When disabled, calls fall back to the declared `object` return type.
+
 #### Bleeding-edge checks
 
-`bleedingEdge.neon` enables all [opt-in rules](#opt-in-rules) plus hook deprecation checks against `.api.php` files. New rules land here first before graduating to the default ruleset in a minor release.
+`bleedingEdge.neon` enables hook deprecation checks against `.api.php` files and stricter service-container checking. New rules land here first before graduating to the default ruleset in a minor release.
 
 ```neon
 includes:
@@ -176,17 +198,47 @@ What it currently enables:
 
 - `checkCoreDeprecatedHooksInApiFiles` — reports hook implementations deprecated in Drupal core `.api.php` files
 - `checkContribDeprecatedHooksInApiFiles` — reports hook implementations deprecated in contrib module `.api.php` files
-- `hookRules` — validates OOP hook method signatures (requires Drupal 10.3+)
-- `testClassSuffixNameRule` — non-abstract test class names must end with `Test`
-- `dependencySerializationTraitPropertyRule` — flags private or read-only properties in classes using `DependencySerializationTrait`
-- `accessResultConditionRule` — flags always-true/always-false `AccessResult` conditions
-- `cacheableDependencyRule` — flags `addCacheableDependency()` calls with non-cacheable arguments
-- `loggerFromFactoryPropertyAssignmentRule` — flags logger channels assigned to properties in classes using `DependencySerializationTrait`
-- `entityStorageDirectInjectionRule` — flags direct injection of entity storage into a constructor; inject `EntityTypeManagerInterface` and call `getStorage()` instead
-- `containerHasAlwaysTrue: false` — `ContainerInterface::has()` returns `bool` instead of always-`true` for known services, preventing false positives that may cause developers to remove legitimate conditional service guards
 
 > [!NOTE]
 > `checkDeprecatedHooksInApiFiles` is deprecated. Use `checkCoreDeprecatedHooksInApiFiles` and `checkContribDeprecatedHooksInApiFiles` instead.
+
+> [!NOTE]
+> `containerHasAlwaysTrue: false` graduated from bleeding edge to the default in 2.1.0. `ContainerInterface::has()` returns `bool` instead of always-`true` for known services, so conditional service guards stay meaningful. Restore the old inference with:
+> ```neon
+> parameters:
+>     drupal:
+>         bleedingEdge:
+>             containerHasAlwaysTrue: true
+> ```
+
+#### Config schema-based checks (experimental)
+
+Two opt-in features use Drupal's config schema files to analyze `Config::get()` calls. Both only act on config objects whose schema has the `FullyValidatable` constraint, since only those schemas are guaranteed complete. Schema files are parsed lazily on first use, so there is no cost when the features are disabled.
+
+```neon
+parameters:
+    drupal:
+        # Narrows Config::get() return types from the config schema, e.g.
+        # \Drupal::config('system.cron')->get('logging') resolves to bool|null
+        # instead of mixed. Types are nullable because any key can be absent
+        # at runtime.
+        configGetReturnType: true
+        rules:
+            # Reports Config::get() calls with a key that does not exist in the
+            # config schema, catching typos at analysis time.
+            configGetUnknownKeyRule: true
+```
+
+Recognized call patterns:
+
+- `\Drupal::config('...')->get('...')`
+- `$configFactory->get('...')->get('...')`
+- `$configFactory->getEditable('...')->get('...')`
+- `$this->config('...')->get('...')` in classes using `ConfigFormBaseTrait`
+
+The config name and key must be literal strings. Config entity schemas with wildcard names (e.g. `block.block.*`) are not supported yet, and keys beneath dynamic type references (e.g. `mailer_dsn.options.[%parent.scheme]`) are not validated.
+
+Neither feature is included in `bleedingEdge.neon` yet.
 
 #### Detecting @todo comments referencing the current Drupal.org issue (contrib CI)
 

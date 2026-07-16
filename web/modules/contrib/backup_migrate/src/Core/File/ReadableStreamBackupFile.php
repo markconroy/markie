@@ -65,9 +65,11 @@ class ReadableStreamBackupFile extends BackupFile implements BackupFileReadableI
    * Open a file for reading or writing.
    *
    * @param bool $binary
+   *   Whether the file is binary.
    *   If true open as a binary file.
    *
    * @return resource
+   *   The return value.
    *
    * @throws \Exception
    */
@@ -116,11 +118,14 @@ class ReadableStreamBackupFile extends BackupFile implements BackupFileReadableI
    * Read a line from the file.
    *
    * @param int $size
+   *   The size.
    *   The number of bites to read or 0 to read the whole file.
+   * @param bool $binary
+   *   Whether to read the file in binary mode.
    *
    * @return string
-   *   The data read from the file or NULL if the file can't be read or is at
-   *   the end of the file.
+   *   The data read from the file or empty string if the file can't be read
+   *   or is at the end of the file.
    */
   public function readBytes($size = 1024, $binary = FALSE) {
     if (!$this->isOpen()) {
@@ -129,7 +134,7 @@ class ReadableStreamBackupFile extends BackupFile implements BackupFileReadableI
     if ($this->handle && !feof($this->handle)) {
       return fread($this->handle, $size);
     }
-    return NULL;
+    return '';
   }
 
   /**
@@ -164,8 +169,10 @@ class ReadableStreamBackupFile extends BackupFile implements BackupFileReadableI
    * Move the file pointer forward a given number of bytes.
    *
    * @param int $bytes
+   *   The bytes.
    *
    * @return int
+   *   The requested integer.
    *   The number of bytes moved or -1 if the operation failed.
    */
   public function seekBytes($bytes) {

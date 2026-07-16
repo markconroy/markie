@@ -125,7 +125,7 @@ ai.tools_library:
     _controller: '\Drupal\ai\Controller\ToolsLibrary::overview'
     _title: 'Tools Library'
   requirements:
-    _permission: 'access ai tools overview'
+    _custom_access: 'ai.tools_library.ui_builder:checkAccess'
 
 # Prompt management.
 entity.ai_prompt.collection:

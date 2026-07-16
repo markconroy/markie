@@ -276,6 +276,63 @@ interface KlaroAppInterface extends ConfigEntityInterface {
   public function setCallbackCode(string $callbackCode = ''): KlaroAppInterface;
 
   /**
+   * Getter for onInit code.
+   *
+   * @return string
+   *   The onInit code.
+   */
+  public function onInit(): string;
+
+  /**
+   * Setter for onInit code.
+   *
+   * @param string $onInit
+   *   The onInit code.
+   *
+   * @return \Drupal\klaro\KlaroAppInterface
+   *   The instance.
+   */
+  public function setOnInit(string $onInit = ''): KlaroAppInterface;
+
+  /**
+   * Getter for onAccept code.
+   *
+   * @return string
+   *   The onAccept code.
+   */
+  public function onAccept(): string;
+
+  /**
+   * Setter for onAccept code.
+   *
+   * @param string $onAccept
+   *   The onAccept code.
+   *
+   * @return \Drupal\klaro\KlaroAppInterface
+   *   The instance.
+   */
+  public function setOnAccept(string $onAccept = ''): KlaroAppInterface;
+
+  /**
+   * Getter for onDecline code.
+   *
+   * @return string
+   *   The onDecline code.
+   */
+  public function onDecline(): string;
+
+  /**
+   * Setter for onDecline code.
+   *
+   * @param string $onDecline
+   *   The onDecline code.
+   *
+   * @return \Drupal\klaro\KlaroAppInterface
+   *   The instance.
+   */
+  public function setOnDecline(string $onDecline = ''): KlaroAppInterface;
+
+  /**
    * Getter for javascripts.
    *
    * @return array

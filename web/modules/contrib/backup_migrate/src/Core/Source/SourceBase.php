@@ -7,7 +7,7 @@ use Drupal\backup_migrate\Core\Plugin\FileProcessorTrait;
 use Drupal\backup_migrate\Core\Plugin\PluginBase;
 
 /**
- *
+ * Provides the source base class.
  *
  * @package Drupal\backup_migrate\Core\Source
  */

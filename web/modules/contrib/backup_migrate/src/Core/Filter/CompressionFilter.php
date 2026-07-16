@@ -3,24 +3,51 @@
 namespace Drupal\backup_migrate\Core\Filter;
 
 use Drupal\backup_migrate\Core\Config\Config;
+use Drupal\backup_migrate\Core\Exception\BackupMigrateException;
 use Drupal\backup_migrate\Core\Plugin\FileProcessorInterface;
 use Drupal\backup_migrate\Core\Plugin\FileProcessorTrait;
 use Drupal\backup_migrate\Core\Plugin\PluginBase;
 use Drupal\backup_migrate\Core\File\BackupFileReadableInterface;
 use Drupal\backup_migrate\Core\File\BackupFileWritableInterface;
+use Drupal\Core\File\FileExists;
+use Drupal\Core\File\FileSystemInterface;
+use Drupal\Core\File\Exception\FileException;
+use Drupal\Core\Utility\Token;
+use Psr\Log\LoggerInterface;
 
 /**
- *
+ * Provides the compression filter class.
  */
 class CompressionFilter extends PluginBase implements FileProcessorInterface {
 
   use FileProcessorTrait;
 
   /**
+   * Constructs a CompressionFilter object.
+   *
+   * @param \Drupal\backup_migrate\Core\Config\ConfigInterface|array $init
+   *   Initial configuration.
+   * @param \Drupal\Core\File\FileSystemInterface|null $fileSystem
+   *   The file system service.
+   * @param \Drupal\Core\Utility\Token|null $token
+   *   The Token service.
+   * @param \Psr\Log\LoggerInterface|null $logger
+   *   The Logger service.
+   */
+  public function __construct(
+    $init = [],
+    protected readonly ?FileSystemInterface $fileSystem = NULL,
+    protected readonly ?Token $token = NULL,
+    protected readonly ?LoggerInterface $logger = NULL,
+  ) {
+    parent::__construct($init);
+  }
+
+  /**
    * Get a list of supported operations and their weight.
    *
    * @return array
-   *   A list of operations keyed by the operation's name with a list of
+   *   *   A list of operations keyed by the operation's name with a list of
    *   attributes as a nested array.
    */
   public function supportedOps() {
@@ -78,6 +105,7 @@ class CompressionFilter extends PluginBase implements FileProcessorInterface {
    * Get a definition for user-configurable settings.
    *
    * @return array
+   *   A render or configuration array.
    */
   public function configSchema(array $params = []) {
     $schema = [];
@@ -103,6 +131,7 @@ class CompressionFilter extends PluginBase implements FileProcessorInterface {
    * Get the default values for the plugin.
    *
    * @return \Drupal\backup_migrate\Core\Config\Config
+   *   The return value.
    */
   public function configDefaults() {
     return new Config([
@@ -114,8 +143,10 @@ class CompressionFilter extends PluginBase implements FileProcessorInterface {
    * Run on a backup.
    *
    * @param \Drupal\backup_migrate\Core\File\BackupFileReadableInterface $file
+   *   The backup file.
    *
    * @return \Drupal\backup_migrate\Core\File\BackupFileReadableInterface
+   *   The requested integer.
    */
   public function afterBackup(BackupFileReadableInterface $file) {
     $out = $success = FALSE;
@@ -147,8 +178,10 @@ class CompressionFilter extends PluginBase implements FileProcessorInterface {
    * Run on a restore.
    *
    * @param \Drupal\backup_migrate\Core\File\BackupFileReadableInterface $file
+   *   The backup file.
    *
    * @return \Drupal\backup_migrate\Core\File\BackupFileReadableInterface
+   *   The requested integer.
    */
   public function beforeRestore(BackupFileReadableInterface $file) {
     // If the file is not a supported compression type then simply return the
@@ -184,9 +217,12 @@ class CompressionFilter extends PluginBase implements FileProcessorInterface {
    * Gzip encode a file.
    *
    * @param \Drupal\backup_migrate\Core\File\BackupFileReadableInterface $from
+   *   The from.
    * @param \Drupal\backup_migrate\Core\File\BackupFileWritableInterface $to
+   *   The to.
    *
    * @return bool
+   *   TRUE when successful, FALSE otherwise.
    */
   protected function gzipEncode(BackupFileReadableInterface $from, BackupFileWritableInterface $to) {
     $success = FALSE;
@@ -201,7 +237,7 @@ class CompressionFilter extends PluginBase implements FileProcessorInterface {
         gzclose($fp_out);
 
         // Get the compressed filesize and set it.
-        $fileszc = filesize(\Drupal::service('file_system')->realpath($to->realpath()));
+        $fileszc = filesize($this->realpath($to->realpath()));
         $to->setMeta('filesize', $fileszc);
       }
     }
@@ -213,9 +249,12 @@ class CompressionFilter extends PluginBase implements FileProcessorInterface {
    * Gzip decode a file.
    *
    * @param \Drupal\backup_migrate\Core\File\BackupFileReadableInterface $from
+   *   The from.
    * @param \Drupal\backup_migrate\Core\File\BackupFileWritableInterface $to
+   *   The to.
    *
    * @return bool
+   *   TRUE when successful, FALSE otherwise.
    */
   protected function gzipDecode(BackupFileReadableInterface $from, BackupFileWritableInterface $to) {
     $success = FALSE;
@@ -238,9 +277,12 @@ class CompressionFilter extends PluginBase implements FileProcessorInterface {
    * BZip encode a file.
    *
    * @param \Drupal\backup_migrate\Core\File\BackupFileReadableInterface $from
+   *   The from.
    * @param \Drupal\backup_migrate\Core\File\BackupFileWritableInterface $to
+   *   The to.
    *
    * @return bool
+   *   TRUE when successful, FALSE otherwise.
    */
   protected function bzipEncode(BackupFileReadableInterface $from, BackupFileWritableInterface $to) {
     $success = FALSE;
@@ -254,7 +296,7 @@ class CompressionFilter extends PluginBase implements FileProcessorInterface {
         bzclose($fp_out);
 
         // Get the compressed filesize and set it.
-        $fileszc = filesize(\Drupal::service('file_system')->realpath($to->realpath()));
+        $fileszc = filesize($this->realpath($to->realpath()));
         $to->setMeta('filesize', $fileszc);
       }
     }
@@ -266,9 +308,12 @@ class CompressionFilter extends PluginBase implements FileProcessorInterface {
    * BZip decode a file.
    *
    * @param \Drupal\backup_migrate\Core\File\BackupFileReadableInterface $from
+   *   The from.
    * @param \Drupal\backup_migrate\Core\File\BackupFileWritableInterface $to
+   *   The to.
    *
    * @return bool
+   *   TRUE when successful, FALSE otherwise.
    */
   protected function bzipDecode(BackupFileReadableInterface $from, BackupFileWritableInterface $to) {
     $success = FALSE;
@@ -291,26 +336,46 @@ class CompressionFilter extends PluginBase implements FileProcessorInterface {
    * Zip encode a file.
    *
    * @param \Drupal\backup_migrate\Core\File\BackupFileReadableInterface $from
+   *   The from.
    *   The source file.
    * @param \Drupal\backup_migrate\Core\File\BackupFileWritableInterface $to
+   *   The to.
    *   The destination file.
    *
    * @return bool
+   *   TRUE when successful, FALSE otherwise.
    */
   protected function zipEncode(BackupFileReadableInterface $from, BackupFileWritableInterface $to) {
     $success = FALSE;
 
     if (class_exists('ZipArchive')) {
       $zip = new \ZipArchive();
-      $res = $zip->open(\Drupal::service('file_system')->realpath($to->realpath()), \ZipArchive::CREATE);
-      if ($res === TRUE) {
-        $zip->addFile(\Drupal::service('file_system')->realpath($from->realpath()), $from->getFullName());
+      $temp_dir = $this->fileSystem->getTempDirectory();
+      $temp_file = $temp_dir . '/' . ($this->token ? $this->token->replace('[current-user:uid]') : \uniqid()) . '-' . time() . '.zip';
+
+      if ($zip->open($temp_file, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) === TRUE) {
+        $zip->addFile($this->fileSystem->realpath($from->realpath()), $from->getFullName());
+        $success = $zip->close();
       }
-      $success = $zip->close();
+
+      if ($success) {
+        // Move the temporary file to its final destination.
+        try {
+          $this->fileSystem->move($temp_file, $to->realpath(), FileExists::Replace);
+          // Get the compressed filesize and set it.
+          $fileszc = filesize($to->realpath());
+          $to->setMeta('filesize', $fileszc);
+        }
+        catch (FileException $e) {
+          // Handle file move errors.
+          if ($this->logger) {
+            $this->logger->error('Error moving the temporary zip file to the final destination: @error', [
+              '@error' => $e->getMessage(),
+            ]);
+          }
+        }
+      }
     }
-    // Get the compressed filesize and set it.
-    $fileszc = filesize(\Drupal::service('file_system')->realpath($to->realpath()));
-    $to->setMeta('filesize', $fileszc);
 
     return $success;
   }
@@ -319,15 +384,18 @@ class CompressionFilter extends PluginBase implements FileProcessorInterface {
    * Gzip decode a file.
    *
    * @param \Drupal\backup_migrate\Core\File\BackupFileReadableInterface $from
+   *   The from.
    * @param \Drupal\backup_migrate\Core\File\BackupFileWritableInterface $to
+   *   The to.
    *
    * @return bool
+   *   TRUE when successful, FALSE otherwise.
    */
   protected function zipDecode(BackupFileReadableInterface $from, BackupFileWritableInterface $to) {
     $success = FALSE;
     if (class_exists('ZipArchive')) {
       $zip = new \ZipArchive();
-      if ($zip->open(\Drupal::service('file_system')->realpath($from->realpath()))) {
+      if ($zip->open($this->realpath($from->realpath()))) {
         $filename = ($zip->getNameIndex(0));
         if ($fp_in = $zip->getStream($filename)) {
           while (!feof($fp_in)) {
@@ -345,6 +413,7 @@ class CompressionFilter extends PluginBase implements FileProcessorInterface {
    * Get the compression options as an options array for a form item.
    *
    * @return array
+   *   A render or configuration array.
    */
   protected function availableCompressionAlgorithms() {
     $compression_options = ["none" => ("No Compression")];
@@ -361,10 +430,28 @@ class CompressionFilter extends PluginBase implements FileProcessorInterface {
   }
 
   /**
+   * Resolves a path through Drupal's file system service.
+   *
+   * @param string $path
+   *   The path to resolve.
+   *
+   * @return string|false
+   *   The resolved real path, or FALSE on failure.
+   *
+   * @throws \Drupal\backup_migrate\Core\Exception\BackupMigrateException
+   */
+  protected function realpath($path) {
+    if (!$this->fileSystem) {
+      throw new BackupMigrateException('Cannot compress backup because the file system service is missing.');
+    }
+    return $this->fileSystem->realpath($path);
+  }
+
+  /**
    * Get the default compression algorithm based on those available.
    *
    * @return string
-   *   The machine name of the algorithm.
+   *   *   The machine name of the algorithm.
    */
   protected function defaultCompressionAlgorithm() {
     $available = array_keys($this->availableCompressionAlgorithms());

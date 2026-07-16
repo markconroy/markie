@@ -26,16 +26,6 @@ interface BackupFileWritableInterface extends BackupFileReadableInterface {
   public function writeAll($data);
 
   /**
-   * Get a metadata value.
-   *
-   * @param string $key The key for the metadata item.
-   *
-   * @return mixed
-   *   The value of the metadata for this file.
-   */
-  // Public function getMeta($key);
-
-  /**
    * Set a metadata value.
    *
    * @param string $key

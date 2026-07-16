@@ -6,10 +6,12 @@ namespace Drupal\node\Hook;
 
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Component\Utility\Xss;
+use Drupal\Core\Entity\EntityDisplayRepositoryInterface;
 use Drupal\node\Entity\NodeType;
 use Drupal\Core\Url;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Hook\Attribute\Hook;
+use Drupal\node\NodeAccessRebuild;
 
 /**
  * Help hook implementation for node.
@@ -17,6 +19,11 @@ use Drupal\Core\Hook\Attribute\Hook;
 class NodeHelpHooks {
 
   use StringTranslationTrait;
+
+  public function __construct(
+    protected readonly NodeAccessRebuild $nodeAccessRebuild,
+    protected readonly EntityDisplayRepositoryInterface $entityDisplayRepository,
+  ) {}
 
   /**
    * Implements hook_help().
@@ -26,7 +33,7 @@ class NodeHelpHooks {
     // Remind site administrators about the {node_access} table being flagged
     // for rebuild. We don't need to issue the message on the confirm form, or
     // while the rebuild is being processed.
-    if ($route_name != 'node.configure_rebuild_confirm' && $route_name != 'system.batch_page.html' && $route_name != 'help.page.node' && $route_name != 'help.main' && \Drupal::currentUser()->hasPermission('rebuild node access permissions') && node_access_needs_rebuild()) {
+    if ($route_name != 'node.configure_rebuild_confirm' && $route_name != 'system.batch_page.html' && $route_name != 'help.page.node' && $route_name != 'help.main' && \Drupal::currentUser()->hasPermission('rebuild node access permissions') && $this->nodeAccessRebuild->needsRebuild()) {
       if ($route_name == 'system.status') {
         $message = $this->t('The content access permissions need to be rebuilt.');
       }
@@ -81,10 +88,30 @@ class NodeHelpHooks {
         $type = $route_match->getParameter('node_type');
         return '<p>' . $this->t('Content items can be edited using different form modes. Here, you can define which fields are shown and hidden when %type content is edited in each form mode, and define how the field form widgets are displayed in each form mode.', ['%type' => $type->label()]) . '</p>';
 
+      case 'entity.entity_view_display_overview.node':
+        $type = $route_match->getParameter('node_type');
+        assert($type instanceof NodeType);
+        return '<p>' . $this->t('This page lists all available view modes for %type. Click <em>Manage</em> on any enabled view mode to configure which fields are shown and how they are displayed.', [
+          '%type' => $type->label(),
+        ]) . '</p>';
+
       case 'entity.entity_view_display.node.default':
       case 'entity.entity_view_display.node.view_mode':
         $type = $route_match->getParameter('node_type');
-        return '<p>' . $this->t('Content items can be displayed using different view modes: Teaser, Full content, Print, RSS, etc. <em>Teaser</em> is a short format that is typically used in lists of multiple content items. <em>Full content</em> is typically used when the content is displayed on its own page.') . '</p><p>' . $this->t('Here, you can define which fields are shown and hidden when %type content is displayed in each view mode, and define how the fields are displayed in each view mode.', ['%type' => $type->label()]) . '</p>';
+        assert($type instanceof NodeType);
+        $view_mode_name = $route_match->getParameter('view_mode_name') ?? 'default';
+
+        // Get view mode label.
+        $view_modes = $this->entityDisplayRepository->getViewModes('node');
+        $view_mode_label = $view_mode_name;
+        if (isset($view_modes[$view_mode_name])) {
+          $view_mode_label = $view_modes[$view_mode_name]['label'];
+        }
+
+        return '<p>' . $this->t('Configure which fields are shown and how they are displayed when %type content is displayed in <em>@view_mode</em> view mode. Use the drag handles to reorder fields, and drag fields to the <em>Disabled</em> region to hide them.', [
+          '%type' => $type->label(),
+          '@view_mode' => $view_mode_label,
+        ]) . '</p>';
 
       case 'entity.node.version_history':
         return '<p>' . $this->t('Revisions allow you to track differences between multiple versions of your content, and revert to older versions.') . '</p>';

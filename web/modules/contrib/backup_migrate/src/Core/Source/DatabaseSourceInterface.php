@@ -3,7 +3,7 @@
 namespace Drupal\backup_migrate\Core\Source;
 
 /**
- * Interface DatabaseSourceInterface.
+ * Defines an interface for database backup sources.
  *
  * @package Drupal\backup_migrate\Core\Source
  */
@@ -20,6 +20,7 @@ interface DatabaseSourceInterface extends SourceInterface {
    * Each entry must have at least a 'name' key containing the table name.
    *
    * @return array
+   *   A render or configuration array.
    */
   public function getTables();
 

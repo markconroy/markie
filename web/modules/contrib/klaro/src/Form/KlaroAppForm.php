@@ -316,10 +316,31 @@ class KlaroAppForm extends EntityForm {
     ];
     $form['advanced']['callback_code'] = [
       '#type' => 'textarea',
-      '#title' => $this->t('Callback code', [], ['context' => 'klaro']),
+      '#title' => $this->t('Callback code (DEPRECATED)', [], ['context' => 'klaro']),
       '#description' => $this->t('This javascript will be executed after loading the page and every time a Klaro! dialog is saved. Available variables are <em>consent</em> and <em>service</em>. <em>consent</em> is either true or false and contains the current value but not whether there has been a change. <em>service</em> is the current service object.', [], ['context' => 'klaro']),
       '#default_value' => $app->callbackCode(),
       '#placeholder' => "console.log('User consent for service ' + service.name + ': consent=' + consent);\nif (consent == true) {\n  _my_call('consentGiven');\n} else {\n  _my_call('consentRevoked');\n}",
+    ];
+    $form['advanced']['on_init'] = [
+      '#type' => 'textarea',
+      '#title' => $this->t('onInit code', [], ['context' => 'klaro']),
+      '#description' => $this->t('This javascript will be executed after loading the page. Klaro is not yet initialized here so consent status is unknown.', [], ['context' => 'klaro']),
+      '#default_value' => $app->onInit(),
+      '#placeholder' => "console.log('Klaro onInit ' + opts.service.name);\nconsole.log(opts); // opts.config, opts.service, opts.vars",
+    ];
+    $form['advanced']['on_accept'] = [
+      '#type' => 'textarea',
+      '#title' => $this->t('onAccept code', [], ['context' => 'klaro']),
+      '#description' => $this->t('This javascript will be executed after the user has accepted the service. If the user has already accepted the service, this is also fired after Klaro is initialized.', [], ['context' => 'klaro']),
+      '#default_value' => $app->onAccept(),
+      '#placeholder' => "console.log('Klaro onAccept ' + opts.service.name);\nconsole.log(opts); // opts.config, opts.consents, opts.confirmed, opts.service, opts.vars",
+    ];
+    $form['advanced']['on_decline'] = [
+      '#type' => 'textarea',
+      '#title' => $this->t('onDecline code', [], ['context' => 'klaro']),
+      '#description' => $this->t('This javascript will be executed after the user has explicitly or implicitly (page load) declined the service.', [], ['context' => 'klaro']),
+      '#default_value' => $app->onDecline(),
+      '#placeholder' => "console.log('Klaro onDecline ' + opts.service.name);\nconsole.log(opts); // opts.config, opts.consents, opts.confirmed, opts.service, opts.vars",
     ];
     $form['advanced']['files_wrapper'] = [
       '#type' => 'item',
@@ -373,6 +394,9 @@ class KlaroAppForm extends EntityForm {
     $app->setCookies($filtered_cookies);
     $app->setPurposes(array_keys(array_filter($form_state->getValue('purposes'))));
     $app->setCallbackCode($form_state->getValue('callback_code'));
+    $app->setOnInit($form_state->getValue('on_init'));
+    $app->setOnAccept($form_state->getValue('on_accept'));
+    $app->setOnDecline($form_state->getValue('on_decline'));
     $app->setJavaScripts(array_filter(array_map('trim', explode("\n", $form_state->getValue('js')))));
     $app->setWrapperIdentifier(array_filter(array_map('trim', explode("\n", $form_state->getValue('wrapper_identifier')))));
     $app->setAttachments(array_filter(array_map('trim', explode("\n", $form_state->getValue('att')))));

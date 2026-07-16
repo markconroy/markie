@@ -186,7 +186,7 @@ class ConfigTest extends UnitTestCase {
    * @legacy-covers ::hasOverrides
    */
   #[DataProvider('overrideDataProvider')]
-  public function testOverrideData($data, $module_data, $setting_data): void {
+  public function testOverrideData(array $data, array $module_data, array $setting_data): void {
     // Set initial data.
     $this->config->setData($data);
 
@@ -272,16 +272,16 @@ class ConfigTest extends UnitTestCase {
   }
 
   /**
-   * Tests set illegal offset value.
+   * Tests set invalid offset value.
    */
-  public function testSetIllegalOffsetValue(): void {
+  public function testSetInvalidOffsetValue(): void {
     // Set a single value.
     $this->config->set('testData', 1);
 
     // Attempt to treat the single value as a nested item.
     $this->expectException(\LogicException::class);
-    $this->expectExceptionMessage('Cannot create key "illegalOffset" on non-array value.');
-    $this->config->set('testData.illegalOffset', 1);
+    $this->expectExceptionMessage('Cannot create key "invalidOffset" on non-array value.');
+    $this->config->set('testData.invalidOffset', 1);
   }
 
   /**
@@ -345,7 +345,7 @@ class ConfigTest extends UnitTestCase {
    * Tests delete.
    */
   #[DataProvider('overrideDataProvider')]
-  public function testDelete($data, $module_data): void {
+  public function testDelete(array $data, array $module_data, array $setting_data): void {
     $this->cacheTagsInvalidator->expects($this->once())
       ->method('invalidateTags')
       ->with(['config:config.test']);
@@ -471,7 +471,7 @@ class ConfigTest extends UnitTestCase {
    * @see \Drupal\Tests\Core\Config\ConfigTest::testOverrideData()
    * @see \Drupal\Tests\Core\Config\ConfigTest::testDelete()
    */
-  public static function overrideDataProvider() {
+  public static function overrideDataProvider(): array {
     $test_cases = [
       [
         // Original data.

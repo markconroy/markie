@@ -13,12 +13,16 @@ namespace Drupal\backup_migrate\Core\Service;
 class ServiceManager implements ServiceManagerInterface {
 
   /**
-   * @var array
+   * Stores the value.
+   *
+   * @var array The services
    */
   protected $services;
 
   /**
-   * @var array
+   * Stores the value.
+   *
+   * @var array The clients
    */
   protected $clients;
 
@@ -36,8 +40,10 @@ class ServiceManager implements ServiceManagerInterface {
    * Add a fully configured service to the service locator.
    *
    * @param string $type
+   *   The type.
    *   The service type identifier.
    * @param mixed $service
+   *   The service.
    */
   public function add($type, $service) {
     $this->services[$type] = $service;
@@ -57,9 +63,11 @@ class ServiceManager implements ServiceManagerInterface {
    * Retrieve a service from the locator.
    *
    * @param string $type
+   *   The type.
    *   The service type identifier.
    *
    * @return mixed
+   *   The return value.
    */
   public function get($type) {
     return $this->services[$type];
@@ -69,6 +77,7 @@ class ServiceManager implements ServiceManagerInterface {
    * Get an array of keys for all available services.
    *
    * @return array
+   *   A render or configuration array.
    */
   public function keys() {
     return array_keys($this->services);
@@ -78,6 +87,7 @@ class ServiceManager implements ServiceManagerInterface {
    * Inject all available services into the give plugin.
    *
    * @param object $client
+   *   The client.
    */
   public function addClient($client) {
     // Inject available services.

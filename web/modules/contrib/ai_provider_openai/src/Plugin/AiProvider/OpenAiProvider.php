@@ -335,7 +335,7 @@ class OpenAiProvider extends OpenAiBasedProviderClientBase {
       }
     }
     // Moderation check - tokens are still there using json.
-    $this->moderationEndpoints(json_encode($chat_input));
+    $this->moderationEndpoints(json_encode($chat_input), $tags);
 
     $payload = [
       'model' => $model_id,
@@ -456,7 +456,7 @@ class OpenAiProvider extends OpenAiBasedProviderClientBase {
       $input = $input->getText();
     }
     // Moderation.
-    $this->moderationEndpoints($input);
+    $this->moderationEndpoints($input, $tags);
     // Handle parameter naming differences between models.
     $payload = [
       'model' => $model_id,
@@ -539,7 +539,7 @@ class OpenAiProvider extends OpenAiBasedProviderClientBase {
       $input = $input->getText();
     }
     // Moderation.
-    $this->moderationEndpoints($input);
+    $this->moderationEndpoints($input, $tags);
     // Send the request.
     $payload = [
       'model' => $model_id,
@@ -624,7 +624,7 @@ class OpenAiProvider extends OpenAiBasedProviderClientBase {
       $input = $input->getPrompt();
     }
     // Moderation.
-    $this->moderationEndpoints($input);
+    $this->moderationEndpoints($input, $tags);
     // Send the request.
     $payload = [
       'model' => $model_id,
@@ -696,12 +696,19 @@ class OpenAiProvider extends OpenAiBasedProviderClientBase {
   /**
    * Moderation endpoints to run before the normal call.
    *
+   * @param string $prompt
+   *   The prompt to moderate.
+   * @param array $tags
+   *   Operation tags. If 'skip_moderation' is present, the check is bypassed
+   *   for this call only without altering the persistent moderation state.
+   *
    * @throws \Drupal\ai\Exception\AiUnsafePromptException
    */
-  public function moderationEndpoints(string $prompt): void {
+  public function moderationEndpoints(string $prompt, array $tags = []): void {
     $this->getClient();
-    // If moderation is disabled, we skip this.
-    if (!$this->moderation) {
+    // If moderation is disabled globally or the caller has tagged this call to
+    // skip moderation, bypass the check.
+    if (!$this->moderation || in_array('skip_moderation', $tags)) {
       return;
     }
     $payload = [

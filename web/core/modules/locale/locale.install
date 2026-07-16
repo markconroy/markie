@@ -7,17 +7,14 @@
 
 use Drupal\Core\File\Exception\FileException;
 use Drupal\Core\File\FileSystemInterface;
+use Drupal\locale\StreamWrapper\TranslationsStream;
 
 /**
  * Implements hook_install().
  */
 function locale_install(): void {
   // Create the interface translations directory and ensure it's writable.
-  if (!$directory = \Drupal::config('locale.settings')->get('translation.path')) {
-    $site_path = \Drupal::getContainer()->getParameter('site.path');
-    $directory = $site_path . '/files/translations';
-    \Drupal::configFactory()->getEditable('locale.settings')->set('translation.path', $directory)->save();
-  }
+  $directory = TranslationsStream::basePath();
   \Drupal::service('file_system')->prepareDirectory($directory, FileSystemInterface::CREATE_DIRECTORY | FileSystemInterface::MODIFY_PERMISSIONS);
 }
 
@@ -27,7 +24,7 @@ function locale_install(): void {
 function locale_uninstall(): void {
   $config = \Drupal::config('locale.settings');
   // Delete all JavaScript translation files.
-  $locale_js_directory = 'public://' . $config->get('javascript.directory');
+  $locale_js_directory = 'assets://' . $config->get('javascript.directory');
 
   if (is_dir($locale_js_directory)) {
     $locale_javascripts = \Drupal::state()->get('locale.translation.javascript', []);
@@ -231,6 +228,13 @@ function locale_schema(): array {
         'description' => 'Unix timestamp of the imported file.',
         'size' => 'big',
       ],
+      'hash' => [
+        'type' => 'varchar_ascii',
+        'length' => 32,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'The hash of the imported file.',
+      ],
       'last_checked' => [
         'type' => 'int',
         'not null' => FALSE,
@@ -310,4 +314,21 @@ function locale_update_10300(): void {
     $schema->dropIndex('locales_location', 'type_name');
   }
   $schema->addIndex('locales_location', 'type_name', ['type', 'name'], $spec['locales_location']);
+}
+
+/**
+ * Add a hash column to the {locale_file} table.
+ */
+function locale_update_11401(): void {
+  $spec = [
+    'type' => 'varchar_ascii',
+    'length' => 32,
+    'not null' => TRUE,
+    'default' => '',
+    'description' => 'The hash of the imported file.',
+  ];
+  $schema = \Drupal::database()->schema();
+  if (!$schema->fieldExists('locale_file', 'hash')) {
+    $schema->addField('locale_file', 'hash', $spec);
+  }
 }

@@ -33,12 +33,18 @@ class BuilderTest extends TestCase {
           'require' =>
           [
             'drupal/core' => Composer::drupalVersionBranch(),
-            'symfony/polyfill-ctype' => '~v1.12.0',
             'symfony/yaml' => '~v3.4.32',
           ],
           'conflict' =>
           [
             'webflo/drupal-core-strict' => '*',
+          ],
+          'extra' =>
+          [
+            'branch-alias' =>
+            [
+              'dev-main' => '11.4.x-dev',
+            ],
           ],
         ],
       ],
@@ -58,16 +64,25 @@ class BuilderTest extends TestCase {
           [
             'webflo/drupal-core-require-dev' => '*',
           ],
+          'extra' =>
+          [
+            'branch-alias' =>
+            [
+              'dev-main' => '11.4.x-dev',
+            ],
+          ],
         ],
       ],
 
       [
+        // @phpstan-ignore classConstant.deprecatedClass
         DrupalPinnedDevDependenciesBuilder::class,
         [
           'name' => 'drupal/core-dev-pinned',
           'type' => 'metapackage',
-          'description' => 'Pinned require-dev dependencies from drupal/drupal; use in addition to drupal/core-recommended to run tests from drupal/core.',
+          'description' => 'Deprecated. Pinned require-dev dependencies from drupal/drupal; use in addition to drupal/core-recommended to run tests from drupal/core. Use drupal/core-dev instead to avoid security vulnerabilities from pinned versions.',
           'license' => 'GPL-2.0-or-later',
+          'abandoned' => 'drupal/core-dev',
           'require' =>
           [
             'drupal/core' => Composer::drupalVersionBranch(),
@@ -77,6 +92,13 @@ class BuilderTest extends TestCase {
           'conflict' =>
           [
             'webflo/drupal-core-require-dev' => '*',
+          ],
+          'extra' =>
+          [
+            'branch-alias' =>
+            [
+              'dev-main' => '11.4.x-dev',
+            ],
           ],
         ],
       ],

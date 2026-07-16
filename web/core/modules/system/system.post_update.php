@@ -148,3 +148,22 @@ function system_post_update_delete_rss_config(array &$sandbox): void {
     \Drupal::configFactory()->getEditable('system.rss')->delete();
   }
 }
+
+/**
+ * Migrate to new compress setting.
+ */
+function system_post_update_migrate_compress_setting(): void {
+  $performanceConfig = \Drupal::configFactory()->getEditable('system.performance');
+  $performanceConfig->set('css.compress', (bool) $performanceConfig->get('css.gzip'));
+  $performanceConfig->set('js.compress', (bool) $performanceConfig->get('js.gzip'));
+  $performanceConfig->clear('css.gzip');
+  $performanceConfig->clear('js.gzip');
+  $performanceConfig->save();
+}
+
+/**
+ * Remove non-admin routes state key.
+ */
+function system_post_update_remove_non_admin_routes_state(): void {
+  \Drupal::state()->delete('routing.non_admin_routes');
+}

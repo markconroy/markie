@@ -11,13 +11,17 @@
  * fallback value to the margin-inline-start property of the layout container.
  */
 body {
-  --admin-toolbar-sidebar-width: calc(4.5 * var(--admin-toolbar-rem));
-  --admin-toolbar-sidebar-header: calc(3.5 * var(--admin-toolbar-rem));
+  --admin-toolbar-sidebar-width: 80vw;
+  --admin-toolbar-sidebar-header: calc(3.75 * var(--admin-toolbar-rem));
 
-  [data-admin-toolbar="expanded"] & {
-    --admin-toolbar-sidebar-width: 80vw;
+  @media (--admin-toolbar-tablet) {
+    --admin-toolbar-sidebar-width: calc(16.5 * var(--admin-toolbar-rem));
+  }
 
-    @media (--admin-toolbar-tablet) {
+  @media (--admin-toolbar-desktop) {
+    --admin-toolbar-sidebar-width: calc(4.5 * var(--admin-toolbar-rem));
+
+    [data-admin-toolbar="expanded"] & {
       --admin-toolbar-sidebar-width: calc(16.5 * var(--admin-toolbar-rem));
     }
   }
@@ -27,7 +31,13 @@ body {
 [data-admin-toolbar-transitions] {
   :is(#extra-specificity-hack, [data-drupal-admin-styles]) {
     &.admin-toolbar {
-      transition: transform var(--admin-toolbar-transition);
+      transition:
+        visibility var(--admin-toolbar-transition),
+        transform var(--admin-toolbar-transition);
+
+      @media not (--admin-toolbar-desktop) {
+        visibility: hidden;
+      }
 
       @media (--admin-toolbar-desktop) {
         transition: width var(--admin-toolbar-transition);
@@ -94,6 +104,7 @@ body {
     }
 
     [data-admin-toolbar="expanded"] & {
+      visibility: visible;
       transform: none;
     }
 
@@ -198,15 +209,8 @@ body {
     justify-content: space-between;
     margin-block-start: calc(var(--admin-toolbar-sidebar-header) * -1);
     padding-block-start: var(--admin-toolbar-space-16);
+    padding-block-end: var(--admin-toolbar-space-4);
     background-color: var(--admin-toolbar-color-white);
-
-    & + .toolbar-block {
-      margin-block-start: calc(var(--admin-toolbar-space-10) * -1);
-
-      @media (--admin-toolbar-desktop) {
-        margin-block-start: 0;
-      }
-    }
 
     &:not(:has(.admin-toolbar__logo)) {
       @media (--admin-toolbar-desktop) {
@@ -219,7 +223,6 @@ body {
       align-items: start;
       margin-block-start: revert;
       padding-block-start: revert;
-      padding-block-end: 0;
     }
   }
 
@@ -246,6 +249,7 @@ body {
     overflow-y: auto;
     flex-direction: column;
     height: 100%;
+    border-inline-end: solid 1px transparent;
     background: linear-gradient(var(--admin-toolbar-color-white) 30%, var(--admin-toolbar-color-white)), radial-gradient(farthest-side at 50% 0, var(--admin-toolbar-color-shadow-15), var(--admin-toolbar-color-shadow-0));
     background-color: var(--admin-toolbar-color-white);
     background-repeat: no-repeat;
@@ -360,6 +364,11 @@ body {
 
     :where([data-admin-toolbar="expanded"]) & {
       display: block;
+    }
+
+    @media (forced-colors: active) {
+      opacity: 0.14;
+      background-color: canvasText;
     }
 
     @media (--admin-toolbar-desktop) {

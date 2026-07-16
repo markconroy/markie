@@ -3,7 +3,7 @@
 namespace Drupal\backup_migrate\Core\File;
 
 /**
- *
+ * Provides the backup file class.
  *
  * @package Drupal\backup_migrate\Core\File
  */
@@ -56,7 +56,7 @@ class BackupFile implements BackupFileInterface {
    *   The value of the metadata for this file.
    */
   public function getMeta($key) {
-    return isset($this->metadata[$key]) ? $this->metadata[$key] : NULL;
+    return $this->metadata[$key] ?? NULL;
   }
 
   /**
@@ -87,6 +87,7 @@ class BackupFile implements BackupFileInterface {
    * Get all metadata.
    *
    * @return array
+   *   A render or configuration array.
    */
   public function getMetaAll() {
     return $this->metadata;
@@ -145,7 +146,10 @@ class BackupFile implements BackupFileInterface {
   }
 
   /**
+   * Sets the extension list.
+   *
    * @param array $ext
+   *   The ext.
    *   The list of file extensions for the file.
    */
   public function setExtList(array $ext) {

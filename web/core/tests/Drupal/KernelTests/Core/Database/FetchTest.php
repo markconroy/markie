@@ -174,6 +174,38 @@ class FetchTest extends DatabaseTestBase {
   }
 
   /**
+   * Confirms that we can fetch all records as class instances explicitly.
+   */
+  public function testQueryFetchAllAsClassInstances(): void {
+    $query = $this->connection->select(table: 'test', options: ['fetch' => FakeRecord::class]);
+    $query->addField('test', 'name');
+    $query->orderBy('name');
+    $query_result = $query->execute()->fetchAll();
+
+    $this->assertContainsOnlyInstancesOf(FakeRecord::class, $query_result);
+    $names = array_map(fn(FakeRecord $record) => $record->name, $query_result);
+    $expected_names = ['George', 'John', 'Paul', 'Ringo'];
+    $this->assertEquals($expected_names, $names);
+  }
+
+  /**
+   * Confirms that we can fetch class instances by setting fetch mode.
+   */
+  public function testQueryFetchAllAsFetchModeClassInstances(): void {
+    $query = $this->connection->query('SELECT [name] FROM {test} ORDER BY [name]');
+    $query->setFetchMode(FetchAs::ClassObject, FakeRecord::class, [
+      // Test custom constructor arguments.
+      'fakeArg' => 10,
+    ]);
+
+    $query_result = $query->fetchAll();
+
+    $arrayed = array_map(fn (FakeRecord $record) => \get_object_vars($record), $query_result);
+    $this->assertEquals(['George', 'John', 'Paul', 'Ringo'], array_column($arrayed, 'name'));
+    $this->assertEquals([10, 10, 10, 10], array_column($arrayed, 'fakeArg'));
+  }
+
+  /**
    * Confirms that we can fetch an entire column of a result set at once.
    */
   public function testQueryFetchCol(): void {
@@ -401,7 +433,7 @@ class FetchTest extends DatabaseTestBase {
       $this->markTestSkipped('This test is for StatementPrefetchIterator statements only.');
     }
 
-    $this->expectDeprecation('Drupal\Core\Database\StatementPrefetchIterator::fetchColumn() is deprecated in drupal:11.2.0 and is removed from drupal:12.0.0. Use ::fetchField() instead. See https://www.drupal.org/node/3490312');
+    $this->expectUserDeprecationMessage('Drupal\Core\Database\StatementPrefetchIterator::fetchColumn() is deprecated in drupal:11.2.0 and is removed from drupal:12.0.0. Use ::fetchField() instead. See https://www.drupal.org/node/3490312');
     $statement->fetchColumn();
   }
 

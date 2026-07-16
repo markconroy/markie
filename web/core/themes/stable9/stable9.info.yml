@@ -5,6 +5,8 @@ package: Core
 version: VERSION
 base theme: false
 hidden: true
+lifecycle: deprecated
+lifecycle_link: https://www.drupal.org/node/3223395#s-stable-9
 
 libraries-override:
   block/drupal.block.admin:
@@ -224,18 +226,10 @@ libraries-override:
       base:
         css/base/layout-builder.css: css/navigation/layout-builder.css
 
-  node/drupal.node:
-    css:
-      layout:
-        css/node.module.css: css/node/node.module.css
   node/drupal.node.preview:
     css:
       theme:
         css/node.preview.css: css/node/node.preview.css
-  node/form:
-    css:
-      layout:
-        css/node.module.css: css/node/node.module.css
   node/drupal.node.admin:
     css:
       theme:
@@ -335,3 +329,7 @@ libraries-override:
     css:
       theme:
         css/field_ui_display_mode_table.css: css/field_ui/field_ui_display_mode_table.css
+  field_ui/drupal.field_ui_display_overview:
+    css:
+      theme:
+        css/field_ui_display_overview_table.css: css/field_ui/field_ui_display_overview_table.css

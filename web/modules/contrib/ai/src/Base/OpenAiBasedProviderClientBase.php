@@ -368,9 +368,11 @@ abstract class OpenAiBasedProviderClientBase extends AiProviderClientBase implem
           }
         }
 
-        // Create the final message from accumulated data.
-        $message = $stream->reconstructChatOutput()->getNormalized();
-        $chat_output = new ChatOutput($message, $response, []);
+        // Create the final message from accumulated data, carrying over the
+        // token usage collected while consuming the stream.
+        $reconstructed = $stream->reconstructChatOutput();
+        $message = $reconstructed->getNormalized();
+        $chat_output = new ChatOutput($message, $response, [], $reconstructed->getTokenUsage());
       }
       else {
         $initialResponse = $this->client->chat()->create($payload);

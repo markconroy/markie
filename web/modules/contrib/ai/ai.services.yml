@@ -22,6 +22,9 @@ services:
   ai.vdb_provider:
     class: Drupal\ai\AiVdbProviderPluginManager
     parent: default_plugin_manager
+    calls:
+      - [ setConfigFactory, [ '@config.factory' ] ]
+      - [ setLoggerChannelFactory, [ '@logger.factory']]
   ai.tokenizer:
     class: Drupal\ai\Utility\Tokenizer
     arguments: ['@ai.provider']

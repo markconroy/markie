@@ -155,7 +155,7 @@ class FormatConstraint implements ConstraintInterface
             return true;
         }
 
-        return preg_match('/^#([a-f0-9]{3}|[a-f0-9]{6})$/i', $color) === 1;
+        return preg_match('/^#([a-f0-9]{3}|[a-f0-9]{6})$/i', $color) !== false;
     }
 
     private function validateStyle(string $style): bool
@@ -168,7 +168,7 @@ class FormatConstraint implements ConstraintInterface
 
     private function validatePhone(string $phone): bool
     {
-        return preg_match('/^\+?(\(\d{3}\)|\d{3}) \d{3} \d{4}$/', $phone) === 1;
+        return preg_match('/^\+?(\(\d{3}\)|\d{3}) \d{3} \d{4}$/', $phone) !== false;
     }
 
     private function validateHostname(string $host): bool

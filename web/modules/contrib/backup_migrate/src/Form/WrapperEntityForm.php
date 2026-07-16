@@ -8,7 +8,7 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormStateInterface;
 
 /**
- *
+ * Provides the wrapper entity form class.
  *
  * @package Drupal\backup_migrate\Form
  */
@@ -85,14 +85,14 @@ class WrapperEntityForm extends EntityForm {
 
     switch ($status) {
       case SAVED_NEW:
-        \Drupal::messenger()->addMessage($this->t('Created %label.', [
+        $this->messenger()->addMessage($this->t('Created %label.', [
           '%label' => $entity->label(),
         ]));
         $form_state->setRedirectUrl($entity->toUrl('edit-form'));
         break;
 
       default:
-        \Drupal::messenger()->addMessage($this->t('Saved %label.', [
+        $this->messenger()->addMessage($this->t('Saved %label.', [
           '%label' => $entity->label(),
         ]));
         $form_state->setRedirectUrl($entity->toUrl('collection'));
@@ -115,6 +115,9 @@ class WrapperEntityForm extends EntityForm {
    */
   protected function copyFormValuesToEntity(EntityInterface $entity, array $form, FormStateInterface $form_state) {
     $values = $form_state->getValues();
+    if (!isset($values['config'])) {
+      $values['config'] = [];
+    }
 
     foreach ($values as $key => $value) {
       $entity->set($key, $value);

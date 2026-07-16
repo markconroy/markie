@@ -3,12 +3,19 @@
 namespace Drupal\filter\Hook;
 
 use Drupal\Core\Hook\Attribute\Hook;
+use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Template\Attribute;
+use Drupal\filter\FilterFormatRepositoryInterface;
 
 /**
  * Theme hooks for filter.
  */
 class FilterThemeHooks {
+
+  public function __construct(
+    protected AccountInterface $currentUser,
+    protected FilterFormatRepositoryInterface $formatRepository,
+  ) {}
 
   /**
    * Implements hook_theme().
@@ -61,7 +68,7 @@ class FilterThemeHooks {
     $format = $variables['format'];
     $variables['tips'] = [
       '#theme' => 'filter_tips',
-      '#tips' => _filter_tips($format->id(), FALSE),
+      '#tips' => $this->getFilterTips($format->id()),
     ];
 
     // Add format id for filter.js.
@@ -89,6 +96,46 @@ class FilterThemeHooks {
   }
 
   /**
+   * Retrieves the filter tips.
+   *
+   * @param string|null $formatId
+   *   (optional) The ID of the text format for which to retrieve tips. If
+   *   omitted, will return tips for all formats accessible to the current user.
+   *
+   * @return array
+   *   An associative array of filtering tips, keyed by the filter name. Each
+   *   filtering tip is an associative array with elements:
+   *   - tip: Tip text.
+   *   - id: Filter ID.
+   */
+  protected function getFilterTips(?string $formatId = NULL): array {
+    $formats = $this->formatRepository->getFormatsForAccount($this->currentUser);
+
+    $tips = [];
+
+    // If only listing one format, extract it from the $formats array.
+    if ($formatId !== NULL) {
+      $formats = [$formats[$formatId]];
+    }
+
+    foreach ($formats as $format) {
+      foreach ($format->filters() as $name => $filter) {
+        if ($filter->status) {
+          $tip = $filter->tips();
+          if (isset($tip)) {
+            $tips[$format->label()][$name] = [
+              'tip' => ['#markup' => $tip],
+              'id' => $name,
+            ];
+          }
+        }
+      }
+    }
+
+    return $tips;
+  }
+
+  /**
    * Prepares variables for filter tips templates.
    *
    * Default template: filter-tips.html.twig.
@@ -112,6 +159,11 @@ class FilterThemeHooks {
    *     explanations, i.e. intended to be output on the path 'filter/tips'
    *     (TRUE), or are in a short format, i.e. suitable to be displayed below a
    *     form element. Defaults to FALSE.
+   *
+   * @deprecated in drupal:11.4.0 and is removed from drupal:12.0.0. There is
+   *   no replacement.
+   *
+   * @see https://www.drupal.org/node/3567879
    */
   public function preprocessFilterTips(array &$variables): void {
     $tips = $variables['tips'];

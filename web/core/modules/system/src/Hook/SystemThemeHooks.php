@@ -264,22 +264,4 @@ class SystemThemeHooks {
     }
   }
 
-  /**
-   * Implements hook_preprocess_toolbar().
-   */
-  #[Hook('preprocess_toolbar')]
-  public function preprocessToolbar(array &$variables, $hook, $info): void {
-    // When Claro is the admin theme, Claro overrides the active theme's if that
-    // active theme is not Claro. Because of these potential overrides, the
-    // toolbar cache should be invalidated any time the default or admin theme
-    // changes.
-    $variables['#cache']['tags'][] = 'config:system.theme';
-    // If Claro is the admin theme but not the active theme, still include
-    // Claro's toolbar preprocessing.
-    if (_system_is_claro_admin_and_not_active()) {
-      require_once DRUPAL_ROOT . '/core/themes/claro/claro.theme';
-      claro_preprocess_toolbar($variables, $hook, $info);
-    }
-  }
-
 }

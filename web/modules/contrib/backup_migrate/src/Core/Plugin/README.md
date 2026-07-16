@@ -1,129 +1,217 @@
-# Plugins and the Plugin Manager
+# Plugins and the plugin manager
 
-**Plugins** do the actual work in Backup and Migrate. **The Plugin Manager** manages the configuration of all installed plugins as well as the calling of plugins during an operation.
+**Plugins** do the actual work in Backup and Migrate. **The plugin manager**
+manages the configuration of all installed plugins and calls plugins during an
+operation.
 
-## Plugins ##
+## Plugins
 
-Plugins may be one of the following type:
+Plugins may be one of the following types:
 
-* **Sources** - Items which can be backed up and restored. (e.g: A MySQL database)
-* **Destinations** - Places where backup files can be stored. (e.g: A directory on your server)
-* **Filters** - Actions that can be performed on backup files after backup or before restore. (e.g: Gzip compression)
+- **Sources** - Items that can be backed up and restored, such as a MySQL
+  database.
+- **Destinations** - Places where backup files can be stored, such as a
+  directory on your server.
+- **Filters** - Actions that can be performed on backup files after backup or
+  before restore, such as gzip compression.
 
-While these three types of plugin are conceptually separate they are technically identical.
+While these three plugin types are conceptually separate, they are technically
+identical.
 
-##### Sources #####
-Each backup and restore operation works on a single source. For simplicity more than one source may be added to the BackupMigrate object. The source to be backed up is identified by id when `backup()` or `restore()` is called.
+### Sources
 
-See: [Sources](https://github.com/backupmigrate/backup_migrate_core/tree/master/src/Source)
+Each backup and restore operation works on a single source. For simplicity,
+more than one source may be added to the `BackupMigrate` object. The source to
+be backed up is identified by ID when `backup()` or `restore()` is called.
 
-##### Destinations #####
-Destinations are the places where the backup files are sent (during `backup()`) or from which they are loaded (uring `restore()`). Restore operations loads a file from a single destination. Backup operations save the backup file to 1 or more specified destinations.
+See: [Sources][sources]
 
-See: [Destinations](https://github.com/backupmigrate/backup_migrate_core/tree/master/src/Destination)
+### Destinations
 
-##### Filters #####
-Filters can alter backup files before `restore()` or after `backup()`. Unlike sources and destinations there can be many filters run per operation. During an operation all installed filters will run unless they are configured not to (e.g: if compression type is set to 'none' for a compression filter).
+Destinations are the places where backup files are sent during `backup()` or
+loaded from during `restore()`. Restore operations load a file from a single
+destination. Backup operations save the backup file to one or more specified
+destinations.
 
-See: [Filters](https://github.com/backupmigrate/backup_migrate_core/tree/master/src/Filter)
+See: [Destinations][destinations]
 
-## The Plugin Manager ##
+### Filters
 
-The plugin manager is a registry that stores each of the installed plugins and configures the plugin as needed. Plugins are added to the manager with an id which is used for 2 things:
+Filters can alter backup files before `restore()` or after `backup()`. Unlike
+sources and destinations, many filters can run per operation. During an
+operation, all installed filters run unless they are configured not to run. For
+example, a compression filter may be configured with the compression type set
+to `none`.
 
-* Specifying the configuration of the plugin
-* Specifying the source and destination for a backup or restore
+See: [Filters][filters]
 
-The consuming application accesses the plugin manager only to add plugins. It may do so by adding the plugins before passing the plugin manager to the `BackupMigrate` object or by calling `plugins()` on the BackupMigrate object:
+## The plugin manager
 
-	$backup_migrate->plugins()->add('demoplugin', new MyPlugin());
-	
-To configure this plugin the consuming application would have a section called 'demoplugin' in the plugin manager configuration object:
+The plugin manager is a registry that stores each installed plugin and
+configures the plugin as needed. Plugins are added to the manager with an ID,
+which is used for two things:
 
-	$conf = new Config([
-		'demoplugin' => ['foo => 'bar']
-	]);
-	
-	$plugins = new PluginManager(NULL, $conf);
-	$backup_migrate = new BackupMigrate($plugins);
-	
-### Calling Plugins ###
-Internally the plugin manager is used to run all plugins for a given operation. This is done using the `call()` method:
+- Specifying the configuration of the plugin.
+- Specifying the source and destination for a backup or restore.
 
-	$file = $this->plugins()->call('afterBackup', $file);
-	
-The call method takes 3 parameters:
-	
-* **Operation**: the name of the operation to call
-* **Operand**: The object being operated on (optional)
-* **Params**: An associative array of additional parameters
+The consuming application accesses the plugin manager only to add plugins. It
+may add plugins before passing the plugin manager to the `BackupMigrate`
+object, or by calling `plugins()` on the `BackupMigrate` object:
 
-Each plugin that implements the **operation** will be called in order. The  **operand** will be passed to the plugin and will be overwritten by the return value from the plugin. In this way plugin operations are chained. A plugin is responsible for returning the operand that was passed in if it does not wish to overwrite it. The **params** array can contain additional information needed to run the operation but it cannot be modified by plugins.
+    $backup_migrate->plugins()->add('demoplugin', new MyPlugin());
 
-### Implementing Operations ###
-If a plugin wishes to be called for a given operation it simply needs to define a method with the same name as the operation. For example, to compress a backup file after it has been created, the plugin must have a method called `afterBackup()` which takes a file as the operand and returns the a new, compressed file.
+To configure this plugin, the consuming application would have a section called
+`demoplugin` in the plugin manager configuration object:
 
-#### Operation Weights ####
-The order in which plugins are called cannot be guaranteed. However, if a plugin needs to run in a specific order it may specify a weight for each operation it implements. To specify a weight it must implement a `opWeight()` method which takes an operation name and returns a numerical weight. Plugins are called from lowest to highest and plugins which do not specify a weight are considered to have a weight of `0`.
+    $conf = new Config([
+      'demoplugin' => [
+        'foo' => 'bar',
+      ],
+    ]);
 
-To specify the weight of may operations it may be easier to extend the `\Drupal\backup_migrate\Core\Plugin\PluginBase` class and override the `supportedOps()` method which returns an array of supported operations and their weight:
+    $plugins = new PluginManager(NULL, $conf);
+    $backup_migrate = new BackupMigrate($plugins);
 
-	public function supportedOps() {
-	    return [
-	      'afterBackup'     => ['weight' => 100],
-	      'beforeRestore'   => ['weight' => -100],
-	    ];
-	  }
-	  
-### Calling Other Plugins ###
-Plugins can call other plugins using the Plugin Manager. For example, a source plugin might want to expose a line-item filter operation to allow other plugins to alter single values before they are added to the backup file. An encryption plugin may want to delegate the actual work of encrypting to other sub-plugins for better code organization and extendability.
+### Calling plugins
 
-By default plugins are not given access to the plugin manager. However, if a plugin implements the `\Drupal\backup_migrate\Core\Plugin\PluginCallerInterface` then the plugin manager will inject itself into the plugin for use when the plugin is prepared for use. The `\Drupal\backup_migrate\Core\Plugin\PluginCallerTrait` can be used to implement the actual requirements of the interface. Plugins with this interface and trait will be able to use `$this->plugins()` to access the plugin manager:
+Internally, the plugin manager runs plugins for a given operation with the
+`call()` method:
 
-	class MyPlugin implements PluginCallerInterface {
-		use PluginCallerTrait;
-		
-		function someOperation() {
-			$this->plugins()->call(...);	
-		}
-	}
+    $file = $this->plugins()->call('afterBackup', $file);
 
-### Accessing Services ###
-If a plugin requires the use of a cache, logger, state storage, mailer or any other backing service it must have the service injected into it by the plugin manager. To make a service available to the plugin manager it may be added to an object which implements `ServiceManagerInterface`. That service locater may be passed to the plugin manager though the constructor or it can be passed in later using `setServiceManager()`.
+The `call()` method takes three parameters:
 
-Any service provided by the service locator will be injected into a plugin when it is added to the plugin manager if the name of the service matches a setter present in the plugin. For example: if a plugin has a method called `setLogger` and the service locator has a service called 'Logger' then the logger service will be injected via the `setLogger` method:
+- **Operation**: the name of the operation to call.
+- **Operand**: the object being operated on, if any.
+- **Params**: an associative array of additional parameters.
 
-	$services = new ServiceManager();
-	$services->add('Logger', new FileLogger('/path/to/log.txt'));
-	
-	$plugins = new PluginManager($services);
-	
-	// If this plugin has a `setLogger` the logger will be injected.
-	$plugins->add('test', new TestPlugin());
+Each plugin that implements the operation is called in order. The operand is
+passed to the plugin and is overwritten by the return value from the plugin. In
+this way, plugin operations are chained. A plugin is responsible for returning
+the operand that was passed in if it does not wish to overwrite it. The params
+array can contain additional information needed to run the operation, but it
+cannot be modified by plugins.
 
-See: [Services](https://github.com/backupmigrate/backup_migrate_core/tree/master/src/Service)
-	
-### Creating New Temporary Files ###
-If a plugin needs to create a new temporary file (for example to decompress a backup file). It may request that the TempFileManager be injected by implementing `\Drupal\backup_migrate\Core\Plugin\FileProcessorInterface` and using the `\Drupal\backup_migrate\Core\Plugin\FileProcessorTrait`. This will allow the following:
+### Implementing operations
 
-	class MyFilePlugin implements FileProcessorInterface {
-		use FileProcessorTrait;
+If a plugin should be called for a given operation, it must define a method
+with the same name as the operation. For example, to compress a backup file
+after it has been created, the plugin must have an `afterBackup()` method that
+takes a file as the operand and returns a new compressed file.
 
-		function someOperation($file_in) {
-			$file_out = $this->getTempFileManager()->popExt($file_in);
-			// ...
-			
-			// Return the new file and so it overwrites the old file 
-			// during plugin chaining.
-			return $file_out;
-		}
-	}
-		
+### Operation weights
 
-See: [Backup Files](https://github.com/backupmigrate/backup_migrate_core/tree/master/src/File)
- 
-## Sources and Destinations ##
-  
-Sources and destinations are special case plugins. While they technically identical to filter plugins they are not called using the plugin manager's `call()` method. Only one source and one destination can be use for each backup or restore operation so they are called individually rather than being chained like most plugin operations. These plugin types are different by convention only and are injected and configured in the same way as filters.
+The order in which plugins are called cannot be guaranteed. However, if a
+plugin needs to run in a specific order, it may specify a weight for each
+operation it implements. To specify a weight, it must implement an `opWeight()`
+method, which takes an operation name and returns a numerical weight. Plugins
+are called from lowest to highest weight. Plugins that do not specify a weight
+are considered to have a weight of `0`.
 
-See: [Sources](https://github.com/backupmigrate/backup_migrate_core/tree/master/src/Source), [Destinations](https://github.com/backupmigrate/backup_migrate_core/tree/master/src/Destination)
+To specify the weight of many operations, it may be easier to extend the
+`\Drupal\backup_migrate\Core\Plugin\PluginBase` class and override the
+`supportedOps()` method, which returns an array of supported operations and
+their weights:
+
+    public function supportedOps() {
+      return [
+        'afterBackup' => ['weight' => 100],
+        'beforeRestore' => ['weight' => -100],
+      ];
+    }
+
+### Calling other plugins
+
+Plugins can call other plugins using the plugin manager. For example, a source
+plugin might expose a line-item filter operation that allows other plugins to
+alter single values before they are added to the backup file. An encryption
+plugin may delegate the work of encryption to sub-plugins for better code
+organization and extensibility.
+
+By default, plugins are not given access to the plugin manager. However, if a
+plugin implements
+`\Drupal\backup_migrate\Core\Plugin\PluginCallerInterface`, the plugin manager
+will inject itself into the plugin when the plugin is prepared for use. The
+`\Drupal\backup_migrate\Core\Plugin\PluginCallerTrait` can be used to
+implement the interface requirements. Plugins with this interface and trait can
+use `$this->plugins()` to access the plugin manager:
+
+    class MyPlugin implements PluginCallerInterface {
+      use PluginCallerTrait;
+
+      public function someOperation() {
+        $this->plugins()->call('someOperation');
+      }
+
+    }
+
+### Accessing services
+
+If a plugin requires a cache, logger, state storage, mailer, or another backing
+service, that service must be injected by the plugin manager. To make a service
+available to the plugin manager, add it to an object that implements
+`ServiceManagerInterface`.
+
+That service locator may be passed to the plugin manager through the
+constructor, or it can be passed later with `setServiceManager()`.
+
+Any service provided by the service locator is injected into a plugin when the
+plugin is added to the plugin manager if the service name matches a setter in
+the plugin. For example, if a plugin has a `setLogger()` method and the service
+locator has a service called `Logger`, then the logger service will be injected
+via the `setLogger()` method:
+
+    $services = new ServiceManager();
+    $services->add('Logger', new FileLogger('/path/to/log.txt'));
+
+    $plugins = new PluginManager($services);
+
+    // If this plugin has setLogger(), the logger will be injected.
+    $plugins->add('test', new TestPlugin());
+
+See: [Services][services]
+
+### Creating new temporary files
+
+If a plugin needs to create a new temporary file, for example to decompress a
+backup file, it may request that the temporary file manager be injected by
+implementing `\Drupal\backup_migrate\Core\Plugin\FileProcessorInterface` and
+using `\Drupal\backup_migrate\Core\Plugin\FileProcessorTrait`.
+
+This allows the following:
+
+    class MyFilePlugin implements FileProcessorInterface {
+      use FileProcessorTrait;
+
+      public function someOperation($file_in) {
+        $file_out = $this->getTempFileManager()->popExt($file_in);
+
+        // Return the new file so it overwrites the old file during plugin
+        // chaining.
+        return $file_out;
+      }
+
+    }
+
+See: [Backup files][files]
+
+## Sources and destinations
+
+Sources and destinations are special-case plugins. While they are technically
+identical to filter plugins, they are not called using the plugin manager's
+`call()` method. Only one source and one destination can be used for each
+backup or restore operation, so they are called individually rather than being
+chained like most plugin operations.
+
+These plugin types are different by convention only, and are injected and
+configured in the same way as filters.
+
+See:
+[Sources][sources],
+[Destinations][destinations]
+
+[destinations]: https://github.com/backupmigrate/backup_migrate_core/tree/master/src/Destination
+[files]: https://github.com/backupmigrate/backup_migrate_core/tree/master/src/File
+[filters]: https://github.com/backupmigrate/backup_migrate_core/tree/master/src/Filter
+[services]: https://github.com/backupmigrate/backup_migrate_core/tree/master/src/Service
+[sources]: https://github.com/backupmigrate/backup_migrate_core/tree/master/src/Source

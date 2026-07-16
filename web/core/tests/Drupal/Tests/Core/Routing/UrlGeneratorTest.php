@@ -179,8 +179,7 @@ class UrlGeneratorTest extends UnitTestCase {
     $this->context->fromRequestStack($this->requestStack);
 
     $processor = new AliasPathProcessor($this->aliasManager);
-    $processor_manager = new PathProcessorManager();
-    $processor_manager->addOutbound($processor, 1000);
+    $processor_manager = new PathProcessorManager([], [$processor]);
     $this->processorManager = $processor_manager;
 
     $this->routeProcessorManager = $this->getMockBuilder('Drupal\Core\RouteProcessor\RouteProcessorManager')
@@ -553,7 +552,15 @@ class UrlGeneratorTest extends UnitTestCase {
         $options['fragment'] = 'foo';
         return $path;
       });
-    $this->processorManager->addOutbound($path_processor);
+
+    $alias_processor = new AliasPathProcessor($this->aliasManager);
+    $processor_manager = new PathProcessorManager([], [$alias_processor, $path_processor]);
+
+    $this->generator = new UrlGenerator($this->provider, $processor_manager, $this->routeProcessorManager, $this->requestStack, [
+      'http',
+      'https',
+    ]);
+    $this->generator->setContext($this->context);
 
     $options = [];
     $this->assertGenerateFromRoute('test_2', ['Lassie' => 5], $options, '/goodbye/cruel/world?zoo=5#foo', (new BubbleableMetadata())->setCacheMaxAge(Cache::PERMANENT));
@@ -596,6 +603,40 @@ class UrlGeneratorTest extends UnitTestCase {
     $generated_url = $this->generator->generateFromRoute($route_name, $route_parameters, $options, TRUE);
     $this->assertSame($expected_url, $generated_url->getGeneratedUrl());
     $this->assertEquals($expected_bubbleable_metadata, BubbleableMetadata::createFromObject($generated_url));
+  }
+
+  /**
+   * Tests that route name and parameters are passed to path processors.
+   *
+   * @legacy-covers ::generateFromRoute
+   */
+  public function testGenerateWithRouteNameInOptions(): void {
+    $path_processor = $this->createMock(OutboundPathProcessorInterface::class);
+
+    $path_processor->expects($this->atLeastOnce())
+      ->method('processOutbound')
+      ->willReturnCallback(function ($path, &$options = []) {
+        // Assert that 'route_name' exists in options and is the expected value.
+        $this->assertArrayHasKey('route_name', $options);
+        $this->assertEquals('test_1', $options['route_name']);
+
+        // Assert that 'route_parameters' exists in options and
+        // is the expected value.
+        $this->assertArrayHasKey('route_parameters', $options);
+        $this->assertEquals(['node' => 1], $options['route_parameters']);
+        return $path;
+      });
+
+    $this->processorManager = new PathProcessorManager([], [
+      $this->processorManager,
+      $path_processor,
+    ]);
+
+    $this->generator = new UrlGenerator($this->provider, $this->processorManager, $this->routeProcessorManager, $this->requestStack);
+    $this->generator->setContext($this->context);
+
+    $options = [];
+    $this->assertGenerateFromRoute('test_1', ['node' => 1], $options, '/hello/world?node=1', (new BubbleableMetadata())->setCacheMaxAge(Cache::PERMANENT));
   }
 
 }

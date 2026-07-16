@@ -8,7 +8,6 @@ use Drupal\block\BlockListBuilder;
 use Drupal\block\BlockViewBuilder;
 use Drupal\block\Form\BlockDeleteForm;
 use Drupal\Core\Entity\Attribute\ConfigEntityType;
-use Drupal\Core\Cache\Cache;
 use Drupal\Core\Condition\ConditionPluginCollection;
 use Drupal\Core\Config\Action\Attribute\ActionMethod;
 use Drupal\Core\Config\Entity\ConfigEntityBase;
@@ -17,6 +16,8 @@ use Drupal\block\BlockInterface;
 use Drupal\Core\Config\Entity\ConfigEntityInterface;
 use Drupal\Core\Entity\EntityWithPluginCollectionInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
+use Drupal\Core\Extension\Exception\UnknownExtensionException;
+use Drupal\Core\Extension\ThemeHandlerInterface;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 
@@ -250,17 +251,11 @@ class Block extends ConfigEntityBase implements BlockInterface, EntityWithPlugin
   /**
    * {@inheritdoc}
    */
-  public function postSave(EntityStorageInterface $storage, $update = TRUE) {
-    parent::postSave($storage, $update);
-
-    // EntityBase::postSave() calls EntityBase::invalidateTagsOnSave(), which
-    // only handles the regular cases. The Block entity has one special case: a
-    // newly created block may *also* appear on any page in the current theme,
-    // so we must invalidate the associated block's cache tag (which includes
-    // the theme cache tag).
-    if (!$update) {
-      Cache::invalidateTags($this->getCacheTagsToInvalidate());
-    }
+  public function getCacheTagsToInvalidate() {
+    // Only use the block_list cache tag for blocks as they are usually very
+    // rarely updated. Not having per-block cache tags results in a large
+    // reduction of unique cache tags on any page that displays blocks.
+    return $this->getEntityType()->getListCacheTags();
   }
 
   /**
@@ -361,10 +356,19 @@ class Block extends ConfigEntityBase implements BlockInterface, EntityWithPlugin
     // Ensure the region is valid to mirror the behavior of block_rebuild().
     // This is done primarily for backwards compatibility support of
     // \Drupal\block\BlockInterface::BLOCK_REGION_NONE.
-    $regions = system_region_list($this->theme);
+    try {
+      $theme_extension = \Drupal::service(ThemeHandlerInterface::class)->getTheme($this->theme);
+      $regions = $theme_extension->listAllRegions();
+      $default_region = $theme_extension->getDefaultRegion();
+    }
+    catch (UnknownExtensionException) {
+      $regions = [];
+      $default_region = '';
+    }
+
     if (!isset($this->region, $regions[$this->region]) && $this->status()) {
       $this
-        ->setRegion(system_default_region($this->theme))
+        ->setRegion($default_region)
         ->disable();
     }
   }
@@ -379,7 +383,13 @@ class Block extends ConfigEntityBase implements BlockInterface, EntityWithPlugin
    */
   public static function validateRegion(?string $region, ExecutionContextInterface $context): void {
     if ($theme = $context->getRoot()->get('theme')->getValue()) {
-      if (!array_key_exists($region, system_region_list($theme))) {
+      $theme_extension = NULL;
+      try {
+        $theme_extension = \Drupal::service(ThemeHandlerInterface::class)->getTheme($theme);
+      }
+      catch (UnknownExtensionException) {
+      }
+      if (!$theme_extension || !array_key_exists($region, $theme_extension->listAllRegions())) {
         $context->addViolation('This is not a valid region of the %theme theme.', ['%theme' => $theme]);
       }
     }

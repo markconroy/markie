@@ -2,6 +2,7 @@
 
 namespace Drupal\jsonapi\Normalizer;
 
+use Drupal\Core\Cache\CacheableDependencyInterface;
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
@@ -99,7 +100,18 @@ class ResourceObjectNormalizer extends NormalizerBase {
   }
 
   /**
-   * {@inheritdoc}
+   * Normalizes data into a set of arrays/scalars.
+   *
+   * @param \Drupal\jsonapi\JsonApiResource\ResourceObject $object
+   *   Data to normalize.
+   * @param string|null $format
+   *   Format the normalization result will be encoded as.
+   * @param array<string, mixed> $context
+   *   Context options for the normalizer.
+   *
+   * @return array|string|int|float|bool|\ArrayObject<mixed, mixed>|null
+   *   \ArrayObject is used to make sure an empty object is encoded as an
+   *   object not an array.
    */
   public function doNormalize($object, $format = NULL, array $context = []): array|string|int|float|bool|\ArrayObject|NULL {
     assert($object instanceof ResourceObject);
@@ -243,6 +255,12 @@ class ResourceObjectNormalizer extends NormalizerBase {
         $normalized_field = $this->serializer->normalize($field, $format, $context);
       }
       assert($normalized_field instanceof CacheableNormalization);
+
+      // Add cacheability metadata if field item list provides some.
+      if ($field instanceof CacheableDependencyInterface) {
+        $normalized_field = $normalized_field->withCacheableDependency($field);
+      }
+
       return $normalized_field->withCacheableDependency(CacheableMetadata::createFromObject($field_access_result));
     }
     else {

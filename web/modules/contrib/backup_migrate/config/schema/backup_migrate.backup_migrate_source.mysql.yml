@@ -2,6 +2,9 @@ backup_migrate.backup_migrate_source.MySQL:
   type: mapping
   label: 'Backup Migrate MySQL Settings'
   mapping:
+    name:
+      type: string
+      label: 'Name'
     host:
       type: string
       label: 'Host'

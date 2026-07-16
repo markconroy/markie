@@ -7,7 +7,7 @@ namespace Drupal\FunctionalTests\DefaultContent;
 use ColinODell\PsrTestLogger\TestLogger;
 use Drupal\Component\Serialization\Yaml;
 use Drupal\Component\Utility\SortArray;
-use Drupal\Core\DefaultContent\ContentExportCommand;
+use Drupal\Core\DefaultContent\Command\ContentExportCommand;
 use Drupal\Core\DefaultContent\Exporter;
 use Drupal\Core\DefaultContent\Finder;
 use Drupal\Core\DefaultContent\Importer;
@@ -74,7 +74,7 @@ class ContentExportTest extends BrowserTestBase {
 
     // Apply the recipe that sets up the fields and configuration for our
     // default content.
-    $fixtures_dir = $this->getDrupalRoot() . '/core/tests/fixtures';
+    $fixtures_dir = $this->root . '/core/tests/fixtures';
     $this->applyRecipe($fixtures_dir . '/recipes/default_content_base');
 
     // We need an administrative user to import and export content.
@@ -196,7 +196,12 @@ class ContentExportTest extends BrowserTestBase {
     // Ensure the import succeeded, and that we can log in with the imported
     // account. We want to use the standard login form, rather than a one-time
     // login link, to ensure the password is preserved.
-    $this->assertIsObject(user_load_by_name($account->getAccountName()));
+    $users = \Drupal::entityTypeManager()
+      ->getStorage('user')
+      ->loadByProperties(['name' => $account->getAccountName()]);
+    $user = reset($users);
+
+    $this->assertIsObject($user);
     $this->useOneTimeLoginLinks = FALSE;
     $this->drupalLogin($account);
     $this->assertSession()->addressMatches('/\/user\/[0-9]+$/');

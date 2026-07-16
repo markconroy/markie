@@ -6,14 +6,16 @@ use Drupal\backup_migrate\Core\Exception\BackupMigrateException;
 use Drupal\backup_migrate\Core\File\BackupFileReadableInterface;
 
 /**
- *
+ * Provides the tar archive reader class.
  *
  * @package Drupal\backup_migrate\Core\Service
  */
 class TarArchiveReader implements ArchiveReaderInterface {
 
   /**
-   * @var \Drupal\backup_migrate\Core\File\BackupFileReadableInterface
+   * Stores the value.
+   *
+   * @var \Drupal\backup_migrate\Core\File\BackupFileReadableInterface The archive
    */
   protected $archive;
 
@@ -24,6 +26,7 @@ class TarArchiveReader implements ArchiveReaderInterface {
    * be 'zip'.
    *
    * @return string
+   *   The requested string.
    */
   public function getFileExt() {
     return 'tar';
@@ -39,9 +42,11 @@ class TarArchiveReader implements ArchiveReaderInterface {
   /**
    * Extract all files to the given directory.
    *
-   * @param $directory
+   * @param mixed $directory
+   *   The directory.
    *
    * @return mixed
+   *   The return value.
    */
   public function extractTo($directory) {
     $this->archive->openForRead(TRUE);
@@ -54,12 +59,16 @@ class TarArchiveReader implements ArchiveReaderInterface {
   }
 
   /**
-   * @param $directory
+   * Extracts the archive to a directory.
+   *
+   * @param mixed $directory
+   *   The directory.
    *   The directory to extract the files to.
    *
    * @return bool
+   *   TRUE when successful, FALSE otherwise.
    *
-   * @throws \Drupal\backup_migrate\Core\Exception\BackupMigrateException
+   * @throws \Drupal\backup_migrate\Core\Exception\BackupMigrateException.
    */
   private function extractAllToDirectory($directory) {
     clearstatcache();
@@ -219,9 +228,11 @@ class TarArchiveReader implements ArchiveReaderInterface {
   /**
    * Create a directory or return true if it already exists.
    *
-   * @param $directory
+   * @param mixed $directory
+   *   The directory.
    *
    * @return bool
+   *   TRUE when successful, FALSE otherwise.
    */
   private function createDir($directory) {
     if ((@is_dir($directory)) || ($directory == '')) {
@@ -245,10 +256,13 @@ class TarArchiveReader implements ArchiveReaderInterface {
   /**
    * Read a tar file header block.
    *
-   * @param $block
+   * @param mixed $block
+   *   The block.
    * @param array $header
+   *   The table header.
    *
    * @return array
+   *   A render or configuration array.
    *
    * @throws \Drupal\backup_migrate\Core\Exception\BackupMigrateException
    */
@@ -341,8 +355,10 @@ class TarArchiveReader implements ArchiveReaderInterface {
    * Read a tar file header block for files with long names.
    *
    * @param array $header
+   *   The table header.
    *
    * @return array
+   *   A render or configuration array.
    *
    * @throws \Drupal\backup_migrate\Core\Exception\BackupMigrateException
    */
@@ -373,8 +389,10 @@ class TarArchiveReader implements ArchiveReaderInterface {
    * Detect and report a malicious file name.
    *
    * @param string $file
+   *   The backup file.
    *
    * @return bool
+   *   TRUE when successful, FALSE otherwise.
    */
   private function maliciousFilename($file) {
     if (strpos($file, '/../') !== FALSE) {
@@ -393,6 +411,7 @@ class TarArchiveReader implements ArchiveReaderInterface {
    * needed.
    *
    * @return mixed
+   *   The return value.
    */
   public function closeArchive() {
     if ($this->archive) {

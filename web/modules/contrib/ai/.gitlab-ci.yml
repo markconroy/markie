@@ -154,7 +154,8 @@ pages:
     - echo "Allowing Mike to deploy to the gh-pages branch"
     - git remote set-url origin https://oauth2:${DOCS_TOKEN}@git.drupalcode.org/project/ai.git
     - echo "Deploying documentation to gh-pages branch to have latest built version"
-    - mike deploy $VERSION --push
+    - ISSUE=$(echo "$CI_COMMIT_REF_NAME" | grep -o '^[0-9]\+')
+    - mike deploy $VERSION --push --message "#$ISSUE Mike deploy for version $VERSION"
     - echo "Remove any changes"
     - git reset --hard
     - git clean -fd

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\jsonapi\Functional;
 
+use Drupal\comment\CommentingStatus;
 use Drupal\comment\Entity\Comment;
-use Drupal\comment\Plugin\Field\FieldType\CommentItemInterface;
 use Drupal\comment\Tests\CommentTestTrait;
 use Drupal\Core\Entity\TranslatableInterface;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
@@ -52,7 +52,7 @@ class JsonApiPatchRegressionTest extends JsonApiFunctionalTestBase {
   public function testBundleSpecificTargetEntityTypeFromIssue2953207(): void {
     // Set up data model.
     $this->assertTrue($this->container->get('module_installer')->install(['comment'], TRUE), 'Installed modules.');
-    $this->addDefaultCommentField('taxonomy_term', 'tags', 'comment', CommentItemInterface::OPEN, 'test_comment_type');
+    $this->addDefaultCommentField('taxonomy_term', 'tags', 'comment', CommentingStatus::Open, 'test_comment_type');
     $this->rebuildAll();
 
     // Create data.
@@ -86,7 +86,7 @@ class JsonApiPatchRegressionTest extends JsonApiFunctionalTestBase {
    * @see https://www.drupal.org/project/drupal/issues/2976371
    */
   public function testBundlelessRelationshipMutationFromIssue2973681(): void {
-    $this->config('jsonapi.settings')->set('read_only', FALSE)->save(TRUE);
+    $this->config('jsonapi.settings')->set('read_only', FALSE)->save();
 
     // Set up data model.
     $this->drupalCreateContentType(['type' => 'page']);
@@ -137,7 +137,7 @@ class JsonApiPatchRegressionTest extends JsonApiFunctionalTestBase {
    * @see https://www.drupal.org/project/drupal/issues/2968972
    */
   public function testDanglingReferencesInAnEntityReferenceFieldFromIssue2968972(): void {
-    $this->config('jsonapi.settings')->set('read_only', FALSE)->save(TRUE);
+    $this->config('jsonapi.settings')->set('read_only', FALSE)->save();
 
     // Set up data model.
     $this->drupalCreateContentType(['type' => 'journal_issue']);
@@ -208,7 +208,7 @@ class JsonApiPatchRegressionTest extends JsonApiFunctionalTestBase {
    * @see https://www.drupal.org/project/drupal/issues/3021194
    */
   public function testPatchingDateTimeFieldsFromIssue3021194(): void {
-    $this->config('jsonapi.settings')->set('read_only', FALSE)->save(TRUE);
+    $this->config('jsonapi.settings')->set('read_only', FALSE)->save();
 
     // Set up data model.
     $this->assertTrue($this->container->get('module_installer')->install(['datetime'], TRUE), 'Installed modules.');
@@ -291,7 +291,7 @@ class JsonApiPatchRegressionTest extends JsonApiFunctionalTestBase {
    * @see https://www.drupal.org/project/drupal/issues/3026030
    */
   public function testPatchToIncludeUrlDoesNotReturnIncludeFromIssue3026030(): void {
-    $this->config('jsonapi.settings')->set('read_only', FALSE)->save(TRUE);
+    $this->config('jsonapi.settings')->set('read_only', FALSE)->save();
 
     // Set up data model.
     $this->drupalCreateContentType(['type' => 'page']);
@@ -338,9 +338,9 @@ class JsonApiPatchRegressionTest extends JsonApiFunctionalTestBase {
    */
   public function testNonTranslatableEntityUpdatesFromIssue3043168(): void {
     // Enable write-mode.
-    $this->config('jsonapi.settings')->set('read_only', FALSE)->save(TRUE);
+    $this->config('jsonapi.settings')->set('read_only', FALSE)->save();
     // Set the site language to Russian.
-    $this->config('system.site')->set('langcode', 'ru')->set('default_langcode', 'ru')->save(TRUE);
+    $this->config('system.site')->set('langcode', 'ru')->set('default_langcode', 'ru')->save();
     // Install a "custom" entity type that is not translatable.
     $this->assertTrue($this->container->get('module_installer')->install(['entity_test'], TRUE), 'Installed modules.');
     // Clear and rebuild caches and routes.
@@ -401,7 +401,7 @@ class JsonApiPatchRegressionTest extends JsonApiFunctionalTestBase {
    * @see https://www.drupal.org/project/drupal/issues/3127883
    */
   public function testPatchInvalidFieldPropertyFromIssue3127883(): void {
-    $this->config('jsonapi.settings')->set('read_only', FALSE)->save(TRUE);
+    $this->config('jsonapi.settings')->set('read_only', FALSE)->save();
 
     // Set up data model.
     $this->drupalCreateContentType(['type' => 'page']);
@@ -454,7 +454,7 @@ class JsonApiPatchRegressionTest extends JsonApiFunctionalTestBase {
     $this->assertSame(422, $response->getStatusCode());
     $this->assertNotNull($data);
     // cSpell:disable-next-line
-    $this->assertSame("The properties 'form', 'sumary', 'foobar' do not exist on the 'body' field of type 'text_with_summary'. Writable properties are: 'value', 'format', 'summary'.", $data['errors'][0]['detail']);
+    $this->assertSame("The properties 'form', 'sumary', 'foobar' do not exist on the 'body' field of type 'text_long'. Writable properties are: 'value', 'format'.", $data['errors'][0]['detail']);
 
     $request_options = [
       RequestOptions::HEADERS => [
@@ -487,7 +487,7 @@ class JsonApiPatchRegressionTest extends JsonApiFunctionalTestBase {
     $this->assertSame(422, $response->getStatusCode());
     $this->assertNotNull($data);
     // cSpell:disable-next-line
-    $this->assertSame("The properties 'form', 'sumary' do not exist on the 'body' field of type 'text_with_summary'. Did you mean 'format', 'summary'?", $data['errors'][0]['detail']);
+    $this->assertSame("The properties 'form', 'sumary' do not exist on the 'body' field of type 'text_long'. Writable properties are: 'value', 'format'.", $data['errors'][0]['detail']);
   }
 
 }

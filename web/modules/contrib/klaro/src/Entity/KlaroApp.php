@@ -49,6 +49,9 @@ use Drupal\klaro\KlaroAppInterface;
  *     "purposes" = "purposes",
  *     "cookies" = "cookies",
  *     "callbackCode" = "callback_code",
+ *     "onInit" = "on_init",
+ *     "onAccept" = "on_accept",
+ *     "onDecline" = "on_decline",
  *     "javascripts" = "javascripts",
  *     "wrapper_identifier" = "wrapper_identifier",
  *     "attachments" = "attachments",
@@ -70,6 +73,9 @@ use Drupal\klaro\KlaroAppInterface;
  *     "purposes",
  *     "cookies",
  *     "callback_code",
+ *     "on_init",
+ *     "on_accept",
+ *     "on_decline",
  *     "javascripts",
  *     "wrapper_identifier",
  *     "attachments",
@@ -188,6 +194,36 @@ class KlaroApp extends ConfigEntityBase implements KlaroAppInterface {
    * @var string
    */
   protected $callback_code = '';
+
+  /**
+   * The initialization code that will be executed after service initialization.
+   *
+   * This javascript will be executed after service initialization change.
+   * See e.g. https://klaro.org/docs/tutorials/google_tag_manager.
+   *
+   * @var string
+   */
+  protected $on_init = '';
+
+  /**
+   * The code that will be executed after is allowed.
+   *
+   * This javascript will be executed after service has been accepted.
+   * See e.g. https://klaro.org/docs/tutorials/google_tag_manager.
+   *
+   * @var string
+   */
+  protected $on_accept = '';
+
+  /**
+   * The code that will be executed after service is denied.
+   *
+   * This javascript will be executed after service has been declined.
+   * See e.g. https://klaro.org/docs/tutorials/google_tag_manager.
+   *
+   * @var string
+   */
+  protected $on_decline = '';
 
   /**
    * The javascripts that will added to the DOM as text/html instead.
@@ -320,6 +356,48 @@ class KlaroApp extends ConfigEntityBase implements KlaroAppInterface {
    */
   public function setCallbackCode(string $callbackCode = ''): KlaroAppInterface {
     return $this->set('callback_code', $callbackCode);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function onInit(): string {
+    return $this->get('on_init');
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setOnInit(string $onInit = ''): KlaroAppInterface {
+    return $this->set('on_init', $onInit);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function onAccept(): string {
+    return $this->get('on_accept');
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setOnAccept(string $onAccept = ''): KlaroAppInterface {
+    return $this->set('on_accept', $onAccept);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function onDecline(): string {
+    return $this->get('on_decline');
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setOnDecline(string $onDecline = ''): KlaroAppInterface {
+    return $this->set('on_decline', $onDecline);
   }
 
   /**

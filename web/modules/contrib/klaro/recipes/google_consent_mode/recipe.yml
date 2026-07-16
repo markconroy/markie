@@ -1,0 +1,18 @@
+name: 'Klaro! Google Consent Mode v2'
+description: 'Provides Klaro! Services for Google Consent Mode v2'
+type: 'Klaro'
+
+config:
+  strict: false
+  actions:
+    klaro.klaro_app.ga:
+      setProperties:
+        label: 'Google Analytics (legacy)'
+    klaro.klaro_app.gtm:
+      setProperties:
+        label: 'Google tag Manager (legacy)'
+  import:
+    klaro:
+      - klaro.klaro_app.gtm_consent_mode
+      - klaro.klaro_app.ga_consent_mode
+      - klaro.klaro_app.google_ads_consent_mode

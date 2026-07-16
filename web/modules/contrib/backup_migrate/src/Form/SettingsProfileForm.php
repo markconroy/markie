@@ -7,7 +7,7 @@ use Drupal\Core\Entity\EntityForm;
 use Drupal\Core\Form\FormStateInterface;
 
 /**
- *
+ * Provides the settings profile form class.
  *
  * @package Drupal\backup_migrate\Form
  */
@@ -53,6 +53,20 @@ class SettingsProfileForm extends EntityForm {
   /**
    * {@inheritdoc}
    */
+  public function buildEntity(array $form, FormStateInterface $form_state) {
+    $config = $form_state->getValue('config');
+    $config['namer']['timestamp'] = (bool) ($config['namer']['timestamp'] ?? FALSE);
+    $config['utils']['site_offline'] = (bool) ($config['utils']['site_offline'] ?? FALSE);
+    $config['notify']['notify_success_enable'] = (bool) ($config['notify']['notify_success_enable'] ?? FALSE);
+    $config['notify']['notify_failure_enable'] = (bool) ($config['notify']['notify_failure_enable'] ?? FALSE);
+    $form_state->setValue('config', $config);
+
+    return parent::buildEntity($form, $form_state);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function save(array $form, FormStateInterface $form_state) {
     $backup_migrate_settings = $this->entity;
 
@@ -60,13 +74,13 @@ class SettingsProfileForm extends EntityForm {
 
     switch ($status) {
       case SAVED_NEW:
-        \Drupal::messenger()->addMessage($this->t('Created the %label Settings Profile.', [
+        $this->messenger()->addMessage($this->t('Created the %label Settings Profile.', [
           '%label' => $backup_migrate_settings->label(),
         ]));
         break;
 
       default:
-        \Drupal::messenger()->addMessage($this->t('Saved the %label Settings Profile.', [
+        $this->messenger()->addMessage($this->t('Saved the %label Settings Profile.', [
           '%label' => $backup_migrate_settings->label(),
         ]));
     }

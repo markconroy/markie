@@ -145,7 +145,7 @@ class EntityQueryAggregateTest extends EntityKernelTestBase {
       // We need to check that a character exists before and after the table,
       // column and alias identifiers. These would be the quote characters
       // specific for each database system.
-      $this->assertMatchesRegularExpression('/' . $aggregation_function . '\(.*entity_test.\..id.\).* AS .id_' . $aggregation_function . './', (string) $query, 'The argument to the aggregation function should be a quoted field.');
+      $this->assertMatchesRegularExpression('/' . $aggregation_function . '\(.*base_table.\..id.\).* AS .id_' . $aggregation_function . './', (string) $query, 'The argument to the aggregation function should be a quoted field.');
       $this->assertEquals($expected, $this->queryResult);
     }
 
@@ -659,6 +659,36 @@ class EntityQueryAggregateTest extends EntityKernelTestBase {
       ['id' => 3],
       ['id' => 4],
       ['id' => 6],
+    ]);
+  }
+
+  /**
+   * Tests that cloning an aggregate query isolates its aggregate conditions.
+   */
+  public function testCloneAggregateIsolation(): void {
+    // Original query: groups with id count > 1 are user 2 (3 rows) and user 3
+    // (2 rows).
+    $original = $this->entityStorage->getAggregateQuery()
+      ->accessCheck(FALSE)
+      ->aggregate('id', 'count')
+      ->groupBy('user_id')
+      ->conditionAggregate('id', 'count', 1, '>');
+
+    $clone = clone $original;
+    // Tightening the clone must not affect the original's conditions.
+    $clone->conditionAggregate('id', 'count', 2, '>');
+
+    $this->queryResult = $original->execute();
+    $this->assertCount(2, $this->queryResult);
+    $this->assertResults([
+      ['user_id' => 2, 'id_count' => 3],
+      ['user_id' => 3, 'id_count' => 2],
+    ]);
+
+    $this->queryResult = $clone->execute();
+    $this->assertCount(1, $this->queryResult);
+    $this->assertResults([
+      ['user_id' => 2, 'id_count' => 3],
     ]);
   }
 

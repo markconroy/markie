@@ -6,7 +6,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Attribute\RenderElement;
 use Drupal\Core\Render\Element\RenderElementBase;
 use Drupal\Core\Render\Element;
-use Drupal\Core\Url;
+use Drupal\filter\FilterFormatRepositoryInterface;
 
 /**
  * Provides a text format render element.
@@ -132,8 +132,9 @@ class TextFormat extends RenderElementBase {
       '#attributes' => ['class' => ['js-filter-wrapper']],
     ];
 
+    $format_repository = \Drupal::service(FilterFormatRepositoryInterface::class);
     // Get a list of formats that the current user has access to.
-    $formats = filter_formats($user);
+    $formats = $format_repository->getFormatsForAccount($user);
 
     // Allow the list of formats to be restricted.
     if (isset($element['#allowed_formats'])) {
@@ -201,21 +202,7 @@ class TextFormat extends RenderElementBase {
       '#parents' => array_merge($element['#parents'], ['format']),
     ];
 
-    $element['format']['help'] = [
-      '#type' => 'container',
-      '#theme_wrappers' => [
-        'container__text_format_filter_help',
-      ],
-      'about' => [
-        '#type' => 'link',
-        '#title' => t('About text formats'),
-        '#url' => new Url('filter.tips_all'),
-        '#attributes' => ['target' => '_blank'],
-      ],
-      '#weight' => 0,
-    ];
-
-    $all_formats = filter_formats();
+    $all_formats = $format_repository->getAllFormats();
     $format_exists = isset($element['#format'], $all_formats[$element['#format']]);
     $format_allowed = !isset($element['#allowed_formats']) || in_array($element['#format'], $element['#allowed_formats']);
     $user_has_access = isset($element['#format'], $formats[$element['#format']]);

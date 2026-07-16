@@ -75,7 +75,7 @@ entity.ai_prompt.collection:
   title: 'Prompt Library'
   description: 'Create and manage reusable AI prompts used throughout the AI ecosystem.'
   route_name: entity.ai_prompt.collection
-  parent: ai.admin_vdb_providers
+  parent: ai.admin_config_infrastructure
 
 entity.ai_prompt_type.collection:
   title: 'AI Prompt Types'

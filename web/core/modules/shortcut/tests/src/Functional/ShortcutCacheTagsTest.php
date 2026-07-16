@@ -98,9 +98,8 @@ class ShortcutCacheTagsTest extends EntityCacheTagsTestBase {
     $this->drupalLogin($this->adminUser);
     $this->drupalGet('admin/config/system/cron');
     $expected_cache_tags = [
-      'block_view',
-      'config:block.block.title',
       'config:block_list',
+      'config:system.cron',
       'config:shortcut.set.default',
       'config:system.menu.admin',
       'config:system.theme',
@@ -112,7 +111,7 @@ class ShortcutCacheTagsTest extends EntityCacheTagsTestBase {
     \Drupal::configFactory()
       ->getEditable('stark.settings')
       ->set('third_party_settings.shortcut.module_link', TRUE)
-      ->save(TRUE);
+      ->save();
 
     // Add cron to the default shortcut set, now the shortcut list cache tag
     // is expected.
@@ -274,10 +273,8 @@ class ShortcutCacheTagsTest extends EntityCacheTagsTestBase {
     $this->drupalGet('admin/config/system/cron');
     $expected_cache_tags = [
       'CACHE_MISS_IF_UNCACHEABLE_HTTP_METHOD:form',
-      'block_view',
-      'config:block.block.shortcuts',
-      'config:block.block.title',
       'config:block_list',
+      'config:system.cron',
       'config:shortcut.set.default',
       'config:system.menu.admin',
       'config:system.theme',
@@ -288,7 +285,7 @@ class ShortcutCacheTagsTest extends EntityCacheTagsTestBase {
     \Drupal::configFactory()
       ->getEditable('stark.settings')
       ->set('third_party_settings.shortcut.module_link', TRUE)
-      ->save(TRUE);
+      ->save();
 
     // Add cron to the default shortcut set, now the shortcut list cache tag
     // is expected.

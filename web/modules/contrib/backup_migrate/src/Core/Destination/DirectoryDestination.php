@@ -9,6 +9,8 @@ use Drupal\backup_migrate\Core\File\BackupFile;
 use Drupal\backup_migrate\Core\File\BackupFileInterface;
 use Drupal\backup_migrate\Core\File\BackupFileReadableInterface;
 use Drupal\backup_migrate\Core\File\ReadableStreamBackupFile;
+use Drupal\Core\Messenger\MessengerInterface;
+use Drupal\Core\StreamWrapper\StreamWrapperManagerInterface;
 
 /**
  * A destination that is a directory.
@@ -17,6 +19,24 @@ use Drupal\backup_migrate\Core\File\ReadableStreamBackupFile;
  */
 class DirectoryDestination extends DestinationBase implements ListableDestinationInterface, ReadableDestinationInterface, ConfigurableInterface, FileProcessorInterface {
   use SidecarMetadataDestinationTrait;
+
+  /**
+   * Constructs a DirectoryDestination object.
+   *
+   * @param \Drupal\backup_migrate\Core\Config\ConfigInterface|array $init
+   *   Initial configuration.
+   * @param \Drupal\Core\StreamWrapper\StreamWrapperManagerInterface|null $streamWrapperManager
+   *   The stream wrapper manager.
+   * @param \Drupal\Core\Messenger\MessengerInterface|null $messenger
+   *   The messenger.
+   */
+  public function __construct(
+    $init = [],
+    protected readonly ?StreamWrapperManagerInterface $streamWrapperManager = NULL,
+    protected readonly ?MessengerInterface $messenger = NULL,
+  ) {
+    parent::__construct($init);
+  }
 
   /**
    * {@inheritdoc}
@@ -37,8 +57,10 @@ class DirectoryDestination extends DestinationBase implements ListableDestinatio
    * Get a definition for user-configurable settings.
    *
    * @param array $params
+   *   The message parameters.
    *
    * @return array
+   *   A render or configuration array.
    */
   public function configSchema(array $params = []) {
     $schema = [];
@@ -61,6 +83,7 @@ class DirectoryDestination extends DestinationBase implements ListableDestinatio
    * file.
    *
    * @param \Drupal\backup_migrate\Core\File\BackupFileReadableInterface $file
+   *   The backup file.
    *
    * @throws \Drupal\backup_migrate\Core\Exception\BackupMigrateException
    */
@@ -188,7 +211,10 @@ class DirectoryDestination extends DestinationBase implements ListableDestinatio
   }
 
   /**
+   * Counts files in the destination.
+   *
    * @return int
+   *   The requested integer.
    *   The number of files in the destination.
    */
   public function countFiles() {
@@ -218,9 +244,11 @@ class DirectoryDestination extends DestinationBase implements ListableDestinatio
   /**
    * Return a file path for the given file id.
    *
-   * @param $id
+   * @param string $id
+   *   The identifier.
    *
    * @return string
+   *   The requested string.
    */
   protected function idToPath($id) {
     return rtrim($this->confGet('directory'), '/') . '/' . $id;
@@ -230,6 +258,7 @@ class DirectoryDestination extends DestinationBase implements ListableDestinatio
    * Get the entire file list from this destination.
    *
    * @return array
+   *   A render or configuration array.
    */
   protected function getAllFileNames() {
     $files = [];
@@ -237,15 +266,18 @@ class DirectoryDestination extends DestinationBase implements ListableDestinatio
     // Read the list of files from the directory.
     $dir = $this->confGet('directory');
 
-    /** @var \Drupal\Core\StreamWrapper\StreamWrapperManagerInterface $stream_wrapper_manager */
-    $stream_wrapper_manager = \Drupal::service('stream_wrapper_manager');
-    $scheme = $stream_wrapper_manager->getScheme($dir);
+    if (!$this->streamWrapperManager) {
+      return $files;
+    }
+    $scheme = $this->streamWrapperManager->getScheme($dir);
 
     // Ensure the stream is configured.
-    if (!$stream_wrapper_manager->isValidScheme($scheme)) {
-      \Drupal::messenger()->addMessage($this->t('Your @scheme stream is not configured.', [
-        '@scheme' => $scheme . '://',
-      ]), 'warning');
+    if (!$this->streamWrapperManager->isValidScheme($scheme)) {
+      if ($this->messenger) {
+        $this->messenger->addMessage($this->t('Your @scheme stream is not configured.', [
+          '@scheme' => $scheme . '://',
+        ]), 'warning');
+      }
       return $files;
     }
 

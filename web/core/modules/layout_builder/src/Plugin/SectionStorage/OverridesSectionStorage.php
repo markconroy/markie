@@ -22,7 +22,6 @@ use Drupal\layout_builder\Entity\LayoutEntityDisplayInterface;
 use Drupal\layout_builder\LayoutEntityHelperTrait;
 use Drupal\layout_builder\OverridesSectionStorageInterface;
 use Drupal\layout_builder\SectionStorage\SectionStorageManagerInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Routing\RouteCollection;
 
 /**
@@ -45,7 +44,7 @@ use Symfony\Component\Routing\RouteCollection;
       data_type: 'entity',
       label: new TranslatableMarkup("Entity"),
       constraints: [
-        "EntityHasField" => OverridesSectionStorage::FIELD_NAME,
+        "EntityHasField" => ['field_name' => OverridesSectionStorage::FIELD_NAME],
       ],
     ),
     'view_mode' => new ContextDefinition(
@@ -111,22 +110,6 @@ class OverridesSectionStorage extends SectionStorageBase implements ContainerFac
   /**
    * {@inheritdoc}
    */
-  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
-    return new static(
-      $configuration,
-      $plugin_id,
-      $plugin_definition,
-      $container->get('entity_type.manager'),
-      $container->get('entity_field.manager'),
-      $container->get('plugin.manager.layout_builder.section_storage'),
-      $container->get('entity.repository'),
-      $container->get('current_user')
-    );
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   protected function getSectionList() {
     return $this->getEntity()->get(static::FIELD_NAME);
   }
@@ -171,7 +154,8 @@ class OverridesSectionStorage extends SectionStorageBase implements ContainerFac
   public function deriveContextsFromRoute($value, $definition, $name, array $defaults) {
     $contexts = [];
 
-    if ($entity = $this->extractEntityFromRoute($value, $defaults)) {
+    $entity = $this->extractEntityFromRoute($value, $defaults);
+    if ($entity instanceof FieldableEntityInterface) {
       $contexts = $this->getSectionStorageContextsForEntity($entity);
     }
     return $contexts;
@@ -262,10 +246,15 @@ class OverridesSectionStorage extends SectionStorageBase implements ContainerFac
    *
    * @return bool
    *   TRUE if this entity type's ID key is always an integer, FALSE otherwise.
+   *
+   * @deprecated in drupal:11.4.0 and is removed from drupal:13.0.0. Use
+   *   \Drupal\Core\Entity\EntityTypeInterface::hasIntegerId() instead.
+   *
+   * @see https://www.drupal.org/node/3566814
    */
   protected function hasIntegerId(EntityTypeInterface $entity_type) {
-    $field_storage_definitions = $this->entityFieldManager->getFieldStorageDefinitions($entity_type->id());
-    return $field_storage_definitions[$entity_type->getKey('id')]->getType() === 'integer';
+    @trigger_error(__METHOD__ . "() is deprecated in drupal:11.4.0 and is removed from drupal:13.0.0. Use \Drupal\Core\Entity\EntityTypeInterface::hasIntegerId() instead. See https://www.drupal.org/node/3566814", E_USER_DEPRECATED);
+    return $entity_type->hasIntegerId();
   }
 
   /**

@@ -4,6 +4,7 @@ namespace Drupal\media\Hook;
 
 use Drupal\Core\Access\AccessResultInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\views\ViewExecutable;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Field\FieldTypeCategoryManagerInterface;
@@ -102,11 +103,29 @@ class MediaHooks {
     // Set the default formatter for media in entity reference fields to be the
     // "Rendered entity" formatter.
     if (!empty($options['media'])) {
-      $options['media']['description'] = $this->t('Field to reference media. Allows uploading and selecting from uploaded media.');
+      $options['media']['description'] = $this->t('Upload new media or select existing one');
       $options['media']['weight'] = -25;
       $options['media']['category'] = FieldTypeCategoryManagerInterface::FALLBACK_CATEGORY;
       $options['media']['entity_view_display']['type'] = 'entity_reference_entity_view';
     }
+  }
+
+  /**
+   * Provides help text to choose between File and Media reference fields.
+   *
+   * @return string|\Drupal\Core\StringTranslation\TranslatableMarkup
+   *   A suggestion of when to use Media fields instead of File or Image fields.
+   */
+  protected function fileMediaHelpText(): string|TranslatableMarkup {
+    $help_text = $this->t('Use <em>Media</em> reference fields for most files, images, audio, videos, and remote media. Use <em>File</em> or <em>Image</em> reference fields when creating your own media types, or for legacy files and images created before installing the Media module.');
+    if (\Drupal::moduleHandler()->moduleExists('help')) {
+      $help_text .= ' ' . $this->t('For more information, see the <a href="@help_url">Media help page</a>.', [
+        '@help_url' => Url::fromRoute('help.page', [
+          'name' => 'media',
+        ])->toString(),
+      ]);
+    }
+    return $help_text;
   }
 
   /**
@@ -116,17 +135,11 @@ class MediaHooks {
   public function formFieldUiFieldStorageAddFormAlter(&$form, FormStateInterface $form_state, $form_id) : void {
     // Provide some help text to aid users decide whether they need a Media,
     // File, or Image reference field.
-    $description_text = $this->t('Use <em>Media</em> reference fields for most files, images, audio, videos, and remote media. Use <em>File</em> or <em>Image</em> reference fields when creating your own media types, or for legacy files and images created before installing the Media module.');
-    if (\Drupal::moduleHandler()->moduleExists('help')) {
-      $description_text .= ' ' . $this->t('For more information, see the <a href="@help_url">Media help page</a>.', [
-        '@help_url' => Url::fromRoute('help.page', [
-          'name' => 'media',
-        ])->toString(),
-      ]);
-    }
-    $field_types = ['file_upload', 'field_ui:entity_reference:media'];
-    if (in_array($form_state->getStorage()['field_type'], $field_types)) {
-      $form['field_options_wrapper']['description_wrapper'] = ['#type' => 'item', '#markup' => $description_text];
+    if ($form_state->getStorage()['field_type'] === 'field_ui:entity_reference:media') {
+      $form['field_options_wrapper']['description_wrapper'] = [
+        '#type' => 'item',
+        '#markup' => $this->fileMediaHelpText(),
+      ];
     }
   }
 
@@ -161,7 +174,7 @@ class MediaHooks {
     // which bundles are available to be created or referenced.
     $settings = $context['items']->getFieldDefinition()->getSetting('handler_settings');
     $allowed_bundles = !empty($settings['target_bundles']) ? $settings['target_bundles'] : [];
-    $add_url = _media_get_add_url($allowed_bundles);
+    $add_url = $this->addUrl($allowed_bundles);
     if ($add_url) {
       $elements['#media_help']['#media_add_help'] = $this->t('Create your media on the <a href=":add_page" target="_blank">media add page</a> (opens a new window), then add it by name to the field below.', [':add_page' => $add_url]);
     }
@@ -225,7 +238,7 @@ class MediaHooks {
     // are added automatically by CKEditor 5. The validator would conflict with
     // the automatic addition of those allowed tags.
     if ($form_state->getValue('editor') !== 'ckeditor5') {
-      $form['#validate'][] = 'media_filter_format_edit_form_validate';
+      $form['#validate'][] = self::class . ':formatEditFormValidate';
     }
   }
 
@@ -239,7 +252,7 @@ class MediaHooks {
     // are added automatically by CKEditor 5. The validator would conflict with
     // the automatic addition of those allowed tags.
     if ($form_state->getValue('editor') !== 'ckeditor5') {
-      $form['#validate'][] = 'media_filter_format_edit_form_validate';
+      $form['#validate'][] = self::class . ':formatEditFormValidate';
     }
   }
 
@@ -275,6 +288,163 @@ class MediaHooks {
     // The `media` field type belongs in the `general` category, so the
     // libraries need to be attached using an alter hook.
     $definitions[FieldTypeCategoryManagerInterface::FALLBACK_CATEGORY]['libraries'][] = 'media/drupal.media-icon';
+
+    // Provide some help text to aid users decide whether they need a Media,
+    // File, or Image reference field.
+    if (!empty($definitions['file_upload'])) {
+      $existing_summary = $definitions['file_upload']['summary'] ?? '';
+      $definitions['file_upload']['summary'] = empty($existing_summary)
+        ? $this->fileMediaHelpText()
+        : $existing_summary . ' ' . $this->fileMediaHelpText();
+    }
+  }
+
+  /**
+   * Returns the appropriate URL to add media for the current user.
+   *
+   * @todo Remove in https://www.drupal.org/project/drupal/issues/2938116
+   *
+   * @param string[] $allowed_bundles
+   *   An array of bundles that should be checked for create access.
+   *
+   * @return string|false
+   *   The URL to add media, or FALSE if the user cannot create any media.
+   *
+   * @internal
+   *   This function is internal and may be removed in a minor release.
+   */
+  protected function addUrl(array $allowed_bundles): string|false {
+    $access_handler = \Drupal::entityTypeManager()->getAccessControlHandler('media');
+    $create_bundles = array_filter($allowed_bundles, [$access_handler, 'createAccess']);
+
+    // Add a section about how to create media if the user has access to do so.
+    if (count($create_bundles) === 1) {
+      return Url::fromRoute('entity.media.add_form', ['media_type' => reset($create_bundles)])->toString();
+    }
+    elseif (count($create_bundles) > 1) {
+      return Url::fromRoute('entity.media.add_page')->toString();
+    }
+
+    return FALSE;
+  }
+
+  /**
+   * Validate callback to ensure filter order and allowed_html are compatible.
+   */
+  public function formatEditFormValidate(array $form, FormStateInterface $form_state): void {
+    if ($form_state->getTriggeringElement()['#name'] !== 'op') {
+      return;
+    }
+
+    $allowed_html_path = [
+      'filters',
+      'filter_html',
+      'settings',
+      'allowed_html',
+    ];
+
+    $filter_html_settings_path = [
+      'filters',
+      'filter_html',
+      'settings',
+    ];
+
+    $filter_html_enabled = $form_state->getValue([
+      'filters',
+      'filter_html',
+      'status',
+    ]);
+
+    $media_embed_enabled = $form_state->getValue([
+      'filters',
+      'media_embed',
+      'status',
+    ]);
+
+    if (!$media_embed_enabled) {
+      return;
+    }
+
+    $get_filter_label = function ($filter_plugin_id) use ($form) {
+      return (string) $form['filters']['order'][$filter_plugin_id]['filter']['#markup'];
+    };
+
+    if ($filter_html_enabled && $form_state->getValue($allowed_html_path)) {
+      /** @var \Drupal\filter\Entity\FilterFormat $filter_format */
+      $filter_format = $form_state->getFormObject()->getEntity();
+
+      $filter_html = clone $filter_format->filters()->get('filter_html');
+      $filter_html->setConfiguration(['settings' => $form_state->getValue($filter_html_settings_path)]);
+      $restrictions = $filter_html->getHTMLRestrictions();
+      $allowed = $restrictions['allowed'];
+
+      // Require `<drupal-media>` HTML tag if filter_html is enabled.
+      if (!isset($allowed['drupal-media'])) {
+        $form_state->setError($form['filters']['settings']['filter_html']['allowed_html'], $this->t('The %media-embed-filter-label filter requires <code>&lt;drupal-media&gt;</code> among the allowed HTML tags.', [
+          '%media-embed-filter-label' => $get_filter_label('media_embed'),
+        ]));
+      }
+      else {
+        $required_attributes = [
+          'data-entity-type',
+          'data-entity-uuid',
+        ];
+
+        // If there are no attributes, the allowed item is set to FALSE,
+        // otherwise, it is set to an array.
+        if ($allowed['drupal-media'] === FALSE) {
+          $missing_attributes = $required_attributes;
+        }
+        else {
+          $missing_attributes = array_diff($required_attributes, array_keys($allowed['drupal-media']));
+        }
+
+        if ($missing_attributes) {
+          $form_state->setError($form['filters']['settings']['filter_html']['allowed_html'], $this->t('The <code>&lt;drupal-media&gt;</code> tag in the allowed HTML tags is missing the following attributes: <code>%list</code>.', [
+            '%list' => implode(', ', $missing_attributes),
+          ]));
+        }
+      }
+    }
+
+    $filters = $form_state->getValue('filters');
+
+    // The "media_embed" filter must run after "filter_align", "filter_caption",
+    // and "filter_html_image_secure".
+    $precedents = [
+      'filter_align',
+      'filter_caption',
+      'filter_html_image_secure',
+    ];
+
+    $error_filters = [];
+    foreach ($precedents as $filter_name) {
+      // A filter that should run before media embed filter.
+      $precedent = $filters[$filter_name];
+
+      if (empty($precedent['status']) || !isset($precedent['weight'])) {
+        continue;
+      }
+
+      if ($precedent['weight'] >= $filters['media_embed']['weight']) {
+        $error_filters[$filter_name] = $get_filter_label($filter_name);
+      }
+    }
+
+    if (!empty($error_filters)) {
+      $error_message = \Drupal::translation()->formatPlural(
+        count($error_filters),
+        'The %media-embed-filter-label filter needs to be placed after the %filter filter.',
+        'The %media-embed-filter-label filter needs to be placed after the following filters: %filters.',
+        [
+          '%media-embed-filter-label' => $get_filter_label('media_embed'),
+          '%filter' => reset($error_filters),
+          '%filters' => implode(', ', $error_filters),
+        ]
+      );
+
+      $form_state->setErrorByName('filters', $error_message);
+    }
   }
 
 }
