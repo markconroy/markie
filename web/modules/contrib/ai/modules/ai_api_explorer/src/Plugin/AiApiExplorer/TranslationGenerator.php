@@ -87,7 +87,7 @@ final class TranslationGenerator extends AiApiExplorerPluginBase {
     try {
       $provider = $this->aiProviderHelper->generateAiProviderFromFormSubmit($form, $form_state, 'translate_text', 'translate_text');
       $text = $form_state->getValue('text');
-      $sourceLanguage = $form_state->getValue('source_language') ?? NULL;
+      $sourceLanguage = $form_state->getValue('source_language');
       $targetLang = $form_state->getValue('target_language');
       $model = $form_state->getValue('tt_ai_model');
 

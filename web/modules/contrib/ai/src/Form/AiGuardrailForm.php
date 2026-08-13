@@ -36,7 +36,10 @@ final class AiGuardrailForm extends EntityForm {
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
     $plugin = $this->entity->getGuardrail();
-    if ($plugin !== NULL) {
+    // Guardrails are not required to be configurable, so only seed the
+    // configuration on those that actually accept it. Calling this
+    // unconditionally fatals the form for guardrails without settings.
+    if ($plugin instanceof ConfigurableInterface) {
       $plugin->setConfiguration($this->entity->get('guardrail_settings') ?: []);
     }
 
@@ -48,6 +51,14 @@ final class AiGuardrailForm extends EntityForm {
    */
   public function form(array $form, FormStateInterface $form_state): array {
     $form = parent::form($form, $form_state);
+
+    // FormBuilder only assigns #parents to the root element in doBuildForm(),
+    // which runs after this method. SubformState::getParents() requires it on
+    // the parent form as well as on the subform, so any guardrail whose
+    // buildConfigurationForm() reads from the form state would otherwise die
+    // with "The subform and parent form must contain the #parents property".
+    // The value is identical to the one doBuildForm() would default to.
+    $form['#parents'] = [];
 
     /** @var \Drupal\ai\Entity\AiGuardrail $guardrail */
     $guardrail = $this->entity;

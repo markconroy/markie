@@ -24,7 +24,7 @@ final class Title extends AiContentSuggestionsPluginBase {
    *
    * @var string
    */
-  private string $defaultPrompt = 'Suggest an SEO friendly title for this page based off of the following content in 10 words or less, in the same language as the input:';
+  protected string $defaultPrompt = 'Suggest an SEO friendly title for this page based off of the following content in 10 words or less, in the same language as the input:';
 
   /**
    * {@inheritdoc}

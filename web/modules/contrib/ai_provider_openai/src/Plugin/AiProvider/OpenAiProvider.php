@@ -195,15 +195,24 @@ class OpenAiProvider extends OpenAiBasedProviderClientBase {
         'label' => 'Reasoning Effort',
         'description' => 'Constrains effort on reasoning for reasoning models.',
         'default' => 'medium',
+        'required' => TRUE,
         'constraints' => [
           'options' => [
+            'none',
             'minimal',
             'low',
             'medium',
             'high',
+            'xhigh',
           ],
         ],
       ];
+
+      // If the model is 5.6 based, we need to set none as default.
+      if (str_starts_with($model_id, 'gpt-5.6') || str_starts_with($model_id, 'o4')) {
+        $generalConfig['reasoning_effort']['default'] = 'none';
+      }
+
     }
 
     return $generalConfig;

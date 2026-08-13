@@ -24,7 +24,7 @@ final class Summarise extends AiContentSuggestionsPluginBase {
    *
    * @var string
    */
-  private string $defaultPrompt = 'Create a detailed summary of the following text in less than 130 words using the same language as the following text:';
+  protected string $defaultPrompt = 'Create a detailed summary of the following text in less than 130 words using the same language as the following text:';
 
   /**
    * {@inheritdoc}

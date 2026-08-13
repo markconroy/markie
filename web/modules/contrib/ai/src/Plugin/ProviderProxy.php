@@ -316,7 +316,7 @@ class ProviderProxy {
           providerId: $this->plugin->getPluginId(),
           operationType: $operation_type,
           configuration: $this->plugin->configuration ?? [],
-          input: $arguments[0] ?? NULL,
+          input: $arguments[0],
           modelId: $arguments[1] ?? '',
           tags: $this->plugin->getTags(),
           debugData: $this->plugin->getDebugData(),
@@ -366,10 +366,10 @@ class ProviderProxy {
         $this->attachStreamMetadata(
           streamed: $response->getNormalized(),
           event_id: $event_id,
-          input: $arguments[0] ?? NULL,
+          input: $arguments[0],
           provider_id: $this->plugin->getPluginId(),
-          model_id: $arguments[1] ?? NULL,
-          provider_configuration: $this->plugin->configuration ?? NULL,
+          model_id: $arguments[1],
+          provider_configuration: $this->plugin->configuration,
           tags: $this->plugin->getTags() ?? []
         );
       }

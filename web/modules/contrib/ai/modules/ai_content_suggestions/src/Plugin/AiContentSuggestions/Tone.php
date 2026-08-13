@@ -32,14 +32,14 @@ final class Tone extends AiContentSuggestionsPluginBase {
    *
    * @var \Drupal\Core\Config\Config
    */
-  private $toneConfig;
+  protected $toneConfig;
 
   /**
    * The Default prompt for this functionality.
    *
    * @var string
    */
-  private string $defaultPrompt = 'Change the tone of the following text to be {{ tone }} using the same language as the following text:';
+  protected string $defaultPrompt = 'Change the tone of the following text to be {{ tone }} using the same language as the following text:';
 
   /**
    * {@inheritdoc}

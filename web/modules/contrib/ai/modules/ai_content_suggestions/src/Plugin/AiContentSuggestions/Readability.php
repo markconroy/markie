@@ -24,7 +24,7 @@ final class Readability extends AiContentSuggestionsPluginBase {
    *
    * @var string
    */
-  private string $defaultPrompt = 'Provide a Flesch score of the following text as well as one sentence description of how that score should be interpreted.
+  protected string $defaultPrompt = 'Provide a Flesch score of the following text as well as one sentence description of how that score should be interpreted.
       Afterward, provide a brief list of suggested improvements to enhance readability, focusing on sentence length, word complexity, and overall structure.
       Return it like so (in html), don\'t answer with other things than the score, the brief explanation and suggestions. no pleasantries or greetings.
       Always answer in the following output format:

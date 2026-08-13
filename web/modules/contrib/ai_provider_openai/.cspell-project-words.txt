@@ -3,3 +3,4 @@ flac
 moderations
 ratelimit
 dall
+xhigh

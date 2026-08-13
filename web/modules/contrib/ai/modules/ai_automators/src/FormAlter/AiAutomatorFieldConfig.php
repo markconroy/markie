@@ -130,7 +130,7 @@ class AiAutomatorFieldConfig {
       $rulesOptions[$ruleKey] = $rule->title;
     }
 
-    $chosenRule = $formState->getValue('automator_rule') ?? NULL;
+    $chosenRule = $formState->getValue('automator_rule');
     if (empty($chosenRule) && !is_null($aiConfig)) {
       $chosenRule = $aiConfig->get('rule');
     }

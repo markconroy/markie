@@ -28,9 +28,9 @@ class OpenAiConfigForm extends ConfigFormBase {
    * Constructs a new OpenAIConfigForm object.
    */
   final public function __construct(
-    private readonly AiProviderPluginManager $aiProviderManager,
-    private readonly KeyRepositoryInterface $keyRepository,
-    private readonly OpenAiHelper $openAiHelper,
+    protected AiProviderPluginManager $aiProviderManager,
+    protected KeyRepositoryInterface $keyRepository,
+    protected OpenAiHelper $openAiHelper,
   ) {
   }
 

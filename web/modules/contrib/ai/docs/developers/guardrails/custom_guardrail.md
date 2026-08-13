@@ -129,6 +129,53 @@ class MaxWordCount extends AiGuardrailPluginBase implements ConfigurableInterfac
 
 ---
 
+## Injecting Services
+
+To use services in your guardrail, implement `ContainerFactoryPluginInterface` and inject them through the constructor as usual.
+
+> [!IMPORTANT]
+> Injected services must be stored in **`protected`** properties that are **not `readonly`**.
+
+`AiGuardrailPluginBase` uses `DependencySerializationTrait`, which swaps every injected service for its service ID when the plugin is serialized and resolves it back on unserialization. This is not optional: the guardrail entity form has an `#ajax` callback on its guardrail select, so Drupal writes the form and its form state to the form cache, and the guardrail plugin instance is reachable from there. Without the trait, the container, the database connection and closures get dragged into the serialized payload, the cache write fails, and the settings subform never loads.
+
+The trait imposes two constraints:
+
+- **`protected`, not `private`.** The trait's `__sleep()` calls `get_object_vars()` from the scope of the class that uses the trait — `AiGuardrailPluginBase` — so it cannot see private properties declared on your subclass. A private service property is serialized whole.
+- **not `readonly`.** The trait's `__wakeup()` reassigns the property to restore the service, and PHP forbids writing to an initialized readonly property outside the declaring scope.
+
+Breaking either rule fails confusingly rather than obviously: you get an uninitialized typed property, or an `Error` thrown from inside `__wakeup()`.
+
+```php
+use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+
+class MaxWordCount extends AiGuardrailPluginBase implements ContainerFactoryPluginInterface {
+
+  public function __construct(
+    array $configuration,
+    $plugin_id,
+    $plugin_definition,
+    // Protected and not readonly, so DependencySerializationTrait can replace
+    // this with its service ID for the form cache and restore it afterwards.
+    protected LoggerChannelInterface $logger,
+  ) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition);
+  }
+
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition): static {
+    return new static(
+      $configuration,
+      $plugin_id,
+      $plugin_definition,
+      $container->get('logger.channel.ai'),
+    );
+  }
+
+}
+```
+
+---
+
 ## Special Interfaces
 
 You can implement special interfaces to extend your guardrail's behavior:

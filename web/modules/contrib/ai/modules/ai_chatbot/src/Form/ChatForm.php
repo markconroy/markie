@@ -68,9 +68,9 @@ class ChatForm extends FormBase {
    *   The route match.
    */
   public function __construct(
-    private readonly EntityTypeManagerInterface $entityTypeManager,
-    private readonly AiAssistantApiRunner $aiAssistantRunner,
-    private readonly RouteMatchInterface $routeMatcher,
+    protected EntityTypeManagerInterface $entityTypeManager,
+    protected AiAssistantApiRunner $aiAssistantRunner,
+    protected RouteMatchInterface $routeMatcher,
   ) {
   }
 

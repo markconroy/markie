@@ -8,7 +8,7 @@ configure: ai_provider_openai.settings_form
 dependencies:
   - ai:ai
 
-# Information added by Drupal.org packaging script on 2026-07-09
-version: '1.2.3'
+# Information added by Drupal.org packaging script on 2026-07-30
+version: '1.2.4'
 project: 'ai_provider_openai'
-datestamp: 1783612216
+datestamp: 1785417704

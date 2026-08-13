@@ -215,6 +215,13 @@ final class Tone extends AiCKEditorPluginBase {
         throw new \Exception('Term could not be loaded.');
       }
 
+      if (!$term->isNew()) {
+        $language = $this->languageManager->getCurrentLanguage()->getId();
+        if ($term->hasTranslation($language)) {
+          $term = $term->getTranslation($language);
+        }
+      }
+
       if ($term->isNew() && $this->configuration['autocreate'] && $this->account->hasPermission('create terms in ' . $this->configuration['tone_vocabulary'])) {
         $term->save();
       }
@@ -246,11 +253,17 @@ final class Tone extends AiCKEditorPluginBase {
    *   The options array.
    */
   protected function getTermOptions(string $vid): array {
-    $terms = $this->entityTypeManager->getStorage('taxonomy_term')->loadTree($vid);
+    $terms = $this->entityTypeManager->getStorage('taxonomy_term')->loadTree($vid, 0, NULL, TRUE);
     $options = [];
+    $language = $this->languageManager->getCurrentLanguage()->getId();
 
     foreach ($terms as $term) {
-      $options[$term->tid] = $term->name;
+      if ($term->hasTranslation($language)) {
+        $options[$term->id()] = $term->getTranslation($language)->label();
+      }
+      else {
+        $options[$term->id()] = $term->label();
+      }
     }
 
     return $options;

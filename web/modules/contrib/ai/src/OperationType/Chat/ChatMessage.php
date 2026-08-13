@@ -307,7 +307,7 @@ class ChatMessage {
       'images' => $images,
       'remote_files' => $this->remoteFiles,
       'tools' => $this->tools ? $this->getRenderedTools() : NULL,
-      'tool_id' => $this->toolId ?? NULL,
+      'tool_id' => $this->toolId,
     ];
   }
 

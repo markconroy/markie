@@ -102,3 +102,7 @@ services:
   ai.file_manager:
     class: Drupal\ai\Service\AiFileManager
     autowire: true
+  ai.validator:
+    class: Drupal\ai\Service\AiValidator
+  Drupal\ai\Service\AiValidator: "@ai.validator"
+  Drupal\ai\Service\AiValidatorInterface: "@ai.validator"

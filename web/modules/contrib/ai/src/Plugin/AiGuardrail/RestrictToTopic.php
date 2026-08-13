@@ -12,6 +12,7 @@ use Drupal\ai\Guardrail\NonStreamableGuardrailInterface;
 use Drupal\ai\Guardrail\Result\GuardrailResultInterface;
 use Drupal\ai\Guardrail\Result\PassResult;
 use Drupal\ai\Guardrail\Result\StopResult;
+use Drupal\ai\Guardrail\UserMessageSelectionTrait;
 use Drupal\ai\OperationType\Chat\ChatInput;
 use Drupal\ai\OperationType\Chat\ChatMessage;
 use Drupal\ai\OperationType\InputInterface;
@@ -40,12 +41,16 @@ final class RestrictToTopic extends AiGuardrailPluginBase implements Configurabl
 
   use NeedsAiPluginManagerTrait;
   use StringTranslationTrait;
+  use UserMessageSelectionTrait;
 
   public function __construct(
     array $configuration,
     $plugin_id,
     $plugin_definition,
-    private readonly PromptJsonDecoderInterface $promptJsonDecoder,
+    // Must stay protected and non-readonly so DependencySerializationTrait on
+    // the base class can swap this service out for its ID when the guardrail
+    // form is written to the form cache.
+    protected PromptJsonDecoderInterface $promptJsonDecoder,
   ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
 
@@ -125,7 +130,7 @@ final class RestrictToTopic extends AiGuardrailPluginBase implements Configurabl
     $form['invalid_topics_present_message'] = [
       '#type' => 'textarea',
       '#title' => $this->t('Message to send if invalid topics are present'),
-      '#default_value' => $this->configuration['invalid_topics_present_message'] ?? 'The text contains invalid topics',
+      '#default_value' => ($this->configuration['invalid_topics_present_message'] ?? '') ?: 'The text contains invalid topics',
       // This property will land into core soon, see
       // https://www.drupal.org/project/drupal/issues/3202631. It can stay
       // after this is added to Drupal core.
@@ -136,10 +141,15 @@ final class RestrictToTopic extends AiGuardrailPluginBase implements Configurabl
       '#value_callback' => [Textarea::class, 'valueCallback'],
     ];
 
+    $form['scan_all_user_messages'] = $this->buildScanAllUserMessagesElement(
+      (string) $this->t('When enabled, every user message in the chat history is concatenated and sent to the classifier as one text. Useful when conversation history may have been imported, replayed, or scanned under different rules. When disabled (default) only the latest user message is classified, even if a tool result message is technically more recent.'),
+      !empty($this->configuration['scan_all_user_messages']),
+    );
+
     $form['valid_topics_missing_message'] = [
       '#type' => 'textarea',
       '#title' => $this->t('Message to send if no valid topics are found'),
-      '#default_value' => $this->configuration['valid_topics_missing_message'] ?? 'The text does not contain any of the valid topics',
+      '#default_value' => ($this->configuration['valid_topics_missing_message'] ?? '') ?: 'The text does not contain any of the valid topics',
       // This property will land into core soon, see
       // https://www.drupal.org/project/drupal/issues/3202631. It can stay
       // after this is added to Drupal core.
@@ -200,14 +210,22 @@ final class RestrictToTopic extends AiGuardrailPluginBase implements Configurabl
       return new PassResult('Input is not a chat input, skipping topic restriction.', $this);
     }
 
-    $messages = $input->getMessages();
-    $last_message = end($messages);
-
-    if (!$last_message instanceof ChatMessage) {
-      return new PassResult('No text message found to analyze.', $this);
+    $scan_all = !empty($this->configuration['scan_all_user_messages']);
+    $user_messages = $this->selectUserMessages($input, $scan_all);
+    if ($user_messages === []) {
+      return new PassResult('No user message found to analyze.', $this);
     }
 
-    $text = $last_message->getText();
+    // The classifier is an LLM call, so concatenate the selected user
+    // messages into a single payload instead of issuing one call per
+    // message. The classifier returns the union of topics found across
+    // the conversation, which is the right semantic for "is anything in
+    // this chat off topic".
+    $text = implode("\n\n", array_map(
+      static fn (ChatMessage $message): string => $message->getText(),
+      $user_messages,
+    ));
+
     $valid_topics = array_filter(
       array_map(
         'mb_strtolower',
@@ -297,7 +315,7 @@ PROMPT;
 
     if (\count($invalid_topics_found) > 0) {
       return new StopResult(
-        $this->configuration['invalid_topics_present_message'],
+        ($this->configuration['invalid_topics_present_message'] ?? '') ?: 'The text contains invalid topics',
         $this,
         [
           'valid_topics' => $valid_topics,
@@ -308,7 +326,7 @@ PROMPT;
 
     if (\count($valid_topics) > 0 && \count($valid_topics_found) === 0) {
       return new StopResult(
-        $this->configuration['valid_topics_missing_message'],
+        ($this->configuration['valid_topics_missing_message'] ?? '') ?: 'The text does not contain any of the valid topics',
         $this,
         [
           'valid_topics' => $valid_topics,
