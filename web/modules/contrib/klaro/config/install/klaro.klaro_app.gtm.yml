@@ -1,5 +1,5 @@
 id: gtm
-label: 'Google Tag Manager'
+label: 'Google Tag Manager (legacy)'
 description: 'Manages and deploys marketing tags.'
 langcode: en
 status: false
@@ -10,7 +10,7 @@ cookies: { }
 required: false
 opt_out: false
 only_once: false
-weight: 2
+weight: 1
 info_url: 'https://marketingplatform.google.com/intl/de/about/tag-manager/'
 privacy_policy_url: 'https://policies.google.com/privacy'
 javascripts:
@@ -19,3 +19,6 @@ javascripts:
   - 'https://www.googletagmanager.com/ns.html'
 attachments:
   - gtm
+on_init: ''
+on_accept: ''
+on_decline: ''

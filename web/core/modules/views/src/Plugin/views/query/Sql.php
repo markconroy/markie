@@ -18,7 +18,7 @@ use Drupal\views\Plugin\views\HandlerBase;
 use Drupal\views\ResultRow;
 use Drupal\views\ViewExecutable;
 use Drupal\views\Views;
-use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 /**
  * Views query plugin for an SQL query.
@@ -181,7 +181,15 @@ class Sql extends QueryPluginBase {
    * @param \Drupal\Core\Messenger\MessengerInterface $messenger
    *   The messenger.
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityTypeManagerInterface $entity_type_manager, DateSqlInterface $date_sql, MessengerInterface $messenger) {
+  public function __construct(
+    array $configuration,
+    $plugin_id,
+    $plugin_definition,
+    EntityTypeManagerInterface $entity_type_manager,
+    #[Autowire(service: 'views.date_sql')]
+    DateSqlInterface $date_sql,
+    MessengerInterface $messenger,
+  ) {
     // By default, use AND operator to connect WHERE groups.
     $this->groupOperator = 'AND';
 
@@ -190,20 +198,6 @@ class Sql extends QueryPluginBase {
     $this->entityTypeManager = $entity_type_manager;
     $this->dateSql = $date_sql;
     $this->messenger = $messenger;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
-    return new static(
-      $configuration,
-      $plugin_id,
-      $plugin_definition,
-      $container->get('entity_type.manager'),
-      $container->get('views.date_sql'),
-      $container->get('messenger')
-    );
   }
 
   /**
@@ -351,7 +345,7 @@ class Sql extends QueryPluginBase {
       '#title' => $this->t('Query Tags'),
       '#description' => $this->t('If set, these tags will be appended to the query and can be used to identify the query in a module. This can be helpful for altering queries.'),
       '#default_value' => implode(', ', $this->options['query_tags']),
-      '#element_validate' => ['views_element_validate_tags'],
+      '#element_validate' => [[static::class, 'elementValidateTags']],
     ];
   }
 
@@ -1912,6 +1906,21 @@ class Sql extends QueryPluginBase {
    */
   public function getDateFormat($field, $format, $string_date = FALSE) {
     return $this->dateSql->getDateFormat($field, $format);
+  }
+
+  /**
+   * Validation callback for query tags.
+   *
+   * @internal
+   */
+  public static function elementValidateTags(array &$element, FormStateInterface $form_state): void {
+    $values = array_map('trim', explode(',', $element['#value']));
+    foreach ($values as $value) {
+      if (preg_match("/[^a-z_]/", $value)) {
+        $form_state->setError($element, t('The query tags may only contain lower-case alphabetical characters and underscores.'));
+        return;
+      }
+    }
   }
 
 }

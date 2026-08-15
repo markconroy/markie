@@ -2,6 +2,7 @@
 
 namespace Drupal\backup_migrate\Drupal\Environment;
 
+use Drupal\Core\Messenger\MessengerInterface;
 use Psr\Log\AbstractLogger;
 use Psr\Log\LogLevel;
 
@@ -13,11 +14,24 @@ use Psr\Log\LogLevel;
 class DrupalSetMessageLogger extends AbstractLogger {
 
   /**
+   * Constructs a DrupalSetMessageLogger object.
+   *
+   * @param \Drupal\Core\Messenger\MessengerInterface|null $messenger
+   *   The messenger.
+   */
+  public function __construct(
+    protected readonly ?MessengerInterface $messenger = NULL,
+  ) {}
+
+  /**
    * Logs with an arbitrary level.
    *
    * @param mixed $level
+   *   The level.
    * @param string $message
+   *   The message.
    * @param array $context
+   *   The context.
    */
   public function log($level, $message, array $context = []): void {
     // Translate the PSR logging level to a drupal message type.
@@ -40,7 +54,9 @@ class DrupalSetMessageLogger extends AbstractLogger {
     }
 
     // @todo Handle translations properly.
-    \Drupal::messenger()->addMessage($message, $type, FALSE);
+    if ($this->messenger) {
+      $this->messenger->addMessage($message, $type, FALSE);
+    }
   }
 
 }

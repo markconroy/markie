@@ -7,7 +7,7 @@ services:
     parent: default_plugin_manager
   ai_automator.field_config:
     class: Drupal\ai_automators\FormAlter\AiAutomatorFieldConfig
-    arguments: ['@entity_field.manager', '@ai_automator.field_rules', '@current_route_match', '@plugin.manager.ai_processor', '@entity_type.manager']
+    arguments: ['@entity_field.manager', '@ai_automator.field_rules', '@current_route_match', '@plugin.manager.ai_processor', '@entity_type.manager', '@ai.guardrail_helper']
   ai_automator.field_rules:
     class: Drupal\ai_automators\AiFieldRules
     arguments: ['@plugin.manager.ai_automator', '@event_dispatcher']

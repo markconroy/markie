@@ -50,6 +50,11 @@ interface InputInterface {
    *
    * @param \Drupal\ai\Guardrail\AiGuardrailSetInterface $guardrails
    *   The guardrail set to set.
+   *
+   * @deprecated in ai:1.4.0 and is removed from ai:2.0.0. Use
+   *   ::addGuardrailSet() instead.
+   *
+   * @see https://www.drupal.org/project/ai/issues/3584849
    */
   public function setGuardrailSet(AiGuardrailSetInterface $guardrails): void;
 
@@ -58,8 +63,45 @@ interface InputInterface {
    *
    * @return \Drupal\ai\Guardrail\AiGuardrailSetInterface|null
    *   The guardrail set for the chat, or NULL if not set.
+   *
+   * @deprecated in ai:1.4.0 and is removed from ai:2.0.0. Use
+   *   ::getGuardrailSets() instead.
+   *
+   * @see https://www.drupal.org/project/ai/issues/3584849
    */
   public function getGuardrailSet(): ?AiGuardrailSetInterface;
+
+  /**
+   * Add a guardrail set to this input.
+   *
+   * Multiple sets may be attached; each is evaluated independently by the
+   * guardrails event subscriber. Adding a set with an id that is already
+   * attached replaces that entry in place.
+   *
+   * @param \Drupal\ai\Guardrail\AiGuardrailSetInterface $guardrails
+   *   The guardrail set to add.
+   */
+  public function addGuardrailSet(AiGuardrailSetInterface $guardrails): void;
+
+  /**
+   * Replace all guardrail sets attached to this input.
+   *
+   * Iteration order of the resulting array matches the order of the values
+   * passed in. Entries are re-keyed internally by set id, so passing either
+   * a list (e.g. [$a, $b]) or a keyed map (e.g. ['a' => $a]) works.
+   *
+   * @param \Drupal\ai\Guardrail\AiGuardrailSetInterface[] $guardrails
+   *   The guardrail sets to attach, in the order they should run.
+   */
+  public function setGuardrailSets(array $guardrails): void;
+
+  /**
+   * Get all guardrail sets attached to this input.
+   *
+   * @return \Drupal\ai\Guardrail\AiGuardrailSetInterface[]
+   *   The guardrail sets, keyed by set id, in insertion order.
+   */
+  public function getGuardrailSets(): array;
 
   /**
    * Take note of an applied guardrail result.
@@ -74,10 +116,31 @@ interface InputInterface {
   /**
    * Get all applied guardrails results.
    *
+   * Flat list keyed by mode value; only the last result per mode is returned.
+   * Retained for backward compatibility - use ::getAllGuardrailResults() to
+   * access every applied result across every guardrail set and mode.
+   *
    * @return \Drupal\ai\Guardrail\Result\GuardrailResultInterface[]
-   *   The applied guardrails results.
+   *   The applied guardrails results, keyed by mode value.
+   *
+   * @deprecated in ai:1.4.0 and is removed from ai:2.0.0. Use
+   *   ::getAllGuardrailResults() instead.
+   *
+   * @see https://www.drupal.org/project/ai/issues/3584849
    */
   public function getGuardrailsResults(): array;
+
+  /**
+   * Get every applied guardrail result, grouped by mode.
+   *
+   * Unlike ::getGuardrailsResults(), this accumulates every result produced
+   * by every guardrail in every attached set, so nothing is overwritten when
+   * multiple guardrails run under the same mode.
+   *
+   * @return \Drupal\ai\Guardrail\Result\GuardrailResultInterface[][]
+   *   Results grouped by mode value, in insertion order within each mode.
+   */
+  public function getAllGuardrailResults(): array;
 
   /**
    * Returns the input as an array.

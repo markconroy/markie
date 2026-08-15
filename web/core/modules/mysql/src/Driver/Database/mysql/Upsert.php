@@ -18,24 +18,34 @@ class Upsert extends QueryUpsert {
 
     // Default fields are always placed first for consistency.
     $insert_fields = array_merge($this->defaultFields, $this->insertFields);
+    $insert_fields = array_combine($insert_fields, $insert_fields);
     $insert_fields = array_map(function ($field) {
       return $this->connection->escapeField($field);
     }, $insert_fields);
 
-    $query = $comments . 'INSERT INTO {' . $this->table . '} (' . implode(', ', $insert_fields) . ') VALUES ';
+    // Updating the unique / primary key fields is not necessary.
+    $update_fields = $insert_fields;
+    foreach ($this->key as $key) {
+      unset($update_fields[$key]);
+    }
 
+    $query = $comments . 'INSERT ';
+
+    if (empty($update_fields)) {
+      $query .= 'IGNORE ';
+    }
+
+    $query .= 'INTO {' . $this->table . '} (' . implode(', ', $insert_fields) . ') VALUES ';
     $values = $this->getInsertPlaceholderFragment($this->insertValues, $this->defaultFields);
     $query .= implode(', ', $values);
 
-    // Updating the unique / primary key is not necessary.
-    unset($insert_fields[$this->key]);
-
-    $update = [];
-    foreach ($insert_fields as $field) {
-      $update[] = "$field = VALUES($field)";
+    if (!empty($update_fields)) {
+      $update = [];
+      foreach ($update_fields as $field) {
+        $update[] = "$field = VALUES($field)";
+      }
+      $query .= ' ON DUPLICATE KEY UPDATE ' . implode(', ', $update);
     }
-
-    $query .= ' ON DUPLICATE KEY UPDATE ' . implode(', ', $update);
 
     return $query;
   }

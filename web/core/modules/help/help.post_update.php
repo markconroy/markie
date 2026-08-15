@@ -15,3 +15,9 @@ function help_removed_post_updates(): array {
     'help_post_update_add_permissions_to_roles' => '11.0.0',
   ];
 }
+
+/**
+ * Moved to search_post_update_search_help_dependencies().
+ */
+function help_post_update_search_help_dependencies(): void {
+}

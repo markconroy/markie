@@ -6,7 +6,6 @@ namespace Drupal\Tests\Component\DependencyInjection;
 
 use Drupal\Component\DependencyInjection\Container;
 use Drupal\Component\Utility\Crypt;
-use Drupal\TestTools\Extension\DeprecationBridge\ExpectDeprecationTrait;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
@@ -26,7 +25,7 @@ use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 #[CoversClass(Container::class)]
 #[Group('DependencyInjection')]
 class ContainerTest extends TestCase {
-  use ExpectDeprecationTrait;
+
   use ProphecyTrait;
 
   /**
@@ -1057,8 +1056,6 @@ class ContainerTest extends TestCase {
 
 /**
  * Helper interface to test Container::get() with configurator.
- *
- * @group DependencyInjection
  */
 interface MockConfiguratorInterface {
 
@@ -1075,8 +1072,6 @@ interface MockConfiguratorInterface {
 
 /**
  * Helper class to test Container::get() method for varying number of parameters.
- *
- * @group DependencyInjection
  */
 class MockInstantiationService {
 
@@ -1107,8 +1102,6 @@ class MockInstantiationService {
 
 /**
  * Helper class to test Container::get() method.
- *
- * @group DependencyInjection
  */
 class MockService {
 

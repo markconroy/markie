@@ -6,6 +6,7 @@ namespace Drupal\Tests\node\Functional;
 
 use Drupal\Core\Database\Database;
 use Drupal\user\Entity\User;
+use Drupal\node\NodeAccessRebuild;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
@@ -68,7 +69,7 @@ class NodeAccessGrantsCacheContextTest extends NodeTestBase {
   protected function setUp(): void {
     parent::setUp();
 
-    node_access_rebuild();
+    \Drupal::service(NodeAccessRebuild::class)->rebuild();
 
     // Create some content.
     $this->drupalCreateNode();
@@ -180,10 +181,10 @@ class NodeAccessGrantsCacheContextTest extends NodeTestBase {
     // Uninstall the node_access_test module.
     \Drupal::service('module_installer')->uninstall(['node_access_test']);
     $this->assertUserCacheContext([
-      0 => 'view.all',
+      0 => 'all',
       $this->adminUser->id() => 'all',
-      $this->accessUser->id() => 'view.all',
-      $this->noAccessUser->id() => 'view.all',
+      $this->accessUser->id() => 'all',
+      $this->noAccessUser->id() => 'all',
     ]);
   }
 

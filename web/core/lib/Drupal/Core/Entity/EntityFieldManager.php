@@ -359,17 +359,43 @@ class EntityFieldManager implements EntityFieldManagerInterface, PreWarmableInte
       $cid = 'entity_bundle_field_definitions:' . $entity_type_id . ':' . $bundle . ':' . $langcode;
       if ($cache = $this->cacheGet($cid)) {
         $bundle_field_definitions = $cache->data;
+        // Field definitions consist of the bundle specific overrides and the
+        // base fields, merge them together. Use array_replace() to replace base
+        // fields with by bundle overrides and keep them in order, append
+        // additional by bundle fields.
+        $this->fieldDefinitions[$entity_type_id][$bundle][$langcode] = array_replace($base_field_definitions, $bundle_field_definitions);
       }
       else {
-        // Rebuild the definitions and put it into the cache.
+        // In some cases, entity types can have dozens or hundreds of bundles,
+        // so attempt to rebuild all of the bundle data in one go. We assume
+        // that if field data is being requested for one bundle, that it will
+        // also be requested for other bundles of the same entity later in the
+        // request. For example when views field data is built.
+        $bundles = $this->entityTypeBundleInfo->getBundleInfo($entity_type_id);
+        unset($bundles[$bundle]);
+        $cache_data = [];
+
+        // Always generate field data for the bundle that is passed in, even if
+        // the bundle does not exist.
+        // @todo remove support for non-existing bundles.
+        // @see https://www.drupal.org/project/drupal/issues/3565232
+        $cid = 'entity_bundle_field_definitions:' . $entity_type_id . ':' . $bundle . ':' . $langcode;
         $bundle_field_definitions = $this->buildBundleFieldDefinitions($entity_type_id, $bundle, $base_field_definitions);
-        $this->cacheSet($cid, $bundle_field_definitions, Cache::PERMANENT, ['entity_types', 'entity_field_info']);
+        $cache_data[$cid] = ['data' => $bundle_field_definitions, 'tags' => ['entity_types', 'entity_field_info']];
+        $this->fieldDefinitions[$entity_type_id][$bundle][$langcode] = array_replace($base_field_definitions, $bundle_field_definitions);
+
+        foreach ($bundles as $bundle_name => $bundle_info) {
+          $cid = 'entity_bundle_field_definitions:' . $entity_type_id . ':' . $bundle_name . ':' . $langcode;
+          // Rebuild the definitions and put it into the cache.
+          $bundle_field_definitions = $this->buildBundleFieldDefinitions($entity_type_id, $bundle_name, $base_field_definitions);
+          $cache_data[$cid] = ['data' => $bundle_field_definitions, 'tags' => ['entity_types', 'entity_field_info']];
+          $this->fieldDefinitions[$entity_type_id][$bundle_name][$langcode] = array_replace($base_field_definitions, $bundle_field_definitions);
+        }
+
+        if ($cache_data && $this->useCaches) {
+          $this->cacheBackend->setMultiple($cache_data);
+        }
       }
-      // Field definitions consist of the bundle specific overrides and the
-      // base fields, merge them together. Use array_replace() to replace base
-      // fields with by bundle overrides and keep them in order, append
-      // additional by bundle fields.
-      $this->fieldDefinitions[$entity_type_id][$bundle][$langcode] = array_replace($base_field_definitions, $bundle_field_definitions);
     }
     return $this->fieldDefinitions[$entity_type_id][$bundle][$langcode];
   }
@@ -539,30 +565,15 @@ class EntityFieldManager implements EntityFieldManagerInterface, PreWarmableInte
                 'bundles' => array_combine($bundles, $bundles),
               ];
             }
-          }
-        }
-
-        // In the second step, the per-bundle fields are added, based on the
-        // persistent bundle field map stored in a key value collection. This
-        // data is managed in the
-        // FieldDefinitionListener::onFieldDefinitionCreate() and
-        // FieldDefinitionListener::onFieldDefinitionDelete() methods.
-        // Rebuilding this information in the same way as base fields would not
-        // scale, as the time to query would grow exponentially with more fields
-        // and bundles. A cache would be deleted during cache clears, which is
-        // the only time it is needed, so a key value collection is used.
-        $bundle_field_maps = $this->keyValueFactory->get('entity.definitions.bundle_field_map')->getAll();
-        foreach ($bundle_field_maps as $entity_type_id => $bundle_field_map) {
-          foreach ($bundle_field_map as $field_name => $map_entry) {
-            if (!isset($this->fieldMap[$entity_type_id][$field_name])) {
-              $this->fieldMap[$entity_type_id][$field_name] = $map_entry;
-            }
-            else {
-              $this->fieldMap[$entity_type_id][$field_name]['bundles'] += $map_entry['bundles'];
+            foreach ($bundles as $bundle) {
+              $fields = $this->getFieldDefinitions($entity_type_id, $bundle);
+              foreach ($fields as $field_name => $field_definition) {
+                $this->fieldMap[$entity_type_id][$field_name]['type'] = $field_definition->getType();
+                $this->fieldMap[$entity_type_id][$field_name]['bundles'][$bundle] = $bundle;
+              }
             }
           }
         }
-
         $this->cacheSet($cid, $this->fieldMap, Cache::PERMANENT, ['entity_types', 'entity_field_info']);
       }
     }

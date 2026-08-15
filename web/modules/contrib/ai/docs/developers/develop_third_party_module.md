@@ -9,7 +9,7 @@ If you want your third party module to use chat for instance and there is no cha
 If you load the AI Provider Plugin service (`ai.provider`), you can use the method `hasProvidersForOperationType` that takes the operation type data name and a boolean if it has to be setup (working API Key, connection etc.). This means that your module could do something like this.
 
 ```php
-if (!\Drupal::service('ai_provider')->hasProvidersForOperationType('chat', TRUE)) {
+if (!\Drupal::service('ai.provider')->hasProvidersForOperationType('chat', TRUE)) {
   return [
     '#type' => 'markup',
     '#markup' => $this->t('Sorry, no provider exists for Chat, install one first'),
@@ -24,98 +24,116 @@ For each operation type the end user can set a default provider and model. There
 If you load the AI Provider Plugin service (`ai.provider`), you can use the method `getDefaultProviderForOperationType` that takes the operation type data name and gives back an array if it exists, so you can write something like this:
 
 ```php
-$defaults = \Drupal::service('ai_provider')->getDefaultProviderForOperationType('chat');
-if (empty($defaults['provider_id']) || empty($default['model_id'])) {
+$defaults = \Drupal::service('ai.provider')->getDefaultProviderForOperationType('chat');
+if (empty($defaults['provider_id']) || empty($defaults['model_id'])) {
   // We have to do something else, since there is no manual provider.
 }
 ```
 
 ## Making simple provider/model selection available
 
-If you want the end user to be able to choose a model in a settings page, but you do not care about the actual configuration of the provider or model, there are three helper functions in the AI Provider Plugin service.
+If you want the end user to be able to choose a provider and model in a settings page, you should use the `ai_provider_configuration` form element. This form element provides a standardized way for modules to select AI providers and models, ensuring consistency across the Drupal AI ecosystem.
 
-One is the method `getSimpleProviderModelOptions` that takes the operation type data name and some optional methods.
+For a simple selector (where you only care about the provider and model, but do not want to show advanced provider-specific configuration fields like temperature or max tokens), you can set `#advanced_config => FALSE`.
 
-You can take this value and save in your config and then use this value with the method `loadProviderFromSimpleOption` and `getModelNameFromSimpleOption`, that both takes the value as parameters.
+For more details, see the [AI Provider Configuration Form Element](ai_provider_configuration_element.md) documentation.
 
-This means that you can have a fairly complex form that looks something like this.
+### Config Form Example
 
-Your config file:
+To use it in your settings form, define the element and link it directly to your configuration using `#config_target` (Drupal 10.2+):
+
 ```php
+use Drupal\Core\Form\ConfigTarget;
 
-$form['provider_model'] = [
-  '#type' => 'select',
-  '#title' => $this->t('Custom Model'),
-  '#description' => $this->t('Choose a provider/model if you are not using the default model'),
-  '#default_value' => $config->get('provider_model'),
-  '#options' => \Drupal::service('ai_provider')->getSimpleProviderModelOptions('chat'),
+$form['provider_config'] = [
+  '#type' => 'ai_provider_configuration',
+  '#title' => $this->t('AI Provider'),
+  '#description' => $this->t('Choose the AI provider and model to use.'),
+  '#operation_type' => 'chat',
+  '#advanced_config' => FALSE, // Hide advanced configuration fields.
+  '#default_provider_allowed' => TRUE,
+  '#config_target' => new ConfigTarget('my_module.settings', 'chat_provider'),
 ];
 ```
 
-And then have a file where you use the config, something like this.
+Make sure your configuration schema defines the target property as type `ai.provider_config`. In `my_module/config/schema/my_module.schema.yml`:
+
+```yaml
+my_module.settings:
+  type: config_object
+  label: 'My Module Settings'
+  mapping:
+    chat_provider:
+      type: ai.provider_config
+      label: 'Chat Provider Configuration'
+```
+
+### Loading the Provider from Configuration
+
+To load and instantiate the provider from the saved configuration:
 
 ```php
-use Drupal\ai\OperationType\Chat\ChatInput;
-use Drupal\ai\OperationType\Chat\ChatMessage;
+$config = \Drupal::config('my_module.settings');
+$provider_config = $config->get('chat_provider') ?? [];
 
-$ai_provider = \Drupal::service('ai_provider');
-$provider_model = $config->get('provider_model');
-// If not set, try to load default.
-if (!$provider_model) {
-  $default = $ai_provider->getDefaultProviderForOperationType('chat');
-  // If no default we fail and give some error message.
-  if (empty($default['provider_id'])) {
-    throw new \Exception('No model set');
-  }
-  // Load the provider
-  $provider = $ai_provider->createInstance($default['provider_id']);
-  $model = $default['model_id'];
+/** @var \Drupal\ai\AiProviderPluginManager $provider_manager */
+$provider_manager = \Drupal::service('ai.provider');
+
+if (empty($provider_config) || !empty($provider_config['use_default'])) {
+  // Use the default provider configured for the operation type.
+  $default = $provider_manager->getDefaultProviderForOperationType('chat');
+  $provider_id = $default['provider_id'] ?? NULL;
+  $model_id = $default['model_id'] ?? NULL;
+  $configuration = [];
 }
 else {
-  $provider = $ai_provider->loadProviderFromSimpleOption($provider_model);
-  $model = $ai_provider->getModelNameFromSimpleOption($provider_model);
+  $provider_id = $provider_config['provider'] ?? NULL;
+  $model_id = $provider_config['model'] ?? NULL;
+  $configuration = $provider_config['config'] ?? [];
+}
+
+if (!$provider_id) {
+  throw new \Exception('No AI provider configured.');
+}
+
+// Create the provider instance and set any configuration (e.g. temperature).
+$provider = $provider_manager->createInstance($provider_id);
+if (!empty($configuration)) {
+  $provider->setConfiguration($configuration);
 }
 
 // Send your chat message.
-$messages = new ChatInput([
+use Drupal\ai\OperationType\Chat\ChatInput;
+use Drupal\ai\OperationType\Chat\ChatMessage;
+
+$input = new ChatInput([
   new ChatMessage('user', 'Hello!'),
 ]);
-$provider->chat($input, $model, ['my-custom-module']);
-
+$response = $provider->chat($input, $model_id, ['my-custom-module']);
 ```
 
-## Making advanced provider/model selection available (experimental)
+## Making advanced provider/model selection available
 
-If you want more complex forms, where the models and configuration are loaded via ajax after you choose the provider, we have a more complex form helper.
+If you want the end user to be able to configure model-specific settings (such as temperature, max tokens, etc.) via AJAX, you can enable advanced configuration on the same form element by setting `#advanced_config => TRUE`.
 
-This one is not set in stone yet and will most likely change before going into production, so use with care.
+This is the recommended replacement for the deprecated form helper service (`AiProviderFormHelper`).
 
-It goes a little bit like this.
-
-In your config form:
+### Config Form Example
 
 ```php
+use Drupal\Core\Form\ConfigTarget;
 
-use Drupal\ai\Service\AiProviderFormHelper;
-
-public buildForm($form, $form_state) {
-  $form_helper = \Drupal::service('ai.form_helper');
-  $form_helper->generateAiProvidersForm($form, $form_state, 'chat', 'some_prefix', AiProviderFormHelper::FORM_CONFIGURATION_FULL);
-}
-
-public validateForm($form, $form_state) {
-  $form_helper = \Drupal::service('ai.form_helper');
-  $form_helper->validateAiProvidersConfig($form, $form_state, 'chat', 'some_prefix');
-}
-
-public submitForm($form, $form_state) {
-  $form_helper = \Drupal::service('ai.form_helper');
-  $config->set('provider', $form_state->get('some_prefix_ai_provider'));
-  $config->set('model', $form_state->get('some_prefix_ai_model'))
-  $config->set('configuration', $form_state->get($form_helper->generateAiProvidersConfigurationFromForm($form, $form_state, 'chat', 'some_prefix')));
-}
-
+$form['provider_config'] = [
+  '#type' => 'ai_provider_configuration',
+  '#title' => $this->t('AI Provider with Configuration'),
+  '#operation_type' => 'chat',
+  '#advanced_config' => TRUE, // Show advanced configuration fields.
+  '#default_provider_allowed' => TRUE,
+  '#config_target' => new ConfigTarget('my_module.settings', 'chat_provider'),
+];
 ```
+
+The returned value automatically handles types, constraints, and validation according to the selected provider's configuration schema. Storing and instantiating the provider works exactly the same as in the simple selection example above.
 
 ## Listening for provider changes.
 Sometimes when you have your own provider picker, you might need to listen for events where this provider is disabled/uninstalled. This can be done
@@ -132,7 +150,7 @@ $provider =  \Drupal::service('ai.provider')->createInstance('openai');
 $input = new ChatInput([
   new ChatMessage('user', 'Hello!'),
 ]);
-$input->setSystemPrompt('You are an expert at bananas.')
+$input->setSystemPrompt('You are an expert at bananas.');
 ```
 
 ## Streaming Chat

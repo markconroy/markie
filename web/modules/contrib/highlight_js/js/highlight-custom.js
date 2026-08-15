@@ -36,10 +36,13 @@
 
       once('highlight-js', 'code', context).forEach((block, i) => {
         let inline = false;
-        // Do not guess language on inline code.
+        // Do not guess language on inline code unless a language is specified.
         if (!(block.parentElement.tagName.toLowerCase() === 'pre')) {
-          block.classList.add('language-plaintext');
           inline = true;
+          const hasLanguage = Array.from(block.classList).some(cls => cls.startsWith('language-') && cls !== 'language-plaintext');
+          if (!hasLanguage) {
+            block.classList.add('language-plaintext');
+          }
         }
 
         hljs.highlightElement(block);

@@ -19,6 +19,7 @@ use Drupal\Component\Gettext\PoItem;
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Routing\StackedRouteMatchInterface;
 use Drupal\Core\Asset\AttachedAssetsInterface;
+use Drupal\Core\Field\FieldPurger;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\Url;
 use Drupal\Core\Routing\RouteMatchInterface;
@@ -344,6 +345,12 @@ class SystemHooks {
       $fetcher = \Drupal::service('system.sa_fetcher');
       $fetcher->getSecurityAdvisories();
     }
+
+    // Do a pass of purging on deleted entity field data, if any exists.
+    if (!$config_purge_batch_size = \Drupal::config('field.field_settings')->get('purge_batch_size')) {
+      $config_purge_batch_size = Settings::get('field_purge_batch_size', 50);
+    }
+    \Drupal::service(FieldPurger::class)->purgeBatch($config_purge_batch_size);
   }
 
   /**
@@ -414,32 +421,6 @@ class SystemHooks {
         $entity_type->setRevisionMetadataKey('workspace', NULL);
         $entity_definition_update_manager->updateEntityType($entity_type);
       }
-    }
-  }
-
-  /**
-   * Implements hook_library_info_alter().
-   */
-  #[Hook('library_info_alter')]
-  public function libraryInfoAlter(&$libraries, $extension): void {
-    // If Claro is the admin theme but not the active theme, grant Claro the
-    // ability to override the toolbar library with its own assets.
-    if ($extension === 'toolbar' && _system_is_claro_admin_and_not_active()) {
-      require_once DRUPAL_ROOT . '/core/themes/claro/claro.theme';
-      claro_system_module_invoked_library_info_alter($libraries, $extension);
-    }
-  }
-
-  /**
-   * Implements hook_theme_registry_alter().
-   */
-  #[Hook('theme_registry_alter')]
-  public function themeRegistryAlter(array &$theme_registry): void {
-    // If Claro is the admin theme but not the active theme, use Claro's toolbar
-    // templates.
-    if (_system_is_claro_admin_and_not_active()) {
-      require_once DRUPAL_ROOT . '/core/themes/claro/claro.theme';
-      claro_system_module_invoked_theme_registry_alter($theme_registry);
     }
   }
 

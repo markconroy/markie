@@ -8,7 +8,6 @@ use Drupal\Core\Entity\EntityRepositoryInterface;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\EntityViewModeInterface;
-use Drupal\Core\Field\Plugin\Field\FieldFormatter\EntityReferenceEntityFormatter;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
@@ -25,7 +24,6 @@ use Drupal\filter\Plugin\FilterBase;
 use Drupal\filter\Plugin\FilterInterface;
 use Drupal\image\Plugin\Field\FieldType\ImageItem;
 use Drupal\media\MediaInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides a filter to embed media items using a custom tag.
@@ -89,18 +87,6 @@ class MediaEmbed extends FilterBase implements ContainerFactoryPluginInterface, 
   protected $loggerFactory;
 
   /**
-   * An array of counters for the recursive rendering protection.
-   *
-   * Each counter takes into account all the relevant information about the
-   * field and the referenced entity that is being rendered.
-   *
-   * @var array
-   *
-   * @see \Drupal\Core\Field\Plugin\Field\FieldFormatter\EntityReferenceEntityFormatter::$recursiveRenderDepth
-   */
-  protected static $recursiveRenderDepth = [];
-
-  /**
    * Constructs a MediaEmbed object.
    *
    * @param array $configuration
@@ -130,23 +116,6 @@ class MediaEmbed extends FilterBase implements ContainerFactoryPluginInterface, 
     $this->entityTypeBundleInfo = $bundle_info;
     $this->renderer = $renderer;
     $this->loggerFactory = $logger_factory;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
-    return new static(
-      $configuration,
-      $plugin_id,
-      $plugin_definition,
-      $container->get('entity.repository'),
-      $container->get('entity_type.manager'),
-      $container->get('entity_display.repository'),
-      $container->get('entity_type.bundle.info'),
-      $container->get('renderer'),
-      $container->get('logger.factory')
-    );
   }
 
   /**
@@ -212,25 +181,6 @@ class MediaEmbed extends FilterBase implements ContainerFactoryPluginInterface, 
    *   A render array.
    */
   protected function renderMedia(MediaInterface $media, $view_mode, $langcode) {
-    // Due to render caching and delayed calls, filtering happens later
-    // in the rendering process through a '#pre_render' callback, so we
-    // need to generate a counter for the media entity that is being embedded.
-    // @see \Drupal\filter\Element\ProcessedText::preRenderText()
-    $recursive_render_id = $media->uuid();
-    if (isset(static::$recursiveRenderDepth[$recursive_render_id])) {
-      static::$recursiveRenderDepth[$recursive_render_id]++;
-    }
-    else {
-      static::$recursiveRenderDepth[$recursive_render_id] = 1;
-    }
-    // Protect ourselves from recursive rendering: return an empty render array.
-    if (static::$recursiveRenderDepth[$recursive_render_id] > EntityReferenceEntityFormatter::RECURSIVE_RENDER_LIMIT) {
-      $this->loggerFactory->get('media')->error('During rendering of embedded media: recursive rendering detected for %entity_id. Aborting rendering.', [
-        '%entity_id' => $media->id(),
-      ]);
-      return [];
-    }
-
     $build = $this->entityTypeManager
       ->getViewBuilder('media')
       ->view($media, $view_mode, $langcode);

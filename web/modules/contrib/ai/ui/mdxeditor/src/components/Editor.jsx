@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   BlockTypeSelect,
   CreateLink,
@@ -20,6 +20,7 @@ import {
   UndoRedo,
   BoldItalicUnderlineToggles,
   toolbarPlugin,
+  directivesPlugin,
 } from "@mdxeditor/editor";
 import { typeaheadPlugin } from "@mdxeditor/typeahead-plugin";
 
@@ -28,6 +29,7 @@ import { TypeaheadEditor } from "../utils/typeahead";
 import {
   getTypeToTrigger,
   markdownDirectivesToPlain,
+  unescapeTokens,
 } from "../utils/typeaheadUtils";
 
 import "@mdxeditor/editor/style.css";
@@ -57,17 +59,27 @@ function Editor({
   initialValue,
   onChange,
   variables = [],
+  onRef,
 }) {
   const editorRef = useRef(null);
   const [markdown, setMarkdown] = useState(initialValue);
+
+  useEffect(() => {
+    if (onRef && editorRef.current) {
+      onRef(editorRef.current);
+    }
+  }, [onRef]);
+  const isDarkMode = document.documentElement.classList.contains('gin--dark-mode');
 
   function handleChange(value) {
     setMarkdown(value);
     if (onChange) {
       onChange(
-        markdownDirectivesToPlain(
-          value,
-          getTypeToTrigger(getTypeaheadConfigs(variables)),
+        unescapeTokens(
+          markdownDirectivesToPlain(
+            value,
+            getTypeToTrigger(getTypeaheadConfigs(variables)),
+          ),
         ),
       );
     }
@@ -81,6 +93,7 @@ function Editor({
         ref={editorRef}
         markdown={markdown}
         onChange={handleChange}
+        className={isDarkMode ? 'dark' : ''}
         plugins={[
           headingsPlugin(),
           listsPlugin(),
@@ -131,6 +144,12 @@ function Editor({
           variables.length > 0 && typeaheadPlugin({
             configs: getTypeaheadConfigs(variables),
           }),
+          // Registered after typeaheadPlugin so its own recognized directive
+          // names are still matched first; any other textDirective (e.g. a
+          // raw Drupal token like [node:title] typed directly, whose colon
+          // the directive grammar misreads as a trigger) degrades to plain
+          // text instead of throwing a parse error.
+          variables.length > 0 && directivesPlugin({ escapeUnknownTextDirectives: true }),
         ]}
       />
     </div>

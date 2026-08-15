@@ -36,7 +36,7 @@ class WorkspacePublisher implements WorkspacePublisherInterface {
     protected ?TimeInterface $time = NULL,
   ) {
     if ($time === NULL) {
-      @trigger_error('Calling ' . __CLASS__ . ' constructor without the $time argument is deprecated in drupal:11.3.0 and it will be required in drupal:12.0.0. See https://www.drupal.org/project/drupal/issues/3531037', E_USER_DEPRECATED);
+      @trigger_error('Calling ' . __CLASS__ . ' constructor without the $time argument is deprecated in drupal:11.3.0 and it will be required in drupal:12.0.0. See https://www.drupal.org/node/3531039', E_USER_DEPRECATED);
       $this->time = \Drupal::time();
     }
   }
@@ -99,14 +99,15 @@ class WorkspacePublisher implements WorkspacePublisherInterface {
             // Extend the execution time in order to allow processing workspaces
             // that contain a large number of items.
             if ((int) ($counter / $step_size) >= 1) {
-              set_time_limit($max_execution_time);
+              set_time_limit((int) $max_execution_time);
               $counter = 0;
             }
           }
         }
       });
+      $transaction->commitOrRelease();
     }
-    catch (\Exception $e) {
+    catch (\Throwable $e) {
       if (isset($transaction)) {
         $transaction->rollBack();
       }

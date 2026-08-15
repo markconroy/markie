@@ -38,7 +38,7 @@ Framework managers
   - Cristina Chumillas 'ckrina' https://www.drupal.org/u/ckrina
   - Ben Mullins 'bnjmnm' https://www.drupal.org/u/bnjmnm
   - Sally Young 'justafish' https://www.drupal.org/u/justafish
-  - (provisional) Pierre Dureau 'pdureau' https://www.drupal.org/u/pdureau
+  - Pierre Dureau 'pdureau' https://www.drupal.org/u/pdureau
 
 Release managers
 - Nathaniel Catchpole 'catch' https://www.drupal.org/u/catch
@@ -131,6 +131,10 @@ Claro
 - Cristina Chumillas 'ckrina' https://www.drupal.org/u/ckrina
 - Sascha Eggenberger 'saschaeggi' https://www.drupal.org/u/saschaeggi
 - Ben Mullins 'bnjmnm' https://www.drupal.org/u/bnjmnm
+
+Command Line Interface (CLI) - `dr`
+- Moshe Weitzman 'moshe weitzman' https://www.drupal.org/u/moshe-weitzman
+- Derek Wright 'dww' https://www.drupal.org/u/dww
 
 Comment
 - Lee Rowlands 'larowlan' https://www.drupal.org/u/larowlan
@@ -462,6 +466,7 @@ provides more information on their responsibilities.
 Accessibility
 - Mike Gifford 'mgifford' https://www.drupal.org/u/mgifford
 - Ben Mullins 'bnjmnm' https://www.drupal.org/u/bnjmnm
+- Kent Richards 'kentr' https://www.drupal.org/u/kentr
 
 Documentation
 - ?
@@ -517,7 +522,6 @@ get involved. They organize communications and logistics, and actively
 participate in mentoring.
 
 - Chris Darke 'chrisdarke' https://www.drupal.org/u/chrisdarke
-- Brian Gilbert 'realityloop' https://www.drupal.org/u/realityloop
 - Lucas Hedding 'heddn' https://www.drupal.org/u/heddn
 - Rachel Lawson 'rachel_norfolk' https://www.drupal.org/u/rachel_norfolk
 - Elli Ludwigson 'ekl1773' https://www.drupal.org/u/ekl1773

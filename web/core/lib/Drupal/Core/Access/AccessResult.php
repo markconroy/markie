@@ -71,13 +71,16 @@ abstract class AccessResult implements AccessResultInterface, RefinableCacheable
    *
    * @param bool $condition
    *   The condition to evaluate.
+   * @param string|null $reason
+   *   (optional) The reason why access is neutral. Intended for developers,
+   *   hence not translatable.
    *
    * @return \Drupal\Core\Access\AccessResult
    *   If $condition is TRUE, isAllowed() will be TRUE, otherwise isNeutral()
    *   will be TRUE.
    */
-  public static function allowedIf($condition) {
-    return $condition ? static::allowed() : static::neutral();
+  public static function allowedIf(bool $condition, ?string $reason = NULL) {
+    return $condition ? static::allowed() : static::neutral($reason);
   }
 
   /**
@@ -88,13 +91,16 @@ abstract class AccessResult implements AccessResultInterface, RefinableCacheable
    * @param string|null $reason
    *   (optional) The reason why access is forbidden. Intended for developers,
    *   hence not translatable.
+   * @param string|null $neutralReason
+   *   (optional) The reason why access is neutral. Intended for developers,
+   *   hence not translatable.
    *
    * @return \Drupal\Core\Access\AccessResult
    *   If $condition is TRUE, isForbidden() will be TRUE, otherwise isNeutral()
    *   will be TRUE.
    */
-  public static function forbiddenIf($condition, $reason = NULL) {
-    return $condition ? static::forbidden($reason) : static::neutral();
+  public static function forbiddenIf(bool $condition, ?string $reason = NULL, ?string $neutralReason = NULL) {
+    return $condition ? static::forbidden($reason) : static::neutral($neutralReason);
   }
 
   /**
@@ -279,6 +285,7 @@ abstract class AccessResult implements AccessResultInterface, RefinableCacheable
   /**
    * {@inheritdoc}
    */
+  #[\NoDiscard]
   public function orIf(AccessResultInterface $other) {
     $merge_other = FALSE;
     // $other's cacheability metadata is merged if $merge_other gets set to TRUE
@@ -340,6 +347,7 @@ abstract class AccessResult implements AccessResultInterface, RefinableCacheable
   /**
    * {@inheritdoc}
    */
+  #[\NoDiscard]
   public function andIf(AccessResultInterface $other) {
     // The other access result's cacheability metadata is merged if $merge_other
     // gets set to TRUE. It gets set to TRUE in one case: if the other access

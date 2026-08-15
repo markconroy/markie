@@ -165,6 +165,29 @@ class DrupalKernelTest extends KernelTestBase {
   }
 
   /**
+   * Tests that dot-prefixed build parameters are removed from the container.
+   *
+   * Build parameters (e.g. '.hook_data') are used to pass data between
+   * compiler passes. RemoveBuildParametersPass strips them so they don't
+   * bloat the cached container definition with data that is only needed at
+   * build time.
+   */
+  public function testBuildParametersRemoved(): void {
+    $request = Request::createFromGlobals();
+    $kernel = $this->getTestKernel($request);
+    $container = $kernel->getContainer();
+
+    $build_only = array_filter(
+      array_keys($container->getParameterBag()->all()),
+      fn(string $name) => str_starts_with($name, '.'),
+    );
+    $this->assertEmpty($build_only, sprintf(
+      'Dot-prefixed build parameters should not be in the compiled container, but found: %s',
+      implode(', ', $build_only),
+    ));
+  }
+
+  /**
    * Tests repeated loading of compiled DIC with different environment.
    */
   public function testRepeatedBootWithDifferentEnvironment(): void {
@@ -312,6 +335,16 @@ class DrupalKernelTest extends KernelTestBase {
     // Ensure persisted services are persisted.
     $request_stack = $container->get('request_stack');
 
+    $container->get('stream_wrapper_manager')->register();
+    $stream_wrappers = array_keys($container->get('stream_wrapper_manager')->getWrappers());
+    $this->assertSame([
+      'assets',
+      'public',
+      'temporary',
+      'module',
+      'theme',
+    ], $stream_wrappers);
+
     $kernel->resetContainer();
 
     // Ensure services are reset when ::resetContainer is called.
@@ -332,6 +365,9 @@ class DrupalKernelTest extends KernelTestBase {
 
     // Ensure persisted services are persisted.
     $this->assertSame($request_stack, $container->get('request_stack'));
+
+    // Ensure stream wrappers are registered.
+    $this->assertSame($stream_wrappers, array_keys($container->get('stream_wrapper_manager')->getWrappers()));
   }
 
   /**

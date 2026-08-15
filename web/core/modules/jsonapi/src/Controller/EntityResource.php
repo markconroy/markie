@@ -282,7 +282,7 @@ class EntityResource {
     static::validate($parsed_entity);
 
     // Return a 409 Conflict response in accordance with the JSON:API spec. See
-    // http://jsonapi.org/format/#crud-creating-responses-409.
+    // https://jsonapi.org/format/#crud-creating-responses-409.
     if ($this->entityExists($parsed_entity)) {
       throw new ConflictHttpException('Conflict: Entity already exists.');
     }
@@ -431,7 +431,7 @@ class EntityResource {
     $query = $this->getCollectionQuery($resource_type, $params, $query_cacheability);
 
     // If the request is for the latest revision, toggle it on entity query.
-    if ($request->get(ResourceVersionRouteEnhancer::WORKING_COPIES_REQUESTED, FALSE)) {
+    if ($request->attributes->get(ResourceVersionRouteEnhancer::WORKING_COPIES_REQUESTED, FALSE)) {
       $query->latestRevision();
     }
 
@@ -467,7 +467,7 @@ class EntityResource {
     }
     // Each item of the collection data contains an array with 'entity' and
     // 'access' elements.
-    $collection_data = $this->loadEntitiesWithAccess($storage, $results, $request->get(ResourceVersionRouteEnhancer::WORKING_COPIES_REQUESTED, FALSE));
+    $collection_data = $this->loadEntitiesWithAccess($storage, $results, $request->attributes->get(ResourceVersionRouteEnhancer::WORKING_COPIES_REQUESTED, FALSE));
     $primary_data = new ResourceObjectData($collection_data);
     $primary_data->setHasNextPage($has_next_page);
 
@@ -659,6 +659,10 @@ class EntityResource {
       throw new ConflictHttpException(sprintf('You can only POST to to-many relationships. %s is a to-one relationship.', $related));
     }
 
+    // @todo Inject the plugin manager service.
+    $definition = \Drupal::service('plugin.manager.field.field_type')->getDefinition($field_definition->getType());
+    $serialized_property_names = $definition['serialized_property_names'] ?? [];
+
     $original_resource_identifiers = ResourceIdentifier::toResourceIdentifiersWithArityRequired($field_list);
     $new_resource_identifiers = array_udiff(
       ResourceIdentifier::deduplicate(array_merge($original_resource_identifiers, $resource_identifiers)),
@@ -678,7 +682,16 @@ class EntityResource {
       $new_field_value = ['entity' => $this->getEntityFromResourceIdentifier($new_resource_identifier)];
       // Remove `arity` from the received extra properties, otherwise this
       // will fail field validation.
-      $new_field_value += array_diff_key($new_resource_identifier->getMeta(), array_flip([ResourceIdentifier::ARITY_KEY]));
+      $meta = array_diff_key($new_resource_identifier->getMeta(), array_flip([ResourceIdentifier::ARITY_KEY]));
+      foreach ($serialized_property_names as $property_name) {
+        if (isset($meta[$property_name]) && is_string($meta[$property_name])) {
+          throw new BadRequestHttpException(sprintf(
+            'The relationship meta field "%s" cannot accept a serialized string value.',
+            $property_name,
+          ));
+        }
+      }
+      $new_field_value += $meta;
       $field_list->appendItem($new_field_value);
     }
 
@@ -716,6 +729,7 @@ class EntityResource {
     $internal_relationship_field_name = $resource_type->getInternalName($related);
     // According to the specification, PATCH works a little bit different if the
     // relationship is to-one or to-many.
+    /** @var \Drupal\Core\Entity\FieldableEntityInterface $entity */
     /** @var \Drupal\Core\Field\EntityReferenceFieldItemListInterface $field_list */
     $field_list = $entity->{$internal_relationship_field_name};
     $field_definition = $field_list->getFieldDefinition();
@@ -761,13 +775,26 @@ class EntityResource {
    *   The field definition of the entity field to be updated.
    */
   protected function doPatchMultipleRelationship(EntityInterface $entity, array $resource_identifiers, FieldDefinitionInterface $field_definition) {
-    $entity->{$field_definition->getName()} = array_map(function (ResourceIdentifier $resource_identifier) {
+    // @todo Inject the plugin manager service.
+    $definition = \Drupal::service('plugin.manager.field.field_type')->getDefinition($field_definition->getType());
+    $serialized_property_names = $definition['serialized_property_names'] ?? [];
+
+    $entity->{$field_definition->getName()} = array_map(function (ResourceIdentifier $resource_identifier) use ($serialized_property_names) {
       // We assume all entity reference fields have an 'entity' computed
       // property that can be used to assign the needed values.
       $field_properties = ['entity' => $this->getEntityFromResourceIdentifier($resource_identifier)];
       // Remove `arity` from the received extra properties, otherwise this
       // will fail field validation.
-      $field_properties += array_diff_key($resource_identifier->getMeta(), array_flip([ResourceIdentifier::ARITY_KEY]));
+      $meta = array_diff_key($resource_identifier->getMeta(), array_flip([ResourceIdentifier::ARITY_KEY]));
+      foreach ($serialized_property_names as $property_name) {
+        if (isset($meta[$property_name]) && is_string($meta[$property_name])) {
+          throw new BadRequestHttpException(sprintf(
+            'The relationship meta field "%s" cannot accept a serialized string value.',
+            $property_name,
+          ));
+        }
+      }
+      $field_properties += $meta;
       return $field_properties;
     }, $resource_identifiers);
   }
@@ -797,6 +824,7 @@ class EntityResource {
   public function removeFromRelationshipData(ResourceType $resource_type, EntityInterface $entity, $related, Request $request) {
     $resource_identifiers = $this->deserialize($resource_type, $request, ResourceIdentifier::class, $related);
     $internal_relationship_field_name = $resource_type->getInternalName($related);
+    /** @var \Drupal\Core\Entity\FieldableEntityInterface $entity */
     /** @var \Drupal\Core\Field\EntityReferenceFieldItemListInterface $field_list */
     $field_list = $entity->{$internal_relationship_field_name};
     $is_multiple = $field_list->getFieldDefinition()

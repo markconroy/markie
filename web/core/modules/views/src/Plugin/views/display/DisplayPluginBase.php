@@ -21,12 +21,14 @@ use Drupal\views\Plugin\views\area\AreaPluginBase;
 use Drupal\views\ViewExecutable;
 use Drupal\views\Plugin\views\PluginBase;
 use Drupal\views\Views;
+use Drupal\views\ViewsFormHelperTrait;
 
 /**
  * Base class for views display plugins.
  */
 abstract class DisplayPluginBase extends PluginBase implements DisplayPluginInterface, DependentPluginInterface {
   use PluginDependencyTrait;
+  use ViewsFormHelperTrait;
 
   /**
    * The top object of a view.
@@ -165,7 +167,7 @@ abstract class DisplayPluginBase extends PluginBase implements DisplayPluginInte
     $display['display_options'] += ['display_extenders' => []];
     $this->extenders = [];
     if ($extenders = Views::getEnabledDisplayExtenders()) {
-      $manager = Views::pluginManager('display_extender');
+      $manager = \Drupal::service('plugin.manager.views.display_extender');
       $display_extender_options = $display['display_options']['display_extenders'];
       foreach ($extenders as $extender) {
         /** @var \Drupal\views\Plugin\views\display_extender\DisplayExtenderPluginBase $plugin */
@@ -701,6 +703,12 @@ abstract class DisplayPluginBase extends PluginBase implements DisplayPluginInte
    */
   public function getLinkDisplay() {
     $display_id = $this->getOption('link_display');
+
+    // custom_url doesn't have a display handler.
+    if ($display_id === 'custom_url') {
+      return $display_id;
+    }
+
     // If unknown, pick the first one.
     if (empty($display_id) || !$this->view->displayHandlers->has($display_id)) {
       foreach ($this->view->displayHandlers as $display_id => $display) {
@@ -724,6 +732,12 @@ abstract class DisplayPluginBase extends PluginBase implements DisplayPluginInte
     }
 
     $display_id = $this->getLinkDisplay();
+
+    // custom_url is an exception as it doesn't have a specific display.
+    if ($display_id === 'custom_url' && $link_url = $this->getOption('link_url')) {
+      return $link_url;
+    }
+
     if ($display_id && $this->view->displayHandlers->has($display_id) && is_object($this->view->displayHandlers->get($display_id))) {
       return $this->view->displayHandlers->get($display_id)->getPath();
     }
@@ -806,7 +820,7 @@ abstract class DisplayPluginBase extends PluginBase implements DisplayPluginInte
 
     // Plugin instances are stored on the display for re-use.
     if (!isset($this->plugins[$type][$name])) {
-      $plugin = Views::pluginManager($type)->createInstance($name);
+      $plugin = \Drupal::service('views.plugin_managers')->get($type)->createInstance($name);
 
       // Initialize the plugin.
       $plugin->init($this->view, $this, $options['options']);
@@ -878,7 +892,7 @@ abstract class DisplayPluginBase extends PluginBase implements DisplayPluginInte
           $handler_type = $type;
         }
 
-        if ($handler = Views::handlerManager($handler_type)->getHandler($info, $override)) {
+        if ($handler = \Drupal::service('views.plugin_managers')->get($handler_type)->getHandler($info, $override)) {
           // Special override for area types so they know where they come from.
           if ($handler instanceof AreaPluginBase) {
             $handler->areaType = $type;
@@ -1193,7 +1207,7 @@ abstract class DisplayPluginBase extends PluginBase implements DisplayPluginInte
     $pager_plugin = $this->getPlugin('pager');
     if (!$pager_plugin) {
       // Default to the no pager plugin.
-      $pager_plugin = Views::pluginManager('pager')->createInstance('none');
+      $pager_plugin = \Drupal::service('plugin.manager.views.pager')->createInstance('none');
     }
 
     $pager_str = $pager_plugin->summaryTitle();
@@ -1254,7 +1268,7 @@ abstract class DisplayPluginBase extends PluginBase implements DisplayPluginInte
     $access_plugin = $this->getPlugin('access');
     if (!$access_plugin) {
       // Default to the no access control plugin.
-      $access_plugin = Views::pluginManager('access')->createInstance('none');
+      $access_plugin = \Drupal::service('plugin.manager.views.access')->createInstance('none');
     }
 
     $access_str = $access_plugin->summaryTitle();
@@ -1274,7 +1288,7 @@ abstract class DisplayPluginBase extends PluginBase implements DisplayPluginInte
     $cache_plugin = $this->getPlugin('cache');
     if (!$cache_plugin) {
       // Default to the no cache control plugin.
-      $cache_plugin = Views::pluginManager('cache')->createInstance('none');
+      $cache_plugin = \Drupal::service('plugin.manager.views.cache')->createInstance('none');
     }
 
     $cache_str = $cache_plugin->summaryTitle();
@@ -1331,7 +1345,7 @@ abstract class DisplayPluginBase extends PluginBase implements DisplayPluginInte
     $exposed_form_plugin = $this->getPlugin('exposed_form');
     if (!$exposed_form_plugin) {
       // Default to the no cache control plugin.
-      $exposed_form_plugin = Views::pluginManager('exposed_form')->createInstance('basic');
+      $exposed_form_plugin = \Drupal::service('plugin.manager.views.exposed_form')->createInstance('basic');
     }
 
     $exposed_form_str = $exposed_form_plugin->summaryTitle();
@@ -1372,7 +1386,7 @@ abstract class DisplayPluginBase extends PluginBase implements DisplayPluginInte
     parent::buildOptionsForm($form, $form_state);
     $section = $form_state->get('section');
     if ($this->defaultableSections($section)) {
-      views_ui_standard_display_dropdown($form, $form_state, $section);
+      $this->standardDisplayDropdown($form, $form_state, $section);
     }
     $form['#title'] = $this->display['display_title'] . ': ';
 
@@ -1990,7 +2004,7 @@ abstract class DisplayPluginBase extends PluginBase implements DisplayPluginInte
         $type = $form_state->getValue([$plugin_type, 'type']);
         if ($plugin_options['type'] != $type) {
           /** @var \Drupal\views\Plugin\views\ViewsPluginInterface $plugin */
-          $plugin = Views::pluginManager($plugin_type)->createInstance($type);
+          $plugin = \Drupal::service('views.plugin_managers')->get($plugin_type)->createInstance($type);
           if ($plugin) {
             $plugin->init($this->view, $this, $plugin_options['options']);
             $plugin_options = [

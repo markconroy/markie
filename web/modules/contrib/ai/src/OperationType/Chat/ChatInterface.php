@@ -12,6 +12,7 @@ use Drupal\ai\OperationType\OperationTypeInterface;
 #[OperationType(
   id: 'chat',
   label: new TranslatableMarkup('Chat'),
+  description: new TranslatableMarkup('Have back-and-forth conversations with AI using plain language.')
 )]
 interface ChatInterface extends OperationTypeInterface {
 

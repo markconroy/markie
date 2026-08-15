@@ -32,8 +32,8 @@ class InstallerTranslationMultipleLanguageTest extends InstallerTestBase {
   protected function setUpLanguage(): void {
     // Place custom local translations in the translations directory.
     mkdir(DRUPAL_ROOT . '/' . $this->siteDirectory . '/files/translations', 0777, TRUE);
-    file_put_contents(DRUPAL_ROOT . '/' . $this->siteDirectory . '/files/translations/drupal-8.0.0.de.po', $this->getPo('de'));
-    file_put_contents(DRUPAL_ROOT . '/' . $this->siteDirectory . '/files/translations/drupal-8.0.0.es.po', $this->getPo('es'));
+    file_put_contents(DRUPAL_ROOT . '/' . $this->siteDirectory . '/files/translations/drupal-' . \Drupal::VERSION . '.de.po', $this->getPo('de'));
+    file_put_contents(DRUPAL_ROOT . '/' . $this->siteDirectory . '/files/translations/drupal-' . \Drupal::VERSION . '.es.po', $this->getPo('es'));
 
     parent::setUpLanguage();
   }
@@ -165,6 +165,8 @@ PO;
     // Spanish is always an override (never used as installation language).
     $this->assertEquals('Anonymous es', $override_es->get('anonymous'));
 
+    // Verify that config entities get the correct language assumptions.
+    $this->verifyConfigLanguageAssumptions();
   }
 
   /**
@@ -185,6 +187,29 @@ PO;
         $this->assertSession()->pageTextContains($sample . ' ' . $langcode);
       }
     }
+  }
+
+  /**
+   * Verifies config entity and simple config langcode assumptions.
+   */
+  protected function verifyConfigLanguageAssumptions(): void {
+    if ($this->langcode === 'en') {
+      return;
+    }
+
+    $config_factory = \Drupal::configFactory();
+    foreach (['language.entity.de', 'language.entity.es'] as $config_name) {
+      $this->assertEquals(
+        $this->langcode,
+        $config_factory->get($config_name)->get('langcode'),
+        "Config entity '$config_name' should use the installation language langcode."
+      );
+    }
+
+    $this->assertNull(
+      $config_factory->get('system.performance')->get('langcode'),
+      'Non-entity config without translatable data should not be rewritten to the installation language.'
+    );
   }
 
 }

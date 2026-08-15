@@ -9,7 +9,6 @@ use Drupal\views\Views;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\HttpKernelInterface;
 
 /**
  * Tests the representative node relationship for terms.
@@ -24,6 +23,16 @@ class TaxonomyDefaultArgumentTest extends TaxonomyTestBase {
    * @var array
    */
   public static $testViews = ['taxonomy_default_argument_test'];
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function setUp($import_test_views = TRUE): void {
+    parent::setUp($import_test_views);
+
+    // The view requires the current user to be logged in.
+    $this->setUpCurrentUser(permissions: ['access content']);
+  }
 
   /**
    * Init view with a request by provided URL.
@@ -45,8 +54,7 @@ class TaxonomyDefaultArgumentTest extends TaxonomyTestBase {
     $request->server->set('SCRIPT_NAME', $GLOBALS['base_path'] . 'index.php');
     $request->server->set('SCRIPT_FILENAME', 'index.php');
 
-    $response = $this->container->get('http_kernel')
-      ->handle($request, HttpKernelInterface::SUB_REQUEST);
+    $response = $this->container->get('http_kernel')->handle($request);
 
     $view->setRequest($request);
     $view->setResponse($response);
@@ -98,6 +106,15 @@ class TaxonomyDefaultArgumentTest extends TaxonomyTestBase {
 
     $expected = $this->term1->id();
     $this->assertEquals($expected, $view->argument['tid']->getDefaultArgument());
+  }
+
+  /**
+   * Tests escaping of page title when the taxonomy plugin provides it.
+   */
+  public function testTermTitleEscaping(): void {
+    $this->term1->setName('<em>Markup</em>')->save();
+    $this->drupalGet('taxonomy_default_argument_test/' . $this->term1->id());
+    $this->assertSession()->assertEscaped($this->term1->label());
   }
 
 }

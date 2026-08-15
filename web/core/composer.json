@@ -24,20 +24,22 @@
         "symfony/event-dispatcher": "^7.4",
         "symfony/filesystem": "^7.4",
         "symfony/finder": "^7.4",
-        "symfony/http-foundation": "^7.4",
-        "symfony/http-kernel": "^7.4",
-        "symfony/mailer": "^7.4",
-        "symfony/mime": "^7.4",
-        "symfony/routing": "^7.4",
+        "symfony/http-foundation": "^7.4.13",
+        "symfony/http-kernel": "^7.4.12",
+        "symfony/mailer": "^7.4.12",
+        "symfony/mime": "^7.4.12",
+        "symfony/routing": "^7.4.13",
+        "symfony/runtime": "^7.4",
         "symfony/serializer": "^7.4",
         "symfony/validator": "^7.4",
         "symfony/process": "^7.4.5",
         "symfony/polyfill-iconv": "^1.32",
         "symfony/polyfill-php84": "^1.32",
         "symfony/polyfill-php85": "^1.32",
-        "symfony/yaml": "^7.4",
+        "symfony/polyfill-php86": "^1.37",
+        "symfony/yaml": "^7.4.12",
         "revolt/event-loop": "^1.0",
-        "twig/twig": "^3.21.0",
+        "twig/twig": "^3.28.0",
         "doctrine/lexer": "^2 || ^3",
         "drupal/core-composer-scaffold": "self.version",
         "guzzlehttp/guzzle": "^7.10",
@@ -52,7 +54,9 @@
         "psr/log": "^3.0",
         "mck89/peast": "^1.17.4",
         "sebastian/diff": "^4 || ^5 || ^6 || ^7",
-        "php-tuf/composer-stager": "^2.0"
+        "php-tuf/composer-stager": "^2.0",
+        "justinrainbow/json-schema": "^5.2 || ^6.5.2",
+        "twig/html-extra": "^3.23"
     },
     "conflict": {
         "drupal/automatic_updates": "<4",
@@ -84,7 +88,11 @@
         "drupal/core-transliteration": "self.version",
         "drupal/core-utility": "self.version",
         "drupal/core-uuid": "self.version",
-        "drupal/core-version": "self.version"
+        "drupal/core-version": "self.version",
+        "drupal/search": "*",
+        "drupal/settings_tray": "*",
+        "drupal/shortcut": "*",
+        "drupal/toolbar": "*"
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
@@ -121,6 +129,9 @@
             "includes/bootstrap.inc"
         ]
     },
+    "bin": [
+        "scripts/dr"
+    ],
     "config": {
         "preferred-install": "dist"
     },
@@ -128,6 +139,9 @@
         "ext-zip": "Needed to extend the plugin.manager.archiver service capability with the handling of files in the ZIP format."
     },
     "extra": {
+        "branch-alias": {
+            "dev-main": "11.x-dev"
+        },
         "drupal-scaffold": {
             "file-mapping": {
                 "[project-root]/.editorconfig": "assets/scaffold/files/editorconfig",
@@ -158,5 +172,11 @@
     },
     "scripts": {
         "pre-autoload-dump": "Drupal\\Core\\Composer\\Composer::preAutoloadDump"
-    }
+    },
+    "funding": [
+        {
+            "type": "other",
+            "url": "https://www.drupal.org/composer-fund"
+        }
+    ]
 }

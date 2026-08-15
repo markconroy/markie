@@ -125,7 +125,7 @@ ai.tools_library:
     _controller: '\Drupal\ai\Controller\ToolsLibrary::overview'
     _title: 'Tools Library'
   requirements:
-    _permission: 'access ai tools overview'
+    _custom_access: 'ai.tools_library.ui_builder:checkAccess'
 
 # Prompt management.
 entity.ai_prompt.collection:
@@ -219,6 +219,29 @@ entity.ai_prompt_type.delete_form:
   options:
     _admin_route: TRUE
 
+entity.ai_file.collection:
+  path: '/admin/config/ai/files'
+  defaults:
+    _entity_list: 'ai_file'
+    _title: 'AI Files'
+  requirements:
+    _permission: 'access ai files overview'
+  options:
+    _admin_route: TRUE
+
+entity.ai_file.delete_form:
+  path: '/admin/config/ai/files/{ai_file}/delete'
+  defaults:
+    _entity_form: 'ai_file.delete'
+    _title: 'Delete AI File'
+  requirements:
+    _entity_access: 'ai_file.delete'
+  options:
+    _admin_route: TRUE
+    parameters:
+      ai_file:
+        type: entity:ai_file
+
 # Guardrails management.
 entity.ai_guardrail.collection:
   path: '/admin/config/ai/guardrails'
@@ -282,5 +305,14 @@ entity.ai_guardrail_set.delete_form:
   defaults:
     _entity_form: 'ai_guardrail_set.delete'
     _title: 'Delete an AI guardrail set'
+  requirements:
+    _permission: 'administer guardrail sets'
+
+# Global guardrails settings.
+ai.global_guardrails_settings:
+  path: '/admin/config/ai/guardrails/global'
+  defaults:
+    _form: '\Drupal\ai\Form\GlobalGuardrailsSettingsForm'
+    _title: 'Global AI guardrails'
   requirements:
     _permission: 'administer guardrail sets'

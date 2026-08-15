@@ -7,7 +7,7 @@ use Drupal\backup_migrate\Core\File\TempFileAdapterInterface;
 use Drupal\Core\File\FileSystemInterface;
 
 /**
- *
+ * Provides the drupal temp file adapter class.
  *
  * @package Drupal\backup_migrate\Drupal\File
  */

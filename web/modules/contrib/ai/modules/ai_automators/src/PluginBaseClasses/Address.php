@@ -6,6 +6,7 @@ use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\ai\AiProviderPluginManager;
+use Drupal\ai\Guardrail\AiGuardrailHelper;
 use Drupal\ai\Service\AiProviderFormHelper;
 use Drupal\ai\Service\PromptJsonDecoder\PromptJsonDecoderInterface;
 use Drupal\ai_automators\Exceptions\AiAutomatorResponseErrorException;
@@ -33,6 +34,8 @@ class Address extends RuleBase {
    *   The AI provider form helper.
    * @param \Drupal\ai\Service\PromptJsonDecoder\PromptJsonDecoderInterface $promptJsonDecoder
    *   The prompt JSON decoder.
+   * @param \Drupal\ai\Guardrail\AiGuardrailHelper $aiGuardrailHelper
+   *   The AI guardrail helper.
    * @param \Drupal\Core\Extension\ModuleHandlerInterface $moduleHandler
    *   The module handler.
    */
@@ -40,9 +43,10 @@ class Address extends RuleBase {
     AiProviderPluginManager $provider,
     AiProviderFormHelper $formHelper,
     PromptJsonDecoderInterface $promptJsonDecoder,
+    AiGuardrailHelper $aiGuardrailHelper,
     ModuleHandlerInterface $moduleHandler,
   ) {
-    parent::__construct($provider, $formHelper, $promptJsonDecoder);
+    parent::__construct($provider, $formHelper, $promptJsonDecoder, $aiGuardrailHelper);
     $this->moduleHandler = $moduleHandler;
   }
 
@@ -54,6 +58,7 @@ class Address extends RuleBase {
       $container->get('ai.provider'),
       $container->get('ai.form_helper'),
       $container->get('ai.prompt_json_decode'),
+      $container->get('ai.guardrail_helper'),
       $container->get('module_handler')
     );
   }

@@ -7,8 +7,10 @@ This document outlines the steps the Publishing Manager needs to take to publish
 3. Check the diff between the last release and the new tag to ensure it matches the intended changes.
 4. Verify in the tag branch that the following UIs have been built and committed:
    - `ui/mdxeditor/dist/assets`
+   - `ui/default-tools-editor/dist/assets`
    - `ui/json-schema-editor/dist`
    - `modules/ai_ckeditor/js/build`
+
 5. No code confirmation should be needed for minor/major releases, since these should have been fully tested by QA.
 
 ## Publish a Release

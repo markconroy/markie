@@ -25,6 +25,7 @@
 %Method "Iterator::[^"]+" might add "void" as a native return type declaration in the future. Do the same in implementation "org\\bovigo\\vfs\\vfsStreamContainerIterator" now to avoid errors or add an explicit @return annotation to suppress this message%
 
 # Drupal 12.
+%ExpectDeprecationTrait is deprecated in drupal:11\.4\.0%
 %The "Drupal\\Core\\Database\\Query\\Select::hasAllTags\(\)" method will require a new "string \.\.\. \$tags" argument in the next major version of its interface%
 %The "Drupal\\Core\\Database\\Query\\Select::hasAnyTag\(\)" method will require a new "string \.\.\. \$tags" argument in the next major version of its interface%
 %The "Drupal\\Core\\Database\\Query\\SelectExtender::hasAllTags\(\)" method will require a new "string \.\.\. \$tags" argument in the next major version of its interface%
@@ -32,13 +33,15 @@
 %The "Drupal\\Core\\Entity\\Query\\QueryBase::hasAllTags\(\)" method will require a new "string \.\.\. \$tags" argument in the next major version of its interface%
 %The "Drupal\\Core\\Entity\\Query\\QueryBase::hasAnyTag\(\)" method will require a new "string \.\.\. \$tags" argument in the next major version of its interface%
 %The "Drupal\\workspaces\\WorkspaceManager::setActiveWorkspace\(\)" method will require a new "bool \$persist" argument in the next major version of its interface%
+%The "Drupal\\(?:Core\\(?:Action|Field|Condition)|(?:user|action_test|action_bulk_test|user_batch_action_test)\\Plugin\\Action)\\.*::execute\(\)" method will require a new "object\|null \$object" argument in the next major version of its interface "Drupal\\Core\\Executable\\ExecutableInterface"%
+%The "(?:Drupal\\Core\\Layout\\LayoutPluginManagerInterface|Drupal\\Core\\Block\\BlockManager)::get(?:Sorted|Grouped)Definitions\(\)" method will require a new "string \$label_key" argument in the next major version of its interface "Drupal\\Component\\Plugin\\CategorizingPluginManagerInterface"%
 %.*::getDefaultOperations\(\) will require a new "\Drupal\Core\Cache\CacheableMetadata|null \$cacheability" argument in the next major version of its parent class%
 %.*::getOperations\(\) will require a new "\Drupal\Core\Cache\CacheableMetadata|null \$cacheability" argument in the next major version of its interface%
 %Class "Drupal\\migrate_drupal\\Plugin\\migrate\\source\\DrupalSqlBase" as extended by "Drupal\\(ban|block|block_content|comment|config_translation|contact|content_translation|field|file|filter|image|language|menu_link_content|migrate_drupal|node|path|responsive_image|search|shortcut|system|taxonomy|update|user)\\[^"]+" is deprecated in drupal:11.3.0 and is removed from drupal:12.0.0%
 %Class "Drupal\\migrate_drupal\\Plugin\\migrate\\source\\DrupalSqlBase" as extended by "Drupal\\Tests\\migrate_drupal\\[^"]+" is deprecated in drupal:11.3.0 and is removed from drupal:12.0.0%
 %Migrate source plugin "md_empty" used in migration "(d6_upload_field|user_picture_field)" is deprecated in drupal:11.3.0 and is removed from drupal:12.0.0%
 %Trait "Drupal\\migrate_drupal\\Plugin\\migrate\\source\\I18nQueryTrait" used by "Drupal\\(block_content|menu_link_content|taxonomy)\\[^"]+" is deprecated in drupal:11.3.0 and is removed from drupal:12.0.0%
-%Drupal\\migrate_drupal\\Plugin\\MigrateFieldPluginManager\(\) is deprecated in drupal:11.3.0 and is removed from drupal:12.0.0. There is no replacement. See https://www.drupal.org/node/3533566%
+%Drupal\\migrate_drupal\\Plugin\\MigrateFieldPluginManager is deprecated in drupal:11.3.0 and is removed from drupal:12.0.0. There is no replacement. See https://www.drupal.org/node/3533566%
 %The "plugin.manager.migrate.field" service is deprecated in drupal:11.3 and is removed from drupal:12.0.0. There is no replacement. See https://www.drupal.org/node/3533566%
 %Drupal\\block\\Plugin\\migrate\\process\\BlockPluginId is deprecated in drupal:11.3.0 and is removed from drupal:12.0.0. There is no replacement. See https://www.drupal.org/node/3533560%
 %Drupal\\block\\Plugin\\migrate\\process\\BlockRegion is deprecated in drupal:11.3.0 and is removed from drupal:12.0.0. There is no replacement. See https://www.drupal.org/node/3533560%
@@ -46,10 +49,10 @@
 %Drupal\\block\\Plugin\\migrate\\process\\BlockTheme is deprecated in drupal:11.3.0 and is removed from drupal:12.0.0. There is no replacement. See https://www.drupal.org/node/3533560%
 %Drupal\\block\\Plugin\\migrate\\process\\BlockVisibility is deprecated in drupal:11.3.0 and is removed from drupal:12.0.0. There is no replacement. See https://www.drupal.org/node/3533560%
 %Drupal\\block\\Plugin\\migrate\\process\\RolesLookup is deprecated in drupal:11.3.0 and is removed from drupal:12.0.0. There is no replacement. See https://www.drupal.org/node/3533560%
-%Drupal\\field\\Plugin\\migrate\\process\\FieldType\(\) is deprecated in drupal:11.3.0 and is removed from drupal:12.0.0. There is no replacement.%
+%Drupal\\field\\Plugin\\migrate\\process\\FieldType is deprecated in drupal:11.3.0 and is removed from drupal:12.0.0. There is no replacement.%
 %The "plugin.manager.archiver" service is deprecated in drupal:11.3.0 and is removed from drupal:12.0.0. There is no replacement. See https://www.drupal.org/node/3556927%
 %Drupal\\Core\\Archiver\\ArchiverManager is deprecated in drupal:11.3.0 and is removed from drupal:12.0.0. There is no replacement. See https://www.drupal.org/node/3556927%
-%Drupal\\field\\Plugin\\migrate\\process\\ProcessField\(\) is deprecated in drupal:11.3.0 and is removed from drupal:12.0.0. There is no replacement.%
+%Drupal\\field\\Plugin\\migrate\\process\\ProcessField is deprecated in drupal:11.3.0 and is removed from drupal:12.0.0. There is no replacement.%
 %Drupal\\field\\Plugin\\migrate\\process\\d6\\FieldFormatterSettingsDefaults is deprecated in drupal:11.3.0 and is removed from drupal:12.0.0. There is no replacement. See https://www.drupal.org/node/3533560%
 %Drupal\\field\\Plugin\\migrate\\process\\d6\\FieldInstanceWidgetSettings is deprecated in drupal:11.3.0 and is removed from drupal:12.0.0. There is no replacement. See https://www.drupal.org/node/3533560%
 %Drupal\\field\\Plugin\\migrate\\process\\d7\\FieldBundle is deprecated in drupal:11.3.0 and is removed from drupal:12.0.0. There is no replacement. See https://www.drupal.org/node/3533560%
@@ -83,18 +86,15 @@
 %Drupal\\user\\Plugin\\migrate\\process\\d6\\UserUpdate7002 is deprecated in drupal:11.3.0 and is removed from drupal:12.0.0. There is no replacement. See https://www.drupal.org/node/3533560%
 %Drupal\\block\\Plugin\\migrate\\destination\\EntityBlock::import\(\) is deprecated in drupal:11.3.0 and is removed from drupal:12.0.0. There is no replacement. See https://www.drupal.org/node/3533565%
 %Drupal\\comment\\Plugin\\migrate\\destination\\EntityComment::import\(\) is deprecated in drupal:11.3.0 and is removed from drupal:12.0.0. There is no replacement. See https://www.drupal.org/node/3533565%
-%Drupal\\migrate\\Plugin\\Derivative\\MigrateEntityComplete\(\) is deprecated in drupal:11.3.0 and is removed from drupal:12.0.0. There is no replacement. See https://www.drupal.org/node/3533565%
-%Drupal\\migrate\\Plugin\\migrate\\destination\\EntityContentComplete\(\) is deprecated in drupal:11.3.0 and is removed from drupal:12.0.0. There is no replacement. See https://www.drupal.org/node/3533565%
+%Drupal\\migrate\\Plugin\\Derivative\\MigrateEntityComplete is deprecated in drupal:11.3.0 and is removed from drupal:12.0.0. There is no replacement. See https://www.drupal.org/node/3533565%
+%Drupal\\migrate\\Plugin\\migrate\\destination\\EntityContentComplete is deprecated in drupal:11.3.0 and is removed from drupal:12.0.0. There is no replacement. See https://www.drupal.org/node/3533565%
 %Drupal\\node\\Plugin\\migrate\\destination\\EntityNodeType::import\(\) is deprecated in drupal:11.3.0 and is removed from drupal:12.0.0. There is no replacement. See https://www.drupal.org/node/3533565%
 %Drupal\\search\\Plugin\\migrate\\destination\\EntitySearchPage::import\(\) is deprecated in drupal:11.3.0 and is removed from drupal:12.0.0. There is no replacement. See https://www.drupal.org/node/3533565%
-%Drupal\\shortcut\\Plugin\\migrate\\destination\\EntityShortcutSet\(\) is deprecated in drupal:11.3.0 and is removed from drupal:12.0.0. There is no replacement. See https://www.drupal.org/node/3533565%
-%Drupal\\system\\Plugin\\migrate\\destination\\d7\\ThemeSettings\(\) is deprecated in drupal:11.3.0 and is removed from drupal:12.0.0. There is no replacement. See https://www.drupal.org/node/3533565%
-%Drupal\\user\\Plugin\\migrate\\destination\\EntityUserRole\(\) is deprecated in drupal:11.3.0 and is removed from drupal:12.0.0. There is no replacement. See https://www.drupal.org/node/3533565%
+%Drupal\\shortcut\\Plugin\\migrate\\destination\\EntityShortcutSet is deprecated in drupal:11.3.0 and is removed from drupal:12.0.0. There is no replacement. See https://www.drupal.org/node/3533565%
+%Drupal\\system\\Plugin\\migrate\\destination\\d7\\ThemeSettings is deprecated in drupal:11.3.0 and is removed from drupal:12.0.0. There is no replacement. See https://www.drupal.org/node/3533565%
+%Drupal\\user\\Plugin\\migrate\\destination\\EntityUserRole is deprecated in drupal:11.3.0 and is removed from drupal:12.0.0. There is no replacement. See https://www.drupal.org/node/3533565%
+%The \$long argument to Drupal\\filter\\Plugin\\Filter\\Filter(Align|AutoP|Caption|Html|HtmlEscape|HtmlImageSecure|Url)::tips\(\) is deprecated in drupal:11.4.0 and is removed from drupal:12.0.0. Only short tips are used. See https://www.drupal.org/node/3567879%
 
 # Drupal 13.
 %The "cache.backend.memory" service is deprecated in drupal:11.3.0 and is removed from drupal:13.0.0. Use cache.backend.memory.memory instead. See https://www.drupal.org/node/3546856%
 %The "cache.static" service is deprecated in drupal:11.3.0 and is removed from drupal:13.0.0. Use the cache.memory bin instead. See https://www.drupal.org/node/3546856%
-
-# Symfony 7.4.
-%Since symfony/http-foundation 7.4: Request::get\(\) is deprecated, use properties -.*attributes, query or request directly instead.%
-%Since symfony/validator 7.4: Support for evaluating options in the base Constraint class is deprecated. Initialize properties in the constructor of Drupal\\(Core|ckeditor5|file)\\[^ ]+ instead.%

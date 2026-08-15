@@ -18,6 +18,9 @@ privacy_policy_url: 'https://stripe.com/privacy'
 javascripts:
   - stripe.com
 callback_code: ''
+on_init: ''
+on_accept: ''
+on_decline: ''
 wrapper_identifier: {  }
 attachments: {  }
 weight: 0

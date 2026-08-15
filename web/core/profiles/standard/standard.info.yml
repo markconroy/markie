@@ -4,12 +4,10 @@ description: 'Install with commonly used features pre-configured.'
 version: VERSION
 install:
   - node
-  - history
   - block
   - breakpoint
   - ckeditor5
   - config
-  - comment
   - contextual
   - menu_link_content
   - datetime
@@ -25,9 +23,7 @@ install:
   - big_pipe
   - taxonomy
   - dblog
-  - search
-  - shortcut
-  - toolbar
+  - navigation
   - field_ui
   - file
   - views

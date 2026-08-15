@@ -16,6 +16,7 @@ use Drupal\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\IgnoreDeprecations;
 use Prophecy\Argument;
 use Prophecy\Prophecy\ObjectProphecy;
 use Prophecy\Prophet;
@@ -266,6 +267,7 @@ class DefaultHtmlRouteProviderTest extends UnitTestCase {
     $entity_type4 = static::getEntityType($entity_type3);
     $entity_type4->entityClassImplements(FieldableEntityInterface::class)->willReturn(TRUE);
     $entity_type4->getKey('id')->willReturn('id');
+    $entity_type4->hasIntegerId()->willReturn(TRUE);
     $route->setRequirement('the_entity_type_id', '\d+');
     $field_storage_definition = $prophet->prophesize(FieldStorageDefinitionInterface::class);
     $field_storage_definition->getType()->willReturn('integer');
@@ -370,6 +372,7 @@ class DefaultHtmlRouteProviderTest extends UnitTestCase {
   /**
    * Tests get entity type id key type.
    */
+  #[IgnoreDeprecations]
   public function testGetEntityTypeIdKeyType(): void {
     $entity_type = $this->prophesize(EntityTypeInterface::class);
     $entity_type->entityClassImplements(FieldableEntityInterface::class)->willReturn(TRUE);
@@ -387,6 +390,7 @@ class DefaultHtmlRouteProviderTest extends UnitTestCase {
   /**
    * Tests get entity type id key type not fieldable.
    */
+  #[IgnoreDeprecations]
   public function testGetEntityTypeIdKeyTypeNotFieldable(): void {
     $entity_type = $this->prophesize(EntityTypeInterface::class);
     $entity_type->entityClassImplements(FieldableEntityInterface::class)->willReturn(FALSE);

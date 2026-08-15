@@ -10,13 +10,13 @@ ai.provider_config:
     use_default:
       type: boolean
       label: 'Use default provider'
-    provider_id:
+    provider:
       type: string
-      label: 'Provider ID'
-    model_id:
+      label: 'Provider'
+    model:
       type: string
-      label: 'Model ID'
-    configuration:
+      label: 'Model'
+    config:
       type: ignore
       label: 'Provider Configuration'
       nullable: true

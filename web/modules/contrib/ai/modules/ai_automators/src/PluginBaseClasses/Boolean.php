@@ -73,8 +73,10 @@ class Boolean extends RuleBase {
       $input = new ChatInput([
         new ChatMessage("user", $prompt),
       ]);
+      $input = $this->applyGuardrailsToInput($input, $automatorConfig);
 
       $response = $instance->chat($input, $automatorConfig['ai_model'])->getNormalized();
+      $this->assertNotStoppedByGuardrail($input);
 
       // Normalize the response.
       $values = json_decode(str_replace("\n", "", trim(str_replace(['```json', '```'], '', $response->getText()))), TRUE);

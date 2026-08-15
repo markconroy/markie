@@ -37,6 +37,12 @@ backup_migrate.backup_migrate_schedule.*:
     keep:
       type: integer
       label: 'Backups to keep'
+    encrypt:
+      type: boolean
+      label: 'Encrypt'
+    encrypt_password:
+      type: string
+      label: 'Encryption Password'
     period:
       type: integer
       label: 'Frequency'
@@ -104,6 +110,10 @@ backup_migrate.backup_migrate_settings.*:
               type: sequence
               sequence:
                 type: string
+            exclude_patterns:
+              type: sequence
+              sequence:
+                type: string
         private_files_exclude:
           type: mapping
           mapping:
@@ -118,6 +128,17 @@ backup_migrate.backup_migrate_settings.*:
               type: sequence
               sequence:
                 type: string
+        notify:
+          type: mapping
+          mapping:
+            notify_success_enable:
+              type: boolean
+            notify_success_email:
+              type: email
+            notify_failure_enable:
+              type: boolean
+            notify_failure_email:
+              type: email
 
 backup_migrate.backup_migrate_destination.*:
   type: config_entity

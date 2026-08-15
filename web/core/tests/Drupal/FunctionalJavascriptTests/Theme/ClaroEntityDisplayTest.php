@@ -19,17 +19,6 @@ use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 class ClaroEntityDisplayTest extends EntityDisplayTest {
 
   /**
-   * Modules to install.
-   *
-   * Install the shortcut module so that claro.settings has its schema checked.
-   * There's currently no way for Claro to provide a default and have valid
-   * configuration as themes cannot react to a module install.
-   *
-   * @var string[]
-   */
-  protected static $modules = ['shortcut'];
-
-  /**
    * {@inheritdoc}
    */
   protected function setUp(): void {
@@ -75,7 +64,7 @@ class ClaroEntityDisplayTest extends EntityDisplayTest {
     $this->drupalGet('entity_test/1');
     $this->assertSession()->elementNotExists('css', '.field--name-field-test-text');
 
-    $this->drupalGet('entity_test/structure/entity_test/display');
+    $this->drupalGet('entity_test/structure/entity_test/display/default');
     $this->assertSession()->elementExists('css', '.region-content-message.region-empty');
     $this->getSession()->getPage()->pressButton('Show row weights');
     $this->assertSession()->waitForElementVisible('css', '[name="fields[field_test_text][region]"]');
@@ -100,7 +89,7 @@ class ClaroEntityDisplayTest extends EntityDisplayTest {
    */
   public function testExtraFields(): void {
     EntityTestHelper::createBundle('bundle_with_extra_fields');
-    $this->drupalGet('entity_test/structure/bundle_with_extra_fields/display');
+    $this->drupalGet('entity_test/structure/bundle_with_extra_fields/display/default');
     $this->assertSession()->waitForElement('css', '.tabledrag-handle');
     $id = $this->getSession()->getPage()->find('css', '[name="form_build_id"]')->getValue();
 

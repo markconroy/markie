@@ -7,3 +7,4 @@ services:
     parent: default_plugin_manager
   backup_migrate.mailer:
     class: Drupal\backup_migrate\Core\Service\Mailer
+    arguments: ['@language_manager', '@plugin.manager.mail']

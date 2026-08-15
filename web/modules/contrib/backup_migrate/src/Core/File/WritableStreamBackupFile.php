@@ -89,7 +89,8 @@ class WritableStreamBackupFile extends ReadableStreamBackupFile implements Backu
    *
    * Used for small amounts of data that can fit in memory.
    *
-   * @param $data
+   * @param array $data
+   *   The data.
    */
   public function writeAll($data) {
     $this->openForWrite();

@@ -6,7 +6,7 @@ use Drupal\backup_migrate\Core\Config\ConfigurableInterface;
 use Drupal\backup_migrate\Core\Config\ConfigurableTrait;
 
 /**
- *
+ * Provides the plugin base class.
  *
  * @package Drupal\backup_migrate\Core\Plugin
  */
@@ -24,6 +24,7 @@ abstract class PluginBase implements PluginInterface, ConfigurableInterface {
    * ];
    *
    * @return array
+   *   A render or configuration array.
    */
   public function supportedOps() {
     return [];
@@ -33,9 +34,11 @@ abstract class PluginBase implements PluginInterface, ConfigurableInterface {
    * Does this plugin implement the given operation.
    *
    * @param string $op
+   *   The op.
    *   The name of the operation.
    *
    * @return bool
+   *   TRUE when successful, FALSE otherwise.
    */
   public function supportsOp($op) {
     // If the function has the method then it supports the op.
@@ -51,9 +54,11 @@ abstract class PluginBase implements PluginInterface, ConfigurableInterface {
    * What is the weight of the given operation for this plugin.
    *
    * @param string $op
+   *   The op.
    *   The name of the operation.
    *
    * @return int
+   *   The requested integer.
    */
   public function opWeight($op) {
     $ops = $this->supportedOps();

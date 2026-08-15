@@ -65,7 +65,16 @@ klaro.klaro_app.*:
         type: string
     callback_code:
       type: string
-      label: 'Callback (inline Javascript)'
+      label: "DEPRECATED Callback (inline Javascript)"
+    on_init:
+      type: string
+      label: "onInit (inline Javascript)"
+    on_accept:
+      type: string
+      label: "onAccept (inline Javascript)"
+    on_decline:
+      type: string
+      label: "onDecline (inline Javascript)"
     wrapper_identifier:
       type: sequence
       label: 'Embed wrap classes'

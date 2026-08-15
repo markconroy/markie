@@ -3,6 +3,7 @@
 namespace Drupal\ai_ckeditor;
 
 use Drupal\Component\Utility\NestedArray;
+use Drupal\Component\Utility\Html;
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\CloseModalDialogCommand;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
@@ -16,6 +17,7 @@ use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\ai\AiProviderPluginManager;
 use Drupal\ai_ckeditor\PluginInterfaces\AiCKEditorPluginInterface;
 use Drupal\ai_ckeditor\Traits\AiCKEditorConfigTrait;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\editor\Ajax\EditorDialogSave;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -119,7 +121,7 @@ abstract class AiCKEditorPluginBase extends PluginBase implements AiCKEditorPlug
    * {@inheritdoc}
    */
   public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
-    return [];
+    return $form;
   }
 
   /**
@@ -207,15 +209,43 @@ abstract class AiCKEditorPluginBase extends PluginBase implements AiCKEditorPlug
   }
 
   /**
+   * Gets the message displayed when no text is selected.
+   *
+   * @return \Drupal\Core\StringTranslation\TranslatableMarkup
+   *   The message.
+   */
+  protected function getNoSelectedTextMessage(): TranslatableMarkup {
+    return $this->t('You must select some text before you can use this tool.');
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function buildCkEditorModalForm(array $form, FormStateInterface $form_state, array $settings = []) {
-    $editor_id = $this->requestStack->getParentRequest()->get('editor_id');
+    $editor_id = $settings['editor_id'] ?? NULL;
+    if (!$editor_id) {
+      $request = $this->requestStack->getCurrentRequest();
+      if ($request) {
+        $editor_id = $request->query->get('editor_id') ?? ($request->request->get('editor_id') ?? $request->attributes->get('editor_id'));
+        if (!$editor_id && method_exists($request, 'getPayload')) {
+          $editor_id = $request->getPayload()->get('editor_id');
+        }
+      }
+    }
+    if (!$editor_id) {
+      $parent_request = $this->requestStack->getParentRequest();
+      if ($parent_request) {
+        $editor_id = $parent_request->query->get('editor_id') ?? ($parent_request->request->get('editor_id') ?? $parent_request->attributes->get('editor_id'));
+        if (!$editor_id && method_exists($parent_request, 'getPayload')) {
+          $editor_id = $parent_request->getPayload()->get('editor_id');
+        }
+      }
+    }
     $storage = $form_state->getStorage();
     if ($this->needsSelectedText()) {
       if (empty($storage['selected_text'])) {
         return [
-          '#markup' => '<p>' . $this->t('You must select some text before you can summarize it.') . '</p>',
+          '#markup' => '<p>' . $this->getNoSelectedTextMessage() . '</p>',
         ];
       }
     }
@@ -225,12 +255,17 @@ abstract class AiCKEditorPluginBase extends PluginBase implements AiCKEditorPlug
       '#weight' => -9999,
     ];
     if ($this->needsSelectedText()) {
+      $selected_text = $storage['selected_text'] ?? '';
+      if (is_string($selected_text) && $selected_text !== '') {
+        $selected_text = Html::decodeEntities($selected_text);
+        $selected_text = str_replace("\xC2\xA0", ' ', $selected_text);
+      }
+
       $form['selected_text'] = [
         '#type' => 'textarea',
         '#title' => $this->getSelectedTextLabel(),
         '#disabled' => TRUE,
-        '#default_value' => $storage['selected_text'],
-        // Ensure this comes before the generate button.
+        '#default_value' => $selected_text,
         '#weight' => 5,
       ];
     }

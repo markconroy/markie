@@ -265,7 +265,7 @@ abstract class FieldWidgetFormActionBase extends FieldWidgetActionBase implement
     $form[$widgetId]['#attributes']['data-dialog-options'] = Json::encode([
       'width' => '80%',
     ]);
-    $form[$widgetId]['#attached']['library'] = array_merge($form[$widgetId]['#attached']['library'], [
+    $form[$widgetId]['#attached']['library'] = array_merge($form[$widgetId]['#attached']['library'] ?? [], [
       'core/drupal.ajax',
       'core/drupal.dialog.ajax',
       'field_widget_actions/commands',

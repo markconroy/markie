@@ -12,6 +12,7 @@ use Drupal\ai\OperationType\OperationTypeInterface;
 #[OperationType(
   id: 'image_and_audio_to_video',
   label: new TranslatableMarkup('Image and Audio to Video'),
+  description: new TranslatableMarkup('Combine an image and audio track to create a video, such as animating a photo with voiceover.')
 )]
 interface ImageAndAudioToVideoInterface extends OperationTypeInterface {
 

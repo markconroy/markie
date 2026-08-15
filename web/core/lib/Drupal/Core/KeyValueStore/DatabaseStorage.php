@@ -122,6 +122,24 @@ class DatabaseStorage extends StorageBase {
   }
 
   /**
+   * {@inheritdoc}
+   */
+  public function getAllKeys(): iterable {
+    try {
+      $values = $this->connection->query(
+        'SELECT [name] FROM {' . $this->connection->escapeTable($this->table) . '} WHERE [collection] = :collection',
+        [
+          ':collection' => $this->collection,
+        ])->fetchCol();
+      return $values;
+    }
+    catch (\Exception $e) {
+      $this->catchException($e);
+    }
+    return [];
+  }
+
+  /**
    * Saves a value for a given key.
    *
    * This will be called by set() within a try block.
@@ -132,12 +150,13 @@ class DatabaseStorage extends StorageBase {
    *   The data to store.
    */
   protected function doSet($key, $value) {
-    $this->connection->merge($this->table)
-      ->keys([
-        'name' => $key,
+    $this->connection->upsert($this->table)
+      ->key(['collection', 'name'])
+      ->fields([
         'collection' => $this->collection,
+        'name' => $key,
+        'value' => $this->serializer->encode($value),
       ])
-      ->fields(['value' => $this->serializer->encode($value)])
       ->execute();
   }
 
@@ -152,6 +171,60 @@ class DatabaseStorage extends StorageBase {
       // If there was an exception, try to create the table.
       if ($this->ensureTableExists()) {
         $this->doSet($key, $value);
+      }
+      else {
+        throw $e;
+      }
+    }
+  }
+
+  /**
+   * Saves key/value pairs.
+   *
+   * This will be called by ::setMultiple() within a try block.
+   *
+   * @param array $data
+   *   An associative array of key/value pairs.
+   */
+  protected function doSetMultiple(array $data): void {
+    $query = $this->connection->upsert($this->table)
+      ->key(['collection', 'name']);
+
+    $fieldsSet = FALSE;
+    foreach ($data as $key => $value) {
+      if (!$fieldsSet) {
+        $query->fields([
+          'collection' => $this->collection,
+          'name' => $key,
+          'value' => $this->serializer->encode($value),
+        ]);
+        $fieldsSet = TRUE;
+        continue;
+      }
+      $query->values([
+        'collection' => $this->collection,
+        'name' => $key,
+        'value' => $this->serializer->encode($value),
+      ]);
+    }
+
+    $query->execute();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setMultiple(array $data): void {
+    if (empty($data)) {
+      return;
+    }
+    try {
+      $this->doSetMultiple($data);
+    }
+    catch (\Exception $e) {
+      // If there was an exception, try to create the table.
+      if ($this->ensureTableExists()) {
+        $this->doSetMultiple($data);
       }
       else {
         throw $e;

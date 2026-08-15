@@ -27,6 +27,20 @@ function backup_migrate_update_50001() {
 }
 
 /**
+ * Add encrypt and encrypt_password default values to existing Schedules.
+ */
+function backup_migrate_update_50002() {
+  // Update existing Schedule config entities to include the new fields.
+  $storage = \Drupal::entityTypeManager()->getStorage('backup_migrate_schedule');
+  $entities = $storage->loadMultiple();
+  foreach ($entities as $entity) {
+    $entity->encrypt = FALSE;
+    $entity->encrypt_password = '';
+    $entity->save();
+  }
+}
+
+/**
  * Implements hook_uninstall().
  */
 function backup_migrate_uninstall($is_syncing) {

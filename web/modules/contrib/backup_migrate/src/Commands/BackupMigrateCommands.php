@@ -79,7 +79,9 @@ class BackupMigrateCommands extends DrushCommands {
     if (isset($profile_settings_options['#options'])) {
       $profile_settings_options = array_keys($profile_settings_options['#options']);
       $profile_settings_choice = $this->io()->choice(dt("Choose the backup settings profile."), $profile_settings_options);
-      $config = SettingsProfile::load($profile_settings_options[$profile_settings_choice])->get('config');
+      // FIX: io()->choice() returns the selected VALUE (machine name), not
+      // its numeric index, so load directly by the returned choice.
+      $config = SettingsProfile::load($profile_settings_choice)->get('config');
     }
 
     $destination_options = DrupalConfigHelper::getDestinationSelector($bam, 'Backup Destination')['#options'];
@@ -87,7 +89,9 @@ class BackupMigrateCommands extends DrushCommands {
     $destination_options = array_keys($destination_options);
     $destination_choice = $this->io()->choice(dt("Choose the destination."), $destination_options);
 
-    backup_migrate_perform_backup($source_options[$source_choice], $destination_options[$destination_choice], $config);
+    // FIX: use the returned choice values directly instead of re-indexing
+    // $source_options / $destination_options with them.
+    backup_migrate_perform_backup($source_choice, $destination_choice, $config);
   }
 
   /**
@@ -177,6 +181,9 @@ class BackupMigrateCommands extends DrushCommands {
     $rows = [[dt('Machine name'), dt('Backup Source'), dt('Type')]];
     foreach ($storage->getQuery()->accessCheck(FALSE)->execute() as $key) {
       $entity = $storage->load($key);
+      // FIX: reset $info each iteration so a source without a plugin
+      // doesn't inherit the previous row's plugin title.
+      $info = NULL;
       if ($plugin = $entity->getPlugin()) {
         $info = $plugin->getPluginDefinition();
       }
@@ -195,20 +202,37 @@ class BackupMigrateCommands extends DrushCommands {
    *
    * @command backup_migrate:schedule_backup
    * @aliases schedule_backup
+   * @option force Force a scheduled backup to run, regardless of whether it should run yet.
    * @usage backup_migrate:schedule_backup
+   *   Perform one of the scheduled backups.
    */
-  public function runScheduledBackup() {
+  public function runScheduledBackup(array $options = []) {
     $bam = backup_migrate_get_service_object();
 
     $schedules = Schedule::loadMultiple();
+    $schedules_id = [];
     foreach ($schedules as $schedule) {
       if ($schedule->get('enabled')) {
         $schedules_id[] = $schedule->id();
       }
     }
+
+    // FIX: guard against no enabled schedules, which previously left
+    // $schedules_id undefined and caused a fatal error further down.
+    if (empty($schedules_id)) {
+      $this->io()->warning(dt('There are no enabled schedules to run.'));
+      return;
+    }
+
     $schedule_choice = $this->io()->choice(dt("Choose the schedule backup you want to run."), $schedules_id);
 
-    $schedules[$schedules_id[$schedule_choice]]->run($bam);
+    // Should the scheduled backup be forced to run now, regardless of the
+    // timing?
+    $force = !empty($options['force']);
+
+    // FIX: io()->choice() returns the selected VALUE (schedule id), and
+    // $schedules is already keyed by entity id, so index it directly.
+    $schedules[$schedule_choice]->run($bam, $force);
   }
 
 }

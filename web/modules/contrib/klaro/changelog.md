@@ -1,6 +1,25 @@
-**V.3.0.10**
+
+**V.3.1.1**
+
+- Issue #3484827: Add on_init, on_accept, on_decline callbacks per service for Google Consent Mode v2 support
+- Issue #3484827: Add services gtm_consent_mode, ga_consent_mode, google_ads_consent_mode for
+  Google Tag Manager, Google Analytics and Google Ads with Google Consent Mode v2 (disabled by default)
+- Issue #3551342: PHP Warning: Undefined array key "#formatter" in klaro_preprocess_field() [Bugfix]
+- Issue #3578931: KlaroHelper executes an entity query multiple times per request
+
+**V.3.1.0**
+
+- Issue #3586970: Make URL scanning more resilient to invalid URLs [Bugfix]
+- Issue #3568940: Required apps still get blocked on first load when Process final HTML is active [Bugfix]
+
+**V.3.1.0-RC2**
 
 - Issue #3584237: Update-Hook breaks services and produces WPOD [Bugfix]
+
+**V.3.1.0-RC1**
+
+- Issue #3504281: Option optOut is broken - scripts will not be loaded [Bugfix]
+- Issue #3508237: Bugfix for #536: Check for optOut state while contextual rendering [Bugfix]
 
 **V.3.0.9**
 

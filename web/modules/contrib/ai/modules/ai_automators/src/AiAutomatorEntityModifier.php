@@ -269,8 +269,26 @@ class AiAutomatorEntityModifier {
     $value = $rule->checkIfEmpty($value, $automatorConfig);
     $value = $this->applyPostCheckIfEmpty($rule, $entity, $value, $automatorConfig);
 
-    // Determine if should process based on isEmpty check.
-    $shouldProcess = $this->isValueEmptyAfterCheck($value);
+    $shouldProcess = FALSE;
+
+    // If the field is empty, always process.
+    if ($this->isValueEmptyAfterCheck($value)) {
+      $shouldProcess = TRUE;
+    }
+    // If edit mode is on, check for changes in the base field.
+    elseif (!empty($automatorConfig['edit_mode'])) {
+      // Token mode does not require a base field, but when one is configured
+      // use it for change detection.
+      if (empty($automatorConfig['base_field'])) {
+        $shouldProcess = TRUE;
+      }
+      else {
+        $originalEntity = $this->getOriginalEntity($entity);
+        $original = $originalEntity ? json_encode($originalEntity->get($automatorConfig['base_field'])->getValue()) : NULL;
+        $current = json_encode($entity->get($automatorConfig['base_field'])->getValue());
+        $shouldProcess = $current !== $original;
+      }
+    }
 
     // Dispatch event to allow modifying the decision after isEmpty check.
     $event = new ShouldProcessFieldEvent($entity, $fieldDefinition, $automatorConfig, $shouldProcess);

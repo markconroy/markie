@@ -58,8 +58,8 @@ class ProviderModelDependencyConstraintValidatorTest extends TestCase {
    */
   public function testValidateWithBothFieldsSet(): void {
     $value = [
-      'provider_id' => 'openai',
-      'model_id' => 'gpt-4',
+      'provider' => 'openai',
+      'model' => 'gpt-4',
     ];
 
     $this->context->expects($this->never())->method('addViolation');
@@ -91,9 +91,9 @@ class ProviderModelDependencyConstraintValidatorTest extends TestCase {
   /**
    * @covers ::validate
    */
-  public function testValidateWithModelIdButNoProviderId(): void {
+  public function testValidateWithModelButNoProvider(): void {
     $value = [
-      'model_id' => 'gpt-4',
+      'model' => 'gpt-4',
     ];
 
     $this->context->expects($this->once())
@@ -106,9 +106,9 @@ class ProviderModelDependencyConstraintValidatorTest extends TestCase {
   /**
    * @covers ::validate
    */
-  public function testValidateWithProviderIdButNoModelId(): void {
+  public function testValidateWithProviderButNoModel(): void {
     $value = [
-      'provider_id' => 'openai',
+      'provider' => 'openai',
     ];
 
     $this->context->expects($this->once())
@@ -121,10 +121,10 @@ class ProviderModelDependencyConstraintValidatorTest extends TestCase {
   /**
    * @covers ::validate
    */
-  public function testValidateWithEmptyStringValues(): void {
+  public function testValidateWithEmptyStrings(): void {
     $value = [
-      'provider_id' => '',
-      'model_id' => '',
+      'provider' => '',
+      'model' => '',
     ];
 
     $this->context->expects($this->never())->method('addViolation');
@@ -150,10 +150,10 @@ class ProviderModelDependencyConstraintValidatorTest extends TestCase {
   /**
    * @covers ::validate
    */
-  public function testValidateWithEmptyModelIdButSetProviderId(): void {
+  public function testValidateWithEmptyModelButSetProvider(): void {
     $value = [
-      'provider_id' => 'openai',
-      'model_id' => '',
+      'provider' => 'openai',
+      'model' => '',
     ];
 
     $this->context->expects($this->once())
@@ -166,10 +166,10 @@ class ProviderModelDependencyConstraintValidatorTest extends TestCase {
   /**
    * @covers ::validate
    */
-  public function testValidateWithEmptyProviderIdButSetModelId(): void {
+  public function testValidateWithEmptyProviderButSetModel(): void {
     $value = [
-      'provider_id' => '',
-      'model_id' => 'gpt-4',
+      'provider' => '',
+      'model' => 'gpt-4',
     ];
 
     $this->context->expects($this->once())
@@ -182,10 +182,10 @@ class ProviderModelDependencyConstraintValidatorTest extends TestCase {
   /**
    * @covers ::validate
    */
-  public function testValidateWithNullProviderIdButSetModelId(): void {
+  public function testValidateWithNullProviderButSetModel(): void {
     $value = [
-      'provider_id' => NULL,
-      'model_id' => 'gpt-4',
+      'provider' => NULL,
+      'model' => 'gpt-4',
     ];
 
     $this->context->expects($this->once())
@@ -198,10 +198,10 @@ class ProviderModelDependencyConstraintValidatorTest extends TestCase {
   /**
    * @covers ::validate
    */
-  public function testValidateWithNullModelIdButSetProviderId(): void {
+  public function testValidateWithNullModelButSetProvider(): void {
     $value = [
-      'provider_id' => 'openai',
-      'model_id' => NULL,
+      'provider' => 'openai',
+      'model' => NULL,
     ];
 
     $this->context->expects($this->once())

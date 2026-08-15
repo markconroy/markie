@@ -390,15 +390,7 @@ class MyModuleSettingsForm extends ConfigFormBase {
   }
 
   public function submitForm(array &$form, FormStateInterface $form_state): void {
-    $value = $form_state->getValue('chat_provider');
-
-    // Convert element format to schema format.
-    $provider_config = [
-      'use_default' => empty($value['provider']),
-      'provider_id' => $value['provider'] ?? '',
-      'model_id' => $value['model'] ?? '',
-      'configuration' => $value['config'] ?? [],
-    ];
+    $provider_config = $form_state->getValue('chat_provider');
 
     $this->config('my_module.settings')
       ->set('chat_provider', $provider_config)
@@ -417,9 +409,9 @@ The `ai.provider_config` schema has the following fields:
 | Field | Type | Description |
 |-------|------|-------------|
 | `use_default` | boolean | Whether to use the system's default provider for the operation type. |
-| `provider_id` | string | The plugin ID of the AI provider (e.g., `openai`, `anthropic`). |
-| `model_id` | string | The model identifier (e.g., `gpt-4`, `claude-3-opus`). |
-| `configuration` | mapping | Provider-specific configuration parameters (e.g., temperature, max_tokens). |
+| `provider` | string | The plugin ID of the AI provider (e.g., `openai`, `anthropic`). |
+| `model` | string | The model identifier (e.g., `gpt-4`, `claude-3-opus`). |
+| `config` | mapping | Provider-specific configuration parameters (e.g., temperature, max_tokens). |
 
 ### Default Configuration Example
 
@@ -429,16 +421,16 @@ In your module's install configuration (`my_module/config/install/my_module.sett
 # Use system default provider
 chat_provider:
   use_default: true
-  provider_id: ''
-  model_id: ''
-  configuration: {}
+  provider: ''
+  model: ''
+  config: {}
 
 # Use specific provider
 embeddings_provider:
   use_default: false
-  provider_id: 'openai'
-  model_id: 'text-embedding-3-small'
-  configuration:
+  provider: 'openai'
+  model: 'text-embedding-3-small'
+  config:
     dimensions: 1536
 ```
 
@@ -461,9 +453,9 @@ if (!empty($provider_config['use_default'])) {
   $configuration = [];
 }
 else {
-  $provider_id = $provider_config['provider_id'];
-  $model_id = $provider_config['model_id'];
-  $configuration = $provider_config['configuration'] ?? [];
+  $provider_id = $provider_config['provider'];
+  $model_id = $provider_config['model'];
+  $configuration = $provider_config['config'] ?? [];
 }
 
 if ($provider_id) {

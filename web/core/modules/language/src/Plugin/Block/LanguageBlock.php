@@ -13,7 +13,6 @@ use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\language\Plugin\Derivative\LanguageBlock as LanguageBlockDeriver;
 
 /**
@@ -64,19 +63,6 @@ class LanguageBlock extends BlockBase implements ContainerFactoryPluginInterface
   /**
    * {@inheritdoc}
    */
-  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
-    return new static(
-      $configuration,
-      $plugin_id,
-      $plugin_definition,
-      $container->get('language_manager'),
-      $container->get('path.matcher')
-    );
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   protected function blockAccess(AccountInterface $account) {
     $access = $this->languageManager->isMultilingual() ? AccessResult::allowed() : AccessResult::forbidden();
     return $access->addCacheTags(['config:configurable_language_list']);
@@ -112,7 +98,7 @@ class LanguageBlock extends BlockBase implements ContainerFactoryPluginInterface
       $build = [
         '#theme' => 'links__language_block',
         '#links' => $links->links,
-        '#attributes' => [
+        '#wrapper_attributes' => [
           'class' => [
             "language-switcher-{$links->method_id}",
           ],

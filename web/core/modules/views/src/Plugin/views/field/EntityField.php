@@ -30,7 +30,8 @@ use Drupal\views\Plugin\views\display\DisplayPluginBase;
 use Drupal\views\Plugin\DependentWithRemovalPluginInterface;
 use Drupal\views\ResultRow;
 use Drupal\views\ViewExecutable;
-use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\views\ViewsFormHelperTrait;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 /**
  * A field that displays entity field data.
@@ -42,6 +43,7 @@ class EntityField extends FieldPluginBase implements CacheableDependencyInterfac
 
   use FieldAPIHandlerTrait;
   use PluginDependencyTrait;
+  use ViewsFormHelperTrait;
 
   /**
    * An array to store field renderable arrays for use by renderItems().
@@ -168,7 +170,20 @@ class EntityField extends FieldPluginBase implements CacheableDependencyInterfac
    * @param \Drupal\Core\Entity\EntityTypeBundleInfoInterface $entity_type_bundle_info
    *   The entity type bundle info service.
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityTypeManagerInterface $entity_type_manager, FormatterPluginManager $formatter_plugin_manager, FieldTypePluginManagerInterface $field_type_plugin_manager, LanguageManagerInterface $language_manager, RendererInterface $renderer, EntityRepositoryInterface $entity_repository, EntityFieldManagerInterface $entity_field_manager, EntityTypeBundleInfoInterface $entity_type_bundle_info) {
+  public function __construct(
+    array $configuration,
+    $plugin_id,
+    $plugin_definition,
+    EntityTypeManagerInterface $entity_type_manager,
+    #[Autowire(service: 'plugin.manager.field.formatter')]
+    FormatterPluginManager $formatter_plugin_manager,
+    FieldTypePluginManagerInterface $field_type_plugin_manager,
+    LanguageManagerInterface $language_manager,
+    RendererInterface $renderer,
+    EntityRepositoryInterface $entity_repository,
+    EntityFieldManagerInterface $entity_field_manager,
+    EntityTypeBundleInfoInterface $entity_type_bundle_info,
+  ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
 
     $this->entityTypeManager = $entity_type_manager;
@@ -186,25 +201,6 @@ class EntityField extends FieldPluginBase implements CacheableDependencyInterfac
       $this->definition['field_name'] = $this->definition['entity field'];
     }
 
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
-    return new static(
-      $configuration,
-      $plugin_id,
-      $plugin_definition,
-      $container->get('entity_type.manager'),
-      $container->get('plugin.manager.field.formatter'),
-      $container->get('plugin.manager.field.field_type'),
-      $container->get('language_manager'),
-      $container->get('renderer'),
-      $container->get('entity.repository'),
-      $container->get('entity_field.manager'),
-      $container->get('entity_type.bundle.info')
-    );
   }
 
   /**
@@ -512,7 +508,7 @@ class EntityField extends FieldPluginBase implements CacheableDependencyInterfac
       '#options' => $formatters,
       '#default_value' => $this->options['type'],
       '#ajax' => [
-        'url' => views_ui_build_form_url($form_state),
+        'url' => $this->buildFormUrl($form_state),
       ],
       '#submit' => [[$this, 'submitTemporaryForm']],
       '#executes_submit_callback' => TRUE,

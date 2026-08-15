@@ -109,7 +109,6 @@ class Connection extends DatabaseConnection implements SupportsTemporaryTablesIn
 
     try {
       if (\PHP_VERSION_ID >= 80400) {
-        // @phpstan-ignore new.noConstructor
         $sqlite = new SqliteConnection('sqlite:' . $connection_options['database'], '', '', $connection_options['pdo']);
       }
       else {
@@ -221,7 +220,8 @@ class Connection extends DatabaseConnection implements SupportsTemporaryTablesIn
             unlink($this->connectionOptions['database'] . '-' . $prefix);
           }
         }
-        catch (\Exception) {
+        // phpcs:ignore SlevomatCodingStandard.Exceptions.RequireNonCapturingCatch.NonCapturingCatchRequired
+        catch (\Exception $e) {
           // Ignore the exception and continue. There is nothing we can do here
           // to report the error or fail safe.
         }
@@ -402,7 +402,7 @@ class Connection extends DatabaseConnection implements SupportsTemporaryTablesIn
    * {@inheritdoc}
    */
   public function queryTemporary($query, array $args = [], array $options = []) {
-    $tablename = 'db_temporary_' . uniqid();
+    $tablename = 'db_temporary_' . bin2hex(random_bytes(12));
 
     $this->query('CREATE TEMPORARY TABLE ' . $tablename . ' AS ' . $query, $args, $options);
 

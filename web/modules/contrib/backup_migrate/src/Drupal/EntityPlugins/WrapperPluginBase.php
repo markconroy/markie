@@ -25,6 +25,7 @@ abstract class WrapperPluginBase extends PluginBase implements WrapperPluginInte
    * Get the Backup and Migrate plugin object.
    *
    * @return Drupal\backup_migrate\Core\Plugin\PluginInterface|null
+   *   The requested integer.
    */
   public function getObject() {
     // If the class to wrap was specified in the annotation then add that class.
@@ -73,6 +74,7 @@ abstract class WrapperPluginBase extends PluginBase implements WrapperPluginInte
    * Return a Backup and Migrate Config object with the plugin configuration.
    *
    * @return \Drupal\backup_migrate\Core\Config\Config
+   *   The return value.
    */
   public function getConfig() {
     return new Config($this->getConfiguration());

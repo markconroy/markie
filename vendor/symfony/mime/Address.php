@@ -50,6 +50,10 @@ final class Address
         $this->address = trim($address);
         $this->name = trim(str_replace(["\n", "\r"], '', $name));
 
+        if (preg_match('/[\x00-\x1F\x7F]/', $this->address)) {
+            throw new InvalidArgumentException('Email address contains control characters.');
+        }
+
         if (!self::$validator->isValid($this->address, class_exists(MessageIDValidation::class) ? new MessageIDValidation() : new RFCValidation())) {
             throw new RfcComplianceException(\sprintf('Email "%s" does not comply with addr-spec of RFC 2822.', $address));
         }
@@ -83,7 +87,7 @@ final class Address
             return '';
         }
 
-        return \sprintf('"%s"', preg_replace('/"/u', '\"', $this->getName()));
+        return \sprintf('"%s"', preg_replace('/["\\\\]/', '\\\\$0', $this->getName()));
     }
 
     public static function create(self|string $address): self

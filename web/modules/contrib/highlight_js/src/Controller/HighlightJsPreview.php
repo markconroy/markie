@@ -41,7 +41,7 @@ class HighlightJsPreview extends ControllerBase {
    */
   public static function create(ContainerInterface $container) {
     return new static(
-      $container->get('plugin.manager.ckedito5_highlight_js'),
+      $container->get('plugin.manager.ckeditor5_highlight_js'),
       $container->get('renderer')
     );
   }

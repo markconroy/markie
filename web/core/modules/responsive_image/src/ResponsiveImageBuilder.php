@@ -139,7 +139,7 @@ class ResponsiveImageBuilder {
    * @code
    * <source [...] sizes="(min-width: 40em) 80vw, 100vw" srcset="a1.jpeg 300w 1x, a2.jpeg 600w 1x, a3.jpeg 1200w 1x, b1.jpeg 250w 2x, b2.jpeg 680w 2x, b3.jpeg 1240w 2x" />
    * @endcode
-   * which is illegal. So the solution is to merge both arrays into one and
+   * which is invalid. So the solution is to merge both arrays into one and
    * disregard the multiplier. Which, in this case, would output
    * @code
    * <source [...] sizes="(min-width: 40em) 80vw, 100vw" srcset="b1.jpeg 250w, a1.jpeg 300w, a2.jpeg 600w, b2.jpeg 680w, a3.jpeg 1200w,  b3.jpeg 1240w" />
@@ -217,7 +217,8 @@ class ResponsiveImageBuilder {
           // source will be used. We multiply it by 100 so multipliers with up
           // to two decimals can be used.
           $srcset[intval(mb_substr($multiplier, 0, -1) * 100)] = $this->getImageStyleUrl($image_style_mapping['image_mapping'], $variables['uri']) . ' ' . $multiplier;
-          $dimensions = $this->getImageDimensions($image_style_mapping['image_mapping'], ['width' => $width, 'height' => $height], $variables['uri']);
+          $dimensions = $this->getImageDimensions($image_style_mapping['image_mapping'],
+            ['width' => $width, 'height' => $height], $variables['uri']);
           break;
       }
     }

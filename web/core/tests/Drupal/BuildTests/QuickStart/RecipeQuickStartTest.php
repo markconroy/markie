@@ -45,20 +45,12 @@ class RecipeQuickStartTest extends BuildTestBase {
   protected TestDatabase $testDb;
 
   /**
-   * The Drupal root directory.
-   *
-   * @var string
-   */
-  protected string $root;
-
-  /**
    * {@inheritdoc}
    */
   protected function setUp(): void {
     parent::setUp();
     $php_executable_finder = new PhpExecutableFinder();
     $this->php = (string) $php_executable_finder->find();
-    $this->root = dirname(substr(__DIR__, 0, -strlen(__NAMESPACE__)), 2);
     if (!is_writable("{$this->root}/sites/simpletest")) {
       $this->markTestSkipped('This test requires a writable sites/simpletest directory');
     }
@@ -94,7 +86,7 @@ class RecipeQuickStartTest extends BuildTestBase {
     // Install a site using the standard recipe to ensure the one time login
     // link generation works.
 
-    $script = $this->root . '/core/scripts/drupal';
+    $script = $this->root . '/core/scripts/dr';
     $install_command = [
       $this->php,
       $script,

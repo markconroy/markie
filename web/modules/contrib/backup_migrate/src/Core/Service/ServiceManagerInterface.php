@@ -13,9 +13,11 @@ interface ServiceManagerInterface {
    * Retrieve a service from the locator.
    *
    * @param string $type
+   *   The type.
    *   The service type identifier.
    *
    * @return mixed
+   *   The return value.
    */
   public function get($type);
 
@@ -23,6 +25,7 @@ interface ServiceManagerInterface {
    * Get an array of keys for all available services.
    *
    * @return array
+   *   A render or configuration array.
    */
   public function keys();
 
@@ -30,8 +33,10 @@ interface ServiceManagerInterface {
    * Inject the services in this locator into the given plugin.
    *
    * @param object $plugin
+   *   The plugin.
    *
    * @return mixed
+   *   The return value.
    */
   public function addClient($plugin);
 

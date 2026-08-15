@@ -310,6 +310,7 @@ final class AiProviderPluginManager extends DefaultPluginManager {
         'label' => $definition['label'] instanceof TranslatableMarkup ? $definition['label']->render() : (string) $definition['label'],
         'actual_type' => $definition['actual_type'] ?? $id,
         'filter' => $definition['filter'] ?? [],
+        'description' => $definition['description'] ?? NULL,
       ];
     }
 

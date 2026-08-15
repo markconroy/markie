@@ -7,7 +7,7 @@ use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Plugin\DefaultPluginManager;
 
 /**
- *
+ * Provides the destination plugin manager class.
  *
  * @package Drupal\backup_migrate\Drupal\Destination
  */

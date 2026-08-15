@@ -36,7 +36,7 @@ use Drupal\taxonomy\Hook\TaxonomyThemeHooks;
  * @see https://www.drupal.org/node/3542527
  */
 function template_preprocess_taxonomy_term(&$variables): void {
-  @trigger_error(__FUNCTION__ . ' is deprecated in drupal:11.3.0 and is removed from drupal:13.0.0. Use \Drupal::service(TaxonomyThemeHooks::class)->preprocessTaxonomyTerm($variables); instead. See https://www.drupal.org/node/3542527', E_USER_DEPRECATED);
+  @trigger_error(__FUNCTION__ . '() is deprecated in drupal:11.3.0 and is removed from drupal:13.0.0. Use \Drupal::service(TaxonomyThemeHooks::class)->preprocessTaxonomyTerm($variables); instead. See https://www.drupal.org/node/3542527', E_USER_DEPRECATED);
   \Drupal::service(TaxonomyThemeHooks::class)->preprocessTaxonomyTerm($variables);
 }
 
@@ -46,7 +46,6 @@ function template_preprocess_taxonomy_term(&$variables): void {
  * @param \Drupal\taxonomy\Entity\Term $term
  *   A taxonomy term entity.
  *
- * @deprecated in drupal:11.3.0 and is removed from drupal:13.0.0. There is no
  * @deprecated in drupal:11.3.0 and is removed from drupal:13.0.0. There is no
  *   replacement, check the view mode instead during rendering.
  *
@@ -73,8 +72,14 @@ function taxonomy_term_is_page(Term $term) {
  *
  * @param \Drupal\node\NodeInterface $node
  *   The node entity.
+ *
+ * @deprecated in drupal:11.4.0 and is removed from drupal:13.0.0. There
+ *   is no replacement.
+ *
+ * @see https://www.drupal.org/node/3566774
  */
 function taxonomy_build_node_index($node): void {
+  @trigger_error(__FUNCTION__ . '() is deprecated in drupal:11.4.0 and is removed from drupal:13.0.0. There is no replacement. See https://www.drupal.org/node/3566774', E_USER_DEPRECATED);
   // We maintain a denormalized table of term/node relationships, containing
   // only data for current, published nodes.
   if (!\Drupal::config('taxonomy.settings')->get('maintain_index_table') || !(\Drupal::entityTypeManager()->getStorage('node') instanceof SqlContentEntityStorage)) {
@@ -106,9 +111,15 @@ function taxonomy_build_node_index($node): void {
     if (!empty($tid_all)) {
       $connection = \Drupal::database();
       foreach ($tid_all as $tid) {
-        $connection->merge('taxonomy_index')
-          ->keys(['nid' => $node->id(), 'tid' => $tid, 'status' => $node->isPublished()])
-          ->fields(['sticky' => $sticky, 'created' => $node->getCreatedTime()])
+        $connection->upsert('taxonomy_index')
+          ->key(['nid', 'tid'])
+          ->fields([
+            'nid' => $node->id(),
+            'tid' => $tid,
+            'status' => $node->isPublished(),
+            'sticky' => $sticky,
+            'created' => $node->getCreatedTime(),
+          ])
           ->execute();
       }
     }
@@ -120,8 +131,14 @@ function taxonomy_build_node_index($node): void {
  *
  * @param \Drupal\Core\Entity\EntityInterface $node
  *   The node entity.
+ *
+ * @deprecated in drupal:11.4.0 and is removed from drupal:13.0.0. There
+ *   is no replacement.
+ *
+ * @see https://www.drupal.org/node/3566774
  */
 function taxonomy_delete_node_index(EntityInterface $node): void {
+  @trigger_error(__FUNCTION__ . '() is deprecated in drupal:11.4.0 and is removed from drupal:13.0.0. There is no replacement. See https://www.drupal.org/node/3566774', E_USER_DEPRECATED);
   if (\Drupal::config('taxonomy.settings')->get('maintain_index_table')) {
     \Drupal::database()->delete('taxonomy_index')->condition('nid', $node->id())->execute();
   }

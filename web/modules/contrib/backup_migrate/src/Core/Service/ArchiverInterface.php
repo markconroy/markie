@@ -18,30 +18,41 @@ interface ArchiverInterface {
    * be 'zip'.
    *
    * @return string
+   *   The requested string.
    */
   public function getFileExt();
 
   /**
+   * Sets the archive.
+   *
    * @param \Drupal\backup_migrate\Core\File\BackupFileReadableInterface $out
+   *   The out.
    */
   public function setArchive(BackupFileReadableInterface $out);
 
   /**
    * Extract all files to the given directory.
    *
-   * @param $directory
+   * @param mixed $directory
+   *   The directory.
    *
    * @return mixed
+   *   The return value.
    */
   public function extractTo($directory);
 
   /**
+   * Adds a file to the archive.
+   *
    * @param string $real_path
+   *   The real path.
    *   The real path to the file. Can be a stream URI.
    * @param string $base_dir
+   *   The base dir.
    *   The base directory of the path to be removed when the file is added.
    *
-   * @return
+   * @return mixed
+   *   The return value.
    */
   public function addFile($real_path, $base_dir = '');
 
@@ -52,6 +63,7 @@ interface ArchiverInterface {
    * needed.
    *
    * @return mixed
+   *   The return value.
    */
   public function closeArchive();
 

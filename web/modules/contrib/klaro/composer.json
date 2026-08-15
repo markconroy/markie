@@ -13,6 +13,6 @@
     },
     "require": {
         "drupal/core": "^10.2 || ^11",
-        "drupal/klaro_js": "~3.0.0"
+        "drupal/klaro_js": "~3.1.0"
     }
 }

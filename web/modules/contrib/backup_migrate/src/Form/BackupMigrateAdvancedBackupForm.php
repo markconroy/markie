@@ -3,14 +3,34 @@
 namespace Drupal\backup_migrate\Form;
 
 use Drupal\backup_migrate\Drupal\Config\DrupalConfigHelper;
+use Drupal\Component\Render\FormattableMarkup;
+use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Messenger\MessengerInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides a form for performing a 1-click site backup.
  */
 class BackupMigrateAdvancedBackupForm extends FormBase {
+
+  /**
+   * Constructs a BackupMigrateAdvancedBackupForm object.
+   *
+   * @param \Drupal\Core\Extension\ModuleHandlerInterface $moduleHandler
+   *   The module handler.
+   */
+  public function __construct(
+    protected readonly ModuleHandlerInterface $moduleHandler,
+  ) {}
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container) {
+    return new static($container->get('module_handler'));
+  }
 
   /**
    * {@inheritdoc}
@@ -42,10 +62,10 @@ class BackupMigrateAdvancedBackupForm extends FormBase {
       "#tree" => FALSE,
     ];
     $form['source']['source_id'] = DrupalConfigHelper::getSourceSelector($bam, $this->t('Backup Source'));
-    $form['source']['source_id']['#default_value'] = \Drupal::config('backup_migrate.settings')->get('backup_migrate_source_id');
+    $form['source']['source_id']['#default_value'] = $this->config('backup_migrate.settings')->get('backup_migrate_source_id');
 
     $form += DrupalConfigHelper::buildAllPluginsForm($bam->plugins(), 'backup');
-    if (\Drupal::moduleHandler()->moduleExists('token')) {
+    if ($this->moduleHandler->moduleExists('token')) {
       $filename_token = [
         '#theme' => 'token_tree_link',
         '#token_types' => ['site'],
@@ -72,7 +92,7 @@ class BackupMigrateAdvancedBackupForm extends FormBase {
     ];
 
     $form['destination']['destination_id'] = DrupalConfigHelper::getDestinationSelector($bam, $this->t('Backup Destination'));
-    $form['destination']['destination_id']['#default_value'] = \Drupal::config('backup_migrate.settings')->get('backup_migrate_destination_id');
+    $form['destination']['destination_id']['#default_value'] = $this->config('backup_migrate.settings')->get('backup_migrate_destination_id');
 
     $form['quickbackup']['submit'] = [
       '#type' => 'submit',
@@ -103,7 +123,7 @@ class BackupMigrateAdvancedBackupForm extends FormBase {
 
     // Let the plugins validate their own config data.
     if ($plugin_errors = $bam->plugins()->map('configErrors', ['operation' => 'backup'])) {
-      $has_token_module = \Drupal::moduleHandler()->moduleExists('token');
+      $has_token_module = $this->moduleHandler->moduleExists('token');
 
       foreach ($plugin_errors as $plugin_key => $errors) {
         if ($plugin_key == "namer" && isset($errors[0])) {
@@ -112,7 +132,7 @@ class BackupMigrateAdvancedBackupForm extends FormBase {
           }
         }
         foreach ($errors as $error) {
-          $form_state->setErrorByName($plugin_key . '][' . $error->getFieldKey(), $this->t($error->getMessage(), $error->getReplacement()));
+          $form_state->setErrorByName($plugin_key . '][' . $error->getFieldKey(), new FormattableMarkup($error->getMessage(), $error->getReplacement()));
         }
       }
     }

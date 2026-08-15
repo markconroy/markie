@@ -84,7 +84,9 @@ class HelpHooks {
         return ['#markup' => $output];
 
       case 'help.help_topic':
-        $help_home = Url::fromRoute('help.main')->toString();
+        $help_home = Url::fromRoute('help.main')
+          ->setOption('fragment', 'help-topics')
+          ->toString();
         return '<p>' . $this->t('See the <a href=":help_page">Help page</a> for more topics.', [':help_page' => $help_home]) . '</p>';
     }
     return NULL;
@@ -98,6 +100,7 @@ class HelpHooks {
     return [
       'help_section' => [
         'variables' => [
+          'plugin_id' => NULL,
           'title' => NULL,
           'description' => NULL,
           'links' => NULL,
@@ -121,40 +124,6 @@ class HelpHooks {
     // Assume that most users do not need or want to perform contextual actions
     // on the help block, so don't needlessly draw attention to it.
     unset($build['#contextual_links']);
-  }
-
-  /**
-   * Implements hook_modules_uninstalled().
-   */
-  #[Hook('modules_uninstalled')]
-  public function modulesUninstalled(array $modules): void {
-    _help_search_update($modules);
-  }
-
-  /**
-   * Implements hook_themes_uninstalled().
-   */
-  #[Hook('themes_uninstalled')]
-  public function themesUninstalled(array $themes): void {
-    \Drupal::service('plugin.cache_clearer')->clearCachedDefinitions();
-    _help_search_update();
-  }
-
-  /**
-   * Implements hook_modules_installed().
-   */
-  #[Hook('modules_installed')]
-  public function modulesInstalled(array $modules, $is_syncing): void {
-    _help_search_update();
-  }
-
-  /**
-   * Implements hook_themes_installed().
-   */
-  #[Hook('themes_installed')]
-  public function themesInstalled(array $themes): void {
-    \Drupal::service('plugin.cache_clearer')->clearCachedDefinitions();
-    _help_search_update();
   }
 
 }

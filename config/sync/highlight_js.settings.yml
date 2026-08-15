@@ -12,7 +12,6 @@ role_copy_access:
   authenticated: authenticated
   administrator: administrator
 languages:
-  'bash, sh, zsh': 'bash, sh, zsh'
   css: css
   xml: xml
   json: json
@@ -23,7 +22,6 @@ languages:
   yml: yml
   1c: 0
   4d: 0
-  'sap-abap, abap': 0
   abnf: 0
   accesslog: 0
   ada: 0
@@ -43,7 +41,6 @@ languages:
   autohotkey: 0
   autoit: 0
   awk: 0
-  'ballerina, bal': 0
   basic: 0
   bbcode: 0
   blade: 0
@@ -221,7 +218,6 @@ languages:
   sml: 0
   solidity: 0
   spl: 0
-  'stan, stanfuncs': 0
   stata: 0
   iecst: 0
   stylus: 0
@@ -229,7 +225,6 @@ languages:
   supercollider: 0
   svelte: 0
   swift: 0
-  'tcl, tk': 0
   terraform: 0
   tap: 0
   thrift: 0
@@ -254,6 +249,11 @@ languages:
   zenscript: 0
   zephir: 0
   zig: 0
+  bash: 'bash, sh, zsh'
+  abap: 0
+  ballerina: 0
+  stan: 0
+  tcl: 0
 theme: monokai-sublime
 success_bg_transparent: false
 success_bg_color: '#4243b1'

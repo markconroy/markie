@@ -52,6 +52,7 @@ variables:
   OPT_IN_TEST_PREVIOUS_MINOR: 0
   OPT_IN_TEST_NEXT_MINOR: 1
   OPT_IN_TEST_NEXT_MAJOR: 1
+  _CSPELL_WORDS: 'exportables, hzif'
 
 
 ###################################################################################

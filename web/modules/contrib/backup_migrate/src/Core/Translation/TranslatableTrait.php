@@ -14,12 +14,17 @@ namespace Drupal\backup_migrate\Core\Translation;
 trait TranslatableTrait {
 
   /**
-   * @var TranslatorInterface
+   * Stores the value.
+   *
+   * @var TranslatorInterface The translator
    */
   protected $translator;
 
   /**
+   * Sets the translator.
+   *
    * @param TranslatorInterface $translator
+   *   The translator.
    */
   public function setTranslator(TranslatorInterface $translator) {
     $this->translator = $translator;
@@ -28,11 +33,15 @@ trait TranslatableTrait {
   /**
    * Translate the given string if there is a translator service available.
    *
-   * @param $string
-   * @param $replacements
-   * @param $context
+   * @param mixed $string
+   *   The string.
+   * @param mixed $replacements
+   *   The replacements.
+   * @param mixed $context
+   *   The context.
    *
    * @return mixed
+   *   The return value.
    */
   public function t($string, $replacements = [], $context = []) {
     // If there is no translation service available use a passthrough to send

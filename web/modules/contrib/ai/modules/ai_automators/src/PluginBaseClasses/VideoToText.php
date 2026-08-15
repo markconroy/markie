@@ -14,6 +14,7 @@ use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\Utility\Token;
 use Drupal\ai\AiProviderPluginManager;
+use Drupal\ai\Guardrail\AiGuardrailHelper;
 use Drupal\ai\OperationType\Chat\ChatInput;
 use Drupal\ai\OperationType\Chat\ChatMessage;
 use Drupal\ai\OperationType\GenericType\AudioFile;
@@ -105,6 +106,8 @@ class VideoToText extends RuleBase implements ContainerFactoryPluginInterface {
    *   The AI provider form helper.
    * @param \Drupal\ai\Service\PromptJsonDecoder\PromptJsonDecoderInterface $promptJsonDecoder
    *   The prompt json decoder.
+   * @param \Drupal\ai\Guardrail\AiGuardrailHelper $aiGuardrailHelper
+   *   The AI guardrail helper.
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityManager
    *   The entity type manager.
    * @param \Drupal\Core\File\FileSystemInterface $fileSystem
@@ -124,6 +127,7 @@ class VideoToText extends RuleBase implements ContainerFactoryPluginInterface {
     AiProviderPluginManager $pluginManager,
     AiProviderFormHelper $formHelper,
     PromptJsonDecoderInterface $promptJsonDecoder,
+    AiGuardrailHelper $aiGuardrailHelper,
     EntityTypeManagerInterface $entityManager,
     FileSystemInterface $fileSystem,
     Token $token,
@@ -132,7 +136,7 @@ class VideoToText extends RuleBase implements ContainerFactoryPluginInterface {
     EntityFieldManagerInterface $fieldManager,
     EntityTypeBundleInfo $entityTypeBundleInfo,
   ) {
-    parent::__construct($pluginManager, $formHelper, $promptJsonDecoder);
+    parent::__construct($pluginManager, $formHelper, $promptJsonDecoder, $aiGuardrailHelper);
     $this->entityManager = $entityManager;
     $this->fileSystem = $fileSystem;
     $this->token = $token;
@@ -151,6 +155,7 @@ class VideoToText extends RuleBase implements ContainerFactoryPluginInterface {
       $container->get('ai.provider'),
       $container->get('ai.form_helper'),
       $container->get('ai.prompt_json_decode'),
+      $container->get('ai.guardrail_helper'),
       $container->get('entity_type.manager'),
       $container->get('file_system'),
       $container->get('token'),
@@ -219,7 +224,9 @@ class VideoToText extends RuleBase implements ContainerFactoryPluginInterface {
           $input = new ChatInput([
             new ChatMessage('user', $prompt, $this->images),
           ]);
+          $input = $this->applyGuardrailsToInput($input, $automatorConfig);
           $response = $instance->chat($input, $automatorConfig['ai_model'])->getNormalized();
+          $this->assertNotStoppedByGuardrail($input);
           $json = json_decode(str_replace("\n", "", trim(str_replace(['```json', '```'], '', $response->getText()))), TRUE);
           $values = $this->decodeValueArray($json);
           $total = array_merge_recursive($total, $values);

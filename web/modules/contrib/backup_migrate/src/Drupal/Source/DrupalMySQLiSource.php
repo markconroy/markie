@@ -6,24 +6,24 @@ use Drupal\backup_migrate\Core\Source\MySQLiSource;
 use Drupal\backup_migrate\Core\File\BackupFileReadableInterface;
 
 /**
- *
+ * Provides the Drupal MySQLi source class.
  *
  * @package Drupal\backup_migrate\Drupal\Source
  */
 class DrupalMySQLiSource extends MySQLiSource {
 
   /**
-   *
+   * Handles the import from file operation.
    */
   public function importFromFile(BackupFileReadableInterface $file) {
     $num = 0;
 
-    if ($conn = $this->_getConnection()) {
+    if ($conn = $this->getConnection()) {
       // Open (or rewind) the file.
       $file->openForRead();
 
       // Read one line at a time and run the query.
-      while ($line = $this->_readSqlCommand($file)) {
+      while ($line = $this->readSqlCommand($file)) {
         // @todo Why was this commented out?
         // @code
         // if (_backup_migrate_check_timeout()) {

@@ -75,13 +75,20 @@ entity.ai_prompt.collection:
   title: 'Prompt Library'
   description: 'Create and manage reusable AI prompts used throughout the AI ecosystem.'
   route_name: entity.ai_prompt.collection
-  parent: ai.admin_vdb_providers
+  parent: ai.admin_config_infrastructure
 
 entity.ai_prompt_type.collection:
   title: 'AI Prompt Types'
   description: 'Manage AI Prompt Types. These are typically provided by the AI Ecosystem to determine required variables and/or tokens needed for a given AI Prompt.'
   route_name: entity.ai_prompt_type.collection
   parent: entity.ai_prompt.collection
+
+entity.ai_file.collection:
+  title: 'AI Files'
+  description: 'Manage AI Files uploaded to remote AI providers.'
+  route_name: entity.ai_file.collection
+  parent: ai.admin_config_infrastructure
+  weight: 15
 
 ai.external_moderation_settings:
   title: 'AI External Moderation'
@@ -90,7 +97,7 @@ ai.external_moderation_settings:
   route_name: ai.external_moderation_settings
 
 entity.ai_guardrail.collection:
-  title: 'AI Moderation Guardrails'
+  title: 'AI Guardrails'
   description: 'Define guardrails to filter and moderate AI-generated content for safety and quality.'
   route_name: entity.ai_guardrail.collection
   parent: ai.admin_config_safety

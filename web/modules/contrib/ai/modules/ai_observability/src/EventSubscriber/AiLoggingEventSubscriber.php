@@ -121,14 +121,22 @@ class AiLoggingEventSubscriber implements EventSubscriberInterface {
       $payload = $event->getInput();
       if ($payload instanceof InputInterface) {
         $context['metadata']['input'] = AiObservabilityUtils::summarizeAiPayloadData($payload->toString());
-        $context['metadata']['guardrails'] = array_map(function (GuardrailResultInterface $result) {
-          return [
-            'guardrail' => $result->getGuardrailLabel(),
-            'type' => get_class($result),
-            'context' => $result->getContext(),
-            'message' => $result->getMessage(),
-          ];
-        }, $payload->getGuardrailsResults());
+        $guardrails_log = [];
+        foreach ($payload->getAllGuardrailResults() as $mode => $results) {
+          foreach ($results as $result) {
+            if (!$result instanceof GuardrailResultInterface) {
+              continue;
+            }
+            $guardrails_log[] = [
+              'mode' => $mode,
+              'guardrail' => $result->getGuardrailLabel(),
+              'type' => get_class($result),
+              'context' => $result->getContext(),
+              'message' => $result->getMessage(),
+            ];
+          }
+        }
+        $context['metadata']['guardrails'] = $guardrails_log;
       }
 
     }

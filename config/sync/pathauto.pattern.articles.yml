@@ -2,17 +2,18 @@ uuid: e0235aaa-dcba-4865-93a7-4c80bbd84c06
 langcode: en
 status: true
 dependencies:
+  config:
+    - node.type.article
   module:
     - node
 id: articles
 label: 'Node: Article'
 type: 'canonical_entities:node'
-pattern: 'blog/[node:title]'
+pattern: '/blog/[node:title]'
 selection_criteria:
   b4c21cdf-3d17-43b1-bec8-f62c99764610:
     id: 'entity_bundle:node'
     negate: false
-    uuid: b4c21cdf-3d17-43b1-bec8-f62c99764610
     context_mapping:
       node: node
     bundles:

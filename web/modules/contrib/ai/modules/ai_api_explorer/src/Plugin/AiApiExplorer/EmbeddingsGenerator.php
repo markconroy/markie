@@ -116,6 +116,7 @@ final class EmbeddingsGenerator extends AiApiExplorerPluginBase {
 
       // Check if a prompt or image has value.
       if (!empty($prompt) || !empty($image)) {
+        $file_name = NULL;
         // Normalize the input.
         $input = new EmbeddingsInput();
         if ($file = $this->generateFile('image')) {
@@ -125,9 +126,8 @@ final class EmbeddingsGenerator extends AiApiExplorerPluginBase {
           $file->resetMimeTypeFromFileName();
           $input->setImage($file);
         }
-        else {
+        if (!empty($prompt)) {
           $input->setPrompt($prompt);
-          $file_name = NULL;
         }
 
         $embeddings = $provider->embeddings($input, $form_state->getValue('embed_ai_model'), ['ai_api_explorer']);

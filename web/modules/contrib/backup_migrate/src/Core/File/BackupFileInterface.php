@@ -18,7 +18,7 @@ interface BackupFileInterface {
    *   The key for the metadata item.
    *
    * @return mixed
-   *   The value of the metadata for this file.
+   *   *   The value of the metadata for this file.
    */
   public function getMeta($key);
 
@@ -44,7 +44,7 @@ interface BackupFileInterface {
    * Get all meta data as an array.
    *
    * @return array
-   *   An array of key-value pairs for the file metadata.
+   *   *   An array of key-value pairs for the file metadata.
    */
   public function getMetaAll();
 
@@ -52,6 +52,7 @@ interface BackupFileInterface {
    * Set the file name without extension.
    *
    * @param string $name
+   *   The name.
    */
   public function setName($name);
 
@@ -59,6 +60,7 @@ interface BackupFileInterface {
    * Get the file name without extension.
    *
    * @return string
+   *   The requested string.
    */
   public function getName();
 
@@ -66,7 +68,7 @@ interface BackupFileInterface {
    * Get the full filename with extensions.
    *
    * @return string
-   *   The full filename (with extension, without filepath)
+   *   *   The full filename (with extension, without filepath)
    */
   public function getFullName();
 
@@ -84,6 +86,7 @@ interface BackupFileInterface {
    * For example: testfile.txt.gz would return: ['txt', 'gz']
    *
    * @return array
+   *   A render or configuration array.
    */
   public function getExtList();
 
@@ -93,6 +96,7 @@ interface BackupFileInterface {
    * For example: testfile.txt.gz would return: 'gz'
    *
    * @return mixed
+   *   The return value.
    */
   public function getExtLast();
 
@@ -102,6 +106,7 @@ interface BackupFileInterface {
    * For example: testfile.txt.gz would return: 'txt.gz'
    *
    * @return mixed
+   *   The return value.
    */
   public function getExt();
 

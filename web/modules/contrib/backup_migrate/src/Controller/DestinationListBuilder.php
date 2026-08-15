@@ -2,6 +2,7 @@
 
 namespace Drupal\backup_migrate\Controller;
 
+use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Config\Entity\ConfigEntityListBuilder;
 use Drupal\Core\Entity\EntityInterface;
 
@@ -40,13 +41,20 @@ class DestinationListBuilder extends ConfigEntityListBuilder {
    *
    * @param \Drupal\Core\Entity\EntityInterface $entity
    *   The entity the operations are for.
+   * @param \Drupal\Core\Cache\CacheableMetadata|null $cacheability
+   *   The cacheability metadata, if supported by the parent list builder.
    *
    * @return array
    *   The array structure is identical to the return value of
    *   self::getOperations().
    */
-  public function getDefaultOperations(EntityInterface $entity) {
-    $operations = parent::getDefaultOperations($entity);
+  public function getDefaultOperations(EntityInterface $entity, ?CacheableMetadata $cacheability = NULL) {
+    $parent_method = new \ReflectionMethod(parent::class, __FUNCTION__);
+    $arguments = [$entity];
+    if ($parent_method->getNumberOfParameters() > 1) {
+      $arguments[] = $cacheability;
+    }
+    $operations = parent::getDefaultOperations(...$arguments);
     if ($entity->access('backups') && $entity->hasLinkTemplate('backups')) {
       $operations['backups'] = [
         'title' => $this->t('List Backups'),

@@ -3,11 +3,10 @@
 namespace Drupal\ai_test\Plugin\AiProvider;
 
 use Drupal\Component\Serialization\Json;
+use Drupal\Component\Serialization\Yaml;
 use Drupal\Core\Config\ImmutableConfig;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
-use Drupal\Tests\ai\Mock\MockIterator;
-use Drupal\Tests\ai\Mock\MockStreamedChatIterator;
 use Drupal\ai\Attribute\AiProvider;
 use Drupal\ai\Base\AiProviderClientBase;
 use Drupal\ai\OperationType\Chat\ChatInput;
@@ -38,6 +37,10 @@ use Drupal\ai\OperationType\Moderation\ModerationResponse;
 use Drupal\ai\OperationType\SpeechToText\SpeechToTextInput;
 use Drupal\ai\OperationType\SpeechToText\SpeechToTextInterface;
 use Drupal\ai\OperationType\SpeechToText\SpeechToTextOutput;
+use Drupal\ai\OperationType\TextClassification\TextClassificationInput;
+use Drupal\ai\OperationType\TextClassification\TextClassificationInterface;
+use Drupal\ai\OperationType\TextClassification\TextClassificationItem;
+use Drupal\ai\OperationType\TextClassification\TextClassificationOutput;
 use Drupal\ai\OperationType\TextToImage\TextToImageInput;
 use Drupal\ai\OperationType\TextToImage\TextToImageInterface;
 use Drupal\ai\OperationType\TextToImage\TextToImageOutput;
@@ -45,11 +48,12 @@ use Drupal\ai\OperationType\TextToSpeech\TextToSpeechInput;
 use Drupal\ai\OperationType\TextToSpeech\TextToSpeechInterface;
 use Drupal\ai\OperationType\TextToSpeech\TextToSpeechOutput;
 use Drupal\ai\Traits\OperationType\ImageToImageTrait;
+use Drupal\ai_test\Mock\MockIterator;
+use Drupal\ai_test\Mock\MockStreamedChatIterator;
 use Drupal\ai_test\OperationType\Echo\EchoInput;
 use Drupal\ai_test\OperationType\Echo\EchoInterface;
 use Drupal\ai_test\OperationType\Echo\EchoOutput;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\Yaml\Yaml;
 
 /**
  * Plugin implementation of the 'mock' provider.
@@ -67,7 +71,8 @@ class EchoProvider extends AiProviderClientBase implements
   ImageClassificationInterface,
   TextToImageInterface,
   EchoInterface,
-  ImageToImageInterface {
+  ImageToImageInterface,
+  TextClassificationInterface {
 
   use ImageToImageTrait;
 
@@ -114,7 +119,7 @@ class EchoProvider extends AiProviderClientBase implements
    */
   public function getApiDefinition(): array {
     // Load the configuration.
-    return Yaml::parseFile($this->moduleHandler->getModule('ai_test')->getPath() . '/definitions/api_defaults.yml');
+    return Yaml::decode(file_get_contents($this->moduleHandler->getModule('ai_test')->getPath() . '/definitions/api_defaults.yml'));
   }
 
   /**
@@ -152,6 +157,7 @@ class EchoProvider extends AiProviderClientBase implements
       'text_to_speech',
       'moderation',
       'image_classification',
+      'text_classification',
       'echo',
     ];
   }
@@ -374,6 +380,26 @@ class EchoProvider extends AiProviderClientBase implements
   /**
    * {@inheritdoc}
    */
+  public function textClassification(string|TextClassificationInput $input, string $model_id, array $tags = []): TextClassificationOutput {
+    $output = [];
+    $response = [];
+    if ($input instanceof TextClassificationInput) {
+      $labels = $input->getLabels();
+      foreach ($labels as $label) {
+        $output[] = new TextClassificationItem($label, 0.5);
+        $response[] = [
+          'label' => $label,
+          'confidence' => 0.5,
+        ];
+      }
+    }
+
+    return new TextClassificationOutput($output, $response, []);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function echo(string|EchoInput $input, string $model_id, array $options = []): EchoOutput {
     if (!$input instanceof EchoInput) {
       $input = new EchoInput($input);
@@ -403,6 +429,25 @@ class EchoProvider extends AiProviderClientBase implements
     $requests = array_merge($requests, $this->testRequestsToTest($operation_type));
     foreach ($requests as $request) {
       $array = $input->toArray();
+      // Look in the request message for added keys and add them to the request
+      // to match against. This is important for new keys that are added to the
+      // input, to not break older tests.
+      if (isset($request['request']) && is_array($request['request'])
+        && !empty($array['messages'])
+        && isset($request['request']['messages']) && is_array($request['request']['messages'])) {
+        foreach ($array['messages'][0] as $key => $value) {
+          foreach ($request['request']['messages'] as $message_key => $message_value) {
+            if (!array_key_exists($key, $message_value)) {
+              $request['request']['messages'][$message_key][$key] = $value;
+            }
+            // Fix the order of the key in the messages.
+            $request['request']['messages'][$message_key] = array_merge(
+              array_intersect_key($array['messages'][0], $request['request']['messages'][$message_key]),
+              $request['request']['messages'][$message_key]
+            );
+          }
+        }
+      }
       if (isset($request['request']) && is_array($request['request']) && Json::encode($request['request']) === Json::encode($array)) {
         // If the request matches, return the response.
         if (isset($request['response']) && is_array($request['response'])) {
@@ -450,8 +495,8 @@ class EchoProvider extends AiProviderClientBase implements
     $responses = [];
     foreach ($entities as $entity) {
       $responses[] = [
-        'request' => Yaml::parse($entity->get('request')->value),
-        'response' => Yaml::parse($entity->get('response')->value),
+        'request' => Yaml::decode($entity->get('request')->value),
+        'response' => Yaml::decode($entity->get('response')->value),
         'wait' => $entity->get('sleep_time')->value,
       ];
     }
@@ -497,7 +542,7 @@ class EchoProvider extends AiProviderClientBase implements
             if (is_file($file_path)) {
               $file_contents = file_get_contents($file_path);
               if ($file_contents !== FALSE) {
-                $data = Yaml::parse($file_contents);
+                $data = Yaml::decode($file_contents);
                 if (!empty($data)) {
                   $requests[] = $data;
                 }

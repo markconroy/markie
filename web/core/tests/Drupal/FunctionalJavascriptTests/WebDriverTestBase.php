@@ -109,14 +109,6 @@ abstract class WebDriverTestBase extends BrowserTestBase {
         // explaining what the problem is.
         throw new \RuntimeException('Unfinished AJAX requests while tearing down a test');
       }
-
-      $warnings = $this->getSession()->evaluateScript("JSON.parse(sessionStorage.getItem('js_testing_log_test.warnings') || JSON.stringify([]))");
-      foreach ($warnings as $warning) {
-        if (str_starts_with($warning, '[Deprecation]')) {
-          // phpcs:ignore Drupal.Semantics.FunctionTriggerError
-          @trigger_error('Javascript Deprecation:' . substr($warning, 13), E_USER_DEPRECATED);
-        }
-      }
     }
     parent::tearDown();
   }
@@ -144,9 +136,8 @@ abstract class WebDriverTestBase extends BrowserTestBase {
       $json = getenv('MINK_DRIVER_ARGS_WEBDRIVER') ?: parent::getMinkDriverArgs();
       if (!($json === FALSE || $json === '')) {
         $args = json_decode($json, TRUE);
-        if (isset($args[0]) && $args[0] === 'chrome' && !isset($args[1]['goog:chromeOptions']['w3c'])) {
-          // @todo https://www.drupal.org/project/drupal/issues/3421202
-          //   Deprecate defaulting behavior and require w3c to be set.
+        if (isset($args[0]) && $args[0] === 'chrome' && empty($args[1]['goog:chromeOptions']['w3c'])) {
+          @trigger_error('The "w3c" option for Chrome is deprecated in drupal:11.4.0 and will be forced to TRUE in drupal:12.0.0. See https://www.drupal.org/node/3460567', E_USER_DEPRECATED);
           $args[1]['goog:chromeOptions']['w3c'] = FALSE;
         }
         $json = json_encode($args);
@@ -212,6 +203,23 @@ abstract class WebDriverTestBase extends BrowserTestBase {
    */
   public function assertSession($name = NULL) {
     return new WebDriverWebAssert($this->getSession($name), $this->baseUrl);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function drupalGet($path, array $options = [], array $headers = []) {
+    $result = parent::drupalGet($path, $options, $headers);
+
+    // Wait for all requests to finish.
+    $this->getSession()->wait(5000, 'window.drupalActiveXhrCount === 0 || typeof window.drupalActiveXhrCount === "undefined"');
+
+    // Process Javascript deprecations.
+    $driver = $this->getSession()->getDriver();
+    assert($driver instanceof DrupalSelenium2Driver);
+    $driver->processJavascriptDeprecations();
+
+    return $result;
   }
 
   /**

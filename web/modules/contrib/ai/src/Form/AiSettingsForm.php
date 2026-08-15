@@ -195,7 +195,7 @@ class AiSettingsForm extends ConfigFormBase {
     $form['advanced_settings']['allowed_host_wrapper']['allowed_hosts'] = [
       '#type' => 'textarea',
       '#title' => $this->t('Trusted Domains'),
-      '#default_value' => implode("\n", $config->get('allowed_hosts') ?? []),
+      '#default_value' => implode("\n", $this->normalizeAllowedHosts($config->get('allowed_hosts'))),
       '#description' => $this->t('Enter one domain per line. Links and images to trusted domains are not filtered. Examples: `example.com`, `docs.example.com`. Use `*.example.com` to allow all subdomains. Links and images pointing to unlisted domains will be handled according to the setting below.'),
     ];
 
@@ -1057,6 +1057,34 @@ class AiSettingsForm extends ConfigFormBase {
       ->save();
 
     parent::submitForm($form, $form_state);
+  }
+
+  /**
+   * Normalizes allowed hosts config values to a clean list of host strings.
+   *
+   * @param mixed $allowed_hosts
+   *   The raw allowed hosts config value.
+   *
+   * @return string[]
+   *   A cleaned host list.
+   */
+  protected function normalizeAllowedHosts(mixed $allowed_hosts): array {
+    if (is_string($allowed_hosts)) {
+      $allowed_hosts = [$allowed_hosts];
+    }
+    if (!is_array($allowed_hosts)) {
+      return [];
+    }
+
+    $normalized_hosts = array_map(
+      static fn($host): string => trim((string) $host),
+      $allowed_hosts
+    );
+
+    return array_values(array_filter(
+      $normalized_hosts,
+      static fn(string $host): bool => $host !== ''
+    ));
   }
 
   /**

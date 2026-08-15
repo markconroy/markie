@@ -19,9 +19,11 @@ interface TempFileManagerInterface {
    * The new file should be writable.
    *
    * @param string $ext
+   *   The ext.
    *   The file extension for this file (optional)
    *
    * @return \Drupal\backup_migrate\Core\File\BackupFileWritableInterface
+   *   The requested integer.
    */
   public function create($ext = '');
 
@@ -34,11 +36,14 @@ interface TempFileManagerInterface {
    * For example: xxx.mysql would become xxx.mysql.gz.
    *
    * @param \Drupal\backup_migrate\Core\File\BackupFileInterface $file
+   *   The backup file.
    *   The file to add the extension to.
-   * @param $ext
+   * @param mixed $ext
+   *   The ext.
    *   The new file extension.
    *
    * @return \Drupal\backup_migrate\Core\File\BackupFileWritableInterface
+   *   The requested integer.
    *   A new writable backup file with the new extension and all of the metadata
    *   from the previous file.
    */
@@ -52,8 +57,10 @@ interface TempFileManagerInterface {
    * For example: xxx.mysql.gz would become xxx.mysql.
    *
    * @param \Drupal\backup_migrate\Core\File\BackupFileInterface $file
+   *   The backup file.
    *
    * @return \Drupal\backup_migrate\Core\File\BackupFileWritableInterface
+   *   The requested integer.
    *   A new writable backup file with the last extension removed and
    *   all of the metadata from the previous file.
    */

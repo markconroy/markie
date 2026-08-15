@@ -3,11 +3,12 @@
     "description": "Tests Drupal core's PHPStan rules",
     "require-dev": {
         "phpunit/phpunit": "^11.5.50",
-        "phpstan/phpstan": "2.1.32"
+        "phpstan/phpstan": "2.2.1"
     },
     "license": "GPL-2.0-or-later",
     "autoload": {
         "psr-4": {
+            "Drupal\\PHPStan\\ErrorFormatter\\": "ErrorFormatter/",
             "Drupal\\PHPStan\\Rules\\": "Rules/",
             "Drupal\\BuildTests\\": "../Drupal/BuildTests/",
             "Drupal\\FunctionalJavascriptTests\\": "../Drupal/FunctionalJavascriptTests",

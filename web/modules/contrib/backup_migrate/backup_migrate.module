@@ -35,8 +35,11 @@ use Drupal\backup_migrate\Core\Filter\Notify;
  * Back up a source to 1 or more destinations.
  *
  * @param string $source_id
+ *   The source id.
  * @param string|array $destination_id
+ *   The destination id.
  * @param array $config
+ *   The configuration values.
  */
 function backup_migrate_perform_backup($source_id, $destination_id, array $config = []) {
   try {
@@ -56,14 +59,17 @@ function backup_migrate_perform_backup($source_id, $destination_id, array $confi
  * Restore a source from a destination and file id.
  *
  * @param string $source_id
+ *   The source id.
  * @param string|array $destination_id
+ *   The destination id.
  * @param string $file_id
+ *   The file id.
  * @param array $config
+ *   The configuration values.
  */
 function backup_migrate_perform_restore($source_id, $destination_id, $file_id = NULL, array $config = []) {
   $time = \Drupal::time()->getCurrentTime();
   $currentTime = \Drupal::service('date.formatter')->format($time, 'long');
-
 
   try {
     // Retrieve the service.
@@ -72,9 +78,31 @@ function backup_migrate_perform_restore($source_id, $destination_id, $file_id = 
     // Run the backup.
     $bam->restore($source_id, $destination_id, $file_id);
     \Drupal::messenger()->addMessage(t('Restore completed at @time', ['@time' => $currentTime]));
+
+    $destination = $bam->destinations()->get($destination_id);
+    $destination_name = '';
+    if ($destination) {
+      $destination_name = $destination->config()->get('name');
+    }
+
+    $source = $bam->sources()->get($source_id);
+    $source_name = '';
+    if ($source) {
+      $source_name = $source->config()->get('name');
+    }
+
+    $message = 'Restore completed using @file_id from @destination_name into @source_name at @time.';
+
+    \Drupal::logger('backup_migrate')->info($message, [
+      '@file_id' => $file_id,
+      '@time' => $currentTime,
+      '@destination_name' => $destination_name,
+      '@source_name' => $source_name,
+    ]);
   }
   catch (Exception $e) {
     \Drupal::messenger()->addMessage($e->getMessage(), 'error');
+    \Drupal::logger('backup_migrate')->error('Restore failed with following error: @error', ['@error' => $e->getMessage()]);
     return;
   }
 }
@@ -83,11 +111,14 @@ function backup_migrate_perform_restore($source_id, $destination_id, $file_id = 
  * Get a BackupMigrate service object.
  *
  * @param array|null $config
+ *   The configuration values.
  *   An array of configuration arrays, keyed by plugin id.
  * @param array|null $options
+ *   The options.
  *   A keyed array of options.
  *
  * @return \Drupal\backup_migrate\Core\Main\BackupMigrate
+ *   The return value.
  */
 function backup_migrate_get_service_object($config = [], $options = []) {
   static $bam = NULL;
@@ -114,15 +145,22 @@ function backup_migrate_get_service_object($config = [], $options = []) {
  */
 function backup_migrate_backup_migrate_service_object_alter(BackupMigrateInterface &$bam, $options = []) {
   // Add the core Backup and Migrate plugins to the service object.
-  $sources = $bam->sources();
   $destinations = $bam->destinations();
   $plugins = $bam->plugins();
 
   $services = $bam->services();
+  $file_system = \Drupal::service('file_system');
+  $messenger = \Drupal::messenger();
+  $request_stack = \Drupal::service('request_stack');
+  $module_handler = \Drupal::moduleHandler();
+  $token = \Drupal::token();
+  $config_factory = \Drupal::configFactory();
+  $state = \Drupal::state();
+  $mailer = \Drupal::service('backup_migrate.mailer');
 
   // Add a temp file manager which can access the drupal temp directory.
   $services->add('TempFileAdapter',
-    new DrupalTempFileAdapter(\Drupal::service('file_system'), 'temporary://', 'bam')
+    new DrupalTempFileAdapter($file_system, 'temporary://', 'bam')
   );
 
   $services->add('TempFileManager',
@@ -131,7 +169,7 @@ function backup_migrate_backup_migrate_service_object_alter(BackupMigrateInterfa
 
   // Add a logger which prints everything to the browser.
   $services->add('Logger',
-    new DrupalSetMessageLogger()
+    new DrupalSetMessageLogger($messenger)
   );
 
   $services->add('ArchiveReader', new TarArchiveReader());
@@ -146,20 +184,20 @@ function backup_migrate_backup_migrate_service_object_alter(BackupMigrateInterfa
       $destinations->add('download', new DrupalBrowserDownloadDestination(new Config(['name' => t('Download')])));
     }
     // Add an upload destination.
-    $destinations->add('upload', new DrupalBrowserUploadDestination(new Config(['name' => t('Upload')])));
+    $destinations->add('upload', new DrupalBrowserUploadDestination(new Config(['name' => t('Upload')]), $request_stack));
   }
 
   // Add a file naming filter.
-  $plugins->add('namer', new FileNamer());
+  $plugins->add('namer', new FileNamer([], $module_handler, $token));
 
   // Add a compression filter.
-  $plugins->add('compressor', new CompressionFilter());
+  $plugins->add('compressor', new CompressionFilter([], $file_system));
 
   // Add the Encrypt utilities filter.
-  $plugins->add('encrypt', new DrupalEncrypt());
+  $plugins->add('encrypt', new DrupalEncrypt([], $file_system, $messenger));
 
   // Add the Drupal utilities filter.
-  $plugins->add('utils', new DrupalUtils());
+  $plugins->add('utils', new DrupalUtils([], $state));
 
   // Add a file metadata filter.
   $plugins->add('metadata', new MetadataWriter(
@@ -170,8 +208,8 @@ function backup_migrate_backup_migrate_service_object_alter(BackupMigrateInterfa
     ])
   ));
 
-  // Add the Notify email user
-  $plugins->add('notify', new Notify());
+  // Add the Notify email user.
+  $plugins->add('notify', new Notify([], $config_factory, $mailer));
 
   // Add the custom configured sources.
   foreach (Source::loadMultiple() as $source) {
@@ -340,7 +378,7 @@ function backup_migrate_module_version() {
 
 /**
  * Implements hook_mail().
-*/
+ */
 function backup_migrate_mail($key, &$message, $params) {
   if (isset($params['subject'])) {
     $subject = $params['subject'];

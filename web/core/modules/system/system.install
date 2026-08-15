@@ -23,7 +23,7 @@ function system_install(): void {
   if (!$site->get('name')) {
     $site->set('name', 'Drupal');
   }
-  $site->save(TRUE);
+  $site->save();
 
   // Populate the dummy query string added to all CSS and JavaScript files.
   \Drupal::service('asset.query_string')->reset();
@@ -165,4 +165,16 @@ function system_update_11300(): TranslatableMarkup|null {
     return $equivalent_update->toSkipMessage();
   }
   return NULL;
+}
+
+/**
+ * Moved to search_update_11401().
+ */
+function system_update_11400(): void {
+}
+
+/**
+ * Moved to search_update_11402().
+ */
+function system_update_11401(): void {
 }

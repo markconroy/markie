@@ -39,7 +39,7 @@ class DeprecatedAssetsTest extends KernelTestBase {
     // this test.
     ini_set('serialize_precision', -1);
 
-    $this->expectDeprecation("The $extension/$name " . $deprecation_suffix);
+    $this->expectUserDeprecationMessage("The $extension/$name " . $deprecation_suffix);
     $library_definition = $library_discovery->getLibraryByName($extension, $name);
     $this->assertEquals($expected_hashed_library_definition, md5(serialize($library_definition)));
   }
@@ -68,7 +68,7 @@ class DeprecatedAssetsTest extends KernelTestBase {
         'core',
         'js-cookie',
         'asset library is deprecated in Drupal 10.1.0 and will be removed in Drupal 11.0.0. There is no replacement. See https://www.drupal.org/node/3322720',
-        '5d6a84c6143d0fa766cabdb1ff0a270d',
+        '3b099930d08e8faf65d20b45941f3e4a',
       ],
     ];
   }

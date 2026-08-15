@@ -40,7 +40,7 @@ class EntityDeleteForm extends EntityConfirmFormBase {
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $this->entity->delete();
 
-    \Drupal::messenger()->addMessage(
+    $this->messenger()->addMessage(
       $this->t('Deleted @label.', ['@label' => $this->entity->label()])
     );
 

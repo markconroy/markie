@@ -50,6 +50,8 @@ module:
   redirect_404: 0
   responsive_image: 0
   search: 0
+  search_help: 0
+  search_node: 0
   shortcut: 0
   simple_sitemap: 0
   simple_sitemap_engines: 0

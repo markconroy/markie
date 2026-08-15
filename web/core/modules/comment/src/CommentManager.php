@@ -2,7 +2,6 @@
 
 namespace Drupal\comment;
 
-use Drupal\comment\Plugin\Field\FieldType\CommentItemInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityDisplayRepositoryInterface;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
@@ -163,7 +162,7 @@ class CommentManager implements CommentManagerInterface {
     if ($this->authenticatedCanPostComments) {
       // We cannot use the redirect.destination service here because these links
       // sometimes appear on /node and taxonomy listing pages.
-      if ($entity->get($field_name)->getFieldDefinition()->getSetting('form_location') == CommentItemInterface::FORM_SEPARATE_PAGE) {
+      if ($entity->get($field_name)->getFieldDefinition()->getSetting('form_location') == FormLocation::SeparatePage->value) {
         $comment_reply_parameters = [
           'entity_type' => $entity->getEntityTypeId(),
           'entity' => $entity->id(),
@@ -196,7 +195,7 @@ class CommentManager implements CommentManagerInterface {
    * {@inheritdoc}
    */
   public function getCountNewComments(EntityInterface $entity, $field_name = NULL, $timestamp = 0) {
-    @trigger_error(__FUNCTION__ . '() is deprecated in drupal:11.3.0 and is removed from drupal:12.0.0. Use \Drupal\history\HistoryManager::getCountNewComments() instead. See https://www.drupal.org/project/drupal/issues/3551729', E_USER_DEPRECATED);
+    @trigger_error(__FUNCTION__ . '() is deprecated in drupal:11.3.0 and is removed from drupal:12.0.0. Use \Drupal\history\HistoryManager::getCountNewComments() instead. See https://www.drupal.org/node/3551729', E_USER_DEPRECATED);
     if (!$this->moduleHandler->moduleExists('history')) {
       return FALSE;
     }

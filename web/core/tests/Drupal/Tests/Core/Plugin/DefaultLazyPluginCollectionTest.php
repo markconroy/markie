@@ -97,6 +97,18 @@ class DefaultLazyPluginCollectionTest extends LazyPluginCollectionTestBase {
   }
 
   /**
+   * Tests the sort helper exception if plugin not found.
+   *
+   * @legacy-covers ::sortHelper
+   */
+  public function testSortHelperException(): void {
+    $this->setupPluginCollection($this->any());
+    $this->expectException(PluginNotFoundException::class);
+    $this->expectExceptionMessage("Plugin ID 'pear' was not found.");
+    $this->defaultPluginCollection->sortHelper("apple", "pear");
+  }
+
+  /**
    * Tests get configuration.
    */
   public function testGetConfiguration(): void {

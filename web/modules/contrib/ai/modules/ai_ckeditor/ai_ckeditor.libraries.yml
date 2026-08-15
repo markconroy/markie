@@ -1,3 +1,4 @@
+# JS assets below require compilation on dev releases. See docs/contribute/testing/full_patch_test.md
 ai_ckeditor:
   js:
     js/build/aickeditor.js: { preprocess: false, minified: true }

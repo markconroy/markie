@@ -128,3 +128,25 @@ function ai_content_suggestions_update_10005() {
   If you are enable to generate a response, respond with "Insufficient information provided, please add more data before generating suggestions."');
   $config->save(TRUE);
 }
+
+/**
+ * Update entity types to use bundles for content types.
+ */
+function ai_content_suggestions_update_14001() {
+  $config = \Drupal::configFactory()->getEditable('ai_content_suggestions.settings');
+  $config->set('entity_types', [
+    'node' => [
+      'bundles' => [],
+      'mode' => 'disable',
+    ],
+    'taxonomy_term' => [
+      'bundles' => [],
+      'mode' => 'disable',
+    ],
+    'block_content' => [
+      'bundles' => [],
+      'mode' => 'disable',
+    ],
+  ]);
+  $config->save();
+}

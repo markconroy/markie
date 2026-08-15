@@ -5,14 +5,16 @@ namespace Drupal\backup_migrate\Core\Service;
 use Drupal\backup_migrate\Core\File\BackupFileWritableInterface;
 
 /**
- *
+ * Provides the tar archive writer class.
  *
  * @package Drupal\backup_migrate\Core\Service
  */
 class TarArchiveWriter implements ArchiveWriterInterface {
 
   /**
-   * @var \Drupal\backup_migrate\Core\File\BackupFileWritableInterface
+   * Stores the value.
+   *
+   * @var \Drupal\backup_migrate\Core\File\BackupFileWritableInterface The archive
    */
   protected $archive;
 
@@ -23,6 +25,7 @@ class TarArchiveWriter implements ArchiveWriterInterface {
    * be 'zip'.
    *
    * @return string
+   *   The requested string.
    */
   public function getFileExt() {
     return 'tar';
@@ -54,8 +57,12 @@ class TarArchiveWriter implements ArchiveWriterInterface {
   }
 
   /**
-   * @param $real_path
-   * @param $new_path
+   * Handles the write header operation.
+   *
+   * @param mixed $real_path
+   *   The real path.
+   * @param mixed $new_path
+   *   The new path.
    */
   protected function writeHeader($real_path, $new_path) {
     if (strlen($new_path) > 99) {
@@ -130,7 +137,10 @@ class TarArchiveWriter implements ArchiveWriterInterface {
   }
 
   /**
-   * @param $new_path
+   * Handles the write long header operation.
+   *
+   * @param mixed $new_path
+   *   The new path.
    */
   public function writeLongHeader($new_path) {
     $v_size = sprintf("%11s ", decoct(strlen($new_path)));

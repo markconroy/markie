@@ -5,7 +5,7 @@ include:
     # are merged. This will be possible until gitlab_templates project has a 2.x
     # branch.
     # See: https://www.drupal.org/project/gitlab_templates/issues/3404175
-    ref: main
+    ref: $_GITLAB_TEMPLATES_REF
     file:
       - '/includes/include.drupalci.main.yml'
       - '/includes/include.drupalci.variables.yml'
@@ -69,6 +69,7 @@ js_build:
     paths:
       - modules/ai_ckeditor/js/build
       - ui/mdxeditor/dist
+      - ui/default-tools-editor/dist
       - ui/json-schema-editor
     expire_in: 1h
   # Build artifacts.
@@ -88,6 +89,12 @@ js_build:
 
       # Build JSON Schema Editor artifacts
       cd ui/json-schema-editor
+      npm install
+      npm run build
+      cd $CI_PROJECT_DIR
+
+      # Build default tools editor artifacts
+      cd ui/default-tools-editor
       npm install
       npm run build
       cd $CI_PROJECT_DIR
@@ -147,7 +154,8 @@ pages:
     - echo "Allowing Mike to deploy to the gh-pages branch"
     - git remote set-url origin https://oauth2:${DOCS_TOKEN}@git.drupalcode.org/project/ai.git
     - echo "Deploying documentation to gh-pages branch to have latest built version"
-    - mike deploy $VERSION --push
+    - ISSUE=$(echo "$CI_COMMIT_REF_NAME" | grep -o '^[0-9]\+')
+    - mike deploy $VERSION --push --message "#$ISSUE Mike deploy for version $VERSION"
     - echo "Remove any changes"
     - git reset --hard
     - git clean -fd

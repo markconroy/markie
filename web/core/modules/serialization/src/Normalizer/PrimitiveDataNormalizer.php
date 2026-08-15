@@ -16,7 +16,18 @@ class PrimitiveDataNormalizer extends NormalizerBase {
   use JsonSchemaReflectionTrait;
 
   /**
-   * {@inheritdoc}
+   * Normalizes data into a set of arrays/scalars.
+   *
+   * @param object $object
+   *   Data to normalize.
+   * @param string|null $format
+   *   Format the normalization result will be encoded as.
+   * @param array<string, mixed> $context
+   *   Context options for the normalizer.
+   *
+   * @return array|string|int|float|bool|\ArrayObject<mixed, mixed>|null
+   *   \ArrayObject is used to make sure an empty object is encoded as an
+   *   object not an array.
    */
   public function doNormalize($object, $format = NULL, array $context = []): array|string|int|float|bool|\ArrayObject|NULL {
     // Add cacheability if applicable.
@@ -26,7 +37,7 @@ class PrimitiveDataNormalizer extends NormalizerBase {
     if ($parent instanceof FieldItemInterface && $object->getValue()) {
       $serialized_property_names = $this->getCustomSerializedPropertyNames($parent);
       if (in_array($object->getName(), $serialized_property_names, TRUE)) {
-        return unserialize($object->getValue());
+        return unserialize($object->getValue(), ['allowed_classes' => FALSE]);
       }
     }
 

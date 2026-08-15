@@ -7,14 +7,37 @@ use Drupal\backup_migrate\Core\Exception\BackupMigrateException;
 use Drupal\backup_migrate\Core\File\BackupFileReadableInterface;
 use Drupal\Core\File\Exception\FileException;
 use Drupal\Core\File\FileSystemInterface;
+use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\StreamWrapper\PrivateStream;
+use Drupal\Core\StreamWrapper\StreamWrapperManagerInterface;
 
 /**
- *
+ * Provides the drupal directory destination class.
  *
  * @package Drupal\backup_migrate\Drupal\Destination
  */
 class DrupalDirectoryDestination extends DirectoryDestination {
+
+  /**
+   * Constructs a DrupalDirectoryDestination object.
+   *
+   * @param \Drupal\backup_migrate\Core\Config\ConfigInterface|array $init
+   *   Initial configuration.
+   * @param \Drupal\Core\File\FileSystemInterface|null $fileSystem
+   *   The file system service.
+   * @param \Drupal\Core\StreamWrapper\StreamWrapperManagerInterface|null $streamWrapperManager
+   *   The stream wrapper manager.
+   * @param \Drupal\Core\Messenger\MessengerInterface|null $messenger
+   *   The messenger.
+   */
+  public function __construct(
+    $init = [],
+    protected readonly ?FileSystemInterface $fileSystem = NULL,
+    ?StreamWrapperManagerInterface $streamWrapperManager = NULL,
+    ?MessengerInterface $messenger = NULL,
+  ) {
+    parent::__construct($init, $streamWrapperManager, $messenger);
+  }
 
   /**
    * Do the actual file save.
@@ -23,6 +46,7 @@ class DrupalDirectoryDestination extends DirectoryDestination {
    * file.
    *
    * @param \Drupal\backup_migrate\Core\File\BackupFileReadableInterface $file
+   *   The backup file.
    *
    * @throws \Drupal\backup_migrate\Core\Exception\BackupMigrateException
    */
@@ -31,8 +55,11 @@ class DrupalDirectoryDestination extends DirectoryDestination {
     $this->checkDirectory();
 
     try {
+      if (!$this->fileSystem) {
+        throw new BackupMigrateException('Cannot save backup because the file system service is missing.');
+      }
       // @phpstan-ignore-next-line as it is deprecated in D10.3 and removed from D12.
-      \Drupal::service('file_system')->move($file->realpath(), $this->idToPath($file->getFullName()), FileSystemInterface::EXISTS_REPLACE);
+      $this->fileSystem->move($file->realpath(), $this->idToPath($file->getFullName()), FileSystemInterface::EXISTS_REPLACE);
     }
     catch (FileException $e) {
       return FALSE;
@@ -59,7 +86,7 @@ class DrupalDirectoryDestination extends DirectoryDestination {
           ['%dir' => $dir]
         );
       }
-      if (!\Drupal::service('file_system')->prepareDirectory($dir, FileSystemInterface::CREATE_DIRECTORY && FileSystemInterface::MODIFY_PERMISSIONS)) {
+      if (!$this->fileSystem || !$this->fileSystem->prepareDirectory($dir, FileSystemInterface::CREATE_DIRECTORY && FileSystemInterface::MODIFY_PERMISSIONS)) {
         throw new BackupMigrateException(
           "The backup file could not be saved to '%dir' because the directory could not be created or cannot be written to. Please make sure your private files directory is writable by the web server.",
           ['%dir' => $dir]
@@ -69,7 +96,7 @@ class DrupalDirectoryDestination extends DirectoryDestination {
     // Not a private directory. Make sure it is outside the web root.
     else {
       // If the file is local to the server.
-      $real = \Drupal::service('file_system')->realpath($dir);
+      $real = $this->fileSystem ? $this->fileSystem->realpath($dir) : FALSE;
 
       if ($real) {
         // If the file is within the docroot.

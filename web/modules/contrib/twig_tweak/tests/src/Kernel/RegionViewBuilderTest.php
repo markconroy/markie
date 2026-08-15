@@ -84,17 +84,17 @@ final class RegionViewBuilderTest extends AbstractTestCase {
       'public_block' => [
         '#cache' =>
           [
-            'keys' => [
-              'entity_view',
-              'block',
-              'public_block',
-            ],
             'contexts' => [],
             'tags' => [
               'block_view',
               'config:block.block.public_block',
             ],
             'max-age' => Cache::PERMANENT,
+            'keys' => [
+              'entity_view',
+              'block',
+              'public_block',
+            ],
           ],
         '#weight' => 0,
         '#lazy_builder' => [

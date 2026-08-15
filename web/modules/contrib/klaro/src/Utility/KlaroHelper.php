@@ -18,6 +18,7 @@ use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\Theme\ThemeManager;
 use Drupal\Core\Url;
+use Drupal\Core\Utility\Error;
 use Drupal\klaro\Entity\KlaroApp;
 use Drupal\klaro\KlaroAppInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -105,6 +106,13 @@ class KlaroHelper {
    * @var \Drupal\Core\Theme\ThemeManager
    */
   protected $themeManager;
+
+  /**
+   * Per-request cache of loaded apps, keyed by the getApps() arguments.
+   *
+   * @var \Drupal\klaro\KlaroAppInterface[][]
+   */
+  protected array $appsCache = [];
 
   /**
    * Constructs a KlaroHelper object.
@@ -304,6 +312,9 @@ class KlaroHelper {
         'description' => $config->get('process_descriptions') ? $this->processDescription($app) : $app->description(),
         'purposes' => $app->purposes(),
         'callbackCode' => $app->callbackCode(),
+        'onInit' => $app->onInit(),
+        'onAccept' => $app->onAccept(),
+        'onDecline' => $app->onDecline(),
         'cookies' => $cookies,
         'required' => $app->isRequired(),
         'optOut' => $app->isOptOut(),
@@ -414,6 +425,11 @@ class KlaroHelper {
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
   public function getApps(bool $only_enabled = TRUE, bool $only_not_required = FALSE): array {
+    $cid = (int) $only_enabled . ':' . (int) $only_not_required;
+    if (isset($this->appsCache[$cid])) {
+      return $this->appsCache[$cid];
+    }
+
     $storage = $this->entityTypeManager->getStorage('klaro_app');
 
     $query = $storage->getQuery();
@@ -436,7 +452,7 @@ class KlaroHelper {
       $result["unknown_app"] = $unknown_app;
     }
 
-    return $result;
+    return $this->appsCache[$cid] = $result;
   }
 
   /**
@@ -673,7 +689,25 @@ class KlaroHelper {
     // Check if there are unknown external resources.
     if (!$found_klaro_app && ($settings->get('block_unknown') || $settings->get('log_unknown_resources'))) {
       if (UrlHelper::isExternal($str)) {
-        $external_is_local = UrlHelper::externalIsLocal($str, $this->request->getSchemeAndHttpHost());
+        try {
+          $external_is_local = UrlHelper::externalIsLocal($str, $this->request->getSchemeAndHttpHost());
+        }
+        catch (\InvalidArgumentException $e) {
+          // Log this event always.
+          Error::logException(
+            $this->logger->get('klaro'),
+            $e,
+            "Found URL %url could not be assessed. %type: @message in %function (line %line of %file).",
+            ['%url' => $str]
+          );
+
+          // Block based on the setting.
+          if ($settings->get('block_unknown')) {
+            $found_klaro_app = $klaro_apps['unknown_app'];
+          }
+          // Bypass the rest of the function.
+          $external_is_local = TRUE;
+        }
         if (!$external_is_local) {
           if ($settings->get('block_unknown')) {
             $found_klaro_app = $klaro_apps['unknown_app'];

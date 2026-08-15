@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\ai\Plugin\AiGuardrail;
 
+use Drupal\ai\Attribute\AiGuardrail;
 use Drupal\ai\Guardrail\AiGuardrailPluginBase;
 use Drupal\ai\Guardrail\NeedsAiPluginManagerTrait;
 use Drupal\ai\Guardrail\NonDeterministicGuardrailInterface;
@@ -11,12 +12,12 @@ use Drupal\ai\Guardrail\NonStreamableGuardrailInterface;
 use Drupal\ai\Guardrail\Result\GuardrailResultInterface;
 use Drupal\ai\Guardrail\Result\PassResult;
 use Drupal\ai\Guardrail\Result\StopResult;
+use Drupal\ai\Guardrail\UserMessageSelectionTrait;
 use Drupal\ai\OperationType\Chat\ChatInput;
 use Drupal\ai\OperationType\Chat\ChatMessage;
 use Drupal\ai\OperationType\InputInterface;
 use Drupal\ai\OperationType\OutputInterface;
-use Drupal\ai\Service\AiProviderFormHelper;
-use Drupal\ai\Utility\CastUtility;
+use Drupal\ai\Service\PromptJsonDecoder\PromptJsonDecoderInterface;
 use Drupal\ai\Utility\Textarea;
 use Drupal\Component\Plugin\ConfigurableInterface;
 use Drupal\Core\Form\FormStateInterface;
@@ -24,7 +25,6 @@ use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Plugin\PluginFormInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
-use Drupal\ai\Attribute\AiGuardrail;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -37,22 +37,20 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
     "Checks if text's main topic is specified within a list of valid topics."
   ),
 )]
-final class RestrictToTopic extends AiGuardrailPluginBase implements ConfigurableInterface, PluginFormInterface, ContainerFactoryPluginInterface, NonDeterministicGuardrailInterface, NonStreamableGuardrailInterface {
+final class RestrictToTopic extends AiGuardrailPluginBase implements ConfigurableInterface, ContainerFactoryPluginInterface, PluginFormInterface, NonDeterministicGuardrailInterface, NonStreamableGuardrailInterface {
 
   use NeedsAiPluginManagerTrait;
   use StringTranslationTrait;
-
-  /**
-   * The AI provider form helper service.
-   *
-   * @var \Drupal\ai\Service\AiProviderFormHelper
-   */
-  private AiProviderFormHelper $aiProviderFormHelper;
+  use UserMessageSelectionTrait;
 
   public function __construct(
     array $configuration,
     $plugin_id,
     $plugin_definition,
+    // Must stay protected and non-readonly so DependencySerializationTrait on
+    // the base class can swap this service out for its ID when the guardrail
+    // form is written to the form cache.
+    protected PromptJsonDecoderInterface $promptJsonDecoder,
   ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
 
@@ -63,18 +61,12 @@ final class RestrictToTopic extends AiGuardrailPluginBase implements Configurabl
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition): self {
-    $instance = new RestrictToTopic(
+    return new self(
       $configuration,
       $plugin_id,
       $plugin_definition,
+      $container->get('ai.prompt_json_decode'),
     );
-
-    $ai_provider_form_helper = $container->get('ai.form_helper');
-    if ($ai_provider_form_helper instanceof AiProviderFormHelper) {
-      $instance->aiProviderFormHelper = $ai_provider_form_helper;
-    }
-
-    return $instance;
   }
 
   /**
@@ -138,7 +130,7 @@ final class RestrictToTopic extends AiGuardrailPluginBase implements Configurabl
     $form['invalid_topics_present_message'] = [
       '#type' => 'textarea',
       '#title' => $this->t('Message to send if invalid topics are present'),
-      '#default_value' => $this->configuration['invalid_topics_present_message'] ?: 'The text contains invalid topics',
+      '#default_value' => ($this->configuration['invalid_topics_present_message'] ?? '') ?: 'The text contains invalid topics',
       // This property will land into core soon, see
       // https://www.drupal.org/project/drupal/issues/3202631. It can stay
       // after this is added to Drupal core.
@@ -148,11 +140,16 @@ final class RestrictToTopic extends AiGuardrailPluginBase implements Configurabl
       // supported Drupal version includes `#normalize_newlines` property.
       '#value_callback' => [Textarea::class, 'valueCallback'],
     ];
+
+    $form['scan_all_user_messages'] = $this->buildScanAllUserMessagesElement(
+      (string) $this->t('When enabled, every user message in the chat history is concatenated and sent to the classifier as one text. Useful when conversation history may have been imported, replayed, or scanned under different rules. When disabled (default) only the latest user message is classified, even if a tool result message is technically more recent.'),
+      !empty($this->configuration['scan_all_user_messages']),
+    );
 
     $form['valid_topics_missing_message'] = [
       '#type' => 'textarea',
       '#title' => $this->t('Message to send if no valid topics are found'),
-      '#default_value' => $this->configuration['valid_topics_missing_message'] ?: 'The text does not contain any of the valid topics',
+      '#default_value' => ($this->configuration['valid_topics_missing_message'] ?? '') ?: 'The text does not contain any of the valid topics',
       // This property will land into core soon, see
       // https://www.drupal.org/project/drupal/issues/3202631. It can stay
       // after this is added to Drupal core.
@@ -162,21 +159,21 @@ final class RestrictToTopic extends AiGuardrailPluginBase implements Configurabl
       // supported Drupal version includes `#normalize_newlines` property.
       '#value_callback' => [Textarea::class, 'valueCallback'],
     ];
-
-    if ($form_state->getValue('llm_ai_provider') == NULL) {
-      $form_state->setValue('llm_ai_provider', $this->getConfiguration()['llm_provider'] ?? $this->getConfiguration()['llm_ai_provider'] ?? NULL);
-    }
-    if ($form_state->getValue('llm_ai_model') == NULL) {
-      $form_state->setValue('llm_ai_model', $this->getConfiguration()['llm_model'] ?? ($this->getConfiguration()['llm_ajax_prefix']['llm_ai_model'] ?? NULL));
-    }
-
-    $this->aiProviderFormHelper->generateAiProvidersForm($form, $form_state, 'chat', 'llm', AiProviderFormHelper::FORM_CONFIGURATION_FULL, 0, '', $this->t('AI Provider'), $this->t('The provider of the AI models used by this guardrail.'), TRUE);
-    $llm_configs = $this->getConfiguration()['llm_config'] ?? [];
-    if ($llm_configs && count($llm_configs)) {
-      foreach ($llm_configs as $key => $value) {
-        $form['llm_ajax_prefix']['llm_ajax_prefix_configuration_' . $key]['#default_value'] = $value;
-      }
-    }
+    $default_ai_provider_value = [
+      'provider' => $this->configuration['llm_provider'] ?? '',
+      'model' => $this->configuration['llm_model'] ?? '',
+      'config' => $this->configuration['llm_config'] ?? [],
+      'use_default' => empty($this->configuration['llm_provider']),
+    ];
+    $form['llm_ai_provider'] = [
+      '#type' => 'ai_provider_configuration',
+      '#title' => $this->t('AI provider'),
+      '#description' => $this->t('The AI provider and model used for internal LLM calls. Defaults to the site-wide default provider.'),
+      '#operation_type' => 'chat',
+      '#advanced_config' => TRUE,
+      '#default_provider_allowed' => TRUE,
+      '#default_value' => $default_ai_provider_value,
+    ];
 
     return $form;
   }
@@ -184,11 +181,8 @@ final class RestrictToTopic extends AiGuardrailPluginBase implements Configurabl
   /**
    * {@inheritdoc}
    */
-  public function validateConfigurationForm(
-    array &$form,
-    FormStateInterface $form_state,
-  ): void {
-    $this->aiProviderFormHelper->validateAiProvidersConfig($form, $form_state, 'chat', 'llm');
+  public function validateConfigurationForm(array &$form, FormStateInterface $form_state): void {
+    // The ai_provider_configuration element handles its own validation.
   }
 
   /**
@@ -200,20 +194,10 @@ final class RestrictToTopic extends AiGuardrailPluginBase implements Configurabl
   ): void {
     $values = $form_state->getValues();
 
-    $values['llm_model'] = $values['llm_ajax_prefix']['llm_ai_model'];
-    $values['llm_provider'] = $values['llm_ai_provider'];
-    unset($values['llm_ajax_prefix']['llm_ai_model']);
+    $values['llm_model'] = $values['llm_ai_provider']['model'];
+    $values['llm_provider'] = $values['llm_ai_provider']['provider'];
+    $values['llm_config'] = $values['llm_ai_provider']['config'];
     unset($values['llm_ai_provider']);
-
-    $provider = $this->getAiPluginManager()->createInstance($values['llm_provider']);
-    $schema = $provider->getAvailableConfiguration('chat', $values['llm_model']);
-
-    foreach ($values['llm_ajax_prefix'] as $key => $value) {
-      $real_key = str_replace('llm_ajax_prefix_configuration_', '', $key);
-      $type = $schema[$real_key]['type'] ?? 'string';
-      $values['llm_config'][$real_key] = CastUtility::typeCast($type, $value);
-    }
-    unset($values['llm_ajax_prefix']);
 
     $this->setConfiguration($values);
   }
@@ -226,14 +210,22 @@ final class RestrictToTopic extends AiGuardrailPluginBase implements Configurabl
       return new PassResult('Input is not a chat input, skipping topic restriction.', $this);
     }
 
-    $messages = $input->getMessages();
-    $last_message = end($messages);
-
-    if (!$last_message instanceof ChatMessage) {
-      return new PassResult('No text message found to analyze.', $this);
+    $scan_all = !empty($this->configuration['scan_all_user_messages']);
+    $user_messages = $this->selectUserMessages($input, $scan_all);
+    if ($user_messages === []) {
+      return new PassResult('No user message found to analyze.', $this);
     }
 
-    $text = $last_message->getText();
+    // The classifier is an LLM call, so concatenate the selected user
+    // messages into a single payload instead of issuing one call per
+    // message. The classifier returns the union of topics found across
+    // the conversation, which is the right semantic for "is anything in
+    // this chat off topic".
+    $text = implode("\n\n", array_map(
+      static fn (ChatMessage $message): string => $message->getText(),
+      $user_messages,
+    ));
+
     $valid_topics = array_filter(
       array_map(
         'mb_strtolower',
@@ -250,17 +242,25 @@ final class RestrictToTopic extends AiGuardrailPluginBase implements Configurabl
     $all_topics_formatted = implode(',', $all_topics);
 
     $prompt = <<<PROMPT
-Given a text and a list of topics, return a valid json list of which topics are present in the text. If none, just return an empty list. Don't format the output in any other way, just return the json list.
+Given a text and a list of topics, return a valid json list of which topics are present in the text. If none, just return an empty list. Don't format the output in any other way, just return the list as JSON inside a ```json code block.
 
-Output Format:
+Output example when not finding anything:
 -------------
-"topics_present": []
+```json
+{"topics_present": []}
+```
+
+Output example when finding something relevant:
+--------------
+```json
+{"topics_present": ["topic_4", "topic_6"]}
+```
 
 Text:
 ----
 "$text"
 
-Topics:
+Relevant Topics you can pick from:
 ------
 $all_topics_formatted
 
@@ -293,10 +293,13 @@ PROMPT;
     $response = $ai_provider
       ->chat($input, $model, ['ai'])
       ->getNormalized();
-    $response_decoded = json_decode($response->getText());
+    $response_decoded = $this->promptJsonDecoder->decode($response);
+    if (!is_array($response_decoded)) {
+      return new StopResult('Could not decode the AI response as JSON.', $this);
+    }
     $topics_present = array_map(
       'mb_strtolower',
-      $response_decoded->topics_present ?? []
+      $response_decoded['topics_present'] ?? []
     );
 
     $invalid_topics_found = [];
@@ -312,7 +315,7 @@ PROMPT;
 
     if (\count($invalid_topics_found) > 0) {
       return new StopResult(
-        $this->configuration['invalid_topics_present_message'],
+        ($this->configuration['invalid_topics_present_message'] ?? '') ?: 'The text contains invalid topics',
         $this,
         [
           'valid_topics' => $valid_topics,
@@ -323,7 +326,7 @@ PROMPT;
 
     if (\count($valid_topics) > 0 && \count($valid_topics_found) === 0) {
       return new StopResult(
-        $this->configuration['valid_topics_missing_message'],
+        ($this->configuration['valid_topics_missing_message'] ?? '') ?: 'The text does not contain any of the valid topics',
         $this,
         [
           'valid_topics' => $valid_topics,

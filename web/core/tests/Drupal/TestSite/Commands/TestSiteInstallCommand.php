@@ -81,9 +81,16 @@ class TestSiteInstallCommand extends Command {
   protected $langcode = 'en';
 
   /**
+   * The Drupal root directory.
+   *
+   * @var string
+   */
+  protected $root;
+
+  /**
    * {@inheritdoc}
    */
-  protected function configure() {
+  protected function configure(): void {
     $this->setName('install')
       ->setDescription('Creates a test Drupal site')
       ->setHelp('The details to connect to the test site created will be displayed upon success. It will contain the database prefix and the user agent.')

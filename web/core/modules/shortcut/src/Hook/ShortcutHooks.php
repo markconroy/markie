@@ -2,11 +2,17 @@
 
 namespace Drupal\shortcut\Hook;
 
+use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Database\Query\AlterableInterface;
+use Drupal\Core\Database\Query\SelectInterface;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\Url;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Hook\Attribute\Hook;
+use Drupal\jsonapi\JsonApiFilter;
 
 /**
  * Hook implementations for shortcut.
@@ -34,10 +40,10 @@ class ShortcutHooks {
         $output .= '<dt>' . $this->t('Adding and removing shortcuts') . '</dt>';
         $output .= '<dd>' . $this->t('The Shortcut module creates an add/remove link for each page on your site; the link lets you add or remove the current page from the currently-enabled set of shortcuts (if your theme displays it and you have permission to edit your shortcut set). The core Claro administration theme displays this link next to the page title, as a gray or yellow star. If you click on the gray star, you will add that page to your preferred set of shortcuts. If the page is already part of your shortcut set, the link will be a yellow star, and will allow you to remove the current page from your shortcut set.') . '</dd>';
         $output .= '<dt>' . $this->t('Displaying shortcuts') . '</dt>';
-        $output .= '<dd>' . $this->t('You can display your shortcuts by enabling the <em>Shortcuts</em> block on the <a href=":blocks">Blocks administration page</a>. Certain administrative modules also display your shortcuts; for example, the core <a href=":toolbar-help">Toolbar module</a> provides a corresponding menu link.', [
+        $output .= '<dd>' . $this->t('You can display your shortcuts by enabling the <em>Shortcuts</em> block on the <a href=":blocks">Blocks administration page</a>. Certain administrative modules also display your shortcuts; for example, the core <a href=":navigation-help">Navigation module</a> provides a corresponding menu.', [
           ':blocks' => \Drupal::moduleHandler()->moduleExists('block') ? Url::fromRoute('block.admin_display')->toString() : '#',
-          ':toolbar-help' => \Drupal::moduleHandler()->moduleExists('toolbar') ? Url::fromRoute('help.page', [
-            'name' => 'toolbar',
+          ':navigation-help' => \Drupal::moduleHandler()->moduleExists('navigation') ? Url::fromRoute('help.page', [
+            'name' => 'navigation',
           ])->toString() : '#',
         ]) . '</dd>';
         $output .= '</dl>';
@@ -124,7 +130,7 @@ class ShortcutHooks {
     // modules so to set a module-specific setting, we need to set it with
     // logic.
     if (in_array('claro', $theme_list, TRUE)) {
-      \Drupal::configFactory()->getEditable("claro.settings")->set('third_party_settings.shortcut.module_link', TRUE)->save(TRUE);
+      \Drupal::configFactory()->getEditable("claro.settings")->set('third_party_settings.shortcut.module_link', TRUE)->save();
     }
   }
 
@@ -135,6 +141,60 @@ class ShortcutHooks {
   public function userDelete(EntityInterface $entity): void {
     // Clean up shortcut set mapping of removed user account.
     \Drupal::entityTypeManager()->getStorage('shortcut_set')->unassignUser($entity);
+  }
+
+  /**
+   * Implements hook_jsonapi_ENTITY_TYPE_filter_access() for 'shortcut'.
+   */
+  #[Hook('jsonapi_shortcut_filter_access')]
+  public function jsonapiShortcutFilterAccess(EntityTypeInterface $entity_type, AccountInterface $account): array {
+    // @see \Drupal\shortcut\ShortcutAccessControlHandler::checkAccess()
+    // queryShortcutAccessAlter() narrows results to only shortcuts in the
+    // user's currently displayed shortcut set for non-administrators.
+    return [
+      JsonApiFilter::AMONG_ALL => AccessResult::allowedIfHasPermission($account, 'administer shortcuts')->orIf(AccessResult::allowedIfHasPermissions($account, [
+        'access shortcuts',
+        'customize shortcut links',
+      ]))->addCacheContexts(['user']),
+    ];
+  }
+
+  /**
+   * Implements hook_query_TAG_alter() for 'shortcut_access'.
+   *
+   * Unless the user can administer shortcuts, restricts queries to only return
+   * shortcuts from the user's currently displayed shortcut set.
+   *
+   * @see \Drupal\shortcut\ShortcutAccessControlHandler::checkAccess()
+   */
+  #[Hook('query_shortcut_access_alter')]
+  public function queryShortcutAccessAlter(AlterableInterface $query): void {
+    $account = $query->getMetaData('account') ?: \Drupal::currentUser();
+
+    // Administrators can access all shortcuts.
+    if ($account->hasPermission('administer shortcuts')) {
+      return;
+    }
+
+    // Non-administrators can only access shortcuts in their displayed set.
+    $shortcut_set = \Drupal::entityTypeManager()
+      ->getStorage('shortcut_set')
+      ->getDisplayedToUser($account);
+
+    $tables = $query->getTables();
+    $base_table = $query->getMetaData('base_table');
+    if (!$base_table) {
+      foreach ($tables as $table_info) {
+        if (!$table_info instanceof SelectInterface && $table_info['table'] === 'shortcut_field_data') {
+          $base_table = $table_info['alias'];
+          break;
+        }
+      }
+    }
+
+    if ($base_table) {
+      $query->condition("$base_table.shortcut_set", $shortcut_set->id());
+    }
   }
 
 }

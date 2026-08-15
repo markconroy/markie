@@ -2,6 +2,7 @@
 
 namespace Drupal\ai_automators\FormAlter;
 
+use Drupal\ai\Guardrail\AiGuardrailHelper;
 use Drupal\ai\Utility\Textarea;
 use Drupal\Core\DependencyInjection\DependencySerializationTrait;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
@@ -35,6 +36,8 @@ class AiAutomatorFieldConfig {
    *   The process manager.
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
    *   The entity type manager.
+   * @param \Drupal\ai\Guardrail\AiGuardrailHelper $aiGuardrailHelper
+   *   The AI guardrail helper.
    */
   public function __construct(
     protected EntityFieldManagerInterface $fieldManager,
@@ -42,6 +45,7 @@ class AiAutomatorFieldConfig {
     protected RouteMatchInterface $routeMatch,
     protected AiAutomatorFieldProcessManager $processes,
     protected EntityTypeManagerInterface $entityTypeManager,
+    protected AiGuardrailHelper $aiGuardrailHelper,
   ) {
   }
 
@@ -109,7 +113,7 @@ class AiAutomatorFieldConfig {
 
     /** @var \Drupal\ai_automators\Entity\AiAutomator $aiConfig */
     $aiConfig = $this->entityTypeManager->getStorage('ai_automator')->load($id);
-
+    $formState->set('ai_automator', $aiConfig);
     $form['automator_enabled'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Enable AI Automator'),
@@ -126,7 +130,7 @@ class AiAutomatorFieldConfig {
       $rulesOptions[$ruleKey] = $rule->title;
     }
 
-    $chosenRule = $formState->getValue('automator_rule') ?? NULL;
+    $chosenRule = $formState->getValue('automator_rule');
     if (empty($chosenRule) && !is_null($aiConfig)) {
       $chosenRule = $aiConfig->get('rule');
     }
@@ -385,6 +389,18 @@ class AiAutomatorFieldConfig {
         '#default_value' => !is_null($aiConfig) ? $aiConfig->get('worker_type') : 'direct',
       ];
 
+      $form['automator_container']['automator_advanced']['automator_queue_allow_requeue'] = [
+        '#type' => 'checkbox',
+        '#title' => $this->t('Re-queue on each save'),
+        '#description' => $this->t('By default, a new queue item is not added if this field is already waiting to be processed. Enable this to add a new queue item on every save, even when processing is still pending.'),
+        '#default_value' => !is_null($aiConfig) ? ($aiConfig->get('plugin_config')['automator_queue_allow_requeue'] ?? FALSE) : FALSE,
+        '#states' => [
+          'visible' => [
+            ':input[name="automator_worker_type"]' => ['value' => 'queue'],
+          ],
+        ],
+      ];
+
       $subForm = $rule->extraAdvancedFormFields($entity, $fieldInfo, $formState, $defaultValues);
       $form['automator_container']['automator_advanced'] = array_merge($form['automator_container']['automator_advanced'], $subForm);
     }
@@ -487,6 +503,7 @@ class AiAutomatorFieldConfig {
       $aiConfig->set('base_field', $formState->getValue('automator_base_field') ?? '');
       $aiConfig->set('prompt', $formState->getValue('automator_prompt') ?? '');
       $aiConfig->set('token', $formState->getValue('automator_token') ?? '');
+      $aiConfig->set('guardrail_set_id', $formState->getValue('automator_guardrail_set_id') ?: NULL);
 
       $pluginConfig = [];
       foreach ($formState->getValues() as $key => $val) {

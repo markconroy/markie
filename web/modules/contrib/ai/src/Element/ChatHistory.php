@@ -86,14 +86,14 @@ class ChatHistory extends FormElementBase {
       $element[$i]['remove'] = [
         '#type' => 'submit',
         '#name' => "chat_remove_{$i}",
-        '#value' => 'x',
+        '#value' => '',
         '#submit' => [[static::class, 'removeRowSubmit']],
         '#ajax' => [
           'callback' => [static::class, 'ajaxCallback'],
           'wrapper' => $wrapper_id,
         ],
         '#attributes' => [
-          'class' => ['remove-button'],
+          'class' => ['ai-icon-button', 'ai-icon--trash'],
           'title' => t('Remove message'),
           'aria-label' => t('Remove message'),
         ],
@@ -209,16 +209,16 @@ class ChatHistory extends FormElementBase {
           $element[$i]['tool_calls'][$j]['remove_tool_call'] = [
             '#type' => 'submit',
             '#name' => "tool_call_remove_{$i}_{$j}",
-            '#value' => 'x',
+            '#value' => '',
             '#submit' => [[static::class, 'removeToolCallSubmit']],
             '#ajax' => [
               'callback' => [static::class, 'ajaxCallback'],
               'wrapper' => $wrapper_id,
             ],
             '#attributes' => [
-              'class' => ['remove-button'],
-              'title' => t('Remove message'),
-              'aria-label' => t('Remove message'),
+              'class' => ['ai-icon-button', 'ai-icon--trash'],
+              'title' => t('Remove tool call'),
+              'aria-label' => t('Remove tool call'),
             ],
             '#limit_validation_errors' => [],
           ];

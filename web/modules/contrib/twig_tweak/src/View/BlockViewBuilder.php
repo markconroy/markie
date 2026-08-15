@@ -3,8 +3,8 @@
 namespace Drupal\twig_tweak\View;
 
 use Drupal\Core\Block\BlockPluginInterface;
+use Drupal\Core\Block\BlockManagerInterface;
 use Drupal\Core\Block\TitleBlockPluginInterface;
-use Drupal\Core\Cache\CacheableDependencyInterface;
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Controller\TitleResolverInterface;
 use Drupal\Core\Plugin\Context\ContextHandlerInterface;
@@ -23,7 +23,7 @@ class BlockViewBuilder {
   /**
    * The plugin.manager.block service.
    *
-   * @var \Drupal\Core\Cache\CacheableDependencyInterface
+   * @var \Drupal\Core\Block\BlockManagerInterface
    */
   protected $pluginManagerBlock;
 
@@ -73,7 +73,7 @@ class BlockViewBuilder {
    * Constructs a BlockViewBuilder object.
    */
   public function __construct(
-    CacheableDependencyInterface $plugin_manager_block,
+    BlockManagerInterface $plugin_manager_block,
     ContextRepositoryInterface $context_repository,
     ContextHandlerInterface $context_handler,
     AccountInterface $account,

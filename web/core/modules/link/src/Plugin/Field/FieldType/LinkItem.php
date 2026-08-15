@@ -3,6 +3,7 @@
 namespace Drupal\link\Plugin\Field\FieldType;
 
 use Drupal\Component\Utility\Random;
+use Drupal\Component\Utility\UrlHelper;
 use Drupal\Core\Field\Attribute\FieldType;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemBase;
@@ -21,7 +22,7 @@ use Drupal\link\LinkTitleVisibility;
 #[FieldType(
   id: "link",
   label: new TranslatableMarkup("Link"),
-  description: new TranslatableMarkup("Stores a URL string, optional varchar link text, and optional blob of attributes to assemble a link."),
+  description: new TranslatableMarkup("A URL or internal path, with optional link text"),
   default_widget: "link_default",
   default_formatter: "link",
   constraints: [
@@ -29,6 +30,7 @@ use Drupal\link\LinkTitleVisibility;
     "LinkAccess" => [],
     "LinkExternalProtocols" => [],
     "LinkNotExistingInternal" => [],
+    "LinkTitleRequired" => [],
   ]
 )]
 class LinkItem extends FieldItemBase implements LinkItemInterface {
@@ -49,6 +51,13 @@ class LinkItem extends FieldItemBase implements LinkItemInterface {
   public static function propertyDefinitions(FieldStorageDefinitionInterface $field_definition) {
     $properties['uri'] = DataDefinition::create('uri')
       ->setLabel(new TranslatableMarkup('URI'));
+
+    $properties['resolvable_uri'] = DataDefinition::create('resolvable_uri')
+      ->setLabel(new TranslatableMarkup('Resolvable URI'))
+      ->setDescription(new TranslatableMarkup('The processed URL for this link suitable for using in anchor href attributes.'))
+      ->setComputed(TRUE)
+      ->setInternal(FALSE)
+      ->setReadOnly(TRUE);
 
     $properties['title'] = DataDefinition::create('string')
       ->setLabel(new TranslatableMarkup('Link text'));
@@ -174,6 +183,34 @@ class LinkItem extends FieldItemBase implements LinkItemInterface {
   /**
    * {@inheritdoc}
    */
+  public function onChange($property_name, $notify = TRUE): void {
+    // Make sure that the link item values can be kept in sync with computed
+    // property url.
+    if ($property_name === 'resolvable_uri') {
+      $property = $this->get('resolvable_uri');
+      if ($url = $property->getValue()) {
+        $parsed = UrlHelper::parse($url);
+        // If the path is not an external URL then add 'internal:' prefix to
+        // make it a valid uri.
+        if (strpos($parsed['path'], ':') === FALSE) {
+          $parsed['path'] = 'internal:' . $parsed['path'];
+        }
+        $this->writePropertyValue('uri', $parsed['path']);
+        // Only set the options if we have query parameters or a fragment.
+        if (!empty($parsed['query']) || !empty($parsed['fragment'])) {
+          $this->writePropertyValue('options', [
+            'query' => $parsed['query'],
+            'fragment' => $parsed['fragment'],
+          ]);
+        }
+      }
+    }
+    parent::onChange($property_name, $notify);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getTitle(): ?string {
     return $this->title ?: NULL;
   }
@@ -193,6 +230,12 @@ class LinkItem extends FieldItemBase implements LinkItemInterface {
       ];
     }
     parent::setValue($values, $notify);
+    // Support setting the field item with only url property, but make sure
+    // values stay in sync if only url property is passed.
+    // NULL is a valid value, so we use array_key_exists().
+    if (is_array($values) && array_key_exists('resolvable_uri', $values) && !array_key_exists('uri', $values)) {
+      $this->onChange('resolvable_uri', FALSE);
+    }
   }
 
 }

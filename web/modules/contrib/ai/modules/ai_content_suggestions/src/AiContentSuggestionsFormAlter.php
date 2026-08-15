@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace Drupal\ai_content_suggestions;
 
-use Drupal\Core\Entity\ContentEntityFormInterface;
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 
 /**
@@ -21,6 +22,8 @@ final class AiContentSuggestionsFormAlter implements AiContentSuggestionsFormAlt
   public function __construct(
     protected AiContentSuggestionsPluginManager $pluginManager,
     protected EntityTypeManagerInterface $entityTypeManager,
+    protected AccountProxyInterface $currentUser,
+    protected ConfigFactoryInterface $configFactory,
   ) {
 
   }
@@ -29,53 +32,52 @@ final class AiContentSuggestionsFormAlter implements AiContentSuggestionsFormAlt
    * {@inheritdoc}
    */
   public function alter(array &$form, FormStateInterface $form_state): void {
-    foreach ($this->pluginManager->getDefinitions() as $id => $definition) {
-      /** @var \Drupal\ai_content_suggestions\AiContentSuggestionsInterface $plugin */
-      if ($plugin = $this->pluginManager->createInstance($id, $definition)) {
-        if ($plugin->isEnabled()) {
-
-          /** @var \Drupal\Core\Entity\ContentEntityFormInterface $form_object */
-          $form_object = $form_state->getFormObject();
-
-          // Check if form object implements ContentEntityFormInterface.
-          if (!$form_object instanceof ContentEntityFormInterface) {
-            continue;
+    $form['#cache']['contexts'][] = 'user.permissions';
+    $form['#cache']['contexts'][] = 'ai_content_suggestions_plugins';
+    $form['#cache']['contexts'][] = 'ai_providers';
+    if ($this->currentUser->hasPermission('access ai content suggestion tools')) {
+      /** @var \Drupal\Core\Entity\ContentEntityFormInterface $form_object */
+      $form_object = $form_state->getFormObject();
+      $entity = $form_object->getEntity();
+      if (!$this->isEnabledForCurrentEntity($entity)) {
+        return;
+      }
+      foreach ($this->pluginManager->getDefinitions() as $id => $definition) {
+        /** @var \Drupal\ai_content_suggestions\AiContentSuggestionsInterface $plugin */
+        if ($plugin = $this->pluginManager->createInstance($id, $definition)) {
+          if ($plugin->isEnabled()) {
+            /** @var \Drupal\Core\Entity\ContentEntityInterface $entity */
+            $entity = $form_object->getEntity();
+            $plugin->alterForm($form, $form_state, $this->getAllTextFields($entity, $form));
           }
-
-          /** @var \Drupal\Core\Entity\ContentEntityInterface $entity */
-          $entity = $form_object->getEntity();
-          $plugin->alterForm($form, $form_state, $this->getAllTextFields($entity, $form));
         }
       }
     }
   }
 
   /**
-   * {@inheritdoc}
+   * Check if AI suggestions are enabled for the current entity.
+   *
+   * @param \Drupal\Core\Entity\ContentEntityInterface $entity
+   *   The content entity on the form.
+   *
+   * @return bool
+   *   TRUE if AI suggestions should be shown for this entity, FALSE otherwise.
    */
-  public static function getPluginResponse(array $form, FormStateInterface $form_state): array {
-    $return = [];
-
-    if ($trigger = $form_state->getTriggeringElement()) {
-      if (isset($trigger['#plugin'])) {
-
-        $plugin_id = $trigger['#plugin'];
-
-        /** @var \Drupal\ai_content_suggestions\AiContentSuggestionsPluginManager $plugin_manager */
-        $plugin_manager = \Drupal::service('plugin.manager.ai_content_suggestions');
-        if ($definition = $plugin_manager->getDefinition($plugin_id)) {
-
-          /** @var \Drupal\ai_content_suggestions\AiContentSuggestionsInterface $plugin */
-          if ($plugin = $plugin_manager->createInstance($plugin_id, $definition)) {
-            $plugin->updateFormWithResponse($form, $form_state);
-
-            $return = $form[$plugin_id]['response'];
-          }
-        }
-      }
+  public function isEnabledForCurrentEntity(ContentEntityInterface $entity): bool {
+    $config = $this->configFactory->get('ai_content_suggestions.settings');
+    $entity_type_id = $entity->getEntityTypeId();
+    $bundle = $entity->bundle();
+    $entity_types = $config->get('entity_types') ?? [];
+    if (!in_array($entity_type_id, array_keys($entity_types), TRUE)) {
+      return FALSE;
     }
-
-    return $return;
+    $mode = $entity_types[$entity_type_id]['mode'] ?? 'enable';
+    $bundles = $entity_types[$entity_type_id]['bundles'] ?? [];
+    if ($mode === 'enable') {
+      return in_array($bundle, $bundles);
+    }
+    return !in_array($bundle, $bundles);
   }
 
   /**
@@ -92,7 +94,7 @@ final class AiContentSuggestionsFormAlter implements AiContentSuggestionsFormAlt
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
-  public function getAllTextFields(ContentEntityInterface $entity, array $form): array {
+  protected function getAllTextFields(ContentEntityInterface $entity, array $form): array {
     $fields = $entity->getFieldDefinitions();
     $options = [];
 
@@ -146,6 +148,30 @@ final class AiContentSuggestionsFormAlter implements AiContentSuggestionsFormAlt
     }
 
     return $options;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function getPluginResponse(array $form, FormStateInterface $form_state): array {
+    @trigger_error(__METHOD__ . '() is deprecated in ai_content_suggestions:1.4.0 and is removed from ai_content_suggestions:2.0.0. The method was moved to plugin class. See https://www.drupal.org/node/3591230', E_USER_DEPRECATED);
+    $return = [];
+    if ($trigger = $form_state->getTriggeringElement()) {
+      if (isset($trigger['#plugin'])) {
+        $plugin_id = $trigger['#plugin'];
+        /** @var \Drupal\ai_content_suggestions\AiContentSuggestionsPluginManager $plugin_manager */
+        $plugin_manager = \Drupal::service('plugin.manager.ai_content_suggestions');
+        if ($definition = $plugin_manager->getDefinition($plugin_id)) {
+          /** @var \Drupal\ai_content_suggestions\AiContentSuggestionsInterface $plugin */
+          if ($plugin = $plugin_manager->createInstance($plugin_id, $definition)) {
+            $plugin->updateFormWithResponse($form, $form_state);
+            $return = $form[$plugin_id]['response'];
+          }
+        }
+      }
+    }
+
+    return $return;
   }
 
 }

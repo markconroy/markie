@@ -16,3 +16,6 @@ info_url: 'https://github.com/klaro-org/klaro-js/blob/master/README.md'
 privacy_policy_url: ''
 javascripts: { }
 attachments: { }
+on_init: ''
+on_accept: ''
+on_decline: ''

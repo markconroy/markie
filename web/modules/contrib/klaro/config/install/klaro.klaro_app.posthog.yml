@@ -17,6 +17,9 @@ info_url: 'https://posthog.com/docs/privacy/data-collection'
 privacy_policy_url: 'https://posthog.com/privacy'
 javascripts: {  }
 callback_code: "// NOTE: \r\n// - On initial call window.posthog and its functions may not be initialized yet:\r\n// - The posthog module detects Klaro and initializes with cookieless_mode: 'on_reject'\r\nif (window.posthog) {\r\n  if (consent === true && window.posthog.opt_in_capturing) {\r\n    window.posthog.opt_in_capturing();\r\n  }\r\n  else if (consent === false && window.posthog.opt_out_capturing) {\r\n    window.posthog.opt_out_capturing();\r\n  }\r\n}"
+on_init: ''
+on_accept: ''
+on_decline: ''
 wrapper_identifier: {  }
 attachments: {  }
 weight: 0

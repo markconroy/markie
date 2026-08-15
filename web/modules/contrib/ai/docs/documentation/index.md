@@ -27,6 +27,37 @@ In general it's quite broad - of course anything that affects AI and its submodu
 
 If you contribute to a Provider and want to promote it or write installation instructions, feel free to push it under the providers directory.
 
+## Best practices for images and diagrams
+
+To keep the repository as lean as possible and ensure easy contributions for everyone (especially those in countries with limited internet bandwidth), we have specific guidelines for images and diagrams.
+
+### Images
+
+**Do not store images directly in the repository.** Instead, follow these steps:
+
+1. **Host images externally**: All images should be stored on the [GitLab Wiki for the AI project](https://git.drupalcode.org/project/ai/-/wikis/). Since it is on the same parent domain, hotlinking is possible and preferred.
+2. **Use absolute URLs**: Link to your images using their full URL from the GitLab wiki.
+3. **Avoid relative paths**: Never use relative paths to image files within the repository.
+
+### Diagrams and Charts
+
+Instead of using static images for diagrams or charts, we use **Mermaid**. Mermaid allows you to create diagrams using text-based definitions which are:
+
+- **Versionable**: Changes can be tracked via Git.
+- **Lightweight**: No heavy binary files in the repository.
+- **Easy to contribute**: Anyone can update a diagram directly in the Markdown file without needing image editing tools.
+
+Example of a Mermaid diagram:
+
+```mermaid
+graph TD;
+    A[User Request]-->B[AI Module];
+    B-->C{Provider};
+    C-->D[OpenAI];
+    C-->E[Anthropic];
+```
+
+
 ## How do you switch the default version (for Maintainers)
 This can only be done by maintainers that have the right to push to the repo. When you have decided that we for instance have a stable release or near stable release of a version and want to make that the default when you visit https://project.pages.drupalcode.org/ai/ these are the following things you need to do.
 

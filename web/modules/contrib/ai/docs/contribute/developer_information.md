@@ -19,6 +19,19 @@ The branching logic is as follows - we are using that 1.2.0 was the latest stabl
 
 When creating a pull request, please ensure that you are merging into the correct branch based on the nature of your contribution. If you are unsure, please ask in the AI-contrib Slack channel or create an issue to discuss it.
 
+## Update Hooks
+We follow a specific naming convention for update hooks (`hook_update_N`) to ensure they are ordered correctly and avoid collisions. The naming convention is `MAJOR` + `MINOR` + `three numbers` (001-999).
+
+The structure is: [Major Version][Minor Version][Three-digit sequence].
+
+Examples:
+- For version **1.1.x**, the update hooks should be named `11001`, `11002`, etc.
+- For version **1.2.x**, the update hooks should be named `12001`, `12002`, etc.
+- For version **1.3.x**, the update hooks should be named `13001`, `13002`, etc.
+- For version **2.0.x**, the update hooks should be named `20001`, `20002`, etc.
+
+This convention ensures that update hooks in later versions always have a higher number than those in earlier versions.
+
 ## Coding Standards
 The AI module follows the [Drupal coding standards](https://www.drupal.org/docs/develop/standards). Please ensure that your code adheres to these standards before submitting a pull request. We have a set of automated tools that will help you check your code against these standards, such as [PHP Code Sniffer](https://www.drupal.org/project/coder) and [PHPstan](https://www.drupal.org/project/phpstan). This means that no merge request will be accepted or can be merged if the code does not pass the linters.
 

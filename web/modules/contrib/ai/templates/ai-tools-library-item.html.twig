@@ -22,7 +22,7 @@
 <div{{ attributes.addClass(classes) }}>
   <h5>{{ title }}</h5>
   <p>{{ description }}</p>
-  <a class="ai-tools-library-item__remove" href="#" data-tool-id="{{ tool_id }}" data-widget-id="{{ widget_id }}"></a>
+  <a class="ai-tools-library-item__remove ai-icon-button ai-icon--trash" href="#" data-tool-id="{{ tool_id }}" data-widget-id="{{ widget_id }}" aria-label="{{ 'Remove tool'|t }}"></a>
   {% if buttons %}
     <div class="ai-tools-library-item__buttons">
       {{ buttons }}

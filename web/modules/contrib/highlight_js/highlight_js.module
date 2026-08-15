@@ -4,47 +4,27 @@
  * @file
  * The module file with theming functions.
  */
-
+use Drupal\Core\Hook\Attribute\LegacyHook;
+use Drupal\highlight_js\Hook\HighlightJsHooks;
 use Drupal\Component\Utility\Html;
 use Drupal\Core\Routing\RouteMatchInterface;
 
 /**
  * Implements hook_help().
  */
-function highlight_js_help($route_name, RouteMatchInterface $route_match) {
-  switch ($route_name) {
-    case 'help.page.highlight_js':
-      $text = file_get_contents(__DIR__ . '/README.txt');
-      if (!\Drupal::moduleHandler()->moduleExists('markdown')) {
-        return '<pre>' . Html::escape($text) . '</pre>';
-      }
-      else {
-        // Use the Markdown filter to render the README.
-        $filter_manager = \Drupal::service('plugin.manager.filter');
-        $settings = \Drupal::configFactory()->get('markdown.settings')->getRawData();
-        $config = ['settings' => $settings];
-        $filter = $filter_manager->createInstance('markdown', $config);
-        return $filter->process($text, 'en');
-      }
-  }
-  return NULL;
+#[LegacyHook]
+function highlight_js_help($route_name, RouteMatchInterface $route_match)
+{
+    return \Drupal::service(HighlightJsHooks::class)->help($route_name, $route_match);
 }
 
 /**
  * Implements hook_theme().
  */
+#[LegacyHook]
 function highlight_js_theme($existing, $type, $theme, $path) {
 
-  return [
-    'highlight_js_language_select' => [
-      'variables' => [
-        'text' => NULL,
-        'url' => NULL,
-        'language' => NULL,
-      ],
-      'template' => 'highlight-js/highlight_js-language-select',
-    ],
-  ];
+  return \Drupal::service(HighlightJsHooks::class)->theme($existing, $type, $theme, $path);
 }
 
 /**
@@ -307,7 +287,7 @@ function highlight_js_available_languages() {
   $languages = [
     '1c' => t('1C'),
     '4d' => t('4D'),
-    'sap-abap, abap' => t('ABAP'),
+    'abap' => t('ABAP'),
     'abnf' => t('ABNF'),
     'accesslog' => t('Access logs'),
     'ada' => t('Ada'),
@@ -327,8 +307,8 @@ function highlight_js_available_languages() {
     'autohotkey' => t('AutoHotkey'),
     'autoit' => t('AutoIt'),
     'awk' => t('Awk'),
-    'ballerina, bal' => t('Ballerina'),
-    'bash, sh, zsh' => t('Bash'),
+    'ballerina' => t('Ballerina'),
+    'bash' => t('Bash'),
     'basic' => t('Basic'),
     'bbcode' => t('BBCode'),
     'blade' => t('Blade (Laravel)'),
@@ -512,7 +492,7 @@ function highlight_js_available_languages() {
     'sml' => t('SML'),
     'solidity' => t('Solidity'),
     'spl' => t('Splunk SPL'),
-    'stan, stanfuncs' => t('Stan'),
+    'stan' => t('Stan'),
     'stata' => t('Stata'),
     'iecst' => t('Structured Text'),
     'stylus' => t('Stylus'),
@@ -520,7 +500,7 @@ function highlight_js_available_languages() {
     'supercollider' => t('Supercollider'),
     'svelte' => t('Svelte'),
     'swift' => t('Swift'),
-    'tcl, tk' => t('Tcl'),
+    'tcl' => t('Tcl'),
     'terraform' => t('Terraform (HCL)'),
     'tap' => t('Test Anything Protocol'),
     'thrift' => t('Thrift'),

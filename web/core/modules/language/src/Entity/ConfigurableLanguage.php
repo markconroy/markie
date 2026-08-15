@@ -148,7 +148,7 @@ class ConfigurableLanguage extends ConfigEntityBase implements ConfigurableLangu
 
     // Update URL Prefixes for all languages after the
     // LanguageManagerInterface::getLanguages() cache is flushed.
-    language_negotiation_url_prefixes_update();
+    $this->updateUrlPrefixes();
 
     // If after adding this language the site will become multilingual, we need
     // to rebuild language services.
@@ -166,7 +166,7 @@ class ConfigurableLanguage extends ConfigEntityBase implements ConfigurableLangu
       $config = \Drupal::configFactory()->getEditable('language.negotiation');
       $domains = $config->get('url.domains');
       $domains[$this->id()] = '';
-      $config->set('url.domains', $domains)->save(TRUE);
+      $config->set('url.domains', $domains)->save();
     }
   }
 
@@ -207,7 +207,7 @@ class ConfigurableLanguage extends ConfigEntityBase implements ConfigurableLangu
     $config = \Drupal::configFactory()->getEditable('language.negotiation');
     $config->clear('url.prefixes.' . $entity->id());
     $config->clear('url.domains.' . $entity->id());
-    $config->save(TRUE);
+    $config->save();
   }
 
   /**
@@ -296,6 +296,25 @@ class ConfigurableLanguage extends ConfigEntityBase implements ConfigurableLangu
         'direction' => $standard_languages[$langcode][2] ?? static::DIRECTION_LTR,
       ]);
     }
+  }
+
+  /**
+   * Update the list of prefixes from the installed languages.
+   */
+  protected function updateUrlPrefixes(): void {
+    $config = \Drupal::configFactory()->getEditable('language.negotiation');
+    $prefixes = $config->get('url.prefixes');
+    foreach ($this->languageManager()->getLanguages() as $langcode => $language) {
+      // The prefix for this language should be updated if it's not assigned yet
+      // or the prefix is set to the empty string.
+      if (empty($prefixes[$langcode])) {
+        // For the default language, set the prefix to the empty string,
+        // otherwise use the langcode.
+        $prefixes[$langcode] = $language->isDefault() ? '' : $langcode;
+      }
+      // Otherwise we keep the configured prefix.
+    }
+    $config->set('url.prefixes', $prefixes)->save();
   }
 
 }

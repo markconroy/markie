@@ -9,9 +9,42 @@ ai_content_suggestions.settings:
       type: sequence
       label: Plugins
       orderby: key
+      constraints:
+        NotNull: []
       sequence:
         type: string
         label: 'Plugin ID'
+        constraints:
+          NotNull: []
+    entity_types:
+      type: sequence
+      label: 'Selected Entity Types'
+      orderby: key
+      constraints:
+        PluginExists:
+          manager: entity_type.manager
+          interface: Drupal\Core\Entity\ContentEntityInterface
+          plugin_id: '%key'
+      sequence:
+        type: mapping
+        mapping:
+          bundles:
+            type: sequence
+            label: 'Bundles'
+            constraints:
+              NotNull: []
+            sequence:
+              type: string
+              label: 'Bundle Machine Name'
+              constraints:
+                EntityBundleExists: '%parent.%key'
+          mode:
+            type: string
+            label: 'Mode for entity types'
+            constraints:
+              Choice:
+                - enable
+                - disable
 
 ai_content_suggestions.prompts:
   type: config_object

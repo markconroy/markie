@@ -11,7 +11,6 @@ use Drupal\Core\Link;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\TempStore\Lock;
 use Drupal\views\Controller\ViewAjaxController;
-use Drupal\views\Views;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\views\ViewExecutable;
 use Drupal\Core\Database\Database;
@@ -20,6 +19,7 @@ use Drupal\views\Plugin\views\query\Sql;
 use Drupal\views\Entity\View;
 use Drupal\views\ViewEntityInterface;
 use Drupal\Core\Routing\RouteObjectInterface;
+use Drupal\views\ViewsFormHelperTrait;
 use Symfony\Component\HttpFoundation\InputBag;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -30,6 +30,7 @@ use Symfony\Component\HttpFoundation\Request;
 class ViewUI implements ViewEntityInterface {
 
   use StringTranslationTrait;
+  use ViewsFormHelperTrait;
 
   /**
    * Indicates if a view is currently being edited.
@@ -331,7 +332,10 @@ class ViewUI implements ViewEntityInterface {
       // button labels.
       if (isset($names)) {
         $form['actions']['submit']['#values'] = $names;
-        $form['actions']['submit']['#process'] = array_merge(['views_ui_form_button_was_clicked'], \Drupal::service('element_info')->getInfoProperty($form['actions']['submit']['#type'], '#process', []));
+        $form['actions']['submit']['#process'] = [
+          [static::class, 'formButtonWasClicked'],
+          ...\Drupal::service('element_info')->getInfoProperty($form['actions']['submit']['#type'], '#process', []),
+        ];
       }
       // If a validation handler exists for the form, assign it to this button.
       $form['actions']['submit']['#validate'][] = [$form_state->getFormObject(), 'validateForm'];
@@ -492,7 +496,7 @@ class ViewUI implements ViewEntityInterface {
           'table' => $table,
           'field' => $field,
         ];
-        $handler = Views::handlerManager($key)->getHandler($item);
+        $handler = \Drupal::service('views.plugin_managers')->get($key)->getHandler($item);
         if ($this->getExecutable()->displayHandlers->get('default')->useGroupBy() && $handler->usesGroupBy()) {
           $this->addFormToStack('handler-group', $display_id, $type, $id);
         }
@@ -612,13 +616,6 @@ class ViewUI implements ViewEntityInterface {
       $request->setSession($request_stack->getSession());
       $request_stack->push($request);
 
-      // Suppress contextual links of entities within the result set during a
-      // Preview.
-      // @todo We'll want to add contextual links specific to editing the View,
-      //   so the suppression may need to be moved deeper into the Preview
-      //   pipeline.
-      views_ui_contextual_links_suppress_push();
-
       $show_additional_queries = $config->get('ui.show.additional_queries');
 
       Timer::start('entity.view.preview_form');
@@ -635,8 +632,6 @@ class ViewUI implements ViewEntityInterface {
       }
 
       $this->render_time = Timer::stop('entity.view.preview_form')['time'];
-
-      views_ui_contextual_links_suppress_pop();
 
       // Prepare the query information and statistics to show either above or
       // below the view preview.
@@ -688,7 +683,10 @@ class ViewUI implements ViewEntityInterface {
                 $query_string = strtr($query['query'], $query['args']);
                 $queries[] = [
                   '#prefix' => "\n",
-                  '#markup' => $this->t('[@time ms] @query', ['@time' => round($query['time'] * 100000, 1) / 100000.0, '@query' => $query_string]),
+                  '#markup' => $this->t('[@time ms] @query', [
+                    '@time' => round($query['time'] * 100000, 1) / 100000.0,
+                    '@query' => $query_string,
+                  ]),
                 ];
               }
 
@@ -1316,6 +1314,7 @@ class ViewUI implements ViewEntityInterface {
    * {@inheritdoc}
    */
   public function trustData() {
+    @trigger_error(__METHOD__ . '() is deprecated in drupal:11.4.0 and is removed from drupal:13.0.0. There is no replacement. See https://www.drupal.org/node/3348180', E_USER_DEPRECATED);
     return $this->storage->trustData();
   }
 

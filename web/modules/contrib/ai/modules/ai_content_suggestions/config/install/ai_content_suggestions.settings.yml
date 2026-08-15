@@ -10,3 +10,13 @@ field_widget_prompt: |
   ```
   If you are enable to generate a response, respond with "Insufficient information provided, please add more data before generating suggestions."
 plugins: {  }
+entity_types:
+  node:
+    bundles: {  }
+    mode: disable
+  taxonomy_term:
+    bundles: {  }
+    mode: disable
+  block_content:
+    bundles: {  }
+    mode: disable

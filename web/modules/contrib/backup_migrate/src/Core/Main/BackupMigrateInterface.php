@@ -20,11 +20,14 @@ interface BackupMigrateInterface extends PluginCallerInterface {
    * Perform the backup from a given source, save it to the given destination.
    *
    * @param string $source_id
+   *   The source id.
    *   The id of the source to backup.
    * @param string $destination_id
+   *   The destination id.
    *   The id of the destination to save the backup to.
    *
-   * @return
+   * @return mixed
+   *   The return value.
    */
   public function backup($source_id, $destination_id);
 
@@ -45,6 +48,7 @@ interface BackupMigrateInterface extends PluginCallerInterface {
    * Get the list of available destinations.
    *
    * @return \Drupal\backup_migrate\Core\Plugin\PluginManagerInterface
+   *   The requested integer.
    */
   public function destinations();
 
@@ -52,6 +56,7 @@ interface BackupMigrateInterface extends PluginCallerInterface {
    * Set the destinations plugin manager.
    *
    * @param \Drupal\backup_migrate\Core\Plugin\PluginManagerInterface $destinations
+   *   The destinations.
    */
   public function setDestinationManager(PluginManagerInterface $destinations);
 
@@ -59,6 +64,7 @@ interface BackupMigrateInterface extends PluginCallerInterface {
    * Get the list of sources.
    *
    * @return \Drupal\backup_migrate\Core\Plugin\PluginManagerInterface
+   *   The requested integer.
    */
   public function sources();
 
@@ -66,6 +72,7 @@ interface BackupMigrateInterface extends PluginCallerInterface {
    * Set the sources plugin manager.
    *
    * @param \Drupal\backup_migrate\Core\Plugin\PluginManagerInterface $sources
+   *   The sources.
    */
   public function setSourceManager(PluginManagerInterface $sources);
 
@@ -73,6 +80,7 @@ interface BackupMigrateInterface extends PluginCallerInterface {
    * Get the service locator.
    *
    * @return \Drupal\backup_migrate\Core\Service\ServiceManager
+   *   The return value.
    */
   public function services();
 
@@ -80,6 +88,7 @@ interface BackupMigrateInterface extends PluginCallerInterface {
    * Set the service locator.
    *
    * @param \Drupal\backup_migrate\Core\Service\ServiceManager $services
+   *   The services.
    */
   public function setServiceManager(ServiceManager $services);
 

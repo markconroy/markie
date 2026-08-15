@@ -58,7 +58,14 @@ class EntityTestHooks {
       }
     }
     // Allow entity_test_rev tests to override the entity type definition.
-    $entity_types['entity_test_rev'] = $state->get('entity_test_rev.entity_type', $entity_types['entity_test_rev']);
+    $entity_test_rev_definition = $state->get('entity_test_rev.entity_type', $entity_types['entity_test_rev']);
+    // Simulate deletion if state value is not an entity type object.
+    if ($entity_test_rev_definition instanceof EntityTypeInterface) {
+      $entity_types['entity_test_rev'] = $entity_test_rev_definition;
+    }
+    else {
+      unset($entity_types['entity_test_rev']);
+    }
     $entity_types['entity_test_revpub'] = $state->get('entity_test_revpub.entity_type', $entity_types['entity_test_revpub']);
     // Enable the entity_test_new only when needed.
     if (!$state->get('entity_test_new')) {
@@ -145,7 +152,7 @@ class EntityTestHooks {
     $bundles = [];
     $entity_types = \Drupal::entityTypeManager()->getDefinitions();
     foreach ($entity_types as $entity_type_id => $entity_type) {
-      if ($entity_type->getProvider() == 'entity_test'
+      if (in_array($entity_type->getProvider(), ['entity_test', 'entity_test_update'], TRUE)
         && !in_array($entity_type_id, ['entity_test_with_bundle', 'entity_test_mul_with_bundle'], TRUE)) {
         $bundles[$entity_type_id] = \Drupal::state()->get($entity_type_id . '.bundles', [$entity_type_id => ['label' => 'Entity Test Bundle']]);
       }

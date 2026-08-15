@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\node\Functional\Views;
 
+use Drupal\filter\FilterFormatRepositoryInterface;
 use Drupal\node\Entity\NodeType;
 use Drupal\Tests\node\Traits\NodeAccessTrait;
+use Drupal\node\NodeAccessRebuild;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
@@ -54,7 +56,7 @@ class FilterNodeAccessTest extends NodeTestBase {
 
     $this->addPrivateField(NodeType::load('article'));
 
-    node_access_rebuild();
+    \Drupal::service(NodeAccessRebuild::class)->rebuild();
     \Drupal::state()->set('node_access_test.private', TRUE);
 
     $num_simple_users = 2;
@@ -73,7 +75,7 @@ class FilterNodeAccessTest extends NodeTestBase {
           'body' => [
             [
               'value' => $type . ' node',
-              'format' => filter_default_format(),
+              'format' => \Drupal::service(FilterFormatRepositoryInterface::class)->getDefaultFormat()->id(),
             ],
           ],
           'title' => "$type Article created by " . $web_user->getAccountName(),

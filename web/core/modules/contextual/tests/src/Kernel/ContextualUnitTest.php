@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\contextual\Kernel;
 
+use Drupal\contextual\ContextualLinksSerializer;
 use Drupal\contextual\Element\ContextualLinksPlaceholder;
 use Drupal\KernelTests\KernelTestBase;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -111,12 +112,14 @@ class ContextualUnitTest extends KernelTestBase {
    *   The #contextual_links property value array.
    * @param string $id
    *   The serialized representation of the passed links.
+   * @param string $theme
+   *   The name of the theme the placeholder should pass to the controller.
    *
    * @legacy-covers ::_contextual_links_to_id
    */
   #[DataProvider('contextualLinksDataProvider')]
-  public function testContextualLinksToId(array $links, string $id): void {
-    $this->assertSame($id, _contextual_links_to_id($links));
+  public function testContextualLinksToId(array $links, string $id, string $theme): void {
+    $this->assertSame($id, $this->container->get(ContextualLinksSerializer::class)->linksToId($links));
   }
 
   /**
@@ -126,12 +129,14 @@ class ContextualUnitTest extends KernelTestBase {
    *   The #contextual_links property value array.
    * @param string $id
    *   The serialized representation of the passed links.
+   * @param string $theme
+   *   The name of the theme the placeholder should pass to the controller.
    *
    * @legacy-covers ::_contextual_id_to_links
    */
   #[DataProvider('contextualLinksDataProvider')]
-  public function testContextualIdToLinks(array $links, string $id): void {
-    $this->assertSame($links, _contextual_id_to_links($id));
+  public function testContextualIdToLinks(array $links, string $id, string $theme): void {
+    $this->assertSame($links, $this->container->get(ContextualLinksSerializer::class)->idToLinks($id));
   }
 
   /**

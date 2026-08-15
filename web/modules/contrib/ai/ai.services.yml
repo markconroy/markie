@@ -22,6 +22,9 @@ services:
   ai.vdb_provider:
     class: Drupal\ai\AiVdbProviderPluginManager
     parent: default_plugin_manager
+    calls:
+      - [ setConfigFactory, [ '@config.factory' ] ]
+      - [ setLoggerChannelFactory, [ '@logger.factory']]
   ai.tokenizer:
     class: Drupal\ai\Utility\Tokenizer
     arguments: ['@ai.provider']
@@ -35,6 +38,11 @@ services:
     class: Drupal\ai\Breadcrumb\AiModelSettingsBreadcrumbBuilder
     tags:
       - { name: breadcrumb_builder, priority: 100 }
+  ai.exception_event_subscriber:
+    class: Drupal\ai\EventSubscriber\AiExceptionEventSubscriber
+    arguments: ['@logger.factory']
+    tags:
+      - { name: event_subscriber }
   plugin.manager.ai.function_calls:
     class: Drupal\ai\Service\FunctionCalling\FunctionCallPluginManager
     parent: default_plugin_manager
@@ -68,6 +76,7 @@ services:
     tags:
       - { name: 'event_subscriber' }
   Drupal\ai\EventSubscriber\GuardrailsEventSubscriber: ~
+  Drupal\ai\EventSubscriber\GlobalGuardrailsEventSubscriber: ~
   Drupal\ai\Guardrail\AiGuardrailRepository: ~
   Drupal\ai\Guardrail\AiGuardrailHelper: ~
   ai.guardrail_helper: '@Drupal\ai\Guardrail\AiGuardrailHelper'
@@ -85,3 +94,15 @@ services:
   ai.hostname_filter_service:
     class: Drupal\ai\Service\HostnameFilter
     arguments: ['@logger.factory', '@config.factory']
+  plugin.manager.ai.chat_processor:
+    class: Drupal\ai\PluginManager\ChatProcessorPluginManager
+    parent: default_plugin_manager
+    arguments: ['@container.namespaces', '@cache.discovery', '@module_handler']
+  Drupal\ai\PluginManager\ChatProcessorPluginManager: '@plugin.manager.ai.chat_processor'
+  ai.file_manager:
+    class: Drupal\ai\Service\AiFileManager
+    autowire: true
+  ai.validator:
+    class: Drupal\ai\Service\AiValidator
+  Drupal\ai\Service\AiValidator: "@ai.validator"
+  Drupal\ai\Service\AiValidatorInterface: "@ai.validator"

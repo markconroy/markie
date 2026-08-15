@@ -22,11 +22,6 @@ class BackupMigrateQuickBackupTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  protected $strictConfigSchema = FALSE;
-
-  /**
-   * {@inheritdoc}
-   */
   protected $defaultTheme = 'stark';
 
   /**

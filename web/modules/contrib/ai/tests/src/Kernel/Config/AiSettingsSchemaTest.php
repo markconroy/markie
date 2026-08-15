@@ -116,6 +116,26 @@ class AiSettingsSchemaTest extends KernelTestBase {
   }
 
   /**
+   * Tests that AI settings form builds with string allowed_hosts config values.
+   */
+  public function testBuildFormWithStringAllowedHostsValue(): void {
+    // Write directly to the config storage to bypass schema validation and
+    // simulate a legacy string value that pre-existing sites may have stored.
+    $storage = \Drupal::service('config.storage');
+    $data = $storage->read('ai.settings') ?: [];
+    $data['allowed_hosts'] = '';
+    $storage->write('ai.settings', $data);
+
+    $form_state = new FormState();
+    $form = $this->settingsForm->buildForm([], $form_state);
+
+    $this->assertSame(
+      '',
+      $form['advanced_settings']['allowed_host_wrapper']['allowed_hosts']['#default_value']
+    );
+  }
+
+  /**
    * Builds form values for AI settings submit.
    *
    * @return array

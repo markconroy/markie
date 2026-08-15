@@ -2,10 +2,10 @@ name: 'Backup and Migrate'
 description: 'Backup the Drupal database and files or migrate them to another environment.'
 package: Other
 type: module
-core_version_requirement: ^9.5 || ^10 || ^11
+core_version_requirement: ^10.3 || ^11
 configure: backup_migrate.quick_backup
 
-# Information added by Drupal.org packaging script on 2026-02-14
-version: '5.1.4'
+# Information added by Drupal.org packaging script on 2026-07-11
+version: '5.1.5'
 project: 'backup_migrate'
-datestamp: 1771081282
+datestamp: 1783803202

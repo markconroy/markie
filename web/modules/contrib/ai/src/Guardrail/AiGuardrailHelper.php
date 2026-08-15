@@ -43,7 +43,7 @@ class AiGuardrailHelper {
 
       if ($guardrail_set !== NULL) {
         $input_with_guardrails = clone $input;
-        $input_with_guardrails->setGuardrailSet($guardrail_set);
+        $input_with_guardrails->addGuardrailSet($guardrail_set);
 
         return $input_with_guardrails;
       }

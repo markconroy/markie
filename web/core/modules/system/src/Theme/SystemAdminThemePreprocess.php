@@ -162,7 +162,7 @@ class SystemAdminThemePreprocess {
       foreach ($theme->info['dependencies'] as $dependency) {
         if (isset($form[$dependency])) {
           // Add themes to the module's required by list.
-          $form[$dependency]['#required_by'][] = $theme->status ? $this->t('@theme', ['@theme (theme)' => $theme->info['name']]) : $this->t('@theme (theme) (<span class="admin-disabled">disabled</span>)', ['@theme' => $theme->info['name']]);
+          $form[$dependency]['#required_by'][] = $theme->status ? $this->t('@theme (theme)', ['@theme' => $theme->info['name']]) : $this->t('@theme (theme) (<span class="admin-disabled">disabled</span>)', ['@theme' => $theme->info['name']]);
         }
       }
     }
@@ -345,7 +345,10 @@ class SystemAdminThemePreprocess {
           if (substr_count($theme->info['php'], '.') < 2) {
             $theme->info['php'] .= '.*';
           }
-          $current_theme['incompatible'] = $this->t('This theme requires PHP version @php_required and is incompatible with PHP version @php_version.', ['@php_required' => $theme->info['php'], '@php_version' => phpversion()]);
+          $current_theme['incompatible'] = $this->t('This theme requires PHP version @php_required and is incompatible with PHP version @php_version.', [
+            '@php_required' => $theme->info['php'],
+            '@php_version' => phpversion(),
+          ]);
         }
         elseif (!empty($theme->incompatible_base)) {
           $current_theme['incompatible'] = $this->t('This theme requires the base theme @base_theme to operate correctly.', ['@base_theme' => $theme->info['base theme']]);

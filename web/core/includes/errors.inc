@@ -63,10 +63,6 @@ function _drupal_error_handler_real($error_level, $message, $filename, $line): v
 
     // We treat recoverable errors as fatal.
     $recoverable = $error_level == E_RECOVERABLE_ERROR;
-    // As __toString() methods must not throw exceptions (recoverable errors)
-    // in PHP, we allow them to trigger a fatal error by emitting a user error
-    // using trigger_error().
-    $to_string = $error_level == E_USER_ERROR && str_ends_with($caller['function'], '__toString()');
     _drupal_log_error([
       '%type' => isset($types[$error_level]) ? $severity_msg : 'Unknown error',
       // The standard PHP error handler considers that the error messages
@@ -79,7 +75,7 @@ function _drupal_error_handler_real($error_level, $message, $filename, $line): v
       'backtrace' => $backtrace,
       '@backtrace_string' => (new \Exception())->getTraceAsString(),
       'exception' => NULL,
-    ], $recoverable || $to_string);
+    ], $recoverable);
   }
   // If the site is a test site then fail for user deprecations so they can be
   // caught by the deprecation error handler.
@@ -171,7 +167,12 @@ function _drupal_log_error($error, $fatal = FALSE): void {
       // Provide the PHP backtrace and exception to logger implementations. Add
       // 'severity_level' to the context to maintain BC and allow logging
       // implementations to use it.
-      \Drupal::logger('php')->log($severity, '%type: @message in %function (line %line of %file) @backtrace_string.', $error + ['backtrace' => $backtrace, 'exception' => $exception, 'severity_level' => $severity]);
+      \Drupal::logger('php')
+        ->log($severity, '%type: @message in %function (line %line of %file) @backtrace_string.', $error + [
+          'backtrace' => $backtrace,
+          'exception' => $exception,
+          'severity_level' => $severity,
+        ]);
     }
     catch (\Throwable) {
       // We can't log, for example because the database connection is not

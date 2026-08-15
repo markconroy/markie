@@ -13,6 +13,7 @@ use org\bovigo\vfs\vfsStream;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\IgnoreDeprecations;
 
 /**
  * Tests InfoParser class and exception.
@@ -216,6 +217,7 @@ VERSION_TEST;
    *
    * @legacy-covers ::parse
    */
+  #[IgnoreDeprecations]
   public function testFloatVersion(): void {
     $float_version = <<<VERSION_TEST
 core_version_requirement: '*'
@@ -230,6 +232,8 @@ VERSION_TEST;
         'float_version.info.txt' => $float_version,
       ],
     ]);
+    $this->expectUserDeprecationMessage("Using a non-string as the 'version' value in vfs://modules/fixtures/float_version.info.txt is deprecated in drupal:11.4.0 and will be a fatal error in drupal:13.0.0. Instead, wrap the version value in single quotes. See https://www.drupal.org/node/3576311");
+
     $info_values = $this->infoParser->parse(vfsStream::url('modules/fixtures/float_version.info.txt'));
     $this->assertSame('1.1', $info_values['version'], 'Floating point version should be cast to a string');
   }

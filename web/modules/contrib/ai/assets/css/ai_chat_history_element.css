@@ -82,55 +82,18 @@
   background-color: #fff;
 }
 
-.chat-history-wrapper>.chat-history-item .remove-button {
+/* Position icon buttons (remove buttons) in chat history items */
+.chat-history-wrapper>.chat-history-item .ai-icon-button {
   position: absolute;
   right: 10px;
   top: 5px;
-  width: 20px;
-  height: 20px;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  padding: 0;
-  border: 0;
-  box-shadow: none;
-  font-size: 20px;
-  color: #777;
   z-index: 1;
 }
 
 /* Position remove buttons inside tool call items to their own top-right */
-.chat-history-wrapper .tool-call-item .remove-button {
+.chat-history-wrapper .tool-call-item .ai-icon-button {
   right: 6px;
   top: 6px;
-}
-
-.chat-history-wrapper>.chat-history-item:hover .remove-button {
-  color: #333;
-  transition: color 0.2s ease-in-out;
-}
-
-.chat-history-wrapper>.chat-history-item .remove-button:hover {
-  color: #000;
-  transition: color 0.2s ease-in-out;
-}
-
-.chat-history-wrapper>.chat-history-item .remove-button::before,
-.chat-history-wrapper>.chat-history-item .remove-button::after {
-  content: '';
-  position: absolute;
-  top: 9px;
-  left: 4px;
-  width: 12px;
-  height: 2px;
-}
-
-.chat-history-wrapper>.chat-history-item .remove-button::before {
-  transform: rotate(45deg);
-}
-
-.chat-history-wrapper>.chat-history-item .remove-button::after {
-  transform: rotate(-45deg);
 }
 
 .chat-history-wrapper>.chat-history-item.dragging {

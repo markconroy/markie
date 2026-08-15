@@ -23,6 +23,7 @@
         new Sortable(element, {
           animation: 150,
           draggable: '.field-widget-action-element',
+          handle: '.field-widget-action-element summary',
           onEnd: function (evt) {
             Drupal.fieldWidgetActions.moveElement(evt);
           }

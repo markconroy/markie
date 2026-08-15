@@ -2,8 +2,11 @@
 
 namespace Drupal\editor\Hook;
 
+use Drupal\Component\Utility\Html;
+use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\editor\Entity\Editor;
+use Drupal\file\FileInterface;
 use Drupal\filter\FilterFormatInterface;
 use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Entity\EntityInterface;
@@ -14,6 +17,7 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Hook\Attribute\Hook;
+use Drupal\text\Plugin\Field\FieldType\TextItemBase;
 
 /**
  * Hook implementations for editor.
@@ -132,7 +136,7 @@ class EditorHooks {
         'trigger_as' => [
           'name' => 'editor_configure',
         ],
-        'callback' => 'editor_form_filter_admin_form_ajax',
+        'callback' => self::class . ':editorFormFilterAdminFormAjax',
         'wrapper' => 'editor-settings-wrapper',
       ],
       '#weight' => -10,
@@ -147,10 +151,10 @@ class EditorHooks {
               ],
       ],
       '#submit' => [
-        'editor_form_filter_admin_format_editor_configure',
+        self::class . ':editorFormFilterAdminFormatEditorConfigure',
       ],
       '#ajax' => [
-        'callback' => 'editor_form_filter_admin_form_ajax',
+        'callback' => self::class . ':editorFormFilterAdminFormAjax',
         'wrapper' => 'editor-settings-wrapper',
       ],
       '#weight' => -10,
@@ -181,8 +185,8 @@ class EditorHooks {
       $form['editor']['settings']['subform'] = $plugin->buildConfigurationForm($form['editor']['settings']['subform'], $subform_state);
       $form['editor']['settings']['subform']['#parents'] = ['editor', 'settings'];
     }
-    $form['#validate'][] = 'editor_form_filter_admin_format_validate';
-    $form['actions']['submit']['#submit'][] = 'editor_form_filter_admin_format_submit';
+    $form['#validate'][] = self::class . ':editorFormFilterAdminFormatValidate';
+    $form['actions']['submit']['#submit'][] = self::class . ':editorFormFilterAdminFormatSubmit';
   }
 
   /**
@@ -194,9 +198,9 @@ class EditorHooks {
     if (!$entity instanceof FieldableEntityInterface) {
       return;
     }
-    $referenced_files_by_field = _editor_get_file_uuids_by_field($entity);
+    $referenced_files_by_field = $this->getFileUuidsByField($entity);
     foreach ($referenced_files_by_field as $uuids) {
-      _editor_record_file_usage($uuids, $entity);
+      $this->recordFileUsage($uuids, $entity);
     }
   }
 
@@ -212,25 +216,25 @@ class EditorHooks {
     // On new revisions, all files are considered to be a new usage and no
     // deletion of previous file usages are necessary.
     if ($entity->getOriginal() && $entity->getRevisionId() != $entity->getOriginal()->getRevisionId()) {
-      $referenced_files_by_field = _editor_get_file_uuids_by_field($entity);
+      $referenced_files_by_field = $this->getFileUuidsByField($entity);
       foreach ($referenced_files_by_field as $uuids) {
-        _editor_record_file_usage($uuids, $entity);
+        $this->recordFileUsage($uuids, $entity);
       }
     }
     else {
-      $original_uuids_by_field = !$entity->getOriginal() ? [] : _editor_get_file_uuids_by_field($entity->getOriginal());
-      $uuids_by_field = _editor_get_file_uuids_by_field($entity);
+      $original_uuids_by_field = !$entity->getOriginal() ? [] : $this->getFileUuidsByField($entity->getOriginal());
+      $uuids_by_field = $this->getFileUuidsByField($entity);
       // Detect file usages that should be incremented.
       foreach ($uuids_by_field as $field => $uuids) {
         $original_uuids = $original_uuids_by_field[$field] ?? [];
         if ($added_files = array_diff($uuids_by_field[$field], $original_uuids)) {
-          _editor_record_file_usage($added_files, $entity);
+          $this->recordFileUsage($added_files, $entity);
         }
       }
       // Detect file usages that should be decremented.
       foreach ($original_uuids_by_field as $field => $uuids) {
         $removed_files = array_diff($original_uuids_by_field[$field], $uuids_by_field[$field]);
-        _editor_delete_file_usage($removed_files, $entity, 1);
+        $this->deleteFileUsage($removed_files, $entity, 1);
       }
     }
   }
@@ -244,9 +248,9 @@ class EditorHooks {
     if (!$entity instanceof FieldableEntityInterface) {
       return;
     }
-    $referenced_files_by_field = _editor_get_file_uuids_by_field($entity);
+    $referenced_files_by_field = $this->getFileUuidsByField($entity);
     foreach ($referenced_files_by_field as $uuids) {
-      _editor_delete_file_usage($uuids, $entity, 0);
+      $this->deleteFileUsage($uuids, $entity, 0);
     }
   }
 
@@ -259,17 +263,17 @@ class EditorHooks {
     if (!$entity instanceof FieldableEntityInterface) {
       return;
     }
-    $referenced_files_by_field = _editor_get_file_uuids_by_field($entity);
+    $referenced_files_by_field = $this->getFileUuidsByField($entity);
     foreach ($referenced_files_by_field as $uuids) {
-      _editor_delete_file_usage($uuids, $entity, 1);
+      $this->deleteFileUsage($uuids, $entity, 1);
     }
   }
 
   /**
    * Implements hook_file_download().
    *
-   * @see file_file_download()
-   * @see file_get_file_references()
+   * @see \Drupal\file\Hook\FileDownloadHook
+   * @see \Drupal\file\FileReferenceResolver::getReferences()
    */
   #[Hook('file_download')]
   public function fileDownload($uri): array|int|null {
@@ -296,7 +300,7 @@ class EditorHooks {
     // Editor.module MUST NOT call $file->access() here (like
     // file_file_download() does) as checking the 'download' access to a file
     // entity would end up in FileAccessControlHandler->checkAccess() and
-    // ->getFileReferences(), which calls file_get_file_references(). This
+    // \Drupal\file\FileReferenceResolver::getReferences(). This
     // latter one would allow downloading files only handled by the file.module,
     // which is exactly not the case right here. So instead we must check if the
     // current user is allowed to view any of the entities that reference the
@@ -345,6 +349,257 @@ class EditorHooks {
     /** @var \Drupal\editor\EditorInterface $editor */
     if ($editor = Editor::load($format->id())) {
       $editor->setStatus($status)->save();
+    }
+  }
+
+  /**
+   * Records file usage of files referenced by formatted text fields.
+   *
+   * Each referenced file that is temporally saved will be resaved as permanent.
+   *
+   * @param array $uuids
+   *   An array of file entity UUIDs.
+   * @param \Drupal\Core\Entity\EntityInterface $entity
+   *   An entity whose fields to inspect for file references.
+   */
+  protected function recordFileUsage(array $uuids, EntityInterface $entity): void {
+    if (!\Drupal::getContainer()->has('file.usage')) {
+      return;
+    }
+
+    $entity_repository = \Drupal::service('entity.repository');
+    $file_usage = \Drupal::service('file.usage');
+
+    foreach ($uuids as $uuid) {
+      if ($file = $entity_repository->loadEntityByUuid('file', $uuid)) {
+        assert($file instanceof FileInterface);
+        if ($file->isTemporary()) {
+          $file->setPermanent();
+          $file->save();
+        }
+        $file_usage->add($file, 'editor', $entity->getEntityTypeId(), $entity->id());
+      }
+    }
+  }
+
+  /**
+   * Deletes file usage of files referenced by formatted text fields.
+   *
+   * @param array $uuids
+   *   An array of file entity UUIDs.
+   * @param \Drupal\Core\Entity\FieldableEntityInterface $entity
+   *   An entity whose fields to inspect for file references.
+   * @param int $count
+   *   The number of references to delete. Should be 1 when deleting a single
+   *   revision and 0 when deleting an entity entirely.
+   *
+   * @see \Drupal\file\FileUsage\FileUsageInterface::delete()
+   */
+  protected function deleteFileUsage(array $uuids, EntityInterface $entity, int $count): void {
+    if (!\Drupal::getContainer()->has('file.usage')) {
+      return;
+    }
+
+    $entity_repository = \Drupal::service('entity.repository');
+    $file_usage = \Drupal::service('file.usage');
+
+    foreach ($uuids as $uuid) {
+      if ($file = $entity_repository->loadEntityByUuid('file', $uuid)) {
+        $file_usage->delete($file, 'editor', $entity->getEntityTypeId(), $entity->id(), $count);
+      }
+    }
+  }
+
+  /**
+   * Finds all files referenced (data-entity-uuid) by formatted text fields.
+   *
+   * @param \Drupal\Core\Entity\FieldableEntityInterface $entity
+   *   An entity whose fields to analyze.
+   *
+   * @return array
+   *   An array of file entity UUIDs.
+   */
+  protected function getFileUuidsByField(FieldableEntityInterface $entity): array {
+    $uuids = [];
+
+    $formatted_text_fields = $this->getFormattedTextFields($entity);
+    foreach ($formatted_text_fields as $formatted_text_field) {
+      $text = '';
+      $field_items = $entity->get($formatted_text_field);
+      foreach ($field_items as $field_item) {
+        $text .= $field_item->value;
+        if ($field_item->getFieldDefinition()->getType() == 'text_with_summary') {
+          $text .= $field_item->summary;
+        }
+      }
+      $uuids[$formatted_text_field] = $this->parseFileUuids($text);
+    }
+    return $uuids;
+  }
+
+  /**
+   * Determines the formatted text fields on an entity.
+   *
+   * A field type is considered to provide formatted text if its class is a
+   * subclass of Drupal\text\Plugin\Field\FieldType\TextItemBase.
+   *
+   * @param \Drupal\Core\Entity\FieldableEntityInterface $entity
+   *   An entity whose fields to analyze.
+   *
+   * @return array
+   *   The names of the fields on this entity that support formatted text.
+   */
+  protected function getFormattedTextFields(FieldableEntityInterface $entity): array {
+    $field_definitions = $entity->getFieldDefinitions();
+    if (empty($field_definitions)) {
+      return [];
+    }
+
+    // Only return formatted text fields.
+    // @todo improve as part of https://www.drupal.org/node/2732429
+    $field_type_manager = \Drupal::service('plugin.manager.field.field_type');
+    return array_keys(array_filter($field_definitions, function (FieldDefinitionInterface $definition) use ($field_type_manager) {
+      $type = $definition->getType();
+      $plugin_class = $field_type_manager->getPluginClass($type);
+      return is_subclass_of($plugin_class, TextItemBase::class);
+    }));
+  }
+
+  /**
+   * Parse an HTML snippet for any linked file with data-entity-uuid attributes.
+   *
+   * @param string $text
+   *   The partial (X)HTML snippet to load. Invalid markup will be corrected on
+   *   import.
+   *
+   * @return array
+   *   An array of all found UUIDs.
+   */
+  protected function parseFileUuids(string $text): array {
+    $dom = Html::load($text);
+    $xpath = new \DOMXPath($dom);
+    $uuids = [];
+    foreach ($xpath->query('//*[@data-entity-type="file" and @data-entity-uuid]') as $node) {
+      $uuids[] = $node->getAttribute('data-entity-uuid');
+    }
+    return $uuids;
+  }
+
+  /**
+   * Submit handler for 'editor_configure' button from 'filter_format_form'.
+   *
+   * @param array $form
+   *   The form render array.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The current form state.
+   */
+  public function editorFormFilterAdminFormatEditorConfigure(array $form, FormStateInterface $form_state): void {
+    $editor = $form_state->get('editor');
+    $editor_value = $form_state->getValue(['editor', 'editor']);
+    if ($editor_value !== NULL) {
+      if ($editor_value === '') {
+        $form_state->set('editor', FALSE);
+        $form_state->set('editor_plugin', NULL);
+      }
+      elseif (empty($editor) || $editor_value !== $editor->getEditor()) {
+        $format = $form_state->getFormObject()->getEntity();
+        $editor = Editor::create([
+          'format' => $format->isNew() ? NULL : $format->id(),
+          'editor' => $editor_value,
+          'image_upload' => [
+            'status' => FALSE,
+          ],
+        ]);
+        $form_state->set('editor', $editor);
+      }
+    }
+    $form_state->setRebuild();
+  }
+
+  /**
+   * Ajax callback handler for 'filter_format_form' form.
+   *
+   * @param array $form
+   *   The form render array.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The current form state.
+   */
+  public function editorFormFilterAdminFormAjax(array $form, FormStateInterface $form_state): array {
+    return $form['editor']['settings'];
+  }
+
+  /**
+   * Additional validate handler for 'filter_format_form' form.
+   *
+   * @param array $form
+   *   The form render array.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The current form state.
+   */
+  public function editorFormFilterAdminFormatValidate(array $form, FormStateInterface $form_state): void {
+    $editor_set = $form_state->getValue(['editor', 'editor']) !== "";
+    $subform_array_exists = (!empty($form['editor']['settings']['subform']) && is_array($form['editor']['settings']['subform']));
+    if ($editor_set && $subform_array_exists && $editor_plugin = $form_state->get('editor_plugin')) {
+      $subform_state = SubformState::createForSubform($form['editor']['settings']['subform'], $form, $form_state);
+      $editor_plugin->validateConfigurationForm($form['editor']['settings']['subform'], $subform_state);
+    }
+
+    // This validation handler should not be used with the 'Configure' button.
+    if ($form_state->getTriggeringElement()['#name'] === 'editor_configure') {
+      return;
+    }
+
+    // When using this form with JavaScript disabled in the browser, the
+    // 'Configure' button won't be clicked automatically. So, when the user has
+    // selected a text editor and has then clicked 'Save configuration', we
+    // should point out that the user must still configure the text editor.
+    if ($form_state->getValue(['editor', 'editor']) !== '' && !$form_state->get('editor')) {
+      $form_state->setErrorByName('editor][editor', $this->t('You must configure the selected text editor.'));
+    }
+  }
+
+  /**
+   * Additional submit handler for 'filter_format_form' form.
+   *
+   * @param array $form
+   *   The form render array.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The current form state.
+   */
+  public function editorFormFilterAdminFormatSubmit(array $form, FormStateInterface $form_state): void {
+    // Delete the existing editor if disabling or switching between editors.
+    $format = $form_state->getFormObject()->getEntity();
+    $format_id = $format->isNew() ? NULL : $format->id();
+    $original_editor = $format_id ? Editor::load($format_id) : NULL;
+    if ($original_editor && $original_editor->getEditor() != $form_state->getValue(['editor', 'editor'])) {
+      $original_editor->delete();
+    }
+
+    $editor_set = $form_state->getValue(['editor', 'editor']) !== "";
+    $subform_array_exists = (!empty($form['editor']['settings']['subform']) && is_array($form['editor']['settings']['subform']));
+    if (($editor_plugin = $form_state->get('editor_plugin')) && $editor_set && $subform_array_exists) {
+      $subform_state = SubformState::createForSubform($form['editor']['settings']['subform'], $form, $form_state);
+      $editor_plugin->submitConfigurationForm($form['editor']['settings']['subform'], $subform_state);
+    }
+
+    // Create a new editor or update the existing editor.
+    if ($editor = $form_state->get('editor')) {
+      // Ensure the text format is set: when creating a new text format, this
+      // would equal the empty string.
+      $editor->set('format', $format_id);
+      if ($settings = $form_state->getValue(['editor', 'settings'])) {
+        $editor->setSettings($settings);
+      }
+      // When image uploads are disabled (status = FALSE), the schema for image
+      // upload settings does not allow other keys to be present.
+      // @see editor.image_upload_settings.*
+      // @see editor.image_upload_settings.1
+      // @see editor.schema.yml
+      $image_upload_settings = $editor->getImageUploadSettings();
+      if (!$image_upload_settings['status']) {
+        $editor->setImageUploadSettings(['status' => FALSE]);
+      }
+      $editor->save();
     }
   }
 

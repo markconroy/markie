@@ -47,13 +47,6 @@ class SystemManager {
   protected $menuActiveTrail;
 
   /**
-   * A static cache of menu items.
-   *
-   * @var array
-   */
-  protected $menuItems;
-
-  /**
    * Requirement severity -- Requirement successfully met.
    *
    * @deprecated in drupal:11.2.0 and is removed from drupal:12.0.0. Use
@@ -121,8 +114,9 @@ class SystemManager {
    */
   public function listRequirements() {
     // Load .install files.
-    include_once DRUPAL_ROOT . '/core/includes/install.inc';
-    drupal_load_updates();
+    foreach ($this->moduleHandler->getModuleList() as $module => $extension) {
+      $this->moduleHandler->loadInclude($module, 'install');
+    }
 
     // Check run-time requirements and status information.
     $requirements = $this->moduleHandler->invokeAll('requirements', ['runtime']);

@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\comment\Functional;
 
+use Drupal\comment\CommentingStatus;
 use Drupal\comment\CommentInterface;
 use Drupal\comment\CommentManagerInterface;
 use Drupal\comment\Entity\Comment;
-use Drupal\comment\Plugin\Field\FieldType\CommentItemInterface;
+use Drupal\comment\FormLocation;
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\user\RoleInterface;
 use PHPUnit\Framework\Attributes\Group;
@@ -86,8 +87,8 @@ class CommentLinksTest extends CommentTestBase {
     $this->assertSession()->linkExists('Reply');
 
     // Change comment settings.
-    $this->setCommentSettings('form_location', CommentItemInterface::FORM_BELOW, 'Set comment form location');
-    $this->node->comment = CommentItemInterface::OPEN;
+    $this->setCommentSettings('form_location', FormLocation::Below->value, 'Set comment form location');
+    $this->node->comment = CommentingStatus::Open->value;
     $this->node->save();
 
     // Change user permissions.

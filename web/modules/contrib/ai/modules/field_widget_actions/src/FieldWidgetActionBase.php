@@ -353,6 +353,12 @@ abstract class FieldWidgetActionBase extends PluginBase implements FieldWidgetAc
       '#field_widget_action_field_delta' => $context['delta'] ?? NULL,
       '#field_widget_action_settings' => $this->getConfiguration(),
     ];
+    $libraries = $this->getLibraries();
+    if (!empty($libraries)) {
+      $form[$widgetId]['#attached'] = [
+        'library' => $libraries,
+      ];
+    }
     if ($this->getAjaxCallback()) {
       if (!empty($form['#group'])) {
         $fieldName = $form['#group'];
@@ -364,12 +370,6 @@ abstract class FieldWidgetActionBase extends PluginBase implements FieldWidgetAc
         'suppress_required_fields_validation' => TRUE,
       ];
     }
-
-    // Add needed libraries.
-    if (empty($form[$widgetId]['#attached']['library'])) {
-      $form[$widgetId]['#attached']['library'] = [];
-    }
-    $form[$widgetId]['#attached']['library'] = array_merge($form[$widgetId]['#attached']['library'], $this->getLibraries());
   }
 
   /**

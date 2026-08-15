@@ -41,6 +41,7 @@ use Drupal\Core\Entity\Entity\EntityViewDisplay;
   label_singular: new TranslatableMarkup('image style'),
   label_plural: new TranslatableMarkup('image styles'),
   config_prefix: 'style',
+  static_cache: TRUE,
   entity_keys: [
     'id' => 'name',
     'label' => 'label',
@@ -234,7 +235,7 @@ class ImageStyle extends ConfigEntityBase implements ImageStyleInterface, Entity
         $path = \Drupal::config('system.file')->get('default_scheme') . '://' . $path;
       }
       $original_uri = $stream_wrapper_manager->normalizeUri($path);
-      $token_query = [IMAGE_DERIVATIVE_TOKEN => $this->getPathToken($original_uri)];
+      $token_query = [ImageStyleInterface::TOKEN => $this->getPathToken($original_uri)];
     }
 
     if ($clean_urls === NULL) {
@@ -255,7 +256,10 @@ class ImageStyle extends ConfigEntityBase implements ImageStyleInterface, Entity
     // built.
     if ($clean_urls === FALSE && $stream_wrapper_manager::getScheme($uri) == 'public' && !file_exists($uri)) {
       $directory_path = $stream_wrapper_manager->getViaUri($uri)->getDirectoryPath();
-      return Url::fromUri('base:' . $directory_path . '/' . $stream_wrapper_manager::getTarget($uri), ['absolute' => TRUE, 'query' => $token_query])->toString();
+      return Url::fromUri('base:' . $directory_path . '/' . $stream_wrapper_manager::getTarget($uri), [
+        'absolute' => TRUE,
+        'query' => $token_query,
+      ])->toString();
     }
 
     /** @var \Drupal\Core\File\FileUrlGeneratorInterface $file_url_generator */

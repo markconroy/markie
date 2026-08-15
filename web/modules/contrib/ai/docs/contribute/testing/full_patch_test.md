@@ -15,6 +15,19 @@ This is a full patch test for the 1.3.x branch. It includes all changes made sin
 10. Copy the file [docker-compose.milvus.yaml](./resources/docker-compose.milvus.yaml) to the `.ddev` folder.
 11. `ddev restart`
 
+## **Important**: If you are testing against a dev release
+If you are testing against a dev release, the JS components are not built and you will have to do this yourself. You need nodejs 20+ to build the JS components.
+
+1. `cd web/modules/contrib/ai/ui/json-schema-editor`
+2. `npm install`
+3. `npm run build`
+4. `cd ../mdxeditor`
+5. `npm install`
+6. `npm run build`
+7. `cd ../../modules/ai_ckeditor/`
+8. `npm install`
+9. `npm run build`
+
 ## Install the current versions of everything
 1. `ddev drush pm:en ai ai_agents ai_provider_openai ai_logging ai_automators field_widget_actions ai_api_explorer ai_assistant_api ai_chatbot ai_ckeditor ai_content_suggestions ai_search ai_observability ai_translate ai_validations ai_vdb_provider_milvus admin_toolbar admin_toolbar_tools ai_agents_explorer -y`
 

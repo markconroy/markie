@@ -282,3 +282,17 @@ function klaro_update_10016() {
     }
   }
 }
+
+/**
+ * Issue #3484827: Set default values for on_init, on_accept, on_decline.
+ */
+function klaro_update_10017() {
+  $storage = \Drupal::entityTypeManager()->getStorage('klaro_app');
+  $result = $storage->loadMultiple($storage->getQuery()->accessCheck(FALSE)->execute());
+  foreach ($result as $app) {
+    $app->set('on_init', $app->get('on_init') ?: '');
+    $app->set('on_accept', $app->get('on_accept') ?: '');
+    $app->set('on_decline', $app->get('on_decline') ?: '');
+    $app->save();
+  }
+}

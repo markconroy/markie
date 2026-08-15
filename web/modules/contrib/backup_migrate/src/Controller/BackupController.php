@@ -6,27 +6,81 @@ use Drupal\backup_migrate\Core\Destination\ListableDestinationInterface;
 use Drupal\backup_migrate\Drupal\Destination\DrupalBrowserDownloadDestination;
 use Drupal\backup_migrate\Entity\Destination;
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\Datetime\DateFormatterInterface;
+use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\StringTranslation\ByteSizeMarkup;
 use Drupal\Core\Url;
 use Drupal\Core\Utility\TableSort;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
- *
+ * Provides the backup controller class.
  *
  * @package Drupal\backup_migrate\Controller
  */
 class BackupController extends ControllerBase {
 
   /**
-   * @var \Drupal\backup_migrate\Core\Destination\DestinationInterface
+   * Stores the value.
+   *
+   * @var \Drupal\backup_migrate\Core\Destination\DestinationInterface The destination
    */
   public $destination;
 
   /**
+   * The renderer.
    *
+   * @var \Drupal\Core\Render\RendererInterface
+   */
+  protected $renderer;
+
+  /**
+   * The date formatter.
+   *
+   * @var \Drupal\Core\Datetime\DateFormatterInterface
+   */
+  protected $dateFormatter;
+
+  /**
+   * The request stack.
+   *
+   * @var \Symfony\Component\HttpFoundation\RequestStack
+   */
+  protected $requestStack;
+
+  /**
+   * Constructs a BackupController object.
+   *
+   * @param \Drupal\Core\Render\RendererInterface $renderer
+   *   The renderer.
+   * @param \Drupal\Core\Datetime\DateFormatterInterface $date_formatter
+   *   The date formatter.
+   * @param \Symfony\Component\HttpFoundation\RequestStack $request_stack
+   *   The request stack.
+   */
+  public function __construct(RendererInterface $renderer, DateFormatterInterface $date_formatter, RequestStack $request_stack) {
+    $this->renderer = $renderer;
+    $this->dateFormatter = $date_formatter;
+    $this->requestStack = $request_stack;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container) {
+    return new static(
+      $container->get('renderer'),
+      $container->get('date.formatter'),
+      $container->get('request_stack')
+    );
+  }
+
+  /**
+   * Lists all backups.
    */
   public function listAll() {
-    $storage = \Drupal::entityTypeManager()
+    $storage = $this->entityTypeManager()
       ->getStorage('backup_migrate_destination');
 
     $out = [];
@@ -56,8 +110,10 @@ class BackupController extends ControllerBase {
    * Get the title for the listing page of a destination entity.
    *
    * @param \Drupal\backup_migrate\Entity\Destination $backup_migrate_destination
+   *   The backup and migrate destination.
    *
    * @return \Drupal\Core\StringTranslation\TranslatableMarkup
+   *   A translated string.
    */
   public function listDestinationEntityBackupsTitle(Destination $backup_migrate_destination) {
     return $this->t('Backups in @destination_name',
@@ -68,8 +124,10 @@ class BackupController extends ControllerBase {
    * List the backups in the given destination.
    *
    * @param \Drupal\backup_migrate\Entity\Destination $backup_migrate_destination
+   *   The backup and migrate destination.
    *
    * @return mixed
+   *   The return value.
    */
   public function listDestinationEntityBackups(Destination $backup_migrate_destination) {
     $destination = $backup_migrate_destination->getObject();
@@ -81,10 +139,14 @@ class BackupController extends ControllerBase {
    * List the backups in the given destination.
    *
    * @param \Drupal\backup_migrate\Core\Destination\ListableDestinationInterface $destination
-   * @param $backup_migrate_destination_id
+   *   The destination.
+   * @param string $backup_migrate_destination_id
+   *   The backup and migrate destination ID.
    * @param int $count
+   *   The maximum number of items to return.
    *
    * @return mixed
+   *   The return value.
    */
   public function listDestinationBackups(ListableDestinationInterface $destination, $backup_migrate_destination_id, $count = NULL) {
     // Get a sorted list of files.
@@ -113,8 +175,9 @@ class BackupController extends ControllerBase {
       ],
     ];
 
-    $order = TableSort::getOrder($header, \Drupal::request());
-    $sort = TableSort::getSort($header, \Drupal::request());
+    $request = $this->requestStack->getCurrentRequest();
+    $order = TableSort::getOrder($header, $request);
+    $sort = TableSort::getSort($header, $request);
     $php_sort = $sort == 'desc' ? SORT_DESC : SORT_ASC;
 
     $backups = $destination->queryFiles([], $order['sql'], $php_sort, $count);
@@ -134,8 +197,8 @@ class BackupController extends ControllerBase {
       $rows[] = [
         'data' => [
           // Cells.
-          \Drupal::service('renderer')->render($col['description']),
-          \Drupal::service('date.formatter')->format($backup->getMeta('datestamp')),
+          $this->renderer->render($col['description']),
+          $this->dateFormatter->format($backup->getMeta('datestamp')),
           $format_data,
           [
             'data' => [
@@ -192,7 +255,9 @@ class BackupController extends ControllerBase {
    * Download a backup via the browser.
    *
    * @param \Drupal\backup_migrate\Entity\Destination $backup_migrate_destination
-   * @param $backup_id
+   *   The backup and migrate destination.
+   * @param string $backup_id
+   *   The backup ID.
    */
   public function download(Destination $backup_migrate_destination, $backup_id) {
     $destination = $backup_migrate_destination->getObject();

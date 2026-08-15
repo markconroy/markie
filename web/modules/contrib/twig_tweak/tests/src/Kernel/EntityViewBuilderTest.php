@@ -88,7 +88,6 @@ final class EntityViewBuilderTest extends AbstractTestCase {
 
     $expected_html = <<< 'HTML'
       <article>
-        <h2><a href="/node/1" rel="bookmark"><span>Public node</span></a></h2>
         <div></div>
       </article>
     HTML;
@@ -176,7 +175,6 @@ final class EntityViewBuilderTest extends AbstractTestCase {
 
     $expected_html = <<< 'HTML'
       <article>
-        <h2><a href="/node/2" rel="bookmark"><span>Private node</span></a></h2>
         <div></div>
       </article>
     HTML;

@@ -193,8 +193,13 @@ function klaro_preprocess_field(&$variables) {
     }
   }
 
-  // Rewrite src from field formatter oembed.
-  if ($variables["element"]['#formatter'] == "oembed") {
+  // Handle different formatters:
+  if (!isset($variables["element"]['#formatter'])) {
+    // No formatter at all, nothing to do.
+    return;
+  }
+  elseif ($variables["element"]['#formatter'] == "oembed") {
+    // Rewrite src from field formatter oembed.
     foreach ($variables['items'] as $i => $item) {
       $src = $item['content']['#attributes']['src'];
       $app = $helper->matchKlaroApp($src);
@@ -209,17 +214,15 @@ function klaro_preprocess_field(&$variables) {
       $variables['items'][0]['content']['#attributes']['data-thumbnail'] = $url;
     }
   }
-
-  // Rewrite markup from field formatter html.
-  if ($variables["element"]['#formatter'] == "html") {
+  elseif ($variables["element"]['#formatter'] == "html") {
+    // Rewrite markup from field formatter html.
     foreach ($variables['items'] as $i => $item) {
       $html = $item['content']['#children'];
       $variables['items'][$i]['content']['#children'] = $helper->processHtml($html);
     }
   }
-
-  // Rewrite src from field formatter video_embed_field_video.
-  if ($variables["element"]['#formatter'] == "video_embed_field_video") {
+  elseif ($variables["element"]['#formatter'] == "video_embed_field_video") {
+    // Rewrite src from field formatter video_embed_field_video.
     foreach ($variables['items'] as $i => $item) {
       $src = $item['content']['children']['#url'];
       if (empty($src)) {
@@ -237,9 +240,8 @@ function klaro_preprocess_field(&$variables) {
       $variables['items'][0]['content']['children']['#attributes']['data-thumbnail'] = $url;
     }
   }
-
-  // Rewrite markup from field formatter simple_gmap.
-  if ($variables["element"]['#formatter'] == "simple_gmap") {
+  elseif ($variables["element"]['#formatter'] == "simple_gmap") {
+    // Rewrite markup from field formatter simple_gmap.
     foreach ($variables['items'] as $i => &$item) {
       // We have to render the field to process the markup.
       $output = \Drupal::service('renderer')->render($item['content']);
