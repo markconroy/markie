@@ -49,3 +49,11 @@ ai_test.ai_prompt_element_nesting:
     _form: 'Drupal\ai_test\Form\AiPromptElementNestingTestForm'
   requirements:
     _permission: 'administer ai'
+
+ai_test.default_tools_editor_ajax:
+  path: '/admin/config/ai/test-default-tools-editor-ajax'
+  defaults:
+    _title: 'AI Default Tools Editor AJAX Test'
+    _form: 'Drupal\ai_test\Form\DefaultToolsEditorAjaxTestForm'
+  requirements:
+    _permission: 'administer ai'

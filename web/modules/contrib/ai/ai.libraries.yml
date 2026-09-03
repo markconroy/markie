@@ -89,3 +89,6 @@ default_tools_editor:
   css:
     component:
       ui/default-tools-editor/dist/assets/index.css: {}
+  dependencies:
+    - core/drupal
+    - core/once

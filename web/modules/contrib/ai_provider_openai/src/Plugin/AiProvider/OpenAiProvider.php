@@ -352,6 +352,10 @@ class OpenAiProvider extends OpenAiBasedProviderClientBase {
     ] + $this->configuration;
     // If we want to add tools to the input.
     if (is_object($input) && method_exists($input, 'getChatTools') && $input->getChatTools()) {
+      // Turn off reasoning mode if tools are used.
+      if (!empty($payload['reasoning_effort'])) {
+        $payload['reasoning_effort'] = 'none';
+      }
       $payload['tools'] = $input->getChatTools()->renderToolsArray();
       foreach ($payload['tools'] as $key => $tool) {
         $payload['tools'][$key]['function']['strict'] = FALSE;
@@ -669,11 +673,11 @@ class OpenAiProvider extends OpenAiBasedProviderClientBase {
     return [
       'key_config_name' => 'api_key',
       'default_models' => [
-        'chat' => 'gpt-5.2',
-        'chat_with_image_vision' => 'gpt-5.2',
-        'chat_with_complex_json' => 'gpt-5.2',
-        'chat_with_tools' => 'gpt-5.2',
-        'chat_with_structured_response' => 'gpt-5.2',
+        'chat' => 'gpt-5.4',
+        'chat_with_image_vision' => 'gpt-5.4',
+        'chat_with_complex_json' => 'gpt-5.4',
+        'chat_with_tools' => 'gpt-5.4',
+        'chat_with_structured_response' => 'gpt-5.4',
         'text_to_image' => 'gpt-image-1',
         'embeddings' => 'text-embedding-3-small',
         'moderation' => 'omni-moderation-latest',

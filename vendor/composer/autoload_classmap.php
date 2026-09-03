@@ -70,7 +70,6 @@ return array(
     'SebastianBergmann\\Diff\\Diff' => $vendorDir . '/sebastian/diff/src/Diff.php',
     'SebastianBergmann\\Diff\\Differ' => $vendorDir . '/sebastian/diff/src/Differ.php',
     'SebastianBergmann\\Diff\\Exception' => $vendorDir . '/sebastian/diff/src/Exception/Exception.php',
-    'SebastianBergmann\\Diff\\InvalidArgumentException' => $vendorDir . '/sebastian/diff/src/Exception/InvalidArgumentException.php',
     'SebastianBergmann\\Diff\\Line' => $vendorDir . '/sebastian/diff/src/Line.php',
     'SebastianBergmann\\Diff\\LongestCommonSubsequenceCalculator' => $vendorDir . '/sebastian/diff/src/LongestCommonSubsequenceCalculator.php',
     'SebastianBergmann\\Diff\\MemoryEfficientLongestCommonSubsequenceCalculator' => $vendorDir . '/sebastian/diff/src/MemoryEfficientLongestCommonSubsequenceCalculator.php',
