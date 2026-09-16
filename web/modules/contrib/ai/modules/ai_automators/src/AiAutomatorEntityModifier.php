@@ -195,14 +195,19 @@ class AiAutomatorEntityModifier {
     $fields = $storage->loadByProperties([
       'entity_type' => $entity->getEntityTypeId(),
       'bundle' => $entity->bundle(),
+      'status' => TRUE,
     ]);
     $fieldDefinitions = $this->fieldManager->getFieldDefinitions($entity->getEntityTypeId(), $entity->bundle());
 
     $fieldConfigs = [];
     /** @var \Drupal\ai_automators\Entity\AiAutomator $field */
     foreach ($fields as $field) {
-      // Check if enabled and return the config.
-      $fieldConfigs[$field->id()]['fieldDefinition'] = $fieldDefinitions[$field->get('field_name')];
+      $fieldName = $field->get('field_name');
+      if (empty($fieldName) || !isset($fieldDefinitions[$fieldName])) {
+        continue;
+      }
+      // Return the config.
+      $fieldConfigs[$field->id()]['fieldDefinition'] = $fieldDefinitions[$fieldName];
       $automatorConfig = [
         'field_name' => $field->get('field_name'),
       ];

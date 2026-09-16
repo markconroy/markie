@@ -14,7 +14,7 @@ For exact instructions see [Contribute Documentation](../contribute/documentatio
 The documentation uses `mkdocs` and the `material` theme, so you can install with:
 
 ```
-pip install mkdocs mike mkdocs-material mkdocs-include-markdown-plugin
+pip install mkdocs mike mkdocs-material mkdocs-include-markdown-plugin mkdocs-git-revision-date-localized-plugin mkdocs-glightbox
 ```
 
 Then you can run `mkdocs serve` in the root directory of the AI module and it will be available under `http://localhost:8000` by default.

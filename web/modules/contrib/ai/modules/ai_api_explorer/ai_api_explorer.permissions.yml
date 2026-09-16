@@ -1,2 +1,4 @@
 access ai prompt:
   title: 'Permit access to using the AI API Explorer.'
+  description: 'The AI API Explorer is a developer tool that can invoke AI providers and function calls directly. Only grant this to trusted developer roles.'
+  restrict access: true

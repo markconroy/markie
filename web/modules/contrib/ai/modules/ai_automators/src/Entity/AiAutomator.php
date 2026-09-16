@@ -9,17 +9,17 @@ use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\ai_automators\AiAutomatorInterface;
 
 /**
- * Defines the ai automator entity type.
+ * Defines the AI automator entity type.
  *
  * @ConfigEntityType(
  *   id = "ai_automator",
  *   label = @Translation("AI Automator"),
  *   label_collection = @Translation("AI Automators"),
- *   label_singular = @Translation("ai automator"),
- *   label_plural = @Translation("ai automators"),
+ *   label_singular = @Translation("AI Automator"),
+ *   label_plural = @Translation("AI Automators"),
  *   label_count = @PluralTranslation(
- *     singular = "@count ai automator",
- *     plural = "@count ai automators",
+ *     singular = "@count AI Automator",
+ *     plural = "@count AI Automators",
  *   ),
  *   handlers = {
  *     "list_builder" = "Drupal\ai_automators\AiAutomatorListBuilder",

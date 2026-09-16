@@ -44,7 +44,7 @@ class ComplexToolItemsConstraintValidator extends ConstraintValidator implements
   /**
    * Checks if the value is valid.
    */
-  public function validate($value, Constraint $constraint) {
+  public function validate($value, Constraint $constraint): void {
     // Load the function call classes.
     if (empty($this->functionCallClasses)) {
       foreach ($this->function_call_plugin_manager->getDefinitions() as $definition) {

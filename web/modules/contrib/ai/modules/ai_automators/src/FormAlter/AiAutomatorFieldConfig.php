@@ -262,7 +262,7 @@ class AiAutomatorFieldConfig {
         $form['automator_container']['normal_prompt']['automator_prompt'] = [
           '#type' => 'textarea',
           '#title' => $this->t('Automator Prompt'),
-          '#description' => $this->t('The prompt to use to fill this field.'),
+          '#description' => $this->t('The prompt to use to fill this field. The Base Field content is only included if the prompt references it: <code>{{ context }}</code> for the text with HTML stripped, or <code>{{ raw_context }}</code> to keep it.'),
           '#attributes' => [
             'placeholder' => $rule->placeholderText(),
           ],
@@ -282,6 +282,7 @@ class AiAutomatorFieldConfig {
         $form['automator_container']['normal_prompt']['automator_prompt_placeholders'] = [
           '#type' => 'details',
           '#title' => $this->t('Placeholders available'),
+          '#open' => TRUE,
           '#weight' => 15,
         ];
 

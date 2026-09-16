@@ -102,6 +102,8 @@ js_build:
 mkdocs:
   stage: test
   image: python:3.12-alpine
+  variables:
+    GIT_DEPTH: "0"
   rules:
     - changes:
         - mkdocs.yml
@@ -111,11 +113,14 @@ mkdocs:
       when: on_success
     - when: never
   script:
-    - pip install mkdocs mkdocs-material mike mkdocs-glightbox mkdocs-include-markdown-plugin
+    - apk add --no-cache git
+    - pip install mkdocs mkdocs-material mike mkdocs-glightbox mkdocs-include-markdown-plugin mkdocs-git-revision-date-localized-plugin
     - mkdocs build --strict
 
 pages:
   stage: .post
+  variables:
+    GIT_DEPTH: "0"
   rules:
     - if: '$CI_COMMIT_TAG'   # skip tags
       when: never
@@ -138,7 +143,7 @@ pages:
         exit 1
       fi
     - cd $CI_PROJECT_DIR && pwd
-    - pip install mkdocs-material mike mkdocs-glightbox mkdocs-include-markdown-plugin
+    - pip install mkdocs-material mike mkdocs-glightbox mkdocs-include-markdown-plugin mkdocs-git-revision-date-localized-plugin
     - echo "Pulling latest changes from origin to get mike versions"
     - git fetch origin gh-pages --depth=1
     - pwd && ls -l logo* && ls -l docs/logo* || true

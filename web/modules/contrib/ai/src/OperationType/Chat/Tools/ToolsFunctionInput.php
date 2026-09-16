@@ -136,16 +136,21 @@ class ToolsFunctionInput implements ToolsFunctionInputInterface {
     foreach ($this->properties as $property) {
       $properties[$property->getName()] = $property->renderPropertyArray();
     }
+    // Always render a valid JSON Schema object, even when the function takes no
+    // arguments. Rendering NULL here is tolerated by OpenAI itself, but breaks
+    // OpenAI compatible endpoints that dereference the schema, which fails the
+    // whole request rather than the single offending tool.
     $function = [
       'name' => $this->name,
       'description' => $this->description,
-      'parameters' => NULL,
+      'parameters' => [
+        'type' => 'object',
+      ],
     ];
     if (!empty($properties)) {
-      $function['parameters'] = [
-        'type' => 'object',
-        'properties' => $properties,
-      ];
+      // Properties are deliberately omitted rather than rendered empty, since
+      // an empty PHP array encodes to [] and not to the {} a schema requires.
+      $function['parameters']['properties'] = $properties;
       foreach ($this->getRequiredProperties() as $property) {
         $function['parameters']['required'][] = $property->getName();
       }

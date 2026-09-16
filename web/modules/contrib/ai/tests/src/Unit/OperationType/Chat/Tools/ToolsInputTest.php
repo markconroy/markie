@@ -74,4 +74,29 @@ class ToolsInputTest extends TestCase {
     $this->assertEquals($compare, $output);
   }
 
+  /**
+   * Test that a function without properties renders a valid schema object.
+   *
+   * @covers \Drupal\ai\OperationType\Chat\Tools\ToolsInput::renderToolsArray
+   */
+  public function testRenderToolsArrayWithoutProperties() {
+    $function = new ToolsFunctionInput('list_pages', [
+      'description' => 'List pages.',
+    ]);
+    $input = new ToolsInput([$function]);
+    $compare = [
+      [
+        'type' => 'function',
+        'function' => [
+          'name' => 'list_pages',
+          'description' => 'List pages.',
+          'parameters' => [
+            'type' => 'object',
+          ],
+        ],
+      ],
+    ];
+    $this->assertEquals($compare, $input->renderToolsArray());
+  }
+
 }

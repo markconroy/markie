@@ -20,7 +20,7 @@ class SimpleToolItemsConstraintValidator extends ConstraintValidator {
   /**
    * Checks if the value is valid.
    */
-  public function validate($value, Constraint $constraint) {
+  public function validate($value, Constraint $constraint): void {
     if (!is_array($value)) {
       $this->context->addViolation($constraint->message);
     }

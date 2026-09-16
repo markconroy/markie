@@ -113,6 +113,11 @@ interface ToolsFunctionInputInterface extends ToolsInterface {
   /**
    * Renders the functions array.
    *
+   * The parameters key is always a JSON Schema object, at minimum
+   * ['type' => 'object'] for a function that takes no arguments. It is never
+   * NULL, so callers must detect a no-argument function by an empty or absent
+   * parameters.properties instead.
+   *
    * @return array
    *   The functions array.
    */

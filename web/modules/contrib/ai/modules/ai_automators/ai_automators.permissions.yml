@@ -1,10 +1,10 @@
 administer ai_automator:
-  title: 'Administer ai automator'
+  title: 'Administer AI Automator'
 
 administer automator_chain types:
-  title: 'Administer automator chain types'
+  title: 'Administer Automator Chain Types'
   description: 'Maintain the types of automator chain entity.'
   restrict access: true
 
 administer automators_tool:
-  title: 'Administer automators tool'
+  title: 'Administer Automators Tool'

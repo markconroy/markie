@@ -8,17 +8,17 @@ use Drupal\Core\Config\Entity\ConfigEntityBase;
 use Drupal\ai_automators\AutomatorsToolInterface;
 
 /**
- * Defines the automators tool entity type.
+ * Defines the Automators Tool entity type.
  *
  * @ConfigEntityType(
  *   id = "automators_tool",
  *   label = @Translation("Automators Tool"),
  *   label_collection = @Translation("Automators Tools"),
- *   label_singular = @Translation("automators tool"),
- *   label_plural = @Translation("automators tools"),
+ *   label_singular = @Translation("Automators Tool"),
+ *   label_plural = @Translation("Automators Tools"),
  *   label_count = @PluralTranslation(
- *     singular = "@count automators tool",
- *     plural = "@count automators tools",
+ *     singular = "@count Automators Tool",
+ *     plural = "@count Automators Tools",
  *   ),
  *   handlers = {
  *     "list_builder" = "Drupal\ai_automators\AutomatorsToolListBuilder",

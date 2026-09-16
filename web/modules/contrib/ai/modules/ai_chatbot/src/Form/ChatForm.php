@@ -201,7 +201,7 @@ class ChatForm extends FormBase {
             if ($this->getChatConfig($form_state)['show_structured_results']) {
               $structured = $this->aiAssistantRunner->getStructuredResults();
               if ($structured) {
-                echo "\n\n<details>\n\n```\n" . Xss::filter(Yaml::dump($structured, 10) ). "\n```\n\n</details>";
+                echo "\n\n<details>\n\n```\n" . Xss::filter(Yaml::dump($structured, 10)) . "\n```\n\n</details>";
                 $full_response .= "\n\n<details>\n\n```\n" . Xss::filter(Yaml::dump($structured, 10)) . "\n```\n\n</details>";
                 flush();
               }

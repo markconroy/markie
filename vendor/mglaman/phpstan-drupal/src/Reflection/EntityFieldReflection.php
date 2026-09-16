@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace mglaman\PHPStanDrupal\Reflection;
 
@@ -22,19 +22,11 @@ use PHPStan\Type\Type;
 class EntityFieldReflection implements PropertyReflection
 {
 
-  /** @var ClassReflection */
-    private $declaringClass;
-
-  /** @var string */
-    private $propertyName;
-
-    private ReflectionProvider $reflectionProvider;
-
-    public function __construct(ClassReflection $declaringClass, string $propertyName, ReflectionProvider $reflectionProvider)
-    {
-        $this->declaringClass = $declaringClass;
-        $this->propertyName = $propertyName;
-        $this->reflectionProvider = $reflectionProvider;
+    public function __construct(
+        private readonly ClassReflection $declaringClass,
+        private readonly string $propertyName,
+        private readonly ReflectionProvider $reflectionProvider
+    ) {
     }
 
     public function getReadableType(): Type
@@ -60,11 +52,17 @@ class EntityFieldReflection implements PropertyReflection
 
     private function isContentEntityType(): bool
     {
+        if (!$this->reflectionProvider->hasClass(ContentEntityInterface::class)) {
+            return false;
+        }
         return $this->declaringClass->isSubclassOfClass($this->reflectionProvider->getClass(ContentEntityInterface::class));
     }
 
     private function isConfigEntityType(): bool
     {
+        if (!$this->reflectionProvider->hasClass(ConfigEntityInterface::class)) {
+            return false;
+        }
         return $this->declaringClass->isSubclassOfClass($this->reflectionProvider->getClass(ConfigEntityInterface::class));
     }
 

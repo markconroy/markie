@@ -53,6 +53,16 @@ toolbar-chatbot:
     - core/drupal
     - core/once
 
+# Attached in hook_page_attachments() and loaded in the document head,
+# before the first paint, so a restored open state never replays the
+# fold-out transition on page load. Not a dependency of toolbar-chatbot:
+# the chatbot block can arrive in a late BigPipe chunk, which would defer
+# this script past the first paint.
+toolbar-chatbot-early:
+  header: true
+  js:
+    js/toolbar-chatbot-early.js: {}
+
 toolbar-fullscreen:
   css:
     theme:

@@ -168,7 +168,9 @@ class SettingsForm extends ConfigFormBase {
     $form['logger'][self::CONFIG_KEY_FALLBACK_LOG_MESSAGE_MODE] = [
       '#type' => 'checkbox',
       '#title' => $this->getSettingLabel(self::CONFIG_KEY_FALLBACK_LOG_MESSAGE_MODE),
-      '#description' => $this->t('Enables generating the log message text using the Drupal style of placeholders, instead of the PSR3-style. This makes the log message compatible with the core Drupal Logger. Uncheck this to minimize the log entry size and increase the performance, if you use a structured logger like <a href="https://www.drupal.org/project/logger">Logger</a> or <a href="https://www.drupal.org/project/extended_logger">Extended Logger</a>.'),
+      '#description' => $this->t('Enables generating the log message text using the Drupal style of placeholders, instead of the PSR3-style. This makes the log message compatible with the core Drupal Logger. Uncheck this to minimize the log entry size and increase the performance, if you use a structured logger like <a href="@url">Logger</a>.', [
+        '@url' => 'https://www.drupal.org/project/logger',
+      ]),
       '#default_value' => $config->get(self::CONFIG_KEY_FALLBACK_LOG_MESSAGE_MODE),
       '#config_target' => static::CONFIG_NAME . ':' . self::CONFIG_KEY_FALLBACK_LOG_MESSAGE_MODE,
     ];

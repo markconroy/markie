@@ -12,7 +12,11 @@ theme:
     - header.autohide
     - navigation.footer
     - content.action.edit
+    - content.action.view
 plugins:
+  - git-revision-date-localized:
+      enable_creation_date: true
+      type: date
   - glightbox
   # Include Markdown: Allows embedding markdown files in one another with {% include-markdown "file.md" %}
   # https://github.com/mondeja/mkdocs-include-markdown-plugin

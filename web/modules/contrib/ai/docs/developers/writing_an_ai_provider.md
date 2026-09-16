@@ -5,7 +5,20 @@ An AI Provider is a Drupal module that connects with the [AI Core](https://drupa
 
 As shown in the image below, AI Core links to multiple AI Providers, such as OpenAI, Gemini, Anthropic, or any custom AI service. Each provider acts as a plugin that supplies AI capabilities, which are standardized by AI Core. This way, your custom module only needs to interact with AI Core, which handles the complexities of each specific provider.
 
-![AI Core module and providers](https://miro.medium.com/v2/resize:fit:4800/format:webp/0*YEUnqeZ9mExt3UI3)
+```mermaid
+
+flowchart TD
+    A(OpenAI<br><br>):::provider --> E(AI Core):::aiCore
+    B(Gemini<br><br>):::provider --> E(AI Core)
+    C(Anthropic<br><br>):::provider --> E(AI Core)
+    D(Any<br>custom<br>provider):::provider --> E(&emsp;&emsp;&emsp;&emsp;AI Core&emsp;&emsp;&emsp;&emsp;&emsp;)
+    E <--> F(Your custom module):::customModule
+
+classDef provider fill:#ffea8f;
+classDef aiCore fill:#A5D7FF;
+classDef customModule fill:#B2F2BA;
+
+```
 
 This structure allows you to switch between AI providers or add new ones easily. Additionally, it enables you to use both public AI providers and your private models together within the same system.
 

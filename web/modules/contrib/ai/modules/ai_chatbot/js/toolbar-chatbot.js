@@ -3,14 +3,23 @@
 
   Drupal.behaviors.aiChatbot = {
     attach: function (context, settings) {
-      const toggleChatbot = () => {
-        const shouldOpen = document.body.classList.toggle('ai-chatbot-opened');
+      // Set the chatbot open state explicitly and persist it. This is
+      // idempotent, so re-running it cannot flip the chatbot: when a
+      // CKEditor or Media Library dialog re-attaches behaviors and the
+      // toolbar button is processed again, restoring an already-open
+      // chatbot is a no-op instead of a blind toggle that closed it.
+      const setChatbotOpen = (open) => {
+        document.body.classList.toggle('ai-chatbot-opened', open);
 
-        if (window.Drupal.ginCoreNavigation) {
+        if (open && window.Drupal.ginCoreNavigation) {
           window.Drupal.ginCoreNavigation.collapseToolbar();
         }
 
-        window.localStorage.setItem('Drupal.ai.chatbotOpened', shouldOpen ? 'true' : 'false');
+        window.localStorage.setItem('Drupal.ai.chatbotOpened', open ? 'true' : 'false');
+      };
+
+      const toggleChatbot = () => {
+        setChatbotOpen(!document.body.classList.contains('ai-chatbot-opened'));
       };
 
       once('ai-chatbot', '.button--ai-chatbot', context).forEach(($toolbarIcon) => {
@@ -20,9 +29,9 @@
           $toolbarIcon.classList.add('button');
         }
 
-        if (window.localStorage.getItem('Drupal.ai.chatbotOpened') === 'true') {
-          toggleChatbot();
-        }
+        setChatbotOpen(
+          window.localStorage.getItem('Drupal.ai.chatbotOpened') === 'true',
+        );
 
         $toolbarIcon.addEventListener('click', (e) => {
           toggleChatbot();

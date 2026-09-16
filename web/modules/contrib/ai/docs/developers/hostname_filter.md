@@ -26,7 +26,7 @@ If you really want to allow all hostnames to be trusted (not recommended), you c
 $settings['ai_output'] = [
   // Full trust mode - bypass all filtering.
   // Default: FALSE
-  'full_trust_mode' => FALSE,
+  'full_trust_mode' => TRUE,
 ];
 ```
 

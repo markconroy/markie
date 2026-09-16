@@ -321,7 +321,7 @@ abstract class AiContentSuggestionsPluginBase extends PluginBase implements AiCo
 
     try {
       $messages = new ChatInput([
-        new chatMessage('user', $prompt),
+        new ChatMessage('user', $prompt),
       ]);
 
       $messages->setSystemPrompt('You are helpful assistant.');

@@ -109,7 +109,7 @@ abstract class AbstractModelFormBase implements ModelFormInterface {
     $form['model_data']['model_id']['#value'] = $form_state->getValue('base_on');
     // Unset all checkboxes before setting them.
     foreach ($form['model_data'] as $key => $element) {
-      if (is_array($element) && $element['#type'] === 'checkbox') {
+      if (is_array($element) && isset($element['#type']) && $element['#type'] === 'checkbox') {
         $form['model_data'][$key]['#checked'] = FALSE;
       }
     }

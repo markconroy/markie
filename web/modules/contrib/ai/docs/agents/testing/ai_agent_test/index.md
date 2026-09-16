@@ -8,10 +8,10 @@ It is very easy to be tricked when you use the Agent Explorer on some random sam
 The AI Agent Test module allows you to create a test suite of actual prompts that testers/end-users used that can be run against any agent, so you can be sure that it will work in production.
 
 ## Installation
-The AI Agent Test module can be found on [Drupal.org](https://www.drupal.org/project/ai_agent_test). To install it, you just need to do the normal steps to install a Drupal module:
+The AI Agent Test module can be found on [Drupal.org](https://www.drupal.org/project/ai_agents_test). To install it, you just need to do the normal steps to install a Drupal module:
 
-1. `composer require drupal/ai_agent_test`
-2. Enable the module via the Drupal admin interface or using Drush: `drush pm:en ai_agent_test`
+1. `composer require 'drupal/ai_agents_test:^1.0@alpha'`
+2. Enable the module via the Drupal admin interface or using Drush: `drush pm:en ai_agents_test`
 
 ## Test parts
 The test suite depends on two main components:

@@ -1,6 +1,8 @@
 :root {
   --toolbar-chatbot-width: 100vw;
   --toolbar-chatbot-expand-amount: 0rem;
+  --ai-chatbot-panel-width: 21rem;
+  --ai-chatbot-canvas-offset: 26rem;
 }
 
 /* Klaro applies the same display style as the element it wraps,
@@ -24,7 +26,18 @@
   pointer-events: none;
 }
 
-body.ai-chatbot-opened {
+/* While toolbar-chatbot-early.js restores the saved open state on page
+   load, render the chatbot and toolbar in place instead of replaying the
+   fold-out transition. toolbar-chatbot.js removes the class once the
+   restored state has painted, so user-initiated toggles animate. */
+html.ai-chatbot-restoring .block-ai-deepchat-block,
+html.ai-chatbot-restoring .admin-toolbar,
+html.ai-chatbot-restoring .dialog-off-canvas-main-canvas {
+  transition: none !important;
+}
+
+body.ai-chatbot-opened,
+html.ai-chatbot-restoring {
   /* Prevent the Site Header of Olivero (and the toolbar) overlapping the chat – 
    * when the chat is in the Header region.
    */
@@ -195,7 +208,7 @@ body.ai-chatbot-opened {
 
 @media (min-width: 1024px) {
   :root {
-    --toolbar-chatbot-width: 21rem;
+    --toolbar-chatbot-width: var(--ai-chatbot-panel-width);
   }
 
   /* Expanded state */
@@ -213,37 +226,37 @@ body.ai-chatbot-opened {
     display: flex;
   }
 
-  /* Page positioning */
-  body.ai-chatbot-opened {
-    --toolbar-chatbot-width: calc(21rem + var(--toolbar-chatbot-expand-amount));
-    --drupal-displace-offset-left: calc(26rem + var(--toolbar-chatbot-expand-amount));
+  /* Page positioning. */
+  body.ai-chatbot-opened,
+  html.ai-chatbot-restoring {
+    --toolbar-chatbot-width: calc(var(--ai-chatbot-panel-width) + var(--toolbar-chatbot-expand-amount));
+    --drupal-displace-offset-left: calc(var(--ai-chatbot-canvas-offset) + var(--toolbar-chatbot-expand-amount));
   }
 
-  body.ai-chatbot-opened .gin--navigation-top-bar {
-    --admin-toolbar-sidebar-width: calc(26rem + var(--toolbar-chatbot-expand-amount));
+  :is(body.ai-chatbot-opened, html.ai-chatbot-restoring) .gin--navigation-top-bar {
+    --admin-toolbar-sidebar-width: calc(var(--ai-chatbot-canvas-offset) + var(--toolbar-chatbot-expand-amount));
     z-index: 1;
   }
 
-  body.ai-chatbot-opened .admin-toolbar__content {
+  :is(body.ai-chatbot-opened, html.ai-chatbot-restoring) .admin-toolbar__content {
     border-left: 0px;
   }
 
-  :is(#ai-chatbot, body) {
-    &.ai-chatbot-opened .admin-toolbar {
-      /* !important used as it's necessary for different states of the toolbar */
-      transform: translateX(var(--toolbar-chatbot-width)) !important;
-    }
-
-    &.ai-chatbot-opened .toolbar-popover:not(.toolbar-popover--expanded) [data-toolbar-popover-wrapper] {
-      transform: translateX(0);
-    }
+  :is(#ai-chatbot, body.ai-chatbot-opened, html.ai-chatbot-restoring) .admin-toolbar {
+    /* !important used as it's necessary for different states of the toolbar */
+    transform: translateX(var(--toolbar-chatbot-width)) !important;
   }
 
-  body.ai-chatbot-opened [data-toolbar-popover-control][aria-expanded="true"] + [data-toolbar-popover-wrapper] {
+  :is(#ai-chatbot, body.ai-chatbot-opened, html.ai-chatbot-restoring) .toolbar-popover:not(.toolbar-popover--expanded) [data-toolbar-popover-wrapper] {
+    transform: translateX(0);
+  }
+
+  :is(body.ai-chatbot-opened, html.ai-chatbot-restoring) [data-toolbar-popover-control][aria-expanded="true"] + [data-toolbar-popover-wrapper] {
     transform: translateX(calc(var(--admin-toolbar-sidebar-width) + var(--toolbar-chatbot-width)));
   }
 
-  body:not(.ai-chatbot-opened) .admin-toolbar ~ .dialog-off-canvas-main-canvas {
+  /* Exclude the restore phase so the canvas doesn't jump from collapsed to opened offset. */
+  html:not(.ai-chatbot-restoring) body:not(.ai-chatbot-opened) .admin-toolbar ~ .dialog-off-canvas-main-canvas {
     --drupal-displace-offset-left: var(--admin-toolbar-sidebar-width);
   }
 

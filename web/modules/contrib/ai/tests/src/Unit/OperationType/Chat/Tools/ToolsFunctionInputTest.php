@@ -57,4 +57,60 @@ class ToolsFunctionInputTest extends TestCase {
     $this->assertEquals($property, $function->getRequiredProperties()['test'], 'Configured function required properties test');
   }
 
+  /**
+   * Test that the rendered array is always a valid JSON Schema object.
+   *
+   * @covers \Drupal\ai\OperationType\Chat\Tools\ToolsFunctionInput::renderFunctionArray
+   * @group ai
+   */
+  public function testRenderFunctionArray() {
+    // A function without properties still has to render a schema object, since
+    // 'parameters' => NULL breaks OpenAI compatible endpoints.
+    $function = new ToolsFunctionInput('list_pages', [
+      'description' => 'List pages.',
+    ]);
+    $output = $function->renderFunctionArray();
+    $this->assertEquals([
+      'name' => 'list_pages',
+      'description' => 'List pages.',
+      'parameters' => [
+        'type' => 'object',
+      ],
+    ], $output, 'No argument function renders an empty schema object');
+    $this->assertArrayNotHasKey('properties', $output['parameters'], 'No argument function renders no properties');
+    $this->assertArrayNotHasKey('required', $output['parameters'], 'No argument function renders no required');
+    // An empty properties array would encode as [] instead of the {} a schema
+    // requires, so assert on the encoded form as well.
+    $this->assertSame('{"type":"object"}', json_encode($output['parameters']), 'No argument schema encodes as an object');
+
+    // A function with properties renders unchanged.
+    $property = new ToolsPropertyInput('test', [
+      'description' => 'Test description',
+      'type' => 'string',
+      'required' => TRUE,
+    ]);
+    $property2 = new ToolsPropertyInput('test2', [
+      'description' => 'Test description',
+      'type' => 'string',
+    ]);
+    $function = new ToolsFunctionInput('test', [
+      'description' => 'Test description',
+      'properties' => [$property, $property2],
+    ]);
+    $this->assertEquals([
+      'name' => 'test',
+      'description' => 'Test description',
+      'parameters' => [
+        'type' => 'object',
+        'properties' => [
+          'test' => $property->renderPropertyArray(),
+          'test2' => $property2->renderPropertyArray(),
+        ],
+        'required' => [
+          'test',
+        ],
+      ],
+    ], $function->renderFunctionArray(), 'Function with properties renders the full schema');
+  }
+
 }
