@@ -1,6 +1,11 @@
 <?php
 
-use \Drupal\node\Entity\Node;
+/**
+ * @file
+ * Install, update and uninstall functions for the markie module.
+ */
+
+use Drupal\node\Entity\Node;
 
 /**
  * Implements hook_update_N().
@@ -14,7 +19,7 @@ function markie_update_10001() {
   // Load all the nodes.
   $nodes = Node::loadMultiple($nids);
   foreach ($nodes as $node) {
-    // Set the field_video_checked boolean to TRUE
+    // Set the field_video_checked boolean to TRUE.
     $node->set('field_video_checked', TRUE);
     $node->save();
     $node->set('field_video_checked', FALSE);

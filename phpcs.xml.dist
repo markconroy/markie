@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ruleset name="markie">
+  <description>PHP CodeSniffer configuration for the markie Drupal project.</description>
+
+  <!-- Scan custom modules and theme PHP files. -->
+  <file>web/modules/custom</file>
+  <file>web/themes/custom</file>
+
+  <!-- Exclude directories that contain third-party or generated code. -->
+  <exclude-pattern>*/node_modules/*</exclude-pattern>
+  <exclude-pattern>*/vendor/*</exclude-pattern>
+
+  <!-- Use Drupal and DrupalPractice coding standards. -->
+  <rule ref="Drupal"/>
+  <rule ref="DrupalPractice"/>
+
+  <!--
+    Exclude CSS sniffs that produce false positives with modern CSS features:
+    CSS custom properties, multi-line values, blank lines in :root,
+    and :where() pseudo-selector treated as multiple selectors.
+  -->
+  <rule ref="Squiz.CSS.MissingColon">
+    <exclude-pattern>*.css</exclude-pattern>
+  </rule>
+  <rule ref="Squiz.CSS.SemicolonSpacing">
+    <exclude-pattern>*.css</exclude-pattern>
+  </rule>
+  <rule ref="Squiz.CSS.Indentation.BlankLine">
+    <exclude-pattern>*.css</exclude-pattern>
+  </rule>
+  <rule ref="Squiz.CSS.Indentation.Incorrect">
+    <exclude-pattern>*.css</exclude-pattern>
+  </rule>
+  <rule ref="Drupal.CSS.ClassDefinitionNameSpacing.MultipleSelectors">
+    <exclude-pattern>*.css</exclude-pattern>
+  </rule>
+
+  <!--
+    Exclude the version key warning for custom (non-distributed) theme/module
+    info files. The version key is valid for site-specific custom code.
+  -->
+  <rule ref="Drupal.InfoFiles.AutoAddedKeys">
+    <exclude-pattern>web/themes/custom/*</exclude-pattern>
+    <exclude-pattern>web/modules/custom/*</exclude-pattern>
+  </rule>
+
+</ruleset>
