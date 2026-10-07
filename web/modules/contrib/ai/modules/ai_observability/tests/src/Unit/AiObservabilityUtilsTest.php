@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\ai_observability\Unit;
 
+use Drupal\ai\OperationType\Chat\ChatInput;
 use Drupal\ai_observability\AiObservabilityUtils;
 use Drupal\ai\OperationType\Chat\ChatMessage;
 use Drupal\ai\OperationType\Chat\ChatOutput;
@@ -17,18 +18,58 @@ use PHPUnit\Framework\TestCase;
 class AiObservabilityUtilsTest extends TestCase {
 
   /**
+   * @covers ::aiInputToString
+   */
+  public function testAiInputToStringUsesStructuredPayload(): void {
+    $input = new ChatInput([
+      new ChatMessage('system', 'Hello'),
+      new ChatMessage('user', 'World'),
+    ]);
+
+    $result = AiObservabilityUtils::aiInputToString($input);
+    $decoded = json_decode($result, TRUE, flags: JSON_THROW_ON_ERROR);
+
+    $this->assertSame('system', $decoded['messages'][0]['role']);
+    $this->assertSame('World', $decoded['messages'][1]['text']);
+  }
+
+  /**
+   * @covers ::aiInputToString
+   */
+  public function testAiInputToStringLegacyPath(): void {
+    $input = new ChatInput([
+      new ChatMessage('system', 'Hello'),
+      new ChatMessage('user', 'World'),
+    ]);
+
+    $result = AiObservabilityUtils::aiInputToString($input, FALSE);
+
+    $this->assertSame($input->toString(), $result);
+  }
+
+  /**
    * @covers ::aiOutputToString
    */
   public function testAiOutputToStringWithChatOutputAndChatMessage(): void {
-    $message = $this->createMock(ChatMessage::class);
-    $message->method('getRole')->willReturn('user');
-    $message->method('getText')->willReturn('Hello!');
-    $message->method('getFiles')->willReturn([]);
-
-    $output = $this->createMock(ChatOutput::class);
-    $output->method('getNormalized')->willReturn($message);
+    $message = new ChatMessage('user', 'Hello!');
+    $output = new ChatOutput($message, ['id' => 'abc'], []);
 
     $result = AiObservabilityUtils::aiOutputToString($output);
+    $decoded = json_decode($result, TRUE, flags: JSON_THROW_ON_ERROR);
+
+    $this->assertSame('user', $decoded['normalized']['role']);
+    $this->assertSame('Hello!', $decoded['normalized']['text']);
+  }
+
+  /**
+   * @covers ::aiOutputToString
+   */
+  public function testAiOutputToStringLegacyChatOutput(): void {
+    $message = new ChatMessage('user', 'Hello!');
+    $output = new ChatOutput($message, ['id' => 'abc'], []);
+
+    $result = AiObservabilityUtils::aiOutputToString($output, FALSE);
+
     $this->assertSame('user: Hello!', $result);
   }
 
@@ -112,7 +153,75 @@ class AiObservabilityUtilsTest extends TestCase {
     $maxLength = 50;
     $result = AiObservabilityUtils::summarizeAiPayloadData($payload, $maxLength);
     $this->assertSame($maxLength, strlen($result));
-    $this->assertStringContainsString('...', $result);
+    $this->assertStringContainsString('[...]', $result);
+  }
+
+  /**
+   * @covers ::summarizeAiPayloadData
+   */
+  public function testSummarizeAiPayloadDataWithStructuredJson(): void {
+    $payload = json_encode([
+      'messages' => array_fill(0, 10, [
+        'role' => 'user',
+        'text' => str_repeat('A', 400),
+      ]),
+      'blob' => 'data:image/png;base64,' . str_repeat('A', 500),
+    ], JSON_THROW_ON_ERROR);
+
+    $result = AiObservabilityUtils::summarizeAiPayloadData($payload, 1024);
+    $decoded = json_decode($result, TRUE, flags: JSON_THROW_ON_ERROR);
+
+    // Default max_list_items 6 -> 3 head + omitted marker + 3 tail = 7 items.
+    $this->assertCount(7, $decoded['messages']);
+    $this->assertSame(4, $decoded['messages'][3]['_omitted_items']);
+    $this->assertStringContainsString('binary-like content omitted', $decoded['messages'][0]['text']);
+    $this->assertStringContainsString('data URL omitted', $decoded['blob']);
+  }
+
+  /**
+   * @covers ::summarizeAiPayloadData
+   */
+  public function testSummarizeAiPayloadDataWithSummarizeDisabled(): void {
+    $payload = json_encode([
+      'messages' => array_fill(0, 10, [
+        'role' => 'user',
+        'text' => str_repeat('A', 400),
+      ]),
+    ], JSON_THROW_ON_ERROR);
+
+    $result = AiObservabilityUtils::summarizeAiPayloadData($payload, 100000, ['summarize' => FALSE]);
+
+    // Payload is returned verbatim because no leaf-level summarization
+    // happens and the length is below the truncation threshold.
+    $this->assertSame($payload, $result);
+  }
+
+  /**
+   * @covers ::summarizeAiPayloadData
+   */
+  public function testSummarizeAiPayloadDataWithCustomLimits(): void {
+    $payload = json_encode([
+      'messages' => array_fill(0, 8, [
+        'role' => 'user',
+        'text' => str_repeat('hello world ', 10),
+      ]),
+    ], JSON_THROW_ON_ERROR);
+
+    $result = AiObservabilityUtils::summarizeAiPayloadData($payload, 4096, [
+      'summarize' => TRUE,
+      'max_string_length' => 20,
+      'max_list_items' => 4,
+      'max_assoc_keys' => 5,
+    ]);
+    $decoded = json_decode($result, TRUE, flags: JSON_THROW_ON_ERROR);
+
+    // 8 items, max_list_items 4 -> collapsed (2 head + summary + 2 tail = 5).
+    $this->assertCount(5, $decoded['messages']);
+    $this->assertSame(4, $decoded['messages'][2]['_omitted_items']);
+    // Leaf strings longer than max_string_length get the [...] truncation
+    // marker (the text contains spaces so the binary-content check skips).
+    $this->assertStringContainsString('[...]', $decoded['messages'][0]['text']);
+    $this->assertSame(20, mb_strlen($decoded['messages'][0]['text']));
   }
 
 }

@@ -225,9 +225,9 @@ class GuardrailSerializationKernelTest extends KernelTestBase {
     );
 
     // The dedicated setter has to invalidate the memo too.
-    $entity->setPlugin('restrict_to_topic');
+    $entity->setPlugin('sensitive_content_stream');
     $this->assertSame(
-      'restrict_to_topic',
+      'sensitive_content_stream',
       $entity->getGuardrail()?->getPluginId(),
       'setPlugin() must re-key the plugin collection.'
     );

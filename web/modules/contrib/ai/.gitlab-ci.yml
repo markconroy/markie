@@ -26,11 +26,151 @@ variables:
   SKIP_ESLINT: 1
   SKIP_STYLELINT: 1   # Until fixed in gitlab templates.
   # showdown.js is full of emoji words.
-  _CSPELL_IGNORE_PATHS: "'assets/js/ai_chat_history_element.js', 'modules/*/tests/resources/ai_test/requests/*/*.yml', 'modules/ai_api_explorer/css', 'modules/ai_api_explorer/js', 'modules/ai_chatbot/js', 'modules/ai_chatbot/deepchat', 'modules/ai_chatbot/css', 'modules/ai_automators/tests/config', '.cspell-project-words.txt', 'grumphp.yml', 'ui'"
+  _CSPELL_IGNORE_PATHS: "'assets/js/ai_chat_history_element.js', 'modules/*/tests/resources/ai_test/requests/*/*.yml', 'modules/ai_api_explorer/css', 'modules/ai_api_explorer/js', 'modules/ai_chatbot/js', 'modules/ai_chatbot/deepchat', 'modules/ai_chatbot/css', 'modules/ai_automators/tests/config', '.cspell-project-words.txt', 'grumphp.yml', 'ui', 'tests/visual-regression'"
   COMPOSER_IGNORE_PLATFORM_REQS: 'ext-ffi'
   # Selenium hostname for video recording in FunctionalJavascript tests.
   # The Drupal CI template uses 'selenium' as the service alias.
   DRUPAL_TEST_WEBDRIVER_HOSTNAME: selenium
+
+# The `ai` submodules (ai_content_suggestions, ai_translate, ai_validations,
+# ...) are required as standalone contrib packages in composer.json,
+# but they themselves require drupal/ai. When Composer resolves this in CI, the
+# checked-out code is the "root package" of the resolution, but on MR pipelines
+# it's checked out as a detached commit, so Composer can't match it against
+# version constraints like "^1.4" or "^1.3" declared by those submodules -
+# see https://www.drupal.org/project/gitlab_templates/issues/3390895.
+#
+# The fix is to tell Composer explicitly which version the root package
+# represents, via COMPOSER_ROOT_VERSION. We derive it from the MR's target
+# branch (or, outside of an MR pipeline, the current ref), converting our
+# branch names (1.2.x, 1.5.x, 1.x, 2.0.x, 2.x, ...) into the matching Composer
+# dev-version string (1.2.x-dev, 1.5.x-dev, 1.x-dev, 2.0.x-dev, 2.x-dev, ...).
+# Tag pipelines are left alone, since Composer can already resolve the version
+# from the tag itself.
+.composer-root-version: &composer-root-version
+  - |
+    if [ -n "$CI_COMMIT_TAG" ]; then
+      echo "Tag pipeline ($CI_COMMIT_TAG): leaving COMPOSER_ROOT_VERSION unset."
+    else
+      if [ -n "$CI_MERGE_REQUEST_TARGET_BRANCH_NAME" ]; then
+        _root_branch="$CI_MERGE_REQUEST_TARGET_BRANCH_NAME"
+      else
+        _root_branch="$CI_COMMIT_REF_NAME"
+      fi
+      export COMPOSER_ROOT_VERSION="${_root_branch}-dev"
+      echo "Resolved branch '$_root_branch' -> COMPOSER_ROOT_VERSION=$COMPOSER_ROOT_VERSION"
+    fi
+
+# Non-required visual regression tests for the built UI widgets (mdxeditor,
+# json-schema-editor, default-tools-editor). These bundles can compile while
+# still rendering a broken widget, which PHP unit tests cannot catch.
+#
+# This job is allow_failure (a warning, never a pipeline blocker). It installs a
+# throwaway Drupal site on SQLite, enables the test module (which exposes the
+# widgets anonymously at /admin/config/ai/test-visual-regression), serves it,
+# and runs Playwright (tests/visual-regression) against the rendered widgets.
+# Screenshots, diffs and the HTML report are always saved as artifacts.
+#
+# Determinism: it runs in the pinned Playwright image (browsers + fonts
+# preinstalled), so baselines generated here are reproducible. Baselines are
+# meant to be generated in this CI environment, then downloaded and committed.
+#
+# NOTE: the site install + serve steps are the part most likely to need tuning
+# against the live Drupal CI template — review before relying on them.
+visual_regression:
+  stage: test
+  allow_failure: true
+  # Ubuntu 24.04 (noble) ships PHP 8.3, which Drupal 11 requires. Keep the tag
+  # in sync with @playwright/test in tests/visual-regression/package.json.
+  image: mcr.microsoft.com/playwright:v1.50.0-noble
+  needs:
+    - composer
+    - js_build
+  variables:
+    _WEB_ROOT: web
+    VR_HOST_PORT: '127.0.0.1:8080'
+    VR_BASE_URL: 'http://127.0.0.1:8080'
+    DRUPAL_ROOT: '$CI_PROJECT_DIR/$_WEB_ROOT'
+    # Pinned so the rendered theme (and therefore the baselines) is stable.
+    # Bump this and re-bless the baselines when intentionally updating Gin.
+    GIN_VERSION: '5.0.12'
+  rules:
+    # Don't run on tags; otherwise run (and let pipelines stay cheap by only
+    # running when the relevant front-end or test code changes).
+    - if: '$CI_COMMIT_TAG'
+      when: never
+    - changes:
+        - ui/**/*
+        - modules/ai_ckeditor/**/*
+        - tests/visual-regression/**/*
+        - tests/modules/ai_test/**/*
+        - src/Element/**/*
+        - ai.libraries.yml
+      when: on_success
+    - when: manual
+      allow_failure: true
+  script:
+    # 1. PHP runtime to serve Drupal (the Playwright image is Node-only).
+    - apt-get update
+    - apt-get install -y --no-install-recommends php-cli php-intl php-sqlite3 php-xml php-gd php-mbstring php-curl php-zip php-ffi sqlite3 curl ca-certificates unzip
+    # 2. Make sure drush is available (the composer build usually provides it).
+    - cd "$CI_PROJECT_DIR"
+    - if [ ! -x vendor/bin/drush ]; then composer require drush/drush --no-interaction -W; fi
+    # 3. Install a throwaway Drupal site on SQLite.
+    - vendor/bin/drush --root="$DRUPAL_ROOT" site:install minimal -y --site-name="VR" --account-pass=admin --db-url="sqlite://localhost/$DRUPAL_ROOT/sites/default/files/.vr.sqlite"
+    # 3b. ai_test lives under tests/modules, so Drupal only discovers it when
+    #     test extension scanning is enabled. Add that to the generated
+    #     settings.php before enabling modules.
+    - chmod u+w "$DRUPAL_ROOT/sites/default" "$DRUPAL_ROOT/sites/default/settings.php"
+    - |
+      cat >> "$DRUPAL_ROOT/sites/default/settings.php" <<'PHP'
+      $settings['extension_discovery_scan_tests'] = TRUE;
+      PHP
+    # 4. Enable the AI module and its test module (exposes the anonymous
+    #    /admin/config/ai/test-visual-regression route).
+    - vendor/bin/drush --root="$DRUPAL_ROOT" en ai ai_test -y
+    # 4b. Render under the Gin admin theme so the widgets are tested in their
+    #     real admin context. Gin is pulled as a pinned tarball (kept out of the
+    #     module's composer.json so it doesn't constrain the multi-core test
+    #     matrix), set as the default theme so the anonymous route uses it, with
+    #     auto dark mode (follows prefers-color-scheme, which Playwright emulates
+    #     per project for the light/dark variants).
+    - curl -fsSL -o /tmp/gin.tar.gz "https://ftp.drupal.org/files/projects/gin-$GIN_VERSION.tar.gz"
+    - mkdir -p "$DRUPAL_ROOT/themes/contrib"
+    - tar -xzf /tmp/gin.tar.gz -C "$DRUPAL_ROOT/themes/contrib"
+    - vendor/bin/drush --root="$DRUPAL_ROOT" theme:enable gin -y
+    - vendor/bin/drush --root="$DRUPAL_ROOT" config:set system.theme default gin -y
+    - vendor/bin/drush --root="$DRUPAL_ROOT" config:set gin.settings enable_darkmode auto -y
+    - vendor/bin/drush --root="$DRUPAL_ROOT" cache:rebuild
+    # 5. Serve the site in the background and wait until it answers.
+    - vendor/bin/drush --root="$DRUPAL_ROOT" runserver "$VR_HOST_PORT" > /tmp/drush-server.log 2>&1 &
+    - |
+      for i in $(seq 1 30); do
+        if curl -sSf -o /dev/null "$VR_BASE_URL/admin/config/ai/test-visual-regression?vr_widget=json_schema&vr_state=empty"; then
+          echo "Drupal is serving."; ok=1; break
+        fi
+        echo "Waiting for Drupal to serve ($i)…"; sleep 2
+      done
+      if [ "${ok:-0}" != "1" ]; then echo "Drupal did not start:"; cat /tmp/drush-server.log; exit 1; fi
+    # 6. Run Playwright, always comparing against the committed baselines.
+    #    Baselines are never updated automatically: a mismatch (or a widget
+    #    that has no baseline yet) makes this allow_failure job warn, and a
+    #    human reviews the report/artifacts and decides whether the new
+    #    screenshot should become the baseline. See
+    #    docs/developers/visual_regression_testing.md.
+    - cd "$CI_PROJECT_DIR/tests/visual-regression"
+    - npm install --no-audit --no-fund
+    - npx playwright test
+  artifacts:
+    when: always
+    expire_in: 1 week
+    paths:
+      - tests/visual-regression/playwright-report
+      - tests/visual-regression/test-results
+      # Includes any candidate PNG Playwright wrote for a not-yet-committed
+      # widget. Review before committing it as a baseline. Mismatches against an
+      # existing baseline appear in test-results/ and the HTML report.
+      - tests/visual-regression/baselines
 
 phpunit (previous major):
   allow_failure: true
@@ -168,12 +308,27 @@ pages:
     - git checkout gh-pages
     - mv mkdocs public
 
+fjs_conventions:
+  stage: test
+  script:
+    - bash scripts/check-functionaljavascript-conventions.sh
+
 cspell:
   allow_failure: false
 phpcs:
   allow_failure: false
 phpstan:
   allow_failure: false
+
+.phpstan-base:
+  before_script:
+    - |
+      echo "Removing deprecated submodules bundled in drupal/ai to avoid a namespace collision (https://www.drupal.org/node/3568339)."
+      find "$CI_PROJECT_DIR/modules" -type d -path '*/field_widget_actions' -prune -exec rm -rf {} + || true
+      find "$CI_PROJECT_DIR/modules" -type d -path '*/ai_content_suggestions' -prune -exec rm -rf {} + || true
+      find "$CI_PROJECT_DIR/modules" -type d -path '*/ai_translate' -prune -exec rm -rf {} + || true
+      find "$CI_PROJECT_DIR/modules" -type d -path '*/ai_logging' -prune -exec rm -rf {} + || true
+      find "$CI_PROJECT_DIR/modules" -type d -path '*/ai_validations' -prune -exec rm -rf {} + || true
 
 .phpunit-base:
   needs:
@@ -194,14 +349,25 @@ phpstan:
       else
         echo "No FunctionalJavascript tests to run, skipping ffmpeg installation."
       fi
+    - |
+      echo "Removing deprecated submodules bundled in drupal/ai to avoid a namespace collision (https://www.drupal.org/node/3568339)."
+      find "$CI_PROJECT_DIR/modules" -type d -path '*/field_widget_actions' -prune -exec rm -rf {} + || true
+      find "$CI_PROJECT_DIR/modules" -type d -path '*/ai_content_suggestions' -prune -exec rm -rf {} + || true
+      find "$CI_PROJECT_DIR/modules" -type d -path '*/ai_translate' -prune -exec rm -rf {} + || true
+      find "$CI_PROJECT_DIR/modules" -type d -path '*/ai_logging' -prune -exec rm -rf {} + || true
+      find "$CI_PROJECT_DIR/modules" -type d -path '*/ai_validations' -prune -exec rm -rf {} + || true
 
 composer:
   before_script:
+    # Resolve the self-referencing ai/ai_* submodule dependency cycle.
+    - !reference [.composer-root-version]
     # Workaround for https://www.drupal.org/project/opentelemetry/issues/3581743
     - composer require "google/protobuf:4.33.6 as 3.25.0" --no-update
 
 composer (previous major):
   before_script:
+    # Resolve the self-referencing ai/ai_* submodule dependency cycle.
+    - !reference [.composer-root-version]
     # We need doctrine/instantiator to still be on 2.0 for previous major.
     - composer require doctrine/instantiator:"2.0.0" --no-update
     # Workaround for https://www.drupal.org/project/opentelemetry/issues/3581743
@@ -209,16 +375,29 @@ composer (previous major):
 
 composer (previous minor):
   before_script:
+    # Resolve the self-referencing ai/ai_* submodule dependency cycle.
+    - !reference [.composer-root-version]
     # Workaround for https://www.drupal.org/project/opentelemetry/issues/3581743
     - composer require "google/protobuf:4.33.6 as 3.25.0" --no-update
 
 composer (next minor):
   before_script:
+    # Resolve the self-referencing ai/ai_* submodule dependency cycle.
+    - !reference [.composer-root-version]
+    # Workaround for https://www.drupal.org/project/opentelemetry/issues/3581743
+    - composer require "google/protobuf:4.33.6 as 3.25.0" --no-update
+
+composer (next major):
+  before_script:
+    # Resolve the self-referencing ai/ai_* submodule dependency cycle.
+    - !reference [.composer-root-version]
     # Workaround for https://www.drupal.org/project/opentelemetry/issues/3581743
     - composer require "google/protobuf:4.33.6 as 3.25.0" --no-update
 
 composer (max PHP version):
   before_script:
+    # Resolve the self-referencing ai/ai_* submodule dependency cycle.
+    - !reference [.composer-root-version]
     # Workaround for https://www.drupal.org/project/opentelemetry/issues/3581743
     - composer require "google/protobuf:4.33.6 as 3.25.0" --no-update
 

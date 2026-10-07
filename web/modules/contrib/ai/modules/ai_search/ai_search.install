@@ -6,6 +6,49 @@
  */
 
 use Drupal\ai\Enum\EmbeddingStrategyIndexingOptions;
+use Drupal\Core\Database\Database;
+
+/**
+ * Implements hook_install().
+ */
+function ai_search_install(): void {
+  $schema = Database::getConnection()->schema();
+  // search_api_item is created by Search API; it may not exist yet when both
+  // modules are installed together. The update hook handles the upgrade path.
+  if (!$schema->tableExists('search_api_item')) {
+    return;
+  }
+  foreach (_ai_search_chunk_tracking_columns() as $column => $definition) {
+    if (!$schema->fieldExists('search_api_item', $column)) {
+      $schema->addField('search_api_item', $column, $definition);
+    }
+  }
+}
+
+/**
+ * Returns the schema definitions for the chunk-tracking columns.
+ *
+ * @return array
+ *   Schema column definitions keyed by column name.
+ */
+function _ai_search_chunk_tracking_columns(): array {
+  return [
+    'total_chunks' => [
+      'type' => 'int',
+      'unsigned' => TRUE,
+      'not null' => FALSE,
+      'default' => NULL,
+      'description' => 'Total number of chunks to index for this item.',
+    ],
+    'processed_chunks' => [
+      'type' => 'int',
+      'unsigned' => TRUE,
+      'not null' => TRUE,
+      'default' => 0,
+      'description' => 'Number of chunks already indexed.',
+    ],
+  ];
+}
 
 /**
  * Update the servers that use AI Search with nested database settings.
@@ -245,9 +288,37 @@ function ai_search_update_10005() {
 }
 
 /**
- * Migrate RAG action configs to enforce access control by default.
+ * Update AI Search indexes to include exclude_title setting.
  */
-function ai_search_update_10006(): string {
+function ai_search_update_10006(): void {
+  $config_factory = \Drupal::configFactory();
+  $indexes = $config_factory->listAll('ai_search.index.');
+  foreach ($indexes as $index) {
+    $config_object = $config_factory->getEditable($index);
+    $config = $config_object->getRawData();
+    if (!isset($config['exclude_title'])) {
+      $config_object->set('exclude_title', FALSE);
+      $config_object->save();
+    }
+  }
+}
+
+/**
+ * Add chunk-tracking columns to search_api_item for the AI Search tracker.
+ */
+function ai_search_update_10007(): void {
+  $schema = Database::getConnection()->schema();
+  foreach (_ai_search_chunk_tracking_columns() as $column => $definition) {
+    if (!$schema->fieldExists('search_api_item', $column)) {
+      $schema->addField('search_api_item', $column, $definition);
+    }
+  }
+}
+
+/**
+ * Migrate RAG action config to enforce access control by default.
+ */
+function ai_search_update_10008(): string {
   $config_factory = \Drupal::configFactory();
   $updated = 0;
 
@@ -277,4 +348,65 @@ function ai_search_update_10006(): string {
   }
 
   return (string) t('Updated @count AI Assistant configuration(s) to enforce RAG access control by default.', ['@count' => $updated]);
+}
+
+/**
+ * Add the max_pager_iterations setting to AI Search boost processors.
+ */
+function ai_search_update_10009(): string {
+  $config_factory = \Drupal::configFactory();
+  $updated = 0;
+
+  foreach ($config_factory->listAll('search_api.index.') as $config_name) {
+    $config = $config_factory->getEditable($config_name);
+    $processor_settings = $config->get('processor_settings');
+    if (empty($processor_settings)) {
+      continue;
+    }
+
+    $changed = FALSE;
+    foreach (['database_boost_by_ai_search', 'solr_boost_by_ai_search'] as $processor_id) {
+      if (
+        isset($processor_settings[$processor_id])
+        && !array_key_exists('max_pager_iterations', $processor_settings[$processor_id])
+      ) {
+        $processor_settings[$processor_id]['max_pager_iterations'] = NULL;
+        $changed = TRUE;
+      }
+    }
+
+    if ($changed) {
+      $config->set('processor_settings', $processor_settings);
+      $config->save();
+      $updated++;
+    }
+  }
+
+  return (string) t('Updated @count Search API index(es) with the max_pager_iterations setting.', ['@count' => $updated]);
+}
+
+/**
+ * Re-apply the exclude_title default for sites upgrading from AI module 1.4.x.
+ *
+ * Sites running the ai_search submodule bundled with the AI module 1.4.x are
+ * at schema version 10006, which there was the RAG access-control migration,
+ * so they skip ai_search_update_10006() (the exclude_title default) from the
+ * standalone project's numbering used since. Re-apply it here; sites coming
+ * from the standalone project already have the key set and are untouched.
+ *
+ * Note for the standalone ai_search project: any new update hook added there
+ * must be numbered 10011 or higher to stay compatible with sites that ran
+ * this hook.
+ */
+function ai_search_update_10010(): void {
+  $config_factory = \Drupal::configFactory();
+  $indexes = $config_factory->listAll('ai_search.index.');
+  foreach ($indexes as $index) {
+    $config_object = $config_factory->getEditable($index);
+    $config = $config_object->getRawData();
+    if (!isset($config['exclude_title'])) {
+      $config_object->set('exclude_title', FALSE);
+      $config_object->save();
+    }
+  }
 }

@@ -20,6 +20,11 @@ class AiToolsLibraryElementTest extends BaseClassFunctionalJavascriptTests {
   /**
    * {@inheritdoc}
    */
+  protected bool $videoRecording = TRUE;
+
+  /**
+   * {@inheritdoc}
+   */
   protected static $modules = [
     'ai',
     'ai_test',

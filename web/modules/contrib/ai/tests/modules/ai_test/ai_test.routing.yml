@@ -26,6 +26,18 @@ ai_test.form_elements:
   requirements:
     _permission: 'administer ai'
 
+ai_test.visual_regression_form:
+  path: '/admin/config/ai/test-visual-regression'
+  defaults:
+    _title: 'AI Visual Regression Widget'
+    _form: 'Drupal\ai_test\Form\VisualRegressionForm'
+  requirements:
+    # No access check on purpose: this test-only route is used by the visual
+    # regression tests (tests/visual-regression) to render the built UI widgets
+    # anonymously. It renders a single widget selected by ?vr_widget= and
+    # ?vr_state=. See \Drupal\ai_test\Form\VisualRegressionForm.
+    _access: 'TRUE'
+
 ai_test.provider_configuration_test:
   path: '/admin/config/ai/test-provider-configuration-values'
   defaults:

@@ -5,32 +5,39 @@ declare(strict_types=1);
 namespace Drupal\ai_chatbot\Controller;
 
 use Drupal\Component\Serialization\Json;
+use Drupal\Component\Utility\Xss;
 use Drupal\Core\Access\CsrfTokenGenerator;
 use Drupal\Core\Controller\ControllerBase;
-use Drupal\ai\Exception\AiBadRequestException;
-use Drupal\ai\Exception\AiQuotaException;
-use Drupal\ai\Exception\AiRateLimitException;
-use Drupal\ai\Exception\AiRequestErrorException;
-use Drupal\ai\Exception\AiSetupFailureException;
+use Drupal\ai\OperationType\Chat\ChatInput;
 use Drupal\ai\OperationType\Chat\ChatMessage;
-use Drupal\ai\OperationType\Chat\StreamedChatMessageIterator;
+use Drupal\ai\OperationType\Chat\StreamedChatMessageIteratorInterface;
+use Drupal\ai\Plugin\ChatProcessor\ChatProcessorInterface;
+use Drupal\ai\PluginManager\ChatProcessorPluginManager;
+use Drupal\ai\Response\AiStreamedResponse;
 use Drupal\ai\Service\FunctionCalling\FunctionCallPluginManager;
-use Drupal\ai_assistant_api\AiAssistantApiRunner;
-use Drupal\ai_assistant_api\Data\UserMessage;
-use Drupal\ai_assistant_api\Entity\AiAssistant;
 use Drupal\ai_chatbot\Service\MessagesButtons;
-use Drupal\Component\Utility\Xss;
+use League\CommonMark\CommonMarkConverter;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Drupal\ai\Response\AiStreamedResponse;
-use Symfony\Component\Yaml\Yaml;
 
 /**
  * Returns responses for AI Deepchat routes.
  */
 class DeepChatApi extends ControllerBase {
+
+  /**
+   * Reserved execution identity fields that callers are not allowed to submit.
+   *
+   * Follow-up under #3573899: centralize execution envelope reserved fields so
+   * all entry points enforce the same contract.
+   */
+  private const RESERVED_EXECUTION_IDENTITY_FIELDS = [
+    'executor_uid',
+    'initiator_uid',
+    'initiator_subject',
+  ];
 
   /**
    * All buttons available for the assistant.
@@ -40,21 +47,12 @@ class DeepChatApi extends ControllerBase {
   protected array $buttons = [];
 
   /**
-   * Should show structured results.
+   * Allowed tags for rendered LLM output.
    *
-   * @var bool
+   * We allow anything that can be expressed in markdown. Shared with the
+   * history rendering in DeepChatFormBlock so both paths sanitize alike.
    */
-  protected bool $showStructuredResults = FALSE;
-
-  /**
-   * Allowed tags.
-   *
-   * These are the allowed tags for the LLM response. We allow anything that
-   * can be expressed in markdown.
-   *
-   * @var array
-   */
-  protected array $allowedTags = [
+  public const ALLOWED_TAGS = [
     'a',
     'b',
     'blockquote',
@@ -82,20 +80,23 @@ class DeepChatApi extends ControllerBase {
   /**
    * Constructs a new DeepChatApi object.
    *
-   * @param \Drupal\ai_assistant_api\AiAssistantApiRunner $aiAssistantClient
-   *   The AI Assistant API client.
    * @param \Drupal\ai_chatbot\Service\MessagesButtons $messagesButtons
    *   The messages buttons render service.
    * @param \Drupal\Core\Access\CsrfTokenGenerator $csrfTokenGenerator
    *   The CSRF token generator.
    * @param \Drupal\ai\Service\FunctionCalling\FunctionCallPluginManager $functionCallPluginManager
    *   The function call plugin manager.
+   * @param \Drupal\ai\PluginManager\ChatProcessorPluginManager $chatProcessorPluginManager
+   *   The chat processor plugin manager.
+   * @param \League\CommonMark\CommonMarkConverter $commonMarkConverter
+   *   The CommonMark converter.
    */
   public function __construct(
-    protected AiAssistantApiRunner $aiAssistantClient,
     protected MessagesButtons $messagesButtons,
     protected CsrfTokenGenerator $csrfTokenGenerator,
     protected FunctionCallPluginManager $functionCallPluginManager,
+    protected ChatProcessorPluginManager $chatProcessorPluginManager,
+    protected CommonMarkConverter $commonMarkConverter,
   ) {
   }
 
@@ -104,10 +105,11 @@ class DeepChatApi extends ControllerBase {
    */
   public static function create(ContainerInterface $container): self {
     return new static(
-      $container->get('ai_assistant_api.runner'),
       $container->get('ai_chatbot.buttons'),
       $container->get('csrf_token'),
       $container->get('plugin.manager.ai.function_calls'),
+      $container->get(ChatProcessorPluginManager::class),
+      $container->get('ai.commonmark_converter'),
     );
   }
 
@@ -125,38 +127,15 @@ class DeepChatApi extends ControllerBase {
     $content = $request->getContent();
     $data = Json::decode($content);
 
-    // Retrieve the assistant_id from request payload.
-    if (!isset($data['assistant_id'])) {
-      // Assistant ID is required.
-      return new JsonResponse(['error' => $this->t('assistant_id is required.')], 422);
-    }
-
-    // Load the AiAssistant entity.
-    $assistant = $this->entityTypeManager()->getStorage('ai_assistant')->load($data['assistant_id']);
-
-    if (!$assistant instanceof AiAssistant) {
-      return new JsonResponse(['error' => $this->t('Invalid assistant ID.')], 422);
-    }
-
-    // Set the assistant in the AiAssistantApiRunner.
-    $this->aiAssistantClient->setAssistant($assistant);
-
-    if (isset($data['stream']) && $data['stream'] === 1) {
-      $this->aiAssistantClient->streamedOutput(TRUE);
-    }
-
-    // Optionally, set the thread_id if provided.
-    if (isset($data['thread_id'])) {
-      $this->aiAssistantClient->setThreadsKey($data['thread_id']);
-    }
-
-    // Set the context if provided.
-    if (isset($data['contexts']) && is_array($data['contexts'])) {
-      $this->aiAssistantClient->setContext($data['contexts']);
-    }
-
-    if (isset($data['verbose_mode']) && $data['verbose_mode']) {
-      $this->aiAssistantClient->setVerboseMode(TRUE);
+    // Reject caller-supplied execution identity fields at the API boundary.
+    $payload_keys = array_keys(is_array($data) ? $data : []);
+    $forbidden_fields = array_intersect(self::RESERVED_EXECUTION_IDENTITY_FIELDS, $payload_keys);
+    if ($forbidden_fields !== []) {
+      return new JsonResponse([
+        'error' => $this->t('Client-supplied execution identity fields are not allowed: @fields', [
+          '@fields' => implode(', ', $forbidden_fields),
+        ]),
+      ], Response::HTTP_UNPROCESSABLE_ENTITY);
     }
 
     // Check if 'messages' array is provided.
@@ -170,7 +149,10 @@ class DeepChatApi extends ControllerBase {
           $role = $message['role'];
           $text = $message['text'];
           if ($role === 'user') {
-            $conversation[] = new UserMessage($text);
+            $conversation[] = new ChatMessage('user', $text);
+          }
+          elseif ($role === 'assistant') {
+            $conversation[] = new ChatMessage('assistant', $text);
           }
         }
       }
@@ -179,66 +161,72 @@ class DeepChatApi extends ControllerBase {
         return new JsonResponse(['error' => $this->t('No user messages provided.')], 400);
       }
 
-      // Set the latest user message.
-      $latestUserMessage = end($conversation);
-      $this->aiAssistantClient->setUserMessage($latestUserMessage);
-      $this->aiAssistantClient->setThrowException(TRUE);
-
-      // Set the structured result data.
-      $this->showStructuredResults = isset($data['structured_results']) && $data['structured_results'];
-
-      // Set the copy button if wanted.
-      if (isset($data['show_copy_icon']) && $data['show_copy_icon']) {
-        $this->buttons[] = [
-          'svg' => $this->moduleHandler()->getModule('ai_chatbot')->getPath() . '/assets/copy-icon.svg',
-          'weight' => 1,
-          'class' => ['copy'],
-          'alt' => $this->t('Copy message'),
-          'title' => $this->t('Copy message'),
-        ];
+      // Check so the chat processor plugin is set.
+      $chat_processor_plugin = $data['chat_processor_plugin'] ?? NULL;
+      if (empty($chat_processor_plugin) || !$this->chatProcessorPluginManager->hasDefinition($chat_processor_plugin)) {
+        return new JsonResponse(['error' => $this->t('Invalid or missing chat processor plugin.')], 400);
       }
+
+      $input = new ChatInput($conversation);
+
+      if (isset($data['stream']) && $data['stream'] === 1) {
+        $input->setStreamedOutput(TRUE);
+      }
+      // Set the context if provided.
+      if (isset($data['contexts']) && is_array($data['contexts'])) {
+        $input->setRequestMetadataValue('contexts', $data['contexts']);
+      }
+
+      $plugin_configuration = $data['plugin_configuration'] ?? [];
+
+      // The identifier passed to hook_deepchat_prepend_message(). Assistant
+      // backed processors keep passing the assistant id for backwards
+      // compatibility; other processors pass their plugin id.
+      $hook_id = !empty($plugin_configuration['assistant_id']) ? $plugin_configuration['assistant_id'] : $chat_processor_plugin;
 
       // Process the user's message.
       try {
-        $response = $this->aiAssistantClient->process();
+        // Load the chat processor plugin.
+        /** @var \Drupal\ai\Plugin\ChatProcessor\ChatProcessorInterface $chat_processor */
+        $chat_processor = $this->chatProcessorPluginManager->createInstance($chat_processor_plugin, $plugin_configuration);
+
+        // Let the plugin enforce its own access rules on top of the route
+        // permission.
+        $access = $chat_processor->access($this->currentUser());
+        if (!$access->isAllowed()) {
+          return new JsonResponse(['error' => $this->t('You do not have access to this chatbot.')], 403);
+        }
+
+        // Set the input messages.
+        $chat_processor->setInput($input);
+        // Optionally, set the thread_id if provided.
+        if (isset($data['thread_id'])) {
+          $chat_processor->setThreadId($data['thread_id']);
+        }
+        // Execute the chat processor.
+        $chat_processor->execute();
+        $response = $chat_processor->getOutput();
+
+        // The processor owns the thread id; use it for the prepend hook.
+        $thread_id = $chat_processor->getThreadId() ?? '';
 
         // Handle the response, which could be a ChatMessage or Stream.
-        $normalizedResponse = $response->getNormalized();
+        $normalized_response = $response->getNormalized();
 
         // Decide response type based on the request.
-        if ($normalizedResponse instanceof ChatMessage) {
-          return $this->createResponse($normalizedResponse);
+        if ($normalized_response instanceof ChatMessage) {
+          return $this->createResponse($normalized_response, $chat_processor, $hook_id, $thread_id);
         }
         else {
-          return $this->createStreamedResponse($normalizedResponse);
+          return $this->createStreamedResponse($normalized_response, $chat_processor, $hook_id, $thread_id);
         }
       }
       catch (\Exception $e) {
-        $error_message = $assistant->get('error_message');
-
-        // Try to find a specific error message to use.
-        if ($e instanceof AiBadRequestException) {
-          $error_message = $assistant->get('specific_error_messages')['AiBadRequestException'] ?? $error_message;
-        }
-        elseif ($e instanceof AiRateLimitException) {
-          $error_message = $assistant->get('specific_error_messages')['AiRateLimitException'] ?? $error_message;
-        }
-        elseif ($e instanceof AiQuotaException) {
-          $error_message = $assistant->get('specific_error_messages')['AiQuotaException'] ?? $error_message;
-        }
-        elseif ($e instanceof AiSetupFailureException) {
-          $error_message = $assistant->get('specific_error_messages')['AiSetupFailureException'] ?? $error_message;
-        }
-        elseif ($e instanceof AiRequestErrorException) {
-          $error_message = $assistant->get('specific_error_messages')['AiRequestErrorException'] ?? $error_message;
-        }
-
-        // Log the error.
-        $this->getLogger('ai_chatbot')->error('The chatbot had an error: @message', ['@message' => $e->getMessage()]);
-
+        // Log the exception.
+        $this->getLogger('ai_chatbot')->error('DeepChat API error: @message', ['@message' => $e->getMessage()]);
         // Otherwise use the default error message.
         return new JsonResponse([
-          'error' => $error_message,
+          'error' => $this->t('An error occurred while processing the request. Please try again later.'),
         ], 500);
 
       }
@@ -251,99 +239,115 @@ class DeepChatApi extends ControllerBase {
 
   /**
    * Returns a normal response.
+   *
+   * @param \Drupal\ai\OperationType\Chat\ChatMessage $response
+   *   The assistant response.
+   * @param \Drupal\ai\Plugin\ChatProcessor\ChatProcessorInterface|null $chat_processor
+   *   The chat processor that produced the response.
+   * @param string $hook_id
+   *   The conversation identifier passed to hook_deepchat_prepend_message()
+   *   (the assistant id for assistant-backed processors, otherwise the
+   *   processor plugin id).
+   * @param string $thread_id
+   *   The conversation thread id.
+   *
+   * @return \Symfony\Component\HttpFoundation\JsonResponse
+   *   The JSON response.
    */
-  public function createResponse($normalizedResponse): JsonResponse {
-    $assistantResponseText = $normalizedResponse->getText();
-    // Set the assistant message for logging or further processing.
-    // Only if it does not contain tools.
-    if (empty($normalizedResponse->getTools())) {
-      $this->aiAssistantClient->setAssistantMessage($assistantResponseText);
-    }
-    // Change the response if needed.
+  public function createResponse(ChatMessage $response, ?ChatProcessorInterface $chat_processor = NULL, string $hook_id = '', string $thread_id = ''): JsonResponse {
+    $response_text = $response->getText();
+
+    // Let modules append extra messages to the response.
     $extra = $this->moduleHandler()->invokeAll('deepchat_prepend_message', [
-      $assistantResponseText,
+      $response_text,
       'text',
-      $this->aiAssistantClient->getAssistant()->id(),
-      $this->aiAssistantClient->getThreadsKey(),
+      $hook_id,
+      $thread_id,
     ]);
 
     $converter = $this->getCommonMarkConverter();
-    $assistantResponseText = $this->rewriteMarkdownMessage($assistantResponseText);
-    $assistantResponseText = $converter ? $converter->convert($assistantResponseText) : $assistantResponseText;
-    $assistantResponseText = (string) $assistantResponseText;
-    // Everything after this is controlled by modules, so we sanitize here.
-    $assistantResponseText = Xss::filter($assistantResponseText, $this->allowedTags);
-    if (empty($normalizedResponse->getTools())) {
-      $assistantResponseText .= $this->renderStructuredResults();
-      if (!empty($extra)) {
-        foreach ($extra as $message) {
-          $assistantResponseText .= $message;
-        }
+    $response_text = $this->rewriteMarkdownMessage($response_text);
+    $response_text = $converter->convert($response_text)->getContent();
+    // The model output is untrusted, so sanitize it. Everything appended
+    // after this point is controlled by modules and plugins.
+    $response_text = Xss::filter($response_text, self::ALLOWED_TAGS);
+    if (empty($response->getTools())) {
+      if ($chat_processor) {
+        $response_text .= $chat_processor->getPostResponseMarkup();
       }
-
-      $assistantResponseText .= $this->messagesButtons->getRenderedButtons($this->buttons, $this->aiAssistantClient->getAssistant()->id(), $this->aiAssistantClient->getThreadsKey());
+      foreach ($extra as $extra_message) {
+        $response_text .= $extra_message;
+      }
     }
     else {
       // If its empty string, we return that a tool was used.
-      $agents = [];
-      foreach ($normalizedResponse->getTools() as $tool) {
-        $agents[$tool->getName()] = $this->functionCallPluginManager->getFunctionCallFromFunctionName($tool->getName())->getPluginDefinition()['name'] ?? $tool->getName();
+      $tools = [];
+      foreach ($response->getTools() as $tool) {
+        $tools[$tool->getName()] = $this->functionCallPluginManager->getFunctionCallFromFunctionName($tool->getName())->getPluginDefinition()['name'] ?? $tool->getName();
       }
-      $assistantResponseText = $this->t('Calling @tools', [
-        '@tools' => implode(', ', $agents),
-      ]) . $assistantResponseText;
+      $response_text = $this->t('Calling @tools', [
+        '@tools' => implode(', ', $tools),
+      ]) . $response_text;
+
     }
 
     // Default to JSON response.
     return new JsonResponse([
-      'html' => $assistantResponseText,
-      'should_continue' => !empty($normalizedResponse->getTools()),
+      'html' => $response_text,
+      'should_continue' => !empty($response->getTools()),
     ]);
   }
 
   /**
    * Creates a StreamedResponse for the assistant's reply.
    *
-   * @param \Drupal\ai\OperationType\Chat\StreamedChatMessageIteratorInterface $streamedMessages
+   * @param \Drupal\ai\OperationType\Chat\StreamedChatMessageIteratorInterface $message
    *   The text generated by the AI assistant.
+   * @param \Drupal\ai\Plugin\ChatProcessor\ChatProcessorInterface $chat_processor
+   *   The chat processor that produced the stream.
+   * @param string $hook_id
+   *   The conversation identifier passed to hook_deepchat_prepend_message().
+   * @param string $thread_id
+   *   The conversation thread id.
    *
    * @return \Drupal\ai\Response\AiStreamedResponse
    *   The streamed response.
    */
-  private function createStreamedResponse(StreamedChatMessageIterator $streamedMessages): AiStreamedResponse {
+  private function createStreamedResponse(StreamedChatMessageIteratorInterface $message, ChatProcessorInterface $chat_processor, string $hook_id = '', string $thread_id = ''): AiStreamedResponse {
     $response = new AiStreamedResponse(NULL, 200, [
       'Content-Type' => 'text/event-stream',
     ]);
 
-    $response->setCallback(function () use ($streamedMessages) {
-      $saveMessage = '';
+    $response->setCallback(function () use ($message, $chat_processor, $hook_id, $thread_id) {
+      $save_message = '';
 
       // Make sure to start session.
-      $this->aiAssistantClient->startSession();
-      foreach ($streamedMessages as $chunk) {
-        $saveMessage .= $chunk->getText();
+      foreach ($message as $chunk) {
+        $save_message .= $chunk->getText();
         // Send each chunk.
-        $this->createSseMessage($saveMessage, TRUE);
+        $this->createSseMessage($save_message, TRUE);
       }
 
-      $this->aiAssistantClient->setAssistantMessage($saveMessage);
+      // Hand the full text back so the plugin can persist it to history.
+      $chat_processor->onStreamComplete($save_message);
 
+      // Send the plugin's trusted post-response markup (e.g. structured
+      // results).
+      $post_markup = $chat_processor->getPostResponseMarkup();
+      if ($post_markup !== '') {
+        $this->createSseMessage($post_markup);
+      }
+
+      // Let modules append extra messages to the response.
       $extra = $this->moduleHandler()->invokeAll('deepchat_prepend_message', [
-        $saveMessage,
+        $save_message,
         'text',
-        $this->aiAssistantClient->getAssistant()->id(),
-        $this->aiAssistantClient->getThreadsKey(),
+        $hook_id,
+        $thread_id,
       ]);
-      if (!empty($extra)) {
-        foreach ($extra as $message) {
-          $this->createSseMessage($message);
-        }
+      foreach ($extra as $extra_message) {
+        $this->createSseMessage($extra_message);
       }
-      // Send the structured results.
-      $this->createSseMessage($this->renderStructuredResults());
-
-      // Send the buttons.
-      $this->createSseMessage($this->messagesButtons->getRenderedButtons($this->buttons, $this->aiAssistantClient->getAssistant()->id(), $this->aiAssistantClient->getThreadsKey()));
     });
 
     return $response;
@@ -407,14 +411,14 @@ class DeepChatApi extends ControllerBase {
    * @param string $type
    *   The type of message.
    */
-  public function createSseMessage(string $message, bool $is_chunk = FALSE, string $type = 'html') {
+  public function createSseMessage(string $message, bool $is_chunk = FALSE, string $type = 'html'): void {
     $message = $this->rewriteMarkdownMessage($message);
     $converter = $this->getCommonMarkConverter();
     if ($is_chunk) {
       // Send the chunk.
-      $html = $converter ? $converter->convert($message)->__toString() : $message;
+      $html = $converter->convert($message)->getContent();
       // This part is generated by the LLM, so sanitize it.
-      $html = Xss::filter($html, $this->allowedTags);
+      $html = Xss::filter($html, self::ALLOWED_TAGS);
       if ($html) {
         echo 'data: ' . Json::encode([$type => $html, 'overwrite' => TRUE]) . "\n\n";
         flush();
@@ -427,45 +431,13 @@ class DeepChatApi extends ControllerBase {
   }
 
   /**
-   * Get the structured results if wanted.
+   * Gets the CommonMark converter.
    *
-   * @return string
-   *   The structured results.
+   * @return \League\CommonMark\CommonMarkConverter
+   *   The CommonMark converter.
    */
-  public function renderStructuredResults(): string {
-    $results = '';
-    if ($this->showStructuredResults) {
-      $structured = $this->aiAssistantClient->getStructuredResults();
-      if ($structured) {
-        // Add the button.
-        $this->buttons[] = [
-          'svg' => $this->moduleHandler()->getModule('ai_chatbot')->getPath() . '/assets/combine-left-right-icon.svg',
-          'weight' => 1,
-          'class' => ['structured-results'],
-          'alt' => $this->t('Structured results'),
-          'title' => $this->t('Structured results'),
-        ];
-        $results .= '<div class="structured-results-dump"><pre>' . Xss::filter(Yaml::dump($structured, 10)) . "</pre></div>";
-      }
-    }
-    return $results;
-  }
-
-  /**
-   * Gets the common mark converter if available.
-   *
-   * @return \League\CommonMark\CommonMarkConverter|null
-   *   The common mark converter.
-   */
-  public function getCommonMarkConverter() {
-    $converter = NULL;
-    if (class_exists('League\CommonMark\CommonMarkConverter')) {
-      // Ignore the non-use statement loading since this dependency may not
-      // exist.
-      // @codingStandardsIgnoreLine
-      $converter = new \League\CommonMark\CommonMarkConverter();
-    }
-    return $converter;
+  public function getCommonMarkConverter(): object {
+    return $this->commonMarkConverter;
   }
 
 }

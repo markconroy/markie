@@ -1,0 +1,13 @@
+name: 'AI Validations Test'
+type: module
+description: 'Support module providing a controllable AI provider for AI Validations tests.'
+package: Testing
+core_version_requirement: ^10.3 || ^11
+dependencies:
+  - ai:ai
+  - ai:ai_test
+
+# Information added by Drupal.org packaging script on 2026-07-01
+version: '1.3.0'
+project: 'ai_validations'
+datestamp: 1782915003

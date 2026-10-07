@@ -12,6 +12,7 @@
         "source": "https://git.drupalcode.org/project/klaro"
     },
     "require": {
+        "masterminds/html5": "^2.8",
         "drupal/core": "^10.2 || ^11",
         "drupal/klaro_js": "~3.1.0"
     }

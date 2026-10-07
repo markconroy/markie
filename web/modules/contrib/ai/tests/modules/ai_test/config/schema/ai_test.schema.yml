@@ -17,6 +17,56 @@ ai_test.settings:
       type: ai.provider_config
       label: 'AI provider configuration'
 
+plugin.plugin_configuration.search_api_backend.ai_test_vdb_config:
+  type: mapping
+  label: 'AI VDB configuration test backend settings'
+  mapping:
+    database:
+      type: string
+      label: 'Database type'
+    database_settings:
+      type: mapping
+      label: 'Database settings'
+      mapping:
+        database_name:
+          type: string
+          label: 'Database name'
+        collection:
+          type: string
+          label: 'Collection name'
+        metric:
+          type: string
+          label: 'Similarity metric'
+    embeddings_engine:
+      type: string
+      label: 'Embeddings engine'
+    embeddings_engine_configuration:
+      type: mapping
+      label: 'Embeddings engine configuration'
+      mapping:
+        set_dimensions:
+          type: boolean
+          label: 'Whether to set dimensions manually'
+        dimensions:
+          type: integer
+          label: 'Number of dimensions'
+    embedding_strategy:
+      type: string
+      label: 'Embedding strategy'
+    embedding_strategy_configuration:
+      type: mapping
+      label: 'Embedding strategy configuration'
+      mapping:
+        chunk_size:
+          type: string
+          label: 'Chunk size'
+        chunk_min_overlap:
+          type: string
+          label: 'Minimum chunk overlap'
+        contextual_content_max_percentage:
+          type: string
+          label: 'Maximum contextual content percentage'
+
 # Settings schema for the test-only counting_stub_guardrail plugin.
 ai.guardrail.settings.counting_stub_guardrail:
   type: mapping

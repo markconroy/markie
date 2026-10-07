@@ -5,13 +5,14 @@ package: AI
 core_version_requirement: ^10.3 || ^11
 lifecycle: deprecated
 lifecycle_link: 'https://www.drupal.org/project/ai/issues/3503947'
+hidden: true
 dependencies:
   - ai:ai
   - drupal:file
   - eca:eca
   - eca_content:eca_content
 
-# Information added by Drupal.org packaging script on 2026-09-16
-version: '1.4.9'
+# Information added by Drupal.org packaging script on 2026-09-25
+version: '1.5.0'
 project: 'ai'
-datestamp: 1789567520
+datestamp: 1790327400

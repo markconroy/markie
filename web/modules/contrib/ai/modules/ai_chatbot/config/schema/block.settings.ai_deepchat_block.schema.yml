@@ -2,9 +2,6 @@ block.settings.ai_deepchat_block:
   type: block_settings
   label: DeepChat Chatbot Block
   mapping:
-    ai_assistant:
-      type: string
-      label: AI Assistant
     bot_name:
       type: string
       label: Bot Name
@@ -29,6 +26,9 @@ block.settings.ai_deepchat_block:
     loading_message:
       type: text
       label: Loading Message
+    agent_delegation_message:
+      type: text
+      label: Agent Delegation Message
     stream:
       type: integer
       label: Stream
@@ -44,9 +44,6 @@ block.settings.ai_deepchat_block:
     placement:
       type: string
       label: Placement
-    show_structured_results:
-      type: boolean
-      label: Show Structured Results
     show_copy_icon:
       type: boolean
       label: Show Copy Icon
@@ -56,9 +53,26 @@ block.settings.ai_deepchat_block:
     style_file:
       type: string
       label: Style File
-    verbose_mode:
+    disable_csrf:
       type: boolean
-      label: Verbose Mode
+      label: Disable CSRF Protection
+    chat_processor_plugin:
+      type: string
+      label: ChatProcessor Plugin
+    plugin_configuration:
+      type: ai_chat_processor.configuration.[%parent.chat_processor_plugin]
+      label: Plugin Configuration
     expansion_method:
       type: string
       label: Expansion Method
+    # Deprecated settings from before the ChatProcessor plugins existed. They
+    # are kept - and ignored - so that block config that predates
+    # ai_chatbot_post_update_chat_processor() still validates, and so that
+    # DeepChatFormBlock can rebuild the plugin configuration from it. The keys
+    # are dropped the next time the block is saved.
+    ai_assistant:
+      type: ignore
+    verbose_mode:
+      type: ignore
+    show_structured_results:
+      type: ignore

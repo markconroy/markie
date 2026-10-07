@@ -29,3 +29,11 @@ ai_chatbot.session:
   requirements:
     _permission: 'access deepchat api'
     _method: 'POST'
+ai_chatbot.reset_thread:
+  path: '/api/deepchat/reset'
+  defaults:
+    _controller: '\Drupal\ai_chatbot\Controller\ResetSession::reset'
+    _format: json
+  requirements:
+    _permission: 'access deepchat api'
+    _method: POST

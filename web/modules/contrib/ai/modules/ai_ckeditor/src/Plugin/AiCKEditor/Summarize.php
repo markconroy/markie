@@ -44,12 +44,22 @@ final class Summarize extends AiCKEditorPluginBase {
       '#description' => $this->t('Select which provider to use for this plugin. See the <a href=":link">Provider overview</a> for details about each provider.', [':link' => '/admin/config/ai/providers']),
     ];
     $prompts_config = $this->getConfigFactory()->get('ai_ckeditor.settings');
-    $prompt_summarise = $prompts_config->get('prompts.summarise');
+    $prompt_summarize = $prompts_config->get('prompts.summarize');
     $form['prompt'] = [
-      '#type' => 'textarea',
-      '#title' => $this->t('Summarise prompt'),
-      '#default_value' => $prompt_summarise,
-      '#description' => $this->t('This prompt will be used to summarise the text.'),
+      '#type' => 'ai_prompt',
+      '#title' => $this->t('Summarize prompt'),
+      '#prompt_types' => ['ai_ckeditor_summarize'],
+      '#default_value' => $prompt_summarize,
+      '#parents' => [
+        'editor',
+        'settings',
+        'plugins',
+        'ai_ckeditor_ai',
+        'plugins',
+        'ai_ckeditor_summarize',
+        'prompt',
+      ],
+      '#description' => $this->t('This prompt will be used to summarize the text.'),
       '#states' => [
         'required' => [
           ':input[name="editor[settings][plugins][ai_ckeditor_ai][plugins][ai_ckeditor_summarize][enabled]"]' => ['checked' => TRUE],
@@ -81,7 +91,7 @@ final class Summarize extends AiCKEditorPluginBase {
     $this->configuration['provider'] = $form_state->getValue('provider');
     $newPrompt = $form_state->getValue('prompt');
     $prompts_config = $this->getConfigFactory()->getEditable('ai_ckeditor.settings');
-    $prompts_config->set('prompts.summarise', $newPrompt)->save();
+    $prompts_config->set('prompts.summarize', $newPrompt)->save();
   }
 
   /**
@@ -126,12 +136,17 @@ final class Summarize extends AiCKEditorPluginBase {
   public function ajaxGenerate(array &$form, FormStateInterface $form_state) {
     $values = $form_state->getValues();
     $prompts_config = $this->getConfigFactory()->get('ai_ckeditor.settings');
-    $prompt = $prompts_config->get('prompts.summarise');
+    $promptId = $prompts_config->get('prompts.summarize');
     try {
-      $prompt .= '"' . $values['plugin_config']['selected_text'] . '"';
+      $promptText = $this->getConfigFactory()->get('ai.ai_prompt.' . $promptId)?->get('prompt') ?? '';
+      // Replace the placeholders.
+      $promptText = strtr($promptText, [
+        '{inputText}' => '"' . $values['plugin_config']['selected_text'] . '"',
+      ]);
       $response = new AjaxResponse();
       $values = $form_state->getValues();
-      $response->addCommand(new AiRequestCommand($prompt, $values['editor_id'], $this->pluginDefinition['id'], 'ai-ckeditor-response'));
+      assert(is_array($this->pluginDefinition));
+      $response->addCommand(new AiRequestCommand($promptText, $values['editor_id'], $this->pluginDefinition['id'], 'ai-ckeditor-response'));
       return $response;
     }
     catch (\Exception $e) {

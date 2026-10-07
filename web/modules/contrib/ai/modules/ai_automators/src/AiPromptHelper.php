@@ -55,8 +55,15 @@ class AiPromptHelper {
    *   The rendered twig.
    */
   public function renderPrompt($prompt, array $tokens) {
-    // Get variables.
-    $template = $this->twig->createTemplate(htmlspecialchars_decode($prompt));
+    // Wrap in {% autoescape false %} so token values (e.g. option labels
+    // containing & or <) are passed to the LLM as plain text, not as
+    // HTML-escaped entities. Prompts are never HTML output, so autoescaping
+    // is wrong here. The htmlspecialchars_decode() on the template body
+    // decodes any HTML entities that were introduced when the prompt text
+    // was saved through a form widget.
+    $template = $this->twig->createTemplate(
+      '{% autoescape false %}' . htmlspecialchars_decode($prompt) . '{% endautoescape %}'
+    );
     return $template->render($tokens);
   }
 
@@ -76,7 +83,7 @@ class AiPromptHelper {
     return $this->token->replace($prompt, [
       $this->getEntityTokenType($entity->getEntityTypeId()) => $entity,
       'user' => $this->currentUser,
-    ]);
+    ], ['clear' => TRUE]);
   }
 
   /**

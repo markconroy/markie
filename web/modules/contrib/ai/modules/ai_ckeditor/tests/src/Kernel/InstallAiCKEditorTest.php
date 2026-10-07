@@ -2,6 +2,7 @@
 
 namespace Drupal\Tests\ai_ckeditor\Kernel;
 
+use Drupal\ai\Entity\AiPrompt;
 use Drupal\KernelTests\KernelTestBase;
 
 /**
@@ -110,6 +111,52 @@ class InstallAiCKEditorTest extends KernelTestBase {
       $untouched->getSettings()['toolbar']['items'] ?? NULL,
       'Editor configs without AI CKEditor items are left unchanged on uninstall.'
     );
+  }
+
+  /**
+   * Tests that uninstalling removes the module's prompts so it can reinstall.
+   *
+   * @see ai_ckeditor_module_preuninstall()
+   */
+  public function testUninstallRemovesPromptsAndAllowsReinstall(): void {
+    $this->installSchema('user', ['users_data']);
+    $module_installer = \Drupal::service('module_installer');
+    $module_installer->install(['ai_ckeditor']);
+    // Kernel tests do not import default configuration on module install.
+    $this->installConfig(['ai_ckeditor']);
+
+    $entity_type_manager = \Drupal::entityTypeManager();
+    $prompt_storage = $entity_type_manager->getStorage('ai_prompt');
+    $this->assertNotNull($entity_type_manager->getStorage('ai_prompt_type')->load('ai_ckeditor_tone'));
+    $this->assertNotNull($prompt_storage->load('ai_ckeditor_tone__default'));
+
+    // A prompt without the enforced module dependency, as created by older
+    // versions of the module, is not removed by the config dependency system.
+    $legacy_prompt = AiPrompt::create([
+      'id' => 'legacy',
+      'type' => 'ai_ckeditor_tone',
+      'label' => 'Legacy tone prompt',
+      'prompt' => 'Change the tone of {inputText} to {tone}.',
+    ]);
+    $legacy_prompt->save();
+    $this->assertSame('ai_ckeditor_tone__legacy', $legacy_prompt->id());
+    $this->assertEmpty($legacy_prompt->getDependencies());
+
+    $module_installer->uninstall(['ai_ckeditor']);
+
+    // The container is rebuilt on uninstall, so use fresh services.
+    $entity_type_manager = \Drupal::entityTypeManager();
+    $prompt_storage = $entity_type_manager->getStorage('ai_prompt');
+    $this->assertNull($prompt_storage->load('ai_ckeditor_tone__default'));
+    $this->assertNull($prompt_storage->load('ai_ckeditor_tone__legacy'));
+    $this->assertNull($entity_type_manager->getStorage('ai_prompt_type')->load('ai_ckeditor_tone'));
+
+    // Reinstalling must not fail with a PreExistingConfigException.
+    $module_installer->install(['ai_ckeditor']);
+    $this->installConfig(['ai_ckeditor']);
+    $this->assertTrue(\Drupal::service('module_handler')->moduleExists('ai_ckeditor'));
+    $prompt_storage = \Drupal::entityTypeManager()->getStorage('ai_prompt');
+    $this->assertNotNull($prompt_storage->load('ai_ckeditor_tone__default'));
   }
 
 }

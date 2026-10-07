@@ -29,6 +29,12 @@ services:
   ai_automator.rule_helper.file:
     class: Drupal\ai_automators\Rulehelpers\FileHelper
     arguments: ['@entity_type.manager', '@file_system', '@file.repository', '@token', '@current_user']
+  ai_automator.rule_helper.rich_text_image:
+    class: Drupal\ai_automators\Rulehelpers\RichTextImageHelper
+    arguments: ['@entity_type.manager', '@current_user']
+  ai_automator.rich_text_image_description:
+    class: Drupal\ai_automators\Service\RichTextImageDescriptionService
+    arguments: ['@ai_automator.rule_helper.rich_text_image', '@http_client', '@logger.factory']
   ai_automator.automate:
     class: Drupal\ai_automators\Service\Automate
     arguments: ['@entity_type.manager', '@entity_field.manager']
@@ -40,3 +46,6 @@ services:
   ai_automators.cleanup:
     class: Drupal\ai_automators\AiAutomatorCleanupService
     arguments: ['@entity_type.manager', '@logger.factory']
+  Drupal\ai_automators\Hook\AiAutomatorsHooks:
+    class: Drupal\ai_automators\Hook\AiAutomatorsHooks
+    autowire: true

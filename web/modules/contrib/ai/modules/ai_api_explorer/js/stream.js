@@ -78,8 +78,15 @@
                       return;
                     }
 
-                    // Valid streaming response
-                    responseField.html(response.replaceAll("\n", "<br />"));
+                    // Valid streaming response. Newlines in the message text
+                    // are line breaks, but anything the server appends after
+                    // the end marker is already rendered markup whose
+                    // whitespace must be left as is.
+                    const marker = '<!--ai-stream-message-end-->';
+                    const end = response.indexOf(marker);
+                    const message = end === -1 ? response : response.slice(0, end);
+                    const trailing = end === -1 ? '' : response.slice(end + marker.length);
+                    responseField.html(message.replaceAll("\n", "<br />") + trailing);
                   }
                 } catch (error) {
                   console.error('Error processing stream response:', error);

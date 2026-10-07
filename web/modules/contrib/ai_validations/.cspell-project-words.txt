@@ -1,0 +1,7 @@
+# List of words excluded from cspell.
+
+XTRUE
+XFALSE
+xtrue
+xfalse
+echoai

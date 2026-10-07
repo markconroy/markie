@@ -18,7 +18,7 @@ use Drupal\field_widget_actions\Attribute\FieldWidgetAction;
 #[FieldWidgetAction(
   id: 'automator_office_hours',
   label: new TranslatableMarkup('Automator Office Hours'),
-  widget_types: ['office_hours_default', 'office_hours_list'],
+  widget_types: ['office_hours_default'],
   field_types: ['office_hours'],
 )]
 class OfficeHours extends AutomatorBaseAction {
@@ -75,6 +75,16 @@ class OfficeHours extends AutomatorBaseAction {
    * {@inheritdoc}
    */
   protected function saveFormValues(array &$form, string $form_key, $entity, ?int $key = NULL): array {
+    // The day-slot mapping below is specific to the
+    // office_hours widgets' ['widget']['value'] layout. Bail out with a log
+    // entry rather than a TypeError if a widget renders a different shape.
+    if (!isset($form[$form_key]['widget']['value']) || !is_array($form[$form_key]['widget']['value'])) {
+      $this->loggerFactory->get('ai_automators')->warning('The office hours widget for field @field did not render the expected slot structure, so generated values could not be applied.', [
+        '@field' => $form_key,
+      ]);
+      return $form[$form_key] ?? [];
+    }
+
     // Build mapping from day number to form slot indices.
     $day_slots = [];
     foreach ($form[$form_key]['widget']['value'] as $slot_index => $slot) {
@@ -84,6 +94,24 @@ class OfficeHours extends AutomatorBaseAction {
       $day = $slot['#value']['day'] ?? NULL;
       if ($day !== NULL) {
         $day_slots[$day][] = $slot_index;
+      }
+    }
+
+    // Once the automator has run, $entity is the source of
+    // truth for this field. RuleBase::storeValues() replaced the field
+    // outright, so the entity holds exactly the days that were generated and
+    // nothing else. This method's job is to make the widget match it.
+    //
+    // The fill loop below only writes the days the entity has, and used to
+    // leave every other slot holding whatever the user had submitted. That
+    // left the widget showing days the entity no longer contains: a re-run
+    // that generates fewer days than the previous one displayed a mix of the
+    // two, and saving the form put those stale rows back on the entity.
+    // Blanking every slot first makes the widget a faithful render of the
+    // entity regardless of which days came back.
+    foreach ($day_slots as $slot_indexes) {
+      foreach ($slot_indexes as $slot_index) {
+        $this->clearSlot($form[$form_key]['widget']['value'][$slot_index]);
       }
     }
 
@@ -132,9 +160,46 @@ class OfficeHours extends AutomatorBaseAction {
         $slot['comment']['#value'] = $comment;
         $slot['comment']['#default_value'] = $comment;
       }
+      unset($slot);
     }
 
     return $form[$form_key];
+  }
+
+  /**
+   * Empties one rendered day slot, keeping the row and its day identity.
+   *
+   * The office_hours widgets pre-render a fixed row per weekday, so a day the
+   * entity no longer holds cannot simply be removed from the form; its hours
+   * have to be blanked in place. Both the composite value on the slot and the
+   * rendered sub-elements are cleared, since the rebuilt AJAX response renders
+   * from the sub-elements while a later submit reads the composite.
+   *
+   * @param array $slot
+   *   The slot render array, by reference.
+   */
+  protected function clearSlot(array &$slot): void {
+    foreach (['starthours', 'endhours', 'comment', 'all_day'] as $property) {
+      if (isset($slot['#value']) && is_array($slot['#value']) && array_key_exists($property, $slot['#value'])) {
+        $slot['#value'][$property] = '';
+      }
+      if (isset($slot['#default_value']) && is_array($slot['#default_value']) && array_key_exists($property, $slot['#default_value'])) {
+        $slot['#default_value'][$property] = '';
+      }
+      if (!isset($slot[$property]) || !is_array($slot[$property])) {
+        continue;
+      }
+      // The starthours and endhours slots render an inner 'time' input, while
+      // comment and all_day are plain elements.
+      if (isset($slot[$property]['time'])) {
+        $slot[$property]['time']['#value'] = '';
+        $slot[$property]['time']['#default_value'] = '';
+      }
+      else {
+        $slot[$property]['#value'] = '';
+        $slot[$property]['#default_value'] = '';
+      }
+    }
   }
 
 }

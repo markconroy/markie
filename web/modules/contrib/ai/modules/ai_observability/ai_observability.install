@@ -20,3 +20,23 @@ function ai_observability_update_10301() {
     ->set('otel_metrics', TRUE)
     ->save(TRUE);
 }
+
+/**
+ * Disable payload summarization on existing sites and seed the size limits.
+ *
+ * The summarization layer rewrites logged AI input/output to a structured
+ * JSON shape, which is a behavior change for running logging pipelines.
+ * Existing sites keep the previous formatting until an operator opts in
+ * via the settings form; new installs default to TRUE via the install
+ * config.
+ */
+function ai_observability_update_10302() {
+  $config = \Drupal::service('config.factory')->getEditable('ai_observability.settings');
+
+  $config
+    ->set('summarize_payload', FALSE)
+    ->set('summarize_payload_max_string_length', 256)
+    ->set('summarize_payload_max_list_items', 6)
+    ->set('summarize_payload_max_assoc_keys', 12)
+    ->save(TRUE);
+}

@@ -103,6 +103,19 @@ The module ships some services, e.g. for Matomo open analytics platform.
 
 You have to review and enable the services you need for your site.
 
+**Update of Services**
+
+The services are created as config entities. If new services are added
+or changes are made to the config files, they will not be imported
+automatically! Only in a few cases update hooks are provided for changes
+to services.
+
+However, you can easily import a config file to create or update a service.
+
+Example command for posthog service:
+
+`cat modules/contrib/klaro/config/install/klaro.klaro_app.posthog.yml | drush config:set --input-format=yaml klaro.klaro_app.posthog ? -`
+
 #### Services for YouTube and Vimeo
 
 Klaro offers two services for embedded external content: YouTube and Vimeo.

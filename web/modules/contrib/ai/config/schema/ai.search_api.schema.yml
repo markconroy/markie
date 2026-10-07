@@ -1,0 +1,21 @@
+# Schema for the Search API processors provided by the AI module.
+
+plugin.plugin_configuration.search_api_processor.ai_reranker:
+  type: search_api.default_processor_configuration
+  label: 'AI Reranker processor configuration'
+  mapping:
+    provider_id:
+      type: string
+      label: 'AI provider ID'
+    model_id:
+      type: string
+      label: 'Model ID'
+    top_n:
+      type: integer
+      label: 'Number of top results to rank'
+    source_fields:
+      type: sequence
+      label: 'Source fields'
+      sequence:
+        type: string
+        label: 'Field ID'

@@ -78,3 +78,14 @@ function ai_automators_update_11000(): void {
     \Drupal::messenger()->addError(t('Failed to install the Automators Tool entity type. Please check the logs for more information.'));
   }
 }
+
+/**
+ * Populate new config setting for the number of cron-processed queue items.
+ */
+function ai_automators_update_15001(): void {
+  // Preserve the previous behavior for existing sites by processing one item
+  // per cron run. New installations default to 10.
+  \Drupal::configFactory()->getEditable('ai_automators.settings')->set('queue_cron_items', 1)->save();
+
+  \Drupal::messenger()->addStatus(t('AI Automators now processes queued field jobs via a custom hook_cron() instead of the built-in QueueWorker cron runner. Existing sites have been set to process 1 item per cron run; change this at Administration » Configuration » AI » AI Automators (/admin/config/ai/ai-automators/settings). Note that one queue item roughly equals one second, but fast Automators (for example regex) can run in milliseconds, so raising the limit may be worthwhile. If you use Ultimate Cron, disable any existing rule targeting the <em>ai_automator_field_modifier</em> queue worker and create a new rule for the <em>ai_automators_cron</em> hook instead.'));
+}

@@ -44,6 +44,9 @@ plugin.plugin_configuration.search_api_backend.search_api_ai_search:
         chunk_size:
           type: string
           label: 'The size of each chunk'
+        embedding_collection_size:
+          type: integer
+          label: 'Number of texts per embedding collection request'
         chunk_min_overlap:
           type: string
           label: 'The minimum overlap between chunks'

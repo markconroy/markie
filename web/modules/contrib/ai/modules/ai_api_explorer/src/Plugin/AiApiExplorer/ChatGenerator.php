@@ -17,6 +17,7 @@ use Drupal\ai\Guardrail\AiGuardrailHelper;
 use Drupal\ai\Guardrail\AiGuardrailSetInterface;
 use Drupal\ai\OperationType\Chat\ChatInput;
 use Drupal\ai\OperationType\Chat\ChatMessage;
+use Drupal\ai\OperationType\Chat\ChatOutput;
 use Drupal\ai\OperationType\Chat\StreamedChatMessageIteratorInterface;
 use Drupal\ai\OperationType\Chat\Tools\ToolsInput;
 use Drupal\ai\OperationType\GenericType\ImageFile;
@@ -41,6 +42,17 @@ use Drupal\ai\Response\AiStreamedResponse;
   description: new TranslatableMarkup('Contains a form where you can experiment and test the AI chat generator with prompts.'),
 )]
 final class ChatGenerator extends AiApiExplorerPluginBase {
+
+  /**
+   * Marks the end of the streamed message text in the response body.
+   *
+   * The streaming JS converts newlines to line breaks so the message keeps its
+   * formatting. Anything after this marker is already rendered markup and is
+   * left alone.
+   *
+   * @see js/stream.js
+   */
+  const STREAM_MESSAGE_END_MARKER = '<!--ai-stream-message-end-->';
 
   /**
    * Constructs the base plugin.
@@ -347,6 +359,7 @@ final class ChatGenerator extends AiApiExplorerPluginBase {
 
       $message = NULL;
       $response = NULL;
+      $chat_output = NULL;
 
       try {
 
@@ -372,10 +385,11 @@ final class ChatGenerator extends AiApiExplorerPluginBase {
         if ($form_state->getValue('streamed')) {
           $input->setStreamedOutput(TRUE);
         }
-        $response = $provider->chat($input, $form_state->getValue('chat_ai_model'), [
+        $chat_output = $provider->chat($input, $form_state->getValue('chat_ai_model'), [
           'chat_generation',
           'ai_api_explorer',
-        ])->getNormalized();
+        ]);
+        $response = $chat_output->getNormalized();
       }
       catch (\TypeError $e) {
         $message = $this->t('The AI provider could not be used. Please make sure a model is selected and the provider is properly configured.');
@@ -424,6 +438,9 @@ final class ChatGenerator extends AiApiExplorerPluginBase {
             '#value' => $tools_output,
           ];
         }
+        if ($chat_output instanceof ChatOutput) {
+          $form['middle']['response']['#context']['ai_response']['metadata'] = $this->getMetadataOutput($chat_output);
+        }
         $form['middle']['response']['#context']['ai_response']['code'] = $code;
         $form_state->setRebuild();
         return $form['middle'];
@@ -436,6 +453,20 @@ final class ChatGenerator extends AiApiExplorerPluginBase {
               echo '<h4>Role: ' . $chat_message->getRole() . "</h4><p>";
             }
             echo $chat_message->getText();
+            flush();
+          }
+          // Everything after this marker is rendered markup rather than
+          // message text, so the JS stops turning newlines into line breaks
+          // there. Without it the whitespace in the templates below shows up
+          // as a wall of empty lines.
+          echo '</p>' . self::STREAM_MESSAGE_END_MARKER;
+          flush();
+          // The token usage is only known once the stream has been fully
+          // consumed, so the metadata is rendered after the loop. Providers do
+          // not report rate limits on a stream, so that section stays hidden.
+          $metadata = $this->getMetadataOutput($response->reconstructChatOutput());
+          if ($metadata) {
+            echo $this->renderer->render($metadata);
             flush();
           }
           echo $this->renderer->render($code);
@@ -517,6 +548,118 @@ final class ChatGenerator extends AiApiExplorerPluginBase {
     if ($form_state->getValue('streamed')) {
       $this->getResponse($form, $form_state);
     }
+  }
+
+  /**
+   * Gets the metadata output for a chat response.
+   *
+   * Renders the token usage and, when the provider exposes them, the rate
+   * limits. The values are read from the DTOs via toArray(), so any value a
+   * provider adds later shows up here without this plugin being changed. Known
+   * keys get a human readable label, unknown keys fall back to a label
+   * generated from the key itself.
+   *
+   * @param \Drupal\ai\OperationType\Chat\ChatOutput $output
+   *   The chat output.
+   *
+   * @return array
+   *   The render array. Empty if the provider returned no metadata at all.
+   */
+  public function getMetadataOutput(ChatOutput $output): array {
+    $sections = [
+      'token_usage' => [
+        'title' => $this->t('Token Usage'),
+        'values' => $output->getTokenUsage()->toArray(),
+        'labels' => [
+          'input' => $this->t('Input tokens'),
+          'output' => $this->t('Output tokens'),
+          'total' => $this->t('Total tokens'),
+          'reasoning' => $this->t('Reasoning tokens'),
+          'cached' => $this->t('Cached tokens'),
+        ],
+      ],
+      'rate_limits' => [
+        'title' => $this->t('Rate Limits'),
+        'values' => $output->getRateLimits()->toArray(),
+        'labels' => [
+          'rateLimitMaxRequests' => $this->t('Request limit'),
+          'rateLimitMaxTokens' => $this->t('Token limit'),
+          'rateLimitRemainingRequests' => $this->t('Requests remaining'),
+          'rateLimitRemainingTokens' => $this->t('Tokens remaining'),
+          'rateLimitResetRequests' => $this->t('Requests reset in (seconds)'),
+          'rateLimitResetTokens' => $this->t('Tokens reset in (seconds)'),
+        ],
+      ],
+      // Whatever the provider chose to hand back. There is no fixed shape
+      // here, so every key falls back to a generated label.
+      'provider_metadata' => [
+        'title' => $this->t('Provider Metadata'),
+        'values' => is_array($output->getMetadata()) ? $output->getMetadata() : [],
+        'labels' => [],
+      ],
+    ];
+
+    $build = [
+      '#type' => 'details',
+      '#title' => $this->t('Response Metadata'),
+      '#open' => FALSE,
+      '#attributes' => [
+        'class' => ['ai-response-metadata'],
+      ],
+    ];
+
+    $has_data = FALSE;
+    foreach ($sections as $key => $section) {
+      $rows = [];
+      foreach ($section['values'] as $name => $value) {
+        // Providers leave anything they do not report as NULL. A zero is real
+        // data (no cached tokens, no requests left), so it is kept.
+        if ($value === NULL) {
+          continue;
+        }
+        $rows[] = [
+          $section['labels'][$name] ?? $this->humanizeMetadataKey($name),
+          is_scalar($value) ? $value : Json::encode($value),
+        ];
+      }
+
+      // Hide a section the provider gave us nothing for.
+      if (!$rows) {
+        continue;
+      }
+
+      $has_data = TRUE;
+      $build[$key . '_title'] = [
+        '#type' => 'html_tag',
+        '#tag' => 'h4',
+        '#value' => $section['title'],
+      ];
+      $build[$key] = [
+        '#theme' => 'table',
+        '#header' => [$this->t('Label'), $this->t('Value')],
+        '#rows' => $rows,
+      ];
+    }
+
+    return $has_data ? $build : [];
+  }
+
+  /**
+   * Turns a metadata property name into a readable label.
+   *
+   * Handles both the camel case used by the DTOs and the snake case providers
+   * tend to use in their own metadata.
+   *
+   * @param string $key
+   *   The property name.
+   *
+   * @return string
+   *   The label.
+   */
+  protected function humanizeMetadataKey(string $key): string {
+    $key = preg_replace('/([A-Z])/', ' $1', $key);
+    $key = str_replace(['_', '-'], ' ', $key);
+    return ucfirst(strtolower(trim(preg_replace('/\s+/', ' ', $key))));
   }
 
   /**

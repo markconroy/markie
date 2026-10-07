@@ -73,7 +73,10 @@ final class RestrictToTopic extends AiGuardrailPluginBase implements Configurabl
    * {@inheritdoc}
    */
   public function defaultConfiguration(): array {
-    return [];
+    return [
+      'matching_mode' => 'exact',
+      'similarity_threshold' => 0.75,
+    ];
   }
 
   /**
@@ -159,6 +162,33 @@ final class RestrictToTopic extends AiGuardrailPluginBase implements Configurabl
       // supported Drupal version includes `#normalize_newlines` property.
       '#value_callback' => [Textarea::class, 'valueCallback'],
     ];
+
+    $form['matching_mode'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Topic matching mode'),
+      '#description' => $this->t('<em>Exact</em> requires the LLM to return topic names exactly as listed above. <em>Semantic</em> hardens the prompt and then fuzzy-matches any residual drift back to the closest configured topic.'),
+      '#options' => [
+        'exact' => $this->t('Exact (default)'),
+        'semantic' => $this->t('Semantic'),
+      ],
+      '#default_value' => $this->configuration['matching_mode'] ?? 'exact',
+    ];
+
+    $form['similarity_threshold'] = [
+      '#type' => 'number',
+      '#title' => $this->t('Similarity threshold'),
+      '#description' => $this->t('Minimum similarity (0.0 – 1.0) between a returned topic and a configured topic for it to count as a match in semantic mode. Values below the threshold are recorded as unmatched.'),
+      '#min' => 0,
+      '#max' => 1,
+      '#step' => 0.01,
+      '#default_value' => $this->configuration['similarity_threshold'] ?? 0.75,
+      '#states' => [
+        'visible' => [
+          ':input[name="guardrail_settings[matching_mode]"]' => ['value' => 'semantic'],
+        ],
+      ],
+    ];
+
     $default_ai_provider_value = [
       'provider' => $this->configuration['llm_provider'] ?? '',
       'model' => $this->configuration['llm_model'] ?? '',
@@ -239,34 +269,10 @@ final class RestrictToTopic extends AiGuardrailPluginBase implements Configurabl
       )
     );
     $all_topics = array_merge($valid_topics, $invalid_topics);
-    $all_topics_formatted = implode(',', $all_topics);
+    $mode = $this->configuration['matching_mode'] ?? 'exact';
+    $threshold = (float) ($this->configuration['similarity_threshold'] ?? 0.75);
 
-    $prompt = <<<PROMPT
-Given a text and a list of topics, return a valid json list of which topics are present in the text. If none, just return an empty list. Don't format the output in any other way, just return the list as JSON inside a ```json code block.
-
-Output example when not finding anything:
--------------
-```json
-{"topics_present": []}
-```
-
-Output example when finding something relevant:
---------------
-```json
-{"topics_present": ["topic_4", "topic_6"]}
-```
-
-Text:
-----
-"$text"
-
-Relevant Topics you can pick from:
-------
-$all_topics_formatted
-
-Result:
-------
-PROMPT;
+    $prompt = $this->buildPrompt($text, $all_topics, $mode);
 
     $input = new ChatInput([
       new ChatMessage('user', $prompt),
@@ -302,16 +308,10 @@ PROMPT;
       $response_decoded['topics_present'] ?? []
     );
 
-    $invalid_topics_found = [];
-    $valid_topics_found = [];
-    foreach ($topics_present as $topic) {
-      if (\in_array($topic, $valid_topics)) {
-        $valid_topics_found[] = $topic;
-      }
-      elseif (\in_array($topic, $invalid_topics)) {
-        $invalid_topics_found[] = $topic;
-      }
-    }
+    $buckets = $this->bucketTopics($topics_present, $valid_topics, $invalid_topics, $mode, $threshold);
+    $valid_topics_found = $buckets['valid_found'];
+    $invalid_topics_found = $buckets['invalid_found'];
+    $unmatched_topics = $buckets['unmatched'];
 
     if (\count($invalid_topics_found) > 0) {
       return new StopResult(
@@ -320,6 +320,7 @@ PROMPT;
         [
           'valid_topics' => $valid_topics,
           'invalid_topics_found' => $invalid_topics_found,
+          'unmatched_topics' => $unmatched_topics,
         ],
       );
     }
@@ -331,6 +332,7 @@ PROMPT;
         [
           'valid_topics' => $valid_topics,
           'invalid_topics_found' => $invalid_topics_found,
+          'unmatched_topics' => $unmatched_topics,
         ],
       );
     }
@@ -340,9 +342,154 @@ PROMPT;
       $this,
       [
         'valid_topics' => $valid_topics,
+        'valid_topics_found' => $valid_topics_found,
         'invalid_topics_found' => $invalid_topics_found,
+        'unmatched_topics' => $unmatched_topics,
       ],
     );
+  }
+
+  /**
+   * Build the LLM prompt that classifies which topics are present in the text.
+   *
+   * @param string $text
+   *   The text being classified.
+   * @param array $all_topics
+   *   The merged list of configured valid + invalid topics.
+   * @param string $mode
+   *   Matching mode, `exact` (default prompt) or `semantic` (hardened prompt
+   *   that instructs the model to return list strings verbatim).
+   *
+   * @return string
+   *   The prompt to send to the LLM.
+   */
+  protected function buildPrompt(string $text, array $all_topics, string $mode): string {
+    $all_topics_formatted = implode(',', $all_topics);
+
+    if ($mode === 'semantic') {
+      $instruction = 'For each topic present in the text, return the closest'
+        . ' matching topic verbatim from the provided list. If no topic from'
+        . ' the list matches, return an empty list. Do not invent, translate,'
+        . " pluralize, or paraphrase topics \u{2014} use the list strings"
+        . " exactly as given. Don't format the output in any other way, just"
+        . ' return the list as JSON inside a ```json code block.';
+    }
+    else {
+      $instruction = 'Given a text and a list of topics, return a valid json'
+        . ' list of which topics are present in the text. If none, just'
+        . " return an empty list. Don't format the output in any other way,"
+        . ' just return the list as JSON inside a ```json code block.';
+    }
+
+    return <<<PROMPT
+$instruction
+
+Output Format:
+-------------
+```json
+{"topics_present": []}
+```
+
+Output example when finding something relevant:
+--------------
+```json
+{"topics_present": ["topic_4", "topic_6"]}
+```
+
+Text:
+----
+"$text"
+
+Relevant Topics you can pick from:
+------
+$all_topics_formatted
+
+Result:
+------
+PROMPT;
+  }
+
+  /**
+   * Bucket LLM-returned topics into valid / invalid / unmatched lists.
+   *
+   * In `exact` mode this is an `in_array()` check with unknown topics
+   * surfaced as unmatched. In `semantic` mode, topics that fail the exact
+   * check are compared against each configured topic using `similar_text()`;
+   * the best scorer wins if it clears the similarity threshold, otherwise
+   * the topic is recorded as unmatched.
+   *
+   * @param array $topics_present
+   *   The topics returned by the LLM (already lower-cased).
+   * @param array $valid_topics
+   *   The configured valid topic list (lower-cased).
+   * @param array $invalid_topics
+   *   The configured invalid topic list (lower-cased).
+   * @param string $mode
+   *   Matching mode, `exact` or `semantic`.
+   * @param float $threshold
+   *   Similarity threshold in the 0.0 – 1.0 range.
+   *
+   * @return array
+   *   Keys: `valid_found`, `invalid_found`, `unmatched`.
+   */
+  protected function bucketTopics(array $topics_present, array $valid_topics, array $invalid_topics, string $mode, float $threshold): array {
+    $valid_found = [];
+    $invalid_found = [];
+    $unmatched = [];
+
+    foreach ($topics_present as $topic) {
+      if (\in_array($topic, $valid_topics, TRUE)) {
+        $valid_found[] = $topic;
+        continue;
+      }
+      if (\in_array($topic, $invalid_topics, TRUE)) {
+        $invalid_found[] = $topic;
+        continue;
+      }
+
+      if ($mode !== 'semantic') {
+        $unmatched[] = $topic;
+        continue;
+      }
+
+      // Semantic fallback: map to the closest configured topic by string
+      // similarity. `similar_text()` returns a 0-100 percentage via its
+      // by-ref third argument.
+      $best_score = 0.0;
+      $best_bucket = NULL;
+      foreach ($valid_topics as $candidate) {
+        similar_text((string) $topic, (string) $candidate, $pct);
+        if ($pct > $best_score) {
+          $best_score = $pct;
+          $best_bucket = 'valid';
+        }
+      }
+      foreach ($invalid_topics as $candidate) {
+        similar_text((string) $topic, (string) $candidate, $pct);
+        if ($pct > $best_score) {
+          $best_score = $pct;
+          $best_bucket = 'invalid';
+        }
+      }
+
+      if ($best_bucket !== NULL && ($best_score / 100) >= $threshold) {
+        if ($best_bucket === 'valid') {
+          $valid_found[] = $topic;
+        }
+        else {
+          $invalid_found[] = $topic;
+        }
+        continue;
+      }
+
+      $unmatched[] = $topic;
+    }
+
+    return [
+      'valid_found' => $valid_found,
+      'invalid_found' => $invalid_found,
+      'unmatched' => $unmatched,
+    ];
   }
 
   /**

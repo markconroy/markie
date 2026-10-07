@@ -1,0 +1,10 @@
+field_widget_action.plugin.rebuild_fill:
+  type: field_widget_action_plugin_base
+  label: 'Rebuild fill test action settings'
+  mapping:
+    produce_value:
+      type: boolean
+      label: 'Produce a value'
+    silent:
+      type: boolean
+      label: 'Report nothing to the base class'

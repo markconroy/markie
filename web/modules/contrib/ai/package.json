@@ -1,0 +1,19 @@
+{
+  "name": "@drupal/ai",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "description": "AI (Artificial Intelligence) integration for Drupal",
+  "license": "GPL-2.0-only",
+  "scripts": {
+    "install": "npm run install-ckeditor && npm run install-json-schema-editor && npm run install-mdxeditor",
+    "build": "npm run build-ckeditor && npm run build-json-schema-editor && npm run build-mdxeditor",
+    "test": "npm run build",
+    "install-ckeditor": "npm ci --prefix modules/ai_ckeditor",
+    "build-ckeditor": "npm run build --prefix modules/ai_ckeditor",
+    "install-json-schema-editor": "npm ci --prefix ui/json-schema-editor",
+    "build-json-schema-editor": "npm run build --prefix ui/json-schema-editor",
+    "install-mdxeditor": "npm ci --prefix ui/mdxeditor",
+    "build-mdxeditor": "npm run build --prefix ui/mdxeditor"
+  }
+}

@@ -59,67 +59,11 @@ also wish to enable the `ai_assistant_advanced_mode_enabled` setting described i
 section so that these fields can be edited through the UI.
 
 ## AI Chatbot module
-### What is the AI Chatbot module?
-The AI Assistant API module provides an API to manage real-time messages to and
-from an LLM, and trigger actions the LLM "decides" the user has requested.
-However, it does not provide a front-end for this process. The AI Chatbot module
-provides a boilerplate frontend, consisting of a block with a text-input that
-pushes user messages to the AI Assistant API, and renders LLM responses as
-user-readable text.
+The AI Chatbot module provides a frontend for chatbot interactions using the
+ChatProcessor plugin system. It can be used with the AI Assistant API or with
+any custom ChatProcessor plugin.
 
-### Dependencies
-The AI Chatbot module requires that the AI Assistant API module has been
-installed and configured (see [How to configure the AI Assistant API module](#how-to-configure-the-ai-assistant-api-module)).
-
-The AI Deepchat Chatbot requires the [league/commonmark](https://github.com/thephpleague/commonmark)
-library. This must be downloaded and made available to the codebase: it is
-recommended to use composer to achieve this.
-
-### How to configure the AI Chatbot module
-1. Enable and configure the AI Assistant API module (see [How to configure the AI Assistant API module](#how-to-configure-the-ai-assistant-api-module)).
-2. Enable the AI Deepchat Chatbot module.
-3. Visit /admin/structure/block
-4. Choose a region of your theme template and click the "place" button.
-5. Select the AI Chatbot block and press the place button.
-6. Configure the block:
-    1. Give it an admin name and user-facing label
-    2. Make sure to not show the label.
-    3. Select which AI Assistant to use.
-    4. Provide an initial statement to use shown to the user.
-
-### Token-based avatars
-The **Default Avatar** field in the chatbot block settings accepts Drupal tokens,
-allowing you to dynamically resolve the avatar image for each user. For example:
-
-- `[current-user:user_picture]` — uses the user's picture field.
-- `[current-user:profile_type:field_name]` — uses an image field from a Profile
-  entity (requires the [Profile](https://www.drupal.org/project/profile) module).
-  Replace `profile_type` with the machine name of the profile type and
-  `field_name` with the image field name, e.g.
-  `[current-user:admin_profile:field_profile_image:entity:url]`.
-
-When a token resolves to an `<img>` HTML tag, the `src` URL is automatically
-extracted. If the token produces no result, the block falls back to the user's
-`user_picture` field. If that is also empty, no avatar is displayed.
-
-### How to use the AI Chatbot
-When an AI Chatbot block is placed on a page, it will display its label to the
-user. If the user clicks it, it will open a form to allow the user to pass
-messages via the AI Assistant API and see the responses.
-
-The message history can be retained inside the block until the page is reloaded
-or the user navigates away, depending on settings in the AI Assistant.
-
-### Customize the Chatbot.
-The Chatbot is based on [Deepchat](https://deepchat.dev/) by OvidijusParsiunas
-and can be customized both in look and feel. The designing of the chatbot is
-done via attributes, see the [documentation on deepchat.dev](https://deepchat.dev/examples/design), but we
-have abstracted it away into [yaml files](https://git.drupalcode.org/project/ai/-/blob/1.0.x/modules/ai_chatbot/deepchat_styles/bard.yml?ref_type=heads).
-
-You can in your active theme add a folder called deepchat_styles and load your
-own custom themes to use.
-
-There is also a hook called [hook_deepchat_settings](https://git.drupalcode.org/project/ai/-/blob/1.0.x/modules/ai_chatbot/ai_chatbot.api.php?ref_type=heads) where you can change the attributes on the fly.
+For full documentation, see the [AI Chatbot module documentation](../ai_chatbot/index.md).
 
 ## AI Assistant Actions
 AI Assistant Actions implement Drupal's inbuilt [Plugin API](https://www.drupal.org/docs/drupal-apis/plugin-api/plugin-api-overview)

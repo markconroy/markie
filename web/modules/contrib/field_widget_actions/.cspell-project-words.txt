@@ -1,0 +1,13 @@
+autohide
+automator
+automators
+buttonpane
+fontawesome
+glightbox
+mkdocs
+pymdownx
+refinable
+Tagify
+tagify
+superfences
+symfony

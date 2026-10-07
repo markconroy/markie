@@ -1,0 +1,15 @@
+name: AI Validations
+description: This provides AI support for the Field Validation module.
+package: AI
+type: module
+core_version_requirement: ^10.4 || ^11 || ^12
+
+dependencies:
+  - ai
+  - field_validation
+  - drupal:image
+
+# Information added by Drupal.org packaging script on 2026-07-01
+version: '1.3.0'
+project: 'ai_validations'
+datestamp: 1782915003

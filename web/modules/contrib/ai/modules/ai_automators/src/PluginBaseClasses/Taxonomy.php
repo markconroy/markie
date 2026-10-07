@@ -202,6 +202,10 @@ class Taxonomy extends RuleBase implements ContainerFactoryPluginInterface {
     $list = $this->getTaxonomyList($entity, $fieldDefinition);
     $values = array_values($list);
 
+    if (is_string($value)) {
+      $value = $this->decodeLabel($value);
+    }
+
     // Has to be in the list.
     if (!in_array($value, $values)) {
       return FALSE;
@@ -220,6 +224,9 @@ class Taxonomy extends RuleBase implements ContainerFactoryPluginInterface {
     // If it's not in the keys, go through values.
     $newValues = [];
     foreach ($values as $key => $value) {
+      if (is_string($value)) {
+        $value = $this->decodeLabel($value);
+      }
       foreach ($list as $tid => $name) {
         if ($value == $name) {
           $newValues[$key] = $tid;

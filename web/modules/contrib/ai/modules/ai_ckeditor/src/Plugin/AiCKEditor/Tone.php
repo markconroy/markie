@@ -2,14 +2,22 @@
 
 namespace Drupal\ai_ckeditor\Plugin\AiCKEditor;
 
+use Drupal\ai\AiProviderPluginManager;
 use Drupal\ai\Utility\Textarea;
 use Drupal\Core\Ajax\AjaxResponse;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Language\LanguageManagerInterface;
+use Drupal\Core\Logger\LoggerChannelFactoryInterface;
+use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\ai_ckeditor\AiCKEditorPluginBase;
 use Drupal\ai_ckeditor\Attribute\AiCKEditor;
 use Drupal\ai_ckeditor\Command\AiRequestCommand;
+use Drupal\Core\Template\TwigEnvironment;
 use Drupal\taxonomy\Entity\Term;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
  * Plugin to convert tone of selected text.
@@ -25,7 +33,43 @@ final class Tone extends AiCKEditorPluginBase {
   /**
    * {@inheritdoc}
    */
-  public function defaultConfiguration() {
+  public function __construct(
+    array $configuration,
+    $plugin_id,
+    $plugin_definition,
+    AiProviderPluginManager $ai_provider_manager,
+    EntityTypeManagerInterface $entity_type_manager,
+    AccountProxyInterface $account,
+    RequestStack $requestStack,
+    LoggerChannelFactoryInterface $logger_factory,
+    LanguageManagerInterface $language_manager,
+    protected TwigEnvironment $twig,
+  ) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition, $ai_provider_manager, $entity_type_manager, $account, $requestStack, $logger_factory, $language_manager);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition): static {
+    return new static(
+      $configuration,
+      $plugin_id,
+      $plugin_definition,
+      $container->get('ai.provider'),
+      $container->get('entity_type.manager'),
+      $container->get('current_user'),
+      $container->get('request_stack'),
+      $container->get('logger.factory'),
+      $container->get('language_manager'),
+      $container->get('twig'),
+    );
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function defaultConfiguration(): array {
     return [
       'autocreate' => FALSE,
       'provider' => NULL,
@@ -86,10 +130,20 @@ final class Tone extends AiCKEditorPluginBase {
     $prompts_config = $this->getConfigFactory()->get('ai_ckeditor.settings');
     $prompt_tone = $prompts_config->get('prompts.tone');
     $form['prompt'] = [
-      '#type' => 'textarea',
+      '#type' => 'ai_prompt',
       '#title' => $this->t('Change tone prompt'),
+      '#prompt_types' => ['ai_ckeditor_tone'],
       '#default_value' => $prompt_tone,
-      '#description' => $this->t('This prompt will be used to change the tone of voice. {{ tone }} is the target tone of voice that is chosen.'),
+      '#description' => $this->t('This prompt will be used to change the tone of voice. {tone} is the target tone of voice that is chosen.'),
+      '#parents' => [
+        'editor',
+        'settings',
+        'plugins',
+        'ai_ckeditor_ai',
+        'plugins',
+        'ai_ckeditor_tone',
+        'prompt',
+      ],
       '#states' => [
         'required' => [
           ':input[name="editor[settings][plugins][ai_ckeditor_ai][plugins][ai_ckeditor_tone][enabled]"]' => ['checked' => TRUE],
@@ -226,15 +280,32 @@ final class Tone extends AiCKEditorPluginBase {
         $term->save();
       }
       $prompts_config = $this->getConfigFactory()->get('ai_ckeditor.settings');
-      $prompt = $prompts_config->get('prompts.tone');
-      $prompt = str_replace('{{ tone }}', $term->label(), $prompt);
+      $promptId = $prompts_config->get('prompts.tone');
+      $promptText = $this->getConfigFactory()->get('ai.ai_prompt.' . $promptId)?->get('prompt') ?? '';
+      // Replace the placeholders.
+      $toneDescription = '';
       if ($this->configuration['use_description'] && !empty($term->getDescription())) {
-        $prompt .= 'That tone can described as: ' . strip_tags($term->getDescription());
+        $toneDescription = strip_tags($term->getDescription());
       }
-      $prompt .= "\n\nThe text that we want to change is the following:\n" . $values['plugin_config']['selected_text'];
+
+      // Use Twig to render the prompt with conditional logic for
+      // the use_description setting. This must happen before the
+      // placeholders are replaced, so that the selected text, the tone name
+      // and the tone description are never evaluated as a Twig template.
+      $promptText = (string) $this->twig->renderInline($promptText, [
+        'use_description' => (bool) $this->configuration['use_description'],
+      ]);
+
+      $promptText = strtr($promptText, [
+        '{tone}' => $term->label(),
+        '{toneDescription}' => $toneDescription,
+        '{inputText}' => $values['plugin_config']['selected_text'],
+      ]);
+
       $response = new AjaxResponse();
       $values = $form_state->getValues();
-      $response->addCommand(new AiRequestCommand($prompt, $values['editor_id'], $this->pluginDefinition['id'], 'ai-ckeditor-response'));
+      assert(is_array($this->pluginDefinition));
+      $response->addCommand(new AiRequestCommand($promptText, $values['editor_id'], $this->pluginDefinition['id'], 'ai-ckeditor-response'));
       return $response;
     }
     catch (\Exception $e) {

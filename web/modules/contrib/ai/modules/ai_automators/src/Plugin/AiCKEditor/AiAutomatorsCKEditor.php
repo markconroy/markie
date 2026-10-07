@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\ai_automators\Plugin\AICKEditor;
+namespace Drupal\ai_automators\Plugin\AiCKEditor;
 
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\InvokeCommand;

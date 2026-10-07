@@ -120,6 +120,14 @@ final class VerifySetupAi implements ConfigActionPluginInterface, ContainerFacto
       }
     }
 
+    if (!empty($value['vector_search_is_setup'])) {
+      $tested = TRUE;
+      $providers = $this->aiVdbProviderPluginManager->getProviders(TRUE);
+      if (empty($providers)) {
+        throw new \InvalidArgumentException("No setup VDB provider found, so this recipe will not work.");
+      }
+    }
+
     // If nothing was tested, throw an error.
     if (!$tested) {
       throw new \InvalidArgumentException('No AI provider or operation type was tested, so this recipe will not work.');

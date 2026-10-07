@@ -58,6 +58,11 @@ import { jsonParseLinter } from '@codemirror/lang-json';
                 const updateListener = EditorView.updateListener.of((update) => {
                     if (update.docChanged) {
                         hiddenInput.value = update.state.doc.toString();
+                        // Programmatic value assignment does not fire input/change
+                        // events. Dispatch them so host integrations that sync on
+                        // these events pick up the edited value.
+                        hiddenInput.dispatchEvent(new Event('input', { bubbles: true }));
+                        hiddenInput.dispatchEvent(new Event('change', { bubbles: true }));
                     }
                 });
 

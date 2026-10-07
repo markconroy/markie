@@ -1,15 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\test_ai_vdb_provider_mysql\Plugin\VdbProvider;
 
+use Drupal\ai\Attribute\AiVdbProvider;
+use Drupal\ai\Base\AiVdbProviderClientBase;
+use Drupal\ai\Enum\VdbSimilarityMetrics;
 use Drupal\Core\Config\ImmutableConfig;
 use Drupal\Core\Database\Database;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
-use Drupal\ai\Attribute\AiVdbProvider;
-use Drupal\ai\Base\AiVdbProviderClientBase;
-use Drupal\ai\Enum\VdbSimilarityMetrics;
 use Drupal\search_api\Query\QueryInterface;
 use Drupal\test_ai_vdb_provider_mysql\TestVectorTable;
 use MHz\MysqlVector\VectorTable;
@@ -40,15 +42,30 @@ class TestAiVdbProviderMySql extends AiVdbProviderClientBase implements Containe
   }
 
   /**
+   * Gets the full, prefixed base name for tables.
+   *
+   * @param string $collection_name
+   *   The collection name.
+   * @param string $database
+   *   The database name.
+   *
+   * @return string
+   *   The prefixed table name base.
+   */
+  private function getBaseTableName(
+    string $collection_name,
+    string $database = 'default',
+  ): string {
+    return $database . '_' . $collection_name;
+  }
+
+  /**
    * Get the MySQL vector table name.
    *
    * @param string $collection_name
    *   The collection name.
    * @param string $database
    *   The database name.
-   * @param bool $with_prefix
-   *   The vector table class does not know about Drupal prefix. When calling
-   *   using Drupal, it automatically adds the prefix.
    *
    * @return string
    *   The vector table name.
@@ -56,10 +73,8 @@ class TestAiVdbProviderMySql extends AiVdbProviderClientBase implements Containe
   public function getVectorTableName(
     string $collection_name,
     string $database = 'default',
-    bool $with_prefix = FALSE,
   ): string {
-    $prefix = ($with_prefix ? Database::getConnection()->getPrefix() : '');
-    return $prefix . $database . '_' . $collection_name . '_vectors';
+    return $this->getBaseTableName($collection_name, $database) . '_vectors';
   }
 
   /**
@@ -77,7 +92,43 @@ class TestAiVdbProviderMySql extends AiVdbProviderClientBase implements Containe
     string $collection_name,
     string $database = 'default',
   ): string {
-    return $database . '_' . $collection_name . '_map';
+    $mapping_table_name = $this->getBaseTableName($collection_name, $database) . '_map';
+
+    $connection = Database::getConnection($database);
+    if (!$connection->schema()->tableExists($mapping_table_name)) {
+      $schema = [
+        'description' => 'Mapping table for vector table IDs to Drupal entities.',
+        'fields' => [
+          'vector_table_id' => [
+            'type' => 'int',
+            'unsigned' => TRUE,
+            'not null' => TRUE,
+            'description' => 'Primary key mapping to the vector table.',
+          ],
+          'drupal_long_id' => [
+            'type' => 'varchar',
+            'length' => 255,
+            'not null' => TRUE,
+            'description' => 'Long ID for the Drupal entity.',
+          ],
+          'drupal_entity_id' => [
+            'type' => 'varchar',
+            'length' => 255,
+            'not null' => TRUE,
+            'description' => 'ID for the Drupal entity.',
+          ],
+        ],
+        'primary key' => ['vector_table_id'],
+        'indexes' => [
+          'drupal_long_id' => ['drupal_long_id'],
+          'drupal_entity_id' => ['drupal_entity_id'],
+        ],
+        'engine' => 'InnoDB',
+      ];
+      $connection->schema()->createTable($mapping_table_name, $schema);
+    }
+
+    return $mapping_table_name;
   }
 
   /**
@@ -122,13 +173,15 @@ class TestAiVdbProviderMySql extends AiVdbProviderClientBase implements Containe
     // Create the vector table using the MHz MysqlVector library.
     // The table name here is automatically getting the suffix '_vectors', so we
     // need to strip it from this particular call.
-    $name = $this->getVectorTableName($collection_name, $database, TRUE);
-    $name = str_replace('_vectors', '', $name);
-    $this->vectorTable = new VectorTable($mysqli, $name, 384, 'InnoDB');
+    // Manually add the prefix ONLY for the external library since it is not
+    // using Drupal's database connection and will not auto-prefix.
+    $prefixed_base_name = Database::getConnection()->getPrefix() . $this->getBaseTableName($collection_name, $database);
+    $this->vectorTable = new VectorTable($mysqli, $prefixed_base_name, 384, 'InnoDB');
+    $full_vector_table_name = $prefixed_base_name . '_vectors';
     $query = $connection->select('information_schema.tables', 't')
       ->fields('t', ['table_name'])
       ->condition('t.table_schema', $options['database'])
-      ->condition('t.table_name', $this->getVectorTableName($collection_name, $database, TRUE))
+      ->condition('t.table_name', $full_vector_table_name)
       ->range(0, 1);
     $result = $query->execute()->fetchField();
     if (!$result) {
@@ -209,46 +262,7 @@ class TestAiVdbProviderMySql extends AiVdbProviderClientBase implements Containe
 
     // Get or create the vector table.
     $this->getVectorTable($collection_name, $database);
-
-    // Define the mapping table name.
-    $mapping_table_name = $this->getMapTableName($collection_name, $database);
-
-    // Use Drupal schema API to define the table structure.
-    $schema = [
-      'description' => 'Mapping table for vector table IDs to Drupal entities.',
-      'fields' => [
-        'vector_table_id' => [
-          'type' => 'int',
-          'unsigned' => TRUE,
-          'not null' => TRUE,
-          'description' => 'Primary key mapping to the vector table.',
-        ],
-        'drupal_long_id' => [
-          'type' => 'varchar',
-          'length' => 255,
-          'not null' => TRUE,
-          'description' => 'Long ID for the Drupal entity.',
-        ],
-        'drupal_entity_id' => [
-          'type' => 'varchar',
-          'length' => 255,
-          'not null' => TRUE,
-          'description' => 'ID for the Drupal entity.',
-        ],
-      ],
-      'primary key' => ['vector_table_id'],
-      'indexes' => [
-        'drupal_long_id' => ['drupal_long_id'],
-        'drupal_entity_id' => ['drupal_entity_id'],
-      ],
-      'engine' => 'InnoDB',
-    ];
-
-    // Create the table using the schema API.
-    $connection = Database::getConnection($database);
-    if (!$connection->schema()->tableExists($mapping_table_name)) {
-      $connection->schema()->createTable($mapping_table_name, $schema);
-    }
+    $this->getMapTableName($collection_name, $database);
   }
 
   /**
@@ -287,11 +301,12 @@ class TestAiVdbProviderMySql extends AiVdbProviderClientBase implements Containe
     foreach ($data['vector'] as $vector) {
       $inserted_id = $vector_table->upsert($vector);
       $query = Database::getConnection()->insert($this->getMapTableName($collection_name, $database));
-      $query->fields([
+      $fields = [
         'vector_table_id' => $inserted_id,
         'drupal_long_id' => $data['drupal_long_id'],
         'drupal_entity_id' => $data['drupal_entity_id'],
-      ]);
+      ];
+      $query->fields($fields);
       $query->execute();
     }
   }
@@ -376,9 +391,17 @@ class TestAiVdbProviderMySql extends AiVdbProviderClientBase implements Containe
     string $database = 'default',
   ): array {
     $vectorTable = $this->getVectorTable($collection_name, $database);
-    $testVectorTable = new TestVectorTable($vectorTable);
-    $vector_input = reset($vector_input);
-    $results = $testVectorTable->search($vector_input, $limit);
+    $this->getMapTableName($collection_name, $database);
+    $testVectorTable = new TestVectorTable(
+      $vectorTable->getConnection(),
+      str_replace('_vectors', '', $vectorTable->getVectorTableName()),
+      384
+    );
+    $maybe_nested_vector_input = reset($vector_input);
+    if ($maybe_nested_vector_input !== FALSE && !is_float($maybe_nested_vector_input)) {
+      $vector_input = $maybe_nested_vector_input;
+    }
+    $results = $testVectorTable->search($vector_input, $limit, $query);
     if (!$results) {
       return [];
     }
@@ -396,7 +419,15 @@ class TestAiVdbProviderMySql extends AiVdbProviderClientBase implements Containe
     $map_table = $this->getMapTableName($collection_name, $database);
     $query = Database::getConnection()->select($map_table, 'map');
     $query->addField('map', 'vector_table_id');
+    $query->condition('map.drupal_entity_id', $drupalIds, 'IN');
     return $query->execute()->fetchCol();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getRawEmbeddingFieldName(): ?string {
+    return 'normalized_vector';
   }
 
 }

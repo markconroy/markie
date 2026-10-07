@@ -1,0 +1,322 @@
+<?php
+
+/**
+ * @file
+ * Contains ai_logging install hooks.
+ */
+
+use Drupal\Core\Config\FileStorage;
+use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\ai_logging\Entity\AiLog;
+
+/**
+ * Removed updated hook now that entity structure has changed.
+ */
+function ai_logging_update_10301() {
+  return t('No action needed.');
+}
+
+/**
+ * Removed updated hook now that entity structure has changed.
+ */
+function ai_logging_update_10302() {
+
+}
+
+/**
+ * Delete the old AI Log entity and its contents and use the new entity.
+ */
+function ai_logging_update_10303() {
+  $messenger = \Drupal::messenger();
+
+  // Step 1: Delete all old ai_log entities from the storage.
+  $entity_type_id = 'ai_log';
+  $storage = \Drupal::entityTypeManager()->getStorage($entity_type_id);
+  $entity_ids = $storage->getQuery()
+    ->accessCheck(FALSE)
+    ->execute();
+  if (!empty($entity_ids)) {
+    $entities = $storage->loadMultiple($entity_ids);
+    $storage->delete($entities);
+  }
+
+  // Step 2: Remove the old ai_log entity type definition if it exists.
+  if (\Drupal::entityTypeManager()->hasDefinition($entity_type_id)) {
+    $entity_type = \Drupal::entityTypeManager()->getDefinition($entity_type_id);
+    \Drupal::service('entity.definition_update_manager')->uninstallEntityType($entity_type);
+
+    // Step 3: Ensure that the new ai_log entity type is registered.
+    // This will trigger the system to recognize the new entity definition.
+    $table_name = $entity_type->getBaseTable();
+    if (!\Drupal::database()->schema()->tableExists($table_name)) {
+      \Drupal::entityDefinitionUpdateManager()->installEntityType($entity_type);
+    }
+
+    $messenger->addMessage(t('New AI Log entity type is now registered.'));
+  }
+}
+
+/**
+ * Install the new AI Log entity.
+ */
+function ai_logging_update_10304() {
+
+  // Recreate the AI Log entity.
+  $entity_type = \Drupal::entityTypeManager()->getDefinition('ai_log');
+  $table_name = $entity_type->getBaseTable();
+  if (!\Drupal::database()->schema()->tableExists($table_name)) {
+    \Drupal::entityDefinitionUpdateManager()->installEntityType($entity_type);
+  }
+
+  // Remove the old view if exists.
+  $config_factory = \Drupal::configFactory();
+  if ($config_factory->get('views.view.ai_logging')) {
+    \Drupal::service('config.factory')->getEditable('views.view.ai_logging')->delete();
+  }
+
+  // Install the new view.
+  $module_path = \Drupal::service('extension.list.module')->getPath('ai_logging');
+  $config_path = $module_path . '/config/install';
+  $source_storage = new FileStorage($config_path);
+  $config_name = 'views.view.ai_logs';
+  $config_data = $source_storage->read($config_name);
+  if ($config_data) {
+    $config = \Drupal::configFactory()->getEditable($config_name);
+
+    // Set the configuration values.
+    foreach ($config_data as $key => $value) {
+      $config->set($key, $value);
+    }
+
+    // Save the configuration.
+    $config->save();
+  }
+
+  // Same for the ai logging generic type.
+  $config_name = 'ai_logging.ai_log_type.generic';
+  $config_data = $source_storage->read($config_name);
+  if ($config_data) {
+    $config = \Drupal::configFactory()->getEditable($config_name);
+
+    // Set the configuration values.
+    foreach ($config_data as $key => $value) {
+      $config->set($key, $value);
+    }
+
+    // Save the configuration.
+    $config->save();
+  }
+
+}
+
+/**
+ * Update the AI logs view access settings.
+ */
+function ai_logging_update_10305() {
+  $config_factory = \Drupal::configFactory();
+  if ($config_factory->get('views.view.ai_logging')) {
+    /** @var \Drupal\Core\Config\Config $view */
+    $view = \Drupal::service('config.factory')->getEditable('views.view.ai_logs');
+    $display = $view->get('display');
+    if (
+      isset($display['default']['display_options']['access'])
+      && $display['default']['display_options']['access']['type'] === 'none'
+    ) {
+
+      // Change permission to the 'view ai log' permission.
+      $display['default']['display_options']['access'] = [
+        'type' => 'perm',
+        'options' => [
+          'perm' => 'view ai log',
+        ],
+      ];
+      $view->set('display', $display);
+      $view->save();
+    }
+  }
+}
+
+/**
+ * Ensure the AI logging entities are installed when moving from AI Core.
+ */
+function ai_logging_update_10306() {
+  $update_manager = \Drupal::entityDefinitionUpdateManager();
+  $entity_type_manager = \Drupal::entityTypeManager();
+  foreach (['ai_log_type', 'ai_log'] as $entity_type_id) {
+    // A site moving from the AI Logging submodule bundled with AI core
+    // already has these. Installing an existing entity type again would
+    // record every current field as installed without adding its column,
+    // so later updates would skip fields such as the token usage ones.
+    if ($update_manager->getEntityType($entity_type_id)) {
+      continue;
+    }
+    $update_manager->installEntityType($entity_type_manager->getDefinition($entity_type_id));
+  }
+}
+
+/**
+ * Add token usage fields to the AI Log entity.
+ */
+function ai_logging_update_10307() {
+  $update_manager = \Drupal::entityDefinitionUpdateManager();
+  $labels = [
+    'tokens_input' => t('Input Tokens'),
+    'tokens_output' => t('Output Tokens'),
+    'tokens_total' => t('Total Tokens'),
+    'tokens_reasoning' => t('Reasoning Tokens'),
+    'tokens_cached' => t('Cached Tokens'),
+  ];
+  foreach ($labels as $field_name => $label) {
+    if ($update_manager->getFieldStorageDefinition($field_name, 'ai_log')) {
+      continue;
+    }
+    $storage_definition = BaseFieldDefinition::create('integer')
+      ->setLabel($label)
+      ->setDescription(t('Token usage data captured from the AI provider response.'))
+      ->setDisplayConfigurable('form', TRUE)
+      ->setDisplayConfigurable('view', TRUE);
+    $update_manager->installFieldStorageDefinition($field_name, 'ai_log', 'ai_logging', $storage_definition);
+  }
+}
+
+/**
+ * Add a Total Tokens column to the AI Logs view, if left unmodified.
+ */
+function ai_logging_update_10308() {
+  $view_config = \Drupal::configFactory()->getEditable('views.view.ai_logs');
+  if ($view_config->isNew()) {
+    return t('AI Logs view not found, skipping.');
+  }
+
+  $fields = $view_config->get('display.default.display_options.fields');
+  if (isset($fields['tokens_total'])) {
+    return t('AI Logs view already has a Total Tokens column, skipping.');
+  }
+
+  // Only touch the field list if it still exactly matches the set of fields
+  // this module shipped with prior to adding token usage tracking. If a site
+  // has customized the view (added/removed/reordered fields), leave it
+  // alone rather than clobbering their changes.
+  $expected_previous_fields = [
+    'bundle',
+    'created',
+    'prompt',
+    'output_text',
+    'extra_data',
+    'provider',
+    'model',
+    'tags_value',
+    'view_ai_log',
+    'edit_ai_log',
+    'delete_ai_log',
+    'dropbutton',
+  ];
+  if (array_keys($fields) !== $expected_previous_fields) {
+    return t('AI Logs view has been customized, skipping automatic update. Add a "Total Tokens" field manually if desired.');
+  }
+
+  $module_path = \Drupal::service('extension.list.module')->getPath('ai_logging');
+  $source_storage = new FileStorage($module_path . '/config/install');
+  $new_config_data = $source_storage->read('views.view.ai_logs');
+  $new_field = $new_config_data['display']['default']['display_options']['fields']['tokens_total'] ?? NULL;
+  if (!$new_field) {
+    return t('Could not find the Total Tokens column definition to install.');
+  }
+
+  // Splice the new column in right after "model", matching where it ships
+  // in a fresh install.
+  $updated_fields = [];
+  foreach ($fields as $key => $value) {
+    $updated_fields[$key] = $value;
+    if ($key === 'model') {
+      $updated_fields['tokens_total'] = $new_field;
+    }
+  }
+
+  $view_config->set('display.default.display_options.fields', $updated_fields);
+  $view_config->save();
+
+  return t('Added a Total Tokens column to the AI Logs view.');
+}
+
+/**
+ * Change AI logs view default sort from 'created' to 'id' (descending).
+ */
+function ai_logging_update_10309() {
+  $config = \Drupal::configFactory()->getEditable('views.view.ai_logs');
+  if ($config->isNew()) {
+    return;
+  }
+  $sorts = $config->get('display.default.display_options.sorts');
+  if ($sorts && isset($sorts['created'])) {
+    unset($sorts['created']);
+    $sorts['id'] = [
+      'id' => 'id',
+      'table' => 'ai_log',
+      'field' => 'id',
+      'relationship' => 'none',
+      'group_type' => 'group',
+      'admin_label' => '',
+      'entity_type' => 'ai_log',
+      'entity_field' => 'id',
+      'plugin_id' => 'standard',
+      'order' => 'DESC',
+      'expose' => [
+        'label' => '',
+        'field_identifier' => '',
+      ],
+      'exposed' => FALSE,
+    ];
+    $config->set('display.default.display_options.sorts', $sorts);
+    $config->save();
+  }
+}
+
+/**
+ * Add the reply field, and repair token usage fields missing their columns.
+ */
+function ai_logging_update_10310() {
+  // Before ai_logging_update_10306() was fixed, a site moving from the AI
+  // Logging submodule bundled with AI core had the token usage fields
+  // recorded as installed without their columns, so ai_logging_update_10307()
+  // skipped them.
+  $storage_definitions = [
+    'response_text' => AiLog::responseTextFieldDefinition(),
+  ];
+  $token_labels = [
+    'tokens_input' => t('Input Tokens'),
+    'tokens_output' => t('Output Tokens'),
+    'tokens_total' => t('Total Tokens'),
+    'tokens_reasoning' => t('Reasoning Tokens'),
+    'tokens_cached' => t('Cached Tokens'),
+  ];
+  foreach ($token_labels as $field_name => $label) {
+    $storage_definitions[$field_name] = BaseFieldDefinition::create('integer')
+      ->setLabel($label)
+      ->setDescription(t('Token usage data captured from the AI provider response.'))
+      ->setDisplayConfigurable('form', TRUE)
+      ->setDisplayConfigurable('view', TRUE);
+  }
+
+  $update_manager = \Drupal::entityDefinitionUpdateManager();
+  $database_schema = \Drupal::database()->schema();
+  $installed_fields = [];
+  foreach ($storage_definitions as $field_name => $storage_definition) {
+    if ($database_schema->fieldExists('ai_log', $field_name)) {
+      continue;
+    }
+    $last_installed_definition = $update_manager->getFieldStorageDefinition($field_name, 'ai_log');
+    if ($last_installed_definition) {
+      // Recorded as installed without a column: forget the record so the
+      // field can be installed properly.
+      \Drupal::service('entity.last_installed_schema.repository')->deleteLastInstalledFieldStorageDefinition($last_installed_definition);
+    }
+    $update_manager->installFieldStorageDefinition($field_name, 'ai_log', 'ai_logging', $storage_definition);
+    $installed_fields[] = $field_name;
+  }
+
+  if (!$installed_fields) {
+    return t('The AI Log reply and token usage fields already exist, skipping.');
+  }
+  return t('Installed the AI Log fields: @fields.', ['@fields' => implode(', ', $installed_fields)]);
+}

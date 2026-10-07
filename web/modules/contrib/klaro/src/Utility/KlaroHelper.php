@@ -21,6 +21,7 @@ use Drupal\Core\Url;
 use Drupal\Core\Utility\Error;
 use Drupal\klaro\Entity\KlaroApp;
 use Drupal\klaro\KlaroAppInterface;
+use Masterminds\HTML5;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
@@ -782,9 +783,8 @@ class KlaroHelper {
     $complete_html = strpos(strtoupper($html), '<!DOCTYPE') !== FALSE;
     // If "complete html" is supplied use DomDocument to create.
     if ($complete_html) {
-      $dom = new \DOMDocument();
-      $html = mb_encode_numericentity($html, [0x80, 0x10FFFF, 0, 0x1FFFFF], 'UTF-8');
-      $dom->loadHTML($html, LIBXML_NOERROR | LIBXML_SCHEMA_CREATE);
+      $html5 = new HTML5();
+      $dom = $html5->loadHTML($html);
     }
     else {
       // If "html fragment" is supplied use The drupal Html helper.
@@ -974,8 +974,7 @@ class KlaroHelper {
     }
 
     if ($complete_html) {
-      $html = $dom->saveHTML();
-      $html = mb_decode_numericentity($html, [0x80, 0x10FFFF, 0, 0x1FFFFF], 'UTF-8');
+      $html = $html5->saveHTML($dom);
     }
     else {
       $html = Html::serialize($dom);

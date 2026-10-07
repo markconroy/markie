@@ -1,0 +1,15 @@
+name: 'AI Translate Tool integration'
+description: 'Exposes AI Translate as a Tool API plugin.'
+package: AI
+type: module
+core_version_requirement: ^10.4 || ^11
+dependencies:
+  - ai_translate:ai_translate
+  - tool:tool
+test_dependencies:
+  - tool:tool
+
+# Information added by Drupal.org packaging script on 2026-09-14
+version: '1.4.2'
+project: 'ai_translate'
+datestamp: 1789391677

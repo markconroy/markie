@@ -252,7 +252,13 @@ class DropAiProvider extends AiProviderClientBase implements ChatInterface {
    * @throws AiResponseErrorException
    *   Thrown if the models cannot be fetched.
    */
-  public function getConfiguredModels(string $operation_type = NULL, array $capabilities = []): array {
+  public function getConfiguredModels(?string $operation_type = NULL, array $capabilities = []): array {
+    // A provider can be installed before it has a Key reference. Dynamic
+    // model discovery must not initialize a client in that state.
+    if (!$this->isUsable($operation_type, $capabilities)) {
+      return [];
+    }
+
     $this->loadClient();
 
     try {
@@ -276,7 +282,7 @@ class DropAiProvider extends AiProviderClientBase implements ChatInterface {
    * @return bool
    *   TRUE if the provider can be used; FALSE otherwise.
    */
-  public function isUsable(string $operation_type = NULL, array $capabilities = []): bool {
+  public function isUsable(?string $operation_type = NULL, array $capabilities = []): bool {
     if (!$this->getConfig()->get('api_key')) {
       return FALSE;
     }

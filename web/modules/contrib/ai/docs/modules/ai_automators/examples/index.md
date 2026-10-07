@@ -9,3 +9,4 @@ Step-by-step examples for configuring AI Automators, including Field Widget Acti
 - [Text to Image Media Field](text_to_image_media_automator.md)
 - [Text to Address Field](address_automator.md)
 - [Metatag](metatag_automator.md)
+- [Text field + `Automator Chain Text Suggestion` action](automator_chain_text.md)

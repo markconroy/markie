@@ -5,6 +5,9 @@
  * This file contains the post update function detailed below.
  */
 
+use Drupal\ai_assistant_api\AiAssistantInterface;
+use Drupal\Core\Config\Entity\ConfigEntityUpdater;
+
 /**
  * Move settings into new fields to handle future restructure on config.
  */
@@ -33,4 +36,19 @@ function ai_assistant_api_post_update_settings(): void {
     // Save the updated config.
     $assistant->save();
   }
+}
+
+/**
+ * Converts allow_history to a ChatMemory plugin selection.
+ */
+function ai_assistant_api_post_update_convert_allow_history(&$sandbox): void {
+  $config_entity_updater = \Drupal::classResolver(ConfigEntityUpdater::class);
+  // AiAssistant::upgradeLegacyChatMemorySettings() converts the legacy
+  // allow_history and history_context_length settings while the entity is
+  // built, so all that is left to do here is save the assistants to persist
+  // that conversion. Assistants that are already in the new shape are simply
+  // resaved unchanged.
+  $callback = fn (AiAssistantInterface $assistant): bool => TRUE;
+
+  $config_entity_updater->update($sandbox, 'ai_assistant', $callback);
 }

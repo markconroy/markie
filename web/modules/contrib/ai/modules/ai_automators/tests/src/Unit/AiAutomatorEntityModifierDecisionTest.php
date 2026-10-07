@@ -582,6 +582,8 @@ class AiAutomatorEntityModifierDecisionTest extends UnitTestCase {
           default => throw new \InvalidArgumentException("Unexpected field: {$fieldName}"),
         };
       });
+    $entity->method('hasField')
+      ->willReturnCallback(static fn(string $fieldName): bool => in_array($fieldName, ['field_target', 'field_source']));
     $supportsGetOriginal = method_exists(ContentEntityBase::class, 'getOriginal');
 
     if (is_array($originalBaseValue)) {
@@ -599,6 +601,8 @@ class AiAutomatorEntityModifierDecisionTest extends UnitTestCase {
           }
           throw new \InvalidArgumentException("Unexpected original field: {$fieldName}");
         });
+      $originalEntity->method('hasField')
+        ->willReturnCallback(static fn(string $fieldName): bool => in_array($fieldName, ['field_target', 'field_source']));
       if ($supportsGetOriginal) {
         /** @var \PHPUnit\Framework\MockObject\MockObject $entityMock */
         $entityMock = $entity;

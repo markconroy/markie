@@ -3,12 +3,14 @@
 namespace Drupal\Tests\ai_search\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests enabling ai_search and its dependencies.
  *
  * @group ai_search
  */
+#[RunTestsInSeparateProcesses]
 class InstallAiSearchTest extends KernelTestBase {
 
   /**

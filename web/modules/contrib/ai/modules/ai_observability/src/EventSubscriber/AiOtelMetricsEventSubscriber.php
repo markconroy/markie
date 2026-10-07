@@ -6,6 +6,7 @@ use Drupal\ai\Event\AiProviderResponseBaseEvent;
 use Drupal\ai\Event\PostGenerateResponseEvent;
 use Drupal\ai\Event\PostStreamingResponseEvent;
 use Drupal\ai_observability\Form\SettingsForm;
+use Drupal\ai_observability\GenAiAttributeMapper;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\opentelemetry_metrics\OpentelemetryMetrics;
@@ -84,6 +85,22 @@ class AiOtelMetricsEventSubscriber implements EventSubscriberInterface {
         'operation_type' => $event->getOperationType(),
         'model' => $event->getModelId(),
       ]);
+    }
+
+    // Emit the OTel GenAI semantic-convention histogram for input/output.
+    // Only 'input' and 'output' are permitted gen_ai.token.type values for
+    // this metric per the OTel GenAI spec; other usage keys (total,
+    // reasoning, cached) are omitted deliberately.
+    $histogram = $meter->createHistogram(SettingsForm::OTEL_HISTOGRAM_NAME_TOKEN_USAGE);
+    $genAiDimensions = [
+      'gen_ai.provider.name' => GenAiAttributeMapper::mapProvider($event->getProviderId()),
+      'gen_ai.request.model' => $event->getModelId(),
+    ];
+    foreach (['input' => $tokenUsage->input, 'output' => $tokenUsage->output] as $type => $value) {
+      if ($value === NULL) {
+        continue;
+      }
+      $histogram->record($value, ['gen_ai.token.type' => $type] + $genAiDimensions);
     }
   }
 

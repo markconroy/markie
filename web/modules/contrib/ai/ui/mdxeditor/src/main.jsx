@@ -11,7 +11,7 @@ window.Drupal.behaviors.aiMdxEditor = {
 
     if (textareas.length === 0) {
       // No textareas found, check for #mdxeditor-demo element for demo mode
-      const rootElement = context.getElementById("mdxeditor-demo");
+      const rootElement = context.querySelector("#mdxeditor-demo");
       if (rootElement) {
         createRoot(rootElement).render(
           <StrictMode>

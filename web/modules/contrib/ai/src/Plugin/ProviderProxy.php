@@ -92,6 +92,7 @@ class ProviderProxy {
     ?string $model_id = NULL,
     ?array $provider_configuration = NULL,
     array $tags = [],
+    array $metadata = [],
   ) {
     $streamed->setInput($input);
     $streamed->setProviderId($provider_id);
@@ -99,6 +100,9 @@ class ProviderProxy {
     $streamed->setProviderConfiguration($provider_configuration);
     $streamed->setTags($tags);
     $streamed->setRequestThreadId($event_id);
+    if (!empty($metadata)) {
+      $streamed->setMetadata($metadata);
+    }
   }
 
   /**
@@ -248,6 +252,12 @@ class ProviderProxy {
     // Create a unique event id.
     $event_id = $this->uuid->generate();
 
+    // Seed event metadata from the input so callers can pass directed
+    // context through to subscribers (e.g. ai_ckeditor's editing entity).
+    $input_metadata = $arguments[0] instanceof InputInterface
+      ? $arguments[0]->getAllRequestMetadata()
+      : [];
+
     // Invoke the pre generate response event.
     $pre_generate_event = new PreGenerateResponseEvent(
       requestThreadId: $event_id,
@@ -257,7 +267,8 @@ class ProviderProxy {
       input: $arguments[0],
       modelId: $arguments[1],
       tags: $this->plugin->getTags(),
-      debugData: $this->plugin->getDebugData()
+      debugData: $this->plugin->getDebugData(),
+      metadata: $input_metadata,
     );
     // Too not have breaking changes, it can't be in the constructor and check.
     if (method_exists($pre_generate_event, 'setRequestParentId') && $this->requestParentId) {
@@ -274,6 +285,12 @@ class ProviderProxy {
     // Get the possible new auth, configuration and input from the event.
     $this->plugin->configuration = $pre_generate_event->getConfiguration();
     $arguments[0] = $pre_generate_event->getInput();
+    // Update chat system role with system prompt from the input, as it could be
+    // modified during PreGenerateResponseEvent.
+    if ($arguments[0] instanceof ChatInput && !empty($arguments[0]->getSystemPrompt())) {
+      // @phpstan-ignore-next-line
+      $this->plugin->setChatSystemRole($arguments[0]->getSystemPrompt());
+    }
     // Only set the authentication if it is set.
     if ($pre_generate_event->getAuthentication()) {
       $this->plugin->setAuthentication($pre_generate_event->getAuthentication());
@@ -320,6 +337,7 @@ class ProviderProxy {
           modelId: $arguments[1] ?? '',
           tags: $this->plugin->getTags(),
           debugData: $this->plugin->getDebugData(),
+          metadata: $pre_generate_event->getAllMetadata(),
         );
         $this->eventDispatcher->dispatch($event);
         // If a subscriber forced a response output object, return it instead of
@@ -370,7 +388,8 @@ class ProviderProxy {
           provider_id: $this->plugin->getPluginId(),
           model_id: $arguments[1],
           provider_configuration: $this->plugin->configuration,
-          tags: $this->plugin->getTags() ?? []
+          tags: $this->plugin->getTags() ?? [],
+          metadata: $post_generate_event->getAllMetadata(),
         );
       }
 

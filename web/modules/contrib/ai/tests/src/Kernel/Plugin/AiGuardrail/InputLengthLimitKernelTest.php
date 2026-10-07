@@ -47,7 +47,7 @@ class InputLengthLimitKernelTest extends KernelTestBase {
       'guardrail_settings' => [
         'max_length' => 20,
         'use_tokens' => FALSE,
-        'check_all_messages' => FALSE,
+        'scan_all_user_messages' => FALSE,
         'violation_message' => 'Too long: @count @unit exceeds @max @unit.',
       ],
     ]);

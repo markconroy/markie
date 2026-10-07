@@ -5,13 +5,16 @@ declare(strict_types=1);
 namespace Drupal\ai_assistant_api\Form;
 
 use Drupal\ai\Utility\Textarea;
+use Drupal\Component\Plugin\ConfigurableInterface;
 use Drupal\Core\Entity\EntityForm;
 use Drupal\Core\Extension\ExtensionPathResolver;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Form\SubformState;
+use Drupal\Core\Plugin\PluginFormInterface;
 use Drupal\Core\Site\Settings;
 use Drupal\ai\AiProviderPluginManager;
+use Drupal\ai\PluginManager\ChatMemoryPluginManager;
 use Drupal\ai\Service\AiProviderFormHelper;
 use Drupal\ai\Utility\CastUtility;
 use Drupal\ai_assistant_api\AiAssistantActionPluginManager;
@@ -58,6 +61,13 @@ final class AiAssistantForm extends EntityForm {
   protected $moduleHandler;
 
   /**
+   * The chat memory plugin manager.
+   *
+   * @var \Drupal\ai\PluginManager\ChatMemoryPluginManager
+   */
+  protected $chatMemoryPluginManager;
+
+  /**
    * Constructs a new AiAssistantForm object.
    */
   public function __construct(
@@ -66,12 +76,14 @@ final class AiAssistantForm extends EntityForm {
     AiProviderFormHelper $form_helper,
     AiProviderPluginManager $ai_provider,
     ModuleHandlerInterface $module_handler,
+    ChatMemoryPluginManager $chat_memory_plugin_manager,
   ) {
     $this->actionPluginManager = $action_plugin_manager;
     $this->extensionPathResolver = $extension_path_resolver;
     $this->formHelper = $form_helper;
     $this->aiProvider = $ai_provider;
     $this->moduleHandler = $module_handler;
+    $this->chatMemoryPluginManager = $chat_memory_plugin_manager;
   }
 
   /**
@@ -84,6 +96,7 @@ final class AiAssistantForm extends EntityForm {
       $container->get('ai.form_helper'),
       $container->get('ai.provider'),
       $container->get('module_handler'),
+      $container->get('plugin.manager.ai.chat_memory'),
     );
   }
 
@@ -122,6 +135,15 @@ final class AiAssistantForm extends EntityForm {
     }
 
     $form = parent::form($form, $form_state);
+
+    // FormBuilder only assigns #parents to the root element in doBuildForm(),
+    // which runs after this method. SubformState::getParents() requires it on
+    // the parent form as well as on the subform, so a chat memory plugin
+    // whose buildConfigurationForm() reads from the form state would
+    // otherwise die with "The subform and parent form must contain the
+    // #parents property". The value is identical to the one doBuildForm()
+    // would default to.
+    $form['#parents'] = [];
 
     // Possible agent object.
     $agent_entity = NULL;
@@ -366,30 +388,50 @@ final class AiAssistantForm extends EntityForm {
       '#default_value' => $entity->status(),
     ];
 
-    $form['advanced']['allow_history'] = [
+    $chat_memory_options = [];
+    foreach ($this->chatMemoryPluginManager->getDefinitions() as $plugin_id => $definition) {
+      $chat_memory_options[$plugin_id] = $definition['label'];
+    }
+
+    $form['advanced']['chat_memory_wrapper'] = [
+      '#type' => 'container',
+      '#attributes' => ['id' => 'chat-memory-wrapper'],
+    ];
+
+    $form['advanced']['chat_memory_wrapper']['allow_history'] = [
       '#type' => 'select',
       '#title' => $this->t('Allow History'),
-      '#default_value' => $entity->get('allow_history') ?? 'session',
-      '#description' => $this->t('If enabled, the AI Assistant will try store the questions and answers in history during a session. This makes it possible to ask follow-up questions to the Assistant. Note that this raises the price and size of AI calls, and might not be needed for all assistants. Sessions means that it will be stored in the session until the page is reloaded. (coming) Database means that it will be stored in the database with an ID and can be continued later in multiple threads. History includes all the user messages and the assistant replies. It does not include the system prompt (this changes), the messages made by the agents themselves. It does not include all the context provided alongside a user prompt.'),
-      '#options' => [
-        'none' => $this->t('None'),
-        'session' => $this->t('Session'),
-        'session_one_thread' => $this->t('Session (Same thread on reload)'),
+      '#default_value' => $entity->get('allow_history') ?? '',
+      '#description' => $this->t('If enabled, the AI Assistant will try store the questions and answers in history during a session. This makes it possible to ask follow-up questions to the Assistant. Note that this raises the price and size of AI calls, and might not be needed for all assistants. History includes all the user messages and the assistant replies. It does not include the system prompt (this changes), the messages made by the agents themselves. It does not include all the context provided alongside a user prompt.'),
+      '#options' => $chat_memory_options,
+      '#empty_option' => $this->t('None'),
+      '#ajax' => [
+        'callback' => [$this, 'ajaxUpdateChatMemorySettings'],
+        'event' => 'change',
+        'wrapper' => 'chat-memory-wrapper',
       ],
     ];
 
-    $form['advanced']['history_context_length'] = [
-      '#type' => 'number',
-      '#title' => $this->t('History context length'),
-      '#default_value' => $entity->get('history_context_length') ?? 2,
-      '#description' => $this->t('The number of user and system messages pair to send from last set of messages, excluding the last message from the user.'),
-      '#states' => [
-        'invisible' => [
-          ':input[name="allow_history"]' => ['value' => 'none'],
-        ],
-      ],
-      '#min' => 0,
+    // Set #parents explicitly so SubformState can scope user input correctly
+    // before doBuildForm() has had a chance to populate it.
+    $form['advanced']['chat_memory_wrapper']['chat_memory_settings'] = [
+      '#type' => 'container',
+      '#title' => $this->t('Chat memory settings'),
+      '#title_display' => FALSE,
+      '#tree' => TRUE,
+      '#parents' => ['chat_memory_settings'],
     ];
+
+    if ($entity->getChatMemory() instanceof PluginFormInterface) {
+      $plugin_form_state = SubformState::createForSubform(
+        $form['advanced']['chat_memory_wrapper']['chat_memory_settings'],
+        $form,
+        $form_state,
+      );
+      $form['advanced']['chat_memory_wrapper']['chat_memory_settings'] += $entity
+        ->getChatMemory()
+        ->buildConfigurationForm([], $plugin_form_state);
+    }
 
     // Set form state if empty.
     if ($form_state->getValue('llm_ai_provider') == NULL) {
@@ -544,6 +586,24 @@ final class AiAssistantForm extends EntityForm {
   }
 
   /**
+   * Ajax callback to update the chat memory settings form.
+   *
+   * @param array $form
+   *   The form array.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The form state.
+   *
+   * @return array
+   *   The updated chat memory wrapper.
+   */
+  public function ajaxUpdateChatMemorySettings(
+    array &$form,
+    FormStateInterface $form_state,
+  ): array {
+    return $form['advanced']['chat_memory_wrapper'];
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function validateForm(array &$form, FormStateInterface $form_state) {
@@ -561,6 +621,24 @@ final class AiAssistantForm extends EntityForm {
     if ($form_state->getValue('enable_rag') && !$form_state->getValue('rag_database')) {
       $form_state->setErrorByName('rag_database', $this->t('You need to select a RAG database.'));
     }
+
+    // Validate the chat memory plugin's own settings, if one is selected.
+    $chat_memory_id = $form_state->getValue('allow_history');
+    if ($chat_memory_id) {
+      $chat_memory = $this->chatMemoryPluginManager->createInstance($chat_memory_id);
+      if ($chat_memory instanceof PluginFormInterface) {
+        $plugin_form_state = SubformState::createForSubform(
+          $form['advanced']['chat_memory_wrapper']['chat_memory_settings'],
+          $form,
+          $form_state,
+        );
+        $chat_memory->validateConfigurationForm($form['advanced']['chat_memory_wrapper']['chat_memory_settings'], $plugin_form_state);
+        // Copy errors back from the subform state to the main state.
+        foreach ($plugin_form_state->getErrors() as $name => $error) {
+          $form_state->setErrorByName($name, $error);
+        }
+      }
+    }
   }
 
   /**
@@ -570,6 +648,28 @@ final class AiAssistantForm extends EntityForm {
     parent::submitForm($form, $form_state);
     /** @var \Drupal\ai_assistant_api\Entity\AiAssistant $entity */
     $entity = $this->entity;
+
+    // Chat memory settings. Set explicitly from the plugin's own
+    // configuration rather than relying on the generic entity builder, so
+    // the plugin's submitConfigurationForm() normalization (casting, etc.)
+    // is honored.
+    $chat_memory_id = $form_state->getValue('allow_history');
+    $entity->set('allow_history', $chat_memory_id ?? '');
+    if ($chat_memory_id) {
+      $chat_memory = $this->chatMemoryPluginManager->createInstance($chat_memory_id);
+      if ($chat_memory instanceof PluginFormInterface) {
+        $plugin_form_state = SubformState::createForSubform(
+          $form['advanced']['chat_memory_wrapper']['chat_memory_settings'],
+          $form,
+          $form_state,
+        );
+        $chat_memory->submitConfigurationForm($form['advanced']['chat_memory_wrapper']['chat_memory_settings'], $plugin_form_state);
+      }
+      $entity->set('chat_memory_settings', $chat_memory instanceof ConfigurableInterface ? $chat_memory->getConfiguration() : []);
+    }
+    else {
+      $entity->set('chat_memory_settings', []);
+    }
 
     // Plugins settings.
     $action_plugins = [];

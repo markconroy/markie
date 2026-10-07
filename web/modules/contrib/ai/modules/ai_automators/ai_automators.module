@@ -6,9 +6,11 @@
  */
 
 use Drupal\ai_automators\AiAutomatorInterface;
+use Drupal\ai_automators\Hook\AiAutomatorsHooks;
 use Drupal\Core\Config\ConfigImporter;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Hook\Attribute\LegacyHook;
 use Drupal\field\Entity\FieldConfig;
 
 /**
@@ -159,4 +161,12 @@ function ai_automators_can_import_toggle($newToggle = NULL) {
     $toggle = $newToggle;
   }
   return $toggle;
+}
+
+/**
+ * Implements hook_cron().
+ */
+#[LegacyHook]
+function ai_automators_cron() {
+  \Drupal::service(AiAutomatorsHooks::class)->cron();
 }

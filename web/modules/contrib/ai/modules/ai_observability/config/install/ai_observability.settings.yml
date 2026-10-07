@@ -12,3 +12,7 @@ otel_spans: true
 otel_spans_store_input: false
 otel_spans_store_output: false
 otel_metrics: true
+summarize_payload: true
+summarize_payload_max_string_length: 256
+summarize_payload_max_list_items: 6
+summarize_payload_max_assoc_keys: 12

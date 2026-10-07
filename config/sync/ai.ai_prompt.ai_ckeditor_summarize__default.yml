@@ -1,0 +1,10 @@
+uuid: a1e2cc8b-c71f-44f7-bcbc-e146842b92b0
+langcode: en
+status: true
+dependencies: {  }
+id: ai_ckeditor_summarize__default
+label: 'Default prompt for summarizing CKEditor text'
+type: ai_ckeditor_summarize
+prompt: |-
+
+  {inputText}

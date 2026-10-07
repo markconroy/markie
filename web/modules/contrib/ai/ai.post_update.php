@@ -5,6 +5,7 @@
  * Contains post update hooks for ai module.
  */
 
+use Drupal\ai\Guardrail\AiGuardrailEntityInterface;
 use Drupal\ai\Guardrail\AiGuardrailSetInterface;
 use Drupal\Core\Config\Entity\ConfigEntityUpdater;
 
@@ -56,4 +57,53 @@ function ai_post_update_14001() {
   if ($config->get('global_guardrails') === NULL) {
     $config->set('global_guardrails', [])->save(TRUE);
   }
+}
+
+/**
+ * Add matching_mode and similarity_threshold to RestrictToTopic guardrails.
+ */
+function ai_post_update_15001(&$sandbox): void {
+  // Resave all guardrails that use the restrict_to_topic plugin so the change
+  // is propagated through the config entity (and its dependencies) rather than
+  // the raw config object.
+  $config_entity_updater = \Drupal::classResolver(ConfigEntityUpdater::class);
+  $callback = function (AiGuardrailEntityInterface $guardrail) {
+    if ($guardrail->get('guardrail') !== 'restrict_to_topic') {
+      return FALSE;
+    }
+    $settings = $guardrail->get('guardrail_settings') ?? [];
+    if (isset($settings['matching_mode'], $settings['similarity_threshold'])) {
+      return FALSE;
+    }
+    $settings += [
+      'matching_mode' => 'exact',
+      'similarity_threshold' => 0.75,
+    ];
+    $guardrail->set('guardrail_settings', $settings);
+    return TRUE;
+  };
+
+  $config_entity_updater->update($sandbox, 'ai_guardrail', $callback);
+}
+
+/**
+ * Rename check_all_messages to scan_all_user_messages for InputLengthLimit.
+ */
+function ai_post_update_15002(&$sandbox): void {
+  $config_entity_updater = \Drupal::classResolver(ConfigEntityUpdater::class);
+  $callback = function (AiGuardrailEntityInterface $guardrail) {
+    if ($guardrail->get('guardrail') !== 'input_length_limit') {
+      return FALSE;
+    }
+    $settings = $guardrail->get('guardrail_settings') ?? [];
+    if (!array_key_exists('check_all_messages', $settings)) {
+      return FALSE;
+    }
+    $settings['scan_all_user_messages'] = $settings['check_all_messages'];
+    unset($settings['check_all_messages']);
+    $guardrail->set('guardrail_settings', $settings);
+    return TRUE;
+  };
+
+  $config_entity_updater->update($sandbox, 'ai_guardrail', $callback);
 }

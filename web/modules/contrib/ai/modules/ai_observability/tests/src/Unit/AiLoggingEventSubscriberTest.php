@@ -103,12 +103,16 @@ class AiLoggingEventSubscriberTest extends UnitTestCase {
 
   /**
    * Tests that logging respects input/output configuration.
+   *
+   * Exercises the structured/summarized payload path that is enabled by the
+   * SettingsForm::CONFIG_KEY_SUMMARIZE_PAYLOAD opt-in.
    */
   public function testLoggingWithInputOutput() {
     TestHelpers::service('config.factory')->stubSetConfig(SettingsForm::CONFIG_NAME, [
       SettingsForm::CONFIG_KEY_LOGGING_ENABLED => TRUE,
       SettingsForm::CONFIG_KEY_LOG_INPUT => TRUE,
       SettingsForm::CONFIG_KEY_LOG_OUTPUT => TRUE,
+      SettingsForm::CONFIG_KEY_SUMMARIZE_PAYLOAD => TRUE,
     ]);
     $service = $this->initAiLoggingEventSubscriberService();
 
@@ -117,11 +121,40 @@ class AiLoggingEventSubscriberTest extends UnitTestCase {
 
     $logs = TestHelpers::service('logger.factory')->stubGetLogs();
     $this->assertCount(1, $logs);
-    $this->assertEquals($logs[0]['_context']['metadata']['input'], AiObservabilityTestHelper::getInputStub()->toString());
+    $inputExpectedString = AiObservabilityUtils::aiInputToString(AiObservabilityTestHelper::getInputStub());
+    $this->assertEquals($logs[0]['_context']['metadata']['input'], $inputExpectedString);
     $outputExpected = AiObservabilityTestHelper::getOutputStub();
     $outputExpectedString = AiObservabilityUtils::aiOutputToString($outputExpected);
     $this->assertEquals($logs[0]['_context']['metadata']['output'], $outputExpectedString);
     $this->assertArrayHasKey('output', $logs[0]['_context']['metadata']);
+  }
+
+  /**
+   * Tests the legacy payload path used when summarization is disabled.
+   */
+  public function testLoggingWithInputOutputLegacy() {
+    TestHelpers::service('config.factory')->stubSetConfig(SettingsForm::CONFIG_NAME, [
+      SettingsForm::CONFIG_KEY_LOGGING_ENABLED => TRUE,
+      SettingsForm::CONFIG_KEY_LOG_INPUT => TRUE,
+      SettingsForm::CONFIG_KEY_LOG_OUTPUT => TRUE,
+      SettingsForm::CONFIG_KEY_SUMMARIZE_PAYLOAD => FALSE,
+    ]);
+    $service = $this->initAiLoggingEventSubscriberService();
+
+    $event = AiObservabilityTestHelper::getAiEventStub(PostGenerateResponseEvent::class);
+    TestHelpers::callEventSubscriber($service, PostGenerateResponseEvent::EVENT_NAME, $event);
+
+    $logs = TestHelpers::service('logger.factory')->stubGetLogs();
+    $this->assertCount(1, $logs);
+
+    $this->assertSame(
+      AiObservabilityTestHelper::getInputStub()->toString(),
+      $logs[0]['_context']['metadata']['input'],
+    );
+    $this->assertSame(
+      AiObservabilityUtils::aiOutputToString(AiObservabilityTestHelper::getOutputStub(), FALSE),
+      $logs[0]['_context']['metadata']['output'],
+    );
   }
 
   /**

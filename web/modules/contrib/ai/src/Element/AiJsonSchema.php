@@ -104,11 +104,17 @@ class AiJsonSchema extends FormElementBase {
     ];
 
     // Container where CodeMirror will mount.
+    // The data-drupal-ck-style-fence attribute opts the editor's descendants
+    // out of core's off-canvas dialog style reset (#drupal-off-canvas-wrapper
+    // *{ all: revert; } in core/misc/dialog/off-canvas/css/reset.css). Without
+    // it, CodeMirror's runtime-injected styles are reverted and the editor
+    // renders broken when the element is shown inside an off-canvas dialog.
     $element['editor'] = [
       '#type' => 'html_tag',
       '#tag' => 'div',
       '#attributes' => [
         'data-ai-json-schema-editor' => $element_id,
+        'data-drupal-ck-style-fence' => '',
         'class' => ['ai-json-schema-editor-wrapper'],
         'style' => 'display: none;',
       ],

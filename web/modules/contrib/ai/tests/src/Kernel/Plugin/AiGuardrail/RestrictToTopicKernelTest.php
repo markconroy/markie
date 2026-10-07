@@ -4,16 +4,17 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\ai\Kernel\Plugin\AiGuardrail;
 
-use Drupal\KernelTests\KernelTestBase;
+use Drupal\ai\Entity\AiGuardrail;
 use Drupal\ai\Guardrail\Result\PassResult;
 use Drupal\ai\Guardrail\Result\StopResult;
 use Drupal\ai\OperationType\Chat\ChatInput;
 use Drupal\ai\OperationType\Chat\ChatMessage;
 use Drupal\ai_test\Entity\AIMockProviderResult;
+use Drupal\KernelTests\KernelTestBase;
 use Symfony\Component\Yaml\Yaml;
 
 /**
- * Tests the RestrictToTopic guardrail end-to-end with a real provider.
+ * Tests the RestrictToTopic guardrail end-to-end and config/plugin discovery.
  *
  * @group ai
  * @covers \Drupal\ai\Plugin\AiGuardrail\RestrictToTopic
@@ -43,7 +44,7 @@ class RestrictToTopicKernelTest extends KernelTestBase {
    * Reproduces the prompt the guardrail constructs from text and topics.
    *
    * Kept in lockstep with the heredoc in
-   * \Drupal\ai\Plugin\AiGuardrail\RestrictToTopic::processInput().
+   * \Drupal\ai\Plugin\AiGuardrail\RestrictToTopic::buildPrompt().
    *
    * @param string $text
    *   The lowercased user message text.
@@ -57,7 +58,7 @@ class RestrictToTopicKernelTest extends KernelTestBase {
     return <<<PROMPT
 Given a text and a list of topics, return a valid json list of which topics are present in the text. If none, just return an empty list. Don't format the output in any other way, just return the list as JSON inside a ```json code block.
 
-Output example when not finding anything:
+Output Format:
 -------------
 ```json
 {"topics_present": []}
@@ -229,6 +230,73 @@ PROMPT;
     ]));
 
     $this->assertInstanceOf(PassResult::class, $result);
+  }
+
+  /**
+   * New config keys survive schema validation and entity save/load.
+   */
+  public function testSchemaAcceptsNewKeys(): void {
+    $guardrail = AiGuardrail::create([
+      'id' => 'test_restrict_to_topic',
+      'label' => 'Test Restrict to Topic',
+      'description' => 'Test.',
+      'guardrail' => 'restrict_to_topic',
+      'guardrail_settings' => [
+        'valid_topics' => 'banana',
+        'invalid_topics' => '',
+        'invalid_topics_present_message' => 'blocked',
+        'valid_topics_missing_message' => 'off-topic',
+        'matching_mode' => 'semantic',
+        'similarity_threshold' => 0.6,
+      ],
+    ]);
+    // Saving under strict config schema checking asserts the schema is valid.
+    $guardrail->save();
+
+    $loaded = AiGuardrail::load('test_restrict_to_topic');
+    $this->assertNotNull($loaded);
+    $settings = $loaded->get('guardrail_settings');
+    $this->assertSame('semantic', $settings['matching_mode']);
+    $this->assertSame(0.6, $settings['similarity_threshold']);
+  }
+
+  /**
+   * Plugin manager instantiates the plugin with the new config keys.
+   */
+  public function testPluginInstanceReceivesMatchingMode(): void {
+    $plugin_manager = \Drupal::service('plugin.manager.ai_guardrail');
+    $plugin = $plugin_manager->createInstance('restrict_to_topic', [
+      'valid_topics' => 'banana',
+      'matching_mode' => 'semantic',
+      'similarity_threshold' => 0.8,
+    ]);
+    $config = $plugin->getConfiguration();
+    $this->assertSame('semantic', $config['matching_mode']);
+    $this->assertSame(0.8, $config['similarity_threshold']);
+  }
+
+  /**
+   * Omitted new keys fall back to exact-mode defaults at runtime.
+   */
+  public function testPluginDefaultsToExactModeWhenKeysOmitted(): void {
+    $guardrail = AiGuardrail::create([
+      'id' => 'test_legacy_restrict_to_topic',
+      'label' => 'Legacy Restrict to Topic',
+      'description' => 'Back-compat check: older entities have no matching_mode.',
+      'guardrail' => 'restrict_to_topic',
+      'guardrail_settings' => [
+        'valid_topics' => 'banana',
+        'invalid_topics' => '',
+        'invalid_topics_present_message' => 'blocked',
+        'valid_topics_missing_message' => 'off-topic',
+      ],
+    ]);
+    $guardrail->save();
+
+    $loaded = AiGuardrail::load('test_legacy_restrict_to_topic');
+    $settings = $loaded->get('guardrail_settings');
+    $this->assertArrayNotHasKey('matching_mode', $settings);
+    $this->assertArrayNotHasKey('similarity_threshold', $settings);
   }
 
 }

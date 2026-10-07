@@ -38,6 +38,14 @@ entity.ai_automator.delete_form:
   requirements:
     _permission: 'administer ai_automator'
 
+ai_automators.settings:
+  path: '/admin/config/ai/ai-automators/settings'
+  defaults:
+    _form: '\Drupal\ai_automators\Form\AiAutomatorsSettingsForm'
+    _title: 'Automators Queue Settings'
+  requirements:
+    _permission: 'administer ai_automator'
+
 route_callbacks:
   - '\Drupal\ai_automators\Routing\AutomatorRouteSubscriber::routes'
 

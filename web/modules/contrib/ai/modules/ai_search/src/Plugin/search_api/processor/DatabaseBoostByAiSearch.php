@@ -27,7 +27,7 @@ class DatabaseBoostByAiSearch extends BoostByAiSearchBase {
    * {@inheritdoc}
    */
   public static function supportsIndex(IndexInterface $index): bool {
-    if ($index->getServerInstance()->getBackendId() == 'search_api_db') {
+    if ($index->hasValidServer() && $index->getServerInstance()->getBackendId() == 'search_api_db') {
       return TRUE;
     }
     return FALSE;
@@ -58,7 +58,7 @@ class DatabaseBoostByAiSearch extends BoostByAiSearchBase {
     // index is being filtered only without any terms, in which case we have
     // nothing more to do.
     if ($query_string_keys = $query->getKeys()) {
-      $ai_results = $this->getAiSearchResults($query_string_keys);
+      $ai_results = $this->getAiSearchResults($query_string_keys, $query);
       if ($ai_results) {
         if ($languages = $query->getLanguages()) {
           $ai_results = $this->normalizeLanguage($ai_results, $languages);

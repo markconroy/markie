@@ -6,8 +6,10 @@
  */
 
 use Drupal\ai_ckeditor\Hook\AiCKEditorHooks;
-use Drupal\ai_ckeditor\PreRender\PreRender;
+use Drupal\Core\Entity\EntityFormInterface;
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\ai_ckeditor\PreRender\PreRender;
 use Drupal\Core\Hook\Attribute\LegacyHook;
 
 /**
@@ -31,6 +33,39 @@ function ai_ckeditor_module_implements_alter(&$implementations, $hook): void {
     unset($implementations['ai_ckeditor']);
     $implementations['ai_ckeditor'] = $implementation;
   }
+}
+
+/**
+ * Implements hook_form_alter().
+ *
+ * Attaches the editing entity's type and id to drupalSettings for any
+ * entity form that may render a CKEditor field. The client-side
+ * AiDrupalDialog command reads this registry (keyed by form HTML id)
+ * to populate the entity context payload sent to the AiRequest
+ * controller, which loads the entity server-side (deriving the bundle
+ * from it) and stores the result on ChatInput metadata for event
+ * subscribers (e.g. ai_context) to consume.
+ *
+ * This avoids URL parsing entirely, handles nested and AJAX-loaded forms,
+ * and works for any entity type that uses a standard form controller.
+ */
+function ai_ckeditor_form_alter(array &$form, FormStateInterface $form_state, string $form_id): void {
+  $form_object = $form_state->getFormObject();
+  if (!$form_object instanceof EntityFormInterface) {
+    return;
+  }
+  $entity = $form_object->getEntity();
+  if (!$entity instanceof EntityInterface) {
+    return;
+  }
+  $html_id = $form['#id'] ?? NULL;
+  if (!$html_id) {
+    return;
+  }
+  $form['#attached']['drupalSettings']['aiCkeditor']['entityContext'][$html_id] = [
+    'entity_type' => $entity->getEntityTypeId(),
+    'id' => (string) ($entity->id() ?? ''),
+  ];
 }
 
 /**

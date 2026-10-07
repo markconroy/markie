@@ -1,0 +1,10 @@
+{
+    "name": "drupal/ai_content_suggestions",
+    "description": "AI Content suggestions for fields",
+    "type": "drupal-module",
+    "license": "GPL-2.0-or-later",
+    "require": {
+        "drupal/ai": "^1.4",
+        "drupal/field_widget_actions": "^1.3"
+    }
+}

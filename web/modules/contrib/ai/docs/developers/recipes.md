@@ -66,6 +66,18 @@ config:
           - milvus
 ```
 
+#### vector_search_is_setup
+This checks if any VDB provider is installed and set up, without requiring a specific one to be named.
+
+Example:
+```
+config:
+  actions:
+    ai.settings:
+      verifySetupAi:
+        vector_search_is_setup: true
+```
+
 ### setupAiProvider
 This makes it possible to setup an AI Provider, but also automatically fill out the key value for it. This will work for any simple provider that is setup using a key.
 
@@ -127,5 +139,16 @@ config:
           embedding_strategy_details: ''
 ```
 
+#### Re-applying the recipe
+The action never modifies a server that already exists with the same ID, so a recipe using it can be applied more than once.
+
+If the server exists, the action compares the settings that are tied to the remote vector collection: `backend`, `database`, `database_settings`, `embeddings_engine`, `embeddings_engine_configuration`, `embedding_strategy` and `embedding_strategy_configuration`. The embeddings engine and the number of dimensions are derived from the current default embeddings model, so changing that model after the server was created counts as a difference. Values are compared using the types declared in the backend's config schema, so `chunk_size: 300` and `chunk_size: '300'` are considered equal.
+
+When everything matches, the action is skipped and a notice is written to the `ai` log channel. When something differs, the action throws an exception and the recipe fails with a message like `The VDB server "recipe_server" already exists with conflicting remote configuration at backend_config.embedding_strategy_configuration.chunk_size`, because changing those settings would leave the site pointing at a collection whose vectors no longer match. Either update the recipe to match the existing server, or remove the server and its remote collection before applying the recipe again.
+
+Settings that do not affect the remote collection, such as `name` or `description`, are neither compared nor updated.
+
 ### setupVdbIndex
 This is just a helper config action to setup the index after the server. Just give the whole config.
+
+If an index with the same ID already exists, the action is skipped and a notice is written to the `ai` log channel. The existing index is left untouched, even if the configuration in the recipe differs.

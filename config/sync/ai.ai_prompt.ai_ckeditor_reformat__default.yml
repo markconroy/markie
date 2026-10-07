@@ -1,0 +1,10 @@
+uuid: 59a6f16f-0a22-456d-9d72-63bd8613189a
+langcode: en
+status: true
+dependencies: {  }
+id: ai_ckeditor_reformat__default
+label: 'Default prompt for reformatting CKEditor text'
+type: ai_ckeditor_reformat
+prompt: |-
+
+  {inputText}

@@ -28,7 +28,7 @@ class ScoreThreshold extends ProcessorPluginBase implements PluginFormInterface 
    * {@inheritdoc}
    */
   public static function supportsIndex(IndexInterface $index): bool {
-    if ($index->getServerInstance()->getBackendId() == 'search_api_ai_search') {
+    if ($index->hasValidServer() && $index->getServerInstance()->getBackendId() == 'search_api_ai_search') {
       return TRUE;
     }
     return FALSE;

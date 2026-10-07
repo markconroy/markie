@@ -12,6 +12,7 @@ use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\ai\AiProviderPluginManager;
 use Drupal\ai\Plugin\ProviderProxy;
 use Drupal\ai\Utility\TextChunker;
+use Drupal\ai\Utility\TokenizerInterface;
 use Drupal\ai_search\EmbeddingStrategyInterface;
 use League\HTMLToMarkdown\Converter\TableConverter;
 use League\HTMLToMarkdown\HtmlConverter;
@@ -53,6 +54,17 @@ abstract class EmbeddingStrategyPluginBase implements EmbeddingStrategyInterface
   protected bool $skipModeration;
 
   /**
+   * Maximum number of texts to send in a single embeddings collection request.
+   *
+   * Used only when the provider supports multi embeddings. Providers have
+   * different limits on the number of inputs per request, so this is
+   * configurable per strategy with a conservative default.
+   *
+   * @var int
+   */
+  protected int $embeddingCollectionSize = 50;
+
+  /**
    * The chunk minimum overlap.
    *
    * @var int
@@ -65,6 +77,13 @@ abstract class EmbeddingStrategyPluginBase implements EmbeddingStrategyInterface
    * @var \Drupal\ai\Plugin\ProviderProxy
    */
   protected ProviderProxy $embeddingLlm;
+
+  /**
+   * The tokenizer.
+   *
+   * @var \Drupal\ai\Utility\TokenizerInterface
+   */
+  protected TokenizerInterface $tokenizer;
 
   /**
    * Constructs a new Embedding Strategy abstract class.
@@ -123,9 +142,19 @@ abstract class EmbeddingStrategyPluginBase implements EmbeddingStrategyInterface
     $chat_model_id = $this->aiProviderManager->getModelNameFromSimpleOption($chat_model);
     $chat_model_id = $chat_model_id ?: 'gpt-3.5';
     $this->textChunker->setModel($chat_model_id);
+
+    // Dependency injection in 2.x branch, but loaded manually here to avoid
+    // breaking changes.
+    // phpcs:ignore DrupalPractice.Objects.GlobalDrupal.GlobalDrupal
+    // @phpstan-ignore-next-line
+    $this->tokenizer = \Drupal::service('ai.tokenizer');
+    $this->tokenizer->setModel($chat_model_id);
     /** @var \Drupal\ai\OperationType\Embeddings\EmbeddingsInterface $embeddingLlm */
     $this->embeddingLlm = $this->aiProviderManager->createInstance($this->providerId);
     $this->skipModeration = !empty($configuration['skip_moderation']);
+    if (!empty($configuration['embedding_collection_size']) && is_numeric($configuration['embedding_collection_size'])) {
+      $this->embeddingCollectionSize = max(1, (int) $configuration['embedding_collection_size']);
+    }
     if (!empty($configuration['chunk_size']) && is_numeric($configuration['chunk_size'])) {
       $this->chunkSize = (int) $configuration['chunk_size'];
     }
@@ -212,6 +241,14 @@ abstract class EmbeddingStrategyPluginBase implements EmbeddingStrategyInterface
     $form['chunk_size_details']['content'] = [
       '#markup' => file_get_contents($file),
     ];
+    $form['embedding_collection_size'] = [
+      '#title' => $this->t('Embedding Collection size'),
+      '#description' => $this->t('When the embeddings provider supports multi embeddings, this many text chunks are sent per request to reduce the number of API calls during indexing. Providers limit how many inputs they accept per request, so lower this if you hit request-size or rate limits. Ignored by providers that do not support multi embeddings.'),
+      '#required' => TRUE,
+      '#type' => 'number',
+      '#min' => 1,
+      '#default_value' => $configuration['embedding_collection_size'] ?? 50,
+    ];
     $form['chunk_min_overlap'] = [
       '#title' => $this->t("Minimum chunk overlap for 'Main Content'"),
       '#description' => $this->t('When breaking apart the content into smaller chunks, copy a bit of the content from the previous chunk to avoid anything important being missed overall by inadvertently splitting for example mid-concept. This specifies the number of tokens to retrieve from the preceding chunk to provide that overlapping content.'),
@@ -233,6 +270,7 @@ abstract class EmbeddingStrategyPluginBase implements EmbeddingStrategyInterface
     return [
       'chunk_size' => 500,
       'chunk_min_overlap' => 100,
+      'embedding_collection_size' => 50,
     ];
   }
 

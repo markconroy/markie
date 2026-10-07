@@ -522,7 +522,7 @@ class GeneralHelper {
     $entityValue = $this->token->replace($automatorConfig["{$id}_override"], [
       $this->aiAutomatorFieldConfig->getEntityTokenType($entity->getEntityTypeId()) => $entity,
       'user' => $this->currentUser,
-    ]);
+    ], ['clear' => TRUE]);
     return !$entityValue && $configValue ? $configValue : $entityValue;
   }
 

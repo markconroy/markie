@@ -2,6 +2,8 @@
 
 namespace Drupal\ai_search\Plugin\EmbeddingStrategy;
 
+use Drupal\ai\OperationType\Embeddings\EmbeddingsCollectionInput;
+use Drupal\ai\OperationType\Embeddings\EmbeddingsCollectionInterface;
 use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\ai\AiVdbProviderInterface;
@@ -44,7 +46,9 @@ class EmbeddingBase extends EmbeddingStrategyPluginBase implements EmbeddingStra
   ): array {
     $this->init($embedding_engine, $chat_model, $configuration);
     [$title, $contextual_content, $main_content] = $this->groupFieldData($fields, $index);
-    $chunks = $this->getChunks($title, $main_content, $contextual_content);
+    $title = $this->resolveEntityTitle($title, $fields, $search_api_item);
+    $title_in_contextual = $this->isTitleInContextual($fields, $index);
+    $chunks = $this->getChunks($title, $main_content, $contextual_content, $title_in_contextual, $index);
     $metadata = $this->buildBaseMetadata($fields, $index);
     $raw_embeddings = $this->getRawEmbeddings($chunks);
     $embeddings = [];
@@ -65,7 +69,141 @@ class EmbeddingBase extends EmbeddingStrategyPluginBase implements EmbeddingStra
   }
 
   /**
+   * Computes chunks for a full search API item, for use by the tracker.
+   *
+   * This method is on EmbeddingBase only — not on EmbeddingStrategyInterface —
+   * to avoid a breaking interface change in 1.0.x. The tracker guards its call
+   * with method_exists() so strategies that do not extend EmbeddingBase degrade
+   * gracefully.
+   *
+   * @param string $embedding_engine
+   *   The embedding engine.
+   * @param array $configuration
+   *   The strategy configuration (chunk_size, overlap, etc.).
+   * @param array $fields
+   *   The Search API fields.
+   * @param \Drupal\search_api\Item\ItemInterface $search_api_item
+   *   The Search API item.
+   * @param \Drupal\search_api\IndexInterface $index
+   *   The Search API index.
+   *
+   * @return string[]
+   *   The array of chunks for this item.
+   */
+  public function computeItemChunks(
+    string $embedding_engine,
+    array $configuration,
+    array $fields,
+    ItemInterface $search_api_item,
+    IndexInterface $index,
+  ): array {
+    // $configuration is the strategy configuration, not the backend
+    // configuration, so chat_model is never present in it. 'gpt-3.5' is used
+    // as the tokenizer model — the difference is marginal for chunk counting.
+    $this->init($embedding_engine, 'gpt-3.5', $configuration);
+    [$title, $contextual_content, $main_content] = $this->groupFieldData($fields, $index);
+    $title = $this->resolveEntityTitle($title, $fields, $search_api_item);
+    $title_in_contextual = $this->isTitleInContextual($fields, $index);
+    return $this->getChunks($title, $main_content, $contextual_content, $title_in_contextual, $index);
+  }
+
+  /**
+   * Extracts the entity title, preferring the entity object over fields.
+   *
+   * Falls back to $fields_title when the entity cannot be loaded or has no
+   * label key, so that indexing continues normally on any failure.
+   *
+   * @param string $fields_title
+   *   The title already extracted from indexed fields (fallback value).
+   * @param array $fields
+   *   The Search API fields.
+   * @param \Drupal\search_api\Item\ItemInterface $search_api_item
+   *   The Search API item.
+   *
+   * @return string
+   *   The resolved title.
+   */
+  protected function resolveEntityTitle(string $fields_title, array $fields, ItemInterface $search_api_item): string {
+    try {
+      $label_key = '';
+      foreach ($fields as $field) {
+        if ($field instanceof FieldInterface) {
+          $datasource = $field->getDatasource();
+          if ($datasource) {
+            $entity_type = $this->entityTypeManager->getDefinition($datasource->getEntityTypeId());
+            $label_key = $entity_type->getKey('label');
+            break;
+          }
+        }
+      }
+      if (!$label_key) {
+        return $fields_title;
+      }
+      $entity = $search_api_item->getOriginalObject()->getValue();
+      if (!$entity instanceof EntityInterface) {
+        return $fields_title;
+      }
+      $title_value = $entity->get($label_key)->value ?? $entity->label();
+      if (!empty($title_value)) {
+        return is_string($title_value) ? $title_value : (string) $title_value;
+      }
+    }
+    catch (\Exception $e) {
+      // Any failure falls through to the field-extracted title.
+    }
+    return $fields_title;
+  }
+
+  /**
+   * Returns TRUE if the entity's label field is indexed as Contextual Content.
+   *
+   * When TRUE, the automatic title header should be suppressed to avoid
+   * duplicating the title in every chunk.
+   *
+   * @param array $fields
+   *   The Search API fields.
+   * @param \Drupal\search_api\IndexInterface $index
+   *   The Search API index.
+   *
+   * @return bool
+   *   TRUE if the label field is configured as Contextual Content.
+   */
+  protected function isTitleInContextual(array $fields, IndexInterface $index): bool {
+    $label_key = '';
+    foreach ($fields as $field) {
+      if ($field instanceof FieldInterface) {
+        $datasource = $field->getDatasource();
+        if ($datasource) {
+          $entity_type = $this->entityTypeManager->getDefinition($datasource->getEntityTypeId());
+          $label_key = $entity_type->getKey('label');
+          break;
+        }
+      }
+    }
+    if (!$label_key) {
+      return FALSE;
+    }
+    $index_config = $this->configFactory->get('ai_search.index.' . $index->id())->getRawData();
+    $indexing_options = $index_config['indexing_options'] ?? [];
+    foreach ($fields as $field) {
+      if (
+        $field instanceof FieldInterface
+        && $field->getPropertyPath() == $label_key
+        && isset($indexing_options[$field->getFieldIdentifier()]['indexing_option'])
+        && $indexing_options[$field->getFieldIdentifier()]['indexing_option'] === EmbeddingStrategyIndexingOptions::ContextualContent->getKey()
+      ) {
+        return TRUE;
+      }
+    }
+    return FALSE;
+  }
+
+  /**
    * Get the raw embeddings.
+   *
+   * Uses multi embedding when supported by the provider to reduce API calls.
+   * Multiple chunks are sent in a single request when possible. Large numbers
+   * of chunks are split into smaller batches to avoid API limits.
    *
    * @param array $chunks
    *   The text chunks.
@@ -78,7 +216,12 @@ class EmbeddingBase extends EmbeddingStrategyPluginBase implements EmbeddingStra
 
     /** @var \Drupal\ai\OperationType\Embeddings\EmbeddingsInterface $embedding_llm */
     $embedding_llm = $this->embeddingLlm;
-    foreach ($chunks as $chunk) {
+
+    // First pass: validate and convert chunks to UTF-8.
+    $valid_chunks = [];
+    $chunk_index_map = [];
+
+    foreach ($chunks as $original_index => $chunk) {
       // If not already UTF8, attempt to convert.
       if (!Unicode::validateUtf8($chunk)) {
         if ($encoding = Unicode::encodingFromBOM($chunk)) {
@@ -103,9 +246,9 @@ class EmbeddingBase extends EmbeddingStrategyPluginBase implements EmbeddingStra
         else {
 
           // Failed to determine encoding to convert from.
-          $this->messenger->addWarning($this->t('Failed to determine non-UTF8 encoding to attempt to auto-convert chunk: @chunk'), [
+          $this->messenger->addWarning($this->t('Failed to determine non-UTF8 encoding to attempt to auto-convert chunk: @chunk', [
             '@chunk' => $chunk,
-          ]);
+          ]));
           $logger = $this->loggerChannelFactory->get('ai_search');
           $logger->warning('Failed to determine non-UTF8 encoding to attempt to auto-convert chunk: @chunk', [
             '@chunk' => $chunk,
@@ -116,19 +259,97 @@ class EmbeddingBase extends EmbeddingStrategyPluginBase implements EmbeddingStra
 
       // Only proceed if we have a valid chunk.
       if ($chunk) {
-        // Normalize the chunk before embedding it.
-        $input = new EmbeddingsInput($chunk);
-        $tags = ['ai_search'];
-        if ($this->skipModeration) {
-          $tags[] = 'skip_moderation';
-        }
-        $raw_embeddings[] = $embedding_llm->embeddings(
-          $input,
-          $this->modelId,
-          $tags,
-        )->getNormalized();
+        $chunk_index_map[count($valid_chunks)] = $original_index;
+        $valid_chunks[] = $chunk;
       }
     }
+
+    // If no valid chunks, return empty array.
+    if (empty($valid_chunks)) {
+      return [];
+    }
+    $tags = ['ai_search', 'indexing'];
+    if ($this->skipModeration) {
+      $tags[] = 'skip_moderation';
+    }
+
+    // Use multi embedding for multiple chunks when the provider opts in by
+    // implementing EmbeddingsCollectionInterface. instanceof safely returns
+    // FALSE on older drupal/ai releases where the interface does not exist, so
+    // we transparently fall through to single-chunk processing.
+    if (count($valid_chunks) > 1 && $embedding_llm->getPlugin() instanceof EmbeddingsCollectionInterface) {
+      $batches = array_chunk($valid_chunks, $this->embeddingCollectionSize, TRUE);
+
+      foreach ($batches as $batch_chunks) {
+        try {
+          // Re-index batch chunks to 0-based for this batch.
+          $batch_texts = array_values($batch_chunks);
+          $batch_keys = array_keys($batch_chunks);
+
+          $input = new EmbeddingsCollectionInput($batch_texts);
+          $result = $embedding_llm->embeddingsCollection(
+            $input,
+            $this->modelId,
+            $tags,
+          );
+          $batch_embeddings = $result->getNormalized();
+
+          // Map embeddings back to original chunk indices.
+          foreach ($batch_embeddings as $batch_index => $embedding) {
+            $valid_chunk_index = $batch_keys[$batch_index] ?? NULL;
+            if ($valid_chunk_index !== NULL && isset($chunk_index_map[$valid_chunk_index])) {
+              $raw_embeddings[$chunk_index_map[$valid_chunk_index]] = $embedding;
+            }
+          }
+        }
+        catch (\Exception $e) {
+          // If batch embedding fails, fall back to single-chunk processing
+          // for this batch only.
+          $logger = $this->loggerChannelFactory->get('ai_search');
+          $logger->warning('Batch embedding failed for @count chunks, falling back to single-chunk processing: @message', [
+            '@count' => count($batch_chunks),
+            '@message' => $e->getMessage(),
+          ]);
+
+          foreach ($batch_chunks as $valid_chunk_index => $chunk) {
+            $input = new EmbeddingsInput($chunk);
+            try {
+              $raw_embeddings[$chunk_index_map[$valid_chunk_index]] = $embedding_llm->embeddings(
+                $input,
+                $this->modelId,
+                $tags,
+              )->getNormalized();
+            }
+            catch (\Exception $e) {
+              $logger->warning('Failed to embed chunk: @message', [
+                '@message' => $e->getMessage(),
+              ]);
+            }
+          }
+        }
+      }
+    }
+    else {
+      // Single chunk - embed directly without batching.
+      foreach ($valid_chunks as $batch_index => $chunk) {
+        // Normalize the chunk before embedding it.
+        $input = new EmbeddingsInput($chunk);
+        try {
+          $raw_embeddings[$chunk_index_map[$batch_index]] = $embedding_llm->embeddings(
+            $input,
+            $this->modelId,
+            $tags,
+          )->getNormalized();
+        }
+        catch (\Exception $e) {
+          $logger = $this->loggerChannelFactory->get('ai_search');
+          $logger->warning('Failed to embed chunk: @message', [
+            '@message' => $e->getMessage(),
+          ]);
+        }
+      }
+    }
+
     return array_filter($raw_embeddings);
   }
 
@@ -182,7 +403,7 @@ class EmbeddingBase extends EmbeddingStrategyPluginBase implements EmbeddingStra
       }
 
       // The title field.
-      if ($field->getFieldIdentifier() == $label_key) {
+      if ($field->getPropertyPath() == $label_key) {
         $title = $value;
       }
 
@@ -215,34 +436,49 @@ class EmbeddingBase extends EmbeddingStrategyPluginBase implements EmbeddingStra
    *   The main field content.
    * @param string $contextual_content
    *   The contextual content.
+   * @param bool $title_in_contextual
+   *   Whether title is explicitly added as contextual content.
+   * @param \Drupal\search_api\IndexInterface|null $index
+   *   The Search API index.
    *
    * @return string[]
    *   The array of chunks from the text chunker.
    */
-  protected function getChunks(string $title, string $main_content, string $contextual_content): array {
-
+  protected function getChunks(string $title, string $main_content, string $contextual_content, bool $title_in_contextual = FALSE, ?IndexInterface $index = NULL): array {
     // This determines the available space in each chunk used by contextual
     // content vs the main fields. See the description for
     // contextual content max percentage for more details.
     $max_contextual_content = $this->contextualContentMaxPercentage / 100;
     $max_main_fields = 1 - $max_contextual_content;
 
-    if (strlen($title . $main_content . $contextual_content) <= $this->chunkSize) {
-      // Ideal situation, all fits min single embedding.
-      $chunks = $this->textChunker->chunkText(
-        $this->prepareChunkText($title, $main_content, $contextual_content),
-        $this->chunkSize,
-        $this->chunkMinOverlap
-      );
+    // Empty the title if it is specifically meant to be excluded OR it is
+    // already in the contextual content. In these cases we do not want it
+    // being part of the calculation for chunking.
+    $exclude_title = FALSE;
+    if ($index !== NULL) {
+      $index_config = $this->configFactory->get('ai_search.index.' . $index->id())->getRawData();
+      $exclude_title = $index_config['exclude_title'] ?? FALSE;
+    }
+    if ($title_in_contextual || $exclude_title) {
+      $title = '';
+    }
+
+    $full_text = $this->prepareChunkText($title, $main_content, $contextual_content);
+    $total_tokens = $this->tokenizer->countTokens($full_text);
+    if ($total_tokens <= $this->chunkSize) {
+      // Ideal situation, all fits in a single embedding.
+      $chunks = [$full_text];
     }
     else {
       $chunks = [];
-      if ((strlen($title . $contextual_content) / $this->chunkSize) < $max_contextual_content) {
-        // Arbitrarily suppose that if 30% of embedding content is contextual
-        // content, it is fine.
+      $contextual_text = $this->prepareChunkText($title, '', $contextual_content);
+      $contextual_tokens = $this->tokenizer->countTokens($contextual_text);
+
+      if ($contextual_tokens < ($this->chunkSize * $max_contextual_content)) {
+        // Contextual content is small enough. Chunk only the main content.
         $main_chunks = $this->textChunker->chunkText(
           $main_content,
-          intval($this->chunkSize * $max_main_fields),
+          (int) ($this->chunkSize * $max_main_fields),
           $this->chunkMinOverlap
         );
         foreach ($main_chunks as $main_chunk) {
@@ -251,13 +487,16 @@ class EmbeddingBase extends EmbeddingStrategyPluginBase implements EmbeddingStra
       }
       else {
         // Both contextual content and main fields need chunking.
-        $available_chunk_size = $this->chunkSize - strlen($title);
-        $contextual_chunk_size = intval($available_chunk_size * $max_contextual_content);
-        $main_chunk_size = intval($available_chunk_size * $max_main_fields);
+        $title_tokens = !empty($title) ? $this->tokenizer->countTokens($title) : 0;
+        $available_chunk_size = $this->chunkSize - $title_tokens;
+        $contextual_chunk_size = (int) ($available_chunk_size * $max_contextual_content);
+        $main_chunk_size = (int) ($available_chunk_size * $max_main_fields);
+        $contextual_min_overlap = max(1, intval($this->chunkMinOverlap * $max_contextual_content));
+
         $contextual_chunks = $this->textChunker->chunkText(
           $contextual_content,
           $contextual_chunk_size,
-          $this->chunkMinOverlap
+          $contextual_min_overlap
         );
         $main_chunks = $this->textChunker->chunkText(
           $main_content,
@@ -271,7 +510,7 @@ class EmbeddingBase extends EmbeddingStrategyPluginBase implements EmbeddingStra
         }
       }
     }
-    return $chunks;
+    return array_filter($chunks);
   }
 
   /**
@@ -399,7 +638,8 @@ class EmbeddingBase extends EmbeddingStrategyPluginBase implements EmbeddingStra
       $definition = $field->getDataDefinition();
       $settings = $definition->getSettings();
       if (
-        in_array($field->getType(), ['fulltext', 'string'])
+        $convert_to_label
+        && in_array($field->getType(), ['fulltext', 'string'])
         && $definition->getDataType() === 'field_item:entity_reference'
         && !empty($settings['target_type'])
       ) {
@@ -438,7 +678,10 @@ class EmbeddingBase extends EmbeddingStrategyPluginBase implements EmbeddingStra
       return (float) reset($values);
     }
     elseif (count($values) == 1) {
-      return $this->converter->convert((string) reset($values));
+      if ($convert_to_label) {
+        return $this->converter->convert((string) reset($values));
+      }
+      return (string) reset($values);
     }
     elseif (count($values) > 1) {
 
@@ -450,7 +693,12 @@ class EmbeddingBase extends EmbeddingStrategyPluginBase implements EmbeddingStra
           $parts[] = (int) $this->converter->convert((string) $value);
         }
         else {
-          $parts[] = $this->converter->convert((string) $value);
+          if ($convert_to_label) {
+            $parts[] = $this->converter->convert((string) reset($values));
+          }
+          else {
+            $parts[] = (string) $value;
+          }
         }
       }
       return $parts;

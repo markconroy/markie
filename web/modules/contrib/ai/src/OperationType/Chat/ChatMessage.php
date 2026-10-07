@@ -59,6 +59,13 @@ class ChatMessage {
   private ?string $toolId = NULL;
 
   /**
+   * The message timestamp.
+   *
+   * @var int|null
+   */
+  private ?int $timestamp = NULL;
+
+  /**
    * The constructor.
    *
    * @param string $role
@@ -67,11 +74,14 @@ class ChatMessage {
    *   The text.
    * @param \Drupal\ai\OperationType\GenericType\FileBaseInterface[] $images
    *   The files.
+   * @param int|null $timestamp
+   *   The message timestamp.
    */
-  public function __construct(string $role = "", string $text = "", array $images = []) {
+  public function __construct(string $role = "", string $text = "", array $images = [], ?int $timestamp = NULL) {
     $this->role = $role;
     $this->text = $text;
     $this->files = $images;
+    $this->timestamp = $timestamp;
   }
 
   /**
@@ -308,6 +318,7 @@ class ChatMessage {
       'remote_files' => $this->remoteFiles,
       'tools' => $this->tools ? $this->getRenderedTools() : NULL,
       'tool_id' => $this->toolId,
+      'timestamp' => $this->timestamp,
     ];
   }
 
@@ -354,8 +365,31 @@ class ChatMessage {
     if (isset($data['role'])) {
       $instance->setRole($data['role']);
     }
+    if (isset($data['timestamp'])) {
+      $instance->setTimestamp($data['timestamp']);
+    }
     // @todo Files.
     return $instance;
+  }
+
+  /**
+   * Gets message timestamp.
+   *
+   * @return int|null
+   *   The timestamp when message was created.
+   */
+  public function getTimestamp(): ?int {
+    return $this->timestamp;
+  }
+
+  /**
+   * Sets message timestamp.
+   *
+   * @param int|null $timestamp
+   *   The timestamp when message was created.
+   */
+  public function setTimestamp(?int $timestamp): void {
+    $this->timestamp = $timestamp;
   }
 
 }

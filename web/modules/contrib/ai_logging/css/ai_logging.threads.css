@@ -1,0 +1,9 @@
+.ai-logging-text__label {
+  display: block;
+  margin-block-start: 1em;
+}
+
+.ai-logging-text__value {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}

@@ -203,6 +203,76 @@ class OpenAiBasedProviderClientBaseTest extends TestCase {
   }
 
   /**
+   * Tests that an authentication-required provider without a Key is unusable.
+   *
+   * @covers ::isUsable
+   */
+  public function testUnconfiguredAuthenticationProviderIsNotUsable(): void {
+    $provider = $this->createUsabilityProvider('');
+
+    $this->assertFalse($provider->isUsable());
+    $this->assertFalse($provider->isUsable('chat'));
+  }
+
+  /**
+   * Tests that a configured Key reference makes a provider usable.
+   *
+   * Key resolution deliberately happens only when a client is loaded.
+   *
+   * @covers ::isUsable
+   */
+  public function testConfiguredKeyReferenceMakesProviderUsable(): void {
+    $provider = $this->createUsabilityProvider('openai_key');
+
+    $this->assertTrue($provider->isUsable());
+    $this->assertTrue($provider->isUsable('chat'));
+    $this->assertFalse($provider->isUsable('embeddings'));
+  }
+
+  /**
+   * Tests that injected authentication makes a provider usable without config.
+   *
+   * @covers ::isUsable
+   */
+  public function testRuntimeAuthenticationMakesProviderUsable(): void {
+    $provider = $this->createUsabilityProvider('');
+    $provider->setAuthentication('runtime-key');
+
+    $this->assertTrue($provider->isUsable('chat'));
+  }
+
+  /**
+   * Tests that providers without authentication remain usable.
+   *
+   * @covers ::isUsable
+   */
+  public function testProviderWithoutAuthenticationDoesNotRequireKey(): void {
+    $provider = $this->createUsabilityProvider('', FALSE);
+
+    $this->assertTrue($provider->isUsable('chat'));
+  }
+
+  /**
+   * Creates a provider fixture for testing usability.
+   */
+  private function createUsabilityProvider(
+    string $api_key,
+    bool $requires_authentication = TRUE,
+  ): UsabilityStubProvider {
+    $config = $this->createMock(ImmutableConfig::class);
+    $config->method('get')
+      ->with('api_key')
+      ->willReturn($api_key);
+
+    $reflection = new \ReflectionClass(UsabilityStubProvider::class);
+    /** @var \Drupal\Tests\ai\Unit\Base\UsabilityStubProvider $provider */
+    $provider = $reflection->newInstanceWithoutConstructor();
+    $provider->testConfig = $config;
+    $provider->requiresAuthentication = $requires_authentication;
+    return $provider;
+  }
+
+  /**
    * Tests that the Fiber branch keeps token usage from the consumed stream.
    *
    * Regression test for issue #3586522: when chat() executes inside a
@@ -289,6 +359,58 @@ abstract class LegacyExceptionSignatureProvider extends OpenAiBasedProviderClien
  */
 // phpcs:disable Drupal.Classes.ClassFileName.NoMatch
 final class FiberTokenUsageStubProvider extends OpenAiBasedProviderClientBase {
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getConfiguredModels(?string $operation_type = NULL, array $capabilities = []): array {
+    return [];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getSupportedOperationTypes(): array {
+    return ['chat'];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getModelSettings(string $model_id, array $generalConfig = []): array {
+    return $generalConfig;
+  }
+
+}
+
+/**
+ * Fixture: a minimal provider for testing usability checks.
+ */
+final class UsabilityStubProvider extends OpenAiBasedProviderClientBase {
+
+  /**
+   * Configuration returned by the fixture.
+   */
+  public ImmutableConfig $testConfig;
+
+  /**
+   * Whether the fixture requires authentication.
+   */
+  public bool $requiresAuthentication = TRUE;
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getConfig(): ImmutableConfig {
+    return $this->testConfig;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function hasAuthentication(): bool {
+    return $this->requiresAuthentication;
+  }
 
   /**
    * {@inheritdoc}

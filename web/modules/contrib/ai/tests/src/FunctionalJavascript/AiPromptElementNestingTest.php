@@ -47,6 +47,7 @@ use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
  *
  * @group ai
  * @group ai_prompt
+ * @group 3586485
  */
 #[RunTestsInSeparateProcesses]
 class AiPromptElementNestingTest extends BaseClassFunctionalJavascriptTests {

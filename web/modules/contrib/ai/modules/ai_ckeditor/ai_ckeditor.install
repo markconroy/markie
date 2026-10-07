@@ -83,6 +83,23 @@ function ai_ckeditor_module_preuninstall(string $module): void {
     $editor->setSettings($settings);
     $editor->save();
   }
+
+  // Remove the prompts belonging to this module's prompt types. Prompts that
+  // were created without the enforced module dependency would otherwise be
+  // left behind and block reinstalling the module because the default prompts
+  // provided in config/install already exist in the active configuration.
+  $entity_type_manager = \Drupal::entityTypeManager();
+  $prompt_type_ids = array_filter(
+    array_keys($entity_type_manager->getStorage('ai_prompt_type')->loadMultiple()),
+    fn (string $id): bool => str_starts_with($id, 'ai_ckeditor_'),
+  );
+  if (!empty($prompt_type_ids)) {
+    $prompt_storage = $entity_type_manager->getStorage('ai_prompt');
+    $prompts = $prompt_storage->loadByProperties(['type' => $prompt_type_ids]);
+    if (!empty($prompts)) {
+      $prompt_storage->delete($prompts);
+    }
+  }
 }
 
 /**

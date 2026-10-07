@@ -33,13 +33,17 @@ interface AiProviderInterface extends PluginInspectionInterface {
   /**
    * Returns if the provider is setup and ready to use for the type.
    *
+   * Providers must return FALSE when they are installed but have not yet
+   * been configured. Callers must check this method before invoking a
+   * provider method that may initialize a client or retrieve remote models.
+   *
    * @param string|null $operation_type
    *   Operation type string.
    * @param array $capabilities
    *   The capabilities to filter by.
    *
    * @return bool
-   *   Returns TRUE if the provider is setup and ready to use.
+   *   TRUE if the provider is setup and ready to use; otherwise FALSE.
    */
   public function isUsable(?string $operation_type = NULL, array $capabilities = []): bool;
 

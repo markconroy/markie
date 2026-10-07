@@ -17,7 +17,7 @@ use Drupal\field_widget_actions\Traits\ImageAltTextActionButtonTrait;
   field_types: ['image'],
   category: new TranslatableMarkup('AI Automators'),
 )]
-class ImageFilename extends AutomatorBaseAction {
+class ImageFilename extends AutomatorRefinableBaseAction {
 
   use ImageAltTextActionButtonTrait;
 

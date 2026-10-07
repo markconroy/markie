@@ -2,13 +2,13 @@
 
 namespace Drupal\ai_automators\PluginBaseClasses;
 
+use Drupal\ai\Service\HtmlToMarkdown\HtmlToMarkdownConverterInterface;
 use Drupal\Core\DependencyInjection\DependencySerializationTrait;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\views\ViewExecutable;
 use Drupal\views\Views;
-use League\HTMLToMarkdown\HtmlConverter;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -54,6 +54,13 @@ abstract class ViewsToText extends RuleBase {
   protected $token;
 
   /**
+   * The HTML to Markdown converter.
+   *
+   * @var \Drupal\ai\Service\HtmlToMarkdown\HtmlToMarkdownConverterInterface
+   */
+  protected HtmlToMarkdownConverterInterface $htmlToMarkdownConverter;
+
+  /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
@@ -63,6 +70,7 @@ abstract class ViewsToText extends RuleBase {
     $instance->currentUser = $container->get('current_user');
     $instance->renderer = $container->get('renderer');
     $instance->token = $container->get('token');
+    $instance->htmlToMarkdownConverter = $container->get('ai.html_to_markdown_converter');
     return $instance;
   }
 
@@ -241,7 +249,7 @@ abstract class ViewsToText extends RuleBase {
         $value = $this->token->replace($value, [
           'entity' => $entity,
           'user' => $this->currentUser,
-        ]);
+        ], ['clear' => TRUE]);
         $view->setArguments([$argument => $value]);
       }
     }
@@ -251,7 +259,7 @@ abstract class ViewsToText extends RuleBase {
         $value = $this->token->replace($value, [
           'entity' => $entity,
           'user' => $this->currentUser,
-        ]);
+        ], ['clear' => TRUE]);
         $view->setExposedInput([$filter => $value]);
       }
     }
@@ -261,8 +269,7 @@ abstract class ViewsToText extends RuleBase {
     $result = $view->buildRenderable($displayId);
     $output = $this->renderer->renderInIsolation($result);
     if ($automatorConfig['html_to_markdown']) {
-      $converter = new HtmlConverter(['strip_tags' => TRUE]);
-      $output = $converter->convert($output);
+      $output = $this->htmlToMarkdownConverter->convert($output);
     }
     return [
       'value' => $output,

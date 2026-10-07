@@ -5,9 +5,11 @@ namespace Drupal\ai\Plugin\AiFunctionCall;
 use Drupal\ai\Attribute\FunctionCall;
 use Drupal\ai\Base\FunctionCallBase;
 use Drupal\ai\Service\FunctionCalling\ExecutableFunctionCallInterface;
+use Drupal\ai\Service\FunctionCalling\FunctionCallInterface;
+use Drupal\ai\Service\HtmlToMarkdown\HtmlToMarkdownConverterInterface;
 use Drupal\Core\Plugin\Context\ContextDefinition;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
-use League\HTMLToMarkdown\HtmlConverter;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Plugin implementation of the html to markdown converter.
@@ -30,18 +32,25 @@ use League\HTMLToMarkdown\HtmlConverter;
 class HtmlToMarkdown extends FunctionCallBase implements ExecutableFunctionCallInterface {
 
   /**
+   * The HTML to Markdown converter.
+   */
+  protected HtmlToMarkdownConverterInterface $htmlToMarkdownConverter;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition): FunctionCallInterface|static {
+    $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
+    $instance->htmlToMarkdownConverter = $container->get('ai.html_to_markdown_converter');
+    return $instance;
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function execute() {
-    $markdown_options = [
-      'header_style' => 'atx',
-      'strip_tags' => TRUE,
-      'strip_whitespace' => TRUE,
-      'strip_placeholder_links' => TRUE,
-    ];
-    $converter = new HtmlConverter($markdown_options);
     $content = $this->getContextValue('content');
-    $content = $converter->convert($content);
+    $content = $this->htmlToMarkdownConverter->convert($content);
     $this->setOutput($content);
   }
 

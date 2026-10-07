@@ -9,8 +9,8 @@ use Drupal\ai\Guardrail\AiGuardrailPluginBase;
 use Drupal\ai\Guardrail\Result\GuardrailResultInterface;
 use Drupal\ai\Guardrail\Result\PassResult;
 use Drupal\ai\Guardrail\Result\StopResult;
+use Drupal\ai\Guardrail\UserMessageSelectionTrait;
 use Drupal\ai\OperationType\Chat\ChatInput;
-use Drupal\ai\OperationType\Chat\ChatMessage;
 use Drupal\ai\OperationType\InputInterface;
 use Drupal\ai\OperationType\OutputInterface;
 use Drupal\ai\Utility\TokenizerInterface;
@@ -36,6 +36,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class InputLengthLimit extends AiGuardrailPluginBase implements ConfigurableInterface, PluginFormInterface, ContainerFactoryPluginInterface {
 
   use StringTranslationTrait;
+  use UserMessageSelectionTrait;
 
   /**
    * Constructs an InputLengthLimit guardrail plugin.
@@ -79,36 +80,24 @@ class InputLengthLimit extends AiGuardrailPluginBase implements ConfigurableInte
       return new PassResult('Input is not a chat input, skipping.', $this);
     }
 
-    $messages = $input->getMessages();
-    if (empty($messages)) {
-      return new PassResult('No messages found.', $this);
-    }
-
     $max_length = (int) ($this->configuration['max_length'] ?? 0);
     if ($max_length <= 0) {
       return new PassResult('No length limit configured, skipping check.', $this);
     }
 
     $use_tokens = !empty($this->configuration['use_tokens']);
-    $check_all = !empty($this->configuration['check_all_messages']);
 
-    // Build the text to measure.
-    if ($check_all) {
-      $parts = [];
-      foreach ($messages as $message) {
-        if ($message instanceof ChatMessage) {
-          $parts[] = $message->getText();
-        }
-      }
-      $text = implode("\n", $parts);
+    $scan_all = !empty($this->configuration['scan_all_user_messages']);
+    $user_messages = $this->selectUserMessages($input, $scan_all);
+    if ($user_messages === []) {
+      return new PassResult('No user message found to analyze.', $this);
     }
-    else {
-      $last_message = end($messages);
-      if (!$last_message instanceof ChatMessage) {
-        return new PassResult('No text message found to analyze.', $this);
-      }
-      $text = $last_message->getText();
+
+    $parts = [];
+    foreach ($user_messages as $message) {
+      $parts[] = $message->getText();
     }
+    $text = implode("\n", $parts);
 
     // Measure length.
     if ($use_tokens) {
@@ -194,12 +183,10 @@ class InputLengthLimit extends AiGuardrailPluginBase implements ConfigurableInte
       ],
     ];
 
-    $form['check_all_messages'] = [
-      '#type' => 'checkbox',
-      '#title' => $this->t('Check total conversation length'),
-      '#description' => $this->t('When enabled, the limit applies to all messages combined instead of just the last user message.'),
-      '#default_value' => $this->configuration['check_all_messages'] ?? FALSE,
-    ];
+    $form['scan_all_user_messages'] = $this->buildScanAllUserMessagesElement(
+      (string) $this->t('When enabled, every user message in the chat history is combined and measured together, not only the most recent one. Useful when conversation history may have been imported, replayed, or scanned under different rules. When disabled (default) only the latest user message is measured, even if a tool result message is technically more recent.'),
+      !empty($this->configuration['scan_all_user_messages']),
+    );
 
     $form['violation_message'] = [
       '#type' => 'textarea',

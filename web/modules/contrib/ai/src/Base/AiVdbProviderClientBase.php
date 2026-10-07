@@ -339,7 +339,7 @@ abstract class AiVdbProviderClientBase implements AiVdbProviderInterface, AiVdbP
         ]);
         continue;
       }
-
+      $batch = [];
       foreach ($embeddings as $embedding) {
         // Ensure consistent embedding structure as per
         // EmbeddingStrategyInterface.
@@ -354,9 +354,14 @@ abstract class AiVdbProviderClientBase implements AiVdbProviderInterface, AiVdbP
         foreach ($embedding['metadata'] as $key => $value) {
           $data[$key] = $value;
         }
-        $this->insertIntoCollection(
+        $batch[] = $data;
+      }
+      // Skip items that produced no embeddings; inserting an empty batch would
+      // push a malformed record into the collection.
+      if (!empty($batch)) {
+        $this->insertBatchIntoCollection(
           collection_name: $configuration['database_settings']['collection'],
-          data: $data,
+          batch: $batch,
           database: $configuration['database_settings']['database_name'],
         );
       }
@@ -365,6 +370,26 @@ abstract class AiVdbProviderClientBase implements AiVdbProviderInterface, AiVdbP
     }
 
     return $successfulItemIds;
+  }
+
+  /**
+   * Insert records into collection.
+   *
+   * @param string $collection_name
+   *   The name of the collection.
+   * @param array $batch
+   *   The list of records to insert.
+   * @param string $database
+   *   The database name.
+   */
+  public function insertBatchIntoCollection(string $collection_name, array $batch, string $database = 'default'): void {
+    foreach ($batch as $record) {
+      $this->insertIntoCollection(
+        collection_name: $collection_name,
+        data: $record,
+        database: $database,
+      );
+    }
   }
 
   /**
@@ -410,10 +435,10 @@ abstract class AiVdbProviderClientBase implements AiVdbProviderInterface, AiVdbP
       database: $configuration['database_settings']['database_name'],
     );
     if ($vdbIds) {
-      $this->getClient()->deleteFromCollection(
+      $this->deleteFromCollection(
         collection_name: $configuration['database_settings']['collection'],
         ids: $vdbIds,
-        database_name: $configuration['database_settings']['database_name'],
+        database: $configuration['database_settings']['database_name'],
       );
     }
   }

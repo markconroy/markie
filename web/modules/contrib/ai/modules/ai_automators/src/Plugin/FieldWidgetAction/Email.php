@@ -18,6 +18,5 @@ use Drupal\field_widget_actions\Attribute\FieldWidgetAction;
   widget_types: ['email_default'],
   field_types: ['email'],
 )]
-class Email extends AutomatorBaseAction {
-
+class Email extends AutomatorRefinableBaseAction {
 }

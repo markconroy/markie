@@ -71,9 +71,6 @@ parameters:
     - message: '#Method .*::allowedFileExtensions\(\) return type has no value type specified in iterable type array.#'
     # DeepChatFormBlock - methods returning arrays without value types.
     - message: '#Method .*::getStyleParameters\(\) return type has no value type specified in iterable type array.#'
-    # CommonMark optional dependency.
-    - message: '#on an unknown class League\\\\CommonMark\\\\CommonMarkConverter.#'
-    - message: '#has invalid return type League\\\\CommonMark\\\\CommonMarkConverter.#'
 
     # Traits intended for use in sub-modules or external provider modules.
     - "#Trait Drupal\\\\ai\\\\Traits\\\\OpenAi\\\\FileApiTrait is used zero times#"

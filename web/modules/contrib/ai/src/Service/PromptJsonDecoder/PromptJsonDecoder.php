@@ -31,9 +31,21 @@ class PromptJsonDecoder implements PromptJsonDecoderInterface {
   public function decode(ChatMessage|StreamedChatMessageIteratorInterface $payload, $chunks_to_test = 10): array|ChatMessage|StreamedChatMessageIteratorInterface {
     // If its a normal ChatOutput, we can decode it directly.
     if ($payload instanceof ChatMessage) {
-      // Return the data or if its null, the same payload.
-      $data = $this->decodePayload($payload->getText());
-      return $data ?? $payload;
+      $text = $payload->getText();
+      // Mirror decodeStreamingMessage()'s safety check: only attempt to
+      // extract JSON if the text contains something that actually looks
+      // like the start of a JSON payload. Without this, decodePayload()'s
+      // substring search happily "decodes" the first balanced-bracket
+      // fragment it finds in otherwise plain prose (for example a reply
+      // that merely mentions "[]" in passing), discarding the real message.
+      foreach ($this->jsonStart as $start) {
+        if (str_contains($text, $start)) {
+          // Return the data or if its null, the same payload.
+          $data = $this->decodePayload($text);
+          return $data ?? $payload;
+        }
+      }
+      return $payload;
     }
     else {
       // If its streaming, we need another test first.

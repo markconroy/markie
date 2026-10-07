@@ -21,7 +21,11 @@ class TokenUsageDto {
    * @param int|null $reasoning
    *   The number of reasoning tokens.
    * @param int|null $cached
-   *   The number of cached tokens.
+   *   The number of cache read tokens.
+   * @param int|null $cachedWrite
+   *   The number of cache write (creation) tokens.
+   * @param int|null $toolUse
+   *   The number of tool use tokens.
    */
   public function __construct(
     public ?int $input = NULL,
@@ -29,6 +33,8 @@ class TokenUsageDto {
     public ?int $total = NULL,
     public ?int $reasoning = NULL,
     public ?int $cached = NULL,
+    public ?int $cachedWrite = NULL,
+    public ?int $toolUse = NULL,
   ) {
   }
 

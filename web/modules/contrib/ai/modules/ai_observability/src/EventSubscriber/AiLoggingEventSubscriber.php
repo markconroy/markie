@@ -114,13 +114,20 @@ class AiLoggingEventSubscriber implements EventSubscriberInterface {
       }
     }
 
+    $summarizeOptions = AiObservabilityUtils::buildSummarizeOptions($config);
+    $summarize = $summarizeOptions['summarize'];
+
     if (
       $config->get(SettingsForm::CONFIG_KEY_LOG_INPUT)
       && $event instanceof AiProviderRequestBaseEvent
     ) {
       $payload = $event->getInput();
       if ($payload instanceof InputInterface) {
-        $context['metadata']['input'] = AiObservabilityUtils::summarizeAiPayloadData($payload->toString());
+        $context['metadata']['input'] = AiObservabilityUtils::summarizeAiPayloadData(
+          AiObservabilityUtils::aiInputToString($payload, $summarize),
+          1024,
+          $summarizeOptions,
+        );
         $guardrails_log = [];
         foreach ($payload->getAllGuardrailResults() as $mode => $results) {
           foreach ($results as $result) {
@@ -145,8 +152,12 @@ class AiLoggingEventSubscriber implements EventSubscriberInterface {
       && $event instanceof AiProviderResponseBaseEvent
     ) {
       $payload = $event->getOutput();
-      $payloadStringified = AiObservabilityUtils::aiOutputToString($payload);
-      $context['metadata']['output'] = AiObservabilityUtils::summarizeAiPayloadData($payloadStringified);
+      $payloadStringified = AiObservabilityUtils::aiOutputToString($payload, $summarize);
+      $context['metadata']['output'] = AiObservabilityUtils::summarizeAiPayloadData(
+        $payloadStringified,
+        1024,
+        $summarizeOptions,
+      );
     }
 
     $message = $this->prepareLogMessage($event, $context);

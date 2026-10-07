@@ -105,6 +105,11 @@ class AiJsonSchemaElementTest extends KernelTestBase implements FormInterface {
     $this->assertContains('ai-json-schema-editor-wrapper', $element['editor']['#attributes']['class']);
     $this->assertEquals('display: none;', $element['editor']['#attributes']['style']);
 
+    // The editor wrapper carries the off-canvas style fence so CodeMirror's
+    // runtime-injected styles survive core's off-canvas dialog reset.
+    // See core/misc/dialog/off-canvas/css/reset.css.
+    $this->assertArrayHasKey('data-drupal-ck-style-fence', $element['editor']['#attributes']);
+
     // The library should be attached.
     $this->assertContains('ai/json_schema_editor', $element['#attached']['library']);
   }

@@ -170,10 +170,6 @@ class AiAssistantApiRunner {
     if ($this->shouldStoreSession() && !$this->threadId) {
       $this->threadId = $this->generateUniqueKey();
     }
-    // Set the thread id.
-    if ($this->assistant->get('allow_history') == 'session_one_thread' && !$this->threadId) {
-      $this->threadId = 'assistant_thread_' . $this->assistant->id() . '_' . $this->currentUser->id();
-    }
   }
 
   /**
@@ -242,39 +238,36 @@ class AiAssistantApiRunner {
    *   The unique key.
    */
   public function generateUniqueKey() {
-    $type = $this->assistant->get('allow_history');
-    // One thread does not have its unique key.
-    if ($type == 'session_one_thread') {
+    $chatMemory = $this->assistant->getChatMemory();
+    // A plugin with a persistent thread always resolves to the same thread
+    // id for this owner, via a sticky pointer kept alongside it, so it
+    // survives across requests without the client having to carry it.
+    if ($chatMemory !== NULL && $chatMemory->hasPersistentThread()) {
       if ($this->getCurrentThreadsKey()) {
         return $this->getCurrentThreadsKey();
       }
-      $current = $this->generateUniqueHash();
+      $current = $chatMemory->createThreadId();
       $this->setCurrentThreadsKey($current);
       return $current;
     }
-    // Iterate over the keys until a new one is found.
-    $i = 0;
-    while (TRUE) {
-      $uid = $this->currentUser->id();
-      $key = "assistant_thread_{$uid}_{$i}";
-      $thread = $this->getTempStore()->get($key);
-      // If its old, we reuse it.
-      if (isset($thread['created']) && (time() - $thread['created']) > 86400) {
-        return $key;
-      }
-      // If its over 10, we start removing them from 0.
-      // This is a temporary solution for sessions so we don't have too many.
-      // We should add garbage collection here later.
-      if ($i > 10) {
-        $this->getTempStore()->delete("assistant_thread_{$uid}_" . ($i - 5));
-      }
-      // If its not set, we use it.
-      if (!$thread) {
-        return $key;
-      }
-      $i++;
+    if ($chatMemory === NULL) {
+      return $this->generateUniqueHash();
     }
-
+    // Otherwise, keep a bounded, rotating pool of concurrent threads per
+    // owner instead of a single persistent one: reuse the first free slot,
+    // or evict the oldest once the pool is full. This is a stopgap; real
+    // garbage collection would be an improvement.
+    $uid = $this->currentUser->id();
+    $pool_size = 10;
+    for ($i = 0; $i <= $pool_size; $i++) {
+      $key = "assistant_thread_{$uid}_{$i}";
+      if (!$chatMemory->hasThread($key)) {
+        return $key;
+      }
+    }
+    $evicted_key = "assistant_thread_{$uid}_0";
+    $chatMemory->deleteThread($evicted_key);
+    return $evicted_key;
   }
 
   /**
@@ -354,7 +347,11 @@ class AiAssistantApiRunner {
 
         $defaults = $this->getProviderAndModel();
 
-        foreach ($return['actions'] as $action) {
+        // $return is only reached here when the prompt JSON decoder decided
+        // this looked like an action plan; guard against it lacking the key
+        // anyway (e.g. a provider whose reply happens to embed a JSON-looking
+        // substring without ever intending an action plan).
+        foreach ($return['actions'] ?? [] as $action) {
           $this->usingAction = TRUE;
           $instance = $this->actions->createInstance($action['plugin'], $this->assistant->get('actions_enabled')[$action['plugin']] ?? []);
           $instance->setAssistant($this->assistant);
@@ -387,8 +384,19 @@ class AiAssistantApiRunner {
       );
     }
 
-    // Run the response to the final assistants message.
-    return $this->assistantMessage();
+    // Run the response to the final assistants message. The prompt JSON
+    // decoder can still mistake plain text for a JSON action plan here (for
+    // example, a provider whose reply happens to embed a JSON-looking
+    // substring), in which case there is nothing left to act on: unlike the
+    // pre-action-prompt call above, an array result at this point is never
+    // expected to carry further actions, so fall back to displaying it
+    // rather than handing a plain array to callers that assume a ChatOutput.
+    $final = $this->assistantMessage();
+    if ($final instanceof ChatOutput) {
+      return $final;
+    }
+    $this->loggerChannelFactory->get('ai_assistant_api')->warning('The final assistant response was decoded as a JSON action plan instead of a plain message; falling back to a raw display of the decoded value.');
+    return new ChatOutput(new ChatMessage('assistant', json_encode($final)), [$final], []);
   }
 
   /**
@@ -577,15 +585,13 @@ class AiAssistantApiRunner {
    *   The message history.
    */
   public function getMessageHistory() {
-    if ($this->shouldStoreSession()) {
-      $history = $this->getTempStore()->get($this->threadId)['messages'] ?? [];
-      if ($history) {
-        // Send the last message + n pairs of user and system messages (where
-        // n=config value for history context length).
-        $messages_to_send = (int) $this->assistant->get('history_context_length') * 2 + 1;
-        $history = array_slice($history, -($messages_to_send), $messages_to_send);
-      }
-      return $history;
+    $chatMemory = $this->assistant->getChatMemory();
+    if ($chatMemory !== NULL) {
+      return array_map(fn (ChatMessage $message) => [
+        'role' => $message->getRole(),
+        'message' => $message->getText(),
+        'timestamp' => $message->getTimestamp(),
+      ], $chatMemory->loadMessages($this->threadId));
     }
     // Otherwise just return the last message.
     if (isset($this->userMessage) && $this->userMessage instanceof UserMessage) {
@@ -601,9 +607,7 @@ class AiAssistantApiRunner {
    * Reset the message history.
    */
   public function resetMessageHistory() {
-    $session = $this->getTempStore()->get($this->threadId);
-    $session['messages'] = [];
-    $this->getTempStore()->set($this->threadId, $session);
+    $this->assistant->getChatMemory()?->clearMessages($this->threadId);
   }
 
   /**
@@ -617,13 +621,16 @@ class AiAssistantApiRunner {
    */
   public function resetThread($thread_id) {
     $this->setThreadsKey($thread_id);
+    $chatMemory = $this->assistant->getChatMemory();
     try {
-      if (is_null($this->getTempStore()->get($thread_id))) {
+      if ($chatMemory === NULL || !$chatMemory->hasThread($thread_id)) {
         throw new ResourceNotFoundException();
       }
-      if (!$this->getTempStore()->delete($thread_id)) {
-        throw new TempStoreException();
-      }
+      $chatMemory->deleteThread($thread_id);
+      // Also clean up the runner's own per-thread bookkeeping (output
+      // contexts, structured results, action contexts) that lives outside
+      // chat memory, in the same tempstore row keyed by the thread id.
+      $this->getTempStore()->delete($thread_id);
     }
     catch (TempStoreException) {
       throw new AccessException();
@@ -679,13 +686,9 @@ class AiAssistantApiRunner {
    *   The message to add.
    */
   protected function addMessageToSession($role, $message) {
-    $session = $this->getTempStore()->get($this->threadId);
-    $session['messages'][] = [
-      'role' => $role,
-      'message' => $message,
-      'timestamp' => time(),
-    ];
-    $this->getTempStore()->set($this->threadId, $session);
+    $this->assistant->getChatMemory()?->appendMessages($this->threadId, [
+      new ChatMessage($role, $message, [], time()),
+    ]);
   }
 
   /**
@@ -704,10 +707,7 @@ class AiAssistantApiRunner {
    *   If the session should be stored.
    */
   public function shouldStoreSession() {
-    return in_array($this->assistant->get('allow_history'), [
-      'session',
-      'session_one_thread',
-    ]);
+    return $this->assistant->getChatMemory() !== NULL;
   }
 
   /**

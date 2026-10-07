@@ -13,6 +13,7 @@ use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
  * Tests the AI Provider Configuration form element.
  *
  * @group ai
+ * @group 3582633
  * @group 3580935
  * @group 3586636
  */
@@ -524,6 +525,60 @@ class AiProviderConfigurationElementTest extends BaseClassFunctionalJavascriptTe
 
       $this->takeScreenshot('4_config_container_checked');
     }
+  }
+
+  /**
+   * Tests that a provider with no configuration options collapses the wrapper.
+   *
+   * Regression test for https://www.drupal.org/i/3586636: selecting a
+   * provider/model whose getAvailableConfiguration() returns an empty schema
+   * (the ai_test EchoProvider has no 'configuration' block for 'rerank' in
+   * api_defaults.yml) must not render an empty "Configuration" details box.
+   */
+  public function testProviderWithNoConfigurationCollapsesWrapper(): void {
+    $this->drupalLogin($this->aiAdmin);
+    $this->drupalGet('admin/config/ai/test-form-elements', ['query' => ['operation_type' => 'rerank']]);
+    $this->takeScreenshot('1_form_loaded_rerank');
+
+    $page = $this->getSession()->getPage();
+    $assert = $this->assertSession();
+
+    $assert->waitForElement('css', '#edit-provider_config-config');
+
+    $select = $page->find('css', 'select[data-drupal-selector="edit-provider-config-provider-model"]');
+    $this->assertNotNull($select, 'Provider/model select should be present.');
+
+    // Pick the first real (non-empty, non-Default) provider/model option.
+    $option_value = NULL;
+    foreach ($select->findAll('css', 'option') as $option) {
+      $value = $option->getValue();
+      if (!empty($value) && $value !== AiProviderInterface::DEFAULT_MODEL_VALUE) {
+        $option_value = $value;
+        break;
+      }
+    }
+    $this->assertNotNull($option_value, 'A selectable provider/model option should be available for the rerank operation type.');
+
+    $select->setValue($option_value);
+    $assert->assertWaitOnAjaxRequest();
+    $this->takeScreenshot('2_provider_with_no_configuration_selected');
+
+    $config_wrapper = $assert->waitForElement('css', '#edit-provider_config-config');
+    $this->assertNotNull($config_wrapper, 'Configuration wrapper should still exist.');
+
+    $this->assertNotEquals(
+      'details',
+      $config_wrapper->getTagName(),
+      'Configuration wrapper should be collapsed to a plain container, not a details element, when the provider has no configuration options.'
+    );
+    $this->assertEmpty(
+      $config_wrapper->findAll('css', 'summary'),
+      'Collapsed configuration wrapper should not have a details summary/title.'
+    );
+    $this->assertEmpty(
+      $config_wrapper->findAll('css', 'input, select, textarea'),
+      'Collapsed configuration wrapper should not contain any configuration fields.'
+    );
   }
 
   /**

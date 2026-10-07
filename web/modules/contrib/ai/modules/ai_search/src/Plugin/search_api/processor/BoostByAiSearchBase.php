@@ -8,6 +8,9 @@ use Drupal\search_api\Entity\Index;
 use Drupal\search_api\Entity\Server;
 use Drupal\search_api\Plugin\PluginFormTrait;
 use Drupal\search_api\Processor\ProcessorPluginBase;
+use Drupal\search_api\Query\ConditionGroupInterface;
+use Drupal\search_api\Query\ConditionInterface;
+use Drupal\search_api\Query\QueryInterface;
 use Drupal\search_api\ServerInterface;
 
 /**
@@ -39,6 +42,10 @@ abstract class BoostByAiSearchBase extends ProcessorPluginBase implements Plugin
       'number_to_return' => 10,
       'exact_phrase_action' => 'skip',
       'exact_phrase_action_reduce_number' => 2,
+      'pass_conditions_fields' => [],
+      // NULL means "inherit the backend's own default cap" (currently 10),
+      // preserving existing behavior for sites that don't touch this.
+      'max_pager_iterations' => NULL,
     ];
   }
 
@@ -92,6 +99,28 @@ abstract class BoostByAiSearchBase extends ProcessorPluginBase implements Plugin
       '#title' => $this->t('Number of results to return'),
       '#description' => $this->t('The number of results to prepend. If found, up to this many results will be prepended to the SOLR search. Note that this is before filtering is applied, so you may wish to have a higher number here.'),
       '#default_value' => $this->configuration['number_to_return'] ?? $this->defaultConfiguration()['number_to_return'],
+    ];
+
+    $form['max_pager_iterations'] = [
+      '#type' => 'number',
+      '#step' => 1,
+      '#min' => 0,
+      '#required' => FALSE,
+      '#title' => $this->t('Maximum retries when deduplicating results'),
+      '#description' => $this->t('Every retry re-queries the AI Search backend for another batch, so this trades network round trips for a better chance of reaching the full "Number of results to return". Leave empty to use the backend default (currently 10). Set to 0 to fetch once and accept however many distinct results that yields without retrying — recommended for vector backends that only support a single ranked top-K query with no true pagination (e.g. Pinecone), where a retry cannot return new data and only adds latency.'),
+      '#default_value' => $this->configuration['max_pager_iterations'] ?? $this->defaultConfiguration()['max_pager_iterations'],
+    ];
+
+    $field_options = [];
+    foreach ($this->index->getFields() as $field_id => $field) {
+      $field_options[$field_id] = $field->getLabel();
+    }
+    $form['pass_conditions_fields'] = [
+      '#type' => 'checkboxes',
+      '#title' => $this->t('Pass conditions from parent query'),
+      '#description' => $this->t('Select which indexed fields from this index should have their top-level conditions copied to the AI Search query. This allows the AI Search to respect certain filters applied on the primary search (e.g. content type, status). Only simple top-level conditions are supported; nested condition groups are ignored.'),
+      '#options' => $field_options,
+      '#default_value' => $this->configuration['pass_conditions_fields'] ?? [],
     ];
 
     if ($this->supportsExactPhraseSearch()) {
@@ -157,6 +186,18 @@ abstract class BoostByAiSearchBase extends ProcessorPluginBase implements Plugin
   }
 
   /**
+   * {@inheritdoc}
+   */
+  public function submitConfigurationForm(array &$form, FormStateInterface $form_state) {
+    $values = $form_state->getValues();
+    if (isset($values['pass_conditions_fields'])) {
+      $values['pass_conditions_fields'] = array_filter($values['pass_conditions_fields']);
+      $form_state->setValues($values);
+    }
+    $this->setConfiguration($form_state->getValues());
+  }
+
+  /**
    * Determine how many results to get.
    *
    * @param string|array $keywords
@@ -196,11 +237,13 @@ abstract class BoostByAiSearchBase extends ProcessorPluginBase implements Plugin
    *
    * @param string|array $keywords
    *   The keyword string or array of keywords for the search.
+   * @param \Drupal\search_api\Query\QueryInterface $parent_query
+   *   The parent query from, for example, the Solr or Database server.
    *
    * @return array
    *   An array of results with Drupal entity IDs as keys.
    */
-  protected function getAiSearchResults(string|array $keywords): array {
+  protected function getAiSearchResults(string|array $keywords, ?QueryInterface $parent_query = NULL): array {
     // Number of results to return from AI search.
     $limit = $this->determineLimit($keywords);
     if ($limit <= 0) {
@@ -221,7 +264,21 @@ abstract class BoostByAiSearchBase extends ProcessorPluginBase implements Plugin
         'limit' => $limit,
       ]);
       $query->setOption('search_api_bypass_access', TRUE);
+      // Only override the backend's own retry cap if the site builder
+      // configured one; NULL means "leave the backend default alone".
+      $max_pager_iterations = $this->configuration['max_pager_iterations'] ?? NULL;
+      if ($max_pager_iterations !== NULL && $max_pager_iterations !== '') {
+        $query->setOption('search_api_ai_max_pager_iterations', (int) $max_pager_iterations);
+      }
       $query->keys($keywords);
+
+      // Pass on the parent query options into the AI Search query.
+      if ($parent_query instanceof QueryInterface) {
+        $parent_query_options = $parent_query->getOptions();
+        $query->setOption('parent_query_options', $parent_query_options);
+        $this->applyParentConditions($query, $parent_query);
+      }
+
       $results = $query->execute();
 
       // Return the entity IDs from the results.
@@ -243,6 +300,47 @@ abstract class BoostByAiSearchBase extends ProcessorPluginBase implements Plugin
         '@message' => $exception->getMessage(),
       ]);
       return [];
+    }
+  }
+
+  /**
+   * Copy configured field conditions from the parent query to the AI query.
+   *
+   * Only simple top-level conditions on fields selected by the site builder
+   * are copied. Nested condition groups are intentionally skipped because the
+   * AI Search backend supports only a limited subset of condition types.
+   *
+   * @param \Drupal\search_api\Query\QueryInterface $ai_query
+   *   The AI Search query being built.
+   * @param \Drupal\search_api\Query\QueryInterface $parent_query
+   *   The parent (Solr or Database) query whose conditions to inspect.
+   */
+  protected function applyParentConditions(QueryInterface $ai_query, QueryInterface $parent_query): void {
+    $configured_fields = array_filter($this->configuration['pass_conditions_fields'] ?? []);
+    if (empty($configured_fields)) {
+      return;
+    }
+    $this->applyConditionsFromGroup($ai_query, $parent_query->getConditionGroup(), $configured_fields);
+  }
+
+  /**
+   * Recursively copies leaf conditions from a group to the AI query.
+   *
+   * @param \Drupal\search_api\Query\QueryInterface $ai_query
+   *   The AI Search query being built.
+   * @param \Drupal\search_api\Query\ConditionGroupInterface $group
+   *   The condition group to inspect.
+   * @param array $configured_fields
+   *   Allowed list of field IDs whose conditions should be forwarded.
+   */
+  private function applyConditionsFromGroup(QueryInterface $ai_query, ConditionGroupInterface $group, array $configured_fields): void {
+    foreach ($group->getConditions() as $condition) {
+      if ($condition instanceof ConditionGroupInterface) {
+        $this->applyConditionsFromGroup($ai_query, $condition, $configured_fields);
+      }
+      elseif ($condition instanceof ConditionInterface && isset($configured_fields[$condition->getField()])) {
+        $ai_query->addCondition($condition->getField(), $condition->getValue(), $condition->getOperator());
+      }
     }
   }
 

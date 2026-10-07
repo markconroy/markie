@@ -1,0 +1,63 @@
+ai_chatbot.styling:
+  type: config_object
+  label: 'AI Chatbot Styling Configuration'
+  mapping:
+    general:
+      type: mapping
+      label: 'General Settings'
+      mapping:
+        default_width:
+          type: string
+          label: 'Default Width'
+        default_height:
+          type: string
+          label: 'Default Height'
+        default_placement:
+          type: string
+          label: 'Default Placement'
+    presets:
+      type: mapping
+      label: 'Style Presets'
+      mapping:
+        available_styles:
+          type: string
+          label: 'Available Styles'
+        default_style:
+          type: string
+          label: 'Default Style'
+    theme:
+      type: mapping
+      label: 'Theme Integration'
+      mapping:
+        use_theme_colors:
+          type: boolean
+          label: 'Use Theme Colors'
+        primary_color:
+          type: string
+          label: 'Primary Color'
+        secondary_color:
+          type: string
+          label: 'Secondary Color'
+    responsive:
+      type: mapping
+      label: 'Responsive Settings'
+      mapping:
+        mobile_width:
+          type: string
+          label: 'Mobile Width'
+        mobile_height:
+          type: string
+          label: 'Mobile Height'
+        mobile_placement:
+          type: string
+          label: 'Mobile Placement'
+    animations:
+      type: mapping
+      label: 'Animation Settings'
+      mapping:
+        enable_animations:
+          type: boolean
+          label: 'Enable Animations'
+        animation_duration:
+          type: integer
+          label: 'Animation Duration'

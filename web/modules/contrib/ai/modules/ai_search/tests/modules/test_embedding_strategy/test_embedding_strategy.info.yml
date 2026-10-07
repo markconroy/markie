@@ -1,0 +1,15 @@
+name: Test Embedding Strategy
+package: Testing
+description: 'Provides a custom EmbeddingBase extension for BC regression tests.'
+type: module
+core_version_requirement: ^10.4 || ^11
+
+dependencies:
+  - ai:ai
+  - ai:ai_search
+  - test_ai_provider_mysql:test_ai_provider_mysql
+
+# Information added by Drupal.org packaging script on 2026-09-25
+version: '1.5.0'
+project: 'ai'
+datestamp: 1790327400

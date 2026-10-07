@@ -88,6 +88,10 @@ class Options extends RuleBase {
     $values = array_values($config['allowed_values']);
     $values = array_merge($keys, $values);
 
+    if (is_string($value)) {
+      $value = $this->decodeLabel($value);
+    }
+
     // Has to be in the list.
     if (!in_array($value, $values)) {
       return FALSE;
@@ -105,6 +109,9 @@ class Options extends RuleBase {
     $realValues = [];
     // If it's not in the keys, go through values.
     foreach ($values as $value) {
+      if (is_string($value)) {
+        $value = $this->decodeLabel($value);
+      }
       $realValue = '';
       if (!in_array($value, $keys)) {
         foreach ($config['allowed_values'] as $key => $name) {

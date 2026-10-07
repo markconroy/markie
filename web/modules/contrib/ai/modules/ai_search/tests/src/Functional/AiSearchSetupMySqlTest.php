@@ -2,13 +2,18 @@
 
 namespace Drupal\Tests\ai_search\Functional;
 
+use Drupal\Core\Session\AnonymousUserSession;
 use Drupal\Tests\BrowserTestBase;
+use Drupal\field\Entity\FieldConfig;
+use Drupal\field\Entity\FieldStorageConfig;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Contains AI Search UI setup functional tests.
  *
  * @group ai_search_functional
  */
+#[RunTestsInSeparateProcesses]
 class AiSearchSetupMySqlTest extends BrowserTestBase {
 
   /**
@@ -20,7 +25,6 @@ class AiSearchSetupMySqlTest extends BrowserTestBase {
     'test_ai_provider_mysql',
     'test_ai_vdb_provider_mysql',
     'node',
-    'file',
     'taxonomy',
     'user',
     'system',
@@ -121,6 +125,7 @@ class AiSearchSetupMySqlTest extends BrowserTestBase {
       'backend_config[database]' => 'test_mysql',
       'backend_config[embeddings_engine_configuration][dimensions]' => 384,
       'backend_config[embeddings_engine_configuration][set_dimensions]' => TRUE,
+      'backend_config[include_raw_embedding_vector]' => TRUE,
     ], 'Save');
     $this->submitForm([
       'backend_config[database_settings][database_name]' => 'test_mysql_database',
@@ -341,6 +346,259 @@ class AiSearchSetupMySqlTest extends BrowserTestBase {
   }
 
   /**
+   * Tests the chunked indexing mechanism for a single, very large item.
+   *
+   * Creates a node whose rendered output exceeds the per-batch chunk limit
+   * (10 chunks) and verifies that successive cron runs incrementally process
+   * it until fully indexed.
+   *
+   * @see \Drupal\ai_search\Plugin\EmbeddingStrategy\LongChunkEmbeddingBase
+   * @see \Drupal\ai_search\Utility\AiSearchIndexingBatchHelper::process()
+   */
+  public function testChunkedIndexing(): void {
+    $this->drupalLogin($this->adminUser);
+
+    // Ensure the existing content is fully indexed.
+    $this->drupalGet('admin/config/search/search-api/index/test_mysql_vdb_index');
+    $this->assertSession()->elementTextContains('css', '.progress__percentage', '100%');
+
+    // Ensure the body field exists on article so the rendered_item is long.
+    $this->addBodyFieldToArticle();
+
+    // str_repeat produces ~54,000 characters → well over 10 chunks.
+    $long_text = str_repeat('This is a very long piece of text designed to test the chunking mechanism. Each sentence adds more content to be processed. ', 500);
+    $long_node = $this->drupalCreateNode([
+      'type' => 'article',
+      'title' => 'Very Long Article for Chunking Test',
+      'body' => ['value' => $long_text, 'format' => 'plain_text'],
+      'status' => 0,
+    ]);
+    $long_node_item_id = 'entity:node/' . $long_node->id() . ':en';
+
+    $cron = \Drupal::service('cron');
+    $db = \Drupal::database();
+
+    // First cron run — starts processing the large item.
+    $cron->run();
+
+    $status = $db->select('search_api_item', 'sai')
+      ->fields('sai', ['processed_chunks', 'total_chunks'])
+      ->condition('index_id', 'test_mysql_vdb_index')
+      ->condition('item_id', $long_node_item_id)
+      ->execute()
+      ->fetchAssoc();
+
+    $this->assertNotNull($status, 'Long node has a tracking row after the first cron run.');
+    $total_chunks = (int) $status['total_chunks'];
+    $processed_run_1 = (int) $status['processed_chunks'];
+
+    $this->assertGreaterThan(10, $total_chunks,
+      sprintf('Long node produced %d chunks (expected > 10).', $total_chunks));
+    $this->assertEquals(10, $processed_run_1,
+      sprintf('First cron run processed %d chunks (expected 10).', $processed_run_1));
+
+    // Second cron run — processes the next batch.
+    $cron->run();
+
+    $processed_run_2 = (int) $db->select('search_api_item', 'sai')
+      ->fields('sai', ['processed_chunks'])
+      ->condition('index_id', 'test_mysql_vdb_index')
+      ->condition('item_id', $long_node_item_id)
+      ->execute()
+      ->fetchField();
+
+    $expected_run_2 = min($total_chunks, 20);
+    $this->assertEquals($expected_run_2, $processed_run_2,
+      sprintf('Second cron run processed %d chunks (expected %d).', $processed_run_2, $expected_run_2));
+
+    // Keep running cron until fully indexed (with a safety ceiling).
+    $max_runs = (int) ceil($total_chunks / 10) + 2;
+    $processed = $processed_run_2;
+    $runs = 2;
+    while ($processed < $total_chunks && $runs < $max_runs) {
+      $cron->run();
+      $runs++;
+      $processed = (int) $db->select('search_api_item', 'sai')
+        ->fields('sai', ['processed_chunks'])
+        ->condition('index_id', 'test_mysql_vdb_index')
+        ->condition('item_id', $long_node_item_id)
+        ->execute()
+        ->fetchField();
+    }
+
+    $this->assertLessThan($max_runs, $runs,
+      'Indexing finished within the expected number of cron runs.');
+    $this->assertEquals($total_chunks, $processed,
+      sprintf('Item fully processed after %d runs (%d/%d chunks).', $runs, $processed, $total_chunks));
+
+    // UI should reflect 100% for all items.
+    $this->drupalGet('admin/config/search/search-api/index/test_mysql_vdb_index');
+    $this->assertSession()->elementTextContains('css', '.progress__percentage', '100%');
+  }
+
+  /**
+   * Tests that chunks from previous cron runs are not deleted on resume.
+   *
+   * Verifies that in-progress items skip the delete step so chunks written in
+   * batch N are still present in the vector store when batch N+1 runs. This
+   * exercises the setSkipDeleteItemIds() progressive-enhancement path.
+   *
+   * The test counts *distinct* chunk IDs (drupal_long_id) rather than raw map
+   * rows, because the test VDB provider inserts one row per embedding dimension
+   * value rather than one row per chunk.
+   *
+   * @see \Drupal\ai\Base\AiVdbProviderClientBase::setSkipDeleteItemIds()
+   * @see \Drupal\ai_search\Plugin\search_api\backend\SearchApiAiSearchBackend::indexItemsWithChunkSlicing()
+   */
+  public function testChunkedIndexingPreservesChunksBetweenRuns(): void {
+    $this->drupalLogin($this->adminUser);
+
+    $this->addBodyFieldToArticle();
+
+    $long_text = str_repeat('Chunk preservation test content that must exceed ten chunks per item. ', 500);
+    $long_node = $this->drupalCreateNode([
+      'type' => 'article',
+      'title' => 'Chunk Preservation Test Node',
+      'body' => ['value' => $long_text, 'format' => 'plain_text'],
+      'status' => 0,
+    ]);
+    $item_id = 'entity:node/' . $long_node->id() . ':en';
+
+    $cron = \Drupal::service('cron');
+    $db = \Drupal::database();
+    $map_table = 'test_mysql_database_test_mysql_collection_map';
+
+    // Run cron once — first 10 chunks should be stored.
+    $cron->run();
+
+    // Count distinct chunk IDs (drupal_long_id) for this item after run 1.
+    // Each chunk has a unique ID like 'entity:node/6:en:0', ':en:1', etc.
+    $chunk_ids_run_1 = $db->select($map_table, 'm')
+      ->fields('m', ['drupal_long_id'])
+      ->distinct()
+      ->condition('drupal_entity_id', $item_id)
+      ->execute()
+      ->fetchCol();
+
+    $this->assertCount(10, $chunk_ids_run_1,
+      sprintf('After run 1, expected 10 distinct chunk IDs, got %d.', count($chunk_ids_run_1)));
+
+    // Run cron again — skip-delete must keep run-1 chunk IDs intact.
+    $cron->run();
+
+    $chunk_ids_run_2 = $db->select($map_table, 'm')
+      ->fields('m', ['drupal_long_id'])
+      ->distinct()
+      ->condition('drupal_entity_id', $item_id)
+      ->execute()
+      ->fetchCol();
+
+    $this->assertGreaterThan(count($chunk_ids_run_1), count($chunk_ids_run_2),
+      sprintf(
+        'After run 2, distinct chunk ID count (%d) must exceed run-1 count (%d) — skip-delete must preserve in-progress chunks.',
+        count($chunk_ids_run_2),
+        count($chunk_ids_run_1),
+      ));
+  }
+
+  /**
+   * Tests that batch embedding indexes every chunk of a multi-chunk item.
+   *
+   * The embeddings provider used in these tests supports batch embeddings, so
+   * the strategy sends chunks to the provider in batches. This verifies the
+   * full indexing pipeline still stores exactly one vector record per chunk —
+   * no chunk is dropped, duplicated, or misaligned by the batching path.
+   */
+  public function testBatchEmbeddingIndexesEveryChunk(): void {
+    $this->drupalLogin($this->adminUser);
+    $this->addBodyFieldToArticle();
+
+    $long_text = str_repeat('Batch embedding coverage sentence to force multiple chunks per item. ', 500);
+    $long_node = $this->drupalCreateNode([
+      'type' => 'article',
+      'title' => 'Batch Embedding Coverage Node',
+      'body' => ['value' => $long_text, 'format' => 'plain_text'],
+      'status' => 0,
+    ]);
+    $item_id = 'entity:node/' . $long_node->id() . ':en';
+
+    $cron = \Drupal::service('cron');
+    $db = \Drupal::database();
+    $map_table = 'test_mysql_database_test_mysql_collection_map';
+
+    // First cron run starts processing the large item.
+    $cron->run();
+    $status = $db->select('search_api_item', 'sai')
+      ->fields('sai', ['processed_chunks', 'total_chunks'])
+      ->condition('index_id', 'test_mysql_vdb_index')
+      ->condition('item_id', $item_id)
+      ->execute()
+      ->fetchAssoc();
+    $this->assertNotNull($status, 'The long node has a tracking row.');
+    $total_chunks = (int) $status['total_chunks'];
+    $this->assertGreaterThan(1, $total_chunks, 'The item produced multiple chunks.');
+
+    // Run cron until the item is fully indexed (with a safety ceiling).
+    $max_runs = (int) ceil($total_chunks / 10) + 2;
+    $runs = 1;
+    $processed = (int) $status['processed_chunks'];
+    while ($processed < $total_chunks && $runs < $max_runs) {
+      $cron->run();
+      $runs++;
+      $processed = (int) $db->select('search_api_item', 'sai')
+        ->fields('sai', ['processed_chunks'])
+        ->condition('index_id', 'test_mysql_vdb_index')
+        ->condition('item_id', $item_id)
+        ->execute()
+        ->fetchField();
+    }
+    $this->assertEquals($total_chunks, $processed, 'All chunks were processed.');
+
+    // Every chunk produced exactly one distinct stored vector record.
+    $stored_chunk_ids = $db->select($map_table, 'm')
+      ->fields('m', ['drupal_long_id'])
+      ->distinct()
+      ->condition('drupal_entity_id', $item_id)
+      ->execute()
+      ->fetchCol();
+    $this->assertCount(
+      $total_chunks,
+      $stored_chunk_ids,
+      sprintf('Expected %d distinct stored chunk IDs (one per chunk), got %d.', $total_chunks, count($stored_chunk_ids)),
+    );
+  }
+
+  /**
+   * Ensures the article content type has a body field shown in default display.
+   *
+   * Called by chunked-indexing tests to guarantee long body text is rendered
+   * by the rendered_item processor.
+   */
+  protected function addBodyFieldToArticle(): void {
+    if (!FieldStorageConfig::loadByName('node', 'body')) {
+      FieldStorageConfig::create([
+        'field_name' => 'body',
+        'entity_type' => 'node',
+        'type' => 'text_long',
+      ])->save();
+    }
+    if (!FieldConfig::loadByName('node', 'article', 'body')) {
+      FieldConfig::create([
+        'field_name' => 'body',
+        'entity_type' => 'node',
+        'bundle' => 'article',
+        'label' => 'Body',
+      ])->save();
+    }
+    $display = \Drupal::entityTypeManager()
+      ->getStorage('entity_view_display')
+      ->load('node.article.default');
+    if ($display && !$display->getComponent('body')) {
+      $display->setComponent('body', ['type' => 'text_default', 'weight' => 1])->save();
+    }
+  }
+
+  /**
    * Tests that raw embedding vector is included in results when enabled.
    */
   public function testRawEmbeddingVectorInResults() {
@@ -398,6 +656,63 @@ class AiSearchSetupMySqlTest extends BrowserTestBase {
       $extra_data = $item->getExtraData();
       $this->assertArrayHasKey('raw_vector', $extra_data, 'raw_vector is present in extra data');
       $this->assertIsArray($extra_data['raw_vector'], 'raw_vector is an array');
+    }
+  }
+
+  /**
+   * Tests that RAG queries enforce access control by default.
+   *
+   * Verifies the core security contract: search_api_bypass_access=FALSE (the
+   * default set by RagAction::getRagResults()) excludes content the requesting
+   * account cannot view, while an explicit TRUE allows it through.
+   */
+  public function testRagQueryRespectsAccessControlByDefault(): void {
+    $index = \Drupal::entityTypeManager()
+      ->getStorage('search_api_index')
+      ->load('test_mysql_vdb_index');
+
+    // The unpublished strawberry cake node is in the index (indexed as admin
+    // during setUp) but must not be visible to anonymous users.
+    $strawberry_entity_id = 'entity:node/' . $this->nodes[1]->id() . ':en';
+
+    $switcher = \Drupal::service('account_switcher');
+    $switcher->switchTo(new AnonymousUserSession());
+
+    try {
+      // search_api_bypass_access=FALSE: access enforced, unpublished excluded.
+      $query = $index->query(['limit' => 10]);
+      $query->keys('Strawberry Cheese');
+      $query->setOption('search_api_bypass_access', FALSE);
+      $results = $query->execute();
+
+      $found_ids = array_map(
+        fn($item) => $item->getExtraData('drupal_entity_id'),
+        $results->getResultItems(),
+      );
+      $this->assertNotContains(
+        $strawberry_entity_id,
+        $found_ids,
+        'Unpublished node must not appear in results when access enforcement is on.',
+      );
+
+      // search_api_bypass_access=TRUE: bypass enabled, unpublished included.
+      $query = $index->query(['limit' => 10]);
+      $query->keys('Strawberry Cheese');
+      $query->setOption('search_api_bypass_access', TRUE);
+      $results = $query->execute();
+
+      $found_ids = array_map(
+        fn($item) => $item->getExtraData('drupal_entity_id'),
+        $results->getResultItems(),
+      );
+      $this->assertContains(
+        $strawberry_entity_id,
+        $found_ids,
+        'Unpublished node must appear in results when access bypass is explicitly enabled.',
+      );
+    }
+    finally {
+      $switcher->switchBack();
     }
   }
 

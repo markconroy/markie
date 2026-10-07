@@ -35,7 +35,9 @@ class AveragePoolEmbeddingStrategy extends EmbeddingBase {
   ): array {
     $this->init($embedding_engine, $chat_model, $configuration);
     [$title, $contextual_content, $main_content] = $this->groupFieldData($fields, $index);
-    $chunks = $this->getChunks($title, $main_content, $contextual_content);
+    $title = $this->resolveEntityTitle($title, $fields, $search_api_item);
+    $title_in_contextual = $this->isTitleInContextual($fields, $index);
+    $chunks = $this->getChunks($title, $main_content, $contextual_content, $title_in_contextual, $index);
 
     // Embed and average.
     if ($raw_embeddings = $this->getRawEmbeddings($chunks)) {

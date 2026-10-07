@@ -1,0 +1,13 @@
+/**
+ * @file
+ * Styling for the AI Logs view's crosslink to the site-wide logs.
+ */
+
+.ai-logging-dblog-help {
+  /* Force this item onto its own row within the exposed form's wrapping
+     flex layout, rather than squeezing into the last row's remaining
+     space. */
+  flex-basis: 100%;
+  width: 100%;
+  margin-top: 1em;
+}

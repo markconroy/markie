@@ -44,11 +44,18 @@ response:
         audio_tokens: 0
   metadata: {  }
   tokenUsage:
-    input: null
-    output: null
-    total: null
-    reasoning: null
-    cached: null
+    input: 9
+    output: 10
+    total: 19
+    reasoning: 0
+    cached: 0
+  rateLimits:
+    rateLimitMaxRequests: 500
+    rateLimitMaxTokens: 30000
+    rateLimitRemainingRequests: 499
+    rateLimitRemainingTokens: 29981
+    rateLimitResetRequests: 120
+    rateLimitResetTokens: 1
 wait: 0
 label: 'Hello There AI API Explorer Test'
 tags:

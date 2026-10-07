@@ -7,7 +7,7 @@
   position: absolute;
 }
 
-.mdxeditor .mdxeditor-rich-text-editor [contenteditable] {
+.mdxeditor .mdxeditor-root-editable {
   min-height: 240px;
 }
 

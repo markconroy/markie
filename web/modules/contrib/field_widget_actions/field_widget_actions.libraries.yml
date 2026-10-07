@@ -1,0 +1,50 @@
+admin_ui:
+  version: 1.3.0
+  css:
+    theme:
+      css/admin.css: {  }
+  js:
+    js/admin.js: {  }
+  dependencies:
+    - core/once
+    - core/sortable
+    - core/drupal
+
+suggestions:
+  version: 1.3.0
+  js:
+    js/suggestions.js: {  }
+  css:
+    theme:
+      css/suggestions.css: {  }
+  dependencies:
+    - core/drupal.dialog.ajax
+    - core/drupalSettings
+
+widget_button:
+  version: 1.3.0
+  css:
+    theme:
+      css/widget-button.css: {}
+  js:
+    js/automatic.js: {}
+  dependencies:
+    - core/drupal
+    - core/once
+
+commands:
+  version: 1.3.0
+  js:
+    js/commands.fill_editor.js: {  }
+    js/commands.fill_simple_field.js: {  }
+    js/commands.fill_select.js: {  }
+    js/commands.fill_checkboxes_or_radios.js: {  }
+  dependencies:
+    - core/drupal.dialog.ajax
+    - core/drupalSettings
+
+gin_compatibility_fix:
+  version: 1.3.0
+  css:
+    theme:
+      css/gin-modal-compatibility-fix.css: {  }

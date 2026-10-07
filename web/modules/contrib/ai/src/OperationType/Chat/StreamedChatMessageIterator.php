@@ -20,6 +20,18 @@ abstract class StreamedChatMessageIterator implements StreamedChatMessageIterato
   use StreamChatMessageIteratorTrait;
 
   /**
+   * Hard ceiling for buffering unbalanced HTML before forcing a flush.
+   *
+   * The shouldFlush() method normally holds the buffer until all open HTML
+   * tags are closed, so the HostnameFilter never re-serializes a partial
+   * fragment. This
+   * ceiling guarantees the buffer is still flushed if a tag never closes (e.g.
+   * malformed model output), preventing unbounded memory growth. It is large
+   * enough that any realistic single HTML element fits within it.
+   */
+  protected const MAX_HTML_BUFFER_SIZE = 102400;
+
+  /**
    * The iterator.
    *
    * @var \Traversable
@@ -98,11 +110,25 @@ abstract class StreamedChatMessageIterator implements StreamedChatMessageIterato
   protected $reasoningTokenUsage = NULL;
 
   /**
-   * Cached token usage.
+   * Cached (read) token usage.
    *
    * @var int|null
    */
   protected $cachedTokenUsage = NULL;
+
+  /**
+   * Cached write (creation) token usage.
+   *
+   * @var int|null
+   */
+  protected $cachedWriteTokenUsage = NULL;
+
+  /**
+   * Tool use token usage.
+   *
+   * @var int|null
+   */
+  protected $toolUseTokenUsage = NULL;
 
   /**
    * The created chat output after iteration.
@@ -645,6 +671,12 @@ abstract class StreamedChatMessageIterator implements StreamedChatMessageIterato
     if ($message->getCachedTokenUsage() !== NULL) {
       $this->cachedTokenUsage = $message->getCachedTokenUsage();
     }
+    if ($message->getCachedWriteTokenUsage() !== NULL) {
+      $this->cachedWriteTokenUsage = $message->getCachedWriteTokenUsage();
+    }
+    if ($message->getToolUseTokenUsage() !== NULL) {
+      $this->toolUseTokenUsage = $message->getToolUseTokenUsage();
+    }
   }
 
   /**
@@ -662,7 +694,9 @@ abstract class StreamedChatMessageIterator implements StreamedChatMessageIterato
       input: $this->inputTokenUsage,
       output: $this->outputTokenUsage,
       reasoning: $this->reasoningTokenUsage,
-      cached: $this->cachedTokenUsage
+      cached: $this->cachedTokenUsage,
+      cachedWrite: $this->cachedWriteTokenUsage,
+      toolUse: $this->toolUseTokenUsage,
     ));
     return $output;
   }
@@ -906,6 +940,28 @@ abstract class StreamedChatMessageIterator implements StreamedChatMessageIterato
       return FALSE;
     }
 
+    // Never flush while the buffer contains an incomplete or unbalanced HTML
+    // structure. flushInternal() runs the buffer through the HostnameFilter,
+    // which parses the text as an HTML fragment and re-serializes it. When a
+    // partial fragment is parsed (e.g. an open "<strong>" or "<p>" whose
+    // closing tag has not streamed yet), the HTML5 parser auto-closes the open
+    // tags and drops orphaned closing tags, corrupting the markup. Holding the
+    // buffer until every open tag is closed guarantees the filter only ever
+    // sees balanced HTML. Any remainder is flushed at end-of-stream, where the
+    // full message is always balanced. A hard ceiling still forces a flush if a
+    // tag never closes, preventing unbounded buffer growth.
+    //
+    // This is skipped while a streaming guardrail is registered: guardrails do
+    // their own start/stop buffering on the post-filter chunks emitted here, so
+    // holding the buffer across their markers would merge content across a
+    // guardrail boundary and change what the guardrail evaluates. Guardrail
+    // payloads are plain text in practice, so they do not need HTML balancing.
+    if (empty($this->streamingGuardrailStates)
+      && $this->bufferHasUnclosedHtml()
+      && strlen($this->buffer) < self::MAX_HTML_BUFFER_SIZE) {
+      return FALSE;
+    }
+
     // Paragraph or block boundary.
     if (str_contains($this->buffer, "\n")) {
       return TRUE;
@@ -917,6 +973,70 @@ abstract class StreamedChatMessageIterator implements StreamedChatMessageIterato
     }
 
     return FALSE;
+  }
+
+  /**
+   * Determines whether the buffer holds an incomplete/unbalanced HTML fragment.
+   *
+   * The buffer is considered unsafe to flush when either:
+   * - it ends inside an unclosed tag delimiter (a "<" with no matching ">"), or
+   * - one or more non-void elements have been opened but not yet closed.
+   *
+   * Void elements (e.g. <br>, <img>) and explicitly self-closed tags are not
+   * counted as open.
+   *
+   * @return bool
+   *   TRUE if the buffer should keep accumulating, FALSE if it is balanced.
+   */
+  private function bufferHasUnclosedHtml(): bool {
+    // If there are no tags at all, the buffer is plain text and safe to flush.
+    if (!str_contains($this->buffer, '<')) {
+      return FALSE;
+    }
+
+    // Trailing, unfinished tag delimiter, e.g. '...<a href="htt'.
+    $last_lt = strrpos($this->buffer, '<');
+    $last_gt = strrpos($this->buffer, '>');
+    if ($last_lt !== FALSE && ($last_gt === FALSE || $last_lt > $last_gt)) {
+      return TRUE;
+    }
+
+    // Track opened/closed elements to detect unbalanced inline/block tags.
+    if (!preg_match_all('/<(\/?)([a-zA-Z][a-zA-Z0-9]*)\b[^>]*?(\/?)>/', $this->buffer, $matches, PREG_SET_ORDER)) {
+      return FALSE;
+    }
+
+    // HTML void elements never need a closing tag.
+    static $void_elements = [
+      'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link',
+      'meta', 'param', 'source', 'track', 'wbr',
+    ];
+
+    $stack = [];
+    foreach ($matches as $match) {
+      $is_closing = $match[1] === '/';
+      $name = strtolower($match[2]);
+      $is_self_closing = $match[3] === '/';
+
+      if (in_array($name, $void_elements, TRUE) || $is_self_closing) {
+        continue;
+      }
+
+      if ($is_closing) {
+        // Pop the nearest matching open tag, if any.
+        for ($i = count($stack) - 1; $i >= 0; $i--) {
+          if ($stack[$i] === $name) {
+            array_splice($stack, $i);
+            break;
+          }
+        }
+      }
+      else {
+        $stack[] = $name;
+      }
+    }
+
+    return !empty($stack);
   }
 
 }

@@ -10,13 +10,13 @@ use Drupal\ai_api_explorer\ExplorerHelper;
 use Drupal\ai_api_explorer\Plugin\AiApiExplorer\TranslationGenerator;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Tests\UnitTestCase;
-use PHPUnit\Framework\Attributes\Group;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
  * Tests TranslationGenerator.
+ *
+ * @group ai_api_explorer
  */
-#[Group('ai_api_explorer')]
 final class TranslationGeneratorTest extends UnitTestCase {
 
   /**

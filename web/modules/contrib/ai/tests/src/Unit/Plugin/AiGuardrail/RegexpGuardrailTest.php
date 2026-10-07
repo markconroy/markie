@@ -42,7 +42,7 @@ class RegexpGuardrailTest extends TestCase {
     $guardrail = new RegexpGuardrail(
       $configuration,
       'regexp_guardrail',
-      ['label' => 'Regexp Guardrail'],
+      ['label' => 'RegEx'],
     );
     $guardrail->setConfiguration($configuration);
     return $guardrail;

@@ -6,8 +6,10 @@ core_version_requirement: ^10.4 || ^11
 dependencies:
   - drupal:ckeditor5
   - ai:ai
+lifecycle: deprecated
+lifecycle_link: https://www.drupal.org/node/3612175
 
-# Information added by Drupal.org packaging script on 2026-09-16
-version: '1.4.9'
+# Information added by Drupal.org packaging script on 2026-09-25
+version: '1.5.0'
 project: 'ai'
-datestamp: 1789567520
+datestamp: 1790327400

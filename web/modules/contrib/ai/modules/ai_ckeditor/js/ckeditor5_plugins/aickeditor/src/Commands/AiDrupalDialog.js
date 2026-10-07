@@ -1,5 +1,42 @@
 import { Command } from 'ckeditor5/src/core';
 
+/**
+ * Reads entity context that ai_ckeditor_form_alter() attached to the
+ * host entity form via drupalSettings. The server-side hook keys each
+ * host form's entity info by the form's HTML id, which is the most
+ * reliable handle we can reach from a CKEditor instance.
+ *
+ * Returns empty strings when no context is available. Entity context is
+ * optional: subscribers that care (like ai_context) will fall back to
+ * global context when it is missing.
+ *
+ * @param {Object} editor - The CKEditor instance.
+ * @returns {{entityType: string, entityId: string}}
+ */
+function getEntityContext(editor) {
+  const result = { entityType: '', entityId: '' };
+
+  try {
+    const hostForm = editor.sourceElement?.closest('form');
+    const formId = hostForm?.getAttribute('id');
+    const registry = drupalSettings?.aiCkeditor?.entityContext;
+    if (!formId || !registry) {
+      return result;
+    }
+    const entry = registry[formId];
+    if (!entry) {
+      return result;
+    }
+    result.entityType = entry.entity_type || '';
+    result.entityId = entry.id || '';
+  }
+  catch (e) {
+    // Silently fail - entity context is optional.
+  }
+
+  return result;
+}
+
 export default class AiDrupalDialog extends Command {
 
   constructor(editor) {
@@ -21,6 +58,8 @@ export default class AiDrupalDialog extends Command {
     dialogSettings.title = dialogSettings.title + ' - ' + plugin_label;
 
     const url = new URL(dialogURL, document.baseURI);
+
+    const entityInfo = getEntityContext(this.editor);
 
     openDialog(
       url.toString(),
@@ -57,6 +96,8 @@ export default class AiDrupalDialog extends Command {
         selected_text: selectedText,
         editor_id: this.editor.sourceElement.dataset.editorActiveTextFormat,
         plugin_id,
+        entity_type: entityInfo.entityType,
+        entity_id: entityInfo.entityId,
       }
     );
   }

@@ -1,11 +1,14 @@
 services:
+  ai_assistant_api.tempstore.private:
+    class: Drupal\ai_assistant_api\TempStore\CachedOwnerPrivateTempStoreFactory
+    arguments: ['@keyvalue.expirable', '@lock', '@current_user', '@request_stack', '%tempstore.expire%']
   ai_assistant_api.runner:
     class: Drupal\ai_assistant_api\AiAssistantApiRunner
     arguments:
       - '@entity_type.manager'
       - '@ai.provider'
       - '@renderer'
-      - '@tempstore.private'
+      - '@ai_assistant_api.tempstore.private'
       - '@ai_assistant_api.action_plugin.manager'
       - '@event_dispatcher'
       - '@current_user'
@@ -41,6 +44,10 @@ services:
     class: Drupal\ai_assistant_api\Service\AgentRunner
     arguments:
       - '@ai.provider'
-      - '@tempstore.private'
+      - '@ai_assistant_api.tempstore.private'
       - '@event_dispatcher'
       - '@?plugin.manager.ai_agents'
+  ai_assistant_api.pass_context_to_agent_subscriber:
+    class: Drupal\ai_assistant_api\EventSubscriber\PassContextToAgentSubscriber
+    tags:
+      - { name: event_subscriber }

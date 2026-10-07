@@ -1,4 +1,9 @@
 
+**V.3.1.2**
+- Added documentation to update services via drush in README.
+- Issue #3573987: Processhtml generates invalid [Bugfix]
+- Issue #3620738: Contextual consent placeholder shows the title of the wrong blocked element when a field contains more than one embed [Bugfix]
+
 **V.3.1.1**
 
 - Issue #3484827: Add on_init, on_accept, on_decline callbacks per service for Google Consent Mode v2 support

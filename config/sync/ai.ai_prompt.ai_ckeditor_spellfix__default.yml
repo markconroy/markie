@@ -1,0 +1,10 @@
+uuid: 7c457b22-6987-4baa-bbb2-4b0d068a143f
+langcode: en
+status: true
+dependencies: {  }
+id: ai_ckeditor_spellfix__default
+label: 'Default prompt for fixing the spelling of CKEditor text'
+type: ai_ckeditor_spellfix
+prompt: |-
+
+  {inputText}

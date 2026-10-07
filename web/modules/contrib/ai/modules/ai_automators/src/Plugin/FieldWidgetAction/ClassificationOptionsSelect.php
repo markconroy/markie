@@ -8,12 +8,17 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\field_widget_actions\Attribute\FieldWidgetAction;
 
 /**
- * Field Widget Action for options_select, chosen_select and cshs widgets.
+ * Field Widget Action for select-style entity reference widgets.
+ *
+ * Covers options_select, chosen_select, cshs and Tagify Select. Tagify Select
+ * is a plain multi-value <select> under the hood, so it needs no special
+ * handling beyond being listed here — its JS re-reads the selected options
+ * when the AJAX response replaces the widget.
  */
 #[FieldWidgetAction(
   id: 'classification_options_select',
   label: new TranslatableMarkup('Classification (Options/Chosen Select)'),
-  widget_types: ['options_select', 'chosen_select', 'cshs'],
+  widget_types: ['options_select', 'chosen_select', 'cshs', 'tagify_select_widget'],
   field_types: ['entity_reference'],
   multiple: FALSE,
 )]

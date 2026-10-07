@@ -24,11 +24,11 @@ use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 
 /**
- * Plugin implementation of the Regexp guardrail.
+ * Plugin implementation of the RegEx guardrail.
  */
 #[AiGuardrail(
   id: 'regexp_guardrail',
-  label: new TranslatableMarkup('Regexp Guardrail'),
+  label: new TranslatableMarkup('RegEx'),
   description: new TranslatableMarkup(
     "Checks if text's content matches a specified regular expression pattern."
   ),
@@ -50,7 +50,7 @@ class RegexpGuardrail extends AiGuardrailPluginBase implements ConfigurableInter
 
     $regexp_pattern = $this->configuration['regexp_pattern'] ?? '';
     if (empty($regexp_pattern)) {
-      return new PassResult('No regexp pattern configured, skipping check.', $this);
+      return new PassResult('No RegEx Pattern configured, skipping check.', $this);
     }
 
     $scan_all = !empty($this->configuration['scan_all_user_messages']);
@@ -68,7 +68,7 @@ class RegexpGuardrail extends AiGuardrailPluginBase implements ConfigurableInter
       }
     }
 
-    return new PassResult('Input text passed the regexp guardrail check.', $this);
+    return new PassResult('Input text passed the RegEx check.', $this);
   }
 
   /**
@@ -78,13 +78,13 @@ class RegexpGuardrail extends AiGuardrailPluginBase implements ConfigurableInter
     OutputInterface $output,
   ): GuardrailResultInterface {
     if (!$output instanceof ChatOutput) {
-      return new PassResult('Output is not a chat output, skipping regexp check.', $this);
+      return new PassResult('Output is not a chat output, skipping RegEx Pattern check.', $this);
     }
 
     $normalized = $output->getNormalized();
 
     if ($normalized instanceof StreamedChatMessageIteratorInterface) {
-      return new PassResult('Streamed output cannot be scanned by regexp guardrail.', $this);
+      return new PassResult('Streamed output cannot be scanned by the RegEx Pattern Guardrail.', $this);
     }
 
     if (!$normalized instanceof ChatMessage) {
@@ -93,7 +93,7 @@ class RegexpGuardrail extends AiGuardrailPluginBase implements ConfigurableInter
 
     $regexp_pattern = $this->configuration['regexp_pattern'] ?? '';
     if (empty($regexp_pattern)) {
-      return new PassResult('No regexp pattern configured, skipping check.', $this);
+      return new PassResult('No RegEx Pattern configured, skipping check.', $this);
     }
 
     // Scan both the assistant text and any tool call argument values the
@@ -118,7 +118,7 @@ class RegexpGuardrail extends AiGuardrailPluginBase implements ConfigurableInter
       }
     }
 
-    return new PassResult('Output text passed the regexp guardrail check.', $this);
+    return new PassResult('Output text passed the RegEx Pattern Guardrail check.', $this);
   }
 
   /**
@@ -185,7 +185,7 @@ class RegexpGuardrail extends AiGuardrailPluginBase implements ConfigurableInter
     $form['regexp_pattern'] = [
       '#type' => 'textfield',
       '#required' => TRUE,
-      '#title' => $this->t('Regexp Pattern'),
+      '#title' => $this->t('RegEx Pattern'),
       '#description' => $this->t('Enter a regular expression pattern, including delimiters. Example: @example', [
         '@example' => '/[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,}/i',
       ]),

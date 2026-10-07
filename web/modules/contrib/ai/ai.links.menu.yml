@@ -71,6 +71,12 @@ ai.admin_vdb_providers:
   parent: ai.admin_config_infrastructure
   route_name: ai.admin_vdb_providers
 
+ai.admin_html_to_markdown_settings:
+  title: 'HTML to Markdown Converter'
+  description: 'Configure the HTML to Markdown converter used by AI features. Redirects to the Markdownify settings page when the Markdownify module is installed.'
+  parent: ai.admin_config_infrastructure
+  route_name: ai.html_to_markdown_settings
+
 entity.ai_prompt.collection:
   title: 'Prompt Library'
   description: 'Create and manage reusable AI prompts used throughout the AI ecosystem.'

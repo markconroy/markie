@@ -3,6 +3,9 @@
 namespace Drupal\ai\Base;
 
 use Drupal\ai\Exception\AiSetupFailureException;
+use Drupal\ai\OperationType\Embeddings\EmbeddingsCollectionInput;
+use Drupal\ai\OperationType\Embeddings\EmbeddingsCollectionInterface;
+use Drupal\ai\OperationType\Embeddings\EmbeddingsCollectionOutput;
 use Drupal\Component\Serialization\Json;
 use Drupal\Core\Config\ImmutableConfig;
 use Drupal\Core\File\FileExists;
@@ -52,6 +55,7 @@ abstract class OpenAiBasedProviderClientBase extends AiProviderClientBase implem
   ChatInterface,
   ModerationInterface,
   EmbeddingsInterface,
+  EmbeddingsCollectionInterface,
   TextToSpeechInterface,
   SpeechToTextInterface,
   TextToImageInterface {
@@ -106,7 +110,11 @@ abstract class OpenAiBasedProviderClientBase extends AiProviderClientBase implem
    * {@inheritdoc}
    */
   public function isUsable(?string $operation_type = NULL, array $capabilities = []): bool {
-    if (!$this->hasAuthentication() && !$this->getConfig()->get('api_key')) {
+    // A provider that requires authentication is not usable until it has
+    // either a configured Key reference or runtime authentication.
+    if ($this->hasAuthentication()
+      && empty($this->apiKey)
+      && !$this->getConfig()->get('api_key')) {
       return FALSE;
     }
     if ($operation_type) {
@@ -556,6 +564,82 @@ abstract class OpenAiBasedProviderClientBase extends AiProviderClientBase implem
   }
 
   /**
+   * Moderate a collection of embeddings inputs before they are sent to the API.
+   *
+   * The default implementation is a no-op. Providers that offer moderation
+   * (e.g. OpenAI) override this to flag unsafe content, ideally in a single
+   * batched request rather than one call per input.
+   *
+   * @param array $prompts
+   *   The list of prompts about to be embedded.
+   * @param array $tags
+   *   The request tags (e.g. 'skip_moderation').
+   */
+  protected function moderateEmbeddingsCollectionInput(array $prompts, array $tags): void {}
+
+  /**
+   * Get multi embeddings.
+   *
+   * @param \Drupal\ai\OperationType\Embeddings\EmbeddingsCollectionInput $input
+   *   The multi embeddings input.
+   * @param string $model_id
+   *   The model to use.
+   * @param array $tags
+   *   The list of tags.
+   *
+   * @return \Drupal\ai\OperationType\Embeddings\EmbeddingsCollectionOutput
+   *   The embeddings collection output.
+   */
+  public function embeddingsCollection(EmbeddingsCollectionInput $input, string $model_id, array $tags = []): EmbeddingsCollectionOutput {
+    $this->loadClient();
+    // Let providers run moderation (or any other pre-processing) on the batch.
+    // The default implementation is a no-op.
+    $this->moderateEmbeddingsCollectionInput($input->getPrompts(), $tags);
+    $payload = [
+      'model' => $model_id,
+      'input' => $input->getPrompts(),
+    ] + $this->configuration;
+    $inputCount = $input->getPromptCount();
+    try {
+      $response = $this->client->embeddings()->create($payload)->toArray();
+    }
+    catch (\Throwable $e) {
+      $this->handleApiThrowable($e);
+      throw $e;
+    }
+
+    // Validate the response structure before processing.
+    if (!isset($response['data']) || !is_array($response['data'])) {
+      $errorMessage = $response['detail'] ?? $response['message'] ?? $response['error'] ?? 'Unknown error';
+      throw new \RuntimeException(sprintf(
+        'Embeddings request failed for %d input(s): %s',
+        $inputCount,
+        is_array($errorMessage) ? Json::encode($errorMessage) : $errorMessage
+      ));
+    }
+    $embeddings = [];
+    // OpenAI returns embeddings in 'data' array, indexed by 'index' field.
+    // Sort by index to ensure order matches input order.
+    $dataItems = $response['data'];
+    usort($dataItems, fn($a, $b) => ($a['index'] ?? 0) <=> ($b['index'] ?? 0));
+    foreach ($dataItems as $item) {
+      if (isset($item['embedding'])) {
+        $embeddings[] = $item['embedding'];
+      }
+    }
+
+    if (count($embeddings) !== $inputCount) {
+      throw new \RuntimeException(sprintf(
+        'Embeddings API returned %d embeddings for %d inputs',
+        count($embeddings),
+        $inputCount
+      ));
+    }
+
+    return new EmbeddingsCollectionOutput($embeddings, $response, []);
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function embeddings(string|EmbeddingsInput $input, string $model_id, array $tags = []): EmbeddingsOutput {
@@ -576,6 +660,11 @@ abstract class OpenAiBasedProviderClientBase extends AiProviderClientBase implem
     catch (\Throwable $e) {
       $this->handleApiThrowable($e);
       throw $e;
+    }
+
+    // Single embedding response.
+    if (!isset($response['data'][0]['embedding'])) {
+      throw new \RuntimeException('Embeddings response missing embedding data');
     }
     return new EmbeddingsOutput($response['data'][0]['embedding'], $response, []);
   }

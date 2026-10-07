@@ -21,12 +21,25 @@ use Drupal\field_widget_actions\Attribute\FieldWidgetAction;
   widget_types: ['text_textarea_with_summary'],
   field_types: ['text_with_summary'],
 )]
-class SummaryTextareaWithSummary extends AutomatorBaseAction {
+class SummaryTextareaWithSummary extends AutomatorRefinableBaseAction {
+
+  /**
+   * The form sub-element that receives refinable modal content.
+   *
+   * Field Widget Actions uses this constant to capture the target element
+   * when opening the modal and to select the element when inserting content.
+   */
+  const FORM_ELEMENT_PROPERTY = 'summary';
 
   /**
    * {@inheritdoc}
    */
   protected bool $clearEntity = FALSE;
+
+  /**
+   * Target the 'summary' subfield for auto-filling.
+   */
+  public string $formElementProperty = 'summary';
 
   /**
    * {@inheritdoc}

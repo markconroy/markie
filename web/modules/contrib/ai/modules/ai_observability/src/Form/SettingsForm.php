@@ -3,6 +3,7 @@
 namespace Drupal\ai_observability\Form;
 
 use Drupal\ai_observability\AiLogEventType;
+use Drupal\ai_observability\AiObservabilityUtils;
 use Drupal\Core\Config\TypedConfigManagerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\ConfigFormBase;
@@ -33,6 +34,10 @@ class SettingsForm extends ConfigFormBase {
   const CONFIG_KEY_OTEL_STORE_INPUT = 'otel_spans_store_input';
   const CONFIG_KEY_OTEL_STORE_OUTPUT = 'otel_spans_store_output';
   const CONFIG_KEY_OTEL_METRICS = 'otel_metrics';
+  const CONFIG_KEY_SUMMARIZE_PAYLOAD = 'summarize_payload';
+  const CONFIG_KEY_SUMMARIZE_PAYLOAD_MAX_STRING_LENGTH = 'summarize_payload_max_string_length';
+  const CONFIG_KEY_SUMMARIZE_PAYLOAD_MAX_LIST_ITEMS = 'summarize_payload_max_list_items';
+  const CONFIG_KEY_SUMMARIZE_PAYLOAD_MAX_ASSOC_KEYS = 'summarize_payload_max_assoc_keys';
 
   /**
    * Default span name for AI requests.
@@ -48,6 +53,11 @@ class SettingsForm extends ConfigFormBase {
    * OpenTelemetry token usage metric prefix.
    */
   const OTEL_METRIC_TOKEN_USAGE_PREFIX = 'ai_token_usage';
+
+  /**
+   * The OTel GenAI token-usage histogram name (OTel semantic conventions).
+   */
+  const OTEL_HISTOGRAM_NAME_TOKEN_USAGE = 'gen_ai.client.token.usage';
 
   /**
    * A TypedConfigManager.
@@ -241,6 +251,51 @@ class SettingsForm extends ConfigFormBase {
     if (!$isOtelMetricsAvailable) {
       $form['opentelemetry'][self::CONFIG_KEY_OTEL_METRICS]['#description'] .= ' ' . $this->t('Requires the OpenTelemetry Metrics module to be installed.');
     }
+
+    $form['payload_summary'] = [
+      '#type' => 'fieldset',
+      '#title' => $this->t('Payload summarization'),
+      '#description' => $this->t('Controls how logged AI input and output payloads are reshaped before they are sent to logs and OpenTelemetry. When enabled, payloads are emitted as structured JSON and large strings, long lists, and base64 blobs are collapsed.'),
+      '#description_display' => 'before',
+    ];
+
+    $form['payload_summary'][self::CONFIG_KEY_SUMMARIZE_PAYLOAD] = [
+      '#type' => 'checkbox',
+      '#title' => $this->getSettingLabel(self::CONFIG_KEY_SUMMARIZE_PAYLOAD),
+      '#description' => $this->t('Off by default on existing sites to avoid changing the format of running logging pipelines. Turn on to opt in to the summarized structured payloads.'),
+      '#default_value' => $config->get(self::CONFIG_KEY_SUMMARIZE_PAYLOAD),
+      '#config_target' => static::CONFIG_NAME . ':' . self::CONFIG_KEY_SUMMARIZE_PAYLOAD,
+    ];
+
+    $form['payload_summary'][self::CONFIG_KEY_SUMMARIZE_PAYLOAD_MAX_STRING_LENGTH] = [
+      '#type' => 'number',
+      '#min' => 1,
+      '#title' => $this->getSettingLabel(self::CONFIG_KEY_SUMMARIZE_PAYLOAD_MAX_STRING_LENGTH),
+      '#description' => $this->t('Maximum length (in bytes) to keep for an individual string value in a payload before it is truncated.'),
+      '#default_value' => $config->get(self::CONFIG_KEY_SUMMARIZE_PAYLOAD_MAX_STRING_LENGTH) ?? AiObservabilityUtils::MAX_STRING_VALUE_LENGTH,
+      '#config_target' => static::CONFIG_NAME . ':' . self::CONFIG_KEY_SUMMARIZE_PAYLOAD_MAX_STRING_LENGTH,
+      '#states' => $this->stateIfChecked(self::CONFIG_KEY_SUMMARIZE_PAYLOAD),
+    ];
+
+    $form['payload_summary'][self::CONFIG_KEY_SUMMARIZE_PAYLOAD_MAX_LIST_ITEMS] = [
+      '#type' => 'number',
+      '#min' => 1,
+      '#title' => $this->getSettingLabel(self::CONFIG_KEY_SUMMARIZE_PAYLOAD_MAX_LIST_ITEMS),
+      '#description' => $this->t('Maximum number of list items to keep before the middle of the list is collapsed.'),
+      '#default_value' => $config->get(self::CONFIG_KEY_SUMMARIZE_PAYLOAD_MAX_LIST_ITEMS) ?? AiObservabilityUtils::MAX_LIST_ITEMS,
+      '#config_target' => static::CONFIG_NAME . ':' . self::CONFIG_KEY_SUMMARIZE_PAYLOAD_MAX_LIST_ITEMS,
+      '#states' => $this->stateIfChecked(self::CONFIG_KEY_SUMMARIZE_PAYLOAD),
+    ];
+
+    $form['payload_summary'][self::CONFIG_KEY_SUMMARIZE_PAYLOAD_MAX_ASSOC_KEYS] = [
+      '#type' => 'number',
+      '#min' => 1,
+      '#title' => $this->getSettingLabel(self::CONFIG_KEY_SUMMARIZE_PAYLOAD_MAX_ASSOC_KEYS),
+      '#description' => $this->t('Maximum number of associative array keys to keep before the tail is collapsed.'),
+      '#default_value' => $config->get(self::CONFIG_KEY_SUMMARIZE_PAYLOAD_MAX_ASSOC_KEYS) ?? AiObservabilityUtils::MAX_ASSOC_KEYS,
+      '#config_target' => static::CONFIG_NAME . ':' . self::CONFIG_KEY_SUMMARIZE_PAYLOAD_MAX_ASSOC_KEYS,
+      '#states' => $this->stateIfChecked(self::CONFIG_KEY_SUMMARIZE_PAYLOAD),
+    ];
 
     return parent::buildForm($form, $form_state);
   }

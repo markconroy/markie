@@ -2,6 +2,8 @@
 
 namespace Drupal\ai_search\Plugin\search_api\backend;
 
+use Drupal\Component\Plugin\Exception\PluginException;
+use Drupal\Core\Database\Connection;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\TranslatableInterface;
@@ -15,6 +17,7 @@ use Drupal\ai\AiVdbProviderPluginManager;
 use Drupal\ai\OperationType\Embeddings\EmbeddingsInput;
 use Drupal\ai\Utility\TokenizerInterface;
 use Drupal\ai_search\Backend\AiSearchBackendPluginBase;
+use Drupal\ai_search\EmbeddingStrategyInterface;
 use Drupal\ai_search\EmbeddingStrategyPluginManager;
 use Drupal\search_api\Backend\BackendSpecificInterface;
 use Drupal\search_api\IndexInterface;
@@ -99,6 +102,20 @@ class SearchApiAiSearchBackend extends AiSearchBackendPluginBase implements Plug
   protected object $vdbClient;
 
   /**
+   * The database connection.
+   *
+   * @var \Drupal\Core\Database\Connection
+   */
+  protected Connection $database;
+
+  /**
+   * Maximum chunks to embed per item per indexItems() batch run.
+   *
+   * Matches LongChunkEmbeddingBase::$maxChunksPerBatch.
+   */
+  protected const MAX_CHUNKS_PER_BATCH = 10;
+
+  /**
    * Max retries for iterating for access.
    *
    * @var int
@@ -118,6 +135,8 @@ class SearchApiAiSearchBackend extends AiSearchBackendPluginBase implements Plug
     $instance->entityTypeManager = $container->get('entity_type.manager');
     $instance->currentUser = $container->get('current_user');
     $instance->tokenizer = $container->get('ai.tokenizer');
+    $instance->database = $container->get('database');
+    $instance->setLogger($container->get('logger.factory')->get('ai_search'));
     return $instance;
   }
 
@@ -400,7 +419,108 @@ class SearchApiAiSearchBackend extends AiSearchBackendPluginBase implements Plug
    */
   public function indexItems(IndexInterface $index, array $items): array {
     $embedding_strategy = $this->embeddingStrategyProviderManager->createInstance($this->configuration['embedding_strategy']);
-    return $this->getClient()->indexItems($this->configuration, $index, $items, $embedding_strategy);
+    $client = $this->getClient();
+
+    // Use chunk-slicing when the strategy supports it and the client can skip
+    // deletion for in-progress items.
+    if (
+      method_exists($embedding_strategy, 'setChunkOffset')
+      && method_exists($client, 'setSkipDeleteItemIds')
+    ) {
+      return $this->indexItemsWithChunkSlicing($index, $items, $embedding_strategy, $client);
+    }
+
+    return $client->indexItems($this->configuration, $index, $items, $embedding_strategy);
+  }
+
+  /**
+   * Indexes items in per-batch chunk slices to prevent PHP timeout.
+   *
+   * Each call processes up to MAX_CHUNKS_PER_BATCH chunks per item. Items with
+   * remaining chunks are not returned as "indexed" so Search API re-queues
+   * them on the next cron run.
+   *
+   * @param \Drupal\search_api\IndexInterface $index
+   *   The Search API index.
+   * @param \Drupal\search_api\Item\ItemInterface[] $items
+   *   The items to index.
+   * @param \Drupal\ai_search\EmbeddingStrategyInterface $embedding_strategy
+   *   The embedding strategy (must support setChunkOffset()).
+   * @param object $client
+   *   The VDB provider client (must support setSkipDeleteItemIds()).
+   *
+   * @return string[]
+   *   IDs of fully-indexed items only.
+   */
+  protected function indexItemsWithChunkSlicing(
+    IndexInterface $index,
+    array $items,
+    EmbeddingStrategyInterface $embedding_strategy,
+    object $client,
+  ): array {
+    $item_ids = array_map(fn($item) => $item->getId(), $items);
+
+    // Fetch current chunk progress for all items.
+    $progress = $this->database->select('search_api_item', 'sai')
+      ->fields('sai', ['item_id', 'processed_chunks', 'total_chunks'])
+      ->condition('index_id', $index->id())
+      ->condition('item_id', $item_ids, 'IN')
+      ->execute()
+      ->fetchAllAssoc('item_id', \PDO::FETCH_ASSOC);
+
+    // Items already in progress must not be deleted before re-indexing —
+    // doing so would erase chunks from previous batch runs.
+    $in_progress_ids = array_values(array_filter(
+      $item_ids,
+      fn($id) => ($progress[$id]['processed_chunks'] ?? 0) > 0
+        && ($progress[$id]['processed_chunks'] ?? 0) < ($progress[$id]['total_chunks'] ?? 0),
+    ));
+    if (method_exists($client, 'setSkipDeleteItemIds')) {
+      $client->setSkipDeleteItemIds($in_progress_ids);
+    }
+
+    $fully_indexed_ids = [];
+    foreach ($items as $item) {
+      $item_id = $item->getId();
+      $offset = (int) ($progress[$item_id]['processed_chunks'] ?? 0);
+      $embedding_strategy->setChunkOffset($offset);
+
+      // Compute total chunks to know if this batch completes the item.
+      $all_chunks = $embedding_strategy->computeItemChunks(
+        $this->configuration['embeddings_engine'],
+        $this->configuration['embedding_strategy_configuration'],
+        $item->getFields(),
+        $item,
+        $index,
+      );
+      $total_chunks = count($all_chunks);
+
+      // Index only this item; the client calls getEmbedding() which returns
+      // the offset-based slice.
+      $client->indexItems($this->configuration, $index, [$item], $embedding_strategy);
+
+      $new_processed = min($offset + static::MAX_CHUNKS_PER_BATCH, $total_chunks);
+
+      $this->database->update('search_api_item')
+        ->fields([
+          'total_chunks' => $total_chunks,
+          'processed_chunks' => $new_processed,
+        ])
+        ->condition('index_id', $index->id())
+        ->condition('item_id', $item_id)
+        ->execute();
+
+      if ($new_processed >= $total_chunks) {
+        $fully_indexed_ids[] = $item_id;
+      }
+    }
+
+    // Reset the skip-delete list so subsequent calls are unaffected.
+    if (method_exists($client, 'setSkipDeleteItemIds')) {
+      $client->setSkipDeleteItemIds([]);
+    }
+
+    return $fully_indexed_ids;
   }
 
   /**
@@ -438,9 +558,13 @@ class SearchApiAiSearchBackend extends AiSearchBackendPluginBase implements Plug
   public function search(QueryInterface $query) {
     // Check if we need to do entity access checks.
     $bypass_access = $query->getOption('search_api_bypass_access', FALSE);
-    // Check if we have a custom value for the iterator.
-    if ($query->getOption('search_api_ai_max_pager_iterations', 0)) {
-      $this->maxAccessRetries = $query->getOption('search_api_ai_max_pager_iterations');
+    // Check if we have a custom value for the iterator. A truthy check would
+    // silently ignore 0, which is a meaningful value here (fetch once, don't
+    // retry for more distinct results at all), so this checks for explicit
+    // presence instead.
+    $max_pager_iterations = $query->getOption('search_api_ai_max_pager_iterations');
+    if ($max_pager_iterations !== NULL) {
+      $this->maxAccessRetries = (int) $max_pager_iterations;
     }
     // Check if we should aggregate results.
     $get_chunked = $query->getOption('search_api_ai_get_chunks_result', FALSE);
@@ -474,10 +598,11 @@ class SearchApiAiSearchBackend extends AiSearchBackendPluginBase implements Plug
       'offset' => (int) $query->getOption('offset', 0),
     ];
 
+    /** @var \Drupal\ai\AiVdbProviderInterface $vdb_client */
+    $vdb_client = $this->getClient();
+
     // Check if we need to include the raw embedding vector.
     if (!empty($this->configuration['include_raw_embedding_vector'])) {
-      /** @var \Drupal\ai\AiVdbProviderInterface $vdb_client */
-      $vdb_client = $this->getClient();
       $raw_embedding_field_name = $vdb_client->getRawEmbeddingFieldName();
       if (!empty($raw_embedding_field_name)) {
         $params['output_fields'][] = $raw_embedding_field_name;
@@ -486,7 +611,7 @@ class SearchApiAiSearchBackend extends AiSearchBackendPluginBase implements Plug
       }
     }
 
-    if ($filters = $this->getClient()->prepareFilters($query)) {
+    if ($filters = $vdb_client->prepareFilters($query)) {
       $params['filters'] = $filters;
     }
 
@@ -543,7 +668,7 @@ class SearchApiAiSearchBackend extends AiSearchBackendPluginBase implements Plug
     // Sort results.
     if (!empty($sorts['search_api_relevance'])) {
       $result_items = $results->getResultItems();
-      usort($result_items, function ($a, $b) use ($sorts) {
+      uasort($result_items, function ($a, $b) use ($sorts) {
         $distance_a = $a->getScore();
         $distance_b = $b->getScore();
         return $sorts["search_api_relevance"] === 'DESC' ? $distance_b <=> $distance_a : $distance_a <=> $distance_b;
@@ -557,39 +682,150 @@ class SearchApiAiSearchBackend extends AiSearchBackendPluginBase implements Plug
 
   /**
    * Run the search until enough items are found.
+   *
+   * @param \Drupal\search_api\Query\QueryInterface $query
+   *   The search query.
+   * @param array $params
+   *   Search parameters.
+   * @param bool $bypass_access
+   *   Whether to bypass access checks.
+   * @param array $results
+   *   Array to store results (passed by reference).
+   * @param int $start_limit
+   *   Maximum number of results to return.
+   * @param int $start_offset
+   *   Starting offset for results.
+   * @param int $iteration
+   *   Current iteration number for recursive calls.
+   *
+   * @return array
+   *   Metadata about the search including offset, reason, and vector score.
    */
-  protected function doSearch(QueryInterface $query, $params, $bypass_access, &$results, $start_limit, $start_offset, $iteration = 0) {
+  protected function doSearch(QueryInterface $query, array $params, bool $bypass_access, array &$results, int $start_limit, int $start_offset, int $iteration = 0): array {
     $params['database'] = $this->configuration['database_settings']['database_name'];
     $params['collection_name'] = $this->configuration['database_settings']['collection'];
 
-    // Conduct the search.
-    if (!$bypass_access) {
-      // Double the results, if we need to run over access checks.
-      $params['limit'] = $start_limit * 2;
-      $params['offset'] = $start_offset + ($iteration * $start_limit * 2);
+    try {
+      $vdb_client = $this->getClient();
     }
-    $search_words = $query->getKeys();
-    if (!empty($search_words)) {
-      [$provider_id, $model_id] = explode('__', $this->configuration['embeddings_engine']);
-      $embedding_llm = $this->aiProviderManager->createInstance($provider_id);
-      // We don't have to redo this.
-      if (!isset($params['vector_input'])) {
-        // Handle complex search queries, but we just normalize to string.
-        // It makes no sense to do Boolean or other complex searches on vectors.
-        if (is_array($search_words)) {
-          if (isset($search_words['#conjunction'])) {
-            unset($search_words['#conjunction']);
-          }
-          $search_words = implode(' ', $search_words);
-        }
-        $input = new EmbeddingsInput($search_words);
-        $params['vector_input'] = $embedding_llm->embeddings($input, $model_id, ['ai_search'])->getNormalized();
-      }
+    catch (PluginException $e) {
+      $this->logger->error('Failed to get VDB client: @message', ['@message' => $e->getMessage()]);
+      return [
+        'real_offset' => $start_offset,
+        'reason' => 'client_error',
+        'vector_score' => 0,
+        'error' => $e->getMessage(),
+      ];
+    }
+
+    $get_chunked = $query->getOption('search_api_ai_get_chunks_result', FALSE);
+    $use_grouping = !$bypass_access && !$get_chunked && method_exists($vdb_client, 'supportsGrouping') && $vdb_client->supportsGrouping();
+
+    // Standard search with iteration for access checks if needed.
+    try {
+      return $this->doSearchWithIteration($query, $params, $bypass_access, $use_grouping, $get_chunked, $results, $start_limit, $start_offset, $iteration);
+    }
+    catch (PluginException $e) {
+      $this->logger->error('Failed to execute search with iteration: @message', ['@message' => $e->getMessage()]);
+      return [
+        'real_offset' => $start_offset,
+        'reason' => 'search_error',
+        'vector_score' => 0,
+        'error' => $e->getMessage(),
+      ];
+    }
+  }
+
+  /**
+   * Search implementation with iteration for VDBs without advanced features.
+   *
+   * @param \Drupal\search_api\Query\QueryInterface $query
+   *   The search query.
+   * @param array $params
+   *   Search parameters.
+   * @param bool $bypass_access
+   *   Whether to bypass access checks.
+   * @param bool $use_grouping
+   *   Whether to use grouping for access checks.
+   * @param bool $get_chunked
+   *   Whether to return chunked results.
+   * @param array $results
+   *   Array to store results (passed by reference).
+   * @param int $start_limit
+   *   Maximum number of results to return.
+   * @param int $start_offset
+   *   Starting offset for results.
+   * @param int $iteration
+   *   Current iteration number for recursive calls.
+   * @param array $excluded_entity_ids
+   *   Entity IDs to exclude from results.
+   *
+   * @return array
+   *   Metadata about the search including offset, reason, and vector score.
+   *
+   * @throws \Drupal\Component\Plugin\Exception\PluginException
+   */
+  protected function doSearchWithIteration(
+    QueryInterface $query,
+    array $params,
+    bool $bypass_access,
+    bool $use_grouping,
+    bool $get_chunked,
+    array &$results,
+    int $start_limit,
+    int $start_offset,
+    int $iteration = 0,
+    array $excluded_entity_ids = [],
+  ): array {
+
+    // Track excluded IDs for NOT IN filtering in subsequent iterations.
+    // The key we use depends on whether we're getting chunked results or not.
+    $local_excluded_ids = [];
+
+    // Conduct the search. Each raw fetch is doubled when access checks are
+    // in play, since some fraction of every batch is expected to be
+    // rejected by checkEntityAccess(). The offset must advance past
+    // whatever was already fetched on every iteration regardless of
+    // $bypass_access: a retry can also be triggered by duplicate/chunked
+    // entities being excluded via $excluded_entity_ids, which happens
+    // independently of access checks. Previously the offset was only
+    // advanced in the !$bypass_access branch, so a bypass_access search
+    // that needed to retry (e.g. because the index stores multiple chunks
+    // per entity) re-fetched the exact same window every time and always
+    // ran to $maxAccessRetries.
+    $batch_limit = $bypass_access ? $start_limit : $start_limit * 2;
+    $params['limit'] = $batch_limit;
+    $params['offset'] = $start_offset + ($iteration * $batch_limit);
+
+    try {
+      $vdb_client = $this->getClient();
+    }
+    catch (PluginException $e) {
+      // Log the error and return empty results with error metadata.
+      $this->logger->error('Failed to get VDB client: @message', ['@message' => $e->getMessage()]);
+      return [
+        'real_offset' => $start_offset,
+        'reason' => 'client_error',
+        'vector_score' => 0,
+        'error' => $e->getMessage(),
+      ];
+    }
+
+    // Get the vectorized input which might come from the search terms, or might
+    // be provided in the query options already.
+    $vector_input = $this->getSearchVectorInput($query, $params);
+    if (!empty($vector_input)) {
+      $params['vector_input'] = $vector_input;
       $params['query'] = $query;
-      $response = $this->getClient()->vectorSearch(...$params);
+      if ($use_grouping) {
+        $response = $vdb_client->vectorSearchWithGrouping(...$params);
+      }
+      else {
+        $response = $vdb_client->vectorSearch(...$params);
+      }
     }
     else {
-      $response = $this->getClient()->querySearch(...$params);
+      $response = $vdb_client->querySearch(...$params);
     }
 
     // Obtain results.
@@ -599,6 +835,19 @@ class SearchApiAiSearchBackend extends AiSearchBackendPluginBase implements Plug
         $match = (array) $match;
       }
       $i++;
+
+      // Determine the appropriate ID to check for exclusion.
+      // If getting chunked results, use drupal_long_id to avoid duplicate
+      // chunks but allow multiple chunks from the same entity.
+      // If getting entity results, use drupal_entity_id to avoid duplicate
+      // entities.
+      $exclusion_id = $get_chunked ? $match['drupal_long_id'] : $match['drupal_entity_id'];
+
+      // Skip if this ID was already found in previous iterations.
+      if (in_array($exclusion_id, $excluded_entity_ids) || in_array($exclusion_id, $local_excluded_ids)) {
+        continue;
+      }
+
       // Do access checks.
       if (!$bypass_access && !$this->checkEntityAccess($match['drupal_entity_id'])) {
         // If we are not allowed to view this entity, we can skip it.
@@ -606,10 +855,12 @@ class SearchApiAiSearchBackend extends AiSearchBackendPluginBase implements Plug
       }
       // Passed.
       $results[] = $match;
+      $local_excluded_ids[] = $exclusion_id;
+
       // If we found enough items, we can stop.
       if (count($results) == $start_limit) {
         return [
-          'real_offset' => $start_offset + ($iteration * $start_limit * 2) + $i,
+          'real_offset' => $start_offset + ($iteration * $batch_limit) + $i,
           'reason' => 'limit',
           'vector_score' => $match['distance'] ?? 0,
         ];
@@ -619,7 +870,7 @@ class SearchApiAiSearchBackend extends AiSearchBackendPluginBase implements Plug
     // If we reach max retries, we can stop.
     if ($iteration == $this->maxAccessRetries) {
       return [
-        'real_offset' => $iteration * $start_limit * 2 + $i,
+        'real_offset' => $iteration * $batch_limit + $i,
         'reason' => 'max_retries',
         'vector_score' => $match['distance'] ?? 0,
       ];
@@ -627,13 +878,72 @@ class SearchApiAiSearchBackend extends AiSearchBackendPluginBase implements Plug
     // If we got less then limit back, it reached the end.
     if (count($response) < $start_limit) {
       return [
-        'real_offset' => $iteration * $start_limit * 2 + $i,
+        'real_offset' => $iteration * $batch_limit + $i,
         'reason' => 'reached_end',
         'vector_score' => $match['distance'] ?? 0,
       ];
     }
     // Else we need to continue.
-    return $this->doSearch($query, $params, $bypass_access, $results, $start_limit, $start_offset, $iteration + 1);
+    $combined_excluded_ids = array_merge($excluded_entity_ids, $local_excluded_ids);
+
+    // Update the exclusions when we are not getting chunks.
+    if (!empty($combined_excluded_ids) && !$get_chunked) {
+      $query->setOption('search_api_ai_excluded_entity_ids', $combined_excluded_ids);
+    }
+
+    return $this->doSearchWithIteration($query, $params, $bypass_access, $use_grouping, $get_chunked, $results, $start_limit, $start_offset, $iteration + 1, $combined_excluded_ids);
+  }
+
+  /**
+   * Get the Vector Input for the search.
+   *
+   * @param \Drupal\search_api\Query\QueryInterface $query
+   *   The Search API Query.
+   * @param array $params
+   *   The params being prepared for passing to the VDB Provider client.
+   *
+   * @return array
+   *   The vector input to search on. The array could be empty if unable to
+   *   generate embeddings from the content input.
+   */
+  protected function getSearchVectorInput(QueryInterface $query, array $params): array {
+    // If we already have vector input set via iteration, no need to get it
+    // again.
+    if (isset($params['vector_input']) && !empty($params['vector_input'])) {
+      return $params['vector_input'];
+    }
+
+    // Allow developers to provide the input prior to calling the AI Search
+    // back-end. This could be done for example in a Views Filter Handler.
+    if ($vector_input = $query->getOption('vector_input', FALSE)) {
+      return $vector_input;
+    }
+
+    // Fall back to generating new vector input based on the search terms
+    // provided.
+    $search_words = $query->getKeys();
+    if (!empty($search_words) && is_array($search_words)) {
+
+      // Search words are sent to Search API as separate terms. For semantic
+      // vector search however, we want to just pass the full input as a string
+      // to retrieve a single vector input based on the complete input content.
+      if (isset($search_words['#conjunction'])) {
+        unset($search_words['#conjunction']);
+      }
+      // Final check that it's still not empty after removing conjunction, as
+      // embeddings input must receive a string.
+      if (!empty($search_words)) {
+        $search_words = implode(' ', $search_words);
+
+        // Convert the search terms to vector input.
+        [$provider_id, $model_id] = explode('__', $this->configuration['embeddings_engine']);
+        $embedding_llm = $this->aiProviderManager->createInstance($provider_id);
+        $input = new EmbeddingsInput($search_words, NULL);
+        return $embedding_llm->embeddings($input, $model_id)->getNormalized();
+      }
+    }
+
+    return [];
   }
 
   /**

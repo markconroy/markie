@@ -31,6 +31,34 @@ modules installed on your site to allow use in a number of different ways. We
 recommend that you use the [AI Automators module guide](https://project.pages.drupalcode.org/ai/latest/modules/ai_automators/index) to assist with
 using the module.
 
+### Rich-text image descriptions
+Selected text-based automators can enrich prompt context with AI-generated
+descriptions of images embedded in formatted text. This is opt-in per automator
+through advanced settings.
+
+When enabled, the automator can:
+
+1. Detect image candidates in the configured base field's HTML.
+2. Generate image descriptions using the default vision provider/model.
+3. Append those descriptions to `{{ context }}`.
+4. Optionally store image metadata as JSON in a configured field.
+
+The relevant settings are:
+
+- `Include image descriptions in output`
+- `Include external image URLs`
+- `Max images to describe`
+- `Image description prompt`
+- `Metadata field name`
+
+If `Include external image URLs` is disabled, plain `<img src="https://...">`
+tags without resolvable Drupal file/media references are detected but not
+analyzed.
+
+For moderation workflows, configurations can enforce human review when image
+analysis is incomplete (for example, when detected images exceed the configured
+max or cannot be fully processed).
+
 ## Develop for it
 Check the [developers guide](https://project.pages.drupalcode.org/ai/developers/developer_information) for information on how to develop using the
 AI module.

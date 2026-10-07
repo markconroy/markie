@@ -10,6 +10,7 @@ use Drupal\ai\OperationType\Chat\ChatMessage;
 use Drupal\ai\OperationType\Chat\ChatOutput;
 use Drupal\ai\OperationType\Chat\Tools\ToolsFunctionInput;
 use Drupal\ai\OperationType\Chat\Tools\ToolsFunctionOutput;
+use Drupal\ai\OperationType\Chat\Tools\ToolsFunctionOutputInterface;
 use Drupal\ai\OperationType\Chat\Tools\ToolsInput;
 use Drupal\ai\OperationType\Chat\Tools\ToolsPropertyInput;
 
@@ -88,19 +89,22 @@ class ToolsInterfaceTest extends KernelTestBase {
     $this->assertIsString($message->getText());
     $this->assertEquals($response_text, $message->getText());
 
+    // Should be function outputs, not a ToolsOutput container.
+    $tools = $message->getTools();
+    $this->assertContainsOnlyInstancesOf(ToolsFunctionOutputInterface::class, $tools);
+
     // Should return the first tools with the test values.
-    foreach ($message->getTools() as $tools) {
-      foreach ($tools->getFunctions() as $function) {
-        $this->assertInstanceOf(ToolsFunctionOutput::class, $function);
-        $this->assertEquals('get_current_weather', $function->getName());
-        $properties = $function->getArguments();
-        $this->assertCount(2, $properties);
-        $this->assertEquals('location', $properties[0]->getName());
-        $this->assertEquals('unit', $properties[1]->getName());
-        // Always returns test on string.
-        $this->assertEquals('test', $properties[0]->getValue());
-        $this->assertEquals('test', $properties[1]->getValue());
-      }
+    $this->assertCount(1, $tools);
+    foreach ($tools as $function) {
+      $this->assertInstanceOf(ToolsFunctionOutput::class, $function);
+      $this->assertEquals('get_current_weather', $function->getName());
+      $properties = $function->getArguments();
+      $this->assertCount(2, $properties);
+      $this->assertEquals('location', $properties[0]->getName());
+      $this->assertEquals('unit', $properties[1]->getName());
+      // Always returns test on string.
+      $this->assertEquals('test', $properties[0]->getValue());
+      $this->assertEquals('test', $properties[1]->getValue());
       // Make sure it validates.
       $function->validate();
     }

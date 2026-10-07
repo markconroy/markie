@@ -5,13 +5,16 @@ namespace Drupal\ai_automators\Plugin\AiAutomatorType;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Logger\LoggerChannelInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\ai\AiProviderPluginManager;
+use Drupal\ai\Guardrail\AiGuardrailHelper;
 use Drupal\ai\Service\AiProviderFormHelper;
 use Drupal\ai\Service\PromptJsonDecoder\PromptJsonDecoderInterface;
 use Drupal\ai_automators\Attribute\AiAutomatorType;
 use Drupal\ai_automators\PluginBaseClasses\RuleBase;
 use Drupal\ai_automators\PluginInterfaces\AiAutomatorTypeInterface;
+use Drupal\ai_automators\Traits\RichTextImageDescriptionTrait;
 use Drupal\content_moderation\ModerationInformation;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -26,6 +29,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 )]
 class LlmModerationState extends RuleBase implements AiAutomatorTypeInterface {
 
+  use RichTextImageDescriptionTrait;
+
   /**
    * The moderation information service.
    *
@@ -37,11 +42,11 @@ class LlmModerationState extends RuleBase implements AiAutomatorTypeInterface {
     AiProviderPluginManager $pluginManager,
     AiProviderFormHelper $formHelper,
     PromptJsonDecoderInterface $promptJsonDecoder,
+    AiGuardrailHelper $aiGuardrailHelper,
+    ?LoggerChannelInterface $logger = NULL,
     ?ModerationInformation $moderationInformation = NULL,
   ) {
-    $this->aiPluginManager = $pluginManager;
-    $this->formHelper = $formHelper;
-    $this->promptJsonDecoder = $promptJsonDecoder;
+    parent::__construct($pluginManager, $formHelper, $promptJsonDecoder, $aiGuardrailHelper, $logger);
     $this->moderationInformation = $moderationInformation;
   }
 
@@ -57,6 +62,8 @@ class LlmModerationState extends RuleBase implements AiAutomatorTypeInterface {
       $container->get('ai.provider'),
       $container->get('ai.form_helper'),
       $container->get('ai.prompt_json_decode'),
+      $container->get('ai.guardrail_helper'),
+      $container->get('logger.factory')->get('ai_automators'),
       $moderation,
     );
   }
@@ -70,7 +77,13 @@ class LlmModerationState extends RuleBase implements AiAutomatorTypeInterface {
    * {@inheritDoc}
    */
   public function checkIfEmpty($value, $automatorConfig = []) {
-    if (!empty($automatorConfig['trigger_states']) && in_array($value[0]['value'], $automatorConfig['trigger_states'])) {
+    // An unsaved node has no moderation state value yet, so
+    // $value[0] can be absent. Compare against the enabled trigger states only
+    // (checkboxes keep unselected options as 0) and treat "no current state"
+    // as a trigger so the automator runs on a fresh node form.
+    $current = $value[0]['value'] ?? NULL;
+    $triggers = array_filter($automatorConfig['trigger_states'] ?? []);
+    if (!empty($triggers) && ($current === NULL || in_array($current, $triggers, TRUE))) {
       return [];
     }
     return $value;
@@ -91,6 +104,7 @@ class LlmModerationState extends RuleBase implements AiAutomatorTypeInterface {
     $tokens = [
       'context' => 'The cleaned text from the base field.',
       'raw_context' => 'The raw text from the base field. Can include HTML',
+      'image_descriptions' => 'Generated descriptions for images discovered in raw_context when enabled.',
       'max_amount' => 'The max amount of entries to set. If unlimited this value will be empty.',
     ];
     $flags = $this->getFlags($entity);
@@ -104,13 +118,9 @@ class LlmModerationState extends RuleBase implements AiAutomatorTypeInterface {
    * {@inheritDoc}
    */
   public function generateTokens(ContentEntityInterface $entity, FieldDefinitionInterface $fieldDefinition, array $automatorConfig, $delta = 0) {
-    $values = $entity->get($automatorConfig['base_field'])->getValue();
+    $tokens = parent::generateTokens($entity, $fieldDefinition, $automatorConfig, $delta);
+    $tokens = $this->appendImageDescriptionsToTokens($entity, $automatorConfig, (int) $delta, $tokens);
     $flags = $this->getFlags($entity);
-    $tokens = [
-      'context' => strip_tags($values[$delta]['value'] ?? ''),
-      'raw_context' => $values[$delta]['value'] ?? '',
-      'max_amount' => $fieldDefinition->getFieldStorageDefinition()->getCardinality() == -1 ? '' : $fieldDefinition->getFieldStorageDefinition()->getCardinality(),
-    ];
     foreach ($flags as $key => $label) {
       $tokens[$key] = $key;
     }
@@ -158,7 +168,7 @@ class LlmModerationState extends RuleBase implements AiAutomatorTypeInterface {
       '#default_value' => $defaultValues['automator_store_explanation'] ?? FALSE,
     ];
 
-    return $form;
+    return $this->addImageDescriptionConfigurationForm($form, $defaultValues);
   }
 
   /**
@@ -192,6 +202,7 @@ class LlmModerationState extends RuleBase implements AiAutomatorTypeInterface {
    * {@inheritDoc}
    */
   public function generate(ContentEntityInterface $entity, FieldDefinitionInterface $fieldDefinition, array $automatorConfig) {
+    $this->initializeImageDescriptionMetadata();
     // Generate the real prompt if needed.
     $prompts = parent::generate($entity, $fieldDefinition, $automatorConfig);
 
@@ -232,7 +243,10 @@ class LlmModerationState extends RuleBase implements AiAutomatorTypeInterface {
     if (is_string($value) && !empty($value)) {
       return TRUE;
     }
-    if (is_array($value) && $value['state']) {
+    // The advanced (JSON) path returns a {state: "..."} record;
+    // check the key exists before reading it so a malformed row is rejected
+    // instead of raising a warning.
+    if (is_array($value) && !empty($value['state'])) {
       return TRUE;
     }
     return FALSE;
@@ -242,33 +256,39 @@ class LlmModerationState extends RuleBase implements AiAutomatorTypeInterface {
    * {@inheritDoc}
    */
   public function storeValues(ContentEntityInterface $entity, array $values, FieldDefinitionInterface $fieldDefinition, array $automatorConfig) {
-    foreach ($values as $value) {
-      if ($automatorConfig['store_explanation']) {
-        if ($automatorConfig['use_simple_model']) {
-          $entity->set($automatorConfig['store_explanation'], $value);
-        }
-        elseif (isset($value['reasoning'])) {
-          $entity->set($automatorConfig['store_explanation'], $value['reasoning']);
-        }
-      }
+    // Both keys are optional in the stored automator config,
+    // so read them defensively rather than assuming they are present.
+    $storeExplanation = $automatorConfig['store_explanation'] ?? '';
+    $useSimpleModel = !empty($automatorConfig['use_simple_model']);
 
-      $allowed = [];
-      foreach ($automatorConfig['trigger_lookup'] as $state => $lookup) {
-        if ($lookup) {
-          $allowed[] = $state;
+    // Checkboxes keep unselected options as 0, so filter down to the states
+    // the site builder actually enabled under "Lookup for these states".
+    $allowed = array_keys(array_filter($automatorConfig['trigger_lookup'] ?? []));
+
+    foreach ($values as $value) {
+      if ($storeExplanation) {
+        if ($useSimpleModel && is_string($value)) {
+          $entity->set($storeExplanation, $value);
+        }
+        elseif (is_array($value) && isset($value['reasoning'])) {
+          $entity->set($storeExplanation, $value['reasoning']);
         }
       }
 
       // If its simple values.
-      if ($automatorConfig['use_simple_model']) {
-        // Look for the trigger words - full words.
-        foreach ($automatorConfig['trigger_lookup'] as $state) {
+      if ($useSimpleModel) {
+        if (!is_string($value)) {
+          continue;
+        }
+        // Look for the trigger words - full words. Only the enabled lookup
+        // states are candidates.
+        foreach ($allowed as $state) {
           // Just do full words, not partials.
           $word = strtok($value, " \n\t");
           // Look to find a word.
           while ($word !== FALSE) {
             // No dots.
-            if (str_replace('.', '', $word) == $state) {
+            if (str_replace('.', '', $word) === $state) {
               $entity->set($fieldDefinition->getName(), $state);
               break;
             }
@@ -277,11 +297,32 @@ class LlmModerationState extends RuleBase implements AiAutomatorTypeInterface {
         }
       }
       else {
-        if (isset($value['state']) && in_array($value['state'], $allowed)) {
-          $entity->set($fieldDefinition->getName(), $value['state']);
+        // The advanced path gets a {state: "..."} record back from
+        // decodeValueArray(). Accept a bare string too, in case a model
+        // answers with the state name only.
+        $state = is_array($value) ? ($value['state'] ?? NULL) : $value;
+        if (is_string($state) && in_array($state, $allowed, TRUE)) {
+          $entity->set($fieldDefinition->getName(), $state);
         }
       }
     }
+
+    if ($this->hasImageDescriptionLimitExceeded()) {
+      $availableStates = $this->getFlags($entity);
+      if (isset($availableStates['flagged'])) {
+        $entity->set($fieldDefinition->getName(), 'flagged');
+      }
+      else {
+        if ($this->logger) {
+          $this->logger->warning('Cannot set moderation state to "flagged": state does not exist in this workflow. Content requires manual review.');
+        }
+      }
+      if (!empty($automatorConfig['store_explanation'])) {
+        $entity->set($automatorConfig['store_explanation'], $this->getImageDescriptionLimitMessage());
+      }
+    }
+
+    $this->storeImageDescriptionsMetadata($entity, $automatorConfig);
   }
 
   /**
@@ -295,7 +336,9 @@ class LlmModerationState extends RuleBase implements AiAutomatorTypeInterface {
    */
   protected function getFlags(ContentEntityInterface $entity) {
     $flags = [];
-    if ($this->moderationInformation->isModeratedEntityType($entity->getEntityType())) {
+    // The service is optional (see create()), so a missing
+    // content_moderation module must yield no states rather than a fatal.
+    if ($this->moderationInformation && $this->moderationInformation->isModeratedEntityType($entity->getEntityType())) {
       $workflow = $this->moderationInformation->getWorkflowForEntityTypeAndBundle($entity->getEntityTypeId(), $entity->bundle());
       $plugin = $workflow->getTypePlugin();
       $config = $plugin->getConfiguration();

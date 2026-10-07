@@ -20,7 +20,7 @@ use Drupal\field_widget_actions\Traits\ImageAltTextActionButtonTrait;
   field_types: ['image'],
   category: new TranslatableMarkup('AI Automators'),
 )]
-class ImageAltText extends AutomatorBaseAction {
+class ImageAltText extends AutomatorRefinableBaseAction {
 
   use ImageAltTextActionButtonTrait;
 
@@ -45,9 +45,9 @@ class ImageAltText extends AutomatorBaseAction {
     $triggering_element = $form_state->getTriggeringElement();
     $array_parents = $triggering_element['#array_parents'];
     array_pop($array_parents);
-    // Find 'widget' in array_parents to correctly identify the field name
-    // and delta regardless of form nesting depth (e.g. media library wraps
-    // fields under media/0/fields/...).
+    // Find 'widget' in array_parents to correctly identify the field name and
+    // delta regardless of form nesting depth (e.g. media library wraps fields
+    // under media/0/fields/...).
     $widget_index = array_search('widget', $array_parents);
     if (!is_int($widget_index) || $widget_index < 1) {
       return [];
@@ -56,11 +56,11 @@ class ImageAltText extends AutomatorBaseAction {
     $key = (int) ($array_parents[$widget_index + 1] ?? 0);
 
     // Handle media library add forms. These use a different form structure
-    // where media entities are stored in form state and fields are nested
-    // under $form['media'][$delta]['fields']. Run populateAutomatorValues()
-    // on the subtree so the base class can locate the field correctly. The
-    // base-class submit handler bails for this case because $form[$form_key]
-    // doesn't exist at the form root, so we do the work here.
+    // where media entities are stored in form state and fields are nested under
+    // $form['media'][$delta]['fields']. Run populateAutomatorValues() on the
+    // subtree so the base class can locate the field correctly. The base-class
+    // submit handler bails for this case because $form[$form_key] doesn't
+    // exist at the form root, so we do the work here.
     $form_object = $form_state->getFormObject();
     if ($form_object instanceof BaseFormIdInterface && $form_object->getBaseFormId() === 'media_library_add_form') {
       $media_index = array_search('media', $array_parents);
@@ -88,9 +88,9 @@ class ImageAltText extends AutomatorBaseAction {
    * {@inheritdoc}
    */
   public function buildEntity(array $form, FormStateInterface $form_state) {
-    // Detect media library add forms by checking the form's base ID.
-    // In this case, $form is the fields subtree with #parents
-    // ['media', $delta, 'fields'], set by AddFormBase.
+    // Detect media library add forms by checking the form's base ID. In this
+    // case, $form is the fields subtree with #parents ['media', $delta,
+    // 'fields'], set by AddFormBase.
     $form_object = $form_state->getFormObject();
     if ($form_object instanceof BaseFormIdInterface && $form_object->getBaseFormId() === 'media_library_add_form') {
       $media_delta = (int) ($form['#parents'][1] ?? 0);

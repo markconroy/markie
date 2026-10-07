@@ -278,6 +278,7 @@ abstract class RuleBase implements AiAutomatorTypeInterface, AiAutomatorPostChec
     return [
       'context' => 'The cleaned text from the base field.',
       'raw_context' => 'The raw text from the base field. Can include HTML',
+      'image_descriptions' => 'Descriptions generated from embedded images in rich text.',
       'max_amount' => 'The max amount of entries to set. If unlimited this value will be empty.',
     ];
   }
@@ -484,9 +485,11 @@ abstract class RuleBase implements AiAutomatorTypeInterface, AiAutomatorPostChec
    */
   public function generateTokens(ContentEntityInterface $entity, FieldDefinitionInterface $fieldDefinition, array $automatorConfig, $delta = 0) {
     $values = $entity->get($automatorConfig['base_field'])->getValue();
+    $rawContext = $values[$delta]['value'] ?? '';
+
     return [
-      'context' => strip_tags($values[$delta]['value'] ?? ''),
-      'raw_context' => $values[$delta]['value'] ?? '',
+      'context' => strip_tags($rawContext),
+      'raw_context' => $rawContext,
       'max_amount' => $fieldDefinition->getFieldStorageDefinition()->getCardinality() == -1 ? '' : $fieldDefinition->getFieldStorageDefinition()->getCardinality(),
     ];
   }
@@ -786,6 +789,7 @@ abstract class RuleBase implements AiAutomatorTypeInterface, AiAutomatorPostChec
       new ChatMessage("user", $prompt, $images),
     ]);
     $input = $this->applyGuardrailsToInput($input, $automatorConfig);
+    $this->attachEntityContext($input, $entity, $automatorConfig);
 
     if ($this->getJsonSchema()) {
       $instance->setChatStructuredJsonSchema($this->getJsonSchema());
@@ -865,6 +869,23 @@ abstract class RuleBase implements AiAutomatorTypeInterface, AiAutomatorPostChec
   }
 
   /**
+   * Decodes HTML entities in a label returned by the AI model.
+   *
+   * LLMs sometimes encode characters in their output (e.g. &amp; → &). Call
+   * this before comparing model output to allowed-values lists so that
+   * "Latin America &amp; Caribbean" still matches "Latin America & Caribbean".
+   *
+   * @param string $value
+   *   The raw value from the AI response.
+   *
+   * @return string
+   *   The value with all HTML entities decoded.
+   */
+  protected function decodeLabel(string $value): string {
+    return html_entity_decode($value, ENT_QUOTES | ENT_HTML5);
+  }
+
+  /**
    * Decode a value array.
    *
    * @param mixed $json
@@ -874,12 +895,34 @@ abstract class RuleBase implements AiAutomatorTypeInterface, AiAutomatorPostChec
    *   The decoded array.
    */
   public function decodeValueArray($json) {
+    // Models occasionally nest all values inside a single array-valued "value"
+    // key: [{"value": ["A","B","C"]}]. Flatten one level so downstream code
+    // always receives a list of scalars, not a list-of-lists.
+    //
+    // Flattening must NOT apply to record-shaped values. Several rules ask the
+    // model for one object per value: office hours slots
+    // ({"day","starthours","endhours"}), FAQ pairs ({"question","answer"}),
+    // metatag sets and moderation states ({"state"}), and shredding those
+    // objects into their loose property values destroys the record before it
+    // reaches verifyValue()/storeValues(). Only a plain list of scalars is
+    // flattened; anything else is appended intact.
+    $append = function (array &$out, $value): void {
+      if (is_array($value) && $this->isScalarList($value)) {
+        foreach ($value as $v) {
+          $out[] = $v;
+        }
+      }
+      else {
+        $out[] = $value;
+      }
+    };
+
     // Sometimes it doesn't become a valid JSON response, but many.
     if (isset($json[0]['value'])) {
       $values = [];
       foreach ($json as $val) {
         if (isset($val['value'])) {
-          $values[] = $val['value'];
+          $append($values, $val['value']);
         }
       }
       return $values;
@@ -889,7 +932,7 @@ abstract class RuleBase implements AiAutomatorTypeInterface, AiAutomatorPostChec
       $values = [];
       foreach ($json as $val) {
         if (is_array($val) && isset($val[key($val)])) {
-          $values[] = $val[key($val)];
+          $append($values, $val[key($val)]);
         }
       }
       return $values;
@@ -907,9 +950,36 @@ abstract class RuleBase implements AiAutomatorTypeInterface, AiAutomatorPostChec
       return $values;
     }
     elseif (isset($json['value'])) {
-      return [$json['value']];
+      $values = [];
+      $append($values, $json['value']);
+      return $values;
     }
     return [];
+  }
+
+  /**
+   * Whether a value is a plain list whose every entry is a scalar.
+   *
+   * Used to tell a model returning many values under one "value" key
+   * (["A","B","C"], safe to flatten) apart from a model returning one
+   * record per value ({"day":1,"starthours":"0900"}, which must stay intact).
+   *
+   * @param array $value
+   *   The decoded value to inspect.
+   *
+   * @return bool
+   *   TRUE for a non-empty list of scalars, FALSE otherwise.
+   */
+  protected function isScalarList(array $value): bool {
+    if ($value === [] || !array_is_list($value)) {
+      return FALSE;
+    }
+    foreach ($value as $entry) {
+      if (!is_scalar($entry)) {
+        return FALSE;
+      }
+    }
+    return TRUE;
   }
 
   /**
@@ -917,7 +987,17 @@ abstract class RuleBase implements AiAutomatorTypeInterface, AiAutomatorPostChec
    *
    * This allows event subscribers to identify automator requests and responses
    * and can provide context such as the entity and field the automator is
-   * attached to.
+   * attached to. The emitted tags are:
+   * - ai_automator
+   * - ai_automator:type:{rule plugin ID}
+   * - ai_automator:id:{automator config entity ID}
+   * - ai_automator:entity_type:{entity type ID}
+   * - ai_automator:entity:{entity ID, empty for unsaved entities}
+   * - ai_automator:bundle:{bundle}
+   * - ai_automator:field_name:{field name}
+   *
+   * The id tag is unique per automator, so several automators configured on
+   * the same field can be told apart by subscribers.
    *
    * @param string $prompt
    *   The prompt.
@@ -942,6 +1022,13 @@ abstract class RuleBase implements AiAutomatorTypeInterface, AiAutomatorPostChec
       $tags[] = 'ai_automator:type:' . $automatorConfig['rule'];
     }
 
+    // Add the automator config entity ID so subscribers can target a single
+    // automator even when several share the same entity type, bundle and
+    // field.
+    if (!empty($automatorConfig['id']) && is_string($automatorConfig['id'])) {
+      $tags[] = 'ai_automator:id:' . $automatorConfig['id'];
+    }
+
     // Add some tags based on the entity & field name.
     if ($entity) {
       $tags[] = 'ai_automator:entity_type:' . $entity->getEntityTypeId();
@@ -952,6 +1039,58 @@ abstract class RuleBase implements AiAutomatorTypeInterface, AiAutomatorPostChec
       $tags[] = 'ai_automator:field_name:' . $automatorConfig['field_name'];
     }
     return $tags;
+  }
+
+  /**
+   * Builds the entity_context request metadata for an automator request.
+   *
+   * The shape follows the aliases read by request-metadata consumers such as
+   * AI Context: entity_type together with entity_id. The entity_id is NULL for
+   * entities that have not been saved yet (for example presave on an add
+   * form); the uuid is always set so subscribers can still correlate the
+   * request with the entity being edited.
+   *
+   * @param \Drupal\Core\Entity\ContentEntityInterface|null $entity
+   *   The entity being processed, if any.
+   * @param array $automatorConfig
+   *   The automator configuration.
+   *
+   * @return array|null
+   *   The entity_context array, or NULL when there is no entity.
+   */
+  protected function buildEntityContext(?ContentEntityInterface $entity, array $automatorConfig): ?array {
+    if (!$entity) {
+      return NULL;
+    }
+    return [
+      'entity_type' => $entity->getEntityTypeId(),
+      'entity_id' => $entity->isNew() ? NULL : $entity->id(),
+      'uuid' => $entity->uuid(),
+      'bundle' => $entity->bundle(),
+      'field_name' => $automatorConfig['field_name'] ?? NULL,
+      'automator_id' => $automatorConfig['id'] ?? NULL,
+    ];
+  }
+
+  /**
+   * Attaches entity_context request metadata to an AI request input.
+   *
+   * Call this on the final input object, after any helper that may return a
+   * clone of it (see applyGuardrailsToInput()), so the metadata reaches the
+   * provider request events.
+   *
+   * @param \Drupal\ai\OperationType\InputInterface $input
+   *   The input to decorate.
+   * @param \Drupal\Core\Entity\ContentEntityInterface|null $entity
+   *   The entity being processed, if any.
+   * @param array $automatorConfig
+   *   The automator configuration.
+   */
+  protected function attachEntityContext(InputInterface $input, ?ContentEntityInterface $entity, array $automatorConfig): void {
+    $context = $this->buildEntityContext($entity, $automatorConfig);
+    if ($context !== NULL) {
+      $input->setRequestMetadataValue('entity_context', $context);
+    }
   }
 
 }

@@ -1,0 +1,53 @@
+/**
+ * "Display the buttons when the form element is in focus".
+ *
+ * Only the buttons of AI Content Suggestions actions that enable this option
+ * are hidden. The layout of all buttons is left to Field Widget Actions.
+ */
+.ai-content-suggestions--on-focus:not(:focus-within) .ai-content-suggestions--on-focus-button {
+  display: none;
+}
+
+/* AI function indicator, shown in the field while the buttons are hidden. */
+.field--type-string.ai-content-suggestions--on-focus *:has(> .form-element),
+.field--type-string-long.ai-content-suggestions--on-focus *:has(> .form-element),
+.field--type-text-long.ai-content-suggestions--on-focus .form-textarea-wrapper {
+  position: relative;
+}
+.field--type-string.ai-content-suggestions--on-focus *:has(> .form-element)::after,
+.field--type-string-long.ai-content-suggestions--on-focus .form-textarea-wrapper::after,
+.field--type-text-long.ai-content-suggestions--on-focus .form-textarea-wrapper::after {
+  position: absolute;
+  right: 12px;
+  display: block;
+  padding-left: 32px;
+  content: "AI Function";
+  transition: all 0.25s ease-in-out;
+  pointer-events: none;
+  opacity: 1;
+  color: #afafaa;
+  background-color: white;
+  background-image: url("../icons/ai_spark.svg");
+  background-repeat: no-repeat;
+  background-position: 8px;
+  background-size: 16px;
+  font-size: 14px;
+  font-weight: 500;
+}
+.field--type-string.ai-content-suggestions--on-focus *:has(> .form-element)::after {
+  top: 36px;
+}
+.field--type-string.field--name-title.ai-content-suggestions--on-focus *:has(> .form-element)::after {
+  top: 44px;
+}
+.field--type-string-long.ai-content-suggestions--on-focus .form-textarea-wrapper::after {
+  bottom: 10px;
+}
+.field--type-text-long.ai-content-suggestions--on-focus .form-textarea-wrapper::after {
+  top: 56px;
+}
+.field--type-string.ai-content-suggestions--on-focus:focus-within *:has(> .form-element)::after,
+.field--type-string-long.ai-content-suggestions--on-focus:focus-within .form-textarea-wrapper::after,
+.field--type-text-long.ai-content-suggestions--on-focus:focus-within .form-textarea-wrapper::after {
+  opacity: 0;
+}

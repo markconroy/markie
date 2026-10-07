@@ -46,24 +46,45 @@ class OfficeHours extends RuleBase {
         $total = array_merge_recursive($total, $values);
       }
     }
-    // Fix up the values for a funny quirk in gpt-5.2.
-    foreach ($total as &$item) {
-      // If the item is only three character long.
-      if (strlen($item['starthours']) === 3) {
-        // Add a 0 at the end.
-        $item['starthours'] .= '0';
+    return $this->normalizeRows($total);
+  }
 
+  /**
+   * Normalizes the decoded rows before they reach verifyValue().
+   *
+   * Each row is expected to be a {day, starthours, endhours, comment} record,
+   * but a model can return a bare string or an object missing a key. Issue
+   * Reading a property off such a row raised a TypeError that
+   * aborted the whole run with "The AI automator failed to run"; dropping the
+   * row here lets the rest of the generated hours through.
+   *
+   * @param array $rows
+   *   The decoded rows.
+   *
+   * @return array
+   *   The record-shaped rows, with hour values and the day index normalized.
+   */
+  protected function normalizeRows(array $rows): array {
+    $normalized = [];
+    foreach ($rows as $item) {
+      if (!is_array($item)) {
+        continue;
       }
-      if (strlen($item['endhours']) === 3) {
-        // Add a 0 at the end.
-        $item['endhours'] .= '0';
+      // Fix up the values for a funny quirk in gpt-5.2: an hour that lost its
+      // trailing zero (e.g. "090" for 09:00) comes back three characters long.
+      foreach (['starthours', 'endhours'] as $property) {
+        if (isset($item[$property]) && is_scalar($item[$property]) && strlen((string) $item[$property]) === 3) {
+          // Add a 0 at the end.
+          $item[$property] = (string) $item[$property] . '0';
+        }
       }
       // If the day is empty, it means 0.
       if (empty($item['day'])) {
         $item['day'] = '0';
       }
+      $normalized[] = $item;
     }
-    return $total;
+    return $normalized;
   }
 
   /**

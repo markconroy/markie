@@ -72,7 +72,7 @@ abstract class AiAssistantActionBase implements AiAssistantActionInterface, Cont
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
     return new static(
       $configuration,
-      $container->get('tempstore.private')
+      $container->get('ai_assistant_api.tempstore.private')
     );
   }
 
@@ -161,7 +161,7 @@ abstract class AiAssistantActionBase implements AiAssistantActionInterface, Cont
    *   The data.
    */
   public function getAllActionContexts(): array {
-    if ($this->assistant->get('allow_history') == 'session') {
+    if ($this->assistant->getChatMemory() !== NULL) {
       $session = $this->getTempStore()->get($this->threadId);
       return $session['contexts'] ?? [];
     }

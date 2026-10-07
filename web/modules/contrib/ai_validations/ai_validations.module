@@ -1,0 +1,70 @@
+<?php
+
+/**
+ * @file
+ * AI Validations module hooks.
+ */
+
+use Drupal\field_validation\Form\FieldValidationRuleFormBase;
+use Drupal\Core\Form\FormStateInterface;
+
+/**
+ * Implements hook_form_FORM_ID_alter() for field_validation_rule_form.
+ *
+ * Works around a latent field_validation bug exposed once the rule form
+ * contains an AJAX-driven element (e.g. the ai_provider_configuration element
+ * used by the AI rules in this module).
+ *
+ * Sequence that triggers it on edit:
+ *   1. The user changes the AJAX-bound element. Drupal caches the form, which
+ *      serializes the form controller and the rule set entity.
+ *   2. ConfigEntityBase::__sleep() flushes plugin configuration into the
+ *      entity's $field_validation_rules property and unsets the cached plugin
+ *      collection so it is rebuilt lazily on wake-up.
+ *   3. On the final POST, the unserialized form controller's
+ *      $fieldValidationRule is a fresh PHP object, while the rule set
+ *      reconstructs its plugin collection from $field_validation_rules and
+ *      produces a *different* plugin instance for the same UUID.
+ *   4. FieldValidationRuleFormBase::submitForm() calls submitConfigurationForm
+ *      on the form's instance and then $ruleSet->save(). preSave() reads
+ *      configuration from the collection's instance, so the user's edits are
+ *      silently dropped.
+ *
+ * The submit handler below pushes the form's modified instance back into the
+ * collection before the second save so preSave() picks up the right object.
+ *
+ * @todo Remove this workaround once the upstream bug is fixed.
+ * @see https://www.drupal.org/project/field_validation/issues/3587461
+ */
+function ai_validations_form_field_validation_rule_form_alter(array &$form, FormStateInterface $form_state): void {
+  $form['#submit'][] = '_ai_validations_sync_rule_to_collection';
+}
+
+/**
+ * Submit handler that syncs the modified rule back into the plugin collection.
+ */
+function _ai_validations_sync_rule_to_collection(array &$form, FormStateInterface $form_state): void {
+  $form_object = $form_state->getFormObject();
+
+  if (!$form_object instanceof FieldValidationRuleFormBase) {
+    return;
+  }
+
+  // Access the form's rule set and rule via reflection, as they are protected.
+  $rule_set_ref = new \ReflectionProperty($form_object, 'fieldValidationRuleSet');
+  $rule_set_ref->setAccessible(TRUE);
+  $rule_set = $rule_set_ref->getValue($form_object);
+
+  $rule_ref = new \ReflectionProperty($form_object, 'fieldValidationRule');
+  $rule_ref->setAccessible(TRUE);
+  $rule = $rule_ref->getValue($form_object);
+
+  if (!$rule_set || !$rule || !$rule->getUuid()) {
+    return;
+  }
+
+  // Replace the collection's instance with the form's modified instance so
+  // that ConfigEntityBase::preSave() picks up the updated configuration.
+  $rule_set->getFieldValidationRules()->set($rule->getUuid(), $rule);
+  $rule_set->save();
+}

@@ -34,25 +34,53 @@ ai_ckeditor.settings:
       mapping:
         complete:
           type: string
-          label: 'Completion prompt'
+          label: 'Completion prompt ID'
+          description: 'The default prompt config entity to use as a completion pre-prompt.'
+          constraints:
+            ConfigExists:
+              prefix: 'ai.ai_prompt.'
         modify_prompt:
-          type: text
-          label: 'Modify with a prompt template'
+          type: string
+          label: 'Modify prompt ID'
+          description: 'The default prompt config entity to use as a modify prompt.'
+          constraints:
+            ConfigExists:
+              prefix: 'ai.ai_prompt.'
         reformat:
-          type: text
-          label: 'Reformat prompt'
+          type: string
+          label: 'Reformat prompt ID'
+          description: 'The default prompt config entity to use as a reformat prompt.'
+          constraints:
+            ConfigExists:
+              prefix: 'ai.ai_prompt.'
         spellfix:
-          type: text
-          label: 'Spellfix prompt'
-        summarise:
-          type: text
-          label: 'Summarize prompt'
+          type: string
+          label: 'Spellfix prompt ID'
+          description: 'The default prompt config entity to use as a spelling fix prompt.'
+          constraints:
+            ConfigExists:
+              prefix: 'ai.ai_prompt.'
+        summarize:
+          type: string
+          label: 'Summarize prompt ID'
+          description: 'The default prompt config entity to use as a summarize prompt.'
+          constraints:
+            ConfigExists:
+              prefix: 'ai.ai_prompt.'
         tone:
-          type: text
-          label: 'Tone adjustment prompt'
+          type: string
+          label: 'Tone adjustment prompt ID'
+          description: 'The default prompt config entity to use as a tone adjustment prompt.'
+          constraints:
+            ConfigExists:
+              prefix: 'ai.ai_prompt.'
         translate:
-          type: text
-          label: 'Translate prompt'
+          type: string
+          label: 'Translate prompt ID'
+          description: 'The default prompt config entity to use as a translation prompt.'
+          constraints:
+            ConfigExists:
+              prefix: 'ai.ai_prompt.'
 
 # Individual AiCKEditor plugins config schema.
 ckeditor5.plugin.ai_ckeditor_ai_base:

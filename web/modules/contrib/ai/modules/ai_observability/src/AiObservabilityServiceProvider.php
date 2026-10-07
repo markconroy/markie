@@ -23,9 +23,13 @@ class AiObservabilityServiceProvider extends ServiceProviderBase {
     // Register OpenTelemetry spans event subscriber if the opentelemetry module
     // is installed.
     if (isset($modules['opentelemetry'])) {
-      $container->register(AiOtelSpansEventSubscriber::class, AiOtelSpansEventSubscriber::class)
+      $container->register(
+        AiOtelSpansEventSubscriber::class,
+        AiOtelSpansEventSubscriber::class,
+      )
         ->setAutowired(TRUE)
-        ->addTag('event_subscriber');
+        ->addTag('event_subscriber')
+        ->addTag('needs_destruction');
     }
 
     // Register OpenTelemetry metrics event subscriber only if the

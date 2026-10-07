@@ -2,6 +2,7 @@
 
 namespace Drupal\Tests\ai_automators\Kernel;
 
+use Drupal\ai\Event\PreGenerateResponseEvent;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\KernelTests\KernelTestBase;
@@ -171,12 +172,40 @@ class ActionProcessingTest extends KernelTestBase {
     $node->save();
     $this->assertTrue($node->get('body')->isEmpty(), 'Action worker should not run during presave.');
 
+    // Capture the provider request the action triggers.
+    $requests = [];
+    $this->container->get('event_dispatcher')->addListener(
+      PreGenerateResponseEvent::EVENT_NAME,
+      function (PreGenerateResponseEvent $event) use (&$requests): void {
+        $requests[] = [
+          'tags' => $event->getTags(),
+          'entity_context' => $event->getMetadata('entity_context'),
+        ];
+      },
+    );
+
     // Explicit action execution should populate the field.
     /** @var \Drupal\ai_automators\Plugin\Action\RunAutomatorAction $action */
     $action = $this->container->get('plugin.manager.action')
       ->createInstance('ai_automators_run:node.article.body.action');
     $action->execute($node);
     $this->assertFalse($node->get('body')->isEmpty(), 'The body field should have a value after action execution.');
+
+    // The action path tags the request with the automator config entity ID
+    // and attaches the saved entity as structured request metadata.
+    $this->assertCount(1, $requests, 'The action triggered exactly one provider request.');
+    $this->assertContains('ai_automator', $requests[0]['tags']);
+    $this->assertContains('ai_automator:id:node.article.body.action', $requests[0]['tags']);
+    $this->assertContains('ai_automator:entity:' . $node->id(), $requests[0]['tags']);
+    $context = $requests[0]['entity_context'];
+    $this->assertIsArray($context, 'The action path attaches entity_context request metadata.');
+    $this->assertSame('node', $context['entity_type']);
+    $this->assertEquals($node->id(), $context['entity_id']);
+    $this->assertTrue(is_numeric($context['entity_id']), 'A saved node exposes its numeric ID.');
+    $this->assertSame($node->uuid(), $context['uuid']);
+    $this->assertSame('article', $context['bundle']);
+    $this->assertSame('body', $context['field_name']);
+    $this->assertSame('node.article.body.action', $context['automator_id']);
 
     // With edit_mode off, existing values should be preserved.
     $node2 = Node::create([

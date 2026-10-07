@@ -45,6 +45,9 @@ ai.settings:
         image_to_video:
           label: 'Default image to video provider'
           type: ai.default_operation_provider
+        extractive_question_answering:
+          label: 'Default extractive question answering provider'
+          type: ai.default_operation_provider
         moderation:
           label: 'Default moderation provider'
           type: ai.default_operation_provider
@@ -154,20 +157,20 @@ ai.guardrail.settings.input_length_limit:
     tokenizer_model:
       type: string
       label: Tokenizer model
-    check_all_messages:
+    scan_all_user_messages:
       type: boolean
-      label: Check total conversation length
+      label: Scan all user messages
     violation_message:
       type: string
       label: Violation message
 
 ai.guardrail.settings.regexp_guardrail:
   type: mapping
-  label: Regexp Guardrail settings
+  label: RegEx settings
   mapping:
     regexp_pattern:
       type: string
-      label: Regexp pattern
+      label: RegEx Pattern
     scan_all_user_messages:
       type: boolean
       label: Scan all user messages
@@ -203,6 +206,40 @@ ai.guardrail.settings.restrict_to_topic:
     llm_config:
       type: mapping
       label: LLM configuration
+    matching_mode:
+      type: string
+      label: 'Topic matching mode'
+    similarity_threshold:
+      type: float
+      label: 'Similarity threshold'
+
+ai.guardrail.settings.sensitive_content_stream:
+  type: mapping
+  label: Sensitive Content Stream Filter settings
+  mapping:
+    start_marker:
+      type: string
+      label: Start marker
+    stop_marker:
+      type: string
+      label: Stop marker
+    replacement_message:
+      type: string
+      label: Replacement message
+
+ai.guardrail.settings.moderation:
+  type: mapping
+  label: Moderation settings
+  mapping:
+    flagged_message:
+      type: string
+      label: Flagged message
+    moderation_model:
+      type: string
+      label: Moderation provider and model
+    scan_all_user_messages:
+      type: boolean
+      label: Scan all user messages
 
 ai.ai_guardrail_set.*:
   type: config_entity
@@ -237,3 +274,92 @@ ai.ai_guardrail_set.*:
           type: sequence
           sequence:
             type: string
+
+field.widget.third_party.ai:
+  type: mapping
+  label: AI Module Field Widget 3rd Party Settings
+  mapping:
+    use_mdx_editor:
+      type: boolean
+      label: Use MDX Editor
+
+ai_chat_processor.configuration.*:
+  type: ai_chat_processor.configuration_base
+
+ai_chat_processor.configuration_base:
+  type: mapping
+
+ai_chat_memory.configuration.*:
+  type: ai_chat_memory.configuration_base
+
+ai_chat_memory.configuration_base:
+  type: mapping
+
+ai_chat_memory.configuration.private_tempstore:
+  type: ai_chat_memory.configuration_base
+  label: Tempstore chat memory configuration
+  mapping:
+    expiry:
+      type: integer
+      label: Thread expiry
+    max_messages:
+      type: integer
+      label: Max messages
+
+ai_chat_memory.configuration.private_tempstore_pool:
+  type: ai_chat_memory.configuration_base
+  label: Tempstore pool chat memory configuration
+  mapping:
+    expiry:
+      type: integer
+      label: Thread expiry
+    max_messages:
+      type: integer
+      label: Max messages
+
+ai.html_to_markdown.settings:
+  type: config_object
+  label: 'AI HTML to Markdown converter settings'
+  mapping:
+    header_style:
+      type: string
+      label: 'Header style'
+    suppress_errors:
+      type: boolean
+      label: 'Suppress errors'
+    strip_tags:
+      type: boolean
+      label: 'Strip tags'
+    strip_placeholder_links:
+      type: boolean
+      label: 'Strip placeholder links'
+    bold_style:
+      type: string
+      label: 'Bold style'
+    italic_style:
+      type: string
+      label: 'Italic style'
+    remove_nodes:
+      type: string
+      label: 'Remove nodes'
+    hard_break:
+      type: boolean
+      label: 'Hard break'
+    list_item_style:
+      type: string
+      label: 'List item style'
+    preserve_comments:
+      type: boolean
+      label: 'Preserve comments'
+    use_autolinks:
+      type: boolean
+      label: 'Use autolinks'
+    table_pipe_escape:
+      type: string
+      label: 'Table pipe escape'
+    table_caption_side:
+      type: string
+      label: 'Table caption side'
+    strip_whitespace:
+      type: boolean
+      label: 'Strip whitespace'

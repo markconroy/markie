@@ -8,12 +8,13 @@ tags:
   - developer
 lifecycle: deprecated
 lifecycle_link: 'https://www.drupal.org/project/ai/issues/3552886'
+hidden: true
 
 dependencies:
   - ai:ai
   - drupal:views
 
-# Information added by Drupal.org packaging script on 2026-09-16
-version: '1.4.9'
+# Information added by Drupal.org packaging script on 2026-09-25
+version: '1.5.0'
 project: 'ai'
-datestamp: 1789567520
+datestamp: 1790327400

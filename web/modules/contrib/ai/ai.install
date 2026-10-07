@@ -5,6 +5,8 @@
  * Install, update and uninstall functions for the ai module.
  */
 
+use Drupal\Core\Config\FileStorage;
+
 /**
  * Implements hook_requirements().
  */
@@ -35,9 +37,58 @@ function ai_requirements($phase) {
         'severity' => REQUIREMENT_OK,
       ];
     }
+
+    $requirements += _ai_built_assets_requirements();
   }
 
   return $requirements;
+}
+
+/**
+ * Checks that the front-end UI assets shipped by the AI module are built.
+ *
+ * The MDXEditor and JSON Schema Editor assets are only committed to tagged
+ * releases. When using a development branch they must be built locally with
+ * `npm run build`. Without them the MDXEditor textarea enhancement and the
+ * `ai_json_schema` form element fall back to plain textareas.
+ *
+ * @return array
+ *   Requirement entries keyed by id, ready to merge into hook_requirements().
+ */
+function _ai_built_assets_requirements(): array {
+  $module_path = \Drupal::service('extension.path.resolver')->getPath('module', 'ai');
+  $assets = [
+    'ui/mdxeditor/dist/assets/main.js',
+    'ui/json-schema-editor/dist/ai-json-schema.js',
+  ];
+
+  $missing = [];
+  foreach ($assets as $asset) {
+    if (!file_exists($module_path . '/' . $asset)) {
+      $missing[] = $asset;
+    }
+  }
+
+  if (empty($missing)) {
+    return [
+      'ai_built_assets' => [
+        'title' => t('AI built assets'),
+        'value' => t('Built JavaScript assets for the AI module are present.'),
+        'severity' => REQUIREMENT_OK,
+      ],
+    ];
+  }
+
+  return [
+    'ai_built_assets' => [
+      'title' => t('AI built assets'),
+      'value' => t('Built JavaScript assets for the AI module are missing.'),
+      'description' => t('The following built assets are missing: <code>@assets</code>. Run <code>npm ci</code> and <code>npm run build</code> in the <code>ai</code> module folder to generate them.', [
+        '@assets' => implode(', ', $missing),
+      ]),
+      'severity' => REQUIREMENT_WARNING,
+    ],
+  ];
 }
 
 /**
@@ -153,4 +204,35 @@ function ai_update_14001(): void {
     $definition = \Drupal::entityTypeManager()->getDefinition('ai_file');
     $update_manager->installEntityType($definition);
   }
+}
+
+/**
+ * Install default settings for the AI HTML to Markdown converter.
+ */
+function ai_update_15001(): void {
+  $config = \Drupal::configFactory()->getEditable('ai.html_to_markdown.settings');
+  if (!$config->isNew()) {
+    // Already installed or already updated; don't overwrite.
+    return;
+  }
+  $module_path = \Drupal::service('extension.list.module')->getPath('ai');
+  $storage = new FileStorage($module_path . '/config/install');
+  $data = $storage->read('ai.html_to_markdown.settings');
+  if ($data !== FALSE) {
+    $config->setData($data)->save();
+  }
+}
+
+/**
+ * Clear modules list to discover new locations of submodules.
+ */
+function ai_update_15002() {
+  \Drupal::service('extension.list.module')->reset();
+}
+
+/**
+ * Clear modules list to discover the reinstated submodules.
+ */
+function ai_update_15003() {
+  \Drupal::service('extension.list.module')->reset();
 }

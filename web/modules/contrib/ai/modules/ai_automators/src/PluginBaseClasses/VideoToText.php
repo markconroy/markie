@@ -22,6 +22,7 @@ use Drupal\ai\OperationType\GenericType\ImageFile;
 use Drupal\ai\OperationType\SpeechToText\SpeechToTextInput;
 use Drupal\ai\Service\AiProviderFormHelper;
 use Drupal\ai\Service\PromptJsonDecoder\PromptJsonDecoderInterface;
+use Drupal\ai_automators\AiPromptHelper;
 use Drupal\ai_automators\Exceptions\AiAutomatorRequestErrorException;
 use Drupal\ai_automators\Exceptions\AiAutomatorResponseErrorException;
 use Drupal\file\Entity\File;
@@ -98,6 +99,11 @@ class VideoToText extends RuleBase implements ContainerFactoryPluginInterface {
   protected PromptJsonDecoderInterface $promptJsonDecoder;
 
   /**
+   * The Ai prompt helper.
+   */
+  protected AiPromptHelper $aiPromptHelper;
+
+  /**
    * Construct a video to text field.
    *
    * @param \Drupal\ai\AiProviderPluginManager $pluginManager
@@ -122,6 +128,9 @@ class VideoToText extends RuleBase implements ContainerFactoryPluginInterface {
    *   Field manager.
    * @param \Drupal\Core\Entity\EntityTypeBundleInfo $entityTypeBundleInfo
    *   The entity type bundle info.
+   * @param \Drupal\ai_automators\AiPromptHelper|null $aiPromptHelper
+   *   The Ai prompt helper. Loaded from the container if not provided, which
+   *   is deprecated.
    */
   public function __construct(
     AiProviderPluginManager $pluginManager,
@@ -135,6 +144,7 @@ class VideoToText extends RuleBase implements ContainerFactoryPluginInterface {
     AccountProxyInterface $currentUser,
     EntityFieldManagerInterface $fieldManager,
     EntityTypeBundleInfo $entityTypeBundleInfo,
+    ?AiPromptHelper $aiPromptHelper = NULL,
   ) {
     parent::__construct($pluginManager, $formHelper, $promptJsonDecoder, $aiGuardrailHelper);
     $this->entityManager = $entityManager;
@@ -144,6 +154,11 @@ class VideoToText extends RuleBase implements ContainerFactoryPluginInterface {
     $this->moduleHandler = $moduleHandler;
     $this->fieldManager = $fieldManager;
     $this->entityTypeBundleInfo = $entityTypeBundleInfo;
+    if (!$aiPromptHelper instanceof AiPromptHelper) {
+      @trigger_error('Calling ' . __METHOD__ . '() without the $aiPromptHelper argument is deprecated in ai:1.5.0 and will be required in ai:2.0.0. See https://www.drupal.org/project/ai/issues/3586535', E_USER_DEPRECATED);
+      $aiPromptHelper = \Drupal::service('ai_automator.prompt_helper'); /* @phpstan-ignore-line */
+    }
+    $this->aiPromptHelper = $aiPromptHelper;
   }
 
   /**
@@ -162,7 +177,8 @@ class VideoToText extends RuleBase implements ContainerFactoryPluginInterface {
       $container->get('module_handler'),
       $container->get('current_user'),
       $container->get('entity_field.manager'),
-      $container->get('entity_type.bundle.info')
+      $container->get('entity_type.bundle.info'),
+      $container->get('ai_automator.prompt_helper')
     );
   }
 
@@ -475,11 +491,8 @@ class VideoToText extends RuleBase implements ContainerFactoryPluginInterface {
    *   The rendered prompt.
    */
   public function renderTokenPrompt($prompt, ContentEntityInterface $entity) {
-    // Get variables.
-    return $this->token->replace($prompt, [
-      $this->getEntityTokenType($entity->getEntityTypeId()) => $entity,
-      'user' => $this->currentUser,
-    ]);
+    // Delegate to the prompt helper so token handling lives in one place.
+    return $this->aiPromptHelper->renderTokenPrompt($prompt, $entity);
   }
 
   /**

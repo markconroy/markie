@@ -141,22 +141,72 @@ class InputLengthLimitTest extends TestCase {
   }
 
   /**
-   * Test check all messages mode.
+   * Test scan all user messages mode combines only user-role text.
    */
-  public function testCheckAllMessages(): void {
+  public function testScanAllUserMessages(): void {
     $plugin = $this->createPlugin([
       'max_length' => 20,
-      'check_all_messages' => TRUE,
+      'scan_all_user_messages' => TRUE,
     ]);
     $input = new ChatInput([
       new ChatMessage('user', 'Hello world'),
       new ChatMessage('assistant', 'Hi there!'),
       new ChatMessage('user', 'How are you?'),
     ]);
-    // Combined: "Hello world\nHi there!\nHow are you?" = 35 chars.
+    // Combined user messages only: "Hello world\nHow are you?" = 24 chars.
+    // The assistant message is excluded from the count.
     $result = $plugin->processInput($input);
     $this->assertInstanceOf(StopResult::class, $result);
     $this->assertTrue($result->stop());
+  }
+
+  /**
+   * Default mode walks back past tool result messages (the role guard).
+   *
+   * Without the role guard, end($messages) would land on the tool result
+   * and the actual user prompt would never be measured.
+   */
+  public function testDefaultWalksBackPastToolResultMessages(): void {
+    $plugin = $this->createPlugin(['max_length' => 5]);
+    $input = new ChatInput([
+      new ChatMessage('user', 'Short'),
+      new ChatMessage('assistant', ''),
+      new ChatMessage('tool', 'this tool result text is much longer than the limit'),
+    ]);
+    // Only "Short" (5 chars) is measured, so this should pass.
+    $result = $plugin->processInput($input);
+    $this->assertInstanceOf(PassResult::class, $result);
+  }
+
+  /**
+   * Scan-all mode excludes assistant and tool messages from the combined text.
+   */
+  public function testScanAllExcludesAssistantAndToolMessages(): void {
+    $plugin = $this->createPlugin([
+      'max_length' => 20,
+      'scan_all_user_messages' => TRUE,
+    ]);
+    $input = new ChatInput([
+      new ChatMessage('user', 'short'),
+      new ChatMessage('assistant', 'this is a long assistant reply that would exceed the limit on its own'),
+      new ChatMessage('tool', 'this is a long tool result that would exceed the limit on its own'),
+    ]);
+    // Only "short" (5 chars) is measured, so this should pass.
+    $result = $plugin->processInput($input);
+    $this->assertInstanceOf(PassResult::class, $result);
+  }
+
+  /**
+   * No user messages at all returns a pass.
+   */
+  public function testPassesWhenNoUserMessages(): void {
+    $plugin = $this->createPlugin(['max_length' => 5]);
+    $input = new ChatInput([
+      new ChatMessage('assistant', 'hello'),
+      new ChatMessage('tool', 'result'),
+    ]);
+    $result = $plugin->processInput($input);
+    $this->assertInstanceOf(PassResult::class, $result);
   }
 
   /**

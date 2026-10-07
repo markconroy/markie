@@ -14,6 +14,20 @@
    *   The parameters from AiRequestCommand.
    */
   Drupal.AjaxCommands.prototype.aiRequest = function (ajax, parameters) {
+    // Read entity context from the dialog's hidden form fields so the
+    // AiWriter command can forward it to the server-side controller.
+    const form = document.querySelector('.ckeditor5-ai-ckeditor-dialog-form');
+    if (form) {
+      const entityType = form.querySelector('input[name="entity_type"]');
+      const entityId = form.querySelector('input[name="entity_id"]');
+      if (entityType) {
+        parameters.entity_type = entityType.value;
+      }
+      if (entityId) {
+        parameters.entity_id = entityId.value;
+      }
+    }
+
     const editor_id = $('#ai-ckeditor-response textarea').attr('data-ckeditor5-id');
     const editor = Drupal.CKEditor5Instances.get(editor_id);
     editor.execute('AiWriter', parameters);

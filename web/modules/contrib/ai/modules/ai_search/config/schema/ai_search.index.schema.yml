@@ -11,6 +11,9 @@ ai_search.index.*:
     exclude_chunk_from_metadata:
       type: boolean
       label: 'Exclude the content chunk from the metadata'
+    exclude_title:
+      type: boolean
+      label: 'Exclude the title from the metadata'
     indexing_options:
       type: sequence
       label: 'Indexing Options'

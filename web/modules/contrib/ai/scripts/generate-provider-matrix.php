@@ -790,7 +790,7 @@ function release_label(string $status): string {
  *   Decoded body, or NULL on a 404.
  */
 function gitlab_get(string $token, string $path, array $query = []): ?array {
-  [$status, $body] = http_request(
+  [$status, $body] = ai_matrix_http_request(
     GITLAB_BASE . $path . ($query ? '?' . http_build_query($query) : ''),
     ['PRIVATE-TOKEN: ' . $token],
   );
@@ -817,7 +817,7 @@ function gitlab_get_all(string $token, string $path, array $query = []): array {
       'per_page' => HTTP_PER_PAGE,
       'page' => $page,
     ]);
-    [$status, $body, $headers] = http_request($url, ['PRIVATE-TOKEN: ' . $token]);
+    [$status, $body, $headers] = ai_matrix_http_request($url, ['PRIVATE-TOKEN: ' . $token]);
     if ($status < 200 || $status >= 300) {
       throw new \RuntimeException("GitLab GET $path (page $page) failed with HTTP $status.");
     }
@@ -845,7 +845,7 @@ function gitlab_get_raw_file(string $token, int $project_id, string $path, strin
     rawurlencode($path),
     rawurlencode($ref),
   );
-  [$status, $body] = http_request($url, ['PRIVATE-TOKEN: ' . $token]);
+  [$status, $body] = ai_matrix_http_request($url, ['PRIVATE-TOKEN: ' . $token]);
   return ($status >= 200 && $status < 300) ? $body : NULL;
 }
 
@@ -853,7 +853,7 @@ function gitlab_get_raw_file(string $token, int $project_id, string $path, strin
  * GETs a drupal.org API resource as decoded JSON.
  */
 function drupal_org_get(string $path, array $query = []): array {
-  [$status, $body] = http_request(
+  [$status, $body] = ai_matrix_http_request(
     DRUPAL_ORG_BASE . $path . ($query ? '?' . http_build_query($query) : ''),
   );
   if ($status < 200 || $status >= 300) {
@@ -868,7 +868,7 @@ function drupal_org_get(string $path, array $query = []): array {
  * @return array{0:int, 1:string, 2:array<string,string>}
  *   [status code, body, lowercased response headers].
  */
-function http_request(string $url, array $headers = []): array {
+function ai_matrix_http_request(string $url, array $headers = []): array {
   $attempts = 0;
   while (TRUE) {
     $attempts++;

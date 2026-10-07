@@ -3,13 +3,14 @@ description: Offers an implementation of the Search API that uses a Vector DB se
 package: AI (Experimental)
 type: module
 core_version_requirement: ^10.4 || ^11
-lifecycle: experimental
+lifecycle: deprecated
+lifecycle_link: https://www.drupal.org/node/3570322
 
 dependencies:
   - ai:ai
-  - search_api:search_api
+  - search_api:search_api (>=8.x-1.40)
 
-# Information added by Drupal.org packaging script on 2026-09-16
-version: '1.4.9'
+# Information added by Drupal.org packaging script on 2026-09-25
+version: '1.5.0'
 project: 'ai'
-datestamp: 1789567520
+datestamp: 1790327400

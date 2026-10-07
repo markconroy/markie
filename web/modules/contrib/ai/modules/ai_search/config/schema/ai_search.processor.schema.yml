@@ -19,6 +19,16 @@ plugin.plugin_configuration.search_api_processor.database_boost_by_ai_search:
     exact_phrase_action_reduce_number:
       type: integer
       label: 'Number of results to return when an exact phrase is searched'
+    pass_conditions_fields:
+      type: sequence
+      label: 'Fields whose conditions are passed to the AI Search query'
+      sequence:
+        type: string
+        label: 'Field ID'
+    max_pager_iterations:
+      type: integer
+      label: 'Maximum retries when deduplicating results'
+      nullable: true
 
 plugin.plugin_configuration.search_api_processor.solr_boost_by_ai_search:
   type: search_api.default_processor_configuration
@@ -39,3 +49,13 @@ plugin.plugin_configuration.search_api_processor.solr_boost_by_ai_search:
     exact_phrase_action_reduce_number:
       type: integer
       label: 'Number of results to return when an exact phrase is searched'
+    pass_conditions_fields:
+      type: sequence
+      label: 'Fields whose conditions are passed to the AI Search query'
+      sequence:
+        type: string
+        label: 'Field ID'
+    max_pager_iterations:
+      type: integer
+      label: 'Maximum retries when deduplicating results'
+      nullable: true

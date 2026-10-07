@@ -9,6 +9,7 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\ai_automators\Attribute\AiAutomatorType;
 use Drupal\ai_automators\PluginBaseClasses\ComplexTextChat;
 use Drupal\ai_automators\PluginInterfaces\AiAutomatorTypeInterface;
+use Drupal\ai_automators\Traits\RichTextImageDescriptionTrait;
 
 /**
  * The rules for a text field.
@@ -20,6 +21,8 @@ use Drupal\ai_automators\PluginInterfaces\AiAutomatorTypeInterface;
   target: '',
 )]
 class LlmText extends ComplexTextChat implements AiAutomatorTypeInterface {
+
+  use RichTextImageDescriptionTrait;
 
   /**
    * {@inheritDoc}
@@ -40,7 +43,7 @@ class LlmText extends ComplexTextChat implements AiAutomatorTypeInterface {
       '#default_value' => $defaultValues['automator_use_text_format'] ?? NULL,
     ];
 
-    return $form;
+    return $this->addImageDescriptionConfigurationForm($form, $defaultValues);
   }
 
   /**
@@ -59,6 +62,23 @@ class LlmText extends ComplexTextChat implements AiAutomatorTypeInterface {
       ];
     }
     $entity->set($fieldDefinition->getName(), $cleanedValues);
+    $this->storeImageDescriptionsMetadata($entity, $automatorConfig);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public function generate(ContentEntityInterface $entity, FieldDefinitionInterface $fieldDefinition, array $automatorConfig) {
+    $this->initializeImageDescriptionMetadata();
+    return parent::generate($entity, $fieldDefinition, $automatorConfig);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public function generateTokens(ContentEntityInterface $entity, FieldDefinitionInterface $fieldDefinition, array $automatorConfig, $delta = 0) {
+    $tokens = parent::generateTokens($entity, $fieldDefinition, $automatorConfig, $delta);
+    return $this->appendImageDescriptionsToTokens($entity, $automatorConfig, (int) $delta, $tokens);
   }
 
 }

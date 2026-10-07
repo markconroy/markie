@@ -1,0 +1,14 @@
+name: 'AI Content Suggestions'
+type: module
+description: 'Allows a configured AI to be passed content to suggest alterations'
+package: AI
+core_version_requirement: ^10.4 || ^11
+configure: ai_content_suggestions.settings
+dependencies:
+  - ai:ai
+  - field_widget_actions:field_widget_actions
+
+# Information added by Drupal.org packaging script on 2026-10-07
+version: '1.5.2'
+project: 'ai_content_suggestions'
+datestamp: 1791397979

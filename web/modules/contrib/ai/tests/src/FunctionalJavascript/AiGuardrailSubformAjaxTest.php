@@ -21,7 +21,6 @@ use Drupal\user\UserInterface;
  *
  * @group ai
  * @group 3586620
- * @group 3586676
  *
  * @runTestsInSeparateProcesses
  */
@@ -61,8 +60,10 @@ class AiGuardrailSubformAjaxTest extends BaseClassFunctionalJavascriptTests {
    * @var array<string, string>
    */
   protected const GUARDRAILS = [
+    'moderation' => 'guardrail_settings[flagged_message]',
     'input_length_limit' => 'guardrail_settings[max_length]',
     'restrict_to_topic' => 'guardrail_settings[valid_topics]',
+    'sensitive_content_stream' => 'guardrail_settings[start_marker]',
     'regexp_guardrail' => 'guardrail_settings[regexp_pattern]',
   ];
 
@@ -80,8 +81,8 @@ class AiGuardrailSubformAjaxTest extends BaseClassFunctionalJavascriptTests {
     $this->assertNotFalse($user, 'The guardrail admin user should be created.');
     $this->guardrailAdmin = $user;
 
-    // RestrictToTopic lists provider models in its subform, so give it a
-    // provider to enumerate.
+    // Moderation and RestrictToTopic list provider models in their subform, so
+    // give them a provider to enumerate.
     $this->setDefaultProvider('chat', 'echoai', 'gpt-test');
   }
 
@@ -166,14 +167,14 @@ class AiGuardrailSubformAjaxTest extends BaseClassFunctionalJavascriptTests {
     $assert->fieldNotExists('guardrail_settings[regexp_pattern]');
 
     // Switch a third time to be sure it keeps following the selection.
-    $page->selectFieldOption('guardrail', 'restrict_to_topic');
+    $page->selectFieldOption('guardrail', 'sensitive_content_stream');
     $assert->assertWaitOnAjaxRequest();
     $this->assertNotEmpty(
-      $assert->waitForField('guardrail_settings[valid_topics]'),
+      $assert->waitForField('guardrail_settings[start_marker]'),
       'The subform must keep following further selections.'
     );
     $assert->fieldNotExists('guardrail_settings[max_length]');
-    $this->takeScreenshot('4_topic_subform');
+    $this->takeScreenshot('4_stream_subform');
   }
 
   /**

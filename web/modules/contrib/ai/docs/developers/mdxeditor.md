@@ -36,6 +36,39 @@ that will also be used in `drupalSettings`. For example for typeahead plugin con
     ];
 ```
 
+## Enabling the editor on a Text (plain, long) field
+
+The MDX Editor can be enabled directly from the field widget settings without any custom
+code. This is supported for fields of type **Text (plain, long)** that use the
+**Textarea** field widget (`string_textarea`).
+
+To enable it, go to the **Manage form display** page of the content type (or any other
+entity type), expand the widget settings for the relevant field, and check the
+**Use MDX editor** checkbox. The editor will replace the plain textarea on the entity form.
+
+You can also enable it programmatically by setting the `use_mdx_editor` third-party
+setting on the widget component in the entity form display:
+
+```php
+use Drupal\Core\Entity\Entity\EntityFormDisplay;
+
+$form_display = EntityFormDisplay::load('node.article.default');
+$form_display->setComponent('field_body', [
+  'type' => 'string_textarea',
+  'region' => 'content',
+  'settings' => [
+    'rows' => 9,
+    'placeholder' => '',
+  ],
+  'third_party_settings' => [
+    'ai' => [
+      'use_mdx_editor' => TRUE,
+    ],
+  ],
+]);
+$form_display->save();
+```
+
 ## Why build editor is not included?
 
 The built assets are only included for tagged versions of the module. If you use the branch

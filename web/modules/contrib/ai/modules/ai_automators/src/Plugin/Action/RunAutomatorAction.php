@@ -81,6 +81,9 @@ class RunAutomatorAction extends EntityActionBase {
     foreach ($automator->get('plugin_config') as $key => $setting) {
       $automatorConfig[substr($key, 10)] = $setting;
     }
+    // Mirror AiAutomatorEntityModifier::entityHasConfig() so action runs are
+    // tagged with the automator config entity ID as well.
+    $automatorConfig['id'] = $automator->id();
 
     // Get field definition.
     $fieldDefinitions = $this->entityFieldManager->getFieldDefinitions(

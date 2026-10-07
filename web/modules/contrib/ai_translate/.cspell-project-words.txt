@@ -1,0 +1,12 @@
+agentic
+caractères
+ceci
+endverbatim
+spécifique
+texte
+tmgmt
+unflatten
+également
+updatedb
+pymdownx
+superfences

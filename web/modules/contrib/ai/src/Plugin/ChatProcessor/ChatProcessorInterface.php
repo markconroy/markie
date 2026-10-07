@@ -3,7 +3,9 @@
 namespace Drupal\ai\Plugin\ChatProcessor;
 
 use Drupal\Component\Plugin\ConfigurableInterface;
+use Drupal\Core\Access\AccessResultInterface;
 use Drupal\Core\Plugin\PluginFormInterface;
+use Drupal\Core\Session\AccountInterface;
 use Drupal\ai\OperationType\Chat\ChatInput;
 use Drupal\ai\OperationType\Chat\ChatOutput;
 
@@ -13,6 +15,9 @@ use Drupal\ai\OperationType\Chat\ChatOutput;
  * ChatProcessor plugins provide different ways to process chat input and
  * generate responses. They can be used to implement various chatbot
  * behaviors like RAG, tool use, or custom processing logic.
+ *
+ * This interface should be implemented by extending ChatProcessorBase, which
+ * provides backwards-compatible defaults when methods are added.
  */
 interface ChatProcessorInterface extends PluginFormInterface, ConfigurableInterface {
 
@@ -145,5 +150,70 @@ interface ChatProcessorInterface extends PluginFormInterface, ConfigurableInterf
    *   TRUE if images are allowed, FALSE otherwise.
    */
   public function allowsImages(): bool;
+
+  /**
+   * Reset a whole thread and get a new thread id.
+   *
+   * @param string $thread_id
+   *   The thread id to reset.
+   *
+   * @return string
+   *   The new thread id.
+   */
+  public function resetThread($thread_id): string;
+
+  /**
+   * Checks if the given account may execute this processor instance.
+   *
+   * Each plugin decides its own rules based on its configuration (e.g. the
+   * AI Assistant processor checks the roles configured on the assistant
+   * entity). Callers must check this before execute() and should add the
+   * result to their cacheability.
+   *
+   * @param \Drupal\Core\Session\AccountInterface $account
+   *   The account to check access for.
+   *
+   * @return \Drupal\Core\Access\AccessResultInterface
+   *   The access result.
+   */
+  public function access(AccountInterface $account): AccessResultInterface;
+
+  /**
+   * Gets the stored conversation history for the current thread.
+   *
+   * Requires the thread id to be set. Plugins without server-side history
+   * return an empty array. Plugins may truncate the returned history (the
+   * AI Assistant runner slices it to its configured context length).
+   *
+   * @return array<int, array{role: string, message: string, timestamp?: int}>
+   *   The messages in chronological order.
+   */
+  public function getMessageHistory(): array;
+
+  /**
+   * Notifies the plugin that a streamed response has fully rendered.
+   *
+   * Called by the consumer once all chunks have been sent, with the full
+   * response text, so plugins that keep server-side history can persist the
+   * assistant reply. No-op for stateless plugins.
+   *
+   * @param string $message
+   *   The complete streamed response text.
+   */
+  public function onStreamComplete(string $message): void;
+
+  /**
+   * Gets trusted markup to append after the response has been sanitized.
+   *
+   * Called by the consumer after execution, once the LLM text has been
+   * rendered and filtered. The returned markup is appended verbatim, so it
+   * must be plugin-generated and safe (escape any embedded model or user
+   * content). Used e.g. for the structured results dump of the AI Assistant
+   * processor.
+   *
+   * @return string
+   *   The markup to append, or an empty string.
+   */
+  public function getPostResponseMarkup(): string;
 
 }

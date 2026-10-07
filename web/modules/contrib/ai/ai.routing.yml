@@ -72,6 +72,14 @@ ai.settings_form:
   requirements:
     _permission: 'administer ai'
 
+ai.html_to_markdown_settings:
+  path: '/admin/config/ai/html-to-markdown'
+  defaults:
+    _controller: '\Drupal\ai\Controller\HtmlToMarkdownSettingsController::build'
+    _title: 'HTML to Markdown Converter'
+  requirements:
+    _permission: 'administer ai'
+
 ai.admin_providers:
   path: '/admin/config/ai/providers'
   defaults:

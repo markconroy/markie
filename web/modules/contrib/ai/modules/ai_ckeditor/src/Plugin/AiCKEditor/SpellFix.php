@@ -49,9 +49,19 @@ final class SpellFix extends AiCKEditorPluginBase {
     $prompts_config = $this->getConfigFactory()->get('ai_ckeditor.settings');
     $prompt_fix_spelling = $prompts_config->get('prompts.spellfix');
     $form['prompt'] = [
-      '#type' => 'textarea',
+      '#type' => 'ai_prompt',
       '#title' => $this->t('Spelling fix prompt'),
+      '#prompt_types' => ['ai_ckeditor_spellfix'],
       '#default_value' => $prompt_fix_spelling,
+      '#parents' => [
+        'editor',
+        'settings',
+        'plugins',
+        'ai_ckeditor_ai',
+        'plugins',
+        'ai_ckeditor_spellfix',
+        'prompt',
+      ],
       '#description' => $this->t('This prompt will be used to fix the spelling.'),
       '#states' => [
         'required' => [
@@ -116,12 +126,18 @@ final class SpellFix extends AiCKEditorPluginBase {
   public function ajaxGenerate(array &$form, FormStateInterface $form_state) {
     $values = $form_state->getValues();
     $prompts_config = $this->getConfigFactory()->get('ai_ckeditor.settings');
-    $prompt = $prompts_config->get('prompts.spellfix');
+    $promptId = $prompts_config->get('prompts.spellfix');
     try {
-      $prompt .= '"' . $values['plugin_config']['selected_text'] . '"';
+      $promptText = $this->getConfigFactory()->get('ai.ai_prompt.' . $promptId)?->get('prompt') ?? '';
+      // Replace the placeholders.
+      $promptText = strtr($promptText, [
+        '{inputText}' => '"' . $values['plugin_config']['selected_text'] . '"',
+      ]);
+
       $response = new AjaxResponse();
       $values = $form_state->getValues();
-      $response->addCommand(new AiRequestCommand($prompt, $values['editor_id'], $this->pluginDefinition['id'], 'ai-ckeditor-response'));
+      assert(is_array($this->pluginDefinition));
+      $response->addCommand(new AiRequestCommand($promptText, $values['editor_id'], $this->pluginDefinition['id'], 'ai-ckeditor-response'));
       return $response;
     }
     catch (\Exception $e) {

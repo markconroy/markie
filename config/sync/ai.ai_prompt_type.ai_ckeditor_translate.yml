@@ -1,0 +1,19 @@
+uuid: 19004389-d3fc-4435-bc59-eb548fda9b21
+langcode: en
+status: true
+dependencies:
+  enforced:
+    module:
+      - ai_ckeditor
+id: ai_ckeditor_translate
+label: 'AI CKEditor translate prompt'
+variables:
+  -
+    name: lang
+    help_text: 'The language name to translate the selected text to'
+    required: true
+  -
+    name: inputText
+    help_text: 'The input text to translate'
+    required: true
+tokens: {  }

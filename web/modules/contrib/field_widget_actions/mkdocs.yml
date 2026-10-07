@@ -1,0 +1,54 @@
+site_name: Field Widget Actions module for Drupal
+repo_url: https://git.drupalcode.org/project/field_widget_actions
+repo_name: drupal/field_widget_actions
+edit_uri: -/tree/1.0.x/docs/
+theme:
+  name: material
+  font:
+    code: Roboto Mono
+  palette:
+    primary: indigo
+  features:
+    - header.autohide
+    - navigation.footer
+    - content.action.edit
+plugins:
+  - glightbox
+  # Include Markdown: Allows embedding markdown files in one another with {% include-markdown "file.md" %}
+  # https://github.com/mondeja/mkdocs-include-markdown-plugin
+  - include-markdown:
+      encoding: ascii
+  - search:
+      lang: en
+  - mike:
+      alias_type: redirect
+      # This is for SEO reasons, not redirects.
+      canonical_version: 1.0.0
+      version_selector: true
+      deploy_prefix: "mkdocs"
+markdown_extensions:
+  - attr_list
+  - md_in_html
+  - pymdownx.blocks.caption
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+extra:
+  version:
+    provider: mike
+  social:
+    - icon: fontawesome/brands/gitlab
+      link: https://git.drupalcode.org/project/field_widget_actions
+    - icon: fontawesome/brands/slack
+      link: https://drupal.slack.com/archives/C09M219ECR4
+nav:
+  - Home: index.md
+  - Configuration: configuration.md
+  - Development: create.md
+  - Usage in Recipes: recipe.md
+  - Integrations:
+      - Automators: automators.md
+docs_dir: docs
+site_dir: site

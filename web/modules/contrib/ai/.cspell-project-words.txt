@@ -71,6 +71,7 @@ deepchat
 deepgram
 Deepgrams
 deepl
+deepseek
 defintion
 derivite
 detab
@@ -102,6 +103,8 @@ endhours
 endverbatim
 erging
 etcdctl
+exfiltration
+expirable
 Euser
 evals
 Explainability
@@ -222,6 +225,7 @@ precode
 precodenum
 prenum
 preprompt
+preuninstall
 Probots
 programmatical
 Providerid
@@ -239,9 +243,14 @@ Recogniztion
 Renederer
 reparses
 replayable
+refinable
+Refinable
 Rerank
 reranked
+reranker
+rerankers
 reranking
+topn
 retag
 rhristov
 robloach
@@ -261,6 +270,7 @@ sqpo
 sshleifer
 starthours
 streamable
+Stringable
 Sublists
 subprompt
 subtag
@@ -299,6 +309,7 @@ Valiudate
 vals
 valthebald
 vectordb
+vertexai
 vframes
 voiceovers
 vsync
@@ -362,7 +373,11 @@ cyberattack
 hotlinking
 pymdownx.superfences
 python/name:pymdownx.superfences.fence_code_format
+deepset
+distilbert
 drupalcode
+darkmode
+runserver
 nondet
 acquia
 aliyun
@@ -394,3 +409,11 @@ markdownify's
 setext
 wsod
 fatals
+functionaljavascript
+simpletest
+tagify
+fataling
+unmigrated
+Inno
+nojs
+subprompts

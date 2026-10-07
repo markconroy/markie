@@ -1,4 +1,8 @@
 # AI CKEditor integration
+
+## Deprecation notice
+This module is being deprecated in favor of the [standalone project](https://www.drupal.org/project/ai_ckeditor). This module will be removed from the AI module in the 1.6.0 release.
+
 ## What is the AI CKEditor integration module?
 The AI CKEditor integration module provides a number of plugins that integrate
 with core's CK Editor 5 module. These plugins allow data to be passed to an LLM

@@ -5,12 +5,15 @@
  * AI module file.
  */
 
+use Drupal\ai\Hook\HtmlToMarkdown;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Hook\Attribute\LegacyHook;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Site\Settings;
 use Drupal\ai\Entity\AiGuardrailSet;
 use Drupal\ai\Form\GlobalGuardrailsSettingsForm;
 use Drupal\ai\Hook\FormElement;
+use Drupal\ai\Service\HtmlToMarkdown\HtmlToMarkdownConverter;
 
 /**
  * Implements hook_modules_installed().
@@ -18,6 +21,45 @@ use Drupal\ai\Hook\FormElement;
 function ai_modules_installed(array $modules) {
   // Clear the provider cache when a module is installed.
   \Drupal::cache('discovery')->delete('ai_provider_plugins');
+
+  if (in_array('markdownify', $modules, TRUE)) {
+    _ai_sync_markdownify_league_settings();
+  }
+}
+
+/**
+ * Copies the AI HTML to Markdown settings into markdownify's league plugin.
+ *
+ * Once markdownify is installed, \Drupal\ai\AiServiceProvider makes
+ * ai.html_to_markdown_converter delegate to markdownify's own converter and
+ * settings. Seeding markdownify's league plugin configuration with the
+ * values that were active in ai.html_to_markdown.settings ensures the actual
+ * conversion output does not change the moment markdownify takes over.
+ *
+ * @see \Drupal\ai\AiServiceProvider
+ * @see \Drupal\ai\Service\HtmlToMarkdown\HtmlToMarkdownConverter
+ */
+function _ai_sync_markdownify_league_settings(): void {
+  $ai_config = \Drupal::config('ai.html_to_markdown.settings');
+
+  // Only copy the known league plugin option keys. Config::getRawData()
+  // would also carry over metadata such as "_core.default_config_hash",
+  // which has no schema once nested under converters.league here and would
+  // fail config schema validation.
+  $league_settings = [];
+  foreach (HtmlToMarkdownConverter::OPTION_KEYS as $key) {
+    $value = $ai_config->get($key);
+    if ($value !== NULL) {
+      $league_settings[$key] = $value;
+    }
+  }
+  if (empty($league_settings)) {
+    return;
+  }
+
+  \Drupal::configFactory()->getEditable('markdownify.settings')
+    ->set('converters.league', $league_settings)
+    ->save();
 }
 
 /**
@@ -120,8 +162,33 @@ function ai_preprocess_links__ai_tools_library_menu(array &$variables): void {
 /**
  * Implements hook_element_info_alter().
  */
+#[LegacyHook]
 function ai_element_info_alter(array &$info) {
   \Drupal::service(FormElement::class)->elementInfoAlter($info);
+}
+
+/**
+ * Implements hook_field_widget_third_party_settings_form().
+ */
+#[LegacyHook]
+function ai_field_widget_third_party_settings_form($plugin, $field_definition, $view_mode, $form, $form_state) {
+  return \Drupal::service(FormElement::class)->fieldWidgetThirdPartySettingsForm($plugin, $field_definition, $view_mode, $form, $form_state);
+}
+
+/**
+ * Implements hook_field_widget_settings_summary_alter().
+ */
+#[LegacyHook]
+function ai_field_widget_settings_summary_alter(array &$summary, array $context) {
+  \Drupal::service(FormElement::class)->fieldWidgetSettingsSummaryAlter($summary, $context);
+}
+
+/**
+ * Implements hook_field_widget_single_element_form_alter().
+ */
+#[LegacyHook]
+function ai_field_widget_single_element_form_alter(array &$element, FormStateInterface $form_state, array $context) {
+  \Drupal::service(FormElement::class)->fieldWidgetSingleElementFormAlter($element, $form_state, $context);
 }
 
 /**
@@ -152,4 +219,12 @@ function ai_form_ai_settings_alter(&$form, FormStateInterface $form_state) {
   else {
     $form['advanced_settings']['allowed_host_wrapper']['allowed_hosts_rewrite_links']['full_trust']['#attributes']['disabled'] = 'disabled';
   }
+}
+
+/**
+ * Implements hook_markdownify_entity_markdown_alter().
+ */
+#[LegacyHook]
+function ai_markdownify_entity_markdown_alter(&$markdown, $context) {
+  \Drupal::service(HtmlToMarkdown::class)->markdownifyEntityMarkdownAlter($markdown, $context);
 }

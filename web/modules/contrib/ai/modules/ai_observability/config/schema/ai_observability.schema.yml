@@ -39,3 +39,15 @@ ai_observability.settings:
     otel_metrics:
       type: boolean
       label: 'Export OpenTelemetry metrics for AI events'
+    summarize_payload:
+      type: boolean
+      label: 'Summarize logged AI input and output payloads'
+    summarize_payload_max_string_length:
+      type: integer
+      label: 'Maximum length to keep before truncating a leaf string value'
+    summarize_payload_max_list_items:
+      type: integer
+      label: 'Maximum number of list items to keep before collapsing the middle'
+    summarize_payload_max_assoc_keys:
+      type: integer
+      label: 'Maximum number of associative array keys to keep before collapsing the tail'

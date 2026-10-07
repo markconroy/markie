@@ -1,0 +1,13 @@
+<?php
+
+/**
+ * @file
+ * Test hooks for the field_widget_actions_test module.
+ */
+
+/**
+ * Implements hook_field_widget_actions_childless_widgets_alter().
+ */
+function field_widget_actions_test_field_widget_actions_childless_widgets_alter(array &$childless_widgets): void {
+  $childless_widgets[] = 'custom_childless_test_widget';
+}

@@ -6,6 +6,9 @@ use Drupal\Core\Config\ImmutableConfig;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\ai\Attribute\AiProvider;
 use Drupal\ai\Base\AiProviderClientBase;
+use Drupal\ai\OperationType\Embeddings\EmbeddingsCollectionInput;
+use Drupal\ai\OperationType\Embeddings\EmbeddingsCollectionInterface;
+use Drupal\ai\OperationType\Embeddings\EmbeddingsCollectionOutput;
 use Drupal\ai\OperationType\Embeddings\EmbeddingsInput;
 use Drupal\ai\OperationType\Embeddings\EmbeddingsInterface;
 use Drupal\ai\OperationType\Embeddings\EmbeddingsOutput;
@@ -18,7 +21,7 @@ use MHz\MysqlVector\Nlp\Embedder;
   id: 'test_mysql_provider',
   label: new TranslatableMarkup('Test MySQL AI Embedding Provider'),
 )]
-class TestMySqlAiEmbeddingProvider extends AiProviderClientBase implements EmbeddingsInterface {
+class TestMySqlAiEmbeddingProvider extends AiProviderClientBase implements EmbeddingsInterface, EmbeddingsCollectionInterface {
 
   /**
    * {@inheritdoc}
@@ -33,6 +36,7 @@ class TestMySqlAiEmbeddingProvider extends AiProviderClientBase implements Embed
   public function getSupportedOperationTypes(): array {
     return [
       'embeddings',
+      'embeddings_collection',
     ];
   }
 
@@ -40,10 +44,7 @@ class TestMySqlAiEmbeddingProvider extends AiProviderClientBase implements Embed
    * {@inheritdoc}
    */
   public function isUsable(?string $operation_type = NULL, array $capabilities = []): bool {
-    if ($operation_type === 'embeddings') {
-      return TRUE;
-    }
-    return FALSE;
+    return in_array($operation_type, ['embeddings', 'embeddings_collection'], TRUE);
   }
 
   /**
@@ -79,10 +80,26 @@ class TestMySqlAiEmbeddingProvider extends AiProviderClientBase implements Embed
     $embedder = new Embedder();
     $embeddings = $embedder->embed([$input]);
     $embedding = reset($embeddings);
+    if (!is_array($embedding)) {
+      $embedding = $embeddings;
+    }
 
     return new EmbeddingsOutput($embedding, $embedding, [
       'model_id' => $model_id,
       'input' => $input,
+    ]);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function embeddingsCollection(EmbeddingsCollectionInput $input, string $model_id, array $tags = []): EmbeddingsCollectionOutput {
+    $embedder = new Embedder();
+    // The embedder returns one vector per input, in order.
+    $embeddings = $embedder->embed($input->getPrompts());
+
+    return new EmbeddingsCollectionOutput($embeddings, $embeddings, [
+      'model_id' => $model_id,
     ]);
   }
 

@@ -2,6 +2,9 @@ request:
   messages:
   - role: user
     text: "hostname-filter-tool-bug-test-trigger"
+    images: []
+    tools: null
+    tool_id: null
   debug_data: {}
   chat_tools: null
   chat_structured_json_schema: {}

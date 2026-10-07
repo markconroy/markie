@@ -135,6 +135,8 @@ class StreamedChatMessageIteratorTest extends UnitTestCase {
     $chunk->setOutputTokenUsage(20);
     $chunk->setCachedTokenUsage(10);
     $chunk->setReasoningTokenUsage(5);
+    $chunk->setCachedWriteTokenUsage(15);
+    $chunk->setToolUseTokenUsage(8);
     $messages[] = $chunk;
     $message->setStreamChatMessages($messages);
     // Now iterate over the messages and check the tokens.
@@ -153,6 +155,8 @@ class StreamedChatMessageIteratorTest extends UnitTestCase {
     $this->assertEquals(20, $tokenUsage->output);
     $this->assertEquals(10, $tokenUsage->cached);
     $this->assertEquals(5, $tokenUsage->reasoning);
+    $this->assertEquals(15, $tokenUsage->cachedWrite);
+    $this->assertEquals(8, $tokenUsage->toolUse);
   }
 
 }

@@ -1,0 +1,103 @@
+# Use the Drupal GitLab CI template.
+include:
+  - project: $_GITLAB_TEMPLATES_REPO
+    ref: $_GITLAB_TEMPLATES_REF
+    file:
+      - '/includes/include.drupalci.main.yml'
+      - '/includes/include.drupalci.variables.yml'
+      - '/includes/include.drupalci.workflows.yml'
+
+variables:
+  # Give more verbose PHPUnit output.
+  _PHPUNIT_EXTRA: --verbose
+  # Opt into the relevant versions.
+  # Drupal 10 does not support #[RunTestsInSeparateProcesses], but it is
+  # required for Drupal 12 (Next Major). There is no middle ground here.
+  # @todo Uncomment once Drupal 10 is no longer support.
+  # OPT_IN_TEST_PREVIOUS_MAJOR: 1
+  OPT_IN_TEST_PREVIOUS_MINOR: 1
+  OPT_IN_TEST_NEXT_MINOR: 1
+  # Until Drupal 12 is closer and upstream gitlab CI issues resolved.
+  OPT_IN_TEST_NEXT_MAJOR: 0
+  OPT_IN_TEST_MAX_PHP: 1
+  # Use runtests.sh which gives better output.
+  _PHPUNIT_CONCURRENT: 1
+  # Configured skipped tests.
+  SKIP_ESLINT: 1
+  SKIP_STYLELINT: 1   # Until fixed in gitlab templates.
+  _CSPELL_IGNORE_PATHS: "'.cspell-project-words.txt'"
+
+phpunit:
+  variables:
+    SYMFONY_DEPRECATIONS_HELPER: "ignoreFile=$CI_PROJECT_DIR/.ignored-deprecations.txt"
+  # The drupal/ai dev dependency (required for the AI Automator integration
+  # tests) bundles a deprecated copy of this module that shares the
+  # 'field_widget_actions' machine name and PHP namespace
+  # (https://www.drupal.org/node/3568339). Because both register the
+  # Drupal\field_widget_actions\ namespace, the PHPUnit autoloader can resolve
+  # classes such as the hook to the outdated bundled version instead of the
+  # module under test, which makes kernel tests fail. Remove only the colliding
+  # bundled module; drupal/ai (and ai_automators) stay so the AI tests still run.
+  # @todo Remove this workaround once the deprecated bundled module is removed
+  #   from drupal/ai. See https://git.drupalcode.org/project/ai/-/work_items/3586556
+  before_script:
+    - |
+      echo "Removing deprecated field_widget_actions module bundled in drupal/ai to avoid a namespace collision (https://www.drupal.org/node/3568339)."
+      find "$CI_PROJECT_DIR/$_WEB_ROOT/modules" -type d -path '*/ai/modules/field_widget_actions' -prune -exec rm -rf {} + || true
+      echo "Remaining field_widget_actions modules in the codebase:"
+      find "$CI_PROJECT_DIR/$_WEB_ROOT/modules" -name field_widget_actions.info.yml || true
+
+pages:
+  stage: .post
+  rules:
+    - if: '$CI_COMMIT_TAG'   # skip tags
+      when: never
+    - if: '$CI_COMMIT_REF_NAME !~ /^[0-9]+\.[0-9]+\.x$/'
+      when: never
+    - changes:
+        - docs/*
+      when: on_success
+    - when: never
+  script:
+    - echo "Project name is $CI_PROJECT_NAME"
+    - echo "Get the version - only for branches matching the pattern [0-9]+.[0-9]+.x"
+    - |
+      if [[ "$CI_COMMIT_REF_NAME" =~ ^([0-9]+)\.([0-9]+)\.x$ ]]; then
+        VERSION="${BASH_REMATCH[1]}.${BASH_REMATCH[2]}.x"
+        echo "Version to write documentation for: $VERSION"
+      else
+        echo "Branch $CI_COMMIT_REF_NAME does not match version pattern."
+        exit 1
+      fi
+    - cd $CI_PROJECT_DIR && pwd
+    - pip install mkdocs-material mike mkdocs-glightbox mkdocs-include-markdown-plugin
+    - echo "Pulling latest changes from origin to get mike versions"
+    - git fetch origin gh-pages --depth=1
+    - pwd && ls -l logo* && ls -l docs/logo* || true
+    - |
+      if [[ -f logo.png ]]; then
+        # Do not copy the logo if the destination file already exists.
+        test -f docs/logo.png && echo "logo.png not copied to /docs because that file already exists." || cp -v logo.png docs/logo.png
+      fi
+    - echo "Setup Mike for deployment"
+    - git config --global user.name "CI Bot Field Widget Actions"
+    - git config --global user.email "ci-bot-fwa@drupal.org"
+    - git config pull.rebase false
+    - echo "Allowing Mike to deploy to the gh-pages branch"
+    - git remote set-url origin https://oauth2:${DOCS_TOKEN}@git.drupalcode.org/project/field_widget_actions.git
+    - echo "Deploying documentation to gh-pages branch to have latest built version"
+    - mike deploy $VERSION --push
+    - mike set-default $VERSION --push
+    - echo "Remove any changes"
+    - git reset --hard
+    - git clean -fd
+    - echo "Switching to updated gh-pages branch to copy the built documentation"
+    - git checkout gh-pages
+    - mv mkdocs public
+
+cspell:
+  allow_failure: false
+phpcs:
+  allow_failure: false
+phpstan:
+  allow_failure: false

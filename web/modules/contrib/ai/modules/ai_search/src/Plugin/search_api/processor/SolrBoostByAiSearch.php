@@ -27,10 +27,7 @@ class SolrBoostByAiSearch extends BoostByAiSearchBase {
    * {@inheritdoc}
    */
   public static function supportsIndex(IndexInterface $index): bool {
-    if ($index->getServerInstance()->getBackendId() == 'search_api_solr') {
-      return TRUE;
-    }
-    return FALSE;
+    return $index->hasValidServer() && $index->getServerInstance()->getBackendId() === 'search_api_solr';
   }
 
   /**
@@ -65,7 +62,7 @@ class SolrBoostByAiSearch extends BoostByAiSearchBase {
     // index is being filtered only without any terms, in which case we have
     // nothing more to do.
     if ($query_string_keys = $query->getKeys()) {
-      $ai_results = $this->getAiSearchResults($query_string_keys);
+      $ai_results = $this->getAiSearchResults($query_string_keys, $query);
       if ($ai_results) {
 
         // This gets passed via the SolrBoostByAiSearchEventSubscriber class
@@ -92,6 +89,9 @@ class SolrBoostByAiSearch extends BoostByAiSearchBase {
     // The item IDs are stored with a prefix that includes the server and index
     // ID, followed by the item ID.
     $index = $query->getIndex();
+    if (!$index->hasValidServer()) {
+      return;
+    }
     $hash = $index->getServerInstance()->getBackend()->getTargetedSiteHash($index);
     $prefix = $hash . '-' . $index->id() . '-';
 

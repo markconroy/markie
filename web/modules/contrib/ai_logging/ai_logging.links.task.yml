@@ -1,0 +1,25 @@
+entity.ai_log.view:
+  title: 'View'
+  route_name: entity.ai_log.canonical
+  base_route: entity.ai_log.canonical
+entity.ai_log.edit_form:
+  title: 'Edit'
+  route_name: entity.ai_log.edit_form
+  base_route: entity.ai_log.canonical
+entity.ai_log.delete_form:
+  title: 'Delete'
+  route_name: entity.ai_log.delete_form
+  base_route: entity.ai_log.canonical
+  weight: 10
+# The AI Logs view's own route answers requests for the collection path, so
+# the tabs are attached to it rather than to entity.ai_log.collection.
+entity.ai_log.collection:
+  title: 'All logs'
+  route_name: view.ai_logs.page_1
+  base_route: view.ai_logs.page_1
+  weight: 10
+entity.ai_log.threads:
+  title: 'Threads'
+  route_name: entity.ai_log.threads
+  base_route: view.ai_logs.page_1
+  weight: 11

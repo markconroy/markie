@@ -1,0 +1,13 @@
+name: Field Validation
+type: module
+description: 'Provides customizable field validation rules.'
+package: Fields
+core_version_requirement: ^10.2 || ^11
+configure: entity.field_validation_rule_set.collection
+dependencies:
+  - drupal:field
+
+# Information added by Drupal.org packaging script on 2026-10-01
+version: '3.0.0'
+project: 'field_validation'
+datestamp: 1790848978

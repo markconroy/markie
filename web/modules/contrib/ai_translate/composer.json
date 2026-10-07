@@ -1,0 +1,28 @@
+{
+    "name": "drupal/ai_translate",
+    "description": "This module provides simple one-click AI-powered translations.",
+    "type": "drupal-module",
+    "license": "GPL-2.0-or-later",
+    "require": {
+        "drupal/ai": ">1.2.1"
+    },
+    "require-dev": {
+        "drupal/layout_builder_at": "^3.0",
+        "drupal/layout_builder_st": "^2.0",
+        "drupal/tool": "^1.0@beta",
+        "drush/drush": "^12 || ^13"
+    },
+    "suggest": {
+        "drupal/tool": "Install to expose AI Translate as a Tool plugin via the optional ai_translate_tool submodule."
+    },
+    "autoload": {
+        "psr-4": {
+            "Drupal\\ai_translate\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Drupal\\Tests\\ai_translate\\": "tests/src/"
+        }
+    }
+}

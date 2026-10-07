@@ -3,7 +3,10 @@
 namespace Drupal\ai\Base;
 
 use Drupal\Component\Plugin\PluginBase;
+use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Access\AccessResultInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Session\AccountInterface;
 use Drupal\ai\OperationType\Chat\ChatInput;
 use Drupal\ai\OperationType\Chat\ChatOutput;
 use Drupal\ai\OperationType\GenericType\GenericFile;
@@ -98,6 +101,13 @@ abstract class ChatProcessorBase extends PluginBase implements ChatProcessorInte
   /**
    * {@inheritdoc}
    */
+  public function resetThread($thread_id): string {
+    return $thread_id;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function setFinished(bool $finished): void {
     $this->finished = $finished;
   }
@@ -144,6 +154,39 @@ abstract class ChatProcessorBase extends PluginBase implements ChatProcessorInte
     // By default, images are allowed.
     // Override this method in your plugin to disallow images.
     return TRUE;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function access(AccountInterface $account): AccessResultInterface {
+    // By default, plugins impose no restrictions of their own. Override
+    // this method to enforce plugin-specific access rules.
+    return AccessResult::allowed();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getMessageHistory(): array {
+    // By default, plugins keep no server-side history.
+    return [];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function onStreamComplete(string $message): void {
+    // By default, nothing to persist. Override in plugins that keep
+    // server-side history.
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getPostResponseMarkup(): string {
+    // By default, nothing to append.
+    return '';
   }
 
   /**

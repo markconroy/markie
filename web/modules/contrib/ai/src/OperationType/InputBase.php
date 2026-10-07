@@ -19,6 +19,13 @@ abstract class InputBase implements InputInterface {
   private array $debugData = [];
 
   /**
+   * Free-form request metadata carried through to AI request events.
+   *
+   * @var array
+   */
+  private array $requestMetadata = [];
+
+  /**
    * The guardrail sets that will be applied to this input.
    *
    * Keyed by guardrail set id, insertion-ordered.
@@ -46,6 +53,34 @@ abstract class InputBase implements InputInterface {
    */
   public function setDebugDataValue(string $key, $value): void {
     $this->debugData[$key] = $value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getAllRequestMetadata(): array {
+    return $this->requestMetadata;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setAllRequestMetadata(array $metadata): void {
+    $this->requestMetadata = $metadata;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getRequestMetadataValue(string $key): mixed {
+    return $this->requestMetadata[$key] ?? NULL;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setRequestMetadataValue(string $key, mixed $value): void {
+    $this->requestMetadata[$key] = $value;
   }
 
   /**

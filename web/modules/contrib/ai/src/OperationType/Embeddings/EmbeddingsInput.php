@@ -30,7 +30,7 @@ class EmbeddingsInput extends InputBase implements InputInterface {
    *
    * @param string $prompt
    *   The prompt to convert to vectors.
-   * @param \Drupal\ai\OperationType\GenericType\ImageFile $image
+   * @param \Drupal\ai\OperationType\GenericType\ImageFile|null $image
    *   The image to convert to vectors.
    */
   public function __construct(string $prompt = '', ?ImageFile $image = NULL) {
@@ -51,7 +51,7 @@ class EmbeddingsInput extends InputBase implements InputInterface {
   /**
    * Get the image.
    *
-   * @return \Drupal\ai\OperationType\GenericType\ImageFile
+   * @return \Drupal\ai\OperationType\GenericType\ImageFile|null
    *   The image.
    */
   public function getImage(): ImageFile|null {
@@ -64,7 +64,7 @@ class EmbeddingsInput extends InputBase implements InputInterface {
    * @param string $prompt
    *   The prompt.
    */
-  public function setPrompt(string $prompt) {
+  public function setPrompt(string $prompt): void {
     $this->prompt = $prompt;
   }
 

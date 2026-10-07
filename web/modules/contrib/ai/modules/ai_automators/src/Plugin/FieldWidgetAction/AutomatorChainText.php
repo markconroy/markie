@@ -1,0 +1,37 @@
+<?php
+
+namespace Drupal\ai_automators\Plugin\FieldWidgetAction;
+
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\field_widget_actions\Attribute\FieldWidgetAction;
+
+/**
+ * The Automator Chain Text action.
+ *
+ * Uses the base-class AJAX + setFormInput contract: the chain's output
+ * items map cleanly to the per-delta ['value' => $text] shape that
+ * string_textfield / string_textarea / text_textfield / text_textarea
+ * widgets expect as user input.
+ */
+#[FieldWidgetAction(
+  id: 'automator_chain_text',
+  label: new TranslatableMarkup('Automator Chain Text Suggestion'),
+  widget_types: [
+    'string_textfield',
+    'string_textarea',
+    'text_textfield',
+    'text_textarea',
+    'text_textarea_with_summary',
+  ],
+  field_types: [
+    'string',
+    'string_long',
+    'text',
+    'text_long',
+    'text_with_summary',
+  ],
+  category: new TranslatableMarkup('AI Automators'),
+)]
+class AutomatorChainText extends AutomatorChainBaseAction {
+
+}

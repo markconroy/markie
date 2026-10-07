@@ -1,0 +1,53 @@
+field_widget_action_plugin_base:
+  type: mapping
+  mapping:
+    plugin_id:
+      type: string
+      label: 'Plugin ID'
+      constraints:
+        PluginExists:
+          manager: plugin.manager.field_widget_actions
+          interface: 'Drupal\field_widget_actions\FieldWidgetActionInterface'
+    enabled:
+      type: boolean
+      label: Enabled
+    automatic:
+      type: boolean
+      label: 'Automatic'
+    button_label:
+      type: label
+      label: 'Button Label'
+    multiple:
+      type: boolean
+      label: 'Multiple'
+    weight:
+      type: integer
+      label: 'Weight'
+    enable_refinement:
+      type: boolean
+      label: 'Enable interactive refinement'
+    refinement_modal_title:
+      type: label
+      label: 'Refinement modal title'
+      nullable: true
+    show_result_message:
+      type: boolean
+      label: 'Show a message with the result of the action'
+    message_success:
+      type: label
+      label: 'Message shown when the action returns a value'
+      nullable: true
+    message_empty:
+      type: label
+      label: 'Message shown when the action returns no value'
+      nullable: true
+
+field_widget_action.plugin.*:
+  type: field_widget_action_plugin_base
+
+field.widget.third_party.field_widget_actions:
+  type: sequence
+  label: 'Actions'
+  sequence:
+    type: field_widget_action.plugin.[plugin_id]
+    label: 'Action settings'

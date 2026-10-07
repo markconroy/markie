@@ -1,0 +1,52 @@
+# --- Field Widget Action Custom Ignores ---
+/Using @FieldWidget annotation for plugin with ID tagify_.*/
+
+# --- Drupal Core Ignores ---
+/Since symfony\/validator 7\.3: Passing an array of options to configure the "Drupal\\Core\\Validation\\Plugin\\Validation\\Constraint\\NotNullConstraint" constraint is deprecated, use named arguments instead\./
+/The "Drupal\\Core\\Field\\FieldUpdateActionBase::execute\(\)" method will require a new "object\|null \$object" argument in the next major version of its interface "Drupal\\Core\\Executable\\ExecutableInterface", not defining it is deprecated\./
+/The "Drupal\\Core\\Action\\Plugin\\Action\\EmailAction::execute\(\)" method will require a new "object\|null \$object" argument in the next major version of its interface "Drupal\\Core\\Executable\\ExecutableInterface", not defining it is deprecated\./
+/The "Drupal\\Core\\Action\\Plugin\\Action\\MessageAction::execute\(\)" method will require a new "object\|null \$object" argument in the next major version of its interface "Drupal\\Core\\Executable\\ExecutableInterface", not defining it is deprecated\./
+/The "Drupal\\Core\\Action\\Plugin\\Action\\PublishAction::execute\(\)" method will require a new "object\|null \$object" argument in the next major version of its interface "Drupal\\Core\\Executable\\ExecutableInterface", not defining it is deprecated\./
+/The "Drupal\\Core\\Action\\Plugin\\Action\\SaveAction::execute\(\)" method will require a new "object\|null \$object" argument in the next major version of its interface "Drupal\\Core\\Executable\\ExecutableInterface", not defining it is deprecated\./
+/The "Drupal\\Core\\Action\\Plugin\\Action\\UnpublishAction::execute\(\)" method will require a new "object\|null \$object" argument in the next major version of its interface "Drupal\\Core\\Executable\\ExecutableInterface", not defining it is deprecated\./
+/The "Drupal\\user\\Plugin\\Action\\AddRoleUser::execute\(\)" method will require a new "object\|null \$object" argument in the next major version of its interface "Drupal\\Core\\Executable\\ExecutableInterface", not defining it is deprecated\./
+/The "Drupal\\user\\Plugin\\Action\\BlockUser::execute\(\)" method will require a new "object\|null \$object" argument in the next major version of its interface "Drupal\\Core\\Executable\\ExecutableInterface", not defining it is deprecated\./
+/The "Drupal\\user\\Plugin\\Action\\RemoveRoleUser::execute\(\)" method will require a new "object\|null \$object" argument in the next major version of its interface "Drupal\\Core\\Executable\\ExecutableInterface", not defining it is deprecated\./
+/The "Drupal\\user\\Plugin\\Action\\UnblockUser::execute\(\)" method will require a new "object\|null \$object" argument in the next major version of its interface "Drupal\\Core\\Executable\\ExecutableInterface", not defining it is deprecated\./
+/The "Drupal\\Core\\Block\\BlockManager::getSortedDefinitions\(\)" method will require a new "string \$label_key" argument in the next major version of its interface "Drupal\\Component\\Plugin\\CategorizingPluginManagerInterface", not defining it is deprecated\./
+/The "Twig\\Environment::getTemplateClass\(\)" method is considered internal\. It may change without further notice\. You should not extend it from "Drupal\\Core\\Template\\TwigEnvironment"\./
+/Method "Twig\\Extension\\ExtensionInterface::getFunctions\(\)" might add "array" as a native return type declaration in the future\. Do the same in implementation "Drupal\\Core\\Template\\TwigExtension" now to avoid errors or add an explicit @return annotation to suppress this message\./
+/Method "Twig\\Extension\\ExtensionInterface::getFilters\(\)" might add "array" as a native return type declaration in the future\. Do the same in implementation "Drupal\\Core\\Template\\TwigExtension" now to avoid errors or add an explicit @return annotation to suppress this message\./
+/Method "Twig\\Extension\\ExtensionInterface::getNodeVisitors\(\)" might add "array" as a native return type declaration in the future\. Do the same in implementation "Drupal\\Core\\Template\\TwigExtension" now to avoid errors or add an explicit @return annotation to suppress this message\./
+/Method "Twig\\Extension\\ExtensionInterface::getTokenParsers\(\)" might add "array" as a native return type declaration in the future\. Do the same in implementation "Drupal\\Core\\Template\\TwigExtension" now to avoid errors or add an explicit @return annotation to suppress this message\./
+/Method "Twig\\Loader\\FilesystemLoader::findTemplate\(\)" might add "\?string" as a native return type declaration in the future\. Do the same in child class "Drupal\\Core\\Template\\Loader\\FilesystemLoader" now to avoid errors or add an explicit @return annotation to suppress this message\./
+/Method "Twig\\Loader\\LoaderInterface::exists\(\)" might add "bool" as a native return type declaration in the future\. Do the same in implementation "Drupal\\Core\\Template\\Loader\\StringLoader" now to avoid errors or add an explicit @return annotation to suppress this message\./
+# Twig return-type deprecations for core Template classes, triggered as soon as a
+# template renders (e.g. the image widget rendering its upload help).
+/Method "Twig\\[^"]+" might add "[^"]+" as a native return type declaration in the future\. Do the same in (implementation|child class) "Drupal\\Core\\Template\\[^"]+" now to avoid errors or add an explicit @return annotation to suppress this message\./
+/The "Drupal\\Core\\Database\\Query\\Select::hasAllTags\(\)" method will require a new "string \.\.\. \$tags" argument in the next major version of its interface "Drupal\\Core\\Database\\Query\\AlterableInterface", not defining it is deprecated\./
+/The "Drupal\\Core\\Database\\Query\\Select::hasAnyTag\(\)" method will require a new "string \.\.\. \$tags" argument in the next major version of its interface "Drupal\\Core\\Database\\Query\\AlterableInterface", not defining it is deprecated\./
+/The "cache\.static" service is deprecated in drupal:11\.3\.0 and is removed from drupal:13\.0\.0\. Use the cache\.memory bin instead\. See https:\/\/www\.drupal\.org\/node\/3546856/
+/The "cache\.backend\.memory" service is deprecated in drupal:11\.3\.0 and is removed from drupal:13\.0\.0\. Use cache\.backend\.memory\.memory instead\. See https:\/\/www\.drupal\.org\/node\/3546856/
+/The "plugin\.manager\.archiver" service is deprecated in drupal:11\.3\.0 and is removed from drupal:12\.0\.0\. There is no replacement\. See https:\/\/www\.drupal\.org\/node\/3556927/
+/Drupal\\Core\\Archiver\\ArchiverManager is deprecated in drupal:11\.3\.0 and is removed from drupal:12\.0\.0\. There is no replacement\. See https:\/\/www\.drupal\.org\/node\/3556927/
+/Since symfony\/validator 7\.4: Support for evaluating options in the base Constraint class is deprecated\. Initialize properties in the constructor of Drupal\\Core\\Validation\\Plugin\\Validation\\Constraint\\ValidKeysConstraint instead\./
+/The "Drupal\\taxonomy\\VocabularyListBuilder::getDefaultOperations\(\)" method will require a new "\\Drupal\\Core\\Cache\\CacheableMetadata\|null \$cacheability" argument in the next major version of its parent class "Drupal\\Core\\Entity\\EntityListBuilder", not defining it is deprecated\./
+/The "Drupal\\Core\\Entity\\Query\\QueryBase::hasAllTags\(\)" method will require a new "string \.\.\. \$tags" argument in the next major version of its interface "Drupal\\Core\\Database\\Query\\AlterableInterface", not defining it is deprecated\./
+/The "Drupal\\Core\\Entity\\Query\\QueryBase::hasAnyTag\(\)" method will require a new "string \.\.\. \$tags" argument in the next major version of its interface "Drupal\\Core\\Database\\Query\\AlterableInterface", not defining it is deprecated\./
+/The "Drupal\\Core\\Entity\\EntityListBuilder::getOperations\(\)" method will require a new "\\Drupal\\Core\\Cache\\CacheableMetadata\|null \$cacheability" argument in the next major version of its interface "Drupal\\Core\\Entity\\EntityListBuilderInterface", not defining it is deprecated\./
+/The "Drupal\\Core\\Config\\Entity\\ConfigEntityListBuilder::getDefaultOperations\(\)" method will require a new "\\Drupal\\Core\\Cache\\CacheableMetadata\|null \$cacheability" argument in the next major version of its parent class "Drupal\\Core\\Entity\\EntityListBuilder", not defining it is deprecated\./
+/Since symfony\/http-foundation 7\.4: Request::get\(\) is deprecated, use properties ->attributes, query or request directly instead\./
+
+# --- Drupal Core previous minor (11.2.x) Doctrine annotation deprecations ---
+/Method "Doctrine\\Common\\Annotations\\Reader::[^"]+" might add/
+# --- drupal/ai dependency deprecations ---
+/[a-z_]+ without a #\[LegacyRequirementsHook\] attribute is deprecated in drupal:11\.3\.0/
+/Using @EntityType annotation for plugin with ID [a-z_]+ is deprecated/
+/Method "Symfony\\Component\\Validator\\ConstraintValidatorInterface::validate\(\)" might add "void".*Drupal\\ai\\/
+/The "Drupal\\ai_automators\\Plugin\\Action\\RunAutomatorAction::execute\(\)" method will require a new "object\|null \$object" argument in the next major version of its interface "Drupal\\Core\\Executable\\ExecutableInterface", not defining it is deprecated\./
+# Drupal Core previous minor
+%Method "Behat\\Mink\\Driver\\CoreDriver::[^"]+" might add "void" as a native return type declaration in the future. Do the same in child class "Drupal\\FunctionalJavascriptTests\\DrupalSelenium2Driver" now to avoid errors or add an explicit @return annotation to suppress this message%
+%Method "Behat\\Mink\\WebAssert::[^"]+" might add "void" as a native return type declaration in the future. Do the same in child class "Drupal\\FunctionalJavascriptTests\\WebDriverWebAssert" now to avoid errors or add an explicit @return annotation to suppress this message%
+%Method "Behat\\Mink\\WebAssert::[^"]+" might add "void" as a native return type declaration in the future. Do the same in child class "Drupal\\Tests\\WebAssert" now to avoid errors or add an explicit @return annotation to suppress this message%
+/Not supporting attribute discovery in Drupal\\key\\Plugin\\KeyPluginManager is deprecated/

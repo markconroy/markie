@@ -15,3 +15,9 @@ entity.automators_tool.overview:
   parent: ai_automators.list
   description: 'Create a tool from an automators workflow.'
   route_name: entity.automators_tool.collection
+
+ai_automators.settings:
+  title: 'Automators Queue Settings'
+  description: 'Configure AI Automators queue and cron behavior.'
+  parent: ai_automators.list
+  route_name: ai_automators.settings

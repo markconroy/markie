@@ -108,7 +108,7 @@ class AgentRunner {
       foreach ($chat_history as $message) {
         $new_messages[] = new ChatMessage($message['role'], $message['message']);
       }
-      $input = new ChatInput($new_messages, []);
+      $input = new ChatInput($new_messages);
       $agent->setChatInput($input);
       $agent->setAiProvider($this->aiProvider->createInstance($defaults['provider_id']));
       $agent->setModelName($defaults['model_id']);
@@ -134,7 +134,7 @@ class AgentRunner {
     $response = $agent->solve();
 
     // Check if tools was used.
-    $message = new ChatMessage('assistant', $response ?? '');
+    $message = new ChatMessage('assistant', is_string($response) ? $response : '');
 
     if ($history = $agent->getChatHistory()) {
       // Get the last message from the history.

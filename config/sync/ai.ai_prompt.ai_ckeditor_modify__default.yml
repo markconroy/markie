@@ -1,0 +1,8 @@
+uuid: d998d6d9-77fa-4b32-bf86-22fab243a510
+langcode: en
+status: true
+dependencies: {  }
+id: ai_ckeditor_modify__default
+label: 'Default prompt for modifying CKEditor text'
+type: ai_ckeditor_modify
+prompt: "Use the following instructions to process this text. Return only the processed text without explanations.\r\nInstructions: {modifyPrompt}\r\n\r\nText to process:\n{inputText}"

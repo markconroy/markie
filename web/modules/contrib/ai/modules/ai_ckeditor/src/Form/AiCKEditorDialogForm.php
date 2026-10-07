@@ -60,6 +60,9 @@ class AiCKEditorDialogForm extends FormBase {
     $request = $this->getRequest();
     $payload = $request->getPayload();
 
+    $entity_type = $payload->get('entity_type') ?? '';
+    $entity_id = $payload->get('entity_id') ?? '';
+
     // Ensure 'editor_id' is provided.
     $editor_id = $payload->get('editor_id');
 
@@ -136,6 +139,8 @@ class AiCKEditorDialogForm extends FormBase {
           'editor_id' => $editor_id,
           'plugin_id' => $plugin_id,
           'selected_text' => $selected_text,
+          'entity_type' => $entity_type,
+          'entity_id' => $entity_id,
         ]);
         $form['plugin_config']['#tree'] = TRUE;
 
@@ -151,6 +156,14 @@ class AiCKEditorDialogForm extends FormBase {
         $form['selected_text'] = [
           '#type' => 'hidden',
           '#value' => $selected_text,
+        ];
+        $form['entity_type'] = [
+          '#type' => 'hidden',
+          '#value' => $entity_type,
+        ];
+        $form['entity_id'] = [
+          '#type' => 'hidden',
+          '#value' => $entity_id,
         ];
       }
       catch (\Exception $exception) {

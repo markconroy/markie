@@ -1,0 +1,73 @@
+# Use the Drupal GitLab CI template.
+include:
+  - project: $_GITLAB_TEMPLATES_REPO
+    ref: $_GITLAB_TEMPLATES_REF
+    file:
+      - '/includes/include.drupalci.main.yml'
+      - '/includes/include.drupalci.variables.yml'
+      - '/includes/include.drupalci.workflows.yml'
+
+variables:
+  # Give more verbose PHPUnit output.
+  _PHPUNIT_EXTRA: --verbose
+  # Opt into the relevant versions.
+  OPT_IN_TEST_PREVIOUS_MAJOR: 1
+  OPT_IN_TEST_PREVIOUS_MINOR: 1
+  OPT_IN_TEST_NEXT_MINOR: 1
+  OPT_IN_TEST_NEXT_MAJOR: 0
+  OPT_IN_TEST_MAX_PHP: 1
+  # Use runtests.sh which gives better output.
+  _PHPUNIT_CONCURRENT: 1
+  # Configured skipped tests.
+  SKIP_ESLINT: 1
+  SKIP_STYLELINT: 1   # Until fixed in gitlab templates.
+  _CSPELL_IGNORE_PATHS: "'.cspell-project-words.txt'"
+  COMPOSER_IGNORE_PLATFORM_REQS: 'ext-ffi'
+
+phpunit (previous major):
+  allow_failure: true
+  needs:
+    - composer (previous major)
+  before_script:
+    # We need to build 8.1 with the FFI extension enabled.
+    # Install dependencies.
+    - apt-get update
+    - apt-get install -y --no-install-recommends $PHPIZE_DEPS libffi-dev
+    # Download and extract PHP source.
+    - curl -LS -o /usr/src/php.tar.xz "https://php.net/distributions/php-$(php -r 'echo PHP_VERSION;').tar.xz"
+    - docker-php-source extract
+    # Compile the FFI module.
+    - |-
+      (
+        cd /usr/src/php/ext/ffi
+        phpize
+        ./configure
+        make
+        make install
+      )
+    # Enable the FFI module.
+    - echo "extension=ffi.so" > /usr/local/etc/php/conf.d/docker-php-ext-ffi.ini
+    - echo "ffi.enable=true" >> /usr/local/etc/php/conf.d/docker-php-ext-ffi.ini
+    # Show the configuration for debugging purposes.
+    - php -i | grep ffi
+
+composer (previous major):
+  before_script:
+    # We need doctrine/instantiator to still be on 2.0 for previous major.
+    - composer require doctrine/instantiator:"2.0.0" --no-update
+
+cspell:
+  allow_failure: false
+phpcs:
+  allow_failure: false
+phpstan:
+  allow_failure: false
+
+.phpunit-base:
+  before_script:
+    # Enable the FFI module.
+    - echo "extension=ffi" > /usr/local/etc/php/conf.d/docker-php-ext-ffi.ini
+    - echo "ffi.enable=true" >> /usr/local/etc/php/conf.d/docker-php-ext-ffi.ini
+    # Show the configuration for debugging purposes.
+    - php --ri ffi
+

@@ -32,6 +32,6 @@ use Drupal\field_widget_actions\Attribute\FieldWidgetAction;
   ],
   category: new TranslatableMarkup('AI Automators'),
 )]
-class Text extends AutomatorBaseAction {
+class Text extends AutomatorRefinableBaseAction {
 
 }

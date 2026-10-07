@@ -13,6 +13,7 @@ use Drupal\ai_api_explorer\AiApiExplorerPluginBase;
 use Drupal\ai_api_explorer\Attribute\AiApiExplorer;
 use Drupal\ai_api_explorer\ExplorerHelper;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\Component\Serialization\Json;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
@@ -72,8 +73,9 @@ final class VectorDBGenerator extends AiApiExplorerPluginBase {
 
     // Check so a search api index exists.
     $return = FALSE;
+    $sapi_storage = $this->entityTypeManager->getStorage('search_api_index');
     try {
-      if ($indexes = $this->entityTypeManager->getStorage('search_api_index')->loadMultiple()) {
+      if ($indexes = $sapi_storage->loadMultiple($sapi_storage->getQuery()->condition('status', 1)->execute())) {
         /** @var \Drupal\search_api\IndexInterface $index */
         foreach ($indexes as $index) {
           $backend = $index->hasValidServer() ? $index->getServerInstance()->getBackendId() : NULL;
@@ -102,8 +104,9 @@ final class VectorDBGenerator extends AiApiExplorerPluginBase {
   public function buildForm(array $form, FormStateInterface $form_state): array {
     $options = [];
 
+    $sapi_storage = $this->entityTypeManager->getStorage('search_api_index');
     /** @var \Drupal\search_api\IndexInterface $index */
-    foreach ($this->entityTypeManager->getStorage('search_api_index')->loadMultiple() as $index) {
+    foreach ($this->entityTypeManager->getStorage('search_api_index')->loadMultiple($sapi_storage->getQuery()->condition('status', 1)->execute()) as $index) {
       $backend = $index->hasValidServer() ? $index->getServerInstance()->getBackendId() : NULL;
 
       if ($backend == 'search_api_ai_search') {
@@ -206,7 +209,22 @@ final class VectorDBGenerator extends AiApiExplorerPluginBase {
             $form['right']['response']['#context']['ai_response']['table']['#header'][$key] = ucfirst($key);
           }
 
-          $html = $converter ? $converter->convert($value) : $value;
+          // Handle array values by converting to JSON or string representation.
+          if (is_array($value)) {
+            $value = Json::encode($value);
+          }
+          elseif (!is_string($value)) {
+            $value = (string) $value;
+          }
+
+          // Only apply markdown conversion to 'content' field
+          // (or other text fields).
+          if ($converter && $key === 'content') {
+            $html = $converter->convert($value);
+          }
+          else {
+            $html = htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+          }
 
           $row_data[$key] = [
             'data' => [

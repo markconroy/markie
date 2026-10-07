@@ -322,11 +322,10 @@ class ChatFormBlock extends BlockBase implements ContainerFactoryPluginInterface
     }
 
     $has_history = FALSE;
-    if ($assistant->get('allow_history') == 'session_one_thread') {
+    if ($assistant->getChatMemory()?->hasPersistentThread()) {
       $session_messages = $this->aiAssistantRunner->getMessageHistory();
       $has_history = count($session_messages) > 0;
       foreach ($session_messages as $message) {
-        // Only show messages newer then 1 day and not finished messages.
         if (isset($message['timestamp']) && $message['timestamp'] > strtotime('-1 day') && (!empty($message['message']) &&
           !str_contains($message['message'], '<div class="loader"></div>'))) {
           $messages[] = [

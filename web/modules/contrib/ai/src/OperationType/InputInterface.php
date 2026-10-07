@@ -46,6 +46,51 @@ interface InputInterface {
   public function setDebugDataValue(string $key, $value): void;
 
   /**
+   * Returns all request-level metadata attached to this input.
+   *
+   * Request metadata is a free-form bag that callers can use to pass directed
+   * context through to AI request events (pre, post, streaming). Unlike debug
+   * data, it is intended to be read by event subscribers that need request
+   * context beyond what the input object itself carries, e.g. the editing
+   * entity type and bundle for ai_ckeditor requests. Distinct from any
+   * operation-specific metadata that concrete input classes (e.g.
+   * ReRankInput) may carry for their own purposes.
+   *
+   * @return array
+   *   The request metadata array.
+   */
+  public function getAllRequestMetadata(): array;
+
+  /**
+   * Replaces all request-level metadata on this input.
+   *
+   * @param array $metadata
+   *   The request metadata array.
+   */
+  public function setAllRequestMetadata(array $metadata): void;
+
+  /**
+   * Gets a single request metadata entry by key.
+   *
+   * @param string $key
+   *   The key to look up.
+   *
+   * @return mixed
+   *   The metadata value, or NULL if not set.
+   */
+  public function getRequestMetadataValue(string $key): mixed;
+
+  /**
+   * Sets a single request metadata entry by key.
+   *
+   * @param string $key
+   *   The key.
+   * @param mixed $value
+   *   The value.
+   */
+  public function setRequestMetadataValue(string $key, mixed $value): void;
+
+  /**
    * Set the guardrail set for this input.
    *
    * @param \Drupal\ai\Guardrail\AiGuardrailSetInterface $guardrails

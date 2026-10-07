@@ -1,0 +1,17 @@
+# Based on the default configuration from the GitLab Templates project, with
+# an extra rule for Drupal 10.
+parameters:
+  level: 0
+  fileExtensions:
+    - php
+    - module
+    - inc
+    - install
+    - theme
+    - profile
+  reportUnmatchedIgnoredErrors: false
+  ignoreErrors:
+    # new static() is a best practice in Drupal, so we cannot fix that.
+    - "#^Unsafe usage of new static#"
+    # PHPUnit 9, used on Drupal 10, does not have PHPUnit's attribute classes.
+    - "#^Attribute class PHPUnit\\\\Framework\\\\Attributes\\\\.+ does not exist\\.$#"

@@ -1,0 +1,49 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the AI Validations module.
+ *
+ * This is the standalone drupal/ai_validations contrib package. It replaces
+ * the deprecated bundled ai_validations submodule inside drupal/ai, which is
+ * removed in AI 2.0.0. The migration mechanism is implemented in drupal/ai
+ * via hook_requirements() and hook_update_10001().
+ *
+ * Schema numbering: the bundled submodule defines hook_update_10001(). Any
+ * future update hooks in this file must start at 10002 to avoid collisions on
+ * sites that ran the bundled migration update before switching to this package.
+ *
+ * @see https://www.drupal.org/project/ai/issues/3552888
+ * @see https://www.drupal.org/project/ai/issues/3586538
+ * @see https://www.drupal.org/project/ai_validations/issues/3606130
+ */
+
+/**
+ * Implements hook_requirements().
+ */
+function ai_validations_requirements(string $phase): array {
+  $requirements = [];
+  if ($phase !== 'runtime') {
+    return $requirements;
+  }
+
+  $path = \Drupal::service('extension.path.resolver')
+    ->getPath('module', 'ai_validations');
+
+  // This can occur if a cache-serving the old container while the standalone
+  // is on disk but the bundled path is still resolved. Running cache-rebuild
+  // will resolve this automatically.
+  if (str_contains($path, '/ai/modules/')) {
+    $requirements['ai_validations_source'] = [
+      'title' => t('AI Validations'),
+      'value' => t('Deprecated bundled version still active'),
+      'description' => t(
+        'The standalone <code>drupal/ai_validations</code> package is installed but the deprecated bundled submodule is still resolving. Run <code>drush cr</code> to rebuild the cache and complete the migration. See <a href=":url">issue #3552888</a>.',
+        [':url' => 'https://www.drupal.org/project/ai/issues/3552888']
+      ),
+      'severity' => REQUIREMENT_WARNING,
+    ];
+  }
+
+  return $requirements;
+}

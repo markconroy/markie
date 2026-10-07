@@ -1,0 +1,37 @@
+# MkDocs configuration for the AI Translate module.
+# Docs live under docs/, entry point docs/index.md.
+site_name: AI Translate
+site_url: https://project.pages.drupalcode.org/ai_translate
+
+theme:
+  name: material
+  features:
+    - navigation.sections
+    - navigation.top
+    - navigation.footer
+    - content.code.copy
+    - search.suggest
+
+markdown_extensions:
+  - admonition
+  - toc:
+      permalink: true
+  - pymdownx.highlight
+  - pymdownx.superfences
+
+plugins:
+  - search
+
+nav:
+  - Home: index.md
+  - Installation: installation.md
+  - Configuration: configuration.md
+  - Usage:
+      - Translating content: usage/translating-content.md
+      - Interface translation: usage/interface-translation.md
+      - Drush commands: usage/drush.md
+  - For Developers:
+      - Overview: developers/index.md
+      - Field text extractors: developers/field-text-extractors.md
+      - Entity translation orchestrator: developers/entity-translation-orchestrator.md
+      - Agentic integrations: developers/agentic-integrations.md

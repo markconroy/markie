@@ -8,7 +8,6 @@ use Drupal\Tests\UnitTestCase;
 use Drupal\ai_assistant_api\Service\AgentRunner;
 use Drupal\Component\Plugin\PluginManagerInterface;
 use Drupal\Core\TempStore\PrivateTempStoreFactory;
-use PHPUnit\Framework\Attributes\CoversMethod;
 use PHPUnit\Framework\MockObject\MockObject;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
@@ -16,7 +15,6 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
  * @coversDefaultClass \Drupal\ai_assistant_api\Service\AgentRunner
  * @group ai_assistant_api
  */
-#[CoversMethod(AgentRunner::class, 'runAsAgent')]
 class AgentRunnerTest extends UnitTestCase {
 
   /**
@@ -64,6 +62,8 @@ class AgentRunnerTest extends UnitTestCase {
    *
    * This simulates the machine-name collision scenario where an ai_agent config
    * entity shares its machine name with a code-defined AiAgent plugin.
+   *
+   * @covers ::runAsAgent
    */
   public function testRunAsAgentThrowsWhenAgentDoesNotImplementConfigAiAgentInterface(): void {
     // Build a plain object that does NOT implement ConfigAiAgentInterface.

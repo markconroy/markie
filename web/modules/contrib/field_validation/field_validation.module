@@ -1,0 +1,68 @@
+<?php
+
+/**
+ * @file
+ * Field validation.
+ */
+
+use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\field_validation\ConstraintFieldValidationRuleBase;
+
+/**
+ * Implements hook_entity_bundle_field_info_alter().
+ */
+function field_validation_entity_bundle_field_info_alter(&$fields, EntityTypeInterface $entity_type, $bundle) {
+
+  $ruleset_name = $entity_type->id() . '_' . $bundle;
+  $ruleset = \Drupal::entityTypeManager()->getStorage('field_validation_rule_set')->load($ruleset_name);
+
+  if ($ruleset) {
+
+    $rules = $ruleset->getFieldValidationRules();
+    foreach ($rules as $field_validation_rule) {
+      $field_name = $field_validation_rule->getFieldName();
+      if (isset($fields[$field_name])) {
+        $is_constraint_rule = ($field_validation_rule instanceof ConstraintFieldValidationRuleBase);
+        $validate_mode = $field_validation_rule->getConfiguration()['data']['validate_mode'] ?? "default";
+        // \Drupal::logger('field_validation')->notice("is_constraint_rule:" . var_export($is_constraint_rule,true));
+        // \Drupal::logger('field_validation')->notice("validate_mode:" . var_export($validate_mode,true));		
+        if ($is_constraint_rule && $validate_mode == "direct") {
+          $constraint_name = $field_validation_rule->getConstraintName();
+          $constraint_options = $field_validation_rule->getConstraintOptions();
+          if ($field_validation_rule->isPropertyConstraint()) {
+            $property = $field_validation_rule->getColumn() ?? "value";
+            $fields[$field_name]->addPropertyConstraints($property, [$constraint_name => $constraint_options]);
+          } else {
+            $fields[$field_name]->addConstraint($constraint_name, $constraint_options);
+		  }
+           
+        } else {
+          $fields[$field_name]->addConstraint('FieldValidationConstraint', [
+            'ruleset_name' => $ruleset_name,
+            'rule_uuid' => '',
+          ]);
+        }
+      }
+    }
+  }
+
+}
+
+/**
+ * Implements hook_entity_base_field_info_alter().
+ */
+function field_validation_entity_base_field_info_alter(&$fields, EntityTypeInterface $entity_type) {
+  $rulesets = \Drupal::entityTypeManager()->getStorage('field_validation_rule_set')->loadByProperties(['entity_type' => $entity_type->id()]);
+  foreach ($rulesets as $ruleset_name => $ruleset) {
+    $rules = $ruleset->getFieldValidationRules();
+    foreach ($rules as $field_validation_rule) {
+      $field_name = $field_validation_rule->getFieldName();
+      if (isset($fields[$field_name])) {
+        $fields[$field_name]->addConstraint('FieldValidationConstraint', [
+          'ruleset_name' => $ruleset_name,
+          'rule_uuid' => '',
+        ]);
+      }
+    }
+  }
+}

@@ -79,7 +79,11 @@ class {{ class }} extends {{ base_class }}{% if 'chat' in operation_types %} imp
   }
 
   /**
-   * {@inheritdoc}
+   * Gets the available models without requiring a configured client.
+   *
+   * Providers that fetch models from their remote API must first return an
+   * empty array when !$this->isUsable($operation_type, $capabilities), so an
+   * installed-but-unconfigured provider cannot initialize a client.
    */
   public function getConfiguredModels(?string $operation_type = NULL, array $capabilities = []): array {
     $models = [];

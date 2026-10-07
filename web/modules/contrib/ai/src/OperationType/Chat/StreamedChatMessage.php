@@ -63,9 +63,19 @@ class StreamedChatMessage implements StreamedChatMessageInterface {
   private ?int $reasoningTokensUsage = NULL;
 
   /**
-   * The amount of cached tokens from the AI provider.
+   * The amount of cached (read) tokens from the AI provider.
    */
   private ?int $cachedTokensUsage = NULL;
+
+  /**
+   * The amount of cached write (creation) tokens from the AI provider.
+   */
+  private ?int $cachedWriteTokensUsage = NULL;
+
+  /**
+   * The amount of tool use tokens from the AI provider.
+   */
+  private ?int $toolUseTokensUsage = NULL;
 
   /**
    * Constructor.
@@ -220,6 +230,34 @@ class StreamedChatMessage implements StreamedChatMessageInterface {
    */
   public function getCachedTokenUsage(): ?int {
     return $this->cachedTokensUsage;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setCachedWriteTokenUsage(int $tokens): void {
+    $this->cachedWriteTokensUsage = $tokens;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getCachedWriteTokenUsage(): ?int {
+    return $this->cachedWriteTokensUsage;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setToolUseTokenUsage(int $tokens): void {
+    $this->toolUseTokensUsage = $tokens;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getToolUseTokenUsage(): ?int {
+    return $this->toolUseTokensUsage;
   }
 
 }

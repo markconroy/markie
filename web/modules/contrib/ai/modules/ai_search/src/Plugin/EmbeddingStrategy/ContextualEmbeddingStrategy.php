@@ -16,6 +16,6 @@ use Drupal\ai_search\Attribute\EmbeddingStrategy;
   label: new TranslatableMarkup('Enriched Embedding Strategy'),
   description: new TranslatableMarkup('This generates multiple vector representations of the content enriched with repeated contextual information alongside each chunk.'),
 )]
-class ContextualEmbeddingStrategy extends EmbeddingBase {
+class ContextualEmbeddingStrategy extends LongChunkEmbeddingBase {
 
 }

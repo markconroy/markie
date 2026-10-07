@@ -273,9 +273,9 @@ If you are testing against a dev release, the JS components are not built and yo
 ### Second Guardrail
 1. Visit Guardrails page at: https://drupal11-test.ddev.site/admin/config/ai/guardrails
 2. Click "Add guardrail"
-3. Set Label to "Orange Regex Guardrail"
-4. Set Guardrail to "Regex Guardrail"
-5. Set "Regexp Pattern" to "/orange/i"
+3. Set Label to "Orange RegEx Guardrail"
+4. Set Guardrail to "RegEx"
+5. Set "RegEx Pattern" to "/orange/i"
 6. Set "Violation Message" to "The request contains oranges - we do not like that."
 7. Click "Save"
 
@@ -284,13 +284,13 @@ If you are testing against a dev release, the JS components are not built and yo
 2. Click tab "AI Guardrail sets"
 3. Click "Add guardrail set"
 4. Set Label to "Fruit Guardrail Set"
-5. In "Pre generated guardrails" select "Orange Regex Guardrail" and click "Add Guardrail"
+5. In "Pre generated guardrails" select "Orange RegEx Guardrail" and click "Add Guardrail"
 6. In "Pre generated guardrails" select "Banana Guardrail" and click "Add Guardrail"
-7. In "Pre generated guardrails" select "Orange Regex Guardrail" and click "Add Guardrail"
-8. On the right side of Orange Regex Guardrail, click "Remove" to see that ajax removal works.
+7. In "Pre generated guardrails" select "Orange RegEx Guardrail" and click "Add Guardrail"
+8. On the right side of Orange RegEx Guardrail, click "Remove" to see that ajax removal works.
 9. Click "Save"
 
-### Test the Guardrail Set Regex Guardrail
+### Test the Guardrail Set RegEx Guardrail
 1. Enable the AI API Explorer module if you haven't already.
 2. Visit the Chat Explorer on: https://drupal11-test.ddev.site/admin/config/ai/explorers/chat_generator
 3. In the "System Prompt" field enter "Always answer with an answer about Mercedes."

@@ -68,9 +68,16 @@ class AiSearchIndexFieldsForm extends IndexFieldsForm {
       '#description' => $this->t('By default the metadata contains a "content" attribute attached to it. This may be used by some tools when a chunk is returned such as an AI Assistant. If you however ensure that the returned results are used to load the full entity (also an option in AI Assistants and the default for Views) then the "content" attribute in the metadata is not needed and can save space.'),
       '#default_value' => $ai_search_index_config['exclude_chunk_from_metadata'] ?? FALSE,
     ];
+    $form['advanced']['exclude_title'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Advanced usage: Exclude the title from being automatically added to chunk metadata.'),
+      '#description' => $this->t('By default, the title is automatically added as a header to each chunk\'s metadata unless the title field is already added as "Contextual Content". Check this box to completely disable automatic title inclusion.'),
+      '#default_value' => $ai_search_index_config['exclude_title'] ?? FALSE,
+    ];
     if (
       $form['advanced']['control_field_max_length']['#default_value']
       || $form['advanced']['exclude_chunk_from_metadata']['#default_value']
+      || $form['advanced']['exclude_title']['#default_value']
     ) {
       $form['advanced']['#open'] = TRUE;
     }
@@ -531,6 +538,7 @@ class AiSearchIndexFieldsForm extends IndexFieldsForm {
     $ai_search_index_config->set('indexing_options', $indexing_options);
     $ai_search_index_config->set('control_field_max_length', (bool) $advanced['control_field_max_length']);
     $ai_search_index_config->set('exclude_chunk_from_metadata', (bool) $advanced['exclude_chunk_from_metadata']);
+    $ai_search_index_config->set('exclude_title', (bool) $advanced['exclude_title']);
     $ai_search_index_config->save();
 
     return $return;

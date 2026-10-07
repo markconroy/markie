@@ -25,9 +25,19 @@ ai_assistant_api.ai_assistant.*:
     allow_history:
       type: string
       label: Allow History
+    chat_memory_settings:
+      type: ai_chat_memory.configuration.[%parent.allow_history]
+      label: Chat memory settings
+      # Only meaningful, and only present in config, when allow_history
+      # selects a chat memory plugin. See AiAssistant::toArray().
+      requiredKey: false
+    # Deprecated setting from before the ChatMemory plugins existed. It is
+    # kept - and ignored - so that assistant config that predates
+    # ai_assistant_api_post_update_convert_allow_history() still validates,
+    # and so that AiAssistant can rebuild the chat memory settings from it.
+    # The key is dropped the next time the assistant is saved.
     history_context_length:
-      type: string
-      label: History context length
+      type: ignore
     preprompt_instructions:
       type: string
       label: Pre-prompt Instructions

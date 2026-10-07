@@ -120,7 +120,7 @@
       // Set preview image for contextual consent.
       var elements = once('klaro-thumbnail', '.klaro.cm-as-context-notice', context);
       Array.prototype.forEach.call(elements, function (el) {
-        let klaro_elem = (el.closest('.field'))?.querySelector('[data-modified-by-klaro]');
+        let klaro_elem = el.closest('[data-type="placeholder"]')?.nextElementSibling;
         let thumbnail = klaro_elem?.getAttribute('data-thumbnail');
         let title = klaro_elem?.getAttribute('title');
 

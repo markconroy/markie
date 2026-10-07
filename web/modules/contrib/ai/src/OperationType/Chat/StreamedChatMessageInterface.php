@@ -120,12 +120,28 @@ interface StreamedChatMessageInterface {
   public function setReasoningTokenUsage(int $tokens): void;
 
   /**
-   * Set the cached tokens used by the AI provider.
+   * Set the cached (read) tokens used by the AI provider.
    *
    * @param int $tokens
    *   The amount of tokens.
    */
   public function setCachedTokenUsage(int $tokens): void;
+
+  /**
+   * Set the cached write (creation) tokens used by the AI provider.
+   *
+   * @param int $tokens
+   *   The amount of tokens.
+   */
+  public function setCachedWriteTokenUsage(int $tokens): void;
+
+  /**
+   * Set the tool use tokens used by the AI provider.
+   *
+   * @param int $tokens
+   *   The amount of tokens.
+   */
+  public function setToolUseTokenUsage(int $tokens): void;
 
   /**
    * Gets the total tokens used by the AI provider.
@@ -160,11 +176,27 @@ interface StreamedChatMessageInterface {
   public function getReasoningTokenUsage(): ?int;
 
   /**
-   * Gets the cached tokens used by the AI provider.
+   * Gets the cached (read) tokens used by the AI provider.
    *
    * @return int|null
    *   The cached token usage.
    */
   public function getCachedTokenUsage(): ?int;
+
+  /**
+   * Gets the cached write (creation) tokens used by the AI provider.
+   *
+   * @return int|null
+   *   The cached write token usage.
+   */
+  public function getCachedWriteTokenUsage(): ?int;
+
+  /**
+   * Gets the tool use tokens used by the AI provider.
+   *
+   * @return int|null
+   *   The tool use token usage.
+   */
+  public function getToolUseTokenUsage(): ?int;
 
 }

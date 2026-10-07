@@ -2,27 +2,27 @@
 
 namespace Drupal\ai_automators\Plugin\QueueWorker;
 
-use Drupal\Core\Database\Connection;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Logger\LoggerChannelFactoryInterface;
-use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
-use Drupal\Core\Queue\QueueWorkerBase;
 use Drupal\ai_automators\AiAutomatorRuleRunner;
 use Drupal\ai_automators\AiAutomatorStatusField;
 use Drupal\ai_automators\Exceptions\AiAutomatorRequestErrorException;
 use Drupal\ai_automators\Exceptions\AiAutomatorResponseErrorException;
 use Drupal\ai_automators\Exceptions\AiAutomatorRuleNotFoundException;
+use Drupal\Core\Database\Connection;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Logger\LoggerChannelFactoryInterface;
+use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Drupal\Core\Queue\Attribute\QueueWorker;
+use Drupal\Core\Queue\QueueWorkerBase;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * A queue worker that fills fields for entities from AI data.
- *
- * @QueueWorker(
- *   id = "ai_automator_field_modifier",
- *   title = @Translation("Queue Job to fill in AI produced data"),
- *   cron = {"time" = 1}
- * )
  */
+#[QueueWorker(
+  id: 'ai_automator_field_modifier',
+  title: new TranslatableMarkup('Queue Job to fill in AI produced data')
+)]
 class AutomatorFieldData extends QueueWorkerBase implements ContainerFactoryPluginInterface {
 
   /**

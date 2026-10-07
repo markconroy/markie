@@ -47,9 +47,19 @@ final class ReformatHtml extends AiCKEditorPluginBase {
     $prompts_config = $this->getConfigFactory()->get('ai_ckeditor.settings');
     $prompt_reformat = $prompts_config->get('prompts.reformat');
     $form['prompt'] = [
-      '#type' => 'textarea',
+      '#type' => 'ai_prompt',
       '#title' => $this->t('Reformat prompt'),
+      '#prompt_types' => ['ai_ckeditor_reformat'],
       '#default_value' => $prompt_reformat,
+      '#parents' => [
+        'editor',
+        'settings',
+        'plugins',
+        'ai_ckeditor_ai',
+        'plugins',
+        'ai_ckeditor_reformat_html',
+        'prompt',
+      ],
       '#description' => $this->t('This prompt will be used to reformat the html.'),
       '#states' => [
         'required' => [
@@ -130,11 +140,16 @@ final class ReformatHtml extends AiCKEditorPluginBase {
 
     try {
       $prompts_config = $this->getConfigFactory()->get('ai_ckeditor.settings');
-      $prompt = $prompts_config->get('prompts.reformat');
-      $prompt = $prompt . '\r\n"' . $values["plugin_config"]["selected_text"];
+      $promptId = $prompts_config->get('prompts.reformat');
+      $promptText = $this->getConfigFactory()->get('ai.ai_prompt.' . $promptId)?->get('prompt') ?? '';
+      // Replace the placeholders.
+      $promptText = strtr($promptText, [
+        '{inputText}' => $values['plugin_config']['selected_text'],
+      ]);
       $response = new AjaxResponse();
       $values = $form_state->getValues();
-      $response->addCommand(new AiRequestCommand($prompt, $values["editor_id"], $this->pluginDefinition['id'], 'ai-ckeditor-response'));
+      assert(is_array($this->pluginDefinition));
+      $response->addCommand(new AiRequestCommand($promptText, $values["editor_id"], $this->pluginDefinition['id'], 'ai-ckeditor-response'));
       return $response;
     }
     catch (\Exception $e) {

@@ -1,0 +1,10 @@
+{
+    "name": "drupal/field_widget_actions",
+    "description": "Provides easy way to attach actions to field widgets, for example for content suggestions.",
+    "type": "drupal-module",
+    "require-dev": {
+        "drupal/ai": "^1.2",
+        "drupal/tagify": "^1.0",
+        "drupal/token": "^1.14"
+    }
+}

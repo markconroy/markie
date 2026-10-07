@@ -124,7 +124,7 @@ class ChatForm extends FormBase {
     ];
 
     // Make it possible to clear history.
-    if ($this->aiAssistantRunner->getAssistant()->get('allow_history') == 'session_one_thread') {
+    if ($this->aiAssistantRunner->getAssistant()->getChatMemory()?->hasPersistentThread()) {
       $form['clear_history'] = [
         '#type' => 'submit',
         '#value' => $this->t('Clear History'),

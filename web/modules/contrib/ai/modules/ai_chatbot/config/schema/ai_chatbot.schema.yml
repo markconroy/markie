@@ -1,0 +1,18 @@
+ai_chat_processor.configuration.ai_assistant_api_processor:
+  type: ai_chat_processor.configuration_base
+  mapping:
+    assistant_id:
+      type: string
+      label: assistant_id
+      constraints:
+        ConfigExists:
+          prefix: ai_assistant_api.ai_assistant.
+    stream_output:
+      type: boolean
+      label: Is streaming enabled
+    verbose_mode:
+      type: boolean
+      label: Verbose mode
+    show_structured_results:
+      type: boolean
+      label: Show structured results

@@ -216,4 +216,28 @@ class VerifySetupAiTest extends KernelTestBase {
     $this->assertTrue(TRUE, 'The vdb server is set up and the action did not throw an error.');
   }
 
+  /**
+   * Test if no VDB provider is set up.
+   */
+  public function testNoVdbProviderSetup(): void {
+    // getProviders(TRUE) should returns empty.
+    $action = \Drupal::service('plugin.manager.config_action')->createInstance('verifySetupAi');
+    $this->expectException(\InvalidArgumentException::class);
+    $action->apply('ai.settings', ['vector_search_is_setup' => TRUE]);
+    $this->assertTrue(TRUE, 'The action threw an error as expected when no VDB provider is set up.');
+  }
+
+  /**
+   * Test if any VDB provider is set up.
+   */
+  public function testAnyVdbProviderIsSetup(): void {
+    // Install a VDB provider that returns isSetup() = TRUE.
+    $this->installTestMysqlProvider = TRUE;
+    $this->setUp();
+    $this->action->apply('ai.settings', [
+      'vector_search_is_setup' => TRUE,
+    ]);
+    $this->assertTrue(TRUE, 'Action did not throw when a VDB provider is set up.');
+  }
+
 }

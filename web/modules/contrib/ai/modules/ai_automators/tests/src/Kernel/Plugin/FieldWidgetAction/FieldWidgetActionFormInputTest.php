@@ -24,7 +24,9 @@ use Drupal\taxonomy\Entity\Vocabulary;
  *   $input[$form_key][$delta].
  * - Flat-shape overrides: Boolean, List* (integer/string/float),
  *   ClassificationOptionsSelect (multiple_values branch),
- *   AutoCompleteTagsTaxonomy.
+ *   AutoCompleteTagsTaxonomy, TagifyTaxonomy.
+ * - Widget discovery: the widget ids that make an action show up at all
+ *   for the Tagify widgets.
  * - Per-item transform overrides: File, ImageAltText, ImageFilename,
  *   TextToImage (target_id → fids), AutoCompleteTaxonomy (label+id),
  *   LlmLinkLinkDefault (drops 'options'), ModerationState
@@ -89,6 +91,15 @@ class FieldWidgetActionFormInputTest extends KernelTestBase {
     $method = new \ReflectionMethod($plugin, 'setFormInput');
     $method->setAccessible(TRUE);
     $method->invoke($plugin, $entity, $form_state, $form_key);
+  }
+
+  /**
+   * Invokes the Field Widget Actions target-element resolver.
+   */
+  protected function invokeGetTargetElement(object $plugin, array &$form, FormState $form_state): array {
+    $method = new \ReflectionMethod($plugin, 'getTargetElement');
+    $method->setAccessible(TRUE);
+    return $method->invokeArgs($plugin, [&$form, $form_state]);
   }
 
   /**
@@ -268,6 +279,85 @@ class FieldWidgetActionFormInputTest extends KernelTestBase {
       $expected[$delta] = ['target_id' => (string) $item->target_id];
     }
     $this->assertSame($expected, $input['field_topics']);
+  }
+
+  /**
+   * The select plugin is offered for Tagify Select too.
+   *
+   * Tagify Select is a plain multi-value <select>, so it reuses the flat-id
+   * branch above. Sharing the plugin id also means an already-configured
+   * action survives switching the widget between the select styles.
+   */
+  public function testClassificationOptionsSelectCoversTagifySelect(): void {
+    $definition = \Drupal::service('plugin.manager.field_widget_actions')
+      ->getDefinition('classification_options_select');
+
+    $this->assertContains('tagify_select_widget', $definition['widget_types']);
+  }
+
+  /**
+   * The Tagify plugin is offered for both Tagify autocomplete widgets.
+   *
+   * FieldWidgetActionManager only offers an action when the current widget id
+   * is listed here, which is why no action showed up on Tagify fields at all.
+   */
+  public function testTagifyTaxonomyTargetsTagifyWidgets(): void {
+    $definition = \Drupal::service('plugin.manager.field_widget_actions')
+      ->getDefinition('automator_tagify_taxonomy');
+
+    $this->assertContains('tagify_entity_reference_autocomplete_widget', $definition['widget_types']);
+    $this->assertContains('tagify_user_list_entity_reference_autocomplete_widget', $definition['widget_types']);
+    $this->assertContains('entity_reference', $definition['field_types']);
+  }
+
+  /**
+   * Tagify gets one button for the whole widget, never one per delta.
+   *
+   * A per-delta button is attached to the Tagify input itself, and a themed
+   * input never renders its children — the button would silently disappear.
+   */
+  public function testTagifyTaxonomyIsNotMultiple(): void {
+    $plugin = $this->plugin('automator_tagify_taxonomy');
+
+    $this->assertFalse($plugin->getMultiple());
+    $this->assertFalse($plugin->isMultiple());
+  }
+
+  /**
+   * Tagify writes a flat list of [target_id => id] pairs.
+   *
+   * The widget renders one input for the whole field, and the element's
+   * valueCallback() turns this shape into the JSON payload Tagify reads.
+   */
+  public function testTagifyTaxonomyWritesTargetIdPairs(): void {
+    $node = $this->createArticleWithTwoTerms('field_tags');
+
+    $form_state = new FormState();
+    $this->invokeSetFormInput($this->plugin('automator_tagify_taxonomy'), $node, $form_state, 'field_tags');
+
+    $expected = [];
+    foreach ($node->get('field_tags') as $item) {
+      $expected[] = ['target_id' => $item->target_id];
+    }
+    $this->assertCount(2, $expected);
+    $this->assertSame($expected, $form_state->getUserInput()['field_tags']);
+  }
+
+  /**
+   * Tagify leaves user input alone when the automator produced nothing.
+   *
+   * An empty array would make valueCallback() return NULL and the raw array
+   * would end up as the element value, breaking the render.
+   */
+  public function testTagifyTaxonomyLeavesUserInputAloneWhenEmpty(): void {
+    $node = $this->createArticleWithTwoTerms('field_tags');
+    $node->set('field_tags', []);
+
+    $form_state = new FormState();
+    $form_state->setUserInput(['sentinel' => 'unchanged']);
+    $this->invokeSetFormInput($this->plugin('automator_tagify_taxonomy'), $node, $form_state, 'field_tags');
+
+    $this->assertSame(['sentinel' => 'unchanged'], $form_state->getUserInput());
   }
 
   /**
@@ -474,6 +564,35 @@ class FieldWidgetActionFormInputTest extends KernelTestBase {
     $this->assertSame('typed-by-user', $input['field_body'][0]['value']);
     $this->assertSame('basic_html', $input['field_body'][0]['format']);
     $this->assertSame('AI summary', $input['field_body'][0]['summary']);
+  }
+
+  /**
+   * The refinement modal must target the plain summary sub-element.
+   */
+  public function testSummaryPluginTargetsSummaryElementForModal(): void {
+    $form = [
+      'field_body' => [
+        'widget' => [
+          0 => [
+            'value' => ['#name' => 'field_body[0][value]'],
+            'summary' => ['#name' => 'field_body[0][summary]'],
+          ],
+        ],
+      ],
+    ];
+    $form_state = new FormState();
+    $form_state->setTriggeringElement([
+      '#field_widget_action_field_name' => 'field_body',
+      '#array_parents' => ['field_body', 'widget', 0, 'action_button'],
+    ]);
+
+    $target = $this->invokeGetTargetElement(
+      $this->plugin('summary_textarea_with_summary'),
+      $form,
+      $form_state,
+    );
+
+    $this->assertSame('field_body[0][summary]', $target['#name']);
   }
 
   /**

@@ -1,0 +1,11 @@
+dblog-help:
+  version: VERSION
+  css:
+    theme:
+      css/ai_logging.dblog-help.css: {}
+
+threads:
+  version: VERSION
+  css:
+    theme:
+      css/ai_logging.threads.css: {}
