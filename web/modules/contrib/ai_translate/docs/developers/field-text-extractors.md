@@ -35,7 +35,9 @@ public function setValue(ContentEntityInterface $entity, string $fieldName, arra
 - `getColumns()` returns the field columns to translate. Most text fields use
   `['value']`.
 - `shouldExtract()` decides whether a given field instance should be translated.
-  The base class returns `TRUE` for any translatable field.
+  The base class returns `TRUE` for any translatable field. To also be called
+  for base fields, widen the second parameter — see
+  [Supporting base fields](#supporting-base-fields).
 - `extract()` returns an array of text metadata, one entry per field delta. Each
   entry carries a `_columns` key naming the parts to translate. The default
   `_columns` value is `['value']`.
@@ -139,3 +141,58 @@ Translate picks it up for the listed field types. For a field with multiple
 translatable columns, return them all from `getColumns()` and override
 `extract()` if the default value-per-delta shape does not fit. The bundled
 `ReferenceFieldExtractor` and `LinkTextExtractor` plugins are useful references.
+
+## Supporting base fields
+
+A field is only looked at if an extractor is registered for its field type;
+everything else is skipped before any of the rules below apply.
+`TextExtractor::shouldExtract()` then decides whether the field is a candidate.
+Computed and read-only fields are always skipped. After that, the rules differ by
+field kind:
+
+| Field kind | How it is gated |
+|---|---|
+| The entity's label key (for example `node.title`) | Always a candidate if translatable. The plugin's `shouldExtract()` is not consulted. |
+| Configurable fields (`FieldConfigInterface`) | Always offered to the plugin's `shouldExtract()`. |
+| Other base fields | Only offered to the plugin if it opted in by widening its `shouldExtract()` signature. |
+
+That last row is the part to know about when adding a plugin: a plugin written
+against `FieldConfigInterface` is never called with a base field, so existing
+plugins keep working unchanged. A plugin declares that it can handle base fields
+by accepting the broader field definition type.
+
+### Opting in
+
+The interface declares the narrow type:
+
+```php
+public function shouldExtract(ContentEntityInterface $entity, FieldConfigInterface $fieldDefinition): bool
+```
+
+To opt in, widen the second parameter to `FieldDefinitionInterface`:
+
+```php
+public function shouldExtract(ContentEntityInterface $entity, FieldDefinitionInterface $fieldDefinition): bool
+```
+
+This is legal because PHP allows parameter type contravariance — an
+implementation may accept more than its interface promises. Since
+`FieldConfigInterface` extends `FieldDefinitionInterface`, the wider signature
+still handles every configurable field it handled before.
+
+`TextExtractor` detects the opt-in with reflection on the concrete plugin's
+`shouldExtract()`, so the declared type must be `FieldDefinitionInterface` or a
+supertype of it. A union type opts in if any member qualifies; an intersection
+type only if every member does.
+
+Two consequences worth remembering:
+
+- `FieldExtractorBase` keeps the narrow signature, so extending it is **not**
+  enough — override `shouldExtract()` with the wider type.
+- A plugin that keeps `FieldConfigInterface` keeps working for configurable
+  fields. Base fields of its field types are silently skipped.
+
+Of the bundled plugins only `TextFieldExtractor` opts in, which is why base
+fields of type `title`, `text`, `text_long`, `string` and `string_long` — a
+taxonomy term `description`, for instance — are translated, while base fields
+handled by the reference, link and Layout Builder extractors are not.

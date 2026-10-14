@@ -5,6 +5,7 @@ namespace Drupal\ai_translate;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Field\FieldConfigInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 
 /**
@@ -102,7 +103,9 @@ class TextExtractor implements TextExtractorInterface {
       if (!$extractor) {
         continue;
       }
-      $extractor->setValue($entity, $fieldName, $fieldValue);
+      if ($extractor instanceof FieldTextExtractorInterface) {
+        $extractor->setValue($entity, $fieldName, $fieldValue);
+      }
     }
   }
 
@@ -137,19 +140,90 @@ class TextExtractor implements TextExtractorInterface {
     if ($fieldDefinition->getName() === $entity->getEntityType()->getKey('label')) {
       return $fieldDefinition->isTranslatable();
     }
-    // @todo better way to find fields that should be translatable?
-    static $supportedFieldNames = [
-      'body',
-      'info',
-      'description',
-      '^field_',
-      '^layout_builder_',
-    ];
-    foreach ($supportedFieldNames as $pattern) {
-      if (preg_match("/$pattern/", $fieldName)) {
-        return $this->plugins[$fieldType]->shouldExtract($entity, $fieldDefinition);
-      }
+    // Configurable fields are always offered to the plugin. Base fields are
+    // only offered when the plugin explicitly opted in by widening its
+    // shouldExtract() signature to accept FieldDefinitionInterface, so plugins
+    // written against FieldConfigInterface are never called with a base field.
+    if ($fieldDefinition instanceof FieldConfigInterface
+      || $this->pluginSupportsFieldDefinition($this->plugins[$fieldType])) {
+      return $this->plugins[$fieldType]->shouldExtract($entity, $fieldDefinition);
     }
+    return FALSE;
+  }
+
+  /**
+   * Determines whether a plugin can accept the given field definition.
+   *
+   * For configurable fields, existing plugins are always expected to work.
+   * For base fields, this inspects the concrete plugin method signature so we
+   * only call plugins that explicitly widened support beyond
+   * FieldConfigInterface.
+   *
+   * @param \Drupal\ai_translate\FieldTextExtractorInterface $plugin
+   *   The extractor plugin.
+   *
+   * @return bool
+   *   TRUE when the plugin can accept the field definition.
+   */
+  protected function pluginSupportsFieldDefinition(
+    FieldTextExtractorInterface $plugin,
+  ): bool {
+    $method = new \ReflectionMethod($plugin, 'shouldExtract');
+    $parameters = $method->getParameters();
+    $parameter = $parameters[1] ?? NULL;
+
+    if (!$parameter instanceof \ReflectionParameter) {
+      return FALSE;
+    }
+
+    $type = $parameter->getType();
+
+    if ($type === NULL) {
+      return FALSE;
+    }
+
+    return $this->reflectionTypeAcceptsFieldDefinition($type);
+  }
+
+  /**
+   * Determines whether a reflected type accepts a field definition.
+   *
+   * @param \ReflectionType $type
+   *   The reflected parameter type.
+   *
+   * @return bool
+   *   TRUE when the type explicitly supports FieldDefinitionInterface.
+   */
+  protected function reflectionTypeAcceptsFieldDefinition(
+    \ReflectionType $type,
+  ): bool {
+    if ($type instanceof \ReflectionNamedType) {
+      if ($type->isBuiltin()) {
+        return FALSE;
+      }
+
+      $type_name = $type->getName();
+      return is_a(FieldDefinitionInterface::class, $type_name, TRUE);
+    }
+
+    if ($type instanceof \ReflectionUnionType) {
+      foreach ($type->getTypes() as $named_type) {
+        if ($this->reflectionTypeAcceptsFieldDefinition($named_type)) {
+          return TRUE;
+        }
+      }
+      return FALSE;
+    }
+
+    if ($type instanceof \ReflectionIntersectionType) {
+      foreach ($type->getTypes() as $named_type) {
+        if (!$this->reflectionTypeAcceptsFieldDefinition($named_type)) {
+          return FALSE;
+        }
+      }
+      return TRUE;
+    }
+
     return FALSE;
   }
 

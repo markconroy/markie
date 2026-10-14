@@ -1,7 +1,9 @@
 agentic
 caractères
 ceci
+contravariance
 endverbatim
+echoai
 spécifique
 texte
 tmgmt

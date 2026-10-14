@@ -1,3 +1,199 @@
+/**
+ * @file
+ * Initialises the Deep Chat widget and loads its bundle on demand.
+ *
+ * The loader lives in this file rather than in one of its own because
+ * Drupal.aiDeepchat.whenNeeded() below is its only caller: shipping the two
+ * as separate library files cost an extra request and made the init half
+ * depend on the loader half having been evaluated first.
+ *
+ * The Deep Chat bundle can be a heavy asset to load, and it is only needed
+ * once the chat is opened, so it is kept out of the ai_chatbot/deepchat
+ * library and imported from here according to the block's loading strategy.
+ *
+ * The strategy is resolved in the browser on purpose: with a "remember" toggle
+ * state the open/closed state lives in localStorage, so deciding server side
+ * would need a per user cache context and would make the block uncacheable.
+ */
+((Drupal, drupalSettings) => {
+  'use strict';
+
+  Drupal.aiDeepchat = Drupal.aiDeepchat || {};
+
+  /**
+   * Imports the bundle once, whatever the number of chats on the page.
+   *
+   * @return {Promise}
+   *   Resolves once the <deep-chat> custom element is defined. Callers must
+   *   wait for this before touching the element: properties set on a custom
+   *   element before it upgrades are shadowed by the class definition.
+   */
+  Drupal.aiDeepchat.load = () => {
+    if (!Drupal.aiDeepchat.loading) {
+      const strategy = drupalSettings.ai_deepchat.load_strategy || 'eager';
+      const url = drupalSettings.ai_deepchat.bundle_url;
+
+      if (strategy === 'eager') {
+        // The eager strategy attaches the bundle as a library, so there is
+        // nothing left to import and only the upgrade has to be awaited.
+        Drupal.aiDeepchat.loading = customElements.whenDefined('deep-chat');
+      }
+      else if (!url) {
+        // DeepChatFormBlock::getBundleUrl() returns an empty string when the
+        // library cannot be resolved. Never resolving is deliberate: there is
+        // nothing to import, and deepchat-init.js must not configure an
+        // element that is never going to upgrade.
+        console.error('Deep Chat: the bundle URL is missing, the chat cannot be loaded.');
+        Drupal.aiDeepchat.loading = new Promise(() => {});
+      }
+      else {
+        Drupal.aiDeepchat.loading = import(url)
+          .then(() => customElements.whenDefined('deep-chat'));
+      }
+    }
+
+    return Drupal.aiDeepchat.loading;
+  };
+
+  /**
+   * Warms the HTTP cache without executing the bundle.
+   *
+   * Called once the visitor shows intent to open the chat, so the click does
+   * not have to wait for the download.
+   */
+  const prefetch = () => {
+    const href = drupalSettings.ai_deepchat.bundle_url;
+
+    // Nothing to warm when the block could not resolve the bundle: preloading
+    // an empty href would make the browser re-request the current page.
+    // Drupal.aiDeepchat.load() reports the failure when the chat is opened.
+    if (!href) {
+      return;
+    }
+
+    if (document.querySelector(`link[rel="modulepreload"][href="${href}"]`)) {
+      return;
+    }
+
+    const link = document.createElement('link');
+    link.rel = 'modulepreload';
+    link.href = href;
+    document.head.append(link);
+  };
+
+  /**
+   * Schedules a callback for when the browser is idle.
+   */
+  const whenIdle = (callback) => {
+    if (typeof requestIdleCallback === 'function') {
+      requestIdleCallback(callback);
+    }
+    else {
+      setTimeout(callback, 1000);
+    }
+  };
+
+  /**
+   * Resolves when the chat holding the given element needs the bundle.
+   *
+   * The open state is read from the class the placement's toggle script
+   * already sets rather than from the toggle control itself, so this works for
+   * every placement without duplicating the toggle_state rules those scripts
+   * apply. The watched element depends on the placement: the toolbar toggles a
+   * class on <body>, every other placement toggles chat-open on the container.
+   *
+   * @param {HTMLElement} deepChat
+   *   The <deep-chat> element.
+   *
+   * @return {Promise}
+   *   Resolves once the bundle has been loaded.
+   */
+  Drupal.aiDeepchat.whenNeeded = (deepChat) => {
+    const strategy = drupalSettings.ai_deepchat.load_strategy || 'eager';
+
+    if (strategy === 'eager') {
+      return Drupal.aiDeepchat.load();
+    }
+
+    if (strategy === 'idle') {
+      return new Promise((resolve) => {
+        whenIdle(() => resolve(Drupal.aiDeepchat.load()));
+      });
+    }
+
+    const container = deepChat.closest('.chat-container');
+
+    // Without a container there is no collapse machinery to wait for, so the
+    // chat is always visible and the bundle is needed straight away.
+    if (!container) {
+      return Drupal.aiDeepchat.load();
+    }
+
+    // The open signal differs per placement. The toolbar chatbot opens by
+    // toggling a class on <body> and its launcher lives in the admin toolbar,
+    // outside the container; every other placement toggles chat-open on the
+    // container itself and is launched from its own header. Resolving this
+    // here keeps whenNeeded from having to know which toggle script owns each
+    // placement, while still watching the element that script actually
+    // mutates.
+    const isToolbar = container.classList.contains('toolbar');
+    const openTarget = isToolbar ? document.body : container;
+    const openClass = isToolbar ? 'ai-chatbot-opened' : 'chat-open';
+    const launcherSelector = isToolbar
+      ? '.button--ai-chatbot'
+      : '.ai-deepchat--header';
+    const launcher = isToolbar
+      ? document.querySelector(launcherSelector)
+      : container.querySelector(launcherSelector);
+
+    if (openTarget.classList.contains(openClass)) {
+      return Drupal.aiDeepchat.load();
+    }
+
+    // Nothing is fetched until the visitor shows intent. Hovering or focusing
+    // the launcher is signal enough, and the fetch is normally finished by the
+    // time the click lands, so the first open still feels instant without
+    // costing a download to everyone who never opens the chat.
+    if (launcher) {
+      ['pointerenter', 'focusin'].forEach((event) => {
+        launcher.addEventListener(event, prefetch, { once: true });
+      });
+    }
+    else {
+      // The launcher can be rendered after this runs, for instance when the
+      // toolbar arrives through BigPipe or a lazy builder, so fall back to
+      // delegated listeners. pointerover is used rather than pointerenter
+      // because pointerenter does not bubble and cannot be delegated.
+      const delegate = (event) => {
+        if (!event.target.closest || !event.target.closest(launcherSelector)) {
+          return;
+        }
+
+        document.removeEventListener('pointerover', delegate);
+        document.removeEventListener('focusin', delegate);
+        prefetch();
+      };
+
+      document.addEventListener('pointerover', delegate);
+      document.addEventListener('focusin', delegate);
+    }
+
+    return new Promise((resolve) => {
+      const observer = new MutationObserver(() => {
+        if (openTarget.classList.contains(openClass)) {
+          observer.disconnect();
+          resolve(Drupal.aiDeepchat.load());
+        }
+      });
+
+      observer.observe(openTarget, {
+        attributes: true,
+        attributeFilter: ['class'],
+      });
+    });
+  };
+})(Drupal, drupalSettings);
+
 (function (Drupal, drupalSettings) {
   'use strict';
 
@@ -11,6 +207,9 @@
     processing: false,
     attach: function (context, settings) {
       once('ai-deepchat', 'deep-chat', context).forEach(($deepChat) => {
+      // The bundle is loaded on demand, and the <deep-chat> element only
+      // accepts the properties set below once it has upgraded.
+      Drupal.aiDeepchat.whenNeeded($deepChat).then(() => {
 
       if (Drupal.behaviors.deepChatToggle.initialized) {
         return;
@@ -223,18 +422,19 @@
               'click': (event) => {
                 event.preventDefault();
                 let details = event.target.closest('.message-bubble').querySelector('.structured-results-dump').cloneNode(true);
-                Drupal.dialog(details, {
+                const dialog = Drupal.dialog(details, {
                   'title': Drupal.t('Structured results'),
                   'width': 'auto',
                   'buttons': {
                     'close': {
                       'text': Drupal.t('Close'),
                       'click': () => {
-                        Drupal.dialog.close();
+                        dialog.close();
                       }
                     }
                   }
-                }).showModal();
+                });
+                dialog.showModal();
               }
             }
           }
@@ -261,6 +461,7 @@
             document.dispatchEvent(event);
           }
         })
+      });
       });
     })
     },

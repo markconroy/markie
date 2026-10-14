@@ -464,6 +464,11 @@ trait AutomatorFieldWidgetActionTrait {
       }
     }
 
+    // Capture the field's pre-run value so plugins that leave existing
+    // values in place (clearEntity = FALSE) can tell whether the automator
+    // actually changed anything, see $produced below.
+    $before = $entity->get($form_key)->getValue();
+
     // Delete all values from the field, so you can recreate.
     if ($this->clearEntity) {
       $entity->get($form_key)->filterEmptyItems();
@@ -497,11 +502,33 @@ trait AutomatorFieldWidgetActionTrait {
       return $form[$form_key] ?? [];
     }
 
-    if (!$entity->get($form_key)->isEmpty()) {
+    // Whether the automator actually changed the field. isEmpty() is not
+    // enough even when clearEntity is set: filterEmptyItems() only drops
+    // empty items, so the author's existing values survive the run.
+    // fieldValuesDiffer() needs Field Widget Actions >=1.5.0.
+    if (method_exists($this, 'fieldValuesDiffer')) {
+      $produced = $this->fieldValuesDiffer($before, $entity->get($form_key)->getValue());
+    }
+    else {
+      $produced = !$entity->get($form_key)->isEmpty();
+    }
+
+    if ($produced) {
       $this->setFormInput($entity, $form_state, $form_key);
       $this->updateItemsCount($form, $form_state, $form_key, $entity->get($form_key)->count());
       $this->resetOptionsWidgetCache($form_state, $form_key);
+      // Field Widget Actions >=1.5.0 adds reporting about the produced value.
+      if (method_exists($this, 'reportProducedValue')) {
+        $this->reportProducedValue($form_state, $form_key);
+      }
       $form_state->setRebuild();
+    }
+    // Field Widget Actions >=1.5.0 adds reporting about no produced value. This
+    // way the one who clicked the button will see that LLM has not filled the
+    // field with value for some reason. Knowing this will help to find the
+    // problem easier.
+    elseif (method_exists($this, 'reportNoValueProduced')) {
+      $this->reportNoValueProduced($form_state, $form_key);
     }
     // Still call saveFormValues() so existing downstream overrides keep
     // running. The return value is discarded by the AJAX flow.

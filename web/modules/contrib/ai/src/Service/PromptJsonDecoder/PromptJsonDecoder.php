@@ -32,6 +32,10 @@ class PromptJsonDecoder implements PromptJsonDecoderInterface {
     // If its a normal ChatOutput, we can decode it directly.
     if ($payload instanceof ChatMessage) {
       $text = $payload->getText();
+      // A bare empty list is a valid "nothing found" answer.
+      if (trim($text) === '[]') {
+        return [];
+      }
       // Mirror decodeStreamingMessage()'s safety check: only attempt to
       // extract JSON if the text contains something that actually looks
       // like the start of a JSON payload. Without this, decodePayload()'s
@@ -88,6 +92,11 @@ class PromptJsonDecoder implements PromptJsonDecoderInterface {
       $i++;
     }
 
+    // A bare empty list, matched as a whole for the same reason as in decode().
+    if (!$could_be_json && trim($full) === '[]') {
+      return [];
+    }
+
     // If its a candidate, we decode it.
     if ($could_be_json) {
       // Lets run the whole thing.
@@ -96,7 +105,7 @@ class PromptJsonDecoder implements PromptJsonDecoderInterface {
       }
       $data = $this->decodePayload($full);
       // If we could decode it, we return the JSON data.
-      if ($data) {
+      if ($data !== NULL) {
         return $data;
       }
     }

@@ -32,6 +32,8 @@ class ChatProxyTranslationCacheTest extends KernelTestBase {
     'key',
     'language',
     'ai',
+    'language',
+    'content_translation',
     'ai_translate',
     'ai_translate_test',
   ];

@@ -33,6 +33,13 @@ class TextFieldExtractor extends FieldExtractorBase {
   /**
    * {@inheritdoc}
    */
+  public function shouldExtract(ContentEntityInterface $entity, FieldDefinitionInterface $fieldDefinition): bool {
+    return $fieldDefinition->isTranslatable();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function setValue(ContentEntityInterface $entity, string $fieldName, array $textMeta) : void {
     $newValue = $entity->get($fieldName)->getValue();
     foreach ($textMeta as $delta => $singleValue) {

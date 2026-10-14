@@ -6,7 +6,6 @@ use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Access\AccessResultInterface;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Plugin\Context\ContextDefinition;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\ai_translate\EntityTranslationOrchestratorInterface;
@@ -15,7 +14,8 @@ use Drupal\tool\ExecutableResult;
 use Drupal\tool\Tool\ToolBase;
 use Drupal\tool\Tool\ToolOperation;
 use Drupal\tool\TypedData\InputDefinition;
-use Drupal\tool\TypedData\ListContextDefinition;
+use Drupal\tool\TypedData\ListOutputDefinition;
+use Drupal\tool\TypedData\OutputDefinition;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -69,45 +69,45 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
     ),
   ],
   output_definitions: [
-    'status' => new ContextDefinition(
+    'status' => new OutputDefinition(
       data_type: 'string',
       label: new TranslatableMarkup('Status'),
       description: new TranslatableMarkup('The translation execution status.'),
     ),
-    'message' => new ContextDefinition(
+    'message' => new OutputDefinition(
       data_type: 'string',
       label: new TranslatableMarkup('Message'),
       description: new TranslatableMarkup('The translation execution summary.'),
     ),
-    'entity_type_id' => new ContextDefinition(
+    'entity_type_id' => new OutputDefinition(
       data_type: 'string',
       label: new TranslatableMarkup('Entity type ID'),
       description: new TranslatableMarkup('The translated entity type machine name.'),
     ),
-    'entity_id' => new ContextDefinition(
+    'entity_id' => new OutputDefinition(
       data_type: 'string',
       label: new TranslatableMarkup('Entity ID'),
       description: new TranslatableMarkup('The translated entity ID.'),
     ),
-    'source_language' => new ContextDefinition(
+    'source_language' => new OutputDefinition(
       data_type: 'string',
       label: new TranslatableMarkup('Source language'),
       description: new TranslatableMarkup('The source language code used for translation.'),
     ),
-    'target_language' => new ContextDefinition(
+    'target_language' => new OutputDefinition(
       data_type: 'string',
       label: new TranslatableMarkup('Target language'),
       description: new TranslatableMarkup('The target language code used for translation.'),
     ),
-    'translated_entity_label' => new ContextDefinition(
+    'translated_entity_label' => new OutputDefinition(
       data_type: 'string',
       label: new TranslatableMarkup('Translated entity label'),
       description: new TranslatableMarkup('The translated entity label, if a translation was created.'),
     ),
-    'failures' => new ListContextDefinition(
+    'failures' => new ListOutputDefinition(
       label: new TranslatableMarkup('Failures'),
       description: new TranslatableMarkup('Any field-level translation failures.'),
-      item_definition: new ContextDefinition(
+      item_definition: new OutputDefinition(
         data_type: 'string',
         label: new TranslatableMarkup('Failure'),
         description: new TranslatableMarkup('A field-level translation failure.'),

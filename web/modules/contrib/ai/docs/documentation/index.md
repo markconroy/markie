@@ -59,12 +59,14 @@ graph TD;
 
 
 ## How do you switch the default version (for Maintainers)
-This can only be done by maintainers that have the right to push to the repo. When you have decided that we for instance have a stable release or near stable release of a version and want to make that the default when you visit https://project.pages.drupalcode.org/ai/ these are the following things you need to do.
+Maintainers with push rights can make a version the default for https://project.pages.drupalcode.org/ai/. The redirect on `/ai/` is only changed by `mike set-default`, not by CI or aliases.
 
-In this case we do 3.1.x for instance.
+Example for 3.1.x:
 
-1. Get mkdocs and mike - `pip install mike mkdocs mkdocs-material`
-2. Checkout that version in git - `git checkout 3.1.x`
-3. Change in mkdocs.yml the canonical_version, this is for SEO reasons. Make sure to push this also.
-4. Run `mike alias 3.1.x latest -u` to set 3.1.x to the latest.
-5. Run `mike deploy 3.1.x --push` to push the alias changes.
+1. `pip install mike mkdocs mkdocs-material mkdocs-include-markdown-plugin mkdocs-git-revision-date-localized-plugin mkdocs-glightbox`
+2. `git checkout 3.1.x` and run the rest from the repo root.
+3. `git fetch origin gh-pages:gh-pages`
+4. Set `canonical_version` in `mkdocs.yml` to `3.1.x` (SEO) and push it.
+5. `mike alias 3.1.x latest -u --push`
+6. `mike set-default latest --push` (only needed once; after that, moving `latest` is enough).
+7. Run the `pages` pipeline on the branch to publish, then check https://project.pages.drupalcode.org/ai/.

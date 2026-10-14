@@ -487,7 +487,11 @@ abstract class OpenAiBasedProviderClientBase extends AiProviderClientBase implem
         if ($mime_type === NULL) {
           throw new AiResponseErrorException('The API returned an image with an unsupported mime type.');
         }
-        $images[] = new ImageFile(base64_decode($image_content), 'image/png', 'generated.png');
+        // The payload is decoded once, above. Hand out those bytes together
+        // with the mime type that was just validated, so that the file is
+        // named and labelled as the format the API actually returned.
+        $file_ext = static::ALLOWED_IMAGE_MIME_TYPES[$mime_type];
+        $images[] = new ImageFile($image_content, $mime_type, 'generated.' . $file_ext);
       }
     }
 

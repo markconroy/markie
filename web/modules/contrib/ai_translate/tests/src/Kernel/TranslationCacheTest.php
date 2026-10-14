@@ -33,6 +33,8 @@ class TranslationCacheTest extends KernelTestBase {
     'file',
     'key',
     'ai',
+    'language',
+    'content_translation',
     'ai_translate',
     'ai_translate_test',
   ];

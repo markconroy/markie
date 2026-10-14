@@ -24,6 +24,9 @@ This document outlines the steps the Publishing Manager needs to take to publish
 8. Click Preview to verify the HTML formatting looks good.
 9. Click Save to publish the release.
 
+## Switch the Default Documentation Version
+See [How do you switch the default version](../../documentation/index.md#how-do-you-switch-the-default-version-for-maintainers).
+
 ## Communicate the Release
 1. Ensure the release is officially published on Drupal.org
 2. [Communicate the release on Slack](communicating_a_release.md)

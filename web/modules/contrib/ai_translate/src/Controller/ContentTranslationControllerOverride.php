@@ -13,9 +13,12 @@ use Drupal\Core\Render\Element;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\content_translation\Controller\ContentTranslationController;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Overridden class for entity translation controllers.
+ *
+ * @phpstan-consistent-constructor
  */
 class ContentTranslationControllerOverride extends ContentTranslationController {
 
@@ -59,7 +62,7 @@ class ContentTranslationControllerOverride extends ContentTranslationController 
   /**
    * {@inheritdoc}
    */
-  public function overview(RouteMatchInterface $route_match, $entity_type_id = NULL): array {
+  public function overview(RouteMatchInterface $route_match, $entity_type_id = NULL): array|Response {
     $build = NULL;
 
     $parent_controller_id = $route_match->getRouteObject()->getDefault('_parent_controller');
@@ -74,6 +77,10 @@ class ContentTranslationControllerOverride extends ContentTranslationController 
       // If anything is unexpected, just use our parent controller to generate
       // the build.
       $build = parent::overview($route_match, $entity_type_id);
+    }
+
+    if ($build instanceof Response) {
+      return $build;
     }
 
     $this->alterForm($build, $route_match, $entity_type_id);

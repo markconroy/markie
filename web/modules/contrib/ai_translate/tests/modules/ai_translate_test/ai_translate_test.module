@@ -1,0 +1,30 @@
+<?php
+
+/**
+ * @file
+ * Legacy hook bridges for Drupal 10.4 compatibility.
+ */
+
+declare(strict_types=1);
+
+use Drupal\ai_translate_test\Hook\AiTranslateTestHooks;
+use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Hook\Attribute\LegacyHook;
+
+/**
+ * Implements hook_entity_base_field_info().
+ */
+#[LegacyHook]
+function ai_translate_test_entity_base_field_info(EntityTypeInterface $entity_type): array {
+  return \Drupal::service(AiTranslateTestHooks::class)
+    ->entityBaseFieldInfo($entity_type);
+}
+
+/**
+ * Implements hook_entity_base_field_info_alter().
+ */
+#[LegacyHook]
+function ai_translate_test_entity_base_field_info_alter(array &$fields, EntityTypeInterface $entity_type): void {
+  \Drupal::service(AiTranslateTestHooks::class)
+    ->entityBaseFieldInfoAlter($fields, $entity_type);
+}

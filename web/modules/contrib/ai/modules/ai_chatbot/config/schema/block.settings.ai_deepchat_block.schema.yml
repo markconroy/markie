@@ -65,6 +65,15 @@ block.settings.ai_deepchat_block:
     expansion_method:
       type: string
       label: Expansion Method
+    load_strategy:
+      type: string
+      label: 'Loading strategy'
+      constraints:
+        Choice:
+          choices:
+            - eager
+            - idle
+            - interaction
     # Deprecated settings from before the ChatProcessor plugins existed. They
     # are kept - and ignored - so that block config that predates
     # ai_chatbot_post_update_chat_processor() still validates, and so that

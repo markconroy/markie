@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\ai_translate\Drush;
 
 use Drupal\Core\Entity\EntityTypeManagerInterface;
@@ -17,6 +19,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * AI translate drush commands.
+ *
+ * @phpstan-consistent-constructor
  */
 class AiTranslateCommands extends DrushCommands {
 

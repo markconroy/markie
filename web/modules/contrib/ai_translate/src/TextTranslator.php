@@ -55,13 +55,6 @@ class TextTranslator implements TextTranslatorInterface {
    */
   protected const CHAT_PROXY_PROVIDER_ID = 'chat_translation';
 
-  /**
-   * AI module configuration.
-   *
-   * @var \Drupal\Core\Config\ImmutableConfig
-   */
-  protected ImmutableConfig $aiConfig;
-
   public function __construct(
     protected EntityTypeManagerInterface $entityTypeManager,
     protected LanguageManagerInterface $languageManager,
@@ -70,9 +63,7 @@ class TextTranslator implements TextTranslatorInterface {
     protected TwigEnvironment $twig,
     protected ModuleHandlerInterface $moduleHandler,
     protected CacheBackendInterface $cache,
-  ) {
-    $this->aiConfig = $this->configFactory->get('ai.settings');
-  }
+  ) {}
 
   /**
    * {@inheritdoc}

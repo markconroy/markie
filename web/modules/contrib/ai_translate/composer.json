@@ -9,8 +9,11 @@
     "require-dev": {
         "drupal/layout_builder_at": "^3.0",
         "drupal/layout_builder_st": "^2.0",
-        "drupal/tool": "^1.0@beta",
+        "drupal/tool": "^1.0.0-beta10",
         "drush/drush": "^12 || ^13"
+    },
+    "conflict": {
+        "drupal/tool": "<1.0.0-beta10"
     },
     "suggest": {
         "drupal/tool": "Install to expose AI Translate as a Tool plugin via the optional ai_translate_tool submodule."

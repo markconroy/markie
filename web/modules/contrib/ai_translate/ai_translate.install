@@ -11,8 +11,30 @@ use Drupal\Core\Url;
 /**
  * Implements hook_install().
  */
-function ai_translate_hook_install($is_syncing) {
+function ai_translate_install($is_syncing) {
+  // During a config import, ai.settings comes from the sync storage and is
+  // only imported after the module is installed.
+  if ($is_syncing) {
+    return;
+  }
+  if (!empty(\Drupal::configFactory()->getEditable('ai.settings')->get('default_providers.chat.provider_id'))) {
+    _ai_translate_set_default_translate_provider();
+  }
   _ai_translate_check_default_provider_and_model();
+}
+
+/**
+ * Sets the chat proxy as default translate_text provider when none is set.
+ */
+function _ai_translate_set_default_translate_provider(): void {
+  $config = \Drupal::configFactory()->getEditable('ai.settings');
+  if (!empty($config->get('default_providers.translate_text.provider_id'))) {
+    return;
+  }
+  $config->set('default_providers.translate_text', [
+    'provider_id' => 'chat_translation',
+    'model_id' => $config->get('default_providers.chat.model_id') ?? 'default',
+  ])->save();
 }
 
 /**
@@ -68,17 +90,7 @@ function ai_translate_update_10001(&$sandbox) {
  * Set chat proxy as default translate text provider when empty.
  */
 function ai_translate_update_10002(&$sandbox) {
-  /** @var \Drupal\Core\Config\ConfigFactory $configFactory */
-  $configFactory = \Drupal::service('config.factory');
-  $config = $configFactory->getEditable('ai.settings');
-  $defaultProvider = $config->get('default_providers')['translate_text'];
-  if (!empty($defaultProvider['provider_id'])) {
-    return;
-  }
-  $config->set('default_providers.translate_text', [
-    'provider_id' => 'chat_translation',
-    'model_id' => $config->get('default_providers.chat.model_id') ?? 'default',
-  ])->save();
+  _ai_translate_set_default_translate_provider();
 }
 
 /**

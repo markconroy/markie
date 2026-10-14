@@ -34,7 +34,7 @@ class AiTranslateController extends ControllerBase {
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container) {
-    $instance = new static();
+    $instance = parent::create($container);
     $instance->entityTypeManager = $container->get('entity_type.manager');
     $instance->languageManager = $container->get('language_manager');
     $instance->translationOrchestrator = $container->get('ai_translate.translation_orchestrator');

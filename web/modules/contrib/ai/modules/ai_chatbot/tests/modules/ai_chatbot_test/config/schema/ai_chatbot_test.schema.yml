@@ -1,0 +1,9 @@
+ai_chat_processor.configuration.chatbot_test_processor:
+  type: ai_chat_processor.configuration_base
+  mapping:
+    greeting:
+      type: string
+      label: Greeting
+    show_structured_results:
+      type: boolean
+      label: Show structured results

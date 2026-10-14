@@ -15,6 +15,7 @@ use Drupal\ai_translate\EntityTranslationOrchestrator;
 use Drupal\ai_translate\TextExtractorInterface;
 use Drupal\ai_translate\TextTranslatorInterface;
 use Drupal\ai_translate\TranslationException;
+use Drupal\content_translation\ContentTranslationManagerInterface;
 
 /**
  * @coversDefaultClass \Drupal\ai_translate\EntityTranslationOrchestrator
@@ -65,6 +66,13 @@ class EntityTranslationOrchestratorTest extends UnitTestCase {
   protected $entityTypeManager;
 
   /**
+   * The content translation manager mock.
+   *
+   * @var \Drupal\content_translation\ContentTranslationManagerInterface|\PHPUnit\Framework\MockObject\MockObject
+   */
+  protected $contentTranslationManager;
+
+  /**
    * The service under test.
    */
   protected EntityTranslationOrchestrator $orchestrator;
@@ -81,6 +89,7 @@ class EntityTranslationOrchestratorTest extends UnitTestCase {
     $this->configFactory = $this->createMock(ConfigFactoryInterface::class);
     $this->loggerFactory = $this->createMock(LoggerChannelFactoryInterface::class);
     $this->entityTypeManager = $this->createMock(EntityTypeManagerInterface::class);
+    $this->contentTranslationManager = $this->createMock(ContentTranslationManagerInterface::class);
 
     $logger = $this->createMock(LoggerChannelInterface::class);
     $this->loggerFactory->method('get')->with('ai_translate')->willReturn($logger);
@@ -96,6 +105,7 @@ class EntityTranslationOrchestratorTest extends UnitTestCase {
       $this->configFactory,
       $this->loggerFactory,
       $this->entityTypeManager,
+      $this->contentTranslationManager,
     );
     $this->orchestrator->setStringTranslation($this->getStringTranslationStub());
   }

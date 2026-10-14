@@ -6,6 +6,7 @@ namespace Drupal\Tests\ai\Unit\Service\PromptJsonDecoder;
 
 use Drupal\Tests\UnitTestCase;
 use Drupal\ai\OperationType\Chat\ChatMessage;
+use Drupal\ai\OperationType\Chat\StreamedChatMessageIteratorInterface;
 use Drupal\ai\Service\PromptJsonDecoder\PromptJsonDecoder;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Yaml\Yaml;
@@ -48,6 +49,29 @@ class PromptJsonDecoderTest extends UnitTestCase {
     else {
       $this->assertInstanceOf(ChatMessage::class, $decoded);
     }
+  }
+
+  /**
+   * Tests that an empty JSON array is recognized as a valid response.
+   */
+  public function testEmptyJsonArray(): void {
+    $prompt_json_decoder = new PromptJsonDecoder();
+    $chat_message = new ChatMessage('assistant', '[]', []);
+
+    $this->assertSame([], $prompt_json_decoder->decode($chat_message));
+  }
+
+  /**
+   * Tests that an empty JSON array is recognized in a streamed response.
+   */
+  public function testEmptyJsonArrayInStream(): void {
+    $prompt_json_decoder = new PromptJsonDecoder();
+    $stream = $this->createStub(StreamedChatMessageIteratorInterface::class);
+    $stream->method('getIterator')->willReturnCallback(static function (): \Generator {
+      yield new ChatMessage('assistant', '[]', []);
+    });
+
+    $this->assertSame([], $prompt_json_decoder->decode($stream));
   }
 
   /**

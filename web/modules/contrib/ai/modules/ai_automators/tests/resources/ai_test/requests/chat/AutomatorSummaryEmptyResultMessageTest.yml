@@ -1,0 +1,27 @@
+request:
+  messages:
+  - role: user
+    text: "Summarize the following text: Nothing to summarize here.\n\nDo not include any explanations, only provide a RFC8259 compliant JSON response following this format without deviation.\n[{\"value\": \"requested value\"}]\n"
+    images: []
+    tools: null
+    tool_id: null
+  debug_data: {}
+  chat_tools: null
+  chat_structured_json_schema: {}
+  chat_strict_schema: false
+response:
+  normalized:
+    role: assistant
+    text: >-
+      []
+    images: []
+    tools: null
+    tool_id: null
+  rawOutput: []
+  metadata: {}
+  tokenUsage:
+    input: null
+    output: null
+    total: null
+    reasoning: null
+    cached: null

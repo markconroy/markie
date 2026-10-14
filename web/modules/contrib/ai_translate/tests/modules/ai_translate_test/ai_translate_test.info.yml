@@ -2,11 +2,12 @@ name: 'AI Translate test helpers'
 type: module
 description: 'Provides test doubles for the AI Translate test suite.'
 package: Testing
+hidden: true
 core_version_requirement: ^10.4 || ^11
 dependencies:
   - ai_translate:ai_translate
 
-# Information added by Drupal.org packaging script on 2026-09-14
-version: '1.4.2'
+# Information added by Drupal.org packaging script on 2026-10-13
+version: '1.4.3'
 project: 'ai_translate'
-datestamp: 1789391677
+datestamp: 1791905982

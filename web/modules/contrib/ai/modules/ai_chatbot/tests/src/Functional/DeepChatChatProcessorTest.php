@@ -127,4 +127,103 @@ class DeepChatChatProcessorTest extends BrowserTestBase {
     $assert->pageTextNotContains('The website encountered an unexpected error');
   }
 
+  /**
+   * Tests the dialog library is left out when structured results are off.
+   */
+  public function testDialogLibraryOmittedWithoutStructuredResults(): void {
+    $this->config('system.performance')->set('js.preprocess', FALSE)->save();
+    $this->drupalPlaceBlock('ai_deepchat_block', [
+      'region' => 'content',
+      'label' => 'Front Chatbot',
+      'chat_processor_plugin' => 'chatbot_test_processor',
+    ]);
+
+    $this->drupalGet('<front>');
+    $assert = $this->assertSession();
+    $assert->statusCodeEquals(200);
+    $assert->responseContains('deepchat-init.js');
+    $assert->responseNotContains('dialog.ajax.js');
+    $assert->responseNotContains('dialog.jquery-ui.js');
+  }
+
+  /**
+   * Tests the dialog library is attached when structured results are on.
+   */
+  public function testDialogLibraryAttachedForStructuredResults(): void {
+    $this->config('system.performance')->set('js.preprocess', FALSE)->save();
+    $this->drupalPlaceBlock('ai_deepchat_block', [
+      'region' => 'content',
+      'label' => 'Front Chatbot',
+      'chat_processor_plugin' => 'chatbot_test_processor',
+      'plugin_configuration' => ['show_structured_results' => TRUE],
+    ]);
+
+    $this->drupalGet('<front>');
+    $assert = $this->assertSession();
+    $assert->statusCodeEquals(200);
+    // Deep Chat opens the modal with Drupal.dialog().showModal(), so only the
+    // core/drupal.dialog stack is needed. The heavier core/drupal.dialog.ajax
+    // variant, which pulls in core/drupal.ajax, must stay out.
+    $assert->responseContains('dialog.jquery-ui.js');
+    $assert->responseNotContains('dialog.ajax.js');
+  }
+
+  /**
+   * Tests which strategies attach the bundle and which defer it to the loader.
+   *
+   * Only the eager strategy attaches it server side. idle and interaction are
+   * indistinguishable in the markup: what separates them lives in the loader
+   * in js/deepchat-init.js, so it is covered by the FunctionalJavascript test.
+   *
+   * @dataProvider providerLoadStrategy
+   */
+  public function testBundleAttachmentPerLoadStrategy(string $strategy, bool $attached): void {
+    // With aggregation on, every asset ends up in one js_*.js file and no
+    // assertion about file names would mean anything.
+    $this->config('system.performance')->set('js.preprocess', FALSE)->save();
+    $settings = [
+      'region' => 'content',
+      'label' => 'Front Chatbot',
+      'chat_processor_plugin' => 'chatbot_test_processor',
+    ];
+    if ($strategy !== '') {
+      $settings['load_strategy'] = $strategy;
+    }
+    $this->drupalPlaceBlock('ai_deepchat_block', $settings);
+
+    $this->drupalGet('<front>');
+    $this->assertSession()->statusCodeEquals(200);
+    $content = $this->getSession()->getPage()->getContent();
+    $bundle_tag = '#<script[^>]+deepchat\\.bundle\\.js#';
+
+    if ($attached) {
+      $this->assertMatchesRegularExpression($bundle_tag, $content);
+    }
+    else {
+      $this->assertDoesNotMatchRegularExpression($bundle_tag, $content);
+    }
+
+    // The loader ships inside deepchat-init.js, which is always attached, and
+    // always knows what to import: the bundle URL travels in drupalSettings
+    // even when there is no script tag.
+    $this->assertMatchesRegularExpression('#<script[^>]+deepchat-init\\.js#', $content);
+    $this->assertStringContainsString('deepchat.bundle.js', $content);
+  }
+
+  /**
+   * Data provider for testBundleAttachmentPerLoadStrategy().
+   *
+   * @return array<string, array{string, bool}>
+   *   Strategy to store on the block, and whether it attaches the bundle. The
+   *   empty strategy stands for a block saved before the setting existed.
+   */
+  public static function providerLoadStrategy(): array {
+    return [
+      'default is eager' => ['', TRUE],
+      'eager attaches the bundle' => ['eager', TRUE],
+      'idle defers to the loader' => ['idle', FALSE],
+      'interaction defers to the loader' => ['interaction', FALSE],
+    ];
+  }
+
 }

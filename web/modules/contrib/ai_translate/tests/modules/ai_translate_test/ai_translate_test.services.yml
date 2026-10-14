@@ -1,0 +1,5 @@
+parameters:
+  ai_translate_test.skip_procedural_hook_scan: true
+
+services:
+  Drupal\ai_translate_test\Hook\AiTranslateTestHooks: ~

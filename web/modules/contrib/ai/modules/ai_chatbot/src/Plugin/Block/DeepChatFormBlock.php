@@ -162,6 +162,20 @@ class DeepChatFormBlock extends BlockBase implements ContainerFactoryPluginInter
   protected $currentPath;
 
   /**
+   * The library discovery service.
+   *
+   * @var \Drupal\Core\Asset\LibraryDiscoveryInterface
+   */
+  protected $libraryDiscovery;
+
+  /**
+   * The asset query string.
+   *
+   * @var \Drupal\Core\Asset\AssetQueryStringInterface
+   */
+  protected $assetQueryString;
+
+  /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
@@ -181,6 +195,8 @@ class DeepChatFormBlock extends BlockBase implements ContainerFactoryPluginInter
     $plugin->currentPath = $container->get('path.current');
     $plugin->chatProcessorManager = $container->get(ChatProcessorPluginManager::class);
     $plugin->commonMarkConverterFactory = $container->get(CommonMarkConverterFactoryInterface::class);
+    $plugin->libraryDiscovery = $container->get('library.discovery');
+    $plugin->assetQueryString = $container->get('asset.query_string');
     return $plugin;
   }
 
@@ -254,6 +270,7 @@ class DeepChatFormBlock extends BlockBase implements ContainerFactoryPluginInter
       'disable_csrf' => FALSE,
       'chat_processor_plugin' => '',
       'plugin_configuration' => [],
+      'load_strategy' => 'eager',
     ];
   }
 
@@ -553,6 +570,18 @@ class DeepChatFormBlock extends BlockBase implements ContainerFactoryPluginInter
       '#default_value' => $this->configuration['toggle_state'],
     ];
 
+    $form['advanced']['load_strategy'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Loading strategy'),
+      '#description' => $this->t('When to load the Deep Chat library. The JavaScript library can be a heavy asset to load, so loading it on first interaction keeps it out of the initial page load for the visitors who never open the chat.'),
+      '#options' => [
+        'eager' => $this->t('On page load'),
+        'idle' => $this->t('When the browser is idle'),
+        'interaction' => $this->t('On first interaction'),
+      ],
+      '#default_value' => $this->configuration['load_strategy'] ?? 'eager',
+    ];
+
     $form['advanced']['disable_csrf'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Disable CSRF Protection'),
@@ -618,6 +647,7 @@ class DeepChatFormBlock extends BlockBase implements ContainerFactoryPluginInter
     $this->configuration['disable_csrf'] = $form_state->getValue('advanced')['disable_csrf'];
     $this->configuration['stream'] = $form_state->getValue('advanced')['stream'] ?? FALSE;
     $this->configuration['toggle_state'] = $form_state->getValue('advanced')['toggle_state'];
+    $this->configuration['load_strategy'] = $form_state->getValue('advanced')['load_strategy'] ?? 'eager';
     $this->configuration['expansion_method'] = $form_state->getValue('styling')['expansion_method'] ?? 'expand';
     // Save plugin configuration.
     $this->configuration['plugin_configuration'] = $form_state->getValue('plugin_configuration') ?? [];
@@ -641,7 +671,20 @@ class DeepChatFormBlock extends BlockBase implements ContainerFactoryPluginInter
     $runtime_settings['default_username'] = $user_data['username'];
     $runtime_settings['default_avatar'] = $user_data['avatar'];
     /** @var \Drupal\ai\Plugin\ChatProcessor\ChatProcessorInterface $plugin_instance */
-    $plugin_instance = $this->chatProcessorManager->createInstance($this->configuration['chat_processor_plugin'], $this->configuration['plugin_configuration']);
+    $plugin_instance = $this->chatProcessorManager->createInstance($this->configuration['chat_processor_plugin'], $this->configuration['plugin_configuration'] ?? []);
+
+    // The dialog library is only needed for the structured results modal, so
+    // it is attached on demand instead of being a dependency of
+    // ai_chatbot/deepchat. Otherwise every page that shows the chatbot also
+    // loads the whole jQuery UI dialog stack. Deep Chat opens the modal with
+    // Drupal.dialog().showModal() and never issues an Ajax dialog command, so
+    // core/drupal.dialog is enough; the .ajax variant would only pull in
+    // core/drupal.ajax for nothing.
+    // @see \Drupal\ai_chatbot\Plugin\ChatProcessor\AiAssistantApiProcessor::getPostResponseMarkup()
+    // @see js/deepchat-init.js
+    if (!empty($plugin_instance->getConfiguration()['show_structured_results'])) {
+      $block['#attached']['library'][] = 'core/drupal.dialog';
+    }
     $block['#settings'] = $runtime_settings;
     $block['#deepchat_settings'] = $this->getDeepChatParameters($this->configuration['style_file'], $user_data);
     $block['#current_theme'] = 'chatbot-' . $active_theme;
@@ -659,6 +702,19 @@ class DeepChatFormBlock extends BlockBase implements ContainerFactoryPluginInter
     $block['#attached']['drupalSettings']['ai_deepchat']['show_copy_icon'] = $this->configuration['show_copy_icon'];
     $block['#attached']['drupalSettings']['ai_deepchat']['disable_csrf'] = $this->configuration['disable_csrf'];
     $block['#attached']['drupalSettings']['ai_deepchat']['expansion_method'] = $this->configuration['expansion_method'] ?? 'expand';
+    $block['#attached']['drupalSettings']['ai_deepchat']['load_strategy'] = $this->configuration['load_strategy'] ?? 'eager';
+    // The eager strategy never reads bundle_url: the bundle is already
+    // attached as a library below, so resolving it here would just cost a
+    // library discovery lookup for a value nothing consumes.
+    $block['#attached']['drupalSettings']['ai_deepchat']['bundle_url'] = ($this->configuration['load_strategy'] ?? 'eager') !== 'eager'
+      ? $this->getBundleUrl()
+      : '';
+
+    // With the eager strategy the bundle stays a plain script tag, so the
+    // markup and the request waterfall are exactly what they were before.
+    if (($this->configuration['load_strategy'] ?? 'eager') === 'eager') {
+      $block['#attached']['library'][] = 'ai_chatbot/deepchat.bundle';
+    }
     $block['#attached']['drupalSettings']['ai_deepchat']['messages'] = $this->historicalMessages($plugin_instance->getThreadId() ?? '');
     $block['#attached']['drupalSettings']['ai_deepchat']['session_exists'] = $this->requestStack->getCurrentRequest()->getSession()->isStarted();
     $block['#attached']['drupalSettings']['ai_deepchat']['verbose_mode'] = (bool) ($this->configuration['plugin_configuration']['verbose_mode'] ?? FALSE);
@@ -972,6 +1028,27 @@ class DeepChatFormBlock extends BlockBase implements ContainerFactoryPluginInter
       'username' => $username,
       'avatar' => $avatar,
     ];
+  }
+
+  /**
+   * Returns the URL of the Deep Chat bundle.
+   *
+   * The bundle lives in its own library so that the loader in
+   * js/deepchat-init.js can import it on demand rather than have it attached
+   * to every page.
+   *
+   * @return string
+   *   The URL to import, cache busted like any other asset.
+   */
+  protected function getBundleUrl(): string {
+    $library = $this->libraryDiscovery->getLibraryByName('ai_chatbot', 'deepchat.bundle');
+    $path = is_array($library) ? ($library['js'][0]['data'] ?? '') : '';
+
+    if ($path === '') {
+      return '';
+    }
+
+    return base_path() . $path . '?' . $this->assetQueryString->get();
   }
 
   /**

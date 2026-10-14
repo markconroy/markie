@@ -15,6 +15,7 @@ use Drupal\ai\Exception\AiRateLimitException;
 use Drupal\ai\Exception\AiResponseErrorException;
 use Drupal\ai\OperationType\Chat\ChatInput;
 use Drupal\ai\OperationType\Chat\ChatMessage;
+use Drupal\ai\OperationType\TextToImage\TextToImageInput;
 use Drupal\ai\Service\HostnameFilter;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\EventDispatcher\EventDispatcher;
@@ -26,6 +27,16 @@ use Symfony\Component\EventDispatcher\EventDispatcher;
  * @coversDefaultClass \Drupal\ai\Base\OpenAiBasedProviderClientBase
  */
 class OpenAiBasedProviderClientBaseTest extends TestCase {
+
+  /**
+   * A 2x2 PNG, base64 encoded the way the images endpoint returns one.
+   */
+  const PNG_FIXTURE = 'iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAIAAAD91JpzAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAFklEQVQImWP8z8DAwMDAxMDAwMDAAAANHQEDDMfniQAAAABJRU5ErkJggg==';
+
+  /**
+   * A 2x2 JPEG, to cover a returned format other than PNG.
+   */
+  const JPEG_FIXTURE = '/9j/4AAQSkZJRgABAQEAYABgAAD//gA7Q1JFQVRPUjogZ2QtanBlZyB2MS4wICh1c2luZyBJSkcgSlBFRyB2ODApLCBxdWFsaXR5ID0gMjAK/9sAQwAoHB4jHhkoIyEjLSsoMDxkQTw3Nzx7WF1JZJGAmZaPgIyKoLTmw6Cq2q2KjMj/y9ru9f///5vB////+v/m/f/4/9sAQwErLS08NTx2QUF2+KWMpfj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4/8AAEQgAAgACAwEiAAIRAQMRAf/EAB8AAAEFAQEBAQEBAAAAAAAAAAABAgMEBQYHCAkKC//EALUQAAIBAwMCBAMFBQQEAAABfQECAwAEEQUSITFBBhNRYQcicRQygZGhCCNCscEVUtHwJDNicoIJChYXGBkaJSYnKCkqNDU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6g4SFhoeIiYqSk5SVlpeYmZqio6Slpqeoqaqys7S1tre4ubrCw8TFxsfIycrS09TV1tfY2drh4uPk5ebn6Onq8fLz9PX29/j5+v/EAB8BAAMBAQEBAQEBAQEAAAAAAAABAgMEBQYHCAkKC//EALURAAIBAgQEAwQHBQQEAAECdwABAgMRBAUhMQYSQVEHYXETIjKBCBRCkaGxwQkjM1LwFWJy0QoWJDThJfEXGBkaJicoKSo1Njc4OTpDREVGR0hJSlNUVVZXWFlaY2RlZmdoaWpzdHV2d3h5eoKDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uLj5OXm5+jp6vLz9PX29/j5+v/aAAwDAQACEQMRAD8Ay6KKK9gzP//Z';
 
   /**
    * The provider instance under test.
@@ -324,6 +335,136 @@ class OpenAiBasedProviderClientBaseTest extends TestCase {
     $this->assertSame(15, $usage->total);
   }
 
+  /**
+   * Tests that textToImage() hands out the image bytes the API returned.
+   *
+   * The b64_json payload must be base64-decoded exactly once. Decoding it
+   * again silently discards most of the payload and returns bytes that are
+   * not an image, while the response still reports success — so callers
+   * write corrupt files without any error to go on.
+   *
+   * @covers ::textToImage
+   */
+  public function testTextToImageDecodesThePayloadOnce(): void {
+    $binary = base64_decode(self::PNG_FIXTURE, TRUE);
+    $provider = $this->createTextToImageProvider([
+      'data' => [['b64_json' => self::PNG_FIXTURE]],
+    ]);
+
+    $images = $provider->textToImage(new TextToImageInput('a red square'), 'stub-model')->getNormalized();
+
+    $this->assertCount(1, $images);
+    $this->assertSame($binary, $images[0]->getBinary());
+    $this->assertSame("\x89PNG\r\n\x1a\n", substr($images[0]->getBinary(), 0, 8));
+    $this->assertSame('image/png', $images[0]->getMimeType());
+    $this->assertSame('generated.png', $images[0]->getFilename());
+  }
+
+  /**
+   * Tests that textToImage() reports the mime type it detected.
+   *
+   * Every mime type in ALLOWED_IMAGE_MIME_TYPES may be returned by the API,
+   * so the detected type has to reach the caller instead of a hardcoded one.
+   * The filename carries the matching extension, because consumers derive
+   * the file type from it when saving.
+   *
+   * @covers ::textToImage
+   */
+  public function testTextToImageKeepsTheDetectedMimeType(): void {
+    $provider = $this->createTextToImageProvider([
+      'data' => [['b64_json' => self::JPEG_FIXTURE]],
+    ]);
+
+    $images = $provider->textToImage('a blue square', 'stub-model')->getNormalized();
+
+    $this->assertSame(base64_decode(self::JPEG_FIXTURE, TRUE), $images[0]->getBinary());
+    $this->assertSame('image/jpeg', $images[0]->getMimeType());
+    $this->assertSame('generated.jpeg', $images[0]->getFilename());
+    $this->assertSame('jpeg', $images[0]->getFileType());
+  }
+
+  /**
+   * Tests that a payload which is not an image is refused.
+   *
+   * @covers ::textToImage
+   */
+  public function testTextToImageRejectsNonImagePayload(): void {
+    $provider = $this->createTextToImageProvider([
+      'data' => [['b64_json' => base64_encode('this is not an image')]],
+    ]);
+
+    $this->expectException(AiResponseErrorException::class);
+    $this->expectExceptionMessage('The API returned an image with an unsupported mime type.');
+
+    $provider->textToImage('a red square', 'stub-model');
+  }
+
+  /**
+   * Builds a provider whose client returns the given images response.
+   *
+   * @param array $response
+   *   The canned response of the images endpoint.
+   *
+   * @return \Drupal\ai\Base\OpenAiBasedProviderClientBase
+   *   The provider, with its client already loaded.
+   */
+  protected function createTextToImageProvider(array $response): OpenAiBasedProviderClientBase {
+    // Only the two abstract methods are stubbed, so that textToImage() itself
+    // runs as written.
+    $provider = $this->createPartialMock(OpenAiBasedProviderClientBase::class, [
+      'getModelSettings',
+      'getSupportedOperationTypes',
+    ]);
+
+    // The SDK's Client, Images and CreateResponse classes are all final, so
+    // none of them can be mocked. The client property carries no type
+    // declaration, so a stand-in answering the images()->create()->toArray()
+    // chain is enough to serve a canned response.
+    $client = new \ReflectionProperty(OpenAiBasedProviderClientBase::class, 'client');
+    $client->setValue($provider, new class($response) {
+
+      public function __construct(
+        protected array $response,
+      ) {}
+
+      /**
+       * Stands in for the images resource.
+       *
+       * @return static
+       *   The stub itself.
+       */
+      public function images(): static {
+        return $this;
+      }
+
+      /**
+       * Stands in for the create call, whose payload does not matter here.
+       *
+       * @param array $payload
+       *   The request payload.
+       *
+       * @return static
+       *   The stub itself.
+       */
+      public function create(array $payload): static {
+        return $this;
+      }
+
+      /**
+       * Serves the canned response.
+       *
+       * @return array
+       *   The raw response data.
+       */
+      public function toArray(): array {
+        return $this->response;
+      }
+
+    });
+
+    return $provider;
+  }
+
 }
 
 /**
@@ -557,4 +698,5 @@ final class FiberTokenUsageStubChoice {
   ) {}
 
 }
+
 // phpcs:enable Drupal.Classes.ClassFileName.NoMatch

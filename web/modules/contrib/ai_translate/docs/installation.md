@@ -50,6 +50,9 @@ composer require drupal/tool
 drush en ai_translate_tool
 ```
 
+The submodule is **experimental** because the Tool module is not yet stable
+(it requires Tool 1.0.0-beta10 or later). Its API may still change.
+
 This is not needed for the AI function call plugin, which ships with
 AI Translate itself. See
 [Agentic integrations](developers/agentic-integrations.md).

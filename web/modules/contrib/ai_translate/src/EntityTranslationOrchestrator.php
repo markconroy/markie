@@ -14,6 +14,7 @@ use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\content_translation\ContentTranslationManagerInterface;
 
 /**
  * Shared orchestration service for entity translation workflows.
@@ -37,6 +38,8 @@ class EntityTranslationOrchestrator implements EntityTranslationOrchestratorInte
    *   The logger channel factory.
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
    *   The entity type manager.
+   * @param \Drupal\content_translation\ContentTranslationManagerInterface $contentTranslationManager
+   *   The content translation manager.
    */
   public function __construct(
     protected TextExtractorInterface $textExtractor,
@@ -45,6 +48,7 @@ class EntityTranslationOrchestrator implements EntityTranslationOrchestratorInte
     protected ConfigFactoryInterface $configFactory,
     protected LoggerChannelFactoryInterface $loggerFactory,
     protected EntityTypeManagerInterface $entityTypeManager,
+    protected ContentTranslationManagerInterface $contentTranslationManager,
   ) {}
 
   /**
@@ -136,6 +140,7 @@ class EntityTranslationOrchestrator implements EntityTranslationOrchestratorInte
     array $failures = [],
   ): EntityTranslationResult {
     $translation = $entity->addTranslation($langTo, $entity->toArray());
+    $this->setTranslationSource($entity, $translation);
     $this->applyTranslationStatus($entity, $translation);
     $this->textExtractor->insertTextMetadata($translation, $processedTranslations);
 
@@ -189,6 +194,28 @@ class EntityTranslationOrchestrator implements EntityTranslationOrchestratorInte
     }
 
     return $this->saveTranslatedEntity($entity, $langTo, $processedTranslations, $failures);
+  }
+
+  /**
+   * Records which language a translation was translated from.
+   *
+   * $entity->toArray() copies the source entity's content_translation_source,
+   * which is 'und' on the original. Left at that, content_translation resolves
+   * the source translation with an invalid langcode, and entity types that
+   * read it back while saving - media does, to build its thumbnail - throw
+   * InvalidArgumentException.
+   *
+   * @param \Drupal\Core\Entity\ContentEntityInterface $entity
+   *   The source entity.
+   * @param \Drupal\Core\Entity\ContentEntityInterface $translation
+   *   The translation being created.
+   */
+  protected function setTranslationSource(ContentEntityInterface $entity, ContentEntityInterface $translation): void {
+    if (!$this->contentTranslationManager->isEnabled($entity->getEntityTypeId(), $entity->bundle())) {
+      return;
+    }
+    $this->contentTranslationManager->getTranslationMetadata($translation)
+      ->setSource($entity->getUntranslated()->language()->getId());
   }
 
   /**
